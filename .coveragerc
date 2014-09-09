@@ -1,0 +1,7 @@
+[run]
+branch = True
+source = magnum
+omit = magnum/tests/*,magnum/openstack/*
+
+[report]
+ignore-errors = True
