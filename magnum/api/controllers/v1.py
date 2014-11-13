@@ -181,7 +181,7 @@ class ContainerController(rest.RestController):
 
     @wsme_pecan.wsexpose(Container, wtypes.text)
     def get_one(self, container_id):
-        # TODO(dims): Returns all the containers
+        # TODO(dims): Returns specified container
         pecan.response.status = 200
         return
 
@@ -193,6 +193,6 @@ class ContainerController(rest.RestController):
 
     @wsme_pecan.wsexpose(None, status_code=204)
     def delete(self):
-        # TODO(dims): DELETE the containers
+        # TODO(dims): DELETE this container
         pecan.response.status = 204
         return
