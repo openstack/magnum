@@ -14,11 +14,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from magnum.api import auth
+
 # Pecan Application Configurations
 app = {
     'root': 'magnum.api.controllers.root.RootController',
     'modules': ['magnum.api'],
-    'debug': False
+    'debug': False,
+    'hooks': [auth.AuthInformationHook()]
 }
 
 # Custom Configurations must be in Python dictionary format::
