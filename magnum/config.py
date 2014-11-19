@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-"""Solum specific config handling."""
+"""Magnum specific config handling."""
 
 from oslo.config import cfg
 
