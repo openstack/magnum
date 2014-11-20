@@ -15,6 +15,13 @@
 # Based on Ubuntu
 ############################################################
 
+############################################################
+# Usage:
+# 1060  docker build -t magnum:latest .
+# docker run --name magnum -p 127.0.0.1:9511:9511 -d magnum:latest /bin/sh -c magnum-api --debug --host=0.0.0.0
+# curl http://127.0.0.1:9511/
+############################################################
+
 # Set the base image to Ubuntu
 FROM ubuntu
 
@@ -37,7 +44,7 @@ ADD . /magnum
 RUN pip install -r /magnum/requirements.txt
 
 # Expose ports
-EXPOSE 5911
+EXPOSE 9511
 
 # Set the default directory where CMD will execute
 WORKDIR /magnum
@@ -47,4 +54,4 @@ RUN python setup.py install
 
 # Set the default command to execute
 # when creating a new container
-CMD magnum-api --debug
+CMD magnum-api --debug --host=0.0.0.0
