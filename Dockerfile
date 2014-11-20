@@ -17,7 +17,7 @@
 
 ############################################################
 # Usage:
-# 1060  docker build -t magnum:latest .
+# docker build -t magnum:latest .
 # docker run --name magnum -p 127.0.0.1:9511:9511 -d magnum:latest /bin/sh -c magnum-api --debug --host=0.0.0.0
 # curl http://127.0.0.1:9511/
 ############################################################
@@ -27,9 +27,6 @@ FROM ubuntu
 
 # File Author / Maintainer
 MAINTAINER Davanum Srinivas
-
-# Add the application resources URL
-RUN echo "deb http://archive.ubuntu.com/ubuntu/ trusty main universe" >> /etc/apt/sources.list
 
 # Update the sources list
 RUN apt-get update
