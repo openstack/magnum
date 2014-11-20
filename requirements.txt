@@ -14,3 +14,4 @@ python-keystoneclient>=0.11.1
 python-zaqarclient>=0.0.3
 six>=1.7.0
 WSME>=0.6
+docker-py>=0.5.1
