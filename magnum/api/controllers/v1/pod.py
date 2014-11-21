@@ -23,13 +23,15 @@ import six
 import wsme
 from wsme import exc
 from wsme import types as wtypes
-import wsmeext.pecan as wsme_pecan
+
+from magnum.common import exception
+from magnum.common import yamlutils
 
 
 # NOTE(dims): We don't depend on oslo*i18n yet
 _ = _LI = _LW = _LE = _LC = lambda x: x
 
-state_kind = ["ok", "containers", "insufficient data"]
+state_kind = ["ok", "pods", "insufficient data"]
 state_kind_enum = wtypes.Enum(str, *state_kind)
 operation_kind = ('lt', 'le', 'eq', 'ne', 'ge', 'gt')
 operation_kind_enum = wtypes.Enum(str, *operation_kind)
@@ -152,49 +154,46 @@ class Query(_Base):
         return converted_value
 
 
-class Container(_Base):
-    """Controller Model."""
+class PodController(rest.RestController):
+    @exception.wrap_pecan_controller_exception
+    @pecan.expose(content_type='application/x-yaml')
+    def get(self):
+        """Retrieve a pod by UUID."""
+        res_yaml = yamlutils.dump({'dummy_data'})
+        pecan.response.status = 200
+        return res_yaml
 
-    container_id = wtypes.text
-    """ The ID of the containers."""
+    @exception.wrap_pecan_controller_exception
+    @pecan.expose(content_type='application/x-yaml')
+    def put(self):
+        """Create a new pod."""
+        res_yaml = yamlutils.dump({'dummy_data'})
+        pecan.response.status = 200
+        return res_yaml
+
+    @exception.wrap_pecan_controller_exception
+    @pecan.expose(content_type='application/x-yaml')
+    def delete(self):
+        """Delete an existing pod."""
+        res_yaml = yamlutils.dump({'dummy_data'})
+        pecan.response.status = 200
+        return res_yaml
+
+
+class Pod(_Base):
+    pod_id = wtypes.text
+    """ The ID of the pods."""
 
     name = wsme.wsattr(wtypes.text, mandatory=True)
-    """ The name of the container."""
+    """ The name of the pod."""
 
     desc = wsme.wsattr(wtypes.text, mandatory=True)
 
     def __init__(self, **kwargs):
-        super(Container, self).__init__(**kwargs)
+        super(Pod, self).__init__(**kwargs)
 
     @classmethod
     def sample(cls):
         return cls(id=str(uuid.uuid1(),
                           name="Docker",
-                          desc='Docker Containers'))
-
-
-class ContainerController(rest.RestController):
-
-    @wsme_pecan.wsexpose([Container], [Query], int)
-    def get_all(self, q=None, limit=None):
-        # TODO(dims): Returns all the containers
-        pecan.response.status = 200
-        return
-
-    @wsme_pecan.wsexpose(Container, wtypes.text)
-    def get_one(self, container_id):
-        # TODO(dims): Returns specified container
-        pecan.response.status = 200
-        return
-
-    @wsme_pecan.wsexpose([Container], body=[Container])
-    def post(self, data):
-        # TODO(dims): Create a new container
-        pecan.response.status = 201
-        return
-
-    @wsme_pecan.wsexpose(None, status_code=204)
-    def delete(self):
-        # TODO(dims): DELETE this container
-        pecan.response.status = 204
-        return
+                          desc='Docker Pods'))

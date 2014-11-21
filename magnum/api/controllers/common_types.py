@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-
-# Copyright 2010-2011 OpenStack Foundation
-# Copyright (c) 2013 Hewlett-Packard Development Company, L.P.
+# Copyright 2013 - Red Hat, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -15,19 +12,22 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo.config import cfg
-from oslotest import base
-import testscenarios
+from wsme import types as wtypes
 
 
-class BaseTestCase(testscenarios.WithScenarios, base.BaseTestCase):
-    """Test base class."""
-
-    def setUp(self):
-        super(BaseTestCase, self).setUp()
-        self.addCleanup(cfg.CONF.reset)
+Uri = wtypes.text
 
 
-class TestCase(base.BaseTestCase):
+class Link(wtypes.Base):
+    """A link representation."""
 
-    """Test case base class for all unit tests."""
+    href = Uri
+    "The link URI."
+
+    target_name = wtypes.text
+    "Textual name of the target link."
+
+    @classmethod
+    def sample(cls):
+        return cls(href=('http://example.com:9777/v1'),
+                   target_name='v1')
