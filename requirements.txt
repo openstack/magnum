@@ -6,6 +6,8 @@ pbr>=0.6,!=0.7,<1.0
 Babel>=1.3
 
 oslo.config>=1.4.0
+oslo.messaging>=1.4.0
+oslo.serialization>=1.0.0
 oslo.utils>=1.0.0
 pecan>=0.8.0
 python-keystoneclient>=0.11.1
