@@ -153,6 +153,8 @@ class Query(_Base):
 
 
 class Container(_Base):
+    """Controller Model."""
+
     container_id = wtypes.text
     """ The ID of the containers."""
 
