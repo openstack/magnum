@@ -80,3 +80,10 @@ class TestContainerController(tests.FunctionalTest):
     def test_delete(self):
         response = self.app.delete('/v1/containers/xyz')
         self.assertEqual(response.status_int, 200)
+
+    def test_container_actions(self):
+        actions = ['start', 'stop', 'pause', 'unpause',
+                   'reboot', 'logs', 'execute']
+        for action in actions:
+            response = self.app.get('/v1/containers/xyz/%s' % action)
+            self.assertEqual(response.status_int, 200)

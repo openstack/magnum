@@ -175,8 +175,58 @@ class Container(_Base):
                    desc='Docker Containers')
 
 
+class StartController(object):
+    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
+    def _default(self, container_id):
+        return "Start Container %s" % container_id
+
+
+class StopController(object):
+    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
+    def _default(self, container_id, *remainder):
+        return "Stop Container %s" % container_id
+
+
+class RebootController(object):
+    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
+    def _default(self, container_id, *remainder):
+        return "Reboot Container %s" % container_id
+
+
+class PauseController(object):
+    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
+    def _default(self, container_id, *remainder):
+        return "Pause Container %s" % container_id
+
+
+class UnpauseController(object):
+    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
+    def _default(self, container_id, *remainder):
+        return "Unpause Container %s" % container_id
+
+
+class LogsController(object):
+    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
+    def _default(self, container_id, *remainder):
+        return "Logs Container %s" % container_id
+
+
+class ExecuteController(object):
+    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
+    def _default(self, container_id, *remainder):
+        return "Execute Container %s" % container_id
+
+
 class ContainerController(rest.RestController):
     """Manages Containers."""
+
+    start = StartController()
+    stop = StopController()
+    reboot = RebootController()
+    pause = PauseController()
+    unpause = UnpauseController()
+    logs = LogsController()
+    execute = ExecuteController()
 
     @wsme_pecan.wsexpose(Container, wtypes.text)
     def get_one(self, container_id):
