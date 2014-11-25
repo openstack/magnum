@@ -44,3 +44,39 @@ class TestRootController(tests.FunctionalTest):
     def test_get_not_found(self):
         response = self.app.get('/a/bogus/url', expect_errors=True)
         assert response.status_int == 404
+
+
+class TestContainerController(tests.FunctionalTest):
+    def test_get_all(self):
+        response = self.app.get('/v1/containers')
+        self.assertEqual(response.status_int, 200)
+        self.assertEqual('Docker', response.json[0].get('name'))
+        self.assertEqual('Docker Containers', response.json[0].get('desc'))
+        self.assertEqual('Docker', response.json[1].get('name'))
+        self.assertEqual('Docker Containers', response.json[1].get('desc'))
+
+    def test_get_one(self):
+        response = self.app.get('/v1/containers/xyz')
+        self.assertEqual(response.status_int, 200)
+        self.assertEqual('Docker', response.json.get('name'))
+        self.assertEqual('Docker Containers', response.json.get('desc'))
+
+    def test_create(self):
+        params = '{"desc": "My Docker Containers", "name": "My Docker"}'
+        response = self.app.post('/v1/containers',
+                                 params=params,
+                                 content_type='application/json')
+        self.assertEqual(response.status_int, 200)
+
+    def test_update(self):
+        params = ('{"container_id":"fake_id", '
+                  '"desc": "My Docker Containers", '
+                  '"name": "My Docker"}')
+        response = self.app.put('/v1/containers',
+                                params=params,
+                                content_type='application/json')
+        self.assertEqual(response.status_int, 200)
+
+    def test_delete(self):
+        response = self.app.delete('/v1/containers/xyz')
+        self.assertEqual(response.status_int, 200)

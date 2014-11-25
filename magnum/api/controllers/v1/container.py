@@ -17,15 +17,12 @@ import uuid
 
 from oslo.utils import strutils
 from oslo.utils import timeutils
-import pecan
 from pecan import rest
 import six
 import wsme
 from wsme import exc
 from wsme import types as wtypes
-
-from magnum.common import exception
-from magnum.common import yamlutils
+import wsmeext.pecan as wsme_pecan
 
 
 # NOTE(dims): We don't depend on oslo*i18n yet
@@ -154,34 +151,8 @@ class Query(_Base):
         return converted_value
 
 
-class ContainerController(rest.RestController):
-    @exception.wrap_pecan_controller_exception
-    @pecan.expose(content_type='application/x-yaml')
-    def get(self):
-        """Retrieve a container by UUID."""
-        res_yaml = yamlutils.dump({'dummy_data'})
-        pecan.response.status = 200
-        return res_yaml
-
-    @exception.wrap_pecan_controller_exception
-    @pecan.expose(content_type='application/x-yaml')
-    def put(self):
-        """Create a new container."""
-        res_yaml = yamlutils.dump({'dummy_data'})
-        pecan.response.status = 200
-        return res_yaml
-
-    @exception.wrap_pecan_controller_exception
-    @pecan.expose(content_type='application/x-yaml')
-    def delete(self):
-        """Delete an existing container."""
-        res_yaml = yamlutils.dump({'dummy_data'})
-        pecan.response.status = 200
-        return res_yaml
-
-
 class Container(_Base):
-    """Controller Model."""
+    """Container Model."""
 
     container_id = wtypes.text
     """ The ID of the containers."""
@@ -194,8 +165,57 @@ class Container(_Base):
     def __init__(self, **kwargs):
         super(Container, self).__init__(**kwargs)
 
+    def as_dict(self):
+        return self.as_dict_from_keys(['container_id', 'name', 'desc'])
+
     @classmethod
     def sample(cls):
-        return cls(id=str(uuid.uuid1(),
-                          name="Docker",
-                          desc='Docker Containers'))
+        return cls(container_id=str(uuid.uuid1()),
+                   name="Docker",
+                   desc='Docker Containers')
+
+
+class ContainerController(rest.RestController):
+    """Manages Containers."""
+
+    @wsme_pecan.wsexpose(Container, wtypes.text)
+    def get_one(self, container_id):
+        """Retrieve details about one container.
+
+        :param container_id: An ID of the container.
+        """
+        return Container.sample()
+
+    @wsme_pecan.wsexpose([Container], [Query], int)
+    def get_all(self, q=None, limit=None):
+        """Retrieve definitions of all of the containers.
+
+        :param query: query parameters.
+        :param limit: The number of containers to retrieve.
+        """
+        return [Container.sample(), Container.sample()]
+
+    @wsme_pecan.wsexpose(Container, body=Container)
+    def post(self, container):
+        """Create a new container.
+
+        :param container: a container within the request body.
+        """
+        return Container.sample()
+
+    @wsme_pecan.wsexpose(Container, wtypes.text, body=Container)
+    def put(self, container_id, container):
+        """Modify this container.
+
+        :param container_id: An ID of the container.
+        :param container: a container within the request body.
+        """
+        pass
+
+    @wsme_pecan.wsexpose(Container, wtypes.text)
+    def delete(self, container_id):
+        """Delete this container.
+
+        :param container_id: An ID of the container.
+        """
+        pass
