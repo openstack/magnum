@@ -41,11 +41,6 @@ CONF.register_opts(AUTH_OPTS)
 CONF.register_opts(auth_token.opts, group=OPT_GROUP_NAME)
 
 PUBLIC_ENDPOINTS = [
-    '^/?$',
-    '^/v[0-9]+/?$',
-    '^/v[0-9]+/triggers',
-    '^/camp/platform_endpoints',
-    '^/camp/camp_v1_1_endpoint'
 ]
 
 
