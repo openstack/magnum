@@ -48,7 +48,8 @@ class RootController(object):
     @wsme_pecan.wsexpose([Version])
     def index(self):
         host_url = '%s/%s' % (pecan.request.host_url, 'v1')
-        Version(id='v1.0',
+        v1 = Version(id='v1.0',
                 status='CURRENT',
                 link=common_types.Link(target_name='v1',
                                        href=host_url))
+        return [v1]
