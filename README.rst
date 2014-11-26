@@ -47,48 +47,54 @@ Features
 
 Installation
 ------------
-* Configure Keystone
+* Configure Keystone::
 
-$ source openrc admin admin
+    $ source openrc admin admin
+    $ keystone user-create --name=magnum \
+                           --pass=<secure-magnum-password> \
+                           --email=magnum@example.com
+    $ keystone service-create --name=container \
+                              --type=container \
+                              --description="Magnum Container Service"
+    $ keystone endpoint-create --service=container \
+                               --publicurl=http://127.0.0.1:9511/v1 \
+                               --internalurl=http://127.0.0.1:9511/v1 \
+                               --adminurl=http://127.0.0.1:9511/v1
 
-$ keystone user-create --name=magnum --pass=<secure-magnum-password> --email=magnum@example.com
-$ keystone 1
- keystone service-create --name=container --type=container --description="Magnum Container Service"
-$keystone endpoint-create --service=container --publicurl=http://127.0.0.1:9511/v1 --internalurl=http://127.0.0.1:9511/v1 --adminurl=http://127.0.0.1:9511/v1
+* Install Magnum::
 
-* Install Magnum
+    $ git clone http://github.com/stackforge/magnum
+    $ cd magnum
+    $ sudo python ./setup.py install
+    $ cd ..
 
-$ git clone http://github.com/stackforge/magnum
-$ cd magnum
-$ sudo python ./setup.py install
-$ cd ..
+* Install Magnum's Python Client::
 
-* Install Magnum's Python Client
-
-$ git clone http://github.com/stackforge/python-magnumclient
-$ cd python-magnumclient
-$ sudo python ./setup.py install
-$ cd ..
+    $ git clone http://github.com/stackforge/python-magnumclient
+    $ cd python-magnumclient
+    $ sudo python ./setup.py install
+    $ cd ..
 
 Run
 ---
-* Start magnum-api
+* Start magnum-api::
 
-$ magnum-api &
+    $ magnum-api &
 
-* Start magnum-conductor
+* Start magnum-conductor::
 
-$ magnum-conductor &
+    $ magnum-conductor &
 
 * Start magnum-backend (should be started where a docker server or kubernetes
-* api server is running
+* api server is running::
 
-$ magnum-backend &
+    $ magnum-backend &
 
-* Install magnum pythonclient
-$ git clone http://github.com/stackforge/python-magnumclient
-$ cd python-magnumclient
-$ sudo python ./setup.py install
+* Install magnum pythonclient::
+
+    $ git clone http://github.com/stackforge/python-magnumclient
+    $ cd python-magnumclient
+    $ sudo python ./setup.py install
 
 Access Magnum via ReST API
 --------------------------
@@ -120,5 +126,6 @@ Access Magnum via ReST API
     service-list
     service-show
 
-* Run the operation:
-$ magnum bay-list
+* Run the operation::
+
+    $ magnum bay-list
