@@ -17,15 +17,13 @@ import uuid
 
 from oslo.utils import strutils
 from oslo.utils import timeutils
-import pecan
 from pecan import rest
 import six
 import wsme
 from wsme import exc
 from wsme import types as wtypes
+import wsmeext.pecan as wsme_pecan
 
-from magnum.common import exception
-from magnum.common import yamlutils
 
 # NOTE(dims): We don't depend on oslo*i18n yet
 _ = _LI = _LW = _LE = _LC = lambda x: x
@@ -153,46 +151,86 @@ class Query(_Base):
         return converted_value
 
 
-class BayController(rest.RestController):
-    @exception.wrap_pecan_controller_exception
-    @pecan.expose(content_type='application/x-yaml')
-    def get(self):
-        """Retrieve a bay by UUID."""
-        res_yaml = yamlutils.dump({'dummy_data'})
-        pecan.response.status = 200
-        return res_yaml
-
-    @exception.wrap_pecan_controller_exception
-    @pecan.expose(content_type='application/x-yaml')
-    def put(self):
-        """Create a new bay."""
-        res_yaml = yamlutils.dump({'dummy_data'})
-        pecan.response.status = 200
-        return res_yaml
-
-    @exception.wrap_pecan_controller_exception
-    @pecan.expose(content_type='application/x-yaml')
-    def delete(self):
-        """Delete an existing bay."""
-        res_yaml = yamlutils.dump({'dummy_data'})
-        pecan.response.status = 200
-        return res_yaml
-
-
 class Bay(_Base):
-    bay_id = wtypes.text
+    id = wtypes.text
     """ The ID of the bays."""
 
     name = wsme.wsattr(wtypes.text, mandatory=True)
     """ The name of the bay."""
 
-    desc = wsme.wsattr(wtypes.text, mandatory=True)
+    type = wsme.wsattr(wtypes.text, mandatory=True)
+    """ The type of the bay."""
 
     def __init__(self, **kwargs):
         super(Bay, self).__init__(**kwargs)
 
     @classmethod
     def sample(cls):
-        return cls(id=str(uuid.uuid1(),
-                          name="Docker",
-                          desc='Docker Bays'))
+        return cls(id=str(uuid.uuid1()),
+                   name='bay_example_A',
+                   type='virt')
+
+
+class BayController(rest.RestController):
+    """Manages Bays."""
+    def __init__(self, **kwargs):
+        super(BayController, self).__init__(**kwargs)
+
+        self.bay_list = []
+
+    @wsme_pecan.wsexpose(Bay, wtypes.text)
+    def get_one(self, id):
+        """Retrieve details about one bay.
+
+        :param id: An ID of the bay.
+        """
+        for bay in self.bay_list:
+            if bay.id == id:
+                return self.bay
+        return None
+
+    @wsme_pecan.wsexpose([Bay], [Query], int)
+    def get_all(self, q=None, limit=None):
+        """Retrieve definitions of all of the bays.
+
+        :param query: query parameters.
+        :param limit: The number of bays to retrieve.
+        """
+        if (self.bay_list.__len__() == 0):
+            return 200
+        return self.bay_list
+
+    @wsme_pecan.wsexpose(Bay, wtypes.text, wtypes.text)
+    def post(self, name, type):
+        """Create a new bay.
+
+        :param bay: a bay within the request body.
+        """
+        bay = Bay(id=str(uuid.uuid1()), name=name, type=type)
+        self.bay_list.append(bay)
+
+        return bay
+
+    @wsme_pecan.wsexpose(Bay, wtypes.text, body=Bay)
+    def put(self, id, bay):
+        """Modify this bay.
+
+        :param id: An ID of the bay.
+        :param bay: a bay within the request body.
+        """
+        pass
+
+    @wsme_pecan.wsexpose(Bay, wtypes.text)
+    def delete(self, id):
+        """Delete this bay.
+
+        :param id: An ID of the bay.
+        """
+        count = 0
+        for bay in self.bay_list:
+            if bay.id == id:
+                self.bay_list.remove(count)
+                break
+            count = count + 1
+
+        return 200
