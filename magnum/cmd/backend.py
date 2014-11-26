@@ -20,6 +20,8 @@ import sys
 
 from oslo.config import cfg
 
+from magnum.backend.handlers import bay_heat as bay_heat
+from magnum.backend.handlers import bay_ironic as bay_ironic
 from magnum.backend.handlers import docker as docker_backend
 from magnum.backend.handlers import k8s as k8s_backend
 from magnum.common.rpc import service
@@ -41,7 +43,9 @@ def main():
     cfg.CONF.import_opt('host', 'magnum.backend.config', group='backend')
     endpoints = [
         docker_backend.Handler(),
-        k8s_backend.Handler()
+        k8s_backend.Handler(),
+        bay_heat.Handler(),
+        bay_ironic.Handler()
     ]
     server = service.Service(cfg.CONF.backend.topic,
                              cfg.CONF.backend.host, endpoints)
