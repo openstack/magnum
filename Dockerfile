@@ -51,4 +51,4 @@ RUN python setup.py install
 
 # Set the default command to execute
 # when creating a new container
-CMD magnum-api --debug --host=0.0.0.0
+CMD magnum-api --debug
