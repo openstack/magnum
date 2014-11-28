@@ -28,11 +28,8 @@ FROM ubuntu:14.04
 # File Author / Maintainer
 MAINTAINER Davanum Srinivas
 
-# Update the sources list
-RUN apt-get update
-
 # Install basic applications and Python tools
-RUN apt-get install -y tar git curl nano wget dialog net-tools build-essential python python-dev python-distribute python-pip
+RUN apt-get update && apt-get install -y tar git curl nano wget dialog net-tools build-essential python python-dev python-distribute python-pip
 
 # Copy the application folder inside the container
 ADD . /magnum
