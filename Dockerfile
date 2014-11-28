@@ -23,7 +23,7 @@
 ############################################################
 
 # Set the base image to Ubuntu
-FROM ubuntu
+FROM ubuntu:14.04
 
 # File Author / Maintainer
 MAINTAINER Davanum Srinivas
