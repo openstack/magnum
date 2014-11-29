@@ -185,7 +185,7 @@ class PodController(rest.RestController):
         """
         for pod in self.pod_list:
             if pod.id == id:
-                return self.pod
+                return pod
         return None
 
     @wsme_pecan.wsexpose([Pod], [Query], int)

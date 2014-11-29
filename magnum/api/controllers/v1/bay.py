@@ -186,7 +186,7 @@ class BayController(rest.RestController):
         """
         for bay in self.bay_list:
             if bay.id == id:
-                return self.bay
+                return bay
         return None
 
     @wsme_pecan.wsexpose([Bay], [Query], int)
