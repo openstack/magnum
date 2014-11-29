@@ -17,15 +17,12 @@ import uuid
 
 from oslo.utils import strutils
 from oslo.utils import timeutils
-import pecan
 from pecan import rest
 import six
 import wsme
 from wsme import exc
 from wsme import types as wtypes
-
-from magnum.common import exception
-from magnum.common import yamlutils
+import wsmeext.pecan as wsme_pecan
 
 
 # NOTE(dims): We don't depend on oslo*i18n yet
@@ -154,32 +151,6 @@ class Query(_Base):
         return converted_value
 
 
-class PodController(rest.RestController):
-    @exception.wrap_pecan_controller_exception
-    @pecan.expose(content_type='application/x-yaml')
-    def get(self):
-        """Retrieve a pod by UUID."""
-        res_yaml = yamlutils.dump({'dummy_data'})
-        pecan.response.status = 200
-        return res_yaml
-
-    @exception.wrap_pecan_controller_exception
-    @pecan.expose(content_type='application/x-yaml')
-    def put(self):
-        """Create a new pod."""
-        res_yaml = yamlutils.dump({'dummy_data'})
-        pecan.response.status = 200
-        return res_yaml
-
-    @exception.wrap_pecan_controller_exception
-    @pecan.expose(content_type='application/x-yaml')
-    def delete(self):
-        """Delete an existing pod."""
-        res_yaml = yamlutils.dump({'dummy_data'})
-        pecan.response.status = 200
-        return res_yaml
-
-
 class Pod(_Base):
     pod_id = wtypes.text
     """ The ID of the pods."""
@@ -197,3 +168,68 @@ class Pod(_Base):
         return cls(id=str(uuid.uuid1(),
                           name="Docker",
                           desc='Docker Pods'))
+
+
+class PodController(rest.RestController):
+    """Manages Pods."""
+    def __init__(self, **kwargs):
+        super(PodController, self).__init__(**kwargs)
+
+        self.pod_list = []
+
+    @wsme_pecan.wsexpose(Pod, wtypes.text)
+    def get_one(self, id):
+        """Retrieve details about one pod.
+
+        :param id: An ID of the pod.
+        """
+        for pod in self.pod_list:
+            if pod.id == id:
+                return self.pod
+        return None
+
+    @wsme_pecan.wsexpose([Pod], [Query], int)
+    def get_all(self, q=None, limit=None):
+        """Retrieve definitions of all of the pods.
+
+        :param query: query parameters.
+        :param limit: The number of pods to retrieve.
+        """
+        if (self.pod_list.__len__() == 0):
+            return 200
+        return self.pod_list
+
+    @wsme_pecan.wsexpose(Pod, wtypes.text, wtypes.text)
+    def post(self, name, type):
+        """Create a new pod.
+
+        :param pod: a pod within the request body.
+        """
+        pod = Pod(id=str(uuid.uuid1()), name=name, type=type)
+        self.pod_list.append(pod)
+
+        return pod
+
+    @wsme_pecan.wsexpose(Pod, wtypes.text, body=Pod)
+    def put(self, id, pod):
+        """Modify this pod.
+
+        :param id: An ID of the pod.
+        :param pod: a pod within the request body.
+        """
+        pass
+
+    @wsme_pecan.wsexpose(Pod, wtypes.text)
+    def delete(self, id):
+        """Delete this pod.
+
+        :param id: An ID of the pod.
+        """
+        count = 0
+        for pod in self.pod_list:
+            if pod.id == id:
+                self.pod_list.remove(count)
+                break
+            count = count + 1
+
+        return 200
