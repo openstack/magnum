@@ -152,7 +152,7 @@ class Query(_Base):
 
 
 class Pod(_Base):
-    pod_id = wtypes.text
+    id = wtypes.text
     """ The ID of the pods."""
 
     name = wsme.wsattr(wtypes.text, mandatory=True)

@@ -154,7 +154,7 @@ class Query(_Base):
 class Container(_Base):
     """Container Model."""
 
-    container_id = wtypes.text
+    id = wtypes.text
     """ The ID of the containers."""
 
     name = wsme.wsattr(wtypes.text, mandatory=True)
@@ -166,55 +166,55 @@ class Container(_Base):
         super(Container, self).__init__(**kwargs)
 
     def as_dict(self):
-        return self.as_dict_from_keys(['container_id', 'name', 'desc'])
+        return self.as_dict_from_keys(['id', 'name', 'desc'])
 
     @classmethod
     def sample(cls):
-        return cls(container_id=str(uuid.uuid1()),
+        return cls(id=str(uuid.uuid1()),
                    name="Docker",
                    desc='Docker Containers')
 
 
 class StartController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, container_id):
-        return "Start Container %s" % container_id
+    def _default(self, id):
+        return "Start Container %s" % id
 
 
 class StopController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, container_id, *remainder):
-        return "Stop Container %s" % container_id
+    def _default(self, id, *remainder):
+        return "Stop Container %s" % id
 
 
 class RebootController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, container_id, *remainder):
-        return "Reboot Container %s" % container_id
+    def _default(self, id, *remainder):
+        return "Reboot Container %s" % id
 
 
 class PauseController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, container_id, *remainder):
-        return "Pause Container %s" % container_id
+    def _default(self, id, *remainder):
+        return "Pause Container %s" % id
 
 
 class UnpauseController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, container_id, *remainder):
-        return "Unpause Container %s" % container_id
+    def _default(self, id, *remainder):
+        return "Unpause Container %s" % id
 
 
 class LogsController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, container_id, *remainder):
-        return "Logs Container %s" % container_id
+    def _default(self, id, *remainder):
+        return "Logs Container %s" % id
 
 
 class ExecuteController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, container_id, *remainder):
-        return "Execute Container %s" % container_id
+    def _default(self, id, *remainder):
+        return "Execute Container %s" % id
 
 
 class ContainerController(rest.RestController):
@@ -229,10 +229,10 @@ class ContainerController(rest.RestController):
     execute = ExecuteController()
 
     @wsme_pecan.wsexpose(Container, wtypes.text)
-    def get_one(self, container_id):
+    def get_one(self, id):
         """Retrieve details about one container.
 
-        :param container_id: An ID of the container.
+        :param id: An ID of the container.
         """
         return Container.sample()
 
@@ -254,18 +254,18 @@ class ContainerController(rest.RestController):
         return Container.sample()
 
     @wsme_pecan.wsexpose(Container, wtypes.text, body=Container)
-    def put(self, container_id, container):
+    def put(self, id, container):
         """Modify this container.
 
-        :param container_id: An ID of the container.
+        :param id: An ID of the container.
         :param container: a container within the request body.
         """
         pass
 
     @wsme_pecan.wsexpose(Container, wtypes.text)
-    def delete(self, container_id):
+    def delete(self, id):
         """Delete this container.
 
-        :param container_id: An ID of the container.
+        :param id: An ID of the container.
         """
         pass

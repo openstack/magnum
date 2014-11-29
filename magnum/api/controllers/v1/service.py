@@ -181,7 +181,7 @@ class ServiceController(rest.RestController):
 
 
 class Service(_Base):
-    service_id = wtypes.text
+    id = wtypes.text
     """ The ID of the services."""
 
     name = wsme.wsattr(wtypes.text, mandatory=True)

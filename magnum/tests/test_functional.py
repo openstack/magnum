@@ -69,7 +69,7 @@ class TestContainerController(tests.FunctionalTest):
         self.assertEqual(response.status_int, 200)
 
     def test_update(self):
-        params = ('{"container_id":"fake_id", '
+        params = ('{"id":"fake_id", '
                   '"desc": "My Docker Containers", '
                   '"name": "My Docker"}')
         response = self.app.put('/v1/containers',
