@@ -165,9 +165,9 @@ class Pod(_Base):
 
     @classmethod
     def sample(cls):
-        return cls(id=str(uuid.uuid1(),
-                          name="Docker",
-                          desc='Docker Pods'))
+        return cls(id=str(uuid.uuid1()),
+                   name="Docker",
+                   desc='Docker Pods')
 
 
 class PodController(rest.RestController):
@@ -200,12 +200,12 @@ class PodController(rest.RestController):
         return self.pod_list
 
     @wsme_pecan.wsexpose(Pod, wtypes.text, wtypes.text)
-    def post(self, name, type):
+    def post(self, name, desc):
         """Create a new pod.
 
         :param pod: a pod within the request body.
         """
-        pod = Pod(id=str(uuid.uuid1()), name=name, type=type)
+        pod = Pod(id=str(uuid.uuid1()), name=name, desc=desc)
         self.pod_list.append(pod)
 
         return pod
@@ -219,7 +219,7 @@ class PodController(rest.RestController):
         """
         pass
 
-    @wsme_pecan.wsexpose(Pod, wtypes.text)
+    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
     def delete(self, id):
         """Delete this pod.
 
@@ -228,8 +228,8 @@ class PodController(rest.RestController):
         count = 0
         for pod in self.pod_list:
             if pod.id == id:
-                self.pod_list.remove(count)
-                break
+                self.pod_list.remove(pod)
+                return id
             count = count + 1
 
-        return 200
+        return None

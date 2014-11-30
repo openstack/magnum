@@ -220,7 +220,7 @@ class BayController(rest.RestController):
         """
         pass
 
-    @wsme_pecan.wsexpose(Bay, wtypes.text)
+    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
     def delete(self, id):
         """Delete this bay.
 
@@ -229,8 +229,8 @@ class BayController(rest.RestController):
         count = 0
         for bay in self.bay_list:
             if bay.id == id:
-                self.bay_list.remove(count)
-                break
+                self.bay_list.remove(bay)
+                return id
             count = count + 1
 
-        return 200
+        return None
