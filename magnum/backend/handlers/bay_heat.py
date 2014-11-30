@@ -27,7 +27,7 @@ class Handler(object):
 
     # Bay Operations
 
-    def bay_create(uuid, contents):
+    def bay_create(id, name, type):
         LOG.debug('heat bay_create\n')
         return None
 
