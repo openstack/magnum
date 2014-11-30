@@ -251,7 +251,7 @@ class ContainerController(rest.RestController):
         :param query: query parameters.
         :param limit: The number of containers to retrieve.
         """
-        if (self.container_list.__len__() == 0):
+        if len(self.container_list) == 0:
             return []
         return self.container_list
 

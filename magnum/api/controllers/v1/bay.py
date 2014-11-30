@@ -196,8 +196,8 @@ class BayController(rest.RestController):
         :param query: query parameters.
         :param limit: The number of bays to retrieve.
         """
-        if (self.bay_list.__len__() == 0):
-            return 200
+        if len(self.bay_list) == 0:
+            return []
         return self.bay_list
 
     @wsme_pecan.wsexpose(Bay, wtypes.text, wtypes.text)

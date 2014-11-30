@@ -195,8 +195,8 @@ class PodController(rest.RestController):
         :param query: query parameters.
         :param limit: The number of pods to retrieve.
         """
-        if (self.pod_list.__len__() == 0):
-            return 200
+        if len(self.pod_list) == 0:
+            return []
         return self.pod_list
 
     @wsme_pecan.wsexpose(Pod, wtypes.text, wtypes.text)
