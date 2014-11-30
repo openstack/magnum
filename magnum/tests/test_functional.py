@@ -1,4 +1,4 @@
-#    Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
 #    You may obtain a copy of the License at
 #
@@ -14,7 +14,6 @@ from magnum import tests
 
 
 class TestRootController(tests.FunctionalTest):
-
     def test_version(self):
         expected = [{'status': 'CURRENT',
                      'link': {'href': 'http://localhost/v1',
@@ -47,43 +46,48 @@ class TestRootController(tests.FunctionalTest):
 
 
 class TestContainerController(tests.FunctionalTest):
-    def test_get_all(self):
-        response = self.app.get('/v1/containers')
-        self.assertEqual(response.status_int, 200)
-        self.assertEqual('Docker', response.json[0].get('name'))
-        self.assertEqual('Docker Containers', response.json[0].get('desc'))
-        self.assertEqual('Docker', response.json[1].get('name'))
-        self.assertEqual('Docker Containers', response.json[1].get('desc'))
-
-    def test_get_one(self):
-        response = self.app.get('/v1/containers/xyz')
-        self.assertEqual(response.status_int, 200)
-        self.assertEqual('Docker', response.json.get('name'))
-        self.assertEqual('Docker Containers', response.json.get('desc'))
-
-    def test_create(self):
+    def test_container_api(self):
+        # Create a container
         params = '{"desc": "My Docker Containers", "name": "My Docker"}'
         response = self.app.post('/v1/containers',
                                  params=params,
                                  content_type='application/json')
         self.assertEqual(response.status_int, 200)
 
-    def test_update(self):
-        params = ('{"id":"fake_id", '
-                  '"desc": "My Docker Containers", '
-                  '"name": "My Docker"}')
+        # Get all containers
+        response = self.app.get('/v1/containers')
+        self.assertEqual(response.status_int, 200)
+        self.assertEqual(1, len(response.json))
+        c = response.json[0]
+        self.assertIsNotNone(c.get('id'))
+        self.assertEqual('My Docker', c.get('name'))
+        self.assertEqual('My Docker Containers', c.get('desc'))
+
+        # Get just the one we created
+        response = self.app.get('/v1/containers/%s' % c.get('id'))
+        self.assertEqual(response.status_int, 200)
+
+        # Update the description
+        params = ('{"id":"' + c.get('id') + '", '
+                   '"desc": "My Docker Containers - 2", '
+                   '"name": "My Docker"}')
         response = self.app.put('/v1/containers',
                                 params=params,
                                 content_type='application/json')
         self.assertEqual(response.status_int, 200)
 
-    def test_delete(self):
-        response = self.app.delete('/v1/containers/xyz')
-        self.assertEqual(response.status_int, 200)
-
-    def test_container_actions(self):
+        # Execute some actions
         actions = ['start', 'stop', 'pause', 'unpause',
                    'reboot', 'logs', 'execute']
         for action in actions:
-            response = self.app.get('/v1/containers/xyz/%s' % action)
+            response = self.app.put('/v1/containers/%s/%s' % (c.get('id'),
+                                                              action))
             self.assertEqual(response.status_int, 200)
+
+        # Delete the container we created
+        response = self.app.delete('/v1/containers/%s' % c.get('id'))
+        self.assertEqual(response.status_int, 200)
+
+        response = self.app.get('/v1/containers')
+        self.assertEqual(response.status_int, 200)
+        self.assertEqual(0, len(response.json))

@@ -228,13 +228,21 @@ class ContainerController(rest.RestController):
     logs = LogsController()
     execute = ExecuteController()
 
+    def __init__(self, **kwargs):
+        super(ContainerController, self).__init__(**kwargs)
+
+        self.container_list = []
+
     @wsme_pecan.wsexpose(Container, wtypes.text)
     def get_one(self, id):
         """Retrieve details about one container.
 
         :param id: An ID of the container.
         """
-        return Container.sample()
+        for container in self.container_list:
+            if container.id == id:
+                return container
+        return None
 
     @wsme_pecan.wsexpose([Container], [Query], int)
     def get_all(self, q=None, limit=None):
@@ -243,7 +251,9 @@ class ContainerController(rest.RestController):
         :param query: query parameters.
         :param limit: The number of containers to retrieve.
         """
-        return [Container.sample(), Container.sample()]
+        if (self.container_list.__len__() == 0):
+            return []
+        return self.container_list
 
     @wsme_pecan.wsexpose(Container, body=Container)
     def post(self, container):
@@ -251,7 +261,10 @@ class ContainerController(rest.RestController):
 
         :param container: a container within the request body.
         """
-        return Container.sample()
+        container.id = str(uuid.uuid1())
+        self.container_list.append(container)
+
+        return container
 
     @wsme_pecan.wsexpose(Container, wtypes.text, body=Container)
     def put(self, id, container):
@@ -262,10 +275,17 @@ class ContainerController(rest.RestController):
         """
         pass
 
-    @wsme_pecan.wsexpose(Container, wtypes.text)
+    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
     def delete(self, id):
         """Delete this container.
 
         :param id: An ID of the container.
         """
-        pass
+        count = 0
+        for container in self.container_list:
+            if container.id == id:
+                self.container_list.remove(container)
+                return id
+            count += 1
+
+        return None
