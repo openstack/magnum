@@ -85,8 +85,7 @@ Run
 
     $ magnum-conductor &
 
-* Start magnum-backend (should be started where a docker server or kubernetes
-* api server is running::
+* Start magnum-backend (should be started where a docker server or kubernetes api server is running)::
 
     $ magnum-backend &
 
@@ -95,7 +94,7 @@ Access Magnum via ReST API
 
 * Note the magnum ReST API is not yet plumbed *
 
-* select a subcommand:
+* select a subcommand::
     bay-create
     bay-delete
     bay-list
