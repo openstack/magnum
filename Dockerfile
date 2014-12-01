@@ -18,7 +18,7 @@
 ############################################################
 # Usage:
 # docker build -t magnum:latest .
-# docker run --name magnum -p 127.0.0.1:9511:9511 -d magnum:latest /bin/sh -c magnum-api --debug --host=0.0.0.0
+# docker run --name magnum -p 127.0.0.1:9511:9511 -d magnum:latest
 # curl http://127.0.0.1:9511/
 ############################################################
 
