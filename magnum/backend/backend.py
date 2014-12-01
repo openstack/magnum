@@ -23,10 +23,10 @@ from magnum.common.rpc import service
 
 class API(service.API):
     def __init__(self, transport=None, context=None):
-        cfg.CONF.import_opt('topic', 'magnum.backends.config',
-                            group='backends')
+        cfg.CONF.import_opt('topic', 'magnum.backend.config',
+                            group='backend')
         super(API, self).__init__(transport, context,
-                                  topic=cfg.CONF.backends.topic)
+                                  topic=cfg.CONF.backend.topic)
 
     # Bay Operations
 
