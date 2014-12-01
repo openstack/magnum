@@ -40,7 +40,7 @@ class CrudMixin(object):
         occurring.
 
         The changes made by this method must match the schema defined
-        for "transitioning" and "new" (see solum.objects.__init__).
+        for "transitioning" and "new" (see magnum.objects.__init__).
         """
 
 
