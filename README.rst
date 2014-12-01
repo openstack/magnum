@@ -90,12 +90,6 @@ Run
 
     $ magnum-backend &
 
-* Install magnum pythonclient::
-
-    $ git clone http://github.com/stackforge/python-magnumclient
-    $ cd python-magnumclient
-    $ sudo python ./setup.py install
-
 Access Magnum via ReST API
 --------------------------
 
