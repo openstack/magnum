@@ -48,4 +48,10 @@ def cleanup():
 
 def load():
     """Activate the sqlalchemy backend."""
-    pass
+    from magnum import objects
+    from magnum.objects import container as abstract_container
+    from magnum.objects.sqlalchemy import container
+
+    objects.registry.add(abstract_container.Container, container.Container)
+    objects.registry.add(abstract_container.ContainerList,
+                         container.ContainerList)

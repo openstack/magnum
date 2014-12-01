@@ -218,5 +218,23 @@ class MagnumException(Exception):
         return self.message
 
 
+class ObjectNotFound(MagnumException):
+    msg_fmt = _("The %(name)s %(id)s could not be found.")
+
+
+class ObjectNotUnique(MagnumException):
+    msg_fmt = _("The %(name)s already exists.")
+
+
+class ResourceNotFound(ObjectNotFound):
+    msg_fmt = _("The %(name)s resource %(id)s could not be found.")
+    code = 404
+
+
+class ResourceExists(ObjectNotUnique):
+    msg_fmt = _("The %(name)s resource already exists.")
+    code = 409
+
+
 class AuthorizationFailure(MagnumException):
     msg_fmt = _("%(client)s connection failed. %(message)s")
