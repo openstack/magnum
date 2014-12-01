@@ -30,8 +30,8 @@ class API(service.API):
 
     # Bay Operations
 
-    def bay_create(self, uuid, contents):
-        return self._call('bay_create', contents=contents)
+    def bay_create(self, id, name, type):
+        return self._call('bay_create', id=id, name=name, type=type)
 
     def bay_list(self):
         return self._call('bay_list')
