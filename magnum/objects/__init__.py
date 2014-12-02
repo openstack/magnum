@@ -13,8 +13,11 @@
 #    under the License.
 
 from magnum.objects import bay
+from magnum.objects import container
 
 
+Container = container.Container
 Bay = bay.Bay
 
-__all__ = (Bay)
+__all__ = (Bay,
+           Container)
