@@ -10,6 +10,7 @@ oslo.db>=0.2.0  # Apache-2.0
 oslo.messaging>=1.4.0
 oslo.serialization>=1.0.0
 oslo.utils>=1.0.0
+paramiko>=1.13.0
 pecan>=0.8.0
 keystonemiddleware>=1.0.0
 python-keystoneclient>=0.11.1
