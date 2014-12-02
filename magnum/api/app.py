@@ -15,7 +15,6 @@ import pecan
 
 from magnum.api import auth
 from magnum.api import config as api_config
-from magnum.api import model
 
 # Register options for the service
 API_SERVICE_OPTS = [
@@ -48,7 +47,6 @@ def setup_app(config=None):
     if not config:
         config = get_pecan_config()
 
-    model.init_model()
     app_conf = dict(config.app)
 
     app = pecan.make_app(
