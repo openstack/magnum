@@ -15,10 +15,6 @@
 from magnum.objects import base
 
 
-class Service(base.CrudMixin):
+class Service(base.MagnumObject):
     # Version 1.0: Initial version
     VERSION = '1.0'
-
-
-class ServiceList(list, base.CrudListMixin):
-    """List of Services."""

@@ -14,11 +14,10 @@
 
 import sqlalchemy as sa
 
-from magnum.objects import container as abstract
 from magnum.objects.sqlalchemy import models as sql
 
 
-class Container(sql.Base, abstract.Container):
+class Container(sql.Base):
     """Represent an container in sqlalchemy."""
 
     __tablename__ = 'container'
@@ -49,7 +48,7 @@ class Container(sql.Base, abstract.Container):
     links = sa.Column(sql.JSONEncodedDict)
 
 
-class ContainerList(abstract.ContainerList):
+class ContainerList():
     """Represent a list of containers in sqlalchemy."""
 
     @classmethod

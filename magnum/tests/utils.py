@@ -19,8 +19,8 @@ from oslo.config import cfg
 from oslo.db import options
 
 from magnum.common import context
-from magnum import objects
-from magnum.objects.sqlalchemy import models
+from magnum.db import api as db_api
+from magnum.db.sqlalchemy import api as sql_api
 
 CONF = cfg.CONF
 
@@ -40,15 +40,13 @@ class Database(fixtures.Fixture):
                                          delete=False) as test_file:
             # note the temp file gets deleted by the NestedTempfile fixture.
             self.db_file = test_file.name
-        objects.IMPL.cleanup()
 
     def setUp(self):
         super(Database, self).setUp()
         self.configure()
-        self.addCleanup(objects.IMPL.cleanup)
-        objects.IMPL.get_engine().connect()
-        objects.load()
-        models.Base.metadata.create_all(objects.IMPL.get_engine())
+        sql_api.get_engine().connect()
+        sql_api.load()
+#        models.Base.metadata.create_all(db_api.IMPL.get_engine())
 
     def configure(self):
         options.cfg.set_defaults(options.database_opts,
@@ -59,7 +57,7 @@ class Database(fixtures.Fixture):
 
 
 def get_dummy_session():
-    return objects.IMPL.get_session()
+    return db_api.IMPL.get_session()
 
 
 def create_models_from_data(model_cls, data, ctx):

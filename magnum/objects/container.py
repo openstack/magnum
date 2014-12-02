@@ -15,10 +15,6 @@
 from magnum.objects import base
 
 
-class Container(base.CrudMixin):
+class Container(base.MagnumObject):
     # Version 1.0: Initial version
     VERSION = '1.0'
-
-
-class ContainerList(list, base.CrudListMixin):
-    """List of Containers."""

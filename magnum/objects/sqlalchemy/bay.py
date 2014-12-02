@@ -14,11 +14,10 @@
 
 import sqlalchemy as sa
 
-from magnum.objects import bay as abstract
 from magnum.objects.sqlalchemy import models as sql
 
 
-class Bay(sql.Base, abstract.Bay):
+class Bay(sql.Base):
     """Represent an bay in sqlalchemy."""
 
     __tablename__ = 'bay'
@@ -35,7 +34,7 @@ class Bay(sql.Base, abstract.Bay):
     external_ip_address = sa.Column(sa.String(15))
 
 
-class BayList(abstract.BayList):
+class BayList():
     """Represent a list of bays in sqlalchemy."""
 
     @classmethod
