@@ -14,10 +14,13 @@
 
 from magnum.objects import bay
 from magnum.objects import container
+from magnum.objects import pod
 
 
 Container = container.Container
 Bay = bay.Bay
+Pod = pod.Pod
 
 __all__ = (Bay,
-           Container)
+           Container,
+           Pod)
