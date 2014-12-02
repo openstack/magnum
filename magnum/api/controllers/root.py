@@ -1,3 +1,9 @@
+# -*- encoding: utf-8 -*-
+#
+# Copyright © 2012 New Dream Network, LLC (DreamHost)
+#
+# Author: Doug Hellmann <doug.hellmann@dreamhost.com>
+#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -10,46 +16,84 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
 import pecan
+from pecan import rest
 from wsme import types as wtypes
 import wsmeext.pecan as wsme_pecan
 
-from magnum.api.controllers import common_types
-from magnum.api.controllers.v1 import root as v1_root
+from magnum.api.controllers import base
+from magnum.api.controllers import link
+from magnum.api.controllers import v1
 
-STATUS_KIND = wtypes.Enum(str, 'SUPPORTED', 'CURRENT', 'DEPRECATED')
 
-
-class Version(wtypes.Base):
-    """Version representation."""
+class Version(base.APIBase):
+    """An API version representation."""
 
     id = wtypes.text
-    "The version identifier."
+    """The ID of the version, also acts as the release number"""
 
-    status = STATUS_KIND
-    "The status of the API (SUPPORTED, CURRENT or DEPRECATED)."
+    links = [link.Link]
+    """A Link that point to a specific version of the API"""
 
-    link = common_types.Link
-    "The link to the versioned API."
-
-    @classmethod
-    def sample(cls):
-        return cls(id='v1.0',
-                   status='CURRENT',
-                   link=common_types.Link(target_name='v1',
-                                          href='http://example.com:9511/v1'))
+    @staticmethod
+    def convert(id):
+        version = Version()
+        version.id = id
+        version.links = [link.Link.make_link('self', pecan.request.host_url,
+                                             id, '', bookmark=True)]
+        return version
 
 
-class RootController(object):
+class Root(base.APIBase):
 
-    v1 = v1_root.Controller()
+    name = wtypes.text
+    """The name of the API"""
 
-    @wsme_pecan.wsexpose([Version])
-    def index(self):
-        host_url = '%s/%s' % (pecan.request.host_url, 'v1')
-        v1 = Version(id='v1.0',
-                status='CURRENT',
-                link=common_types.Link(target_name='v1',
-                                       href=host_url))
-        return [v1]
+    description = wtypes.text
+    """Some information about this API"""
+
+    versions = [Version]
+    """Links to all the versions available in this API"""
+
+    default_version = Version
+    """A link to the default version of the API"""
+
+    @staticmethod
+    def convert():
+        root = Root()
+        root.name = "OpenStack Magnum API"
+        root.description = ("Magnum is an OpenStack project which aims to "
+                            "provide container management.")
+        root.versions = [Version.convert('v1')]
+        root.default_version = Version.convert('v1')
+        return root
+
+
+class RootController(rest.RestController):
+
+    _versions = ['v1']
+    """All supported API versions"""
+
+    _default_version = 'v1'
+    """The default API version"""
+
+    v1 = v1.Controller()
+
+    @wsme_pecan.wsexpose(Root)
+    def get(self):
+        # NOTE: The reason why convert() it's being called for every
+        #       request is because we need to get the host url from
+        #       the request object to make the links.
+        return Root.convert()
+
+    @pecan.expose()
+    def _route(self, args):
+        """Overrides the default routing behavior.
+
+        It redirects the request to the default version of the magnum API
+        if the version number is not specified in the url.
+        """
+
+        if args[0] and args[0] not in self._versions:
+            args = [self._default_version] + args
+        return super(RootController, self)._route(args)

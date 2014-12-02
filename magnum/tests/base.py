@@ -15,9 +15,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import os
+
 from oslo.config import cfg
 from oslotest import base
+import pecan
+from pecan import testing
 import testscenarios
+
+from magnum.tests import conf_fixture
 
 
 class BaseTestCase(testscenarios.WithScenarios, base.BaseTestCase):
@@ -29,5 +35,16 @@ class BaseTestCase(testscenarios.WithScenarios, base.BaseTestCase):
 
 
 class TestCase(base.BaseTestCase):
+    def setUp(self):
+        super(TestCase, self).setUp()
+        self.app = testing.load_test_app(os.path.join(
+            os.path.dirname(__file__),
+            'config.py'
+        ))
+        self.useFixture(conf_fixture.ConfFixture(cfg.CONF))
+
+    def tearDown(self):
+        super(TestCase, self).tearDown()
+        pecan.set_config({}, overwrite=True)
 
     """Test case base class for all unit tests."""

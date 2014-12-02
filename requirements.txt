@@ -20,3 +20,4 @@ six>=1.7.0
 SQLAlchemy>=0.8.4,!=0.9.5,<=0.9.99
 WSME>=0.6
 docker-py>=0.5.1
+jsonpatch>=1.1

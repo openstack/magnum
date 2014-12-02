@@ -1,109 +1,315 @@
-#    Licensed under the Apache License, Version 2.0 (the "License");
-#    you may not use this file except in compliance with the License.
-#    You may obtain a copy of the License at
+# Copyright 2013 UnitedStack Inc.
+# All Rights Reserved.
 #
-#        http://www.apache.org/licenses/LICENSE-2.0
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
 #
 #    Unless required by applicable law or agreed to in writing, software
-#    distributed under the License is distributed on an "AS IS" BASIS,
-#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#    See the License for the specific language governing permissions and
-#    limitations under the License.
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
 
-import uuid
+import datetime
 
+import pecan
 from pecan import rest
 import wsme
 from wsme import types as wtypes
 import wsmeext.pecan as wsme_pecan
 
-from magnum.api.controllers.v1.base import Base
-from magnum.api.controllers.v1.base import Query
+from magnum.api.controllers import base
+from magnum.api.controllers import link
+from magnum.api.controllers.v1 import collection
+from magnum.api.controllers.v1 import types
+from magnum.api.controllers.v1 import utils as api_utils
+from magnum.common import exception
+from magnum import objects
 
-# NOTE(dims): We don't depend on oslo*i18n yet
-_ = _LI = _LW = _LE = _LC = lambda x: x
+
+class BayPatchType(types.JsonPatchType):
+
+    @staticmethod
+    def mandatory_attrs():
+        return ['/bay_uuid']
 
 
-class Bay(Base):
-    id = wtypes.text
-    """ The ID of the bays."""
+class Bay(base.APIBase):
+    """API representation of a bay.
 
-    name = wsme.wsattr(wtypes.text, mandatory=True)
-    """ The name of the bay."""
+    This class enforces type checking and value constraints, and converts
+    between the internal object model and the API representation of a bay.
+    """
 
-    type = wsme.wsattr(wtypes.text, mandatory=True)
-    """ The type of the bay."""
+    _bay_uuid = None
+
+    def _get_bay_uuid(self):
+        return self._bay_uuid
+
+    def _set_bay_uuid(self, value):
+        if value and self._bay_uuid != value:
+            try:
+                # FIXME(comstud): One should only allow UUID here, but
+                # there seems to be a bug in that tests are passing an
+                # ID. See bug #1301046 for more details.
+                bay = objects.Node.get(pecan.request.context, value)
+                self._bay_uuid = bay.uuid
+                # NOTE(lucasagomes): Create the bay_id attribute on-the-fly
+                #                    to satisfy the api -> rpc object
+                #                    conversion.
+                self.bay_id = bay.id
+            except exception.NodeNotFound as e:
+                # Change error code because 404 (NotFound) is inappropriate
+                # response for a POST request to create a Bay
+                e.code = 400  # BadRequest
+                raise e
+        elif value == wtypes.Unset:
+            self._bay_uuid = wtypes.Unset
+
+    uuid = types.uuid
+    """Unique UUID for this bay"""
+
+    name = wtypes.text
+    """Name of this bay"""
+
+    type = wtypes.text
+    """Type of this bay"""
+
+    links = wsme.wsattr([link.Link], readonly=True)
+    """A list containing a self link and associated bay links"""
 
     def __init__(self, **kwargs):
-        super(Bay, self).__init__(**kwargs)
+        self.fields = []
+        fields = list(objects.Bay.fields)
+        # NOTE(lucasagomes): bay_uuid is not part of objects.Bay.fields
+        #                    because it's an API-only attribute
+        fields.append('bay_uuid')
+        for field in fields:
+            # Skip fields we do not expose.
+            if not hasattr(self, field):
+                continue
+            self.fields.append(field)
+            setattr(self, field, kwargs.get(field, wtypes.Unset))
+
+        # NOTE(lucasagomes): bay_id is an attribute created on-the-fly
+        # by _set_bay_uuid(), it needs to be present in the fields so
+        # that as_dict() will contain bay_id field when converting it
+        # before saving it in the database.
+        self.fields.append('bay_id')
+        setattr(self, 'bay_uuid', kwargs.get('bay_id', wtypes.Unset))
+
+    @staticmethod
+    def _convert_with_links(bay, url, expand=True):
+        if not expand:
+            bay.unset_fields_except(['uuid', 'name', 'type'])
+
+        # never expose the bay_id attribute
+        bay.bay_id = wtypes.Unset
+
+        bay.links = [link.Link.make_link('self', url,
+                                          'bays', bay.uuid),
+                      link.Link.make_link('bookmark', url,
+                                          'bays', bay.uuid,
+                                          bookmark=True)
+                     ]
+        return bay
+
+    @classmethod
+    def convert_with_links(cls, rpc_bay, expand=True):
+        bay = Bay(**rpc_bay.as_dict())
+        return cls._convert_with_links(bay, pecan.request.host_url, expand)
+
+    @classmethod
+    def sample(cls, expand=True):
+        sample = cls(uuid='27e3153e-d5bf-4b7e-b517-fb518e17f34c',
+                     name='example',
+                     type='virt',
+                     created_at=datetime.datetime.utcnow(),
+                     updated_at=datetime.datetime.utcnow())
+        # NOTE(lucasagomes): bay_uuid getter() method look at the
+        # _bay_uuid variable
+        sample._bay_uuid = '7ae81bb3-dec3-4289-8d6c-da80bd8001ae'
+        return cls._convert_with_links(sample, 'http://localhost:9511', expand)
+
+
+class BayCollection(collection.Collection):
+    """API representation of a collection of bays."""
+
+    bays = [Bay]
+    """A list containing bays objects"""
+
+    def __init__(self, **kwargs):
+        self._type = 'bays'
+
+    @staticmethod
+    def convert_with_links(rpc_bays, limit, url=None, expand=False, **kwargs):
+        collection = BayCollection()
+        collection.bays = [Bay.convert_with_links(p, expand)
+                            for p in rpc_bays]
+        collection.next = collection.get_next(limit, url=url, **kwargs)
+        return collection
 
     @classmethod
     def sample(cls):
-        return cls(id=str(uuid.uuid1()),
-                   name='bay_example_A',
-                   type='virt')
+        sample = cls()
+        sample.bays = [Bay.sample(expand=False)]
+        return sample
 
 
-class BayController(rest.RestController):
-    """Manages Bays."""
-    def __init__(self, **kwargs):
-        super(BayController, self).__init__(**kwargs)
+class BaysController(rest.RestController):
+    """REST controller for Bays."""
 
-        self.bay_list = []
+    from_bays = False
+    """A flag to indicate if the requests to this controller are coming
+    from the top-level resource Nodes."""
 
-    @wsme_pecan.wsexpose(Bay, wtypes.text)
-    def get_one(self, id):
-        """Retrieve details about one bay.
+    _custom_actions = {
+        'detail': ['GET'],
+    }
 
-        :param id: An ID of the bay.
+    def _get_bays_collection(self, marker, limit,
+                              sort_key, sort_dir, expand=False,
+                              resource_url=None):
+
+        limit = api_utils.validate_limit(limit)
+        sort_dir = api_utils.validate_sort_dir(sort_dir)
+
+        marker_obj = None
+        if marker:
+            marker_obj = objects.Bay.get_by_uuid(pecan.request.context,
+                                                  marker)
+
+        bays = objects.Bay.list(pecan.request.context, limit,
+                                marker_obj, sort_key=sort_key,
+                                sort_dir=sort_dir)
+
+        return BayCollection.convert_with_links(bays, limit,
+                                                url=resource_url,
+                                                expand=expand,
+                                                sort_key=sort_key,
+                                                sort_dir=sort_dir)
+
+    @wsme_pecan.wsexpose(BayCollection, types.uuid,
+                         types.uuid, int, wtypes.text, wtypes.text)
+    def get_all(self, bay_uuid=None, marker=None, limit=None,
+                sort_key='id', sort_dir='asc'):
+        """Retrieve a list of bays.
+
+        :param marker: pagination marker for large data sets.
+        :param limit: maximum number of resources to return in a single result.
+        :param sort_key: column to sort results by. Default: id.
+        :param sort_dir: direction to sort. "asc" or "desc". Default: asc.
         """
-        for bay in self.bay_list:
-            if bay.id == id:
-                return bay
-        return None
+        return self._get_bays_collection(marker, limit, sort_key,
+                                         sort_dir)
 
-    @wsme_pecan.wsexpose([Bay], [Query], int)
-    def get_all(self, q=None, limit=None):
-        """Retrieve definitions of all of the bays.
+    @wsme_pecan.wsexpose(BayCollection, types.uuid,
+                         types.uuid, int, wtypes.text, wtypes.text)
+    def detail(self, bay_uuid=None, marker=None, limit=None,
+                sort_key='id', sort_dir='asc'):
+        """Retrieve a list of bays with detail.
 
-        :param query: query parameters.
-        :param limit: The number of bays to retrieve.
+        :param bay_uuid: UUID of a bay, to get only bays for that bay.
+        :param marker: pagination marker for large data sets.
+        :param limit: maximum number of resources to return in a single result.
+        :param sort_key: column to sort results by. Default: id.
+        :param sort_dir: direction to sort. "asc" or "desc". Default: asc.
         """
-        if len(self.bay_list) == 0:
-            return []
-        return self.bay_list
+        # NOTE(lucasagomes): /detail should only work agaist collections
+        parent = pecan.request.path.split('/')[:-1][-1]
+        if parent != "bays":
+            raise exception.HTTPNotFound
 
-    @wsme_pecan.wsexpose(Bay, wtypes.text, wtypes.text)
-    def post(self, name, type):
+        expand = True
+        resource_url = '/'.join(['bays', 'detail'])
+        return self._get_bays_collection(marker, limit,
+                                         sort_key, sort_dir, expand,
+                                         resource_url)
+
+    @wsme_pecan.wsexpose(Bay, types.uuid)
+    def get_one(self, bay_uuid):
+        """Retrieve information about the given bay.
+
+        :param bay_uuid: UUID of a bay.
+        """
+        if self.from_bays:
+            raise exception.OperationNotPermitted
+
+        rpc_bay = objects.Bay.get_by_uuid(pecan.request.context, bay_uuid)
+        return Bay.convert_with_links(rpc_bay)
+
+    @wsme_pecan.wsexpose(Bay, body=Bay, status_code=201)
+    def post(self, bay):
         """Create a new bay.
 
         :param bay: a bay within the request body.
         """
-        bay = Bay(id=str(uuid.uuid1()), name=name, type=type)
-        self.bay_list.append(bay)
+        if self.from_bays:
+            raise exception.OperationNotPermitted
 
-        return bay
+        new_bay = objects.Bay(pecan.request.context,
+                                **bay.as_dict())
+        new_bay.create()
+        # Set the HTTP Location Header
+        pecan.response.location = link.build_url('bays', new_bay.uuid)
+        return Bay.convert_with_links(new_bay)
 
-    @wsme_pecan.wsexpose(Bay, wtypes.text, body=Bay)
-    def put(self, id, bay):
-        """Modify this bay.
+    @wsme.validate(types.uuid, [BayPatchType])
+    @wsme_pecan.wsexpose(Bay, types.uuid, body=[BayPatchType])
+    def patch(self, bay_uuid, patch):
+        """Update an existing bay.
 
-        :param id: An ID of the bay.
-        :param bay: a bay within the request body.
+        :param bay_uuid: UUID of a bay.
+        :param patch: a json PATCH document to apply to this bay.
         """
-        pass
+        if self.from_bays:
+            raise exception.OperationNotPermitted
 
-    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def delete(self, id):
-        """Delete this bay.
+        rpc_bay = objects.Bay.get_by_uuid(pecan.request.context, bay_uuid)
+        try:
+            bay_dict = rpc_bay.as_dict()
+            # NOTE(lucasagomes):
+            # 1) Remove bay_id because it's an internal value and
+            #    not present in the API object
+            # 2) Add bay_uuid
+            bay_dict['bay_uuid'] = bay_dict.pop('bay_id', None)
+            bay = Bay(**api_utils.apply_jsonpatch(bay_dict, patch))
+        except api_utils.JSONPATCH_EXCEPTIONS as e:
+            raise exception.PatchError(patch=patch, reason=e)
 
-        :param id: An ID of the bay.
+        # Update only the fields that have changed
+        for field in objects.Bay.fields:
+            try:
+                patch_val = getattr(bay, field)
+            except AttributeError:
+                # Ignore fields that aren't exposed in the API
+                continue
+            if patch_val == wtypes.Unset:
+                patch_val = None
+            if rpc_bay[field] != patch_val:
+                rpc_bay[field] = patch_val
+
+        rpc_bay = objects.Node.get_by_id(pecan.request.context,
+                                         rpc_bay.bay_id)
+        topic = pecan.request.rpcapi.get_topic_for(rpc_bay)
+
+        new_bay = pecan.request.rpcapi.update_bay(
+            pecan.request.context, rpc_bay, topic)
+
+        return Bay.convert_with_links(new_bay)
+
+    @wsme_pecan.wsexpose(None, types.uuid, status_code=204)
+    def delete(self, bay_uuid):
+        """Delete a bay.
+
+        :param bay_uuid: UUID of a bay.
         """
-        count = 0
-        for bay in self.bay_list:
-            if bay.id == id:
-                self.bay_list.remove(bay)
-                return id
-            count = count + 1
+        if self.from_bays:
+            raise exception.OperationNotPermitted
 
-        return None
+        rpc_bay = objects.Bay.get_by_uuid(pecan.request.context,
+                                            bay_uuid)
+        rpc_bay.destroy()

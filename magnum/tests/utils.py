@@ -45,7 +45,7 @@ class Database(fixtures.Fixture):
         super(Database, self).setUp()
         self.configure()
         sql_api.get_engine().connect()
-        sql_api.load()
+#        sql_api.load()
 #        models.Base.metadata.create_all(db_api.IMPL.get_engine())
 
     def configure(self):
