@@ -24,7 +24,11 @@ API_SERVICE_OPTS = [
                help='The port for the magnum API server'),
     cfg.StrOpt('host',
                default='127.0.0.1',
-               help='The listen IP for the magnum API server')
+               help='The listen IP for the magnum API server'),
+    cfg.IntOpt('max_limit',
+               default=1000,
+               help='The maximum number of items returned in a single '
+                    'response from a collection resource.')
 ]
 
 CONF = cfg.CONF
