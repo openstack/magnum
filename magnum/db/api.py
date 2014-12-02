@@ -1,0 +1,470 @@
+# -*- encoding: utf-8 -*-
+#
+# Copyright 2013 Hewlett-Packard Development Company, L.P.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+"""
+Base classes for storage engines
+"""
+
+import abc
+
+from oslo.config import cfg
+from oslo.db import api as db_api
+import six
+
+
+_BACKEND_MAPPING = {'sqlalchemy': 'magnum.db.sqlalchemy.api'}
+IMPL = db_api.DBAPI.from_config(cfg.CONF, backend_mapping=_BACKEND_MAPPING,
+                                lazy=True)
+
+
+def get_instance():
+    """Return a DB API instance."""
+    return IMPL
+
+
+@six.add_metaclass(abc.ABCMeta)
+class Connection(object):
+    """Base class for storage system connections."""
+
+    @abc.abstractmethod
+    def __init__(self):
+        """Constructor."""
+
+    @abc.abstractmethod
+    def get_bay_list(self, columns=None, filters=None, limit=None,
+                     marker=None, sort_key=None, sort_dir=None):
+        """Get specific columns for matching bays.
+
+        Return a list of the specified columns for all bays that match the
+        specified filters.
+
+        :param columns: List of column names to return.
+                        Defaults to 'id' column when columns == None.
+        :param filters: Filters to apply. Defaults to None.
+
+        :param limit: Maximum number of bays to return.
+        :param marker: the last item of the previous page; we return the next
+                       result set.
+        :param sort_key: Attribute by which results should be sorted.
+        :param sort_dir: direction in which results should be sorted.
+                         (asc, desc)
+        :returns: A list of tuples of the specified columns.
+        """
+
+    @abc.abstractmethod
+    def reserve_bay(self, tag, bay_id):
+        """Reserve a bay.
+
+        To prevent other ManagerServices from manipulating the given
+        Bay while a Task is performed, mark it reserved by this host.
+
+        :param tag: A string uniquely identifying the reservation holder.
+        :param bay_id: A bay id or uuid.
+        :returns: A Bay object.
+        :raises: BayNotFound if the bay is not found.
+        :raises: BayLocked if the bay is already reserved.
+        """
+
+    @abc.abstractmethod
+    def release_bay(self, tag, bay_id):
+        """Release the reservation on a bay.
+
+        :param tag: A string uniquely identifying the reservation holder.
+        :param bay_id: A bay id or uuid.
+        :raises: BayNotFound if the bay is not found.
+        :raises: BayLocked if the bay is reserved by another host.
+        :raises: BayNotLocked if the bay was found to not have a
+                 reservation at all.
+        """
+
+    @abc.abstractmethod
+    def create_bay(self, values):
+        """Create a new bay.
+
+        :param values: A dict containing several items used to identify
+                       and track the bay, and several dicts which are passed
+                       into the Drivers when managing this bay. For example:
+
+                       ::
+
+                        {
+                         'uuid': utils.generate_uuid(),
+                         'name': 'example',
+                         'type': 'virt'
+                        }
+        :returns: A bay.
+        """
+
+    @abc.abstractmethod
+    def get_bay_by_id(self, bay_id):
+        """Return a bay.
+
+        :param bay_id: The id of a bay.
+        :returns: A bay.
+        """
+
+    @abc.abstractmethod
+    def get_bay_by_uuid(self, bay_uuid):
+        """Return a bay.
+
+        :param bay_uuid: The uuid of a bay.
+        :returns: A bay.
+        """
+
+    @abc.abstractmethod
+    def get_bay_by_instance(self, instance):
+        """Return a bay.
+
+        :param instance: The instance name or uuid to search for.
+        :returns: A bay.
+        """
+
+    @abc.abstractmethod
+    def destroy_bay(self, bay_id):
+        """Destroy a bay and all associated interfaces.
+
+        :param bay_id: The id or uuid of a bay.
+        """
+
+    @abc.abstractmethod
+    def update_bay(self, bay_id, values):
+        """Update properties of a bay.
+
+        :param bay_id: The id or uuid of a bay.
+        :returns: A bay.
+        :raises: BayAssociated
+        :raises: BayNotFound
+        """
+
+    @abc.abstractmethod
+    def get_container_list(self, columns=None, filters=None, limit=None,
+                     marker=None, sort_key=None, sort_dir=None):
+        """Get specific columns for matching containers.
+
+        Return a list of the specified columns for all containers that match
+        the specified filters.
+
+        :param columns: List of column names to return.
+                        Defaults to 'id' column when columns == None.
+        :param filters: Filters to apply. Defaults to None.
+
+        :param limit: Maximum number of containers to return.
+        :param marker: the last item of the previous page; we return the next
+                       result set.
+        :param sort_key: Attribute by which results should be sorted.
+        :param sort_dir: direction in which results should be sorted.
+                         (asc, desc)
+        :returns: A list of tuples of the specified columns.
+        """
+
+    @abc.abstractmethod
+    def reserve_container(self, tag, container_id):
+        """Reserve a container.
+
+        To prevent other ManagerServices from manipulating the given
+        Bay while a Task is performed, mark it reserved by this host.
+
+        :param tag: A string uniquely identifying the reservation holder.
+        :param container_id: A container id or uuid.
+        :returns: A Bay object.
+        :raises: BayNotFound if the container is not found.
+        :raises: BayLocked if the container is already reserved.
+        """
+
+    @abc.abstractmethod
+    def release_container(self, tag, container_id):
+        """Release the reservation on a container.
+
+        :param tag: A string uniquely identifying the reservation holder.
+        :param container_id: A container id or uuid.
+        :raises: BayNotFound if the container is not found.
+        :raises: BayLocked if the container is reserved by another host.
+        :raises: BayNotLocked if the container was found to not have a
+                 reservation at all.
+        """
+
+    @abc.abstractmethod
+    def create_container(self, values):
+        """Create a new container.
+
+        :param values: A dict containing several items used to identify
+                       and track the container, and several dicts which are
+                       passed
+                       into the Drivers when managing this container. For
+                       example:
+
+                       ::
+
+                        {
+                         'uuid': utils.generate_uuid(),
+                         'name': 'example',
+                         'type': 'virt'
+                        }
+        :returns: A container.
+        """
+
+    @abc.abstractmethod
+    def get_container_by_id(self, container_id):
+        """Return a container.
+
+        :param container_id: The id of a container.
+        :returns: A container.
+        """
+
+    @abc.abstractmethod
+    def get_container_by_uuid(self, container_uuid):
+        """Return a container.
+
+        :param container_uuid: The uuid of a container.
+        :returns: A container.
+        """
+
+    @abc.abstractmethod
+    def get_container_by_instance(self, instance):
+        """Return a container.
+
+        :param instance: The instance name or uuid to search for.
+        :returns: A container.
+        """
+
+    @abc.abstractmethod
+    def destroy_container(self, container_id):
+        """Destroy a container and all associated interfaces.
+
+        :param container_id: The id or uuid of a container.
+        """
+
+    @abc.abstractmethod
+    def update_container(self, container_id, values):
+        """Update properties of a container.
+
+        :param container_id: The id or uuid of a container.
+        :returns: A container.
+        :raises: BayAssociated
+        :raises: BayNotFound
+        """
+
+    @abc.abstractmethod
+    def get_pod_list(self, columns=None, filters=None, limit=None,
+                     marker=None, sort_key=None, sort_dir=None):
+        """Get specific columns for matching pods.
+
+        Return a list of the specified columns for all pods that match the
+        specified filters.
+
+        :param columns: List of column names to return.
+                        Defaults to 'id' column when columns == None.
+        :param filters: Filters to apply. Defaults to None.
+
+        :param limit: Maximum number of pods to return.
+        :param marker: the last item of the previous page; we return the next
+                       result set.
+        :param sort_key: Attribute by which results should be sorted.
+        :param sort_dir: direction in which results should be sorted.
+                         (asc, desc)
+        :returns: A list of tuples of the specified columns.
+        """
+
+    @abc.abstractmethod
+    def reserve_pod(self, tag, pod_id):
+        """Reserve a pod.
+
+        To prevent other ManagerServices from manipulating the given
+        Bay while a Task is performed, mark it reserved by this host.
+
+        :param tag: A string uniquely identifying the reservation holder.
+        :param pod_id: A pod id or uuid.
+        :returns: A Bay object.
+        :raises: BayNotFound if the pod is not found.
+        :raises: BayLocked if the pod is already reserved.
+        """
+
+    @abc.abstractmethod
+    def release_pod(self, tag, pod_id):
+        """Release the reservation on a pod.
+
+        :param tag: A string uniquely identifying the reservation holder.
+        :param pod_id: A pod id or uuid.
+        :raises: BayNotFound if the pod is not found.
+        :raises: BayLocked if the pod is reserved by another host.
+        :raises: BayNotLocked if the pod was found to not have a
+                 reservation at all.
+        """
+
+    @abc.abstractmethod
+    def create_pod(self, values):
+        """Create a new pod.
+
+        :param values: A dict containing several items used to identify
+                       and track the pod, and several dicts which are passed
+                       into the Drivers when managing this pod. For example:
+
+                       ::
+
+                        {
+                         'uuid': utils.generate_uuid(),
+                         'name': 'example',
+                         'type': 'virt'
+                        }
+        :returns: A pod.
+        """
+
+    @abc.abstractmethod
+    def get_pod_by_id(self, pod_id):
+        """Return a pod.
+
+        :param pod_id: The id of a pod.
+        :returns: A pod.
+        """
+
+    @abc.abstractmethod
+    def get_pod_by_uuid(self, pod_uuid):
+        """Return a pod.
+
+        :param pod_uuid: The uuid of a pod.
+        :returns: A pod.
+        """
+
+    @abc.abstractmethod
+    def get_pod_by_instance(self, instance):
+        """Return a pod.
+
+        :param instance: The instance name or uuid to search for.
+        :returns: A pod.
+        """
+
+    @abc.abstractmethod
+    def destroy_pod(self, pod_id):
+        """Destroy a pod and all associated interfaces.
+
+        :param pod_id: The id or uuid of a pod.
+        """
+
+    @abc.abstractmethod
+    def update_pod(self, pod_id, values):
+        """Update properties of a pod.
+
+        :param pod_id: The id or uuid of a pod.
+        :returns: A pod.
+        :raises: BayAssociated
+        :raises: BayNotFound
+        """
+
+    @abc.abstractmethod
+    def get_service_list(self, columns=None, filters=None, limit=None,
+                     marker=None, sort_key=None, sort_dir=None):
+        """Get specific columns for matching services.
+
+        Return a list of the specified columns for all services that match the
+        specified filters.
+
+        :param columns: List of column names to return.
+                        Defaults to 'id' column when columns == None.
+        :param filters: Filters to apply. Defaults to None.
+
+        :param limit: Maximum number of services to return.
+        :param marker: the last item of the previous page; we return the next
+                       result set.
+        :param sort_key: Attribute by which results should be sorted.
+        :param sort_dir: direction in which results should be sorted.
+                         (asc, desc)
+        :returns: A list of tuples of the specified columns.
+        """
+
+    @abc.abstractmethod
+    def reserve_service(self, tag, service_id):
+        """Reserve a service.
+
+        To prevent other ManagerServices from manipulating the given
+        Bay while a Task is performed, mark it reserved by this host.
+
+        :param tag: A string uniquely identifying the reservation holder.
+        :param service_id: A service id or uuid.
+        :returns: A Bay object.
+        :raises: BayNotFound if the service is not found.
+        :raises: BayLocked if the service is already reserved.
+        """
+
+    @abc.abstractmethod
+    def release_service(self, tag, service_id):
+        """Release the reservation on a service.
+
+        :param tag: A string uniquely identifying the reservation holder.
+        :param service_id: A service id or uuid.
+        :raises: BayNotFound if the service is not found.
+        :raises: BayLocked if the service is reserved by another host.
+        :raises: BayNotLocked if the service was found to not have a
+                 reservation at all.
+        """
+
+    @abc.abstractmethod
+    def create_service(self, values):
+        """Create a new service.
+
+        :param values: A dict containing several items used to identify
+                       and track the service, and several dicts which are
+                       passed into the Drivers when managing this service.
+                       For example:
+
+                       ::
+
+                        {
+                         'uuid': utils.generate_uuid(),
+                         'name': 'example',
+                         'type': 'virt'
+                        }
+        :returns: A service.
+        """
+
+    @abc.abstractmethod
+    def get_service_by_id(self, service_id):
+        """Return a service.
+
+        :param service_id: The id of a service.
+        :returns: A service.
+        """
+
+    @abc.abstractmethod
+    def get_service_by_uuid(self, service_uuid):
+        """Return a service.
+
+        :param service_uuid: The uuid of a service.
+        :returns: A service.
+        """
+
+    @abc.abstractmethod
+    def get_service_by_instance(self, instance):
+        """Return a service.
+
+        :param instance: The instance name or uuid to search for.
+        :returns: A service.
+        """
+
+    @abc.abstractmethod
+    def destroy_service(self, service_id):
+        """Destroy a service and all associated interfaces.
+
+        :param service_id: The id or uuid of a service.
+        """
+
+    @abc.abstractmethod
+    def update_service(self, service_id, values):
+        """Update properties of a service.
+
+        :param service_id: The id or uuid of a service.
+        :returns: A service.
+        :raises: BayAssociated
+        :raises: BayNotFound
+        """
