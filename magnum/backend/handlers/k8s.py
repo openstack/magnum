@@ -13,99 +13,151 @@
 """Magnum Kubernetes RPC handler."""
 
 from magnum.openstack.common import log as logging
+from magnum.openstack.common import utils
 
 LOG = logging.getLogger(__name__)
 
 
-# These are the backend operations.  They are executed by the backend
-# service.  API calls via AMQP (within the ReST API) trigger the handlers to
-# be called.
+class KubeHandler(object):
+    """These are the backend operations.  They are executed by the backend
+         service.  API calls via AMQP (within the ReST API) trigger the
+         handlers to be called.
 
-class Handler(object):
+         This handler acts as an interface to executes kubectl command line
+         services.
+    """
+
     def __init__(self):
-        super(Handler, self).__init__()
+        super(KubeHandler, self).__init__()
 
-    # Bay Operations
-
-    def bay_create(id, name, type):
-        return None
-
-    def bay_list():
-        return None
-
-    def bay_delete(uuid):
-        return None
-
-    def bay_show(uuid):
-        return None
-
-    # Service Operations
-
+    @staticmethod
     def service_create(uuid, contents):
         LOG.debug("service_create %s contents %s" % (uuid, contents))
-        return None
+        try:
+            out, err = utils.trycmd('kubectl', 'create', '-f', contents)
+            if err:
+                return False
+        except Exception as e:
+            LOG.error("Couldn't create service with contents %s \
+                        due to error %s" % (contents, e))
+            return False
+        return True
 
+    @staticmethod
     def service_list():
         LOG.debug("service_list")
-        return None
+        try:
+            out = utils.execute('kubectl', 'get', 'services')
+            pod_data = [s.split() for s in out.split('\n')]
+            return pod_data
+        except Exception as e:
+            LOG.error("Couldn't get list of services due to error %s" % e)
+            return None
 
+    @staticmethod
     def service_delete(uuid):
         LOG.debug("service_delete %s" % uuid)
-        return None
+        try:
+            out, err = utils.trycmd('kubectl', 'delete', 'service', uuid)
+            if err:
+                return False
+        except Exception as e:
+            LOG.error("Couldn't delete service  %s due to error %s"
+                      % (uuid, e))
+            return False
+        return False
 
+    @staticmethod
+    def service_get(uuid):
+        LOG.debug("service_get %s" % uuid)
+        try:
+            out = utils.execute('kubectl', 'get', 'service', uuid)
+            # TODO(pkilambi): process the output as needed
+            return out
+        except Exception as e:
+            LOG.error("Couldn't get service  %s due to error %s" % (uuid, e))
+            return None
+
+    @staticmethod
     def service_show(uuid):
         LOG.debug("service_show %s" % uuid)
-        return None
+        try:
+            out = utils.execute('kubectl', 'describe', 'service', uuid)
+            # TODO(pkilambi): process the output as needed
+            return out
+        except Exception as e:
+            LOG.error("Couldn't describe service  %s due to error %s"
+                      % (uuid, e))
+            return None
 
     # Pod Operations
+    @staticmethod
+    def pod_create(contents):
+        LOG.debug("pod_create contents %s" % contents)
+        try:
+            out, err = utils.trycmd('kubectl', 'create', '-f', contents)
+            if err:
+                return False
+        except Exception as e:
+            LOG.error("Couldn't create pod with contents %s due to error %s"
+                      % (contents, e))
+            return False
+        return True
 
-    def pod_create(uuid, contents):
-        LOG.debug("pod_create %s contents %s" % (uuid, contents))
-        return None
+    @staticmethod
+    def pod_update(contents):
+        LOG.debug("pod_create contents %s" % contents)
+        try:
+            out, err = utils.trycmd('kubectl', 'update', '-f', contents)
+            if err:
+                return False
+        except Exception as e:
+            LOG.error("Couldn't update pod with contents %s due to error %s"
+                      % (contents, e))
+            return False
+        return True
 
+    @staticmethod
     def pod_list():
         LOG.debug("pod_list")
-        return None
+        try:
+            out = utils.execute('kubectl', 'get', 'pods')
+            pod_data = [s.split() for s in out.split('\n')]
+            return pod_data
+        except Exception as e:
+            LOG.error("Couldn't get list of pods due to error %s" % e)
+            return None
 
+    @staticmethod
     def pod_delete(uuid):
         LOG.debug("pod_delete %s" % uuid)
-        return None
+        try:
+            out, err = utils.trycmd('kubectl', 'delete', 'pod', uuid)
+            if err:
+                return False
+        except Exception as e:
+            LOG.error("Couldn't delete pod  %s due to error %s" % (uuid, e))
+            return False
+        return True
 
+    @staticmethod
+    def pod_get(uuid):
+        LOG.debug("service_get %s" % uuid)
+        try:
+            out = utils.execute('kubectl', 'get', 'pod', uuid)
+            # TODO(pkilambi): process the output as needed
+            return out
+        except Exception as e:
+            LOG.error("Couldn't get service  %s due to error %s" % (uuid, e))
+            return None
+
+    @staticmethod
     def pod_show(uuid):
         LOG.debug("pod_show %s" % uuid)
-        return None
-
-    # Container operations
-
-    def container_create(uuid, contents):
-        return None
-
-    def container_list():
-        return None
-
-    def container_delete(uuid):
-        return None
-
-    def container_show(uuid):
-        return None
-
-    def container_reboot(uuid):
-        return None
-
-    def container_stop(uuid):
-        return None
-
-    def container_start(uuid):
-        return None
-
-    def container_pause(uuid):
-        return None
-
-    def container_unpause(uuid):
-        return None
-
-    def container_logs(uuid):
-        return None
-
-    def container_execute(uuid):
-        return None
+        try:
+            out = utils.execute('kubectl', 'describe', 'pod', uuid)
+            # TODO(pkilambi): process the output as needed
+            return out
+        except Exception as e:
+            LOG.error("Couldn't delete pod  %s due to error %s" % (uuid, e))
+            return None
