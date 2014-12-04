@@ -466,6 +466,33 @@ class Connection(api.Connection):
             ref.update(values)
         return ref
 
+    def _add_pods_filters(self, query, filters):
+        if filters is None:
+            filters = []
+
+        if 'associated' in filters:
+            if filters['associated']:
+                query = query.filter(models.Pod.instance_uuid is not None)
+            else:
+                query = query.filter(models.Pod.instance_uuid is None)
+        if 'reserved' in filters:
+            if filters['reserved']:
+                query = query.filter(models.Pod.reservation is not None)
+            else:
+                query = query.filter(models.Pod.reservation is None)
+        if 'maintenance' in filters:
+            query = query.filter_by(maintenance=filters['maintenance'])
+        if 'driver' in filters:
+            query = query.filter_by(driver=filters['driver'])
+        if 'provision_state' in filters:
+            query = query.filter_by(provision_state=filters['provision_state'])
+        if 'provisioned_before' in filters:
+            limit = timeutils.utcnow() - datetime.timedelta(
+                                         seconds=filters['provisioned_before'])
+            query = query.filter(models.Pod.provision_updated_at < limit)
+
+        return query
+
     def get_podinfo_list(self, columns=None, filters=None, limit=None,
                           marker=None, sort_key=None, sort_dir=None):
         # list-ify columns default values because it is bad form

@@ -34,6 +34,8 @@ class Pod(base.MagnumObject):
     fields = {
         'id': int,
         'uuid': obj_utils.str_or_none,
+        'name': obj_utils.str_or_none,
+        'desc': obj_utils.str_or_none
     }
 
     @staticmethod

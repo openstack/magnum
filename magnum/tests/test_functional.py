@@ -108,44 +108,44 @@ class TestBayController(db_base.DbTestCase):
         self.assertEqual(0, len(c))
 
 
-# class TestPodController(tests.FunctionalTest):
-#     def test_pod_api(self):
-#         # Create a pod
-#         params = '{"desc": "my pod", "name": "pod_example_A"}'
-#         response = self.app.post('/v1/pods',
-#                                  params=params,
-#                                  content_type='application/json')
-#         self.assertEqual(response.status_int, 200)
-#
-#         # Get all bays
-#         response = self.app.get('/v1/pods')
-#         self.assertEqual(response.status_int, 200)
-#         self.assertEqual(1, len(response.json))
-#         c = response.json[0]
-#         self.assertIsNotNone(c.get('uuid'))
-#         self.assertEqual('pod_example_A', c.get('name'))
-#         self.assertEqual('my pod', c.get('desc'))
-#
-#         # Get just the one we created
-#         response = self.app.get('/v1/pods/%s' % c.get('uuid'))
-#         self.assertEqual(response.status_int, 200)
-#
-#         # Update the description
-#         params = ('{"uuid":"' + c.get('uuid') + '", '
-#                    '"desc": "your pod", '
-#                    '"name": "pod_example_A"}')
-#         response = self.app.put('/v1/pods',
-#                                 params=params,
-#                                 content_type='application/json')
-#         self.assertEqual(response.status_int, 200)
-#
-#         # Delete the bay we created
-#         response = self.app.delete('/v1/pods/%s' % c.get('uuid'))
-#         self.assertEqual(response.status_int, 200)
-#
-#         response = self.app.get('/v1/pods')
-#         self.assertEqual(response.status_int, 200)
-#         self.assertEqual(0, len(response.json))
+class TestPodController(db_base.DbTestCase):
+    def test_pod_api(self):
+        # Create a pod
+        params = '{"name": "pod_example_A", "desc": "My Pod"}'
+        response = self.app.post('/v1/pods',
+                                 params=params,
+                                 content_type='application/json')
+        self.assertEqual(response.status_int, 201)
+
+        # Get all pods
+        response = self.app.get('/v1/pods')
+        self.assertEqual(response.status_int, 200)
+        self.assertEqual(1, len(response.json))
+        c = response.json['pods'][0]
+        self.assertIsNotNone(c.get('uuid'))
+        self.assertEqual('pod_example_A', c.get('name'))
+        self.assertEqual('My Pod', c.get('desc'))
+
+        # Get just the one we created
+        response = self.app.get('/v1/pods/%s' % c.get('uuid'))
+        self.assertEqual(response.status_int, 200)
+
+        # Update the description
+        params = [{'path': '/name',
+                   'value': 'pod_example_B',
+                   'op': 'replace'}]
+        response = self.app.patch_json('/v1/pods/%s' % c.get('uuid'),
+                               params=params)
+        self.assertEqual(response.status_int, 200)
+
+        # Delete the pod we created
+        response = self.app.delete('/v1/pods/%s' % c.get('uuid'))
+        self.assertEqual(response.status_int, 204)
+
+        response = self.app.get('/v1/pods')
+        self.assertEqual(response.status_int, 200)
+        c = response.json['pods']
+        self.assertEqual(0, len(c))
 
 
 # class TestContainerController(tests.FunctionalTest):
