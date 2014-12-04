@@ -91,13 +91,12 @@ class TestBayController(db_base.DbTestCase):
         self.assertEqual(response.status_int, 200)
 
         # Update the description
-#        params = ('{"uuid":"' + c.get('uuid') + '", '
-#                   '"type": "virt", '
-#                   '"name": "bay_example_B"}')
-#        response = self.app.put('/v1/bays,
-#                                params=params,
-#                                content_type='application/json')
-#        self.assertEqual(response.status_int, 200)
+        params = [{'path': '/name',
+                   'value': 'bay_example_B',
+                   'op': 'replace'}]
+        response = self.app.patch_json('/v1/bays/%s' % c.get('uuid'),
+                               params=params)
+        self.assertEqual(response.status_int, 200)
 
         # Delete the bay we created
         response = self.app.delete('/v1/bays/%s' % c.get('uuid'))
