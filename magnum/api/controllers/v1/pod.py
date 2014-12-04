@@ -76,6 +76,9 @@ class Pod(base.APIBase):
     desc = wtypes.text
     """Description of this pod"""
 
+    bay_uuid = types.uuid
+    """Unique UUID of the bay the pod runs on"""
+
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated pod links"""
 
@@ -102,7 +105,7 @@ class Pod(base.APIBase):
     @staticmethod
     def _convert_with_links(pod, url, expand=True):
         if not expand:
-            pod.unset_fields_except(['uuid', 'name', 'desc'])
+            pod.unset_fields_except(['uuid', 'name', 'desc', 'bay_uuid'])
 
         # never expose the pod_id attribute
         pod.pod_id = wtypes.Unset
@@ -125,6 +128,7 @@ class Pod(base.APIBase):
         sample = cls(uuid='f978db47-9a37-4e9f-8572-804a10abc0aa',
                      name='MyPod',
                      desc='Pod - Description',
+                     bay_uuid='7ae81bb3-dec3-4289-8d6c-da80bd8001ae',
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())
         # NOTE(lucasagomes): pod_uuid getter() method look at the

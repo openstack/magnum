@@ -111,7 +111,8 @@ class TestBayController(db_base.DbTestCase):
 class TestPodController(db_base.DbTestCase):
     def test_pod_api(self):
         # Create a pod
-        params = '{"name": "pod_example_A", "desc": "My Pod"}'
+        params = '{"name": "pod_example_A", "desc": "My Pod",' \
+                 '"bay_uuid": "7ae81bb3-dec3-4289-8d6c-da80bd8001ae"}'
         response = self.app.post('/v1/pods',
                                  params=params,
                                  content_type='application/json')
@@ -125,6 +126,8 @@ class TestPodController(db_base.DbTestCase):
         self.assertIsNotNone(c.get('uuid'))
         self.assertEqual('pod_example_A', c.get('name'))
         self.assertEqual('My Pod', c.get('desc'))
+        self.assertEqual('7ae81bb3-dec3-4289-8d6c-da80bd8001ae',
+                         c.get('bay_uuid'))
 
         # Get just the one we created
         response = self.app.get('/v1/pods/%s' % c.get('uuid'))

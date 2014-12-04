@@ -150,6 +150,7 @@ class Pod(Base):
     uuid = Column(String(36))
     name = Column(String(255))
     desc = Column(String(255))
+    bay_uuid = Column(String(36))
 
 
 class AbrviceObject(Base):

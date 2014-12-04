@@ -35,7 +35,8 @@ class Pod(base.MagnumObject):
         'id': int,
         'uuid': obj_utils.str_or_none,
         'name': obj_utils.str_or_none,
-        'desc': obj_utils.str_or_none
+        'desc': obj_utils.str_or_none,
+        'bay_uuid': obj_utils.str_or_none,
     }
 
     @staticmethod
@@ -88,6 +89,17 @@ class Pod(base.MagnumObject):
         db_pod = cls.dbapi.get_pod_by_uuid(uuid)
         pod = Pod._from_db_object(cls(context), db_pod)
         return pod
+
+    @base.remotable_classmethod
+    def get_by_bay_uuid(cls, context, bay_uuid):
+        """Find a pods based on bay uuid and return a :class:`Pod` object.
+
+        :param bay_uuid: the uuid of a bay.
+        :param context: Security context
+        :returns: a list of class:`Pod` object.
+        """
+        db_pods = cls.dbapi.get_pods_by_bay_uuid(bay_uuid)
+        return Pod._from_db_object_list(db_pods, cls, context)
 
     @base.remotable_classmethod
     def list(cls, context, limit=None, marker=None,
