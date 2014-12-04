@@ -148,49 +148,40 @@ class TestPodController(db_base.DbTestCase):
         self.assertEqual(0, len(c))
 
 
-# class TestContainerController(tests.FunctionalTest):
-#     def test_container_api(self):
-#         # Create a container
-#         params = '{"desc": "My Docker Containers", "name": "My Docker"}'
-#         response = self.app.post('/v1/containers',
-#                                  params=params,
-#                                  content_type='application/json')
-#         self.assertEqual(response.status_int, 200)
-#
-#         # Get all containers
-#         response = self.app.get('/v1/containers')
-#         self.assertEqual(response.status_int, 200)
-#         self.assertEqual(1, len(response.json))
-#         c = response.json[0]
-#         self.assertIsNotNone(c.get('uuid'))
-#         self.assertEqual('My Docker', c.get('name'))
-#         self.assertEqual('My Docker Containers', c.get('desc'))
-#
-#         # Get just the one we created
-#         response = self.app.get('/v1/containers/%s' % c.get('uuid'))
-#         self.assertEqual(response.status_int, 200)
-#
-#         # Update the description
-#         params = ('{"uuid":"' + c.get('uuid') + '", '
-#                    '"desc": "My Docker Containers - 2", '
-#                    '"name": "My Docker"}')
-#         response = self.app.put('/v1/containers',
-#                                 params=params,
-#                                 content_type='application/json')
-#         self.assertEqual(response.status_int, 200)
-#
-#         # Execute some actions
-#         actions = ['start', 'stop', 'pause', 'unpause',
-#                    'reboot', 'logs', 'execute']
-#         for action in actions:
-#             response = self.app.put('/v1/containers/%s/%s' % (c.get('uuid'),
-#                                                               action))
-#             self.assertEqual(response.status_int, 200)
-#
-#         # Delete the container we created
-#         response = self.app.delete('/v1/containers/%s' % c.get('uuid'))
-#         self.assertEqual(response.status_int, 200)
-#
-#         response = self.app.get('/v1/containers')
-#         self.assertEqual(response.status_int, 200)
-#         self.assertEqual(0, len(response.json))
+class TestContainerController(db_base.DbTestCase):
+    def test_containers_api(self):
+        # Create a container
+        params = '{"name": "My Docker"}'
+        response = self.app.post('/v1/containers',
+                                 params=params,
+                                 content_type='application/json')
+        self.assertEqual(response.status_int, 201)
+
+        # Get all containers
+        response = self.app.get('/v1/containers')
+        self.assertEqual(response.status_int, 200)
+        self.assertEqual(1, len(response.json))
+        c = response.json['containers'][0]
+        self.assertIsNotNone(c.get('uuid'))
+        self.assertEqual('My Docker', c.get('name'))
+
+        # Get just the one we created
+        response = self.app.get('/v1/containers/%s' % c.get('uuid'))
+        self.assertEqual(response.status_int, 200)
+
+        # Update the description
+        params = [{'path': '/name',
+                   'value': 'container_example_B',
+                   'op': 'replace'}]
+        response = self.app.patch_json('/v1/containers/%s' % c.get('uuid'),
+                               params=params)
+        self.assertEqual(response.status_int, 200)
+
+        # Delete the bay we created
+        response = self.app.delete('/v1/containers/%s' % c.get('uuid'))
+        self.assertEqual(response.status_int, 204)
+
+        response = self.app.get('/v1/containers')
+        self.assertEqual(response.status_int, 200)
+        c = response.json['containers']
+        self.assertEqual(0, len(c))

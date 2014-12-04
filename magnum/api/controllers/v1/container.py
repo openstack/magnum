@@ -41,8 +41,8 @@ class Container(base.APIBase):
     """API representation of a container.
 
     This class enforces type checking and value constraints, and converts
-    between the internal object model and the API representation
-    of a container.
+    between the internal object model and the API representation of a
+    container.
     """
 
     _container_uuid = None
@@ -61,7 +61,7 @@ class Container(base.APIBase):
                 # NOTE(lucasagomes): Create the container_id attribute
                 # on-the-fly to satisfy the api -> rpc object conversion.
                 self.container_id = container.id
-            except exception.BayNotFound as e:
+            except exception.ContainerNotFound as e:
                 # Change error code because 404 (NotFound) is inappropriate
                 # response for a POST request to create a Container
                 e.code = 400  # BadRequest
@@ -74,9 +74,6 @@ class Container(base.APIBase):
 
     name = wtypes.text
     """Name of this container"""
-
-    type = wtypes.text
-    """Type of this container"""
 
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated container links"""
@@ -105,7 +102,7 @@ class Container(base.APIBase):
     @staticmethod
     def _convert_with_links(container, url, expand=True):
         if not expand:
-            container.unset_fields_except(['uuid'])
+            container.unset_fields_except(['uuid', 'name'])
 
         # never expose the container_id attribute
         container.container_id = wtypes.Unset
@@ -128,7 +125,6 @@ class Container(base.APIBase):
     def sample(cls, expand=True):
         sample = cls(uuid='27e3153e-d5bf-4b7e-b517-fb518e17f34c',
                      name='example',
-                     type='virt',
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())
         # NOTE(lucasagomes): container_uuid getter() method look at the
@@ -147,8 +143,8 @@ class ContainerCollection(collection.Collection):
         self._type = 'containers'
 
     @staticmethod
-    def convert_with_links(rpc_containers, limit, url=None, expand=False,
-                           **kwargs):
+    def convert_with_links(rpc_containers, limit, url=None,
+                           expand=False, **kwargs):
         collection = ContainerCollection()
         collection.containers = [Container.convert_with_links(p, expand)
                             for p in rpc_containers]
@@ -167,7 +163,7 @@ class ContainersController(rest.RestController):
 
     from_containers = False
     """A flag to indicate if the requests to this controller are coming
-    from the top-level resource Nodes."""
+    from the top-level resource Containers."""
 
     _custom_actions = {
         'detail': ['GET'],
@@ -301,14 +297,18 @@ class ContainersController(rest.RestController):
             if rpc_container[field] != patch_val:
                 rpc_container[field] = patch_val
 
-        rpc_container = objects.Container.get_by_id(pecan.request.context,
-                                         rpc_container.container_id)
-        topic = pecan.request.rpcapi.get_topic_for(rpc_container)
+        if hasattr(pecan.request, 'rpcapi'):
+            rpc_container = objects.Container.get_by_id(pecan.request.context,
+                                             rpc_container.container_id)
+            topic = pecan.request.rpcapi.get_topic_for(rpc_container)
 
-        new_container = pecan.request.rpcapi.update_container(
-            pecan.request.context, rpc_container, topic)
+            new_container = pecan.request.rpcapi.update_container(
+                pecan.request.context, rpc_container, topic)
 
-        return Container.convert_with_links(new_container)
+            return Container.convert_with_links(new_container)
+        else:
+            rpc_container.save()
+            return Container.convert_with_links(rpc_container)
 
     @wsme_pecan.wsexpose(None, types.uuid, status_code=204)
     def delete(self, container_uuid):

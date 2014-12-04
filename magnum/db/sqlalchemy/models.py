@@ -135,6 +135,7 @@ class Container(Base):
         )
     id = Column(Integer, primary_key=True)
     uuid = Column(String(36))
+    name = Column(String(255))
 
 
 class Pod(Base):
