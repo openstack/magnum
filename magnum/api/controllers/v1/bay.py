@@ -55,13 +55,13 @@ class Bay(base.APIBase):
                 # FIXME(comstud): One should only allow UUID here, but
                 # there seems to be a bug in that tests are passing an
                 # ID. See bug #1301046 for more details.
-                bay = objects.Node.get(pecan.request.context, value)
+                bay = objects.Bay.get(pecan.request.context, value)
                 self._bay_uuid = bay.uuid
                 # NOTE(lucasagomes): Create the bay_id attribute on-the-fly
                 #                    to satisfy the api -> rpc object
                 #                    conversion.
                 self.bay_id = bay.id
-            except exception.NodeNotFound as e:
+            except exception.BayNotFound as e:
                 # Change error code because 404 (NotFound) is inappropriate
                 # response for a POST request to create a Bay
                 e.code = 400  # BadRequest
@@ -164,7 +164,7 @@ class BaysController(rest.RestController):
 
     from_bays = False
     """A flag to indicate if the requests to this controller are coming
-    from the top-level resource Nodes."""
+    from the top-level resource Bays."""
 
     _custom_actions = {
         'detail': ['GET'],

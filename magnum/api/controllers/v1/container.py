@@ -56,12 +56,12 @@ class Container(base.APIBase):
                 # FIXME(comstud): One should only allow UUID here, but
                 # there seems to be a bug in that tests are passing an
                 # ID. See bug #1301046 for more details.
-                container = objects.Node.get(pecan.request.context, value)
+                container = objects.Container.get(pecan.request.context, value)
                 self._container_uuid = container.uuid
                 # NOTE(lucasagomes): Create the container_id attribute
                 # on-the-fly to satisfy the api -> rpc object conversion.
                 self.container_id = container.id
-            except exception.NodeNotFound as e:
+            except exception.BayNotFound as e:
                 # Change error code because 404 (NotFound) is inappropriate
                 # response for a POST request to create a Container
                 e.code = 400  # BadRequest
@@ -301,7 +301,7 @@ class ContainersController(rest.RestController):
             if rpc_container[field] != patch_val:
                 rpc_container[field] = patch_val
 
-        rpc_container = objects.Node.get_by_id(pecan.request.context,
+        rpc_container = objects.Container.get_by_id(pecan.request.context,
                                          rpc_container.container_id)
         topic = pecan.request.rpcapi.get_topic_for(rpc_container)
 

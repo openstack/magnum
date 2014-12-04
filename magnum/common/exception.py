@@ -238,3 +238,173 @@ class ResourceExists(ObjectNotUnique):
 
 class AuthorizationFailure(MagnumException):
     msg_fmt = _("%(client)s connection failed. %(message)s")
+
+
+class UnsupportedObjectError(MagnumException):
+    message = _('Unsupported object type %(objtype)s')
+
+
+class IncompatibleObjectVersion(MagnumException):
+    message = _('Version %(objver)s of %(objname)s is not supported')
+
+
+class OrphanedObjectError(MagnumException):
+    message = _('Cannot call %(method)s on orphaned %(objtype)s object')
+
+
+class Invalid(MagnumException):
+    message = _("Unacceptable parameters.")
+    code = 400
+
+
+class InvalidUUID(Invalid):
+    message = _("Expected a uuid but received %(uuid)s.")
+
+
+class InvalidIdentity(Invalid):
+    message = _("Expected an uuid or int but received %(identity)s.")
+
+
+class HTTPNotFound(ResourceNotFound):
+    pass
+
+
+class Conflict(MagnumException):
+    message = _('Conflict.')
+    code = 409
+
+
+class Invalid(MagnumException):
+    message = _("Unacceptable parameters.")
+    code = 400
+
+
+class InvalidState(Conflict):
+    message = _("Invalid resource state.")
+
+
+# Cannot be templated as the error syntax varies.
+# msg needs to be constructed when raised.
+class InvalidParameterValue(Invalid):
+    message = _("%(err)s")
+
+
+class InstanceAssociated(Conflict):
+    message = _("Instance %(instance_uuid)s is already associated with a node,"
+                " it cannot be associated with this other node %(node)s")
+
+
+class InstanceNotFound(ResourceNotFound):
+    message = _("Instance %(instance)s could not be found.")
+
+
+class PatchError(Invalid):
+    message = _("Couldn't apply patch '%(patch)s'. Reason: %(reason)s")
+
+
+class NotAuthorized(MagnumException):
+    message = _("Not authorized.")
+    code = 403
+
+
+class OperationNotPermitted(NotAuthorized):
+    message = _("Operation not permitted.")
+
+
+class InvalidMAC(Invalid):
+    message = _("Expected a MAC address but received %(mac)s.")
+
+
+class SSHConnectFailed(MagnumException):
+    message = _("Failed to establish SSH connection to host %(host)s.")
+
+
+class FileSystemNotSupported(MagnumException):
+    message = _("Failed to create a file system. "
+                "File system %(fs)s is not supported.")
+
+
+class BayNotFound(ResourceNotFound):
+    message = _("Bay %(bay)s could not be found.")
+
+
+class BayAssociated(InvalidState):
+    message = _("Bay %(bay)s is associated with instance %(instance)s.")
+
+
+class BayAlreadyExists(Conflict):
+    message = _("A node with UUID %(uuid)s already exists.")
+
+
+class BayLocked(Conflict):
+    message = _("Bay %(bay)s is locked by host %(host)s, please retry "
+                "after the current operation is completed.")
+
+
+class BayNotLocked(Invalid):
+    message = _("Bay %(bay)s found not to be locked on release")
+
+
+class ContainerNotFound(ResourceNotFound):
+    message = _("Container %(container)s could not be found.")
+
+
+class ContainerAssociated(InvalidState):
+    message = _("Container %(container)s is associated with "
+                "instance %(instance)s.")
+
+
+class ContainerAlreadyExists(Conflict):
+    message = _("A node with UUID %(uuid)s already exists.")
+
+
+class ContainerLocked(Conflict):
+    message = _("Container %(container)s is locked by host %(host)s, "
+                "please retry after the current operation is completed.")
+
+
+class ContainerNotLocked(Invalid):
+    message = _("Container %(container)s found not to be locked on release")
+
+
+class PodNotFound(ResourceNotFound):
+    message = _("Pod %(pod)s could not be found.")
+
+
+class PodAssociated(InvalidState):
+    message = _("Pod %(pod)s is associated with instance %(instance)s.")
+
+
+class PodAlreadyExists(Conflict):
+    message = _("A node with UUID %(uuid)s already exists.")
+
+
+class PodLocked(Conflict):
+    message = _("Pod %(pod)s is locked by host %(host)s, please retry "
+                "after the current operation is completed.")
+
+
+class PodNotLocked(Invalid):
+    message = _("Pod %(pod)s found not to be locked on release")
+
+
+class ServiceNotFound(ResourceNotFound):
+    message = _("Service %(service)s could not be found.")
+
+
+class ServiceAssociated(InvalidState):
+    message = _("Service %(service)s is associated with "
+                "instance %(instance)s.")
+
+
+class ServiceAlreadyExists(Conflict):
+    message = _("A node with UUID %(uuid)s already exists.")
+
+
+class ServiceLocked(Conflict):
+    message = _("Service %(service)s is locked by host %(host)s, please retry "
+                "after the current operation is completed.")
+
+
+class ServiceNotLocked(Invalid):
+    message = _("Service %(service)s found not to be locked on release")
