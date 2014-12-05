@@ -35,7 +35,9 @@ class Bay(base.MagnumObject):
         'id': int,
         'uuid': obj_utils.str_or_none,
         'name': obj_utils.str_or_none,
-        'type': obj_utils.str_or_none
+        'type': obj_utils.str_or_none,
+        'image_id': obj_utils.str_or_none,
+        'node_count': obj_utils.int_or_none
     }
 
     @staticmethod

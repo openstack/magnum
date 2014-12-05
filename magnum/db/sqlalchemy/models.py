@@ -123,6 +123,8 @@ class Bay(Base):
     uuid = Column(String(36))
     name = Column(String(255))
     type = Column(String(20))
+    image_id = Column(String(255))
+    node_count = Column(Integer())
 
 
 class Container(Base):
