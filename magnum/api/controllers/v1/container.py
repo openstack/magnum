@@ -158,8 +158,58 @@ class ContainerCollection(collection.Collection):
         return sample
 
 
+class StartController(object):
+    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
+    def _default(self, container_uuid):
+        return "Start Container %s" % container_uuid
+
+
+class StopController(object):
+    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
+    def _default(self, container_uuid, *remainder):
+        return "Stop Container %s" % container_uuid
+
+
+class RebootController(object):
+    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
+    def _default(self, container_uuid, *remainder):
+        return "Reboot Container %s" % container_uuid
+
+
+class PauseController(object):
+    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
+    def _default(self, container_uuid, *remainder):
+        return "Pause Container %s" % container_uuid
+
+
+class UnpauseController(object):
+    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
+    def _default(self, container_uuid, *remainder):
+        return "Unpause Container %s" % container_uuid
+
+
+class LogsController(object):
+    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
+    def _default(self, container_uuid, *remainder):
+        return "Logs Container %s" % container_uuid
+
+
+class ExecuteController(object):
+    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
+    def _default(self, container_uuid, *remainder):
+        return "Execute Container %s" % container_uuid
+
+
 class ContainersController(rest.RestController):
     """REST controller for Containers."""
+
+    start = StartController()
+    stop = StopController()
+    reboot = RebootController()
+    pause = PauseController()
+    unpause = UnpauseController()
+    logs = LogsController()
+    execute = ExecuteController()
 
     from_containers = False
     """A flag to indicate if the requests to this controller are coming
