@@ -177,6 +177,14 @@ class TestContainerController(db_base.DbTestCase):
                                params=params)
         self.assertEqual(response.status_int, 200)
 
+        # Execute some actions
+        actions = ['start', 'stop', 'pause', 'unpause',
+                   'reboot', 'logs', 'execute']
+        for action in actions:
+            response = self.app.put('/v1/containers/%s/%s' % (c.get('uuid'),
+                                                              action))
+            self.assertEqual(response.status_int, 200)
+
         # Delete the bay we created
         response = self.app.delete('/v1/containers/%s' % c.get('uuid'))
         self.assertEqual(response.status_int, 204)
