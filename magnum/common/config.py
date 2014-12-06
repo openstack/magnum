@@ -17,11 +17,14 @@
 
 from oslo.config import cfg
 
+from magnum.common import rpc
 from magnum import version
 
 
 def parse_args(argv, default_config_files=None):
+    rpc.set_defaults(control_exchange='magnum')
     cfg.CONF(argv[1:],
              project='magnum',
              version=version.version_info.release_string(),
              default_config_files=default_config_files)
+    rpc.init(cfg.CONF)
