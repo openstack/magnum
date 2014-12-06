@@ -14,7 +14,8 @@
 
 from oslo.config import cfg
 
-from magnum.common.rpc import service
+from magnum.common import rpc_service as service
+from magnum import objects
 
 
 # The Backend API class serves as a AMQP client for communicating
@@ -30,11 +31,11 @@ class API(service.API):
 
     # Bay Operations
 
-    def bay_create(self, id, name, type):
-        return self._call('bay_create', id=id, name=name, type=type)
+    def bay_create(self, bay):
+        return self._call('bay_create', bay=bay)
 
-    def bay_list(self):
-        return self._call('bay_list')
+    def bay_list(self, context, limit, marker, sort_key, sort_dir):
+        return objects.Bay.list(context, limit, marker, sort_key, sort_dir)
 
     def bay_delete(self, uuid):
         return self._call('bay_delete', uuid=uuid)
@@ -44,8 +45,8 @@ class API(service.API):
 
     # Service Operations
 
-    def service_create(self, uuid, contents):
-        return self._call('service_create', uuid=uuid, contents=contents)
+    def service_create(self, service):
+        return self._call('service_create', service=service)
 
     def service_list(self):
         return self._call('service_list')
@@ -58,8 +59,8 @@ class API(service.API):
 
     # Pod Operations
 
-    def pod_create(self, uuid, contents):
-        return self._call('pod_create4', uuid=uuid, contents=contents)
+    def pod_create(self, uuid, pod):
+        return self._call('pod_create', uuid=uuid, pod=pod)
 
     def pod_list(self):
         return self._call('pod_list')
@@ -72,8 +73,8 @@ class API(service.API):
 
     # Container operations
 
-    def container_create(self, uuid, contents):
-        return self._call('container_create', uuid=uuid)
+    def container_create(self, uuid, container):
+        return self._call('container_create', container=container)
 
     def container_list(self):
         return self._call('container_list')

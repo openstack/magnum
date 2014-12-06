@@ -25,48 +25,6 @@ class Handler(object):
     def __init__(self):
         super(Handler, self).__init__()
 
-    # Bay Operations
-
-    def bay_create(id, name, type):
-        return None
-
-    def bay_list():
-        return None
-
-    def bay_delete(uuid):
-        return None
-
-    def bay_show(uuid):
-        return None
-
-    # Service Operations
-
-    def service_create(uuid, contents):
-        return None
-
-    def service_list():
-        return None
-
-    def service_delete():
-        return None
-
-    def service_show(uuid):
-        return None
-
-    # Pod Operations
-
-    def pod_create(uuid, contents):
-        return None
-
-    def pod_list():
-        return None
-
-    def pod_delete(uuid):
-        return None
-
-    def pod_show(uuid):
-        return None
-
     # Container operations
 
     def container_create(uuid, contents):
