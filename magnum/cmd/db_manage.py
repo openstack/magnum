@@ -95,6 +95,5 @@ def main():
     # set_defaults() is called to register the db options.
     options.set_defaults(CONF)
 
-    print ('manager is %s' % get_manager())
     CONF(project='magnum')
     CONF.command.func(get_manager())
