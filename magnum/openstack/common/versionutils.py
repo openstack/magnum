@@ -18,8 +18,10 @@ Helpers for comparing version strings.
 """
 
 import functools
+import inspect
 
 import pkg_resources
+import six
 
 from magnum.openstack.common._i18n import _
 from magnum.openstack.common import log as logging
@@ -116,16 +118,34 @@ class deprecated(object):
         self.remove_in = remove_in
         self.what = what
 
-    def __call__(self, func):
+    def __call__(self, func_or_cls):
         if not self.what:
-            self.what = func.__name__ + '()'
+            self.what = func_or_cls.__name__ + '()'
+        msg, details = self._build_message()
 
-        @functools.wraps(func)
-        def wrapped(*args, **kwargs):
-            msg, details = self._build_message()
-            LOG.deprecated(msg, details)
-            return func(*args, **kwargs)
-        return wrapped
+        if inspect.isfunction(func_or_cls):
+
+            @six.wraps(func_or_cls)
+            def wrapped(*args, **kwargs):
+                LOG.deprecated(msg, details)
+                return func_or_cls(*args, **kwargs)
+            return wrapped
+        elif inspect.isclass(func_or_cls):
+            orig_init = func_or_cls.__init__
+
+            # TODO(tsufiev): change `functools` module to `six` as
+            # soon as six 1.7.4 (with fix for passing `assigned`
+            # argument to underlying `functools.wraps`) is released
+            # and added to the magnum-incubator requrements
+            @functools.wraps(orig_init, assigned=('__name__', '__doc__'))
+            def new_init(self, *args, **kwargs):
+                LOG.deprecated(msg, details)
+                orig_init(self, *args, **kwargs)
+            func_or_cls.__init__ = new_init
+            return func_or_cls
+        else:
+            raise TypeError('deprecated can be used only with functions or '
+                            'classes')
 
     def _get_safe_to_remove_release(self, release):
         # TODO(dstanek): this method will have to be reimplemented once
