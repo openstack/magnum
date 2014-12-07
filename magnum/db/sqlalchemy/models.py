@@ -140,6 +140,21 @@ class Container(Base):
     name = Column(String(255))
 
 
+class Node(Base):
+    """Represents a node."""
+
+    __tablename__ = 'node'
+    __table_args__ = (
+        schema.UniqueConstraint('uuid', name='uniq_node0uuid'),
+        table_args()
+        )
+    id = Column(Integer, primary_key=True)
+    uuid = Column(String(36))
+    type = Column(String(20))
+    image_id = Column(String(255))
+    ironic_node_id = Column(String(36))
+
+
 class Pod(Base):
     """Represents a pod."""
 

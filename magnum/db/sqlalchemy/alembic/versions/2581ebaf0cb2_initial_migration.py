@@ -53,6 +53,19 @@ def upgrade():
         mysql_DEFAULT_CHARSET='UTF8'
     )
     op.create_table(
+        'node',
+        sa.Column('created_at', sa.DateTime(), nullable=True),
+        sa.Column('updated_at', sa.DateTime(), nullable=True),
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('uuid', sa.String(length=36), nullable=True),
+        sa.Column('type', sa.String(length=20), nullable=True),
+        sa.Column('image_id', sa.String(length=255), nullable=True),
+        sa.Column('ironic_node_id', sa.String(length=36), nullable=True),
+        sa.PrimaryKeyConstraint('id'),
+        mysql_ENGINE='InnoDB',
+        mysql_DEFAULT_CHARSET='UTF8'
+    )
+    op.create_table(
         'pod',
         sa.Column('created_at', sa.DateTime(), nullable=True),
         sa.Column('updated_at', sa.DateTime(), nullable=True),
@@ -78,6 +91,7 @@ def upgrade():
 def downgrade():
     op.drop_table('bay')
     op.drop_table('container')
+    op.drop_table('node')
     op.drop_table('service')
     op.drop_table('pod')
 # We should probably remove the drops later ;-)

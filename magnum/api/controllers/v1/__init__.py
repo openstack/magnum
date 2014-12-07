@@ -29,6 +29,7 @@ import wsmeext.pecan as wsme_pecan
 from magnum.api.controllers import link
 from magnum.api.controllers.v1 import bay
 from magnum.api.controllers.v1 import container
+from magnum.api.controllers.v1 import node
 from magnum.api.controllers.v1 import pod
 
 
@@ -146,6 +147,7 @@ class Controller(rest.RestController):
 
     bays = bay.BaysController()
     containers = container.ContainersController()
+    nodes = node.NodesController()
     pods = pod.PodsController()
 #    services = service.ServicesController()
 

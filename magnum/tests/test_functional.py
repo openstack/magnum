@@ -111,6 +111,38 @@ class TestBayController(db_base.DbTestCase):
         self.assertEqual(0, len(c))
 
 
+class TestNodeController(db_base.DbTestCase):
+    def test_node_api(self):
+        # Create a node
+        params = '{"type": "bare", "image_id": "Fedora"}'
+        response = self.app.post('/v1/nodes',
+                                 params=params,
+                                 content_type='application/json')
+        self.assertEqual(response.status_int, 201)
+
+        # Get all nodes
+        response = self.app.get('/v1/nodes')
+        self.assertEqual(response.status_int, 200)
+        self.assertEqual(1, len(response.json))
+        c = response.json['nodes'][0]
+        self.assertIsNotNone(c.get('uuid'))
+        self.assertEqual('bare', c.get('type'))
+        self.assertEqual('Fedora', c.get('image_id'))
+
+        # Get just the one we created
+        response = self.app.get('/v1/nodes/%s' % c.get('uuid'))
+        self.assertEqual(response.status_int, 200)
+
+        # Delete the node we created
+        response = self.app.delete('/v1/nodes/%s' % c.get('uuid'))
+        self.assertEqual(response.status_int, 204)
+
+        response = self.app.get('/v1/nodes')
+        self.assertEqual(response.status_int, 200)
+        c = response.json['nodes']
+        self.assertEqual(0, len(c))
+
+
 class TestPodController(db_base.DbTestCase):
     def test_pod_api(self):
         # Create a pod

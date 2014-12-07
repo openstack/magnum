@@ -14,16 +14,19 @@
 
 from magnum.objects import bay
 from magnum.objects import container
+from magnum.objects import node
 from magnum.objects import pod
 from magnum.objects import service
 
 
 Container = container.Container
 Bay = bay.Bay
+Node = node.Node
 Pod = pod.Pod
 Service = service.Service
 
 __all__ = (Bay,
            Container,
+           Node,
            Pod,
            Service)
