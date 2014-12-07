@@ -78,6 +78,12 @@ class Bay(base.APIBase):
     type = wtypes.text
     """Type of this bay"""
 
+    image_id = wtypes.text
+    """The image name or UUID to use as a base image for this bay"""
+
+    node_count = wtypes.IntegerType()
+    """The image name or UUID to use as a base image for this bay"""
+
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated bay links"""
 
@@ -104,7 +110,8 @@ class Bay(base.APIBase):
     @staticmethod
     def _convert_with_links(bay, url, expand=True):
         if not expand:
-            bay.unset_fields_except(['uuid', 'name', 'type'])
+            bay.unset_fields_except(['uuid', 'name', 'type', 'image_id',
+                                    'node_count'])
 
         # never expose the bay_id attribute
         bay.bay_id = wtypes.Unset
@@ -127,6 +134,8 @@ class Bay(base.APIBase):
         sample = cls(uuid='27e3153e-d5bf-4b7e-b517-fb518e17f34c',
                      name='example',
                      type='virt',
+                     image_id='Fedora-k8s',
+                     node_count=1,
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())
         # NOTE(lucasagomes): bay_uuid getter() method look at the

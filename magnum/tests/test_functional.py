@@ -71,7 +71,8 @@ class TestRootController(tests.FunctionalTest):
 class TestBayController(db_base.DbTestCase):
     def test_bay_api(self):
         # Create a bay
-        params = '{"name": "bay_example_A", "type": "virt"}'
+        params = '{"name": "bay_example_A", "type": "virt", \
+            "image_id": "Fedora", "node_count": "3"}'
         response = self.app.post('/v1/bays',
                                  params=params,
                                  content_type='application/json')
@@ -85,6 +86,8 @@ class TestBayController(db_base.DbTestCase):
         self.assertIsNotNone(c.get('uuid'))
         self.assertEqual('bay_example_A', c.get('name'))
         self.assertEqual('virt', c.get('type'))
+        self.assertEqual('Fedora', c.get('image_id'))
+        self.assertEqual(3, c.get('node_count'))
 
         # Get just the one we created
         response = self.app.get('/v1/bays/%s' % c.get('uuid'))
