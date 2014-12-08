@@ -257,6 +257,111 @@ class Connection(object):
         """
 
     @abc.abstractmethod
+    def get_node_list(self, columns=None, filters=None, limit=None,
+                     marker=None, sort_key=None, sort_dir=None):
+        """Get specific columns for matching nodes.
+
+        Return a list of the specified columns for all nodes that match the
+        specified filters.
+
+        :param columns: List of column names to return.
+                        Defaults to 'id' column when columns == None.
+        :param filters: Filters to apply. Defaults to None.
+
+        :param limit: Maximum number of nodes to return.
+        :param marker: the last item of the previous page; we return the next
+                       result set.
+        :param sort_key: Attribute by which results should be sorted.
+        :param sort_dir: direction in which results should be sorted.
+                         (asc, desc)
+        :returns: A list of tuples of the specified columns.
+        """
+
+    @abc.abstractmethod
+    def reserve_node(self, tag, node_id):
+        """Reserve a node.
+
+        To prevent other ManagerServices from manipulating the given
+        Node while a Task is performed, mark it reserved by this host.
+
+        :param tag: A string uniquely identifying the reservation holder.
+        :param node_id: A node id or uuid.
+        :returns: A Node object.
+        :raises: NodeNotFound if the node is not found.
+        :raises: NodeLocked if the node is already reserved.
+        """
+
+    @abc.abstractmethod
+    def release_node(self, tag, node_id):
+        """Release the reservation on a node.
+
+        :param tag: A string uniquely identifying the reservation holder.
+        :param node_id: A node id or uuid.
+        :raises: NodeNotFound if the node is not found.
+        :raises: NodeLocked if the node is reserved by another host.
+        :raises: NodeNotLocked if the node was found to not have a
+                 reservation at all.
+        """
+
+    @abc.abstractmethod
+    def create_node(self, values):
+        """Create a new node.
+
+        :param values: A dict containing several items used to identify
+                       and track the node, and several dicts which are passed
+                       into the Drivers when managing this node. For example:
+
+                       ::
+
+                        {
+                         'uuid': utils.generate_uuid(),
+                         'name': 'example',
+                         'type': 'virt'
+                        }
+        :returns: A node.
+        """
+
+    @abc.abstractmethod
+    def get_node_by_id(self, node_id):
+        """Return a node.
+
+        :param node_id: The id of a node.
+        :returns: A node.
+        """
+
+    @abc.abstractmethod
+    def get_node_by_uuid(self, node_uuid):
+        """Return a node.
+
+        :param node_uuid: The uuid of a node.
+        :returns: A node.
+        """
+
+    @abc.abstractmethod
+    def get_node_by_instance(self, instance):
+        """Return a node.
+
+        :param instance: The instance name or uuid to search for.
+        :returns: A node.
+        """
+
+    @abc.abstractmethod
+    def destroy_node(self, node_id):
+        """Destroy a node and all associated interfaces.
+
+        :param node_id: The id or uuid of a node.
+        """
+
+    @abc.abstractmethod
+    def update_node(self, node_id, values):
+        """Update properties of a node.
+
+        :param node_id: The id or uuid of a node.
+        :returns: A node.
+        :raises: NodeAssociated
+        :raises: NodeNotFound
+        """
+    @abc.abstractmethod
     def get_pod_list(self, columns=None, filters=None, limit=None,
                      marker=None, sort_key=None, sort_dir=None):
         """Get specific columns for matching pods.

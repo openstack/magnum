@@ -466,6 +466,178 @@ class Connection(api.Connection):
             ref.update(values)
         return ref
 
+    def _add_nodes_filters(self, query, filters):
+        if filters is None:
+            filters = []
+
+        if 'associated' in filters:
+            if filters['associated']:
+                query = query.filter(models.Node.instance_uuid is not None)
+            else:
+                query = query.filter(models.Node.instance_uuid is None)
+        if 'reserved' in filters:
+            if filters['reserved']:
+                query = query.filter(models.Node.reservation is not None)
+            else:
+                query = query.filter(models.Node.reservation is None)
+        if 'maintenance' in filters:
+            query = query.filter_by(maintenance=filters['maintenance'])
+        if 'driver' in filters:
+            query = query.filter_by(driver=filters['driver'])
+        if 'provision_state' in filters:
+            query = query.filter_by(provision_state=filters['provision_state'])
+        if 'provisioned_before' in filters:
+            limit = timeutils.utcnow() - datetime.timedelta(
+                                         seconds=filters['provisioned_before'])
+            query = query.filter(models.Node.provision_updated_at < limit)
+
+        return query
+
+    def get_nodeinfo_list(self, columns=None, filters=None, limit=None,
+                          marker=None, sort_key=None, sort_dir=None):
+        # list-ify columns default values because it is bad form
+        # to include a mutable list in function definitions.
+        if columns is None:
+            columns = [models.Node.id]
+        else:
+            columns = [getattr(models.Node, c) for c in columns]
+
+        query = model_query(*columns, base_model=models.Node)
+        query = self._add_nodes_filters(query, filters)
+        return _paginate_query(models.Node, limit, marker,
+                               sort_key, sort_dir, query)
+
+    def get_node_list(self, filters=None, limit=None, marker=None,
+                      sort_key=None, sort_dir=None):
+        query = model_query(models.Node)
+        query = self._add_nodes_filters(query, filters)
+        return _paginate_query(models.Node, limit, marker,
+                               sort_key, sort_dir, query)
+
+    def reserve_node(self, tag, node_id):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.Node, session=session)
+            query = add_identity_filter(query, node_id)
+            # be optimistic and assume we usually create a reservation
+            count = query.filter_by(reservation=None).update(
+                        {'reservation': tag}, synchronize_session=False)
+            try:
+                node = query.one()
+                if count != 1:
+                    # Nothing updated and node exists. Must already be
+                    # locked.
+                    raise exception.NodeLocked(node=node_id,
+                                               host=node['reservation'])
+                return node
+            except NoResultFound:
+                raise exception.NodeNotFound(node_id)
+
+    def release_node(self, tag, node_id):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.Node, session=session)
+            query = add_identity_filter(query, node_id)
+            # be optimistic and assume we usually release a reservation
+            count = query.filter_by(reservation=tag).update(
+                        {'reservation': None}, synchronize_session=False)
+            try:
+                if count != 1:
+                    node = query.one()
+                    if node['reservation'] is None:
+                        raise exception.NodeNotLocked(node=node_id)
+                    else:
+                        raise exception.NodeLocked(node=node_id,
+                                                   host=node['reservation'])
+            except NoResultFound:
+                raise exception.NodeNotFound(node_id)
+
+    def create_node(self, values):
+        # ensure defaults are present for new nodes
+        if not values.get('uuid'):
+            values['uuid'] = utils.generate_uuid()
+
+        node = models.Node()
+        node.update(values)
+        try:
+            node.save()
+        except db_exc.DBDuplicateEntry as exc:
+            if 'instance_uuid' in exc.columns:
+                raise exception.InstanceAssociated(
+                    instance_uuid=values['instance_uuid'],
+                    node=values['uuid'])
+            raise exception.NodeAlreadyExists(uuid=values['uuid'])
+        return node
+
+    def get_node_by_id(self, node_id):
+        query = model_query(models.Node).filter_by(id=node_id)
+        try:
+            return query.one()
+        except NoResultFound:
+            raise exception.NodeNotFound(node=node_id)
+
+    def get_node_by_uuid(self, node_uuid):
+        query = model_query(models.Node).filter_by(uuid=node_uuid)
+        try:
+            return query.one()
+        except NoResultFound:
+            raise exception.NodeNotFound(node=node_uuid)
+
+    def get_node_by_instance(self, instance):
+        if not utils.is_uuid_like(instance):
+            raise exception.InvalidUUID(uuid=instance)
+
+        query = (model_query(models.Node)
+                 .filter_by(instance_uuid=instance))
+
+        try:
+            result = query.one()
+        except NoResultFound:
+            raise exception.InstanceNotFound(instance=instance)
+
+        return result
+
+    def destroy_node(self, node_id):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.Node, session=session)
+            query = add_identity_filter(query, node_id)
+            query.delete()
+
+    def update_node(self, node_id, values):
+        # NOTE(dtantsur): this can lead to very strange errors
+        if 'uuid' in values:
+            msg = _("Cannot overwrite UUID for an existing Node.")
+            raise exception.InvalidParameterValue(err=msg)
+
+        try:
+            return self._do_update_node(node_id, values)
+        except db_exc.DBDuplicateEntry:
+            raise exception.InstanceAssociated(
+                instance_uuid=values['instance_uuid'],
+                node=node_id)
+
+    def _do_update_node(self, node_id, values):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.Node, session=session)
+            query = add_identity_filter(query, node_id)
+            try:
+                ref = query.with_lockmode('update').one()
+            except NoResultFound:
+                raise exception.NodeNotFound(node=node_id)
+
+            # Prevent instance_uuid overwriting
+            if values.get("instance_uuid") and ref.instance_uuid:
+                raise exception.NodeAssociated(node=node_id,
+                                instance=ref.instance_uuid)
+
+            if 'provision_state' in values:
+                values['provision_updated_at'] = timeutils.utcnow()
+
+            ref.update(values)
+        return ref
+
     def _add_pods_filters(self, query, filters):
         if filters is None:
             filters = []

@@ -13,9 +13,10 @@ new Openstack project for containers.
 Architecture
 ------------
 
-There are four different types of objects in the Magnum system:
+There are five different types of objects in the Magnum system:
 
-* Bay: A physical machine or virtual machine where work is scheduled
+* Bay: A collection of node objects where work is scheduled
+* Node: A baremetal or virtual machine where work executes
 * Pod: A collection of containers running on one physical or virtual machine
 * Service: A port to Pod mapping
 * Container: A docker container
@@ -40,7 +41,7 @@ one magnum-conductor process running.
 
 Features
 --------
-* Abstractions for bays, pods, services, and containers.
+* Abstractions for bays, containers, nodes, pods, and services
 * Integration with Kubernetes and Docker for backend container technology.
 * Integration with Keystone for multi-tenant security.
 * Integraiton with Neutron for k8s multi-tenancy network security.
