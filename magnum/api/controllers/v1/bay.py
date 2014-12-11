@@ -26,9 +26,9 @@ from magnum.api.controllers import link
 from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
-from magnum.backend import api
 from magnum.common import context
 from magnum.common import exception
+from magnum.conductor import api
 from magnum import objects
 
 

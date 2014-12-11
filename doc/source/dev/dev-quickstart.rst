@@ -210,7 +210,7 @@ Next start the API service::
 
 Next start the ackend service in a new window::
 
-    magnum-backend
+    magnum-conductor
 
 Create a new shell, and source the devstack openrc script::
 
@@ -230,7 +230,7 @@ The existing bays can be listed as follows::
     magnum bay-list
 
 If you make some code changes and want to test their effects,
-just restart either magnum-api or magnum-backend.  the -e option to
+just restart either magnum-api or magnum-conductor.  the -e option to
 pip install will link to the location from where the source code
 was installed.
 

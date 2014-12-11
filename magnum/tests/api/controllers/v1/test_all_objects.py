@@ -10,7 +10,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from magnum.backend import api
+from magnum.conductor import api
 from magnum import tests
 from magnum.tests.db import base as db_base
 

@@ -19,15 +19,15 @@ from magnum import objects
 
 
 # The Backend API class serves as a AMQP client for communicating
-# on a topic exchange specific to the backends.  This allows the ReST
-# API to trigger operations on the backends
+# on a topic exchange specific to the conductors.  This allows the ReST
+# API to trigger operations on the conductors
 
 class API(service.API):
     def __init__(self, transport=None, context=None):
-        cfg.CONF.import_opt('topic', 'magnum.backend.config',
-                            group='backend')
+        cfg.CONF.import_opt('topic', 'magnum.conductor.config',
+                            group='conductor')
         super(API, self).__init__(transport, context,
-                                  topic=cfg.CONF.backend.topic)
+                                  topic=cfg.CONF.conductor.topic)
 
     # Bay Operations
 

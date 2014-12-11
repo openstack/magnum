@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-"""Starter script for the Magnum backend service."""
+"""Starter script for the Magnum conductor service."""
 
 import logging as std_logging
 import os
@@ -20,10 +20,10 @@ import sys
 
 from oslo.config import cfg
 
-from magnum.backend.handlers import bay_ironic as bay_ironic
-from magnum.backend.handlers import docker as docker_backend
-from magnum.backend.handlers import k8s as k8s_backend
 from magnum.common import rpc_service as service
+from magnum.conductor.handlers import bay_ironic as bay_ironic
+from magnum.conductor.handlers import docker as docker_conductor
+from magnum.conductor.handlers import k8s as k8s_conductor
 from magnum.openstack.common._i18n import _
 from magnum.openstack.common import log as logging
 
@@ -38,13 +38,13 @@ def main():
     LOG.debug("Configuration:")
     cfg.CONF.log_opt_values(LOG, std_logging.DEBUG)
 
-    cfg.CONF.import_opt('topic', 'magnum.backend.config', group='backend')
-    cfg.CONF.import_opt('host', 'magnum.backend.config', group='backend')
+    cfg.CONF.import_opt('topic', 'magnum.conductor.config', group='conductor')
+    cfg.CONF.import_opt('host', 'magnum.conductor.config', group='conductor')
     endpoints = [
-        docker_backend.Handler(),
-        k8s_backend.Handler(),
+        docker_conductor.Handler(),
+        k8s_conductor.Handler(),
         bay_ironic.Handler()
     ]
-    server = service.Service(cfg.CONF.backend.topic,
-                             cfg.CONF.backend.host, endpoints)
+    server = service.Service(cfg.CONF.conductor.topic,
+                             cfg.CONF.conductor.host, endpoints)
     server.serve()

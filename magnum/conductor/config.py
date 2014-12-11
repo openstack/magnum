@@ -19,15 +19,15 @@ from oslo.config import cfg
 
 SERVICE_OPTS = [
     cfg.StrOpt('topic',
-               default='magnum-backend',
-               help='The queue to add backend tasks to'),
+               default='magnum-conductor',
+               help='The queue to add conductor tasks to'),
     cfg.StrOpt('host',
                default='localhost',
-               help='The location of the backend rpc queue'),
+               help='The location of the conductor rpc queue'),
 ]
 
 opt_group = cfg.OptGroup(
-    name='backend',
-    title='Options for the magnum-backend service')
+    name='conductor',
+    title='Options for the magnum-conductor service')
 cfg.CONF.register_group(opt_group)
 cfg.CONF.register_opts(SERVICE_OPTS, opt_group)
