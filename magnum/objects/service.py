@@ -34,6 +34,7 @@ class Service(base.MagnumObject):
     fields = {
         'id': int,
         'uuid': obj_utils.str_or_none,
+        'name': obj_utils.str_or_none,
         'bay_uuid': obj_utils.str_or_none,
     }
 
@@ -114,9 +115,9 @@ class Service(base.MagnumObject):
 
         """
         db_services = cls.dbapi.get_service_list(limit=limit,
-                                         marker=marker,
-                                         sort_key=sort_key,
-                                         sort_dir=sort_dir)
+                                                 marker=marker,
+                                                 sort_key=sort_key,
+                                                 sort_dir=sort_dir)
         return Service._from_db_object_list(db_services, cls, context)
 
     @base.remotable

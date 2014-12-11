@@ -31,6 +31,7 @@ from magnum.api.controllers.v1 import bay
 from magnum.api.controllers.v1 import container
 from magnum.api.controllers.v1 import node
 from magnum.api.controllers.v1 import pod
+from magnum.api.controllers.v1 import service
 
 
 class APIBase(wtypes.Base):
@@ -149,7 +150,7 @@ class Controller(rest.RestController):
     containers = container.ContainersController()
     nodes = node.NodesController()
     pods = pod.PodsController()
-#    services = service.ServicesController()
+    services = service.ServicesController()
 
     @wsme_pecan.wsexpose(V1)
     def get(self):
