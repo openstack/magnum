@@ -170,7 +170,7 @@ class Pod(Base):
     bay_uuid = Column(String(36))
 
 
-class AbrviceObject(Base):
+class ServiceObject(Base):
     """Represents a software service."""
 
     __tablename__ = 'service'
@@ -180,3 +180,4 @@ class AbrviceObject(Base):
         )
     id = Column(Integer, primary_key=True)
     uuid = Column(String(36))
+    bay_uuid = Column(String(36))
