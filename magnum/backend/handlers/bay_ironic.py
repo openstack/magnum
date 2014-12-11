@@ -27,81 +27,19 @@ class Handler(object):
 
     # Bay Operations
 
-    def bay_create(id, name, type):
+    def bay_create(self, ctxt, bay):
         LOG.debug('ironic bay_create\n')
-        return None
+        bay.create()
+        return bay
 
-    def bay_list():
+    def bay_list(self, ctxt):
         LOG.debug('ironic bay_list\n')
         return None
 
-    def bay_delete(uuid):
+    def bay_delete(self, ctxt, uuid):
         LOG.debug('ironic bay_delete\n')
         return None
 
-    def bay_show(uuid):
+    def bay_show(self, ctxt, uuid):
         LOG.debug('ironic bay_show\n')
-        return None
-
-    # Service Operations
-
-    def service_create(uuid, contents):
-        return None
-
-    def service_list():
-        return None
-
-    def service_delete():
-        return None
-
-    def service_show(uuid):
-        return None
-
-    # Pod Operations
-
-    def pod_create(uuid, contents):
-        return None
-
-    def pod_list():
-        return None
-
-    def pod_delete(uuid):
-        return None
-
-    def pod_show(uuid):
-        return None
-
-    # Container operations
-
-    def container_create(uuid, contents):
-        return None
-
-    def container_list():
-        return None
-
-    def container_delete(uuid):
-        return None
-
-    def container_show(uuid):
-        return None
-
-    def container_reboot(uuid):
-        return None
-
-    def container_stop(uuid):
-        return None
-
-    def container_start(uuid):
-        return None
-
-    def container_pause(uuid):
-        return None
-
-    def container_unpause(uuid):
-        return None
-
-    def container_logs(uuid):
-        return None
-
-    def container_execute(uuid):
         return None

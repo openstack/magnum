@@ -18,7 +18,7 @@ from magnum.openstack.common import utils
 LOG = logging.getLogger(__name__)
 
 
-class KubeHandler(object):
+class Handler(object):
     """These are the backend operations.  They are executed by the backend
          service.  API calls via AMQP (within the ReST API) trigger the
          handlers to be called.
@@ -28,7 +28,7 @@ class KubeHandler(object):
     """
 
     def __init__(self):
-        super(KubeHandler, self).__init__()
+        super(Handler, self).__init__()
 
     @staticmethod
     def service_create(uuid, contents):

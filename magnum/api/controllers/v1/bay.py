@@ -26,6 +26,8 @@ from magnum.api.controllers import link
 from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
+from magnum.backend import api
+from magnum.common import context
 from magnum.common import exception
 from magnum import objects
 
@@ -88,6 +90,9 @@ class Bay(base.APIBase):
     """A list containing a self link and associated bay links"""
 
     def __init__(self, **kwargs):
+        super(Bay, self).__init__()
+        self.backend_api = api.API(context=context.RequestContext())
+
         self.fields = []
         fields = list(objects.Bay.fields)
         # NOTE(lucasagomes): bay_uuid is not part of objects.Bay.fields
@@ -152,6 +157,7 @@ class BayCollection(collection.Collection):
 
     def __init__(self, **kwargs):
         self._type = 'bays'
+        self.backend_api = api.API(context=context.RequestContext())
 
     @staticmethod
     def convert_with_links(rpc_bays, limit, url=None, expand=False, **kwargs):
@@ -170,6 +176,9 @@ class BayCollection(collection.Collection):
 
 class BaysController(rest.RestController):
     """REST controller for Bays."""
+    def __init__(self):
+        super(BaysController, self).__init__()
+        self.backend_api = api.API(context=context.RequestContext())
 
     from_bays = False
     """A flag to indicate if the requests to this controller are coming
@@ -191,9 +200,9 @@ class BaysController(rest.RestController):
             marker_obj = objects.Bay.get_by_uuid(pecan.request.context,
                                                   marker)
 
-        bays = objects.Bay.list(pecan.request.context, limit,
-                                marker_obj, sort_key=sort_key,
-                                sort_dir=sort_dir)
+        bays = self.backend_api.bay_list(pecan.request.context, limit,
+                                         marker_obj, sort_key=sort_key,
+                                         sort_dir=sort_dir)
 
         return BayCollection.convert_with_links(bays, limit,
                                                 url=resource_url,
@@ -259,12 +268,12 @@ class BaysController(rest.RestController):
         if self.from_bays:
             raise exception.OperationNotPermitted
 
-        new_bay = objects.Bay(pecan.request.context,
-                                **bay.as_dict())
-        new_bay.create()
+        new_bay = objects.Bay(pecan.request.context, **bay.as_dict())
+        res_bay = self.backend_api.bay_create(new_bay)
+
         # Set the HTTP Location Header
-        pecan.response.location = link.build_url('bays', new_bay.uuid)
-        return Bay.convert_with_links(new_bay)
+        pecan.response.location = link.build_url('bays', res_bay.uuid)
+        return Bay.convert_with_links(res_bay)
 
     @wsme.validate(types.uuid, [BayPatchType])
     @wsme_pecan.wsexpose(Bay, types.uuid, body=[BayPatchType])

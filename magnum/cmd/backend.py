@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-"""Starter script for the Magnum Magnum service."""
+"""Starter script for the Magnum backend service."""
 
 import logging as std_logging
 import os
@@ -20,11 +20,10 @@ import sys
 
 from oslo.config import cfg
 
-from magnum.backend.handlers import bay_heat as bay_heat
 from magnum.backend.handlers import bay_ironic as bay_ironic
 from magnum.backend.handlers import docker as docker_backend
 from magnum.backend.handlers import k8s as k8s_backend
-from magnum.common.rpc import service
+from magnum.common import rpc_service as service
 from magnum.openstack.common._i18n import _
 from magnum.openstack.common import log as logging
 
@@ -44,7 +43,6 @@ def main():
     endpoints = [
         docker_backend.Handler(),
         k8s_backend.Handler(),
-        bay_heat.Handler(),
         bay_ironic.Handler()
     ]
     server = service.Service(cfg.CONF.backend.topic,
