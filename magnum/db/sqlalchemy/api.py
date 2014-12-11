@@ -934,6 +934,13 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.ServiceNotFound(service=service_uuid)
 
+    def get_service_by_bay_uuid(self, bay_uuid):
+        query = model_query(models.Service).filter_by(bay_uuid=bay_uuid)
+        try:
+            return query.all()
+        except NoResultFound:
+            raise exception.ServiceNotFound(bay=bay_uuid)
+
     def get_service_by_instance(self, instance):
         if not utils.is_uuid_like(instance):
             raise exception.InvalidUUID(uuid=instance)

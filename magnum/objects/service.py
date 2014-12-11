@@ -34,6 +34,7 @@ class Service(base.MagnumObject):
     fields = {
         'id': int,
         'uuid': obj_utils.str_or_none,
+        'bay_uuid': obj_utils.str_or_none,
     }
 
     @staticmethod
@@ -87,6 +88,17 @@ class Service(base.MagnumObject):
         db_service = cls.dbapi.get_service_by_uuid(uuid)
         service = Service._from_db_object(cls(context), db_service)
         return service
+
+    @base.remotable_classmethod
+    def get_by_bay_uuid(cls, context, bay_uuid):
+        """Find a service based on bay uuid and return a :class:`Pod` object.
+
+        :param bay_uuid: the uuid of a bay.
+        :param context: Security context
+        :returns: a list of class:`Service` object.
+        """
+        db_services = cls.dbapi.get_service_by_bay_uuid(bay_uuid)
+        return Service._from_db_object_list(db_services, cls, context)
 
     @base.remotable_classmethod
     def list(cls, context, limit=None, marker=None,
