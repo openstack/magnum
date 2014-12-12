@@ -73,6 +73,7 @@ def upgrade():
         sa.Column('uuid', sa.String(length=36), nullable=True),
         sa.Column('name', sa.String(length=255), nullable=True),
         sa.Column('desc', sa.String(length=255), nullable=True),
+        sa.Column('bay_uuid', sa.String(length=36), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         mysql_ENGINE='InnoDB',
         mysql_DEFAULT_CHARSET='UTF8'
@@ -83,6 +84,7 @@ def upgrade():
         sa.Column('updated_at', sa.DateTime(), nullable=True),
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('uuid', sa.String(length=36), nullable=True),
+        sa.Column('name', sa.String(length=255), nullable=True),
         sa.Column('bay_uuid', sa.String(length=36), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         mysql_ENGINE='InnoDB',
