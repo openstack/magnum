@@ -415,3 +415,16 @@ class ServiceLocked(Conflict):
 
 class ServiceNotLocked(Invalid):
     message = _("Service %(service)s found not to be locked on release")
+
+
+class KeystoneUnauthorized(MagnumException):
+    message = _("Not authorized in Keystone.")
+
+
+class KeystoneFailure(MagnumException):
+    message = _("Keystone failed.")
+
+
+class CatalogNotFound(MagnumException):
+    message = _("Service type %(service_type)s with endpoint type "
+                "%(endpoint_type)s not found in keystone service catalog.")

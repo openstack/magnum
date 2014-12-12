@@ -26,6 +26,10 @@ import testscenarios
 from magnum.tests import conf_fixture
 
 
+CONF = cfg.CONF
+CONF.set_override('use_stderr', False)
+
+
 class BaseTestCase(testscenarios.WithScenarios, base.BaseTestCase):
     """Test base class."""
 
@@ -35,6 +39,8 @@ class BaseTestCase(testscenarios.WithScenarios, base.BaseTestCase):
 
 
 class TestCase(base.BaseTestCase):
+    """Test case base class for all unit tests."""
+
     def setUp(self):
         super(TestCase, self).setUp()
         self.app = testing.load_test_app(os.path.join(
@@ -47,4 +53,8 @@ class TestCase(base.BaseTestCase):
         super(TestCase, self).tearDown()
         pecan.set_config({}, overwrite=True)
 
-    """Test case base class for all unit tests."""
+    def config(self, **kw):
+        """Override config options for a test."""
+        group = kw.pop('group', None)
+        for k, v in kw.iteritems():
+            CONF.set_override(k, v, group)
