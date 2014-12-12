@@ -11,10 +11,9 @@
 #    limitations under the License.
 
 """API for interfacing with Magnum Backend."""
-
 from oslo.config import cfg
 
-from magnum.common import rpc_service as service
+from magnum.common import rpc_service
 from magnum import objects
 
 
@@ -22,7 +21,7 @@ from magnum import objects
 # on a topic exchange specific to the conductors.  This allows the ReST
 # API to trigger operations on the conductors
 
-class API(service.API):
+class API(rpc_service.API):
     def __init__(self, transport=None, context=None):
         cfg.CONF.import_opt('topic', 'magnum.conductor.config',
                             group='conductor')
@@ -48,25 +47,27 @@ class API(service.API):
     def service_create(self, service):
         return self._call('service_create', service=service)
 
-    def service_list(self):
-        return self._call('service_list')
+    def service_list(self, context, limit, marker, sort_key, sort_dir):
+        # TODO(pkilambi): return kubectl results once we parse appropriately
+        # or figure out a clean way to interact with k8s.
+        return objects.Service.list(context, limit, marker, sort_key, sort_dir)
 
-    def service_delete(self, uuid):
-        return self._call('service_delete', uuid=uuid)
+    def service_delete(self, service):
+        return self._call('service_delete', service)
 
     def service_show(self, uuid):
         return self._call('service_show', uuid=uuid)
 
     # Pod Operations
 
-    def pod_create(self, uuid, pod):
-        return self._call('pod_create', uuid=uuid, pod=pod)
+    def pod_create(self, pod):
+        return self._call('pod_create', pod=pod)
 
-    def pod_list(self):
-        return self._call('pod_list')
+    def pod_list(self, context, limit, marker, sort_key, sort_dir):
+        return objects.Pod.list(context, limit, marker, sort_key, sort_dir)
 
-    def pod_delete(self, uuid):
-        return self._call('pod_delete', uuid=uuid)
+    def pod_delete(self, pod):
+        return self._call('pod_delete', pod)
 
     def pod_show(self, uuid):
         return self._call('pod_show', uuid=uuid)

@@ -23,7 +23,9 @@ from magnum.api.controllers import link
 from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
+from magnum.common import context
 from magnum.common import exception
+from magnum.conductor import api
 from magnum import objects
 
 
@@ -71,6 +73,9 @@ class Service(base.APIBase):
     """A list containing a self link and associated service links"""
 
     def __init__(self, **kwargs):
+        super(Service, self).__init__()
+        self.backend_api = api.API(context=context.RequestContext())
+
         self.fields = []
         fields = list(objects.Service.fields)
         fields.append('service_uuid')
@@ -123,6 +128,7 @@ class ServiceCollection(collection.Collection):
 
     def __init__(self, **kwargs):
         self._type = 'services'
+        self.backend_api = api.API(context=context.RequestContext())
 
     @staticmethod
     def convert_with_links(rpc_services, limit, url=None,
@@ -142,6 +148,10 @@ class ServiceCollection(collection.Collection):
 
 class ServicesController(rest.RestController):
     """REST controller for Services."""
+
+    def __init__(self):
+        super(ServicesController, self).__init__()
+        self.backend_api = api.API(context=context.RequestContext())
 
     from_services = False
     """A flag to indicate if the requests to this controller are coming
@@ -163,9 +173,11 @@ class ServicesController(rest.RestController):
             marker_obj = objects.Service.get_by_uuid(pecan.request.context,
                                                      marker)
 
-        services = objects.Service.list(pecan.request.context, limit,
-                                        marker_obj, sort_key=sort_key,
-                                        sort_dir=sort_dir)
+        services = self.backend_api.service_list(pecan.request.context,
+                                                 limit,
+                                                 marker_obj,
+                                                 sort_key=sort_key,
+                                                 sort_dir=sort_dir)
 
         return ServiceCollection.convert_with_links(services, limit,
                                                     url=resource_url,
@@ -232,9 +244,9 @@ class ServicesController(rest.RestController):
         """
         if self.from_services:
             raise exception.OperationNotPermitted
-        new_service = objects.Service(pecan.request.context,
+        service_obj = objects.Service(pecan.request.context,
                                       **service.as_dict())
-        new_service.create()
+        new_service = self.backend_api.service_create(service_obj)
         # Set the HTTP Location Header
         pecan.response.location = link.build_url('services', new_service.uuid)
         return Service.convert_with_links(new_service)
@@ -299,4 +311,4 @@ class ServicesController(rest.RestController):
 
         rpc_service = objects.Service.get_by_uuid(pecan.request.context,
                                                   service_uuid)
-        rpc_service.destroy()
+        self.backend_api.service_delete(rpc_service)

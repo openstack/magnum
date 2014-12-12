@@ -24,7 +24,9 @@ from magnum.api.controllers import link
 from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
+from magnum.common import context
 from magnum.common import exception
+from magnum.conductor import api
 from magnum import objects
 
 
@@ -83,6 +85,9 @@ class Pod(base.APIBase):
     """A list containing a self link and associated pod links"""
 
     def __init__(self, **kwargs):
+        super(Pod, self).__init__()
+        self.backend_api = api.API(context=context.RequestContext())
+
         self.fields = []
         fields = list(objects.Pod.fields)
         # NOTE(lucasagomes): pod_uuid is not part of objects.Pod.fields
@@ -111,10 +116,10 @@ class Pod(base.APIBase):
         pod.pod_id = wtypes.Unset
 
         pod.links = [link.Link.make_link('self', url,
-                                          'pods', pod.uuid),
-                      link.Link.make_link('bookmark', url,
-                                          'pods', pod.uuid,
-                                          bookmark=True)
+                                         'pods', pod.uuid),
+                     link.Link.make_link('bookmark', url,
+                                         'pods', pod.uuid,
+                                         bookmark=True)
                      ]
         return pod
 
@@ -145,12 +150,13 @@ class PodCollection(collection.Collection):
 
     def __init__(self, **kwargs):
         self._type = 'pods'
+        self.backend_api = api.API(context=context.RequestContext())
 
     @staticmethod
     def convert_with_links(rpc_pods, limit, url=None, expand=False, **kwargs):
         collection = PodCollection()
         collection.pods = [Pod.convert_with_links(p, expand)
-                            for p in rpc_pods]
+                           for p in rpc_pods]
         collection.next = collection.get_next(limit, url=url, **kwargs)
         return collection
 
@@ -164,6 +170,10 @@ class PodCollection(collection.Collection):
 class PodsController(rest.RestController):
     """REST controller for Pods."""
 
+    def __init__(self):
+        super(PodsController, self).__init__()
+        self.backend_api = api.API(context=context.RequestContext())
+
     from_pods = False
     """A flag to indicate if the requests to this controller are coming
     from the top-level resource Pods."""
@@ -173,8 +183,8 @@ class PodsController(rest.RestController):
     }
 
     def _get_pods_collection(self, marker, limit,
-                              sort_key, sort_dir, expand=False,
-                              resource_url=None):
+                             sort_key, sort_dir, expand=False,
+                             resource_url=None):
 
         limit = api_utils.validate_limit(limit)
         sort_dir = api_utils.validate_sort_dir(sort_dir)
@@ -182,11 +192,11 @@ class PodsController(rest.RestController):
         marker_obj = None
         if marker:
             marker_obj = objects.Pod.get_by_uuid(pecan.request.context,
-                                                  marker)
+                                                 marker)
 
-        pods = objects.Pod.list(pecan.request.context, limit,
-                                marker_obj, sort_key=sort_key,
-                                sort_dir=sort_dir)
+        pods = self.backend_api.pod_list(pecan.request.context, limit,
+                                         marker_obj, sort_key=sort_key,
+                                         sort_dir=sort_dir)
 
         return PodCollection.convert_with_links(pods, limit,
                                                 url=resource_url,
@@ -211,7 +221,7 @@ class PodsController(rest.RestController):
     @wsme_pecan.wsexpose(PodCollection, types.uuid,
                          types.uuid, int, wtypes.text, wtypes.text)
     def detail(self, pod_uuid=None, marker=None, limit=None,
-                sort_key='id', sort_dir='asc'):
+               sort_key='id', sort_dir='asc'):
         """Retrieve a list of pods with detail.
 
         :param pod_uuid: UUID of a pod, to get only pods for that pod.
@@ -252,9 +262,9 @@ class PodsController(rest.RestController):
         if self.from_pods:
             raise exception.OperationNotPermitted
 
-        new_pod = objects.Pod(pecan.request.context,
-                                **pod.as_dict())
-        new_pod.create()
+        pod_obj = objects.Pod(pecan.request.context,
+                              **pod.as_dict())
+        new_pod = self.backend_api.pod_create(pod_obj)
         # Set the HTTP Location Header
         pecan.response.location = link.build_url('pods', new_pod.uuid)
         return Pod.convert_with_links(new_pod)
@@ -296,7 +306,7 @@ class PodsController(rest.RestController):
 
         if hasattr(pecan.request, 'rpcapi'):
             rpc_pod = objects.Pod.get_by_id(pecan.request.context,
-                                             rpc_pod.pod_id)
+                                            rpc_pod.pod_id)
             topic = pecan.request.rpcapi.get_topic_for(rpc_pod)
 
             new_pod = pecan.request.rpcapi.update_pod(
@@ -317,5 +327,5 @@ class PodsController(rest.RestController):
             raise exception.OperationNotPermitted
 
         rpc_pod = objects.Pod.get_by_uuid(pecan.request.context,
-                                            pod_uuid)
-        rpc_pod.destroy()
+                                          pod_uuid)
+        self.backend_api.pod_delete(rpc_pod)

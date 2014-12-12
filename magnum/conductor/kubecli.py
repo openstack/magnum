@@ -18,7 +18,7 @@ from magnum.openstack.common import utils
 LOG = logging.getLogger(__name__)
 
 
-class Handler(object):
+class KubeClient(object):
     """These are the backend operations.  They are executed by the backend
          service.  API calls via AMQP (within the ReST API) trigger the
          handlers to be called.
@@ -28,18 +28,19 @@ class Handler(object):
     """
 
     def __init__(self):
-        super(Handler, self).__init__()
+        super(KubeClient, self).__init__()
+        # TODO(pkilambi): Add server endpoint config
 
     @staticmethod
-    def service_create(uuid, contents):
-        LOG.debug("service_create %s contents %s" % (uuid, contents))
+    def service_create(service):
+        LOG.debug("service_create with contents %s" % service)
         try:
-            out, err = utils.trycmd('kubectl', 'create', '-f', contents)
+            out, err = utils.trycmd('kubectl', 'create', '-f', service)
             if err:
                 return False
         except Exception as e:
             LOG.error("Couldn't create service with contents %s \
-                        due to error %s" % (contents, e))
+                        due to error %s" % (service, e))
             return False
         return True
 
