@@ -31,6 +31,7 @@ import wsme
 
 from magnum.common import safe_utils
 from magnum.openstack.common._i18n import _
+from magnum.openstack.common._i18n import _LE
 from magnum.openstack.common import log as logging
 
 
@@ -179,35 +180,40 @@ class MagnumException(Exception):
     """Base Magnum Exception
 
     To correctly use this class, inherit from it and define
-    a 'msg_fmt' property. That msg_fmt will get printf'd
+    a 'message' property. That message will get printf'd
     with the keyword arguments provided to the constructor.
 
     """
     message = _("An unknown exception occurred.")
     code = 500
 
-    def __init__(self, **kwargs):
+    def __init__(self, message=None, **kwargs):
         self.kwargs = kwargs
 
-        if CONF.fatal_exception_format_errors:
-            assert isinstance(self.msg_fmt, six.text_type)
+        if 'code' not in self.kwargs:
+            try:
+                self.kwargs['code'] = self.code
+            except AttributeError:
+                pass
 
-        try:
-            self.message = self.msg_fmt % kwargs
-        except KeyError:
-            # kwargs doesn't match a variable in the message
-            # log the issue and the kwargs
-            LOG.exception(_('Exception in string format operation'),
-                          extra=dict(
-                              private=dict(
-                                  msg=self.msg_fmt,
-                                  args=kwargs
-                                  )
-                              )
-                          )
+        if not message:
+            try:
+                self.message = self.message % kwargs
 
-            if CONF.fatal_exception_format_errors:
-                raise
+            except Exception as e:
+                # kwargs doesn't match a variable in the message
+                # log the issue and the kwargs
+                LOG.exception(_LE('Exception in string format operation'))
+                for name, value in kwargs.iteritems():
+                    LOG.error("%s: %s" % (name, value))
+
+                if CONF.fatal_exception_format_errors:
+                    raise e
+                else:
+                    # at least get the core message out if something happened
+                    message = self.message
+
+        super(MagnumException, self).__init__(self.message)
 
     def __str__(self):
         if six.PY3:
@@ -217,27 +223,33 @@ class MagnumException(Exception):
     def __unicode__(self):
         return self.message
 
+    def format_message(self):
+        if self.__class__.__name__.endswith('_Remote'):
+            return self.args[0]
+        else:
+            return six.text_type(self)
+
 
 class ObjectNotFound(MagnumException):
-    msg_fmt = _("The %(name)s %(id)s could not be found.")
+    message = _("The %(name)s %(id)s could not be found.")
 
 
 class ObjectNotUnique(MagnumException):
-    msg_fmt = _("The %(name)s already exists.")
+    message = _("The %(name)s already exists.")
 
 
 class ResourceNotFound(ObjectNotFound):
-    msg_fmt = _("The %(name)s resource %(id)s could not be found.")
+    message = _("The %(name)s resource %(id)s could not be found.")
     code = 404
 
 
 class ResourceExists(ObjectNotUnique):
-    msg_fmt = _("The %(name)s resource already exists.")
+    message = _("The %(name)s resource already exists.")
     code = 409
 
 
 class AuthorizationFailure(MagnumException):
-    msg_fmt = _("%(client)s connection failed. %(message)s")
+    message = _("%(client)s connection failed. %(message)s")
 
 
 class UnsupportedObjectError(MagnumException):
@@ -272,11 +284,6 @@ class HTTPNotFound(ResourceNotFound):
 class Conflict(MagnumException):
     message = _('Conflict.')
     code = 409
-
-
-class Invalid(MagnumException):
-    message = _("Unacceptable parameters.")
-    code = 400
 
 
 class InvalidState(Conflict):
