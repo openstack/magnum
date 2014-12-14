@@ -18,13 +18,13 @@ import collections
 import copy
 
 from oslo import messaging
+from oslo_context import context
 import six
 
 from magnum.common import exception
 from magnum.objects import utils as obj_utils
 from magnum.openstack.common._i18n import _
 from magnum.openstack.common._i18n import _LE
-from magnum.openstack.common import context
 from magnum.openstack.common import log as logging
 from magnum.openstack.common import versionutils
 

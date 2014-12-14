@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from magnum.openstack.common import context
+from oslo_context import context
 
 
 class RequestContext(context.RequestContext):
