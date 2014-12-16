@@ -127,6 +127,24 @@ class Bay(Base):
     node_count = Column(Integer())
 
 
+class BayModel(Base):
+    """Represents a bay model."""
+
+    __tablename__ = 'baymodel'
+    __table_args__ = (
+        schema.UniqueConstraint('uuid', name='uniq_baymodel0uuid'),
+        table_args()
+        )
+    id = Column(Integer, primary_key=True)
+    uuid = Column(String(36))
+    name = Column(String(255))
+    image_id = Column(String(255))
+    flavor_id = Column(String(255))
+    keypair_id = Column(String(255))
+    external_network_id = Column(String(255))
+    dns_nameserver = Column(String(255))
+
+
 class Container(Base):
     """Represents a container."""
 
