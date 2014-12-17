@@ -123,6 +123,9 @@ class Bay(Base):
     uuid = Column(String(36))
     name = Column(String(255))
     baymodel_id = Column(String(255))
+    stack_id = Column(String(255))
+    master_address = Column(String(255))
+    minions_address = Column(JSONEncodedList)
     node_count = Column(Integer())
 
 

@@ -21,7 +21,7 @@ import sys
 from oslo.config import cfg
 
 from magnum.common import rpc_service as service
-from magnum.conductor.handlers import bay_ironic as bay_ironic
+from magnum.conductor.handlers import bay_k8s_heat
 from magnum.conductor.handlers import docker_conductor
 from magnum.conductor.handlers import kube as k8s_conductor
 from magnum.openstack.common._i18n import _
@@ -43,7 +43,7 @@ def main():
     endpoints = [
         docker_conductor.Handler(),
         k8s_conductor.Handler(),
-        bay_ironic.Handler()
+        bay_k8s_heat.Handler()
     ]
     server = service.Service(cfg.CONF.conductor.topic,
                              cfg.CONF.conductor.host, endpoints)

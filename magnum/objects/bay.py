@@ -31,6 +31,9 @@ class Bay(base.MagnumObject):
         'uuid': obj_utils.str_or_none,
         'name': obj_utils.str_or_none,
         'baymodel_id': obj_utils.str_or_none,
+        'stack_id': obj_utils.str_or_none,
+        'master_address': obj_utils.str_or_none,
+        'minions_address': obj_utils.list_or_none,
         'node_count': obj_utils.int_or_none
     }
 

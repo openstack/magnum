@@ -12,9 +12,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from heatclient.common import template_utils
 from oslo.config import cfg
 
-from magnum.common import heat
+from magnum.common import clients
 from magnum import objects
 from magnum.openstack.common._i18n import _
 from magnum.openstack.common import log as logging
@@ -22,7 +23,8 @@ from magnum.openstack.common import log as logging
 
 k8s_heat_opts = [
     cfg.StrOpt('template_path',
-               default='/etc/magnum/templates/kubecluster.yaml',
+               default=
+                   '/etc/magnum/templates/heat-kubernetes/kubecluster.yaml',
                help=_(
                    'Location of template to build a k8s cluster. '))]
 
@@ -43,25 +45,30 @@ class Handler(object):
     # Bay Operations
 
     def bay_create(self, ctxt, bay):
-        if bay.type is not 'k8s_heat':
-            return
-
         LOG.debug('k8s_heat bay_create')
-        # 'definition' and 'properties' field are needed.
+
+        osc = clients.OpenStackClients(ctxt)
 
         # stack_name is unique on each tenant.
         stack_name = bay.name
-        # bay_definition is used for heat parameter
-        # larsks/heat-kubernetes requires
-        # 'ssh_key_name' and 'external_network_id'
-        bay_definition = bay.definition
+        bay_model = objects.BayModel.get_by_uuid(ctxt, bay.baymodel_id)
+        bay_definition = {
+            'ssh_key_name': bay_model.keypair_id,
+            'external_network_id': bay_model.external_network_id,
+            'server_image': bay_model.image_id,
+            'server_flavor': bay_model.flavor_id
+        }
+        tpl_files, template = template_utils.get_template_contents(
+                                            cfg.CONF.k8s_heat.template_path)
 
-        heat_client = heat.get_client(ctxt)
-        created_stack = heat_client.stacks.create(stack_name=stack_name,
-                                    template=cfg.CONF.k8s_heat.template_path,
-                                    parameters=bay_definition)
-        stack_id = created_stack['stack']['id']
-        bay.properties['stack_id'] = stack_id
+        fields = {
+            'stack_name': stack_name,
+            'parameters': bay_definition,
+            'template': template,
+            'files': dict(list(tpl_files.items()))
+        }
+        created_stack = osc.heat().stacks.create(**fields)
+        bay.stack_id = created_stack['stack']['id']
 
         bay.create()
 
@@ -71,31 +78,14 @@ class Handler(object):
         return bay
 
     def bay_delete(self, ctxt, uuid):
-        # if bay.type is not 'k8s_heat':
-        #     return
-
         LOG.debug('k8s_heat bay_delete')
         bay = objects.Bay.get_by_uuid(ctxt, uuid)
-        stack_id = bay.properties['stack_id']
-        heat.stacks.delete(stack_id)
         bay.destroy()
 
         return None
 
     def bay_show(self, ctxt, uuid):
-        # if bay.type is not 'k8s_heat':
-        #     return
-
         LOG.debug('k8s_heat bay_show')
         bay = objects.Bay.get_by_uuid(ctxt, uuid)
-        stack_id = bay.properties['stack_id']
-        stack = heat.stacks.get(stack_id)
-
-        if stack.status == 'COMPLETE':
-            master_address = stack['outputs'][0]['output_value']
-            minion_addresses = stack['outputs'][2]['output_value']
-            bay.properties['master_address'] = master_address
-            bay.properties['minion_addresses'] = minion_addresses
-            bay.save()
 
         return bay
