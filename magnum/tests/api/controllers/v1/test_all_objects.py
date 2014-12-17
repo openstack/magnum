@@ -82,8 +82,8 @@ class TestBayController(db_base.DbTestCase):
         with patch.object(api.API, 'bay_create') as mock_method:
             # Create a bay
             mock_method.side_effect = self.simulate_rpc_bay_create
-            params = '{"name": "bay_example_A", "type": "virt", \
-                "image_id": "Fedora", "node_count": "3"}'
+            params = '{"name": "bay_example_A", "baymodel_id": "12345", \
+                "node_count": "3"}'
             response = self.app.post('/v1/bays',
                                      params=params,
                                      content_type='application/json')
@@ -96,8 +96,6 @@ class TestBayController(db_base.DbTestCase):
             c = response.json['bays'][0]
             self.assertIsNotNone(c.get('uuid'))
             self.assertEqual('bay_example_A', c.get('name'))
-            self.assertEqual('virt', c.get('type'))
-            self.assertEqual('Fedora', c.get('image_id'))
             self.assertEqual(3, c.get('node_count'))
 
             # Get just the one we created

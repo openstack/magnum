@@ -77,14 +77,11 @@ class Bay(base.APIBase):
     name = wtypes.text
     """Name of this bay"""
 
-    type = wtypes.text
-    """Type of this bay"""
-
-    image_id = wtypes.text
-    """The image name or UUID to use as a base image for this bay"""
+    baymodel_id = wtypes.text
+    """The bay model UUID or id"""
 
     node_count = wtypes.IntegerType()
-    """The image name or UUID to use as a base image for this bay"""
+    """The node count for this bay"""
 
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated bay links"""
