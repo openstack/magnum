@@ -44,6 +44,23 @@ def upgrade():
         mysql_DEFAULT_CHARSET='UTF8'
     )
     op.create_table(
+        'baymodel',
+        sa.Column('created_at', sa.DateTime(), nullable=True),
+        sa.Column('updated_at', sa.DateTime(), nullable=True),
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('uuid', sa.String(length=36), nullable=True),
+        sa.Column('name', sa.String(length=255), nullable=True),
+        sa.Column('type', sa.String(length=20), nullable=True),
+        sa.Column('image_id', sa.String(length=255), nullable=True),
+        sa.Column('flavor_id', sa.String(length=255), nullable=True),
+        sa.Column('keypair_id', sa.String(length=255), nullable=True),
+        sa.Column('external_network_id', sa.String(length=255), nullable=True),
+        sa.Column('dns_nameserver', sa.String(length=255), nullable=True),
+        sa.PrimaryKeyConstraint('id'),
+        mysql_ENGINE='InnoDB',
+        mysql_DEFAULT_CHARSET='UTF8'
+    )
+    op.create_table(
         'container',
         sa.Column('created_at', sa.DateTime(), nullable=True),
         sa.Column('updated_at', sa.DateTime(), nullable=True),
@@ -95,6 +112,7 @@ def upgrade():
 
 def downgrade():
     op.drop_table('bay')
+    op.drop_table('baymodel')
     op.drop_table('container')
     op.drop_table('node')
     op.drop_table('service')

@@ -292,6 +292,178 @@ class Connection(api.Connection):
             ref.update(values)
         return ref
 
+    def _add_baymodels_filters(self, query, filters):
+        if filters is None:
+            filters = []
+
+        if 'associated' in filters:
+            if filters['associated']:
+                query = query.filter(models.BayModel.instance_uuid is not None)
+            else:
+                query = query.filter(models.BayModel.instance_uuid is None)
+        if 'reserved' in filters:
+            if filters['reserved']:
+                query = query.filter(models.BayModel.reservation is not None)
+            else:
+                query = query.filter(models.BayModel.reservation is None)
+        if 'maintenance' in filters:
+            query = query.filter_by(maintenance=filters['maintenance'])
+        if 'driver' in filters:
+            query = query.filter_by(driver=filters['driver'])
+        if 'provision_state' in filters:
+            query = query.filter_by(provision_state=filters['provision_state'])
+        if 'provisioned_before' in filters:
+            limit = timeutils.utcnow() - datetime.timedelta(
+                                         seconds=filters['provisioned_before'])
+            query = query.filter(models.BayModel.provision_updated_at < limit)
+
+        return query
+
+    def get_baymodelinfo_list(self, columns=None, filters=None, limit=None,
+                          marker=None, sort_key=None, sort_dir=None):
+        # list-ify columns default values because it is bad form
+        # to include a mutable list in function definitions.
+        if columns is None:
+            columns = [models.BayModel.id]
+        else:
+            columns = [getattr(models.BayModel, c) for c in columns]
+
+        query = model_query(*columns, base_model=models.BayModel)
+        query = self._add_baymodels_filters(query, filters)
+        return _paginate_query(models.BayModel, limit, marker,
+                               sort_key, sort_dir, query)
+
+    def get_baymodel_list(self, filters=None, limit=None, marker=None,
+                      sort_key=None, sort_dir=None):
+        query = model_query(models.BayModel)
+        query = self._add_baymodels_filters(query, filters)
+        return _paginate_query(models.BayModel, limit, marker,
+                               sort_key, sort_dir, query)
+
+    def reserve_baymodel(self, tag, baymodel_id):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.BayModel, session=session)
+            query = add_identity_filter(query, baymodel_id)
+            # be optimistic and assume we usually create a reservation
+            count = query.filter_by(reservation=None).update(
+                        {'reservation': tag}, synchronize_session=False)
+            try:
+                baymodel = query.one()
+                if count != 1:
+                    # Nothing updated and baymodel exists. Must already be
+                    # locked.
+                    raise exception.BayModelLocked(baymodel=baymodel_id,
+                                               host=baymodel['reservation'])
+                return baymodel
+            except NoResultFound:
+                raise exception.BayModelNotFound(baymodel_id)
+
+    def release_baymodel(self, tag, baymodel_id):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.BayModel, session=session)
+            query = add_identity_filter(query, baymodel_id)
+            # be optimistic and assume we usually release a reservation
+            count = query.filter_by(reservation=tag).update(
+                        {'reservation': None}, synchronize_session=False)
+            try:
+                if count != 1:
+                    baymodel = query.one()
+                    if baymodel['reservation'] is None:
+                        raise exception.BayModelNotLocked(baymodel=baymodel_id)
+                    else:
+                        raise exception.BayModelLocked(baymodel=baymodel_id,
+                            host=baymodel['reservation'])
+            except NoResultFound:
+                raise exception.BayModelNotFound(baymodel_id)
+
+    def create_baymodel(self, values):
+        # ensure defaults are present for new baymodels
+        if not values.get('uuid'):
+            values['uuid'] = utils.generate_uuid()
+
+        baymodel = models.BayModel()
+        baymodel.update(values)
+        try:
+            baymodel.save()
+        except db_exc.DBDuplicateEntry as exc:
+            if 'instance_uuid' in exc.columns:
+                raise exception.InstanceAssociated(
+                    instance_uuid=values['instance_uuid'],
+                    baymodel=values['uuid'])
+            raise exception.BayModelAlreadyExists(uuid=values['uuid'])
+        return baymodel
+
+    def get_baymodel_by_id(self, baymodel_id):
+        query = model_query(models.BayModel).filter_by(id=baymodel_id)
+        try:
+            return query.one()
+        except NoResultFound:
+            raise exception.BayModelNotFound(baymodel=baymodel_id)
+
+    def get_baymodel_by_uuid(self, baymodel_uuid):
+        query = model_query(models.BayModel).filter_by(uuid=baymodel_uuid)
+        try:
+            return query.one()
+        except NoResultFound:
+            raise exception.BayModelNotFound(baymodel=baymodel_uuid)
+
+    def get_baymodel_by_instance(self, instance):
+        if not utils.is_uuid_like(instance):
+            raise exception.InvalidUUID(uuid=instance)
+
+        query = (model_query(models.BayModel)
+                 .filter_by(instance_uuid=instance))
+
+        try:
+            result = query.one()
+        except NoResultFound:
+            raise exception.InstanceNotFound(instance=instance)
+
+        return result
+
+    def destroy_baymodel(self, baymodel_id):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.BayModel, session=session)
+            query = add_identity_filter(query, baymodel_id)
+            query.delete()
+
+    def update_baymodel(self, baymodel_id, values):
+        # NOTE(dtantsur): this can lead to very strange errors
+        if 'uuid' in values:
+            msg = _("Cannot overwrite UUID for an existing BayModel.")
+            raise exception.InvalidParameterValue(err=msg)
+
+        try:
+            return self._do_update_baymodel(baymodel_id, values)
+        except db_exc.DBDuplicateEntry:
+            raise exception.InstanceAssociated(
+                instance_uuid=values['instance_uuid'],
+                baymodel=baymodel_id)
+
+    def _do_update_baymodel(self, baymodel_id, values):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.BayModel, session=session)
+            query = add_identity_filter(query, baymodel_id)
+            try:
+                ref = query.with_lockmode('update').one()
+            except NoResultFound:
+                raise exception.BayModelNotFound(baymodel=baymodel_id)
+
+            # Prevent instance_uuid overwriting
+            if values.get("instance_uuid") and ref.instance_uuid:
+                raise exception.BayModelAssociated(baymodel=baymodel_id,
+                                instance=ref.instance_uuid)
+
+            if 'provision_state' in values:
+                values['provision_updated_at'] = timeutils.utcnow()
+
+            ref.update(values)
+        return ref
+
     def _add_containers_filters(self, query, filters):
         if filters is None:
             filters = []

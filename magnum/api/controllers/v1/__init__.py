@@ -28,6 +28,7 @@ import wsmeext.pecan as wsme_pecan
 
 from magnum.api.controllers import link
 from magnum.api.controllers.v1 import bay
+from magnum.api.controllers.v1 import baymodel
 from magnum.api.controllers.v1 import container
 from magnum.api.controllers.v1 import node
 from magnum.api.controllers.v1 import pod
@@ -89,6 +90,9 @@ class V1(APIBase):
     pods = [link.Link]
     """Links to the pods resource"""
 
+    baymodels = [link.Link]
+    """Links to the baymodels resource"""
+
     bays = [link.Link]
     """Links to the bays resource"""
 
@@ -119,6 +123,13 @@ class V1(APIBase):
                                            'pods', '',
                                            bookmark=True)
                      ]
+        v1.baymodels = [link.Link.make_link('self', pecan.request.host_url,
+                                        'baymodels', ''),
+                    link.Link.make_link('bookmark',
+                                        pecan.request.host_url,
+                                        'bays', '',
+                                        bookmark=True)
+                   ]
         v1.bays = [link.Link.make_link('self', pecan.request.host_url,
                                         'bays', ''),
                     link.Link.make_link('bookmark',
@@ -147,6 +158,7 @@ class Controller(rest.RestController):
     """Version 1 API controller root."""
 
     bays = bay.BaysController()
+    baymodels = baymodel.BayModelsController()
     containers = container.ContainersController()
     nodes = node.NodesController()
     pods = pod.PodsController()

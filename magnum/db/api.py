@@ -149,6 +149,113 @@ class Connection(object):
         """
 
     @abc.abstractmethod
+    def get_baymodel_list(self, columns=None, filters=None, limit=None,
+                     marker=None, sort_key=None, sort_dir=None):
+        """Get specific columns for matching baymodels.
+
+        Return a list of the specified columns for all baymodels that match the
+        specified filters.
+
+        :param columns: List of column names to return.
+                        Defaults to 'id' column when columns == None.
+        :param filters: Filters to apply. Defaults to None.
+
+        :param limit: Maximum number of baymodels to return.
+        :param marker: the last item of the previous page; we return the next
+                       result set.
+        :param sort_key: Attribute by which results should be sorted.
+        :param sort_dir: direction in which results should be sorted.
+                         (asc, desc)
+        :returns: A list of tuples of the specified columns.
+        """
+
+    @abc.abstractmethod
+    def reserve_baymodel(self, tag, baymodel_id):
+        """Reserve a baymodel.
+
+        To prevent other ManagerServices from manipulating the given
+        BayModel while a Task is performed, mark it reserved by this host.
+
+        :param tag: A string uniquely identifying the reservation holder.
+        :param baymodel_id: A baymodel id or uuid.
+        :returns: A BayModel object.
+        :raises: BayModelNotFound if the baymodel is not found.
+        :raises: BayModelLocked if the baymodel is already reserved.
+        """
+
+    @abc.abstractmethod
+    def release_baymodel(self, tag, baymodel_id):
+        """Release the reservation on a baymodel.
+
+        :param tag: A string uniquely identifying the reservation holder.
+        :param baymodel_id: A baymodel id or uuid.
+        :raises: BayModelNotFound if the baymodel is not found.
+        :raises: BayModelLocked if the baymodel is reserved by another host.
+        :raises: BayModelNotLocked if the baymodel was found to not have a
+                 reservation at all.
+        """
+
+    @abc.abstractmethod
+    def create_baymodel(self, values):
+        """Create a new baymodel.
+
+        :param values: A dict containing several items used to identify
+                       and track the baymodel, and several dicts which are
+                       passed into the Drivers when managing this baymodel.
+                       For example:
+
+                       ::
+
+                        {
+                         'uuid': utils.generate_uuid(),
+                         'name': 'example',
+                         'type': 'virt'
+                        }
+        :returns: A baymodel.
+        """
+
+    @abc.abstractmethod
+    def get_baymodel_by_id(self, baymodel_id):
+        """Return a baymodel.
+
+        :param baymodel_id: The id of a baymodel.
+        :returns: A baymodel.
+        """
+
+    @abc.abstractmethod
+    def get_baymodel_by_uuid(self, baymodel_uuid):
+        """Return a baymodel.
+
+        :param baymodel_uuid: The uuid of a baymodel.
+        :returns: A baymodel.
+        """
+
+    @abc.abstractmethod
+    def get_baymodel_by_instance(self, instance):
+        """Return a baymodel.
+
+        :param instance: The instance name or uuid to search for.
+        :returns: A baymodel.
+        """
+
+    @abc.abstractmethod
+    def destroy_baymodel(self, baymodel_id):
+        """Destroy a baymodel and all associated interfaces.
+
+        :param baymodel_id: The id or uuid of a baymodel.
+        """
+
+    @abc.abstractmethod
+    def update_baymodel(self, baymodel_id, values):
+        """Update properties of a baymodel.
+
+        :param baymodel_id: The id or uuid of a baymodel.
+        :returns: A baymodel.
+        :raises: BayModelAssociated
+        :raises: BayModelNotFound
+        """
+
+    @abc.abstractmethod
     def get_container_list(self, columns=None, filters=None, limit=None,
                      marker=None, sort_key=None, sort_dir=None):
         """Get specific columns for matching containers.

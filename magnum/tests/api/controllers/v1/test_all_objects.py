@@ -33,34 +33,36 @@ class TestRootController(tests.FunctionalTest):
         self.assertEqual(expected, response.json)
 
     def test_v1_controller(self):
-        api_spec_url = (u'http://docs.openstack.org/developer'
-                        u'/magnum/dev/api-spec-v1.html')
         expected = {u'media_types':
-                    [{u'base': u'application/json',
-                      u'type': u'application/vnd.openstack.magnum.v1+json'}],
-                    u'links': [{u'href': u'http://localhost/v1/',
-                    u'rel': u'self'},
-                    {u'href': api_spec_url,
-                    u'type': u'text/html',
-                    u'rel': u'describedby'}],
-                    u'bays': [{u'href': u'http://localhost/v1/bays/',
-                             u'rel': u'self'},
-                             {u'href': u'http://localhost/bays/',
-                              u'rel': u'bookmark'}],
-                    u'services': [{u'href': u'http://localhost/v1/services/',
-                                 u'rel': u'self'},
-                                 {u'href': u'http://localhost/services/',
-                                 u'rel': u'bookmark'}],
-                    u'pods': [{u'href': u'http://localhost/v1/pods/',
-                             u'rel': u'self'},
-                             {u'href': u'http://localhost/pods/',
-                             u'rel': u'bookmark'}],
-                             u'id': u'v1',
-                    u'containers': [{u'href':
-                                   u'http://localhost/v1/containers/',
-                                   u'rel': u'self'},
-                                   {u'href': u'http://localhost/containers/',
-                                   u'rel': u'bookmark'}]}
+            [{u'base': u'application/json',
+            u'type': u'application/vnd.openstack.magnum.v1+json'}],
+            u'links': [{u'href': u'http://localhost/v1/',
+            u'rel': u'self'},
+            {u'href':
+             u'http://docs.openstack.org/developer'
+              '/magnum/dev/api-spec-v1.html',
+            u'type': u'text/html', u'rel': u'describedby'}],
+            u'bays': [{u'href': u'http://localhost/v1/bays/',
+                u'rel': u'self'},
+                {u'href': u'http://localhost/bays/',
+                u'rel': u'bookmark'}],
+            u'services': [{u'href': u'http://localhost/v1/services/',
+                u'rel': u'self'},
+                {u'href': u'http://localhost/services/',
+                u'rel': u'bookmark'}],
+            u'baymodels': [{u'href': u'http://localhost/v1/baymodels/',
+                u'rel': u'self'},
+                {u'href': u'http://localhost/bays/',
+                u'rel': u'bookmark'}],
+                u'pods': [{u'href': u'http://localhost/v1/pods/',
+            u'rel': u'self'},
+                {u'href': u'http://localhost/pods/',
+                u'rel': u'bookmark'}],
+                u'id': u'v1',
+            u'containers': [{u'href': u'http://localhost/v1/containers/',
+                u'rel': u'self'},
+                {u'href': u'http://localhost/containers/',
+                u'rel': u'bookmark'}]}
 
         response = self.app.get('/v1/')
         self.assertEqual(expected, response.json)
@@ -116,6 +118,52 @@ class TestBayController(db_base.DbTestCase):
             response = self.app.get('/v1/bays')
             self.assertEqual(response.status_int, 200)
             c = response.json['bays']
+            self.assertEqual(0, len(c))
+
+
+class TestBayModelController(db_base.DbTestCase):
+    def simulate_rpc_baymodel_create(self, baymodel):
+        baymodel.create()
+        return baymodel
+
+    def test_bay_model_api(self):
+        with patch.object(api.API, 'baymodel_create') as mock_method:
+            # Create a bay_model
+            mock_method.side_effect = self.simulate_rpc_baymodel_create
+            params = '{"name": "bay_model_example_A", "image_id": "nerdherd"}'
+            response = self.app.post('/v1/baymodels',
+                                     params=params,
+                                     content_type='application/json')
+            self.assertEqual(response.status_int, 201)
+
+            # Get all baymodels
+            response = self.app.get('/v1/baymodels')
+            self.assertEqual(response.status_int, 200)
+            self.assertEqual(1, len(response.json))
+            c = response.json['baymodels'][0]
+            self.assertIsNotNone(c.get('uuid'))
+            self.assertEqual('bay_model_example_A', c.get('name'))
+            self.assertEqual('nerdherd', c.get('image_id'))
+
+            # Get just the one we created
+            response = self.app.get('/v1/baymodels/%s' % c.get('uuid'))
+            self.assertEqual(response.status_int, 200)
+
+            # Update the description
+            params = [{'path': '/name',
+                       'value': 'bay_model_example_B',
+                       'op': 'replace'}]
+            response = self.app.patch_json('/v1/baymodels/%s' % c.get('uuid'),
+                                   params=params)
+            self.assertEqual(response.status_int, 200)
+
+            # Delete the bay_model we created
+            response = self.app.delete('/v1/baymodels/%s' % c.get('uuid'))
+            self.assertEqual(response.status_int, 204)
+
+            response = self.app.get('/v1/baymodels')
+            self.assertEqual(response.status_int, 200)
+            c = response.json['baymodels']
             self.assertEqual(0, len(c))
 
 

@@ -28,6 +28,21 @@ class API(rpc_service.API):
         super(API, self).__init__(transport, context,
                                   topic=cfg.CONF.conductor.topic)
 
+    # Bay Model Operations
+
+    def baymodel_create(self, bay):
+        return self._call('baymodel_create', bay=bay)
+
+    def baymodel_list(self, context, limit, marker, sort_key, sort_dir):
+        return objects.BayModel.list(context, limit, marker, sort_key,
+            sort_dir)
+
+    def baymodel_delete(self, uuid):
+        return self._call('baymodel_delete', uuid=uuid)
+
+    def baymodel_show(self, uuid):
+        return self._call('baymodel_show', uuid=uuid)
+
     # Bay Operations
 
     def bay_create(self, bay):
