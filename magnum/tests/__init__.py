@@ -13,8 +13,13 @@
 import os
 import unittest
 
+from oslo.config import cfg
 import pecan
 from pecan import testing
+
+
+cfg.CONF.import_opt('enable_authentication', 'magnum.api.auth')
+
 
 __all__ = ['FunctionalTest']
 
@@ -27,6 +32,7 @@ class FunctionalTest(unittest.TestCase):
     """
 
     def setUp(self):
+        cfg.CONF.set_override("enable_authentication", False)
         self.app = testing.load_test_app(os.path.join(
             os.path.dirname(__file__),
             'config.py'

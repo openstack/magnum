@@ -31,6 +31,8 @@ from magnum.tests import base
 
 CONF = cfg.CONF
 
+CONF.import_opt('enable_authentication', 'magnum.api.auth')
+
 _DB_CACHE = None
 
 
@@ -88,6 +90,7 @@ class Database(fixtures.Fixture):
 class DbTestCase(base.TestCase):
 
     def setUp(self):
+        cfg.CONF.set_override("enable_authentication", False)
         super(DbTestCase, self).setUp()
 
         self.dbapi = dbapi.get_instance()

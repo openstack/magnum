@@ -17,7 +17,6 @@ import re
 
 from keystonemiddleware import auth_token
 from oslo.config import cfg
-from oslo.utils import importutils
 from pecan import hooks
 
 from magnum.common import context
@@ -40,6 +39,7 @@ CONF = cfg.CONF
 CONF.register_opts(AUTH_OPTS)
 
 PUBLIC_ENDPOINTS = [
+    "^/$"
 ]
 
 
@@ -93,18 +93,15 @@ class AuthInformationHook(hooks.PecanHook):
 
         headers = state.request.headers
         user_id = headers.get('X-User-Id')
+        user_id = headers.get('X-User', user_id)
         if user_id is None:
             LOG.debug("X-User-Id header was not found in the request")
             raise Exception('Not authorized')
 
-        roles = self._get_roles(state.request)
-
-        project_id = headers.get('X-Project-Id')
-        user_name = headers.get('X-User-Name', '')
-
-        domain = headers.get('X-Domain-Name')
-        project_domain_id = headers.get('X-Project-Domain-Id', '')
-        user_domain_id = headers.get('X-User-Domain-Id', '')
+        tenant = state.request.headers.get('X-Tenant-Id')
+        tenant = state.request.headers.get('X-Tenant', tenant)
+        domain_id = state.request.headers.get('X-User-Domain-Id')
+        domain_name = state.request.headers.get('X-User-Domain-Name')
 
         # Get the auth token
         try:
@@ -114,42 +111,23 @@ class AuthInformationHook(hooks.PecanHook):
         except ValueError:
             LOG.debug("No auth token found in the request.")
             raise Exception('Not authorized')
-        auth_url = headers.get('X-Auth-Url')
-        if auth_url is None:
-            importutils.import_module('keystonemiddleware.auth_token')
-            auth_url = cfg.CONF.keystone_authtoken.auth_uri
+        # auth_url = headers.get('X-Auth-Url')
+        # if auth_url is None:
+        #     importutils.import_module('keystonemiddleware.auth_token')
+        #     auth_url = cfg.CONF.keystone_authtoken.auth_uri
 
-        auth_token_info = state.request.environ.get('keystone.token_info')
         identity_status = headers.get('X-Identity-Status')
         if identity_status == 'Confirmed':
             ctx = context.RequestContext(auth_token=recv_auth_token,
-                                         auth_token_info=auth_token_info,
                                          user=user_id,
-                                         tenant=project_id,
-                                         domain=domain,
-                                         user_domain=user_domain_id,
-                                         project_domain=project_domain_id,
-                                         user_name=user_name,
-                                         roles=roles,
-                                         auth_url=auth_url)
+                                         tenant=tenant,
+                                         domain_id=domain_id,
+                                         domain_name=domain_name)
             state.request.security_context = ctx
         else:
             LOG.debug("The provided identity is not confirmed.")
             raise Exception('Not authorized. Identity not confirmed.')
         return
-
-    def _get_roles(self, req):
-        """Get the list of roles."""
-
-        if 'X-Roles' in req.headers:
-            roles = req.headers.get('X-Roles', '')
-        else:
-            # Fallback to deprecated role header:
-            roles = req.headers.get('X-Role', '')
-            if roles:
-                LOG.warn(_("X-Roles is missing. Using deprecated X-Role "
-                           "header"))
-        return [r.strip() for r in roles.split(',')]
 
 
 AUTH = AuthHelper()

@@ -9,7 +9,6 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-
 from magnum.conductor import api
 from magnum import tests
 from magnum.tests.db import base as db_base
