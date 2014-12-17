@@ -54,7 +54,7 @@ cfg.CONF.import_opt('auth_version', 'keystonemiddleware.auth_token',
 @exception.wrap_keystone_exception
 def get_client(context):
     endpoint_type = cfg.CONF.heat_client.endpoint_type
-    auth_url = cfg.CONF.keystone_authtoken.auth_uri,
+    auth_url = cfg.CONF.keystone_authtoken.auth_uri
     auth_version = cfg.CONF.keystone_authtoken.auth_version
     auth_url = keystone.get_keystone_url(auth_url, auth_version)
 
