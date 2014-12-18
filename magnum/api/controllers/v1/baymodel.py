@@ -83,7 +83,7 @@ class BayModel(base.APIBase):
     keypair_id = wtypes.text
     """The name or id of the nova ssh keypair"""
 
-    external_network = wtypes.text
+    external_network_id = wtypes.text
     """The external network to attach the Bay"""
 
     links = wsme.wsattr([link.Link], readonly=True)
