@@ -27,6 +27,7 @@ from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
 from magnum.common import exception
+from magnum.conductor import api
 from magnum import objects
 
 
@@ -231,7 +232,8 @@ class ContainersController(rest.RestController):
             marker_obj = objects.Container.get_by_uuid(pecan.request.context,
                                                   marker)
 
-        containers = objects.Container.list(pecan.request.context, limit,
+        backend_api = api.API(context=pecan.request.context)
+        containers = backend_api.container_list(pecan.request.context, limit,
                                 marker_obj, sort_key=sort_key,
                                 sort_dir=sort_dir)
 
