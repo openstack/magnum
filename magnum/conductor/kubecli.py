@@ -40,7 +40,7 @@ class KubeClient(object):
                 return False
         except Exception as e:
             LOG.error("Couldn't create service with contents %s \
-                        due to error %s" % (service, e))
+                       due to error %s" % (service, e))
             return False
         return True
 
@@ -63,7 +63,7 @@ class KubeClient(object):
             if err:
                 return False
         except Exception as e:
-            LOG.error("Couldn't delete service  %s due to error %s"
+            LOG.error("Couldn't delete service %s due to error %s"
                       % (uuid, e))
             return False
         return False
@@ -76,7 +76,7 @@ class KubeClient(object):
             # TODO(pkilambi): process the output as needed
             return out
         except Exception as e:
-            LOG.error("Couldn't get service  %s due to error %s" % (uuid, e))
+            LOG.error("Couldn't get service %s due to error %s" % (uuid, e))
             return None
 
     @staticmethod
@@ -87,7 +87,7 @@ class KubeClient(object):
             # TODO(pkilambi): process the output as needed
             return out
         except Exception as e:
-            LOG.error("Couldn't describe service  %s due to error %s"
+            LOG.error("Couldn't describe service %s due to error %s"
                       % (uuid, e))
             return None
 
@@ -107,7 +107,7 @@ class KubeClient(object):
 
     @staticmethod
     def pod_update(contents):
-        LOG.debug("pod_create contents %s" % contents)
+        LOG.debug("pod_update contents %s" % contents)
         try:
             out, err = utils.trycmd('kubectl', 'update', '-f', contents)
             if err:
@@ -137,19 +137,19 @@ class KubeClient(object):
             if err:
                 return False
         except Exception as e:
-            LOG.error("Couldn't delete pod  %s due to error %s" % (uuid, e))
+            LOG.error("Couldn't delete pod %s due to error %s" % (uuid, e))
             return False
         return True
 
     @staticmethod
     def pod_get(uuid):
-        LOG.debug("service_get %s" % uuid)
+        LOG.debug("pod_get %s" % uuid)
         try:
             out = utils.execute('kubectl', 'get', 'pod', uuid)
             # TODO(pkilambi): process the output as needed
             return out
         except Exception as e:
-            LOG.error("Couldn't get service  %s due to error %s" % (uuid, e))
+            LOG.error("Couldn't get pod %s due to error %s" % (uuid, e))
             return None
 
     @staticmethod
@@ -160,5 +160,5 @@ class KubeClient(object):
             # TODO(pkilambi): process the output as needed
             return out
         except Exception as e:
-            LOG.error("Couldn't delete pod  %s due to error %s" % (uuid, e))
+            LOG.error("Couldn't show pod %s due to error %s" % (uuid, e))
             return None
