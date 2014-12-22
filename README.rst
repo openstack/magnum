@@ -46,5 +46,4 @@ Features
 
 Installation and Usage
 ----------------------
-For installation and usage, please read the developer installation guide
-located at doc/source/dev/dev-quickstart.rst.
+* Getting Started Guides: [doc/source/dev/dev-quickstart.rst](doc/source/dev/dev-quickstart.rst)
