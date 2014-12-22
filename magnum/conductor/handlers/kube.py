@@ -42,7 +42,7 @@ class Handler(object):
         return service
 
     def service_update(self, context, service):
-        LOG.debug("service_create")
+        LOG.debug("service_update")
         # trigger a kubectl command
         status = self.kube_cli.service_update(service)
         if not status:
@@ -86,11 +86,11 @@ class Handler(object):
     def pod_update(self, context, pod):
         LOG.debug("pod_update")
         # trigger a kubectl command
-        status = self.kube_cli.pod_create(pod)
+        status = self.kube_cli.pod_update(pod)
         if not status:
             return None
         # call the pod object to persist in db
-        pod.create(context)
+        pod.refresh(context)
         return pod
 
     def pod_list(self, context):
@@ -100,7 +100,7 @@ class Handler(object):
     def pod_delete(self, context, pod):
         LOG.debug("pod_delete ")
         # trigger a kubectl command
-        status = self.kube_cli.service_delete(pod.uuid)
+        status = self.kube_cli.pod_delete(pod.uuid)
         if not status:
             return None
         # call the pod object to persist in db
