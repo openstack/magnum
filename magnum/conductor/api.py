@@ -92,8 +92,9 @@ class API(rpc_service.API):
     def container_create(self, uuid, container):
         return self._call('container_create', container=container)
 
-    def container_list(self):
-        return self._call('container_list')
+    def container_list(self, context, limit, marker, sort_key, sort_dir):
+        return objects.Container.list(context, limit, marker, sort_key,
+                                      sort_dir)
 
     def container_delete(self, uuid):
         return self._call('container_delete', uuid=uuid)
