@@ -26,9 +26,13 @@ from magnum.api.controllers import link
 from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
+from magnum.common import context
 from magnum.common import exception
 from magnum.conductor import api
 from magnum import objects
+from magnum.openstack.common import log as logging
+
+LOG = logging.getLogger(__name__)
 
 
 class ContainerPatchType(types.JsonPatchType):
@@ -76,6 +80,9 @@ class Container(base.APIBase):
     name = wtypes.text
     """Name of this container"""
 
+    image_id = wtypes.text
+    """The image name or UUID to use as a base image for this baymodel"""
+
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated container links"""
 
@@ -103,7 +110,7 @@ class Container(base.APIBase):
     @staticmethod
     def _convert_with_links(container, url, expand=True):
         if not expand:
-            container.unset_fields_except(['uuid', 'name'])
+            container.unset_fields_except(['uuid', 'name', 'image_id'])
 
         # never expose the container_id attribute
         container.container_id = wtypes.Unset
@@ -126,6 +133,7 @@ class Container(base.APIBase):
     def sample(cls, expand=True):
         sample = cls(uuid='27e3153e-d5bf-4b7e-b517-fb518e17f34c',
                      name='example',
+                     image_id='ubuntu',
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())
         # NOTE(lucasagomes): container_uuid getter() method look at the
@@ -158,51 +166,63 @@ class ContainerCollection(collection.Collection):
         sample.containers = [Container.sample(expand=False)]
         return sample
 
+backend_api = api.API(context=context.RequestContext())
+
 
 class StartController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, container_uuid):
-        return "Start Container %s" % container_uuid
+    def _default(self, uuid):
+        LOG.debug('Calling backend_api.container_start with %s' % uuid)
+        return backend_api.container_start(uuid)
 
 
 class StopController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, container_uuid, *remainder):
-        return "Stop Container %s" % container_uuid
+    def _default(self, uuid, *remainder):
+        LOG.debug('Calling backend_api.container_stop with %s' % uuid)
+        return backend_api.container_stop(uuid)
 
 
 class RebootController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, container_uuid, *remainder):
-        return "Reboot Container %s" % container_uuid
+    def _default(self, uuid, *remainder):
+        LOG.debug('Calling backend_api.container_reboot with %s' % uuid)
+        return backend_api.container_reboot(uuid)
 
 
 class PauseController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, container_uuid, *remainder):
-        return "Pause Container %s" % container_uuid
+    def _default(self, uuid, *remainder):
+        LOG.debug('Calling backend_api.container_pause with %s' % uuid)
+        return backend_api.container_pause(uuid)
 
 
 class UnpauseController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, container_uuid, *remainder):
-        return "Unpause Container %s" % container_uuid
+    def _default(self, uuid, *remainder):
+        LOG.debug('Calling backend_api.container_unpause with %s' % uuid)
+        return backend_api.container_unpause(uuid)
 
 
 class LogsController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, container_uuid, *remainder):
-        return "Logs Container %s" % container_uuid
+    def _default(self, uuid, *remainder):
+        LOG.debug('Calling backend_api.container_logs with %s' % uuid)
+        return backend_api.container_logs(uuid)
 
 
 class ExecuteController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, container_uuid, *remainder):
-        return "Execute Container %s" % container_uuid
+    def _default(self, uuid, *remainder):
+        LOG.debug('Calling backend_api.container_execute with %s' % uuid)
+        backend_api.container_execute(uuid)
 
 
 class ContainersController(rest.RestController):
     """REST controller for Containers."""
+
+    def __init__(self):
+        super(ContainersController, self).__init__()
 
     start = StartController()
     stop = StopController()
@@ -306,10 +326,12 @@ class ContainersController(rest.RestController):
         new_container = objects.Container(pecan.request.context,
                                 **container.as_dict())
         new_container.create()
+        res_container = backend_api.container_create(new_container.uuid,
+                                                     new_container)
         # Set the HTTP Location Header
         pecan.response.location = link.build_url('containers',
-                                                 new_container.uuid)
-        return Container.convert_with_links(new_container)
+                                                 res_container.uuid)
+        return Container.convert_with_links(res_container)
 
     @wsme.validate(types.uuid, [ContainerPatchType])
     @wsme_pecan.wsexpose(Container, types.uuid, body=[ContainerPatchType])

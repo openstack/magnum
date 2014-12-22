@@ -252,9 +252,34 @@ class TestPodController(db_base.DbTestCase):
 
 
 class TestContainerController(db_base.DbTestCase):
-    def test_containers_api(self):
+    @patch('magnum.conductor.api.API.container_create')
+    @patch('magnum.conductor.api.API.container_start')
+    @patch('magnum.conductor.api.API.container_stop')
+    @patch('magnum.conductor.api.API.container_pause')
+    @patch('magnum.conductor.api.API.container_unpause')
+    @patch('magnum.conductor.api.API.container_reboot')
+    @patch('magnum.conductor.api.API.container_logs')
+    @patch('magnum.conductor.api.API.container_execute')
+    def test_containers_api(self,
+                            mock_container_execute,
+                            mock_container_logs,
+                            mock_container_reboot,
+                            mock_container_unpause,
+                            mock_container_pause,
+                            mock_container_stop,
+                            mock_container_start,
+                            mock_container_create):
+        mock_container_create.side_effect = lambda x, y: y
+        mock_container_start.return_value = None
+        mock_container_stop.return_value = None
+        mock_container_pause.return_value = None
+        mock_container_unpause.return_value = None
+        mock_container_reboot.return_value = None
+        mock_container_logs.return_value = None
+        mock_container_execute.return_value = None
+
         # Create a container
-        params = '{"name": "My Docker"}'
+        params = '{"name": "My Docker", "image_id": "ubuntu"}'
         response = self.app.post('/v1/containers',
                                  params=params,
                                  content_type='application/json')

@@ -22,7 +22,7 @@ from oslo.config import cfg
 
 from magnum.common import rpc_service as service
 from magnum.conductor.handlers import bay_ironic as bay_ironic
-from magnum.conductor.handlers import docker as docker_conductor
+from magnum.conductor.handlers import docker_conductor
 from magnum.conductor.handlers import kube as k8s_conductor
 from magnum.openstack.common._i18n import _
 from magnum.openstack.common import log as logging

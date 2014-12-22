@@ -155,6 +155,7 @@ class Container(Base):
     id = Column(Integer, primary_key=True)
     uuid = Column(String(36))
     name = Column(String(255))
+    image_id = Column(String(255))
 
 
 class Node(Base):
