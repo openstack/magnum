@@ -550,6 +550,14 @@ class Connection(object):
         """
 
     @abc.abstractmethod
+    def get_pod_by_name(self, pod_name):
+        """Return a pod.
+
+        :param pod_name: The name of a pod.
+        :returns: A pod.
+        """
+
+    @abc.abstractmethod
     def get_pod_by_instance(self, instance):
         """Return a pod.
 

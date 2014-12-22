@@ -927,6 +927,13 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.PodNotFound(pod=pod_uuid)
 
+    def get_pod_by_name(self, pod_name):
+        query = model_query(models.Pod).filter_by(name=pod_name)
+        try:
+            return query.one()
+        except NoResultFound:
+            raise exception.PodNotFound(pod=pod_name)
+
     def get_pods_by_bay_uuid(self, bay_uuid):
         query = model_query(models.Pod).filter_by(bay_uuid=bay_uuid)
         try:
