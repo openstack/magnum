@@ -12,6 +12,7 @@
 
 """Magnum Bay Ironic RPC handler."""
 
+from magnum import objects
 from magnum.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
@@ -28,18 +29,21 @@ class Handler(object):
     # Bay Operations
 
     def bay_create(self, ctxt, bay):
-        LOG.debug('ironic bay_create\n')
+        LOG.debug('ironic bay_create')
         bay.create()
         return bay
 
     def bay_list(self, ctxt):
-        LOG.debug('ironic bay_list\n')
-        return None
+        LOG.debug('ironic bay_list')
+        return objects.Bay.list(ctxt)
 
     def bay_delete(self, ctxt, uuid):
-        LOG.debug('ironic bay_delete\n')
+        LOG.debug('ironic bay_delete')
+        bay = objects.Bay.get_by_uuid(ctxt, uuid)
+        bay.destroy()
         return None
 
     def bay_show(self, ctxt, uuid):
-        LOG.debug('ironic bay_show\n')
-        return None
+        LOG.debug('ironic bay_show')
+        bay = objects.Bay.get_by_uuid(ctxt, uuid)
+        return bay
