@@ -33,10 +33,6 @@ class Handler(object):
         bay.create()
         return bay
 
-    def bay_list(self, ctxt):
-        LOG.debug('ironic bay_list')
-        return objects.Bay.list(ctxt)
-
     def bay_delete(self, ctxt, uuid):
         LOG.debug('ironic bay_delete')
         bay = objects.Bay.get_by_uuid(ctxt, uuid)

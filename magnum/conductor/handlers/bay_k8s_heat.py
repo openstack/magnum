@@ -70,10 +70,6 @@ class Handler(object):
 
         return bay
 
-    def bay_list(self, ctxt):
-        LOG.debug('k8s_heat bay_list')
-        return objects.Bay.list(ctxt)
-
     def bay_delete(self, ctxt, uuid):
         # if bay.type is not 'k8s_heat':
         #     return
