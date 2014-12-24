@@ -22,11 +22,6 @@ from magnum.objects import utils as obj_utils
 
 class Service(base.MagnumObject):
     # Version 1.0: Initial version
-    # Version 1.1: Add get() and get_by_id() and get_by_address() and
-    #              make get_by_uuid() only work with a uuid
-    # Version 1.2: Add create() and destroy()
-    # Version 1.3: Add list()
-    # Version 1.4: Add list_by_node_id()
     VERSION = '1.0'
 
     dbapi = dbapi.get_instance()
