@@ -86,6 +86,18 @@ class Pod(base.MagnumObject):
         return pod
 
     @base.remotable_classmethod
+    def get_by_name(cls, context, name):
+        """Find a pod based on pod name and return a :class:`Pod` object.
+
+        :param name: the name of a pod.
+        :param context: Security context
+        :returns: a :class:`Pod` object.
+        """
+        db_pod = cls.dbapi.get_pod_by_name(name)
+        pod = Pod._from_db_object(cls(context), db_pod)
+        return pod
+
+    @base.remotable_classmethod
     def get_by_bay_uuid(cls, context, bay_uuid):
         """Find a pods based on bay uuid and return a :class:`Pod` object.
 
