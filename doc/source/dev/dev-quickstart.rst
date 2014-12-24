@@ -185,13 +185,13 @@ Next, clone and install the client::
     cd python-magnumclient
     sudo pip install -e .
 
+Next configure the database connection for Magnum::
+
+    sed -i "s/#connection=.*/connection=mysql:\/\/root:password@localhost\/magnum/" etc/magnum/magnum.conf.sample
+
 Next, configure the database for use with Magnum::
 
     magnum-db-manage upgrade
-
-Next configure the database connection for Magnum::
-
-    sed -i "s/#connection=.*/connection=mysql:\/\/root@localhost\/magnum/" etc/magnum/magnum.conf.sample
 
 Finally, configure the keystone endpoint::
 
