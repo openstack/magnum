@@ -79,7 +79,10 @@ class Handler(object):
 
     def bay_delete(self, ctxt, uuid):
         LOG.debug('k8s_heat bay_delete')
+        osc = clients.OpenStackClients(ctxt)
         bay = objects.Bay.get_by_uuid(ctxt, uuid)
+        stack_id = bay.stack_id
+        osc.heat().stacks.delete(stack_id)
         bay.destroy()
 
         return None
