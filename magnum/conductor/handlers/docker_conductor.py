@@ -186,7 +186,7 @@ class Handler(object):
         container_id = self._find_container_by_name(name)
         return self.docker.get_container_logs(container_id)
 
-    def container_execute(self, ctxt, name):
-        LOG.debug("container_execute %s" % name)
+    def container_execute(self, ctxt, name, command):
+        LOG.debug("container_execute %s command %s" % (name, command))
         container_id = self._find_container_by_name(name)
-        return self.docker.execute(container_id, "ls")
+        return self.docker.execute(container_id, command)

@@ -307,11 +307,16 @@ class TestContainerController(db_base.DbTestCase):
 
         # Execute some actions
         actions = ['start', 'stop', 'pause', 'unpause',
-                   'reboot', 'logs', 'execute']
+                   'reboot', 'logs']
         for action in actions:
             response = self.app.put('/v1/containers/%s/%s' % (c.get('uuid'),
                                                               action))
             self.assertEqual(response.status_int, 200)
+
+        # Execute command in docker container
+        response = self.app.put('/v1/containers/%s/%s' % (c.get('uuid'),
+                                               'execute'), {'command': 'ls'})
+        self.assertEqual(response.status_int, 200)
 
         # Delete the bay we created
         response = self.app.delete('/v1/containers/%s' % c.get('uuid'))

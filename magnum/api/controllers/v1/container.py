@@ -212,10 +212,11 @@ class LogsController(object):
 
 
 class ExecuteController(object):
-    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, name, *remainder):
-        LOG.debug('Calling backend_api.container_execute with %s' % name)
-        backend_api.container_execute(name)
+    @wsme_pecan.wsexpose(wtypes.text, wtypes.text, wtypes.text)
+    def _default(self, name, command, *remainder):
+        LOG.debug('Calling backend_api.container_execute with %s command %s'
+                  % (name, command))
+        backend_api.container_execute(name, command)
 
 
 class ContainersController(rest.RestController):
