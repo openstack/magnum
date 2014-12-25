@@ -18,9 +18,10 @@ from oslo_context import context
 class RequestContext(context.RequestContext):
     """Extends security contexts from the OpenStack common library."""
 
-    def __init__(self, auth_token=None, domain_id=None, domain_name=None,
-                 user=None, tenant=None, is_admin=False, is_public_api=False,
-                 read_only=False, show_deleted=False, request_id=None):
+    def __init__(self, auth_token=None, auth_url=None, domain_id=None,
+                 domain_name=None, user=None, tenant=None, is_admin=False,
+                 is_public_api=False, read_only=False, show_deleted=False,
+                 request_id=None, trust_id=None, auth_token_info=None):
         """Stores several additional request parameters:
 
         :param domain_id: The ID of the domain.
@@ -32,6 +33,9 @@ class RequestContext(context.RequestContext):
         self.is_public_api = is_public_api
         self.domain_id = domain_id
         self.domain_name = domain_name
+        self.auth_url = auth_url
+        self.auth_token_info = auth_token_info
+        self.trust_id = trust_id
 
         super(RequestContext, self).__init__(auth_token=auth_token,
                                              user=user, tenant=tenant,

@@ -17,6 +17,7 @@ import re
 
 from keystonemiddleware import auth_token
 from oslo.config import cfg
+from oslo.utils import importutils
 from pecan import hooks
 
 from magnum.common import context
@@ -102,6 +103,7 @@ class AuthInformationHook(hooks.PecanHook):
         tenant = state.request.headers.get('X-Tenant', tenant)
         domain_id = state.request.headers.get('X-User-Domain-Id')
         domain_name = state.request.headers.get('X-User-Domain-Name')
+        auth_token_info = state.request.environ.get('keystone.token_info')
 
         # Get the auth token
         try:
@@ -111,19 +113,21 @@ class AuthInformationHook(hooks.PecanHook):
         except ValueError:
             LOG.debug("No auth token found in the request.")
             raise Exception('Not authorized')
-        # auth_url = headers.get('X-Auth-Url')
-        # if auth_url is None:
-        #     importutils.import_module('keystonemiddleware.auth_token')
-        #     auth_url = cfg.CONF.keystone_authtoken.auth_uri
+        auth_url = headers.get('X-Auth-Url')
+        if auth_url is None:
+            importutils.import_module('keystonemiddleware.auth_token')
+            auth_url = cfg.CONF.keystone_authtoken.auth_uri
 
         identity_status = headers.get('X-Identity-Status')
         if identity_status == 'Confirmed':
             ctx = context.RequestContext(auth_token=recv_auth_token,
+                                         auth_url=auth_url,
+                                         auth_token_info=auth_token_info,
                                          user=user_id,
                                          tenant=tenant,
                                          domain_id=domain_id,
                                          domain_name=domain_name)
-            state.request.security_context = ctx
+            state.request.context = ctx
         else:
             LOG.debug("The provided identity is not confirmed.")
             raise Exception('Not authorized. Identity not confirmed.')
