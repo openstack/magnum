@@ -132,11 +132,12 @@ class Handler(object):
 
     # Container operations
 
-    def container_create(self, ctxt, uuid, container):
-        LOG.debug('Creating container with image %s' % container.image_id)
+    def container_create(self, ctxt, name, container):
+        LOG.debug('Creating container with image %s name %s'
+                  % (container.image_id, name))
         self.docker.inspect_image(self._encode_utf8(container.image_id))
-        self.docker.create_container(container.image_id, name=uuid,
-                                     hostname=uuid)
+        self.docker.create_container(container.image_id, name=name,
+                                     hostname=name)
         return container
 
     def container_list(self, ctxt):
@@ -144,48 +145,48 @@ class Handler(object):
         container_list = self.docker.containers()
         return container_list
 
-    def container_delete(self, ctxt, uuid):
-        LOG.debug("container_delete %s" % uuid)
-        container_id = self._find_container_by_name(uuid)
+    def container_delete(self, ctxt, name):
+        LOG.debug("container_delete %s" % name)
+        container_id = self._find_container_by_name(name)
         return self.docker.stop(container_id)
 
-    def container_show(self, ctxt, uuid):
-        LOG.debug("container_show %s" % uuid)
-        container_id = self._find_container_by_name(uuid)
+    def container_show(self, ctxt, name):
+        LOG.debug("container_show %s" % name)
+        container_id = self._find_container_by_name(name)
         return self.docker.inspect_container(container_id)
 
-    def container_reboot(self, ctxt, uuid):
-        LOG.debug("container_reboot %s" % uuid)
-        container_id = self._find_container_by_name(uuid)
+    def container_reboot(self, ctxt, name):
+        LOG.debug("container_reboot %s" % name)
+        container_id = self._find_container_by_name(name)
         return self.docker.restart(container_id)
 
-    def container_stop(self, ctxt, uuid):
-        LOG.debug("container_stop %s" % uuid)
-        container_id = self._find_container_by_name(uuid)
+    def container_stop(self, ctxt, name):
+        LOG.debug("container_stop %s" % name)
+        container_id = self._find_container_by_name(name)
         return self.docker.stop(container_id)
 
-    def container_start(self, ctxt, uuid):
-        LOG.debug("Starting container %s" % uuid)
-        container_id = self._find_container_by_name(uuid)
+    def container_start(self, ctxt, name):
+        LOG.debug("Starting container %s" % name)
+        container_id = self._find_container_by_name(name)
         LOG.debug("Found Docker container %s" % container_id)
         return self.docker.start(container_id)
 
-    def container_pause(self, ctxt, uuid):
-        LOG.debug("container_pause %s" % uuid)
-        container_id = self._find_container_by_name(uuid)
+    def container_pause(self, ctxt, name):
+        LOG.debug("container_pause %s" % name)
+        container_id = self._find_container_by_name(name)
         return self.docker.pause(container_id)
 
-    def container_unpause(self, ctxt, uuid):
-        LOG.debug("container_unpause %s" % uuid)
-        container_id = self._find_container_by_name(uuid)
+    def container_unpause(self, ctxt, name):
+        LOG.debug("container_unpause %s" % name)
+        container_id = self._find_container_by_name(name)
         return self.docker.unpause(container_id)
 
-    def container_logs(self, ctxt, uuid):
-        LOG.debug("container_logs %s" % uuid)
-        container_id = self._find_container_by_name(uuid)
+    def container_logs(self, ctxt, name):
+        LOG.debug("container_logs %s" % name)
+        container_id = self._find_container_by_name(name)
         return self.docker.get_container_logs(container_id)
 
-    def container_execute(self, ctxt, uuid):
-        LOG.debug("container_execute %s" % uuid)
-        container_id = self._find_container_by_name(uuid)
+    def container_execute(self, ctxt, name):
+        LOG.debug("container_execute %s" % name)
+        container_id = self._find_container_by_name(name)
         return self.docker.execute(container_id, "ls")

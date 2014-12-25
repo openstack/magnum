@@ -89,36 +89,36 @@ class API(rpc_service.API):
 
     # Container operations
 
-    def container_create(self, uuid, container):
-        return self._call('container_create', uuid=uuid, container=container)
+    def container_create(self, name, container):
+        return self._call('container_create', name=name, container=container)
 
     def container_list(self, context, limit, marker, sort_key, sort_dir):
         return objects.Container.list(context, limit, marker, sort_key,
                                       sort_dir)
 
-    def container_delete(self, uuid):
-        return self._call('container_delete', uuid=uuid)
+    def container_delete(self, name):
+        return self._call('container_delete', name=name)
 
-    def container_show(self, uuid):
-        return self._call('container_show', uuid=uuid)
+    def container_show(self, name):
+        return self._call('container_show', name)
 
-    def container_reboot(self, uuid):
-        return self._call('container_reboot', uuid=uuid)
+    def container_reboot(self, name):
+        return self._call('container_reboot', name=name)
 
-    def container_stop(self, uuid):
-        return self._call('container_stop', uuid=uuid)
+    def container_stop(self, name):
+        return self._call('container_stop', name=name)
 
-    def container_start(self, uuid):
-        return self._call('container_start', uuid=uuid)
+    def container_start(self, name):
+        return self._call('container_start', name=name)
 
-    def container_pause(self, uuid):
-        return self._call('container_pause', uuid=uuid)
+    def container_pause(self, name):
+        return self._call('container_pause', name=name)
 
-    def container_unpause(self, uuid):
-        return self._call('container_unpause', uuid=uuid)
+    def container_unpause(self, name):
+        return self._call('container_unpause', name=name)
 
-    def container_logs(self, uuid):
-        return self._call('container_logs', uuid=uuid)
+    def container_logs(self, name):
+        return self._call('container_logs', name=name)
 
-    def container_execute(self, uuid):
-        return self._call('container_execute', uuid=uuid)
+    def container_execute(self, name):
+        return self._call('container_execute', name=name)

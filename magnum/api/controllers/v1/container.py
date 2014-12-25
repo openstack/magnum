@@ -171,51 +171,51 @@ backend_api = api.API(context=context.RequestContext())
 
 class StartController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, uuid):
-        LOG.debug('Calling backend_api.container_start with %s' % uuid)
-        return backend_api.container_start(uuid)
+    def _default(self, name):
+        LOG.debug('Calling backend_api.container_start with %s' % name)
+        return backend_api.container_start(name)
 
 
 class StopController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, uuid, *remainder):
-        LOG.debug('Calling backend_api.container_stop with %s' % uuid)
-        return backend_api.container_stop(uuid)
+    def _default(self, name, *remainder):
+        LOG.debug('Calling backend_api.container_stop with %s' % name)
+        return backend_api.container_stop(name)
 
 
 class RebootController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, uuid, *remainder):
-        LOG.debug('Calling backend_api.container_reboot with %s' % uuid)
-        return backend_api.container_reboot(uuid)
+    def _default(self, name, *remainder):
+        LOG.debug('Calling backend_api.container_reboot with %s' % name)
+        return backend_api.container_reboot(name)
 
 
 class PauseController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, uuid, *remainder):
-        LOG.debug('Calling backend_api.container_pause with %s' % uuid)
-        return backend_api.container_pause(uuid)
+    def _default(self, name, *remainder):
+        LOG.debug('Calling backend_api.container_pause with %s' % name)
+        return backend_api.container_pause(name)
 
 
 class UnpauseController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, uuid, *remainder):
-        LOG.debug('Calling backend_api.container_unpause with %s' % uuid)
-        return backend_api.container_unpause(uuid)
+    def _default(self, name, *remainder):
+        LOG.debug('Calling backend_api.container_unpause with %s' % name)
+        return backend_api.container_unpause(name)
 
 
 class LogsController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, uuid, *remainder):
-        LOG.debug('Calling backend_api.container_logs with %s' % uuid)
-        return backend_api.container_logs(uuid)
+    def _default(self, name, *remainder):
+        LOG.debug('Calling backend_api.container_logs with %s' % name)
+        return backend_api.container_logs(name)
 
 
 class ExecuteController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, uuid, *remainder):
-        LOG.debug('Calling backend_api.container_execute with %s' % uuid)
-        backend_api.container_execute(uuid)
+    def _default(self, name, *remainder):
+        LOG.debug('Calling backend_api.container_execute with %s' % name)
+        backend_api.container_execute(name)
 
 
 class ContainersController(rest.RestController):
@@ -326,7 +326,7 @@ class ContainersController(rest.RestController):
         new_container = objects.Container(pecan.request.context,
                                 **container.as_dict())
         new_container.create()
-        res_container = backend_api.container_create(new_container.uuid,
+        res_container = backend_api.container_create(new_container.name,
                                                      new_container)
         # Set the HTTP Location Header
         pecan.response.location = link.build_url('containers',
