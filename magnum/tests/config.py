@@ -25,6 +25,7 @@ app = {
     'debug': True,
     'hooks': [
         hooks.ContextHook(),
+        hooks.RPCHook()
     ],
     'acl_public_routes': [
         '/'

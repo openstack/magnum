@@ -298,18 +298,8 @@ class NodesController(rest.RestController):
             if rpc_node[field] != patch_val:
                 rpc_node[field] = patch_val
 
-        if hasattr(pecan.request, 'rpcapi'):
-            rpc_node = objects.Node.get_by_id(pecan.request.context,
-                                             rpc_node.node_id)
-            topic = pecan.request.rpcapi.get_topic_for(rpc_node)
-
-            new_node = pecan.request.rpcapi.update_node(
-                pecan.request.context, rpc_node, topic)
-
-            return Node.convert_with_links(new_node)
-        else:
-            rpc_node.save()
-            return Node.convert_with_links(rpc_node)
+        rpc_node.save()
+        return Node.convert_with_links(rpc_node)
 
     @wsme_pecan.wsexpose(None, types.uuid, status_code=204)
     def delete(self, node_uuid):

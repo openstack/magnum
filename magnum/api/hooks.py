@@ -22,6 +22,7 @@ from oslo.utils import importutils
 from pecan import hooks
 
 from magnum.common import context
+from magnum.conductor import api as conductor_api
 
 
 class ContextHook(hooks.PecanHook):
@@ -65,3 +66,10 @@ class ContextHook(hooks.PecanHook):
             tenant=tenant,
             domain_id=domain_id,
             domain_name=domain_name)
+
+
+class RPCHook(hooks.PecanHook):
+    """Attach the rpcapi object to the request so controllers can get to it."""
+
+    def before(self, state):
+        state.request.rpcapi = conductor_api.API(context=state.request.context)
