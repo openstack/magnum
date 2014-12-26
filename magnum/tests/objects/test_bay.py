@@ -21,7 +21,6 @@ from magnum.tests import utils
 class TestBay(base.BaseTestCase):
     def setUp(self):
         super(TestBay, self).setUp()
-#        self.db = self.useFixture(utils.Database())
         self.ctx = utils.dummy_context()
 
         self.data = [{'uuid': 'ce43e347f0b0422825245b3e5f140a81cef6e65b',
@@ -29,17 +28,3 @@ class TestBay(base.BaseTestCase):
                       'type': 'virt',
                       'ip_address': '10.0.0.3',
                       'external_ip_address': '192.0.2.3'}]
-#        utils.create_models_from_data(bay.Bay, self.data, self.ctx)
-#
-#    def test_objects_registered(self):
-#        self.assertTrue(registry.Bay)
-#        self.assertTrue(registry.BayList)
-#
-#    def test_get_all(self):
-#        lst = bay.BayList()
-#        self.assertEqual(1, len(lst.get_all(self.ctx)))
-#
-#    def test_check_data(self):
-#        ta = bay.Bay().get_by_id(self.ctx, self.data[0]['id'])
-#        for key, value in self.data[0].items():
-#            self.assertEqual(value, getattr(ta, key))
