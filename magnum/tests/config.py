@@ -10,6 +10,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+from magnum.api import hooks
+
 # Server Specific Configurations
 server = {
     'port': '8080',
@@ -20,13 +22,13 @@ server = {
 app = {
     'root': 'magnum.api.controllers.root.RootController',
     'modules': ['magnum.api'],
-    'static_root': '%(confdir)s/../../public',
-    'template_path': '%(confdir)s/../templates',
     'debug': True,
-    'errors': {
-        '404': '/error/404',
-        '__force_dict__': True
-    }
+    'hooks': [
+        hooks.ContextHook(),
+    ],
+    'acl_public_routes': [
+        '/'
+    ],
 }
 
 # Custom Configurations must be in Python dictionary format::

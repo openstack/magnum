@@ -14,8 +14,8 @@
 # limitations under the License.
 
 from magnum.api import app as api_app
-from magnum.api import auth
 from magnum.api import config as api_config
+from magnum.api import hooks
 from magnum.tests import base
 
 
@@ -30,4 +30,4 @@ class TestAppConfig(base.BaseTestCase):
 
         self.assertEqual(config_d['modules'], api_config.app['modules'])
         self.assertEqual(config_d['root'], api_config.app['root'])
-        self.assertIsInstance(config_d['hooks'][0], auth.AuthInformationHook)
+        self.assertIsInstance(config_d['hooks'][0], hooks.ContextHook)

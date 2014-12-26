@@ -1,5 +1,8 @@
 # -*- encoding: utf-8 -*-
 #
+# Copyright © 2012 New Dream Network, LLC (DreamHost)
+#
+# Author: Doug Hellmann <doug.hellmann@dreamhost.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -13,21 +16,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import re
-
-from keystonemiddleware import auth_token
+"""Access Control Lists (ACL's) control access the API server."""
 from oslo.config import cfg
-from oslo.utils import importutils
-from pecan import hooks
 
-from magnum.common import context
-from magnum.openstack.common._i18n import _
-from magnum.openstack.common import log as logging
+from magnum.api.middleware import auth_token
 
-
-LOG = logging.getLogger(__name__)
-
-OPT_GROUP_NAME = 'keystone_authtoken'
 
 AUTH_OPTS = [
     cfg.BoolOpt('enable_authentication',
@@ -39,99 +32,19 @@ AUTH_OPTS = [
 CONF = cfg.CONF
 CONF.register_opts(AUTH_OPTS)
 
-PUBLIC_ENDPOINTS = [
-    "^/$"
-]
 
+def install(app, conf, public_routes):
+    """Install ACL check on application.
 
-def install(app, conf):
-    if conf.get('enable_authentication'):
-        return AuthProtocolWrapper(app, conf=dict(conf.get(OPT_GROUP_NAME)))
-    else:
-        LOG.warning(_('Keystone authentication is disabled by Magnum '
-                      'configuration parameter enable_authentication. '
-                      'Magnum will not authenticate incoming request. '
-                      'In order to enable authentication set '
-                      'enable_authentication option to True.'))
-
-    return app
-
-
-class AuthHelper(object):
-    """Helper methods for Auth."""
-
-    def __init__(self):
-        endpoints_pattern = '|'.join(pe for pe in PUBLIC_ENDPOINTS)
-        self._public_endpoints_regexp = re.compile(endpoints_pattern)
-
-    def is_endpoint_public(self, path):
-        return self._public_endpoints_regexp.match(path)
-
-
-class AuthProtocolWrapper(auth_token.AuthProtocol):
-    """A wrapper on Keystone auth_token AuthProtocol.
-
-    Does not perform verification of authentication tokens for pub routes in
-    the API. Public routes are those defined by PUBLIC_ENDPOINTS
+    :param app: A WSGI applicatin.
+    :param conf: Settings. Dict'ified and passed to keystonemiddleware
+    :param public_routes: The list of the routes which will be allowed to
+                          access without authentication.
+    :return: The same WSGI application with ACL installed.
 
     """
-
-    def __call__(self, env, start_response):
-        path = env.get('PATH_INFO')
-        if AUTH.is_endpoint_public(path):
-            return self._app(env, start_response)
-        return super(AuthProtocolWrapper, self).__call__(env, start_response)
-
-
-class AuthInformationHook(hooks.PecanHook):
-
-    def before(self, state):
-        if not CONF.get('enable_authentication'):
-            return
-        # Skip authentication for public endpoints
-        if AUTH.is_endpoint_public(state.request.path):
-            return
-
-        headers = state.request.headers
-        user_id = headers.get('X-User-Id')
-        user_id = headers.get('X-User', user_id)
-        if user_id is None:
-            LOG.debug("X-User-Id header was not found in the request")
-            raise Exception('Not authorized')
-
-        tenant = state.request.headers.get('X-Tenant-Id')
-        tenant = state.request.headers.get('X-Tenant', tenant)
-        domain_id = state.request.headers.get('X-User-Domain-Id')
-        domain_name = state.request.headers.get('X-User-Domain-Name')
-        auth_token_info = state.request.environ.get('keystone.token_info')
-
-        # Get the auth token
-        try:
-            recv_auth_token = headers.get('X-Auth-Token',
-                                          headers.get(
-                                              'X-Storage-Token'))
-        except ValueError:
-            LOG.debug("No auth token found in the request.")
-            raise Exception('Not authorized')
-        auth_url = headers.get('X-Auth-Url')
-        if auth_url is None:
-            importutils.import_module('keystonemiddleware.auth_token')
-            auth_url = cfg.CONF.keystone_authtoken.auth_uri
-
-        identity_status = headers.get('X-Identity-Status')
-        if identity_status == 'Confirmed':
-            ctx = context.RequestContext(auth_token=recv_auth_token,
-                                         auth_url=auth_url,
-                                         auth_token_info=auth_token_info,
-                                         user=user_id,
-                                         tenant=tenant,
-                                         domain_id=domain_id,
-                                         domain_name=domain_name)
-            state.request.context = ctx
-        else:
-            LOG.debug("The provided identity is not confirmed.")
-            raise Exception('Not authorized. Identity not confirmed.')
-        return
-
-
-AUTH = AuthHelper()
+    if not cfg.CONF.get('enable_authentication'):
+        return app
+    return auth_token.AuthTokenMiddleware(app,
+                                          conf=dict(conf),
+                                          public_api_routes=public_routes)
