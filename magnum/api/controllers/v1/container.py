@@ -259,10 +259,9 @@ class ContainersController(rest.RestController):
             marker_obj = objects.Container.get_by_uuid(pecan.request.context,
                                                   marker)
 
-        backend_api = api.API(context=pecan.request.context)
-        containers = backend_api.container_list(pecan.request.context, limit,
-                                marker_obj, sort_key=sort_key,
-                                sort_dir=sort_dir)
+        containers = objects.Container.list(pecan.request.context, limit,
+                                            marker_obj, sort_key=sort_key,
+                                            sort_dir=sort_dir)
 
         return ContainerCollection.convert_with_links(containers, limit,
                                                 url=resource_url,
