@@ -32,7 +32,7 @@ class TestContainerController(db_base.DbTestCase):
                             mock_container_stop,
                             mock_container_start,
                             mock_container_create):
-        mock_container_create.side_effect = lambda x, y: y
+        mock_container_create.side_effect = lambda x, y, z: z
         mock_container_start.return_value = None
         mock_container_stop.return_value = None
         mock_container_pause.return_value = None

@@ -89,36 +89,39 @@ class API(rpc_service.API):
 
     # Container operations
 
-    def container_create(self, name, container):
-        return self._call('container_create', name=name, container=container)
+    def container_create(self, name, container_uuid, container):
+        return self._call('container_create', name=name,
+                          container_uuid=container_uuid,
+                          container=container)
 
     def container_list(self, context, limit, marker, sort_key, sort_dir):
         return objects.Container.list(context, limit, marker, sort_key,
                                       sort_dir)
 
-    def container_delete(self, name):
-        return self._call('container_delete', name=name)
+    def container_delete(self, container_uuid):
+        return self._call('container_delete', container_uuid=container_uuid)
 
-    def container_show(self, name):
-        return self._call('container_show', name)
+    def container_show(self, container_uuid):
+        return self._call('container_show', container_uuid)
 
-    def container_reboot(self, name):
-        return self._call('container_reboot', name=name)
+    def container_reboot(self, container_uuid):
+        return self._call('container_reboot', container_uuid=container_uuid)
 
-    def container_stop(self, name):
-        return self._call('container_stop', name=name)
+    def container_stop(self, container_uuid):
+        return self._call('container_stop', container_uuid=container_uuid)
 
-    def container_start(self, name):
-        return self._call('container_start', name=name)
+    def container_start(self, container_uuid):
+        return self._call('container_start', container_uuid=container_uuid)
 
-    def container_pause(self, name):
-        return self._call('container_pause', name=name)
+    def container_pause(self, container_uuid):
+        return self._call('container_pause', container_uuid=container_uuid)
 
-    def container_unpause(self, name):
-        return self._call('container_unpause', name=name)
+    def container_unpause(self, container_uuid):
+        return self._call('container_unpause', container_uuid=container_uuid)
 
-    def container_logs(self, name):
-        return self._call('container_logs', name=name)
+    def container_logs(self, container_uuid):
+        return self._call('container_logs', container_uuid=container_uuid)
 
-    def container_execute(self, name, command):
-        return self._call('container_execute', name=name, command=command)
+    def container_execute(self, container_uuid, command):
+        return self._call('container_execute', container_uuid=container_uuid,
+                          command=command)
