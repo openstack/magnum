@@ -401,6 +401,7 @@ class ContainersController(rest.RestController):
         if self.from_containers:
             raise exception.OperationNotPermitted
 
+        backend_api.container_delete(container_uuid)
         rpc_container = objects.Container.get_by_uuid(pecan.request.context,
                                             container_uuid)
         rpc_container.destroy()
