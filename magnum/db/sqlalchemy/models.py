@@ -186,6 +186,9 @@ class Pod(Base):
     name = Column(String(255))
     desc = Column(String(255))
     bay_uuid = Column(String(36))
+    images = Column(JSONEncodedList)
+    labels = Column(JSONEncodedDict)
+    status = Column(String(255))
 
 
 class Service(Base):

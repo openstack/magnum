@@ -93,6 +93,9 @@ def upgrade():
         sa.Column('name', sa.String(length=255), nullable=True),
         sa.Column('desc', sa.String(length=255), nullable=True),
         sa.Column('bay_uuid', sa.String(length=36), nullable=True),
+        sa.Column('images', sa.Text(), nullable=False),
+        sa.Column('labels', sa.Text(), nullable=True),
+        sa.Column('status', sa.String(length=255), nullable=False),
         sa.PrimaryKeyConstraint('id'),
         mysql_ENGINE='InnoDB',
         mysql_DEFAULT_CHARSET='UTF8'

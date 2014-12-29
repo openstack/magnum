@@ -81,6 +81,15 @@ class Pod(base.APIBase):
     bay_uuid = types.uuid
     """Unique UUID of the bay the pod runs on"""
 
+    images = [wtypes.text]
+    """A list of images used by containers in this pod."""
+
+    labels = {wtypes.text: wtypes.text}
+    """Labels of this pod"""
+
+    status = wtypes.text
+    """Staus of this pod """
+
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated pod links"""
 
@@ -110,7 +119,8 @@ class Pod(base.APIBase):
     @staticmethod
     def _convert_with_links(pod, url, expand=True):
         if not expand:
-            pod.unset_fields_except(['uuid', 'name', 'desc', 'bay_uuid'])
+            pod.unset_fields_except(['uuid', 'name', 'desc', 'bay_uuid',
+                                     'images', 'labels', 'status'])
 
         # never expose the pod_id attribute
         pod.pod_id = wtypes.Unset
@@ -134,6 +144,9 @@ class Pod(base.APIBase):
                      name='MyPod',
                      desc='Pod - Description',
                      bay_uuid='7ae81bb3-dec3-4289-8d6c-da80bd8001ae',
+                     images=['MyImage'],
+                     labels={'name': 'foo'},
+                     status='Running',
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())
         # NOTE(lucasagomes): pod_uuid getter() method look at the

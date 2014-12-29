@@ -32,6 +32,9 @@ class Pod(base.MagnumObject):
         'name': obj_utils.str_or_none,
         'desc': obj_utils.str_or_none,
         'bay_uuid': obj_utils.str_or_none,
+        'images': obj_utils.list_or_none,
+        'labels': obj_utils.dict_or_none,
+        'status': obj_utils.str_or_none,
     }
 
     @staticmethod
