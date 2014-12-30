@@ -16,6 +16,7 @@ from mock import patch
 
 class TestContainerController(db_base.DbTestCase):
     @patch('magnum.conductor.api.API.container_create')
+    @patch('magnum.conductor.api.API.container_delete')
     @patch('magnum.conductor.api.API.container_start')
     @patch('magnum.conductor.api.API.container_stop')
     @patch('magnum.conductor.api.API.container_pause')
@@ -31,6 +32,7 @@ class TestContainerController(db_base.DbTestCase):
                             mock_container_pause,
                             mock_container_stop,
                             mock_container_start,
+                            mock_container_delete,
                             mock_container_create):
         mock_container_create.side_effect = lambda x, y, z: z
         mock_container_start.return_value = None

@@ -148,7 +148,7 @@ class Handler(object):
     def container_delete(self, ctxt, container_uuid):
         LOG.debug("container_delete %s" % container_uuid)
         docker_id = self._find_container_by_name(container_uuid)
-        return self.docker.stop(docker_id)
+        return self.docker.remove_container(docker_id)
 
     def container_show(self, ctxt, container_uuid):
         LOG.debug("container_show %s" % container_uuid)
