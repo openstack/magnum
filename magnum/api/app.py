@@ -54,4 +54,5 @@ def setup_app(config=None):
         logging=getattr(config, 'logging', {}),
         **app_conf
     )
-    return auth.install(app, CONF)
+
+    return auth.install(app, CONF, config.app.acl_public_routes)

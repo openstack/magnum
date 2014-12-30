@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-#
-# Copyright 2013 - Noorul Islam K M
+# -*- encoding: utf-8 -*-
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -14,24 +12,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from magnum.api import hooks
+from magnum.api.middleware import auth_token
 
-# Pecan Application Configurations
-app = {
-    'root': 'magnum.api.controllers.root.RootController',
-    'modules': ['magnum.api'],
-    'debug': False,
-    'hooks': [
-        hooks.ContextHook()
-    ],
-    'acl_public_routes': [
-        '/'
-    ],
-}
 
-# Custom Configurations must be in Python dictionary format::
-#
-# foo = {'bar':'baz'}
-#
-# All configurations are accessible at::
-# pecan.conf
+AuthTokenMiddleware = auth_token.AuthTokenMiddleware
+
+__all__ = (AuthTokenMiddleware)
