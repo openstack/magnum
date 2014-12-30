@@ -203,3 +203,7 @@ class Service(Base):
     uuid = Column(String(36))
     name = Column(String(255))
     bay_uuid = Column(String(36))
+    labels = Column(JSONEncodedDict)
+    selector = Column(JSONEncodedDict)
+    ip = Column(String(36))
+    port = Column(Integer())

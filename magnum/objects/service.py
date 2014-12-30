@@ -31,6 +31,10 @@ class Service(base.MagnumObject):
         'uuid': obj_utils.str_or_none,
         'name': obj_utils.str_or_none,
         'bay_uuid': obj_utils.str_or_none,
+        'labels': obj_utils.dict_or_none,
+        'selector': obj_utils.dict_or_none,
+        'ip': obj_utils.str_or_none,
+        'port': int
     }
 
     @staticmethod
