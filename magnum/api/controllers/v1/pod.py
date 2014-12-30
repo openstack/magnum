@@ -24,9 +24,7 @@ from magnum.api.controllers import link
 from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
-from magnum.common import context
 from magnum.common import exception
-from magnum.conductor import api
 from magnum import objects
 
 
@@ -98,7 +96,6 @@ class Pod(base.APIBase):
 
     def __init__(self, **kwargs):
         super(Pod, self).__init__()
-        self.backend_api = api.API(context=context.RequestContext())
 
         self.fields = []
         fields = list(objects.Pod.fields)
@@ -166,7 +163,6 @@ class PodCollection(collection.Collection):
 
     def __init__(self, **kwargs):
         self._type = 'pods'
-        self.backend_api = api.API(context=context.RequestContext())
 
     @staticmethod
     def convert_with_links(rpc_pods, limit, url=None, expand=False, **kwargs):
@@ -188,7 +184,6 @@ class PodsController(rest.RestController):
 
     def __init__(self):
         super(PodsController, self).__init__()
-        self.backend_api = api.API(context=context.RequestContext())
 
     from_pods = False
     """A flag to indicate if the requests to this controller are coming
@@ -210,7 +205,7 @@ class PodsController(rest.RestController):
             marker_obj = objects.Pod.get_by_uuid(pecan.request.context,
                                                  marker)
 
-        pods = self.backend_api.pod_list(pecan.request.context, limit,
+        pods = pecan.request.rpcapi.pod_list(pecan.request.context, limit,
                                          marker_obj, sort_key=sort_key,
                                          sort_dir=sort_dir)
 
@@ -280,7 +275,7 @@ class PodsController(rest.RestController):
 
         pod_obj = objects.Pod(pecan.request.context,
                               **pod.as_dict())
-        new_pod = self.backend_api.pod_create(pod_obj)
+        new_pod = pecan.request.rpcapi.pod_create(pod_obj)
         # Set the HTTP Location Header
         pecan.response.location = link.build_url('pods', new_pod.uuid)
         return Pod.convert_with_links(new_pod)
@@ -337,4 +332,4 @@ class PodsController(rest.RestController):
 
         rpc_pod = objects.Pod.get_by_uuid(pecan.request.context,
                                           pod_uuid)
-        self.backend_api.pod_delete(rpc_pod)
+        pecan.request.rpcapi.pod_delete(rpc_pod)
