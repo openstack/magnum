@@ -29,7 +29,10 @@ class TestServiceController(db_base.DbTestCase):
             mock_method.side_effect = self.mock_service_create
             # Create a service
             params = '{"name": "service_foo",'\
-                     '"bay_uuid": "7ae81bb3-dec3-4289-8d6c-da80bd8001ae"}'
+                     '"bay_uuid": "7ae81bb3-dec3-4289-8d6c-da80bd8001ae",' \
+                     '"labels": {"bar": "foo"},' \
+                     '"selector": {"bar": "foo"}, "ip": "172.17.2.3",' \
+                     '"port": 88}'
             response = self.app.post('/v1/services',
                                      params=params,
                                      content_type='application/json')
@@ -43,6 +46,10 @@ class TestServiceController(db_base.DbTestCase):
             self.assertEqual('service_foo', c.get('name'))
             self.assertEqual('7ae81bb3-dec3-4289-8d6c-da80bd8001ae',
                              c.get('bay_uuid'))
+            self.assertEqual('foo', c.get('labels')['bar'])
+            self.assertEqual('foo', c.get('selector')['bar'])
+            self.assertEqual('172.17.2.3', c.get('ip'))
+            self.assertEqual(88, c.get('port'))
 
             # Get just the one we created
             response = self.app.get('/v1/services/%s' % c.get('uuid'))

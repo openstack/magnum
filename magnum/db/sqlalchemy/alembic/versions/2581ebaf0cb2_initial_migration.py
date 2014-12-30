@@ -105,6 +105,10 @@ def upgrade():
         sa.Column('uuid', sa.String(length=36), nullable=True),
         sa.Column('name', sa.String(length=255), nullable=True),
         sa.Column('bay_uuid', sa.String(length=36), nullable=True),
+        sa.Column('labels', sa.Text, nullable=True),
+        sa.Column('selector', sa.Text, nullable=True),
+        sa.Column('ip', sa.String(length=36), nullable=True),
+        sa.Column('port', sa.Integer(), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         mysql_ENGINE='InnoDB',
         mysql_DEFAULT_CHARSET='UTF8'

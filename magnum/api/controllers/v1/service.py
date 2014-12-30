@@ -69,6 +69,18 @@ class Service(base.APIBase):
     bay_uuid = types.uuid
     """Unique UUID of the bay the service runs on"""
 
+    labels = {wtypes.text: wtypes.text}
+    """Labels of this service"""
+
+    selector = {wtypes.text: wtypes.text}
+    """Selector of this service"""
+
+    ip = wtypes.text
+    """IP of this service"""
+
+    port = wtypes.IntegerType()
+    """Port of this service"""
+
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated service links"""
 
@@ -92,7 +104,8 @@ class Service(base.APIBase):
     @staticmethod
     def _convert_with_links(service, url, expand=True):
         if not expand:
-            service.unset_fields_except(['uuid', 'name', 'bay_uuid'])
+            service.unset_fields_except(['uuid', 'name', 'bay_uuid', 'labels',
+                                         'selector', 'ip', 'port'])
         # never expose the service_id attribute
         service.service_id = wtypes.Unset
 
@@ -114,6 +127,10 @@ class Service(base.APIBase):
         sample = cls(uuid='fe78db47-9a37-4e9f-8572-804a10abc0aa',
                      name='MyService',
                      bay_uuid='7ae81bb3-dec3-4289-8d6c-da80bd8001ae',
+                     labels={'label1': 'foo'},
+                     selector={'label1': 'foo'},
+                     ip='172.17.2.2',
+                     port=80,
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())
         sample._service_uuid = '87504bd9-ca50-40fd-b14e-bcb23ed42b27'
