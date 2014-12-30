@@ -28,7 +28,8 @@ class TestPodController(db_base.DbTestCase):
             mock_method.side_effect = self.mock_pod_create
             # Create a pod
             params = '{"name": "pod_example_A", "desc": "My Pod",' \
-                     '"bay_uuid": "7ae81bb3-dec3-4289-8d6c-da80bd8001ae"}'
+                     '"bay_uuid": "7ae81bb3-dec3-4289-8d6c-da80bd8001ae",' \
+                     '"images": ["ubuntu"], "labels": {"foo": "foo1"}}'
             response = self.app.post('/v1/pods',
                                      params=params,
                                      content_type='application/json')
@@ -44,6 +45,8 @@ class TestPodController(db_base.DbTestCase):
             self.assertEqual('My Pod', c.get('desc'))
             self.assertEqual('7ae81bb3-dec3-4289-8d6c-da80bd8001ae',
                              c.get('bay_uuid'))
+            self.assertEqual(['ubuntu'], c.get('images'))
+            self.assertEqual('foo1', c.get('labels')['foo'])
 
             # Get just the one we created
             response = self.app.get('/v1/pods/%s' % c.get('uuid'))
