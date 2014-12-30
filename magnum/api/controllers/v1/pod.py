@@ -317,18 +317,8 @@ class PodsController(rest.RestController):
             if rpc_pod[field] != patch_val:
                 rpc_pod[field] = patch_val
 
-        if hasattr(pecan.request, 'rpcapi'):
-            rpc_pod = objects.Pod.get_by_id(pecan.request.context,
-                                            rpc_pod.pod_id)
-            topic = pecan.request.rpcapi.get_topic_for(rpc_pod)
-
-            new_pod = pecan.request.rpcapi.update_pod(
-                pecan.request.context, rpc_pod, topic)
-
-            return Pod.convert_with_links(new_pod)
-        else:
-            rpc_pod.save()
-            return Pod.convert_with_links(rpc_pod)
+        rpc_pod.save()
+        return Pod.convert_with_links(rpc_pod)
 
     @wsme_pecan.wsexpose(None, types.uuid, status_code=204)
     def delete(self, pod_uuid):

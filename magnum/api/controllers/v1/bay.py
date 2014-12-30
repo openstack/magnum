@@ -307,18 +307,8 @@ class BaysController(rest.RestController):
             if rpc_bay[field] != patch_val:
                 rpc_bay[field] = patch_val
 
-        if hasattr(pecan.request, 'rpcapi'):
-            rpc_bay = objects.Bay.get_by_id(pecan.request.context,
-                                             rpc_bay.bay_id)
-            topic = pecan.request.rpcapi.get_topic_for(rpc_bay)
-
-            new_bay = pecan.request.rpcapi.update_bay(
-                pecan.request.context, rpc_bay, topic)
-
-            return Bay.convert_with_links(new_bay)
-        else:
-            rpc_bay.save()
-            return Bay.convert_with_links(rpc_bay)
+        rpc_bay.save()
+        return Bay.convert_with_links(rpc_bay)
 
     @wsme_pecan.wsexpose(None, types.uuid, status_code=204)
     def delete(self, bay_uuid):

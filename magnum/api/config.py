@@ -22,7 +22,8 @@ app = {
     'modules': ['magnum.api'],
     'debug': False,
     'hooks': [
-        hooks.ContextHook()
+        hooks.ContextHook(),
+        hooks.RPCHook(),
     ],
     'acl_public_routes': [
         '/'

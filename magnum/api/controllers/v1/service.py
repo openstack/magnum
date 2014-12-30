@@ -304,18 +304,8 @@ class ServicesController(rest.RestController):
             if rpc_service[field] != patch_val:
                 rpc_service[field] = patch_val
 
-        if hasattr(pecan.request, 'rpcapi'):
-            rpc_service = objects.Service.get_by_id(pecan.request.context,
-                                                    rpc_service.service_id)
-            topic = pecan.request.rpcapi.get_topic_for(rpc_service)
-
-            new_service = pecan.request.rpcapi.update_service(
-                pecan.request.context, rpc_service, topic)
-
-            return Service.convert_with_links(new_service)
-        else:
-            rpc_service.save()
-            return Service.convert_with_links(rpc_service)
+        rpc_service.save()
+        return Service.convert_with_links(rpc_service)
 
     @wsme_pecan.wsexpose(None, types.uuid, status_code=204)
     def delete(self, service_uuid):

@@ -379,18 +379,8 @@ class ContainersController(rest.RestController):
             if rpc_container[field] != patch_val:
                 rpc_container[field] = patch_val
 
-        if hasattr(pecan.request, 'rpcapi'):
-            rpc_container = objects.Container.get_by_id(pecan.request.context,
-                                             rpc_container.container_id)
-            topic = pecan.request.rpcapi.get_topic_for(rpc_container)
-
-            new_container = pecan.request.rpcapi.update_container(
-                pecan.request.context, rpc_container, topic)
-
-            return Container.convert_with_links(new_container)
-        else:
-            rpc_container.save()
-            return Container.convert_with_links(rpc_container)
+        rpc_container.save()
+        return Container.convert_with_links(rpc_container)
 
     @wsme_pecan.wsexpose(None, types.uuid, status_code=204)
     def delete(self, container_uuid):

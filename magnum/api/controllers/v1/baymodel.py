@@ -309,18 +309,8 @@ class BayModelsController(rest.RestController):
             if rpc_baymodel[field] != patch_val:
                 rpc_baymodel[field] = patch_val
 
-        if hasattr(pecan.request, 'rpcapi'):
-            rpc_baymodel = objects.BayModel.get_by_id(pecan.request.context,
-                                             rpc_baymodel.baymodel_id)
-            topic = pecan.request.rpcapi.get_topic_for(rpc_baymodel)
-
-            new_baymodel = pecan.request.rpcapi.update_baymodel(
-                pecan.request.context, rpc_baymodel, topic)
-
-            return BayModel.convert_with_links(new_baymodel)
-        else:
-            rpc_baymodel.save()
-            return BayModel.convert_with_links(rpc_baymodel)
+        rpc_baymodel.save()
+        return BayModel.convert_with_links(rpc_baymodel)
 
     @wsme_pecan.wsexpose(None, types.uuid, status_code=204)
     def delete(self, baymodel_uuid):
