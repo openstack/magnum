@@ -135,59 +135,92 @@ class Handler(object):
     def container_create(self, ctxt, name, container_uuid, container):
         LOG.debug('Creating container with image %s name %s'
                   % (container.image_id, name))
-        self.docker.inspect_image(self._encode_utf8(container.image_id))
-        self.docker.create_container(container.image_id, name=name,
-                                     hostname=container_uuid)
-        return container
+        try:
+            self.docker.inspect_image(self._encode_utf8(container.image_id))
+            self.docker.create_container(container.image_id, name=name,
+                                         hostname=container_uuid)
+            return container
+        except errors.APIError as api_error:
+            raise Exception("Docker API Error : %s" % str(api_error))
 
     def container_list(self, ctxt):
         LOG.debug("container_list")
-        container_list = self.docker.containers()
-        return container_list
+        try:
+            container_list = self.docker.containers()
+            return container_list
+        except errors.APIError as api_error:
+            raise Exception("Docker API Error : %s" % str(api_error))
 
     def container_delete(self, ctxt, container_uuid):
         LOG.debug("container_delete %s" % container_uuid)
-        docker_id = self._find_container_by_name(container_uuid)
-        return self.docker.remove_container(docker_id)
+        try:
+            docker_id = self._find_container_by_name(container_uuid)
+            return self.docker.remove_container(docker_id)
+        except errors.APIError as api_error:
+            raise Exception("Docker API Error : %s" % str(api_error))
 
     def container_show(self, ctxt, container_uuid):
         LOG.debug("container_show %s" % container_uuid)
-        docker_id = self._find_container_by_name(container_uuid)
-        return self.docker.inspect_container(docker_id)
+        try:
+            docker_id = self._find_container_by_name(container_uuid)
+            return self.docker.inspect_container(docker_id)
+        except errors.APIError as api_error:
+            raise Exception("Docker API Error : %s" % str(api_error))
 
     def container_reboot(self, ctxt, container_uuid):
         LOG.debug("container_reboot %s" % container_uuid)
-        docker_id = self._find_container_by_name(container_uuid)
-        return self.docker.restart(docker_id)
+        try:
+            docker_id = self._find_container_by_name(container_uuid)
+            return self.docker.restart(docker_id)
+        except errors.APIError as api_error:
+            raise Exception("Docker API Error : %s" % str(api_error))
 
     def container_stop(self, ctxt, container_uuid):
         LOG.debug("container_stop %s" % container_uuid)
-        docker_id = self._find_container_by_name(container_uuid)
-        return self.docker.stop(docker_id)
+        try:
+            docker_id = self._find_container_by_name(container_uuid)
+            return self.docker.stop(docker_id)
+        except errors.APIError as api_error:
+            raise Exception("Docker API Error : %s" % str(api_error))
 
     def container_start(self, ctxt, container_uuid):
         LOG.debug("Starting container %s" % container_uuid)
-        docker_id = self._find_container_by_name(container_uuid)
-        LOG.debug("Found Docker container %s" % docker_id)
-        return self.docker.start(docker_id)
+        try:
+            docker_id = self._find_container_by_name(container_uuid)
+            LOG.debug("Found Docker container %s" % docker_id)
+            return self.docker.start(docker_id)
+        except errors.APIError as api_error:
+            raise Exception("Docker API Error : %s" % str(api_error))
 
     def container_pause(self, ctxt, container_uuid):
         LOG.debug("container_pause %s" % container_uuid)
-        docker_id = self._find_container_by_name(container_uuid)
-        return self.docker.pause(docker_id)
+        try:
+            docker_id = self._find_container_by_name(container_uuid)
+            return self.docker.pause(docker_id)
+        except errors.APIError as api_error:
+            raise Exception("Docker API Error : %s" % str(api_error))
 
     def container_unpause(self, ctxt, container_uuid):
         LOG.debug("container_unpause %s" % container_uuid)
-        docker_id = self._find_container_by_name(container_uuid)
-        return self.docker.unpause(docker_id)
+        try:
+            docker_id = self._find_container_by_name(container_uuid)
+            return self.docker.unpause(docker_id)
+        except errors.APIError as api_error:
+            raise Exception("Docker API Error : %s" % str(api_error))
 
     def container_logs(self, ctxt, container_uuid):
         LOG.debug("container_logs %s" % container_uuid)
-        docker_id = self._find_container_by_name(container_uuid)
-        return self.docker.get_container_logs(docker_id)
+        try:
+            docker_id = self._find_container_by_name(container_uuid)
+            return self.docker.get_container_logs(docker_id)
+        except errors.APIError as api_error:
+            raise Exception("Docker API Error : %s" % str(api_error))
 
     def container_execute(self, ctxt, container_uuid, command):
         LOG.debug("container_execute %s command %s" %
                   (container_uuid, command))
-        docker_id = self._find_container_by_name(container_uuid)
-        return self.docker.execute(docker_id, command)
+        try:
+            docker_id = self._find_container_by_name(container_uuid)
+            return self.docker.execute(docker_id, command)
+        except errors.APIError as api_error:
+            raise Exception("Docker API Error : %s" % str(api_error))
