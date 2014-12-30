@@ -90,6 +90,9 @@ class Pod(base.APIBase):
     status = wtypes.text
     """Staus of this pod """
 
+    pod_definition_url = wtypes.text
+    """URL for pod file to create the pod"""
+
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated pod links"""
 
@@ -307,6 +310,9 @@ class PodsController(rest.RestController):
 
         # Update only the fields that have changed
         for field in objects.Pod.fields:
+            # ignore pod_definition_url as it was used for create pod
+            if field == 'pod_definition_url':
+                continue
             try:
                 patch_val = getattr(pod, field)
             except AttributeError:

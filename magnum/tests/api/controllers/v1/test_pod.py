@@ -29,7 +29,8 @@ class TestPodController(db_base.DbTestCase):
             # Create a pod
             params = '{"name": "pod_example_A", "desc": "My Pod",' \
                      '"bay_uuid": "7ae81bb3-dec3-4289-8d6c-da80bd8001ae",' \
-                     '"images": ["ubuntu"], "labels": {"foo": "foo1"}}'
+                     '"images": ["ubuntu"], "labels": {"foo": "foo1"},' \
+                     '"pod_definition_url": "http://172.17.1.2/pod.json"}'
             response = self.app.post('/v1/pods',
                                      params=params,
                                      content_type='application/json')

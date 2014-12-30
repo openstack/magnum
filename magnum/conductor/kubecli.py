@@ -96,7 +96,13 @@ class KubeClient(object):
     def pod_create(contents):
         LOG.debug("pod_create contents %s" % contents)
         try:
-            out, err = utils.trycmd('kubectl', 'create', '-f', contents)
+            if contents.pod_definition_url:
+                out, err = utils.trycmd('kubectl', 'create', '-f',
+                                        contents.pod_definition_url)
+            else:
+                # TODO(jay-lau-513) Translate the contents to a json stdin
+                out, err = utils.trycmd('echo contents | kubectl', 'create',
+                                        '-f', '-')
             if err:
                 return False
         except Exception as e:
