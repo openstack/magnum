@@ -86,6 +86,17 @@ class Handler(object):
 
     def bay_show(self, ctxt, uuid):
         LOG.debug('k8s_heat bay_show')
+        osc = clients.OpenStackClients(ctxt)
         bay = objects.Bay.get_by_uuid(ctxt, uuid)
+
+        stack_id = bay.stack_id
+        stack = osc.heat().stacks.get(stack_id)
+
+        if stack.status == 'COMPLETE':
+            master_address = stack['outputs'][0]['output_value']
+            minion_addresses = stack['outputs'][2]['output_value']
+            bay.master_address = master_address
+            bay.minions_address = minion_addresses
+            bay.save()
 
         return bay
