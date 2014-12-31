@@ -82,15 +82,19 @@ class DockerHTTPClient(client.Client):
                 res.append(info['Config'].get('Hostname'))
         return res
 
-    def pause(self, docker_id):
-        url = self._url("/containers/{0}/pause".format(docker_id))
+    def pause(self, container):
+        if isinstance(container, dict):
+            container = container.get('Id')
+        url = self._url('/containers/{0}/pause'.format(container))
         res = self._post(url)
-        return res.status_code == 204
+        self._raise_for_status(res)
 
-    def unpause(self, docker_id):
-        url = self._url("/containers/{0}/unpause".format(docker_id))
+    def unpause(self, container):
+        if isinstance(container, dict):
+            container = container.get('Id')
+        url = self._url('/containers/{0}/unpause'.format(container))
         res = self._post(url)
-        return res.status_code == 204
+        self._raise_for_status(res)
 
     def load_repository_file(self, name, path):
         with open(path) as fh:
