@@ -390,7 +390,9 @@ class Connection(api.Connection):
         with session.begin():
             query = model_query(models.BayModel, session=session)
             query = add_identity_filter(query, baymodel_id)
-            query.delete()
+            count = query.delete()
+            if count != 1:
+                raise exception.BayModelNotFound(baymodel_id)
 
     def update_baymodel(self, baymodel_id, values):
         # NOTE(dtantsur): this can lead to very strange errors
