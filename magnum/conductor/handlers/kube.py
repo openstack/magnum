@@ -12,7 +12,7 @@
 
 """Magnum Kubernetes RPC handler."""
 
-from magnum.conductor import kubecli
+from magnum.conductor.handlers.common import kube_utils
 from magnum.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ class Handler(object):
 
     def __init__(self):
         super(Handler, self).__init__()
-        self.kube_cli = kubecli.KubeClient()
+        self.kube_cli = kube_utils.KubeClient()
 
     def service_create(self, context, service):
         LOG.debug("service_create")
