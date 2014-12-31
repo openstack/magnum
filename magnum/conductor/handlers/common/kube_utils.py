@@ -51,6 +51,25 @@ class KubeClient(object):
         return True
 
     @staticmethod
+    def service_update(service):
+        LOG.debug("service_update with contents %s" % service)
+        try:
+            if service.service_definition_url:
+                out, err = utils.trycmd('kubectl', 'update', '-f',
+                                        service.service_definition_url)
+            else:
+                # TODO(jay-lau-513) Translate the contents to a json stdin
+                out, err = utils.trycmd('echo service | kubectl', 'update',
+                                        '-f', '-')
+            if err:
+                return False
+        except Exception as e:
+            LOG.error("Couldn't update service with contents %s \
+                       due to error %s" % (service, e))
+            return False
+        return True
+
+    @staticmethod
     def service_list():
         LOG.debug("service_list")
         try:
