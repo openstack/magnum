@@ -115,7 +115,13 @@ class KubeClient(object):
     def pod_update(contents):
         LOG.debug("pod_update contents %s" % contents)
         try:
-            out, err = utils.trycmd('kubectl', 'update', '-f', contents)
+            if contents.pod_definition_url:
+                out, err = utils.trycmd('kubectl', 'update', '-f',
+                                        contents.pod_definition_url)
+            else:
+                # TODO(jay-lau-513) Translate the contents to a json stdin
+                out, err = utils.trycmd('echo contents | kubectl', 'update',
+                                        '-f', '-')
             if err:
                 return False
         except Exception as e:
