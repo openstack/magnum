@@ -222,7 +222,7 @@ class ExecuteController(object):
     def _default(self, container_uuid, command, *remainder):
         LOG.debug('Calling backend_api.container_execute with %s command %s'
                   % (container_uuid, command))
-        backend_api.container_execute(container_uuid, command)
+        return backend_api.container_execute(container_uuid, command)
 
 
 class ContainersController(rest.RestController):

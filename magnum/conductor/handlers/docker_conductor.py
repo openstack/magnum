@@ -65,7 +65,7 @@ class DockerHTTPClient(client.Client):
             ssl_config = False
         super(DockerHTTPClient, self).__init__(
             base_url=url,
-            version='1.13',
+            version='1.15',
             timeout=10,
             tls=ssl_config
         )
