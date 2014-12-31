@@ -18,7 +18,7 @@ There are five different types of objects in the Magnum system:
 * Bay: A collection of node objects where work is scheduled
 * Node: A baremetal or virtual machine where work executes
 * Pod: A collection of containers running on one physical or virtual machine
-* Service: A port to Pod mapping
+* Service: An abstraction which defines a logical set of pods and a policy by which to access them
 * Container: A docker container
 
 Two binaries work together to compose the Magnum system.  The first binary
