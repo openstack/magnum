@@ -340,44 +340,6 @@ class Connection(api.Connection):
         return _paginate_query(models.BayModel, limit, marker,
                                sort_key, sort_dir, query)
 
-    def reserve_baymodel(self, tag, baymodel_id):
-        session = get_session()
-        with session.begin():
-            query = model_query(models.BayModel, session=session)
-            query = add_identity_filter(query, baymodel_id)
-            # be optimistic and assume we usually create a reservation
-            count = query.filter_by(reservation=None).update(
-                        {'reservation': tag}, synchronize_session=False)
-            try:
-                baymodel = query.one()
-                if count != 1:
-                    # Nothing updated and baymodel exists. Must already be
-                    # locked.
-                    raise exception.BayModelLocked(baymodel=baymodel_id,
-                                               host=baymodel['reservation'])
-                return baymodel
-            except NoResultFound:
-                raise exception.BayModelNotFound(baymodel_id)
-
-    def release_baymodel(self, tag, baymodel_id):
-        session = get_session()
-        with session.begin():
-            query = model_query(models.BayModel, session=session)
-            query = add_identity_filter(query, baymodel_id)
-            # be optimistic and assume we usually release a reservation
-            count = query.filter_by(reservation=tag).update(
-                        {'reservation': None}, synchronize_session=False)
-            try:
-                if count != 1:
-                    baymodel = query.one()
-                    if baymodel['reservation'] is None:
-                        raise exception.BayModelNotLocked(baymodel=baymodel_id)
-                    else:
-                        raise exception.BayModelLocked(baymodel=baymodel_id,
-                            host=baymodel['reservation'])
-            except NoResultFound:
-                raise exception.BayModelNotFound(baymodel_id)
-
     def create_baymodel(self, values):
         # ensure defaults are present for new baymodels
         if not values.get('uuid'):
@@ -452,14 +414,6 @@ class Connection(api.Connection):
                 ref = query.with_lockmode('update').one()
             except NoResultFound:
                 raise exception.BayModelNotFound(baymodel=baymodel_id)
-
-            # Prevent instance_uuid overwriting
-            if values.get("instance_uuid") and ref.instance_uuid:
-                raise exception.BayModelAssociated(baymodel=baymodel_id,
-                                instance=ref.instance_uuid)
-
-            if 'provision_state' in values:
-                values['provision_updated_at'] = timeutils.utcnow()
 
             ref.update(values)
         return ref
