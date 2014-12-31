@@ -116,6 +116,21 @@ def upgrade():
         mysql_ENGINE='InnoDB',
         mysql_DEFAULT_CHARSET='UTF8'
     )
+    op.create_table(
+        'replicationcontroller',
+        sa.Column('created_at', sa.DateTime(), nullable=True),
+        sa.Column('updated_at', sa.DateTime(), nullable=True),
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('uuid', sa.String(length=36), nullable=True),
+        sa.Column('name', sa.String(length=255), nullable=True),
+        sa.Column('bay_uuid', sa.String(length=36), nullable=True),
+        sa.Column('images', sa.Text(), nullable=False),
+        sa.Column('selector', sa.Text(), nullable=True),
+        sa.Column('replicas', sa.Integer(), nullable=True),
+        sa.PrimaryKeyConstraint('id'),
+        mysql_ENGINE='InnoDB',
+        mysql_DEFAULT_CHARSET='UTF8'
+    )
     # end Alembic commands
 
 
@@ -126,6 +141,7 @@ def downgrade():
     op.drop_table('node')
     op.drop_table('service')
     op.drop_table('pod')
+    op.drop_table('replicationcontroller')
 # We should probably remove the drops later ;-)
 #    raise NotImplementedError(('Downgrade from initial migration is'
 #                              ' unsupported.'))
