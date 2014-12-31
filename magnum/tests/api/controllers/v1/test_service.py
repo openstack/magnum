@@ -32,7 +32,8 @@ class TestServiceController(db_base.DbTestCase):
                      '"bay_uuid": "7ae81bb3-dec3-4289-8d6c-da80bd8001ae",' \
                      '"labels": {"bar": "foo"},' \
                      '"selector": {"bar": "foo"}, "ip": "172.17.2.3",' \
-                     '"port": 88}'
+                     '"port": 88,' \
+                     '"service_definition_url": "http://172.17.1.2/svc.json"}'
             response = self.app.post('/v1/services',
                                      params=params,
                                      content_type='application/json')

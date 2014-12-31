@@ -79,6 +79,9 @@ class Service(base.APIBase):
     port = wtypes.IntegerType()
     """Port of this service"""
 
+    service_definition_url = wtypes.text
+    """URL for service file to create the service"""
+
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated service links"""
 
@@ -290,6 +293,9 @@ class ServicesController(rest.RestController):
 
         # Update only the fields that have changed
         for field in objects.Service.fields:
+            # ignore service_definition_url as it was used for create service
+            if field == 'service_definition_url':
+                continue
             try:
                 patch_val = getattr(service, field)
             except AttributeError:

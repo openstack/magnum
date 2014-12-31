@@ -35,7 +35,13 @@ class KubeClient(object):
     def service_create(service):
         LOG.debug("service_create with contents %s" % service)
         try:
-            out, err = utils.trycmd('kubectl', 'create', '-f', service)
+            if service.service_definition_url:
+                out, err = utils.trycmd('kubectl', 'create', '-f',
+                                        service.service_definition_url)
+            else:
+                # TODO(jay-lau-513) Translate the contents to a json stdin
+                out, err = utils.trycmd('echo service | kubectl', 'create',
+                                        '-f', '-')
             if err:
                 return False
         except Exception as e:
