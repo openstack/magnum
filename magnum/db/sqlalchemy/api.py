@@ -1120,20 +1120,6 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.ServiceNotFound(bay=bay_uuid)
 
-    def get_service_by_instance(self, instance):
-        if not utils.is_uuid_like(instance):
-            raise exception.InvalidUUID(uuid=instance)
-
-        query = (model_query(models.Service)
-                 .filter_by(instance_uuid=instance))
-
-        try:
-            result = query.one()
-        except NoResultFound:
-            raise exception.InstanceNotFound(instance=instance)
-
-        return result
-
     def destroy_service(self, service_id):
         session = get_session()
         with session.begin():

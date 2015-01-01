@@ -665,14 +665,6 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_service_by_instance(self, instance):
-        """Return a service.
-
-        :param instance: The instance name or uuid to search for.
-        :returns: A service.
-        """
-
-    @abc.abstractmethod
     def destroy_service(self, service_id):
         """Destroy a service and all associated interfaces.
 
