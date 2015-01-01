@@ -109,7 +109,7 @@ class Bay(base.APIBase):
     @staticmethod
     def _convert_with_links(bay, url, expand=True):
         if not expand:
-            bay.unset_fields_except(['uuid', 'name', 'type', 'image_id',
+            bay.unset_fields_except(['uuid', 'name', 'baymodel_id',
                                     'node_count'])
 
         # never expose the bay_id attribute
@@ -132,7 +132,6 @@ class Bay(base.APIBase):
     def sample(cls, expand=True):
         sample = cls(uuid='27e3153e-d5bf-4b7e-b517-fb518e17f34c',
                      name='example',
-                     type='virt',
                      image_id='Fedora-k8s',
                      node_count=1,
                      created_at=datetime.datetime.utcnow(),
