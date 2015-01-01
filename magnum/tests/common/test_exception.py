@@ -143,6 +143,14 @@ class TestException(base.BaseTestCase):
         self.assertRaises(exception.BayNotLocked,
                     lambda: self.raise_(exception.BayNotLocked()))
 
+    def test_BayModelNotFound(self):
+        self.assertRaises(exception.BayModelNotFound,
+                    lambda: self.raise_(exception.BayModelNotFound()))
+
+    def test_BayModelAlreadyExists(self):
+        self.assertRaises(exception.BayModelAlreadyExists,
+                    lambda: self.raise_(exception.BayModelAlreadyExists()))
+
     def test_ContainerNotFound(self):
         self.assertRaises(exception.ContainerNotFound,
                     lambda: self.raise_(exception.ContainerNotFound()))

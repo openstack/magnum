@@ -170,32 +170,6 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def reserve_baymodel(self, tag, baymodel_id):
-        """Reserve a baymodel.
-
-        To prevent other ManagerServices from manipulating the given
-        BayModel while a Task is performed, mark it reserved by this host.
-
-        :param tag: A string uniquely identifying the reservation holder.
-        :param baymodel_id: A baymodel id or uuid.
-        :returns: A BayModel object.
-        :raises: BayModelNotFound if the baymodel is not found.
-        :raises: BayModelLocked if the baymodel is already reserved.
-        """
-
-    @abc.abstractmethod
-    def release_baymodel(self, tag, baymodel_id):
-        """Release the reservation on a baymodel.
-
-        :param tag: A string uniquely identifying the reservation holder.
-        :param baymodel_id: A baymodel id or uuid.
-        :raises: BayModelNotFound if the baymodel is not found.
-        :raises: BayModelLocked if the baymodel is reserved by another host.
-        :raises: BayModelNotLocked if the baymodel was found to not have a
-                 reservation at all.
-        """
-
-    @abc.abstractmethod
     def create_baymodel(self, values):
         """Create a new baymodel.
 
@@ -251,7 +225,6 @@ class Connection(object):
 
         :param baymodel_id: The id or uuid of a baymodel.
         :returns: A baymodel.
-        :raises: BayModelAssociated
         :raises: BayModelNotFound
         """
 

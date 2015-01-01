@@ -331,6 +331,14 @@ class FileSystemNotSupported(MagnumException):
                 "File system %(fs)s is not supported.")
 
 
+class BayModelNotFound(ResourceNotFound):
+    message = _("Baymodel %(baymodel)s could not be found.")
+
+
+class BayModelAlreadyExists(Conflict):
+    message = _("A baymodel with UUID %(uuid)s already exists.")
+
+
 class BayNotFound(ResourceNotFound):
     message = _("Bay %(bay)s could not be found.")
 
