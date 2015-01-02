@@ -12,11 +12,10 @@
 
 """Magnum Docker RPC handler."""
 
-from docker import client
 from docker import errors
-from docker import tls
 from oslo.config import cfg
 
+from magnum.conductor.handlers.common import docker_client
 from magnum.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
@@ -47,68 +46,6 @@ docker_opts = [
 CONF.register_opts(docker_opts, 'docker')
 
 
-class DockerHTTPClient(client.Client):
-    def __init__(self, url='unix://var/run/docker.sock'):
-        if (CONF.docker.cert_file or
-                CONF.docker.key_file):
-            client_cert = (CONF.docker.cert_file, CONF.docker.key_file)
-        else:
-            client_cert = None
-        if (CONF.docker.ca_file or
-                CONF.docker.api_insecure or
-                client_cert):
-            ssl_config = tls.TLSConfig(
-                client_cert=client_cert,
-                ca_cert=CONF.docker.ca_file,
-                verify=CONF.docker.api_insecure)
-        else:
-            ssl_config = False
-        super(DockerHTTPClient, self).__init__(
-            base_url=url,
-            version='1.15',
-            timeout=10,
-            tls=ssl_config
-        )
-
-    def list_instances(self, inspect=False):
-        res = []
-        for container in self.containers(all=True):
-            info = self.inspect_container(container['Id'])
-            if not info:
-                continue
-            if inspect:
-                res.append(info)
-            else:
-                res.append(info['Config'].get('Hostname'))
-        return res
-
-    def pause(self, container):
-        if isinstance(container, dict):
-            container = container.get('Id')
-        url = self._url('/containers/{0}/pause'.format(container))
-        res = self._post(url)
-        self._raise_for_status(res)
-
-    def unpause(self, container):
-        if isinstance(container, dict):
-            container = container.get('Id')
-        url = self._url('/containers/{0}/unpause'.format(container))
-        res = self._post(url)
-        self._raise_for_status(res)
-
-    def load_repository_file(self, name, path):
-        with open(path) as fh:
-            self.load_image(fh)
-
-    def get_container_logs(self, docker_id):
-        return self.attach(docker_id, 1, 1, 0, 1)
-
-
-# These are the backend operations.  They are executed by the backend
-# service.  API calls via AMQP (within the ReST API) trigger the handlers to
-# be called.
-
-
 class Handler(object):
 
     def __init__(self):
@@ -118,7 +55,7 @@ class Handler(object):
     @property
     def docker(self):
         if self._docker is None:
-            self._docker = DockerHTTPClient(CONF.docker.host_url)
+            self._docker = docker_client.DockerHTTPClient(CONF.docker.host_url)
         return self._docker
 
     def _find_container_by_name(self, name):
