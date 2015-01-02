@@ -216,7 +216,7 @@ class Handler(object):
         LOG.debug("container_logs %s" % container_uuid)
         try:
             docker_id = self._find_container_by_name(container_uuid)
-            return self.docker.get_container_logs(docker_id)
+            return {'output': self.docker.get_container_logs(docker_id)}
         except errors.APIError as api_error:
             raise Exception("Docker API Error : %s" % str(api_error))
 
@@ -225,6 +225,6 @@ class Handler(object):
                   (container_uuid, command))
         try:
             docker_id = self._find_container_by_name(container_uuid)
-            return self.docker.execute(docker_id, command)
+            return {'output': self.docker.execute(docker_id, command)}
         except errors.APIError as api_error:
             raise Exception("Docker API Error : %s" % str(api_error))
