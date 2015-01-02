@@ -124,26 +124,18 @@ class Connection(api.Connection):
         if filters is None:
             filters = []
 
-        if 'associated' in filters:
-            if filters['associated']:
-                query = query.filter(models.Bay.instance_uuid is not None)
-            else:
-                query = query.filter(models.Bay.instance_uuid is None)
-        if 'reserved' in filters:
-            if filters['reserved']:
-                query = query.filter(models.Bay.reservation is not None)
-            else:
-                query = query.filter(models.Bay.reservation is None)
-        if 'maintenance' in filters:
-            query = query.filter_by(maintenance=filters['maintenance'])
-        if 'driver' in filters:
-            query = query.filter_by(driver=filters['driver'])
-        if 'provision_state' in filters:
-            query = query.filter_by(provision_state=filters['provision_state'])
-        if 'provisioned_before' in filters:
-            limit = timeutils.utcnow() - datetime.timedelta(
-                                         seconds=filters['provisioned_before'])
-            query = query.filter(models.Bay.provision_updated_at < limit)
+        if 'baymodel_id' in filters:
+            query = query.filter_by(baymodel_id=filters['baymodel_id'])
+        if 'name' in filters:
+            query = query.filter_by(name=filters['name'])
+        if 'node_count' in filters:
+            query = query.filter_by(node_count=filters['node_count'])
+        if 'stack_id' in filters:
+            query = query.filter_by(stack_id=filters['stack_id'])
+        if 'master_address' in filters:
+            query = query.filter_by(master_address=filters['master_address'])
+        if 'minions_address' in filters:
+            query = query.filter_by(minions_address=filters['minions_address'])
 
         return query
 
@@ -252,10 +244,35 @@ class Connection(api.Connection):
         return result
 
     def destroy_bay(self, bay_id):
+        def bay_not_empty(session, bay_uuid):
+            """Checks whether the bay does not have pods or services."""
+            query = model_query(models.Pod, session=session)
+            query = self._add_pods_filters(query, {'bay_uuid': bay_uuid})
+            if query.count() != 0:
+                return True
+            else:
+                query = model_query(models.Service, session=session)
+                query = self._add_services_filters(query, {
+                            'bay_uuid': bay_uuid})
+                return query.count() != 0
+
         session = get_session()
         with session.begin():
             query = model_query(models.Bay, session=session)
             query = add_identity_filter(query, bay_id)
+
+            try:
+                bay_ref = query.one()
+            except NoResultFound:
+                raise exception.BayNotFound(bay=bay_id)
+
+            # TODO(hongbin): delete pods and services that attached to the bay.
+            #     We don't do it now because it could cause a long deletion
+            #     time which would block the conductor. It needs either threads
+            #     or coroutines.
+            if bay_not_empty(session, bay_ref['uuid']):
+                raise exception.BayNotEmpty(bay=bay_id)
+
             query.delete()
 
     def update_bay(self, bay_id, values):
@@ -770,26 +787,12 @@ class Connection(api.Connection):
         if filters is None:
             filters = []
 
-        if 'associated' in filters:
-            if filters['associated']:
-                query = query.filter(models.Pod.instance_uuid is not None)
-            else:
-                query = query.filter(models.Pod.instance_uuid is None)
-        if 'reserved' in filters:
-            if filters['reserved']:
-                query = query.filter(models.Pod.reservation is not None)
-            else:
-                query = query.filter(models.Pod.reservation is None)
-        if 'maintenance' in filters:
-            query = query.filter_by(maintenance=filters['maintenance'])
-        if 'driver' in filters:
-            query = query.filter_by(driver=filters['driver'])
-        if 'provision_state' in filters:
-            query = query.filter_by(provision_state=filters['provision_state'])
-        if 'provisioned_before' in filters:
-            limit = timeutils.utcnow() - datetime.timedelta(
-                                         seconds=filters['provisioned_before'])
-            query = query.filter(models.Pod.provision_updated_at < limit)
+        if 'bay_uuid' in filters:
+            query = query.filter_by(bay_uuid=filters['bay_uuid'])
+        if 'name' in filters:
+            query = query.filter_by(name=filters['name'])
+        if 'status' in filters:
+            query = query.filter_by(status=filters['status'])
 
         return query
 
@@ -956,26 +959,14 @@ class Connection(api.Connection):
         if filters is None:
             filters = []
 
-        if 'associated' in filters:
-            if filters['associated']:
-                query = query.filter(models.Service.instance_uuid is not None)
-            else:
-                query = query.filter(models.Service.instance_uuid is None)
-        if 'reserved' in filters:
-            if filters['reserved']:
-                query = query.filter(models.Service.reservation is not None)
-            else:
-                query = query.filter(models.Service.reservation is None)
-        if 'maintenance' in filters:
-            query = query.filter_by(maintenance=filters['maintenance'])
-        if 'driver' in filters:
-            query = query.filter_by(driver=filters['driver'])
-        if 'provision_state' in filters:
-            query = query.filter_by(provision_state=filters['provision_state'])
-        if 'provisioned_before' in filters:
-            limit = timeutils.utcnow() - datetime.timedelta(
-                                         seconds=filters['provisioned_before'])
-            query = query.filter(models.Service.provision_updated_at < limit)
+        if 'bay_uuid' in filters:
+            query = query.filter_by(bay_uuid=filters['bay_uuid'])
+        if 'name' in filters:
+            query = query.filter_by(name=filters['name'])
+        if 'ip' in filters:
+            query = query.filter_by(ip=filters['ip'])
+        if 'port' in filters:
+            query = query.filter_by(port=filters['port'])
 
         return query
 
