@@ -17,6 +17,7 @@ from magnum.objects import baymodel
 from magnum.objects import container
 from magnum.objects import node
 from magnum.objects import pod
+from magnum.objects import replicationcontroller as rc
 from magnum.objects import service
 
 
@@ -25,6 +26,7 @@ Bay = bay.Bay
 BayModel = baymodel.BayModel
 Node = node.Node
 Pod = pod.Pod
+ReplicationController = rc.ReplicationController
 Service = service.Service
 
 __all__ = (Bay,
@@ -32,4 +34,5 @@ __all__ = (Bay,
            Container,
            Node,
            Pod,
+           ReplicationController,
            Service)

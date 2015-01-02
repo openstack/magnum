@@ -1107,3 +1107,97 @@ class Connection(api.Connection):
 
             ref.update(values)
         return ref
+
+    def _add_rcs_filters(self, query, filters):
+        if filters is None:
+            filters = []
+
+        if 'associated' in filters:
+            if filters['associated']:
+                query = query.filter(
+                       models.ReplicationController.instance_uuid is not None)
+            else:
+                query = query.filter(
+                       models.ReplicationController.instance_uuid is None)
+
+        return query
+
+    def get_rc_list(self, filters=None, limit=None, marker=None,
+                      sort_key=None, sort_dir=None):
+        query = model_query(models.ReplicationController)
+        query = self._add_rcs_filters(query, filters)
+        return _paginate_query(models.ReplicationController, limit, marker,
+                               sort_key, sort_dir, query)
+
+    def create_rc(self, values):
+        # ensure defaults are present for new ReplicationController
+        if not values.get('uuid'):
+            values['uuid'] = utils.generate_uuid()
+
+        rc = models.ReplicationController()
+        rc.update(values)
+        try:
+            rc.save()
+        except db_exc.DBDuplicateEntry as exc:
+            if 'instance_uuid' in exc.columns:
+                raise exception.InstanceAssociated(
+                    instance_uuid=values['instance_uuid'],
+                    pod=values['uuid'])
+            raise exception.ReplicationControllerAlreadyExists(
+                                                        uuid=values['uuid'])
+        return rc
+
+    def get_rc_by_id(self, rc_id):
+        query = model_query(models.ReplicationController).filter_by(id=rc_id)
+        try:
+            return query.one()
+        except NoResultFound:
+            raise exception.ReplicationControllerNotFound(rc=rc_id)
+
+    def get_rc_by_uuid(self, rc_uuid):
+        query = model_query(models.ReplicationController).filter_by(
+                                                             uuid=rc_uuid)
+        try:
+            return query.one()
+        except NoResultFound:
+            raise exception.ReplicationControllerNotFound(rc=rc_uuid)
+
+    def get_rc_by_name(self, rc_name):
+        query = model_query(models.ReplicationController).filter_by(
+                                                             name=rc_name)
+        try:
+            return query.one()
+        except NoResultFound:
+            raise exception.ReplicationControllerNotFound(rc=rc_name)
+
+    def destroy_rc(self, rc_id):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.ReplicationController, session=session)
+            query = add_identity_filter(query, rc_id)
+            query.delete()
+
+    def update_rc(self, rc_id, values):
+        if 'uuid' in values:
+            msg = _("Cannot overwrite UUID for an existing rc.")
+            raise exception.InvalidParameterValue(err=msg)
+
+        try:
+            return self._do_update_rc(rc_id, values)
+        except db_exc.DBDuplicateEntry:
+            raise exception.InstanceAssociated(
+                instance_uuid=values['instance_uuid'],
+                rc=rc_id)
+
+    def _do_update_rc(self, rc_id, values):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.ReplicationController, session=session)
+            query = add_identity_filter(query, rc_id)
+            try:
+                ref = query.with_lockmode('update').one()
+            except NoResultFound:
+                raise exception.ReplicationControllerNotFound(rc=rc_id)
+
+            ref.update(values)
+        return ref

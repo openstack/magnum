@@ -32,6 +32,7 @@ from magnum.api.controllers.v1 import baymodel
 from magnum.api.controllers.v1 import container
 from magnum.api.controllers.v1 import node
 from magnum.api.controllers.v1 import pod
+from magnum.api.controllers.v1 import replicationcontroller as rc
 from magnum.api.controllers.v1 import service
 
 
@@ -90,6 +91,9 @@ class V1(APIBase):
     pods = [link.Link]
     """Links to the pods resource"""
 
+    rcs = [link.Link]
+    """Links to the rcs resource"""
+
     baymodels = [link.Link]
     """Links to the baymodels resource"""
 
@@ -121,6 +125,13 @@ class V1(APIBase):
                       link.Link.make_link('bookmark',
                                            pecan.request.host_url,
                                            'pods', '',
+                                           bookmark=True)
+                     ]
+        v1.rcs = [link.Link.make_link('self', pecan.request.host_url,
+                                      'rcs', ''),
+                      link.Link.make_link('bookmark',
+                                           pecan.request.host_url,
+                                           'rcs', '',
                                            bookmark=True)
                      ]
         v1.baymodels = [link.Link.make_link('self', pecan.request.host_url,
@@ -162,6 +173,7 @@ class Controller(rest.RestController):
     containers = container.ContainersController()
     nodes = node.NodesController()
     pods = pod.PodsController()
+    rcs = rc.ReplicationControllersController()
     services = service.ServicesController()
 
     @wsme_pecan.wsexpose(V1)

@@ -199,3 +199,54 @@ class KubeClient(object):
         except Exception as e:
             LOG.error("Couldn't show pod %s due to error %s" % (uuid, e))
             return None
+
+    # Replication Controller Operations
+    @staticmethod
+    def rc_create(contents):
+        LOG.debug("rc_create contents %s" % contents)
+        try:
+            if contents.rc_definition_url:
+                out, err = utils.trycmd('kubectl', 'create', '-f',
+                                        contents.rc_definition_url)
+            else:
+                # TODO(jay-lau-513) Translate the contents to a json stdin
+                out, err = utils.trycmd('echo contents | kubectl', 'create',
+                                        '-f', '-')
+            if err:
+                return False
+        except Exception as e:
+            LOG.error("Couldn't create rc with contents %s due to error %s"
+                      % (contents, e))
+            return False
+        return True
+
+    @staticmethod
+    def rc_update(contents):
+        LOG.debug("rc_update contents %s" % contents)
+        try:
+            if contents.rc_definition_url:
+                out, err = utils.trycmd('kubectl', 'update', '-f',
+                                        contents.rc_definition_url)
+            else:
+                # TODO(jay-lau-513) Translate the contents to a json stdin
+                out, err = utils.trycmd('echo contents | kubectl', 'update',
+                                        '-f', '-')
+            if err:
+                return False
+        except Exception as e:
+            LOG.error("Couldn't update rc with contents %s due to error %s"
+                      % (contents, e))
+            return False
+        return True
+
+    @staticmethod
+    def rc_delete(uuid):
+        LOG.debug("rc_delete %s" % uuid)
+        try:
+            out, err = utils.trycmd('kubectl', 'delete', 'rc', uuid)
+            if err:
+                return False
+        except Exception as e:
+            LOG.error("Couldn't delete rc %s due to error %s" % (uuid, e))
+            return False
+        return True

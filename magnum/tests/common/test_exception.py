@@ -195,6 +195,14 @@ class TestException(base.BaseTestCase):
         self.assertRaises(exception.PodNotLocked,
                     lambda: self.raise_(exception.PodNotLocked()))
 
+    def test_ReplicationControllerNotFound(self):
+        self.assertRaises(exception.ReplicationControllerNotFound,
+           lambda: self.raise_(exception.ReplicationControllerNotFound()))
+
+    def test_ReplicationControllerAlreadyExists(self):
+        self.assertRaises(exception.ReplicationControllerAlreadyExists,
+         lambda: self.raise_(exception.ReplicationControllerAlreadyExists()))
+
     def test_ServiceNotFound(self):
         self.assertRaises(exception.ServiceNotFound,
                     lambda: self.raise_(exception.ServiceNotFound()))

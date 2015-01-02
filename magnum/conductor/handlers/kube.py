@@ -113,3 +113,33 @@ class Handler(object):
     def pod_show(self, context, uuid):
         LOG.debug("pod_show")
         return self.kube_cli.pod_show(uuid)
+
+    # Replication Controller Operations
+    def rc_create(self, context, rc):
+        LOG.debug("rc_create")
+        # trigger a kubectl command
+        status = self.kube_cli.rc_create(rc)
+        if not status:
+            return None
+        # call the rc object to persist in db
+        rc.create(context)
+        return rc
+
+    def rc_update(self, context, rc):
+        LOG.debug("rc_update")
+        # trigger a kubectl command
+        status = self.kube_cli.rc_update(rc)
+        if not status:
+            return None
+        # call the rc object to persist in db
+        rc.refresh(context)
+        return rc
+
+    def rc_delete(self, context, rc):
+        LOG.debug("rc_delete ")
+        # trigger a kubectl command
+        status = self.kube_cli.pod_delete(rc.uuid)
+        if not status:
+            return None
+        # call the rc object to persist in db
+        rc.destroy(context)

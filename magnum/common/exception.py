@@ -407,6 +407,14 @@ class PodNotLocked(Invalid):
     message = _("Pod %(pod)s found not to be locked on release")
 
 
+class ReplicationControllerNotFound(ResourceNotFound):
+    message = _("ReplicationController %(rc)s could not be found.")
+
+
+class ReplicationControllerAlreadyExists(Conflict):
+    message = _("A ReplicationController with UUID %(uuid)s already exists.")
+
+
 class ServiceNotFound(ResourceNotFound):
     message = _("Service %(service)s could not be found.")
 
