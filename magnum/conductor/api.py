@@ -55,7 +55,7 @@ class API(rpc_service.API):
         return self._call('bay_delete', ctxt=ctxt, uuid=uuid)
 
     def bay_show(self, ctxt, uuid):
-        return self._call('bay_show', ctxt=ctxt, uuid=uuid)
+        return objects.Bay.get_by_uuid(ctxt, uuid)
 
     # Service Operations
 
@@ -71,7 +71,7 @@ class API(rpc_service.API):
         return self._call('service_delete', ctxt=ctxt, service=service)
 
     def service_show(self, ctxt, uuid):
-        return self._call('service_show', ctxt=ctxt, uuid=uuid)
+        return objects.Service.get_by_uuid(ctxt, uuid)
 
     # Pod Operations
 
@@ -85,7 +85,7 @@ class API(rpc_service.API):
         return self._call('pod_delete', ctxt=ctxt, pod=pod)
 
     def pod_show(self, ctxt, uuid):
-        return self._call('pod_show', ctxt=ctxt, uuid=uuid)
+        return objects.Pod.get_by_uuid(ctxt, uuid)
 
     # ReplicationController Operations
 
