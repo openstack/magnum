@@ -64,32 +64,6 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def reserve_bay(self, tag, bay_id):
-        """Reserve a bay.
-
-        To prevent other ManagerServices from manipulating the given
-        Bay while a Task is performed, mark it reserved by this host.
-
-        :param tag: A string uniquely identifying the reservation holder.
-        :param bay_id: A bay id or uuid.
-        :returns: A Bay object.
-        :raises: BayNotFound if the bay is not found.
-        :raises: BayLocked if the bay is already reserved.
-        """
-
-    @abc.abstractmethod
-    def release_bay(self, tag, bay_id):
-        """Release the reservation on a bay.
-
-        :param tag: A string uniquely identifying the reservation holder.
-        :param bay_id: A bay id or uuid.
-        :raises: BayNotFound if the bay is not found.
-        :raises: BayLocked if the bay is reserved by another host.
-        :raises: BayNotLocked if the bay was found to not have a
-                 reservation at all.
-        """
-
-    @abc.abstractmethod
     def create_bay(self, values):
         """Create a new bay.
 
@@ -120,14 +94,6 @@ class Connection(object):
         """Return a bay.
 
         :param bay_uuid: The uuid of a bay.
-        :returns: A bay.
-        """
-
-    @abc.abstractmethod
-    def get_bay_by_instance(self, instance):
-        """Return a bay.
-
-        :param instance: The instance name or uuid to search for.
         :returns: A bay.
         """
 
@@ -205,14 +171,6 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_baymodel_by_instance(self, instance):
-        """Return a baymodel.
-
-        :param instance: The instance name or uuid to search for.
-        :returns: A baymodel.
-        """
-
-    @abc.abstractmethod
     def destroy_baymodel(self, baymodel_id):
         """Destroy a baymodel and all associated interfaces.
 
@@ -250,32 +208,6 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def reserve_container(self, tag, container_id):
-        """Reserve a container.
-
-        To prevent other ManagerServices from manipulating the given
-        Bay while a Task is performed, mark it reserved by this host.
-
-        :param tag: A string uniquely identifying the reservation holder.
-        :param container_id: A container id or uuid.
-        :returns: A Bay object.
-        :raises: BayNotFound if the container is not found.
-        :raises: BayLocked if the container is already reserved.
-        """
-
-    @abc.abstractmethod
-    def release_container(self, tag, container_id):
-        """Release the reservation on a container.
-
-        :param tag: A string uniquely identifying the reservation holder.
-        :param container_id: A container id or uuid.
-        :raises: BayNotFound if the container is not found.
-        :raises: BayLocked if the container is reserved by another host.
-        :raises: BayNotLocked if the container was found to not have a
-                 reservation at all.
-        """
-
-    @abc.abstractmethod
     def create_container(self, values):
         """Create a new container.
 
@@ -308,14 +240,6 @@ class Connection(object):
         """Return a container.
 
         :param container_uuid: The uuid of a container.
-        :returns: A container.
-        """
-
-    @abc.abstractmethod
-    def get_container_by_instance(self, instance):
-        """Return a container.
-
-        :param instance: The instance name or uuid to search for.
         :returns: A container.
         """
 
@@ -358,32 +282,6 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def reserve_node(self, tag, node_id):
-        """Reserve a node.
-
-        To prevent other ManagerServices from manipulating the given
-        Node while a Task is performed, mark it reserved by this host.
-
-        :param tag: A string uniquely identifying the reservation holder.
-        :param node_id: A node id or uuid.
-        :returns: A Node object.
-        :raises: NodeNotFound if the node is not found.
-        :raises: NodeLocked if the node is already reserved.
-        """
-
-    @abc.abstractmethod
-    def release_node(self, tag, node_id):
-        """Release the reservation on a node.
-
-        :param tag: A string uniquely identifying the reservation holder.
-        :param node_id: A node id or uuid.
-        :raises: NodeNotFound if the node is not found.
-        :raises: NodeLocked if the node is reserved by another host.
-        :raises: NodeNotLocked if the node was found to not have a
-                 reservation at all.
-        """
-
-    @abc.abstractmethod
     def create_node(self, values):
         """Create a new node.
 
@@ -414,14 +312,6 @@ class Connection(object):
         """Return a node.
 
         :param node_uuid: The uuid of a node.
-        :returns: A node.
-        """
-
-    @abc.abstractmethod
-    def get_node_by_instance(self, instance):
-        """Return a node.
-
-        :param instance: The instance name or uuid to search for.
         :returns: A node.
         """
 
@@ -460,32 +350,6 @@ class Connection(object):
         :param sort_dir: direction in which results should be sorted.
                          (asc, desc)
         :returns: A list of tuples of the specified columns.
-        """
-
-    @abc.abstractmethod
-    def reserve_pod(self, tag, pod_id):
-        """Reserve a pod.
-
-        To prevent other ManagerServices from manipulating the given
-        Bay while a Task is performed, mark it reserved by this host.
-
-        :param tag: A string uniquely identifying the reservation holder.
-        :param pod_id: A pod id or uuid.
-        :returns: A Bay object.
-        :raises: BayNotFound if the pod is not found.
-        :raises: BayLocked if the pod is already reserved.
-        """
-
-    @abc.abstractmethod
-    def release_pod(self, tag, pod_id):
-        """Release the reservation on a pod.
-
-        :param tag: A string uniquely identifying the reservation holder.
-        :param pod_id: A pod id or uuid.
-        :raises: BayNotFound if the pod is not found.
-        :raises: BayLocked if the pod is reserved by another host.
-        :raises: BayNotLocked if the pod was found to not have a
-                 reservation at all.
         """
 
     @abc.abstractmethod
@@ -531,14 +395,6 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_pod_by_instance(self, instance):
-        """Return a pod.
-
-        :param instance: The instance name or uuid to search for.
-        :returns: A pod.
-        """
-
-    @abc.abstractmethod
     def destroy_pod(self, pod_id):
         """Destroy a pod and all associated interfaces.
 
@@ -574,32 +430,6 @@ class Connection(object):
         :param sort_dir: direction in which results should be sorted.
                          (asc, desc)
         :returns: A list of tuples of the specified columns.
-        """
-
-    @abc.abstractmethod
-    def reserve_service(self, tag, service_id):
-        """Reserve a service.
-
-        To prevent other ManagerServices from manipulating the given
-        Bay while a Task is performed, mark it reserved by this host.
-
-        :param tag: A string uniquely identifying the reservation holder.
-        :param service_id: A service id or uuid.
-        :returns: A Bay object.
-        :raises: BayNotFound if the service is not found.
-        :raises: BayLocked if the service is already reserved.
-        """
-
-    @abc.abstractmethod
-    def release_service(self, tag, service_id):
-        """Release the reservation on a service.
-
-        :param tag: A string uniquely identifying the reservation holder.
-        :param service_id: A service id or uuid.
-        :raises: BayNotFound if the service is not found.
-        :raises: BayLocked if the service is reserved by another host.
-        :raises: BayNotLocked if the service was found to not have a
-                 reservation at all.
         """
 
     @abc.abstractmethod

@@ -351,15 +351,6 @@ class BayAlreadyExists(Conflict):
     message = _("A node with UUID %(uuid)s already exists.")
 
 
-class BayLocked(Conflict):
-    message = _("Bay %(bay)s is locked by host %(host)s, please retry "
-                "after the current operation is completed.")
-
-
-class BayNotLocked(Invalid):
-    message = _("Bay %(bay)s found not to be locked on release")
-
-
 class BayNotEmpty(Invalid):
     message = _("Bay %(bay)s is not empty.")
 
@@ -377,15 +368,6 @@ class ContainerAlreadyExists(Conflict):
     message = _("A node with UUID %(uuid)s already exists.")
 
 
-class ContainerLocked(Conflict):
-    message = _("Container %(container)s is locked by host %(host)s, "
-                "please retry after the current operation is completed.")
-
-
-class ContainerNotLocked(Invalid):
-    message = _("Container %(container)s found not to be locked on release")
-
-
 class PodNotFound(ResourceNotFound):
     message = _("Pod %(pod)s could not be found.")
 
@@ -396,15 +378,6 @@ class PodAssociated(InvalidState):
 
 class PodAlreadyExists(Conflict):
     message = _("A node with UUID %(uuid)s already exists.")
-
-
-class PodLocked(Conflict):
-    message = _("Pod %(pod)s is locked by host %(host)s, please retry "
-                "after the current operation is completed.")
-
-
-class PodNotLocked(Invalid):
-    message = _("Pod %(pod)s found not to be locked on release")
 
 
 class ReplicationControllerNotFound(ResourceNotFound):
@@ -426,15 +399,6 @@ class ServiceAssociated(InvalidState):
 
 class ServiceAlreadyExists(Conflict):
     message = _("A node with UUID %(uuid)s already exists.")
-
-
-class ServiceLocked(Conflict):
-    message = _("Service %(service)s is locked by host %(host)s, please retry "
-                "after the current operation is completed.")
-
-
-class ServiceNotLocked(Invalid):
-    message = _("Service %(service)s found not to be locked on release")
 
 
 class KeystoneUnauthorized(MagnumException):

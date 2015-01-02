@@ -160,44 +160,6 @@ class Connection(api.Connection):
         return _paginate_query(models.Bay, limit, marker,
                                sort_key, sort_dir, query)
 
-    def reserve_bay(self, tag, bay_id):
-        session = get_session()
-        with session.begin():
-            query = model_query(models.Bay, session=session)
-            query = add_identity_filter(query, bay_id)
-            # be optimistic and assume we usually create a reservation
-            count = query.filter_by(reservation=None).update(
-                        {'reservation': tag}, synchronize_session=False)
-            try:
-                bay = query.one()
-                if count != 1:
-                    # Nothing updated and bay exists. Must already be
-                    # locked.
-                    raise exception.BayLocked(bay=bay_id,
-                                               host=bay['reservation'])
-                return bay
-            except NoResultFound:
-                raise exception.BayNotFound(bay_id)
-
-    def release_bay(self, tag, bay_id):
-        session = get_session()
-        with session.begin():
-            query = model_query(models.Bay, session=session)
-            query = add_identity_filter(query, bay_id)
-            # be optimistic and assume we usually release a reservation
-            count = query.filter_by(reservation=tag).update(
-                        {'reservation': None}, synchronize_session=False)
-            try:
-                if count != 1:
-                    bay = query.one()
-                    if bay['reservation'] is None:
-                        raise exception.BayNotLocked(bay=bay_id)
-                    else:
-                        raise exception.BayLocked(bay=bay_id,
-                                                   host=bay['reservation'])
-            except NoResultFound:
-                raise exception.BayNotFound(bay_id)
-
     def create_bay(self, values):
         # ensure defaults are present for new bays
         if not values.get('uuid'):
@@ -228,20 +190,6 @@ class Connection(api.Connection):
             return query.one()
         except NoResultFound:
             raise exception.BayNotFound(bay=bay_uuid)
-
-    def get_bay_by_instance(self, instance):
-        if not utils.is_uuid_like(instance):
-            raise exception.InvalidUUID(uuid=instance)
-
-        query = (model_query(models.Bay)
-                 .filter_by(instance_uuid=instance))
-
-        try:
-            result = query.one()
-        except NoResultFound:
-            raise exception.InstanceNotFound(instance=instance)
-
-        return result
 
     def destroy_bay(self, bay_id):
         def bay_not_empty(session, bay_uuid):
@@ -388,20 +336,6 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.BayModelNotFound(baymodel=baymodel_uuid)
 
-    def get_baymodel_by_instance(self, instance):
-        if not utils.is_uuid_like(instance):
-            raise exception.InvalidUUID(uuid=instance)
-
-        query = (model_query(models.BayModel)
-                 .filter_by(instance_uuid=instance))
-
-        try:
-            result = query.one()
-        except NoResultFound:
-            raise exception.InstanceNotFound(instance=instance)
-
-        return result
-
     def destroy_baymodel(self, baymodel_id):
         session = get_session()
         with session.begin():
@@ -486,45 +420,6 @@ class Connection(api.Connection):
         return _paginate_query(models.Container, limit, marker,
                                sort_key, sort_dir, query)
 
-    def reserve_container(self, tag, container_id):
-        session = get_session()
-        with session.begin():
-            query = model_query(models.Container, session=session)
-            query = add_identity_filter(query, container_id)
-            # be optimistic and assume we usually create a reservation
-            count = query.filter_by(reservation=None).update(
-                        {'reservation': tag}, synchronize_session=False)
-            try:
-                container = query.one()
-                if count != 1:
-                    # Nothing updated and container exists. Must already be
-                    # locked.
-                    raise exception.ContainerLocked(container=container_id,
-                                               host=container['reservation'])
-                return container
-            except NoResultFound:
-                raise exception.ContainerNotFound(container_id)
-
-    def release_container(self, tag, container_id):
-        session = get_session()
-        with session.begin():
-            query = model_query(models.Container, session=session)
-            query = add_identity_filter(query, container_id)
-            # be optimistic and assume we usually release a reservation
-            count = query.filter_by(reservation=tag).update(
-                        {'reservation': None}, synchronize_session=False)
-            try:
-                if count != 1:
-                    container = query.one()
-                    if container['reservation'] is None:
-                        raise exception.ContainerNotLocked(
-                            container=container_id)
-                    else:
-                        raise exception.ContainerLocked(container=container_id,
-                            host=container['reservation'])
-            except NoResultFound:
-                raise exception.ContainerNotFound(container_id)
-
     def create_container(self, values):
         # ensure defaults are present for new containers
         if not values.get('uuid'):
@@ -555,20 +450,6 @@ class Connection(api.Connection):
             return query.one()
         except NoResultFound:
             raise exception.ContainerNotFound(container=container_uuid)
-
-    def get_container_by_instance(self, instance):
-        if not utils.is_uuid_like(instance):
-            raise exception.InvalidUUID(uuid=instance)
-
-        query = (model_query(models.Container)
-                 .filter_by(instance_uuid=instance))
-
-        try:
-            result = query.one()
-        except NoResultFound:
-            raise exception.InstanceNotFound(instance=instance)
-
-        return result
 
     def destroy_container(self, container_id):
         session = get_session()
@@ -659,44 +540,6 @@ class Connection(api.Connection):
         return _paginate_query(models.Node, limit, marker,
                                sort_key, sort_dir, query)
 
-    def reserve_node(self, tag, node_id):
-        session = get_session()
-        with session.begin():
-            query = model_query(models.Node, session=session)
-            query = add_identity_filter(query, node_id)
-            # be optimistic and assume we usually create a reservation
-            count = query.filter_by(reservation=None).update(
-                        {'reservation': tag}, synchronize_session=False)
-            try:
-                node = query.one()
-                if count != 1:
-                    # Nothing updated and node exists. Must already be
-                    # locked.
-                    raise exception.NodeLocked(node=node_id,
-                                               host=node['reservation'])
-                return node
-            except NoResultFound:
-                raise exception.NodeNotFound(node_id)
-
-    def release_node(self, tag, node_id):
-        session = get_session()
-        with session.begin():
-            query = model_query(models.Node, session=session)
-            query = add_identity_filter(query, node_id)
-            # be optimistic and assume we usually release a reservation
-            count = query.filter_by(reservation=tag).update(
-                        {'reservation': None}, synchronize_session=False)
-            try:
-                if count != 1:
-                    node = query.one()
-                    if node['reservation'] is None:
-                        raise exception.NodeNotLocked(node=node_id)
-                    else:
-                        raise exception.NodeLocked(node=node_id,
-                                                   host=node['reservation'])
-            except NoResultFound:
-                raise exception.NodeNotFound(node_id)
-
     def create_node(self, values):
         # ensure defaults are present for new nodes
         if not values.get('uuid'):
@@ -727,20 +570,6 @@ class Connection(api.Connection):
             return query.one()
         except NoResultFound:
             raise exception.NodeNotFound(node=node_uuid)
-
-    def get_node_by_instance(self, instance):
-        if not utils.is_uuid_like(instance):
-            raise exception.InvalidUUID(uuid=instance)
-
-        query = (model_query(models.Node)
-                 .filter_by(instance_uuid=instance))
-
-        try:
-            result = query.one()
-        except NoResultFound:
-            raise exception.InstanceNotFound(instance=instance)
-
-        return result
 
     def destroy_node(self, node_id):
         session = get_session()
@@ -817,44 +646,6 @@ class Connection(api.Connection):
         return _paginate_query(models.Pod, limit, marker,
                                sort_key, sort_dir, query)
 
-    def reserve_pod(self, tag, pod_id):
-        session = get_session()
-        with session.begin():
-            query = model_query(models.Pod, session=session)
-            query = add_identity_filter(query, pod_id)
-            # be optimistic and assume we usually create a reservation
-            count = query.filter_by(reservation=None).update(
-                        {'reservation': tag}, synchronize_session=False)
-            try:
-                pod = query.one()
-                if count != 1:
-                    # Nothing updated and pod exists. Must already be
-                    # locked.
-                    raise exception.PodLocked(pod=pod_id,
-                                               host=pod['reservation'])
-                return pod
-            except NoResultFound:
-                raise exception.PodNotFound(pod_id)
-
-    def release_pod(self, tag, pod_id):
-        session = get_session()
-        with session.begin():
-            query = model_query(models.Pod, session=session)
-            query = add_identity_filter(query, pod_id)
-            # be optimistic and assume we usually release a reservation
-            count = query.filter_by(reservation=tag).update(
-                        {'reservation': None}, synchronize_session=False)
-            try:
-                if count != 1:
-                    pod = query.one()
-                    if pod['reservation'] is None:
-                        raise exception.PodNotLocked(pod=pod_id)
-                    else:
-                        raise exception.PodLocked(pod=pod_id,
-                                                   host=pod['reservation'])
-            except NoResultFound:
-                raise exception.PodNotFound(pod_id)
-
     def create_pod(self, values):
         # ensure defaults are present for new pods
         if not values.get('uuid'):
@@ -899,20 +690,6 @@ class Connection(api.Connection):
             return query.all()
         except NoResultFound:
             raise exception.BayNotFound(bay=bay_uuid)
-
-    def get_pod_by_instance(self, instance):
-        if not utils.is_uuid_like(instance):
-            raise exception.InvalidUUID(uuid=instance)
-
-        query = (model_query(models.Pod)
-                 .filter_by(instance_uuid=instance))
-
-        try:
-            result = query.one()
-        except NoResultFound:
-            raise exception.InstanceNotFound(instance=instance)
-
-        return result
 
     def destroy_pod(self, pod_id):
         session = get_session()
@@ -990,44 +767,6 @@ class Connection(api.Connection):
         query = self._add_services_filters(query, filters)
         return _paginate_query(models.Service, limit, marker,
                                sort_key, sort_dir, query)
-
-    def reserve_service(self, tag, service_id):
-        session = get_session()
-        with session.begin():
-            query = model_query(models.Service, session=session)
-            query = add_identity_filter(query, service_id)
-            # be optimistic and assume we usually create a reservation
-            count = query.filter_by(reservation=None).update(
-                        {'reservation': tag}, synchronize_session=False)
-            try:
-                service = query.one()
-                if count != 1:
-                    # Nothing updated and service exists. Must already be
-                    # locked.
-                    raise exception.ServiceLocked(service=service_id,
-                                               host=service['reservation'])
-                return service
-            except NoResultFound:
-                raise exception.ServiceNotFound(service_id)
-
-    def release_service(self, tag, service_id):
-        session = get_session()
-        with session.begin():
-            query = model_query(models.Service, session=session)
-            query = add_identity_filter(query, service_id)
-            # be optimistic and assume we usually release a reservation
-            count = query.filter_by(reservation=tag).update(
-                        {'reservation': None}, synchronize_session=False)
-            try:
-                if count != 1:
-                    service = query.one()
-                    if service['reservation'] is None:
-                        raise exception.ServiceNotLocked(service=service_id)
-                    else:
-                        raise exception.ServiceLocked(service=service_id,
-                                                   host=service['reservation'])
-            except NoResultFound:
-                raise exception.ServiceNotFound(service_id)
 
     def create_service(self, values):
         # ensure defaults are present for new services

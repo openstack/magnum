@@ -135,14 +135,6 @@ class TestException(base.BaseTestCase):
         self.assertRaises(exception.BayAlreadyExists,
                     lambda: self.raise_(exception.BayAlreadyExists()))
 
-    def test_BayLocked(self):
-        self.assertRaises(exception.BayLocked,
-                    lambda: self.raise_(exception.BayLocked()))
-
-    def test_BayNotLocked(self):
-        self.assertRaises(exception.BayNotLocked,
-                    lambda: self.raise_(exception.BayNotLocked()))
-
     def test_BayNotEmpty(self):
         self.assertRaises(exception.BayNotEmpty,
                     lambda: self.raise_(exception.BayNotEmpty()))
@@ -167,14 +159,6 @@ class TestException(base.BaseTestCase):
         self.assertRaises(exception.ContainerAlreadyExists,
                     lambda: self.raise_(exception.ContainerAlreadyExists()))
 
-    def test_ContainerLocked(self):
-        self.assertRaises(exception.ContainerLocked,
-                    lambda: self.raise_(exception.ContainerLocked()))
-
-    def test_ContainerNotLocked(self):
-        self.assertRaises(exception.ContainerNotLocked,
-                    lambda: self.raise_(exception.ContainerNotLocked()))
-
     def test_PodNotFound(self):
         self.assertRaises(exception.PodNotFound,
                     lambda: self.raise_(exception.PodNotFound()))
@@ -186,14 +170,6 @@ class TestException(base.BaseTestCase):
     def test_PodAlreadyExists(self):
         self.assertRaises(exception.PodAlreadyExists,
                     lambda: self.raise_(exception.PodAlreadyExists()))
-
-    def test_PodLocked(self):
-        self.assertRaises(exception.PodLocked,
-                    lambda: self.raise_(exception.PodLocked()))
-
-    def test_PodNotLocked(self):
-        self.assertRaises(exception.PodNotLocked,
-                    lambda: self.raise_(exception.PodNotLocked()))
 
     def test_ReplicationControllerNotFound(self):
         self.assertRaises(exception.ReplicationControllerNotFound,
@@ -214,11 +190,3 @@ class TestException(base.BaseTestCase):
     def test_ServiceAlreadyExists(self):
         self.assertRaises(exception.ServiceAlreadyExists,
                     lambda: self.raise_(exception.ServiceAlreadyExists()))
-
-    def test_ServiceLocked(self):
-        self.assertRaises(exception.ServiceLocked,
-                    lambda: self.raise_(exception.ServiceLocked()))
-
-    def test_ServiceNotLocked(self):
-        self.assertRaises(exception.ServiceNotLocked,
-                    lambda: self.raise_(exception.ServiceNotLocked()))
