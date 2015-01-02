@@ -360,6 +360,10 @@ class BayNotLocked(Invalid):
     message = _("Bay %(bay)s found not to be locked on release")
 
 
+class BayNotEmpty(Invalid):
+    message = _("Bay %(bay)s is not empty.")
+
+
 class ContainerNotFound(ResourceNotFound):
     message = _("Container %(container)s could not be found.")
 
