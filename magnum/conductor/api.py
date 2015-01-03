@@ -30,18 +30,18 @@ class API(rpc_service.API):
 
     # Bay Model Operations
 
-    def baymodel_create(self, ctxt, bay):
-        return self._call('baymodel_create', ctxt=ctxt, bay=bay)
+    def baymodel_create(self, ctxt, baymodel):
+        return baymodel.create(ctxt)
 
-    def baymodel_list(self, context, limit, marker, sort_key, sort_dir):
-        return objects.BayModel.list(context, limit, marker, sort_key,
-            sort_dir)
+    def baymodel_list(self, ctxt, limit, marker, sort_key, sort_dir):
+        return objects.BayModel.list(ctxt, limit, marker, sort_key, sort_dir)
 
     def baymodel_delete(self, ctxt, uuid):
-        return self._call('baymodel_delete', ctxt=ctxt, uuid=uuid)
+        baymodel = objects.BayModel.get_by_uuid(uuid)
+        return baymodel.destroy()
 
     def baymodel_show(self, ctxt, uuid):
-        return self._call('baymodel_show', ctxt=ctxt, uuid=uuid)
+        return objects.BayModel.get_by_uuid(uuid)
 
     # Bay Operations
 
