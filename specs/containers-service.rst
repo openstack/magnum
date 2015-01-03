@@ -74,6 +74,15 @@ Use cases
    OpenStack, and does not need to manage a second infrastructure for his/her
    application hosting needs. All details involving the integration of
    containers with Nova instances is managed by OpenStack.
+8. Container network. End-user wants to define a custom overlay network for
+   containers, and wants to have admin priviledge to manage the network
+   topology. Builing a container network can decouple application deployment
+   and management from the underlying network infrastructure, and enable
+   additional usage scenario, such as (i) software-defined networking, and
+   (ii) extending the container network (i.e. connecting various resources from
+   multiple hosting environments). End-users want a single service that could
+   help them build the container network, and dynamically modify the network
+   topology by adding or removing containers to or from the network.
 
 Proposed change
 ===============
