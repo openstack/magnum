@@ -94,14 +94,14 @@ class Service(base.MagnumObject):
         return service
 
     @base.remotable_classmethod
-    def get_by_bay_uuid(cls, context, bay_uuid):
-        """Find a service based on bay uuid and return a :class:`Pod` object.
+    def list_by_bay_uuid(cls, context, bay_uuid):
+        """Return a list of :class:`Service` objects associated with a given bay.
 
         :param bay_uuid: the uuid of a bay.
         :param context: Security context
         :returns: a list of class:`Service` object.
         """
-        db_services = cls.dbapi.get_service_by_bay_uuid(bay_uuid)
+        db_services = cls.dbapi.get_services_by_bay_uuid(bay_uuid)
         return Service._from_db_object_list(db_services, cls, context)
 
     @base.remotable_classmethod

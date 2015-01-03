@@ -39,7 +39,7 @@ class DbBaymodelTestCase(base.DbTestCase):
             uuids.append(six.text_type(bm['uuid']))
         res = self.dbapi.get_baymodel_list()
         res_uuids = [r.uuid for r in res]
-        self.assertEqual(uuids.sort(), res_uuids.sort())
+        self.assertEqual(sorted(uuids), sorted(res_uuids))
 
     def test_get_baymodel_by_id(self):
         bm = self._create_test_baymodel()

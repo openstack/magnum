@@ -105,8 +105,8 @@ class Pod(base.MagnumObject):
         return pod
 
     @base.remotable_classmethod
-    def get_by_bay_uuid(cls, context, bay_uuid):
-        """Find a pods based on bay uuid and return a :class:`Pod` object.
+    def list_by_bay_uuid(cls, context, bay_uuid):
+        """Return a list of :class:`Pod` objects associated with a given bay.
 
         :param bay_uuid: the uuid of a bay.
         :param context: Security context

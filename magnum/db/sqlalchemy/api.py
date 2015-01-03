@@ -174,6 +174,7 @@ class Connection(api.Connection):
                 raise exception.InstanceAssociated(
                     instance_uuid=values['instance_uuid'],
                     bay=values['uuid'])
+
             raise exception.BayAlreadyExists(uuid=values['uuid'])
         return bay
 
@@ -696,7 +697,9 @@ class Connection(api.Connection):
         with session.begin():
             query = model_query(models.Pod, session=session)
             query = add_identity_filter(query, pod_id)
-            query.delete()
+            count = query.delete()
+            if count != 1:
+                raise exception.PodNotFound(pod_id)
 
     def update_pod(self, pod_id, values):
         # NOTE(dtantsur): this can lead to very strange errors
@@ -799,7 +802,7 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.ServiceNotFound(service=service_uuid)
 
-    def get_service_by_bay_uuid(self, bay_uuid):
+    def get_services_by_bay_uuid(self, bay_uuid):
         query = model_query(models.Service).filter_by(bay_uuid=bay_uuid)
         try:
             return query.all()
@@ -811,7 +814,9 @@ class Connection(api.Connection):
         with session.begin():
             query = model_query(models.Service, session=session)
             query = add_identity_filter(query, service_id)
-            query.delete()
+            count = query.delete()
+            if count != 1:
+                raise exception.ServiceNotFound(service_id)
 
     def update_service(self, service_id, values):
         # NOTE(dtantsur): this can lead to very strange errors
