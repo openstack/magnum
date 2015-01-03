@@ -84,6 +84,21 @@ Use cases
    help them build the container network, and dynamically modify the network
    topology by adding or removing containers to or from the network.
 
+Long Term Use Cases
+-------------------
+These use cases have been identified by the community as important, but
+unlikely to be tackled in short term (especially prior to incubation). We wish
+to adapt to these use cases in long term, but this is not a firm project
+commitment.
+
+1. Multi-region/multi-cloud support. End-user wants to deploy applications to
+   multiple regions/clouds, and dynamically relocate deployed applications
+   across different regions/clouds. In particular, they want a single service
+   that could help them (i) provision nodes from multiple regions/clouds, thus
+   running containers on top of them, and (ii) dynamically relocate containers
+   (e.g. through container migration) between nodes regardless of the
+   underlying infrastructure.
+
 Proposed change
 ===============
 Add a new API service for CRUD and advanced management of containers.
