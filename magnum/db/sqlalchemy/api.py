@@ -91,17 +91,6 @@ def add_identity_filter(query, value):
         raise exception.InvalidIdentity(identity=value)
 
 
-def _check_port_change_forbidden(port, session):
-    bay_id = port['bay_id']
-    if bay_id is not None:
-        query = model_query(models.Bay, session=session)
-        query = query.filter_by(id=bay_id)
-        bay_ref = query.one()
-        if bay_ref['reservation'] is not None:
-            raise exception.BayLocked(bay=bay_ref['uuid'],
-                                       host=bay_ref['reservation'])
-
-
 def _paginate_query(model, limit=None, marker=None, sort_key=None,
                     sort_dir=None, query=None):
     if not query:
