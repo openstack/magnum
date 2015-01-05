@@ -29,6 +29,7 @@ class TestRCController(db_base.DbTestCase):
             # Create a replication controller
             params = '{"name": "rc_example_A", "images": ["ubuntu"],' \
                      '"selector": {"foo": "foo1"}, "replicas": 2,' \
+                     '"bay_uuid": "7ae81bb3-dec3-4289-8d6c-da80bd8001ae",' \
                      '"rc_definition_url": "http://172.17.1.2/rc.json"}'
             response = self.app.post('/v1/rcs',
                                      params=params,
@@ -43,6 +44,8 @@ class TestRCController(db_base.DbTestCase):
             self.assertIsNotNone(c.get('uuid'))
             self.assertEqual('rc_example_A', c.get('name'))
             self.assertEqual(['ubuntu'], c.get('images'))
+            self.assertEqual('7ae81bb3-dec3-4289-8d6c-da80bd8001ae',
+                             c.get('bay_uuid'))
             self.assertEqual('foo1', c.get('selector')['foo'])
 
             # Get just the one we created

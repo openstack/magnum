@@ -76,6 +76,9 @@ class ReplicationController(base.APIBase):
     images = [wtypes.text]
     """A list of images used by containers in this ReplicationController."""
 
+    bay_uuid = types.uuid
+    """Unique UUID of the bay the ReplicationController runs on"""
+
     selector = {wtypes.text: wtypes.text}
     """Selector of this ReplicationController"""
 
@@ -114,8 +117,8 @@ class ReplicationController(base.APIBase):
     @staticmethod
     def _convert_with_links(rc, url, expand=True):
         if not expand:
-            rc.unset_fields_except(['uuid', 'name', 'images', 'selector',
-                                    'replicas'])
+            rc.unset_fields_except(['uuid', 'name', 'images', 'bay_uuid',
+                                    'selector', 'replicas'])
 
         # never expose the rc_id attribute
         rc.rc_id = wtypes.Unset
@@ -138,6 +141,7 @@ class ReplicationController(base.APIBase):
         sample = cls(uuid='f978db47-9a37-4e9f-8572-804a10abc0aa',
                      name='MyReplicationController',
                      images=['MyImage'],
+                     bay_uuid='f978db47-9a37-4e9f-8572-804a10abc0ab',
                      selector={'name': 'foo'},
                      replicas=2,
                      created_at=datetime.datetime.utcnow(),

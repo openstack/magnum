@@ -30,6 +30,7 @@ class ReplicationController(base.MagnumObject):
         'uuid': obj_utils.str_or_none,
         'name': obj_utils.str_or_none,
         'images': obj_utils.list_or_none,
+        'bay_uuid': obj_utils.str_or_none,
         'selector': obj_utils.dict_or_none,
         'replicas': int,
         'rc_definition_url': obj_utils.str_or_none,
