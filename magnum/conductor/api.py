@@ -51,24 +51,24 @@ class API(rpc_service.API):
     def bay_list(self, context, limit, marker, sort_key, sort_dir):
         return objects.Bay.list(context, limit, marker, sort_key, sort_dir)
 
-    def bay_delete(self, ctxt, uuid):
-        return self._call('bay_delete', ctxt=ctxt, uuid=uuid)
+    def bay_delete(self, uuid):
+        return self._call('bay_delete', uuid=uuid)
 
     def bay_show(self, ctxt, uuid):
         return objects.Bay.get_by_uuid(ctxt, uuid)
 
     # Service Operations
 
-    def service_create(self, ctxt, service):
-        return self._call('service_create', ctxt=ctxt, service=service)
+    def service_create(self, service):
+        return self._call('service_create', service=service)
 
     def service_list(self, context, limit, marker, sort_key, sort_dir):
         # TODO(pkilambi): return kubectl results once we parse appropriately
         # or figure out a clean way to interact with k8s.
         return objects.Service.list(context, limit, marker, sort_key, sort_dir)
 
-    def service_delete(self, ctxt, service):
-        return self._call('service_delete', ctxt=ctxt, service=service)
+    def service_delete(self, service):
+        return self._call('service_delete', service=service)
 
     def service_show(self, ctxt, uuid):
         return objects.Service.get_by_uuid(ctxt, uuid)
@@ -81,30 +81,30 @@ class API(rpc_service.API):
     def pod_list(self, context, limit, marker, sort_key, sort_dir):
         return objects.Pod.list(context, limit, marker, sort_key, sort_dir)
 
-    def pod_delete(self, ctxt, pod):
-        return self._call('pod_delete', ctxt=ctxt, pod=pod)
+    def pod_delete(self, pod):
+        return self._call('pod_delete', pod=pod)
 
     def pod_show(self, ctxt, uuid):
         return objects.Pod.get_by_uuid(ctxt, uuid)
 
     # ReplicationController Operations
 
-    def rc_create(self, ctxt, rc):
-        return self._call('rc_create', ctxt=ctxt, rc=rc)
+    def rc_create(self, rc):
+        return self._call('rc_create', rc=rc)
 
     def rc_list(self, context, limit, marker, sort_key, sort_dir):
         return objects.ReplicationController.list(context, limit, marker,
                                                   sort_key, sort_dir)
 
-    def rc_delete(self, ctxt, rc):
-        return self._call('rc_delete', ctxt=ctxt, rc=rc)
+    def rc_delete(self, rc):
+        return self._call('rc_delete', rc=rc)
 
     def rc_show(self, ctxt, uuid):
         return objects.ReplicationController.get_by_uuid(ctxt, uuid)
 
     # Container operations
 
-    def container_create(self, ctxt, name, container_uuid, container):
+    def container_create(self, name, container_uuid, container):
         return self._call('container_create', name=name,
                           container_uuid=container_uuid,
                           container=container)
@@ -113,39 +113,30 @@ class API(rpc_service.API):
         return objects.Container.list(context, limit, marker, sort_key,
                                       sort_dir)
 
-    def container_delete(self, ctxt, container_uuid):
-        return self._call('container_delete', ctxt=ctxt,
-                          container_uuid=container_uuid)
+    def container_delete(self, container_uuid):
+        return self._call('container_delete', container_uuid=container_uuid)
 
-    def container_show(self, ctxt, container_uuid):
-        return self._call('container_show', ctxt=ctxt,
-                          container_uuid=container_uuid)
+    def container_show(self, container_uuid):
+        return self._call('container_show', container_uuid=container_uuid)
 
-    def container_reboot(self, ctxt, container_uuid):
-        return self._call('container_reboot', ctxt=ctxt,
-                          container_uuid=container_uuid)
+    def container_reboot(self, container_uuid):
+        return self._call('container_reboot', container_uuid=container_uuid)
 
-    def container_stop(self, ctxt, container_uuid):
-        return self._call('container_stop', ctxt=ctxt,
-                          container_uuid=container_uuid)
+    def container_stop(self, container_uuid):
+        return self._call('container_stop', container_uuid=container_uuid)
 
-    def container_start(self, ctxt, container_uuid):
-        return self._call('container_start', ctxt=ctxt,
-                          container_uuid=container_uuid)
+    def container_start(self, container_uuid):
+        return self._call('container_start', container_uuid=container_uuid)
 
-    def container_pause(self, ctxt, container_uuid):
-        return self._call('container_pause', ctxt=ctxt,
-                          container_uuid=container_uuid)
+    def container_pause(self, container_uuid):
+        return self._call('container_pause', container_uuid=container_uuid)
 
-    def container_unpause(self, ctxt, container_uuid):
-        return self._call('container_unpause', ctxt=ctxt,
-                          container_uuid=container_uuid)
+    def container_unpause(self, container_uuid):
+        return self._call('container_unpause', container_uuid=container_uuid)
 
-    def container_logs(self, ctxt, container_uuid):
-        return self._call('container_logs', ctxt=ctxt,
-                          container_uuid=container_uuid)
+    def container_logs(self, container_uuid):
+        return self._call('container_logs', ontainer_uuid=container_uuid)
 
-    def container_execute(self, ctxt, container_uuid, command):
-        return self._call('container_execute', ctxt=ctxt,
-                          container_uuid=container_uuid,
+    def container_execute(self, container_uuid, command):
+        return self._call('container_execute', container_uuid=container_uuid,
                           command=command)
