@@ -45,8 +45,8 @@ class API(rpc_service.API):
 
     # Bay Operations
 
-    def bay_create(self, ctxt, bay):
-        return self._call('bay_create', ctxt=ctxt, bay=bay)
+    def bay_create(self, bay):
+        return self._call('bay_create', bay=bay)
 
     def bay_list(self, context, limit, marker, sort_key, sort_dir):
         return objects.Bay.list(context, limit, marker, sort_key, sort_dir)
