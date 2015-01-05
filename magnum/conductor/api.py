@@ -75,8 +75,8 @@ class API(rpc_service.API):
 
     # Pod Operations
 
-    def pod_create(self, ctxt, pod):
-        return self._call('pod_create', ctxt=ctxt, pod=pod)
+    def pod_create(self, pod):
+        return self._call('pod_create', pod=pod)
 
     def pod_list(self, context, limit, marker, sort_key, sort_dir):
         return objects.Pod.list(context, limit, marker, sort_key, sort_dir)
