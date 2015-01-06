@@ -13,13 +13,14 @@ new Openstack project for containers.
 Architecture
 ------------
 
-There are six different types of objects in the Magnum system:
+There are seven different types of objects in the Magnum system:
 
 * Bay: A collection of node objects where work is scheduled
 * BayModel: An object stores template information about the bay which is used to create new bays consistently
 * Node: A baremetal or virtual machine where work executes
 * Pod: A collection of containers running on one physical or virtual machine
 * Service: An abstraction which defines a logical set of pods and a policy by which to access them
+* ReplicationController: An abstraction for managing a group of PODs to ensure a specified number of PODs are running
 * Container: A docker container
 
 Two binaries work together to compose the Magnum system.  The first binary
