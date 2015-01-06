@@ -15,6 +15,7 @@
 from docker import errors
 from oslo.config import cfg
 
+from magnum.common import docker_utils
 from magnum.conductor.handlers.common import docker_client
 from magnum.openstack.common import log as logging
 
@@ -74,11 +75,14 @@ class Handler(object):
     # Container operations
 
     def container_create(self, ctxt, name, container_uuid, container):
+        image_id = container.image_id
         LOG.debug('Creating container with image %s name %s'
-                  % (container.image_id, name))
+                  % (image_id, name))
         try:
+            image_repo, image_tag = docker_utils.parse_docker_image(image_id)
+            self.docker.pull(image_repo, tag=image_tag)
             self.docker.inspect_image(self._encode_utf8(container.image_id))
-            self.docker.create_container(container.image_id, name=name,
+            self.docker.create_container(image_id, name=name,
                                          hostname=container_uuid)
             return container
         except errors.APIError as api_error:
