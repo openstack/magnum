@@ -122,6 +122,57 @@ def create_test_service(**kw):
     return dbapi.create_service(service)
 
 
+def get_test_node(**kw):
+    return {
+        'id': kw.get('id', 42),
+        'uuid': kw.get('uuid', 'ea8e2a25-2901-438d-8157-de7ffd68d051'),
+        'type': kw.get('type', 'virt'),
+        'image_id': kw.get('image_id', 'ubuntu'),
+        'ironic_node_id': kw.get('ironic_node_id'),
+        'created_at': kw.get('created_at'),
+        'updated_at': kw.get('updated_at'),
+    }
+
+
+def create_test_node(**kw):
+    """Create test node entry in DB and return Node DB object.
+    Function to be used to create test Node objects in the database.
+    :param kw: kwargs with overriding values for node's attributes.
+    :returns: Test Node DB object.
+    """
+    node = get_test_node(**kw)
+    # Let DB generate ID if it isn't specified explicitly
+    if 'id' not in kw:
+        del node['id']
+    dbapi = db_api.get_instance()
+    return dbapi.create_node(node)
+
+
+def get_test_container(**kw):
+    return {
+        'id': kw.get('id', 42),
+        'uuid': kw.get('uuid', 'ea8e2a25-2901-438d-8157-de7ffd68d051'),
+        'name': kw.get('name', 'container1'),
+        'image_id': kw.get('image_id', 'ubuntu'),
+        'created_at': kw.get('created_at'),
+        'updated_at': kw.get('updated_at'),
+    }
+
+
+def create_test_container(**kw):
+    """Create test container entry in DB and return Container DB object.
+    Function to be used to create test Container objects in the database.
+    :param kw: kwargs with overriding values for container's attributes.
+    :returns: Test Container DB object.
+    """
+    container = get_test_container(**kw)
+    # Let DB generate ID if it isn't specified explicitly
+    if 'id' not in kw:
+        del container['id']
+    dbapi = db_api.get_instance()
+    return dbapi.create_container(container)
+
+
 def get_test_rc(**kw):
     return {
         'id': kw.get('id', 42),
