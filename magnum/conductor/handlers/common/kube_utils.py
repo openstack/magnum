@@ -12,10 +12,72 @@
 
 """Magnum Kubernetes RPC handler."""
 
+import tempfile
+
 from magnum.openstack.common import log as logging
 from magnum.openstack.common import utils
 
 LOG = logging.getLogger(__name__)
+
+
+def _extract_resource_type(resource):
+    return resource.__class__.__name__.lower()
+
+
+def _extract_resource_data(resource):
+    resource_type = _extract_resource_type(resource)
+    data_attribute = "%s_data" % resource_type
+    return getattr(resource, data_attribute, None)
+
+
+def _extract_resource_definition_url(resource):
+    resource_type = _extract_resource_type(resource)
+    definition_url_attribute = "%s_definition_url" % resource_type
+    return getattr(resource, definition_url_attribute, None)
+
+
+def _k8s_create(master_address, resource):
+    data = _extract_resource_data(resource)
+    definition_url = _extract_resource_definition_url(resource)
+    if data is not None:
+        return _k8s_create_with_data(master_address, data)
+    else:
+        return _k8s_create_with_path(master_address, definition_url)
+
+
+def _k8s_create_with_path(master_address, resource_file):
+    return utils.trycmd('kubectl', 'create',
+                        '-s', master_address,
+                        '-f', resource_file)
+
+
+def _k8s_create_with_data(master_address, resource_data):
+    with tempfile.NamedTemporaryFile() as f:
+        f.write(resource_data)
+        f.flush()
+        return _k8s_create_with_path(master_address, f.name)
+
+
+def _k8s_update(master_address, resource):
+    data = _extract_resource_data(resource)
+    definition_url = _extract_resource_definition_url(resource)
+    if data is not None:
+        return _k8s_update_with_data(master_address, data)
+    else:
+        return _k8s_update_with_path(master_address, definition_url)
+
+
+def _k8s_update_with_path(master_address, resource_file):
+    return utils.trycmd('kubectl', 'update',
+                        '-s', master_address,
+                        '-f', resource_file)
+
+
+def _k8s_update_with_data(master_address, resource_data):
+    with tempfile.NamedTemporaryFile() as f:
+        f.write(resource_data)
+        f.flush()
+        return _k8s_update_with_path(master_address, f.name)
 
 
 class KubeClient(object):
@@ -33,14 +95,8 @@ class KubeClient(object):
     def service_create(self, master_address, service):
         LOG.debug("service_create with contents %s" % service)
         try:
-            if service.service_definition_url:
-                out, err = utils.trycmd('kubectl', 'create',
-                                        '-s', master_address,
-                                        '-f', service.service_definition_url)
-            else:
-                # TODO(jay-lau-513) Translate the contents to a json stdin
-                out, err = utils.trycmd('echo service | kubectl', 'create',
-                                        '-f', '-')
+            out, err = _k8s_create(master_address, service)
+
             if err:
                 return False
         except Exception as e:
@@ -52,15 +108,8 @@ class KubeClient(object):
     def service_update(self, master_address, service):
         LOG.debug("service_update with contents %s" % service)
         try:
-            if service.service_definition_url:
-                out, err = utils.trycmd('kubectl', 'update',
-                                        '-s', master_address,
-                                        '-f', service.service_definition_url)
-            else:
-                # TODO(jay-lau-513) Translate the contents to a json stdin
-                out, err = utils.trycmd('echo service | kubectl', 'update',
-                                        '-s', master_address,
-                                        '-f', '-')
+            out, err = _k8s_update(master_address, service)
+
             if err:
                 return False
         except Exception as e:
@@ -117,43 +166,29 @@ class KubeClient(object):
             return None
 
     # Pod Operations
-    def pod_create(self, master_address, contents):
-        LOG.debug("pod_create contents %s" % contents)
+    def pod_create(self, master_address, pod):
+        LOG.debug("pod_create contents %s" % pod)
         try:
-            if contents.pod_definition_url:
-                out, err = utils.trycmd('kubectl', 'create',
-                                        '-s', master_address,
-                                        '-f', contents.pod_definition_url)
-            else:
-                # TODO(jay-lau-513) Translate the contents to a json stdin
-                out, err = utils.trycmd('echo contents | kubectl', 'create',
-                                        '-s', master_address,
-                                        '-f', '-')
+            out, err = _k8s_create(master_address, pod)
+
             if err:
                 return False
         except Exception as e:
             LOG.error("Couldn't create pod with contents %s due to error %s"
-                      % (contents, e))
+                      % (pod, e))
             return False
         return True
 
-    def pod_update(self, master_address, contents):
-        LOG.debug("pod_update contents %s" % contents)
+    def pod_update(self, master_address, pod):
+        LOG.debug("pod_update contents %s" % pod)
         try:
-            if contents.pod_definition_url:
-                out, err = utils.trycmd('kubectl', 'update',
-                                        '-s', master_address,
-                                        '-f', contents.pod_definition_url)
-            else:
-                # TODO(jay-lau-513) Translate the contents to a json stdin
-                out, err = utils.trycmd('echo contents | kubectl', 'update',
-                                        '-s', master_address,
-                                        '-f', '-')
+            out, err = _k8s_update(master_address, pod)
+
             if err:
                 return False
         except Exception as e:
             LOG.error("Couldn't update pod with contents %s due to error %s"
-                      % (contents, e))
+                      % (pod, e))
             return False
         return True
 
@@ -202,43 +237,29 @@ class KubeClient(object):
             return None
 
     # Replication Controller Operations
-    def rc_create(self, master_address, contents):
-        LOG.debug("rc_create contents %s" % contents)
+    def rc_create(self, master_address, rc):
+        LOG.debug("rc_create contents %s" % rc)
         try:
-            if contents.rc_definition_url:
-                out, err = utils.trycmd('kubectl', 'create',
-                                        '-s', master_address,
-                                        '-f', contents.rc_definition_url)
-            else:
-                # TODO(jay-lau-513) Translate the contents to a json stdin
-                out, err = utils.trycmd('echo contents | kubectl', 'create',
-                                        '-s', master_address,
-                                        '-f', '-')
+            out, err = _k8s_create(master_address, rc)
+
             if err:
                 return False
         except Exception as e:
             LOG.error("Couldn't create rc with contents %s due to error %s"
-                      % (contents, e))
+                      % (rc, e))
             return False
         return True
 
-    def rc_update(self, master_address, contents):
-        LOG.debug("rc_update contents %s" % contents)
+    def rc_update(self, master_address, rc):
+        LOG.debug("rc_update contents %s" % rc)
         try:
-            if contents.rc_definition_url:
-                out, err = utils.trycmd('kubectl', 'update',
-                                        '-s', master_address,
-                                        '-f', contents.rc_definition_url)
-            else:
-                # TODO(jay-lau-513) Translate the contents to a json stdin
-                out, err = utils.trycmd('echo contents | kubectl', 'update',
-                                        '-s', master_address,
-                                        '-f', '-')
+            out, err = _k8s_update(master_address, rc)
+
             if err:
                 return False
         except Exception as e:
             LOG.error("Couldn't update rc with contents %s due to error %s"
-                      % (contents, e))
+                      % (rc, e))
             return False
         return True
 
