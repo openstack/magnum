@@ -107,6 +107,8 @@ class Handler(object):
                 bay.minions_address = minion_addresses
                 bay.save()
                 raise loopingcall.LoopingCallDone()
+            # poll_and_check is detached and polling long time to check status,
+            # so another user/client can call delete bay/stack.
             if stack.stack_status == 'DELETE_COMPLETE':
                 LOG.info('Bay has been deleted, stack_id: %s' % bay.stack_id)
                 raise loopingcall.LoopingCallDone()
