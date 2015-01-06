@@ -22,9 +22,10 @@ from magnum import objects
 # API to trigger operations on the conductors
 
 class API(rpc_service.API):
-    def __init__(self, transport=None, context=None):
-        cfg.CONF.import_opt('topic', 'magnum.conductor.config',
-                            group='conductor')
+    def __init__(self, transport=None, context=None, topic=None):
+        if topic is None:
+            cfg.CONF.import_opt('topic', 'magnum.conductor.config',
+                                group='conductor')
         super(API, self).__init__(transport, context,
                                   topic=cfg.CONF.conductor.topic)
 

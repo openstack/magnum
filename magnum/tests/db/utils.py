@@ -120,3 +120,33 @@ def create_test_service(**kw):
         del service['id']
     dbapi = db_api.get_instance()
     return dbapi.create_service(service)
+
+
+def get_test_rc(**kw):
+    return {
+        'id': kw.get('id', 42),
+        'uuid': kw.get('uuid', '10a47dd1-4874-4298-91cf-eff046dbdb8d'),
+        'name': kw.get('name', 'service1'),
+        'images': kw.get('images', ['steak/for-dinner']),
+        'bay_uuid': kw.get('bay_uuid', '10a47dd1-4874-4298-91cf-eff046dbdb8e'),
+        'selector': kw.get('selector', {'name': 'foo'}),
+        'replicas': kw.get('replicas', 3),
+        'rc_definition_url': kw.get('file:///tmp/rc.yaml'),
+        'created_at': kw.get('created_at'),
+        'updated_at': kw.get('updated_at'),
+    }
+
+
+def create_test_rc(**kw):
+    """Create test rc entry in DB and return ReplicationController DB object.
+    Function to be used to create test ReplicationController objects in the
+    database.
+    :param kw: kwargs with overriding values for service's attributes.
+    :returns: Test Service DB object.
+    """
+    service = get_test_rc(**kw)
+    # Let DB generate ID if it isn't specified explicitly
+    if 'id' not in kw:
+        del service['id']
+    dbapi = db_api.get_instance()
+    return dbapi.create_rc(service)
