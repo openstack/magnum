@@ -190,3 +190,19 @@ class TestException(base.BaseTestCase):
     def test_ServiceAlreadyExists(self):
         self.assertRaises(exception.ServiceAlreadyExists,
                     lambda: self.raise_(exception.ServiceAlreadyExists()))
+
+    def test_ConfigInvalid(self):
+        self.assertRaises(exception.ConfigInvalid,
+                    lambda: self.raise_(exception.ConfigInvalid()))
+
+    def test_NodeAlreadyExists(self):
+        self.assertRaises(exception.NodeAlreadyExists,
+                    lambda: self.raise_(exception.NodeAlreadyExists()))
+
+    def test_NodeNotFound(self):
+        self.assertRaises(exception.NodeNotFound,
+                    lambda: self.raise_(exception.NodeNotFound()))
+
+    def test_NodeAssociated(self):
+        self.assertRaises(exception.NodeAssociated,
+                    lambda: self.raise_(exception.NodeAssociated()))

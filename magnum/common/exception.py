@@ -322,6 +322,22 @@ class InvalidMAC(Invalid):
     message = _("Expected a MAC address but received %(mac)s.")
 
 
+class ConfigInvalid(MagnumException):
+    message = _("Invalid configuration file. %(error_msg)s")
+
+
+class NodeAlreadyExists(Conflict):
+    message = _("A node with UUID %(uuid)s already exists.")
+
+
+class NodeNotFound(ResourceNotFound):
+    message = _("Node %(node)s could not be found.")
+
+
+class NodeAssociated(InvalidState):
+    message = _("Node %(node)s is associated with instance %(instance)s.")
+
+
 class SSHConnectFailed(MagnumException):
     message = _("Failed to establish SSH connection to host %(host)s.")
 
