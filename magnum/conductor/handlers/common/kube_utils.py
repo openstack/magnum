@@ -29,15 +29,14 @@ class KubeClient(object):
 
     def __init__(self):
         super(KubeClient, self).__init__()
-        # TODO(pkilambi): Add server endpoint config
 
-    @staticmethod
-    def service_create(service):
+    def service_create(self, master_address, service):
         LOG.debug("service_create with contents %s" % service)
         try:
             if service.service_definition_url:
-                out, err = utils.trycmd('kubectl', 'create', '-f',
-                                        service.service_definition_url)
+                out, err = utils.trycmd('kubectl', 'create',
+                                        '-s', master_address,
+                                        '-f', service.service_definition_url)
             else:
                 # TODO(jay-lau-513) Translate the contents to a json stdin
                 out, err = utils.trycmd('echo service | kubectl', 'create',
@@ -50,16 +49,17 @@ class KubeClient(object):
             return False
         return True
 
-    @staticmethod
-    def service_update(service):
+    def service_update(self, master_address, service):
         LOG.debug("service_update with contents %s" % service)
         try:
             if service.service_definition_url:
-                out, err = utils.trycmd('kubectl', 'update', '-f',
-                                        service.service_definition_url)
+                out, err = utils.trycmd('kubectl', 'update',
+                                        '-s', master_address,
+                                        '-f', service.service_definition_url)
             else:
                 # TODO(jay-lau-513) Translate the contents to a json stdin
                 out, err = utils.trycmd('echo service | kubectl', 'update',
+                                        '-s', master_address,
                                         '-f', '-')
             if err:
                 return False
@@ -69,22 +69,22 @@ class KubeClient(object):
             return False
         return True
 
-    @staticmethod
-    def service_list():
+    def service_list(self, master_address):
         LOG.debug("service_list")
         try:
-            out = utils.execute('kubectl', 'get', 'services')
+            out = utils.execute('kubectl', 'get', 'services',
+                                '-s', master_address,)
             pod_data = [s.split() for s in out.split('\n')]
             return pod_data
         except Exception as e:
             LOG.error("Couldn't get list of services due to error %s" % e)
             return None
 
-    @staticmethod
-    def service_delete(uuid):
+    def service_delete(self, master_address, uuid):
         LOG.debug("service_delete %s" % uuid)
         try:
-            out, err = utils.trycmd('kubectl', 'delete', 'service', uuid)
+            out, err = utils.trycmd('kubectl', 'delete', 'service', uuid,
+                                    '-s', master_address)
             if err:
                 return False
         except Exception as e:
@@ -93,22 +93,22 @@ class KubeClient(object):
             return False
         return False
 
-    @staticmethod
-    def service_get(uuid):
+    def service_get(self, master_address, uuid):
         LOG.debug("service_get %s" % uuid)
         try:
-            out = utils.execute('kubectl', 'get', 'service', uuid)
+            out = utils.execute('kubectl', 'get', 'service', uuid,
+                                '-s', master_address)
             # TODO(pkilambi): process the output as needed
             return out
         except Exception as e:
             LOG.error("Couldn't get service %s due to error %s" % (uuid, e))
             return None
 
-    @staticmethod
-    def service_show(uuid):
+    def service_show(self, master_address, uuid):
         LOG.debug("service_show %s" % uuid)
         try:
-            out = utils.execute('kubectl', 'describe', 'service', uuid)
+            out = utils.execute('kubectl', 'describe', 'service', uuid,
+                                '-s', master_address)
             # TODO(pkilambi): process the output as needed
             return out
         except Exception as e:
@@ -117,16 +117,17 @@ class KubeClient(object):
             return None
 
     # Pod Operations
-    @staticmethod
-    def pod_create(contents):
+    def pod_create(self, master_address, contents):
         LOG.debug("pod_create contents %s" % contents)
         try:
             if contents.pod_definition_url:
-                out, err = utils.trycmd('kubectl', 'create', '-f',
-                                        contents.pod_definition_url)
+                out, err = utils.trycmd('kubectl', 'create',
+                                        '-s', master_address,
+                                        '-f', contents.pod_definition_url)
             else:
                 # TODO(jay-lau-513) Translate the contents to a json stdin
                 out, err = utils.trycmd('echo contents | kubectl', 'create',
+                                        '-s', master_address,
                                         '-f', '-')
             if err:
                 return False
@@ -136,16 +137,17 @@ class KubeClient(object):
             return False
         return True
 
-    @staticmethod
-    def pod_update(contents):
+    def pod_update(self, master_address, contents):
         LOG.debug("pod_update contents %s" % contents)
         try:
             if contents.pod_definition_url:
-                out, err = utils.trycmd('kubectl', 'update', '-f',
-                                        contents.pod_definition_url)
+                out, err = utils.trycmd('kubectl', 'update',
+                                        '-s', master_address,
+                                        '-f', contents.pod_definition_url)
             else:
                 # TODO(jay-lau-513) Translate the contents to a json stdin
                 out, err = utils.trycmd('echo contents | kubectl', 'update',
+                                        '-s', master_address,
                                         '-f', '-')
             if err:
                 return False
@@ -155,22 +157,21 @@ class KubeClient(object):
             return False
         return True
 
-    @staticmethod
-    def pod_list():
+    def pod_list(self, master_address):
         LOG.debug("pod_list")
         try:
-            out = utils.execute('kubectl', 'get', 'pods')
+            out = utils.execute('kubectl', 'get', 'pods', '-s', master_address)
             pod_data = [s.split() for s in out.split('\n')]
             return pod_data
         except Exception as e:
             LOG.error("Couldn't get list of pods due to error %s" % e)
             return None
 
-    @staticmethod
-    def pod_delete(uuid):
+    def pod_delete(self, master_address, uuid):
         LOG.debug("pod_delete %s" % uuid)
         try:
-            out, err = utils.trycmd('kubectl', 'delete', 'pod', uuid)
+            out, err = utils.trycmd('kubectl', 'delete', 'pod', uuid,
+                                    '-s', master_address,)
             if err:
                 return False
         except Exception as e:
@@ -178,22 +179,22 @@ class KubeClient(object):
             return False
         return True
 
-    @staticmethod
-    def pod_get(uuid):
+    def pod_get(self, master_address, uuid):
         LOG.debug("pod_get %s" % uuid)
         try:
-            out = utils.execute('kubectl', 'get', 'pod', uuid)
+            out = utils.execute('kubectl', 'get', 'pod', uuid,
+                                '-s', master_address)
             # TODO(pkilambi): process the output as needed
             return out
         except Exception as e:
             LOG.error("Couldn't get pod %s due to error %s" % (uuid, e))
             return None
 
-    @staticmethod
-    def pod_show(uuid):
+    def pod_show(self, master_address, uuid):
         LOG.debug("pod_show %s" % uuid)
         try:
-            out = utils.execute('kubectl', 'describe', 'pod', uuid)
+            out = utils.execute('kubectl', 'describe', 'pod', uuid,
+                                '-s', master_address)
             # TODO(pkilambi): process the output as needed
             return out
         except Exception as e:
@@ -201,16 +202,17 @@ class KubeClient(object):
             return None
 
     # Replication Controller Operations
-    @staticmethod
-    def rc_create(contents):
+    def rc_create(self, master_address, contents):
         LOG.debug("rc_create contents %s" % contents)
         try:
             if contents.rc_definition_url:
-                out, err = utils.trycmd('kubectl', 'create', '-f',
-                                        contents.rc_definition_url)
+                out, err = utils.trycmd('kubectl', 'create',
+                                        '-s', master_address,
+                                        '-f', contents.rc_definition_url)
             else:
                 # TODO(jay-lau-513) Translate the contents to a json stdin
                 out, err = utils.trycmd('echo contents | kubectl', 'create',
+                                        '-s', master_address,
                                         '-f', '-')
             if err:
                 return False
@@ -220,16 +222,17 @@ class KubeClient(object):
             return False
         return True
 
-    @staticmethod
-    def rc_update(contents):
+    def rc_update(self, master_address, contents):
         LOG.debug("rc_update contents %s" % contents)
         try:
             if contents.rc_definition_url:
-                out, err = utils.trycmd('kubectl', 'update', '-f',
-                                        contents.rc_definition_url)
+                out, err = utils.trycmd('kubectl', 'update',
+                                        '-s', master_address,
+                                        '-f', contents.rc_definition_url)
             else:
                 # TODO(jay-lau-513) Translate the contents to a json stdin
                 out, err = utils.trycmd('echo contents | kubectl', 'update',
+                                        '-s', master_address,
                                         '-f', '-')
             if err:
                 return False
@@ -239,11 +242,11 @@ class KubeClient(object):
             return False
         return True
 
-    @staticmethod
-    def rc_delete(uuid):
+    def rc_delete(self, master_address, uuid):
         LOG.debug("rc_delete %s" % uuid)
         try:
-            out, err = utils.trycmd('kubectl', 'delete', 'rc', uuid)
+            out, err = utils.trycmd('kubectl', 'delete', 'rc', uuid,
+                                    '-s', master_address)
             if err:
                 return False
         except Exception as e:
