@@ -845,15 +845,27 @@ class Connection(api.Connection):
         if filters is None:
             filters = []
 
-        if 'associated' in filters:
-            if filters['associated']:
-                query = query.filter(
-                       models.ReplicationController.instance_uuid is not None)
-            else:
-                query = query.filter(
-                       models.ReplicationController.instance_uuid is None)
+        if 'bay_uuid' in filters:
+            query = query.filter_by(bay_uuid=filters['bay_uuid'])
+        if 'name' in filters:
+            query = query.filter_by(name=filters['name'])
+        if 'replicas' in filters:
+            query = query.filter_by(replicas=filters['replicas'])
 
         return query
+
+    def get_rcinfo_list(self, columns=None, filters=None, limit=None,
+                        marker=None, sort_key=None, sort_dir=None):
+        if columns is None:
+            columns = [models.ReplicationController.id]
+        else:
+            columns = [getattr(models.ReplicationController, c)
+                       for c in columns]
+
+        query = model_query(*columns, base_model=models.ReplicationController)
+        query = self._add_rcs_filters(query, filters)
+        return _paginate_query(models.ReplicationController, limit, marker,
+                               sort_key, sort_dir, query)
 
     def get_rc_list(self, filters=None, limit=None, marker=None,
                       sort_key=None, sort_dir=None):
@@ -895,6 +907,14 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.ReplicationControllerNotFound(rc=rc_uuid)
 
+    def get_rcs_by_bay_uuid(self, bay_uuid):
+        query = model_query(models.ReplicationController).filter_by(
+                                                        bay_uuid=bay_uuid)
+        try:
+            return query.all()
+        except NoResultFound:
+            raise exception.ReplicationControllerNotFound(bay=bay_uuid)
+
     def get_rc_by_name(self, rc_name):
         query = model_query(models.ReplicationController).filter_by(
                                                              name=rc_name)
@@ -908,7 +928,9 @@ class Connection(api.Connection):
         with session.begin():
             query = model_query(models.ReplicationController, session=session)
             query = add_identity_filter(query, rc_id)
-            query.delete()
+            count = query.delete()
+            if count != 1:
+                raise exception.ReplicationControllerNotFound(rc_id)
 
     def update_rc(self, rc_id, values):
         if 'uuid' in values:
