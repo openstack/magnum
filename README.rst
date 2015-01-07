@@ -26,10 +26,10 @@ There are seven different types of objects in the Magnum system:
 Two binaries work together to compose the Magnum system.  The first binary
 accessed by the python-magnumclient code is the magnum-api ReST server.  The
 ReST server may run as one process or multiple processes.  When a ReST request
-is sent to the client API, the request is sent via AMQP to the magnum-backend
-process.  The ReST server is horizontally scalable.  AT this time, the backend
-is limited to one process, but we intend to add horizontal scalability to the
-backend as well.
+is sent to the client API, the request is sent via AMQP to the magnum-conductor
+process.  The ReST server is horizontally scalable.  At this time, the
+conductor is limited to one process, but we intend to add horizontal
+scalability to the conductor as well.
 
 The magnum-backend process runs on a controller machine and connects to a
 kubernetes or docker ReST API endpoint.  The kubernetes and docker ReST API
@@ -44,7 +44,7 @@ Features
 * Abstractions for bays, containers, nodes, pods, and services
 * Integration with Kubernetes and Docker for backend container technology.
 * Integration with Keystone for multi-tenant security.
-* Integraiton with Neutron for k8s multi-tenancy network security.
+* Integration with Neutron for k8s multi-tenancy network security.
 
 Installation and Usage
 ----------------------
