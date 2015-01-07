@@ -355,6 +355,10 @@ class BayModelAlreadyExists(Conflict):
     message = _("A baymodel with UUID %(uuid)s already exists.")
 
 
+class BayModelReferenced(Invalid):
+    message = _("Baymodel %(baymodel)s is referenced by one or multiple bays.")
+
+
 class BayNotFound(ResourceNotFound):
     message = _("Bay %(bay)s could not be found.")
 

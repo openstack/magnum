@@ -327,13 +327,27 @@ class Connection(api.Connection):
             raise exception.BayModelNotFound(baymodel=baymodel_uuid)
 
     def destroy_baymodel(self, baymodel_id):
+        def is_baymodel_referenced(session, baymodel_uuid):
+            """Checks whether the baymodel is referenced by bay(s)."""
+            query = model_query(models.Bay, session=session)
+            query = self._add_bays_filters(query,
+                                           {'baymodel_id': baymodel_uuid})
+            return query.count() != 0
+
         session = get_session()
         with session.begin():
             query = model_query(models.BayModel, session=session)
             query = add_identity_filter(query, baymodel_id)
-            count = query.delete()
-            if count != 1:
-                raise exception.BayModelNotFound(baymodel_id)
+
+            try:
+                baymodel_ref = query.one()
+            except NoResultFound:
+                raise exception.BayModelNotFound(baymodel=baymodel_id)
+
+            if is_baymodel_referenced(session, baymodel_ref['uuid']):
+                raise exception.BayModelReferenced(baymodel=baymodel_id)
+
+            query.delete()
 
     def update_baymodel(self, baymodel_id, values):
         # NOTE(dtantsur): this can lead to very strange errors
