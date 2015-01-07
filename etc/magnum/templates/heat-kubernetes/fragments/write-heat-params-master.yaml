@@ -1,0 +1,14 @@
+#cloud-config
+merge_how: dict(recurse_array)+list(append)
+write_files:
+  - path: /etc/sysconfig/heat-params
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      MINION_ADDRESSES="$MINION_ADDRESSES"
+      KUBE_ALLOW_PRIV="$KUBE_ALLOW_PRIV"
+      WAIT_HANDLE="$WAIT_HANDLE"
+      FLANNEL_NETWORK_CIDR="$FLANNEL_NETWORK_CIDR"
+      FLANNEL_NETWORK_SUBNETLEN="$FLANNEL_NETWORK_SUBNETLEN"
+      FLANNEL_USE_VXLAN="$FLANNEL_USE_VXLAN"
+      PORTAL_NETWORK_CIDR="$PORTAL_NETWORK_CIDR"
