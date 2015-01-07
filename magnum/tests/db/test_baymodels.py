@@ -41,6 +41,48 @@ class DbBaymodelTestCase(base.DbTestCase):
         res_uuids = [r.uuid for r in res]
         self.assertEqual(sorted(uuids), sorted(res_uuids))
 
+    def test_get_baymodel_list_with_filters(self):
+        bm1 = self._create_test_baymodel(id=1, name='bm-one',
+            uuid=magnum_utils.generate_uuid(),
+            image_id='image1')
+        bm2 = self._create_test_baymodel(id=2, name='bm-two',
+            uuid=magnum_utils.generate_uuid(),
+            image_id='image2')
+
+        res = self.dbapi.get_baymodel_list(filters={'name': 'bm-one'})
+        self.assertEqual([bm1['id']], [r.id for r in res])
+
+        res = self.dbapi.get_baymodel_list(filters={'name': 'bad-name'})
+        self.assertEqual([], [r.id for r in res])
+
+        res = self.dbapi.get_baymodel_list(filters={'image_id': 'image1'})
+        self.assertEqual([bm1['id']], [r.id for r in res])
+
+        res = self.dbapi.get_baymodel_list(filters={'image_id': 'image2'})
+        self.assertEqual([bm2['id']], [r.id for r in res])
+
+    def test_get_baymodelinfo_list_defaults(self):
+        bm_id_list = []
+        for i in range(1, 6):
+            bm = self._create_test_baymodel(id=i,
+                uuid=magnum_utils.generate_uuid())
+            bm_id_list.append(bm['id'])
+        res = [i[0] for i in self.dbapi.get_baymodelinfo_list()]
+        self.assertEqual(sorted(res), sorted(bm_id_list))
+
+    def test_get_baymodelinfo_list_with_cols(self):
+        uuids = {}
+        names = {}
+        for i in range(1, 6):
+            uuid = magnum_utils.generate_uuid()
+            name = "node" + str(i)
+            bm = self._create_test_baymodel(id=i, name=name, uuid=uuid)
+            uuids[bm['id']] = uuid
+            names[bm['id']] = name
+        res = self.dbapi.get_baymodelinfo_list(columns=['id', 'name', 'uuid'])
+        self.assertEqual(names, dict((r[0], r[1]) for r in res))
+        self.assertEqual(uuids, dict((r[0], r[2]) for r in res))
+
     def test_get_baymodel_by_id(self):
         bm = self._create_test_baymodel()
         baymodel = self.dbapi.get_baymodel_by_id(bm['id'])

@@ -16,8 +16,6 @@
 
 """SQLAlchemy storage backend."""
 
-import datetime
-
 from oslo.config import cfg
 from oslo.db import exception as db_exc
 from oslo.db.sqlalchemy import session as db_session
@@ -251,26 +249,19 @@ class Connection(api.Connection):
         if filters is None:
             filters = []
 
-        if 'associated' in filters:
-            if filters['associated']:
-                query = query.filter(models.BayModel.instance_uuid is not None)
-            else:
-                query = query.filter(models.BayModel.instance_uuid is None)
-        if 'reserved' in filters:
-            if filters['reserved']:
-                query = query.filter(models.BayModel.reservation is not None)
-            else:
-                query = query.filter(models.BayModel.reservation is None)
-        if 'maintenance' in filters:
-            query = query.filter_by(maintenance=filters['maintenance'])
-        if 'driver' in filters:
-            query = query.filter_by(driver=filters['driver'])
-        if 'provision_state' in filters:
-            query = query.filter_by(provision_state=filters['provision_state'])
-        if 'provisioned_before' in filters:
-            limit = timeutils.utcnow() - datetime.timedelta(
-                                         seconds=filters['provisioned_before'])
-            query = query.filter(models.BayModel.provision_updated_at < limit)
+        if 'name' in filters:
+            query = query.filter_by(name=filters['name'])
+        if 'image_id' in filters:
+            query = query.filter_by(image_id=filters['image_id'])
+        if 'flavor_id' in filters:
+            query = query.filter_by(flavor_id=filters['flavor_id'])
+        if 'keypair_id' in filters:
+            query = query.filter_by(keypair_id=filters['keypair_id'])
+        if 'external_network_id' in filters:
+            query = query.filter_by(
+                external_network_id=filters['external_network_id'])
+        if 'dns_nameserver' in filters:
+            query = query.filter_by(dns_nameserver=filters['dns_nameserver'])
 
         return query
 
