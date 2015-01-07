@@ -365,27 +365,10 @@ class Connection(api.Connection):
         if filters is None:
             filters = []
 
-        if 'associated' in filters:
-            if filters['associated']:
-                query = query.filter(models.Container.instance_uuid is not
-                    None)
-            else:
-                query = query.filter(models.Container.instance_uuid is None)
-        if 'reserved' in filters:
-            if filters['reserved']:
-                query = query.filter(models.Container.reservation is not None)
-            else:
-                query = query.filter(models.Container.reservation is None)
-        if 'maintenance' in filters:
-            query = query.filter_by(maintenance=filters['maintenance'])
-        if 'driver' in filters:
-            query = query.filter_by(driver=filters['driver'])
-        if 'provision_state' in filters:
-            query = query.filter_by(provision_state=filters['provision_state'])
-        if 'provisioned_before' in filters:
-            limit = timeutils.utcnow() - datetime.timedelta(
-                                         seconds=filters['provisioned_before'])
-            query = query.filter(models.Container.provision_updated_at < limit)
+        if 'name' in filters:
+            query = query.filter_by(name=filters['name'])
+        if 'image_id' in filters:
+            query = query.filter_by(image_id=filters['image_id'])
 
         return query
 
@@ -446,7 +429,9 @@ class Connection(api.Connection):
         with session.begin():
             query = model_query(models.Container, session=session)
             query = add_identity_filter(query, container_id)
-            query.delete()
+            count = query.delete()
+            if count != 1:
+                raise exception.ContainerNotFound(container_id)
 
     def update_container(self, container_id, values):
         # NOTE(dtantsur): this can lead to very strange errors
@@ -488,24 +473,13 @@ class Connection(api.Connection):
 
         if 'associated' in filters:
             if filters['associated']:
-                query = query.filter(models.Node.instance_uuid is not None)
+                query = query.filter(models.Node.ironic_node_id != None)
             else:
-                query = query.filter(models.Node.instance_uuid is None)
-        if 'reserved' in filters:
-            if filters['reserved']:
-                query = query.filter(models.Node.reservation is not None)
-            else:
-                query = query.filter(models.Node.reservation is None)
-        if 'maintenance' in filters:
-            query = query.filter_by(maintenance=filters['maintenance'])
-        if 'driver' in filters:
-            query = query.filter_by(driver=filters['driver'])
-        if 'provision_state' in filters:
-            query = query.filter_by(provision_state=filters['provision_state'])
-        if 'provisioned_before' in filters:
-            limit = timeutils.utcnow() - datetime.timedelta(
-                                         seconds=filters['provisioned_before'])
-            query = query.filter(models.Node.provision_updated_at < limit)
+                query = query.filter(models.Node.ironic_node_id == None)
+        if 'type' in filters:
+            query = query.filter_by(type=filters['type'])
+        if 'image_id' in filters:
+            query = query.filter_by(image_id=filters['image_id'])
 
         return query
 
@@ -540,9 +514,9 @@ class Connection(api.Connection):
         try:
             node.save()
         except db_exc.DBDuplicateEntry as exc:
-            if 'instance_uuid' in exc.columns:
+            if 'ironic_node_id' in exc.columns:
                 raise exception.InstanceAssociated(
-                    instance_uuid=values['instance_uuid'],
+                    instance_uuid=values['ironic_node_id'],
                     node=values['uuid'])
             raise exception.NodeAlreadyExists(uuid=values['uuid'])
         return node
@@ -566,7 +540,9 @@ class Connection(api.Connection):
         with session.begin():
             query = model_query(models.Node, session=session)
             query = add_identity_filter(query, node_id)
-            query.delete()
+            count = query.delete()
+            if count != 1:
+                raise exception.NodeNotFound(node_id)
 
     def update_node(self, node_id, values):
         # NOTE(dtantsur): this can lead to very strange errors
@@ -578,7 +554,7 @@ class Connection(api.Connection):
             return self._do_update_node(node_id, values)
         except db_exc.DBDuplicateEntry:
             raise exception.InstanceAssociated(
-                instance_uuid=values['instance_uuid'],
+                instance_uuid=values['ironic_node_id'],
                 node=node_id)
 
     def _do_update_node(self, node_id, values):
@@ -591,13 +567,10 @@ class Connection(api.Connection):
             except NoResultFound:
                 raise exception.NodeNotFound(node=node_id)
 
-            # Prevent instance_uuid overwriting
-            if values.get("instance_uuid") and ref.instance_uuid:
+            # Prevent ironic_node_id overwriting
+            if values.get("ironic_node_id") and ref.ironic_node_id:
                 raise exception.NodeAssociated(node=node_id,
-                                instance=ref.instance_uuid)
-
-            if 'provision_state' in values:
-                values['provision_updated_at'] = timeutils.utcnow()
+                                instance=ref.ironic_node_id)
 
             ref.update(values)
         return ref

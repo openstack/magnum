@@ -381,7 +381,7 @@ class ContainerAssociated(InvalidState):
 
 
 class ContainerAlreadyExists(Conflict):
-    message = _("A node with UUID %(uuid)s already exists.")
+    message = _("A container with UUID %(uuid)s already exists.")
 
 
 class PodNotFound(ResourceNotFound):

@@ -167,6 +167,8 @@ class Node(Base):
     __tablename__ = 'node'
     __table_args__ = (
         schema.UniqueConstraint('uuid', name='uniq_node0uuid'),
+        schema.UniqueConstraint('ironic_node_id',
+                                name='uniq_node0ironic_node_id'),
         table_args()
         )
     id = Column(Integer, primary_key=True)
