@@ -12,10 +12,45 @@
 
 """Magnum Kubernetes RPC handler."""
 
+from oslo.config import cfg
+
 from magnum.conductor.handlers.common import kube_utils
+from magnum import objects
+from magnum.openstack.common._i18n import _
 from magnum.openstack.common import log as logging
 
+
 LOG = logging.getLogger(__name__)
+
+
+kubernetes_opts = [
+    cfg.StrOpt('k8s_protocol',
+               default='http',
+               help=_('Default protocol of k8s master endpoint'
+               ' (http or https).')),
+    cfg.IntOpt('k8s_port',
+               default=8080,
+               help=_('Default port of the k8s master endpoint.')),
+]
+
+cfg.CONF.register_opts(kubernetes_opts, group='kubernetes')
+
+
+def _retrive_bay(ctxt, obj):
+    bay_uuid = obj.bay_uuid
+    return objects.Bay.get_by_uuid(ctxt, bay_uuid)
+
+
+def _retrive_k8s_master_url(ctxt, obj):
+    if hasattr(obj, 'bay_uuid'):
+        obj = _retrive_bay(ctxt, obj)
+
+    params = {
+        'k8s_protocol': cfg.CONF.kubernetes.k8s_protocol,
+        'k8s_port': cfg.CONF.kubernetes.k8s_port,
+        'master_address': obj.master_address
+    }
+    return "%(k8s_protocol)s://%(master_address)s:%(k8s_port)s" % params
 
 
 class Handler(object):
@@ -75,12 +110,21 @@ class Handler(object):
     # Pod Operations
     def pod_create(self, ctxt, pod):
         LOG.debug("pod_create")
+        k8s_master_url = _retrive_k8s_master_url(ctxt, pod)
         # trigger a kubectl command
-        status = self.kube_cli.pod_create(pod)
+        status = self.kube_cli.pod_create(k8s_master_url, pod)
+        # TODO(yuanying): Is this correct location of updating status?
         if not status:
-            return None
+            pod.status = 'failed'
+        else:
+            pod.status = 'pending'
         # call the pod object to persist in db
-        pod.create(ctxt)
+        # TODO(yuanying): parse pod file and,
+        # - extract pod name and set it
+        # - extract pod labels and set it
+        # TODO(yuanying): Should kube_utils support definition_url?
+        # When do we get pod labels and name?
+        pod.create()
         return pod
 
     def pod_update(self, ctxt, pod):

@@ -91,6 +91,9 @@ class Pod(base.APIBase):
     pod_definition_url = wtypes.text
     """URL for pod file to create the pod"""
 
+    pod_data = wtypes.text
+    """Data for pod to create the pod"""
+
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated pod links"""
 
@@ -307,6 +310,8 @@ class PodsController(rest.RestController):
         for field in objects.Pod.fields:
             # ignore pod_definition_url as it was used for create pod
             if field == 'pod_definition_url':
+                continue
+            if field == 'pod_data':
                 continue
             try:
                 patch_val = getattr(pod, field)

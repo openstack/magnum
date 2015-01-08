@@ -36,6 +36,7 @@ class Pod(base.MagnumObject):
         'labels': obj_utils.dict_or_none,
         'status': obj_utils.str_or_none,
         'pod_definition_url': obj_utils.str_or_none,
+        'pod_data': obj_utils.str_or_none,
     }
 
     @staticmethod
@@ -44,6 +45,8 @@ class Pod(base.MagnumObject):
         for field in pod.fields:
             # ignore pod_definition_url as it was used for create pod
             if field == 'pod_definition_url':
+                continue
+            if field == 'pod_data':
                 continue
             pod[field] = db_pod[field]
 
