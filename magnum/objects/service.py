@@ -36,6 +36,7 @@ class Service(base.MagnumObject):
         'ip': obj_utils.str_or_none,
         'port': int,
         'service_definition_url': obj_utils.str_or_none,
+        'service_data': obj_utils.str_or_none,
     }
 
     @staticmethod
@@ -44,6 +45,8 @@ class Service(base.MagnumObject):
         for field in service.fields:
             # ignore service_definition_url as it was used for create service
             if field == 'service_definition_url':
+                continue
+            if field == 'service_data':
                 continue
             service[field] = db_service[field]
 
