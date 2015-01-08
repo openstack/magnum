@@ -68,8 +68,9 @@ class Handler(object):
 
     def service_create(self, ctxt, service):
         LOG.debug("service_create")
+        k8s_master_url = _retrive_k8s_master_url(ctxt, service)
         # trigger a kubectl command
-        status = self.kube_cli.service_create(service)
+        status = self.kube_cli.service_create(k8s_master_url, service)
         if not status:
             return None
         # call the service object to persist in db

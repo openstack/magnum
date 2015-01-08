@@ -82,6 +82,9 @@ class Service(base.APIBase):
     service_definition_url = wtypes.text
     """URL for service file to create the service"""
 
+    service_data = wtypes.text
+    """Data for service to create the service"""
+
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated service links"""
 
@@ -295,6 +298,8 @@ class ServicesController(rest.RestController):
         for field in objects.Service.fields:
             # ignore service_definition_url as it was used for create service
             if field == 'service_definition_url':
+                continue
+            if field == 'service_data':
                 continue
             try:
                 patch_val = getattr(service, field)

@@ -28,6 +28,9 @@ class TestKube(base.BaseTestCase):
     def mock_pod(self):
         return objects.Pod({})
 
+    def mock_service(self):
+        return objects.Service({})
+
     def mock_bay(self):
         return objects.Bay({})
 
@@ -89,3 +92,18 @@ class TestKube(base.BaseTestCase):
 
             self.kube_handler.pod_create({}, expected_pod)
             self.assertEqual('failed', expected_pod.status)
+
+    @patch('magnum.conductor.handlers.kube._retrive_k8s_master_url')
+    def test_service_create_with_success(self,
+                                         mock_retrive_k8s_master_url):
+        expected_master_url = 'master_address'
+        expected_service = self.mock_service()
+        expected_service.create = mock.MagicMock()
+
+        mock_retrive_k8s_master_url.return_value = expected_master_url
+        with patch.object(self.kube_handler, 'kube_cli') as mock_kube_cli:
+            mock_kube_cli.service_create.return_value = True
+
+            self.kube_handler.service_create({}, expected_service)
+            mock_kube_cli.service_create.assert_called_once_with(
+                expected_master_url, expected_service)
