@@ -36,7 +36,7 @@ upgrade it individually, if you need to::
 
     sudo pip install -U virtualenv
 
-Ironic source code should be pulled directly from git::
+Magnum source code should be pulled directly from git::
 
     # from your home or source directory
     cd ~
