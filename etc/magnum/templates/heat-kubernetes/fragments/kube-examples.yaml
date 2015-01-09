@@ -1,0 +1,32 @@
+#cloud-config
+merge_how: dict(recurse_array)+list(append)
+write_files:
+  - path: /etc/kubernetes/examples/web.pod
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      kind: Pod
+      apiVersion: v1beta1
+      labels:
+        name: web
+      desiredState:
+        manifest:
+          version: v1beta1
+          id: web
+          containers:
+            - name: web
+              image: larsks/onehttpd
+              command: [/onehttpd, -p, 80, /data]
+              ports:
+                - containerPort: 80
+  - path: /etc/kubernetes/examples/web.service
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      kind: Service
+      apiVersion: v1beta1
+      id: web
+      port: 8000
+      selector:
+        name: web
+      containerPort: 80
