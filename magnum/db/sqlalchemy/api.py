@@ -156,12 +156,7 @@ class Connection(api.Connection):
         bay.update(values)
         try:
             bay.save()
-        except db_exc.DBDuplicateEntry as exc:
-            if 'instance_uuid' in exc.columns:
-                raise exception.InstanceAssociated(
-                    instance_uuid=values['instance_uuid'],
-                    bay=values['uuid'])
-
+        except db_exc.DBDuplicateEntry:
             raise exception.BayAlreadyExists(uuid=values['uuid'])
         return bay
 
@@ -217,12 +212,7 @@ class Connection(api.Connection):
             msg = _("Cannot overwrite UUID for an existing Bay.")
             raise exception.InvalidParameterValue(err=msg)
 
-        try:
-            return self._do_update_bay(bay_id, values)
-        except db_exc.DBDuplicateEntry:
-            raise exception.InstanceAssociated(
-                instance_uuid=values['instance_uuid'],
-                bay=bay_id)
+        return self._do_update_bay(bay_id, values)
 
     def _do_update_bay(self, bay_id, values):
         session = get_session()
@@ -233,11 +223,6 @@ class Connection(api.Connection):
                 ref = query.with_lockmode('update').one()
             except NoResultFound:
                 raise exception.BayNotFound(bay=bay_id)
-
-            # Prevent instance_uuid overwriting
-            if values.get("instance_uuid") and ref.instance_uuid:
-                raise exception.BayAssociated(bay=bay_id,
-                                instance=ref.instance_uuid)
 
             if 'provision_state' in values:
                 values['provision_updated_at'] = timeutils.utcnow()
@@ -295,11 +280,7 @@ class Connection(api.Connection):
         baymodel.update(values)
         try:
             baymodel.save()
-        except db_exc.DBDuplicateEntry as exc:
-            if 'instance_uuid' in exc.columns:
-                raise exception.InstanceAssociated(
-                    instance_uuid=values['instance_uuid'],
-                    baymodel=values['uuid'])
+        except db_exc.DBDuplicateEntry:
             raise exception.BayModelAlreadyExists(uuid=values['uuid'])
         return baymodel
 
@@ -346,12 +327,7 @@ class Connection(api.Connection):
             msg = _("Cannot overwrite UUID for an existing BayModel.")
             raise exception.InvalidParameterValue(err=msg)
 
-        try:
-            return self._do_update_baymodel(baymodel_id, values)
-        except db_exc.DBDuplicateEntry:
-            raise exception.InstanceAssociated(
-                instance_uuid=values['instance_uuid'],
-                baymodel=baymodel_id)
+        return self._do_update_baymodel(baymodel_id, values)
 
     def _do_update_baymodel(self, baymodel_id, values):
         session = get_session()
@@ -407,11 +383,7 @@ class Connection(api.Connection):
         container.update(values)
         try:
             container.save()
-        except db_exc.DBDuplicateEntry as exc:
-            if 'instance_uuid' in exc.columns:
-                raise exception.InstanceAssociated(
-                    instance_uuid=values['instance_uuid'],
-                    container=values['uuid'])
+        except db_exc.DBDuplicateEntry:
             raise exception.ContainerAlreadyExists(uuid=values['uuid'])
         return container
 
@@ -444,12 +416,7 @@ class Connection(api.Connection):
             msg = _("Cannot overwrite UUID for an existing Container.")
             raise exception.InvalidParameterValue(err=msg)
 
-        try:
-            return self._do_update_container(container_id, values)
-        except db_exc.DBDuplicateEntry:
-            raise exception.InstanceAssociated(
-                instance_uuid=values['instance_uuid'],
-                container=container_id)
+        return self._do_update_container(container_id, values)
 
     def _do_update_container(self, container_id, values):
         session = get_session()
@@ -460,11 +427,6 @@ class Connection(api.Connection):
                 ref = query.with_lockmode('update').one()
             except NoResultFound:
                 raise exception.ContainerNotFound(container=container_id)
-
-            # Prevent instance_uuid overwriting
-            if values.get("instance_uuid") and ref.instance_uuid:
-                raise exception.ContainerAssociated(container=container_id,
-                                instance=ref.instance_uuid)
 
             if 'provision_state' in values:
                 values['provision_updated_at'] = timeutils.utcnow()
@@ -623,11 +585,7 @@ class Connection(api.Connection):
         pod.update(values)
         try:
             pod.save()
-        except db_exc.DBDuplicateEntry as exc:
-            if 'instance_uuid' in exc.columns:
-                raise exception.InstanceAssociated(
-                    instance_uuid=values['instance_uuid'],
-                    pod=values['uuid'])
+        except db_exc.DBDuplicateEntry:
             raise exception.PodAlreadyExists(uuid=values['uuid'])
         return pod
 
@@ -674,12 +632,7 @@ class Connection(api.Connection):
             msg = _("Cannot overwrite UUID for an existing Pod.")
             raise exception.InvalidParameterValue(err=msg)
 
-        try:
-            return self._do_update_pod(pod_id, values)
-        except db_exc.DBDuplicateEntry:
-            raise exception.InstanceAssociated(
-                instance_uuid=values['instance_uuid'],
-                pod=pod_id)
+        return self._do_update_pod(pod_id, values)
 
     def _do_update_pod(self, pod_id, values):
         session = get_session()
@@ -690,11 +643,6 @@ class Connection(api.Connection):
                 ref = query.with_lockmode('update').one()
             except NoResultFound:
                 raise exception.PodNotFound(pod=pod_id)
-
-            # Prevent instance_uuid overwriting
-            if values.get("instance_uuid") and ref.instance_uuid:
-                raise exception.PodAssociated(pod=pod_id,
-                                instance=ref.instance_uuid)
 
             if 'provision_state' in values:
                 values['provision_updated_at'] = timeutils.utcnow()
@@ -747,11 +695,7 @@ class Connection(api.Connection):
         service.update(values)
         try:
             service.save()
-        except db_exc.DBDuplicateEntry as exc:
-            if 'instance_uuid' in exc.columns:
-                raise exception.InstanceAssociated(
-                    instance_uuid=values['instance_uuid'],
-                    service=values['uuid'])
+        except db_exc.DBDuplicateEntry:
             raise exception.ServiceAlreadyExists(uuid=values['uuid'])
         return service
 
@@ -791,12 +735,7 @@ class Connection(api.Connection):
             msg = _("Cannot overwrite UUID for an existing Service.")
             raise exception.InvalidParameterValue(err=msg)
 
-        try:
-            return self._do_update_service(service_id, values)
-        except db_exc.DBDuplicateEntry:
-            raise exception.InstanceAssociated(
-                instance_uuid=values['instance_uuid'],
-                service=service_id)
+        return self._do_update_service(service_id, values)
 
     def _do_update_service(self, service_id, values):
         session = get_session()
@@ -807,11 +746,6 @@ class Connection(api.Connection):
                 ref = query.with_lockmode('update').one()
             except NoResultFound:
                 raise exception.ServiceNotFound(service=service_id)
-
-            # Prevent instance_uuid overwriting
-            if values.get("instance_uuid") and ref.instance_uuid:
-                raise exception.ServiceAssociated(service=service_id,
-                                instance=ref.instance_uuid)
 
             if 'provision_state' in values:
                 values['provision_updated_at'] = timeutils.utcnow()
@@ -861,11 +795,7 @@ class Connection(api.Connection):
         rc.update(values)
         try:
             rc.save()
-        except db_exc.DBDuplicateEntry as exc:
-            if 'instance_uuid' in exc.columns:
-                raise exception.InstanceAssociated(
-                    instance_uuid=values['instance_uuid'],
-                    pod=values['uuid'])
+        except db_exc.DBDuplicateEntry:
             raise exception.ReplicationControllerAlreadyExists(
                                                         uuid=values['uuid'])
         return rc
@@ -915,12 +845,7 @@ class Connection(api.Connection):
             msg = _("Cannot overwrite UUID for an existing rc.")
             raise exception.InvalidParameterValue(err=msg)
 
-        try:
-            return self._do_update_rc(rc_id, values)
-        except db_exc.DBDuplicateEntry:
-            raise exception.InstanceAssociated(
-                instance_uuid=values['instance_uuid'],
-                rc=rc_id)
+        return self._do_update_rc(rc_id, values)
 
     def _do_update_rc(self, rc_id, values):
         session = get_session()

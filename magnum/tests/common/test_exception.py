@@ -127,10 +127,6 @@ class TestException(base.BaseTestCase):
         self.assertRaises(exception.BayNotFound,
                     lambda: self.raise_(exception.BayNotFound()))
 
-    def test_BayAssociated(self):
-        self.assertRaises(exception.BayAssociated,
-                    lambda: self.raise_(exception.BayAssociated()))
-
     def test_BayAlreadyExists(self):
         self.assertRaises(exception.BayAlreadyExists,
                     lambda: self.raise_(exception.BayAlreadyExists()))
@@ -155,10 +151,6 @@ class TestException(base.BaseTestCase):
         self.assertRaises(exception.ContainerNotFound,
                     lambda: self.raise_(exception.ContainerNotFound()))
 
-    def test_ContainerAssociated(self):
-        self.assertRaises(exception.ContainerAssociated,
-                    lambda: self.raise_(exception.ContainerAssociated()))
-
     def test_ContainerAlreadyExists(self):
         self.assertRaises(exception.ContainerAlreadyExists,
                     lambda: self.raise_(exception.ContainerAlreadyExists()))
@@ -166,10 +158,6 @@ class TestException(base.BaseTestCase):
     def test_PodNotFound(self):
         self.assertRaises(exception.PodNotFound,
                     lambda: self.raise_(exception.PodNotFound()))
-
-    def test_PodAssociated(self):
-        self.assertRaises(exception.PodAssociated,
-                    lambda: self.raise_(exception.PodAssociated()))
 
     def test_PodAlreadyExists(self):
         self.assertRaises(exception.PodAlreadyExists,
@@ -186,10 +174,6 @@ class TestException(base.BaseTestCase):
     def test_ServiceNotFound(self):
         self.assertRaises(exception.ServiceNotFound,
                     lambda: self.raise_(exception.ServiceNotFound()))
-
-    def test_ServiceAssociated(self):
-        self.assertRaises(exception.ServiceAssociated,
-                    lambda: self.raise_(exception.ServiceAssociated()))
 
     def test_ServiceAlreadyExists(self):
         self.assertRaises(exception.ServiceAlreadyExists,

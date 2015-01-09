@@ -110,7 +110,6 @@ class Connection(object):
 
         :param bay_id: The id or uuid of a bay.
         :returns: A bay.
-        :raises: BayAssociated
         :raises: BayNotFound
         """
 
@@ -256,7 +255,6 @@ class Connection(object):
 
         :param container_id: The id or uuid of a container.
         :returns: A container.
-        :raises: BayAssociated
         :raises: BayNotFound
         """
 
@@ -415,7 +413,6 @@ class Connection(object):
 
         :param pod_id: The id or uuid of a pod.
         :returns: A pod.
-        :raises: BayAssociated
         :raises: BayNotFound
         """
 
@@ -496,7 +493,6 @@ class Connection(object):
 
         :param service_id: The id or uuid of a service.
         :returns: A service.
-        :raises: BayAssociated
         :raises: BayNotFound
         """
 

@@ -363,10 +363,6 @@ class BayNotFound(ResourceNotFound):
     message = _("Bay %(bay)s could not be found.")
 
 
-class BayAssociated(InvalidState):
-    message = _("Bay %(bay)s is associated with instance %(instance)s.")
-
-
 class BayAlreadyExists(Conflict):
     message = _("A node with UUID %(uuid)s already exists.")
 
@@ -379,21 +375,12 @@ class ContainerNotFound(ResourceNotFound):
     message = _("Container %(container)s could not be found.")
 
 
-class ContainerAssociated(InvalidState):
-    message = _("Container %(container)s is associated with "
-                "instance %(instance)s.")
-
-
 class ContainerAlreadyExists(Conflict):
     message = _("A container with UUID %(uuid)s already exists.")
 
 
 class PodNotFound(ResourceNotFound):
     message = _("Pod %(pod)s could not be found.")
-
-
-class PodAssociated(InvalidState):
-    message = _("Pod %(pod)s is associated with instance %(instance)s.")
 
 
 class PodAlreadyExists(Conflict):
@@ -410,11 +397,6 @@ class ReplicationControllerAlreadyExists(Conflict):
 
 class ServiceNotFound(ResourceNotFound):
     message = _("Service %(service)s could not be found.")
-
-
-class ServiceAssociated(InvalidState):
-    message = _("Service %(service)s is associated with "
-                "instance %(instance)s.")
 
 
 class ServiceAlreadyExists(Conflict):
