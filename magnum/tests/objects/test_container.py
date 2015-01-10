@@ -1,4 +1,5 @@
-# Copyright 2014 NEC Corporation.  All rights reserved.
+# Copyright 2015 OpenStack Foundation
+# All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -12,21 +13,104 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-# import magnum.objects
-# from magnum.objects import container
-from magnum.tests import base
-from magnum.tests import utils
+import mock
+from testtools.matchers import HasLength
+
+from magnum.common import exception
+from magnum.common import utils as magnum_utils
+from magnum import objects
+from magnum.tests.db import base
+from magnum.tests.db import utils
 
 
-class TestContainer(base.BaseTestCase):
+class TestContainerObject(base.DbTestCase):
+
     def setUp(self):
-        super(TestContainer, self).setUp()
-        self.ctx = utils.dummy_context()
+        super(TestContainerObject, self).setUp()
+        self.fake_container = utils.get_test_container()
 
-        self.data = [{'uuid': 'ce43e347f0b0422825245b3e5f140a81cef6e65b',
-                      'name': 'container1',
-                      'dns': ['8.8.8.8'],
-                      'image': 'ubuntu:latest',
-                      'command': ['echo', 'Hello World!'],
-                      'ports': [{"container_port": 80, "host_port": 8080}],
-                      'env': {'FOO': 'BAR'}}]
+    def test_get_by_id(self):
+        container_id = self.fake_container['id']
+        with mock.patch.object(self.dbapi, 'get_container_by_id',
+                               autospec=True) as mock_get_container:
+            mock_get_container.return_value = self.fake_container
+            container = objects.Container.get(self.context, container_id)
+            mock_get_container.assert_called_once_with(container_id)
+            self.assertEqual(self.context, container._context)
+
+    def test_get_by_uuid(self):
+        uuid = self.fake_container['uuid']
+        with mock.patch.object(self.dbapi, 'get_container_by_uuid',
+                               autospec=True) as mock_get_container:
+            mock_get_container.return_value = self.fake_container
+            container = objects.Container.get(self.context, uuid)
+            mock_get_container.assert_called_once_with(uuid)
+            self.assertEqual(self.context, container._context)
+
+    def test_get_bad_id_and_uuid(self):
+        self.assertRaises(exception.InvalidIdentity,
+                          objects.Container.get, self.context, 'not-a-uuid')
+
+    def test_list(self):
+        with mock.patch.object(self.dbapi, 'get_container_list',
+                               autospec=True) as mock_get_list:
+            mock_get_list.return_value = [self.fake_container]
+            containers = objects.Container.list(self.context)
+            self.assertEqual(mock_get_list.call_count, 1)
+            self.assertThat(containers, HasLength(1))
+            self.assertIsInstance(containers[0], objects.Container)
+            self.assertEqual(self.context, containers[0]._context)
+
+    def test_create(self):
+        with mock.patch.object(self.dbapi, 'create_container',
+                               autospec=True) as mock_create_container:
+            mock_create_container.return_value = self.fake_container
+            container = objects.Container(self.context, **self.fake_container)
+            container.create()
+            mock_create_container.assert_called_once_with(self.fake_container)
+            self.assertEqual(self.context, container._context)
+
+    def test_destroy(self):
+        uuid = self.fake_container['uuid']
+        with mock.patch.object(self.dbapi, 'get_container_by_uuid',
+                               autospec=True) as mock_get_container:
+            mock_get_container.return_value = self.fake_container
+            with mock.patch.object(self.dbapi, 'destroy_container',
+                                   autospec=True) as mock_destroy_container:
+                container = objects.Container.get_by_uuid(self.context, uuid)
+                container.destroy()
+                mock_get_container.assert_called_once_with(uuid)
+                mock_destroy_container.assert_called_once_with(uuid)
+                self.assertEqual(self.context, container._context)
+
+    def test_save(self):
+        uuid = self.fake_container['uuid']
+        with mock.patch.object(self.dbapi, 'get_container_by_uuid',
+                               autospec=True) as mock_get_container:
+            mock_get_container.return_value = self.fake_container
+            with mock.patch.object(self.dbapi, 'update_container',
+                                   autospec=True) as mock_update_container:
+                container = objects.Container.get_by_uuid(self.context, uuid)
+                container.image_id = 'container.img'
+                container.save()
+
+                mock_get_container.assert_called_once_with(uuid)
+                mock_update_container.assert_called_once_with(
+                        uuid, {'image_id': 'container.img'})
+                self.assertEqual(self.context, container._context)
+
+    def test_refresh(self):
+        uuid = self.fake_container['uuid']
+        new_uuid = magnum_utils.generate_uuid()
+        returns = [dict(self.fake_container, uuid=uuid),
+                   dict(self.fake_container, uuid=new_uuid)]
+        expected = [mock.call(uuid), mock.call(uuid)]
+        with mock.patch.object(self.dbapi, 'get_container_by_uuid',
+                               side_effect=returns,
+                               autospec=True) as mock_get_container:
+            container = objects.Container.get_by_uuid(self.context, uuid)
+            self.assertEqual(uuid, container.uuid)
+            container.refresh()
+            self.assertEqual(new_uuid, container.uuid)
+            self.assertEqual(expected, mock_get_container.call_args_list)
+            self.assertEqual(self.context, container._context)
