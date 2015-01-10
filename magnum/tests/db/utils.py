@@ -29,6 +29,7 @@ def get_test_baymodel(**kw):
         'external_network_id': kw.get('external_network_id',
                                       'd1f02cfb-d27f-4068-9332-84d907cb0e2e'),
         'dns_nameserver': kw.get('dns_nameserver', '8.8.1.1'),
+        'apiserver_port': kw.get('apiserver_port', 8080),
         'created_at': kw.get('created_at'),
         'updated_at': kw.get('updated_at'),
     }

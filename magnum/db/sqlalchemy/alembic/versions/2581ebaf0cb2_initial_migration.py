@@ -57,6 +57,7 @@ def upgrade():
         sa.Column('image_id', sa.String(length=255), nullable=True),
         sa.Column('external_network_id', sa.String(length=255), nullable=True),
         sa.Column('dns_nameserver', sa.String(length=255), nullable=True),
+        sa.Column('apiserver_port', sa.Integer(), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         mysql_ENGINE='InnoDB',
         mysql_DEFAULT_CHARSET='UTF8'

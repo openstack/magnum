@@ -28,7 +28,8 @@ class TestBayK8sHeat(base.BaseTestCase):
             'flavor_id': 'flavor_id',
             'keypair_id': 'keypair_id',
             'dns_nameserver': 'dns_nameserver',
-            'external_network_id': 'external_network_id'
+            'external_network_id': 'external_network_id',
+            'apiserver_port': 8080
         }
 
     def test_extract_bay_definition(self):
@@ -41,7 +42,8 @@ class TestBayK8sHeat(base.BaseTestCase):
             'external_network_id': 'external_network_id',
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
-            'server_flavor': 'flavor_id'
+            'server_flavor': 'flavor_id',
+            'apiserver_port': 8080
         }
         self.assertEqual(expected, bay_definition)
 
@@ -56,7 +58,8 @@ class TestBayK8sHeat(base.BaseTestCase):
             'ssh_key_name': 'keypair_id',
             'external_network_id': 'external_network_id',
             'server_image': 'image_id',
-            'server_flavor': 'flavor_id'
+            'server_flavor': 'flavor_id',
+            'apiserver_port': 8080
         }
         self.assertEqual(expected, bay_definition)
 
@@ -71,7 +74,8 @@ class TestBayK8sHeat(base.BaseTestCase):
             'ssh_key_name': 'keypair_id',
             'external_network_id': 'external_network_id',
             'dns_nameserver': 'dns_nameserver',
-            'server_flavor': 'flavor_id'
+            'server_flavor': 'flavor_id',
+            'apiserver_port': 8080
         }
         self.assertEqual(expected, bay_definition)
 
@@ -86,7 +90,25 @@ class TestBayK8sHeat(base.BaseTestCase):
             'ssh_key_name': 'keypair_id',
             'external_network_id': 'external_network_id',
             'dns_nameserver': 'dns_nameserver',
-            'server_image': 'image_id'
+            'server_image': 'image_id',
+            'apiserver_port': 8080
+        }
+        self.assertEqual(expected, bay_definition)
+
+    def test_extract_bay_definition_without_apiserver_port(self):
+        baymodel_dict = self.baymodel_dict
+        baymodel_dict['apiserver_port'] = None
+        baymodel = objects.BayModel({}, **baymodel_dict)
+        bay_definition = bay_k8s_heat._extract_bay_definition(
+            baymodel)
+
+        expected = {
+            'ssh_key_name': 'keypair_id',
+            'external_network_id': 'external_network_id',
+            'dns_nameserver': 'dns_nameserver',
+            'server_image': 'image_id',
+            'server_flavor': 'flavor_id',
+            'apiserver_port': 8080
         }
         self.assertEqual(expected, bay_definition)
 
