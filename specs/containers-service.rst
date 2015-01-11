@@ -83,6 +83,12 @@ Use cases
    multiple hosting environments). End-users want a single service that could
    help them build the container network, and dynamically modify the network
    topology by adding or removing containers to or from the network.
+9. Permit secure use of native ReST APIs. Provide two models of operation with
+   Magnum.  The first model allows Magnum to manage the lifecycle of Pods,
+   ReplicationControllers, and Services.  The second model allows end-users to
+   manage the lifecycle of Pods, ReplicationControllers, and Services by
+   providing direct secure access to the native ReST APIs in Kubernetes and
+   possibly Docker.
 
 Long Term Use Cases
 -------------------
