@@ -23,6 +23,7 @@ import pecan
 from pecan import testing
 import testscenarios
 
+from magnum.common import context as magnum_context
 from magnum.tests import conf_fixture
 
 
@@ -47,6 +48,7 @@ class TestCase(base.BaseTestCase):
             os.path.dirname(__file__),
             'config.py'
         ))
+        self.context = magnum_context.RequestContext()
         self.useFixture(conf_fixture.ConfFixture(cfg.CONF))
 
     def tearDown(self):
