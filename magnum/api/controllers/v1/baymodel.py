@@ -86,6 +86,9 @@ class BayModel(base.APIBase):
     external_network_id = wtypes.text
     """The external network to attach the Bay"""
 
+    apiserver_port = wtypes.IntegerType()
+    """The API server port for k8s"""
+
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated baymodel links"""
 
@@ -111,7 +114,7 @@ class BayModel(base.APIBase):
     def _convert_with_links(baymodel, url, expand=True):
         if not expand:
             baymodel.unset_fields_except(['uuid', 'name', 'type', 'image_id',
-                                     'ironic_baymodel_id'])
+                                     'ironic_baymodel_id', 'apiserver_port'])
 
         # never expose the baymodel_id attribute
         baymodel.baymodel_id = wtypes.Unset
@@ -136,6 +139,7 @@ class BayModel(base.APIBase):
                      name='example',
                      type='virt',
                      image_id='Fedora-k8s',
+                     apiserver_port=8080,
                      baymodel_count=1,
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())

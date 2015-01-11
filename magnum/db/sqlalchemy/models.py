@@ -145,6 +145,7 @@ class BayModel(Base):
     keypair_id = Column(String(255))
     external_network_id = Column(String(255))
     dns_nameserver = Column(String(255))
+    apiserver_port = Column(Integer())
 
 
 class Container(Base):
