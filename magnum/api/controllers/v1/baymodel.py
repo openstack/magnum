@@ -113,8 +113,8 @@ class BayModel(base.APIBase):
     @staticmethod
     def _convert_with_links(baymodel, url, expand=True):
         if not expand:
-            baymodel.unset_fields_except(['uuid', 'name', 'type', 'image_id',
-                                     'ironic_baymodel_id', 'apiserver_port'])
+            baymodel.unset_fields_except(['uuid', 'name', 'image_id',
+                                          'apiserver_port'])
 
         # never expose the baymodel_id attribute
         baymodel.baymodel_id = wtypes.Unset
