@@ -336,6 +336,10 @@
 # The listen IP for the magnum API server (string value)
 #host=127.0.0.1
 
+# The maximum number of items returned in a single response
+# from a collection resource. (integer value)
+#max_limit=1000
+
 
 #
 # Options defined in magnum.api.handlers.assembly_handler
