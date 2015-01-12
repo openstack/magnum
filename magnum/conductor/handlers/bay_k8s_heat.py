@@ -104,8 +104,8 @@ class Handler(object):
         def poll_and_check():
             stack = osc.heat().stacks.get(bay.stack_id)
             if stack.stack_status == 'CREATE_COMPLETE':
-                master_address = stack.outputs[2]['output_value']
-                minion_addresses = stack.outputs[0]['output_value']
+                master_address = stack.outputs[0]['output_value']
+                minion_addresses = stack.outputs[2]['output_value']
                 bay.master_address = master_address
                 bay.minions_address = minion_addresses
                 bay.save()
