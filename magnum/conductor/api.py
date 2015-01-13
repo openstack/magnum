@@ -82,8 +82,8 @@ class API(rpc_service.API):
     def pod_list(self, context, limit, marker, sort_key, sort_dir):
         return objects.Pod.list(context, limit, marker, sort_key, sort_dir)
 
-    def pod_delete(self, pod):
-        return self._call('pod_delete', pod=pod)
+    def pod_delete(self, uuid):
+        return self._call('pod_delete', uuid=uuid)
 
     def pod_show(self, ctxt, uuid):
         return objects.Pod.get_by_uuid(ctxt, uuid)

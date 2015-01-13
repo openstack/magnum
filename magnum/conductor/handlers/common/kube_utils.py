@@ -202,15 +202,15 @@ class KubeClient(object):
             LOG.error("Couldn't get list of pods due to error %s" % e)
             return None
 
-    def pod_delete(self, master_address, uuid):
-        LOG.debug("pod_delete %s" % uuid)
+    def pod_delete(self, master_address, name):
+        LOG.debug("pod_delete %s" % name)
         try:
-            out, err = utils.trycmd('kubectl', 'delete', 'pod', uuid,
+            out, err = utils.trycmd('kubectl', 'delete', 'pod', name,
                                     '-s', master_address,)
             if err:
                 return False
         except Exception as e:
-            LOG.error("Couldn't delete pod %s due to error %s" % (uuid, e))
+            LOG.error("Couldn't delete pod %s due to error %s" % (name, e))
             return False
         return True
 

@@ -346,6 +346,4 @@ class PodsController(rest.RestController):
         if self.from_pods:
             raise exception.OperationNotPermitted
 
-        rpc_pod = objects.Pod.get_by_uuid(pecan.request.context,
-                                          pod_uuid)
-        pecan.request.rpcapi.pod_delete(rpc_pod)
+        pecan.request.rpcapi.pod_delete(pod_uuid)

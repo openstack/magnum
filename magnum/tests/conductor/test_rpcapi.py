@@ -102,12 +102,11 @@ class RPCAPITestCase(base.DbTestCase):
                           version='1.0',
                           pod=self.fake_pod)
 
-    # TODO(sdake) the parameters to delete operations are highly suspect
     def test_pod_delete(self):
         self._test_rpcapi('pod_delete',
                           'call',
                           version='1.0',
-                          pod=self.fake_pod)
+                          uuid=self.fake_pod['uuid'])
 
     def test_rc_create(self):
         self._test_rpcapi('rc_create',
