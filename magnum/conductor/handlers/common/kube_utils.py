@@ -129,18 +129,18 @@ class KubeClient(object):
             LOG.error("Couldn't get list of services due to error %s" % e)
             return None
 
-    def service_delete(self, master_address, uuid):
-        LOG.debug("service_delete %s" % uuid)
+    def service_delete(self, master_address, name):
+        LOG.debug("service_delete %s" % name)
         try:
-            out, err = utils.trycmd('kubectl', 'delete', 'service', uuid,
+            out, err = utils.trycmd('kubectl', 'delete', 'service', name,
                                     '-s', master_address)
             if err:
                 return False
         except Exception as e:
             LOG.error("Couldn't delete service %s due to error %s"
-                      % (uuid, e))
+                      % (name, e))
             return False
-        return False
+        return True
 
     def service_get(self, master_address, uuid):
         LOG.debug("service_get %s" % uuid)

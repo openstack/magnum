@@ -10,6 +10,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 from magnum.conductor import api
+from magnum import objects
 from magnum.tests.db import base as db_base
 
 from mock import patch
@@ -21,7 +22,8 @@ class TestServiceController(db_base.DbTestCase):
         service.create()
         return service
 
-    def mock_service_destroy(self, service):
+    def mock_service_destroy(self, uuid):
+        service = objects.Service.get_by_uuid({}, uuid)
         service.destroy()
 
     def test_service_api(self):

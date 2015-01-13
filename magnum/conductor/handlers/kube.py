@@ -98,10 +98,12 @@ class Handler(object):
         LOG.debug("service_list")
         return self.kube_cli.service_list()
 
-    def service_delete(self, ctxt, service):
+    def service_delete(self, ctxt, uuid):
         LOG.debug("service_delete")
+        service = objects.Service.get_by_uuid(ctxt, uuid)
+        k8s_master_url = _retrive_k8s_master_url(ctxt, service)
         # trigger a kubectl command
-        status = self.kube_cli.service_delete(service.uuid)
+        status = self.kube_cli.service_delete(k8s_master_url, service.name)
         if not status:
             return None
         # call the service object to persist in db

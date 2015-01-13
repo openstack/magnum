@@ -338,6 +338,4 @@ class ServicesController(rest.RestController):
         if self.from_services:
             raise exception.OperationNotPermitted
 
-        rpc_service = objects.Service.get_by_uuid(pecan.request.context,
-                                                  service_uuid)
-        pecan.request.rpcapi.service_delete(rpc_service)
+        pecan.request.rpcapi.service_delete(service_uuid)

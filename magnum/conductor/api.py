@@ -68,8 +68,8 @@ class API(rpc_service.API):
         # or figure out a clean way to interact with k8s.
         return objects.Service.list(context, limit, marker, sort_key, sort_dir)
 
-    def service_delete(self, service):
-        return self._call('service_delete', service=service)
+    def service_delete(self, uuid):
+        return self._call('service_delete', uuid=uuid)
 
     def service_show(self, ctxt, uuid):
         return objects.Service.get_by_uuid(ctxt, uuid)
