@@ -29,7 +29,6 @@ class TestBayK8sHeat(base.BaseTestCase):
             'keypair_id': 'keypair_id',
             'dns_nameserver': 'dns_nameserver',
             'external_network_id': 'external_network_id',
-            'apiserver_port': 8080
         }
 
     def test_extract_bay_definition(self):
@@ -43,7 +42,6 @@ class TestBayK8sHeat(base.BaseTestCase):
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'server_flavor': 'flavor_id',
-            'apiserver_port': 8080
         }
         self.assertEqual(expected, bay_definition)
 
@@ -59,7 +57,6 @@ class TestBayK8sHeat(base.BaseTestCase):
             'external_network_id': 'external_network_id',
             'server_image': 'image_id',
             'server_flavor': 'flavor_id',
-            'apiserver_port': 8080
         }
         self.assertEqual(expected, bay_definition)
 
@@ -75,7 +72,6 @@ class TestBayK8sHeat(base.BaseTestCase):
             'external_network_id': 'external_network_id',
             'dns_nameserver': 'dns_nameserver',
             'server_flavor': 'flavor_id',
-            'apiserver_port': 8080
         }
         self.assertEqual(expected, bay_definition)
 
@@ -91,7 +87,6 @@ class TestBayK8sHeat(base.BaseTestCase):
             'external_network_id': 'external_network_id',
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
-            'apiserver_port': 8080
         }
         self.assertEqual(expected, bay_definition)
 
@@ -108,7 +103,6 @@ class TestBayK8sHeat(base.BaseTestCase):
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'server_flavor': 'flavor_id',
-            'apiserver_port': 8080
         }
         self.assertEqual(expected, bay_definition)
 
