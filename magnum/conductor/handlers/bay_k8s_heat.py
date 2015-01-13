@@ -83,6 +83,22 @@ def _create_stack(ctxt, osc, bay):
     return created_stack
 
 
+def _parse_stack_outputs(outputs):
+    parsed_outputs = {}
+
+    for output in outputs:
+        output_key = output["output_key"]
+        output_value = output["output_value"]
+        if output_key == "kube_minions_external":
+            parsed_outputs["kube_minions_external"] = output_value
+        if output_key == "kube_minions":
+            parsed_outputs["kube_minions"] = output_value
+        if output_key == "kube_master":
+            parsed_outputs["kube_master"] = output_value
+
+    return parsed_outputs
+
+
 class Handler(object):
     def __init__(self):
         super(Handler, self).__init__()
@@ -104,10 +120,11 @@ class Handler(object):
         def poll_and_check():
             stack = osc.heat().stacks.get(bay.stack_id)
             if stack.stack_status == 'CREATE_COMPLETE':
-                master_address = stack.outputs[0]['output_value']
-                minion_addresses = stack.outputs[2]['output_value']
+                parsed_outputs = _parse_stack_outputs(stack.outputs)
+                master_address = parsed_outputs["kube_master"]
+                minion_address = parsed_outputs["kube_minions_external"]
                 bay.master_address = master_address
-                bay.minions_address = minion_addresses
+                bay.minions_address = minion_address
                 bay.save()
                 raise loopingcall.LoopingCallDone()
             # poll_and_check is detached and polling long time to check status,
