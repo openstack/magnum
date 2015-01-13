@@ -10,6 +10,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 from magnum.conductor import api
+from magnum import objects
 from magnum.tests.db import base as db_base
 
 from mock import patch
@@ -20,7 +21,8 @@ class TestPodController(db_base.DbTestCase):
         pod.create()
         return pod
 
-    def mock_pod_destroy(self, pod):
+    def mock_pod_destroy(self, pod_uuid):
+        pod = objects.Pod.get_by_uuid({}, pod_uuid)
         pod.destroy()
 
     def test_pod_api(self):

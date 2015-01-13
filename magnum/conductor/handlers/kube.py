@@ -149,10 +149,13 @@ class Handler(object):
         LOG.debug("pod_list")
         return self.kube_cli.pod_list()
 
-    def pod_delete(self, ctxt, pod):
+    def pod_delete(self, ctxt, uuid):
         LOG.debug("pod_delete ")
         # trigger a kubectl command
-        status = self.kube_cli.pod_delete(pod.uuid)
+        pod = objects.Pod.get_by_uuid(ctxt, uuid)
+        k8s_master_url = _retrive_k8s_master_url(ctxt, pod)
+
+        status = self.kube_cli.pod_delete(k8s_master_url, pod.name)
         if not status:
             return None
         # call the pod object to persist in db
