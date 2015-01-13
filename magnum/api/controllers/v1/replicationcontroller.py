@@ -83,10 +83,13 @@ class ReplicationController(base.APIBase):
     """Selector of this ReplicationController"""
 
     replicas = wtypes.IntegerType()
-    """Replicas of this ReplicationController """
+    """Replicas of this ReplicationController"""
 
     rc_definition_url = wtypes.text
     """URL for ReplicationController file to create the RC"""
+
+    rc_data = wtypes.text
+    """Data for service to create the ReplicationController"""
 
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated rc links"""
@@ -311,6 +314,9 @@ class ReplicationControllersController(rest.RestController):
         for field in objects.ReplicationController.fields:
             # ignore rc_definition_url as it was used for create rc
             if field == 'rc_definition_url':
+                continue
+            # ignore rc_data as it was used for create rc
+            if field == 'rc_data':
                 continue
             try:
                 patch_val = getattr(rc, field)
