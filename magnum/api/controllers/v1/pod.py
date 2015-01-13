@@ -25,6 +25,7 @@ from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
 from magnum.common import exception
+from magnum.common import k8s_manifest
 from magnum import objects
 
 
@@ -70,7 +71,7 @@ class Pod(base.APIBase):
     uuid = types.uuid
     """Unique UUID for this pod"""
 
-    name = wtypes.text
+    name = wsme.wsattr(wtypes.text, readonly=True)
     """Name of this pod"""
 
     desc = wtypes.text
@@ -82,7 +83,7 @@ class Pod(base.APIBase):
     images = [wtypes.text]
     """A list of images used by containers in this pod."""
 
-    labels = {wtypes.text: wtypes.text}
+    labels = wsme.wsattr({wtypes.text: wtypes.text}, readonly=True)
     """Labels of this pod"""
 
     status = wtypes.text
@@ -156,6 +157,15 @@ class Pod(base.APIBase):
         # _pod_uuid variable
         sample._pod_uuid = '87504bd9-ca50-40fd-b14e-bcb23ed42b27'
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
+
+    def parse_manifest(self):
+        # Set pod name from its manifest
+        # TODO(yuanying): retrive pod name from pod_definition_url
+        if hasattr(self, "pod_data") and self.pod_data is not None:
+            manifest = k8s_manifest.parse(self.pod_data)
+            self.name = manifest["id"]
+            if "labels" in manifest:
+                self.labels = manifest["labels"]
 
 
 class PodCollection(collection.Collection):
@@ -276,6 +286,7 @@ class PodsController(rest.RestController):
         if self.from_pods:
             raise exception.OperationNotPermitted
 
+        pod.parse_manifest()
         pod_obj = objects.Pod(pecan.request.context,
                               **pod.as_dict())
         new_pod = pecan.request.rpcapi.pod_create(pod_obj)
