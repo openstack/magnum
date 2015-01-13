@@ -28,12 +28,25 @@ class TestServiceController(db_base.DbTestCase):
         with patch.object(api.API, 'service_create') as mock_method:
             mock_method.side_effect = self.mock_service_create
             # Create a service
-            params = '{"name": "service_foo",'\
-                     '"bay_uuid": "7ae81bb3-dec3-4289-8d6c-da80bd8001ae",' \
-                     '"labels": {"bar": "foo"},' \
-                     '"selector": {"bar": "foo"}, "ip": "172.17.2.3",' \
-                     '"port": 88,' \
-                     '"service_definition_url": "http://172.17.1.2/svc.json"}'
+            params = '''
+            {
+                "bay_uuid": "7ae81bb3-dec3-4289-8d6c-da80bd8001ae",
+                "service_data": "\
+                {\
+                  \\"id\\": \\"service_foo\\",\
+                  \\"kind\\": \\"Service\\",\
+                  \\"apiVersion\\": \\"v1beta1\\",\
+                  \\"port\\": 88,\
+                  \\"selector\\": {\
+                    \\"bar\\": \\"foo\\"\
+                  },\
+                  \\"labels\\": {\
+                    \\"bar\\": \\"foo\\"\
+                  }\
+                }\
+                \"
+            }
+            '''
             response = self.app.post('/v1/services',
                                      params=params,
                                      content_type='application/json')
@@ -49,7 +62,6 @@ class TestServiceController(db_base.DbTestCase):
                              c.get('bay_uuid'))
             self.assertEqual('foo', c.get('labels')['bar'])
             self.assertEqual('foo', c.get('selector')['bar'])
-            self.assertEqual('172.17.2.3', c.get('ip'))
             self.assertEqual(88, c.get('port'))
 
             # Get just the one we created

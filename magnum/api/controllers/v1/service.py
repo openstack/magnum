@@ -24,6 +24,7 @@ from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
 from magnum.common import exception
+from magnum.common import k8s_manifest
 from magnum import objects
 
 
@@ -61,16 +62,16 @@ class Service(base.APIBase):
     uuid = types.uuid
     """Unique UUID for this service"""
 
-    name = wsme.wsattr(wtypes.text, mandatory=True)
+    name = wsme.wsattr(wtypes.text, readonly=True)
     """ The name of the service."""
 
     bay_uuid = types.uuid
     """Unique UUID of the bay the service runs on"""
 
-    labels = {wtypes.text: wtypes.text}
+    labels = wsme.wsattr({wtypes.text: wtypes.text}, readonly=True)
     """Labels of this service"""
 
-    selector = {wtypes.text: wtypes.text}
+    selector = wsme.wsattr({wtypes.text: wtypes.text}, readonly=True)
     """Selector of this service"""
 
     ip = wtypes.text
@@ -138,6 +139,19 @@ class Service(base.APIBase):
                      updated_at=datetime.datetime.utcnow())
         sample._service_uuid = '87504bd9-ca50-40fd-b14e-bcb23ed42b27'
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
+
+    def parse_manifest(self):
+        # Set service name and port from its manifest
+        # TODO(yuanying): retrive service name from definition_url
+        if hasattr(self, "service_data") and self.service_data is not None:
+            manifest = k8s_manifest.parse(self.service_data)
+            self.name = manifest["id"]
+            if "port" in manifest:
+                self.port = manifest["port"]
+            if "selector" in manifest:
+                self.selector = manifest["selector"]
+            if "labels" in manifest:
+                self.labels = manifest["labels"]
 
 
 class ServiceCollection(collection.Collection):
@@ -263,6 +277,7 @@ class ServicesController(rest.RestController):
         if self.from_services:
             raise exception.OperationNotPermitted
 
+        service.parse_manifest()
         service_obj = objects.Service(pecan.request.context,
                                       **service.as_dict())
         new_service = pecan.request.rpcapi.service_create(service_obj)

@@ -34,7 +34,7 @@ class Service(base.MagnumObject):
         'labels': obj_utils.dict_or_none,
         'selector': obj_utils.dict_or_none,
         'ip': obj_utils.str_or_none,
-        'port': int,
+        'port': obj_utils.int_or_none,
         'service_definition_url': obj_utils.str_or_none,
         'service_data': obj_utils.str_or_none,
     }
