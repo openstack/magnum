@@ -27,10 +27,15 @@ class TestPodController(db_base.DbTestCase):
         with patch.object(api.API, 'pod_create') as mock_method:
             mock_method.side_effect = self.mock_pod_create
             # Create a pod
-            params = '{"name": "pod_example_A", "desc": "My Pod",' \
-                     '"bay_uuid": "7ae81bb3-dec3-4289-8d6c-da80bd8001ae",' \
-                     '"images": ["ubuntu"], "labels": {"foo": "foo1"},' \
-                     '"pod_definition_url": "http://172.17.1.2/pod.json"}'
+            params = '''
+            {
+                "desc": "My Pod",
+                "bay_uuid": "7ae81bb3-dec3-4289-8d6c-da80bd8001ae",
+                "images": ["ubuntu"],
+                "pod_data": "{\\"id\\": \\"name_of_pod\\", \
+                \\"labels\\": {\\"foo\\": \\"foo1\\"} }"
+            }
+            '''
             response = self.app.post('/v1/pods',
                                      params=params,
                                      content_type='application/json')
@@ -42,7 +47,7 @@ class TestPodController(db_base.DbTestCase):
             self.assertEqual(1, len(response.json))
             c = response.json['pods'][0]
             self.assertIsNotNone(c.get('uuid'))
-            self.assertEqual('pod_example_A', c.get('name'))
+            self.assertEqual('name_of_pod', c.get('name'))
             self.assertEqual('My Pod', c.get('desc'))
             self.assertEqual('7ae81bb3-dec3-4289-8d6c-da80bd8001ae',
                              c.get('bay_uuid'))
