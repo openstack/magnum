@@ -49,7 +49,6 @@ def _extract_bay_definition(baymodel):
     bay_definition = {
         'ssh_key_name': baymodel.keypair_id,
         'external_network_id': baymodel.external_network_id,
-        'apiserver_port': 8080
     }
     if baymodel.dns_nameserver:
         bay_definition['dns_nameserver'] = baymodel.dns_nameserver
@@ -57,8 +56,9 @@ def _extract_bay_definition(baymodel):
         bay_definition['server_image'] = baymodel.image_id
     if baymodel.flavor_id:
         bay_definition['server_flavor'] = baymodel.flavor_id
-    if baymodel.apiserver_port:
-        bay_definition['apiserver_port'] = baymodel.apiserver_port
+    # TODO(yuanying): Add below lines if apiserver_port parameter is supported
+    # if baymodel.apiserver_port:
+    #     bay_definition['apiserver_port'] = baymodel.apiserver_port
 
     return bay_definition
 
