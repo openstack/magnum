@@ -41,13 +41,20 @@ def _retrive_bay(ctxt, obj):
     return objects.Bay.get_by_uuid(ctxt, bay_uuid)
 
 
+def _retrive_baymodel(ctxt, obj):
+    return objects.BayModel.get_by_uuid(ctxt, obj.baymodel_id)
+
+
 def _retrive_k8s_master_url(ctxt, obj):
+    apiserver_port = cfg.CONF.kubernetes.k8s_port
     if hasattr(obj, 'bay_uuid'):
         obj = _retrive_bay(ctxt, obj)
+        baymodel = _retrive_baymodel(ctxt, obj)
+        apiserver_port = baymodel.apiserver_port
 
     params = {
         'k8s_protocol': cfg.CONF.kubernetes.k8s_protocol,
-        'k8s_port': cfg.CONF.kubernetes.k8s_port,
+        'k8s_port': apiserver_port,
         'master_address': obj.master_address
     }
     return "%(k8s_protocol)s://%(master_address)s:%(k8s_port)s" % params

@@ -34,6 +34,9 @@ class TestKube(base.BaseTestCase):
     def mock_bay(self):
         return objects.Bay({})
 
+    def mock_baymodel(self):
+        return objects.BayModel({})
+
     @patch('magnum.objects.Bay.get_by_uuid')
     def test_retrive_bay_from_pod(self,
                                   mock_bay_get_by_uuid):
@@ -49,20 +52,30 @@ class TestKube(base.BaseTestCase):
                                                      expected_bay_uuid)
 
     @patch('magnum.objects.Bay.get_by_uuid')
+    @patch('magnum.objects.BayModel.get_by_uuid')
     def test_retrive_k8s_master_url_from_pod(self,
+                                    mock_baymodel_get_by_uuid,
                                     mock_bay_get_by_uuid):
         expected_context = 'context'
         expected_master_address = 'master_address'
+        expected_baymodel_id = 'e74c40e0-d825-11e2-a28f-0800200c9a61'
+        expected_apiserver_port = 8080
 
         pod = self.mock_pod()
         pod.bay_uuid = 'bay_uuid'
         bay = self.mock_bay()
         bay.master_address = expected_master_address
+        bay.baymodel_id = expected_baymodel_id
+        baymodel = self.mock_baymodel()
+        baymodel.apiserver_port = expected_apiserver_port
+
         mock_bay_get_by_uuid.return_value = bay
+        mock_baymodel_get_by_uuid.return_value = baymodel
 
         actual_master_address = kube._retrive_k8s_master_url(expected_context,
                                                              pod)
-        self.assertEqual("http://%s:8080" % expected_master_address,
+        self.assertEqual("http://%s:%d" % (expected_master_address,
+                                           expected_apiserver_port),
                          actual_master_address)
 
     @patch('magnum.conductor.handlers.kube._retrive_k8s_master_url')
