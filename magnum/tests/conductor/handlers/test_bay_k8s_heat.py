@@ -106,6 +106,37 @@ class TestBayK8sHeat(base.BaseTestCase):
         }
         self.assertEqual(expected, bay_definition)
 
+    def test_parse_stack_outputs(self):
+        expected_master_address = 'master_address'
+        expected_minion_address = ['minion', 'address']
+        expected_minion_external_address = ['ex_minion', 'address']
+        expected_return_value = {
+            'kube_master': expected_master_address,
+            'kube_minions': expected_minion_address,
+            'kube_minions_external': expected_minion_external_address
+        }
+
+        outputs = [
+          {
+             "output_value": expected_minion_external_address,
+             "description": "No description given",
+             "output_key": "kube_minions_external"
+           },
+           {
+             "output_value": expected_minion_address,
+             "description": "No description given",
+             "output_key": "kube_minions"
+           },
+           {
+             "output_value": expected_master_address,
+             "description": "No description given",
+             "output_key": "kube_master"
+           }
+        ]
+
+        parsed_outputs = bay_k8s_heat._parse_stack_outputs(outputs)
+        self.assertEqual(expected_return_value, parsed_outputs)
+
     @patch('heatclient.common.template_utils.get_template_contents')
     @patch('magnum.objects.BayModel.get_by_uuid')
     @patch('magnum.conductor.handlers.bay_k8s_heat._extract_bay_definition')
