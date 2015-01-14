@@ -34,6 +34,7 @@ class ReplicationController(base.MagnumObject):
         'selector': obj_utils.dict_or_none,
         'replicas': int,
         'rc_definition_url': obj_utils.str_or_none,
+        'rc_data': obj_utils.str_or_none,
     }
 
     @staticmethod
@@ -42,6 +43,9 @@ class ReplicationController(base.MagnumObject):
         for field in rc.fields:
             # ignore rc_definition_url as it was used for create rc
             if field == 'rc_definition_url':
+                continue
+            # ignore rc_data as it was used for create rc
+            if field == 'rc_data':
                 continue
             rc[field] = db_rc[field]
 

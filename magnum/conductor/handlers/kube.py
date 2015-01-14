@@ -174,8 +174,9 @@ class Handler(object):
     # Replication Controller Operations
     def rc_create(self, ctxt, rc):
         LOG.debug("rc_create")
+        k8s_master_url = _retrive_k8s_master_url(ctxt, rc)
         # trigger a kubectl command
-        status = self.kube_cli.rc_create(rc)
+        status = self.kube_cli.rc_create(k8s_master_url, rc)
         if not status:
             return None
         # call the rc object to persist in db

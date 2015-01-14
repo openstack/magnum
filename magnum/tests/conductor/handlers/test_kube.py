@@ -31,6 +31,9 @@ class TestKube(base.BaseTestCase):
     def mock_service(self):
         return objects.Service({})
 
+    def mock_rc(self):
+        return objects.ReplicationController({})
+
     def mock_bay(self):
         return objects.Bay({})
 
@@ -120,3 +123,18 @@ class TestKube(base.BaseTestCase):
             self.kube_handler.service_create({}, expected_service)
             mock_kube_cli.service_create.assert_called_once_with(
                 expected_master_url, expected_service)
+
+    @patch('magnum.conductor.handlers.kube._retrive_k8s_master_url')
+    def test_rc_create_with_success(self,
+                                    mock_retrive_k8s_master_url):
+        expected_master_url = 'master_address'
+        expected_rc = self.mock_rc()
+        expected_rc.create = mock.MagicMock()
+
+        mock_retrive_k8s_master_url.return_value = expected_master_url
+        with patch.object(self.kube_handler, 'kube_cli') as mock_kube_cli:
+            mock_kube_cli.rc_create.return_value = True
+
+            self.kube_handler.rc_create({}, expected_rc)
+            mock_kube_cli.rc_create.assert_called_once_with(
+                expected_master_url, expected_rc)
