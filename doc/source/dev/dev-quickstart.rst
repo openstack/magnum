@@ -82,21 +82,25 @@ Exercising the Services Using DevStack
 
 DevStack does not yet have Magnum support.  It is, however, necessary to
 develop Magnum from a devstack environment at the present time.  Magnum depends
-on Ironic to create and schedule bare metal machines.  These instructions show
-how to use Ironic in a virtualized environment so only one machine is needed
-to develop.
+on Nova, Heat, and Neutron to create and schedule virtual machines to simulate
+bare-metal.  For milestone #2 we intend to introduce support for Ironic
+deployment of baremetal nodes.
 
 Clone DevStack::
 
     cd ~
     git clone https://github.com/openstack-dev/devstack.git devstack
 
-Create devstack/localrc with minimal settings required to enable Ironic.
-Magnum depends on Ironic for bare metal provisioning of an micro-OS containing
-Kubernetes and Docker.  For Ironic, we recommend using the pxe+ssh driver::
+Create devstack/localrc with minimal settings required to enable Heat
+and Neutron.::
 
     cd devstack
     cat >localrc <<END
+    # Modify to your environment
+    FLOATING_RANGE=192.168.1.224/27
+    PUBLIC_NETWORK_GATEWAY=192.168.1.225
+    PUBLIC_INTERFACE=em1
+
     # Credentials
     ADMIN_PASSWORD=password
     DATABASE_PASSWORD=password
@@ -104,10 +108,7 @@ Kubernetes and Docker.  For Ironic, we recommend using the pxe+ssh driver::
     SERVICE_PASSWORD=password
     SERVICE_TOKEN=password
 
-    # Enable Ironic API and Ironic Conductor
-    enable_service ironic
-    enable_service ir-api
-    enable_service ir-cond
+    enable_service rabbit
 
     # Enable Neutron which is required by Ironic and disable nova-network.
     disable_service n-net
@@ -118,50 +119,44 @@ Kubernetes and Docker.  For Ironic, we recommend using the pxe+ssh driver::
     enable_service q-meta
     enable_service neutron
 
-    # Create 5 virtual machines to pose as Ironic's baremetal nodes.
-    IRONIC_VM_COUNT=5
-    IRONIC_VM_SSH_PORT=22
-    IRONIC_BAREMETAL_BASIC_OPS=True
+    FIXED_RANGE=10.0.0.0/24
 
-    # The parameters below represent the minimum possible values to create
-    # functional nodes.
-    IRONIC_VM_SPECS_RAM=1024
-    IRONIC_VM_SPECS_DISK=10
+    Q_USE_SECGROUP=True
+    ENABLE_TENANT_VLANS=True
+    TENANT_VLAN_RANGE=
 
-    # Size of the ephemeral partition in GB. Use 0 for no ephemeral partition.
-    IRONIC_VM_EPHEMERAL_DISK=0
-
-    VIRT_DRIVER=ironic
-
-    # By default, DevStack creates a 10.0.0.0/24 network for instances.
-    # If this overlaps with the hosts network, you may adjust with the
-    # following.
-    NETWORK_GATEWAY=10.1.0.1
-    FIXED_RANGE=10.1.0.0/24
-    FIXED_NETWORK_SIZE=256
+    PHYSICAL_NETWORK=public
+    OVS_PHYSICAL_BRIDGE=br-ex
 
     # Log all output to files
     LOGFILE=$HOME/devstack.log
     SCREEN_LOGDIR=$HOME/logs
-    IRONIC_VM_LOG_DIR=$HOME/ironic-bm-logs
+
+    # Magnum doesn't work with latest heat.
+    # See: https://bugs.launchpad.net/magnum/+bug/1411092
+    HEAT_BRANCH=stable/juno
 
     END
 
 At this time, Magnum has only been tested with the Fedora Atomic micro-OS.
 Magnum will likely work with other micro-OS platforms, but each one requires
-individual support.
+individual support in the heat template.
 
 The next step is to store the Fedora Atomic micro-OS in glance.  The steps for
-making the Atomic images for Ironic are a bit detailed, but fortunately one
-of the core Magnum developers has written some simple scripts to automate
-the process::
+updating Fedora Atomic images are a bit detailed.  Fortunately one of the core
+developers has made Atomic images avaliable via the web:
+
+Create a new shell, and source the devstack openrc script::
+
+    source ~/devstack/openrc admin admin
 
     cd ~
-    git clone http://github.com/sdake/fedora-atomic-to-liveos-pxe
-    cd fedora-atomic-to-liveos-pxe
-    wget http://dl.fedoraproject.org/pub/alt/stage/21_RC5/Cloud/Images/x86_64/Fedora-Cloud-Atomic-20141203-21.x86_64.qcow2
-    ./convert.sh
-    ./register-with-glance.sh
+    wget https://fedorapeople.org/groups/heat/kolla/fedora-21-atomic.qcow2
+    glance image-create --name fedora21-atomic \
+                        --is-public True \
+                        --disk-format qcow2 \
+                        --container-format bare < fedora-21-atomic.qcow2
+    nova keypair-add --pub-key ~/.ssh/id_rsa.pub testkey
 
 Next, create a database in MySQL for Magnum::
 
@@ -177,6 +172,9 @@ Next, clone and install magnum::
     git clone https://github.com/stackforge/magnum
     cd magnum
     sudo pip install -e .
+    mkdir -p /etc/magnum/templates
+    cp -r etc/magnum/templates/heat-kubernetes \
+          /etc/magnum/templates/
 
 Next, clone and install the client::
 
@@ -185,9 +183,26 @@ Next, clone and install the client::
     cd python-magnumclient
     sudo pip install -e .
 
-Next configure the database connection for Magnum::
+Next configure Magnum::
 
-    sed -i "s/#connection=.*/connection=mysql:\/\/root:password@localhost\/magnum/" etc/magnum/magnum.conf.sample
+    mkdir -p /etc/magnum
+    cat >/etc/magnum/magnum.conf <<END
+    [DEFAULT]
+    debug = True
+    verbose = True
+
+    rabbit_password = password
+
+    [database]
+    connection = mysql://root:password@localhost/magnum
+
+    [keystone_authtoken]
+    admin_password = password
+    admin_user = admin
+    identity_uri = http://127.0.0.1:35357
+
+    auth_uri=http://127.0.0.1:5000/v2.0
+    END
 
 Next, configure the database for use with Magnum::
 
@@ -212,18 +227,50 @@ Next start the ackend service in a new window::
 
     magnum-conductor
 
-Create a new shell, and source the devstack openrc script::
-
     . ~/repos/devstack/openrc admin admin
 
 To get started, list the available commands and resources::
 
     magnum help
 
+First create a baymodel, which is similar in nature to a flavor.  It informs
+Magnum in which way to construct a bay.::
+
+    magnum baymodel-create  --name steak --image-id fedora21-atomic
+
 A bay can be created with 3 nodes.  One node will be configured as a master
 Kubernetes node, while the remaining two nodes will be configured as minions::
 
-    magnum bay-create --name=cats --type=baremetal --image_id=<IMAGE_ID_FROM_GLANCE_REGISTRATION_SCRIPT> --node_count=3
+First obtain the public Neutron network UUID::
+
+    [nobody@bigiron ~]$ neutron net-show public
+    +---------------------------+--------------------------------------+
+    | Field                     | Value                                |
+    +---------------------------+--------------------------------------+
+    | admin_state_up            | True                                 |
+    | id                        | 267efcaf-c38d-43ee-86d1-db3c3c758917 |
+    | name                      | public                               |
+    | provider:network_type     | vxlan                                |
+    | provider:physical_network |                                      |
+    | provider:segmentation_id  | 1002                                 |
+    | router:external           | True                                 |
+    | shared                    | False                                |
+    | status                    | ACTIVE                               |
+    | subnets                   | 8386f1d0-3ad3-4397-8c95-972a2e5097a9 |
+    | tenant_id                 | 59abd617f1bd47c1baa4d8290fe37016     |
+    +---------------------------+--------------------------------------+
+
+Next create a baymodel::
+
+    magnum baymodel-create --name testbaymodel --image-id fedora21-atomic \
+                           --keypair-id=testkey \
+                           --external-network-id 267efcaf-c38d-43ee-86d1-db3c3c758917 \
+                           --dns-nameserver 8.8.8.8 --flavor-id m1.medium
+
+Next create a bay. Use the baymodel UUID as a template for bay creation.
+This bay will result in one master kubernetes node and three minion nodes.::
+
+    magnum bay-create --name testbay --baymodel-id $BAYMODEL_UUID --node-count 3
 
 The existing bays can be listed as follows::
 
@@ -233,6 +280,26 @@ If you make some code changes and want to test their effects,
 just restart either magnum-api or magnum-conductor.  the -e option to
 pip install will link to the location from where the source code
 was installed.
+
+To start a kubernetes pod, use Kolla as an example repo::
+
+    git clone http://github.com/stackforge/kolla
+
+    cd kolla/k8s/pod
+    magnum pod-create --pod-file ./mariadb-pod.yaml --bay-id $BAY_UUID
+
+To start a kubernetes service, use Kolla as an example repo::
+
+    cd ../service
+    magnum service-create --service-file ./mariadb-service.yaml --bay-id $BAY_UUID
+
+To start a kubernetes replication controller, use Kolla as an example repo::
+
+    cd ../replication
+    magnum rc-create --rc-file ./nova-compute-replicationyaml --bay-id $BAY_UUID
+
+Full lifecycle and introspection operations for each object are supported.  For
+exmaple, magnum bay-create magnum baymodel-delete, magnum rc-show, magnum service-list.
 
 ================================
 Building developer documentation
