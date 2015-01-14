@@ -149,7 +149,9 @@ class Handler(object):
         osc = clients.OpenStackClients(ctxt)
         bay = objects.Bay.get_by_uuid(ctxt, uuid)
         stack_id = bay.stack_id
+        # TODO(yuanying): handle stack status DELETE_IN_PROGRESS
         osc.heat().stacks.delete(stack_id)
+        # TODO(yuanying): bay.destroy will be triggered by stack status change.
         bay.destroy()
 
         return None
