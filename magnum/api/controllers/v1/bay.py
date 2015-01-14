@@ -313,6 +313,4 @@ class BaysController(rest.RestController):
         if self.from_bays:
             raise exception.OperationNotPermitted
 
-        rpc_bay = objects.Bay.get_by_uuid(pecan.request.context,
-                                            bay_uuid)
-        rpc_bay.destroy()
+        pecan.request.rpcapi.bay_delete(bay_uuid)

@@ -10,6 +10,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 from magnum.conductor import api
+from magnum import objects
 from magnum.tests.db import base as db_base
 
 from mock import patch
@@ -19,6 +20,10 @@ class TestBayController(db_base.DbTestCase):
     def simulate_rpc_bay_create(self, bay):
         bay.create()
         return bay
+
+    def mock_bay_destroy(self, bay_uuid):
+        bay = objects.Bay.get_by_uuid({}, bay_uuid)
+        bay.destroy()
 
     def test_bay_api(self):
         with patch.object(api.API, 'bay_create') as mock_method:
@@ -52,6 +57,8 @@ class TestBayController(db_base.DbTestCase):
                                    params=params)
             self.assertEqual(response.status_int, 200)
 
+        with patch.object(api.API, 'bay_delete') as mock_method:
+            mock_method.side_effect = self.mock_bay_destroy
             # Delete the bay we created
             response = self.app.delete('/v1/bays/%s' % c.get('uuid'))
             self.assertEqual(response.status_int, 204)
