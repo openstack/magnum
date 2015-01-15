@@ -181,7 +181,7 @@ def get_test_rc(**kw):
         'name': kw.get('name', 'service1'),
         'images': kw.get('images', ['steak/for-dinner']),
         'bay_uuid': kw.get('bay_uuid', '10a47dd1-4874-4298-91cf-eff046dbdb8e'),
-        'selector': kw.get('selector', {'name': 'foo'}),
+        'labels': kw.get('labels', {'name': 'foo'}),
         'replicas': kw.get('replicas', 3),
         'rc_definition_url': kw.get('file:///tmp/rc.yaml'),
         'created_at': kw.get('created_at'),

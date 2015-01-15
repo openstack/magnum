@@ -229,5 +229,5 @@ class ReplicationController(Base):
     name = Column(String(255))
     bay_uuid = Column(String(36))
     images = Column(JSONEncodedList)
-    selector = Column(JSONEncodedDict)
+    labels = Column(JSONEncodedDict)
     replicas = Column(Integer())

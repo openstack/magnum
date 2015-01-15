@@ -128,7 +128,7 @@ def upgrade():
         sa.Column('name', sa.String(length=255), nullable=True),
         sa.Column('bay_uuid', sa.String(length=36), nullable=True),
         sa.Column('images', sa.Text(), nullable=False),
-        sa.Column('selector', sa.Text(), nullable=True),
+        sa.Column('labels', sa.Text(), nullable=True),
         sa.Column('replicas', sa.Integer(), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         mysql_ENGINE='InnoDB',

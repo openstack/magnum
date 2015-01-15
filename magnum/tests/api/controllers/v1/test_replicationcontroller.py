@@ -27,10 +27,20 @@ class TestRCController(db_base.DbTestCase):
         with patch.object(api.API, 'rc_create') as mock_method:
             mock_method.side_effect = self.mock_rc_create
             # Create a replication controller
-            params = '{"name": "rc_example_A", "images": ["ubuntu"],' \
-                     '"selector": {"foo": "foo1"}, "replicas": 2,' \
-                     '"bay_uuid": "7ae81bb3-dec3-4289-8d6c-da80bd8001ae",' \
-                     '"rc_definition_url": "http://172.17.1.2/rc.json"}'
+            params = '''
+            {
+                "bay_uuid": "7ae81bb3-dec3-4289-8d6c-da80bd8001ae",
+                "replicationcontroller_data": "\
+                {\
+                  \\"id\\": \\"name_of_rc\\", \
+                  \\"replicas\\": 3, \
+                  \\"labels\\": {\
+                    \\"foo\\": \\"foo1\\"\
+                  }\
+                }\
+                \"
+            }
+            '''
             response = self.app.post('/v1/rcs',
                                      params=params,
                                      content_type='application/json')
@@ -42,11 +52,10 @@ class TestRCController(db_base.DbTestCase):
             self.assertEqual(1, len(response.json))
             c = response.json['rcs'][0]
             self.assertIsNotNone(c.get('uuid'))
-            self.assertEqual('rc_example_A', c.get('name'))
-            self.assertEqual(['ubuntu'], c.get('images'))
+            self.assertEqual('name_of_rc', c.get('name'))
             self.assertEqual('7ae81bb3-dec3-4289-8d6c-da80bd8001ae',
                              c.get('bay_uuid'))
-            self.assertEqual('foo1', c.get('selector')['foo'])
+            self.assertEqual('foo1', c.get('labels')['foo'])
 
             # Get just the one we created
             response = self.app.get('/v1/rcs/%s' % c.get('uuid'))

@@ -31,10 +31,10 @@ class ReplicationController(base.MagnumObject):
         'name': obj_utils.str_or_none,
         'images': obj_utils.list_or_none,
         'bay_uuid': obj_utils.str_or_none,
-        'selector': obj_utils.dict_or_none,
-        'replicas': int,
+        'labels': obj_utils.dict_or_none,
+        'replicas': obj_utils.int_or_none,
         'rc_definition_url': obj_utils.str_or_none,
-        'rc_data': obj_utils.str_or_none,
+        'repplicationcontroller_data': obj_utils.str_or_none,
     }
 
     @staticmethod
@@ -44,8 +44,8 @@ class ReplicationController(base.MagnumObject):
             # ignore rc_definition_url as it was used for create rc
             if field == 'rc_definition_url':
                 continue
-            # ignore rc_data as it was used for create rc
-            if field == 'rc_data':
+            # ignore repplicationcontroller_data as it was used for create rc
+            if field == 'repplicationcontroller_data':
                 continue
             rc[field] = db_rc[field]
 

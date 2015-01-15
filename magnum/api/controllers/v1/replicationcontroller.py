@@ -26,6 +26,7 @@ from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
 from magnum.common import exception
+from magnum.common import k8s_manifest
 from magnum import objects
 
 
@@ -70,7 +71,7 @@ class ReplicationController(base.APIBase):
     uuid = types.uuid
     """Unique UUID for this ReplicationController"""
 
-    name = wtypes.text
+    name = wsme.wsattr(wtypes.text, readonly=True)
     """Name of this ReplicationController"""
 
     images = [wtypes.text]
@@ -79,16 +80,16 @@ class ReplicationController(base.APIBase):
     bay_uuid = types.uuid
     """Unique UUID of the bay the ReplicationController runs on"""
 
-    selector = {wtypes.text: wtypes.text}
+    labels = wsme.wsattr({wtypes.text: wtypes.text}, readonly=True)
     """Selector of this ReplicationController"""
 
-    replicas = wtypes.IntegerType()
+    replicas = wsme.wsattr(wtypes.IntegerType(), readonly=True)
     """Replicas of this ReplicationController"""
 
     rc_definition_url = wtypes.text
     """URL for ReplicationController file to create the RC"""
 
-    rc_data = wtypes.text
+    replicationcontroller_data = wtypes.text
     """Data for service to create the ReplicationController"""
 
     links = wsme.wsattr([link.Link], readonly=True)
@@ -121,7 +122,7 @@ class ReplicationController(base.APIBase):
     def _convert_with_links(rc, url, expand=True):
         if not expand:
             rc.unset_fields_except(['uuid', 'name', 'images', 'bay_uuid',
-                                    'selector', 'replicas'])
+                                    'labels', 'replicas'])
 
         # never expose the rc_id attribute
         rc.rc_id = wtypes.Unset
@@ -145,7 +146,7 @@ class ReplicationController(base.APIBase):
                      name='MyReplicationController',
                      images=['MyImage'],
                      bay_uuid='f978db47-9a37-4e9f-8572-804a10abc0ab',
-                     selector={'name': 'foo'},
+                     labels={'name': 'foo'},
                      replicas=2,
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())
@@ -153,6 +154,19 @@ class ReplicationController(base.APIBase):
         # _rc_uuid variable
         sample._rc_uuid = '87504bd9-ca50-40fd-b14e-bcb23ed42b27'
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
+
+    def parse_manifest(self):
+        # Set replication controller name and labels from its manifest
+        # TODO(jay-lau-513): retrieve replication controller name from
+        # rc_definition_url
+        if (hasattr(self, "replicationcontroller_data")
+              and self.replicationcontroller_data is not None):
+            manifest = k8s_manifest.parse(self.replicationcontroller_data)
+            self.name = manifest["id"]
+            if "labels" in manifest:
+                self.labels = manifest["labels"]
+            if "replicas" in manifest:
+                self.replicas = manifest["replicas"]
 
 
 class ReplicationControllerCollection(collection.Collection):
@@ -277,6 +291,7 @@ class ReplicationControllersController(rest.RestController):
         if self.from_rcs:
             raise exception.OperationNotPermitted
 
+        rc.parse_manifest()
         rc_obj = objects.ReplicationController(pecan.request.context,
                               **rc.as_dict())
         new_rc = pecan.request.rpcapi.rc_create(rc_obj)
@@ -315,8 +330,8 @@ class ReplicationControllersController(rest.RestController):
             # ignore rc_definition_url as it was used for create rc
             if field == 'rc_definition_url':
                 continue
-            # ignore rc_data as it was used for create rc
-            if field == 'rc_data':
+            # ignore replicationcontroller_data as it was used for create rc
+            if field == 'replicationcontroller_data':
                 continue
             try:
                 patch_val = getattr(rc, field)
