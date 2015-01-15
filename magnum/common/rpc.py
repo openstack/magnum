@@ -29,7 +29,7 @@ __all__ = [
 
 from oslo.config import cfg
 from oslo import messaging
-from oslo.serialization import jsonutils
+from oslo_serialization import jsonutils
 
 from magnum.common import context as magnum_context
 from magnum.common import exception
