@@ -97,8 +97,8 @@ class API(rpc_service.API):
         return objects.ReplicationController.list(context, limit, marker,
                                                   sort_key, sort_dir)
 
-    def rc_delete(self, rc):
-        return self._call('rc_delete', rc=rc)
+    def rc_delete(self, uuid):
+        return self._call('rc_delete', uuid=uuid)
 
     def rc_show(self, ctxt, uuid):
         return objects.ReplicationController.get_by_uuid(ctxt, uuid)

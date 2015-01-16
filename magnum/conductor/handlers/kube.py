@@ -193,10 +193,12 @@ class Handler(object):
         rc.refresh(ctxt)
         return rc
 
-    def rc_delete(self, ctxt, rc):
+    def rc_delete(self, ctxt, uuid):
         LOG.debug("rc_delete ")
+        rc = objects.ReplicationController.get_by_uuid(ctxt, uuid)
+        k8s_master_url = _retrive_k8s_master_url(ctxt, rc)
         # trigger a kubectl command
-        status = self.kube_cli.pod_delete(rc.uuid)
+        status = self.kube_cli.pod_delete(k8s_master_url, rc.name)
         if not status:
             return None
         # call the rc object to persist in db

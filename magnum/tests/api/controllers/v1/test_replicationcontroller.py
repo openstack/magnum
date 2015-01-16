@@ -10,6 +10,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 from magnum.conductor import api
+from magnum import objects
 from magnum.tests.db import base as db_base
 
 from mock import patch
@@ -20,7 +21,8 @@ class TestRCController(db_base.DbTestCase):
         rc.create()
         return rc
 
-    def mock_rc_destroy(self, rc):
+    def mock_rc_destroy(self, uuid):
+        rc = objects.ReplicationController.get_by_uuid({}, uuid)
         rc.destroy()
 
     def test_rc_api(self):
