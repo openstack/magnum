@@ -13,7 +13,6 @@
 # under the License.
 
 from magnum.conductor.handlers.common import kube_utils
-from magnum import objects
 from magnum.tests import base
 
 import mock
@@ -24,71 +23,27 @@ class TestKubeUtils(base.BaseTestCase):
     def setUp(self):
         super(TestKubeUtils, self).setUp()
 
-    def test_extract_resource_type(self):
-        expected_resource_type = 'bay'
-
-        bay = objects.Bay({})
-        actual_type = kube_utils._extract_resource_type(bay)
-        self.assertEqual(expected_resource_type, actual_type)
-
-    @patch('magnum.conductor.handlers.common.kube_utils.'
-           '_extract_resource_type')
-    def test_extract_resource_data_with_data(self,
-                                             mock_extract_resource_type):
-        expected_data = 'expected_data'
-
-        mock_extract_resource_type.return_value = 'mock_type'
-        mock_resource = mock.MagicMock()
-        mock_resource.mock_type_data = expected_data
-        actual_data = kube_utils._extract_resource_data(mock_resource)
-        self.assertEqual(expected_data, actual_data)
-
-    @patch('magnum.conductor.handlers.common.kube_utils.'
-           '_extract_resource_type')
-    def test_extract_resource_definition_url(self,
-                                             mock_extract_resource_type):
-        expected_data = 'expected_url'
-
-        mock_extract_resource_type.return_value = 'mock_type'
-        mock_resource = mock.MagicMock()
-        mock_resource.mock_type_definition_url = expected_data
-        actual_data = kube_utils._extract_resource_definition_url(
-            mock_resource)
-        self.assertEqual(expected_data, actual_data)
-
     @patch('magnum.conductor.handlers.common.kube_utils._k8s_create_with_data')
-    @patch('magnum.conductor.handlers.common.kube_utils.'
-           '_extract_resource_data')
-    @patch('magnum.conductor.handlers.common.kube_utils.'
-            '_extract_resource_definition_url')
     def test_k8s_create_data(self,
-                             mock_definition_url,
-                             mock_data,
                              mock_create_with_data):
         expected_data = 'data'
         master_address = 'master_address'
-        mock_data.return_value = expected_data
-        mock_definition_url.return_value = None
         mock_resource = mock.MagicMock()
+        mock_resource.manifest = expected_data
+        mock_resource.manifest_url = None
 
         kube_utils._k8s_create(master_address, mock_resource)
         mock_create_with_data.assert_called_once_with(master_address,
                                                       expected_data)
 
     @patch('magnum.conductor.handlers.common.kube_utils._k8s_create_with_path')
-    @patch('magnum.conductor.handlers.common.kube_utils.'
-           '_extract_resource_data')
-    @patch('magnum.conductor.handlers.common.kube_utils.'
-            '_extract_resource_definition_url')
     def test_k8s_create_url(self,
-                             mock_definition_url,
-                             mock_data,
                              mock_create_with_path):
         expected_url = 'url'
         master_address = 'master_address'
-        mock_data.return_value = None
-        mock_definition_url.return_value = expected_url
         mock_resource = mock.MagicMock()
+        mock_resource.manifest = None
+        mock_resource.manifest_url = expected_url
 
         kube_utils._k8s_create(master_address, mock_resource)
         mock_create_with_path.assert_called_once_with(master_address,
@@ -129,38 +84,26 @@ class TestKubeUtils(base.BaseTestCase):
                                                 expected_filename)
 
     @patch('magnum.conductor.handlers.common.kube_utils._k8s_update_with_data')
-    @patch('magnum.conductor.handlers.common.kube_utils.'
-            '_extract_resource_data')
-    @patch('magnum.conductor.handlers.common.kube_utils.'
-            '_extract_resource_definition_url')
     def test_k8s_update_data(self,
-                             mock_definition_url,
-                             mock_data,
                              mock_update_with_data):
         expected_data = 'data'
         master_address = 'master_address'
-        mock_data.return_value = expected_data
-        mock_definition_url.return_value = None
         mock_resource = mock.MagicMock()
+        mock_resource.manifest = expected_data
+        mock_resource.manifest_url = None
 
         kube_utils._k8s_update(master_address, mock_resource)
         mock_update_with_data.assert_called_once_with(master_address,
                                                       expected_data)
 
     @patch('magnum.conductor.handlers.common.kube_utils._k8s_update_with_path')
-    @patch('magnum.conductor.handlers.common.kube_utils.'
-           '_extract_resource_data')
-    @patch('magnum.conductor.handlers.common.kube_utils.'
-            '_extract_resource_definition_url')
     def test_k8s_update_url(self,
-                             mock_definition_url,
-                             mock_data,
-                             mock_update_with_path):
+                            mock_update_with_path):
         expected_url = 'url'
         master_address = 'master_address'
-        mock_data.return_value = None
-        mock_definition_url.return_value = expected_url
         mock_resource = mock.MagicMock()
+        mock_resource.manifest = None
+        mock_resource.manifest_url = expected_url
 
         kube_utils._k8s_update(master_address, mock_resource)
         mock_update_with_path.assert_called_once_with(master_address,

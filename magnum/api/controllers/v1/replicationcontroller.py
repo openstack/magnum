@@ -86,7 +86,7 @@ class ReplicationController(base.APIBase):
     replicas = wsme.wsattr(wtypes.IntegerType(), readonly=True)
     """Replicas of this ReplicationController"""
 
-    rc_definition_url = wtypes.text
+    manifest_url = wtypes.text
     """URL for ReplicationController file to create the RC"""
 
     replicationcontroller_data = wtypes.text
@@ -158,7 +158,7 @@ class ReplicationController(base.APIBase):
     def parse_manifest(self):
         # Set replication controller name and labels from its manifest
         # TODO(jay-lau-513): retrieve replication controller name from
-        # rc_definition_url
+        # manifest_url
         if (hasattr(self, "replicationcontroller_data")
               and self.replicationcontroller_data is not None):
             manifest = k8s_manifest.parse(self.replicationcontroller_data)
@@ -327,8 +327,8 @@ class ReplicationControllersController(rest.RestController):
 
         # Update only the fields that have changed
         for field in objects.ReplicationController.fields:
-            # ignore rc_definition_url as it was used for create rc
-            if field == 'rc_definition_url':
+            # ignore manifest_url as it was used for create rc
+            if field == 'manifest_url':
                 continue
             # ignore replicationcontroller_data as it was used for create rc
             if field == 'replicationcontroller_data':

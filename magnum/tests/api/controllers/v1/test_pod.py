@@ -34,7 +34,7 @@ class TestPodController(db_base.DbTestCase):
                 "desc": "My Pod",
                 "bay_uuid": "7ae81bb3-dec3-4289-8d6c-da80bd8001ae",
                 "images": ["ubuntu"],
-                "pod_data": "{\\"id\\": \\"name_of_pod\\", \
+                "manifest": "{\\"id\\": \\"name_of_pod\\", \
                 \\"labels\\": {\\"foo\\": \\"foo1\\"} }"
             }
             '''

@@ -35,18 +35,18 @@ class Service(base.MagnumObject):
         'selector': obj_utils.dict_or_none,
         'ip': obj_utils.str_or_none,
         'port': obj_utils.int_or_none,
-        'service_definition_url': obj_utils.str_or_none,
-        'service_data': obj_utils.str_or_none,
+        'manifest_url': obj_utils.str_or_none,
+        'manifest': obj_utils.str_or_none,
     }
 
     @staticmethod
     def _from_db_object(service, db_service):
         """Converts a database entity to a formal object."""
         for field in service.fields:
-            # ignore service_definition_url as it was used for create service
-            if field == 'service_definition_url':
+            # ignore manifest_url as it was used for create service
+            if field == 'manifest_url':
                 continue
-            if field == 'service_data':
+            if field == 'manifest':
                 continue
             service[field] = db_service[field]
 
