@@ -76,7 +76,7 @@ Use cases
    containers with Nova instances is managed by OpenStack.
 8. Container network. End-user wants to define a custom overlay network for
    containers, and wants to have admin priviledge to manage the network
-   topology. Builing a container network can decouple application deployment
+   topology. Building a container network can decouple application deployment
    and management from the underlying network infrastructure, and enable
    additional usage scenario, such as (i) software-defined networking, and
    (ii) extending the container network (i.e. connecting various resources from
