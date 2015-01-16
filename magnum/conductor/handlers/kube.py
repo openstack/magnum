@@ -49,7 +49,9 @@ def _retrive_k8s_master_url(ctxt, obj):
     apiserver_port = cfg.CONF.kubernetes.k8s_port
     if hasattr(obj, 'bay_uuid'):
         obj = _retrive_bay(ctxt, obj)
-        baymodel = _retrive_baymodel(ctxt, obj)
+
+    baymodel = _retrive_baymodel(ctxt, obj)
+    if baymodel.apiserver_port is not None:
         apiserver_port = baymodel.apiserver_port
 
     params = {
