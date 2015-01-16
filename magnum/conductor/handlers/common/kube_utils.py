@@ -263,14 +263,14 @@ class KubeClient(object):
             return False
         return True
 
-    def rc_delete(self, master_address, uuid):
-        LOG.debug("rc_delete %s" % uuid)
+    def rc_delete(self, master_address, name):
+        LOG.debug("rc_delete %s" % name)
         try:
-            out, err = utils.trycmd('kubectl', 'delete', 'rc', uuid,
+            out, err = utils.trycmd('kubectl', 'delete', 'rc', name,
                                     '-s', master_address)
             if err:
                 return False
         except Exception as e:
-            LOG.error("Couldn't delete rc %s due to error %s" % (uuid, e))
+            LOG.error("Couldn't delete rc %s due to error %s" % (name, e))
             return False
         return True

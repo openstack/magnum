@@ -355,6 +355,4 @@ class ReplicationControllersController(rest.RestController):
         if self.from_rcs:
             raise exception.OperationNotPermitted
 
-        rpc_rc = objects.ReplicationController.get_by_uuid(
-                                    pecan.request.context, rc_uuid)
-        pecan.request.rpcapi.rc_delete(rpc_rc)
+        pecan.request.rpcapi.rc_delete(rc_uuid)
