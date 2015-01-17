@@ -35,18 +35,18 @@ class Pod(base.MagnumObject):
         'images': obj_utils.list_or_none,
         'labels': obj_utils.dict_or_none,
         'status': obj_utils.str_or_none,
-        'pod_definition_url': obj_utils.str_or_none,
-        'pod_data': obj_utils.str_or_none,
+        'manifest_url': obj_utils.str_or_none,
+        'manifest': obj_utils.str_or_none,
     }
 
     @staticmethod
     def _from_db_object(pod, db_pod):
         """Converts a database entity to a formal object."""
         for field in pod.fields:
-            # ignore pod_definition_url as it was used for create pod
-            if field == 'pod_definition_url':
+            # ignore manifest_url as it was used for create pod
+            if field == 'manifest_url':
                 continue
-            if field == 'pod_data':
+            if field == 'manifest':
                 continue
             pod[field] = db_pod[field]
 

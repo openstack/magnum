@@ -33,19 +33,19 @@ class ReplicationController(base.MagnumObject):
         'bay_uuid': obj_utils.str_or_none,
         'labels': obj_utils.dict_or_none,
         'replicas': obj_utils.int_or_none,
-        'rc_definition_url': obj_utils.str_or_none,
-        'repplicationcontroller_data': obj_utils.str_or_none,
+        'manifest_url': obj_utils.str_or_none,
+        'manifest': obj_utils.str_or_none,
     }
 
     @staticmethod
     def _from_db_object(rc, db_rc):
         """Converts a database entity to a formal object."""
         for field in rc.fields:
-            # ignore rc_definition_url as it was used for create rc
-            if field == 'rc_definition_url':
+            # ignore manifest_url as it was used for create rc
+            if field == 'manifest_url':
                 continue
-            # ignore repplicationcontroller_data as it was used for create rc
-            if field == 'repplicationcontroller_data':
+            # ignore manifest as it was used for create rc
+            if field == 'manifest':
                 continue
             rc[field] = db_rc[field]
 

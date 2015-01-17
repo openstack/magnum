@@ -33,7 +33,7 @@ class TestServiceController(db_base.DbTestCase):
             params = '''
             {
                 "bay_uuid": "7ae81bb3-dec3-4289-8d6c-da80bd8001ae",
-                "service_data": "\
+                "manifest": "\
                 {\
                   \\"id\\": \\"service_foo\\",\
                   \\"kind\\": \\"Service\\",\

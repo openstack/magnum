@@ -89,10 +89,10 @@ class Pod(base.APIBase):
     status = wtypes.text
     """Staus of this pod """
 
-    pod_definition_url = wtypes.text
+    manifest_url = wtypes.text
     """URL for pod file to create the pod"""
 
-    pod_data = wtypes.text
+    manifest = wtypes.text
     """Data for pod to create the pod"""
 
     links = wsme.wsattr([link.Link], readonly=True)
@@ -160,9 +160,9 @@ class Pod(base.APIBase):
 
     def parse_manifest(self):
         # Set pod name from its manifest
-        # TODO(yuanying): retrive pod name from pod_definition_url
-        if hasattr(self, "pod_data") and self.pod_data is not None:
-            manifest = k8s_manifest.parse(self.pod_data)
+        # TODO(yuanying): retrive pod name from manifest_url
+        if hasattr(self, "manifest") and self.manifest is not None:
+            manifest = k8s_manifest.parse(self.manifest)
             self.name = manifest["id"]
             if "labels" in manifest:
                 self.labels = manifest["labels"]
@@ -319,10 +319,10 @@ class PodsController(rest.RestController):
 
         # Update only the fields that have changed
         for field in objects.Pod.fields:
-            # ignore pod_definition_url as it was used for create pod
-            if field == 'pod_definition_url':
+            # ignore manifest_url as it was used for create pod
+            if field == 'manifest_url':
                 continue
-            if field == 'pod_data':
+            if field == 'manifest':
                 continue
             try:
                 patch_val = getattr(pod, field)

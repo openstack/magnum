@@ -286,17 +286,17 @@ To start a kubernetes pod, use Kolla as an example repo::
     git clone http://github.com/stackforge/kolla
 
     cd kolla/k8s/pod
-    magnum pod-create --pod-file ./mariadb-pod.yaml --bay-id $BAY_UUID
+    magnum pod-create --manifest ./mariadb-pod.yaml --bay-id $BAY_UUID
 
 To start a kubernetes service, use Kolla as an example repo::
 
     cd ../service
-    magnum service-create --service-file ./mariadb-service.yaml --bay-id $BAY_UUID
+    magnum service-create --manifest ./mariadb-service.yaml --bay-id $BAY_UUID
 
 To start a kubernetes replication controller, use Kolla as an example repo::
 
     cd ../replication
-    magnum rc-create --rc-file ./nova-compute-replicationyaml --bay-id $BAY_UUID
+    magnum rc-create --manifest ./nova-compute-replicationyaml --bay-id $BAY_UUID
 
 Full lifecycle and introspection operations for each object are supported.  For
 exmaple, magnum bay-create magnum baymodel-delete, magnum rc-show, magnum service-list.

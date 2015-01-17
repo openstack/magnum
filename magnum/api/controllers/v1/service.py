@@ -80,10 +80,10 @@ class Service(base.APIBase):
     port = wtypes.IntegerType()
     """Port of this service"""
 
-    service_definition_url = wtypes.text
+    manifest_url = wtypes.text
     """URL for service file to create the service"""
 
-    service_data = wtypes.text
+    manifest = wtypes.text
     """Data for service to create the service"""
 
     links = wsme.wsattr([link.Link], readonly=True)
@@ -143,8 +143,8 @@ class Service(base.APIBase):
     def parse_manifest(self):
         # Set service name and port from its manifest
         # TODO(yuanying): retrive service name from definition_url
-        if hasattr(self, "service_data") and self.service_data is not None:
-            manifest = k8s_manifest.parse(self.service_data)
+        if hasattr(self, "manifest") and self.manifest is not None:
+            manifest = k8s_manifest.parse(self.manifest)
             self.name = manifest["id"]
             if "port" in manifest:
                 self.port = manifest["port"]
@@ -311,10 +311,10 @@ class ServicesController(rest.RestController):
 
         # Update only the fields that have changed
         for field in objects.Service.fields:
-            # ignore service_definition_url as it was used for create service
-            if field == 'service_definition_url':
+            # ignore manifest_url as it was used for create service
+            if field == 'manifest_url':
                 continue
-            if field == 'service_data':
+            if field == 'manifest':
                 continue
             try:
                 patch_val = getattr(service, field)

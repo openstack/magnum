@@ -20,25 +20,9 @@ from magnum.openstack.common import utils
 LOG = logging.getLogger(__name__)
 
 
-def _extract_resource_type(resource):
-    return resource.__class__.__name__.lower()
-
-
-def _extract_resource_data(resource):
-    resource_type = _extract_resource_type(resource)
-    data_attribute = "%s_data" % resource_type
-    return getattr(resource, data_attribute, None)
-
-
-def _extract_resource_definition_url(resource):
-    resource_type = _extract_resource_type(resource)
-    definition_url_attribute = "%s_definition_url" % resource_type
-    return getattr(resource, definition_url_attribute, None)
-
-
 def _k8s_create(master_address, resource):
-    data = _extract_resource_data(resource)
-    definition_url = _extract_resource_definition_url(resource)
+    data = resource.manifest
+    definition_url = resource.manifest_url
     if data is not None:
         return _k8s_create_with_data(master_address, data)
     else:
@@ -59,8 +43,8 @@ def _k8s_create_with_data(master_address, resource_data):
 
 
 def _k8s_update(master_address, resource):
-    data = _extract_resource_data(resource)
-    definition_url = _extract_resource_definition_url(resource)
+    data = resource.manifest
+    definition_url = resource.manifest_url
     if data is not None:
         return _k8s_update_with_data(master_address, data)
     else:
@@ -123,8 +107,8 @@ class KubeClient(object):
         try:
             out = utils.execute('kubectl', 'get', 'services',
                                 '-s', master_address,)
-            pod_data = [s.split() for s in out.split('\n')]
-            return pod_data
+            manifest = [s.split() for s in out.split('\n')]
+            return manifest
         except Exception as e:
             LOG.error("Couldn't get list of services due to error %s" % e)
             return None
@@ -196,8 +180,8 @@ class KubeClient(object):
         LOG.debug("pod_list")
         try:
             out = utils.execute('kubectl', 'get', 'pods', '-s', master_address)
-            pod_data = [s.split() for s in out.split('\n')]
-            return pod_data
+            manifest = [s.split() for s in out.split('\n')]
+            return manifest
         except Exception as e:
             LOG.error("Couldn't get list of pods due to error %s" % e)
             return None
