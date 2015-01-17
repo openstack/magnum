@@ -136,7 +136,7 @@ class TestPatch(api_base.FunctionalTest):
                                    expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['faultstring'])
+        self.assertTrue(response.json['error_message'])
 
     @mock.patch.object(timeutils, 'utcnow')
     def test_replace_singular(self, mock_utcnow):
@@ -185,7 +185,7 @@ class TestPatch(api_base.FunctionalTest):
                              expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_code)
-        self.assertTrue(response.json['faultstring'])
+        self.assertTrue(response.json['error_message'])
 
     def test_add_root(self):
         name = 'bay_model_example_B'
@@ -208,7 +208,7 @@ class TestPatch(api_base.FunctionalTest):
                             expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
-        self.assertTrue(response.json['faultstring'])
+        self.assertTrue(response.json['error_message'])
 
     def test_add_multi(self):
         json = [
@@ -241,7 +241,7 @@ class TestPatch(api_base.FunctionalTest):
                                    expect_errors=True)
         self.assertEqual(400, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['faultstring'])
+        self.assertTrue(response.json['error_message'])
 
 
 class TestPost(api_base.FunctionalTest):
@@ -297,7 +297,7 @@ class TestDelete(api_base.FunctionalTest):
                                  expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['faultstring'])
+        self.assertTrue(response.json['error_message'])
 
     def test_delete_baymodel_with_bay(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
@@ -306,12 +306,12 @@ class TestDelete(api_base.FunctionalTest):
                                expect_errors=True)
         self.assertEqual(400, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['faultstring'])
-        self.assertIn(baymodel.uuid, response.json['faultstring'])
+        self.assertTrue(response.json['error_message'])
+        self.assertIn(baymodel.uuid, response.json['error_message'])
 
     def test_delete_baymodel_not_found(self):
         uuid = utils.generate_uuid()
         response = self.delete('/baymodels/%s' % uuid, expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['faultstring'])
+        self.assertTrue(response.json['error_message'])
