@@ -73,3 +73,40 @@ class RPCHook(hooks.PecanHook):
 
     def before(self, state):
         state.request.rpcapi = conductor_api.API(context=state.request.context)
+
+
+class NoExceptionTracebackHook(hooks.PecanHook):
+    """Workaround rpc.common: deserialize_remote_exception.
+    deserialize_remote_exception builds rpc exception traceback into error
+    message which is then sent to the client. Such behavior is a security
+    concern so this hook is aimed to cut-off traceback from the error message.
+    """
+    # NOTE(max_lobur): 'after' hook used instead of 'on_error' because
+    # 'on_error' never fired for wsme+pecan pair. wsme @wsexpose decorator
+    # catches and handles all the errors, so 'on_error' dedicated for unhandled
+    # exceptions never fired.
+    def after(self, state):
+        # Omit empty body. Some errors may not have body at this level yet.
+        if not state.response.body:
+            return
+
+        # Do nothing if there is no error.
+        if 200 <= state.response.status_int < 400:
+            return
+
+        json_body = state.response.json
+        # Do not remove traceback when server in debug mode (except 'Server'
+        # errors when 'debuginfo' will be used for traces).
+        if cfg.CONF.debug and json_body.get('faultcode') != 'Server':
+            return
+
+        faultsting = json_body.get('faultstring')
+        traceback_marker = 'Traceback (most recent call last):'
+        if faultsting and (traceback_marker in faultsting):
+            # Cut-off traceback.
+            faultsting = faultsting.split(traceback_marker, 1)[0]
+            # Remove trailing newlines and spaces if any.
+            json_body['faultstring'] = faultsting.rstrip()
+            # Replace the whole json. Cannot change original one beacause it's
+            # generated on the fly.
+            state.response.json = json_body
