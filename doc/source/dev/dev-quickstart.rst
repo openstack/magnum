@@ -210,10 +210,10 @@ Next, configure the database for use with Magnum::
 
 Finally, configure the keystone endpoint::
 
-    keystone service-create --name=container \
+    keystone service-create --name=magnum \
                             --type=container \
                             --description="Magnum Container Service"
-    keystone endpoint-create --service=container \
+    keystone endpoint-create --service=magnum \
                              --publicurl=http://127.0.0.1:9511/v1 \
                              --internalurl=http://127.0.0.1:9511/v1 \
                              --adminurl=http://127.0.0.1:9511/v1
