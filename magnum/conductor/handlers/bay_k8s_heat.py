@@ -13,6 +13,7 @@
 # under the License.
 
 from heatclient.common import template_utils
+from heatclient import exc
 from oslo.config import cfg
 
 from magnum.common import clients
@@ -150,7 +151,22 @@ class Handler(object):
         bay = objects.Bay.get_by_uuid(ctxt, uuid)
         stack_id = bay.stack_id
         # TODO(yuanying): handle stack status DELETE_IN_PROGRESS
-        osc.heat().stacks.delete(stack_id)
+        #
+        # NOTE(sdake): This will execute a stack_delete operation.  This will
+        # Ignore HTTPNotFound exceptions (stack wasn't present).  In the case
+        # that Heat couldn't find the stack representing the bay, likely a user
+        # has deleted the stack outside the context of Magnum.  Therefore the
+        # contents of the bay are forever lost.
+        #
+        # If the exception is unhandled, the original exception will be raised.
+        try:
+            osc.heat().stacks.delete(stack_id)
+        except Exception as e:
+            if isinstance(e, exc.HTTPNotFound):
+                LOG.info('The stack %s was not be found during bay deletion.' %
+                         stack_id)
+            else:
+                raise
         # TODO(yuanying): bay.destroy will be triggered by stack status change.
         bay.destroy()
 
