@@ -24,6 +24,7 @@ app = {
     'hooks': [
         hooks.ContextHook(),
         hooks.RPCHook(),
+        hooks.NoExceptionTracebackHook(),
     ],
     'acl_public_routes': [
         '/'

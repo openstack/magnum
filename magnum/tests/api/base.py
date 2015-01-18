@@ -27,6 +27,7 @@ import pecan
 import pecan.testing
 from six.moves.urllib import parse as urlparse
 
+from magnum.api import hooks
 from magnum.db import api as dbapi
 from magnum.tests.db import base
 
@@ -67,6 +68,9 @@ class FunctionalTest(base.DbTestCase):
                 'template_path': '%s/api/templates' % root_dir,
                 'enable_acl': enable_acl,
                 'acl_public_routes': ['/', '/v1'],
+                'hooks': [
+                    hooks.NoExceptionTracebackHook(),
+                ],
             },
         }
 
