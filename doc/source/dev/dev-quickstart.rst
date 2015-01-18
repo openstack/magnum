@@ -15,13 +15,23 @@ an OpenStack project.
 Install prerequisites::
 
     # Ubuntu/Debian:
-    sudo apt-get install python-dev libssl-dev python-pip libmysqlclient-dev libxml2-dev libxslt-dev libpq-dev git git-review libffi-dev gettext python-tox
+    sudo apt-get update
+    sudo apt-get install python-dev libssl-dev python-pip libmysqlclient-dev \
+                         libxml2-dev libxslt-dev libpq-dev git git-review \
+                         libffi-dev gettext python-tox
 
     # Fedora/RHEL:
-    sudo yum install python-devel openssl-devel python-pip mysql-devel libxml2-devel libxslt-devel postgresql-devel git git-review libffi-devel gettext ipmitool
+    sudo yum install python-devel openssl-devel python-pip mysql-devel \
+                     libxml2-devel libxslt-devel postgresql-devel git \
+                     git-review libffi-devel gettext ipmitool
 
     # openSUSE/SLE 12:
-    sudo zypper install git git-review libffi-devel libmysqlclient-devel libopenssl-devel libxml2-devel libxslt-devel postgresql-devel python-devel python-flake8 python-nose python-pip python-setuptools-git python-testrepository python-tox python-virtualenv gettext-runtime
+    sudo zypper install git git-review libffi-devel libmysqlclient-devel \
+                        libopenssl-devel libxml2-devel libxslt-devel \
+                        postgresql-devel python-devel python-flake8 \
+                        python-nose python-pip python-setuptools-git \
+                        python-testrepository python-tox python-virtualenv \
+                        gettext-runtime
 
     sudo easy_install nose
     sudo pip install virtualenv setuptools-git flake8 tox testrepository
@@ -137,6 +147,7 @@ and Neutron.::
     HEAT_BRANCH=stable/juno
 
     END
+    ./stack.sh
 
 At this time, Magnum has only been tested with the Fedora Atomic micro-OS.
 Magnum will likely work with other micro-OS platforms, but each one requires
@@ -156,6 +167,7 @@ Create a new shell, and source the devstack openrc script::
                         --is-public True \
                         --disk-format qcow2 \
                         --container-format bare < fedora-21-atomic.qcow2
+    test -f ~/.ssh/id_rsa.pub || ssh-keygen
     nova keypair-add --pub-key ~/.ssh/id_rsa.pub testkey
 
 Next, create a database in MySQL for Magnum::
@@ -176,33 +188,44 @@ Next, clone and install magnum::
     sudo cp -r etc/magnum/templates/heat-kubernetes \
           /etc/magnum/templates/
 
+Next configure Magnum::
+
+    # copy sample config and modify it as necessary
+    sudo cp etc/magnum/magnum.conf.sample /etc/magnum/magnum.conf
+
+    # enable debugging output
+    sudo sed -i "s/#debug=.*/debug=true/" /etc/magnum/magnum.conf
+
+    # enable more verbose output
+    sudo sed -i "s/#verbose=.*/verbose=true/" /etc/magnum/magnum.conf
+
+    # set RabbitMQ userid
+    sudo sed -i "s/#rabbit_userid=.*/rabbit_userid=stackrabbit/" /etc/magnum/magnum.conf
+
+    # set RabbitMQ password
+    sudo sed -i "s/#rabbit_password=.*/rabbit_password=password/" /etc/magnum/magnum.conf
+
+    # set SQLAlchemy connection string to connect to MySQL
+    sudo sed -i "s/#connection=.*/connection=mysql:\/\/root:password@localhost\/magnum/" /etc/magnum/magnum.conf
+
+    # set Keystone account username
+    sudo sed -i "s/#admin_user=.*/admin_user=admin/" /etc/magnum/magnum.conf
+
+    # set Keystone account password
+    sudo sed -i "s/#admin_password=.*/admin_password=password/" /etc/magnum/magnum.conf
+
+    # set admin Identity API endpoint
+    sudo sed -i "s/#identity_uri=.*/identity_uri=http:\/\/127.0.0.1:35357/" /etc/magnum/magnum.conf
+
+    # set admin Identity API endpoint
+    sudo sed -i "s/#auth_uri=.*/auth_uri=http:\/\/127.0.0.1:5000\/v2.0/" /etc/magnum/magnum.conf
+
 Next, clone and install the client::
 
     cd ~
     git clone https://github.com/stackforge/python-magnumclient
     cd python-magnumclient
     sudo pip install -e .
-
-Next configure Magnum::
-
-    mkdir -p /etc/magnum
-    cat >/etc/magnum/magnum.conf <<END
-    [DEFAULT]
-    debug = True
-    verbose = True
-
-    rabbit_password = password
-
-    [database]
-    connection = mysql://root:password@localhost/magnum
-
-    [keystone_authtoken]
-    admin_password = password
-    admin_user = admin
-    identity_uri = http://127.0.0.1:35357
-
-    auth_uri=http://127.0.0.1:5000/v2.0
-    END
 
 Next, configure the database for use with Magnum::
 
@@ -294,6 +317,7 @@ https://blueprints.launchpad.net/magnum/+spec/magnum-bay-status
 
 To start a kubernetes pod, use Kolla as an example repo::
 
+    cd ~
     git clone http://github.com/stackforge/kolla
 
     cd kolla/k8s/pod
