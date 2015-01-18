@@ -223,7 +223,7 @@ Next start the API service::
 
     magnum-api
 
-Next start the ackend service in a new window::
+Next start the conductor service in a new window::
 
     magnum-conductor
 
