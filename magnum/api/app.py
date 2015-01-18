@@ -15,6 +15,7 @@ import pecan
 
 from magnum.api import auth
 from magnum.api import config as api_config
+from magnum.api import middleware
 
 # Register options for the service
 API_SERVICE_OPTS = [
@@ -52,6 +53,7 @@ def setup_app(config=None):
     app = pecan.make_app(
         app_conf.pop('root'),
         logging=getattr(config, 'logging', {}),
+        wrap_app=middleware.ParsableErrorMiddleware,
         **app_conf
     )
 

@@ -13,8 +13,11 @@
 # under the License.
 
 from magnum.api.middleware import auth_token
+from magnum.api.middleware import parsable_error
 
 
 AuthTokenMiddleware = auth_token.AuthTokenMiddleware
+ParsableErrorMiddleware = parsable_error.ParsableErrorMiddleware
 
-__all__ = (AuthTokenMiddleware)
+__all__ = (AuthTokenMiddleware,
+           ParsableErrorMiddleware)
