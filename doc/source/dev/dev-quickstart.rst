@@ -102,7 +102,8 @@ Clone DevStack::
     git clone https://github.com/openstack-dev/devstack.git devstack
 
 Create devstack/localrc with minimal settings required to enable Heat
-and Neutron.::
+and Neutron, refer to http://docs.openstack.org/developer/devstack/guides/neutron.html
+for more detailed neutron configuration.::
 
     cd devstack
     cat >localrc <<END
