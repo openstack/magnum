@@ -48,4 +48,4 @@ Features
 
 Installation and Usage
 ----------------------
-* Getting Started Guides: [doc/source/dev/dev-quickstart.rst](doc/source/dev/dev-quickstart.rst)
+* Getting Started Guides: https://github.com/stackforge/magnum/blob/master/doc/source/dev/dev-quickstart.rst
