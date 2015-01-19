@@ -233,14 +233,6 @@ To get started, list the available commands and resources::
 
     magnum help
 
-First create a baymodel, which is similar in nature to a flavor.  It informs
-Magnum in which way to construct a bay.::
-
-    magnum baymodel-create  --name steak --image-id fedora21-atomic
-
-A bay can be created with 3 nodes.  One node will be configured as a master
-Kubernetes node, while the remaining two nodes will be configured as minions::
-
 First obtain the public Neutron network UUID::
 
     [nobody@bigiron ~]$ neutron net-show public
@@ -260,7 +252,8 @@ First obtain the public Neutron network UUID::
     | tenant_id                 | 59abd617f1bd47c1baa4d8290fe37016     |
     +---------------------------+--------------------------------------+
 
-Next create a baymodel::
+First create a baymodel, which is similar in nature to a flavor.  It informs
+Magnum in which way to construct a bay.::
 
     magnum baymodel-create --name testbaymodel --image-id fedora21-atomic \
                            --keypair-id testkey \
