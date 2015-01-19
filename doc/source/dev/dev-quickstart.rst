@@ -253,42 +253,23 @@ Next start the conductor service in a new window::
 
     magnum-conductor
 
-    . ~/repos/devstack/openrc admin admin
-
 To get started, list the available commands and resources::
 
     magnum help
 
-First obtain the public Neutron network UUID::
-
-    [nobody@bigiron ~]$ neutron net-show public
-    +---------------------------+--------------------------------------+
-    | Field                     | Value                                |
-    +---------------------------+--------------------------------------+
-    | admin_state_up            | True                                 |
-    | id                        | 267efcaf-c38d-43ee-86d1-db3c3c758917 |
-    | name                      | public                               |
-    | provider:network_type     | vxlan                                |
-    | provider:physical_network |                                      |
-    | provider:segmentation_id  | 1002                                 |
-    | router:external           | True                                 |
-    | shared                    | False                                |
-    | status                    | ACTIVE                               |
-    | subnets                   | 8386f1d0-3ad3-4397-8c95-972a2e5097a9 |
-    | tenant_id                 | 59abd617f1bd47c1baa4d8290fe37016     |
-    +---------------------------+--------------------------------------+
-
 First create a baymodel, which is similar in nature to a flavor.  It informs
 Magnum in which way to construct a bay.::
 
+    NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
     magnum baymodel-create --name testbaymodel --image-id fedora21-atomic \
                            --keypair-id testkey \
-                           --external-network-id 267efcaf-c38d-43ee-86d1-db3c3c758917 \
+                           --external-network-id $NIC_ID \
                            --dns-nameserver 8.8.8.8 --flavor-id m1.medium
 
 Next create a bay. Use the baymodel UUID as a template for bay creation.
 This bay will result in one master kubernetes node and three minion nodes.::
 
+    BAYMODEL_UUID=$(magnum baymodel-list | awk '/ testbaymodel /{print $2}')
     magnum bay-create --name testbay --baymodel-id $BAYMODEL_UUID --node-count 3
 
 The existing bays can be listed as follows::
@@ -324,6 +305,7 @@ To start a kubernetes pod, use Kolla as an example repo::
     git clone http://github.com/stackforge/kolla
 
     cd kolla/k8s/pod
+    BAY_UUID=$(magnum bay-list | awk '/ testbay /{print $2}')
     magnum pod-create --manifest ./mariadb-pod.yaml --bay-id $BAY_UUID
 
 To start a kubernetes service, use Kolla as an example repo::
