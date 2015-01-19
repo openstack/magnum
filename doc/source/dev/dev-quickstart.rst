@@ -172,8 +172,8 @@ Next, clone and install magnum::
     git clone https://github.com/stackforge/magnum
     cd magnum
     sudo pip install -e .
-    mkdir -p /etc/magnum/templates
-    cp -r etc/magnum/templates/heat-kubernetes \
+    sudo mkdir -p /etc/magnum/templates
+    sudo cp -r etc/magnum/templates/heat-kubernetes \
           /etc/magnum/templates/
 
 Next, clone and install the client::
