@@ -120,7 +120,7 @@ and Neutron.::
 
     enable_service rabbit
 
-    # Enable Neutron which is required by Ironic and disable nova-network.
+    # Enable Neutron which is required by Magnum and disable nova-network.
     disable_service n-net
     enable_service q-svc
     enable_service q-agt
