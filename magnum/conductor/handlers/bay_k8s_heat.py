@@ -137,7 +137,6 @@ class Handler(object):
                 (attempts_count > cfg.CONF.k8s_heat.max_attempts)):
                 # TODO(yuanying): update status to failed
                 LOG.error('Unable to create bay, stack_id: %s' % bay.stack_id)
-                osc.heat().stacks.delete(bay.stack_id)
                 raise loopingcall.LoopingCallDone()
 
         lc = loopingcall.FixedIntervalLoopingCall(f=poll_and_check)
