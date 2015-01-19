@@ -263,7 +263,7 @@ First obtain the public Neutron network UUID::
 Next create a baymodel::
 
     magnum baymodel-create --name testbaymodel --image-id fedora21-atomic \
-                           --keypair-id=testkey \
+                           --keypair-id testkey \
                            --external-network-id 267efcaf-c38d-43ee-86d1-db3c3c758917 \
                            --dns-nameserver 8.8.8.8 --flavor-id m1.medium
 
