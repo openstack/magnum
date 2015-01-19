@@ -14,6 +14,7 @@
 
 from oslo.config import cfg
 
+from magnum.common import clients
 from magnum.conductor.handlers.common import kube_utils
 from magnum import objects
 from magnum.openstack.common._i18n import _
@@ -62,6 +63,19 @@ def _retrive_k8s_master_url(ctxt, obj):
     return "%(k8s_protocol)s://%(master_address)s:%(k8s_port)s" % params
 
 
+def _object_has_stack(ctxt, obj):
+    osc = clients.OpenStackClients(ctxt)
+    if hasattr(obj, 'bay_uuid'):
+        obj = _retrive_bay(ctxt, obj)
+
+    stack = osc.heat().stacks.get(obj.stack_id)
+    if (stack.stack_status == 'DELETE_COMPLETE' or
+       stack.stack_status == 'DELETE_IN_PROGRESS'):
+        return False
+    else:
+        return True
+
+
 class Handler(object):
     """These are the backend operations.  They are executed by the backend
          service.  API calls via AMQP (within the ReST API) trigger the
@@ -104,10 +118,11 @@ class Handler(object):
         LOG.debug("service_delete")
         service = objects.Service.get_by_uuid(ctxt, uuid)
         k8s_master_url = _retrive_k8s_master_url(ctxt, service)
-        # trigger a kubectl command
-        status = self.kube_cli.service_delete(k8s_master_url, service.name)
-        if not status:
-            return None
+        if _object_has_stack(ctxt, service):
+            # trigger a kubectl command
+            status = self.kube_cli.service_delete(k8s_master_url, service.name)
+            if not status:
+                return None
         # call the service object to persist in db
         service.destroy(ctxt)
 
@@ -158,10 +173,10 @@ class Handler(object):
         # trigger a kubectl command
         pod = objects.Pod.get_by_uuid(ctxt, uuid)
         k8s_master_url = _retrive_k8s_master_url(ctxt, pod)
-
-        status = self.kube_cli.pod_delete(k8s_master_url, pod.name)
-        if not status:
-            return None
+        if _object_has_stack(ctxt, pod):
+            status = self.kube_cli.pod_delete(k8s_master_url, pod.name)
+            if not status:
+                return None
         # call the pod object to persist in db
         pod.destroy(ctxt)
 
@@ -199,9 +214,10 @@ class Handler(object):
         LOG.debug("rc_delete ")
         rc = objects.ReplicationController.get_by_uuid(ctxt, uuid)
         k8s_master_url = _retrive_k8s_master_url(ctxt, rc)
-        # trigger a kubectl command
-        status = self.kube_cli.pod_delete(k8s_master_url, rc.name)
-        if not status:
-            return None
+        if _object_has_stack(ctxt, rc):
+            # trigger a kubectl command
+            status = self.kube_cli.pod_delete(k8s_master_url, rc.name)
+            if not status:
+                return None
         # call the rc object to persist in db
         rc.destroy(ctxt)
