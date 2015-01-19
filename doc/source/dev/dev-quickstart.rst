@@ -96,6 +96,9 @@ on Nova, Heat, and Neutron to create and schedule virtual machines to simulate
 bare-metal.  For milestone #2 we intend to introduce support for Ironic
 deployment of baremetal nodes.
 
+This session has only been tested on Ubuntu 14.04 (Trusty) and Fedora 21.
+We recommend users to select one of them if it is possible.
+
 Clone DevStack::
 
     cd ~
@@ -217,7 +220,7 @@ Next configure Magnum::
     # set admin Identity API endpoint
     sudo sed -i "s/#identity_uri=.*/identity_uri=http:\/\/127.0.0.1:35357/" /etc/magnum/magnum.conf
 
-    # set admin Identity API endpoint
+    # set public Identity API endpoint
     sudo sed -i "s/#auth_uri=.*/auth_uri=http:\/\/127.0.0.1:5000\/v2.0/" /etc/magnum/magnum.conf
 
 Next, clone and install the client::
