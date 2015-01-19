@@ -20,6 +20,7 @@ import netaddr
 from oslo.utils import timeutils
 import six
 
+from magnum.common import context
 from magnum.common import exception
 from magnum.objects import base
 from magnum.objects import utils
@@ -183,6 +184,31 @@ class TestUtils(test_base.TestCase):
         self.assertIsNone(utils.dt_deserializer(None, None))
         self.assertRaises(ValueError, utils.dt_deserializer, None, 'foo')
 
+    def test_obj_to_primitive_list(self):
+        class MyList(base.ObjectListBase, base.MagnumObject):
+            pass
+        mylist = MyList(self.context)
+        mylist.objects = [1, 2, 3]
+        self.assertEqual([1, 2, 3], base.obj_to_primitive(mylist))
+
+    def test_obj_to_primitive_dict(self):
+        myobj = MyObj(self.context)
+        myobj.foo = 1
+        myobj.bar = 'foo'
+        self.assertEqual({'foo': 1, 'bar': 'foo'},
+                         base.obj_to_primitive(myobj))
+
+    def test_obj_to_primitive_recursive(self):
+        class MyList(base.ObjectListBase, base.MagnumObject):
+            pass
+
+        mylist = MyList(self.context)
+        mylist.objects = [MyObj(self.context), MyObj(self.context)]
+        for i, value in enumerate(mylist):
+            value.foo = i
+        self.assertEqual([{'foo': 0}, {'foo': 1}],
+                         base.obj_to_primitive(mylist))
+
 
 class _TestObject(object):
     def test_hydration_type_error(self):
@@ -293,6 +319,14 @@ class _TestObject(object):
     def test_unknown_objtype(self):
         self.assertRaises(exception.UnsupportedObjectError,
                           base.MagnumObject.obj_class_from_name, 'foo', '1.0')
+
+    def test_with_alternate_context(self):
+        ctxt1 = context.RequestContext('foo', 'foo')
+        ctxt2 = context.RequestContext('bar', tenant='alternate')
+        obj = MyObj.query(ctxt1)
+        obj.update_test(ctxt2)
+        self.assertEqual('alternate-context', obj.bar)
+        self.assertRemotes()
 
     def test_orphaned_object(self):
         obj = MyObj.query(self.context)
@@ -449,6 +483,40 @@ class _TestObject(object):
 
 class TestObjectListBase(test_base.TestCase):
 
+    def test_list_like_operations(self):
+        class Foo(base.ObjectListBase, base.MagnumObject):
+            pass
+
+        objlist = Foo(self.context)
+        objlist._context = 'foo'
+        objlist.objects = [1, 2, 3]
+        self.assertEqual(list(objlist), objlist.objects)
+        self.assertEqual(3, len(objlist))
+        self.assertEqual([1], list(objlist[:1]))
+        self.assertEqual('foo', objlist[:1]._context)
+        self.assertEqual(3, objlist[2])
+        self.assertEqual(1, objlist.count(1))
+        self.assertEqual(1, objlist.index(2))
+
+    def test_serialization(self):
+        class Foo(base.ObjectListBase, base.MagnumObject):
+            pass
+
+        class Bar(base.MagnumObject):
+            fields = {'foo': str}
+
+        obj = Foo(self.context)
+        obj.objects = []
+        for i in 'abc':
+            bar = Bar(self.context)
+            bar.foo = i
+            obj.objects.append(bar)
+
+        obj2 = base.MagnumObject.obj_from_primitive(obj.obj_to_primitive())
+        self.assertFalse(obj is obj2)
+        self.assertEqual([x.foo for x in obj],
+                         [y.foo for y in obj2])
+
     def _test_object_list_version_mappings(self, list_obj_class):
         # Figure out what sort of object this list is for
         list_field = list_obj_class.fields['objects']
@@ -482,3 +550,26 @@ class TestObjectSerializer(test_base.TestCase):
         ser = base.MagnumObjectSerializer()
         for thing in (1, 'foo', [1, 2], {'foo': 'bar'}):
             self.assertEqual(thing, ser.deserialize_entity(None, thing))
+
+    def test_object_serialization(self):
+        ser = base.MagnumObjectSerializer()
+        obj = MyObj(self.context)
+        primitive = ser.serialize_entity(self.context, obj)
+        self.assertTrue('magnum_object.name' in primitive)
+        obj2 = ser.deserialize_entity(self.context, primitive)
+        self.assertIsInstance(obj2, MyObj)
+        self.assertEqual(self.context, obj2._context)
+
+    def test_object_serialization_iterables(self):
+        ser = base.MagnumObjectSerializer()
+        obj = MyObj(self.context)
+        for iterable in (list, tuple, set):
+            thing = iterable([obj])
+            primitive = ser.serialize_entity(self.context, thing)
+            self.assertEqual(1, len(primitive))
+            for item in primitive:
+                self.assertFalse(isinstance(item, base.MagnumObject))
+            thing2 = ser.deserialize_entity(self.context, primitive)
+            self.assertEqual(1, len(thing2))
+            for item in thing2:
+                self.assertIsInstance(item, MyObj)
