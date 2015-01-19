@@ -281,6 +281,24 @@ just restart either magnum-api or magnum-conductor.  the -e option to
 pip install will link to the location from where the source code
 was installed.
 
+Magnum uses heat to orchestrate.  Heat reports COMPLETE_COMPLETE when it is
+done orchestrating.  Do not create containeers, pods, services, or replication
+controllers before Heat finishes orchestrating the bay.  They will likely
+not be created, causing Magnum to become confused.
+
+See blueprint:
+https://blueprints.launchpad.net/magnum/+spec/magnum-bay-status
+
+
+    heat stack-list
+
+    +--------------------------------------+------------+-----------------+----------------------+
+    | id                                   | stack_name | stack_status    | creation_time        |
+    +--------------------------------------+------------+-----------------+----------------------+
+    | 8eb10314-e6b8-400f-8d4c-c0f5762eecea | testbay    | CREATE_COMPLETE | 2015-01-17T17:06:27Z |
+    +--------------------------------------+------------+-----------------+----------------------+
+
+
 To start a kubernetes pod, use Kolla as an example repo::
 
     git clone http://github.com/stackforge/kolla
