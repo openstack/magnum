@@ -276,13 +276,13 @@ Magnum in which way to construct a bay.::
     magnum baymodel-create --name testbaymodel --image-id fedora21-atomic \
                            --keypair-id testkey \
                            --external-network-id $NIC_ID \
-                           --dns-nameserver 8.8.8.8 --flavor-id m1.medium
+                           --dns-nameserver 8.8.8.8 --flavor-id m1.small
 
 Next create a bay. Use the baymodel UUID as a template for bay creation.
 This bay will result in one master kubernetes node and three minion nodes.::
 
     BAYMODEL_UUID=$(magnum baymodel-list | awk '/ testbaymodel /{print $2}')
-    magnum bay-create --name testbay --baymodel-id $BAYMODEL_UUID --node-count 3
+    magnum bay-create --name testbay --baymodel-id $BAYMODEL_UUID --node-count 2
 
 The existing bays can be listed as follows::
 
