@@ -23,7 +23,7 @@ Install prerequisites::
     # Fedora/RHEL:
     sudo yum install python-devel openssl-devel python-pip mysql-devel \
                      libxml2-devel libxslt-devel postgresql-devel git \
-                     git-review libffi-devel gettext ipmitool
+                     git-review libffi-devel gettext
 
     # openSUSE/SLE 12:
     sudo zypper install git git-review libffi-devel libmysqlclient-devel \
@@ -98,6 +98,17 @@ deployment of baremetal nodes.
 
 This session has only been tested on Ubuntu 14.04 (Trusty) and Fedora 21.
 We recommend users to select one of them if it is possible.
+
+NB: Magnum depends on a command line tool in kubernetes called kubectl
+to execute its operations with Kubernetes.  We are addressing this in milestone
+#2 by implementing a native ReST client for Kubernetes.  In the meantime, the
+required action is to install kubectl manually.
+
+Install binary distribution of kubectl distributed by Google::
+
+    wget https://github.com/GoogleCloudPlatform/kubernetes/releases/download/v0.7.0/kubernetes.tar.gz
+    tar -xzvf kubernetes.tar.gz
+    sudo cp -a kubernetes/platforms/linux/amd64/kubectl /usr/bin/kubectl
 
 Clone DevStack::
 
