@@ -137,18 +137,22 @@ class TestBayK8sHeat(base.BaseTestCase):
         parsed_outputs = bay_k8s_heat._parse_stack_outputs(outputs)
         self.assertEqual(expected_return_value, parsed_outputs)
 
+    @patch('magnum.common.short_id.generate_id')
     @patch('heatclient.common.template_utils.get_template_contents')
     @patch('magnum.objects.BayModel.get_by_uuid')
     @patch('magnum.conductor.handlers.bay_k8s_heat._extract_bay_definition')
     def test_create_stack(self,
                           mock_extract_bay_definition,
                           mock_objects_baymodel_get_by_uuid,
-                          mock_get_template_contents):
+                          mock_get_template_contents,
+                          mock_generate_id):
 
-        expected_stack_name = 'expected_stack_name'
+        mock_generate_id.return_value = 'xx-xx-xx-xx'
+        expected_stack_name = 'expected_stack_name-xx-xx-xx-xx'
         expected_number_of_minions = 1
         expected_template_contents = 'template_contents'
         exptected_files = []
+        dummy_bay_name = 'expected_stack_name'
 
         mock_tpl_files = mock.MagicMock()
         mock_tpl_files.items.return_value = exptected_files
@@ -160,7 +164,7 @@ class TestBayK8sHeat(base.BaseTestCase):
         mock_osc = mock.MagicMock()
         mock_osc.heat.return_value = mock_heat_client
         mock_bay = mock.MagicMock()
-        mock_bay.name = expected_stack_name
+        mock_bay.name = dummy_bay_name
         mock_bay.node_count = expected_number_of_minions
 
         bay_k8s_heat._create_stack({}, mock_osc, mock_bay)

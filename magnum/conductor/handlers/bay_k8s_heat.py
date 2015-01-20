@@ -17,6 +17,7 @@ from heatclient import exc
 from oslo.config import cfg
 
 from magnum.common import clients
+from magnum.common import short_id
 from magnum import objects
 from magnum.openstack.common._i18n import _
 from magnum.openstack.common import log as logging
@@ -73,8 +74,10 @@ def _create_stack(ctxt, osc, bay):
 
     tpl_files, template = template_utils.get_template_contents(
                                         cfg.CONF.k8s_heat.template_path)
+    # Make sure no duplicate stack name
+    stack_name = '%s-%s' % (bay.name, short_id.generate_id())
     fields = {
-        'stack_name': bay.name,
+        'stack_name': stack_name,
         'parameters': bay_definition,
         'template': template,
         'files': dict(list(tpl_files.items()))
