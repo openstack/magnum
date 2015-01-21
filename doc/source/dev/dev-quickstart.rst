@@ -200,36 +200,38 @@ Next, clone and install magnum::
           /etc/magnum/templates/
 
 Next configure Magnum::
+    # If using milestone #1, please use the documentation shipped with the milestone
+    # as the current master instructions are slightly incompatible.
 
     # copy sample config and modify it as necessary
     sudo cp etc/magnum/magnum.conf.sample /etc/magnum/magnum.conf
 
     # enable debugging output
-    sudo sed -i "s/#debug=.*/debug=true/" /etc/magnum/magnum.conf
+    sudo sed -i "s/#debug\s*=.*/debug=true/" /etc/magnum/magnum.conf
 
     # enable more verbose output
-    sudo sed -i "s/#verbose=.*/verbose=true/" /etc/magnum/magnum.conf
+    sudo sed -i "s/#verbose\s*=.*/verbose=true/" /etc/magnum/magnum.conf
 
     # set RabbitMQ userid
-    sudo sed -i "s/#rabbit_userid=.*/rabbit_userid=stackrabbit/" /etc/magnum/magnum.conf
+    sudo sed -i "s/#rabbit_userid\s*=.*/rabbit_userid=stackrabbit/" /etc/magnum/magnum.conf
 
     # set RabbitMQ password
-    sudo sed -i "s/#rabbit_password=.*/rabbit_password=password/" /etc/magnum/magnum.conf
+    sudo sed -i "s/#rabbit_password\s*=.*/rabbit_password=password/" /etc/magnum/magnum.conf
 
     # set SQLAlchemy connection string to connect to MySQL
-    sudo sed -i "s/#connection=.*/connection=mysql:\/\/root:password@localhost\/magnum/" /etc/magnum/magnum.conf
+    sudo sed -i "s/#connection\s*=.*/connection=mysql:\/\/root:password@localhost\/magnum/" /etc/magnum/magnum.conf
 
     # set Keystone account username
-    sudo sed -i "s/#admin_user=.*/admin_user=admin/" /etc/magnum/magnum.conf
+    sudo sed -i "s/#admin_user\s*=.*/admin_user=admin/" /etc/magnum/magnum.conf
 
     # set Keystone account password
-    sudo sed -i "s/#admin_password=.*/admin_password=password/" /etc/magnum/magnum.conf
+    sudo sed -i "s/#admin_password\s*=.*/admin_password=password/" /etc/magnum/magnum.conf
 
     # set admin Identity API endpoint
-    sudo sed -i "s/#identity_uri=.*/identity_uri=http:\/\/127.0.0.1:35357/" /etc/magnum/magnum.conf
+    sudo sed -i "s/#identity_uri\s*=.*/identity_uri=http:\/\/127.0.0.1:35357/" /etc/magnum/magnum.conf
 
     # set public Identity API endpoint
-    sudo sed -i "s/#auth_uri=.*/auth_uri=http:\/\/127.0.0.1:5000\/v2.0/" /etc/magnum/magnum.conf
+    sudo sed -i "s/#auth_uri\s*=.*/auth_uri=http:\/\/127.0.0.1:5000\/v2.0/" /etc/magnum/magnum.conf
 
 Next, clone and install the client::
 
