@@ -289,8 +289,8 @@ just restart either magnum-api or magnum-conductor.  the -e option to
 pip install will link to the location from where the source code
 was installed.
 
-Magnum uses heat to orchestrate.  Heat reports COMPLETE_COMPLETE when it is
-done orchestrating.  Do not create containeers, pods, services, or replication
+Magnum uses heat to orchestrate.  Heat reports CREATE_COMPLETE when it is
+done orchestrating.  Do not create containers, pods, services, or replication
 controllers before Heat finishes orchestrating the bay.  They will likely
 not be created, causing Magnum to become confused.
 
