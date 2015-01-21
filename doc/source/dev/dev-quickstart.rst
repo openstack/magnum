@@ -157,10 +157,6 @@ for more detailed neutron configuration.::
     LOGFILE=$HOME/devstack.log
     SCREEN_LOGDIR=$HOME/logs
 
-    # Magnum doesn't work with latest heat.
-    # See: https://bugs.launchpad.net/magnum/+bug/1411092
-    HEAT_BRANCH=stable/juno
-
     END
     ./stack.sh
 
