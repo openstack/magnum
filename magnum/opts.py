@@ -32,8 +32,7 @@ import magnum.openstack.common.periodic_task
 def list_opts():
     return [
         ('DEFAULT',
-         itertools.chain(magnum.api.app.API_SERVICE_OPTS,
-                         magnum.api.auth.AUTH_OPTS,
+         itertools.chain(magnum.api.auth.AUTH_OPTS,
                          magnum.common.exception.exc_log_opts,
                          magnum.common.magnum_keystoneclient.trust_opts,
                          magnum.common.paths.PATH_OPTS,
@@ -42,8 +41,11 @@ def list_opts():
                           .eventlet_backdoor_opts),
                          magnum.openstack.common.log.generic_log_opts,
                          magnum.openstack.common.log.log_opts,
+                         magnum.openstack.common.log.common_cli_opts,
+                         magnum.openstack.common.log.logging_cli_opts,
                          magnum.openstack.common.periodic_task.periodic_opts,
                          )),
+        ('api', magnum.api.app.API_SERVICE_OPTS),
         ('conductor', magnum.conductor.config.SERVICE_OPTS),
         ('database', magnum.db.sqlalchemy.models.sql_opts),
         ('docker', magnum.conductor.handlers.docker_conductor.docker_opts),
