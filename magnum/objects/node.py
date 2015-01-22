@@ -29,6 +29,8 @@ class Node(base.MagnumObject):
     fields = {
         'id': int,
         'uuid': obj_utils.str_or_none,
+        'project_id': obj_utils.str_or_none,
+        'user_id': obj_utils.str_or_none,
         'type': obj_utils.str_or_none,
         'image_id': obj_utils.str_or_none,
         'ironic_node_id': obj_utils.str_or_none

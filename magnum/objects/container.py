@@ -30,6 +30,8 @@ class Container(base.MagnumObject):
         'id': int,
         'uuid': obj_utils.str_or_none,
         'name': obj_utils.str_or_none,
+        'project_id': obj_utils.str_or_none,
+        'user_id': obj_utils.str_or_none,
         'image_id': obj_utils.str_or_none,
     }
 
