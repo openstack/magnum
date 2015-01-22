@@ -299,7 +299,7 @@ class _TestObject(object):
         self.assertEqual('loaded!', obj.bar)
         expected = {'magnum_object.name': 'MyObj',
                     'magnum_object.namespace': 'magnum',
-                    'magnum_object.version': '1.5',
+                    'magnum_object.version': '1.0',
                     'magnum_object.changes': ['bar'],
                     'magnum_object.data': {'foo': 1,
                                          'bar': 'loaded!'}}
@@ -394,7 +394,7 @@ class _TestObject(object):
         obj.updated_at = dt
         expected = {'magnum_object.name': 'MyObj',
                     'magnum_object.namespace': 'magnum',
-                    'magnum_object.version': '1.5',
+                    'magnum_object.version': '1.0',
                     'magnum_object.changes':
                         ['created_at', 'updated_at'],
                     'magnum_object.data':
@@ -492,6 +492,7 @@ class TestObjectListBase(test_base.TestCase):
         objlist.objects = [1, 2, 3]
         self.assertEqual(list(objlist), objlist.objects)
         self.assertEqual(3, len(objlist))
+        self.assertIn(2, objlist)
         self.assertEqual([1], list(objlist[:1]))
         self.assertEqual('foo', objlist[:1]._context)
         self.assertEqual(3, objlist[2])
@@ -537,6 +538,24 @@ class TestObjectListBase(test_base.TestCase):
             for obj_class in obj_classes:
                 if issubclass(obj_class, base.ObjectListBase):
                     self._test_object_list_version_mappings(obj_class)
+
+    def test_list_changes(self):
+        class Foo(base.ObjectListBase, base.MagnumObject):
+            pass
+
+        class Bar(base.MagnumObject):
+            fields = {'foo': str}
+
+        obj = Foo(self.context, objects=[])
+        self.assertEqual(set(['objects']), obj.obj_what_changed())
+        obj.objects.append(Bar(self.context, foo='test'))
+        self.assertEqual(set(['objects']), obj.obj_what_changed())
+        obj.obj_reset_changes()
+        # This should still look dirty because the child is dirty
+        self.assertEqual(set(['objects']), obj.obj_what_changed())
+        obj.objects[0].obj_reset_changes()
+        # This should now look clean because the child is clean
+        self.assertEqual(set(), obj.obj_what_changed())
 
 
 class TestObjectSerializer(test_base.TestCase):

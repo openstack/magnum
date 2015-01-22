@@ -15,6 +15,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import copy
 import os
 
 from oslo.config import cfg
@@ -24,6 +25,7 @@ from pecan import testing
 import testscenarios
 
 from magnum.common import context as magnum_context
+from magnum.objects import base as objects_base
 from magnum.tests import conf_fixture
 
 
@@ -50,6 +52,13 @@ class TestCase(base.BaseTestCase):
         ))
         self.context = magnum_context.RequestContext()
         self.useFixture(conf_fixture.ConfFixture(cfg.CONF))
+
+        self._base_test_obj_backup = copy.copy(
+                objects_base.MagnumObject._obj_classes)
+        self.addCleanup(self._restore_obj_registry)
+
+    def _restore_obj_registry(self):
+        objects_base.MagnumObject._obj_classes = self._base_test_obj_backup
 
     def tearDown(self):
         super(TestCase, self).tearDown()
