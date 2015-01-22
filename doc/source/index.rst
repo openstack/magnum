@@ -12,7 +12,7 @@ Contents:
    :maxdepth: 2
 
    readme
-   quickstart
+   dev/dev-quickstart
    installation
    usage
    contributing
