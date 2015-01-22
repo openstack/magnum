@@ -168,6 +168,9 @@ The next step is to store the Fedora Atomic micro-OS in glance.  The steps for
 updating Fedora Atomic images are a bit detailed.  Fortunately one of the core
 developers has made Atomic images avaliable via the web:
 
+If using the m-1 tag or tarball, please use the documentation shipped with the
+milestone as the current master instructions are slightly incompatible.
+
 Create a new shell, and source the devstack openrc script::
 
     source ~/devstack/openrc admin admin
@@ -200,8 +203,6 @@ Next, clone and install magnum::
           /etc/magnum/templates/
 
 Next configure Magnum::
-    # If using milestone #1, please use the documentation shipped with the milestone
-    # as the current master instructions are slightly incompatible.
 
     # copy sample config and modify it as necessary
     sudo cp etc/magnum/magnum.conf.sample /etc/magnum/magnum.conf
