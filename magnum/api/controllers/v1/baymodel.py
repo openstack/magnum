@@ -30,10 +30,7 @@ from magnum import objects
 
 
 class BayModelPatchType(types.JsonPatchType):
-
-    @staticmethod
-    def mandatory_attrs():
-        return ['/baymodel_uuid']
+    pass
 
 
 class BayModel(base.APIBase):
@@ -42,28 +39,6 @@ class BayModel(base.APIBase):
     This class enforces type checking and value constraints, and converts
     between the internal object model and the API representation of a baymodel.
     """
-
-    _baymodel_uuid = None
-
-    def _get_baymodel_uuid(self):
-        return self._baymodel_uuid
-
-    def _set_baymodel_uuid(self, value):
-        if value and self._baymodel_uuid != value:
-            try:
-                # FIXME(comstud): One should only allow UUID here, but
-                # there seems to be a bug in that tests are passing an
-                # ID. See bug #1301046 for more details.
-                baymodel = objects.BayModel.get(pecan.request.context, value)
-                self._baymodel_uuid = baymodel.uuid
-                self.baymodel_id = baymodel.id
-            except exception.BayModelNotFound as e:
-                # Change error code because 404 (NotFound) is inappropriate
-                # response for a POST request to create a BayModel
-                e.code = 400  # BadRequest
-                raise e
-        elif value == wtypes.Unset:
-            self._baymodel_uuid = wtypes.Unset
 
     uuid = types.uuid
     """Unique UUID for this baymodel"""
@@ -94,30 +69,18 @@ class BayModel(base.APIBase):
 
     def __init__(self, **kwargs):
         self.fields = []
-        fields = list(objects.BayModel.fields)
-        fields.append('baymodel_uuid')
-        for field in fields:
+        for field in objects.BayModel.fields:
             # Skip fields we do not expose.
             if not hasattr(self, field):
                 continue
             self.fields.append(field)
             setattr(self, field, kwargs.get(field, wtypes.Unset))
 
-        # NOTE(lucasagomes): baymodel_id is an attribute created on-the-fly
-        # by _set_baymodel_uuid(), it needs to be present in the fields so
-        # that as_dict() will contain baymodel_id field when converting it
-        # before saving it in the database.
-        self.fields.append('baymodel_id')
-        setattr(self, 'baymodel_uuid', kwargs.get('baymodel_id', wtypes.Unset))
-
     @staticmethod
     def _convert_with_links(baymodel, url, expand=True):
         if not expand:
             baymodel.unset_fields_except(['uuid', 'name', 'image_id',
                                           'apiserver_port'])
-
-        # never expose the baymodel_id attribute
-        baymodel.baymodel_id = wtypes.Unset
 
         baymodel.links = [link.Link.make_link('self', url,
                                           'baymodels', baymodel.uuid),
@@ -136,16 +99,15 @@ class BayModel(base.APIBase):
     @classmethod
     def sample(cls, expand=True):
         sample = cls(uuid='27e3153e-d5bf-4b7e-b517-fb518e17f34c',
-                     name='example',
-                     type='virt',
-                     image_id='Fedora-k8s',
-                     apiserver_port=8080,
-                     baymodel_count=1,
-                     created_at=datetime.datetime.utcnow(),
-                     updated_at=datetime.datetime.utcnow())
-        # NOTE(lucasagomes): baymodel_uuid getter() method look at the
-        # _baymodel_uuid variable
-        sample._baymodel_uuid = '7ae81bb3-dec3-4289-8d6c-da80bd8001ae'
+                    name='example',
+                    image_id='Fedora-k8s',
+                    flavor_id='m1.small',
+                    dns_nameserver='8.8.1.1',
+                    keypair_id='keypair1',
+                    external_network_id='ffc44e4a-2319-4062-bce0-9ae1c38b05ba',
+                    apiserver_port=8080,
+                    created_at=datetime.datetime.utcnow(),
+                    updated_at=datetime.datetime.utcnow())
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 
 
@@ -290,12 +252,6 @@ class BayModelsController(rest.RestController):
             baymodel_uuid)
         try:
             baymodel_dict = rpc_baymodel.as_dict()
-            # NOTE(lucasagomes):
-            # 1) Remove baymodel_id because it's an internal value and
-            #    not present in the API object
-            # 2) Add baymodel_uuid
-            baymodel_dict['baymodel_uuid'] = baymodel_dict.pop('baymodel_id',
-                                             None)
             baymodel = BayModel(**api_utils.apply_jsonpatch(baymodel_dict,
                 patch))
         except api_utils.JSONPATCH_EXCEPTIONS as e:

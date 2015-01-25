@@ -34,7 +34,7 @@ class BayPatchType(types.JsonPatchType):
 
     @staticmethod
     def mandatory_attrs():
-        return ['/bay_uuid']
+        return ['/baymodel_id']
 
 
 class Bay(base.APIBase):
@@ -44,30 +44,23 @@ class Bay(base.APIBase):
     between the internal object model and the API representation of a bay.
     """
 
-    _bay_uuid = None
+    _baymodel_id = None
 
-    def _get_bay_uuid(self):
-        return self._bay_uuid
+    def _get_baymodel_id(self):
+        return self._baymodel_id
 
-    def _set_bay_uuid(self, value):
-        if value and self._bay_uuid != value:
+    def _set_baymodel_id(self, value):
+        if value and self._baymodel_id != value:
             try:
-                # FIXME(comstud): One should only allow UUID here, but
-                # there seems to be a bug in that tests are passing an
-                # ID. See bug #1301046 for more details.
-                bay = objects.Bay.get(pecan.request.context, value)
-                self._bay_uuid = bay.uuid
-                # NOTE(lucasagomes): Create the bay_id attribute on-the-fly
-                #                    to satisfy the api -> rpc object
-                #                    conversion.
-                self.bay_id = bay.id
-            except exception.BayNotFound as e:
+                baymodel = objects.BayModel.get(pecan.request.context, value)
+                self._baymodel_id = baymodel.uuid
+            except exception.BayModelNotFound as e:
                 # Change error code because 404 (NotFound) is inappropriate
                 # response for a POST request to create a Bay
                 e.code = 400  # BadRequest
                 raise e
         elif value == wtypes.Unset:
-            self._bay_uuid = wtypes.Unset
+            self._baymodel_id = wtypes.Unset
 
     uuid = types.uuid
     """Unique UUID for this bay"""
@@ -75,7 +68,8 @@ class Bay(base.APIBase):
     name = wtypes.text
     """Name of this bay"""
 
-    baymodel_id = wtypes.text
+    baymodel_id = wsme.wsproperty(wtypes.text, _get_baymodel_id,
+                                  _set_baymodel_id, mandatory=True)
     """The bay model UUID or id"""
 
     node_count = wtypes.IntegerType()
@@ -88,32 +82,18 @@ class Bay(base.APIBase):
         super(Bay, self).__init__()
 
         self.fields = []
-        fields = list(objects.Bay.fields)
-        # NOTE(lucasagomes): bay_uuid is not part of objects.Bay.fields
-        #                    because it's an API-only attribute
-        fields.append('bay_uuid')
-        for field in fields:
+        for field in objects.Bay.fields:
             # Skip fields we do not expose.
             if not hasattr(self, field):
                 continue
             self.fields.append(field)
             setattr(self, field, kwargs.get(field, wtypes.Unset))
 
-        # NOTE(lucasagomes): bay_id is an attribute created on-the-fly
-        # by _set_bay_uuid(), it needs to be present in the fields so
-        # that as_dict() will contain bay_id field when converting it
-        # before saving it in the database.
-        self.fields.append('bay_id')
-        setattr(self, 'bay_uuid', kwargs.get('bay_id', wtypes.Unset))
-
     @staticmethod
     def _convert_with_links(bay, url, expand=True):
         if not expand:
             bay.unset_fields_except(['uuid', 'name', 'baymodel_id',
                                     'node_count'])
-
-        # never expose the bay_id attribute
-        bay.bay_id = wtypes.Unset
 
         bay.links = [link.Link.make_link('self', url,
                                           'bays', bay.uuid),
@@ -132,13 +112,10 @@ class Bay(base.APIBase):
     def sample(cls, expand=True):
         sample = cls(uuid='27e3153e-d5bf-4b7e-b517-fb518e17f34c',
                      name='example',
-                     image_id='Fedora-k8s',
+                     baymodel_id='4a96ac4b-2447-43f1-8ca6-9fd6f36d146d',
                      node_count=1,
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())
-        # NOTE(lucasagomes): bay_uuid getter() method look at the
-        # _bay_uuid variable
-        sample._bay_uuid = '7ae81bb3-dec3-4289-8d6c-da80bd8001ae'
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 
 
@@ -280,11 +257,6 @@ class BaysController(rest.RestController):
         rpc_bay = objects.Bay.get_by_uuid(pecan.request.context, bay_uuid)
         try:
             bay_dict = rpc_bay.as_dict()
-            # NOTE(lucasagomes):
-            # 1) Remove bay_id because it's an internal value and
-            #    not present in the API object
-            # 2) Add bay_uuid
-            bay_dict['bay_uuid'] = bay_dict.pop('bay_id', None)
             bay = Bay(**api_utils.apply_jsonpatch(bay_dict, patch))
         except api_utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)
