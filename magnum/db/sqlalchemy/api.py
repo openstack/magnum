@@ -123,6 +123,10 @@ class Connection(api.Connection):
             query = query.filter_by(master_address=filters['master_address'])
         if 'minions_address' in filters:
             query = query.filter_by(minions_address=filters['minions_address'])
+        if 'project_id' in filters:
+            query = query.filter_by(project_id=filters['project_id'])
+        if 'user_id' in filters:
+            query = query.filter_by(user_id=filters['user_id'])
 
         return query
 
@@ -247,6 +251,10 @@ class Connection(api.Connection):
                 external_network_id=filters['external_network_id'])
         if 'dns_nameserver' in filters:
             query = query.filter_by(dns_nameserver=filters['dns_nameserver'])
+        if 'project_id' in filters:
+            query = query.filter_by(project_id=filters['project_id'])
+        if 'user_id' in filters:
+            query = query.filter_by(user_id=filters['user_id'])
 
         return query
 
@@ -350,6 +358,10 @@ class Connection(api.Connection):
             query = query.filter_by(name=filters['name'])
         if 'image_id' in filters:
             query = query.filter_by(image_id=filters['image_id'])
+        if 'project_id' in filters:
+            query = query.filter_by(project_id=filters['project_id'])
+        if 'user_id' in filters:
+            query = query.filter_by(user_id=filters['user_id'])
 
         return query
 
@@ -447,6 +459,10 @@ class Connection(api.Connection):
             query = query.filter_by(type=filters['type'])
         if 'image_id' in filters:
             query = query.filter_by(image_id=filters['image_id'])
+        if 'project_id' in filters:
+            query = query.filter_by(project_id=filters['project_id'])
+        if 'user_id' in filters:
+            query = query.filter_by(user_id=filters['user_id'])
 
         return query
 

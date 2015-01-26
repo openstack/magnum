@@ -85,9 +85,13 @@ class DbNodeTestCase(base.DbTestCase):
     def test_get_nodeinfo_list_with_filters(self):
         node1 = utils.create_test_node(type='virt',
             ironic_node_id=magnum_utils.generate_uuid(),
-            uuid=magnum_utils.generate_uuid())
+            uuid=magnum_utils.generate_uuid(),
+            project_id='fake-project1',
+            user_id='fake-user1')
         node2 = utils.create_test_node(type='bare',
-            uuid=magnum_utils.generate_uuid())
+            uuid=magnum_utils.generate_uuid(),
+            project_id='fake-project2',
+            user_id='fake-user2')
 
         res = self.dbapi.get_nodeinfo_list(filters={'type': 'virt'})
         self.assertEqual([node1.id], [r[0] for r in res])
@@ -98,7 +102,15 @@ class DbNodeTestCase(base.DbTestCase):
         res = self.dbapi.get_nodeinfo_list(filters={'associated': True})
         self.assertEqual([node1.id], [r[0] for r in res])
 
+        res = self.dbapi.get_nodeinfo_list(filters={
+                 'project_id': 'fake-project1', 'user_id': 'fake-user1'})
+        self.assertEqual([node1.id], [r[0] for r in res])
+
         res = self.dbapi.get_nodeinfo_list(filters={'associated': False})
+        self.assertEqual([node2.id], [r[0] for r in res])
+
+        res = self.dbapi.get_nodeinfo_list(filters={
+                 'project_id': 'fake-project2', 'user_id': 'fake-user2'})
         self.assertEqual([node2.id], [r[0] for r in res])
 
     def test_get_node_list(self):
