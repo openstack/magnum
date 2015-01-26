@@ -26,7 +26,8 @@ class TestBayController(db_base.DbTestCase):
         bay = objects.Bay.get_by_uuid({}, bay_uuid)
         bay.destroy()
 
-    def test_bay_api(self):
+    @patch('magnum.common.context.RequestContext')
+    def test_bay_api(self, mock_RequestContext):
         with patch.object(api.API, 'bay_create') as mock_method:
             # Create a baymodel
             baymodel = db_utils.get_test_baymodel()
@@ -34,6 +35,9 @@ class TestBayController(db_base.DbTestCase):
 
             # Create a bay
             mock_method.side_effect = self.simulate_rpc_bay_create
+            mock_auth_token = mock_RequestContext.auth_token_info['token']
+            mock_auth_token['project']['id'].return_value = 'fake_project'
+            mock_auth_token['user']['id'].return_value = 'fake_user'
             params = '{"name": "bay_example_A", "baymodel_id": "12345", \
                 "node_count": "3", "baymodel_id": "%s"}' % baymodel['uuid']
             response = self.app.post('/v1/bays',

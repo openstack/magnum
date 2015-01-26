@@ -329,8 +329,12 @@ class ContainersController(rest.RestController):
         if self.from_containers:
             raise exception.OperationNotPermitted
 
-        new_container = objects.Container(pecan.request.context,
-                                **container.as_dict())
+        container_dict = container.as_dict()
+        ctxt = pecan.request.context
+        auth_token = ctxt.auth_token_info['token']
+        container_dict['project_id'] = auth_token['project']['id']
+        container_dict['user_id'] = auth_token['user']['id']
+        new_container = objects.Container(ctxt, **container_dict)
         new_container.create()
         res_container = backend_api.container_create(new_container.name,
                                                      new_container.uuid,

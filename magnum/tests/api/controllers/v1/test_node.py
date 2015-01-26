@@ -9,13 +9,19 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
+from mock import patch
+
 from magnum.tests.db import base as db_base
 
 
 class TestNodeController(db_base.DbTestCase):
-    def test_node_api(self):
+    @patch('magnum.common.context.RequestContext')
+    def test_node_api(self, mock_RequestContext):
         # Create a node
         params = '{"type": "bare", "image_id": "Fedora"}'
+        mock_auth_token = mock_RequestContext.auth_token_info['token']
+        mock_auth_token['project']['id'].return_value = 'fake_project'
+        mock_auth_token['user']['id'].return_value = 'fake_user'
         response = self.app.post('/v1/nodes',
                                  params=params,
                                  content_type='application/json')
