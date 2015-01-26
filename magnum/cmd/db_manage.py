@@ -59,7 +59,7 @@ def add_command_parsers(subparsers):
     parser.set_defaults(func=do_downgrade)
 
     parser = subparsers.add_parser('stamp')
-    parser.add_argument('revision', nargs='?')
+    parser.add_argument('revision')
     parser.set_defaults(func=do_stamp)
 
     parser = subparsers.add_parser('revision')
