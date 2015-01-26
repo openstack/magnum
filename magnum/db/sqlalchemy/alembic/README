@@ -1,15 +1,15 @@
 Please see https://alembic.readthedocs.org/en/latest/index.html for general documentation
 
 To create alembic migrations use:
-$ magnum-db-manage revision --message --autogenerate
+$ magnum-db-manage revision --message "description of revision" --autogenerate
 
 Stamp db with most recent migration version, without actually running migrations
-$ magnum-db-manage stamp --revision head
+$ magnum-db-manage stamp head
 
 Upgrade can be performed by:
 $ magnum-db-manage upgrade
-# magnum-db-manage upgrade --revision head
+$ magnum-db-manage upgrade head
 
 Downgrading db:
 $ magnum-db-manage downgrade
-$ magnum-db-manage downgrade --revision base
+$ magnum-db-manage downgrade base
