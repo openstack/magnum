@@ -15,6 +15,7 @@
 Utils for testing the API service.
 """
 
+from magnum.api.controllers.v1 import bay as bay_controller
 from magnum.api.controllers.v1 import baymodel as baymodel_controller
 from magnum.tests.db import utils
 
@@ -29,3 +30,9 @@ def baymodel_post_data(**kw):
     baymodel = utils.get_test_baymodel(**kw)
     internal = baymodel_controller.BayModelPatchType.internal_attrs()
     return remove_internal(baymodel, internal)
+
+
+def bay_post_data(**kw):
+    bay = utils.get_test_bay(**kw)
+    internal = bay_controller.BayPatchType.internal_attrs()
+    return remove_internal(bay, internal)

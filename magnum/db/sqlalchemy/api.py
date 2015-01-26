@@ -180,16 +180,20 @@ class Connection(api.Connection):
 
     def destroy_bay(self, bay_id):
         def bay_not_empty(session, bay_uuid):
-            """Checks whether the bay does not have pods or services."""
+            """Checks whether the bay does not have resources."""
             query = model_query(models.Pod, session=session)
             query = self._add_pods_filters(query, {'bay_uuid': bay_uuid})
             if query.count() != 0:
                 return True
-            else:
-                query = model_query(models.Service, session=session)
-                query = self._add_services_filters(query, {
-                            'bay_uuid': bay_uuid})
-                return query.count() != 0
+
+            query = model_query(models.Service, session=session)
+            query = self._add_services_filters(query, {'bay_uuid': bay_uuid})
+            if query.count() != 0:
+                return True
+
+            query = model_query(models.ReplicationController, session=session)
+            query = self._add_rcs_filters(query, {'bay_uuid': bay_uuid})
+            return query.count() != 0
 
         session = get_session()
         with session.begin():

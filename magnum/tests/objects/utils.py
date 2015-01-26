@@ -70,3 +70,84 @@ def create_test_bay(ctxt, **kw):
     bay = get_test_bay(ctxt, **kw)
     bay.create()
     return bay
+
+
+def get_test_pod(ctxt, **kw):
+    """Return a Pod object with appropriate attributes.
+
+    NOTE: The object leaves the attributes marked as changed, such
+    that a create() could be used to commit it to the DB.
+    """
+    db_pod = db_utils.get_test_pod(**kw)
+    # Let DB generate ID if it isn't specified explicitly
+    if 'id' not in kw:
+        del db_pod['id']
+    pod = objects.Pod(ctxt)
+    for key in db_pod:
+        setattr(pod, key, db_pod[key])
+    return pod
+
+
+def create_test_pod(ctxt, **kw):
+    """Create and return a test pod object.
+
+    Create a pod in the DB and return a Pod object with appropriate
+    attributes.
+    """
+    pod = get_test_pod(ctxt, **kw)
+    pod.create()
+    return pod
+
+
+def get_test_service(ctxt, **kw):
+    """Return a Service object with appropriate attributes.
+
+    NOTE: The object leaves the attributes marked as changed, such
+    that a create() could be used to commit it to the DB.
+    """
+    db_service = db_utils.get_test_service(**kw)
+    # Let DB generate ID if it isn't specified explicitly
+    if 'id' not in kw:
+        del db_service['id']
+    service = objects.Service(ctxt)
+    for key in db_service:
+        setattr(service, key, db_service[key])
+    return service
+
+
+def create_test_service(ctxt, **kw):
+    """Create and return a test service object.
+
+    Create a service in the DB and return a Service object with appropriate
+    attributes.
+    """
+    service = get_test_service(ctxt, **kw)
+    service.create()
+    return service
+
+
+def get_test_rc(ctxt, **kw):
+    """Return a ReplicationController object with appropriate attributes.
+
+    NOTE: The object leaves the attributes marked as changed, such
+    that a create() could be used to commit it to the DB.
+    """
+    db_rc = db_utils.get_test_rc(**kw)
+    # Let DB generate ID if it isn't specified explicitly
+    if 'id' not in kw:
+        del db_rc['id']
+    rc = objects.ReplicationController(ctxt)
+    for key in db_rc:
+        setattr(rc, key, db_rc[key])
+    return rc
+
+
+def create_test_rc(ctxt, **kw):
+    """Create and return a test ReplicationController object.
+
+    Create a replication controller in the DB and return a
+    ReplicationController object with appropriate attributes.
+    """
+    rc = get_test_rc(ctxt, **kw)
+    rc.create()
+    return rc

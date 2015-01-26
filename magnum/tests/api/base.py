@@ -69,6 +69,8 @@ class FunctionalTest(base.DbTestCase):
                 'enable_acl': enable_acl,
                 'acl_public_routes': ['/', '/v1'],
                 'hooks': [
+                    hooks.ContextHook(),
+                    hooks.RPCHook(),
                     hooks.NoExceptionTracebackHook(),
                 ],
             },
