@@ -46,6 +46,7 @@ class RequestContext(context.RequestContext):
 
     def to_dict(self):
         return {'auth_token': self.auth_token,
+                'auth_token_info': self.auth_token_info,
                 'user': self.user,
                 'tenant': self.tenant,
                 'is_admin': self.is_admin,

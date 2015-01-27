@@ -53,3 +53,13 @@ class ContextTestCase(base.TestCase):
         self.assertTrue(ctx2.is_admin)
         self.assertIsNone(ctx2.user)
         self.assertIsNone(ctx2.tenant)
+
+    def test_to_dict_does_not_drop_auth_token_info(self):
+        ctx = context.RequestContext(is_admin=True, user='foo',
+                                     tenant='foo', auth_token_info='info')
+        self.assertTrue(ctx.is_admin)
+        self.assertIsNotNone(ctx.user)
+        self.assertIsNotNone(ctx.tenant)
+        ctx_dict = ctx.to_dict()
+        self.assertTrue('auth_token_info' in ctx_dict)
+        self.assertEqual(ctx_dict['auth_token_info'], ctx.auth_token_info)
