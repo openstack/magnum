@@ -19,6 +19,7 @@ from six.moves.urllib import parse as urlparse
 from wsme import types as wtypes
 
 from magnum.api.controllers.v1 import baymodel as api_baymodel
+from magnum.common import context
 from magnum.common import utils
 from magnum.tests.api import base as api_base
 from magnum.tests.api import utils as apiutils
@@ -245,6 +246,15 @@ class TestPatch(api_base.FunctionalTest):
 
 
 class TestPost(api_base.FunctionalTest):
+
+    def setUp(self):
+        super(TestPost, self).setUp()
+        p = mock.patch.object(context, 'RequestContext')
+        self.mock_request_context = p.start()
+        mock_auth_token = self.mock_request_context.auth_token_info['token']
+        mock_auth_token['project']['id'].return_value = 'fake_project'
+        mock_auth_token['user']['id'].return_value = 'fake_user'
+        self.addCleanup(p.stop)
 
     @mock.patch.object(timeutils, 'utcnow')
     def test_create_baymodel(self, mock_utcnow):
