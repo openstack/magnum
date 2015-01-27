@@ -12,6 +12,7 @@
 from magnum.conductor import api
 from magnum import objects
 from magnum.tests.db import base as db_base
+from magnum.tests.db import utils as db_utils
 
 from mock import patch
 
@@ -28,16 +29,19 @@ class TestPodController(db_base.DbTestCase):
     def test_pod_api(self):
         with patch.object(api.API, 'pod_create') as mock_method:
             mock_method.side_effect = self.mock_pod_create
+            # Create a bay
+            bay = db_utils.create_test_bay()
+
             # Create a pod
             params = '''
             {
                 "desc": "My Pod",
-                "bay_uuid": "7ae81bb3-dec3-4289-8d6c-da80bd8001ae",
+                "bay_uuid": "%s",
                 "images": ["ubuntu"],
                 "manifest": "{\\"id\\": \\"name_of_pod\\", \
                 \\"labels\\": {\\"foo\\": \\"foo1\\"} }"
             }
-            '''
+            ''' % bay.uuid
             response = self.app.post('/v1/pods',
                                      params=params,
                                      content_type='application/json')
@@ -51,8 +55,7 @@ class TestPodController(db_base.DbTestCase):
             self.assertIsNotNone(c.get('uuid'))
             self.assertEqual('name_of_pod', c.get('name'))
             self.assertEqual('My Pod', c.get('desc'))
-            self.assertEqual('7ae81bb3-dec3-4289-8d6c-da80bd8001ae',
-                             c.get('bay_uuid'))
+            self.assertEqual(bay.uuid, c.get('bay_uuid'))
             self.assertEqual(['ubuntu'], c.get('images'))
             self.assertEqual('foo1', c.get('labels')['foo'])
 
