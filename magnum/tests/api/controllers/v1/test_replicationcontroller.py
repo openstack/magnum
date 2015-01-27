@@ -12,6 +12,7 @@
 from magnum.conductor import api
 from magnum import objects
 from magnum.tests.db import base as db_base
+from magnum.tests.db import utils as db_utils
 
 from mock import patch
 
@@ -28,10 +29,13 @@ class TestRCController(db_base.DbTestCase):
     def test_rc_api(self):
         with patch.object(api.API, 'rc_create') as mock_method:
             mock_method.side_effect = self.mock_rc_create
+            # Create a bay
+            bay = db_utils.create_test_bay()
+
             # Create a replication controller
             params = '''
             {
-                "bay_uuid": "7ae81bb3-dec3-4289-8d6c-da80bd8001ae",
+                "bay_uuid": "%s",
                 "replicationcontroller_data": "\
                 {\
                   \\"id\\": \\"name_of_rc\\", \
@@ -42,7 +46,7 @@ class TestRCController(db_base.DbTestCase):
                 }\
                 \"
             }
-            '''
+            ''' % bay.uuid
             response = self.app.post('/v1/rcs',
                                      params=params,
                                      content_type='application/json')
@@ -55,8 +59,7 @@ class TestRCController(db_base.DbTestCase):
             c = response.json['rcs'][0]
             self.assertIsNotNone(c.get('uuid'))
             self.assertEqual('name_of_rc', c.get('name'))
-            self.assertEqual('7ae81bb3-dec3-4289-8d6c-da80bd8001ae',
-                             c.get('bay_uuid'))
+            self.assertEqual(bay.uuid, c.get('bay_uuid'))
             self.assertEqual('foo1', c.get('labels')['foo'])
 
             # Get just the one we created
