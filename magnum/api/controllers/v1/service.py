@@ -36,28 +36,27 @@ class ServicePatchType(types.JsonPatchType):
 
     @staticmethod
     def mandatory_attrs():
-        return ['/service_uuid']
+        return ['/bay_uuid']
 
 
 class Service(base.APIBase):
-    _service_uuid = None
+    _bay_uuid = None
 
-    def _get_service_uuid(self):
-        return self._service_uuid
+    def _get_bay_uuid(self):
+        return self._bay_uuid
 
-    def _set_service_uuid(self, value):
-        if value and self._service_uuid != value:
+    def _set_bay_uuid(self, value):
+        if value and self._bay_uuid != value:
             try:
-                service = objects.Service.get(pecan.request.context, value)
-                self._service_uuid = service.uuid
-                self.service_id = service.id
-            except exception.ServiceNotFound as e:
+                bay = objects.Bay.get(pecan.request.context, value)
+                self._bay_uuid = bay.uuid
+            except exception.BayNotFound as e:
                 # Change error code because 404 (NotFound) is inappropriate
                 # response for a POST request to create a Service
                 e.code = 400  # BadRequest
                 raise e
         elif value == wtypes.Unset:
-            self._service_uuid = wtypes.Unset
+            self._bay_uuid = wtypes.Unset
 
     uuid = types.uuid
     """Unique UUID for this service"""
@@ -65,7 +64,8 @@ class Service(base.APIBase):
     name = wsme.wsattr(wtypes.text, readonly=True)
     """ The name of the service."""
 
-    bay_uuid = types.uuid
+    bay_uuid = wsme.wsproperty(types.uuid, _get_bay_uuid, _set_bay_uuid,
+                               mandatory=True)
     """Unique UUID of the bay the service runs on"""
 
     labels = wsme.wsattr({wtypes.text: wtypes.text}, readonly=True)
@@ -93,25 +93,18 @@ class Service(base.APIBase):
         super(Service, self).__init__()
 
         self.fields = []
-        fields = list(objects.Service.fields)
-        fields.append('service_uuid')
-        for field in fields:
+        for field in objects.Service.fields:
             # Skip fields we do not expose.
             if not hasattr(self, field):
                 continue
             self.fields.append(field)
             setattr(self, field, kwargs.get(field, wtypes.Unset))
 
-        self.fields.append('service_id')
-        setattr(self, 'service_uuid', kwargs.get('service_id', wtypes.Unset))
-
     @staticmethod
     def _convert_with_links(service, url, expand=True):
         if not expand:
             service.unset_fields_except(['uuid', 'name', 'bay_uuid', 'labels',
                                          'selector', 'ip', 'port'])
-        # never expose the service_id attribute
-        service.service_id = wtypes.Unset
 
         service.links = [link.Link.make_link('self', url,
                                              'services', service.uuid),
@@ -135,9 +128,21 @@ class Service(base.APIBase):
                      selector={'label1': 'foo'},
                      ip='172.17.2.2',
                      port=80,
+                     manifest_url='file:///tmp/rc.yaml',
+                     manifest='''{
+                         "id": "service_foo",
+                         "kind": "Service",
+                         "apiVersion": "v1beta1",
+                         "port": 88,
+                         "selector": {
+                             "bar": "foo"
+                         },
+                         "labels": {
+                             "bar": "foo"
+                         }
+                     }''',
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())
-        sample._service_uuid = '87504bd9-ca50-40fd-b14e-bcb23ed42b27'
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 
     def parse_manifest(self):
@@ -300,11 +305,6 @@ class ServicesController(rest.RestController):
                                                   service_uuid)
         try:
             service_dict = rpc_service.as_dict()
-            # NOTE(lucasagomes):
-            # 1) Remove service_id because it's an internal value and
-            #    not present in the API object
-            # 2) Add service_uuid
-            service_dict['service_uuid'] = service_dict.pop('service_id', None)
             service = Service(**api_utils.apply_jsonpatch(service_dict, patch))
         except api_utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)
