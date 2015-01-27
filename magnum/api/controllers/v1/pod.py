@@ -33,7 +33,7 @@ class PodPatchType(types.JsonPatchType):
 
     @staticmethod
     def mandatory_attrs():
-        return ['/pod_uuid']
+        return ['/bay_uuid']
 
 
 class Pod(base.APIBase):
@@ -43,30 +43,23 @@ class Pod(base.APIBase):
     between the internal object model and the API representation of a pod.
     """
 
-    _pod_uuid = None
+    _bay_uuid = None
 
-    def _get_pod_uuid(self):
-        return self._pod_uuid
+    def _get_bay_uuid(self):
+        return self._bay_uuid
 
-    def _set_pod_uuid(self, value):
-        if value and self._pod_uuid != value:
+    def _set_bay_uuid(self, value):
+        if value and self._bay_uuid != value:
             try:
-                # FIXME(comstud): One should only allow UUID here, but
-                # there seems to be a bug in that tests are passing an
-                # ID. See bug #1301046 for more details.
-                pod = objects.Pod.get(pecan.request.context, value)
-                self._pod_uuid = pod.uuid
-                # NOTE(lucasagomes): Create the pod_id attribute on-the-fly
-                #                    to satisfy the api -> rpc object
-                #                    conversion.
-                self.pod_id = pod.id
-            except exception.PodNotFound as e:
+                bay = objects.Bay.get(pecan.request.context, value)
+                self._bay_uuid = bay.uuid
+            except exception.BayNotFound as e:
                 # Change error code because 404 (NotFound) is inappropriate
                 # response for a POST request to create a Pod
                 e.code = 400  # BadRequest
                 raise e
         elif value == wtypes.Unset:
-            self._pod_uuid = wtypes.Unset
+            self._bay_uuid = wtypes.Unset
 
     uuid = types.uuid
     """Unique UUID for this pod"""
@@ -77,7 +70,8 @@ class Pod(base.APIBase):
     desc = wtypes.text
     """Description of this pod"""
 
-    bay_uuid = types.uuid
+    bay_uuid = wsme.wsproperty(types.uuid, _get_bay_uuid, _set_bay_uuid,
+                               mandatory=True)
     """Unique UUID of the bay the pod runs on"""
 
     images = [wtypes.text]
@@ -102,32 +96,18 @@ class Pod(base.APIBase):
         super(Pod, self).__init__()
 
         self.fields = []
-        fields = list(objects.Pod.fields)
-        # NOTE(lucasagomes): pod_uuid is not part of objects.Pod.fields
-        #                    because it's an API-only attribute
-        fields.append('pod_uuid')
-        for field in fields:
+        for field in objects.Pod.fields:
             # Skip fields we do not expose.
             if not hasattr(self, field):
                 continue
             self.fields.append(field)
             setattr(self, field, kwargs.get(field, wtypes.Unset))
 
-        # NOTE(lucasagomes): pod_id is an attribute created on-the-fly
-        # by _set_pod_uuid(), it needs to be present in the fields so
-        # that as_dict() will contain pod_id field when converting it
-        # before saving it in the database.
-        self.fields.append('pod_id')
-        setattr(self, 'pod_uuid', kwargs.get('pod_id', wtypes.Unset))
-
     @staticmethod
     def _convert_with_links(pod, url, expand=True):
         if not expand:
             pod.unset_fields_except(['uuid', 'name', 'desc', 'bay_uuid',
                                      'images', 'labels', 'status'])
-
-        # never expose the pod_id attribute
-        pod.pod_id = wtypes.Unset
 
         pod.links = [link.Link.make_link('self', url,
                                          'pods', pod.uuid),
@@ -151,11 +131,15 @@ class Pod(base.APIBase):
                      images=['MyImage'],
                      labels={'name': 'foo'},
                      status='Running',
+                     manifest_url='file:///tmp/rc.yaml',
+                     manifest='''{
+                         "id": "name_of_pod",
+                         "labels": {
+                             "foo": "foo1"
+                         }
+                     }''',
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())
-        # NOTE(lucasagomes): pod_uuid getter() method look at the
-        # _pod_uuid variable
-        sample._pod_uuid = '87504bd9-ca50-40fd-b14e-bcb23ed42b27'
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 
     def parse_manifest(self):
@@ -308,11 +292,6 @@ class PodsController(rest.RestController):
         rpc_pod = objects.Pod.get_by_uuid(pecan.request.context, pod_uuid)
         try:
             pod_dict = rpc_pod.as_dict()
-            # NOTE(lucasagomes):
-            # 1) Remove pod_id because it's an internal value and
-            #    not present in the API object
-            # 2) Add pod_uuid
-            pod_dict['pod_uuid'] = pod_dict.pop('pod_id', None)
             pod = Pod(**api_utils.apply_jsonpatch(pod_dict, patch))
         except api_utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)
