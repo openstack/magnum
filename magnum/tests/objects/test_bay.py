@@ -44,7 +44,7 @@ class TestBayObject(base.DbTestCase):
                                autospec=True) as mock_get_bay:
             mock_get_bay.return_value = self.fake_bay
             bay = objects.Bay.get(self.context, uuid)
-            mock_get_bay.assert_called_once_with(uuid)
+            mock_get_bay.assert_called_once_with(self.context, uuid)
             self.assertEqual(self.context, bay._context)
 
     def test_get_bad_id_and_uuid(self):
@@ -79,7 +79,7 @@ class TestBayObject(base.DbTestCase):
                                    autospec=True) as mock_destroy_bay:
                 bay = objects.Bay.get_by_uuid(self.context, uuid)
                 bay.destroy()
-                mock_get_bay.assert_called_once_with(uuid)
+                mock_get_bay.assert_called_once_with(self.context, uuid)
                 mock_destroy_bay.assert_called_once_with(uuid)
                 self.assertEqual(self.context, bay._context)
 
@@ -94,7 +94,7 @@ class TestBayObject(base.DbTestCase):
                 bay.node_count = 10
                 bay.save()
 
-                mock_get_bay.assert_called_once_with(uuid)
+                mock_get_bay.assert_called_once_with(self.context, uuid)
                 mock_update_bay.assert_called_once_with(
                         uuid, {'node_count': 10})
                 self.assertEqual(self.context, bay._context)
@@ -104,7 +104,8 @@ class TestBayObject(base.DbTestCase):
         new_uuid = magnum_utils.generate_uuid()
         returns = [dict(self.fake_bay, uuid=uuid),
                    dict(self.fake_bay, uuid=new_uuid)]
-        expected = [mock.call(uuid), mock.call(uuid)]
+        expected = [mock.call(self.context, uuid),
+                    mock.call(self.context, uuid)]
         with mock.patch.object(self.dbapi, 'get_bay_by_uuid',
                                side_effect=returns,
                                autospec=True) as mock_get_bay:

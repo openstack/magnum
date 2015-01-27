@@ -171,7 +171,12 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.BayNotFound(bay=bay_id)
 
-    def get_bay_by_uuid(self, bay_uuid):
+    def get_bay_by_uuid(self, ctxt, bay_uuid):
+        auth_token = ctxt.auth_token_info['token']
+        project_id = auth_token['project']['id']
+        user_id = auth_token['user']['id']
+        query = model_query(models.Bay).filter_by(uuid=bay_uuid,
+                            project_id=project_id, user_id=user_id)
         query = model_query(models.Bay).filter_by(uuid=bay_uuid)
         try:
             return query.one()

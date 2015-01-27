@@ -15,8 +15,10 @@
 
 """Tests for manipulating Bays via the DB API"""
 
+from mock import patch
 import six
 
+from magnum.common import context
 from magnum.common import exception
 from magnum.common import utils as magnum_utils
 from magnum.tests.db import base
@@ -24,6 +26,15 @@ from magnum.tests.db import utils
 
 
 class DbBayTestCase(base.DbTestCase):
+
+    def setUp(self):
+        super(DbBayTestCase, self).setUp()
+        p = patch.object(context, 'RequestContext')
+        self.mock_context = p.start()
+        mock_auth_token = self.mock_context.auth_token_info['token']
+        mock_auth_token['project']['id'].return_value = 'fake_project'
+        mock_auth_token['user']['id'].return_value = 'fake_user'
+        self.addCleanup(p.stop)
 
     def test_create_bay(self):
         utils.create_test_bay()
@@ -44,7 +55,7 @@ class DbBayTestCase(base.DbTestCase):
 
     def test_get_bay_by_uuid(self):
         bay = utils.create_test_bay()
-        res = self.dbapi.get_bay_by_uuid(bay.uuid)
+        res = self.dbapi.get_bay_by_uuid(self.mock_context, bay.uuid)
         self.assertEqual(bay.id, res.id)
         self.assertEqual(bay.uuid, res.uuid)
 
@@ -53,6 +64,7 @@ class DbBayTestCase(base.DbTestCase):
                           self.dbapi.get_bay_by_id, 999)
         self.assertRaises(exception.BayNotFound,
                           self.dbapi.get_bay_by_uuid,
+                          self.mock_context,
                           '12345678-9999-0000-aaaa-123456789012')
 
     def test_get_bayinfo_list_defaults(self):
@@ -182,10 +194,12 @@ class DbBayTestCase(base.DbTestCase):
 
     def test_destroy_bay_by_uuid(self):
         bay = utils.create_test_bay()
-        self.assertIsNotNone(self.dbapi.get_bay_by_uuid(bay.uuid))
+        self.assertIsNotNone(self.dbapi.get_bay_by_uuid(self.mock_context,
+                                                        bay.uuid))
         self.dbapi.destroy_bay(bay.uuid)
         self.assertRaises(exception.BayNotFound,
-                          self.dbapi.get_bay_by_uuid, bay.uuid)
+                          self.dbapi.get_bay_by_uuid, self.mock_context,
+                          bay.uuid)
 
     def test_destroy_bay_that_does_not_exist(self):
         self.assertRaises(exception.BayNotFound,

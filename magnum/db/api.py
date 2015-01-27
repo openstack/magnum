@@ -90,9 +90,10 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_bay_by_uuid(self, bay_uuid):
+    def get_bay_by_uuid(self, ctxt, bay_uuid):
         """Return a bay.
 
+        :param ctxt: The security context
         :param bay_uuid: The uuid of a bay.
         :returns: A bay.
         """

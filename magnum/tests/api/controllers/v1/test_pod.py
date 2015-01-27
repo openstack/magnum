@@ -26,9 +26,13 @@ class TestPodController(db_base.DbTestCase):
         pod = objects.Pod.get_by_uuid({}, pod_uuid)
         pod.destroy()
 
-    def test_pod_api(self):
+    @patch('magnum.common.context.RequestContext')
+    def test_pod_api(self, mock_RequestContext):
         with patch.object(api.API, 'pod_create') as mock_method:
             mock_method.side_effect = self.mock_pod_create
+            mock_auth_token = mock_RequestContext.auth_token_info['token']
+            mock_auth_token['project']['id'].return_value = 'fake_project'
+            mock_auth_token['user']['id'].return_value = 'fake_user'
             # Create a bay
             bay = db_utils.create_test_bay()
 

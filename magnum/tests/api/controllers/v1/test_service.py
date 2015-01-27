@@ -27,9 +27,13 @@ class TestServiceController(db_base.DbTestCase):
         service = objects.Service.get_by_uuid({}, uuid)
         service.destroy()
 
-    def test_service_api(self):
+    @patch('magnum.common.context.RequestContext')
+    def test_service_api(self, mock_RequestContext):
         with patch.object(api.API, 'service_create') as mock_method:
             mock_method.side_effect = self.mock_service_create
+            mock_auth_token = mock_RequestContext.auth_token_info['token']
+            mock_auth_token['project']['id'].return_value = 'fake_project'
+            mock_auth_token['user']['id'].return_value = 'fake_user'
             # Create a bay
             bay = db_utils.create_test_bay()
 

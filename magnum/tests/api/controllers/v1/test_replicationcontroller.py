@@ -26,9 +26,13 @@ class TestRCController(db_base.DbTestCase):
         rc = objects.ReplicationController.get_by_uuid({}, uuid)
         rc.destroy()
 
-    def test_rc_api(self):
+    @patch('magnum.common.context.RequestContext')
+    def test_rc_api(self, mock_RequestContext):
         with patch.object(api.API, 'rc_create') as mock_method:
             mock_method.side_effect = self.mock_rc_create
+            mock_auth_token = mock_RequestContext.auth_token_info['token']
+            mock_auth_token['project']['id'].return_value = 'fake_project'
+            mock_auth_token['user']['id'].return_value = 'fake_user'
             # Create a bay
             bay = db_utils.create_test_bay()
 
