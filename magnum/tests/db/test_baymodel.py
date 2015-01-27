@@ -44,10 +44,12 @@ class DbBaymodelTestCase(base.DbTestCase):
     def test_get_baymodel_list_with_filters(self):
         bm1 = self._create_test_baymodel(id=1, name='bm-one',
             uuid=magnum_utils.generate_uuid(),
-            image_id='image1')
+            image_id='image1', project_id='fake-project1',
+            user_id='fake-user1')
         bm2 = self._create_test_baymodel(id=2, name='bm-two',
             uuid=magnum_utils.generate_uuid(),
-            image_id='image2')
+            image_id='image2', project_id='fake-project2',
+            user_id='fake-user2')
 
         res = self.dbapi.get_baymodel_list(filters={'name': 'bm-one'})
         self.assertEqual([bm1['id']], [r.id for r in res])
@@ -58,7 +60,15 @@ class DbBaymodelTestCase(base.DbTestCase):
         res = self.dbapi.get_baymodel_list(filters={'image_id': 'image1'})
         self.assertEqual([bm1['id']], [r.id for r in res])
 
+        res = self.dbapi.get_baymodel_list(filters={
+                   'prject_id': 'fake-project1', 'user_id': 'fake-user1'})
+        self.assertEqual([bm1['id']], [r.id for r in res])
+
         res = self.dbapi.get_baymodel_list(filters={'image_id': 'image2'})
+        self.assertEqual([bm2['id']], [r.id for r in res])
+
+        res = self.dbapi.get_baymodel_list(filters={
+                   'prject_id': 'fake-project2', 'user_id': 'fake-user2'})
         self.assertEqual([bm2['id']], [r.id for r in res])
 
     def test_get_baymodelinfo_list_defaults(self):

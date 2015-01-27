@@ -77,14 +77,26 @@ class DbContainerTestCase(base.DbTestCase):
 
     def test_get_containerinfo_list_with_filters(self):
         container1 = utils.create_test_container(name='c1',
-            uuid=magnum_utils.generate_uuid())
+            uuid=magnum_utils.generate_uuid(),
+            project_id='fake-project1',
+            user_id='fake-user1')
         container2 = utils.create_test_container(name='c2',
-            uuid=magnum_utils.generate_uuid())
+            uuid=magnum_utils.generate_uuid(),
+            project_id='fake-project2',
+            user_id='fake-user2')
 
         res = self.dbapi.get_containerinfo_list(filters={'name': 'c1'})
         self.assertEqual([container1.id], [r[0] for r in res])
 
+        res = self.dbapi.get_containerinfo_list(filters={
+                     'project_id': 'fake-project1', 'user_id': 'fake-user1'})
+        self.assertEqual([container1.id], [r[0] for r in res])
+
         res = self.dbapi.get_containerinfo_list(filters={'name': 'c2'})
+        self.assertEqual([container2.id], [r[0] for r in res])
+
+        res = self.dbapi.get_containerinfo_list(filters={
+                     'project_id': 'fake-project2', 'user_id': 'fake-user2'})
         self.assertEqual([container2.id], [r[0] for r in res])
 
         res = self.dbapi.get_containerinfo_list(filters={'name': 'bad-name'})

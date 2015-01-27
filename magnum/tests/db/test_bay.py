@@ -77,19 +77,27 @@ class DbBayTestCase(base.DbTestCase):
         self.assertEqual(uuids, dict((r[0], r[2]) for r in res))
 
     def test_get_bayinfo_list_with_filters(self):
-        bm1 = utils.get_test_baymodel(id=1, uuid=magnum_utils.generate_uuid())
-        bm2 = utils.get_test_baymodel(id=2, uuid=magnum_utils.generate_uuid())
+        bm1 = utils.get_test_baymodel(id=1, uuid=magnum_utils.generate_uuid(),
+                                      project_id='fake-project1',
+                                      user_id='fake-user1')
+        bm2 = utils.get_test_baymodel(id=2, uuid=magnum_utils.generate_uuid(),
+                                      project_id='fake-project2',
+                                      user_id='fake-user2')
         self.dbapi.create_baymodel(bm1)
         self.dbapi.create_baymodel(bm2)
 
         bay1 = utils.create_test_bay(name='bay-one',
             uuid=magnum_utils.generate_uuid(),
             baymodel_id=bm1['uuid'],
-            node_count=1)
+            node_count=1,
+            project_id='fake-project1',
+            user_id='fake-user1')
         bay2 = utils.create_test_bay(name='bay-two',
             uuid=magnum_utils.generate_uuid(),
             baymodel_id=bm2['uuid'],
-            node_count=2)
+            node_count=2,
+            project_id='fake-project2',
+            user_id='fake-user2')
 
         res = self.dbapi.get_bayinfo_list(filters={'baymodel_id': bm1['uuid']})
         self.assertEqual([bay1.id], [r.id for r in res])
@@ -106,7 +114,15 @@ class DbBayTestCase(base.DbTestCase):
         res = self.dbapi.get_bayinfo_list(filters={'node_count': 1})
         self.assertEqual([bay1.id], [r[0] for r in res])
 
+        res = self.dbapi.get_bayinfo_list(filters={
+                      'project_id': 'fake-project1', 'user_id': 'fake-user1'})
+        self.assertEqual([bay1.id], [r[0] for r in res])
+
         res = self.dbapi.get_bayinfo_list(filters={'node_count': 2})
+        self.assertEqual([bay2.id], [r[0] for r in res])
+
+        res = self.dbapi.get_bayinfo_list(filters={
+                      'project_id': 'fake-project2', 'user_id': 'fake-user2'})
         self.assertEqual([bay2.id], [r[0] for r in res])
 
     def test_get_bay_list(self):
