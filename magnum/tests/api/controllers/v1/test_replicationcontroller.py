@@ -36,7 +36,7 @@ class TestRCController(db_base.DbTestCase):
             params = '''
             {
                 "bay_uuid": "%s",
-                "replicationcontroller_data": "\
+                "manifest": "\
                 {\
                   \\"id\\": \\"name_of_rc\\", \
                   \\"replicas\\": 3, \

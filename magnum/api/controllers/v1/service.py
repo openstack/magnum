@@ -18,8 +18,8 @@ import wsme
 from wsme import types as wtypes
 import wsmeext.pecan as wsme_pecan
 
-from magnum.api.controllers import base
 from magnum.api.controllers import link
+from magnum.api.controllers.v1 import base as v1_base
 from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
@@ -39,34 +39,13 @@ class ServicePatchType(types.JsonPatchType):
         return ['/bay_uuid']
 
 
-class Service(base.APIBase):
-    _bay_uuid = None
-
-    def _get_bay_uuid(self):
-        return self._bay_uuid
-
-    def _set_bay_uuid(self, value):
-        if value and self._bay_uuid != value:
-            try:
-                bay = objects.Bay.get(pecan.request.context, value)
-                self._bay_uuid = bay.uuid
-            except exception.BayNotFound as e:
-                # Change error code because 404 (NotFound) is inappropriate
-                # response for a POST request to create a Service
-                e.code = 400  # BadRequest
-                raise e
-        elif value == wtypes.Unset:
-            self._bay_uuid = wtypes.Unset
+class Service(v1_base.K8sResourceBase):
 
     uuid = types.uuid
     """Unique UUID for this service"""
 
     name = wsme.wsattr(wtypes.text, readonly=True)
     """ The name of the service."""
-
-    bay_uuid = wsme.wsproperty(types.uuid, _get_bay_uuid, _set_bay_uuid,
-                               mandatory=True)
-    """Unique UUID of the bay the service runs on"""
 
     labels = wsme.wsattr({wtypes.text: wtypes.text}, readonly=True)
     """Labels of this service"""
@@ -79,12 +58,6 @@ class Service(base.APIBase):
 
     port = wtypes.IntegerType()
     """Port of this service"""
-
-    manifest_url = wtypes.text
-    """URL for service file to create the service"""
-
-    manifest = wtypes.text
-    """Data for service to create the service"""
 
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated service links"""
@@ -146,17 +119,14 @@ class Service(base.APIBase):
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 
     def parse_manifest(self):
-        # Set service name and port from its manifest
-        # TODO(yuanying): retrive service name from definition_url
-        if hasattr(self, "manifest") and self.manifest is not None:
-            manifest = k8s_manifest.parse(self.manifest)
-            self.name = manifest["id"]
-            if "port" in manifest:
-                self.port = manifest["port"]
-            if "selector" in manifest:
-                self.selector = manifest["selector"]
-            if "labels" in manifest:
-                self.labels = manifest["labels"]
+        manifest = k8s_manifest.parse(self._get_manifest())
+        self.name = manifest["id"]
+        if "port" in manifest:
+            self.port = manifest["port"]
+        if "selector" in manifest:
+            self.selector = manifest["selector"]
+        if "labels" in manifest:
+            self.labels = manifest["labels"]
 
 
 class ServiceCollection(collection.Collection):
