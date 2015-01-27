@@ -20,8 +20,8 @@ import wsme
 from wsme import types as wtypes
 import wsmeext.pecan as wsme_pecan
 
-from magnum.api.controllers import base
 from magnum.api.controllers import link
+from magnum.api.controllers.v1 import base as v1_base
 from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
@@ -37,31 +37,13 @@ class ReplicationControllerPatchType(types.JsonPatchType):
         return ['/bay_uuid']
 
 
-class ReplicationController(base.APIBase):
+class ReplicationController(v1_base.K8sResourceBase):
     """API representation of a ReplicationController.
 
     This class enforces type checking and value constraints, and converts
     between the internal object model and the API representation of a
     ReplicationController.
     """
-
-    _bay_uuid = None
-
-    def _get_bay_uuid(self):
-        return self._bay_uuid
-
-    def _set_bay_uuid(self, value):
-        if value and self._bay_uuid != value:
-            try:
-                bay = objects.Bay.get(pecan.request.context, value)
-                self._bay_uuid = bay.uuid
-            except exception.BayNotFound as e:
-                # Change error code because 404 (NotFound) is inappropriate
-                # response for a POST request to create a rc
-                e.code = 400  # BadRequest
-                raise e
-        elif value == wtypes.Unset:
-            self._bay_uuid = wtypes.Unset
 
     uuid = types.uuid
     """Unique UUID for this ReplicationController"""
@@ -72,21 +54,11 @@ class ReplicationController(base.APIBase):
     images = [wtypes.text]
     """A list of images used by containers in this ReplicationController."""
 
-    bay_uuid = wsme.wsproperty(types.uuid, _get_bay_uuid, _set_bay_uuid,
-                               mandatory=True)
-    """Unique UUID of the bay the ReplicationController runs on"""
-
     labels = wsme.wsattr({wtypes.text: wtypes.text}, readonly=True)
     """Selector of this ReplicationController"""
 
     replicas = wsme.wsattr(wtypes.IntegerType(), readonly=True)
     """Replicas of this ReplicationController"""
-
-    manifest_url = wtypes.text
-    """URL for ReplicationController file to create the RC"""
-
-    replicationcontroller_data = wtypes.text
-    """Data for service to create the ReplicationController"""
 
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated rc links"""
@@ -142,17 +114,12 @@ class ReplicationController(base.APIBase):
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 
     def parse_manifest(self):
-        # Set replication controller name and labels from its manifest
-        # TODO(jay-lau-513): retrieve replication controller name from
-        # manifest_url
-        if (hasattr(self, "replicationcontroller_data")
-              and self.replicationcontroller_data is not None):
-            manifest = k8s_manifest.parse(self.replicationcontroller_data)
-            self.name = manifest["id"]
-            if "labels" in manifest:
-                self.labels = manifest["labels"]
-            if "replicas" in manifest:
-                self.replicas = manifest["replicas"]
+        manifest = k8s_manifest.parse(self._get_manifest())
+        self.name = manifest["id"]
+        if "labels" in manifest:
+            self.labels = manifest["labels"]
+        if "replicas" in manifest:
+            self.replicas = manifest["replicas"]
 
 
 class ReplicationControllerCollection(collection.Collection):
