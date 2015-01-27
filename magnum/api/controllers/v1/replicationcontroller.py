@@ -34,7 +34,7 @@ class ReplicationControllerPatchType(types.JsonPatchType):
 
     @staticmethod
     def mandatory_attrs():
-        return ['/rc_uuid']
+        return ['/bay_uuid']
 
 
 class ReplicationController(base.APIBase):
@@ -45,28 +45,23 @@ class ReplicationController(base.APIBase):
     ReplicationController.
     """
 
-    _rc_uuid = None
+    _bay_uuid = None
 
-    def _get_rc_uuid(self):
-        return self._rc_uuid
+    def _get_bay_uuid(self):
+        return self._bay_uuid
 
-    def _set_rc_uuid(self, value):
-        if value and self._rc_uuid != value:
+    def _set_bay_uuid(self, value):
+        if value and self._bay_uuid != value:
             try:
-                rc = objects.ReplicationController.get(pecan.request.context,
-                                                       value)
-                self._rc_uuid = rc.uuid
-                # NOTE(jay-lau-513): Create the rc_id attribute on-the-fly
-                #                    to satisfy the api -> rpc object
-                #                    conversion.
-                self.rc_id = rc.id
-            except exception.ReplicationControllerNotFound as e:
+                bay = objects.Bay.get(pecan.request.context, value)
+                self._bay_uuid = bay.uuid
+            except exception.BayNotFound as e:
                 # Change error code because 404 (NotFound) is inappropriate
                 # response for a POST request to create a rc
                 e.code = 400  # BadRequest
                 raise e
         elif value == wtypes.Unset:
-            self._rc_uuid = wtypes.Unset
+            self._bay_uuid = wtypes.Unset
 
     uuid = types.uuid
     """Unique UUID for this ReplicationController"""
@@ -77,7 +72,8 @@ class ReplicationController(base.APIBase):
     images = [wtypes.text]
     """A list of images used by containers in this ReplicationController."""
 
-    bay_uuid = types.uuid
+    bay_uuid = wsme.wsproperty(types.uuid, _get_bay_uuid, _set_bay_uuid,
+                               mandatory=True)
     """Unique UUID of the bay the ReplicationController runs on"""
 
     labels = wsme.wsattr({wtypes.text: wtypes.text}, readonly=True)
@@ -99,33 +95,18 @@ class ReplicationController(base.APIBase):
         super(ReplicationController, self).__init__()
 
         self.fields = []
-        fields = list(objects.ReplicationController.fields)
-        # NOTE(jay-lau-513): rc_uuid is not part of
-        #                    objects.ReplicationController.fields
-        #                    because it's an API-only attribute
-        fields.append('rc_uuid')
-        for field in fields:
+        for field in objects.ReplicationController.fields:
             # Skip fields we do not expose.
             if not hasattr(self, field):
                 continue
             self.fields.append(field)
             setattr(self, field, kwargs.get(field, wtypes.Unset))
 
-        # NOTE(jay-lau-513): rc_id is an attribute created on-the-fly
-        # by _set_rc_uuid(), it needs to be present in the fields so
-        # that as_dict() will contain rc_id field when converting it
-        # before saving it in the database.
-        self.fields.append('rc_id')
-        setattr(self, 'rc_uuid', kwargs.get('rc_id', wtypes.Unset))
-
     @staticmethod
     def _convert_with_links(rc, url, expand=True):
         if not expand:
             rc.unset_fields_except(['uuid', 'name', 'images', 'bay_uuid',
                                     'labels', 'replicas'])
-
-        # never expose the rc_id attribute
-        rc.rc_id = wtypes.Unset
 
         rc.links = [link.Link.make_link('self', url,
                                          'rcs', rc.uuid),
@@ -148,11 +129,16 @@ class ReplicationController(base.APIBase):
                      bay_uuid='f978db47-9a37-4e9f-8572-804a10abc0ab',
                      labels={'name': 'foo'},
                      replicas=2,
+                     manifest_url='file:///tmp/rc.yaml',
+                     replicationcontroller_data='''{
+                         "id": "name_of_rc",
+                         "replicas": 3,
+                         "labels": {
+                             "foo": "foo1"
+                         }
+                     }''',
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())
-        # NOTE(jay-lau-513): rc_uuid getter() method look at the
-        # _rc_uuid variable
-        sample._rc_uuid = '87504bd9-ca50-40fd-b14e-bcb23ed42b27'
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 
     def parse_manifest(self):
@@ -315,11 +301,6 @@ class ReplicationControllersController(rest.RestController):
                                     pecan.request.context, rc_uuid)
         try:
             rc_dict = rpc_rc.as_dict()
-            # NOTE(jay-lau-513):
-            # 1) Remove rc_id because it's an internal value and
-            #    not present in the API object
-            # 2) Add rc_uuid
-            rc_dict['rc_uuid'] = rc_dict.pop('rc_id', None)
             rc = ReplicationController(**api_utils.apply_jsonpatch(rc_dict,
                                                                    patch))
         except api_utils.JSONPATCH_EXCEPTIONS as e:
