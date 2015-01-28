@@ -177,7 +177,6 @@ class Connection(api.Connection):
         user_id = auth_token['user']['id']
         query = model_query(models.Bay).filter_by(uuid=bay_uuid,
                             project_id=project_id, user_id=user_id)
-        query = model_query(models.Bay).filter_by(uuid=bay_uuid)
         try:
             return query.one()
         except NoResultFound:
