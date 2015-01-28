@@ -62,3 +62,7 @@ class RequestContext(context.RequestContext):
         values.pop('user', None)
         values.pop('tenant', None)
         return cls(**values)
+
+
+def make_context(*args, **kwargs):
+    return RequestContext(*args, **kwargs)
