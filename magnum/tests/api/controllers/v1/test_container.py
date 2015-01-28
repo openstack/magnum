@@ -15,7 +15,6 @@ from mock import patch
 
 
 class TestContainerController(db_base.DbTestCase):
-    @patch('magnum.common.context.RequestContext')
     @patch('magnum.conductor.api.API.container_create')
     @patch('magnum.conductor.api.API.container_delete')
     @patch('magnum.conductor.api.API.container_start')
@@ -34,8 +33,7 @@ class TestContainerController(db_base.DbTestCase):
                             mock_container_stop,
                             mock_container_start,
                             mock_container_delete,
-                            mock_container_create,
-                            mock_RequestContext):
+                            mock_container_create):
         mock_container_create.side_effect = lambda x, y, z: z
         mock_container_start.return_value = None
         mock_container_stop.return_value = None
@@ -44,9 +42,6 @@ class TestContainerController(db_base.DbTestCase):
         mock_container_reboot.return_value = None
         mock_container_logs.return_value = None
         mock_container_execute.return_value = None
-        mock_auth_token = mock_RequestContext.auth_token_info['token']
-        mock_auth_token['project']['id'].return_value = 'fake_project'
-        mock_auth_token['user']['id'].return_value = 'fake_user'
 
         # Create a container
         params = '{"name": "My Docker", "image_id": "ubuntu"}'

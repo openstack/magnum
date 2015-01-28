@@ -58,7 +58,7 @@ class ContextHook(hooks.PecanHook):
             importutils.import_module('keystonemiddleware.auth_token')
             auth_url = cfg.CONF.keystone_authtoken.auth_uri
 
-        state.request.context = context.RequestContext(
+        state.request.context = context.make_context(
             auth_token=auth_token,
             auth_url=auth_url,
             auth_token_info=auth_token_info,

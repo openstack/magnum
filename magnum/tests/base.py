@@ -18,6 +18,7 @@
 import copy
 import os
 
+import mock
 from oslo.config import cfg
 from oslotest import base
 import pecan
@@ -61,7 +62,21 @@ class TestCase(base.BaseTestCase):
             }
         }
         self.context = magnum_context.RequestContext(
-                                auth_token_info=token_info)
+                            auth_token_info=token_info)
+
+        def make_context(*args, **kwargs):
+            # If context hasn't been constructed with token_info
+            if not kwargs.get('auth_token_info'):
+                kwargs['auth_token_info'] = copy.deepcopy(token_info)
+
+            ctxt = magnum_context.RequestContext(*args, **kwargs)
+            return magnum_context.RequestContext.from_dict(ctxt.to_dict())
+
+        p = mock.patch.object(magnum_context, 'make_context',
+                              side_effect=make_context)
+        self.mock_make_ctxt = p.start()
+        self.addCleanup(p.stop)
+
         self.useFixture(conf_fixture.ConfFixture(cfg.CONF))
 
         self._base_test_obj_backup = copy.copy(

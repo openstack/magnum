@@ -19,7 +19,6 @@ from six.moves.urllib import parse as urlparse
 from wsme import types as wtypes
 
 from magnum.api.controllers.v1 import bay as api_bay
-from magnum.common import context
 from magnum.common import utils
 from magnum.conductor import api as rpcapi
 from magnum import objects
@@ -43,12 +42,6 @@ class TestListBay(api_base.FunctionalTest):
     def setUp(self):
         super(TestListBay, self).setUp()
         obj_utils.create_test_baymodel(self.context)
-        p = mock.patch.object(context, 'RequestContext')
-        self.mock_request_context = p.start()
-        mock_auth_token = self.mock_request_context.auth_token_info['token']
-        mock_auth_token['project']['id'].return_value = 'fake_project'
-        mock_auth_token['user']['id'].return_value = 'fake_user'
-        self.addCleanup(p.stop)
 
     def test_empty(self):
         response = self.get_json('/bays')
@@ -136,12 +129,6 @@ class TestPatch(api_base.FunctionalTest):
         self.bay = obj_utils.create_test_bay(self.context,
                                              name='bay_example_A',
                                              node_count=3)
-        p = mock.patch.object(context, 'RequestContext')
-        self.mock_request_context = p.start()
-        mock_auth_token = self.mock_request_context.auth_token_info['token']
-        mock_auth_token['project']['id'].return_value = 'fake_project'
-        mock_auth_token['user']['id'].return_value = 'fake_user'
-        self.addCleanup(p.stop)
 
     @mock.patch.object(timeutils, 'utcnow')
     def test_replace_ok(self, mock_utcnow):
@@ -303,12 +290,6 @@ class TestPost(api_base.FunctionalTest):
         self.mock_bay_create = p.start()
         self.mock_bay_create.side_effect = self._simulate_rpc_bay_create
         self.addCleanup(p.stop)
-        p = mock.patch.object(context, 'RequestContext')
-        self.mock_request_context = p.start()
-        mock_auth_token = self.mock_request_context.auth_token_info['token']
-        mock_auth_token['project']['id'].return_value = 'fake_project'
-        mock_auth_token['user']['id'].return_value = 'fake_user'
-        self.addCleanup(p.stop)
 
     def _simulate_rpc_bay_create(self, bay):
         bay.create()
@@ -384,15 +365,9 @@ class TestDelete(api_base.FunctionalTest):
         self.mock_bay_delete = p.start()
         self.mock_bay_delete.side_effect = self._simulate_rpc_bay_delete
         self.addCleanup(p.stop)
-        p = mock.patch.object(context, 'RequestContext')
-        self.mock_request_context = p.start()
-        mock_auth_token = self.mock_request_context.auth_token_info['token']
-        mock_auth_token['project']['id'].return_value = 'fake_project'
-        mock_auth_token['user']['id'].return_value = 'fake_user'
-        self.addCleanup(p.stop)
 
     def _simulate_rpc_bay_delete(self, bay_uuid):
-        bay = objects.Bay.get_by_uuid(self.mock_request_context, bay_uuid)
+        bay = objects.Bay.get_by_uuid(self.context, bay_uuid)
         bay.destroy()
 
     def test_delete_bay(self):
