@@ -50,7 +50,18 @@ class TestCase(base.BaseTestCase):
             os.path.dirname(__file__),
             'config.py'
         ))
-        self.context = magnum_context.RequestContext()
+        token_info = {
+            'token': {
+                'project': {
+                    'id': 'fake_project'
+                },
+                'user': {
+                    'id': 'fake_user'
+                }
+            }
+        }
+        self.context = magnum_context.RequestContext(
+                                auth_token_info=token_info)
         self.useFixture(conf_fixture.ConfFixture(cfg.CONF))
 
         self._base_test_obj_backup = copy.copy(
