@@ -48,10 +48,10 @@ class K8sResourceBase(base.APIBase):
     """Unique UUID of the bay this runs on"""
 
     manifest_url = wtypes.text
-    """URL for service file to create the service"""
+    """URL for manifest file to create the k8s resource"""
 
     manifest = wtypes.text
-    """Data for service to create the service"""
+    """Data for manifest to create the k8s resource"""
 
     def _get_manifest(self):
         if self.manifest is not wsme.Unset and self.manifest is not None:
