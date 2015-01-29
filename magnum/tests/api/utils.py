@@ -17,6 +17,7 @@ Utils for testing the API service.
 
 from magnum.api.controllers.v1 import bay as bay_controller
 from magnum.api.controllers.v1 import baymodel as baymodel_controller
+from magnum.api.controllers.v1 import pod as pod_controller
 from magnum.tests.db import utils
 
 
@@ -36,3 +37,16 @@ def bay_post_data(**kw):
     bay = utils.get_test_bay(**kw)
     internal = bay_controller.BayPatchType.internal_attrs()
     return remove_internal(bay, internal)
+
+
+def pod_post_data(**kw):
+    pod = utils.get_test_pod(**kw)
+    if 'manifest' not in pod:
+        pod['manifest'] = '''{
+            "id": "name_of_pod",
+            "labels": {
+                "foo": "foo1"
+            }
+        }'''
+    internal = pod_controller.PodPatchType.internal_attrs()
+    return remove_internal(pod, internal)
