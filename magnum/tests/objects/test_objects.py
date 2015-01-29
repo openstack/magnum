@@ -54,7 +54,7 @@ class MyObj(base.MagnumObject):
 
     @base.remotable
     def update_test(self, context):
-        if context.tenant == 'alternate':
+        if context.project_id == 'alternate':
             self.bar = 'alternate-context'
         else:
             self.bar = 'updated'
@@ -322,7 +322,7 @@ class _TestObject(object):
 
     def test_with_alternate_context(self):
         ctxt1 = context.RequestContext('foo', 'foo')
-        ctxt2 = context.RequestContext('bar', tenant='alternate')
+        ctxt2 = context.RequestContext('bar', project_id='alternate')
         obj = MyObj.query(ctxt1)
         obj.update_test(ctxt2)
         self.assertEqual('alternate-context', obj.bar)

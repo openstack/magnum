@@ -118,7 +118,7 @@ class KeystoneClientV3(object):
                 raise exception.AuthorizationFailure()
         elif self.context.auth_token is not None:
             kwargs['token'] = self.context.auth_token
-            kwargs['project_id'] = self.context.tenant
+            kwargs['project_id'] = self.context.project_id
         else:
             LOG.error(_("Keystone v3 API connection failed, no password "
                         "trust or auth_token!"))
@@ -137,7 +137,7 @@ class KeystoneClientV3(object):
             self.context.auth_token = client.auth_ref.auth_token
             self.context.auth_url = self.v3_endpoint
             self.context.user = client.auth_ref.user_id
-            self.context.tenant = client.auth_ref.project_id
+            self.context.project_id = client.auth_ref.project_id
             self.context.user_name = client.auth_ref.username
 
         return client

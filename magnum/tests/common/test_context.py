@@ -18,23 +18,34 @@ from magnum.tests import base
 
 class ContextTestCase(base.TestCase):
 
+    def _create_context(self):
+        return context.RequestContext(auth_token='auth_token1',
+                                      auth_url='auth_url1',
+                                      domain_id='domain_id1',
+                                      domain_name='domain_name1',
+                                      user='user1',
+                                      user_id='user-id1',
+                                      project='tenant1',
+                                      project_id='tenant-id1',
+                                      is_admin=True,
+                                      is_public_api=True,
+                                      read_only=True,
+                                      show_deleted=True,
+                                      request_id='request_id1',
+                                      trust_id='trust_id1',
+                                      auth_token_info='auth_token_info1')
+
     def test_context(self):
-        ctx = context.RequestContext(auth_token='auth_token1',
-                                     auth_url='auth_url1',
-                                     domain_id='domain_id1',
-                                     domain_name='domain_name1',
-                                     user='user1', tenant='tenant1',
-                                     is_admin=True, is_public_api=True,
-                                     read_only=True, show_deleted=True,
-                                     request_id='request_id1',
-                                     trust_id='trust_id1',
-                                     auth_token_info='auth_token_info1')
+        ctx = self._create_context()
+
         self.assertEqual("auth_token1", ctx.auth_token)
         self.assertEqual("auth_url1", ctx.auth_url)
         self.assertEqual("domain_id1", ctx.domain_id)
         self.assertEqual("domain_name1", ctx.domain_name)
         self.assertEqual("user1", ctx.user)
-        self.assertEqual("tenant1", ctx.tenant)
+        self.assertEqual("user-id1", ctx.user_id)
+        self.assertEqual("tenant1", ctx.project)
+        self.assertEqual("tenant-id1", ctx.project_id)
         self.assertTrue(ctx.is_admin)
         self.assertTrue(ctx.is_public_api)
         self.assertTrue(ctx.read_only)
@@ -44,22 +55,22 @@ class ContextTestCase(base.TestCase):
         self.assertEqual("auth_token_info1", ctx.auth_token_info)
 
     def test_to_dict_from_dict(self):
-        ctx = context.RequestContext(is_admin=True, user='foo',
-                                     tenant='foo')
-        self.assertTrue(ctx.is_admin)
-        self.assertIsNotNone(ctx.user)
-        self.assertIsNotNone(ctx.tenant)
+        ctx = self._create_context()
         ctx2 = context.RequestContext.from_dict(ctx.to_dict())
-        self.assertTrue(ctx2.is_admin)
-        self.assertIsNone(ctx2.user)
-        self.assertIsNone(ctx2.tenant)
 
-    def test_to_dict_does_not_drop_auth_token_info(self):
-        ctx = context.RequestContext(is_admin=True, user='foo',
-                                     tenant='foo', auth_token_info='info')
-        self.assertTrue(ctx.is_admin)
-        self.assertIsNotNone(ctx.user)
-        self.assertIsNotNone(ctx.tenant)
-        ctx_dict = ctx.to_dict()
-        self.assertTrue('auth_token_info' in ctx_dict)
-        self.assertEqual(ctx_dict['auth_token_info'], ctx.auth_token_info)
+        self.assertEqual(ctx.auth_token, ctx2.auth_token)
+        self.assertEqual(ctx.auth_url, ctx2.auth_url)
+        self.assertEqual(ctx.domain_id, ctx2.domain_id)
+        self.assertEqual(ctx.domain_name, ctx2.domain_name)
+        self.assertEqual(ctx.user, ctx2.user)
+        self.assertEqual(ctx.user_id, ctx2.user_id)
+        self.assertEqual(ctx.tenant, ctx2.tenant)
+        self.assertEqual(ctx.project, ctx2.project)
+        self.assertEqual(ctx.project_id, ctx2.project_id)
+        self.assertEqual(ctx.is_admin, ctx2.is_admin)
+        self.assertEqual(ctx.is_public_api, ctx2.is_public_api)
+        self.assertEqual(ctx.read_only, ctx2.read_only)
+        self.assertEqual(ctx.show_deleted, ctx2.show_deleted)
+        self.assertEqual(ctx.request_id, ctx2.request_id)
+        self.assertEqual(ctx.trust_id, ctx2.trust_id)
+        self.assertEqual(ctx.auth_token_info, ctx2.auth_token_info)

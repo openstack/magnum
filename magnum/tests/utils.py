@@ -25,8 +25,8 @@ from magnum.db.sqlalchemy import api as sql_api
 CONF = cfg.CONF
 
 
-def dummy_context(user='test_username', tenant_id='test_tenant_id'):
-    return context.RequestContext(user=user, tenant=tenant_id)
+def dummy_context(user='test_username', project_id='test_tenant_id'):
+    return context.RequestContext(user=user, project_id=project_id)
 
 
 class Database(fixtures.Fixture):

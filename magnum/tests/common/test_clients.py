@@ -35,7 +35,6 @@ class ClientsTest(base.BaseTestCase):
     def test_clients_heat(self, mock_auth, mock_url, mock_call):
         mock_auth.__get__ = mock.Mock(return_value="keystone_url")
         con = mock.MagicMock()
-        con.tenant = "b363706f891f48019483f8bd6503c54b"
         con.auth_token = "3bcc3d3a03f44e3d8377f9247b0ad155"
         con.auth_url = "keystone_url"
         mock_url.return_value = "url_from_keystone"
@@ -54,7 +53,6 @@ class ClientsTest(base.BaseTestCase):
         con = mock.MagicMock()
         con.auth_token = None
         con.auth_token_info = None
-        con.tenant = "b363706f891f48019483f8bd6503c54b"
         auth_url = mock.PropertyMock(name="auth_url",
                                      return_value="keystone_url")
         type(con).auth_url = auth_url
@@ -69,7 +67,6 @@ class ClientsTest(base.BaseTestCase):
     def test_clients_heat_cached(self, mock_auth, mock_url):
         mock_auth.__get__ = mock.Mock(return_value="keystone_url")
         con = mock.MagicMock()
-        con.tenant = "b363706f891f48019483f8bd6503c54b"
         con.auth_token = "3bcc3d3a03f44e3d8377f9247b0ad155"
         con.auth_url = "keystone_url"
         mock_url.return_value = "url_from_keystone"

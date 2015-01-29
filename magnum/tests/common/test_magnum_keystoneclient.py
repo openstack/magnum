@@ -50,7 +50,7 @@ class KeystoneClientTest(base.BaseTestCase):
 
     def test_init_v3_token(self, mock_ks):
         """Test creating the client, token auth."""
-        self.ctx.tenant = None
+        self.ctx.project_id = None
         self.ctx.trust_id = None
         magnum_ks_client = magnum_keystoneclient.KeystoneClientV3(self.ctx)
         magnum_ks_client.client
@@ -71,7 +71,7 @@ class KeystoneClientTest(base.BaseTestCase):
 
     def test_init_trust_token_access(self, mock_ks):
         """Test creating the client, token auth."""
-        self.ctx.tenant = 'abcd1234'
+        self.ctx.project_id = 'abcd1234'
         self.ctx.trust_id = None
         self.ctx.auth_token_info = {'access': {'token': {'id': 'placeholder'}}}
 
@@ -85,7 +85,7 @@ class KeystoneClientTest(base.BaseTestCase):
                                         auth_url='http://server.test:5000/v3')
 
     def test_init_trust_token_token(self, mock_ks):
-        self.ctx.tenant = None
+        self.ctx.project_id = None
         self.ctx.trust_id = None
         self.ctx.auth_token_info = {'token': {}}
 
@@ -98,7 +98,7 @@ class KeystoneClientTest(base.BaseTestCase):
                                         auth_url='http://server.test:5000/v3')
 
     def test_init_trust_token_none(self, mock_ks):
-        self.ctx.tenant = None
+        self.ctx.project_id = None
         self.ctx.trust_id = None
         self.ctx.auth_token_info = {'not_this': 'urg'}
 

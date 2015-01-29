@@ -30,11 +30,17 @@ class ContextHook(hooks.PecanHook):
 
     The following HTTP request headers are used:
 
-    X-User-Id or X-User:
+    X-User:
+        Used for context.user.
+
+    X-User-Id:
         Used for context.user_id.
 
-    X-Tenant-Id or X-Tenant:
-        Used for context.tenant.
+    X-Project-Name:
+        Used for context.project.
+
+    X-Project-Id:
+        Used for context.project_id.
 
     X-Auth-Token:
         Used for context.auth_token.
@@ -43,14 +49,14 @@ class ContextHook(hooks.PecanHook):
 
     def before(self, state):
         headers = state.request.headers
+        user = headers.get('X-User')
         user_id = headers.get('X-User-Id')
-        user_id = headers.get('X-User', user_id)
-        tenant = state.request.headers.get('X-Tenant-Id')
-        tenant = state.request.headers.get('X-Tenant', tenant)
-        domain_id = state.request.headers.get('X-User-Domain-Id')
-        domain_name = state.request.headers.get('X-User-Domain-Name')
-        auth_token = state.request.headers.get('X-Storage-Token')
-        auth_token = state.request.headers.get('X-Auth-Token', auth_token)
+        project = headers.get('X-Project-Name')
+        project_id = headers.get('X-Project-Id')
+        domain_id = headers.get('X-User-Domain-Id')
+        domain_name = headers.get('X-User-Domain-Name')
+        auth_token = headers.get('X-Storage-Token')
+        auth_token = headers.get('X-Auth-Token', auth_token)
         auth_token_info = state.request.environ.get('keystone.token_info')
 
         auth_url = headers.get('X-Auth-Url')
@@ -62,8 +68,10 @@ class ContextHook(hooks.PecanHook):
             auth_token=auth_token,
             auth_url=auth_url,
             auth_token_info=auth_token_info,
-            user=user_id,
-            tenant=tenant,
+            user=user,
+            user_id=user_id,
+            project=project,
+            project_id=project_id,
             domain_id=domain_id,
             domain_name=domain_name)
 
