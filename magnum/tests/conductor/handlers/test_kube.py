@@ -49,7 +49,7 @@ class TestKube(base.BaseTestCase):
         return objects.BayModel({})
 
     @patch('magnum.objects.Bay.get_by_uuid')
-    def test_retrive_bay_from_pod(self,
+    def test_retrieve_bay_from_pod(self,
                                   mock_bay_get_by_uuid):
         expected_context = 'context'
         expected_bay_uuid = 'bay_uuid'
@@ -57,14 +57,14 @@ class TestKube(base.BaseTestCase):
         pod = self.mock_pod()
         pod.bay_uuid = expected_bay_uuid
 
-        kube._retrive_bay(expected_context, pod)
+        kube._retrieve_bay(expected_context, pod)
 
         mock_bay_get_by_uuid.assert_called_once_with(expected_context,
                                                      expected_bay_uuid)
 
     @patch('magnum.objects.Bay.get_by_uuid')
     @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_retrive_k8s_master_url_from_pod(self,
+    def test_retrieve_k8s_master_url_from_pod(self,
                                     mock_baymodel_get_by_uuid,
                                     mock_bay_get_by_uuid):
         expected_context = 'context'
@@ -83,7 +83,7 @@ class TestKube(base.BaseTestCase):
         mock_bay_get_by_uuid.return_value = bay
         mock_baymodel_get_by_uuid.return_value = baymodel
 
-        actual_master_address = kube._retrive_k8s_master_url(expected_context,
+        actual_master_address = kube._retrieve_k8s_master_url(expected_context,
                                                              pod)
         self.assertEqual("http://%s:%d" % (expected_master_address,
                                            expected_apiserver_port),
@@ -91,7 +91,7 @@ class TestKube(base.BaseTestCase):
 
     @patch('magnum.objects.Bay.get_by_uuid')
     @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_retrive_k8s_master_url_without_baymodel_apiserver_port(self,
+    def test_retrieve_k8s_master_url_without_baymodel_apiserver_port(self,
                                                     mock_baymodel_get_by_uuid,
                                                     mock_bay_get_by_uuid):
         expected_context = 'context'
@@ -111,49 +111,49 @@ class TestKube(base.BaseTestCase):
         mock_bay_get_by_uuid.return_value = bay
         mock_baymodel_get_by_uuid.return_value = baymodel
 
-        actual_master_address = kube._retrive_k8s_master_url(expected_context,
+        actual_master_address = kube._retrieve_k8s_master_url(expected_context,
                                                              resource)
         self.assertEqual("%s://%s:%d" % (expected_protocol,
                                          expected_master_address,
                                          expected_apiserver_port),
                                          actual_master_address)
 
-    @patch('magnum.conductor.handlers.kube._retrive_k8s_master_url')
+    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
     def test_pod_create_with_success(self,
-                                     mock_retrive_k8s_master_url):
+                                     mock_retrieve_k8s_master_url):
         expected_master_url = 'master_address'
         expected_pod = self.mock_pod()
         expected_pod.create = mock.MagicMock()
 
-        mock_retrive_k8s_master_url.return_value = expected_master_url
+        mock_retrieve_k8s_master_url.return_value = expected_master_url
         with patch.object(self.kube_handler, 'kube_cli') as mock_kube_cli:
             mock_kube_cli.pod_create.return_value = True
 
             self.kube_handler.pod_create({}, expected_pod)
             self.assertEqual('pending', expected_pod.status)
 
-    @patch('magnum.conductor.handlers.kube._retrive_k8s_master_url')
+    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
     def test_pod_create_with_fail(self,
-                                  mock_retrive_k8s_master_url):
+                                  mock_retrieve_k8s_master_url):
         expected_master_url = 'master_address'
         expected_pod = self.mock_pod()
         expected_pod.create = mock.MagicMock()
 
-        mock_retrive_k8s_master_url.return_value = expected_master_url
+        mock_retrieve_k8s_master_url.return_value = expected_master_url
         with patch.object(self.kube_handler, 'kube_cli') as mock_kube_cli:
             mock_kube_cli.pod_create.return_value = False
 
             self.kube_handler.pod_create({}, expected_pod)
             self.assertEqual('failed', expected_pod.status)
 
-    @patch('magnum.conductor.handlers.kube._retrive_k8s_master_url')
+    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
     def test_service_create_with_success(self,
-                                         mock_retrive_k8s_master_url):
+                                         mock_retrieve_k8s_master_url):
         expected_master_url = 'master_address'
         expected_service = self.mock_service()
         expected_service.create = mock.MagicMock()
 
-        mock_retrive_k8s_master_url.return_value = expected_master_url
+        mock_retrieve_k8s_master_url.return_value = expected_master_url
         with patch.object(self.kube_handler, 'kube_cli') as mock_kube_cli:
             mock_kube_cli.service_create.return_value = True
 
@@ -161,14 +161,14 @@ class TestKube(base.BaseTestCase):
             mock_kube_cli.service_create.assert_called_once_with(
                 expected_master_url, expected_service)
 
-    @patch('magnum.conductor.handlers.kube._retrive_k8s_master_url')
+    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
     def test_rc_create_with_success(self,
-                                    mock_retrive_k8s_master_url):
+                                    mock_retrieve_k8s_master_url):
         expected_master_url = 'master_address'
         expected_rc = self.mock_rc()
         expected_rc.create = mock.MagicMock()
 
-        mock_retrive_k8s_master_url.return_value = expected_master_url
+        mock_retrieve_k8s_master_url.return_value = expected_master_url
         with patch.object(self.kube_handler, 'kube_cli') as mock_kube_cli:
             mock_kube_cli.rc_create.return_value = True
 
