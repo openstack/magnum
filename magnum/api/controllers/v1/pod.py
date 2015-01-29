@@ -32,6 +32,11 @@ from magnum import objects
 class PodPatchType(types.JsonPatchType):
 
     @staticmethod
+    def internal_attrs():
+        defaults = types.JsonPatchType.internal_attrs()
+        return defaults + ['/name', '/labels']
+
+    @staticmethod
     def mandatory_attrs():
         return ['/bay_uuid']
 

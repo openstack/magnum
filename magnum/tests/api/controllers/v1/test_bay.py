@@ -85,7 +85,7 @@ class TestListBay(api_base.FunctionalTest):
             bm_list.append(bay.uuid)
         response = self.get_json('/bays')
         self.assertEqual(len(bm_list), len(response['bays']))
-        uuids = [bm['uuid'] for bm in response['bays']]
+        uuids = [b['uuid'] for b in response['bays']]
         self.assertEqual(sorted(bm_list), sorted(uuids))
 
     def test_links(self):
@@ -102,7 +102,7 @@ class TestListBay(api_base.FunctionalTest):
     def test_collection_links(self):
         for id_ in range(5):
             obj_utils.create_test_bay(self.context, id=id_,
-                                          uuid=utils.generate_uuid())
+                                      uuid=utils.generate_uuid())
         response = self.get_json('/bays/?limit=3')
         self.assertEqual(3, len(response['bays']))
 
@@ -113,7 +113,7 @@ class TestListBay(api_base.FunctionalTest):
         cfg.CONF.set_override('max_limit', 3, 'api')
         for id_ in range(5):
             obj_utils.create_test_bay(self.context, id=id_,
-                                           uuid=utils.generate_uuid())
+                                      uuid=utils.generate_uuid())
         response = self.get_json('/bays')
         self.assertEqual(3, len(response['bays']))
 
@@ -239,22 +239,20 @@ class TestPatch(api_base.FunctionalTest):
         self.assertTrue(response.json['error_message'])
 
     def test_remove_ok(self):
-        bay = obj_utils.create_test_bay(self.context,
-                                        uuid=utils.generate_uuid())
-        response = self.get_json('/bays/%s' % bay.uuid)
+        response = self.get_json('/bays/%s' % self.bay.uuid)
         self.assertIsNotNone(response['name'])
 
-        response = self.patch_json('/bays/%s' % bay.uuid,
+        response = self.patch_json('/bays/%s' % self.bay.uuid,
                                    [{'path': '/name', 'op': 'remove'}])
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(200, response.status_code)
 
-        response = self.get_json('/bays/%s' % bay.uuid)
+        response = self.get_json('/bays/%s' % self.bay.uuid)
         self.assertIsNone(response['name'])
         # Assert nothing else was changed
-        self.assertEqual(bay.uuid, response['uuid'])
-        self.assertEqual(bay.baymodel_id, response['baymodel_id'])
-        self.assertEqual(bay.node_count, response['node_count'])
+        self.assertEqual(self.bay.uuid, response['uuid'])
+        self.assertEqual(self.bay.baymodel_id, response['baymodel_id'])
+        self.assertEqual(self.bay.node_count, response['node_count'])
 
     def test_remove_uuid(self):
         response = self.patch_json('/bays/%s' % self.bay.uuid,
