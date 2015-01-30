@@ -74,6 +74,8 @@ def get_test_pod(**kw):
         'id': kw.get('id', 42),
         'uuid': kw.get('uuid', '10a47dd1-4874-4298-91cf-eff046dbdb8d'),
         'name': kw.get('name', 'pod1'),
+        'project_id': kw.get('project_id', 'fake_project'),
+        'user_id': kw.get('user_id', 'fake_user'),
         'desc': kw.get('desc', 'test pod'),
         'bay_uuid': kw.get('bay_uuid', '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'),
         'images': kw.get('images', ['MyImage']),

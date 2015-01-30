@@ -203,6 +203,8 @@ class Pod(Base):
     images = Column(JSONEncodedList)
     labels = Column(JSONEncodedDict)
     status = Column(String(255))
+    project_id = Column(String(255))
+    user_id = Column(String(255))
 
 
 class Service(Base):
