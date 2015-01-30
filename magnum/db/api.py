@@ -43,13 +43,14 @@ class Connection(object):
         """Constructor."""
 
     @abc.abstractmethod
-    def get_bay_list(self, columns=None, filters=None, limit=None,
+    def get_bay_list(self, ctxt, columns=None, filters=None, limit=None,
                      marker=None, sort_key=None, sort_dir=None):
         """Get specific columns for matching bays.
 
         Return a list of the specified columns for all bays that match the
         specified filters.
 
+        :param ctxt: The security context
         :param columns: List of column names to return.
                         Defaults to 'id' column when columns == None.
         :param filters: Filters to apply. Defaults to None.
@@ -115,13 +116,14 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_baymodel_list(self, columns=None, filters=None, limit=None,
+    def get_baymodel_list(self, ctxt, columns=None, filters=None, limit=None,
                      marker=None, sort_key=None, sort_dir=None):
         """Get specific columns for matching baymodels.
 
         Return a list of the specified columns for all baymodels that match the
         specified filters.
 
+        :param ctxt: The security context
         :param columns: List of column names to return.
                         Defaults to 'id' column when columns == None.
         :param filters: Filters to apply. Defaults to None.
@@ -188,13 +190,14 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_container_list(self, columns=None, filters=None, limit=None,
+    def get_container_list(self, ctxt, columns=None, filters=None, limit=None,
                      marker=None, sort_key=None, sort_dir=None):
         """Get specific columns for matching containers.
 
         Return a list of the specified columns for all containers that match
         the specified filters.
 
+        :param ctxt: The security context
         :param columns: List of column names to return.
                         Defaults to 'id' column when columns == None.
         :param filters: Filters to apply. Defaults to None.
@@ -262,13 +265,14 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_node_list(self, columns=None, filters=None, limit=None,
+    def get_node_list(self, ctxt, columns=None, filters=None, limit=None,
                      marker=None, sort_key=None, sort_dir=None):
         """Get specific columns for matching nodes.
 
         Return a list of the specified columns for all nodes that match the
         specified filters.
 
+        :param ctxt: The security context
         :param columns: List of column names to return.
                         Defaults to 'id' column when columns == None.
         :param filters: Filters to apply. Defaults to None.

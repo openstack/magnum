@@ -100,7 +100,7 @@ class Container(base.MagnumObject):
         :returns: a list of :class:`Container` object.
 
         """
-        db_containers = cls.dbapi.get_container_list(limit=limit,
+        db_containers = cls.dbapi.get_container_list(context, limit=limit,
                                          marker=marker,
                                          sort_key=sort_key,
                                          sort_dir=sort_dir)

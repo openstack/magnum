@@ -131,7 +131,7 @@ class DbBayTestCase(base.DbTestCase):
         for i in range(1, 6):
             bay = utils.create_test_bay(uuid=magnum_utils.generate_uuid())
             uuids.append(six.text_type(bay['uuid']))
-        res = self.dbapi.get_bay_list()
+        res = self.dbapi.get_bay_list(self.context)
         res_uuids = [r.uuid for r in res]
         self.assertEqual(uuids.sort(), res_uuids.sort())
 
@@ -149,28 +149,34 @@ class DbBayTestCase(base.DbTestCase):
             baymodel_id=bm2['uuid'],
             node_count=1)
 
-        res = self.dbapi.get_bay_list(filters={'baymodel_id': bm1['uuid']})
+        res = self.dbapi.get_bay_list(self.context,
+                                      filters={'baymodel_id': bm1['uuid']})
         self.assertEqual([bay1.id], [r.id for r in res])
 
-        res = self.dbapi.get_bay_list(filters={'baymodel_id': bm2['uuid']})
+        res = self.dbapi.get_bay_list(self.context,
+                                      filters={'baymodel_id': bm2['uuid']})
         self.assertEqual([bay2.id], [r.id for r in res])
 
-        res = self.dbapi.get_bay_list(filters={'name': 'bay-one'})
+        res = self.dbapi.get_bay_list(self.context,
+                                      filters={'name': 'bay-one'})
         self.assertEqual([bay1.id], [r.id for r in res])
 
-        res = self.dbapi.get_bay_list(filters={'name': 'bad-bay'})
+        res = self.dbapi.get_bay_list(self.context,
+                                      filters={'name': 'bad-bay'})
         self.assertEqual([], [r.id for r in res])
 
-        res = self.dbapi.get_bay_list(filters={'node_count': 3})
+        res = self.dbapi.get_bay_list(self.context,
+                                      filters={'node_count': 3})
         self.assertEqual([bay1.id], [r.id for r in res])
 
-        res = self.dbapi.get_bay_list(filters={'node_count': 1})
+        res = self.dbapi.get_bay_list(self.context,
+                                      filters={'node_count': 1})
         self.assertEqual([bay2.id], [r.id for r in res])
 
     def test_get_bay_list_baymodel_not_exist(self):
         utils.create_test_bay()
-        self.assertEqual(1, len(self.dbapi.get_bay_list()))
-        res = self.dbapi.get_bay_list({
+        self.assertEqual(1, len(self.dbapi.get_bay_list(self.context)))
+        res = self.dbapi.get_bay_list(self.context, {
             'baymodel_id': magnum_utils.generate_uuid()})
         self.assertEqual(0, len(res))
 

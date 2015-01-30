@@ -110,7 +110,7 @@ class DbContainerTestCase(base.DbTestCase):
             container = utils.create_test_container(
                 uuid=magnum_utils.generate_uuid())
             uuids.append(six.text_type(container['uuid']))
-        res = self.dbapi.get_container_list()
+        res = self.dbapi.get_container_list(self.context)
         res_uuids = [r.uuid for r in res]
         self.assertEqual(sorted(uuids), sorted(res_uuids))
 
@@ -120,13 +120,16 @@ class DbContainerTestCase(base.DbTestCase):
         container2 = utils.create_test_container(name='container-two',
             uuid=magnum_utils.generate_uuid())
 
-        res = self.dbapi.get_container_list(filters={'name': 'container-one'})
+        res = self.dbapi.get_container_list(self.context,
+                                            filters={'name': 'container-one'})
         self.assertEqual([container1.id], [r.id for r in res])
 
-        res = self.dbapi.get_container_list(filters={'name': 'container-two'})
+        res = self.dbapi.get_container_list(self.context,
+                                            filters={'name': 'container-two'})
         self.assertEqual([container2.id], [r.id for r in res])
 
-        res = self.dbapi.get_container_list(filters={'name': 'bad-container'})
+        res = self.dbapi.get_container_list(self.context,
+                                            filters={'name': 'bad-container'})
         self.assertEqual([], [r.id for r in res])
 
     def test_destroy_container(self):
