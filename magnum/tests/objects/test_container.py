@@ -44,7 +44,7 @@ class TestContainerObject(base.DbTestCase):
                                autospec=True) as mock_get_container:
             mock_get_container.return_value = self.fake_container
             container = objects.Container.get(self.context, uuid)
-            mock_get_container.assert_called_once_with(uuid)
+            mock_get_container.assert_called_once_with(self.context, uuid)
             self.assertEqual(self.context, container._context)
 
     def test_get_bad_id_and_uuid(self):
@@ -79,7 +79,7 @@ class TestContainerObject(base.DbTestCase):
                                    autospec=True) as mock_destroy_container:
                 container = objects.Container.get_by_uuid(self.context, uuid)
                 container.destroy()
-                mock_get_container.assert_called_once_with(uuid)
+                mock_get_container.assert_called_once_with(self.context, uuid)
                 mock_destroy_container.assert_called_once_with(uuid)
                 self.assertEqual(self.context, container._context)
 
@@ -94,7 +94,7 @@ class TestContainerObject(base.DbTestCase):
                 container.image_id = 'container.img'
                 container.save()
 
-                mock_get_container.assert_called_once_with(uuid)
+                mock_get_container.assert_called_once_with(self.context, uuid)
                 mock_update_container.assert_called_once_with(
                         uuid, {'image_id': 'container.img'})
                 self.assertEqual(self.context, container._context)
@@ -104,7 +104,8 @@ class TestContainerObject(base.DbTestCase):
         new_uuid = magnum_utils.generate_uuid()
         returns = [dict(self.fake_container, uuid=uuid),
                    dict(self.fake_container, uuid=new_uuid)]
-        expected = [mock.call(uuid), mock.call(uuid)]
+        expected = [mock.call(self.context, uuid),
+                    mock.call(self.context, uuid)]
         with mock.patch.object(self.dbapi, 'get_container_by_uuid',
                                side_effect=returns,
                                autospec=True) as mock_get_container:

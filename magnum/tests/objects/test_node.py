@@ -44,7 +44,7 @@ class TestNodeObject(base.DbTestCase):
                                autospec=True) as mock_get_node:
             mock_get_node.return_value = self.fake_node
             node = objects.Node.get(self.context, uuid)
-            mock_get_node.assert_called_once_with(uuid)
+            mock_get_node.assert_called_once_with(self.context, uuid)
             self.assertEqual(self.context, node._context)
 
     def test_get_bad_id_and_uuid(self):
@@ -79,7 +79,7 @@ class TestNodeObject(base.DbTestCase):
                                    autospec=True) as mock_destroy_node:
                 node = objects.Node.get_by_uuid(self.context, uuid)
                 node.destroy()
-                mock_get_node.assert_called_once_with(uuid)
+                mock_get_node.assert_called_once_with(self.context, uuid)
                 mock_destroy_node.assert_called_once_with(uuid)
                 self.assertEqual(self.context, node._context)
 
@@ -94,7 +94,7 @@ class TestNodeObject(base.DbTestCase):
                 node.type = 'bare'
                 node.save()
 
-                mock_get_node.assert_called_once_with(uuid)
+                mock_get_node.assert_called_once_with(self.context, uuid)
                 mock_update_node.assert_called_once_with(
                         uuid, {'type': 'bare'})
                 self.assertEqual(self.context, node._context)
@@ -104,7 +104,8 @@ class TestNodeObject(base.DbTestCase):
         new_uuid = magnum_utils.generate_uuid()
         returns = [dict(self.fake_node, uuid=uuid),
                    dict(self.fake_node, uuid=new_uuid)]
-        expected = [mock.call(uuid), mock.call(uuid)]
+        expected = [mock.call(self.context, uuid),
+                    mock.call(self.context, uuid)]
         with mock.patch.object(self.dbapi, 'get_node_by_uuid',
                                side_effect=returns,
                                autospec=True) as mock_get_node:

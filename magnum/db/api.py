@@ -163,9 +163,10 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_baymodel_by_uuid(self, baymodel_uuid):
+    def get_baymodel_by_uuid(self, ctxt, baymodel_uuid):
         """Return a baymodel.
 
+        :param ctxt: The security context
         :param baymodel_uuid: The uuid of a baymodel.
         :returns: A baymodel.
         """
@@ -236,9 +237,10 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_container_by_uuid(self, container_uuid):
+    def get_container_by_uuid(self, ctxt, container_uuid):
         """Return a container.
 
+        :param ctxt: The security context
         :param container_uuid: The uuid of a container.
         :returns: A container.
         """
@@ -307,9 +309,10 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_node_by_uuid(self, node_uuid):
+    def get_node_by_uuid(self, ctxt, node_uuid):
         """Return a node.
 
+        :param ctxt: The security context
         :param node_uuid: The uuid of a node.
         :returns: A node.
         """

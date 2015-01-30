@@ -50,7 +50,7 @@ class DbNodeTestCase(base.DbTestCase):
 
     def test_get_node_by_uuid(self):
         node = utils.create_test_node()
-        res = self.dbapi.get_node_by_uuid(node.uuid)
+        res = self.dbapi.get_node_by_uuid(self.context, node.uuid)
         self.assertEqual(node.id, res.id)
         self.assertEqual(node.uuid, res.uuid)
 
@@ -59,6 +59,7 @@ class DbNodeTestCase(base.DbTestCase):
                           self.dbapi.get_node_by_id, 99)
         self.assertRaises(exception.NodeNotFound,
                           self.dbapi.get_node_by_uuid,
+                          self.context,
                           magnum_utils.generate_uuid())
 
     def test_get_nodeinfo_list_defaults(self):
@@ -151,7 +152,8 @@ class DbNodeTestCase(base.DbTestCase):
         node = utils.create_test_node()
         self.dbapi.destroy_node(node.uuid)
         self.assertRaises(exception.NodeNotFound,
-                          self.dbapi.get_node_by_uuid, node.uuid)
+                          self.dbapi.get_node_by_uuid,
+                          self.context, node.uuid)
 
     def test_destroy_node_that_does_not_exist(self):
         self.assertRaises(exception.NodeNotFound,

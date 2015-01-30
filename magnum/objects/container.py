@@ -83,7 +83,7 @@ class Container(base.MagnumObject):
         :param context: Security context
         :returns: a :class:`Container` object.
         """
-        db_container = cls.dbapi.get_container_by_uuid(uuid)
+        db_container = cls.dbapi.get_container_by_uuid(context, uuid)
         container = Container._from_db_object(cls(context), db_container)
         return container
 
