@@ -35,7 +35,8 @@ class TestBayModelObject(base.DbTestCase):
                                autospec=True) as mock_get_baymodel:
             mock_get_baymodel.return_value = self.fake_baymodel
             baymodel = objects.BayModel.get(self.context, baymodel_id)
-            mock_get_baymodel.assert_called_once_with(baymodel_id)
+            mock_get_baymodel.assert_called_once_with(self.context,
+                                                      baymodel_id)
             self.assertEqual(self.context, baymodel._context)
 
     def test_get_by_uuid(self):

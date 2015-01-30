@@ -35,7 +35,7 @@ class TestNodeObject(base.DbTestCase):
                                autospec=True) as mock_get_node:
             mock_get_node.return_value = self.fake_node
             node = objects.Node.get(self.context, node_id)
-            mock_get_node.assert_called_once_with(node_id)
+            mock_get_node.assert_called_once_with(self.context, node_id)
             self.assertEqual(self.context, node._context)
 
     def test_get_by_uuid(self):

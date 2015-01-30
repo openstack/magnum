@@ -71,7 +71,7 @@ class Node(base.MagnumObject):
         :param node_id: the id of a node.
         :returns: a :class:`Node` object.
         """
-        db_node = cls.dbapi.get_node_by_id(node_id)
+        db_node = cls.dbapi.get_node_by_id(context, node_id)
         node = Node._from_db_object(cls(context), db_node)
         return node
 
