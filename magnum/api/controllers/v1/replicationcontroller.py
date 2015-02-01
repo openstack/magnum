@@ -30,11 +30,8 @@ from magnum.common import k8s_manifest
 from magnum import objects
 
 
-class ReplicationControllerPatchType(types.JsonPatchType):
-
-    @staticmethod
-    def mandatory_attrs():
-        return ['/bay_uuid']
+class ReplicationControllerPatchType(v1_base.K8sPatchType):
+    pass
 
 
 class ReplicationController(v1_base.K8sResourceBase):
@@ -48,14 +45,8 @@ class ReplicationController(v1_base.K8sResourceBase):
     uuid = types.uuid
     """Unique UUID for this ReplicationController"""
 
-    name = wsme.wsattr(wtypes.text, readonly=True)
-    """Name of this ReplicationController"""
-
     images = [wtypes.text]
     """A list of images used by containers in this ReplicationController."""
-
-    labels = wsme.wsattr({wtypes.text: wtypes.text}, readonly=True)
-    """Selector of this ReplicationController"""
 
     replicas = wsme.wsattr(wtypes.IntegerType(), readonly=True)
     """Replicas of this ReplicationController"""

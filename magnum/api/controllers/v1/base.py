@@ -23,6 +23,18 @@ from magnum.common import urlfetch
 from magnum import objects
 
 
+class K8sPatchType(types.JsonPatchType):
+
+    @staticmethod
+    def internal_attrs():
+        defaults = types.JsonPatchType.internal_attrs()
+        return defaults + ['/name', '/labels']
+
+    @staticmethod
+    def mandatory_attrs():
+        return ['/bay_uuid']
+
+
 class K8sResourceBase(base.APIBase):
 
     _bay_uuid = None
@@ -52,6 +64,12 @@ class K8sResourceBase(base.APIBase):
 
     manifest = wtypes.text
     """Data for manifest to create the k8s resource"""
+
+    name = wsme.wsattr(wtypes.text, readonly=True)
+    """Name of this k8s resource"""
+
+    labels = wsme.wsattr({wtypes.text: wtypes.text}, readonly=True)
+    """Labels of this k8s resource"""
 
     def _get_manifest(self):
         if self.manifest is not wsme.Unset and self.manifest is not None:

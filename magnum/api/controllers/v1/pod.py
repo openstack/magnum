@@ -29,16 +29,8 @@ from magnum.common import k8s_manifest
 from magnum import objects
 
 
-class PodPatchType(types.JsonPatchType):
-
-    @staticmethod
-    def internal_attrs():
-        defaults = types.JsonPatchType.internal_attrs()
-        return defaults + ['/name', '/labels']
-
-    @staticmethod
-    def mandatory_attrs():
-        return ['/bay_uuid']
+class PodPatchType(v1_base.K8sPatchType):
+    pass
 
 
 class Pod(v1_base.K8sResourceBase):
@@ -51,17 +43,11 @@ class Pod(v1_base.K8sResourceBase):
     uuid = types.uuid
     """Unique UUID for this pod"""
 
-    name = wsme.wsattr(wtypes.text, readonly=True)
-    """Name of this pod"""
-
     desc = wtypes.text
     """Description of this pod"""
 
     images = [wtypes.text]
     """A list of images used by containers in this pod."""
-
-    labels = wsme.wsattr({wtypes.text: wtypes.text}, readonly=True)
-    """Labels of this pod"""
 
     status = wtypes.text
     """Staus of this pod """
