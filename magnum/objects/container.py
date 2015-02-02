@@ -71,7 +71,7 @@ class Container(base.MagnumObject):
         :param container_id: the id of a container.
         :returns: a :class:`Container` object.
         """
-        db_container = cls.dbapi.get_container_by_id(container_id)
+        db_container = cls.dbapi.get_container_by_id(context, container_id)
         container = Container._from_db_object(cls(context), db_container)
         return container
 

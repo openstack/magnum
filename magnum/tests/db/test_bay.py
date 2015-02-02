@@ -38,7 +38,7 @@ class DbBayTestCase(base.DbTestCase):
 
     def test_get_bay_by_id(self):
         bay = utils.create_test_bay()
-        res = self.dbapi.get_bay_by_id(bay.id)
+        res = self.dbapi.get_bay_by_id(self.context, bay.id)
         self.assertEqual(bay.id, res.id)
         self.assertEqual(bay.uuid, res.uuid)
 
@@ -50,7 +50,8 @@ class DbBayTestCase(base.DbTestCase):
 
     def test_get_bay_that_does_not_exist(self):
         self.assertRaises(exception.BayNotFound,
-                          self.dbapi.get_bay_by_id, 999)
+                          self.dbapi.get_bay_by_id,
+                          self.context, 999)
         self.assertRaises(exception.BayNotFound,
                           self.dbapi.get_bay_by_uuid,
                           self.context,
@@ -182,10 +183,12 @@ class DbBayTestCase(base.DbTestCase):
 
     def test_destroy_bay(self):
         bay = utils.create_test_bay()
-        self.assertIsNotNone(self.dbapi.get_bay_by_id(bay.id))
+        self.assertIsNotNone(self.dbapi.get_bay_by_id(self.context,
+                                                      bay.id))
         self.dbapi.destroy_bay(bay.id)
         self.assertRaises(exception.BayNotFound,
-                          self.dbapi.get_bay_by_id, bay.id)
+                          self.dbapi.get_bay_by_id,
+                          self.context, bay.id)
 
     def test_destroy_bay_by_uuid(self):
         bay = utils.create_test_bay()

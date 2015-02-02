@@ -173,8 +173,10 @@ class Connection(api.Connection):
             raise exception.BayAlreadyExists(uuid=values['uuid'])
         return bay
 
-    def get_bay_by_id(self, bay_id):
-        query = model_query(models.Bay).filter_by(id=bay_id)
+    def get_bay_by_id(self, ctxt, bay_id):
+        query = model_query(models.Bay)
+        query = self._add_tenant_filters(ctxt, query)
+        query = query.filter_by(id=bay_id)
         try:
             return query.one()
         except NoResultFound:
@@ -308,8 +310,10 @@ class Connection(api.Connection):
             raise exception.BayModelAlreadyExists(uuid=values['uuid'])
         return baymodel
 
-    def get_baymodel_by_id(self, baymodel_id):
-        query = model_query(models.BayModel).filter_by(id=baymodel_id)
+    def get_baymodel_by_id(self, ctxt, baymodel_id):
+        query = model_query(models.BayModel)
+        query = self._add_tenant_filters(ctxt, query)
+        query = query.filter_by(id=baymodel_id)
         try:
             return query.one()
         except NoResultFound:
@@ -418,8 +422,10 @@ class Connection(api.Connection):
             raise exception.ContainerAlreadyExists(uuid=values['uuid'])
         return container
 
-    def get_container_by_id(self, container_id):
-        query = model_query(models.Container).filter_by(id=container_id)
+    def get_container_by_id(self, ctxt, container_id):
+        query = model_query(models.Container)
+        query = self._add_tenant_filters(ctxt, query)
+        query = query.filter_by(id=container_id)
         try:
             return query.one()
         except NoResultFound:
@@ -526,8 +532,10 @@ class Connection(api.Connection):
             raise exception.NodeAlreadyExists(uuid=values['uuid'])
         return node
 
-    def get_node_by_id(self, node_id):
-        query = model_query(models.Node).filter_by(id=node_id)
+    def get_node_by_id(self, ctxt, node_id):
+        query = model_query(models.Node)
+        query = self._add_tenant_filters(ctxt, query)
+        query = query.filter_by(id=node_id)
         try:
             return query.one()
         except NoResultFound:

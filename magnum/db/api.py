@@ -83,9 +83,10 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_bay_by_id(self, bay_id):
+    def get_bay_by_id(self, ctxt, bay_id):
         """Return a bay.
 
+        :param ctxt: The security context
         :param bay_id: The id of a bay.
         :returns: A bay.
         """
@@ -157,9 +158,10 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_baymodel_by_id(self, baymodel_id):
+    def get_baymodel_by_id(self, ctxt, baymodel_id):
         """Return a baymodel.
 
+        :param ctxt: The security context
         :param baymodel_id: The id of a baymodel.
         :returns: A baymodel.
         """
@@ -232,9 +234,10 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_container_by_id(self, container_id):
+    def get_container_by_id(self, ctxt, container_id):
         """Return a container.
 
+        :param ctxt: The security context
         :param container_id: The id of a container.
         :returns: A container.
         """
@@ -305,9 +308,10 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_node_by_id(self, node_id):
+    def get_node_by_id(self, ctxt, node_id):
         """Return a node.
 
+        :param ctxt: The security context
         :param node_id: The id of a node.
         :returns: A node.
         """

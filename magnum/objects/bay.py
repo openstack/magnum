@@ -74,7 +74,7 @@ class Bay(base.MagnumObject):
         :param bay_id: the id of a bay.
         :returns: a :class:`Bay` object.
         """
-        db_bay = cls.dbapi.get_bay_by_id(bay_id)
+        db_bay = cls.dbapi.get_bay_by_id(context, bay_id)
         bay = Bay._from_db_object(cls(context), db_bay)
         return bay
 

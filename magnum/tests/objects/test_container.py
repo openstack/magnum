@@ -35,7 +35,8 @@ class TestContainerObject(base.DbTestCase):
                                autospec=True) as mock_get_container:
             mock_get_container.return_value = self.fake_container
             container = objects.Container.get(self.context, container_id)
-            mock_get_container.assert_called_once_with(container_id)
+            mock_get_container.assert_called_once_with(self.context,
+                                                       container_id)
             self.assertEqual(self.context, container._context)
 
     def test_get_by_uuid(self):
