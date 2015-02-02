@@ -31,10 +31,7 @@ from magnum import objects
 
 
 class NodePatchType(types.JsonPatchType):
-
-    @staticmethod
-    def mandatory_attrs():
-        return ['/node_uuid']
+    pass
 
 
 class Node(base.APIBase):
@@ -43,31 +40,6 @@ class Node(base.APIBase):
     This class enforces type checking and value constraints, and converts
     between the internal object model and the API representation of a node.
     """
-
-    _node_uuid = None
-
-    def _get_node_uuid(self):
-        return self._node_uuid
-
-    def _set_node_uuid(self, value):
-        if value and self._node_uuid != value:
-            try:
-                # FIXME(comstud): One should only allow UUID here, but
-                # there seems to be a bug in that tests are passing an
-                # ID. See bug #1301046 for more details.
-                node = objects.Node.get(pecan.request.context, value)
-                self._node_uuid = node.uuid
-                # NOTE(lucasagomes): Create the node_id attribute on-the-fly
-                #                    to satisfy the api -> rpc object
-                #                    conversion.
-                self.node_id = node.id
-            except exception.NodeNotFound as e:
-                # Change error code because 404 (NotFound) is inappropriate
-                # response for a POST request to create a Node
-                e.code = 400  # BadRequest
-                raise e
-        elif value == wtypes.Unset:
-            self._node_uuid = wtypes.Unset
 
     uuid = types.uuid
     """Unique UUID for this node"""
@@ -86,32 +58,18 @@ class Node(base.APIBase):
 
     def __init__(self, **kwargs):
         self.fields = []
-        fields = list(objects.Node.fields)
-        # NOTE(lucasagomes): node_uuid is not part of objects.Node.fields
-        #                    because it's an API-only attribute
-        fields.append('node_uuid')
-        for field in fields:
+        for field in objects.Node.fields:
             # Skip fields we do not expose.
             if not hasattr(self, field):
                 continue
             self.fields.append(field)
             setattr(self, field, kwargs.get(field, wtypes.Unset))
 
-        # NOTE(lucasagomes): node_id is an attribute created on-the-fly
-        # by _set_node_uuid(), it needs to be present in the fields so
-        # that as_dict() will contain node_id field when converting it
-        # before saving it in the database.
-        self.fields.append('node_id')
-        setattr(self, 'node_uuid', kwargs.get('node_id', wtypes.Unset))
-
     @staticmethod
     def _convert_with_links(node, url, expand=True):
         if not expand:
             node.unset_fields_except(['uuid', 'name', 'type', 'image_id',
-                                     'ironic_node_id'])
-
-        # never expose the node_id attribute
-        node.node_id = wtypes.Unset
+                                      'ironic_node_id'])
 
         node.links = [link.Link.make_link('self', url,
                                           'nodes', node.uuid),
@@ -129,15 +87,11 @@ class Node(base.APIBase):
     @classmethod
     def sample(cls, expand=True):
         sample = cls(uuid='27e3153e-d5bf-4b7e-b517-fb518e17f34c',
-                     name='example',
                      type='virt',
                      image_id='Fedora-k8s',
-                     node_count=1,
+                     ironic_node_id='4b6ec4a9-d412-494a-be77-a2fd16361402',
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())
-        # NOTE(lucasagomes): node_uuid getter() method look at the
-        # _node_uuid variable
-        sample._node_uuid = '7ae81bb3-dec3-4289-8d6c-da80bd8001ae'
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 
 
@@ -189,14 +143,14 @@ class NodesController(rest.RestController):
                                                   marker)
 
         nodes = objects.Node.list(pecan.request.context, limit,
-                                marker_obj, sort_key=sort_key,
-                                sort_dir=sort_dir)
+                                  marker_obj, sort_key=sort_key,
+                                  sort_dir=sort_dir)
 
         return NodeCollection.convert_with_links(nodes, limit,
-                                                url=resource_url,
-                                                expand=expand,
-                                                sort_key=sort_key,
-                                                sort_dir=sort_dir)
+                                                 url=resource_url,
+                                                 expand=expand,
+                                                 sort_key=sort_key,
+                                                 sort_dir=sort_dir)
 
     @wsme_pecan.wsexpose(NodeCollection, types.uuid,
                          types.uuid, int, wtypes.text, wtypes.text)
@@ -210,12 +164,12 @@ class NodesController(rest.RestController):
         :param sort_dir: direction to sort. "asc" or "desc". Default: asc.
         """
         return self._get_nodes_collection(marker, limit, sort_key,
-                                         sort_dir)
+                                          sort_dir)
 
     @wsme_pecan.wsexpose(NodeCollection, types.uuid,
                          types.uuid, int, wtypes.text, wtypes.text)
     def detail(self, node_uuid=None, marker=None, limit=None,
-                sort_key='id', sort_dir='asc'):
+               sort_key='id', sort_dir='asc'):
         """Retrieve a list of nodes with detail.
 
         :param node_uuid: UUID of a node, to get only nodes for that node.
@@ -232,8 +186,8 @@ class NodesController(rest.RestController):
         expand = True
         resource_url = '/'.join(['nodes', 'detail'])
         return self._get_nodes_collection(marker, limit,
-                                         sort_key, sort_dir, expand,
-                                         resource_url)
+                                          sort_key, sort_dir, expand,
+                                          resource_url)
 
     @wsme_pecan.wsexpose(Node, types.uuid)
     def get_one(self, node_uuid):
@@ -281,11 +235,6 @@ class NodesController(rest.RestController):
         rpc_node = objects.Node.get_by_uuid(pecan.request.context, node_uuid)
         try:
             node_dict = rpc_node.as_dict()
-            # NOTE(lucasagomes):
-            # 1) Remove node_id because it's an internal value and
-            #    not present in the API object
-            # 2) Add node_uuid
-            node_dict['node_uuid'] = node_dict.pop('node_id', None)
             node = Node(**api_utils.apply_jsonpatch(node_dict, patch))
         except api_utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)
