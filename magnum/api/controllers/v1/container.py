@@ -58,13 +58,8 @@ class Container(base.APIBase):
     def _set_container_uuid(self, value):
         if value and self._container_uuid != value:
             try:
-                # FIXME(comstud): One should only allow UUID here, but
-                # there seems to be a bug in that tests are passing an
-                # ID. See bug #1301046 for more details.
                 container = objects.Container.get(pecan.request.context, value)
                 self._container_uuid = container.uuid
-                # NOTE(lucasagomes): Create the container_id attribute
-                # on-the-fly to satisfy the api -> rpc object conversion.
                 self.container_id = container.id
             except exception.ContainerNotFound as e:
                 # Change error code because 404 (NotFound) is inappropriate
@@ -89,8 +84,6 @@ class Container(base.APIBase):
     def __init__(self, **kwargs):
         self.fields = []
         fields = list(objects.Container.fields)
-        # NOTE(lucasagomes): container_uuid is not part of
-        # objects.Container.fields because it's an API-only attribute
         fields.append('container_uuid')
         for field in fields:
             # Skip fields we do not expose.
@@ -99,10 +92,6 @@ class Container(base.APIBase):
             self.fields.append(field)
             setattr(self, field, kwargs.get(field, wtypes.Unset))
 
-        # NOTE(lucasagomes): container_id is an attribute created on-the-fly
-        # by _set_container_uuid(), it needs to be present in the fields so
-        # that as_dict() will contain container_id field when converting it
-        # before saving it in the database.
         self.fields.append('container_id')
         setattr(self, 'container_uuid',
                 kwargs.get('container_id', wtypes.Unset))
@@ -111,9 +100,6 @@ class Container(base.APIBase):
     def _convert_with_links(container, url, expand=True):
         if not expand:
             container.unset_fields_except(['uuid', 'name', 'image_id'])
-
-        # never expose the container_id attribute
-        container.container_id = wtypes.Unset
 
         container.links = [link.Link.make_link('self', url,
                                           'containers', container.uuid),
@@ -136,9 +122,6 @@ class Container(base.APIBase):
                      image_id='ubuntu',
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())
-        # NOTE(lucasagomes): container_uuid getter() method look at the
-        # _container_uuid variable
-        sample._container_uuid = '7ae81bb3-dec3-4289-8d6c-da80bd8001ae'
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 
 
@@ -296,7 +279,6 @@ class ContainersController(rest.RestController):
         :param sort_key: column to sort results by. Default: id.
         :param sort_dir: direction to sort. "asc" or "desc". Default: asc.
         """
-        # NOTE(lucasagomes): /detail should only work agaist collections
         parent = pecan.request.path.split('/')[:-1][-1]
         if parent != "containers":
             raise exception.HTTPNotFound
@@ -360,10 +342,6 @@ class ContainersController(rest.RestController):
                                                       container_uuid)
         try:
             container_dict = rpc_container.as_dict()
-            # NOTE(lucasagomes):
-            # 1) Remove container_id because it's an internal value and
-            #    not present in the API object
-            # 2) Add container_uuid
             container_dict['container_uuid'] = container_dict.pop(
                 'container_id', None)
             container = Container(**api_utils.apply_jsonpatch(
