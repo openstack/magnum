@@ -100,7 +100,7 @@ class DbBaymodelTestCase(base.DbTestCase):
 
     def test_get_baymodel_by_uuid(self):
         bm = self._create_test_baymodel()
-        baymodel = self.dbapi.get_baymodel_by_uuid(bm['uuid'])
+        baymodel = self.dbapi.get_baymodel_by_uuid(self.context, bm['uuid'])
         self.assertEqual(bm['id'], baymodel.id)
 
     def test_get_baymodel_that_does_not_exist(self):
@@ -131,10 +131,11 @@ class DbBaymodelTestCase(base.DbTestCase):
     def test_destroy_baymodel_by_uuid(self):
         uuid = magnum_utils.generate_uuid()
         self._create_test_baymodel(uuid=uuid)
-        self.assertIsNotNone(self.dbapi.get_baymodel_by_uuid(uuid))
+        self.assertIsNotNone(self.dbapi.get_baymodel_by_uuid(self.context,
+                                                             uuid))
         self.dbapi.destroy_baymodel(uuid)
         self.assertRaises(exception.BayModelNotFound,
-                          self.dbapi.get_baymodel_by_uuid, uuid)
+                          self.dbapi.get_baymodel_by_uuid, self.context, uuid)
 
     def test_destroy_baymodel_that_does_not_exist(self):
         self.assertRaises(exception.BayModelNotFound,

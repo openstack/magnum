@@ -107,6 +107,14 @@ class Connection(api.Connection):
     def __init__(self):
         pass
 
+    def _add_tenant_filters(self, ctxt, query):
+        if ctxt.project_id:
+            query = query.filter_by(project_id=ctxt.project_id)
+        else:
+            query = query.filter_by(user_id=ctxt.user_id)
+
+        return query
+
     def _add_bays_filters(self, query, filters):
         if filters is None:
             filters = []
@@ -172,11 +180,9 @@ class Connection(api.Connection):
             raise exception.BayNotFound(bay=bay_id)
 
     def get_bay_by_uuid(self, ctxt, bay_uuid):
-        auth_token = ctxt.auth_token_info['token']
-        project_id = auth_token['project']['id']
-        user_id = auth_token['user']['id']
-        query = model_query(models.Bay).filter_by(uuid=bay_uuid,
-                            project_id=project_id, user_id=user_id)
+        query = model_query(models.Bay)
+        query = self._add_tenant_filters(ctxt, query)
+        query = query.filter_by(uuid=bay_uuid)
         try:
             return query.one()
         except NoResultFound:
@@ -307,8 +313,10 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.BayModelNotFound(baymodel=baymodel_id)
 
-    def get_baymodel_by_uuid(self, baymodel_uuid):
-        query = model_query(models.BayModel).filter_by(uuid=baymodel_uuid)
+    def get_baymodel_by_uuid(self, ctxt, baymodel_uuid):
+        query = model_query(models.BayModel)
+        query = self._add_tenant_filters(ctxt, query)
+        query = query.filter_by(uuid=baymodel_uuid)
         try:
             return query.one()
         except NoResultFound:
@@ -414,8 +422,10 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.ContainerNotFound(container=container_id)
 
-    def get_container_by_uuid(self, container_uuid):
-        query = model_query(models.Container).filter_by(uuid=container_uuid)
+    def get_container_by_uuid(self, ctxt, container_uuid):
+        query = model_query(models.Container)
+        query = self._add_tenant_filters(ctxt, query)
+        query = query.filter_by(uuid=container_uuid)
         try:
             return query.one()
         except NoResultFound:
@@ -519,8 +529,10 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.NodeNotFound(node=node_id)
 
-    def get_node_by_uuid(self, node_uuid):
-        query = model_query(models.Node).filter_by(uuid=node_uuid)
+    def get_node_by_uuid(self, ctxt, node_uuid):
+        query = model_query(models.Node)
+        query = self._add_tenant_filters(ctxt, query)
+        query = query.filter_by(uuid=node_uuid)
         try:
             return query.one()
         except NoResultFound:

@@ -83,7 +83,7 @@ class Node(base.MagnumObject):
         :param context: Security context
         :returns: a :class:`Node` object.
         """
-        db_node = cls.dbapi.get_node_by_uuid(uuid)
+        db_node = cls.dbapi.get_node_by_uuid(context, uuid)
         node = Node._from_db_object(cls(context), db_node)
         return node
 

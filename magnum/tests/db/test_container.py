@@ -41,7 +41,8 @@ class DbContainerTestCase(base.DbTestCase):
 
     def test_get_container_by_uuid(self):
         container = utils.create_test_container()
-        res = self.dbapi.get_container_by_uuid(container.uuid)
+        res = self.dbapi.get_container_by_uuid(self.context,
+                                               container.uuid)
         self.assertEqual(container.id, res.id)
         self.assertEqual(container.uuid, res.uuid)
 
@@ -50,6 +51,7 @@ class DbContainerTestCase(base.DbTestCase):
                           self.dbapi.get_container_by_id, 99)
         self.assertRaises(exception.ContainerNotFound,
                           self.dbapi.get_container_by_uuid,
+                          self.context,
                           magnum_utils.generate_uuid())
 
     def test_get_containerinfo_list_defaults(self):
@@ -137,7 +139,8 @@ class DbContainerTestCase(base.DbTestCase):
         container = utils.create_test_container()
         self.dbapi.destroy_container(container.uuid)
         self.assertRaises(exception.ContainerNotFound,
-                          self.dbapi.get_container_by_uuid, container.uuid)
+                          self.dbapi.get_container_by_uuid,
+                          self.context, container.uuid)
 
     def test_destroy_container_that_does_not_exist(self):
         self.assertRaises(exception.ContainerNotFound,

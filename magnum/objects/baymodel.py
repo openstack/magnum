@@ -88,7 +88,7 @@ class BayModel(base.MagnumObject):
         :param context: Security context
         :returns: a :class:`BayModel` object.
         """
-        db_baymodel = cls.dbapi.get_baymodel_by_uuid(uuid)
+        db_baymodel = cls.dbapi.get_baymodel_by_uuid(context, uuid)
         baymodel = BayModel._from_db_object(cls(context), db_baymodel)
         return baymodel
 

@@ -44,7 +44,7 @@ class TestBayModelObject(base.DbTestCase):
                                autospec=True) as mock_get_baymodel:
             mock_get_baymodel.return_value = self.fake_baymodel
             baymodel = objects.BayModel.get(self.context, uuid)
-            mock_get_baymodel.assert_called_once_with(uuid)
+            mock_get_baymodel.assert_called_once_with(self.context, uuid)
             self.assertEqual(self.context, baymodel._context)
 
     def test_get_bad_id_and_uuid(self):
@@ -79,7 +79,7 @@ class TestBayModelObject(base.DbTestCase):
                                    autospec=True) as mock_destroy_baymodel:
                 bm = objects.BayModel.get_by_uuid(self.context, uuid)
                 bm.destroy()
-                mock_get_baymodel.assert_called_once_with(uuid)
+                mock_get_baymodel.assert_called_once_with(self.context, uuid)
                 mock_destroy_baymodel.assert_called_once_with(uuid)
                 self.assertEqual(self.context, bm._context)
 
@@ -94,7 +94,7 @@ class TestBayModelObject(base.DbTestCase):
                 bm.image_id = 'test-image'
                 bm.save()
 
-                mock_get_baymodel.assert_called_once_with(uuid)
+                mock_get_baymodel.assert_called_once_with(self.context, uuid)
                 mock_update_baymodel.assert_called_once_with(
                         uuid, {'image_id': 'test-image'})
                 self.assertEqual(self.context, bm._context)
@@ -104,7 +104,8 @@ class TestBayModelObject(base.DbTestCase):
         new_uuid = magnum_utils.generate_uuid()
         returns = [dict(self.fake_baymodel, uuid=uuid),
                    dict(self.fake_baymodel, uuid=new_uuid)]
-        expected = [mock.call(uuid), mock.call(uuid)]
+        expected = [mock.call(self.context, uuid),
+                    mock.call(self.context, uuid)]
         with mock.patch.object(self.dbapi, 'get_baymodel_by_uuid',
                                side_effect=returns,
                                autospec=True) as mock_get_baymodel:
