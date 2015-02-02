@@ -119,7 +119,7 @@ class DbNodeTestCase(base.DbTestCase):
         for i in range(1, 6):
             node = utils.create_test_node(uuid=magnum_utils.generate_uuid())
             uuids.append(six.text_type(node['uuid']))
-        res = self.dbapi.get_node_list()
+        res = self.dbapi.get_node_list(self.context)
         res_uuids = [r.uuid for r in res]
         self.assertEqual(sorted(uuids), sorted(res_uuids))
 
@@ -130,16 +130,19 @@ class DbNodeTestCase(base.DbTestCase):
         node2 = utils.create_test_node(type='bare',
             uuid=magnum_utils.generate_uuid())
 
-        res = self.dbapi.get_node_list(filters={'type': 'virt'})
+        res = self.dbapi.get_node_list(self.context, filters={'type': 'virt'})
         self.assertEqual([node1.id], [r.id for r in res])
 
-        res = self.dbapi.get_node_list(filters={'type': 'bad-type'})
+        res = self.dbapi.get_node_list(self.context,
+                                       filters={'type': 'bad-type'})
         self.assertEqual([], [r.id for r in res])
 
-        res = self.dbapi.get_node_list(filters={'associated': True})
+        res = self.dbapi.get_node_list(self.context,
+                                       filters={'associated': True})
         self.assertEqual([node1.id], [r.id for r in res])
 
-        res = self.dbapi.get_node_list(filters={'associated': False})
+        res = self.dbapi.get_node_list(self.context,
+                                       filters={'associated': False})
         self.assertEqual([node2.id], [r.id for r in res])
 
     def test_destroy_node(self):

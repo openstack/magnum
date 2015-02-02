@@ -105,7 +105,7 @@ class BayModel(base.MagnumObject):
         :returns: a list of :class:`BayModel` object.
 
         """
-        db_baymodels = cls.dbapi.get_baymodel_list(limit=limit,
+        db_baymodels = cls.dbapi.get_baymodel_list(context, limit=limit,
                                          marker=marker,
                                          sort_key=sort_key,
                                          sort_dir=sort_dir)

@@ -152,9 +152,10 @@ class Connection(api.Connection):
         return _paginate_query(models.Bay, limit, marker,
                                sort_key, sort_dir, query)
 
-    def get_bay_list(self, filters=None, limit=None, marker=None,
+    def get_bay_list(self, ctxt, filters=None, limit=None, marker=None,
                       sort_key=None, sort_dir=None):
         query = model_query(models.Bay)
+        query = self._add_tenant_filters(ctxt, query)
         query = self._add_bays_filters(query, filters)
         return _paginate_query(models.Bay, limit, marker,
                                sort_key, sort_dir, query)
@@ -286,9 +287,10 @@ class Connection(api.Connection):
         return _paginate_query(models.BayModel, limit, marker,
                                sort_key, sort_dir, query)
 
-    def get_baymodel_list(self, filters=None, limit=None, marker=None,
+    def get_baymodel_list(self, ctxt, filters=None, limit=None, marker=None,
                       sort_key=None, sort_dir=None):
         query = model_query(models.BayModel)
+        query = self._add_tenant_filters(ctxt, query)
         query = self._add_baymodels_filters(query, filters)
         return _paginate_query(models.BayModel, limit, marker,
                                sort_key, sort_dir, query)
@@ -395,9 +397,10 @@ class Connection(api.Connection):
         return _paginate_query(models.Container, limit, marker,
                                sort_key, sort_dir, query)
 
-    def get_container_list(self, filters=None, limit=None, marker=None,
+    def get_container_list(self, ctxt, filters=None, limit=None, marker=None,
                       sort_key=None, sort_dir=None):
         query = model_query(models.Container)
+        query = self._add_tenant_filters(ctxt, query)
         query = self._add_containers_filters(query, filters)
         return _paginate_query(models.Container, limit, marker,
                                sort_key, sort_dir, query)
@@ -498,9 +501,10 @@ class Connection(api.Connection):
         return _paginate_query(models.Node, limit, marker,
                                sort_key, sort_dir, query)
 
-    def get_node_list(self, filters=None, limit=None, marker=None,
+    def get_node_list(self, ctxt, filters=None, limit=None, marker=None,
                       sort_key=None, sort_dir=None):
         query = model_query(models.Node)
+        query = self._add_tenant_filters(ctxt, query)
         query = self._add_nodes_filters(query, filters)
         return _paginate_query(models.Node, limit, marker,
                                sort_key, sort_dir, query)

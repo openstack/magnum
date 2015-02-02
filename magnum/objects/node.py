@@ -100,7 +100,7 @@ class Node(base.MagnumObject):
         :returns: a list of :class:`Node` object.
 
         """
-        db_nodes = cls.dbapi.get_node_list(limit=limit,
+        db_nodes = cls.dbapi.get_node_list(context, limit=limit,
                                          marker=marker,
                                          sort_key=sort_key,
                                          sort_dir=sort_dir)

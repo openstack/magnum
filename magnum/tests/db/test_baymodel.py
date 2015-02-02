@@ -37,38 +37,32 @@ class DbBaymodelTestCase(base.DbTestCase):
                                          uuid=magnum_utils.generate_uuid())
             self.dbapi.create_baymodel(bm)
             uuids.append(six.text_type(bm['uuid']))
-        res = self.dbapi.get_baymodel_list()
+        res = self.dbapi.get_baymodel_list(self.context)
         res_uuids = [r.uuid for r in res]
         self.assertEqual(sorted(uuids), sorted(res_uuids))
 
     def test_get_baymodel_list_with_filters(self):
         bm1 = self._create_test_baymodel(id=1, name='bm-one',
             uuid=magnum_utils.generate_uuid(),
-            image_id='image1', project_id='fake-project1',
-            user_id='fake-user1')
+            image_id='image1')
         bm2 = self._create_test_baymodel(id=2, name='bm-two',
             uuid=magnum_utils.generate_uuid(),
-            image_id='image2', project_id='fake-project2',
-            user_id='fake-user2')
+            image_id='image2')
 
-        res = self.dbapi.get_baymodel_list(filters={'name': 'bm-one'})
+        res = self.dbapi.get_baymodel_list(self.context,
+                                           filters={'name': 'bm-one'})
         self.assertEqual([bm1['id']], [r.id for r in res])
 
-        res = self.dbapi.get_baymodel_list(filters={'name': 'bad-name'})
+        res = self.dbapi.get_baymodel_list(self.context,
+                                           filters={'name': 'bad-name'})
         self.assertEqual([], [r.id for r in res])
 
-        res = self.dbapi.get_baymodel_list(filters={'image_id': 'image1'})
+        res = self.dbapi.get_baymodel_list(self.context,
+                                           filters={'image_id': 'image1'})
         self.assertEqual([bm1['id']], [r.id for r in res])
 
-        res = self.dbapi.get_baymodel_list(filters={
-                   'prject_id': 'fake-project1', 'user_id': 'fake-user1'})
-        self.assertEqual([bm1['id']], [r.id for r in res])
-
-        res = self.dbapi.get_baymodel_list(filters={'image_id': 'image2'})
-        self.assertEqual([bm2['id']], [r.id for r in res])
-
-        res = self.dbapi.get_baymodel_list(filters={
-                   'prject_id': 'fake-project2', 'user_id': 'fake-user2'})
+        res = self.dbapi.get_baymodel_list(self.context,
+                                           filters={'image_id': 'image2'})
         self.assertEqual([bm2['id']], [r.id for r in res])
 
     def test_get_baymodelinfo_list_defaults(self):
