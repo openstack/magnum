@@ -30,6 +30,8 @@ class Service(base.MagnumObject):
         'id': int,
         'uuid': obj_utils.str_or_none,
         'name': obj_utils.str_or_none,
+        'project_id': obj_utils.str_or_none,
+        'user_id': obj_utils.str_or_none,
         'bay_uuid': obj_utils.str_or_none,
         'labels': obj_utils.dict_or_none,
         'selector': obj_utils.dict_or_none,

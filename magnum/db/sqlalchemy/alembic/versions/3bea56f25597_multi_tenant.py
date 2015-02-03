@@ -47,6 +47,14 @@ def upgrade():
                   nullable=True))
     op.add_column('pod', sa.Column('user_id', sa.String(length=255),
                   nullable=True))
+    op.add_column('service', sa.Column('project_id', sa.String(length=255),
+                  nullable=True))
+    op.add_column('service', sa.Column('user_id', sa.String(length=255),
+                  nullable=True))
+    op.add_column('replicationcontroller', sa.Column('project_id',
+                  sa.String(length=255), nullable=True))
+    op.add_column('replicationcontroller', sa.Column('user_id',
+                  sa.String(length=255), nullable=True))
 
 
 def downgrade():
@@ -60,3 +68,7 @@ def downgrade():
     op.drop_column('node', 'user_id')
     op.drop_column('pod', 'project_id')
     op.drop_column('pod', 'user_id')
+    op.drop_column('service', 'project_id')
+    op.drop_column('service', 'user_id')
+    op.drop_column('replicationcontroller', 'project_id')
+    op.drop_column('replicationcontroller', 'user_id')

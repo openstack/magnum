@@ -223,6 +223,8 @@ class Service(Base):
     selector = Column(JSONEncodedDict)
     ip = Column(String(36))
     port = Column(Integer())
+    project_id = Column(String(255))
+    user_id = Column(String(255))
 
 
 class ReplicationController(Base):
@@ -241,3 +243,5 @@ class ReplicationController(Base):
     images = Column(JSONEncodedList)
     labels = Column(JSONEncodedDict)
     replicas = Column(Integer())
+    project_id = Column(String(255))
+    user_id = Column(String(255))

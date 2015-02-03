@@ -29,6 +29,8 @@ class ReplicationController(base.MagnumObject):
         'id': int,
         'uuid': obj_utils.str_or_none,
         'name': obj_utils.str_or_none,
+        'project_id': obj_utils.str_or_none,
+        'user_id': obj_utils.str_or_none,
         'images': obj_utils.list_or_none,
         'bay_uuid': obj_utils.str_or_none,
         'labels': obj_utils.dict_or_none,
