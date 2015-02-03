@@ -50,25 +50,6 @@ class Container(base.APIBase):
     container.
     """
 
-    _container_uuid = None
-
-    def _get_container_uuid(self):
-        return self._container_uuid
-
-    def _set_container_uuid(self, value):
-        if value and self._container_uuid != value:
-            try:
-                container = objects.Container.get(pecan.request.context, value)
-                self._container_uuid = container.uuid
-                self.container_id = container.id
-            except exception.ContainerNotFound as e:
-                # Change error code because 404 (NotFound) is inappropriate
-                # response for a POST request to create a Container
-                e.code = 400  # BadRequest
-                raise e
-        elif value == wtypes.Unset:
-            self._container_uuid = wtypes.Unset
-
     uuid = types.uuid
     """Unique UUID for this container"""
 
@@ -83,18 +64,12 @@ class Container(base.APIBase):
 
     def __init__(self, **kwargs):
         self.fields = []
-        fields = list(objects.Container.fields)
-        fields.append('container_uuid')
-        for field in fields:
+        for field in objects.Container.fields:
             # Skip fields we do not expose.
             if not hasattr(self, field):
                 continue
             self.fields.append(field)
             setattr(self, field, kwargs.get(field, wtypes.Unset))
-
-        self.fields.append('container_id')
-        setattr(self, 'container_uuid',
-                kwargs.get('container_id', wtypes.Unset))
 
     @staticmethod
     def _convert_with_links(container, url, expand=True):
