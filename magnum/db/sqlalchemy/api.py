@@ -644,8 +644,10 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.PodNotFound(pod=pod_id)
 
-    def get_pod_by_uuid(self, pod_uuid):
-        query = model_query(models.Pod).filter_by(uuid=pod_uuid)
+    def get_pod_by_uuid(self, context, pod_uuid):
+        query = model_query(models.Pod)
+        query = self._add_tenant_filters(context, query)
+        query = query.filter_by(uuid=pod_uuid)
         try:
             return query.one()
         except NoResultFound:

@@ -44,7 +44,7 @@ class DbPodTestCase(base.DbTestCase):
         self.assertEqual(self.pod.uuid, res.uuid)
 
     def test_get_pod_by_uuid(self):
-        res = self.dbapi.get_pod_by_uuid(self.pod.uuid)
+        res = self.dbapi.get_pod_by_uuid(self.context, self.pod.uuid)
         self.assertEqual(self.pod.id, res.id)
         self.assertEqual(self.pod.uuid, res.uuid)
 
@@ -58,6 +58,7 @@ class DbPodTestCase(base.DbTestCase):
                           self.dbapi.get_pod_by_id, 999)
         self.assertRaises(exception.PodNotFound,
                           self.dbapi.get_pod_by_uuid,
+                          self.context,
                           magnum_utils.generate_uuid())
         self.assertRaises(exception.PodNotFound,
                           self.dbapi.get_pod_by_name,
@@ -184,10 +185,12 @@ class DbPodTestCase(base.DbTestCase):
                           self.dbapi.get_pod_by_id, self.pod.id)
 
     def test_destroy_pod_by_uuid(self):
-        self.assertIsNotNone(self.dbapi.get_pod_by_uuid(self.pod.uuid))
+        self.assertIsNotNone(self.dbapi.get_pod_by_uuid(self.context,
+                                                        self.pod.uuid))
         self.dbapi.destroy_pod(self.pod.uuid)
         self.assertRaises(exception.PodNotFound,
-                          self.dbapi.get_pod_by_uuid, self.pod.uuid)
+                          self.dbapi.get_pod_by_uuid,
+                          self.context, self.pod.uuid)
 
     def test_destroy_pod_that_does_not_exist(self):
         self.assertRaises(exception.PodNotFound,

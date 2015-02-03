@@ -44,7 +44,7 @@ class TestPodObject(base.DbTestCase):
                                autospec=True) as mock_get_pod:
             mock_get_pod.return_value = self.fake_pod
             pod = objects.Pod.get(self.context, uuid)
-            mock_get_pod.assert_called_once_with(uuid)
+            mock_get_pod.assert_called_once_with(self.context, uuid)
             self.assertEqual(self.context, pod._context)
 
     def test_get_bad_id_and_uuid(self):
@@ -79,7 +79,7 @@ class TestPodObject(base.DbTestCase):
                                    autospec=True) as mock_destroy_pod:
                 pod = objects.Pod.get_by_uuid(self.context, uuid)
                 pod.destroy()
-                mock_get_pod.assert_called_once_with(uuid)
+                mock_get_pod.assert_called_once_with(self.context, uuid)
                 mock_destroy_pod.assert_called_once_with(uuid)
                 self.assertEqual(self.context, pod._context)
 
@@ -94,7 +94,7 @@ class TestPodObject(base.DbTestCase):
                 pod.desc = 'test-pod'
                 pod.save()
 
-                mock_get_pod.assert_called_once_with(uuid)
+                mock_get_pod.assert_called_once_with(self.context, uuid)
                 mock_update_pod.assert_called_once_with(
                         uuid, {'desc': 'test-pod'})
                 self.assertEqual(self.context, pod._context)
@@ -104,7 +104,8 @@ class TestPodObject(base.DbTestCase):
         new_uuid = magnum_utils.generate_uuid()
         returns = [dict(self.fake_pod, uuid=uuid),
                    dict(self.fake_pod, uuid=new_uuid)]
-        expected = [mock.call(uuid), mock.call(uuid)]
+        expected = [mock.call(self.context, uuid),
+                    mock.call(self.context, uuid)]
         with mock.patch.object(self.dbapi, 'get_pod_by_uuid',
                                side_effect=returns,
                                autospec=True) as mock_get_pod:

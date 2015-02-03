@@ -389,9 +389,10 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_pod_by_uuid(self, pod_uuid):
+    def get_pod_by_uuid(self, context, pod_uuid):
         """Return a pod.
 
+        :param context: The security context
         :param pod_uuid: The uuid of a pod.
         :returns: A pod.
         """

@@ -231,8 +231,12 @@ class PodsController(rest.RestController):
             raise exception.OperationNotPermitted
 
         pod.parse_manifest()
-        pod_obj = objects.Pod(pecan.request.context,
-                              **pod.as_dict())
+        pod_dict = pod.as_dict()
+        ctxt = pecan.request.context
+        auth_token = ctxt.auth_token_info['token']
+        pod_dict['project_id'] = auth_token['project']['id']
+        pod_dict['user_id'] = auth_token['user']['id']
+        pod_obj = objects.Pod(ctxt, **pod_dict)
         new_pod = pecan.request.rpcapi.pod_create(pod_obj)
         # Set the HTTP Location Header
         pecan.response.location = link.build_url('pods', new_pod.uuid)

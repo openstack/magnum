@@ -93,7 +93,7 @@ class Pod(base.MagnumObject):
         :param context: Security context
         :returns: a :class:`Pod` object.
         """
-        db_pod = cls.dbapi.get_pod_by_uuid(uuid)
+        db_pod = cls.dbapi.get_pod_by_uuid(context, uuid)
         pod = Pod._from_db_object(cls(context), db_pod)
         return pod
 
