@@ -152,7 +152,7 @@ class TestPatch(api_base.FunctionalTest):
 
     def test_replace_bay_uuid(self):
         another_bay = obj_utils.create_test_bay(self.context,
-                                        uuid=utils.generate_uuid())
+                                                uuid=utils.generate_uuid())
         response = self.patch_json('/pods/%s' % self.pod.uuid,
                                    [{'path': '/bay_uuid',
                                      'value': another_bay.uuid,

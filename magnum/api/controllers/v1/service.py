@@ -33,7 +33,11 @@ _ = _LI = _LW = _LE = _LC = lambda x: x
 
 
 class ServicePatchType(v1_base.K8sPatchType):
-    pass
+
+    @staticmethod
+    def internal_attrs():
+        defaults = v1_base.K8sPatchType.internal_attrs()
+        return defaults + ['/selector', '/port', '/ip']
 
 
 class Service(v1_base.K8sResourceBase):
@@ -47,7 +51,7 @@ class Service(v1_base.K8sResourceBase):
     ip = wtypes.text
     """IP of this service"""
 
-    port = wtypes.IntegerType()
+    port = wsme.wsattr(wtypes.IntegerType(), readonly=True)
     """Port of this service"""
 
     links = wsme.wsattr([link.Link], readonly=True)
