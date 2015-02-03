@@ -32,23 +32,14 @@ from magnum import objects
 _ = _LI = _LW = _LE = _LC = lambda x: x
 
 
-class ServicePatchType(types.JsonPatchType):
-
-    @staticmethod
-    def mandatory_attrs():
-        return ['/bay_uuid']
+class ServicePatchType(v1_base.K8sPatchType):
+    pass
 
 
 class Service(v1_base.K8sResourceBase):
 
     uuid = types.uuid
     """Unique UUID for this service"""
-
-    name = wsme.wsattr(wtypes.text, readonly=True)
-    """ The name of the service."""
-
-    labels = wsme.wsattr({wtypes.text: wtypes.text}, readonly=True)
-    """Labels of this service"""
 
     selector = wsme.wsattr({wtypes.text: wtypes.text}, readonly=True)
     """Selector of this service"""

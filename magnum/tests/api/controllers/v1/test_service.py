@@ -74,8 +74,8 @@ class TestServiceController(db_base.DbTestCase):
             self.assertEqual(response.status_int, 200)
 
             # Update the description
-            params = [{'path': '/name',
-                       'value': 'service_bar',
+            params = [{'path': '/port',
+                       'value': '8888',
                        'op': 'replace'}]
             response = self.app.patch_json('/v1/services/%s' % c.get('uuid'),
                                            params=params)
