@@ -83,7 +83,7 @@ class ReplicationController(base.MagnumObject):
         :param rc_id: the id of a ReplicationController.
         :returns: a :class:`ReplicationController` object.
         """
-        db_rc = cls.dbapi.get_rc_by_id(rc_id)
+        db_rc = cls.dbapi.get_rc_by_id(context, rc_id)
         rc = ReplicationController._from_db_object(cls(context), db_rc)
         return rc
 

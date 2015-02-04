@@ -382,9 +382,10 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_pod_by_id(self, pod_id):
+    def get_pod_by_id(self, context, pod_id):
         """Return a pod.
 
+        :param context: The security context
         :param pod_id: The id of a pod.
         :returns: A pod.
         """
@@ -472,9 +473,10 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_service_by_id(self, service_id):
+    def get_service_by_id(self, context, service_id):
         """Return a service.
 
+        :param context: The security context
         :param service_id: The id of a service.
         :returns: A service.
         """
@@ -561,9 +563,10 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_rc_by_id(self, rc_id):
+    def get_rc_by_id(self, context, rc_id):
         """Return a ReplicationController.
 
+        :param context: The security context
         :param rc_id: The id of a rc.
         :returns: A ReplicationController.
         """

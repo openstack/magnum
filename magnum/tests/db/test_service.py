@@ -39,7 +39,7 @@ class DbServiceTestCase(base.DbTestCase):
                           bay_uuid=self.bay.uuid)
 
     def test_get_service_by_id(self):
-        res = self.dbapi.get_service_by_id(self.service.id)
+        res = self.dbapi.get_service_by_id(self.context, self.service.id)
         self.assertEqual(self.service.id, res.id)
         self.assertEqual(self.service.uuid, res.uuid)
 
@@ -50,7 +50,7 @@ class DbServiceTestCase(base.DbTestCase):
 
     def test_get_service_that_does_not_exist(self):
         self.assertRaises(exception.ServiceNotFound,
-                          self.dbapi.get_service_by_id, 999)
+                          self.dbapi.get_service_by_id, self.context, 999)
         self.assertRaises(exception.ServiceNotFound,
                           self.dbapi.get_service_by_uuid,
                           self.context,
@@ -183,7 +183,8 @@ class DbServiceTestCase(base.DbTestCase):
     def test_destroy_service(self):
         self.dbapi.destroy_service(self.service.id)
         self.assertRaises(exception.ServiceNotFound,
-                          self.dbapi.get_service_by_id, self.service.id)
+                          self.dbapi.get_service_by_id,
+                          self.context, self.service.id)
 
     def test_destroy_service_by_uuid(self):
         self.assertIsNotNone(self.dbapi.get_service_by_uuid(self.context,

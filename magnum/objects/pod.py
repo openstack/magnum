@@ -81,7 +81,7 @@ class Pod(base.MagnumObject):
         :param pod_id: the id of a pod.
         :returns: a :class:`Pod` object.
         """
-        db_pod = cls.dbapi.get_pod_by_id(pod_id)
+        db_pod = cls.dbapi.get_pod_by_id(context, pod_id)
         pod = Pod._from_db_object(cls(context), db_pod)
         return pod
 

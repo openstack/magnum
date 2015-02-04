@@ -82,7 +82,7 @@ class Service(base.MagnumObject):
         :param service_id: the id of a service.
         :returns: a :class:`Service` object.
         """
-        db_service = cls.dbapi.get_service_by_id(service_id)
+        db_service = cls.dbapi.get_service_by_id(context, service_id)
         service = Service._from_db_object(cls(context), db_service)
         return service
 

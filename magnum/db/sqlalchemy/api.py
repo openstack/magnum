@@ -638,8 +638,10 @@ class Connection(api.Connection):
             raise exception.PodAlreadyExists(uuid=values['uuid'])
         return pod
 
-    def get_pod_by_id(self, pod_id):
-        query = model_query(models.Pod).filter_by(id=pod_id)
+    def get_pod_by_id(self, context, pod_id):
+        query = model_query(models.Pod)
+        query = self._add_tenant_filters(context, query)
+        query = query.filter_by(id=pod_id)
         try:
             return query.one()
         except NoResultFound:
@@ -751,8 +753,10 @@ class Connection(api.Connection):
             raise exception.ServiceAlreadyExists(uuid=values['uuid'])
         return service
 
-    def get_service_by_id(self, service_id):
-        query = model_query(models.Service).filter_by(id=service_id)
+    def get_service_by_id(self, context, service_id):
+        query = model_query(models.Service)
+        query = self._add_tenant_filters(context, query)
+        query = query.filter_by(id=service_id)
         try:
             return query.one()
         except NoResultFound:
@@ -855,8 +859,10 @@ class Connection(api.Connection):
                                                         uuid=values['uuid'])
         return rc
 
-    def get_rc_by_id(self, rc_id):
-        query = model_query(models.ReplicationController).filter_by(id=rc_id)
+    def get_rc_by_id(self, context, rc_id):
+        query = model_query(models.ReplicationController)
+        query = self._add_tenant_filters(context, query)
+        query = query.filter_by(id=rc_id)
         try:
             return query.one()
         except NoResultFound:

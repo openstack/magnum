@@ -35,7 +35,7 @@ class TestPodObject(base.DbTestCase):
                                autospec=True) as mock_get_pod:
             mock_get_pod.return_value = self.fake_pod
             pod = objects.Pod.get(self.context, pod_id)
-            mock_get_pod.assert_called_once_with(pod_id)
+            mock_get_pod.assert_called_once_with(self.context, pod_id)
             self.assertEqual(self.context, pod._context)
 
     def test_get_by_uuid(self):

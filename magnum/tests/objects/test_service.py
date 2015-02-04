@@ -35,7 +35,7 @@ class TestServiceObject(base.DbTestCase):
                                autospec=True) as mock_get_service:
             mock_get_service.return_value = self.fake_service
             service = objects.Service.get(self.context, service_id)
-            mock_get_service.assert_called_once_with(service_id)
+            mock_get_service.assert_called_once_with(self.context, service_id)
             self.assertEqual(self.context, service._context)
 
     def test_get_by_uuid(self):

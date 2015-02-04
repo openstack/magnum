@@ -35,7 +35,7 @@ class TestReplicationControllerObject(base.DbTestCase):
                                autospec=True) as mock_get_rc:
             mock_get_rc.return_value = self.fake_rc
             rc = objects.ReplicationController.get(self.context, rc_id)
-            mock_get_rc.assert_called_once_with(rc_id)
+            mock_get_rc.assert_called_once_with(self.context, rc_id)
             self.assertEqual(self.context, rc._context)
 
     def test_get_by_uuid(self):
