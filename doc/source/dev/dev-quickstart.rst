@@ -310,27 +310,69 @@ https://blueprints.launchpad.net/magnum/+spec/magnum-bay-status
     +--------------------------------------+------------+-----------------+----------------------+
 
 
-To start a kubernetes pod, use Kolla as an example repo::
+Kubernetes provides a number of examples you can use to check that things
+are working. Here's how to set up the replicated redis example. First get
+the kubernetes repo::
 
     cd ~
-    git clone http://github.com/stackforge/kolla
+    git clone https://github.com/GoogleCloudPlatform/kubernetes.git
 
-    cd kolla/k8s/pod
+Create a pod for the redis-master::
+
+    cd kubernetes/examples/redis
     BAY_UUID=$(magnum bay-list | awk '/ testbay /{print $2}')
-    magnum pod-create --manifest ./mariadb-pod.yaml --bay-id $BAY_UUID
+    magnum pod-create --manifest ./redis-master.yaml --bay-id $BAY_UUID
 
-To start a kubernetes service, use Kolla as an example repo::
+Now turn up a service to provide a discoverable endpoint for the redis sentinels
+in the cluster::
 
-    cd ../service
-    magnum service-create --manifest ./mariadb-service.yaml --bay-id $BAY_UUID
+    magnum service-create --manifest ./redis-sentinel-service.yaml --bay-id $BAY_UUID
 
-To start a kubernetes replication controller, use Kolla as an example repo::
+To make it a replicated redis cluster create replication controllers for the redis
+slaves and sentinels::
 
-    cd ../replication
-    magnum rc-create --manifest ./nova-compute-replicationyaml --bay-id $BAY_UUID
+    sed -i 's/\(replicas: \)1/\1 4/' redis-controller.yaml
+    magnum rc-create --manifest ./redis-controller.yaml --bay-id $BAY_UUID
+
+    sed -i 's/\(replicas: \)1/\1 4/' redis-sentinel-controller.yaml
+    magnum rc-create --manifest ./redis-sentinel-controller.yaml --bay-id $BAY_UUID
 
 Full lifecycle and introspection operations for each object are supported.  For
 exmaple, magnum bay-create magnum baymodel-delete, magnum rc-show, magnum service-list.
+
+In this milestone you have to use the kubernetes kubectl tool to explore the
+redis cluster in detail::
+
+    export KUBERNETES_MASTER=http://$(nova list | grep kube_master | awk '{print $13}'):8080
+    kubectl get pod
+
+The output of `kubectl get pod` indicates the redis-master is running on the
+bay host with IP address 10.0.0.5. To access the redis master::
+
+    ssh minion@$(nova list | grep 10.0.0.5 | awk '{print $13}')
+    REDIS_ID=$(docker ps | grep redis:v1 | grep k8s_master | awk '{print $1}')
+    docker exec -i -t $REDIS_ID redis-cli
+
+    127.0.0.1:6379> set replication:test true
+    OK
+    ^D
+
+    exit
+
+Now log into one of the other container hosts and access a redis slave from there::
+
+    ssh minion@$(nova list | grep 10.0.0.4 | awk '{print $13}')
+    REDIS_ID=$(docker ps | grep redis:v1 | grep k8s_redis | tail -n +2 | awk '{print $1}')
+    docker exec -i -t $REDIS_ID redis-cli
+
+    127.0.0.1:6379> get replication:test
+    "true"
+    ^D
+
+    exit
+
+There are four redis instances, one master and three slaves, running across the bay,
+replicating data between one another.
 
 ================================
 Building developer documentation
