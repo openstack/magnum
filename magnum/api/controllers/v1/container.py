@@ -36,10 +36,7 @@ LOG = logging.getLogger(__name__)
 
 
 class ContainerPatchType(types.JsonPatchType):
-
-    @staticmethod
-    def mandatory_attrs():
-        return ['/container_uuid']
+    pass
 
 
 class Container(base.APIBase):
@@ -317,8 +314,6 @@ class ContainersController(rest.RestController):
                                                       container_uuid)
         try:
             container_dict = rpc_container.as_dict()
-            container_dict['container_uuid'] = container_dict.pop(
-                'container_id', None)
             container = Container(**api_utils.apply_jsonpatch(
                 container_dict, patch))
         except api_utils.JSONPATCH_EXCEPTIONS as e:
