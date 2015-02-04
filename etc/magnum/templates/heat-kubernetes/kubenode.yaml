@@ -9,7 +9,7 @@ parameters:
 
   server_image:
     type: string
-    default: fedora-20-x86_64-updated
+    default: centos-7-atomic-20150120
     description: glance image used to boot the server
 
   server_flavor:
@@ -33,6 +33,13 @@ parameters:
     default: "false"
     constraints:
       - allowed_values: ["true", "false"]
+
+  docker_volume_size:
+    type: string
+    description: >
+      size of a cinder volume to allocate to docker for container/image
+      storage
+    default: 25
 
   # The following are all generated in the parent template.
   kube_master_ip:
@@ -90,12 +97,19 @@ resources:
             "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
             "$KUBE_MASTER_IP": {get_param: kube_master_ip}
             "$WAIT_HANDLE": {get_resource: node_wait_handle}
+            "$DOCKER_VOLUME": {get_resource: docker_volume}
 
   add_to_docker_group:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
       config: {get_file: fragments/add-to-docker-group.sh}
+
+  configure_docker_storage:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/configure-docker-storage.sh}
 
   configure_kubernetes_minion:
     type: "OS::Heat::SoftwareConfig"
@@ -148,6 +162,7 @@ resources:
         - config: {get_resource: kube_user}
         - config: {get_resource: kube_examples}
         - config: {get_resource: add_to_docker_group}
+        - config: {get_resource: configure_docker_storage}
         - config: {get_resource: configure_kubernetes_minion}
         - config: {get_resource: docker_service}
         - config: {get_resource: enable_services}
@@ -178,6 +193,7 @@ resources:
       fixed_ips:
         - subnet_id:
             get_param: fixed_subnet_id
+      replacement_policy: AUTO
 
   kube_node_floating:
     type: "OS::Neutron::FloatingIP"
@@ -186,6 +202,17 @@ resources:
         get_param: external_network_id
       port_id:
         get_resource: kube_node_eth0
+
+  docker_volume:
+    type: "OS::Cinder::Volume"
+    properties:
+      size: {get_param: docker_volume_size}
+
+  docker_volume_attach:
+    type: "OS::Cinder::VolumeAttachment"
+    properties:
+      instance_uuid: {get_resource: kube_node}
+      volume_id: {get_resource: docker_volume}
 
 outputs:
 

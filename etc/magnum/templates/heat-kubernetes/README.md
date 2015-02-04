@@ -22,9 +22,9 @@ These templates will work with the Juno version of Heat.
 ### Guest image
 
 These templates will work with either CentOS Atomic Host or Fedora 21
-Atomic.  You will need an image dated later than 2015-01-01, or you
-will need to create an image that includes Flannel by booting an
-existing image, running `atomic ugprade`, and saving the new image.
+Atomic.  You will need an image dated later than 2015-01-20 in order
+to have both the `flannel` package installed and the appropriately
+configured `docker.service` unit.
 
 You can enable the VXLAN backend for flannel by setting the
 "flannel_use_vxlan" parameter to "true", but I have run into kernel

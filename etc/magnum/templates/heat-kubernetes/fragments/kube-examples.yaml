@@ -15,8 +15,7 @@ write_files:
           id: web
           containers:
             - name: web
-              image: larsks/onehttpd
-              command: [/onehttpd, -p, 80, /data]
+              image: larsks/thttpd
               ports:
                 - containerPort: 80
   - path: /etc/kubernetes/examples/web.service
