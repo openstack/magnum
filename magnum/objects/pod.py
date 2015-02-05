@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from magnum.common import exception
-from magnum.common import utils
 from magnum.db import api as dbapi
 from magnum.objects import base
 from magnum.objects import utils as obj_utils
@@ -59,20 +57,6 @@ class Pod(base.MagnumObject):
     def _from_db_object_list(db_objects, cls, context):
         """Converts a list of database entities to a list of formal objects."""
         return [Pod._from_db_object(cls(context), obj) for obj in db_objects]
-
-    @base.remotable_classmethod
-    def get(cls, context, pod_id):
-        """Find a pod based on its id or uuid and return a Pod object.
-
-        :param pod_id: the id *or* uuid of a pod.
-        :returns: a :class:`Pod` object.
-        """
-        if utils.is_int_like(pod_id):
-            return cls.get_by_id(context, pod_id)
-        elif utils.is_uuid_like(pod_id):
-            return cls.get_by_uuid(context, pod_id)
-        else:
-            raise exception.InvalidIdentity(identity=pod_id)
 
     @base.remotable_classmethod
     def get_by_id(cls, context, pod_id):

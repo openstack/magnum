@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from magnum.common import exception
-from magnum.common import utils
 from magnum.db import api as dbapi
 from magnum.objects import base
 from magnum.objects import utils as obj_utils
@@ -59,21 +57,6 @@ class ReplicationController(base.MagnumObject):
         """Converts a list of database entities to a list of formal objects."""
         return [ReplicationController._from_db_object(cls(context),
                                                     obj) for obj in db_objects]
-
-    @base.remotable_classmethod
-    def get(cls, context, rc_id):
-        """Find a ReplicationController based on its id or uuid and return a
-        replication controller object.
-
-        :param rc_id: the id *or* uuid of a ReplicationController.
-        :returns: a :class:`ReplicationController` object.
-        """
-        if utils.is_int_like(rc_id):
-            return cls.get_by_id(context, rc_id)
-        elif utils.is_uuid_like(rc_id):
-            return cls.get_by_uuid(context, rc_id)
-        else:
-            raise exception.InvalidIdentity(identity=rc_id)
 
     @base.remotable_classmethod
     def get_by_id(cls, context, rc_id):

@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from magnum.common import exception
-from magnum.common import utils
 from magnum.db import api as dbapi
 from magnum.objects import base
 from magnum.objects import utils as obj_utils
@@ -60,20 +58,6 @@ class Service(base.MagnumObject):
         """Converts a list of database entities to a list of formal objects."""
         return [Service._from_db_object(cls(context), obj)
                 for obj in db_objects]
-
-    @base.remotable_classmethod
-    def get(cls, context, service_id):
-        """Find a service based on its id or uuid and return a Service object.
-
-        :param service_id: the id *or* uuid of a service.
-        :returns: a :class:`Service` object.
-        """
-        if utils.is_int_like(service_id):
-            return cls.get_by_id(context, service_id)
-        elif utils.is_uuid_like(service_id):
-            return cls.get_by_uuid(context, service_id)
-        else:
-            raise exception.InvalidIdentity(identity=service_id)
 
     @base.remotable_classmethod
     def get_by_id(cls, context, service_id):

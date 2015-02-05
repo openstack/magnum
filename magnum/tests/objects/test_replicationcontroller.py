@@ -16,7 +16,6 @@
 import mock
 from testtools.matchers import HasLength
 
-from magnum.common import exception
 from magnum.common import utils as magnum_utils
 from magnum import objects
 from magnum.tests.db import base
@@ -34,7 +33,8 @@ class TestReplicationControllerObject(base.DbTestCase):
         with mock.patch.object(self.dbapi, 'get_rc_by_id',
                                autospec=True) as mock_get_rc:
             mock_get_rc.return_value = self.fake_rc
-            rc = objects.ReplicationController.get(self.context, rc_id)
+            rc = objects.ReplicationController.get_by_id(self.context,
+                                                         rc_id)
             mock_get_rc.assert_called_once_with(self.context, rc_id)
             self.assertEqual(self.context, rc._context)
 
@@ -43,14 +43,10 @@ class TestReplicationControllerObject(base.DbTestCase):
         with mock.patch.object(self.dbapi, 'get_rc_by_uuid',
                                autospec=True) as mock_get_rc:
             mock_get_rc.return_value = self.fake_rc
-            rc = objects.ReplicationController.get(self.context, uuid)
+            rc = objects.ReplicationController.get_by_uuid(self.context,
+                                                           uuid)
             mock_get_rc.assert_called_once_with(self.context, uuid)
             self.assertEqual(self.context, rc._context)
-
-    def test_get_bad_id_and_uuid(self):
-        self.assertRaises(exception.InvalidIdentity,
-                          objects.ReplicationController.get,
-                          self.context, 'not-a-uuid')
 
     def test_list(self):
         with mock.patch.object(self.dbapi, 'get_rc_list',

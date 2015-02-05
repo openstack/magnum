@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from magnum.common import exception
-from magnum.common import utils
 from magnum.db import api as dbapi
 from magnum.objects import base
 from magnum.objects import utils as obj_utils
@@ -49,20 +47,6 @@ class Node(base.MagnumObject):
     def _from_db_object_list(db_objects, cls, context):
         """Converts a list of database entities to a list of formal objects."""
         return [Node._from_db_object(cls(context), obj) for obj in db_objects]
-
-    @base.remotable_classmethod
-    def get(cls, context, node_id):
-        """Find a node based on its id or uuid and return a Node object.
-
-        :param node_id: the id *or* uuid of a node.
-        :returns: a :class:`Node` object.
-        """
-        if utils.is_int_like(node_id):
-            return cls.get_by_id(context, node_id)
-        elif utils.is_uuid_like(node_id):
-            return cls.get_by_uuid(context, node_id)
-        else:
-            raise exception.InvalidIdentity(identity=node_id)
 
     @base.remotable_classmethod
     def get_by_id(cls, context, node_id):

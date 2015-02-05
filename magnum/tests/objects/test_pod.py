@@ -16,7 +16,6 @@
 import mock
 from testtools.matchers import HasLength
 
-from magnum.common import exception
 from magnum.common import utils as magnum_utils
 from magnum import objects
 from magnum.tests.db import base
@@ -34,7 +33,7 @@ class TestPodObject(base.DbTestCase):
         with mock.patch.object(self.dbapi, 'get_pod_by_id',
                                autospec=True) as mock_get_pod:
             mock_get_pod.return_value = self.fake_pod
-            pod = objects.Pod.get(self.context, pod_id)
+            pod = objects.Pod.get_by_id(self.context, pod_id)
             mock_get_pod.assert_called_once_with(self.context, pod_id)
             self.assertEqual(self.context, pod._context)
 
@@ -43,13 +42,9 @@ class TestPodObject(base.DbTestCase):
         with mock.patch.object(self.dbapi, 'get_pod_by_uuid',
                                autospec=True) as mock_get_pod:
             mock_get_pod.return_value = self.fake_pod
-            pod = objects.Pod.get(self.context, uuid)
+            pod = objects.Pod.get_by_uuid(self.context, uuid)
             mock_get_pod.assert_called_once_with(self.context, uuid)
             self.assertEqual(self.context, pod._context)
-
-    def test_get_bad_id_and_uuid(self):
-        self.assertRaises(exception.InvalidIdentity,
-                          objects.Pod.get, self.context, 'not-a-uuid')
 
     def test_list(self):
         with mock.patch.object(self.dbapi, 'get_pod_list',
