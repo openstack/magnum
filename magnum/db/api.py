@@ -478,9 +478,10 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_service_by_uuid(self, service_uuid):
+    def get_service_by_uuid(self, context, service_uuid):
         """Return a service.
 
+        :param context: The security context
         :param service_uuid: The uuid of a service.
         :returns: A service.
         """
@@ -565,9 +566,10 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_rc_by_uuid(self, rc_uuid):
+    def get_rc_by_uuid(self, context, rc_uuid):
         """Return a ReplicationController.
 
+        :param context: The security context
         :param rc_uuid: The uuid of a ReplicationController.
         :returns: A ReplicationController.
         """

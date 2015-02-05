@@ -44,7 +44,7 @@ class DbRCTestCase(base.DbTestCase):
         self.assertEqual(self.rc.uuid, rc.uuid)
 
     def test_get_rc_by_uuid(self):
-        rc = self.dbapi.get_rc_by_uuid(self.rc.uuid)
+        rc = self.dbapi.get_rc_by_uuid(self.context, self.rc.uuid)
         self.assertEqual(self.rc.id, rc.id)
         self.assertEqual(self.rc.uuid, rc.uuid)
 
@@ -53,6 +53,7 @@ class DbRCTestCase(base.DbTestCase):
                           self.dbapi.get_rc_by_id, 999)
         self.assertRaises(exception.ReplicationControllerNotFound,
                           self.dbapi.get_rc_by_uuid,
+                          self.context,
                           magnum_utils.generate_uuid())
 
     def test_get_rc_list_defaults(self):
@@ -142,10 +143,12 @@ class DbRCTestCase(base.DbTestCase):
                           self.dbapi.get_rc_by_id, self.rc.id)
 
     def test_destroy_rc_by_uuid(self):
-        self.assertIsNotNone(self.dbapi.get_rc_by_uuid(self.rc.uuid))
+        self.assertIsNotNone(self.dbapi.get_rc_by_uuid(self.context,
+                                                       self.rc.uuid))
         self.dbapi.destroy_rc(self.rc.uuid)
         self.assertRaises(exception.ReplicationControllerNotFound,
-                          self.dbapi.get_rc_by_uuid, self.rc.uuid)
+                          self.dbapi.get_rc_by_uuid,
+                          self.context, self.rc.uuid)
 
     def test_destroy_rc_that_does_not_exist(self):
         self.assertRaises(exception.ReplicationControllerNotFound,

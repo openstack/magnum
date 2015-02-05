@@ -756,8 +756,10 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.ServiceNotFound(service=service_id)
 
-    def get_service_by_uuid(self, service_uuid):
-        query = model_query(models.Service).filter_by(uuid=service_uuid)
+    def get_service_by_uuid(self, context, service_uuid):
+        query = model_query(models.Service)
+        query = self._add_tenant_filters(context, query)
+        query = query.filter_by(uuid=service_uuid)
         try:
             return query.one()
         except NoResultFound:
@@ -857,9 +859,10 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.ReplicationControllerNotFound(rc=rc_id)
 
-    def get_rc_by_uuid(self, rc_uuid):
-        query = model_query(models.ReplicationController).filter_by(
-                                                             uuid=rc_uuid)
+    def get_rc_by_uuid(self, context, rc_uuid):
+        query = model_query(models.ReplicationController)
+        query = self._add_tenant_filters(context, query)
+        query = query.filter_by(uuid=rc_uuid)
         try:
             return query.one()
         except NoResultFound:

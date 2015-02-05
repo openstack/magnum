@@ -44,7 +44,7 @@ class DbServiceTestCase(base.DbTestCase):
         self.assertEqual(self.service.uuid, res.uuid)
 
     def test_get_service_by_uuid(self):
-        res = self.dbapi.get_service_by_uuid(self.service.uuid)
+        res = self.dbapi.get_service_by_uuid(self.context, self.service.uuid)
         self.assertEqual(self.service.id, res.id)
         self.assertEqual(self.service.uuid, res.uuid)
 
@@ -53,6 +53,7 @@ class DbServiceTestCase(base.DbTestCase):
                           self.dbapi.get_service_by_id, 999)
         self.assertRaises(exception.ServiceNotFound,
                           self.dbapi.get_service_by_uuid,
+                          self.context,
                           magnum_utils.generate_uuid())
 
     def test_get_serviceinfo_list_defaults(self):
@@ -178,10 +179,12 @@ class DbServiceTestCase(base.DbTestCase):
                           self.dbapi.get_service_by_id, self.service.id)
 
     def test_destroy_service_by_uuid(self):
-        self.assertIsNotNone(self.dbapi.get_service_by_uuid(self.service.uuid))
+        self.assertIsNotNone(self.dbapi.get_service_by_uuid(self.context,
+                                                            self.service.uuid))
         self.dbapi.destroy_service(self.service.uuid)
         self.assertRaises(exception.ServiceNotFound,
-                          self.dbapi.get_service_by_uuid, self.service.uuid)
+                          self.dbapi.get_service_by_uuid,
+                          self.context, self.service.uuid)
 
     def test_destroy_service_that_does_not_exist(self):
         self.assertRaises(exception.ServiceNotFound,

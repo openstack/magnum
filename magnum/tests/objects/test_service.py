@@ -44,7 +44,7 @@ class TestServiceObject(base.DbTestCase):
                                autospec=True) as mock_get_service:
             mock_get_service.return_value = self.fake_service
             service = objects.Service.get(self.context, uuid)
-            mock_get_service.assert_called_once_with(uuid)
+            mock_get_service.assert_called_once_with(self.context, uuid)
             self.assertEqual(self.context, service._context)
 
     def test_get_bad_id_and_uuid(self):
@@ -79,7 +79,7 @@ class TestServiceObject(base.DbTestCase):
                                    autospec=True) as mock_destroy_service:
                 service = objects.Service.get_by_uuid(self.context, uuid)
                 service.destroy()
-                mock_get_service.assert_called_once_with(uuid)
+                mock_get_service.assert_called_once_with(self.context, uuid)
                 mock_destroy_service.assert_called_once_with(uuid)
                 self.assertEqual(self.context, service._context)
 
@@ -94,7 +94,7 @@ class TestServiceObject(base.DbTestCase):
                 service.port = 4567
                 service.save()
 
-                mock_get_service.assert_called_once_with(uuid)
+                mock_get_service.assert_called_once_with(self.context, uuid)
                 mock_update_service.assert_called_once_with(
                         uuid, {'port': 4567})
                 self.assertEqual(self.context, service._context)
@@ -104,7 +104,8 @@ class TestServiceObject(base.DbTestCase):
         new_uuid = magnum_utils.generate_uuid()
         returns = [dict(self.fake_service, uuid=uuid),
                    dict(self.fake_service, uuid=new_uuid)]
-        expected = [mock.call(uuid), mock.call(uuid)]
+        expected = [mock.call(self.context, uuid),
+                    mock.call(self.context, uuid)]
         with mock.patch.object(self.dbapi, 'get_service_by_uuid',
                                side_effect=returns,
                                autospec=True) as mock_get_service:

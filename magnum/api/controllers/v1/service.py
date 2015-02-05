@@ -248,8 +248,12 @@ class ServicesController(rest.RestController):
             raise exception.OperationNotPermitted
 
         service.parse_manifest()
-        service_obj = objects.Service(pecan.request.context,
-                                      **service.as_dict())
+        service_dict = service.as_dict()
+        ctxt = pecan.request.context
+        auth_token = ctxt.auth_token_info['token']
+        service_dict['project_id'] = auth_token['project']['id']
+        service_dict['user_id'] = auth_token['user']['id']
+        service_obj = objects.Service(ctxt, **service_dict)
         new_service = pecan.request.rpcapi.service_create(service_obj)
         # Set the HTTP Location Header
         pecan.response.location = link.build_url('services', new_service.uuid)

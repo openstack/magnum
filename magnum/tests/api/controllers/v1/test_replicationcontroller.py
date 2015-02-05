@@ -23,7 +23,7 @@ class TestRCController(db_base.DbTestCase):
         return rc
 
     def mock_rc_destroy(self, uuid):
-        rc = objects.ReplicationController.get_by_uuid({}, uuid)
+        rc = objects.ReplicationController.get_by_uuid(self.context, uuid)
         rc.destroy()
 
     def test_rc_api(self):

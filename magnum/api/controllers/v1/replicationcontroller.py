@@ -236,8 +236,12 @@ class ReplicationControllersController(rest.RestController):
             raise exception.OperationNotPermitted
 
         rc.parse_manifest()
-        rc_obj = objects.ReplicationController(pecan.request.context,
-                              **rc.as_dict())
+        rc_dict = rc.as_dict()
+        ctxt = pecan.request.context
+        auth_token = ctxt.auth_token_info['token']
+        rc_dict['project_id'] = auth_token['project']['id']
+        rc_dict['user_id'] = auth_token['user']['id']
+        rc_obj = objects.ReplicationController(ctxt, **rc_dict)
         new_rc = pecan.request.rpcapi.rc_create(rc_obj)
         # Set the HTTP Location Header
         pecan.response.location = link.build_url('rcs', new_rc.uuid)

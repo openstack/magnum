@@ -44,7 +44,7 @@ class TestReplicationControllerObject(base.DbTestCase):
                                autospec=True) as mock_get_rc:
             mock_get_rc.return_value = self.fake_rc
             rc = objects.ReplicationController.get(self.context, uuid)
-            mock_get_rc.assert_called_once_with(uuid)
+            mock_get_rc.assert_called_once_with(self.context, uuid)
             self.assertEqual(self.context, rc._context)
 
     def test_get_bad_id_and_uuid(self):
@@ -81,7 +81,7 @@ class TestReplicationControllerObject(base.DbTestCase):
                 rc = objects.ReplicationController.get_by_uuid(self.context,
                                                                uuid)
                 rc.destroy()
-                mock_get_rc.assert_called_once_with(uuid)
+                mock_get_rc.assert_called_once_with(self.context, uuid)
                 mock_destroy_rc.assert_called_once_with(uuid)
                 self.assertEqual(self.context, rc._context)
 
@@ -97,7 +97,7 @@ class TestReplicationControllerObject(base.DbTestCase):
                 rc.replicas = 10
                 rc.save()
 
-                mock_get_rc.assert_called_once_with(uuid)
+                mock_get_rc.assert_called_once_with(self.context, uuid)
                 mock_update_rc.assert_called_once_with(
                         uuid, {'replicas': 10})
                 self.assertEqual(self.context, rc._context)
@@ -107,7 +107,8 @@ class TestReplicationControllerObject(base.DbTestCase):
         new_uuid = magnum_utils.generate_uuid()
         returns = [dict(self.fake_rc, uuid=uuid),
                    dict(self.fake_rc, uuid=new_uuid)]
-        expected = [mock.call(uuid), mock.call(uuid)]
+        expected = [mock.call(self.context, uuid),
+                    mock.call(self.context, uuid)]
         with mock.patch.object(self.dbapi, 'get_rc_by_uuid',
                                side_effect=returns,
                                autospec=True) as mock_get_rc:

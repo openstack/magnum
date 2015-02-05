@@ -96,7 +96,7 @@ class ReplicationController(base.MagnumObject):
         :param context: Security context
         :returns: a :class:`ReplicationController` object.
         """
-        db_rc = cls.dbapi.get_rc_by_uuid(uuid)
+        db_rc = cls.dbapi.get_rc_by_uuid(context, uuid)
         rc = ReplicationController._from_db_object(cls(context), db_rc)
         return rc
 

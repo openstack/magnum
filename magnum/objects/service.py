@@ -94,7 +94,7 @@ class Service(base.MagnumObject):
         :param context: Security context
         :returns: a :class:`Service` object.
         """
-        db_service = cls.dbapi.get_service_by_uuid(uuid)
+        db_service = cls.dbapi.get_service_by_uuid(context, uuid)
         service = Service._from_db_object(cls(context), db_service)
         return service
 
