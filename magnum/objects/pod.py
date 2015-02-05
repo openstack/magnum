@@ -133,7 +133,7 @@ class Pod(base.MagnumObject):
         :returns: a list of :class:`Pod` object.
 
         """
-        db_pods = cls.dbapi.get_pod_list(limit=limit,
+        db_pods = cls.dbapi.get_pod_list(context, limit=limit,
                                          marker=marker,
                                          sort_key=sort_key,
                                          sort_dir=sort_dir)

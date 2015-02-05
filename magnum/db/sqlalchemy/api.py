@@ -617,9 +617,10 @@ class Connection(api.Connection):
         return _paginate_query(models.Pod, limit, marker,
                                sort_key, sort_dir, query)
 
-    def get_pod_list(self, filters=None, limit=None, marker=None,
+    def get_pod_list(self, context, filters=None, limit=None, marker=None,
                       sort_key=None, sort_dir=None):
         query = model_query(models.Pod)
+        query = self._add_tenant_filters(context, query)
         query = self._add_pods_filters(query, filters)
         return _paginate_query(models.Pod, limit, marker,
                                sort_key, sort_dir, query)
@@ -729,9 +730,10 @@ class Connection(api.Connection):
         return _paginate_query(models.Service, limit, marker,
                                sort_key, sort_dir, query)
 
-    def get_service_list(self, filters=None, limit=None, marker=None,
+    def get_service_list(self, context, filters=None, limit=None, marker=None,
                       sort_key=None, sort_dir=None):
         query = model_query(models.Service)
+        query = self._add_tenant_filters(context, query)
         query = self._add_services_filters(query, filters)
         return _paginate_query(models.Service, limit, marker,
                                sort_key, sort_dir, query)
@@ -831,9 +833,10 @@ class Connection(api.Connection):
         return _paginate_query(models.ReplicationController, limit, marker,
                                sort_key, sort_dir, query)
 
-    def get_rc_list(self, filters=None, limit=None, marker=None,
+    def get_rc_list(self, context, filters=None, limit=None, marker=None,
                       sort_key=None, sort_dir=None):
         query = model_query(models.ReplicationController)
+        query = self._add_tenant_filters(context, query)
         query = self._add_rcs_filters(query, filters)
         return _paginate_query(models.ReplicationController, limit, marker,
                                sort_key, sort_dir, query)

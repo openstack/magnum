@@ -122,7 +122,7 @@ class Service(base.MagnumObject):
         :returns: a list of :class:`Service` object.
 
         """
-        db_services = cls.dbapi.get_service_list(limit=limit,
+        db_services = cls.dbapi.get_service_list(context, limit=limit,
                                                  marker=marker,
                                                  sort_key=sort_key,
                                                  sort_dir=sort_dir)

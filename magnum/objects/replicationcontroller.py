@@ -126,7 +126,7 @@ class ReplicationController(base.MagnumObject):
         :returns: a list of :class:`ReplicationController` object.
 
         """
-        db_rcs = cls.dbapi.get_rc_list(limit=limit,
+        db_rcs = cls.dbapi.get_rc_list(context, limit=limit,
                                        marker=marker,
                                        sort_key=sort_key,
                                        sort_dir=sort_dir)

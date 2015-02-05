@@ -342,13 +342,14 @@ class Connection(object):
         :raises: NodeNotFound
         """
     @abc.abstractmethod
-    def get_pod_list(self, columns=None, filters=None, limit=None,
+    def get_pod_list(self, context, columns=None, filters=None, limit=None,
                      marker=None, sort_key=None, sort_dir=None):
         """Get specific columns for matching pods.
 
         Return a list of the specified columns for all pods that match the
         specified filters.
 
+        :param context: The security context
         :param columns: List of column names to return.
                         Defaults to 'id' column when columns == None.
         :param filters: Filters to apply. Defaults to None.
@@ -430,13 +431,14 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_service_list(self, columns=None, filters=None, limit=None,
+    def get_service_list(self, context, columns=None, filters=None, limit=None,
                      marker=None, sort_key=None, sort_dir=None):
         """Get specific columns for matching services.
 
         Return a list of the specified columns for all services that match the
         specified filters.
 
+        :param context: The security context
         :param columns: List of column names to return.
                         Defaults to 'id' column when columns == None.
         :param filters: Filters to apply. Defaults to None.
@@ -511,13 +513,14 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_rc_list(self, columns=None, filters=None, limit=None,
+    def get_rc_list(self, context, columns=None, filters=None, limit=None,
                      marker=None, sort_key=None, sort_dir=None):
         """Get specific columns for matching ReplicationController.
 
         Return a list of the specified columns for all rcs that match the
         specified filters.
 
+        :param context: The security context
         :param columns: List of column names to return.
                         Defaults to 'id' column when columns == None.
         :param filters: Filters to apply. Defaults to None.
