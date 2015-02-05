@@ -151,3 +151,30 @@ def create_test_rc(ctxt, **kw):
     rc = get_test_rc(ctxt, **kw)
     rc.create()
     return rc
+
+
+def get_test_node(ctxt, **kw):
+    """Return a Node object with appropriate attributes.
+
+    NOTE: The object leaves the attributes marked as changed, such
+    that a create() could be used to commit it to the DB.
+    """
+    db_node = db_utils.get_test_node(**kw)
+    # Let DB generate ID if it isn't specified explicitly
+    if 'id' not in kw:
+        del db_node['id']
+    node = objects.Node(ctxt)
+    for key in db_node:
+        setattr(node, key, db_node[key])
+    return node
+
+
+def create_test_node(ctxt, **kw):
+    """Create and return a test Node object.
+
+    Create a node in the DB and return a Node object with appropriate
+    attributes.
+    """
+    node = get_test_node(ctxt, **kw)
+    node.create()
+    return node
