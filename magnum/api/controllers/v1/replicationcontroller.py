@@ -31,7 +31,11 @@ from magnum import objects
 
 
 class ReplicationControllerPatchType(v1_base.K8sPatchType):
-    pass
+
+    @staticmethod
+    def internal_attrs():
+        defaults = v1_base.K8sPatchType.internal_attrs()
+        return defaults + ['/replicas']
 
 
 class ReplicationController(v1_base.K8sResourceBase):
@@ -93,7 +97,7 @@ class ReplicationController(v1_base.K8sResourceBase):
                      labels={'name': 'foo'},
                      replicas=2,
                      manifest_url='file:///tmp/rc.yaml',
-                     replicationcontroller_data='''{
+                     manifest='''{
                          "id": "name_of_rc",
                          "replicas": 3,
                          "labels": {
@@ -273,8 +277,8 @@ class ReplicationControllersController(rest.RestController):
             # ignore manifest_url as it was used for create rc
             if field == 'manifest_url':
                 continue
-            # ignore replicationcontroller_data as it was used for create rc
-            if field == 'replicationcontroller_data':
+            # ignore manifest as it was used for create rc
+            if field == 'manifest':
                 continue
             try:
                 patch_val = getattr(rc, field)

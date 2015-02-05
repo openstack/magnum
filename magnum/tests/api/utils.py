@@ -18,6 +18,7 @@ Utils for testing the API service.
 from magnum.api.controllers.v1 import bay as bay_controller
 from magnum.api.controllers.v1 import baymodel as baymodel_controller
 from magnum.api.controllers.v1 import pod as pod_controller
+from magnum.api.controllers.v1 import replicationcontroller as rc_controller
 from magnum.api.controllers.v1 import service as service_controller
 from magnum.tests.db import utils
 
@@ -70,3 +71,17 @@ def service_post_data(**kw):
         }'''
     internal = service_controller.ServicePatchType.internal_attrs()
     return remove_internal(service, internal)
+
+
+def rc_post_data(**kw):
+    rc = utils.get_test_rc(**kw)
+    if 'manifest' not in rc:
+        rc['manifest'] = '''{
+            "id": "name_of_rc",
+            "replicas": 3,
+            "labels": {
+                "foo": "foo1"
+            }
+        }'''
+    internal = rc_controller.ReplicationControllerPatchType.internal_attrs()
+    return remove_internal(rc, internal)

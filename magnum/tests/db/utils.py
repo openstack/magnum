@@ -194,7 +194,7 @@ def get_test_rc(**kw):
         'project_id': kw.get('project_id', 'fake_project'),
         'user_id': kw.get('user_id', 'fake_user'),
         'images': kw.get('images', ['steak/for-dinner']),
-        'bay_uuid': kw.get('bay_uuid', '10a47dd1-4874-4298-91cf-eff046dbdb8e'),
+        'bay_uuid': kw.get('bay_uuid', '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'),
         'labels': kw.get('labels', {'name': 'foo'}),
         'replicas': kw.get('replicas', 3),
         'manifest_url': kw.get('file:///tmp/rc.yaml'),
