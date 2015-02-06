@@ -118,31 +118,10 @@ class Handler(object):
         bay.stack_id = created_stack['stack']['id']
         bay.create()
 
-        attempts_count = 0
+        self.attempts_count = 0
 
-        # TODO(yuanying): temporary implementation of updating master_address
-        def poll_and_check():
-            stack = osc.heat().stacks.get(bay.stack_id)
-            if stack.stack_status == 'CREATE_COMPLETE':
-                parsed_outputs = _parse_stack_outputs(stack.outputs)
-                master_address = parsed_outputs["kube_master"]
-                minion_address = parsed_outputs["kube_minions_external"]
-                bay.master_address = master_address
-                bay.minions_address = minion_address
-                bay.save()
-                raise loopingcall.LoopingCallDone()
-            # poll_and_check is detached and polling long time to check status,
-            # so another user/client can call delete bay/stack.
-            if stack.stack_status == 'DELETE_COMPLETE':
-                LOG.info('Bay has been deleted, stack_id: %s' % bay.stack_id)
-                raise loopingcall.LoopingCallDone()
-            if ((stack.status == 'FAILED') or
-                (attempts_count > cfg.CONF.k8s_heat.max_attempts)):
-                # TODO(yuanying): update status to failed
-                LOG.error('Unable to create bay, stack_id: %s' % bay.stack_id)
-                raise loopingcall.LoopingCallDone()
-
-        lc = loopingcall.FixedIntervalLoopingCall(f=poll_and_check)
+        lc = loopingcall.FixedIntervalLoopingCall(self._poll_and_check,
+                                                  osc, bay)
         lc.start(cfg.CONF.k8s_heat.wait_interval, True)
 
         return bay
@@ -173,3 +152,25 @@ class Handler(object):
         bay.destroy()
 
         return None
+
+    def _poll_and_check(self, osc, bay):
+        # TODO(yuanying): temporary implementation of updating master_address
+        stack = osc.heat().stacks.get(bay.stack_id)
+        if stack.stack_status == 'CREATE_COMPLETE':
+            parsed_outputs = _parse_stack_outputs(stack.outputs)
+            master_address = parsed_outputs["kube_master"]
+            minion_address = parsed_outputs["kube_minions_external"]
+            bay.master_address = master_address
+            bay.minions_address = minion_address
+            bay.save()
+            raise loopingcall.LoopingCallDone()
+        # poll_and_check is detached and polling long time to check status,
+        # so another user/client can call delete bay/stack.
+        if stack.stack_status == 'DELETE_COMPLETE':
+            LOG.info('Bay has been deleted, stack_id: %s' % bay.stack_id)
+            raise loopingcall.LoopingCallDone()
+        if ((stack.status == 'FAILED') or
+            (self.attempts_count > cfg.CONF.k8s_heat.max_attempts)):
+            # TODO(yuanying): update status to failed
+            LOG.error('Unable to create bay, stack_id: %s' % bay.stack_id)
+            raise loopingcall.LoopingCallDone()
