@@ -1,0 +1,268 @@
+heat_template_version: 2013-05-23
+
+description: >
+  This template will boot a Docker swarm cluster. A swarm cluster is made up
+  of a single manager node, and N agent nodes. Every node in the cluster,
+  including the manager, is running a Docker daemon and a swarm agent
+  advertising it to the cluster. The manager is running an addition swarm
+  manager container listening on port 2376. By default, the cluster is made
+  up of one manager node and one agent node.
+
+parameters:
+
+  #
+  # REQUIRED PARAMETERS
+  #
+  ssh_key_name:
+    type: string
+    description: name of ssh key to be provisioned on our server
+
+  external_network_id:
+    type: string
+    description: uuid of a network to use for floating ip addresses
+
+  swarm_token:
+    type: string
+    description: identifier of swarm cluster to build
+
+  #
+  # OPTIONAL PARAMETERS
+  #
+  server_image:
+    type: string
+    default: fedora-atomic
+    description: glance image used to boot the server
+
+  server_flavor:
+    type: string
+    default: m1.small
+    description: flavor to use when booting the server
+
+  dns_nameserver:
+    type: string
+    description: address of a dns nameserver reachable in your environment
+    default: 8.8.8.8
+
+  number_of_nodes:
+    type: string
+    description: how many swarm nodes to spawn
+    default: 1
+
+  fixed_network_cidr:
+    type: string
+    description: network range for fixed ip network
+    default: "10.0.0.0/24"
+
+resources:
+
+  master_wait_handle:
+    type: "AWS::CloudFormation::WaitConditionHandle"
+
+  master_wait_condition:
+    type: "AWS::CloudFormation::WaitCondition"
+    depends_on:
+      - swarm_manager
+    properties:
+      Handle:
+        get_resource: master_wait_handle
+      Timeout: "6000"
+
+  ######################################################################
+  #
+  # network resources.  allocate a network and router for our server.
+  # it would also be possible to take advantage of existing network
+  # resources (and have the deployer provide network and subnet ids,
+  # etc, as parameters), but I wanted to minmize the amount of
+  # configuration necessary to make this go.
+
+  fixed_network:
+    type: "OS::Neutron::Net"
+
+  # This is the subnet on which we will deploy our server.
+  fixed_subnet:
+    type: "OS::Neutron::Subnet"
+    properties:
+      cidr: {get_param: fixed_network_cidr}
+      network_id:
+        get_resource: fixed_network
+      dns_nameservers:
+        - get_param: dns_nameserver
+
+  # create a router attached to the external network provided as a
+  # parameter to this stack.
+  extrouter:
+    type: "OS::Neutron::Router"
+    properties:
+      external_gateway_info:
+        network:
+          get_param: external_network_id
+
+  # attached fixed_subnet to our extrouter router.
+  extrouter_inside:
+    type: "OS::Neutron::RouterInterface"
+    properties:
+      router_id:
+        get_resource: extrouter
+      subnet_id:
+        get_resource:
+          fixed_subnet
+
+  ######################################################################
+  #
+  # security groups.  we need to permit network traffic of various
+  # sorts.
+  #
+
+  secgroup_manager:
+    type: "OS::Neutron::SecurityGroup"
+    properties:
+      rules:
+        - protocol: icmp
+        - protocol: tcp
+          port_range_min: 22 # ssh
+          port_range_max: 22
+        - protocol: tcp
+          port_range_min: 2375 # docker
+          port_range_max: 2376 # swarm-manager
+        - protocol: udp
+
+  ######################################################################
+  #
+  # software configs.  these are components that are combined into
+  # a multipart MIME user-data archive.
+  #
+  write_heat_params:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/write-heat-params.yaml}
+          params:
+            "$WAIT_HANDLE": {get_resource: master_wait_handle}
+
+  write_docker_socket:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/write-docker-socket.yaml}
+
+  write_swarm_agent_service:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/write-swarm-agent-service.yaml}
+          params:
+            "$NODE_IP": {get_attr: [swarm_manager_eth0, fixed_ips, 0, ip_address]}
+            "$SWARM_TOKEN": {get_param: swarm_token}
+
+  write_swarm_manager_service:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/write-swarm-manager-service.yaml}
+          params:
+            "$SWARM_TOKEN": {get_param: swarm_token}
+
+  enable_services:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/enable-services.sh}
+          params:
+            "$NODE_SERVICES": "docker-tcp.socket swarm-agent swarm-manager"
+
+  cfn_signal:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/cfn-signal.sh}
+
+  swarm_manager_init:
+    type: "OS::Heat::MultipartMime"
+    properties:
+      parts:
+        - config: {get_resource: write_heat_params}
+        - config: {get_resource: write_docker_socket}
+        - config: {get_resource: write_swarm_agent_service}
+        - config: {get_resource: write_swarm_manager_service}
+        - config: {get_resource: enable_services}
+        - config: {get_resource: cfn_signal}
+
+  ######################################################################
+  #
+  # Swarm_manager is a special node running the swarm manage daemon along
+  # side the swarm agent.
+  #
+
+  swarm_manager:
+    type: "OS::Nova::Server"
+    depends_on:
+      - extrouter_inside
+    properties:
+      image:
+        get_param: server_image
+      flavor:
+        get_param: server_flavor
+      key_name:
+        get_param: ssh_key_name
+      user_data_format: RAW
+      user_data: {get_resource: swarm_manager_init}
+      networks:
+        - port:
+            get_resource: swarm_manager_eth0
+
+  swarm_manager_eth0:
+    type: "OS::Neutron::Port"
+    properties:
+      network_id:
+        get_resource: fixed_network
+      security_groups:
+        - get_resource: secgroup_manager
+      fixed_ips:
+        - subnet_id:
+            get_resource: fixed_subnet
+
+  swarm_manager_floating:
+    type: "OS::Neutron::FloatingIP"
+    depends_on:
+      - extrouter_inside
+    properties:
+      floating_network_id:
+        get_param: external_network_id
+      port_id:
+        get_resource: swarm_manager_eth0
+
+  swarm_nodes:
+    type: "OS::Heat::ResourceGroup"
+    depends_on:
+      - extrouter_inside
+    properties:
+      count: {get_param: number_of_nodes}
+      resource_def:
+        type: swarmnode.yaml
+        properties:
+          ssh_key_name: {get_param: ssh_key_name}
+          server_image: {get_param: server_image}
+          server_flavor: {get_param: server_flavor}
+          fixed_network_id: {get_resource: fixed_network}
+          fixed_subnet_id: {get_resource: fixed_subnet}
+          external_network_id: {get_param: external_network_id}
+          swarm_token: {get_param: swarm_token}
+
+outputs:
+
+  swarm_manager:
+    value: {get_attr: [swarm_manager_floating, floating_ip_address]}
+
+  swarm_nodes:
+    value: {get_attr: [swarm_nodes, swarm_node_ip]}
+
+  swarm_nodes_external:
+    value: {get_attr: [swarm_nodes, swarm_node_external_ip]}

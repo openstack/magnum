@@ -1,0 +1,8 @@
+#cloud-config
+merge_how: dict(recurse_array)+list(append)
+write_files:
+  - path: /etc/sysconfig/heat-params
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      WAIT_HANDLE="$WAIT_HANDLE"
