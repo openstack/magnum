@@ -107,11 +107,11 @@ class Connection(api.Connection):
     def __init__(self):
         pass
 
-    def _add_tenant_filters(self, ctxt, query):
-        if ctxt.project_id:
-            query = query.filter_by(project_id=ctxt.project_id)
+    def _add_tenant_filters(self, context, query):
+        if context.project_id:
+            query = query.filter_by(project_id=context.project_id)
         else:
-            query = query.filter_by(user_id=ctxt.user_id)
+            query = query.filter_by(user_id=context.user_id)
 
         return query
 
@@ -152,10 +152,10 @@ class Connection(api.Connection):
         return _paginate_query(models.Bay, limit, marker,
                                sort_key, sort_dir, query)
 
-    def get_bay_list(self, ctxt, filters=None, limit=None, marker=None,
+    def get_bay_list(self, context, filters=None, limit=None, marker=None,
                       sort_key=None, sort_dir=None):
         query = model_query(models.Bay)
-        query = self._add_tenant_filters(ctxt, query)
+        query = self._add_tenant_filters(context, query)
         query = self._add_bays_filters(query, filters)
         return _paginate_query(models.Bay, limit, marker,
                                sort_key, sort_dir, query)
@@ -173,18 +173,18 @@ class Connection(api.Connection):
             raise exception.BayAlreadyExists(uuid=values['uuid'])
         return bay
 
-    def get_bay_by_id(self, ctxt, bay_id):
+    def get_bay_by_id(self, context, bay_id):
         query = model_query(models.Bay)
-        query = self._add_tenant_filters(ctxt, query)
+        query = self._add_tenant_filters(context, query)
         query = query.filter_by(id=bay_id)
         try:
             return query.one()
         except NoResultFound:
             raise exception.BayNotFound(bay=bay_id)
 
-    def get_bay_by_uuid(self, ctxt, bay_uuid):
+    def get_bay_by_uuid(self, context, bay_uuid):
         query = model_query(models.Bay)
-        query = self._add_tenant_filters(ctxt, query)
+        query = self._add_tenant_filters(context, query)
         query = query.filter_by(uuid=bay_uuid)
         try:
             return query.one()
@@ -289,10 +289,10 @@ class Connection(api.Connection):
         return _paginate_query(models.BayModel, limit, marker,
                                sort_key, sort_dir, query)
 
-    def get_baymodel_list(self, ctxt, filters=None, limit=None, marker=None,
+    def get_baymodel_list(self, context, filters=None, limit=None, marker=None,
                       sort_key=None, sort_dir=None):
         query = model_query(models.BayModel)
-        query = self._add_tenant_filters(ctxt, query)
+        query = self._add_tenant_filters(context, query)
         query = self._add_baymodels_filters(query, filters)
         return _paginate_query(models.BayModel, limit, marker,
                                sort_key, sort_dir, query)
@@ -310,18 +310,18 @@ class Connection(api.Connection):
             raise exception.BayModelAlreadyExists(uuid=values['uuid'])
         return baymodel
 
-    def get_baymodel_by_id(self, ctxt, baymodel_id):
+    def get_baymodel_by_id(self, context, baymodel_id):
         query = model_query(models.BayModel)
-        query = self._add_tenant_filters(ctxt, query)
+        query = self._add_tenant_filters(context, query)
         query = query.filter_by(id=baymodel_id)
         try:
             return query.one()
         except NoResultFound:
             raise exception.BayModelNotFound(baymodel=baymodel_id)
 
-    def get_baymodel_by_uuid(self, ctxt, baymodel_uuid):
+    def get_baymodel_by_uuid(self, context, baymodel_uuid):
         query = model_query(models.BayModel)
-        query = self._add_tenant_filters(ctxt, query)
+        query = self._add_tenant_filters(context, query)
         query = query.filter_by(uuid=baymodel_uuid)
         try:
             return query.one()
@@ -401,10 +401,10 @@ class Connection(api.Connection):
         return _paginate_query(models.Container, limit, marker,
                                sort_key, sort_dir, query)
 
-    def get_container_list(self, ctxt, filters=None, limit=None, marker=None,
-                      sort_key=None, sort_dir=None):
+    def get_container_list(self, context, filters=None, limit=None,
+                           marker=None, sort_key=None, sort_dir=None):
         query = model_query(models.Container)
-        query = self._add_tenant_filters(ctxt, query)
+        query = self._add_tenant_filters(context, query)
         query = self._add_containers_filters(query, filters)
         return _paginate_query(models.Container, limit, marker,
                                sort_key, sort_dir, query)
@@ -422,18 +422,18 @@ class Connection(api.Connection):
             raise exception.ContainerAlreadyExists(uuid=values['uuid'])
         return container
 
-    def get_container_by_id(self, ctxt, container_id):
+    def get_container_by_id(self, context, container_id):
         query = model_query(models.Container)
-        query = self._add_tenant_filters(ctxt, query)
+        query = self._add_tenant_filters(context, query)
         query = query.filter_by(id=container_id)
         try:
             return query.one()
         except NoResultFound:
             raise exception.ContainerNotFound(container=container_id)
 
-    def get_container_by_uuid(self, ctxt, container_uuid):
+    def get_container_by_uuid(self, context, container_uuid):
         query = model_query(models.Container)
-        query = self._add_tenant_filters(ctxt, query)
+        query = self._add_tenant_filters(context, query)
         query = query.filter_by(uuid=container_uuid)
         try:
             return query.one()
@@ -507,10 +507,10 @@ class Connection(api.Connection):
         return _paginate_query(models.Node, limit, marker,
                                sort_key, sort_dir, query)
 
-    def get_node_list(self, ctxt, filters=None, limit=None, marker=None,
+    def get_node_list(self, context, filters=None, limit=None, marker=None,
                       sort_key=None, sort_dir=None):
         query = model_query(models.Node)
-        query = self._add_tenant_filters(ctxt, query)
+        query = self._add_tenant_filters(context, query)
         query = self._add_nodes_filters(query, filters)
         return _paginate_query(models.Node, limit, marker,
                                sort_key, sort_dir, query)
@@ -532,18 +532,18 @@ class Connection(api.Connection):
             raise exception.NodeAlreadyExists(uuid=values['uuid'])
         return node
 
-    def get_node_by_id(self, ctxt, node_id):
+    def get_node_by_id(self, context, node_id):
         query = model_query(models.Node)
-        query = self._add_tenant_filters(ctxt, query)
+        query = self._add_tenant_filters(context, query)
         query = query.filter_by(id=node_id)
         try:
             return query.one()
         except NoResultFound:
             raise exception.NodeNotFound(node=node_id)
 
-    def get_node_by_uuid(self, ctxt, node_uuid):
+    def get_node_by_uuid(self, context, node_uuid):
         query = model_query(models.Node)
-        query = self._add_tenant_filters(ctxt, query)
+        query = self._add_tenant_filters(context, query)
         query = query.filter_by(uuid=node_uuid)
         try:
             return query.one()

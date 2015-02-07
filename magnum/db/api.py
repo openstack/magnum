@@ -43,14 +43,14 @@ class Connection(object):
         """Constructor."""
 
     @abc.abstractmethod
-    def get_bay_list(self, ctxt, columns=None, filters=None, limit=None,
+    def get_bay_list(self, context, columns=None, filters=None, limit=None,
                      marker=None, sort_key=None, sort_dir=None):
         """Get specific columns for matching bays.
 
         Return a list of the specified columns for all bays that match the
         specified filters.
 
-        :param ctxt: The security context
+        :param context: The security context
         :param columns: List of column names to return.
                         Defaults to 'id' column when columns == None.
         :param filters: Filters to apply. Defaults to None.
@@ -83,19 +83,19 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_bay_by_id(self, ctxt, bay_id):
+    def get_bay_by_id(self, context, bay_id):
         """Return a bay.
 
-        :param ctxt: The security context
+        :param context: The security context
         :param bay_id: The id of a bay.
         :returns: A bay.
         """
 
     @abc.abstractmethod
-    def get_bay_by_uuid(self, ctxt, bay_uuid):
+    def get_bay_by_uuid(self, context, bay_uuid):
         """Return a bay.
 
-        :param ctxt: The security context
+        :param context: The security context
         :param bay_uuid: The uuid of a bay.
         :returns: A bay.
         """
@@ -117,14 +117,15 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_baymodel_list(self, ctxt, columns=None, filters=None, limit=None,
-                     marker=None, sort_key=None, sort_dir=None):
+    def get_baymodel_list(self, context, columns=None, filters=None,
+                          limit=None, marker=None, sort_key=None,
+                          sort_dir=None):
         """Get specific columns for matching baymodels.
 
         Return a list of the specified columns for all baymodels that match the
         specified filters.
 
-        :param ctxt: The security context
+        :param context: The security context
         :param columns: List of column names to return.
                         Defaults to 'id' column when columns == None.
         :param filters: Filters to apply. Defaults to None.
@@ -158,19 +159,19 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_baymodel_by_id(self, ctxt, baymodel_id):
+    def get_baymodel_by_id(self, context, baymodel_id):
         """Return a baymodel.
 
-        :param ctxt: The security context
+        :param context: The security context
         :param baymodel_id: The id of a baymodel.
         :returns: A baymodel.
         """
 
     @abc.abstractmethod
-    def get_baymodel_by_uuid(self, ctxt, baymodel_uuid):
+    def get_baymodel_by_uuid(self, context, baymodel_uuid):
         """Return a baymodel.
 
-        :param ctxt: The security context
+        :param context: The security context
         :param baymodel_uuid: The uuid of a baymodel.
         :returns: A baymodel.
         """
@@ -192,14 +193,15 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_container_list(self, ctxt, columns=None, filters=None, limit=None,
-                     marker=None, sort_key=None, sort_dir=None):
+    def get_container_list(self, context, columns=None, filters=None,
+                           limit=None, marker=None, sort_key=None,
+                           sort_dir=None):
         """Get specific columns for matching containers.
 
         Return a list of the specified columns for all containers that match
         the specified filters.
 
-        :param ctxt: The security context
+        :param context: The security context
         :param columns: List of column names to return.
                         Defaults to 'id' column when columns == None.
         :param filters: Filters to apply. Defaults to None.
@@ -234,19 +236,19 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_container_by_id(self, ctxt, container_id):
+    def get_container_by_id(self, context, container_id):
         """Return a container.
 
-        :param ctxt: The security context
+        :param context: The security context
         :param container_id: The id of a container.
         :returns: A container.
         """
 
     @abc.abstractmethod
-    def get_container_by_uuid(self, ctxt, container_uuid):
+    def get_container_by_uuid(self, context, container_uuid):
         """Return a container.
 
-        :param ctxt: The security context
+        :param context: The security context
         :param container_uuid: The uuid of a container.
         :returns: A container.
         """
@@ -268,14 +270,14 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_node_list(self, ctxt, columns=None, filters=None, limit=None,
+    def get_node_list(self, context, columns=None, filters=None, limit=None,
                      marker=None, sort_key=None, sort_dir=None):
         """Get specific columns for matching nodes.
 
         Return a list of the specified columns for all nodes that match the
         specified filters.
 
-        :param ctxt: The security context
+        :param context: The security context
         :param columns: List of column names to return.
                         Defaults to 'id' column when columns == None.
         :param filters: Filters to apply. Defaults to None.
@@ -308,19 +310,19 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_node_by_id(self, ctxt, node_id):
+    def get_node_by_id(self, context, node_id):
         """Return a node.
 
-        :param ctxt: The security context
+        :param context: The security context
         :param node_id: The id of a node.
         :returns: A node.
         """
 
     @abc.abstractmethod
-    def get_node_by_uuid(self, ctxt, node_uuid):
+    def get_node_by_uuid(self, context, node_uuid):
         """Return a node.
 
-        :param ctxt: The security context
+        :param context: The security context
         :param node_uuid: The uuid of a node.
         :returns: A node.
         """
