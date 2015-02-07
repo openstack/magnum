@@ -54,7 +54,7 @@ class FakePecanResponse(mock.Mock):
         self.status = None
 
 
-class FakeApp:
+class FakeApp(object):
     pass
 
 
