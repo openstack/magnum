@@ -14,7 +14,7 @@
 
 from heatclient.common import template_utils
 from heatclient import exc
-from oslo.config import cfg
+from oslo_config import cfg
 
 from magnum.common import clients
 from magnum.common import short_id

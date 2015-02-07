@@ -15,9 +15,9 @@
 
 import os
 
-from oslo.config import cfg
-from oslo.db import options
-from oslo.db.sqlalchemy.migration_cli import manager
+from oslo_config import cfg
+from oslo_db import options
+from oslo_db.sqlalchemy.migration_cli import manager
 
 from magnum.openstack.common import log as logging
 

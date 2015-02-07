@@ -17,7 +17,7 @@
 
 import os
 
-from oslo.config import cfg
+from oslo_config import cfg
 
 PATH_OPTS = [
     cfg.StrOpt('pybasedir',

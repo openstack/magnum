@@ -15,8 +15,8 @@
 """Common RPC service and API tools for Magnum."""
 
 import eventlet
-from oslo.config import cfg
-from oslo import messaging
+from oslo_config import cfg
+import oslo_messaging as messaging
 
 import magnum.common.context
 from magnum.objects import base as objects_base

@@ -13,7 +13,7 @@
 import os
 import unittest
 
-from oslo.config import cfg
+from oslo_config import cfg
 import pecan
 from pecan import testing
 

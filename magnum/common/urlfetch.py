@@ -13,7 +13,7 @@
 
 """Utility for fetching a resource (e.g. a manifest) from a URL."""
 
-from oslo.config import cfg
+from oslo_config import cfg
 import requests
 from requests import exceptions
 from six.moves import urllib

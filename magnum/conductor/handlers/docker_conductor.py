@@ -13,7 +13,7 @@
 """Magnum Docker RPC handler."""
 
 from docker import errors
-from oslo.config import cfg
+from oslo_config import cfg
 
 from magnum.common import docker_utils
 from magnum.conductor.handlers.common import docker_client

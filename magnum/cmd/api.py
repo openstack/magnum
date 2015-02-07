@@ -19,7 +19,7 @@ import os
 import sys
 from wsgiref import simple_server
 
-from oslo.config import cfg
+from oslo_config import cfg
 
 from magnum.api import app as api_app
 from magnum.common import service

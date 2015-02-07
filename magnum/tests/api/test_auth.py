@@ -14,7 +14,7 @@
 # limitations under the License.
 
 import mock
-from oslo.config import fixture
+from oslo_config import fixture
 
 from magnum.api import auth
 from magnum.tests import base

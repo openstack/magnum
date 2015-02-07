@@ -13,8 +13,8 @@
 import datetime
 
 import mock
-from oslo.config import cfg
-from oslo.utils import timeutils
+from oslo_config import cfg
+from oslo_utils import timeutils
 from six.moves.urllib import parse as urlparse
 from wsme import types as wtypes
 
@@ -120,7 +120,7 @@ class TestPatch(api_base.FunctionalTest):
         super(TestPatch, self).setUp()
         self.node = obj_utils.create_test_node(self.context, image_id='Fedora')
 
-    @mock.patch.object(timeutils, 'utcnow')
+    @mock.patch('oslo.utils.timeutils.utcnow')
     def test_replace_ok(self, mock_utcnow):
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
         mock_utcnow.return_value = test_time
@@ -199,7 +199,7 @@ class TestPatch(api_base.FunctionalTest):
 
 class TestPost(api_base.FunctionalTest):
 
-    @mock.patch.object(timeutils, 'utcnow')
+    @mock.patch('oslo.utils.timeutils.utcnow')
     def test_create_node(self, mock_utcnow):
         node_dict = apiutils.node_post_data()
         test_time = datetime.datetime(2000, 1, 1, 0, 0)

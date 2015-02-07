@@ -13,8 +13,8 @@
 import datetime
 
 import mock
-from oslo.config import cfg
-from oslo.utils import timeutils
+from oslo_config import cfg
+from oslo_utils import timeutils
 from six.moves.urllib import parse as urlparse
 from wsme import types as wtypes
 
@@ -225,7 +225,7 @@ class TestPost(api_base.FunctionalTest):
         service.create()
         return service
 
-    @mock.patch.object(timeutils, 'utcnow')
+    @mock.patch('oslo.utils.timeutils.utcnow')
     def test_create_service(self, mock_utcnow):
         sdict = apiutils.service_post_data()
         test_time = datetime.datetime(2000, 1, 1, 0, 0)

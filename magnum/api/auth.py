@@ -15,7 +15,7 @@
 # under the License.
 
 """Access Control Lists (ACL's) control access the API server."""
-from oslo.config import cfg
+from oslo_config import cfg
 
 from magnum.api.middleware import auth_token
 

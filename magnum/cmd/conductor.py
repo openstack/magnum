@@ -18,7 +18,7 @@ import logging as std_logging
 import os
 import sys
 
-from oslo.config import cfg
+from oslo_config import cfg
 
 from magnum.common import rpc_service as service
 from magnum.conductor.handlers import bay_k8s_heat
