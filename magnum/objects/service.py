@@ -179,5 +179,5 @@ class Service(base.MagnumObject):
         current = self.__class__.get_by_uuid(self._context, uuid=self.uuid)
         for field in self.fields:
             if (hasattr(self, base.get_attrname(field)) and
-                    self[field] != current[field]):
+                self[field] != current[field]):
                 self[field] = current[field]
