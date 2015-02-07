@@ -85,9 +85,9 @@ class Node(base.MagnumObject):
 
         """
         db_nodes = cls.dbapi.get_node_list(context, limit=limit,
-                                         marker=marker,
-                                         sort_key=sort_key,
-                                         sort_dir=sort_dir)
+                                           marker=marker,
+                                           sort_key=sort_key,
+                                           sort_dir=sort_dir)
         return Node._from_db_object_list(db_nodes, cls, context)
 
     @base.remotable
@@ -157,5 +157,5 @@ class Node(base.MagnumObject):
         current = self.__class__.get_by_uuid(self._context, uuid=self.uuid)
         for field in self.fields:
             if (hasattr(self, base.get_attrname(field)) and
-                    self[field] != current[field]):
+                self[field] != current[field]):
                 self[field] = current[field]

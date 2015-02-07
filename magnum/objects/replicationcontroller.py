@@ -55,8 +55,8 @@ class ReplicationController(base.MagnumObject):
     @staticmethod
     def _from_db_object_list(db_objects, cls, context):
         """Converts a list of database entities to a list of formal objects."""
-        return [ReplicationController._from_db_object(cls(context),
-                                                    obj) for obj in db_objects]
+        return [ReplicationController._from_db_object(cls(context), obj)
+                for obj in db_objects]
 
     @base.remotable_classmethod
     def get_by_id(cls, context, rc_id):
@@ -182,5 +182,5 @@ class ReplicationController(base.MagnumObject):
         current = self.__class__.get_by_uuid(self._context, uuid=self.uuid)
         for field in self.fields:
             if (hasattr(self, base.get_attrname(field)) and
-                    self[field] != current[field]):
+                self[field] != current[field]):
                 self[field] = current[field]

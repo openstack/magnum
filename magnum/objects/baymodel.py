@@ -106,9 +106,9 @@ class BayModel(base.MagnumObject):
 
         """
         db_baymodels = cls.dbapi.get_baymodel_list(context, limit=limit,
-                                         marker=marker,
-                                         sort_key=sort_key,
-                                         sort_dir=sort_dir)
+                                                   marker=marker,
+                                                   sort_key=sort_key,
+                                                   sort_dir=sort_dir)
         return BayModel._from_db_object_list(db_baymodels, cls, context)
 
     @base.remotable
@@ -178,5 +178,5 @@ class BayModel(base.MagnumObject):
         current = self.__class__.get_by_uuid(self._context, uuid=self.uuid)
         for field in self.fields:
             if (hasattr(self, base.get_attrname(field)) and
-                    self[field] != current[field]):
+                self[field] != current[field]):
                 self[field] = current[field]

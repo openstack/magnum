@@ -195,7 +195,7 @@ class MagnumObject(object):
     fields = {
         'created_at': obj_utils.datetime_or_str_or_none,
         'updated_at': obj_utils.datetime_or_str_or_none,
-        }
+    }
     obj_extra_fields = []
 
     _attr_created_at_from_primitive = obj_utils.dt_deserializer
@@ -404,7 +404,7 @@ class MagnumObject(object):
         """
         for name in self.fields.keys() + self.obj_extra_fields:
             if (hasattr(self, get_attrname(name)) or
-                    name in self.obj_extra_fields):
+                name in self.obj_extra_fields):
                 yield name, getattr(self, name)
 
     items = lambda self: list(self.iteritems())
@@ -454,8 +454,8 @@ class MagnumObject(object):
 
     def as_dict(self):
         return dict((k, getattr(self, k))
-                for k in self.fields
-                if hasattr(self, k))
+                    for k in self.fields
+                    if hasattr(self, k))
 
 
 class ObjectListBase(object):
@@ -468,7 +468,7 @@ class ObjectListBase(object):
     """
     fields = {
         'objects': list,
-        }
+    }
 
     # This is a dictionary of my_version:child_version mappings so that
     # we can support backleveling our contents based on the version
@@ -566,7 +566,7 @@ class MagnumObjectSerializer(messaging.NoOpSerializer):
             entity = self._process_iterable(context, self.serialize_entity,
                                             entity)
         elif (hasattr(entity, 'obj_to_primitive') and
-                callable(entity.obj_to_primitive)):
+              callable(entity.obj_to_primitive)):
             entity = entity.obj_to_primitive()
         return entity
 
