@@ -16,8 +16,8 @@ import copy
 
 import keystoneclient.exceptions as kc_exception
 from keystoneclient.v3 import client as kc_v3
-from oslo.config import cfg
-from oslo.utils import importutils
+from oslo_config import cfg
+from oslo_utils import importutils
 
 from magnum.common import context
 from magnum.common import exception

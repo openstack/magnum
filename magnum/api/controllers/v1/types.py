@@ -15,7 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo.utils import strutils
+from oslo_utils import strutils
 import wsme
 from wsme import types as wtypes
 

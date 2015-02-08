@@ -19,7 +19,7 @@ import os
 import alembic
 from alembic import config as alembic_config
 import alembic.migration as alembic_migration
-from oslo.db import exception as db_exc
+from oslo_db import exception as db_exc
 
 from magnum.db.sqlalchemy import api as sqla_api
 from magnum.db.sqlalchemy import models

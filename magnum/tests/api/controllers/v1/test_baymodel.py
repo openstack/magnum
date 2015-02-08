@@ -13,8 +13,8 @@
 import datetime
 
 import mock
-from oslo.config import cfg
-from oslo.utils import timeutils
+from oslo_config import cfg
+from oslo_utils import timeutils
 from six.moves.urllib import parse as urlparse
 from wsme import types as wtypes
 
@@ -138,7 +138,7 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
-    @mock.patch.object(timeutils, 'utcnow')
+    @mock.patch('oslo.utils.timeutils.utcnow')
     def test_replace_singular(self, mock_utcnow):
         name = 'bay_model_example_B'
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
@@ -249,7 +249,7 @@ class TestPost(api_base.FunctionalTest):
     def setUp(self):
         super(TestPost, self).setUp()
 
-    @mock.patch.object(timeutils, 'utcnow')
+    @mock.patch('oslo.utils.timeutils.utcnow')
     def test_create_baymodel(self, mock_utcnow):
         cdict = apiutils.baymodel_post_data()
         test_time = datetime.datetime(2000, 1, 1, 0, 0)

@@ -12,7 +12,7 @@
 
 """Tests for custom SQLAlchemy types via Magnum DB."""
 
-from oslo.db import exception as db_exc
+from oslo_db import exception as db_exc
 
 from magnum.common import utils as magnum_utils
 from magnum.db import api as dbapi

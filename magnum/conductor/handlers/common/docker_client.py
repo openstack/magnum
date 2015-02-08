@@ -14,7 +14,7 @@
 
 from docker import client
 from docker import tls
-from oslo.config import cfg
+from oslo_config import cfg
 
 from magnum.openstack.common import log as logging
 

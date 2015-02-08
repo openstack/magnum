@@ -13,8 +13,8 @@
 import datetime
 
 import mock
-from oslo.config import cfg
-from oslo.utils import timeutils
+from oslo_config import cfg
+from oslo_utils import timeutils
 from six.moves.urllib import parse as urlparse
 from wsme import types as wtypes
 
@@ -129,7 +129,7 @@ class TestPatch(api_base.FunctionalTest):
                                              desc='pod_example_A_desc',
                                              status='Running')
 
-    @mock.patch.object(timeutils, 'utcnow')
+    @mock.patch('oslo.utils.timeutils.utcnow')
     def test_replace_ok(self, mock_utcnow):
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
         mock_utcnow.return_value = test_time
@@ -293,7 +293,7 @@ class TestPost(api_base.FunctionalTest):
         pod.create()
         return pod
 
-    @mock.patch.object(timeutils, 'utcnow')
+    @mock.patch('oslo.utils.timeutils.utcnow')
     def test_create_pod(self, mock_utcnow):
         pdict = apiutils.pod_post_data()
         test_time = datetime.datetime(2000, 1, 1, 0, 0)

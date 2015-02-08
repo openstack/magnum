@@ -17,8 +17,8 @@
 import collections
 import copy
 
-from oslo import messaging
 from oslo_context import context
+import oslo_messaging as messaging
 import six
 
 from magnum.common import exception

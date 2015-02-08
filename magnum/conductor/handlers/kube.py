@@ -12,7 +12,7 @@
 
 """Magnum Kubernetes RPC handler."""
 
-from oslo.config import cfg
+from oslo_config import cfg
 
 from magnum.common import clients
 from magnum.conductor.handlers.common import kube_utils

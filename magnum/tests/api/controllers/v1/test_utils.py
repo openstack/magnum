@@ -18,7 +18,7 @@ import wsme
 from magnum.api.controllers.v1 import utils
 from magnum.tests.api import base
 
-from oslo.config import cfg
+from oslo_config import cfg
 
 CONF = cfg.CONF
 

@@ -13,8 +13,8 @@
 import datetime
 
 import mock
-from oslo.config import cfg
-from oslo.utils import timeutils
+from oslo_config import cfg
+from oslo_utils import timeutils
 from six.moves.urllib import parse as urlparse
 from wsme import types as wtypes
 
@@ -130,7 +130,7 @@ class TestPatch(api_base.FunctionalTest):
                                              name='bay_example_A',
                                              node_count=3)
 
-    @mock.patch.object(timeutils, 'utcnow')
+    @mock.patch('oslo.utils.timeutils.utcnow')
     def test_replace_ok(self, mock_utcnow):
         name = 'bay_example_B'
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
@@ -293,7 +293,7 @@ class TestPost(api_base.FunctionalTest):
         bay.create()
         return bay
 
-    @mock.patch.object(timeutils, 'utcnow')
+    @mock.patch('oslo.utils.timeutils.utcnow')
     def test_create_bay(self, mock_utcnow):
         bdict = apiutils.bay_post_data()
         test_time = datetime.datetime(2000, 1, 1, 0, 0)

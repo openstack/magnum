@@ -11,7 +11,7 @@
 #    limitations under the License.
 
 """API for interfacing with Magnum Backend."""
-from oslo.config import cfg
+from oslo_config import cfg
 
 from magnum.common import rpc_service
 from magnum import objects

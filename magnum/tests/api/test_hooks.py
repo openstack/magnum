@@ -16,8 +16,8 @@
 import json
 
 import mock
-from oslo.config import cfg
-from oslo import messaging
+from oslo_config import cfg
+import oslo_messaging as messaging
 
 from magnum.api.controllers import root
 from magnum.api import hooks

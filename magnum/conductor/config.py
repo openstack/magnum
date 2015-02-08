@@ -15,7 +15,7 @@
 """Config options for Magnum Backend service."""
 
 
-from oslo.config import cfg
+from oslo_config import cfg
 
 SERVICE_OPTS = [
     cfg.StrOpt('topic',

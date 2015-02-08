@@ -35,7 +35,7 @@ except ImportError:
 
 import eventlet
 from eventlet import event
-from oslo.config import cfg
+from oslo_config import cfg
 
 from magnum.openstack.common import eventlet_backdoor
 from magnum.openstack.common._i18n import _LE, _LI, _LW

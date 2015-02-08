@@ -13,7 +13,7 @@
 # under the License.
 
 from heatclient.v1 import client as heatclient
-from oslo.config import cfg
+from oslo_config import cfg
 
 from magnum.common import exception
 from magnum.common import magnum_keystoneclient

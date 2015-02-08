@@ -13,7 +13,7 @@
 # under the License.
 
 import mock
-from oslo.config import cfg
+from oslo_config import cfg
 
 cfg.CONF.import_group('keystone_authtoken',
                       'keystonemiddleware.auth_token')
