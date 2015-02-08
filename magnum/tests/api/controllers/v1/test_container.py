@@ -12,6 +12,7 @@
 from magnum.tests.db import base as db_base
 
 from mock import patch
+from webtest.app import AppError
 
 
 class TestContainerController(db_base.DbTestCase):
@@ -72,11 +73,24 @@ class TestContainerController(db_base.DbTestCase):
 
         # Execute some actions
         actions = ['start', 'stop', 'pause', 'unpause',
-                   'reboot', 'logs']
+                   'reboot']
         for action in actions:
             response = self.app.put('/v1/containers/%s/%s' % (c.get('uuid'),
                                                               action))
             self.assertEqual(response.status_int, 200)
+
+            # Only PUT should work, others like GET should fail
+            self.assertRaises(AppError, self.app.get,
+                              ('/v1/containers/%s/%s' %
+                               (c.get('uuid'), action)))
+
+        # Fetch the logs
+        response = self.app.get('/v1/containers/%s/logs' % c.get('uuid'))
+        self.assertEqual(response.status_int, 200)
+
+        # Fetch the logs should fail with put
+        self.assertRaises(AppError, self.app.put,
+                          ('/v1/containers/%s/logs' % c.get('uuid')))
 
         # Execute command in docker container
         response = self.app.put('/v1/containers/%s/%s' % (c.get('uuid'),
