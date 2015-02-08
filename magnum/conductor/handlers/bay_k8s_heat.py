@@ -17,6 +17,7 @@ from heatclient import exc
 from oslo_config import cfg
 
 from magnum.common import clients
+from magnum.common import exception
 from magnum.common import short_id
 from magnum import objects
 from magnum.openstack.common._i18n import _
@@ -87,6 +88,20 @@ def _create_stack(context, osc, bay):
     return created_stack
 
 
+def _update_stack(context, osc, bay):
+    bay_definition = _extract_bay_definition(context, bay)
+
+    tpl_files, template = template_utils.get_template_contents(
+                                        cfg.CONF.k8s_heat.template_path)
+    fields = {
+        'parameters': bay_definition,
+        'template': template,
+        'files': dict(list(tpl_files.items()))
+    }
+
+    return osc.heat().stacks.update(bay.stack_id, **fields)
+
+
 def _parse_stack_outputs(outputs):
     parsed_outputs = {}
 
@@ -120,6 +135,30 @@ class Handler(object):
 
         self._poll_and_check(osc, bay)
 
+        return bay
+
+    def bay_update(self, context, bay):
+        LOG.debug('k8s_heat bay_update')
+
+        osc = clients.OpenStackClients(context)
+        stack = osc.heat().stacks.get(bay.stack_id)
+        if (stack.stack_status != 'CREATE_COMPLETE' and
+            stack.stack_status != 'UPDATE_COMPLETE'):
+            raise exception.MagnumException(_(
+                "Cannot update stack with status: %s") % stack.stack_status)
+
+        delta = bay.obj_what_changed()
+        if 'node_count' in delta:
+            delta.remove('node_count')
+
+            _update_stack(context, osc, bay)
+            self._poll_and_check(osc, bay)
+
+        if delta:
+            raise exception.InvalidParameterValue(err=(
+                "cannot change bay property(ies) %s." % ", ".join(delta)))
+
+        bay.save()
         return bay
 
     def bay_delete(self, context, uuid):
@@ -156,7 +195,8 @@ class Handler(object):
         def poll_and_check():
             stack = osc.heat().stacks.get(bay.stack_id)
             attempts['count'] += 1
-            if stack.stack_status == 'CREATE_COMPLETE':
+            if (stack.stack_status == 'CREATE_COMPLETE' or
+                stack.stack_status == 'UPDATE_COMPLETE'):
                 parsed_outputs = _parse_stack_outputs(stack.outputs)
                 master_address = parsed_outputs["kube_master"]
                 minion_address = parsed_outputs["kube_minions_external"]

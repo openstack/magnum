@@ -59,6 +59,9 @@ class API(rpc_service.API):
     def bay_show(self, context, uuid):
         return objects.Bay.get_by_uuid(context, uuid)
 
+    def bay_update(self, bay):
+        return self._call('bay_update', bay=bay)
+
     # Service Operations
 
     def service_create(self, service):
