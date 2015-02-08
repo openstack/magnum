@@ -127,6 +127,9 @@ backend_api = api.API(context=context.RequestContext())
 class StartController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
     def _default(self, container_uuid):
+        if pecan.request.method != 'PUT':
+            pecan.abort(405, ('HTTP method %s is not allowed'
+                              % pecan.request.method))
         LOG.debug('Calling backend_api.container_start with %s' %
                   container_uuid)
         return backend_api.container_start(container_uuid)
@@ -135,6 +138,9 @@ class StartController(object):
 class StopController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
     def _default(self, container_uuid, *remainder):
+        if pecan.request.method != 'PUT':
+            pecan.abort(405, ('HTTP method %s is not allowed'
+                              % pecan.request.method))
         LOG.debug('Calling backend_api.container_stop with %s' %
                   container_uuid)
         return backend_api.container_stop(container_uuid)
@@ -143,6 +149,9 @@ class StopController(object):
 class RebootController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
     def _default(self, container_uuid, *remainder):
+        if pecan.request.method != 'PUT':
+            pecan.abort(405, ('HTTP method %s is not allowed'
+                              % pecan.request.method))
         LOG.debug('Calling backend_api.container_reboot with %s' %
                   container_uuid)
         return backend_api.container_reboot(container_uuid)
@@ -151,6 +160,9 @@ class RebootController(object):
 class PauseController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
     def _default(self, container_uuid, *remainder):
+        if pecan.request.method != 'PUT':
+            pecan.abort(405, ('HTTP method %s is not allowed'
+                              % pecan.request.method))
         LOG.debug('Calling backend_api.container_pause with %s' %
                   container_uuid)
         return backend_api.container_pause(container_uuid)
@@ -159,6 +171,9 @@ class PauseController(object):
 class UnpauseController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
     def _default(self, container_uuid, *remainder):
+        if pecan.request.method != 'PUT':
+            pecan.abort(405, ('HTTP method %s is not allowed'
+                              % pecan.request.method))
         LOG.debug('Calling backend_api.container_unpause with %s' %
                   container_uuid)
         return backend_api.container_unpause(container_uuid)
@@ -167,6 +182,9 @@ class UnpauseController(object):
 class LogsController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
     def _default(self, container_uuid, *remainder):
+        if pecan.request.method != 'GET':
+            pecan.abort(405, ('HTTP method %s is not allowed'
+                              % pecan.request.method))
         LOG.debug('Calling backend_api.container_logs with %s' %
         container_uuid)
         return backend_api.container_logs(container_uuid)
@@ -175,6 +193,9 @@ class LogsController(object):
 class ExecuteController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text, wtypes.text)
     def _default(self, container_uuid, command, *remainder):
+        if pecan.request.method != 'PUT':
+            pecan.abort(405, ('HTTP method %s is not allowed'
+                              % pecan.request.method))
         LOG.debug('Calling backend_api.container_execute with %s command %s'
                   % (container_uuid, command))
         return backend_api.container_execute(container_uuid, command)
