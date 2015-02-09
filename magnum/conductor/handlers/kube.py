@@ -37,21 +37,21 @@ kubernetes_opts = [
 cfg.CONF.register_opts(kubernetes_opts, group='kubernetes')
 
 
-def _retrieve_bay(ctxt, obj):
+def _retrieve_bay(context, obj):
     bay_uuid = obj.bay_uuid
-    return objects.Bay.get_by_uuid(ctxt, bay_uuid)
+    return objects.Bay.get_by_uuid(context, bay_uuid)
 
 
-def _retrieve_baymodel(ctxt, obj):
-    return objects.BayModel.get_by_uuid(ctxt, obj.baymodel_id)
+def _retrieve_baymodel(context, obj):
+    return objects.BayModel.get_by_uuid(context, obj.baymodel_id)
 
 
-def _retrieve_k8s_master_url(ctxt, obj):
+def _retrieve_k8s_master_url(context, obj):
     apiserver_port = cfg.CONF.kubernetes.k8s_port
     if hasattr(obj, 'bay_uuid'):
-        obj = _retrieve_bay(ctxt, obj)
+        obj = _retrieve_bay(context, obj)
 
-    baymodel = _retrieve_baymodel(ctxt, obj)
+    baymodel = _retrieve_baymodel(context, obj)
     if baymodel.apiserver_port is not None:
         apiserver_port = baymodel.apiserver_port
 
@@ -63,10 +63,10 @@ def _retrieve_k8s_master_url(ctxt, obj):
     return "%(k8s_protocol)s://%(master_address)s:%(k8s_port)s" % params
 
 
-def _object_has_stack(ctxt, obj):
-    osc = clients.OpenStackClients(ctxt)
+def _object_has_stack(context, obj):
+    osc = clients.OpenStackClients(context)
     if hasattr(obj, 'bay_uuid'):
-        obj = _retrieve_bay(ctxt, obj)
+        obj = _retrieve_bay(context, obj)
 
     stack = osc.heat().stacks.get(obj.stack_id)
     if (stack.stack_status == 'DELETE_COMPLETE' or
@@ -89,44 +89,44 @@ class Handler(object):
         super(Handler, self).__init__()
         self.kube_cli = kube_utils.KubeClient()
 
-    def service_create(self, ctxt, service):
+    def service_create(self, context, service):
         LOG.debug("service_create")
-        k8s_master_url = _retrieve_k8s_master_url(ctxt, service)
+        k8s_master_url = _retrieve_k8s_master_url(context, service)
         # trigger a kubectl command
         status = self.kube_cli.service_create(k8s_master_url, service)
         if not status:
             return None
         # call the service object to persist in db
-        service.create(ctxt)
+        service.create(context)
         return service
 
-    def service_update(self, ctxt, service):
+    def service_update(self, context, service):
         LOG.debug("service_update")
         # trigger a kubectl command
         status = self.kube_cli.service_update(service)
         if not status:
             return None
         # call the service object to persist in db
-        service.refresh(ctxt)
+        service.refresh(context)
         return service
 
-    def service_list(self, ctxt):
+    def service_list(self, context):
         LOG.debug("service_list")
         return self.kube_cli.service_list()
 
-    def service_delete(self, ctxt, uuid):
+    def service_delete(self, context, uuid):
         LOG.debug("service_delete")
-        service = objects.Service.get_by_uuid(ctxt, uuid)
-        k8s_master_url = _retrieve_k8s_master_url(ctxt, service)
-        if _object_has_stack(ctxt, service):
+        service = objects.Service.get_by_uuid(context, uuid)
+        k8s_master_url = _retrieve_k8s_master_url(context, service)
+        if _object_has_stack(context, service):
             # trigger a kubectl command
             status = self.kube_cli.service_delete(k8s_master_url, service.name)
             if not status:
                 return None
         # call the service object to persist in db
-        service.destroy(ctxt)
+        service.destroy(context)
 
-    def service_get(self, ctxt, uuid):
+    def service_get(self, context, uuid):
         LOG.debug("service_get")
         return self.kube_cli.service_get(uuid)
 
@@ -135,9 +135,9 @@ class Handler(object):
         return self.kube_cli.service_show(uuid)
 
     # Pod Operations
-    def pod_create(self, ctxt, pod):
+    def pod_create(self, context, pod):
         LOG.debug("pod_create")
-        k8s_master_url = _retrieve_k8s_master_url(ctxt, pod)
+        k8s_master_url = _retrieve_k8s_master_url(context, pod)
         # trigger a kubectl command
         status = self.kube_cli.pod_create(k8s_master_url, pod)
         # TODO(yuanying): Is this correct location of updating status?
@@ -154,70 +154,70 @@ class Handler(object):
         pod.create()
         return pod
 
-    def pod_update(self, ctxt, pod):
+    def pod_update(self, context, pod):
         LOG.debug("pod_update")
         # trigger a kubectl command
         status = self.kube_cli.pod_update(pod)
         if not status:
             return None
         # call the pod object to persist in db
-        pod.refresh(ctxt)
+        pod.refresh(context)
         return pod
 
-    def pod_list(self, ctxt):
+    def pod_list(self, context):
         LOG.debug("pod_list")
         return self.kube_cli.pod_list()
 
-    def pod_delete(self, ctxt, uuid):
+    def pod_delete(self, context, uuid):
         LOG.debug("pod_delete ")
         # trigger a kubectl command
-        pod = objects.Pod.get_by_uuid(ctxt, uuid)
-        k8s_master_url = _retrieve_k8s_master_url(ctxt, pod)
-        if _object_has_stack(ctxt, pod):
+        pod = objects.Pod.get_by_uuid(context, uuid)
+        k8s_master_url = _retrieve_k8s_master_url(context, pod)
+        if _object_has_stack(context, pod):
             status = self.kube_cli.pod_delete(k8s_master_url, pod.name)
             if not status:
                 return None
         # call the pod object to persist in db
-        pod.destroy(ctxt)
+        pod.destroy(context)
 
-    def pod_get(self, ctxt, uuid):
+    def pod_get(self, context, uuid):
         LOG.debug("pod_get")
         return self.kube_cli.pod_get(uuid)
 
-    def pod_show(self, ctxt, uuid):
+    def pod_show(self, context, uuid):
         LOG.debug("pod_show")
         return self.kube_cli.pod_show(uuid)
 
     # Replication Controller Operations
-    def rc_create(self, ctxt, rc):
+    def rc_create(self, context, rc):
         LOG.debug("rc_create")
-        k8s_master_url = _retrieve_k8s_master_url(ctxt, rc)
+        k8s_master_url = _retrieve_k8s_master_url(context, rc)
         # trigger a kubectl command
         status = self.kube_cli.rc_create(k8s_master_url, rc)
         if not status:
             return None
         # call the rc object to persist in db
-        rc.create(ctxt)
+        rc.create(context)
         return rc
 
-    def rc_update(self, ctxt, rc):
+    def rc_update(self, context, rc):
         LOG.debug("rc_update")
         # trigger a kubectl command
         status = self.kube_cli.rc_update(rc)
         if not status:
             return None
         # call the rc object to persist in db
-        rc.refresh(ctxt)
+        rc.refresh(context)
         return rc
 
-    def rc_delete(self, ctxt, uuid):
+    def rc_delete(self, context, uuid):
         LOG.debug("rc_delete ")
-        rc = objects.ReplicationController.get_by_uuid(ctxt, uuid)
-        k8s_master_url = _retrieve_k8s_master_url(ctxt, rc)
-        if _object_has_stack(ctxt, rc):
+        rc = objects.ReplicationController.get_by_uuid(context, uuid)
+        k8s_master_url = _retrieve_k8s_master_url(context, rc)
+        if _object_has_stack(context, rc):
             # trigger a kubectl command
             status = self.kube_cli.pod_delete(k8s_master_url, rc.name)
             if not status:
                 return None
         # call the rc object to persist in db
-        rc.destroy(ctxt)
+        rc.destroy(context)

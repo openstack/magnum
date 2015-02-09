@@ -230,11 +230,11 @@ class BayModelsController(rest.RestController):
             raise exception.OperationNotPermitted
 
         baymodel_dict = baymodel.as_dict()
-        ctxt = pecan.request.context
-        auth_token = ctxt.auth_token_info['token']
+        context = pecan.request.context
+        auth_token = context.auth_token_info['token']
         baymodel_dict['project_id'] = auth_token['project']['id']
         baymodel_dict['user_id'] = auth_token['user']['id']
-        new_baymodel = objects.BayModel(ctxt, **baymodel_dict)
+        new_baymodel = objects.BayModel(context, **baymodel_dict)
         new_baymodel.create()
         # Set the HTTP Location Header
         pecan.response.location = link.build_url('baymodels',

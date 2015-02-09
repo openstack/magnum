@@ -237,11 +237,11 @@ class BaysController(rest.RestController):
             raise exception.OperationNotPermitted
 
         bay_dict = bay.as_dict()
-        ctxt = pecan.request.context
-        auth_token = ctxt.auth_token_info['token']
+        context = pecan.request.context
+        auth_token = context.auth_token_info['token']
         bay_dict['project_id'] = auth_token['project']['id']
         bay_dict['user_id'] = auth_token['user']['id']
-        new_bay = objects.Bay(ctxt, **bay_dict)
+        new_bay = objects.Bay(context, **bay_dict)
         res_bay = pecan.request.rpcapi.bay_create(new_bay)
 
         # Set the HTTP Location Header

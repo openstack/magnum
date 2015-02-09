@@ -21,7 +21,7 @@ import oslo_messaging as messaging
 
 from magnum.api.controllers import root
 from magnum.api import hooks
-from magnum.common import context
+from magnum.common import context as magnum_context
 from magnum.tests.api import base as api_base
 from magnum.tests import base
 from magnum.tests import fakes
@@ -38,7 +38,7 @@ class TestContextHook(base.BaseTestCase):
         hook = hooks.ContextHook()
         hook.before(state)
         ctx = state.request.context
-        self.assertIsInstance(ctx, context.RequestContext)
+        self.assertIsInstance(ctx, magnum_context.RequestContext)
         self.assertEqual(ctx.auth_token,
                          fakes.fakeAuthTokenHeaders['X-Auth-Token'])
         self.assertEqual(ctx.project_id,
@@ -59,7 +59,7 @@ class TestContextHook(base.BaseTestCase):
         hook = hooks.ContextHook()
         hook.before(state)
         ctx = state.request.context
-        self.assertIsInstance(ctx, context.RequestContext)
+        self.assertIsInstance(ctx, magnum_context.RequestContext)
         self.assertEqual(fakes.fakeAuthTokenHeaders['X-Auth-Token'],
                          ctx.auth_token)
         self.assertEqual('assert_this', ctx.auth_token_info)
@@ -72,7 +72,7 @@ class TestNoExceptionTracebackHook(api_base.FunctionalTest):
              ' line 434, in _process_data\\n   **args)',
              u'  File "/opt/stack/magnum/magnum/openstack/common/rpc/'
              'dispatcher.py", line 172, in dispatch\\n   result ='
-             ' getattr(proxyobj, method)(ctxt, **kwargs)']
+             ' getattr(proxyobj, method)(context, **kwargs)']
     MSG_WITHOUT_TRACE = "Test exception message."
     MSG_WITH_TRACE = MSG_WITHOUT_TRACE + "\n" + "\n".join(TRACE)
 

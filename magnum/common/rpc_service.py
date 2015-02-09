@@ -18,7 +18,7 @@ import eventlet
 from oslo_config import cfg
 import oslo_messaging as messaging
 
-import magnum.common.context
+from magnum.common import context as magnum_context
 from magnum.objects import base as objects_base
 
 
@@ -58,7 +58,7 @@ class RequestContextSerializer(messaging.Serializer):
         return context.to_dict()
 
     def deserialize_context(self, context):
-        return magnum.common.context.RequestContext.from_dict(context)
+        return magnum_context.RequestContext.from_dict(context)
 
 
 class Service(object):

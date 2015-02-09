@@ -19,7 +19,7 @@ from keystoneclient.v3 import client as kc_v3
 from oslo_config import cfg
 from oslo_utils import importutils
 
-from magnum.common import context
+from magnum.common import context as magnum_context
 from magnum.common import exception
 from magnum.openstack.common._i18n import _
 from magnum.openstack.common import log as logging
@@ -179,7 +179,7 @@ class KeystoneClientV3(object):
                                           impersonation=True,
                                           role_names=roles)
 
-        trust_context = context.RequestContext.from_dict(
+        trust_context = magnum_context.RequestContext.from_dict(
             self.context.to_dict())
         trust_context.trust_id = trust.id
         return trust_context

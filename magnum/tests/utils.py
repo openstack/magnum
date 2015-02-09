@@ -18,7 +18,7 @@ import fixtures
 from oslo_config import cfg
 from oslo_db import options
 
-from magnum.common import context
+from magnum.common import context as magnum_context
 from magnum.db import api as db_api
 from magnum.db.sqlalchemy import api as sql_api
 
@@ -26,7 +26,7 @@ CONF = cfg.CONF
 
 
 def dummy_context(user='test_username', project_id='test_tenant_id'):
-    return context.RequestContext(user=user, project_id=project_id)
+    return magnum_context.RequestContext(user=user, project_id=project_id)
 
 
 class Database(fixtures.Fixture):

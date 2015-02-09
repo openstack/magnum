@@ -26,7 +26,7 @@ from magnum.api.controllers import link
 from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
-from magnum.common import context
+from magnum.common import context as magnum_context
 from magnum.common import exception
 from magnum.conductor import api
 from magnum import objects
@@ -121,7 +121,7 @@ class ContainerCollection(collection.Collection):
         sample.containers = [Container.sample(expand=False)]
         return sample
 
-backend_api = api.API(context=context.RequestContext())
+backend_api = api.API(context=magnum_context.RequestContext())
 
 
 class StartController(object):
@@ -305,11 +305,11 @@ class ContainersController(rest.RestController):
             raise exception.OperationNotPermitted
 
         container_dict = container.as_dict()
-        ctxt = pecan.request.context
-        auth_token = ctxt.auth_token_info['token']
+        context = pecan.request.context
+        auth_token = context.auth_token_info['token']
         container_dict['project_id'] = auth_token['project']['id']
         container_dict['user_id'] = auth_token['user']['id']
-        new_container = objects.Container(ctxt, **container_dict)
+        new_container = objects.Container(context, **container_dict)
         new_container.create()
         res_container = backend_api.container_create(new_container.name,
                                                      new_container.uuid,

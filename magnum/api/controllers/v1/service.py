@@ -249,11 +249,11 @@ class ServicesController(rest.RestController):
 
         service.parse_manifest()
         service_dict = service.as_dict()
-        ctxt = pecan.request.context
-        auth_token = ctxt.auth_token_info['token']
+        context = pecan.request.context
+        auth_token = context.auth_token_info['token']
         service_dict['project_id'] = auth_token['project']['id']
         service_dict['user_id'] = auth_token['user']['id']
-        service_obj = objects.Service(ctxt, **service_dict)
+        service_obj = objects.Service(context, **service_dict)
         new_service = pecan.request.rpcapi.service_create(service_obj)
         # Set the HTTP Location Header
         pecan.response.location = link.build_url('services', new_service.uuid)

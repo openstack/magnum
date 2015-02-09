@@ -75,12 +75,12 @@ class TestCase(base.BaseTestCase):
             if not kwargs.get('user_id'):
                 kwargs['user_id'] = 'fake_user'
 
-            ctxt = magnum_context.RequestContext(*args, **kwargs)
-            return magnum_context.RequestContext.from_dict(ctxt.to_dict())
+            context = magnum_context.RequestContext(*args, **kwargs)
+            return magnum_context.RequestContext.from_dict(context.to_dict())
 
         p = mock.patch.object(magnum_context, 'make_context',
                               side_effect=make_context)
-        self.mock_make_ctxt = p.start()
+        self.mock_make_context = p.start()
         self.addCleanup(p.stop)
 
         self.useFixture(conf_fixture.ConfFixture(cfg.CONF))

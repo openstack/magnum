@@ -12,28 +12,28 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from magnum.common import context
+from magnum.common import context as magnum_context
 from magnum.tests import base
 
 
 class ContextTestCase(base.TestCase):
 
     def _create_context(self):
-        return context.RequestContext(auth_token='auth_token1',
-                                      auth_url='auth_url1',
-                                      domain_id='domain_id1',
-                                      domain_name='domain_name1',
-                                      user='user1',
-                                      user_id='user-id1',
-                                      project='tenant1',
-                                      project_id='tenant-id1',
-                                      is_admin=True,
-                                      is_public_api=True,
-                                      read_only=True,
-                                      show_deleted=True,
-                                      request_id='request_id1',
-                                      trust_id='trust_id1',
-                                      auth_token_info='auth_token_info1')
+        return magnum_context.RequestContext(auth_token='auth_token1',
+                                             auth_url='auth_url1',
+                                             domain_id='domain_id1',
+                                             domain_name='domain_name1',
+                                             user='user1',
+                                             user_id='user-id1',
+                                             project='tenant1',
+                                             project_id='tenant-id1',
+                                             is_admin=True,
+                                             is_public_api=True,
+                                             read_only=True,
+                                             show_deleted=True,
+                                             request_id='request_id1',
+                                             trust_id='trust_id1',
+                                             auth_token_info='token_info1')
 
     def test_context(self):
         ctx = self._create_context()
@@ -52,11 +52,11 @@ class ContextTestCase(base.TestCase):
         self.assertTrue(ctx.show_deleted)
         self.assertEqual("request_id1", ctx.request_id)
         self.assertEqual("trust_id1", ctx.trust_id)
-        self.assertEqual("auth_token_info1", ctx.auth_token_info)
+        self.assertEqual("token_info1", ctx.auth_token_info)
 
     def test_to_dict_from_dict(self):
         ctx = self._create_context()
-        ctx2 = context.RequestContext.from_dict(ctx.to_dict())
+        ctx2 = magnum_context.RequestContext.from_dict(ctx.to_dict())
 
         self.assertEqual(ctx.auth_token, ctx2.auth_token)
         self.assertEqual(ctx.auth_url, ctx2.auth_url)

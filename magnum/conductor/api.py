@@ -31,17 +31,18 @@ class API(rpc_service.API):
 
     # Bay Model Operations
 
-    def baymodel_create(self, ctxt, baymodel):
-        return baymodel.create(ctxt)
+    def baymodel_create(self, context, baymodel):
+        return baymodel.create(context)
 
-    def baymodel_list(self, ctxt, limit, marker, sort_key, sort_dir):
-        return objects.BayModel.list(ctxt, limit, marker, sort_key, sort_dir)
+    def baymodel_list(self, context, limit, marker, sort_key, sort_dir):
+        return objects.BayModel.list(context, limit, marker,
+                                     sort_key, sort_dir)
 
-    def baymodel_delete(self, ctxt, uuid):
+    def baymodel_delete(self, context, uuid):
         baymodel = objects.BayModel.get_by_uuid(uuid)
         return baymodel.destroy()
 
-    def baymodel_show(self, ctxt, uuid):
+    def baymodel_show(self, context, uuid):
         return objects.BayModel.get_by_uuid(uuid)
 
     # Bay Operations
@@ -55,8 +56,8 @@ class API(rpc_service.API):
     def bay_delete(self, uuid):
         return self._call('bay_delete', uuid=uuid)
 
-    def bay_show(self, ctxt, uuid):
-        return objects.Bay.get_by_uuid(ctxt, uuid)
+    def bay_show(self, context, uuid):
+        return objects.Bay.get_by_uuid(context, uuid)
 
     # Service Operations
 
@@ -71,8 +72,8 @@ class API(rpc_service.API):
     def service_delete(self, uuid):
         return self._call('service_delete', uuid=uuid)
 
-    def service_show(self, ctxt, uuid):
-        return objects.Service.get_by_uuid(ctxt, uuid)
+    def service_show(self, context, uuid):
+        return objects.Service.get_by_uuid(context, uuid)
 
     # Pod Operations
 
@@ -85,8 +86,8 @@ class API(rpc_service.API):
     def pod_delete(self, uuid):
         return self._call('pod_delete', uuid=uuid)
 
-    def pod_show(self, ctxt, uuid):
-        return objects.Pod.get_by_uuid(ctxt, uuid)
+    def pod_show(self, context, uuid):
+        return objects.Pod.get_by_uuid(context, uuid)
 
     # ReplicationController Operations
 
@@ -100,8 +101,8 @@ class API(rpc_service.API):
     def rc_delete(self, uuid):
         return self._call('rc_delete', uuid=uuid)
 
-    def rc_show(self, ctxt, uuid):
-        return objects.ReplicationController.get_by_uuid(ctxt, uuid)
+    def rc_show(self, context, uuid):
+        return objects.ReplicationController.get_by_uuid(context, uuid)
 
     # Container operations
 

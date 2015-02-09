@@ -65,8 +65,8 @@ def _extract_bay_definition(baymodel):
     return bay_definition
 
 
-def _create_stack(ctxt, osc, bay):
-    baymodel = objects.BayModel.get_by_uuid(ctxt, bay.baymodel_id)
+def _create_stack(context, osc, bay):
+    baymodel = objects.BayModel.get_by_uuid(context, bay.baymodel_id)
     bay_definition = _extract_bay_definition(baymodel)
 
     if bay.node_count:
@@ -109,12 +109,12 @@ class Handler(object):
 
     # Bay Operations
 
-    def bay_create(self, ctxt, bay):
+    def bay_create(self, context, bay):
         LOG.debug('k8s_heat bay_create')
 
-        osc = clients.OpenStackClients(ctxt)
+        osc = clients.OpenStackClients(context)
 
-        created_stack = _create_stack(ctxt, osc, bay)
+        created_stack = _create_stack(context, osc, bay)
         bay.stack_id = created_stack['stack']['id']
         bay.create()
 
@@ -126,10 +126,10 @@ class Handler(object):
 
         return bay
 
-    def bay_delete(self, ctxt, uuid):
+    def bay_delete(self, context, uuid):
         LOG.debug('k8s_heat bay_delete')
-        osc = clients.OpenStackClients(ctxt)
-        bay = objects.Bay.get_by_uuid(ctxt, uuid)
+        osc = clients.OpenStackClients(context)
+        bay = objects.Bay.get_by_uuid(context, uuid)
         stack_id = bay.stack_id
         # TODO(yuanying): handle stack status DELETE_IN_PROGRESS
         #

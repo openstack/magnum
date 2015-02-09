@@ -17,7 +17,7 @@
 import collections
 import copy
 
-from oslo_context import context
+from oslo_context import context as oslo_context
 import oslo_messaging as messaging
 import six
 
@@ -121,26 +121,26 @@ def remotable_classmethod(fn):
 def remotable(fn):
     """Decorator for remotable object methods."""
     def wrapper(self, *args, **kwargs):
-        ctxt = self._context
+        context = self._context
         try:
-            if isinstance(args[0], (context.RequestContext)):
-                ctxt = args[0]
+            if isinstance(args[0], (oslo_context.RequestContext)):
+                context = args[0]
                 args = args[1:]
         except IndexError:
             pass
-        if ctxt is None:
+        if context is None:
             raise exception.OrphanedObjectError(method=fn.__name__,
                                                 objtype=self.obj_name())
         if MagnumObject.indirection_api:
             updates, result = MagnumObject.indirection_api.object_action(
-                ctxt, self, fn.__name__, args, kwargs)
+                context, self, fn.__name__, args, kwargs)
             for key, value in updates.iteritems():
                 if key in self.fields:
                     self[key] = self._attr_from_primitive(key, value)
             self._changed_fields = set(updates.get('obj_what_changed', []))
             return result
         else:
-            return fn(self, ctxt, *args, **kwargs)
+            return fn(self, context, *args, **kwargs)
     return wrapper
 
 

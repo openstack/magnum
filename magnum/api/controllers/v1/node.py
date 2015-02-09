@@ -211,11 +211,11 @@ class NodesController(rest.RestController):
             raise exception.OperationNotPermitted
 
         node_dict = node.as_dict()
-        ctxt = pecan.request.context
-        auth_token = ctxt.auth_token_info['token']
+        context = pecan.request.context
+        auth_token = context.auth_token_info['token']
         node_dict['project_id'] = auth_token['project']['id']
         node_dict['user_id'] = auth_token['user']['id']
-        new_node = objects.Node(ctxt, **node_dict)
+        new_node = objects.Node(context, **node_dict)
         new_node.create()
         # Set the HTTP Location Header
         pecan.response.location = link.build_url('nodes', new_node.uuid)

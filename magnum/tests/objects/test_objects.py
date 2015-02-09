@@ -20,7 +20,7 @@ import netaddr
 from oslo_utils import timeutils
 import six
 
-from magnum.common import context
+from magnum.common import context as magnum_context
 from magnum.common import exception
 from magnum.objects import base
 from magnum.objects import utils
@@ -321,10 +321,10 @@ class _TestObject(object):
                           base.MagnumObject.obj_class_from_name, 'foo', '1.0')
 
     def test_with_alternate_context(self):
-        ctxt1 = context.RequestContext('foo', 'foo')
-        ctxt2 = context.RequestContext('bar', project_id='alternate')
-        obj = MyObj.query(ctxt1)
-        obj.update_test(ctxt2)
+        context1 = magnum_context.RequestContext('foo', 'foo')
+        context2 = magnum_context.RequestContext('bar', project_id='alternate')
+        obj = MyObj.query(context1)
+        obj.update_test(context2)
         self.assertEqual('alternate-context', obj.bar)
         self.assertRemotes()
 

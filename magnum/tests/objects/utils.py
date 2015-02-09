@@ -18,7 +18,7 @@ from magnum import objects
 from magnum.tests.db import utils as db_utils
 
 
-def get_test_baymodel(ctxt, **kw):
+def get_test_baymodel(context, **kw):
     """Return a BayModel object with appropriate attributes.
 
     NOTE: The object leaves the attributes marked as changed, such
@@ -28,24 +28,24 @@ def get_test_baymodel(ctxt, **kw):
     # Let DB generate ID if it isn't specified explicitly
     if 'id' not in kw:
         del db_baymodel['id']
-    baymodel = objects.BayModel(ctxt)
+    baymodel = objects.BayModel(context)
     for key in db_baymodel:
         setattr(baymodel, key, db_baymodel[key])
     return baymodel
 
 
-def create_test_baymodel(ctxt, **kw):
+def create_test_baymodel(context, **kw):
     """Create and return a test baymodel object.
 
     Create a baymodel in the DB and return a BayModel object with appropriate
     attributes.
     """
-    baymodel = get_test_baymodel(ctxt, **kw)
+    baymodel = get_test_baymodel(context, **kw)
     baymodel.create()
     return baymodel
 
 
-def get_test_bay(ctxt, **kw):
+def get_test_bay(context, **kw):
     """Return a Bay object with appropriate attributes.
 
     NOTE: The object leaves the attributes marked as changed, such
@@ -55,24 +55,24 @@ def get_test_bay(ctxt, **kw):
     # Let DB generate ID if it isn't specified explicitly
     if 'id' not in kw:
         del db_bay['id']
-    bay = objects.Bay(ctxt)
+    bay = objects.Bay(context)
     for key in db_bay:
         setattr(bay, key, db_bay[key])
     return bay
 
 
-def create_test_bay(ctxt, **kw):
+def create_test_bay(context, **kw):
     """Create and return a test bay object.
 
     Create a bay in the DB and return a Bay object with appropriate
     attributes.
     """
-    bay = get_test_bay(ctxt, **kw)
+    bay = get_test_bay(context, **kw)
     bay.create()
     return bay
 
 
-def get_test_pod(ctxt, **kw):
+def get_test_pod(context, **kw):
     """Return a Pod object with appropriate attributes.
 
     NOTE: The object leaves the attributes marked as changed, such
@@ -82,24 +82,24 @@ def get_test_pod(ctxt, **kw):
     # Let DB generate ID if it isn't specified explicitly
     if 'id' not in kw:
         del db_pod['id']
-    pod = objects.Pod(ctxt)
+    pod = objects.Pod(context)
     for key in db_pod:
         setattr(pod, key, db_pod[key])
     return pod
 
 
-def create_test_pod(ctxt, **kw):
+def create_test_pod(context, **kw):
     """Create and return a test pod object.
 
     Create a pod in the DB and return a Pod object with appropriate
     attributes.
     """
-    pod = get_test_pod(ctxt, **kw)
+    pod = get_test_pod(context, **kw)
     pod.create()
     return pod
 
 
-def get_test_service(ctxt, **kw):
+def get_test_service(context, **kw):
     """Return a Service object with appropriate attributes.
 
     NOTE: The object leaves the attributes marked as changed, such
@@ -109,24 +109,24 @@ def get_test_service(ctxt, **kw):
     # Let DB generate ID if it isn't specified explicitly
     if 'id' not in kw:
         del db_service['id']
-    service = objects.Service(ctxt)
+    service = objects.Service(context)
     for key in db_service:
         setattr(service, key, db_service[key])
     return service
 
 
-def create_test_service(ctxt, **kw):
+def create_test_service(context, **kw):
     """Create and return a test service object.
 
     Create a service in the DB and return a Service object with appropriate
     attributes.
     """
-    service = get_test_service(ctxt, **kw)
+    service = get_test_service(context, **kw)
     service.create()
     return service
 
 
-def get_test_rc(ctxt, **kw):
+def get_test_rc(context, **kw):
     """Return a ReplicationController object with appropriate attributes.
 
     NOTE: The object leaves the attributes marked as changed, such
@@ -136,24 +136,24 @@ def get_test_rc(ctxt, **kw):
     # Let DB generate ID if it isn't specified explicitly
     if 'id' not in kw:
         del db_rc['id']
-    rc = objects.ReplicationController(ctxt)
+    rc = objects.ReplicationController(context)
     for key in db_rc:
         setattr(rc, key, db_rc[key])
     return rc
 
 
-def create_test_rc(ctxt, **kw):
+def create_test_rc(context, **kw):
     """Create and return a test ReplicationController object.
 
     Create a replication controller in the DB and return a
     ReplicationController object with appropriate attributes.
     """
-    rc = get_test_rc(ctxt, **kw)
+    rc = get_test_rc(context, **kw)
     rc.create()
     return rc
 
 
-def get_test_node(ctxt, **kw):
+def get_test_node(context, **kw):
     """Return a Node object with appropriate attributes.
 
     NOTE: The object leaves the attributes marked as changed, such
@@ -163,18 +163,18 @@ def get_test_node(ctxt, **kw):
     # Let DB generate ID if it isn't specified explicitly
     if 'id' not in kw:
         del db_node['id']
-    node = objects.Node(ctxt)
+    node = objects.Node(context)
     for key in db_node:
         setattr(node, key, db_node[key])
     return node
 
 
-def create_test_node(ctxt, **kw):
+def create_test_node(context, **kw):
     """Create and return a test Node object.
 
     Create a node in the DB and return a Node object with appropriate
     attributes.
     """
-    node = get_test_node(ctxt, **kw)
+    node = get_test_node(context, **kw)
     node.create()
     return node

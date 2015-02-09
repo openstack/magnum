@@ -28,18 +28,18 @@ class Handler(object):
 
     # Bay Operations
 
-    def bay_create(self, ctxt, bay):
+    def bay_create(self, context, bay):
         LOG.debug('ironic bay_create')
         bay.create()
         return bay
 
-    def bay_delete(self, ctxt, uuid):
+    def bay_delete(self, context, uuid):
         LOG.debug('ironic bay_delete')
-        bay = objects.Bay.get_by_uuid(ctxt, uuid)
+        bay = objects.Bay.get_by_uuid(context, uuid)
         bay.destroy()
         return None
 
-    def bay_show(self, ctxt, uuid):
+    def bay_show(self, context, uuid):
         LOG.debug('ironic bay_show')
-        bay = objects.Bay.get_by_uuid(ctxt, uuid)
+        bay = objects.Bay.get_by_uuid(context, uuid)
         return bay
