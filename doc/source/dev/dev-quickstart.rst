@@ -331,10 +331,10 @@ in the cluster::
 To make it a replicated redis cluster create replication controllers for the redis
 slaves and sentinels::
 
-    sed -i 's/\(replicas: \)1/\1 4/' redis-controller.yaml
+    sed -i 's/\(replicas: \)1/\1 2/' redis-controller.yaml
     magnum rc-create --manifest ./redis-controller.yaml --bay-id $BAY_UUID
 
-    sed -i 's/\(replicas: \)1/\1 4/' redis-sentinel-controller.yaml
+    sed -i 's/\(replicas: \)1/\1 2/' redis-sentinel-controller.yaml
     magnum rc-create --manifest ./redis-sentinel-controller.yaml --bay-id $BAY_UUID
 
 Full lifecycle and introspection operations for each object are supported.  For
