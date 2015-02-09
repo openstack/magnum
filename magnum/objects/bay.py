@@ -20,6 +20,18 @@ from magnum.objects import base
 from magnum.objects import utils as obj_utils
 
 
+class Status(object):
+    CREATE_IN_PROGRESS = 'CREATE_IN_PROGRESS'
+    CREATE_FAILED = 'CREATE_FAILED'
+    CREATED = 'CREATED'
+    UPDATE_IN_PROGRESS = 'UPDATE_IN_PROGRESS'
+    UPDATE_FAILED = 'UPDATE_FAILED'
+    UPDATED = 'UPDATED'
+    DELETE_IN_PROGRESS = 'DELETE_IN_PROGRESS'
+    DELETE_FAILED = 'DELETE_FAILED'
+    DELETED = 'DELETED'
+
+
 class Bay(base.MagnumObject):
     # Version 1.0: Initial version
     VERSION = '1.0'
@@ -34,6 +46,10 @@ class Bay(base.MagnumObject):
         'user_id': obj_utils.str_or_none,
         'baymodel_id': obj_utils.str_or_none,
         'stack_id': obj_utils.str_or_none,
+        # One of CREATE_IN_PROGRESS|CREATE_FAILED|CREATED
+        #        UPDATE_IN_PROGRESS|UPDATE_FAILED|UPDATED
+        #        DELETE_IN_PROGRESS|DELETE_FAILED|DELETED
+        'status': obj_utils.str_or_none,
         'master_address': obj_utils.str_or_none,
         'minions_address': obj_utils.list_or_none,
         'node_count': obj_utils.int_or_none

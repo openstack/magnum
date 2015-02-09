@@ -129,6 +129,7 @@ class Bay(Base):
     master_address = Column(String(255))
     minions_address = Column(JSONEncodedList)
     node_count = Column(Integer())
+    status = Column(String(20), nullable=True)
 
 
 class BayModel(Base):
