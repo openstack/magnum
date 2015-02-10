@@ -195,11 +195,17 @@ resources:
       group: ungrouped
       config: {get_file: fragments/configure-kubernetes-master.sh}
 
-  configure_flannel:
+  write_flannel_config:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
-      config: {get_file: fragments/configure-flannel.sh}
+      config: {get_file: fragments/write-flannel-config.sh}
+
+  flannel_config_service:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/flannel-config.service.yaml}
 
   enable_services:
     type: "OS::Heat::SoftwareConfig"
@@ -240,7 +246,8 @@ resources:
         - config: {get_resource: kube_user}
         - config: {get_resource: configure_kubernetes}
         - config: {get_resource: enable_services}
-        - config: {get_resource: configure_flannel}
+        - config: {get_resource: write_flannel_config}
+        - config: {get_resource: flannel_config_service}
         - config: {get_resource: kube_examples}
         - config: {get_resource: cfn_signal}
 
@@ -276,6 +283,7 @@ resources:
       fixed_ips:
         - subnet_id:
             get_resource: fixed_subnet
+      replacement_policy: AUTO
 
   kube_master_floating:
     type: "OS::Neutron::FloatingIP"

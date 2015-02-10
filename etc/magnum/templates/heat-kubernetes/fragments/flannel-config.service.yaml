@@ -1,0 +1,46 @@
+#cloud-config
+merge_how: dict(recurse_array)+list(append)
+write_files:
+  - path: /usr/local/bin/flannel-config
+    owner: "root:root"
+    permissions: "0755"
+    content: |
+      #!/bin/sh
+      
+      : ${FLANNEL_JSON:=/etc/sysconfig/flannel-network.json}
+
+      if ! [ -f "$FLANNEL_JSON" ]; then
+        echo "ERROR: missing network configuration file" >&2
+        exit 1
+      fi
+
+      if ! [ "$FLANNEL_ETCD" ] && [ "$FLANNEL_ETCD_KEY" ]; then
+        echo "ERROR: missing required configuration" >&2
+        exit 1
+      fi
+      
+      echo "creating flanneld config in etcd"
+      while ! curl -sf -L $FLANNEL_ETCD/v2/keys${FLANNEL_ETCD_KEY}/config \
+        -X PUT --data-urlencode value@${FLANNEL_JSON}; do
+          echo "waiting for etcd"
+          sleep 1
+      done
+  - path: /etc/systemd/system/flannel-config.service
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      After=etcd.service
+      Requires=etcd.service
+
+      [Service]
+      Type=oneshot
+      EnvironmentFile=/etc/sysconfig/flanneld
+      ExecStart=/usr/local/bin/flannel-config
+
+      [Install]
+      WantedBy=multi-user.target
+runcmd:
+  - systemctl enable flannel-config
+  - systemctl start --no-block flannel-config
+

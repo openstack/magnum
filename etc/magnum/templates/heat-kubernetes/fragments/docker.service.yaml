@@ -1,65 +1,58 @@
 #cloud-config
 merge_how: dict(recurse_array)+list(append)
+bootcmd:
+  - mkdir -p /etc/systemd/system/docker.service.d
+  - mkdir -p /etc/systemd/system/flanneld.service.d
 write_files:
-  - path: /etc/systemd/system/docker.service
-    owner: "root:root"
-    permissions: "0644"
-    content: |
-      [Unit]
-      Description=Docker Application Container Engine
-      Documentation=http://docs.docker.com
-      After=network.target docker.socket wait-for-flanneld.service
-      Requires=docker.socket wait-for-flanneld.service
-
-      [Service]
-      Type=notify
-      EnvironmentFile=-/etc/sysconfig/docker
-      EnvironmentFile=-/etc/sysconfig/docker-storage
-      
-      # This EnvironmentFile is required.
-      EnvironmentFile=/run/flannel/subnet.env
-
-      # This works around https://github.com/docker/docker/issues/9468
-      Environment=DOCKER_CERT_PATH=/etc/docker
-
-      ExecStart=/usr/bin/docker -d -H fd:// --bip $FLANNEL_SUBNET --mtu $FLANNEL_MTU $OPTIONS $DOCKER_STORAGE_OPTIONS
-      Restart=on-failure
-      LimitNOFILE=1048576
-      LimitNPROC=1048576
-
-      [Install]
-      WantedBy=multi-user.target
-  - path: /usr/local/bin/wait-for-flanneld
+  - path: /usr/local/bin/flannel-docker-bridge
     owner: "root:root"
     permissions: "0755"
     content: |
       #!/bin/sh
       
-      # This script waits for flannel to provide the /run/flannel/subnet.env
-      # file. This can be used to synchronize docker startup with the
-      # availability of this file.
-
-      while ! [ -f /run/flannel/subnet.env ]; do
-        echo "waiting for flanneld"
-        sleep 1
-      done
-
-      echo "flanneld is active"
-
-      exit 0
-  - path: /etc/systemd/system/wait-for-flanneld.service
+      if ! [ "$FLANNEL_SUBNET" ] && [ "$FLANNEL_MTU" ] ; then
+        echo "ERROR: missing required environment variables." >&2
+        exit 1
+      fi
+      
+      mkdir -p /run/flannel/
+      cat > /run/flannel/docker <<EOF
+      DOCKER_NETWORK_OPTIONS="--bip=$FLANNEL_SUBNET --mtu=$FLANNEL_MTU"
+      EOF
+  - path: /etc/systemd/system/flannel-docker-bridge.service
     owner: "root:root"
     permissions: "0644"
     content: |
       [Unit]
-      Description=Wait for flanneld to provide subnet/mtu information
-      After=network.target flanneld.service
+      After=flanneld.service
+      Before=docker.service
       Requires=flanneld.service
 
       [Service]
       Type=oneshot
-      ExecStart=/usr/local/bin/wait-for-flanneld
+      EnvironmentFile=/run/flannel/subnet.env
+      ExecStart=/usr/local/bin/flannel-docker-bridge
 
       [Install]
-      WantedBy=multi-user.target
+      WantedBy=docker.service
+  - path: /etc/systemd/system/docker.service.d/flannel.conf
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Requires=flannel-docker-bridge.service
+      After=flannel-docker-bridge.service
+
+      [Service]
+      EnvironmentFile=/run/flannel/docker
+  - path: /etc/systemd/system/flanneld.service.d/flannel-docker-bridge.conf
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Requires=flannel-docker-bridge.service
+      Before=flannel-docker-bridge.service
+
+      [Install]
+      Also=flannel-docker-bridge.service
 
