@@ -1,0 +1,4 @@
+kubernetes:
+etcd:
+flannel:
+docker-io:
