@@ -47,7 +47,9 @@ cfg.CONF.register_opts(k8s_heat_opts, group='k8s_heat')
 LOG = logging.getLogger(__name__)
 
 
-def _extract_bay_definition(baymodel):
+def _extract_bay_definition(context, bay):
+    baymodel = objects.BayModel.get_by_uuid(context, bay.baymodel_id)
+
     bay_definition = {
         'ssh_key_name': baymodel.keypair_id,
         'external_network_id': baymodel.external_network_id,
@@ -61,16 +63,14 @@ def _extract_bay_definition(baymodel):
     # TODO(yuanying): Add below lines if apiserver_port parameter is supported
     # if baymodel.apiserver_port:
     #     bay_definition['apiserver_port'] = baymodel.apiserver_port
+    if bay.node_count is not None:
+        bay_definition['number_of_minions'] = str(bay.node_count)
 
     return bay_definition
 
 
 def _create_stack(context, osc, bay):
-    baymodel = objects.BayModel.get_by_uuid(context, bay.baymodel_id)
-    bay_definition = _extract_bay_definition(baymodel)
-
-    if bay.node_count:
-        bay_definition['number_of_minions'] = str(bay.node_count)
+    bay_definition = _extract_bay_definition(context, bay)
 
     tpl_files, template = template_utils.get_template_contents(
                                         cfg.CONF.k8s_heat.template_path)
