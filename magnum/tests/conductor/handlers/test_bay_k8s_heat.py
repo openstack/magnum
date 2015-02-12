@@ -20,7 +20,7 @@ import mock
 from mock import patch
 
 
-class TestBayK8sHeat(base.BaseTestCase):
+class TestBayK8sHeat(base.TestCase):
     def setUp(self):
         super(TestBayK8sHeat, self).setUp()
         self.baymodel_dict = {
@@ -30,11 +30,24 @@ class TestBayK8sHeat(base.BaseTestCase):
             'dns_nameserver': 'dns_nameserver',
             'external_network_id': 'external_network_id',
         }
+        self.bay_dict = {
+            'baymodel_id': 'xx-xx-xx-xx',
+            'name': 'bay1',
+            'stack_id': 'xx-xx-xx-xx',
+            'master_address': '172.17.2.3',
+            'minions_address': ['172.17.2.4'],
+            'node_count': 1,
+        }
 
-    def test_extract_bay_definition(self):
-        baymodel = objects.BayModel({}, **self.baymodel_dict)
-        bay_definition = bay_k8s_heat._extract_bay_definition(
-            baymodel)
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_bay_definition(self,
+                                    mock_objects_baymodel_get_by_uuid):
+        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        bay = objects.Bay(self.context, **self.bay_dict)
+
+        bay_definition = bay_k8s_heat._extract_bay_definition(self.context,
+                                                              bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -42,60 +55,106 @@ class TestBayK8sHeat(base.BaseTestCase):
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'server_flavor': 'flavor_id',
+            'number_of_minions': '1',
         }
         self.assertEqual(expected, bay_definition)
 
-    def test_extract_bay_definition_without_dns(self):
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_bay_definition_without_dns(self,
+                                        mock_objects_baymodel_get_by_uuid):
         baymodel_dict = self.baymodel_dict
         baymodel_dict['dns_nameserver'] = None
-        baymodel = objects.BayModel({}, **baymodel_dict)
-        bay_definition = bay_k8s_heat._extract_bay_definition(
-            baymodel)
+        baymodel = objects.BayModel(self.context, **baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        bay = objects.Bay(self.context, **self.bay_dict)
+
+        bay_definition = bay_k8s_heat._extract_bay_definition(self.context,
+                                                              bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
             'external_network_id': 'external_network_id',
             'server_image': 'image_id',
             'server_flavor': 'flavor_id',
+            'number_of_minions': '1',
         }
         self.assertEqual(expected, bay_definition)
 
-    def test_extract_bay_definition_without_server_image(self):
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_bay_definition_without_server_image(self,
+                                        mock_objects_baymodel_get_by_uuid):
         baymodel_dict = self.baymodel_dict
         baymodel_dict['image_id'] = None
-        baymodel = objects.BayModel({}, **baymodel_dict)
-        bay_definition = bay_k8s_heat._extract_bay_definition(
-            baymodel)
+        baymodel = objects.BayModel(self.context, **baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        bay = objects.Bay(self.context, **self.bay_dict)
+
+        bay_definition = bay_k8s_heat._extract_bay_definition(self.context,
+                                                              bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
             'external_network_id': 'external_network_id',
             'dns_nameserver': 'dns_nameserver',
             'server_flavor': 'flavor_id',
+            'number_of_minions': '1',
         }
         self.assertEqual(expected, bay_definition)
 
-    def test_extract_bay_definition_without_server_flavor(self):
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_bay_definition_without_server_flavor(self,
+                                        mock_objects_baymodel_get_by_uuid):
         baymodel_dict = self.baymodel_dict
         baymodel_dict['flavor_id'] = None
-        baymodel = objects.BayModel({}, **baymodel_dict)
-        bay_definition = bay_k8s_heat._extract_bay_definition(
-            baymodel)
+        baymodel = objects.BayModel(self.context, **baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        bay = objects.Bay(self.context, **self.bay_dict)
+
+        bay_definition = bay_k8s_heat._extract_bay_definition(self.context,
+                                                              bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
             'external_network_id': 'external_network_id',
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
+            'number_of_minions': '1',
         }
         self.assertEqual(expected, bay_definition)
 
-    def test_extract_bay_definition_without_apiserver_port(self):
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_bay_definition_without_apiserver_port(self,
+                                        mock_objects_baymodel_get_by_uuid):
         baymodel_dict = self.baymodel_dict
         baymodel_dict['apiserver_port'] = None
-        baymodel = objects.BayModel({}, **baymodel_dict)
-        bay_definition = bay_k8s_heat._extract_bay_definition(
-            baymodel)
+        baymodel = objects.BayModel(self.context, **baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        bay = objects.Bay(self.context, **self.bay_dict)
+
+        bay_definition = bay_k8s_heat._extract_bay_definition(self.context,
+                                                              bay)
+
+        expected = {
+            'ssh_key_name': 'keypair_id',
+            'external_network_id': 'external_network_id',
+            'dns_nameserver': 'dns_nameserver',
+            'server_image': 'image_id',
+            'server_flavor': 'flavor_id',
+            'number_of_minions': '1',
+        }
+        self.assertEqual(expected, bay_definition)
+
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_bay_definition_without_node_count(self,
+                                        mock_objects_baymodel_get_by_uuid):
+        bay_dict = self.bay_dict
+        bay_dict['node_count'] = None
+        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        bay = objects.Bay(self.context, **bay_dict)
+
+        bay_definition = bay_k8s_heat._extract_bay_definition(self.context,
+                                                              bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -139,17 +198,14 @@ class TestBayK8sHeat(base.BaseTestCase):
 
     @patch('magnum.common.short_id.generate_id')
     @patch('heatclient.common.template_utils.get_template_contents')
-    @patch('magnum.objects.BayModel.get_by_uuid')
     @patch('magnum.conductor.handlers.bay_k8s_heat._extract_bay_definition')
     def test_create_stack(self,
                           mock_extract_bay_definition,
-                          mock_objects_baymodel_get_by_uuid,
                           mock_get_template_contents,
                           mock_generate_id):
 
         mock_generate_id.return_value = 'xx-xx-xx-xx'
         expected_stack_name = 'expected_stack_name-xx-xx-xx-xx'
-        expected_number_of_minions = 1
         expected_template_contents = 'template_contents'
         exptected_files = []
         dummy_bay_name = 'expected_stack_name'
@@ -158,21 +214,18 @@ class TestBayK8sHeat(base.BaseTestCase):
         mock_tpl_files.items.return_value = exptected_files
         mock_get_template_contents.return_value = [
             mock_tpl_files, expected_template_contents]
-        mock_objects_baymodel_get_by_uuid.return_value = {}
         mock_extract_bay_definition.return_value = {}
         mock_heat_client = mock.MagicMock()
         mock_osc = mock.MagicMock()
         mock_osc.heat.return_value = mock_heat_client
         mock_bay = mock.MagicMock()
         mock_bay.name = dummy_bay_name
-        mock_bay.node_count = expected_number_of_minions
 
-        bay_k8s_heat._create_stack({}, mock_osc, mock_bay)
+        bay_k8s_heat._create_stack(self.context, mock_osc, mock_bay)
 
         expected_args = {
             'stack_name': expected_stack_name,
-            'parameters': {
-                'number_of_minions': str(expected_number_of_minions)},
+            'parameters': {},
             'template': expected_template_contents,
             'files': dict(exptected_files)
         }
