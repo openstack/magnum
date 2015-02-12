@@ -129,6 +129,14 @@ class TestPatch(api_base.FunctionalTest):
         self.bay = obj_utils.create_test_bay(self.context,
                                              name='bay_example_A',
                                              node_count=3)
+        p = mock.patch.object(rpcapi.API, 'bay_update')
+        self.mock_bay_update = p.start()
+        self.mock_bay_update.side_effect = self._simulate_rpc_bay_update
+        self.addCleanup(p.stop)
+
+    def _simulate_rpc_bay_update(self, bay):
+        bay.save()
+        return bay
 
     @mock.patch('oslo.utils.timeutils.utcnow')
     def test_replace_ok(self, mock_utcnow):

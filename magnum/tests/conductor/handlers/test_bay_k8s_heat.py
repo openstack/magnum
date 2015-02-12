@@ -230,3 +230,34 @@ class TestBayK8sHeat(base.TestCase):
             'files': dict(exptected_files)
         }
         mock_heat_client.stacks.create.assert_called_once_with(**expected_args)
+
+    @patch('heatclient.common.template_utils.get_template_contents')
+    @patch('magnum.conductor.handlers.bay_k8s_heat._extract_bay_definition')
+    def test_update_stack(self,
+                          mock_extract_bay_definition,
+                          mock_get_template_contents):
+
+        mock_stack_id = 'xx-xx-xx-xx'
+        expected_template_contents = 'template_contents'
+        exptected_files = []
+
+        mock_tpl_files = mock.MagicMock()
+        mock_tpl_files.items.return_value = exptected_files
+        mock_get_template_contents.return_value = [
+            mock_tpl_files, expected_template_contents]
+        mock_extract_bay_definition.return_value = {}
+        mock_heat_client = mock.MagicMock()
+        mock_osc = mock.MagicMock()
+        mock_osc.heat.return_value = mock_heat_client
+        mock_bay = mock.MagicMock()
+        mock_bay.stack_id = mock_stack_id
+
+        bay_k8s_heat._update_stack({}, mock_osc, mock_bay)
+
+        expected_args = {
+            'parameters': {},
+            'template': expected_template_contents,
+            'files': dict(exptected_files)
+        }
+        mock_heat_client.stacks.update.assert_called_once_with(mock_stack_id,
+                                                               **expected_args)
