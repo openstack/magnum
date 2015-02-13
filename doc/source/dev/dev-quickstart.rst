@@ -278,7 +278,7 @@ Magnum in which way to construct a bay.::
                            --dns-nameserver 8.8.8.8 --flavor-id m1.small
 
 Next create a bay. Use the baymodel UUID as a template for bay creation.
-This bay will result in one master kubernetes node and three minion nodes.::
+This bay will result in one master kubernetes node and two minion nodes.::
 
     BAYMODEL_UUID=$(magnum baymodel-list | awk '/ testbaymodel /{print $2}')
     magnum bay-create --name testbay --baymodel-id $BAYMODEL_UUID --node-count 2
