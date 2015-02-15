@@ -56,62 +56,6 @@ class DbRCTestCase(base.DbTestCase):
                           self.context,
                           magnum_utils.generate_uuid())
 
-    def test_get_rc_list_defaults(self):
-        rc_id_list = [self.rc.id]
-        for i in range(1, 6):
-            rc = utils.create_test_rc(bay_uuid=self.bay.uuid,
-                uuid=magnum_utils.generate_uuid())
-            rc_id_list.append(rc.id)
-        rc = [i[0] for i in self.dbapi.get_rcinfo_list()]
-        self.assertEqual(sorted(rc), sorted(rc_id_list))
-
-    def test_get_rcinfo_list_with_cols(self):
-        uuids = {self.rc.id: self.rc.uuid}
-        rc_replicas = {self.rc.id: self.rc.replicas}
-        for i in range(1, 6):
-            uuid = magnum_utils.generate_uuid()
-            replicas = i
-            rc = utils.create_test_rc(replicas=replicas, uuid=uuid,
-                                      bay_uuid=self.bay.uuid)
-            uuids[rc.id] = uuid
-            rc_replicas[rc.id] = replicas
-        rc = self.dbapi.get_rcinfo_list(columns=['id', 'uuid', 'replicas'])
-        self.assertEqual(uuids, dict((r[0], r[1]) for r in rc))
-        self.assertEqual(rc_replicas, dict((r[0], r[2]) for r in rc))
-
-    def test_get_rcinfo_list_with_filters(self):
-        bay1 = utils.get_test_bay(id=11, uuid=magnum_utils.generate_uuid())
-        bay2 = utils.get_test_bay(id=12, uuid=magnum_utils.generate_uuid())
-
-        self.dbapi.create_bay(bay1)
-        self.dbapi.create_bay(bay2)
-
-        rc1 = utils.create_test_rc(name='rc-one',
-            uuid=magnum_utils.generate_uuid(),
-            bay_uuid=bay1['uuid'],
-            replicas=2)
-        rc2 = utils.create_test_rc(name='rc-two',
-            uuid=magnum_utils.generate_uuid(),
-            bay_uuid=bay2['uuid'],
-            replicas=3)
-
-        rc = self.dbapi.get_rcinfo_list(
-            filters={'bay_uuid': bay1['uuid']})
-        self.assertEqual([rc1.id], [r.id for r in rc])
-
-        rc = self.dbapi.get_rcinfo_list(
-            filters={'bay_uuid': bay2['uuid']})
-        self.assertEqual([rc2.id], [r.id for r in rc])
-
-        rc = self.dbapi.get_rcinfo_list(filters={'name': 'rc-one'})
-        self.assertEqual([rc1.id], [r[0] for r in rc])
-
-        rc = self.dbapi.get_rcinfo_list(filters={'name': 'bad-rc'})
-        self.assertEqual([], [r[0] for r in rc])
-
-        rc = self.dbapi.get_rcinfo_list(filters={'replicas': 2})
-        self.assertEqual([rc1.id], [r[0] for r in rc])
-
     def test_get_rc_list(self):
         uuids = [self.rc.uuid]
         for i in range(1, 6):

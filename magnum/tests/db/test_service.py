@@ -56,65 +56,6 @@ class DbServiceTestCase(base.DbTestCase):
                           self.context,
                           magnum_utils.generate_uuid())
 
-    def test_get_serviceinfo_list_defaults(self):
-        service_id_list = [self.service.id]
-        for i in range(1, 6):
-            service = utils.create_test_service(bay_uuid=self.bay.uuid,
-                uuid=magnum_utils.generate_uuid())
-            service_id_list.append(service.id)
-        res = [i[0] for i in self.dbapi.get_serviceinfo_list()]
-        self.assertEqual(sorted(res), sorted(service_id_list))
-
-    def test_get_serviceinfo_list_with_cols(self):
-        uuids = {self.service.id: self.service.uuid}
-        ports = {self.service.id: self.service.port}
-        for i in range(1, 6):
-            uuid = magnum_utils.generate_uuid()
-            port = i
-            service = utils.create_test_service(port=port, uuid=uuid,
-                                                bay_uuid=self.bay.uuid)
-            uuids[service.id] = uuid
-            ports[service.id] = port
-        res = self.dbapi.get_serviceinfo_list(columns=['id', 'port', 'uuid'])
-        self.assertEqual(ports, dict((r[0], r[1]) for r in res))
-        self.assertEqual(uuids, dict((r[0], r[2]) for r in res))
-
-    def test_get_serviceinfo_list_with_filters(self):
-        bay1 = utils.get_test_bay(id=11, uuid=magnum_utils.generate_uuid())
-        bay2 = utils.get_test_bay(id=12, uuid=magnum_utils.generate_uuid())
-
-        self.dbapi.create_bay(bay1)
-        self.dbapi.create_bay(bay2)
-
-        service1 = utils.create_test_service(name='service-one',
-            uuid=magnum_utils.generate_uuid(),
-            bay_uuid=bay1['uuid'],
-            port=8000)
-        service2 = utils.create_test_service(name='service-two',
-            uuid=magnum_utils.generate_uuid(),
-            bay_uuid=bay2['uuid'],
-            port=8001)
-
-        res = self.dbapi.get_serviceinfo_list(
-            filters={'bay_uuid': bay1['uuid']})
-        self.assertEqual([service1.id], [r.id for r in res])
-
-        res = self.dbapi.get_serviceinfo_list(
-            filters={'bay_uuid': bay2['uuid']})
-        self.assertEqual([service2.id], [r.id for r in res])
-
-        res = self.dbapi.get_serviceinfo_list(filters={'name': 'service-one'})
-        self.assertEqual([service1.id], [r[0] for r in res])
-
-        res = self.dbapi.get_serviceinfo_list(filters={'name': 'bad-service'})
-        self.assertEqual([], [r[0] for r in res])
-
-        res = self.dbapi.get_serviceinfo_list(filters={'port': 8000})
-        self.assertEqual([service1.id], [r[0] for r in res])
-
-        res = self.dbapi.get_serviceinfo_list(filters={'port': 8001})
-        self.assertEqual([service2.id], [r[0] for r in res])
-
     def test_get_service_list(self):
         uuids = [self.service.uuid]
         for i in range(1, 6):

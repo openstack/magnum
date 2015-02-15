@@ -54,56 +54,6 @@ class DbContainerTestCase(base.DbTestCase):
                           self.context,
                           magnum_utils.generate_uuid())
 
-    def test_get_containerinfo_list_defaults(self):
-        container_id_list = []
-        for i in range(1, 6):
-            container = utils.create_test_container(
-                uuid=magnum_utils.generate_uuid())
-            container_id_list.append(container.id)
-        res = [i[0] for i in self.dbapi.get_containerinfo_list()]
-        self.assertEqual(sorted(res), sorted(container_id_list))
-
-    def test_get_containerinfo_list_with_cols(self):
-        uuids = {}
-        images = {}
-        for i in range(1, 6):
-            uuid = magnum_utils.generate_uuid()
-            image = 'image' + str(i)
-            container = utils.create_test_container(image_id=image, uuid=uuid)
-            uuids[container.id] = uuid
-            images[container.id] = image
-        res = self.dbapi.get_containerinfo_list(columns=['id', 'image_id',
-                                                         'uuid'])
-        self.assertEqual(images, dict((r[0], r[1]) for r in res))
-        self.assertEqual(uuids, dict((r[0], r[2]) for r in res))
-
-    def test_get_containerinfo_list_with_filters(self):
-        container1 = utils.create_test_container(name='c1',
-            uuid=magnum_utils.generate_uuid(),
-            project_id='fake-project1',
-            user_id='fake-user1')
-        container2 = utils.create_test_container(name='c2',
-            uuid=magnum_utils.generate_uuid(),
-            project_id='fake-project2',
-            user_id='fake-user2')
-
-        res = self.dbapi.get_containerinfo_list(filters={'name': 'c1'})
-        self.assertEqual([container1.id], [r[0] for r in res])
-
-        res = self.dbapi.get_containerinfo_list(filters={
-                     'project_id': 'fake-project1', 'user_id': 'fake-user1'})
-        self.assertEqual([container1.id], [r[0] for r in res])
-
-        res = self.dbapi.get_containerinfo_list(filters={'name': 'c2'})
-        self.assertEqual([container2.id], [r[0] for r in res])
-
-        res = self.dbapi.get_containerinfo_list(filters={
-                     'project_id': 'fake-project2', 'user_id': 'fake-user2'})
-        self.assertEqual([container2.id], [r[0] for r in res])
-
-        res = self.dbapi.get_containerinfo_list(filters={'name': 'bad-name'})
-        self.assertEqual([], [r[0] for r in res])
-
     def test_get_container_list(self):
         uuids = []
         for i in range(1, 6):

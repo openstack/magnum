@@ -138,20 +138,6 @@ class Connection(api.Connection):
 
         return query
 
-    def get_bayinfo_list(self, columns=None, filters=None, limit=None,
-                          marker=None, sort_key=None, sort_dir=None):
-        # list-ify columns default values because it is bad form
-        # to include a mutable list in function definitions.
-        if columns is None:
-            columns = [models.Bay.id]
-        else:
-            columns = [getattr(models.Bay, c) for c in columns]
-
-        query = model_query(*columns, base_model=models.Bay)
-        query = self._add_bays_filters(query, filters)
-        return _paginate_query(models.Bay, limit, marker,
-                               sort_key, sort_dir, query)
-
     def get_bay_list(self, context, filters=None, limit=None, marker=None,
                       sort_key=None, sort_dir=None):
         query = model_query(models.Bay)
@@ -275,20 +261,6 @@ class Connection(api.Connection):
 
         return query
 
-    def get_baymodelinfo_list(self, columns=None, filters=None, limit=None,
-                          marker=None, sort_key=None, sort_dir=None):
-        # list-ify columns default values because it is bad form
-        # to include a mutable list in function definitions.
-        if columns is None:
-            columns = [models.BayModel.id]
-        else:
-            columns = [getattr(models.BayModel, c) for c in columns]
-
-        query = model_query(*columns, base_model=models.BayModel)
-        query = self._add_baymodels_filters(query, filters)
-        return _paginate_query(models.BayModel, limit, marker,
-                               sort_key, sort_dir, query)
-
     def get_baymodel_list(self, context, filters=None, limit=None, marker=None,
                       sort_key=None, sort_dir=None):
         query = model_query(models.BayModel)
@@ -387,20 +359,6 @@ class Connection(api.Connection):
 
         return query
 
-    def get_containerinfo_list(self, columns=None, filters=None, limit=None,
-                          marker=None, sort_key=None, sort_dir=None):
-        # list-ify columns default values because it is bad form
-        # to include a mutable list in function definitions.
-        if columns is None:
-            columns = [models.Container.id]
-        else:
-            columns = [getattr(models.Container, c) for c in columns]
-
-        query = model_query(*columns, base_model=models.Container)
-        query = self._add_containers_filters(query, filters)
-        return _paginate_query(models.Container, limit, marker,
-                               sort_key, sort_dir, query)
-
     def get_container_list(self, context, filters=None, limit=None,
                            marker=None, sort_key=None, sort_dir=None):
         query = model_query(models.Container)
@@ -492,20 +450,6 @@ class Connection(api.Connection):
             query = query.filter_by(user_id=filters['user_id'])
 
         return query
-
-    def get_nodeinfo_list(self, columns=None, filters=None, limit=None,
-                          marker=None, sort_key=None, sort_dir=None):
-        # list-ify columns default values because it is bad form
-        # to include a mutable list in function definitions.
-        if columns is None:
-            columns = [models.Node.id]
-        else:
-            columns = [getattr(models.Node, c) for c in columns]
-
-        query = model_query(*columns, base_model=models.Node)
-        query = self._add_nodes_filters(query, filters)
-        return _paginate_query(models.Node, limit, marker,
-                               sort_key, sort_dir, query)
 
     def get_node_list(self, context, filters=None, limit=None, marker=None,
                       sort_key=None, sort_dir=None):
@@ -602,20 +546,6 @@ class Connection(api.Connection):
             query = query.filter_by(status=filters['status'])
 
         return query
-
-    def get_podinfo_list(self, columns=None, filters=None, limit=None,
-                          marker=None, sort_key=None, sort_dir=None):
-        # list-ify columns default values because it is bad form
-        # to include a mutable list in function definitions.
-        if columns is None:
-            columns = [models.Pod.id]
-        else:
-            columns = [getattr(models.Pod, c) for c in columns]
-
-        query = model_query(*columns, base_model=models.Pod)
-        query = self._add_pods_filters(query, filters)
-        return _paginate_query(models.Pod, limit, marker,
-                               sort_key, sort_dir, query)
 
     def get_pod_list(self, context, filters=None, limit=None, marker=None,
                       sort_key=None, sort_dir=None):
@@ -718,20 +648,6 @@ class Connection(api.Connection):
 
         return query
 
-    def get_serviceinfo_list(self, columns=None, filters=None, limit=None,
-                          marker=None, sort_key=None, sort_dir=None):
-        # list-ify columns default values because it is bad form
-        # to include a mutable list in function definitions.
-        if columns is None:
-            columns = [models.Service.id]
-        else:
-            columns = [getattr(models.Service, c) for c in columns]
-
-        query = model_query(*columns, base_model=models.Service)
-        query = self._add_services_filters(query, filters)
-        return _paginate_query(models.Service, limit, marker,
-                               sort_key, sort_dir, query)
-
     def get_service_list(self, context, filters=None, limit=None, marker=None,
                       sort_key=None, sort_dir=None):
         query = model_query(models.Service)
@@ -823,19 +739,6 @@ class Connection(api.Connection):
             query = query.filter_by(replicas=filters['replicas'])
 
         return query
-
-    def get_rcinfo_list(self, columns=None, filters=None, limit=None,
-                        marker=None, sort_key=None, sort_dir=None):
-        if columns is None:
-            columns = [models.ReplicationController.id]
-        else:
-            columns = [getattr(models.ReplicationController, c)
-                       for c in columns]
-
-        query = model_query(*columns, base_model=models.ReplicationController)
-        query = self._add_rcs_filters(query, filters)
-        return _paginate_query(models.ReplicationController, limit, marker,
-                               sort_key, sort_dir, query)
 
     def get_rc_list(self, context, filters=None, limit=None, marker=None,
                       sort_key=None, sort_dir=None):
