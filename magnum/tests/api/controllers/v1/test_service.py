@@ -239,12 +239,10 @@ class TestPost(api_base.FunctionalTest):
         expected_location = '/v1/services/%s' % sdict['uuid']
         self.assertEqual(urlparse.urlparse(response.location).path,
                          expected_location)
-
-        response = self.get_json('/services/%s' % sdict['uuid'])
-        self.assertEqual(sdict['uuid'], response['uuid'])
-        self.assertFalse(response['updated_at'])
+        self.assertEqual(sdict['uuid'], response.json['uuid'])
+        self.assertNotIn('updated_at', response.json.keys)
         return_created_at = timeutils.parse_isotime(
-                            response['created_at']).replace(tzinfo=None)
+                            response.json['created_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_created_at)
 
     def test_create_service_doesnt_contain_id(self):
@@ -263,9 +261,7 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/services', sdict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
-
-        response = self.get_json('/services')
-        self.assertTrue(utils.is_uuid_like(response['services'][0]['uuid']))
+        self.assertTrue(utils.is_uuid_like(response.json['uuid']))
 
     def test_create_service_no_bay_uuid(self):
         sdict = apiutils.service_post_data()

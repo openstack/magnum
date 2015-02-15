@@ -315,21 +315,18 @@ class TestPost(api_base.FunctionalTest):
         expected_location = '/v1/bays/%s' % bdict['uuid']
         self.assertEqual(urlparse.urlparse(response.location).path,
                          expected_location)
-
-        response = self.get_json('/bays/%s' % bdict['uuid'])
-        self.assertEqual(bdict['uuid'], response['uuid'])
-        self.assertFalse(response['updated_at'])
+        self.assertEqual(bdict['uuid'], response.json['uuid'])
+        self.assertNotIn('updated_at', response.json.keys)
         return_created_at = timeutils.parse_isotime(
-                            response['created_at']).replace(tzinfo=None)
+                            response.json['created_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_created_at)
 
     def test_create_bay_doesnt_contain_id(self):
         with mock.patch.object(self.dbapi, 'create_bay',
                                wraps=self.dbapi.create_bay) as cc_mock:
             bdict = apiutils.bay_post_data(name='bay_example_A')
-            self.post_json('/bays', bdict)
-            response = self.get_json('/bays/%s' % bdict['uuid'])
-            self.assertEqual(bdict['name'], response['name'])
+            response = self.post_json('/bays', bdict)
+            self.assertEqual(bdict['name'], response.json['name'])
             cc_mock.assert_called_once_with(mock.ANY)
             # Check that 'id' is not in first arg of positional args
             self.assertNotIn('id', cc_mock.call_args[0][0])
@@ -341,10 +338,8 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/bays', bdict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
-
-        response = self.get_json('/bays')
-        self.assertEqual(bdict['name'], response['bays'][0]['name'])
-        self.assertTrue(utils.is_uuid_like(response['bays'][0]['uuid']))
+        self.assertEqual(bdict['name'], response.json['name'])
+        self.assertTrue(utils.is_uuid_like(response.json['uuid']))
 
     def test_create_bay_no_baymodel_id(self):
         bdict = apiutils.bay_post_data()

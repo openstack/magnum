@@ -213,21 +213,18 @@ class TestPost(api_base.FunctionalTest):
         expected_location = '/v1/nodes/%s' % node_dict['uuid']
         self.assertEqual(urlparse.urlparse(response.location).path,
                          expected_location)
-
-        response = self.get_json('/nodes/%s' % node_dict['uuid'])
-        self.assertEqual(node_dict['uuid'], response['uuid'])
-        self.assertFalse(response['updated_at'])
+        self.assertEqual(node_dict['uuid'], response.json['uuid'])
+        self.assertNotIn('updated_at', response.json.keys)
         return_created_at = timeutils.parse_isotime(
-                            response['created_at']).replace(tzinfo=None)
+                            response.json['created_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_created_at)
 
     def test_create_node_doesnt_contain_id(self):
         with mock.patch.object(self.dbapi, 'create_node',
                                wraps=self.dbapi.create_node) as cn_mock:
             node_dict = apiutils.node_post_data(image_id='Ubuntu')
-            self.post_json('/nodes', node_dict)
-            response = self.get_json('/nodes/%s' % node_dict['uuid'])
-            self.assertEqual(node_dict['image_id'], response['image_id'])
+            response = self.post_json('/nodes', node_dict)
+            self.assertEqual(node_dict['image_id'], response.json['image_id'])
             cn_mock.assert_called_once_with(mock.ANY)
             # Check that 'id' is not in first arg of positional args
             self.assertNotIn('id', cn_mock.call_args[0][0])
@@ -239,11 +236,9 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/nodes', node_dict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
-
-        response = self.get_json('/nodes')
         self.assertEqual(node_dict['image_id'],
-                         response['nodes'][0]['image_id'])
-        self.assertTrue(utils.is_uuid_like(response['nodes'][0]['uuid']))
+                         response.json['image_id'])
+        self.assertTrue(utils.is_uuid_like(response.json['uuid']))
 
 
 class TestDelete(api_base.FunctionalTest):
