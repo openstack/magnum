@@ -223,7 +223,7 @@ class TestPatch(api_base.FunctionalTest):
             },
             {
                 'path': '/node_count',
-                'value': '33',
+                'value': 33,
                 'op': 'add'
             }
         ]
