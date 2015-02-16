@@ -283,21 +283,18 @@ class TestPost(api_base.FunctionalTest):
         expected_location = '/v1/rcs/%s' % rc_dict['uuid']
         self.assertEqual(urlparse.urlparse(response.location).path,
                          expected_location)
-
-        response = self.get_json('/rcs/%s' % rc_dict['uuid'])
-        self.assertEqual(rc_dict['uuid'], response['uuid'])
-        self.assertFalse(response['updated_at'])
+        self.assertEqual(rc_dict['uuid'], response.json['uuid'])
+        self.assertNotIn('updated_at', response.json.keys)
         return_created_at = timeutils.parse_isotime(
-                            response['created_at']).replace(tzinfo=None)
+                            response.json['created_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_created_at)
 
     def test_create_rc_doesnt_contain_id(self):
         with mock.patch.object(self.dbapi, 'create_rc',
                                wraps=self.dbapi.create_rc) as cc_mock:
             rc_dict = apiutils.rc_post_data(images=['rc_example_A_image'])
-            self.post_json('/rcs', rc_dict)
-            response = self.get_json('/rcs/%s' % rc_dict['uuid'])
-            self.assertEqual(rc_dict['images'], response['images'])
+            response = self.post_json('/rcs', rc_dict)
+            self.assertEqual(rc_dict['images'], response.json['images'])
             cc_mock.assert_called_once_with(mock.ANY)
             # Check that 'id' is not in first arg of positional args
             self.assertNotIn('id', cc_mock.call_args[0][0])
@@ -309,10 +306,8 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/rcs', rc_dict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
-
-        response = self.get_json('/rcs')
-        self.assertEqual(rc_dict['images'], response['rcs'][0]['images'])
-        self.assertTrue(utils.is_uuid_like(response['rcs'][0]['uuid']))
+        self.assertEqual(rc_dict['images'], response.json['images'])
+        self.assertTrue(utils.is_uuid_like(response.json['uuid']))
 
     def test_create_rc_no_bay_uuid(self):
         rc_dict = apiutils.rc_post_data()

@@ -307,21 +307,18 @@ class TestPost(api_base.FunctionalTest):
         expected_location = '/v1/pods/%s' % pdict['uuid']
         self.assertEqual(urlparse.urlparse(response.location).path,
                          expected_location)
-
-        response = self.get_json('/pods/%s' % pdict['uuid'])
-        self.assertEqual(pdict['uuid'], response['uuid'])
-        self.assertFalse(response['updated_at'])
+        self.assertEqual(pdict['uuid'], response.json['uuid'])
+        self.assertNotIn('updated_at', response.json.keys)
         return_created_at = timeutils.parse_isotime(
-                            response['created_at']).replace(tzinfo=None)
+                            response.json['created_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_created_at)
 
     def test_create_pod_doesnt_contain_id(self):
         with mock.patch.object(self.dbapi, 'create_pod',
                                wraps=self.dbapi.create_pod) as cc_mock:
             pdict = apiutils.pod_post_data(desc='pod_example_A_desc')
-            self.post_json('/pods', pdict)
-            response = self.get_json('/pods/%s' % pdict['uuid'])
-            self.assertEqual(pdict['desc'], response['desc'])
+            response = self.post_json('/pods', pdict)
+            self.assertEqual(pdict['desc'], response.json['desc'])
             cc_mock.assert_called_once_with(mock.ANY)
             # Check that 'id' is not in first arg of positional args
             self.assertNotIn('id', cc_mock.call_args[0][0])
@@ -333,10 +330,8 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/pods', pdict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
-
-        response = self.get_json('/pods')
-        self.assertEqual(pdict['desc'], response['pods'][0]['desc'])
-        self.assertTrue(utils.is_uuid_like(response['pods'][0]['uuid']))
+        self.assertEqual(pdict['desc'], response.json['desc'])
+        self.assertTrue(utils.is_uuid_like(response.json['uuid']))
 
     def test_create_pod_no_bay_uuid(self):
         pdict = apiutils.pod_post_data()

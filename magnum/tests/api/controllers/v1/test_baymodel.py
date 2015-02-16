@@ -262,21 +262,18 @@ class TestPost(api_base.FunctionalTest):
         expected_location = '/v1/baymodels/%s' % cdict['uuid']
         self.assertEqual(urlparse.urlparse(response.location).path,
                          expected_location)
-
-        response = self.get_json('/baymodels/%s' % cdict['uuid'])
-        self.assertEqual(cdict['uuid'], response['uuid'])
-        self.assertFalse(response['updated_at'])
+        self.assertEqual(cdict['uuid'], response.json['uuid'])
+        self.assertNotIn('updated_at', response.json.keys)
         return_created_at = timeutils.parse_isotime(
-                            response['created_at']).replace(tzinfo=None)
+                            response.json['created_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_created_at)
 
     def test_create_baymodel_doesnt_contain_id(self):
         with mock.patch.object(self.dbapi, 'create_baymodel',
                                wraps=self.dbapi.create_baymodel) as cc_mock:
             cdict = apiutils.baymodel_post_data(image_id='my-image')
-            self.post_json('/baymodels', cdict)
-            response = self.get_json('/baymodels/%s' % cdict['uuid'])
-            self.assertEqual(cdict['image_id'], response['image_id'])
+            response = self.post_json('/baymodels', cdict)
+            self.assertEqual(cdict['image_id'], response.json['image_id'])
             cc_mock.assert_called_once_with(mock.ANY)
             # Check that 'id' is not in first arg of positional args
             self.assertNotIn('id', cc_mock.call_args[0][0])
@@ -284,11 +281,10 @@ class TestPost(api_base.FunctionalTest):
     def test_create_baymodel_generate_uuid(self):
         cdict = apiutils.baymodel_post_data()
         del cdict['uuid']
-        self.post_json('/baymodels', cdict)
-        response = self.get_json('/baymodels')
+        response = self.post_json('/baymodels', cdict)
         self.assertEqual(cdict['image_id'],
-                         response['baymodels'][0]['image_id'])
-        self.assertTrue(utils.is_uuid_like(response['baymodels'][0]['uuid']))
+                         response.json['image_id'])
+        self.assertTrue(utils.is_uuid_like(response.json['uuid']))
 
 
 class TestDelete(api_base.FunctionalTest):
