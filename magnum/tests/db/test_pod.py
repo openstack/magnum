@@ -64,63 +64,6 @@ class DbPodTestCase(base.DbTestCase):
                           self.dbapi.get_pod_by_name,
                           'bad-name')
 
-    def test_get_podinfo_list_defaults(self):
-        pod_id_list = [self.pod.id]
-        for i in range(1, 6):
-            pod = utils.create_test_pod(bay_uuid=self.bay.uuid,
-                uuid=magnum_utils.generate_uuid())
-            pod_id_list.append(pod.id)
-        res = [i[0] for i in self.dbapi.get_podinfo_list()]
-        self.assertEqual(sorted(res), sorted(pod_id_list))
-
-    def test_get_podinfo_list_with_cols(self):
-        uuids = {self.pod.id: self.pod.uuid}
-        names = {self.pod.id: self.pod.name}
-        for i in range(1, 6):
-            uuid = magnum_utils.generate_uuid()
-            name = 'pod' + str(i)
-            pod = utils.create_test_pod(name=name, uuid=uuid,
-                                        bay_uuid=self.bay.uuid)
-            uuids[pod.id] = uuid
-            names[pod.id] = name
-        res = self.dbapi.get_podinfo_list(columns=['id', 'name', 'uuid'])
-        self.assertEqual(names, dict((r[0], r[1]) for r in res))
-        self.assertEqual(uuids, dict((r[0], r[2]) for r in res))
-
-    def test_get_podinfo_list_with_filters(self):
-        bay1 = utils.get_test_bay(id=11, uuid=magnum_utils.generate_uuid())
-        bay2 = utils.get_test_bay(id=12, uuid=magnum_utils.generate_uuid())
-
-        self.dbapi.create_bay(bay1)
-        self.dbapi.create_bay(bay2)
-
-        pod1 = utils.create_test_pod(name='pod-one',
-            uuid=magnum_utils.generate_uuid(),
-            bay_uuid=bay1['uuid'],
-            status='status1')
-        pod2 = utils.create_test_pod(name='pod-two',
-            uuid=magnum_utils.generate_uuid(),
-            bay_uuid=bay2['uuid'],
-            status='status2')
-
-        res = self.dbapi.get_podinfo_list(filters={'bay_uuid': bay1['uuid']})
-        self.assertEqual([pod1.id], [r.id for r in res])
-
-        res = self.dbapi.get_podinfo_list(filters={'bay_uuid': bay2['uuid']})
-        self.assertEqual([pod2.id], [r.id for r in res])
-
-        res = self.dbapi.get_podinfo_list(filters={'name': 'pod-one'})
-        self.assertEqual([pod1.id], [r[0] for r in res])
-
-        res = self.dbapi.get_podinfo_list(filters={'name': 'bad-pod'})
-        self.assertEqual([], [r[0] for r in res])
-
-        res = self.dbapi.get_podinfo_list(filters={'status': 'status1'})
-        self.assertEqual([pod1.id], [r[0] for r in res])
-
-        res = self.dbapi.get_podinfo_list(filters={'status': 'status2'})
-        self.assertEqual([pod2.id], [r[0] for r in res])
-
     def test_get_pod_list(self):
         uuids = [self.pod.uuid]
         for i in range(1, 6):
