@@ -72,7 +72,7 @@ class Bay(base.APIBase):
                                   _set_baymodel_id, mandatory=True)
     """The bay model UUID or id"""
 
-    node_count = wtypes.IntegerType()
+    node_count = wtypes.IntegerType(minimum=1)
     """The node count for this bay"""
 
     links = wsme.wsattr([link.Link], readonly=True)
