@@ -352,6 +352,22 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['error_message'])
 
+    def test_create_bay_with_node_count_zero(self):
+        bdict = apiutils.bay_post_data()
+        bdict['node_count'] = 0
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_int)
+        self.assertTrue(response.json['error_message'])
+
+    def test_create_bay_with_node_count_negative(self):
+        bdict = apiutils.bay_post_data()
+        bdict['node_count'] = -1
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_int)
+        self.assertTrue(response.json['error_message'])
+
 
 class TestDelete(api_base.FunctionalTest):
 
