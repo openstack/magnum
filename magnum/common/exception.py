@@ -196,22 +196,20 @@ class MagnumException(Exception):
             except AttributeError:
                 pass
 
-        if not message:
-            try:
-                self.message = self.message % kwargs
+        if message:
+            self.message = message
 
-            except Exception as e:
-                # kwargs doesn't match a variable in the message
-                # log the issue and the kwargs
-                LOG.exception(_LE('Exception in string format operation'))
-                for name, value in kwargs.iteritems():
-                    LOG.error("%s: %s" % (name, value))
+        try:
+            self.message = self.message % kwargs
+        except Exception as e:
+            # kwargs doesn't match a variable in the message
+            # log the issue and the kwargs
+            LOG.exception(_LE('Exception in string format operation'))
+            for name, value in kwargs.iteritems():
+                LOG.error("%s: %s" % (name, value))
 
-                if CONF.fatal_exception_format_errors:
-                    raise e
-                else:
-                    # at least get the core message out if something happened
-                    message = self.message
+            if CONF.fatal_exception_format_errors:
+                raise e
 
         super(MagnumException, self).__init__(self.message)
 
