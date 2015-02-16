@@ -460,6 +460,10 @@
 # (string value)
 #host_url = unix:///var/run/docker.sock
 
+# Docker remote api version. Override it according to specific docker
+# api version in your environment. (string value)
+#docker_remote_api_version = 1.17
+
 # If set, ignore any SSL validation issues (boolean value)
 #api_insecure = false
 

@@ -30,6 +30,10 @@ docker_opts = [
                default='unix:///var/run/docker.sock',
                help='tcp://host:port to bind/connect to or '
                     'unix://path/to/socket to use'),
+    cfg.StrOpt('docker_remote_api_version',
+               default=docker_client.DEFAULT_DOCKER_REMOTE_API_VERSION,
+               help='Docker remote api version. Override it according to '
+                    'specific docker api version in your environment.'),
     cfg.BoolOpt('api_insecure',
                 default=False,
                 help='If set, ignore any SSL validation issues'),
@@ -56,7 +60,8 @@ class Handler(object):
     @property
     def docker(self):
         if self._docker is None:
-            self._docker = docker_client.DockerHTTPClient(CONF.docker.host_url)
+            self._docker = docker_client.DockerHTTPClient(CONF.docker.host_url,
+                CONF.docker.docker_remote_api_version)
         return self._docker
 
     def _find_container_by_name(self, name):
