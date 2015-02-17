@@ -31,6 +31,10 @@ class TestException(base.BaseTestCase):
         ex = TestMagnumException(name="NAME")
         self.assertEqual(ex.message, "templated NAME")
 
+    def test_custom_message_is_templated(self):
+        ex = TestMagnumException(_("custom templated %(name)s"), name="NAME")
+        self.assertEqual(ex.message, "custom templated NAME")
+
     def test_ObjectNotFound(self):
         self.assertRaises(exception.ObjectNotFound,
                     lambda: self.raise_(exception.ObjectNotFound()))
