@@ -1,0 +1,22 @@
+#cloud-config
+merge_how: dict(recurse_array)+list(append)
+write_files:
+  - path: /etc/systemd/system/swarm-manager.service
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Swarm Manager
+      After=docker.service
+      Requires=docker.service
+
+      [Service]
+      TimeoutStartSec=0
+      ExecStartPre=-/usr/bin/docker kill swarm-manager
+      ExecStartPre=-/usr/bin/docker rm swarm-manager
+      ExecStartPre=/usr/bin/docker pull dockerswarm/swarm
+      ExecStart=/usr/bin/docker run --name swarm-manager -p 2376:2375 dockerswarm/swarm manage -H tcp://0.0.0.0:2375 token://$SWARM_TOKEN
+      ExecStop=/usr/bin/docker stop swarm-manager
+
+      [Install]
+      WantedBy=multi-user.target

@@ -1,0 +1,22 @@
+#cloud-config
+merge_how: dict(recurse_array)+list(append)
+write_files:
+  - path: /etc/systemd/system/swarm-agent.service
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Swarm Agent
+      After=docker.service
+      Requires=docker.service
+
+      [Service]
+      TimeoutStartSec=0
+      ExecStartPre=-/usr/bin/docker kill swarm-agent
+      ExecStartPre=-/usr/bin/docker rm swarm-agent
+      ExecStartPre=/usr/bin/docker pull dockerswarm/swarm
+      ExecStart=/usr/bin/docker run --name swarm-agent dockerswarm/swarm join --addr $NODE_IP:2375 token://$SWARM_TOKEN
+      ExecStop=/usr/bin/docker stop swarm-agent
+
+      [Install]
+      WantedBy=multi-user.target

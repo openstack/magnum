@@ -1,0 +1,171 @@
+heat_template_version: 2013-05-23
+
+description: >
+  This is a nested stack that defines a single swarm node,
+  based on a vanilla Fedora 20 cloud image.  This stack is included by
+  a ResourceGroup resource in the parent template (swarm.yaml).
+
+parameters:
+
+  server_image:
+    type: string
+    default: fedora-atomic
+    description: glance image used to boot the server
+
+  server_flavor:
+    type: string
+    default: m1.small
+    description: flavor to use when booting the server
+
+  ssh_key_name:
+    type: string
+    description: name of ssh key to be provisioned on our server
+    default: lars
+
+  external_network_id:
+    type: string
+    description: uuid of a network to use for floating ip addresses
+
+  fixed_network_id:
+    type: string
+    description: Network from which to allocate fixed addresses.
+
+  fixed_subnet_id:
+    type: string
+    description: Subnet from which to allocate fixed addresses.
+
+  swarm_token:
+    type: string
+    description: token of swarm cluster to build
+
+resources:
+
+  node_wait_handle:
+    type: "AWS::CloudFormation::WaitConditionHandle"
+
+  node_wait_condition:
+    type: "AWS::CloudFormation::WaitCondition"
+    depends_on:
+      - swarm_node
+    properties:
+      Handle:
+        get_resource: node_wait_handle
+      Timeout: "6000"
+
+  ######################################################################
+  #
+  # security groups.  we need to permit network traffic of various
+  # sorts.
+  #
+
+  secgroup_node:
+    type: "OS::Neutron::SecurityGroup"
+    properties:
+      rules:
+        - protocol: icmp
+        - protocol: tcp
+          port_range_min: 22 # ssh
+          port_range_max: 22
+        - protocol: tcp
+          port_range_min: 2375 # docker
+          port_range_max: 2375
+        - protocol: udp
+
+  ######################################################################
+  #
+  # software configs.  these are components that are combined into
+  # a multipart MIME user-data archive.
+  write_heat_params:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/write-heat-params.yaml}
+          params:
+            "$WAIT_HANDLE": {get_resource: node_wait_handle}
+
+  write_docker_socket:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/write-docker-socket.yaml}
+
+  write_swarm_agent_service:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/write-swarm-agent-service.yaml}
+          params:
+            "$NODE_IP": {get_attr: [swarm_node_eth0, fixed_ips, 0, ip_address]}
+            "$SWARM_TOKEN": {get_param: swarm_token}
+
+  enable_services:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/enable-services.sh}
+          params:
+            "$NODE_SERVICES": "docker-tcp.socket swarm-agent"
+
+  cfn_signal:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/cfn-signal.sh}
+
+  swarm_node_init:
+    type: "OS::Heat::MultipartMime"
+    properties:
+      parts:
+        - config: {get_resource: write_heat_params}
+        - config: {get_resource: write_swarm_agent_service}
+        - config: {get_resource: write_docker_socket}
+        - config: {get_resource: enable_services}
+        - config: {get_resource: cfn_signal}
+
+  swarm_node:
+    type: "OS::Nova::Server"
+    properties:
+      image:
+        get_param: server_image
+      flavor:
+        get_param: server_flavor
+      key_name:
+        get_param: ssh_key_name
+      user_data_format: RAW
+      user_data: {get_resource: swarm_node_init}
+      networks:
+        - port:
+            get_resource: swarm_node_eth0
+
+  swarm_node_eth0:
+    type: "OS::Neutron::Port"
+    properties:
+      network_id:
+        get_param: fixed_network_id
+      security_groups:
+        - get_resource: secgroup_node
+      fixed_ips:
+        - subnet_id:
+            get_param: fixed_subnet_id
+
+  swarm_node_floating:
+    type: "OS::Neutron::FloatingIP"
+    properties:
+      floating_network_id:
+        get_param: external_network_id
+      port_id:
+        get_resource: swarm_node_eth0
+
+outputs:
+
+  swarm_node_ip:
+    value: {get_attr: [swarm_node_eth0, fixed_ips, 0, ip_address]}
+
+  swarm_node_external_ip:
+    value: {get_attr: [swarm_node_floating, floating_ip_address]}
