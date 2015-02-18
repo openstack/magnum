@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from magnum.common import exception
 from magnum.conductor.handlers.common import kube_utils
 from magnum.tests import base
 
@@ -142,3 +143,69 @@ class TestKubeUtils(base.BaseTestCase):
         mock_file.write.assert_called_once_with(expected_data)
         mock_k8s_update.assert_called_once_with(expected_master_address,
                                                 expected_filename)
+
+
+class KubeClientTestCase(base.TestCase):
+    def setUp(self):
+        super(KubeClientTestCase, self).setUp()
+        self.kube_client = kube_utils.KubeClient()
+
+    @patch('magnum.openstack.common.utils.trycmd')
+    def test_pod_delete(self, mock_trycmd):
+        expected_master_address = 'master-address'
+        expected_pod_name = 'test-pod'
+        expected_command = [
+            'kubectl', 'delete', 'pod', expected_pod_name,
+            '-s', expected_master_address
+        ]
+        mock_trycmd.return_value = ("", "")
+
+        result = self.kube_client.pod_delete(expected_master_address,
+                                             expected_pod_name)
+        self.assertTrue(result)
+        mock_trycmd.assert_called_once_with(*expected_command)
+
+    @patch('magnum.openstack.common.utils.trycmd')
+    def test_pod_delete_failure_err_not_empty(self, mock_trycmd):
+        expected_master_address = 'master-address'
+        expected_pod_name = 'test-pod'
+        expected_command = [
+            'kubectl', 'delete', 'pod', expected_pod_name,
+            '-s', expected_master_address
+        ]
+        mock_trycmd.return_value = ("", "error")
+
+        result = self.kube_client.pod_delete(expected_master_address,
+                                             expected_pod_name)
+        self.assertFalse(result)
+        mock_trycmd.assert_called_once_with(*expected_command)
+
+    @patch('magnum.openstack.common.utils.trycmd')
+    def test_pod_delete_failure_exception(self, mock_trycmd):
+        expected_master_address = 'master-address'
+        expected_pod_name = 'test-pod'
+        expected_command = [
+            'kubectl', 'delete', 'pod', expected_pod_name,
+            '-s', expected_master_address
+        ]
+        mock_trycmd.side_effect = Exception()
+
+        result = self.kube_client.pod_delete(expected_master_address,
+                                             expected_pod_name)
+        self.assertFalse(result)
+        mock_trycmd.assert_called_once_with(*expected_command)
+
+    @patch('magnum.openstack.common.utils.trycmd')
+    def test_pod_delete_not_found(self, mock_trycmd):
+        expected_master_address = 'master-address'
+        expected_pod_name = 'test-pod'
+        expected_command = [
+            'kubectl', 'delete', 'pod', expected_pod_name,
+            '-s', expected_master_address
+        ]
+        mock_trycmd.return_value = ("", 'pod "test-pod" not found')
+
+        self.assertRaises(exception.PodNotFound, self.kube_client.pod_delete,
+                          expected_master_address, expected_pod_name)
+
+        mock_trycmd.assert_called_once_with(*expected_command)

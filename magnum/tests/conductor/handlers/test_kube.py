@@ -28,7 +28,7 @@ cfg.CONF.import_opt('k8s_port', 'magnum.conductor.handlers.kube',
                     group='kubernetes')
 
 
-class TestKube(base.BaseTestCase):
+class TestKube(base.TestCase):
     def setUp(self):
         super(TestKube, self).setUp()
         self.kube_handler = kube.Handler()
@@ -145,6 +145,78 @@ class TestKube(base.BaseTestCase):
 
             self.kube_handler.pod_create({}, expected_pod)
             self.assertEqual('failed', expected_pod.status)
+
+    @patch('magnum.conductor.handlers.kube._object_has_stack')
+    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.objects.Pod.get_by_uuid')
+    def test_pod_delete_with_success(self,
+                                     mock_pod_get_by_uuid,
+                                     mock_retrieve_k8s_master_url,
+                                     mock_object_has_stack):
+        expected_master_url = 'master_address'
+        mock_pod = mock.MagicMock()
+        mock_pod.name = 'test-pod'
+        mock_pod.uuid = 'test-uuid'
+        mock_pod_get_by_uuid.return_value = mock_pod
+
+        mock_retrieve_k8s_master_url.return_value = expected_master_url
+        mock_object_has_stack.return_value = True
+        with patch.object(self.kube_handler, 'kube_cli') as mock_kube_cli:
+            mock_kube_cli.pod_delete.return_value = True
+
+            self.kube_handler.pod_delete(self.context, mock_pod.uuid)
+
+            mock_kube_cli.pod_delete.assert_called_once_with(
+                expected_master_url, mock_pod.name)
+            mock_pod.destroy.assert_called_once_with(self.context)
+
+    @patch('magnum.conductor.handlers.kube._object_has_stack')
+    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.objects.Pod.get_by_uuid')
+    def test_pod_delete_with_failure(self,
+                                     mock_pod_get_by_uuid,
+                                     mock_retrieve_k8s_master_url,
+                                     mock_object_has_stack):
+        expected_master_url = 'master_address'
+        mock_pod = mock.MagicMock()
+        mock_pod.name = 'test-pod'
+        mock_pod.uuid = 'test-uuid'
+        mock_pod_get_by_uuid.return_value = mock_pod
+
+        mock_retrieve_k8s_master_url.return_value = expected_master_url
+        mock_object_has_stack.return_value = True
+        with patch.object(self.kube_handler, 'kube_cli') as mock_kube_cli:
+            mock_kube_cli.pod_delete.return_value = False
+
+            self.kube_handler.pod_delete(self.context, mock_pod.uuid)
+
+            mock_kube_cli.pod_delete.assert_called_once_with(
+                expected_master_url, mock_pod.name)
+            self.assertFalse(mock_pod.destroy.called)
+
+    @patch('magnum.conductor.handlers.kube._object_has_stack')
+    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.objects.Pod.get_by_uuid')
+    def test_pod_delete_succeeds_when_not_found(self,
+                                     mock_pod_get_by_uuid,
+                                     mock_retrieve_k8s_master_url,
+                                     mock_object_has_stack):
+        expected_master_url = 'master_address'
+        mock_pod = mock.MagicMock()
+        mock_pod.name = 'test-pod'
+        mock_pod.uuid = 'test-uuid'
+        mock_pod_get_by_uuid.return_value = mock_pod
+
+        mock_retrieve_k8s_master_url.return_value = expected_master_url
+        mock_object_has_stack.return_value = True
+        with patch.object(self.kube_handler, 'kube_cli') as mock_kube_cli:
+            mock_kube_cli.pod_delete.return_value = True
+
+            self.kube_handler.pod_delete(self.context, mock_pod.uuid)
+
+            mock_kube_cli.pod_delete.assert_called_once_with(
+                expected_master_url, mock_pod.name)
+            mock_pod.destroy.assert_called_once_with(self.context)
 
     @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
     def test_service_create_with_success(self,
