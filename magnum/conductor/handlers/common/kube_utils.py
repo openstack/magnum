@@ -14,6 +14,7 @@
 
 import tempfile
 
+from magnum.common import exception
 from magnum.openstack.common import log as logging
 from magnum.openstack.common import utils
 
@@ -191,11 +192,16 @@ class KubeClient(object):
         try:
             out, err = utils.trycmd('kubectl', 'delete', 'pod', name,
                                     '-s', master_address,)
-            if err:
-                return False
         except Exception as e:
             LOG.error("Couldn't delete pod %s due to error %s" % (name, e))
             return False
+
+        if err:
+            if ('pod "%s" not found' % name) in err:
+                raise exception.PodNotFound(pod=name)
+            else:
+                return False
+
         return True
 
     def pod_get(self, master_address, uuid):
