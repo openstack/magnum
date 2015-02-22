@@ -14,6 +14,7 @@
 
 from oslo_config import cfg
 
+from magnum.common import exception
 from magnum.conductor.handlers import kube
 from magnum import objects
 from magnum.tests import base
@@ -210,7 +211,7 @@ class TestKube(base.TestCase):
         mock_retrieve_k8s_master_url.return_value = expected_master_url
         mock_object_has_stack.return_value = True
         with patch.object(self.kube_handler, 'kube_cli') as mock_kube_cli:
-            mock_kube_cli.pod_delete.return_value = True
+            mock_kube_cli.pod_delete.side_effect = exception.PodNotFound()
 
             self.kube_handler.pod_delete(self.context, mock_pod.uuid)
 
