@@ -15,6 +15,7 @@
 from oslo_config import cfg
 
 from magnum.common import clients
+from magnum.common import exception
 from magnum.conductor.handlers.common import kube_utils
 from magnum import objects
 from magnum.openstack.common._i18n import _
@@ -174,9 +175,15 @@ class Handler(object):
         pod = objects.Pod.get_by_uuid(context, uuid)
         k8s_master_url = _retrieve_k8s_master_url(context, pod)
         if _object_has_stack(context, pod):
-            status = self.kube_cli.pod_delete(k8s_master_url, pod.name)
-            if not status:
-                return None
+            try:
+                status = self.kube_cli.pod_delete(k8s_master_url, pod.name)
+
+                if not status:
+                    return None
+            except exception.PodNotFound:
+                msg = ("Pod '%s' not found on bay, "
+                       "continuing to delete from database.")
+                LOG.warn(msg, uuid)
         # call the pod object to persist in db
         pod.destroy(context)
 
