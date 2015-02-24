@@ -37,7 +37,8 @@ class BayModel(base.MagnumObject):
         'keypair_id': obj_utils.str_or_none,
         'dns_nameserver': obj_utils.str_or_none,
         'external_network_id': obj_utils.str_or_none,
-        'apiserver_port': obj_utils.int_or_none
+        'apiserver_port': obj_utils.int_or_none,
+        'docker_volume_size': obj_utils.int_or_none,
     }
 
     @staticmethod

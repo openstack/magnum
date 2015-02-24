@@ -16,6 +16,7 @@ import mock
 from oslo_config import cfg
 from oslo_utils import timeutils
 from six.moves.urllib import parse as urlparse
+from webtest.app import AppError
 from wsme import types as wtypes
 
 from magnum.api.controllers.v1 import baymodel as api_baymodel
@@ -49,6 +50,7 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertNotIn('dns_nameserver', response['baymodels'][0])
         self.assertNotIn('keypair_id', response['baymodels'][0])
         self.assertNotIn('external_network_id', response['baymodels'][0])
+        self.assertNotIn('docker_volume_size', response['baymodels'][0])
 
     def test_get_one(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
@@ -58,6 +60,7 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertIn('dns_nameserver', response)
         self.assertIn('keypair_id', response)
         self.assertIn('external_network_id', response)
+        self.assertIn('docker_volume_size', response)
 
     def test_detail(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
@@ -67,6 +70,7 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertIn('dns_nameserver', response['baymodels'][0])
         self.assertIn('keypair_id', response['baymodels'][0])
         self.assertIn('external_network_id', response['baymodels'][0])
+        self.assertIn('docker_volume_size', response['baymodels'][0])
 
     def test_detail_against_single(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
@@ -125,7 +129,8 @@ class TestPatch(api_base.FunctionalTest):
         self.baymodel = obj_utils.create_test_baymodel(self.context,
                                                 name='bay_model_example_A',
                                                 image_id='nerdherd',
-                                                apiserver_port=8080)
+                                                apiserver_port=8080,
+                                                docker_volume_size=20)
 
     def test_update_not_found(self):
         uuid = utils.generate_uuid()
@@ -160,6 +165,8 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(self.baymodel.image_id, response['image_id'])
         self.assertEqual(self.baymodel.apiserver_port,
                          response['apiserver_port'])
+        self.assertEqual(self.baymodel.docker_volume_size,
+                         response['docker_volume_size'])
 
     def test_remove_singular(self):
         baymodel = obj_utils.create_test_baymodel(self.context,
@@ -178,6 +185,8 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(baymodel.uuid, response['uuid'])
         self.assertEqual(baymodel.name, response['name'])
         self.assertEqual(baymodel.apiserver_port, response['apiserver_port'])
+        self.assertEqual(self.baymodel.docker_volume_size,
+                         response['docker_volume_size'])
 
     def test_remove_non_existent_property_fail(self):
         response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
@@ -201,6 +210,8 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(self.baymodel.image_id, response['image_id'])
         self.assertEqual(self.baymodel.apiserver_port,
                          response['apiserver_port'])
+        self.assertEqual(self.baymodel.docker_volume_size,
+                         response['docker_volume_size'])
 
     def test_add_root_non_existent(self):
         response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
@@ -234,6 +245,8 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(self.baymodel.uuid, response['uuid'])
         self.assertEqual(self.baymodel.apiserver_port,
                          response['apiserver_port'])
+        self.assertEqual(self.baymodel.docker_volume_size,
+                         response['docker_volume_size'])
 
     def test_remove_uuid(self):
         response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
@@ -276,6 +289,23 @@ class TestPost(api_base.FunctionalTest):
             self.assertEqual(cdict['image_id'], response.json['image_id'])
             cc_mock.assert_called_once_with(mock.ANY)
             # Check that 'id' is not in first arg of positional args
+            self.assertNotIn('id', cc_mock.call_args[0][0])
+
+    def test_create_baymodel_with_invalid_docker_volume_size(self):
+        with mock.patch.object(self.dbapi, 'create_baymodel',
+                               wraps=self.dbapi.create_baymodel) as cc_mock:
+            cdict = apiutils.baymodel_post_data(docker_volume_size='docker')
+            self.assertRaises(AppError, self.post_json, '/baymodels', cdict)
+            self.assertFalse(cc_mock.called)
+
+    def test_create_baymodel_with_docker_volume_size(self):
+        with mock.patch.object(self.dbapi, 'create_baymodel',
+                               wraps=self.dbapi.create_baymodel) as cc_mock:
+            cdict = apiutils.baymodel_post_data(docker_volume_size=99)
+            response = self.post_json('/baymodels', cdict)
+            self.assertEqual(cdict['docker_volume_size'],
+                    response.json['docker_volume_size'])
+            cc_mock.assert_called_once_with(mock.ANY)
             self.assertNotIn('id', cc_mock.call_args[0][0])
 
     def test_create_baymodel_generate_uuid(self):
