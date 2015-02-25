@@ -19,6 +19,7 @@ from oslo_config import cfg
 import oslo_messaging as messaging
 
 from magnum.common import context as magnum_context
+from magnum.common import rpc
 from magnum.objects import base as objects_base
 
 
@@ -84,7 +85,9 @@ class API(object):
         serializer = RequestContextSerializer(
             objects_base.MagnumObjectSerializer())
         if transport is None:
+            exmods = rpc.get_allowed_exmods()
             transport = messaging.get_transport(cfg.CONF,
+                                                allowed_remote_exmods=exmods,
                                                 aliases=TRANSPORT_ALIASES)
         self._context = context
         if topic is None:
