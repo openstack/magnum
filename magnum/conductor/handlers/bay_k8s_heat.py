@@ -66,6 +66,8 @@ def _extract_bay_definition(context, bay):
     #     bay_definition['apiserver_port'] = baymodel.apiserver_port
     if bay.node_count is not None:
         bay_definition['number_of_minions'] = str(bay.node_count)
+    if baymodel.docker_volume_size:
+        bay_definition['docker_volume_size'] = baymodel.docker_volume_size
 
     return bay_definition
 

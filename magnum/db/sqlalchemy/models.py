@@ -149,6 +149,7 @@ class BayModel(Base):
     external_network_id = Column(String(255))
     dns_nameserver = Column(String(255))
     apiserver_port = Column(Integer())
+    docker_volume_size = Column(Integer())
 
 
 class Container(Base):

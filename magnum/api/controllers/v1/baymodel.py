@@ -64,6 +64,9 @@ class BayModel(base.APIBase):
     apiserver_port = wtypes.IntegerType()
     """The API server port for k8s"""
 
+    docker_volume_size = wtypes.IntegerType()
+    """The size in GB of the docker volume"""
+
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated baymodel links"""
 
@@ -106,6 +109,7 @@ class BayModel(base.APIBase):
                     keypair_id='keypair1',
                     external_network_id='ffc44e4a-2319-4062-bce0-9ae1c38b05ba',
                     apiserver_port=8080,
+                    docker_volume_size=25,
                     created_at=datetime.datetime.utcnow(),
                     updated_at=datetime.datetime.utcnow())
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
