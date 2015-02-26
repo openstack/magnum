@@ -147,6 +147,7 @@ class BayModel(Base):
     flavor_id = Column(String(255))
     keypair_id = Column(String(255))
     external_network_id = Column(String(255))
+    fixed_network = Column(String(255))
     dns_nameserver = Column(String(255))
     apiserver_port = Column(Integer())
     docker_volume_size = Column(Integer())

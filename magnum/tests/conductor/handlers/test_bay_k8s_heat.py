@@ -29,6 +29,7 @@ class TestBayK8sHeat(base.TestCase):
             'keypair_id': 'keypair_id',
             'dns_nameserver': 'dns_nameserver',
             'external_network_id': 'external_network_id',
+            'fixed_network': 'private',
             'docker_volume_size': 20,
         }
         self.bay_dict = {
@@ -57,6 +58,7 @@ class TestBayK8sHeat(base.TestCase):
             'server_image': 'image_id',
             'server_flavor': 'flavor_id',
             'number_of_minions': '1',
+            'fixed_network': 'private',
             'docker_volume_size': 20,
         }
         self.assertEqual(expected, bay_definition)
@@ -79,6 +81,7 @@ class TestBayK8sHeat(base.TestCase):
             'server_image': 'image_id',
             'server_flavor': 'flavor_id',
             'number_of_minions': '1',
+            'fixed_network': 'private',
             'docker_volume_size': 20,
         }
         self.assertEqual(expected, bay_definition)
@@ -101,6 +104,7 @@ class TestBayK8sHeat(base.TestCase):
             'dns_nameserver': 'dns_nameserver',
             'server_flavor': 'flavor_id',
             'number_of_minions': '1',
+            'fixed_network': 'private',
             'docker_volume_size': 20,
         }
         self.assertEqual(expected, bay_definition)
@@ -123,6 +127,7 @@ class TestBayK8sHeat(base.TestCase):
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'number_of_minions': '1',
+            'fixed_network': 'private',
             'docker_volume_size': 20,
         }
         self.assertEqual(expected, bay_definition)
@@ -145,7 +150,31 @@ class TestBayK8sHeat(base.TestCase):
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'server_flavor': 'flavor_id',
+            'fixed_network': 'private',
             'number_of_minions': '1',
+        }
+        self.assertEqual(expected, bay_definition)
+
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_bay_definition_without_fixed_network(self,
+                                        mock_objects_baymodel_get_by_uuid):
+        baymodel_dict = self.baymodel_dict
+        baymodel_dict['fixed_network'] = None
+        baymodel = objects.BayModel(self.context, **baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        bay = objects.Bay(self.context, **self.bay_dict)
+
+        bay_definition = bay_k8s_heat._extract_bay_definition(self.context,
+                                                              bay)
+
+        expected = {
+            'ssh_key_name': 'keypair_id',
+            'external_network_id': 'external_network_id',
+            'dns_nameserver': 'dns_nameserver',
+            'server_image': 'image_id',
+            'server_flavor': 'flavor_id',
+            'number_of_minions': '1',
+            'docker_volume_size': 20,
         }
         self.assertEqual(expected, bay_definition)
 
@@ -168,6 +197,7 @@ class TestBayK8sHeat(base.TestCase):
             'server_image': 'image_id',
             'server_flavor': 'flavor_id',
             'number_of_minions': '1',
+            'fixed_network': 'private',
             'docker_volume_size': 20,
         }
         self.assertEqual(expected, bay_definition)
@@ -190,6 +220,7 @@ class TestBayK8sHeat(base.TestCase):
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'server_flavor': 'flavor_id',
+            'fixed_network': 'private',
             'docker_volume_size': 20,
         }
         self.assertEqual(expected, bay_definition)
