@@ -21,6 +21,7 @@ from magnum.common import exception
 from magnum.common import short_id
 from magnum import objects
 from magnum.openstack.common._i18n import _
+from magnum.openstack.common._i18n import _LI
 from magnum.openstack.common import log as logging
 from magnum.openstack.common import loopingcall
 
@@ -181,8 +182,8 @@ class Handler(object):
             osc.heat().stacks.delete(stack_id)
         except Exception as e:
             if isinstance(e, exc.HTTPNotFound):
-                LOG.info('The stack %s was not be found during bay deletion.' %
-                         stack_id)
+                LOG.info(_LI('The stack %s was not be found during bay'
+                             ' deletion.') % stack_id)
             else:
                 raise
         # TODO(yuanying): bay.destroy will be triggered by stack status change.
@@ -209,7 +210,8 @@ class Handler(object):
             # poll_and_check is detached and polling long time to check status,
             # so another user/client can call delete bay/stack.
             if stack.stack_status == 'DELETE_COMPLETE':
-                LOG.info('Bay has been deleted, stack_id: %s' % bay.stack_id)
+                LOG.info(_LI('Bay has been deleted, stack_id: %s')
+                              % bay.stack_id)
                 raise loopingcall.LoopingCallDone()
             if ((stack.status == 'FAILED') or
                 (attempts['count'] > cfg.CONF.k8s_heat.max_attempts)):
