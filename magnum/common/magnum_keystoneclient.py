@@ -22,6 +22,7 @@ from oslo_utils import importutils
 from magnum.common import context as magnum_context
 from magnum.common import exception
 from magnum.openstack.common._i18n import _
+from magnum.openstack.common._i18n import _LI
 from magnum.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
@@ -151,7 +152,7 @@ class KeystoneClientV3(object):
             'auth_url': self.v3_endpoint,
             'endpoint': self.v3_endpoint,
             'project_name': cfg.CONF.keystone_authtoken.admin_tenant_name}
-        LOG.info('admin creds %s' % creds)
+        LOG.info(_LI('admin creds %s') % creds)
         return creds
 
     def create_trust_context(self):
