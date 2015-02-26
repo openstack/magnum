@@ -138,7 +138,7 @@ class TestPatch(api_base.FunctionalTest):
         bay.save()
         return bay
 
-    @mock.patch('oslo.utils.timeutils.utcnow')
+    @mock.patch('oslo_utils.timeutils.utcnow')
     def test_replace_ok(self, mock_utcnow):
         name = 'bay_example_B'
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
@@ -301,7 +301,7 @@ class TestPost(api_base.FunctionalTest):
         bay.create()
         return bay
 
-    @mock.patch('oslo.utils.timeutils.utcnow')
+    @mock.patch('oslo_utils.timeutils.utcnow')
     def test_create_bay(self, mock_utcnow):
         bdict = apiutils.bay_post_data()
         test_time = datetime.datetime(2000, 1, 1, 0, 0)

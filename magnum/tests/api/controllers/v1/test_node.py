@@ -120,7 +120,7 @@ class TestPatch(api_base.FunctionalTest):
         super(TestPatch, self).setUp()
         self.node = obj_utils.create_test_node(self.context, image_id='Fedora')
 
-    @mock.patch('oslo.utils.timeutils.utcnow')
+    @mock.patch('oslo_utils.timeutils.utcnow')
     def test_replace_ok(self, mock_utcnow):
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
         mock_utcnow.return_value = test_time
@@ -199,7 +199,7 @@ class TestPatch(api_base.FunctionalTest):
 
 class TestPost(api_base.FunctionalTest):
 
-    @mock.patch('oslo.utils.timeutils.utcnow')
+    @mock.patch('oslo_utils.timeutils.utcnow')
     def test_create_node(self, mock_utcnow):
         node_dict = apiutils.node_post_data()
         test_time = datetime.datetime(2000, 1, 1, 0, 0)

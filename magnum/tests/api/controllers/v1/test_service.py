@@ -225,7 +225,7 @@ class TestPost(api_base.FunctionalTest):
         service.create()
         return service
 
-    @mock.patch('oslo.utils.timeutils.utcnow')
+    @mock.patch('oslo_utils.timeutils.utcnow')
     def test_create_service(self, mock_utcnow):
         sdict = apiutils.service_post_data()
         test_time = datetime.datetime(2000, 1, 1, 0, 0)

@@ -129,7 +129,7 @@ class TestPatch(api_base.FunctionalTest):
         self.rc = obj_utils.create_test_rc(self.context,
                                            images=['rc_example_A_image'])
 
-    @mock.patch('oslo.utils.timeutils.utcnow')
+    @mock.patch('oslo_utils.timeutils.utcnow')
     def test_replace_ok(self, mock_utcnow):
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
         mock_utcnow.return_value = test_time
@@ -269,7 +269,7 @@ class TestPost(api_base.FunctionalTest):
         rc.create(self.context)
         return rc
 
-    @mock.patch('oslo.utils.timeutils.utcnow')
+    @mock.patch('oslo_utils.timeutils.utcnow')
     def test_create_rc(self, mock_utcnow):
         rc_dict = apiutils.rc_post_data()
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
