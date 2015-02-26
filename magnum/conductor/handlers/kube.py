@@ -19,6 +19,7 @@ from magnum.common import exception
 from magnum.conductor.handlers.common import kube_utils
 from magnum import objects
 from magnum.openstack.common._i18n import _
+from magnum.openstack.common._i18n import _LW
 from magnum.openstack.common import log as logging
 
 
@@ -181,7 +182,7 @@ class Handler(object):
                 if not status:
                     return None
             except exception.PodNotFound:
-                msg = ("Pod '%s' not found on bay, "
+                msg = _LW("Pod '%s' not found on bay, "
                        "continuing to delete from database.")
                 LOG.warn(msg, uuid)
         # call the pod object to persist in db
