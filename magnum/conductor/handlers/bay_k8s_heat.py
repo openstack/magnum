@@ -21,6 +21,7 @@ from magnum.common import exception
 from magnum.common import short_id
 from magnum import objects
 from magnum.openstack.common._i18n import _
+from magnum.openstack.common._i18n import _LE
 from magnum.openstack.common._i18n import _LI
 from magnum.openstack.common import log as logging
 from magnum.openstack.common import loopingcall
@@ -216,7 +217,8 @@ class Handler(object):
             if ((stack.status == 'FAILED') or
                 (attempts['count'] > cfg.CONF.k8s_heat.max_attempts)):
                 # TODO(yuanying): update status to failed
-                LOG.error('Unable to create bay, stack_id: %s' % bay.stack_id)
+                LOG.error(_LE('Unable to create bay, stack_id: %s')
+                               % bay.stack_id)
                 raise loopingcall.LoopingCallDone()
 
         lc = loopingcall.FixedIntervalLoopingCall(f=poll_and_check)
