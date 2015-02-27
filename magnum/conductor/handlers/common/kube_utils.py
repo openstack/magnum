@@ -15,6 +15,7 @@
 import tempfile
 
 from magnum.common import exception
+from magnum.openstack.common._i18n import _LE
 from magnum.openstack.common import log as logging
 from magnum.openstack.common import utils
 
@@ -85,8 +86,9 @@ class KubeClient(object):
             if err:
                 return False
         except Exception as e:
-            LOG.error("Couldn't create service with contents %s \
-                       due to error %s" % (service, e))
+            LOG.error(_LE("Couldn't create service with contents %(content)s "
+                          "due to error %(error)s") %
+                         {'content': service, 'error': e})
             return False
         return True
 
@@ -98,8 +100,9 @@ class KubeClient(object):
             if err:
                 return False
         except Exception as e:
-            LOG.error("Couldn't update service with contents %s \
-                       due to error %s" % (service, e))
+            LOG.error(_LE("Couldn't update service with contents %(content)s "
+                          "due to error %(error)s") %
+                         {'content': service, 'error': e})
             return False
         return True
 
@@ -111,7 +114,8 @@ class KubeClient(object):
             manifest = [s.split() for s in out.split('\n')]
             return manifest
         except Exception as e:
-            LOG.error("Couldn't get list of services due to error %s" % e)
+            LOG.error(_LE("Couldn't get list of services due to error %s")
+                           % e)
             return None
 
     def service_delete(self, master_address, name):
@@ -122,8 +126,8 @@ class KubeClient(object):
             if err:
                 return False
         except Exception as e:
-            LOG.error("Couldn't delete service %s due to error %s"
-                      % (name, e))
+            LOG.error(_LE("Couldn't delete service %(service)s due to error "
+                          "%(error)s") % {'service': name, 'error': e})
             return False
         return True
 
@@ -135,7 +139,8 @@ class KubeClient(object):
             # TODO(pkilambi): process the output as needed
             return out
         except Exception as e:
-            LOG.error("Couldn't get service %s due to error %s" % (uuid, e))
+            LOG.error(_LE("Couldn't get service %(service)s due to error "
+                          "%(error)s") % {'service': uuid, 'error': e})
             return None
 
     def service_show(self, master_address, uuid):
@@ -146,8 +151,8 @@ class KubeClient(object):
             # TODO(pkilambi): process the output as needed
             return out
         except Exception as e:
-            LOG.error("Couldn't describe service %s due to error %s"
-                      % (uuid, e))
+            LOG.error(_LE("Couldn't describe service %(service)s due to error"
+                          " %(error)s") % {'service': uuid, 'error': e})
             return None
 
     # Pod Operations
@@ -159,8 +164,9 @@ class KubeClient(object):
             if err:
                 return False
         except Exception as e:
-            LOG.error("Couldn't create pod with contents %s due to error %s"
-                      % (pod, e))
+            LOG.error(_LE("Couldn't create pod with contents %(content)s "
+                          "due to error %(error)s") %
+                         {'content': pod, 'error': e})
             return False
         return True
 
@@ -172,8 +178,8 @@ class KubeClient(object):
             if err:
                 return False
         except Exception as e:
-            LOG.error("Couldn't update pod with contents %s due to error %s"
-                      % (pod, e))
+            LOG.error(_LE("Couldn't update pod with %(content)s due to error "
+                          "%(error)s") % {'content': pod, 'error': e})
             return False
         return True
 
@@ -184,7 +190,7 @@ class KubeClient(object):
             manifest = [s.split() for s in out.split('\n')]
             return manifest
         except Exception as e:
-            LOG.error("Couldn't get list of pods due to error %s" % e)
+            LOG.error(_LE("Couldn't get list of pods due to error %s") % e)
             return None
 
     def pod_delete(self, master_address, name):
@@ -193,7 +199,8 @@ class KubeClient(object):
             out, err = utils.trycmd('kubectl', 'delete', 'pod', name,
                                     '-s', master_address,)
         except Exception as e:
-            LOG.error("Couldn't delete pod %s due to error %s" % (name, e))
+            LOG.error(_LE("Couldn't delete pod %(pod)s due to error "
+                          "%(error)s") % {'pod': name, 'error': e})
             return False
 
         if err:
@@ -212,7 +219,8 @@ class KubeClient(object):
             # TODO(pkilambi): process the output as needed
             return out
         except Exception as e:
-            LOG.error("Couldn't get pod %s due to error %s" % (uuid, e))
+            LOG.error(_LE("Couldn't get pod %(pod)s due to error %(error)s")
+                         % {'pod': uuid, 'error': e})
             return None
 
     def pod_show(self, master_address, uuid):
@@ -223,7 +231,8 @@ class KubeClient(object):
             # TODO(pkilambi): process the output as needed
             return out
         except Exception as e:
-            LOG.error("Couldn't show pod %s due to error %s" % (uuid, e))
+            LOG.error(_LE("Couldn't show pod %(pod)s due to error %(error)s")
+                         % {'pod': uuid, 'error': e})
             return None
 
     # Replication Controller Operations
@@ -235,8 +244,8 @@ class KubeClient(object):
             if err:
                 return False
         except Exception as e:
-            LOG.error("Couldn't create rc with contents %s due to error %s"
-                      % (rc, e))
+            LOG.error(_LE("Couldn't create rc with contents %(content)s due "
+                          "error %(error)s") % {'content': rc, 'error': e})
             return False
         return True
 
@@ -248,8 +257,8 @@ class KubeClient(object):
             if err:
                 return False
         except Exception as e:
-            LOG.error("Couldn't update rc with contents %s due to error %s"
-                      % (rc, e))
+            LOG.error(_LE("Couldn't update rc with contents %(content)s due "
+                          "to error %(error)s") % {'content': rc, 'error': e})
             return False
         return True
 
@@ -261,6 +270,7 @@ class KubeClient(object):
             if err:
                 return False
         except Exception as e:
-            LOG.error("Couldn't delete rc %s due to error %s" % (name, e))
+            LOG.error(_LE("Couldn't delete rc %(rc)s due to error %(error)s")
+                         % {'rc': name, 'error': e})
             return False
         return True

@@ -22,6 +22,7 @@ from oslo_utils import importutils
 from magnum.common import context as magnum_context
 from magnum.common import exception
 from magnum.openstack.common._i18n import _
+from magnum.openstack.common._i18n import _LE
 from magnum.openstack.common._i18n import _LI
 from magnum.openstack.common import log as logging
 
@@ -85,7 +86,7 @@ class KeystoneClientV3(object):
             if c.authenticate():
                 self._admin_client = c
             else:
-                LOG.error("Admin client authentication failed")
+                LOG.error(_LE("Admin client authentication failed"))
                 raise exception.AuthorizationFailure()
         return self._admin_client
 
@@ -115,13 +116,13 @@ class KeystoneClientV3(object):
                 kwargs['auth_ref']['version'] = 'v3'
                 kwargs['auth_ref']['auth_token'] = self.context.auth_token
             else:
-                LOG.error("Unknown version in auth_token_info")
+                LOG.error(_LE("Unknown version in auth_token_info"))
                 raise exception.AuthorizationFailure()
         elif self.context.auth_token is not None:
             kwargs['token'] = self.context.auth_token
             kwargs['project_id'] = self.context.project_id
         else:
-            LOG.error(_("Keystone v3 API connection failed, no password "
+            LOG.error(_LE("Keystone v3 API connection failed, no password "
                         "trust or auth_token!"))
             raise exception.AuthorizationFailure()
         client = kc_v3.Client(**kwargs)
@@ -132,7 +133,7 @@ class KeystoneClientV3(object):
         if 'trust_id' in kwargs:
             # Sanity check
             if not client.auth_ref.trust_scoped:
-                LOG.error(_("trust token re-scoping failed!"))
+                LOG.error(_LE("trust token re-scoping failed!"))
                 raise exception.AuthorizationFailure()
             # All OK so update the context with the token
             self.context.auth_token = client.auth_ref.auth_token

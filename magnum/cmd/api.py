@@ -23,7 +23,7 @@ from oslo_config import cfg
 
 from magnum.api import app as api_app
 from magnum.common import service
-from magnum.openstack.common._i18n import _
+from magnum.openstack.common._i18n import _LI
 from magnum.openstack.common import log as logging
 
 
@@ -39,16 +39,16 @@ def main():
     host, port = cfg.CONF.api.host, cfg.CONF.api.port
     srv = simple_server.make_server(host, port, app)
 
-    LOG.info(_('Starting server in PID %s') % os.getpid())
+    LOG.info(_LI('Starting server in PID %s') % os.getpid())
     LOG.debug("Configuration:")
     cfg.CONF.log_opt_values(LOG, std_logging.DEBUG)
 
     if host == '0.0.0.0':
-        LOG.info(_('serving on 0.0.0.0:%(port)s, '
+        LOG.info(_LI('serving on 0.0.0.0:%(port)s, '
                    'view at http://127.0.0.1:%(port)s') %
                  dict(port=port))
     else:
-        LOG.info(_('serving on http://%(host)s:%(port)s') %
+        LOG.info(_LI('serving on http://%(host)s:%(port)s') %
                  dict(host=host, port=port))
 
     srv.serve_forever()
