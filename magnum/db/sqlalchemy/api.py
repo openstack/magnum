@@ -245,6 +245,9 @@ class Connection(api.Connection):
             query = query.filter_by(image_id=filters['image_id'])
         if 'flavor_id' in filters:
             query = query.filter_by(flavor_id=filters['flavor_id'])
+        if 'master_flavor_id' in filters:
+            query = query.filter_by(
+                    master_flavor_id=filters['master_flavor_id'])
         if 'keypair_id' in filters:
             query = query.filter_by(keypair_id=filters['keypair_id'])
         if 'external_network_id' in filters:

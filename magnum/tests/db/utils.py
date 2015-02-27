@@ -27,6 +27,7 @@ def get_test_baymodel(**kw):
         'name': kw.get('name', 'baymodel1'),
         'image_id': kw.get('image_id', 'ubuntu'),
         'flavor_id': kw.get('flavor_id', 'm1.small'),
+        'master_flavor_id': kw.get('master_flavor_id', 'm1.small'),
         'keypair_id': kw.get('keypair_id', 'keypair1'),
         'external_network_id': kw.get('external_network_id',
                                       'd1f02cfb-d27f-4068-9332-84d907cb0e2e'),
