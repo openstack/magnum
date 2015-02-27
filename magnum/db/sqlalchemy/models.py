@@ -145,6 +145,7 @@ class BayModel(Base):
     name = Column(String(255))
     image_id = Column(String(255))
     flavor_id = Column(String(255))
+    master_flavor_id = Column(String(255))
     keypair_id = Column(String(255))
     external_network_id = Column(String(255))
     fixed_network = Column(String(255))

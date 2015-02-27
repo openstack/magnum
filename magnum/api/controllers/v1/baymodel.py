@@ -52,6 +52,9 @@ class BayModel(base.APIBase):
     flavor_id = wtypes.text
     """The flavor of this bay model"""
 
+    master_flavor_id = wtypes.text
+    """The flavor of the master node for this bay model"""
+
     dns_nameserver = wtypes.text
     """The DNS nameserver address"""
 
@@ -108,6 +111,7 @@ class BayModel(base.APIBase):
                     name='example',
                     image_id='Fedora-k8s',
                     flavor_id='m1.small',
+                    master_flavor_id='m1.small',
                     dns_nameserver='8.8.1.1',
                     keypair_id='keypair1',
                     external_network_id='ffc44e4a-2319-4062-bce0-9ae1c38b05ba',

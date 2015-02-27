@@ -63,6 +63,8 @@ def _extract_bay_definition(context, bay):
         bay_definition['server_image'] = baymodel.image_id
     if baymodel.flavor_id:
         bay_definition['server_flavor'] = baymodel.flavor_id
+    if baymodel.master_flavor_id:
+        bay_definition['master_flavor'] = baymodel.master_flavor_id
     # TODO(yuanying): Add below lines if apiserver_port parameter is supported
     # if baymodel.apiserver_port:
     #     bay_definition['apiserver_port'] = baymodel.apiserver_port

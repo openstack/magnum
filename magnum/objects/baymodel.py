@@ -34,6 +34,7 @@ class BayModel(base.MagnumObject):
         'name': obj_utils.str_or_none,
         'image_id': obj_utils.str_or_none,
         'flavor_id': obj_utils.str_or_none,
+        'master_flavor_id': obj_utils.str_or_none,
         'keypair_id': obj_utils.str_or_none,
         'dns_nameserver': obj_utils.str_or_none,
         'external_network_id': obj_utils.str_or_none,
