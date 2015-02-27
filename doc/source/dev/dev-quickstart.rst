@@ -12,6 +12,9 @@ an OpenStack project.
 
     https://wiki.openstack.org/wiki/GerritWorkflow
 
+Setup Dev Environment
+=====================
+
 Install prerequisites::
 
     # Ubuntu/Debian:
@@ -86,7 +89,7 @@ When you're done, deactivate the virtualenv::
 
     deactivate
 
-======================================
+
 Exercising the Services Using DevStack
 ======================================
 
@@ -338,7 +341,7 @@ slaves and sentinels::
     magnum rc-create --manifest ./redis-sentinel-controller.yaml --bay-id $BAY_UUID
 
 Full lifecycle and introspection operations for each object are supported.  For
-exmaple, magnum bay-create magnum baymodel-delete, magnum rc-show, magnum service-list.
+exmaple, magnum bay-create, magnum baymodel-delete, magnum rc-show, magnum service-list.
 
 In this milestone you have to use the kubernetes kubectl tool to explore the
 redis cluster in detail::
@@ -374,7 +377,6 @@ Now log into one of the other container hosts and access a redis slave from ther
 There are four redis instances, one master and three slaves, running across the bay,
 replicating data between one another.
 
-================================
 Building developer documentation
 ================================
 
