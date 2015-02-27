@@ -61,6 +61,9 @@ class BayModel(base.APIBase):
     external_network_id = wtypes.text
     """The external network to attach the Bay"""
 
+    fixed_network = wtypes.text
+    """The fixed network name to attach the Bay"""
+
     apiserver_port = wtypes.IntegerType()
     """The API server port for k8s"""
 
@@ -108,6 +111,7 @@ class BayModel(base.APIBase):
                     dns_nameserver='8.8.1.1',
                     keypair_id='keypair1',
                     external_network_id='ffc44e4a-2319-4062-bce0-9ae1c38b05ba',
+                    fixed_network='private',
                     apiserver_port=8080,
                     docker_volume_size=25,
                     created_at=datetime.datetime.utcnow(),

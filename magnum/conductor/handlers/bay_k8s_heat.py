@@ -70,6 +70,8 @@ def _extract_bay_definition(context, bay):
         bay_definition['number_of_minions'] = str(bay.node_count)
     if baymodel.docker_volume_size:
         bay_definition['docker_volume_size'] = baymodel.docker_volume_size
+    if baymodel.fixed_network:
+        bay_definition['fixed_network'] = baymodel.fixed_network
 
     return bay_definition
 

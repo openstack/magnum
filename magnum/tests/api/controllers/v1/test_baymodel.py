@@ -50,6 +50,7 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertNotIn('dns_nameserver', response['baymodels'][0])
         self.assertNotIn('keypair_id', response['baymodels'][0])
         self.assertNotIn('external_network_id', response['baymodels'][0])
+        self.assertNotIn('fixed_network', response['baymodels'][0])
         self.assertNotIn('docker_volume_size', response['baymodels'][0])
 
     def test_get_one(self):
@@ -60,6 +61,7 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertIn('dns_nameserver', response)
         self.assertIn('keypair_id', response)
         self.assertIn('external_network_id', response)
+        self.assertIn('fixed_network', response)
         self.assertIn('docker_volume_size', response)
 
     def test_detail(self):
@@ -70,6 +72,7 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertIn('dns_nameserver', response['baymodels'][0])
         self.assertIn('keypair_id', response['baymodels'][0])
         self.assertIn('external_network_id', response['baymodels'][0])
+        self.assertIn('fixed_network', response['baymodels'][0])
         self.assertIn('docker_volume_size', response['baymodels'][0])
 
     def test_detail_against_single(self):
@@ -130,6 +133,7 @@ class TestPatch(api_base.FunctionalTest):
                                                 name='bay_model_example_A',
                                                 image_id='nerdherd',
                                                 apiserver_port=8080,
+                                                fixed_network='private',
                                                 docker_volume_size=20)
 
     def test_update_not_found(self):
@@ -165,6 +169,8 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(self.baymodel.image_id, response['image_id'])
         self.assertEqual(self.baymodel.apiserver_port,
                          response['apiserver_port'])
+        self.assertEqual(self.baymodel.fixed_network,
+                         response['fixed_network'])
         self.assertEqual(self.baymodel.docker_volume_size,
                          response['docker_volume_size'])
 
@@ -185,6 +191,8 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(baymodel.uuid, response['uuid'])
         self.assertEqual(baymodel.name, response['name'])
         self.assertEqual(baymodel.apiserver_port, response['apiserver_port'])
+        self.assertEqual(self.baymodel.fixed_network,
+                         response['fixed_network'])
         self.assertEqual(self.baymodel.docker_volume_size,
                          response['docker_volume_size'])
 
@@ -245,6 +253,8 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(self.baymodel.uuid, response['uuid'])
         self.assertEqual(self.baymodel.apiserver_port,
                          response['apiserver_port'])
+        self.assertEqual(self.baymodel.fixed_network,
+                         response['fixed_network'])
         self.assertEqual(self.baymodel.docker_volume_size,
                          response['docker_volume_size'])
 
