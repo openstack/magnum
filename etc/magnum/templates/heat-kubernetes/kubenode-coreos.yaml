@@ -1,0 +1,244 @@
+heat_template_version: 2013-05-23
+
+description: >
+  This is a nested stack that defines a single Kubernetes minion,
+  based on a vanilla Fedora 20 cloud image.  This stack is included by
+  a ResourceGroup resource in the parent template (kubecluster-coreos.yaml).
+
+parameters:
+
+  server_image:
+    type: string
+    default: CoreOS
+    description: glance image used to boot the server
+
+  server_flavor:
+    type: string
+    default: m1.small
+    description: flavor to use when booting the server
+
+  ssh_key_name:
+    type: string
+    description: name of ssh key to be provisioned on our server
+    default: testkey
+
+  external_network_id:
+    type: string
+    description: uuid of a network to use for floating ip addresses
+
+  token:
+    type: string
+    description: token is generated from https://discovery.etcd.io/new
+
+  ssh_authorized_key:
+    type: string
+    description: complete ssh key.
+
+  kube_allow_priv:
+    type: string
+    description: >
+      whether or not kubernetes should permit privileged containers.
+    default: "false"
+    constraints:
+      - allowed_values: ["true", "false"]
+
+  docker_volume_size:
+    type: string
+    description: >
+      size of a cinder volume to allocate to docker for container/image
+      storage
+    default: 25
+
+  # The following are all generated in the parent template.
+  kube_master_ip:
+    type: string
+    description: IP address of the Kubernetes master server.
+  fixed_network_id:
+    type: string
+    description: Network from which to allocate fixed addresses.
+  fixed_subnet_id:
+    type: string
+    description: Subnet from which to allocate fixed addresses.
+
+resources:
+
+  node_wait_handle:
+    type: "AWS::CloudFormation::WaitConditionHandle"
+
+  node_wait_condition:
+    type: "AWS::CloudFormation::WaitCondition"
+    depends_on:
+      - kube_node
+    properties:
+      Handle:
+        get_resource: node_wait_handle
+      Timeout: "6000"
+
+  ######################################################################
+  #
+  # security groups.  we need to permit network traffic of various
+  # sorts.
+  #
+
+  secgroup_all_open:
+    type: "OS::Neutron::SecurityGroup"
+    properties:
+      rules:
+        - protocol: icmp
+        - protocol: tcp
+        - protocol: udp
+
+  ######################################################################
+  #
+  # software configs.  these are components that are combined into
+  # a multipart MIME user-data archive.
+  #
+
+  write_heat_params:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/write-heat-params.yaml}
+          params:
+            "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
+            "$KUBE_MASTER_IP": {get_param: kube_master_ip}
+            "$WAIT_HANDLE": {get_resource: node_wait_handle}
+            "$DOCKER_VOLUME": {get_resource: docker_volume}
+
+  coreos_params:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/coreos.params.yaml}
+          params:
+            token: {get_param: token}
+            ssh_authorized_key: {get_param: ssh_authorized_key}
+
+  add_to_docker_group:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/add-to-docker-group.sh}
+
+  configure_docker_storage:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/configure-docker-storage.sh}
+
+  configure_kubernetes_minion:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/configure-kubernetes-minion.sh}
+
+  kube_user:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/kube-user.yaml}
+
+  kube_examples:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/kube-examples.yaml}
+
+  docker_service:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/docker.service.yaml}
+
+  enable_services:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/enable-services-minion.sh}
+
+  cfn_signal:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/cfn-signal.sh}
+
+  disable_selinux:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/disable-selinux.sh}
+
+  kube_node_init:
+    type: "OS::Heat::MultipartMime"
+    properties:
+      parts:
+        - config: {get_resource: disable_selinux}
+        - config: {get_resource: write_heat_params}
+        - config: {get_resource: kube_user}
+        - config: {get_resource: kube_examples}
+        - config: {get_resource: add_to_docker_group}
+        - config: {get_resource: configure_docker_storage}
+        - config: {get_resource: configure_kubernetes_minion}
+        - config: {get_resource: docker_service}
+        - config: {get_resource: enable_services}
+        - config: {get_resource: cfn_signal}
+        - config: {get_resource: coreos_params}
+
+  kube_node:
+    type: "OS::Nova::Server"
+    properties:
+      image:
+        get_param: server_image
+      flavor:
+        get_param: server_flavor
+      key_name:
+        get_param: ssh_key_name
+      user_data_format: RAW
+      user_data: {get_resource: kube_node_init}
+      networks:
+        - port:
+            get_resource: kube_node_eth0
+
+  kube_node_eth0:
+    type: "OS::Neutron::Port"
+    properties:
+      network_id:
+        get_param: fixed_network_id
+      security_groups:
+        - get_resource: secgroup_all_open
+      fixed_ips:
+        - subnet_id:
+            get_param: fixed_subnet_id
+      replacement_policy: AUTO
+
+  kube_node_floating:
+    type: "OS::Neutron::FloatingIP"
+    properties:
+      floating_network_id:
+        get_param: external_network_id
+      port_id:
+        get_resource: kube_node_eth0
+
+  docker_volume:
+    type: "OS::Cinder::Volume"
+    properties:
+      size: {get_param: docker_volume_size}
+
+  docker_volume_attach:
+    type: "OS::Cinder::VolumeAttachment"
+    properties:
+      instance_uuid: {get_resource: kube_node}
+      volume_id: {get_resource: docker_volume}
+
+outputs:
+
+  kube_node_ip:
+    value: {get_attr: [kube_node_eth0, fixed_ips, 0, ip_address]}
+
+  kube_node_external_ip:
+    value: {get_attr: [kube_node_floating, floating_ip_address]}
+
