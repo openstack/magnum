@@ -5,3 +5,5 @@ parameters:
   external_network_id: 59bcbd61-f5ed-4c77-8b60-b7a004ed40b3
   dns_nameserver: 10.16.36.29
   fixed_network_cidr: 192.168.113.0/24
+  token: 1cf43303da52ca09964158d40d5248de
+  ssh_authorized_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAB
