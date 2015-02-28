@@ -47,10 +47,6 @@ def main():
         bay_k8s_heat.Handler()
     ]
 
-    # TODO(sdake): Presently Magnum only has one template file.  As we go to
-    # Ironic, we will need a second template  I somewhat it believes it makes
-    # sense to move these under the magnum/magnum/templates directory since
-    # they are a hardcoded dependency and not store them in etc.
     if not os.path.isfile(cfg.CONF.k8s_heat.template_path):
         LOG.error(_LE("The Heat template %s is not found.  Install template.")
                        % (cfg.CONF.k8s_heat.template_path))
