@@ -103,7 +103,7 @@ class Handler(object):
         return service
 
     def service_update(self, context, service):
-        LOG.debug("service_update")
+        LOG.debug("service_update %s", service.uuid)
         # trigger a kubectl command
         status = self.kube_cli.service_update(service)
         if not status:
@@ -117,7 +117,7 @@ class Handler(object):
         return self.kube_cli.service_list()
 
     def service_delete(self, context, uuid):
-        LOG.debug("service_delete")
+        LOG.debug("service_delete %s", uuid)
         service = objects.Service.get_by_uuid(context, uuid)
         k8s_master_url = _retrieve_k8s_master_url(context, service)
         if _object_has_stack(context, service):
@@ -129,11 +129,11 @@ class Handler(object):
         service.destroy(context)
 
     def service_get(self, context, uuid):
-        LOG.debug("service_get")
+        LOG.debug("service_get %s", uuid)
         return self.kube_cli.service_get(uuid)
 
     def service_show(self, uuid):
-        LOG.debug("service_show")
+        LOG.debug("service_show %s", uuid)
         return self.kube_cli.service_show(uuid)
 
     # Pod Operations
@@ -157,7 +157,7 @@ class Handler(object):
         return pod
 
     def pod_update(self, context, pod):
-        LOG.debug("pod_update")
+        LOG.debug("pod_update %s", pod.uuid)
         # trigger a kubectl command
         status = self.kube_cli.pod_update(pod)
         if not status:
@@ -171,7 +171,7 @@ class Handler(object):
         return self.kube_cli.pod_list()
 
     def pod_delete(self, context, uuid):
-        LOG.debug("pod_delete ")
+        LOG.debug("pod_delete %s", uuid)
         # trigger a kubectl command
         pod = objects.Pod.get_by_uuid(context, uuid)
         k8s_master_url = _retrieve_k8s_master_url(context, pod)
@@ -189,11 +189,11 @@ class Handler(object):
         pod.destroy(context)
 
     def pod_get(self, context, uuid):
-        LOG.debug("pod_get")
+        LOG.debug("pod_get %s", uuid)
         return self.kube_cli.pod_get(uuid)
 
     def pod_show(self, context, uuid):
-        LOG.debug("pod_show")
+        LOG.debug("pod_show %s", uuid)
         return self.kube_cli.pod_show(uuid)
 
     # Replication Controller Operations
@@ -209,7 +209,7 @@ class Handler(object):
         return rc
 
     def rc_update(self, context, rc):
-        LOG.debug("rc_update")
+        LOG.debug("rc_update %s", rc.uuid)
         # trigger a kubectl command
         status = self.kube_cli.rc_update(rc)
         if not status:
@@ -219,7 +219,7 @@ class Handler(object):
         return rc
 
     def rc_delete(self, context, uuid):
-        LOG.debug("rc_delete ")
+        LOG.debug("rc_delete %s", uuid)
         rc = objects.ReplicationController.get_by_uuid(context, uuid)
         k8s_master_url = _retrieve_k8s_master_url(context, rc)
         if _object_has_stack(context, rc):
