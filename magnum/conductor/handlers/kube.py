@@ -224,7 +224,7 @@ class Handler(object):
         k8s_master_url = _retrieve_k8s_master_url(context, rc)
         if _object_has_stack(context, rc):
             # trigger a kubectl command
-            status = self.kube_cli.rc_delete(k8s_master_url, rc.name)
+            status = self.kube_cli.rc_stop(k8s_master_url, rc.name)
             if not status:
                 return None
         # call the rc object to persist in db
