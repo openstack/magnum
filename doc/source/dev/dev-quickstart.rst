@@ -203,6 +203,8 @@ Next, clone and install magnum::
     sudo pip install -e .
 
 Next configure Magnum::
+    # create the magnum conf directory
+    sudo mkdir -p /etc/magnum
 
     # copy sample config and modify it as necessary
     sudo cp etc/magnum/magnum.conf.sample /etc/magnum/magnum.conf
