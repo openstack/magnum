@@ -277,6 +277,14 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['error_message'])
 
+    def test_create_service_no_manifest(self):
+        sdict = apiutils.service_post_data()
+        del sdict['manifest']
+        response = self.post_json('/services', sdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_int)
+        self.assertTrue(response.json['error_message'])
+
 
 class TestDelete(api_base.FunctionalTest):
 
