@@ -274,6 +274,14 @@ class InvalidUUID(Invalid):
     message = _("Expected a uuid but received %(uuid)s.")
 
 
+class InvalidName(Invalid):
+    message = _("Expected a name but received %(uuid)s.")
+
+
+class InvalidUuidOrName(Invalid):
+    message = _("Expected a name or uuid but received %(uuid)s.")
+
+
 class InvalidIdentity(Invalid):
     message = _("Expected an uuid or int but received %(identity)s.")
 

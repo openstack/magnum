@@ -27,6 +27,7 @@ from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
 from magnum.common import exception
+from magnum.common import utils
 from magnum import objects
 
 
@@ -35,6 +36,26 @@ class BayPatchType(types.JsonPatchType):
     @staticmethod
     def mandatory_attrs():
         return ['/baymodel_id']
+
+
+def _get_rpc_bay(bay_ident):
+    """Get the RPC bay from the bay uuid or logical name.
+
+    :param bay_ident: the UUID or logical name of a bay.
+
+    :returns: The RPC bay.
+    :raises: InvalidUuidOrName if the name or uuid provided is not valid.
+    :raises: BayNotFound if the bay is not found.
+    :raises: Conflict if two bay exist with same name.
+
+    """
+    if utils.is_uuid_like(bay_ident):
+        return objects.Bay.get_by_uuid(pecan.request.context, bay_ident)
+
+    if utils.allow_logical_names():
+        return objects.Bay.get_by_name(pecan.request.context, bay_ident)
+
+    raise exception.InvalidUuidOrName(name=bay_ident)
 
 
 class Bay(base.APIBase):
@@ -215,16 +236,17 @@ class BaysController(rest.RestController):
                                          sort_key, sort_dir, expand,
                                          resource_url)
 
-    @wsme_pecan.wsexpose(Bay, types.uuid)
-    def get_one(self, bay_uuid):
+    @wsme_pecan.wsexpose(Bay, types.uuid_or_name)
+    def get_one(self, bay_ident):
         """Retrieve information about the given bay.
 
-        :param bay_uuid: UUID of a bay.
+        :param bay_ident: UUID of a bay or logical name of the bay.
         """
         if self.from_bays:
             raise exception.OperationNotPermitted
 
-        rpc_bay = objects.Bay.get_by_uuid(pecan.request.context, bay_uuid)
+        rpc_bay = _get_rpc_bay(bay_ident)
+
         return Bay.convert_with_links(rpc_bay)
 
     @wsme_pecan.wsexpose(Bay, body=Bay, status_code=201)
@@ -281,13 +303,15 @@ class BaysController(rest.RestController):
         res_bay = pecan.request.rpcapi.bay_update(rpc_bay)
         return Bay.convert_with_links(res_bay)
 
-    @wsme_pecan.wsexpose(None, types.uuid, status_code=204)
-    def delete(self, bay_uuid):
+    @wsme_pecan.wsexpose(None, types.uuid_or_name, status_code=204)
+    def delete(self, bay_ident):
         """Delete a bay.
 
-        :param bay_uuid: UUID of a bay.
+        :param bay_ident: UUID of a bay or logical name of the bay.
         """
         if self.from_bays:
             raise exception.OperationNotPermitted
 
-        pecan.request.rpcapi.bay_delete(bay_uuid)
+        rpc_bay = _get_rpc_bay(bay_ident)
+
+        pecan.request.rpcapi.bay_delete(rpc_bay.uuid)

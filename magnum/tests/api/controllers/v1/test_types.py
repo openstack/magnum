@@ -156,10 +156,27 @@ class TestMultiType(base.FunctionalTest):
         value = vt.validate(10)
         self.assertEqual(10, value)
 
+        vt = types.MultiType(types.UuidType, types.NameType)
+        value = vt.validate('name')
+        self.assertEqual(value, 'name')
+        uuid = "437319e3-d10f-49ec-84c8-e4abb6118c29"
+        value = vt.validate(uuid)
+        self.assertEqual(uuid, value)
+
+        vt = types.MultiType(types.UuidType, six.integer_types)
+        value = vt.validate(10)
+        self.assertEqual(value, 10)
+        value = vt.validate(uuid)
+        self.assertEqual(uuid, value)
+
     def test_invalid_values(self):
         vt = types.MultiType(wsme.types.text, six.integer_types)
         self.assertRaises(ValueError, vt.validate, 0.10)
         self.assertRaises(ValueError, vt.validate, object())
+
+        vt = types.MultiType(types.UuidType, six.integer_types)
+        self.assertRaises(ValueError, vt.validate, 'abc')
+        self.assertRaises(ValueError, vt.validate, 0.10)
 
     def test_multitype_tostring(self):
         vt = types.MultiType(str, int)
@@ -196,3 +213,14 @@ class TestBooleanType(base.FunctionalTest):
         v = types.BooleanType()
         self.assertRaises(exception.Invalid, v.validate, "invalid-value")
         self.assertRaises(exception.Invalid, v.validate, "01")
+
+
+class TestNameType(base.FunctionalTest):
+
+    def test_valid_name(self):
+        self.assertEqual('name', types.NameType.validate('name'))
+        self.assertEqual(1234, types.NameType.validate(1234))
+
+    def test_invalid_name(self):
+        self.assertRaises(exception.InvalidName, types.NameType.validate, None)
+        self.assertRaises(exception.InvalidName, types.NameType.validate, '')

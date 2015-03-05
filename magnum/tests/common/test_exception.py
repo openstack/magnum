@@ -75,6 +75,14 @@ class TestException(base.BaseTestCase):
         self.assertRaises(exception.InvalidUUID,
                     lambda: self.raise_(exception.InvalidUUID()))
 
+    def test_InvalidName(self):
+        self.assertRaises(exception.InvalidName,
+                    lambda: self.raise_(exception.InvalidName()))
+
+    def test_InvalidUuidOrName(self):
+        self.assertRaises(exception.InvalidUuidOrName,
+                    lambda: self.raise_(exception.InvalidUuidOrName()))
+
     def test_InvalidIdentity(self):
         self.assertRaises(exception.InvalidIdentity,
                     lambda: self.raise_(exception.InvalidIdentity()))

@@ -47,6 +47,15 @@ class TestBayObject(base.DbTestCase):
             mock_get_bay.assert_called_once_with(self.context, uuid)
             self.assertEqual(self.context, bay._context)
 
+    def test_get_by_name(self):
+        name = self.fake_bay['name']
+        with mock.patch.object(self.dbapi, 'get_bay_by_name',
+                               autospec=True) as mock_get_bay:
+            mock_get_bay.return_value = self.fake_bay
+            bay = objects.Bay.get_by_name(self.context, name)
+            mock_get_bay.assert_called_once_with(self.context, name)
+            self.assertEqual(self.context, bay._context)
+
     def test_get_bad_id_and_uuid(self):
         self.assertRaises(exception.InvalidIdentity,
                           objects.Bay.get, self.context, 'not-a-uuid')

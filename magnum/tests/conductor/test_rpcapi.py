@@ -83,6 +83,11 @@ class RPCAPITestCase(base.DbTestCase):
                           version='1.0',
                           uuid=self.fake_bay['uuid'])
 
+        self._test_rpcapi('bay_delete',
+                          'call',
+                          version='1.1',
+                          uuid=self.fake_bay['name'])
+
     def test_service_create(self):
         self._test_rpcapi('service_create',
                           'call',
