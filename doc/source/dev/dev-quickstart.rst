@@ -314,15 +314,10 @@ https://blueprints.launchpad.net/magnum/+spec/magnum-bay-status
 
 
 Kubernetes provides a number of examples you can use to check that things
-are working. Here's how to set up the replicated redis example. First get
-the kubernetes repo::
+are working. Here's how to set up the replicated redis example. First, create
+a pod for the redis-master::
 
-    cd ~
-    git clone https://github.com/GoogleCloudPlatform/kubernetes.git
-
-Create a pod for the redis-master::
-
-    cd kubernetes/examples/redis
+    cd ~/kubernetes/examples/redis
     BAY_UUID=$(magnum bay-list | awk '/ testbay /{print $2}')
     magnum pod-create --manifest ./redis-master.yaml --bay-id $BAY_UUID
 
