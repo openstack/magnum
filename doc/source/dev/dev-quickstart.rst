@@ -195,7 +195,7 @@ Next, create a database in MySQL for Magnum::
         'root'@'%' IDENTIFIED BY 'password'
     EOF
 
-Next, clone and install magnum::
+Next, clone and install Magnum::
 
     cd ~
     git clone https://github.com/stackforge/magnum
@@ -336,7 +336,7 @@ slaves and sentinels::
     magnum rc-create --manifest ./redis-sentinel-controller.yaml --bay-id $BAY_UUID
 
 Full lifecycle and introspection operations for each object are supported.  For
-exmaple, magnum bay-create, magnum baymodel-delete, magnum rc-show, magnum service-list.
+example, magnum bay-create, magnum baymodel-delete, magnum rc-show, magnum service-list.
 
 In this milestone you have to use the kubernetes kubectl tool to explore the
 redis cluster in detail::
