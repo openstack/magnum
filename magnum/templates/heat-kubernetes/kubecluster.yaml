@@ -26,6 +26,11 @@ parameters:
     default: centos-atomic
     description: glance image used to boot the server
 
+  master_flavor:
+    type: string
+    default: m1.small
+    description: flavor to use when booting the server
+
   server_flavor:
     type: string
     default: m1.small
@@ -78,6 +83,13 @@ parameters:
     default: "true"
     constraints:
       - allowed_values: ["true", "false"]
+
+  docker_volume_size:
+    type: string
+    description: >
+      size of a cinder volume to allocate to docker for container/image
+      storage
+    default: 25
 
 resources:
 
@@ -263,7 +275,7 @@ resources:
       image:
         get_param: server_image
       flavor:
-        get_param: server_flavor
+        get_param: master_flavor
       key_name:
         get_param: ssh_key_name
       user_data_format: RAW
@@ -312,6 +324,7 @@ resources:
           kube_master_ip: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
           external_network_id: {get_param: external_network_id}
           kube_allow_priv: {get_param: kube_allow_priv}
+          docker_volume_size: {get_param: docker_volume_size}
 
 outputs:
 
