@@ -116,7 +116,10 @@ class Service(v1_base.K8sResourceBase):
     def parse_manifest(self):
         if not self.manifest and not self.manifest_url:
             raise exception.InvalidParameterValue("'manifest' can't be empty")
-        manifest = k8s_manifest.parse(self._get_manifest())
+        try:
+            manifest = k8s_manifest.parse(self._get_manifest())
+        except ValueError as e:
+            raise exception.InvalidParameterValue(message=str(e))
         self.name = manifest["id"]
         if "port" in manifest:
             self.port = manifest["port"]
