@@ -48,6 +48,9 @@ def parse(manifest_str):
     This includes determination of whether the string is using the
     JSON or YAML format.
     '''
+    if not manifest_str:
+        msg = _("'manifest' can't be empty")
+        raise ValueError(msg)
     if manifest_str.startswith('{'):
         manifest = json.loads(manifest_str)
     else:

@@ -114,8 +114,6 @@ class Service(v1_base.K8sResourceBase):
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 
     def parse_manifest(self):
-        if not self.manifest and not self.manifest_url:
-            raise exception.InvalidParameterValue("'manifest' can't be empty")
         try:
             manifest = k8s_manifest.parse(self._get_manifest())
         except ValueError as e:
