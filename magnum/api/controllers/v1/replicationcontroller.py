@@ -113,7 +113,11 @@ class ReplicationController(v1_base.K8sResourceBase):
             manifest = k8s_manifest.parse(self._get_manifest())
         except ValueError as e:
             raise exception.InvalidParameterValue(message=str(e))
-        self.name = manifest["id"]
+        try:
+            self.name = manifest["id"]
+        except KeyError:
+            raise exception.InvalidParameterValue(
+                "'id' can't be empty in manifest.")
         if "labels" in manifest:
             self.labels = manifest["labels"]
         if "replicas" in manifest:

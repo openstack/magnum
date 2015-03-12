@@ -363,6 +363,14 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['error_message'])
 
+    def test_create_pod_no_id_in_manifest(self):
+        pdict = apiutils.pod_post_data()
+        pdict['manifest'] = {}
+        response = self.post_json('/pods', pdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_int)
+        self.assertTrue(response.json['error_message'])
+
 
 class TestDelete(api_base.FunctionalTest):
 
