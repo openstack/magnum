@@ -32,6 +32,8 @@ class TestBayK8sHeat(base.TestCase):
             'external_network_id': 'external_network_id',
             'fixed_network': 'private',
             'docker_volume_size': 20,
+            'ssh_authorized_key': 'ssh_authorized_key',
+            'token': None,
         }
         self.bay_dict = {
             'baymodel_id': 'xx-xx-xx-xx',
@@ -62,6 +64,8 @@ class TestBayK8sHeat(base.TestCase):
             'number_of_minions': '1',
             'fixed_network': 'private',
             'docker_volume_size': 20,
+            'ssh_authorized_key': 'ssh_authorized_key',
+            'token': None,
         }
         self.assertEqual(expected, bay_definition)
 
@@ -86,6 +90,8 @@ class TestBayK8sHeat(base.TestCase):
             'number_of_minions': '1',
             'fixed_network': 'private',
             'docker_volume_size': 20,
+            'ssh_authorized_key': 'ssh_authorized_key',
+            'token': None,
         }
         self.assertEqual(expected, bay_definition)
 
@@ -110,6 +116,8 @@ class TestBayK8sHeat(base.TestCase):
             'number_of_minions': '1',
             'fixed_network': 'private',
             'docker_volume_size': 20,
+            'ssh_authorized_key': 'ssh_authorized_key',
+            'token': None,
         }
         self.assertEqual(expected, bay_definition)
 
@@ -134,6 +142,8 @@ class TestBayK8sHeat(base.TestCase):
             'number_of_minions': '1',
             'fixed_network': 'private',
             'docker_volume_size': 20,
+            'ssh_authorized_key': 'ssh_authorized_key',
+            'token': None,
         }
         self.assertEqual(expected, bay_definition)
 
@@ -158,6 +168,8 @@ class TestBayK8sHeat(base.TestCase):
             'fixed_network': 'private',
             'master_flavor': 'master_flavor_id',
             'number_of_minions': '1',
+            'ssh_authorized_key': 'ssh_authorized_key',
+            'token': None,
         }
         self.assertEqual(expected, bay_definition)
 
@@ -182,6 +194,8 @@ class TestBayK8sHeat(base.TestCase):
             'server_flavor': 'flavor_id',
             'number_of_minions': '1',
             'docker_volume_size': 20,
+            'ssh_authorized_key': 'ssh_authorized_key',
+            'token': None,
         }
         self.assertEqual(expected, bay_definition)
 
@@ -206,6 +220,34 @@ class TestBayK8sHeat(base.TestCase):
             'number_of_minions': '1',
             'fixed_network': 'private',
             'docker_volume_size': 20,
+            'ssh_authorized_key': 'ssh_authorized_key',
+            'token': None,
+        }
+        self.assertEqual(expected, bay_definition)
+
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_bay_definition_without_ssh_authorized_key(self,
+                                        mock_objects_baymodel_get_by_uuid):
+        baymodel_dict = self.baymodel_dict
+        baymodel_dict['ssh_authorized_key'] = None
+        baymodel = objects.BayModel(self.context, **baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        bay = objects.Bay(self.context, **self.bay_dict)
+
+        bay_definition = bay_k8s_heat._extract_bay_definition(self.context,
+                                                              bay)
+
+        expected = {
+            'ssh_key_name': 'keypair_id',
+            'external_network_id': 'external_network_id',
+            'dns_nameserver': 'dns_nameserver',
+            'server_image': 'image_id',
+            'master_flavor': 'master_flavor_id',
+            'server_flavor': 'flavor_id',
+            'number_of_minions': '1',
+            'fixed_network': 'private',
+            'docker_volume_size': 20,
+            'token': None,
         }
         self.assertEqual(expected, bay_definition)
 
@@ -231,6 +273,8 @@ class TestBayK8sHeat(base.TestCase):
             'number_of_minions': '1',
             'fixed_network': 'private',
             'docker_volume_size': 20,
+            'ssh_authorized_key': 'ssh_authorized_key',
+            'token': None,
         }
         self.assertEqual(expected, bay_definition)
 
@@ -255,6 +299,8 @@ class TestBayK8sHeat(base.TestCase):
             'fixed_network': 'private',
             'master_flavor': 'master_flavor_id',
             'docker_volume_size': 20,
+            'ssh_authorized_key': 'ssh_authorized_key',
+            'token': None,
         }
         self.assertEqual(expected, bay_definition)
 

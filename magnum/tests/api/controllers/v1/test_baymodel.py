@@ -53,6 +53,7 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertNotIn('external_network_id', response['baymodels'][0])
         self.assertNotIn('fixed_network', response['baymodels'][0])
         self.assertNotIn('docker_volume_size', response['baymodels'][0])
+        self.assertNotIn('ssh_authorized_key', response['baymodels'][0])
 
     def test_get_one(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
@@ -65,6 +66,7 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertIn('external_network_id', response)
         self.assertIn('fixed_network', response)
         self.assertIn('docker_volume_size', response)
+        self.assertIn('ssh_authorized_key', response)
 
     def test_detail(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
@@ -77,6 +79,7 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertIn('external_network_id', response['baymodels'][0])
         self.assertIn('fixed_network', response['baymodels'][0])
         self.assertIn('docker_volume_size', response['baymodels'][0])
+        self.assertIn('ssh_authorized_key', response['baymodels'][0])
 
     def test_detail_against_single(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
@@ -133,11 +136,19 @@ class TestPatch(api_base.FunctionalTest):
     def setUp(self):
         super(TestPatch, self).setUp()
         self.baymodel = obj_utils.create_test_baymodel(self.context,
-                                                name='bay_model_example_A',
-                                                image_id='nerdherd',
-                                                apiserver_port=8080,
-                                                fixed_network='private',
-                                                docker_volume_size=20)
+                            name='bay_model_example_A',
+                            image_id='nerdherd',
+                            apiserver_port=8080,
+                            fixed_network='private',
+                            docker_volume_size=20,
+                            ssh_authorized_key='ssh-rsa AAAAB3NzaC1ycEAAAADA'
+                                               'v0XRqg3tm+jlsOKGO81lPDH+KaSJ'
+                                               'Q7wvmjUqszP/H6NC/m+qiGp/sTis'
+                                               'DYucqbeuM7nmJi+8Hb55y1xWoOZI'
+                                               'KMa71G5/4EOQxuQ/sgW965OOO2Hq'
+                                               'X8vjlQUnTK0HijrbSTLxp/9kazWW'
+                                               'FrfsdB8RtZBN digambar@magnum'
+                        )
 
     def test_update_not_found(self):
         uuid = utils.generate_uuid()
@@ -176,6 +187,8 @@ class TestPatch(api_base.FunctionalTest):
                          response['fixed_network'])
         self.assertEqual(self.baymodel.docker_volume_size,
                          response['docker_volume_size'])
+        self.assertEqual(self.baymodel.ssh_authorized_key,
+                         response['ssh_authorized_key'])
 
     def test_remove_singular(self):
         baymodel = obj_utils.create_test_baymodel(self.context,
@@ -198,6 +211,8 @@ class TestPatch(api_base.FunctionalTest):
                          response['fixed_network'])
         self.assertEqual(self.baymodel.docker_volume_size,
                          response['docker_volume_size'])
+        self.assertEqual(self.baymodel.ssh_authorized_key,
+                         response['ssh_authorized_key'])
 
     def test_remove_non_existent_property_fail(self):
         response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
@@ -260,6 +275,8 @@ class TestPatch(api_base.FunctionalTest):
                          response['fixed_network'])
         self.assertEqual(self.baymodel.docker_volume_size,
                          response['docker_volume_size'])
+        self.assertEqual(self.baymodel.ssh_authorized_key,
+                         response['ssh_authorized_key'])
 
     def test_remove_uuid(self):
         response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,

@@ -73,6 +73,9 @@ class BayModel(base.APIBase):
     docker_volume_size = wtypes.IntegerType()
     """The size in GB of the docker volume"""
 
+    ssh_authorized_key = wtypes.text
+    """The SSH Authorized Key"""
+
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated baymodel links"""
 
@@ -118,6 +121,7 @@ class BayModel(base.APIBase):
                     fixed_network='private',
                     apiserver_port=8080,
                     docker_volume_size=25,
+                    ssh_authorized_key='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAB',
                     created_at=datetime.datetime.utcnow(),
                     updated_at=datetime.datetime.utcnow())
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
