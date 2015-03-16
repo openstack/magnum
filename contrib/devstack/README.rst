@@ -24,5 +24,5 @@ To install magnum into devstack: ::
 
 Run devstack as normal: ::
 
-    cd /opt/stack/magnum
+    cd /opt/stack/devstack
     ./stack.sh
