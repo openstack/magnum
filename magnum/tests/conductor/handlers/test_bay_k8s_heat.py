@@ -14,6 +14,7 @@
 
 from magnum.conductor.handlers import bay_k8s_heat
 from magnum import objects
+from magnum.openstack.common import loopingcall
 from magnum.tests import base
 
 import mock
@@ -400,3 +401,46 @@ class TestBayK8sHeat(base.TestCase):
         }
         mock_heat_client.stacks.update.assert_called_once_with(mock_stack_id,
                                                                **expected_args)
+
+    @patch('oslo_config.cfg')
+    @patch('magnum.common.clients.OpenStackClients')
+    def setup_poll_test(self, mock_openstack_client, cfg):
+        cfg.CONF.k8s_heat.max_attempts = 10
+        bay = mock.MagicMock()
+        mock_heat_stack = mock.MagicMock()
+        mock_heat_client = mock.MagicMock()
+        mock_heat_client.stacks.get.return_value = mock_heat_stack
+        mock_openstack_client.heat.return_value = mock_heat_client
+        poller = bay_k8s_heat.HeatPoller(mock_openstack_client, bay)
+        return (mock_heat_stack, bay, poller)
+
+    def test_poll_no_save(self):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+
+        bay.status = 'CREATE_IN_PROGRESS'
+        mock_heat_stack.stack_status = 'CREATE_IN_PROGRESS'
+        poller.poll_and_check()
+
+        self.assertEqual(bay.save.call_count, 0)
+        self.assertEqual(poller.attempts, 1)
+
+    def test_poll_save(self):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+
+        bay.status = 'CREATE_IN_PROGRESS'
+        mock_heat_stack.stack_status = 'CREATE_FAILED'
+        poller.poll_and_check()
+
+        self.assertEqual(bay.save.call_count, 1)
+        self.assertEqual(bay.status, 'CREATE_FAILED')
+        self.assertEqual(poller.attempts, 1)
+
+    def test_poll_done(self):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+
+        mock_heat_stack.stack_status = 'DELETE_COMPLETE'
+        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+
+        mock_heat_stack.stack_status = 'FAILED'
+        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+        self.assertEqual(poller.attempts, 2)

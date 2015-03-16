@@ -78,6 +78,9 @@ class Bay(base.APIBase):
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated bay links"""
 
+    status = wtypes.text
+    """Status of the bay from the heat stack"""
+
     def __init__(self, **kwargs):
         super(Bay, self).__init__()
 
@@ -93,7 +96,7 @@ class Bay(base.APIBase):
     def _convert_with_links(bay, url, expand=True):
         if not expand:
             bay.unset_fields_except(['uuid', 'name', 'baymodel_id',
-                                    'node_count'])
+                                    'node_count', 'status'])
 
         bay.links = [link.Link.make_link('self', url,
                                           'bays', bay.uuid),
@@ -114,6 +117,7 @@ class Bay(base.APIBase):
                      name='example',
                      baymodel_id='4a96ac4b-2447-43f1-8ca6-9fd6f36d146d',
                      node_count=1,
+                     status="CREATED",
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)

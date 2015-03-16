@@ -54,6 +54,7 @@ class TestListBay(api_base.FunctionalTest):
         self.assertIn('name', response['bays'][0])
         self.assertIn('baymodel_id', response['bays'][0])
         self.assertIn('node_count', response['bays'][0])
+        self.assertIn('status', response['bays'][0])
 
     def test_get_one(self):
         bay = obj_utils.create_test_bay(self.context)
@@ -62,6 +63,7 @@ class TestListBay(api_base.FunctionalTest):
         self.assertIn('name', response)
         self.assertIn('baymodel_id', response)
         self.assertIn('node_count', response)
+        self.assertIn('status', response)
 
     def test_detail(self):
         bay = obj_utils.create_test_bay(self.context)
@@ -70,6 +72,7 @@ class TestListBay(api_base.FunctionalTest):
         self.assertIn('name', response['bays'][0])
         self.assertIn('baymodel_id', response['bays'][0])
         self.assertIn('node_count', response['bays'][0])
+        self.assertIn('status', response['bays'][0])
 
     def test_detail_against_single(self):
         bay = obj_utils.create_test_bay(self.context)
