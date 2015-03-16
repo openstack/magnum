@@ -87,6 +87,13 @@ parameters:
     constraints:
       - allowed_values: ["true", "false"]
 
+  docker_volume_size:
+    type: string
+    description: >
+      size of a cinder volume to allocate to docker for container/image
+      storage
+    default: 25
+
 resources:
 
   master_wait_handle:
@@ -332,6 +339,7 @@ resources:
           kube_master_ip: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
           external_network_id: {get_param: external_network_id}
           kube_allow_priv: {get_param: kube_allow_priv}
+          docker_volume_size: {get_param: docker_volume_size}
           token: {get_param: token}
           ssh_authorized_key: {get_param: ssh_authorized_key}
 
