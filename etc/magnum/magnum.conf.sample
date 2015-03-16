@@ -514,6 +514,16 @@
 # Location of template to build a k8s cluster.  (string value)
 #template_path = /etc/magnum/templates/heat-kubernetes/kubecluster.yaml
 
+# Define the Cluster type. (string value)
+# Whenever you want to create cluster of any of these
+# fedora-atomic,coreos, ironic then specify a cluster_type.
+#cluster_type = fedora-atomic, coreos, ironic
+
+# Discovery token url for coreos cluster. (string value)
+# Forming a coreos cluster will require a discovery token if your cloud
+# has internet support otherwise uuid will generate the token for you.
+#discovery_token_url = https://discovery.etcd.io/new
+
 # Number of attempts to query the Heat stack for finding out the
 # status of the created stack and getting url of the DU created in the
 # stack (integer value)

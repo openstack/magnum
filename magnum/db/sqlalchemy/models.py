@@ -27,6 +27,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Integer
 from sqlalchemy import schema
 from sqlalchemy import String
+from sqlalchemy import Text
 from sqlalchemy.types import TypeDecorator, TEXT
 
 from magnum.common import paths
@@ -152,6 +153,7 @@ class BayModel(Base):
     dns_nameserver = Column(String(255))
     apiserver_port = Column(Integer())
     docker_volume_size = Column(Integer())
+    ssh_authorized_key = Column(Text)
 
 
 class Container(Base):

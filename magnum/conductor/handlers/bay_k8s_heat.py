@@ -12,6 +12,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import requests
+import uuid
+
 from heatclient.common import template_utils
 from heatclient import exc
 from oslo_config import cfg
@@ -34,6 +37,12 @@ k8s_heat_opts = [
                                          'kubecluster.yaml'),
                help=_(
                    'Location of template to build a k8s cluster. ')),
+    cfg.StrOpt('cluster_type',
+               default=None,
+               help=_('Cluster types are fedora-atomic, coreos, ironic.')),
+    cfg.StrOpt('discovery_token_url',
+               default=None,
+               help=_('coreos discovery token url.')),
     cfg.IntOpt('max_attempts',
                default=2000,
                help=('Number of attempts to query the Heat stack for '
@@ -51,12 +60,27 @@ cfg.CONF.register_opts(k8s_heat_opts, group='k8s_heat')
 LOG = logging.getLogger(__name__)
 
 
+def _get_coreos_token(context):
+    if cfg.CONF.k8s_heat.cluster_type == 'coreos':
+        token = ""
+        discovery_url = cfg.CONF.k8s_heat.discovery_token_url
+        if discovery_url:
+            coreos_token_url = requests.get(discovery_url)
+            token = str(coreos_token_url.text.split('/')[3])
+        else:
+            token = uuid.uuid4().hex
+        return token
+    else:
+        return None
+
+
 def _extract_bay_definition(context, bay):
     baymodel = objects.BayModel.get_by_uuid(context, bay.baymodel_id)
-
+    token = _get_coreos_token(context)
     bay_definition = {
         'ssh_key_name': baymodel.keypair_id,
         'external_network_id': baymodel.external_network_id,
+        'token': token,
     }
     if baymodel.dns_nameserver:
         bay_definition['dns_nameserver'] = baymodel.dns_nameserver
@@ -75,6 +99,8 @@ def _extract_bay_definition(context, bay):
         bay_definition['docker_volume_size'] = baymodel.docker_volume_size
     if baymodel.fixed_network:
         bay_definition['fixed_network'] = baymodel.fixed_network
+    if baymodel.ssh_authorized_key:
+        bay_definition['ssh_authorized_key'] = baymodel.ssh_authorized_key
 
     return bay_definition
 
