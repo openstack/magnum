@@ -99,6 +99,10 @@ class RPCAPITestCase(base.DbTestCase):
                           'call',
                           version='1.0',
                           uuid=self.fake_service['uuid'])
+        self._test_rpcapi('service_delete',
+                          'call',
+                          version='1.1',
+                          uuid=self.fake_service['name'])
 
     def test_pod_create(self):
         self._test_rpcapi('pod_create',

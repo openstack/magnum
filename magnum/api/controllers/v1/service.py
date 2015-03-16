@@ -227,17 +227,17 @@ class ServicesController(rest.RestController):
                                              sort_key, sort_dir, expand,
                                              resource_url)
 
-    @wsme_pecan.wsexpose(Service, types.uuid)
-    def get_one(self, service_uuid):
+    @wsme_pecan.wsexpose(Service, types.uuid_or_name)
+    def get_one(self, service_ident):
         """Retrieve information about the given service.
 
-        :param service_uuid: UUID of a service.
+        :param service_ident: UUID or logical name of the service.
         """
         if self.from_services:
             raise exception.OperationNotPermitted
 
-        rpc_service = objects.Service.get_by_uuid(pecan.request.context,
-                                                  service_uuid)
+        rpc_service = api_utils.get_rpc_resource('Service', service_ident)
+
         return Service.convert_with_links(rpc_service)
 
     @wsme_pecan.wsexpose(Service, body=Service, status_code=201)
@@ -300,13 +300,15 @@ class ServicesController(rest.RestController):
         rpc_service.save()
         return Service.convert_with_links(rpc_service)
 
-    @wsme_pecan.wsexpose(None, types.uuid, status_code=204)
-    def delete(self, service_uuid):
+    @wsme_pecan.wsexpose(None, types.uuid_or_name, status_code=204)
+    def delete(self, service_ident):
         """Delete a service.
 
-        :param service_uuid: UUID of a service.
+        :param service_ident: UUID or logical name of a service.
         """
         if self.from_services:
             raise exception.OperationNotPermitted
 
-        pecan.request.rpcapi.service_delete(service_uuid)
+        rpc_service = api_utils.get_rpc_resource('Service', service_ident)
+
+        pecan.request.rpcapi.service_delete(rpc_service.uuid)

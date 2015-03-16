@@ -83,6 +83,19 @@ class Service(base.MagnumObject):
         return service
 
     @base.remotable_classmethod
+    def get_by_name(cls, context, name):
+        """Find a service based on service name and
+        return a :class:`Service` object.
+
+        :param name: the name of a service.
+        :param context: Security context
+        :returns: a :class:`Service` object.
+        """
+        db_service = cls.dbapi.get_service_by_name(context, name)
+        service = Service._from_db_object(cls(context), db_service)
+        return service
+
+    @base.remotable_classmethod
     def list_by_bay_uuid(cls, context, bay_uuid):
         """Return a list of :class:`Service` objects associated with a given bay.
 

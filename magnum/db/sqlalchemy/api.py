@@ -174,9 +174,8 @@ class Connection(api.Connection):
         try:
             return query.one()
         except MultipleResultsFound:
-            raise exception.Conflict('Multiple bays exist with same name. '
-                                     'Please use the bay uuid instead to '
-                                     'indicate which to delete')
+            raise exception.Conflict('Multiple bays exist with same name.'
+                                     ' Please use the bay uuid instead.')
         except NoResultFound:
             raise exception.BayNotFound(bay=bay_name)
 
@@ -708,6 +707,18 @@ class Connection(api.Connection):
             return query.all()
         except NoResultFound:
             raise exception.ServiceNotFound(bay=bay_uuid)
+
+    def get_service_by_name(self, context, service_name):
+        query = model_query(models.Service)
+        query = self._add_tenant_filters(context, query)
+        query = query.filter_by(name=service_name)
+        try:
+            return query.one()
+        except MultipleResultsFound:
+            raise exception.Conflict('Multiple services exist with same name.'
+                                     ' Please use the service uuid instead.')
+        except NoResultFound:
+            raise exception.ServiceNotFound(service=service_name)
 
     def destroy_service(self, service_id):
         session = get_session()

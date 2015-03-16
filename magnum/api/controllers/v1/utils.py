@@ -15,8 +15,12 @@
 
 import jsonpatch
 from oslo_config import cfg
+import pecan
 import wsme
 
+from magnum.common import exception
+from magnum.common import utils
+from magnum import objects
 from magnum.openstack.common._i18n import _
 
 CONF = cfg.CONF
@@ -50,3 +54,23 @@ def apply_jsonpatch(doc, patch):
                         ' the resource is not allowed')
                 raise wsme.exc.ClientSideError(msg % p['path'])
     return jsonpatch.apply_patch(doc, jsonpatch.JsonPatch(patch))
+
+
+def get_rpc_resource(resource, resource_ident):
+    """Get the RPC resource from the uuid or logical name.
+
+    :param resource: the resource type.
+    :param resource_ident: the UUID or logical name of the resource.
+
+    :returns: The RPC resource.
+    :raises: InvalidUuidOrName if the name or uuid provided is not valid.
+    """
+    resource = getattr(objects, resource)
+
+    if utils.is_uuid_like(resource_ident):
+        return resource.get_by_uuid(pecan.request.context, resource_ident)
+
+    if utils.allow_logical_names():
+        return resource.get_by_name(pecan.request.context, resource_ident)
+
+    raise exception.InvalidUuidOrName(name=resource_ident)
