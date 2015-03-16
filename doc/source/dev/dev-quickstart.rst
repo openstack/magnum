@@ -115,157 +115,45 @@ Install binary distribution of kubectl distributed by Google::
 
 Clone DevStack::
 
-    cd ~
-    git clone https://github.com/openstack-dev/devstack.git devstack
+    # Create dir to run devstack from, if not done so already
+    sudo mkdir -p /opt/stack
+    sudo chown $USER /opt/stack
 
-Create devstack/localrc with minimal settings required to enable Heat
+    git clone https://github.com/openstack-dev/devstack.git /opt/stack/devstack
+    git clone https://github.com/stackforge/magnum /opt/stack/magnum
+
+Copy devstack/localrc with minimal settings required to enable Heat
 and Neutron, refer to http://docs.openstack.org/developer/devstack/guides/neutron.html
-for more detailed neutron configuration.::
+for more detailed neutron configuration.
 
-    cd devstack
-    cat >localrc <<END
-    # Modify to your environment
-    FLOATING_RANGE=192.168.1.224/27
-    PUBLIC_NETWORK_GATEWAY=192.168.1.225
-    PUBLIC_INTERFACE=em1
+Be sure to update network and other config as appropriate for your setup.::
 
-    # Credentials
-    ADMIN_PASSWORD=password
-    DATABASE_PASSWORD=password
-    RABBIT_PASSWORD=password
-    SERVICE_PASSWORD=password
-    SERVICE_TOKEN=password
+    cp /opt/stack/magnum/contrib/devstack/localrc.example /opt/stack/devstack/localrc
 
-    enable_service rabbit
+Prepare DevStack for Magnum::
 
-    # Enable Neutron which is required by Magnum and disable nova-network.
-    disable_service n-net
-    enable_service q-svc
-    enable_service q-agt
-    enable_service q-dhcp
-    enable_service q-l3
-    enable_service q-meta
-    enable_service neutron
+    cd /opt/stack/magnum
+    ./contrib/devstack/prepare_devstack.sh
 
-    FIXED_RANGE=10.0.0.0/24
+Run DevStack::
 
-    Q_USE_SECGROUP=True
-    ENABLE_TENANT_VLANS=True
-    TENANT_VLAN_RANGE=
-
-    PHYSICAL_NETWORK=public
-    OVS_PHYSICAL_BRIDGE=br-ex
-
-    # Log all output to files
-    LOGFILE=$HOME/devstack.log
-    SCREEN_LOGDIR=$HOME/logs
-
-    END
+    cd /opt/stack/magnum
     ./stack.sh
 
 At this time, Magnum has only been tested with the Fedora Atomic micro-OS.
 Magnum will likely work with other micro-OS platforms, but each one requires
 individual support in the heat template.
 
-The next step is to store the Fedora Atomic micro-OS in glance.  The steps for
-updating Fedora Atomic images are a bit detailed.  Fortunately one of the core
-developers has made Atomic images avaliable via the web:
-
-If using the m-1 tag or tarball, please use the documentation shipped with the
-milestone as the current master instructions are slightly incompatible.
+The fedora-atomic-21 image will automatically be added to glance, you can still
+add your own images to use manually through glance.
 
 Create a new shell, and source the devstack openrc script::
 
     source ~/devstack/openrc admin admin
 
     cd ~
-    wget https://fedorapeople.org/groups/heat/kolla/fedora-21-atomic.qcow2
-    glance image-create --name fedora21-atomic \
-                        --is-public True \
-                        --disk-format qcow2 \
-                        --container-format bare < fedora-21-atomic.qcow2
     test -f ~/.ssh/id_rsa.pub || ssh-keygen
     nova keypair-add --pub-key ~/.ssh/id_rsa.pub testkey
-
-Next, create a database in MySQL for Magnum::
-
-    mysql -h 127.0.0.1 -u root -ppassword mysql <<EOF
-    CREATE DATABASE IF NOT EXISTS magnum DEFAULT CHARACTER SET utf8;
-    GRANT ALL PRIVILEGES ON magnum.* TO
-        'root'@'%' IDENTIFIED BY 'password'
-    EOF
-
-Next, clone and install Magnum::
-
-    cd ~
-    git clone https://github.com/stackforge/magnum
-    cd magnum
-    sudo pip install -e .
-
-Next configure Magnum::
-
-    # create the magnum conf directory
-    sudo mkdir -p /etc/magnum
-
-    # copy sample config and modify it as necessary
-    sudo cp etc/magnum/magnum.conf.sample /etc/magnum/magnum.conf
-
-    # enable debugging output
-    sudo sed -i "s/#debug\s*=.*/debug=true/" /etc/magnum/magnum.conf
-
-    # enable more verbose output
-    sudo sed -i "s/#verbose\s*=.*/verbose=true/" /etc/magnum/magnum.conf
-
-    # set RabbitMQ userid
-    sudo sed -i "s/#rabbit_userid\s*=.*/rabbit_userid=stackrabbit/" /etc/magnum/magnum.conf
-
-    # set RabbitMQ password
-    sudo sed -i "s/#rabbit_password\s*=.*/rabbit_password=password/" /etc/magnum/magnum.conf
-
-    # set SQLAlchemy connection string to connect to MySQL
-    sudo sed -i "s/#connection\s*=.*/connection=mysql:\/\/root:password@localhost\/magnum/" /etc/magnum/magnum.conf
-
-    # set Keystone account username
-    sudo sed -i "s/#admin_user\s*=.*/admin_user=admin/" /etc/magnum/magnum.conf
-
-    # set Keystone account password
-    sudo sed -i "s/#admin_password\s*=.*/admin_password=password/" /etc/magnum/magnum.conf
-
-    # set admin Identity API endpoint
-    sudo sed -i "s/#identity_uri\s*=.*/identity_uri=http:\/\/127.0.0.1:35357/" /etc/magnum/magnum.conf
-
-    # set public Identity API endpoint
-    sudo sed -i "s/#auth_uri\s*=.*/auth_uri=http:\/\/127.0.0.1:5000\/v2.0/" /etc/magnum/magnum.conf
-
-Next, clone and install the client::
-
-    cd ~
-    git clone https://github.com/stackforge/python-magnumclient
-    cd python-magnumclient
-    sudo pip install -e .
-
-Next, configure the database for use with Magnum::
-
-    magnum-db-manage upgrade
-
-Finally, configure the keystone endpoint::
-
-    keystone service-create --name=magnum \
-                            --type=container \
-                            --description="Magnum Container Service"
-    keystone endpoint-create --service=magnum \
-                             --publicurl=http://127.0.0.1:9511/v1 \
-                             --internalurl=http://127.0.0.1:9511/v1 \
-                             --adminurl=http://127.0.0.1:9511/v1
-
-
-Next start the API service::
-
-    magnum-api
-
-Next start the conductor service in a new window::
-
-    magnum-conductor
 
 To get started, list the available commands and resources::
 
@@ -275,7 +163,7 @@ First create a baymodel, which is similar in nature to a flavor.  It informs
 Magnum in which way to construct a bay.::
 
     NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
-    magnum baymodel-create --name testbaymodel --image-id fedora21-atomic \
+    magnum baymodel-create --name testbaymodel --image-id fedora-21-atomic \
                            --keypair-id testkey \
                            --external-network-id $NIC_ID \
                            --dns-nameserver 8.8.8.8 --flavor-id m1.small

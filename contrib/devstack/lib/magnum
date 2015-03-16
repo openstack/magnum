@@ -1,0 +1,251 @@
+#!/bin/bash
+#
+# lib/magnum
+# Functions to control the configuration and operation of the **magnum** service
+
+# Dependencies:
+#
+# - ``functions`` file
+# - ``DEST``, ``DATA_DIR``, ``STACK_USER`` must be defined
+# - ``SERVICE_{TENANT_NAME|PASSWORD}`` must be defined
+
+# ``stack.sh`` calls the entry points in this order:
+#
+# - install_magnum
+# - configure_magnum
+# - create_magnum_conf
+# - init_magnum
+# - start_magnum
+# - stop_magnum
+# - cleanup_magnum
+
+# Save trace setting
+XTRACE=$(set +o | grep xtrace)
+set +o xtrace
+
+
+# Defaults
+# --------
+
+# Set up default directories
+MAGNUM_REPO=${MAGNUM_REPO:-${GIT_BASE}/stackforge/magnum.git}
+MAGNUM_BRANCH=${MAGNUM_BRANCH:-master}
+MAGNUM_DIR=$DEST/magnum
+
+GITREPO["python-magnumclient"]=${MAGNUMCLIENT_REPO:-${GIT_BASE}/stackforge/python-magnumclient.git}
+GITBRANCH["python-magnumclient"]=${MAGNUMCLIENT_BRANCH:-master}
+GITDIR["python-magnumclient"]=$DEST/python-magnumclient
+
+MAGNUM_STATE_PATH=${MAGNUM_STATE_PATH:=$DATA_DIR/magnum}
+MAGNUM_AUTH_CACHE_DIR=${MAGNUM_AUTH_CACHE_DIR:-/var/cache/magnum}
+
+MAGNUM_CONF_DIR=/etc/magnum
+MAGNUM_CONF=$MAGNUM_CONF_DIR/magnum.conf
+
+if is_ssl_enabled_service "magnum" || is_service_enabled tls-proxy; then
+    MAGNUM_SERVICE_PROTOCOL="https"
+fi
+
+# Public facing bits
+MAGNUM_SERVICE_HOST=${MAGNUM_SERVICE_HOST:-$SERVICE_HOST}
+MAGNUM_SERVICE_PORT=${MAGNUM_SERVICE_PORT:-9511}
+MAGNUM_SERVICE_PORT_INT=${MAGNUM_SERVICE_PORT_INT:-19511}
+MAGNUM_SERVICE_PROTOCOL=${MAGNUM_SERVICE_PROTOCOL:-$SERVICE_PROTOCOL}
+
+# Support entry points installation of console scripts
+if [[ -d $MAGNUM_DIR/bin ]]; then
+    MAGNUM_BIN_DIR=$MAGNUM_DIR/bin
+else
+    MAGNUM_BIN_DIR=$(get_python_exec_prefix)
+fi
+
+# Functions
+# ---------
+
+# Test if any magnum services are enabled
+# is_magnum_enabled
+function is_magnum_enabled {
+    [[ ,${ENABLED_SERVICES} =~ ,"m-" ]] && return 0
+    return 1
+}
+# cleanup_magnum() - Remove residual data files, anything left over from previous
+# runs that a clean run would need to clean up
+function cleanup_magnum {
+    sudo rm -rf $MAGNUM_STATE_PATH $MAGNUM_AUTH_CACHE_DIR
+}
+
+# configure_magnum() - Set config files, create data dirs, etc
+function configure_magnum {
+    # Put config files in ``/etc/magnum`` for everyone to find
+    if [[ ! -d $MAGNUM_CONF_DIR ]]; then
+        sudo mkdir -p $MAGNUM_CONF_DIR
+        sudo chown $STACK_USER $MAGNUM_CONF_DIR
+    fi
+
+    # Rebuild the config file from scratch
+    create_magnum_conf
+
+}
+
+# create_magnum_accounts() - Set up common required magnum accounts
+#
+# Project              User         Roles
+# ------------------------------------------------------------------
+# SERVICE_TENANT_NAME  magnum         service
+function create_magnum_accounts {
+
+    create_service_user "magnum" "admin"
+
+    if [[ "$KEYSTONE_CATALOG_BACKEND" = 'sql' ]]; then
+
+        local magnum_service=$(get_or_create_service "magnum" \
+            "container" "Magnum Container Service")
+        get_or_create_endpoint $magnum_service \
+            "$REGION_NAME" \
+            "$MAGNUM_SERVICE_PROTOCOL://$MAGNUM_SERVICE_HOST:$MAGNUM_SERVICE_PORT/v1" \
+            "$MAGNUM_SERVICE_PROTOCOL://$MAGNUM_SERVICE_HOST:$MAGNUM_SERVICE_PORT/v1" \
+            "$MAGNUM_SERVICE_PROTOCOL://$MAGNUM_SERVICE_HOST:$MAGNUM_SERVICE_PORT/v1"
+    fi
+
+}
+
+# create_magnum_conf() - Create a new magnum.conf file
+function create_magnum_conf {
+
+    # (Re)create ``magnum.conf``
+    rm -f $MAGNUM_CONF
+    iniset $MAGNUM_CONF DEFAULT verbose "True"
+    iniset $MAGNUM_CONF DEFAULT debug "$ENABLE_DEBUG_LOG_LEVEL"
+    iniset $MAGNUM_CONF DEFAULT rabbit_userid $RABBIT_USERID
+    iniset $MAGNUM_CONF DEFAULT rabbit_password $RABBIT_PASSWORD
+    iniset $MAGNUM_CONF DEFAULT rabbit_host $RABBIT_HOST
+
+    iniset $MAGNUM_CONF database connection `database_connection_url magnum`
+    iniset $MAGNUM_CONF api host "$MAGNUM_SERVICE_HOST"
+    iniset $MAGNUM_CONF api port "$MAGNUM_SERVICE_PORT"
+    iniset $MAGNUM_CONF conductor host "$MAGNUM_SERVICE_HOST"
+
+    configure_auth_token_middleware $MAGNUM_CONF magnum $MAGNUM_AUTH_CACHE_DIR
+
+    if is_fedora || is_suse; then
+        # magnum defaults to /usr/local/bin, but fedora and suse pip like to
+        # install things in /usr/bin
+        iniset $MAGNUM_CONF DEFAULT bindir "/usr/bin"
+    fi
+
+    if [ -n "$MAGNUM_STATE_PATH" ]; then
+        iniset $MAGNUM_CONF DEFAULT state_path "$MAGNUM_STATE_PATH"
+        iniset $MAGNUM_CONF DEFAULT lock_path "$MAGNUM_STATE_PATH"
+    fi
+
+    if [ "$SYSLOG" != "False" ]; then
+        iniset $MAGNUM_CONF DEFAULT use_syslog "True"
+    fi
+
+    # Format logging
+    if [ "$LOG_COLOR" == "True" ] && [ "$SYSLOG" == "False" ]; then
+        setup_colorized_logging $MAGNUM_CONF DEFAULT
+    else
+        # Show user_name and project_name instead of user_id and project_id
+        iniset $MAGNUM_CONF DEFAULT logging_context_format_string "%(asctime)s.%(msecs)03d %(levelname)s %(name)s [%(request_id)s %(user_name)s %(project_name)s] %(instance)s%(message)s"
+    fi
+
+    # Register SSL certificates if provided
+    if is_ssl_enabled_service magnum; then
+        ensure_certificates MAGNUM
+
+        iniset $MAGNUM_CONF DEFAULT ssl_cert_file "$MAGNUM_SSL_CERT"
+        iniset $MAGNUM_CONF DEFAULT ssl_key_file "$MAGNUM_SSL_KEY"
+
+        iniset $MAGNUM_CONF DEFAULT enabled_ssl_apis "$MAGNUM_ENABLED_APIS"
+    fi
+}
+
+function create_magnum_conf_magnum_network {
+    iniset $MAGNUM_CONF DEFAULT network_manager "magnum.network.manager.$NETWORK_MANAGER"
+    iniset $MAGNUM_CONF DEFAULT public_interface "$PUBLIC_INTERFACE"
+    iniset $MAGNUM_CONF DEFAULT vlan_interface "$VLAN_INTERFACE"
+    iniset $MAGNUM_CONF DEFAULT flat_network_bridge "$FLAT_NETWORK_BRIDGE"
+    if [ -n "$FLAT_INTERFACE" ]; then
+        iniset $MAGNUM_CONF DEFAULT flat_interface "$FLAT_INTERFACE"
+    fi
+}
+
+# create_magnum_cache_dir() - Part of the init_magnum() process
+function create_magnum_cache_dir {
+    # Create cache dir
+    sudo mkdir -p $MAGNUM_AUTH_CACHE_DIR
+    sudo chown $STACK_USER $MAGNUM_AUTH_CACHE_DIR
+    rm -f $MAGNUM_AUTH_CACHE_DIR/*
+}
+
+
+# init_magnum() - Initialize databases, etc.
+function init_magnum {
+    # Only do this step once on the API node for an entire cluster.
+    if is_service_enabled $DATABASE_BACKENDS && is_service_enabled m-api; then
+        # (Re)create magnum database
+        recreate_database magnum
+
+        # Migrate magnum database
+        $MAGNUM_BIN_DIR/magnum-db-manage upgrade
+    fi
+    create_magnum_cache_dir
+}
+
+# install_magnumclient() - Collect source and prepare
+function install_magnumclient {
+    if use_library_from_git "python-magnumclient"; then
+        git_clone_by_name "python-magnumclient"
+        setup_dev_lib "python-magnumclient"
+    fi
+}
+
+# install_magnum() - Collect source and prepare
+function install_magnum {
+    git_clone $MAGNUM_REPO $MAGNUM_DIR $MAGNUM_BRANCH
+    setup_develop $MAGNUM_DIR
+}
+
+# start_magnum_api() - Start the API process ahead of other things
+function start_magnum_api {
+    # Get right service port for testing
+    local service_port=$MAGNUM_SERVICE_PORT
+    local service_protocol=$MAGNUM_SERVICE_PROTOCOL
+    if is_service_enabled tls-proxy; then
+        service_port=$MAGNUM_SERVICE_PORT_INT
+        service_protocol="http"
+    fi
+
+    run_process m-api "$MAGNUM_BIN_DIR/magnum-api"
+    echo "Waiting for magnum-api to start..."
+    if ! wait_for_service $SERVICE_TIMEOUT $service_protocol://$SERVICE_HOST:$service_port; then
+        die $LINENO "magnum-api did not start"
+    fi
+
+    # Start proxies if enabled
+    if is_service_enabled tls-proxy; then
+        start_tls_proxy '*' $MAGNUM_SERVICE_PORT $MAGNUM_SERVICE_HOST $MAGNUM_SERVICE_PORT_INT &
+        start_tls_proxy '*' $EC2_SERVICE_PORT $MAGNUM_SERVICE_HOST $EC2_SERVICE_PORT_INT &
+    fi
+}
+
+
+# start_magnum() - Start running processes, including screen
+function start_magnum {
+
+    # ``run_process`` checks ``is_service_enabled``, it is not needed here
+    start_magnum_api
+    run_process m-cond "$MAGNUM_BIN_DIR/magnum-conductor"
+}
+
+# stop_magnum() - Stop running processes (non-screen)
+function stop_magnum {
+    for serv in m-api m-cond; do
+        stop_process $serv
+    done
+}
+
+
+# Restore xtrace
+$XTRACE
