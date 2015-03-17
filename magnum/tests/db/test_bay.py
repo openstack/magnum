@@ -42,6 +42,12 @@ class DbBayTestCase(base.DbTestCase):
         self.assertEqual(bay.id, res.id)
         self.assertEqual(bay.uuid, res.uuid)
 
+    def test_get_bay_by_name(self):
+        bay = utils.create_test_bay()
+        res = self.dbapi.get_bay_by_name(self.context, bay.name)
+        self.assertEqual(bay.name, res.name)
+        self.assertEqual(bay.uuid, res.uuid)
+
     def test_get_bay_by_uuid(self):
         bay = utils.create_test_bay()
         res = self.dbapi.get_bay_by_uuid(self.context, bay.uuid)

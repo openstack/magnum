@@ -99,6 +99,15 @@ class Connection(object):
         """
 
     @abc.abstractmethod
+    def get_bay_by_name(self, context, bay_name):
+        """Return a bay.
+
+        :param context: The security context
+        :param bay_name: The name of a bay.
+        :returns: A bay.
+        """
+
+    @abc.abstractmethod
     def destroy_bay(self, bay_id):
         """Destroy a bay and all associated interfaces.
 

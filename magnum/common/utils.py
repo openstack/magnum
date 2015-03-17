@@ -22,6 +22,7 @@ import contextlib
 import errno
 import hashlib
 import os
+import pecan
 import random
 import re
 import shutil
@@ -543,3 +544,30 @@ def dd(src, dst, *args):
     """
     execute('dd', 'if=%s' % src, 'of=%s' % dst, *args,
             run_as_root=True, check_exit_code=[0])
+
+
+def is_name_safe(name):
+    """Checks whether the name is valid or not.
+
+    :param name: name of the resource.
+    :returns: True, when name is valid
+              False, otherwise.
+    """
+    # TODO(madhuri): There should be some validation of name.
+    # Leaving it now as there is no validation
+    # while resource creation.
+    # https://bugs.launchpad.net/magnum/+bug/1430617
+    if not name:
+        return False
+    return True
+
+
+def allow_logical_names():
+    try:
+        # v1.5 added logical name aliases
+        if pecan.request.version.minor < 5:
+            return False
+    # ignore check if we're not in a pecan context
+    except AttributeError:
+        pass
+    return True

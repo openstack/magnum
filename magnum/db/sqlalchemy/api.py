@@ -19,6 +19,7 @@ from oslo_db import exception as db_exc
 from oslo_db.sqlalchemy import session as db_session
 from oslo_db.sqlalchemy import utils as db_utils
 from oslo_utils import timeutils
+from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from magnum.common import exception
@@ -165,6 +166,19 @@ class Connection(api.Connection):
             return query.one()
         except NoResultFound:
             raise exception.BayNotFound(bay=bay_id)
+
+    def get_bay_by_name(self, context, bay_name):
+        query = model_query(models.Bay)
+        query = self._add_tenant_filters(context, query)
+        query = query.filter_by(name=bay_name)
+        try:
+            return query.one()
+        except MultipleResultsFound:
+            raise exception.Conflict('Multiple bays exist with same name. '
+                                     'Please use the bay uuid instead to '
+                                     'indicate which to delete')
+        except NoResultFound:
+            raise exception.BayNotFound(bay=bay_name)
 
     def get_bay_by_uuid(self, context, bay_uuid):
         query = model_query(models.Bay)
