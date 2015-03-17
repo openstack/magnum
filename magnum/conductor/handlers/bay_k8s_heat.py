@@ -80,8 +80,9 @@ def _extract_bay_definition(context, bay):
     bay_definition = {
         'ssh_key_name': baymodel.keypair_id,
         'external_network_id': baymodel.external_network_id,
-        'token': token,
     }
+    if token is not None:
+        bay_definition['token'] = token
     if baymodel.dns_nameserver:
         bay_definition['dns_nameserver'] = baymodel.dns_nameserver
     if baymodel.image_id:

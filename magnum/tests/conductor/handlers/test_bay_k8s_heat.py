@@ -19,6 +19,7 @@ from magnum.tests import base
 
 import mock
 from mock import patch
+from oslo_config import cfg
 
 
 class TestBayK8sHeat(base.TestCase):
@@ -66,7 +67,76 @@ class TestBayK8sHeat(base.TestCase):
             'fixed_network': 'private',
             'docker_volume_size': 20,
             'ssh_authorized_key': 'ssh_authorized_key',
-            'token': None,
+        }
+        self.assertEqual(expected, bay_definition)
+
+    @patch('requests.get')
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_bay_definition_coreos_with_disovery(self,
+                                           mock_objects_baymodel_get_by_uuid,
+                                           reqget):
+        cfg.CONF.set_override('cluster_type',
+                              'coreos',
+                              group='k8s_heat')
+        cfg.CONF.set_override('discovery_token_url',
+                              'http://tokentest',
+                              group='k8s_heat')
+        mock_req = mock.MagicMock(text='/h1/h2/h3')
+        reqget.return_value = mock_req
+        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        bay = objects.Bay(self.context, **self.bay_dict)
+
+        bay_definition = bay_k8s_heat._extract_bay_definition(self.context,
+                                                              bay)
+
+        expected = {
+            'ssh_key_name': 'keypair_id',
+            'external_network_id': 'external_network_id',
+            'dns_nameserver': 'dns_nameserver',
+            'server_image': 'image_id',
+            'server_flavor': 'flavor_id',
+            'master_flavor': 'master_flavor_id',
+            'number_of_minions': '1',
+            'fixed_network': 'private',
+            'docker_volume_size': 20,
+            'ssh_authorized_key': 'ssh_authorized_key',
+            'token': 'h3'
+        }
+        self.assertEqual(expected, bay_definition)
+
+    @patch('uuid.uuid4')
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_bay_definition_coreos_no_discoveryurl(self,
+                                           mock_objects_baymodel_get_by_uuid,
+                                           mock_uuid):
+        cfg.CONF.set_override('cluster_type',
+                              'coreos',
+                              group='k8s_heat')
+        cfg.CONF.set_override('discovery_token_url',
+                              None,
+                              group='k8s_heat')
+        mock_uuid.return_value = mock.MagicMock(
+            hex='ba3d1866282848ddbedc76112110c208')
+        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        bay = objects.Bay(self.context, **self.bay_dict)
+
+        bay_definition = bay_k8s_heat._extract_bay_definition(self.context,
+                                                              bay)
+
+        expected = {
+            'ssh_key_name': 'keypair_id',
+            'external_network_id': 'external_network_id',
+            'dns_nameserver': 'dns_nameserver',
+            'server_image': 'image_id',
+            'server_flavor': 'flavor_id',
+            'master_flavor': 'master_flavor_id',
+            'number_of_minions': '1',
+            'fixed_network': 'private',
+            'docker_volume_size': 20,
+            'ssh_authorized_key': 'ssh_authorized_key',
+            'token': 'ba3d1866282848ddbedc76112110c208'
         }
         self.assertEqual(expected, bay_definition)
 
@@ -92,7 +162,6 @@ class TestBayK8sHeat(base.TestCase):
             'fixed_network': 'private',
             'docker_volume_size': 20,
             'ssh_authorized_key': 'ssh_authorized_key',
-            'token': None,
         }
         self.assertEqual(expected, bay_definition)
 
@@ -118,7 +187,6 @@ class TestBayK8sHeat(base.TestCase):
             'fixed_network': 'private',
             'docker_volume_size': 20,
             'ssh_authorized_key': 'ssh_authorized_key',
-            'token': None,
         }
         self.assertEqual(expected, bay_definition)
 
@@ -144,7 +212,6 @@ class TestBayK8sHeat(base.TestCase):
             'fixed_network': 'private',
             'docker_volume_size': 20,
             'ssh_authorized_key': 'ssh_authorized_key',
-            'token': None,
         }
         self.assertEqual(expected, bay_definition)
 
@@ -170,7 +237,6 @@ class TestBayK8sHeat(base.TestCase):
             'master_flavor': 'master_flavor_id',
             'number_of_minions': '1',
             'ssh_authorized_key': 'ssh_authorized_key',
-            'token': None,
         }
         self.assertEqual(expected, bay_definition)
 
@@ -196,7 +262,6 @@ class TestBayK8sHeat(base.TestCase):
             'number_of_minions': '1',
             'docker_volume_size': 20,
             'ssh_authorized_key': 'ssh_authorized_key',
-            'token': None,
         }
         self.assertEqual(expected, bay_definition)
 
@@ -222,7 +287,6 @@ class TestBayK8sHeat(base.TestCase):
             'fixed_network': 'private',
             'docker_volume_size': 20,
             'ssh_authorized_key': 'ssh_authorized_key',
-            'token': None,
         }
         self.assertEqual(expected, bay_definition)
 
@@ -248,7 +312,6 @@ class TestBayK8sHeat(base.TestCase):
             'number_of_minions': '1',
             'fixed_network': 'private',
             'docker_volume_size': 20,
-            'token': None,
         }
         self.assertEqual(expected, bay_definition)
 
@@ -275,7 +338,6 @@ class TestBayK8sHeat(base.TestCase):
             'fixed_network': 'private',
             'docker_volume_size': 20,
             'ssh_authorized_key': 'ssh_authorized_key',
-            'token': None,
         }
         self.assertEqual(expected, bay_definition)
 
@@ -301,7 +363,6 @@ class TestBayK8sHeat(base.TestCase):
             'master_flavor': 'master_flavor_id',
             'docker_volume_size': 20,
             'ssh_authorized_key': 'ssh_authorized_key',
-            'token': None,
         }
         self.assertEqual(expected, bay_definition)
 
