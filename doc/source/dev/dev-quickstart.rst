@@ -137,7 +137,7 @@ Prepare DevStack for Magnum::
 
 Run DevStack::
 
-    cd /opt/stack/magnum
+    cd /opt/stack/devstack
     ./stack.sh
 
 At this time, Magnum has only been tested with the Fedora Atomic micro-OS.
