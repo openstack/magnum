@@ -68,6 +68,36 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertIn('docker_volume_size', response)
         self.assertIn('ssh_authorized_key', response)
 
+    def test_get_one_by_name(self):
+        baymodel = obj_utils.create_test_baymodel(self.context)
+        response = self.get_json('/baymodels/%s' % baymodel['name'])
+        self.assertEqual(baymodel.uuid, response['uuid'])
+        self.assertIn('flavor_id', response)
+        self.assertIn('master_flavor_id', response)
+        self.assertIn('dns_nameserver', response)
+        self.assertIn('keypair_id', response)
+        self.assertIn('external_network_id', response)
+        self.assertIn('fixed_network', response)
+        self.assertIn('docker_volume_size', response)
+
+    def test_get_one_by_name_not_found(self):
+        response = self.get_json('/baymodels/not_found',
+                                  expect_errors=True)
+        self.assertEqual(404, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(response.json['error_message'])
+
+    def test_get_one_by_name_multiple_baymodel(self):
+        obj_utils.create_test_baymodel(self.context, name='test_baymodel',
+                                  uuid=utils.generate_uuid())
+        obj_utils.create_test_baymodel(self.context, name='test_baymodel',
+                                  uuid=utils.generate_uuid())
+        response = self.get_json('/baymodels/test_baymodel',
+                                 expect_errors=True)
+        self.assertEqual(409, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(response.json['error_message'])
+
     def test_detail(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
         response = self.get_json('/baymodels/detail')
@@ -372,5 +402,27 @@ class TestDelete(api_base.FunctionalTest):
         uuid = utils.generate_uuid()
         response = self.delete('/baymodels/%s' % uuid, expect_errors=True)
         self.assertEqual(404, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(response.json['error_message'])
+
+    def test_delete_baymodel_with_name(self):
+        baymodel = obj_utils.create_test_baymodel(self.context)
+        response = self.delete('/baymodels/%s' % baymodel['name'],
+                               expect_errors=True)
+        self.assertEqual(204, response.status_int)
+
+    def test_delete_baymodel_with_name_not_found(self):
+        response = self.delete('/baymodels/not_found', expect_errors=True)
+        self.assertEqual(404, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(response.json['error_message'])
+
+    def test_delete_multiple_baymodel_by_name(self):
+        obj_utils.create_test_baymodel(self.context, name='test_baymodel',
+                                  uuid=utils.generate_uuid())
+        obj_utils.create_test_baymodel(self.context, name='test_baymodel',
+                                  uuid=utils.generate_uuid())
+        response = self.delete('/baymodels/test_baymodel', expect_errors=True)
+        self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])

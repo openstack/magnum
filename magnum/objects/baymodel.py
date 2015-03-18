@@ -97,6 +97,18 @@ class BayModel(base.MagnumObject):
         return baymodel
 
     @base.remotable_classmethod
+    def get_by_name(cls, context, name):
+        """Find a baymodel based on name and return a :class:`BayModel` object.
+
+        :param name: the name of a baymodel.
+        :param context: Security context
+        :returns: a :class:`BayModel` object.
+        """
+        db_baymodel = cls.dbapi.get_baymodel_by_name(context, name)
+        baymodel = BayModel._from_db_object(cls(context), db_baymodel)
+        return baymodel
+
+    @base.remotable_classmethod
     def list(cls, context, limit=None, marker=None,
              sort_key=None, sort_dir=None):
         """Return a list of BayModel objects.
