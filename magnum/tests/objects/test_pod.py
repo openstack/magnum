@@ -46,6 +46,15 @@ class TestPodObject(base.DbTestCase):
             mock_get_pod.assert_called_once_with(self.context, uuid)
             self.assertEqual(self.context, pod._context)
 
+    def test_get_by_name(self):
+        name = self.fake_pod['name']
+        with mock.patch.object(self.dbapi, 'get_pod_by_name',
+                               autospec=True) as mock_get_pod:
+            mock_get_pod.return_value = self.fake_pod
+            pod = objects.Pod.get_by_name(self.context, name)
+            mock_get_pod.assert_called_once_with(name)
+            self.assertEqual(self.context, pod._context)
+
     def test_list(self):
         with mock.patch.object(self.dbapi, 'get_pod_list',
                                autospec=True) as mock_get_list:

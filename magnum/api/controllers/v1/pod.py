@@ -209,16 +209,17 @@ class PodsController(rest.RestController):
                                          sort_key, sort_dir, expand,
                                          resource_url)
 
-    @wsme_pecan.wsexpose(Pod, types.uuid)
-    def get_one(self, pod_uuid):
+    @wsme_pecan.wsexpose(Pod, types.uuid_or_name)
+    def get_one(self, pod_ident):
         """Retrieve information about the given pod.
 
-        :param pod_uuid: UUID of a pod.
+        :param pod_ident: UUID of a pod or logical name of the pod.
         """
         if self.from_pods:
             raise exception.OperationNotPermitted
 
-        rpc_pod = objects.Pod.get_by_uuid(pecan.request.context, pod_uuid)
+        rpc_pod = api_utils.get_rpc_resource('Pod', pod_ident)
+
         return Pod.convert_with_links(rpc_pod)
 
     @wsme_pecan.wsexpose(Pod, body=Pod, status_code=201)
@@ -280,13 +281,15 @@ class PodsController(rest.RestController):
         rpc_pod.save()
         return Pod.convert_with_links(rpc_pod)
 
-    @wsme_pecan.wsexpose(None, types.uuid, status_code=204)
-    def delete(self, pod_uuid):
+    @wsme_pecan.wsexpose(None, types.uuid_or_name, status_code=204)
+    def delete(self, pod_ident):
         """Delete a pod.
 
-        :param pod_uuid: UUID of a pod.
+        :param pod_ident: UUID of a pod or logical name of the pod.
         """
         if self.from_pods:
             raise exception.OperationNotPermitted
 
-        pecan.request.rpcapi.pod_delete(pod_uuid)
+        rpc_pod = api_utils.get_rpc_resource('Pod', pod_ident)
+
+        pecan.request.rpcapi.pod_delete(rpc_pod.uuid)
