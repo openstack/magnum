@@ -127,3 +127,8 @@ class RPCAPITestCase(base.DbTestCase):
                           'call',
                           version='1.0',
                           uuid=self.fake_rc['uuid'])
+
+        self._test_rpcapi('rc_delete',
+                          'call',
+                          version='1.1',
+                          uuid=self.fake_rc['name'])

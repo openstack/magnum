@@ -819,6 +819,9 @@ class Connection(api.Connection):
                                                              name=rc_name)
         try:
             return query.one()
+        except MultipleResultsFound:
+            raise exception.Conflict('Multiple rcs exist with same name.'
+                                     ' Please use the rc uuid instead.')
         except NoResultFound:
             raise exception.ReplicationControllerNotFound(rc=rc_name)
 
