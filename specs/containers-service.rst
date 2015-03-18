@@ -154,8 +154,8 @@ Service through a REST API. The containers service may silently create Nova
 instances if one with enough capacity to host the requested container is not
 already known to the Containers service. The containers service will maintain
 a database "Map" of containers, and what Nova instance each belongs to. Nova
-creates instances. Instances are created in Nova, and contaienrs belong only
-to the Containers Service, and run witin a Nova instance. If the instance
+creates instances. Instances are created in Nova, and containers belong only
+to the Containers Service, and run within a Nova instance. If the instance
 includes the agent software "A", then it may be included in the inventory of
 the Containers service. Instances that do not contain an agent may not interact
 with the Containers Service, and can be controlled only by a Nova virt driver.
@@ -240,7 +240,7 @@ For Nova, none. All new API calls will be implemented in the Containers
 Service. The OpenStack Containers Service API will be a superset of
 functionality offered by the The `Docker API:
 <https://docs.docker.com/reference/api/docker_remote_api_v1.13/>`_
-with additionls to make is suitable for general use regardless of the backend
+with additionals to make is suitable for general use regardless of the backend
 container technology used, and to be compatible with OpenStack multi-tenancy
 and Keystone authentication.
 
@@ -251,12 +251,12 @@ Specific Additions:
 2. Support for the X-Auth-Token HTTP request header to allow for authentication
    with keystone.
 
-If either of the above headers are missing, a 401 Unathorized response will
+If either of the above headers are missing, a 401 Unauthorized response will
 be generated.
 
 Docker CLI clients may communicate with a Swarmd instance that is configured
 to use the OpenStack Containers API as the backend for libswarm. This will
-allow for tool compatability with the Docker ecosystem using the officially
+allow for tool compatibility with the Docker ecosystem using the officially
 supported means for integration of a distributed system.
 
 The scope of the full API will cause this spec to be too long to review, so
@@ -295,7 +295,7 @@ operators. These include:
 * Creating containers usually requires root access. This means that the Agent
   may need to be run with special privileges, or be given a method to
   escalate privileges using techniques such as sudo.
-* User provided data is passed through the API. This will require sensuble
+* User provided data is passed through the API. This will require sensible
   data input validation.
 
 
@@ -378,7 +378,7 @@ Dependencies
 
 1. <Links to Agent Blueprint and Spec here, once ready>
 2. Early implementations may use libswarm, or a python port of libswarm to
-   implement Docker API conpatibility.
+   implement Docker API compatibility.
 
 Testing
 =======
@@ -395,6 +395,6 @@ A set of documentation for this new service will be required.
 References
 ==========
 
-* Link to high level draft proposal from the Nova Midcyle Meetup for Juno:
+* Link to high level draft proposal from the Nova Midcycle Meetup for Juno:
   `PDF <https://wiki.openstack.org/w/images/5/51/Containers_Proposal.pdf>`_
 * `Libswarm Source <https://github.com/docker/libswarm>`_
