@@ -83,7 +83,7 @@ individual support in the heat template.
 
 The next step is to store the Fedora Atomic micro-OS in glance.  The steps for
 updating Fedora Atomic images are a bit detailed.  Fortunately one of the core
-developers has made Atomic images avaliable via the web:
+developers has made Atomic images available via the web:
 
 If using the m-1 tag or tarball, please use the documentation shipped with the
 milestone as the current master instructions are slightly incompatible.
