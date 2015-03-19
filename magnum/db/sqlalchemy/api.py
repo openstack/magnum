@@ -604,6 +604,9 @@ class Connection(api.Connection):
         query = model_query(models.Pod).filter_by(name=pod_name)
         try:
             return query.one()
+        except MultipleResultsFound:
+            raise exception.Conflict('Multiple pods exist with same name.'
+                                     ' Please use the pod uuid instead.')
         except NoResultFound:
             raise exception.PodNotFound(pod=pod_name)
 

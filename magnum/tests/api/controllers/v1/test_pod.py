@@ -64,6 +64,28 @@ class TestListPod(api_base.FunctionalTest):
         self.assertEqual(pod.uuid, response['uuid'])
         self._assert_pod_fields(response)
 
+    def test_get_one_by_name(self):
+        pod = obj_utils.create_test_pod(self.context)
+        response = self.get_json('/pods/%s' % pod['name'])
+        self.assertEqual(pod.uuid, response['uuid'])
+        self._assert_pod_fields(response)
+
+    def test_get_one_by_name_not_found(self):
+        response = self.get_json('/pods/not_found', expect_errors=True)
+        self.assertEqual(response.status_int, 404)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(response.json['error_message'])
+
+    def test_get_one_by_name_multiple_pod(self):
+        obj_utils.create_test_pod(self.context, name='test_pod',
+                                  uuid=utils.generate_uuid())
+        obj_utils.create_test_pod(self.context, name='test_pod',
+                                  uuid=utils.generate_uuid())
+        response = self.get_json('/pods/test_pod', expect_errors=True)
+        self.assertEqual(response.status_int, 409)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(response.json['error_message'])
+
     def test_detail(self):
         pod = obj_utils.create_test_pod(self.context)
         response = self.get_json('/pods/detail')
@@ -392,6 +414,30 @@ class TestDelete(api_base.FunctionalTest):
         response = self.get_json('/pods/%s' % self.pod.uuid,
                                  expect_errors=True)
         self.assertEqual(404, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(response.json['error_message'])
+
+    def test_delete_pod_by_name(self):
+        self.delete('/pods/%s' % self.pod.name)
+        response = self.get_json('/pods/%s' % self.pod.name,
+                                 expect_errors=True)
+        self.assertEqual(404, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(response.json['error_message'])
+
+    def test_delete_pod_by_name_not_found(self):
+        response = self.delete('/pods/not_found', expect_errors=True)
+        self.assertEqual(404, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(response.json['error_message'])
+
+    def test_delete_multiple_pod_by_name(self):
+        obj_utils.create_test_pod(self.context, name='test_pod',
+                                  uuid=utils.generate_uuid())
+        obj_utils.create_test_pod(self.context, name='test_pod',
+                                  uuid=utils.generate_uuid())
+        response = self.delete('/pods/test_pod', expect_errors=True)
+        self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 

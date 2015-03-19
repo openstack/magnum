@@ -53,6 +53,17 @@ class DbPodTestCase(base.DbTestCase):
         self.assertEqual(self.pod.id, res.id)
         self.assertEqual(self.pod.uuid, res.uuid)
 
+    def test_get_pod_by_name_multiple_pods(self):
+        utils.create_test_pod(bay_uuid=self.bay.uuid,
+                              uuid=magnum_utils.generate_uuid())
+        self.assertRaises(exception.Conflict, self.dbapi.get_pod_by_name,
+                          self.pod.name)
+
+    def test_get_pod_by_name_not_found(self):
+        self.assertRaises(exception.PodNotFound,
+                          self.dbapi.get_pod_by_name,
+                          'not_found')
+
     def test_get_pod_that_does_not_exist(self):
         self.assertRaises(exception.PodNotFound,
                           self.dbapi.get_pod_by_id, self.context, 999)
