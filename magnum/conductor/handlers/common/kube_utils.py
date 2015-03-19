@@ -262,15 +262,15 @@ class KubeClient(object):
             return False
         return True
 
-    def rc_stop(self, master_address, name):
-        LOG.debug("rc_stop %s" % name)
+    def rc_delete(self, master_address, name):
+        LOG.debug("rc_delete %s" % name)
         try:
-            out, err = utils.trycmd('kubectl', 'stop', 'rc', name,
+            out, err = utils.trycmd('kubectl', 'delete', 'rc', name,
                                     '-s', master_address)
             if err:
                 return False
         except Exception as e:
-            LOG.error(_LE("Couldn't stop rc %(rc)s due to error %(error)s")
+            LOG.error(_LE("Couldn't delete rc %(rc)s due to error %(error)s")
                          % {'rc': name, 'error': e})
             return False
         return True
