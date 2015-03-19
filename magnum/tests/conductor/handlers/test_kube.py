@@ -313,10 +313,10 @@ class TestKube(base.TestCase):
         mock_retrieve_k8s_master_url.return_value = expected_master_url
         mock_object_has_stack.return_value = True
         with patch.object(self.kube_handler, 'kube_cli') as mock_kube_cli:
-            mock_kube_cli.rc_stop.return_value = True
+            mock_kube_cli.rc_delete.return_value = True
 
             self.kube_handler.rc_delete(self.context, mock_rc.uuid)
 
-            mock_kube_cli.rc_stop.assert_called_once_with(
+            mock_kube_cli.rc_delete.assert_called_once_with(
                 expected_master_url, mock_rc.name)
             mock_rc.destroy.assert_called_once_with(self.context)
