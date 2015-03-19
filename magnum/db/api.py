@@ -184,6 +184,15 @@ class Connection(object):
         """
 
     @abc.abstractmethod
+    def get_baymodel_by_name(self, context, baymodel_name):
+        """Return a baymodel.
+
+        :param context: The security context
+        :param baymodel_name: The name of a baymodel.
+        :returns: A baymodel.
+        """
+
+    @abc.abstractmethod
     def destroy_baymodel(self, baymodel_id):
         """Destroy a baymodel and all associated interfaces.
 

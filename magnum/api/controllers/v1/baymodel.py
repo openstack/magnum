@@ -223,17 +223,16 @@ class BayModelsController(rest.RestController):
                                          sort_key, sort_dir, expand,
                                          resource_url)
 
-    @wsme_pecan.wsexpose(BayModel, types.uuid)
-    def get_one(self, baymodel_uuid):
+    @wsme_pecan.wsexpose(BayModel, types.uuid_or_name)
+    def get_one(self, baymodel_ident):
         """Retrieve information about the given baymodel.
 
-        :param baymodel_uuid: UUID of a baymodel.
+        :param baymodel_ident: UUID or logical name of a baymodel.
         """
         if self.from_baymodels:
             raise exception.OperationNotPermitted
 
-        rpc_baymodel = objects.BayModel.get_by_uuid(pecan.request.context,
-            baymodel_uuid)
+        rpc_baymodel = api_utils.get_rpc_resource('BayModel', baymodel_ident)
         return BayModel.convert_with_links(rpc_baymodel)
 
     @wsme_pecan.wsexpose(BayModel, body=BayModel, status_code=201)
@@ -292,15 +291,14 @@ class BayModelsController(rest.RestController):
         rpc_baymodel.save()
         return BayModel.convert_with_links(rpc_baymodel)
 
-    @wsme_pecan.wsexpose(None, types.uuid, status_code=204)
-    def delete(self, baymodel_uuid):
+    @wsme_pecan.wsexpose(None, types.uuid_or_name, status_code=204)
+    def delete(self, baymodel_ident):
         """Delete a baymodel.
 
-        :param baymodel_uuid: UUID of a baymodel.
+        :param baymodel_uuid: UUID or logical name of a baymodel.
         """
         if self.from_baymodels:
             raise exception.OperationNotPermitted
 
-        rpc_baymodel = objects.BayModel.get_by_uuid(pecan.request.context,
-                                            baymodel_uuid)
+        rpc_baymodel = api_utils.get_rpc_resource('BayModel', baymodel_ident)
         rpc_baymodel.destroy()

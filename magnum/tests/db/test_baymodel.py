@@ -79,6 +79,27 @@ class DbBaymodelTestCase(base.DbTestCase):
         self.assertRaises(exception.BayModelNotFound,
                           self.dbapi.get_baymodel_by_id, self.context, 666)
 
+    def test_get_baymodel_by_name(self):
+        bm = self._create_test_baymodel()
+        res = self.dbapi.get_baymodel_by_name(self.context, bm['name'])
+        self.assertEqual(bm['id'], res.id)
+        self.assertEqual(bm['uuid'], res.uuid)
+
+    def test_get_baymodel_by_name_multiple_baymodel(self):
+        self._create_test_baymodel(id=1, name='bm',
+            uuid=magnum_utils.generate_uuid(),
+            image_id='image1')
+        self._create_test_baymodel(id=2, name='bm',
+            uuid=magnum_utils.generate_uuid(),
+            image_id='image2')
+        self.assertRaises(exception.Conflict, self.dbapi.get_baymodel_by_name,
+                          self.context, 'bm')
+
+    def test_get_baymodel_by_name_not_found(self):
+        self.assertRaises(exception.BayModelNotFound,
+                          self.dbapi.get_baymodel_by_name,
+                          self.context, 'not_found')
+
     def test_update_baymodel(self):
         bm = self._create_test_baymodel()
         res = self.dbapi.update_baymodel(bm['id'], {'name': 'updated-model'})

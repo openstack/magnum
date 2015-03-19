@@ -314,6 +314,18 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.BayModelNotFound(baymodel=baymodel_uuid)
 
+    def get_baymodel_by_name(self, context, baymodel_name):
+        query = model_query(models.BayModel)
+        query = self._add_tenant_filters(context, query)
+        query = query.filter_by(name=baymodel_name)
+        try:
+            return query.one()
+        except MultipleResultsFound:
+            raise exception.Conflict('Multiple baymodels exist with same name.'
+                                     ' Please use the baymodel uuid instead.')
+        except NoResultFound:
+            raise exception.BayModelNotFound(baymodel=baymodel_name)
+
     def destroy_baymodel(self, baymodel_id):
         def is_baymodel_referenced(session, baymodel_uuid):
             """Checks whether the baymodel is referenced by bay(s)."""
