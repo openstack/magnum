@@ -223,17 +223,16 @@ class ReplicationControllersController(rest.RestController):
                                          sort_key, sort_dir, expand,
                                          resource_url)
 
-    @wsme_pecan.wsexpose(ReplicationController, types.uuid)
-    def get_one(self, rc_uuid):
+    @wsme_pecan.wsexpose(ReplicationController, types.uuid_or_name)
+    def get_one(self, rc_ident):
         """Retrieve information about the given ReplicationController.
 
-        :param rc_uuid: UUID of a ReplicationController.
+        :param rc_ident: UUID or logical name of a ReplicationController.
         """
         if self.from_rcs:
             raise exception.OperationNotPermitted
 
-        rpc_rc = objects.ReplicationController.get_by_uuid(
-                                      pecan.request.context, rc_uuid)
+        rpc_rc = api_utils.get_rpc_resource('ReplicationController', rc_ident)
         return ReplicationController.convert_with_links(rpc_rc)
 
     @wsme_pecan.wsexpose(ReplicationController, body=ReplicationController,
@@ -300,8 +299,8 @@ class ReplicationControllersController(rest.RestController):
         rpc_rc.save()
         return ReplicationController.convert_with_links(rpc_rc)
 
-    @wsme_pecan.wsexpose(None, types.uuid, status_code=204)
-    def delete(self, rc_uuid):
+    @wsme_pecan.wsexpose(None, types.uuid_or_name, status_code=204)
+    def delete(self, rc_ident):
         """Delete a ReplicationController.
 
         :param rc_uuid: UUID of a ReplicationController.
@@ -309,4 +308,5 @@ class ReplicationControllersController(rest.RestController):
         if self.from_rcs:
             raise exception.OperationNotPermitted
 
-        pecan.request.rpcapi.rc_delete(rc_uuid)
+        rpc_rc = api_utils.get_rpc_resource('ReplicationController', rc_ident)
+        pecan.request.rpcapi.rc_delete(rpc_rc.uuid)

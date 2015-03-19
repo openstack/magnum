@@ -65,6 +65,29 @@ class TestListRC(api_base.FunctionalTest):
         self.assertEqual(rc.uuid, response['uuid'])
         self._assert_rc_fields(response)
 
+    def test_get_one_by_name(self):
+        rc = obj_utils.create_test_rc(self.context)
+        response = self.get_json('/rcs/%s' % rc['name'])
+        self.assertEqual(rc.uuid, response['uuid'])
+        self._assert_rc_fields(response)
+
+    def test_get_one_by_name_not_found(self):
+        response = self.get_json('/rcs/not_found',
+                                  expect_errors=True)
+        self.assertEqual(404, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(response.json['error_message'])
+
+    def test_get_one_by_name_multiple_rc(self):
+        obj_utils.create_test_rc(self.context, name='test_rc',
+                                  uuid=utils.generate_uuid())
+        obj_utils.create_test_rc(self.context, name='test_rc',
+                                  uuid=utils.generate_uuid())
+        response = self.get_json('/rcs/test_rc', expect_errors=True)
+        self.assertEqual(409, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(response.json['error_message'])
+
     def test_detail(self):
         rc = obj_utils.create_test_rc(self.context)
         response = self.get_json('/rcs/detail')
@@ -375,5 +398,26 @@ class TestDelete(api_base.FunctionalTest):
         uuid = utils.generate_uuid()
         response = self.delete('/rcs/%s' % uuid, expect_errors=True)
         self.assertEqual(404, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(response.json['error_message'])
+
+    def test_delete_rc_with_name_not_found(self):
+        response = self.delete('/rcs/not_found', expect_errors=True)
+        self.assertEqual(404, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(response.json['error_message'])
+
+    def test_delete_rc_with_name(self):
+        response = self.delete('/rcs/%s' % self.rc.name,
+                               expect_errors=True)
+        self.assertEqual(204, response.status_int)
+
+    def test_delete_multiple_rc_by_name(self):
+        obj_utils.create_test_rc(self.context, name='test_rc',
+                                  uuid=utils.generate_uuid())
+        obj_utils.create_test_rc(self.context, name='test_rc',
+                                  uuid=utils.generate_uuid())
+        response = self.delete('/rcs/test_rc', expect_errors=True)
+        self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
