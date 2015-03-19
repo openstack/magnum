@@ -149,7 +149,7 @@ add your own images to use manually through glance.
 
 Create a new shell, and source the devstack openrc script::
 
-    source ~/devstack/openrc admin admin
+    source /opt/stack/devstack/openrc admin admin
 
     cd ~
     test -f ~/.ssh/id_rsa.pub || ssh-keygen
@@ -184,23 +184,18 @@ just restart either magnum-api or magnum-conductor.  the -e option to
 pip install will link to the location from where the source code
 was installed.
 
-Magnum uses heat to orchestrate.  Heat reports CREATE_COMPLETE when it is
-done orchestrating.  Do not create containers, pods, services, or replication
-controllers before Heat finishes orchestrating the bay.  They will likely
-not be created, causing Magnum to become confused.
+Magnum reports CREATE_COMPLETE when it is done creating the bay.  Do not create
+containers, pods, services, or replication controllers before Magnum finishes
+creating the bay. They will likely not be created, causing Magnum to become
+confused.
 
-See blueprint:
-https://blueprints.launchpad.net/magnum/+spec/magnum-bay-status
+    magnum bay-list
 
-
-    heat stack-list
-
-    +--------------------------------------+------------+-----------------+----------------------+
-    | id                                   | stack_name | stack_status    | creation_time        |
-    +--------------------------------------+------------+-----------------+----------------------+
-    | 8eb10314-e6b8-400f-8d4c-c0f5762eecea | testbay    | CREATE_COMPLETE | 2015-01-17T17:06:27Z |
-    +--------------------------------------+------------+-----------------+----------------------+
-
+    +--------------------------------------+---------+------------+-----------------+
+    | uuid                                 | name    | node_count | status          |
+    +--------------------------------------+---------+------------+-----------------+
+    | 9dccb1e6-02dc-4e2b-b897-10656c5339ce | testbay | 2          | CREATE_COMPLETE |
+    +--------------------------------------+---------+------------+-----------------+
 
 Kubernetes provides a number of examples you can use to check that things
 are working. Here's how to set up the replicated redis example. First, create
