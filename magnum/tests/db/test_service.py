@@ -48,6 +48,22 @@ class DbServiceTestCase(base.DbTestCase):
         self.assertEqual(self.service.id, res.id)
         self.assertEqual(self.service.uuid, res.uuid)
 
+    def test_get_service_by_name(self):
+        res = self.dbapi.get_service_by_name(self.context, self.service.name)
+        self.assertEqual(self.service.id, res.id)
+        self.assertEqual(self.service.uuid, res.uuid)
+
+    def test_get_service_by_name_multiple_service(self):
+        utils.create_test_service(bay_uuid=self.bay.uuid,
+                                  uuid=magnum_utils.generate_uuid())
+        self.assertRaises(exception.Conflict, self.dbapi.get_service_by_name,
+                          self.context, self.service.name)
+
+    def test_get_service_by_name_not_found(self):
+        self.assertRaises(exception.ServiceNotFound,
+                          self.dbapi.get_service_by_name,
+                          self.context, 'not_found')
+
     def test_get_service_that_does_not_exist(self):
         self.assertRaises(exception.ServiceNotFound,
                           self.dbapi.get_service_by_id, self.context, 999)

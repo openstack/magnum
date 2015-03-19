@@ -508,6 +508,15 @@ class Connection(object):
         """
 
     @abc.abstractmethod
+    def get_service_by_name(self, bay_name):
+        """Return a service.
+
+        :param context: The security context
+        :param service_name: The name of a service
+        :returns: A service.
+        """
+
+    @abc.abstractmethod
     def destroy_service(self, service_id):
         """Destroy a service and all associated interfaces.
 

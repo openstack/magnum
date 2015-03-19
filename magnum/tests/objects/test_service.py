@@ -46,6 +46,15 @@ class TestServiceObject(base.DbTestCase):
             mock_get_service.assert_called_once_with(self.context, uuid)
             self.assertEqual(self.context, service._context)
 
+    def test_get_by_name(self):
+        name = self.fake_service['name']
+        with mock.patch.object(self.dbapi, 'get_service_by_name',
+                               autospec=True) as mock_get_service:
+            mock_get_service.return_value = self.fake_service
+            service = objects.Service.get_by_name(self.context, name)
+            mock_get_service.assert_called_once_with(self.context, name)
+            self.assertEqual(self.context, service._context)
+
     def test_list(self):
         with mock.patch.object(self.dbapi, 'get_service_list',
                                autospec=True) as mock_get_list:

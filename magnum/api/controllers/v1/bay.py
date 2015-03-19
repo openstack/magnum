@@ -27,7 +27,6 @@ from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
 from magnum.common import exception
-from magnum.common import utils
 from magnum import objects
 
 
@@ -36,26 +35,6 @@ class BayPatchType(types.JsonPatchType):
     @staticmethod
     def mandatory_attrs():
         return ['/baymodel_id']
-
-
-def _get_rpc_bay(bay_ident):
-    """Get the RPC bay from the bay uuid or logical name.
-
-    :param bay_ident: the UUID or logical name of a bay.
-
-    :returns: The RPC bay.
-    :raises: InvalidUuidOrName if the name or uuid provided is not valid.
-    :raises: BayNotFound if the bay is not found.
-    :raises: Conflict if two bay exist with same name.
-
-    """
-    if utils.is_uuid_like(bay_ident):
-        return objects.Bay.get_by_uuid(pecan.request.context, bay_ident)
-
-    if utils.allow_logical_names():
-        return objects.Bay.get_by_name(pecan.request.context, bay_ident)
-
-    raise exception.InvalidUuidOrName(name=bay_ident)
 
 
 class Bay(base.APIBase):
@@ -249,7 +228,7 @@ class BaysController(rest.RestController):
         if self.from_bays:
             raise exception.OperationNotPermitted
 
-        rpc_bay = _get_rpc_bay(bay_ident)
+        rpc_bay = api_utils.get_rpc_resource('Bay', bay_ident)
 
         return Bay.convert_with_links(rpc_bay)
 
@@ -316,6 +295,6 @@ class BaysController(rest.RestController):
         if self.from_bays:
             raise exception.OperationNotPermitted
 
-        rpc_bay = _get_rpc_bay(bay_ident)
+        rpc_bay = api_utils.get_rpc_resource('Bay', bay_ident)
 
         pecan.request.rpcapi.bay_delete(rpc_bay.uuid)

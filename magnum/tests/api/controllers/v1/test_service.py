@@ -65,6 +65,30 @@ class TestListService(api_base.FunctionalTest):
         self.assertEqual(service.uuid, response['uuid'])
         self._assert_service_fields(response)
 
+    def test_get_one_by_name(self):
+        service = obj_utils.create_test_service(self.context)
+        response = self.get_json('/services/%s' % service['name'])
+        self.assertEqual(service.uuid, response['uuid'])
+        self._assert_service_fields(response)
+
+    def test_get_one_by_name_not_found(self):
+        response = self.get_json('/services/not_found',
+                                  expect_errors=True)
+        self.assertEqual(404, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(response.json['error_message'])
+
+    def test_get_one_by_name_multiple_service(self):
+        obj_utils.create_test_service(self.context, name='test_service',
+                                  uuid=utils.generate_uuid())
+        obj_utils.create_test_service(self.context, name='test_service',
+                                  uuid=utils.generate_uuid())
+        response = self.get_json('/services/test_service',
+                                 expect_errors=True)
+        self.assertEqual(409, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(response.json['error_message'])
+
     def test_detail(self):
         service = obj_utils.create_test_service(self.context)
         response = self.get_json('/services/detail')
@@ -330,5 +354,26 @@ class TestDelete(api_base.FunctionalTest):
         uuid = utils.generate_uuid()
         response = self.delete('/services/%s' % uuid, expect_errors=True)
         self.assertEqual(404, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(response.json['error_message'])
+
+    def test_delete_service_with_name(self):
+        response = self.delete('/services/%s' % self.service.name,
+                               expect_errors=True)
+        self.assertEqual(204, response.status_int)
+
+    def test_delete_service_with_name_not_found(self):
+        response = self.delete('/services/not_found', expect_errors=True)
+        self.assertEqual(404, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(response.json['error_message'])
+
+    def test_delete_multiple_service_by_name(self):
+        obj_utils.create_test_service(self.context, name='test_service',
+                                  uuid=utils.generate_uuid())
+        obj_utils.create_test_service(self.context, name='test_service',
+                                  uuid=utils.generate_uuid())
+        response = self.delete('/services/test_service', expect_errors=True)
+        self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
