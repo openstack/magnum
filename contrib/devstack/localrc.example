@@ -13,11 +13,6 @@ SERVICE_TOKEN=password
 enable_service rabbit
 
 # Enable Neutron which is required by Magnum and disable nova-network.
-
-enable_service magnum
-enable_service m-cond
-enable_service m-api
-
 disable_service n-net
 enable_service q-svc
 enable_service q-agt
@@ -26,6 +21,7 @@ enable_service q-l3
 enable_service q-meta
 enable_service neutron
 
+# Enable Magnum services
 enable_service magnum
 enable_service m-api
 enable_service m-cond
