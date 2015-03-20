@@ -183,7 +183,7 @@ class Handler(object):
             raise exception.MagnumException(_(
                 "Cannot update stack with status: %s") % stack.stack_status)
 
-        delta = bay.obj_what_changed()
+        delta = set(bay.obj_what_changed())
         if 'node_count' in delta:
             delta.remove('node_count')
 
