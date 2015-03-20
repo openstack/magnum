@@ -52,7 +52,7 @@ class Bay(base.APIBase):
     def _set_baymodel_id(self, value):
         if value and self._baymodel_id != value:
             try:
-                baymodel = objects.BayModel.get(pecan.request.context, value)
+                baymodel = api_utils.get_rpc_resource('BayModel', value)
                 self._baymodel_id = baymodel.uuid
             except exception.BayModelNotFound as e:
                 # Change error code because 404 (NotFound) is inappropriate

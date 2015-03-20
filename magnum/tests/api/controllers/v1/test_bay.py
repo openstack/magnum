@@ -319,7 +319,7 @@ class TestPost(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestPost, self).setUp()
-        obj_utils.create_test_baymodel(self.context)
+        self.baymodel = obj_utils.create_test_baymodel(self.context)
         p = mock.patch.object(rpcapi.API, 'bay_create')
         self.mock_bay_create = p.start()
         self.mock_bay_create.side_effect = self._simulate_rpc_bay_create
@@ -382,6 +382,12 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['error_message'])
+
+    def test_create_bay_with_baymodel_name(self):
+        bdict = apiutils.bay_post_data(baymodel_id=self.baymodel.name)
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(201, response.status_int)
 
     def test_create_bay_with_node_count_zero(self):
         bdict = apiutils.bay_post_data()
