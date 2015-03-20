@@ -19,19 +19,18 @@ from __future__ import print_function
 import copy
 import errno
 import gc
+import logging
 import os
 import pprint
 import socket
 import sys
 import traceback
 
-import eventlet
 import eventlet.backdoor
 import greenlet
 from oslo_config import cfg
 
 from magnum.openstack.common._i18n import _LI
-from magnum.openstack.common import log as logging
 
 help_for_backdoor_port = (
     "Acceptable values are 0, <port>, and <start>:<end>, where 0 results "
@@ -51,7 +50,7 @@ LOG = logging.getLogger(__name__)
 
 
 def list_opts():
-    """Entry point for oslo.config-generator.
+    """Entry point for oslo-config-generator.
     """
     return [(None, copy.deepcopy(eventlet_backdoor_opts))]
 
