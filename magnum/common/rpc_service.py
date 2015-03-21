@@ -31,7 +31,7 @@ from magnum.objects import base as objects_base
 eventlet.monkey_patch()
 
 # NOTE(asalkeld):
-# The magnum.openstack.common.rpc entries are for compatability
+# The magnum.openstack.common.rpc entries are for compatibility
 # with devstack rpc_backend configuration values.
 TRANSPORT_ALIASES = {
     'magnum.openstack.common.rpc.impl_kombu': 'rabbit',
