@@ -16,6 +16,8 @@ from magnum.conductor.handlers import bay_k8s_heat
 from magnum import objects
 from magnum.openstack.common import loopingcall
 from magnum.tests import base
+from magnum.tests.db import base as db_base
+from magnum.tests.db import utils
 
 import mock
 from mock import patch
@@ -505,3 +507,34 @@ class TestBayK8sHeat(base.TestCase):
         mock_heat_stack.stack_status = 'FAILED'
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
         self.assertEqual(poller.attempts, 2)
+
+
+class TestHandler(db_base.DbTestCase):
+
+    def setUp(self):
+        super(TestHandler, self).setUp()
+        self.handler = bay_k8s_heat.Handler()
+        bay_dict = utils.get_test_bay(node_count=1)
+        self.bay = objects.Bay(self.context, **bay_dict)
+        self.bay.create()
+
+    @patch('magnum.conductor.handlers.bay_k8s_heat.Handler._poll_and_check')
+    @patch('magnum.conductor.handlers.bay_k8s_heat._update_stack')
+    @patch('magnum.common.clients.OpenStackClients')
+    def test_update_node_count(self, mock_openstack_client_class,
+                               mock_update_stack, mock_poll_and_check):
+        mock_heat_stack = mock.MagicMock()
+        mock_heat_stack.stack_status = 'CREATE_COMPLETE'
+        mock_heat_client = mock.MagicMock()
+        mock_heat_client.stacks.get.return_value = mock_heat_stack
+        mock_openstack_client = mock_openstack_client_class.return_value
+        mock_openstack_client.heat.return_value = mock_heat_client
+
+        self.bay.node_count = 2
+        self.handler.bay_update(self.context, self.bay)
+
+        mock_update_stack.assert_called_once_with(self.context,
+                                                  mock_openstack_client,
+                                                  self.bay)
+        bay = objects.Bay.get(self.context, self.bay.uuid)
+        self.assertEqual(bay.node_count, 2)
