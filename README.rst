@@ -31,7 +31,7 @@ process.  The ReST server is horizontally scalable.  At this time, the
 conductor is limited to one process, but we intend to add horizontal
 scalability to the conductor as well.
 
-The magnum-backend process runs on a controller machine and connects to a
+The magnum-conductor process runs on a controller machine and connects to a
 kubernetes or docker ReST API endpoint.  The kubernetes and docker ReST API
 endpoints are managed by the bay object.
 
