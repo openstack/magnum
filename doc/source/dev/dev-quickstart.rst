@@ -144,8 +144,8 @@ At this time, Magnum has only been tested with the Fedora Atomic micro-OS.
 Magnum will likely work with other micro-OS platforms, but each one requires
 individual support in the heat template.
 
-The fedora-atomic-21 image will automatically be added to glance, you can still
-add your own images to use manually through glance.
+The fedora-21-atomic-2 image will automatically be added to glance.  You can
+still add your own images to use manually through glance.
 
 Create a new shell, and source the devstack openrc script::
 
@@ -163,7 +163,7 @@ First create a baymodel, which is similar in nature to a flavor.  It informs
 Magnum in which way to construct a bay.::
 
     NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
-    magnum baymodel-create --name testbaymodel --image-id fedora-21-atomic \
+    magnum baymodel-create --name testbaymodel --image-id fedora-21-atomic-2 \
                            --keypair-id testkey \
                            --external-network-id $NIC_ID \
                            --dns-nameserver 8.8.8.8 --flavor-id m1.small \

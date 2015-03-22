@@ -10,7 +10,7 @@ if is_service_enabled m-api m-cond; then
 
         # add image to glance
         if [[ "$ENABLED_SERVICES" =~ 'm-api' ]]; then
-            MANGUM_GUEST_IMAGE_URL=${MANGUM_GUEST_IMAGE_URL:-"https://fedorapeople.org/groups/heat/kolla/fedora-21-atomic.qcow2"}
+            MANGUM_GUEST_IMAGE_URL=${MANGUM_GUEST_IMAGE_URL:-"https://fedorapeople.org/groups/heat/kolla/fedora-21-atomic-2.qcow2"}
             IMAGE_URLS+=",${MANGUM_GUEST_IMAGE_URL}"
         fi
 

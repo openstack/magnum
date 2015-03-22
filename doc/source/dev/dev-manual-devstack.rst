@@ -93,11 +93,11 @@ Create a new shell, and source the devstack openrc script::
     source ~/devstack/openrc admin admin
 
     cd ~
-    wget https://fedorapeople.org/groups/heat/kolla/fedora-21-atomic.qcow2
-    glance image-create --name fedora-21-atomic \
+    wget https://fedorapeople.org/groups/heat/kolla/fedora-21-atomic-2.qcow2
+    glance image-create --name fedora-21-atomic-2 \
                         --is-public True \
                         --disk-format qcow2 \
-                        --container-format bare < fedora-21-atomic.qcow2
+                        --container-format bare < fedora-21-atomic-2.qcow2
     test -f ~/.ssh/id_rsa.pub || ssh-keygen
     nova keypair-add --pub-key ~/.ssh/id_rsa.pub testkey
 
