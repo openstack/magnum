@@ -5,7 +5,6 @@ write_files:
     owner: "root:root"
     permissions: "0644"
     content: |
-      MINION_ADDRESSES="$MINION_ADDRESSES"
       KUBE_ALLOW_PRIV="$KUBE_ALLOW_PRIV"
       WAIT_HANDLE="$WAIT_HANDLE"
       FLANNEL_NETWORK_CIDR="$FLANNEL_NETWORK_CIDR"

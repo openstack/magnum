@@ -193,7 +193,6 @@ resources:
         str_replace:
           template: {get_file: fragments/write-heat-params-master.yaml}
           params:
-            "$MINION_ADDRESSES": {"Fn::Join": [",", {get_attr: [kube_minions, kube_node_ip]}]}
             "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
             "$WAIT_HANDLE": {get_resource: master_wait_handle}
             "$FLANNEL_NETWORK_CIDR": {get_param: flannel_network_cidr}
@@ -311,6 +310,7 @@ resources:
     type: "OS::Heat::ResourceGroup"
     depends_on:
       - extrouter_inside
+      - master_wait_condition
     properties:
       count: {get_param: number_of_minions}
       resource_def:

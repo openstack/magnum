@@ -14,6 +14,6 @@ sed -i '
 ' /etc/kubernetes/apiserver
 
 sed -i '
-  /^KUBELET_ADDRESSES=/ s/=.*/="--machines='"$MINION_ADDRESSES"'"/
+  /^KUBELET_ADDRESSES=/ s/=.*/="--machines='""'"/
 ' /etc/kubernetes/controller-manager
 
