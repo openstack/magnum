@@ -204,7 +204,7 @@ class KubeClient(object):
             return False
 
         if err:
-            if ('pod "%s" not found' % name) in err:
+            if ('"%s" not found' % name) in err:
                 raise exception.PodNotFound(pod=name)
             else:
                 return False

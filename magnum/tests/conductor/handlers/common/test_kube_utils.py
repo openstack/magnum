@@ -196,7 +196,7 @@ class KubeClientTestCase(base.TestCase):
         mock_trycmd.assert_called_once_with(*expected_command)
 
     @patch('magnum.openstack.common.utils.trycmd')
-    def test_pod_delete_not_found(self, mock_trycmd):
+    def test_pod_delete_not_found_old(self, mock_trycmd):
         expected_master_address = 'master-address'
         expected_pod_name = 'test-pod'
         expected_command = [
@@ -204,6 +204,21 @@ class KubeClientTestCase(base.TestCase):
             '-s', expected_master_address
         ]
         mock_trycmd.return_value = ("", 'pod "test-pod" not found')
+
+        self.assertRaises(exception.PodNotFound, self.kube_client.pod_delete,
+                          expected_master_address, expected_pod_name)
+
+        mock_trycmd.assert_called_once_with(*expected_command)
+
+    @patch('magnum.openstack.common.utils.trycmd')
+    def test_pod_delete_not_found_new(self, mock_trycmd):
+        expected_master_address = 'master-address'
+        expected_pod_name = 'test-pod'
+        expected_command = [
+            'kubectl', 'delete', 'pod', expected_pod_name,
+            '-s', expected_master_address
+        ]
+        mock_trycmd.return_value = ("", 'pods "test-pod" not found')
 
         self.assertRaises(exception.PodNotFound, self.kube_client.pod_delete,
                           expected_master_address, expected_pod_name)
