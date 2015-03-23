@@ -12,6 +12,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from heatclient import exc
+
+from magnum.common import exception
 from magnum.conductor.handlers import bay_k8s_heat
 from magnum import objects
 from magnum.openstack.common import loopingcall
@@ -538,3 +541,10 @@ class TestHandler(db_base.DbTestCase):
                                                   self.bay)
         bay = objects.Bay.get(self.context, self.bay.uuid)
         self.assertEqual(bay.node_count, 2)
+
+    @patch('magnum.conductor.handlers.bay_k8s_heat._create_stack')
+    @patch('magnum.common.clients.OpenStackClients')
+    def test_create(self, mock_openstack_client_class, mock_create_stack):
+        mock_create_stack.side_effect = exc.HTTPBadRequest
+        self.assertRaises(exception.InvalidParameterValue,
+                          self.handler.bay_create, self.context, self.bay)

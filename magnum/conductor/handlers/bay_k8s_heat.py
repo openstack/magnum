@@ -165,7 +165,13 @@ class Handler(object):
 
         osc = clients.OpenStackClients(context)
 
-        created_stack = _create_stack(context, osc, bay)
+        try:
+            created_stack = _create_stack(context, osc, bay)
+        except Exception as e:
+            if isinstance(e, exc.HTTPBadRequest):
+                raise exception.InvalidParameterValue(message=str(e))
+            else:
+                raise
         bay.stack_id = created_stack['stack']['id']
         bay.create()
 
