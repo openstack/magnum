@@ -99,7 +99,7 @@ on Nova, Heat, and Neutron to create and schedule virtual machines to simulate
 bare-metal.  For milestone #2 we intend to introduce support for Ironic
 deployment of baremetal nodes.
 
-This session has only been tested on Ubuntu 14.04 (Trusty) and Fedora 21.
+This session has only been tested on Ubuntu 14.04 (Trusty) and Fedora 20/21.
 We recommend users to select one of them if it is possible.
 
 NB: Magnum depends on a command line tool in kubernetes called kubectl
