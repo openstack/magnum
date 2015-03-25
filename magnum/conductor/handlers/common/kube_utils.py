@@ -22,48 +22,48 @@ from magnum.openstack.common import utils
 LOG = logging.getLogger(__name__)
 
 
-def _k8s_create(master_address, resource):
+def _k8s_create(api_address, resource):
     data = resource.manifest
     definition_url = resource.manifest_url
     if data is not None:
-        return _k8s_create_with_data(master_address, data)
+        return _k8s_create_with_data(api_address, data)
     else:
-        return _k8s_create_with_path(master_address, definition_url)
+        return _k8s_create_with_path(api_address, definition_url)
 
 
-def _k8s_create_with_path(master_address, resource_file):
+def _k8s_create_with_path(api_address, resource_file):
     return utils.trycmd('kubectl', 'create',
-                        '-s', master_address,
+                        '-s', api_address,
                         '-f', resource_file)
 
 
-def _k8s_create_with_data(master_address, resource_data):
+def _k8s_create_with_data(api_address, resource_data):
     with tempfile.NamedTemporaryFile() as f:
         f.write(resource_data)
         f.flush()
-        return _k8s_create_with_path(master_address, f.name)
+        return _k8s_create_with_path(api_address, f.name)
 
 
-def _k8s_update(master_address, resource):
+def _k8s_update(api_address, resource):
     data = resource.manifest
     definition_url = resource.manifest_url
     if data is not None:
-        return _k8s_update_with_data(master_address, data)
+        return _k8s_update_with_data(api_address, data)
     else:
-        return _k8s_update_with_path(master_address, definition_url)
+        return _k8s_update_with_path(api_address, definition_url)
 
 
-def _k8s_update_with_path(master_address, resource_file):
+def _k8s_update_with_path(api_address, resource_file):
     return utils.trycmd('kubectl', 'update',
-                        '-s', master_address,
+                        '-s', api_address,
                         '-f', resource_file)
 
 
-def _k8s_update_with_data(master_address, resource_data):
+def _k8s_update_with_data(api_address, resource_data):
     with tempfile.NamedTemporaryFile() as f:
         f.write(resource_data)
         f.flush()
-        return _k8s_update_with_path(master_address, f.name)
+        return _k8s_update_with_path(api_address, f.name)
 
 
 class KubeClient(object):
@@ -78,10 +78,10 @@ class KubeClient(object):
     def __init__(self):
         super(KubeClient, self).__init__()
 
-    def service_create(self, master_address, service):
+    def service_create(self, api_address, service):
         LOG.debug("service_create with contents %s" % service)
         try:
-            out, err = _k8s_create(master_address, service)
+            out, err = _k8s_create(api_address, service)
 
             if err:
                 return False
@@ -92,10 +92,10 @@ class KubeClient(object):
             return False
         return True
 
-    def service_update(self, master_address, service):
+    def service_update(self, api_address, service):
         LOG.debug("service_update with contents %s" % service)
         try:
-            out, err = _k8s_update(master_address, service)
+            out, err = _k8s_update(api_address, service)
 
             if err:
                 return False
@@ -106,11 +106,11 @@ class KubeClient(object):
             return False
         return True
 
-    def service_list(self, master_address):
+    def service_list(self, api_address):
         LOG.debug("service_list")
         try:
             out = utils.execute('kubectl', 'get', 'services',
-                                '-s', master_address,)
+                                '-s', api_address,)
             manifest = [s.split() for s in out.split('\n')]
             return manifest
         except Exception as e:
@@ -118,11 +118,11 @@ class KubeClient(object):
                            % e)
             return None
 
-    def service_delete(self, master_address, name):
+    def service_delete(self, api_address, name):
         LOG.debug("service_delete %s" % name)
         try:
             out, err = utils.trycmd('kubectl', 'delete', 'service', name,
-                                    '-s', master_address)
+                                    '-s', api_address)
             if err:
                 return False
         except Exception as e:
@@ -131,11 +131,11 @@ class KubeClient(object):
             return False
         return True
 
-    def service_get(self, master_address, uuid):
+    def service_get(self, api_address, uuid):
         LOG.debug("service_get %s" % uuid)
         try:
             out = utils.execute('kubectl', 'get', 'service', uuid,
-                                '-s', master_address)
+                                '-s', api_address)
             # TODO(pkilambi): process the output as needed
             return out
         except Exception as e:
@@ -143,11 +143,11 @@ class KubeClient(object):
                           "%(error)s") % {'service': uuid, 'error': e})
             return None
 
-    def service_show(self, master_address, uuid):
+    def service_show(self, api_address, uuid):
         LOG.debug("service_show %s" % uuid)
         try:
             out = utils.execute('kubectl', 'describe', 'service', uuid,
-                                '-s', master_address)
+                                '-s', api_address)
             # TODO(pkilambi): process the output as needed
             return out
         except Exception as e:
@@ -156,10 +156,10 @@ class KubeClient(object):
             return None
 
     # Pod Operations
-    def pod_create(self, master_address, pod):
+    def pod_create(self, api_address, pod):
         LOG.debug("pod_create contents %s" % pod)
         try:
-            out, err = _k8s_create(master_address, pod)
+            out, err = _k8s_create(api_address, pod)
 
             if err:
                 return False
@@ -170,10 +170,10 @@ class KubeClient(object):
             return False
         return True
 
-    def pod_update(self, master_address, pod):
+    def pod_update(self, api_address, pod):
         LOG.debug("pod_update contents %s" % pod)
         try:
-            out, err = _k8s_update(master_address, pod)
+            out, err = _k8s_update(api_address, pod)
 
             if err:
                 return False
@@ -183,21 +183,21 @@ class KubeClient(object):
             return False
         return True
 
-    def pod_list(self, master_address):
+    def pod_list(self, api_address):
         LOG.debug("pod_list")
         try:
-            out = utils.execute('kubectl', 'get', 'pods', '-s', master_address)
+            out = utils.execute('kubectl', 'get', 'pods', '-s', api_address)
             manifest = [s.split() for s in out.split('\n')]
             return manifest
         except Exception as e:
             LOG.error(_LE("Couldn't get list of pods due to error %s") % e)
             return None
 
-    def pod_delete(self, master_address, name):
+    def pod_delete(self, api_address, name):
         LOG.debug("pod_delete %s" % name)
         try:
             out, err = utils.trycmd('kubectl', 'delete', 'pod', name,
-                                    '-s', master_address,)
+                                    '-s', api_address,)
         except Exception as e:
             LOG.error(_LE("Couldn't delete pod %(pod)s due to error "
                           "%(error)s") % {'pod': name, 'error': e})
@@ -211,11 +211,11 @@ class KubeClient(object):
 
         return True
 
-    def pod_get(self, master_address, uuid):
+    def pod_get(self, api_address, uuid):
         LOG.debug("pod_get %s" % uuid)
         try:
             out = utils.execute('kubectl', 'get', 'pod', uuid,
-                                '-s', master_address)
+                                '-s', api_address)
             # TODO(pkilambi): process the output as needed
             return out
         except Exception as e:
@@ -223,11 +223,11 @@ class KubeClient(object):
                          % {'pod': uuid, 'error': e})
             return None
 
-    def pod_show(self, master_address, uuid):
+    def pod_show(self, api_address, uuid):
         LOG.debug("pod_show %s" % uuid)
         try:
             out = utils.execute('kubectl', 'describe', 'pod', uuid,
-                                '-s', master_address)
+                                '-s', api_address)
             # TODO(pkilambi): process the output as needed
             return out
         except Exception as e:
@@ -236,10 +236,10 @@ class KubeClient(object):
             return None
 
     # Replication Controller Operations
-    def rc_create(self, master_address, rc):
+    def rc_create(self, api_address, rc):
         LOG.debug("rc_create contents %s" % rc)
         try:
-            out, err = _k8s_create(master_address, rc)
+            out, err = _k8s_create(api_address, rc)
 
             if err:
                 return False
@@ -249,10 +249,10 @@ class KubeClient(object):
             return False
         return True
 
-    def rc_update(self, master_address, rc):
+    def rc_update(self, api_address, rc):
         LOG.debug("rc_update contents %s" % rc)
         try:
-            out, err = _k8s_update(master_address, rc)
+            out, err = _k8s_update(api_address, rc)
 
             if err:
                 return False
@@ -262,11 +262,11 @@ class KubeClient(object):
             return False
         return True
 
-    def rc_delete(self, master_address, name):
+    def rc_delete(self, api_address, name):
         LOG.debug("rc_delete %s" % name)
         try:
             out, err = utils.trycmd('kubectl', 'delete', 'rc', name,
-                                    '-s', master_address)
+                                    '-s', api_address)
             if err:
                 return False
         except Exception as e:

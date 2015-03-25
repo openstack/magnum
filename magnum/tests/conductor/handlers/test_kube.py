@@ -69,14 +69,14 @@ class TestKube(base.TestCase):
                                     mock_baymodel_get_by_uuid,
                                     mock_bay_get_by_uuid):
         expected_context = 'context'
-        expected_master_address = 'master_address'
+        expected_api_address = 'api_address'
         expected_baymodel_id = 'e74c40e0-d825-11e2-a28f-0800200c9a61'
         expected_apiserver_port = 9999
 
         pod = self.mock_pod()
         pod.bay_uuid = 'bay_uuid'
         bay = self.mock_bay()
-        bay.master_address = expected_master_address
+        bay.api_address = expected_api_address
         bay.baymodel_id = expected_baymodel_id
         baymodel = self.mock_baymodel()
         baymodel.apiserver_port = expected_apiserver_port
@@ -84,11 +84,11 @@ class TestKube(base.TestCase):
         mock_bay_get_by_uuid.return_value = bay
         mock_baymodel_get_by_uuid.return_value = baymodel
 
-        actual_master_address = kube._retrieve_k8s_master_url(expected_context,
+        actual_api_address = kube._retrieve_k8s_master_url(expected_context,
                                                              pod)
-        self.assertEqual("http://%s:%d" % (expected_master_address,
+        self.assertEqual("http://%s:%d" % (expected_api_address,
                                            expected_apiserver_port),
-                         actual_master_address)
+                         actual_api_address)
 
     @patch('magnum.objects.Bay.get_by_uuid')
     @patch('magnum.objects.BayModel.get_by_uuid')
@@ -96,7 +96,7 @@ class TestKube(base.TestCase):
                                                     mock_baymodel_get_by_uuid,
                                                     mock_bay_get_by_uuid):
         expected_context = 'context'
-        expected_master_address = 'master_address'
+        expected_api_address = 'api_address'
         expected_baymodel_id = 'e74c40e0-d825-11e2-a28f-0800200c9a61'
         expected_protocol = cfg.CONF.kubernetes.k8s_protocol
         expected_apiserver_port = cfg.CONF.kubernetes.k8s_port
@@ -104,7 +104,7 @@ class TestKube(base.TestCase):
         resource = self.mock_pod()
         resource.bay_uuid = 'bay_uuid'
         bay = self.mock_bay()
-        bay.master_address = expected_master_address
+        bay.api_address = expected_api_address
         bay.baymodel_id = expected_baymodel_id
         baymodel = self.mock_baymodel()
         baymodel.apiserver_port = None
@@ -112,17 +112,17 @@ class TestKube(base.TestCase):
         mock_bay_get_by_uuid.return_value = bay
         mock_baymodel_get_by_uuid.return_value = baymodel
 
-        actual_master_address = kube._retrieve_k8s_master_url(expected_context,
+        actual_api_address = kube._retrieve_k8s_master_url(expected_context,
                                                              resource)
         self.assertEqual("%s://%s:%d" % (expected_protocol,
-                                         expected_master_address,
+                                         expected_api_address,
                                          expected_apiserver_port),
-                                         actual_master_address)
+                                         actual_api_address)
 
     @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
     def test_pod_create_with_success(self,
                                      mock_retrieve_k8s_master_url):
-        expected_master_url = 'master_address'
+        expected_master_url = 'api_address'
         expected_pod = self.mock_pod()
         expected_pod.create = mock.MagicMock()
 
@@ -136,7 +136,7 @@ class TestKube(base.TestCase):
     @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
     def test_pod_create_with_fail(self,
                                   mock_retrieve_k8s_master_url):
-        expected_master_url = 'master_address'
+        expected_master_url = 'api_address'
         expected_pod = self.mock_pod()
         expected_pod.create = mock.MagicMock()
 
@@ -154,7 +154,7 @@ class TestKube(base.TestCase):
                                      mock_pod_get_by_uuid,
                                      mock_retrieve_k8s_master_url,
                                      mock_object_has_stack):
-        expected_master_url = 'master_address'
+        expected_master_url = 'api_address'
         mock_pod = mock.MagicMock()
         mock_pod.name = 'test-pod'
         mock_pod.uuid = 'test-uuid'
@@ -178,7 +178,7 @@ class TestKube(base.TestCase):
                                      mock_pod_get_by_uuid,
                                      mock_retrieve_k8s_master_url,
                                      mock_object_has_stack):
-        expected_master_url = 'master_address'
+        expected_master_url = 'api_address'
         mock_pod = mock.MagicMock()
         mock_pod.name = 'test-pod'
         mock_pod.uuid = 'test-uuid'
@@ -202,7 +202,7 @@ class TestKube(base.TestCase):
                                      mock_pod_get_by_uuid,
                                      mock_retrieve_k8s_master_url,
                                      mock_object_has_stack):
-        expected_master_url = 'master_address'
+        expected_master_url = 'api_address'
         mock_pod = mock.MagicMock()
         mock_pod.name = 'test-pod'
         mock_pod.uuid = 'test-uuid'
@@ -222,7 +222,7 @@ class TestKube(base.TestCase):
     @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
     def test_service_create_with_success(self,
                                          mock_retrieve_k8s_master_url):
-        expected_master_url = 'master_address'
+        expected_master_url = 'api_address'
         expected_service = self.mock_service()
         expected_service.create = mock.MagicMock()
 
@@ -241,7 +241,7 @@ class TestKube(base.TestCase):
                                      mock_service_get_by_uuid,
                                      mock_retrieve_k8s_master_url,
                                      mock_object_has_stack):
-        expected_master_url = 'master_address'
+        expected_master_url = 'api_address'
         mock_service = mock.MagicMock()
         mock_service.name = 'test-service'
         mock_service.uuid = 'test-uuid'
@@ -265,7 +265,7 @@ class TestKube(base.TestCase):
                                      mock_service_get_by_uuid,
                                      mock_retrieve_k8s_master_url,
                                      mock_object_has_stack):
-        expected_master_url = 'master_address'
+        expected_master_url = 'api_address'
         mock_service = mock.MagicMock()
         mock_service.name = 'test-service'
         mock_service.uuid = 'test-uuid'
@@ -285,7 +285,7 @@ class TestKube(base.TestCase):
     @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
     def test_rc_create_with_success(self,
                                     mock_retrieve_k8s_master_url):
-        expected_master_url = 'master_address'
+        expected_master_url = 'api_address'
         expected_rc = self.mock_rc()
         expected_rc.create = mock.MagicMock()
 
@@ -304,7 +304,7 @@ class TestKube(base.TestCase):
                                     mock_rc_get_by_uuid,
                                     mock_retrieve_k8s_master_url,
                                     mock_object_has_stack):
-        expected_master_url = 'master_address'
+        expected_master_url = 'api_address'
         mock_rc = mock.MagicMock()
         mock_rc.name = 'test-rc'
         mock_rc.uuid = 'test-uuid'

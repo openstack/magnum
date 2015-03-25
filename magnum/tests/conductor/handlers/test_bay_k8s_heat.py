@@ -46,7 +46,7 @@ class TestBayK8sHeat(base.TestCase):
             'baymodel_id': 'xx-xx-xx-xx',
             'name': 'bay1',
             'stack_id': 'xx-xx-xx-xx',
-            'master_address': '172.17.2.3',
+            'api_address': '172.17.2.3',
             'minions_address': ['172.17.2.4'],
             'node_count': 1,
         }
@@ -372,11 +372,11 @@ class TestBayK8sHeat(base.TestCase):
         self.assertEqual(expected, bay_definition)
 
     def test_parse_stack_outputs(self):
-        expected_master_address = 'master_address'
+        expected_api_address = 'api_address'
         expected_minion_address = ['minion', 'address']
         expected_minion_external_address = ['ex_minion', 'address']
         expected_return_value = {
-            'kube_master': expected_master_address,
+            'kube_master': expected_api_address,
             'kube_minions': expected_minion_address,
             'kube_minions_external': expected_minion_external_address
         }
@@ -393,7 +393,7 @@ class TestBayK8sHeat(base.TestCase):
              "output_key": "kube_minions"
            },
            {
-             "output_value": expected_master_address,
+             "output_value": expected_api_address,
              "description": "No description given",
              "output_key": "kube_master"
            }

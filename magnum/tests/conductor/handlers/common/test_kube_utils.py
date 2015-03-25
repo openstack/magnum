@@ -28,39 +28,39 @@ class TestKubeUtils(base.BaseTestCase):
     def test_k8s_create_data(self,
                              mock_create_with_data):
         expected_data = 'data'
-        master_address = 'master_address'
+        api_address = 'api_address'
         mock_resource = mock.MagicMock()
         mock_resource.manifest = expected_data
         mock_resource.manifest_url = None
 
-        kube_utils._k8s_create(master_address, mock_resource)
-        mock_create_with_data.assert_called_once_with(master_address,
+        kube_utils._k8s_create(api_address, mock_resource)
+        mock_create_with_data.assert_called_once_with(api_address,
                                                       expected_data)
 
     @patch('magnum.conductor.handlers.common.kube_utils._k8s_create_with_path')
     def test_k8s_create_url(self,
                              mock_create_with_path):
         expected_url = 'url'
-        master_address = 'master_address'
+        api_address = 'api_address'
         mock_resource = mock.MagicMock()
         mock_resource.manifest = None
         mock_resource.manifest_url = expected_url
 
-        kube_utils._k8s_create(master_address, mock_resource)
-        mock_create_with_path.assert_called_once_with(master_address,
+        kube_utils._k8s_create(api_address, mock_resource)
+        mock_create_with_path.assert_called_once_with(api_address,
                                                       expected_url)
 
     @patch('magnum.openstack.common.utils.trycmd')
     def test_k8s_create_with_path(self, mock_trycmd):
-        expected_master_address = 'master_address'
+        expected_api_address = 'api_address'
         expected_pod_file = 'pod_file'
         expected_command = [
             'kubectl', 'create',
-            '-s', expected_master_address,
+            '-s', expected_api_address,
             '-f', expected_pod_file
         ]
 
-        kube_utils._k8s_create_with_path(expected_master_address,
+        kube_utils._k8s_create_with_path(expected_api_address,
                                          expected_pod_file)
         mock_trycmd.assert_called_once_with(*expected_command)
 
@@ -69,7 +69,7 @@ class TestKubeUtils(base.BaseTestCase):
     def test_k8s_create_with_data(self,
                                   mock_named_tempfile,
                                   mock_k8s_create):
-        expected_master_address = 'master_address'
+        expected_api_address = 'api_address'
         expected_data = 'resource_data'
         expected_filename = 'resource_file'
 
@@ -77,50 +77,50 @@ class TestKubeUtils(base.BaseTestCase):
         mock_file.name = expected_filename
         mock_named_tempfile.return_value.__enter__.return_value = mock_file
 
-        kube_utils._k8s_create_with_data(expected_master_address,
+        kube_utils._k8s_create_with_data(expected_api_address,
             expected_data)
 
         mock_file.write.assert_called_once_with(expected_data)
-        mock_k8s_create.assert_called_once_with(expected_master_address,
+        mock_k8s_create.assert_called_once_with(expected_api_address,
                                                 expected_filename)
 
     @patch('magnum.conductor.handlers.common.kube_utils._k8s_update_with_data')
     def test_k8s_update_data(self,
                              mock_update_with_data):
         expected_data = 'data'
-        master_address = 'master_address'
+        api_address = 'api_address'
         mock_resource = mock.MagicMock()
         mock_resource.manifest = expected_data
         mock_resource.manifest_url = None
 
-        kube_utils._k8s_update(master_address, mock_resource)
-        mock_update_with_data.assert_called_once_with(master_address,
+        kube_utils._k8s_update(api_address, mock_resource)
+        mock_update_with_data.assert_called_once_with(api_address,
                                                       expected_data)
 
     @patch('magnum.conductor.handlers.common.kube_utils._k8s_update_with_path')
     def test_k8s_update_url(self,
                             mock_update_with_path):
         expected_url = 'url'
-        master_address = 'master_address'
+        api_address = 'api_address'
         mock_resource = mock.MagicMock()
         mock_resource.manifest = None
         mock_resource.manifest_url = expected_url
 
-        kube_utils._k8s_update(master_address, mock_resource)
-        mock_update_with_path.assert_called_once_with(master_address,
+        kube_utils._k8s_update(api_address, mock_resource)
+        mock_update_with_path.assert_called_once_with(api_address,
                                                       expected_url)
 
     @patch('magnum.openstack.common.utils.trycmd')
     def test_k8s_update_with_path(self, mock_trycmd):
-        expected_master_address = 'master_address'
+        expected_api_address = 'api_address'
         expected_pod_file = 'pod_file'
         expected_command = [
             'kubectl', 'update',
-            '-s', expected_master_address,
+            '-s', expected_api_address,
             '-f', expected_pod_file
         ]
 
-        kube_utils._k8s_update_with_path(expected_master_address,
+        kube_utils._k8s_update_with_path(expected_api_address,
                                          expected_pod_file)
         mock_trycmd.assert_called_once_with(*expected_command)
 
@@ -129,7 +129,7 @@ class TestKubeUtils(base.BaseTestCase):
     def test_k8s_update_with_data(self,
                                   mock_named_tempfile,
                                   mock_k8s_update):
-        expected_master_address = 'master_address'
+        expected_api_address = 'api_address'
         expected_data = 'resource_data'
         expected_filename = 'resource_file'
 
@@ -137,11 +137,11 @@ class TestKubeUtils(base.BaseTestCase):
         mock_file.name = expected_filename
         mock_named_tempfile.return_value.__enter__.return_value = mock_file
 
-        kube_utils._k8s_update_with_data(expected_master_address,
+        kube_utils._k8s_update_with_data(expected_api_address,
             expected_data)
 
         mock_file.write.assert_called_once_with(expected_data)
-        mock_k8s_update.assert_called_once_with(expected_master_address,
+        mock_k8s_update.assert_called_once_with(expected_api_address,
                                                 expected_filename)
 
 
@@ -152,75 +152,75 @@ class KubeClientTestCase(base.TestCase):
 
     @patch('magnum.openstack.common.utils.trycmd')
     def test_pod_delete(self, mock_trycmd):
-        expected_master_address = 'master-address'
+        expected_api_address = 'master-address'
         expected_pod_name = 'test-pod'
         expected_command = [
             'kubectl', 'delete', 'pod', expected_pod_name,
-            '-s', expected_master_address
+            '-s', expected_api_address
         ]
         mock_trycmd.return_value = ("", "")
 
-        result = self.kube_client.pod_delete(expected_master_address,
+        result = self.kube_client.pod_delete(expected_api_address,
                                              expected_pod_name)
         self.assertTrue(result)
         mock_trycmd.assert_called_once_with(*expected_command)
 
     @patch('magnum.openstack.common.utils.trycmd')
     def test_pod_delete_failure_err_not_empty(self, mock_trycmd):
-        expected_master_address = 'master-address'
+        expected_api_address = 'master-address'
         expected_pod_name = 'test-pod'
         expected_command = [
             'kubectl', 'delete', 'pod', expected_pod_name,
-            '-s', expected_master_address
+            '-s', expected_api_address
         ]
         mock_trycmd.return_value = ("", "error")
 
-        result = self.kube_client.pod_delete(expected_master_address,
+        result = self.kube_client.pod_delete(expected_api_address,
                                              expected_pod_name)
         self.assertFalse(result)
         mock_trycmd.assert_called_once_with(*expected_command)
 
     @patch('magnum.openstack.common.utils.trycmd')
     def test_pod_delete_failure_exception(self, mock_trycmd):
-        expected_master_address = 'master-address'
+        expected_api_address = 'master-address'
         expected_pod_name = 'test-pod'
         expected_command = [
             'kubectl', 'delete', 'pod', expected_pod_name,
-            '-s', expected_master_address
+            '-s', expected_api_address
         ]
         mock_trycmd.side_effect = Exception()
 
-        result = self.kube_client.pod_delete(expected_master_address,
+        result = self.kube_client.pod_delete(expected_api_address,
                                              expected_pod_name)
         self.assertFalse(result)
         mock_trycmd.assert_called_once_with(*expected_command)
 
     @patch('magnum.openstack.common.utils.trycmd')
     def test_pod_delete_not_found_old(self, mock_trycmd):
-        expected_master_address = 'master-address'
+        expected_api_address = 'master-address'
         expected_pod_name = 'test-pod'
         expected_command = [
             'kubectl', 'delete', 'pod', expected_pod_name,
-            '-s', expected_master_address
+            '-s', expected_api_address
         ]
         mock_trycmd.return_value = ("", 'pod "test-pod" not found')
 
         self.assertRaises(exception.PodNotFound, self.kube_client.pod_delete,
-                          expected_master_address, expected_pod_name)
+                          expected_api_address, expected_pod_name)
 
         mock_trycmd.assert_called_once_with(*expected_command)
 
     @patch('magnum.openstack.common.utils.trycmd')
     def test_pod_delete_not_found_new(self, mock_trycmd):
-        expected_master_address = 'master-address'
+        expected_api_address = 'master-address'
         expected_pod_name = 'test-pod'
         expected_command = [
             'kubectl', 'delete', 'pod', expected_pod_name,
-            '-s', expected_master_address
+            '-s', expected_api_address
         ]
         mock_trycmd.return_value = ("", 'pods "test-pod" not found')
 
         self.assertRaises(exception.PodNotFound, self.kube_client.pod_delete,
-                          expected_master_address, expected_pod_name)
+                          expected_api_address, expected_pod_name)
 
         mock_trycmd.assert_called_once_with(*expected_command)

@@ -59,7 +59,7 @@ def get_test_bay(**kw):
                               'e74c40e0-d825-11e2-a28f-0800200c9a66'),
         'stack_id': kw.get('stack_id', '047c6319-7abd-4bd9-a033-8c6af0173cd0'),
         'status': kw.get('status', 'CREATE_IN_PROGRESS'),
-        'master_address': kw.get('master_address', '172.17.2.3'),
+        'api_address': kw.get('api_address', '172.17.2.3'),
         'minions_address': kw.get('minions_address', ['172.17.2.4']),
         'node_count': kw.get('node_count', 3),
         'created_at': kw.get('created_at'),

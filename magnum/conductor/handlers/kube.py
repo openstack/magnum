@@ -60,9 +60,9 @@ def _retrieve_k8s_master_url(context, obj):
     params = {
         'k8s_protocol': cfg.CONF.kubernetes.k8s_protocol,
         'k8s_port': apiserver_port,
-        'master_address': obj.master_address
+        'api_address': obj.api_address
     }
-    return "%(k8s_protocol)s://%(master_address)s:%(k8s_port)s" % params
+    return "%(k8s_protocol)s://%(api_address)s:%(k8s_port)s" % params
 
 
 def _object_has_stack(context, obj):
