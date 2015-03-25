@@ -1,0 +1,45 @@
+heat_template_version: 2013-05-23
+
+description: >
+  This is just an example template. It does not produce a usable bay.
+
+parameters:
+  #
+  # REQUIRED PARAMETERS
+  #
+  ssh_key_name:
+    type: string
+    description: name of ssh key to be provisioned on our server
+
+  #
+  # OPTIONAL PARAMETERS
+  #
+  server_image:
+    type: string
+    default: centos-atomic
+    description: glance image used to boot the server
+
+  server_flavor:
+    type: string
+    default: m1.small
+    description: flavor to use when booting the server
+
+resources:
+
+  example_server:
+    type: "OS::Nova::Server"
+    properties:
+      image:
+        get_param: server_image
+      flavor:
+        get_param: server_flavor
+      key_name:
+        get_param: ssh_key_name
+
+outputs:
+
+  server_address:
+    value: {get_attr: [example_server, accessIPv4]}
+
+  node_addresses:
+    value: []

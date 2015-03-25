@@ -415,3 +415,15 @@ class ContainerException(Exception):
 class NotSupported(MagnumException):
     message = _("%(operation)s is not supported.")
     code = 400
+
+
+class BayTypeNotSupported(MagnumException):
+    message = _("Bay type (%(platform)s, %(os)s, %(coe)s) not supported.")
+
+
+class BayTypeNotEnabled(MagnumException):
+    message = _("Bay type (%(platform)s, %(os)s, %(coe)s) not enabled.")
+
+
+class RequiredParameterNotProvided(MagnumException):
+    message = _("Required parameter %(heat_param)s not provided.")
