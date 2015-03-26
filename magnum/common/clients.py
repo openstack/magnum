@@ -25,6 +25,10 @@ LOG = logging.getLogger(__name__)
 
 
 heat_client_opts = [
+    cfg.StrOpt('region_name',
+               default=None,
+               help=_('Region in Identity service catalog to use for '
+                      'communication with the OpenStack service.')),
     cfg.StrOpt('endpoint_type',
                default='publicURL',
                help=_(
@@ -80,8 +84,10 @@ class OpenStackClients(object):
             return self._heat
 
         endpoint_type = self._get_client_option('heat', 'endpoint_type')
+        region_name = self._get_client_option('heat', 'region_name')
         endpoint = self.url_for(service_type='orchestration',
-                                endpoint_type=endpoint_type)
+                                endpoint_type=endpoint_type,
+                                region_name=region_name)
 
         args = {
             'endpoint': endpoint,

@@ -12,6 +12,7 @@
 
 from heatclient.v1 import client as heatclient
 import mock
+from oslo_config import cfg
 
 from magnum.common import clients
 from magnum.common import exception
@@ -32,7 +33,8 @@ class ClientsTest(base.BaseTestCase):
     @mock.patch.object(heatclient, 'Client')
     @mock.patch.object(clients.OpenStackClients, 'url_for')
     @mock.patch.object(clients.OpenStackClients, 'auth_url')
-    def test_clients_heat(self, mock_auth, mock_url, mock_call):
+    def _test_clients_heat(self, expected_region_name, mock_auth, mock_url,
+                          mock_call):
         mock_auth.__get__ = mock.Mock(return_value="keystone_url")
         con = mock.MagicMock()
         con.auth_token = "3bcc3d3a03f44e3d8377f9247b0ad155"
@@ -47,7 +49,15 @@ class ClientsTest(base.BaseTestCase):
             auth_url='keystone_url', ca_file=None, key_file=None,
             password=None, insecure=False)
         mock_url.assert_called_once_with(service_type='orchestration',
-                                         endpoint_type='publicURL')
+                                         endpoint_type='publicURL',
+                                         region_name=expected_region_name)
+
+    def test_clients_heat(self):
+        self._test_clients_heat(None)
+
+    def test_clients_heat_region(self):
+        cfg.CONF.set_override('region_name', 'myregion', group='heat_client')
+        self._test_clients_heat('myregion')
 
     def test_clients_heat_noauth(self):
         con = mock.MagicMock()
