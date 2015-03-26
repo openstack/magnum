@@ -106,18 +106,6 @@ class KubeClient(object):
             return False
         return True
 
-    def service_list(self, api_address):
-        LOG.debug("service_list")
-        try:
-            out = utils.execute('kubectl', 'get', 'services',
-                                '-s', api_address,)
-            manifest = [s.split() for s in out.split('\n')]
-            return manifest
-        except Exception as e:
-            LOG.error(_LE("Couldn't get list of services due to error %s")
-                           % e)
-            return None
-
     def service_delete(self, api_address, name):
         LOG.debug("service_delete %s" % name)
         try:
@@ -130,30 +118,6 @@ class KubeClient(object):
                           "%(error)s") % {'service': name, 'error': e})
             return False
         return True
-
-    def service_get(self, api_address, uuid):
-        LOG.debug("service_get %s" % uuid)
-        try:
-            out = utils.execute('kubectl', 'get', 'service', uuid,
-                                '-s', api_address)
-            # TODO(pkilambi): process the output as needed
-            return out
-        except Exception as e:
-            LOG.error(_LE("Couldn't get service %(service)s due to error "
-                          "%(error)s") % {'service': uuid, 'error': e})
-            return None
-
-    def service_show(self, api_address, uuid):
-        LOG.debug("service_show %s" % uuid)
-        try:
-            out = utils.execute('kubectl', 'describe', 'service', uuid,
-                                '-s', api_address)
-            # TODO(pkilambi): process the output as needed
-            return out
-        except Exception as e:
-            LOG.error(_LE("Couldn't describe service %(service)s due to error"
-                          " %(error)s") % {'service': uuid, 'error': e})
-            return None
 
     # Pod Operations
     def pod_create(self, api_address, pod):
@@ -183,16 +147,6 @@ class KubeClient(object):
             return False
         return True
 
-    def pod_list(self, api_address):
-        LOG.debug("pod_list")
-        try:
-            out = utils.execute('kubectl', 'get', 'pods', '-s', api_address)
-            manifest = [s.split() for s in out.split('\n')]
-            return manifest
-        except Exception as e:
-            LOG.error(_LE("Couldn't get list of pods due to error %s") % e)
-            return None
-
     def pod_delete(self, api_address, name):
         LOG.debug("pod_delete %s" % name)
         try:
@@ -210,30 +164,6 @@ class KubeClient(object):
                 return False
 
         return True
-
-    def pod_get(self, api_address, uuid):
-        LOG.debug("pod_get %s" % uuid)
-        try:
-            out = utils.execute('kubectl', 'get', 'pod', uuid,
-                                '-s', api_address)
-            # TODO(pkilambi): process the output as needed
-            return out
-        except Exception as e:
-            LOG.error(_LE("Couldn't get pod %(pod)s due to error %(error)s")
-                         % {'pod': uuid, 'error': e})
-            return None
-
-    def pod_show(self, api_address, uuid):
-        LOG.debug("pod_show %s" % uuid)
-        try:
-            out = utils.execute('kubectl', 'describe', 'pod', uuid,
-                                '-s', api_address)
-            # TODO(pkilambi): process the output as needed
-            return out
-        except Exception as e:
-            LOG.error(_LE("Couldn't show pod %(pod)s due to error %(error)s")
-                         % {'pod': uuid, 'error': e})
-            return None
 
     # Replication Controller Operations
     def rc_create(self, api_address, rc):
