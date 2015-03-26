@@ -254,3 +254,33 @@ class KubeClientTestCase(base.TestCase):
                                              expected_service_name)
         self.assertFalse(result)
         mock_trycmd.assert_called_once_with(*expected_command)
+
+    @patch('magnum.openstack.common.utils.trycmd')
+    def test_rc_delete(self, mock_trycmd):
+        expected_api_address = 'master-address'
+        expected_rc_name = 'test-rc'
+        expected_command = [
+            'kubectl', 'delete', 'rc', expected_rc_name,
+            '-s', expected_api_address
+        ]
+        mock_trycmd.return_value = ("", "")
+
+        result = self.kube_client.rc_delete(expected_api_address,
+                                             expected_rc_name)
+        self.assertTrue(result)
+        mock_trycmd.assert_called_once_with(*expected_command)
+
+    @patch('magnum.openstack.common.utils.trycmd')
+    def test_rc_delete_failure_exception(self, mock_trycmd):
+        expected_api_address = 'master-address'
+        expected_rc_name = 'test-rc'
+        expected_command = [
+            'kubectl', 'delete', 'rc', expected_rc_name,
+            '-s', expected_api_address
+        ]
+        mock_trycmd.side_effect = Exception()
+
+        result = self.kube_client.rc_delete(expected_api_address,
+                                             expected_rc_name)
+        self.assertFalse(result)
+        mock_trycmd.assert_called_once_with(*expected_command)
