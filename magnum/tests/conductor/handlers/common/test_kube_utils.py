@@ -256,6 +256,94 @@ class KubeClientTestCase(base.TestCase):
         mock_trycmd.assert_called_once_with(*expected_command)
 
     @patch('magnum.conductor.handlers.common.kube_utils._k8s_update')
+    def test_service_update(self, mock_k8s_update):
+        expected_api_address = 'master-address'
+        expected_service_content = mock.MagicMock(manifest='service_content')
+        expected_command = [
+             expected_api_address,
+             expected_service_content
+        ]
+        mock_k8s_update.return_value = ("", "")
+
+        result = self.kube_client.service_update(expected_api_address,
+                                                 expected_service_content)
+        self.assertTrue(result)
+        mock_k8s_update.assert_called_once_with(*expected_command)
+
+    @patch('magnum.conductor.handlers.common.kube_utils._k8s_update')
+    def test_service_update_with_err(self, mock_k8s_update):
+        expected_api_address = 'master-address'
+        expected_service_content = mock.MagicMock(manifest='service_content')
+        expected_command = [
+             expected_api_address,
+             expected_service_content
+        ]
+        mock_k8s_update.return_value = ("", "create failed")
+
+        result = self.kube_client.service_update(expected_api_address,
+                                                 expected_service_content)
+        self.assertFalse(result)
+        mock_k8s_update.assert_called_once_with(*expected_command)
+
+    @patch('magnum.conductor.handlers.common.kube_utils._k8s_update')
+    def test_service_update_failure_exception(self, mock_k8s_update):
+        expected_api_address = 'master-address'
+        expected_service_content = mock.MagicMock(manifest='service_content')
+        expected_command = [
+             expected_api_address,
+             expected_service_content
+        ]
+        mock_k8s_update.side_effect = Exception()
+        result = self.kube_client.service_update(expected_api_address,
+                                                 expected_service_content)
+        self.assertFalse(result)
+        mock_k8s_update.assert_called_once_with(*expected_command)
+
+    @patch('magnum.conductor.handlers.common.kube_utils._k8s_create')
+    def test_service_create(self, mock_k8s_create):
+        expected_api_address = 'master-address'
+        expected_service_content = mock.MagicMock(manifest='service_content')
+        expected_command = [
+             expected_api_address,
+             expected_service_content
+        ]
+        mock_k8s_create.return_value = ("", "")
+
+        result = self.kube_client.service_create(expected_api_address,
+                                                 expected_service_content)
+        self.assertTrue(result)
+        mock_k8s_create.assert_called_once_with(*expected_command)
+
+    @patch('magnum.conductor.handlers.common.kube_utils._k8s_create')
+    def test_service_create_with_err(self, mock_k8s_create):
+        expected_api_address = 'master-address'
+        expected_service_content = mock.MagicMock(manifest='service_content')
+        expected_command = [
+             expected_api_address,
+             expected_service_content
+        ]
+        mock_k8s_create.return_value = ("", "create failed")
+
+        result = self.kube_client.service_create(expected_api_address,
+                                                 expected_service_content)
+        self.assertFalse(result)
+        mock_k8s_create.assert_called_once_with(*expected_command)
+
+    @patch('magnum.conductor.handlers.common.kube_utils._k8s_create')
+    def test_service_create_failure_exception(self, mock_k8s_create):
+        expected_api_address = 'master-address'
+        expected_service_content = mock.MagicMock(manifest='service_content')
+        expected_command = [
+             expected_api_address,
+             expected_service_content
+        ]
+        mock_k8s_create.side_effect = Exception()
+        result = self.kube_client.service_create(expected_api_address,
+                                                 expected_service_content)
+        self.assertFalse(result)
+        mock_k8s_create.assert_called_once_with(*expected_command)
+
+    @patch('magnum.conductor.handlers.common.kube_utils._k8s_update')
     def test_rc_update(self, mock_k8s_update):
         expected_api_address = 'master-address'
         expected_rc_content = mock.MagicMock(manifest='rc_content')
