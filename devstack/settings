@@ -1,7 +1,17 @@
-# Modify to your environment
-FLOATING_RANGE=192.168.1.224/27
-PUBLIC_NETWORK_GATEWAY=192.168.1.225
-PUBLIC_INTERFACE=em1
+# Devstack settings
+
+## Modify to your environment
+# FLOATING_RANGE=192.168.1.224/27
+# PUBLIC_NETWORK_GATEWAY=192.168.1.225
+# PUBLIC_INTERFACE=em1
+# FIXED_RANGE=10.0.0.0/24
+
+# Neutron settings
+Q_USE_SECGROUP=True
+ENABLE_TENANT_VLANS=True
+TENANT_VLAN_RANGE=
+PHYSICAL_NETWORK=public
+OVS_PHYSICAL_BRIDGE=br-ex
 
 # Credentials
 ADMIN_PASSWORD=password
@@ -25,15 +35,6 @@ enable_service neutron
 enable_service magnum
 enable_service m-api
 enable_service m-cond
-
-FIXED_RANGE=10.0.0.0/24
-
-Q_USE_SECGROUP=True
-ENABLE_TENANT_VLANS=True
-TENANT_VLAN_RANGE=
-
-PHYSICAL_NETWORK=public
-OVS_PHYSICAL_BRIDGE=br-ex
 
 # Log all output to files
 LOGFILE=$HOME/devstack.log
