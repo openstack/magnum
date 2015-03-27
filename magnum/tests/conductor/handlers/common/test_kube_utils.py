@@ -255,6 +255,94 @@ class KubeClientTestCase(base.TestCase):
         self.assertFalse(result)
         mock_trycmd.assert_called_once_with(*expected_command)
 
+    @patch('magnum.conductor.handlers.common.kube_utils._k8s_update')
+    def test_rc_update(self, mock_k8s_update):
+        expected_api_address = 'master-address'
+        expected_rc_content = mock.MagicMock(manifest='rc_content')
+        expected_command = [
+             expected_api_address,
+             expected_rc_content
+        ]
+        mock_k8s_update.return_value = ("", "")
+
+        result = self.kube_client.rc_update(expected_api_address,
+                                            expected_rc_content)
+        self.assertTrue(result)
+        mock_k8s_update.assert_called_once_with(*expected_command)
+
+    @patch('magnum.conductor.handlers.common.kube_utils._k8s_update')
+    def test_rc_update_with_err(self, mock_k8s_update):
+        expected_api_address = 'master-address'
+        expected_rc_content = mock.MagicMock(manifest='rc_content')
+        expected_command = [
+             expected_api_address,
+             expected_rc_content
+        ]
+        mock_k8s_update.return_value = ("", "update failed")
+
+        result = self.kube_client.rc_update(expected_api_address,
+                                            expected_rc_content)
+        self.assertFalse(result)
+        mock_k8s_update.assert_called_once_with(*expected_command)
+
+    @patch('magnum.conductor.handlers.common.kube_utils._k8s_update')
+    def test_rc_update_failure_exception(self, mock_k8s_update):
+        expected_api_address = 'master-address'
+        expected_rc_content = mock.MagicMock(manifest='rc_content')
+        expected_command = [
+             expected_api_address,
+             expected_rc_content
+        ]
+        mock_k8s_update.side_effect = Exception()
+        result = self.kube_client.rc_update(expected_api_address,
+                                            expected_rc_content)
+        self.assertFalse(result)
+        mock_k8s_update.assert_called_once_with(*expected_command)
+
+    @patch('magnum.conductor.handlers.common.kube_utils._k8s_create')
+    def test_rc_create(self, mock_k8s_create):
+        expected_api_address = 'master-address'
+        expected_rc_content = mock.MagicMock(manifest='rc_content')
+        expected_command = [
+             expected_api_address,
+             expected_rc_content
+        ]
+        mock_k8s_create.return_value = ("", "")
+
+        result = self.kube_client.rc_create(expected_api_address,
+                                            expected_rc_content)
+        self.assertTrue(result)
+        mock_k8s_create.assert_called_once_with(*expected_command)
+
+    @patch('magnum.conductor.handlers.common.kube_utils._k8s_create')
+    def test_rc_create_with_err(self, mock_k8s_create):
+        expected_api_address = 'master-address'
+        expected_rc_content = mock.MagicMock(manifest='rc_content')
+        expected_command = [
+             expected_api_address,
+             expected_rc_content
+        ]
+        mock_k8s_create.return_value = ("", "create failed")
+
+        result = self.kube_client.rc_create(expected_api_address,
+                                            expected_rc_content)
+        self.assertFalse(result)
+        mock_k8s_create.assert_called_once_with(*expected_command)
+
+    @patch('magnum.conductor.handlers.common.kube_utils._k8s_create')
+    def test_rc_create_failure_exception(self, mock_k8s_create):
+        expected_api_address = 'master-address'
+        expected_rc_content = mock.MagicMock(manifest='rc_content')
+        expected_command = [
+             expected_api_address,
+             expected_rc_content
+        ]
+        mock_k8s_create.side_effect = Exception()
+        result = self.kube_client.rc_create(expected_api_address,
+                                            expected_rc_content)
+        self.assertFalse(result)
+        mock_k8s_create.assert_called_once_with(*expected_command)
+
     @patch('magnum.openstack.common.utils.trycmd')
     def test_rc_delete(self, mock_trycmd):
         expected_api_address = 'master-address'
@@ -266,7 +354,7 @@ class KubeClientTestCase(base.TestCase):
         mock_trycmd.return_value = ("", "")
 
         result = self.kube_client.rc_delete(expected_api_address,
-                                             expected_rc_name)
+                                            expected_rc_name)
         self.assertTrue(result)
         mock_trycmd.assert_called_once_with(*expected_command)
 
@@ -281,6 +369,6 @@ class KubeClientTestCase(base.TestCase):
         mock_trycmd.side_effect = Exception()
 
         result = self.kube_client.rc_delete(expected_api_address,
-                                             expected_rc_name)
+                                            expected_rc_name)
         self.assertFalse(result)
         mock_trycmd.assert_called_once_with(*expected_command)
