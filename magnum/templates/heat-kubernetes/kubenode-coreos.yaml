@@ -72,7 +72,7 @@ resources:
     properties:
       Handle:
         get_resource: node_wait_handle
-      Timeout: "6000"
+      Timeout: 6000
 
   ######################################################################
   #

@@ -65,7 +65,7 @@ resources:
     properties:
       Handle:
         get_resource: master_wait_handle
-      Timeout: "6000"
+      Timeout: 6000
 
   ######################################################################
   #
