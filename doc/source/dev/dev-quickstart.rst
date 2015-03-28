@@ -172,8 +172,7 @@ Magnum in which way to construct a bay.::
 Next create a bay. Use the baymodel UUID as a template for bay creation.
 This bay will result in one master kubernetes node and two minion nodes.::
 
-    BAYMODEL_UUID=$(magnum baymodel-list | awk '/ testbaymodel /{print $2}')
-    magnum bay-create --name testbay --baymodel-id $BAYMODEL_UUID --node-count 2
+    magnum bay-create --name testbay --baymodel testbaymodel --node-count 2
 
 The existing bays can be listed as follows::
 
@@ -202,22 +201,21 @@ are working. Here's how to set up the replicated redis example. First, create
 a pod for the redis-master::
 
     cd ~/kubernetes/examples/redis
-    BAY_UUID=$(magnum bay-list | awk '/ testbay /{print $2}')
-    magnum pod-create --manifest ./redis-master.yaml --bay-id $BAY_UUID
+    magnum pod-create --manifest ./redis-master.yaml --bay testbay
 
 Now turn up a service to provide a discoverable endpoint for the redis sentinels
 in the cluster::
 
-    magnum service-create --manifest ./redis-sentinel-service.yaml --bay-id $BAY_UUID
+    magnum service-create --manifest ./redis-sentinel-service.yaml --bay testbay
 
 To make it a replicated redis cluster create replication controllers for the redis
 slaves and sentinels::
 
     sed -i 's/\(replicas: \)1/\1 2/' redis-controller.yaml
-    magnum rc-create --manifest ./redis-controller.yaml --bay-id $BAY_UUID
+    magnum rc-create --manifest ./redis-controller.yaml --bay testbay
 
     sed -i 's/\(replicas: \)1/\1 2/' redis-sentinel-controller.yaml
-    magnum rc-create --manifest ./redis-sentinel-controller.yaml --bay-id $BAY_UUID
+    magnum rc-create --manifest ./redis-sentinel-controller.yaml --bay testbay
 
 Full lifecycle and introspection operations for each object are supported.  For
 example, magnum bay-create, magnum baymodel-delete, magnum rc-show, magnum service-list.
