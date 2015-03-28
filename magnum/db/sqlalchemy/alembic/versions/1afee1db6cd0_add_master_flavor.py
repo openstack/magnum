@@ -28,7 +28,3 @@ import sqlalchemy as sa
 def upgrade():
     op.add_column('baymodel', sa.Column('master_flavor_id',
                   sa.String(length=255), nullable=True))
-
-
-def downgrade():
-    op.drop_column('baymodel', 'master_flavor_id')

@@ -33,10 +33,6 @@ def do_upgrade(mgr):
     mgr.upgrade(CONF.command.revision)
 
 
-def do_downgrade(mgr):
-    mgr.downgrade(CONF.command.revision)
-
-
 def do_stamp(mgr):
     mgr.stamp(CONF.command.revision)
 
@@ -53,10 +49,6 @@ def add_command_parsers(subparsers):
     parser = subparsers.add_parser('upgrade')
     parser.add_argument('revision', nargs='?')
     parser.set_defaults(func=do_upgrade)
-
-    parser = subparsers.add_parser('downgrade')
-    parser.add_argument('revision', nargs='?')
-    parser.set_defaults(func=do_downgrade)
 
     parser = subparsers.add_parser('stamp')
     parser.add_argument('revision')

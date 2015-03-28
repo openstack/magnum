@@ -135,16 +135,3 @@ def upgrade():
         mysql_DEFAULT_CHARSET='UTF8'
     )
     # end Alembic commands
-
-
-def downgrade():
-    op.drop_table('bay')
-    op.drop_table('baymodel')
-    op.drop_table('container')
-    op.drop_table('node')
-    op.drop_table('service')
-    op.drop_table('pod')
-    op.drop_table('replicationcontroller')
-# We should probably remove the drops later ;-)
-#    raise NotImplementedError(('Downgrade from initial migration is'
-#                              ' unsupported.'))

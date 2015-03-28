@@ -28,7 +28,3 @@ import sqlalchemy as sa
 def upgrade():
     op.add_column('bay', sa.Column('status', sa.String(length=20),
                   nullable=True))
-
-
-def downgrade():
-    op.drop_column('bay', 'status')
