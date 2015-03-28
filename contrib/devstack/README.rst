@@ -13,7 +13,7 @@ this time.
 
 To install magnum into devstack: ::
 
-    git clone https://git.openstack.org/stackforge/magnum /opt/stack/magnum
+    git clone https://git.openstack.org/openstack/magnum /opt/stack/magnum
     git clone https://git.openstack.org/openstack-dev/devstack /opt/stack/devstack
 
     # copy example localrc, modify as necessary

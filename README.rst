@@ -6,9 +6,9 @@ new Openstack project for containers.
 
 * Free software: Apache license
 * Documentation: http://docs.openstack.org/developer/magnum
-* Source: http://git.openstack.org/cgit/stackforge/magnum
+* Source: http://git.openstack.org/cgit/openstack/magnum
 * Bugs: http://bugs.launchpad.net/magnum
-* ReST Client: http://git.openstack.org/cgit/stackforge/python-magnumclient
+* ReST Client: http://git.openstack.org/cgit/openstack/python-magnumclient
 
 Architecture
 ------------
@@ -48,4 +48,4 @@ Features
 
 Installation and Usage
 ----------------------
-* Getting Started Guides: http://git.openstack.org/cgit/stackforge/magnum/tree/doc/source/dev/dev-quickstart.rst
+* Getting Started Guides: http://git.openstack.org/cgit/openstack/magnum/tree/doc/source/dev/dev-quickstart.rst

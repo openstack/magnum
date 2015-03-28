@@ -53,7 +53,7 @@ Magnum source code should be pulled directly from git::
 
     # from your home or source directory
     cd ~
-    git clone https://git.openstack.org/stackforge/magnum
+    git clone https://git.openstack.org/openstack/magnum
     cd magnum
 
 Set up a local environment for development and testing should be done with tox::
@@ -120,7 +120,7 @@ Clone DevStack::
     sudo chown $USER /opt/stack
 
     git clone https://github.com/openstack-dev/devstack.git /opt/stack/devstack
-    git clone https://github.com/stackforge/magnum /opt/stack/magnum
+    git clone https://github.com/openstack/magnum /opt/stack/magnum
 
 Copy devstack/localrc with minimal settings required to enable Heat
 and Neutron, refer to http://docs.openstack.org/developer/devstack/guides/neutron.html

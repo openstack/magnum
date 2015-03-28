@@ -28,11 +28,11 @@ set +o xtrace
 # --------
 
 # Set up default directories
-MAGNUM_REPO=${MAGNUM_REPO:-${GIT_BASE}/stackforge/magnum.git}
+MAGNUM_REPO=${MAGNUM_REPO:-${GIT_BASE}/openstack/magnum.git}
 MAGNUM_BRANCH=${MAGNUM_BRANCH:-master}
 MAGNUM_DIR=$DEST/magnum
 
-GITREPO["python-magnumclient"]=${MAGNUMCLIENT_REPO:-${GIT_BASE}/stackforge/python-magnumclient.git}
+GITREPO["python-magnumclient"]=${MAGNUMCLIENT_REPO:-${GIT_BASE}/openstack/python-magnumclient.git}
 GITBRANCH["python-magnumclient"]=${MAGNUMCLIENT_BRANCH:-master}
 GITDIR["python-magnumclient"]=$DEST/python-magnumclient
 

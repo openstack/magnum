@@ -112,7 +112,7 @@ Next, create a database in MySQL for Magnum::
 Next, clone and install Magnum::
 
     cd ~
-    git clone https://github.com/stackforge/magnum
+    git clone https://github.com/openstack/magnum
     cd magnum
     sudo pip install -e .
 
@@ -154,7 +154,7 @@ Next configure Magnum::
 Next, clone and install the client::
 
     cd ~
-    git clone https://github.com/stackforge/python-magnumclient
+    git clone https://github.com/openstack/python-magnumclient
     cd python-magnumclient
     sudo pip install -e .
 

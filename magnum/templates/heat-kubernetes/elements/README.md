@@ -6,7 +6,7 @@ elements to build an image which contains kubernetes required to use kubecluster
 
 An example fedora based image and uploaded to glance with the following:
 
-    git clone https://git.openstack.org/stackforge/magnum
+    git clone https://git.openstack.org/openstack/magnum
     git clone https://git.openstack.org/openstack/diskimage-builder.git
     git clone https://git.openstack.org/openstack/tripleo-image-elements.git
     git clone https://git.openstack.org/openstack/heat-templates.git
