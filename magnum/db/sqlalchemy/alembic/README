@@ -9,7 +9,3 @@ $ magnum-db-manage stamp head
 Upgrade can be performed by:
 $ magnum-db-manage upgrade
 $ magnum-db-manage upgrade head
-
-Downgrading db:
-$ magnum-db-manage downgrade
-$ magnum-db-manage downgrade base

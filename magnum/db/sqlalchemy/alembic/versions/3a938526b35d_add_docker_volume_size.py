@@ -32,7 +32,3 @@ import sqlalchemy as sa
 def upgrade():
     op.add_column('baymodel', sa.Column('docker_volume_size', sa.Integer(),
                   nullable=True))
-
-
-def downgrade():
-    op.drop_column('baymodel', 'docker_volume_size')

@@ -32,7 +32,3 @@ import sqlalchemy as sa
 def upgrade():
     op.add_column('baymodel', sa.Column('ssh_authorized_key',
                   sa.Text, nullable=True))
-
-
-def downgrade():
-    op.drop_column('baymodel', 'ssh_authorized_key')
