@@ -223,7 +223,7 @@ Design Principles
 Alternatives
 ------------
 
-1. Extending Nova's existing featureset to offer container features
+1. Extending Nova's existing feature set to offer container features
 1.1. Container features don't fit into Nova's idea of compute (VM/Server)
 2. A completely separate containers service forked from Nova.
 2.1. Would result in large overlap and duplication in features and code
