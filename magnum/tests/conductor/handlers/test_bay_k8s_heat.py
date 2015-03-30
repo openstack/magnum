@@ -47,7 +47,7 @@ class TestBayK8sHeat(base.TestCase):
             'name': 'bay1',
             'stack_id': 'xx-xx-xx-xx',
             'api_address': '172.17.2.3',
-            'minions_address': ['172.17.2.4'],
+            'node_addresses': ['172.17.2.4'],
             'node_count': 1,
         }
 

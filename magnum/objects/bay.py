@@ -51,7 +51,7 @@ class Bay(base.MagnumObject):
         #        DELETE_IN_PROGRESS|DELETE_FAILED|DELETED
         'status': obj_utils.str_or_none,
         'api_address': obj_utils.str_or_none,
-        'minions_address': obj_utils.list_or_none,
+        'node_addresses': obj_utils.list_or_none,
         'node_count': obj_utils.int_or_none
     }
 
