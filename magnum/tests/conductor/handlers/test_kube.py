@@ -130,8 +130,9 @@ class TestKube(base.TestCase):
         with patch.object(self.kube_handler, 'kube_cli') as mock_kube_cli:
             mock_kube_cli.pod_create.return_value = True
 
-            self.kube_handler.pod_create({}, expected_pod)
+            self.kube_handler.pod_create(self.context, expected_pod)
             self.assertEqual('pending', expected_pod.status)
+            expected_pod.create.assert_called_once_with(self.context)
 
     @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
     def test_pod_create_with_fail(self,
@@ -144,8 +145,9 @@ class TestKube(base.TestCase):
         with patch.object(self.kube_handler, 'kube_cli') as mock_kube_cli:
             mock_kube_cli.pod_create.return_value = False
 
-            self.kube_handler.pod_create({}, expected_pod)
+            self.kube_handler.pod_create(self.context, expected_pod)
             self.assertEqual('failed', expected_pod.status)
+            expected_pod.create.assert_called_once_with(self.context)
 
     @patch('magnum.conductor.handlers.kube._object_has_stack')
     @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')

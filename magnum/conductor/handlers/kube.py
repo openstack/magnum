@@ -142,7 +142,7 @@ class Handler(object):
         # - extract pod labels and set it
         # TODO(yuanying): Should kube_utils support definition_url?
         # When do we get pod labels and name?
-        pod.create()
+        pod.create(context)
         return pod
 
     def pod_update(self, context, pod):
