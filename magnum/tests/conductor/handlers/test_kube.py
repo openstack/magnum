@@ -230,9 +230,26 @@ class TestKube(base.TestCase):
         with patch.object(self.kube_handler, 'kube_cli') as mock_kube_cli:
             mock_kube_cli.service_create.return_value = True
 
-            self.kube_handler.service_create({}, expected_service)
+            self.kube_handler.service_create(self.context, expected_service)
             mock_kube_cli.service_create.assert_called_once_with(
                 expected_master_url, expected_service)
+            expected_service.create.assert_called_once_with(self.context)
+
+    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    def test_service_create_with_failure(self,
+                                         mock_retrieve_k8s_master_url):
+        expected_master_url = 'api_address'
+        expected_service = self.mock_service()
+        expected_service.create = mock.MagicMock()
+
+        mock_retrieve_k8s_master_url.return_value = expected_master_url
+        with patch.object(self.kube_handler, 'kube_cli') as mock_kube_cli:
+            mock_kube_cli.service_create.return_value = False
+
+            self.kube_handler.service_create(self.context, expected_service)
+            mock_kube_cli.service_create.assert_called_once_with(
+                expected_master_url, expected_service)
+            self.assertFalse(expected_service.create.called)
 
     @patch('magnum.conductor.handlers.kube._object_has_stack')
     @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
