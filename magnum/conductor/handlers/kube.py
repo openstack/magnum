@@ -104,8 +104,9 @@ class Handler(object):
 
     def service_update(self, context, service):
         LOG.debug("service_update %s", service.uuid)
+        k8s_master_url = _retrieve_k8s_master_url(context, service)
         # trigger a kubectl command
-        status = self.kube_cli.service_update(service)
+        status = self.kube_cli.service_update(k8s_master_url, service)
         if not status:
             return None
         # call the service object to persist in db
@@ -146,8 +147,9 @@ class Handler(object):
 
     def pod_update(self, context, pod):
         LOG.debug("pod_update %s", pod.uuid)
+        k8s_master_url = _retrieve_k8s_master_url(context, pod)
         # trigger a kubectl command
-        status = self.kube_cli.pod_update(pod)
+        status = self.kube_cli.pod_update(k8s_master_url, pod)
         if not status:
             return None
         # call the pod object to persist in db
@@ -186,8 +188,9 @@ class Handler(object):
 
     def rc_update(self, context, rc):
         LOG.debug("rc_update %s", rc.uuid)
+        k8s_master_url = _retrieve_k8s_master_url(context, rc)
         # trigger a kubectl command
-        status = self.kube_cli.rc_update(rc)
+        status = self.kube_cli.rc_update(k8s_master_url, rc)
         if not status:
             return None
         # call the rc object to persist in db
