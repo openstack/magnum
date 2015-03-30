@@ -297,6 +297,22 @@ class TestKube(base.TestCase):
             mock_kube_cli.rc_create.assert_called_once_with(
                 expected_master_url, expected_rc)
 
+    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    def test_rc_create_with_failure(self,
+                                    mock_retrieve_k8s_master_url):
+        expected_master_url = 'api_address'
+        expected_rc = self.mock_rc()
+        expected_rc.create = mock.MagicMock()
+
+        mock_retrieve_k8s_master_url.return_value = expected_master_url
+        with patch.object(self.kube_handler, 'kube_cli') as mock_kube_cli:
+            mock_kube_cli.rc_create.return_value = False
+
+            self.kube_handler.rc_create(self.context, expected_rc)
+            mock_kube_cli.rc_create.assert_called_once_with(
+                expected_master_url, expected_rc)
+            self.assertFalse(expected_rc.create.called)
+
     @patch('magnum.conductor.handlers.kube._object_has_stack')
     @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
     @patch('magnum.objects.ReplicationController.get_by_uuid')
@@ -320,6 +336,30 @@ class TestKube(base.TestCase):
             mock_kube_cli.rc_delete.assert_called_once_with(
                 expected_master_url, mock_rc.name)
             mock_rc.destroy.assert_called_once_with(self.context)
+
+    @patch('magnum.conductor.handlers.kube._object_has_stack')
+    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.objects.ReplicationController.get_by_uuid')
+    def test_rc_delete_with_failure(self,
+                                    mock_rc_get_by_uuid,
+                                    mock_retrieve_k8s_master_url,
+                                    mock_object_has_stack):
+        expected_master_url = 'api_address'
+        mock_rc = mock.MagicMock()
+        mock_rc.name = 'test-rc'
+        mock_rc.uuid = 'test-uuid'
+        mock_rc_get_by_uuid.return_value = mock_rc
+
+        mock_retrieve_k8s_master_url.return_value = expected_master_url
+        mock_object_has_stack.return_value = True
+        with patch.object(self.kube_handler, 'kube_cli') as mock_kube_cli:
+            mock_kube_cli.rc_delete.return_value = False
+
+            self.kube_handler.rc_delete(self.context, mock_rc.uuid)
+
+            mock_kube_cli.rc_delete.assert_called_once_with(
+                expected_master_url, mock_rc.name)
+            self.assertFalse(mock_rc.destroy.called)
 
     @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
     def test_rc_update_with_success(self,
