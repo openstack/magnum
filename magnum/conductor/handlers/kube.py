@@ -112,10 +112,6 @@ class Handler(object):
         service.refresh(context)
         return service
 
-    def service_list(self, context):
-        LOG.debug("service_list")
-        return self.kube_cli.service_list()
-
     def service_delete(self, context, uuid):
         LOG.debug("service_delete %s", uuid)
         service = objects.Service.get_by_uuid(context, uuid)
@@ -127,14 +123,6 @@ class Handler(object):
                 return None
         # call the service object to persist in db
         service.destroy(context)
-
-    def service_get(self, context, uuid):
-        LOG.debug("service_get %s", uuid)
-        return self.kube_cli.service_get(uuid)
-
-    def service_show(self, uuid):
-        LOG.debug("service_show %s", uuid)
-        return self.kube_cli.service_show(uuid)
 
     # Pod Operations
     def pod_create(self, context, pod):
@@ -166,10 +154,6 @@ class Handler(object):
         pod.refresh(context)
         return pod
 
-    def pod_list(self, context):
-        LOG.debug("pod_list")
-        return self.kube_cli.pod_list()
-
     def pod_delete(self, context, uuid):
         LOG.debug("pod_delete %s", uuid)
         # trigger a kubectl command
@@ -187,14 +171,6 @@ class Handler(object):
                 LOG.warn(msg, uuid)
         # call the pod object to persist in db
         pod.destroy(context)
-
-    def pod_get(self, context, uuid):
-        LOG.debug("pod_get %s", uuid)
-        return self.kube_cli.pod_get(uuid)
-
-    def pod_show(self, context, uuid):
-        LOG.debug("pod_show %s", uuid)
-        return self.kube_cli.pod_show(uuid)
 
     # Replication Controller Operations
     def rc_create(self, context, rc):
