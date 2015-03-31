@@ -182,6 +182,6 @@ Finally start the conductor service in a new window::
 
     magnum-conductor
 
-Magnum should now be up and running. Further steps on utilising Magnum and
+Magnum should now be up and running. Further steps on utilizing Magnum and
 deploying containers can be found in the `quickstart guide
 <../dev-quickstart.rst>`.
