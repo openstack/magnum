@@ -495,7 +495,7 @@ class TestBayK8sHeat(base.TestCase):
 
         bay.status = 'CREATE_IN_PROGRESS'
         mock_heat_stack.stack_status = 'CREATE_FAILED'
-        poller.poll_and_check()
+        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
         self.assertEqual(bay.save.call_count, 1)
         self.assertEqual(bay.status, 'CREATE_FAILED')
@@ -507,7 +507,7 @@ class TestBayK8sHeat(base.TestCase):
         mock_heat_stack.stack_status = 'DELETE_COMPLETE'
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
-        mock_heat_stack.stack_status = 'FAILED'
+        mock_heat_stack.stack_status = 'CREATE_FAILED'
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
         self.assertEqual(poller.attempts, 2)
 

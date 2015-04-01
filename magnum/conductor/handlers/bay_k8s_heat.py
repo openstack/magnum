@@ -264,7 +264,7 @@ class HeatPoller(object):
             LOG.info(_LI('Bay has been deleted, stack_id: %s')
                           % self.bay.stack_id)
             raise loopingcall.LoopingCallDone()
-        if (stack.stack_status == 'FAILED' or
+        if (stack.stack_status == 'CREATE_FAILED' or
                 self.attempts > cfg.CONF.k8s_heat.max_attempts):
             LOG.error(_LE('Unable to create bay, stack_id: %s')
                            % self.bay.stack_id)
