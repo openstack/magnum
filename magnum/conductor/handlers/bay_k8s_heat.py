@@ -208,8 +208,6 @@ class Handler(object):
         osc = clients.OpenStackClients(context)
         bay = objects.Bay.get_by_uuid(context, uuid)
         stack_id = bay.stack_id
-        # TODO(yuanying): handle stack status DELETE_IN_PROGRESS
-        #
         # NOTE(sdake): This will execute a stack_delete operation.  This will
         # Ignore HTTPNotFound exceptions (stack wasn't present).  In the case
         # that Heat couldn't find the stack representing the bay, likely a user
@@ -223,10 +221,12 @@ class Handler(object):
             if isinstance(e, exc.HTTPNotFound):
                 LOG.info(_LI('The stack %s was not be found during bay'
                              ' deletion.') % stack_id)
+                bay.destroy()
+                return None
             else:
                 raise
-        # TODO(yuanying): bay.destroy will be triggered by stack status change.
-        bay.destroy()
+
+        self._poll_and_check(osc, bay)
 
         return None
 
@@ -248,6 +248,13 @@ class HeatPoller(object):
         # node_addresses and bay status
         stack = self.openstack_client.heat().stacks.get(self.bay.stack_id)
         self.attempts += 1
+        # poll_and_check is detached and polling long time to check status,
+        # so another user/client can call delete bay/stack.
+        if stack.stack_status == 'DELETE_COMPLETE':
+            LOG.info(_LI('Bay has been deleted, stack_id: %s')
+                          % self.bay.stack_id)
+            self.bay.destroy()
+            raise loopingcall.LoopingCallDone()
         if (stack.stack_status in ['CREATE_COMPLETE', 'UPDATE_COMPLETE']):
             parsed_outputs = _parse_stack_outputs(stack.outputs)
             self.bay.api_address = parsed_outputs["kube_master"]
@@ -258,14 +265,18 @@ class HeatPoller(object):
         elif stack.stack_status != self.bay.status:
             self.bay.status = stack.stack_status
             self.bay.save()
-        # poll_and_check is detached and polling long time to check status,
-        # so another user/client can call delete bay/stack.
-        if stack.stack_status == 'DELETE_COMPLETE':
-            LOG.info(_LI('Bay has been deleted, stack_id: %s')
-                          % self.bay.stack_id)
-            raise loopingcall.LoopingCallDone()
-        if (stack.stack_status == 'CREATE_FAILED' or
-                self.attempts > cfg.CONF.k8s_heat.max_attempts):
+        if stack.stack_status == 'CREATE_FAILED':
             LOG.error(_LE('Unable to create bay, stack_id: %s')
                            % self.bay.stack_id)
+            raise loopingcall.LoopingCallDone()
+        if stack.stack_status == 'DELETE_FAILED':
+            LOG.error(_LE('Unable to delete bay, stack_id: %s')
+                           % self.bay.stack_id)
+            raise loopingcall.LoopingCallDone()
+        if self.attempts > cfg.CONF.k8s_heat.max_attempts:
+            LOG.error(_LE('Bay check exit after %(attempts)s attempts,'
+                          'stack_id: %(id)s, stack_status: %(status)s') %
+                          {'attemps': cfg.CONF.k8s_heat.max_attempts,
+                           'id': self.bay.stack_id,
+                           'status': stack.stack_status})
             raise loopingcall.LoopingCallDone()
