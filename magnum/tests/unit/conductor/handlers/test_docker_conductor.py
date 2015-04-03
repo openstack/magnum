@@ -58,7 +58,7 @@ class TestDockerConductor(base.BaseTestCase):
                               None, 'some-name', 'some-uuid', mock_container)
             self.mock_client.pull.assert_called_once_with(
                                           'test_image',
-                                                      tag='some_tag')
+                                          tag='some_tag')
             self.assertFalse(self.mock_client.create_container.called)
             mock_init.assert_called_once_with()
 
@@ -242,6 +242,75 @@ class TestDockerConductor(base.BaseTestCase):
                               self.conductor.container_show,
                               None, mock_container_uuid)
             self.mock_client.inspect_container.assert_called_once_with(
+                                                        mock_docker_id)
+            mock_find_container.assert_called_once_with(mock_container_uuid)
+            mock_init.assert_called_once_with()
+
+    def test_container_list(self):
+        self.conductor.container_list(None)
+        self.mock_client.containers.assert_called_once_with()
+
+    def test_container_list_with_failure(self):
+        with patch.object(errors.APIError, '__str__',
+                          return_value='hit error') as mock_init:
+            self.mock_client.containers = mock.Mock(side_effect=
+                                  errors.APIError('Error', '', ''))
+            self.assertRaises(exception.ContainerException,
+                              self.conductor.container_list,
+                              None)
+            self.mock_client.containers.assert_called_once_with()
+            mock_init.assert_called_once_with()
+
+    @patch.object(docker_conductor.Handler, '_find_container_by_name')
+    def test_container_execute(self, mock_find_container):
+        mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
+        mock_docker_id = '2703ef2b705d'
+        mock_find_container.return_value = mock_docker_id
+        self.conductor.container_execute(None, mock_container_uuid, 'ls')
+        self.mock_client.execute.assert_called_once_with(
+                                                    mock_docker_id, 'ls')
+        mock_find_container.assert_called_once_with(mock_container_uuid)
+
+    @patch.object(docker_conductor.Handler, '_find_container_by_name')
+    def test_container_execute_with_failure(self, mock_find_container):
+        mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
+        mock_docker_id = '2703ef2b705d'
+        mock_find_container.return_value = mock_docker_id
+        with patch.object(errors.APIError, '__str__',
+                          return_value='hit error') as mock_init:
+            self.mock_client.execute = mock.Mock(side_effect=
+                                  errors.APIError('Error', '', ''))
+            self.assertRaises(exception.ContainerException,
+                              self.conductor.container_execute,
+                              None, mock_container_uuid, 'ls')
+            self.mock_client.execute.assert_called_once_with(
+                                                        mock_docker_id, 'ls')
+            mock_find_container.assert_called_once_with(mock_container_uuid)
+            mock_init.assert_called_once_with()
+
+    @patch.object(docker_conductor.Handler, '_find_container_by_name')
+    def test_container_logs(self, mock_find_container):
+        mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
+        mock_docker_id = '2703ef2b705d'
+        mock_find_container.return_value = mock_docker_id
+        self.conductor.container_logs(None, mock_container_uuid)
+        self.mock_client.get_container_logs.assert_called_once_with(
+                                                    mock_docker_id)
+        mock_find_container.assert_called_once_with(mock_container_uuid)
+
+    @patch.object(docker_conductor.Handler, '_find_container_by_name')
+    def test_container_logs_with_failure(self, mock_find_container):
+        mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
+        mock_docker_id = '2703ef2b705d'
+        mock_find_container.return_value = mock_docker_id
+        with patch.object(errors.APIError, '__str__',
+                          return_value='hit error') as mock_init:
+            self.mock_client.get_container_logs = mock.Mock(side_effect=
+                                  errors.APIError('Error', '', ''))
+            self.assertRaises(exception.ContainerException,
+                              self.conductor.container_logs,
+                              None, mock_container_uuid)
+            self.mock_client.get_container_logs.assert_called_once_with(
                                                         mock_docker_id)
             mock_find_container.assert_called_once_with(mock_container_uuid)
             mock_init.assert_called_once_with()
