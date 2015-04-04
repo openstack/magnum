@@ -511,6 +511,27 @@ class TestBayK8sHeat(base.TestCase):
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
         self.assertEqual(poller.attempts, 2)
 
+    def test_poll_destroy(self):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+
+        mock_heat_stack.stack_status = 'DELETE_FAILED'
+        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+        # Destroy method is not called when stack delete failed
+        self.assertEqual(bay.destroy.call_count, 0)
+
+        mock_heat_stack.stack_status = 'DELETE_IN_PROGRESS'
+        poller.poll_and_check()
+        self.assertEqual(bay.destroy.call_count, 0)
+        self.assertEqual(bay.status, 'DELETE_IN_PROGRESS')
+
+        mock_heat_stack.stack_status = 'DELETE_COMPLETE'
+        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+        # The bay status should still be DELETE_IN_PROGRESS, because
+        # the destroy() method may be failed. If success, this bay record
+        # will delete directly, change status is meaningless.
+        self.assertEqual(bay.status, 'DELETE_IN_PROGRESS')
+        self.assertEqual(bay.destroy.call_count, 1)
+
 
 class TestHandler(db_base.DbTestCase):
 
@@ -548,3 +569,13 @@ class TestHandler(db_base.DbTestCase):
         mock_create_stack.side_effect = exc.HTTPBadRequest
         self.assertRaises(exception.InvalidParameterValue,
                           self.handler.bay_create, self.context, self.bay)
+
+    @patch('magnum.common.clients.OpenStackClients')
+    def test_bay_delete(self, mock_openstack_client_class):
+        osc = mock.MagicMock()
+        mock_openstack_client_class.return_value = osc
+        osc.heat.side_effect = exc.HTTPNotFound
+        self.handler.bay_delete(self.context, self.bay.uuid)
+        # The bay has been destroyed
+        self.assertRaises(exception.BayNotFound,
+                          objects.Bay.get, self.context, self.bay.uuid)
