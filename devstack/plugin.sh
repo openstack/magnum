@@ -1,9 +1,19 @@
 # magnum.sh - Devstack extras script to install magnum
 
+# Save trace setting
+XTRACE=$(set +o | grep xtrace)
+set -o xtrace
+
+echo_summary "magnum's plugin.sh was called..."
+source $DEST/magnum/devstack/lib/magnum
+(set -o posix; set)
+
 if is_service_enabled m-api m-cond; then
-    if [[ "$1" == "source" ]]; then
-        # Initial source
-        source $TOP_DIR/lib/magnum
+    if [[ "$1" == "stack" && "$2" == "pre-install" ]]; then
+        echo_summary "Before Installing magnum"
+        mkdir -p $SCREEN_LOGDIR
+        echo "python-kubernetes>=0.2" >> ${REQUIREMENTS_DIR}/global-requirements.txt
+        echo "docker-py>=0.5.1" >> ${REQUIREMENTS_DIR}/global-requirements.txt
     elif [[ "$1" == "stack" && "$2" == "install" ]]; then
         echo_summary "Installing magnum"
         install_magnum
@@ -43,3 +53,6 @@ if is_service_enabled m-api m-cond; then
         cleanup_magnum
     fi
 fi
+
+# Restore xtrace
+$XTRACE
