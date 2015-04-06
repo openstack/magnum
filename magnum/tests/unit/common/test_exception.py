@@ -206,3 +206,7 @@ class TestException(base.BaseTestCase):
     def test_NodeAssociated(self):
         self.assertRaises(exception.NodeAssociated,
                     lambda: self.raise_(exception.NodeAssociated()))
+
+    def test_NotSupported(self):
+        self.assertRaises(exception.NotSupported,
+                    lambda: self.raise_(exception.NotSupported()))

@@ -427,3 +427,8 @@ class CatalogNotFound(MagnumException):
 
 class ContainerException(Exception):
     pass
+
+
+class NotSupported(MagnumException):
+    message = _("%(operation)s is not supported.")
+    code = 400

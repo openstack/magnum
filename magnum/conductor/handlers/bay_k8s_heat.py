@@ -186,8 +186,9 @@ class Handler(object):
         stack = osc.heat().stacks.get(bay.stack_id)
         if (stack.stack_status != 'CREATE_COMPLETE' and
             stack.stack_status != 'UPDATE_COMPLETE'):
-            raise exception.MagnumException(_(
-                "Cannot update stack with status: %s") % stack.stack_status)
+            operation = _('Updating a bay when stack status is '
+                          '"%s"') % stack.stack_status
+            raise exception.NotSupported(operation=operation)
 
         delta = set(bay.obj_what_changed())
         if 'node_count' in delta:

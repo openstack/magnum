@@ -545,7 +545,7 @@ class TestHandler(db_base.DbTestCase):
     @patch('magnum.conductor.handlers.bay_k8s_heat.Handler._poll_and_check')
     @patch('magnum.conductor.handlers.bay_k8s_heat._update_stack')
     @patch('magnum.common.clients.OpenStackClients')
-    def test_update_node_count(self, mock_openstack_client_class,
+    def test_update_node_count_success(self, mock_openstack_client_class,
                                mock_update_stack, mock_poll_and_check):
         mock_heat_stack = mock.MagicMock()
         mock_heat_stack.stack_status = 'CREATE_COMPLETE'
@@ -562,6 +562,25 @@ class TestHandler(db_base.DbTestCase):
                                                   self.bay)
         bay = objects.Bay.get(self.context, self.bay.uuid)
         self.assertEqual(bay.node_count, 2)
+
+    @patch('magnum.conductor.handlers.bay_k8s_heat.Handler._poll_and_check')
+    @patch('magnum.conductor.handlers.bay_k8s_heat._update_stack')
+    @patch('magnum.common.clients.OpenStackClients')
+    def test_update_node_count_failure(self, mock_openstack_client_class,
+                               mock_update_stack, mock_poll_and_check):
+        mock_heat_stack = mock.MagicMock()
+        mock_heat_stack.stack_status = 'CREATE_FAILED'
+        mock_heat_client = mock.MagicMock()
+        mock_heat_client.stacks.get.return_value = mock_heat_stack
+        mock_openstack_client = mock_openstack_client_class.return_value
+        mock_openstack_client.heat.return_value = mock_heat_client
+
+        self.bay.node_count = 2
+        self.assertRaises(exception.NotSupported, self.handler.bay_update,
+                          self.context, self.bay)
+
+        bay = objects.Bay.get(self.context, self.bay.uuid)
+        self.assertEqual(bay.node_count, 1)
 
     @patch('magnum.conductor.handlers.bay_k8s_heat._create_stack')
     @patch('magnum.common.clients.OpenStackClients')
