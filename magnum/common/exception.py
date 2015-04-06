@@ -376,10 +376,6 @@ class BayAlreadyExists(Conflict):
     message = _("A node with UUID %(uuid)s already exists.")
 
 
-class BayNotEmpty(Invalid):
-    message = _("Bay %(bay)s is not empty.")
-
-
 class ContainerNotFound(ResourceNotFound):
     message = _("Container %(container)s could not be found.")
 

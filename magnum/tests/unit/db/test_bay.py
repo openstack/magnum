@@ -144,29 +144,53 @@ class DbBayTestCase(base.DbTestCase):
         bay = utils.create_test_bay()
         pod = utils.create_test_pod(bay_uuid=bay.uuid)
         self.assertEqual(bay.uuid, pod.bay_uuid)
-        self.assertRaises(exception.BayNotEmpty,
-                          self.dbapi.destroy_bay, bay.id)
+        self.dbapi.destroy_bay(bay.id)
+        self.assertRaises(exception.PodNotFound,
+                          self.dbapi.get_pod_by_id, self.context, pod.id)
 
     def test_destroy_bay_that_has_pods_by_uuid(self):
         bay = utils.create_test_bay()
         pod = utils.create_test_pod(bay_uuid=bay.uuid)
         self.assertEqual(bay.uuid, pod.bay_uuid)
-        self.assertRaises(exception.BayNotEmpty,
-                          self.dbapi.destroy_bay, bay.uuid)
+        self.dbapi.destroy_bay(bay.uuid)
+        self.assertRaises(exception.PodNotFound,
+                          self.dbapi.get_pod_by_id, self.context, pod.id)
 
     def test_destroy_bay_that_has_services(self):
         bay = utils.create_test_bay()
         service = utils.create_test_service(bay_uuid=bay.uuid)
         self.assertEqual(bay.uuid, service.bay_uuid)
-        self.assertRaises(exception.BayNotEmpty,
-                          self.dbapi.destroy_bay, bay.id)
+        self.dbapi.destroy_bay(bay.id)
+        self.assertRaises(exception.ServiceNotFound,
+                          self.dbapi.get_service_by_id,
+                          self.context, service.id)
 
     def test_destroy_bay_that_has_services_by_uuid(self):
         bay = utils.create_test_bay()
         service = utils.create_test_service(bay_uuid=bay.uuid)
         self.assertEqual(bay.uuid, service.bay_uuid)
-        self.assertRaises(exception.BayNotEmpty,
-                          self.dbapi.destroy_bay, bay.uuid)
+        self.dbapi.destroy_bay(bay.id)
+        self.assertRaises(exception.ServiceNotFound,
+                          self.dbapi.get_service_by_id,
+                          self.context, service.id)
+
+    def test_destroy_bay_that_has_rc(self):
+        bay = utils.create_test_bay()
+        rc = utils.create_test_rc(bay_uuid=bay.uuid)
+        self.assertEqual(bay.uuid, rc.bay_uuid)
+        self.dbapi.destroy_bay(bay.id)
+        self.assertRaises(exception.ReplicationControllerNotFound,
+                          self.dbapi.get_rc_by_id,
+                          self.context, rc.id)
+
+    def test_destroy_bay_that_has_rc_by_uuid(self):
+        bay = utils.create_test_bay()
+        rc = utils.create_test_rc(bay_uuid=bay.uuid)
+        self.assertEqual(bay.uuid, rc.bay_uuid)
+        self.dbapi.destroy_bay(bay.uuid)
+        self.assertRaises(exception.ReplicationControllerNotFound,
+                          self.dbapi.get_rc_by_id,
+                          self.context, rc.id)
 
     def test_update_bay(self):
         bay = utils.create_test_bay()

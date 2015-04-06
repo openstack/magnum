@@ -440,28 +440,19 @@ class TestDelete(api_base.FunctionalTest):
         obj_utils.create_test_pod(self.context, bay_uuid=self.bay.uuid)
         response = self.delete('/bays/%s' % self.bay.uuid,
                                expect_errors=True)
-        self.assertEqual(400, response.status_int)
-        self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
-        self.assertIn(self.bay.uuid, response.json['error_message'])
+        self.assertEqual(204, response.status_int)
 
     def test_delete_bay_with_services(self):
         obj_utils.create_test_service(self.context, bay_uuid=self.bay.uuid)
         response = self.delete('/bays/%s' % self.bay.uuid,
                                expect_errors=True)
-        self.assertEqual(400, response.status_int)
-        self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
-        self.assertIn(self.bay.uuid, response.json['error_message'])
+        self.assertEqual(204, response.status_int)
 
     def test_delete_bay_with_replication_controllers(self):
         obj_utils.create_test_rc(self.context, bay_uuid=self.bay.uuid)
         response = self.delete('/bays/%s' % self.bay.uuid,
                                expect_errors=True)
-        self.assertEqual(400, response.status_int)
-        self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
-        self.assertIn(self.bay.uuid, response.json['error_message'])
+        self.assertEqual(204, response.status_int)
 
     def test_delete_bay_with_name_not_found(self):
         response = self.delete('/bays/not_found', expect_errors=True)

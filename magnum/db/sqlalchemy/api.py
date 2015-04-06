@@ -189,21 +189,22 @@ class Connection(api.Connection):
             raise exception.BayNotFound(bay=bay_uuid)
 
     def destroy_bay(self, bay_id):
-        def bay_not_empty(session, bay_uuid):
+        def destroy_bay_resources(session, bay_uuid):
             """Checks whether the bay does not have resources."""
             query = model_query(models.Pod, session=session)
             query = self._add_pods_filters(query, {'bay_uuid': bay_uuid})
             if query.count() != 0:
-                return True
+                query.delete()
 
             query = model_query(models.Service, session=session)
             query = self._add_services_filters(query, {'bay_uuid': bay_uuid})
             if query.count() != 0:
-                return True
+                query.delete()
 
             query = model_query(models.ReplicationController, session=session)
             query = self._add_rcs_filters(query, {'bay_uuid': bay_uuid})
-            return query.count() != 0
+            if query.count() != 0:
+                query.delete()
 
         session = get_session()
         with session.begin():
@@ -215,13 +216,7 @@ class Connection(api.Connection):
             except NoResultFound:
                 raise exception.BayNotFound(bay=bay_id)
 
-            # TODO(hongbin): delete pods and services that attached to the bay.
-            #     We don't do it now because it could cause a long deletion
-            #     time which would block the conductor. It needs either threads
-            #     or coroutines.
-            if bay_not_empty(session, bay_ref['uuid']):
-                raise exception.BayNotEmpty(bay=bay_id)
-
+            destroy_bay_resources(session, bay_ref['uuid'])
             query.delete()
 
     def update_bay(self, bay_id, values):
