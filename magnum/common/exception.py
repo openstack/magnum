@@ -408,18 +408,5 @@ class ServiceAlreadyExists(Conflict):
     message = _("A node with UUID %(uuid)s already exists.")
 
 
-class KeystoneUnauthorized(MagnumException):
-    message = _("Not authorized in Keystone.")
-
-
-class KeystoneFailure(MagnumException):
-    message = _("Keystone failed.")
-
-
-class CatalogNotFound(MagnumException):
-    message = _("Service type %(service_type)s with endpoint type "
-                "%(endpoint_type)s not found in keystone service catalog.")
-
-
 class ContainerException(Exception):
     pass
