@@ -188,6 +188,58 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(self.bay.baymodel_id, response['baymodel_id'])
         self.assertEqual(self.bay.node_count, response['node_count'])
 
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_replace_ok_by_name(self, mock_utcnow):
+        name = 'bay_example_B'
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.patch_json('/bays/%s' % self.bay.name,
+                                   [{'path': '/name', 'value': name,
+                                     'op': 'replace'}])
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(200, response.status_code)
+
+        response = self.get_json('/bays/%s' % self.bay.uuid)
+        self.assertEqual(name, response['name'])
+        return_updated_at = timeutils.parse_isotime(
+                            response['updated_at']).replace(tzinfo=None)
+        self.assertEqual(test_time, return_updated_at)
+        # Assert nothing else was changed
+        self.assertEqual(self.bay.uuid, response['uuid'])
+        self.assertEqual(self.bay.baymodel_id, response['baymodel_id'])
+        self.assertEqual(self.bay.node_count, response['node_count'])
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_replace_ok_by_name_not_found(self, mock_utcnow):
+        name = 'not_found'
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.patch_json('/bays/%s' % name,
+                                   [{'path': '/name', 'value': name,
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(404, response.status_code)
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_replace_ok_by_name_multiple_bay(self, mock_utcnow):
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        obj_utils.create_test_bay(self.context, name='test_bay',
+                                  uuid=utils.generate_uuid())
+        obj_utils.create_test_bay(self.context, name='test_bay',
+                                  uuid=utils.generate_uuid())
+
+        response = self.patch_json('/bays/test_bay',
+                                   [{'path': '/name', 'value': 'test_bay',
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(409, response.status_code)
+
     def test_replace_baymodel_id(self):
         baymodel = obj_utils.create_test_baymodel(self.context,
                                                   uuid=utils.generate_uuid())

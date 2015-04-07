@@ -254,17 +254,17 @@ class BaysController(rest.RestController):
         return Bay.convert_with_links(res_bay)
 
     @wsme.validate(types.uuid, [BayPatchType])
-    @wsme_pecan.wsexpose(Bay, types.uuid, body=[BayPatchType])
-    def patch(self, bay_uuid, patch):
+    @wsme_pecan.wsexpose(Bay, types.uuid_or_name, body=[BayPatchType])
+    def patch(self, bay_ident, patch):
         """Update an existing bay.
 
-        :param bay_uuid: UUID of a bay.
+        :param bay_ident: UUID or logical name of a bay.
         :param patch: a json PATCH document to apply to this bay.
         """
         if self.from_bays:
             raise exception.OperationNotPermitted
 
-        rpc_bay = objects.Bay.get_by_uuid(pecan.request.context, bay_uuid)
+        rpc_bay = api_utils.get_rpc_resource('Bay', bay_ident)
         try:
             bay_dict = rpc_bay.as_dict()
             bay = Bay(**api_utils.apply_jsonpatch(bay_dict, patch))
