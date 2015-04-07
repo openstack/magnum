@@ -410,3 +410,8 @@ class ServiceAlreadyExists(Conflict):
 
 class ContainerException(Exception):
     pass
+
+
+class NotSupported(MagnumException):
+    message = _("%(operation)s is not supported.")
+    code = 400
