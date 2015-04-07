@@ -42,7 +42,7 @@ magnum --debug bay-list
 
 # Run functional tests
 echo "Running magnum functional test suite"
-sudo -H -u stack tox -e functional
+sudo -E -H -u stack tox -e functional
 EXIT_CODE=$?
 
 # Save the logs
