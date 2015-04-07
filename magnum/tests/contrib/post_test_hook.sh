@@ -32,20 +32,23 @@ echo_summary "magnum's post_test_hook.sh was called..."
 
 sudo pip install -r test-requirements.txt
 
-# Try a command line as a sanity check
-source ../devstack/accrc/admin/admin
+# Get admin credentials
+pushd ../devstack
+source openrc admin admin
+popd
 
 echo_summary "Running bay-list"
 magnum --debug bay-list
 
-sudo OS_STDOUT_CAPTURE=-1 OS_STDERR_CAPTURE=-1 OS_TEST_TIMEOUT=500 OS_TEST_LOCK_PATH=${TMPDIR:-'/tmp'} \
-  python -m subunit.run discover -t ./ ./magnum/tests/functional | subunit-2to1 | tools/colorizer.py
-RETVAL=$?
-
-# Restore xtrace
-$XTRACE
+# Run functional tests
+echo "Running magnum functional test suite"
+sudo -H -u stack tox -e functional
+EXIT_CODE=$?
 
 # Save the logs
 sudo mv ../logs/* /opt/stack/logs/
 
-exit $RETVAL
+# Restore xtrace
+$XTRACE
+
+exit $EXIT_CODE

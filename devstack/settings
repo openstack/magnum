@@ -13,13 +13,6 @@ TENANT_VLAN_RANGE=
 PHYSICAL_NETWORK=public
 OVS_PHYSICAL_BRIDGE=br-ex
 
-# Credentials
-ADMIN_PASSWORD=password
-DATABASE_PASSWORD=password
-RABBIT_PASSWORD=password
-SERVICE_PASSWORD=password
-SERVICE_TOKEN=password
-
 enable_service rabbit
 
 # Enable Neutron which is required by Magnum and disable nova-network.
