@@ -61,6 +61,12 @@ for more detailed neutron configuration.::
     enable_service q-meta
     enable_service neutron
 
+    # Enable Heat services
+    enable_service h-eng
+    enable_service h-api
+    enable_service h-api-cfn
+    enable_service h-api-cw
+
     FIXED_RANGE=10.0.0.0/24
 
     Q_USE_SECGROUP=True
