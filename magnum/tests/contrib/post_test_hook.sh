@@ -37,8 +37,39 @@ pushd ../devstack
 source openrc admin admin
 popd
 
+# First we test Magnum's command line to see if we can stand up
+# a baymodel, bay and a pod
+export NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
+export IMAGE_ID=$(glance image-show fedora-21-atomic-2 | awk '/ id /{print $4}')
+
+echo_summary "Generate a key-pair"
+nova keypair-add default
+
+echo_summary "Running baymodel-create"
+magnum baymodel-create --name default --keypair-id default \
+    --external-network-id $NIC_ID \
+    --image-id $IMAGE_ID \
+    --flavor-id m1.small --docker-volume-size 5
+
+echo_summary "Running baymodel-list"
+magnum baymodel-list
+export BAYMODEL_ID=$(magnum baymodel-list | awk '/ default /{print $2}')
+
+echo_summary "Running bay-create"
+magnum bay-create --name k8s --baymodel $BAYMODEL_ID
+
 echo_summary "Running bay-list"
-magnum --debug bay-list
+magnum bay-list
+export BAY_ID=$(magnum bay-list | awk '/ k8s /{print $2}')
+
+echo_summary "Running bay-delete"
+magnum bay-delete $BAY_ID
+
+echo_summary "Running baymodel-delete"
+magnum baymodel-delete $BAY_ID
+
+echo_summary "Running keypair-delete"
+nova keypair-delete default
 
 # Run functional tests
 echo "Running magnum functional test suite"
