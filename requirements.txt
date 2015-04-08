@@ -19,6 +19,7 @@ keystonemiddleware>=1.0.0    # Apache-2.0
 oslo.i18n>=1.3.0             # Apache-2.0
 python-heatclient>=0.2.9     # Apache-2.0
 python-keystoneclient>=1.1.0 # Apache-2.0
+python-glanceclient>=0.15.0  # Apache-2.0
 python-kubernetes>=0.2       # Apache-2.0
 six>=1.7.0                   # MIT
 SQLAlchemy>=0.9.7,<=0.9.99   # MIT

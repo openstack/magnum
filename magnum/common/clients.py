@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from glanceclient.v2 import client as glanceclient
 from heatclient.v1 import client as heatclient
 from oslo_config import cfg
 
@@ -46,7 +47,20 @@ heat_client_opts = [
                 help=_("If set, then the server's certificate will not "
                        "be verified."))]
 
+glance_client_opts = [
+    cfg.StrOpt('region_name',
+               default=None,
+               help=_('Region in Identity service catalog to use for '
+                      'communication with the OpenStack service.')),
+    cfg.StrOpt('endpoint_type',
+               default='publicURL',
+               help=_(
+                   'Type of endpoint in Identity service catalog to use '
+                   'for communication with the OpenStack service.')),
+    ]
+
 cfg.CONF.register_opts(heat_client_opts, group='heat_client')
+cfg.CONF.register_opts(glance_client_opts, group='glance_client')
 
 
 class OpenStackClients(object):
@@ -56,6 +70,7 @@ class OpenStackClients(object):
         self.context = context
         self._keystone = None
         self._heat = None
+        self._glance = None
 
     def url_for(self, **kwargs):
         return self.keystone().client.service_catalog.url_for(**kwargs)
@@ -103,3 +118,24 @@ class OpenStackClients(object):
         self._heat = heatclient.Client(**args)
 
         return self._heat
+
+    @exception.wrap_keystone_exception
+    def glance(self):
+        if self._glance:
+            return self._glance
+
+        endpoint_type = self._get_client_option('glance', 'endpoint_type')
+        region_name = self._get_client_option('glance', 'region_name')
+        endpoint = self.url_for(service_type='image',
+                                endpoint_type=endpoint_type,
+                                region_name=region_name)
+        args = {
+            'endpoint': endpoint,
+            'auth_url': self.auth_url,
+            'token': self.auth_token,
+            'username': None,
+            'password': None,
+        }
+        self._glance = glanceclient.Client(**args)
+
+        return self._glance
