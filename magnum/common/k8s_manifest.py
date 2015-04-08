@@ -19,11 +19,6 @@ import yaml
 from magnum.openstack.common._i18n import _
 
 
-if hasattr(yaml, 'CSafeLoader'):
-    yaml_loader = yaml.CSafeLoader
-else:
-    yaml_loader = yaml.SafeLoader
-
 if hasattr(yaml, 'CSafeDumper'):
     yaml_dumper = yaml.CSafeDumper
 else:
@@ -34,13 +29,6 @@ def _construct_yaml_str(self, node):
     # Override the default string handling function
     # to always return unicode objects
     return self.construct_scalar(node)
-yaml_loader.add_constructor(u'tag:yaml.org,2002:str', _construct_yaml_str)
-# Unquoted dates like 2013-05-23 in yaml files get loaded as objects of type
-# datetime.data which causes problems in API layer when being processed by
-# openstack.common.jsonutils. Therefore, make unicode string out of timestamps
-# until jsonutils can handle dates.
-yaml_loader.add_constructor(u'tag:yaml.org,2002:timestamp',
-                            _construct_yaml_str)
 
 
 def parse(manifest_str):
@@ -55,7 +43,7 @@ def parse(manifest_str):
         manifest = json.loads(manifest_str)
     else:
         try:
-            manifest = yaml.load(manifest_str, Loader=yaml_loader)
+            manifest = yaml.safe_load(manifest_str)
         except yaml.YAMLError as yea:
             yea = six.text_type(yea)
             msg = _('Error parsing manifest: %s') % yea

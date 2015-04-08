@@ -13,12 +13,6 @@
 import yaml
 
 
-if hasattr(yaml, 'CSafeLoader'):
-    yaml_loader = yaml.CSafeLoader
-else:
-    yaml_loader = yaml.SafeLoader
-
-
 if hasattr(yaml, 'CSafeDumper'):
     yaml_dumper = yaml.CSafeDumper
 else:
@@ -27,7 +21,7 @@ else:
 
 def load(s):
     try:
-        yml_dict = yaml.load(s, yaml_loader)
+        yml_dict = yaml.safe_load(s)
     except yaml.YAMLError as exc:
         msg = 'An error occurred during YAML parsing.'
         if hasattr(exc, 'problem_mark'):
