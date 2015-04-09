@@ -128,12 +128,13 @@ for more detailed neutron configuration.
 
 Be sure to update network and other config as appropriate for your setup.::
 
-    cp /opt/stack/magnum/contrib/devstack/localrc.example /opt/stack/devstack/localrc
+    cp /opt/stack/magnum/devstack/settings /opt/stack/devstack/localrc
 
-Prepare DevStack for Magnum::
+To install magnum into devstack, Add this repo as an external repository: ::
 
-    cd /opt/stack/magnum
-    ./contrib/devstack/prepare_devstack.sh
+     > cat local.conf
+     [[local|localrc]]
+     enable_plugin magnum https://github.com/openstack/magnum
 
 Run DevStack::
 
