@@ -243,6 +243,38 @@ class Connection(api.Connection):
             ref.update(values)
         return ref
 
+    def create_bay_lock(self, bay_uuid, conductor_id):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.BayLock, session=session)
+            lock = query.filter_by(bay_uuid=bay_uuid).first()
+            if lock is not None:
+                return lock.conductor_id
+            session.add(models.BayLock(bay_uuid=bay_uuid,
+                                       conductor_id=conductor_id))
+
+    def steal_bay_lock(self, bay_uuid, old_conductor_id, new_conductor_id):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.BayLock, session=session)
+            lock = query.filter_by(bay_uuid=bay_uuid).first()
+            if lock is None:
+                return True
+            elif lock.conductor_id != old_conductor_id:
+                return lock.conductor_id
+            else:
+                lock.update({'conductor_id': new_conductor_id})
+
+    def release_bay_lock(self, bay_uuid, conductor_id):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.BayLock, session=session)
+            query = query.filter_by(bay_uuid=bay_uuid,
+                                    conductor_id=conductor_id)
+            count = query.delete()
+            if count == 0:
+                return True
+
     def _add_baymodels_filters(self, query, filters):
         if filters is None:
             filters = []
