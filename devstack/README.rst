@@ -11,11 +11,12 @@ needs to download an atomic fedora 21 qcow image. If you already have this image
 you can copy it to /opt/stack/devstack/files/fedora-21-atomic.qcow2 to save you
 this time.
 
-To install magnum into devstack, Add this repo as an external repository: ::
+To install magnum into devstack, add the following settings to enable magnum plugin: ::
 
-     > cat local.conf
+     cat > /opt/stack/devstack/local.conf << END
      [[local|localrc]]
-     enable_plugin magnum https://github.com/openstack/magnum
+     enable_plugin magnum https://github.com/openstack/magnum master
+     END
 
 Run devstack as normal: ::
 

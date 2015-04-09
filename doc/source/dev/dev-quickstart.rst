@@ -120,21 +120,25 @@ Clone DevStack::
     sudo chown $USER /opt/stack
 
     git clone https://github.com/openstack-dev/devstack.git /opt/stack/devstack
-    git clone https://github.com/openstack/magnum /opt/stack/magnum
 
 Copy devstack/localrc with minimal settings required to enable Heat
 and Neutron, refer to http://docs.openstack.org/developer/devstack/guides/neutron.html
 for more detailed neutron configuration.
 
-Be sure to update network and other config as appropriate for your setup.::
+To install magnum into devstack, add following settings to local.conf. You need to
+make customized setting according to your environment requirement, refer devstack
+guide for details.::
 
-    cp /opt/stack/magnum/devstack/settings /opt/stack/devstack/localrc
-
-To install magnum into devstack, Add this repo as an external repository: ::
-
-     > cat local.conf
+     cat > /opt/stack/devstack/local.conf << END
      [[local|localrc]]
      enable_plugin magnum https://github.com/openstack/magnum
+     DATABASE_PASSWORD=password
+     RABBIT_PASSWORD=password
+     SERVICE_TOKEN=password
+     SERVICE_PASSWORD=password
+     ADMIN_PASSWORD=password
+     PUBLIC_INTERFACE=eth1
+     END
 
 Run DevStack::
 

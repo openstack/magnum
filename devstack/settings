@@ -31,7 +31,6 @@ enable_service h-api-cfn
 enable_service h-api-cw
 
 # Enable Magnum services
-enable_service magnum
 enable_service m-api
 enable_service m-cond
 
