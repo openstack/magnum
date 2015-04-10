@@ -12,17 +12,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import requests
-import uuid
-
 from heatclient.common import template_utils
 from heatclient import exc
 from oslo_config import cfg
 
 from magnum.common import clients
 from magnum.common import exception
-from magnum.common import paths
 from magnum.common import short_id
+from magnum.conductor import template_definition as tdef
 from magnum import objects
 from magnum.openstack.common._i18n import _
 from magnum.openstack.common._i18n import _LE
@@ -32,17 +29,9 @@ from magnum.openstack.common import loopingcall
 
 
 k8s_heat_opts = [
-    cfg.StrOpt('template_path',
-               default=paths.basedir_def('templates/heat-kubernetes/'
-                                         'kubecluster.yaml'),
-               help=_(
-                   'Location of template to build a k8s cluster. ')),
     cfg.StrOpt('cluster_type',
-               default=None,
+               default='fedora-atomic',
                help=_('Cluster types are fedora-atomic, coreos, ironic.')),
-    cfg.StrOpt('discovery_token_url',
-               default=None,
-               help=_('coreos discovery token url.')),
     cfg.IntOpt('max_attempts',
                default=2000,
                help=('Number of attempts to query the Heat stack for '
@@ -60,62 +49,23 @@ cfg.CONF.register_opts(k8s_heat_opts, group='k8s_heat')
 LOG = logging.getLogger(__name__)
 
 
-def _get_coreos_token(context):
-    if cfg.CONF.k8s_heat.cluster_type == 'coreos':
-        token = ""
-        discovery_url = cfg.CONF.k8s_heat.discovery_token_url
-        if discovery_url:
-            coreos_token_url = requests.get(discovery_url)
-            token = str(coreos_token_url.text.split('/')[3])
-        else:
-            token = uuid.uuid4().hex
-        return token
-    else:
-        return None
-
-
-def _extract_bay_definition(context, bay):
+def _extract_template_definition(context, bay):
     baymodel = objects.BayModel.get_by_uuid(context, bay.baymodel_id)
-    token = _get_coreos_token(context)
-    bay_definition = {
-        'ssh_key_name': baymodel.keypair_id,
-        'external_network_id': baymodel.external_network_id,
-    }
-    if token is not None:
-        bay_definition['token'] = token
-    if baymodel.dns_nameserver:
-        bay_definition['dns_nameserver'] = baymodel.dns_nameserver
-    if baymodel.image_id:
-        bay_definition['server_image'] = baymodel.image_id
-    if baymodel.flavor_id:
-        bay_definition['server_flavor'] = baymodel.flavor_id
-    if baymodel.master_flavor_id:
-        bay_definition['master_flavor'] = baymodel.master_flavor_id
-    # TODO(yuanying): Add below lines if apiserver_port parameter is supported
-    # if baymodel.apiserver_port:
-    #     bay_definition['apiserver_port'] = baymodel.apiserver_port
-    if bay.node_count is not None:
-        bay_definition['number_of_minions'] = str(bay.node_count)
-    if baymodel.docker_volume_size:
-        bay_definition['docker_volume_size'] = baymodel.docker_volume_size
-    if baymodel.fixed_network:
-        bay_definition['fixed_network'] = baymodel.fixed_network
-    if baymodel.ssh_authorized_key:
-        bay_definition['ssh_authorized_key'] = baymodel.ssh_authorized_key
-
-    return bay_definition
+    definition = tdef.TemplateDefinition.get_template_definition('vm',
+                                                cfg.CONF.k8s_heat.cluster_type,
+                                                'kubernetes')
+    return definition.extract_definition(baymodel, bay)
 
 
 def _create_stack(context, osc, bay):
-    bay_definition = _extract_bay_definition(context, bay)
+    template_path, heat_params = _extract_template_definition(context, bay)
 
-    tpl_files, template = template_utils.get_template_contents(
-                                        cfg.CONF.k8s_heat.template_path)
+    tpl_files, template = template_utils.get_template_contents(template_path)
     # Make sure no duplicate stack name
     stack_name = '%s-%s' % (bay.name, short_id.generate_id())
     fields = {
         'stack_name': stack_name,
-        'parameters': bay_definition,
+        'parameters': heat_params,
         'template': template,
         'files': dict(list(tpl_files.items()))
     }
@@ -125,12 +75,11 @@ def _create_stack(context, osc, bay):
 
 
 def _update_stack(context, osc, bay):
-    bay_definition = _extract_bay_definition(context, bay)
+    template_path, heat_params = _extract_template_definition(context, bay)
 
-    tpl_files, template = template_utils.get_template_contents(
-                                        cfg.CONF.k8s_heat.template_path)
+    tpl_files, template = template_utils.get_template_contents(template_path)
     fields = {
-        'parameters': bay_definition,
+        'parameters': heat_params,
         'template': template,
         'files': dict(list(tpl_files.items()))
     }
@@ -138,20 +87,11 @@ def _update_stack(context, osc, bay):
     return osc.heat().stacks.update(bay.stack_id, **fields)
 
 
-def _parse_stack_outputs(outputs):
-    parsed_outputs = {}
-
-    for output in outputs:
-        output_key = output["output_key"]
-        output_value = output["output_value"]
-        if output_key == "kube_minions_external":
-            parsed_outputs["kube_minions_external"] = output_value
-        if output_key == "kube_minions":
-            parsed_outputs["kube_minions"] = output_value
-        if output_key == "kube_master":
-            parsed_outputs["kube_master"] = output_value
-
-    return parsed_outputs
+def _update_stack_outputs(stack, bay):
+    definition = tdef.TemplateDefinition.get_template_definition('vm',
+                                                cfg.CONF.k8s_heat.cluster_type,
+                                                'kubernetes')
+    return definition.update_outputs(stack, bay)
 
 
 class Handler(object):
@@ -257,9 +197,7 @@ class HeatPoller(object):
             self.bay.destroy()
             raise loopingcall.LoopingCallDone()
         if (stack.stack_status in ['CREATE_COMPLETE', 'UPDATE_COMPLETE']):
-            parsed_outputs = _parse_stack_outputs(stack.outputs)
-            self.bay.api_address = parsed_outputs["kube_master"]
-            self.bay.node_addresses = parsed_outputs["kube_minions_external"]
+            _update_stack_outputs(stack, self.bay)
             self.bay.status = stack.stack_status
             self.bay.save()
             raise loopingcall.LoopingCallDone()

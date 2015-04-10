@@ -23,6 +23,7 @@ import magnum.common.magnum_keystoneclient
 import magnum.conductor.config
 import magnum.conductor.handlers.bay_k8s_heat
 import magnum.conductor.handlers.docker_conductor
+import magnum.conductor.template_definition
 import magnum.db.sqlalchemy.models
 import magnum.openstack.common.eventlet_backdoor
 import magnum.openstack.common.log
@@ -46,6 +47,7 @@ def list_opts():
                          magnum.openstack.common.periodic_task.periodic_opts,
                          )),
         ('api', magnum.api.app.API_SERVICE_OPTS),
+        ('bay', magnum.conductor.template_definition.template_def_opts),
         ('conductor', magnum.conductor.config.SERVICE_OPTS),
         ('database', magnum.db.sqlalchemy.models.sql_opts),
         ('docker', magnum.conductor.handlers.docker_conductor.docker_opts),
