@@ -99,7 +99,7 @@ Create a new shell, and source the devstack openrc script::
     source ~/devstack/openrc admin admin
 
     cd ~
-    wget https://fedorapeople.org/groups/heat/kolla/fedora-21-atomic-2.qcow2
+    wget https://fedorapeople.org/groups/magnum/fedora-21-atomic-2.qcow2
     glance image-create --name fedora-21-atomic-2 \
                         --is-public True \
                         --disk-format qcow2 \
