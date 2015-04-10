@@ -13,6 +13,7 @@
 #    under the License.
 
 from magnum.objects import bay
+from magnum.objects import baylock
 from magnum.objects import baymodel
 from magnum.objects import container
 from magnum.objects import node
@@ -23,6 +24,7 @@ from magnum.objects import service
 
 Container = container.Container
 Bay = bay.Bay
+BayLock = baylock.BayLock
 BayModel = baymodel.BayModel
 Node = node.Node
 Pod = pod.Pod
@@ -30,6 +32,7 @@ ReplicationController = rc.ReplicationController
 Service = service.Service
 
 __all__ = (Bay,
+           BayLock,
            BayModel,
            Container,
            Node,
