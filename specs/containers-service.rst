@@ -75,7 +75,7 @@ Use cases
    application hosting needs. All details involving the integration of
    containers with Nova instances is managed by OpenStack.
 8. Container network. End-user wants to define a custom overlay network for
-   containers, and wants to have admin priviledge to manage the network
+   containers, and wants to have admin privilege to manage the network
    topology. Building a container network can decouple application deployment
    and management from the underlying network infrastructure, and enable
    additional usage scenario, such as (i) software-defined networking, and
@@ -290,7 +290,7 @@ operators. These include:
   resources on the host, including contents of other containers.
 * Output of processes may be persisted by the containers service in order to
   allow asynchronous collection of exit status, and terminal output. Such
-  content may include sensitive information. Features may be added to mitgate
+  content may include sensitive information. Features may be added to mitigate
   the risk of this data being replicated in log messages, including errors.
 * Creating containers usually requires root access. This means that the Agent
   may need to be run with special privileges, or be given a method to
