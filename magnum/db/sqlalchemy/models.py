@@ -131,6 +131,19 @@ class Bay(Base):
     status = Column(String(20), nullable=True)
 
 
+class BayLock(Base):
+    """Represents a baylock."""
+
+    __tablename__ = 'baylock'
+    __table_args__ = (
+        schema.UniqueConstraint('bay_uuid', name='uniq_baylock0bay_uuid'),
+        table_args()
+        )
+    id = Column(Integer, primary_key=True)
+    bay_uuid = Column(String(36))
+    conductor_id = Column(String(64))
+
+
 class BayModel(Base):
     """Represents a bay model."""
 
