@@ -79,7 +79,7 @@ class KubeClient(object):
         super(KubeClient, self).__init__()
 
     def service_create(self, api_address, service):
-        LOG.debug("service_create with contents %s" % service)
+        LOG.debug("service_create with contents %s" % service.as_dict())
         try:
             out, err = _k8s_create(api_address, service)
 
@@ -93,7 +93,7 @@ class KubeClient(object):
         return True
 
     def service_update(self, api_address, service):
-        LOG.debug("service_update with contents %s" % service)
+        LOG.debug("service_update with contents %s" % service.as_dict())
         try:
             out, err = _k8s_update(api_address, service)
 
@@ -121,7 +121,7 @@ class KubeClient(object):
 
     # Pod Operations
     def pod_create(self, api_address, pod):
-        LOG.debug("pod_create contents %s" % pod)
+        LOG.debug("pod_create contents %s" % pod.as_dict())
         try:
             out, err = _k8s_create(api_address, pod)
 
@@ -135,7 +135,7 @@ class KubeClient(object):
         return True
 
     def pod_update(self, api_address, pod):
-        LOG.debug("pod_update contents %s" % pod)
+        LOG.debug("pod_update contents %s" % pod.as_dict())
         try:
             out, err = _k8s_update(api_address, pod)
 
@@ -167,7 +167,7 @@ class KubeClient(object):
 
     # Replication Controller Operations
     def rc_create(self, api_address, rc):
-        LOG.debug("rc_create contents %s" % rc)
+        LOG.debug("rc_create contents %s" % rc.as_dict())
         try:
             out, err = _k8s_create(api_address, rc)
 
@@ -180,7 +180,7 @@ class KubeClient(object):
         return True
 
     def rc_update(self, api_address, rc):
-        LOG.debug("rc_update contents %s" % rc)
+        LOG.debug("rc_update contents %s" % rc.as_dict())
         try:
             out, err = _k8s_update(api_address, rc)
 
