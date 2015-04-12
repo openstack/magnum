@@ -571,3 +571,14 @@ def allow_logical_names():
     except AttributeError:
         pass
     return True
+
+
+def raise_exception_invalid_scheme(url):
+    valid_schemes = ['http', 'https']
+
+    if not isinstance(url, basestring):
+        raise exception.Urllib2InvalidScheme(url=url)
+
+    scheme = url.split(':')[0]
+    if scheme not in valid_schemes:
+        raise exception.Urllib2InvalidScheme(url=url)

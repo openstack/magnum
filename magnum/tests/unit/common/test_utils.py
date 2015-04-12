@@ -499,3 +499,35 @@ class TempFilesTestCase(base.TestCase):
 
         rmtree_mock.assert_called_once_with(tempdir_created)
         self.assertTrue(log_mock.error.called)
+
+
+class Urllib2_invalid_scheme(base.TestCase):
+    def test_raise_exception_invalid_scheme_file(self):
+        self.assertRaises(
+            exception.Urllib2InvalidScheme,
+            utils.raise_exception_invalid_scheme,
+            'file:///etc/passwd')
+
+    def test_raise_exception_invalid_scheme_starting_colon(self):
+        self.assertRaises(
+            exception.Urllib2InvalidScheme,
+            utils.raise_exception_invalid_scheme,
+            ':///etc/passwd')
+
+    def test_raise_exception_invalid_scheme_None(self):
+        self.assertRaises(
+            exception.Urllib2InvalidScheme,
+            utils.raise_exception_invalid_scheme,
+            None)
+
+    def test_raise_exception_invalid_scheme_empty_string(self):
+        self.assertRaises(
+            exception.Urllib2InvalidScheme,
+            utils.raise_exception_invalid_scheme,
+            '')
+
+    def test_raise_exception_invalid_scheme_http(self):
+        utils.raise_exception_invalid_scheme(url='http://www.openstack.org')
+
+    def test_raise_exception_invalid_scheme_https(self):
+        utils.raise_exception_invalid_scheme(url='https://www.openstack.org')

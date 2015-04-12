@@ -17,6 +17,7 @@ import mimetypes
 import random
 import string
 
+from magnum import utils
 from models import *
 
 
@@ -94,11 +95,13 @@ class ApiClient(object):
     else:
       raise Exception('Method ' + method + ' is not recognized.')
 
+    utils.raise_exception_invalid_scheme(url)
+
     request = MethodRequest(method=method, url=url, headers=headers,
                             data=data)
 
     # Make the request
-    response = urllib2.urlopen(request)
+    response = urllib2.urlopen(request) #nosec
     if 'Set-Cookie' in response.headers:
       self.cookie = response.headers['Set-Cookie']
     string = response.read()

@@ -427,3 +427,7 @@ class BayTypeNotEnabled(MagnumException):
 
 class RequiredParameterNotProvided(MagnumException):
     message = _("Required parameter %(heat_param)s not provided.")
+
+
+class Urllib2InvalidScheme(MagnumException):
+    message = _("The urllib2 URL %(url) has an invalid scheme.")
