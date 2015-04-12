@@ -4,6 +4,7 @@ server communication, and is invariant across implementations. Specifics of
 the methods and models for each application are generated from the Swagger
 templates."""
 
+import ast
 import sys
 import os
 import re
@@ -205,9 +206,9 @@ class ApiClient(object):
         return [self.deserialize(subObj, subClass) for subObj in obj]
 
       if (objClass in ['int', 'float', 'long', 'dict', 'list', 'str', 'bool', 'datetime']):
-        objClass = eval(objClass)
+        objClass = ast.literal_eval(objClass)
       else:  # not a native type, must be model class
-        objClass = eval(objClass + '.' + objClass)
+        objClass = ast.literal_eval(objClass + '.' + objClass)
 
     if objClass in [int, long, float, dict, list, str, bool]:
       return objClass(obj)
@@ -220,7 +221,7 @@ class ApiClient(object):
         if obj is not None and instance.attributeMap[attr] in obj and type(obj) in [list, dict]:
           value = obj[instance.attributeMap[attr]]
           if attrType in ['str', 'int', 'long', 'float', 'bool']:
-            attrType = eval(attrType)
+            attrType = ast.literal_eval(attrType)
             try:
               value = attrType(value)
             except UnicodeEncodeError:
