@@ -81,7 +81,8 @@ class Service(object):
 
 
 class API(object):
-    def __init__(self, transport=None, context=None, topic=None):
+    def __init__(self, transport=None, context=None, topic=None, server=None,
+                 timeout=None):
         serializer = RequestContextSerializer(
             objects_base.MagnumObjectSerializer())
         if transport is None:
@@ -92,9 +93,10 @@ class API(object):
         self._context = context
         if topic is None:
             topic = ''
-        target = messaging.Target(topic=topic)
+        target = messaging.Target(topic=topic, server=server)
         self._client = messaging.RPCClient(transport, target,
-                                           serializer=serializer)
+                                           serializer=serializer,
+                                           timeout=timeout)
 
     def _call(self, method, *args, **kwargs):
         return self._client.call(self._context, method, *args, **kwargs)

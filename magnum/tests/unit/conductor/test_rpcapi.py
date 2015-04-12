@@ -32,7 +32,8 @@ class RPCAPITestCase(base.DbTestCase):
         self.fake_service = dbutils.get_test_service(driver='fake-driver')
 
     def _test_rpcapi(self, method, rpc_method, **kwargs):
-        rpcapi = conductor_rpcapi.API(topic='fake-topic')
+        rpcapi_cls = kwargs.pop('rpcapi_cls', conductor_rpcapi.API)
+        rpcapi = rpcapi_cls(topic='fake-topic')
 
         expected_retval = 'hello world' if rpc_method == 'call' else None
 
@@ -143,3 +144,9 @@ class RPCAPITestCase(base.DbTestCase):
                           'call',
                           version='1.1',
                           uuid=self.fake_rc['name'])
+
+    def test_ping_conductor(self):
+        self._test_rpcapi('ping_conductor',
+                          'call',
+                          rpcapi_cls=conductor_rpcapi.ListenerAPI,
+                          version='1.0')

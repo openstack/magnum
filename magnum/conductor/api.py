@@ -145,3 +145,12 @@ class API(rpc_service.API):
     def container_execute(self, container_uuid, command):
         return self._call('container_execute', container_uuid=container_uuid,
                           command=command)
+
+
+class ListenerAPI(rpc_service.API):
+    def __init__(self, context=None, topic=None, server=None, timeout=None):
+        super(ListenerAPI, self).__init__(context=context, topic=topic,
+                                          server=server, timeout=timeout)
+
+    def ping_conductor(self):
+        return self._call('ping_conductor')

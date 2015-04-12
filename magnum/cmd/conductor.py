@@ -22,6 +22,7 @@ from oslo_config import cfg
 
 from magnum.common import rpc_service as service
 from magnum.conductor.handlers import bay_k8s_heat
+from magnum.conductor.handlers import conductor_listener
 from magnum.conductor.handlers import docker_conductor
 from magnum.conductor.handlers import kube as k8s_conductor
 from magnum.openstack.common._i18n import _LE
@@ -41,10 +42,12 @@ def main():
 
     cfg.CONF.import_opt('topic', 'magnum.conductor.config', group='conductor')
     cfg.CONF.import_opt('host', 'magnum.conductor.config', group='conductor')
+
     endpoints = [
         docker_conductor.Handler(),
         k8s_conductor.Handler(),
-        bay_k8s_heat.Handler()
+        bay_k8s_heat.Handler(),
+        conductor_listener.Handler(),
     ]
 
     if not os.path.isfile(cfg.CONF.k8s_heat.template_path):
