@@ -331,8 +331,9 @@
 # The queue to add conductor tasks to (string value)
 #topic = magnum-conductor
 
-# The location of the conductor rpc queue (string value)
-#host = localhost
+# RPC timeout for the conductor liveness check that is used for bay
+# locking. (integer value)
+#conductor_life_check_timeout = 4
 
 
 [database]

@@ -123,7 +123,6 @@ function create_magnum_conf {
     iniset $MAGNUM_CONF database connection `database_connection_url magnum`
     iniset $MAGNUM_CONF api host "$MAGNUM_SERVICE_HOST"
     iniset $MAGNUM_CONF api port "$MAGNUM_SERVICE_PORT"
-    iniset $MAGNUM_CONF conductor host "$MAGNUM_SERVICE_HOST"
 
     configure_auth_token_middleware $MAGNUM_CONF magnum $MAGNUM_AUTH_CACHE_DIR
 
