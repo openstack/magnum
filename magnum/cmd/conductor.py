@@ -52,12 +52,12 @@ def main():
 
     if (not os.path.isfile(cfg.CONF.bay.k8s_atomic_template_path)
          and not os.path.isfile(cfg.CONF.bay.k8s_coreos_template_path)):
-        LOG.error(_LE("The Heat template for both k8s atomic "
-                      "%(atomic_template)s and coreos (coreos_template)%s "
-                      "can not be found. Install template.") %
+        LOG.error(_LE("The Heat template can not be found for either k8s "
+                      "atomic %(atomic_template)s or coreos "
+                      "(coreos_template)%s. Install template first if you "
+                      "want to create bay.") %
                   {'atomic_template': cfg.CONF.bay.k8s_atomic_template_path,
                    'coreos_template': cfg.CONF.bay.k8s_coreos_template_path})
-        exit(-1)
 
     server = service.Service(cfg.CONF.conductor.topic,
                              cfg.CONF.conductor.host, endpoints)
