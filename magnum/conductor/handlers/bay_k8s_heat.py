@@ -215,7 +215,7 @@ class HeatPoller(object):
         if self.attempts > cfg.CONF.k8s_heat.max_attempts:
             LOG.error(_LE('Bay check exit after %(attempts)s attempts,'
                           'stack_id: %(id)s, stack_status: %(status)s') %
-                          {'attemps': cfg.CONF.k8s_heat.max_attempts,
+                          {'attempts': cfg.CONF.k8s_heat.max_attempts,
                            'id': self.bay.stack_id,
                            'status': stack.stack_status})
             raise loopingcall.LoopingCallDone()
