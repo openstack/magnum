@@ -73,6 +73,17 @@ class TestDockerConductor(base.BaseTestCase):
         mock_find_container.assert_called_once_with(mock_container_uuid)
 
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
+    def test_container_delete_with_container_not_exist(self,
+                                                       mock_find_container):
+        mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
+        mock_docker_id = {}
+        mock_find_container.return_value = mock_docker_id
+        res = self.conductor.container_delete(None, mock_container_uuid)
+        self.assertIsNone(res)
+        self.assertFalse(self.mock_client.remove_container.called)
+        mock_find_container.assert_called_once_with(mock_container_uuid)
+
+    @patch.object(docker_conductor.Handler, '_find_container_by_name')
     def test_container_delete_with_failure(self, mock_find_container):
         mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
         mock_docker_id = '2703ef2b705d'

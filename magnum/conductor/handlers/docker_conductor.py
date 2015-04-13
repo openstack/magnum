@@ -108,6 +108,8 @@ class Handler(object):
         LOG.debug("container_delete %s" % container_uuid)
         try:
             docker_id = self._find_container_by_name(container_uuid)
+            if not docker_id:
+                return None
             return self.docker.remove_container(docker_id)
         except errors.APIError as api_error:
             raise exception.ContainerException(
