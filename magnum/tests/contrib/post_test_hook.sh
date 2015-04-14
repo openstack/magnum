@@ -42,6 +42,9 @@ popd
 export NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
 export IMAGE_ID=$(glance image-show fedora-21-atomic-2 | awk '/ id /{print $4}')
 
+echo_summary "Running magnum-template-manage"
+magnum-template-manage list-templates
+
 echo_summary "Generate a key-pair"
 nova keypair-add default
 
