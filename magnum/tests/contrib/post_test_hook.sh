@@ -30,7 +30,7 @@ set -o xtrace
 echo_summary "magnum's post_test_hook.sh was called..."
 (set -o posix; set)
 
-sudo pip install -r test-requirements.txt
+sudo pip install -U -r requirements.txt -r test-requirements.txt
 
 # Get admin credentials
 pushd ../devstack
