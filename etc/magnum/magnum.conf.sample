@@ -130,125 +130,13 @@
 # From oslo.messaging
 #
 
-# Use durable queues in AMQP. (boolean value)
-# Deprecated group/name - [DEFAULT]/rabbit_durable_queues
-#amqp_durable_queues = false
-
-# Auto-delete queues in AMQP. (boolean value)
-#amqp_auto_delete = false
-
-# Size of RPC connection pool. (integer value)
-#rpc_conn_pool_size = 30
-
-# Qpid broker hostname. (string value)
-#qpid_hostname = localhost
-
-# Qpid broker port. (integer value)
-#qpid_port = 5672
-
-# Qpid HA cluster host:port pairs. (list value)
-#qpid_hosts = $qpid_hostname:$qpid_port
-
-# Username for Qpid connection. (string value)
-#qpid_username =
-
-# Password for Qpid connection. (string value)
-#qpid_password =
-
-# Space separated list of SASL mechanisms to use for auth. (string
-# value)
-#qpid_sasl_mechanisms =
-
-# Seconds between connection keepalive heartbeats. (integer value)
-#qpid_heartbeat = 60
-
-# Transport to use, either 'tcp' or 'ssl'. (string value)
-#qpid_protocol = tcp
-
-# Whether to disable the Nagle algorithm. (boolean value)
-#qpid_tcp_nodelay = true
-
-# The number of prefetched messages held by receiver. (integer value)
-#qpid_receiver_capacity = 1
-
-# The qpid topology version to use.  Version 1 is what was originally
-# used by impl_qpid.  Version 2 includes some backwards-incompatible
-# changes that allow broker federation to work.  Users should update
-# to version 2 when they are able to take everything down, as it
-# requires a clean break. (integer value)
-#qpid_topology_version = 1
-
-# SSL version to use (valid only if SSL enabled). Valid values are
-# TLSv1 and SSLv23. SSLv2, SSLv3, TLSv1_1, and TLSv1_2 may be
-# available on some distributions. (string value)
-#kombu_ssl_version =
-
-# SSL key file (valid only if SSL enabled). (string value)
-#kombu_ssl_keyfile =
-
-# SSL cert file (valid only if SSL enabled). (string value)
-#kombu_ssl_certfile =
-
-# SSL certification authority file (valid only if SSL enabled).
-# (string value)
-#kombu_ssl_ca_certs =
-
-# How long to wait before reconnecting in response to an AMQP consumer
-# cancel notification. (floating point value)
-#kombu_reconnect_delay = 1.0
-
-# The RabbitMQ broker address where a single node is used. (string
-# value)
-#rabbit_host = localhost
-
-# The RabbitMQ broker port where a single node is used. (integer
-# value)
-#rabbit_port = 5672
-
-# RabbitMQ HA cluster host:port pairs. (list value)
-#rabbit_hosts = $rabbit_host:$rabbit_port
-
-# Connect over SSL for RabbitMQ. (boolean value)
-#rabbit_use_ssl = false
-
-# The RabbitMQ userid. (string value)
-#rabbit_userid = guest
-
-# The RabbitMQ password. (string value)
-#rabbit_password = guest
-
-# The RabbitMQ login method. (string value)
-#rabbit_login_method = AMQPLAIN
-
-# The RabbitMQ virtual host. (string value)
-#rabbit_virtual_host = /
-
-# How frequently to retry connecting with RabbitMQ. (integer value)
-#rabbit_retry_interval = 1
-
-# How long to backoff for between retries when connecting to RabbitMQ.
-# (integer value)
-#rabbit_retry_backoff = 2
-
-# Maximum number of RabbitMQ connection retries. Default is 0
-# (infinite retry count). (integer value)
-#rabbit_max_retries = 0
-
-# Use HA queues in RabbitMQ (x-ha-policy: all). If you change this
-# option, you must wipe the RabbitMQ database. (boolean value)
-#rabbit_ha_queues = false
-
-# Deprecated, use rpc_backend=kombu+memory or rpc_backend=fake
-# (boolean value)
-#fake_rabbit = false
-
 # ZeroMQ bind address. Should be a wildcard (*), an ethernet
 # interface, or IP. The "host" option should point or resolve to this
 # address. (string value)
 #rpc_zmq_bind_address = *
 
 # MatchMaker driver. (string value)
-#rpc_zmq_matchmaker = oslo_messaging._drivers.matchmaker.MatchMakerLocalhost
+#rpc_zmq_matchmaker = local
 
 # ZeroMQ receiver listening port. (integer value)
 #rpc_zmq_port = 9501
@@ -320,6 +208,29 @@
 # The maximum number of items returned in a single response from a
 # collection resource. (integer value)
 #max_limit = 1000
+
+
+[bay]
+
+#
+# From magnum
+#
+
+# Location of template to build a k8s cluster on atomic.  (string
+# value)
+# Deprecated group/name - [k8s_heat]/template_path
+#k8s_atomic_template_path = $pybasedir/templates/heat-kubernetes/kubecluster.yaml
+
+# Location of template to build a k8s cluster on coreos.  (string
+# value)
+#k8s_coreos_template_path = $pybasedir/templates/heat-kubernetes/kubecluster-coreos.yaml
+
+# coreos discovery token url. (string value)
+# Deprecated group/name - [k8s_heat]/discovery_token_url
+#coreos_discovery_token_url = <None>
+
+# Enabled bay definition entry points.  (list value)
+#enabled_definitions = magnum_vm_atomic_k8s,magnum_vm_coreos_k8s
 
 
 [conductor]
@@ -431,19 +342,20 @@
 # lost. (boolean value)
 #use_db_reconnect = false
 
-# Seconds between database connection retries. (integer value)
+# Seconds between retries of a database transaction. (integer value)
 #db_retry_interval = 1
 
-# If True, increases the interval between database connection retries
-# up to db_max_retry_interval. (boolean value)
+# If True, increases the interval between retries of a database
+# operation up to db_max_retry_interval. (boolean value)
 #db_inc_retry_interval = true
 
-# If db_inc_retry_interval is set, the maximum seconds between
-# database connection retries. (integer value)
+# If db_inc_retry_interval is set, the maximum seconds between retries
+# of a database operation. (integer value)
 #db_max_retry_interval = 10
 
-# Maximum database connection retries before error is raised. Set to
-# -1 to specify an infinite retry count. (integer value)
+# Maximum retries in case of connection error or deadlock error before
+# error is raised. Set to -1 to specify an infinite retry count.
+# (integer value)
 #db_max_retries = 20
 
 
@@ -486,9 +398,9 @@
 # From magnum
 #
 
-# Region in Identity service catalog to use for
-# communication with the OpenStack service. (string value)
-#region_name = None
+# Region in Identity service catalog to use for communication with the
+# OpenStack service. (string value)
+#region_name = <None>
 
 # Type of endpoint in Identity service catalog to use for
 # communication with the OpenStack service. (string value)
@@ -515,18 +427,8 @@
 # From magnum
 #
 
-# Location of template to build a k8s cluster.  (string value)
-#template_path = /etc/magnum/templates/heat-kubernetes/kubecluster.yaml
-
-# Define the Cluster type. (string value)
-# Whenever you want to create cluster of any of these
-# fedora-atomic,coreos, ironic then specify a cluster_type.
-#cluster_type = fedora-atomic, coreos, ironic
-
-# Discovery token url for coreos cluster. (string value)
-# Forming a coreos cluster will require a discovery token if your cloud
-# has internet support otherwise uuid will generate the token for you.
-#discovery_token_url = https://discovery.etcd.io/new
+# Cluster types are fedora-atomic, coreos, ironic. (string value)
+#cluster_type = fedora-atomic
 
 # Number of attempts to query the Heat stack for finding out the
 # status of the created stack and getting url of the DU created in the
@@ -804,3 +706,182 @@
 # Accept clients using either SSL or plain TCP (boolean value)
 # Deprecated group/name - [amqp1]/allow_insecure_clients
 #allow_insecure_clients = false
+
+
+[oslo_messaging_qpid]
+
+#
+# From oslo.messaging
+#
+
+# Use durable queues in AMQP. (boolean value)
+# Deprecated group/name - [DEFAULT]/amqp_durable_queues
+# Deprecated group/name - [DEFAULT]/rabbit_durable_queues
+#amqp_durable_queues = false
+
+# Auto-delete queues in AMQP. (boolean value)
+# Deprecated group/name - [DEFAULT]/amqp_auto_delete
+#amqp_auto_delete = false
+
+# Size of RPC connection pool. (integer value)
+# Deprecated group/name - [DEFAULT]/rpc_conn_pool_size
+#rpc_conn_pool_size = 30
+
+# Qpid broker hostname. (string value)
+# Deprecated group/name - [DEFAULT]/qpid_hostname
+#qpid_hostname = localhost
+
+# Qpid broker port. (integer value)
+# Deprecated group/name - [DEFAULT]/qpid_port
+#qpid_port = 5672
+
+# Qpid HA cluster host:port pairs. (list value)
+# Deprecated group/name - [DEFAULT]/qpid_hosts
+#qpid_hosts = $qpid_hostname:$qpid_port
+
+# Username for Qpid connection. (string value)
+# Deprecated group/name - [DEFAULT]/qpid_username
+#qpid_username =
+
+# Password for Qpid connection. (string value)
+# Deprecated group/name - [DEFAULT]/qpid_password
+#qpid_password =
+
+# Space separated list of SASL mechanisms to use for auth. (string
+# value)
+# Deprecated group/name - [DEFAULT]/qpid_sasl_mechanisms
+#qpid_sasl_mechanisms =
+
+# Seconds between connection keepalive heartbeats. (integer value)
+# Deprecated group/name - [DEFAULT]/qpid_heartbeat
+#qpid_heartbeat = 60
+
+# Transport to use, either 'tcp' or 'ssl'. (string value)
+# Deprecated group/name - [DEFAULT]/qpid_protocol
+#qpid_protocol = tcp
+
+# Whether to disable the Nagle algorithm. (boolean value)
+# Deprecated group/name - [DEFAULT]/qpid_tcp_nodelay
+#qpid_tcp_nodelay = true
+
+# The number of prefetched messages held by receiver. (integer value)
+# Deprecated group/name - [DEFAULT]/qpid_receiver_capacity
+#qpid_receiver_capacity = 1
+
+# The qpid topology version to use.  Version 1 is what was originally
+# used by impl_qpid.  Version 2 includes some backwards-incompatible
+# changes that allow broker federation to work.  Users should update
+# to version 2 when they are able to take everything down, as it
+# requires a clean break. (integer value)
+# Deprecated group/name - [DEFAULT]/qpid_topology_version
+#qpid_topology_version = 1
+
+
+[oslo_messaging_rabbit]
+
+#
+# From oslo.messaging
+#
+
+# Use durable queues in AMQP. (boolean value)
+# Deprecated group/name - [DEFAULT]/amqp_durable_queues
+# Deprecated group/name - [DEFAULT]/rabbit_durable_queues
+#amqp_durable_queues = false
+
+# Auto-delete queues in AMQP. (boolean value)
+# Deprecated group/name - [DEFAULT]/amqp_auto_delete
+#amqp_auto_delete = false
+
+# Size of RPC connection pool. (integer value)
+# Deprecated group/name - [DEFAULT]/rpc_conn_pool_size
+#rpc_conn_pool_size = 30
+
+# SSL version to use (valid only if SSL enabled). Valid values are
+# TLSv1 and SSLv23. SSLv2, SSLv3, TLSv1_1, and TLSv1_2 may be
+# available on some distributions. (string value)
+# Deprecated group/name - [DEFAULT]/kombu_ssl_version
+#kombu_ssl_version =
+
+# SSL key file (valid only if SSL enabled). (string value)
+# Deprecated group/name - [DEFAULT]/kombu_ssl_keyfile
+#kombu_ssl_keyfile =
+
+# SSL cert file (valid only if SSL enabled). (string value)
+# Deprecated group/name - [DEFAULT]/kombu_ssl_certfile
+#kombu_ssl_certfile =
+
+# SSL certification authority file (valid only if SSL enabled).
+# (string value)
+# Deprecated group/name - [DEFAULT]/kombu_ssl_ca_certs
+#kombu_ssl_ca_certs =
+
+# How long to wait before reconnecting in response to an AMQP consumer
+# cancel notification. (floating point value)
+# Deprecated group/name - [DEFAULT]/kombu_reconnect_delay
+#kombu_reconnect_delay = 1.0
+
+# The RabbitMQ broker address where a single node is used. (string
+# value)
+# Deprecated group/name - [DEFAULT]/rabbit_host
+#rabbit_host = localhost
+
+# The RabbitMQ broker port where a single node is used. (integer
+# value)
+# Deprecated group/name - [DEFAULT]/rabbit_port
+#rabbit_port = 5672
+
+# RabbitMQ HA cluster host:port pairs. (list value)
+# Deprecated group/name - [DEFAULT]/rabbit_hosts
+#rabbit_hosts = $rabbit_host:$rabbit_port
+
+# Connect over SSL for RabbitMQ. (boolean value)
+# Deprecated group/name - [DEFAULT]/rabbit_use_ssl
+#rabbit_use_ssl = false
+
+# The RabbitMQ userid. (string value)
+# Deprecated group/name - [DEFAULT]/rabbit_userid
+#rabbit_userid = guest
+
+# The RabbitMQ password. (string value)
+# Deprecated group/name - [DEFAULT]/rabbit_password
+#rabbit_password = guest
+
+# The RabbitMQ login method. (string value)
+# Deprecated group/name - [DEFAULT]/rabbit_login_method
+#rabbit_login_method = AMQPLAIN
+
+# The RabbitMQ virtual host. (string value)
+# Deprecated group/name - [DEFAULT]/rabbit_virtual_host
+#rabbit_virtual_host = /
+
+# How frequently to retry connecting with RabbitMQ. (integer value)
+#rabbit_retry_interval = 1
+
+# How long to backoff for between retries when connecting to RabbitMQ.
+# (integer value)
+# Deprecated group/name - [DEFAULT]/rabbit_retry_backoff
+#rabbit_retry_backoff = 2
+
+# Maximum number of RabbitMQ connection retries. Default is 0
+# (infinite retry count). (integer value)
+# Deprecated group/name - [DEFAULT]/rabbit_max_retries
+#rabbit_max_retries = 0
+
+# Use HA queues in RabbitMQ (x-ha-policy: all). If you change this
+# option, you must wipe the RabbitMQ database. (boolean value)
+# Deprecated group/name - [DEFAULT]/rabbit_ha_queues
+#rabbit_ha_queues = false
+
+# Number of seconds after which the Rabbit broker is considered down
+# if heartbeat's keep-alive fails (0 disable the heartbeat). (integer
+# value)
+#heartbeat_timeout_threshold = 60
+
+# How often times during the heartbeat_timeout_threshold we check the
+# heartbeat. (integer value)
+#heartbeat_rate = 2
+
+# Deprecated, use rpc_backend=kombu+memory or rpc_backend=fake
+# (boolean value)
+# Deprecated group/name - [DEFAULT]/fake_rabbit
+#fake_rabbit = false
