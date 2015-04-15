@@ -13,6 +13,7 @@ Contents:
 
    readme
    dev/dev-quickstart
+   dev/dev-manual-devstack
    installation
    usage
    contributing

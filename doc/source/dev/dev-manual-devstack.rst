@@ -1,23 +1,21 @@
-.. _dev-quickstart:
+.. _dev-manual-install:
 
 Manually Adding Magnum to DevStack
 ==================================
 
 If you are getting started with Magnum it is recommended you follow the
-`dev quickstart guide <./dev-quickstart.rst>` to get up and running with
-Magnum. This guide covers a more in-depth process to setup Magnum with devstack.
+:ref:`dev-quickstart` to get up and running with Magnum. This guide covers
+a more in-depth process to setup Magnum with devstack.
 
-DevStack does not yet have Magnum support.  It is, however, necessary to
-develop Magnum from a devstack environment at the present time.  Magnum depends
-on Nova, Glance, Heat, and Neutron to create and schedule virtual machines to simulate
-bare-metal.  For milestone #2 we intend to introduce support for Ironic
-deployment of baremetal nodes.
+Magnum depends on Nova, Glance, Heat, and Neutron to create and schedule
+virtual machines to simulate bare-metal. For milestone #2 we intend to
+introduce support for Ironic deployment of baremetal nodes.
 
 This session has only been tested on Ubuntu 14.04 (Trusty) and Fedora 20/21.
 We recommend users to select one of them if it is possible.
 
 NB: Magnum depends on a command line tool in Kubernetes called kubectl
-to execute its operations with Kubernetes.  We are addressing this in milestone
+to execute its operations with Kubernetes. We are addressing this in milestone
 #2 by implementing a native ReST client for Kubernetes.  In the meantime, the
 required action is to install kubectl manually.
 
@@ -189,5 +187,4 @@ Finally start the conductor service in a new window::
     magnum-conductor
 
 Magnum should now be up and running. Further steps on utilizing Magnum and
-deploying containers can be found in the `quickstart guide
-<../dev-quickstart.rst>`.
+deploying containers can be found in guide :ref:`dev-quickstart`.
