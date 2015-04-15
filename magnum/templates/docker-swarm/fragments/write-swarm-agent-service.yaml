@@ -15,7 +15,7 @@ write_files:
       ExecStartPre=-/usr/bin/docker kill swarm-agent
       ExecStartPre=-/usr/bin/docker rm swarm-agent
       ExecStartPre=/usr/bin/docker pull swarm
-      ExecStart=/usr/bin/docker run --name swarm-agent swarm join --addr $NODE_IP:2375 token://$SWARM_TOKEN
+      ExecStart=/usr/bin/docker run --name swarm-agent swarm join --addr $NODE_IP:2375 $DISCOVERY_URL
       ExecStop=/usr/bin/docker stop swarm-agent
 
       [Install]

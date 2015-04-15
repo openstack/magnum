@@ -52,7 +52,8 @@ class Bay(base.MagnumObject):
         'status': obj_utils.str_or_none,
         'api_address': obj_utils.str_or_none,
         'node_addresses': obj_utils.list_or_none,
-        'node_count': obj_utils.int_or_none
+        'node_count': obj_utils.int_or_none,
+        'discovery_url': obj_utils.str_or_none,
     }
 
     @staticmethod

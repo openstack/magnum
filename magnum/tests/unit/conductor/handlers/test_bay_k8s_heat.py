@@ -604,3 +604,81 @@ class TestHandler(db_base.DbTestCase):
         # The bay has been destroyed
         self.assertRaises(exception.BayNotFound,
                           objects.Bay.get, self.context, self.bay.uuid)
+
+
+class TestBayK8sHeatSwarm(base.TestCase):
+    def setUp(self):
+        super(TestBayK8sHeatSwarm, self).setUp()
+        self.baymodel_dict = {
+            'image_id': 'image_id',
+            'flavor_id': 'flavor_id',
+            'keypair_id': 'keypair_id',
+            'dns_nameserver': 'dns_nameserver',
+            'external_network_id': 'external_network_id',
+            'fixed_network': '10.2.0.0/22'
+        }
+        self.bay_dict = {
+            'id': 1,
+            'uuid': 'some_uuid',
+            'baymodel_id': 'xx-xx-xx-xx',
+            'name': 'bay1',
+            'stack_id': 'xx-xx-xx-xx',
+            'api_address': '172.17.2.3',
+            'node_addresses': ['172.17.2.4'],
+            'node_count': 1,
+            'discovery_url': 'token://39987da72f8386e0d0225ae8929e7cb4',
+        }
+
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_template_definition_all_values(self,
+                                    mock_objects_baymodel_get_by_uuid):
+        cfg.CONF.set_override('cluster_coe', 'swarm', group='k8s_heat')
+        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        bay = objects.Bay(self.context, **self.bay_dict)
+
+        (template_path,
+         definition) = bay_k8s_heat._extract_template_definition(self.context,
+                                                                 bay)
+
+        expected = {
+            'ssh_key_name': 'keypair_id',
+            'external_network_id': 'external_network_id',
+            'dns_nameserver': 'dns_nameserver',
+            'server_image': 'image_id',
+            'server_flavor': 'flavor_id',
+            'number_of_nodes': '1',
+            'fixed_network_cidr': '10.2.0.0/22',
+            'discovery_url': 'token://39987da72f8386e0d0225ae8929e7cb4'
+        }
+        self.assertEqual(expected, definition)
+
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_template_definition_only_required(self,
+                                    mock_objects_baymodel_get_by_uuid):
+        cfg.CONF.set_override('cluster_coe', 'swarm', group='k8s_heat')
+        cfg.CONF.set_override('public_swarm_discovery', False, group='bay')
+        cfg.CONF.set_override('swarm_discovery_url_format',
+                              'test_discovery', group='bay')
+
+        not_required = ['image_id', 'flavor_id', 'dns_nameserver',
+                        'fixed_network']
+        for key in not_required:
+            self.baymodel_dict[key] = None
+        self.bay_dict['discovery_url'] = None
+
+        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        bay = objects.Bay(self.context, **self.bay_dict)
+
+        (template_path,
+         definition) = bay_k8s_heat._extract_template_definition(self.context,
+                                                                 bay)
+
+        expected = {
+            'ssh_key_name': 'keypair_id',
+            'external_network_id': 'external_network_id',
+            'number_of_nodes': '1',
+            'discovery_url': 'test_discovery'
+        }
+        self.assertEqual(expected, definition)

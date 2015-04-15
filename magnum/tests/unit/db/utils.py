@@ -53,6 +53,7 @@ def get_test_bay(**kw):
         'id': kw.get('id', 42),
         'uuid': kw.get('uuid', '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'),
         'name': kw.get('name', 'bay1'),
+        'discovery_url': kw.get('discovery_url', None),
         'project_id': kw.get('project_id', 'fake_project'),
         'user_id': kw.get('user_id', 'fake_user'),
         'baymodel_id': kw.get('baymodel_id',

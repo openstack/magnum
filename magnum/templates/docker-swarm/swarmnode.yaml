@@ -34,9 +34,9 @@ parameters:
     type: string
     description: Subnet from which to allocate fixed addresses.
 
-  swarm_token:
+  discovery_url:
     type: string
-    description: token of swarm cluster to build
+    description: url provided for node discovery
 
 resources:
 
@@ -118,7 +118,7 @@ resources:
           template: {get_file: fragments/write-swarm-agent-service.yaml}
           params:
             "$NODE_IP": {get_attr: [swarm_node_eth0, fixed_ips, 0, ip_address]}
-            "$SWARM_TOKEN": {get_param: swarm_token}
+            "$DISCOVERY_URL": {get_param: discovery_url}
 
   enable_services:
     type: "OS::Heat::SoftwareConfig"

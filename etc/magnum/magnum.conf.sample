@@ -229,8 +229,12 @@
 # Deprecated group/name - [k8s_heat]/discovery_token_url
 #coreos_discovery_token_url = <None>
 
+# Location of template to build a swarm cluster on atomic.  (string
+# value)
+#swarm_atomic_template_path = $pybasedir/templates/docker-swarm/swarm.yaml
+
 # Enabled bay definition entry points.  (list value)
-#enabled_definitions = magnum_vm_atomic_k8s,magnum_vm_coreos_k8s
+#enabled_definitions = magnum_vm_atomic_k8s,magnum_vm_coreos_k8s,magnum_vm_atomic_swarm
 
 
 [conductor]
@@ -429,6 +433,10 @@
 
 # Cluster types are fedora-atomic, coreos, ironic. (string value)
 #cluster_type = fedora-atomic
+
+# Container Orchestration Environments are kubernetes or swarm.
+# (string value)
+#cluster_coe = kubernetes
 
 # Number of attempts to query the Heat stack for finding out the
 # status of the created stack and getting url of the DU created in the
