@@ -9,14 +9,14 @@ Magnum. This guide covers a more in-depth process to setup Magnum with devstack.
 
 DevStack does not yet have Magnum support.  It is, however, necessary to
 develop Magnum from a devstack environment at the present time.  Magnum depends
-on Nova, Heat, and Neutron to create and schedule virtual machines to simulate
+on Nova, Glance, Heat, and Neutron to create and schedule virtual machines to simulate
 bare-metal.  For milestone #2 we intend to introduce support for Ironic
 deployment of baremetal nodes.
 
 This session has only been tested on Ubuntu 14.04 (Trusty) and Fedora 20/21.
 We recommend users to select one of them if it is possible.
 
-NB: Magnum depends on a command line tool in kubernetes called kubectl
+NB: Magnum depends on a command line tool in Kubernetes called kubectl
 to execute its operations with Kubernetes.  We are addressing this in milestone
 #2 by implementing a native ReST client for Kubernetes.  In the meantime, the
 required action is to install kubectl manually.
