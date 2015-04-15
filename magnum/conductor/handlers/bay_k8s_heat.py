@@ -40,11 +40,18 @@ k8s_heat_opts = [
                default=2000,
                help=('Number of attempts to query the Heat stack for '
                      'finding out the status of the created stack and '
-                     'getting url of the DU created in the stack')),
+                     'getting template outputs.  This value is ignored '
+                     'during bay creation if timeout is set as the poll '
+                     'will continue until bay creation either ends '
+                     'or times out.')),
     cfg.IntOpt('wait_interval',
                default=1,
                help=('Sleep time interval between two attempts of querying '
-                     'the Heat stack. This interval is in seconds.')),
+                     'the Heat stack.  This interval is in seconds.')),
+    cfg.IntOpt('bay_create_timeout',
+               default=None,
+               help=('The length of time to let bay creation continue.  This '
+                    'interval is in minutes.  The default is no timeout.'))
 ]
 
 cfg.CONF.register_opts(k8s_heat_opts, group='k8s_heat')
@@ -61,17 +68,26 @@ def _extract_template_definition(context, bay):
     return definition.extract_definition(baymodel, bay)
 
 
-def _create_stack(context, osc, bay):
+def _create_stack(context, osc, bay, bay_create_timeout):
     template_path, heat_params = _extract_template_definition(context, bay)
 
     tpl_files, template = template_utils.get_template_contents(template_path)
     # Make sure no duplicate stack name
     stack_name = '%s-%s' % (bay.name, short_id.generate_id())
+    if bay_create_timeout:
+        heat_timeout = bay_create_timeout
+    elif bay_create_timeout == 0:
+        heat_timeout = None
+    else:
+        # no bay_create_timeout value was passed in to the request
+        # so falling back on configuration file value
+        heat_timeout = cfg.CONF.k8s_heat.bay_create_timeout
     fields = {
         'stack_name': stack_name,
         'parameters': heat_params,
         'template': template,
-        'files': dict(list(tpl_files.items()))
+        'files': dict(list(tpl_files.items())),
+        'timeout_mins': heat_timeout
     }
     created_stack = osc.heat().stacks.create(**fields)
 
@@ -104,13 +120,14 @@ class Handler(object):
 
     # Bay Operations
 
-    def bay_create(self, context, bay):
+    def bay_create(self, context, bay, bay_create_timeout):
         LOG.debug('k8s_heat bay_create')
 
         osc = clients.OpenStackClients(context)
 
         try:
-            created_stack = _create_stack(context, osc, bay)
+            created_stack = _create_stack(context, osc, bay,
+                                          bay_create_timeout)
         except Exception as e:
             if isinstance(e, exc.HTTPBadRequest):
                 raise exception.InvalidParameterValue(message=str(e))
@@ -216,10 +233,23 @@ class HeatPoller(object):
             LOG.error(_LE('Unable to delete bay, stack_id: %s')
                            % self.bay.stack_id)
             raise loopingcall.LoopingCallDone()
-        if self.attempts > cfg.CONF.k8s_heat.max_attempts:
-            LOG.error(_LE('Bay check exit after %(attempts)s attempts,'
-                          'stack_id: %(id)s, stack_status: %(status)s') %
-                          {'attempts': cfg.CONF.k8s_heat.max_attempts,
-                           'id': self.bay.stack_id,
-                           'status': stack.stack_status})
-            raise loopingcall.LoopingCallDone()
+        # only check max attempts when the stack is being created when
+        # the timeout hasn't been set. If the timeout has been set then
+        # the loop will end when the stack completes or the timeout occurs
+        if stack.stack_status == 'CREATE_IN_PROGRESS':
+            if (stack.timeout_mins is None and
+               self.attempts > cfg.CONF.k8s_heat.max_attempts):
+                LOG.error(_LE('Bay check exit after %(attempts)s attempts,'
+                              'stack_id: %(id)s, stack_status: %(status)s') %
+                              {'attempts': cfg.CONF.k8s_heat.max_attempts,
+                              'id': self.bay.stack_id,
+                              'status': stack.stack_status})
+                raise loopingcall.LoopingCallDone()
+        else:
+            if self.attempts > cfg.CONF.k8s_heat.max_attempts:
+                LOG.error(_LE('Bay check exit after %(attempts)s attempts,'
+                              'stack_id: %(id)s, stack_status: %(status)s') %
+                              {'attempts': cfg.CONF.k8s_heat.max_attempts,
+                              'id': self.bay.stack_id,
+                              'status': stack.stack_status})
+                raise loopingcall.LoopingCallDone()

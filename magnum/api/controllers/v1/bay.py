@@ -75,6 +75,9 @@ class Bay(base.APIBase):
     node_count = wtypes.IntegerType(minimum=1)
     """The node count for this bay"""
 
+    bay_create_timeout = wtypes.IntegerType(minimum=0)
+    """Timeout for creating the bay in minutes. Set to 0 for no timeout."""
+
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated bay links"""
 
@@ -99,7 +102,8 @@ class Bay(base.APIBase):
     def _convert_with_links(bay, url, expand=True):
         if not expand:
             bay.unset_fields_except(['uuid', 'name', 'baymodel_id',
-                                    'node_count', 'status'])
+                                    'node_count', 'status',
+                                    'bay_create_timeout'])
 
         bay.links = [link.Link.make_link('self', url,
                                           'bays', bay.uuid),
@@ -120,6 +124,7 @@ class Bay(base.APIBase):
                      name='example',
                      baymodel_id='4a96ac4b-2447-43f1-8ca6-9fd6f36d146d',
                      node_count=1,
+                     bay_create_timeout=15,
                      status="CREATED",
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())
@@ -250,7 +255,8 @@ class BaysController(rest.RestController):
         bay_dict['project_id'] = auth_token['project']['id']
         bay_dict['user_id'] = auth_token['user']['id']
         new_bay = objects.Bay(context, **bay_dict)
-        res_bay = pecan.request.rpcapi.bay_create(new_bay)
+        res_bay = pecan.request.rpcapi.bay_create(new_bay,
+                                                  bay.bay_create_timeout)
 
         # Set the HTTP Location Header
         pecan.response.location = link.build_url('bays', res_bay.uuid)
