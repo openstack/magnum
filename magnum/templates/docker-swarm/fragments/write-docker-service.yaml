@@ -1,0 +1,30 @@
+#cloud-config
+merge_how: dict(recurse_array)+list(append)
+write_files:
+  - path: /etc/systemd/system/docker.service
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Docker Application Container Engine
+      Documentation=http://docs.docker.com
+      After=network.target docker.socket
+      Requires=docker.socket
+
+      [Service]
+      Type=notify
+      EnvironmentFile=-/etc/sysconfig/docker
+      EnvironmentFile=-/etc/sysconfig/docker-storage
+      EnvironmentFile=-/etc/sysconfig/docker-network
+      ExecStart=/usr/bin/docker -d -H fd:// \
+                $OPTIONS \
+                $DOCKER_STORAGE_OPTIONS \
+                $DOCKER_NETWORK_OPTIONS \
+                $INSECURE_REGISTRY
+      LimitNOFILE=1048576
+      LimitNPROC=1048576
+      LimitCORE=infinity
+      MountFlags=slave
+
+      [Install]
+      WantedBy=multi-user.target

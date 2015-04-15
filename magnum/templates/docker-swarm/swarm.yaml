@@ -141,11 +141,29 @@ resources:
           params:
             "$WAIT_HANDLE": {get_resource: master_wait_handle}
 
+  remove_docker_key:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/remove-docker-key.sh}
+
+  write_docker_service:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/write-docker-service.yaml}
+
   write_docker_socket:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
       config: {get_file: fragments/write-docker-socket.yaml}
+
+  write_docker_tcp_socket:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/write-docker-tcp-socket.yaml}
 
   write_swarm_agent_service:
     type: "OS::Heat::SoftwareConfig"
@@ -184,12 +202,22 @@ resources:
       group: ungrouped
       config: {get_file: fragments/cfn-signal.sh}
 
+  disable_selinux:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/disable-selinux.sh}
+
   swarm_manager_init:
     type: "OS::Heat::MultipartMime"
     properties:
       parts:
+        - config: {get_resource: disable_selinux}
+        - config: {get_resource: remove_docker_key}
         - config: {get_resource: write_heat_params}
+        - config: {get_resource: write_docker_service}
         - config: {get_resource: write_docker_socket}
+        - config: {get_resource: write_docker_tcp_socket}
         - config: {get_resource: write_swarm_agent_service}
         - config: {get_resource: write_swarm_manager_service}
         - config: {get_resource: enable_services}
