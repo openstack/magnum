@@ -455,6 +455,7 @@ class TestKube(base.TestCase):
         expected_pod = self.mock_pod()
         expected_pod.uuid = 'test-uuid'
         expected_pod.refresh = mock.MagicMock()
+        expected_pod.save = mock.MagicMock()
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
         with patch.object(self.kube_handler, 'kube_cli') as mock_kube_cli:
@@ -464,6 +465,7 @@ class TestKube(base.TestCase):
             mock_kube_cli.pod_update.assert_called_once_with(
                 expected_master_url, expected_pod)
             expected_pod.refresh.assert_called_once_with(self.context)
+            expected_pod.save.assert_called_once_with()
 
     @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
     def test_pod_update_with_failure(self,
