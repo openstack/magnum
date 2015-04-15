@@ -154,6 +154,7 @@ class Handler(object):
             return None
         # call the pod object to persist in db
         pod.refresh(context)
+        pod.save()
         return pod
 
     def pod_delete(self, context, uuid):

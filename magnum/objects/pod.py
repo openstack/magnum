@@ -189,6 +189,10 @@ class Pod(base.MagnumObject):
         """
         current = self.__class__.get_by_uuid(self._context, uuid=self.uuid)
         for field in self.fields:
+            if field == 'manifest_url':
+                continue
+            if field == 'manifest':
+                continue
             if (hasattr(self, base.get_attrname(field)) and
                 self[field] != current[field]):
                 self[field] = current[field]

@@ -262,19 +262,20 @@ class PodsController(rest.RestController):
             raise exception.OperationNotPermitted
 
         rpc_pod = objects.Pod.get_by_uuid(pecan.request.context, pod_uuid)
+        # Init manifest and manifest_url field because we don't store them
+        # in database.
+        rpc_pod['manifest'] = None
+        rpc_pod['manifest_url'] = None
         try:
             pod_dict = rpc_pod.as_dict()
             pod = Pod(**api_utils.apply_jsonpatch(pod_dict, patch))
+            if pod.manifest or pod.manifest_url:
+                pod.parse_manifest()
         except api_utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)
 
         # Update only the fields that have changed
         for field in objects.Pod.fields:
-            # ignore manifest_url as it was used for create pod
-            if field == 'manifest_url':
-                continue
-            if field == 'manifest':
-                continue
             try:
                 patch_val = getattr(pod, field)
             except AttributeError:
@@ -285,7 +286,10 @@ class PodsController(rest.RestController):
             if rpc_pod[field] != patch_val:
                 rpc_pod[field] = patch_val
 
-        rpc_pod.save()
+        if pod.manifest or pod.manifest_url:
+            pecan.request.rpcapi.pod_update(rpc_pod)
+        else:
+            rpc_pod.save()
         return Pod.convert_with_links(rpc_pod)
 
     @wsme_pecan.wsexpose(None, types.uuid_or_name, status_code=204)
