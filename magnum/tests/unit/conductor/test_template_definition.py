@@ -21,6 +21,21 @@ from magnum.tests import base
 
 
 class TemplateDefinitionTestCase(base.TestCase):
+
+    @mock.patch.object(tdef, 'iter_entry_points')
+    def test_load_entry_points(self, mock_iter_entry_points):
+        mock_entry_point = mock.MagicMock()
+        mock_entry_points = [mock_entry_point]
+        mock_iter_entry_points.return_value = mock_entry_points.__iter__()
+
+        entry_points = tdef.TemplateDefinition.load_entry_points()
+
+        for (expected_entry_point,
+             (actual_entry_point, loaded_cls)) in zip(mock_entry_points,
+                                                      entry_points):
+            self.assertEqual(expected_entry_point, actual_entry_point)
+            expected_entry_point.load.assert_called_once_with(require=False)
+
     def test_get_template_definitions(self):
         defs = tdef.TemplateDefinition.get_template_definitions()
 
