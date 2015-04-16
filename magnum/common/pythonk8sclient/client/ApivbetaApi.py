@@ -2410,6 +2410,8 @@ class ApivbetaApi(object):
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
                                           postData, headerParams, files=files)
 
+        return response
+
         
         
         
@@ -2557,6 +2559,8 @@ class ApivbetaApi(object):
 
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
                                           postData, headerParams, files=files)
+
+        return response
 
         
         
@@ -3082,6 +3086,8 @@ class ApivbetaApi(object):
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
                                           postData, headerParams, files=files)
 
+        return response
+
         
         
         
@@ -3229,6 +3235,8 @@ class ApivbetaApi(object):
 
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
                                           postData, headerParams, files=files)
+
+        return response
 
         
         
@@ -4500,6 +4508,8 @@ class ApivbetaApi(object):
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
                                           postData, headerParams, files=files)
 
+        return response
+
         
         
         
@@ -4647,6 +4657,8 @@ class ApivbetaApi(object):
 
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
                                           postData, headerParams, files=files)
+
+        return response
 
         
         
