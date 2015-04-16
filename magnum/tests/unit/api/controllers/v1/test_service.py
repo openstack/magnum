@@ -193,6 +193,18 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
+    @mock.patch.object(rpcapi.API, 'service_update')
+    @mock.patch.object(api_service.Service, 'parse_manifest')
+    def test_replace_with_manifest(self, parse_manifest, service_update):
+        response = self.patch_json('/services/%s' % self.service.uuid,
+                                   [{'path': '/manifest',
+                                     'value': '{}',
+                                     'op': 'replace'}])
+        self.assertEqual(200, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        parse_manifest.assert_called_once_with()
+        self.assertTrue(service_update.is_called)
+
     def test_add_non_existent_property(self):
         response = self.patch_json('/services/%s' % self.service.uuid,
                             [{'path': '/foo', 'value': 'bar', 'op': 'add'}],

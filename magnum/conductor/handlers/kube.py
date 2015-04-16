@@ -111,6 +111,7 @@ class Handler(object):
             return None
         # call the service object to persist in db
         service.refresh(context)
+        service.save()
         return service
 
     def service_delete(self, context, uuid):

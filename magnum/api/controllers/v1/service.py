@@ -281,19 +281,20 @@ class ServicesController(rest.RestController):
             raise exception.OperationNotPermitted
 
         rpc_service = api_utils.get_rpc_resource('Service', service_ident)
+        # Init manifest and manifest_url field because we don't store them
+        # in database.
+        rpc_service['manifest'] = None
+        rpc_service['manifest_url'] = None
         try:
             service_dict = rpc_service.as_dict()
             service = Service(**api_utils.apply_jsonpatch(service_dict, patch))
+            if service.manifest or service.manifest_url:
+                service.parse_manifest()
         except api_utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)
 
         # Update only the fields that have changed
         for field in objects.Service.fields:
-            # ignore manifest_url as it was used for create service
-            if field == 'manifest_url':
-                continue
-            if field == 'manifest':
-                continue
             try:
                 patch_val = getattr(service, field)
             except AttributeError:
@@ -304,7 +305,10 @@ class ServicesController(rest.RestController):
             if rpc_service[field] != patch_val:
                 rpc_service[field] = patch_val
 
-        rpc_service.save()
+        if service.manifest or service.manifest_url:
+            pecan.request.rpcapi.service_update(rpc_service)
+        else:
+            rpc_service.save()
         return Service.convert_with_links(rpc_service)
 
     @wsme_pecan.wsexpose(None, types.uuid_or_name, status_code=204)

@@ -102,6 +102,12 @@ class RPCAPITestCase(base.DbTestCase):
                           version='1.0',
                           service=self.fake_service)
 
+    def test_service_update(self):
+        self._test_rpcapi('service_update',
+                          'call',
+                          version='1.0',
+                          service=self.fake_service)
+
     def test_service_delete(self):
         self._test_rpcapi('service_delete',
                           'call',
