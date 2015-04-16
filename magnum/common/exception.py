@@ -37,14 +37,9 @@ from magnum.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 
-exc_log_opts = [
-    cfg.BoolOpt('fatal_exception_format_errors',
-                default=False,
-                help='make exception message format errors fatal')
-]
-
 CONF = cfg.CONF
-CONF.register_opts(exc_log_opts)
+CONF.import_opt('fatal_exception_format_errors',
+                'oslo_versionedobjects.exception')
 
 
 def wrap_exception(notifier=None, publisher_id=None, event_type=None,
