@@ -262,6 +262,9 @@ class ServicesController(rest.RestController):
         service_dict['user_id'] = auth_token['user']['id']
         service_obj = objects.Service(context, **service_dict)
         new_service = pecan.request.rpcapi.service_create(service_obj)
+        if new_service is None:
+            raise exception.InvalidState()
+
         # Set the HTTP Location Header
         pecan.response.location = link.build_url('services', new_service.uuid)
         return Service.convert_with_links(new_service)

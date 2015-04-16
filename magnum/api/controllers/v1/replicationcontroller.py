@@ -253,6 +253,9 @@ class ReplicationControllersController(rest.RestController):
         rc_dict['user_id'] = auth_token['user']['id']
         rc_obj = objects.ReplicationController(context, **rc_dict)
         new_rc = pecan.request.rpcapi.rc_create(rc_obj)
+        if not new_rc:
+            raise exception.InvalidState()
+
         # Set the HTTP Location Header
         pecan.response.location = link.build_url('rcs', new_rc.uuid)
         return ReplicationController.convert_with_links(new_rc)
