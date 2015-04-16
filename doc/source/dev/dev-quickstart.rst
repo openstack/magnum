@@ -89,6 +89,9 @@ When you're done, deactivate the virtualenv::
 
     deactivate
 
+To discover and interact with templates, please refer to
+`<http://git.openstack.org/cgit/openstack/magnum/tree/contrib/templates/example/README.rst>`_
+
 
 Exercising the Services Using DevStack
 ======================================
