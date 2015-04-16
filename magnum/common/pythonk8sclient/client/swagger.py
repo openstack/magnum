@@ -17,7 +17,7 @@ import mimetypes
 import random
 import string
 
-from magnum import utils
+from magnum.common import utils
 from models import *
 
 
