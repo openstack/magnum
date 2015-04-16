@@ -104,6 +104,9 @@ class API(rpc_service.API):
     def rc_create(self, rc):
         return self._call('rc_create', rc=rc)
 
+    def rc_update(self, rc):
+        return self._call('rc_update', rc=rc)
+
     def rc_list(self, context, limit, marker, sort_key, sort_dir):
         return objects.ReplicationController.list(context, limit, marker,
                                                   sort_key, sort_dir)

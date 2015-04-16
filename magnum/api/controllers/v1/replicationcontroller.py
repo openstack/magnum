@@ -273,21 +273,21 @@ class ReplicationControllersController(rest.RestController):
             raise exception.OperationNotPermitted
 
         rpc_rc = api_utils.get_rpc_resource('ReplicationController', rc_ident)
+        # Init manifest and manifest_url field because we don't store them
+        # in database.
+        rpc_rc['manifest'] = None
+        rpc_rc['manifest_url'] = None
         try:
             rc_dict = rpc_rc.as_dict()
             rc = ReplicationController(**api_utils.apply_jsonpatch(rc_dict,
                                                                    patch))
+            if rc.manifest or rc.manifest_url:
+                rc.parse_manifest()
         except api_utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)
 
         # Update only the fields that have changed
         for field in objects.ReplicationController.fields:
-            # ignore manifest_url as it was used for create rc
-            if field == 'manifest_url':
-                continue
-            # ignore manifest as it was used for create rc
-            if field == 'manifest':
-                continue
             try:
                 patch_val = getattr(rc, field)
             except AttributeError:
@@ -298,7 +298,10 @@ class ReplicationControllersController(rest.RestController):
             if rpc_rc[field] != patch_val:
                 rpc_rc[field] = patch_val
 
-        rpc_rc.save()
+        if rc.manifest or rc.manifest_url:
+            pecan.request.rpcapi.rc_update(rpc_rc)
+        else:
+            rpc_rc.save()
         return ReplicationController.convert_with_links(rpc_rc)
 
     @wsme_pecan.wsexpose(None, types.uuid_or_name, status_code=204)

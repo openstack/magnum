@@ -151,6 +151,8 @@ class TestPatch(api_base.FunctionalTest):
         obj_utils.create_test_bay(self.context)
         self.rc = obj_utils.create_test_rc(self.context,
                                            images=['rc_example_A_image'])
+        self.another_bay = obj_utils.create_test_bay(self.context,
+                               uuid=utils.generate_uuid())
 
     @mock.patch('oslo_utils.timeutils.utcnow')
     def test_replace_ok(self, mock_utcnow):
@@ -175,11 +177,9 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(test_time, return_updated_at)
 
     def test_replace_bay_uuid(self):
-        another_bay = obj_utils.create_test_bay(self.context,
-                                                uuid=utils.generate_uuid())
         response = self.patch_json('/rcs/%s' % self.rc.uuid,
                                    [{'path': '/bay_uuid',
-                                     'value': another_bay.uuid,
+                                     'value': self.another_bay.uuid,
                                      'op': 'replace'}],
                                    expect_errors=True)
         self.assertEqual('application/json', response.content_type)
@@ -212,6 +212,18 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
+
+    @mock.patch.object(rpcapi.API, 'rc_update')
+    @mock.patch.object(api_rc.ReplicationController, 'parse_manifest')
+    def test_replace_with_manifest(self, parse_manifest, rc_update):
+        response = self.patch_json('/rcs/%s' % self.rc.uuid,
+                                  [{'path': '/manifest',
+                                    'value': '{}',
+                                    'op': 'replace'}])
+        self.assertEqual(200, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        parse_manifest.assert_called_once_with()
+        self.assertTrue(rc_update.is_called)
 
     def test_add_ok(self):
         new_image = 'rc_example_B_image'

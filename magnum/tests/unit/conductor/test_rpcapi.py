@@ -147,6 +147,12 @@ class RPCAPITestCase(base.DbTestCase):
                           version='1.0',
                           rc=self.fake_rc)
 
+    def test_rc_update(self):
+        self._test_rpcapi('rc_update',
+                          'call',
+                          version='1.0',
+                          rc=self.fake_rc)
+
     def test_rc_delete(self):
         self._test_rpcapi('rc_delete',
                           'call',
