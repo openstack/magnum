@@ -59,6 +59,9 @@ class Container(base.APIBase):
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated container links"""
 
+    command = wtypes.text
+    """The command execute when container starts"""
+
     def __init__(self, **kwargs):
         self.fields = []
         for field in objects.Container.fields:
@@ -71,7 +74,8 @@ class Container(base.APIBase):
     @staticmethod
     def _convert_with_links(container, url, expand=True):
         if not expand:
-            container.unset_fields_except(['uuid', 'name', 'image_id'])
+            container.unset_fields_except(['uuid', 'name',
+                                           'image_id', 'command'])
 
         container.links = [link.Link.make_link('self', url,
                                           'containers', container.uuid),
@@ -92,6 +96,7 @@ class Container(base.APIBase):
         sample = cls(uuid='27e3153e-d5bf-4b7e-b517-fb518e17f34c',
                      name='example',
                      image_id='ubuntu',
+                     command='env',
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)

@@ -32,6 +32,7 @@ class TestDockerConductor(base.BaseTestCase):
     def test_container_create(self):
         mock_container = mock.MagicMock()
         mock_container.image_id = 'test_image:some_tag'
+        mock_container.command = None
 
         self.conductor.container_create(None, 'some-name', 'some-uuid',
                                         mock_container)
@@ -43,7 +44,26 @@ class TestDockerConductor(base.BaseTestCase):
         self.mock_client.create_container.assert_called_once_with(
                                           mock_container.image_id,
                                           name='some-name',
-                                          hostname='some-uuid')
+                                          hostname='some-uuid',
+                                          command=None)
+
+    def test_container_create_with_command(self):
+        mock_container = mock.MagicMock()
+        mock_container.image_id = 'test_image:some_tag'
+        mock_container.command = 'env'
+
+        self.conductor.container_create(None, 'some-name', 'some-uuid',
+                                        mock_container)
+
+        utf8_image_id = self.conductor._encode_utf8(mock_container.image_id)
+        self.mock_client.pull.assert_called_once_with('test_image',
+                                                      tag='some_tag')
+        self.mock_client.inspect_image.assert_called_once_with(utf8_image_id)
+        self.mock_client.create_container.assert_called_once_with(
+                                          mock_container.image_id,
+                                          name='some-name',
+                                          hostname='some-uuid',
+                                          command='env')
 
     def test_container_create_with_failure(self):
         mock_container = mock.MagicMock()

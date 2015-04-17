@@ -89,7 +89,8 @@ class Handler(object):
             self.docker.pull(image_repo, tag=image_tag)
             self.docker.inspect_image(self._encode_utf8(container.image_id))
             self.docker.create_container(image_id, name=name,
-                                         hostname=container_uuid)
+                                         hostname=container_uuid,
+                                         command=container.command)
             return container
         except errors.APIError as api_error:
             raise exception.ContainerException(
