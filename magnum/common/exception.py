@@ -431,3 +431,7 @@ class RequiredParameterNotProvided(MagnumException):
 
 class Urllib2InvalidScheme(MagnumException):
     message = _("The urllib2 URL %(url) has an invalid scheme.")
+
+
+class OperationInProgress(Invalid):
+    message = _("Bay %(bay_name)s already has an operation in progress.")

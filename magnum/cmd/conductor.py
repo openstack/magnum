@@ -21,6 +21,7 @@ import sys
 from oslo_config import cfg
 
 from magnum.common import rpc_service as service
+from magnum.common import short_id
 from magnum.conductor.handlers import bay_k8s_heat
 from magnum.conductor.handlers import conductor_listener
 from magnum.conductor.handlers import docker_conductor
@@ -41,8 +42,8 @@ def main():
     cfg.CONF.log_opt_values(LOG, std_logging.DEBUG)
 
     cfg.CONF.import_opt('topic', 'magnum.conductor.config', group='conductor')
-    cfg.CONF.import_opt('host', 'magnum.conductor.config', group='conductor')
 
+    conductor_id = short_id.generate_id()
     endpoints = [
         docker_conductor.Handler(),
         k8s_conductor.Handler(),
@@ -60,5 +61,5 @@ def main():
                    'coreos_template': cfg.CONF.bay.k8s_coreos_template_path})
 
     server = service.Service(cfg.CONF.conductor.topic,
-                             cfg.CONF.conductor.host, endpoints)
+                             conductor_id, endpoints)
     server.serve()
