@@ -121,7 +121,7 @@ class TemplateDefinition(object):
     @staticmethod
     def load_entry_points():
         for entry_point in iter_entry_points('magnum.template_definitions'):
-            yield entry_point, entry_point.load()
+            yield entry_point, entry_point.load(require=False)
 
     @classmethod
     def get_template_definitions(cls):
