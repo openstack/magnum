@@ -63,6 +63,13 @@ class TemplateDefinitionTestCase(base.TestCase):
         self.assertIsInstance(definition,
                               tdef.CoreOSK8sTemplateDefinition)
 
+    def test_get_vm_atomic_swarm_definition(self):
+        definition = tdef.TemplateDefinition.get_template_definition('vm',
+                                                    'fedora-atomic', 'swarm')
+
+        self.assertIsInstance(definition,
+                              tdef.AtomicSwarmTemplateDefinition)
+
     def test_get_definition_not_supported(self):
         self.assertRaises(exception.BayTypeNotSupported,
                           tdef.TemplateDefinition.get_template_definition,
@@ -84,3 +91,61 @@ class TemplateDefinitionTestCase(base.TestCase):
 
         self.assertRaises(exception.RequiredParameterNotProvided,
                           param.set_param, {}, mock_baymodel, None)
+
+    @mock.patch('requests.post')
+    def test_swarm_discovery_url_public_token(self, mock_post):
+
+        mock_resp = mock.MagicMock()
+        mock_resp.text = 'some_token'
+        mock_post.return_value = mock_resp
+
+        mock_bay = mock.MagicMock()
+        mock_bay.discovery_url = None
+        mock_bay.id = 1
+        mock_bay.uuid = 'some_uuid'
+
+        swarm_def = tdef.AtomicSwarmTemplateDefinition()
+        actual_url = swarm_def.get_discovery_url(mock_bay)
+
+        self.assertEqual('token://some_token', actual_url)
+
+    def test_swarm_discovery_url_format_bay_id(self):
+        cfg.CONF.set_override('public_swarm_discovery', False, group='bay')
+        cfg.CONF.set_override('swarm_discovery_url_format',
+                              'etcd://test.com/bay-%(bay_id)s', group='bay')
+
+        mock_bay = mock.MagicMock()
+        mock_bay.discovery_url = None
+        mock_bay.id = 1
+        mock_bay.uuid = 'some_uuid'
+
+        swarm_def = tdef.AtomicSwarmTemplateDefinition()
+        actual_url = swarm_def.get_discovery_url(mock_bay)
+
+        self.assertEqual('etcd://test.com/bay-1', actual_url)
+
+    def test_swarm_discovery_url_format_bay_uuid(self):
+        cfg.CONF.set_override('public_swarm_discovery', False, group='bay')
+        cfg.CONF.set_override('swarm_discovery_url_format',
+                              'etcd://test.com/bay-%(bay_uuid)s', group='bay')
+
+        mock_bay = mock.MagicMock()
+        mock_bay.discovery_url = None
+        mock_bay.id = 1
+        mock_bay.uuid = 'some_uuid'
+
+        swarm_def = tdef.AtomicSwarmTemplateDefinition()
+        actual_url = swarm_def.get_discovery_url(mock_bay)
+
+        self.assertEqual('etcd://test.com/bay-some_uuid', actual_url)
+
+    def test_swarm_discovery_url_from_bay(self):
+        mock_bay = mock.MagicMock()
+        mock_bay.discovery_url = 'token://some_token'
+        mock_bay.id = 1
+        mock_bay.uuid = 'some_uuid'
+
+        swarm_def = tdef.AtomicSwarmTemplateDefinition()
+        actual_url = swarm_def.get_discovery_url(mock_bay)
+
+        self.assertEqual(mock_bay.discovery_url, actual_url)

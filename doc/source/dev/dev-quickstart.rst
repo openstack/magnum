@@ -262,6 +262,35 @@ Now log into one of the other container hosts and access a redis slave from ther
 There are four redis instances, one master and three slaves, running across the bay,
 replicating data between one another.
 
+Building a Swarm bay
+====================
+
+First, we will need to reconfigure Magnum. We need to set 'cluster_coe' in
+the 'k8s_head' section to 'swarm' in the magnum.conf. After changing
+magnum.conf restart magnum-api and magnum-conductor.::
+
+    sudo cat >> /etc/magnum/magnum.conf << END_CONFIG
+    [k8s_heat]
+    cluster_coe=swarm
+    END_CONFIG
+
+
+Next, create a baymodel, it is very similar to the Kubernetes baymodel,
+it is only missing some Kubernetes specific arguments.::
+
+    NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
+    magnum baymodel-create --name swarmbaymodel --image-id fedora-21-atomic-2 \
+                           --keypair-id testkey \
+                           --external-network-id $NIC_ID \
+                           --dns-nameserver 8.8.8.8 --flavor-id m1.small
+
+Finally, create the bay. Use the baymodel 'swarmbaymodel' as a template for
+bay creation. This bay will result in one swarm manager node and two extra
+agent nodes. ::
+
+    magnum bay-create --name swarmbay --baymodel swarmbaymodel --node-count 2
+
+
 Building developer documentation
 ================================
 

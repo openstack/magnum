@@ -21,9 +21,9 @@ parameters:
     type: string
     description: uuid of a network to use for floating ip addresses
 
-  swarm_token:
+  discovery_url:
     type: string
-    description: identifier of swarm cluster to build
+    description: url provided for node discovery
 
   #
   # OPTIONAL PARAMETERS
@@ -174,7 +174,7 @@ resources:
           template: {get_file: fragments/write-swarm-agent-service.yaml}
           params:
             "$NODE_IP": {get_attr: [swarm_manager_eth0, fixed_ips, 0, ip_address]}
-            "$SWARM_TOKEN": {get_param: swarm_token}
+            "$DISCOVERY_URL": {get_param: discovery_url}
 
   write_swarm_manager_service:
     type: "OS::Heat::SoftwareConfig"
@@ -184,7 +184,7 @@ resources:
         str_replace:
           template: {get_file: fragments/write-swarm-manager-service.yaml}
           params:
-            "$SWARM_TOKEN": {get_param: swarm_token}
+            "$DISCOVERY_URL": {get_param: discovery_url}
 
   enable_services:
     type: "OS::Heat::SoftwareConfig"
@@ -282,7 +282,7 @@ resources:
           fixed_network_id: {get_resource: fixed_network}
           fixed_subnet_id: {get_resource: fixed_subnet}
           external_network_id: {get_param: external_network_id}
-          swarm_token: {get_param: swarm_token}
+          discovery_url: {get_param: discovery_url}
 
 outputs:
 
@@ -294,3 +294,6 @@ outputs:
 
   swarm_nodes_external:
     value: {get_attr: [swarm_nodes, swarm_node_external_ip]}
+
+  discovery_url:
+    value: {get_param: discovery_url}

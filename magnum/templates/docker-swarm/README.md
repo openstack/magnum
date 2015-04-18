@@ -40,7 +40,7 @@ your environment:
       external_network_id: 028d70dd-67b8-4901-8bdd-0c62b06cce2d
       dns_nameserver: 192.168.200.1
       server_image: fedora-21-atomic
-      swarm_token: d8cdfe5128af6e1075b34aa06ff1cc2c
+      discovery_url: token://d8cdfe5128af6e1075b34aa06ff1cc2c
 
 And then create the stack, referencing that environment file:
 
@@ -51,7 +51,7 @@ You must provide values for:
 - `ssh_key_name`
 - `external_network_id`
 - `server_image`
-- `swarm_token`
+- `discovery_url`
 
 ## Interacting with Swarm
 

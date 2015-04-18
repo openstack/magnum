@@ -81,6 +81,9 @@ class Bay(base.APIBase):
     status = wtypes.text
     """Status of the bay from the heat stack"""
 
+    discovery_url = wtypes.text
+    """Url used for bay node discovery"""
+
     def __init__(self, **kwargs):
         super(Bay, self).__init__()
 

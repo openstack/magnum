@@ -15,7 +15,7 @@ write_files:
       ExecStartPre=-/usr/bin/docker kill swarm-manager
       ExecStartPre=-/usr/bin/docker rm swarm-manager
       ExecStartPre=/usr/bin/docker pull swarm
-      ExecStart=/usr/bin/docker run --name swarm-manager -p 2376:2375 swarm manage -H tcp://0.0.0.0:2375 token://$SWARM_TOKEN
+      ExecStart=/usr/bin/docker run --name swarm-manager -p 2376:2375 swarm manage -H tcp://0.0.0.0:2375 $DISCOVERY_URL
       ExecStop=/usr/bin/docker stop swarm-manager
 
       [Install]

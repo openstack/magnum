@@ -43,8 +43,26 @@ template_def_opts = [
                deprecated_name='discovery_token_url',
                deprecated_group='k8s_heat',
                help=_('coreos discovery token url.')),
+    cfg.StrOpt('swarm_atomic_template_path',
+               default=paths.basedir_def('templates/docker-swarm/'
+                                         'swarm.yaml'),
+               help=_('Location of template to build a swarm '
+                      'cluster on atomic. ')),
+    cfg.StrOpt('swarm_discovery_url_format',
+               default=None,
+               help=_('Format string to use for swarm discovery url. '
+                      'Available values: bay_id, bay_uuid. '
+                      'Example: "etcd://etcd.example.com/\%(bay_uuid)s" ')),
+    cfg.BoolOpt('public_swarm_discovery',
+                default=True,
+                help=_('Indicates Swarm discovery should use public '
+                       'endpoint.')),
+    cfg.StrOpt('public_swarm_discovery_url',
+               default='https://discovery-stage.hub.docker.com/v1/clusters',
+               help=_('Url for swarm public discovery endpoint.')),
     cfg.ListOpt('enabled_definitions',
-                default=['magnum_vm_atomic_k8s', 'magnum_vm_coreos_k8s'],
+                default=['magnum_vm_atomic_k8s', 'magnum_vm_coreos_k8s',
+                         'magnum_vm_atomic_swarm'],
                 help=_('Enabled bay definition entry points. ')),
 ]
 
@@ -263,11 +281,20 @@ class BaseTemplateDefinition(TemplateDefinition):
         self.add_parameter('ssh_key_name',
                            baymodel_attr='keypair_id',
                            required=True)
+        self.add_parameter('external_network_id',
+                           baymodel_attr='external_network_id',
+                           required=True)
 
         self.add_parameter('server_image',
                            baymodel_attr='image_id')
         self.add_parameter('server_flavor',
                            baymodel_attr='flavor_id')
+        self.add_parameter('dns_nameserver',
+                           baymodel_attr='dns_nameserver')
+
+    @abc.abstractproperty
+    def template_path(self):
+        pass
 
 
 class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
@@ -277,12 +304,6 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
 
     def __init__(self):
         super(AtomicK8sTemplateDefinition, self).__init__()
-        self.add_parameter('external_network_id',
-                           baymodel_attr='external_network_id',
-                           required=True)
-
-        self.add_parameter('dns_nameserver',
-                           baymodel_attr='dns_nameserver')
         self.add_parameter('master_flavor',
                            baymodel_attr='master_flavor_id')
         self.add_parameter('fixed_network',
@@ -339,3 +360,57 @@ class CoreOSK8sTemplateDefinition(AtomicK8sTemplateDefinition):
     @property
     def template_path(self):
         return cfg.CONF.bay.k8s_coreos_template_path
+
+
+class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
+    provides = [
+        {'platform': 'vm', 'os': 'fedora-atomic', 'coe': 'swarm'},
+    ]
+
+    def __init__(self):
+        super(AtomicSwarmTemplateDefinition, self).__init__()
+        self.add_parameter('number_of_nodes',
+                           bay_attr='node_count',
+                           param_type=str)
+        self.add_parameter('fixed_network_cidr',
+                           baymodel_attr='fixed_network')
+
+        self.add_output('swarm_manager',
+                        bay_attr='api_address')
+        self.add_output('swarm_nodes_external',
+                        bay_attr='node_addresses')
+        self.add_output('discovery_url',
+                        bay_attr='discovery_url')
+
+    @staticmethod
+    def get_public_token():
+        token_id = requests.post(cfg.CONF.bay.public_swarm_discovery_url).text
+        return 'token://%s' % token_id
+
+    @staticmethod
+    def parse_discovery_url(bay):
+        strings = dict(bay_id=bay.id, bay_uuid=bay.uuid)
+        return cfg.CONF.bay.swarm_discovery_url_format % strings
+
+    def get_discovery_url(self, bay):
+        if hasattr(bay, 'discovery_url') and bay.discovery_url:
+            discovery_url = bay.discovery_url
+        elif cfg.CONF.bay.public_swarm_discovery:
+            discovery_url = self.get_public_token()
+        else:
+            discovery_url = self.parse_discovery_url(bay)
+
+        return discovery_url
+
+    def get_params(self, baymodel, bay, extra_params=None):
+        if not extra_params:
+            extra_params = dict()
+
+        extra_params['discovery_url'] = self.get_discovery_url(bay)
+
+        return super(AtomicSwarmTemplateDefinition,
+                     self).get_params(baymodel, bay, extra_params=extra_params)
+
+    @property
+    def template_path(self):
+        return cfg.CONF.bay.swarm_atomic_template_path

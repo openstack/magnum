@@ -19,7 +19,7 @@ from oslo_config import cfg
 from magnum.common import clients
 from magnum.common import exception
 from magnum.common import short_id
-from magnum.conductor import template_definition as tdef
+from magnum.conductor.template_definition import TemplateDefinition as TDef
 from magnum import objects
 from magnum.openstack.common._i18n import _
 from magnum.openstack.common._i18n import _LE
@@ -32,6 +32,10 @@ k8s_heat_opts = [
     cfg.StrOpt('cluster_type',
                default='fedora-atomic',
                help=_('Cluster types are fedora-atomic, coreos, ironic.')),
+    cfg.StrOpt('cluster_coe',
+               default='kubernetes',
+               help=_('Container Orchestration Environments are '
+                      'kubernetes or swarm. ')),
     cfg.IntOpt('max_attempts',
                default=2000,
                help=('Number of attempts to query the Heat stack for '
@@ -51,9 +55,9 @@ LOG = logging.getLogger(__name__)
 
 def _extract_template_definition(context, bay):
     baymodel = objects.BayModel.get_by_uuid(context, bay.baymodel_id)
-    definition = tdef.TemplateDefinition.get_template_definition('vm',
-                                                cfg.CONF.k8s_heat.cluster_type,
-                                                'kubernetes')
+    cluster_type = cfg.CONF.k8s_heat.cluster_type
+    cluster_coe = cfg.CONF.k8s_heat.cluster_coe
+    definition = TDef.get_template_definition('vm', cluster_type, cluster_coe)
     return definition.extract_definition(baymodel, bay)
 
 
@@ -88,9 +92,9 @@ def _update_stack(context, osc, bay):
 
 
 def _update_stack_outputs(stack, bay):
-    definition = tdef.TemplateDefinition.get_template_definition('vm',
-                                                cfg.CONF.k8s_heat.cluster_type,
-                                                'kubernetes')
+    cluster_type = cfg.CONF.k8s_heat.cluster_type
+    cluster_coe = cfg.CONF.k8s_heat.cluster_coe
+    definition = TDef.get_template_definition('vm', cluster_type, cluster_coe)
     return definition.update_outputs(stack, bay)
 
 
