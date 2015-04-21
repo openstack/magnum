@@ -270,18 +270,17 @@ class ServicesController(rest.RestController):
         return Service.convert_with_links(new_service)
 
     @wsme.validate(types.uuid, [ServicePatchType])
-    @wsme_pecan.wsexpose(Service, types.uuid, body=[ServicePatchType])
-    def patch(self, service_uuid, patch):
+    @wsme_pecan.wsexpose(Service, types.uuid_or_name, body=[ServicePatchType])
+    def patch(self, service_ident, patch):
         """Update an existing service.
 
-        :param service_uuid: UUID of a service.
+        :param service_ident: UUID or logical name of a service.
         :param patch: a json PATCH document to apply to this service.
         """
         if self.from_services:
             raise exception.OperationNotPermitted
 
-        rpc_service = objects.Service.get_by_uuid(pecan.request.context,
-                                                  service_uuid)
+        rpc_service = api_utils.get_rpc_resource('Service', service_ident)
         try:
             service_dict = rpc_service.as_dict()
             service = Service(**api_utils.apply_jsonpatch(service_dict, patch))
