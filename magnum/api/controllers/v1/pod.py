@@ -251,17 +251,17 @@ class PodsController(rest.RestController):
         return Pod.convert_with_links(new_pod)
 
     @wsme.validate(types.uuid, [PodPatchType])
-    @wsme_pecan.wsexpose(Pod, types.uuid, body=[PodPatchType])
-    def patch(self, pod_uuid, patch):
+    @wsme_pecan.wsexpose(Pod, types.uuid_or_name, body=[PodPatchType])
+    def patch(self, pod_ident, patch):
         """Update an existing pod.
 
-        :param pod_uuid: UUID of a pod.
+        :param pod_ident: UUID or logical name of a pod.
         :param patch: a json PATCH document to apply to this pod.
         """
         if self.from_pods:
             raise exception.OperationNotPermitted
 
-        rpc_pod = objects.Pod.get_by_uuid(pecan.request.context, pod_uuid)
+        rpc_pod = api_utils.get_rpc_resource('Pod', pod_ident)
         # Init manifest and manifest_url field because we don't store them
         # in database.
         rpc_pod['manifest'] = None

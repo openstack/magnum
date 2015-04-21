@@ -117,6 +117,12 @@ class RPCAPITestCase(base.DbTestCase):
                           version='1.0',
                           pod=self.fake_pod)
 
+    def test_pod_update(self):
+        self._test_rpcapi('pod_update',
+                          'call',
+                          version='1.1',
+                          pod=self.fake_pod['name'])
+
     def test_pod_delete(self):
         self._test_rpcapi('pod_delete',
                           'call',
