@@ -42,11 +42,25 @@ class BayModel(base.APIBase):
     between the internal object model and the API representation of a baymodel.
     """
 
+    _coe = None
+
+    def _get_coe(self):
+        return self._coe
+
+    def _set_coe(self, value):
+        if value and self._coe != value:
+            self._coe = value
+        elif value == wtypes.Unset:
+            self._coe = wtypes.Unset
+
     uuid = types.uuid
     """Unique UUID for this baymodel"""
 
     name = wtypes.text
     """The name of the bay model"""
+
+    coe = wsme.wsproperty(wtypes.text, _get_coe, _set_coe, mandatory=True)
+    """The Container Orchestration Engine for this bay model"""
 
     image_id = wtypes.text
     """The image name or UUID to use as a base image for this baymodel"""
@@ -97,7 +111,7 @@ class BayModel(base.APIBase):
     def _convert_with_links(baymodel, url, expand=True):
         if not expand:
             baymodel.unset_fields_except(['uuid', 'name', 'image_id',
-                                          'apiserver_port'])
+                                          'apiserver_port', 'coe'])
 
         baymodel.links = [link.Link.make_link('self', url,
                                           'baymodels', baymodel.uuid),
@@ -128,6 +142,7 @@ class BayModel(base.APIBase):
                     docker_volume_size=25,
                     cluster_distro='fedora-atomic',
                     ssh_authorized_key='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAB',
+                    coe='kubernetes',
                     created_at=datetime.datetime.utcnow(),
                     updated_at=datetime.datetime.utcnow())
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)

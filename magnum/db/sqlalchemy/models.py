@@ -169,6 +169,7 @@ class BayModel(Base):
     docker_volume_size = Column(Integer())
     ssh_authorized_key = Column(Text)
     cluster_distro = Column(String(255))
+    coe = Column(String(255))
 
 
 class Container(Base):

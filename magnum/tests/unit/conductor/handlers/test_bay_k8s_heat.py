@@ -41,6 +41,7 @@ class TestBayK8sHeat(base.TestCase):
             'docker_volume_size': 20,
             'cluster_distro': 'fedora-atomic',
             'ssh_authorized_key': 'ssh_authorized_key',
+            'coe': 'kubernetes',
             'token': None,
         }
         self.bay_dict = {
@@ -51,6 +52,15 @@ class TestBayK8sHeat(base.TestCase):
             'node_addresses': ['172.17.2.4'],
             'node_count': 1,
         }
+
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_get_baymodel(self, mock_objects_baymodel_get_by_uuid):
+        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        bay = objects.Bay(self.context, **self.bay_dict)
+
+        fetched_baymodel = bay_k8s_heat._get_baymodel(self.context, bay)
+        self.assertEqual(baymodel, fetched_baymodel)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition(self,
@@ -167,7 +177,7 @@ class TestBayK8sHeat(base.TestCase):
             'master_flavor': 'master_flavor_id',
             'number_of_minions': '1',
             'fixed_network': 'private',
-            'docker_volume_size': 20
+            'docker_volume_size': 20,
         }
         self.assertEqual(expected, definition)
 
@@ -192,7 +202,7 @@ class TestBayK8sHeat(base.TestCase):
             'master_flavor': 'master_flavor_id',
             'number_of_minions': '1',
             'fixed_network': 'private',
-            'docker_volume_size': 20
+            'docker_volume_size': 20,
         }
         self.assertEqual(expected, definition)
 
@@ -700,6 +710,9 @@ class TestHandler(db_base.DbTestCase):
     def setUp(self):
         super(TestHandler, self).setUp()
         self.handler = bay_k8s_heat.Handler()
+        baymodel_dict = utils.get_test_baymodel()
+        self.baymodel = objects.BayModel(self.context, **baymodel_dict)
+        self.baymodel.create()
         bay_dict = utils.get_test_bay(node_count=1)
         self.bay = objects.Bay(self.context, **bay_dict)
         self.bay.create()
@@ -775,6 +788,7 @@ class TestBayK8sHeatSwarm(base.TestCase):
             'external_network_id': 'external_network_id',
             'fixed_network': '10.2.0.0/22',
             'cluster_distro': 'fedora-atomic',
+            'coe': 'swarm'
         }
         self.bay_dict = {
             'id': 1,
@@ -791,7 +805,6 @@ class TestBayK8sHeatSwarm(base.TestCase):
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_all_values(self,
                                     mock_objects_baymodel_get_by_uuid):
-        cfg.CONF.set_override('cluster_coe', 'swarm', group='k8s_heat')
         baymodel = objects.BayModel(self.context, **self.baymodel_dict)
         mock_objects_baymodel_get_by_uuid.return_value = baymodel
         bay = objects.Bay(self.context, **self.bay_dict)
@@ -815,7 +828,6 @@ class TestBayK8sHeatSwarm(base.TestCase):
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_only_required(self,
                                     mock_objects_baymodel_get_by_uuid):
-        cfg.CONF.set_override('cluster_coe', 'swarm', group='k8s_heat')
         cfg.CONF.set_override('public_swarm_discovery', False, group='bay')
         cfg.CONF.set_override('swarm_discovery_url_format',
                               'test_discovery', group='bay')

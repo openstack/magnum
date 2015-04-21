@@ -67,6 +67,7 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertIn('fixed_network', response)
         self.assertIn('docker_volume_size', response)
         self.assertIn('ssh_authorized_key', response)
+        self.assertIn('coe', response)
 
     def test_get_one_by_name(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
@@ -79,6 +80,7 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertIn('external_network_id', response)
         self.assertIn('fixed_network', response)
         self.assertIn('docker_volume_size', response)
+        self.assertIn('coe', response)
 
     def test_get_one_by_name_not_found(self):
         response = self.get_json('/baymodels/not_found',
@@ -110,6 +112,7 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertIn('fixed_network', response['baymodels'][0])
         self.assertIn('docker_volume_size', response['baymodels'][0])
         self.assertIn('ssh_authorized_key', response['baymodels'][0])
+        self.assertIn('coe', response['baymodels'][0])
 
     def test_detail_against_single(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
@@ -177,7 +180,8 @@ class TestPatch(api_base.FunctionalTest):
                                                'DYucqbeuM7nmJi+8Hb55y1xWoOZI'
                                                'KMa71G5/4EOQxuQ/sgW965OOO2Hq'
                                                'X8vjlQUnTK0HijrbSTLxp/9kazWW'
-                                               'FrfsdB8RtZBN digambar@magnum'
+                                               'FrfsdB8RtZBN digambar@magnum',
+                            coe='swarm'
                         )
 
     def test_update_not_found(self):
@@ -219,6 +223,8 @@ class TestPatch(api_base.FunctionalTest):
                          response['docker_volume_size'])
         self.assertEqual(self.baymodel.ssh_authorized_key,
                          response['ssh_authorized_key'])
+        self.assertEqual(self.baymodel.coe,
+                         response['coe'])
 
     def test_remove_singular(self):
         baymodel = obj_utils.create_test_baymodel(self.context,
@@ -243,6 +249,8 @@ class TestPatch(api_base.FunctionalTest):
                          response['docker_volume_size'])
         self.assertEqual(self.baymodel.ssh_authorized_key,
                          response['ssh_authorized_key'])
+        self.assertEqual(self.baymodel.coe,
+                         response['coe'])
 
     def test_remove_non_existent_property_fail(self):
         response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
@@ -268,6 +276,8 @@ class TestPatch(api_base.FunctionalTest):
                          response['apiserver_port'])
         self.assertEqual(self.baymodel.docker_volume_size,
                          response['docker_volume_size'])
+        self.assertEqual(self.baymodel.coe,
+                         response['coe'])
 
     def test_add_root_non_existent(self):
         response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
@@ -307,6 +317,8 @@ class TestPatch(api_base.FunctionalTest):
                          response['docker_volume_size'])
         self.assertEqual(self.baymodel.ssh_authorized_key,
                          response['ssh_authorized_key'])
+        self.assertEqual(self.baymodel.coe,
+                         response['coe'])
 
     def test_remove_uuid(self):
         response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,

@@ -29,10 +29,6 @@ from magnum.openstack.common import loopingcall
 
 
 k8s_heat_opts = [
-    cfg.StrOpt('cluster_coe',
-               default='kubernetes',
-               help=_('Container Orchestration Environments are '
-                      'kubernetes or swarm. ')),
     cfg.IntOpt('max_attempts',
                default=2000,
                help=('Number of attempts to query the Heat stack for '
@@ -57,12 +53,16 @@ cfg.CONF.register_opts(k8s_heat_opts, group='k8s_heat')
 LOG = logging.getLogger(__name__)
 
 
-def _extract_template_definition(context, bay):
+def _get_baymodel(context, bay):
     baymodel = objects.BayModel.get_by_uuid(context, bay.baymodel_id)
+    return baymodel
+
+
+def _extract_template_definition(context, bay):
+    baymodel = _get_baymodel(context, bay)
     cluster_distro = baymodel.cluster_distro
-    cluster_coe = cfg.CONF.k8s_heat.cluster_coe
-    definition = TDef.get_template_definition('vm',
-                                              cluster_distro,
+    cluster_coe = baymodel.coe
+    definition = TDef.get_template_definition('vm', cluster_distro,
                                               cluster_coe)
     return definition.extract_definition(baymodel, bay)
 
@@ -107,11 +107,10 @@ def _update_stack(context, osc, bay):
 
 
 def _update_stack_outputs(context, stack, bay):
-    baymodel = objects.BayModel.get_by_uuid(context, bay.baymodel_id)
+    baymodel = _get_baymodel(context, bay)
     cluster_distro = baymodel.cluster_distro
-    cluster_coe = cfg.CONF.k8s_heat.cluster_coe
-    definition = TDef.get_template_definition('vm',
-                                              cluster_distro,
+    cluster_coe = baymodel.coe
+    definition = TDef.get_template_definition('vm', cluster_distro,
                                               cluster_coe)
     return definition.update_outputs(stack, bay)
 
@@ -222,6 +221,7 @@ class HeatPoller(object):
             raise loopingcall.LoopingCallDone()
         if (stack.stack_status in ['CREATE_COMPLETE', 'UPDATE_COMPLETE']):
             _update_stack_outputs(self.context, stack, self.bay)
+
             self.bay.status = stack.stack_status
             self.bay.save()
             raise loopingcall.LoopingCallDone()

@@ -175,7 +175,7 @@ Magnum in which way to construct a bay.::
                            --keypair-id testkey \
                            --external-network-id $NIC_ID \
                            --dns-nameserver 8.8.8.8 --flavor-id m1.small \
-                           --docker-volume-size 5
+                           --docker-volume-size 5 --coe kubernetes
 
 Next create a bay. Use the baymodel UUID as a template for bay creation.
 This bay will result in one master kubernetes node and two minion nodes.::
@@ -264,25 +264,16 @@ replicating data between one another.
 
 Building and using a Swarm bay
 ==============================
-
-First, we will need to reconfigure Magnum. We need to set 'cluster_coe' in
-the 'k8s_heat' section to 'swarm' in the magnum.conf. After changing
-magnum.conf restart magnum-api and magnum-conductor.::
-
-    sudo cat >> /etc/magnum/magnum.conf << END_CONFIG
-    [k8s_heat]
-    cluster_coe=swarm
-    END_CONFIG
-
-
-Next, create a baymodel, it is very similar to the Kubernetes baymodel,
-it is only missing some Kubernetes specific arguments.::
+Create a baymodel. It is very similar to the Kubernetes baymodel,
+it is only missing some Kubernetes specific arguments and uses 'swarm' as the
+coe. ::
 
     NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
     magnum baymodel-create --name swarmbaymodel --image-id fedora-21-atomic-3 \
                            --keypair-id testkey \
                            --external-network-id $NIC_ID \
-                           --dns-nameserver 8.8.8.8 --flavor-id m1.small
+                           --dns-nameserver 8.8.8.8 --flavor-id m1.small \
+                           --coe swarm
 
 Finally, create the bay. Use the baymodel 'swarmbaymodel' as a template for
 bay creation. This bay will result in one swarm manager node and two extra
