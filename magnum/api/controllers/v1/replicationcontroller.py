@@ -261,19 +261,18 @@ class ReplicationControllersController(rest.RestController):
         return ReplicationController.convert_with_links(new_rc)
 
     @wsme.validate(types.uuid, [ReplicationControllerPatchType])
-    @wsme_pecan.wsexpose(ReplicationController, types.uuid,
+    @wsme_pecan.wsexpose(ReplicationController, types.uuid_or_name,
                          body=[ReplicationControllerPatchType])
-    def patch(self, rc_uuid, patch):
+    def patch(self, rc_ident, patch):
         """Update an existing rc.
 
-        :param rc_uuid: UUID of a ReplicationController.
+        :param rc_ident: UUID or logical name of a ReplicationController.
         :param patch: a json PATCH document to apply to this rc.
         """
         if self.from_rcs:
             raise exception.OperationNotPermitted
 
-        rpc_rc = objects.ReplicationController.get_by_uuid(
-                                    pecan.request.context, rc_uuid)
+        rpc_rc = api_utils.get_rpc_resource('ReplicationController', rc_ident)
         try:
             rc_dict = rpc_rc.as_dict()
             rc = ReplicationController(**api_utils.apply_jsonpatch(rc_dict,
