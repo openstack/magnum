@@ -312,6 +312,50 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_replace_ok_by_name(self, mock_utcnow):
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.patch_json('/pods/%s' % self.pod.name,
+                                   [{'path': '/desc', 'op': 'remove'}])
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(200, response.status_code)
+
+        response = self.get_json('/pods/%s' % self.pod.uuid)
+        self.assertEqual('pod1', response['name'])
+        return_updated_at = timeutils.parse_isotime(
+                            response['updated_at']).replace(tzinfo=None)
+        self.assertEqual(test_time, return_updated_at)
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_replace_ok_by_name_not_found(self, mock_utcnow):
+        name = 'not_found'
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.patch_json('/pods/%s' % name,
+                                   [{'path': '/desc', 'op': 'remove'}],
+                                   expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(404, response.status_code)
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_replace_ok_by_name_multiple_pod(self, mock_utcnow):
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        obj_utils.create_test_pod(self.context, name='test_pod',
+                                  uuid=utils.generate_uuid())
+        obj_utils.create_test_pod(self.context, name='test_pod',
+                                  uuid=utils.generate_uuid())
+
+        response = self.patch_json('/pods/test_pod',
+                                   [{'path': '/desc', 'op': 'remove'}],
+                                   expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(409, response.status_code)
+
 
 class TestPost(api_base.FunctionalTest):
 
