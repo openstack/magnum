@@ -26,9 +26,7 @@ from magnum.api.controllers import link
 from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
-from magnum.common import context as magnum_context
 from magnum.common import exception
-from magnum.conductor import api
 from magnum import objects
 from magnum.openstack.common import log as logging
 
@@ -152,8 +150,6 @@ class ContainerCollection(collection.Collection):
         sample.containers = [Container.sample(expand=False)]
         return sample
 
-backend_api = api.API(context=magnum_context.RequestContext())
-
 
 class StartController(object):
     @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
@@ -161,9 +157,9 @@ class StartController(object):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
-        LOG.debug('Calling backend_api.container_start with %s' %
+        LOG.debug('Calling conductor.container_start with %s' %
                   container_uuid)
-        return backend_api.container_start(container_uuid)
+        return pecan.request.rpcapi.container_start(container_uuid)
 
 
 class StopController(object):
@@ -172,9 +168,9 @@ class StopController(object):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
-        LOG.debug('Calling backend_api.container_stop with %s' %
+        LOG.debug('Calling conductor.container_stop with %s' %
                   container_uuid)
-        return backend_api.container_stop(container_uuid)
+        return pecan.request.rpcapi.container_stop(container_uuid)
 
 
 class RebootController(object):
@@ -183,9 +179,9 @@ class RebootController(object):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
-        LOG.debug('Calling backend_api.container_reboot with %s' %
+        LOG.debug('Calling conductor.container_reboot with %s' %
                   container_uuid)
-        return backend_api.container_reboot(container_uuid)
+        return pecan.request.rpcapi.container_reboot(container_uuid)
 
 
 class PauseController(object):
@@ -194,9 +190,9 @@ class PauseController(object):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
-        LOG.debug('Calling backend_api.container_pause with %s' %
+        LOG.debug('Calling conductor.container_pause with %s' %
                   container_uuid)
-        return backend_api.container_pause(container_uuid)
+        return pecan.request.rpcapi.container_pause(container_uuid)
 
 
 class UnpauseController(object):
@@ -205,9 +201,9 @@ class UnpauseController(object):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
-        LOG.debug('Calling backend_api.container_unpause with %s' %
+        LOG.debug('Calling conductor.container_unpause with %s' %
                   container_uuid)
-        return backend_api.container_unpause(container_uuid)
+        return pecan.request.rpcapi.container_unpause(container_uuid)
 
 
 class LogsController(object):
@@ -216,9 +212,9 @@ class LogsController(object):
         if pecan.request.method != 'GET':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
-        LOG.debug('Calling backend_api.container_logs with %s' %
+        LOG.debug('Calling conductor.container_logs with %s' %
         container_uuid)
-        return backend_api.container_logs(container_uuid)
+        return pecan.request.rpcapi.container_logs(container_uuid)
 
 
 class ExecuteController(object):
@@ -227,9 +223,9 @@ class ExecuteController(object):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
-        LOG.debug('Calling backend_api.container_execute with %s command %s'
+        LOG.debug('Calling conductor.container_execute with %s command %s'
                   % (container_uuid, command))
-        return backend_api.container_execute(container_uuid, command)
+        return pecan.request.rpcapi.container_execute(container_uuid, command)
 
 
 class ContainersController(rest.RestController):
@@ -342,9 +338,9 @@ class ContainersController(rest.RestController):
         container_dict['user_id'] = auth_token['user']['id']
         new_container = objects.Container(context, **container_dict)
         new_container.create()
-        res_container = backend_api.container_create(new_container.name,
-                                                     new_container.uuid,
-                                                     new_container)
+        res_container = pecan.request.rpcapi.container_create(
+                                    new_container.name, new_container.uuid,
+                                    new_container)
 
         # Set the HTTP Location Header
         pecan.response.location = link.build_url('containers',
@@ -395,7 +391,7 @@ class ContainersController(rest.RestController):
         if self.from_containers:
             raise exception.OperationNotPermitted
 
-        backend_api.container_delete(container_uuid)
+        pecan.request.rpcapi.container_delete(container_uuid)
         rpc_container = objects.Container.get_by_uuid(pecan.request.context,
                                             container_uuid)
         rpc_container.destroy()

@@ -118,6 +118,15 @@ class TestContainerController(db_base.DbTestCase):
         c = response.json['containers']
         self.assertEqual(0, len(c))
 
+        self.assertTrue(mock_container_create.called)
+        self.assertTrue(mock_container_start.called)
+        self.assertTrue(mock_container_stop.called)
+        self.assertTrue(mock_container_pause.called)
+        self.assertTrue(mock_container_unpause.called)
+        self.assertTrue(mock_container_reboot.called)
+        self.assertTrue(mock_container_logs.called)
+        self.assertTrue(mock_container_execute.called)
+
     @patch('magnum.objects.bay.Bay.get_by_uuid')
     @patch('magnum.conductor.api.API.container_create')
     @patch('magnum.conductor.api.API.container_delete')
@@ -155,6 +164,7 @@ class TestContainerController(db_base.DbTestCase):
         self.assertEqual(response.status_int, 200)
         c = response.json['containers']
         self.assertEqual(0, len(c))
+        self.assertTrue(mock_container_create.called)
 
     @patch('magnum.objects.bay.Bay.get_by_uuid')
     @patch('magnum.conductor.api.API.container_create')
@@ -193,3 +203,4 @@ class TestContainerController(db_base.DbTestCase):
         self.assertEqual(response.status_int, 200)
         c = response.json['containers']
         self.assertEqual(0, len(c))
+        self.assertTrue(mock_container_create.called)
