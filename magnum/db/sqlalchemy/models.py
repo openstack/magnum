@@ -185,6 +185,7 @@ class Container(Base):
     name = Column(String(255))
     image_id = Column(String(255))
     command = Column(String(255))
+    bay_uuid = Column(String(36))
 
 
 class Node(Base):

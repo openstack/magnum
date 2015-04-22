@@ -9,13 +9,17 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
+
+from magnum import objects
 from magnum.tests.unit.db import base as db_base
+from magnum.tests.unit.db import utils
 
 from mock import patch
 from webtest.app import AppError
 
 
 class TestContainerController(db_base.DbTestCase):
+    @patch('magnum.objects.bay.Bay.get_by_uuid')
     @patch('magnum.conductor.api.API.container_create')
     @patch('magnum.conductor.api.API.container_delete')
     @patch('magnum.conductor.api.API.container_start')
@@ -34,7 +38,8 @@ class TestContainerController(db_base.DbTestCase):
                             mock_container_stop,
                             mock_container_start,
                             mock_container_delete,
-                            mock_container_create):
+                            mock_container_create,
+                            mock_get_by_uuid):
         mock_container_create.side_effect = lambda x, y, z: z
         mock_container_start.return_value = None
         mock_container_stop.return_value = None
@@ -45,7 +50,14 @@ class TestContainerController(db_base.DbTestCase):
         mock_container_execute.return_value = None
 
         # Create a container
-        params = '{"name": "My Docker", "image_id": "ubuntu"}'
+        params = ('{"name": "My Docker", "image_id": "ubuntu",'
+                  '"command": "env",'
+                  '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
+        self.fake_bay = utils.get_test_bay()
+        value = self.fake_bay['uuid']
+        mock_get_by_uuid.return_value = self.fake_bay
+        bay = objects.Bay.get_by_uuid(self.context, value)
+        self.assertEqual(value, bay['uuid'])
         response = self.app.post('/v1/containers',
                                  params=params,
                                  content_type='application/json')
@@ -106,20 +118,65 @@ class TestContainerController(db_base.DbTestCase):
         c = response.json['containers']
         self.assertEqual(0, len(c))
 
+    @patch('magnum.objects.bay.Bay.get_by_uuid')
     @patch('magnum.conductor.api.API.container_create')
     @patch('magnum.conductor.api.API.container_delete')
     def test_create_container_with_command(self,
                                            mock_container_delete,
-                                           mock_container_create):
+                                           mock_container_create,
+                                           mock_get_by_uuid):
         mock_container_create.side_effect = lambda x, y, z: z
         # Create a container with a command
         params = ('{"name": "My Docker", "image_id": "ubuntu",'
-                  '"command": "env"}')
+                  '"command": "env",'
+                  '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
+        self.fake_bay = utils.get_test_bay()
+        value = self.fake_bay['uuid']
+        mock_get_by_uuid.return_value = self.fake_bay
+        bay = objects.Bay.get_by_uuid(self.context, value)
+        self.assertEqual(value, bay['uuid'])
         response = self.app.post('/v1/containers',
                                  params=params,
                                  content_type='application/json')
         self.assertEqual(response.status_int, 201)
+        # get all containers
+        response = self.app.get('/v1/containers')
+        self.assertEqual(response.status_int, 200)
+        self.assertEqual(1, len(response.json))
+        c = response.json['containers'][0]
+        self.assertIsNotNone(c.get('uuid'))
+        self.assertEqual('My Docker', c.get('name'))
+        self.assertEqual('env', c.get('command'))
+        # Delete the container we created
+        response = self.app.delete('/v1/containers/%s' % c.get('uuid'))
+        self.assertEqual(response.status_int, 204)
 
+        response = self.app.get('/v1/containers')
+        self.assertEqual(response.status_int, 200)
+        c = response.json['containers']
+        self.assertEqual(0, len(c))
+
+    @patch('magnum.objects.bay.Bay.get_by_uuid')
+    @patch('magnum.conductor.api.API.container_create')
+    @patch('magnum.conductor.api.API.container_delete')
+    def test_create_container_with_bay_uuid(self,
+                                           mock_container_delete,
+                                           mock_container_create,
+                                           mock_get_by_uuid):
+        mock_container_create.side_effect = lambda x, y, z: z
+        # Create a container with a command
+        params = ('{"name": "My Docker", "image_id": "ubuntu",'
+                  '"command": "env",'
+                  '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
+        self.fake_bay = utils.get_test_bay()
+        value = self.fake_bay['uuid']
+        mock_get_by_uuid.return_value = self.fake_bay
+        bay = objects.Bay.get_by_uuid(self.context, value)
+        self.assertEqual(value, bay['uuid'])
+        response = self.app.post('/v1/containers',
+                                 params=params,
+                                 content_type='application/json')
+        self.assertEqual(response.status_int, 201)
         # get all containers
         response = self.app.get('/v1/containers')
         self.assertEqual(response.status_int, 200)

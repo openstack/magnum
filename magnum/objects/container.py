@@ -32,6 +32,7 @@ class Container(base.MagnumObject):
         'user_id': obj_utils.str_or_none,
         'image_id': obj_utils.str_or_none,
         'command': obj_utils.str_or_none,
+        'bay_uuid': obj_utils.str_or_none,
     }
 
     @staticmethod

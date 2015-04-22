@@ -36,7 +36,10 @@ LOG = logging.getLogger(__name__)
 
 
 class ContainerPatchType(types.JsonPatchType):
-    pass
+
+    @staticmethod
+    def mandatory_attrs():
+        return ['/bay_uuid']
 
 
 class Container(base.APIBase):
@@ -47,6 +50,24 @@ class Container(base.APIBase):
     container.
     """
 
+    _bay_uuid = None
+
+    def _get_bay_uuid(self):
+        return self._bay_uuid
+
+    def _set_bay_uuid(self, value):
+        if value and self._bay_uuid != value:
+            try:
+                bay = objects.Bay.get_by_uuid(pecan.request.context, value)
+                self._bay_uuid = bay['uuid']
+            except exception.BayNotFound as e:
+                # Change error code because 404 (NotFound) is inappropriate
+                # response for a POST request to create a Service
+                e.code = 400  # BadRequest
+                raise e
+        elif value == wtypes.Unset:
+            self._bay_uuid = wtypes.Unset
+
     uuid = types.uuid
     """Unique UUID for this container"""
 
@@ -55,6 +76,10 @@ class Container(base.APIBase):
 
     image_id = wtypes.text
     """The image name or UUID to use as a base image for this baymodel"""
+
+    bay_uuid = wsme.wsproperty(types.uuid, _get_bay_uuid, _set_bay_uuid,
+                               mandatory=True)
+    """Unique UUID of the bay this runs on"""
 
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated container links"""
@@ -74,7 +99,7 @@ class Container(base.APIBase):
     @staticmethod
     def _convert_with_links(container, url, expand=True):
         if not expand:
-            container.unset_fields_except(['uuid', 'name',
+            container.unset_fields_except(['uuid', 'name', 'bay_uuid',
                                            'image_id', 'command'])
 
         container.links = [link.Link.make_link('self', url,
@@ -97,6 +122,7 @@ class Container(base.APIBase):
                      name='example',
                      image_id='ubuntu',
                      command='env',
+                     bay_uuid="fff114da-3bfa-4a0f-a123-c0dffad9718e",
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
