@@ -277,6 +277,58 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_replace_ok_by_name(self, mock_utcnow):
+        new_image = 'rc_example_B_image'
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.patch_json('/rcs/%s' % self.rc.name,
+                                   [{'path': '/images/0',
+                                     'value': new_image,
+                                     'op': 'replace'}])
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(200, response.status_code)
+
+        response = self.get_json('/rcs/%s' % self.rc.uuid)
+        return_updated_at = timeutils.parse_isotime(
+                            response['updated_at']).replace(tzinfo=None)
+        self.assertEqual(test_time, return_updated_at)
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_replace_ok_by_name_not_found(self, mock_utcnow):
+        new_image = 'rc_example_B_image'
+        name = 'not_found'
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.patch_json('/rcs/%s' % name,
+                                   [{'path': '/images/0',
+                                     'value': new_image,
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(404, response.status_code)
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_replace_ok_by_name_multiple_rc(self, mock_utcnow):
+        new_image = 'rc_example_B_image'
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        obj_utils.create_test_rc(self.context, name='test_rc',
+                                  uuid=utils.generate_uuid())
+        obj_utils.create_test_rc(self.context, name='test_rc',
+                                  uuid=utils.generate_uuid())
+
+        response = self.patch_json('/rcs/test_rc',
+                                   [{'path': '/images/0',
+                                     'value': new_image,
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(409, response.status_code)
+
 
 class TestPost(api_base.FunctionalTest):
 
