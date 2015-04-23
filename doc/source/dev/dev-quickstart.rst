@@ -266,7 +266,7 @@ Building a Swarm bay
 ====================
 
 First, we will need to reconfigure Magnum. We need to set 'cluster_coe' in
-the 'k8s_head' section to 'swarm' in the magnum.conf. After changing
+the 'k8s_heat' section to 'swarm' in the magnum.conf. After changing
 magnum.conf restart magnum-api and magnum-conductor.::
 
     sudo cat >> /etc/magnum/magnum.conf << END_CONFIG
