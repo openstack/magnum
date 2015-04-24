@@ -14,6 +14,7 @@
 
 import datetime
 
+import glanceclient.exc
 import pecan
 from pecan import rest
 import wsme
@@ -25,6 +26,7 @@ from magnum.api.controllers import link
 from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
+from magnum.common import clients
 from magnum.common import exception
 from magnum import objects
 
@@ -76,6 +78,9 @@ class BayModel(base.APIBase):
     ssh_authorized_key = wtypes.text
     """The SSH Authorized Key"""
 
+    cluster_distro = wtypes.text
+    """The Cluster distro for the bay, ex - coreos, fedora-atomic."""
+
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated baymodel links"""
 
@@ -121,6 +126,7 @@ class BayModel(base.APIBase):
                     fixed_network='private',
                     apiserver_port=8080,
                     docker_volume_size=25,
+                    cluster_distro='fedora-atomic',
                     ssh_authorized_key='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAB',
                     created_at=datetime.datetime.utcnow(),
                     updated_at=datetime.datetime.utcnow())
@@ -184,6 +190,20 @@ class BayModelsController(rest.RestController):
                                                 expand=expand,
                                                 sort_key=sort_key,
                                                 sort_dir=sort_dir)
+
+    def _get_image_data(self, context, image_id):
+        """Retrieves os_distro and other metadata from the Glance image.
+
+        :param image_id: image_id of baymodel.
+        """
+        try:
+            cli = clients.OpenStackClients(context)
+            image_data = cli.glance().images.get(image_id)
+            return image_data
+        except glanceclient.exc.NotFound:
+            raise exception.ImageNotFound(image_id=image_id)
+        except glanceclient.exc.HTTPForbidden:
+            raise exception.ImageNotAuthorized(image_id=image_id)
 
     @wsme_pecan.wsexpose(BayModelCollection, types.uuid,
                          types.uuid, int, wtypes.text, wtypes.text)
@@ -249,6 +269,11 @@ class BayModelsController(rest.RestController):
         auth_token = context.auth_token_info['token']
         baymodel_dict['project_id'] = auth_token['project']['id']
         baymodel_dict['user_id'] = auth_token['user']['id']
+        image_data = self._get_image_data(context, baymodel_dict['image_id'])
+        if image_data['os_distro']:
+            baymodel_dict['cluster_distro'] = image_data['os_distro']
+        else:
+            raise exception.OSDistroFieldNotFound(baymodel_dict['image_id'])
         new_baymodel = objects.BayModel(context, **baymodel_dict)
         new_baymodel.create()
         # Set the HTTP Location Header

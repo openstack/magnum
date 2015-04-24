@@ -430,3 +430,15 @@ class Urllib2InvalidScheme(MagnumException):
 
 class OperationInProgress(Invalid):
     message = _("Bay %(bay_name)s already has an operation in progress.")
+
+
+class ImageNotFound(ResourceNotFound):
+    message = _("Image %(image_id)s could not be found.")
+
+
+class ImageNotAuthorized(MagnumException):
+    message = _("Not authorized for image %(image_id)s.")
+
+
+class OSDistroFieldNotFound(ResourceNotFound):
+    message = _("Image %(image_id)s doesn't contain os-distro field.")

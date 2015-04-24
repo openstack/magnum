@@ -42,6 +42,7 @@ class BayModel(base.MagnumObject):
         'apiserver_port': obj_utils.int_or_none,
         'docker_volume_size': obj_utils.int_or_none,
         'ssh_authorized_key': obj_utils.str_or_none,
+        'cluster_distro': obj_utils.str_or_none,
     }
 
     @staticmethod

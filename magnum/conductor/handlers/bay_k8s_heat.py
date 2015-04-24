@@ -29,9 +29,6 @@ from magnum.openstack.common import loopingcall
 
 
 k8s_heat_opts = [
-    cfg.StrOpt('cluster_type',
-               default='fedora-atomic',
-               help=_('Cluster types are fedora-atomic, coreos, ironic.')),
     cfg.StrOpt('cluster_coe',
                default='kubernetes',
                help=_('Container Orchestration Environments are '
@@ -62,9 +59,11 @@ LOG = logging.getLogger(__name__)
 
 def _extract_template_definition(context, bay):
     baymodel = objects.BayModel.get_by_uuid(context, bay.baymodel_id)
-    cluster_type = cfg.CONF.k8s_heat.cluster_type
+    cluster_distro = baymodel.cluster_distro
     cluster_coe = cfg.CONF.k8s_heat.cluster_coe
-    definition = TDef.get_template_definition('vm', cluster_type, cluster_coe)
+    definition = TDef.get_template_definition('vm',
+                                              cluster_distro,
+                                              cluster_coe)
     return definition.extract_definition(baymodel, bay)
 
 
@@ -107,10 +106,13 @@ def _update_stack(context, osc, bay):
     return osc.heat().stacks.update(bay.stack_id, **fields)
 
 
-def _update_stack_outputs(stack, bay):
-    cluster_type = cfg.CONF.k8s_heat.cluster_type
+def _update_stack_outputs(context, stack, bay):
+    baymodel = objects.BayModel.get_by_uuid(context, bay.baymodel_id)
+    cluster_distro = baymodel.cluster_distro
     cluster_coe = cfg.CONF.k8s_heat.cluster_coe
-    definition = TDef.get_template_definition('vm', cluster_type, cluster_coe)
+    definition = TDef.get_template_definition('vm',
+                                              cluster_distro,
+                                              cluster_coe)
     return definition.update_outputs(stack, bay)
 
 
@@ -202,6 +204,7 @@ class HeatPoller(object):
 
     def __init__(self, openstack_client, bay):
         self.openstack_client = openstack_client
+        self.context = self.openstack_client.context
         self.bay = bay
         self.attempts = 0
 
@@ -218,7 +221,7 @@ class HeatPoller(object):
             self.bay.destroy()
             raise loopingcall.LoopingCallDone()
         if (stack.stack_status in ['CREATE_COMPLETE', 'UPDATE_COMPLETE']):
-            _update_stack_outputs(stack, self.bay)
+            _update_stack_outputs(self.context, stack, self.bay)
             self.bay.status = stack.stack_status
             self.bay.save()
             raise loopingcall.LoopingCallDone()

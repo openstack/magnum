@@ -35,6 +35,7 @@ def get_test_baymodel(**kw):
         'dns_nameserver': kw.get('dns_nameserver', '8.8.1.1'),
         'apiserver_port': kw.get('apiserver_port', 8080),
         'docker_volume_size': kw.get('docker_volume_size', 20),
+        'cluster_distro': kw.get('cluster_distro', 'fedora-atomic'),
         'ssh_authorized_key': kw.get('ssh_authorized_key',
                                      'ssh-rsa AAAAB3NzaC1ycEAAAADA'
                                      'v0XRqg3tm+jlsOKGO81lPDH+KaSJ'

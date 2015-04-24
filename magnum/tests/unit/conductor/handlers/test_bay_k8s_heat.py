@@ -39,6 +39,7 @@ class TestBayK8sHeat(base.TestCase):
             'external_network_id': 'external_network_id',
             'fixed_network': 'private',
             'docker_volume_size': 20,
+            'cluster_distro': 'fedora-atomic',
             'ssh_authorized_key': 'ssh_authorized_key',
             'token': None,
         }
@@ -80,9 +81,8 @@ class TestBayK8sHeat(base.TestCase):
     def test_extract_template_definition_coreos_with_disovery(self,
                                            mock_objects_baymodel_get_by_uuid,
                                            reqget):
-        cfg.CONF.set_override('cluster_type',
-                              'coreos',
-                              group='k8s_heat')
+        baymodel_dict = self.baymodel_dict
+        baymodel_dict['cluster_distro'] = 'coreos'
         cfg.CONF.set_override('coreos_discovery_token_url',
                               'http://tokentest',
                               group='bay')
@@ -116,9 +116,8 @@ class TestBayK8sHeat(base.TestCase):
     def test_extract_template_definition_coreos_no_discoveryurl(self,
                                            mock_objects_baymodel_get_by_uuid,
                                            mock_uuid):
-        cfg.CONF.set_override('cluster_type',
-                              'coreos',
-                              group='k8s_heat')
+        baymodel_dict = self.baymodel_dict
+        baymodel_dict['cluster_distro'] = 'coreos'
         cfg.CONF.set_override('coreos_discovery_token_url',
                               None,
                               group='bay')
@@ -300,10 +299,8 @@ class TestBayK8sHeat(base.TestCase):
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_without_ssh_authorized_key(self,
                                         mock_objects_baymodel_get_by_uuid):
-        cfg.CONF.set_override('cluster_type',
-                              'coreos',
-                              group='k8s_heat')
         baymodel_dict = self.baymodel_dict
+        baymodel_dict['cluster_distro'] = 'coreos'
         baymodel_dict['ssh_authorized_key'] = None
         baymodel = objects.BayModel(self.context, **baymodel_dict)
         mock_objects_baymodel_get_by_uuid.return_value = baymodel
@@ -379,7 +376,12 @@ class TestBayK8sHeat(base.TestCase):
         }
         self.assertEqual(expected, definition)
 
-    def test_update_stack_outputs(self):
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_update_stack_outputs(self, mock_objects_baymodel_get_by_uuid):
+        baymodel_dict = self.baymodel_dict
+        baymodel_dict['cluster_distro'] = 'coreos'
+        baymodel = objects.BayModel(self.context, **baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
         expected_api_address = 'api_address'
         expected_node_addresses = ['ex_minion', 'address']
 
@@ -399,7 +401,7 @@ class TestBayK8sHeat(base.TestCase):
         mock_stack.outputs = outputs
         mock_bay = mock.MagicMock()
 
-        bay_k8s_heat._update_stack_outputs(mock_stack, mock_bay)
+        bay_k8s_heat._update_stack_outputs(self.context, mock_stack, mock_bay)
 
         self.assertEqual(mock_bay.api_address, expected_api_address)
         self.assertEqual(mock_bay.node_addresses, expected_node_addresses)
@@ -765,7 +767,8 @@ class TestBayK8sHeatSwarm(base.TestCase):
             'keypair_id': 'keypair_id',
             'dns_nameserver': 'dns_nameserver',
             'external_network_id': 'external_network_id',
-            'fixed_network': '10.2.0.0/22'
+            'fixed_network': '10.2.0.0/22',
+            'cluster_distro': 'fedora-atomic',
         }
         self.bay_dict = {
             'id': 1,

@@ -322,11 +322,14 @@ class TestPost(api_base.FunctionalTest):
     def setUp(self):
         super(TestPost, self).setUp()
 
+    @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('oslo_utils.timeutils.utcnow')
-    def test_create_baymodel(self, mock_utcnow):
+    def test_create_baymodel(self, mock_utcnow, mock_openstack_client):
         cdict = apiutils.baymodel_post_data()
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
         mock_utcnow.return_value = test_time
+        test_auth_url = 'http://127.0.0.1:5000/v2.0'
+        mock_openstack_client.glance.return_value = test_auth_url
 
         response = self.post_json('/baymodels', cdict)
         self.assertEqual(201, response.status_int)
@@ -341,9 +344,12 @@ class TestPost(api_base.FunctionalTest):
                             response.json['created_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_created_at)
 
-    def test_create_baymodel_doesnt_contain_id(self):
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    def test_create_baymodel_doesnt_contain_id(self, mock_openstack_client):
         with mock.patch.object(self.dbapi, 'create_baymodel',
                                wraps=self.dbapi.create_baymodel) as cc_mock:
+            test_auth_url = 'http://127.0.0.1:5000/v2.0'
+            mock_openstack_client.glance.return_value = test_auth_url
             cdict = apiutils.baymodel_post_data(image_id='my-image')
             response = self.post_json('/baymodels', cdict)
             self.assertEqual(cdict['image_id'], response.json['image_id'])
@@ -351,16 +357,24 @@ class TestPost(api_base.FunctionalTest):
             # Check that 'id' is not in first arg of positional args
             self.assertNotIn('id', cc_mock.call_args[0][0])
 
-    def test_create_baymodel_with_invalid_docker_volume_size(self):
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    def test_create_baymodel_with_invalid_docker_volume_size(self,
+                               mock_openstack_client):
         with mock.patch.object(self.dbapi, 'create_baymodel',
                                wraps=self.dbapi.create_baymodel) as cc_mock:
+            test_auth_url = 'http://127.0.0.1:5000/v2.0'
+            mock_openstack_client.glance.return_value = test_auth_url
             cdict = apiutils.baymodel_post_data(docker_volume_size='docker')
             self.assertRaises(AppError, self.post_json, '/baymodels', cdict)
             self.assertFalse(cc_mock.called)
 
-    def test_create_baymodel_with_docker_volume_size(self):
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    def test_create_baymodel_with_docker_volume_size(self,
+                               mock_openstack_client):
         with mock.patch.object(self.dbapi, 'create_baymodel',
                                wraps=self.dbapi.create_baymodel) as cc_mock:
+            test_auth_url = 'http://127.0.0.1:5000/v2.0'
+            mock_openstack_client.glance.return_value = test_auth_url
             cdict = apiutils.baymodel_post_data(docker_volume_size=99)
             response = self.post_json('/baymodels', cdict)
             self.assertEqual(cdict['docker_volume_size'],
@@ -368,7 +382,10 @@ class TestPost(api_base.FunctionalTest):
             cc_mock.assert_called_once_with(mock.ANY)
             self.assertNotIn('id', cc_mock.call_args[0][0])
 
-    def test_create_baymodel_generate_uuid(self):
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    def test_create_baymodel_generate_uuid(self, mock_openstack_client):
+        test_auth_url = 'http://127.0.0.1:5000/v2.0'
+        mock_openstack_client.glance.return_value = test_auth_url
         cdict = apiutils.baymodel_post_data()
         del cdict['uuid']
         response = self.post_json('/baymodels', cdict)
