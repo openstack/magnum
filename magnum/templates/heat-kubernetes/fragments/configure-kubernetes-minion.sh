@@ -16,7 +16,7 @@ sed -i '
 sed -i '
 /^KUBELET_ADDRESS=/ s/=.*/="--address=0.0.0.0"/
 /^KUBELET_HOSTNAME=/ s/=.*/="--hostname_override='"$myip"'"/
-/^KUBELET_API_SERVER=/ s/=.*/="--api_servers='"$KUBE_MASTER_IP"':8080"/
+/^KUBELET_API_SERVER=/ s/=.*/="--api_servers='http:\/\/"$KUBE_MASTER_IP"':8080"/
 ' /etc/kubernetes/kubelet
 
 sed -i '
