@@ -38,8 +38,20 @@ from magnum.openstack.common import log as logging
 LOG = logging.getLogger(__name__)
 
 CONF = cfg.CONF
-CONF.import_opt('fatal_exception_format_errors',
+
+try:
+    CONF.import_opt('fatal_exception_format_errors',
                 'oslo_versionedobjects.exception')
+except cfg.NoSuchOptError as e:
+    # Note:work around for magnum run against master branch
+    # in devstack gate job, as magnum not branched yet
+    # verisonobjects kilo/master different version can
+    # cause issue here. As it changed import group. So
+    # add here before branch to prevent gate failure.
+    # Bug: #1447873
+    CONF.import_opt('fatal_exception_format_errors',
+                    'oslo_versionedobjects.exception',
+                    group='oslo_versionedobjects')
 
 
 def wrap_exception(notifier=None, publisher_id=None, event_type=None,
@@ -205,9 +217,13 @@ class MagnumException(Exception):
             for name, value in kwargs.iteritems():
                 LOG.error(_LE("%(name)s: %(value)s") %
                              {'name': name, 'value': value})
-
-            if CONF.fatal_exception_format_errors:
-                raise e
+            try:
+                if CONF.fatal_exception_format_errors:
+                    raise e
+            except cfg.NoSuchOptError:
+                # Note: work around for Bug: #1447873
+                if CONF.oslo_versionedobjects.fatal_exception_format_errors:
+                    raise e
 
         super(MagnumException, self).__init__(self.message)
 
