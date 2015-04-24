@@ -262,8 +262,8 @@ Now log into one of the other container hosts and access a redis slave from ther
 There are four redis instances, one master and three slaves, running across the bay,
 replicating data between one another.
 
-Building a Swarm bay
-====================
+Building and using a Swarm bay
+==============================
 
 First, we will need to reconfigure Magnum. We need to set 'cluster_coe' in
 the 'k8s_head' section to 'swarm' in the magnum.conf. After changing
@@ -290,6 +290,61 @@ agent nodes. ::
 
     magnum bay-create --name swarmbay --baymodel swarmbaymodel --node-count 2
 
+Now that we have a swarm bay we can start interacting with it. First we need
+to get it's uuid. ::
+
+    $ magnum bay-show swarmbay
+    +---------------+------------------------------------------+
+    | Property      | Value                                    |
+    +---------------+------------------------------------------+
+    | status        | CREATE_COMPLETE                          |
+    | uuid          | eda91c1e-6103-45d4-ab09-3f316310fa8e     |
+    | created_at    | 2015-04-20T19:05:27+00:00                |
+    | updated_at    | 2015-04-20T19:06:08+00:00                |
+    | baymodel_id   | a93ee8bd-fec9-4ea7-ac65-c66c1dba60af     |
+    | node_count    | 2                                        |
+    | discovery_url |                                          |
+    | name          | swarm bay                                |
+    +---------------+------------------------------------------+
+
+Next we will create a container in this bay. This container will ping the
+address 8.8.8.8 four times. ::
+
+    $ echo '{"bay_uuid": "eda91c1e-6103-45d4-ab09-3f316310fa8e",
+             "name": "test-container", "image_id": "cirros",
+             "command": "ping -c 4 8.8.8.8"}' > container.json
+    $ magnum container-create < container.json
+    +------------+----------------------------------------+
+    | Property   | Value                                  |
+    +------------+----------------------------------------+
+    | uuid       | 25485358-ae9b-49d1-a1e1-1af0a7c3f911   |
+    | links      | ...                                    |
+    | bay_uuid   | eda91c1e-6103-45d4-ab09-3f316310fa8e   |
+    | updated_at | None                                   |
+    | image_id   | cirros                                 |
+    | command    | ping -c 4 8.8.8.8                      |
+    | created_at | 2015-04-22T20:21:11+00:00              |
+    | name       | test-container                         |
+    +------------+----------------------------------------+
+
+At this point, the container exists, but it has not been started yet. Let's
+start it then check it's output. ::
+
+    $ mangum container-start 25485358-ae9b-49d1-a1e1-1af0a7c3f911
+    $ magnum container-logs 25485358-ae9b-49d1-a1e1-1af0a7c3f911
+    PING 8.8.8.8 (8.8.8.8): 56 data bytes
+    64 bytes from 8.8.8.8: seq=0 ttl=40 time=25.513 ms
+    64 bytes from 8.8.8.8: seq=1 ttl=40 time=25.348 ms
+    64 bytes from 8.8.8.8: seq=2 ttl=40 time=25.226 ms
+    64 bytes from 8.8.8.8: seq=3 ttl=40 time=25.275 ms
+
+    --- 8.8.8.8 ping statistics ---
+    4 packets transmitted, 4 packets received, 0% packet loss
+    round-trip min/avg/max = 25.226/25.340/25.513 ms
+
+Now that we're done with the container, we can delete it. ::
+
+    magnum container-delete 25485358-ae9b-49d1-a1e1-1af0a7c3f911
 
 Building developer documentation
 ================================
