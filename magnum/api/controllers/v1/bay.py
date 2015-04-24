@@ -36,6 +36,11 @@ class BayPatchType(types.JsonPatchType):
     def mandatory_attrs():
         return ['/baymodel_id']
 
+    @staticmethod
+    def internal_attrs():
+        internal_attrs = ['/api_address', '/node_addresses']
+        return types.JsonPatchType.internal_attrs() + internal_attrs
+
 
 class Bay(base.APIBase):
     """API representation of a bay.
@@ -87,6 +92,12 @@ class Bay(base.APIBase):
     discovery_url = wtypes.text
     """Url used for bay node discovery"""
 
+    api_address = wsme.wsattr(wtypes.text, readonly=True)
+    """Api address of cluster master node"""
+
+    node_addresses = wsme.wsattr([wtypes.text], readonly=True)
+    """Ip addresses of cluster slave nodes"""
+
     def __init__(self, **kwargs):
         super(Bay, self).__init__()
 
@@ -123,9 +134,11 @@ class Bay(base.APIBase):
         sample = cls(uuid='27e3153e-d5bf-4b7e-b517-fb518e17f34c',
                      name='example',
                      baymodel_id='4a96ac4b-2447-43f1-8ca6-9fd6f36d146d',
-                     node_count=1,
+                     node_count=2,
                      bay_create_timeout=15,
                      status="CREATED",
+                     api_address='172.24.4.3',
+                     node_addresses=['172.24.4.4', '172.24.4.5'],
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
