@@ -418,6 +418,7 @@ class TestBayK8sHeat(base.TestCase):
         expected_template_contents = 'template_contents'
         exptected_files = []
         dummy_bay_name = 'expected_stack_name'
+        expected_timeout = 15
 
         mock_tpl_files = mock.MagicMock()
         mock_tpl_files.items.return_value = exptected_files
@@ -431,13 +432,96 @@ class TestBayK8sHeat(base.TestCase):
         mock_bay = mock.MagicMock()
         mock_bay.name = dummy_bay_name
 
-        bay_k8s_heat._create_stack(self.context, mock_osc, mock_bay)
+        bay_k8s_heat._create_stack(self.context, mock_osc,
+                                   mock_bay, expected_timeout)
 
         expected_args = {
             'stack_name': expected_stack_name,
             'parameters': {},
             'template': expected_template_contents,
-            'files': dict(exptected_files)
+            'files': dict(exptected_files),
+            'timeout_mins': expected_timeout
+        }
+        mock_heat_client.stacks.create.assert_called_once_with(**expected_args)
+
+    @patch('magnum.common.short_id.generate_id')
+    @patch('heatclient.common.template_utils.get_template_contents')
+    @patch('magnum.conductor.handlers.bay_k8s_heat'
+           '._extract_template_definition')
+    def test_create_stack_no_timeout_specified(self,
+                          mock_extract_template_definition,
+                          mock_get_template_contents,
+                          mock_generate_id):
+
+        mock_generate_id.return_value = 'xx-xx-xx-xx'
+        expected_stack_name = 'expected_stack_name-xx-xx-xx-xx'
+        expected_template_contents = 'template_contents'
+        exptected_files = []
+        dummy_bay_name = 'expected_stack_name'
+        expected_timeout = cfg.CONF.k8s_heat.bay_create_timeout
+
+        mock_tpl_files = mock.MagicMock()
+        mock_tpl_files.items.return_value = exptected_files
+        mock_get_template_contents.return_value = [
+            mock_tpl_files, expected_template_contents]
+        mock_extract_template_definition.return_value = ('template/path',
+                                                         {})
+        mock_heat_client = mock.MagicMock()
+        mock_osc = mock.MagicMock()
+        mock_osc.heat.return_value = mock_heat_client
+        mock_bay = mock.MagicMock()
+        mock_bay.name = dummy_bay_name
+
+        bay_k8s_heat._create_stack(self.context, mock_osc,
+                                   mock_bay, None)
+
+        expected_args = {
+            'stack_name': expected_stack_name,
+            'parameters': {},
+            'template': expected_template_contents,
+            'files': dict(exptected_files),
+            'timeout_mins': expected_timeout
+        }
+        mock_heat_client.stacks.create.assert_called_once_with(**expected_args)
+
+    @patch('magnum.common.short_id.generate_id')
+    @patch('heatclient.common.template_utils.get_template_contents')
+    @patch('magnum.conductor.handlers.bay_k8s_heat'
+           '._extract_template_definition')
+    def test_create_stack_timeout_is_zero(self,
+                          mock_extract_template_definition,
+                          mock_get_template_contents,
+                          mock_generate_id):
+
+        mock_generate_id.return_value = 'xx-xx-xx-xx'
+        expected_stack_name = 'expected_stack_name-xx-xx-xx-xx'
+        expected_template_contents = 'template_contents'
+        exptected_files = []
+        dummy_bay_name = 'expected_stack_name'
+        bay_timeout = 0
+        expected_timeout = None
+
+        mock_tpl_files = mock.MagicMock()
+        mock_tpl_files.items.return_value = exptected_files
+        mock_get_template_contents.return_value = [
+            mock_tpl_files, expected_template_contents]
+        mock_extract_template_definition.return_value = ('template/path',
+                                                         {})
+        mock_heat_client = mock.MagicMock()
+        mock_osc = mock.MagicMock()
+        mock_osc.heat.return_value = mock_heat_client
+        mock_bay = mock.MagicMock()
+        mock_bay.name = dummy_bay_name
+
+        bay_k8s_heat._create_stack(self.context, mock_osc,
+                                   mock_bay, bay_timeout)
+
+        expected_args = {
+            'stack_name': expected_stack_name,
+            'parameters': {},
+            'template': expected_template_contents,
+            'files': dict(exptected_files),
+            'timeout_mins': expected_timeout
         }
         mock_heat_client.stacks.create.assert_called_once_with(**expected_args)
 
@@ -538,6 +622,70 @@ class TestBayK8sHeat(base.TestCase):
         self.assertEqual(bay.status, 'DELETE_IN_PROGRESS')
         self.assertEqual(bay.destroy.call_count, 1)
 
+    def test_poll_delete_in_progress_timeout_set(self):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+
+        mock_heat_stack.stack_status = 'DELETE_IN_PROGRESS'
+        mock_heat_stack.timeout_mins = 60
+        # timeout only affects stack creation so expecting this
+        # to process normally
+        poller.poll_and_check()
+
+    def test_poll_delete_in_progress_max_attempts_reached(self):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+
+        mock_heat_stack.stack_status = 'DELETE_IN_PROGRESS'
+        poller.attempts = cfg.CONF.k8s_heat.max_attempts
+        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+
+    def test_poll_create_in_prog_max_att_reached_no_timeout(self):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+
+        mock_heat_stack.stack_status = 'CREATE_IN_PROGRESS'
+        poller.attempts = cfg.CONF.k8s_heat.max_attempts
+        mock_heat_stack.timeout_mins = None
+        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+
+    def test_poll_create_in_prog_max_att_reached_timeout_set(self):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+
+        mock_heat_stack.stack_status = 'CREATE_IN_PROGRESS'
+        poller.attempts = cfg.CONF.k8s_heat.max_attempts
+        mock_heat_stack.timeout_mins = 60
+        # since the timeout is set the max attempts gets ignored since
+        # the timeout will eventually stop the poller either when
+        # the stack gets created or the timeout gets reached
+        poller.poll_and_check()
+
+    def test_poll_create_in_prog_max_att_reached_timed_out(self):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+
+        mock_heat_stack.stack_status = 'CREATE_FAILED'
+        poller.attempts = cfg.CONF.k8s_heat.max_attempts
+        mock_heat_stack.timeout_mins = 60
+        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+
+    def test_poll_create_in_prog_max_att_not_reached_no_timeout(self):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+
+        mock_heat_stack.stack_status = 'CREATE_IN_PROGRESS'
+        mock_heat_stack.timeout.mins = None
+        poller.poll_and_check()
+
+    def test_poll_create_in_prog_max_att_not_reached_timeout_set(self):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+
+        mock_heat_stack.stack_status = 'CREATE_IN_PROGRESS'
+        mock_heat_stack.timeout_mins = 60
+        poller.poll_and_check()
+
+    def test_poll_create_in_prog_max_att_not_reached_timed_out(self):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+
+        mock_heat_stack.stack_status = 'CREATE_FAILED'
+        mock_heat_stack.timeout_mins = 60
+        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+
 
 class TestHandler(db_base.DbTestCase):
 
@@ -592,8 +740,10 @@ class TestHandler(db_base.DbTestCase):
     @patch('magnum.common.clients.OpenStackClients')
     def test_create(self, mock_openstack_client_class, mock_create_stack):
         mock_create_stack.side_effect = exc.HTTPBadRequest
+        timeout = 15
         self.assertRaises(exception.InvalidParameterValue,
-                          self.handler.bay_create, self.context, self.bay)
+                          self.handler.bay_create, self.context,
+                          self.bay, timeout)
 
     @patch('magnum.common.clients.OpenStackClients')
     def test_bay_delete(self, mock_openstack_client_class):

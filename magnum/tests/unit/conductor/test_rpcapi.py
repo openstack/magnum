@@ -76,7 +76,8 @@ class RPCAPITestCase(base.DbTestCase):
         self._test_rpcapi('bay_create',
                           'call',
                           version='1.0',
-                          bay=self.fake_bay)
+                          bay=self.fake_bay,
+                          bay_create_timeout=15)
 
     def test_bay_delete(self):
         self._test_rpcapi('bay_delete',

@@ -377,7 +377,7 @@ class TestPost(api_base.FunctionalTest):
         self.mock_bay_create.side_effect = self._simulate_rpc_bay_create
         self.addCleanup(p.stop)
 
-    def _simulate_rpc_bay_create(self, bay):
+    def _simulate_rpc_bay_create(self, bay, bay_create_timeout):
         bay.create()
         return bay
 
@@ -456,6 +456,35 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['error_message'])
+
+    def test_create_bay_with_timeout_none(self):
+        bdict = apiutils.bay_post_data()
+        bdict['bay_create_timeout'] = None
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(201, response.status_int)
+
+    def test_create_bay_with_no_timeout(self):
+        bdict = apiutils.bay_post_data()
+        del bdict['bay_create_timeout']
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(201, response.status_int)
+
+    def test_create_bay_with_timeout_negative(self):
+        bdict = apiutils.bay_post_data()
+        bdict['bay_create_timeout'] = -1
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_int)
+        self.assertTrue(response.json['error_message'])
+
+    def test_create_bay_with_timeout_zero(self):
+        bdict = apiutils.bay_post_data()
+        bdict['bay_create_timeout'] = 0
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(201, response.status_int)
 
 
 class TestDelete(api_base.FunctionalTest):
