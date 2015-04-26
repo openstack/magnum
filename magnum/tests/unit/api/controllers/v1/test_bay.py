@@ -465,6 +465,11 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(201, response.status_int)
 
     def test_create_bay_with_no_timeout(self):
+        def _simulate_rpc_bay_create(bay, bay_create_timeout):
+            self.assertEqual(0, bay_create_timeout)
+            bay.create()
+            return bay
+        self.mock_bay_create.side_effect = _simulate_rpc_bay_create
         bdict = apiutils.bay_post_data()
         del bdict['bay_create_timeout']
         response = self.post_json('/bays', bdict, expect_errors=True)

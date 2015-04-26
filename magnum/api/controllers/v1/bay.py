@@ -255,6 +255,8 @@ class BaysController(rest.RestController):
         bay_dict['project_id'] = auth_token['project']['id']
         bay_dict['user_id'] = auth_token['user']['id']
         new_bay = objects.Bay(context, **bay_dict)
+        if isinstance(bay.bay_create_timeout, wsme.types.UnsetType):
+            bay.bay_create_timeout = 0
         res_bay = pecan.request.rpcapi.bay_create(new_bay,
                                                   bay.bay_create_timeout)
 
