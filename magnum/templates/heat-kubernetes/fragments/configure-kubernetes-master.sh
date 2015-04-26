@@ -3,6 +3,9 @@
 . /etc/sysconfig/heat-params
 
 echo "configuring kubernetes (master)"
+sed -i '
+  /^ETCD_LISTEN_CLIENT_URLS=/ s/=.*/="http:\/\/0.0.0.0:4001"/
+' /etc/etcd/etcd.conf
 
 sed -i '
   /^KUBE_ALLOW_PRIV=/ s/=.*/="--allow_privileged='"$KUBE_ALLOW_PRIV"'"/
