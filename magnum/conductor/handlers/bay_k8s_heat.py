@@ -240,6 +240,12 @@ class HeatPoller(object):
                           {'stack_id': self.bay.stack_id,
                           'reason': stack.stack_status_reason})
             raise loopingcall.LoopingCallDone()
+        if stack.stack_status == 'UPDATE_FAILED':
+            LOG.error(_LE('Unable to update bay, stack_id: %(stack_id)s, '
+                          'reason: %(reason)s') %
+                         {'stack_id': self.bay.stack_id,
+                         'reason': stack.stack_status_reason})
+            raise loopingcall.LoopingCallDone()
         # only check max attempts when the stack is being created when
         # the timeout hasn't been set. If the timeout has been set then
         # the loop will end when the stack completes or the timeout occurs
