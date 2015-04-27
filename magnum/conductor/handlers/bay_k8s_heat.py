@@ -229,12 +229,16 @@ class HeatPoller(object):
             self.bay.status = stack.stack_status
             self.bay.save()
         if stack.stack_status == 'CREATE_FAILED':
-            LOG.error(_LE('Unable to create bay, stack_id: %s')
-                           % self.bay.stack_id)
+            LOG.error(_LE('Unable to create bay, stack_id: %(stack_id)s, '
+                          'reason: %(reason)s') %
+                          {'stack_id': self.bay.stack_id,
+                          'reason': stack.stack_status_reason})
             raise loopingcall.LoopingCallDone()
         if stack.stack_status == 'DELETE_FAILED':
-            LOG.error(_LE('Unable to delete bay, stack_id: %s')
-                           % self.bay.stack_id)
+            LOG.error(_LE('Unable to delete bay, stack_id: %(stack_id)s, '
+                          'reason: %(reason)s') %
+                          {'stack_id': self.bay.stack_id,
+                          'reason': stack.stack_status_reason})
             raise loopingcall.LoopingCallDone()
         # only check max attempts when the stack is being created when
         # the timeout hasn't been set. If the timeout has been set then
