@@ -74,3 +74,31 @@ def get_rpc_resource(resource, resource_ident):
         return resource.get_by_name(pecan.request.context, resource_ident)
 
     raise exception.InvalidUuidOrName(name=resource_ident)
+
+
+def get_openstack_resource(manager, resource_ident, resource_type):
+    """Get the openstack resource from the uuid or logical name.
+
+    :param manager: the resource manager class.
+    :param resource_ident: the UUID or logical name of the resource.
+    :param resource_type: the type of the resource
+
+    :returns: The openstack resource.
+    :raises: ResourceNotFound if the openstack resource is not exist.
+             Conflict if multi openstack resources have same name.
+    """
+    if utils.is_uuid_like(resource_ident):
+        resource_data = manager.get(resource_ident)
+    else:
+        filters = {'name': resource_ident}
+        matches = list(manager.list(filters=filters))
+        if len(matches) == 0:
+            raise exception.ResourceNotFound(name=resource_type,
+                                             id=resource_ident)
+        if len(matches) > 1:
+            msg = ("Multiple '%s' exist with same name '%s'. "
+                   "Please use the resource id instead." %
+                   (resource_type, resource_ident))
+            raise exception.Conflict(msg)
+        resource_data = matches[0]
+    return resource_data

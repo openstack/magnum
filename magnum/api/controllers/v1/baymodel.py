@@ -206,19 +206,19 @@ class BayModelsController(rest.RestController):
                                                 sort_key=sort_key,
                                                 sort_dir=sort_dir)
 
-    def _get_image_data(self, context, image_id):
+    def _get_image_data(self, context, image_ident):
         """Retrieves os_distro and other metadata from the Glance image.
 
-        :param image_id: image_id of baymodel.
+        :param image_ident: image id or name of baymodel.
         """
         try:
             cli = clients.OpenStackClients(context)
-            image_data = cli.glance().images.get(image_id)
-            return image_data
+            return api_utils.get_openstack_resource(cli.glance().images,
+                                                    image_ident, 'images')
         except glanceclient.exc.NotFound:
-            raise exception.ImageNotFound(image_id=image_id)
+            raise exception.ImageNotFound(image_id=image_ident)
         except glanceclient.exc.HTTPForbidden:
-            raise exception.ImageNotAuthorized(image_id=image_id)
+            raise exception.ImageNotAuthorized(image_id=image_ident)
 
     @wsme_pecan.wsexpose(BayModelCollection, types.uuid,
                          types.uuid, int, wtypes.text, wtypes.text)

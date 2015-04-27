@@ -13,9 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import mock
 import wsme
 
 from magnum.api.controllers.v1 import utils
+from magnum.common import exception
+from magnum.common import utils as common_utils
 from magnum.tests.unit.api import base
 
 from oslo_config import cfg
@@ -47,3 +50,38 @@ class TestApiUtils(base.FunctionalTest):
         self.assertRaises(wsme.exc.ClientSideError,
                           utils.validate_sort_dir,
                           'fake-sort')
+
+    @mock.patch.object(common_utils, 'is_uuid_like', return_value=True)
+    def test_get_openstack_resource_by_uuid(self, fake_is_uuid_like):
+        fake_manager = mock.MagicMock()
+        fake_manager.get.return_value = 'fake_resource_data'
+        resource_data = utils.get_openstack_resource(fake_manager,
+                                                     'fake_resource',
+                                                     'fake_resource_type')
+        self.assertEqual('fake_resource_data', resource_data)
+
+    @mock.patch.object(common_utils, 'is_uuid_like', return_value=False)
+    def test_get_openstack_resource_by_name(self, fake_is_uuid_like):
+        fake_manager = mock.MagicMock()
+        fake_manager.list.return_value = ['fake_resource_data']
+        resource_data = utils.get_openstack_resource(fake_manager,
+                                                     'fake_resource',
+                                                     'fake_resource_type')
+        self.assertEqual('fake_resource_data', resource_data)
+
+    @mock.patch.object(common_utils, 'is_uuid_like', return_value=False)
+    def test_get_openstack_resource_non_exist(self, fake_is_uuid_like):
+        fake_manager = mock.MagicMock()
+        fake_manager.list.return_value = []
+        self.assertRaises(exception.ResourceNotFound,
+                          utils.get_openstack_resource,
+                          fake_manager, 'fake_resource', 'fake_resource_type')
+
+    @mock.patch.object(common_utils, 'is_uuid_like', return_value=False)
+    def test_get_openstack_resource_multi_exist(self, fake_is_uuid_like):
+        fake_manager = mock.MagicMock()
+        fake_manager.list.return_value = ['fake_resource_data1',
+                                          'fake_resource_data2']
+        self.assertRaises(exception.Conflict,
+                          utils.get_openstack_resource,
+                          fake_manager, 'fake_resource', 'fake_resource_type')
