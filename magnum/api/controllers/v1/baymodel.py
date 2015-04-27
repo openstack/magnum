@@ -270,7 +270,7 @@ class BayModelsController(rest.RestController):
         baymodel_dict['project_id'] = auth_token['project']['id']
         baymodel_dict['user_id'] = auth_token['user']['id']
         image_data = self._get_image_data(context, baymodel_dict['image_id'])
-        if image_data['os_distro']:
+        if image_data.get('os_distro'):
             baymodel_dict['cluster_distro'] = image_data['os_distro']
         else:
             raise exception.OSDistroFieldNotFound(baymodel_dict['image_id'])
