@@ -97,12 +97,12 @@ Create a new shell, and source the devstack openrc script::
     source ~/devstack/openrc admin admin
 
     cd ~
-    wget https://fedorapeople.org/groups/magnum/fedora-21-atomic-2.qcow2
-    glance image-create --name fedora-21-atomic-2 \
+    wget https://fedorapeople.org/groups/magnum/fedora-21-atomic-3.qcow2
+    glance image-create --name fedora-21-atomic-3 \
                         --is-public True \
                         --disk-format qcow2 \
                         --property os-distro='fedora-atomic'\
-                        --container-format bare < fedora-21-atomic-2.qcow2
+                        --container-format bare < fedora-21-atomic-3.qcow2
     test -f ~/.ssh/id_rsa.pub || ssh-keygen
     nova keypair-add --pub-key ~/.ssh/id_rsa.pub testkey
 
