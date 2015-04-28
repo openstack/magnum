@@ -47,9 +47,16 @@ def pod_post_data(**kw):
     pod = utils.get_test_pod(**kw)
     if 'manifest' not in pod:
         pod['manifest'] = '''{
-            "id": "name_of_pod",
-            "labels": {
-                "foo": "foo1"
+            "metadata": {
+                "name": "name_of_pod"
+            },
+            "spec": {
+                "containers": [
+                    {
+                        "name": "test",
+                        "image": "test"
+                    }
+                ]
             }
         }'''
     internal = pod_controller.PodPatchType.internal_attrs()

@@ -95,10 +95,17 @@ class Pod(v1_base.K8sResourceBase):
                      labels={'name': 'foo'},
                      status='Running',
                      manifest_url='file:///tmp/rc.yaml',
-                     manifest='''{
-                         "id": "name_of_pod",
-                         "labels": {
-                             "foo": "foo1"
+                     manifest = '''{
+                         "metadata": {
+                             "name": "name_of_pod"
+                         },
+                         "spec": {
+                             "containers": [
+                                 {
+                                     "name": "test",
+                                     "image": "test"
+                                 }
+                             ]
                          }
                      }''',
                      created_at=datetime.datetime.utcnow(),
@@ -111,12 +118,20 @@ class Pod(v1_base.K8sResourceBase):
         except ValueError as e:
             raise exception.InvalidParameterValue(message=str(e))
         try:
-            self.name = manifest["id"]
-        except KeyError:
+            self.name = manifest["metadata"]["name"]
+        except (KeyError, TypeError):
             raise exception.InvalidParameterValue(
-                "'id' can't be empty in manifest.")
-        if "labels" in manifest:
-            self.labels = manifest["labels"]
+                "Field metadata['name'] can't be empty in manifest.")
+        images = []
+        try:
+            for container in manifest["spec"]["containers"]:
+                images.append(container["image"])
+            self.images = images
+        except (KeyError, TypeError):
+            raise exception.InvalidParameterValue(
+                "Field spec['containers'] can't be empty in manifest.")
+        if "labels" in manifest["metadata"]:
+            self.labels = manifest["metadata"]["labels"]
 
 
 class PodCollection(collection.Collection):
