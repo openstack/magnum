@@ -64,6 +64,9 @@ class TestListBay(api_base.FunctionalTest):
         self.assertIn('baymodel_id', response)
         self.assertIn('node_count', response)
         self.assertIn('status', response)
+        self.assertIn('discovery_url', response)
+        self.assertIn('api_address', response)
+        self.assertIn('node_addresses', response)
 
     def test_get_one_by_name(self):
         bay = obj_utils.create_test_bay(self.context)
@@ -72,6 +75,10 @@ class TestListBay(api_base.FunctionalTest):
         self.assertIn('name', response)
         self.assertIn('baymodel_id', response)
         self.assertIn('node_count', response)
+        self.assertIn('status', response)
+        self.assertIn('discovery_url', response)
+        self.assertIn('api_address', response)
+        self.assertIn('node_addresses', response)
 
     def test_get_one_by_name_not_found(self):
         response = self.get_json('/bays/not_found',
