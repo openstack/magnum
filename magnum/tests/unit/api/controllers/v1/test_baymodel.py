@@ -393,6 +393,23 @@ class TestPost(api_base.FunctionalTest):
                          response.json['image_id'])
         self.assertTrue(utils.is_uuid_like(response.json['uuid']))
 
+    @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
+    def test_create_baymodel_with_no_os_distro_image(self, mock_image_data):
+        mock_image_data.return_value = {'name': 'mock_name'}
+        cdict = apiutils.baymodel_post_data()
+        del cdict['uuid']
+        response = self.post_json('/baymodels', cdict, expect_errors=True)
+        self.assertEqual(404, response.status_int)
+
+    @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
+    def test_create_baymodel_with_os_distro_image(self, mock_image_data):
+        mock_image_data.return_value = {'name': 'mock_name',
+                                        'os_distro': 'fedora-atomic'}
+        cdict = apiutils.baymodel_post_data()
+        del cdict['uuid']
+        response = self.post_json('/baymodels', cdict, expect_errors=True)
+        self.assertEqual(201, response.status_int)
+
 
 class TestDelete(api_base.FunctionalTest):
 
