@@ -44,6 +44,7 @@ if is_service_enabled m-api m-cond; then
     elif [[ "$1" == "stack" && "$2" == "extra" ]]; then
         # Initialize magnum
         init_magnum
+        magnum_register_image
 
         # Start the magnum API and magnum taskmgr components
         echo_summary "Starting magnum"
