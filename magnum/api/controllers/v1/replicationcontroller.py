@@ -98,10 +98,35 @@ class ReplicationController(v1_base.K8sResourceBase):
                      replicas=2,
                      manifest_url='file:///tmp/rc.yaml',
                      manifest='''{
-                         "id": "name_of_rc",
-                         "replicas": 3,
-                         "labels": {
-                             "foo": "foo1"
+                         "metadata": {
+                             "name": "name_of_rc"
+                         },
+                         "spec":{
+                             "replicas":2,
+                             "selector":{
+                                 "name":"frontend"
+                             },
+                             "template":{
+                                 "metadata":{
+                                     "labels":{
+                                         "name":"frontend"
+                                     }
+                                 },
+                                 "spec":{
+                                     "containers":[
+                                         {
+                                             "name":"test-redis",
+                                             "image":"steak/for-dinner",
+                                             "ports":[
+                                                 {
+                                                     "containerPort":80,
+                                                     "protocol":"TCP"
+                                                 }
+                                             ]
+                                         }
+                                     ]
+                                 }
+                             }
                          }
                      }''',
                      created_at=datetime.datetime.utcnow(),
@@ -114,14 +139,34 @@ class ReplicationController(v1_base.K8sResourceBase):
         except ValueError as e:
             raise exception.InvalidParameterValue(message=str(e))
         try:
-            self.name = manifest["id"]
-        except KeyError:
+            self.name = manifest["metadata"]["name"]
+        except (KeyError, TypeError):
             raise exception.InvalidParameterValue(
-                "'id' can't be empty in manifest.")
-        if "labels" in manifest:
-            self.labels = manifest["labels"]
-        if "replicas" in manifest:
-            self.replicas = manifest["replicas"]
+                "Field metadata['name'] can't be empty in manifest.")
+        try:
+            self.replicas = manifest["spec"]["replicas"]
+        except (KeyError, TypeError):
+            pass
+        try:
+            self.selector = manifest["spec"]["selector"]
+        except (KeyError, TypeError):
+            raise exception.InvalidParameterValue(
+                "Field spec['selector'] can't be empty in manifest.")
+        try:
+            self.labels = manifest["spec"]["template"]["metadata"]["labels"]
+        except (KeyError, TypeError):
+            raise exception.InvalidParameterValue(
+                "Field spec['template']['metadata']['labels'] "
+                "can't be empty in manifest.")
+        try:
+            images = []
+            for cont in manifest["spec"]["template"]["spec"]["containers"]:
+                images.append(cont["image"])
+            self.images = images
+        except (KeyError, TypeError):
+            raise exception.InvalidParameterValue(
+                "Field spec['template']['spec']['containers'] "
+                "can't be empty in manifest.")
 
 
 class ReplicationControllerCollection(collection.Collection):
