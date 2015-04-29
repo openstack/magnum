@@ -288,7 +288,8 @@ class BayModelsController(rest.RestController):
         if image_data.get('os_distro'):
             baymodel_dict['cluster_distro'] = image_data['os_distro']
         else:
-            raise exception.OSDistroFieldNotFound(baymodel_dict['image_id'])
+            raise exception.OSDistroFieldNotFound(
+                image_id=baymodel_dict['image_id'])
         new_baymodel = objects.BayModel(context, **baymodel_dict)
         new_baymodel.create()
         # Set the HTTP Location Header
