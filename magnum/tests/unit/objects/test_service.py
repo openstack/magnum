@@ -95,12 +95,12 @@ class TestServiceObject(base.DbTestCase):
             with mock.patch.object(self.dbapi, 'update_service',
                                    autospec=True) as mock_update_service:
                 service = objects.Service.get_by_uuid(self.context, uuid)
-                service.port = 4567
+                service.ports = [{'port': 4567}]
                 service.save()
 
                 mock_get_service.assert_called_once_with(self.context, uuid)
                 mock_update_service.assert_called_once_with(
-                        uuid, {'port': 4567})
+                        uuid, {'ports': [{'port': 4567}]})
                 self.assertEqual(self.context, service._context)
 
     def test_refresh(self):

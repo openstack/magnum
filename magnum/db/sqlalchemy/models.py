@@ -244,7 +244,7 @@ class Service(Base):
     labels = Column(JSONEncodedDict)
     selector = Column(JSONEncodedDict)
     ip = Column(String(36))
-    port = Column(Integer())
+    ports = Column(JSONEncodedList)
     project_id = Column(String(255))
     user_id = Column(String(255))
 

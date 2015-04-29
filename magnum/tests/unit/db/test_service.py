@@ -91,11 +91,11 @@ class DbServiceTestCase(base.DbTestCase):
         service1 = utils.create_test_service(name='service-one',
             uuid=magnum_utils.generate_uuid(),
             bay_uuid=bay1['uuid'],
-            port=8000)
+            ports=[{'port': 8000}])
         service2 = utils.create_test_service(name='service-two',
             uuid=magnum_utils.generate_uuid(),
             bay_uuid=bay2['uuid'],
-            port=8001)
+            ports=[{'port': 8001}])
 
         res = self.dbapi.get_service_list(self.context,
                                           filters={'bay_uuid': bay1['uuid']})
@@ -114,11 +114,11 @@ class DbServiceTestCase(base.DbTestCase):
         self.assertEqual([], [r.id for r in res])
 
         res = self.dbapi.get_service_list(self.context,
-                                          filters={'port': 8000})
+                                          filters={'ports': [{'port': 8000}]})
         self.assertEqual([service1.id], [r.id for r in res])
 
         res = self.dbapi.get_service_list(self.context,
-                                          filters={'port': 8001})
+                                          filters={'ports': [{'port': 8001}]})
         self.assertEqual([service2.id], [r.id for r in res])
 
     def test_get_service_list_bay_not_exist(self):

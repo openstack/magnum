@@ -704,8 +704,8 @@ class Connection(api.Connection):
             query = query.filter_by(name=filters['name'])
         if 'ip' in filters:
             query = query.filter_by(ip=filters['ip'])
-        if 'port' in filters:
-            query = query.filter_by(port=filters['port'])
+        if 'ports' in filters:
+            query = query.filter_by(ports=filters['ports'])
 
         return query
 
