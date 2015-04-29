@@ -473,16 +473,6 @@ class _TestObject(object):
 
 class TestObjectSerializer(test_base.TestCase):
 
-    def test_serialize_entity_primitive(self):
-        ser = base.MagnumObjectSerializer()
-        for thing in (1, 'foo', [1, 2], {'foo': 'bar'}):
-            self.assertEqual(thing, ser.serialize_entity(None, thing))
-
-    def test_deserialize_entity_primitive(self):
-        ser = base.MagnumObjectSerializer()
-        for thing in (1, 'foo', [1, 2], {'foo': 'bar'}):
-            self.assertEqual(thing, ser.deserialize_entity(None, thing))
-
     def test_object_serialization(self):
         ser = base.MagnumObjectSerializer()
         obj = MyObj(self.context)
