@@ -86,12 +86,37 @@ def rc_post_data(**kw):
     rc = utils.get_test_rc(**kw)
     if 'manifest' not in rc:
         rc['manifest'] = '''{
-            "id": "name_of_rc",
-            "replicas": 3,
-            "labels": {
-                "foo": "foo1"
-            }
-        }'''
+            "metadata": {
+                "name": "name_of_rc"
+                },
+                "spec":{
+                    "replicas":2,
+                    "selector":{
+                        "name":"frontend"
+                    },
+                    "template":{
+                        "metadata":{
+                            "labels":{
+                                "name":"frontend"
+                            }
+                        },
+                        "spec":{
+                            "containers":[
+                                {
+                                    "name":"test-redis",
+                                    "image":"steak/for-dinner",
+                                    "ports":[
+                                        {
+                                            "containerPort":80,
+                                            "protocol":"TCP"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                   }
+               }
+           }'''
     internal = rc_controller.ReplicationControllerPatchType.internal_attrs()
     return remove_internal(rc, internal)
 

@@ -379,7 +379,7 @@ class TestPost(api_base.FunctionalTest):
     def test_create_rc_doesnt_contain_id(self):
         with mock.patch.object(self.dbapi, 'create_rc',
                                wraps=self.dbapi.create_rc) as cc_mock:
-            rc_dict = apiutils.rc_post_data(images=['rc_example_A_image'])
+            rc_dict = apiutils.rc_post_data()
             response = self.post_json('/rcs', rc_dict)
             self.assertEqual(rc_dict['images'], response.json['images'])
             cc_mock.assert_called_once_with(mock.ANY)
