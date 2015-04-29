@@ -37,7 +37,7 @@ class TestBayK8sHeat(base.TestCase):
             'keypair_id': 'keypair_id',
             'dns_nameserver': 'dns_nameserver',
             'external_network_id': 'external_network_id',
-            'fixed_network': 'private',
+            'fixed_network': '10.20.30.0/24',
             'docker_volume_size': 20,
             'cluster_distro': 'fedora-atomic',
             'ssh_authorized_key': 'ssh_authorized_key',
@@ -81,7 +81,7 @@ class TestBayK8sHeat(base.TestCase):
             'server_flavor': 'flavor_id',
             'master_flavor': 'master_flavor_id',
             'number_of_minions': '1',
-            'fixed_network': 'private',
+            'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
         }
         self.assertEqual(expected, definition)
@@ -114,7 +114,7 @@ class TestBayK8sHeat(base.TestCase):
             'server_flavor': 'flavor_id',
             'master_flavor': 'master_flavor_id',
             'number_of_minions': '1',
-            'fixed_network': 'private',
+            'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
             'ssh_authorized_key': 'ssh_authorized_key',
             'token': 'h3'
@@ -149,7 +149,7 @@ class TestBayK8sHeat(base.TestCase):
             'server_flavor': 'flavor_id',
             'master_flavor': 'master_flavor_id',
             'number_of_minions': '1',
-            'fixed_network': 'private',
+            'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
             'ssh_authorized_key': 'ssh_authorized_key',
             'token': 'ba3d1866282848ddbedc76112110c208'
@@ -176,7 +176,7 @@ class TestBayK8sHeat(base.TestCase):
             'server_flavor': 'flavor_id',
             'master_flavor': 'master_flavor_id',
             'number_of_minions': '1',
-            'fixed_network': 'private',
+            'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
         }
         self.assertEqual(expected, definition)
@@ -201,7 +201,7 @@ class TestBayK8sHeat(base.TestCase):
             'server_flavor': 'flavor_id',
             'master_flavor': 'master_flavor_id',
             'number_of_minions': '1',
-            'fixed_network': 'private',
+            'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
         }
         self.assertEqual(expected, definition)
@@ -226,7 +226,7 @@ class TestBayK8sHeat(base.TestCase):
             'server_image': 'image_id',
             'master_flavor': 'master_flavor_id',
             'number_of_minions': '1',
-            'fixed_network': 'private',
+            'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
         }
         self.assertEqual(expected, definition)
@@ -250,7 +250,7 @@ class TestBayK8sHeat(base.TestCase):
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'server_flavor': 'flavor_id',
-            'fixed_network': 'private',
+            'fixed_network_cidr': '10.20.30.0/24',
             'master_flavor': 'master_flavor_id',
             'number_of_minions': '1',
         }
@@ -301,7 +301,7 @@ class TestBayK8sHeat(base.TestCase):
             'server_image': 'image_id',
             'server_flavor': 'flavor_id',
             'number_of_minions': '1',
-            'fixed_network': 'private',
+            'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
         }
         self.assertEqual(expected, definition)
@@ -328,7 +328,7 @@ class TestBayK8sHeat(base.TestCase):
             'master_flavor': 'master_flavor_id',
             'server_flavor': 'flavor_id',
             'number_of_minions': '1',
-            'fixed_network': 'private',
+            'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
         }
         self.assertIn('token', definition)
@@ -356,7 +356,7 @@ class TestBayK8sHeat(base.TestCase):
             'server_flavor': 'flavor_id',
             'master_flavor': 'master_flavor_id',
             'number_of_minions': '1',
-            'fixed_network': 'private',
+            'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
         }
         self.assertEqual(expected, definition)
@@ -380,7 +380,7 @@ class TestBayK8sHeat(base.TestCase):
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'server_flavor': 'flavor_id',
-            'fixed_network': 'private',
+            'fixed_network_cidr': '10.20.30.0/24',
             'master_flavor': 'master_flavor_id',
             'docker_volume_size': 20,
         }
