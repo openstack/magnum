@@ -34,7 +34,6 @@ def list_opts():
     return [
         ('DEFAULT',
          itertools.chain(magnum.api.auth.AUTH_OPTS,
-                         magnum.common.exception.exc_log_opts,
                          magnum.common.magnum_keystoneclient.trust_opts,
                          magnum.common.paths.PATH_OPTS,
                          magnum.common.utils.UTILS_OPTS,
