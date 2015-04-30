@@ -167,8 +167,9 @@ To get started, list the available commands and resources::
 
     magnum help
 
-First create a baymodel, which is similar in nature to a flavor.  It informs
-Magnum in which way to construct a bay.::
+First create a baymodel, which is similar in nature to a flavor.  The
+coe (Container Orchestration Engine) needs to be specified for baymodel.
+The baymodel informs Magnum in which way to construct a bay.::
 
     NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
     magnum baymodel-create --name testbaymodel --image-id fedora-21-atomic-3 \
