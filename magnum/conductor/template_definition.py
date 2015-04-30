@@ -291,6 +291,8 @@ class BaseTemplateDefinition(TemplateDefinition):
                            baymodel_attr='flavor_id')
         self.add_parameter('dns_nameserver',
                            baymodel_attr='dns_nameserver')
+        self.add_parameter('fixed_network_cidr',
+                           baymodel_attr='fixed_network')
 
     @abc.abstractproperty
     def template_path(self):
@@ -306,8 +308,6 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
         super(AtomicK8sTemplateDefinition, self).__init__()
         self.add_parameter('master_flavor',
                            baymodel_attr='master_flavor_id')
-        self.add_parameter('fixed_network',
-                           baymodel_attr='fixed_network')
         self.add_parameter('number_of_minions',
                            bay_attr='node_count',
                            param_type=str)
@@ -372,8 +372,6 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
         self.add_parameter('number_of_nodes',
                            bay_attr='node_count',
                            param_type=str)
-        self.add_parameter('fixed_network_cidr',
-                           baymodel_attr='fixed_network')
 
         self.add_output('swarm_manager',
                         bay_attr='api_address')
