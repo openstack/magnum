@@ -39,7 +39,8 @@ class TestDockerConductor(base.BaseTestCase):
 
         self.assertEqual(mock_docker, actual_docker)
 
-        args = ('tcp://1.1.1.1:2376', CONF.docker.docker_remote_api_version)
+        args = ('tcp://1.1.1.1:2376', CONF.docker.docker_remote_api_version,
+                CONF.docker.default_timeout)
         mock_docker_client.DockerHTTPClient.assert_called_once_with(*args)
 
     @mock.patch.object(docker_conductor, 'docker_client')
@@ -62,7 +63,8 @@ class TestDockerConductor(base.BaseTestCase):
 
         self.assertEqual(mock_docker, actual_docker)
 
-        args = ('tcp://1.1.1.1:2376', CONF.docker.docker_remote_api_version)
+        args = ('tcp://1.1.1.1:2376', CONF.docker.docker_remote_api_version,
+                CONF.docker.default_timeout)
         mock_bay_get_by_uuid.assert_called_once_with(mock.sentinel.context,
                                                      mock_container.bay_uuid)
         mock_docker_client.DockerHTTPClient.assert_called_once_with(*args)
@@ -91,7 +93,8 @@ class TestDockerConductor(base.BaseTestCase):
 
         self.assertEqual(mock_docker, actual_docker)
 
-        args = ('tcp://1.1.1.1:2376', CONF.docker.docker_remote_api_version)
+        args = ('tcp://1.1.1.1:2376', CONF.docker.docker_remote_api_version,
+                CONF.docker.default_timeout)
         mock_container_get_by_uuid.assert_called_once_with(
                                                  mock.sentinel.context,
                                                  mock_container.uuid)
