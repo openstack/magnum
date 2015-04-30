@@ -112,7 +112,7 @@ required action is to install kubectl manually.
 
 Install binary distribution of kubectl distributed by Google::
 
-    wget https://github.com/GoogleCloudPlatform/kubernetes/releases/download/v0.11.0/kubernetes.tar.gz
+    wget https://github.com/GoogleCloudPlatform/kubernetes/releases/download/v0.15.0/kubernetes.tar.gz
     tar -xzvf kubernetes.tar.gz
     sudo cp -a kubernetes/platforms/linux/amd64/kubectl /usr/bin/kubectl
 
