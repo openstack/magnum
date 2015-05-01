@@ -434,10 +434,6 @@
 # From magnum
 #
 
-# Container Orchestration Environments are kubernetes or swarm.
-# (string value)
-#cluster_coe = kubernetes
-
 # Number of attempts to query the Heat stack for finding out the
 # status of the created stack and getting template outputs.  This
 # value is ignored during bay creation if timeout is set as the poll
