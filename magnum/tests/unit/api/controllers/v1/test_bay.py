@@ -464,6 +464,20 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['error_message'])
 
+    def test_create_bay_with_invalid_long_name(self):
+        bdict = apiutils.bay_post_data(name='x' * 256)
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_int)
+        self.assertTrue(response.json['error_message'])
+
+    def test_create_bay_with_invalid_empty_name(self):
+        bdict = apiutils.bay_post_data(name='')
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_int)
+        self.assertTrue(response.json['error_message'])
+
     def test_create_bay_with_timeout_none(self):
         bdict = apiutils.bay_post_data()
         bdict['bay_create_timeout'] = None

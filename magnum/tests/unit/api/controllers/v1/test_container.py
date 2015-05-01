@@ -204,3 +204,22 @@ class TestContainerController(db_base.DbTestCase):
         c = response.json['containers']
         self.assertEqual(0, len(c))
         self.assertTrue(mock_container_create.called)
+
+    @patch('magnum.conductor.api.API.container_create')
+    def test_create_container_without_name(self, mock_container_create):
+        # No name param
+        params = ('{"image_id": "ubuntu", "command": "env",'
+                  '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
+        self.assertRaises(AppError, self.app.post, '/v1/containers',
+                          params=params, content_type='application/json')
+        self.assertTrue(mock_container_create.not_called)
+
+    @patch('magnum.conductor.api.API.container_create')
+    def test_create_container_invalid_long_name(self, mock_container_create,):
+        # Long name
+        params = ('{"name": "' + 'i' * 256 + '", "image_id": "ubuntu",'
+                  '"command": "env",'
+                  '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
+        self.assertRaises(AppError, self.app.post, '/v1/containers',
+                          params=params, content_type='application/json')
+        self.assertTrue(mock_container_create.not_called)

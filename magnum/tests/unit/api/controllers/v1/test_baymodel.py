@@ -369,6 +369,20 @@ class TestPost(api_base.FunctionalTest):
             # Check that 'id' is not in first arg of positional args
             self.assertNotIn('id', cc_mock.call_args[0][0])
 
+    def test_create_baymodel_with_invalid_empty_str_name(self):
+        with mock.patch.object(self.dbapi, 'create_baymodel',
+                               wraps=self.dbapi.create_baymodel) as cc_mock:
+            cdict = apiutils.baymodel_post_data(name='')
+            self.assertRaises(AppError, self.post_json, '/baymodels', cdict)
+            self.assertFalse(cc_mock.called)
+
+    def test_create_baymodel_with_invalid_long_name(self):
+        with mock.patch.object(self.dbapi, 'create_baymodel',
+                               wraps=self.dbapi.create_baymodel) as cc_mock:
+            cdict = apiutils.baymodel_post_data(name='i' * 256)
+            self.assertRaises(AppError, self.post_json, '/baymodels', cdict)
+            self.assertFalse(cc_mock.called)
+
     @mock.patch('magnum.common.clients.OpenStackClients')
     def test_create_baymodel_with_invalid_docker_volume_size(self,
                                mock_openstack_client):

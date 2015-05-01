@@ -69,7 +69,7 @@ class Container(base.APIBase):
     uuid = types.uuid
     """Unique UUID for this container"""
 
-    name = wtypes.text
+    name = wtypes.StringType(min_length=1, max_length=255)
     """Name of this container"""
 
     image_id = wtypes.text

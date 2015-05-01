@@ -70,7 +70,7 @@ class Bay(base.APIBase):
     uuid = types.uuid
     """Unique UUID for this bay"""
 
-    name = wtypes.text
+    name = wtypes.StringType(min_length=1, max_length=255)
     """Name of this bay"""
 
     baymodel_id = wsme.wsproperty(wtypes.text, _get_baymodel_id,

@@ -56,7 +56,7 @@ class BayModel(base.APIBase):
     uuid = types.uuid
     """Unique UUID for this baymodel"""
 
-    name = wtypes.text
+    name = wtypes.StringType(min_length=1, max_length=255)
     """The name of the bay model"""
 
     coe = wsme.wsproperty(wtypes.text, _get_coe, _set_coe, mandatory=True)
