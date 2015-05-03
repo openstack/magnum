@@ -37,6 +37,9 @@ if is_service_enabled m-api m-cond; then
         echo_summary "Configuring magnum"
         configure_magnum
 
+        # Hack a large timeout for now
+        iniset /etc/keystone/keystone.conf token expiration 7200
+
         if is_service_enabled key; then
             create_magnum_accounts
         fi
