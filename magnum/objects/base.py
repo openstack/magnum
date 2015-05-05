@@ -15,14 +15,13 @@
 """Magnum common internal object model"""
 
 import collections
-import copy
 
 from oslo_context import context as oslo_context
 from oslo_versionedobjects import base as ovoo_base
+from oslo_versionedobjects import fields as ovoo_fields
 import six
 
 from magnum.common import exception
-from magnum.objects import utils as obj_utils
 from magnum.openstack.common._i18n import _
 from magnum.openstack.common._i18n import _LE
 from magnum.openstack.common import log as logging
@@ -30,49 +29,6 @@ from magnum.openstack.common import versionutils
 
 
 LOG = logging.getLogger('object')
-
-
-class NotSpecifiedSentinel(object):
-    pass
-
-
-def get_attrname(name):
-    """Return the mangled name of the attribute's underlying storage."""
-    return '_%s' % name
-
-
-def make_class_properties(cls):
-    # NOTE(danms/comstud): Inherit fields from super classes.
-    # mro() returns the current class first and returns 'object' last, so
-    # those can be skipped.  Also be careful to not overwrite any fields
-    # that already exist.  And make sure each cls has its own copy of
-    # fields and that it is not sharing the dict with a super class.
-    cls.fields = dict(cls.fields)
-    for supercls in cls.mro()[1:-1]:
-        if not hasattr(supercls, 'fields'):
-            continue
-        for name, field in supercls.fields.items():
-            if name not in cls.fields:
-                cls.fields[name] = field
-    for name, typefn in cls.fields.iteritems():
-
-        def getter(self, name=name):
-            attrname = get_attrname(name)
-            if not hasattr(self, attrname):
-                self.obj_load_attr(name)
-            return getattr(self, attrname)
-
-        def setter(self, value, name=name, typefn=typefn):
-            self._changed_fields.add(name)
-            try:
-                return setattr(self, get_attrname(name), typefn(value))
-            except Exception:
-                attr = "%s.%s" % (self.obj_name(), name)
-                LOG.exception(_LE('Error setting %(attr)s'),
-                              {'attr': attr})
-                raise
-
-        setattr(cls, name, property(getter, setter))
 
 
 class MagnumObjectMetaclass(type):
@@ -88,8 +44,10 @@ class MagnumObjectMetaclass(type):
             cls._obj_classes = collections.defaultdict(list)
         else:
             # Add the subclass to MagnumObject._obj_classes
-            make_class_properties(cls)
+            ovoo_base._make_class_properties(cls)
             cls._obj_classes[cls.obj_name()].append(cls)
+            # NOTE(xek): object tracking will be moved to a new registartion
+            # scheme from oslo.versionedobjects, which uses decorators
 
 
 # These are decorators that mark an object's method as remotable.
@@ -136,7 +94,8 @@ def remotable(fn):
                 context, self, fn.__name__, args, kwargs)
             for key, value in updates.iteritems():
                 if key in self.fields:
-                    self[key] = self._attr_from_primitive(key, value)
+                    field = self.fields[key]
+                    self[key] = field.from_primitive(self, key, value)
             self._changed_fields = set(updates.get('obj_what_changed', []))
             return result
         else:
@@ -169,7 +128,7 @@ def check_object_version(server, client):
 
 
 @six.add_metaclass(MagnumObjectMetaclass)
-class MagnumObject(ovoo_base.VersionedObjectDictCompat):
+class MagnumObject(ovoo_base.VersionedObject):
     """Base class and object factory.
 
     This forms the base of all objects that can be remoted or instantiated
@@ -180,43 +139,7 @@ class MagnumObject(ovoo_base.VersionedObjectDictCompat):
     """
 
     OBJ_SERIAL_NAMESPACE = 'magnum_object'
-
-    # Version of this object (see rules above check_object_version())
-    VERSION = '1.0'
-
-    # The fields present in this object as key:typefn pairs. For example:
-    #
-    # fields = { 'foo': int,
-    #            'bar': str,
-    #            'baz': lambda x: str(x).ljust(8),
-    #          }
-    #
-    # NOTE(danms): The base MagnumObject class' fields will be inherited
-    # by subclasses, but that is a special case. Objects inheriting from
-    # other objects will not receive this merging of fields contents.
-    fields = {
-        'created_at': obj_utils.datetime_or_str_or_none,
-        'updated_at': obj_utils.datetime_or_str_or_none,
-    }
-    obj_extra_fields = []
-
-    _attr_created_at_from_primitive = obj_utils.dt_deserializer
-    _attr_updated_at_from_primitive = obj_utils.dt_deserializer
-    _attr_created_at_to_primitive = obj_utils.dt_serializer('created_at')
-    _attr_updated_at_to_primitive = obj_utils.dt_serializer('updated_at')
-
-    def __init__(self, context, **kwargs):
-        self._changed_fields = set()
-        self._context = context
-        self.update(kwargs)
-
-    @classmethod
-    def obj_name(cls):
-        """Get canonical object name.
-
-        This object name will be used over the wire for remote hydration.
-        """
-        return cls.__name__
+    OBJ_PROJECT_NAMESPACE = 'magnum'
 
     @classmethod
     def obj_class_from_name(cls, objname, objver):
@@ -249,159 +172,24 @@ class MagnumObject(ovoo_base.VersionedObjectDictCompat):
                                                   objver=objver,
                                                   supported=latest_ver)
 
-    def _attr_from_primitive(self, attribute, value):
-        """Attribute deserialization dispatcher.
-
-        This calls self._attr_foo_from_primitive(value) for an attribute
-        foo with value, if it exists, otherwise it assumes the value
-        is suitable for the attribute's setter method.
-        """
-        handler = '_attr_%s_from_primitive' % attribute
-        if hasattr(self, handler):
-            return getattr(self, handler)(value)
-        return value
-
-    @classmethod
-    def _obj_from_primitive(cls, context, objver, primitive):
-        self = cls(context)
-        self.VERSION = objver
-        objdata = primitive['magnum_object.data']
-        changes = primitive.get('magnum_object.changes', [])
-        for name in self.fields:
-            if name in objdata:
-                setattr(self, name,
-                        self._attr_from_primitive(name, objdata[name]))
-        self._changed_fields = set([x for x in changes if x in self.fields])
-        return self
-
-    @classmethod
-    def obj_from_primitive(cls, primitive, context=None):
-        """Simple base-case hydration.
-
-        This calls self._attr_from_primitive() for each item in fields.
-        """
-        if primitive['magnum_object.namespace'] != 'magnum':
-            # NOTE(danms): We don't do anything with this now, but it's
-            # there for "the future"
-            raise exception.UnsupportedObjectError(
-                objtype='%s.%s' % (primitive['magnum_object.namespace'],
-                                   primitive['magnum_object.name']))
-        objname = primitive['magnum_object.name']
-        objver = primitive['magnum_object.version']
-        objclass = cls.obj_class_from_name(objname, objver)
-        return objclass._obj_from_primitive(context, objver, primitive)
-
-    def __deepcopy__(self, memo):
-        """Efficiently make a deep copy of this object."""
-
-        # NOTE(danms): A naive deepcopy would copy more than we need,
-        # and since we have knowledge of the volatile bits of the
-        # object, we can be smarter here. Also, nested entities within
-        # some objects may be uncopyable, so we can avoid those sorts
-        # of issues by copying only our field data.
-
-        nobj = self.__class__(self._context)
-        for name in self.fields:
-            if self.obj_attr_is_set(name):
-                nval = copy.deepcopy(getattr(self, name), memo)
-                setattr(nobj, name, nval)
-        nobj._changed_fields = set(self._changed_fields)
-        return nobj
-
-    def obj_clone(self):
-        """Create a copy."""
-        return copy.deepcopy(self)
-
-    def _attr_to_primitive(self, attribute):
-        """Attribute serialization dispatcher.
-
-        This calls self._attr_foo_to_primitive() for an attribute foo,
-        if it exists, otherwise it assumes the attribute itself is
-        primitive-enough to be sent over the RPC wire.
-        """
-        handler = '_attr_%s_to_primitive' % attribute
-        if hasattr(self, handler):
-            return getattr(self, handler)()
-        else:
-            return getattr(self, attribute)
-
-    def obj_to_primitive(self):
-        """Simple base-case dehydration.
-
-        This calls self._attr_to_primitive() for each item in fields.
-        """
-        primitive = dict()
-        for name in self.fields:
-            if hasattr(self, get_attrname(name)):
-                primitive[name] = self._attr_to_primitive(name)
-        obj = {'magnum_object.name': self.obj_name(),
-               'magnum_object.namespace': 'magnum',
-               'magnum_object.version': self.VERSION,
-               'magnum_object.data': primitive}
-        if self.obj_what_changed():
-            obj['magnum_object.changes'] = list(self.obj_what_changed())
-        return obj
-
-    def obj_load_attr(self, attrname):
-        """Load an additional attribute from the real object.
-
-        This should use self._conductor, and cache any data that might
-        be useful for future load operations.
-        """
-        raise NotImplementedError(
-            _("Cannot load '%(attrname)s' in the base class") %
-            {'attrname': attrname})
-
-    def save(self, context):
-        """Save the changed fields back to the store.
-
-        This is optional for subclasses, but is presented here in the base
-        class for consistency among those that do.
-        """
-        raise NotImplementedError(_("Cannot save anything in the base class"))
-
-    def obj_get_changes(self):
-        """Returns a dict of changed fields and their new values."""
-        changes = {}
-        for key in self.obj_what_changed():
-            changes[key] = self[key]
-        return changes
-
-    def obj_what_changed(self):
-        """Returns a set of fields that have been modified."""
-        return self._changed_fields
-
-    def obj_reset_changes(self, fields=None):
-        """Reset the list of fields that have been changed.
-
-        Note that this is NOT "revert to previous values"
-        """
-        if fields:
-            self._changed_fields -= set(fields)
-        else:
-            self._changed_fields.clear()
-
-    def obj_attr_is_set(self, attrname):
-        """Test object to see if attrname is present.
-
-        Returns True if the named attribute has a value set, or
-        False if not. Raises AttributeError if attrname is not
-        a valid attribute for this object.
-        """
-        if attrname not in self.obj_fields:
-            raise AttributeError(
-                _("%(objname)s object has no attribute '%(attrname)s'") %
-                {'objname': self.obj_name(), 'attrname': attrname})
-        return hasattr(self, get_attrname(attrname))
-
-    @property
-    def obj_fields(self):
-        return self.fields.keys() + self.obj_extra_fields
-
     def as_dict(self):
         return dict((k, getattr(self, k))
                     for k in self.fields
                     if hasattr(self, k))
+
+
+class MagnumObjectDictCompat(ovoo_base.VersionedObjectDictCompat):
+    pass
+
+
+class MagnumPersistentObject(object):
+    """Mixin class for Persistent objects.
+    This adds the fields that we use in common for all persistent objects.
+    """
+    fields = {
+        'created_at': ovoo_fields.DateTimeField(nullable=True),
+        'updated_at': ovoo_fields.DateTimeField(nullable=True),
+        }
 
 
 class ObjectListBase(ovoo_base.ObjectListBase):
@@ -440,8 +228,9 @@ def obj_to_primitive(obj):
         return [obj_to_primitive(x) for x in obj]
     elif isinstance(obj, MagnumObject):
         result = {}
-        for key, value in obj.iteritems():
-            result[key] = obj_to_primitive(value)
+        for key in obj.obj_fields:
+            if obj.obj_attr_is_set(key) or key in obj.obj_extra_fields:
+                result[key] = obj_to_primitive(getattr(obj, key))
         return result
     else:
         return obj

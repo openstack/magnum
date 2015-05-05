@@ -12,29 +12,31 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_versionedobjects import fields
+
 from magnum.db import api as dbapi
 from magnum.objects import base
-from magnum.objects import utils as obj_utils
 
 
-class ReplicationController(base.MagnumObject):
+class ReplicationController(base.MagnumPersistentObject, base.MagnumObject,
+                            base.MagnumObjectDictCompat):
     # Version 1.0: Initial version
     VERSION = '1.0'
 
     dbapi = dbapi.get_instance()
 
     fields = {
-        'id': int,
-        'uuid': obj_utils.str_or_none,
-        'name': obj_utils.str_or_none,
-        'project_id': obj_utils.str_or_none,
-        'user_id': obj_utils.str_or_none,
-        'images': obj_utils.list_or_none,
-        'bay_uuid': obj_utils.str_or_none,
-        'labels': obj_utils.dict_or_none,
-        'replicas': obj_utils.int_or_none,
-        'manifest_url': obj_utils.str_or_none,
-        'manifest': obj_utils.str_or_none,
+        'id': fields.IntegerField(),
+        'uuid': fields.StringField(nullable=True),
+        'name': fields.StringField(nullable=True),
+        'project_id': fields.StringField(nullable=True),
+        'user_id': fields.StringField(nullable=True),
+        'images': fields.ListOfStringsField(nullable=True),
+        'bay_uuid': fields.StringField(nullable=True),
+        'labels': fields.DictOfStringsField(nullable=True),
+        'replicas': fields.IntegerField(nullable=True),
+        'manifest_url': fields.StringField(nullable=True),
+        'manifest': fields.StringField(nullable=True),
     }
 
     @staticmethod
@@ -185,6 +187,5 @@ class ReplicationController(base.MagnumObject):
                 continue
             if field == 'manifest':
                 continue
-            if (hasattr(self, base.get_attrname(field)) and
-                self[field] != current[field]):
+            if self.obj_attr_is_set(field) and self[field] != current[field]:
                 self[field] = current[field]

@@ -13,37 +13,39 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_versionedobjects import fields
+
 from magnum.common import exception
 from magnum.common import utils
 from magnum.db import api as dbapi
 from magnum.objects import base
-from magnum.objects import utils as obj_utils
 
 
-class BayModel(base.MagnumObject):
+class BayModel(base.MagnumPersistentObject, base.MagnumObject,
+               base.MagnumObjectDictCompat):
     # Version 1.0: Initial version
     VERSION = '1.0'
 
     dbapi = dbapi.get_instance()
 
     fields = {
-        'id': int,
-        'uuid': obj_utils.str_or_none,
-        'project_id': obj_utils.str_or_none,
-        'user_id': obj_utils.str_or_none,
-        'name': obj_utils.str_or_none,
-        'image_id': obj_utils.str_or_none,
-        'flavor_id': obj_utils.str_or_none,
-        'master_flavor_id': obj_utils.str_or_none,
-        'keypair_id': obj_utils.str_or_none,
-        'dns_nameserver': obj_utils.str_or_none,
-        'external_network_id': obj_utils.str_or_none,
-        'fixed_network': obj_utils.str_or_none,
-        'apiserver_port': obj_utils.int_or_none,
-        'docker_volume_size': obj_utils.int_or_none,
-        'ssh_authorized_key': obj_utils.str_or_none,
-        'cluster_distro': obj_utils.str_or_none,
-        'coe': obj_utils.str_or_none,
+        'id': fields.IntegerField(),
+        'uuid': fields.StringField(nullable=True),
+        'project_id': fields.StringField(nullable=True),
+        'user_id': fields.StringField(nullable=True),
+        'name': fields.StringField(nullable=True),
+        'image_id': fields.StringField(nullable=True),
+        'flavor_id': fields.StringField(nullable=True),
+        'master_flavor_id': fields.StringField(nullable=True),
+        'keypair_id': fields.StringField(nullable=True),
+        'dns_nameserver': fields.StringField(nullable=True),
+        'external_network_id': fields.StringField(nullable=True),
+        'fixed_network': fields.StringField(nullable=True),
+        'apiserver_port': fields.IntegerField(nullable=True),
+        'docker_volume_size': fields.IntegerField(nullable=True),
+        'ssh_authorized_key': fields.StringField(nullable=True),
+        'cluster_distro': fields.StringField(nullable=True),
+        'coe': fields.StringField(nullable=True),
     }
 
     @staticmethod
@@ -195,6 +197,5 @@ class BayModel(base.MagnumObject):
         """
         current = self.__class__.get_by_uuid(self._context, uuid=self.uuid)
         for field in self.fields:
-            if (hasattr(self, base.get_attrname(field)) and
-                self[field] != current[field]):
+            if self.obj_attr_is_set(field) and self[field] != current[field]:
                 self[field] = current[field]

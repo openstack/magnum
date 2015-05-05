@@ -18,6 +18,7 @@ import gettext
 import iso8601
 import netaddr
 from oslo_utils import timeutils
+from oslo_versionedobjects import fields
 import six
 
 from magnum.common import context as magnum_context
@@ -32,9 +33,9 @@ gettext.install('magnum')
 class MyObj(base.MagnumObject):
     VERSION = '1.0'
 
-    fields = {'foo': int,
-              'bar': str,
-              'missing': str,
+    fields = {'foo': fields.IntegerField(),
+              'bar': fields.StringField(),
+              'missing': fields.StringField(),
               }
 
     def obj_load_attr(self, attrname):
@@ -87,7 +88,7 @@ class MyObj2(object):
 
 
 class TestSubclassedObject(MyObj):
-    fields = {'new_field': str}
+    fields = {'new_field': fields.StringField()}
 
 
 class TestMetaclass(test_base.TestCase):
@@ -186,10 +187,10 @@ class TestUtils(test_base.TestCase):
 
     def test_obj_to_primitive_list(self):
         class MyList(base.ObjectListBase, base.MagnumObject):
-            pass
+            fields = {'objects': fields.ListOfStringsField()}
         mylist = MyList(self.context)
-        mylist.objects = [1, 2, 3]
-        self.assertEqual([1, 2, 3], base.obj_to_primitive(mylist))
+        mylist.objects = ['1', '2', '3']
+        self.assertEqual(['1', '2', '3'], base.obj_to_primitive(mylist))
 
     def test_obj_to_primitive_dict(self):
         myobj = MyObj(self.context)
@@ -200,7 +201,7 @@ class TestUtils(test_base.TestCase):
 
     def test_obj_to_primitive_recursive(self):
         class MyList(base.ObjectListBase, base.MagnumObject):
-            pass
+            fields = {'objects': fields.ListOfObjectsField('MyObj')}
 
         mylist = MyList(self.context)
         mylist.objects = [MyObj(self.context), MyObj(self.context)]
@@ -271,7 +272,7 @@ class _TestObject(object):
 
     def test_load_in_base(self):
         class Foo(base.MagnumObject):
-            fields = {'foobar': int}
+            fields = {'foobar': fields.IntegerField()}
         obj = Foo(self.context)
         # NOTE(danms): Can't use assertRaisesRegexp() because of py26
         raised = False
@@ -453,7 +454,7 @@ class _TestObject(object):
 
     def test_obj_fields(self):
         class TestObj(base.MagnumObject):
-            fields = {'foo': int}
+            fields = {'foo': fields.IntegerField()}
             obj_extra_fields = ['bar']
 
             @property

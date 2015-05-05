@@ -13,30 +13,33 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_versionedobjects import fields
+
 from magnum.db import api as dbapi
 from magnum.objects import base
-from magnum.objects import utils as obj_utils
+from magnum.objects import fields as magnum_fields
 
 
-class Service(base.MagnumObject):
+class Service(base.MagnumPersistentObject, base.MagnumObject,
+              base.MagnumObjectDictCompat):
     # Version 1.0: Initial version
     VERSION = '1.0'
 
     dbapi = dbapi.get_instance()
 
     fields = {
-        'id': int,
-        'uuid': obj_utils.str_or_none,
-        'name': obj_utils.str_or_none,
-        'project_id': obj_utils.str_or_none,
-        'user_id': obj_utils.str_or_none,
-        'bay_uuid': obj_utils.str_or_none,
-        'labels': obj_utils.dict_or_none,
-        'selector': obj_utils.dict_or_none,
-        'ip': obj_utils.str_or_none,
-        'ports': obj_utils.list_or_none,
-        'manifest_url': obj_utils.str_or_none,
-        'manifest': obj_utils.str_or_none,
+        'id': fields.IntegerField(),
+        'uuid': fields.StringField(nullable=True),
+        'name': fields.StringField(nullable=True),
+        'project_id': fields.StringField(nullable=True),
+        'user_id': fields.StringField(nullable=True),
+        'bay_uuid': fields.StringField(nullable=True),
+        'labels': fields.DictOfStringsField(nullable=True),
+        'selector': fields.DictOfStringsField(nullable=True),
+        'ip': fields.StringField(nullable=True),
+        'ports': magnum_fields.ListOfDictsField(nullable=True),
+        'manifest_url': fields.StringField(nullable=True),
+        'manifest': fields.StringField(nullable=True),
     }
 
     @staticmethod
@@ -195,6 +198,5 @@ class Service(base.MagnumObject):
                 continue
             if field == 'manifest':
                 continue
-            if (hasattr(self, base.get_attrname(field)) and
-                self[field] != current[field]):
+            if self.obj_attr_is_set(field) and self[field] != current[field]:
                 self[field] = current[field]
