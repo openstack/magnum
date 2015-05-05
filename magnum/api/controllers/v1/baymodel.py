@@ -62,37 +62,37 @@ class BayModel(base.APIBase):
     coe = wsme.wsproperty(wtypes.text, _get_coe, _set_coe, mandatory=True)
     """The Container Orchestration Engine for this bay model"""
 
-    image_id = wtypes.text
+    image_id = wtypes.StringType(min_length=1, max_length=255)
     """The image name or UUID to use as a base image for this baymodel"""
 
-    flavor_id = wtypes.text
+    flavor_id = wtypes.StringType(min_length=1, max_length=255)
     """The flavor of this bay model"""
 
-    master_flavor_id = wtypes.text
+    master_flavor_id = wtypes.StringType(min_length=1, max_length=255)
     """The flavor of the master node for this bay model"""
 
-    dns_nameserver = wtypes.text
+    dns_nameserver = wtypes.IPv4AddressType()
     """The DNS nameserver address"""
 
-    keypair_id = wtypes.text
+    keypair_id = wtypes.StringType(min_length=1, max_length=255)
     """The name or id of the nova ssh keypair"""
 
-    external_network_id = wtypes.text
+    external_network_id = wtypes.StringType(min_length=1, max_length=255)
     """The external network to attach the Bay"""
 
-    fixed_network = wtypes.text
+    fixed_network = wtypes.StringType(min_length=1, max_length=255)
     """The fixed network name to attach the Bay"""
 
-    apiserver_port = wtypes.IntegerType()
+    apiserver_port = wtypes.IntegerType(minimum=1024, maximum=65535)
     """The API server port for k8s"""
 
-    docker_volume_size = wtypes.IntegerType()
+    docker_volume_size = wtypes.IntegerType(minimum=1)
     """The size in GB of the docker volume"""
 
-    ssh_authorized_key = wtypes.text
+    ssh_authorized_key = wtypes.StringType(min_length=1)
     """The SSH Authorized Key"""
 
-    cluster_distro = wtypes.text
+    cluster_distro = wtypes.StringType(min_length=1, max_length=255)
     """The Cluster distro for the bay, ex - coreos, fedora-atomic."""
 
     links = wsme.wsattr([link.Link], readonly=True)
