@@ -20,6 +20,7 @@ from magnum.common import exception
 from magnum.common import utils
 from magnum.conductor.handlers.common import docker_client
 from magnum import objects
+from magnum.objects import container as obj_container
 from magnum.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
@@ -102,10 +103,14 @@ class Handler(object):
             docker.create_container(image_id, name=name,
                                     hostname=container_uuid,
                                     command=container.command)
+            container.status = obj_container.STOPPED
             return container
         except errors.APIError as api_error:
+            container.status = obj_container.ERROR
             raise exception.ContainerException(
                       "Docker API Error : %s" % str(api_error))
+        finally:
+            container.save()
 
     def container_delete(self, context, container_uuid):
         LOG.debug("container_delete %s" % container_uuid)
@@ -122,63 +127,64 @@ class Handler(object):
     def container_show(self, context, container_uuid):
         LOG.debug("container_show %s" % container_uuid)
         docker = self.get_docker_client(context, container_uuid)
+        container = objects.Container.get_by_uuid(context, container_uuid)
         try:
             docker_id = self._find_container_by_name(docker, container_uuid)
-            return docker.inspect_container(docker_id)
+            result = docker.inspect_container(docker_id)
+            status = result.get('State')
+            if status:
+                if status.get('Error') is True:
+                    container.status = obj_container.ERROR
+                elif status.get('Running'):
+                    container.status = obj_container.RUNNING
+                elif status.get('Paused'):
+                    container.status = obj_container.PAUSED
+                else:
+                    container.status = obj_container.STOPPED
+                container.save()
+            return container
+        except errors.APIError as api_error:
+            error_message = str(api_error)
+            if '404' in error_message:
+                container.status = obj_container.ERROR
+                container.save()
+                return container
+            raise exception.ContainerException(
+                      "Docker API Error : %s" % (error_message))
+
+    def _container_action(self, context, container_uuid, status, docker_func):
+        LOG.debug("container_%s %s" % (status, container_uuid))
+        docker = self.get_docker_client(context, container_uuid)
+        try:
+            docker_id = self._find_container_by_name(docker, container_uuid)
+            result = getattr(docker, docker_func)(docker_id)
+            container = objects.Container.get_by_uuid(context, container_uuid)
+            container.status = status
+            container.save()
+            return result
         except errors.APIError as api_error:
             raise exception.ContainerException(
                       "Docker API Error : %s" % str(api_error))
 
     def container_reboot(self, context, container_uuid):
-        LOG.debug("container_reboot %s" % container_uuid)
-        docker = self.get_docker_client(context, container_uuid)
-        try:
-            docker_id = self._find_container_by_name(docker, container_uuid)
-            return docker.restart(docker_id)
-        except errors.APIError as api_error:
-            raise exception.ContainerException(
-                      "Docker API Error : %s" % str(api_error))
+        return self._container_action(context, container_uuid,
+                                      obj_container.RUNNING, 'restart')
 
     def container_stop(self, context, container_uuid):
-        LOG.debug("container_stop %s" % container_uuid)
-        docker = self.get_docker_client(context, container_uuid)
-        try:
-            docker_id = self._find_container_by_name(docker, container_uuid)
-            return docker.stop(docker_id)
-        except errors.APIError as api_error:
-            raise exception.ContainerException(
-                      "Docker API Error : %s" % str(api_error))
+        return self._container_action(context, container_uuid,
+                                      obj_container.STOPPED, 'stop')
 
     def container_start(self, context, container_uuid):
-        LOG.debug("Starting container %s" % container_uuid)
-        docker = self.get_docker_client(context, container_uuid)
-        try:
-            docker_id = self._find_container_by_name(docker, container_uuid)
-            LOG.debug("Found Docker container %s" % docker_id)
-            return docker.start(docker_id)
-        except errors.APIError as api_error:
-            raise exception.ContainerException(
-                      "Docker API Error : %s" % str(api_error))
+        return self._container_action(context, container_uuid,
+                                      obj_container.RUNNING, 'start')
 
     def container_pause(self, context, container_uuid):
-        LOG.debug("container_pause %s" % container_uuid)
-        docker = self.get_docker_client(context, container_uuid)
-        try:
-            docker_id = self._find_container_by_name(docker, container_uuid)
-            return docker.pause(docker_id)
-        except errors.APIError as api_error:
-            raise exception.ContainerException(
-                      "Docker API Error : %s" % str(api_error))
+        return self._container_action(context, container_uuid,
+                                      obj_container.PAUSED, 'pause')
 
     def container_unpause(self, context, container_uuid):
-        LOG.debug("container_unpause %s" % container_uuid)
-        docker = self.get_docker_client(context, container_uuid)
-        try:
-            docker_id = self._find_container_by_name(docker, container_uuid)
-            return docker.unpause(docker_id)
-        except errors.APIError as api_error:
-            raise exception.ContainerException(
-                      "Docker API Error : %s" % str(api_error))
+        return self._container_action(context, container_uuid,
+                                      obj_container.RUNNING, 'unpause')
 
     def container_logs(self, context, container_uuid):
         LOG.debug("container_logs %s" % container_uuid)

@@ -19,6 +19,13 @@ from magnum.db import api as dbapi
 from magnum.objects import base
 
 
+# possible status
+ERROR = 'Error'
+RUNNING = 'Running'
+STOPPED = 'Stopped'
+PAUSED = 'Paused'
+
+
 @base.MagnumObjectRegistry.register
 class Container(base.MagnumPersistentObject, base.MagnumObject,
                 base.MagnumObjectDictCompat):
@@ -36,6 +43,7 @@ class Container(base.MagnumPersistentObject, base.MagnumObject,
         'image_id': fields.StringField(nullable=True),
         'command': fields.StringField(nullable=True),
         'bay_uuid': fields.StringField(nullable=True),
+        'status': fields.StringField(nullable=True),
     }
 
     @staticmethod
