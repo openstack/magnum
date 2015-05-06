@@ -14,18 +14,10 @@
 
 """Magnum common internal object model"""
 
-import collections
-
 from oslo_versionedobjects import base as ovoo_base
 from oslo_versionedobjects import fields as ovoo_fields
-import six
 
-from magnum.common import exception
-from magnum.openstack.common._i18n import _
-from magnum.openstack.common._i18n import _LE
 from magnum.openstack.common import log as logging
-from magnum.openstack.common import versionutils
-
 
 LOG = logging.getLogger('object')
 
@@ -33,50 +25,10 @@ remotable_classmethod = ovoo_base.remotable_classmethod
 remotable = ovoo_base.remotable
 
 
-class MagnumObjectMetaclass(type):
-    """Metaclass that allows tracking of object classes."""
-
-    # NOTE(danms): This is what controls whether object operations are
-    # remoted. If this is not None, use it to remote things over RPC.
-    indirection_api = None
-
-    def __init__(cls, names, bases, dict_):
-        if not hasattr(cls, '_obj_classes'):
-            # This will be set in the 'MagnumObject' class.
-            cls._obj_classes = collections.defaultdict(list)
-        else:
-            # Add the subclass to MagnumObject._obj_classes
-            ovoo_base._make_class_properties(cls)
-            cls._obj_classes[cls.obj_name()].append(cls)
-            # NOTE(xek): object tracking will be moved to a new registartion
-            # scheme from oslo.versionedobjects, which uses decorators
+class MagnumObjectRegistry(ovoo_base.VersionedObjectRegistry):
+    pass
 
 
-# Object versioning rules
-#
-# Each service has its set of objects, each with a version attached. When
-# a client attempts to call an object method, the server checks to see if
-# the version of that object matches (in a compatible way) its object
-# implementation. If so, cool, and if not, fail.
-def check_object_version(server, client):
-    try:
-        client_major, _client_minor = client.split('.')
-        server_major, _server_minor = server.split('.')
-        client_minor = int(_client_minor)
-        server_minor = int(_server_minor)
-    except ValueError:
-        raise exception.IncompatibleObjectVersion(
-            _('Invalid version string'))
-
-    if client_major != server_major:
-        raise exception.IncompatibleObjectVersion(
-            dict(client=client_major, server=server_major))
-    if client_minor > server_minor:
-        raise exception.IncompatibleObjectVersion(
-            dict(client=client_minor, server=server_minor))
-
-
-@six.add_metaclass(MagnumObjectMetaclass)
 class MagnumObject(ovoo_base.VersionedObject):
     """Base class and object factory.
 
@@ -89,37 +41,6 @@ class MagnumObject(ovoo_base.VersionedObject):
 
     OBJ_SERIAL_NAMESPACE = 'magnum_object'
     OBJ_PROJECT_NAMESPACE = 'magnum'
-
-    @classmethod
-    def obj_class_from_name(cls, objname, objver):
-        """Returns a class from the registry based on a name and version."""
-        if objname not in cls._obj_classes:
-            LOG.error(_LE('Unable to instantiate unregistered object type '
-                          '%(objtype)s'), dict(objtype=objname))
-            raise exception.UnsupportedObjectError(objtype=objname)
-
-        latest = None
-        compatible_match = None
-        for objclass in cls._obj_classes[objname]:
-            if objclass.VERSION == objver:
-                return objclass
-
-            version_bits = tuple([int(x) for x in objclass.VERSION.split(".")])
-            if latest is None:
-                latest = version_bits
-            elif latest < version_bits:
-                latest = version_bits
-
-            if versionutils.is_compatible(objver, objclass.VERSION):
-                compatible_match = objclass
-
-        if compatible_match:
-            return compatible_match
-
-        latest_ver = '%i.%i' % latest
-        raise exception.IncompatibleObjectVersion(objname=objname,
-                                                  objver=objver,
-                                                  supported=latest_ver)
 
     def as_dict(self):
         return dict((k, getattr(self, k))

@@ -19,7 +19,6 @@ import iso8601
 import netaddr
 from oslo_utils import timeutils
 from oslo_versionedobjects import fields
-import six
 
 from magnum.common import context as magnum_context
 from magnum.common import exception
@@ -30,6 +29,7 @@ from magnum.tests import base as test_base
 gettext.install('magnum')
 
 
+@base.MagnumObjectRegistry.register
 class MyObj(base.MagnumObject):
     VERSION = '1.0'
 
@@ -89,38 +89,6 @@ class MyObj2(object):
 
 class TestSubclassedObject(MyObj):
     fields = {'new_field': fields.StringField()}
-
-
-class TestMetaclass(test_base.TestCase):
-    def test_obj_tracking(self):
-
-        @six.add_metaclass(base.MagnumObjectMetaclass)
-        class NewBaseClass(object):
-            fields = {}
-
-            @classmethod
-            def obj_name(cls):
-                return cls.__name__
-
-        class Test1(NewBaseClass):
-            @staticmethod
-            def obj_name():
-                return 'fake1'
-
-        class Test2(NewBaseClass):
-            pass
-
-        class Test2v2(NewBaseClass):
-            @staticmethod
-            def obj_name():
-                return 'Test2'
-
-        expected = {'fake1': [Test1], 'Test2': [Test2, Test2v2]}
-
-        self.assertEqual(expected, NewBaseClass._obj_classes)
-        # The following should work, also.
-        self.assertEqual(expected, Test1._obj_classes)
-        self.assertEqual(expected, Test2._obj_classes)
 
 
 class TestUtils(test_base.TestCase):
