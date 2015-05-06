@@ -192,6 +192,24 @@ class DbBayTestCase(base.DbTestCase):
                           self.dbapi.get_rc_by_id,
                           self.context, rc.id)
 
+    def test_destroy_bay_that_has_containers(self):
+        bay = utils.create_test_bay()
+        container = utils.create_test_container(bay_uuid=bay.uuid)
+        self.assertEqual(bay.uuid, container.bay_uuid)
+        self.dbapi.destroy_bay(bay.id)
+        self.assertRaises(exception.ContainerNotFound,
+                          self.dbapi.get_container_by_id,
+                          self.context, container.id)
+
+    def test_destroy_bay_that_has_containers_by_uuid(self):
+        bay = utils.create_test_bay()
+        container = utils.create_test_container(bay_uuid=bay.uuid)
+        self.assertEqual(bay.uuid, container.bay_uuid)
+        self.dbapi.destroy_bay(bay.uuid)
+        self.assertRaises(exception.ContainerNotFound,
+                          self.dbapi.get_container_by_id,
+                          self.context, container.id)
+
     def test_update_bay(self):
         bay = utils.create_test_bay()
         old_nc = bay.node_count
