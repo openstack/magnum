@@ -206,6 +206,11 @@ class Connection(api.Connection):
             if query.count() != 0:
                 query.delete()
 
+            query = model_query(models.Container, session=session)
+            query = self._add_containers_filters(query, {'bay_uuid': bay_uuid})
+            if query.count() != 0:
+                query.delete()
+
         session = get_session()
         with session.begin():
             query = model_query(models.Bay, session=session)
