@@ -12,6 +12,7 @@
 
 import datetime
 
+import contextlib
 import mock
 from oslo_config import cfg
 from oslo_utils import timeutils
@@ -370,30 +371,53 @@ class TestPost(api_base.FunctionalTest):
             # Check that 'id' is not in first arg of positional args
             self.assertNotIn('id', cc_mock.call_args[0][0])
 
-    def test_create_baymodel_with_invalid_empty_str_name(self):
-        with mock.patch.object(self.dbapi, 'create_baymodel',
-                               wraps=self.dbapi.create_baymodel) as cc_mock:
-            cdict = apiutils.baymodel_post_data(name='')
-            self.assertRaises(AppError, self.post_json, '/baymodels', cdict)
-            self.assertFalse(cc_mock.called)
+    def _create_baymodel_raises_app_error(self, **kwargs):
+        # Create mock for db and image data
+        with contextlib.nested(
+            mock.patch.object(self.dbapi, 'create_baymodel',
+                              wraps=self.dbapi.create_baymodel),
+            mock.patch.object(api_baymodel.BayModelsController,
+                              '_get_image_data')) as (cc_mock,
+                                                      mock_image_data):
 
-    def test_create_baymodel_with_invalid_long_name(self):
-        with mock.patch.object(self.dbapi, 'create_baymodel',
-                               wraps=self.dbapi.create_baymodel) as cc_mock:
-            cdict = apiutils.baymodel_post_data(name='i' * 256)
-            self.assertRaises(AppError, self.post_json, '/baymodels', cdict)
-            self.assertFalse(cc_mock.called)
-
-    @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
-    def test_create_baymodel_with_invalid_docker_volume_size(self,
-                               mock_image_data):
-        with mock.patch.object(self.dbapi, 'create_baymodel',
-                               wraps=self.dbapi.create_baymodel) as cc_mock:
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
-            cdict = apiutils.baymodel_post_data(docker_volume_size='docker')
+            cdict = apiutils.baymodel_post_data(**kwargs)
             self.assertRaises(AppError, self.post_json, '/baymodels', cdict)
             self.assertFalse(cc_mock.called)
+
+    def test_create_baymodel_with_invalid_long_string(self):
+        fields = ["uuid", "name", "image_id", "flavor_id", "master_flavor_id",
+                  "dns_nameserver", "keypair_id", "external_network_id",
+                  "cluster_distro", "fixed_network", "apiserver_port",
+                  "docker_volume_size"]
+        for field in fields:
+            self._create_baymodel_raises_app_error(**{field: 'i' * 256})
+
+    def test_create_baymodel_with_invalid_empty_string(self):
+        fields = ["uuid", "name", "image_id", "flavor_id", "master_flavor_id",
+                  "dns_nameserver", "keypair_id", "external_network_id",
+                  "cluster_distro", "fixed_network", "apiserver_port",
+                  "docker_volume_size", "ssh_authorized_key"]
+        for field in fields:
+            self._create_baymodel_raises_app_error(**{field: ''})
+
+    def test_create_baymodel_with_invalid_docker_volume_size(self):
+        self._create_baymodel_raises_app_error(docker_volume_size=0)
+        self._create_baymodel_raises_app_error(docker_volume_size=-1)
+        self._create_baymodel_raises_app_error(docker_volume_size='notanint')
+
+    def test_create_baymodel_with_invalid_dns_nameserver(self):
+        self._create_baymodel_raises_app_error(dns_nameserver='1.1.2')
+        self._create_baymodel_raises_app_error(dns_nameserver='1.1..1')
+        self._create_baymodel_raises_app_error(dns_nameserver='openstack.org')
+
+    def test_create_baymodel_with_invalid_apiserver_port(self):
+        self._create_baymodel_raises_app_error(apiserver_port=-12)
+        self._create_baymodel_raises_app_error(apiserver_port=65536)
+        self._create_baymodel_raises_app_error(apiserver_port=0)
+        self._create_baymodel_raises_app_error(apiserver_port=1023)
+        self._create_baymodel_raises_app_error(apiserver_port='not an int')
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
     def test_create_baymodel_with_docker_volume_size(self,
