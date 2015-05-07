@@ -52,8 +52,8 @@ Use cases
    to allow the application to use the services available in each environment
    without changing the container image.
 3. Docker Compatibility. End-user has a Dockerfile used to build an application
-   and its runtime environment and dependencies in a Docker container image. 
-   They want an easy way to run the Docker resulting image on an OpenStack 
+   and its runtime environment and dependencies in a Docker container image.
+   They want an easy way to run the Docker resulting image on an OpenStack
    cloud.
 4. LXC Compatibility. End-user wants an easy way to remotely create multiple
    LXC containers within a single Nova instance.
@@ -145,7 +145,7 @@ implement only two provisioning schemes for containers:
    2.1. Fill them sequentially until full.
    2.2. Remove them automatically when they become empty.
 
-The above orchestration will be implemented using Heat. This requires some 
+The above orchestration will be implemented using Heat. This requires some
 kind of hypervisor painting (such as host aggregates) for security reasons.
 
 The diagram below offers an overview of the system architecture. The OSC box
@@ -304,7 +304,7 @@ Notifications impact
 
 Contemplated features (in subsequent release cycles):
 
-* Notify the end user each time a Nova instance is created or deleted by 
+* Notify the end user each time a Nova instance is created or deleted by
   the Containers service, if (s)he has registered for such notifications.
 * Notify the user each on CRUD of containers containing start and end
   notifications. (compute.container.create/delete/etc)
