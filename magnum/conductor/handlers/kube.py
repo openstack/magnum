@@ -197,6 +197,7 @@ class Handler(object):
             return None
         # call the rc object to persist in db
         rc.refresh(context)
+        rc.save()
         return rc
 
     def rc_delete(self, context, uuid):
