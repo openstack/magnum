@@ -4,6 +4,19 @@
 
 DOCKER_DEV=/dev/disk/by-id/virtio-${DOCKER_VOLUME:0:20}
 
+# Wait until docker volume is hot-plugged
+attempts=1200
+while [ ! -b $DOCKER_DEV ]
+do
+  sleep 0.25
+  # Trigger udev to make sure symlinks are up to date
+  udevadm trigger
+  attempts=$(($attempts - 1))
+  if [[ $attempts -eq 0 ]]; then
+    break
+  fi
+done
+
 if ! [ -b $DOCKER_DEV ]; then
 	echo "ERROR: device $DOCKER_DEV does not exist" >&2
 	exit 1
