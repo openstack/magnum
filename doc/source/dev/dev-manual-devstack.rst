@@ -79,6 +79,12 @@ for more detailed neutron configuration.::
     SCREEN_LOGDIR=$HOME/logs
 
     END
+    cat > local.sh << END_LOCAL_SH
+    #!/bin/sh
+    sudo iptables -t nat -A POSTROUTING -o br-ex -j MASQUERADE
+    END_LOCAL_SH
+    chmod 755 local.sh
+
     ./stack.sh
 
 At this time, Magnum has only been tested with the Fedora Atomic micro-OS.
