@@ -209,7 +209,7 @@ Kubernetes provides a number of examples you can use to check that things
 are working. Here's how to set up the replicated redis example. First, create
 a pod for the redis-master::
 
-    cd ~/kubernetes/examples/redis
+    cd ~/kubernetes/examples/redis/v1beta3/
     magnum pod-create --manifest ./redis-master.yaml --bay testbay
 
 Now turn up a service to provide a discoverable endpoint for the redis sentinels
