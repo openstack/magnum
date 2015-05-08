@@ -133,7 +133,7 @@
 #rpc_zmq_bind_address = *
 
 # MatchMaker driver. (string value)
-#rpc_zmq_matchmaker = oslo_messaging._drivers.matchmaker.MatchMakerLocalhost
+#rpc_zmq_matchmaker = local
 
 # ZeroMQ receiver listening port. (integer value)
 #rpc_zmq_port = 9501
@@ -382,6 +382,10 @@
 # Docker remote api version. Override it according to specific docker
 # api version in your environment. (string value)
 #docker_remote_api_version = 1.17
+
+# Default timeout in seconds for docker client operations. (integer
+# value)
+#default_timeout = 10
 
 # If set, ignore any SSL validation issues (boolean value)
 #api_insecure = false
@@ -881,9 +885,10 @@
 #rabbit_ha_queues = false
 
 # Number of seconds after which the Rabbit broker is considered down
-# if heartbeat's keep-alive fails (0 disable the heartbeat). (integer
-# value)
-#heartbeat_timeout_threshold = 60
+# if heartbeat's keep-alive fails (0 disables the heartbeat, >0
+# enables it. Enabling heartbeats requires kombu>=3.0.7 and
+# amqp>=1.4.0). EXPERIMENTAL (integer value)
+#heartbeat_timeout_threshold = 0
 
 # How often times during the heartbeat_timeout_threshold we check the
 # heartbeat. (integer value)

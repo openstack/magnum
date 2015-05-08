@@ -19,13 +19,16 @@ from oslo_config import cfg
 from magnum.openstack.common import log as logging
 
 DEFAULT_DOCKER_REMOTE_API_VERSION = '1.17'
+DEFAULT_DOCKER_TIMEOUT = 10
+
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
 
 
 class DockerHTTPClient(client.Client):
     def __init__(self, url='unix://var/run/docker.sock',
-                 ver=DEFAULT_DOCKER_REMOTE_API_VERSION):
+                 ver=DEFAULT_DOCKER_REMOTE_API_VERSION,
+                 timeout=DEFAULT_DOCKER_TIMEOUT):
         if (CONF.docker.cert_file or
                 CONF.docker.key_file):
             client_cert = (CONF.docker.cert_file, CONF.docker.key_file)
@@ -43,7 +46,7 @@ class DockerHTTPClient(client.Client):
         super(DockerHTTPClient, self).__init__(
             base_url=url,
             version=ver,
-            timeout=10,
+            timeout=timeout,
             tls=ssl_config
         )
 

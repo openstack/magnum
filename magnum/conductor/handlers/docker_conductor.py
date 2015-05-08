@@ -30,6 +30,10 @@ docker_opts = [
                default=docker_client.DEFAULT_DOCKER_REMOTE_API_VERSION,
                help='Docker remote api version. Override it according to '
                     'specific docker api version in your environment.'),
+    cfg.IntOpt('default_timeout',
+               default=docker_client.DEFAULT_DOCKER_TIMEOUT,
+               help='Default timeout in seconds for docker client '
+                    'operations.'),
     cfg.BoolOpt('api_insecure',
                 default=False,
                 help='If set, ignore any SSL validation issues'),
@@ -70,7 +74,8 @@ class Handler(object):
     def _docker_for_bay(bay):
         tcp_url = 'tcp://%s:2376' % bay.api_address
         return docker_client.DockerHTTPClient(tcp_url,
-                                        CONF.docker.docker_remote_api_version)
+                                    CONF.docker.docker_remote_api_version,
+                                    CONF.docker.default_timeout)
 
     @classmethod
     def _docker_for_container(cls, context, container):
