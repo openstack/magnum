@@ -76,9 +76,5 @@ class DockerHTTPClient(client.Client):
         res = self._post(url)
         self._raise_for_status(res)
 
-    def load_repository_file(self, name, path):
-        with open(path) as fh:
-            self.load_image(fh)
-
     def get_container_logs(self, docker_id):
         return self.attach(docker_id, 1, 1, 0, 1)
