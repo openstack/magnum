@@ -305,6 +305,15 @@ class Connection(object):
         """
 
     @abc.abstractmethod
+    def get_container_by_name(self, context, container_name):
+        """Return a container.
+
+        :param context: The security context
+        :param container_name: The name of a container.
+        :returns: A container.
+        """
+
+    @abc.abstractmethod
     def destroy_container(self, container_id):
         """Destroy a container and all associated interfaces.
 

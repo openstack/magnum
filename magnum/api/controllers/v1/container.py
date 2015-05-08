@@ -152,77 +152,92 @@ class ContainerCollection(collection.Collection):
 
 
 class StartController(object):
-    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, container_uuid):
+    @wsme_pecan.wsexpose(types.uuid_or_name, wtypes.text)
+    def _default(self, container_ident):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
+        container_uuid = api_utils.get_rpc_resource('Container',
+                                                    container_ident).uuid
+
         LOG.debug('Calling conductor.container_start with %s' %
                   container_uuid)
         return pecan.request.rpcapi.container_start(container_uuid)
 
 
 class StopController(object):
-    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, container_uuid, *remainder):
+    @wsme_pecan.wsexpose(types.uuid_or_name, wtypes.text)
+    def _default(self, container_ident, *remainder):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
+        container_uuid = api_utils.get_rpc_resource('Container',
+                                                    container_ident).uuid
         LOG.debug('Calling conductor.container_stop with %s' %
                   container_uuid)
         return pecan.request.rpcapi.container_stop(container_uuid)
 
 
 class RebootController(object):
-    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, container_uuid, *remainder):
+    @wsme_pecan.wsexpose(types.uuid_or_name, wtypes.text)
+    def _default(self, container_ident, *remainder):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
+        container_uuid = api_utils.get_rpc_resource('Container',
+                                                    container_ident).uuid
         LOG.debug('Calling conductor.container_reboot with %s' %
                   container_uuid)
         return pecan.request.rpcapi.container_reboot(container_uuid)
 
 
 class PauseController(object):
-    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, container_uuid, *remainder):
+    @wsme_pecan.wsexpose(types.uuid_or_name, wtypes.text)
+    def _default(self, container_ident, *remainder):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
+        container_uuid = api_utils.get_rpc_resource('Container',
+                                                    container_ident).uuid
         LOG.debug('Calling conductor.container_pause with %s' %
                   container_uuid)
         return pecan.request.rpcapi.container_pause(container_uuid)
 
 
 class UnpauseController(object):
-    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, container_uuid, *remainder):
+    @wsme_pecan.wsexpose(types.uuid_or_name, wtypes.text)
+    def _default(self, container_ident, *remainder):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
+        container_uuid = api_utils.get_rpc_resource('Container',
+                                                    container_ident).uuid
         LOG.debug('Calling conductor.container_unpause with %s' %
                   container_uuid)
         return pecan.request.rpcapi.container_unpause(container_uuid)
 
 
 class LogsController(object):
-    @wsme_pecan.wsexpose(wtypes.text, wtypes.text)
-    def _default(self, container_uuid, *remainder):
+    @wsme_pecan.wsexpose(types.uuid_or_name, wtypes.text)
+    def _default(self, container_ident, *remainder):
         if pecan.request.method != 'GET':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
+        container_uuid = api_utils.get_rpc_resource('Container',
+                                                    container_ident).uuid
         LOG.debug('Calling conductor.container_logs with %s' %
         container_uuid)
         return pecan.request.rpcapi.container_logs(container_uuid)
 
 
 class ExecuteController(object):
-    @wsme_pecan.wsexpose(wtypes.text, wtypes.text, wtypes.text)
-    def _default(self, container_uuid, command, *remainder):
+    @wsme_pecan.wsexpose(types.uuid_or_name, wtypes.text, wtypes.text)
+    def _default(self, container_ident, command, *remainder):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
+        container_uuid = api_utils.get_rpc_resource('Container',
+                                                    container_ident).uuid
         LOG.debug('Calling conductor.container_execute with %s command %s'
                   % (container_uuid, command))
         return pecan.request.rpcapi.container_execute(container_uuid, command)
@@ -309,17 +324,17 @@ class ContainersController(rest.RestController):
                                          sort_key, sort_dir, expand,
                                          resource_url)
 
-    @wsme_pecan.wsexpose(Container, types.uuid)
-    def get_one(self, container_uuid):
+    @wsme_pecan.wsexpose(Container, types.uuid_or_name)
+    def get_one(self, container_ident):
         """Retrieve information about the given container.
 
-        :param container_uuid: UUID of a container.
+        :param container_ident: UUID or name of a container.
         """
         if self.from_containers:
             raise exception.OperationNotPermitted
 
-        rpc_container = objects.Container.get_by_uuid(pecan.request.context,
-                                                      container_uuid)
+        rpc_container = api_utils.get_rpc_resource('Container',
+                                                   container_ident)
         return Container.convert_with_links(rpc_container)
 
     @wsme_pecan.wsexpose(Container, body=Container, status_code=201)
@@ -348,18 +363,19 @@ class ContainersController(rest.RestController):
         return Container.convert_with_links(res_container)
 
     @wsme.validate(types.uuid, [ContainerPatchType])
-    @wsme_pecan.wsexpose(Container, types.uuid, body=[ContainerPatchType])
-    def patch(self, container_uuid, patch):
+    @wsme_pecan.wsexpose(Container, types.uuid_or_name,
+                         body=[ContainerPatchType])
+    def patch(self, container_ident, patch):
         """Update an existing container.
 
-        :param container_uuid: UUID of a container.
+        :param container_ident: UUID or name of a container.
         :param patch: a json PATCH document to apply to this container.
         """
         if self.from_containers:
             raise exception.OperationNotPermitted
 
-        rpc_container = objects.Container.get_by_uuid(pecan.request.context,
-                                                      container_uuid)
+        rpc_container = api_utils.get_rpc_resource('Container',
+                                                   container_ident)
         try:
             container_dict = rpc_container.as_dict()
             container = Container(**api_utils.apply_jsonpatch(
@@ -382,8 +398,8 @@ class ContainersController(rest.RestController):
         rpc_container.save()
         return Container.convert_with_links(rpc_container)
 
-    @wsme_pecan.wsexpose(None, types.uuid, status_code=204)
-    def delete(self, container_uuid):
+    @wsme_pecan.wsexpose(None, types.uuid_or_name, status_code=204)
+    def delete(self, container_ident):
         """Delete a container.
 
         :param container_uuid: UUID of a container.
@@ -391,7 +407,7 @@ class ContainersController(rest.RestController):
         if self.from_containers:
             raise exception.OperationNotPermitted
 
-        rpc_container = objects.Container.get_by_uuid(pecan.request.context,
-                                                      container_uuid)
-        pecan.request.rpcapi.container_delete(container_uuid)
+        rpc_container = api_utils.get_rpc_resource('Container',
+                                                   container_ident)
+        pecan.request.rpcapi.container_delete(rpc_container.uuid)
         rpc_container.destroy()

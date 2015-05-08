@@ -46,6 +46,13 @@ class DbContainerTestCase(base.DbTestCase):
         self.assertEqual(container.id, res.id)
         self.assertEqual(container.uuid, res.uuid)
 
+    def test_get_container_by_name(self):
+        container = utils.create_test_container()
+        res = self.dbapi.get_container_by_name(self.context,
+                                               container.name)
+        self.assertEqual(container.id, res.id)
+        self.assertEqual(container.uuid, res.uuid)
+
     def test_get_container_that_does_not_exist(self):
         self.assertRaises(exception.ContainerNotFound,
                           self.dbapi.get_container_by_id, self.context, 99)

@@ -456,6 +456,19 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.ContainerNotFound(container=container_uuid)
 
+    def get_container_by_name(self, context, container_name):
+        query = model_query(models.Container)
+        query = self._add_tenant_filters(context, query)
+        query = query.filter_by(name=container_name)
+        try:
+            return query.one()
+        except NoResultFound:
+            raise exception.ContainerNotFound(container=container_name)
+        except MultipleResultsFound:
+            raise exception.Conflict('Multiple containers exist with same '
+                                     'name. Please use the container uuid '
+                                     'instead.')
+
     def destroy_container(self, container_id):
         session = get_session()
         with session.begin():

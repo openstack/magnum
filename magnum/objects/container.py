@@ -74,6 +74,18 @@ class Container(base.MagnumObject):
         return container
 
     @base.remotable_classmethod
+    def get_by_name(cls, context, name):
+        """Find a bay based on name and return a Bay object.
+
+        :param name: the logical name of a bay.
+        :param context: Security context
+        :returns: a :class:`Bay` object.
+        """
+        db_bay = cls.dbapi.get_container_by_name(context, name)
+        bay = Container._from_db_object(cls(context), db_bay)
+        return bay
+
+    @base.remotable_classmethod
     def list(cls, context, limit=None, marker=None,
              sort_key=None, sort_dir=None):
         """Return a list of Container objects.
