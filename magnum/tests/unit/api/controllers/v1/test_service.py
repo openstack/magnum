@@ -49,7 +49,7 @@ class TestListService(api_base.FunctionalTest):
 
     def _assert_service_fields(self, service):
         service_fields = ['name', 'bay_uuid', 'name', 'labels', 'selector',
-                          'ip', 'port']
+                          'ip', 'ports']
         for field in service_fields:
             self.assertIn(field, service)
 

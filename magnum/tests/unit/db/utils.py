@@ -126,7 +126,7 @@ def get_test_service(**kw):
         'labels': kw.get('labels', {'name': 'foo'}),
         'selector': kw.get('selector', {'name': 'foo'}),
         'ip': kw.get('ip', '172.17.2.2'),
-        'port': kw.get('port', 80),
+        'ports': kw.get('ports', [{'port': 80}]),
         'created_at': kw.get('created_at'),
         'updated_at': kw.get('updated_at'),
     }

@@ -37,7 +37,7 @@ class ServicePatchType(v1_base.K8sPatchType):
     @staticmethod
     def internal_attrs():
         defaults = v1_base.K8sPatchType.internal_attrs()
-        return defaults + ['/selector', '/port', '/ip']
+        return defaults + ['/selector', '/ports', '/ip']
 
 
 class Service(v1_base.K8sResourceBase):
@@ -51,7 +51,7 @@ class Service(v1_base.K8sResourceBase):
     ip = wtypes.text
     """IP of this service"""
 
-    port = wsme.wsattr(wtypes.IntegerType(), readonly=True)
+    ports = wsme.wsattr([{wtypes.text: wtypes.IntegerType()}], readonly=True)
     """Port of this service"""
 
     links = wsme.wsattr([link.Link], readonly=True)
@@ -72,7 +72,7 @@ class Service(v1_base.K8sResourceBase):
     def _convert_with_links(service, url, expand=True):
         if not expand:
             service.unset_fields_except(['uuid', 'name', 'bay_uuid', 'labels',
-                                         'selector', 'ip', 'port'])
+                                         'selector', 'ip', 'ports'])
 
         service.links = [link.Link.make_link('self', url,
                                              'services', service.uuid),
@@ -95,20 +95,34 @@ class Service(v1_base.K8sResourceBase):
                      labels={'label1': 'foo'},
                      selector={'label1': 'foo'},
                      ip='172.17.2.2',
-                     port=80,
+                     ports=[
+                                 {
+                                 "port": 88,
+                                 "targetPort": 6379,
+                                 "protocol": "TCP"
+                                 }
+                             ],
                      manifest_url='file:///tmp/rc.yaml',
                      manifest='''{
-                         "id": "service_foo",
-                         "kind": "Service",
-                         "apiVersion": "v1beta1",
-                         "port": 88,
-                         "selector": {
-                             "bar": "foo"
+                         "metadata": {
+                             "name": "test",
+                             "labels": {
+                                 "key": "value"
+                             }
                          },
-                         "labels": {
-                             "bar": "foo"
+                         "spec": {
+                             "ports": [
+                                 {
+                                 "port": 88,
+                                 "targetPort": 6379,
+                                 "protocol": "TCP"
+                                 }
+                             ],
+                             "selector": {
+                                 "bar": "foo"
+                             }
                          }
-                     }''',
+                         }''',
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
@@ -119,16 +133,20 @@ class Service(v1_base.K8sResourceBase):
         except ValueError as e:
             raise exception.InvalidParameterValue(message=str(e))
         try:
-            self.name = manifest["id"]
-        except KeyError:
+            self.name = manifest["metadata"]["name"]
+        except (KeyError, TypeError):
             raise exception.InvalidParameterValue(
-                "'id' can't be empty in manifest.")
-        if "port" in manifest:
-            self.port = manifest["port"]
-        if "selector" in manifest:
-            self.selector = manifest["selector"]
-        if "labels" in manifest:
-            self.labels = manifest["labels"]
+                "Field metadata['name'] can't be empty in manifest.")
+        try:
+            self.ports = manifest["spec"]["ports"][:]
+        except (KeyError, TypeError):
+            raise exception.InvalidParameterValue(
+                "Field spec['ports'] can't be empty in manifest.")
+
+        if "selector" in manifest["spec"]:
+            self.selector = manifest["spec"]["selector"]
+        if "labels" in manifest["metadata"]:
+            self.labels = manifest["metadata"]["labels"]
 
 
 class ServiceCollection(collection.Collection):
