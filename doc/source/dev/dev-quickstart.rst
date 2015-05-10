@@ -143,6 +143,15 @@ guide for details.::
      PUBLIC_INTERFACE=eth1
      END
 
+Create a local.sh make final networking changes after devstack has spawned. This
+will allow Bays spawned by Magnum to access the internet through PUBLIC_INTERFACE.::
+
+    cat > /opt/stack/devstack/local.sh << END_LOCAL_SH
+    #!/bin/sh
+    sudo iptables -t nat -A POSTROUTING -o br-ex -j MASQUERADE
+    END_LOCAL_SH
+    chmod 755 /opt/stack/devstack/local.sh
+
 Run DevStack::
 
     cd /opt/stack/devstack
