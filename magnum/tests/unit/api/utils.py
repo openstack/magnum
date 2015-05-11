@@ -67,17 +67,25 @@ def service_post_data(**kw):
     service = utils.get_test_service(**kw)
     if 'manifest' not in service:
         service['manifest'] = '''{
-            "id": "service_foo",
-            "kind": "Service",
-            "apiVersion": "v1beta1",
-            "port": 88,
-            "selector": {
-                "bar": "foo"
+            "metadata": {
+                "name": "test",
+                "labels": {
+                    "key": "value"
+                }
             },
-            "labels": {
-                "bar": "foo"
+            "spec": {
+                "ports": [
+                    {
+                    "port": 88,
+                    "targetPort": 6379,
+                    "protocol": "TCP"
+                    }
+                ],
+                "selector": {
+                    "bar": "foo"
+                }
             }
-        }'''
+            }'''
     internal = service_controller.ServicePatchType.internal_attrs()
     return remove_internal(service, internal)
 

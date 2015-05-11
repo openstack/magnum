@@ -98,17 +98,25 @@ class Service(v1_base.K8sResourceBase):
                      port=80,
                      manifest_url='file:///tmp/rc.yaml',
                      manifest='''{
-                         "id": "service_foo",
-                         "kind": "Service",
-                         "apiVersion": "v1beta1",
-                         "port": 88,
-                         "selector": {
-                             "bar": "foo"
+                         "metadata": {
+                             "name": "test",
+                             "labels": {
+                                 "key": "value"
+                             }
                          },
-                         "labels": {
-                             "bar": "foo"
+                         "spec": {
+                             "ports": [
+                                 {
+                                 "port": 80,
+                                 "targetPort": 6379,
+                                 "protocol": "TCP"
+                                 }
+                             ],
+                             "selector": {
+                                 "bar": "foo"
+                             }
                          }
-                     }''',
+                         }''',
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
@@ -119,16 +127,22 @@ class Service(v1_base.K8sResourceBase):
         except ValueError as e:
             raise exception.InvalidParameterValue(message=str(e))
         try:
-            self.name = manifest["id"]
-        except KeyError:
+            self.name = manifest["metadata"]["name"]
+        except (KeyError, TypeError):
             raise exception.InvalidParameterValue(
-                "'id' can't be empty in manifest.")
-        if "port" in manifest:
-            self.port = manifest["port"]
-        if "selector" in manifest:
-            self.selector = manifest["selector"]
-        if "labels" in manifest:
-            self.labels = manifest["labels"]
+                "Field metadata['name'] can't be empty in manifest.")
+        try:
+            # NOTE(madhuri): stable/kilo just stores TCP port in db.
+            # Further release will store multiple ports in db.
+            self.port = manifest["spec"]["ports"][0]["port"]
+        except (KeyError, TypeError):
+            raise exception.InvalidParameterValue(
+                "Field spec['ports'] can't be empty in manifest.")
+
+        if "selector" in manifest["spec"]:
+            self.selector = manifest["spec"]["selector"]
+        if "labels" in manifest["metadata"]:
+            self.labels = manifest["metadata"]["labels"]
 
 
 class ServiceCollection(collection.Collection):
