@@ -16,7 +16,6 @@
 
 import collections
 
-from oslo_context import context as oslo_context
 from oslo_versionedobjects import base as ovoo_base
 from oslo_versionedobjects import fields as ovoo_fields
 import six
@@ -29,6 +28,9 @@ from magnum.openstack.common import versionutils
 
 
 LOG = logging.getLogger('object')
+
+remotable_classmethod = ovoo_base.remotable_classmethod
+remotable = ovoo_base.remotable
 
 
 class MagnumObjectMetaclass(type):
@@ -48,59 +50,6 @@ class MagnumObjectMetaclass(type):
             cls._obj_classes[cls.obj_name()].append(cls)
             # NOTE(xek): object tracking will be moved to a new registartion
             # scheme from oslo.versionedobjects, which uses decorators
-
-
-# These are decorators that mark an object's method as remotable.
-# If the metaclass is configured to forward object methods to an
-# indirection service, these will result in making an RPC call
-# instead of directly calling the implementation in the object. Instead,
-# the object implementation on the remote end will perform the
-# requested action and the result will be returned here.
-def remotable_classmethod(fn):
-    """Decorator for remotable classmethods."""
-    def wrapper(cls, context, *args, **kwargs):
-        if MagnumObject.indirection_api:
-            result = MagnumObject.indirection_api.object_class_action(
-                context, cls.obj_name(), fn.__name__, cls.VERSION,
-                args, kwargs)
-        else:
-            result = fn(cls, context, *args, **kwargs)
-            if isinstance(result, MagnumObject):
-                result._context = context
-        return result
-    return classmethod(wrapper)
-
-
-# See comment above for remotable_classmethod()
-#
-# Note that this will use either the provided context, or the one
-# stashed in the object. If neither are present, the object is
-# "orphaned" and remotable methods cannot be called.
-def remotable(fn):
-    """Decorator for remotable object methods."""
-    def wrapper(self, *args, **kwargs):
-        context = self._context
-        try:
-            if isinstance(args[0], (oslo_context.RequestContext)):
-                context = args[0]
-                args = args[1:]
-        except IndexError:
-            pass
-        if context is None:
-            raise exception.OrphanedObjectError(method=fn.__name__,
-                                                objtype=self.obj_name())
-        if MagnumObject.indirection_api:
-            updates, result = MagnumObject.indirection_api.object_action(
-                context, self, fn.__name__, args, kwargs)
-            for key, value in updates.iteritems():
-                if key in self.fields:
-                    field = self.fields[key]
-                    self[key] = field.from_primitive(self, key, value)
-            self._changed_fields = set(updates.get('obj_what_changed', []))
-            return result
-        else:
-            return fn(self, context, *args, **kwargs)
-    return wrapper
 
 
 # Object versioning rules
