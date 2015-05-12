@@ -33,6 +33,7 @@ class Status(object):
     DELETED = 'DELETED'
 
 
+@base.MagnumObjectRegistry.register
 class Bay(base.MagnumPersistentObject, base.MagnumObject,
           base.MagnumObjectDictCompat):
     # Version 1.0: Initial version

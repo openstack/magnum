@@ -18,6 +18,7 @@ from magnum.db import api as dbapi
 from magnum.objects import base
 
 
+@base.MagnumObjectRegistry.register
 class ReplicationController(base.MagnumPersistentObject, base.MagnumObject,
                             base.MagnumObjectDictCompat):
     # Version 1.0: Initial version

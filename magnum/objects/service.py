@@ -20,6 +20,7 @@ from magnum.objects import base
 from magnum.objects import fields as magnum_fields
 
 
+@base.MagnumObjectRegistry.register
 class Service(base.MagnumPersistentObject, base.MagnumObject,
               base.MagnumObjectDictCompat):
     # Version 1.0: Initial version

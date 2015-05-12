@@ -86,11 +86,12 @@ class TestCase(base.BaseTestCase):
         self.useFixture(conf_fixture.ConfFixture(cfg.CONF))
 
         self._base_test_obj_backup = copy.copy(
-                objects_base.MagnumObject._obj_classes)
+            objects_base.MagnumObjectRegistry._registry._obj_classes)
         self.addCleanup(self._restore_obj_registry)
 
     def _restore_obj_registry(self):
-        objects_base.MagnumObject._obj_classes = self._base_test_obj_backup
+        objects_base.MagnumObjectRegistry._registry._obj_classes \
+            = self._base_test_obj_backup
 
     def tearDown(self):
         super(TestCase, self).tearDown()
