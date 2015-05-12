@@ -62,7 +62,8 @@ class BayModel(base.APIBase):
     coe = wsme.wsproperty(wtypes.text, _get_coe, _set_coe, mandatory=True)
     """The Container Orchestration Engine for this bay model"""
 
-    image_id = wtypes.StringType(min_length=1, max_length=255)
+    image_id = wsme.wsattr(wtypes.StringType(min_length=1, max_length=255),
+                           mandatory=True)
     """The image name or UUID to use as a base image for this baymodel"""
 
     flavor_id = wtypes.StringType(min_length=1, max_length=255)
