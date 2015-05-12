@@ -13,11 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_versionedobjects import fields
+
 from magnum.common import exception
 from magnum.common import utils
 from magnum.db import api as dbapi
 from magnum.objects import base
-from magnum.objects import utils as obj_utils
 
 
 class Status(object):
@@ -32,28 +33,29 @@ class Status(object):
     DELETED = 'DELETED'
 
 
-class Bay(base.MagnumObject):
+class Bay(base.MagnumPersistentObject, base.MagnumObject,
+          base.MagnumObjectDictCompat):
     # Version 1.0: Initial version
     VERSION = '1.0'
 
     dbapi = dbapi.get_instance()
 
     fields = {
-        'id': int,
-        'uuid': obj_utils.str_or_none,
-        'name': obj_utils.str_or_none,
-        'project_id': obj_utils.str_or_none,
-        'user_id': obj_utils.str_or_none,
-        'baymodel_id': obj_utils.str_or_none,
-        'stack_id': obj_utils.str_or_none,
+        'id': fields.IntegerField(),
+        'uuid': fields.UUIDField(nullable=True),
+        'name': fields.StringField(nullable=True),
+        'project_id': fields.StringField(nullable=True),
+        'user_id': fields.StringField(nullable=True),
+        'baymodel_id': fields.StringField(nullable=True),
+        'stack_id': fields.StringField(nullable=True),
         # One of CREATE_IN_PROGRESS|CREATE_FAILED|CREATED
         #        UPDATE_IN_PROGRESS|UPDATE_FAILED|UPDATED
         #        DELETE_IN_PROGRESS|DELETE_FAILED|DELETED
-        'status': obj_utils.str_or_none,
-        'api_address': obj_utils.str_or_none,
-        'node_addresses': obj_utils.list_or_none,
-        'node_count': obj_utils.int_or_none,
-        'discovery_url': obj_utils.str_or_none,
+        'status': fields.StringField(nullable=True),
+        'api_address': fields.StringField(nullable=True),
+        'node_addresses': fields.ListOfStringsField(nullable=True),
+        'node_count': fields.IntegerField(nullable=True),
+        'discovery_url': fields.StringField(nullable=True),
     }
 
     @staticmethod
@@ -204,6 +206,5 @@ class Bay(base.MagnumObject):
         """
         current = self.__class__.get_by_uuid(self._context, uuid=self.uuid)
         for field in self.fields:
-            if (hasattr(self, base.get_attrname(field)) and
-                self[field] != current[field]):
+            if self.obj_attr_is_set(field) and self[field] != current[field]:
                 self[field] = current[field]

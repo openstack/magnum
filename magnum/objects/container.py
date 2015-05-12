@@ -13,26 +13,28 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_versionedobjects import fields
+
 from magnum.db import api as dbapi
 from magnum.objects import base
-from magnum.objects import utils as obj_utils
 
 
-class Container(base.MagnumObject):
+class Container(base.MagnumPersistentObject, base.MagnumObject,
+                base.MagnumObjectDictCompat):
     # Version 1.0: Initial version
     VERSION = '1.0'
 
     dbapi = dbapi.get_instance()
 
     fields = {
-        'id': int,
-        'uuid': obj_utils.str_or_none,
-        'name': obj_utils.str_or_none,
-        'project_id': obj_utils.str_or_none,
-        'user_id': obj_utils.str_or_none,
-        'image_id': obj_utils.str_or_none,
-        'command': obj_utils.str_or_none,
-        'bay_uuid': obj_utils.str_or_none,
+        'id': fields.IntegerField(),
+        'uuid': fields.StringField(nullable=True),
+        'name': fields.StringField(nullable=True),
+        'project_id': fields.StringField(nullable=True),
+        'user_id': fields.StringField(nullable=True),
+        'image_id': fields.StringField(nullable=True),
+        'command': fields.StringField(nullable=True),
+        'bay_uuid': fields.StringField(nullable=True),
     }
 
     @staticmethod
@@ -170,6 +172,5 @@ class Container(base.MagnumObject):
         """
         current = self.__class__.get_by_uuid(self._context, uuid=self.uuid)
         for field in self.fields:
-            if (hasattr(self, base.get_attrname(field)) and
-                self[field] != current[field]):
+            if self.obj_attr_is_set(field) and self[field] != current[field]:
                 self[field] = current[field]

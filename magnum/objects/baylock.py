@@ -11,21 +11,23 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from oslo_versionedobjects import fields
+
 from magnum.db import api as dbapi
 from magnum.objects import base
-from magnum.objects import utils as obj_utils
 
 
-class BayLock(base.MagnumObject):
+class BayLock(base.MagnumPersistentObject, base.MagnumObject,
+              base.MagnumObjectDictCompat):
     # Version 1.0: Initial version
     VERSION = '1.0'
 
     dbapi = dbapi.get_instance()
 
     fields = {
-        'id': int,
-        'bay_uuid': obj_utils.str_or_none,
-        'conductor_id': obj_utils.str_or_none,
+        'id': fields.IntegerField(),
+        'bay_uuid': fields.StringField(nullable=True),
+        'conductor_id': fields.StringField(nullable=True),
     }
 
     @base.remotable_classmethod
