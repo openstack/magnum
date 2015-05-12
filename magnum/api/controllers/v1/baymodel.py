@@ -75,7 +75,8 @@ class BayModel(base.APIBase):
     dns_nameserver = wtypes.IPv4AddressType()
     """The DNS nameserver address"""
 
-    keypair_id = wtypes.StringType(min_length=1, max_length=255)
+    keypair_id = wsme.wsattr(wtypes.StringType(min_length=1, max_length=255),
+                             mandatory=True)
     """The name or id of the nova ssh keypair"""
 
     external_network_id = wtypes.StringType(min_length=1, max_length=255)
