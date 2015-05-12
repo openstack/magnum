@@ -499,6 +499,12 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/baymodels', cdict, expect_errors=True)
         self.assertEqual(409, response.status_int)
 
+    def test_create_baymodel_without_image_id(self):
+        cdict = apiutils.baymodel_post_data()
+        del cdict['image_id']
+        response = self.post_json('/baymodels', cdict, expect_errors=True)
+        self.assertEqual(400, response.status_int)
+
 
 class TestDelete(api_base.FunctionalTest):
 
