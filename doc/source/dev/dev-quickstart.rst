@@ -331,7 +331,7 @@ address 8.8.8.8 four times. ::
 At this point, the container exists, but it has not been started yet. Let's
 start it then check it's output. ::
 
-    $ mangum container-start 25485358-ae9b-49d1-a1e1-1af0a7c3f911
+    $ magnum container-start 25485358-ae9b-49d1-a1e1-1af0a7c3f911
     $ magnum container-logs 25485358-ae9b-49d1-a1e1-1af0a7c3f911
     PING 8.8.8.8 (8.8.8.8): 56 data bytes
     64 bytes from 8.8.8.8: seq=0 ttl=40 time=25.513 ms
