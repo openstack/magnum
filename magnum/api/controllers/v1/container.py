@@ -85,6 +85,9 @@ class Container(base.APIBase):
     command = wtypes.text
     """The command execute when container starts"""
 
+    status = wtypes.text
+    """The status of container"""
+
     def __init__(self, **kwargs):
         self.fields = []
         for field in objects.Container.fields:
@@ -98,7 +101,7 @@ class Container(base.APIBase):
     def _convert_with_links(container, url, expand=True):
         if not expand:
             container.unset_fields_except(['uuid', 'name', 'bay_uuid',
-                                           'image_id', 'command'])
+                                           'image_id', 'command', 'status'])
 
         container.links = [link.Link.make_link('self', url,
                                           'containers', container.uuid),
@@ -120,6 +123,7 @@ class Container(base.APIBase):
                      name='example',
                      image_id='ubuntu',
                      command='env',
+                     status='Running',
                      bay_uuid="fff114da-3bfa-4a0f-a123-c0dffad9718e",
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())
@@ -280,6 +284,8 @@ class ContainersController(rest.RestController):
         containers = objects.Container.list(pecan.request.context, limit,
                                             marker_obj, sort_key=sort_key,
                                             sort_dir=sort_dir)
+        containers = [pecan.request.rpcapi.container_show(c.uuid)
+                          for c in containers]
 
         return ContainerCollection.convert_with_links(containers, limit,
                                                 url=resource_url,
@@ -299,7 +305,7 @@ class ContainersController(rest.RestController):
         :param sort_dir: direction to sort. "asc" or "desc". Default: asc.
         """
         return self._get_containers_collection(marker, limit, sort_key,
-                                         sort_dir)
+                                               sort_dir)
 
     @wsme_pecan.wsexpose(ContainerCollection, types.uuid,
                          types.uuid, int, wtypes.text, wtypes.text)
@@ -335,7 +341,8 @@ class ContainersController(rest.RestController):
 
         rpc_container = api_utils.get_rpc_resource('Container',
                                                    container_ident)
-        return Container.convert_with_links(rpc_container)
+        res_container = pecan.request.rpcapi.container_show(rpc_container.uuid)
+        return Container.convert_with_links(res_container)
 
     @wsme_pecan.wsexpose(Container, body=Container, status_code=201)
     def post(self, container):

@@ -45,11 +45,13 @@ class TestContainerController(db_base.DbTestCase):
         self.assertEqual(response.status_int, 201)
         self.assertTrue(mock_container_create.called)
 
+    @patch('magnum.conductor.api.API.container_show')
     @patch('magnum.conductor.api.API.container_create')
     @patch('magnum.conductor.api.API.container_delete')
     def test_create_container_with_command(self,
                                            mock_container_delete,
-                                           mock_container_create):
+                                           mock_container_create,
+                                           mock_container_show):
         mock_container_create.side_effect = lambda x, y, z: z
         # Create a container with a command
         params = ('{"name": "My Docker", "image_id": "ubuntu",'
@@ -60,6 +62,9 @@ class TestContainerController(db_base.DbTestCase):
                                  content_type='application/json')
         self.assertEqual(response.status_int, 201)
         # get all containers
+        container = objects.Container.list(self.context)[0]
+        container.status = 'Stopped'
+        mock_container_show.return_value = container
         response = self.app.get('/v1/containers')
         self.assertEqual(response.status_int, 200)
         self.assertEqual(1, len(response.json))
@@ -67,6 +72,7 @@ class TestContainerController(db_base.DbTestCase):
         self.assertIsNotNone(c.get('uuid'))
         self.assertEqual('My Docker', c.get('name'))
         self.assertEqual('env', c.get('command'))
+        self.assertEqual('Stopped', c.get('status'))
         # Delete the container we created
         response = self.app.delete('/v1/containers/%s' % c.get('uuid'))
         self.assertEqual(response.status_int, 204)
@@ -77,11 +83,13 @@ class TestContainerController(db_base.DbTestCase):
         self.assertEqual(0, len(c))
         self.assertTrue(mock_container_create.called)
 
+    @patch('magnum.conductor.api.API.container_show')
     @patch('magnum.conductor.api.API.container_create')
     @patch('magnum.conductor.api.API.container_delete')
     def test_create_container_with_bay_uuid(self,
-                                           mock_container_delete,
-                                           mock_container_create):
+                                            mock_container_delete,
+                                            mock_container_create,
+                                            mock_container_show):
         mock_container_create.side_effect = lambda x, y, z: z
         # Create a container with a command
         params = ('{"name": "My Docker", "image_id": "ubuntu",'
@@ -92,6 +100,9 @@ class TestContainerController(db_base.DbTestCase):
                                  content_type='application/json')
         self.assertEqual(response.status_int, 201)
         # get all containers
+        container = objects.Container.list(self.context)[0]
+        container.status = 'Stopped'
+        mock_container_show.return_value = container
         response = self.app.get('/v1/containers')
         self.assertEqual(response.status_int, 200)
         self.assertEqual(1, len(response.json))
@@ -99,6 +110,7 @@ class TestContainerController(db_base.DbTestCase):
         self.assertIsNotNone(c.get('uuid'))
         self.assertEqual('My Docker', c.get('name'))
         self.assertEqual('env', c.get('command'))
+        self.assertEqual('Stopped', c.get('status'))
         # Delete the container we created
         response = self.app.delete('/v1/containers/%s' % c.get('uuid'))
         self.assertEqual(response.status_int, 204)
@@ -128,11 +140,14 @@ class TestContainerController(db_base.DbTestCase):
                           params=params, content_type='application/json')
         self.assertTrue(mock_container_create.not_called)
 
+    @patch('magnum.conductor.api.API.container_show')
     @patch('magnum.objects.Container.list')
-    def test_get_all_containers(self, mock_container_list):
+    def test_get_all_containers(self, mock_container_list,
+                                mock_container_show):
         test_container = utils.get_test_container()
         containers = [objects.Container(self.context, **test_container)]
         mock_container_list.return_value = containers
+        mock_container_show.return_value = containers[0]
 
         response = self.app.get('/v1/containers')
 
@@ -145,11 +160,14 @@ class TestContainerController(db_base.DbTestCase):
         self.assertEqual(actual_containers[0].get('uuid'),
                          test_container['uuid'])
 
+    @patch('magnum.conductor.api.API.container_show')
     @patch('magnum.objects.Container.get_by_uuid')
-    def test_get_one_by_uuid(self, mock_container_get_by_uuid):
+    def test_get_one_by_uuid(self, mock_container_get_by_uuid,
+                             mock_container_show):
         test_container = utils.get_test_container()
         test_container_obj = objects.Container(self.context, **test_container)
         mock_container_get_by_uuid.return_value = test_container_obj
+        mock_container_show.return_value = test_container_obj
 
         response = self.app.get('/v1/containers/%s' % test_container['uuid'])
 
@@ -159,11 +177,14 @@ class TestContainerController(db_base.DbTestCase):
         self.assertEqual(response.json['uuid'],
                          test_container['uuid'])
 
+    @patch('magnum.conductor.api.API.container_show')
     @patch('magnum.objects.Container.get_by_name')
-    def test_get_one_by_name(self, mock_container_get_by_name):
+    def test_get_one_by_name(self, mock_container_get_by_name,
+                             mock_container_show):
         test_container = utils.get_test_container()
         test_container_obj = objects.Container(self.context, **test_container)
         mock_container_get_by_name.return_value = test_container_obj
+        mock_container_show.return_value = test_container_obj
 
         response = self.app.get('/v1/containers/%s' % test_container['name'])
 

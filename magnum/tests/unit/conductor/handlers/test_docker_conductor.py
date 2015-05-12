@@ -17,6 +17,8 @@ from oslo_config import cfg
 
 from magnum.common import exception
 from magnum.conductor.handlers import docker_conductor
+from magnum import objects
+from magnum.objects import container as obj_container
 from magnum.tests import base
 from mock import patch
 
@@ -111,18 +113,19 @@ class TestDockerConductor(base.BaseTestCase):
         mock_container.image_id = 'test_image:some_tag'
         mock_container.command = None
 
-        self.conductor.container_create(None, 'some-name', 'some-uuid',
-                                        mock_container)
+        container = self.conductor.container_create(None, 'some-name',
+                        'some-uuid', mock_container)
 
         utf8_image_id = self.conductor._encode_utf8(mock_container.image_id)
         mock_docker.pull.assert_called_once_with('test_image',
-                                                      tag='some_tag')
+                                                 tag='some_tag')
         mock_docker.inspect_image.assert_called_once_with(utf8_image_id)
         mock_docker.create_container.assert_called_once_with(
                                           mock_container.image_id,
                                           name='some-name',
                                           hostname='some-uuid',
                                           command=None)
+        self.assertEqual(obj_container.STOPPED, container.status)
 
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
     def test_container_create_with_command(self, mock_get_docker_client):
@@ -133,8 +136,8 @@ class TestDockerConductor(base.BaseTestCase):
         mock_container.image_id = 'test_image:some_tag'
         mock_container.command = 'env'
 
-        self.conductor.container_create(None, 'some-name', 'some-uuid',
-                                        mock_container)
+        container = self.conductor.container_create(None, 'some-name',
+                        'some-uuid', mock_container)
 
         utf8_image_id = self.conductor._encode_utf8(mock_container.image_id)
         mock_docker.pull.assert_called_once_with('test_image',
@@ -145,6 +148,7 @@ class TestDockerConductor(base.BaseTestCase):
                                           name='some-name',
                                           hostname='some-uuid',
                                           command='env')
+        self.assertEqual(obj_container.STOPPED, container.status)
 
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
     def test_container_create_with_failure(self, mock_get_docker_client):
@@ -165,8 +169,9 @@ class TestDockerConductor(base.BaseTestCase):
                                           tag='some_tag')
             self.assertFalse(mock_docker.create_container.called)
             mock_init.assert_called_once_with()
+            self.assertEqual(obj_container.ERROR, mock_container.status)
 
-    @patch.object(docker_conductor.Handler, '_find_container_by_name')
+    @mock.patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
     def test_container_delete(self, mock_get_docker_client,
                               mock_find_container):
@@ -220,12 +225,32 @@ class TestDockerConductor(base.BaseTestCase):
                                                         mock_container_uuid)
             mock_init.assert_called_once_with()
 
+    @mock.patch.object(objects.Container, 'get_by_uuid')
+    @patch.object(docker_conductor.Handler, '_find_container_by_name')
+    @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
+    def test_container_action(self, mock_get_docker_client,
+                              mock_find_container, mock_get_by_uuid):
+
+        mock_docker = mock.MagicMock()
+        mock_get_docker_client.return_value = mock_docker
+        mock_container = mock.MagicMock()
+        mock_get_by_uuid.return_value = mock_container
+        mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
+        mock_docker_id = '2703ef2b705d'
+        mock_find_container.return_value = mock_docker_id
+        self.conductor._container_action(None, mock_container_uuid,
+                                         'fake-status', 'fake-func')
+        self.assertEqual('fake-status', mock_container.status)
+
+    @mock.patch.object(objects.Container, 'get_by_uuid')
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
     def test_container_reboot(self, mock_get_docker_client,
-                              mock_find_container):
+                              mock_find_container, mock_get_by_uuid):
         mock_docker = mock.MagicMock()
         mock_get_docker_client.return_value = mock_docker
+        mock_container = mock.MagicMock()
+        mock_get_by_uuid.return_value = mock_container
         mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
         mock_docker_id = '2703ef2b705d'
         mock_find_container.return_value = mock_docker_id
@@ -233,6 +258,7 @@ class TestDockerConductor(base.BaseTestCase):
         mock_docker.restart.assert_called_once_with(mock_docker_id)
         mock_find_container.assert_called_once_with(mock_docker,
                                                     mock_container_uuid)
+        self.assertEqual(obj_container.RUNNING, mock_container.status)
 
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
@@ -257,12 +283,15 @@ class TestDockerConductor(base.BaseTestCase):
                                                         mock_container_uuid)
             mock_init.assert_called_once_with()
 
+    @mock.patch.object(objects.Container, 'get_by_uuid')
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
     def test_container_start(self, mock_get_docker_client,
-                             mock_find_container):
+                             mock_find_container, mock_get_by_uuid):
         mock_docker = mock.MagicMock()
         mock_get_docker_client.return_value = mock_docker
+        mock_container = mock.MagicMock()
+        mock_get_by_uuid.return_value = mock_container
         mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
         mock_docker_id = '2703ef2b705d'
         mock_find_container.return_value = mock_docker_id
@@ -270,6 +299,7 @@ class TestDockerConductor(base.BaseTestCase):
         mock_docker.start.assert_called_once_with(mock_docker_id)
         mock_find_container.assert_called_once_with(mock_docker,
                                                     mock_container_uuid)
+        self.assertEqual(obj_container.RUNNING, mock_container.status)
 
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
@@ -294,12 +324,15 @@ class TestDockerConductor(base.BaseTestCase):
                                                         mock_container_uuid)
             mock_init.assert_called_once_with()
 
+    @mock.patch.object(objects.Container, 'get_by_uuid')
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
     def test_container_stop(self, mock_get_docker_client,
-                            mock_find_container):
+                            mock_find_container, mock_get_by_uuid):
         mock_docker = mock.MagicMock()
         mock_get_docker_client.return_value = mock_docker
+        mock_container = mock.MagicMock()
+        mock_get_by_uuid.return_value = mock_container
         mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
         mock_docker_id = '2703ef2b705d'
         mock_find_container.return_value = mock_docker_id
@@ -307,6 +340,7 @@ class TestDockerConductor(base.BaseTestCase):
         mock_docker.stop.assert_called_once_with(mock_docker_id)
         mock_find_container.assert_called_once_with(mock_docker,
                                                     mock_container_uuid)
+        self.assertEqual(obj_container.STOPPED, mock_container.status)
 
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
@@ -330,12 +364,15 @@ class TestDockerConductor(base.BaseTestCase):
                                                         mock_container_uuid)
             mock_init.assert_called_once_with()
 
+    @mock.patch.object(objects.Container, 'get_by_uuid')
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
     def test_container_pause(self, mock_get_docker_client,
-                             mock_find_container):
+                             mock_find_container, mock_get_by_uuid):
         mock_docker = mock.MagicMock()
         mock_get_docker_client.return_value = mock_docker
+        mock_container = mock.MagicMock()
+        mock_get_by_uuid.return_value = mock_container
         mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
         mock_docker_id = '2703ef2b705d'
         mock_find_container.return_value = mock_docker_id
@@ -343,6 +380,7 @@ class TestDockerConductor(base.BaseTestCase):
         mock_docker.pause.assert_called_once_with(mock_docker_id)
         mock_find_container.assert_called_once_with(mock_docker,
                                                     mock_container_uuid)
+        self.assertEqual(obj_container.PAUSED, mock_container.status)
 
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
@@ -366,12 +404,15 @@ class TestDockerConductor(base.BaseTestCase):
                                                         mock_container_uuid)
             mock_init.assert_called_once_with()
 
+    @mock.patch.object(objects.Container, 'get_by_uuid')
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
     def test_container_unpause(self, mock_get_docker_client,
-                               mock_find_container):
+                               mock_find_container, mock_get_by_uuid):
         mock_docker = mock.MagicMock()
         mock_get_docker_client.return_value = mock_docker
+        mock_container = mock.MagicMock()
+        mock_get_by_uuid.return_value = mock_container
         mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
         mock_docker_id = '2703ef2b705d'
         mock_find_container.return_value = mock_docker_id
@@ -379,6 +420,7 @@ class TestDockerConductor(base.BaseTestCase):
         mock_docker.unpause.assert_called_once_with(mock_docker_id)
         mock_find_container.assert_called_once_with(mock_docker,
                                                     mock_container_uuid)
+        self.assertEqual(obj_container.RUNNING, mock_container.status)
 
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
@@ -403,12 +445,15 @@ class TestDockerConductor(base.BaseTestCase):
                                                         mock_container_uuid)
             mock_init.assert_called_once_with()
 
+    @mock.patch.object(objects.Container, 'get_by_uuid')
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
     def test_container_show(self, mock_get_docker_client,
-                            mock_find_container):
+                            mock_find_container, mock_get_by_uuid):
         mock_docker = mock.MagicMock()
         mock_get_docker_client.return_value = mock_docker
+        mock_container = mock.MagicMock()
+        mock_get_by_uuid.return_value = mock_container
         mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
         mock_docker_id = '2703ef2b705d'
         mock_find_container.return_value = mock_docker_id
@@ -418,13 +463,96 @@ class TestDockerConductor(base.BaseTestCase):
         mock_find_container.assert_called_once_with(mock_docker,
                                                     mock_container_uuid)
 
+    @mock.patch.object(objects.Container, 'get_by_uuid')
+    @mock.patch.object(docker_conductor.Handler, '_find_container_by_name')
+    @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
+    def test_container_show_with_running_state(self, mock_get_docker_client,
+                                               mock_find_container,
+                                               mock_get_by_uuid):
+        mock_docker = mock.MagicMock()
+        mock_get_docker_client.return_value = mock_docker
+        mock_container = mock.MagicMock()
+        mock_get_by_uuid.return_value = mock_container
+        mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
+        mock_docker_id = '2703ef2b705d'
+        mock_find_container.return_value = mock_docker_id
+        mock_container_detail = {'State': {'Error': '',
+                                           'Running': True,
+                                           'Paused': False}}
+        mock_docker.inspect_container.return_value = mock_container_detail
+        self.conductor.container_show(None, mock_container_uuid)
+        self.assertEqual(obj_container.RUNNING, mock_container.status)
+
+    @mock.patch.object(objects.Container, 'get_by_uuid')
+    @mock.patch.object(docker_conductor.Handler, '_find_container_by_name')
+    @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
+    def test_container_show_with_stop_state(self, mock_get_docker_client,
+                                            mock_find_container,
+                                            mock_get_by_uuid):
+        mock_docker = mock.MagicMock()
+        mock_get_docker_client.return_value = mock_docker
+        mock_container = mock.MagicMock()
+        mock_get_by_uuid.return_value = mock_container
+        mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
+        mock_docker_id = '2703ef2b705d'
+        mock_find_container.return_value = mock_docker_id
+        mock_container_detail = {'State': {'Error': '',
+                                           'Running': False,
+                                           'Paused': False}}
+        mock_docker.inspect_container.return_value = mock_container_detail
+        self.conductor.container_show(None, mock_container_uuid)
+        self.assertEqual(obj_container.STOPPED, mock_container.status)
+
+    @mock.patch.object(objects.Container, 'get_by_uuid')
+    @mock.patch.object(docker_conductor.Handler, '_find_container_by_name')
+    @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
+    def test_container_show_with_pause_state(self, mock_get_docker_client,
+                                             mock_find_container,
+                                             mock_get_by_uuid):
+        mock_docker = mock.MagicMock()
+        mock_get_docker_client.return_value = mock_docker
+        mock_container = mock.MagicMock()
+        mock_get_by_uuid.return_value = mock_container
+        mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
+        mock_docker_id = '2703ef2b705d'
+        mock_find_container.return_value = mock_docker_id
+        mock_container_detail = {'State': {'Error': '',
+                                           'Running': False,
+                                           'Paused': True}}
+        mock_docker.inspect_container.return_value = mock_container_detail
+        self.conductor.container_show(None, mock_container_uuid)
+        self.assertEqual(obj_container.PAUSED, mock_container.status)
+
+    @mock.patch.object(objects.Container, 'get_by_uuid')
+    @mock.patch.object(docker_conductor.Handler, '_find_container_by_name')
+    @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
+    def test_container_show_with_error_status(self, mock_get_docker_client,
+                                              mock_find_container,
+                                              mock_get_by_uuid):
+        mock_docker = mock.MagicMock()
+        mock_get_docker_client.return_value = mock_docker
+        mock_container = mock.MagicMock()
+        mock_get_by_uuid.return_value = mock_container
+        mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
+        mock_docker_id = '2703ef2b705d'
+        mock_find_container.return_value = mock_docker_id
+        mock_container_detail = {'State': {'Error': True,
+                                           'Running': False,
+                                           'Paused': False}}
+        mock_docker.inspect_container.return_value = mock_container_detail
+        self.conductor.container_show(None, mock_container_uuid)
+        self.assertEqual(obj_container.ERROR, mock_container.status)
+
+    @mock.patch.object(objects.Container, 'get_by_uuid')
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
     def test_container_show_with_failure(self, mock_get_docker_client,
-                                         mock_find_container):
+                                         mock_find_container,
+                                         mock_get_by_uuid):
         mock_docker = mock.MagicMock()
         mock_get_docker_client.return_value = mock_docker
-        mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
+        mock_get_by_uuid.return_value = mock.MagicMock()
+        mock_container_uuid = 'd545a92d-609a-428f-8edb-1d6b02ad20ca1'
         mock_docker_id = '2703ef2b705d'
         mock_find_container.return_value = mock_docker_id
         with patch.object(errors.APIError, '__str__',
@@ -439,6 +567,31 @@ class TestDockerConductor(base.BaseTestCase):
             mock_find_container.assert_called_once_with(mock_docker,
                                                         mock_container_uuid)
             mock_init.assert_called_once_with()
+
+    @mock.patch.object(objects.Container, 'get_by_uuid')
+    @patch.object(docker_conductor.Handler, '_find_container_by_name')
+    @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
+    def test_container_show_with_not_found(self, mock_get_docker_client,
+                                           mock_find_container,
+                                           mock_get_by_uuid):
+        mock_docker = mock.MagicMock()
+        mock_get_docker_client.return_value = mock_docker
+        mock_container = mock.MagicMock()
+        mock_get_by_uuid.return_value = mock_container
+        mock_container_uuid = 'd545a92d-609a-428f-8edb-1d6b02ad20ca1'
+        mock_docker_id = '2703ef2b705d'
+        mock_find_container.return_value = mock_docker_id
+        with patch.object(errors.APIError, '__str__',
+                          return_value='404 error') as mock_init:
+            mock_docker.inspect_container = mock.Mock(side_effect=
+                                  errors.APIError('Error', '', ''))
+            self.conductor.container_show(None, mock_container_uuid)
+            mock_docker.inspect_container.assert_called_once_with(
+                                                        mock_docker_id)
+            mock_find_container.assert_called_once_with(mock_docker,
+                                                        mock_container_uuid)
+            mock_init.assert_called_once_with()
+            self.assertEqual(obj_container.ERROR, mock_container.status)
 
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
