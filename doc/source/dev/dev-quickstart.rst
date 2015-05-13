@@ -313,8 +313,8 @@ address 8.8.8.8 four times. ::
 
     $ echo '{"bay_uuid": "eda91c1e-6103-45d4-ab09-3f316310fa8e",
              "name": "test-container", "image_id": "cirros",
-             "command": "ping -c 4 8.8.8.8"}' > container.json
-    $ magnum container-create < container.json
+             "command": "ping -c 4 8.8.8.8"}' > ~/container.json
+    $ magnum container-create < ~/container.json
     +------------+----------------------------------------+
     | Property   | Value                                  |
     +------------+----------------------------------------+
