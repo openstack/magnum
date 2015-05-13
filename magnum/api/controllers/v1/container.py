@@ -171,7 +171,7 @@ class StartController(object):
 
 class StopController(object):
     @wsme_pecan.wsexpose(types.uuid_or_name, wtypes.text)
-    def _default(self, container_ident, *remainder):
+    def _default(self, container_ident):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
@@ -184,7 +184,7 @@ class StopController(object):
 
 class RebootController(object):
     @wsme_pecan.wsexpose(types.uuid_or_name, wtypes.text)
-    def _default(self, container_ident, *remainder):
+    def _default(self, container_ident):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
@@ -197,7 +197,7 @@ class RebootController(object):
 
 class PauseController(object):
     @wsme_pecan.wsexpose(types.uuid_or_name, wtypes.text)
-    def _default(self, container_ident, *remainder):
+    def _default(self, container_ident):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
@@ -210,7 +210,7 @@ class PauseController(object):
 
 class UnpauseController(object):
     @wsme_pecan.wsexpose(types.uuid_or_name, wtypes.text)
-    def _default(self, container_ident, *remainder):
+    def _default(self, container_ident):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
@@ -223,7 +223,7 @@ class UnpauseController(object):
 
 class LogsController(object):
     @wsme_pecan.wsexpose(types.uuid_or_name, wtypes.text)
-    def _default(self, container_ident, *remainder):
+    def _default(self, container_ident):
         if pecan.request.method != 'GET':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
@@ -236,7 +236,7 @@ class LogsController(object):
 
 class ExecuteController(object):
     @wsme_pecan.wsexpose(types.uuid_or_name, wtypes.text, wtypes.text)
-    def _default(self, container_ident, command, *remainder):
+    def _default(self, container_ident, command):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
