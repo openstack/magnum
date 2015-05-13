@@ -20,8 +20,8 @@ import wsme
 
 from magnum.common import exception
 from magnum.common import utils
+from magnum.i18n import _
 from magnum import objects
-from magnum.openstack.common._i18n import _
 
 CONF = cfg.CONF
 

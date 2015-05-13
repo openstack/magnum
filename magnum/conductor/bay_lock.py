@@ -19,9 +19,9 @@ from oslo_utils import excutils
 
 from magnum.common import exception
 from magnum.conductor.api import ListenerAPI
+from magnum.i18n import _LI
+from magnum.i18n import _LW
 from magnum import objects
-from magnum.openstack.common._i18n import _LI
-from magnum.openstack.common._i18n import _LW
 from magnum.openstack.common import log as logging
 
 

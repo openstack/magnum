@@ -19,8 +19,8 @@ from requests import exceptions
 from six.moves import urllib
 
 from magnum.common import exception
-from magnum.openstack.common._i18n import _
-from magnum.openstack.common._i18n import _LI
+from magnum.i18n import _
+from magnum.i18n import _LI
 from magnum.openstack.common import log as logging
 
 URLFETCH_OPTS = [

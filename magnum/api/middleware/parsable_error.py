@@ -23,8 +23,8 @@ from xml import etree as et
 
 import webob
 
-from magnum.openstack.common._i18n import _
-from magnum.openstack.common._i18n import _LE
+from magnum.i18n import _
+from magnum.i18n import _LE
 from magnum.openstack.common import log
 
 LOG = log.getLogger(__name__)

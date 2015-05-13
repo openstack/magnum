@@ -20,7 +20,7 @@ import requests
 import six
 
 from magnum.common import exception
-from magnum.openstack.common._i18n import _
+from magnum.i18n import _
 
 from magnum.common import paths
 

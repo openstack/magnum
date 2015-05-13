@@ -23,7 +23,7 @@ from oslo_config import cfg
 
 from magnum.api import app as api_app
 from magnum.common import service
-from magnum.openstack.common._i18n import _LI
+from magnum.i18n import _LI
 from magnum.openstack.common import log as logging
 
 

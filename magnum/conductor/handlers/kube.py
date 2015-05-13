@@ -19,8 +19,8 @@ from magnum.common import exception
 from magnum.common import k8s_manifest
 from magnum.common.pythonk8sclient.client import ApivbetaApi
 from magnum.common.pythonk8sclient.client import swagger
+from magnum.i18n import _
 from magnum import objects
-from magnum.openstack.common._i18n import _
 from magnum.openstack.common import log as logging
 
 import ast
