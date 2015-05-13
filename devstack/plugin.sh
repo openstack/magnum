@@ -12,9 +12,6 @@ if is_service_enabled m-api m-cond; then
     if [[ "$1" == "stack" && "$2" == "pre-install" ]]; then
         echo_summary "Before Installing magnum"
         mkdir -p $SCREEN_LOGDIR
-        if [[ -z `grep 'python-kubernetes' ${REQUIREMENTS_DIR}/global-requirements.txt` ]]; then
-            echo "python-kubernetes>=0.2" >> ${REQUIREMENTS_DIR}/global-requirements.txt
-        fi
         if [[ -z `grep 'docker-py' ${REQUIREMENTS_DIR}/global-requirements.txt` ]]; then
             sed -i 's/requests>=.*/requests>=2.5.2/g' ${REQUIREMENTS_DIR}/global-requirements.txt
             echo "docker-py>=1.1.0" >> ${REQUIREMENTS_DIR}/global-requirements.txt
