@@ -14,17 +14,6 @@ introduce support for Ironic deployment of baremetal nodes.
 This session has only been tested on Ubuntu 14.04 (Trusty) and Fedora 20/21.
 We recommend users to select one of them if it is possible.
 
-NB: Magnum depends on a command line tool in Kubernetes called kubectl
-to execute its operations with Kubernetes. We are addressing this in milestone
-#2 by implementing a native ReST client for Kubernetes.  In the meantime, the
-required action is to install kubectl manually.
-
-Install binary distribution of kubectl distributed by Google::
-
-    wget https://github.com/GoogleCloudPlatform/kubernetes/releases/download/v0.15.0/kubernetes.tar.gz
-    tar -xzvf kubernetes.tar.gz
-    sudo cp -a kubernetes/platforms/linux/amd64/kubectl /usr/bin/kubectl
-
 Clone DevStack::
 
     cd ~

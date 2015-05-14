@@ -86,8 +86,6 @@ class Handler(object):
          service.  API calls via AMQP (within the ReST API) trigger the
          handlers to be called.
 
-         This handler acts as an interface to executes kubectl command line
-         services.
     """
 
     def __init__(self):
@@ -206,7 +204,6 @@ class Handler(object):
 
     def pod_delete(self, context, uuid):
         LOG.debug("pod_delete %s", uuid)
-        # trigger a kubectl command
         pod = objects.Pod.get_by_uuid(context, uuid)
         k8s_master_url = _retrieve_k8s_master_url(context, pod)
         self.k8s_api = k8s_master_url

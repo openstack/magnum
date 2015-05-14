@@ -105,17 +105,6 @@ deployment of baremetal nodes.
 This session has only been tested on Ubuntu 14.04 (Trusty) and Fedora 20/21.
 We recommend users to select one of them if it is possible.
 
-NB: Magnum depends on a command line tool in kubernetes called kubectl
-to execute its operations with Kubernetes.  We are addressing this in milestone
-#2 by implementing a native ReST client for Kubernetes.  In the meantime, the
-required action is to install kubectl manually.
-
-Install binary distribution of kubectl distributed by Google::
-
-    wget https://github.com/GoogleCloudPlatform/kubernetes/releases/download/v0.15.0/kubernetes.tar.gz
-    tar -xzvf kubernetes.tar.gz
-    sudo cp -a kubernetes/platforms/linux/amd64/kubectl /usr/bin/kubectl
-
 Clone DevStack::
 
     # Create dir to run devstack from, if not done so already
@@ -238,16 +227,29 @@ slaves and sentinels::
 Full lifecycle and introspection operations for each object are supported.  For
 example, magnum bay-create, magnum baymodel-delete, magnum rc-show, magnum service-list.
 
-In this milestone you have to use the kubernetes kubectl tool to explore the
-redis cluster in detail::
+Now run bay-show command to get the IP of the bay host on which the redis-master is
+running on::
 
-    export KUBERNETES_MASTER=http://$(nova list | grep kube_master | awk '{print $13}'):8080
-    kubectl get pod
+    $ magnum bay-show testbay
+    +----------------+--------------------------------------+
+    | Property       | Value                                |
+    +----------------+--------------------------------------+
+    | status         | CREATE_COMPLETE                      |
+    | uuid           | 7d59afb0-1c24-4cae-93fc-4692f5438d34 |
+    | created_at     | 2015-05-11T05:13:42+00:00            |
+    | updated_at     | 2015-05-11T05:15:32+00:00            |
+    | api_address    | 192.168.19.85                        |
+    | baymodel_id    | 0a79f347-54e5-406c-bc20-4cd4ee1fcea0 |
+    | node_count     | 1                                    |
+    | node_addresses | [u'192.168.19.86']                   |
+    | discovery_url  | None                                 |
+    | name           | testbay                              |
+    +----------------+--------------------------------------+
 
-The output of `kubectl get pod` indicates the redis-master is running on the
-bay host with IP address 10.0.0.5. To access the redis master::
+The output indicates the redis-master is running on the
+bay host with IP address 192.168.19.86. To access the redis master::
 
-    ssh minion@$(nova list | grep 10.0.0.5 | awk '{print $13}')
+    ssh minion@192.168.19.86
     REDIS_ID=$(docker ps | grep redis:v1 | grep k8s_master | awk '{print $1}')
     docker exec -i -t $REDIS_ID redis-cli
 

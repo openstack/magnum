@@ -72,8 +72,6 @@ class API(rpc_service.API):
         return self._call('service_update', service=service)
 
     def service_list(self, context, limit, marker, sort_key, sort_dir):
-        # TODO(pkilambi): return kubectl results once we parse appropriately
-        # or figure out a clean way to interact with k8s.
         return objects.Service.list(context, limit, marker, sort_key, sort_dir)
 
     def service_delete(self, uuid):
