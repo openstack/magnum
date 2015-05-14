@@ -458,3 +458,9 @@ class ImageNotAuthorized(MagnumException):
 
 class OSDistroFieldNotFound(ResourceNotFound):
     message = _("Image %(image_id)s doesn't contain os-distro field.")
+
+
+class KubernetesAPIFailed(MagnumException):
+    def __init__(self, message=None, **kwargs):
+        self.__class__.code = kwargs.get('code')
+        super(KubernetesAPIFailed, self).__init__(message, **kwargs)

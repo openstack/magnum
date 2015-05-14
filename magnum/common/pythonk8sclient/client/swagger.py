@@ -139,7 +139,7 @@ class ApiClient(object):
     """
     if isinstance(obj, type(None)):
       return None
-    elif isinstance(obj, (str, int, long, float, bool, file)):
+    elif isinstance(obj, (unicode, str, int, long, float, bool, file)):
       return obj
     elif isinstance(obj, list):
       return [ApiClient.sanitizeForSerialization(subObj) for subObj in obj]

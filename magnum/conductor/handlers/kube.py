@@ -16,12 +16,15 @@ from oslo_config import cfg
 
 from magnum.common import clients
 from magnum.common import exception
-from magnum.conductor.handlers.common import kube_utils
+from magnum.common import k8s_manifest
+from magnum.common.pythonk8sclient.client import ApivbetaApi
+from magnum.common.pythonk8sclient.client import swagger
 from magnum import objects
 from magnum.openstack.common._i18n import _
-from magnum.openstack.common._i18n import _LW
 from magnum.openstack.common import log as logging
 
+import ast
+from six.moves.urllib import error
 
 LOG = logging.getLogger(__name__)
 
@@ -89,15 +92,38 @@ class Handler(object):
 
     def __init__(self):
         super(Handler, self).__init__()
-        self.kube_cli = kube_utils.KubeClient()
+        self._k8s_api = None
+
+    @property
+    def k8s_api(self):
+        return self._k8s_api
+
+    @k8s_api.setter
+    def k8s_api(self, k8s_master_url):
+        """Creates connection with Kubernetes master and
+            creates ApivbetaApi instance to call Kubernetes
+            APIs.
+
+            :param k8s_master_url: Kubernetes master URL
+        """
+        if self._k8s_api is None:
+            # build a connection with Kubernetes master
+            client = swagger.ApiClient(k8s_master_url)
+
+            # create the ApivbetaApi class instance
+            self._k8s_api = ApivbetaApi.ApivbetaApi(client)
 
     def service_create(self, context, service):
         LOG.debug("service_create")
         k8s_master_url = _retrieve_k8s_master_url(context, service)
-        # trigger a kubectl command
-        status = self.kube_cli.service_create(k8s_master_url, service)
-        if not status:
-            return None
+        self.k8s_api = k8s_master_url
+        manifest = k8s_manifest.parse(service.manifest)
+        try:
+            self.k8s_api.createService(body=manifest,
+                                       namespaces='default')
+        except error.HTTPError as err:
+            message = ast.literal_eval(err.read())['message']
+            raise exception.KubernetesAPIFailed(code=err.code, message=message)
         # call the service object to persist in db
         service.create(context)
         return service
@@ -105,10 +131,15 @@ class Handler(object):
     def service_update(self, context, service):
         LOG.debug("service_update %s", service.uuid)
         k8s_master_url = _retrieve_k8s_master_url(context, service)
-        # trigger a kubectl command
-        status = self.kube_cli.service_update(k8s_master_url, service)
-        if not status:
-            return None
+        self.k8s_api = k8s_master_url
+        manifest = k8s_manifest.parse(service.manifest)
+        try:
+            self.k8s_api.replaceService(name=service.name,
+                                        body=manifest,
+                                        namespaces='default')
+        except error.HTTPError as err:
+            message = ast.literal_eval(err.read())['message']
+            raise exception.KubernetesAPIFailed(code=err.code, message=message)
         # call the service object to persist in db
         service.refresh(context)
         service.save()
@@ -118,11 +149,18 @@ class Handler(object):
         LOG.debug("service_delete %s", uuid)
         service = objects.Service.get_by_uuid(context, uuid)
         k8s_master_url = _retrieve_k8s_master_url(context, service)
+        self.k8s_api = k8s_master_url
         if _object_has_stack(context, service):
-            # trigger a kubectl command
-            status = self.kube_cli.service_delete(k8s_master_url, service.name)
-            if not status:
-                return None
+            try:
+                self.k8s_api.deleteService(name=service.name,
+                                           namespaces='default')
+            except error.HTTPError as err:
+                if err.code == 404:
+                    pass
+                else:
+                    message = ast.literal_eval(err.read())['message']
+                    raise exception.KubernetesAPIFailed(code=err.code,
+                                                        message=message)
         # call the service object to persist in db
         service.destroy(context)
 
@@ -130,13 +168,17 @@ class Handler(object):
     def pod_create(self, context, pod):
         LOG.debug("pod_create")
         k8s_master_url = _retrieve_k8s_master_url(context, pod)
-        # trigger a kubectl command
-        status = self.kube_cli.pod_create(k8s_master_url, pod)
-        # TODO(yuanying): Is this correct location of updating status?
-        if not status:
+        self.k8s_api = k8s_master_url
+        manifest = k8s_manifest.parse(pod.manifest)
+        try:
+            resp = self.k8s_api.createPod(body=manifest, namespaces='default')
+        except error.HTTPError as err:
             pod.status = 'failed'
-        else:
-            pod.status = 'pending'
+            if err.code != 409:
+                pod.create(context)
+            message = ast.literal_eval(err.read())['message']
+            raise exception.KubernetesAPIFailed(code=err.code, message=message)
+        pod.status = resp['status']['phase']
         # call the pod object to persist in db
         # TODO(yuanying): parse pod file and,
         # - extract pod name and set it
@@ -149,10 +191,14 @@ class Handler(object):
     def pod_update(self, context, pod):
         LOG.debug("pod_update %s", pod.uuid)
         k8s_master_url = _retrieve_k8s_master_url(context, pod)
-        # trigger a kubectl command
-        status = self.kube_cli.pod_update(k8s_master_url, pod)
-        if not status:
-            return None
+        self.k8s_api = k8s_master_url
+        manifest = k8s_manifest.parse(pod.manifest)
+        try:
+            self.k8s_api.replacePod(name=pod.name, body=manifest,
+                                    namespaces='default')
+        except error.HTTPError as err:
+            message = ast.literal_eval(err.read())['message']
+            raise exception.KubernetesAPIFailed(code=err.code, message=message)
         # call the pod object to persist in db
         pod.refresh(context)
         pod.save()
@@ -163,16 +209,18 @@ class Handler(object):
         # trigger a kubectl command
         pod = objects.Pod.get_by_uuid(context, uuid)
         k8s_master_url = _retrieve_k8s_master_url(context, pod)
+        self.k8s_api = k8s_master_url
         if _object_has_stack(context, pod):
             try:
-                status = self.kube_cli.pod_delete(k8s_master_url, pod.name)
-
-                if not status:
-                    return None
-            except exception.PodNotFound:
-                msg = _LW("Pod '%s' not found on bay, "
-                       "continuing to delete from database.")
-                LOG.warn(msg, uuid)
+                self.k8s_api.deletePod(name=pod.name,
+                                       namespaces='default')
+            except error.HTTPError as err:
+                if err.code == 404:
+                    pass
+                else:
+                    message = ast.literal_eval(err.read())['message']
+                    raise exception.KubernetesAPIFailed(code=err.code,
+                                                        message=message)
         # call the pod object to persist in db
         pod.destroy(context)
 
@@ -180,10 +228,14 @@ class Handler(object):
     def rc_create(self, context, rc):
         LOG.debug("rc_create")
         k8s_master_url = _retrieve_k8s_master_url(context, rc)
-        # trigger a kubectl command
-        status = self.kube_cli.rc_create(k8s_master_url, rc)
-        if not status:
-            return None
+        self.k8s_api = k8s_master_url
+        manifest = k8s_manifest.parse(rc.manifest)
+        try:
+            self.k8s_api.createReplicationController(body=manifest,
+                                                     namespaces='default')
+        except error.HTTPError as err:
+            message = ast.literal_eval(err.read())['message']
+            raise exception.KubernetesAPIFailed(code=err.code, message=message)
         # call the rc object to persist in db
         rc.create(context)
         return rc
@@ -191,10 +243,15 @@ class Handler(object):
     def rc_update(self, context, rc):
         LOG.debug("rc_update %s", rc.uuid)
         k8s_master_url = _retrieve_k8s_master_url(context, rc)
-        # trigger a kubectl command
-        status = self.kube_cli.rc_update(k8s_master_url, rc)
-        if not status:
-            return None
+        self.k8s_api = k8s_master_url
+        manifest = k8s_manifest.parse(rc.manifest)
+        try:
+            self.k8s_api.replaceReplicationController(name=rc.name,
+                                                      body=manifest,
+                                                      namespaces='default')
+        except error.HTTPError as err:
+            message = ast.literal_eval(err.read())['message']
+            raise exception.KubernetesAPIFailed(code=err.code, message=message)
         # call the rc object to persist in db
         rc.refresh(context)
         rc.save()
@@ -204,10 +261,17 @@ class Handler(object):
         LOG.debug("rc_delete %s", uuid)
         rc = objects.ReplicationController.get_by_uuid(context, uuid)
         k8s_master_url = _retrieve_k8s_master_url(context, rc)
+        self.k8s_api = k8s_master_url
         if _object_has_stack(context, rc):
-            # trigger a kubectl command
-            status = self.kube_cli.rc_delete(k8s_master_url, rc.name)
-            if not status:
-                return None
+            try:
+                self.k8s_api.deleteReplicationController(name=rc.name,
+                                                         namespaces='default')
+            except error.HTTPError as err:
+                if err.code == 404:
+                    pass
+                else:
+                    message = ast.literal_eval(err.read())['message']
+                    raise exception.KubernetesAPIFailed(code=err.code,
+                                                        message=message)
         # call the rc object to persist in db
         rc.destroy(context)
