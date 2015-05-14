@@ -307,15 +307,21 @@ to get it's uuid. ::
     | baymodel_id   | a93ee8bd-fec9-4ea7-ac65-c66c1dba60af     |
     | node_count    | 2                                        |
     | discovery_url |                                          |
-    | name          | swarm bay                                |
+    | name          | swarmbay                                 |
     +---------------+------------------------------------------+
 
 Next we will create a container in this bay. This container will ping the
 address 8.8.8.8 four times. ::
 
-    $ echo '{"bay_uuid": "eda91c1e-6103-45d4-ab09-3f316310fa8e",
-             "name": "test-container", "image_id": "cirros",
-             "command": "ping -c 4 8.8.8.8"}' > ~/container.json
+    $ BAY_UUID=$(magnum bay-list | awk '/ swarmbay /{print $2}')
+    $ cat > ~/container.json << END
+    {
+        "bay_uuid": "$BAY_UUID",
+        "name": "test-container",
+        "image_id": "cirros",
+        "command": "ping -c 4 8.8.8.8"
+    }
+    END
     $ magnum container-create < ~/container.json
     +------------+----------------------------------------+
     | Property   | Value                                  |
@@ -333,8 +339,8 @@ address 8.8.8.8 four times. ::
 At this point, the container exists, but it has not been started yet. Let's
 start it then check it's output. ::
 
-    $ magnum container-start 25485358-ae9b-49d1-a1e1-1af0a7c3f911
-    $ magnum container-logs 25485358-ae9b-49d1-a1e1-1af0a7c3f911
+    $ magnum container-start test-container
+    $ magnum container-logs test-container
     PING 8.8.8.8 (8.8.8.8): 56 data bytes
     64 bytes from 8.8.8.8: seq=0 ttl=40 time=25.513 ms
     64 bytes from 8.8.8.8: seq=1 ttl=40 time=25.348 ms
@@ -347,7 +353,7 @@ start it then check it's output. ::
 
 Now that we're done with the container, we can delete it. ::
 
-    magnum container-delete 25485358-ae9b-49d1-a1e1-1af0a7c3f911
+    magnum container-delete test-container
 
 Building developer documentation
 ================================
