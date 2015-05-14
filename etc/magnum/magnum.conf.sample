@@ -165,7 +165,8 @@
 # Size of RPC thread pool. (integer value)
 #rpc_thread_pool_size = 64
 
-# Driver or drivers to handle sending notifications. (multi valued)
+# The Drivers(s) to handle sending notifications. Possible values are
+# messaging, messagingv2, routing,log, test, noop (multi valued)
 #notification_driver =
 
 # AMQP topic used for OpenStack notifications. (list value)
@@ -215,7 +216,7 @@
 
 # Location of template to build a k8s cluster on atomic.  (string
 # value)
-# Deprecated group/name - [k8s_heat]/template_path
+# Deprecated group/name - [bay_heat]/template_path
 #k8s_atomic_template_path = $pybasedir/templates/heat-kubernetes/kubecluster.yaml
 
 # Location of template to build a k8s cluster on coreos.  (string
@@ -223,7 +224,7 @@
 #k8s_coreos_template_path = $pybasedir/templates/heat-kubernetes/kubecluster-coreos.yaml
 
 # coreos discovery token url. (string value)
-# Deprecated group/name - [k8s_heat]/discovery_token_url
+# Deprecated group/name - [bay_heat]/discovery_token_url
 #coreos_discovery_token_url = <None>
 
 # Location of template to build a swarm cluster on atomic.  (string
@@ -244,6 +245,28 @@
 
 # Enabled bay definition entry points.  (list value)
 #enabled_definitions = magnum_vm_atomic_k8s,magnum_vm_coreos_k8s,magnum_vm_atomic_swarm
+
+
+[bay_heat]
+
+#
+# From magnum
+#
+
+# Number of attempts to query the Heat stack for finding out the
+# status of the created stack and getting template outputs.  This
+# value is ignored during bay creation if timeout is set as the poll
+# will continue until bay creation either ends or times out. (integer
+# value)
+#max_attempts = 2000
+
+# Sleep time interval between two attempts of querying the Heat stack.
+# This interval is in seconds. (integer value)
+#wait_interval = 1
+
+# The length of time to let bay creation continue.  This interval is
+# in minutes.  The default is no timeout. (integer value)
+#bay_create_timeout = <None>
 
 
 [conductor]
@@ -430,28 +453,6 @@
 # If set, then the server's certificate will not be verified. (boolean
 # value)
 #insecure = false
-
-
-[k8s_heat]
-
-#
-# From magnum
-#
-
-# Number of attempts to query the Heat stack for finding out the
-# status of the created stack and getting template outputs.  This
-# value is ignored during bay creation if timeout is set as the poll
-# will continue until bay creation either ends or times out. (integer
-# value)
-#max_attempts = 2000
-
-# Sleep time interval between two attempts of querying the Heat stack.
-# This interval is in seconds. (integer value)
-#wait_interval = 1
-
-# The length of time to let bay creation continue.  This interval is
-# in minutes.  The default is no timeout. (integer value)
-#bay_create_timeout = <None>
 
 
 [keystone_authtoken]
@@ -698,8 +699,7 @@
 # Deprecated group/name - [amqp1]/trace
 #trace = false
 
-# CA certificate PEM file for verifing server certificate (string
-# value)
+# CA certificate PEM file to verify server certificate (string value)
 # Deprecated group/name - [amqp1]/ssl_ca_file
 #ssl_ca_file =
 
@@ -729,6 +729,7 @@
 #
 
 # Use durable queues in AMQP. (boolean value)
+# Deprecated group/name - [DEFAULT]/amqp_durable_queues
 # Deprecated group/name - [DEFAULT]/rabbit_durable_queues
 #amqp_durable_queues = false
 
@@ -797,6 +798,7 @@
 #
 
 # Use durable queues in AMQP. (boolean value)
+# Deprecated group/name - [DEFAULT]/amqp_durable_queues
 # Deprecated group/name - [DEFAULT]/rabbit_durable_queues
 #amqp_durable_queues = false
 
@@ -885,10 +887,9 @@
 #rabbit_ha_queues = false
 
 # Number of seconds after which the Rabbit broker is considered down
-# if heartbeat's keep-alive fails (0 disables the heartbeat, >0
-# enables it. Enabling heartbeats requires kombu>=3.0.7 and
-# amqp>=1.4.0). EXPERIMENTAL (integer value)
-#heartbeat_timeout_threshold = 0
+# if heartbeat's keep-alive fails (0 disable the heartbeat). (integer
+# value)
+#heartbeat_timeout_threshold = 60
 
 # How often times during the heartbeat_timeout_threshold we check the
 # heartbeat. (integer value)

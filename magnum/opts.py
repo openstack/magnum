@@ -21,7 +21,7 @@ import magnum.common.clients
 import magnum.common.exception
 import magnum.common.magnum_keystoneclient
 import magnum.conductor.config
-import magnum.conductor.handlers.bay_k8s_heat
+import magnum.conductor.handlers.bay_conductor
 import magnum.conductor.handlers.docker_conductor
 import magnum.conductor.template_definition
 import magnum.db.sqlalchemy.models
@@ -51,5 +51,5 @@ def list_opts():
         ('database', magnum.db.sqlalchemy.models.sql_opts),
         ('docker', magnum.conductor.handlers.docker_conductor.docker_opts),
         ('heat_client', magnum.common.clients.heat_client_opts),
-        ('k8s_heat', magnum.conductor.handlers.bay_k8s_heat.k8s_heat_opts),
+        ('bay_heat', magnum.conductor.handlers.bay_conductor.bay_heat_opts),
     ]

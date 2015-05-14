@@ -28,7 +28,7 @@ from magnum.openstack.common import log as logging
 from magnum.openstack.common import loopingcall
 
 
-k8s_heat_opts = [
+bay_heat_opts = [
     cfg.IntOpt('max_attempts',
                default=2000,
                help=('Number of attempts to query the Heat stack for '
@@ -47,7 +47,7 @@ k8s_heat_opts = [
                     'interval is in minutes.  The default is no timeout.'))
 ]
 
-cfg.CONF.register_opts(k8s_heat_opts, group='k8s_heat')
+cfg.CONF.register_opts(bay_heat_opts, group='bay_heat')
 
 
 LOG = logging.getLogger(__name__)
@@ -80,7 +80,7 @@ def _create_stack(context, osc, bay, bay_create_timeout):
     else:
         # no bay_create_timeout value was passed in to the request
         # so falling back on configuration file value
-        heat_timeout = cfg.CONF.k8s_heat.bay_create_timeout
+        heat_timeout = cfg.CONF.bay_heat.bay_create_timeout
     fields = {
         'stack_name': stack_name,
         'parameters': heat_params,
@@ -122,7 +122,7 @@ class Handler(object):
     # Bay Operations
 
     def bay_create(self, context, bay, bay_create_timeout):
-        LOG.debug('k8s_heat bay_create')
+        LOG.debug('bay_heat bay_create')
 
         osc = clients.OpenStackClients(context)
 
@@ -142,7 +142,7 @@ class Handler(object):
         return bay
 
     def bay_update(self, context, bay):
-        LOG.debug('k8s_heat bay_update')
+        LOG.debug('bay_heat bay_update')
 
         osc = clients.OpenStackClients(context)
         stack = osc.heat().stacks.get(bay.stack_id)
@@ -167,7 +167,7 @@ class Handler(object):
         return bay
 
     def bay_delete(self, context, uuid):
-        LOG.debug('k8s_heat bay_delete')
+        LOG.debug('bay_heat bay_delete')
         osc = clients.OpenStackClients(context)
         bay = objects.Bay.get_by_uuid(context, uuid)
         stack_id = bay.stack_id
@@ -196,7 +196,7 @@ class Handler(object):
     def _poll_and_check(self, osc, bay):
         poller = HeatPoller(osc, bay)
         lc = loopingcall.FixedIntervalLoopingCall(f=poller.poll_and_check)
-        lc.start(cfg.CONF.k8s_heat.wait_interval, True)
+        lc.start(cfg.CONF.bay_heat.wait_interval, True)
 
 
 class HeatPoller(object):
@@ -251,18 +251,18 @@ class HeatPoller(object):
         # the loop will end when the stack completes or the timeout occurs
         if stack.stack_status == 'CREATE_IN_PROGRESS':
             if (stack.timeout_mins is None and
-               self.attempts > cfg.CONF.k8s_heat.max_attempts):
+               self.attempts > cfg.CONF.bay_heat.max_attempts):
                 LOG.error(_LE('Bay check exit after %(attempts)s attempts,'
                               'stack_id: %(id)s, stack_status: %(status)s') %
-                              {'attempts': cfg.CONF.k8s_heat.max_attempts,
+                              {'attempts': cfg.CONF.bay_heat.max_attempts,
                               'id': self.bay.stack_id,
                               'status': stack.stack_status})
                 raise loopingcall.LoopingCallDone()
         else:
-            if self.attempts > cfg.CONF.k8s_heat.max_attempts:
+            if self.attempts > cfg.CONF.bay_heat.max_attempts:
                 LOG.error(_LE('Bay check exit after %(attempts)s attempts,'
                               'stack_id: %(id)s, stack_status: %(status)s') %
-                              {'attempts': cfg.CONF.k8s_heat.max_attempts,
+                              {'attempts': cfg.CONF.bay_heat.max_attempts,
                               'id': self.bay.stack_id,
                               'status': stack.stack_status})
                 raise loopingcall.LoopingCallDone()

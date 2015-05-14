@@ -22,7 +22,7 @@ from oslo_config import cfg
 
 from magnum.common import rpc_service as service
 from magnum.common import short_id
-from magnum.conductor.handlers import bay_k8s_heat
+from magnum.conductor.handlers import bay_conductor
 from magnum.conductor.handlers import conductor_listener
 from magnum.conductor.handlers import docker_conductor
 from magnum.conductor.handlers import kube as k8s_conductor
@@ -47,7 +47,7 @@ def main():
     endpoints = [
         docker_conductor.Handler(),
         k8s_conductor.Handler(),
-        bay_k8s_heat.Handler(),
+        bay_conductor.Handler(),
         conductor_listener.Handler(),
     ]
 

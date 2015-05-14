@@ -30,7 +30,7 @@ template_def_opts = [
                default=paths.basedir_def('templates/heat-kubernetes/'
                                          'kubecluster.yaml'),
                deprecated_name='template_path',
-               deprecated_group='k8s_heat',
+               deprecated_group='bay_heat',
                help=_(
                    'Location of template to build a k8s cluster on atomic. ')),
     cfg.StrOpt('k8s_coreos_template_path',
@@ -41,7 +41,7 @@ template_def_opts = [
     cfg.StrOpt('coreos_discovery_token_url',
                default=None,
                deprecated_name='discovery_token_url',
-               deprecated_group='k8s_heat',
+               deprecated_group='bay_heat',
                help=_('coreos discovery token url.')),
     cfg.StrOpt('swarm_atomic_template_path',
                default=paths.basedir_def('templates/docker-swarm/'

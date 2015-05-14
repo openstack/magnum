@@ -15,7 +15,7 @@
 from heatclient import exc
 
 from magnum.common import exception
-from magnum.conductor.handlers import bay_k8s_heat
+from magnum.conductor.handlers import bay_conductor
 from magnum import objects
 from magnum.openstack.common import loopingcall
 from magnum.tests import base
@@ -27,9 +27,9 @@ from mock import patch
 from oslo_config import cfg
 
 
-class TestBayK8sHeat(base.TestCase):
+class TestBayConductorWithK8s(base.TestCase):
     def setUp(self):
-        super(TestBayK8sHeat, self).setUp()
+        super(TestBayConductorWithK8s, self).setUp()
         self.baymodel_dict = {
             'image_id': 'image_id',
             'flavor_id': 'flavor_id',
@@ -59,7 +59,7 @@ class TestBayK8sHeat(base.TestCase):
         mock_objects_baymodel_get_by_uuid.return_value = baymodel
         bay = objects.Bay(self.context, **self.bay_dict)
 
-        fetched_baymodel = bay_k8s_heat._get_baymodel(self.context, bay)
+        fetched_baymodel = bay_conductor._get_baymodel(self.context, bay)
         self.assertEqual(baymodel, fetched_baymodel)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
@@ -70,7 +70,7 @@ class TestBayK8sHeat(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_k8s_heat._extract_template_definition(self.context,
+         definition) = bay_conductor._extract_template_definition(self.context,
                                                                  bay)
 
         expected = {
@@ -103,7 +103,7 @@ class TestBayK8sHeat(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_k8s_heat._extract_template_definition(self.context,
+         definition) = bay_conductor._extract_template_definition(self.context,
                                                                  bay)
 
         expected = {
@@ -138,7 +138,7 @@ class TestBayK8sHeat(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_k8s_heat._extract_template_definition(self.context,
+         definition) = bay_conductor._extract_template_definition(self.context,
                                                                  bay)
 
         expected = {
@@ -166,7 +166,7 @@ class TestBayK8sHeat(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_k8s_heat._extract_template_definition(self.context,
+         definition) = bay_conductor._extract_template_definition(self.context,
                                                                  bay)
 
         expected = {
@@ -191,7 +191,7 @@ class TestBayK8sHeat(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_k8s_heat._extract_template_definition(self.context,
+         definition) = bay_conductor._extract_template_definition(self.context,
                                                                  bay)
 
         expected = {
@@ -216,7 +216,7 @@ class TestBayK8sHeat(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_k8s_heat._extract_template_definition(self.context,
+         definition) = bay_conductor._extract_template_definition(self.context,
                                                                  bay)
 
         expected = {
@@ -241,7 +241,7 @@ class TestBayK8sHeat(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_k8s_heat._extract_template_definition(self.context,
+         definition) = bay_conductor._extract_template_definition(self.context,
                                                                  bay)
 
         expected = {
@@ -266,7 +266,7 @@ class TestBayK8sHeat(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_k8s_heat._extract_template_definition(self.context,
+         definition) = bay_conductor._extract_template_definition(self.context,
                                                                  bay)
 
         expected = {
@@ -291,7 +291,7 @@ class TestBayK8sHeat(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_k8s_heat._extract_template_definition(self.context,
+         definition) = bay_conductor._extract_template_definition(self.context,
                                                                  bay)
 
         expected = {
@@ -317,7 +317,7 @@ class TestBayK8sHeat(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_k8s_heat._extract_template_definition(self.context,
+         definition) = bay_conductor._extract_template_definition(self.context,
                                                                  bay)
 
         expected = {
@@ -345,7 +345,7 @@ class TestBayK8sHeat(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_k8s_heat._extract_template_definition(self.context,
+         definition) = bay_conductor._extract_template_definition(self.context,
                                                                  bay)
 
         expected = {
@@ -371,7 +371,7 @@ class TestBayK8sHeat(base.TestCase):
         bay = objects.Bay(self.context, **bay_dict)
 
         (template_path,
-         definition) = bay_k8s_heat._extract_template_definition(self.context,
+         definition) = bay_conductor._extract_template_definition(self.context,
                                                                  bay)
 
         expected = {
@@ -411,14 +411,14 @@ class TestBayK8sHeat(base.TestCase):
         mock_stack.outputs = outputs
         mock_bay = mock.MagicMock()
 
-        bay_k8s_heat._update_stack_outputs(self.context, mock_stack, mock_bay)
+        bay_conductor._update_stack_outputs(self.context, mock_stack, mock_bay)
 
         self.assertEqual(mock_bay.api_address, expected_api_address)
         self.assertEqual(mock_bay.node_addresses, expected_node_addresses)
 
     @patch('magnum.common.short_id.generate_id')
     @patch('heatclient.common.template_utils.get_template_contents')
-    @patch('magnum.conductor.handlers.bay_k8s_heat'
+    @patch('magnum.conductor.handlers.bay_conductor'
            '._extract_template_definition')
     def test_create_stack(self,
                           mock_extract_template_definition,
@@ -444,7 +444,7 @@ class TestBayK8sHeat(base.TestCase):
         mock_bay = mock.MagicMock()
         mock_bay.name = dummy_bay_name
 
-        bay_k8s_heat._create_stack(self.context, mock_osc,
+        bay_conductor._create_stack(self.context, mock_osc,
                                    mock_bay, expected_timeout)
 
         expected_args = {
@@ -458,7 +458,7 @@ class TestBayK8sHeat(base.TestCase):
 
     @patch('magnum.common.short_id.generate_id')
     @patch('heatclient.common.template_utils.get_template_contents')
-    @patch('magnum.conductor.handlers.bay_k8s_heat'
+    @patch('magnum.conductor.handlers.bay_conductor'
            '._extract_template_definition')
     def test_create_stack_no_timeout_specified(self,
                           mock_extract_template_definition,
@@ -470,7 +470,7 @@ class TestBayK8sHeat(base.TestCase):
         expected_template_contents = 'template_contents'
         exptected_files = []
         dummy_bay_name = 'expected_stack_name'
-        expected_timeout = cfg.CONF.k8s_heat.bay_create_timeout
+        expected_timeout = cfg.CONF.bay_heat.bay_create_timeout
 
         mock_tpl_files = mock.MagicMock()
         mock_tpl_files.items.return_value = exptected_files
@@ -484,7 +484,7 @@ class TestBayK8sHeat(base.TestCase):
         mock_bay = mock.MagicMock()
         mock_bay.name = dummy_bay_name
 
-        bay_k8s_heat._create_stack(self.context, mock_osc,
+        bay_conductor._create_stack(self.context, mock_osc,
                                    mock_bay, None)
 
         expected_args = {
@@ -498,7 +498,7 @@ class TestBayK8sHeat(base.TestCase):
 
     @patch('magnum.common.short_id.generate_id')
     @patch('heatclient.common.template_utils.get_template_contents')
-    @patch('magnum.conductor.handlers.bay_k8s_heat'
+    @patch('magnum.conductor.handlers.bay_conductor'
            '._extract_template_definition')
     def test_create_stack_timeout_is_zero(self,
                           mock_extract_template_definition,
@@ -525,7 +525,7 @@ class TestBayK8sHeat(base.TestCase):
         mock_bay = mock.MagicMock()
         mock_bay.name = dummy_bay_name
 
-        bay_k8s_heat._create_stack(self.context, mock_osc,
+        bay_conductor._create_stack(self.context, mock_osc,
                                    mock_bay, bay_timeout)
 
         expected_args = {
@@ -538,7 +538,7 @@ class TestBayK8sHeat(base.TestCase):
         mock_heat_client.stacks.create.assert_called_once_with(**expected_args)
 
     @patch('heatclient.common.template_utils.get_template_contents')
-    @patch('magnum.conductor.handlers.bay_k8s_heat'
+    @patch('magnum.conductor.handlers.bay_conductor'
            '._extract_template_definition')
     def test_update_stack(self,
                           mock_extract_template_definition,
@@ -560,7 +560,7 @@ class TestBayK8sHeat(base.TestCase):
         mock_bay = mock.MagicMock()
         mock_bay.stack_id = mock_stack_id
 
-        bay_k8s_heat._update_stack({}, mock_osc, mock_bay)
+        bay_conductor._update_stack({}, mock_osc, mock_bay)
 
         expected_args = {
             'parameters': {},
@@ -573,13 +573,13 @@ class TestBayK8sHeat(base.TestCase):
     @patch('oslo_config.cfg')
     @patch('magnum.common.clients.OpenStackClients')
     def setup_poll_test(self, mock_openstack_client, cfg):
-        cfg.CONF.k8s_heat.max_attempts = 10
+        cfg.CONF.bay_heat.max_attempts = 10
         bay = mock.MagicMock()
         mock_heat_stack = mock.MagicMock()
         mock_heat_client = mock.MagicMock()
         mock_heat_client.stacks.get.return_value = mock_heat_stack
         mock_openstack_client.heat.return_value = mock_heat_client
-        poller = bay_k8s_heat.HeatPoller(mock_openstack_client, bay)
+        poller = bay_conductor.HeatPoller(mock_openstack_client, bay)
         return (mock_heat_stack, bay, poller)
 
     def test_poll_no_save(self):
@@ -653,14 +653,14 @@ class TestBayK8sHeat(base.TestCase):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = 'DELETE_IN_PROGRESS'
-        poller.attempts = cfg.CONF.k8s_heat.max_attempts
+        poller.attempts = cfg.CONF.bay_heat.max_attempts
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
     def test_poll_create_in_prog_max_att_reached_no_timeout(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = 'CREATE_IN_PROGRESS'
-        poller.attempts = cfg.CONF.k8s_heat.max_attempts
+        poller.attempts = cfg.CONF.bay_heat.max_attempts
         mock_heat_stack.timeout_mins = None
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
@@ -668,7 +668,7 @@ class TestBayK8sHeat(base.TestCase):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = 'CREATE_IN_PROGRESS'
-        poller.attempts = cfg.CONF.k8s_heat.max_attempts
+        poller.attempts = cfg.CONF.bay_heat.max_attempts
         mock_heat_stack.timeout_mins = 60
         # since the timeout is set the max attempts gets ignored since
         # the timeout will eventually stop the poller either when
@@ -679,7 +679,7 @@ class TestBayK8sHeat(base.TestCase):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = 'CREATE_FAILED'
-        poller.attempts = cfg.CONF.k8s_heat.max_attempts
+        poller.attempts = cfg.CONF.bay_heat.max_attempts
         mock_heat_stack.timeout_mins = 60
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
@@ -709,7 +709,7 @@ class TestHandler(db_base.DbTestCase):
 
     def setUp(self):
         super(TestHandler, self).setUp()
-        self.handler = bay_k8s_heat.Handler()
+        self.handler = bay_conductor.Handler()
         baymodel_dict = utils.get_test_baymodel()
         self.baymodel = objects.BayModel(self.context, **baymodel_dict)
         self.baymodel.create()
@@ -717,8 +717,8 @@ class TestHandler(db_base.DbTestCase):
         self.bay = objects.Bay(self.context, **bay_dict)
         self.bay.create()
 
-    @patch('magnum.conductor.handlers.bay_k8s_heat.Handler._poll_and_check')
-    @patch('magnum.conductor.handlers.bay_k8s_heat._update_stack')
+    @patch('magnum.conductor.handlers.bay_conductor.Handler._poll_and_check')
+    @patch('magnum.conductor.handlers.bay_conductor._update_stack')
     @patch('magnum.common.clients.OpenStackClients')
     def test_update_node_count_success(self, mock_openstack_client_class,
                                mock_update_stack, mock_poll_and_check):
@@ -738,8 +738,8 @@ class TestHandler(db_base.DbTestCase):
         bay = objects.Bay.get(self.context, self.bay.uuid)
         self.assertEqual(bay.node_count, 2)
 
-    @patch('magnum.conductor.handlers.bay_k8s_heat.Handler._poll_and_check')
-    @patch('magnum.conductor.handlers.bay_k8s_heat._update_stack')
+    @patch('magnum.conductor.handlers.bay_conductor.Handler._poll_and_check')
+    @patch('magnum.conductor.handlers.bay_conductor._update_stack')
     @patch('magnum.common.clients.OpenStackClients')
     def test_update_node_count_failure(self, mock_openstack_client_class,
                                mock_update_stack, mock_poll_and_check):
@@ -757,7 +757,7 @@ class TestHandler(db_base.DbTestCase):
         bay = objects.Bay.get(self.context, self.bay.uuid)
         self.assertEqual(bay.node_count, 1)
 
-    @patch('magnum.conductor.handlers.bay_k8s_heat._create_stack')
+    @patch('magnum.conductor.handlers.bay_conductor._create_stack')
     @patch('magnum.common.clients.OpenStackClients')
     def test_create(self, mock_openstack_client_class, mock_create_stack):
         mock_create_stack.side_effect = exc.HTTPBadRequest
@@ -777,9 +777,9 @@ class TestHandler(db_base.DbTestCase):
                           objects.Bay.get, self.context, self.bay.uuid)
 
 
-class TestBayK8sHeatSwarm(base.TestCase):
+class TestBayConductorWithSwarm(base.TestCase):
     def setUp(self):
-        super(TestBayK8sHeatSwarm, self).setUp()
+        super(TestBayConductorWithSwarm, self).setUp()
         self.baymodel_dict = {
             'image_id': 'image_id',
             'flavor_id': 'flavor_id',
@@ -810,7 +810,7 @@ class TestBayK8sHeatSwarm(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_k8s_heat._extract_template_definition(self.context,
+         definition) = bay_conductor._extract_template_definition(self.context,
                                                                  bay)
 
         expected = {
@@ -843,7 +843,7 @@ class TestBayK8sHeatSwarm(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_k8s_heat._extract_template_definition(self.context,
+         definition) = bay_conductor._extract_template_definition(self.context,
                                                                  bay)
 
         expected = {
