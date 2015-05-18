@@ -32,6 +32,9 @@ echo_summary "magnum's post_test_hook.sh was called..."
 
 sudo pip install -U -r requirements.txt -r test-requirements.txt
 
+export MAGNUM_DIR="$BASE/new/magnum"
+sudo chown -R jenkins:stack $MAGNUM_DIR
+
 # Get admin credentials
 pushd ../devstack
 source openrc admin admin
@@ -42,13 +45,32 @@ popd
 export NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
 export IMAGE_ID=$(glance image-show fedora-21-atomic-3 | awk '/ id /{print $4}')
 
+
+# pass the appropriate variables via a config file
+CREDS_FILE=$MAGNUM_DIR/functional_creds.conf
+cat <<EOF > $CREDS_FILE
+# Credentials for functional testing
+
+[auth]
+auth_url = $OS_AUTH_URL
+magnum_url = $BYPASS_URL
+[admin]
+user = $OS_USERNAME
+tenant = $OS_TENANT_NAME
+pass = $OS_PASSWORD
+region_name = $OS_REGION_NAME
+[magnum]
+image_id = $IMAGE_ID
+nic_id = $NIC_ID
+EOF
+
 # Create a keypair for use in the functional tests.
 echo_summary "Generate a key-pair"
 nova keypair-add default
 
 # Run functional tests
 echo "Running magnum functional test suite"
-sudo -E -H -u stack tox -e functional
+sudo -E -H -u jenkins tox -e functional
 EXIT_CODE=$?
 
 # Delete the keypair used in the functional test.

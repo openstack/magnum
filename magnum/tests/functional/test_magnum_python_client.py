@@ -19,6 +19,7 @@ test_magnum
 Tests for `magnum` module.
 """
 
+import ConfigParser
 import os
 import time
 
@@ -34,14 +35,42 @@ from magnum.tests import base
 class BaseMagnumClient(base.TestCase):
     def setUp(self):
         super(BaseMagnumClient, self).setUp()
-        self.cs = client.Client(username=cliutils.env('OS_USERNAME'),
-                                api_key=cliutils.env('OS_PASSWORD'),
-                                project_id=cliutils.env('OS_TENANT_ID'),
-                                project_name=cliutils.env('OS_TENANT_NAME'),
-                                auth_url=cliutils.env('OS_AUTH_URL'),
+        # Collecting of credentials:
+        #
+        # Support the existence of a functional_creds.conf for
+        # testing. This makes it possible to use a config file.
+        user = cliutils.env('OS_USERNAME')
+        passwd = cliutils.env('OS_PASSWORD')
+        tenant = cliutils.env('OS_TENANT_NAME')
+        tenant_id = cliutils.env('OS_TENANT_ID')
+        auth_url = cliutils.env('OS_AUTH_URL')
+        region_name = cliutils.env('OS_REGION_NAME')
+        magnum_url = cliutils.env('BYPASS_URL')
+        image_id = cliutils.env('IMAGE_ID')
+        nic_id = cliutils.env('NIC_ID')
+
+        config = ConfigParser.RawConfigParser()
+        if config.read('functional_creds.conf'):
+            # the OR pattern means the environment is preferred for
+            # override
+            user = user or config.get('admin', 'user')
+            passwd = passwd or config.get('admin', 'pass')
+            tenant = tenant or config.get('admin', 'tenant')
+            auth_url = auth_url or config.get('auth', 'auth_url')
+            magnum_url = magnum_url or config.get('auth', 'magnum_url')
+            image_id = image_id or config.get('magnum', 'image_id')
+            nic_id = nic_id or config.get('magnum', 'nic_id')
+
+        self.image_id = image_id
+        self.nic_id = nic_id
+        self.cs = client.Client(username=user,
+                                api_key=passwd,
+                                project_id=tenant_id,
+                                project_name=tenant,
+                                auth_url=auth_url,
                                 service_type='container',
-                                region_name=cliutils.env('OS_REGION_NAME'),
-                                magnum_url=cliutils.env('BYPASS_URL'))
+                                region_name=region_name,
+                                magnum_url=magnum_url)
 
 
 class TestListResources(BaseMagnumClient):
@@ -72,8 +101,8 @@ class TestBayModelResource(BaseMagnumClient):
         baymodel = self.cs.baymodels.create(
             name='default',
             keypair_id='default',
-            external_network_id=cliutils.env('NIC_ID'),
-            image_id=cliutils.env('IMAGE_ID'),
+            external_network_id=self.nic_id,
+            image_id=self.image_id,
             flavor_id='m1.small',
             docker_volume_size=5,
             coe='kubernetes',
@@ -102,8 +131,8 @@ class TestBayResource(BaseMagnumClient):
         self.baymodel = self.cs.baymodels.create(
             name='default',
             keypair_id='default',
-            external_network_id=cliutils.env('NIC_ID'),
-            image_id=cliutils.env('IMAGE_ID'),
+            external_network_id=self.nic_id,
+            image_id=self.image_id,
             flavor_id='m1.small',
             docker_volume_size=5,
             coe='kubernetes',
