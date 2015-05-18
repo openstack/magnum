@@ -29,10 +29,13 @@ FROM ubuntu:14.04
 MAINTAINER Davanum Srinivas
 
 # Install basic applications and Python tools
-RUN apt-get update && apt-get install -y tar git curl nano wget dialog net-tools build-essential python python-dev python-distribute python-pip
+RUN apt-get update && apt-get install -y tar git curl nano wget dialog net-tools build-essential libssl-dev libffi-dev python python-dev python-distribute python-pip
 
 # Copy the application folder inside the container
 ADD . /magnum
+
+# Upgrade pip since ubuntu pip package has bug
+RUN easy_install -U pip
 
 # Get pip to download and install requirements:
 RUN pip install -r /magnum/requirements.txt
