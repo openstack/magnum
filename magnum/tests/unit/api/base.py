@@ -15,11 +15,12 @@
 """Base classes for API tests."""
 
 # NOTE: Ported from ceilometer/tests/api.py (subsequently moved to
-#       ceilometer/tests/api/__init__.py). This should be oslo'ified:
-#       https://bugs.launchpad.net/ironic/+bug/1255115.
+# ceilometer/tests/api/__init__.py). This should be oslo'ified:
+# https://bugs.launchpad.net/ironic/+bug/1255115.
 
 # NOTE(deva): import auth_token so we can override a config option
 from keystonemiddleware import auth_token  # noqa
+import mock
 from oslo_config import cfg
 import pecan
 import pecan.testing
@@ -53,6 +54,10 @@ class FunctionalTest(base.DbTestCase):
             pecan.set_config({}, overwrite=True)
 
         self.addCleanup(reset_pecan)
+
+        p = mock.patch('magnum.api.controllers.v1.Controller._check_version')
+        self._check_version = p.start()
+        self.addCleanup(p.stop)
 
     def _make_app(self, enable_acl=False):
         # Determine where we are so we can set up paths in the config

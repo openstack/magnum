@@ -14,8 +14,12 @@
 
 import datetime
 
+from webob import exc
 import wsme
 from wsme import types as wtypes
+
+from magnum.common.exception import NotAcceptable
+from magnum.i18n import _
 
 
 class APIBase(wtypes.Base):
@@ -45,3 +49,74 @@ class APIBase(wtypes.Base):
         for k in self.as_dict():
             if k not in except_list:
                 setattr(self, k, wsme.Unset)
+
+
+class Version(object):
+    """API Version object."""
+
+    string = 'X-OpenStack-Magnum-API-Version'
+    """HTTP Header string carrying the requested version"""
+
+    min_string = 'X-OpenStack-Magnum-API-Minimum-Version'
+    """HTTP response header"""
+
+    max_string = 'X-OpenStack-Magnum-API-Maximum-Version'
+    """HTTP response header"""
+
+    def __init__(self, headers, default_version, latest_version):
+        """Create an API Version object from the supplied headers.
+
+        :param headers: webob headers
+        :param default_version: version to use if not specified in headers
+        :param latest_version: version to use if latest is requested
+        :raises: webob.HTTPNotAcceptable
+        """
+        (self.major, self.minor) = Version.parse_headers(headers,
+                                                         default_version,
+                                                         latest_version)
+
+    def __repr__(self):
+        return '%s.%s' % (self.major, self.minor)
+
+    @staticmethod
+    def parse_headers(headers, default_version, latest_version):
+        """Determine the API version requested based on the headers supplied.
+
+        :param headers: webob headers
+        :param default_version: version to use if not specified in headers
+        :param latest_version: version to use if latest is requested
+        :returns: a tupe of (major, minor) version numbers
+        :raises: webob.HTTPNotAcceptable
+        """
+        version_str = headers.get(Version.string, default_version)
+
+        if version_str.lower() == 'latest':
+            parse_str = latest_version
+        else:
+            parse_str = version_str
+
+        try:
+            version = tuple(int(i) for i in parse_str.split('.'))
+        except ValueError:
+            version = ()
+
+        if len(version) != 2:
+            raise exc.HTTPNotAcceptable(_(
+                "Invalid value for %s header") % Version.string)
+        return version
+
+    def __lt__(a, b):
+        if a.major != b.major:
+            raise NotAcceptable()
+
+        if (a.major == b.major and a.minor < b.minor):
+            return True
+        return False
+
+    def __gt__(a, b):
+        if a.major != b.major:
+            raise NotAcceptable()
+
+        if (a.major == b.major and a.minor > b.minor):
+            return True
+        return False
