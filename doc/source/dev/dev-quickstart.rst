@@ -96,11 +96,10 @@ To discover and interact with templates, please refer to
 Exercising the Services Using DevStack
 ======================================
 
-DevStack does not yet have Magnum support.  It is, however, necessary to
-develop Magnum from a devstack environment at the present time.  Magnum depends
-on Nova, Heat, and Neutron to create and schedule virtual machines to simulate
-bare-metal.  For milestone #2 we intend to introduce support for Ironic
-deployment of baremetal nodes.
+DevStack can be configured to enable Magnum support. It is easy to develop Magnum
+with devstack environment. Magnum depends on Nova, Glance, Heat and Neutron to
+create and schedule virtual machines to simulate bare-metal. For bare-metal fully
+support, it is still under active development.
 
 This session has only been tested on Ubuntu 14.04 (Trusty) and Fedora 20/21.
 We recommend users to select one of them if it is possible.

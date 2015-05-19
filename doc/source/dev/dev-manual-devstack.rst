@@ -7,9 +7,9 @@ If you are getting started with Magnum it is recommended you follow the
 :ref:`dev-quickstart` to get up and running with Magnum. This guide covers
 a more in-depth process to setup Magnum with devstack.
 
-Magnum depends on Nova, Glance, Heat, and Neutron to create and schedule
-virtual machines to simulate bare-metal. For milestone #2 we intend to
-introduce support for Ironic deployment of baremetal nodes.
+Magnum depends on Nova, Glance, Heat and Neutron to create and schedule
+virtual machines to simulate bare-metal. For bare-metal fully support, it
+is still under active development.
 
 This session has only been tested on Ubuntu 14.04 (Trusty) and Fedora 20/21.
 We recommend users to select one of them if it is possible.
