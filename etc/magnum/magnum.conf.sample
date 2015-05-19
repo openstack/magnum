@@ -985,3 +985,27 @@
 # (boolean value)
 # Deprecated group/name - [DEFAULT]/fake_rabbit
 #fake_rabbit = false
+
+[oslo_policy]
+
+#
+# From oslo.policy
+#
+
+# The JSON file that defines policies. (string value)
+# Deprecated group/name - [DEFAULT]/policy_file
+#policy_file = policy.json
+
+# Default rule. Enforced when a requested rule is not found. (string value)
+# Deprecated group/name - [DEFAULT]/policy_default_rule
+#policy_default_rule = default
+
+# Directories where policy configuration files are stored. They can be relative
+# to any directory in the search path defined by the config_dir option, or
+# absolute paths. The file defined by policy_file must exist for these
+# directories to be searched. Missing or empty directories are ignored. (multi
+# valued)
+# Deprecated group/name - [DEFAULT]/policy_dirs
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+#policy_dirs = policy.d
