@@ -62,45 +62,6 @@ class MagnumPersistentObject(object):
         }
 
 
-class ObjectListBase(ovoo_base.ObjectListBase):
-    # TODO(xek): These are for transition to using the oslo base object
-    # and can be removed when we move to it.
-    fields = {
-        'objects': list,
-    }
-
-    def _attr_objects_to_primitive(self):
-        """Serialization of object list."""
-        return [x.obj_to_primitive() for x in self.objects]
-
-    def _attr_objects_from_primitive(self, value):
-        """Deserialization of object list."""
-        objects = []
-        for entity in value:
-            obj = MagnumObject.obj_from_primitive(entity,
-                                                  context=self._context)
-            objects.append(obj)
-        return objects
-
-
 class MagnumObjectSerializer(ovoo_base.VersionedObjectSerializer):
     # Base class to use for object hydration
     OBJ_BASE_CLASS = MagnumObject
-
-
-def obj_to_primitive(obj):
-    """Recursively turn an object into a python primitive.
-
-    An MagnumObject becomes a dict, and anything that implements ObjectListBase
-    becomes a list.
-    """
-    if isinstance(obj, ObjectListBase):
-        return [obj_to_primitive(x) for x in obj]
-    elif isinstance(obj, MagnumObject):
-        result = {}
-        for key in obj.obj_fields:
-            if obj.obj_attr_is_set(key) or key in obj.obj_extra_fields:
-                result[key] = obj_to_primitive(getattr(obj, key))
-        return result
-    else:
-        return obj
