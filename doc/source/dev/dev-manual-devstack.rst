@@ -67,7 +67,9 @@ for more detailed neutron configuration.::
     LOGFILE=$HOME/devstack.log
     SCREEN_LOGDIR=$HOME/logs
 
+    VOLUME_BACKING_FILE_SIZE=20G
     END
+
     cat > local.sh << END_LOCAL_SH
     #!/bin/sh
     sudo iptables -t nat -A POSTROUTING -o br-ex -j MASQUERADE
