@@ -16,6 +16,7 @@ import datetime
 import gettext
 
 import iso8601
+import mock
 import netaddr
 from oslo_utils import timeutils
 from oslo_versionedobjects import fields
@@ -438,3 +439,51 @@ class TestObjectSerializer(test_base.TestCase):
             self.assertEqual(1, len(thing2))
             for item in thing2:
                 self.assertIsInstance(item, MyObj)
+
+    @mock.patch('magnum.objects.base.MagnumObject.indirection_api')
+    def _test_deserialize_entity_newer(self, obj_version, backported_to,
+                                       mock_indirection_api,
+                                       my_version='1.6'):
+        ser = base.MagnumObjectSerializer()
+        mock_indirection_api.object_backport_versions.side_effect \
+            = NotImplementedError()
+        mock_indirection_api.object_backport.return_value = 'backported'
+
+        @base.MagnumObjectRegistry.register
+        class MyTestObj(MyObj):
+            VERSION = my_version
+
+        obj = MyTestObj()
+        obj.VERSION = obj_version
+        primitive = obj.obj_to_primitive()
+        result = ser.deserialize_entity(self.context, primitive)
+        if backported_to is None:
+            self.assertFalse(mock_indirection_api.object_backport.called)
+        else:
+            self.assertEqual('backported', result)
+            mock_indirection_api.object_backport.assert_called_with(
+                self.context, primitive, backported_to)
+
+    def test_deserialize_entity_newer_version_backports_level1(self):
+        "Test object with unsupported (newer) version"
+        self._test_deserialize_entity_newer('11.5', '1.6')
+
+    def test_deserialize_entity_newer_version_backports_level2(self):
+        "Test object with unsupported (newer) version"
+        self._test_deserialize_entity_newer('1.25', '1.6')
+
+    def test_deserialize_entity_same_revision_does_not_backport(self):
+        "Test object with supported revision"
+        self._test_deserialize_entity_newer('1.6', None)
+
+    def test_deserialize_entity_newer_revision_does_not_backport_zero(self):
+        "Test object with supported revision"
+        self._test_deserialize_entity_newer('1.6.0', None)
+
+    def test_deserialize_entity_newer_revision_does_not_backport(self):
+        "Test object with supported (newer) revision"
+        self._test_deserialize_entity_newer('1.6.1', None)
+
+    def test_deserialize_entity_newer_version_passes_revision(self):
+        "Test object with unsupported (newer) version and revision"
+        self._test_deserialize_entity_newer('1.7', '1.6.1', my_version='1.6.1')
