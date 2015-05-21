@@ -17,6 +17,9 @@ write_files:
       ExecStartPre=/usr/bin/docker pull swarm
       ExecStart=/usr/bin/docker run --name swarm-agent swarm join --addr $NODE_IP:2375 $DISCOVERY_URL
       ExecStop=/usr/bin/docker stop swarm-agent
+      ExecStartPost=/usr/bin/curl -sf -X PUT -H 'Content-Type: application/json' \
+        --data-binary '{"Status": "SUCCESS", "Reason": "Setup complete", "Data": "OK", "UniqueId": "00000"}' \
+        "$WAIT_HANDLE"
 
       [Install]
       WantedBy=multi-user.target
