@@ -171,6 +171,16 @@ class TestDockerConductor(base.BaseTestCase):
             mock_init.assert_called_once_with()
             self.assertEqual(obj_container.ERROR, mock_container.status)
 
+    def test_find_container_by_name_not_found(self):
+        mock_docker = mock.MagicMock()
+        fake_response = mock.MagicMock()
+        fake_response.content = 'not_found'
+        fake_response.status_code = 404
+        mock_docker.list_instances.side_effect = errors.APIError(
+                                                 'not_found', fake_response)
+        ret = self.conductor._find_container_by_name(mock_docker, '1')
+        self.assertEqual({}, ret)
+
     @mock.patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
     def test_container_delete(self, mock_get_docker_client,
@@ -665,3 +675,14 @@ class TestDockerConductor(base.BaseTestCase):
             mock_find_container.assert_called_once_with(mock_docker,
                                                         mock_container_uuid)
             mock_init.assert_called_once_with()
+
+    def test_container_common_exception(self):
+        for action in ('container_execute', 'container_logs', 'container_show',
+                       'container_delete', 'container_create',
+                       '_container_action'):
+            func = getattr(self.conductor, action)
+            with patch.object(docker_conductor,
+                              'docker_client') as mock_docker:
+                mock_docker.side_effect = Exception("So bad")
+                self.assertRaises(exception.ContainerException,
+                    func, None, None)

@@ -13,6 +13,7 @@
 """Magnum Docker RPC handler."""
 
 from docker import errors
+import functools
 from oslo_config import cfg
 
 from magnum.common import docker_utils
@@ -21,6 +22,7 @@ from magnum.common import utils
 from magnum.conductor.handlers.common import docker_client
 from magnum import objects
 from magnum.objects import container as obj_container
+from magnum.openstack.common._i18n import _LE
 from magnum.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
@@ -50,6 +52,22 @@ docker_opts = [
 ]
 
 CONF.register_opts(docker_opts, 'docker')
+
+
+def wrap_container_exception(f):
+    def wrapped(self, context, *args, **kwargs):
+        try:
+            return f(self, context, *args, **kwargs)
+        except Exception as e:
+            container_uuid = kwargs.get('container_uuid')
+            if container_uuid is not None:
+                LOG.exception(_LE("Error while connect to docker "
+                                  "container %(name)s: %(error)s"),
+                              {'name': container_uuid,
+                               'error': str(e)})
+            raise exception.ContainerException(
+                                "Docker internal Error: %s" % str(e))
+    return functools.wraps(f)(wrapped)
 
 
 class Handler(object):
@@ -91,6 +109,7 @@ class Handler(object):
 
     # Container operations
 
+    @wrap_container_exception
     def container_create(self, context, name, container_uuid, container):
         docker = self.get_docker_client(context, container)
         image_id = container.image_id
@@ -112,6 +131,7 @@ class Handler(object):
         finally:
             container.save()
 
+    @wrap_container_exception
     def container_delete(self, context, container_uuid):
         LOG.debug("container_delete %s" % container_uuid)
         docker = self.get_docker_client(context, container_uuid)
@@ -124,6 +144,7 @@ class Handler(object):
             raise exception.ContainerException(
                       "Docker API Error : %s" % str(api_error))
 
+    @wrap_container_exception
     def container_show(self, context, container_uuid):
         LOG.debug("container_show %s" % container_uuid)
         docker = self.get_docker_client(context, container_uuid)
@@ -152,6 +173,7 @@ class Handler(object):
             raise exception.ContainerException(
                       "Docker API Error : %s" % (error_message))
 
+    @wrap_container_exception
     def _container_action(self, context, container_uuid, status, docker_func):
         LOG.debug("container_%s %s" % (status, container_uuid))
         docker = self.get_docker_client(context, container_uuid)
@@ -186,6 +208,7 @@ class Handler(object):
         return self._container_action(context, container_uuid,
                                       obj_container.RUNNING, 'unpause')
 
+    @wrap_container_exception
     def container_logs(self, context, container_uuid):
         LOG.debug("container_logs %s" % container_uuid)
         docker = self.get_docker_client(context, container_uuid)
@@ -196,6 +219,7 @@ class Handler(object):
             raise exception.ContainerException(
                       "Docker API Error : %s" % str(api_error))
 
+    @wrap_container_exception
     def container_execute(self, context, container_uuid, command):
         LOG.debug("container_execute %s command %s" %
                   (container_uuid, command))
