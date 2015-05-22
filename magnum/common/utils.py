@@ -22,7 +22,6 @@ import contextlib
 import errno
 import hashlib
 import os
-import pecan
 import random
 import re
 import shutil
@@ -559,17 +558,6 @@ def is_name_safe(name):
     # https://bugs.launchpad.net/magnum/+bug/1430617
     if not name:
         return False
-    return True
-
-
-def allow_logical_names():
-    try:
-        # v1.5 added logical name aliases
-        if pecan.request.version.minor < 5:
-            return False
-    # ignore check if we're not in a pecan context
-    except AttributeError:
-        pass
     return True
 
 
