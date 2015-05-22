@@ -129,7 +129,17 @@ guide for details.::
      SERVICE_PASSWORD=password
      ADMIN_PASSWORD=password
      PUBLIC_INTERFACE=eth1
+     VOLUME_BACKING_FILE_SIZE=20G
      END
+
+Or, if you already have localrc in /opt/stack/devstack/, then ::
+     cat >> /opt/stack/devstack/localrc << END
+     enable_plugin magnum https://github.com/openstack/magnum
+     PUBLIC_INTERFACE=eth1
+     VOLUME_BACKING_FILE_SIZE=20G
+     END
+
+Note: Replace eth1 with your public interface for Neutron to use.
 
 Create a local.sh make final networking changes after devstack has spawned. This
 will allow Bays spawned by Magnum to access the internet through PUBLIC_INTERFACE.::
@@ -152,6 +162,7 @@ individual support in the heat template.
 The fedora-21-atomic-3 image will automatically be added to glance.  You can
 still add your own images to use manually through glance.
 
+Prepare to use the magnum client.
 Create a new shell, and source the devstack openrc script::
 
     source /opt/stack/devstack/openrc admin admin
@@ -185,7 +196,7 @@ The existing bays can be listed as follows::
     magnum bay-list
 
 If you make some code changes and want to test their effects,
-just restart either magnum-api or magnum-conductor.  the -e option to
+just restart either magnum-api or magnum-conductor.  The -e option to
 pip install will link to the location from where the source code
 was installed.
 
@@ -203,10 +214,15 @@ confused.
     +--------------------------------------+---------+------------+-----------------+
 
 Kubernetes provides a number of examples you can use to check that things
-are working. Here's how to set up the replicated redis example. First, create
+are working. You may need to clone kubernetes by::
+
+    git clone https://github.com/GoogleCloudPlatform/kubernetes.git
+
+(No require to install it, we just use the example file)
+Here's how to set up the replicated redis example. First, create
 a pod for the redis-master::
 
-    cd ~/kubernetes/examples/redis/v1beta3/
+    cd kubernetes/examples/redis/
     magnum pod-create --manifest ./redis-master.yaml --bay testbay
 
 Now turn up a service to provide a discoverable endpoint for the redis sentinels
