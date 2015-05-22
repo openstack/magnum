@@ -31,7 +31,7 @@ parameters:
     default: m1.small
     description: flavor to use when booting the server
 
-  server_flavor:
+  minion_flavor:
     type: string
     default: m1.small
     description: flavor to use when booting the server
@@ -314,11 +314,11 @@ resources:
     properties:
       count: {get_param: number_of_minions}
       resource_def:
-        type: kubenode.yaml
+        type: kubeminion.yaml
         properties:
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: server_image}
-          server_flavor: {get_param: server_flavor}
+          minion_flavor: {get_param: minion_flavor}
           fixed_network_id: {get_resource: fixed_network}
           fixed_subnet_id: {get_resource: fixed_subnet}
           kube_master_ip: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
@@ -332,8 +332,8 @@ outputs:
     value: {get_attr: [kube_master_floating, floating_ip_address]}
 
   kube_minions:
-    value: {get_attr: [kube_minions, kube_node_ip]}
+    value: {get_attr: [kube_minions, kube_minion_ip]}
 
   kube_minions_external:
-    value: {get_attr: [kube_minions, kube_node_external_ip]}
+    value: {get_attr: [kube_minions, kube_minion_external_ip]}
 
