@@ -29,6 +29,7 @@ import testscenarios
 from magnum.common import context as magnum_context
 from magnum.objects import base as objects_base
 from magnum.tests import conf_fixture
+from magnum.tests import policy_fixture
 
 
 CONF = cfg.CONF
@@ -67,6 +68,8 @@ class TestCase(base.BaseTestCase):
             auth_token_info=token_info,
             project_id='fake_project',
             user_id='fake_user')
+
+        self.policy = self.useFixture(policy_fixture.PolicyFixture())
 
         def make_context(*args, **kwargs):
             # If context hasn't been constructed with token_info

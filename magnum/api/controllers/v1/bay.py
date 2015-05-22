@@ -27,6 +27,7 @@ from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
 from magnum.common import exception
+from magnum.common import policy
 from magnum import objects
 
 
@@ -207,6 +208,7 @@ class BaysController(rest.RestController):
                                                 sort_key=sort_key,
                                                 sort_dir=sort_dir)
 
+    @policy.enforce_wsgi("bay")
     @wsme_pecan.wsexpose(BayCollection, types.uuid,
                          types.uuid, int, wtypes.text, wtypes.text)
     def get_all(self, bay_uuid=None, marker=None, limit=None,
@@ -221,6 +223,7 @@ class BaysController(rest.RestController):
         return self._get_bays_collection(marker, limit, sort_key,
                                          sort_dir)
 
+    @policy.enforce_wsgi("bay")
     @wsme_pecan.wsexpose(BayCollection, types.uuid,
                          types.uuid, int, wtypes.text, wtypes.text)
     def detail(self, bay_uuid=None, marker=None, limit=None,
@@ -244,6 +247,7 @@ class BaysController(rest.RestController):
                                          sort_key, sort_dir, expand,
                                          resource_url)
 
+    @policy.enforce_wsgi("bay", "get")
     @wsme_pecan.wsexpose(Bay, types.uuid_or_name)
     def get_one(self, bay_ident):
         """Retrieve information about the given bay.
@@ -257,6 +261,7 @@ class BaysController(rest.RestController):
 
         return Bay.convert_with_links(rpc_bay)
 
+    @policy.enforce_wsgi("bay", "create")
     @wsme_pecan.wsexpose(Bay, body=Bay, status_code=201)
     def post(self, bay):
         """Create a new bay.
@@ -281,6 +286,7 @@ class BaysController(rest.RestController):
         pecan.response.location = link.build_url('bays', res_bay.uuid)
         return Bay.convert_with_links(res_bay)
 
+    @policy.enforce_wsgi("bay", "update")
     @wsme.validate(types.uuid, [BayPatchType])
     @wsme_pecan.wsexpose(Bay, types.uuid_or_name, body=[BayPatchType])
     def patch(self, bay_ident, patch):
@@ -314,6 +320,7 @@ class BaysController(rest.RestController):
         res_bay = pecan.request.rpcapi.bay_update(rpc_bay)
         return Bay.convert_with_links(res_bay)
 
+    @policy.enforce_wsgi("bay", "delete")
     @wsme_pecan.wsexpose(None, types.uuid_or_name, status_code=204)
     def delete(self, bay_ident):
         """Delete a bay.
