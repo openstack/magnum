@@ -93,12 +93,6 @@ resources:
             $KUBE_MASTER_IP: {get_param: kube_master_ip}
             $DOCKER_VOLUME: {get_resource: docker_volume}
 
-  add_to_docker_group:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/add-to-docker-group.sh}
-
   configure_docker_storage:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -167,7 +161,6 @@ resources:
         - config: {get_resource: write_heat_params}
         - config: {get_resource: kube_user}
         - config: {get_resource: kube_examples}
-        - config: {get_resource: add_to_docker_group}
         - config: {get_resource: configure_docker_storage}
         - config: {get_resource: kube_register}
         - config: {get_resource: configure_kubernetes_minion}
