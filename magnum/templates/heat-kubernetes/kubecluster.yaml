@@ -330,10 +330,18 @@ outputs:
 
   kube_master:
     value: {get_attr: [kube_master_floating, floating_ip_address]}
+    description: >
+      This is the "public" ip address of the Kubernetes master server. Use this address to
+      log in to the Kubernetes master via ssh or to access the Kubernetes API
+      from outside the cluster.
 
   kube_minions:
     value: {get_attr: [kube_minions, kube_minion_ip]}
+    description: >
+      This is a list of the "private" addresses of all the Kubernetes minions.
 
   kube_minions_external:
     value: {get_attr: [kube_minions, kube_minion_external_ip]}
-
+    description: >
+      This is a list of the "public" addresses of all the Kubernetes minions. Use
+      these addresses to, e.g., log into the minions.
