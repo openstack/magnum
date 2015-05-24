@@ -1,9 +1,8 @@
 A Kubernetes cluster with Heat
 ==============================
 
-These [Heat][] templates will deploy an *N*-node [Kubernetes][] cluster,
-where *N* is the value of the `number_of_minions` parameter you
-specify when creating the stack.
+These [Heat][] templates will deploy a [Kubernetes][] cluster that
+supports automatic scaling based on CPU load.
 
 [heat]: https://wiki.openstack.org/wiki/Heat
 [kubernetes]: https://github.com/GoogleCloudPlatform/kubernetes
@@ -17,7 +16,10 @@ pods deployed on different minions.
 
 ### OpenStack
 
-These templates will work with the Juno version of Heat.
+These templates will work with the Kilo version of Heat.  They *may*
+work with Juno as well as soon as [#1402894][] is resolved.
+
+[#1402894]: https://bugs.launchpad.net/heat/+bug/1402894
 
 ### Guest image
 
@@ -47,7 +49,6 @@ And then create the stack, referencing that environment file:
 You must provide values for:
 
 - `ssh_key_name`
-- `external_network`
 - `server_image`
 
 ## Interacting with Kubernetes
