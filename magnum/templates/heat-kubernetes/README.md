@@ -36,7 +36,7 @@ your environment:
 
     parameters:
       ssh_key_name: lars
-      external_network_id: 028d70dd-67b8-4901-8bdd-0c62b06cce2d
+      external_network: public
       dns_nameserver: 192.168.200.1
       server_image: centos-7-atomic-20150101
 
@@ -47,7 +47,7 @@ And then create the stack, referencing that environment file:
 You must provide values for:
 
 - `ssh_key_name`
-- `external_network_id`
+- `external_network`
 - `server_image`
 
 ## Interacting with Kubernetes
@@ -65,8 +65,8 @@ You can ssh into that server as the `minion` user:
 And once logged in you can run `kubectl`, etc:
 
     $ kubectl get minions
-    NAME                LABELS
-    10.0.0.4            <none>
+    NAME                LABELS       STATUS
+    10.0.0.4            <none>       Ready
 
 You can log into your minions using the `minion` user as well.  You
 can get a list of minion addresses by running:

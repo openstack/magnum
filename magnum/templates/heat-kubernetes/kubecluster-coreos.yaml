@@ -14,7 +14,7 @@ parameters:
     type: string
     description: name of ssh key to be provisioned on our server
 
-  external_network_id:
+  external_network:
     type: string
     description: uuid of a network to use for floating ip addresses
 
