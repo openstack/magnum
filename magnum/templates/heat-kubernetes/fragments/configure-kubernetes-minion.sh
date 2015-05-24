@@ -32,5 +32,5 @@ cat >> /etc/environment <<EOF
 KUBERNETES_MASTER=http://$KUBE_MASTER_IP:8080
 EOF
 
-/usr/local/bin/kube-register
+systemctl enable kube-register
 
