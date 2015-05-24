@@ -32,11 +32,5 @@ cat >> /etc/environment <<EOF
 KUBERNETES_MASTER=http://$KUBE_MASTER_IP:8080
 EOF
 
-cpu=$(expr $(nproc) \* 1000)
-memory_kb=$(cat /proc/meminfo | awk '/MemTotal: /{print $2}')
-memory=$(expr $memory_kb \* 1024)
-curl -sf -X POST -H 'Content-Type: application/json' \
-    --data-binary "{\"kind\":\"Minion\",\"id\":\"$myip\",\"apiVersion\":\"v1beta1\",
-        \"resources\":{\"capacity\":{\"cpu\":$cpu,\"memory\":$memory}}}" \
-    http://$KUBE_MASTER_IP:8080/api/v1beta1/minions
+/usr/local/bin/kube-register
 
