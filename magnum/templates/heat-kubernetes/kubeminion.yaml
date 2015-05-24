@@ -1,9 +1,9 @@
 heat_template_version: 2013-05-23
 
 description: >
-  This is a nested stack that defines a single Kubernetes minion,
-  based on a vanilla Fedora 20 cloud image.  This stack is included by
-  a ResourceGroup resource in the parent template (kubecluster.yaml).
+  This is a nested stack that defines a single Kubernetes minion, This stack is
+  included by an AutoScalingGroup resource in the parent template
+  (kubecluster.yaml).
 
 parameters:
 
