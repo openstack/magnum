@@ -43,7 +43,7 @@ parameters:
       - allowed_values: ["true", "false"]
 
   docker_volume_size:
-    type: string
+    type: number
     description: >
       size of a cinder volume to allocate to docker for container/image
       storage
