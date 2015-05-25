@@ -133,6 +133,7 @@ guide for details.::
      END
 
 Or, if you already have localrc in /opt/stack/devstack/, then ::
+
      cat >> /opt/stack/devstack/localrc << END
      enable_plugin magnum https://github.com/openstack/magnum
      PUBLIC_INTERFACE=eth1
