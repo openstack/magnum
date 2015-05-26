@@ -3,13 +3,10 @@ heat_template_version: 2013-05-23
 description: >
   This template will boot a Kubernetes cluster with one or more
   minions (as specified by the number_of_minions parameter, which
-  defaults to "2").
+  defaults to 2).
 
 parameters:
 
-  #
-  # REQUIRED PARAMETERS
-  #
   ssh_key_name:
     type: string
     description: name of ssh key to be provisioned on our server
@@ -18,9 +15,6 @@ parameters:
     type: string
     description: uuid/name of a network to use for floating ip addresses
 
-  #
-  # OPTIONAL PARAMETERS
-  #
   server_image:
     type: string
     default: centos-atomic
@@ -49,18 +43,18 @@ parameters:
   fixed_network_cidr:
     type: string
     description: network range for fixed ip network
-    default: "10.0.0.0/24"
+    default: 10.0.0.0/24
 
   portal_network_cidr:
     type: string
     description: >
       address range used by kubernetes for service portals
-    default: "10.254.0.0/16"
+    default: 10.254.0.0/16
 
   flannel_network_cidr:
     type: string
     description: network range for flannel overlay network
-    default: "10.100.0.0/16"
+    default: 10.100.0.0/16
 
   flannel_network_subnetlen:
     type: string
@@ -72,17 +66,17 @@ parameters:
     description: >
       if true use the vxlan backend, otherwise use the default
       udp backend
-    default: "false"
+    default: false
     constraints:
-      - allowed_values: ["true", "false"]
+      - allowed_values: [true, false]
 
   kube_allow_priv:
     type: string
     description: >
       whether or not kubernetes should permit privileged containers.
-    default: "true"
+    default: true
     constraints:
-      - allowed_values: ["true", "false"]
+      - allowed_values: [true, false]
 
   docker_volume_size:
     type: string
@@ -112,42 +106,30 @@ resources:
   ######################################################################
   #
   # network resources.  allocate a network and router for our server.
-  # it would also be possible to take advantage of existing network
-  # resources (and have the deployer provide network and subnet ids,
-  # etc, as parameters), but I wanted to minmize the amount of
-  # configuration necessary to make this go.
+  #
 
   fixed_network:
-    type: "OS::Neutron::Net"
+    type: OS::Neutron::Net
 
-  # This is the subnet on which we will deploy our server.
   fixed_subnet:
-    type: "OS::Neutron::Subnet"
+    type: OS::Neutron::Subnet
     properties:
       cidr: {get_param: fixed_network_cidr}
-      network_id:
-        get_resource: fixed_network
+      network: {get_resource: fixed_network}
       dns_nameservers:
-        - get_param: dns_nameserver
+        - {get_param: dns_nameserver}
 
-  # create a router attached to the external network provided as a
-  # parameter to this stack.
   extrouter:
-    type: "OS::Neutron::Router"
+    type: OS::Neutron::Router
     properties:
       external_gateway_info:
-        network:
-          get_param: external_network
+        network: {get_param: external_network}
 
-  # attached fixed_subnet to our extrouter router.
   extrouter_inside:
-    type: "OS::Neutron::RouterInterface"
+    type: OS::Neutron::RouterInterface
     properties:
-      router_id:
-        get_resource: extrouter
-      subnet:
-        get_resource:
-          fixed_subnet
+      router_id: {get_resource: extrouter}
+      subnet: {get_resource: fixed_subnet}
 
   ######################################################################
   #
@@ -155,9 +137,8 @@ resources:
   # sorts.
   #
 
-  # permit ssh access
   secgroup_base:
-    type: "OS::Neutron::SecurityGroup"
+    type: OS::Neutron::SecurityGroup
     properties:
       rules:
         - protocol: icmp
@@ -165,9 +146,8 @@ resources:
           port_range_min: 22
           port_range_max: 22
 
-  # open ports for kubernetes and etcd
   secgroup_kubernetes:
-    type: "OS::Neutron::SecurityGroup"
+    type: OS::Neutron::SecurityGroup
     properties:
       rules:
         - protocol: tcp
@@ -190,7 +170,7 @@ resources:
   #
 
   write_heat_params:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config:
@@ -204,43 +184,43 @@ resources:
             "$PORTAL_NETWORK_CIDR": {get_param: portal_network_cidr}
 
   configure_etcd:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/configure-etcd.yaml}
 
   configure_kubernetes:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/configure-kubernetes-master.sh}
 
   write_flannel_config:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/write-flannel-config.sh}
 
   flannel_config_service:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/flannel-config.service.yaml}
 
   enable_services:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/enable-services-master.sh}
 
   kube_user:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/kube-user.yaml}
 
   kube_examples:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/kube-examples.yaml}
@@ -258,13 +238,13 @@ resources:
             wc_notify: {get_attr: [master_wait_handle, curl_cli]}
 
   disable_selinux:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/disable-selinux.sh}
 
   kube_master_init:
-    type: "OS::Heat::MultipartMime"
+    type: OS::Heat::MultipartMime
     properties:
       parts:
         - config: {get_resource: disable_selinux}
@@ -280,45 +260,45 @@ resources:
 
   ######################################################################
   #
-  # databases server.  this sets up a Kubernetes server
+  # kubernetes master server.
   #
+
   kube_master:
-    type: "OS::Nova::Server"
+    type: OS::Nova::Server
     depends_on:
       - extrouter_inside
     properties:
-      image:
-        get_param: server_image
-      flavor:
-        get_param: master_flavor
-      key_name:
-        get_param: ssh_key_name
+      image: {get_param: server_image}
+      flavor: {get_param: master_flavor}
+      key_name: {get_param: ssh_key_name}
       user_data_format: RAW
       user_data: {get_resource: kube_master_init}
       networks:
-        - port:
-            get_resource: kube_master_eth0
+        - port: {get_resource: kube_master_eth0}
 
   kube_master_eth0:
-    type: "OS::Neutron::Port"
+    type: OS::Neutron::Port
     properties:
-      network:
-        get_resource: fixed_network
+      network: {get_resource: fixed_network}
       security_groups:
-        - get_resource: secgroup_base
-        - get_resource: secgroup_kubernetes
+        - {get_resource: secgroup_base}
+        - {get_resource: secgroup_kubernetes}
       fixed_ips:
-        - subnet:
-            get_resource: fixed_subnet
+        - subnet: {get_resource: fixed_subnet}
       replacement_policy: AUTO
 
   kube_master_floating:
-    type: "OS::Neutron::FloatingIP"
+    type: OS::Neutron::FloatingIP
     properties:
-      floating_network:
-        get_param: external_network
-      port_id:
-        get_resource: kube_master_eth0
+      floating_network: {get_param: external_network}
+      port_id: {get_resource: kube_master_eth0}
+
+  ######################################################################
+  #
+  # kubernetes minions. This is an autoscaling group that will initially
+  # create <number_of_minions> minions, and will scale up to
+  # <max_number_of_minions> based on CPU utilization.
+  #
 
   kube_minions:
     type: "OS::Heat::ResourceGroup"
