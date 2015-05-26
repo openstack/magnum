@@ -58,10 +58,10 @@ resources:
   node_agent_wait_condition:
     type: "AWS::CloudFormation::WaitCondition"
     depends_on:
-      - swarm_manager
+      - swarm_node
     properties:
       Handle:
-        get_resource: agent_wait_handle
+        get_resource: node_agent_wait_handle
       Timeout: 6000
 
   ######################################################################
@@ -131,7 +131,7 @@ resources:
           params:
             "$NODE_IP": {get_attr: [swarm_node_eth0, fixed_ips, 0, ip_address]}
             "$DISCOVERY_URL": {get_param: discovery_url}
-            "$WAIT_HANDLE": {get_resource: node_agent_wait_condition}
+            "$WAIT_HANDLE": {get_resource: node_agent_wait_handle}
 
   enable_services:
     type: "OS::Heat::SoftwareConfig"
