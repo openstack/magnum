@@ -12,7 +12,7 @@ parameters:
     default: centos-7-atomic-20150120
     description: glance image used to boot the server
 
-  server_flavor:
+  minion_flavor:
     type: string
     default: m1.small
     description: flavor to use when booting the server
@@ -60,7 +60,7 @@ resources:
   node_wait_condition:
     type: "AWS::CloudFormation::WaitCondition"
     depends_on:
-      - kube_node
+      - kube_minion
     properties:
       Handle:
         get_resource: node_wait_handle
@@ -153,7 +153,7 @@ resources:
       group: ungrouped
       config: {get_file: fragments/disable-selinux.sh}
 
-  kube_node_init:
+  kube_minion_init:
     type: "OS::Heat::MultipartMime"
     properties:
       parts:
@@ -168,22 +168,22 @@ resources:
         - config: {get_resource: enable_services}
         - config: {get_resource: cfn_signal}
 
-  kube_node:
+  kube_minion:
     type: "OS::Nova::Server"
     properties:
       image:
         get_param: server_image
       flavor:
-        get_param: server_flavor
+        get_param: minion_flavor
       key_name:
         get_param: ssh_key_name
       user_data_format: RAW
-      user_data: {get_resource: kube_node_init}
+      user_data: {get_resource: kube_minion_init}
       networks:
         - port:
-            get_resource: kube_node_eth0
+            get_resource: kube_minion_eth0
 
-  kube_node_eth0:
+  kube_minion_eth0:
     type: "OS::Neutron::Port"
     properties:
       network_id:
@@ -195,13 +195,13 @@ resources:
             get_param: fixed_subnet_id
       replacement_policy: AUTO
 
-  kube_node_floating:
+  kube_minion_floating:
     type: "OS::Neutron::FloatingIP"
     properties:
       floating_network_id:
         get_param: external_network_id
       port_id:
-        get_resource: kube_node_eth0
+        get_resource: kube_minion_eth0
 
   docker_volume:
     type: "OS::Cinder::Volume"
@@ -211,14 +211,14 @@ resources:
   docker_volume_attach:
     type: "OS::Cinder::VolumeAttachment"
     properties:
-      instance_uuid: {get_resource: kube_node}
+      instance_uuid: {get_resource: kube_minion}
       volume_id: {get_resource: docker_volume}
 
 outputs:
 
-  kube_node_ip:
-    value: {get_attr: [kube_node_eth0, fixed_ips, 0, ip_address]}
-  
-  kube_node_external_ip:
-    value: {get_attr: [kube_node_floating, floating_ip_address]}
+  kube_minion_ip:
+    value: {get_attr: [kube_minion_eth0, fixed_ips, 0, ip_address]}
+
+  kube_minion_external_ip:
+    value: {get_attr: [kube_minion_floating, floating_ip_address]}
 
