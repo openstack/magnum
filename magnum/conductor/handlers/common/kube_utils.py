@@ -15,7 +15,7 @@
 import tempfile
 
 from magnum.common import exception
-from magnum.openstack.common._i18n import _LE
+from magnum.i18n import _LE
 from magnum.openstack.common import log as logging
 from magnum.openstack.common import utils
 

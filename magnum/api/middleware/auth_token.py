@@ -16,7 +16,7 @@ from keystonemiddleware import auth_token
 
 from magnum.common import exception
 from magnum.common import utils
-from magnum.openstack.common._i18n import _
+from magnum.i18n import _
 from magnum.openstack.common import log
 
 LOG = log.getLogger(__name__)

@@ -30,8 +30,8 @@ import six
 import wsme
 
 from magnum.common import safe_utils
-from magnum.openstack.common._i18n import _
-from magnum.openstack.common._i18n import _LE
+from magnum.i18n import _
+from magnum.i18n import _LE
 from magnum.openstack.common import log as logging
 
 

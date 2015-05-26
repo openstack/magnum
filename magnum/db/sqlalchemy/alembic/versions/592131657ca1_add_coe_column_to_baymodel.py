@@ -26,7 +26,7 @@ from alembic import op
 from oslo_config import cfg
 import sqlalchemy as sa
 
-from magnum.openstack.common._i18n import _
+from magnum.i18n import _
 
 
 k8s_heat_opts = [

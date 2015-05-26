@@ -18,7 +18,7 @@ from oslo_config import cfg
 
 from magnum.common import exception
 from magnum.common import magnum_keystoneclient
-from magnum.openstack.common._i18n import _
+from magnum.i18n import _
 from magnum.openstack.common import log as logging
 
 

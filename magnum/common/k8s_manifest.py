@@ -16,7 +16,7 @@ import json
 import six
 import yaml
 
-from magnum.openstack.common._i18n import _
+from magnum.i18n import _
 
 
 if hasattr(yaml, 'CSafeDumper'):

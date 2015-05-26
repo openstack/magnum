@@ -37,9 +37,9 @@ import paramiko
 import six
 
 from magnum.common import exception
-from magnum.openstack.common._i18n import _
-from magnum.openstack.common._i18n import _LE
-from magnum.openstack.common._i18n import _LW
+from magnum.i18n import _
+from magnum.i18n import _LE
+from magnum.i18n import _LW
 from magnum.openstack.common import log as logging
 
 UTILS_OPTS = [

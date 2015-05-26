@@ -21,9 +21,9 @@ from oslo_utils import importutils
 
 from magnum.common import context as magnum_context
 from magnum.common import exception
-from magnum.openstack.common._i18n import _
-from magnum.openstack.common._i18n import _LE
-from magnum.openstack.common._i18n import _LI
+from magnum.i18n import _
+from magnum.i18n import _LE
+from magnum.i18n import _LI
 from magnum.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
