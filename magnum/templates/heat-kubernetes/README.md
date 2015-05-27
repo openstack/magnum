@@ -22,9 +22,7 @@ These templates will work with the Juno version of Heat.
 ### Guest image
 
 These templates will work with either CentOS Atomic Host or Fedora 21
-Atomic.  You will need an image dated later than 2015-01-20 in order
-to have both the `flannel` package installed and the appropriately
-configured `docker.service` unit.
+Atomic.
 
 You can enable the VXLAN backend for flannel by setting the
 "flannel_use_vxlan" parameter to "true", but I have run into kernel
@@ -107,10 +105,19 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-## Contact
+## Contributing
 
-Please report bugs using the [GitHub issue tracker][] at
-https://github.com/larsks/heat-kubernetes/issues.
+Please submit bugs and pull requests via the [GitHub repository][] at
+https://github.com/larsks/heat-kubernetes/.
 
-[github issue tracker]: https://github.com/larsks/heat-kubernetes/issues
+When submitting pull requests:
+
+- Please ensure that each pull request contains a single commit and
+  contains only related changes.  Put unrelated changes in multiple
+  pull requests.
+
+- Please avoid conflating new features with
+  stylistic/formatting/cleanup changes.
+
+[github repository]: https://github.com/larsks/heat-kubernetes/
 
