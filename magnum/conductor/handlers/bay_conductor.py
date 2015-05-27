@@ -24,6 +24,7 @@ from magnum.i18n import _
 from magnum.i18n import _LE
 from magnum.i18n import _LI
 from magnum import objects
+from magnum.objects.bay import Status as bay_status
 from magnum.openstack.common import log as logging
 from magnum.openstack.common import loopingcall
 
@@ -146,8 +147,8 @@ class Handler(object):
 
         osc = clients.OpenStackClients(context)
         stack = osc.heat().stacks.get(bay.stack_id)
-        if (stack.stack_status != 'CREATE_COMPLETE' and
-            stack.stack_status != 'UPDATE_COMPLETE'):
+        if (stack.stack_status != bay_status.CREATE_COMPLETE and
+            stack.stack_status != bay_status.UPDATE_COMPLETE):
             operation = _('Updating a bay when stack status is '
                           '"%s"') % stack.stack_status
             raise exception.NotSupported(operation=operation)
@@ -214,12 +215,13 @@ class HeatPoller(object):
         self.attempts += 1
         # poll_and_check is detached and polling long time to check status,
         # so another user/client can call delete bay/stack.
-        if stack.stack_status == 'DELETE_COMPLETE':
+        if stack.stack_status == bay_status.DELETE_COMPLETE:
             LOG.info(_LI('Bay has been deleted, stack_id: %s')
                           % self.bay.stack_id)
             self.bay.destroy()
             raise loopingcall.LoopingCallDone()
-        if (stack.stack_status in ['CREATE_COMPLETE', 'UPDATE_COMPLETE']):
+        if (stack.stack_status in [bay_status.CREATE_COMPLETE,
+                                   bay_status.UPDATE_COMPLETE]):
             _update_stack_outputs(self.context, stack, self.bay)
 
             self.bay.status = stack.stack_status
@@ -228,19 +230,19 @@ class HeatPoller(object):
         elif stack.stack_status != self.bay.status:
             self.bay.status = stack.stack_status
             self.bay.save()
-        if stack.stack_status == 'CREATE_FAILED':
+        if stack.stack_status == bay_status.CREATE_FAILED:
             LOG.error(_LE('Unable to create bay, stack_id: %(stack_id)s, '
                           'reason: %(reason)s') %
                           {'stack_id': self.bay.stack_id,
                           'reason': stack.stack_status_reason})
             raise loopingcall.LoopingCallDone()
-        if stack.stack_status == 'DELETE_FAILED':
+        if stack.stack_status == bay_status.DELETE_FAILED:
             LOG.error(_LE('Unable to delete bay, stack_id: %(stack_id)s, '
                           'reason: %(reason)s') %
                           {'stack_id': self.bay.stack_id,
                           'reason': stack.stack_status_reason})
             raise loopingcall.LoopingCallDone()
-        if stack.stack_status == 'UPDATE_FAILED':
+        if stack.stack_status == bay_status.UPDATE_FAILED:
             LOG.error(_LE('Unable to update bay, stack_id: %(stack_id)s, '
                           'reason: %(reason)s') %
                          {'stack_id': self.bay.stack_id,
@@ -249,7 +251,7 @@ class HeatPoller(object):
         # only check max attempts when the stack is being created when
         # the timeout hasn't been set. If the timeout has been set then
         # the loop will end when the stack completes or the timeout occurs
-        if stack.stack_status == 'CREATE_IN_PROGRESS':
+        if stack.stack_status == bay_status.CREATE_IN_PROGRESS:
             if (stack.timeout_mins is None and
                self.attempts > cfg.CONF.bay_heat.max_attempts):
                 LOG.error(_LE('Bay check exit after %(attempts)s attempts,'

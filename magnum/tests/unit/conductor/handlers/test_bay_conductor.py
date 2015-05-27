@@ -17,6 +17,7 @@ from heatclient import exc
 from magnum.common import exception
 from magnum.conductor.handlers import bay_conductor
 from magnum import objects
+from magnum.objects.bay import Status as bay_status
 from magnum.openstack.common import loopingcall
 from magnum.tests import base
 from magnum.tests.unit.db import base as db_base
@@ -585,8 +586,8 @@ class TestBayConductorWithK8s(base.TestCase):
     def test_poll_no_save(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
-        bay.status = 'CREATE_IN_PROGRESS'
-        mock_heat_stack.stack_status = 'CREATE_IN_PROGRESS'
+        bay.status = bay_status.CREATE_IN_PROGRESS
+        mock_heat_stack.stack_status = bay_status.CREATE_IN_PROGRESS
         poller.poll_and_check()
 
         self.assertEqual(bay.save.call_count, 0)
@@ -595,55 +596,55 @@ class TestBayConductorWithK8s(base.TestCase):
     def test_poll_save(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
-        bay.status = 'CREATE_IN_PROGRESS'
-        mock_heat_stack.stack_status = 'CREATE_FAILED'
+        bay.status = bay_status.CREATE_IN_PROGRESS
+        mock_heat_stack.stack_status = bay_status.CREATE_FAILED
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
         self.assertEqual(bay.save.call_count, 1)
-        self.assertEqual(bay.status, 'CREATE_FAILED')
+        self.assertEqual(bay.status, bay_status.CREATE_FAILED)
         self.assertEqual(poller.attempts, 1)
 
     def test_poll_done(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
-        mock_heat_stack.stack_status = 'DELETE_COMPLETE'
+        mock_heat_stack.stack_status = bay_status.DELETE_COMPLETE
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
-        mock_heat_stack.stack_status = 'CREATE_FAILED'
+        mock_heat_stack.stack_status = bay_status.CREATE_FAILED
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
         self.assertEqual(poller.attempts, 2)
 
     def test_poll_done_by_update_failed(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
-        mock_heat_stack.stack_status = 'UPDATE_FAILED'
+        mock_heat_stack.stack_status = bay_status.UPDATE_FAILED
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
     def test_poll_destroy(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
-        mock_heat_stack.stack_status = 'DELETE_FAILED'
+        mock_heat_stack.stack_status = bay_status.DELETE_FAILED
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
         # Destroy method is not called when stack delete failed
         self.assertEqual(bay.destroy.call_count, 0)
 
-        mock_heat_stack.stack_status = 'DELETE_IN_PROGRESS'
+        mock_heat_stack.stack_status = bay_status.DELETE_IN_PROGRESS
         poller.poll_and_check()
         self.assertEqual(bay.destroy.call_count, 0)
-        self.assertEqual(bay.status, 'DELETE_IN_PROGRESS')
+        self.assertEqual(bay.status, bay_status.DELETE_IN_PROGRESS)
 
-        mock_heat_stack.stack_status = 'DELETE_COMPLETE'
+        mock_heat_stack.stack_status = bay_status.DELETE_COMPLETE
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
         # The bay status should still be DELETE_IN_PROGRESS, because
         # the destroy() method may be failed. If success, this bay record
         # will delete directly, change status is meaningless.
-        self.assertEqual(bay.status, 'DELETE_IN_PROGRESS')
+        self.assertEqual(bay.status, bay_status.DELETE_IN_PROGRESS)
         self.assertEqual(bay.destroy.call_count, 1)
 
     def test_poll_delete_in_progress_timeout_set(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
-        mock_heat_stack.stack_status = 'DELETE_IN_PROGRESS'
+        mock_heat_stack.stack_status = bay_status.DELETE_IN_PROGRESS
         mock_heat_stack.timeout_mins = 60
         # timeout only affects stack creation so expecting this
         # to process normally
@@ -652,14 +653,14 @@ class TestBayConductorWithK8s(base.TestCase):
     def test_poll_delete_in_progress_max_attempts_reached(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
-        mock_heat_stack.stack_status = 'DELETE_IN_PROGRESS'
+        mock_heat_stack.stack_status = bay_status.DELETE_IN_PROGRESS
         poller.attempts = cfg.CONF.bay_heat.max_attempts
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
     def test_poll_create_in_prog_max_att_reached_no_timeout(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
-        mock_heat_stack.stack_status = 'CREATE_IN_PROGRESS'
+        mock_heat_stack.stack_status = bay_status.CREATE_IN_PROGRESS
         poller.attempts = cfg.CONF.bay_heat.max_attempts
         mock_heat_stack.timeout_mins = None
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
@@ -667,7 +668,7 @@ class TestBayConductorWithK8s(base.TestCase):
     def test_poll_create_in_prog_max_att_reached_timeout_set(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
-        mock_heat_stack.stack_status = 'CREATE_IN_PROGRESS'
+        mock_heat_stack.stack_status = bay_status.CREATE_IN_PROGRESS
         poller.attempts = cfg.CONF.bay_heat.max_attempts
         mock_heat_stack.timeout_mins = 60
         # since the timeout is set the max attempts gets ignored since
@@ -678,7 +679,7 @@ class TestBayConductorWithK8s(base.TestCase):
     def test_poll_create_in_prog_max_att_reached_timed_out(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
-        mock_heat_stack.stack_status = 'CREATE_FAILED'
+        mock_heat_stack.stack_status = bay_status.CREATE_FAILED
         poller.attempts = cfg.CONF.bay_heat.max_attempts
         mock_heat_stack.timeout_mins = 60
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
@@ -686,21 +687,21 @@ class TestBayConductorWithK8s(base.TestCase):
     def test_poll_create_in_prog_max_att_not_reached_no_timeout(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
-        mock_heat_stack.stack_status = 'CREATE_IN_PROGRESS'
+        mock_heat_stack.stack_status = bay_status.CREATE_IN_PROGRESS
         mock_heat_stack.timeout.mins = None
         poller.poll_and_check()
 
     def test_poll_create_in_prog_max_att_not_reached_timeout_set(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
-        mock_heat_stack.stack_status = 'CREATE_IN_PROGRESS'
+        mock_heat_stack.stack_status = bay_status.CREATE_IN_PROGRESS
         mock_heat_stack.timeout_mins = 60
         poller.poll_and_check()
 
     def test_poll_create_in_prog_max_att_not_reached_timed_out(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
-        mock_heat_stack.stack_status = 'CREATE_FAILED'
+        mock_heat_stack.stack_status = bay_status.CREATE_FAILED
         mock_heat_stack.timeout_mins = 60
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
@@ -723,7 +724,7 @@ class TestHandler(db_base.DbTestCase):
     def test_update_node_count_success(self, mock_openstack_client_class,
                                mock_update_stack, mock_poll_and_check):
         mock_heat_stack = mock.MagicMock()
-        mock_heat_stack.stack_status = 'CREATE_COMPLETE'
+        mock_heat_stack.stack_status = bay_status.CREATE_COMPLETE
         mock_heat_client = mock.MagicMock()
         mock_heat_client.stacks.get.return_value = mock_heat_stack
         mock_openstack_client = mock_openstack_client_class.return_value
@@ -744,7 +745,7 @@ class TestHandler(db_base.DbTestCase):
     def test_update_node_count_failure(self, mock_openstack_client_class,
                                mock_update_stack, mock_poll_and_check):
         mock_heat_stack = mock.MagicMock()
-        mock_heat_stack.stack_status = 'CREATE_FAILED'
+        mock_heat_stack.stack_status = bay_status.CREATE_FAILED
         mock_heat_client = mock.MagicMock()
         mock_heat_client.stacks.get.return_value = mock_heat_stack
         mock_openstack_client = mock_openstack_client_class.return_value
