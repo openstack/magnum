@@ -70,8 +70,7 @@ def get_rpc_resource(resource, resource_ident):
     if utils.is_uuid_like(resource_ident):
         return resource.get_by_uuid(pecan.request.context, resource_ident)
 
-    if utils.allow_logical_names():
-        return resource.get_by_name(pecan.request.context, resource_ident)
+    return resource.get_by_name(pecan.request.context, resource_ident)
 
     raise exception.InvalidUuidOrName(name=resource_ident)
 
