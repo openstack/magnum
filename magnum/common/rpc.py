@@ -112,7 +112,7 @@ class RequestContextSerializer(messaging.Serializer):
         return self._base.deserialize_entity(context, entity)
 
     def serialize_context(self, context):
-        return context
+        return context.to_dict()
 
     def deserialize_context(self, context):
         return magnum_context.RequestContext.from_dict(context)

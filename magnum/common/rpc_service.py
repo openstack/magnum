@@ -18,7 +18,6 @@ import eventlet
 from oslo_config import cfg
 import oslo_messaging as messaging
 
-from magnum.common import context as magnum_context
 from magnum.common import rpc
 from magnum.objects import base as objects_base
 
@@ -40,33 +39,11 @@ TRANSPORT_ALIASES = {
 }
 
 
-class RequestContextSerializer(messaging.Serializer):
-
-    def __init__(self, base):
-        self._base = base
-
-    def serialize_entity(self, context, entity):
-        if not self._base:
-            return entity
-        return self._base.serialize_entity(context, entity)
-
-    def deserialize_entity(self, context, entity):
-        if not self._base:
-            return entity
-        return self._base.deserialize_entity(context, entity)
-
-    def serialize_context(self, context):
-        return context.to_dict()
-
-    def deserialize_context(self, context):
-        return magnum_context.RequestContext.from_dict(context)
-
-
 class Service(object):
     _server = None
 
     def __init__(self, topic, server, handlers):
-        serializer = RequestContextSerializer(
+        serializer = rpc.RequestContextSerializer(
             objects_base.MagnumObjectSerializer())
         transport = messaging.get_transport(cfg.CONF,
                                             aliases=TRANSPORT_ALIASES)
@@ -83,7 +60,7 @@ class Service(object):
 class API(object):
     def __init__(self, transport=None, context=None, topic=None, server=None,
                  timeout=None):
-        serializer = RequestContextSerializer(
+        serializer = rpc.RequestContextSerializer(
             objects_base.MagnumObjectSerializer())
         if transport is None:
             exmods = rpc.get_allowed_exmods()
