@@ -50,7 +50,8 @@ def parse(manifest_str):
             raise ValueError(msg)
         else:
             if manifest is None:
-                manifest = {}
+                msg = _("'manifest' can't be empty")
+                raise ValueError(msg)
 
     if not isinstance(manifest, dict):
         raise ValueError(_('The manifest is not a JSON object '

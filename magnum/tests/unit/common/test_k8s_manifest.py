@@ -19,13 +19,15 @@ from magnum.tests import base
 class K8sManifestTestCase(base.TestCase):
 
     def test_parse_with_json(self):
+        port = 6379
+        containerPort = 6380
         json_str = '''
         {
           "id": "redis-master",
           "kind": "Service",
           "apiVersion": "v1beta1",
-          "port": 6379,
-          "containerPort": 6379,
+          "port": %d,
+          "containerPort": %d,
           "selector": {
             "name": "redis-master"
           },
@@ -33,27 +35,48 @@ class K8sManifestTestCase(base.TestCase):
             "name": "redis-master"
           }
         }
-        '''
+        ''' % (port, containerPort)
 
         manifest = k8s_manifest.parse(json_str)
         self.assertIsInstance(manifest, dict)
+        self.assertEqual(port, manifest['port'])
+        self.assertEqual(containerPort, manifest['containerPort'])
 
     def test_parse_with_yaml(self):
+        port = 6389
+        containerPort = 6380
         yaml_str = '''
         id: redis-master
         kind: Service
-        port: 6379
-        containerPort: 6379
+        port: %d
+        containerPort: %d
         selector:
             name: redis-master
         labels:
             name: redis-master
-        '''
+        ''' % (port, containerPort)
 
         manifest = k8s_manifest.parse(yaml_str)
         self.assertIsInstance(manifest, dict)
+        self.assertEqual(port, manifest['port'])
+        self.assertEqual(containerPort, manifest['containerPort'])
 
     def test_parse_invalid_value(self):
         invalid_str = 'aoa89**'
+
+        self.assertRaises(ValueError, k8s_manifest.parse, invalid_str)
+
+    def test_parse_empty_value(self):
+        empty_str = ''
+
+        self.assertRaises(ValueError, k8s_manifest.parse, empty_str)
+
+    def test_parse_empty_yaml_response(self):
+        blank_str = ' '
+
+        self.assertRaises(ValueError, k8s_manifest.parse, blank_str)
+
+    def test_parse_yaml_error(self):
+        invalid_str = "}invalid: y'm'l3!"
 
         self.assertRaises(ValueError, k8s_manifest.parse, invalid_str)
