@@ -160,16 +160,30 @@ At this time, Magnum has only been tested with the Fedora Atomic micro-OS.
 Magnum will likely work with other micro-OS platforms, but each one requires
 individual support in the heat template.
 
-The fedora-21-atomic-3 image will automatically be added to glance.  You can
-still add your own images to use manually through glance.
-
-Prepare to use the magnum client.
-Create a new shell, and source the devstack openrc script::
+Prepare your session to be able to use the various openstack clients including
+magnum, neutron and glance. Create a new shell, and source the devstack openrc
+script::
 
     source /opt/stack/devstack/openrc admin admin
 
+The fedora-21-atomic-3 image will automatically be added to glance.  You can
+add additional images to use manually through glance. To verify the image
+created when installing DevStack::
+
+    glance image-list
+    +--------------------------------------+---------------------------------+-------------+------------------+-----------+--------+
+    | ID                                   | Name                            | Disk Format | Container Format | Size      | Status |
+    +--------------------------------------+---------------------------------+-------------+------------------+-----------+--------+
+    | 7f5b6a15-f2fd-4552-aec5-952c6f6d4bc7 | cirros-0.3.4-x86_64-uec         | ami         | ami              | 25165824  | active |
+    | bd3c0f92-669a-4390-a97d-b3e0a2043362 | cirros-0.3.4-x86_64-uec-kernel  | aki         | aki              | 4979632   | active |
+    | 843ce0f7-ae51-4db3-8e74-bcb860d06c55 | cirros-0.3.4-x86_64-uec-ramdisk | ari         | ari              | 3740163   | active |
+    | 02c312e3-2d30-43fd-ab2d-1d25622c0eaa | fedora-21-atomic-3              | qcow2       | bare             | 770179072 | active |
+    +--------------------------------------+---------------------------------+-------------+------------------+-----------+--------+
+
+You need to define and register a keypair for use when creating baymodel's::
+
     cd ~
-    test -f ~/.ssh/id_rsa.pub || ssh-keygen
+    test -f ~/.ssh/id_rsa.pub || ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
     nova keypair-add --pub-key ~/.ssh/id_rsa.pub testkey
 
 To get started, list the available commands and resources::
@@ -201,7 +215,8 @@ just restart either magnum-api or magnum-conductor.  The -e option to
 pip install will link to the location from where the source code
 was installed.
 
-Magnum reports CREATE_COMPLETE when it is done creating the bay.  Do not create
+Bays will have an initial status of CREATE_IN_PROGRESS.  Magnum will update
+the status to CREATE_COMPLETE when it is done creating the bay.  Do not create
 containers, pods, services, or replication controllers before Magnum finishes
 creating the bay. They will likely not be created, causing Magnum to become
 confused.
