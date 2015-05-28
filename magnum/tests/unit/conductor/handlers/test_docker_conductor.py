@@ -612,8 +612,14 @@ class TestDockerConductor(base.BaseTestCase):
         mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
         mock_docker_id = '2703ef2b705d'
         mock_find_container.return_value = mock_docker_id
+        mock_create_res = mock.MagicMock()
+        mock_docker.exec_create.return_value = mock_create_res
         self.conductor.container_execute(None, mock_container_uuid, 'ls')
-        mock_docker.execute.assert_called_once_with(mock_docker_id, 'ls')
+        mock_docker.exec_create.assert_called_once_with(mock_docker_id, 'ls',
+            True, True, False)
+
+        mock_docker.exec_start.assert_called_once_with(mock_create_res,
+            False, False, False)
         mock_find_container.assert_called_once_with(mock_docker,
                                                     mock_container_uuid)
 
@@ -629,12 +635,13 @@ class TestDockerConductor(base.BaseTestCase):
         mock_find_container.return_value = mock_docker_id
         with patch.object(errors.APIError, '__str__',
                           return_value='hit error') as mock_init:
-            mock_docker.execute = mock.Mock(side_effect=
+            mock_docker.exec_create = mock.Mock(side_effect=
                                   errors.APIError('Error', '', ''))
             self.assertRaises(exception.ContainerException,
                               self.conductor.container_execute,
                               None, mock_container_uuid, 'ls')
-            mock_docker.execute.assert_called_once_with(mock_docker_id, 'ls')
+            mock_docker.exec_create.assert_called_once_with(mock_docker_id,
+                'ls', True, True, False)
             mock_find_container.assert_called_once_with(mock_docker,
                                                         mock_container_uuid)
             mock_init.assert_called_once_with()
