@@ -51,20 +51,22 @@ parameters:
   fixed_subnet_id:
     type: string
     description: Subnet from which to allocate fixed addresses.
+  wait_condition_timeout:
+    type: number
+    description : >
+      timeout for the Wait Conditions
 
 resources:
 
-  node_wait_handle:
-    type: "AWS::CloudFormation::WaitConditionHandle"
+  minion_wait_handle:
+    type: OS::Heat::WaitConditionHandle
 
   node_wait_condition:
-    type: "AWS::CloudFormation::WaitCondition"
-    depends_on:
-      - kube_minion
+    type: OS::Heat::WaitCondition
+    depends_on: kube_minion
     properties:
-      Handle:
-        get_resource: node_wait_handle
-      Timeout: 6000
+      handle: {get_resource: minion_wait_handle}
+      timeout: {get_param: wait_condition_timeout}
 
   ######################################################################
   #
@@ -96,7 +98,6 @@ resources:
           params:
             "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
             "$KUBE_MASTER_IP": {get_param: kube_master_ip}
-            "$WAIT_HANDLE": {get_resource: node_wait_handle}
             "$DOCKER_VOLUME": {get_resource: docker_volume}
 
   add_to_docker_group:
@@ -147,11 +148,17 @@ resources:
       group: ungrouped
       config: {get_file: fragments/enable-services-minion.sh}
 
-  cfn_signal:
-    type: "OS::Heat::SoftwareConfig"
+  minion_wc_notify:
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/cfn-signal.sh}
+      config:
+        str_replace:
+          template: |
+            #!/bin/bash -v
+            wc_notify --data-binary '{"status": "SUCCESS"}'
+          params:
+            wc_notify: {get_attr: [minion_wait_handle, curl_cli]}
 
   disable_selinux:
     type: "OS::Heat::SoftwareConfig"
@@ -173,7 +180,7 @@ resources:
         - config: {get_resource: configure_kubernetes_minion}
         - config: {get_resource: docker_service}
         - config: {get_resource: enable_services}
-        - config: {get_resource: cfn_signal}
+        - config: {get_resource: minion_wc_notify}
 
   kube_minion:
     type: "OS::Nova::Server"

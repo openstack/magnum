@@ -91,19 +91,23 @@ parameters:
       storage
     default: 25
 
+  wait_condition_timeout:
+    type: number
+    description : >
+      timeout for the Wait Conditions
+    default: 6000
+
 resources:
 
   master_wait_handle:
-    type: "AWS::CloudFormation::WaitConditionHandle"
+    type: OS::Heat::WaitConditionHandle
 
   master_wait_condition:
-    type: "AWS::CloudFormation::WaitCondition"
-    depends_on:
-      - kube_master
+    type: OS::Heat::WaitCondition
+    depends_on: kube_master
     properties:
-      Handle:
-        get_resource: master_wait_handle
-      Timeout: 6000
+      handle: {get_resource: master_wait_handle}
+      timeout: {get_param: wait_condition_timeout}
 
   ######################################################################
   #
@@ -194,7 +198,6 @@ resources:
           template: {get_file: fragments/write-heat-params-master.yaml}
           params:
             "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
-            "$WAIT_HANDLE": {get_resource: master_wait_handle}
             "$FLANNEL_NETWORK_CIDR": {get_param: flannel_network_cidr}
             "$FLANNEL_NETWORK_SUBNETLEN": {get_param: flannel_network_subnetlen}
             "$FLANNEL_USE_VXLAN": {get_param: flannel_use_vxlan}
@@ -242,11 +245,17 @@ resources:
       group: ungrouped
       config: {get_file: fragments/kube-examples.yaml}
 
-  cfn_signal:
-    type: "OS::Heat::SoftwareConfig"
+  master_wc_notify:
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/cfn-signal.sh}
+      config:
+        str_replace:
+          template: |
+            #!/bin/bash -v
+            wc_notify --data-binary '{"status": "SUCCESS"}'
+          params:
+            wc_notify: {get_attr: [master_wait_handle, curl_cli]}
 
   disable_selinux:
     type: "OS::Heat::SoftwareConfig"
@@ -267,7 +276,7 @@ resources:
         - config: {get_resource: write_flannel_config}
         - config: {get_resource: flannel_config_service}
         - config: {get_resource: kube_examples}
-        - config: {get_resource: cfn_signal}
+        - config: {get_resource: master_wc_notify}
 
   ######################################################################
   #
@@ -330,6 +339,7 @@ resources:
           external_network_id: {get_param: external_network_id}
           kube_allow_priv: {get_param: kube_allow_priv}
           docker_volume_size: {get_param: docker_volume_size}
+          wait_condition_timeout: {get_param: wait_condition_timeout}
 
 outputs:
 
