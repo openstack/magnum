@@ -1,0 +1,31 @@
+#cloud-config
+merge_how: dict(recurse_array)+list(append)
+write_files:
+  - path: /usr/local/bin/kube-register
+    permissions: "0755"
+    owner: root
+    content: |
+      #!/bin/sh
+
+      . /etc/sysconfig/heat-params
+      master_url=http://${KUBE_MASTER_IP}:8080
+      myip=$(ip addr show eth0 |
+        awk '$1 == "inet" {print $2}' | cut -f1 -d/)
+
+      # wait for master api
+      until curl -sf "${master_url}/healthz"; do
+        sleep 1
+      done
+
+      cpu=$(($(nproc) * 1000))
+      memory=$(awk '/MemTotal: /{print $2 * 1024}' /proc/meminfo)
+
+      cat <<EOF | kubectl create -s ${master_url} -f-
+      apiVersion: v1beta1
+      id: $myip
+      kind: Minion
+      resources:
+        capacity:
+          cpu: $cpu
+          memory: $memory
+      EOF
