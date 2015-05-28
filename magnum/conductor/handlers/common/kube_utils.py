@@ -14,9 +14,10 @@
 
 import tempfile
 
+from oslo_log import log as logging
+
 from magnum.common import exception
 from magnum.i18n import _LE
-from magnum.openstack.common import log as logging
 from magnum.openstack.common import utils
 
 LOG = logging.getLogger(__name__)

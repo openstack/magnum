@@ -19,6 +19,7 @@ import os
 import sys
 
 from oslo_config import cfg
+from oslo_log import log as logging
 
 from magnum.common import rpc_service as service
 from magnum.common import short_id
@@ -28,14 +29,14 @@ from magnum.conductor.handlers import docker_conductor
 from magnum.conductor.handlers import kube as k8s_conductor
 from magnum.i18n import _LE
 from magnum.i18n import _LI
-from magnum.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 
 
 def main():
+    logging.register_options(cfg.CONF)
     cfg.CONF(sys.argv[1:], project='magnum')
-    logging.setup('magnum')
+    logging.setup(cfg.CONF, 'magnum')
 
     LOG.info(_LI('Starting server in PID %s') % os.getpid())
     LOG.debug("Configuration:")

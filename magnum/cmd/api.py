@@ -20,17 +20,18 @@ import sys
 from wsgiref import simple_server
 
 from oslo_config import cfg
+from oslo_log import log as logging
 
 from magnum.api import app as api_app
 from magnum.common import service
 from magnum.i18n import _LI
-from magnum.openstack.common import log as logging
 
 
 LOG = logging.getLogger(__name__)
 
 
 def main():
+    logging.register_options(cfg.CONF)
     service.prepare_service(sys.argv)
 
     app = api_app.setup_app()

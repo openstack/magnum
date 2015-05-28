@@ -15,10 +15,10 @@
 import operator
 
 from oslo_config import cfg
+from oslo_log import log as logging
 
 from magnum.conductor import template_definition as tdef
 from magnum.openstack.common import cliutils
-from magnum.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF

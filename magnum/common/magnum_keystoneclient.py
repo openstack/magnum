@@ -17,6 +17,7 @@ import copy
 import keystoneclient.exceptions as kc_exception
 from keystoneclient.v3 import client as kc_v3
 from oslo_config import cfg
+from oslo_log import log as logging
 from oslo_utils import importutils
 
 from magnum.common import context as magnum_context
@@ -24,7 +25,6 @@ from magnum.common import exception
 from magnum.i18n import _
 from magnum.i18n import _LE
 from magnum.i18n import _LI
-from magnum.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 

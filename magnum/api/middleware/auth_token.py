@@ -13,11 +13,11 @@
 import re
 
 from keystonemiddleware import auth_token
+from oslo_log import log
 
 from magnum.common import exception
 from magnum.common import utils
 from magnum.i18n import _
-from magnum.openstack.common import log
 
 LOG = log.getLogger(__name__)
 

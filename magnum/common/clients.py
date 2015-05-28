@@ -15,11 +15,11 @@
 from glanceclient.v2 import client as glanceclient
 from heatclient.v1 import client as heatclient
 from oslo_config import cfg
+from oslo_log import log as logging
 
 from magnum.common import exception
 from magnum.common import magnum_keystoneclient
 from magnum.i18n import _
-from magnum.openstack.common import log as logging
 
 
 LOG = logging.getLogger(__name__)

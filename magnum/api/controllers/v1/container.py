@@ -15,6 +15,7 @@
 
 import datetime
 
+from oslo_log import log as logging
 import pecan
 from pecan import rest
 import wsme
@@ -28,7 +29,6 @@ from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
 from magnum.common import exception
 from magnum import objects
-from magnum.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 
