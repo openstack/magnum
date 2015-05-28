@@ -7,6 +7,7 @@ write_files:
     content: |
       kind: Pod
       apiVersion: v1beta1
+      id: web
       labels:
         name: web
       desiredState:
