@@ -35,7 +35,7 @@ class ClientsTest(base.BaseTestCase):
     @mock.patch.object(clients.OpenStackClients, 'url_for')
     @mock.patch.object(clients.OpenStackClients, 'auth_url')
     def _test_clients_heat(self, expected_region_name, mock_auth, mock_url,
-                          mock_call):
+                           mock_call):
         mock_auth.__get__ = mock.Mock(return_value="keystone_url")
         con = mock.MagicMock()
         con.auth_token = "3bcc3d3a03f44e3d8377f9247b0ad155"
@@ -91,7 +91,7 @@ class ClientsTest(base.BaseTestCase):
     @mock.patch.object(clients.OpenStackClients, 'url_for')
     @mock.patch.object(clients.OpenStackClients, 'auth_url')
     def _test_clients_glance(self, expected_region_name, mock_auth, mock_url,
-                          mock_call):
+                             mock_call):
         mock_auth.__get__ = mock.Mock(return_value="keystone_url")
         con = mock.MagicMock()
         con.auth_token = "3bcc3d3a03f44e3d8377f9247b0ad155"

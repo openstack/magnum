@@ -72,10 +72,12 @@ class DbNodeTestCase(base.DbTestCase):
         self.assertEqual(sorted(uuids), sorted(res_uuids))
 
     def test_get_node_list_with_filters(self):
-        node1 = utils.create_test_node(type='virt',
+        node1 = utils.create_test_node(
+            type='virt',
             ironic_node_id=magnum_utils.generate_uuid(),
             uuid=magnum_utils.generate_uuid())
-        node2 = utils.create_test_node(type='bare',
+        node2 = utils.create_test_node(
+            type='bare',
             uuid=magnum_utils.generate_uuid())
 
         res = self.dbapi.get_node_list(self.context, filters={'type': 'virt'})

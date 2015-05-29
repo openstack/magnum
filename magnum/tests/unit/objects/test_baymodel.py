@@ -106,7 +106,7 @@ class TestBayModelObject(base.DbTestCase):
 
                 mock_get_baymodel.assert_called_once_with(self.context, uuid)
                 mock_update_baymodel.assert_called_once_with(
-                        uuid, {'image_id': 'test-image'})
+                    uuid, {'image_id': 'test-image'})
                 self.assertEqual(self.context, bm._context)
 
     def test_refresh(self):

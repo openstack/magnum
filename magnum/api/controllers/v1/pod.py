@@ -185,8 +185,8 @@ class PodsController(rest.RestController):
                                                  marker)
 
         pods = pecan.request.rpcapi.pod_list(pecan.request.context, limit,
-                                         marker_obj, sort_key=sort_key,
-                                         sort_dir=sort_dir)
+                                             marker_obj, sort_key=sort_key,
+                                             sort_dir=sort_dir)
 
         return PodCollection.convert_with_links(pods, limit,
                                                 url=resource_url,

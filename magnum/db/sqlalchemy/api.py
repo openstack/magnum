@@ -138,7 +138,7 @@ class Connection(api.Connection):
         return query
 
     def get_bay_list(self, context, filters=None, limit=None, marker=None,
-                      sort_key=None, sort_dir=None):
+                     sort_key=None, sort_dir=None):
         query = model_query(models.Bay)
         query = self._add_tenant_filters(context, query)
         query = self._add_bays_filters(query, filters)
@@ -292,7 +292,7 @@ class Connection(api.Connection):
             query = query.filter_by(flavor_id=filters['flavor_id'])
         if 'master_flavor_id' in filters:
             query = query.filter_by(
-                    master_flavor_id=filters['master_flavor_id'])
+                master_flavor_id=filters['master_flavor_id'])
         if 'keypair_id' in filters:
             query = query.filter_by(keypair_id=filters['keypair_id'])
         if 'external_network_id' in filters:
@@ -308,7 +308,7 @@ class Connection(api.Connection):
         return query
 
     def get_baymodel_list(self, context, filters=None, limit=None, marker=None,
-                      sort_key=None, sort_dir=None):
+                          sort_key=None, sort_dir=None):
         query = model_query(models.BayModel)
         query = self._add_tenant_filters(context, query)
         query = self._add_baymodels_filters(query, filters)
@@ -599,8 +599,9 @@ class Connection(api.Connection):
 
             # Prevent ironic_node_id overwriting
             if values.get("ironic_node_id") and ref.ironic_node_id:
-                raise exception.NodeAssociated(node=node_id,
-                                instance=ref.ironic_node_id)
+                raise exception.NodeAssociated(
+                    node=node_id,
+                    instance=ref.ironic_node_id)
 
             ref.update(values)
         return ref
@@ -619,7 +620,7 @@ class Connection(api.Connection):
         return query
 
     def get_pod_list(self, context, filters=None, limit=None, marker=None,
-                      sort_key=None, sort_dir=None):
+                     sort_key=None, sort_dir=None):
         query = model_query(models.Pod)
         query = self._add_tenant_filters(context, query)
         query = self._add_pods_filters(query, filters)
@@ -723,7 +724,7 @@ class Connection(api.Connection):
         return query
 
     def get_service_list(self, context, filters=None, limit=None, marker=None,
-                      sort_key=None, sort_dir=None):
+                         sort_key=None, sort_dir=None):
         query = model_query(models.Service)
         query = self._add_tenant_filters(context, query)
         query = self._add_services_filters(query, filters)
@@ -827,7 +828,7 @@ class Connection(api.Connection):
         return query
 
     def get_rc_list(self, context, filters=None, limit=None, marker=None,
-                      sort_key=None, sort_dir=None):
+                    sort_key=None, sort_dir=None):
         query = model_query(models.ReplicationController)
         query = self._add_tenant_filters(context, query)
         query = self._add_rcs_filters(query, filters)
@@ -845,7 +846,7 @@ class Connection(api.Connection):
             rc.save()
         except db_exc.DBDuplicateEntry:
             raise exception.ReplicationControllerAlreadyExists(
-                                                        uuid=values['uuid'])
+                uuid=values['uuid'])
         return rc
 
     def get_rc_by_id(self, context, rc_id):
@@ -868,7 +869,7 @@ class Connection(api.Connection):
 
     def get_rcs_by_bay_uuid(self, bay_uuid):
         query = model_query(models.ReplicationController).filter_by(
-                                                        bay_uuid=bay_uuid)
+            bay_uuid=bay_uuid)
         try:
             return query.all()
         except NoResultFound:
@@ -876,7 +877,7 @@ class Connection(api.Connection):
 
     def get_rc_by_name(self, rc_name):
         query = model_query(models.ReplicationController).filter_by(
-                                                             name=rc_name)
+            name=rc_name)
         try:
             return query.one()
         except MultipleResultsFound:

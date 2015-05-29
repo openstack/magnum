@@ -253,7 +253,7 @@ def is_valid_cidr(address):
     ip_segment = address.split('/')
 
     if (len(ip_segment) <= 1 or
-        ip_segment[1] == ''):
+            ip_segment[1] == ''):
         return False
 
     return True
@@ -442,7 +442,7 @@ def unlink_without_raise(path):
             return
         else:
             LOG.warn(_LW("Failed to unlink %(path)s, error: %(e)s"),
-                        {'path': path, 'e': e})
+                     {'path': path, 'e': e})
 
 
 def rmtree_without_raise(path):
@@ -451,7 +451,7 @@ def rmtree_without_raise(path):
             shutil.rmtree(path)
     except OSError as e:
         LOG.warn(_LW("Failed to remove dir %(path)s, error: %(e)s"),
-                {'path': path, 'e': e})
+                 {'path': path, 'e': e})
 
 
 def write_to_file(path, contents):
@@ -468,7 +468,7 @@ def create_link_without_raise(source, link):
         else:
             LOG.warn(_LW("Failed to create symlink from %(source)s to %(link)s"
                          ", error: %(e)s"),
-                         {'source': source, 'link': link, 'e': e})
+                     {'source': source, 'link': link, 'e': e})
 
 
 def safe_rstrip(value, chars=None):

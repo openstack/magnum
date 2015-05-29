@@ -62,9 +62,9 @@ class TestCase(base.BaseTestCase):
             }
         }
         self.context = magnum_context.RequestContext(
-                            auth_token_info=token_info,
-                            project_id='fake_project',
-                            user_id='fake_user')
+            auth_token_info=token_info,
+            project_id='fake_project',
+            user_id='fake_user')
 
         def make_context(*args, **kwargs):
             # If context hasn't been constructed with token_info

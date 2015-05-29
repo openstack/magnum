@@ -60,8 +60,8 @@ class TestDockerConductor(base.BaseTestCase):
         mock_container.bay_uuid = '9fb6c41e-a7e4-48b8-97c4-702b26034b8e'
 
         actual_docker = self.conductor.get_docker_client(
-                                                mock.sentinel.context,
-                                                mock_container)
+            mock.sentinel.context,
+            mock_container)
 
         self.assertEqual(mock_docker, actual_docker)
 
@@ -98,8 +98,8 @@ class TestDockerConductor(base.BaseTestCase):
         args = ('tcp://1.1.1.1:2376', CONF.docker.docker_remote_api_version,
                 CONF.docker.default_timeout)
         mock_container_get_by_uuid.assert_called_once_with(
-                                                 mock.sentinel.context,
-                                                 mock_container.uuid)
+            mock.sentinel.context,
+            mock_container.uuid)
         mock_bay_get_by_uuid.assert_called_once_with(mock.sentinel.context,
                                                      mock_container.bay_uuid)
         mock_docker_client.DockerHTTPClient.assert_called_once_with(*args)
@@ -113,18 +113,19 @@ class TestDockerConductor(base.BaseTestCase):
         mock_container.image_id = 'test_image:some_tag'
         mock_container.command = None
 
-        container = self.conductor.container_create(None, 'some-name',
-                        'some-uuid', mock_container)
+        container = self.conductor.container_create(
+            None, 'some-name',
+            'some-uuid', mock_container)
 
         utf8_image_id = self.conductor._encode_utf8(mock_container.image_id)
         mock_docker.pull.assert_called_once_with('test_image',
                                                  tag='some_tag')
         mock_docker.inspect_image.assert_called_once_with(utf8_image_id)
         mock_docker.create_container.assert_called_once_with(
-                                          mock_container.image_id,
-                                          name='some-name',
-                                          hostname='some-uuid',
-                                          command=None)
+            mock_container.image_id,
+            name='some-name',
+            hostname='some-uuid',
+            command=None)
         self.assertEqual(obj_container.STOPPED, container.status)
 
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
@@ -136,18 +137,19 @@ class TestDockerConductor(base.BaseTestCase):
         mock_container.image_id = 'test_image:some_tag'
         mock_container.command = 'env'
 
-        container = self.conductor.container_create(None, 'some-name',
-                        'some-uuid', mock_container)
+        container = self.conductor.container_create(
+            None, 'some-name',
+            'some-uuid', mock_container)
 
         utf8_image_id = self.conductor._encode_utf8(mock_container.image_id)
         mock_docker.pull.assert_called_once_with('test_image',
-                                                      tag='some_tag')
+                                                 tag='some_tag')
         mock_docker.inspect_image.assert_called_once_with(utf8_image_id)
         mock_docker.create_container.assert_called_once_with(
-                                          mock_container.image_id,
-                                          name='some-name',
-                                          hostname='some-uuid',
-                                          command='env')
+            mock_container.image_id,
+            name='some-name',
+            hostname='some-uuid',
+            command='env')
         self.assertEqual(obj_container.STOPPED, container.status)
 
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
@@ -158,15 +160,15 @@ class TestDockerConductor(base.BaseTestCase):
         mock_container.image_id = 'test_image:some_tag'
         with patch.object(errors.APIError, '__str__',
                           return_value='hit error') as mock_init:
-            mock_docker.pull = mock.Mock(side_effect=
-                                  errors.APIError('Error', '', ''))
+            mock_docker.pull = mock.Mock(
+                side_effect=errors.APIError('Error', '', ''))
 
             self.assertRaises(exception.ContainerException,
                               self.conductor.container_create,
                               None, 'some-name', 'some-uuid', mock_container)
             mock_docker.pull.assert_called_once_with(
-                                          'test_image',
-                                          tag='some_tag')
+                'test_image',
+                tag='some_tag')
             self.assertFalse(mock_docker.create_container.called)
             mock_init.assert_called_once_with()
             self.assertEqual(obj_container.ERROR, mock_container.status)
@@ -177,7 +179,7 @@ class TestDockerConductor(base.BaseTestCase):
         fake_response.content = 'not_found'
         fake_response.status_code = 404
         mock_docker.list_instances.side_effect = errors.APIError(
-                                                 'not_found', fake_response)
+            'not_found', fake_response)
         ret = self.conductor._find_container_by_name(mock_docker, '1')
         self.assertEqual({}, ret)
 
@@ -192,15 +194,16 @@ class TestDockerConductor(base.BaseTestCase):
         mock_find_container.return_value = mock_docker_id
         self.conductor.container_delete(None, mock_container_uuid)
         mock_docker.remove_container.assert_called_once_with(
-                                                   mock_docker_id)
+            mock_docker_id)
         mock_find_container.assert_called_once_with(mock_docker,
                                                     mock_container_uuid)
 
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
-    def test_container_delete_with_container_not_exist(self,
-                                        mock_get_docker_client,
-                                        mock_find_container):
+    def test_container_delete_with_container_not_exist(
+            self,
+            mock_get_docker_client,
+            mock_find_container):
         mock_docker = mock.MagicMock()
         mock_get_docker_client.return_value = mock_docker
         mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
@@ -214,9 +217,10 @@ class TestDockerConductor(base.BaseTestCase):
 
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
-    def test_container_delete_with_failure(self,
-                                        mock_get_docker_client,
-                                        mock_find_container):
+    def test_container_delete_with_failure(
+            self,
+            mock_get_docker_client,
+            mock_find_container):
         mock_docker = mock.MagicMock()
         mock_get_docker_client.return_value = mock_docker
         mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
@@ -224,13 +228,13 @@ class TestDockerConductor(base.BaseTestCase):
         mock_find_container.return_value = mock_docker_id
         with patch.object(errors.APIError, '__str__',
                           return_value='hit error') as mock_init:
-            mock_docker.remove_container = mock.Mock(side_effect=
-                                  errors.APIError('Error', '', ''))
+            mock_docker.remove_container = mock.Mock(
+                side_effect=errors.APIError('Error', '', ''))
             self.assertRaises(exception.ContainerException,
                               self.conductor.container_delete,
                               None, mock_container_uuid)
             mock_docker.remove_container.assert_called_once_with(
-                                                       mock_docker_id)
+                mock_docker_id)
             mock_find_container.assert_called_once_with(mock_docker,
                                                         mock_container_uuid)
             mock_init.assert_called_once_with()
@@ -282,8 +286,8 @@ class TestDockerConductor(base.BaseTestCase):
         mock_find_container.return_value = mock_docker_id
         with patch.object(errors.APIError, '__str__',
                           return_value='hit error') as mock_init:
-            mock_docker.restart = mock.Mock(side_effect=
-                                  errors.APIError('Error', '', ''))
+            mock_docker.restart = mock.Mock(
+                side_effect=errors.APIError('Error', '', ''))
 
             self.assertRaises(exception.ContainerException,
                               self.conductor.container_reboot,
@@ -323,8 +327,8 @@ class TestDockerConductor(base.BaseTestCase):
         mock_find_container.return_value = mock_docker_id
         with patch.object(errors.APIError, '__str__',
                           return_value='hit error') as mock_init:
-            mock_docker.start = mock.Mock(side_effect=
-                                  errors.APIError('Error', '', ''))
+            mock_docker.start = mock.Mock(
+                side_effect=errors.APIError('Error', '', ''))
 
             self.assertRaises(exception.ContainerException,
                               self.conductor.container_start,
@@ -363,8 +367,8 @@ class TestDockerConductor(base.BaseTestCase):
         mock_find_container.return_value = mock_docker_id
         with patch.object(errors.APIError, '__str__',
                           return_value='hit error') as mock_init:
-            mock_docker.stop = mock.Mock(side_effect=
-                                  errors.APIError('Error', '', ''))
+            mock_docker.stop = mock.Mock(
+                side_effect=errors.APIError('Error', '', ''))
 
             self.assertRaises(exception.ContainerException,
                               self.conductor.container_stop,
@@ -403,8 +407,8 @@ class TestDockerConductor(base.BaseTestCase):
         mock_find_container.return_value = mock_docker_id
         with patch.object(errors.APIError, '__str__',
                           return_value='hit error') as mock_init:
-            mock_docker.pause = mock.Mock(side_effect=
-                                  errors.APIError('Error', '', ''))
+            mock_docker.pause = mock.Mock(
+                side_effect=errors.APIError('Error', '', ''))
 
             self.assertRaises(exception.ContainerException,
                               self.conductor.container_pause,
@@ -444,8 +448,8 @@ class TestDockerConductor(base.BaseTestCase):
         mock_find_container.return_value = mock_docker_id
         with patch.object(errors.APIError, '__str__',
                           return_value='hit error') as mock_init:
-            mock_docker.unpause = mock.Mock(side_effect=
-                                  errors.APIError('Error', '', ''))
+            mock_docker.unpause = mock.Mock(
+                side_effect=errors.APIError('Error', '', ''))
 
             self.assertRaises(exception.ContainerException,
                               self.conductor.container_unpause,
@@ -469,7 +473,7 @@ class TestDockerConductor(base.BaseTestCase):
         mock_find_container.return_value = mock_docker_id
         self.conductor.container_show(None, mock_container_uuid)
         mock_docker.inspect_container.assert_called_once_with(
-                                                    mock_docker_id)
+            mock_docker_id)
         mock_find_container.assert_called_once_with(mock_docker,
                                                     mock_container_uuid)
 
@@ -567,13 +571,13 @@ class TestDockerConductor(base.BaseTestCase):
         mock_find_container.return_value = mock_docker_id
         with patch.object(errors.APIError, '__str__',
                           return_value='hit error') as mock_init:
-            mock_docker.inspect_container = mock.Mock(side_effect=
-                                  errors.APIError('Error', '', ''))
+            mock_docker.inspect_container = mock.Mock(
+                side_effect=errors.APIError('Error', '', ''))
             self.assertRaises(exception.ContainerException,
                               self.conductor.container_show,
                               None, mock_container_uuid)
             mock_docker.inspect_container.assert_called_once_with(
-                                                        mock_docker_id)
+                mock_docker_id)
             mock_find_container.assert_called_once_with(mock_docker,
                                                         mock_container_uuid)
             mock_init.assert_called_once_with()
@@ -593,11 +597,11 @@ class TestDockerConductor(base.BaseTestCase):
         mock_find_container.return_value = mock_docker_id
         with patch.object(errors.APIError, '__str__',
                           return_value='404 error') as mock_init:
-            mock_docker.inspect_container = mock.Mock(side_effect=
-                                  errors.APIError('Error', '', ''))
+            mock_docker.inspect_container = mock.Mock(
+                side_effect=errors.APIError('Error', '', ''))
             self.conductor.container_show(None, mock_container_uuid)
             mock_docker.inspect_container.assert_called_once_with(
-                                                        mock_docker_id)
+                mock_docker_id)
             mock_find_container.assert_called_once_with(mock_docker,
                                                         mock_container_uuid)
             mock_init.assert_called_once_with()
@@ -616,10 +620,10 @@ class TestDockerConductor(base.BaseTestCase):
         mock_docker.exec_create.return_value = mock_create_res
         self.conductor.container_execute(None, mock_container_uuid, 'ls')
         mock_docker.exec_create.assert_called_once_with(mock_docker_id, 'ls',
-            True, True, False)
+                                                        True, True, False)
 
         mock_docker.exec_start.assert_called_once_with(mock_create_res,
-            False, False, False)
+                                                       False, False, False)
         mock_find_container.assert_called_once_with(mock_docker,
                                                     mock_container_uuid)
 
@@ -635,13 +639,14 @@ class TestDockerConductor(base.BaseTestCase):
         mock_find_container.return_value = mock_docker_id
         with patch.object(errors.APIError, '__str__',
                           return_value='hit error') as mock_init:
-            mock_docker.exec_create = mock.Mock(side_effect=
-                                  errors.APIError('Error', '', ''))
+            mock_docker.exec_create = mock.Mock(
+                side_effect=errors.APIError('Error', '', ''))
             self.assertRaises(exception.ContainerException,
                               self.conductor.container_execute,
                               None, mock_container_uuid, 'ls')
             mock_docker.exec_create.assert_called_once_with(mock_docker_id,
-                'ls', True, True, False)
+                                                            'ls', True, True,
+                                                            False)
             mock_find_container.assert_called_once_with(mock_docker,
                                                         mock_container_uuid)
             mock_init.assert_called_once_with()
@@ -657,7 +662,7 @@ class TestDockerConductor(base.BaseTestCase):
         mock_find_container.return_value = mock_docker_id
         self.conductor.container_logs(None, mock_container_uuid)
         mock_docker.get_container_logs.assert_called_once_with(
-                                                    mock_docker_id)
+            mock_docker_id)
         mock_find_container.assert_called_once_with(mock_docker,
                                                     mock_container_uuid)
 
@@ -672,13 +677,13 @@ class TestDockerConductor(base.BaseTestCase):
         mock_find_container.return_value = mock_docker_id
         with patch.object(errors.APIError, '__str__',
                           return_value='hit error') as mock_init:
-            mock_docker.get_container_logs = mock.Mock(side_effect=
-                                  errors.APIError('Error', '', ''))
+            mock_docker.get_container_logs = mock.Mock(
+                side_effect=errors.APIError('Error', '', ''))
             self.assertRaises(exception.ContainerException,
                               self.conductor.container_logs,
                               None, mock_container_uuid)
             mock_docker.get_container_logs.assert_called_once_with(
-                                                        mock_docker_id)
+                mock_docker_id)
             mock_find_container.assert_called_once_with(mock_docker,
                                                         mock_container_uuid)
             mock_init.assert_called_once_with()
@@ -692,4 +697,4 @@ class TestDockerConductor(base.BaseTestCase):
                               'docker_client') as mock_docker:
                 mock_docker.side_effect = Exception("So bad")
                 self.assertRaises(exception.ContainerException,
-                    func, None, None)
+                                  func, None, None)

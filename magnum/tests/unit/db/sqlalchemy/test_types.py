@@ -44,7 +44,7 @@ class SqlAlchemyCustomTypesTestCase(base.DbTestCase):
         self.assertRaises(db_exc.DBError,
                           self.dbapi.create_pod,
                           {'labels':
-                               ['this is not a dict']})
+                           ['this is not a dict']})
 
     def test_JSONEncodedList_default_value(self):
         # Create pod w/o images
@@ -64,4 +64,4 @@ class SqlAlchemyCustomTypesTestCase(base.DbTestCase):
         self.assertRaises(db_exc.DBError,
                           self.dbapi.create_pod,
                           {'images':
-                               {'this is not a list': 'test'}})
+                           {'this is not a list': 'test'}})

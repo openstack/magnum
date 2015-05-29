@@ -101,7 +101,7 @@ class DockerClientTestCase(base.BaseTestCase):
         mock_url.assert_called_once_with('/containers/someid/pause')
         mock_post.assert_callend_once_with(mock_url.return_value)
         mock_raise_for_status.assert_called_once_with(
-                                            mock_post.return_value)
+            mock_post.return_value)
 
     @mock.patch.object(docker_py_client.Client, '_raise_for_status')
     @mock.patch.object(docker_py_client.Client, '_post')
@@ -115,7 +115,7 @@ class DockerClientTestCase(base.BaseTestCase):
         mock_url.assert_called_once_with('/containers/someid/pause')
         mock_post.assert_callend_once_with(mock_url.return_value)
         mock_raise_for_status.assert_called_once_with(
-                                            mock_post.return_value)
+            mock_post.return_value)
 
     @mock.patch.object(docker_py_client.Client, '_raise_for_status')
     @mock.patch.object(docker_py_client.Client, '_post')
@@ -128,7 +128,7 @@ class DockerClientTestCase(base.BaseTestCase):
         mock_url.assert_called_once_with('/containers/someid/unpause')
         mock_post.assert_callend_once_with(mock_url.return_value)
         mock_raise_for_status.assert_called_once_with(
-                                            mock_post.return_value)
+            mock_post.return_value)
 
     @mock.patch.object(docker_py_client.Client, '_raise_for_status')
     @mock.patch.object(docker_py_client.Client, '_post')
@@ -142,7 +142,7 @@ class DockerClientTestCase(base.BaseTestCase):
         mock_url.assert_called_once_with('/containers/someid/unpause')
         mock_post.assert_callend_once_with(mock_url.return_value)
         mock_raise_for_status.assert_called_once_with(
-                                            mock_post.return_value)
+            mock_post.return_value)
 
     @mock.patch.object(docker_py_client.Client, 'attach')
     def test_get_container_logs(self, mock_attach):

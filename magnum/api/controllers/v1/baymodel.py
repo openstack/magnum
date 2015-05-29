@@ -116,10 +116,10 @@ class BayModel(base.APIBase):
                                           'apiserver_port', 'coe'])
 
         baymodel.links = [link.Link.make_link('self', url,
-                                          'baymodels', baymodel.uuid),
-                      link.Link.make_link('bookmark', url,
-                                          'baymodels', baymodel.uuid,
-                                          bookmark=True)
+                                              'baymodels', baymodel.uuid),
+                          link.Link.make_link('bookmark', url,
+                                              'baymodels', baymodel.uuid,
+                                              bookmark=True)
                      ]
         return baymodel
 
@@ -131,22 +131,23 @@ class BayModel(base.APIBase):
 
     @classmethod
     def sample(cls, expand=True):
-        sample = cls(uuid='27e3153e-d5bf-4b7e-b517-fb518e17f34c',
-                    name='example',
-                    image_id='Fedora-k8s',
-                    flavor_id='m1.small',
-                    master_flavor_id='m1.small',
-                    dns_nameserver='8.8.1.1',
-                    keypair_id='keypair1',
-                    external_network_id='ffc44e4a-2319-4062-bce0-9ae1c38b05ba',
-                    fixed_network='private',
-                    apiserver_port=8080,
-                    docker_volume_size=25,
-                    cluster_distro='fedora-atomic',
-                    ssh_authorized_key='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAB',
-                    coe='kubernetes',
-                    created_at=datetime.datetime.utcnow(),
-                    updated_at=datetime.datetime.utcnow())
+        sample = cls(
+            uuid='27e3153e-d5bf-4b7e-b517-fb518e17f34c',
+            name='example',
+            image_id='Fedora-k8s',
+            flavor_id='m1.small',
+            master_flavor_id='m1.small',
+            dns_nameserver='8.8.1.1',
+            keypair_id='keypair1',
+            external_network_id='ffc44e4a-2319-4062-bce0-9ae1c38b05ba',
+            fixed_network='private',
+            apiserver_port=8080,
+            docker_volume_size=25,
+            cluster_distro='fedora-atomic',
+            ssh_authorized_key='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAB',
+            coe='kubernetes',
+            created_at=datetime.datetime.utcnow(),
+            updated_at=datetime.datetime.utcnow())
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 
 
@@ -164,7 +165,7 @@ class BayModelCollection(collection.Collection):
                            **kwargs):
         collection = BayModelCollection()
         collection.baymodels = [BayModel.convert_with_links(p, expand)
-                            for p in rpc_baymodels]
+                                for p in rpc_baymodels]
         collection.next = collection.get_next(limit, url=url, **kwargs)
         return collection
 
@@ -187,8 +188,8 @@ class BayModelsController(rest.RestController):
     }
 
     def _get_baymodels_collection(self, marker, limit,
-                              sort_key, sort_dir, expand=False,
-                              resource_url=None):
+                                  sort_key, sort_dir, expand=False,
+                                  resource_url=None):
 
         limit = api_utils.validate_limit(limit)
         sort_dir = api_utils.validate_sort_dir(sort_dir)
@@ -196,17 +197,17 @@ class BayModelsController(rest.RestController):
         marker_obj = None
         if marker:
             marker_obj = objects.BayModel.get_by_uuid(pecan.request.context,
-                                                  marker)
+                                                      marker)
 
         baymodels = objects.BayModel.list(pecan.request.context, limit,
-                                marker_obj, sort_key=sort_key,
-                                sort_dir=sort_dir)
+                                          marker_obj, sort_key=sort_key,
+                                          sort_dir=sort_dir)
 
         return BayModelCollection.convert_with_links(baymodels, limit,
-                                                url=resource_url,
-                                                expand=expand,
-                                                sort_key=sort_key,
-                                                sort_dir=sort_dir)
+                                                     url=resource_url,
+                                                     expand=expand,
+                                                     sort_key=sort_key,
+                                                     sort_dir=sort_dir)
 
     def _get_image_data(self, context, image_ident):
         """Retrieves os_distro and other metadata from the Glance image.
@@ -234,12 +235,12 @@ class BayModelsController(rest.RestController):
         :param sort_dir: direction to sort. "asc" or "desc". Default: asc.
         """
         return self._get_baymodels_collection(marker, limit, sort_key,
-                                         sort_dir)
+                                              sort_dir)
 
     @wsme_pecan.wsexpose(BayModelCollection, types.uuid,
                          types.uuid, int, wtypes.text, wtypes.text)
     def detail(self, baymodel_uuid=None, marker=None, limit=None,
-                sort_key='id', sort_dir='asc'):
+               sort_key='id', sort_dir='asc'):
         """Retrieve a list of baymodels with detail.
 
         :param baymodel_uuid: UUID of a baymodel, to get only baymodels for
@@ -257,8 +258,8 @@ class BayModelsController(rest.RestController):
         expand = True
         resource_url = '/'.join(['baymodels', 'detail'])
         return self._get_baymodels_collection(marker, limit,
-                                         sort_key, sort_dir, expand,
-                                         resource_url)
+                                              sort_key, sort_dir, expand,
+                                              resource_url)
 
     @wsme_pecan.wsexpose(BayModel, types.uuid_or_name)
     def get_one(self, baymodel_ident):
@@ -296,7 +297,7 @@ class BayModelsController(rest.RestController):
         new_baymodel.create()
         # Set the HTTP Location Header
         pecan.response.location = link.build_url('baymodels',
-                                  new_baymodel.uuid)
+                                                 new_baymodel.uuid)
         return BayModel.convert_with_links(new_baymodel)
 
     @wsme.validate(types.uuid, [BayModelPatchType])
@@ -311,10 +312,11 @@ class BayModelsController(rest.RestController):
             raise exception.OperationNotPermitted
 
         rpc_baymodel = objects.BayModel.get_by_uuid(pecan.request.context,
-            baymodel_uuid)
+                                                    baymodel_uuid)
         try:
             baymodel_dict = rpc_baymodel.as_dict()
-            baymodel = BayModel(**api_utils.apply_jsonpatch(baymodel_dict,
+            baymodel = BayModel(**api_utils.apply_jsonpatch(
+                baymodel_dict,
                 patch))
         except api_utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)

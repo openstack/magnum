@@ -28,4 +28,4 @@ import sqlalchemy as sa
 def upgrade():
     op.add_column('container',
                   sa.Column('command', sa.String(length=255),
-                  nullable=True))
+                            nullable=True))

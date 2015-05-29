@@ -66,7 +66,7 @@ def wrap_container_exception(f):
                               {'name': container_uuid,
                                'error': str(e)})
             raise exception.ContainerException(
-                                "Docker internal Error: %s" % str(e))
+                "Docker internal Error: %s" % str(e))
     return functools.wraps(f)(wrapped)
 
 
@@ -92,9 +92,11 @@ class Handler(object):
     @staticmethod
     def _docker_for_bay(bay):
         tcp_url = 'tcp://%s:2376' % bay.api_address
-        return docker_client.DockerHTTPClient(tcp_url,
-                                    CONF.docker.docker_remote_api_version,
-                                    CONF.docker.default_timeout)
+        return docker_client.DockerHTTPClient(
+            tcp_url,
+            CONF.docker.docker_remote_api_version,
+            CONF.docker.default_timeout
+        )
 
     @classmethod
     def _docker_for_container(cls, context, container):
@@ -127,7 +129,7 @@ class Handler(object):
         except errors.APIError as api_error:
             container.status = obj_container.ERROR
             raise exception.ContainerException(
-                      "Docker API Error : %s" % str(api_error))
+                "Docker API Error : %s" % str(api_error))
         finally:
             container.save()
 
@@ -142,7 +144,7 @@ class Handler(object):
             return docker.remove_container(docker_id)
         except errors.APIError as api_error:
             raise exception.ContainerException(
-                      "Docker API Error : %s" % str(api_error))
+                "Docker API Error : %s" % str(api_error))
 
     @wrap_container_exception
     def container_show(self, context, container_uuid):
@@ -171,7 +173,7 @@ class Handler(object):
                 container.save()
                 return container
             raise exception.ContainerException(
-                      "Docker API Error : %s" % (error_message))
+                "Docker API Error : %s" % (error_message))
 
     @wrap_container_exception
     def _container_action(self, context, container_uuid, status, docker_func):
@@ -186,7 +188,7 @@ class Handler(object):
             return result
         except errors.APIError as api_error:
             raise exception.ContainerException(
-                      "Docker API Error : %s" % str(api_error))
+                "Docker API Error : %s" % str(api_error))
 
     def container_reboot(self, context, container_uuid):
         return self._container_action(context, container_uuid,
@@ -217,7 +219,7 @@ class Handler(object):
             return {'output': docker.get_container_logs(docker_id)}
         except errors.APIError as api_error:
             raise exception.ContainerException(
-                      "Docker API Error : %s" % str(api_error))
+                "Docker API Error : %s" % str(api_error))
 
     @wrap_container_exception
     def container_execute(self, context, container_uuid, command):
@@ -227,9 +229,9 @@ class Handler(object):
         try:
             docker_id = self._find_container_by_name(docker, container_uuid)
             create_res = docker.exec_create(docker_id, command, True,
-                True, False)
+                                            True, False)
             return {'output': docker.exec_start(create_res, False,
-                False, False)}
+                                                False, False)}
         except errors.APIError as api_error:
             raise exception.ContainerException(
-                      "Docker API Error : %s" % str(api_error))
+                "Docker API Error : %s" % str(api_error))

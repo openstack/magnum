@@ -236,7 +236,7 @@ class _TestObject(object):
                     'magnum_object.version': '1.0',
                     'magnum_object.changes': ['bar'],
                     'magnum_object.data': {'foo': 1,
-                                         'bar': 'loaded!'}}
+                                           'bar': 'loaded!'}}
         self.assertEqual(expected, obj.obj_to_primitive())
 
     def test_changes_in_primitive(self):
@@ -333,8 +333,7 @@ class _TestObject(object):
                         ['created_at', 'updated_at'],
                     'magnum_object.data':
                         {'created_at': timeutils.isotime(dt),
-                         'updated_at': timeutils.isotime(dt),
-                        }
+                         'updated_at': timeutils.isotime(dt)}
                     }
         actual = obj.obj_to_primitive()
         # magnum_object.changes is built from a set and order is undefined

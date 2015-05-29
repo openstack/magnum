@@ -116,52 +116,45 @@ class V1(APIBase):
                                         'http://docs.openstack.org',
                                         'developer/magnum/dev',
                                         'api-spec-v1.html',
-                                        bookmark=True, type='text/html')
-                   ]
+                                        bookmark=True, type='text/html')]
         v1.media_types = [MediaType('application/json',
                           'application/vnd.openstack.magnum.v1+json')]
         v1.pods = [link.Link.make_link('self', pecan.request.host_url,
-                                          'pods', ''),
-                      link.Link.make_link('bookmark',
-                                           pecan.request.host_url,
-                                           'pods', '',
-                                           bookmark=True)
-                     ]
+                                       'pods', ''),
+                   link.Link.make_link('bookmark',
+                                       pecan.request.host_url,
+                                       'pods', '',
+                                       bookmark=True)]
         v1.rcs = [link.Link.make_link('self', pecan.request.host_url,
                                       'rcs', ''),
-                      link.Link.make_link('bookmark',
-                                           pecan.request.host_url,
-                                           'rcs', '',
-                                           bookmark=True)
-                     ]
+                  link.Link.make_link('bookmark',
+                                      pecan.request.host_url,
+                                      'rcs', '',
+                                      bookmark=True)]
         v1.baymodels = [link.Link.make_link('self', pecan.request.host_url,
-                                        'baymodels', ''),
-                    link.Link.make_link('bookmark',
-                                        pecan.request.host_url,
-                                        'bays', '',
-                                        bookmark=True)
-                   ]
+                                            'baymodels', ''),
+                        link.Link.make_link('bookmark',
+                                            pecan.request.host_url,
+                                            'bays', '',
+                                            bookmark=True)]
         v1.bays = [link.Link.make_link('self', pecan.request.host_url,
-                                        'bays', ''),
-                    link.Link.make_link('bookmark',
-                                        pecan.request.host_url,
-                                        'bays', '',
-                                        bookmark=True)
-                   ]
+                                       'bays', ''),
+                   link.Link.make_link('bookmark',
+                                       pecan.request.host_url,
+                                       'bays', '',
+                                       bookmark=True)]
         v1.containers = [link.Link.make_link('self', pecan.request.host_url,
-                                        'containers', ''),
-                    link.Link.make_link('bookmark',
-                                        pecan.request.host_url,
-                                        'containers', '',
-                                        bookmark=True)
-                   ]
+                                             'containers', ''),
+                         link.Link.make_link('bookmark',
+                                             pecan.request.host_url,
+                                             'containers', '',
+                                             bookmark=True)]
         v1.services = [link.Link.make_link('self', pecan.request.host_url,
-                                          'services', ''),
-                      link.Link.make_link('bookmark',
-                                          pecan.request.host_url,
-                                          'services', '',
-                                          bookmark=True)
-                     ]
+                                           'services', ''),
+                       link.Link.make_link('bookmark',
+                                           pecan.request.host_url,
+                                           'services', '',
+                                           bookmark=True)]
         return v1
 
 

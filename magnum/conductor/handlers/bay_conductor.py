@@ -45,7 +45,7 @@ bay_heat_opts = [
     cfg.IntOpt('bay_create_timeout',
                default=None,
                help=('The length of time to let bay creation continue.  This '
-                    'interval is in minutes.  The default is no timeout.'))
+                     'interval is in minutes.  The default is no timeout.'))
 ]
 
 cfg.CONF.register_opts(bay_heat_opts, group='bay_heat')
@@ -148,7 +148,7 @@ class Handler(object):
         osc = clients.OpenStackClients(context)
         stack = osc.heat().stacks.get(bay.stack_id)
         if (stack.stack_status != bay_status.CREATE_COMPLETE and
-            stack.stack_status != bay_status.UPDATE_COMPLETE):
+                stack.stack_status != bay_status.UPDATE_COMPLETE):
             operation = _('Updating a bay when stack status is '
                           '"%s"') % stack.stack_status
             raise exception.NotSupported(operation=operation)
@@ -217,7 +217,7 @@ class HeatPoller(object):
         # so another user/client can call delete bay/stack.
         if stack.stack_status == bay_status.DELETE_COMPLETE:
             LOG.info(_LI('Bay has been deleted, stack_id: %s')
-                          % self.bay.stack_id)
+                     % self.bay.stack_id)
             self.bay.destroy()
             raise loopingcall.LoopingCallDone()
         if (stack.stack_status in [bay_status.CREATE_COMPLETE,
@@ -233,20 +233,20 @@ class HeatPoller(object):
         if stack.stack_status == bay_status.CREATE_FAILED:
             LOG.error(_LE('Unable to create bay, stack_id: %(stack_id)s, '
                           'reason: %(reason)s') %
-                          {'stack_id': self.bay.stack_id,
-                          'reason': stack.stack_status_reason})
+                      {'stack_id': self.bay.stack_id,
+                       'reason': stack.stack_status_reason})
             raise loopingcall.LoopingCallDone()
         if stack.stack_status == bay_status.DELETE_FAILED:
             LOG.error(_LE('Unable to delete bay, stack_id: %(stack_id)s, '
                           'reason: %(reason)s') %
-                          {'stack_id': self.bay.stack_id,
-                          'reason': stack.stack_status_reason})
+                      {'stack_id': self.bay.stack_id,
+                       'reason': stack.stack_status_reason})
             raise loopingcall.LoopingCallDone()
         if stack.stack_status == bay_status.UPDATE_FAILED:
             LOG.error(_LE('Unable to update bay, stack_id: %(stack_id)s, '
                           'reason: %(reason)s') %
-                         {'stack_id': self.bay.stack_id,
-                         'reason': stack.stack_status_reason})
+                      {'stack_id': self.bay.stack_id,
+                       'reason': stack.stack_status_reason})
             raise loopingcall.LoopingCallDone()
         # only check max attempts when the stack is being created when
         # the timeout hasn't been set. If the timeout has been set then
@@ -256,15 +256,15 @@ class HeatPoller(object):
                self.attempts > cfg.CONF.bay_heat.max_attempts):
                 LOG.error(_LE('Bay check exit after %(attempts)s attempts,'
                               'stack_id: %(id)s, stack_status: %(status)s') %
-                              {'attempts': cfg.CONF.bay_heat.max_attempts,
-                              'id': self.bay.stack_id,
-                              'status': stack.stack_status})
+                          {'attempts': cfg.CONF.bay_heat.max_attempts,
+                           'id': self.bay.stack_id,
+                           'status': stack.stack_status})
                 raise loopingcall.LoopingCallDone()
         else:
             if self.attempts > cfg.CONF.bay_heat.max_attempts:
                 LOG.error(_LE('Bay check exit after %(attempts)s attempts,'
                               'stack_id: %(id)s, stack_status: %(status)s') %
-                              {'attempts': cfg.CONF.bay_heat.max_attempts,
-                              'id': self.bay.stack_id,
-                              'status': stack.stack_status})
+                          {'attempts': cfg.CONF.bay_heat.max_attempts,
+                           'id': self.bay.stack_id,
+                           'status': stack.stack_status})
                 raise loopingcall.LoopingCallDone()

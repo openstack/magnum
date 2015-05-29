@@ -50,22 +50,28 @@ class TemplateDefinitionTestCase(base.TestCase):
                          tdef.CoreOSK8sTemplateDefinition)
 
     def test_get_vm_atomic_kubernetes_definition(self):
-        definition = tdef.TemplateDefinition.get_template_definition('vm',
-                                             'fedora-atomic', 'kubernetes')
+        definition = tdef.TemplateDefinition.get_template_definition(
+            'vm',
+            'fedora-atomic',
+            'kubernetes')
 
         self.assertIsInstance(definition,
                               tdef.AtomicK8sTemplateDefinition)
 
     def test_get_vm_coreos_kubernetes_definition(self):
-        definition = tdef.TemplateDefinition.get_template_definition('vm',
-                                                    'coreos', 'kubernetes')
+        definition = tdef.TemplateDefinition.get_template_definition(
+            'vm',
+            'coreos',
+            'kubernetes')
 
         self.assertIsInstance(definition,
                               tdef.CoreOSK8sTemplateDefinition)
 
     def test_get_vm_atomic_swarm_definition(self):
-        definition = tdef.TemplateDefinition.get_template_definition('vm',
-                                                    'fedora-atomic', 'swarm')
+        definition = tdef.TemplateDefinition.get_template_definition(
+            'vm',
+            'fedora-atomic',
+            'swarm')
 
         self.assertIsInstance(definition,
                               tdef.AtomicSwarmTemplateDefinition)

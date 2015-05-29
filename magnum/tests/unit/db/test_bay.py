@@ -78,10 +78,12 @@ class DbBayTestCase(base.DbTestCase):
         self.dbapi.create_baymodel(bm1)
         self.dbapi.create_baymodel(bm2)
 
-        bay1 = utils.create_test_bay(name='bay-one',
+        bay1 = utils.create_test_bay(
+            name='bay-one',
             uuid=magnum_utils.generate_uuid(),
             baymodel_id=bm1['uuid'])
-        bay2 = utils.create_test_bay(name='bay-two',
+        bay2 = utils.create_test_bay(
+            name='bay-two',
             uuid=magnum_utils.generate_uuid(),
             baymodel_id=bm2['uuid'],
             node_count=1)

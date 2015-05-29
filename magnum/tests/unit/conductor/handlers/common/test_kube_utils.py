@@ -39,7 +39,7 @@ class TestKubeUtils(base.BaseTestCase):
 
     @patch('magnum.conductor.handlers.common.kube_utils._k8s_create_with_path')
     def test_k8s_create_url(self,
-                             mock_create_with_path):
+                            mock_create_with_path):
         expected_url = 'url'
         api_address = 'api_address'
         mock_resource = mock.MagicMock()
@@ -77,7 +77,8 @@ class TestKubeUtils(base.BaseTestCase):
         mock_file.name = expected_filename
         mock_named_tempfile.return_value.__enter__.return_value = mock_file
 
-        kube_utils._k8s_create_with_data(expected_api_address,
+        kube_utils._k8s_create_with_data(
+            expected_api_address,
             expected_data)
 
         mock_file.write.assert_called_once_with(expected_data)
@@ -137,7 +138,8 @@ class TestKubeUtils(base.BaseTestCase):
         mock_file.name = expected_filename
         mock_named_tempfile.return_value.__enter__.return_value = mock_file
 
-        kube_utils._k8s_update_with_data(expected_api_address,
+        kube_utils._k8s_update_with_data(
+            expected_api_address,
             expected_data)
 
         mock_file.write.assert_called_once_with(expected_data)
@@ -155,8 +157,8 @@ class KubeClientTestCase(base.TestCase):
         expected_api_address = 'master-address'
         expected_pod_content = mock.MagicMock(manifest='pod_content')
         expected_command = [
-             expected_api_address,
-             expected_pod_content
+            expected_api_address,
+            expected_pod_content,
         ]
         mock_k8s_create.return_value = ("", "")
 
@@ -170,8 +172,8 @@ class KubeClientTestCase(base.TestCase):
         expected_api_address = 'master-address'
         expected_pod_content = mock.MagicMock(manifest='pod_content')
         expected_command = [
-             expected_api_address,
-             expected_pod_content
+            expected_api_address,
+            expected_pod_content,
         ]
         mock_k8s_create.return_value = ("", "create failed")
 
@@ -185,8 +187,8 @@ class KubeClientTestCase(base.TestCase):
         expected_api_address = 'master-address'
         expected_pod_content = mock.MagicMock(manifest='pod_content')
         expected_command = [
-             expected_api_address,
-             expected_pod_content
+            expected_api_address,
+            expected_pod_content,
         ]
         mock_k8s_create.side_effect = Exception()
         result = self.kube_client.pod_create(expected_api_address,
@@ -199,8 +201,8 @@ class KubeClientTestCase(base.TestCase):
         expected_api_address = 'master-address'
         expected_pod_content = mock.MagicMock(manifest='pod_content')
         expected_command = [
-             expected_api_address,
-             expected_pod_content
+            expected_api_address,
+            expected_pod_content,
         ]
         mock_k8s_update.return_value = ("", "")
 
@@ -214,8 +216,8 @@ class KubeClientTestCase(base.TestCase):
         expected_api_address = 'master-address'
         expected_pod_content = mock.MagicMock(manifest='pod_content')
         expected_command = [
-             expected_api_address,
-             expected_pod_content
+            expected_api_address,
+            expected_pod_content,
         ]
         mock_k8s_update.return_value = ("", "create failed")
 
@@ -229,8 +231,8 @@ class KubeClientTestCase(base.TestCase):
         expected_api_address = 'master-address'
         expected_pod_content = mock.MagicMock(manifest='pod_content')
         expected_command = [
-             expected_api_address,
-             expected_pod_content
+            expected_api_address,
+            expected_pod_content,
         ]
         mock_k8s_update.side_effect = Exception()
         result = self.kube_client.pod_update(expected_api_address,
@@ -324,7 +326,7 @@ class KubeClientTestCase(base.TestCase):
         mock_trycmd.return_value = ("", "")
 
         result = self.kube_client.service_delete(expected_api_address,
-                                             expected_service_name)
+                                                 expected_service_name)
         self.assertTrue(result)
         mock_trycmd.assert_called_once_with(*expected_command)
 
@@ -339,7 +341,7 @@ class KubeClientTestCase(base.TestCase):
         mock_trycmd.side_effect = Exception()
 
         result = self.kube_client.service_delete(expected_api_address,
-                                             expected_service_name)
+                                                 expected_service_name)
         self.assertFalse(result)
         mock_trycmd.assert_called_once_with(*expected_command)
 
@@ -348,8 +350,8 @@ class KubeClientTestCase(base.TestCase):
         expected_api_address = 'master-address'
         expected_service_content = mock.MagicMock(manifest='service_content')
         expected_command = [
-             expected_api_address,
-             expected_service_content
+            expected_api_address,
+            expected_service_content,
         ]
         mock_k8s_update.return_value = ("", "")
 
@@ -363,8 +365,8 @@ class KubeClientTestCase(base.TestCase):
         expected_api_address = 'master-address'
         expected_service_content = mock.MagicMock(manifest='service_content')
         expected_command = [
-             expected_api_address,
-             expected_service_content
+            expected_api_address,
+            expected_service_content,
         ]
         mock_k8s_update.return_value = ("", "create failed")
 
@@ -378,8 +380,8 @@ class KubeClientTestCase(base.TestCase):
         expected_api_address = 'master-address'
         expected_service_content = mock.MagicMock(manifest='service_content')
         expected_command = [
-             expected_api_address,
-             expected_service_content
+            expected_api_address,
+            expected_service_content,
         ]
         mock_k8s_update.side_effect = Exception()
         result = self.kube_client.service_update(expected_api_address,
@@ -392,8 +394,8 @@ class KubeClientTestCase(base.TestCase):
         expected_api_address = 'master-address'
         expected_service_content = mock.MagicMock(manifest='service_content')
         expected_command = [
-             expected_api_address,
-             expected_service_content
+            expected_api_address,
+            expected_service_content,
         ]
         mock_k8s_create.return_value = ("", "")
 
@@ -407,8 +409,8 @@ class KubeClientTestCase(base.TestCase):
         expected_api_address = 'master-address'
         expected_service_content = mock.MagicMock(manifest='service_content')
         expected_command = [
-             expected_api_address,
-             expected_service_content
+            expected_api_address,
+            expected_service_content,
         ]
         mock_k8s_create.return_value = ("", "create failed")
 
@@ -422,8 +424,8 @@ class KubeClientTestCase(base.TestCase):
         expected_api_address = 'master-address'
         expected_service_content = mock.MagicMock(manifest='service_content')
         expected_command = [
-             expected_api_address,
-             expected_service_content
+            expected_api_address,
+            expected_service_content,
         ]
         mock_k8s_create.side_effect = Exception()
         result = self.kube_client.service_create(expected_api_address,
@@ -436,8 +438,8 @@ class KubeClientTestCase(base.TestCase):
         expected_api_address = 'master-address'
         expected_rc_content = mock.MagicMock(manifest='rc_content')
         expected_command = [
-             expected_api_address,
-             expected_rc_content
+            expected_api_address,
+            expected_rc_content,
         ]
         mock_k8s_update.return_value = ("", "")
 
@@ -451,8 +453,8 @@ class KubeClientTestCase(base.TestCase):
         expected_api_address = 'master-address'
         expected_rc_content = mock.MagicMock(manifest='rc_content')
         expected_command = [
-             expected_api_address,
-             expected_rc_content
+            expected_api_address,
+            expected_rc_content,
         ]
         mock_k8s_update.return_value = ("", "update failed")
 
@@ -466,8 +468,8 @@ class KubeClientTestCase(base.TestCase):
         expected_api_address = 'master-address'
         expected_rc_content = mock.MagicMock(manifest='rc_content')
         expected_command = [
-             expected_api_address,
-             expected_rc_content
+            expected_api_address,
+            expected_rc_content,
         ]
         mock_k8s_update.side_effect = Exception()
         result = self.kube_client.rc_update(expected_api_address,
@@ -480,8 +482,8 @@ class KubeClientTestCase(base.TestCase):
         expected_api_address = 'master-address'
         expected_rc_content = mock.MagicMock(manifest='rc_content')
         expected_command = [
-             expected_api_address,
-             expected_rc_content
+            expected_api_address,
+            expected_rc_content,
         ]
         mock_k8s_create.return_value = ("", "")
 
@@ -495,8 +497,8 @@ class KubeClientTestCase(base.TestCase):
         expected_api_address = 'master-address'
         expected_rc_content = mock.MagicMock(manifest='rc_content')
         expected_command = [
-             expected_api_address,
-             expected_rc_content
+            expected_api_address,
+            expected_rc_content,
         ]
         mock_k8s_create.return_value = ("", "create failed")
 
@@ -510,8 +512,8 @@ class KubeClientTestCase(base.TestCase):
         expected_api_address = 'master-address'
         expected_rc_content = mock.MagicMock(manifest='rc_content')
         expected_command = [
-             expected_api_address,
-             expected_rc_content
+            expected_api_address,
+            expected_rc_content,
         ]
         mock_k8s_create.side_effect = Exception()
         result = self.kube_client.rc_create(expected_api_address,

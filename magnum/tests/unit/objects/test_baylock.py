@@ -40,7 +40,8 @@ class TestBayLockObject(base.DbTestCase):
             new_conductor_id = str(uuid.uuid4())
             objects.BayLock.steal(self.bay_uuid, old_conductor_id,
                                   new_conductor_id)
-            mock_steal_baylock.assert_called_once_with(self.bay_uuid,
+            mock_steal_baylock.assert_called_once_with(
+                self.bay_uuid,
                 old_conductor_id, new_conductor_id)
 
     def test_release(self):

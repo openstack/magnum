@@ -138,7 +138,7 @@ class TestPatch(api_base.FunctionalTest):
         response = self.get_json('/nodes/%s' % self.node.uuid)
         self.assertEqual(new_image, response['image_id'])
         return_updated_at = timeutils.parse_isotime(
-                            response['updated_at']).replace(tzinfo=None)
+            response['updated_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_updated_at)
 
     def test_replace_non_existent_node(self):
@@ -152,8 +152,9 @@ class TestPatch(api_base.FunctionalTest):
 
     def test_add_ok(self):
         new_image = 'Ubuntu'
-        response = self.patch_json('/nodes/%s' % self.node.uuid,
-                   [{'path': '/image_id', 'value': new_image, 'op': 'add'}])
+        response = self.patch_json(
+            '/nodes/%s' % self.node.uuid,
+            [{'path': '/image_id', 'value': new_image, 'op': 'add'}])
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(200, response.status_int)
 
@@ -161,9 +162,10 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(new_image, response['image_id'])
 
     def test_add_non_existent_property(self):
-        response = self.patch_json('/nodes/%s' % self.node.uuid,
-                            [{'path': '/foo', 'value': 'bar', 'op': 'add'}],
-                            expect_errors=True)
+        response = self.patch_json(
+            '/nodes/%s' % self.node.uuid,
+            [{'path': '/foo', 'value': 'bar', 'op': 'add'}],
+            expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['error_message'])
@@ -189,9 +191,10 @@ class TestPatch(api_base.FunctionalTest):
         self.assertTrue(response.json['error_message'])
 
     def test_remove_non_existent_property(self):
-        response = self.patch_json('/nodes/%s' % self.node.uuid,
-                             [{'path': '/non-existent', 'op': 'remove'}],
-                             expect_errors=True)
+        response = self.patch_json(
+            '/nodes/%s' % self.node.uuid,
+            [{'path': '/non-existent', 'op': 'remove'}],
+            expect_errors=True)
         self.assertEqual(400, response.status_code)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
@@ -216,7 +219,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(node_dict['uuid'], response.json['uuid'])
         self.assertNotIn('updated_at', response.json.keys)
         return_created_at = timeutils.parse_isotime(
-                            response.json['created_at']).replace(tzinfo=None)
+            response.json['created_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_created_at)
 
     def test_create_node_doesnt_contain_id(self):

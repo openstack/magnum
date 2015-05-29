@@ -95,7 +95,7 @@ class TestReplicationControllerObject(base.DbTestCase):
 
                 mock_get_rc.assert_called_once_with(self.context, uuid)
                 mock_update_rc.assert_called_once_with(
-                        uuid, {'replicas': 10})
+                    uuid, {'replicas': 10})
                 self.assertEqual(self.context, rc._context)
 
     def test_refresh(self):

@@ -100,7 +100,7 @@ class TestServiceObject(base.DbTestCase):
 
                 mock_get_service.assert_called_once_with(self.context, uuid)
                 mock_update_service.assert_called_once_with(
-                        uuid, {'ports': [{'port': 4567}]})
+                    uuid, {'ports': [{'port': 4567}]})
                 self.assertEqual(self.context, service._context)
 
     def test_refresh(self):

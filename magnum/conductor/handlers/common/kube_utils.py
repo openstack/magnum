@@ -88,7 +88,7 @@ class KubeClient(object):
         except Exception as e:
             LOG.error(_LE("Couldn't create service with contents %(content)s "
                           "due to error %(error)s") %
-                         {'content': service, 'error': e})
+                      {'content': service, 'error': e})
             return False
         return True
 
@@ -102,7 +102,7 @@ class KubeClient(object):
         except Exception as e:
             LOG.error(_LE("Couldn't update service with contents %(content)s "
                           "due to error %(error)s") %
-                         {'content': service, 'error': e})
+                      {'content': service, 'error': e})
             return False
         return True
 
@@ -130,7 +130,7 @@ class KubeClient(object):
         except Exception as e:
             LOG.error(_LE("Couldn't create pod with contents %(content)s "
                           "due to error %(error)s") %
-                         {'content': pod, 'error': e})
+                      {'content': pod, 'error': e})
             return False
         return True
 
@@ -201,6 +201,6 @@ class KubeClient(object):
                 return False
         except Exception as e:
             LOG.error(_LE("Couldn't delete rc %(rc)s due to error %(error)s")
-                         % {'rc': name, 'error': e})
+                      % {'rc': name, 'error': e})
             return False
         return True

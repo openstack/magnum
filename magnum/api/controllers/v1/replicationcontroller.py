@@ -76,11 +76,10 @@ class ReplicationController(v1_base.K8sResourceBase):
                                     'labels', 'replicas'])
 
         rc.links = [link.Link.make_link('self', url,
-                                         'rcs', rc.uuid),
-                     link.Link.make_link('bookmark', url,
-                                         'rcs', rc.uuid,
-                                         bookmark=True)
-                     ]
+                                        'rcs', rc.uuid),
+                    link.Link.make_link('bookmark', url,
+                                        'rcs', rc.uuid,
+                                        bookmark=True)]
         return rc
 
     @classmethod
@@ -182,7 +181,7 @@ class ReplicationControllerCollection(collection.Collection):
     def convert_with_links(rpc_rcs, limit, url=None, expand=False, **kwargs):
         collection = ReplicationControllerCollection()
         collection.rcs = [ReplicationController.convert_with_links(p, expand)
-                           for p in rpc_rcs]
+                          for p in rpc_rcs]
         collection.next = collection.get_next(limit, url=url, **kwargs)
         return collection
 
@@ -208,8 +207,8 @@ class ReplicationControllersController(rest.RestController):
     }
 
     def _get_rcs_collection(self, marker, limit,
-                             sort_key, sort_dir, expand=False,
-                             resource_url=None):
+                            sort_key, sort_dir, expand=False,
+                            resource_url=None):
 
         limit = api_utils.validate_limit(limit)
         sort_dir = api_utils.validate_sort_dir(sort_dir)
@@ -217,18 +216,20 @@ class ReplicationControllersController(rest.RestController):
         marker_obj = None
         if marker:
             marker_obj = objects.ReplicationController.get_by_uuid(
-                                                 pecan.request.context,
-                                                 marker)
+                pecan.request.context,
+                marker)
 
-        rcs = pecan.request.rpcapi.rc_list(pecan.request.context, limit,
-                                         marker_obj, sort_key=sort_key,
-                                         sort_dir=sort_dir)
+        rcs = pecan.request.rpcapi.rc_list(
+            pecan.request.context, limit,
+            marker_obj, sort_key=sort_key,
+            sort_dir=sort_dir)
 
-        return ReplicationControllerCollection.convert_with_links(rcs, limit,
-                                                url=resource_url,
-                                                expand=expand,
-                                                sort_key=sort_key,
-                                                sort_dir=sort_dir)
+        return ReplicationControllerCollection.convert_with_links(
+            rcs, limit,
+            url=resource_url,
+            expand=expand,
+            sort_key=sort_key,
+            sort_dir=sort_dir)
 
     @wsme_pecan.wsexpose(ReplicationControllerCollection, types.uuid,
                          types.uuid, int, wtypes.text, wtypes.text)
@@ -265,8 +266,8 @@ class ReplicationControllersController(rest.RestController):
         expand = True
         resource_url = '/'.join(['rcs', 'detail'])
         return self._get_rcs_collection(marker, limit,
-                                         sort_key, sort_dir, expand,
-                                         resource_url)
+                                        sort_key, sort_dir, expand,
+                                        resource_url)
 
     @wsme_pecan.wsexpose(ReplicationController, types.uuid_or_name)
     def get_one(self, rc_ident):
