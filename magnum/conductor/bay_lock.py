@@ -14,6 +14,7 @@
 import contextlib
 
 from oslo_config import cfg
+from oslo_log import log as logging
 import oslo_messaging as messaging
 from oslo_utils import excutils
 
@@ -22,7 +23,6 @@ from magnum.conductor.api import ListenerAPI
 from magnum.i18n import _LI
 from magnum.i18n import _LW
 from magnum import objects
-from magnum.openstack.common import log as logging
 
 
 cfg.CONF.import_opt('topic', 'magnum.conductor.config',

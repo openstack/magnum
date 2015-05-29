@@ -15,6 +15,7 @@
 from docker import errors
 import functools
 from oslo_config import cfg
+from oslo_log import log as logging
 
 from magnum.common import docker_utils
 from magnum.common import exception
@@ -23,7 +24,6 @@ from magnum.conductor.handlers.common import docker_client
 from magnum import objects
 from magnum.objects import container as obj_container
 from magnum.openstack.common._i18n import _LE
-from magnum.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF

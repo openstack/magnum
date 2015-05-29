@@ -13,10 +13,9 @@
 # limitations under the License.
 
 from oslo_config import cfg
-
-from magnum.openstack.common import log as logging
+from oslo_log import log as logging
 
 
 def prepare_service(argv=[]):
     cfg.CONF(argv[1:], project='magnum')
-    logging.setup('magnum')
+    logging.setup(cfg.CONF, 'magnum')

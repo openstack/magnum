@@ -15,6 +15,7 @@
 from heatclient.common import template_utils
 from heatclient import exc
 from oslo_config import cfg
+from oslo_log import log as logging
 
 from magnum.common import clients
 from magnum.common import exception
@@ -25,7 +26,6 @@ from magnum.i18n import _LE
 from magnum.i18n import _LI
 from magnum import objects
 from magnum.objects.bay import Status as bay_status
-from magnum.openstack.common import log as logging
 from magnum.openstack.common import loopingcall
 
 

@@ -14,10 +14,10 @@
 
 """Magnum common internal object model"""
 
+from oslo_log import log as logging
 from oslo_versionedobjects import base as ovoo_base
 from oslo_versionedobjects import fields as ovoo_fields
 
-from magnum.openstack.common import log as logging
 
 LOG = logging.getLogger('object')
 

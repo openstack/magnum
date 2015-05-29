@@ -14,6 +14,7 @@
 """Utility for fetching a resource (e.g. a manifest) from a URL."""
 
 from oslo_config import cfg
+from oslo_log import log as logging
 import requests
 from requests import exceptions
 from six.moves import urllib
@@ -21,7 +22,6 @@ from six.moves import urllib
 from magnum.common import exception
 from magnum.i18n import _
 from magnum.i18n import _LI
-from magnum.openstack.common import log as logging
 
 URLFETCH_OPTS = [
     cfg.IntOpt('max_manifest_size',

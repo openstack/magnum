@@ -13,6 +13,7 @@
 """Magnum Kubernetes RPC handler."""
 
 from oslo_config import cfg
+from oslo_log import log as logging
 
 from magnum.common import clients
 from magnum.common import exception
@@ -21,7 +22,6 @@ from magnum.common.pythonk8sclient.client import ApivbetaApi
 from magnum.common.pythonk8sclient.client import swagger
 from magnum.i18n import _
 from magnum import objects
-from magnum.openstack.common import log as logging
 
 import ast
 from six.moves.urllib import error

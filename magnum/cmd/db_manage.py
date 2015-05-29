@@ -18,8 +18,8 @@ import os
 from oslo_config import cfg
 from oslo_db import options
 from oslo_db.sqlalchemy.migration_cli import manager
+from oslo_log import log as logging
 
-from magnum.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF

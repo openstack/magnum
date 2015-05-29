@@ -15,6 +15,8 @@
 
 import itertools
 
+from oslo_log import log
+
 import magnum.api.app
 import magnum.api.auth
 import magnum.common.clients
@@ -26,7 +28,6 @@ import magnum.conductor.handlers.docker_conductor
 import magnum.conductor.template_definition
 import magnum.db.sqlalchemy.models
 import magnum.openstack.common.eventlet_backdoor
-import magnum.openstack.common.log
 import magnum.openstack.common.periodic_task
 
 
@@ -39,10 +40,10 @@ def list_opts():
                          magnum.common.utils.UTILS_OPTS,
                          (magnum.openstack.common.eventlet_backdoor
                           .eventlet_backdoor_opts),
-                         magnum.openstack.common.log.generic_log_opts,
-                         magnum.openstack.common.log.log_opts,
-                         magnum.openstack.common.log.common_cli_opts,
-                         magnum.openstack.common.log.logging_cli_opts,
+                         log.generic_log_opts,
+                         log.log_opts,
+                         log.common_cli_opts,
+                         log.logging_cli_opts,
                          magnum.openstack.common.periodic_task.periodic_opts,
                          )),
         ('api', magnum.api.app.API_SERVICE_OPTS),

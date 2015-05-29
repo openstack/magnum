@@ -31,6 +31,7 @@ import uuid
 import netaddr
 from oslo_concurrency import processutils
 from oslo_config import cfg
+from oslo_log import log as logging
 from oslo_utils import excutils
 import paramiko
 import six
@@ -39,7 +40,6 @@ from magnum.common import exception
 from magnum.i18n import _
 from magnum.i18n import _LE
 from magnum.i18n import _LW
-from magnum.openstack.common import log as logging
 
 UTILS_OPTS = [
     cfg.StrOpt('rootwrap_config',

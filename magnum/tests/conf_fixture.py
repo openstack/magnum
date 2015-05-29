@@ -16,10 +16,12 @@
 
 import fixtures
 from oslo_config import cfg
+from oslo_log import log
 
 from magnum.common import config
 
 cfg.CONF.register_opt(cfg.StrOpt('host', default='localhost', help='host'))
+log.register_options(cfg.CONF)
 
 
 class ConfFixture(fixtures.Fixture):

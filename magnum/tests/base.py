@@ -20,6 +20,7 @@ import os
 
 import mock
 from oslo_config import cfg
+from oslo_log import log
 from oslotest import base
 import pecan
 from pecan import testing
@@ -31,6 +32,7 @@ from magnum.tests import conf_fixture
 
 
 CONF = cfg.CONF
+log.register_options(CONF)
 CONF.set_override('use_stderr', False)
 
 

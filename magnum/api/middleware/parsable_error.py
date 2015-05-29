@@ -21,11 +21,11 @@ Based on pecan.middleware.errordocument
 import json
 from xml import etree as et
 
+from oslo_log import log
 import webob
 
 from magnum.i18n import _
 from magnum.i18n import _LE
-from magnum.openstack.common import log
 
 LOG = log.getLogger(__name__)
 

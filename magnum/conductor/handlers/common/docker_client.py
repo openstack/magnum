@@ -15,8 +15,8 @@
 from docker import client
 from docker import tls
 from oslo_config import cfg
+from oslo_log import log as logging
 
-from magnum.openstack.common import log as logging
 
 DEFAULT_DOCKER_REMOTE_API_VERSION = '1.17'
 DEFAULT_DOCKER_TIMEOUT = 10
