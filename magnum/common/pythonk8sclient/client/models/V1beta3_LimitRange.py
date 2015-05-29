@@ -61,7 +61,7 @@ class V1beta3_LimitRange(object):
             'selfLink': 'str',
             
             
-            'spec': 'v1beta3_LimitRangeSpec',
+            'spec': 'V1beta3_LimitRangeSpec',
             
             
             'uid': 'str'
@@ -145,7 +145,7 @@ class V1beta3_LimitRange(object):
         
         #spec defines the limits enforced; https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/api-conventions.md#spec-and-status
         
-        self.spec = None # v1beta3_LimitRangeSpec
+        self.spec = None # V1beta3_LimitRangeSpec
         
         #unique UUID across space and time; populated by the system; read-only
         

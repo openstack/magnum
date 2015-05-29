@@ -28,7 +28,7 @@ class V1beta3_PodSpec(object):
         """
         self.swaggerTypes = {
             
-            'containers': 'list[v1beta3_Container]',
+            'containers': 'list[V1beta3_Container]',
             
             
             'dnsPolicy': 'str',
@@ -46,7 +46,7 @@ class V1beta3_PodSpec(object):
             'restartPolicy': 'str',
             
             
-            'volumes': 'list[v1beta3_Volume]'
+            'volumes': 'list[V1beta3_Volume]'
             
         }
 
@@ -71,7 +71,7 @@ class V1beta3_PodSpec(object):
         
         #list of containers belonging to the pod; cannot be updated; containers cannot currently be added or removed; there must be at least one container in a Pod
         
-        self.containers = None # list[v1beta3_Container]
+        self.containers = None # list[V1beta3_Container]
         
         #DNS policy for containers within the pod; one of &#39;ClusterFirst&#39; or &#39;Default&#39;
         
@@ -95,5 +95,5 @@ class V1beta3_PodSpec(object):
         
         #list of volumes that can be mounted by containers belonging to the pod
         
-        self.volumes = None # list[v1beta3_Volume]
+        self.volumes = None # list[V1beta3_Volume]
         

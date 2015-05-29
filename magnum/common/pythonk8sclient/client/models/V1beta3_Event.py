@@ -49,7 +49,7 @@ class V1beta3_Event(object):
             'generateName': 'str',
             
             
-            'involvedObject': 'v1beta3_ObjectReference',
+            'involvedObject': 'V1beta3_ObjectReference',
             
             
             'kind': 'str',
@@ -79,7 +79,7 @@ class V1beta3_Event(object):
             'selfLink': 'str',
             
             
-            'source': 'v1beta3_EventSource',
+            'source': 'V1beta3_EventSource',
             
             
             'uid': 'str'
@@ -159,7 +159,7 @@ class V1beta3_Event(object):
         
         #object this event is about
         
-        self.involvedObject = None # v1beta3_ObjectReference
+        self.involvedObject = None # V1beta3_ObjectReference
         
         #kind of object, in CamelCase; cannot be updated
         
@@ -199,7 +199,7 @@ class V1beta3_Event(object):
         
         #component reporting this event
         
-        self.source = None # v1beta3_EventSource
+        self.source = None # V1beta3_EventSource
         
         #unique UUID across space and time; populated by the system; read-only
         

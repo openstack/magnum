@@ -28,10 +28,10 @@ class V1beta3_Lifecycle(object):
         """
         self.swaggerTypes = {
             
-            'postStart': 'v1beta3_Handler',
+            'postStart': 'V1beta3_Handler',
             
             
-            'preStop': 'v1beta3_Handler'
+            'preStop': 'V1beta3_Handler'
             
         }
 
@@ -46,9 +46,9 @@ class V1beta3_Lifecycle(object):
         
         #called immediately after a container is started; if the handler fails, the container is terminated and restarted according to its restart policy; other management of the container blocks until the hook completes
         
-        self.postStart = None # v1beta3_Handler
+        self.postStart = None # V1beta3_Handler
         
         #called before a container is terminated; the container is terminated after the handler completes; other management of the container blocks until the hook completes
         
-        self.preStop = None # v1beta3_Handler
+        self.preStop = None # V1beta3_Handler
         

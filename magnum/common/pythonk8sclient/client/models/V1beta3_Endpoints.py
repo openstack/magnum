@@ -61,7 +61,7 @@ class V1beta3_Endpoints(object):
             'selfLink': 'str',
             
             
-            'subsets': 'list[v1beta3_EndpointSubset]',
+            'subsets': 'list[V1beta3_EndpointSubset]',
             
             
             'uid': 'str'
@@ -145,7 +145,7 @@ class V1beta3_Endpoints(object):
         
         #sets of addresses and ports that comprise a service
         
-        self.subsets = None # list[v1beta3_EndpointSubset]
+        self.subsets = None # list[V1beta3_EndpointSubset]
         
         #unique UUID across space and time; populated by the system; read-only
         

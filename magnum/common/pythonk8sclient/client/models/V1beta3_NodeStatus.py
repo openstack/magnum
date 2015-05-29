@@ -28,16 +28,16 @@ class V1beta3_NodeStatus(object):
         """
         self.swaggerTypes = {
             
-            'addresses': 'list[v1beta3_NodeAddress]',
+            'addresses': 'list[V1beta3_NodeAddress]',
             
             
             'capacity': 'any',
             
             
-            'conditions': 'list[v1beta3_NodeCondition]',
+            'conditions': 'list[V1beta3_NodeCondition]',
             
             
-            'nodeInfo': 'v1beta3_NodeSystemInfo',
+            'nodeInfo': 'V1beta3_NodeSystemInfo',
             
             
             'phase': 'str'
@@ -61,7 +61,7 @@ class V1beta3_NodeStatus(object):
         
         #list of addresses reachable to the node
         
-        self.addresses = None # list[v1beta3_NodeAddress]
+        self.addresses = None # list[V1beta3_NodeAddress]
         
         #compute resource capacity of the node; https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/resources.md
         
@@ -69,10 +69,10 @@ class V1beta3_NodeStatus(object):
         
         #list of node conditions observed
         
-        self.conditions = None # list[v1beta3_NodeCondition]
+        self.conditions = None # list[V1beta3_NodeCondition]
         
         
-        self.nodeInfo = None # v1beta3_NodeSystemInfo
+        self.nodeInfo = None # V1beta3_NodeSystemInfo
         
         #most recently observed lifecycle phase of the node
         

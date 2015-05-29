@@ -31,7 +31,7 @@ class V1beta3_PodList(object):
             'apiVersion': 'str',
             
             
-            'items': 'list[v1beta3_Pod]',
+            'items': 'list[V1beta3_Pod]',
             
             
             'kind': 'str',
@@ -65,7 +65,7 @@ class V1beta3_PodList(object):
         
         #list of pods
         
-        self.items = None # list[v1beta3_Pod]
+        self.items = None # list[V1beta3_Pod]
         
         #kind of object, in CamelCase; cannot be updated
         

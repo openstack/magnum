@@ -34,10 +34,10 @@ class V1beta3_ReplicationControllerSpec(object):
             'selector': 'any',
             
             
-            'template': 'v1beta3_PodTemplateSpec',
+            'template': 'V1beta3_PodTemplateSpec',
             
             
-            'templateRef': 'v1beta3_ObjectReference'
+            'templateRef': 'V1beta3_ObjectReference'
             
         }
 
@@ -64,9 +64,9 @@ class V1beta3_ReplicationControllerSpec(object):
         
         #object that describes the pod that will be created if insufficient replicas are detected; takes precendence over templateRef
         
-        self.template = None # v1beta3_PodTemplateSpec
+        self.template = None # V1beta3_PodTemplateSpec
         
         #reference to an object that describes the pod that will be created if insufficient replicas are detected
         
-        self.templateRef = None # v1beta3_ObjectReference
+        self.templateRef = None # V1beta3_ObjectReference
         

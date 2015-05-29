@@ -28,13 +28,13 @@ class V1beta3_ContainerState(object):
         """
         self.swaggerTypes = {
             
-            'running': 'v1beta3_ContainerStateRunning',
+            'running': 'V1beta3_ContainerStateRunning',
             
             
-            'termination': 'v1beta3_ContainerStateTerminated',
+            'termination': 'V1beta3_ContainerStateTerminated',
             
             
-            'waiting': 'v1beta3_ContainerStateWaiting'
+            'waiting': 'V1beta3_ContainerStateWaiting'
             
         }
 
@@ -51,13 +51,13 @@ class V1beta3_ContainerState(object):
         
         #details about a running container
         
-        self.running = None # v1beta3_ContainerStateRunning
+        self.running = None # V1beta3_ContainerStateRunning
         
         #details about a terminated container
         
-        self.termination = None # v1beta3_ContainerStateTerminated
+        self.termination = None # V1beta3_ContainerStateTerminated
         
         #details about a waiting container
         
-        self.waiting = None # v1beta3_ContainerStateWaiting
+        self.waiting = None # V1beta3_ContainerStateWaiting
         

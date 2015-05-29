@@ -61,7 +61,7 @@ class V1beta3_Binding(object):
             'selfLink': 'str',
             
             
-            'target': 'v1beta3_ObjectReference',
+            'target': 'V1beta3_ObjectReference',
             
             
             'uid': 'str'
@@ -145,7 +145,7 @@ class V1beta3_Binding(object):
         
         #an object to bind to
         
-        self.target = None # v1beta3_ObjectReference
+        self.target = None # V1beta3_ObjectReference
         
         #unique UUID across space and time; populated by the system; read-only
         

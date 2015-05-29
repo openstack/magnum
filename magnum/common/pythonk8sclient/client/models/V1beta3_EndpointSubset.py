@@ -28,10 +28,10 @@ class V1beta3_EndpointSubset(object):
         """
         self.swaggerTypes = {
             
-            'addresses': 'list[v1beta3_EndpointAddress]',
+            'addresses': 'list[V1beta3_EndpointAddress]',
             
             
-            'ports': 'list[v1beta3_EndpointPort]'
+            'ports': 'list[V1beta3_EndpointPort]'
             
         }
 
@@ -46,9 +46,9 @@ class V1beta3_EndpointSubset(object):
         
         #IP addresses which offer the related ports
         
-        self.addresses = None # list[v1beta3_EndpointAddress]
+        self.addresses = None # list[V1beta3_EndpointAddress]
         
         #port numbers available on the related IP addresses
         
-        self.ports = None # list[v1beta3_EndpointPort]
+        self.ports = None # list[V1beta3_EndpointPort]
         

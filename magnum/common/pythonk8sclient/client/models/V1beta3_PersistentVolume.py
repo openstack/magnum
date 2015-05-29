@@ -61,10 +61,10 @@ class V1beta3_PersistentVolume(object):
             'selfLink': 'str',
             
             
-            'spec': 'v1beta3_PersistentVolumeSpec',
+            'spec': 'V1beta3_PersistentVolumeSpec',
             
             
-            'status': 'v1beta3_PersistentVolumeStatus',
+            'status': 'V1beta3_PersistentVolumeStatus',
             
             
             'uid': 'str'
@@ -150,11 +150,11 @@ class V1beta3_PersistentVolume(object):
         
         #specification of a persistent volume as provisioned by an administrator
         
-        self.spec = None # v1beta3_PersistentVolumeSpec
+        self.spec = None # V1beta3_PersistentVolumeSpec
         
         #current status of a persistent volume; populated by the system, read-only
         
-        self.status = None # v1beta3_PersistentVolumeStatus
+        self.status = None # V1beta3_PersistentVolumeStatus
         
         #unique UUID across space and time; populated by the system; read-only
         

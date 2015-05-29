@@ -28,7 +28,7 @@ class V1beta3_LimitRangeSpec(object):
         """
         self.swaggerTypes = {
             
-            'limits': 'list[v1beta3_LimitRangeItem]'
+            'limits': 'list[V1beta3_LimitRangeItem]'
             
         }
 
@@ -41,5 +41,5 @@ class V1beta3_LimitRangeSpec(object):
         
         #limits is the list of LimitRangeItem objects that are enforced
         
-        self.limits = None # list[v1beta3_LimitRangeItem]
+        self.limits = None # list[V1beta3_LimitRangeItem]
         

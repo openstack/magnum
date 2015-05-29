@@ -28,16 +28,16 @@ class V1beta3_Probe(object):
         """
         self.swaggerTypes = {
             
-            'exect': 'v1beta3_ExecAction',
+            'exect': 'V1beta3_ExecAction',
             
             
-            'httpGet': 'v1beta3_HTTPGetAction',
+            'httpGet': 'V1beta3_HTTPGetAction',
             
             
             'initialDelaySeconds': 'long',
             
             
-            'tcpSocket': 'v1beta3_TCPSocketAction',
+            'tcpSocket': 'V1beta3_TCPSocketAction',
             
             
             'timeoutSeconds': 'long'
@@ -61,11 +61,11 @@ class V1beta3_Probe(object):
         
         #exec-based handler
         
-        self.exect = None # v1beta3_ExecAction
+        self.exect = None # V1beta3_ExecAction
         
         #HTTP-based handler
         
-        self.httpGet = None # v1beta3_HTTPGetAction
+        self.httpGet = None # V1beta3_HTTPGetAction
         
         #number of seconds after the container has started before liveness probes are initiated
         
@@ -73,7 +73,7 @@ class V1beta3_Probe(object):
         
         #TCP-based handler; TCP hooks not yet supported
         
-        self.tcpSocket = None # v1beta3_TCPSocketAction
+        self.tcpSocket = None # V1beta3_TCPSocketAction
         
         #number of seconds after which liveness probes timeout; defaults to 1 second
         

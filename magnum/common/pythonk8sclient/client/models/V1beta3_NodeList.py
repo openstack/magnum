@@ -31,7 +31,7 @@ class V1beta3_NodeList(object):
             'apiVersion': 'str',
             
             
-            'items': 'list[v1beta3_Node]',
+            'items': 'list[V1beta3_Node]',
             
             
             'kind': 'str',
@@ -65,7 +65,7 @@ class V1beta3_NodeList(object):
         
         #list of nodes
         
-        self.items = None # list[v1beta3_Node]
+        self.items = None # list[V1beta3_Node]
         
         #kind of object, in CamelCase; cannot be updated
         

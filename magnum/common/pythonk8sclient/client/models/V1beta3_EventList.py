@@ -31,7 +31,7 @@ class V1beta3_EventList(object):
             'apiVersion': 'str',
             
             
-            'items': 'list[v1beta3_Event]',
+            'items': 'list[V1beta3_Event]',
             
             
             'kind': 'str',
@@ -65,7 +65,7 @@ class V1beta3_EventList(object):
         
         #list of events
         
-        self.items = None # list[v1beta3_Event]
+        self.items = None # list[V1beta3_Event]
         
         #kind of object, in CamelCase; cannot be updated
         

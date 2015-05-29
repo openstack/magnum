@@ -61,10 +61,10 @@ class V1beta3_Node(object):
             'selfLink': 'str',
             
             
-            'spec': 'v1beta3_NodeSpec',
+            'spec': 'V1beta3_NodeSpec',
             
             
-            'status': 'v1beta3_NodeStatus',
+            'status': 'V1beta3_NodeStatus',
             
             
             'uid': 'str'
@@ -150,11 +150,11 @@ class V1beta3_Node(object):
         
         #specification of a node; https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/api-conventions.md#spec-and-status
         
-        self.spec = None # v1beta3_NodeSpec
+        self.spec = None # V1beta3_NodeSpec
         
         #most recently observed status of the node; populated by the system, read-only; https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/api-conventions.md#spec-and-status
         
-        self.status = None # v1beta3_NodeStatus
+        self.status = None # V1beta3_NodeStatus
         
         #unique UUID across space and time; populated by the system; read-only
         

@@ -28,28 +28,28 @@ class V1beta3_Volume(object):
         """
         self.swaggerTypes = {
             
-            'emptyDir': 'v1beta3_EmptyDirVolumeSource',
+            'emptyDir': 'V1beta3_EmptyDirVolumeSource',
             
             
-            'gcePersistentDisk': 'v1beta3_GCEPersistentDiskVolumeSource',
+            'gcePersistentDisk': 'V1beta3_GCEPersistentDiskVolumeSource',
             
             
-            'gitRepo': 'v1beta3_GitRepoVolumeSource',
+            'gitRepo': 'V1beta3_GitRepoVolumeSource',
             
             
-            'hostPath': 'v1beta3_HostPathVolumeSource',
+            'hostPath': 'V1beta3_HostPathVolumeSource',
             
             
-            'iscsi': 'v1beta3_ISCSIVolumeSource',
+            'iscsi': 'V1beta3_ISCSIVolumeSource',
             
             
             'name': 'str',
             
             
-            'nfs': 'v1beta3_NFSVolumeSource',
+            'nfs': 'V1beta3_NFSVolumeSource',
             
             
-            'secret': 'v1beta3_SecretVolumeSource'
+            'secret': 'V1beta3_SecretVolumeSource'
             
         }
 
@@ -76,23 +76,23 @@ class V1beta3_Volume(object):
         
         #temporary directory that shares a pod&#39;s lifetime
         
-        self.emptyDir = None # v1beta3_EmptyDirVolumeSource
+        self.emptyDir = None # V1beta3_EmptyDirVolumeSource
         
         #GCE disk resource attached to the host machine on demand
         
-        self.gcePersistentDisk = None # v1beta3_GCEPersistentDiskVolumeSource
+        self.gcePersistentDisk = None # V1beta3_GCEPersistentDiskVolumeSource
         
         #git repository at a particular revision
         
-        self.gitRepo = None # v1beta3_GitRepoVolumeSource
+        self.gitRepo = None # V1beta3_GitRepoVolumeSource
         
         #pre-existing host file or directory; generally for privileged system daemons or other agents tied to the host
         
-        self.hostPath = None # v1beta3_HostPathVolumeSource
+        self.hostPath = None # V1beta3_HostPathVolumeSource
         
         #iSCSI disk attached to host machine on demand
         
-        self.iscsi = None # v1beta3_ISCSIVolumeSource
+        self.iscsi = None # V1beta3_ISCSIVolumeSource
         
         #volume name; must be a DNS_LABEL and unique within the pod
         
@@ -100,9 +100,9 @@ class V1beta3_Volume(object):
         
         #NFS volume that will be mounted in the host machine
         
-        self.nfs = None # v1beta3_NFSVolumeSource
+        self.nfs = None # V1beta3_NFSVolumeSource
         
         #secret to populate volume
         
-        self.secret = None # v1beta3_SecretVolumeSource
+        self.secret = None # V1beta3_SecretVolumeSource
         

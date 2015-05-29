@@ -28,7 +28,7 @@ class V1beta3_PersistentVolumeClaimStatus(object):
         """
         self.swaggerTypes = {
             
-            'accessModes': 'list[v1beta3_AccessModeType]',
+            'accessModes': 'list[V1beta3_AccessModeType]',
             
             
             'capacity': 'any',
@@ -37,7 +37,7 @@ class V1beta3_PersistentVolumeClaimStatus(object):
             'phase': 'str',
             
             
-            'volumeRef': 'v1beta3_ObjectReference'
+            'volumeRef': 'V1beta3_ObjectReference'
             
         }
 
@@ -56,7 +56,7 @@ class V1beta3_PersistentVolumeClaimStatus(object):
         
         #the actual access modes the volume has
         
-        self.accessModes = None # list[v1beta3_AccessModeType]
+        self.accessModes = None # list[V1beta3_AccessModeType]
         
         #the actual resources the volume has
         
@@ -68,5 +68,5 @@ class V1beta3_PersistentVolumeClaimStatus(object):
         
         #a reference to the backing persistent volume, when bound
         
-        self.volumeRef = None # v1beta3_ObjectReference
+        self.volumeRef = None # V1beta3_ObjectReference
         

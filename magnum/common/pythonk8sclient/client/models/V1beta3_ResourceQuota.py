@@ -61,10 +61,10 @@ class V1beta3_ResourceQuota(object):
             'selfLink': 'str',
             
             
-            'spec': 'v1beta3_ResourceQuotaSpec',
+            'spec': 'V1beta3_ResourceQuotaSpec',
             
             
-            'status': 'v1beta3_ResourceQuotaStatus',
+            'status': 'V1beta3_ResourceQuotaStatus',
             
             
             'uid': 'str'
@@ -150,11 +150,11 @@ class V1beta3_ResourceQuota(object):
         
         #spec defines the desired quota; https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/api-conventions.md#spec-and-status
         
-        self.spec = None # v1beta3_ResourceQuotaSpec
+        self.spec = None # V1beta3_ResourceQuotaSpec
         
         #status defines the actual enforced quota and current usage; https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/api-conventions.md#spec-and-status
         
-        self.status = None # v1beta3_ResourceQuotaStatus
+        self.status = None # V1beta3_ResourceQuotaStatus
         
         #unique UUID across space and time; populated by the system; read-only
         

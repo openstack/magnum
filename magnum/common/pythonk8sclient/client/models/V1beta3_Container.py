@@ -31,13 +31,13 @@ class V1beta3_Container(object):
             'args': 'list[str]',
             
             
-            'capabilities': 'v1beta3_Capabilities',
+            'capabilities': 'V1beta3_Capabilities',
             
             
             'command': 'list[str]',
             
             
-            'env': 'list[v1beta3_EnvVar]',
+            'env': 'list[V1beta3_EnvVar]',
             
             
             'image': 'str',
@@ -46,31 +46,31 @@ class V1beta3_Container(object):
             'imagePullPolicy': 'str',
             
             
-            'lifecycle': 'v1beta3_Lifecycle',
+            'lifecycle': 'V1beta3_Lifecycle',
             
             
-            'livenessProbe': 'v1beta3_Probe',
+            'livenessProbe': 'V1beta3_Probe',
             
             
             'name': 'str',
             
             
-            'ports': 'list[v1beta3_ContainerPort]',
+            'ports': 'list[V1beta3_ContainerPort]',
             
             
             'privileged': 'bool',
             
             
-            'readinessProbe': 'v1beta3_Probe',
+            'readinessProbe': 'V1beta3_Probe',
             
             
-            'resources': 'v1beta3_ResourceRequirements',
+            'resources': 'V1beta3_ResourceRequirements',
             
             
             'terminationMessagePath': 'str',
             
             
-            'volumeMounts': 'list[v1beta3_VolumeMount]',
+            'volumeMounts': 'list[V1beta3_VolumeMount]',
             
             
             'workingDir': 'str'
@@ -120,7 +120,7 @@ class V1beta3_Container(object):
         
         #capabilities for container; cannot be updated
         
-        self.capabilities = None # v1beta3_Capabilities
+        self.capabilities = None # V1beta3_Capabilities
         
         #entrypoint array; not executed within a shell; the docker image&#39;s entrypoint is used if this is not provided; cannot be updated
         
@@ -128,7 +128,7 @@ class V1beta3_Container(object):
         
         #list of environment variables to set in the container; cannot be updated
         
-        self.env = None # list[v1beta3_EnvVar]
+        self.env = None # list[V1beta3_EnvVar]
         
         #Docker image name
         
@@ -140,11 +140,11 @@ class V1beta3_Container(object):
         
         #actions that the management system should take in response to container lifecycle events; cannot be updated
         
-        self.lifecycle = None # v1beta3_Lifecycle
+        self.lifecycle = None # V1beta3_Lifecycle
         
         #periodic probe of container liveness; container will be restarted if the probe fails; cannot be updated
         
-        self.livenessProbe = None # v1beta3_Probe
+        self.livenessProbe = None # V1beta3_Probe
         
         #name of the container; must be a DNS_LABEL and unique within the pod; cannot be updated
         
@@ -152,7 +152,7 @@ class V1beta3_Container(object):
         
         #list of ports to expose from the container; cannot be updated
         
-        self.ports = None # list[v1beta3_ContainerPort]
+        self.ports = None # list[V1beta3_ContainerPort]
         
         #whether or not the container is granted privileged status; defaults to false; cannot be updated
         
@@ -160,11 +160,11 @@ class V1beta3_Container(object):
         
         #periodic probe of container service readiness; container will be removed from service endpoints if the probe fails; cannot be updated
         
-        self.readinessProbe = None # v1beta3_Probe
+        self.readinessProbe = None # V1beta3_Probe
         
         #Compute Resources required by this container; cannot be updated
         
-        self.resources = None # v1beta3_ResourceRequirements
+        self.resources = None # V1beta3_ResourceRequirements
         
         #path at which the file to which the container&#39;s termination message will be written is mounted into the container&#39;s filesystem; message written is intended to be brief final status, such as an assertion failure message; defaults to /dev/termination-log; cannot be updated
         
@@ -172,7 +172,7 @@ class V1beta3_Container(object):
         
         #pod volumes to mount into the container&#39;s filesyste; cannot be updated
         
-        self.volumeMounts = None # list[v1beta3_VolumeMount]
+        self.volumeMounts = None # list[V1beta3_VolumeMount]
         
         #container&#39;s working directory; defaults to image&#39;s default; cannot be updated
         

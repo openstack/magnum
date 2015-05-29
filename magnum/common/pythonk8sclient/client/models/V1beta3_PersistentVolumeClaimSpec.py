@@ -28,10 +28,10 @@ class V1beta3_PersistentVolumeClaimSpec(object):
         """
         self.swaggerTypes = {
             
-            'accessModes': 'list[v1beta3_AccessModeType]',
+            'accessModes': 'list[V1beta3_AccessModeType]',
             
             
-            'resources': 'v1beta3_ResourceRequirements'
+            'resources': 'V1beta3_ResourceRequirements'
             
         }
 
@@ -46,9 +46,9 @@ class V1beta3_PersistentVolumeClaimSpec(object):
         
         #the desired access modes the volume should have
         
-        self.accessModes = None # list[v1beta3_AccessModeType]
+        self.accessModes = None # list[V1beta3_AccessModeType]
         
         #the desired resources the volume should have
         
-        self.resources = None # v1beta3_ResourceRequirements
+        self.resources = None # V1beta3_ResourceRequirements
         

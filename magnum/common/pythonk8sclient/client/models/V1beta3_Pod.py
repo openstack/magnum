@@ -61,10 +61,10 @@ class V1beta3_Pod(object):
             'selfLink': 'str',
             
             
-            'spec': 'v1beta3_PodSpec',
+            'spec': 'V1beta3_PodSpec',
             
             
-            'status': 'v1beta3_PodStatus',
+            'status': 'V1beta3_PodStatus',
             
             
             'uid': 'str'
@@ -150,11 +150,11 @@ class V1beta3_Pod(object):
         
         #specification of the desired behavior of the pod; https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/api-conventions.md#spec-and-status
         
-        self.spec = None # v1beta3_PodSpec
+        self.spec = None # V1beta3_PodSpec
         
         #most recently observed status of the pod; populated by the system, read-only; https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/api-conventions.md#spec-and-status
         
-        self.status = None # v1beta3_PodStatus
+        self.status = None # V1beta3_PodStatus
         
         #unique UUID across space and time; populated by the system; read-only
         
