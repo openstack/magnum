@@ -58,7 +58,9 @@ class V1beta3_PodTemplateSpec(object):
             'spec': 'V1beta3_PodSpec',
             
             
-            'uid': 'str'
+            'uid': 'str',
+
+            'metadata': 'dict'
             
         }
 
@@ -84,7 +86,9 @@ class V1beta3_PodTemplateSpec(object):
             
             'spec': 'spec',
             
-            'uid': 'uid'
+            'uid': 'uid',
+
+            'metadata': 'metadata'
             
         }       
 
@@ -132,4 +136,5 @@ class V1beta3_PodTemplateSpec(object):
         #unique UUID across space and time; populated by the system; read-only
         
         self.uid = None # str
-        
+
+        self.metadata = None # dict

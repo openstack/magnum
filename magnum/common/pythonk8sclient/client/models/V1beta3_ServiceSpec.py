@@ -40,7 +40,7 @@ class V1beta3_ServiceSpec(object):
             'publicIPs': 'list[str]',
             
             
-            'selector': 'any',
+            'selector': 'dict',
             
             
             'sessionAffinity': 'str'
