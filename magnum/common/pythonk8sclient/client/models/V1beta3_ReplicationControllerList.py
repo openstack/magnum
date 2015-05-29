@@ -31,7 +31,7 @@ class V1beta3_ReplicationControllerList(object):
             'apiVersion': 'str',
             
             
-            'items': 'list[v1beta3_ReplicationController]',
+            'items': 'list[V1beta3_ReplicationController]',
             
             
             'kind': 'str',
@@ -65,7 +65,7 @@ class V1beta3_ReplicationControllerList(object):
         
         #list of replication controllers
         
-        self.items = None # list[v1beta3_ReplicationController]
+        self.items = None # list[V1beta3_ReplicationController]
         
         #kind of object, in CamelCase; cannot be updated
         

@@ -34,7 +34,7 @@ class V1beta3_ServiceSpec(object):
             'portalIP': 'str',
             
             
-            'ports': 'list[v1beta3_ServicePort]',
+            'ports': 'list[V1beta3_ServicePort]',
             
             
             'publicIPs': 'list[str]',
@@ -73,7 +73,7 @@ class V1beta3_ServiceSpec(object):
         
         #ports exposed by the service
         
-        self.ports = None # list[v1beta3_ServicePort]
+        self.ports = None # list[V1beta3_ServicePort]
         
         #externally visible IPs (e.g. load balancers) that should be proxied to this service
         

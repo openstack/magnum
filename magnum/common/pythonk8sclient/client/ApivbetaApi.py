@@ -49,7 +49,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_EndpointsList
+        Returns: V1beta3_EndpointsList
         """
 
         allParams = ['fieldSelector', 'labelSelector', 'resourceVersion', 'watch']
@@ -105,7 +105,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_EndpointsList')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_EndpointsList')
         return responseObject
         
         
@@ -129,7 +129,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_EventList
+        Returns: V1beta3_EventList
         """
 
         allParams = ['fieldSelector', 'labelSelector', 'resourceVersion', 'watch']
@@ -185,7 +185,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_EventList')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_EventList')
         return responseObject
         
         
@@ -209,7 +209,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_LimitRangeList
+        Returns: V1beta3_LimitRangeList
         """
 
         allParams = ['fieldSelector', 'labelSelector', 'resourceVersion', 'watch']
@@ -265,7 +265,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_LimitRangeList')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_LimitRangeList')
         return responseObject
         
         
@@ -289,7 +289,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_NamespaceList
+        Returns: V1beta3_NamespaceList
         """
 
         allParams = ['fieldSelector', 'labelSelector', 'resourceVersion', 'watch']
@@ -345,7 +345,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_NamespaceList')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_NamespaceList')
         return responseObject
         
         
@@ -493,7 +493,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_EndpointsList
+        Returns: V1beta3_EndpointsList
         """
 
         allParams = ['namespaces', 'fieldSelector', 'labelSelector', 'resourceVersion', 'watch']
@@ -555,7 +555,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_EndpointsList')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_EndpointsList')
         return responseObject
         
         
@@ -638,7 +638,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_Endpoints
+        Returns: V1beta3_Endpoints
         """
 
         allParams = ['name', 'namespaces']
@@ -694,7 +694,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_Endpoints')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_Endpoints')
         return responseObject
         
         
@@ -943,7 +943,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_EventList
+        Returns: V1beta3_EventList
         """
 
         allParams = ['namespaces', 'fieldSelector', 'labelSelector', 'resourceVersion', 'watch']
@@ -1005,7 +1005,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_EventList')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_EventList')
         return responseObject
         
         
@@ -1088,7 +1088,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_Event
+        Returns: V1beta3_Event
         """
 
         allParams = ['name', 'namespaces']
@@ -1144,7 +1144,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_Event')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_Event')
         return responseObject
         
         
@@ -1387,7 +1387,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_LimitRangeList
+        Returns: V1beta3_LimitRangeList
         """
 
         allParams = ['namespaces', 'fieldSelector', 'labelSelector', 'resourceVersion', 'watch']
@@ -1449,7 +1449,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_LimitRangeList')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_LimitRangeList')
         return responseObject
         
         
@@ -1532,7 +1532,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_LimitRange
+        Returns: V1beta3_LimitRange
         """
 
         allParams = ['name', 'namespaces']
@@ -1588,7 +1588,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_LimitRange')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_LimitRange')
         return responseObject
         
         
@@ -1831,7 +1831,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_PersistentVolumeClaimList
+        Returns: V1beta3_PersistentVolumeClaimList
         """
 
         allParams = ['namespaces', 'fieldSelector', 'labelSelector', 'resourceVersion', 'watch']
@@ -1893,7 +1893,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_PersistentVolumeClaimList')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_PersistentVolumeClaimList')
         return responseObject
         
         
@@ -1976,7 +1976,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_PersistentVolumeClaim
+        Returns: V1beta3_PersistentVolumeClaim
         """
 
         allParams = ['name', 'namespaces']
@@ -2032,7 +2032,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_PersistentVolumeClaim')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_PersistentVolumeClaim')
         return responseObject
         
         
@@ -2281,7 +2281,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_PodList
+        Returns: V1beta3_PodList
         """
 
         allParams = ['namespaces', 'fieldSelector', 'labelSelector', 'resourceVersion', 'watch']
@@ -2343,7 +2343,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_PodList')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_PodList')
         return responseObject
         
         
@@ -2428,7 +2428,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_Pod
+        Returns: V1beta3_Pod
         """
 
         allParams = ['name', 'namespaces']
@@ -2484,7 +2484,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_Pod')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_Pod')
         return responseObject
         
         
@@ -2800,7 +2800,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_PodLogOptions
+        Returns: V1beta3_PodLogOptions
         """
 
         allParams = ['name', 'namespaces']
@@ -2856,7 +2856,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_PodLogOptions')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_PodLogOptions')
         return responseObject
         
         
@@ -2885,7 +2885,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_ReplicationControllerList
+        Returns: V1beta3_ReplicationControllerList
         """
 
         allParams = ['namespaces', 'fieldSelector', 'labelSelector', 'resourceVersion', 'watch']
@@ -2947,7 +2947,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_ReplicationControllerList')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_ReplicationControllerList')
         return responseObject
         
         
@@ -3032,7 +3032,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_ReplicationController
+        Returns: V1beta3_ReplicationController
         """
 
         allParams = ['name', 'namespaces']
@@ -3088,7 +3088,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_ReplicationController')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_ReplicationController')
         return responseObject
         
         
@@ -3339,7 +3339,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_ResourceQuotaList
+        Returns: V1beta3_ResourceQuotaList
         """
 
         allParams = ['namespaces', 'fieldSelector', 'labelSelector', 'resourceVersion', 'watch']
@@ -3401,7 +3401,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_ResourceQuotaList')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_ResourceQuotaList')
         return responseObject
         
         
@@ -3484,7 +3484,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_ResourceQuota
+        Returns: V1beta3_ResourceQuota
         """
 
         allParams = ['name', 'namespaces']
@@ -3540,7 +3540,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_ResourceQuota')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_ResourceQuota')
         return responseObject
         
         
@@ -3863,7 +3863,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_SecretList
+        Returns: V1beta3_SecretList
         """
 
         allParams = ['namespaces', 'fieldSelector', 'labelSelector', 'resourceVersion', 'watch']
@@ -3925,7 +3925,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_SecretList')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_SecretList')
         return responseObject
         
         
@@ -4008,7 +4008,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_Secret
+        Returns: V1beta3_Secret
         """
 
         allParams = ['name', 'namespaces']
@@ -4064,7 +4064,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_Secret')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_Secret')
         return responseObject
         
         
@@ -4307,7 +4307,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_ServiceList
+        Returns: V1beta3_ServiceList
         """
 
         allParams = ['namespaces', 'fieldSelector', 'labelSelector', 'resourceVersion', 'watch']
@@ -4369,7 +4369,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_ServiceList')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_ServiceList')
         return responseObject
         
         
@@ -4454,7 +4454,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_Service
+        Returns: V1beta3_Service
         """
 
         allParams = ['name', 'namespaces']
@@ -4510,7 +4510,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_Service')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_Service')
         return responseObject
         
         
@@ -4743,7 +4743,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_Namespace
+        Returns: V1beta3_Namespace
         """
 
         allParams = ['name']
@@ -4793,7 +4793,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_Namespace')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_Namespace')
         return responseObject
         
         
@@ -5142,7 +5142,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_NodeList
+        Returns: V1beta3_NodeList
         """
 
         allParams = ['fieldSelector', 'labelSelector', 'resourceVersion', 'watch']
@@ -5198,7 +5198,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_NodeList')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_NodeList')
         return responseObject
         
         
@@ -5269,7 +5269,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_Node
+        Returns: V1beta3_Node
         """
 
         allParams = ['name']
@@ -5319,7 +5319,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_Node')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_Node')
         return responseObject
         
         
@@ -5538,7 +5538,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_PersistentVolumeClaimList
+        Returns: V1beta3_PersistentVolumeClaimList
         """
 
         allParams = ['fieldSelector', 'labelSelector', 'resourceVersion', 'watch']
@@ -5594,7 +5594,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_PersistentVolumeClaimList')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_PersistentVolumeClaimList')
         return responseObject
         
         
@@ -5618,7 +5618,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_PersistentVolumeList
+        Returns: V1beta3_PersistentVolumeList
         """
 
         allParams = ['fieldSelector', 'labelSelector', 'resourceVersion', 'watch']
@@ -5674,7 +5674,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_PersistentVolumeList')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_PersistentVolumeList')
         return responseObject
         
         
@@ -5745,7 +5745,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_PersistentVolume
+        Returns: V1beta3_PersistentVolume
         """
 
         allParams = ['name']
@@ -5795,7 +5795,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_PersistentVolume')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_PersistentVolume')
         return responseObject
         
         
@@ -6079,7 +6079,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_PodList
+        Returns: V1beta3_PodList
         """
 
         allParams = ['fieldSelector', 'labelSelector', 'resourceVersion', 'watch']
@@ -6135,7 +6135,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_PodList')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_PodList')
         return responseObject
         
         
@@ -8022,7 +8022,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_ReplicationControllerList
+        Returns: V1beta3_ReplicationControllerList
         """
 
         allParams = ['fieldSelector', 'labelSelector', 'resourceVersion', 'watch']
@@ -8078,7 +8078,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_ReplicationControllerList')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_ReplicationControllerList')
         return responseObject
         
         
@@ -8102,7 +8102,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_ResourceQuotaList
+        Returns: V1beta3_ResourceQuotaList
         """
 
         allParams = ['fieldSelector', 'labelSelector', 'resourceVersion', 'watch']
@@ -8158,7 +8158,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_ResourceQuotaList')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_ResourceQuotaList')
         return responseObject
         
         
@@ -8182,7 +8182,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_SecretList
+        Returns: V1beta3_SecretList
         """
 
         allParams = ['fieldSelector', 'labelSelector', 'resourceVersion', 'watch']
@@ -8238,7 +8238,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_SecretList')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_SecretList')
         return responseObject
         
         
@@ -8262,7 +8262,7 @@ class ApivbetaApi(object):
             
             
         
-        Returns: v1beta3_ServiceList
+        Returns: V1beta3_ServiceList
         """
 
         allParams = ['fieldSelector', 'labelSelector', 'resourceVersion', 'watch']
@@ -8318,7 +8318,7 @@ class ApivbetaApi(object):
         if not response:
             return None
 
-        responseObject = self.apiClient.deserialize(response, 'v1beta3_ServiceList')
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_ServiceList')
         return responseObject
         
         

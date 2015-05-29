@@ -31,7 +31,7 @@ class V1beta3_LimitRangeList(object):
             'apiVersion': 'str',
             
             
-            'items': 'list[v1beta3_LimitRange]',
+            'items': 'list[V1beta3_LimitRange]',
             
             
             'kind': 'str',
@@ -65,7 +65,7 @@ class V1beta3_LimitRangeList(object):
         
         #items is a list of LimitRange objects
         
-        self.items = None # list[v1beta3_LimitRange]
+        self.items = None # list[V1beta3_LimitRange]
         
         #kind of object, in CamelCase; cannot be updated
         

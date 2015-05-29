@@ -31,7 +31,7 @@ class V1beta3_PersistentVolumeClaimList(object):
             'apiVersion': 'str',
             
             
-            'items': 'list[v1beta3_PersistentVolumeClaim]',
+            'items': 'list[V1beta3_PersistentVolumeClaim]',
             
             
             'kind': 'str',
@@ -64,7 +64,7 @@ class V1beta3_PersistentVolumeClaimList(object):
         self.apiVersion = None # str
         
         
-        self.items = None # list[v1beta3_PersistentVolumeClaim]
+        self.items = None # list[V1beta3_PersistentVolumeClaim]
         
         #kind of object, in CamelCase; cannot be updated
         

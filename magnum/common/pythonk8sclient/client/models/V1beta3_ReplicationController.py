@@ -61,10 +61,10 @@ class V1beta3_ReplicationController(object):
             'selfLink': 'str',
             
             
-            'spec': 'v1beta3_ReplicationControllerSpec',
+            'spec': 'V1beta3_ReplicationControllerSpec',
             
             
-            'status': 'v1beta3_ReplicationControllerStatus',
+            'status': 'V1beta3_ReplicationControllerStatus',
             
             
             'uid': 'str'
@@ -150,11 +150,11 @@ class V1beta3_ReplicationController(object):
         
         #specification of the desired behavior of the replication controller; https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/api-conventions.md#spec-and-status
         
-        self.spec = None # v1beta3_ReplicationControllerSpec
+        self.spec = None # V1beta3_ReplicationControllerSpec
         
         #most recently observed status of the replication controller; populated by the system, read-only; https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/api-conventions.md#spec-and-status
         
-        self.status = None # v1beta3_ReplicationControllerStatus
+        self.status = None # V1beta3_ReplicationControllerStatus
         
         #unique UUID across space and time; populated by the system; read-only
         

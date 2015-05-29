@@ -28,7 +28,7 @@ class V1beta3_NamespaceSpec(object):
         """
         self.swaggerTypes = {
             
-            'finalizers': 'list[v1beta3_FinalizerName]'
+            'finalizers': 'list[V1beta3_FinalizerName]'
             
         }
 
@@ -41,5 +41,5 @@ class V1beta3_NamespaceSpec(object):
         
         #an opaque list of values that must be empty to permanently remove object from storage
         
-        self.finalizers = None # list[v1beta3_FinalizerName]
+        self.finalizers = None # list[V1beta3_FinalizerName]
         

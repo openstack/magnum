@@ -31,7 +31,7 @@ class V1beta3_NamespaceList(object):
             'apiVersion': 'str',
             
             
-            'items': 'list[v1beta3_Namespace]',
+            'items': 'list[V1beta3_Namespace]',
             
             
             'kind': 'str',
@@ -65,7 +65,7 @@ class V1beta3_NamespaceList(object):
         
         #items is the list of Namespace objects in the list
         
-        self.items = None # list[v1beta3_Namespace]
+        self.items = None # list[V1beta3_Namespace]
         
         #kind of object, in CamelCase; cannot be updated
         

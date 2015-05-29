@@ -61,10 +61,10 @@ class V1beta3_Namespace(object):
             'selfLink': 'str',
             
             
-            'spec': 'v1beta3_NamespaceSpec',
+            'spec': 'V1beta3_NamespaceSpec',
             
             
-            'status': 'v1beta3_NamespaceStatus',
+            'status': 'V1beta3_NamespaceStatus',
             
             
             'uid': 'str'
@@ -150,11 +150,11 @@ class V1beta3_Namespace(object):
         
         #spec defines the behavior of the Namespace; https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/api-conventions.md#spec-and-status
         
-        self.spec = None # v1beta3_NamespaceSpec
+        self.spec = None # V1beta3_NamespaceSpec
         
         #status describes the current status of a Namespace; https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/api-conventions.md#spec-and-status
         
-        self.status = None # v1beta3_NamespaceStatus
+        self.status = None # V1beta3_NamespaceStatus
         
         #unique UUID across space and time; populated by the system; read-only
         

@@ -31,7 +31,7 @@ class V1beta3_ServiceList(object):
             'apiVersion': 'str',
             
             
-            'items': 'list[v1beta3_Service]',
+            'items': 'list[V1beta3_Service]',
             
             
             'kind': 'str',
@@ -65,7 +65,7 @@ class V1beta3_ServiceList(object):
         
         #list of services
         
-        self.items = None # list[v1beta3_Service]
+        self.items = None # list[V1beta3_Service]
         
         #kind of object, in CamelCase; cannot be updated
         

@@ -55,7 +55,7 @@ class V1beta3_PodTemplateSpec(object):
             'selfLink': 'str',
             
             
-            'spec': 'v1beta3_PodSpec',
+            'spec': 'V1beta3_PodSpec',
             
             
             'uid': 'str'
@@ -127,7 +127,7 @@ class V1beta3_PodTemplateSpec(object):
         
         #specification of the desired behavior of the pod; https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/api-conventions.md#spec-and-status
         
-        self.spec = None # v1beta3_PodSpec
+        self.spec = None # V1beta3_PodSpec
         
         #unique UUID across space and time; populated by the system; read-only
         

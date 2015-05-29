@@ -61,10 +61,10 @@ class V1beta3_PersistentVolumeClaim(object):
             'selfLink': 'str',
             
             
-            'spec': 'v1beta3_PersistentVolumeClaimSpec',
+            'spec': 'V1beta3_PersistentVolumeClaimSpec',
             
             
-            'status': 'v1beta3_PersistentVolumeClaimStatus',
+            'status': 'V1beta3_PersistentVolumeClaimStatus',
             
             
             'uid': 'str'
@@ -149,11 +149,11 @@ class V1beta3_PersistentVolumeClaim(object):
         self.selfLink = None # str
         
         
-        self.spec = None # v1beta3_PersistentVolumeClaimSpec
+        self.spec = None # V1beta3_PersistentVolumeClaimSpec
         
         #the current status of a persistent volume claim; read-only
         
-        self.status = None # v1beta3_PersistentVolumeClaimStatus
+        self.status = None # V1beta3_PersistentVolumeClaimStatus
         
         #unique UUID across space and time; populated by the system; read-only
         

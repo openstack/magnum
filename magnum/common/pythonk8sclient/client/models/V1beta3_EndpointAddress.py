@@ -31,7 +31,7 @@ class V1beta3_EndpointAddress(object):
             'IP': 'str',
             
             
-            'targetRef': 'v1beta3_ObjectReference'
+            'targetRef': 'V1beta3_ObjectReference'
             
         }
 
@@ -50,5 +50,5 @@ class V1beta3_EndpointAddress(object):
         
         #reference to object providing the endpoint
         
-        self.targetRef = None # v1beta3_ObjectReference
+        self.targetRef = None # V1beta3_ObjectReference
         

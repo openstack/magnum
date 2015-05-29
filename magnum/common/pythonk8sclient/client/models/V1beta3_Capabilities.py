@@ -28,10 +28,10 @@ class V1beta3_Capabilities(object):
         """
         self.swaggerTypes = {
             
-            'add': 'list[v1beta3_CapabilityType]',
+            'add': 'list[V1beta3_CapabilityType]',
             
             
-            'drop': 'list[v1beta3_CapabilityType]'
+            'drop': 'list[V1beta3_CapabilityType]'
             
         }
 
@@ -46,9 +46,9 @@ class V1beta3_Capabilities(object):
         
         #added capabilities
         
-        self.add = None # list[v1beta3_CapabilityType]
+        self.add = None # list[V1beta3_CapabilityType]
         
         #droped capabilities
         
-        self.drop = None # list[v1beta3_CapabilityType]
+        self.drop = None # list[V1beta3_CapabilityType]
         

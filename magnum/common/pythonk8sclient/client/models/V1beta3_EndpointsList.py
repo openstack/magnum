@@ -31,7 +31,7 @@ class V1beta3_EndpointsList(object):
             'apiVersion': 'str',
             
             
-            'items': 'list[v1beta3_Endpoints]',
+            'items': 'list[V1beta3_Endpoints]',
             
             
             'kind': 'str',
@@ -65,7 +65,7 @@ class V1beta3_EndpointsList(object):
         
         #list of endpoints
         
-        self.items = None # list[v1beta3_Endpoints]
+        self.items = None # list[V1beta3_Endpoints]
         
         #kind of object, in CamelCase; cannot be updated
         

@@ -28,13 +28,13 @@ class V1beta3_Handler(object):
         """
         self.swaggerTypes = {
             
-            'exect': 'v1beta3_ExecAction',
+            'exect': 'V1beta3_ExecAction',
             
             
-            'httpGet': 'v1beta3_HTTPGetAction',
+            'httpGet': 'V1beta3_HTTPGetAction',
             
             
-            'tcpSocket': 'v1beta3_TCPSocketAction'
+            'tcpSocket': 'V1beta3_TCPSocketAction'
             
         }
 
@@ -51,13 +51,13 @@ class V1beta3_Handler(object):
         
         #exec-based handler
         
-        self.exect = None # v1beta3_ExecAction
+        self.exect = None # V1beta3_ExecAction
         
         #HTTP-based handler
         
-        self.httpGet = None # v1beta3_HTTPGetAction
+        self.httpGet = None # V1beta3_HTTPGetAction
         
         #TCP-based handler; TCP hooks not yet supported
         
-        self.tcpSocket = None # v1beta3_TCPSocketAction
+        self.tcpSocket = None # V1beta3_TCPSocketAction
         

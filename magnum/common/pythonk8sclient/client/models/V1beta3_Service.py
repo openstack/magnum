@@ -61,10 +61,10 @@ class V1beta3_Service(object):
             'selfLink': 'str',
             
             
-            'spec': 'v1beta3_ServiceSpec',
+            'spec': 'V1beta3_ServiceSpec',
             
             
-            'status': 'v1beta3_ServiceStatus',
+            'status': 'V1beta3_ServiceStatus',
             
             
             'uid': 'str'
@@ -150,11 +150,11 @@ class V1beta3_Service(object):
         
         #specification of the desired behavior of the service; https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/api-conventions.md#spec-and-status
         
-        self.spec = None # v1beta3_ServiceSpec
+        self.spec = None # V1beta3_ServiceSpec
         
         #most recently observed status of the service; populated by the system, read-only; https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/api-conventions.md#spec-and-status
         
-        self.status = None # v1beta3_ServiceStatus
+        self.status = None # V1beta3_ServiceStatus
         
         #unique UUID across space and time; populated by the system; read-only
         

@@ -28,19 +28,19 @@ class V1beta3_PersistentVolumeSpec(object):
         """
         self.swaggerTypes = {
             
-            'accessModes': 'list[v1beta3_AccessModeType]',
+            'accessModes': 'list[V1beta3_AccessModeType]',
             
             
             'capacity': 'any',
             
             
-            'claimRef': 'v1beta3_ObjectReference',
+            'claimRef': 'V1beta3_ObjectReference',
             
             
-            'gcePersistentDisk': 'v1beta3_GCEPersistentDiskVolumeSource',
+            'gcePersistentDisk': 'V1beta3_GCEPersistentDiskVolumeSource',
             
             
-            'hostPath': 'v1beta3_HostPathVolumeSource'
+            'hostPath': 'V1beta3_HostPathVolumeSource'
             
         }
 
@@ -61,7 +61,7 @@ class V1beta3_PersistentVolumeSpec(object):
         
         #all ways the volume can be mounted
         
-        self.accessModes = None # list[v1beta3_AccessModeType]
+        self.accessModes = None # list[V1beta3_AccessModeType]
         
         #a description of the persistent volume&#39;s resources and capacity
         
@@ -69,13 +69,13 @@ class V1beta3_PersistentVolumeSpec(object):
         
         #the binding reference to a persistent volume claim
         
-        self.claimRef = None # v1beta3_ObjectReference
+        self.claimRef = None # V1beta3_ObjectReference
         
         #GCE disk resource provisioned by an admin
         
-        self.gcePersistentDisk = None # v1beta3_GCEPersistentDiskVolumeSource
+        self.gcePersistentDisk = None # V1beta3_GCEPersistentDiskVolumeSource
         
         #a HostPath provisioned by a developer or tester; for develment use only
         
-        self.hostPath = None # v1beta3_HostPathVolumeSource
+        self.hostPath = None # V1beta3_HostPathVolumeSource
         

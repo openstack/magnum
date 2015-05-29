@@ -28,10 +28,10 @@ class V1beta3_PodStatus(object):
         """
         self.swaggerTypes = {
             
-            'Condition': 'list[v1beta3_PodCondition]',
+            'Condition': 'list[V1beta3_PodCondition]',
             
             
-            'containerStatuses': 'list[v1beta3_ContainerStatus]',
+            'containerStatuses': 'list[V1beta3_ContainerStatus]',
             
             
             'hostIP': 'str',
@@ -66,11 +66,11 @@ class V1beta3_PodStatus(object):
         
         #current service state of pod
         
-        self.Condition = None # list[v1beta3_PodCondition]
+        self.Condition = None # list[V1beta3_PodCondition]
         
         #list of container statuses
         
-        self.containerStatuses = None # list[v1beta3_ContainerStatus]
+        self.containerStatuses = None # list[V1beta3_ContainerStatus]
         
         #IP address of the host to which the pod is assigned; empty if not yet scheduled
         

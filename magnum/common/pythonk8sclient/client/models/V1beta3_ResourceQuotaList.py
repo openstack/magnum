@@ -31,7 +31,7 @@ class V1beta3_ResourceQuotaList(object):
             'apiVersion': 'str',
             
             
-            'items': 'list[v1beta3_ResourceQuota]',
+            'items': 'list[V1beta3_ResourceQuota]',
             
             
             'kind': 'str',
@@ -65,7 +65,7 @@ class V1beta3_ResourceQuotaList(object):
         
         #items is a list of ResourceQuota objects
         
-        self.items = None # list[v1beta3_ResourceQuota]
+        self.items = None # list[V1beta3_ResourceQuota]
         
         #kind of object, in CamelCase; cannot be updated
         

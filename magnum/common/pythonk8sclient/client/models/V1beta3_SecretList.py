@@ -31,7 +31,7 @@ class V1beta3_SecretList(object):
             'apiVersion': 'str',
             
             
-            'items': 'list[v1beta3_Secret]',
+            'items': 'list[V1beta3_Secret]',
             
             
             'kind': 'str',
@@ -65,7 +65,7 @@ class V1beta3_SecretList(object):
         
         #items is a list of secret objects
         
-        self.items = None # list[v1beta3_Secret]
+        self.items = None # list[V1beta3_Secret]
         
         #kind of object, in CamelCase; cannot be updated
         

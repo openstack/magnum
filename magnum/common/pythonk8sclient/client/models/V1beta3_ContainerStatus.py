@@ -37,7 +37,7 @@ class V1beta3_ContainerStatus(object):
             'imageID': 'str',
             
             
-            'lastState': 'v1beta3_ContainerState',
+            'lastState': 'V1beta3_ContainerState',
             
             
             'name': 'str',
@@ -49,7 +49,7 @@ class V1beta3_ContainerStatus(object):
             'restartCount': 'int',
             
             
-            'state': 'v1beta3_ContainerState'
+            'state': 'V1beta3_ContainerState'
             
         }
 
@@ -88,7 +88,7 @@ class V1beta3_ContainerStatus(object):
         
         #details about the container&#39;s last termination condition
         
-        self.lastState = None # v1beta3_ContainerState
+        self.lastState = None # V1beta3_ContainerState
         
         #name of the container; must be a DNS_LABEL and unique within the pod; cannot be updated
         
@@ -104,5 +104,5 @@ class V1beta3_ContainerStatus(object):
         
         #details about the container&#39;s current condition
         
-        self.state = None # v1beta3_ContainerState
+        self.state = None # V1beta3_ContainerState
         
