@@ -225,10 +225,12 @@ class HeatPoller(object):
             _update_stack_outputs(self.context, stack, self.bay)
 
             self.bay.status = stack.stack_status
+            self.bay.status_reason = stack.stack_status_reason
             self.bay.save()
             raise loopingcall.LoopingCallDone()
         elif stack.stack_status != self.bay.status:
             self.bay.status = stack.stack_status
+            self.bay.status_reason = stack.stack_status_reason
             self.bay.save()
         if stack.stack_status == bay_status.CREATE_FAILED:
             LOG.error(_LE('Unable to create bay, stack_id: %(stack_id)s, '

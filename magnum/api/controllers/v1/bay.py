@@ -89,6 +89,9 @@ class Bay(base.APIBase):
     status = wtypes.text
     """Status of the bay from the heat stack"""
 
+    status_reason = wtypes.text
+    """Status reason of the bay from the heat stack"""
+
     discovery_url = wtypes.text
     """Url used for bay node discovery"""
 
@@ -135,7 +138,8 @@ class Bay(base.APIBase):
                      baymodel_id='4a96ac4b-2447-43f1-8ca6-9fd6f36d146d',
                      node_count=2,
                      bay_create_timeout=15,
-                     status="CREATED",
+                     status="CREATE_COMPLETE",
+                     status_reason="CREATE completed successfully",
                      api_address='172.24.4.3',
                      node_addresses=['172.24.4.4', '172.24.4.5'],
                      created_at=datetime.datetime.utcnow(),

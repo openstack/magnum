@@ -53,6 +53,7 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
         #        UPDATE_IN_PROGRESS|UPDATE_FAILED|UPDATED
         #        DELETE_IN_PROGRESS|DELETE_FAILED|DELETED
         'status': fields.StringField(nullable=True),
+        'status_reason': fields.StringField(nullable=True),
         'api_address': fields.StringField(nullable=True),
         'node_addresses': fields.ListOfStringsField(nullable=True),
         'node_count': fields.IntegerField(nullable=True),

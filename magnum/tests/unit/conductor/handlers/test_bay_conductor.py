@@ -613,10 +613,12 @@ class TestBayConductorWithK8s(base.TestCase):
 
         bay.status = bay_status.CREATE_IN_PROGRESS
         mock_heat_stack.stack_status = bay_status.CREATE_FAILED
+        mock_heat_stack.stack_status_reason = 'Create failed'
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
         self.assertEqual(bay.save.call_count, 1)
         self.assertEqual(bay.status, bay_status.CREATE_FAILED)
+        self.assertEqual(bay.status_reason, 'Create failed')
         self.assertEqual(poller.attempts, 1)
 
     def test_poll_done(self):
