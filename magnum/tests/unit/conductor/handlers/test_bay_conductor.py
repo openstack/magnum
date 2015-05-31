@@ -64,15 +64,16 @@ class TestBayConductorWithK8s(base.TestCase):
         self.assertEqual(baymodel, fetched_baymodel)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_extract_template_definition(self,
-                                    mock_objects_baymodel_get_by_uuid):
+    def test_extract_template_definition(
+            self,
+            mock_objects_baymodel_get_by_uuid):
         baymodel = objects.BayModel(self.context, **self.baymodel_dict)
         mock_objects_baymodel_get_by_uuid.return_value = baymodel
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
          definition) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+                                                                  bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -89,9 +90,10 @@ class TestBayConductorWithK8s(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_extract_template_definition_coreos_with_disovery(self,
-                                           mock_objects_baymodel_get_by_uuid,
-                                           reqget):
+    def test_extract_template_definition_coreos_with_disovery(
+            self,
+            mock_objects_baymodel_get_by_uuid,
+            reqget):
         baymodel_dict = self.baymodel_dict
         baymodel_dict['cluster_distro'] = 'coreos'
         cfg.CONF.set_override('coreos_discovery_token_url',
@@ -105,7 +107,7 @@ class TestBayConductorWithK8s(base.TestCase):
 
         (template_path,
          definition) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+                                                                  bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -124,9 +126,10 @@ class TestBayConductorWithK8s(base.TestCase):
 
     @patch('uuid.uuid4')
     @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_extract_template_definition_coreos_no_discoveryurl(self,
-                                           mock_objects_baymodel_get_by_uuid,
-                                           mock_uuid):
+    def test_extract_template_definition_coreos_no_discoveryurl(
+            self,
+            mock_objects_baymodel_get_by_uuid,
+            mock_uuid):
         baymodel_dict = self.baymodel_dict
         baymodel_dict['cluster_distro'] = 'coreos'
         cfg.CONF.set_override('coreos_discovery_token_url',
@@ -140,7 +143,7 @@ class TestBayConductorWithK8s(base.TestCase):
 
         (template_path,
          definition) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+                                                                  bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -158,8 +161,9 @@ class TestBayConductorWithK8s(base.TestCase):
         self.assertEqual(expected, definition)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_extract_template_definition_without_dns(self,
-                                        mock_objects_baymodel_get_by_uuid):
+    def test_extract_template_definition_without_dns(
+            self,
+            mock_objects_baymodel_get_by_uuid):
         baymodel_dict = self.baymodel_dict
         baymodel_dict['dns_nameserver'] = None
         baymodel = objects.BayModel(self.context, **baymodel_dict)
@@ -167,8 +171,9 @@ class TestBayConductorWithK8s(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+         definition) = bay_conductor._extract_template_definition(
+            self.context,
+            bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -183,8 +188,9 @@ class TestBayConductorWithK8s(base.TestCase):
         self.assertEqual(expected, definition)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_extract_template_definition_without_server_image(self,
-                                        mock_objects_baymodel_get_by_uuid):
+    def test_extract_template_definition_without_server_image(
+            self,
+            mock_objects_baymodel_get_by_uuid):
         baymodel_dict = self.baymodel_dict
         baymodel_dict['image_id'] = None
         baymodel = objects.BayModel(self.context, **baymodel_dict)
@@ -192,8 +198,9 @@ class TestBayConductorWithK8s(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+         definition) = bay_conductor._extract_template_definition(
+            self.context,
+            bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -208,8 +215,9 @@ class TestBayConductorWithK8s(base.TestCase):
         self.assertEqual(expected, definition)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_extract_template_definition_without_minion_flavor(self,
-                                        mock_objects_baymodel_get_by_uuid):
+    def test_extract_template_definition_without_minion_flavor(
+            self,
+            mock_objects_baymodel_get_by_uuid):
         baymodel_dict = self.baymodel_dict
         baymodel_dict['flavor_id'] = None
         baymodel = objects.BayModel(self.context, **baymodel_dict)
@@ -217,8 +225,9 @@ class TestBayConductorWithK8s(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+         definition) = bay_conductor._extract_template_definition(
+            self.context,
+            bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -233,8 +242,9 @@ class TestBayConductorWithK8s(base.TestCase):
         self.assertEqual(expected, definition)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_extract_template_definition_without_docker_volume_size(self,
-                                        mock_objects_baymodel_get_by_uuid):
+    def test_extract_template_definition_without_docker_volume_size(
+            self,
+            mock_objects_baymodel_get_by_uuid):
         baymodel_dict = self.baymodel_dict
         baymodel_dict['docker_volume_size'] = None
         baymodel = objects.BayModel(self.context, **baymodel_dict)
@@ -243,7 +253,7 @@ class TestBayConductorWithK8s(base.TestCase):
 
         (template_path,
          definition) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+                                                                  bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -258,8 +268,9 @@ class TestBayConductorWithK8s(base.TestCase):
         self.assertEqual(expected, definition)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_extract_template_definition_without_fixed_network(self,
-                                        mock_objects_baymodel_get_by_uuid):
+    def test_extract_template_definition_without_fixed_network(
+            self,
+            mock_objects_baymodel_get_by_uuid):
         baymodel_dict = self.baymodel_dict
         baymodel_dict['fixed_network'] = None
         baymodel = objects.BayModel(self.context, **baymodel_dict)
@@ -268,7 +279,7 @@ class TestBayConductorWithK8s(base.TestCase):
 
         (template_path,
          definition) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+                                                                  bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -283,8 +294,9 @@ class TestBayConductorWithK8s(base.TestCase):
         self.assertEqual(expected, definition)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_extract_template_definition_without_master_flavor(self,
-                                        mock_objects_baymodel_get_by_uuid):
+    def test_extract_template_definition_without_master_flavor(
+            self,
+            mock_objects_baymodel_get_by_uuid):
         baymodel_dict = self.baymodel_dict
         baymodel_dict['master_flavor_id'] = None
         baymodel = objects.BayModel(self.context, **baymodel_dict)
@@ -292,8 +304,9 @@ class TestBayConductorWithK8s(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+         definition) = bay_conductor._extract_template_definition(
+            self.context,
+            bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -308,8 +321,9 @@ class TestBayConductorWithK8s(base.TestCase):
         self.assertEqual(expected, definition)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_extract_template_definition_without_ssh_authorized_key(self,
-                                        mock_objects_baymodel_get_by_uuid):
+    def test_extract_template_definition_without_ssh_authorized_key(
+            self,
+            mock_objects_baymodel_get_by_uuid):
         baymodel_dict = self.baymodel_dict
         baymodel_dict['cluster_distro'] = 'coreos'
         baymodel_dict['ssh_authorized_key'] = None
@@ -319,7 +333,7 @@ class TestBayConductorWithK8s(base.TestCase):
 
         (template_path,
          definition) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+                                                                  bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -337,8 +351,9 @@ class TestBayConductorWithK8s(base.TestCase):
         self.assertEqual(expected, definition)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_extract_template_definition_without_apiserver_port(self,
-                                        mock_objects_baymodel_get_by_uuid):
+    def test_extract_template_definition_without_apiserver_port(
+            self,
+            mock_objects_baymodel_get_by_uuid):
         baymodel_dict = self.baymodel_dict
         baymodel_dict['apiserver_port'] = None
         baymodel = objects.BayModel(self.context, **baymodel_dict)
@@ -346,8 +361,9 @@ class TestBayConductorWithK8s(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+         definition) = bay_conductor._extract_template_definition(
+            self.context,
+            bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -363,8 +379,9 @@ class TestBayConductorWithK8s(base.TestCase):
         self.assertEqual(expected, definition)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_extract_template_definition_without_node_count(self,
-                                        mock_objects_baymodel_get_by_uuid):
+    def test_extract_template_definition_without_node_count(
+            self,
+            mock_objects_baymodel_get_by_uuid):
         bay_dict = self.bay_dict
         bay_dict['node_count'] = None
         baymodel = objects.BayModel(self.context, **self.baymodel_dict)
@@ -373,7 +390,7 @@ class TestBayConductorWithK8s(base.TestCase):
 
         (template_path,
          definition) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+                                                                  bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -397,16 +414,12 @@ class TestBayConductorWithK8s(base.TestCase):
         expected_node_addresses = ['ex_minion', 'address']
 
         outputs = [
-          {
-             "output_value": expected_node_addresses,
-             "description": "No description given",
-             "output_key": "kube_minions_external"
-           },
-           {
-             "output_value": expected_api_address,
-             "description": "No description given",
-             "output_key": "kube_master"
-           }
+          {"output_value": expected_node_addresses,
+           "description": "No description given",
+           "output_key": "kube_minions_external"},
+          {"output_value": expected_api_address,
+           "description": "No description given",
+           "output_key": "kube_master"}
         ]
         mock_stack = mock.MagicMock()
         mock_stack.outputs = outputs
@@ -446,7 +459,7 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_bay.name = dummy_bay_name
 
         bay_conductor._create_stack(self.context, mock_osc,
-                                   mock_bay, expected_timeout)
+                                    mock_bay, expected_timeout)
 
         expected_args = {
             'stack_name': expected_stack_name,
@@ -461,10 +474,11 @@ class TestBayConductorWithK8s(base.TestCase):
     @patch('heatclient.common.template_utils.get_template_contents')
     @patch('magnum.conductor.handlers.bay_conductor'
            '._extract_template_definition')
-    def test_create_stack_no_timeout_specified(self,
-                          mock_extract_template_definition,
-                          mock_get_template_contents,
-                          mock_generate_id):
+    def test_create_stack_no_timeout_specified(
+            self,
+            mock_extract_template_definition,
+            mock_get_template_contents,
+            mock_generate_id):
 
         mock_generate_id.return_value = 'xx-xx-xx-xx'
         expected_stack_name = 'expected_stack_name-xx-xx-xx-xx'
@@ -486,7 +500,7 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_bay.name = dummy_bay_name
 
         bay_conductor._create_stack(self.context, mock_osc,
-                                   mock_bay, None)
+                                    mock_bay, None)
 
         expected_args = {
             'stack_name': expected_stack_name,
@@ -501,10 +515,11 @@ class TestBayConductorWithK8s(base.TestCase):
     @patch('heatclient.common.template_utils.get_template_contents')
     @patch('magnum.conductor.handlers.bay_conductor'
            '._extract_template_definition')
-    def test_create_stack_timeout_is_zero(self,
-                          mock_extract_template_definition,
-                          mock_get_template_contents,
-                          mock_generate_id):
+    def test_create_stack_timeout_is_zero(
+            self,
+            mock_extract_template_definition,
+            mock_get_template_contents,
+            mock_generate_id):
 
         mock_generate_id.return_value = 'xx-xx-xx-xx'
         expected_stack_name = 'expected_stack_name-xx-xx-xx-xx'
@@ -527,7 +542,7 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_bay.name = dummy_bay_name
 
         bay_conductor._create_stack(self.context, mock_osc,
-                                   mock_bay, bay_timeout)
+                                    mock_bay, bay_timeout)
 
         expected_args = {
             'stack_name': expected_stack_name,
@@ -721,8 +736,9 @@ class TestHandler(db_base.DbTestCase):
     @patch('magnum.conductor.handlers.bay_conductor.Handler._poll_and_check')
     @patch('magnum.conductor.handlers.bay_conductor._update_stack')
     @patch('magnum.common.clients.OpenStackClients')
-    def test_update_node_count_success(self, mock_openstack_client_class,
-                               mock_update_stack, mock_poll_and_check):
+    def test_update_node_count_success(
+            self, mock_openstack_client_class,
+            mock_update_stack, mock_poll_and_check):
         mock_heat_stack = mock.MagicMock()
         mock_heat_stack.stack_status = bay_status.CREATE_COMPLETE
         mock_heat_client = mock.MagicMock()
@@ -742,8 +758,9 @@ class TestHandler(db_base.DbTestCase):
     @patch('magnum.conductor.handlers.bay_conductor.Handler._poll_and_check')
     @patch('magnum.conductor.handlers.bay_conductor._update_stack')
     @patch('magnum.common.clients.OpenStackClients')
-    def test_update_node_count_failure(self, mock_openstack_client_class,
-                               mock_update_stack, mock_poll_and_check):
+    def test_update_node_count_failure(
+            self, mock_openstack_client_class,
+            mock_update_stack, mock_poll_and_check):
         mock_heat_stack = mock.MagicMock()
         mock_heat_stack.stack_status = bay_status.CREATE_FAILED
         mock_heat_client = mock.MagicMock()
@@ -804,15 +821,16 @@ class TestBayConductorWithSwarm(base.TestCase):
         }
 
     @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_extract_template_definition_all_values(self,
-                                    mock_objects_baymodel_get_by_uuid):
+    def test_extract_template_definition_all_values(
+            self,
+            mock_objects_baymodel_get_by_uuid):
         baymodel = objects.BayModel(self.context, **self.baymodel_dict)
         mock_objects_baymodel_get_by_uuid.return_value = baymodel
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
          definition) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+                                                                  bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -827,8 +845,9 @@ class TestBayConductorWithSwarm(base.TestCase):
         self.assertEqual(expected, definition)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_extract_template_definition_only_required(self,
-                                    mock_objects_baymodel_get_by_uuid):
+    def test_extract_template_definition_only_required(
+            self,
+            mock_objects_baymodel_get_by_uuid):
         cfg.CONF.set_override('public_swarm_discovery', False, group='bay')
         cfg.CONF.set_override('swarm_discovery_url_format',
                               'test_discovery', group='bay')
@@ -845,7 +864,7 @@ class TestBayConductorWithSwarm(base.TestCase):
 
         (template_path,
          definition) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+                                                                  bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',

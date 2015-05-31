@@ -80,9 +80,10 @@ class TestJsonPatchType(base.FunctionalTest):
         self.app = webtest.TestApp(MyRoot(['restjson']).wsgiapp())
 
     def _patch_json(self, params, expect_errors=False):
-        return self.app.patch_json('/test', params=params,
-                              headers={'Accept': 'application/json'},
-                              expect_errors=expect_errors)
+        return self.app.patch_json(
+            '/test', params=params,
+            headers={'Accept': 'application/json'},
+            expect_errors=expect_errors)
 
     def test_valid_patches(self):
         valid_patches = [{'path': '/extra/foo', 'op': 'remove'},

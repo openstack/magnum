@@ -29,40 +29,41 @@ class TestRootController(tests.FunctionalTest):
         self.assertEqual(expected, response.json)
 
     def test_v1_controller(self):
-        expected = {u'media_types':
+        expected = {
+            u'media_types':
             [{u'base': u'application/json',
-            u'type': u'application/vnd.openstack.magnum.v1+json'}],
+              u'type': u'application/vnd.openstack.magnum.v1+json'}],
             u'links': [{u'href': u'http://localhost/v1/',
-            u'rel': u'self'},
-            {u'href':
-             u'http://docs.openstack.org/developer'
-              '/magnum/dev/api-spec-v1.html',
-            u'type': u'text/html', u'rel': u'describedby'}],
+                        u'rel': u'self'},
+                       {u'href':
+                        u'http://docs.openstack.org/developer'
+                        '/magnum/dev/api-spec-v1.html',
+                        u'type': u'text/html', u'rel': u'describedby'}],
             u'bays': [{u'href': u'http://localhost/v1/bays/',
-                u'rel': u'self'},
-                {u'href': u'http://localhost/bays/',
-                u'rel': u'bookmark'}],
+                       u'rel': u'self'},
+                      {u'href': u'http://localhost/bays/',
+                       u'rel': u'bookmark'}],
             u'services': [{u'href': u'http://localhost/v1/services/',
-                u'rel': u'self'},
-                {u'href': u'http://localhost/services/',
-                u'rel': u'bookmark'}],
+                           u'rel': u'self'},
+                          {u'href': u'http://localhost/services/',
+                           u'rel': u'bookmark'}],
             u'baymodels': [{u'href': u'http://localhost/v1/baymodels/',
-                u'rel': u'self'},
-                {u'href': u'http://localhost/bays/',
-                u'rel': u'bookmark'}],
+                            u'rel': u'self'},
+                           {u'href': u'http://localhost/bays/',
+                            u'rel': u'bookmark'}],
             u'pods': [{u'href': u'http://localhost/v1/pods/',
-                u'rel': u'self'},
-                {u'href': u'http://localhost/pods/',
-                u'rel': u'bookmark'}],
+                       u'rel': u'self'},
+                      {u'href': u'http://localhost/pods/',
+                       u'rel': u'bookmark'}],
             u'rcs': [{u'href': u'http://localhost/v1/rcs/',
-                u'rel': u'self'},
-                {u'href': u'http://localhost/rcs/',
-                u'rel': u'bookmark'}],
+                      u'rel': u'self'},
+                     {u'href': u'http://localhost/rcs/',
+                      u'rel': u'bookmark'}],
             u'id': u'v1',
             u'containers': [{u'href': u'http://localhost/v1/containers/',
-                u'rel': u'self'},
-                {u'href': u'http://localhost/containers/',
-                u'rel': u'bookmark'}]}
+                             u'rel': u'self'},
+                            {u'href': u'http://localhost/containers/',
+                             u'rel': u'bookmark'}]}
 
         response = self.app.get('/v1/')
         self.assertEqual(expected, response.json)

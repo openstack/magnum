@@ -61,7 +61,8 @@ class BayLockTest(base.TestCase):
 
             mock_object_create.assert_called_once_with(self.bay.uuid,
                                                        self.conductor_id)
-            mock_object_steal.assert_called_once_with(self.bay.uuid,
+            mock_object_steal.assert_called_once_with(
+                self.bay.uuid,
                 'fake-conductor-id', self.conductor_id)
 
     @patch('magnum.objects.BayLock.create', return_value='fake-conductor-id')
@@ -85,7 +86,8 @@ class BayLockTest(base.TestCase):
 
             mock_object_create.assert_called_once_with(self.bay.uuid,
                                                        self.conductor_id)
-            mock_object_steal.assert_called_once_with(self.bay.uuid,
+            mock_object_steal.assert_called_once_with(
+                self.bay.uuid,
                 'fake-conductor-id', self.conductor_id)
 
     @patch('magnum.objects.BayLock.steal', side_effect=[True, None])

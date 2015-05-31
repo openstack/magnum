@@ -105,7 +105,7 @@ class TestBayObject(base.DbTestCase):
 
                 mock_get_bay.assert_called_once_with(self.context, uuid)
                 mock_update_bay.assert_called_once_with(
-                        uuid, {'node_count': 10})
+                    uuid, {'node_count': 10})
                 self.assertEqual(self.context, bay._context)
 
     def test_refresh(self):

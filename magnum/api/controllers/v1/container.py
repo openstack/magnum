@@ -103,12 +103,13 @@ class Container(base.APIBase):
             container.unset_fields_except(['uuid', 'name', 'bay_uuid',
                                            'image_id', 'command', 'status'])
 
-        container.links = [link.Link.make_link('self', url,
-                                          'containers', container.uuid),
-                      link.Link.make_link('bookmark', url,
-                                          'containers', container.uuid,
-                                          bookmark=True)
-                     ]
+        container.links = [link.Link.make_link(
+            'self', url,
+            'containers', container.uuid),
+            link.Link.make_link(
+                'bookmark', url,
+                'containers', container.uuid,
+                bookmark=True)]
         return container
 
     @classmethod
@@ -144,7 +145,7 @@ class ContainerCollection(collection.Collection):
                            expand=False, **kwargs):
         collection = ContainerCollection()
         collection.containers = [Container.convert_with_links(p, expand)
-                            for p in rpc_containers]
+                                 for p in rpc_containers]
         collection.next = collection.get_next(limit, url=url, **kwargs)
         return collection
 
@@ -230,7 +231,7 @@ class LogsController(object):
         container_uuid = api_utils.get_rpc_resource('Container',
                                                     container_ident).uuid
         LOG.debug('Calling conductor.container_logs with %s' %
-        container_uuid)
+                  container_uuid)
         return pecan.request.rpcapi.container_logs(container_uuid)
 
 
@@ -270,8 +271,8 @@ class ContainersController(rest.RestController):
     }
 
     def _get_containers_collection(self, marker, limit,
-                              sort_key, sort_dir, expand=False,
-                              resource_url=None):
+                                   sort_key, sort_dir, expand=False,
+                                   resource_url=None):
 
         limit = api_utils.validate_limit(limit)
         sort_dir = api_utils.validate_sort_dir(sort_dir)
@@ -279,19 +280,19 @@ class ContainersController(rest.RestController):
         marker_obj = None
         if marker:
             marker_obj = objects.Container.get_by_uuid(pecan.request.context,
-                                                  marker)
+                                                       marker)
 
         containers = objects.Container.list(pecan.request.context, limit,
                                             marker_obj, sort_key=sort_key,
                                             sort_dir=sort_dir)
         containers = [pecan.request.rpcapi.container_show(c.uuid)
-                          for c in containers]
+                      for c in containers]
 
         return ContainerCollection.convert_with_links(containers, limit,
-                                                url=resource_url,
-                                                expand=expand,
-                                                sort_key=sort_key,
-                                                sort_dir=sort_dir)
+                                                      url=resource_url,
+                                                      expand=expand,
+                                                      sort_key=sort_key,
+                                                      sort_dir=sort_dir)
 
     @wsme_pecan.wsexpose(ContainerCollection, types.uuid,
                          types.uuid, int, wtypes.text, wtypes.text)
@@ -310,7 +311,7 @@ class ContainersController(rest.RestController):
     @wsme_pecan.wsexpose(ContainerCollection, types.uuid,
                          types.uuid, int, wtypes.text, wtypes.text)
     def detail(self, container_uuid=None, marker=None, limit=None,
-                sort_key='id', sort_dir='asc'):
+               sort_key='id', sort_dir='asc'):
         """Retrieve a list of containers with detail.
 
         :param container_uuid: UUID of a container, to get only containers
@@ -327,8 +328,8 @@ class ContainersController(rest.RestController):
         expand = True
         resource_url = '/'.join(['containers', 'detail'])
         return self._get_containers_collection(marker, limit,
-                                         sort_key, sort_dir, expand,
-                                         resource_url)
+                                               sort_key, sort_dir, expand,
+                                               resource_url)
 
     @wsme_pecan.wsexpose(Container, types.uuid_or_name)
     def get_one(self, container_ident):
@@ -361,8 +362,8 @@ class ContainersController(rest.RestController):
         new_container = objects.Container(context, **container_dict)
         new_container.create()
         res_container = pecan.request.rpcapi.container_create(
-                                    new_container.name, new_container.uuid,
-                                    new_container)
+            new_container.name, new_container.uuid,
+            new_container)
 
         # Set the HTTP Location Header
         pecan.response.location = link.build_url('containers',

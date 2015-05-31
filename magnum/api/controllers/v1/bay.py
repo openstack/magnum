@@ -113,15 +113,14 @@ class Bay(base.APIBase):
     def _convert_with_links(bay, url, expand=True):
         if not expand:
             bay.unset_fields_except(['uuid', 'name', 'baymodel_id',
-                                    'node_count', 'status',
-                                    'bay_create_timeout'])
+                                     'node_count', 'status',
+                                     'bay_create_timeout'])
 
         bay.links = [link.Link.make_link('self', url,
-                                          'bays', bay.uuid),
-                      link.Link.make_link('bookmark', url,
-                                          'bays', bay.uuid,
-                                          bookmark=True)
-                     ]
+                                         'bays', bay.uuid),
+                     link.Link.make_link('bookmark', url,
+                                         'bays', bay.uuid,
+                                         bookmark=True)]
         return bay
 
     @classmethod
@@ -157,7 +156,7 @@ class BayCollection(collection.Collection):
     def convert_with_links(rpc_bays, limit, url=None, expand=False, **kwargs):
         collection = BayCollection()
         collection.bays = [Bay.convert_with_links(p, expand)
-                            for p in rpc_bays]
+                           for p in rpc_bays]
         collection.next = collection.get_next(limit, url=url, **kwargs)
         return collection
 
@@ -182,8 +181,8 @@ class BaysController(rest.RestController):
     }
 
     def _get_bays_collection(self, marker, limit,
-                              sort_key, sort_dir, expand=False,
-                              resource_url=None):
+                             sort_key, sort_dir, expand=False,
+                             resource_url=None):
 
         limit = api_utils.validate_limit(limit)
         sort_dir = api_utils.validate_sort_dir(sort_dir)
@@ -191,11 +190,12 @@ class BaysController(rest.RestController):
         marker_obj = None
         if marker:
             marker_obj = objects.Bay.get_by_uuid(pecan.request.context,
-                                                  marker)
+                                                 marker)
 
-        bays = pecan.request.rpcapi.bay_list(pecan.request.context, limit,
-                                         marker_obj, sort_key=sort_key,
-                                         sort_dir=sort_dir)
+        bays = pecan.request.rpcapi.bay_list(
+            pecan.request.context, limit,
+            marker_obj, sort_key=sort_key,
+            sort_dir=sort_dir)
 
         return BayCollection.convert_with_links(bays, limit,
                                                 url=resource_url,
@@ -220,7 +220,7 @@ class BaysController(rest.RestController):
     @wsme_pecan.wsexpose(BayCollection, types.uuid,
                          types.uuid, int, wtypes.text, wtypes.text)
     def detail(self, bay_uuid=None, marker=None, limit=None,
-                sort_key='id', sort_dir='asc'):
+               sort_key='id', sort_dir='asc'):
         """Retrieve a list of bays with detail.
 
         :param bay_uuid: UUID of a bay, to get only bays for that bay.

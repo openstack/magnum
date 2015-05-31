@@ -28,5 +28,5 @@ import sqlalchemy as sa
 
 def upgrade():
     op.add_column('container',
-               sa.Column('status', sa.String(length=20),
-               nullable=True))
+                  sa.Column('status', sa.String(length=20),
+                            nullable=True))

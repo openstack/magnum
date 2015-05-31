@@ -95,13 +95,9 @@ class Service(v1_base.K8sResourceBase):
                      labels={'label1': 'foo'},
                      selector={'label1': 'foo'},
                      ip='172.17.2.2',
-                     ports=[
-                                 {
-                                 "port": 88,
-                                 "targetPort": 6379,
-                                 "protocol": "TCP"
-                                 }
-                             ],
+                     ports=[{"port": 88,
+                             "targetPort": 6379,
+                             "protocol": "TCP"}],
                      manifest_url='file:///tmp/rc.yaml',
                      manifest='''{
                          "metadata": {
@@ -201,10 +197,10 @@ class ServicesController(rest.RestController):
                                                      marker)
 
         services = pecan.request.rpcapi.service_list(pecan.request.context,
-                                                 limit,
-                                                 marker_obj,
-                                                 sort_key=sort_key,
-                                                 sort_dir=sort_dir)
+                                                     limit,
+                                                     marker_obj,
+                                                     sort_key=sort_key,
+                                                     sort_dir=sort_dir)
 
         return ServiceCollection.convert_with_links(services, limit,
                                                     url=resource_url,

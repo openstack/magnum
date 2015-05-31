@@ -30,10 +30,10 @@ from magnum.i18n import _
 
 
 bay_heat_opts = [
-   cfg.StrOpt('cluster_coe',
-              default='kubernetes',
-              help=_('Container Orchestration Environments are '
-                     'kubernetes or swarm. ')),
+    cfg.StrOpt('cluster_coe',
+               default='kubernetes',
+               help=_('Container Orchestration Environments are '
+                      'kubernetes or swarm.'))
 ]
 
 cfg.CONF.register_opts(bay_heat_opts, group='bay_heat')
@@ -46,7 +46,6 @@ def upgrade():
     baymodel = sa.sql.table('baymodel',
                             sa.sql.column('coe', sa.String(length=255)))
     op.execute(
-        baymodel.update().values({'coe':
-                                      op.inline_literal(
-                                          cfg.CONF.bay_heat.cluster_coe)})
+        baymodel.update().values({
+            'coe': op.inline_literal(cfg.CONF.bay_heat.cluster_coe)})
     )

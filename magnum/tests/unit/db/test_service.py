@@ -75,7 +75,8 @@ class DbServiceTestCase(base.DbTestCase):
     def test_get_service_list(self):
         uuids = [self.service.uuid]
         for i in range(1, 6):
-            service = utils.create_test_service(bay_uuid=self.bay.uuid,
+            service = utils.create_test_service(
+                bay_uuid=self.bay.uuid,
                 uuid=magnum_utils.generate_uuid())
             uuids.append(six.text_type(service.uuid))
         res = self.dbapi.get_service_list(self.context)
@@ -88,11 +89,13 @@ class DbServiceTestCase(base.DbTestCase):
         self.dbapi.create_bay(bay1)
         self.dbapi.create_bay(bay2)
 
-        service1 = utils.create_test_service(name='service-one',
+        service1 = utils.create_test_service(
+            name='service-one',
             uuid=magnum_utils.generate_uuid(),
             bay_uuid=bay1['uuid'],
             ports=[{'port': 8000}])
-        service2 = utils.create_test_service(name='service-two',
+        service2 = utils.create_test_service(
+            name='service-two',
             uuid=magnum_utils.generate_uuid(),
             bay_uuid=bay2['uuid'],
             ports=[{'port': 8001}])

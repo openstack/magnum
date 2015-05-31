@@ -123,7 +123,7 @@ class KeystoneClientV3(object):
             kwargs['project_id'] = self.context.project_id
         else:
             LOG.error(_LE("Keystone v3 API connection failed, no password "
-                        "trust or auth_token!"))
+                          "trust or auth_token!"))
             raise exception.AuthorizationFailure()
         client = kc_v3.Client(**kwargs)
         if 'auth_ref' not in kwargs:

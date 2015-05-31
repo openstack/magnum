@@ -72,9 +72,11 @@ class DbContainerTestCase(base.DbTestCase):
         self.assertEqual(sorted(uuids), sorted(res_uuids))
 
     def test_get_container_list_with_filters(self):
-        container1 = utils.create_test_container(name='container-one',
+        container1 = utils.create_test_container(
+            name='container-one',
             uuid=magnum_utils.generate_uuid())
-        container2 = utils.create_test_container(name='container-two',
+        container2 = utils.create_test_container(
+            name='container-two',
             uuid=magnum_utils.generate_uuid())
 
         res = self.dbapi.get_container_list(self.context,

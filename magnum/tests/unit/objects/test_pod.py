@@ -100,7 +100,7 @@ class TestPodObject(base.DbTestCase):
 
                 mock_get_pod.assert_called_once_with(self.context, uuid)
                 mock_update_pod.assert_called_once_with(
-                        uuid, {'desc': 'test-pod'})
+                    uuid, {'desc': 'test-pod'})
                 self.assertEqual(self.context, pod._context)
 
     def test_refresh(self):

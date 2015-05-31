@@ -81,8 +81,9 @@ class TestListBay(api_base.FunctionalTest):
         self.assertIn('node_addresses', response)
 
     def test_get_one_by_name_not_found(self):
-        response = self.get_json('/bays/not_found',
-                                  expect_errors=True)
+        response = self.get_json(
+            '/bays/not_found',
+            expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
@@ -188,7 +189,7 @@ class TestPatch(api_base.FunctionalTest):
         response = self.get_json('/bays/%s' % self.bay.uuid)
         self.assertEqual(name, response['name'])
         return_updated_at = timeutils.parse_isotime(
-                            response['updated_at']).replace(tzinfo=None)
+            response['updated_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_updated_at)
         # Assert nothing else was changed
         self.assertEqual(self.bay.uuid, response['uuid'])
@@ -210,7 +211,7 @@ class TestPatch(api_base.FunctionalTest):
         response = self.get_json('/bays/%s' % self.bay.uuid)
         self.assertEqual(name, response['name'])
         return_updated_at = timeutils.parse_isotime(
-                            response['updated_at']).replace(tzinfo=None)
+            response['updated_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_updated_at)
         # Assert nothing else was changed
         self.assertEqual(self.bay.uuid, response['uuid'])
@@ -289,8 +290,9 @@ class TestPatch(api_base.FunctionalTest):
 
     def test_add_ok(self):
         name = 'bay_example_B'
-        response = self.patch_json('/bays/%s' % self.bay.uuid,
-                            [{'path': '/name', 'value': name, 'op': 'add'}])
+        response = self.patch_json(
+            '/bays/%s' % self.bay.uuid,
+            [{'path': '/name', 'value': name, 'op': 'add'}])
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(200, response.status_int)
 
@@ -326,9 +328,10 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(self.bay.baymodel_id, response['baymodel_id'])
 
     def test_add_non_existent_property(self):
-        response = self.patch_json('/bays/%s' % self.bay.uuid,
-                            [{'path': '/foo', 'value': 'bar', 'op': 'add'}],
-                            expect_errors=True)
+        response = self.patch_json(
+            '/bays/%s' % self.bay.uuid,
+            [{'path': '/foo', 'value': 'bar', 'op': 'add'}],
+            expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['error_message'])
@@ -366,9 +369,10 @@ class TestPatch(api_base.FunctionalTest):
         self.assertTrue(response.json['error_message'])
 
     def test_remove_non_existent_property(self):
-        response = self.patch_json('/bays/%s' % self.bay.uuid,
-                             [{'path': '/non-existent', 'op': 'remove'}],
-                             expect_errors=True)
+        response = self.patch_json(
+            '/bays/%s' % self.bay.uuid,
+            [{'path': '/non-existent', 'op': 'remove'}],
+            expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_code)
         self.assertTrue(response.json['error_message'])
@@ -405,7 +409,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(bdict['uuid'], response.json['uuid'])
         self.assertNotIn('updated_at', response.json.keys)
         return_created_at = timeutils.parse_isotime(
-                            response.json['created_at']).replace(tzinfo=None)
+            response.json['created_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_created_at)
 
     def test_create_bay_doesnt_contain_id(self):

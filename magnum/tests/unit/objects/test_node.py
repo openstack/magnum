@@ -91,7 +91,7 @@ class TestNodeObject(base.DbTestCase):
 
                 mock_get_node.assert_called_once_with(self.context, uuid)
                 mock_update_node.assert_called_once_with(
-                        uuid, {'type': 'bare'})
+                    uuid, {'type': 'bare'})
                 self.assertEqual(self.context, node._context)
 
     def test_refresh(self):

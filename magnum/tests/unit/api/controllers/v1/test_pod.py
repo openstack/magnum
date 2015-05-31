@@ -169,7 +169,7 @@ class TestPatch(api_base.FunctionalTest):
         response = self.get_json('/pods/%s' % self.pod.uuid)
         self.assertEqual(new_desc, response['desc'])
         return_updated_at = timeutils.parse_isotime(
-                            response['updated_at']).replace(tzinfo=None)
+            response['updated_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_updated_at)
 
     def test_replace_bay_uuid(self):
@@ -194,9 +194,10 @@ class TestPatch(api_base.FunctionalTest):
         self.assertTrue(response.json['error_message'])
 
     def test_replace_internal_field(self):
-        response = self.patch_json('/pods/%s' % self.pod.uuid,
-                       [{'path': '/labels', 'value': {}, 'op': 'replace'}],
-                       expect_errors=True)
+        response = self.patch_json(
+            '/pods/%s' % self.pod.uuid,
+            [{'path': '/labels', 'value': {}, 'op': 'replace'}],
+            expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_code)
         self.assertTrue(response.json['error_message'])
@@ -225,8 +226,9 @@ class TestPatch(api_base.FunctionalTest):
 
     def test_add_ok(self):
         new_desc = 'pod_example_B_desc'
-        response = self.patch_json('/pods/%s' % self.pod.uuid,
-                       [{'path': '/desc', 'value': new_desc, 'op': 'add'}])
+        response = self.patch_json(
+            '/pods/%s' % self.pod.uuid,
+            [{'path': '/desc', 'value': new_desc, 'op': 'add'}])
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(200, response.status_int)
 
@@ -261,9 +263,10 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(new_desc, response['desc'])
 
     def test_add_non_existent_property(self):
-        response = self.patch_json('/pods/%s' % self.pod.uuid,
-                            [{'path': '/foo', 'value': 'bar', 'op': 'add'}],
-                            expect_errors=True)
+        response = self.patch_json(
+            '/pods/%s' % self.pod.uuid,
+            [{'path': '/foo', 'value': 'bar', 'op': 'add'}],
+            expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['error_message'])
@@ -305,9 +308,10 @@ class TestPatch(api_base.FunctionalTest):
         self.assertTrue(response.json['error_message'])
 
     def test_remove_non_existent_property(self):
-        response = self.patch_json('/pods/%s' % self.pod.uuid,
-                             [{'path': '/non-existent', 'op': 'remove'}],
-                             expect_errors=True)
+        response = self.patch_json(
+            '/pods/%s' % self.pod.uuid,
+            [{'path': '/non-existent', 'op': 'remove'}],
+            expect_errors=True)
         self.assertEqual(400, response.status_code)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
@@ -325,7 +329,7 @@ class TestPatch(api_base.FunctionalTest):
         response = self.get_json('/pods/%s' % self.pod.uuid)
         self.assertEqual('pod1', response['name'])
         return_updated_at = timeutils.parse_isotime(
-                            response['updated_at']).replace(tzinfo=None)
+            response['updated_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_updated_at)
 
     @mock.patch('oslo_utils.timeutils.utcnow')
@@ -388,7 +392,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(pdict['uuid'], response.json['uuid'])
         self.assertNotIn('updated_at', response.json.keys)
         return_created_at = timeutils.parse_isotime(
-                            response.json['created_at']).replace(tzinfo=None)
+            response.json['created_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_created_at)
 
     def test_create_pod_doesnt_contain_id(self):

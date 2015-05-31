@@ -91,11 +91,13 @@ class DbPodTestCase(base.DbTestCase):
         self.dbapi.create_bay(bay1)
         self.dbapi.create_bay(bay2)
 
-        pod1 = utils.create_test_pod(name='pod-one',
+        pod1 = utils.create_test_pod(
+            name='pod-one',
             uuid=magnum_utils.generate_uuid(),
             bay_uuid=bay1['uuid'],
             status='status1')
-        pod2 = utils.create_test_pod(name='pod-two',
+        pod2 = utils.create_test_pod(
+            name='pod-two',
             uuid=magnum_utils.generate_uuid(),
             bay_uuid=bay2['uuid'],
             status='status2')

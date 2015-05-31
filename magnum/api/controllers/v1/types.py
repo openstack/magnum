@@ -146,8 +146,8 @@ class MultiType(wtypes.UserType):
                 pass
         else:
             raise ValueError(
-                     _("Wrong type. Expected '%(type)s', got '%(value)s'")
-                     % {'type': self.types, 'value': type(value)})
+                _("Wrong type. Expected '%(type)s', got '%(value)s'")
+                % {'type': self.types, 'value': type(value)})
 
 
 macaddress = MacAddressType()

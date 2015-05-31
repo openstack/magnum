@@ -75,7 +75,8 @@ class DbRCTestCase(base.DbTestCase):
     def test_get_rc_list(self):
         uuids = [self.rc.uuid]
         for i in range(1, 6):
-            rc = utils.create_test_rc(bay_uuid=self.bay.uuid,
+            rc = utils.create_test_rc(
+                bay_uuid=self.bay.uuid,
                 uuid=magnum_utils.generate_uuid())
             uuids.append(six.text_type(rc.uuid))
         rc = self.dbapi.get_rc_list(self.context)

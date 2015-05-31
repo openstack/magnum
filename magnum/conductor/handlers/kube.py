@@ -32,8 +32,8 @@ LOG = logging.getLogger(__name__)
 kubernetes_opts = [
     cfg.StrOpt('k8s_protocol',
                default='http',
-               help=_('Default protocol of k8s master endpoint'
-               ' (http or https).')),
+               help=_('Default protocol of k8s master endpoint '
+                      '(http or https).')),
     cfg.IntOpt('k8s_port',
                default=8080,
                help=_('Default port of the k8s master endpoint.')),

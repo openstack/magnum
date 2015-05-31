@@ -42,10 +42,14 @@ class DbBaymodelTestCase(base.DbTestCase):
         self.assertEqual(sorted(uuids), sorted(res_uuids))
 
     def test_get_baymodel_list_with_filters(self):
-        bm1 = self._create_test_baymodel(id=1, name='bm-one',
+        bm1 = self._create_test_baymodel(
+            id=1,
+            name='bm-one',
             uuid=magnum_utils.generate_uuid(),
             image_id='image1')
-        bm2 = self._create_test_baymodel(id=2, name='bm-two',
+        bm2 = self._create_test_baymodel(
+            id=2,
+            name='bm-two',
             uuid=magnum_utils.generate_uuid(),
             image_id='image2')
 
@@ -86,10 +90,12 @@ class DbBaymodelTestCase(base.DbTestCase):
         self.assertEqual(bm['uuid'], res.uuid)
 
     def test_get_baymodel_by_name_multiple_baymodel(self):
-        self._create_test_baymodel(id=1, name='bm',
+        self._create_test_baymodel(
+            id=1, name='bm',
             uuid=magnum_utils.generate_uuid(),
             image_id='image1')
-        self._create_test_baymodel(id=2, name='bm',
+        self._create_test_baymodel(
+            id=2, name='bm',
             uuid=magnum_utils.generate_uuid(),
             image_id='image2')
         self.assertRaises(exception.Conflict, self.dbapi.get_baymodel_by_name,

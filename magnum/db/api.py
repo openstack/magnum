@@ -331,7 +331,7 @@ class Connection(object):
 
     @abc.abstractmethod
     def get_node_list(self, context, columns=None, filters=None, limit=None,
-                     marker=None, sort_key=None, sort_dir=None):
+                      marker=None, sort_key=None, sort_dir=None):
         """Get specific columns for matching nodes.
 
         Return a list of the specified columns for all nodes that match the
@@ -495,7 +495,7 @@ class Connection(object):
 
     @abc.abstractmethod
     def get_service_list(self, context, columns=None, filters=None, limit=None,
-                     marker=None, sort_key=None, sort_dir=None):
+                         marker=None, sort_key=None, sort_dir=None):
         """Get specific columns for matching services.
 
         Return a list of the specified columns for all services that match the
@@ -587,7 +587,7 @@ class Connection(object):
 
     @abc.abstractmethod
     def get_rc_list(self, context, columns=None, filters=None, limit=None,
-                     marker=None, sort_key=None, sort_dir=None):
+                    marker=None, sort_key=None, sort_dir=None):
         """Get specific columns for matching ReplicationController.
 
         Return a list of the specified columns for all rcs that match the

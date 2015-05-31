@@ -85,19 +85,23 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertIn('coe', response)
 
     def test_get_one_by_name_not_found(self):
-        response = self.get_json('/baymodels/not_found',
-                                  expect_errors=True)
+        response = self.get_json(
+            '/baymodels/not_found',
+            expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
     def test_get_one_by_name_multiple_baymodel(self):
-        obj_utils.create_test_baymodel(self.context, name='test_baymodel',
-                                  uuid=utils.generate_uuid())
-        obj_utils.create_test_baymodel(self.context, name='test_baymodel',
-                                  uuid=utils.generate_uuid())
-        response = self.get_json('/baymodels/test_baymodel',
-                                 expect_errors=True)
+        obj_utils.create_test_baymodel(
+            self.context, name='test_baymodel',
+            uuid=utils.generate_uuid())
+        obj_utils.create_test_baymodel(
+            self.context, name='test_baymodel',
+            uuid=utils.generate_uuid())
+        response = self.get_json(
+            '/baymodels/test_baymodel',
+            expect_errors=True)
         self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
@@ -125,8 +129,9 @@ class TestListBayModel(api_base.FunctionalTest):
     def test_many(self):
         bm_list = []
         for id_ in range(5):
-            baymodel = obj_utils.create_test_baymodel(self.context, id=id_,
-                                                    uuid=utils.generate_uuid())
+            baymodel = obj_utils.create_test_baymodel(
+                self.context, id=id_,
+                uuid=utils.generate_uuid())
             bm_list.append(baymodel.uuid)
         response = self.get_json('/baymodels')
         self.assertEqual(len(bm_list), len(response['baymodels']))
@@ -147,7 +152,7 @@ class TestListBayModel(api_base.FunctionalTest):
     def test_collection_links(self):
         for id_ in range(5):
             obj_utils.create_test_baymodel(self.context, id=id_,
-                                          uuid=utils.generate_uuid())
+                                           uuid=utils.generate_uuid())
         response = self.get_json('/baymodels/?limit=3')
         self.assertEqual(3, len(response['baymodels']))
 
@@ -170,21 +175,22 @@ class TestPatch(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestPatch, self).setUp()
-        self.baymodel = obj_utils.create_test_baymodel(self.context,
-                            name='bay_model_example_A',
-                            image_id='nerdherd',
-                            apiserver_port=8080,
-                            fixed_network='private',
-                            docker_volume_size=20,
-                            ssh_authorized_key='ssh-rsa AAAAB3NzaC1ycEAAAADA'
-                                               'v0XRqg3tm+jlsOKGO81lPDH+KaSJ'
-                                               'Q7wvmjUqszP/H6NC/m+qiGp/sTis'
-                                               'DYucqbeuM7nmJi+8Hb55y1xWoOZI'
-                                               'KMa71G5/4EOQxuQ/sgW965OOO2Hq'
-                                               'X8vjlQUnTK0HijrbSTLxp/9kazWW'
-                                               'FrfsdB8RtZBN digambar@magnum',
-                            coe='swarm'
-                        )
+        self.baymodel = obj_utils.create_test_baymodel(
+            self.context,
+            name='bay_model_example_A',
+            image_id='nerdherd',
+            apiserver_port=8080,
+            fixed_network='private',
+            docker_volume_size=20,
+            ssh_authorized_key='ssh-rsa AAAAB3NzaC1ycEAAAADA'
+                               'v0XRqg3tm+jlsOKGO81lPDH+KaSJ'
+                               'Q7wvmjUqszP/H6NC/m+qiGp/sTis'
+                               'DYucqbeuM7nmJi+8Hb55y1xWoOZI'
+                               'KMa71G5/4EOQxuQ/sgW965OOO2Hq'
+                               'X8vjlQUnTK0HijrbSTLxp/9kazWW'
+                               'FrfsdB8RtZBN digambar@magnum',
+            coe='swarm'
+        )
 
     def test_update_not_found(self):
         uuid = utils.generate_uuid()
@@ -212,7 +218,7 @@ class TestPatch(api_base.FunctionalTest):
         response = self.get_json('/baymodels/%s' % self.baymodel.uuid)
         self.assertEqual(name, response['name'])
         return_updated_at = timeutils.parse_isotime(
-                            response['updated_at']).replace(tzinfo=None)
+            response['updated_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_updated_at)
         # Assert nothing else was changed
         self.assertEqual(self.baymodel.uuid, response['uuid'])
@@ -256,16 +262,17 @@ class TestPatch(api_base.FunctionalTest):
 
     def test_remove_non_existent_property_fail(self):
         response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
-                             [{'path': '/non-existent', 'op': 'remove'}],
-                             expect_errors=True)
+                                   [{'path': '/non-existent', 'op': 'remove'}],
+                                   expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_code)
         self.assertTrue(response.json['error_message'])
 
     def test_add_root(self):
         name = 'bay_model_example_B'
-        response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
-                            [{'path': '/name', 'value': name, 'op': 'add'}])
+        response = self.patch_json(
+            '/baymodels/%s' % self.baymodel.uuid,
+            [{'path': '/name', 'value': name, 'op': 'add'}])
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(200, response.status_int)
 
@@ -282,9 +289,10 @@ class TestPatch(api_base.FunctionalTest):
                          response['coe'])
 
     def test_add_root_non_existent(self):
-        response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
-                            [{'path': '/foo', 'value': 'bar', 'op': 'add'}],
-                            expect_errors=True)
+        response = self.patch_json(
+            '/baymodels/%s' % self.baymodel.uuid,
+            [{'path': '/foo', 'value': 'bar', 'op': 'add'}],
+            expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['error_message'])
@@ -355,7 +363,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(cdict['uuid'], response.json['uuid'])
         self.assertNotIn('updated_at', response.json.keys)
         return_created_at = timeutils.parse_isotime(
-                            response.json['created_at']).replace(tzinfo=None)
+            response.json['created_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_created_at)
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
@@ -421,7 +429,7 @@ class TestPost(api_base.FunctionalTest):
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
     def test_create_baymodel_with_docker_volume_size(self,
-                               mock_image_data):
+                                                     mock_image_data):
         with mock.patch.object(self.dbapi, 'create_baymodel',
                                wraps=self.dbapi.create_baymodel) as cc_mock:
             mock_image_data.return_value = {'name': 'mock_name',
@@ -429,7 +437,7 @@ class TestPost(api_base.FunctionalTest):
             cdict = apiutils.baymodel_post_data(docker_volume_size=99)
             response = self.post_json('/baymodels', cdict)
             self.assertEqual(cdict['docker_volume_size'],
-                    response.json['docker_volume_size'])
+                             response.json['docker_volume_size'])
             cc_mock.assert_called_once_with(mock.ANY)
             self.assertNotIn('id', cc_mock.call_args[0][0])
 
@@ -554,9 +562,9 @@ class TestDelete(api_base.FunctionalTest):
 
     def test_delete_multiple_baymodel_by_name(self):
         obj_utils.create_test_baymodel(self.context, name='test_baymodel',
-                                  uuid=utils.generate_uuid())
+                                       uuid=utils.generate_uuid())
         obj_utils.create_test_baymodel(self.context, name='test_baymodel',
-                                  uuid=utils.generate_uuid())
+                                       uuid=utils.generate_uuid())
         response = self.delete('/baymodels/test_baymodel', expect_errors=True)
         self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)

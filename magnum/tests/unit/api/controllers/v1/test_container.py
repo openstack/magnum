@@ -171,8 +171,9 @@ class TestContainerController(db_base.DbTestCase):
 
         response = self.app.get('/v1/containers/%s' % test_container['uuid'])
 
-        mock_container_get_by_uuid.assert_called_once_with(mock.ANY,
-                                                       test_container['uuid'])
+        mock_container_get_by_uuid.assert_called_once_with(
+            mock.ANY,
+            test_container['uuid'])
         self.assertEqual(response.status_int, 200)
         self.assertEqual(response.json['uuid'],
                          test_container['uuid'])
@@ -188,8 +189,9 @@ class TestContainerController(db_base.DbTestCase):
 
         response = self.app.get('/v1/containers/%s' % test_container['name'])
 
-        mock_container_get_by_name.assert_called_once_with(mock.ANY,
-                                                       test_container['name'])
+        mock_container_get_by_name.assert_called_once_with(
+            mock.ANY,
+            test_container['name'])
         self.assertEqual(response.status_int, 200)
         self.assertEqual(response.json['uuid'],
                          test_container['uuid'])
@@ -206,8 +208,8 @@ class TestContainerController(db_base.DbTestCase):
                        'op': 'replace'}]
             container_uuid = test_container.get('uuid')
             response = self.app.patch_json(
-                                '/v1/containers/%s' % container_uuid,
-                                params=params)
+                '/v1/containers/%s' % container_uuid,
+                params=params)
 
             mock_save.assert_called_once_with()
             self.assertEqual(response.status_int, 200)
@@ -225,8 +227,8 @@ class TestContainerController(db_base.DbTestCase):
                        'op': 'replace'}]
             container_name = test_container.get('name')
             response = self.app.patch_json(
-                                    '/v1/containers/%s' % container_name,
-                                    params=params)
+                '/v1/containers/%s' % container_name,
+                params=params)
 
             mock_save.assert_called_once_with()
             self.assertEqual(response.status_int, 200)
@@ -252,70 +254,70 @@ class TestContainerController(db_base.DbTestCase):
         test_container = utils.get_test_container()
         self._action_test(test_container, 'start', 'uuid')
         mock_container_start.assert_called_once_with(
-                                            test_container.get('uuid'))
+            test_container.get('uuid'))
 
     @patch('magnum.conductor.api.API.container_start')
     def test_start_by_name(self, mock_container_start):
         test_container = utils.get_test_container()
         self._action_test(test_container, 'start', 'name')
         mock_container_start.assert_called_once_with(
-                                            test_container.get('uuid'))
+            test_container.get('uuid'))
 
     @patch('magnum.conductor.api.API.container_stop')
     def test_stop_by_uuid(self, mock_container_stop):
         test_container = utils.get_test_container()
         self._action_test(test_container, 'stop', 'uuid')
         mock_container_stop.assert_called_once_with(
-                                            test_container.get('uuid'))
+            test_container.get('uuid'))
 
     @patch('magnum.conductor.api.API.container_stop')
     def test_stop_by_name(self, mock_container_stop):
         test_container = utils.get_test_container()
         self._action_test(test_container, 'stop', 'name')
         mock_container_stop.assert_called_once_with(
-                                            test_container.get('uuid'))
+            test_container.get('uuid'))
 
     @patch('magnum.conductor.api.API.container_pause')
     def test_pause_by_uuid(self, mock_container_pause):
         test_container = utils.get_test_container()
         self._action_test(test_container, 'pause', 'uuid')
         mock_container_pause.assert_called_once_with(
-                                            test_container.get('uuid'))
+            test_container.get('uuid'))
 
     @patch('magnum.conductor.api.API.container_pause')
     def test_pause_by_name(self, mock_container_pause):
         test_container = utils.get_test_container()
         self._action_test(test_container, 'pause', 'name')
         mock_container_pause.assert_called_once_with(
-                                            test_container.get('uuid'))
+            test_container.get('uuid'))
 
     @patch('magnum.conductor.api.API.container_unpause')
     def test_unpause_by_uuid(self, mock_container_unpause):
         test_container = utils.get_test_container()
         self._action_test(test_container, 'unpause', 'uuid')
         mock_container_unpause.assert_called_once_with(
-                                                test_container.get('uuid'))
+            test_container.get('uuid'))
 
     @patch('magnum.conductor.api.API.container_unpause')
     def test_unpause_by_name(self, mock_container_unpause):
         test_container = utils.get_test_container()
         self._action_test(test_container, 'unpause', 'name')
         mock_container_unpause.assert_called_once_with(
-                                                test_container.get('uuid'))
+            test_container.get('uuid'))
 
     @patch('magnum.conductor.api.API.container_reboot')
     def test_reboot_by_uuid(self, mock_container_reboot):
         test_container = utils.get_test_container()
         self._action_test(test_container, 'reboot', 'uuid')
         mock_container_reboot.assert_called_once_with(
-                                                test_container.get('uuid'))
+            test_container.get('uuid'))
 
     @patch('magnum.conductor.api.API.container_reboot')
     def test_reboot_by_name(self, mock_container_reboot):
         test_container = utils.get_test_container()
         self._action_test(test_container, 'reboot', 'name')
         mock_container_reboot.assert_called_once_with(
-                                                test_container.get('uuid'))
+            test_container.get('uuid'))
 
     @patch('magnum.conductor.api.API.container_logs')
     @patch('magnum.objects.Container.get_by_uuid')
