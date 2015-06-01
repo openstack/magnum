@@ -80,6 +80,12 @@ resources:
       group: ungrouped
       config: {get_file: fragments/add-to-docker-group.sh}
 
+  kube_register:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/kube-register.yaml}
+
   configure_kubernetes_minion:
     type: "OS::Heat::SoftwareConfig"
     properties:
@@ -131,6 +137,7 @@ resources:
         - config: {get_resource: kube_user}
         - config: {get_resource: kube_examples}
         - config: {get_resource: add_to_docker_group}
+        - config: {get_resource: kube_register}
         - config: {get_resource: configure_kubernetes_minion}
         - config: {get_resource: docker_service}
         - config: {get_resource: enable_services}
