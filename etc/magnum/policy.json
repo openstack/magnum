@@ -9,5 +9,12 @@
     "bay:detail": "rule:default",
     "bay:get": "rule:default",
     "bay:get_all": "rule:default",
-    "bay:update": "rule:default"
+    "bay:update": "rule:default",
+
+    "baymodel:create": "rule:default",
+    "baymodel:delete": "rule:default",
+    "baymodel:detail": "rule:default",
+    "baymodel:get": "rule:default",
+    "baymodel:get_all": "rule:default",
+    "baymodel:update": "rule:default"
 }

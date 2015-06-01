@@ -28,6 +28,7 @@ from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
 from magnum.common import clients
 from magnum.common import exception
+from magnum.common import policy
 from magnum import objects
 
 
@@ -222,6 +223,7 @@ class BayModelsController(rest.RestController):
         except glanceclient.exc.HTTPForbidden:
             raise exception.ImageNotAuthorized(image_id=image_ident)
 
+    @policy.enforce_wsgi("baymodel")
     @wsme_pecan.wsexpose(BayModelCollection, types.uuid,
                          types.uuid, int, wtypes.text, wtypes.text)
     def get_all(self, baymodel_uuid=None, marker=None, limit=None,
@@ -236,6 +238,7 @@ class BayModelsController(rest.RestController):
         return self._get_baymodels_collection(marker, limit, sort_key,
                                               sort_dir)
 
+    @policy.enforce_wsgi("baymodel")
     @wsme_pecan.wsexpose(BayModelCollection, types.uuid,
                          types.uuid, int, wtypes.text, wtypes.text)
     def detail(self, baymodel_uuid=None, marker=None, limit=None,
@@ -260,6 +263,7 @@ class BayModelsController(rest.RestController):
                                               sort_key, sort_dir, expand,
                                               resource_url)
 
+    @policy.enforce_wsgi("baymodel", "get")
     @wsme_pecan.wsexpose(BayModel, types.uuid_or_name)
     def get_one(self, baymodel_ident):
         """Retrieve information about the given baymodel.
@@ -272,6 +276,7 @@ class BayModelsController(rest.RestController):
         rpc_baymodel = api_utils.get_rpc_resource('BayModel', baymodel_ident)
         return BayModel.convert_with_links(rpc_baymodel)
 
+    @policy.enforce_wsgi("baymodel", "create")
     @wsme_pecan.wsexpose(BayModel, body=BayModel, status_code=201)
     def post(self, baymodel):
         """Create a new baymodel.
@@ -299,6 +304,7 @@ class BayModelsController(rest.RestController):
                                                  new_baymodel.uuid)
         return BayModel.convert_with_links(new_baymodel)
 
+    @policy.enforce_wsgi("baymodel", "update")
     @wsme.validate(types.uuid, [BayModelPatchType])
     @wsme_pecan.wsexpose(BayModel, types.uuid, body=[BayModelPatchType])
     def patch(self, baymodel_uuid, patch):
@@ -335,6 +341,7 @@ class BayModelsController(rest.RestController):
         rpc_baymodel.save()
         return BayModel.convert_with_links(rpc_baymodel)
 
+    @policy.enforce_wsgi("baymodel")
     @wsme_pecan.wsexpose(None, types.uuid_or_name, status_code=204)
     def delete(self, baymodel_ident):
         """Delete a baymodel.

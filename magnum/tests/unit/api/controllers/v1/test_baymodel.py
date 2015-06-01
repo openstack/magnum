@@ -15,6 +15,7 @@ import datetime
 import contextlib
 import mock
 from oslo_config import cfg
+from oslo_policy import policy
 from oslo_utils import timeutils
 from six.moves.urllib import parse as urlparse
 from webtest.app import AppError
@@ -579,3 +580,45 @@ class TestDelete(api_base.FunctionalTest):
         self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
+
+
+class TestBayModelPolicyEnforcement(api_base.FunctionalTest):
+
+    def setUp(self):
+        super(TestBayModelPolicyEnforcement, self).setUp()
+
+    def _common_policy_check(self, rule, func, *arg, **kwarg):
+        self.policy.set_rules({rule: "project:non_fake"})
+        exc = self.assertRaises(policy.PolicyNotAuthorized,
+                                func, *arg, **kwarg)
+        self.assertTrue(exc.message.startswith(rule))
+        self.assertTrue(exc.message.endswith("disallowed by policy"))
+
+    def test_policy_disallow_get_all(self):
+        self._common_policy_check(
+            "baymodel:get_all", self.get_json, '/baymodels')
+
+    def test_policy_disallow_get_one(self):
+        self._common_policy_check(
+            "baymodel:get", self.get_json, '/baymodels/111-222-333')
+
+    def test_policy_disallow_update(self):
+        baymodel = obj_utils.create_test_baymodel(self.context,
+                                                  name='example_A',
+                                                  uuid="333-444-5555")
+        self._common_policy_check(
+            "baymodel:update", self.patch_json,
+            '/baymodels/%s' % baymodel.name,
+            [{'name': '/name', 'value': "new_name", 'op': 'replace'}])
+
+    def test_policy_disallow_create(self):
+        bdict = apiutils.bay_post_data(name='bay_example_A')
+        self._common_policy_check(
+            "baymodel:create", self.post_json, '/baymodels', bdict)
+
+    def test_policy_disallow_delete(self):
+        baymodel = obj_utils.create_test_baymodel(self.context,
+                                                  uuid='137-246-789')
+        self._common_policy_check(
+            "baymodel:delete", self.delete,
+            '/baymodels/%s' % baymodel.uuid)
