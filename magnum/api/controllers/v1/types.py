@@ -217,5 +217,6 @@ class IPv4AddressType(wtypes.UserType):
     def validate(value):
         try:
             netaddr.IPAddress(value, version=4, flags=netaddr.INET_PTON)
+            return value
         except netaddr.AddrFormatError as e:
             raise ValueError(six.text_type(e))

@@ -519,6 +519,16 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/baymodels', cdict, expect_errors=True)
         self.assertEqual(400, response.status_int)
 
+    @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
+    def test_create_baymodel_with_dns(self, mock_image_data):
+        mock_image_data.return_value = {'name': 'mock_name',
+                                        'os_distro': 'fedora-atomic'}
+        cdict = apiutils.baymodel_post_data()
+        response = self.post_json('/baymodels', cdict)
+        self.assertEqual(201, response.status_int)
+        self.assertEqual(cdict['dns_nameserver'],
+                         response.json['dns_nameserver'])
+
 
 class TestDelete(api_base.FunctionalTest):
 
