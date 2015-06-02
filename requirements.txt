@@ -9,7 +9,7 @@ Babel>=1.3
 PrettyTable>=0.7,<0.8
 PyYAML>=3.1.0
 SQLAlchemy>=0.9.7,<=0.9.99
-WSME>=0.6
+WSME>=0.7
 WebOb>=1.2.3
 alembic>=0.7.2
 docker-py>=1.1.0  # Apache-2.0
@@ -26,7 +26,7 @@ oslo.db>=1.7.0  # Apache-2.0
 oslo.i18n>=1.5.0  # Apache-2.0
 oslo.log>=1.0.0  # Apache-2.0
 oslo.messaging>=1.8.0  # Apache-2.0
-oslo.policy>=0.3.1                      # Apache-2.0
+oslo.policy>=0.3.1  # Apache-2.0
 oslo.serialization>=1.4.0               # Apache-2.0
 oslo.utils>=1.4.0                       # Apache-2.0
 oslo.versionedobjects>=0.1.1
