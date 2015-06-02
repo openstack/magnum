@@ -41,16 +41,14 @@ class Connection(object):
         """Constructor."""
 
     @abc.abstractmethod
-    def get_bay_list(self, context, columns=None, filters=None, limit=None,
+    def get_bay_list(self, context, filters=None, limit=None,
                      marker=None, sort_key=None, sort_dir=None):
-        """Get specific columns for matching bays.
+        """Get matching bays.
 
         Return a list of the specified columns for all bays that match the
         specified filters.
 
         :param context: The security context
-        :param columns: List of column names to return.
-                        Defaults to 'id' column when columns == None.
         :param filters: Filters to apply. Defaults to None.
 
         :param limit: Maximum number of bays to return.
@@ -159,17 +157,15 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_baymodel_list(self, context, columns=None, filters=None,
+    def get_baymodel_list(self, context, filters=None,
                           limit=None, marker=None, sort_key=None,
                           sort_dir=None):
-        """Get specific columns for matching baymodels.
+        """Get matching baymodels.
 
         Return a list of the specified columns for all baymodels that match the
         specified filters.
 
         :param context: The security context
-        :param columns: List of column names to return.
-                        Defaults to 'id' column when columns == None.
         :param filters: Filters to apply. Defaults to None.
 
         :param limit: Maximum number of baymodels to return.
@@ -244,17 +240,15 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_container_list(self, context, columns=None, filters=None,
+    def get_container_list(self, context, filters=None,
                            limit=None, marker=None, sort_key=None,
                            sort_dir=None):
-        """Get specific columns for matching containers.
+        """Get matching containers.
 
         Return a list of the specified columns for all containers that match
         the specified filters.
 
         :param context: The security context
-        :param columns: List of column names to return.
-                        Defaults to 'id' column when columns == None.
         :param filters: Filters to apply. Defaults to None.
 
         :param limit: Maximum number of containers to return.
@@ -330,16 +324,14 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_node_list(self, context, columns=None, filters=None, limit=None,
+    def get_node_list(self, context, filters=None, limit=None,
                       marker=None, sort_key=None, sort_dir=None):
-        """Get specific columns for matching nodes.
+        """Get for matching nodes.
 
         Return a list of the specified columns for all nodes that match the
         specified filters.
 
         :param context: The security context
-        :param columns: List of column names to return.
-                        Defaults to 'id' column when columns == None.
         :param filters: Filters to apply. Defaults to None.
 
         :param limit: Maximum number of nodes to return.
@@ -404,16 +396,14 @@ class Connection(object):
         :raises: NodeNotFound
         """
     @abc.abstractmethod
-    def get_pod_list(self, context, columns=None, filters=None, limit=None,
+    def get_pod_list(self, context, filters=None, limit=None,
                      marker=None, sort_key=None, sort_dir=None):
-        """Get specific columns for matching pods.
+        """Get matching pods.
 
         Return a list of the specified columns for all pods that match the
         specified filters.
 
         :param context: The security context
-        :param columns: List of column names to return.
-                        Defaults to 'id' column when columns == None.
         :param filters: Filters to apply. Defaults to None.
 
         :param limit: Maximum number of pods to return.
@@ -494,16 +484,14 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_service_list(self, context, columns=None, filters=None, limit=None,
+    def get_service_list(self, context, filters=None, limit=None,
                          marker=None, sort_key=None, sort_dir=None):
-        """Get specific columns for matching services.
+        """Get matching services.
 
         Return a list of the specified columns for all services that match the
         specified filters.
 
         :param context: The security context
-        :param columns: List of column names to return.
-                        Defaults to 'id' column when columns == None.
         :param filters: Filters to apply. Defaults to None.
 
         :param limit: Maximum number of services to return.
@@ -561,7 +549,7 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_service_by_name(self, bay_name):
+    def get_service_by_name(self, context, service_name):
         """Return a service.
 
         :param context: The security context
@@ -586,16 +574,14 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_rc_list(self, context, columns=None, filters=None, limit=None,
+    def get_rc_list(self, context, filters=None, limit=None,
                     marker=None, sort_key=None, sort_dir=None):
-        """Get specific columns for matching ReplicationController.
+        """Get matching ReplicationControllers.
 
         Return a list of the specified columns for all rcs that match the
         specified filters.
 
         :param context: The security context
-        :param columns: List of column names to return.
-                        Defaults to 'id' column when columns == None.
         :param filters: Filters to apply. Defaults to None.
 
         :param limit: Maximum number of pods to return.

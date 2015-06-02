@@ -125,10 +125,10 @@ class DbServiceTestCase(base.DbTestCase):
         self.assertEqual([service2.id], [r.id for r in res])
 
     def test_get_service_list_bay_not_exist(self):
-        res = self.dbapi.get_service_list(self.context,
-                                          {'bay_uuid': self.bay.uuid})
+        res = self.dbapi.get_service_list(self.context, filters={
+                                          'bay_uuid': self.bay.uuid})
         self.assertEqual(1, len(res))
-        res = self.dbapi.get_service_list(self.context, {
+        res = self.dbapi.get_service_list(self.context, filters={
             'bay_uuid': magnum_utils.generate_uuid()})
         self.assertEqual(0, len(res))
 

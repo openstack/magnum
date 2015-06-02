@@ -130,7 +130,7 @@ class DbPodTestCase(base.DbTestCase):
         res = self.dbapi.get_pod_list(self.context,
                                       {'bay_uuid': self.bay.uuid})
         self.assertEqual(1, len(res))
-        res = self.dbapi.get_pod_list(self.context, {
+        res = self.dbapi.get_pod_list(self.context, filters={
             'bay_uuid': magnum_utils.generate_uuid()})
         self.assertEqual(0, len(res))
 
