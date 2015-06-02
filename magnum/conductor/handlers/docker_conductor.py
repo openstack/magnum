@@ -21,9 +21,9 @@ from magnum.common import docker_utils
 from magnum.common import exception
 from magnum.common import utils
 from magnum.conductor.handlers.common import docker_client
+from magnum.i18n import _LE
 from magnum import objects
 from magnum.objects import container as obj_container
-from magnum.openstack.common._i18n import _LE
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
