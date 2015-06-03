@@ -72,7 +72,7 @@ class BayModel(base.APIBase):
     master_flavor_id = wtypes.StringType(min_length=1, max_length=255)
     """The flavor of the master node for this bay model"""
 
-    dns_nameserver = types.IPv4AddressType()
+    dns_nameserver = wtypes.IPv4AddressType()
     """The DNS nameserver address"""
 
     keypair_id = wsme.wsattr(wtypes.StringType(min_length=1, max_length=255),

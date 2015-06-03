@@ -225,15 +225,3 @@ class TestNameType(base.FunctionalTest):
     def test_invalid_name(self):
         self.assertRaises(exception.InvalidName, types.NameType.validate, None)
         self.assertRaises(exception.InvalidName, types.NameType.validate, '')
-
-
-class TestIPv4AddressType(base.FunctionalTest):
-
-    def test_valid_value(self):
-        v = types.IPv4AddressType()
-        self.assertEqual('192.168.0.1', v.validate('192.168.0.1'))
-
-    def test_invalid_value(self):
-        v = types.IPv4AddressType()
-        self.assertRaises(ValueError, v.validate, "")
-        self.assertRaises(ValueError, v.validate, "1")
