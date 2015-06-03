@@ -84,10 +84,10 @@ class DbRCTestCase(base.DbTestCase):
         self.assertEqual(sorted(uuids), sorted(rc_uuids))
 
     def test_get_rc_list_bay_not_exist(self):
-        rc = self.dbapi.get_rc_list(self.context,
-                                    {'bay_uuid': self.bay.uuid})
+        rc = self.dbapi.get_rc_list(self.context, filters={
+                                    'bay_uuid': self.bay.uuid})
         self.assertEqual(1, len(rc))
-        rc = self.dbapi.get_rc_list(self.context, {
+        rc = self.dbapi.get_rc_list(self.context, filters={
             'bay_uuid': magnum_utils.generate_uuid()})
         self.assertEqual(0, len(rc))
 

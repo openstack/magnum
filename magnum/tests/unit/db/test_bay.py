@@ -115,7 +115,7 @@ class DbBayTestCase(base.DbTestCase):
     def test_get_bay_list_baymodel_not_exist(self):
         utils.create_test_bay()
         self.assertEqual(1, len(self.dbapi.get_bay_list(self.context)))
-        res = self.dbapi.get_bay_list(self.context, {
+        res = self.dbapi.get_bay_list(self.context, filters={
             'baymodel_id': magnum_utils.generate_uuid()})
         self.assertEqual(0, len(res))
 
