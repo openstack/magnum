@@ -19,7 +19,8 @@ server communication, and is invariant across implementations. Specifics of
 the methods and models for each application are generated from the Swagger
 templates."""
 
-import ast
+import __builtin__
+
 import sys
 import os
 import re
@@ -33,7 +34,8 @@ import random
 import string
 
 from magnum.common import utils
-from models import *
+
+from oslo_utils import importutils
 
 
 class ApiClient(object):
@@ -223,23 +225,29 @@ class ApiClient(object):
         subClass = match.group(1)
         return [self.deserialize(subObj, subClass) for subObj in obj]
 
-      if (objClass in ['int', 'float', 'long', 'dict', 'list', 'str', 'bool', 'datetime']):
-        objClass = ast.literal_eval(objClass)
+      classname = objClass
+      if classname in {'int', 'float', 'long', 'dict', 'list', 'str', 'bool'}:
+        objClass = getattr(__builtin__, classname)
+      elif classname == 'datetime':
+        objClass = self.__parse_string_to_datetime
       else:  # not a native type, must be model class
-        objClass = ast.literal_eval(objClass + '.' + objClass)
+        model = ('magnum.common.pythonk8sclient.client.models.%s.%s' %
+                 (classname, classname))
+        objClass = importutils.import_class(model)
+    else:
+      classname = None
 
-    if objClass in [int, long, float, dict, list, str, bool]:
+    if ((getattr(objClass, '__module__', None) == __builtin__.__name__) or
+        (classname == 'datetime')):
       return objClass(obj)
-    elif objClass == datetime:
-      return self.__parse_string_to_datetime(obj)
 
     instance = objClass()
 
     for attr, attrType in instance.swaggerTypes.iteritems():
         if obj is not None and instance.attributeMap[attr] in obj and type(obj) in [list, dict]:
           value = obj[instance.attributeMap[attr]]
-          if attrType in ['str', 'int', 'long', 'float', 'bool']:
-            attrType = ast.literal_eval(attrType)
+          if attrType in {'str', 'int', 'long', 'float', 'bool'}:
+            attrType = getattr(__builtin__, attrType)
             try:
               value = attrType(value)
             except UnicodeEncodeError:
