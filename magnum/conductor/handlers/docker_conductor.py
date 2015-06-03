@@ -228,10 +228,14 @@ class Handler(object):
         docker = self.get_docker_client(context, container_uuid)
         try:
             docker_id = self._find_container_by_name(docker, container_uuid)
-            create_res = docker.exec_create(docker_id, command, True,
-                                            True, False)
-            return {'output': docker.exec_start(create_res, False,
-                                                False, False)}
+            if docker_utils.is_docker_library_version_atleast('1.2.0'):
+                create_res = docker.exec_create(docker_id, command, True,
+                                                True, False)
+                exec_output = docker.exec_start(create_res, False, False,
+                                                False)
+            else:
+                exec_output = docker.execute(docker_id, command)
+            return {'output': exec_output}
         except errors.APIError as api_error:
             raise exception.ContainerException(
                 "Docker API Error : %s" % str(api_error))

@@ -11,6 +11,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import docker
+from docker.utils import utils
 
 
 def parse_docker_image(image_id):
@@ -23,3 +25,9 @@ def parse_docker_image(image_id):
         image_tag = image_parts[1]
 
     return image_repo, image_tag
+
+
+def is_docker_library_version_atleast(version):
+    if utils.compare_version(docker.version, version) <= 0:
+        return True
+    return False

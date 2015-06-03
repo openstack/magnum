@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import docker
 from docker import errors
 import mock
 from oslo_config import cfg
@@ -615,6 +616,7 @@ class TestDockerConductor(base.BaseTestCase):
         mock_get_docker_client.return_value = mock_docker
         mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
         mock_docker_id = '2703ef2b705d'
+        docker.version = '1.2.2'
         mock_find_container.return_value = mock_docker_id
         mock_create_res = mock.MagicMock()
         mock_docker.exec_create.return_value = mock_create_res
@@ -629,6 +631,23 @@ class TestDockerConductor(base.BaseTestCase):
 
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
+    def test_container_execute_deprecated(self, mock_get_docker_client,
+                                          mock_find_container):
+        mock_docker = mock.MagicMock()
+        mock_get_docker_client.return_value = mock_docker
+        mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
+        mock_docker_id = '2703ef2b705d'
+        docker.version = '0.7.0'
+        mock_find_container.return_value = mock_docker_id
+        mock_create_res = mock.MagicMock()
+        mock_docker.exec_create.return_value = mock_create_res
+        self.conductor.container_execute(None, mock_container_uuid, 'ls')
+        mock_docker.execute.assert_called_once_with(mock_docker_id, 'ls')
+        mock_find_container.assert_called_once_with(mock_docker,
+                                                    mock_container_uuid)
+
+    @patch.object(docker_conductor.Handler, '_find_container_by_name')
+    @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
     def test_container_execute_with_failure(self,
                                             mock_get_docker_client,
                                             mock_find_container):
@@ -636,6 +655,7 @@ class TestDockerConductor(base.BaseTestCase):
         mock_get_docker_client.return_value = mock_docker
         mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
         mock_docker_id = '2703ef2b705d'
+        docker.version = '1.2.2'
         mock_find_container.return_value = mock_docker_id
         with patch.object(errors.APIError, '__str__',
                           return_value='hit error') as mock_init:
@@ -647,6 +667,29 @@ class TestDockerConductor(base.BaseTestCase):
             mock_docker.exec_create.assert_called_once_with(mock_docker_id,
                                                             'ls', True, True,
                                                             False)
+            mock_find_container.assert_called_once_with(mock_docker,
+                                                        mock_container_uuid)
+            mock_init.assert_called_once_with()
+
+    @patch.object(docker_conductor.Handler, '_find_container_by_name')
+    @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
+    def test_container_execute_deprecated_with_failure(self,
+                                                       mock_get_docker_client,
+                                                       mock_find_container):
+        mock_docker = mock.MagicMock()
+        mock_get_docker_client.return_value = mock_docker
+        mock_container_uuid = 'd545a92d-609a-428f-8edb-16b02ad20ca1'
+        mock_docker_id = '2703ef2b705d'
+        docker.version = '0.7.0'
+        mock_find_container.return_value = mock_docker_id
+        with patch.object(errors.APIError, '__str__',
+                          return_value='hit error') as mock_init:
+            mock_docker.execute = mock.Mock(
+                side_effect=errors.APIError('Error', '', ''))
+            self.assertRaises(exception.ContainerException,
+                              self.conductor.container_execute,
+                              None, mock_container_uuid, 'ls')
+            mock_docker.execute.assert_called_once_with(mock_docker_id, 'ls')
             mock_find_container.assert_called_once_with(mock_docker,
                                                         mock_container_uuid)
             mock_init.assert_called_once_with()
