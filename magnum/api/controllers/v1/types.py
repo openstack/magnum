@@ -15,9 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import netaddr
 from oslo_utils import strutils
-import six
 import wsme
 from wsme import types as wtypes
 
@@ -205,18 +203,3 @@ class JsonPatchType(wtypes.Base):
         if patch.value:
             ret['value'] = patch.value
         return ret
-
-
-class IPv4AddressType(wtypes.UserType):
-    """A simple IPv4 type."""
-
-    basetype = six.string_types
-    name = "ipv4address"
-
-    @staticmethod
-    def validate(value):
-        try:
-            netaddr.IPAddress(value, version=4, flags=netaddr.INET_PTON)
-            return value
-        except netaddr.AddrFormatError as e:
-            raise ValueError(six.text_type(e))

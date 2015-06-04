@@ -18,7 +18,6 @@ greenlet>=0.3.2
 iso8601>=0.1.9
 jsonpatch>=1.1
 keystonemiddleware>=1.5.0
-netaddr>=0.7.12
 oslo.concurrency>=1.8.0         # Apache-2.0
 oslo.config>=1.11.0  # Apache-2.0
 oslo.context>=0.2.0                     # Apache-2.0
