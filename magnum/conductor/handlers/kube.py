@@ -181,7 +181,6 @@ class Handler(object):
         # TODO(yuanying): parse pod file and,
         # - extract pod name and set it
         # - extract pod labels and set it
-        # TODO(yuanying): Should kube_utils support definition_url?
         # When do we get pod labels and name?
         pod.create(context)
         return pod
