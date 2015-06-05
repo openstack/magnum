@@ -67,6 +67,65 @@ class UtilsTestCase(base.TestCase):
             utils.create_link_without_raise("/fake/source", "/fake/link")
             symlink_mock.assert_called_once_with("/fake/source", "/fake/link")
 
+    def test_generate_uid(self):
+        topic = 'test'
+        size = 8
+        s = utils.generate_uid(topic)
+        self.assertEqual(len(topic) + size + 1, len(s))
+        self.assertEqual(topic, s[:len(topic)])
+        size = 22
+        s = utils.generate_uid(topic, size)
+        self.assertEqual(len(topic) + size + 1, len(s))
+
+    def test_valid_ipv4(self):
+        self.assertTrue(utils.is_valid_ipv4('10.0.0.1'))
+        self.assertTrue(utils.is_valid_ipv4('255.255.255.255'))
+
+    def test_invalid_ipv4(self):
+        self.assertFalse(utils.is_valid_ipv4(''))
+        self.assertFalse(utils.is_valid_ipv4('x.x.x.x'))
+        self.assertFalse(utils.is_valid_ipv4('256.256.256.256'))
+        self.assertFalse(utils.is_valid_ipv4(
+                         'AA42:0000:0000:0000:0202:B3FF:FE1E:8329'))
+
+    def test_valid_ipv6(self):
+        self.assertTrue(utils.is_valid_ipv6(
+                        'AA42:0000:0000:0000:0202:B3FF:FE1E:8329'))
+        self.assertTrue(utils.is_valid_ipv6(
+                        'AA42::0202:B3FF:FE1E:8329'))
+
+    def test_invalid_ipv6(self):
+        self.assertFalse(utils.is_valid_ipv6(''))
+        self.assertFalse(utils.is_valid_ipv6('10.0.0.1'))
+        self.assertFalse(utils.is_valid_ipv6('AA42::0202:B3FF:FE1E:'))
+
+    def test_valid_cidr(self):
+        self.assertTrue(utils.is_valid_cidr('10.0.0.0/24'))
+        self.assertTrue(utils.is_valid_cidr('10.0.0.1/32'))
+        self.assertTrue(utils.is_valid_cidr('0.0.0.0/0'))
+
+    def test_invalid_cidr(self):
+        self.assertFalse(utils.is_valid_cidr('10.0.0.1'))
+        self.assertFalse(utils.is_valid_cidr('10.0.0.1/33'))
+
+    def test_valid_network(self):
+        self.assertEqual('IPv4', utils.get_ip_version('10.0.0.1'))
+        self.assertEqual('IPv6', utils.get_ip_version(
+                         'AA42:0000:0000:0000:0202:B3FF:FE1E:8329'))
+
+    def test_invalid_network(self):
+        self.assertRaises(netaddr.core.AddrFormatError,
+                          utils.get_ip_version, 'x.x.x.x')
+
+    def test_convert_to_list_dict(self):
+        self.assertEqual(None, utils.convert_to_list_dict(None, 'fred'))
+        self.assertEqual(None, utils.convert_to_list_dict('', 'fred'))
+        self.assertEqual([{'fred': 'list'}],
+                         utils.convert_to_list_dict('list', 'fred'))
+        self.assertEqual([{'fred': 'first'}, {'fred': 'second'}],
+                         utils.convert_to_list_dict(['first', 'second'],
+                                                    'fred'))
+
 
 class ExecuteTestCase(base.TestCase):
 
