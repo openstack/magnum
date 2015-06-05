@@ -20,7 +20,7 @@ class RequestContext(context.RequestContext):
                  domain_name=None, user=None, user_id=None, project=None,
                  project_id=None, is_admin=False, is_public_api=False,
                  read_only=False, show_deleted=False, request_id=None,
-                 trust_id=None, auth_token_info=None):
+                 trust_id=None, auth_token_info=None, **kwargs):
         """Stores several additional request parameters:
 
         :param domain_id: The ID of the domain.
@@ -47,21 +47,23 @@ class RequestContext(context.RequestContext):
                                              request_id=request_id)
 
     def to_dict(self):
-        return {'auth_token': self.auth_token,
-                'auth_url': self.auth_url,
-                'domain_id': self.domain_id,
-                'domain_name': self.domain_name,
-                'user': self.user,
-                'user_id': self.user_id,
-                'project': self.project,
-                'project_id': self.project_id,
-                'is_admin': self.is_admin,
-                'is_public_api': self.is_public_api,
-                'read_only': self.read_only,
-                'show_deleted': self.show_deleted,
-                'request_id': self.request_id,
-                'trust_id': self.trust_id,
-                'auth_token_info': self.auth_token_info}
+        value = super(RequestContext, self).to_dict()
+        value.update({'auth_token': self.auth_token,
+                      'auth_url': self.auth_url,
+                      'domain_id': self.domain_id,
+                      'domain_name': self.domain_name,
+                      'user': self.user,
+                      'user_id': self.user_id,
+                      'project': self.project,
+                      'project_id': self.project_id,
+                      'is_admin': self.is_admin,
+                      'is_public_api': self.is_public_api,
+                      'read_only': self.read_only,
+                      'show_deleted': self.show_deleted,
+                      'request_id': self.request_id,
+                      'trust_id': self.trust_id,
+                      'auth_token_info': self.auth_token_info})
+        return value
 
     @classmethod
     def from_dict(cls, values):
