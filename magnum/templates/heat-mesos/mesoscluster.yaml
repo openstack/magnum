@@ -1,0 +1,261 @@
+heat_template_version: 2014-10-16
+
+description: >
+  This template will boot a Mesos cluster with one or more slaves
+  (as specified by the number_of_slaves parameter, which
+  defaults to 1).
+
+parameters:
+
+  ssh_key_name:
+    type: string
+    description: name of ssh key to be provisioned on our server
+
+  external_network:
+    type: string
+    description: uuid/name of a network to use for floating ip addresses
+    default: public
+
+  server_image:
+    type: string
+    default: ubuntu-mesos
+    description: glance image used to boot the server
+
+  master_flavor:
+    type: string
+    default: m1.small
+    description: flavor to use when booting the server
+
+  slave_flavor:
+    type: string
+    default: m1.small
+    description: flavor to use when booting the server
+
+  dns_nameserver:
+    type: string
+    description: address of a dns nameserver reachable in your environment
+    default: 8.8.8.8
+
+  number_of_slaves:
+    type: number
+    description: how many mesos slaves to spawn initially
+    default: 1
+
+  fixed_network_cidr:
+    type: string
+    description: network range for fixed ip network
+    default: 10.0.0.0/24
+
+  wait_condition_timeout:
+    type: number
+    description: >
+      timeout for the Wait Conditions
+    default: 6000
+
+  cluster_name:
+    type: string
+    description: human readable name for the mesos cluster
+    default: my-cluster
+
+  executor_registration_timeout:
+    type: string
+    description: >
+      Amount of time to wait for an executor to register with the slave before
+      considering it hung and shutting it down
+    default: 5mins
+
+resources:
+
+  master_wait_handle:
+    type: OS::Heat::WaitConditionHandle
+
+  master_wait_condition:
+    type: OS::Heat::WaitCondition
+    depends_on: mesos_master
+    properties:
+      handle: {get_resource: master_wait_handle}
+      timeout: {get_param: wait_condition_timeout}
+
+  ######################################################################
+  #
+  # network resources.  allocate a network and router for our server.
+  #
+
+  fixed_network:
+    type: OS::Neutron::Net
+
+  fixed_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      cidr: {get_param: fixed_network_cidr}
+      network: {get_resource: fixed_network}
+      dns_nameservers:
+        - {get_param: dns_nameserver}
+
+  extrouter:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: {get_param: external_network}
+
+  extrouter_inside:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: {get_resource: extrouter}
+      subnet: {get_resource: fixed_subnet}
+
+  ######################################################################
+  #
+  # security groups.  we need to permit network traffic of various
+  # sorts.
+  #
+
+  secgroup_base:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      rules:
+        - protocol: icmp
+        - protocol: tcp
+          port_range_min: 22
+          port_range_max: 22
+
+  secgroup_mesos:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      rules:
+        - protocol: tcp
+          port_range_min: 2181
+          port_range_max: 2181
+        - protocol: tcp
+          port_range_min: 2888
+          port_range_max: 2888
+          remote_mode: remote_group_id
+        - protocol: tcp
+          port_range_min: 3888
+          port_range_max: 3888
+          remote_mode: remote_group_id
+        - protocol: tcp
+          port_range_min: 5050
+          port_range_max: 5050
+        - protocol: tcp
+          port_range_min: 8080
+          port_range_max: 8080
+
+  ######################################################################
+  #
+  # software configs.  these are components that are combined into
+  # a multipart MIME user-data archive.
+  #
+
+  write_heat_params:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/write-heat-params-master.yaml}
+          params:
+            "$MESOS_MASTER_IP": {get_attr: [mesos_master_eth0, fixed_ips, 0, ip_address]}
+            "$CLUSTER_NAME": {get_param: cluster_name}
+
+  configure_mesos:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/configure-mesos-master.sh}
+
+  start_services:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/start-services-master.sh}
+
+  master_wc_notify:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: |
+            #!/bin/bash -v
+            wc_notify --data-binary '{"status": "SUCCESS"}'
+          params:
+            wc_notify: {get_attr: [master_wait_handle, curl_cli]}
+
+  mesos_master_init:
+    type: OS::Heat::MultipartMime
+    properties:
+      parts:
+        - config: {get_resource: write_heat_params}
+        - config: {get_resource: configure_mesos}
+        - config: {get_resource: start_services}
+        - config: {get_resource: master_wc_notify}
+
+  ######################################################################
+  #
+  # Mesos master server.
+  #
+
+  mesos_master:
+    type: OS::Nova::Server
+    depends_on:
+      - extrouter_inside
+    properties:
+      image: {get_param: server_image}
+      flavor: {get_param: master_flavor}
+      key_name: {get_param: ssh_key_name}
+      user_data_format: RAW
+      user_data: {get_resource: mesos_master_init}
+      networks:
+        - port: {get_resource: mesos_master_eth0}
+
+  mesos_master_eth0:
+    type: OS::Neutron::Port
+    properties:
+      network: {get_resource: fixed_network}
+      security_groups:
+        - {get_resource: secgroup_base}
+        - {get_resource: secgroup_mesos}
+      fixed_ips:
+        - subnet: {get_resource: fixed_subnet}
+      replacement_policy: AUTO
+
+  mesos_master_floating:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: {get_param: external_network}
+      port_id: {get_resource: mesos_master_eth0}
+
+  mesos_slaves:
+    type: OS::Heat::ResourceGroup
+    depends_on:
+      - extrouter_inside
+      - master_wait_condition
+    properties:
+      count: {get_param: number_of_slaves}
+      resource_def:
+        type: mesosslave.yaml
+        properties:
+          ssh_key_name: {get_param: ssh_key_name}
+          server_image: {get_param: server_image}
+          slave_flavor: {get_param: slave_flavor}
+          fixed_network: {get_resource: fixed_network}
+          fixed_subnet: {get_resource: fixed_subnet}
+          mesos_master_ip: {get_attr: [mesos_master_eth0, fixed_ips, 0, ip_address]}
+          external_network: {get_param: external_network}
+          wait_condition_timeout: {get_param: wait_condition_timeout}
+          executor_registration_timeout: {get_param: executor_registration_timeout}
+
+outputs:
+
+  mesos_master:
+    value: {get_attr: [mesos_master_floating, floating_ip_address]}
+    description: >
+      This is the "public" ip address of the Mesos master server.  Use this address to
+      log in to the Mesos master via ssh or to access the Mesos API
+      from outside the cluster.
+
+  mesos_slaves:
+    value: {get_attr: [mesos_slaves, mesos_slave_external_ip]}
+    description: >
+      This is a list of the addresses of all the Mesos slaves.
