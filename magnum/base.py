@@ -52,18 +52,12 @@ class ContainerBase(object):
 
 
 @six.add_metaclass(abc.ABCMeta)
-class PodFactory(ContainerBase):
-    @abc.abstractmethod
-    def list(self, bay_id):
-        pass
-
-    @abc.abstractmethod
-    def create(self, bay_id, pod_definition):
-        pass
+class PodBase(object):
+    pass
 
 
 @six.add_metaclass(abc.ABCMeta)
-class Pod(ContainerBase):
+class Pod(PodBase):
     pass
 
 
