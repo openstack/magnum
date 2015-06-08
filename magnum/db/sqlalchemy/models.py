@@ -117,7 +117,7 @@ class Bay(Base):
     __table_args__ = (
         schema.UniqueConstraint('uuid', name='uniq_bay0uuid'),
         table_args()
-        )
+    )
     id = Column(Integer, primary_key=True)
     project_id = Column(String(255))
     user_id = Column(String(255))
@@ -140,7 +140,7 @@ class BayLock(Base):
     __table_args__ = (
         schema.UniqueConstraint('bay_uuid', name='uniq_baylock0bay_uuid'),
         table_args()
-        )
+    )
     id = Column(Integer, primary_key=True)
     bay_uuid = Column(String(36))
     conductor_id = Column(String(64))
@@ -153,7 +153,7 @@ class BayModel(Base):
     __table_args__ = (
         schema.UniqueConstraint('uuid', name='uniq_baymodel0uuid'),
         table_args()
-        )
+    )
     id = Column(Integer, primary_key=True)
     uuid = Column(String(36))
     project_id = Column(String(255))
@@ -180,7 +180,7 @@ class Container(Base):
     __table_args__ = (
         schema.UniqueConstraint('uuid', name='uniq_container0uuid'),
         table_args()
-        )
+    )
     id = Column(Integer, primary_key=True)
     project_id = Column(String(255))
     user_id = Column(String(255))
@@ -201,7 +201,7 @@ class Node(Base):
         schema.UniqueConstraint('ironic_node_id',
                                 name='uniq_node0ironic_node_id'),
         table_args()
-        )
+    )
     id = Column(Integer, primary_key=True)
     uuid = Column(String(36))
     type = Column(String(20))
@@ -218,7 +218,7 @@ class Pod(Base):
     __table_args__ = (
         schema.UniqueConstraint('uuid', name='uniq_pod0uuid'),
         table_args()
-        )
+    )
     id = Column(Integer, primary_key=True)
     uuid = Column(String(36))
     name = Column(String(255))
@@ -238,7 +238,7 @@ class Service(Base):
     __table_args__ = (
         schema.UniqueConstraint('uuid', name='uniq_service0uuid'),
         table_args()
-        )
+    )
     id = Column(Integer, primary_key=True)
     uuid = Column(String(36))
     name = Column(String(255))
@@ -259,7 +259,7 @@ class ReplicationController(Base):
         schema.UniqueConstraint('uuid',
                                 name='uniq_replicationcontroller0uuid'),
         table_args()
-        )
+    )
     id = Column(Integer, primary_key=True)
     uuid = Column(String(36))
     name = Column(String(255))

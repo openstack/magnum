@@ -119,8 +119,7 @@ class BayModel(base.APIBase):
                                               'baymodels', baymodel.uuid),
                           link.Link.make_link('bookmark', url,
                                               'baymodels', baymodel.uuid,
-                                              bookmark=True)
-                     ]
+                                              bookmark=True)]
         return baymodel
 
     @classmethod

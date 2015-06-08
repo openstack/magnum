@@ -414,12 +414,12 @@ class TestBayConductorWithK8s(base.TestCase):
         expected_node_addresses = ['ex_minion', 'address']
 
         outputs = [
-          {"output_value": expected_node_addresses,
-           "description": "No description given",
-           "output_key": "kube_minions_external"},
-          {"output_value": expected_api_address,
-           "description": "No description given",
-           "output_key": "kube_master"}
+            {"output_value": expected_node_addresses,
+             "description": "No description given",
+             "output_key": "kube_minions_external"},
+            {"output_value": expected_api_address,
+             "description": "No description given",
+             "output_key": "kube_master"}
         ]
         mock_stack = mock.MagicMock()
         mock_stack.outputs = outputs

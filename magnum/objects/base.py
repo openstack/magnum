@@ -59,7 +59,7 @@ class MagnumPersistentObject(object):
     fields = {
         'created_at': ovoo_fields.DateTimeField(nullable=True),
         'updated_at': ovoo_fields.DateTimeField(nullable=True),
-        }
+    }
 
 
 class MagnumObjectSerializer(ovoo_base.VersionedObjectSerializer):

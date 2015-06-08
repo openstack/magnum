@@ -75,8 +75,7 @@ class Node(base.APIBase):
                                           'nodes', node.uuid),
                       link.Link.make_link('bookmark', url,
                                           'nodes', node.uuid,
-                                          bookmark=True)
-                     ]
+                                          bookmark=True)]
         return node
 
     @classmethod

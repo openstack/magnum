@@ -56,8 +56,7 @@ glance_client_opts = [
                default='publicURL',
                help=_(
                    'Type of endpoint in Identity service catalog to use '
-                   'for communication with the OpenStack service.')),
-    ]
+                   'for communication with the OpenStack service.'))]
 
 cfg.CONF.register_opts(heat_client_opts, group='heat_client')
 cfg.CONF.register_opts(glance_client_opts, group='glance_client')
