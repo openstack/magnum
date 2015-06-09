@@ -338,7 +338,7 @@ class NotAcceptable(MagnumException):
     # TODO(yuntongjin): We need to set response headers
     # in the API for this exception
     message = _("Request not acceptable.")
-    code = 404
+    code = 406
 
 
 class OperationNotPermitted(NotAuthorized):
