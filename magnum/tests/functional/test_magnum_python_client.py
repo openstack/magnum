@@ -35,6 +35,9 @@ from magnum.tests import base
 class BaseMagnumClient(base.TestCase):
     def setUp(self):
         super(BaseMagnumClient, self).setUp()
+
+    @classmethod
+    def setUpClass(cls):
         # Collecting of credentials:
         #
         # Support the existence of a functional_creds.conf for
@@ -61,16 +64,64 @@ class BaseMagnumClient(base.TestCase):
             image_id = image_id or config.get('magnum', 'image_id')
             nic_id = nic_id or config.get('magnum', 'nic_id')
 
-        self.image_id = image_id
-        self.nic_id = nic_id
-        self.cs = client.Client(username=user,
-                                api_key=passwd,
-                                project_id=tenant_id,
-                                project_name=tenant,
-                                auth_url=auth_url,
-                                service_type='container',
-                                region_name=region_name,
-                                magnum_url=magnum_url)
+        cls.image_id = image_id
+        cls.nic_id = nic_id
+        cls.cs = client.Client(username=user,
+                               api_key=passwd,
+                               project_id=tenant_id,
+                               project_name=tenant,
+                               auth_url=auth_url,
+                               service_type='container',
+                               region_name=region_name,
+                               magnum_url=magnum_url)
+
+    @classmethod
+    def _wait_on_status(cls, bay, wait_status, finish_status):
+        # Check status every 5 seconds for a total of 120 minutes
+        for i in range(100):
+            status = cls.cs.bays.get(bay.uuid).status
+            if status in wait_status:
+                time.sleep(60)
+            elif status in finish_status:
+                break
+            else:
+                raise Exception("Unknown Status : %s" % status)
+
+    @classmethod
+    def _create_baymodel(cls):
+        baymodel = cls.cs.baymodels.create(
+            name='default',
+            keypair_id='default',
+            external_network_id=cls.nic_id,
+            image_id=cls.image_id,
+            flavor_id='m1.small',
+            docker_volume_size=5,
+            coe='kubernetes',
+        )
+        return baymodel
+
+    @classmethod
+    def _create_bay(cls, baymodel_uuid, wait=True):
+        bay = cls.cs.bays.create(
+            name='k8s',
+            baymodel_id=baymodel_uuid,
+            node_count=None,
+        )
+
+        if wait:
+            cls._wait_on_status(bay,
+                                [None, "CREATE_IN_PROGRESS"],
+                                ["CREATE_FAILED",
+                                 "CREATE_COMPLETE"])
+        return bay
+
+    @classmethod
+    def _delete_baymodel(cls, baymodel_uuid):
+        cls.cs.baymodels.delete(baymodel_uuid)
+
+    @classmethod
+    def _delete_bay(cls, bay_uuid):
+        cls.cs.bays.delete(bay_uuid)
 
 
 class TestListResources(BaseMagnumClient):
@@ -98,15 +149,7 @@ class TestListResources(BaseMagnumClient):
 
 class TestBayModelResource(BaseMagnumClient):
     def test_bay_model_create_and_delete(self):
-        baymodel = self.cs.baymodels.create(
-            name='default',
-            keypair_id='default',
-            external_network_id=self.nic_id,
-            image_id=self.image_id,
-            flavor_id='m1.small',
-            docker_volume_size=5,
-            coe='kubernetes',
-        )
+        baymodel = self._create_baymodel()
         list = [item.uuid for item in self.cs.baymodels.list()]
         self.assertTrue(baymodel.uuid in list)
 
@@ -128,15 +171,7 @@ class TestBayResource(BaseMagnumClient):
         if test_timeout > 0:
             self.useFixture(fixtures.Timeout(test_timeout, gentle=True))
 
-        self.baymodel = self.cs.baymodels.create(
-            name='default',
-            keypair_id='default',
-            external_network_id=self.nic_id,
-            image_id=self.image_id,
-            flavor_id='m1.small',
-            docker_volume_size=5,
-            coe='kubernetes',
-        )
+        self.baymodel = self._create_baymodel()
 
     def tearDown(self):
         super(TestBayResource, self).tearDown()
@@ -145,31 +180,11 @@ class TestBayResource(BaseMagnumClient):
         except exceptions.BadRequest:
             pass
 
-    def _wait_on_status(self, bay, wait_status, finish_status):
-        # Check status every 5 seconds for a total of 120 minutes
-        for i in range(100):
-            status = self.cs.bays.get(bay.uuid).status
-            if status in wait_status:
-                time.sleep(60)
-            elif status in finish_status:
-                break
-            else:
-                self.assertTrue(False, "Unknown Status : %s" % status)
-
     def test_bay_create_and_delete(self):
-        bay = self.cs.bays.create(
-            name='k8s',
-            baymodel_id=self.baymodel.uuid,
-            node_count=None,
-        )
+        bay = self._create_bay(self.baymodel.uuid)
         list = [item.uuid for item in self.cs.bays.list()]
         self.assertTrue(bay.uuid in list)
 
-        self._wait_on_status(bay,
-                             [None, "CREATE_IN_PROGRESS"],
-                             ["CREATE_FAILED",
-                              "CREATED",
-                              "CREATE_COMPLETE"])
         try:
             self.assertIn(self.cs.bays.get(bay.uuid).status,
                           ["CREATED", "CREATE_COMPLETE"])
@@ -182,7 +197,7 @@ class TestBayResource(BaseMagnumClient):
                                  ["CREATE_COMPLETE",
                                   "DELETE_IN_PROGRESS"],
                                  ["DELETE_FAILED",
-                                  "DELETED"])
+                                  "DELETE_COMPLETE"])
         except exceptions.NotFound:
             # if bay/get fails, the bay has been deleted already
             pass
