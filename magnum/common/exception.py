@@ -334,6 +334,13 @@ class NotAuthorized(MagnumException):
     code = 403
 
 
+class NotAcceptable(MagnumException):
+    # TODO(yuntongjin): We need to set response headers
+    # in the API for this exception
+    message = _("Request not acceptable.")
+    code = 404
+
+
 class OperationNotPermitted(NotAuthorized):
     message = _("Operation not permitted.")
 

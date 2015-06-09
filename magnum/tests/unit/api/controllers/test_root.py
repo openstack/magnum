@@ -9,7 +9,14 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
+
+import mock
+from webob import exc as webob_exc
+
+from magnum.api.controllers import v1 as v1_api
 from magnum import tests
+from magnum.tests import base as test_base
+from magnum.tests.unit.api import base as api_base
 
 
 class TestRootController(tests.FunctionalTest):
@@ -71,3 +78,54 @@ class TestRootController(tests.FunctionalTest):
     def test_get_not_found(self):
         response = self.app.get('/a/bogus/url', expect_errors=True)
         assert response.status_int == 404
+
+
+class TestV1Routing(api_base.FunctionalTest):
+    def setUp(self):
+        super(TestV1Routing, self).setUp()
+
+    def test_route_checks_version(self):
+        self.get_json('/')
+        self._check_version.assert_called_once_with(mock.ANY,
+                                                    mock.ANY)
+
+
+class TestCheckVersions(test_base.TestCase):
+
+    def setUp(self):
+        super(TestCheckVersions, self).setUp()
+
+        class ver(object):
+            major = None
+            minor = None
+
+        self.version = ver()
+
+    def test_check_version_invalid_major_version(self):
+        self.version.major = v1_api.BASE_VERSION + 1
+        self.version.minor = v1_api.MIN_VER.minor
+        self.assertRaises(webob_exc.HTTPNotAcceptable,
+                          v1_api.Controller()._check_version,
+                          self.version)
+
+    def test_check_version_too_low(self):
+        self.version.major = v1_api.BASE_VERSION
+        self.version.minor = v1_api.MIN_VER.minor - 1
+        self.assertRaises(webob_exc.HTTPNotAcceptable,
+                          v1_api.Controller()._check_version,
+                          self.version)
+
+    def test_check_version_too_high(self):
+        self.version.major = v1_api.BASE_VERSION
+        self.version.minor = v1_api.MAX_VER.minor + 1
+        e = self.assertRaises(webob_exc.HTTPNotAcceptable,
+                              v1_api.Controller()._check_version,
+                              self.version, {'fake-headers':
+                                             v1_api.MAX_VER.minor})
+
+        self.assertEqual(v1_api.MAX_VER.minor, e.headers['fake-headers'])
+
+    def test_check_version_ok(self):
+        self.version.major = v1_api.BASE_VERSION
+        self.version.minor = v1_api.MIN_VER.minor
+        v1_api.Controller()._check_version(self.version)

@@ -27,6 +27,7 @@ fakeAuthTokenHeaders = {'X-User-Id': u'773a902f022949619b5c2f32cd89d419',
                         'X-User-Domain-Name': 'domain',
                         'X-Project-Domain-Id': 'project_domain_id',
                         'X-User-Domain-Id': 'user_domain_id',
+                        'X-OpenStack-Magnum-API-Version': '1.0'
                         }
 
 
@@ -42,6 +43,7 @@ class FakePecanRequest(mock.Mock):
         self.path = '/v1/services'
         self.headers = fakeAuthTokenHeaders
         self.environ = {}
+        self.version = (1, 0)
 
     def __setitem__(self, index, value):
         setattr(self, index, value)

@@ -22,10 +22,12 @@ import datetime
 
 import pecan
 from pecan import rest
+from webob import exc
 import wsme
 from wsme import types as wtypes
 import wsmeext.pecan as wsme_pecan
 
+from magnum.api.controllers import base as controllers_base
 from magnum.api.controllers import link
 from magnum.api.controllers.v1 import bay
 from magnum.api.controllers.v1 import baymodel
@@ -34,6 +36,32 @@ from magnum.api.controllers.v1 import node
 from magnum.api.controllers.v1 import pod
 from magnum.api.controllers.v1 import replicationcontroller as rc
 from magnum.api.controllers.v1 import service
+from magnum.i18n import _
+
+
+BASE_VERSION = 1
+
+# NOTE(yuntong): v1.0 is reserved to indicate Kilo's API, but is not presently
+#             supported by the API service. All changes between Kilo and the
+#             point where we added microversioning are considered backwards-
+#             compatible, but are not specifically discoverable at this time.
+#
+#             The v1.1 version indicates this "initial" version as being
+#             different from Kilo (v1.0), and includes the following changes:
+#
+
+# v1.1: API at the point in time when microversioning support was added
+MIN_VER_STR = '1.1'
+
+# v1.1: Add API changelog here
+MAX_VER_STR = '1.1'
+
+
+MIN_VER = controllers_base.Version(
+    {controllers_base.Version.string: MIN_VER_STR}, MIN_VER_STR, MAX_VER_STR)
+MAX_VER = controllers_base.Version(
+    {controllers_base.Version.string: MAX_VER_STR},
+                       MIN_VER_STR, MAX_VER_STR)
 
 
 class APIBase(wtypes.Base):
@@ -175,5 +203,44 @@ class Controller(rest.RestController):
         #       request is because we need to get the host url from
         #       the request object to make the links.
         return V1.convert()
+
+    def _check_version(self, version, headers=None):
+        if headers is None:
+            headers = {}
+        # ensure that major version in the URL matches the header
+        if version.major != BASE_VERSION:
+            raise exc.HTTPNotAcceptable(_(
+                "Mutually exclusive versions requested. Version %(ver)s "
+                "requested but not supported by this service."
+                "The supported version range is: "
+                "[%(min)s, %(max)s].") % {'ver': version,
+                                          'min': MIN_VER_STR,
+                                          'max': MAX_VER_STR},
+                headers=headers)
+        # ensure the minor version is within the supported range
+        if version < MIN_VER or version > MAX_VER:
+            raise exc.HTTPNotAcceptable(_(
+                "Version %(ver)s was requested but the minor version is not "
+                "supported by this service. The supported version range is: "
+                "[%(min)s, %(max)s].") % {'ver': version, 'min': MIN_VER_STR,
+                                          'max': MAX_VER_STR}, headers=headers)
+
+    @pecan.expose()
+    def _route(self, args):
+        version = controllers_base.Version(
+            pecan.request.headers, MIN_VER_STR, MAX_VER_STR)
+
+        # Always set the min and max headers
+        pecan.response.headers[
+            controllers_base.Version.min_string] = MIN_VER_STR
+        pecan.response.headers[
+            controllers_base.Version.max_string] = MAX_VER_STR
+
+        # assert that requested version is supported
+        self._check_version(version, pecan.response.headers)
+        pecan.response.headers[controllers_base.Version.string] = str(version)
+        pecan.request.version = version
+
+        return super(Controller, self)._route(args)
 
 __all__ = (Controller)
