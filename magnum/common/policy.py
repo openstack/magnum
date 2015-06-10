@@ -15,8 +15,10 @@
 
 """Policy Engine For magnum."""
 
+import functools
 from oslo_config import cfg
 from oslo_policy import policy
+import pecan
 
 
 _ENFORCER = None
@@ -88,3 +90,30 @@ def enforce(context, action=None, target=None,
                   'user_id': context.user_id}
     return enforcer.enforce(action, target, credentials,
                             do_raise=do_raise, exc=exc, *args, **kwargs)
+
+
+# NOTE(Shaohe Feng): This decorator MUST appear first (the outermost
+# decorator) on an API method for it to work correctly
+def enforce_wsgi(api_name, act=None):
+    """This is a decorator to simplify wsgi action policy rule check.
+        :param api_name: The collection name to be evaluate.
+        :param act: The function name of wsgi action.
+
+       example:
+           from magnum.common import policy
+           class BaysController(rest.RestController):
+               ....
+               @policy.enforce_wsgi("bay", "delete")
+               @wsme_pecan.wsexpose(None, types.uuid_or_name, status_code=204)
+               def delete(self, bay_ident):
+                   ...
+    """
+    def wraper(fn):
+        action = "%s:%s" % (api_name, (act or fn.func_name))
+
+        @functools.wraps(fn)
+        def handle(self, *args, **kwargs):
+            enforce(pecan.request.context, action, None)
+            return fn(self, *args, **kwargs)
+        return handle
+    return wraper
