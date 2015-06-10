@@ -243,9 +243,9 @@ class ExecuteController(object):
                               % pecan.request.method))
         container_uuid = api_utils.get_rpc_resource('Container',
                                                     container_ident).uuid
-        LOG.debug('Calling conductor.container_execute with %s command %s'
+        LOG.debug('Calling conductor.container_exec with %s command %s'
                   % (container_uuid, command))
-        return pecan.request.rpcapi.container_execute(container_uuid, command)
+        return pecan.request.rpcapi.container_exec(container_uuid, command)
 
 
 class ContainersController(rest.RestController):

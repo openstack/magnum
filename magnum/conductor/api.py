@@ -150,8 +150,8 @@ class API(rpc_service.API):
     def container_logs(self, container_uuid):
         return self._call('container_logs', container_uuid=container_uuid)
 
-    def container_execute(self, container_uuid, command):
-        return self._call('container_execute', container_uuid=container_uuid,
+    def container_exec(self, container_uuid, command):
+        return self._call('container_exec', container_uuid=container_uuid,
                           command=command)
 
 
