@@ -18,7 +18,6 @@ from webob import exc
 import wsme
 from wsme import types as wtypes
 
-from magnum.common.exception import NotAcceptable
 from magnum.i18n import _
 
 
@@ -106,17 +105,15 @@ class Version(object):
         return version
 
     def __lt__(a, b):
-        if a.major != b.major:
-            raise NotAcceptable()
-
+        if (a.major < b.major):
+            return True
         if (a.major == b.major and a.minor < b.minor):
             return True
         return False
 
     def __gt__(a, b):
-        if a.major != b.major:
-            raise NotAcceptable()
-
+        if (a.major > b.major):
+            return True
         if (a.major == b.major and a.minor > b.minor):
             return True
         return False
