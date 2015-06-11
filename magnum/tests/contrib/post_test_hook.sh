@@ -70,7 +70,7 @@ nova keypair-add default
 
 # Run functional tests
 echo "Running magnum functional test suite"
-sudo -E -H -u jenkins tox -e functional
+sudo -E -H -u jenkins tox -e functional -- --concurrency=1
 EXIT_CODE=$?
 
 # Delete the keypair used in the functional test.
