@@ -15,7 +15,7 @@
 from oslo_config import cfg
 
 from magnum.common import exception
-from magnum.conductor.handlers import kube
+from magnum.conductor.handlers import k8s_conductor
 from magnum import objects
 from magnum.tests import base
 
@@ -24,16 +24,16 @@ from mock import patch
 from six.moves.urllib import error
 
 
-cfg.CONF.import_opt('k8s_protocol', 'magnum.conductor.handlers.kube',
+cfg.CONF.import_opt('k8s_protocol', 'magnum.conductor.handlers.k8s_conductor',
                     group='kubernetes')
-cfg.CONF.import_opt('k8s_port', 'magnum.conductor.handlers.kube',
+cfg.CONF.import_opt('k8s_port', 'magnum.conductor.handlers.k8s_conductor',
                     group='kubernetes')
 
 
-class TestKube(base.TestCase):
+class TestK8sConductor(base.TestCase):
     def setUp(self):
-        super(TestKube, self).setUp()
-        self.kube_handler = kube.Handler()
+        super(TestK8sConductor, self).setUp()
+        self.kube_handler = k8s_conductor.Handler()
 
     def mock_pod(self):
         return objects.Pod({})
@@ -59,7 +59,7 @@ class TestKube(base.TestCase):
         pod = self.mock_pod()
         pod.bay_uuid = expected_bay_uuid
 
-        kube._retrieve_bay(expected_context, pod)
+        k8s_conductor._retrieve_bay(expected_context, pod)
 
         mock_bay_get_by_uuid.assert_called_once_with(expected_context,
                                                      expected_bay_uuid)
@@ -86,8 +86,8 @@ class TestKube(base.TestCase):
         mock_bay_get_by_uuid.return_value = bay
         mock_baymodel_get_by_uuid.return_value = baymodel
 
-        actual_api_address = kube._retrieve_k8s_master_url(expected_context,
-                                                           pod)
+        actual_api_address = k8s_conductor._retrieve_k8s_master_url(
+            expected_context, pod)
         self.assertEqual("http://%s:%d" % (expected_api_address,
                                            expected_apiserver_port),
                          actual_api_address)
@@ -115,14 +115,14 @@ class TestKube(base.TestCase):
         mock_bay_get_by_uuid.return_value = bay
         mock_baymodel_get_by_uuid.return_value = baymodel
 
-        actual_api_address = kube._retrieve_k8s_master_url(expected_context,
-                                                           resource)
+        actual_api_address = k8s_conductor._retrieve_k8s_master_url(
+            expected_context, resource)
         self.assertEqual("%s://%s:%d" % (expected_protocol,
                                          expected_api_address,
                                          expected_apiserver_port),
                          actual_api_address)
 
-    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     def test_pod_create_with_success(self,
                                      mock_retrieve_k8s_master_url):
         expected_master_url = 'api_address'
@@ -139,7 +139,7 @@ class TestKube(base.TestCase):
             self.assertEqual('Pending', expected_pod.status)
             expected_pod.create.assert_called_once_with(self.context)
 
-    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     @patch('ast.literal_eval')
     def test_pod_create_with_fail(self, mock_literal_eval,
                                   mock_retrieve_k8s_master_url):
@@ -160,7 +160,7 @@ class TestKube(base.TestCase):
             self.assertEqual('failed', expected_pod.status)
             expected_pod.create.assert_called_once_with(self.context)
 
-    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     @patch('ast.literal_eval')
     def test_pod_create_fail_on_existing_pod(
             self, mock_literal_eval,
@@ -182,8 +182,8 @@ class TestKube(base.TestCase):
             self.assertEqual('failed', expected_pod.status)
             self.assertFalse(expected_pod.create.called)
 
-    @patch('magnum.conductor.handlers.kube._object_has_stack')
-    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.conductor.handlers.k8s_conductor._object_has_stack')
+    @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     @patch('magnum.objects.Pod.get_by_uuid')
     def test_pod_delete_with_success(self,
                                      mock_pod_get_by_uuid,
@@ -206,8 +206,8 @@ class TestKube(base.TestCase):
                 namespaces='default')
             mock_pod.destroy.assert_called_once_with(self.context)
 
-    @patch('magnum.conductor.handlers.kube._object_has_stack')
-    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.conductor.handlers.k8s_conductor._object_has_stack')
+    @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     @patch('magnum.objects.Pod.get_by_uuid')
     @patch('ast.literal_eval')
     def test_pod_delete_with_failure(self, mock_literal_eval,
@@ -236,8 +236,8 @@ class TestKube(base.TestCase):
                 namespaces='default')
             self.assertFalse(mock_pod.destroy.called)
 
-    @patch('magnum.conductor.handlers.kube._object_has_stack')
-    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.conductor.handlers.k8s_conductor._object_has_stack')
+    @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     @patch('magnum.objects.Pod.get_by_uuid')
     @patch('ast.literal_eval')
     def test_pod_delete_succeeds_when_not_found(
@@ -265,7 +265,7 @@ class TestKube(base.TestCase):
                 name=mock_pod.name, namespaces='default')
             mock_pod.destroy.assert_called_once_with(self.context)
 
-    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     def test_service_create_with_success(self,
                                          mock_retrieve_k8s_master_url):
         expected_master_url = 'api_address'
@@ -282,7 +282,7 @@ class TestKube(base.TestCase):
                 body=manifest, namespaces='default')
             expected_service.create.assert_called_once_with(self.context)
 
-    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     @patch('ast.literal_eval')
     def test_service_create_with_failure(self, mock_literal_eval,
                                          mock_retrieve_k8s_master_url):
@@ -306,8 +306,8 @@ class TestKube(base.TestCase):
                 body=manifest, namespaces='default')
             self.assertFalse(expected_service.create.called)
 
-    @patch('magnum.conductor.handlers.kube._object_has_stack')
-    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.conductor.handlers.k8s_conductor._object_has_stack')
+    @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     @patch('magnum.objects.Service.get_by_uuid')
     def test_service_delete_with_success(
             self,
@@ -330,8 +330,8 @@ class TestKube(base.TestCase):
                 name=mock_service.name, namespaces='default')
             mock_service.destroy.assert_called_once_with(self.context)
 
-    @patch('magnum.conductor.handlers.kube._object_has_stack')
-    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.conductor.handlers.k8s_conductor._object_has_stack')
+    @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     @patch('magnum.objects.Service.get_by_uuid')
     @patch('ast.literal_eval')
     def test_service_delete_with_failure(
@@ -361,8 +361,8 @@ class TestKube(base.TestCase):
                 name=mock_service.name, namespaces='default')
             self.assertFalse(mock_service.destroy.called)
 
-    @patch('magnum.conductor.handlers.kube._object_has_stack')
-    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.conductor.handlers.k8s_conductor._object_has_stack')
+    @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     @patch('magnum.objects.Service.get_by_uuid')
     @patch('ast.literal_eval')
     def test_service_delete_succeeds_when_not_found(
@@ -390,7 +390,7 @@ class TestKube(base.TestCase):
                 name=mock_service.name, namespaces='default')
             mock_service.destroy.assert_called_once_with(self.context)
 
-    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     def test_rc_create_with_success(self,
                                     mock_retrieve_k8s_master_url):
         expected_master_url = 'api_address'
@@ -406,7 +406,7 @@ class TestKube(base.TestCase):
             mock_kube_api.createReplicationController.assert_called_once_with(
                 body=manifest, namespaces='default')
 
-    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     @patch('ast.literal_eval')
     def test_rc_create_with_failure(self, mock_literal_eval,
                                     mock_retrieve_k8s_master_url):
@@ -430,8 +430,8 @@ class TestKube(base.TestCase):
                 body=manifest, namespaces='default')
             self.assertFalse(expected_rc.create.called)
 
-    @patch('magnum.conductor.handlers.kube._object_has_stack')
-    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.conductor.handlers.k8s_conductor._object_has_stack')
+    @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     @patch('magnum.objects.ReplicationController.get_by_uuid')
     def test_rc_delete_with_success(self,
                                     mock_rc_get_by_uuid,
@@ -453,8 +453,8 @@ class TestKube(base.TestCase):
                 name=mock_rc.name, namespaces='default')
             mock_rc.destroy.assert_called_once_with(self.context)
 
-    @patch('magnum.conductor.handlers.kube._object_has_stack')
-    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.conductor.handlers.k8s_conductor._object_has_stack')
+    @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     @patch('magnum.objects.ReplicationController.get_by_uuid')
     @patch('ast.literal_eval')
     def test_rc_delete_with_failure(self, mock_literal_eval,
@@ -483,8 +483,8 @@ class TestKube(base.TestCase):
                 name=mock_rc.name, namespaces='default')
             self.assertFalse(mock_rc.destroy.called)
 
-    @patch('magnum.conductor.handlers.kube._object_has_stack')
-    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.conductor.handlers.k8s_conductor._object_has_stack')
+    @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     @patch('magnum.objects.ReplicationController.get_by_uuid')
     @patch('ast.literal_eval')
     def test_rc_delete_succeeds_when_not_found(
@@ -512,7 +512,7 @@ class TestKube(base.TestCase):
                 name=mock_rc.name, namespaces='default')
             self.assertTrue(mock_rc.destroy.called)
 
-    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     def test_rc_update_with_success(self,
                                     mock_retrieve_k8s_master_url):
         expected_master_url = 'api_address'
@@ -533,7 +533,7 @@ class TestKube(base.TestCase):
             expected_rc.refresh.assert_called_once_with(self.context)
             expected_rc.save.assert_called_once_with()
 
-    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     @patch('ast.literal_eval')
     def test_rc_update_with_failure(self, mock_literal_eval,
                                     mock_retrieve_k8s_master_url):
@@ -560,7 +560,7 @@ class TestKube(base.TestCase):
                 namespaces='default')
             self.assertFalse(expected_rc.update.called)
 
-    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     def test_service_update_with_success(self,
                                          mock_retrieve_k8s_master_url):
         expected_master_url = 'api_address'
@@ -582,7 +582,7 @@ class TestKube(base.TestCase):
             expected_service.refresh.assert_called_once_with(self.context)
             expected_service.save.assert_called_once_with()
 
-    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     @patch('ast.literal_eval')
     def test_service_update_with_failure(self, mock_literal_eval,
                                          mock_retrieve_k8s_master_url):
@@ -608,7 +608,7 @@ class TestKube(base.TestCase):
                 namespaces='default')
             self.assertFalse(expected_service.refresh.called)
 
-    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     def test_pod_update_with_success(self,
                                      mock_retrieve_k8s_master_url):
         expected_master_url = 'api_address'
@@ -630,7 +630,7 @@ class TestKube(base.TestCase):
             expected_pod.refresh.assert_called_once_with(self.context)
             expected_pod.save.assert_called_once_with()
 
-    @patch('magnum.conductor.handlers.kube._retrieve_k8s_master_url')
+    @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     @patch('ast.literal_eval')
     def test_pod_update_with_failure(self, mock_literal_eval,
                                      mock_retrieve_k8s_master_url):
