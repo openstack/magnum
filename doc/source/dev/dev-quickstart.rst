@@ -232,13 +232,14 @@ confused.
 Kubernetes provides a number of examples you can use to check that things
 are working. You may need to clone kubernetes by::
 
-    git clone https://github.com/GoogleCloudPlatform/kubernetes.git
+    wget https://github.com/GoogleCloudPlatform/kubernetes/releases/download/v0.15.0/kubernetes.tar.gz
+    tar -xvzf kubernetes.tar.gz
 
 (No require to install it, we just use the example file)
 Here's how to set up the replicated redis example. First, create
 a pod for the redis-master::
 
-    cd kubernetes/examples/redis/
+    cd kubernetes/examples/redis/v1beta3
     magnum pod-create --manifest ./redis-master.yaml --bay testbay
 
 Now turn up a service to provide a discoverable endpoint for the redis sentinels
