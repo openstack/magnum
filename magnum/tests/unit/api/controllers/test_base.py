@@ -10,6 +10,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import mock
+from webob import exc
+
 from magnum.api.controllers import base
 from magnum.tests import base as test_base
 
@@ -72,3 +75,58 @@ class TestVersion(test_base.TestCase):
 
         self.assertEqual(self.a.major, self.b.major)
         self.assertEqual(1 > 2, self.a > self.b)
+
+    @mock.patch('magnum.api.controllers.base.Version.parse_headers')
+    def test_init(self, mock_parse):
+        a = mock.Mock()
+        b = mock.Mock()
+        mock_parse.return_value = (a, b)
+        v = base.Version('test', 'foo', 'bar')
+
+        mock_parse.assert_called_with('test', 'foo', 'bar')
+        self.assertEqual(a, v.major)
+        self.assertEqual(b, v.minor)
+
+    @mock.patch('magnum.api.controllers.base.Version.parse_headers')
+    def test_repr(self, mock_parse):
+        mock_parse.return_value = (123, 456)
+        v = base.Version('test', mock.ANY, mock.ANY)
+        result = "%s" % v
+        self.assertEqual('123.456', result)
+
+    @mock.patch('magnum.api.controllers.base.Version.parse_headers')
+    def test_repr_with_strings(self, mock_parse):
+        mock_parse.return_value = ('abc', 'def')
+        v = base.Version('test', mock.ANY, mock.ANY)
+        result = "%s" % v
+        self.assertEqual('abc.def', result)
+
+    def test_parse_headers_ok(self):
+        version = base.Version.parse_headers(
+            {base.Version.string: '123.456'}, mock.ANY, mock.ANY)
+        self.assertEqual((123, 456), version)
+
+    def test_parse_headers_latest(self):
+        for s in ['latest', 'LATEST']:
+            version = base.Version.parse_headers(
+                {base.Version.string: s}, mock.ANY, '1.9')
+            self.assertEqual((1, 9), version)
+
+    def test_parse_headers_bad_length(self):
+        self.assertRaises(
+            exc.HTTPNotAcceptable,
+            base.Version.parse_headers,
+            {base.Version.string: '1'},
+            mock.ANY,
+            mock.ANY)
+        self.assertRaises(
+            exc.HTTPNotAcceptable,
+            base.Version.parse_headers,
+            {base.Version.string: '1.2.3'},
+            mock.ANY,
+            mock.ANY)
+
+    def test_parse_no_header(self):
+        # this asserts that the minimum version string of "1.1" is applied
+        version = base.Version.parse_headers({}, '1.1', '1.5')
+        self.assertEqual((1, 1), version)
