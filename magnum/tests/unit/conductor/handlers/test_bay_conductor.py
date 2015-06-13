@@ -745,3 +745,77 @@ class TestBayConductorWithSwarm(base.TestCase):
             'discovery_url': 'test_discovery'
         }
         self.assertEqual(expected, definition)
+
+
+class TestBayConductorWithMesos(base.TestCase):
+    def setUp(self):
+        super(TestBayConductorWithMesos, self).setUp()
+        self.baymodel_dict = {
+            'image_id': 'image_id',
+            'flavor_id': 'flavor_id',
+            'master_flavor_id': 'master_flavor_id',
+            'keypair_id': 'keypair_id',
+            'dns_nameserver': 'dns_nameserver',
+            'external_network_id': 'external_network_id',
+            'fixed_network': '10.2.0.0/22',
+            'cluster_distro': 'ubuntu',
+            'coe': 'mesos'
+        }
+        self.bay_dict = {
+            'id': 1,
+            'uuid': 'some_uuid',
+            'baymodel_id': 'xx-xx-xx-xx',
+            'name': 'bay1',
+            'stack_id': 'xx-xx-xx-xx',
+            'api_address': '172.17.2.3',
+            'node_addresses': ['172.17.2.4'],
+            'node_count': 1,
+        }
+
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_template_definition_all_values(
+            self,
+            mock_objects_baymodel_get_by_uuid):
+        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        bay = objects.Bay(self.context, **self.bay_dict)
+
+        (template_path,
+         definition) = bay_conductor._extract_template_definition(self.context,
+                                                                  bay)
+
+        expected = {
+            'ssh_key_name': 'keypair_id',
+            'external_network': 'external_network_id',
+            'dns_nameserver': 'dns_nameserver',
+            'server_image': 'image_id',
+            'master_flavor': 'master_flavor_id',
+            'slave_flavor': 'flavor_id',
+            'number_of_slaves': '1',
+            'fixed_network_cidr': '10.2.0.0/22'
+        }
+        self.assertEqual(expected, definition)
+
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_template_definition_only_required(
+            self,
+            mock_objects_baymodel_get_by_uuid):
+        not_required = ['image_id', 'master_flavor_id', 'flavor_id',
+                        'dns_nameserver', 'fixed_network']
+        for key in not_required:
+            self.baymodel_dict[key] = None
+
+        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        bay = objects.Bay(self.context, **self.bay_dict)
+
+        (template_path,
+         definition) = bay_conductor._extract_template_definition(self.context,
+                                                                  bay)
+
+        expected = {
+            'ssh_key_name': 'keypair_id',
+            'external_network': 'external_network_id',
+            'number_of_slaves': '1',
+        }
+        self.assertEqual(expected, definition)
