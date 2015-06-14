@@ -31,7 +31,7 @@ class V1beta3_ReplicationControllerSpec(object):
             'replicas': 'int',
             
             
-            'selector': 'any',
+            'selector': 'dict',
             
             
             'template': 'V1beta3_PodTemplateSpec',

@@ -67,7 +67,9 @@ class V1beta3_Service(object):
             'status': 'V1beta3_ServiceStatus',
             
             
-            'uid': 'str'
+            'uid': 'str',
+
+            'metadata': 'dict'
             
         }
 
@@ -99,7 +101,9 @@ class V1beta3_Service(object):
             
             'status': 'status',
             
-            'uid': 'uid'
+            'uid': 'uid',
+
+            'metadata': 'metadata'
             
         }       
 
@@ -159,4 +163,5 @@ class V1beta3_Service(object):
         #unique UUID across space and time; populated by the system; read-only
         
         self.uid = None # str
-        
+
+        self.metadata = None # dict

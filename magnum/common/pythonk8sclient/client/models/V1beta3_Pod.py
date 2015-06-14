@@ -67,7 +67,9 @@ class V1beta3_Pod(object):
             'status': 'V1beta3_PodStatus',
             
             
-            'uid': 'str'
+            'uid': 'str',
+
+            'metadata': 'dict'
             
         }
 
@@ -99,7 +101,9 @@ class V1beta3_Pod(object):
             
             'status': 'status',
             
-            'uid': 'uid'
+            'uid': 'uid',
+
+            'metadata': 'metadata'
             
         }       
 
@@ -159,4 +163,6 @@ class V1beta3_Pod(object):
         #unique UUID across space and time; populated by the system; read-only
         
         self.uid = None # str
+
+        self.metadata = None # dict
         

@@ -46,8 +46,9 @@ class V1beta3_PodSpec(object):
             'restartPolicy': 'str',
             
             
-            'volumes': 'list[V1beta3_Volume]'
-            
+            'volumes': 'list[V1beta3_Volume]',
+
+            'metadata': 'dict'
         }
 
         self.attributeMap = {
@@ -64,7 +65,9 @@ class V1beta3_PodSpec(object):
             
             'restartPolicy': 'restartPolicy',
             
-            'volumes': 'volumes'
+            'volumes': 'volumes',
+
+            'metadata': 'metadata'
             
         }       
 
@@ -96,4 +99,5 @@ class V1beta3_PodSpec(object):
         #list of volumes that can be mounted by containers belonging to the pod
         
         self.volumes = None # list[V1beta3_Volume]
-        
+
+        self.metadata = None # dict
