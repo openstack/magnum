@@ -132,8 +132,10 @@ class TestK8sConductor(base.TestCase):
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
         with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
-            mock_kube_api.createPod.return_value = {'status':
-                                                    {'phase': 'Pending'}}
+            return_value = mock.MagicMock()
+            return_value.status = mock.MagicMock()
+            return_value.status.phase = 'Pending'
+            mock_kube_api.createPod.return_value = return_value
 
             self.kube_handler.pod_create(self.context, expected_pod)
             self.assertEqual('Pending', expected_pod.status)

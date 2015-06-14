@@ -2410,7 +2410,11 @@ class ApivbetaApi(object):
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
                                           postData, headerParams, files=files)
 
-        return response
+        if not response:
+            return None
+
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_Pod')
+        return responseObject
 
         
         
@@ -2560,7 +2564,11 @@ class ApivbetaApi(object):
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
                                           postData, headerParams, files=files)
 
-        return response
+        if not response:
+            return None
+
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_Pod')
+        return responseObject
 
         
         
@@ -2636,6 +2644,11 @@ class ApivbetaApi(object):
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
                                           postData, headerParams, files=files)
 
+        if not response:
+            return None
+
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_PodStatus')
+        return responseObject
         
         
         
@@ -3014,7 +3027,11 @@ class ApivbetaApi(object):
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
                                           postData, headerParams, files=files)
 
-        return response
+        if not response:
+            return None
+
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_ReplicationController')
+        return responseObject
 
         
         
@@ -3164,7 +3181,11 @@ class ApivbetaApi(object):
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
                                           postData, headerParams, files=files)
 
-        return response
+        if not response:
+            return None
+
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_ReplicationController')
+        return responseObject
 
         
         
@@ -3240,6 +3261,11 @@ class ApivbetaApi(object):
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
                                           postData, headerParams, files=files)
 
+        if not response:
+            return None
+
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_ReplicationControllerStatus')
+        return responseObject
         
         
         
@@ -4436,7 +4462,11 @@ class ApivbetaApi(object):
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
                                           postData, headerParams, files=files)
 
-        return response
+        if not response:
+            return None
+
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_Service')
+        return responseObject
 
         
         
@@ -4586,7 +4616,11 @@ class ApivbetaApi(object):
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
                                           postData, headerParams, files=files)
 
-        return response
+        if not response:
+            return None
+
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_Service')
+        return responseObject
 
         
         
@@ -4656,6 +4690,11 @@ class ApivbetaApi(object):
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
                                           postData, headerParams, files=files)
 
+        if not response:
+            return None
+
+        responseObject = self.apiClient.deserialize(response, 'V1beta3_ServiceStatus')
+        return responseObject
         
         
         
