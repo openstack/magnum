@@ -208,7 +208,7 @@ The baymodel informs Magnum in which way to construct a bay.::
 Next create a bay. Use the baymodel UUID as a template for bay creation.
 This bay will result in one master kubernetes node and two minion nodes.::
 
-    magnum bay-create --name k8sbay --baymodel k8sbaymodel --node-count 2
+    magnum bay-create --name k8sbay --baymodel k8sbaymodel --node-count 1
 
 The existing bays can be listed as follows::
 
@@ -225,8 +225,19 @@ confused.
     +--------------------------------------+---------+------------+-----------------+
     | uuid                                 | name    | node_count | status          |
     +--------------------------------------+---------+------------+-----------------+
-    | 9dccb1e6-02dc-4e2b-b897-10656c5339ce | k8sbay  | 2          | CREATE_COMPLETE |
+    | 9dccb1e6-02dc-4e2b-b897-10656c5339ce | k8sbay  | 1          | CREATE_COMPLETE |
     +--------------------------------------+---------+------------+-----------------+
+
+After a bay is created, you can dynamically add/remove node(s) to/from the bay
+by updating the node_count attribute. For example, to add one more node::
+
+    magnum bay-update k8sbay replace node_count=2
+
+Bays will have an initial status of UPDATE_IN_PROGRESS. Magnum will update
+the status to UPDATE_COMPLETE when it is done updating the bay.
+
+NOTE: Reducing node_count will remove all your existing containers on the nodes
+that are deleted.
 
 Kubernetes provides a number of examples you can use to check that things
 are working. You may need to clone kubernetes by::
