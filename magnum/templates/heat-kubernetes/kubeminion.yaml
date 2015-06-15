@@ -30,12 +30,12 @@ parameters:
     type: string
     description: >
       whether or not kubernetes should permit privileged containers.
-    default: "false"
+    default: false
     constraints:
-      - allowed_values: ["true", "false"]
+      - allowed_values: [true, false]
 
   docker_volume_size:
-    type: string
+    type: number
     description: >
       size of a cinder volume to allocate to docker for container/image
       storage
@@ -68,14 +68,8 @@ resources:
       handle: {get_resource: minion_wait_handle}
       timeout: {get_param: wait_condition_timeout}
 
-  ######################################################################
-  #
-  # security groups.  we need to permit network traffic of various
-  # sorts.
-  #
-
   secgroup_all_open:
-    type: "OS::Neutron::SecurityGroup"
+    type: OS::Neutron::SecurityGroup
     properties:
       rules:
         - protocol: icmp
@@ -89,25 +83,25 @@ resources:
   #
 
   write_heat_params:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config:
         str_replace:
           template: {get_file: fragments/write-heat-params.yaml}
           params:
-            "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
-            "$KUBE_MASTER_IP": {get_param: kube_master_ip}
-            "$DOCKER_VOLUME": {get_resource: docker_volume}
+            $KUBE_ALLOW_PRIV: {get_param: kube_allow_priv}
+            $KUBE_MASTER_IP: {get_param: kube_master_ip}
+            $DOCKER_VOLUME: {get_resource: docker_volume}
 
   add_to_docker_group:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/add-to-docker-group.sh}
 
   configure_docker_storage:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/configure-docker-storage.sh}
@@ -119,31 +113,31 @@ resources:
       config: {get_file: fragments/kube-register.yaml}
 
   configure_kubernetes_minion:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/configure-kubernetes-minion.sh}
 
   kube_user:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/kube-user.yaml}
 
   kube_examples:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/kube-examples.yaml}
 
   docker_service:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/docker.service.yaml}
 
   enable_services:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/enable-services-minion.sh}
@@ -161,13 +155,13 @@ resources:
             wc_notify: {get_attr: [minion_wait_handle, curl_cli]}
 
   disable_selinux:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/disable-selinux.sh}
 
   kube_minion_init:
-    type: "OS::Heat::MultipartMime"
+    type: OS::Heat::MultipartMime
     properties:
       parts:
         - config: {get_resource: disable_selinux}
@@ -182,48 +176,51 @@ resources:
         - config: {get_resource: enable_services}
         - config: {get_resource: minion_wc_notify}
 
+  ######################################################################
+  #
+  # a single kubernetes minion.
+  #
+
   kube_minion:
-    type: "OS::Nova::Server"
+    type: OS::Nova::Server
     properties:
-      image:
-        get_param: server_image
-      flavor:
-        get_param: minion_flavor
-      key_name:
-        get_param: ssh_key_name
+      image: {get_param: server_image}
+      flavor: {get_param: minion_flavor}
+      key_name: {get_param: ssh_key_name}
       user_data_format: RAW
       user_data: {get_resource: kube_minion_init}
       networks:
-        - port:
-            get_resource: kube_minion_eth0
+        - port: {get_resource: kube_minion_eth0}
 
   kube_minion_eth0:
-    type: "OS::Neutron::Port"
+    type: OS::Neutron::Port
     properties:
-      network:
-        get_param: fixed_network
+      network: {get_param: fixed_network}
       security_groups:
         - get_resource: secgroup_all_open
       fixed_ips:
-        - subnet:
-            get_param: fixed_subnet
+        - subnet: {get_param: fixed_subnet}
       replacement_policy: AUTO
 
   kube_minion_floating:
-    type: "OS::Neutron::FloatingIP"
+    type: OS::Neutron::FloatingIP
     properties:
-      floating_network:
-        get_param: external_network
-      port_id:
-        get_resource: kube_minion_eth0
+      floating_network: {get_param: external_network}
+      port_id: {get_resource: kube_minion_eth0}
+
+  ######################################################################
+  #
+  # docker storage.  This allocates a cinder volume and attaches it
+  # to the minion.
+  #
 
   docker_volume:
-    type: "OS::Cinder::Volume"
+    type: OS::Cinder::Volume
     properties:
       size: {get_param: docker_volume_size}
 
   docker_volume_attach:
-    type: "OS::Cinder::VolumeAttachment"
+    type: OS::Cinder::VolumeAttachment
     properties:
       instance_uuid: {get_resource: kube_minion}
       volume_id: {get_resource: docker_volume}
@@ -232,7 +229,5 @@ outputs:
 
   kube_minion_ip:
     value: {get_attr: [kube_minion_eth0, fixed_ips, 0, ip_address]}
-
   kube_minion_external_ip:
     value: {get_attr: [kube_minion_floating, floating_ip_address]}
-
