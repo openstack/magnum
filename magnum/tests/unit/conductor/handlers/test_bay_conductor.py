@@ -67,6 +67,17 @@ class TestBayConductorWithK8s(base.TestCase):
     def test_extract_template_definition(
             self,
             mock_objects_baymodel_get_by_uuid):
+        self._test_extract_template_definition(
+            mock_objects_baymodel_get_by_uuid)
+
+    def _test_extract_template_definition(
+            self,
+            mock_objects_baymodel_get_by_uuid,
+            missing_attr=None):
+        if missing_attr in self.baymodel_dict:
+            self.baymodel_dict[missing_attr] = None
+        elif missing_attr in self.bay_dict:
+            self.bay_dict[missing_attr] = None
         baymodel = objects.BayModel(self.context, **self.baymodel_dict)
         mock_objects_baymodel_get_by_uuid.return_value = baymodel
         bay = objects.Bay(self.context, **self.bay_dict)
@@ -75,6 +86,16 @@ class TestBayConductorWithK8s(base.TestCase):
          definition) = bay_conductor._extract_template_definition(self.context,
                                                                   bay)
 
+        mapping = {
+            'dns_nameserver': 'dns_nameserver',
+            'image_id': 'server_image',
+            'flavor_id': 'minion_flavor',
+            'docker_volume_size': 'docker_volume_size',
+            'fixed_network': 'fixed_network_cidr',
+            'master_flavor_id': 'master_flavor',
+            'apiserver_port': '',
+            'node_count': 'number_of_minions'
+        }
         expected = {
             'ssh_key_name': 'keypair_id',
             'external_network_id': 'external_network_id',
@@ -86,6 +107,9 @@ class TestBayConductorWithK8s(base.TestCase):
             'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
         }
+        if missing_attr is not None:
+            expected.pop(mapping[missing_attr], None)
+
         self.assertEqual(expected, definition)
 
     @patch('requests.get')
@@ -164,161 +188,49 @@ class TestBayConductorWithK8s(base.TestCase):
     def test_extract_template_definition_without_dns(
             self,
             mock_objects_baymodel_get_by_uuid):
-        baymodel_dict = self.baymodel_dict
-        baymodel_dict['dns_nameserver'] = None
-        baymodel = objects.BayModel(self.context, **baymodel_dict)
-        mock_objects_baymodel_get_by_uuid.return_value = baymodel
-        bay = objects.Bay(self.context, **self.bay_dict)
-
-        (template_path,
-         definition) = bay_conductor._extract_template_definition(
-            self.context,
-            bay)
-
-        expected = {
-            'ssh_key_name': 'keypair_id',
-            'external_network_id': 'external_network_id',
-            'server_image': 'image_id',
-            'minion_flavor': 'flavor_id',
-            'master_flavor': 'master_flavor_id',
-            'number_of_minions': '1',
-            'fixed_network_cidr': '10.20.30.0/24',
-            'docker_volume_size': 20,
-        }
-        self.assertEqual(expected, definition)
+        self._test_extract_template_definition(
+            mock_objects_baymodel_get_by_uuid,
+            missing_attr='dns_nameserver')
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_without_server_image(
             self,
             mock_objects_baymodel_get_by_uuid):
-        baymodel_dict = self.baymodel_dict
-        baymodel_dict['image_id'] = None
-        baymodel = objects.BayModel(self.context, **baymodel_dict)
-        mock_objects_baymodel_get_by_uuid.return_value = baymodel
-        bay = objects.Bay(self.context, **self.bay_dict)
-
-        (template_path,
-         definition) = bay_conductor._extract_template_definition(
-            self.context,
-            bay)
-
-        expected = {
-            'ssh_key_name': 'keypair_id',
-            'external_network_id': 'external_network_id',
-            'dns_nameserver': 'dns_nameserver',
-            'minion_flavor': 'flavor_id',
-            'master_flavor': 'master_flavor_id',
-            'number_of_minions': '1',
-            'fixed_network_cidr': '10.20.30.0/24',
-            'docker_volume_size': 20,
-        }
-        self.assertEqual(expected, definition)
+        self._test_extract_template_definition(
+            mock_objects_baymodel_get_by_uuid,
+            missing_attr='image_id')
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_without_minion_flavor(
             self,
             mock_objects_baymodel_get_by_uuid):
-        baymodel_dict = self.baymodel_dict
-        baymodel_dict['flavor_id'] = None
-        baymodel = objects.BayModel(self.context, **baymodel_dict)
-        mock_objects_baymodel_get_by_uuid.return_value = baymodel
-        bay = objects.Bay(self.context, **self.bay_dict)
-
-        (template_path,
-         definition) = bay_conductor._extract_template_definition(
-            self.context,
-            bay)
-
-        expected = {
-            'ssh_key_name': 'keypair_id',
-            'external_network_id': 'external_network_id',
-            'dns_nameserver': 'dns_nameserver',
-            'server_image': 'image_id',
-            'master_flavor': 'master_flavor_id',
-            'number_of_minions': '1',
-            'fixed_network_cidr': '10.20.30.0/24',
-            'docker_volume_size': 20,
-        }
-        self.assertEqual(expected, definition)
+        self._test_extract_template_definition(
+            mock_objects_baymodel_get_by_uuid,
+            missing_attr='flavor_id')
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_without_docker_volume_size(
             self,
             mock_objects_baymodel_get_by_uuid):
-        baymodel_dict = self.baymodel_dict
-        baymodel_dict['docker_volume_size'] = None
-        baymodel = objects.BayModel(self.context, **baymodel_dict)
-        mock_objects_baymodel_get_by_uuid.return_value = baymodel
-        bay = objects.Bay(self.context, **self.bay_dict)
-
-        (template_path,
-         definition) = bay_conductor._extract_template_definition(self.context,
-                                                                  bay)
-
-        expected = {
-            'ssh_key_name': 'keypair_id',
-            'external_network_id': 'external_network_id',
-            'dns_nameserver': 'dns_nameserver',
-            'server_image': 'image_id',
-            'minion_flavor': 'flavor_id',
-            'fixed_network_cidr': '10.20.30.0/24',
-            'master_flavor': 'master_flavor_id',
-            'number_of_minions': '1',
-        }
-        self.assertEqual(expected, definition)
+        self._test_extract_template_definition(
+            mock_objects_baymodel_get_by_uuid,
+            missing_attr='docker_volume_size')
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_without_fixed_network(
             self,
             mock_objects_baymodel_get_by_uuid):
-        baymodel_dict = self.baymodel_dict
-        baymodel_dict['fixed_network'] = None
-        baymodel = objects.BayModel(self.context, **baymodel_dict)
-        mock_objects_baymodel_get_by_uuid.return_value = baymodel
-        bay = objects.Bay(self.context, **self.bay_dict)
-
-        (template_path,
-         definition) = bay_conductor._extract_template_definition(self.context,
-                                                                  bay)
-
-        expected = {
-            'ssh_key_name': 'keypair_id',
-            'external_network_id': 'external_network_id',
-            'dns_nameserver': 'dns_nameserver',
-            'server_image': 'image_id',
-            'master_flavor': 'master_flavor_id',
-            'minion_flavor': 'flavor_id',
-            'number_of_minions': '1',
-            'docker_volume_size': 20,
-        }
-        self.assertEqual(expected, definition)
+        self._test_extract_template_definition(
+            mock_objects_baymodel_get_by_uuid,
+            missing_attr='fixed_network')
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_without_master_flavor(
             self,
             mock_objects_baymodel_get_by_uuid):
-        baymodel_dict = self.baymodel_dict
-        baymodel_dict['master_flavor_id'] = None
-        baymodel = objects.BayModel(self.context, **baymodel_dict)
-        mock_objects_baymodel_get_by_uuid.return_value = baymodel
-        bay = objects.Bay(self.context, **self.bay_dict)
-
-        (template_path,
-         definition) = bay_conductor._extract_template_definition(
-            self.context,
-            bay)
-
-        expected = {
-            'ssh_key_name': 'keypair_id',
-            'external_network_id': 'external_network_id',
-            'dns_nameserver': 'dns_nameserver',
-            'server_image': 'image_id',
-            'minion_flavor': 'flavor_id',
-            'number_of_minions': '1',
-            'fixed_network_cidr': '10.20.30.0/24',
-            'docker_volume_size': 20,
-        }
-        self.assertEqual(expected, definition)
+        self._test_extract_template_definition(
+            mock_objects_baymodel_get_by_uuid,
+            missing_attr='master_flavor_id')
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_without_ssh_authorized_key(
@@ -354,55 +266,17 @@ class TestBayConductorWithK8s(base.TestCase):
     def test_extract_template_definition_without_apiserver_port(
             self,
             mock_objects_baymodel_get_by_uuid):
-        baymodel_dict = self.baymodel_dict
-        baymodel_dict['apiserver_port'] = None
-        baymodel = objects.BayModel(self.context, **baymodel_dict)
-        mock_objects_baymodel_get_by_uuid.return_value = baymodel
-        bay = objects.Bay(self.context, **self.bay_dict)
-
-        (template_path,
-         definition) = bay_conductor._extract_template_definition(
-            self.context,
-            bay)
-
-        expected = {
-            'ssh_key_name': 'keypair_id',
-            'external_network_id': 'external_network_id',
-            'dns_nameserver': 'dns_nameserver',
-            'server_image': 'image_id',
-            'minion_flavor': 'flavor_id',
-            'master_flavor': 'master_flavor_id',
-            'number_of_minions': '1',
-            'fixed_network_cidr': '10.20.30.0/24',
-            'docker_volume_size': 20,
-        }
-        self.assertEqual(expected, definition)
+        self._test_extract_template_definition(
+            mock_objects_baymodel_get_by_uuid,
+            missing_attr='apiserver_port')
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_without_node_count(
             self,
             mock_objects_baymodel_get_by_uuid):
-        bay_dict = self.bay_dict
-        bay_dict['node_count'] = None
-        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
-        mock_objects_baymodel_get_by_uuid.return_value = baymodel
-        bay = objects.Bay(self.context, **bay_dict)
-
-        (template_path,
-         definition) = bay_conductor._extract_template_definition(self.context,
-                                                                  bay)
-
-        expected = {
-            'ssh_key_name': 'keypair_id',
-            'external_network_id': 'external_network_id',
-            'dns_nameserver': 'dns_nameserver',
-            'server_image': 'image_id',
-            'minion_flavor': 'flavor_id',
-            'fixed_network_cidr': '10.20.30.0/24',
-            'master_flavor': 'master_flavor_id',
-            'docker_volume_size': 20,
-        }
-        self.assertEqual(expected, definition)
+        self._test_extract_template_definition(
+            mock_objects_baymodel_get_by_uuid,
+            missing_attr='node_count')
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_update_stack_outputs(self, mock_objects_baymodel_get_by_uuid):
