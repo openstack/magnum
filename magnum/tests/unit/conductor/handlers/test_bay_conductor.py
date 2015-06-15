@@ -52,6 +52,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'labels': {'flannel_network_cidr': '10.101.0.0/16',
                        'flannel_network_subnetlen': '26',
                        'flannel_use_vxlan': 'yes'},
+
         }
         self.bay_dict = {
             'baymodel_id': 'xx-xx-xx-xx',
@@ -66,6 +67,9 @@ class TestBayConductorWithK8s(base.TestCase):
             'ca_cert_ref': 'http://barbican/v1/containers/xx-xx-xx-xx',
             'magnum_cert_ref': 'http://barbican/v1/containers/xx-xx-xx-xx',
         }
+        self.context.auth_url = 'http://192.168.10.10:5000/v3'
+        self.context.user_name = 'fake_user'
+        self.context.tenant = 'fake_tenant'
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition(
@@ -128,6 +132,9 @@ class TestBayConductorWithK8s(base.TestCase):
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
+            'auth_url': 'http://192.168.10.10:5000/v2',
+            'tenant_name': 'fake_tenant',
+            'username': 'fake_user',
         }
         if missing_attr is not None:
             expected.pop(mapping[missing_attr], None)
@@ -176,6 +183,9 @@ class TestBayConductorWithK8s(base.TestCase):
             'flannel_network_cidr': '10.101.0.0/16',
             'flannel_network_subnetlen': '26',
             'flannel_use_vxlan': 'yes',
+            'auth_url': 'http://192.168.10.10:5000/v2',
+            'tenant_name': 'fake_tenant',
+            'username': 'fake_user',
         }
         self.assertEqual(expected, definition)
 
@@ -221,6 +231,9 @@ class TestBayConductorWithK8s(base.TestCase):
             'flannel_network_cidr': '10.101.0.0/16',
             'flannel_network_subnetlen': '26',
             'flannel_use_vxlan': 'yes',
+            'auth_url': 'http://192.168.10.10:5000/v2',
+            'tenant_name': 'fake_tenant',
+            'username': 'fake_user',
         }
         self.assertEqual(expected, definition)
 
@@ -306,6 +319,9 @@ class TestBayConductorWithK8s(base.TestCase):
             'flannel_network_cidr': '10.101.0.0/16',
             'flannel_network_subnetlen': '26',
             'flannel_use_vxlan': 'yes',
+            'auth_url': 'http://192.168.10.10:5000/v2',
+            'tenant_name': 'fake_tenant',
+            'username': 'fake_user',
         }
         self.assertIn('token', definition)
         del definition['token']
@@ -376,6 +392,9 @@ class TestBayConductorWithK8s(base.TestCase):
             'flannel_network_cidr': '10.101.0.0/16',
             'flannel_network_subnetlen': '26',
             'flannel_use_vxlan': 'yes',
+            'auth_url': 'http://192.168.10.10:5000/v2',
+            'tenant_name': 'fake_tenant',
+            'username': 'fake_user',
         }
         self.assertEqual(expected, definition)
         reqget.assert_called_once_with('http://etcd/test?size=1')

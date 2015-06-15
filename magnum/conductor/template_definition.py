@@ -429,6 +429,10 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
                 scale_mgr.get_removal_nodes(hosts))
 
         extra_params['discovery_url'] = self.get_discovery_url(bay)
+        # Kubernetes backend code is still using v2 API
+        extra_params['auth_url'] = context.auth_url.replace("v3", "v2")
+        extra_params['username'] = context.user_name
+        extra_params['tenant_name'] = context.tenant
 
         for label in label_list:
             extra_params[label] = baymodel.labels.get(label)

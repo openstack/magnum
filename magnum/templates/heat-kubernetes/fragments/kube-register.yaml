@@ -9,8 +9,7 @@ write_files:
 
       . /etc/sysconfig/heat-params
       master_url=http://${KUBE_MASTER_IP}:8080
-      myip=$(ip addr show eth0 |
-        awk '$1 == "inet" {print $2}' | cut -f1 -d/)
+      nova_instance_name=$(hostname -s)
 
       # wait for master api
       until curl -o /dev/null -sf "${master_url}/healthz"; do
@@ -19,41 +18,24 @@ write_files:
       done
 
       if [ "$1" = "-u" ]; then
-      echo "unregistering minion $myip"
-      kubectl -s ${master_url} delete node/$myip
+      echo "unregistering minion $nova_instance_name"
+      kubectl -s ${master_url} delete node/$nova_instance_name
       else
-      echo "registering minion $myip"
+      echo "registering minion $nova_instance_name"
       cpu=$(($(nproc) * 1000))
       memory=$(awk '/MemTotal: /{print $2 * 1024}' /proc/meminfo)
 
       cat <<EOF | kubectl create -s ${master_url} -f-
       apiVersion: v1
-      id: $myip
+      id: $nova_instance_name
       kind: Node
       resources:
         capacity:
           cpu: $cpu
           memory: $memory
       metadata:
-        name: $myip
+        name: $nova_instance_name
       spec:
-         externalID: $myip
+         externalID: $nova_instance_name
       EOF
       fi
-  - path: /etc/systemd/system/kube-register.service
-    permissions: "0644"
-    owner: root
-    content: |
-      [Unit]
-      Description=Register/unregister this node with the Kubernetes master
-      Requires=kubelet.service
-      After=kubelet.service
-
-      [Service]
-      Type=oneshot
-      RemainAfterExit=yes
-      ExecStart=/usr/local/bin/kube-register
-      ExecStop=/usr/local/bin/kube-register -u
-
-      [Install]
-      WantedBy=kubelet.service

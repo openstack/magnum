@@ -185,6 +185,10 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         mock_scale_manager.get_removal_nodes.return_value = removal_nodes
         mock_get_discovery_url.return_value = 'fake_discovery_url'
 
+        mock_context.auth_url = 'http://192.168.10.10:5000/v3'
+        mock_context.user_name = 'fake_user'
+        mock_context.tenant = 'fake_tenant'
+
         flannel_cidr = mock_baymodel.labels.get('flannel_network_cidr')
         flannel_subnet = mock_baymodel.labels.get('flannel_network_subnetlen')
         flannel_vxlan = mock_baymodel.labels.get('flannel_use_vxlan')
@@ -199,7 +203,10 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
             'discovery_url': 'fake_discovery_url',
             'flannel_network_cidr': flannel_cidr,
             'flannel_use_vxlan': flannel_subnet,
-            'flannel_network_subnetlen': flannel_vxlan}}
+            'flannel_network_subnetlen': flannel_vxlan,
+            'auth_url': 'http://192.168.10.10:5000/v2',
+            'username': 'fake_user',
+            'tenant_name': 'fake_tenant'}}
         mock_get_params.assert_called_once_with(mock_context, mock_baymodel,
                                                 mock_bay, **expected_kwargs)
 
