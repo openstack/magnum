@@ -66,9 +66,9 @@ class ContextHook(hooks.PecanHook):
             auth_token=auth_token,
             auth_url=auth_url,
             auth_token_info=auth_token_info,
-            user=user,
+            user_name=user,
             user_id=user_id,
-            project=project,
+            project_name=project,
             project_id=project_id,
             domain_id=domain_id,
             domain_name=domain_name)

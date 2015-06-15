@@ -23,9 +23,9 @@ class ContextTestCase(base.TestCase):
                                              auth_url='auth_url1',
                                              domain_id='domain_id1',
                                              domain_name='domain_name1',
-                                             user='user1',
+                                             user_name='user1',
                                              user_id='user-id1',
-                                             project='tenant1',
+                                             project_name='tenant1',
                                              project_id='tenant-id1',
                                              is_admin=True,
                                              is_public_api=True,
@@ -42,9 +42,9 @@ class ContextTestCase(base.TestCase):
         self.assertEqual("auth_url1", ctx.auth_url)
         self.assertEqual("domain_id1", ctx.domain_id)
         self.assertEqual("domain_name1", ctx.domain_name)
-        self.assertEqual("user1", ctx.user)
+        self.assertEqual("user1", ctx.user_name)
         self.assertEqual("user-id1", ctx.user_id)
-        self.assertEqual("tenant1", ctx.project)
+        self.assertEqual("tenant1", ctx.project_name)
         self.assertEqual("tenant-id1", ctx.project_id)
         self.assertTrue(ctx.is_admin)
         self.assertTrue(ctx.is_public_api)
@@ -62,10 +62,10 @@ class ContextTestCase(base.TestCase):
         self.assertEqual(ctx.auth_url, ctx2.auth_url)
         self.assertEqual(ctx.domain_id, ctx2.domain_id)
         self.assertEqual(ctx.domain_name, ctx2.domain_name)
-        self.assertEqual(ctx.user, ctx2.user)
+        self.assertEqual(ctx.user_name, ctx2.user_name)
         self.assertEqual(ctx.user_id, ctx2.user_id)
         self.assertEqual(ctx.tenant, ctx2.tenant)
-        self.assertEqual(ctx.project, ctx2.project)
+        self.assertEqual(ctx.project_name, ctx2.project_name)
         self.assertEqual(ctx.project_id, ctx2.project_id)
         self.assertEqual(ctx.is_admin, ctx2.is_admin)
         self.assertEqual(ctx.is_public_api, ctx2.is_public_api)
