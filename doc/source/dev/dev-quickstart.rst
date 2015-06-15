@@ -156,6 +156,10 @@ Run DevStack::
     cd /opt/stack/devstack
     ./stack.sh
 
+After the script finishes, two magnum process (magnum-api and magnum-conductor)
+will be running on a stack screen. If you make some code changes and want to
+test their effects, just restart either magnum-api or magnum-conductor.
+
 At this time, Magnum has only been tested with the Fedora Atomic micro-OS.
 Magnum will likely work with other micro-OS platforms, but each one requires
 individual support in the heat template.
@@ -209,11 +213,6 @@ This bay will result in one master kubernetes node and two minion nodes.::
 The existing bays can be listed as follows::
 
     magnum bay-list
-
-If you make some code changes and want to test their effects,
-just restart either magnum-api or magnum-conductor.  The -e option to
-pip install will link to the location from where the source code
-was installed.
 
 Bays will have an initial status of CREATE_IN_PROGRESS.  Magnum will update
 the status to CREATE_COMPLETE when it is done creating the bay.  Do not create
