@@ -281,9 +281,6 @@ class BaseTemplateDefinition(TemplateDefinition):
         self.add_parameter('ssh_key_name',
                            baymodel_attr='keypair_id',
                            required=True)
-        self.add_parameter('external_network_id',
-                           baymodel_attr='external_network_id',
-                           required=True)
 
         self.add_parameter('server_image',
                            baymodel_attr='image_id')
@@ -313,6 +310,9 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
                            param_type=str)
         self.add_parameter('docker_volume_size',
                            baymodel_attr='docker_volume_size')
+        self.add_parameter('external_network',
+                           baymodel_attr='external_network_id',
+                           required=True)
         # TODO(yuanying): Add below lines if apiserver_port parameter
         # is supported
         # self.add_parameter('apiserver_port',
@@ -374,6 +374,9 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
                            param_type=str)
         self.add_parameter('server_flavor',
                            baymodel_attr='flavor_id')
+        self.add_parameter('external_network_id',
+                           baymodel_attr='external_network_id',
+                           required=True)
 
         self.add_output('swarm_manager',
                         bay_attr='api_address')

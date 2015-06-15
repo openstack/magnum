@@ -22,9 +22,9 @@ parameters:
     description: name of ssh key to be provisioned on our server
     default: lars
 
-  external_network_id:
+  external_network:
     type: string
-    description: uuid of a network to use for floating ip addresses
+    description: uuid/name of a network to use for floating ip addresses
 
   kube_allow_priv:
     type: string
@@ -45,10 +45,10 @@ parameters:
   kube_master_ip:
     type: string
     description: IP address of the Kubernetes master server.
-  fixed_network_id:
+  fixed_network:
     type: string
     description: Network from which to allocate fixed addresses.
-  fixed_subnet_id:
+  fixed_subnet:
     type: string
     description: Subnet from which to allocate fixed addresses.
   wait_condition_timeout:
@@ -61,7 +61,7 @@ resources:
   minion_wait_handle:
     type: OS::Heat::WaitConditionHandle
 
-  node_wait_condition:
+  minion_wait_condition:
     type: OS::Heat::WaitCondition
     depends_on: kube_minion
     properties:
@@ -200,20 +200,20 @@ resources:
   kube_minion_eth0:
     type: "OS::Neutron::Port"
     properties:
-      network_id:
-        get_param: fixed_network_id
+      network:
+        get_param: fixed_network
       security_groups:
         - get_resource: secgroup_all_open
       fixed_ips:
-        - subnet_id:
-            get_param: fixed_subnet_id
+        - subnet:
+            get_param: fixed_subnet
       replacement_policy: AUTO
 
   kube_minion_floating:
     type: "OS::Neutron::FloatingIP"
     properties:
-      floating_network_id:
-        get_param: external_network_id
+      floating_network:
+        get_param: external_network
       port_id:
         get_resource: kube_minion_eth0
 

@@ -98,7 +98,7 @@ class TestBayConductorWithK8s(base.TestCase):
         }
         expected = {
             'ssh_key_name': 'keypair_id',
-            'external_network_id': 'external_network_id',
+            'external_network': 'external_network_id',
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'minion_flavor': 'flavor_id',
@@ -135,7 +135,7 @@ class TestBayConductorWithK8s(base.TestCase):
 
         expected = {
             'ssh_key_name': 'keypair_id',
-            'external_network_id': 'external_network_id',
+            'external_network': 'external_network_id',
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'minion_flavor': 'flavor_id',
@@ -171,7 +171,7 @@ class TestBayConductorWithK8s(base.TestCase):
 
         expected = {
             'ssh_key_name': 'keypair_id',
-            'external_network_id': 'external_network_id',
+            'external_network': 'external_network_id',
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'minion_flavor': 'flavor_id',
@@ -249,7 +249,7 @@ class TestBayConductorWithK8s(base.TestCase):
 
         expected = {
             'ssh_key_name': 'keypair_id',
-            'external_network_id': 'external_network_id',
+            'external_network': 'external_network_id',
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'master_flavor': 'master_flavor_id',
