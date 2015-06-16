@@ -14,10 +14,10 @@ parameters:
   external_network:
     type: string
     description: uuid/name of a network to use for floating ip addresses
+    default: public
 
   server_image:
     type: string
-    default: centos-atomic
     description: glance image used to boot the server
 
   master_flavor:
