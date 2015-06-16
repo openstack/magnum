@@ -68,6 +68,27 @@ parameters:
       timeout for the Wait Conditions
     default: 6000
 
+  auth_url:
+    type: string
+    description: >
+      url for kubernetes to authenticate before sending request to neutron
+      must be v2 since kubernetes backend only suppor v2 at this point
+
+  username:
+    type: string
+    description: >
+      user account
+
+  password:
+    type: string
+    description: >
+      user password
+
+  tenant_name:
+    type: string
+    description: >
+      tenant name
+
 resources:
 
   master_wait_handle:
@@ -97,6 +118,7 @@ resources:
         - config: {get_resource: disable_selinux}
         - config: {get_resource: write_heat_params}
         - config: {get_resource: enable_etcd}
+        - config: {get_resource: write_kube_os_config}
         - config: {get_resource: configure_kubernetes}
         - config: {get_resource: enable_services}
         - config: {get_resource: configure_flannel}
@@ -127,6 +149,11 @@ resources:
             "$FLANNEL_NETWORK_SUBNETLEN": {get_param: flannel_network_subnetlen}
             "$FLANNEL_USE_VXLAN": {get_param: flannel_use_vxlan}
             "$PORTAL_NETWORK_CIDR": {get_param: portal_network_cidr}
+            "$AUTH_URL": {get_param: auth_url}
+            "$USERNAME": {get_param: username}
+            "$PASSWORD": {get_param: password}
+            "$TENANT_NAME": {get_param: tenant_name}
+            "$CLUSTER_SUBNET": {get_param: fixed_subnet}
 
   configure_kubernetes:
     type: OS::Heat::SoftwareConfig
@@ -145,6 +172,12 @@ resources:
     properties:
       group: ungrouped
       config: {get_file: fragments/configure-flannel.sh}
+
+  write_kube_os_config:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/write-kube-os-config.sh}
 
   enable_services:
     type: OS::Heat::SoftwareConfig

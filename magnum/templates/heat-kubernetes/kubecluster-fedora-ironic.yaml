@@ -17,7 +17,11 @@ parameters:
 
   fixed_network:
     type: string
-    description: name of private network into which servers get deployed
+    description: >
+      name of private network into which servers get deployed
+      Important: the Load Balancer feature in Kubernetes requires that
+      the name for the fixed_network must be "private" for the
+      address lookup in Kubernetes to work properly
 
   server_image:
     type: string
@@ -82,6 +86,29 @@ parameters:
       timeout for the Wait Conditions
     default: 6000
 
+  auth_url:
+    type: string
+    description: >
+      url for kubernetes to authenticate before sending request to neutron
+
+  username:
+    type: string
+    description: >
+      user account
+
+  password:
+    type: string
+    description: >
+      user password, not set in current implementation, only used to
+      fill in for Kubernetes config file
+    default:
+      ChangeMe
+
+  tenant_name:
+    type: string
+    description: >
+      tenant name
+
 resources:
 
   ######################################################################
@@ -110,6 +137,10 @@ resources:
           flannel_use_vxlan: {get_param: flannel_use_vxlan}
           portal_network_cidr: {get_param: portal_network_cidr}
           fixed_network: {get_resource: fixed_network}
+          auth_url: {get_param: auth_url}
+          username: {get_param: username}
+          password: {get_param: password}
+          tenant_name: {get_param: tenant_name}
 
   kube_minions:
     type: OS::Heat::ResourceGroup

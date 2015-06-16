@@ -53,7 +53,7 @@ resources:
 
   minion_wait_condition:
     type: OS::Heat::WaitCondition
-    depends_on: kube_minion
+    depends_on: kube-minion
     properties:
       handle: {get_resource: minion_wait_handle}
       timeout: {get_param: wait_condition_timeout}
@@ -144,7 +144,14 @@ resources:
         - config: {get_resource: enable_services}
         - config: {get_resource: minion_wc_notify}
 
-  kube_minion:
+  # Important:  the name for the heat resource kube-minion below must
+  # not contain "_" (underscore) because it will be used in the
+  # hostname.  Because DNS domain name does not allow "_", the "_"
+  # will be converted to a "-" and this will make the hostname different
+  # from the Nova instance name.  This in turn will break the load
+  # balancer feature in Kubernetes.
+
+  kube-minion:
     type: OS::Nova::Server
     properties:
       image: {get_param: server_image}
@@ -160,15 +167,15 @@ resources:
     properties:
       floating_network: {get_param: external_network}
       port_id:
-        get_attr: [kube_minion, addresses, {get_param: fixed_network}, 0, port]
+        get_attr: [kube-minion, addresses, {get_param: fixed_network}, 0, port]
 
 outputs:
 
   kube_minion_ip:
-    value: {get_attr: [kube_minion, networks, private, 0]}
+    value: {get_attr: [kube-minion, networks, private, 0]}
 
   kube_minion_external_ip:
     value: {get_attr: [kube_minion_floating, floating_ip_address]}
 
   OS::stack_id:
-    value: {get_attr: [kube_minion, networks, private, 0]}
+    value: {get_attr: [kube-minion, networks, private, 0]}
