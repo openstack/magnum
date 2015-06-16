@@ -3,4 +3,11 @@
     "admin_or_owner":  "is_admin:True or project_id:%(project_id)s",
     "default": "rule:admin_or_owner",
     "admin_api": "is_admin:True",
+
+    "bay:create": "rule:default",
+    "bay:delete": "rule:default",
+    "bay:detail": "rule:default",
+    "bay:get": "rule:default",
+    "bay:get_all": "rule:default",
+    "bay:update": "rule:default"
 }
