@@ -21,7 +21,7 @@ import sys
 from oslo_config import cfg
 from oslo_log import log as logging
 
-from magnum.common import rpc_service as service
+from magnum.common import rpc_service
 from magnum.common import short_id
 from magnum.conductor.handlers import bay_conductor
 from magnum.conductor.handlers import conductor_listener
@@ -29,6 +29,7 @@ from magnum.conductor.handlers import docker_conductor
 from magnum.conductor.handlers import k8s_conductor
 from magnum.i18n import _LE
 from magnum.i18n import _LI
+from magnum.openstack.common import service
 
 LOG = logging.getLogger(__name__)
 
@@ -61,6 +62,7 @@ def main():
                   {'atomic_template': cfg.CONF.bay.k8s_atomic_template_path,
                    'coreos_template': cfg.CONF.bay.k8s_coreos_template_path})
 
-    server = service.Service(cfg.CONF.conductor.topic,
-                             conductor_id, endpoints)
-    server.serve()
+    server = rpc_service.Service.create(cfg.CONF.conductor.topic,
+                                        conductor_id, endpoints)
+    launcher = service.launch(server)
+    launcher.wait()

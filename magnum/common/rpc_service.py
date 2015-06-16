@@ -20,6 +20,7 @@ import oslo_messaging as messaging
 
 from magnum.common import rpc
 from magnum.objects import base as objects_base
+from magnum.openstack.common import service
 
 
 # NOTE(paulczar):
@@ -39,10 +40,11 @@ TRANSPORT_ALIASES = {
 }
 
 
-class Service(object):
+class Service(service.Service):
     _server = None
 
     def __init__(self, topic, server, handlers):
+        super(Service, self).__init__()
         serializer = rpc.RequestContextSerializer(
             objects_base.MagnumObjectSerializer())
         transport = messaging.get_transport(cfg.CONF,
@@ -52,9 +54,16 @@ class Service(object):
         self._server = messaging.get_rpc_server(transport, target, handlers,
                                                 serializer=serializer)
 
-    def serve(self):
+    def start(self):
         self._server.start()
+
+    def wait(self):
         self._server.wait()
+
+    @classmethod
+    def create(cls, topic, server, handlers):
+        service_obj = cls(topic, server, handlers)
+        return service_obj
 
 
 class API(object):
