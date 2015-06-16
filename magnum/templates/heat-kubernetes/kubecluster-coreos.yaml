@@ -103,15 +103,43 @@ parameters:
       be empty when doing a create.
     default: []
 
+  auth_url:
+    type: string
+    description: >
+      url for kubernetes to authenticate before sending request to neutron
+
+  username:
+    type: string
+    description: >
+      user account
+
+  password:
+    type: string
+    description: >
+      user password, not set in current implementation, only used to
+      fill in for Kubernetes config file
+    default:
+      ChangeMe
+
+  tenant_name:
+    type: string
+    description: >
+      tenant name
+
 resources:
 
   ######################################################################
   #
   # network resources. allocate a network and router for our server.
+  # Important: the Load Balancer feature in Kubernetes requires that
+  # the name for the fixed_network must be "private" for the
+  # address lookup in Kubernetes to work properly
   #
 
   fixed_network:
     type: OS::Neutron::Net
+    properties:
+      name: private
 
   fixed_subnet:
     type: OS::Neutron::Subnet
@@ -161,6 +189,10 @@ resources:
           fixed_subnet: {get_resource: fixed_subnet}
           token: {get_param: token}
           ssh_authorized_key: {get_param: ssh_authorized_key}
+          auth_url: {get_param: auth_url}
+          username: {get_param: username}
+          password: {get_param: password}
+          tenant_name: {get_param: tenant_name}
 
   ######################################################################
   #
