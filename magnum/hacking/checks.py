@@ -20,10 +20,11 @@ Guidelines for writing new hacking checks
 
  - Use only for Magnum specific tests. OpenStack general tests
    should be submitted to the common 'hacking' module.
- - Pick numbers in the range N3xx. Find the current test with
+ - Pick numbers in the range M3xx. Find the current test with
    the highest allocated number and then pick the next value.
+   If nova has an N3xx code for that test, use the same number.
  - Keep the test method code in the source file ordered based
-   on the N3xx value.
+   on the M3xx value.
  - List the new rule in the top level HACKING.rst file
  - Add test cases for each new rule to magnum/tests/unit/test_hacking.py
 
@@ -36,7 +37,7 @@ decorator_re = re.compile(r"@.*")
 def check_policy_enforce_decorator(logical_line,
                                    previous_logical, blank_before,
                                    filename):
-    msg = ("N301: the policy.enforce_wsgi decorator must be the "
+    msg = ("M301: the policy.enforce_wsgi decorator must be the "
            "first decorator on a method.")
     if (blank_before == 0 and re.match(enforce_re, logical_line)
             and re.match(decorator_re, previous_logical)):
