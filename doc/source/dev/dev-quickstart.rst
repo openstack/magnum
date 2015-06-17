@@ -199,7 +199,7 @@ coe (Container Orchestration Engine) needs to be specified for baymodel.
 The baymodel informs Magnum in which way to construct a bay.::
 
     NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
-    magnum baymodel-create --name testbaymodel --image-id fedora-21-atomic-3 \
+    magnum baymodel-create --name k8sbaymodel --image-id fedora-21-atomic-3 \
                            --keypair-id testkey \
                            --external-network-id $NIC_ID \
                            --dns-nameserver 8.8.8.8 --flavor-id m1.small \
@@ -208,7 +208,7 @@ The baymodel informs Magnum in which way to construct a bay.::
 Next create a bay. Use the baymodel UUID as a template for bay creation.
 This bay will result in one master kubernetes node and two minion nodes.::
 
-    magnum bay-create --name testbay --baymodel testbaymodel --node-count 2
+    magnum bay-create --name k8sbay --baymodel k8sbaymodel --node-count 2
 
 The existing bays can be listed as follows::
 
@@ -225,7 +225,7 @@ confused.
     +--------------------------------------+---------+------------+-----------------+
     | uuid                                 | name    | node_count | status          |
     +--------------------------------------+---------+------------+-----------------+
-    | 9dccb1e6-02dc-4e2b-b897-10656c5339ce | testbay | 2          | CREATE_COMPLETE |
+    | 9dccb1e6-02dc-4e2b-b897-10656c5339ce | k8sbay  | 2          | CREATE_COMPLETE |
     +--------------------------------------+---------+------------+-----------------+
 
 Kubernetes provides a number of examples you can use to check that things
@@ -239,21 +239,21 @@ Here's how to set up the replicated redis example. First, create
 a pod for the redis-master::
 
     cd kubernetes/examples/redis/v1beta3
-    magnum pod-create --manifest ./redis-master.yaml --bay testbay
+    magnum pod-create --manifest ./redis-master.yaml --bay k8sbay
 
 Now turn up a service to provide a discoverable endpoint for the redis sentinels
 in the cluster::
 
-    magnum service-create --manifest ./redis-sentinel-service.yaml --bay testbay
+    magnum service-create --manifest ./redis-sentinel-service.yaml --bay k8sbay
 
 To make it a replicated redis cluster create replication controllers for the redis
 slaves and sentinels::
 
     sed -i 's/\(replicas: \)1/\1 2/' redis-controller.yaml
-    magnum rc-create --manifest ./redis-controller.yaml --bay testbay
+    magnum rc-create --manifest ./redis-controller.yaml --bay k8sbay
 
     sed -i 's/\(replicas: \)1/\1 2/' redis-sentinel-controller.yaml
-    magnum rc-create --manifest ./redis-sentinel-controller.yaml --bay testbay
+    magnum rc-create --manifest ./redis-sentinel-controller.yaml --bay k8sbay
 
 Full lifecycle and introspection operations for each object are supported.  For
 example, magnum bay-create, magnum baymodel-delete, magnum rc-show, magnum service-list.
@@ -261,7 +261,7 @@ example, magnum bay-create, magnum baymodel-delete, magnum rc-show, magnum servi
 Now run bay-show command to get the IP of the bay host on which the redis-master is
 running on::
 
-    $ magnum bay-show testbay
+    $ magnum bay-show k8sbay
     +----------------+--------------------------------------+
     | Property       | Value                                |
     +----------------+--------------------------------------+
@@ -274,7 +274,7 @@ running on::
     | node_count     | 1                                    |
     | node_addresses | [u'192.168.19.86']                   |
     | discovery_url  | None                                 |
-    | name           | testbay                              |
+    | name           | k8sbay                               |
     +----------------+--------------------------------------+
 
 The output indicates the redis-master is running on the
