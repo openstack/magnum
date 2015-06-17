@@ -1,4 +1,4 @@
-#    Copyright 2915 Intel, Inc.
+#    Copyright 2015 Intel, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -82,4 +82,4 @@ class HackingTestCase(base.TestCase):
                    pass
                """
         self._assert_has_errors(code, checks.check_policy_enforce_decorator,
-                                expected_errors=[(2, 0, "N301")])
+                                expected_errors=[(2, 0, "M301")])

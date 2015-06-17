@@ -1,11 +1,11 @@
-magnum Style Commandments
+Magnum Style Commandments
 =========================
 
 - Step 1: Read the OpenStack Style Commandments
   http://docs.openstack.org/developer/hacking/
 - Step 2: Read on
 
-magnum Specific Commandments
+Magnum Specific Commandments
 ---------------------------
 
-- [N301] policy.enforce_wsgi decorator must be the first decorator on a method.
+- [M301] policy.enforce_wsgi decorator must be the first decorator on a method.
