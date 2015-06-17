@@ -718,6 +718,20 @@
 #admin_tenant_name = admin
 
 
+[kubernetes]
+
+#
+# From magnum
+#
+
+# Default protocol of k8s master endpoint (http or https). (string
+# value)
+#k8s_protocol = http
+
+# Default port of the k8s master endpoint. (integer value)
+#k8s_port = 8080
+
+
 [matchmaker_redis]
 
 #

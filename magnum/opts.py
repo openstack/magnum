@@ -25,6 +25,7 @@ import magnum.common.magnum_keystoneclient
 import magnum.conductor.config
 import magnum.conductor.handlers.bay_conductor
 import magnum.conductor.handlers.docker_conductor
+import magnum.conductor.handlers.k8s_conductor
 import magnum.conductor.template_definition
 import magnum.db.sqlalchemy.models
 import magnum.openstack.common.eventlet_backdoor
@@ -53,4 +54,6 @@ def list_opts():
         ('docker', magnum.conductor.handlers.docker_conductor.docker_opts),
         ('heat_client', magnum.common.clients.heat_client_opts),
         ('bay_heat', magnum.conductor.handlers.bay_conductor.bay_heat_opts),
+        ('kubernetes',
+            magnum.conductor.handlers.k8s_conductor.kubernetes_opts),
     ]
