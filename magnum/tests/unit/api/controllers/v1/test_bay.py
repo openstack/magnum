@@ -14,6 +14,7 @@ import datetime
 
 import mock
 from oslo_config import cfg
+from oslo_policy import policy
 from oslo_utils import timeutils
 from six.moves.urllib import parse as urlparse
 from wsme import types as wtypes
@@ -585,3 +586,50 @@ class TestDelete(api_base.FunctionalTest):
         self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
+
+
+class TestBayPolicyEnforcement(api_base.FunctionalTest):
+
+    def setUp(self):
+        super(TestBayPolicyEnforcement, self).setUp()
+        obj_utils.create_test_baymodel(self.context)
+
+    def _common_policy_check(self, rule, func, *arg, **kwarg):
+        self.policy.set_rules({rule: "project:non_fake"})
+        exc = self.assertRaises(policy.PolicyNotAuthorized,
+                                func, *arg, **kwarg)
+        self.assertTrue(exc.message.startswith(rule))
+        self.assertTrue(exc.message.endswith("disallowed by policy"))
+
+    def test_policy_disallow_get_all(self):
+        self._common_policy_check(
+            "bay:get_all", self.get_json, '/bays')
+
+    def test_policy_disallow_get_one(self):
+        self._common_policy_check(
+            "bay:get", self.get_json, '/bays/111-222-333')
+
+    def test_policy_disallow_update(self):
+        self.bay = obj_utils.create_test_bay(self.context,
+                                             name='bay_example_A',
+                                             node_count=3)
+        self._common_policy_check(
+            "bay:update", self.patch_json, '/bays/%s' % self.bay.name,
+            [{'path': '/name', 'value': "new_name", 'op': 'replace'}])
+
+    def test_policy_disallow_create(self):
+        bdict = apiutils.bay_post_data(name='bay_example_A')
+        self._common_policy_check(
+            "bay:create", self.post_json, '/bays', bdict)
+
+    def _simulate_rpc_bay_delete(self, bay_uuid):
+        bay = objects.Bay.get_by_uuid(self.context, bay_uuid)
+        bay.destroy()
+
+    def test_policy_disallow_delete(self):
+        p = mock.patch.object(rpcapi.API, 'bay_delete')
+        self.mock_bay_delete = p.start()
+        self.mock_bay_delete.side_effect = self._simulate_rpc_bay_delete
+        self.addCleanup(p.stop)
+        self._common_policy_check(
+            "bay:delete", self.delete, '/bays/test_bay')

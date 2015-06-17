@@ -16,6 +16,7 @@ import os
 
 import fixtures
 from oslo_config import cfg
+from oslo_policy import _parser
 from oslo_policy import opts as policy_opts
 
 from magnum.common import policy as magnum_policy
@@ -39,3 +40,8 @@ class PolicyFixture(fixtures.Fixture):
         CONF.set_override('policy_file', self.policy_file_name, 'oslo_policy')
         magnum_policy._ENFORCER = None
         self.addCleanup(magnum_policy.init().clear)
+
+    def set_rules(self, rules):
+        policy = magnum_policy._ENFORCER
+        policy.set_rules({k: _parser.parse_rule(v)
+                          for k, v in rules.items()})
