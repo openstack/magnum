@@ -112,20 +112,20 @@ class DbContainerTestCase(base.DbTestCase):
 
     def test_update_container(self):
         container = utils.create_test_container()
-        old_image = container.image_id
+        old_image = container.image
         new_image = 'new-image'
         self.assertNotEqual(old_image, new_image)
 
         res = self.dbapi.update_container(container.id,
-                                          {'image_id': new_image})
-        self.assertEqual(new_image, res.image_id)
+                                          {'image': new_image})
+        self.assertEqual(new_image, res.image)
 
     def test_update_container_not_found(self):
         container_uuid = magnum_utils.generate_uuid()
         new_image = 'new-image'
         self.assertRaises(exception.ContainerNotFound,
                           self.dbapi.update_container,
-                          container_uuid, {'image_id': new_image})
+                          container_uuid, {'image': new_image})
 
     def test_update_container_uuid(self):
         container = utils.create_test_container()

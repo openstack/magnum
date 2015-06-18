@@ -408,8 +408,8 @@ class Connection(api.Connection):
 
         if 'name' in filters:
             query = query.filter_by(name=filters['name'])
-        if 'image_id' in filters:
-            query = query.filter_by(image_id=filters['image_id'])
+        if 'image' in filters:
+            query = query.filter_by(image=filters['image'])
         if 'project_id' in filters:
             query = query.filter_by(project_id=filters['project_id'])
         if 'user_id' in filters:

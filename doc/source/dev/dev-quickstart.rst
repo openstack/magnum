@@ -356,7 +356,7 @@ Next we will create a container in this bay. This container will ping the
 address 8.8.8.8 four times. ::
 
     $ BAY_UUID=$(magnum bay-list | awk '/ swarmbay /{print $2}')
-    $ magnum container-create --name testcontainer --image_id cirros\
+    $ magnum container-create --name testcontainer --image cirros\
                               --bay $BAY_UUID\
                               --command "ping -c 4 8.8.8.8"
     +------------+----------------------------------------+
@@ -366,7 +366,7 @@ address 8.8.8.8 four times. ::
     | links      | ...                                    |
     | bay_uuid   | eda91c1e-6103-45d4-ab09-3f316310fa8e   |
     | updated_at | None                                   |
-    | image_id   | cirros                                 |
+    | image      | cirros                                 |
     | command    | ping -c 4 8.8.8.8                      |
     | created_at | 2015-04-22T20:21:11+00:00              |
     | name       | test-container                         |

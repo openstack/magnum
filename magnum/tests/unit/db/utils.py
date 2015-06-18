@@ -182,7 +182,7 @@ def get_test_container(**kw):
         'name': kw.get('name', 'container1'),
         'project_id': kw.get('project_id', 'fake_project'),
         'user_id': kw.get('user_id', 'fake_user'),
-        'image_id': kw.get('image_id', 'ubuntu'),
+        'image': kw.get('image', 'ubuntu'),
         'created_at': kw.get('created_at'),
         'updated_at': kw.get('updated_at'),
         'command': kw.get('command', 'fake_command'),
