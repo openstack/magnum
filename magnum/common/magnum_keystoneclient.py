@@ -56,6 +56,7 @@ class KeystoneClientV3(object):
         self.context = context
         self._client = None
         self._admin_client = None
+        self._is_admin = context.is_admin
 
         if self.context.auth_url:
             self.v3_endpoint = self.context.auth_url.replace('v2.0', 'v3')
@@ -72,10 +73,13 @@ class KeystoneClientV3(object):
 
     @property
     def client(self):
-        if not self._client:
-            # Create connection to v3 API
-            self._client = self._v3_client_init()
-        return self._client
+        if self._is_admin:
+            return self.admin_client
+        else:
+            if not self._client:
+                # Create connection to v3 API
+                self._client = self._v3_client_init()
+            return self._client
 
     @property
     def admin_client(self):

@@ -215,3 +215,15 @@ class KeystoneClientTest(base.BaseTestCase):
         mock_delete.side_effect = kc_exception.NotFound()
         magnum_ks_client = magnum_keystoneclient.KeystoneClientV3(self.ctx)
         self.assertIsNone(magnum_ks_client.delete_trust(trust_id='atrust123'))
+
+    @mock.patch.object(magnum_keystoneclient.KeystoneClientV3,
+                       '_service_admin_creds')
+    def test_client_is_admin(self, mock_admin_creds, mock_ks):
+        """Test client is admin when passing an admin_context."""
+        self.ctx.is_admin = True
+        magnum_ks_client = magnum_keystoneclient.KeystoneClientV3(self.ctx)
+        magnum_ks_client.client
+
+        self.assertIsNone(magnum_ks_client._client)
+        self.assertIsNotNone(magnum_ks_client._admin_client)
+        mock_admin_creds.assert_called_once_with()
