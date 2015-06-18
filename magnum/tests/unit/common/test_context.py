@@ -74,3 +74,7 @@ class ContextTestCase(base.TestCase):
         self.assertEqual(ctx.request_id, ctx2.request_id)
         self.assertEqual(ctx.trust_id, ctx2.trust_id)
         self.assertEqual(ctx.auth_token_info, ctx2.auth_token_info)
+
+    def test_request_context_sets_is_admin(self):
+        ctxt = magnum_context.make_admin_context()
+        self.assertEqual(ctxt.is_admin, True)

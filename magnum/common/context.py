@@ -75,3 +75,15 @@ class RequestContext(context.RequestContext):
 
 def make_context(*args, **kwargs):
     return RequestContext(*args, **kwargs)
+
+
+def make_admin_context(show_deleted=False):
+    """Create an administrator context.
+
+    :param show_deleted: if True, will show deleted items when query db
+    """
+    context = RequestContext(user_id=None,
+                             project=None,
+                             is_admin=True,
+                             show_deleted=show_deleted)
+    return context
