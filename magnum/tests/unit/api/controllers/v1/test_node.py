@@ -14,6 +14,7 @@ import datetime
 
 import mock
 from oslo_config import cfg
+from oslo_policy import policy
 from oslo_utils import timeutils
 from six.moves.urllib import parse as urlparse
 from wsme import types as wtypes
@@ -264,3 +265,45 @@ class TestDelete(api_base.FunctionalTest):
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
+
+
+class TestNodePolicyEnforcement(api_base.FunctionalTest):
+
+    def setUp(self):
+        super(TestNodePolicyEnforcement, self).setUp()
+
+    def _common_policy_check(self, rule, func, *arg, **kwarg):
+        self.policy.set_rules({rule: "project:non_fake"})
+        exc = self.assertRaises(policy.PolicyNotAuthorized,
+                                func, *arg, **kwarg)
+        self.assertTrue(exc.message.startswith(rule))
+        self.assertTrue(exc.message.endswith("disallowed by policy"))
+
+    def test_policy_disallow_get_all(self):
+        self._common_policy_check(
+            "node:get_all", self.get_json, '/nodes')
+
+    def test_policy_disallow_get_one(self):
+        self._common_policy_check(
+            "node:get", self.get_json, '/nodes/111-222-333')
+
+    def test_policy_disallow_update(self):
+        node = obj_utils.create_test_node(self.context,
+                                          type='type_A',
+                                          uuid="333-444-5555")
+        self._common_policy_check(
+            "node:update", self.patch_json,
+            '/nodes/%s' % node.uuid,
+            [{'type': '/type', 'value': "new_type", 'op': 'replace'}])
+
+    def test_policy_disallow_create(self):
+        bdict = apiutils.node_post_data(name='node_example_A')
+        self._common_policy_check(
+            "node:create", self.post_json, '/nodes', bdict)
+
+    def test_policy_disallow_delete(self):
+        node = obj_utils.create_test_node(self.context,
+                                          uuid='137-246-789')
+        self._common_policy_check(
+            "node:delete", self.delete,
+            '/nodes/%s' % node.uuid)

@@ -32,7 +32,14 @@ policy_data = """
     "baymodel:detail": "",
     "baymodel:get": "",
     "baymodel:get_all": "",
-    "baymodel:update": ""
+    "baymodel:update": "",
+
+    "node:create": "",
+    "node:delete": "",
+    "node:detail": "",
+    "node:get": "",
+    "node:get_all": "",
+    "node:update": ""
 }
 """
 

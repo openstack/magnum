@@ -16,5 +16,12 @@
     "baymodel:detail": "rule:default",
     "baymodel:get": "rule:default",
     "baymodel:get_all": "rule:default",
-    "baymodel:update": "rule:default"
+    "baymodel:update": "rule:default",
+
+    "node:create": "rule:default",
+    "node:delete": "rule:default",
+    "node:detail": "rule:default",
+    "node:get": "rule:default",
+    "node:get_all": "rule:default",
+    "node:update": "rule:default"
 }
