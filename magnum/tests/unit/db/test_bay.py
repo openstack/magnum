@@ -17,6 +17,7 @@
 
 import six
 
+from magnum.common import context
 from magnum.common import exception
 from magnum.common import utils as magnum_utils
 from magnum.objects.bay import Status as bay_status
@@ -124,6 +125,19 @@ class DbBayTestCase(base.DbTestCase):
         res = self.dbapi.get_bay_list(self.context,
                                       filters=filters)
         self.assertEqual([bay1.id, bay3.id], [r.id for r in res])
+
+    def test_get_bay_list_by_admin_all_tenants(self):
+        uuids = []
+        for i in range(1, 6):
+            bay = utils.create_test_bay(
+                uuid=magnum_utils.generate_uuid(),
+                project_id=magnum_utils.generate_uuid(),
+                user_id=magnum_utils.generate_uuid())
+            uuids.append(six.text_type(bay['uuid']))
+        ctx = context.make_admin_context()
+        res = self.dbapi.get_bay_list(ctx, opts={'get_all_tenants': True})
+        res_uuids = [r.uuid for r in res]
+        self.assertEqual(sorted(uuids), sorted(res_uuids))
 
     def test_get_bay_list_baymodel_not_exist(self):
         utils.create_test_bay()
