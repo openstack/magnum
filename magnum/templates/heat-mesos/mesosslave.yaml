@@ -1,0 +1,160 @@
+heat_template_version: 2014-10-16
+
+description: >
+  This is a nested stack that defines a single Mesos slave, This stack is
+  included by an ResourceGroup resource in the parent template
+  (mesoscluster.yaml).
+
+parameters:
+
+  server_image:
+    type: string
+    default: ubuntu-mesos
+    description: glance image used to boot the server
+
+  slave_flavor:
+    type: string
+    default: m1.small
+    description: flavor to use when booting the server
+
+  ssh_key_name:
+    type: string
+    description: name of ssh key to be provisioned on our server
+
+  external_network:
+    type: string
+    default: public
+    description: uuid/name of a network to use for floating ip addresses
+
+  wait_condition_timeout:
+    type: number
+    default: 6000
+    description : >
+      timeout for the Wait Conditions
+
+  executor_registration_timeout:
+    type: string
+    description: >
+      Amount of time to wait for an executor to register with the slave before
+      considering it hung and shutting it down
+    default: 5mins
+
+  # The following are all generated in the parent template.
+  mesos_master_ip:
+    type: string
+    description: IP address of the Mesos master server.
+  fixed_network:
+    type: string
+    description: Network from which to allocate fixed addresses.
+  fixed_subnet:
+    type: string
+    description: Subnet from which to allocate fixed addresses.
+
+resources:
+
+  slave_wait_handle:
+    type: OS::Heat::WaitConditionHandle
+
+  slave_wait_condition:
+    type: OS::Heat::WaitCondition
+    depends_on: mesos_slave
+    properties:
+      handle: {get_resource: slave_wait_handle}
+      timeout: {get_param: wait_condition_timeout}
+
+  secgroup_all_open:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      rules:
+        - protocol: icmp
+        - protocol: tcp
+        - protocol: udp
+
+  ######################################################################
+  #
+  # software configs.  these are components that are combined into
+  # a multipart MIME user-data archive.
+  #
+
+  write_heat_params:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/write-heat-params.yaml}
+          params:
+            "$MESOS_MASTER_IP": {get_param: mesos_master_ip}
+            "$EXECUTOR_REGISTRATION_TIMEOUT": {get_param: executor_registration_timeout}
+
+  configure_mesos_slave:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/configure-mesos-slave.sh}
+
+  start_services:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/start-services-slave.sh}
+
+  slave_wc_notify:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: |
+            #!/bin/bash -v
+            wc_notify --data-binary '{"status": "SUCCESS"}'
+          params:
+            wc_notify: {get_attr: [slave_wait_handle, curl_cli]}
+
+  mesos_slave_init:
+    type: OS::Heat::MultipartMime
+    properties:
+      parts:
+        - config: {get_resource: write_heat_params}
+        - config: {get_resource: configure_mesos_slave}
+        - config: {get_resource: start_services}
+        - config: {get_resource: slave_wc_notify}
+
+  ######################################################################
+  #
+  # a single mesos slave.
+  #
+
+  mesos_slave:
+    type: OS::Nova::Server
+    properties:
+      image: {get_param: server_image}
+      flavor: {get_param: slave_flavor}
+      key_name: {get_param: ssh_key_name}
+      user_data_format: RAW
+      user_data: {get_resource: mesos_slave_init}
+      networks:
+        - port: {get_resource: mesos_slave_eth0}
+
+  mesos_slave_eth0:
+    type: OS::Neutron::Port
+    properties:
+      network: {get_param: fixed_network}
+      security_groups:
+        - get_resource: secgroup_all_open
+      fixed_ips:
+        - subnet: {get_param: fixed_subnet}
+      replacement_policy: AUTO
+
+  mesos_slave_floating:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: {get_param: external_network}
+      port_id: {get_resource: mesos_slave_eth0}
+
+outputs:
+
+  mesos_slave_ip:
+    value: {get_attr: [mesos_slave_eth0, fixed_ips, 0, ip_address]}
+  mesos_slave_external_ip:
+    value: {get_attr: [mesos_slave_floating, floating_ip_address]}
