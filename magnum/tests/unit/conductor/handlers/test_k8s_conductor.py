@@ -136,10 +136,13 @@ class TestK8sConductor(base.TestCase):
             return_value = mock.MagicMock()
             return_value.status = mock.MagicMock()
             return_value.status.phase = 'Pending'
+            return_value.spec = mock.MagicMock()
+            return_value.spec.host = '10.0.0.3'
             mock_kube_api.return_value.createPod.return_value = return_value
 
             self.kube_handler.pod_create(self.context, expected_pod)
             self.assertEqual('Pending', expected_pod.status)
+            self.assertEqual('10.0.0.3', expected_pod.host)
             expected_pod.create.assert_called_once_with(self.context)
 
     @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')

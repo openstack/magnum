@@ -97,6 +97,7 @@ def get_test_pod(**kw):
         'images': kw.get('images', ['MyImage']),
         'labels': kw.get('labels', {'name': 'foo'}),
         'status': kw.get('status', 'Running'),
+        'host': kw.get('host', '10.0.0.3'),
         'created_at': kw.get('created_at'),
         'updated_at': kw.get('updated_at'),
     }

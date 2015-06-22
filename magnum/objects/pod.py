@@ -40,6 +40,7 @@ class Pod(base.MagnumPersistentObject, base.MagnumObject,
         'status': fields.StringField(nullable=True),
         'manifest_url': fields.StringField(nullable=True),
         'manifest': fields.StringField(nullable=True),
+        'host': fields.StringField(nullable=True),
     }
 
     @staticmethod

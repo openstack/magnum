@@ -229,6 +229,7 @@ class Pod(Base):
     status = Column(String(255))
     project_id = Column(String(255))
     user_id = Column(String(255))
+    host = Column(String(255))
 
 
 class Service(Base):

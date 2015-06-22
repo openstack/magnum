@@ -48,7 +48,8 @@ class TestListPod(api_base.FunctionalTest):
         self.assertEqual([], response['pods'])
 
     def _assert_pod_fields(self, pod):
-        pod_fields = ['name', 'bay_uuid', 'desc', 'images', 'labels', 'status']
+        pod_fields = ['name', 'bay_uuid', 'desc', 'images', 'labels',
+                      'status', 'host']
         for field in pod_fields:
             self.assertIn(field, pod)
 
