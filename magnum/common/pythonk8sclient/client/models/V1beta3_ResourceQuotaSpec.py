@@ -28,7 +28,7 @@ class V1beta3_ResourceQuotaSpec(object):
         """
         self.swaggerTypes = {
             
-            'hard': 'any'
+            'hard': 'dict'
             
         }
 

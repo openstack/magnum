@@ -31,7 +31,7 @@ class V1beta3_PersistentVolumeSpec(object):
             'accessModes': 'list[V1beta3_AccessModeType]',
             
             
-            'capacity': 'any',
+            'capacity': 'dict',
             
             
             'claimRef': 'V1beta3_ObjectReference',

@@ -28,7 +28,7 @@ class V1beta3_Binding(object):
         """
         self.swaggerTypes = {
             
-            'annotations': 'any',
+            'annotations': 'dict',
             
             
             'apiVersion': 'str',
@@ -46,7 +46,7 @@ class V1beta3_Binding(object):
             'kind': 'str',
             
             
-            'labels': 'any',
+            'labels': 'dict',
             
             
             'name': 'str',

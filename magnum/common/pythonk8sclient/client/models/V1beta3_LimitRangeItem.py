@@ -28,13 +28,13 @@ class V1beta3_LimitRangeItem(object):
         """
         self.swaggerTypes = {
             
-            'default': 'any',
+            'default': 'dict',
             
             
-            'max': 'any',
+            'max': 'dict',
             
             
-            'min': 'any',
+            'min': 'dict',
             
             
             'type': 'str'
