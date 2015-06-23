@@ -358,10 +358,10 @@ class TestContainerController(db_base.DbTestCase):
                           '/v1/containers/%s/logs' % container_uuid)
         self.assertFalse(mock_container_logs.called)
 
-    @patch('magnum.conductor.api.API.container_execute')
+    @patch('magnum.conductor.api.API.container_exec')
     @patch('magnum.objects.Container.get_by_uuid')
     def test_execute_command_by_uuid(self, mock_get_by_uuid,
-                                     mock_container_execute):
+                                     mock_container_exec):
         test_container = utils.get_test_container()
         test_container_obj = objects.Container(self.context, **test_container)
         mock_get_by_uuid.return_value = test_container_obj
@@ -371,12 +371,12 @@ class TestContainerController(db_base.DbTestCase):
         cmd = {'command': 'ls'}
         response = self.app.put(url, cmd)
         self.assertEqual(response.status_int, 200)
-        mock_container_execute.assert_called_one_with(container_uuid, cmd)
+        mock_container_exec.assert_called_one_with(container_uuid, cmd)
 
-    @patch('magnum.conductor.api.API.container_execute')
+    @patch('magnum.conductor.api.API.container_exec')
     @patch('magnum.objects.Container.get_by_name')
     def test_execute_command_by_name(self, mock_get_by_name,
-                                     mock_container_execute):
+                                     mock_container_exec):
         test_container = utils.get_test_container()
         test_container_obj = objects.Container(self.context, **test_container)
         mock_get_by_name.return_value = test_container_obj
@@ -387,7 +387,7 @@ class TestContainerController(db_base.DbTestCase):
         cmd = {'command': 'ls'}
         response = self.app.put(url, cmd)
         self.assertEqual(response.status_int, 200)
-        mock_container_execute.assert_called_one_with(container_uuid, cmd)
+        mock_container_exec.assert_called_one_with(container_uuid, cmd)
 
     @patch('magnum.conductor.api.API.container_delete')
     @patch('magnum.objects.Container.get_by_uuid')

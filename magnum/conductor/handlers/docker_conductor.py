@@ -222,8 +222,8 @@ class Handler(object):
                 "Docker API Error : %s" % str(api_error))
 
     @wrap_container_exception
-    def container_execute(self, context, container_uuid, command):
-        LOG.debug("container_execute %s command %s" %
+    def container_exec(self, context, container_uuid, command):
+        LOG.debug("container_exec %s command %s" %
                   (container_uuid, command))
         docker = self.get_docker_client(context, container_uuid)
         try:
