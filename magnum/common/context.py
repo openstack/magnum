@@ -10,6 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from eventlet.green import threading
 from oslo_context import context
 
 
@@ -87,3 +88,26 @@ def make_admin_context(show_deleted=False):
                              is_admin=True,
                              show_deleted=show_deleted)
     return context
+
+
+_CTX_STORE = threading.local()
+_CTX_KEY = 'current_ctx'
+
+
+def has_ctx():
+    return hasattr(_CTX_STORE, _CTX_KEY)
+
+
+def ctx():
+    return getattr(_CTX_STORE, _CTX_KEY)
+
+
+def set_ctx(new_ctx):
+    if not new_ctx and has_ctx():
+        delattr(_CTX_STORE, _CTX_KEY)
+        if hasattr(context._request_store, 'context'):
+            delattr(context._request_store, 'context')
+
+    if new_ctx:
+        setattr(_CTX_STORE, _CTX_KEY, new_ctx)
+        setattr(context._request_store, 'context', new_ctx)
