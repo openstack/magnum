@@ -70,6 +70,22 @@ class TestBayObject(base.DbTestCase):
             self.assertIsInstance(bays[0], objects.Bay)
             self.assertEqual(self.context, bays[0]._context)
 
+    def test_list_with_filters(self):
+        with mock.patch.object(self.dbapi, 'get_bay_list',
+                               autospec=True) as mock_get_list:
+            mock_get_list.return_value = [self.fake_bay]
+            filters = {'name': 'bay1'}
+            bays = objects.Bay.list(self.context, filters=filters)
+
+            mock_get_list.assert_called_once_with(self.context, sort_key=None,
+                                                  sort_dir=None,
+                                                  filters=filters, limit=None,
+                                                  marker=None)
+            self.assertEqual(mock_get_list.call_count, 1)
+            self.assertThat(bays, HasLength(1))
+            self.assertIsInstance(bays[0], objects.Bay)
+            self.assertEqual(self.context, bays[0]._context)
+
     def test_create(self):
         with mock.patch.object(self.dbapi, 'create_bay',
                                autospec=True) as mock_create_bay:
