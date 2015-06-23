@@ -72,8 +72,8 @@ class Container(base.APIBase):
     name = wtypes.StringType(min_length=1, max_length=255)
     """Name of this container"""
 
-    image_id = wtypes.text
-    """The image name or UUID to use as a base image for this baymodel"""
+    image = wtypes.text
+    """The image name or ID to use as a base image for this container"""
 
     bay_uuid = wsme.wsproperty(types.uuid, _get_bay_uuid, _set_bay_uuid,
                                mandatory=True)
@@ -101,7 +101,7 @@ class Container(base.APIBase):
     def _convert_with_links(container, url, expand=True):
         if not expand:
             container.unset_fields_except(['uuid', 'name', 'bay_uuid',
-                                           'image_id', 'command', 'status'])
+                                           'image', 'command', 'status'])
 
         container.links = [link.Link.make_link(
             'self', url,
@@ -122,7 +122,7 @@ class Container(base.APIBase):
     def sample(cls, expand=True):
         sample = cls(uuid='27e3153e-d5bf-4b7e-b517-fb518e17f34c',
                      name='example',
-                     image_id='ubuntu',
+                     image='ubuntu',
                      command='env',
                      status='Running',
                      bay_uuid="fff114da-3bfa-4a0f-a123-c0dffad9718e",

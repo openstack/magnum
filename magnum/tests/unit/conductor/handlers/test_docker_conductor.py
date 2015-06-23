@@ -111,19 +111,19 @@ class TestDockerConductor(base.BaseTestCase):
         mock_get_docker_client.return_value = mock_docker
 
         mock_container = mock.MagicMock()
-        mock_container.image_id = 'test_image:some_tag'
+        mock_container.image = 'test_image:some_tag'
         mock_container.command = None
 
         container = self.conductor.container_create(
             None, 'some-name',
             'some-uuid', mock_container)
 
-        utf8_image_id = self.conductor._encode_utf8(mock_container.image_id)
+        utf8_image = self.conductor._encode_utf8(mock_container.image)
         mock_docker.pull.assert_called_once_with('test_image',
                                                  tag='some_tag')
-        mock_docker.inspect_image.assert_called_once_with(utf8_image_id)
+        mock_docker.inspect_image.assert_called_once_with(utf8_image)
         mock_docker.create_container.assert_called_once_with(
-            mock_container.image_id,
+            mock_container.image,
             name='some-name',
             hostname='some-uuid',
             command=None)
@@ -135,19 +135,19 @@ class TestDockerConductor(base.BaseTestCase):
         mock_get_docker_client.return_value = mock_docker
 
         mock_container = mock.MagicMock()
-        mock_container.image_id = 'test_image:some_tag'
+        mock_container.image = 'test_image:some_tag'
         mock_container.command = 'env'
 
         container = self.conductor.container_create(
             None, 'some-name',
             'some-uuid', mock_container)
 
-        utf8_image_id = self.conductor._encode_utf8(mock_container.image_id)
+        utf8_image = self.conductor._encode_utf8(mock_container.image)
         mock_docker.pull.assert_called_once_with('test_image',
                                                  tag='some_tag')
-        mock_docker.inspect_image.assert_called_once_with(utf8_image_id)
+        mock_docker.inspect_image.assert_called_once_with(utf8_image)
         mock_docker.create_container.assert_called_once_with(
-            mock_container.image_id,
+            mock_container.image,
             name='some-name',
             hostname='some-uuid',
             command='env')
@@ -158,7 +158,7 @@ class TestDockerConductor(base.BaseTestCase):
         mock_docker = mock.MagicMock()
         mock_get_docker_client.return_value = mock_docker
         mock_container = mock.MagicMock()
-        mock_container.image_id = 'test_image:some_tag'
+        mock_container.image = 'test_image:some_tag'
         with patch.object(errors.APIError, '__str__',
                           return_value='hit error') as mock_init:
             mock_docker.pull = mock.Mock(

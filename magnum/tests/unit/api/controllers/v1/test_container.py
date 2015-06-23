@@ -35,7 +35,7 @@ class TestContainerController(db_base.DbTestCase):
     def test_create_container(self, mock_container_create,):
         mock_container_create.side_effect = lambda x, y, z: z
 
-        params = ('{"name": "My Docker", "image_id": "ubuntu",'
+        params = ('{"name": "My Docker", "image": "ubuntu",'
                   '"command": "env",'
                   '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
         response = self.app.post('/v1/containers',
@@ -54,7 +54,7 @@ class TestContainerController(db_base.DbTestCase):
                                            mock_container_show):
         mock_container_create.side_effect = lambda x, y, z: z
         # Create a container with a command
-        params = ('{"name": "My Docker", "image_id": "ubuntu",'
+        params = ('{"name": "My Docker", "image": "ubuntu",'
                   '"command": "env",'
                   '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
         response = self.app.post('/v1/containers',
@@ -92,7 +92,7 @@ class TestContainerController(db_base.DbTestCase):
                                             mock_container_show):
         mock_container_create.side_effect = lambda x, y, z: z
         # Create a container with a command
-        params = ('{"name": "My Docker", "image_id": "ubuntu",'
+        params = ('{"name": "My Docker", "image": "ubuntu",'
                   '"command": "env",'
                   '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
         response = self.app.post('/v1/containers',
@@ -124,7 +124,7 @@ class TestContainerController(db_base.DbTestCase):
     @patch('magnum.conductor.api.API.container_create')
     def test_create_container_without_name(self, mock_container_create):
         # No name param
-        params = ('{"image_id": "ubuntu", "command": "env",'
+        params = ('{"image": "ubuntu", "command": "env",'
                   '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
         self.assertRaises(AppError, self.app.post, '/v1/containers',
                           params=params, content_type='application/json')
@@ -133,7 +133,7 @@ class TestContainerController(db_base.DbTestCase):
     @patch('magnum.conductor.api.API.container_create')
     def test_create_container_invalid_long_name(self, mock_container_create,):
         # Long name
-        params = ('{"name": "' + 'i' * 256 + '", "image_id": "ubuntu",'
+        params = ('{"name": "' + 'i' * 256 + '", "image": "ubuntu",'
                   '"command": "env",'
                   '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
         self.assertRaises(AppError, self.app.post, '/v1/containers',

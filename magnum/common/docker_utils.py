@@ -15,8 +15,8 @@ import docker
 from docker.utils import utils
 
 
-def parse_docker_image(image_id):
-    image_parts = image_id.split(':', 1)
+def parse_docker_image(image):
+    image_parts = image.split(':', 1)
 
     image_repo = image_parts[0]
     image_tag = None

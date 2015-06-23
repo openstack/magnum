@@ -114,14 +114,14 @@ class Handler(object):
     @wrap_container_exception
     def container_create(self, context, name, container_uuid, container):
         docker = self.get_docker_client(context, container)
-        image_id = container.image_id
+        image = container.image
         LOG.debug('Creating container with image %s name %s'
-                  % (image_id, name))
+                  % (image, name))
         try:
-            image_repo, image_tag = docker_utils.parse_docker_image(image_id)
+            image_repo, image_tag = docker_utils.parse_docker_image(image)
             docker.pull(image_repo, tag=image_tag)
-            docker.inspect_image(self._encode_utf8(container.image_id))
-            docker.create_container(image_id, name=name,
+            docker.inspect_image(self._encode_utf8(container.image))
+            docker.create_container(image, name=name,
                                     hostname=container_uuid,
                                     command=container.command)
             container.status = obj_container.STOPPED

@@ -186,7 +186,7 @@ class Container(Base):
     user_id = Column(String(255))
     uuid = Column(String(36))
     name = Column(String(255))
-    image_id = Column(String(255))
+    image = Column(String(255))
     command = Column(String(255))
     bay_uuid = Column(String(36))
     status = Column(String(20))
