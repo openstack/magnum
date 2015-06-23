@@ -134,6 +134,8 @@ class Connection(api.Connection):
             query = query.filter_by(project_id=filters['project_id'])
         if 'user_id' in filters:
             query = query.filter_by(user_id=filters['user_id'])
+        if 'status' in filters:
+            query = query.filter(models.Bay.status.in_(filters['status']))
 
         return query
 

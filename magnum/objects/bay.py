@@ -135,7 +135,8 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
         :param sort_dir: direction to sort. "asc" or "desc".
         :param filters: filter dict, can includes 'baymodel_id', 'name',
                         'node_count', 'stack_id', 'api_address',
-                        'node_addresses', 'project_id', 'user_id'.
+                        'node_addresses', 'project_id', 'user_id',
+                        'status'(should be a status list).
         :returns: a list of :class:`Bay` object.
 
         """

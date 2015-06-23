@@ -19,6 +19,7 @@ import six
 
 from magnum.common import exception
 from magnum.common import utils as magnum_utils
+from magnum.objects.bay import Status as bay_status
 from magnum.tests.unit.db import base
 from magnum.tests.unit.db import utils
 
@@ -81,12 +82,18 @@ class DbBayTestCase(base.DbTestCase):
         bay1 = utils.create_test_bay(
             name='bay-one',
             uuid=magnum_utils.generate_uuid(),
-            baymodel_id=bm1['uuid'])
+            baymodel_id=bm1['uuid'],
+            status=bay_status.CREATE_IN_PROGRESS)
         bay2 = utils.create_test_bay(
             name='bay-two',
             uuid=magnum_utils.generate_uuid(),
             baymodel_id=bm2['uuid'],
-            node_count=1)
+            node_count=1,
+            status=bay_status.UPDATE_IN_PROGRESS)
+        bay3 = utils.create_test_bay(
+            name='bay-three',
+            node_count=2,
+            status=bay_status.DELETE_IN_PROGRESS)
 
         res = self.dbapi.get_bay_list(self.context,
                                       filters={'baymodel_id': bm1['uuid']})
@@ -111,6 +118,12 @@ class DbBayTestCase(base.DbTestCase):
         res = self.dbapi.get_bay_list(self.context,
                                       filters={'node_count': 1})
         self.assertEqual([bay2.id], [r.id for r in res])
+
+        filters = {'status': [bay_status.CREATE_IN_PROGRESS,
+                              bay_status.DELETE_IN_PROGRESS]}
+        res = self.dbapi.get_bay_list(self.context,
+                                      filters=filters)
+        self.assertEqual([bay1.id, bay3.id], [r.id for r in res])
 
     def test_get_bay_list_baymodel_not_exist(self):
         utils.create_test_bay()
