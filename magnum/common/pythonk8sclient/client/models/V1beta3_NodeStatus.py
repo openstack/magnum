@@ -31,7 +31,7 @@ class V1beta3_NodeStatus(object):
             'addresses': 'list[V1beta3_NodeAddress]',
             
             
-            'capacity': 'any',
+            'capacity': 'dict',
             
             
             'conditions': 'list[V1beta3_NodeCondition]',

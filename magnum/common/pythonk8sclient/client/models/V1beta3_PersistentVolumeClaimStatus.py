@@ -31,7 +31,7 @@ class V1beta3_PersistentVolumeClaimStatus(object):
             'accessModes': 'list[V1beta3_AccessModeType]',
             
             
-            'capacity': 'any',
+            'capacity': 'dict',
             
             
             'phase': 'str',

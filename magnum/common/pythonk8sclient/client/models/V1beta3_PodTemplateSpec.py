@@ -28,7 +28,7 @@ class V1beta3_PodTemplateSpec(object):
         """
         self.swaggerTypes = {
             
-            'annotations': 'any',
+            'annotations': 'dict',
             
             
             'creationTimestamp': 'str',
@@ -40,7 +40,7 @@ class V1beta3_PodTemplateSpec(object):
             'generateName': 'str',
             
             
-            'labels': 'any',
+            'labels': 'dict',
             
             
             'name': 'str',

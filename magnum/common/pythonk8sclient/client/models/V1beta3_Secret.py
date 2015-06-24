@@ -28,7 +28,7 @@ class V1beta3_Secret(object):
         """
         self.swaggerTypes = {
             
-            'annotations': 'any',
+            'annotations': 'dict',
             
             
             'apiVersion': 'str',
@@ -37,7 +37,7 @@ class V1beta3_Secret(object):
             'creationTimestamp': 'str',
             
             
-            'data': 'any',
+            'data': 'dict',
             
             
             'deletionTimestamp': 'str',
@@ -49,7 +49,7 @@ class V1beta3_Secret(object):
             'kind': 'str',
             
             
-            'labels': 'any',
+            'labels': 'dict',
             
             
             'name': 'str',

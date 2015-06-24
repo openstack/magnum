@@ -28,7 +28,7 @@ class V1beta3_Event(object):
         """
         self.swaggerTypes = {
             
-            'annotations': 'any',
+            'annotations': 'dict',
             
             
             'apiVersion': 'str',
@@ -55,7 +55,7 @@ class V1beta3_Event(object):
             'kind': 'str',
             
             
-            'labels': 'any',
+            'labels': 'dict',
             
             
             'lastTimestamp': 'str',

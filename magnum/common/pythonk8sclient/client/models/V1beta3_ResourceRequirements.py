@@ -28,10 +28,10 @@ class V1beta3_ResourceRequirements(object):
         """
         self.swaggerTypes = {
             
-            'limits': 'any',
+            'limits': 'dict',
             
             
-            'requests': 'any'
+            'requests': 'dict'
             
         }
 

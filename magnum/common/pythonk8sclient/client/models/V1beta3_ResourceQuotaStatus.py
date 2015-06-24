@@ -28,10 +28,10 @@ class V1beta3_ResourceQuotaStatus(object):
         """
         self.swaggerTypes = {
             
-            'hard': 'any',
+            'hard': 'dict',
             
             
-            'used': 'any'
+            'used': 'dict'
             
         }
 

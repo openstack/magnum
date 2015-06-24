@@ -40,7 +40,7 @@ class V1beta3_PodSpec(object):
             'hostNetwork': 'bool',
             
             
-            'nodeSelector': 'any',
+            'nodeSelector': 'dict',
             
             
             'restartPolicy': 'str',

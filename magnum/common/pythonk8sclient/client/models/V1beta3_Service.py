@@ -28,7 +28,7 @@ class V1beta3_Service(object):
         """
         self.swaggerTypes = {
             
-            'annotations': 'any',
+            'annotations': 'dict',
             
             
             'apiVersion': 'str',
@@ -46,7 +46,7 @@ class V1beta3_Service(object):
             'kind': 'str',
             
             
-            'labels': 'any',
+            'labels': 'dict',
             
             
             'name': 'str',
