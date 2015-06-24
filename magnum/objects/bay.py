@@ -125,7 +125,7 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
 
     @base.remotable_classmethod
     def list(cls, context, limit=None, marker=None,
-             sort_key=None, sort_dir=None):
+             sort_key=None, sort_dir=None, filters=None):
         """Return a list of Bay objects.
 
         :param context: Security context.
@@ -133,13 +133,17 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
         :param marker: pagination marker for large data sets.
         :param sort_key: column to sort results by.
         :param sort_dir: direction to sort. "asc" or "desc".
+        :param filters: filter dict, can includes 'baymodel_id', 'name',
+                        'node_count', 'stack_id', 'api_address',
+                        'node_addresses', 'project_id', 'user_id'.
         :returns: a list of :class:`Bay` object.
 
         """
         db_bays = cls.dbapi.get_bay_list(context, limit=limit,
                                          marker=marker,
                                          sort_key=sort_key,
-                                         sort_dir=sort_dir)
+                                         sort_dir=sort_dir,
+                                         filters=filters)
         return Bay._from_db_object_list(db_bays, cls, context)
 
     @base.remotable
