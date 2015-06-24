@@ -105,7 +105,7 @@ class TestCase(base.BaseTestCase):
     def config(self, **kw):
         """Override config options for a test."""
         group = kw.pop('group', None)
-        for k, v in kw.iteritems():
+        for k, v in kw.items():
             CONF.set_override(k, v, group)
 
     def path_get(self, project_file=None):
