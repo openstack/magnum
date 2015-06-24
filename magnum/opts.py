@@ -15,8 +15,6 @@
 
 import itertools
 
-from oslo_log import log
-
 import magnum.api.app
 import magnum.api.auth
 import magnum.common.clients
@@ -41,10 +39,6 @@ def list_opts():
                          magnum.common.utils.UTILS_OPTS,
                          (magnum.openstack.common.eventlet_backdoor
                           .eventlet_backdoor_opts),
-                         log._options.generic_log_opts,
-                         log._options.log_opts,
-                         log._options.common_cli_opts,
-                         log._options.logging_cli_opts,
                          magnum.openstack.common.periodic_task.periodic_opts,
                          )),
         ('api', magnum.api.app.API_SERVICE_OPTS),
