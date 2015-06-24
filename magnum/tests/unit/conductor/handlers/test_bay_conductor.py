@@ -13,12 +13,12 @@
 # under the License.
 
 from heatclient import exc
+from oslo_service import loopingcall
 
 from magnum.common import exception
 from magnum.conductor.handlers import bay_conductor
 from magnum import objects
 from magnum.objects.bay import Status as bay_status
-from magnum.openstack.common import loopingcall
 from magnum.tests import base
 from magnum.tests.unit.db import base as db_base
 from magnum.tests.unit.db import utils

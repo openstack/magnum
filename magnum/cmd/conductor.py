@@ -20,6 +20,7 @@ import sys
 
 from oslo_config import cfg
 from oslo_log import log as logging
+from oslo_service import service
 
 from magnum.common import rpc_service
 from magnum.common import short_id
@@ -29,7 +30,6 @@ from magnum.conductor.handlers import docker_conductor
 from magnum.conductor.handlers import k8s_conductor
 from magnum.i18n import _LE
 from magnum.i18n import _LI
-from magnum.openstack.common import service
 
 LOG = logging.getLogger(__name__)
 
@@ -64,5 +64,5 @@ def main():
 
     server = rpc_service.Service.create(cfg.CONF.conductor.topic,
                                         conductor_id, endpoints)
-    launcher = service.launch(server)
+    launcher = service.launch(cfg.CONF, server)
     launcher.wait()

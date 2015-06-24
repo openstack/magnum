@@ -26,8 +26,6 @@ import magnum.conductor.handlers.docker_conductor
 import magnum.conductor.handlers.k8s_conductor
 import magnum.conductor.template_definition
 import magnum.db.sqlalchemy.models
-import magnum.openstack.common.eventlet_backdoor
-import magnum.openstack.common.periodic_task
 
 
 def list_opts():
@@ -37,9 +35,6 @@ def list_opts():
                          magnum.common.magnum_keystoneclient.trust_opts,
                          magnum.common.paths.PATH_OPTS,
                          magnum.common.utils.UTILS_OPTS,
-                         (magnum.openstack.common.eventlet_backdoor
-                          .eventlet_backdoor_opts),
-                         magnum.openstack.common.periodic_task.periodic_opts,
                          )),
         ('api', magnum.api.app.API_SERVICE_OPTS),
         ('bay', magnum.conductor.template_definition.template_def_opts),

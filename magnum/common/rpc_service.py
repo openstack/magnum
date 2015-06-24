@@ -17,10 +17,10 @@
 import eventlet
 from oslo_config import cfg
 import oslo_messaging as messaging
+from oslo_service import service
 
 from magnum.common import rpc
 from magnum.objects import base as objects_base
-from magnum.openstack.common import service
 
 
 # NOTE(paulczar):
