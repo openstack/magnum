@@ -104,12 +104,11 @@ class Handler(object):
 
             :param k8s_master_url: Kubernetes master URL
         """
-        if self._k8s_api is None:
-            # build a connection with Kubernetes master
-            client = swagger.ApiClient(k8s_master_url)
+        # build a connection with Kubernetes master
+        client = swagger.ApiClient(k8s_master_url)
 
-            # create the ApivbetaApi class instance
-            self._k8s_api = ApivbetaApi.ApivbetaApi(client)
+        # create the ApivbetaApi class instance
+        self._k8s_api = ApivbetaApi.ApivbetaApi(client)
 
     def service_create(self, context, service):
         LOG.debug("service_create")

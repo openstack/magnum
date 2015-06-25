@@ -131,11 +131,12 @@ class TestK8sConductor(base.TestCase):
         expected_pod.manifest = '{"key": "value"}'
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
-        with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.handlers.k8s_conductor.Handler.k8s_api',
+                   new_callable=mock.PropertyMock) as mock_kube_api:
             return_value = mock.MagicMock()
             return_value.status = mock.MagicMock()
             return_value.status.phase = 'Pending'
-            mock_kube_api.createPod.return_value = return_value
+            mock_kube_api.return_value.createPod.return_value = return_value
 
             self.kube_handler.pod_create(self.context, expected_pod)
             self.assertEqual('Pending', expected_pod.status)
@@ -151,10 +152,11 @@ class TestK8sConductor(base.TestCase):
         expected_pod.manifest = '{"key": "value"}'
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
-        with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.handlers.k8s_conductor.Handler.k8s_api',
+                   new_callable=mock.PropertyMock) as mock_kube_api:
             err = error.HTTPError(url='fake', msg='fake', hdrs='fake',
                                   fp=mock.MagicMock(), code=500)
-            mock_kube_api.createPod.side_effect = err
+            mock_kube_api.return_value.createPod.side_effect = err
             mock_literal_eval.return_value = {'message': 'error'}
 
             self.assertRaises(exception.KubernetesAPIFailed, self.kube_handler.
@@ -173,10 +175,11 @@ class TestK8sConductor(base.TestCase):
         expected_pod.manifest = '{"key": "value"}'
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
-        with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.handlers.k8s_conductor.Handler.k8s_api',
+                   new_callable=mock.PropertyMock) as mock_kube_api:
             err = error.HTTPError(url='fake', msg='fake', hdrs='fake',
                                   fp=mock.MagicMock(), code=409)
-            mock_kube_api.createPod.side_effect = err
+            mock_kube_api.return_value.createPod.side_effect = err
             mock_literal_eval.return_value = {'message': 'error'}
 
             self.assertRaises(exception.KubernetesAPIFailed, self.kube_handler.
@@ -199,11 +202,12 @@ class TestK8sConductor(base.TestCase):
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
         mock_object_has_stack.return_value = True
-        with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.handlers.k8s_conductor.Handler.k8s_api',
+                   new_callable=mock.PropertyMock) as mock_kube_api:
 
             self.kube_handler.pod_delete(self.context, mock_pod.uuid)
 
-            mock_kube_api.deletePod.assert_called_once_with(
+            mock_kube_api.return_value.deletePod.assert_called_once_with(
                 name=mock_pod.name,
                 namespaces='default')
             mock_pod.destroy.assert_called_once_with(self.context)
@@ -224,16 +228,17 @@ class TestK8sConductor(base.TestCase):
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
         mock_object_has_stack.return_value = True
-        with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.handlers.k8s_conductor.Handler.k8s_api',
+                   new_callable=mock.PropertyMock) as mock_kube_api:
             err = error.HTTPError(url='fake', msg='fake', hdrs='fake',
                                   fp=mock.MagicMock(), code=500)
-            mock_kube_api.deletePod.side_effect = err
+            mock_kube_api.return_value.deletePod.side_effect = err
             mock_literal_eval.return_value = {'message': 'error'}
 
             self.assertRaises(exception.KubernetesAPIFailed,
                               self.kube_handler.pod_delete,
                               self.context, mock_pod.uuid)
-            mock_kube_api.deletePod.assert_called_once_with(
+            mock_kube_api.return_value.deletePod.assert_called_once_with(
                 name=mock_pod.name,
                 namespaces='default')
             self.assertFalse(mock_pod.destroy.called)
@@ -255,15 +260,16 @@ class TestK8sConductor(base.TestCase):
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
         mock_object_has_stack.return_value = True
-        with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.handlers.k8s_conductor.Handler.k8s_api',
+                   new_callable=mock.PropertyMock) as mock_kube_api:
             err = error.HTTPError(url='fake', msg='fake', hdrs='fake',
                                   fp=mock.MagicMock(), code=404)
-            mock_kube_api.deletePod.side_effect = err
+            mock_kube_api.return_value.deletePod.side_effect = err
             mock_literal_eval.return_value = {'message': 'error'}
 
             self.kube_handler.pod_delete(self.context, mock_pod.uuid)
 
-            mock_kube_api.deletePod.assert_called_once_with(
+            mock_kube_api.return_value.deletePod.assert_called_once_with(
                 name=mock_pod.name, namespaces='default')
             mock_pod.destroy.assert_called_once_with(self.context)
 
@@ -277,10 +283,11 @@ class TestK8sConductor(base.TestCase):
         expected_service.manifest = '{"key": "value"}'
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
-        with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.handlers.k8s_conductor.Handler.k8s_api',
+                   new_callable=mock.PropertyMock) as mock_kube_api:
 
             self.kube_handler.service_create(self.context, expected_service)
-            mock_kube_api.createService.assert_called_once_with(
+            mock_kube_api.return_value.createService.assert_called_once_with(
                 body=manifest, namespaces='default')
             expected_service.create.assert_called_once_with(self.context)
 
@@ -295,16 +302,17 @@ class TestK8sConductor(base.TestCase):
         expected_service.manifest = '{"key": "value"}'
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
-        with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.handlers.k8s_conductor.Handler.k8s_api',
+                   new_callable=mock.PropertyMock) as mock_kube_api:
             err = error.HTTPError(url='fake', msg='fake', hdrs='fake',
                                   fp=mock.MagicMock(), code=404)
-            mock_kube_api.createService.side_effect = err
+            mock_kube_api.return_value.createService.side_effect = err
             mock_literal_eval.return_value = {'message': 'error'}
 
             self.assertRaises(exception.KubernetesAPIFailed,
                               self.kube_handler.service_create,
                               self.context, expected_service)
-            mock_kube_api.createService.assert_called_once_with(
+            mock_kube_api.return_value.createService.assert_called_once_with(
                 body=manifest, namespaces='default')
             self.assertFalse(expected_service.create.called)
 
@@ -324,11 +332,12 @@ class TestK8sConductor(base.TestCase):
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
         mock_object_has_stack.return_value = True
-        with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.handlers.k8s_conductor.Handler.k8s_api',
+                   new_callable=mock.PropertyMock) as mock_kube_api:
 
             self.kube_handler.service_delete(self.context, mock_service.uuid)
 
-            mock_kube_api.deleteService.assert_called_once_with(
+            mock_kube_api.return_value.deleteService.assert_called_once_with(
                 name=mock_service.name, namespaces='default')
             mock_service.destroy.assert_called_once_with(self.context)
 
@@ -349,17 +358,18 @@ class TestK8sConductor(base.TestCase):
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
         mock_object_has_stack.return_value = True
-        with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.handlers.k8s_conductor.Handler.k8s_api',
+                   new_callable=mock.PropertyMock) as mock_kube_api:
             err = error.HTTPError(url='fake', msg='fake', hdrs='fake',
                                   fp=mock.MagicMock(), code=500)
-            mock_kube_api.deleteService.side_effect = err
+            mock_kube_api.return_value.deleteService.side_effect = err
             mock_literal_eval.return_value = {'message': 'error'}
 
             self.assertRaises(exception.KubernetesAPIFailed,
                               self.kube_handler.service_delete,
                               self.context, mock_service.uuid)
 
-            mock_kube_api.deleteService.assert_called_once_with(
+            mock_kube_api.return_value.deleteService.assert_called_once_with(
                 name=mock_service.name, namespaces='default')
             self.assertFalse(mock_service.destroy.called)
 
@@ -380,15 +390,16 @@ class TestK8sConductor(base.TestCase):
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
         mock_object_has_stack.return_value = True
-        with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.handlers.k8s_conductor.Handler.k8s_api',
+                   new_callable=mock.PropertyMock) as mock_kube_api:
             err = error.HTTPError(url='fake', msg='fake', hdrs='fake',
                                   fp=mock.MagicMock(), code=404)
-            mock_kube_api.deleteService.side_effect = err
+            mock_kube_api.return_value.deleteService.side_effect = err
             mock_literal_eval.return_value = {'message': 'error'}
 
             self.kube_handler.service_delete(self.context, mock_service.uuid)
 
-            mock_kube_api.deleteService.assert_called_once_with(
+            mock_kube_api.return_value.deleteService.assert_called_once_with(
                 name=mock_service.name, namespaces='default')
             mock_service.destroy.assert_called_once_with(self.context)
 
@@ -402,11 +413,12 @@ class TestK8sConductor(base.TestCase):
         expected_rc.manifest = '{"key": "value"}'
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
-        with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.handlers.k8s_conductor.Handler.k8s_api',
+                   new_callable=mock.PropertyMock) as mock_kube_api:
 
             self.kube_handler.rc_create({}, expected_rc)
-            mock_kube_api.createReplicationController.assert_called_once_with(
-                body=manifest, namespaces='default')
+            (mock_kube_api.return_value.createReplicationController
+                .assert_called_once_with(body=manifest, namespaces='default'))
 
     @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
     @patch('ast.literal_eval')
@@ -419,17 +431,19 @@ class TestK8sConductor(base.TestCase):
         expected_rc.manifest = '{"key": "value"}'
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
-        with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.handlers.k8s_conductor.Handler.k8s_api',
+                   new_callable=mock.PropertyMock) as mock_kube_api:
             err = error.HTTPError(url='fake', msg='fake', hdrs='fake',
                                   fp=mock.MagicMock(), code=500)
-            mock_kube_api.createReplicationController.side_effect = err
+            (mock_kube_api.return_value.createReplicationController.side_effect
+             ) = err
             mock_literal_eval.return_value = {'message': 'error'}
 
             self.assertRaises(exception.KubernetesAPIFailed,
                               self.kube_handler.rc_create,
                               self.context, expected_rc)
-            mock_kube_api.createReplicationController.assert_called_once_with(
-                body=manifest, namespaces='default')
+            (mock_kube_api.return_value.createReplicationController
+                .assert_called_once_with(body=manifest, namespaces='default'))
             self.assertFalse(expected_rc.create.called)
 
     @patch('magnum.conductor.handlers.k8s_conductor._object_has_stack')
@@ -447,12 +461,14 @@ class TestK8sConductor(base.TestCase):
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
         mock_object_has_stack.return_value = True
-        with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.handlers.k8s_conductor.Handler.k8s_api',
+                   new_callable=mock.PropertyMock) as mock_kube_api:
 
             self.kube_handler.rc_delete(self.context, mock_rc.uuid)
 
-            mock_kube_api.deleteReplicationController.assert_called_once_with(
-                name=mock_rc.name, namespaces='default')
+            (mock_kube_api.return_value.deleteReplicationController
+                .assert_called_once_with(name=mock_rc.name,
+                                         namespaces='default'))
             mock_rc.destroy.assert_called_once_with(self.context)
 
     @patch('magnum.conductor.handlers.k8s_conductor._object_has_stack')
@@ -471,18 +487,21 @@ class TestK8sConductor(base.TestCase):
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
         mock_object_has_stack.return_value = True
-        with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.handlers.k8s_conductor.Handler.k8s_api',
+                   new_callable=mock.PropertyMock) as mock_kube_api:
             err = error.HTTPError(url='fake', msg='fake', hdrs='fake',
                                   fp=mock.MagicMock(), code=500)
-            mock_kube_api.deleteReplicationController.side_effect = err
+            (mock_kube_api.return_value.deleteReplicationController.side_effect
+             ) = err
             mock_literal_eval.return_value = {'message': 'error'}
 
             self.assertRaises(exception.KubernetesAPIFailed,
                               self.kube_handler.rc_delete,
                               self.context, mock_rc.uuid)
 
-            mock_kube_api.deleteReplicationController.assert_called_once_with(
-                name=mock_rc.name, namespaces='default')
+            (mock_kube_api.return_value.deleteReplicationController
+                .assert_called_once_with(name=mock_rc.name,
+                                         namespaces='default'))
             self.assertFalse(mock_rc.destroy.called)
 
     @patch('magnum.conductor.handlers.k8s_conductor._object_has_stack')
@@ -502,16 +521,19 @@ class TestK8sConductor(base.TestCase):
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
         mock_object_has_stack.return_value = True
-        with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.handlers.k8s_conductor.Handler.k8s_api',
+                   new_callable=mock.PropertyMock) as mock_kube_api:
             err = error.HTTPError(url='fake', msg='fake', hdrs='fake',
                                   fp=mock.MagicMock(), code=404)
-            mock_kube_api.deleteReplicationController.side_effect = err
+            (mock_kube_api.return_value.deleteReplicationController.side_effect
+             ) = err
             mock_literal_eval.return_value = {'message': 'error'}
 
             self.kube_handler.rc_delete(self.context, mock_rc.uuid)
 
-            mock_kube_api.deleteReplicationController.assert_called_once_with(
-                name=mock_rc.name, namespaces='default')
+            (mock_kube_api.return_value.deleteReplicationController
+                .assert_called_once_with(name=mock_rc.name,
+                                         namespaces='default'))
             self.assertTrue(mock_rc.destroy.called)
 
     @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
@@ -527,11 +549,13 @@ class TestK8sConductor(base.TestCase):
         expected_rc.manifest = '{"key": "value"}'
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
-        with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.handlers.k8s_conductor.Handler.k8s_api',
+                   new_callable=mock.PropertyMock) as mock_kube_api:
 
             self.kube_handler.rc_update(self.context, expected_rc)
-            mock_kube_api.replaceReplicationController.assert_called_once_with(
-                body=manifest, name=expected_rc.name, namespaces='default')
+            (mock_kube_api.return_value.replaceReplicationController
+                .assert_called_once_with(body=manifest, name=expected_rc.name,
+                                         namespaces='default'))
             expected_rc.refresh.assert_called_once_with(self.context)
             expected_rc.save.assert_called_once_with()
 
@@ -548,18 +572,20 @@ class TestK8sConductor(base.TestCase):
         expected_rc.manifest = '{"key": "value"}'
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
-        with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.handlers.k8s_conductor.Handler.k8s_api',
+                   new_callable=mock.PropertyMock) as mock_kube_api:
             err = error.HTTPError(url='fake', msg='fake', hdrs='fake',
                                   fp=mock.MagicMock(), code=404)
-            mock_kube_api.replaceReplicationController.side_effect = err
+            (mock_kube_api.return_value.replaceReplicationController
+                .side_effect) = err
             mock_literal_eval.return_value = {'message': 'error'}
 
             self.assertRaises(exception.KubernetesAPIFailed,
                               self.kube_handler.rc_update,
                               self.context, expected_rc)
-            mock_kube_api.replaceReplicationController.assert_called_once_with(
-                body=manifest, name=expected_rc.name,
-                namespaces='default')
+            (mock_kube_api.return_value.replaceReplicationController
+                .assert_called_once_with(body=manifest, name=expected_rc.name,
+                                         namespaces='default'))
             self.assertFalse(expected_rc.update.called)
 
     @patch('magnum.conductor.handlers.k8s_conductor._retrieve_k8s_master_url')
@@ -575,10 +601,11 @@ class TestK8sConductor(base.TestCase):
         expected_service.manifest = '{"key": "value"}'
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
-        with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.handlers.k8s_conductor.Handler.k8s_api',
+                   new_callable=mock.PropertyMock) as mock_kube_api:
 
             self.kube_handler.service_update(self.context, expected_service)
-            mock_kube_api.replaceService.assert_called_once_with(
+            mock_kube_api.return_value.replaceService.assert_called_once_with(
                 body=manifest, name=expected_service.name,
                 namespaces='default')
             expected_service.refresh.assert_called_once_with(self.context)
@@ -596,16 +623,17 @@ class TestK8sConductor(base.TestCase):
         manifest = {"key": "value"}
         expected_service.manifest = '{"key": "value"}'
         mock_retrieve_k8s_master_url.return_value = expected_master_url
-        with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.handlers.k8s_conductor.Handler.k8s_api',
+                   new_callable=mock.PropertyMock) as mock_kube_api:
             err = error.HTTPError(url='fake', msg='fake', hdrs='fake',
                                   fp=mock.MagicMock(), code=404)
-            mock_kube_api.replaceService.side_effect = err
+            mock_kube_api.return_value.replaceService.side_effect = err
             mock_literal_eval.return_value = {'message': 'error'}
 
             self.assertRaises(exception.KubernetesAPIFailed,
                               self.kube_handler.service_update,
                               self.context, expected_service)
-            mock_kube_api.replaceService.assert_called_once_with(
+            mock_kube_api.return_value.replaceService.assert_called_once_with(
                 body=manifest, name=expected_service.name,
                 namespaces='default')
             self.assertFalse(expected_service.refresh.called)
@@ -623,10 +651,11 @@ class TestK8sConductor(base.TestCase):
         expected_pod.manifest = '{"key": "value"}'
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
-        with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.handlers.k8s_conductor.Handler.k8s_api',
+                   new_callable=mock.PropertyMock) as mock_kube_api:
 
             self.kube_handler.pod_update(self.context, expected_pod)
-            mock_kube_api.replacePod.assert_called_once_with(
+            mock_kube_api.return_value.replacePod.assert_called_once_with(
                 body=manifest, name=expected_pod.name,
                 namespaces='default')
             expected_pod.refresh.assert_called_once_with(self.context)
@@ -645,16 +674,17 @@ class TestK8sConductor(base.TestCase):
         expected_pod.manifest = '{"key": "value"}'
 
         mock_retrieve_k8s_master_url.return_value = expected_master_url
-        with patch.object(self.kube_handler, '_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.handlers.k8s_conductor.Handler.k8s_api',
+                   new_callable=mock.PropertyMock) as mock_kube_api:
             err = error.HTTPError(url='fake', msg='fake', hdrs='fake',
                                   fp=mock.MagicMock(), code=404)
-            mock_kube_api.replacePod.side_effect = err
+            mock_kube_api.return_value.replacePod.side_effect = err
             mock_literal_eval.return_value = {'message': 'error'}
 
             self.assertRaises(exception.KubernetesAPIFailed,
                               self.kube_handler.pod_update,
                               self.context, expected_pod)
-            mock_kube_api.replacePod.assert_called_once_with(
+            mock_kube_api.return_value.replacePod.assert_called_once_with(
                 body=manifest, name=expected_pod.name,
                 namespaces='default')
             self.assertFalse(expected_pod.refresh.called)
