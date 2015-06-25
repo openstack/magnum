@@ -72,7 +72,7 @@ class DbBayTestCase(base.DbTestCase):
             uuids.append(six.text_type(bay['uuid']))
         res = self.dbapi.get_bay_list(self.context)
         res_uuids = [r.uuid for r in res]
-        self.assertEqual(uuids.sort(), res_uuids.sort())
+        self.assertEqual(sorted(uuids), sorted(res_uuids))
 
     def test_get_bay_list_with_filters(self):
         bm1 = utils.get_test_baymodel(id=1, uuid=magnum_utils.generate_uuid())
