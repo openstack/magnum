@@ -206,7 +206,7 @@ The baymodel informs Magnum in which way to construct a bay.::
                            --docker-volume-size 5 --coe kubernetes
 
 Next create a bay. Use the baymodel UUID as a template for bay creation.
-This bay will result in one master kubernetes node and two minion nodes.::
+This bay will result in one master kubernetes node and one minion node.::
 
     magnum bay-create --name k8sbay --baymodel k8sbaymodel --node-count 1
 
