@@ -106,7 +106,13 @@ class Connection(api.Connection):
     def __init__(self):
         pass
 
-    def _add_tenant_filters(self, context, query):
+    def _add_tenant_filters(self, context, query, opts={}):
+
+        all_tenants = opts.get('get_all_tenants', False)
+
+        if context.is_admin and all_tenants:
+            return query
+
         if context.project_id:
             query = query.filter_by(project_id=context.project_id)
         else:
@@ -140,9 +146,9 @@ class Connection(api.Connection):
         return query
 
     def get_bay_list(self, context, filters=None, limit=None, marker=None,
-                     sort_key=None, sort_dir=None):
+                     sort_key=None, sort_dir=None, opts={}):
         query = model_query(models.Bay)
-        query = self._add_tenant_filters(context, query)
+        query = self._add_tenant_filters(context, query, opts=opts)
         query = self._add_bays_filters(query, filters)
         return _paginate_query(models.Bay, limit, marker,
                                sort_key, sort_dir, query)
