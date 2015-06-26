@@ -281,11 +281,10 @@ def convert_to_list_dict(lst, label):
 
 def sanitize_hostname(hostname):
     """Return a hostname which conforms to RFC-952 and RFC-1123 specs."""
-    if isinstance(hostname, six.text_type):
-        hostname = hostname.encode('latin-1', 'ignore')
+    hostname = six.text_type(hostname)
 
     hostname = re.sub('[ _]', '-', hostname)
-    hostname = re.sub('[^\w.-]+', '', hostname)
+    hostname = re.sub('[^a-zA-Z0-9_.-]+', '', hostname)
     hostname = hostname.lower()
     hostname = hostname.strip('.-')
 
@@ -564,7 +563,7 @@ def is_name_safe(name):
 def raise_exception_invalid_scheme(url):
     valid_schemes = ['http', 'https']
 
-    if not isinstance(url, basestring):
+    if not isinstance(url, six.string_types):
         raise exception.Urllib2InvalidScheme(url=url)
 
     scheme = url.split(':')[0]

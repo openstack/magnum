@@ -109,7 +109,7 @@ def enforce_wsgi(api_name, act=None):
                    ...
     """
     def wraper(fn):
-        action = "%s:%s" % (api_name, (act or fn.func_name))
+        action = "%s:%s" % (api_name, (act or fn.__name__))
 
         @functools.wraps(fn)
         def handle(self, *args, **kwargs):
