@@ -44,5 +44,5 @@ def list_opts():
         ('heat_client', magnum.common.clients.heat_client_opts),
         ('bay_heat', magnum.conductor.handlers.bay_conductor.bay_heat_opts),
         ('kubernetes',
-            magnum.conductor.handlers.k8s_conductor.kubernetes_opts),
+            magnum.conductor.k8s_api.kubernetes_opts),
     ]

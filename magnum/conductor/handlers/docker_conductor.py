@@ -21,6 +21,7 @@ from magnum.common import docker_utils
 from magnum.common import exception
 from magnum.common import utils
 from magnum.conductor.handlers.common import docker_client
+from magnum.conductor import utils as conductor_utils
 from magnum.i18n import _LE
 from magnum import objects
 from magnum.objects import container as obj_container
@@ -100,7 +101,7 @@ class Handler(object):
 
     @classmethod
     def _docker_for_container(cls, context, container):
-        bay = objects.Bay.get_by_uuid(context, container.bay_uuid)
+        bay = conductor_utils.retrieve_bay(context, container)
         return cls._docker_for_bay(bay)
 
     @classmethod
