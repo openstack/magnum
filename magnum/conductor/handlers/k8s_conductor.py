@@ -176,6 +176,7 @@ class Handler(object):
             message = ast.literal_eval(err.read())['message']
             raise exception.KubernetesAPIFailed(code=err.code, message=message)
         pod.status = resp.status.phase
+        pod.host = resp.spec.host
         # call the pod object to persist in db
         # TODO(yuanying): parse pod file and,
         # - extract pod name and set it

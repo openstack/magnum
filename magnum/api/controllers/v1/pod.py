@@ -55,6 +55,9 @@ class Pod(v1_base.K8sResourceBase):
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated pod links"""
 
+    host = wtypes.text
+    """The host of this pod"""
+
     def __init__(self, **kwargs):
         super(Pod, self).__init__()
 
@@ -70,7 +73,7 @@ class Pod(v1_base.K8sResourceBase):
     def _convert_with_links(pod, url, expand=True):
         if not expand:
             pod.unset_fields_except(['uuid', 'name', 'desc', 'bay_uuid',
-                                     'images', 'labels', 'status'])
+                                     'images', 'labels', 'status', 'host'])
 
         pod.links = [link.Link.make_link('self', url,
                                          'pods', pod.uuid),
@@ -94,6 +97,7 @@ class Pod(v1_base.K8sResourceBase):
                      images=['MyImage'],
                      labels={'name': 'foo'},
                      status='Running',
+                     host='10.0.0.3',
                      manifest_url='file:///tmp/rc.yaml',
                      manifest = '''{
                          "metadata": {
