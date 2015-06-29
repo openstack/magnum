@@ -117,6 +117,9 @@ class OutputMapping(object):
         self.heat_output = heat_output
 
     def set_output(self, stack, bay):
+        if self.bay_attr is None:
+            return
+
         for output in stack.outputs:
             if output['output_key'] == self.heat_output:
                 setattr(bay, self.bay_attr, output['output_value'])
@@ -320,6 +323,8 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
 
         self.add_output('kube_master',
                         bay_attr='api_address')
+        self.add_output('kube_minions',
+                        bay_attr=None)
         self.add_output('kube_minions_external',
                         bay_attr='node_addresses')
 

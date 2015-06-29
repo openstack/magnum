@@ -173,3 +173,5 @@ outputs:
   kube_node_external_ip:
     value: {get_attr: [kube_node_floating, floating_ip_address]}
 
+  OS::stack_id:
+    value: {get_attr: [kube_node, networks, private, 0]}
