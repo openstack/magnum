@@ -98,6 +98,27 @@ class TemplateDefinitionTestCase(base.TestCase):
         self.assertRaises(exception.RequiredParameterNotProvided,
                           param.set_param, {}, mock_baymodel, None)
 
+    @mock.patch('magnum.conductor.template_definition.BaseTemplateDefinition'
+                '.get_params')
+    @mock.patch('magnum.conductor.template_definition.TemplateDefinition'
+                '.get_output')
+    def test_k8s_get_params(self, mock_get_output, mock_get_params):
+        mock_baymodel = mock.MagicMock()
+        mock_bay = mock.MagicMock()
+        mock_scale_manager = mock.MagicMock()
+
+        removal_nodes = ['node1', 'node2']
+        mock_scale_manager.get_removal_nodes.return_value = removal_nodes
+        k8s_def = tdef.AtomicK8sTemplateDefinition()
+
+        k8s_def.get_params(mock_baymodel, mock_bay,
+                           scale_manager=mock_scale_manager)
+
+        expected_kwargs = {'extra_params': {
+            'minions_to_remove': removal_nodes}}
+        mock_get_params.assert_called_once_with(mock_baymodel, mock_bay,
+                                                **expected_kwargs)
+
     @mock.patch('requests.post')
     def test_swarm_discovery_url_public_token(self, mock_post):
 
@@ -155,3 +176,32 @@ class TemplateDefinitionTestCase(base.TestCase):
         actual_url = swarm_def.get_discovery_url(mock_bay)
 
         self.assertEqual(mock_bay.discovery_url, actual_url)
+
+    def test_output_mapping(self):
+        heat_outputs = [
+            {
+                "output_value": "value1",
+                "description": "No description given",
+                "output_key": "key1"
+            },
+            {
+                "output_value": ["value2", "value3"],
+                "description": "No description given",
+                "output_key": "key2"
+            }
+        ]
+
+        mock_stack = mock.MagicMock()
+        mock_stack.outputs = heat_outputs
+
+        output = tdef.OutputMapping('key1')
+        value = output.get_output_value(mock_stack)
+        self.assertEqual(value, 'value1')
+
+        output = tdef.OutputMapping('key2')
+        value = output.get_output_value(mock_stack)
+        self.assertEqual(value, ["value2", "value3"])
+
+        output = tdef.OutputMapping('key3')
+        value = output.get_output_value(mock_stack)
+        self.assertIsNone(value)
