@@ -612,7 +612,7 @@ class TestBayModelPolicyEnforcement(api_base.FunctionalTest):
             [{'name': '/name', 'value': "new_name", 'op': 'replace'}])
 
     def test_policy_disallow_create(self):
-        bdict = apiutils.bay_post_data(name='bay_example_A')
+        bdict = apiutils.baymodel_post_data(name='bay_model_example_A')
         self._common_policy_check(
             "baymodel:create", self.post_json, '/baymodels', bdict)
 
