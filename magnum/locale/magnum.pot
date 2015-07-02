@@ -328,7 +328,7 @@ msgstr ""
 
 #: magnum/common/exception.py:460
 #, python-format
-msgid "Image %(image_id)s doesn't contain os-distro field."
+msgid "Image %(image_id)s doesn't contain os_distro field."
 msgstr ""
 
 #: magnum/common/k8s_manifest.py:40 magnum/common/k8s_manifest.py:53

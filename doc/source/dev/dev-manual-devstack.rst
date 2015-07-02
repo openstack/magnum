@@ -98,7 +98,7 @@ Create a new shell, and source the devstack openrc script::
     glance image-create --name fedora-21-atomic-3 \
                         --is-public True \
                         --disk-format qcow2 \
-                        --property os-distro='fedora-atomic'\
+                        --property os_distro='fedora-atomic'\
                         --container-format bare < fedora-21-atomic-3.qcow2
     test -f ~/.ssh/id_rsa.pub || ssh-keygen
     nova keypair-add --pub-key ~/.ssh/id_rsa.pub testkey
