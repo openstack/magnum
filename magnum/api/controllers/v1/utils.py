@@ -63,7 +63,6 @@ def get_rpc_resource(resource, resource_ident):
     :param resource_ident: the UUID or logical name of the resource.
 
     :returns: The RPC resource.
-    :raises: InvalidUuidOrName if the name or uuid provided is not valid.
     """
     resource = getattr(objects, resource)
 
@@ -71,8 +70,6 @@ def get_rpc_resource(resource, resource_ident):
         return resource.get_by_uuid(pecan.request.context, resource_ident)
 
     return resource.get_by_name(pecan.request.context, resource_ident)
-
-    raise exception.InvalidUuidOrName(name=resource_ident)
 
 
 def get_openstack_resource(manager, resource_ident, resource_type):
