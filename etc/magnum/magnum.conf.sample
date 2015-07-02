@@ -37,9 +37,12 @@
 # is displayed in the service's log file. (string value)
 #backdoor_port = <None>
 
-# Some periodic tasks can be run in a separate process. Should we run
-# them here? (boolean value)
-#run_external_periodic_tasks = true
+# Enable periodic tasks. (boolean value)
+#periodic_enable = true
+
+# Max interval size between periodic tasks execution in seconds.
+# (integer value)
+#periodic_interval_max = 60
 
 #
 # From oslo.log
