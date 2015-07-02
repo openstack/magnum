@@ -135,6 +135,8 @@ function create_magnum_conf {
 
     configure_auth_token_middleware $MAGNUM_CONF magnum $MAGNUM_AUTH_CACHE_DIR
 
+    iniset $MAGNUM_CONF keystone_authtoken auth_uri $KEYSTONE_SERVICE_URI/v2.0
+
     if is_fedora || is_suse; then
         # magnum defaults to /usr/local/bin, but fedora and suse pip like to
         # install things in /usr/bin
