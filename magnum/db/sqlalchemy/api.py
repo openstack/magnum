@@ -106,7 +106,9 @@ class Connection(api.Connection):
     def __init__(self):
         pass
 
-    def _add_tenant_filters(self, context, query, opts={}):
+    def _add_tenant_filters(self, context, query, opts=None):
+        if opts is None:
+            opts = {}
 
         all_tenants = opts.get('get_all_tenants', False)
 
@@ -146,7 +148,9 @@ class Connection(api.Connection):
         return query
 
     def get_bay_list(self, context, filters=None, limit=None, marker=None,
-                     sort_key=None, sort_dir=None, opts={}):
+                     sort_key=None, sort_dir=None, opts=None):
+        if opts is None:
+            opts = {}
         query = model_query(models.Bay)
         query = self._add_tenant_filters(context, query, opts=opts)
         query = self._add_bays_filters(query, filters)

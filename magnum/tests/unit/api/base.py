@@ -189,7 +189,8 @@ class FunctionalTest(base.DbTestCase):
         return response
 
     def get_json(self, path, expect_errors=False, headers=None,
-                 extra_environ=None, q=[], path_prefix=PATH_PREFIX, **params):
+                 extra_environ=None, q=None, path_prefix=PATH_PREFIX,
+                 **params):
         """Sends simulated HTTP GET request to Pecan test app.
 
         :param path: url path of target service
@@ -203,6 +204,8 @@ class FunctionalTest(base.DbTestCase):
         :param path_prefix: prefix of the url path
         :param params: content for wsgi.input of request
         """
+        if q is None:
+            q = []
         full_path = path_prefix + path
         query_params = {'q.field': [],
                         'q.value': [],

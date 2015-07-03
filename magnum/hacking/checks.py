@@ -32,6 +32,7 @@ Guidelines for writing new hacking checks
 
 enforce_re = re.compile(r"@policy.enforce_wsgi*")
 decorator_re = re.compile(r"@.*")
+mutable_default_args = re.compile(r"^\s*def .+\((.+=\{\}|.+=\[\])")
 
 
 def check_policy_enforce_decorator(logical_line,
@@ -44,5 +45,12 @@ def check_policy_enforce_decorator(logical_line,
         yield(0, msg)
 
 
+def no_mutable_default_args(logical_line):
+    msg = "M322: Method's default argument shouldn't be mutable!"
+    if mutable_default_args.match(logical_line):
+        yield (0, msg)
+
+
 def factory(register):
     register(check_policy_enforce_decorator)
+    register(no_mutable_default_args)

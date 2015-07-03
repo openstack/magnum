@@ -83,3 +83,13 @@ class HackingTestCase(base.TestCase):
                """
         self._assert_has_errors(code, checks.check_policy_enforce_decorator,
                                 expected_errors=[(2, 0, "M301")])
+
+    def test_no_mutable_default_args(self):
+        self.assertEqual(1, len(list(checks.no_mutable_default_args(
+            "def get_info_from_bdm(virt_type, bdm, mapping=[])"))))
+
+        self.assertEqual(0, len(list(checks.no_mutable_default_args(
+            "defined = []"))))
+
+        self.assertEqual(0, len(list(checks.no_mutable_default_args(
+            "defined, undefined = [], {}"))))

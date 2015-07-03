@@ -16,7 +16,9 @@ from oslo_config import cfg
 from oslo_log import log as logging
 
 
-def prepare_service(argv=[]):
+def prepare_service(argv=None):
+    if argv is None:
+        argv = []
     logging.register_options(cfg.CONF)
     cfg.CONF(argv[1:], project='magnum')
     logging.setup(cfg.CONF, 'magnum')
