@@ -371,6 +371,10 @@ class TestPost(api_base.FunctionalTest):
         self.mock_pod_create = p.start()
         self.mock_pod_create.side_effect = self._simulate_rpc_pod_create
         self.addCleanup(p.stop)
+        p = mock.patch('magnum.objects.BayModel.get_by_uuid')
+        self.mock_baymodel_get_by_uuid = p.start()
+        self.mock_baymodel_get_by_uuid.return_value.coe = 'kubernetes'
+        self.addCleanup(p.stop)
 
     def _simulate_rpc_pod_create(self, pod):
         pod.create()
