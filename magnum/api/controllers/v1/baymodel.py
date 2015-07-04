@@ -179,10 +179,6 @@ class BayModelCollection(collection.Collection):
 class BayModelsController(rest.RestController):
     """REST controller for BayModels."""
 
-    from_baymodels = False
-    """A flag to indicate if the requests to this controller are coming
-    from the top-level resource BayModels."""
-
     _custom_actions = {
         'detail': ['GET'],
     }
@@ -270,9 +266,6 @@ class BayModelsController(rest.RestController):
 
         :param baymodel_ident: UUID or logical name of a baymodel.
         """
-        if self.from_baymodels:
-            raise exception.OperationNotPermitted
-
         rpc_baymodel = api_utils.get_rpc_resource('BayModel', baymodel_ident)
         return BayModel.convert_with_links(rpc_baymodel)
 
@@ -283,9 +276,6 @@ class BayModelsController(rest.RestController):
 
         :param baymodel: a baymodel within the request body.
         """
-        if self.from_baymodels:
-            raise exception.OperationNotPermitted
-
         baymodel_dict = baymodel.as_dict()
         context = pecan.request.context
         auth_token = context.auth_token_info['token']
@@ -313,9 +303,6 @@ class BayModelsController(rest.RestController):
         :param baymodel_uuid: UUID of a baymodel.
         :param patch: a json PATCH document to apply to this baymodel.
         """
-        if self.from_baymodels:
-            raise exception.OperationNotPermitted
-
         rpc_baymodel = objects.BayModel.get_by_uuid(pecan.request.context,
                                                     baymodel_uuid)
         try:
@@ -348,8 +335,5 @@ class BayModelsController(rest.RestController):
 
         :param baymodel_uuid: UUID or logical name of a baymodel.
         """
-        if self.from_baymodels:
-            raise exception.OperationNotPermitted
-
         rpc_baymodel = api_utils.get_rpc_resource('BayModel', baymodel_ident)
         rpc_baymodel.destroy()

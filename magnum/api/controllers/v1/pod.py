@@ -168,10 +168,6 @@ class PodsController(rest.RestController):
     def __init__(self):
         super(PodsController, self).__init__()
 
-    from_pods = False
-    """A flag to indicate if the requests to this controller are coming
-    from the top-level resource Pods."""
-
     _custom_actions = {
         'detail': ['GET'],
     }
@@ -241,9 +237,6 @@ class PodsController(rest.RestController):
 
         :param pod_ident: UUID of a pod or logical name of the pod.
         """
-        if self.from_pods:
-            raise exception.OperationNotPermitted
-
         rpc_pod = api_utils.get_rpc_resource('Pod', pod_ident)
 
         return Pod.convert_with_links(rpc_pod)
@@ -254,9 +247,6 @@ class PodsController(rest.RestController):
 
         :param pod: a pod within the request body.
         """
-        if self.from_pods:
-            raise exception.OperationNotPermitted
-
         pod.parse_manifest()
         pod_dict = pod.as_dict()
         context = pecan.request.context
@@ -277,9 +267,6 @@ class PodsController(rest.RestController):
         :param pod_ident: UUID or logical name of a pod.
         :param patch: a json PATCH document to apply to this pod.
         """
-        if self.from_pods:
-            raise exception.OperationNotPermitted
-
         rpc_pod = api_utils.get_rpc_resource('Pod', pod_ident)
         # Init manifest and manifest_url field because we don't store them
         # in database.
@@ -317,9 +304,6 @@ class PodsController(rest.RestController):
 
         :param pod_ident: UUID of a pod or logical name of the pod.
         """
-        if self.from_pods:
-            raise exception.OperationNotPermitted
-
         rpc_pod = api_utils.get_rpc_resource('Pod', pod_ident)
 
         pecan.request.rpcapi.pod_delete(rpc_pod.uuid)
