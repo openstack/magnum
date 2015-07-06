@@ -9,7 +9,6 @@ parameters:
 
   server_image:
     type: string
-    default: centos-7-atomic-20150120
     description: glance image used to boot the server
 
   server_flavor:
@@ -22,9 +21,9 @@ parameters:
     description: name of ssh key to be provisioned on our server
     default: lars
 
-  external_network_id:
+  external_network:
     type: string
-    description: uuid of a network to use for floating ip addresses
+    description: uuid/name of a network to use for floating ip addresses
 
   kube_allow_priv:
     type: string
@@ -41,20 +40,24 @@ parameters:
   fixed_network:
     type: string
     description: Network from which to allocate fixed addresses.
+  wait_condition_timeout:
+    type: number
+    default: 6000
+    description : >
+      timeout for the Wait Conditions
 
 resources:
 
   node_wait_handle:
-    type: "AWS::CloudFormation::WaitConditionHandle"
+    type: OS::Heat::WaitConditionHandle
 
   node_wait_condition:
-    type: "AWS::CloudFormation::WaitCondition"
+    type: OS::Heat::WaitCondition
     depends_on:
       - kube_node
     properties:
-      Handle:
-        get_resource: node_wait_handle
-      Timeout: 6000
+      handle: {get_resource: node_wait_handle}
+      timeout: {get_param: wait_condition_timeout}
 
   ######################################################################
   #
@@ -73,12 +76,6 @@ resources:
             "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
             "$KUBE_MASTER_IP": {get_param: kube_master_ip}
             "$WAIT_HANDLE": {get_resource: node_wait_handle}
-
-  add_to_docker_group:
-    type: "OS::Heat::SoftwareConfig"
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/add-to-docker-group.sh}
 
   kube_register:
     type: "OS::Heat::SoftwareConfig"
@@ -116,11 +113,17 @@ resources:
       group: ungrouped
       config: {get_file: fragments/enable-services-minion.sh}
 
-  cfn_signal:
-    type: "OS::Heat::SoftwareConfig"
+  minion_wc_notify:
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/cfn-signal.sh}
+      config:
+        str_replace:
+          template: |
+            #!/bin/bash -v
+            wc_notify --data-binary '{"status": "SUCCESS"}'
+          params:
+            wc_notify: {get_attr: [node_wait_handle, curl_cli]}
 
   disable_selinux:
     type: "OS::Heat::SoftwareConfig"
@@ -136,12 +139,11 @@ resources:
         - config: {get_resource: write_heat_params}
         - config: {get_resource: kube_user}
         - config: {get_resource: kube_examples}
-        - config: {get_resource: add_to_docker_group}
         - config: {get_resource: kube_register}
         - config: {get_resource: configure_kubernetes_minion}
         - config: {get_resource: docker_service}
         - config: {get_resource: enable_services}
-        - config: {get_resource: cfn_signal}
+        - config: {get_resource: minion_wc_notify}
 
   kube_node:
     type: "OS::Nova::Server"
@@ -160,8 +162,8 @@ resources:
   kube_node_floating:
     type: "OS::Neutron::FloatingIP"
     properties:
-      floating_network_id:
-        get_param: external_network_id
+      floating_network:
+        get_param: external_network
       port_id:
         get_attr: [kube_node, addresses, {get_param: fixed_network}, 0, port]
 
