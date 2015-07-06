@@ -88,6 +88,7 @@ function configure_magnum {
     # Rebuild the config file from scratch
     create_magnum_conf
 
+    update_heat_policy
 }
 
 # create_magnum_accounts() - Set up common required magnum accounts
@@ -167,6 +168,12 @@ function create_magnum_conf {
 
         iniset $MAGNUM_CONF DEFAULT enabled_ssl_apis "$MAGNUM_ENABLED_APIS"
     fi
+}
+
+function update_heat_policy {
+    # enable stacks globel_index search so that magnum can use
+    # list(global_tenant=True)
+    sed 's/\("stacks:global_index":\).*$/\1 "role:admin",/' $HEAT_CONF_DIR/policy.json
 }
 
 function create_magnum_conf_magnum_network {
