@@ -236,8 +236,12 @@ by updating the node_count attribute. For example, to add one more node::
 Bays will have an initial status of UPDATE_IN_PROGRESS. Magnum will update
 the status to UPDATE_COMPLETE when it is done updating the bay.
 
-NOTE: Reducing node_count will remove all your existing containers on the nodes
-that are deleted.
+NOTE: If you choose to reduce the node_count, Magnum will first try to remove
+empty nodes with no containers running on them. If you reduce node_count by
+more than the number of empty nodes, Magnum must remove nodes that have running
+containers on them. This action will delete those containers. We strongly
+recommend using a replication controller before reducing the node_count so
+any removed containers can be automatically recovered on your remaining nodes.
 
 Kubernetes provides a number of examples you can use to check that things
 are working. You may need to clone kubernetes by::
