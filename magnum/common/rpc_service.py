@@ -21,6 +21,7 @@ from oslo_service import service
 
 from magnum.common import rpc
 from magnum.objects import base as objects_base
+from magnum.service import periodic
 
 
 # NOTE(paulczar):
@@ -39,6 +40,19 @@ TRANSPORT_ALIASES = {
     'magnum.openstack.common.rpc.impl_zmq': 'zmq',
 }
 
+periodic_opts = [
+    cfg.BoolOpt('periodic_enable',
+                default=True,
+                help='Enable periodic tasks.'),
+    cfg.IntOpt('periodic_interval_max',
+               default=60,
+               help='Max interval size between periodic tasks execution in '
+                    'seconds.'),
+]
+
+CONF = cfg.CONF
+CONF.register_opts(periodic_opts)
+
 
 class Service(service.Service):
     _server = None
@@ -55,6 +69,8 @@ class Service(service.Service):
                                                 serializer=serializer)
 
     def start(self):
+        if CONF.periodic_enable:
+            self.tg = periodic.setup(CONF)
         self._server.start()
 
     def wait(self):

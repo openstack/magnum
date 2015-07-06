@@ -35,6 +35,7 @@ def list_opts():
                          magnum.common.magnum_keystoneclient.trust_opts,
                          magnum.common.paths.PATH_OPTS,
                          magnum.common.utils.UTILS_OPTS,
+                         magnum.common.rpc_service.periodic_opts
                          )),
         ('api', magnum.api.app.API_SERVICE_OPTS),
         ('bay', magnum.conductor.template_definition.template_def_opts),
