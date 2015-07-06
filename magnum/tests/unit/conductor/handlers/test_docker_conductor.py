@@ -15,6 +15,7 @@ import docker
 from docker import errors
 import mock
 from oslo_config import cfg
+import six
 
 from magnum.common import exception
 from magnum.conductor.handlers import docker_conductor
@@ -152,6 +153,12 @@ class TestDockerConductor(base.BaseTestCase):
             hostname='some-uuid',
             command='env')
         self.assertEqual(obj_container.STOPPED, container.status)
+
+    def test_encode_utf8_unicode(self):
+        image = 'some_image:some_tag'
+        unicode_image = six.u(image)
+        utf8_image = self.conductor._encode_utf8(unicode_image)
+        self.assertEqual(image, utf8_image)
 
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
     def test_container_create_with_failure(self, mock_get_docker_client):

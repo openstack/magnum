@@ -89,7 +89,9 @@ class Handler(object):
         return {}
 
     def _encode_utf8(self, value):
-        return six.u(value).encode('utf-8')
+        if not isinstance(value, unicode):
+            value = six.u(value)
+        return value.encode('utf-8')
 
     @staticmethod
     def _docker_for_bay(bay):
