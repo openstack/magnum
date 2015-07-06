@@ -55,15 +55,6 @@ class TestBayConductorWithK8s(base.TestCase):
         }
 
     @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_get_baymodel(self, mock_objects_baymodel_get_by_uuid):
-        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
-        mock_objects_baymodel_get_by_uuid.return_value = baymodel
-        bay = objects.Bay(self.context, **self.bay_dict)
-
-        fetched_baymodel = bay_conductor._get_baymodel(self.context, bay)
-        self.assertEqual(baymodel, fetched_baymodel)
-
-    @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition(
             self,
             mock_objects_baymodel_get_by_uuid):

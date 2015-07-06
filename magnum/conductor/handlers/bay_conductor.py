@@ -22,6 +22,7 @@ from magnum.common import clients
 from magnum.common import exception
 from magnum.common import short_id
 from magnum.conductor.template_definition import TemplateDefinition as TDef
+from magnum.conductor import utils as conductor_utils
 from magnum.i18n import _
 from magnum.i18n import _LE
 from magnum.i18n import _LI
@@ -54,13 +55,8 @@ cfg.CONF.register_opts(bay_heat_opts, group='bay_heat')
 LOG = logging.getLogger(__name__)
 
 
-def _get_baymodel(context, bay):
-    baymodel = objects.BayModel.get_by_uuid(context, bay.baymodel_id)
-    return baymodel
-
-
 def _extract_template_definition(context, bay):
-    baymodel = _get_baymodel(context, bay)
+    baymodel = conductor_utils.retrieve_baymodel(context, bay)
     cluster_distro = baymodel.cluster_distro
     cluster_coe = baymodel.coe
     definition = TDef.get_template_definition('vm', cluster_distro,
@@ -108,7 +104,7 @@ def _update_stack(context, osc, bay):
 
 
 def _update_stack_outputs(context, stack, bay):
-    baymodel = _get_baymodel(context, bay)
+    baymodel = conductor_utils.retrieve_baymodel(context, bay)
     cluster_distro = baymodel.cluster_distro
     cluster_coe = baymodel.coe
     definition = TDef.get_template_definition('vm', cluster_distro,
