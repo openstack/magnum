@@ -54,8 +54,7 @@ except cfg.NoSuchOptError as e:
                     group='oslo_versionedobjects')
 
 
-def wrap_exception(notifier=None, publisher_id=None, event_type=None,
-                   level=None):
+def wrap_exception(notifier=None, event_type=None):
     """This decorator wraps a method to catch any exceptions.
 
     It logs the exception as well as optionally sending
@@ -70,16 +69,11 @@ def wrap_exception(notifier=None, publisher_id=None, event_type=None,
             except Exception as e:
                 with excutils.save_and_reraise_exception():
                     if notifier:
-                        call_dict = safe_utils.getcallargs(f, *args, **kw)
+                        call_dict = safe_utils.getcallargs(f, context,
+                                                           *args, **kw)
                         payload = dict(exception=e,
                                        private=dict(args=call_dict)
                                        )
-
-                        # Use a temp vars so we don't shadow
-                        # our outer definitions.
-                        temp_level = level
-                        if not temp_level:
-                            temp_level = notifier.ERROR
 
                         temp_type = event_type
                         if not temp_type:
@@ -88,8 +82,7 @@ def wrap_exception(notifier=None, publisher_id=None, event_type=None,
                             # propagated.
                             temp_type = f.__name__
 
-                        notifier.notify(context, publisher_id, temp_type,
-                                        temp_level, payload)
+                        notifier.error(context, temp_type, payload)
 
         return functools.wraps(f)(wrapped)
     return inner
