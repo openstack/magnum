@@ -373,7 +373,7 @@ class _TestObject(object):
         self.assertRaises(AttributeError, obj.get, 'nothing', 3)
 
     def test_object_inheritance(self):
-        base_fields = base.MagnumObject.fields.keys()
+        base_fields = list(base.MagnumObject.fields.keys())
         myobj_fields = ['foo', 'bar', 'missing'] + base_fields
         myobj3_fields = ['new_field']
         self.assertTrue(issubclass(TestSubclassedObject, MyObj))

@@ -16,6 +16,7 @@ from docker import errors
 import functools
 from oslo_config import cfg
 from oslo_log import log as logging
+import six
 
 from magnum.common import docker_utils
 from magnum.common import exception
@@ -88,7 +89,7 @@ class Handler(object):
         return {}
 
     def _encode_utf8(self, value):
-        return unicode(value).encode('utf-8')
+        return six.u(value).encode('utf-8')
 
     @staticmethod
     def _docker_for_bay(bay):

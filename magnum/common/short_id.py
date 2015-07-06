@@ -49,7 +49,7 @@ def get_id(source_uuid):
     # (see RFC4122, Section 4.4)
     random_bytes = _to_byte_string(source_uuid.time, 60)
     # The first 12 bytes (= 60 bits) of base32-encoded output is our data
-    encoded = base64.b32encode(random_bytes)[:12]
+    encoded = base64.b32encode(six.b(random_bytes))[:12]
 
     return encoded.lower()
 
