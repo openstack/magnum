@@ -348,20 +348,20 @@ class TestPost(api_base.FunctionalTest):
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
     @mock.patch('oslo_utils.timeutils.utcnow')
     def test_create_baymodel(self, mock_utcnow, mock_image_data):
-        cdict = apiutils.baymodel_post_data()
+        bdict = apiutils.baymodel_post_data()
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
         mock_utcnow.return_value = test_time
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
 
-        response = self.post_json('/baymodels', cdict)
+        response = self.post_json('/baymodels', bdict)
         self.assertEqual(201, response.status_int)
         # Check location header
         self.assertIsNotNone(response.location)
-        expected_location = '/v1/baymodels/%s' % cdict['uuid']
+        expected_location = '/v1/baymodels/%s' % bdict['uuid']
         self.assertEqual(urlparse.urlparse(response.location).path,
                          expected_location)
-        self.assertEqual(cdict['uuid'], response.json['uuid'])
+        self.assertEqual(bdict['uuid'], response.json['uuid'])
         self.assertNotIn('updated_at', response.json.keys)
         return_created_at = timeutils.parse_isotime(
             response.json['created_at']).replace(tzinfo=None)
@@ -373,9 +373,9 @@ class TestPost(api_base.FunctionalTest):
                                wraps=self.dbapi.create_baymodel) as cc_mock:
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
-            cdict = apiutils.baymodel_post_data(image_id='my-image')
-            response = self.post_json('/baymodels', cdict)
-            self.assertEqual(cdict['image_id'], response.json['image_id'])
+            bdict = apiutils.baymodel_post_data(image_id='my-image')
+            response = self.post_json('/baymodels', bdict)
+            self.assertEqual(bdict['image_id'], response.json['image_id'])
             cc_mock.assert_called_once_with(mock.ANY)
             # Check that 'id' is not in first arg of positional args
             self.assertNotIn('id', cc_mock.call_args[0][0])
@@ -391,8 +391,8 @@ class TestPost(api_base.FunctionalTest):
 
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
-            cdict = apiutils.baymodel_post_data(**kwargs)
-            self.assertRaises(AppError, self.post_json, '/baymodels', cdict)
+            bdict = apiutils.baymodel_post_data(**kwargs)
+            self.assertRaises(AppError, self.post_json, '/baymodels', bdict)
             self.assertFalse(cc_mock.called)
 
     def test_create_baymodel_with_invalid_long_string(self):
@@ -435,9 +435,9 @@ class TestPost(api_base.FunctionalTest):
                                wraps=self.dbapi.create_baymodel) as cc_mock:
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
-            cdict = apiutils.baymodel_post_data(docker_volume_size=99)
-            response = self.post_json('/baymodels', cdict)
-            self.assertEqual(cdict['docker_volume_size'],
+            bdict = apiutils.baymodel_post_data(docker_volume_size=99)
+            response = self.post_json('/baymodels', bdict)
+            self.assertEqual(bdict['docker_volume_size'],
                              response.json['docker_volume_size'])
             cc_mock.assert_called_once_with(mock.ANY)
             self.assertNotIn('id', cc_mock.call_args[0][0])
@@ -446,28 +446,28 @@ class TestPost(api_base.FunctionalTest):
     def test_create_baymodel_generate_uuid(self, mock_image_data):
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
-        cdict = apiutils.baymodel_post_data()
-        del cdict['uuid']
-        response = self.post_json('/baymodels', cdict)
-        self.assertEqual(cdict['image_id'],
+        bdict = apiutils.baymodel_post_data()
+        del bdict['uuid']
+        response = self.post_json('/baymodels', bdict)
+        self.assertEqual(bdict['image_id'],
                          response.json['image_id'])
         self.assertTrue(utils.is_uuid_like(response.json['uuid']))
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
     def test_create_baymodel_with_no_os_distro_image(self, mock_image_data):
         mock_image_data.return_value = {'name': 'mock_name'}
-        cdict = apiutils.baymodel_post_data()
-        del cdict['uuid']
-        response = self.post_json('/baymodels', cdict, expect_errors=True)
+        bdict = apiutils.baymodel_post_data()
+        del bdict['uuid']
+        response = self.post_json('/baymodels', bdict, expect_errors=True)
         self.assertEqual(404, response.status_int)
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
     def test_create_baymodel_with_os_distro_image(self, mock_image_data):
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
-        cdict = apiutils.baymodel_post_data()
-        del cdict['uuid']
-        response = self.post_json('/baymodels', cdict, expect_errors=True)
+        bdict = apiutils.baymodel_post_data()
+        del bdict['uuid']
+        response = self.post_json('/baymodels', bdict, expect_errors=True)
         self.assertEqual(201, response.status_int)
 
     @mock.patch.object(openstack_client, 'glance')
@@ -477,9 +477,9 @@ class TestPost(api_base.FunctionalTest):
         mock_glance = mock.MagicMock()
         mock_glance.images.list.return_value = mock_images
         mock_glance_client.return_value = mock_glance
-        cdict = apiutils.baymodel_post_data()
-        del cdict['uuid']
-        response = self.post_json('/baymodels', cdict, expect_errors=True)
+        bdict = apiutils.baymodel_post_data()
+        del bdict['uuid']
+        response = self.post_json('/baymodels', bdict, expect_errors=True)
         self.assertEqual(201, response.status_int)
 
     @mock.patch.object(openstack_client, 'glance')
@@ -489,9 +489,9 @@ class TestPost(api_base.FunctionalTest):
         mock_glance = mock.MagicMock()
         mock_glance.images.list.return_value = mock_images
         mock_glance_client.return_value = mock_glance
-        cdict = apiutils.baymodel_post_data()
-        del cdict['uuid']
-        response = self.post_json('/baymodels', cdict, expect_errors=True)
+        bdict = apiutils.baymodel_post_data()
+        del bdict['uuid']
+        response = self.post_json('/baymodels', bdict, expect_errors=True)
         self.assertEqual(404, response.status_int)
 
     @mock.patch.object(openstack_client, 'glance')
@@ -503,31 +503,31 @@ class TestPost(api_base.FunctionalTest):
         mock_glance = mock.MagicMock()
         mock_glance.images.list.return_value = mock_images
         mock_glance_client.return_value = mock_glance
-        cdict = apiutils.baymodel_post_data()
-        del cdict['uuid']
-        response = self.post_json('/baymodels', cdict, expect_errors=True)
+        bdict = apiutils.baymodel_post_data()
+        del bdict['uuid']
+        response = self.post_json('/baymodels', bdict, expect_errors=True)
         self.assertEqual(409, response.status_int)
 
     def test_create_baymodel_without_image_id(self):
-        cdict = apiutils.baymodel_post_data()
-        del cdict['image_id']
-        response = self.post_json('/baymodels', cdict, expect_errors=True)
+        bdict = apiutils.baymodel_post_data()
+        del bdict['image_id']
+        response = self.post_json('/baymodels', bdict, expect_errors=True)
         self.assertEqual(400, response.status_int)
 
     def test_create_baymodel_without_keypair_id(self):
-        cdict = apiutils.baymodel_post_data()
-        del cdict['keypair_id']
-        response = self.post_json('/baymodels', cdict, expect_errors=True)
+        bdict = apiutils.baymodel_post_data()
+        del bdict['keypair_id']
+        response = self.post_json('/baymodels', bdict, expect_errors=True)
         self.assertEqual(400, response.status_int)
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
     def test_create_baymodel_with_dns(self, mock_image_data):
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
-        cdict = apiutils.baymodel_post_data()
-        response = self.post_json('/baymodels', cdict)
+        bdict = apiutils.baymodel_post_data()
+        response = self.post_json('/baymodels', bdict)
         self.assertEqual(201, response.status_int)
-        self.assertEqual(cdict['dns_nameserver'],
+        self.assertEqual(bdict['dns_nameserver'],
                          response.json['dns_nameserver'])
 
 
