@@ -334,10 +334,6 @@ class NotAcceptable(MagnumException):
     code = 406
 
 
-class OperationNotPermitted(NotAuthorized):
-    message = _("Operation not permitted.")
-
-
 class InvalidMAC(Invalid):
     message = _("Expected a MAC address but received %(mac)s.")
 

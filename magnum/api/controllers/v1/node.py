@@ -122,10 +122,6 @@ class NodeCollection(collection.Collection):
 class NodesController(rest.RestController):
     """REST controller for Nodes."""
 
-    from_nodes = False
-    """A flag to indicate if the requests to this controller are coming
-    from the top-level resource Nodes."""
-
     _custom_actions = {
         'detail': ['GET'],
     }
@@ -198,9 +194,6 @@ class NodesController(rest.RestController):
 
         :param node_uuid: UUID of a node.
         """
-        if self.from_nodes:
-            raise exception.OperationNotPermitted
-
         rpc_node = objects.Node.get_by_uuid(pecan.request.context, node_uuid)
         return Node.convert_with_links(rpc_node)
 
@@ -211,9 +204,6 @@ class NodesController(rest.RestController):
 
         :param node: a node within the request body.
         """
-        if self.from_nodes:
-            raise exception.OperationNotPermitted
-
         node_dict = node.as_dict()
         context = pecan.request.context
         auth_token = context.auth_token_info['token']
@@ -234,9 +224,6 @@ class NodesController(rest.RestController):
         :param node_uuid: UUID of a node.
         :param patch: a json PATCH document to apply to this node.
         """
-        if self.from_nodes:
-            raise exception.OperationNotPermitted
-
         rpc_node = objects.Node.get_by_uuid(pecan.request.context, node_uuid)
         try:
             node_dict = rpc_node.as_dict()
@@ -266,9 +253,6 @@ class NodesController(rest.RestController):
 
         :param node_uuid: UUID of a node.
         """
-        if self.from_nodes:
-            raise exception.OperationNotPermitted
-
         rpc_node = objects.Node.get_by_uuid(pecan.request.context,
                                             node_uuid)
         rpc_node.destroy()

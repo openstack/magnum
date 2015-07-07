@@ -262,10 +262,6 @@ class ContainersController(rest.RestController):
     logs = LogsController()
     execute = ExecuteController()
 
-    from_containers = False
-    """A flag to indicate if the requests to this controller are coming
-    from the top-level resource Containers."""
-
     _custom_actions = {
         'detail': ['GET'],
     }
@@ -337,9 +333,6 @@ class ContainersController(rest.RestController):
 
         :param container_ident: UUID or name of a container.
         """
-        if self.from_containers:
-            raise exception.OperationNotPermitted
-
         rpc_container = api_utils.get_rpc_resource('Container',
                                                    container_ident)
         res_container = pecan.request.rpcapi.container_show(rpc_container.uuid)
@@ -351,9 +344,6 @@ class ContainersController(rest.RestController):
 
         :param container: a container within the request body.
         """
-        if self.from_containers:
-            raise exception.OperationNotPermitted
-
         container_dict = container.as_dict()
         context = pecan.request.context
         auth_token = context.auth_token_info['token']
@@ -379,9 +369,6 @@ class ContainersController(rest.RestController):
         :param container_ident: UUID or name of a container.
         :param patch: a json PATCH document to apply to this container.
         """
-        if self.from_containers:
-            raise exception.OperationNotPermitted
-
         rpc_container = api_utils.get_rpc_resource('Container',
                                                    container_ident)
         try:
@@ -412,9 +399,6 @@ class ContainersController(rest.RestController):
 
         :param container_uuid: UUID of a container.
         """
-        if self.from_containers:
-            raise exception.OperationNotPermitted
-
         rpc_container = api_utils.get_rpc_resource('Container',
                                                    container_ident)
         pecan.request.rpcapi.container_delete(rpc_container.uuid)

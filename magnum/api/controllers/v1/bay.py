@@ -177,10 +177,6 @@ class BaysController(rest.RestController):
     def __init__(self):
         super(BaysController, self).__init__()
 
-    from_bays = False
-    """A flag to indicate if the requests to this controller are coming
-    from the top-level resource Bays."""
-
     _custom_actions = {
         'detail': ['GET'],
     }
@@ -254,9 +250,6 @@ class BaysController(rest.RestController):
 
         :param bay_ident: UUID of a bay or logical name of the bay.
         """
-        if self.from_bays:
-            raise exception.OperationNotPermitted
-
         rpc_bay = api_utils.get_rpc_resource('Bay', bay_ident)
 
         return Bay.convert_with_links(rpc_bay)
@@ -268,9 +261,6 @@ class BaysController(rest.RestController):
 
         :param bay: a bay within the request body.
         """
-        if self.from_bays:
-            raise exception.OperationNotPermitted
-
         bay_dict = bay.as_dict()
         context = pecan.request.context
         auth_token = context.auth_token_info['token']
@@ -295,9 +285,6 @@ class BaysController(rest.RestController):
         :param bay_ident: UUID or logical name of a bay.
         :param patch: a json PATCH document to apply to this bay.
         """
-        if self.from_bays:
-            raise exception.OperationNotPermitted
-
         rpc_bay = api_utils.get_rpc_resource('Bay', bay_ident)
         try:
             bay_dict = rpc_bay.as_dict()
@@ -327,9 +314,6 @@ class BaysController(rest.RestController):
 
         :param bay_ident: UUID of a bay or logical name of the bay.
         """
-        if self.from_bays:
-            raise exception.OperationNotPermitted
-
         rpc_bay = api_utils.get_rpc_resource('Bay', bay_ident)
 
         pecan.request.rpcapi.bay_delete(rpc_bay.uuid)

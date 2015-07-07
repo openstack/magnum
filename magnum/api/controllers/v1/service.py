@@ -176,10 +176,6 @@ class ServicesController(rest.RestController):
     def __init__(self):
         super(ServicesController, self).__init__()
 
-    from_services = False
-    """A flag to indicate if the requests to this controller are coming
-    from the top-level resource Services."""
-
     _custom_actions = {
         'detail': ['GET'],
     }
@@ -252,9 +248,6 @@ class ServicesController(rest.RestController):
 
         :param service_ident: UUID or logical name of the service.
         """
-        if self.from_services:
-            raise exception.OperationNotPermitted
-
         rpc_service = api_utils.get_rpc_resource('Service', service_ident)
 
         return Service.convert_with_links(rpc_service)
@@ -265,9 +258,6 @@ class ServicesController(rest.RestController):
 
         :param service: a service within the request body.
         """
-        if self.from_services:
-            raise exception.OperationNotPermitted
-
         service.parse_manifest()
         service_dict = service.as_dict()
         context = pecan.request.context
@@ -291,9 +281,6 @@ class ServicesController(rest.RestController):
         :param service_ident: UUID or logical name of a service.
         :param patch: a json PATCH document to apply to this service.
         """
-        if self.from_services:
-            raise exception.OperationNotPermitted
-
         rpc_service = api_utils.get_rpc_resource('Service', service_ident)
         # Init manifest and manifest_url field because we don't store them
         # in database.
@@ -331,9 +318,6 @@ class ServicesController(rest.RestController):
 
         :param service_ident: UUID or logical name of a service.
         """
-        if self.from_services:
-            raise exception.OperationNotPermitted
-
         rpc_service = api_utils.get_rpc_resource('Service', service_ident)
 
         pecan.request.rpcapi.service_delete(rpc_service.uuid)

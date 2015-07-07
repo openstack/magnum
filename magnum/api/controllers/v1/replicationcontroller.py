@@ -198,10 +198,6 @@ class ReplicationControllersController(rest.RestController):
     def __init__(self):
         super(ReplicationControllersController, self).__init__()
 
-    from_rcs = False
-    """A flag to indicate if the requests to this controller are coming
-    from the top-level resource ReplicationControllers."""
-
     _custom_actions = {
         'detail': ['GET'],
     }
@@ -275,9 +271,6 @@ class ReplicationControllersController(rest.RestController):
 
         :param rc_ident: UUID or logical name of a ReplicationController.
         """
-        if self.from_rcs:
-            raise exception.OperationNotPermitted
-
         rpc_rc = api_utils.get_rpc_resource('ReplicationController', rc_ident)
         return ReplicationController.convert_with_links(rpc_rc)
 
@@ -288,9 +281,6 @@ class ReplicationControllersController(rest.RestController):
 
         :param rc: a ReplicationController within the request body.
         """
-        if self.from_rcs:
-            raise exception.OperationNotPermitted
-
         rc.parse_manifest()
         rc_dict = rc.as_dict()
         context = pecan.request.context
@@ -315,9 +305,6 @@ class ReplicationControllersController(rest.RestController):
         :param rc_ident: UUID or logical name of a ReplicationController.
         :param patch: a json PATCH document to apply to this rc.
         """
-        if self.from_rcs:
-            raise exception.OperationNotPermitted
-
         rpc_rc = api_utils.get_rpc_resource('ReplicationController', rc_ident)
         # Init manifest and manifest_url field because we don't store them
         # in database.
@@ -356,8 +343,5 @@ class ReplicationControllersController(rest.RestController):
 
         :param rc_uuid: UUID of a ReplicationController.
         """
-        if self.from_rcs:
-            raise exception.OperationNotPermitted
-
         rpc_rc = api_utils.get_rpc_resource('ReplicationController', rc_ident)
         pecan.request.rpcapi.rc_delete(rpc_rc.uuid)
