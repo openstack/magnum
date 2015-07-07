@@ -18,12 +18,9 @@ Version 1 of the Magnum API
 NOTE: IN PROGRESS AND NOT FULLY IMPLEMENTED.
 """
 
-import datetime
-
 import pecan
 from pecan import rest
 from webob import exc
-import wsme
 from wsme import types as wtypes
 import wsmeext.pecan as wsme_pecan
 
@@ -64,36 +61,7 @@ MAX_VER = controllers_base.Version(
                        MIN_VER_STR, MAX_VER_STR)
 
 
-class APIBase(wtypes.Base):
-
-    created_at = wsme.wsattr(datetime.datetime, readonly=True)
-    """The time in UTC at which the object is created"""
-
-    updated_at = wsme.wsattr(datetime.datetime, readonly=True)
-    """The time in UTC at which the object is updated"""
-
-    def as_dict(self):
-        """Render this object as a dict of its fields."""
-        return dict((k, getattr(self, k))
-                    for k in self.fields
-                    if hasattr(self, k) and
-                    getattr(self, k) != wsme.Unset)
-
-    def unset_fields_except(self, except_list=None):
-        """Unset fields so they don't appear in the message body.
-
-        :param except_list: A list of fields that won't be touched.
-
-        """
-        if except_list is None:
-            except_list = []
-
-        for k in self.as_dict():
-            if k not in except_list:
-                setattr(self, k, wsme.Unset)
-
-
-class MediaType(APIBase):
+class MediaType(controllers_base.APIBase):
     """A media type representation."""
 
     base = wtypes.text
@@ -104,7 +72,7 @@ class MediaType(APIBase):
         self.type = type
 
 
-class V1(APIBase):
+class V1(controllers_base.APIBase):
     """The representation of the version 1 of the API."""
 
     id = wtypes.text
