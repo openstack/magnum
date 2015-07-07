@@ -19,22 +19,22 @@ write_files:
       done
 
       if [ "$1" = "-u" ]; then
-        echo "unregistering minion $myip"
-        kubectl -s ${master_url} delete minion/$myip
+      echo "unregistering minion $myip"
+      kubectl -s ${master_url} delete minion/$myip
       else
-        echo "registering minion $myip"
-        cpu=$(($(nproc) * 1000))
-        memory=$(awk '/MemTotal: /{print $2 * 1024}' /proc/meminfo)
+      echo "registering minion $myip"
+      cpu=$(($(nproc) * 1000))
+      memory=$(awk '/MemTotal: /{print $2 * 1024}' /proc/meminfo)
 
-        cat <<EOF | kubectl create -s ${master_url} -f-
-        apiVersion: v1beta1
-        id: $myip
-        kind: Minion
-        resources:
-          capacity:
-            cpu: $cpu
-            memory: $memory
-        EOF
+      cat <<EOF | kubectl create -s ${master_url} -f-
+      apiVersion: v1beta1
+      id: $myip
+      kind: Minion
+      resources:
+        capacity:
+          cpu: $cpu
+          memory: $memory
+      EOF
       fi
   - path: /etc/systemd/system/kube-register.service
     permissions: "0644"
