@@ -4,9 +4,9 @@
 Developer Quick-Start
 =====================
 
-This is a quick walkthrough to get you started developing code for Magnum.
-This assumes you are already familiar with submitting code reviews to
-an OpenStack project.
+This is a quick walkthrough to get you started developing code for magnum.
+This assumes you are already familiar with submitting code reviews to an
+OpenStack project.
 
 .. seealso::
 
@@ -15,7 +15,7 @@ an OpenStack project.
 Setup Dev Environment
 =====================
 
-Install prerequisites::
+Install OS-specific prerequisites::
 
     # Ubuntu/Debian:
     sudo apt-get update
@@ -36,11 +36,13 @@ Install prerequisites::
                         python-testrepository python-tox python-virtualenv \
                         gettext-runtime
 
+Install common prerequisites::
+
     sudo pip install virtualenv setuptools-git flake8 tox testrepository
 
-If using RHEL and yum reports "No package python-pip available" and "No
+Note: If using RHEL and yum reports "No package python-pip available" and "No
 package git-review available", use the EPEL software repository. Instructions
-can be found at `<http://fedoraproject.org/wiki/EPEL/FAQ#howtouse>`_.
+can be found at the http://fedoraproject.org/wiki/EPEL/FAQ#howtouse page.
 
 You may need to explicitly upgrade virtualenv if you've installed the one
 from your OS distribution and it is too old (tox will complain). You can
@@ -55,7 +57,7 @@ Magnum source code should be pulled directly from git::
     git clone https://git.openstack.org/openstack/magnum
     cd magnum
 
-Set up a local environment for development and testing should be done with tox::
+Set up a local environment for development and testing with tox::
 
     # create a virtualenv for development
     tox -evenv -- python -V
@@ -65,7 +67,7 @@ All further commands in this section should be run with the venv active::
 
     source .tox/venv/bin/activate
 
-All unit tests should be run using tox. To run Magnum's entire test suite::
+All unit tests should be run using tox. To run magnum's entire test suite::
 
     # run all tests (unit and pep8)
     tox
@@ -91,58 +93,56 @@ When you're done, deactivate the virtualenv::
 To discover and interact with templates, please refer to
 `<http://git.openstack.org/cgit/openstack/magnum/tree/contrib/templates/example/README.rst>`_
 
-
-Exercising the Services Using DevStack
+Exercising the Services Using Devstack
 ======================================
 
-DevStack can be configured to enable Magnum support. It is easy to develop Magnum
-with devstack environment. Magnum depends on Nova, Glance, Heat and Neutron to
-create and schedule virtual machines to simulate bare-metal. For bare-metal fully
-support, it is still under active development.
+Devstack can be configured to enable magnum support. It is easy to develop
+magnum with the devstack environment. Magnum depends on nova, glance, heat and
+neutron to create and schedule virtual machines to simulate bare-metal (full
+bare-metal support is under active development).
+
+Note: Running devstack within a virtual machine with magnum enabled is not
+recommended at this time.
 
 This session has only been tested on Ubuntu 14.04 (Trusty) and Fedora 20/21.
 We recommend users to select one of them if it is possible.
 
-Clone DevStack::
+Clone devstack::
 
-    # Create dir to run devstack from, if not done so already
+    # Create a root directory for devstack if needed
     sudo mkdir -p /opt/stack
     sudo chown $USER /opt/stack
 
-    git clone https://github.com/openstack-dev/devstack.git /opt/stack/devstack
+    git clone https://git.openstack.org/openstack-dev/devstack /opt/stack/devstack
 
-Copy devstack/localrc with minimal settings required to enable Heat
-and Neutron, refer to http://docs.openstack.org/developer/devstack/guides/neutron.html
-for more detailed neutron configuration.
+We will run devstack with minimal local.conf settings required to enable
+magnum, heat, and neutron (neutron is enabled by default in devstack since
+Kilo, and heat is enabled by the magnum plugin)::
 
-To install magnum into devstack, add following settings to local.conf. You need to
-make customized setting according to your environment requirement, refer devstack
-guide for details.::
+    cat > /opt/stack/devstack/local.conf << END
+    [[local|localrc]]
+    DATABASE_PASSWORD=password
+    RABBIT_PASSWORD=password
+    SERVICE_TOKEN=password
+    SERVICE_PASSWORD=password
+    ADMIN_PASSWORD=password
+    # magnum requires the following to be set correctly
+    PUBLIC_INTERFACE=eth1
+    enable_plugin magnum https://github.com/openstack/magnum
+    VOLUME_BACKING_FILE_SIZE=20G
+    END
 
-     cat > /opt/stack/devstack/local.conf << END
-     [[local|localrc]]
-     enable_plugin magnum https://github.com/openstack/magnum
-     DATABASE_PASSWORD=password
-     RABBIT_PASSWORD=password
-     SERVICE_TOKEN=password
-     SERVICE_PASSWORD=password
-     ADMIN_PASSWORD=password
-     PUBLIC_INTERFACE=eth1
-     VOLUME_BACKING_FILE_SIZE=20G
-     END
+Note: Update PUBLIC_INTERFACE as appropriate for your system.
 
-Or, if you already have localrc in /opt/stack/devstack/, then ::
+More devstack configuration information can be found at
+http://docs.openstack.org/developer/devstack/configuration.html
 
-     cat >> /opt/stack/devstack/localrc << END
-     enable_plugin magnum https://github.com/openstack/magnum
-     PUBLIC_INTERFACE=eth1
-     VOLUME_BACKING_FILE_SIZE=20G
-     END
+More neutron configuration information can be found at
+http://docs.openstack.org/developer/devstack/guides/neutron.html
 
-Note: Replace eth1 with your public interface for Neutron to use.
-
-Create a local.sh make final networking changes after devstack has spawned. This
-will allow Bays spawned by Magnum to access the internet through PUBLIC_INTERFACE.::
+Create a local.sh to automatically make necessary networking changes during
+the devstack deployment process. This will allow bays spawned by magnum to
+access the internet through PUBLIC_INTERFACE::
 
     cat > /opt/stack/devstack/local.sh << END_LOCAL_SH
     #!/bin/sh
@@ -150,30 +150,34 @@ will allow Bays spawned by Magnum to access the internet through PUBLIC_INTERFAC
     END_LOCAL_SH
     chmod 755 /opt/stack/devstack/local.sh
 
-Run DevStack::
+Run devstack::
 
     cd /opt/stack/devstack
     ./stack.sh
 
-After the script finishes, two magnum process (magnum-api and magnum-conductor)
-will be running on a stack screen. If you make some code changes and want to
-test their effects, just restart either magnum-api or magnum-conductor.
+Note: This will take a little extra time when the Fedora Atomic micro-OS
+image is downloaded for the first time.
 
-At this time, Magnum has only been tested with the Fedora Atomic micro-OS.
-Magnum will likely work with other micro-OS platforms, but each one requires
-individual support in the heat template.
+At this point, two magnum process (magnum-api and magnum-conductor) will be
+running on devstack screens. If you make some code changes and want to
+test their effects, just stop and restart magnum-api and/or magnum-conductor.
 
 Prepare your session to be able to use the various openstack clients including
-magnum, neutron and glance. Create a new shell, and source the devstack openrc
+magnum, neutron, and glance. Create a new shell, and source the devstack openrc
 script::
 
     source /opt/stack/devstack/openrc admin admin
 
-The fedora-21-atomic-3 image will automatically be added to glance.  You can
-add additional images to use manually through glance. To verify the image
-created when installing DevStack::
+Magnum has been tested with the Fedora Atomic micro-OS and CoreOS. Magnum will
+likely work with other micro-OS platforms, but each requires individual
+support in the heat template.
+
+The Fedora Atomic micro-OS image will automatically be added to glance.  You
+can add additional images manually through glance. To verify the image created
+when installing devstack use::
 
     glance image-list
+
     +--------------------------------------+---------------------------------+-------------+------------------+-----------+--------+
     | ID                                   | Name                            | Disk Format | Container Format | Size      | Status |
     +--------------------------------------+---------------------------------+-------------+------------------+-----------+--------+
@@ -183,41 +187,43 @@ created when installing DevStack::
     | 02c312e3-2d30-43fd-ab2d-1d25622c0eaa | fedora-21-atomic-3              | qcow2       | bare             | 770179072 | active |
     +--------------------------------------+---------------------------------+-------------+------------------+-----------+--------+
 
-You need to define and register a keypair for use when creating baymodel's::
-
-    cd ~
-    test -f ~/.ssh/id_rsa.pub || ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
-    nova keypair-add --pub-key ~/.ssh/id_rsa.pub testkey
-
-To get started, list the available commands and resources::
+To list the available commands and resources for magnum, use::
 
     magnum help
 
-First create a baymodel, which is similar in nature to a flavor.  The
-coe (Container Orchestration Engine) needs to be specified for baymodel.
-The baymodel informs Magnum in which way to construct a bay.::
+Create a keypair for use with the baymodel::
+
+    test -f ~/.ssh/id_rsa.pub || ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
+    nova keypair-add --pub-key ~/.ssh/id_rsa.pub testkey
+
+Create a baymodel. This is similar in nature to a flavor and describes
+to magnum how to construct the bay. The coe (Container Orchestration Engine)
+and keypair need to be specified for the baymodel::
 
     NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
-    magnum baymodel-create --name k8sbaymodel --image-id fedora-21-atomic-3 \
-                           --keypair-id testkey \
-                           --external-network-id $NIC_ID \
-                           --dns-nameserver 8.8.8.8 --flavor-id m1.small \
-                           --docker-volume-size 5 --coe kubernetes
+    echo ${NIC_ID}
 
-Next create a bay. Use the baymodel UUID as a template for bay creation.
-This bay will result in one master kubernetes node and one minion node.::
+    magnum baymodel-create --name k8sbaymodel \
+                           --image-id fedora-21-atomic-3 \
+                           --keypair-id testkey \
+                           --external-network-id ${NIC_ID} \
+                           --dns-nameserver 8.8.8.8 \
+                           --flavor-id m1.small \
+                           --docker-volume-size 5 \
+                           --coe kubernetes
+
+Create a bay. Use the baymodel name as a template for bay creation.
+This bay will result in one master kubernetes node and one minion node::
 
     magnum bay-create --name k8sbay --baymodel k8sbaymodel --node-count 1
 
-The existing bays can be listed as follows::
-
-    magnum bay-list
-
 Bays will have an initial status of CREATE_IN_PROGRESS.  Magnum will update
 the status to CREATE_COMPLETE when it is done creating the bay.  Do not create
-containers, pods, services, or replication controllers before Magnum finishes
-creating the bay. They will likely not be created, causing Magnum to become
-confused.
+containers, pods, services, or replication controllers before magnum finishes
+creating the bay. They will likely not be created, and may cause magnum to
+become confused.
+
+The existing bays can be listed as follows::
 
     magnum bay-list
 
@@ -227,41 +233,69 @@ confused.
     | 9dccb1e6-02dc-4e2b-b897-10656c5339ce | k8sbay  | 1          | CREATE_COMPLETE |
     +--------------------------------------+---------+------------+-----------------+
 
+More detailed information for a given bay is obtained via::
+
+    magnum bay-show k8sbay
+
 After a bay is created, you can dynamically add/remove node(s) to/from the bay
 by updating the node_count attribute. For example, to add one more node::
 
     magnum bay-update k8sbay replace node_count=2
 
-Bays will have an initial status of UPDATE_IN_PROGRESS. Magnum will update
-the status to UPDATE_COMPLETE when it is done updating the bay.
+Bays in the process of updating will have a status of UPDATE_IN_PROGRESS.
+Magnum will update the status to UPDATE_COMPLETE when it is done updating
+the bay.
 
-NOTE: If you choose to reduce the node_count, Magnum will first try to remove
+Note: Reducing node_count will remove all the existing containers on the
+nodes that are deleted.
+
+Heat can be used to see detailed information on the status of a stack or
+specific bay::
+
+    heat stack-list
+
+Monitoring bay status in detail (e.g., creating, updating)::
+
+    BAY_HEAT_NAME=$(heat stack-list | awk "/\sk8sbay-/{print \$4}")
+    echo ${BAY_HEAT_NAME}
+    heat resource-list ${BAY_HEAT_NAME}
+
+A bay can be deleted as follows::
+
+    magnum bay-delete k8sbay
+
+Note: If you choose to reduce the node_count, magnum will first try to remove
 empty nodes with no containers running on them. If you reduce node_count by
-more than the number of empty nodes, Magnum must remove nodes that have running
+more than the number of empty nodes, magnum must remove nodes that have running
 containers on them. This action will delete those containers. We strongly
 recommend using a replication controller before reducing the node_count so
 any removed containers can be automatically recovered on your remaining nodes.
 
-Kubernetes provides a number of examples you can use to check that things
-are working. You may need to clone kubernetes by::
+Using Kubernetes
+================
+
+Kubernetes provides a number of examples you can use to check that things are
+working. You may need to clone kubernetes using::
 
     wget https://github.com/GoogleCloudPlatform/kubernetes/releases/download/v0.15.0/kubernetes.tar.gz
     tar -xvzf kubernetes.tar.gz
 
-(No require to install it, we just use the example file)
+Note: We do not need to install Kubernetes, we just need the example file
+from the tarball.
+
 Here's how to set up the replicated redis example. First, create
 a pod for the redis-master::
 
     cd kubernetes/examples/redis/v1beta3
     magnum pod-create --manifest ./redis-master.yaml --bay k8sbay
 
-Now turn up a service to provide a discoverable endpoint for the redis sentinels
-in the cluster::
+Now create a service to provide a discoverable endpoint for the redis
+sentinels in the cluster::
 
     magnum service-create --manifest ./redis-sentinel-service.yaml --bay k8sbay
 
-To make it a replicated redis cluster create replication controllers for the redis
-slaves and sentinels::
+To make it a replicated redis cluster create replication controllers for the
+redis slaves and sentinels::
 
     sed -i 's/\(replicas: \)1/\1 2/' redis-controller.yaml
     magnum rc-create --manifest ./redis-controller.yaml --bay k8sbay
@@ -269,13 +303,15 @@ slaves and sentinels::
     sed -i 's/\(replicas: \)1/\1 2/' redis-sentinel-controller.yaml
     magnum rc-create --manifest ./redis-sentinel-controller.yaml --bay k8sbay
 
-Full lifecycle and introspection operations for each object are supported.  For
-example, magnum bay-create, magnum baymodel-delete, magnum rc-show, magnum service-list.
+Full lifecycle and introspection operations for each object are supported.
+For example, magnum bay-create, magnum baymodel-delete, magnum rc-show,
+magnum service-list.
 
-Now run bay-show command to get the IP of the bay host on which the redis-master is
-running on::
+Now run bay-show command to get the IP of the bay host on which the
+redis-master is running::
 
-    $ magnum bay-show k8sbay
+    magnum bay-show k8sbay
+
     +----------------+--------------------------------------+
     | Property       | Value                                |
     +----------------+--------------------------------------+
@@ -291,8 +327,8 @@ running on::
     | name           | k8sbay                               |
     +----------------+--------------------------------------+
 
-The output indicates the redis-master is running on the
-bay host with IP address 192.168.19.86. To access the redis master::
+The output indicates the redis-master is running on the bay host with IP
+address 192.168.19.86. To access the redis master::
 
     ssh minion@192.168.19.86
     REDIS_ID=$(sudo docker ps | grep redis:v1 | grep k8s_master | awk '{print $1}')
@@ -304,7 +340,7 @@ bay host with IP address 192.168.19.86. To access the redis master::
 
     exit
 
-Now log into one of the other container hosts and access a redis slave from there::
+Log into one of the other container hosts and access a redis slave from it::
 
     ssh minion@$(nova list | grep 10.0.0.4 | awk '{print $13}')
     REDIS_ID=$(sudo docker ps | grep redis:v1 | grep k8s_redis | tail -n +2 | awk '{print $1}')
@@ -316,32 +352,35 @@ Now log into one of the other container hosts and access a redis slave from ther
 
     exit
 
-There are four redis instances, one master and three slaves, running across the bay,
-replicating data between one another.
+Now there are four redis instances (one master and three slaves) running
+across the bay, replicating data between one another.
 
-Building and using a Swarm bay
+Building and Using a Swarm Bay
 ==============================
-Create a baymodel. It is very similar to the Kubernetes baymodel,
-it is only missing some Kubernetes specific arguments and uses 'swarm' as the
-coe. ::
+
+Create a baymodel. It is very similar to the Kubernetes baymodel, except for
+the absence of some Kubernetes-specific arguments and the use of 'swarm'
+as the coe::
 
     NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
-    magnum baymodel-create --name swarmbaymodel --image-id fedora-21-atomic-3 \
+    magnum baymodel-create --name swarmbaymodel \
+                           --image-id fedora-21-atomic-3 \
                            --keypair-id testkey \
-                           --external-network-id $NIC_ID \
-                           --dns-nameserver 8.8.8.8 --flavor-id m1.small \
+                           --external-network-id ${NIC_ID} \
+                           --dns-nameserver 8.8.8.8 \
+                           --flavor-id m1.small \
                            --coe swarm
 
 Finally, create the bay. Use the baymodel 'swarmbaymodel' as a template for
 bay creation. This bay will result in one swarm manager node and two extra
-agent nodes. ::
+agent nodes::
 
     magnum bay-create --name swarmbay --baymodel swarmbaymodel --node-count 2
 
-Now that we have a swarm bay we can start interacting with it. First we need
-to get it's uuid. ::
+Now that we have a swarm bay we can start interacting with it::
 
-    $ magnum bay-show swarmbay
+    magnum bay-show swarmbay
+
     +---------------+------------------------------------------+
     | Property      | Value                                    |
     +---------------+------------------------------------------+
@@ -356,11 +395,13 @@ to get it's uuid. ::
     +---------------+------------------------------------------+
 
 Next we will create a container in this bay. This container will ping the
-address 8.8.8.8 four times. ::
+address 8.8.8.8 four times::
 
-    $ magnum container-create --name testcontainer --image cirros\
-                              --bay swarmbay\
-                              --command "ping -c 4 8.8.8.8"
+    magnum container-create --name testcontainer \
+                            --image cirros \
+                            --bay swarmbay \
+                            --command "ping -c 4 8.8.8.8"
+
     +------------+----------------------------------------+
     | Property   | Value                                  |
     +------------+----------------------------------------+
@@ -374,11 +415,12 @@ address 8.8.8.8 four times. ::
     | name       | test-container                         |
     +------------+----------------------------------------+
 
-At this point, the container exists, but it has not been started yet. Let's
-start it then check it's output. ::
+At this point the container exists but it has not been started yet. To start
+it and check its output run the following::
 
-    $ magnum container-start test-container
-    $ magnum container-logs test-container
+    magnum container-start test-container
+    magnum container-logs test-container
+
     PING 8.8.8.8 (8.8.8.8): 56 data bytes
     64 bytes from 8.8.8.8: seq=0 ttl=40 time=25.513 ms
     64 bytes from 8.8.8.8: seq=1 ttl=40 time=25.348 ms
@@ -389,23 +431,22 @@ start it then check it's output. ::
     4 packets transmitted, 4 packets received, 0% packet loss
     round-trip min/avg/max = 25.226/25.340/25.513 ms
 
-Now that we're done with the container, we can delete it. ::
+Now that we're done with the container we can delete it::
 
     magnum container-delete test-container
 
-Building developer documentation
+Building Developer Documentation
 ================================
 
-If you would like to build the documentation locally, eg. to test your
-documentation changes before uploading them for review, run these
-commands to build the documentation set::
+To build the documentation locally (e.g., to test documentation changes
+before uploading them for review) chdir to the magnum root folder and
+run tox::
 
-    # activate your development virtualenv
-    source .tox/venv/bin/activate
-
-    # build the docs
     tox -edocs
 
-Now use your browser to open the top-level index.html located at::
+Note: The first time you run this will take some extra time as it
+creates a virtual environment to run in.
 
-    magnum/doc/build/html/index.html
+When complete, the documentation can be accesed from::
+
+    doc/build/html/index.html

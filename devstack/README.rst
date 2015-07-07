@@ -1,24 +1,27 @@
 ====================
-Devstack Integration
+DevStack Integration
 ====================
 
-This directory contains the files necessary to integrate Magnum with devstack.
+This directory contains the files necessary to integrate magnum with devstack.
 
-Refer the quickstart guide for more information on using devstack and magnum.
+Refer the quickstart guide at
+http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html
+for more information on using devstack and magnum.
 
 Running devstack with magnum for the first time may take a long time as it
-needs to download an atomic fedora 21 qcow image. If you already have this image
-you can copy it to /opt/stack/devstack/files/fedora-21-atomic-3.qcow2 to save you
-this time.
+needs to download the Fedora Atomic micro-OS qcow2 image (e.g.,
+``fedora-21-atomic-3.qcow2``). If you already have this image you can copy it
+to /opt/stack/devstack/files first to save time.
 
-To install magnum into devstack, add the following settings to enable magnum plugin: ::
+To install magnum into devstack, add the following settings to enable the
+magnum plugin::
 
      cat > /opt/stack/devstack/local.conf << END
      [[local|localrc]]
      enable_plugin magnum https://github.com/openstack/magnum master
      END
 
-Run devstack as normal: ::
+Then run devstack normally::
 
     cd /opt/stack/devstack
     ./stack.sh
