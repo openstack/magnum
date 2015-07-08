@@ -2364,7 +2364,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['namespaces', 'body']
+        allParams = ['namespaces', 'body', 'ca', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -2407,8 +2407,12 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
+        ca = params.get('ca')
+        cert = params.get('cert')
+        key = params.get('key')
+
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
-                                          postData, headerParams, files=files)
+                                          postData, ca, cert, key, headerParams, files=files)
 
         if not response:
             return None
@@ -2435,7 +2439,7 @@ class ApivbetaApi(object):
         Returns: V1beta3_Pod
         """
 
-        allParams = ['name', 'namespaces']
+        allParams = ['name', 'namespaces', 'ca', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -2481,8 +2485,12 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
+        ca = params.get('ca')
+        cert = params.get('cert')
+        key = params.get('key')
+
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
-                                          postData, headerParams, files=files)
+                                          postData, ca, cert, key, headerParams, files=files)
 
         
         if not response:
@@ -2512,7 +2520,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['name', 'namespaces', 'body']
+        allParams = ['name', 'namespaces', 'body', 'ca', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -2561,8 +2569,12 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
+        ca = params.get('ca')
+        cert = params.get('cert')
+        key = params.get('key')
+
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
-                                          postData, headerParams, files=files)
+                                          postData, ca, cert, key, headerParams, files=files)
 
         if not response:
             return None
@@ -2592,7 +2604,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['name', 'namespaces', 'body']
+        allParams = ['name', 'namespaces', 'body', 'ca', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -2641,8 +2653,12 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
+        ca = params.get('ca')
+        cert = params.get('cert')
+        key = params.get('key')
+
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
-                                          postData, headerParams, files=files)
+                                          postData, ca, cert, key, headerParams, files=files)
 
         if not response:
             return None
@@ -2671,7 +2687,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['name', 'namespaces', 'body']
+        allParams = ['name', 'namespaces', 'body', 'ca', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -2720,8 +2736,12 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
+        ca = params.get('ca')
+        cert = params.get('cert')
+        key = params.get('key')
+
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
-                                          postData, headerParams, files=files)
+                                          postData, ca, cert, key, headerParams, files=files)
 
         
         
@@ -2981,7 +3001,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['namespaces', 'body']
+        allParams = ['namespaces', 'body', 'ca', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -3024,8 +3044,12 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
+        ca = params.get('ca')
+        cert = params.get('cert')
+        key = params.get('key')
+
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
-                                          postData, headerParams, files=files)
+                                          postData, ca, cert, key, headerParams, files=files)
 
         if not response:
             return None
@@ -3052,7 +3076,7 @@ class ApivbetaApi(object):
         Returns: V1beta3_ReplicationController
         """
 
-        allParams = ['name', 'namespaces']
+        allParams = ['name', 'namespaces', 'ca', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -3098,8 +3122,12 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
+        ca = params.get('ca')
+        cert = params.get('cert')
+        key = params.get('key')
+
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
-                                          postData, headerParams, files=files)
+                                          postData, ca, cert, key, headerParams, files=files)
 
         
         if not response:
@@ -3129,7 +3157,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['name', 'namespaces', 'body']
+        allParams = ['name', 'namespaces', 'body', 'ca', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -3178,8 +3206,12 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
+        ca = params.get('ca')
+        cert = params.get('cert')
+        key = params.get('key')
+
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
-                                          postData, headerParams, files=files)
+                                          postData, ca, cert, key, headerParams, files=files)
 
         if not response:
             return None
@@ -3209,7 +3241,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['name', 'namespaces', 'body']
+        allParams = ['name', 'namespaces', 'body', 'ca', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -3258,8 +3290,12 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
+        ca = params.get('ca')
+        cert = params.get('cert')
+        key = params.get('key')
+
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
-                                          postData, headerParams, files=files)
+                                          postData, ca, cert, key, headerParams, files=files)
 
         if not response:
             return None
@@ -3288,7 +3324,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['name', 'namespaces', 'body']
+        allParams = ['name', 'namespaces', 'body', 'ca', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -3337,8 +3373,12 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
+        ca = params.get('ca')
+        cert = params.get('cert')
+        key = params.get('key')
+
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
-                                          postData, headerParams, files=files)
+                                          postData, ca, cert, key, headerParams, files=files)
 
         
         
@@ -4416,7 +4456,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['namespaces', 'body']
+        allParams = ['namespaces', 'body', 'ca', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -4459,8 +4499,12 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
+        ca = params.get('ca')
+        cert = params.get('cert')
+        key = params.get('key')
+
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
-                                          postData, headerParams, files=files)
+                                          postData, ca, cert, key, headerParams, files=files)
 
         if not response:
             return None
@@ -4487,7 +4531,7 @@ class ApivbetaApi(object):
         Returns: V1beta3_Service
         """
 
-        allParams = ['name', 'namespaces']
+        allParams = ['name', 'namespaces', 'ca', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -4533,8 +4577,12 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
+        ca = params.get('ca')
+        cert = params.get('cert')
+        key = params.get('key')
+
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
-                                          postData, headerParams, files=files)
+                                          postData, ca, cert, key, headerParams, files=files)
 
         
         if not response:
@@ -4564,7 +4612,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['name', 'namespaces', 'body']
+        allParams = ['name', 'namespaces', 'body', 'ca', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -4613,8 +4661,12 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
+        ca = params.get('ca')
+        cert = params.get('cert')
+        key = params.get('key')
+
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
-                                          postData, headerParams, files=files)
+                                          postData, ca, cert, key, headerParams, files=files)
 
         if not response:
             return None
@@ -4641,7 +4693,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['name', 'namespaces']
+        allParams = ['name', 'namespaces', 'ca', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -4687,8 +4739,12 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
+        ca = params.get('ca')
+        cert = params.get('cert')
+        key = params.get('key')
+
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
-                                          postData, headerParams, files=files)
+                                          postData, ca, cert, key, headerParams, files=files)
 
         if not response:
             return None
@@ -4717,7 +4773,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['name', 'namespaces', 'body']
+        allParams = ['name', 'namespaces', 'body', 'ca', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -4766,8 +4822,12 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
+        ca = params.get('ca')
+        cert = params.get('cert')
+        key = params.get('key')
+
         response = self.apiClient.callAPI(resourcePath, method, queryParams,
-                                          postData, headerParams, files=files)
+                                          postData, ca, cert, key, headerParams, files=files)
 
         
         

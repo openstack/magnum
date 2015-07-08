@@ -24,6 +24,7 @@ import __builtin__
 import sys
 import os
 import re
+import requests
 import urllib
 import urllib2
 import httplib
@@ -68,7 +69,7 @@ class ApiClient(object):
     self.defaultHeaders[headerName] = headerValue
 
   def callAPI(self, resourcePath, method, queryParams, postData,
-              headerParams=None, files=None):
+              ca=None, cert=None, key=None, headerParams=None, files=None):
 
     url = self.host + resourcePath
 
@@ -114,17 +115,12 @@ class ApiClient(object):
 
     utils.raise_exception_invalid_scheme(url)
 
-    request = MethodRequest(method=method, url=url, headers=headers,
-                            data=data)
-
-    # Make the request
-    response = urllib2.urlopen(request) #nosec
+    response = requests.request(method, url=url, headers=headers, data=data,
+                                cert=(cert, key), verify=ca)
     if 'Set-Cookie' in response.headers:
       self.cookie = response.headers['Set-Cookie']
-    string = response.read()
-
     try:
-      data = json.loads(string)
+      data = json.loads(response.content)
     except ValueError:  # PUT requests don't return anything
       data = None
 
@@ -269,7 +265,6 @@ class ApiClient(object):
             setattr(instance, attr, subValues)
           else:
             setattr(instance, attr, self.deserialize(value, attrType))
-
     return instance
 
   def __parse_string_to_datetime(self, string):
@@ -283,17 +278,3 @@ class ApiClient(object):
         return parse(string)
     except ImportError:
         return string
-
-class MethodRequest(urllib2.Request):
-  def __init__(self, *args, **kwargs):
-    """Construct a MethodRequest. Usage is the same as for
-    `urllib2.Request` except it also takes an optional `method`
-    keyword argument. If supplied, `method` will be used instead of
-    the default."""
-
-    if 'method' in kwargs:
-      self.method = kwargs.pop('method')
-    return urllib2.Request.__init__(self, *args, **kwargs)
-
-  def get_method(self):
-    return getattr(self, 'method', urllib2.Request.get_method(self))
