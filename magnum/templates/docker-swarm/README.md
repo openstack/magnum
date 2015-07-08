@@ -37,7 +37,7 @@ your environment:
 
     parameters:
       ssh_key_name: apmelton
-      external_network_id: 028d70dd-67b8-4901-8bdd-0c62b06cce2d
+      external_network: 028d70dd-67b8-4901-8bdd-0c62b06cce2d
       dns_nameserver: 192.168.200.1
       server_image: fedora-21-atomic-3
       discovery_url: token://d8cdfe5128af6e1075b34aa06ff1cc2c
@@ -49,7 +49,7 @@ And then create the stack, referencing that environment file:
 You must provide values for:
 
 - `ssh_key_name`
-- `external_network_id`
+- `external_network`
 - `server_image`
 - `discovery_url`
 
