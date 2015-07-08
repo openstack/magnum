@@ -221,5 +221,9 @@ outputs:
 
   kube_minion_ip:
     value: {get_attr: [kube_minion_eth0, fixed_ips, 0, ip_address]}
+
   kube_minion_external_ip:
     value: {get_attr: [kube_minion_floating, floating_ip_address]}
+
+  OS::stack_id:
+    value: {get_attr: [kube_minion_eth0, fixed_ips, 0, ip_address]}
