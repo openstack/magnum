@@ -51,6 +51,42 @@ class TestApiUtils(base.FunctionalTest):
                           utils.validate_sort_dir,
                           'fake-sort')
 
+    @mock.patch('pecan.request')
+    @mock.patch('magnum.objects.Bay.get_by_name')
+    @mock.patch('magnum.objects.Bay.get_by_uuid')
+    def test_get_rpc_resource_with_uuid(
+            self,
+            mock_get_by_uuid,
+            mock_get_by_name,
+            mock_request):
+        mock_bay = mock.MagicMock
+        mock_get_by_uuid.return_value = mock_bay
+        uuid = common_utils.generate_uuid()
+
+        returned_bay = utils.get_rpc_resource('Bay', uuid)
+
+        mock_get_by_uuid.assert_called_once_with(mock_request.context, uuid)
+        self.assertFalse(mock_get_by_name.called)
+        self.assertEqual(returned_bay, mock_bay)
+
+    @mock.patch('pecan.request')
+    @mock.patch('magnum.objects.Bay.get_by_name')
+    @mock.patch('magnum.objects.Bay.get_by_uuid')
+    def test_get_rpc_resource_with_name(
+            self,
+            mock_get_by_uuid,
+            mock_get_by_name,
+            mock_request):
+        mock_bay = mock.MagicMock
+        mock_get_by_name.return_value = mock_bay
+
+        returned_bay = utils.get_rpc_resource('Bay', 'fake-name')
+
+        self.assertFalse(mock_get_by_uuid.called)
+        mock_get_by_name.assert_called_once_with(mock_request.context,
+                                                 'fake-name')
+        self.assertEqual(returned_bay, mock_bay)
+
     @mock.patch.object(common_utils, 'is_uuid_like', return_value=True)
     def test_get_openstack_resource_by_uuid(self, fake_is_uuid_like):
         fake_manager = mock.MagicMock()
