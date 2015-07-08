@@ -89,8 +89,8 @@ class Handler(object):
         return {}
 
     def _encode_utf8(self, value):
-        if not isinstance(value, unicode):
-            value = six.u(value)
+        if six.PY2 and not isinstance(value, unicode):
+            value = unicode(value)
         return value.encode('utf-8')
 
     @staticmethod
