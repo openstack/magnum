@@ -32,11 +32,10 @@ Install prerequisites::
     sudo zypper install git git-review libffi-devel libmysqlclient-devel \
                         libopenssl-devel libxml2-devel libxslt-devel \
                         postgresql-devel python-devel python-flake8 \
-                        python-nose python-pip python-setuptools-git \
+                        python-pip python-setuptools-git \
                         python-testrepository python-tox python-virtualenv \
                         gettext-runtime
 
-    sudo easy_install nose
     sudo pip install virtualenv setuptools-git flake8 tox testrepository
 
 If using RHEL and yum reports "No package python-pip available" and "No
