@@ -24,6 +24,7 @@ from magnum.api.controllers.v1 import base as v1_base
 from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
+from magnum.api import validation
 from magnum.common import exception
 from magnum.common import k8s_manifest
 from magnum import objects
@@ -242,6 +243,7 @@ class PodsController(rest.RestController):
         return Pod.convert_with_links(rpc_pod)
 
     @wsme_pecan.wsexpose(Pod, body=Pod, status_code=201)
+    @validation.enforce_bay_types('kubernetes')
     def post(self, pod):
         """Create a new pod.
 

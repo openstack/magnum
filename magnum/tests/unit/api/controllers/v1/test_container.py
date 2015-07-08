@@ -22,14 +22,18 @@ from webtest.app import AppError
 class TestContainerController(db_base.DbTestCase):
     def setUp(self):
         super(TestContainerController, self).setUp()
-        self.bay_get_by_uuid_patch = patch('magnum.objects.Bay.get_by_uuid')
-        self.mock_bay_get_by_uuid = self.bay_get_by_uuid_patch.start()
-        self.addCleanup(self.bay_get_by_uuid_patch.stop)
+        p = patch('magnum.objects.Bay.get_by_uuid')
+        self.mock_bay_get_by_uuid = p.start()
+        self.addCleanup(p.stop)
+        p = patch('magnum.objects.BayModel.get_by_uuid')
+        self.mock_baymodel_get_by_uuid = p.start()
+        self.addCleanup(p.stop)
 
         def fake_get_by_uuid(context, uuid):
             return objects.Bay(self.context, **utils.get_test_bay(uuid=uuid))
 
         self.mock_bay_get_by_uuid.side_effect = fake_get_by_uuid
+        self.mock_baymodel_get_by_uuid.return_value.coe = 'swarm'
 
     @patch('magnum.conductor.api.API.container_create')
     def test_create_container(self, mock_container_create,):

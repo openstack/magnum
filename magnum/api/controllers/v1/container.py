@@ -27,6 +27,7 @@ from magnum.api.controllers import link
 from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
+from magnum.api import validation
 from magnum.common import exception
 from magnum import objects
 
@@ -339,6 +340,7 @@ class ContainersController(rest.RestController):
         return Container.convert_with_links(res_container)
 
     @wsme_pecan.wsexpose(Container, body=Container, status_code=201)
+    @validation.enforce_bay_types('swarm')
     def post(self, container):
         """Create a new container.
 
