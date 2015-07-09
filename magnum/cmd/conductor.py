@@ -23,6 +23,7 @@ from oslo_log import log as logging
 from oslo_service import service
 
 from magnum.common import rpc_service
+from magnum.common import service as magnum_service
 from magnum.common import short_id
 from magnum.conductor.handlers import bay_conductor
 from magnum.conductor.handlers import conductor_listener
@@ -35,9 +36,7 @@ LOG = logging.getLogger(__name__)
 
 
 def main():
-    logging.register_options(cfg.CONF)
-    cfg.CONF(sys.argv[1:], project='magnum')
-    logging.setup(cfg.CONF, 'magnum')
+    magnum_service.prepare_service(sys.argv)
 
     LOG.info(_LI('Starting server in PID %s') % os.getpid())
     LOG.debug("Configuration:")

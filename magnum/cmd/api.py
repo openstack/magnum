@@ -31,7 +31,6 @@ LOG = logging.getLogger(__name__)
 
 
 def main():
-    logging.register_options(cfg.CONF)
     service.prepare_service(sys.argv)
 
     app = api_app.setup_app()
