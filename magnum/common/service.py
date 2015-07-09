@@ -17,5 +17,6 @@ from oslo_log import log as logging
 
 
 def prepare_service(argv=[]):
+    logging.register_options(cfg.CONF)
     cfg.CONF(argv[1:], project='magnum')
     logging.setup(cfg.CONF, 'magnum')
