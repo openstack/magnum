@@ -704,7 +704,7 @@ class TestBayConductorWithSwarm(base.TestCase):
 
         expected = {
             'ssh_key_name': 'keypair_id',
-            'external_network_id': 'external_network_id',
+            'external_network': 'external_network_id',
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'server_flavor': 'flavor_id',
@@ -738,7 +738,7 @@ class TestBayConductorWithSwarm(base.TestCase):
 
         expected = {
             'ssh_key_name': 'keypair_id',
-            'external_network_id': 'external_network_id',
+            'external_network': 'external_network_id',
             'number_of_nodes': '1',
             'discovery_url': 'test_discovery'
         }

@@ -17,9 +17,9 @@ parameters:
     type: string
     description: name of ssh key to be provisioned on our server
 
-  external_network_id:
+  external_network:
     type: string
-    description: uuid of a network to use for floating ip addresses
+    description: uuid/name of a network to use for floating ip addresses
 
   discovery_url:
     type: string
@@ -119,7 +119,7 @@ resources:
     properties:
       external_gateway_info:
         network:
-          get_param: external_network_id
+          get_param: external_network
 
   # attached fixed_subnet to our extrouter router.
   extrouter_inside:
@@ -288,8 +288,8 @@ resources:
     depends_on:
       - extrouter_inside
     properties:
-      floating_network_id:
-        get_param: external_network_id
+      floating_network:
+        get_param: external_network
       port_id:
         get_resource: swarm_manager_eth0
 
@@ -307,7 +307,7 @@ resources:
           server_flavor: {get_param: server_flavor}
           fixed_network_id: {get_resource: fixed_network}
           fixed_subnet_id: {get_resource: fixed_subnet}
-          external_network_id: {get_param: external_network_id}
+          external_network: {get_param: external_network}
           discovery_url: {get_param: discovery_url}
 
 outputs:
