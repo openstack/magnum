@@ -53,3 +53,4 @@ ChangeLog
 *~
 .*.swp
 .*sw?
+*.DS_Store
