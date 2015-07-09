@@ -55,7 +55,6 @@ CONF.register_opts(periodic_opts)
 
 
 class Service(service.Service):
-    _server = None
 
     def __init__(self, topic, server, handlers):
         super(Service, self).__init__()
