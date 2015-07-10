@@ -375,7 +375,8 @@ class TestContainerController(db_base.DbTestCase):
         cmd = {'command': 'ls'}
         response = self.app.put(url, cmd)
         self.assertEqual(response.status_int, 200)
-        mock_container_exec.assert_called_one_with(container_uuid, cmd)
+        mock_container_exec.assert_called_once_with(container_uuid,
+                                                    cmd['command'])
 
     @patch('magnum.conductor.api.API.container_exec')
     @patch('magnum.objects.Container.get_by_name')
@@ -391,7 +392,8 @@ class TestContainerController(db_base.DbTestCase):
         cmd = {'command': 'ls'}
         response = self.app.put(url, cmd)
         self.assertEqual(response.status_int, 200)
-        mock_container_exec.assert_called_one_with(container_uuid, cmd)
+        mock_container_exec.assert_called_once_with(container_uuid,
+                                                    cmd['command'])
 
     @patch('magnum.conductor.api.API.container_delete')
     @patch('magnum.objects.Container.get_by_uuid')

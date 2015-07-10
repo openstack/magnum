@@ -99,7 +99,7 @@ class DockerClientTestCase(base.BaseTestCase):
         client.pause('someid')
 
         mock_url.assert_called_once_with('/containers/someid/pause')
-        mock_post.assert_callend_once_with(mock_url.return_value)
+        mock_post.assert_called_once_with(mock_url.return_value)
         mock_raise_for_status.assert_called_once_with(
             mock_post.return_value)
 
@@ -113,7 +113,7 @@ class DockerClientTestCase(base.BaseTestCase):
         client.pause(dict(Id='someid'))
 
         mock_url.assert_called_once_with('/containers/someid/pause')
-        mock_post.assert_callend_once_with(mock_url.return_value)
+        mock_post.assert_called_once_with(mock_url.return_value)
         mock_raise_for_status.assert_called_once_with(
             mock_post.return_value)
 
@@ -126,7 +126,7 @@ class DockerClientTestCase(base.BaseTestCase):
         client.unpause('someid')
 
         mock_url.assert_called_once_with('/containers/someid/unpause')
-        mock_post.assert_callend_once_with(mock_url.return_value)
+        mock_post.assert_called_once_with(mock_url.return_value)
         mock_raise_for_status.assert_called_once_with(
             mock_post.return_value)
 
@@ -140,7 +140,7 @@ class DockerClientTestCase(base.BaseTestCase):
         client.unpause(dict(Id='someid'))
 
         mock_url.assert_called_once_with('/containers/someid/unpause')
-        mock_post.assert_callend_once_with(mock_url.return_value)
+        mock_post.assert_called_once_with(mock_url.return_value)
         mock_raise_for_status.assert_called_once_with(
             mock_post.return_value)
 
