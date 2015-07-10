@@ -20,8 +20,8 @@ from magnum.conductor import template_definition
 
 class ExampleTemplate(template_definition.BaseTemplateDefinition):
     provides = [
-        {'platform': 'vm', 'os': 'example', 'coe': 'example_coe'},
-        {'platform': 'vm', 'os': 'example2', 'coe': 'example_coe'},
+        {'server_type': 'vm', 'os': 'example', 'coe': 'example_coe'},
+        {'server_type': 'vm', 'os': 'example2', 'coe': 'example_coe'},
     ]
 
     def __init__(self):

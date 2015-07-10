@@ -172,12 +172,12 @@ class TemplateDefinition(object):
         With the following classes:
         class TemplateDefinition1(TemplateDefinition):
             provides = [
-                ('platform1', 'os1', 'coe1')
+                ('server_type1', 'os1', 'coe1')
             ]
 
         class TemplateDefinition2(TemplateDefinition):
             provides = [
-                ('platform2', 'os2', 'coe2')
+                ('server_type2', 'os2', 'coe2')
             ]
 
         And the following entry_points:
@@ -188,9 +188,9 @@ class TemplateDefinition(object):
 
         get_template_definitions will return:
             {
-                (platform1, os1, coe1):
+                (server_type1, os1, coe1):
                     {'template_name_1': TemplateDefinition1},
-                (platform2, os2, coe2):
+                (server_type2, os2, coe2):
                     {'template_name_2': TemplateDefinition2}
             }
 
@@ -201,7 +201,7 @@ class TemplateDefinition(object):
             cls.definitions = dict()
             for entry_point, def_class in cls.load_entry_points():
                 for bay_type in def_class.provides:
-                    bay_type_tuple = (bay_type['platform'],
+                    bay_type_tuple = (bay_type['server_type'],
                                       bay_type['os'],
                                       bay_type['coe'])
                     providers = cls.definitions.setdefault(bay_type_tuple,
@@ -211,19 +211,19 @@ class TemplateDefinition(object):
         return cls.definitions
 
     @classmethod
-    def get_template_definition(cls, platform, os, coe):
+    def get_template_definition(cls, server_type, os, coe):
         '''Returns the enabled TemplateDefinition class for the provided
         bay_type.
 
         With the following classes:
         class TemplateDefinition1(TemplateDefinition):
             provides = [
-                ('platform1', 'os1', 'coe1')
+                ('server_type1', 'os1', 'coe1')
             ]
 
         class TemplateDefinition2(TemplateDefinition):
             provides = [
-                ('platform2', 'os2', 'coe2')
+                ('server_type2', 'os2', 'coe2')
             ]
 
         And the following entry_points:
@@ -232,10 +232,11 @@ class TemplateDefinition(object):
             template_name_1 = some.python.path:TemplateDefinition1
             template_name_2 = some.python.path:TemplateDefinition2
 
-        get_template_name_1_definition('platform2', 'os2', 'coe2')
+        get_template_name_1_definition('server_type2', 'os2', 'coe2')
         will return: TemplateDefinition2
 
-        :param platform: The platform the bay definition will build on
+        :param server_type: The server_type the bay definition
+                                   will build on
         :param os: The operation system the bay definition will build on
         :param coe: The Container Orchestration Environment the bay will
                     produce
@@ -244,18 +245,21 @@ class TemplateDefinition(object):
         '''
 
         definition_map = cls.get_template_definitions()
-        bay_type = (platform, os, coe)
+        bay_type = (server_type, os, coe)
 
         if bay_type not in definition_map:
-            raise exception.BayTypeNotSupported(platform=platform, os=os,
-                                                coe=coe)
+            raise exception.BayTypeNotSupported(
+                server_type=server_type,
+                os=os,
+                coe=coe)
         type_definitions = definition_map[bay_type]
 
         for name in cfg.CONF.bay.enabled_definitions:
             if name in type_definitions:
                 return type_definitions[name]()
 
-        raise exception.BayTypeNotEnabled(platform=platform, os=os, coe=coe)
+        raise exception.BayTypeNotEnabled(
+            server_type=server_type, os=os, coe=coe)
 
     def add_parameter(self, *args, **kwargs):
         param = ParameterMapping(*args, **kwargs)
@@ -323,7 +327,9 @@ class BaseTemplateDefinition(TemplateDefinition):
 
 class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
     provides = [
-        {'platform': 'vm', 'os': 'fedora-atomic', 'coe': 'kubernetes'},
+        {'server_type': 'vm',
+         'os': 'fedora-atomic',
+         'coe': 'kubernetes'},
     ]
 
     def __init__(self):
@@ -371,7 +377,7 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
 
 class CoreOSK8sTemplateDefinition(AtomicK8sTemplateDefinition):
     provides = [
-        {'platform': 'vm', 'os': 'coreos', 'coe': 'kubernetes'},
+        {'server_type': 'vm', 'os': 'coreos', 'coe': 'kubernetes'},
     ]
 
     def __init__(self):
@@ -404,7 +410,7 @@ class CoreOSK8sTemplateDefinition(AtomicK8sTemplateDefinition):
 
 class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
     provides = [
-        {'platform': 'vm', 'os': 'fedora-atomic', 'coe': 'swarm'},
+        {'server_type': 'vm', 'os': 'fedora-atomic', 'coe': 'swarm'},
     ]
 
     def __init__(self):
@@ -460,7 +466,7 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
 
 class UbuntuMesosTemplateDefinition(BaseTemplateDefinition):
     provides = [
-        {'platform': 'vm', 'os': 'ubuntu', 'coe': 'mesos'},
+        {'server_type': 'vm', 'os': 'ubuntu', 'coe': 'mesos'},
     ]
 
     def __init__(self):
