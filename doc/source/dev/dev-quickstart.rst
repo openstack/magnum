@@ -295,8 +295,8 @@ The output indicates the redis-master is running on the
 bay host with IP address 192.168.19.86. To access the redis master::
 
     ssh minion@192.168.19.86
-    REDIS_ID=$(docker ps | grep redis:v1 | grep k8s_master | awk '{print $1}')
-    docker exec -i -t $REDIS_ID redis-cli
+    REDIS_ID=$(sudo docker ps | grep redis:v1 | grep k8s_master | awk '{print $1}')
+    sudo docker exec -i -t $REDIS_ID redis-cli
 
     127.0.0.1:6379> set replication:test true
     OK
@@ -307,8 +307,8 @@ bay host with IP address 192.168.19.86. To access the redis master::
 Now log into one of the other container hosts and access a redis slave from there::
 
     ssh minion@$(nova list | grep 10.0.0.4 | awk '{print $13}')
-    REDIS_ID=$(docker ps | grep redis:v1 | grep k8s_redis | tail -n +2 | awk '{print $1}')
-    docker exec -i -t $REDIS_ID redis-cli
+    REDIS_ID=$(sudo docker ps | grep redis:v1 | grep k8s_redis | tail -n +2 | awk '{print $1}')
+    sudo docker exec -i -t $REDIS_ID redis-cli
 
     127.0.0.1:6379> get replication:test
     "true"
