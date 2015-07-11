@@ -126,11 +126,11 @@ class Handler(object):
         try:
             created_stack = _create_stack(context, osc, bay,
                                           bay_create_timeout)
-        except Exception as e:
-            if isinstance(e, exc.HTTPBadRequest):
-                raise exception.InvalidParameterValue(message=str(e))
-            else:
-                raise
+        except exc.HTTPBadRequest as e:
+            raise exception.InvalidParameterValue(message=str(e))
+        except Exception:
+            raise
+
         bay.stack_id = created_stack['stack']['id']
         bay.create()
 
@@ -177,14 +177,13 @@ class Handler(object):
         # If the exception is unhandled, the original exception will be raised.
         try:
             osc.heat().stacks.delete(stack_id)
-        except Exception as e:
-            if isinstance(e, exc.HTTPNotFound):
-                LOG.info(_LI('The stack %s was not be found during bay'
-                             ' deletion.') % stack_id)
-                bay.destroy()
-                return None
-            else:
-                raise
+        except exc.HTTPNotFound:
+            LOG.info(_LI('The stack %s was not be found during bay'
+                         ' deletion.') % stack_id)
+            bay.destroy()
+            return None
+        except Exception:
+            raise
 
         self._poll_and_check(osc, bay)
 
