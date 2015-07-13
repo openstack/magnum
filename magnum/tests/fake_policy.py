@@ -39,7 +39,14 @@ policy_data = """
     "node:detail": "",
     "node:get": "",
     "node:get_all": "",
-    "node:update": ""
+    "node:update": "",
+
+    "pod:create": "",
+    "pod:delete": "",
+    "pod:detail": "",
+    "pod:get": "",
+    "pod:get_all": "",
+    "pod:update": ""
 }
 """
 

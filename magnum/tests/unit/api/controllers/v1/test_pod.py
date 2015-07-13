@@ -14,6 +14,7 @@ import datetime
 
 import mock
 from oslo_config import cfg
+from oslo_policy import policy
 from oslo_utils import timeutils
 from six.moves.urllib import parse as urlparse
 from wsme import types as wtypes
@@ -512,3 +513,44 @@ class TestDelete(api_base.FunctionalTest):
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
+
+
+class TestPodPolicyEnforcement(api_base.FunctionalTest):
+
+    def _common_policy_check(self, rule, func, *arg, **kwarg):
+        self.policy.set_rules({rule: 'project:non_fake'})
+        exc = self.assertRaises(policy.PolicyNotAuthorized,
+                                func, *arg, **kwarg)
+        self.assertTrue(exc.message.startswith(rule))
+        self.assertTrue(exc.message.endswith('disallowed by policy'))
+
+    def test_policy_disallow_get_all(self):
+        self._common_policy_check(
+            'pod:get_all', self.get_json, '/pods')
+
+    def test_policy_disallow_get_one(self):
+        self._common_policy_check(
+            'pod:get', self.get_json, '/pods/111-222-333')
+
+    def test_policy_disallow_update(self):
+        pod = obj_utils.create_test_pod(self.context,
+                                        desc='test pod',
+                                        uuid=utils.generate_uuid())
+
+        self._common_policy_check(
+            'pod:update', self.patch_json,
+            '/pods/%s' % pod.uuid,
+            [{'path': '/desc', 'value': 'new test pod', 'op': 'replace'}])
+
+    def test_policy_disallow_create(self):
+        pdict = apiutils.pod_post_data()
+        self._common_policy_check(
+            'pod:create', self.post_json, '/pods', pdict)
+
+    def test_policy_disallow_delete(self):
+        pod = obj_utils.create_test_pod(self.context,
+                                        name='test_pod',
+                                        uuid=utils.generate_uuid())
+        self._common_policy_check(
+            'pod:delete', self.delete,
+            '/pods/%s' % pod.uuid)

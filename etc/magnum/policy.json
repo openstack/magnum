@@ -23,5 +23,13 @@
     "node:detail": "rule:default",
     "node:get": "rule:default",
     "node:get_all": "rule:default",
-    "node:update": "rule:default"
+    "node:update": "rule:default",
+
+    "pod:create": "rule:default",
+    "pod:delete": "rule:default",
+    "pod:detail": "rule:default",
+    "pod:get": "rule:default",
+    "pod:get_all": "rule:default",
+    "pod:update": "rule:default"
+
 }

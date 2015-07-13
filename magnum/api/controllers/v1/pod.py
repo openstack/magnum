@@ -27,6 +27,7 @@ from magnum.api import expose
 from magnum.api import validation
 from magnum.common import exception
 from magnum.common import k8s_manifest
+from magnum.common import policy
 from magnum import objects
 
 
@@ -195,6 +196,7 @@ class PodsController(rest.RestController):
                                                 sort_key=sort_key,
                                                 sort_dir=sort_dir)
 
+    @policy.enforce_wsgi("pod")
     @expose.expose(PodCollection, types.uuid,
                    types.uuid, int, wtypes.text, wtypes.text)
     def get_all(self, pod_uuid=None, marker=None, limit=None,
@@ -209,6 +211,7 @@ class PodsController(rest.RestController):
         return self._get_pods_collection(marker, limit, sort_key,
                                          sort_dir)
 
+    @policy.enforce_wsgi("pod")
     @expose.expose(PodCollection, types.uuid,
                    types.uuid, int, wtypes.text, wtypes.text)
     def detail(self, pod_uuid=None, marker=None, limit=None,
@@ -232,6 +235,7 @@ class PodsController(rest.RestController):
                                          sort_key, sort_dir, expand,
                                          resource_url)
 
+    @policy.enforce_wsgi("pod", "get")
     @expose.expose(Pod, types.uuid_or_name)
     def get_one(self, pod_ident):
         """Retrieve information about the given pod.
@@ -242,6 +246,7 @@ class PodsController(rest.RestController):
 
         return Pod.convert_with_links(rpc_pod)
 
+    @policy.enforce_wsgi("pod", "create")
     @expose.expose(Pod, body=Pod, status_code=201)
     @validation.enforce_bay_types('kubernetes')
     def post(self, pod):
@@ -261,6 +266,7 @@ class PodsController(rest.RestController):
         pecan.response.location = link.build_url('pods', new_pod.uuid)
         return Pod.convert_with_links(new_pod)
 
+    @policy.enforce_wsgi("pod", "update")
     @wsme.validate(types.uuid, [PodPatchType])
     @expose.expose(Pod, types.uuid_or_name, body=[PodPatchType])
     def patch(self, pod_ident, patch):
@@ -300,6 +306,7 @@ class PodsController(rest.RestController):
             rpc_pod.save()
         return Pod.convert_with_links(rpc_pod)
 
+    @policy.enforce_wsgi("pod")
     @expose.expose(None, types.uuid_or_name, status_code=204)
     def delete(self, pod_ident):
         """Delete a pod.
