@@ -19,13 +19,13 @@ import pecan
 from pecan import rest
 import wsme
 from wsme import types as wtypes
-import wsmeext.pecan as wsme_pecan
 
 from magnum.api.controllers import base
 from magnum.api.controllers import link
 from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
+from magnum.api import expose
 from magnum.common import clients
 from magnum.common import exception
 from magnum.common import policy
@@ -220,8 +220,8 @@ class BayModelsController(rest.RestController):
             raise exception.ImageNotAuthorized(image_id=image_ident)
 
     @policy.enforce_wsgi("baymodel")
-    @wsme_pecan.wsexpose(BayModelCollection, types.uuid,
-                         types.uuid, int, wtypes.text, wtypes.text)
+    @expose.expose(BayModelCollection, types.uuid,
+                   types.uuid, int, wtypes.text, wtypes.text)
     def get_all(self, baymodel_uuid=None, marker=None, limit=None,
                 sort_key='id', sort_dir='asc'):
         """Retrieve a list of baymodels.
@@ -235,8 +235,8 @@ class BayModelsController(rest.RestController):
                                               sort_dir)
 
     @policy.enforce_wsgi("baymodel")
-    @wsme_pecan.wsexpose(BayModelCollection, types.uuid,
-                         types.uuid, int, wtypes.text, wtypes.text)
+    @expose.expose(BayModelCollection, types.uuid,
+                   types.uuid, int, wtypes.text, wtypes.text)
     def detail(self, baymodel_uuid=None, marker=None, limit=None,
                sort_key='id', sort_dir='asc'):
         """Retrieve a list of baymodels with detail.
@@ -260,7 +260,7 @@ class BayModelsController(rest.RestController):
                                               resource_url)
 
     @policy.enforce_wsgi("baymodel", "get")
-    @wsme_pecan.wsexpose(BayModel, types.uuid_or_name)
+    @expose.expose(BayModel, types.uuid_or_name)
     def get_one(self, baymodel_ident):
         """Retrieve information about the given baymodel.
 
@@ -270,7 +270,7 @@ class BayModelsController(rest.RestController):
         return BayModel.convert_with_links(rpc_baymodel)
 
     @policy.enforce_wsgi("baymodel", "create")
-    @wsme_pecan.wsexpose(BayModel, body=BayModel, status_code=201)
+    @expose.expose(BayModel, body=BayModel, status_code=201)
     def post(self, baymodel):
         """Create a new baymodel.
 
@@ -296,7 +296,7 @@ class BayModelsController(rest.RestController):
 
     @policy.enforce_wsgi("baymodel", "update")
     @wsme.validate(types.uuid, [BayModelPatchType])
-    @wsme_pecan.wsexpose(BayModel, types.uuid, body=[BayModelPatchType])
+    @expose.expose(BayModel, types.uuid, body=[BayModelPatchType])
     def patch(self, baymodel_uuid, patch):
         """Update an existing baymodel.
 
@@ -329,7 +329,7 @@ class BayModelsController(rest.RestController):
         return BayModel.convert_with_links(rpc_baymodel)
 
     @policy.enforce_wsgi("baymodel")
-    @wsme_pecan.wsexpose(None, types.uuid_or_name, status_code=204)
+    @expose.expose(None, types.uuid_or_name, status_code=204)
     def delete(self, baymodel_ident):
         """Delete a baymodel.
 

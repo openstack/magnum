@@ -18,13 +18,13 @@ import pecan
 from pecan import rest
 import wsme
 from wsme import types as wtypes
-import wsmeext.pecan as wsme_pecan
 
 from magnum.api.controllers import link
 from magnum.api.controllers.v1 import base as v1_base
 from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
+from magnum.api import expose
 from magnum.api import validation
 from magnum.common import exception
 from magnum.common import k8s_manifest
@@ -228,8 +228,8 @@ class ReplicationControllersController(rest.RestController):
             sort_key=sort_key,
             sort_dir=sort_dir)
 
-    @wsme_pecan.wsexpose(ReplicationControllerCollection, types.uuid,
-                         types.uuid, int, wtypes.text, wtypes.text)
+    @expose.expose(ReplicationControllerCollection, types.uuid,
+                   types.uuid, int, wtypes.text, wtypes.text)
     def get_all(self, rc_uuid=None, marker=None, limit=None,
                 sort_key='id', sort_dir='asc'):
         """Retrieve a list of ReplicationControllers.
@@ -242,8 +242,8 @@ class ReplicationControllersController(rest.RestController):
         return self._get_rcs_collection(marker, limit, sort_key,
                                         sort_dir)
 
-    @wsme_pecan.wsexpose(ReplicationControllerCollection, types.uuid,
-                         types.uuid, int, wtypes.text, wtypes.text)
+    @expose.expose(ReplicationControllerCollection, types.uuid,
+                   types.uuid, int, wtypes.text, wtypes.text)
     def detail(self, rc_uuid=None, marker=None, limit=None,
                sort_key='id', sort_dir='asc'):
         """Retrieve a list of ReplicationControllers with detail.
@@ -266,7 +266,7 @@ class ReplicationControllersController(rest.RestController):
                                         sort_key, sort_dir, expand,
                                         resource_url)
 
-    @wsme_pecan.wsexpose(ReplicationController, types.uuid_or_name)
+    @expose.expose(ReplicationController, types.uuid_or_name)
     def get_one(self, rc_ident):
         """Retrieve information about the given ReplicationController.
 
@@ -275,8 +275,8 @@ class ReplicationControllersController(rest.RestController):
         rpc_rc = api_utils.get_rpc_resource('ReplicationController', rc_ident)
         return ReplicationController.convert_with_links(rpc_rc)
 
-    @wsme_pecan.wsexpose(ReplicationController, body=ReplicationController,
-                         status_code=201)
+    @expose.expose(ReplicationController, body=ReplicationController,
+                   status_code=201)
     @validation.enforce_bay_types('kubernetes')
     def post(self, rc):
         """Create a new ReplicationController.
@@ -299,8 +299,8 @@ class ReplicationControllersController(rest.RestController):
         return ReplicationController.convert_with_links(new_rc)
 
     @wsme.validate(types.uuid, [ReplicationControllerPatchType])
-    @wsme_pecan.wsexpose(ReplicationController, types.uuid_or_name,
-                         body=[ReplicationControllerPatchType])
+    @expose.expose(ReplicationController, types.uuid_or_name,
+                   body=[ReplicationControllerPatchType])
     def patch(self, rc_ident, patch):
         """Update an existing rc.
 
@@ -339,7 +339,7 @@ class ReplicationControllersController(rest.RestController):
             rpc_rc.save()
         return ReplicationController.convert_with_links(rpc_rc)
 
-    @wsme_pecan.wsexpose(None, types.uuid_or_name, status_code=204)
+    @expose.expose(None, types.uuid_or_name, status_code=204)
     def delete(self, rc_ident):
         """Delete a ReplicationController.
 

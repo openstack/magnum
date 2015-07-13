@@ -22,7 +22,6 @@ import pecan
 from pecan import rest
 from webob import exc
 from wsme import types as wtypes
-import wsmeext.pecan as wsme_pecan
 
 from magnum.api.controllers import base as controllers_base
 from magnum.api.controllers import link
@@ -33,6 +32,7 @@ from magnum.api.controllers.v1 import node
 from magnum.api.controllers.v1 import pod
 from magnum.api.controllers.v1 import replicationcontroller as rc
 from magnum.api.controllers.v1 import service
+from magnum.api import expose
 from magnum.i18n import _
 
 
@@ -165,7 +165,7 @@ class Controller(rest.RestController):
     rcs = rc.ReplicationControllersController()
     services = service.ServicesController()
 
-    @wsme_pecan.wsexpose(V1)
+    @expose.expose(V1)
     def get(self):
         # NOTE: The reason why convert() it's being called for every
         #       request is because we need to get the host url from
