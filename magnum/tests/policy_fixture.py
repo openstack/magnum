@@ -29,8 +29,7 @@ class PolicyFixture(fixtures.Fixture):
     def __init__(self, compat=None):
         self.compat = compat
 
-    def setUp(self):
-        super(PolicyFixture, self).setUp()
+    def _setUp(self):
         self.policy_dir = self.useFixture(fixtures.TempDir())
         self.policy_file_name = os.path.join(self.policy_dir.path,
                                              'policy.json')

@@ -71,9 +71,7 @@ class Database(fixtures.Fixture):
         models.Base.metadata.create_all(self.engine)
         db_migrate.stamp('head')
 
-    def setUp(self):
-        super(Database, self).setUp()
-
+    def _setUp(self):
         if self.sql_connection == "sqlite://":
             conn = self.engine.connect()
             conn.connection.executescript(self._DB)
