@@ -30,6 +30,7 @@ from magnum.api import expose
 from magnum.api import validation
 from magnum.common import exception
 from magnum.common import policy
+from magnum.i18n import _LE
 from magnum import objects
 
 LOG = logging.getLogger(__name__)
@@ -283,8 +284,14 @@ class ContainersController(rest.RestController):
         containers = objects.Container.list(pecan.request.context, limit,
                                             marker_obj, sort_key=sort_key,
                                             sort_dir=sort_dir)
-        containers = [pecan.request.rpcapi.container_show(c.uuid)
-                      for c in containers]
+        for i, c in enumerate(containers):
+            try:
+                containers[i] = pecan.request.rpcapi.container_show(c.uuid)
+            except Exception as e:
+                LOG.exception(_LE("Error while list container %(uuid)s: "
+                                  "%(e)s."),
+                              {'uuid': c.uuid, 'e': e})
+                containers[i].status = 'Unknown'
 
         return ContainerCollection.convert_with_links(containers, limit,
                                                       url=resource_url,
