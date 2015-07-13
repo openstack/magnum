@@ -38,6 +38,12 @@ sudo chown -R jenkins:stack $MAGNUM_DIR
 # Get admin credentials
 pushd ../devstack
 source openrc admin admin
+# NOTE(hongbin): This is a temporary work around. These variables are for
+# keystone v3, but magnum is using v2 API. Therefore, unset them to make the
+# keystoneclient work.
+# Bug: #1473600
+unset OS_PROJECT_DOMAIN_ID
+unset OS_USER_DOMAIN_ID
 popd
 
 # First we test Magnum's command line to see if we can stand up
