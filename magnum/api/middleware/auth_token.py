@@ -32,6 +32,8 @@ class AuthTokenMiddleware(auth_token.AuthProtocol):
     def __init__(self, app, conf, public_api_routes=None):
         if public_api_routes is None:
             public_api_routes = []
+        # TODO(?): Remove .xml and ensure it doesn't result in a
+        # 401 Authentication Required instead of 404 Not Found
         route_pattern_tpl = '%s(\.json|\.xml)?$'
 
         try:

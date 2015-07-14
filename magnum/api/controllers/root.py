@@ -17,11 +17,11 @@
 import pecan
 from pecan import rest
 from wsme import types as wtypes
-import wsmeext.pecan as wsme_pecan
 
 from magnum.api.controllers import base
 from magnum.api.controllers import link
 from magnum.api.controllers import v1
+from magnum.api import expose
 
 
 class Version(base.APIBase):
@@ -77,7 +77,7 @@ class RootController(rest.RestController):
 
     v1 = v1.Controller()
 
-    @wsme_pecan.wsexpose(Root)
+    @expose.expose(Root)
     def get(self):
         # NOTE: The reason why convert() it's being called for every
         #       request is because we need to get the host url from

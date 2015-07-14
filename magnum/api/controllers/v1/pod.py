@@ -17,13 +17,13 @@ import pecan
 from pecan import rest
 import wsme
 from wsme import types as wtypes
-import wsmeext.pecan as wsme_pecan
 
 from magnum.api.controllers import link
 from magnum.api.controllers.v1 import base as v1_base
 from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
+from magnum.api import expose
 from magnum.api import validation
 from magnum.common import exception
 from magnum.common import k8s_manifest
@@ -195,8 +195,8 @@ class PodsController(rest.RestController):
                                                 sort_key=sort_key,
                                                 sort_dir=sort_dir)
 
-    @wsme_pecan.wsexpose(PodCollection, types.uuid,
-                         types.uuid, int, wtypes.text, wtypes.text)
+    @expose.expose(PodCollection, types.uuid,
+                   types.uuid, int, wtypes.text, wtypes.text)
     def get_all(self, pod_uuid=None, marker=None, limit=None,
                 sort_key='id', sort_dir='asc'):
         """Retrieve a list of pods.
@@ -209,8 +209,8 @@ class PodsController(rest.RestController):
         return self._get_pods_collection(marker, limit, sort_key,
                                          sort_dir)
 
-    @wsme_pecan.wsexpose(PodCollection, types.uuid,
-                         types.uuid, int, wtypes.text, wtypes.text)
+    @expose.expose(PodCollection, types.uuid,
+                   types.uuid, int, wtypes.text, wtypes.text)
     def detail(self, pod_uuid=None, marker=None, limit=None,
                sort_key='id', sort_dir='asc'):
         """Retrieve a list of pods with detail.
@@ -232,7 +232,7 @@ class PodsController(rest.RestController):
                                          sort_key, sort_dir, expand,
                                          resource_url)
 
-    @wsme_pecan.wsexpose(Pod, types.uuid_or_name)
+    @expose.expose(Pod, types.uuid_or_name)
     def get_one(self, pod_ident):
         """Retrieve information about the given pod.
 
@@ -242,7 +242,7 @@ class PodsController(rest.RestController):
 
         return Pod.convert_with_links(rpc_pod)
 
-    @wsme_pecan.wsexpose(Pod, body=Pod, status_code=201)
+    @expose.expose(Pod, body=Pod, status_code=201)
     @validation.enforce_bay_types('kubernetes')
     def post(self, pod):
         """Create a new pod.
@@ -262,7 +262,7 @@ class PodsController(rest.RestController):
         return Pod.convert_with_links(new_pod)
 
     @wsme.validate(types.uuid, [PodPatchType])
-    @wsme_pecan.wsexpose(Pod, types.uuid_or_name, body=[PodPatchType])
+    @expose.expose(Pod, types.uuid_or_name, body=[PodPatchType])
     def patch(self, pod_ident, patch):
         """Update an existing pod.
 
@@ -300,7 +300,7 @@ class PodsController(rest.RestController):
             rpc_pod.save()
         return Pod.convert_with_links(rpc_pod)
 
-    @wsme_pecan.wsexpose(None, types.uuid_or_name, status_code=204)
+    @expose.expose(None, types.uuid_or_name, status_code=204)
     def delete(self, pod_ident):
         """Delete a pod.
 

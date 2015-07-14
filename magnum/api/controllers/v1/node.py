@@ -19,13 +19,13 @@ import pecan
 from pecan import rest
 import wsme
 from wsme import types as wtypes
-import wsmeext.pecan as wsme_pecan
 
 from magnum.api.controllers import base
 from magnum.api.controllers import link
 from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
+from magnum.api import expose
 from magnum.common import exception
 from magnum.common import policy
 from magnum import objects
@@ -149,8 +149,8 @@ class NodesController(rest.RestController):
                                                  sort_dir=sort_dir)
 
     @policy.enforce_wsgi("node")
-    @wsme_pecan.wsexpose(NodeCollection, types.uuid,
-                         types.uuid, int, wtypes.text, wtypes.text)
+    @expose.expose(NodeCollection, types.uuid,
+                   types.uuid, int, wtypes.text, wtypes.text)
     def get_all(self, node_uuid=None, marker=None, limit=None,
                 sort_key='id', sort_dir='asc'):
         """Retrieve a list of nodes.
@@ -164,8 +164,8 @@ class NodesController(rest.RestController):
                                           sort_dir)
 
     @policy.enforce_wsgi("node")
-    @wsme_pecan.wsexpose(NodeCollection, types.uuid,
-                         types.uuid, int, wtypes.text, wtypes.text)
+    @expose.expose(NodeCollection, types.uuid,
+                   types.uuid, int, wtypes.text, wtypes.text)
     def detail(self, node_uuid=None, marker=None, limit=None,
                sort_key='id', sort_dir='asc'):
         """Retrieve a list of nodes with detail.
@@ -188,7 +188,7 @@ class NodesController(rest.RestController):
                                           resource_url)
 
     @policy.enforce_wsgi("node", "get")
-    @wsme_pecan.wsexpose(Node, types.uuid)
+    @expose.expose(Node, types.uuid)
     def get_one(self, node_uuid):
         """Retrieve information about the given node.
 
@@ -198,7 +198,7 @@ class NodesController(rest.RestController):
         return Node.convert_with_links(rpc_node)
 
     @policy.enforce_wsgi("node", "create")
-    @wsme_pecan.wsexpose(Node, body=Node, status_code=201)
+    @expose.expose(Node, body=Node, status_code=201)
     def post(self, node):
         """Create a new node.
 
@@ -217,7 +217,7 @@ class NodesController(rest.RestController):
 
     @policy.enforce_wsgi("node", "update")
     @wsme.validate(types.uuid, [NodePatchType])
-    @wsme_pecan.wsexpose(Node, types.uuid, body=[NodePatchType])
+    @expose.expose(Node, types.uuid, body=[NodePatchType])
     def patch(self, node_uuid, patch):
         """Update an existing node.
 
@@ -247,7 +247,7 @@ class NodesController(rest.RestController):
         return Node.convert_with_links(rpc_node)
 
     @policy.enforce_wsgi("node", "delete")
-    @wsme_pecan.wsexpose(None, types.uuid, status_code=204)
+    @expose.expose(None, types.uuid, status_code=204)
     def delete(self, node_uuid):
         """Delete a node.
 

@@ -20,13 +20,13 @@ import pecan
 from pecan import rest
 import wsme
 from wsme import types as wtypes
-import wsmeext.pecan as wsme_pecan
 
 from magnum.api.controllers import base
 from magnum.api.controllers import link
 from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
+from magnum.api import expose
 from magnum.api import validation
 from magnum.common import exception
 from magnum import objects
@@ -158,7 +158,7 @@ class ContainerCollection(collection.Collection):
 
 
 class StartController(object):
-    @wsme_pecan.wsexpose(types.uuid_or_name, wtypes.text)
+    @expose.expose(types.uuid_or_name, wtypes.text)
     def _default(self, container_ident):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
@@ -172,7 +172,7 @@ class StartController(object):
 
 
 class StopController(object):
-    @wsme_pecan.wsexpose(types.uuid_or_name, wtypes.text)
+    @expose.expose(types.uuid_or_name, wtypes.text)
     def _default(self, container_ident):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
@@ -185,7 +185,7 @@ class StopController(object):
 
 
 class RebootController(object):
-    @wsme_pecan.wsexpose(types.uuid_or_name, wtypes.text)
+    @expose.expose(types.uuid_or_name, wtypes.text)
     def _default(self, container_ident):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
@@ -198,7 +198,7 @@ class RebootController(object):
 
 
 class PauseController(object):
-    @wsme_pecan.wsexpose(types.uuid_or_name, wtypes.text)
+    @expose.expose(types.uuid_or_name, wtypes.text)
     def _default(self, container_ident):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
@@ -211,7 +211,7 @@ class PauseController(object):
 
 
 class UnpauseController(object):
-    @wsme_pecan.wsexpose(types.uuid_or_name, wtypes.text)
+    @expose.expose(types.uuid_or_name, wtypes.text)
     def _default(self, container_ident):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
@@ -224,7 +224,7 @@ class UnpauseController(object):
 
 
 class LogsController(object):
-    @wsme_pecan.wsexpose(types.uuid_or_name, wtypes.text)
+    @expose.expose(types.uuid_or_name, wtypes.text)
     def _default(self, container_ident):
         if pecan.request.method != 'GET':
             pecan.abort(405, ('HTTP method %s is not allowed'
@@ -237,7 +237,7 @@ class LogsController(object):
 
 
 class ExecuteController(object):
-    @wsme_pecan.wsexpose(types.uuid_or_name, wtypes.text, wtypes.text)
+    @expose.expose(types.uuid_or_name, wtypes.text, wtypes.text)
     def _default(self, container_ident, command):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
@@ -291,8 +291,8 @@ class ContainersController(rest.RestController):
                                                       sort_key=sort_key,
                                                       sort_dir=sort_dir)
 
-    @wsme_pecan.wsexpose(ContainerCollection, types.uuid,
-                         types.uuid, int, wtypes.text, wtypes.text)
+    @expose.expose(ContainerCollection, types.uuid,
+                   types.uuid, int, wtypes.text, wtypes.text)
     def get_all(self, container_uuid=None, marker=None, limit=None,
                 sort_key='id', sort_dir='asc'):
         """Retrieve a list of containers.
@@ -305,8 +305,8 @@ class ContainersController(rest.RestController):
         return self._get_containers_collection(marker, limit, sort_key,
                                                sort_dir)
 
-    @wsme_pecan.wsexpose(ContainerCollection, types.uuid,
-                         types.uuid, int, wtypes.text, wtypes.text)
+    @expose.expose(ContainerCollection, types.uuid,
+                   types.uuid, int, wtypes.text, wtypes.text)
     def detail(self, container_uuid=None, marker=None, limit=None,
                sort_key='id', sort_dir='asc'):
         """Retrieve a list of containers with detail.
@@ -328,7 +328,7 @@ class ContainersController(rest.RestController):
                                                sort_key, sort_dir, expand,
                                                resource_url)
 
-    @wsme_pecan.wsexpose(Container, types.uuid_or_name)
+    @expose.expose(Container, types.uuid_or_name)
     def get_one(self, container_ident):
         """Retrieve information about the given container.
 
@@ -339,7 +339,7 @@ class ContainersController(rest.RestController):
         res_container = pecan.request.rpcapi.container_show(rpc_container.uuid)
         return Container.convert_with_links(res_container)
 
-    @wsme_pecan.wsexpose(Container, body=Container, status_code=201)
+    @expose.expose(Container, body=Container, status_code=201)
     @validation.enforce_bay_types('swarm')
     def post(self, container):
         """Create a new container.
@@ -363,8 +363,8 @@ class ContainersController(rest.RestController):
         return Container.convert_with_links(res_container)
 
     @wsme.validate(types.uuid, [ContainerPatchType])
-    @wsme_pecan.wsexpose(Container, types.uuid_or_name,
-                         body=[ContainerPatchType])
+    @expose.expose(Container, types.uuid_or_name,
+                   body=[ContainerPatchType])
     def patch(self, container_ident, patch):
         """Update an existing container.
 
@@ -395,7 +395,7 @@ class ContainersController(rest.RestController):
         rpc_container.save()
         return Container.convert_with_links(rpc_container)
 
-    @wsme_pecan.wsexpose(None, types.uuid_or_name, status_code=204)
+    @expose.expose(None, types.uuid_or_name, status_code=204)
     def delete(self, container_ident):
         """Delete a container.
 

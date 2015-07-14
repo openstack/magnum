@@ -16,13 +16,13 @@ import pecan
 from pecan import rest
 import wsme
 from wsme import types as wtypes
-import wsmeext.pecan as wsme_pecan
 
 from magnum.api.controllers import link
 from magnum.api.controllers.v1 import base as v1_base
 from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
+from magnum.api import expose
 from magnum.api import validation
 from magnum.common import exception
 from magnum.common import k8s_manifest
@@ -205,8 +205,8 @@ class ServicesController(rest.RestController):
                                                     sort_key=sort_key,
                                                     sort_dir=sort_dir)
 
-    @wsme_pecan.wsexpose(ServiceCollection, types.uuid,
-                         types.uuid, int, wtypes.text, wtypes.text)
+    @expose.expose(ServiceCollection, types.uuid,
+                   types.uuid, int, wtypes.text, wtypes.text)
     def get_all(self, service_uuid=None, marker=None, limit=None,
                 sort_key='id', sort_dir='asc'):
         """Retrieve a list of services.
@@ -219,8 +219,8 @@ class ServicesController(rest.RestController):
         return self._get_services_collection(marker, limit, sort_key,
                                              sort_dir)
 
-    @wsme_pecan.wsexpose(ServiceCollection, types.uuid,
-                         types.uuid, int, wtypes.text, wtypes.text)
+    @expose.expose(ServiceCollection, types.uuid,
+                   types.uuid, int, wtypes.text, wtypes.text)
     def detail(self, service_uuid=None, marker=None, limit=None,
                sort_key='id', sort_dir='asc'):
         """Retrieve a list of services with detail.
@@ -243,7 +243,7 @@ class ServicesController(rest.RestController):
                                              sort_key, sort_dir, expand,
                                              resource_url)
 
-    @wsme_pecan.wsexpose(Service, types.uuid_or_name)
+    @expose.expose(Service, types.uuid_or_name)
     def get_one(self, service_ident):
         """Retrieve information about the given service.
 
@@ -253,7 +253,7 @@ class ServicesController(rest.RestController):
 
         return Service.convert_with_links(rpc_service)
 
-    @wsme_pecan.wsexpose(Service, body=Service, status_code=201)
+    @expose.expose(Service, body=Service, status_code=201)
     @validation.enforce_bay_types('kubernetes')
     def post(self, service):
         """Create a new service.
@@ -276,7 +276,7 @@ class ServicesController(rest.RestController):
         return Service.convert_with_links(new_service)
 
     @wsme.validate(types.uuid, [ServicePatchType])
-    @wsme_pecan.wsexpose(Service, types.uuid_or_name, body=[ServicePatchType])
+    @expose.expose(Service, types.uuid_or_name, body=[ServicePatchType])
     def patch(self, service_ident, patch):
         """Update an existing service.
 
@@ -314,7 +314,7 @@ class ServicesController(rest.RestController):
             rpc_service.save()
         return Service.convert_with_links(rpc_service)
 
-    @wsme_pecan.wsexpose(None, types.uuid_or_name, status_code=204)
+    @expose.expose(None, types.uuid_or_name, status_code=204)
     def delete(self, service_ident):
         """Delete a service.
 
