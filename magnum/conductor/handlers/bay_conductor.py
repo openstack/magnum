@@ -21,6 +21,7 @@ from oslo_service import loopingcall
 from magnum.common import clients
 from magnum.common import exception
 from magnum.common import short_id
+from magnum.conductor import scale_manager
 from magnum.conductor.template_definition import TemplateDefinition as TDef
 from magnum.conductor import utils as conductor_utils
 from magnum.i18n import _
@@ -55,13 +56,14 @@ cfg.CONF.register_opts(bay_heat_opts, group='bay_heat')
 LOG = logging.getLogger(__name__)
 
 
-def _extract_template_definition(context, bay):
+def _extract_template_definition(context, bay, scale_manager=None):
     baymodel = conductor_utils.retrieve_baymodel(context, bay)
     cluster_distro = baymodel.cluster_distro
     cluster_coe = baymodel.coe
     definition = TDef.get_template_definition('vm', cluster_distro,
                                               cluster_coe)
-    return definition.extract_definition(baymodel, bay)
+    return definition.extract_definition(baymodel, bay,
+                                         scale_manager=scale_manager)
 
 
 def _create_stack(context, osc, bay, bay_create_timeout):
@@ -90,8 +92,9 @@ def _create_stack(context, osc, bay, bay_create_timeout):
     return created_stack
 
 
-def _update_stack(context, osc, bay):
-    template_path, heat_params = _extract_template_definition(context, bay)
+def _update_stack(context, osc, bay, scale_manager=None):
+    template_path, heat_params = _extract_template_definition(
+        context, bay, scale_manager=scale_manager)
 
     tpl_files, template = template_utils.get_template_contents(template_path)
     fields = {
@@ -152,8 +155,9 @@ class Handler(object):
         delta = set(bay.obj_what_changed())
         if 'node_count' in delta:
             delta.remove('node_count')
+            manager = scale_manager.ScaleManager(context, osc, bay)
 
-            _update_stack(context, osc, bay)
+            _update_stack(context, osc, bay, manager)
             self._poll_and_check(osc, bay)
 
         if delta:

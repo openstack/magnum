@@ -603,12 +603,14 @@ class TestHandler(db_base.DbTestCase):
         self.bay = objects.Bay(self.context, **bay_dict)
         self.bay.create()
 
+    @patch('magnum.conductor.scale_manager.ScaleManager')
     @patch('magnum.conductor.handlers.bay_conductor.Handler._poll_and_check')
     @patch('magnum.conductor.handlers.bay_conductor._update_stack')
     @patch('magnum.common.clients.OpenStackClients')
     def test_update_node_count_success(
             self, mock_openstack_client_class,
-            mock_update_stack, mock_poll_and_check):
+            mock_update_stack, mock_poll_and_check,
+            mock_scale_manager):
         mock_heat_stack = mock.MagicMock()
         mock_heat_stack.stack_status = bay_status.CREATE_COMPLETE
         mock_heat_client = mock.MagicMock()
@@ -619,9 +621,9 @@ class TestHandler(db_base.DbTestCase):
         self.bay.node_count = 2
         self.handler.bay_update(self.context, self.bay)
 
-        mock_update_stack.assert_called_once_with(self.context,
-                                                  mock_openstack_client,
-                                                  self.bay)
+        mock_update_stack.assert_called_once_with(
+            self.context, mock_openstack_client, self.bay,
+            mock_scale_manager.return_value)
         bay = objects.Bay.get(self.context, self.bay.uuid)
         self.assertEqual(bay.node_count, 2)
 

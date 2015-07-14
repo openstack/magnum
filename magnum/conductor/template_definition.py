@@ -15,14 +15,18 @@ import abc
 import uuid
 
 from oslo_config import cfg
+from oslo_log import log as logging
 from pkg_resources import iter_entry_points
 import requests
 import six
 
 from magnum.common import exception
-from magnum.i18n import _
-
 from magnum.common import paths
+from magnum.i18n import _
+from magnum.i18n import _LW
+
+
+LOG = logging.getLogger(__name__)
 
 
 template_def_opts = [
@@ -120,10 +124,20 @@ class OutputMapping(object):
         if self.bay_attr is None:
             return
 
+        output_value = self.get_output_value(stack)
+        if output_value is not None:
+            setattr(bay, self.bay_attr, output_value)
+
+    def matched(self, output_key):
+        return self.heat_output == output_key
+
+    def get_output_value(self, stack):
         for output in stack.outputs:
             if output['output_key'] == self.heat_output:
-                setattr(bay, self.bay_attr, output['output_value'])
-                break
+                return output['output_value']
+
+        LOG.warning(_LW('stack does not have output_key %s'), self.heat_output)
+        return None
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -246,7 +260,14 @@ class TemplateDefinition(object):
         output = OutputMapping(*args, **kwargs)
         self.output_mappings.append(output)
 
-    def get_params(self, baymodel, bay, extra_params=None):
+    def get_output(self, *args, **kwargs):
+        for output in self.output_mappings:
+            if output.matched(*args, **kwargs):
+                return output
+
+        return None
+
+    def get_params(self, baymodel, bay, **kwargs):
         """Pulls template parameters from Baymodel and Bay.
 
         :param baymodel: Baymodel to pull template parameters from
@@ -260,8 +281,8 @@ class TemplateDefinition(object):
         for mapping in self.param_mappings:
             mapping.set_param(template_params, baymodel, bay)
 
-        if extra_params:
-            template_params.update(extra_params)
+        if 'extra_params' in kwargs:
+            template_params.update(kwargs.get('extra_params'))
 
         return template_params
 
@@ -273,9 +294,8 @@ class TemplateDefinition(object):
     def template_path(self):
         pass
 
-    def extract_definition(self, baymodel, bay, extra_params=None):
-        return self.template_path, self.get_params(baymodel, bay,
-                                                   extra_params=extra_params)
+    def extract_definition(self, baymodel, bay, **kwargs):
+        return self.template_path, self.get_params(baymodel, bay, **kwargs)
 
 
 class BaseTemplateDefinition(TemplateDefinition):
@@ -328,6 +348,18 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
         self.add_output('kube_minions_external',
                         bay_attr='node_addresses')
 
+    def get_params(self, baymodel, bay, **kwargs):
+        extra_params = kwargs.pop('extra_params', {})
+        scale_mgr = kwargs.pop('scale_manager', None)
+        if scale_mgr:
+            hosts = self.get_output('kube_minions')
+            extra_params['minions_to_remove'] = (
+                scale_mgr.get_removal_nodes(hosts))
+
+        return super(AtomicK8sTemplateDefinition,
+                     self).get_params(baymodel, bay, extra_params=extra_params,
+                                      **kwargs)
+
     @property
     def template_path(self):
         return cfg.CONF.bay.k8s_atomic_template_path
@@ -353,14 +385,13 @@ class CoreOSK8sTemplateDefinition(AtomicK8sTemplateDefinition):
             token = uuid.uuid4().hex
         return token
 
-    def get_params(self, baymodel, bay, extra_params=None):
-        if not extra_params:
-            extra_params = dict()
-
+    def get_params(self, baymodel, bay, **kwargs):
+        extra_params = kwargs.pop('extra_params', {})
         extra_params['token'] = self.get_token()
 
         return super(CoreOSK8sTemplateDefinition,
-                     self).get_params(baymodel, bay, extra_params=extra_params)
+                     self).get_params(baymodel, bay, extra_params=extra_params,
+                                      **kwargs)
 
     @property
     def template_path(self):
@@ -410,14 +441,13 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
 
         return discovery_url
 
-    def get_params(self, baymodel, bay, extra_params=None):
-        if not extra_params:
-            extra_params = dict()
-
+    def get_params(self, baymodel, bay, **kwargs):
+        extra_params = kwargs.pop('extra_params', {})
         extra_params['discovery_url'] = self.get_discovery_url(bay)
 
         return super(AtomicSwarmTemplateDefinition,
-                     self).get_params(baymodel, bay, extra_params=extra_params)
+                     self).get_params(baymodel, bay, extra_params=extra_params,
+                                      **kwargs)
 
     @property
     def template_path(self):
