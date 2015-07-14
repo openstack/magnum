@@ -14,12 +14,11 @@ import mock
 from webob import exc as webob_exc
 
 from magnum.api.controllers import v1 as v1_api
-from magnum import tests
 from magnum.tests import base as test_base
 from magnum.tests.unit.api import base as api_base
 
 
-class TestRootController(tests.FunctionalTest):
+class TestRootController(api_base.FunctionalTest):
     def test_version(self):
         expected = {u'default_version':
                     {u'id': u'v1', u'links':
