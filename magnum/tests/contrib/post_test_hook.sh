@@ -30,7 +30,13 @@ set -o xtrace
 echo_summary "magnum's post_test_hook.sh was called..."
 (set -o posix; set)
 
-sudo pip install -U -r requirements.txt -r test-requirements.txt
+if [[ "$USE_CONSTRAINTS" == "True" ]]; then
+    constraints="-c $REQUIREMENTS_DIR/upper-constraints.txt"
+else
+    constraints=""
+fi
+# XXX(lifeless) This should probably use setup_dev or some such.
+sudo pip install $constraints -U -r requirements.txt -r test-requirements.txt
 
 export MAGNUM_DIR="$BASE/new/magnum"
 sudo chown -R jenkins:stack $MAGNUM_DIR
