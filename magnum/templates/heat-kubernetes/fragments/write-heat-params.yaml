@@ -7,5 +7,6 @@ write_files:
     content: |
       KUBE_ALLOW_PRIV="$KUBE_ALLOW_PRIV"
       KUBE_MASTER_IP="$KUBE_MASTER_IP"
+      ETCD_SERVER_IP="$ETCD_SERVER_IP"
       DOCKER_VOLUME="$DOCKER_VOLUME"
 
