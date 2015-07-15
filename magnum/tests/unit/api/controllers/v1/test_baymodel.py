@@ -342,9 +342,6 @@ class TestPatch(api_base.FunctionalTest):
 
 class TestPost(api_base.FunctionalTest):
 
-    def setUp(self):
-        super(TestPost, self).setUp()
-
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
     @mock.patch('oslo_utils.timeutils.utcnow')
     def test_create_baymodel(self, mock_utcnow, mock_image_data):
@@ -583,9 +580,6 @@ class TestDelete(api_base.FunctionalTest):
 
 
 class TestBayModelPolicyEnforcement(api_base.FunctionalTest):
-
-    def setUp(self):
-        super(TestBayModelPolicyEnforcement, self).setUp()
 
     def _common_policy_check(self, rule, func, *arg, **kwarg):
         self.policy.set_rules({rule: "project:non_fake"})

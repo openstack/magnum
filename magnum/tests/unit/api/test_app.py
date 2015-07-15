@@ -20,8 +20,6 @@ from magnum.tests import base
 
 
 class TestAppConfig(base.BaseTestCase):
-    def setUp(self):
-        super(TestAppConfig, self).setUp()
 
     def test_get_pecan_config(self):
         config = api_app.get_pecan_config()

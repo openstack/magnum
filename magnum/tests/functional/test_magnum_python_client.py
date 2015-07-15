@@ -34,8 +34,6 @@ from magnumclient.v1 import client as v1client
 
 
 class BaseMagnumClient(base.TestCase):
-    def setUp(self):
-        super(BaseMagnumClient, self).setUp()
 
     @classmethod
     def setUpClass(cls):

@@ -19,8 +19,6 @@ from magnum.tests import base
 
 
 class TestUrlFetch(base.BaseTestCase):
-    def setUp(self):
-        super(TestUrlFetch, self).setUp()
 
     def test_get_unsupported_scheme(self):
         self.assertRaises(urlfetch.URLFetchError,
