@@ -107,6 +107,9 @@ recommended at this time.
 This session has only been tested on Ubuntu 14.04 (Trusty) and Fedora 20/21.
 We recommend users to select one of them if it is possible.
 
+For in-depth guidance on adding magnum manually to a devstack instance, please
+refer to the :ref:`dev-manual-install` guide.
+
 Clone devstack::
 
     # Create a root directory for devstack if needed
