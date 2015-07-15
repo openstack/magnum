@@ -50,6 +50,20 @@ def get_test_baymodel(**kw):
     }
 
 
+def create_test_baymodel(**kw):
+    """Create test baymodel entry in DB and return BayModel DB object.
+    Function to be used to create test BayModel objects in the database.
+    :param kw: kwargs with overriding values for baymodel's attributes.
+    :returns: Test BayModel DB object.
+    """
+    baymodel = get_test_baymodel(**kw)
+    # Let DB generate ID if it isn't specified explicitly
+    if 'id' not in kw:
+        del baymodel['id']
+    dbapi = db_api.get_instance()
+    return dbapi.create_baymodel(baymodel)
+
+
 def get_test_bay(**kw):
     return {
         'id': kw.get('id', 42),

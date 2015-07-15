@@ -71,6 +71,21 @@ class DbContainerTestCase(base.DbTestCase):
         res_uuids = [r.uuid for r in res]
         self.assertEqual(sorted(uuids), sorted(res_uuids))
 
+    def test_get_container_list_sorted(self):
+        uuids = []
+        for _ in range(5):
+            container = utils.create_test_container(
+                uuid=magnum_utils.generate_uuid())
+            uuids.append(six.text_type(container.uuid))
+        res = self.dbapi.get_container_list(self.context, sort_key='uuid')
+        res_uuids = [r.uuid for r in res]
+        self.assertEqual(sorted(uuids), res_uuids)
+
+        self.assertRaises(exception.InvalidParameterValue,
+                          self.dbapi.get_container_list,
+                          self.context,
+                          sort_key='foo')
+
     def test_get_container_list_with_filters(self):
         container1 = utils.create_test_container(
             name='container-one',
