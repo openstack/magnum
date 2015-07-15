@@ -89,13 +89,14 @@ class TestCase(base.BaseTestCase):
             objects_base.MagnumObjectRegistry._registry._obj_classes)
         self.addCleanup(self._restore_obj_registry)
 
+        def reset_pecan():
+            pecan.set_config({}, overwrite=True)
+
+        self.addCleanup(reset_pecan)
+
     def _restore_obj_registry(self):
         objects_base.MagnumObjectRegistry._registry._obj_classes \
             = self._base_test_obj_backup
-
-    def tearDown(self):
-        super(TestCase, self).tearDown()
-        pecan.set_config({}, overwrite=True)
 
     def config(self, **kw):
         """Override config options for a test."""
