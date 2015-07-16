@@ -304,6 +304,67 @@ resources:
 
   ######################################################################
   #
+  # load balancers.
+  #
+
+  api_monitor:
+    type: OS::Neutron::HealthMonitor
+    properties:
+      type: TCP
+      delay: 5
+      max_retries: 5
+      timeout: 5
+
+  api_pool:
+    type: OS::Neutron::Pool
+    properties:
+      protocol: HTTP
+      monitors: [{get_resource: api_monitor}]
+      subnet: {get_resource: fixed_subnet}
+      lb_method: ROUND_ROBIN
+      vip:
+        protocol_port: 8080
+
+  api_pool_member:
+    type: OS::Neutron::PoolMember
+    properties:
+      pool_id: {get_resource: api_pool}
+      address: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
+      protocol_port: 8080
+
+  api_pool_floating:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: {get_param: external_network}
+      port_id: {get_attr: [api_pool, vip, port_id]}
+
+  etcd_monitor:
+    type: OS::Neutron::HealthMonitor
+    properties:
+      type: TCP
+      delay: 5
+      max_retries: 5
+      timeout: 5
+
+  etcd_pool:
+    type: OS::Neutron::Pool
+    properties:
+      protocol: HTTP
+      monitors: [{get_resource: etcd_monitor}]
+      subnet: {get_resource: fixed_subnet}
+      lb_method: ROUND_ROBIN
+      vip:
+        protocol_port: 4001
+
+  etcd_pool_member:
+    type: OS::Neutron::PoolMember
+    properties:
+      pool_id: {get_resource: etcd_pool}
+      address: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
+      protocol_port: 4001
+
+  ######################################################################
+  #
   # kubernetes minions. This is an autoscaling group that will initially
   # create <number_of_minions> minions, and will scale up to
   # <max_number_of_minions> based on CPU utilization.
@@ -332,6 +393,15 @@ resources:
           wait_condition_timeout: {get_param: wait_condition_timeout}
 
 outputs:
+
+  api_address:
+    value:
+      str_replace:
+        template: api_ip_address:8080
+        params:
+          api_ip_address: {get_attr: [api_pool_floating, floating_ip_address]}
+    description: >
+      This is the IP address and port of the Kubernetes API server.
 
   kube_master:
     value: {get_attr: [kube_master_floating, floating_ip_address]}
