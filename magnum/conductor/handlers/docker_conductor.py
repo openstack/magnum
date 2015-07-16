@@ -157,6 +157,12 @@ class Handler(object):
         container = objects.Container.get_by_uuid(context, container_uuid)
         try:
             docker_id = self._find_container_by_name(docker, container_uuid)
+            if not docker_id:
+                LOG.exception(_LE("Can not find docker instance with %s,"
+                                  "set it to Error status"), container_uuid)
+                container.status = obj_container.ERROR
+                container.save()
+                return container
             result = docker.inspect_container(docker_id)
             status = result.get('State')
             if status:
