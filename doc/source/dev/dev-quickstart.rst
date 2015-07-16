@@ -438,6 +438,75 @@ Now that we're done with the container we can delete it::
 
     magnum container-delete test-container
 
+Building and Using a Mesos Bay
+==============================
+
+Provisioning a mesos bay requires a Ubuntu-based image with some packages
+pre-installed. To build and upload such image, please refer to
+`<http://git.openstack.org/cgit/openstack/magnum/tree/magnum/templates/heat-mesos/elements/README.md>`_
+
+Then, create a baymodel by using 'mesos' as the coe, with the rest of arguments
+similar to the Kubernetes baymodel::
+
+    NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
+    magnum baymodel-create --name mesosbaymodel --image-id ubuntu-mesos \
+                           --keypair-id testkey \
+                           --external-network-id $NIC_ID \
+                           --dns-nameserver 8.8.8.8 --flavor-id m1.small \
+                           --coe mesos
+
+Finally, create the bay. Use the baymodel 'mesosbaymodel' as a template for
+bay creation. This bay will result in one mesos master node and two mesos
+slave nodes::
+
+    magnum bay-create --name mesosbay --baymodel mesosbaymodel --node-count 2
+
+Now that we have a mesos bay we can start interacting with it. First we need
+to make sure the bay's status is 'CREATE_COMPLETE'::
+
+    $ magnum bay-show mesosbay
+    +----------------+--------------------------------------+
+    | Property       | Value                                |
+    +----------------+--------------------------------------+
+    | status         | CREATE_COMPLETE                      |
+    | uuid           | ff727f0d-72ca-4e2b-9fef-5ec853d74fdf |
+    | created_at     | 2015-06-09T20:21:43+00:00            |
+    | updated_at     | 2015-06-09T20:28:18+00:00            |
+    | api_address    | 172.24.4.115                         |
+    | baymodel_id    | 92dbda62-32d4-4435-88fc-8f42d514b347 |
+    | node_count     | 2                                    |
+    | node_addresses | [u'172.24.4.116', u'172.24.4.117']   |
+    | status_reason  | Stack CREATE completed successfully  |
+    | discovery_url  | None                                 |
+    | name           | mesosbay                             |
+    +----------------+--------------------------------------+
+
+Next we will create a container in this bay by using the REST API of Marathon.
+This container will ping the address 8.8.8.8::
+
+    $ cat > mesos.json << END
+    {
+      "container": {
+        "type": "DOCKER",
+        "docker": {
+          "image": "cirros"
+        }
+      },
+      "id": "ubuntu",
+      "instances": 1,
+      "cpus": 0.5,
+      "mem": 512,
+      "uris": [],
+      "cmd": "ping 8.8.8.8"
+    }
+    END
+    $ MASTER_IP=$(magnum bay-show mesosbay | awk '/ api_address /{print $4}')
+    $ curl -X POST -H "Content-Type: application/json" \
+        http://${MASTER_IP}:8080/v2/apps -d@mesos.json
+
+Using the Marathon web console (at http://<master>:8080/), you will see the
+application you created.
+
 Building Developer Documentation
 ================================
 

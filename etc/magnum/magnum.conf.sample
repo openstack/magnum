@@ -259,8 +259,12 @@
 # Url for swarm public discovery endpoint. (string value)
 #public_swarm_discovery_url = https://discovery-stage.hub.docker.com/v1/clusters
 
+# Location of template to build a mesos cluster on ubuntu.  (string
+# value)
+#mesos_ubuntu_template_path = $pybasedir/templates/heat-mesos/mesoscluster.yaml
+
 # Enabled bay definition entry points.  (list value)
-#enabled_definitions = magnum_vm_atomic_k8s,magnum_vm_coreos_k8s,magnum_vm_atomic_swarm
+#enabled_definitions = magnum_vm_atomic_k8s,magnum_vm_coreos_k8s,magnum_vm_atomic_swarm,magnum_vm_ubuntu_mesos
 
 
 [bay_heat]

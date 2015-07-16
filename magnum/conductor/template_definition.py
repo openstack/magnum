@@ -64,9 +64,14 @@ template_def_opts = [
     cfg.StrOpt('public_swarm_discovery_url',
                default='https://discovery-stage.hub.docker.com/v1/clusters',
                help=_('Url for swarm public discovery endpoint.')),
+    cfg.StrOpt('mesos_ubuntu_template_path',
+               default=paths.basedir_def('templates/heat-mesos/'
+                                         'mesoscluster.yaml'),
+               help=_('Location of template to build a mesos cluster '
+                      'on ubuntu. ')),
     cfg.ListOpt('enabled_definitions',
                 default=['magnum_vm_atomic_k8s', 'magnum_vm_coreos_k8s',
-                         'magnum_vm_atomic_swarm'],
+                         'magnum_vm_atomic_swarm', 'magnum_vm_ubuntu_mesos'],
                 help=_('Enabled bay definition entry points. ')),
 ]
 
@@ -304,7 +309,6 @@ class BaseTemplateDefinition(TemplateDefinition):
         self.add_parameter('ssh_key_name',
                            baymodel_attr='keypair_id',
                            required=True)
-
         self.add_parameter('server_image',
                            baymodel_attr='image_id')
         self.add_parameter('dns_nameserver',
@@ -452,3 +456,31 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
     @property
     def template_path(self):
         return cfg.CONF.bay.swarm_atomic_template_path
+
+
+class UbuntuMesosTemplateDefinition(BaseTemplateDefinition):
+    provides = [
+        {'platform': 'vm', 'os': 'ubuntu', 'coe': 'mesos'},
+    ]
+
+    def __init__(self):
+        super(UbuntuMesosTemplateDefinition, self).__init__()
+        self.add_parameter('external_network',
+                           baymodel_attr='external_network_id',
+                           required=True)
+        self.add_parameter('number_of_slaves',
+                           bay_attr='node_count',
+                           param_type=str)
+        self.add_parameter('master_flavor',
+                           baymodel_attr='master_flavor_id')
+        self.add_parameter('slave_flavor',
+                           baymodel_attr='flavor_id')
+
+        self.add_output('mesos_master',
+                        bay_attr='api_address')
+        self.add_output('mesos_slaves',
+                        bay_attr='node_addresses')
+
+    @property
+    def template_path(self):
+        return cfg.CONF.bay.mesos_ubuntu_template_path

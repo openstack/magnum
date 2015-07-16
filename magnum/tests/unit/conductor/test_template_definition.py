@@ -76,6 +76,15 @@ class TemplateDefinitionTestCase(base.TestCase):
         self.assertIsInstance(definition,
                               tdef.AtomicSwarmTemplateDefinition)
 
+    def test_get_vm_ubuntu_mesos_definition(self):
+        definition = tdef.TemplateDefinition.get_template_definition(
+            'vm',
+            'ubuntu',
+            'mesos')
+
+        self.assertIsInstance(definition,
+                              tdef.UbuntuMesosTemplateDefinition)
+
     def test_get_definition_not_supported(self):
         self.assertRaises(exception.BayTypeNotSupported,
                           tdef.TemplateDefinition.get_template_definition,
