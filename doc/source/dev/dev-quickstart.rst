@@ -19,28 +19,27 @@ Install OS-specific prerequisites::
 
     # Ubuntu/Debian:
     sudo apt-get update
-    sudo apt-get install -y python-dev libssl-dev python-pip libxml2-dev \
+    sudo apt-get install -y python-dev libssl-dev libxml2-dev \
                             libmysqlclient-dev libxslt-dev libpq-dev git \
-                            git-review libffi-dev gettext build-essential
+                            libffi-dev gettext build-essential
 
     # Fedora/RHEL:
-    sudo yum install -y python-devel openssl-devel python-pip mysql-devel \
+    sudo yum install -y python-devel openssl-devel mysql-devel \
                         libxml2-devel libxslt-devel postgresql-devel git \
-                        git-review libffi-devel gettext gcc
+                        libffi-devel gettext gcc
 
     # openSUSE/SLE 12:
-    sudo zypper --non-interactive install git git-review libffi-devel \
-                        libmysqlclient-devel  libopenssl-devel libxml2-devel \
+    sudo zypper --non-interactive install git libffi-devel \
+                        libmysqlclient-devel libopenssl-devel libxml2-devel \
                         libxslt-devel postgresql-devel python-devel \
-                        python-pip gettext-runtime
+                        gettext-runtime
+Install pip::
+
+    curl -s https://bootstrap.pypa.io/get-pip.py | sudo python
 
 Install common prerequisites::
 
-    sudo pip install virtualenv flake8 tox testrepository
-
-Note: If using RHEL and yum reports "No package python-pip available" and "No
-package git-review available", use the EPEL software repository. Instructions
-can be found at the http://fedoraproject.org/wiki/EPEL/FAQ#howtouse page.
+    sudo pip install virtualenv flake8 tox testrepository git-review
 
 You may need to explicitly upgrade virtualenv if you've installed the one
 from your OS distribution and it is too old (tox will complain). You can
