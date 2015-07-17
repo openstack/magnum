@@ -255,6 +255,7 @@ class TestContainerController(db_base.DbTestCase):
 
     @patch('magnum.conductor.api.API.container_start')
     def test_start_by_uuid(self, mock_container_start):
+        mock_container_start.return_value = ""
         test_container = utils.get_test_container()
         self._action_test(test_container, 'start', 'uuid')
         mock_container_start.assert_called_once_with(
@@ -262,6 +263,7 @@ class TestContainerController(db_base.DbTestCase):
 
     @patch('magnum.conductor.api.API.container_start')
     def test_start_by_name(self, mock_container_start):
+        mock_container_start.return_value = ""
         test_container = utils.get_test_container()
         self._action_test(test_container, 'start', 'name')
         mock_container_start.assert_called_once_with(
@@ -269,6 +271,7 @@ class TestContainerController(db_base.DbTestCase):
 
     @patch('magnum.conductor.api.API.container_stop')
     def test_stop_by_uuid(self, mock_container_stop):
+        mock_container_stop.return_value = ""
         test_container = utils.get_test_container()
         self._action_test(test_container, 'stop', 'uuid')
         mock_container_stop.assert_called_once_with(
@@ -276,6 +279,7 @@ class TestContainerController(db_base.DbTestCase):
 
     @patch('magnum.conductor.api.API.container_stop')
     def test_stop_by_name(self, mock_container_stop):
+        mock_container_stop.return_value = ""
         test_container = utils.get_test_container()
         self._action_test(test_container, 'stop', 'name')
         mock_container_stop.assert_called_once_with(
@@ -283,6 +287,7 @@ class TestContainerController(db_base.DbTestCase):
 
     @patch('magnum.conductor.api.API.container_pause')
     def test_pause_by_uuid(self, mock_container_pause):
+        mock_container_pause.return_value = ""
         test_container = utils.get_test_container()
         self._action_test(test_container, 'pause', 'uuid')
         mock_container_pause.assert_called_once_with(
@@ -290,6 +295,7 @@ class TestContainerController(db_base.DbTestCase):
 
     @patch('magnum.conductor.api.API.container_pause')
     def test_pause_by_name(self, mock_container_pause):
+        mock_container_pause.return_value = ""
         test_container = utils.get_test_container()
         self._action_test(test_container, 'pause', 'name')
         mock_container_pause.assert_called_once_with(
@@ -297,6 +303,7 @@ class TestContainerController(db_base.DbTestCase):
 
     @patch('magnum.conductor.api.API.container_unpause')
     def test_unpause_by_uuid(self, mock_container_unpause):
+        mock_container_unpause.return_value = ""
         test_container = utils.get_test_container()
         self._action_test(test_container, 'unpause', 'uuid')
         mock_container_unpause.assert_called_once_with(
@@ -304,6 +311,7 @@ class TestContainerController(db_base.DbTestCase):
 
     @patch('magnum.conductor.api.API.container_unpause')
     def test_unpause_by_name(self, mock_container_unpause):
+        mock_container_unpause.return_value = ""
         test_container = utils.get_test_container()
         self._action_test(test_container, 'unpause', 'name')
         mock_container_unpause.assert_called_once_with(
@@ -311,6 +319,7 @@ class TestContainerController(db_base.DbTestCase):
 
     @patch('magnum.conductor.api.API.container_reboot')
     def test_reboot_by_uuid(self, mock_container_reboot):
+        mock_container_reboot.return_value = ""
         test_container = utils.get_test_container()
         self._action_test(test_container, 'reboot', 'uuid')
         mock_container_reboot.assert_called_once_with(
@@ -318,6 +327,7 @@ class TestContainerController(db_base.DbTestCase):
 
     @patch('magnum.conductor.api.API.container_reboot')
     def test_reboot_by_name(self, mock_container_reboot):
+        mock_container_reboot.return_value = ""
         test_container = utils.get_test_container()
         self._action_test(test_container, 'reboot', 'name')
         mock_container_reboot.assert_called_once_with(
@@ -326,6 +336,7 @@ class TestContainerController(db_base.DbTestCase):
     @patch('magnum.conductor.api.API.container_logs')
     @patch('magnum.objects.Container.get_by_uuid')
     def test_get_logs_by_uuid(self, mock_get_by_uuid, mock_container_logs):
+        mock_container_logs.return_value = ""
         test_container = utils.get_test_container()
         test_container_obj = objects.Container(self.context, **test_container)
         mock_get_by_uuid.return_value = test_container_obj
@@ -339,6 +350,7 @@ class TestContainerController(db_base.DbTestCase):
     @patch('magnum.conductor.api.API.container_logs')
     @patch('magnum.objects.Container.get_by_name')
     def test_get_logs_by_name(self, mock_get_by_name, mock_container_logs):
+        mock_container_logs.return_value = ""
         test_container = utils.get_test_container()
         test_container_obj = objects.Container(self.context, **test_container)
         mock_get_by_name.return_value = test_container_obj
@@ -366,6 +378,7 @@ class TestContainerController(db_base.DbTestCase):
     @patch('magnum.objects.Container.get_by_uuid')
     def test_execute_command_by_uuid(self, mock_get_by_uuid,
                                      mock_container_exec):
+        mock_container_exec.return_value = ""
         test_container = utils.get_test_container()
         test_container_obj = objects.Container(self.context, **test_container)
         mock_get_by_uuid.return_value = test_container_obj
@@ -382,6 +395,7 @@ class TestContainerController(db_base.DbTestCase):
     @patch('magnum.objects.Container.get_by_name')
     def test_execute_command_by_name(self, mock_get_by_name,
                                      mock_container_exec):
+        mock_container_exec.return_value = ""
         test_container = utils.get_test_container()
         test_container_obj = objects.Container(self.context, **test_container)
         mock_get_by_name.return_value = test_container_obj
