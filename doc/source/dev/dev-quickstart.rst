@@ -21,7 +21,7 @@ Install OS-specific prerequisites::
     sudo apt-get update
     sudo apt-get install python-dev libssl-dev python-pip libmysqlclient-dev \
                          libxml2-dev libxslt-dev libpq-dev git git-review \
-                         libffi-dev gettext python-tox
+                         libffi-dev gettext
 
     # Fedora/RHEL:
     sudo yum install python-devel openssl-devel python-pip mysql-devel \
@@ -31,14 +31,12 @@ Install OS-specific prerequisites::
     # openSUSE/SLE 12:
     sudo zypper install git git-review libffi-devel libmysqlclient-devel \
                         libopenssl-devel libxml2-devel libxslt-devel \
-                        postgresql-devel python-devel python-flake8 \
-                        python-pip python-setuptools-git \
-                        python-testrepository python-tox python-virtualenv \
-                        gettext-runtime
+                        postgresql-devel python-devel \
+                        python-pip gettext-runtime
 
 Install common prerequisites::
 
-    sudo pip install virtualenv setuptools-git flake8 tox testrepository
+    sudo pip install virtualenv flake8 tox testrepository
 
 Note: If using RHEL and yum reports "No package python-pip available" and "No
 package git-review available", use the EPEL software repository. Instructions
