@@ -23,7 +23,6 @@ from oslo_config import cfg
 from oslo_log import log
 from oslotest import base
 import pecan
-from pecan import testing
 import testscenarios
 
 from magnum.common import context as magnum_context
@@ -50,10 +49,6 @@ class TestCase(base.BaseTestCase):
 
     def setUp(self):
         super(TestCase, self).setUp()
-        self.app = testing.load_test_app(os.path.join(
-            os.path.dirname(__file__),
-            'config.py'
-        ))
         token_info = {
             'token': {
                 'project': {
@@ -108,7 +103,7 @@ class TestCase(base.BaseTestCase):
         for k, v in kw.items():
             CONF.set_override(k, v, group)
 
-    def path_get(self, project_file=None):
+    def get_path(self, project_file=None):
         """Get the absolute path to a file. Used for testing the API.
 
         :param project_file: File whose path to return. Default: None.
