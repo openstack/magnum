@@ -36,20 +36,6 @@ periodic_opts = [
 ]
 
 
-ctx = context.make_admin_context()
-
-bay1 = utils.get_test_bay(id=1, stack_id='11',
-                          status=bay_status.CREATE_IN_PROGRESS)
-bay2 = utils.get_test_bay(id=2, stack_id='22',
-                          status=bay_status.DELETE_IN_PROGRESS)
-bay3 = utils.get_test_bay(id=3, stack_id='33',
-                          status=bay_status.UPDATE_IN_PROGRESS)
-
-bay1 = objects.Bay(ctx, **bay1)
-bay2 = objects.Bay(ctx, **bay2)
-bay3 = objects.Bay(ctx, **bay3)
-
-
 class fake_stack(object):
     def __init__(self, **kw):
         for key, val in kw.items():
@@ -57,6 +43,22 @@ class fake_stack(object):
 
 
 class PeriodictTestCase(base.TestCase):
+
+    def setUp(self):
+        super(PeriodictTestCase, self).setUp()
+
+        ctx = context.make_admin_context()
+
+        bay1 = utils.get_test_bay(id=1, stack_id='11',
+                                  status=bay_status.CREATE_IN_PROGRESS)
+        bay2 = utils.get_test_bay(id=2, stack_id='22',
+                                  status=bay_status.DELETE_IN_PROGRESS)
+        bay3 = utils.get_test_bay(id=3, stack_id='33',
+                                  status=bay_status.UPDATE_IN_PROGRESS)
+
+        self.bay1 = objects.Bay(ctx, **bay1)
+        self.bay2 = objects.Bay(ctx, **bay2)
+        self.bay3 = objects.Bay(ctx, **bay3)
 
     @mock.patch.object(objects.Bay, 'list_all')
     @mock.patch('magnum.common.clients.OpenStackClients')
@@ -70,7 +72,7 @@ class PeriodictTestCase(base.TestCase):
         mock_heat_client.stacks.list.return_value = [stack1, stack3]
         mock_osc = mock_oscc.return_value
         mock_osc.heat.return_value = mock_heat_client
-        mock_bay_list.return_value = [bay1, bay2, bay3]
+        mock_bay_list.return_value = [self.bay1, self.bay2, self.bay3]
 
         mock_keystone_client = mock.MagicMock()
         mock_keystone_client.client.project_id = "fake_project"
@@ -78,9 +80,9 @@ class PeriodictTestCase(base.TestCase):
 
         periodic.MagnumPeriodicTasks(CONF).sync_bay_status(None)
 
-        self.assertEqual(bay1.status, bay_status.CREATE_COMPLETE)
-        mock_db_destroy.assert_called_once_with(bay2.uuid)
-        self.assertEqual(bay3.status, bay_status.UPDATE_COMPLETE)
+        self.assertEqual(self.bay1.status, bay_status.CREATE_COMPLETE)
+        mock_db_destroy.assert_called_once_with(self.bay2.uuid)
+        self.assertEqual(self.bay3.status, bay_status.UPDATE_COMPLETE)
 
     @mock.patch.object(objects.Bay, 'list_all')
     @mock.patch('magnum.common.clients.OpenStackClients')
@@ -95,12 +97,12 @@ class PeriodictTestCase(base.TestCase):
         mock_heat_client.stacks.list.return_value = [stack1, stack2, stack3]
         mock_osc = mock_oscc.return_value
         mock_osc.heat.return_value = mock_heat_client
-        mock_bay_list.return_value = [bay1, bay2, bay3]
+        mock_bay_list.return_value = [self.bay1, self.bay2, self.bay3]
         periodic.MagnumPeriodicTasks(CONF).sync_bay_status(None)
 
-        self.assertEqual(bay1.status, bay_status.CREATE_IN_PROGRESS)
-        self.assertEqual(bay2.status, bay_status.DELETE_IN_PROGRESS)
-        self.assertEqual(bay3.status, bay_status.UPDATE_IN_PROGRESS)
+        self.assertEqual(self.bay1.status, bay_status.CREATE_IN_PROGRESS)
+        self.assertEqual(self.bay2.status, bay_status.DELETE_IN_PROGRESS)
+        self.assertEqual(self.bay3.status, bay_status.UPDATE_IN_PROGRESS)
 
     @mock.patch.object(objects.Bay, 'list_all')
     @mock.patch('magnum.common.clients.OpenStackClients')
@@ -113,7 +115,7 @@ class PeriodictTestCase(base.TestCase):
         mock_heat_client.stacks.list.return_value = []
         mock_osc = mock_oscc.return_value
         mock_osc.heat.return_value = mock_heat_client
-        mock_bay_list.return_value = [bay1, bay2, bay3]
+        mock_bay_list.return_value = [self.bay1, self.bay2, self.bay3]
 
         mock_keystone_client = mock.MagicMock()
         mock_keystone_client.client.project_id = "fake_project"
@@ -121,6 +123,6 @@ class PeriodictTestCase(base.TestCase):
 
         periodic.MagnumPeriodicTasks(CONF).sync_bay_status(None)
 
-        self.assertEqual(bay1.status, bay_status.CREATE_FAILED)
-        mock_db_destroy.assert_called_once_with(bay2.uuid)
-        self.assertEqual(bay3.status, bay_status.UPDATE_FAILED)
+        self.assertEqual(self.bay1.status, bay_status.CREATE_FAILED)
+        mock_db_destroy.assert_called_once_with(self.bay2.uuid)
+        self.assertEqual(self.bay3.status, bay_status.UPDATE_FAILED)
