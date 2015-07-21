@@ -353,7 +353,7 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
         # self.add_parameter('apiserver_port',
         #                    baymodel_attr='apiserver_port')
 
-        self.add_output('kube_master',
+        self.add_output('api_address',
                         bay_attr='api_address')
         self.add_output('kube_minions',
                         bay_attr=None)

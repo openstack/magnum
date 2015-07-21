@@ -401,14 +401,14 @@ outputs:
         params:
           api_ip_address: {get_attr: [api_pool_floating, floating_ip_address]}
     description: >
-      This is the IP address and port of the Kubernetes API server.
+      This is the API endpoint of the Kubernetes server. Use this to access
+      the Kubernetes API from outside the cluster.
 
   kube_master:
     value: {get_attr: [kube_master_floating, floating_ip_address]}
     description: >
       This is the "public" ip address of the Kubernetes master server. Use this address to
-      log in to the Kubernetes master via ssh or to access the Kubernetes API
-      from outside the cluster.
+      log in to the Kubernetes master via ssh.
 
   kube_minions:
     value: {get_attr: [kube_minions, kube_minion_ip]}

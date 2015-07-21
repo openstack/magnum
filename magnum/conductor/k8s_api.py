@@ -46,20 +46,14 @@ class K8sAPI(ApivbetaApi.ApivbetaApi):
 
     @staticmethod
     def _retrieve_k8s_api_endpoint(context, obj):
-        apiserver_port = cfg.CONF.kubernetes.k8s_port
         if hasattr(obj, 'bay_uuid'):
             obj = utils.retrieve_bay(context, obj)
 
-        baymodel = utils.retrieve_baymodel(context, obj)
-        if baymodel.apiserver_port is not None:
-            apiserver_port = baymodel.apiserver_port
-
         params = {
             'k8s_protocol': cfg.CONF.kubernetes.k8s_protocol,
-            'k8s_port': apiserver_port,
             'api_address': obj.api_address
         }
-        return "%(k8s_protocol)s://%(api_address)s:%(k8s_port)s" % params
+        return "%(k8s_protocol)s://%(api_address)s" % params
 
 
 def create_k8s_api(context, obj):
