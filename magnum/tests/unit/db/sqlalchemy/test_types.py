@@ -15,17 +15,12 @@
 from oslo_db import exception as db_exc
 
 from magnum.common import utils as magnum_utils
-from magnum.db import api as dbapi
 import magnum.db.sqlalchemy.api as sa_api
 from magnum.db.sqlalchemy import models
 from magnum.tests.unit.db import base
 
 
 class SqlAlchemyCustomTypesTestCase(base.DbTestCase):
-
-    def setUp(self):
-        super(SqlAlchemyCustomTypesTestCase, self).setUp()
-        self.dbapi = dbapi.get_instance()
 
     def test_JSONEncodedDict_default_value(self):
         # Create pod w/o labels
