@@ -83,6 +83,21 @@ class DbServiceTestCase(base.DbTestCase):
         res_uuids = [r.uuid for r in res]
         self.assertEqual(sorted(uuids), sorted(res_uuids))
 
+    def test_get_service_list_sorted(self):
+        uuids = [self.service.uuid]
+        for _ in range(5):
+            service = utils.create_test_service(
+                uuid=magnum_utils.generate_uuid())
+            uuids.append(six.text_type(service.uuid))
+        res = self.dbapi.get_service_list(self.context, sort_key='uuid')
+        res_uuids = [r.uuid for r in res]
+        self.assertEqual(sorted(uuids), res_uuids)
+
+        self.assertRaises(exception.InvalidParameterValue,
+                          self.dbapi.get_service_list,
+                          self.context,
+                          sort_key='foo')
+
     def test_get_service_list_with_filters(self):
         bay1 = utils.get_test_bay(id=11, uuid=magnum_utils.generate_uuid())
         bay2 = utils.get_test_bay(id=12, uuid=magnum_utils.generate_uuid())

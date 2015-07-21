@@ -41,6 +41,20 @@ class DbBaymodelTestCase(base.DbTestCase):
         res_uuids = [r.uuid for r in res]
         self.assertEqual(sorted(uuids), sorted(res_uuids))
 
+    def test_get_baymodel_list_sorted(self):
+        uuids = []
+        for _ in range(5):
+            bm = utils.create_test_baymodel(uuid=magnum_utils.generate_uuid())
+            uuids.append(six.text_type(bm['uuid']))
+        res = self.dbapi.get_baymodel_list(self.context, sort_key='uuid')
+        res_uuids = [r.uuid for r in res]
+        self.assertEqual(sorted(uuids), res_uuids)
+
+        self.assertRaises(exception.InvalidParameterValue,
+                          self.dbapi.get_baymodel_list,
+                          self.context,
+                          sort_key='foo')
+
     def test_get_baymodel_list_with_filters(self):
         bm1 = self._create_test_baymodel(
             id=1,

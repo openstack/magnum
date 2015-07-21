@@ -83,6 +83,20 @@ class DbRCTestCase(base.DbTestCase):
         rc_uuids = [r.uuid for r in rc]
         self.assertEqual(sorted(uuids), sorted(rc_uuids))
 
+    def test_get_rc_list_sorted(self):
+        uuids = [self.rc.uuid]
+        for _ in range(5):
+            rc = utils.create_test_rc(uuid=magnum_utils.generate_uuid())
+            uuids.append(six.text_type(rc.uuid))
+        res = self.dbapi.get_rc_list(self.context, sort_key='uuid')
+        res_uuids = [r.uuid for r in res]
+        self.assertEqual(sorted(uuids), res_uuids)
+
+        self.assertRaises(exception.InvalidParameterValue,
+                          self.dbapi.get_rc_list,
+                          self.context,
+                          sort_key='foo')
+
     def test_get_rc_list_bay_not_exist(self):
         rc = self.dbapi.get_rc_list(self.context, filters={
                                     'bay_uuid': self.bay.uuid})

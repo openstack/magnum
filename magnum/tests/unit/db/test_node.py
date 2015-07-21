@@ -71,6 +71,20 @@ class DbNodeTestCase(base.DbTestCase):
         res_uuids = [r.uuid for r in res]
         self.assertEqual(sorted(uuids), sorted(res_uuids))
 
+    def test_get_node_list_sorted(self):
+        uuids = []
+        for _ in range(5):
+            node = utils.create_test_node(uuid=magnum_utils.generate_uuid())
+            uuids.append(six.text_type(node.uuid))
+        res = self.dbapi.get_node_list(self.context, sort_key='uuid')
+        res_uuids = [r.uuid for r in res]
+        self.assertEqual(sorted(uuids), res_uuids)
+
+        self.assertRaises(exception.InvalidParameterValue,
+                          self.dbapi.get_node_list,
+                          self.context,
+                          sort_key='foo')
+
     def test_get_node_list_with_filters(self):
         node1 = utils.create_test_node(
             type='virt',
