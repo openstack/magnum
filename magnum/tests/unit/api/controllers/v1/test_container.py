@@ -36,7 +36,7 @@ class TestContainerController(db_base.DbTestCase):
         self.mock_baymodel_get_by_uuid.return_value.coe = 'swarm'
 
     @patch('magnum.conductor.api.API.container_create')
-    def test_create_container(self, mock_container_create,):
+    def test_create_container(self, mock_container_create):
         mock_container_create.side_effect = lambda x, y, z: z
 
         params = ('{"name": "My Docker", "image": "ubuntu",'
@@ -135,7 +135,7 @@ class TestContainerController(db_base.DbTestCase):
         self.assertTrue(mock_container_create.not_called)
 
     @patch('magnum.conductor.api.API.container_create')
-    def test_create_container_invalid_long_name(self, mock_container_create,):
+    def test_create_container_invalid_long_name(self, mock_container_create):
         # Long name
         params = ('{"name": "' + 'i' * 256 + '", "image": "ubuntu",'
                   '"command": "env",'

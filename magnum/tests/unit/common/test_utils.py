@@ -176,7 +176,7 @@ exit 1
                                 'correctly')
             runs = int(runs.strip())
             self.assertEqual(10, runs,
-                             'Ran %d times instead of 10.' % (runs,))
+                             'Ran %d times instead of 10.' % runs)
         finally:
             os.unlink(tmpfilename)
             os.unlink(tmpfilename2)
