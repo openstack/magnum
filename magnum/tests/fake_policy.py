@@ -46,7 +46,14 @@ policy_data = """
     "pod:detail": "",
     "pod:get": "",
     "pod:get_all": "",
-    "pod:update": ""
+    "pod:update": "",
+
+    "rc:create": "",
+    "rc:delete": "",
+    "rc:detail": "",
+    "rc:get": "",
+    "rc:get_all": "",
+    "rc:update": ""
 }
 """
 

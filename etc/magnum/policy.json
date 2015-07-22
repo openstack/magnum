@@ -30,6 +30,13 @@
     "pod:detail": "rule:default",
     "pod:get": "rule:default",
     "pod:get_all": "rule:default",
-    "pod:update": "rule:default"
+    "pod:update": "rule:default",
+
+    "rc:create": "rule:default",
+    "rc:delete": "rule:default",
+    "rc:detail": "rule:default",
+    "rc:get": "rule:default",
+    "rc:get_all": "rule:default",
+    "rc:update": "rule:default"
 
 }

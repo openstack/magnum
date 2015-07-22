@@ -28,6 +28,7 @@ from magnum.api import expose
 from magnum.api import validation
 from magnum.common import exception
 from magnum.common import k8s_manifest
+from magnum.common import policy
 from magnum import objects
 
 
@@ -228,6 +229,7 @@ class ReplicationControllersController(rest.RestController):
             sort_key=sort_key,
             sort_dir=sort_dir)
 
+    @policy.enforce_wsgi("rc")
     @expose.expose(ReplicationControllerCollection, types.uuid,
                    types.uuid, int, wtypes.text, wtypes.text)
     def get_all(self, rc_uuid=None, marker=None, limit=None,
@@ -242,6 +244,7 @@ class ReplicationControllersController(rest.RestController):
         return self._get_rcs_collection(marker, limit, sort_key,
                                         sort_dir)
 
+    @policy.enforce_wsgi("rc")
     @expose.expose(ReplicationControllerCollection, types.uuid,
                    types.uuid, int, wtypes.text, wtypes.text)
     def detail(self, rc_uuid=None, marker=None, limit=None,
@@ -266,6 +269,7 @@ class ReplicationControllersController(rest.RestController):
                                         sort_key, sort_dir, expand,
                                         resource_url)
 
+    @policy.enforce_wsgi("rc", "get")
     @expose.expose(ReplicationController, types.uuid_or_name)
     def get_one(self, rc_ident):
         """Retrieve information about the given ReplicationController.
@@ -275,6 +279,7 @@ class ReplicationControllersController(rest.RestController):
         rpc_rc = api_utils.get_rpc_resource('ReplicationController', rc_ident)
         return ReplicationController.convert_with_links(rpc_rc)
 
+    @policy.enforce_wsgi("rc", "create")
     @expose.expose(ReplicationController, body=ReplicationController,
                    status_code=201)
     @validation.enforce_bay_types('kubernetes')
@@ -298,6 +303,7 @@ class ReplicationControllersController(rest.RestController):
         pecan.response.location = link.build_url('rcs', new_rc.uuid)
         return ReplicationController.convert_with_links(new_rc)
 
+    @policy.enforce_wsgi("rc", "update")
     @wsme.validate(types.uuid, [ReplicationControllerPatchType])
     @expose.expose(ReplicationController, types.uuid_or_name,
                    body=[ReplicationControllerPatchType])
@@ -339,6 +345,7 @@ class ReplicationControllersController(rest.RestController):
             rpc_rc.save()
         return ReplicationController.convert_with_links(rpc_rc)
 
+    @policy.enforce_wsgi("rc")
     @expose.expose(None, types.uuid_or_name, status_code=204)
     def delete(self, rc_ident):
         """Delete a ReplicationController.

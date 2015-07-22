@@ -14,6 +14,7 @@ import datetime
 
 import mock
 from oslo_config import cfg
+from oslo_policy import policy
 from oslo_utils import timeutils
 from six.moves.urllib import parse as urlparse
 from wsme import types as wtypes
@@ -496,3 +497,49 @@ class TestDelete(api_base.FunctionalTest):
         self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
+
+
+class TestRCEnforcement(api_base.FunctionalTest):
+
+    def _common_policy_check(self, rule, func, *arg, **kwarg):
+        self.policy.set_rules({rule: 'project:non_fake'})
+        exc = self.assertRaises(policy.PolicyNotAuthorized,
+                                func, *arg, **kwarg)
+        self.assertTrue(exc.message.startswith(rule))
+        self.assertTrue(exc.message.endswith('disallowed by policy'))
+
+    def test_policy_disallow_get_all(self):
+        self._common_policy_check(
+            'rc:get_all', self.get_json, '/rcs')
+
+    def test_policy_disallow_get_one(self):
+        self._common_policy_check(
+            'rc:get', self.get_json, '/rcs/111-222-333')
+
+    def test_policy_disallow_detail(self):
+        self._common_policy_check(
+            'rc:detail', self.get_json, '/rcs/111-222-333/detail')
+
+    def test_policy_disallow_update(self):
+        rc = obj_utils.create_test_rc(self.context,
+                                      desc='test rc',
+                                      uuid=utils.generate_uuid())
+
+        new_image = 'rc_example_B_image'
+        self._common_policy_check(
+            'rc:update', self.patch_json,
+            '/rcs/%s' % rc.uuid,
+            [{'path': '/images/0', 'value': new_image, 'op': 'replace'}])
+
+    def test_policy_disallow_create(self):
+        pdict = apiutils.rc_post_data()
+        self._common_policy_check(
+            'rc:create', self.post_json, '/rcs', pdict)
+
+    def test_policy_disallow_delete(self):
+        rc = obj_utils.create_test_rc(self.context,
+                                      name='test_rc',
+                                      uuid=utils.generate_uuid())
+        self._common_policy_check(
+            'rc:delete', self.delete,
+            '/rcs/%s' % rc.uuid)
