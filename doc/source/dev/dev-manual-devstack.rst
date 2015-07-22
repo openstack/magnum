@@ -149,6 +149,9 @@ Configure magnum::
     # copy sample config and modify it as necessary
     sudo cp etc/magnum/magnum.conf.sample /etc/magnum/magnum.conf
 
+    # copy policy.json
+    sudo cp etc/magnum/policy.json /etc/magnum/policy.json
+
     # enable debugging output
     sudo sed -i "s/#debug\s*=.*/debug=true/" /etc/magnum/magnum.conf
 
