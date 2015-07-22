@@ -26,6 +26,7 @@ from magnum.api import expose
 from magnum.api import validation
 from magnum.common import exception
 from magnum.common import k8s_manifest
+from magnum.common import policy
 from magnum import objects
 
 
@@ -205,6 +206,7 @@ class ServicesController(rest.RestController):
                                                     sort_key=sort_key,
                                                     sort_dir=sort_dir)
 
+    @policy.enforce_wsgi("service")
     @expose.expose(ServiceCollection, types.uuid,
                    types.uuid, int, wtypes.text, wtypes.text)
     def get_all(self, service_uuid=None, marker=None, limit=None,
@@ -219,6 +221,7 @@ class ServicesController(rest.RestController):
         return self._get_services_collection(marker, limit, sort_key,
                                              sort_dir)
 
+    @policy.enforce_wsgi("service")
     @expose.expose(ServiceCollection, types.uuid,
                    types.uuid, int, wtypes.text, wtypes.text)
     def detail(self, service_uuid=None, marker=None, limit=None,
@@ -243,6 +246,7 @@ class ServicesController(rest.RestController):
                                              sort_key, sort_dir, expand,
                                              resource_url)
 
+    @policy.enforce_wsgi("service", "get")
     @expose.expose(Service, types.uuid_or_name)
     def get_one(self, service_ident):
         """Retrieve information about the given service.
@@ -253,6 +257,7 @@ class ServicesController(rest.RestController):
 
         return Service.convert_with_links(rpc_service)
 
+    @policy.enforce_wsgi("service", "create")
     @expose.expose(Service, body=Service, status_code=201)
     @validation.enforce_bay_types('kubernetes')
     def post(self, service):
@@ -275,6 +280,7 @@ class ServicesController(rest.RestController):
         pecan.response.location = link.build_url('services', new_service.uuid)
         return Service.convert_with_links(new_service)
 
+    @policy.enforce_wsgi("service", "update")
     @wsme.validate(types.uuid, [ServicePatchType])
     @expose.expose(Service, types.uuid_or_name, body=[ServicePatchType])
     def patch(self, service_ident, patch):
@@ -314,6 +320,7 @@ class ServicesController(rest.RestController):
             rpc_service.save()
         return Service.convert_with_links(rpc_service)
 
+    @policy.enforce_wsgi("service")
     @expose.expose(None, types.uuid_or_name, status_code=204)
     def delete(self, service_ident):
         """Delete a service.

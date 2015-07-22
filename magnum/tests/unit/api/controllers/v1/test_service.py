@@ -14,6 +14,7 @@ import datetime
 
 import mock
 from oslo_config import cfg
+from oslo_policy import policy
 from oslo_utils import timeutils
 from six.moves.urllib import parse as urlparse
 from wsme import types as wtypes
@@ -448,3 +449,50 @@ class TestDelete(api_base.FunctionalTest):
         self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
+
+
+class TestServiceEnforcement(api_base.FunctionalTest):
+
+    def _common_policy_check(self, rule, func, *arg, **kwarg):
+        self.policy.set_rules({rule: 'project:non_fake'})
+        exc = self.assertRaises(policy.PolicyNotAuthorized,
+                                func, *arg, **kwarg)
+        self.assertTrue(exc.message.startswith(rule))
+        self.assertTrue(exc.message.endswith('disallowed by policy'))
+
+    def test_policy_disallow_get_all(self):
+        self._common_policy_check(
+            'service:get_all', self.get_json, '/services')
+
+    def test_policy_disallow_get_one(self):
+        self._common_policy_check(
+            'service:get', self.get_json, '/services/111-222-333')
+
+    def test_policy_disallow_detail(self):
+        self._common_policy_check(
+            'service:detail', self.get_json, '/services/111-222-333/detail')
+
+    def test_policy_disallow_update(self):
+        service = obj_utils.create_test_service(self.context,
+                                                desc='test service',
+                                                uuid=utils.generate_uuid())
+
+        self._common_policy_check(
+            'service:update', self.patch_json,
+            '/services/%s' % service.uuid,
+            [{'path': '/bay_uuid',
+              'value': utils.generate_uuid(),
+              'op': 'replace'}])
+
+    def test_policy_disallow_create(self):
+        pdict = apiutils.service_post_data()
+        self._common_policy_check(
+            'service:create', self.post_json, '/services', pdict)
+
+    def test_policy_disallow_delete(self):
+        service = obj_utils.create_test_service(self.context,
+                                                desc='test_service',
+                                                uuid=utils.generate_uuid())
+        self._common_policy_check(
+            'service:delete', self.delete,
+            '/services/%s' % service.uuid)

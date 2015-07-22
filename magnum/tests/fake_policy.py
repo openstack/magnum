@@ -53,7 +53,14 @@ policy_data = """
     "rc:detail": "",
     "rc:get": "",
     "rc:get_all": "",
-    "rc:update": ""
+    "rc:update": "",
+
+    "service:create": "",
+    "service:delete": "",
+    "service:detail": "",
+    "service:get": "",
+    "service:get_all": "",
+    "service:update": ""
 }
 """
 
