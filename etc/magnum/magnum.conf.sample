@@ -252,6 +252,9 @@
 # value)
 #k8s_coreos_template_path = $pybasedir/templates/heat-kubernetes/kubecluster-coreos.yaml
 
+# Url for etcd public discovery endpoint. (string value)
+#etcd_discovery_service_endpoint_format = https://discovery.etcd.io/new?size=%(size)d
+
 # coreos discovery token url. (string value)
 # Deprecated group/name - [bay_heat]/discovery_token_url
 #coreos_discovery_token_url = <None>

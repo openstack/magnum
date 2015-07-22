@@ -100,6 +100,11 @@ parameters:
       be empty when doing an create.
     default: []
 
+  discovery_url:
+    type: string
+    description: >
+      Discovery URL used for bootstrapping the etcd cluster.
+
 resources:
 
   master_wait_handle:
@@ -191,6 +196,7 @@ resources:
             "$FLANNEL_NETWORK_SUBNETLEN": {get_param: flannel_network_subnetlen}
             "$FLANNEL_USE_VXLAN": {get_param: flannel_use_vxlan}
             "$PORTAL_NETWORK_CIDR": {get_param: portal_network_cidr}
+            "$ETCD_DISCOVERY_URL": {get_param: discovery_url}
 
   configure_etcd:
     type: OS::Heat::SoftwareConfig

@@ -52,6 +52,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'api_address': '172.17.2.3',
             'node_addresses': ['172.17.2.4'],
             'node_count': 1,
+            'discovery_url': 'https://discovery.etcd.io/test',
         }
 
     @patch('magnum.objects.BayModel.get_by_uuid')
@@ -85,7 +86,8 @@ class TestBayConductorWithK8s(base.TestCase):
             'fixed_network': 'fixed_network_cidr',
             'master_flavor_id': 'master_flavor',
             'apiserver_port': '',
-            'node_count': 'number_of_minions'
+            'node_count': 'number_of_minions',
+            'discovery_url': 'discovery_url',
         }
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -97,6 +99,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'number_of_minions': '1',
             'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
+            'discovery_url': 'https://discovery.etcd.io/test',
         }
         if missing_attr is not None:
             expected.pop(mapping[missing_attr], None)
@@ -135,7 +138,8 @@ class TestBayConductorWithK8s(base.TestCase):
             'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
             'ssh_authorized_key': 'ssh_authorized_key',
-            'token': 'h3'
+            'token': 'h3',
+            'discovery_url': 'https://discovery.etcd.io/test',
         }
         self.assertEqual(expected, definition)
 
@@ -171,7 +175,8 @@ class TestBayConductorWithK8s(base.TestCase):
             'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
             'ssh_authorized_key': 'ssh_authorized_key',
-            'token': 'ba3d1866282848ddbedc76112110c208'
+            'token': 'ba3d1866282848ddbedc76112110c208',
+            'discovery_url': 'https://discovery.etcd.io/test',
         }
         self.assertEqual(expected, definition)
 
@@ -248,6 +253,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'number_of_minions': '1',
             'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
+            'discovery_url': 'https://discovery.etcd.io/test',
         }
         self.assertIn('token', definition)
         del definition['token']
@@ -268,6 +274,43 @@ class TestBayConductorWithK8s(base.TestCase):
         self._test_extract_template_definition(
             mock_objects_baymodel_get_by_uuid,
             missing_attr='node_count')
+
+    @patch('requests.get')
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_template_definition_without_discovery_url(
+            self,
+            mock_objects_baymodel_get_by_uuid,
+            reqget):
+        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        bay_dict = self.bay_dict
+        bay_dict['discovery_url'] = None
+        bay = objects.Bay(self.context, **bay_dict)
+
+        cfg.CONF.set_override('etcd_discovery_service_endpoint_format',
+                              'http://etcd/test?size=%(size)d',
+                              group='bay')
+        mock_req = mock.MagicMock(text='https://address/token')
+        reqget.return_value = mock_req
+
+        (template_path,
+         definition) = bay_conductor._extract_template_definition(self.context,
+                                                                  bay)
+
+        expected = {
+            'ssh_key_name': 'keypair_id',
+            'external_network': 'external_network_id',
+            'dns_nameserver': 'dns_nameserver',
+            'server_image': 'image_id',
+            'master_flavor': 'master_flavor_id',
+            'minion_flavor': 'flavor_id',
+            'number_of_minions': '1',
+            'fixed_network_cidr': '10.20.30.0/24',
+            'docker_volume_size': 20,
+            'discovery_url': 'https://address/token',
+        }
+        self.assertEqual(expected, definition)
+        reqget.assert_called_once_with('http://etcd/test?size=1')
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_update_stack_outputs(self, mock_objects_baymodel_get_by_uuid):
