@@ -425,11 +425,13 @@ class NotSupported(MagnumException):
 
 
 class BayTypeNotSupported(MagnumException):
-    message = _("Bay type (%(platform)s, %(os)s, %(coe)s) not supported.")
+    message = _("Bay type (%(server_type)s, %(os)s, %(coe)s)"
+                " not supported.")
 
 
 class BayTypeNotEnabled(MagnumException):
-    message = _("Bay type (%(platform)s, %(os)s, %(coe)s) not enabled.")
+    message = _("Bay type (%(server_type)s, %(os)s, %(coe)s)"
+                " not enabled.")
 
 
 class RequiredParameterNotProvided(MagnumException):

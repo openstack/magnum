@@ -93,13 +93,13 @@ Enabling a template is as simple as adding it's Entry Point to the
     (.venv)$ magnum-template-manage list-templates --details
     Enabled Templates
       example_template: /home/example/.venv/local/lib/python2.7/site-packages/ExampleTemplate-0.1-py2.7.egg/example_template/example.yaml
-         Platform  OS       CoE
-         vm        example  example_coe
+         Server_Type  OS       CoE
+         vm         example  example_coe
       magnum_vm_atomic_k8s: /home/example/.venv/local/lib/python2.7/site-packages/magnum/templates/heat-kubernetes/kubecluster.yaml
-         Platform  OS             CoE
+         Server_Type   OS             CoE
          vm        fedora-atomic  kubernetes
       magnum_vm_coreos_k8s: /home/example/.venv/local/lib/python2.7/site-packages/magnum/templates/heat-kubernetes/kubecluster-coreos.yaml
-         Platform  OS      CoE
-         vm        coreos  kubernetes
+         Server_Type  OS      CoE
+         vm         coreos  kubernetes
     Disabled Templates
 

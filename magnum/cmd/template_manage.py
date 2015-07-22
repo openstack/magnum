@@ -33,8 +33,8 @@ def print_rows(rows):
     field_labels = ['Name', 'Enabled']
 
     if CONF.command.details:
-        fields.extend(['platform', 'os', 'coe'])
-        field_labels.extend(['Platform', 'OS', 'COE'])
+        fields.extend(['server_type', 'os', 'coe'])
+        field_labels.extend(['Server_Type', 'OS', 'COE'])
     if CONF.command.paths:
         fields.append('path')
         field_labels.append('Template Path')
