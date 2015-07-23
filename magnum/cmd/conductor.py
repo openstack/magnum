@@ -29,6 +29,7 @@ from magnum.conductor.handlers import bay_conductor
 from magnum.conductor.handlers import conductor_listener
 from magnum.conductor.handlers import docker_conductor
 from magnum.conductor.handlers import k8s_conductor
+from magnum.conductor.handlers import x509keypair_conductor
 from magnum.i18n import _LE
 from magnum.i18n import _LI
 
@@ -49,6 +50,7 @@ def main():
         docker_conductor.Handler(),
         k8s_conductor.Handler(),
         bay_conductor.Handler(),
+        x509keypair_conductor.Handler(),
         conductor_listener.Handler(),
     ]
 

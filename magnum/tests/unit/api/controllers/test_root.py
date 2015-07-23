@@ -69,7 +69,11 @@ class TestRootController(api_base.FunctionalTest):
             u'containers': [{u'href': u'http://localhost/v1/containers/',
                              u'rel': u'self'},
                             {u'href': u'http://localhost/containers/',
-                             u'rel': u'bookmark'}]}
+                             u'rel': u'bookmark'}],
+            u'x509keypairs': [{u'href': u'http://localhost/v1/x509keypairs/',
+                               u'rel': u'self'},
+                              {u'href': u'http://localhost/x509keypairs/',
+                               u'rel': u'bookmark'}]}
 
         response = self.app.get('/v1/')
         self.assertEqual(expected, response.json)

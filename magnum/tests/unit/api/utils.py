@@ -19,6 +19,7 @@ from magnum.api.controllers.v1 import node as node_controller
 from magnum.api.controllers.v1 import pod as pod_controller
 from magnum.api.controllers.v1 import replicationcontroller as rc_controller
 from magnum.api.controllers.v1 import service as service_controller
+from magnum.api.controllers.v1 import x509keypair as x509keypair_controller
 from magnum.tests.unit.db import utils
 
 
@@ -133,3 +134,9 @@ def node_post_data(**kw):
     node = utils.get_test_node(**kw)
     internal = node_controller.NodePatchType.internal_attrs()
     return remove_internal(node, internal)
+
+
+def x509keypair_post_data(**kw):
+    x509keypair = utils.get_test_x509keypair(**kw)
+    internal = x509keypair_controller.X509KeyPairPatchType.internal_attrs()
+    return remove_internal(x509keypair, internal)
