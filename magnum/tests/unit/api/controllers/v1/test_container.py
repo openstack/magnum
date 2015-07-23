@@ -10,9 +10,12 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+from magnum.common import utils as comm_utils
 from magnum import objects
 from magnum.tests.unit.api import base as api_base
 from magnum.tests.unit.db import utils
+
+from oslo_policy import policy
 
 import mock
 from mock import patch
@@ -441,3 +444,50 @@ class TestContainerController(api_base.FunctionalTest):
             self.assertEqual(response.status_int, 204)
             mock_container_delete.assert_called_once_with(container_uuid)
             mock_destroy.assert_called_once_with()
+
+
+class TestContainerEnforcement(api_base.FunctionalTest):
+
+    def _common_policy_check(self, rule, func, *arg, **kwarg):
+        self.policy.set_rules({rule: 'project:non_fake'})
+        exc = self.assertRaises(policy.PolicyNotAuthorized,
+                                func, *arg, **kwarg)
+        self.assertTrue(exc.message.startswith(rule))
+        self.assertTrue(exc.message.endswith('disallowed by policy'))
+
+    def test_policy_disallow_get_all(self):
+        self._common_policy_check(
+            'container:get_all', self.get_json, '/containers')
+
+    def test_policy_disallow_get_one(self):
+        self._common_policy_check(
+            'container:get', self.get_json, '/containers/111-222-333')
+
+    def test_policy_disallow_detail(self):
+        self._common_policy_check(
+            'container:detail',
+            self.get_json,
+            '/containers/111-222-333/detail')
+
+    def test_policy_disallow_update(self):
+        test_container = utils.get_test_container()
+        container_uuid = test_container.get('uuid')
+        params = [{'path': '/name',
+                   'value': 'new_name',
+                   'op': 'replace'}]
+        self._common_policy_check(
+            'container:update', self.app.patch_json,
+            '/v1/containers/%s' % container_uuid, params)
+
+    def test_policy_disallow_create(self):
+        params = ('{"name": "' + 'i' * 256 + '", "image": "ubuntu",'
+                  '"command": "env",'
+                  '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
+
+        self._common_policy_check(
+            'container:create', self.app.post, '/v1/containers', params)
+
+    def test_policy_disallow_delete(self):
+        self._common_policy_check(
+            'container:delete', self.app.delete,
+            '/v1/containers/%s' % comm_utils.generate_uuid())

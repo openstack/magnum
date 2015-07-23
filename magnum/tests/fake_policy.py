@@ -60,7 +60,14 @@ policy_data = """
     "service:detail": "",
     "service:get": "",
     "service:get_all": "",
-    "service:update": ""
+    "service:update": "",
+
+    "container:create": "",
+    "container:delete": "",
+    "container:detail": "",
+    "container:get": "",
+    "container:get_all": "",
+    "container:update": ""
 }
 """
 
