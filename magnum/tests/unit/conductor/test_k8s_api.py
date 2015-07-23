@@ -22,9 +22,9 @@ from magnum.tests import base
 
 class TestK8sAPI(base.TestCase):
 
-    def _test_retrieve_k8s_master_url(self, mock_baymodel_get_by_uuid,
-                                      mock_bay_get_by_uuid,
-                                      apiserver_port=None):
+    def _test_retrieve_k8s_api_endpoint(self, mock_baymodel_get_by_uuid,
+                                        mock_bay_get_by_uuid,
+                                        apiserver_port=None):
         expected_context = 'context'
         expected_api_address = 'api_address'
         expected_baymodel_id = 'e74c40e0-d825-11e2-a28f-0800200c9a61'
@@ -45,31 +45,31 @@ class TestK8sAPI(base.TestCase):
         mock_bay_get_by_uuid.return_value = bay
         mock_baymodel_get_by_uuid.return_value = baymodel
 
-        actual_api_address = k8s_api.K8sAPI._retrieve_k8s_master_url(
+        actual_api_endpoint = k8s_api.K8sAPI._retrieve_k8s_api_endpoint(
             expected_context, resource)
         self.assertEqual("%s://%s:%d" % (expected_protocol,
                                          expected_api_address,
                                          expected_apiserver_port),
-                         actual_api_address)
+                         actual_api_endpoint)
 
     @patch('magnum.objects.Bay.get_by_uuid')
     @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_retrieve_k8s_master_url(
+    def test_retrieve_k8s_api_endpoint(
             self,
             mock_baymodel_get_by_uuid,
             mock_bay_get_by_uuid):
-        self._test_retrieve_k8s_master_url(mock_baymodel_get_by_uuid,
-                                           mock_bay_get_by_uuid,
-                                           apiserver_port=9999)
+        self._test_retrieve_k8s_api_endpoint(mock_baymodel_get_by_uuid,
+                                             mock_bay_get_by_uuid,
+                                             apiserver_port=9999)
 
     @patch('magnum.objects.Bay.get_by_uuid')
     @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_retrieve_k8s_master_url_without_baymodel_apiserver_port(
+    def test_retrieve_k8s_api_endpoint_without_baymodel_apiserver_port(
             self,
             mock_baymodel_get_by_uuid,
             mock_bay_get_by_uuid):
-        self._test_retrieve_k8s_master_url(mock_baymodel_get_by_uuid,
-                                           mock_bay_get_by_uuid)
+        self._test_retrieve_k8s_api_endpoint(mock_baymodel_get_by_uuid,
+                                             mock_bay_get_by_uuid)
 
     @patch('magnum.conductor.k8s_api.K8sAPI')
     def test_create_k8s_api(self, mock_k8s_api_cls):
