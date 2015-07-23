@@ -37,15 +37,15 @@ class K8sAPI(ApivbetaApi.ApivbetaApi):
 
     def __init__(self, context, obj):
         # retrieve the URL of the k8s API endpoint
-        k8s_master_url = self._retrieve_k8s_master_url(context, obj)
+        k8s_api_endpoint = self._retrieve_k8s_api_endpoint(context, obj)
 
         # build a connection with Kubernetes master
-        client = swagger.ApiClient(k8s_master_url)
+        client = swagger.ApiClient(k8s_api_endpoint)
 
         super(K8sAPI, self).__init__(client)
 
     @staticmethod
-    def _retrieve_k8s_master_url(context, obj):
+    def _retrieve_k8s_api_endpoint(context, obj):
         apiserver_port = cfg.CONF.kubernetes.k8s_port
         if hasattr(obj, 'bay_uuid'):
             obj = utils.retrieve_bay(context, obj)
