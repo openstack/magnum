@@ -42,10 +42,10 @@ class fake_stack(object):
             setattr(self, key, val)
 
 
-class PeriodictTestCase(base.TestCase):
+class PeriodicTestCase(base.TestCase):
 
     def setUp(self):
-        super(PeriodictTestCase, self).setUp()
+        super(PeriodicTestCase, self).setUp()
 
         ctx = context.make_admin_context()
 
