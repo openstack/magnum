@@ -276,9 +276,10 @@ class TemplateDefinition(object):
 
         return None
 
-    def get_params(self, baymodel, bay, **kwargs):
+    def get_params(self, context, baymodel, bay, **kwargs):
         """Pulls template parameters from Baymodel and Bay.
 
+        :param context: Context to pull template parameters from
         :param baymodel: Baymodel to pull template parameters from
         :param bay: Bay to pull template parameters from
         :param extra_params: Any extra params to provide to the template
@@ -303,8 +304,9 @@ class TemplateDefinition(object):
     def template_path(self):
         pass
 
-    def extract_definition(self, baymodel, bay, **kwargs):
-        return self.template_path, self.get_params(baymodel, bay, **kwargs)
+    def extract_definition(self, context, baymodel, bay, **kwargs):
+        return self.template_path, self.get_params(context, baymodel, bay,
+                                                   **kwargs)
 
 
 class BaseTemplateDefinition(TemplateDefinition):
@@ -358,7 +360,7 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
         self.add_output('kube_minions_external',
                         bay_attr='node_addresses')
 
-    def get_params(self, baymodel, bay, **kwargs):
+    def get_params(self, context, baymodel, bay, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
         scale_mgr = kwargs.pop('scale_manager', None)
         if scale_mgr:
@@ -367,7 +369,8 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
                 scale_mgr.get_removal_nodes(hosts))
 
         return super(AtomicK8sTemplateDefinition,
-                     self).get_params(baymodel, bay, extra_params=extra_params,
+                     self).get_params(context, baymodel, bay,
+                                      extra_params=extra_params,
                                       **kwargs)
 
     @property
@@ -395,12 +398,13 @@ class CoreOSK8sTemplateDefinition(AtomicK8sTemplateDefinition):
             token = uuid.uuid4().hex
         return token
 
-    def get_params(self, baymodel, bay, **kwargs):
+    def get_params(self, context, baymodel, bay, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
         extra_params['token'] = self.get_token()
 
         return super(CoreOSK8sTemplateDefinition,
-                     self).get_params(baymodel, bay, extra_params=extra_params,
+                     self).get_params(context, baymodel, bay,
+                                      extra_params=extra_params,
                                       **kwargs)
 
     @property
@@ -451,12 +455,13 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
 
         return discovery_url
 
-    def get_params(self, baymodel, bay, **kwargs):
+    def get_params(self, context, baymodel, bay, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
         extra_params['discovery_url'] = self.get_discovery_url(bay)
 
         return super(AtomicSwarmTemplateDefinition,
-                     self).get_params(baymodel, bay, extra_params=extra_params,
+                     self).get_params(context, baymodel, bay,
+                                      extra_params=extra_params,
                                       **kwargs)
 
     @property

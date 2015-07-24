@@ -62,7 +62,7 @@ def _extract_template_definition(context, bay, scale_manager=None):
     cluster_coe = baymodel.coe
     definition = TDef.get_template_definition('vm', cluster_distro,
                                               cluster_coe)
-    return definition.extract_definition(baymodel, bay,
+    return definition.extract_definition(context, baymodel, bay,
                                          scale_manager=scale_manager)
 
 
