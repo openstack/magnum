@@ -615,6 +615,25 @@ class TestDockerConductor(base.BaseTestCase):
             mock_init.assert_called_once_with()
             self.assertEqual(obj_container.ERROR, mock_container.status)
 
+    @mock.patch.object(objects.Container, 'get_by_uuid')
+    @patch.object(docker_conductor.Handler, '_find_container_by_name')
+    @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
+    def test_container_show_with_not_found_from_docker(self,
+                                                       mock_get_docker_client,
+                                                       mock_find_container,
+                                                       mock_get_by_uuid):
+        mock_docker = mock.MagicMock()
+        mock_get_docker_client.return_value = mock_docker
+        mock_container = mock.MagicMock()
+        mock_get_by_uuid.return_value = mock_container
+        mock_container_uuid = 'd545a92d-609a-428f-8edb-1d6b02ad20ca1'
+        mock_docker_id = {}
+        mock_find_container.return_value = mock_docker_id
+        self.conductor.container_show(None, mock_container_uuid)
+        mock_find_container.assert_called_once_with(mock_docker,
+                                                    mock_container_uuid)
+        self.assertEqual(obj_container.ERROR, mock_container.status)
+
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
     def test_container_exec(self, mock_get_docker_client,
