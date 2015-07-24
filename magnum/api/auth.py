@@ -24,7 +24,7 @@ AUTH_OPTS = [
     cfg.BoolOpt('enable_authentication',
                 default=True,
                 help='This option enables or disables user authentication '
-                'via keystone. Default value is True.'),
+                'via Keystone. Default value is True.'),
 ]
 
 CONF = cfg.CONF

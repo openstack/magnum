@@ -74,7 +74,7 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                     bay.status = stack.stack_status
                     bay.save()
                     LOG.info(_LI("Sync up bay with id %(id)s from "
-                                 "%(old_status)s to %(status)s"),
+                                 "%(old_status)s to %(status)s."),
                              {'id': bay.id, 'old_status': old_status,
                               'status': bay.status})
 
@@ -85,14 +85,14 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                     bay.destroy()
                     LOG.info(_LI("Bay with id %(id)s has been deleted due "
                                  "to stack with id %(sid)s not found in "
-                                 "heat."),
+                                 "Heat."),
                              {'id': bay.id, 'sid': sid})
                 elif bay.status == bay_status.CREATE_IN_PROGRESS:
                     bay.status = bay_status.CREATE_FAILED
                     bay.save()
                     LOG.info(_LI("Bay with id %(id)s has been set to "
                                  "%(status)s due to stack with id %(sid)s "
-                                 "not found in heat."),
+                                 "not found in Heat."),
                              {'id': bay.id, 'status': bay.status,
                               'sid': sid})
                 elif bay.status == bay_status.UPDATE_IN_PROGRESS:
@@ -100,7 +100,7 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                     bay.save()
                     LOG.info(_LI("Bay with id %(id)s has been set to "
                                  "%(status)s due to stack with id %(sid)s "
-                                 "not found in heat."),
+                                 "not found in Heat."),
                              {'id': bay.id, 'status': bay.status,
                               'sid': sid})
 

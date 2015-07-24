@@ -21,10 +21,10 @@ from magnum.api import middleware
 API_SERVICE_OPTS = [
     cfg.IntOpt('port',
                default=9511,
-               help='The port for the magnum API server'),
+               help='The port for the Magnum API server.'),
     cfg.StrOpt('host',
                default='127.0.0.1',
-               help='The listen IP for the magnum API server'),
+               help='The listen IP for the Magnum API server.'),
     cfg.IntOpt('max_limit',
                default=1000,
                help='The maximum number of items returned in a single '

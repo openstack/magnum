@@ -30,7 +30,7 @@ def enforce_bay_types(*bay_types):
                                                     bay.baymodel_id)
             if baymodel.coe not in bay_types:
                 raise exception.InvalidParameterValue(
-                    'cannot fulfill request with a %(bay_type)s bay, '
+                    'Cannot fulfill request with a %(bay_type)s bay, '
                     'expecting a %(supported_bay_types)s bay.' %
                     {'bay_type': baymodel.coe,
                      'supported_bay_types': '/'.join(bay_types)})

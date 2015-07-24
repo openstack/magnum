@@ -42,7 +42,7 @@ class ScaleManager(object):
         hosts = hosts_output.get_output_value(stack)
         if hosts is None:
             raise exception.MagnumException(_(
-                "output key '%(output_key)s' is missing from stack "
+                "Output key '%(output_key)s' is missing from stack "
                 "%(stack_id)s") % {'output_key': hosts_output.heat_output,
                                    'stack_id': stack.id})
 

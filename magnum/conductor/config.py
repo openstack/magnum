@@ -20,7 +20,7 @@ from oslo_config import cfg
 SERVICE_OPTS = [
     cfg.StrOpt('topic',
                default='magnum-conductor',
-               help='The queue to add conductor tasks to'),
+               help='The queue to add conductor tasks to.'),
     cfg.IntOpt('conductor_life_check_timeout',
                default=4,
                help=('RPC timeout for the conductor liveness check that is '

@@ -36,12 +36,12 @@ template_def_opts = [
                deprecated_name='template_path',
                deprecated_group='bay_heat',
                help=_(
-                   'Location of template to build a k8s cluster on atomic. ')),
+                   'Location of template to build a k8s cluster on atomic.')),
     cfg.StrOpt('k8s_coreos_template_path',
                default=paths.basedir_def('templates/heat-kubernetes/'
                                          'kubecluster-coreos.yaml'),
                help=_(
-                   'Location of template to build a k8s cluster on coreos. ')),
+                   'Location of template to build a k8s cluster on CoreOS.')),
     cfg.StrOpt('coreos_discovery_token_url',
                default=None,
                deprecated_name='discovery_token_url',
@@ -51,12 +51,12 @@ template_def_opts = [
                default=paths.basedir_def('templates/docker-swarm/'
                                          'swarm.yaml'),
                help=_('Location of template to build a swarm '
-                      'cluster on atomic. ')),
+                      'cluster on atomic.')),
     cfg.StrOpt('swarm_discovery_url_format',
                default=None,
                help=_('Format string to use for swarm discovery url. '
                       'Available values: bay_id, bay_uuid. '
-                      'Example: "etcd://etcd.example.com/\%(bay_uuid)s" ')),
+                      'Example: "etcd://etcd.example.com/\%(bay_uuid)s"')),
     cfg.BoolOpt('public_swarm_discovery',
                 default=True,
                 help=_('Indicates Swarm discovery should use public '
@@ -67,12 +67,12 @@ template_def_opts = [
     cfg.StrOpt('mesos_ubuntu_template_path',
                default=paths.basedir_def('templates/heat-mesos/'
                                          'mesoscluster.yaml'),
-               help=_('Location of template to build a mesos cluster '
-                      'on ubuntu. ')),
+               help=_('Location of template to build a Mesos cluster '
+                      'on Ubuntu.')),
     cfg.ListOpt('enabled_definitions',
                 default=['magnum_vm_atomic_k8s', 'magnum_vm_coreos_k8s',
                          'magnum_vm_atomic_swarm', 'magnum_vm_ubuntu_mesos'],
-                help=_('Enabled bay definition entry points. ')),
+                help=_('Enabled bay definition entry points.')),
 ]
 
 cfg.CONF.register_opts(template_def_opts, group='bay')
