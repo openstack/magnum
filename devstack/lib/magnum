@@ -17,6 +17,7 @@
 # - init_magnum
 # - magnum_register_image
 # - start_magnum
+# - configure_iptables
 # - stop_magnum
 # - cleanup_magnum
 
@@ -59,6 +60,10 @@ if [[ -d $MAGNUM_DIR/bin ]]; then
     MAGNUM_BIN_DIR=$MAGNUM_DIR/bin
 else
     MAGNUM_BIN_DIR=$(get_python_exec_prefix)
+fi
+
+if is_service_enabled ir-api; then
+    MAGNUM_CONFIGURE_IPTABLES=${MAGNUM_CONFIGURE_IPTABLES:-False}
 fi
 
 # Functions
@@ -251,6 +256,16 @@ function start_magnum_api {
     if is_service_enabled tls-proxy; then
         start_tls_proxy '*' $MAGNUM_SERVICE_PORT $MAGNUM_SERVICE_HOST $MAGNUM_SERVICE_PORT_INT &
         start_tls_proxy '*' $EC2_SERVICE_PORT $MAGNUM_SERVICE_HOST $EC2_SERVICE_PORT_INT &
+    fi
+}
+
+
+# configure_iptables() - Configure the IP table rules for Magnum
+function configure_iptables {
+    if [ "$MAGNUM_CONFIGURE_IPTABLES" != "False" ]; then
+        ROUTE_TO_INTERNET=$(ip route get 8.8.8.8)
+        OBOUND_DEV=$(echo ${ROUTE_TO_INTERNET#*dev} | awk '{print $1}')
+        sudo iptables -t nat -A POSTROUTING -o $OBOUND_DEV -j MASQUERADE
     fi
 }
 
