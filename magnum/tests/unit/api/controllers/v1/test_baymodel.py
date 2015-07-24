@@ -12,7 +12,6 @@
 
 import datetime
 
-import contextlib
 import mock
 from oslo_config import cfg
 from oslo_policy import policy
@@ -382,13 +381,10 @@ class TestPost(api_base.FunctionalTest):
 
     def _create_baymodel_raises_app_error(self, **kwargs):
         # Create mock for db and image data
-        with contextlib.nested(
-            mock.patch.object(self.dbapi, 'create_baymodel',
-                              wraps=self.dbapi.create_baymodel),
+        with mock.patch.object(self.dbapi, 'create_baymodel',
+                               wraps=self.dbapi.create_baymodel) as cc_mock,\
             mock.patch.object(api_baymodel.BayModelsController,
-                              '_get_image_data')) as (cc_mock,
-                                                      mock_image_data):
-
+                              '_get_image_data') as mock_image_data:
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.baymodel_post_data(**kwargs)
