@@ -400,7 +400,7 @@ Now that we have a swarm bay we can start interacting with it::
 Next we will create a container in this bay. This container will ping the
 address 8.8.8.8 four times::
 
-    magnum container-create --name testcontainer \
+    magnum container-create --name test-container \
                             --image cirros \
                             --bay swarmbay \
                             --command "ping -c 4 8.8.8.8"
