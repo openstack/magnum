@@ -175,7 +175,7 @@ function create_magnum_conf {
 function update_heat_policy {
     # enable stacks globel_index search so that magnum can use
     # list(global_tenant=True)
-    sed 's/\("stacks:global_index":\).*$/\1 "role:admin",/' $HEAT_CONF_DIR/policy.json
+    sed -i 's/\("stacks:global_index":\).*$/\1 "role:admin",/' $HEAT_CONF_DIR/policy.json
 }
 
 function create_magnum_conf_magnum_network {
