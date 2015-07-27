@@ -4,7 +4,7 @@
 # From magnum
 #
 
-# This option enables or disables user authentication via keystone.
+# This option enables or disables user authentication via Keystone.
 # Default value is True. (boolean value)
 #enable_authentication = true
 
@@ -27,15 +27,6 @@
 
 # Explicitly specify the temporary working directory. (string value)
 #tempdir = <None>
-
-# Enable eventlet backdoor.  Acceptable values are 0, <port>, and
-# <start>:<end>, where 0 results in listening on a random tcp port
-# number; <port> results in listening on the specified port number
-# (and not enabling backdoor if that port is in use); and
-# <start>:<end> results in listening on the smallest unused port
-# number within the specified range of port numbers.  The chosen port
-# is displayed in the service's log file. (string value)
-#backdoor_port = <None>
 
 # Enable periodic tasks. (boolean value)
 #periodic_enable = true
@@ -121,9 +112,6 @@
 # Enables or disables publication of error events. (boolean value)
 #publish_errors = false
 
-# Enables or disables fatal status of deprecations. (boolean value)
-#fatal_deprecations = false
-
 # The format for an instance that is passed with the log message.
 # (string value)
 #instance_format = "[instance: %(uuid)s] "
@@ -206,6 +194,31 @@
 # option. (string value)
 #control_exchange = openstack
 
+#
+# From oslo.service.periodic_task
+#
+
+# Some periodic tasks can be run in a separate process. Should we run
+# them here? (boolean value)
+#run_external_periodic_tasks = true
+
+#
+# From oslo.service.service
+#
+
+# Enable eventlet backdoor.  Acceptable values are 0, <port>, and
+# <start>:<end>, where 0 results in listening on a random tcp port
+# number; <port> results in listening on the specified port number
+# (and not enabling backdoor if that port is in use); and
+# <start>:<end> results in listening on the smallest unused port
+# number within the specified range of port numbers.  The chosen port
+# is displayed in the service's log file. (string value)
+#backdoor_port = <None>
+
+# Enables or disables logging values of all registered options when
+# starting a service (at DEBUG level). (boolean value)
+#log_options = true
+
 
 [api]
 
@@ -213,10 +226,10 @@
 # From magnum
 #
 
-# The port for the magnum API server (integer value)
+# The port for the Magnum API server. (integer value)
 #port = 9511
 
-# The listen IP for the magnum API server (string value)
+# The listen IP for the Magnum API server. (string value)
 #host = 127.0.0.1
 
 # The maximum number of items returned in a single response from a
@@ -230,12 +243,12 @@
 # From magnum
 #
 
-# Location of template to build a k8s cluster on atomic.  (string
+# Location of template to build a k8s cluster on atomic. (string
 # value)
 # Deprecated group/name - [bay_heat]/template_path
 #k8s_atomic_template_path = $pybasedir/templates/heat-kubernetes/kubecluster.yaml
 
-# Location of template to build a k8s cluster on coreos.  (string
+# Location of template to build a k8s cluster on CoreOS. (string
 # value)
 #k8s_coreos_template_path = $pybasedir/templates/heat-kubernetes/kubecluster-coreos.yaml
 
@@ -243,7 +256,7 @@
 # Deprecated group/name - [bay_heat]/discovery_token_url
 #coreos_discovery_token_url = <None>
 
-# Location of template to build a swarm cluster on atomic.  (string
+# Location of template to build a swarm cluster on atomic. (string
 # value)
 #swarm_atomic_template_path = $pybasedir/templates/docker-swarm/swarm.yaml
 
@@ -259,11 +272,11 @@
 # Url for swarm public discovery endpoint. (string value)
 #public_swarm_discovery_url = https://discovery-stage.hub.docker.com/v1/clusters
 
-# Location of template to build a mesos cluster on ubuntu.  (string
+# Location of template to build a Mesos cluster on Ubuntu. (string
 # value)
 #mesos_ubuntu_template_path = $pybasedir/templates/heat-mesos/mesoscluster.yaml
 
-# Enabled bay definition entry points.  (list value)
+# Enabled bay definition entry points. (list value)
 #enabled_definitions = magnum_vm_atomic_k8s,magnum_vm_coreos_k8s,magnum_vm_atomic_swarm,magnum_vm_ubuntu_mesos
 
 
@@ -295,7 +308,7 @@
 # From magnum
 #
 
-# The queue to add conductor tasks to (string value)
+# The queue to add conductor tasks to. (string value)
 #topic = magnum-conductor
 
 # RPC timeout for the conductor liveness check that is used for bay
@@ -444,6 +457,21 @@
 # Location of TLS private key file for securing docker api requests
 # (tlskey). (string value)
 #key_file = <None>
+
+
+[glance_client]
+
+#
+# From magnum
+#
+
+# Region in Identity service catalog to use for communication with the
+# OpenStack service. (string value)
+#region_name = <None>
+
+# Type of endpoint in Identity service catalog to use for
+# communication with the OpenStack service. (string value)
+#endpoint_type = publicURL
 
 
 [heat_client]
@@ -940,7 +968,7 @@
 # Number of seconds after which the Rabbit broker is considered down
 # if heartbeat's keep-alive fails (0 disable the heartbeat).
 # EXPERIMENTAL (integer value)
-#heartbeat_timeout_threshold = 0
+#heartbeat_timeout_threshold = 60
 
 # How often times during the heartbeat_timeout_threshold we check the
 # heartbeat. (integer value)
