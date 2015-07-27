@@ -112,6 +112,7 @@ class TemplateDefinitionTestCase(base.TestCase):
     @mock.patch('magnum.conductor.template_definition.TemplateDefinition'
                 '.get_output')
     def test_k8s_get_params(self, mock_get_output, mock_get_params):
+        mock_context = mock.MagicMock()
         mock_baymodel = mock.MagicMock()
         mock_bay = mock.MagicMock()
         mock_scale_manager = mock.MagicMock()
@@ -120,13 +121,13 @@ class TemplateDefinitionTestCase(base.TestCase):
         mock_scale_manager.get_removal_nodes.return_value = removal_nodes
         k8s_def = tdef.AtomicK8sTemplateDefinition()
 
-        k8s_def.get_params(mock_baymodel, mock_bay,
+        k8s_def.get_params(mock_context, mock_baymodel, mock_bay,
                            scale_manager=mock_scale_manager)
 
         expected_kwargs = {'extra_params': {
             'minions_to_remove': removal_nodes}}
-        mock_get_params.assert_called_once_with(mock_baymodel, mock_bay,
-                                                **expected_kwargs)
+        mock_get_params.assert_called_once_with(mock_context, mock_baymodel,
+                                                mock_bay, **expected_kwargs)
 
     @mock.patch('requests.post')
     def test_swarm_discovery_url_public_token(self, mock_post):
