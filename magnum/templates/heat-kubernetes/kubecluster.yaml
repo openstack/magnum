@@ -196,7 +196,7 @@ resources:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/configure-etcd.yaml}
+      config: {get_file: fragments/configure-etcd.sh}
 
   configure_kubernetes:
     type: OS::Heat::SoftwareConfig
