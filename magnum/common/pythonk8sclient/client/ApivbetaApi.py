@@ -2364,7 +2364,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['namespaces', 'body', 'ca', 'cert', 'key']
+        allParams = ['namespaces', 'body', 'ca_cert', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -2407,7 +2407,7 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
-        ca = params.get('ca')
+        ca = params.get('ca_cert')
         cert = params.get('cert')
         key = params.get('key')
 
@@ -2439,7 +2439,7 @@ class ApivbetaApi(object):
         Returns: V1beta3_Pod
         """
 
-        allParams = ['name', 'namespaces', 'ca', 'cert', 'key']
+        allParams = ['name', 'namespaces', 'ca_cert', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -2485,7 +2485,7 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
-        ca = params.get('ca')
+        ca = params.get('ca_cert')
         cert = params.get('cert')
         key = params.get('key')
 
@@ -2520,7 +2520,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['name', 'namespaces', 'body', 'ca', 'cert', 'key']
+        allParams = ['name', 'namespaces', 'body', 'ca_cert', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -2569,7 +2569,7 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
-        ca = params.get('ca')
+        ca = params.get('ca_cert')
         cert = params.get('cert')
         key = params.get('key')
 
@@ -2604,7 +2604,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['name', 'namespaces', 'body', 'ca', 'cert', 'key']
+        allParams = ['name', 'namespaces', 'body', 'ca_cert', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -2653,7 +2653,7 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
-        ca = params.get('ca')
+        ca = params.get('ca_cert')
         cert = params.get('cert')
         key = params.get('key')
 
@@ -2687,7 +2687,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['name', 'namespaces', 'body', 'ca', 'cert', 'key']
+        allParams = ['name', 'namespaces', 'body', 'ca_cert', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -2736,7 +2736,7 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
-        ca = params.get('ca')
+        ca = params.get('ca_cert')
         cert = params.get('cert')
         key = params.get('key')
 
@@ -3001,7 +3001,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['namespaces', 'body', 'ca', 'cert', 'key']
+        allParams = ['namespaces', 'body', 'ca_cert', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -3044,7 +3044,7 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
-        ca = params.get('ca')
+        ca = params.get('ca_cert')
         cert = params.get('cert')
         key = params.get('key')
 
@@ -3076,7 +3076,7 @@ class ApivbetaApi(object):
         Returns: V1beta3_ReplicationController
         """
 
-        allParams = ['name', 'namespaces', 'ca', 'cert', 'key']
+        allParams = ['name', 'namespaces', 'ca_cert', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -3122,7 +3122,7 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
-        ca = params.get('ca')
+        ca = params.get('ca_cert')
         cert = params.get('cert')
         key = params.get('key')
 
@@ -3157,7 +3157,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['name', 'namespaces', 'body', 'ca', 'cert', 'key']
+        allParams = ['name', 'namespaces', 'body', 'ca_cert', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -3206,7 +3206,7 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
-        ca = params.get('ca')
+        ca = params.get('ca_cert')
         cert = params.get('cert')
         key = params.get('key')
 
@@ -3241,7 +3241,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['name', 'namespaces', 'body', 'ca', 'cert', 'key']
+        allParams = ['name', 'namespaces', 'body', 'ca_cert', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -3290,7 +3290,7 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
-        ca = params.get('ca')
+        ca = params.get('ca_cert')
         cert = params.get('cert')
         key = params.get('key')
 
@@ -3324,7 +3324,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['name', 'namespaces', 'body', 'ca', 'cert', 'key']
+        allParams = ['name', 'namespaces', 'body', 'ca_cert', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -3373,7 +3373,7 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
-        ca = params.get('ca')
+        ca = params.get('ca_cert')
         cert = params.get('cert')
         key = params.get('key')
 
@@ -4456,7 +4456,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['namespaces', 'body', 'ca', 'cert', 'key']
+        allParams = ['namespaces', 'body', 'ca_cert', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -4499,7 +4499,7 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
-        ca = params.get('ca')
+        ca = params.get('ca_cert')
         cert = params.get('cert')
         key = params.get('key')
 
@@ -4531,7 +4531,7 @@ class ApivbetaApi(object):
         Returns: V1beta3_Service
         """
 
-        allParams = ['name', 'namespaces', 'ca', 'cert', 'key']
+        allParams = ['name', 'namespaces', 'ca_cert', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -4577,7 +4577,7 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
-        ca = params.get('ca')
+        ca = params.get('ca_cert')
         cert = params.get('cert')
         key = params.get('key')
 
@@ -4612,7 +4612,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['name', 'namespaces', 'body', 'ca', 'cert', 'key']
+        allParams = ['name', 'namespaces', 'body', 'ca_cert', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -4661,7 +4661,7 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
-        ca = params.get('ca')
+        ca = params.get('ca_cert')
         cert = params.get('cert')
         key = params.get('key')
 
@@ -4693,7 +4693,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['name', 'namespaces', 'ca', 'cert', 'key']
+        allParams = ['name', 'namespaces', 'ca_cert', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -4739,7 +4739,7 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
-        ca = params.get('ca')
+        ca = params.get('ca_cert')
         cert = params.get('cert')
         key = params.get('key')
 
@@ -4773,7 +4773,7 @@ class ApivbetaApi(object):
         Returns: 
         """
 
-        allParams = ['name', 'namespaces', 'body', 'ca', 'cert', 'key']
+        allParams = ['name', 'namespaces', 'body', 'ca_cert', 'cert', 'key']
 
         params = locals()
         for (key, val) in params['kwargs'].iteritems():
@@ -4822,7 +4822,7 @@ class ApivbetaApi(object):
 
         postData = (formParams if formParams else bodyParam)
 
-        ca = params.get('ca')
+        ca = params.get('ca_cert')
         cert = params.get('cert')
         key = params.get('key')
 
