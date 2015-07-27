@@ -269,9 +269,6 @@ class TestDelete(api_base.FunctionalTest):
 
 class TestNodePolicyEnforcement(api_base.FunctionalTest):
 
-    def setUp(self):
-        super(TestNodePolicyEnforcement, self).setUp()
-
     def _common_policy_check(self, rule, func, *arg, **kwarg):
         self.policy.set_rules({rule: "project:non_fake"})
         exc = self.assertRaises(policy.PolicyNotAuthorized,

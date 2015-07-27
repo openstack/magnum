@@ -18,8 +18,6 @@ from magnum.tests import base
 
 
 class TestYamlUtils(base.BaseTestCase):
-    def setUp(self):
-        super(TestYamlUtils, self).setUp()
 
     def test_load_yaml(self):
         yml_dict = yamlutils.load('a: x\nb: y\n')

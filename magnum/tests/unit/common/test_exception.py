@@ -55,8 +55,6 @@ class TestWrapException(base.BaseTestCase):
 
 
 class TestException(base.BaseTestCase):
-    def setUp(self):
-        super(TestException, self).setUp()
 
     def raise_(self, ex):
         raise ex

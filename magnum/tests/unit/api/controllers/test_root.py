@@ -80,8 +80,6 @@ class TestRootController(api_base.FunctionalTest):
 
 
 class TestV1Routing(api_base.FunctionalTest):
-    def setUp(self):
-        super(TestV1Routing, self).setUp()
 
     def test_route_checks_version(self):
         self.get_json('/')
