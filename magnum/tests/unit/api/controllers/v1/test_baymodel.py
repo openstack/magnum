@@ -598,6 +598,10 @@ class TestBayModelPolicyEnforcement(api_base.FunctionalTest):
         self._common_policy_check(
             "baymodel:get", self.get_json, '/baymodels/111-222-333')
 
+    def test_policy_disallow_detail(self):
+        self._common_policy_check(
+            "baymodel:detail", self.get_json, '/baymodels/111-222-333/detail')
+
     def test_policy_disallow_update(self):
         baymodel = obj_utils.create_test_baymodel(self.context,
                                                   name='example_A',
