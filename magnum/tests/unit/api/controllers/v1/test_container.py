@@ -11,7 +11,7 @@
 #    limitations under the License.
 
 from magnum import objects
-from magnum.tests.unit.db import base as db_base
+from magnum.tests.unit.api import base as api_base
 from magnum.tests.unit.db import utils
 
 import mock
@@ -19,7 +19,7 @@ from mock import patch
 from webtest.app import AppError
 
 
-class TestContainerController(db_base.DbTestCase):
+class TestContainerController(api_base.FunctionalTest):
     def setUp(self):
         super(TestContainerController, self).setUp()
         p = patch('magnum.objects.Bay.get_by_uuid')
