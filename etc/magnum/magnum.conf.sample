@@ -686,6 +686,21 @@
 #k8s_port = 8080
 
 
+[magnum_client]
+
+#
+# From magnum
+#
+
+# Region in Identity service catalog to use for communication with the
+# OpenStack service. (string value)
+#region_name = <None>
+
+# Type of endpoint in Identity service catalog to use for
+# communication with the OpenStack service. (string value)
+#endpoint_type = publicURL
+
+
 [matchmaker_redis]
 
 #
