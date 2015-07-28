@@ -609,6 +609,10 @@ class TestBayPolicyEnforcement(api_base.FunctionalTest):
         self._common_policy_check(
             "bay:get", self.get_json, '/bays/111-222-333')
 
+    def test_policy_disallow_detail(self):
+        self._common_policy_check(
+            "bay:detail", self.get_json, '/bays/111-222-333/detail')
+
     def test_policy_disallow_update(self):
         self.bay = obj_utils.create_test_bay(self.context,
                                              name='bay_example_A',
