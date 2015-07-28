@@ -145,7 +145,7 @@ Create a local.sh to automatically make necessary networking changes during
 the devstack deployment process. This will allow bays spawned by magnum to
 access the internet through PUBLIC_INTERFACE::
 
-    cat > /opt/stack/devstack/local.sh << END_LOCAL_SH
+    cat > /opt/stack/devstack/local.sh << 'END_LOCAL_SH'
     #!/bin/sh
     ROUTE_TO_INTERNET=$(ip route get 8.8.8.8)
     OBOUND_DEV=$(echo ${ROUTE_TO_INTERNET#*dev} | awk '{print $1}')
