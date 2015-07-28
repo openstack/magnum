@@ -35,6 +35,11 @@ parameters:
     description: address of a dns nameserver reachable in your environment
     default: 8.8.8.8
 
+  number_of_masters:
+    type: string
+    description: how many kubernetes masters to spawn
+    default: 1
+
   number_of_minions:
     type: string
     description: how many kubernetes minions to spawn
@@ -107,16 +112,6 @@ parameters:
 
 resources:
 
-  master_wait_handle:
-    type: OS::Heat::WaitConditionHandle
-
-  master_wait_condition:
-    type: OS::Heat::WaitCondition
-    depends_on: kube_master
-    properties:
-      handle: {get_resource: master_wait_handle}
-      timeout: {get_param: wait_condition_timeout}
-
   ######################################################################
   #
   # network resources.  allocate a network and router for our server.
@@ -147,169 +142,6 @@ resources:
 
   ######################################################################
   #
-  # security groups.  we need to permit network traffic of various
-  # sorts.
-  #
-
-  secgroup_base:
-    type: OS::Neutron::SecurityGroup
-    properties:
-      rules:
-        - protocol: icmp
-        - protocol: tcp
-          port_range_min: 22
-          port_range_max: 22
-
-  secgroup_kubernetes:
-    type: OS::Neutron::SecurityGroup
-    properties:
-      rules:
-        - protocol: tcp
-          port_range_min: 7080
-          port_range_max: 7080
-        - protocol: tcp
-          port_range_min: 8080
-          port_range_max: 8080
-        - protocol: tcp
-          port_range_min: 4001
-          port_range_max: 4001
-        - protocol: tcp
-          port_range_min: 7001
-          port_range_max: 7001
-
-  ######################################################################
-  #
-  # software configs.  these are components that are combined into
-  # a multipart MIME user-data archive.
-  #
-
-  write_heat_params:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config:
-        str_replace:
-          template: {get_file: fragments/write-heat-params-master.yaml}
-          params:
-            "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
-            "$FLANNEL_NETWORK_CIDR": {get_param: flannel_network_cidr}
-            "$FLANNEL_NETWORK_SUBNETLEN": {get_param: flannel_network_subnetlen}
-            "$FLANNEL_USE_VXLAN": {get_param: flannel_use_vxlan}
-            "$PORTAL_NETWORK_CIDR": {get_param: portal_network_cidr}
-            "$ETCD_DISCOVERY_URL": {get_param: discovery_url}
-
-  configure_etcd:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/configure-etcd.sh}
-
-  configure_kubernetes:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/configure-kubernetes-master.sh}
-
-  write_flannel_config:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/write-flannel-config.sh}
-
-  flannel_config_service:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/flannel-config.service.yaml}
-
-  enable_services:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/enable-services-master.sh}
-
-  kube_user:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/kube-user.yaml}
-
-  kube_examples:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/kube-examples.yaml}
-
-  master_wc_notify:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config:
-        str_replace:
-          template: |
-            #!/bin/bash -v
-            wc_notify --data-binary '{"status": "SUCCESS"}'
-          params:
-            wc_notify: {get_attr: [master_wait_handle, curl_cli]}
-
-  disable_selinux:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/disable-selinux.sh}
-
-  kube_master_init:
-    type: OS::Heat::MultipartMime
-    properties:
-      parts:
-        - config: {get_resource: disable_selinux}
-        - config: {get_resource: write_heat_params}
-        - config: {get_resource: configure_etcd}
-        - config: {get_resource: kube_user}
-        - config: {get_resource: configure_kubernetes}
-        - config: {get_resource: enable_services}
-        - config: {get_resource: write_flannel_config}
-        - config: {get_resource: flannel_config_service}
-        - config: {get_resource: kube_examples}
-        - config: {get_resource: master_wc_notify}
-
-  ######################################################################
-  #
-  # kubernetes master server.
-  #
-
-  kube_master:
-    type: OS::Nova::Server
-    depends_on:
-      - extrouter_inside
-    properties:
-      image: {get_param: server_image}
-      flavor: {get_param: master_flavor}
-      key_name: {get_param: ssh_key_name}
-      user_data_format: RAW
-      user_data: {get_resource: kube_master_init}
-      networks:
-        - port: {get_resource: kube_master_eth0}
-
-  kube_master_eth0:
-    type: OS::Neutron::Port
-    properties:
-      network: {get_resource: fixed_network}
-      security_groups:
-        - {get_resource: secgroup_base}
-        - {get_resource: secgroup_kubernetes}
-      fixed_ips:
-        - subnet: {get_resource: fixed_subnet}
-      replacement_policy: AUTO
-
-  kube_master_floating:
-    type: OS::Neutron::FloatingIP
-    properties:
-      floating_network: {get_param: external_network}
-      port_id: {get_resource: kube_master_eth0}
-
-  ######################################################################
-  #
   # load balancers.
   #
 
@@ -330,13 +162,6 @@ resources:
       lb_method: ROUND_ROBIN
       vip:
         protocol_port: 8080
-
-  api_pool_member:
-    type: OS::Neutron::PoolMember
-    properties:
-      pool_id: {get_resource: api_pool}
-      address: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
-      protocol_port: 8080
 
   api_pool_floating:
     type: OS::Neutron::FloatingIP
@@ -362,12 +187,36 @@ resources:
       vip:
         protocol_port: 4001
 
-  etcd_pool_member:
-    type: OS::Neutron::PoolMember
+  ######################################################################
+  #
+  # kubernetes masters. This is a resource group that will create
+  # <number_of_masters> masters.
+  #
+
+  kube_masters:
+    type: "OS::Heat::ResourceGroup"
+    depends_on:
+      - extrouter_inside
     properties:
-      pool_id: {get_resource: etcd_pool}
-      address: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
-      protocol_port: 4001
+      count: {get_param: number_of_masters}
+      resource_def:
+        type: kubemaster.yaml
+        properties:
+          ssh_key_name: {get_param: ssh_key_name}
+          server_image: {get_param: server_image}
+          master_flavor: {get_param: master_flavor}
+          external_network: {get_param: external_network}
+          kube_allow_priv: {get_param: kube_allow_priv}
+          wait_condition_timeout: {get_param: wait_condition_timeout}
+          flannel_network_cidr: {get_param: flannel_network_cidr}
+          flannel_network_subnetlen: {get_param: flannel_network_subnetlen}
+          flannel_use_vxlan: {get_param: flannel_use_vxlan}
+          portal_network_cidr: {get_param: portal_network_cidr}
+          discovery_url: {get_param: discovery_url}
+          fixed_network: {get_resource: fixed_network}
+          fixed_subnet: {get_resource: fixed_subnet}
+          api_pool_id: {get_resource: api_pool}
+          etcd_pool_id: {get_resource: etcd_pool}
 
   ######################################################################
   #
@@ -380,7 +229,7 @@ resources:
     type: "OS::Heat::ResourceGroup"
     depends_on:
       - extrouter_inside
-      - master_wait_condition
+      - kube_masters
     properties:
       count: {get_param: number_of_minions}
       removal_policies: [{resource_list: {get_param: minions_to_remove}}]
@@ -411,11 +260,11 @@ outputs:
       This is the API endpoint of the Kubernetes server. Use this to access
       the Kubernetes API from outside the cluster.
 
-  kube_master:
-    value: {get_attr: [kube_master_floating, floating_ip_address]}
+  kube_masters:
+    value: {get_attr: [kube_masters, kube_master_external_ip]}
     description: >
-      This is the "public" ip address of the Kubernetes master server. Use this address to
-      log in to the Kubernetes master via ssh.
+      This is a list of "public" ip addresses of all Kubernetes master servers.
+      Use these addresses to log in to the Kubernetes masters via ssh.
 
   kube_minions:
     value: {get_attr: [kube_minions, kube_minion_ip]}
