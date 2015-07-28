@@ -172,12 +172,13 @@ class TestBayResource(BaseMagnumClient):
 
         self.baymodel = self._create_baymodel('testbay')
 
-    def tearDown(self):
-        super(TestBayResource, self).tearDown()
-        try:
-            self.cs.baymodels.delete(self.baymodel.uuid)
-        except exceptions.BadRequest:
-            pass
+        def delete_baymodel():
+            try:
+                self.cs.baymodels.delete(self.baymodel.uuid)
+            except exceptions.BadRequest:
+                pass
+
+        self.addCleanup(delete_baymodel)
 
     def test_bay_create_and_delete(self):
         bay = self._create_bay('testbay', self.baymodel.uuid)
