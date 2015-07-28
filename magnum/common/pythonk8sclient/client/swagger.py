@@ -69,7 +69,7 @@ class ApiClient(object):
     self.defaultHeaders[headerName] = headerValue
 
   def callAPI(self, resourcePath, method, queryParams, postData,
-              ca=None, cert=None, key=None, headerParams=None, files=None):
+              ca_cert=None, cert=None, key=None, headerParams=None, files=None):
 
     url = self.host + resourcePath
 
@@ -116,7 +116,7 @@ class ApiClient(object):
     utils.raise_exception_invalid_scheme(url)
 
     response = requests.request(method, url=url, headers=headers, data=data,
-                                cert=(cert, key), verify=ca)
+                                cert=(cert, key), verify=ca_cert)
     if 'Set-Cookie' in response.headers:
       self.cookie = response.headers['Set-Cookie']
     try:
