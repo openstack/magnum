@@ -74,9 +74,8 @@ class K8sResourceBase(base.APIBase):
     def _get_manifest(self):
         if not self.manifest and not self.manifest_url:
             return None
-        if self.manifest is not wsme.Unset and self.manifest is not None:
+        if self.manifest:
             return self.manifest
-        if (self.manifest_url is not wsme.Unset
-                and self.manifest_url is not None):
+        if self.manifest_url:
             self.manifest = urlfetch.get(self.manifest_url)
             return self.manifest
