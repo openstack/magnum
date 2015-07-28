@@ -185,7 +185,7 @@ resources:
       subnet: {get_resource: fixed_subnet}
       lb_method: ROUND_ROBIN
       vip:
-        protocol_port: 4001
+        protocol_port: 2379
 
   ######################################################################
   #
