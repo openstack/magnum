@@ -37,6 +37,12 @@
     "rc:detail": "rule:default",
     "rc:get": "rule:default",
     "rc:get_all": "rule:default",
-    "rc:update": "rule:default"
+    "rc:update": "rule:default",
 
+    "service:create": "rule:default",
+    "service:delete": "rule:default",
+    "service:detail": "rule:default",
+    "service:get": "rule:default",
+    "service:get_all": "rule:default",
+    "service:update": "rule:default"
 }
