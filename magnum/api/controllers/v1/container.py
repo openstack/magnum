@@ -29,6 +29,7 @@ from magnum.api.controllers.v1 import utils as api_utils
 from magnum.api import expose
 from magnum.api import validation
 from magnum.common import exception
+from magnum.common import policy
 from magnum import objects
 
 LOG = logging.getLogger(__name__)
@@ -291,6 +292,7 @@ class ContainersController(rest.RestController):
                                                       sort_key=sort_key,
                                                       sort_dir=sort_dir)
 
+    @policy.enforce_wsgi("container")
     @expose.expose(ContainerCollection, types.uuid,
                    types.uuid, int, wtypes.text, wtypes.text)
     def get_all(self, container_uuid=None, marker=None, limit=None,
@@ -305,6 +307,7 @@ class ContainersController(rest.RestController):
         return self._get_containers_collection(marker, limit, sort_key,
                                                sort_dir)
 
+    @policy.enforce_wsgi("container")
     @expose.expose(ContainerCollection, types.uuid,
                    types.uuid, int, wtypes.text, wtypes.text)
     def detail(self, container_uuid=None, marker=None, limit=None,
@@ -328,6 +331,7 @@ class ContainersController(rest.RestController):
                                                sort_key, sort_dir, expand,
                                                resource_url)
 
+    @policy.enforce_wsgi("container", "get")
     @expose.expose(Container, types.uuid_or_name)
     def get_one(self, container_ident):
         """Retrieve information about the given container.
@@ -339,6 +343,7 @@ class ContainersController(rest.RestController):
         res_container = pecan.request.rpcapi.container_show(rpc_container.uuid)
         return Container.convert_with_links(res_container)
 
+    @policy.enforce_wsgi("container", "create")
     @expose.expose(Container, body=Container, status_code=201)
     @validation.enforce_bay_types('swarm')
     def post(self, container):
@@ -362,6 +367,7 @@ class ContainersController(rest.RestController):
                                                  res_container.uuid)
         return Container.convert_with_links(res_container)
 
+    @policy.enforce_wsgi("container", "update")
     @wsme.validate(types.uuid, [ContainerPatchType])
     @expose.expose(Container, types.uuid_or_name,
                    body=[ContainerPatchType])
@@ -395,6 +401,7 @@ class ContainersController(rest.RestController):
         rpc_container.save()
         return Container.convert_with_links(rpc_container)
 
+    @policy.enforce_wsgi("container")
     @expose.expose(None, types.uuid_or_name, status_code=204)
     def delete(self, container_ident):
         """Delete a container.

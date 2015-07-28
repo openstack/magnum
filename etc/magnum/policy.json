@@ -44,5 +44,12 @@
     "service:detail": "rule:default",
     "service:get": "rule:default",
     "service:get_all": "rule:default",
-    "service:update": "rule:default"
+    "service:update": "rule:default",
+
+    "container:create": "rule:default",
+    "container:delete": "rule:default",
+    "container:detail": "rule:default",
+    "container:get": "rule:default",
+    "container:get_all": "rule:default",
+    "container:update": "rule:default"
 }
