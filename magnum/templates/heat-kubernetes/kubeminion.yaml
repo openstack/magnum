@@ -29,9 +29,9 @@ parameters:
     type: string
     description: >
       whether or not kubernetes should permit privileged containers.
-    default: false
+    default: "false"
     constraints:
-      - allowed_values: [true, false]
+      - allowed_values: ["true", "false"]
 
   docker_volume_size:
     type: number
