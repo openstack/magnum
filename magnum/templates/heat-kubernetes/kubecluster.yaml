@@ -365,9 +365,8 @@ resources:
 
   ######################################################################
   #
-  # kubernetes minions. This is an autoscaling group that will initially
-  # create <number_of_minions> minions, and will scale up to
-  # <max_number_of_minions> based on CPU utilization.
+  # kubernetes minions. This is an resource group that will initially
+  # create <number_of_minions> minions, and needs to be manually scaled.
   #
 
   kube_minions:
