@@ -70,18 +70,3 @@ policy_data = """
     "container:update": ""
 }
 """
-
-
-policy_data_compat_juno = """
-{
-}
-"""
-
-
-def get_policy_data(compat):
-    if not compat:
-        return policy_data
-    elif compat == 'juno':
-        return policy_data_compat_juno
-    else:
-        raise Exception('Policy data for %s not available' % compat)

@@ -26,15 +26,13 @@ CONF = cfg.CONF
 
 
 class PolicyFixture(fixtures.Fixture):
-    def __init__(self, compat=None):
-        self.compat = compat
 
     def _setUp(self):
         self.policy_dir = self.useFixture(fixtures.TempDir())
         self.policy_file_name = os.path.join(self.policy_dir.path,
                                              'policy.json')
         with open(self.policy_file_name, 'w') as policy_file:
-            policy_file.write(fake_policy.get_policy_data(self.compat))
+            policy_file.write(fake_policy.policy_data)
         policy_opts.set_defaults(CONF)
         CONF.set_override('policy_file', self.policy_file_name, 'oslo_policy')
         magnum_policy._ENFORCER = None
