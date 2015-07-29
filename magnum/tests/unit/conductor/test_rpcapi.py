@@ -169,8 +169,6 @@ class RPCAPITestCase(base.DbTestCase):
         self._test_rpcapi('container_create',
                           'call',
                           version='1.0',
-                          name=self.fake_container['name'],
-                          container_uuid=self.fake_container['uuid'],
                           container=self.fake_container)
 
     def test_container_delete(self):

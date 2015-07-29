@@ -358,9 +358,7 @@ class ContainersController(rest.RestController):
         container_dict['user_id'] = auth_token['user']['id']
         new_container = objects.Container(context, **container_dict)
         new_container.create()
-        res_container = pecan.request.rpcapi.container_create(
-            new_container.name, new_container.uuid,
-            new_container)
+        res_container = pecan.request.rpcapi.container_create(new_container)
 
         # Set the HTTP Location Header
         pecan.response.location = link.build_url('containers',

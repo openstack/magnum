@@ -116,8 +116,10 @@ class Handler(object):
     # Container operations
 
     @wrap_container_exception
-    def container_create(self, context, name, container_uuid, container):
+    def container_create(self, context, container):
         docker = self.get_docker_client(context, container)
+        name = container.name
+        container_uuid = container.uuid
         image = container.image
         LOG.debug('Creating container with image %s name %s'
                   % (image, name))

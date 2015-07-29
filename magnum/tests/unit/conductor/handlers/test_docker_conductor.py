@@ -112,12 +112,13 @@ class TestDockerConductor(base.BaseTestCase):
         mock_get_docker_client.return_value = mock_docker
 
         mock_container = mock.MagicMock()
+        mock_container.name = 'some-name'
+        mock_container.uuid = 'some-uuid'
         mock_container.image = 'test_image:some_tag'
         mock_container.command = None
 
         container = self.conductor.container_create(
-            None, 'some-name',
-            'some-uuid', mock_container)
+            None, mock_container)
 
         utf8_image = self.conductor._encode_utf8(mock_container.image)
         mock_docker.pull.assert_called_once_with('test_image',
@@ -136,12 +137,13 @@ class TestDockerConductor(base.BaseTestCase):
         mock_get_docker_client.return_value = mock_docker
 
         mock_container = mock.MagicMock()
+        mock_container.name = 'some-name'
+        mock_container.uuid = 'some-uuid'
         mock_container.image = 'test_image:some_tag'
         mock_container.command = 'env'
 
         container = self.conductor.container_create(
-            None, 'some-name',
-            'some-uuid', mock_container)
+            None, mock_container)
 
         utf8_image = self.conductor._encode_utf8(mock_container.image)
         mock_docker.pull.assert_called_once_with('test_image',
@@ -173,7 +175,7 @@ class TestDockerConductor(base.BaseTestCase):
 
             self.assertRaises(exception.ContainerException,
                               self.conductor.container_create,
-                              None, 'some-name', 'some-uuid', mock_container)
+                              None, mock_container)
             mock_docker.pull.assert_called_once_with(
                 'test_image',
                 tag='some_tag')

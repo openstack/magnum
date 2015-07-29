@@ -117,10 +117,8 @@ class API(rpc_service.API):
 
     # Container operations
 
-    def container_create(self, name, container_uuid, container):
-        return self._call('container_create', name=name,
-                          container_uuid=container_uuid,
-                          container=container)
+    def container_create(self, container):
+        return self._call('container_create', container=container)
 
     def container_list(self, context, limit, marker, sort_key, sort_dir):
         return objects.Container.list(context, limit, marker, sort_key,
