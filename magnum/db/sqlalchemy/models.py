@@ -128,6 +128,7 @@ class Bay(Base):
     api_address = Column(String(255))
     node_addresses = Column(JSONEncodedList)
     node_count = Column(Integer())
+    master_count = Column(Integer())
     status = Column(String(20))
     status_reason = Column(Text)
     discovery_url = Column(String(255))

@@ -137,6 +137,8 @@ class Connection(api.Connection):
             query = query.filter_by(name=filters['name'])
         if 'node_count' in filters:
             query = query.filter_by(node_count=filters['node_count'])
+        if 'master_count' in filters:
+            query = query.filter_by(master_count=filters['master_count'])
         if 'stack_id' in filters:
             query = query.filter_by(stack_id=filters['stack_id'])
         if 'api_address' in filters:

@@ -57,6 +57,7 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
         'api_address': fields.StringField(nullable=True),
         'node_addresses': fields.ListOfStringsField(nullable=True),
         'node_count': fields.IntegerField(nullable=True),
+        'master_count': fields.IntegerField(nullable=True),
         'discovery_url': fields.StringField(nullable=True),
     }
 
@@ -136,7 +137,7 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
         :param filters: filter dict, can includes 'baymodel_id', 'name',
                         'node_count', 'stack_id', 'api_address',
                         'node_addresses', 'project_id', 'user_id',
-                        'status'(should be a status list).
+                        'status'(should be a status list), 'master_count'.
         :returns: a list of :class:`Bay` object.
 
         """
@@ -160,7 +161,7 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
         :param filters: filter dict, can includes 'baymodel_id', 'name',
                         'node_count', 'stack_id', 'api_address',
                         'node_addresses', 'project_id', 'user_id',
-                        'status'(should be a status list).
+                        'status'(should be a status list), 'master_count'.
         :returns: a list of :class:`Bay` object.
 
         """
