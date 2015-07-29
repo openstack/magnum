@@ -31,6 +31,22 @@ class ClientsTest(base.BaseTestCase):
         mock_cat.url_for.assert_called_once_with(service_type='fake_service',
                                                  endpoint_type='fake_endpoint')
 
+    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    def test_magnum_url(self, mock_keystone):
+        fake_region = 'fake_region'
+        fake_endpoint = 'fake_endpoint'
+        cfg.CONF.set_override('region_name', fake_region,
+                              group='magnum_client')
+        cfg.CONF.set_override('endpoint_type', fake_endpoint,
+                              group='magnum_client')
+        obj = clients.OpenStackClients(None)
+        obj.magnum_url()
+
+        mock_cat = mock_keystone.return_value.client.service_catalog
+        mock_cat.url_for.assert_called_once_with(region_name=fake_region,
+                                                 service_type='container',
+                                                 endpoint_type=fake_endpoint)
+
     @mock.patch.object(heatclient, 'Client')
     @mock.patch.object(clients.OpenStackClients, 'url_for')
     @mock.patch.object(clients.OpenStackClients, 'auth_url')

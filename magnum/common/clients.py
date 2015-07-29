@@ -25,6 +25,17 @@ from magnum.i18n import _
 LOG = logging.getLogger(__name__)
 
 
+magnum_client_opts = [
+    cfg.StrOpt('region_name',
+               default=None,
+               help=_('Region in Identity service catalog to use for '
+                      'communication with the OpenStack service.')),
+    cfg.StrOpt('endpoint_type',
+               default='publicURL',
+               help=_(
+                   'Type of endpoint in Identity service catalog to use '
+                   'for communication with the OpenStack service.'))]
+
 heat_client_opts = [
     cfg.StrOpt('region_name',
                default=None,
@@ -58,6 +69,7 @@ glance_client_opts = [
                    'Type of endpoint in Identity service catalog to use '
                    'for communication with the OpenStack service.'))]
 
+cfg.CONF.register_opts(magnum_client_opts, group='magnum_client')
 cfg.CONF.register_opts(heat_client_opts, group='heat_client')
 cfg.CONF.register_opts(glance_client_opts, group='glance_client')
 
@@ -73,6 +85,13 @@ class OpenStackClients(object):
 
     def url_for(self, **kwargs):
         return self.keystone().client.service_catalog.url_for(**kwargs)
+
+    def magnum_url(self):
+        endpoint_type = self._get_client_option('magnum', 'endpoint_type')
+        region_name = self._get_client_option('magnum', 'region_name')
+        return self.url_for(service_type='container',
+                            endpoint_type=endpoint_type,
+                            region_name=region_name)
 
     @property
     def auth_url(self):
