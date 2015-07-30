@@ -293,20 +293,23 @@ redis-master is running::
 
     magnum bay-show k8sbay
 
-    +----------------+--------------------------------------+
-    | Property       | Value                                |
-    +----------------+--------------------------------------+
-    | status         | CREATE_COMPLETE                      |
-    | uuid           | 7d59afb0-1c24-4cae-93fc-4692f5438d34 |
-    | created_at     | 2015-05-11T05:13:42+00:00            |
-    | updated_at     | 2015-05-11T05:15:32+00:00            |
-    | api_address    | 192.168.19.85                        |
-    | baymodel_id    | 0a79f347-54e5-406c-bc20-4cd4ee1fcea0 |
-    | node_count     | 1                                    |
-    | node_addresses | [u'192.168.19.86']                   |
-    | discovery_url  | None                                 |
-    | name           | k8sbay                               |
-    +----------------+--------------------------------------+
+    +--------------------+------------------------------------------------------------+
+    | Property           | Value                                                      |
+    +--------------------+------------------------------------------------------------+
+    | status             | CREATE_COMPLETE                                            |
+    | uuid               | 481685d2-bc16-4daf-9aac-9e830c7da3f7                       |
+    | status_reason      | Stack CREATE completed successfully                        |
+    | created_at         | 2015-09-22T20:02:39+00:00                                  |
+    | updated_at         | 2015-09-22T20:05:00+00:00                                  |
+    | bay_create_timeout | 0                                                          |
+    | api_address        | 192.168.19.84:8080                                         |
+    | baymodel_id        | 194a4b7e-0125-4956-8660-7551469ae1ed                       |
+    | node_count         | 1                                                          |
+    | node_addresses     | [u'192.168.19.86']                                         |
+    | master_count       | 1                                                          |
+    | discovery_url      | https://discovery.etcd.io/373452625d4f52263904584b9d3616b1 |
+    | name               | k8sbay                                                     |
+    +--------------------+------------------------------------------------------------+
 
 The output indicates the redis-master is running on the bay host with IP
 address 192.168.19.86. To access the redis master::

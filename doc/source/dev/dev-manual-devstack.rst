@@ -125,12 +125,12 @@ Atomic images are a bit detailed. Fortunately one of the core developers has
 made Atomic images available at https://fedorapeople.org/groups/magnum)::
 
     cd ~
-    wget https://fedorapeople.org/groups/magnum/fedora-21-atomic-3.qcow2
-    glance image-create --name fedora-21-atomic-3 \
+    wget https://fedorapeople.org/groups/magnum/fedora-21-atomic-5.qcow2
+    glance image-create --name fedora-21-atomic-5 \
                         --is-public True \
                         --disk-format qcow2 \
                         --property os_distro='fedora-atomic'\
-                        --container-format bare < fedora-21-atomic-3.qcow2
+                        --container-format bare < fedora-21-atomic-5.qcow2
 
 Create a keypair for use with the baymodel::
 
