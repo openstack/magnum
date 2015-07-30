@@ -7,5 +7,5 @@ user = admin
 tenant = admin
 pass = secrete
 [magnum]
-image_id = fedora-21-atomic-3
+image_id = fedora-21-atomic-5
 nic_id = public

@@ -32,11 +32,11 @@ class TestScaleManager(base.TestCase):
         pods = list()
         for h in pod_hosts:
             pod = mock.MagicMock()
-            pod.spec.host = h
+            pod.spec.node_name = h
             pods.append(pod)
 
         mock_k8s_api = mock.MagicMock()
-        mock_k8s_api.listPod.return_value.items = pods
+        mock_k8s_api.list_namespaced_pod.return_value.items = pods
         mock_create_k8s_api.return_value = mock_k8s_api
 
         mock_heat_output = mock.MagicMock()

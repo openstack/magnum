@@ -15,8 +15,8 @@
 from oslo_config import cfg
 
 from magnum.common import config
-from magnum.common.pythonk8sclient.client import ApivbetaApi
-from magnum.common.pythonk8sclient.client import swagger
+from magnum.common.pythonk8sclient.swagger_client import api_client
+from magnum.common.pythonk8sclient.swagger_client.apis import apiv_api
 from magnum.conductor import utils
 from magnum.i18n import _
 
@@ -35,14 +35,14 @@ kubernetes_opts = [
 cfg.CONF.register_opts(kubernetes_opts, group='kubernetes')
 
 
-class K8sAPI(ApivbetaApi.ApivbetaApi):
+class K8sAPI(apiv_api.ApivApi):
 
     def __init__(self, context, obj):
         # retrieve the URL of the k8s API endpoint
         k8s_api_endpoint = self._retrieve_k8s_api_endpoint(context, obj)
 
         # build a connection with Kubernetes master
-        client = swagger.ApiClient(k8s_api_endpoint)
+        client = api_client.ApiClient(k8s_api_endpoint)
 
         super(K8sAPI, self).__init__(client)
 

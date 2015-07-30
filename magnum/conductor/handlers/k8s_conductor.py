@@ -16,12 +16,11 @@ from oslo_log import log as logging
 
 from magnum.common import exception
 from magnum.common import k8s_manifest
+from magnum.common.pythonk8sclient.swagger_client import rest
 from magnum.conductor import k8s_api as k8s
 from magnum.conductor import utils as conductor_utils
 from magnum import objects
 
-import ast
-from six.moves.urllib import error
 
 LOG = logging.getLogger(__name__)
 
@@ -41,11 +40,10 @@ class Handler(object):
         self.k8s_api = k8s.create_k8s_api(context, service)
         manifest = k8s_manifest.parse(service.manifest)
         try:
-            self.k8s_api.createService(body=manifest,
-                                       namespaces='default')
-        except error.HTTPError as err:
-            message = ast.literal_eval(err.read())['message']
-            raise exception.KubernetesAPIFailed(code=err.code, message=message)
+            self.k8s_api.create_namespaced_service(body=manifest,
+                                                   namespace='default')
+        except rest.ApiException as err:
+            raise exception.KubernetesAPIFailed(err=err)
         # call the service object to persist in db
         service.create(context)
         return service
@@ -55,12 +53,11 @@ class Handler(object):
         self.k8s_api = k8s.create_k8s_api(context, service)
         manifest = k8s_manifest.parse(service.manifest)
         try:
-            self.k8s_api.replaceService(name=service.name,
-                                        body=manifest,
-                                        namespaces='default')
-        except error.HTTPError as err:
-            message = ast.literal_eval(err.read())['message']
-            raise exception.KubernetesAPIFailed(code=err.code, message=message)
+            self.k8s_api.replace_namespaced_service(name=str(service.name),
+                                                    body=manifest,
+                                                    namespace='default')
+        except rest.ApiException as err:
+            raise exception.KubernetesAPIFailed(err=err)
         # call the service object to persist in db
         service.refresh(context)
         service.save()
@@ -72,15 +69,13 @@ class Handler(object):
         self.k8s_api = k8s.create_k8s_api(context, service)
         if conductor_utils.object_has_stack(context, service):
             try:
-                self.k8s_api.deleteService(name=service.name,
-                                           namespaces='default')
-            except error.HTTPError as err:
-                if err.code == 404:
+                self.k8s_api.delete_namespaced_service(name=str(service.name),
+                                                       namespace='default')
+            except rest.ApiException as err:
+                if err.status == 404:
                     pass
                 else:
-                    message = ast.literal_eval(err.read())['message']
-                    raise exception.KubernetesAPIFailed(code=err.code,
-                                                        message=message)
+                    raise exception.KubernetesAPIFailed(err=err)
         # call the service object to persist in db
         service.destroy(context)
 
@@ -90,15 +85,15 @@ class Handler(object):
         self.k8s_api = k8s.create_k8s_api(context, pod)
         manifest = k8s_manifest.parse(pod.manifest)
         try:
-            resp = self.k8s_api.createPod(body=manifest, namespaces='default')
-        except error.HTTPError as err:
+            resp = self.k8s_api.create_namespaced_pod(body=manifest,
+                                                      namespace='default')
+        except rest.ApiException as err:
             pod.status = 'failed'
-            if err.code != 409:
+            if err.status != 409:
                 pod.create(context)
-            message = ast.literal_eval(err.read())['message']
-            raise exception.KubernetesAPIFailed(code=err.code, message=message)
+            raise exception.KubernetesAPIFailed(err=err)
         pod.status = resp.status.phase
-        pod.host = resp.spec.host
+        pod.host = resp.spec.node_name
         # call the pod object to persist in db
         # TODO(yuanying): parse pod file and,
         # - extract pod name and set it
@@ -112,11 +107,11 @@ class Handler(object):
         self.k8s_api = k8s.create_k8s_api(context, pod)
         manifest = k8s_manifest.parse(pod.manifest)
         try:
-            self.k8s_api.replacePod(name=pod.name, body=manifest,
-                                    namespaces='default')
-        except error.HTTPError as err:
-            message = ast.literal_eval(err.read())['message']
-            raise exception.KubernetesAPIFailed(code=err.code, message=message)
+            self.k8s_api.replace_namespaced_pod(name=str(pod.name),
+                                                body=manifest,
+                                                namespace='default')
+        except rest.ApiException as err:
+            raise exception.KubernetesAPIFailed(err=err)
         # call the pod object to persist in db
         pod.refresh(context)
         pod.save()
@@ -128,15 +123,13 @@ class Handler(object):
         self.k8s_api = k8s.create_k8s_api(context, pod)
         if conductor_utils.object_has_stack(context, pod):
             try:
-                self.k8s_api.deletePod(name=pod.name,
-                                       namespaces='default')
-            except error.HTTPError as err:
-                if err.code == 404:
+                self.k8s_api.delete_namespaced_pod(name=str(pod.name), body={},
+                                                   namespace='default')
+            except rest.ApiException as err:
+                if err.status == 404:
                     pass
                 else:
-                    message = ast.literal_eval(err.read())['message']
-                    raise exception.KubernetesAPIFailed(code=err.code,
-                                                        message=message)
+                    raise exception.KubernetesAPIFailed(err=err)
         # call the pod object to persist in db
         pod.destroy(context)
 
@@ -146,11 +139,10 @@ class Handler(object):
         self.k8s_api = k8s.create_k8s_api(context, rc)
         manifest = k8s_manifest.parse(rc.manifest)
         try:
-            self.k8s_api.createReplicationController(body=manifest,
-                                                     namespaces='default')
-        except error.HTTPError as err:
-            message = ast.literal_eval(err.read())['message']
-            raise exception.KubernetesAPIFailed(code=err.code, message=message)
+            self.k8s_api.create_namespaced_replication_controller(
+                body=manifest, namespace='default')
+        except rest.ApiException as err:
+            raise exception.KubernetesAPIFailed(err=err)
         # call the rc object to persist in db
         rc.create(context)
         return rc
@@ -160,12 +152,10 @@ class Handler(object):
         self.k8s_api = k8s.create_k8s_api(context, rc)
         manifest = k8s_manifest.parse(rc.manifest)
         try:
-            self.k8s_api.replaceReplicationController(name=rc.name,
-                                                      body=manifest,
-                                                      namespaces='default')
-        except error.HTTPError as err:
-            message = ast.literal_eval(err.read())['message']
-            raise exception.KubernetesAPIFailed(code=err.code, message=message)
+            self.k8s_api.replace_namespaced_replication_controller(
+                name=str(rc.name), body=manifest, namespace='default')
+        except rest.ApiException as err:
+            raise exception.KubernetesAPIFailed(err=err)
         # call the rc object to persist in db
         rc.refresh(context)
         rc.save()
@@ -177,14 +167,12 @@ class Handler(object):
         self.k8s_api = k8s.create_k8s_api(context, rc)
         if conductor_utils.object_has_stack(context, rc):
             try:
-                self.k8s_api.deleteReplicationController(name=rc.name,
-                                                         namespaces='default')
-            except error.HTTPError as err:
-                if err.code == 404:
+                self.k8s_api.delete_namespaced_replication_controller(
+                    name=str(rc.name), body={}, namespace='default')
+            except rest.ApiException as err:
+                if err.status == 404:
                     pass
                 else:
-                    message = ast.literal_eval(err.read())['message']
-                    raise exception.KubernetesAPIFailed(code=err.code,
-                                                        message=message)
+                    raise exception.KubernetesAPIFailed(err=err)
         # call the rc object to persist in db
         rc.destroy(context)

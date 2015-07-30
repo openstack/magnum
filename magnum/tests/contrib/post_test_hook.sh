@@ -60,7 +60,7 @@ popd
 # First we test Magnum's command line to see if we can stand up
 # a baymodel, bay and a pod
 export NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
-export IMAGE_ID=$(glance --os-image-api-version 1 image-show fedora-21-atomic-3 | awk '/ id /{print $4}')
+export IMAGE_ID=$(glance --os-image-api-version 1 image-show fedora-21-atomic-5 | awk '/ id /{print $4}')
 
 
 # pass the appropriate variables via a config file
