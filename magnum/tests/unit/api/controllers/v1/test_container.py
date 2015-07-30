@@ -40,7 +40,7 @@ class TestContainerController(api_base.FunctionalTest):
 
     @patch('magnum.conductor.api.API.container_create')
     def test_create_container(self, mock_container_create):
-        mock_container_create.side_effect = lambda x, y, z: z
+        mock_container_create.side_effect = lambda x: x
 
         params = ('{"name": "My Docker", "image": "ubuntu",'
                   '"command": "env",'
@@ -59,7 +59,7 @@ class TestContainerController(api_base.FunctionalTest):
                                            mock_container_delete,
                                            mock_container_create,
                                            mock_container_show):
-        mock_container_create.side_effect = lambda x, y, z: z
+        mock_container_create.side_effect = lambda x: x
         # Create a container with a command
         params = ('{"name": "My Docker", "image": "ubuntu",'
                   '"command": "env",'
@@ -97,7 +97,7 @@ class TestContainerController(api_base.FunctionalTest):
                                             mock_container_delete,
                                             mock_container_create,
                                             mock_container_show):
-        mock_container_create.side_effect = lambda x, y, z: z
+        mock_container_create.side_effect = lambda x: x
         # Create a container with a command
         params = ('{"name": "My Docker", "image": "ubuntu",'
                   '"command": "env",'
