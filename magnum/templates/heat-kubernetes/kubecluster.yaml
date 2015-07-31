@@ -66,17 +66,17 @@ parameters:
     description: >
       if true use the vxlan backend, otherwise use the default
       udp backend
-    default: false
+    default: "false"
     constraints:
-      - allowed_values: [true, false]
+      - allowed_values: ["true", "false"]
 
   kube_allow_priv:
     type: string
     description: >
       whether or not kubernetes should permit privileged containers.
-    default: true
+    default: "true"
     constraints:
-      - allowed_values: [true, false]
+      - allowed_values: ["true", "false"]
 
   docker_volume_size:
     type: number
