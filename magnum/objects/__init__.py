@@ -20,6 +20,7 @@ from magnum.objects import node
 from magnum.objects import pod
 from magnum.objects import replicationcontroller as rc
 from magnum.objects import service
+from magnum.objects import x509keypair
 
 
 Container = container.Container
@@ -30,6 +31,7 @@ Node = node.Node
 Pod = pod.Pod
 ReplicationController = rc.ReplicationController
 Service = service.Service
+X509KeyPair = x509keypair.X509KeyPair
 
 __all__ = (Bay,
            BayLock,
@@ -38,4 +40,5 @@ __all__ = (Bay,
            Node,
            Pod,
            ReplicationController,
-           Service)
+           Service,
+           X509KeyPair)

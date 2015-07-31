@@ -178,3 +178,30 @@ def create_test_node(context, **kw):
     node = get_test_node(context, **kw)
     node.create()
     return node
+
+
+def get_test_x509keypair(context, **kw):
+    """Return a X509KeyPair object with appropriate attributes.
+
+    NOTE: The object leaves the attributes marked as changed, such
+    that a create() could be used to commit it to the DB.
+    """
+    db_x509keypair = db_utils.get_test_x509keypair(**kw)
+    # Let DB generate ID if it isn't specified explicitly
+    if 'id' not in kw:
+        del db_x509keypair['id']
+    x509keypair = objects.X509KeyPair(context)
+    for key in db_x509keypair:
+        setattr(x509keypair, key, db_x509keypair[key])
+    return x509keypair
+
+
+def create_test_x509keypair(context, **kw):
+    """Create and return a test x509keypair object.
+
+    Create a x509keypair in the DB and return a X509KeyPair object with
+    appropriate attributes.
+    """
+    x509keypair = get_test_x509keypair(context, **kw)
+    x509keypair.create()
+    return x509keypair

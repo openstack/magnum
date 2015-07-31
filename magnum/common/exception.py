@@ -462,3 +462,11 @@ class KubernetesAPIFailed(MagnumException):
     def __init__(self, message=None, **kwargs):
         self.__class__.code = kwargs.get('code')
         super(KubernetesAPIFailed, self).__init__(message, **kwargs)
+
+
+class X509KeyPairNotFound(ResourceNotFound):
+    message = _("A key pair %(keypair)s could not be found.")
+
+
+class X509KeyPairAlreadyExists(Conflict):
+    message = _("A key pair with UUID %(uuid)s already exists.")

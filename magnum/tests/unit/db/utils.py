@@ -260,3 +260,35 @@ def get_test_baylock(**kw):
         'conductor_id': kw.get('conductor_id',
                                '72625085-c507-4410-9b28-cd7cf1fbf1ad'),
     }
+
+
+def get_test_x509keypair(**kw):
+    return {
+        'id': kw.get('id', 42),
+        'uuid': kw.get('uuid', '72625085-c507-4410-9b28-cd7cf1fbf1ad'),
+        'name': kw.get('name', 'x509keypair1'),
+        'project_id': kw.get('project_id', 'fake_project'),
+        'user_id': kw.get('user_id', 'fake_user'),
+        'bay_uuid': kw.get('bay_uuid',
+                           '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'),
+        'ca_cert': kw.get('ca_cert', 'client_ca'),
+        'certificate': kw.get('certificate',
+                              'certificate'),
+        'private_key': kw.get('private_key', 'private_key'),
+        'created_at': kw.get('created_at'),
+        'updated_at': kw.get('updated_at'),
+    }
+
+
+def create_test_x509keypair(**kw):
+    """Create test x509keypair entry in DB and return X509KeyPair DB object.
+    Function to be used to create test X509KeyPair objects in the database.
+    :param kw: kwargs with overriding values for x509keypair's attributes.
+    :returns: Test X509KeyPair DB object.
+    """
+    x509keypair = get_test_x509keypair(**kw)
+    # Let DB generate ID if it isn't specified explicitly
+    if 'id' not in kw:
+        del x509keypair['id']
+    dbapi = db_api.get_instance()
+    return dbapi.create_x509keypair(x509keypair)
