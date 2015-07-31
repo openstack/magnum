@@ -3,7 +3,7 @@ heat_template_version: 2013-05-23
 description: >
   This template will boot a Kubernetes cluster with one or more
   minions (as specified by the number_of_minions parameter, which
-  defaults to 2).
+  defaults to 1).
 
 parameters:
 
@@ -39,7 +39,7 @@ parameters:
     type: string
     description: how many kubernetes minions to spawn
     default: 1
-  
+
   fixed_network_cidr:
     type: string
     description: network range for fixed ip network
