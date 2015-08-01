@@ -168,6 +168,55 @@ class TestContainerController(api_base.FunctionalTest):
                          test_container['uuid'])
 
     @patch('magnum.conductor.api.API.container_show')
+    @patch('magnum.objects.Container.list')
+    def test_get_all_containers_with_pagination_marker(self,
+                                                       mock_container_list,
+                                                       mock_container_show):
+        container_list = []
+        for id_ in range(4):
+            test_container = utils.create_test_container(
+                id=id_, uuid=comm_utils.generate_uuid())
+            container_list.append(objects.Container(self.context,
+                                                    **test_container))
+        mock_container_list.return_value = container_list[-1:]
+        mock_container_show.return_value = container_list[-1]
+        response = self.app.get('/v1/containers?limit=3&marker=%s'
+                                % container_list[2].uuid)
+
+        self.assertEqual(response.status_int, 200)
+        actual_containers = response.json['containers']
+        self.assertEqual(1, len(actual_containers))
+        self.assertEqual(container_list[-1].uuid,
+                         actual_containers[0].get('uuid'))
+
+    @patch('magnum.conductor.api.API.container_show')
+    @patch('magnum.objects.Container.list')
+    def test_detail_containers_with_pagination_marker(self,
+                                                      mock_container_list,
+                                                      mock_container_show):
+        container_list = []
+        for id_ in range(4):
+            test_container = utils.create_test_container(
+                id=id_, uuid=comm_utils.generate_uuid())
+            container_list.append(objects.Container(self.context,
+                                                    **test_container))
+        mock_container_list.return_value = container_list[-1:]
+        mock_container_show.return_value = container_list[-1]
+        response = self.app.get('/v1/containers/detail?limit=3&marker=%s'
+                                % container_list[2].uuid)
+
+        self.assertEqual(response.status_int, 200)
+        actual_containers = response.json['containers']
+        self.assertEqual(1, len(actual_containers))
+        self.assertEqual(container_list[-1].uuid,
+                         actual_containers[0].get('uuid'))
+        self.assertIn('name', actual_containers[0])
+        self.assertIn('bay_uuid', actual_containers[0])
+        self.assertIn('status', actual_containers[0])
+        self.assertIn('image', actual_containers[0])
+        self.assertIn('command', actual_containers[0])
+
+    @patch('magnum.conductor.api.API.container_show')
     @patch('magnum.objects.Container.get_by_uuid')
     def test_get_one_by_uuid(self, mock_container_get_by_uuid,
                              mock_container_show):

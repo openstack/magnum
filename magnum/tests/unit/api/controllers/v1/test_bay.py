@@ -99,6 +99,18 @@ class TestListBay(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
+    def test_get_all_with_pagination_marker(self):
+        bay_list = []
+        for id_ in range(4):
+            bay = obj_utils.create_test_bay(self.context, id=id_,
+                                            uuid=utils.generate_uuid())
+            bay_list.append(bay)
+
+        response = self.get_json('/bays?limit=3&marker=%s'
+                                 % bay_list[2].uuid)
+        self.assertEqual(1, len(response['bays']))
+        self.assertEqual(bay_list[-1].uuid, response['bays'][0]['uuid'])
+
     def test_detail(self):
         bay = obj_utils.create_test_bay(self.context)
         response = self.get_json('/bays/detail')
@@ -107,6 +119,25 @@ class TestListBay(api_base.FunctionalTest):
         self.assertIn('baymodel_id', response['bays'][0])
         self.assertIn('node_count', response['bays'][0])
         self.assertIn('status', response['bays'][0])
+
+    def test_detail_with_pagination_marker(self):
+        bay_list = []
+        for id_ in range(4):
+            bay = obj_utils.create_test_bay(self.context, id=id_,
+                                            uuid=utils.generate_uuid())
+            bay_list.append(bay)
+
+        response = self.get_json('/bays/detail?limit=3&marker=%s'
+                                 % bay_list[2].uuid)
+        self.assertEqual(1, len(response['bays']))
+        self.assertEqual(bay_list[-1].uuid, response['bays'][0]['uuid'])
+        self.assertIn('name', response['bays'][0])
+        self.assertIn('baymodel_id', response['bays'][0])
+        self.assertIn('node_count', response['bays'][0])
+        self.assertIn('status', response['bays'][0])
+        self.assertIn('discovery_url', response['bays'][0])
+        self.assertIn('api_address', response['bays'][0])
+        self.assertIn('node_addresses', response['bays'][0])
 
     def test_detail_against_single(self):
         bay = obj_utils.create_test_bay(self.context)

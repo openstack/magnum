@@ -59,10 +59,34 @@ class TestListNode(api_base.FunctionalTest):
         self.assertEqual(node.uuid, response['uuid'])
         self._assert_node_fields(response)
 
+    def test_get_all_with_pagination_marker(self):
+        node_list = []
+        for id_ in range(4):
+            node = obj_utils.create_test_node(self.context, id=id_,
+                                              uuid=utils.generate_uuid())
+            node_list.append(node.uuid)
+
+        response = self.get_json('/nodes?limit=3&marker=%s' % node_list[2])
+        self.assertEqual(1, len(response['nodes']))
+        self.assertEqual(node_list[-1], response['nodes'][0]['uuid'])
+
     def test_detail(self):
         node = obj_utils.create_test_node(self.context)
         response = self.get_json('/nodes/detail')
         self.assertEqual(node.uuid, response['nodes'][0]["uuid"])
+        self._assert_node_fields(response['nodes'][0])
+
+    def test_detail_with_pagination_marker(self):
+        node_list = []
+        for id_ in range(4):
+            node = obj_utils.create_test_node(self.context, id=id_,
+                                              uuid=utils.generate_uuid())
+            node_list.append(node.uuid)
+
+        response = self.get_json('/nodes/detail?limit=3&marker=%s'
+                                 % node_list[2])
+        self.assertEqual(1, len(response['nodes']))
+        self.assertEqual(node_list[-1], response['nodes'][0]['uuid'])
         self._assert_node_fields(response['nodes'][0])
 
     def test_detail_against_single(self):
