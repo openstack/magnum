@@ -141,18 +141,6 @@ http://docs.openstack.org/developer/devstack/configuration.html
 More neutron configuration information can be found at
 http://docs.openstack.org/developer/devstack/guides/neutron.html
 
-Create a local.sh to automatically make necessary networking changes during
-the devstack deployment process. This will allow bays spawned by magnum to
-access the internet through PUBLIC_INTERFACE::
-
-    cat > /opt/stack/devstack/local.sh << 'END_LOCAL_SH'
-    #!/bin/sh
-    ROUTE_TO_INTERNET=$(ip route get 8.8.8.8)
-    OBOUND_DEV=$(echo ${ROUTE_TO_INTERNET#*dev} | awk '{print $1}')
-    sudo iptables -t nat -A POSTROUTING -o $OBOUND_DEV -j MASQUERADE
-    END_LOCAL_SH
-    chmod 755 /opt/stack/devstack/local.sh
-
 Run devstack::
 
     cd /opt/stack/devstack

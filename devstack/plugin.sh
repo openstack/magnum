@@ -45,6 +45,8 @@ if is_service_enabled m-api m-cond; then
         # Start the magnum API and magnum taskmgr components
         echo_summary "Starting magnum"
         start_magnum
+
+        configure_iptables
     fi
 
     if [[ "$1" == "unstack" ]]; then
