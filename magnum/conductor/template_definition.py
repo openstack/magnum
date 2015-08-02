@@ -42,6 +42,9 @@ template_def_opts = [
                                          'kubecluster-coreos.yaml'),
                help=_(
                    'Location of template to build a k8s cluster on CoreOS.')),
+    cfg.StrOpt('etcd_discovery_service_endpoint_format',
+               default='https://discovery.etcd.io/new?size=%(size)d',
+               help=_('Url for etcd public discovery endpoint.')),
     cfg.StrOpt('coreos_discovery_token_url',
                default=None,
                deprecated_name='discovery_token_url',
@@ -360,6 +363,20 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
         self.add_output('kube_minions_external',
                         bay_attr='node_addresses')
 
+    def get_discovery_url(self, bay):
+        if hasattr(bay, 'discovery_url') and bay.discovery_url:
+            discovery_url = bay.discovery_url
+        else:
+            # TODO(hongbin): Eliminate hard coding of the size when multiple
+            # masters is supported.
+            discovery_endpoint = (
+                cfg.CONF.bay.etcd_discovery_service_endpoint_format %
+                {'size': 1})
+            discovery_url = requests.get(discovery_endpoint).text
+            bay.discovery_url = discovery_url
+
+        return discovery_url
+
     def get_params(self, context, baymodel, bay, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
         scale_mgr = kwargs.pop('scale_manager', None)
@@ -367,6 +384,8 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
             hosts = self.get_output('kube_minions')
             extra_params['minions_to_remove'] = (
                 scale_mgr.get_removal_nodes(hosts))
+
+        extra_params['discovery_url'] = self.get_discovery_url(bay)
 
         return super(AtomicK8sTemplateDefinition,
                      self).get_params(context, baymodel, bay,

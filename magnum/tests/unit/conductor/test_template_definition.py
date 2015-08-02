@@ -139,11 +139,14 @@ class TemplateDefinitionTestCase(base.TestCase):
 
 class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
 
+    @mock.patch('magnum.conductor.template_definition'
+                '.AtomicK8sTemplateDefinition.get_discovery_url')
     @mock.patch('magnum.conductor.template_definition.BaseTemplateDefinition'
                 '.get_params')
     @mock.patch('magnum.conductor.template_definition.TemplateDefinition'
                 '.get_output')
-    def test_k8s_get_params(self, mock_get_output, mock_get_params):
+    def test_k8s_get_params(self, mock_get_output, mock_get_params,
+                            mock_get_discovery_url):
         mock_context = mock.MagicMock()
         mock_baymodel = mock.MagicMock()
         mock_bay = mock.MagicMock()
@@ -151,13 +154,15 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
 
         removal_nodes = ['node1', 'node2']
         mock_scale_manager.get_removal_nodes.return_value = removal_nodes
+        mock_get_discovery_url.return_value = 'fake_discovery_url'
         k8s_def = tdef.AtomicK8sTemplateDefinition()
 
         k8s_def.get_params(mock_context, mock_baymodel, mock_bay,
                            scale_manager=mock_scale_manager)
 
         expected_kwargs = {'extra_params': {
-            'minions_to_remove': removal_nodes}}
+            'minions_to_remove': removal_nodes,
+            'discovery_url': 'fake_discovery_url'}}
         mock_get_params.assert_called_once_with(mock_context, mock_baymodel,
                                                 mock_bay, **expected_kwargs)
 
