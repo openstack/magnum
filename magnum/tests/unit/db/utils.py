@@ -80,6 +80,7 @@ def get_test_bay(**kw):
         'api_address': kw.get('api_address', '172.17.2.3'),
         'node_addresses': kw.get('node_addresses', ['172.17.2.4']),
         'node_count': kw.get('node_count', 3),
+        'master_count': kw.get('master_count', 3),
         'created_at': kw.get('created_at'),
         'updated_at': kw.get('updated_at'),
     }
