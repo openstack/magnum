@@ -469,6 +469,14 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['error_message'])
 
+    def test_create_bay_with_no_node_count(self):
+        bdict = apiutils.bay_post_data()
+        del bdict['node_count']
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(201, response.status_int)
+        self.assertEqual(1, response.json['node_count'])
+
     def test_create_bay_with_invalid_long_name(self):
         bdict = apiutils.bay_post_data(name='x' * 256)
         response = self.post_json('/bays', bdict, expect_errors=True)
