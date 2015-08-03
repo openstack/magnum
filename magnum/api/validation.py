@@ -21,21 +21,19 @@ from magnum import objects
 
 
 def enforce_bay_types(*bay_types):
-    def decorate(func):
-        @decorator.decorator
-        def handler(func, *args, **kwargs):
-            obj = args[1]
-            bay = objects.Bay.get_by_uuid(pecan.request.context, obj.bay_uuid)
-            baymodel = objects.BayModel.get_by_uuid(pecan.request.context,
-                                                    bay.baymodel_id)
-            if baymodel.coe not in bay_types:
-                raise exception.InvalidParameterValue(
-                    'Cannot fulfill request with a %(bay_type)s bay, '
-                    'expecting a %(supported_bay_types)s bay.' %
-                    {'bay_type': baymodel.coe,
-                     'supported_bay_types': '/'.join(bay_types)})
+    @decorator.decorator
+    def wrapper(func, *args, **kwargs):
+        obj = args[1]
+        bay = objects.Bay.get_by_uuid(pecan.request.context, obj.bay_uuid)
+        baymodel = objects.BayModel.get_by_uuid(pecan.request.context,
+                                                bay.baymodel_id)
+        if baymodel.coe not in bay_types:
+            raise exception.InvalidParameterValue(
+                'Cannot fulfill request with a %(bay_type)s bay, '
+                'expecting a %(supported_bay_types)s bay.' %
+                {'bay_type': baymodel.coe,
+                 'supported_bay_types': '/'.join(bay_types)})
 
-            return func(*args, **kwargs)
-        return handler(func)
+        return func(*args, **kwargs)
 
-    return decorate
+    return wrapper
