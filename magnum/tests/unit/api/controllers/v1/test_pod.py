@@ -88,10 +88,34 @@ class TestListPod(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
+    def test_get_all_with_pagination_marker(self):
+        pod_list = []
+        for id_ in range(4):
+            pod = obj_utils.create_test_pod(self.context, id=id_,
+                                            uuid=utils.generate_uuid())
+            pod_list.append(pod.uuid)
+
+        response = self.get_json('/pods?limit=3&marker=%s' % pod_list[2])
+        self.assertEqual(1, len(response['pods']))
+        self.assertEqual(pod_list[-1], response['pods'][0]['uuid'])
+
     def test_detail(self):
         pod = obj_utils.create_test_pod(self.context)
         response = self.get_json('/pods/detail')
         self.assertEqual(pod.uuid, response['pods'][0]["uuid"])
+        self._assert_pod_fields(response['pods'][0])
+
+    def test_detail_with_pagination_marker(self):
+        pod_list = []
+        for id_ in range(4):
+            pod = obj_utils.create_test_pod(self.context, id=id_,
+                                            uuid=utils.generate_uuid())
+            pod_list.append(pod.uuid)
+
+        response = self.get_json('/pods/detail?limit=3&marker=%s'
+                                 % pod_list[2])
+        self.assertEqual(1, len(response['pods']))
+        self.assertEqual(pod_list[-1], response['pods'][0]['uuid'])
         self._assert_pod_fields(response['pods'][0])
 
     def test_detail_against_single(self):

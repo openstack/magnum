@@ -93,10 +93,35 @@ class TestListService(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
+    def test_get_all_with_pagination_marker(self):
+        service_list = []
+        for id_ in range(4):
+            service = obj_utils.create_test_service(self.context, id=id_,
+                                                    uuid=utils.generate_uuid())
+            service_list.append(service.uuid)
+
+        response = self.get_json('/services?limit=3&marker=%s'
+                                 % service_list[2])
+        self.assertEqual(1, len(response['services']))
+        self.assertEqual(service_list[-1], response['services'][0]['uuid'])
+
     def test_detail(self):
         service = obj_utils.create_test_service(self.context)
         response = self.get_json('/services/detail')
         self.assertEqual(service.uuid, response['services'][0]["uuid"])
+        self._assert_service_fields(response['services'][0])
+
+    def test_detail_with_pagination_marker(self):
+        service_list = []
+        for id_ in range(4):
+            service = obj_utils.create_test_service(self.context, id=id_,
+                                                    uuid=utils.generate_uuid())
+            service_list.append(service.uuid)
+
+        response = self.get_json('/services/detail?limit=3&marker=%s'
+                                 % service_list[2])
+        self.assertEqual(1, len(response['services']))
+        self.assertEqual(service_list[-1], response['services'][0]['uuid'])
         self._assert_service_fields(response['services'][0])
 
     def test_detail_against_single(self):

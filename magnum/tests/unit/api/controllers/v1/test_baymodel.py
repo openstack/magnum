@@ -106,10 +106,45 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
+    def test_get_all_with_pagination_marker(self):
+        bm_list = []
+        for id_ in range(4):
+            baymodel = obj_utils.create_test_baymodel(
+                self.context, id=id_,
+                uuid=utils.generate_uuid())
+            bm_list.append(baymodel)
+
+        response = self.get_json('/baymodels?limit=3&marker=%s'
+                                 % bm_list[2].uuid)
+        self.assertEqual(1, len(response['baymodels']))
+        self.assertEqual(bm_list[-1].uuid, response['baymodels'][0]['uuid'])
+
     def test_detail(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
         response = self.get_json('/baymodels/detail')
         self.assertEqual(baymodel.uuid, response['baymodels'][0]["uuid"])
+        self.assertIn('flavor_id', response['baymodels'][0])
+        self.assertIn('master_flavor_id', response['baymodels'][0])
+        self.assertIn('dns_nameserver', response['baymodels'][0])
+        self.assertIn('keypair_id', response['baymodels'][0])
+        self.assertIn('external_network_id', response['baymodels'][0])
+        self.assertIn('fixed_network', response['baymodels'][0])
+        self.assertIn('docker_volume_size', response['baymodels'][0])
+        self.assertIn('ssh_authorized_key', response['baymodels'][0])
+        self.assertIn('coe', response['baymodels'][0])
+
+    def test_detail_with_pagination_marker(self):
+        bm_list = []
+        for id_ in range(4):
+            baymodel = obj_utils.create_test_baymodel(
+                self.context, id=id_,
+                uuid=utils.generate_uuid())
+            bm_list.append(baymodel)
+
+        response = self.get_json('/baymodels/detail?limit=3&marker=%s'
+                                 % bm_list[2].uuid)
+        self.assertEqual(1, len(response['baymodels']))
+        self.assertEqual(bm_list[-1].uuid, response['baymodels'][0]['uuid'])
         self.assertIn('flavor_id', response['baymodels'][0])
         self.assertIn('master_flavor_id', response['baymodels'][0])
         self.assertIn('dns_nameserver', response['baymodels'][0])

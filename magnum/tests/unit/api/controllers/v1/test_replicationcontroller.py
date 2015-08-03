@@ -92,10 +92,34 @@ class TestListRC(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
+    def test_get_all_with_pagination_marker(self):
+        rc_list = []
+        for id_ in range(4):
+            rc = obj_utils.create_test_rc(self.context, id=id_,
+                                          uuid=utils.generate_uuid())
+            rc_list.append(rc.uuid)
+
+        response = self.get_json('/rcs?limit=3&marker=%s' % rc_list[2])
+        self.assertEqual(1, len(response['rcs']))
+        self.assertEqual(rc_list[-1], response['rcs'][0]['uuid'])
+
     def test_detail(self):
         rc = obj_utils.create_test_rc(self.context)
         response = self.get_json('/rcs/detail')
         self.assertEqual(rc.uuid, response['rcs'][0]["uuid"])
+        self._assert_rc_fields(response['rcs'][0])
+
+    def test_detail_with_pagination_marker(self):
+        rc_list = []
+        for id_ in range(4):
+            rc = obj_utils.create_test_rc(self.context, id=id_,
+                                          uuid=utils.generate_uuid())
+            rc_list.append(rc.uuid)
+
+        response = self.get_json('/rcs/detail?limit=3&marker=%s'
+                                 % rc_list[2])
+        self.assertEqual(1, len(response['rcs']))
+        self.assertEqual(rc_list[-1], response['rcs'][0]['uuid'])
         self._assert_rc_fields(response['rcs'][0])
 
     def test_detail_against_single(self):
