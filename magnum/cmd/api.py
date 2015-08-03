@@ -21,10 +21,12 @@ from wsgiref import simple_server
 
 from oslo_config import cfg
 from oslo_log import log as logging
+from oslo_reports import guru_meditation_report as gmr
 
 from magnum.api import app as api_app
 from magnum.common import service
 from magnum.i18n import _LI
+from magnum import version
 
 
 LOG = logging.getLogger(__name__)
@@ -32,6 +34,8 @@ LOG = logging.getLogger(__name__)
 
 def main():
     service.prepare_service(sys.argv)
+
+    gmr.TextGuruMeditation.setup_autorun(version)
 
     app = api_app.setup_app()
 

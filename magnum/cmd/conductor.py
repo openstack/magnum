@@ -20,6 +20,7 @@ import sys
 
 from oslo_config import cfg
 from oslo_log import log as logging
+from oslo_reports import guru_meditation_report as gmr
 from oslo_service import service
 
 from magnum.common import rpc_service
@@ -31,12 +32,15 @@ from magnum.conductor.handlers import docker_conductor
 from magnum.conductor.handlers import k8s_conductor
 from magnum.i18n import _LE
 from magnum.i18n import _LI
+from magnum import version
 
 LOG = logging.getLogger(__name__)
 
 
 def main():
     magnum_service.prepare_service(sys.argv)
+
+    gmr.TextGuruMeditation.setup_autorun(version)
 
     LOG.info(_LI('Starting server in PID %s') % os.getpid())
     LOG.debug("Configuration:")
