@@ -35,9 +35,9 @@ parameters:
     type: string
     description: >
       whether or not kubernetes should permit privileged containers.
-    default: false
+    default: "false"
     constraints:
-      - allowed_values: [true, false]
+      - allowed_values: ["true", "false"]
 
   flannel_network_cidr:
     type: string
@@ -54,9 +54,9 @@ parameters:
     description: >
       if true use the vxlan backend, otherwise use the default
       udp backend
-    default: false
+    default: "false"
     constraints:
-      - allowed_values: [true, false]
+      - allowed_values: ["true", "false"]
 
   discovery_url:
     type: string
