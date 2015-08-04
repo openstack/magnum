@@ -266,6 +266,10 @@ class BaysController(rest.RestController):
         auth_token = context.auth_token_info['token']
         bay_dict['project_id'] = auth_token['project']['id']
         bay_dict['user_id'] = auth_token['user']['id']
+        # NOTE(suro-patz): Apply default node_count is 1, None -> 1
+        if bay_dict.get('node_count', None) is None:
+            bay_dict['node_count'] = 1
+
         new_bay = objects.Bay(context, **bay_dict)
         if isinstance(bay.bay_create_timeout, wsme.types.UnsetType):
             bay.bay_create_timeout = 0
