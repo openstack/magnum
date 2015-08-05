@@ -52,6 +52,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'api_address': '172.17.2.3',
             'node_addresses': ['172.17.2.4'],
             'node_count': 1,
+            'master_count': 1,
             'discovery_url': 'https://discovery.etcd.io/test',
         }
 
@@ -87,6 +88,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'master_flavor_id': 'master_flavor',
             'apiserver_port': '',
             'node_count': 'number_of_minions',
+            'master_count': 'number_of_masters',
             'discovery_url': 'discovery_url',
         }
         expected = {
@@ -97,6 +99,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'minion_flavor': 'flavor_id',
             'master_flavor': 'master_flavor_id',
             'number_of_minions': '1',
+            'number_of_masters': '1',
             'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
             'discovery_url': 'https://discovery.etcd.io/test',
@@ -135,6 +138,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'minion_flavor': 'flavor_id',
             'master_flavor': 'master_flavor_id',
             'number_of_minions': '1',
+            'number_of_masters': '1',
             'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
             'ssh_authorized_key': 'ssh_authorized_key',
@@ -172,6 +176,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'minion_flavor': 'flavor_id',
             'master_flavor': 'master_flavor_id',
             'number_of_minions': '1',
+            'number_of_masters': '1',
             'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
             'ssh_authorized_key': 'ssh_authorized_key',
@@ -251,6 +256,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'master_flavor': 'master_flavor_id',
             'minion_flavor': 'flavor_id',
             'number_of_minions': '1',
+            'number_of_masters': '1',
             'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
             'discovery_url': 'https://discovery.etcd.io/test',
@@ -274,6 +280,14 @@ class TestBayConductorWithK8s(base.TestCase):
         self._test_extract_template_definition(
             mock_objects_baymodel_get_by_uuid,
             missing_attr='node_count')
+
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_template_definition_without_master_count(
+            self,
+            mock_objects_baymodel_get_by_uuid):
+        self._test_extract_template_definition(
+            mock_objects_baymodel_get_by_uuid,
+            missing_attr='master_count')
 
     @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
@@ -305,6 +319,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'master_flavor': 'master_flavor_id',
             'minion_flavor': 'flavor_id',
             'number_of_minions': '1',
+            'number_of_masters': '1',
             'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
             'discovery_url': 'https://address/token',

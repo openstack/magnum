@@ -81,6 +81,9 @@ class Bay(base.APIBase):
     node_count = wtypes.IntegerType(minimum=1)
     """The node count for this bay"""
 
+    master_count = wsme.wsattr(wtypes.IntegerType(minimum=1), default=1)
+    """The number of master nodes for this bay"""
+
     bay_create_timeout = wtypes.IntegerType(minimum=0)
     """Timeout for creating the bay in minutes. Set to 0 for no timeout."""
 
@@ -118,7 +121,7 @@ class Bay(base.APIBase):
         if not expand:
             bay.unset_fields_except(['uuid', 'name', 'baymodel_id',
                                      'node_count', 'status',
-                                     'bay_create_timeout'])
+                                     'bay_create_timeout', 'master_count'])
 
         bay.links = [link.Link.make_link('self', url,
                                          'bays', bay.uuid),
@@ -138,6 +141,7 @@ class Bay(base.APIBase):
                      name='example',
                      baymodel_id='4a96ac4b-2447-43f1-8ca6-9fd6f36d146d',
                      node_count=2,
+                     master_count=1,
                      bay_create_timeout=15,
                      status="CREATE_COMPLETE",
                      status_reason="CREATE completed successfully",

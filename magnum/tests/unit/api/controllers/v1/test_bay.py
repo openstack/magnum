@@ -52,7 +52,8 @@ class TestListBay(api_base.FunctionalTest):
         bay = obj_utils.create_test_bay(self.context)
         response = self.get_json('/bays')
         self.assertEqual(bay.uuid, response['bays'][0]["uuid"])
-        for key in ("name", "baymodel_id", "node_count", "status"):
+        for key in ("name", "baymodel_id", "node_count", "status",
+                    "master_count"):
             self.assertIn(key, response['bays'][0])
 
     def test_get_one(self):
@@ -60,7 +61,8 @@ class TestListBay(api_base.FunctionalTest):
         response = self.get_json('/bays/%s' % bay['uuid'])
         self.assertEqual(bay.uuid, response['uuid'])
         for key in ("name", "baymodel_id", "node_count", "status",
-                    "api_address", "discovery_url", "node_addresses"):
+                    "api_address", "discovery_url", "node_addresses",
+                    "master_count"):
             self.assertIn(key, response)
 
     def test_get_one_by_name(self):
@@ -68,7 +70,8 @@ class TestListBay(api_base.FunctionalTest):
         response = self.get_json('/bays/%s' % bay['name'])
         self.assertEqual(bay.uuid, response['uuid'])
         for key in ("name", "baymodel_id", "node_count", "status",
-                    "api_address", "discovery_url", "node_addresses"):
+                    "api_address", "discovery_url", "node_addresses",
+                    "master_count"):
             self.assertIn(key, response)
 
     def test_get_one_by_name_not_found(self):
@@ -105,7 +108,8 @@ class TestListBay(api_base.FunctionalTest):
         bay = obj_utils.create_test_bay(self.context)
         response = self.get_json('/bays/detail')
         self.assertEqual(bay.uuid, response['bays'][0]["uuid"])
-        for key in ("name", "baymodel_id", "node_count", "status"):
+        for key in ("name", "baymodel_id", "node_count", "status",
+                    "master_count"):
             self.assertIn(key, response['bays'][0])
 
     def test_detail_with_pagination_marker(self):
@@ -367,6 +371,7 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(self.bay.uuid, response['uuid'])
         self.assertEqual(self.bay.baymodel_id, response['baymodel_id'])
         self.assertEqual(self.bay.node_count, response['node_count'])
+        self.assertEqual(self.bay.master_count, response['master_count'])
 
     def test_remove_uuid(self):
         response = self.patch_json('/bays/%s' % self.bay.uuid,
@@ -491,6 +496,22 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
         self.assertEqual(1, response.json['node_count'])
+
+    def test_create_bay_with_master_count_zero(self):
+        bdict = apiutils.bay_post_data()
+        bdict['master_count'] = 0
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_int)
+        self.assertTrue(response.json['error_message'])
+
+    def test_create_bay_with_no_master_count(self):
+        bdict = apiutils.bay_post_data()
+        del bdict['master_count']
+        response = self.post_json('/bays', bdict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(201, response.status_int)
+        self.assertEqual(1, response.json['master_count'])
 
     def test_create_bay_with_invalid_long_name(self):
         bdict = apiutils.bay_post_data(name='x' * 256)
