@@ -3,13 +3,10 @@ heat_template_version: 2013-05-23
 description: >
   This template will boot a Kubernetes cluster with one or more
   minions (as specified by the number_of_minions parameter, which
-  defaults to "1").
+  defaults to 1).
 
 parameters:
 
-  #
-  # REQUIRED PARAMETERS
-  #
   ssh_key_name:
     type: string
     description: name of ssh key to be provisioned on our server
@@ -22,9 +19,6 @@ parameters:
     type: string
     description: name of private network into which servers get deployed
 
-  #
-  # OPTIONAL PARAMETERS
-  #
   server_image:
     type: string
     default: fedora-k8s
@@ -44,12 +38,12 @@ parameters:
     type: string
     description: >
       address range used by kubernetes for service portals
-    default: "10.254.0.0/16"
+    default: 10.254.0.0/16
 
   flannel_network_cidr:
     type: string
     description: network range for flannel overlay network
-    default: "10.100.0.0/16"
+    default: 10.100.0.0/16
 
   flannel_network_subnetlen:
     type: string
@@ -117,7 +111,7 @@ resources:
   # software configs
   #
   disable_selinux:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/disable-selinux.sh}
@@ -135,7 +129,7 @@ resources:
         - config: {get_resource: master_wc_notify}
 
   write_heat_params:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config:
@@ -149,25 +143,25 @@ resources:
             "$PORTAL_NETWORK_CIDR": {get_param: portal_network_cidr}
 
   configure_kubernetes:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/configure-kubernetes-master.sh}
 
   enable_etcd:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/enable-etcd.sh}
 
   configure_flannel:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/configure-flannel.sh}
 
   enable_services:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/enable-services-master.sh}
@@ -177,7 +171,7 @@ resources:
   # databases server.  this sets up a Kubernetes server
   #
   kube_master_floating:
-    type: "OS::Neutron::FloatingIP"
+    type: OS::Neutron::FloatingIP
     properties:
       floating_network:
         get_param: external_network
@@ -185,21 +179,18 @@ resources:
         get_attr: [kube_master, addresses, {get_param: fixed_network}, 0, port]
 
   kube_master:
-    type: "OS::Nova::Server"
+    type: OS::Nova::Server
     properties:
-      image:
-        get_param: server_image
-      flavor:
-        get_param: server_flavor
-      key_name:
-        get_param: ssh_key_name
+      image: {get_param: server_image}
+      flavor: {get_param: server_flavor}
+      key_name: {get_param: ssh_key_name}
       networks:
         - network: {get_param: fixed_network}
       user_data_format: RAW
       user_data: {get_resource: kube_master_init}
 
   kube_minions:
-    type: "OS::Heat::ResourceGroup"
+    type: OS::Heat::ResourceGroup
     depends_on:
       - kube_master
       - master_wait_condition
