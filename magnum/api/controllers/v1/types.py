@@ -29,11 +29,6 @@ class MacAddressType(wtypes.UserType):
 
     basetype = wtypes.text
     name = 'macaddress'
-    # FIXME(lucasagomes): When used with wsexpose decorator WSME will try
-    # to get the name of the type by accessing it's __name__ attribute.
-    # Remove this __name__ attribute once it's fixed in WSME.
-    # https://bugs.launchpad.net/wsme/+bug/1265590
-    __name__ = name
 
     @staticmethod
     def validate(value):
@@ -51,11 +46,6 @@ class NameType(wtypes.UserType):
 
     basetype = wtypes.text
     name = 'name'
-    # FIXME(lucasagomes): When used with wsexpose decorator WSME will try
-    # to get the name of the type by accessing it's __name__ attribute.
-    # Remove this __name__ attribute once it's fixed in WSME.
-    # https://bugs.launchpad.net/wsme/+bug/1265590
-    __name__ = name
 
     @staticmethod
     def validate(value):
@@ -75,11 +65,6 @@ class UuidType(wtypes.UserType):
 
     basetype = wtypes.text
     name = 'uuid'
-    # FIXME(lucasagomes): When used with wsexpose decorator WSME will try
-    # to get the name of the type by accessing it's __name__ attribute.
-    # Remove this __name__ attribute once it's fixed in WSME.
-    # https://bugs.launchpad.net/wsme/+bug/1265590
-    __name__ = name
 
     @staticmethod
     def validate(value):
@@ -99,11 +84,6 @@ class BooleanType(wtypes.UserType):
 
     basetype = wtypes.text
     name = 'boolean'
-    # FIXME(lucasagomes): When used with wsexpose decorator WSME will try
-    # to get the name of the type by accessing it's __name__ attribute.
-    # Remove this __name__ attribute once it's fixed in WSME.
-    # https://bugs.launchpad.net/wsme/+bug/1265590
-    __name__ = name
 
     @staticmethod
     def validate(value):
