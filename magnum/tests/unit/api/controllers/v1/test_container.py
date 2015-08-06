@@ -217,6 +217,29 @@ class TestContainerController(api_base.FunctionalTest):
         self.assertIn('command', actual_containers[0])
 
     @patch('magnum.conductor.api.API.container_show')
+    @patch('magnum.objects.Container.list')
+    def test_get_all_containers_with_exception(self, mock_container_list,
+                                               mock_container_show):
+        test_container = utils.get_test_container()
+        containers = [objects.Container(self.context, **test_container)]
+        mock_container_list.return_value = containers
+        mock_container_show.side_effect = Exception
+
+        response = self.app.get('/v1/containers')
+
+        mock_container_list.assert_called_once_with(mock.ANY,
+                                                    1000, None, sort_dir='asc',
+                                                    sort_key='id')
+        self.assertEqual(response.status_int, 200)
+        actual_containers = response.json['containers']
+        self.assertEqual(len(actual_containers), 1)
+        self.assertEqual(actual_containers[0].get('uuid'),
+                         test_container['uuid'])
+
+        self.assertEqual(actual_containers[0].get('status'),
+                         'Unknown')
+
+    @patch('magnum.conductor.api.API.container_show')
     @patch('magnum.objects.Container.get_by_uuid')
     def test_get_one_by_uuid(self, mock_container_get_by_uuid,
                              mock_container_show):
