@@ -185,11 +185,11 @@ resources:
           port_range_min: 8080
           port_range_max: 8080
         - protocol: tcp
-          port_range_min: 4001
-          port_range_max: 4001
+          port_range_min: 2379
+          port_range_max: 2379
         - protocol: tcp
-          port_range_min: 7001
-          port_range_max: 7001
+          port_range_min: 2380
+          port_range_max: 2380
 
   ######################################################################
   #
