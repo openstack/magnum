@@ -52,34 +52,24 @@ class TestListBay(api_base.FunctionalTest):
         bay = obj_utils.create_test_bay(self.context)
         response = self.get_json('/bays')
         self.assertEqual(bay.uuid, response['bays'][0]["uuid"])
-        self.assertIn('name', response['bays'][0])
-        self.assertIn('baymodel_id', response['bays'][0])
-        self.assertIn('node_count', response['bays'][0])
-        self.assertIn('status', response['bays'][0])
+        for key in ("name", "baymodel_id", "node_count", "status"):
+            self.assertIn(key, response['bays'][0])
 
     def test_get_one(self):
         bay = obj_utils.create_test_bay(self.context)
         response = self.get_json('/bays/%s' % bay['uuid'])
         self.assertEqual(bay.uuid, response['uuid'])
-        self.assertIn('name', response)
-        self.assertIn('baymodel_id', response)
-        self.assertIn('node_count', response)
-        self.assertIn('status', response)
-        self.assertIn('discovery_url', response)
-        self.assertIn('api_address', response)
-        self.assertIn('node_addresses', response)
+        for key in ("name", "baymodel_id", "node_count", "status",
+                    "api_address", "discovery_url", "node_addresses"):
+            self.assertIn(key, response)
 
     def test_get_one_by_name(self):
         bay = obj_utils.create_test_bay(self.context)
         response = self.get_json('/bays/%s' % bay['name'])
         self.assertEqual(bay.uuid, response['uuid'])
-        self.assertIn('name', response)
-        self.assertIn('baymodel_id', response)
-        self.assertIn('node_count', response)
-        self.assertIn('status', response)
-        self.assertIn('discovery_url', response)
-        self.assertIn('api_address', response)
-        self.assertIn('node_addresses', response)
+        for key in ("name", "baymodel_id", "node_count", "status",
+                    "api_address", "discovery_url", "node_addresses"):
+            self.assertIn(key, response)
 
     def test_get_one_by_name_not_found(self):
         response = self.get_json(
@@ -115,10 +105,8 @@ class TestListBay(api_base.FunctionalTest):
         bay = obj_utils.create_test_bay(self.context)
         response = self.get_json('/bays/detail')
         self.assertEqual(bay.uuid, response['bays'][0]["uuid"])
-        self.assertIn('name', response['bays'][0])
-        self.assertIn('baymodel_id', response['bays'][0])
-        self.assertIn('node_count', response['bays'][0])
-        self.assertIn('status', response['bays'][0])
+        for key in ("name", "baymodel_id", "node_count", "status"):
+            self.assertIn(key, response['bays'][0])
 
     def test_detail_with_pagination_marker(self):
         bay_list = []
@@ -131,13 +119,9 @@ class TestListBay(api_base.FunctionalTest):
                                  % bay_list[2].uuid)
         self.assertEqual(1, len(response['bays']))
         self.assertEqual(bay_list[-1].uuid, response['bays'][0]['uuid'])
-        self.assertIn('name', response['bays'][0])
-        self.assertIn('baymodel_id', response['bays'][0])
-        self.assertIn('node_count', response['bays'][0])
-        self.assertIn('status', response['bays'][0])
-        self.assertIn('discovery_url', response['bays'][0])
-        self.assertIn('api_address', response['bays'][0])
-        self.assertIn('node_addresses', response['bays'][0])
+        for key in ("name", "baymodel_id", "node_count", "status",
+                    "discovery_url", "api_address", "node_addresses"):
+            self.assertIn(key, response['bays'][0])
 
     def test_detail_against_single(self):
         bay = obj_utils.create_test_bay(self.context)
