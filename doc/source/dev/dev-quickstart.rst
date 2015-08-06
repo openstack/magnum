@@ -55,16 +55,6 @@ Magnum source code should be pulled directly from git::
     git clone https://git.openstack.org/openstack/magnum
     cd magnum
 
-Set up a local environment for development and testing with tox::
-
-    # create a virtualenv for development
-    tox -evenv -- python -V
-
-Activate the virtual environment whenever you want to work in it.
-All further commands in this section should be run with the venv active::
-
-    source .tox/venv/bin/activate
-
 All unit tests should be run using tox. To run magnum's entire test suite::
 
     # run all tests (unit and pep8)
@@ -83,10 +73,6 @@ You may pass options to the test programs using positional arguments::
 To run only the pep8/flake8 syntax and style checks::
 
     tox -epep8
-
-When you're done, deactivate the virtualenv::
-
-    deactivate
 
 To discover and interact with templates, please refer to
 `<http://git.openstack.org/cgit/openstack/magnum/tree/contrib/templates/example/README.rst>`_
