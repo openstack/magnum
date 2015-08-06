@@ -116,6 +116,9 @@ def _update_stack_outputs(context, stack, bay):
 
 
 class Handler(object):
+
+    _update_allowed_properties = set(['node_count'])
+
     def __init__(self):
         super(Handler, self).__init__()
 
@@ -141,6 +144,13 @@ class Handler(object):
 
         return bay
 
+    def _validate_properties(self, delta):
+        update_disallowed_properties = delta - self._update_allowed_properties
+        if update_disallowed_properties:
+            err = (_("cannot change bay property(ies) %s.") %
+                   ", ".join(update_disallowed_properties))
+            raise exception.InvalidParameterValue(err=err)
+
     def bay_update(self, context, bay):
         LOG.debug('bay_heat bay_update')
 
@@ -152,17 +162,16 @@ class Handler(object):
                           '"%s"') % stack.stack_status
             raise exception.NotSupported(operation=operation)
 
-        delta = set(bay.obj_what_changed())
-        if 'node_count' in delta:
-            delta.remove('node_count')
-            manager = scale_manager.ScaleManager(context, osc, bay)
+        delta = bay.obj_what_changed()
+        if not delta:
+            return bay
 
-            _update_stack(context, osc, bay, manager)
-            self._poll_and_check(osc, bay)
+        self._validate_properties(delta)
 
-        if delta:
-            raise exception.InvalidParameterValue(err=(
-                "cannot change bay property(ies) %s." % ", ".join(delta)))
+        manager = scale_manager.ScaleManager(context, osc, bay)
+
+        _update_stack(context, osc, bay, manager)
+        self._poll_and_check(osc, bay)
 
         return bay
 
