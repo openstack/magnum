@@ -19,19 +19,19 @@ Install OS-specific prerequisites::
 
     # Ubuntu/Debian:
     sudo apt-get update
-    sudo apt-get install python-dev libssl-dev python-pip libmysqlclient-dev \
-                         libxml2-dev libxslt-dev libpq-dev git git-review \
-                         libffi-dev gettext
+    sudo apt-get install -y python-dev libssl-dev python-pip libxml2-dev \
+                            libmysqlclient-dev libxslt-dev libpq-dev git \
+                            git-review libffi-dev gettext
 
     # Fedora/RHEL:
-    sudo yum install python-devel openssl-devel python-pip mysql-devel \
-                     libxml2-devel libxslt-devel postgresql-devel git \
-                     git-review libffi-devel gettext
+    sudo yum install -y python-devel openssl-devel python-pip mysql-devel \
+                        libxml2-devel libxslt-devel postgresql-devel git \
+                        git-review libffi-devel gettext
 
     # openSUSE/SLE 12:
-    sudo zypper install git git-review libffi-devel libmysqlclient-devel \
-                        libopenssl-devel libxml2-devel libxslt-devel \
-                        postgresql-devel python-devel \
+    sudo zypper --non-interactive install git git-review libffi-devel \
+                        libmysqlclient-devel  libopenssl-devel libxml2-devel \
+                        libxslt-devel postgresql-devel python-devel \
                         python-pip gettext-runtime
 
 Install common prerequisites::
@@ -129,7 +129,7 @@ Kilo, and heat is enabled by the magnum plugin)::
     ADMIN_PASSWORD=password
     # magnum requires the following to be set correctly
     PUBLIC_INTERFACE=eth1
-    enable_plugin magnum https://github.com/openstack/magnum
+    enable_plugin magnum https://git.openstack.org/openstack/magnum
     VOLUME_BACKING_FILE_SIZE=20G
     END
 
