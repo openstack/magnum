@@ -557,11 +557,30 @@ class TestBayConductorWithK8s(base.TestCase):
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
         self.assertEqual(poller.attempts, 2)
 
+    @patch('magnum.conductor.handlers.bay_conductor._update_stack_outputs')
+    def test_poll_done_by_update(self, mock_update_stack_outputs):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+
+        mock_heat_stack.stack_status = bay_status.UPDATE_COMPLETE
+        mock_heat_stack.parameters = {'number_of_minions': 2}
+        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+
+        self.assertEqual(bay.save.call_count, 1)
+        self.assertEqual(bay.status, bay_status.UPDATE_COMPLETE)
+        self.assertEqual(bay.node_count, 2)
+        self.assertEqual(poller.attempts, 1)
+
     def test_poll_done_by_update_failed(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = bay_status.UPDATE_FAILED
+        mock_heat_stack.parameters = {'number_of_minions': 2}
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+
+        self.assertEqual(bay.save.call_count, 1)
+        self.assertEqual(bay.status, bay_status.UPDATE_FAILED)
+        self.assertEqual(bay.node_count, 2)
+        self.assertEqual(poller.attempts, 1)
 
     def test_poll_destroy(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
@@ -669,6 +688,10 @@ class TestHandler(db_base.DbTestCase):
             self, mock_openstack_client_class,
             mock_update_stack, mock_poll_and_check,
             mock_scale_manager):
+        def side_effect(*args, **kwargs):
+            self.bay.node_count = 2
+            self.bay.save()
+        mock_poll_and_check.side_effect = side_effect
         mock_heat_stack = mock.MagicMock()
         mock_heat_stack.stack_status = bay_status.CREATE_COMPLETE
         mock_heat_client = mock.MagicMock()
@@ -691,6 +714,10 @@ class TestHandler(db_base.DbTestCase):
     def test_update_node_count_failure(
             self, mock_openstack_client_class,
             mock_update_stack, mock_poll_and_check):
+        def side_effect(*args, **kwargs):
+            self.bay.node_count = 2
+            self.bay.save()
+        mock_poll_and_check.side_effect = side_effect
         mock_heat_stack = mock.MagicMock()
         mock_heat_stack.stack_status = bay_status.CREATE_FAILED
         mock_heat_client = mock.MagicMock()
