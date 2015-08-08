@@ -11,7 +11,7 @@ parameters:
     type: string
     description: glance image used to boot the server
 
-  server_flavor:
+  minion_flavor:
     type: string
     default: m1.small
     description: flavor to use when booting the server
@@ -48,15 +48,14 @@ parameters:
 
 resources:
 
-  node_wait_handle:
+  minion_wait_handle:
     type: OS::Heat::WaitConditionHandle
 
-  node_wait_condition:
+  minion_wait_condition:
     type: OS::Heat::WaitCondition
-    depends_on:
-      - kube_node
+    depends_on: kube_minion
     properties:
-      handle: {get_resource: node_wait_handle}
+      handle: {get_resource: minion_wait_handle}
       timeout: {get_param: wait_condition_timeout}
 
   ######################################################################
@@ -66,49 +65,49 @@ resources:
   #
 
   write_heat_params:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config:
         str_replace:
           template: {get_file: fragments/write-heat-params.yaml}
           params:
-            "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
-            "$KUBE_MASTER_IP": {get_param: kube_master_ip}
-            "$WAIT_HANDLE": {get_resource: node_wait_handle}
+            $KUBE_ALLOW_PRIV: {get_param: kube_allow_priv}
+            $KUBE_MASTER_IP: {get_param: kube_master_ip}
+            $WAIT_HANDLE: {get_resource: minion_wait_handle}
 
   kube_register:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/kube-register.yaml}
 
   configure_kubernetes_minion:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/configure-kubernetes-minion.sh}
 
   kube_user:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/kube-user.yaml}
 
   kube_examples:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/kube-examples.yaml}
 
   docker_service:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/docker.service.yaml}
 
   enable_services:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/enable-services-minion.sh}
@@ -123,16 +122,16 @@ resources:
             #!/bin/bash -v
             wc_notify --data-binary '{"status": "SUCCESS"}'
           params:
-            wc_notify: {get_attr: [node_wait_handle, curl_cli]}
+            wc_notify: {get_attr: [minion_wait_handle, curl_cli]}
 
   disable_selinux:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/disable-selinux.sh}
 
-  kube_node_init:
-    type: "OS::Heat::MultipartMime"
+  kube_minion_init:
+    type: OS::Heat::MultipartMime
     properties:
       parts:
         - config: {get_resource: disable_selinux}
@@ -145,35 +144,31 @@ resources:
         - config: {get_resource: enable_services}
         - config: {get_resource: minion_wc_notify}
 
-  kube_node:
-    type: "OS::Nova::Server"
+  kube_minion:
+    type: OS::Nova::Server
     properties:
-      image:
-        get_param: server_image
-      flavor:
-        get_param: server_flavor
-      key_name:
-        get_param: ssh_key_name
+      image: {get_param: server_image}
+      flavor: {get_param: minion_flavor}
+      key_name: {get_param: ssh_key_name}
       user_data_format: RAW
-      user_data: {get_resource: kube_node_init}
+      user_data: {get_resource: kube_minion_init}
       networks:
         - network: {get_param: fixed_network}
 
-  kube_node_floating:
-    type: "OS::Neutron::FloatingIP"
+  kube_minion_floating:
+    type: OS::Neutron::FloatingIP
     properties:
-      floating_network:
-        get_param: external_network
+      floating_network: {get_param: external_network}
       port_id:
-        get_attr: [kube_node, addresses, {get_param: fixed_network}, 0, port]
+        get_attr: [kube_minion, addresses, {get_param: fixed_network}, 0, port]
 
 outputs:
 
-  kube_node_ip:
-    value: {get_attr: [kube_node, networks, private, 0]}
+  kube_minion_ip:
+    value: {get_attr: [kube_minion, networks, private, 0]}
 
-  kube_node_external_ip:
-    value: {get_attr: [kube_node_floating, floating_ip_address]}
+  kube_minion_external_ip:
+    value: {get_attr: [kube_minion_floating, floating_ip_address]}
 
   OS::stack_id:
-    value: {get_attr: [kube_node, networks, private, 0]}
+    value: {get_attr: [kube_minion, networks, private, 0]}

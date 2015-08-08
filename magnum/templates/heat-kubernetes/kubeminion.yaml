@@ -104,7 +104,7 @@ resources:
       config: {get_file: fragments/configure-docker-storage.sh}
 
   kube_register:
-    type: "OS::Heat::SoftwareConfig"
+    type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/kube-register.yaml}

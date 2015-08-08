@@ -194,7 +194,7 @@ resources:
   #
 
   kube_masters:
-    type: "OS::Heat::ResourceGroup"
+    type: OS::Heat::ResourceGroup
     depends_on:
       - extrouter_inside
     properties:
@@ -225,7 +225,7 @@ resources:
   #
 
   kube_minions:
-    type: "OS::Heat::ResourceGroup"
+    type: OS::Heat::ResourceGroup
     depends_on:
       - extrouter_inside
       - kube_masters
