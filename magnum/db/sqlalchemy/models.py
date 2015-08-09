@@ -271,3 +271,22 @@ class ReplicationController(Base):
     replicas = Column(Integer())
     project_id = Column(String(255))
     user_id = Column(String(255))
+
+
+class X509KeyPair(Base):
+    """X509KeyPair"""
+    __tablename__ = 'x509keypair'
+    __table_args__ = (
+        schema.UniqueConstraint('uuid',
+                                name='uniq_x509keypair0uuid'),
+        table_args()
+    )
+    id = Column(Integer, primary_key=True)
+    uuid = Column(String(36))
+    name = Column(String(255))
+    bay_uuid = Column(String(36))
+    ca_cert = Column(Text())
+    certificate = Column(Text())
+    private_key = Column(Text())
+    project_id = Column(String(255))
+    user_id = Column(String(255))

@@ -933,3 +933,106 @@ class Connection(api.Connection):
 
             ref.update(values)
         return ref
+
+    def create_x509keypair(self, values):
+        # ensure defaults are present for new x509keypairs
+        if not values.get('uuid'):
+            values['uuid'] = utils.generate_uuid()
+
+        x509keypair = models.X509KeyPair()
+        x509keypair.update(values)
+        try:
+            x509keypair.save()
+        except db_exc.DBDuplicateEntry:
+            raise exception.X509KeyPairAlreadyExists(uuid=values['uuid'])
+        return x509keypair
+
+    def get_x509keypair_by_id(self, context, x509keypair_id):
+        query = model_query(models.X509KeyPair)
+        query = self._add_tenant_filters(context, query)
+        query = query.filter_by(id=x509keypair_id)
+        try:
+            return query.one()
+        except NoResultFound:
+            raise exception.X509KeyPairNotFound(x509keypair=x509keypair_id)
+
+    def get_x509keypair_by_name(self, context, x509keypair_name):
+        query = model_query(models.X509KeyPair)
+        query = self._add_tenant_filters(context, query)
+        query = query.filter_by(name=x509keypair_name)
+        try:
+            return query.one()
+        except MultipleResultsFound:
+            raise exception.Conflict('Multiple x509keypairs exist with '
+                                     'same name. Please use the x509keypair '
+                                     'uuid instead.')
+        except NoResultFound:
+            raise exception.X509KeyPairNotFound(x509keypair=x509keypair_name)
+
+    def get_x509keypair_by_uuid(self, context, x509keypair_uuid):
+        query = model_query(models.X509KeyPair)
+        query = self._add_tenant_filters(context, query)
+        query = query.filter_by(uuid=x509keypair_uuid)
+        try:
+            return query.one()
+        except NoResultFound:
+            raise exception.X509KeyPairNotFound(x509keypair=x509keypair_uuid)
+
+    def destroy_x509keypair(self, x509keypair_id):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.X509KeyPair, session=session)
+            query = add_identity_filter(query, x509keypair_id)
+            count = query.delete()
+            if count != 1:
+                raise exception.X509KeyPairNotFound(x509keypair_id)
+
+    def update_x509keypair(self, x509keypair_id, values):
+        # NOTE(dtantsur): this can lead to very strange errors
+        if 'uuid' in values:
+            msg = _("Cannot overwrite UUID for an existing X509KeyPair.")
+            raise exception.InvalidParameterValue(err=msg)
+
+        return self._do_update_x509keypair(x509keypair_id, values)
+
+    def _do_update_x509keypair(self, x509keypair_id, values):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.X509KeyPair, session=session)
+            query = add_identity_filter(query, x509keypair_id)
+            try:
+                ref = query.with_lockmode('update').one()
+            except NoResultFound:
+                raise exception.X509KeyPairNotFound(x509keypair=x509keypair_id)
+
+            if 'provision_state' in values:
+                values['provision_updated_at'] = timeutils.utcnow()
+
+            ref.update(values)
+        return ref
+
+    def _add_x509keypairs_filters(self, query, filters):
+        if filters is None:
+            filters = []
+
+        if 'bay_uuid' in filters:
+            query = query.filter_by(bay_uuid=filters['bay_uuid'])
+        if 'name' in filters:
+            query = query.filter_by(name=filters['name'])
+        if 'project_id' in filters:
+            query = query.filter_by(project_id=filters['project_id'])
+        if 'user_id' in filters:
+            query = query.filter_by(user_id=filters['user_id'])
+
+        return query
+
+    def get_x509keypair_list(self, context, filters=None, limit=None,
+                             marker=None, sort_key=None, sort_dir=None,
+                             opts=None):
+        if opts is None:
+            opts = {}
+        query = model_query(models.X509KeyPair)
+        query = self._add_tenant_filters(context, query, opts=opts)
+        query = self._add_x509keypairs_filters(query, filters)
+        return _paginate_query(models.X509KeyPair, limit, marker,
+                               sort_key, sort_dir, query)

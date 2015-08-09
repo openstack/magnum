@@ -659,3 +659,86 @@ class Connection(object):
         :param rc_id: The id or uuid of a ReplicationController.
         :returns: A ReplicationController.
         """
+
+    @abc.abstractmethod
+    def create_x509keypair(self, values):
+        """Create a new x509keypair.
+
+        :param values: A dict containing several items used to identify
+                       and track the x509keypair, and several dicts which
+                       are passed into the Drivers when managing this
+                       x509keypair. For example:
+
+                       ::
+
+                        {
+                         'uuid': utils.generate_uuid(),
+                         'name': 'example',
+                         'ca_cert': 'AAA...',
+                         'certificate': 'BBB...',
+                         'private_key': 'CCC...',
+                        }
+        :returns: A X509KeyPair.
+        """
+
+    @abc.abstractmethod
+    def get_x509keypair_by_id(self, context, x509keypair_id):
+        """Return a x509keypair.
+
+        :param context: The security context
+        :param x509keypair_id: The id of a x509keypair.
+        :returns: A x509keypair.
+        """
+
+    @abc.abstractmethod
+    def get_x509keypair_by_uuid(self, context, x509keypair_uuid):
+        """Return a x509keypair.
+
+        :param context: The security context
+        :param x509keypair_uuid: The uuid of a x509keypair.
+        :returns: A x509keypair.
+        """
+
+    @abc.abstractmethod
+    def get_x509keypair_by_name(self, context, x509keypair_name):
+        """Return a x509keypair.
+
+        :param context: The security context
+        :param x509keypair_name: The name of a x509keypair.
+        :returns: A x509keypair.
+        """
+
+    @abc.abstractmethod
+    def destroy_x509keypair(self, x509keypair_id):
+        """Destroy a x509keypair.
+
+        :param x509keypair_id: The id or uuid of a x509keypair.
+        """
+
+    @abc.abstractmethod
+    def update_x509keypair(self, x509keypair_id, values):
+        """Update properties of a X509KeyPair.
+
+        :param x509keypair_id: The id or uuid of a X509KeyPair.
+        :returns: A X509KeyPair.
+        """
+
+    @abc.abstractmethod
+    def get_x509keypair_list(self, context, filters=None, limit=None,
+                             marker=None, sort_key=None, sort_dir=None):
+        """Get matching x509keypairs.
+
+        Return a list of the specified columns for all x509keypairs
+        that match the specified filters.
+
+        :param context: The security context
+        :param filters: Filters to apply. Defaults to None.
+
+        :param limit: Maximum number of x509keypairs to return.
+        :param marker: the last item of the previous page; we return the next
+                       result set.
+        :param sort_key: Attribute by which results should be sorted.
+        :param sort_dir: direction in which results should be sorted.
+                         (asc, desc)
+        :returns: A list of tuples of the specified columns.
+        """
