@@ -10,6 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from barbicanclient import client as barbicanclient
 from glanceclient.v2 import client as glanceclient
 from heatclient.v1 import client as heatclient
 import mock
@@ -158,3 +159,62 @@ class ClientsTest(base.BaseTestCase):
         glance = obj.glance()
         glance_cached = obj.glance()
         self.assertEqual(glance, glance_cached)
+
+    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    @mock.patch.object(barbicanclient, 'Client')
+    @mock.patch.object(clients.OpenStackClients, 'url_for')
+    def _test_clients_barbican(self, expected_region_name, mock_url,
+                               mock_call, mock_keystone):
+        con = mock.MagicMock()
+        con.auth_url = "keystone_url"
+        mock_url.return_value = "url_from_keystone"
+        keystone = mock.MagicMock()
+        keystone._client.session = mock.MagicMock()
+        mock_keystone.return_value = keystone
+        obj = clients.OpenStackClients(con)
+        obj._barbican = None
+        obj.barbican()
+        mock_call.assert_called_once_with(
+            endpoint='url_from_keystone',
+            session=keystone._client.session)
+
+        mock_keystone.assert_called_once_with()
+        mock_url.assert_called_once_with(service_type='key-manager',
+                                         endpoint_type='publicURL',
+                                         region_name=expected_region_name)
+
+    def test_clients_barbican(self):
+        self._test_clients_barbican(None)
+
+    def test_clients_barbican_region(self):
+        cfg.CONF.set_override('region_name', 'myregion',
+                              group='barbican_client')
+        self._test_clients_barbican('myregion')
+
+    def test_clients_barbican_noauth(self):
+        con = mock.MagicMock()
+        con.auth_token = None
+        con.auth_token_info = None
+        auth_url = mock.PropertyMock(name="auth_url",
+                                     return_value="keystone_url")
+        type(con).auth_url = auth_url
+        con.get_url_for = mock.Mock(name="get_url_for")
+        con.get_url_for.return_value = "url_from_keystone"
+        obj = clients.OpenStackClients(con)
+        obj._barbican = None
+        self.assertRaises(exception.AuthorizationFailure, obj.barbican)
+
+    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    @mock.patch.object(clients.OpenStackClients, 'url_for')
+    def test_clients_barbican_cached(self, mock_url, mock_keystone):
+        con = mock.MagicMock()
+        con.auth_url = "keystone_url"
+        mock_url.return_value = "url_from_keystone"
+        keystone = mock.MagicMock()
+        keystone._client.session = mock.MagicMock()
+        mock_keystone.return_value = keystone
+        obj = clients.OpenStackClients(con)
+        obj._barbican = None
+        barbican = obj.barbican()
+        barbican_cached = obj.barbican()
+        self.assertEqual(barbican, barbican_cached)
