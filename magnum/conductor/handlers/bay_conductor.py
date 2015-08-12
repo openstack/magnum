@@ -184,7 +184,10 @@ class Handler(object):
         except exc.HTTPNotFound:
             LOG.info(_LI('The stack %s was not be found during bay'
                          ' deletion.') % stack_id)
-            bay.destroy()
+            try:
+                bay.destroy()
+            except exception.BayNotFound:
+                LOG.info(_LI('The bay %s has been deleted by others.') % uuid)
             return None
         except Exception:
             raise
@@ -217,7 +220,11 @@ class HeatPoller(object):
         if stack.stack_status == bay_status.DELETE_COMPLETE:
             LOG.info(_LI('Bay has been deleted, stack_id: %s')
                      % self.bay.stack_id)
-            self.bay.destroy()
+            try:
+                self.bay.destroy()
+            except exception.BayNotFound:
+                LOG.info(_LI('The bay %s has been deleted by others.')
+                         % self.bay.uuid)
             raise loopingcall.LoopingCallDone()
         if (stack.stack_status in [bay_status.CREATE_COMPLETE,
                                    bay_status.UPDATE_COMPLETE]):
