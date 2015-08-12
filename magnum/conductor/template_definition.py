@@ -346,6 +346,9 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
         self.add_parameter('number_of_minions',
                            bay_attr='node_count',
                            param_type=str)
+        self.add_parameter('number_of_masters',
+                           bay_attr='master_count',
+                           param_type=str)
         self.add_parameter('docker_volume_size',
                            baymodel_attr='docker_volume_size')
         self.add_parameter('external_network',
