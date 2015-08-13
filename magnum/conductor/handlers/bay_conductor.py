@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import uuid
 
 from heatclient.common import template_utils
 from heatclient import exc
@@ -124,6 +125,7 @@ class Handler(object):
         try:
             # Generate certificate and set the cert reference to bay
             cert_manager.generate_certificates_to_bay(bay)
+            bay.uuid = uuid.uuid4()
             created_stack = _create_stack(context, osc, bay,
                                           bay_create_timeout)
         except exc.HTTPBadRequest as e:

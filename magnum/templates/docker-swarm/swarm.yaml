@@ -25,6 +25,18 @@ parameters:
     type: string
     description: url provided for node discovery
 
+  user_token:
+    type: string
+    description: token used for communicating back to Magnum for TLS certs
+
+  bay_uuid:
+    type: string
+    description: identifier for the bay this template is generating
+
+  magnum_url:
+    type: string
+    description: endpoint to retrieve TLS certs from
+
   #
   # OPTIONAL PARAMETERS
   #
@@ -67,6 +79,11 @@ parameters:
     type: string
     description: network range for fixed ip network
     default: "10.0.0.0/24"
+
+  insecure:
+    type: boolean
+    description: whether or not to enable TLS
+    default: False
 
 resources:
 
@@ -171,6 +188,11 @@ resources:
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
             "$SWARM_MASTER_IP": {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
+            "$SWARM_NODE_IP": {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
+            "$BAY_UUID": {get_param: bay_uuid}
+            "$USER_TOKEN": {get_param: user_token}
+            "$MAGNUM_URL": {get_param: magnum_url}
+            "$INSECURE": {get_param: insecure}
 
   remove_docker_key:
     type: "OS::Heat::SoftwareConfig"
@@ -178,23 +200,23 @@ resources:
       group: ungrouped
       config: {get_file: fragments/remove-docker-key.sh}
 
+  make_cert:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/make_cert.py}
+
   write_docker_service:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
-      config: {get_file: fragments/write-docker-service.yaml}
+      config: {get_file: fragments/write-docker-service.sh}
 
   write_docker_socket:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
       config: {get_file: fragments/write-docker-socket.yaml}
-
-  write_docker_tcp_socket:
-    type: "OS::Heat::SoftwareConfig"
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/write-docker-tcp-socket.yaml}
 
   write_swarm_agent_service:
     type: "OS::Heat::SoftwareConfig"
@@ -217,13 +239,14 @@ resources:
       group: ungrouped
       config:
         str_replace:
-          template: {get_file: fragments/write-swarm-master-service.yaml}
+          template: {get_file: fragments/write-swarm-master-service.sh}
           params:
             "$DISCOVERY_URL": {get_param: discovery_url}
             "$WAIT_HANDLE": {get_resource: master_wait_handle}
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
+            "$INSECURE": {get_param: insecure}
 
   enable_services:
     type: "OS::Heat::SoftwareConfig"
@@ -261,9 +284,9 @@ resources:
         - config: {get_resource: remove_docker_key}
         - config: {get_resource: write_heat_params}
         - config: {get_resource: add_proxy}
+        - config: {get_resource: make_cert}
         - config: {get_resource: write_docker_service}
         - config: {get_resource: write_docker_socket}
-        - config: {get_resource: write_docker_tcp_socket}
         - config: {get_resource: write_swarm_agent_service}
         - config: {get_resource: write_swarm_master_service}
         - config: {get_resource: enable_services}
@@ -333,6 +356,10 @@ resources:
           https_proxy: {get_param: https_proxy}
           no_proxy: {get_param: no_proxy}
           swarm_master_ip: {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
+          bay_uuid: {get_param: bay_uuid}
+          user_token: {get_param: user_token}
+          magnum_url: {get_param: magnum_url}
+          insecure: {get_param: insecure}
 
 outputs:
 
