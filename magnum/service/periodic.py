@@ -22,6 +22,7 @@ from oslo_service import threadgroup
 
 from magnum.common import clients
 from magnum.common import context
+from magnum.common import exception
 from magnum.i18n import _LI
 from magnum.i18n import _LW
 from magnum import objects
@@ -82,7 +83,11 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                         six.viewkeys(sid_to_stack_mapping)):
                 bay = sid_to_bay_mapping[sid]
                 if bay.status == bay_status.DELETE_IN_PROGRESS:
-                    bay.destroy()
+                    try:
+                        bay.destroy()
+                    except exception.BayNotFound:
+                        LOG.info(_LI('The bay %s has been deleted by others.')
+                                 % bay.uuid)
                     LOG.info(_LI("Bay with id %(id)s has been deleted due "
                                  "to stack with id %(sid)s not found in "
                                  "Heat."),
