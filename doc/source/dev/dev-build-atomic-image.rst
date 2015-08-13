@@ -55,7 +55,7 @@ steps:
 
 The build may take some time depending on how busy the system is.
 
-When the build completes successfuly, go to the Overview tab and look under
+When the build completes successfully, go to the Overview tab and look under
 the column for "Yum repo". Find the link for a repo file to point to your
 newly built package in copr. Save the text from this link to use later.
 
