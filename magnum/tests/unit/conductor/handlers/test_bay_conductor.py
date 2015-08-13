@@ -44,6 +44,9 @@ class TestBayConductorWithK8s(base.TestCase):
             'ssh_authorized_key': 'ssh_authorized_key',
             'coe': 'kubernetes',
             'token': None,
+            'http_proxy': 'http_proxy',
+            'https_proxy': 'https_proxy',
+            'no_proxy': 'no_proxy',
         }
         self.bay_dict = {
             'baymodel_id': 'xx-xx-xx-xx',
@@ -88,6 +91,9 @@ class TestBayConductorWithK8s(base.TestCase):
             'apiserver_port': '',
             'node_count': 'number_of_minions',
             'discovery_url': 'discovery_url',
+            'http_proxy': 'http_proxy',
+            'https_proxy': 'https_proxy',
+            'no_proxy': 'no_proxy',
         }
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -100,6 +106,9 @@ class TestBayConductorWithK8s(base.TestCase):
             'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
             'discovery_url': 'https://discovery.etcd.io/test',
+            'http_proxy': 'http_proxy',
+            'https_proxy': 'https_proxy',
+            'no_proxy': 'no_proxy',
         }
         if missing_attr is not None:
             expected.pop(mapping[missing_attr], None)
@@ -140,6 +149,9 @@ class TestBayConductorWithK8s(base.TestCase):
             'ssh_authorized_key': 'ssh_authorized_key',
             'token': 'h3',
             'discovery_url': 'https://discovery.etcd.io/test',
+            'http_proxy': 'http_proxy',
+            'https_proxy': 'https_proxy',
+            'no_proxy': 'no_proxy',
         }
         self.assertEqual(expected, definition)
 
@@ -177,6 +189,9 @@ class TestBayConductorWithK8s(base.TestCase):
             'ssh_authorized_key': 'ssh_authorized_key',
             'token': 'ba3d1866282848ddbedc76112110c208',
             'discovery_url': 'https://discovery.etcd.io/test',
+            'http_proxy': 'http_proxy',
+            'https_proxy': 'https_proxy',
+            'no_proxy': 'no_proxy',
         }
         self.assertEqual(expected, definition)
 
@@ -254,6 +269,9 @@ class TestBayConductorWithK8s(base.TestCase):
             'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
             'discovery_url': 'https://discovery.etcd.io/test',
+            'http_proxy': 'http_proxy',
+            'https_proxy': 'https_proxy',
+            'no_proxy': 'no_proxy'
         }
         self.assertIn('token', definition)
         del definition['token']
@@ -308,6 +326,9 @@ class TestBayConductorWithK8s(base.TestCase):
             'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
             'discovery_url': 'https://address/token',
+            'http_proxy': 'http_proxy',
+            'https_proxy': 'https_proxy',
+            'no_proxy': 'no_proxy'
         }
         self.assertEqual(expected, definition)
         reqget.assert_called_once_with('http://etcd/test?size=1')
@@ -721,7 +742,10 @@ class TestBayConductorWithSwarm(base.TestCase):
             'external_network_id': 'external_network_id',
             'fixed_network': '10.2.0.0/22',
             'cluster_distro': 'fedora-atomic',
-            'coe': 'swarm'
+            'coe': 'swarm',
+            'http_proxy': 'http_proxy',
+            'https_proxy': 'https_proxy',
+            'no_proxy': 'no_proxy'
         }
         self.bay_dict = {
             'id': 1,
@@ -755,7 +779,10 @@ class TestBayConductorWithSwarm(base.TestCase):
             'server_flavor': 'flavor_id',
             'number_of_nodes': '1',
             'fixed_network_cidr': '10.2.0.0/22',
-            'discovery_url': 'token://39987da72f8386e0d0225ae8929e7cb4'
+            'discovery_url': 'token://39987da72f8386e0d0225ae8929e7cb4',
+            'http_proxy': 'http_proxy',
+            'https_proxy': 'https_proxy',
+            'no_proxy': 'no_proxy'
         }
         self.assertEqual(expected, definition)
 
@@ -768,7 +795,8 @@ class TestBayConductorWithSwarm(base.TestCase):
                               'test_discovery', group='bay')
 
         not_required = ['image_id', 'flavor_id', 'dns_nameserver',
-                        'fixed_network']
+                        'fixed_network', 'http_proxy', 'https_proxy',
+                        'no_proxy']
         for key in not_required:
             self.baymodel_dict[key] = None
         self.bay_dict['discovery_url'] = None
@@ -802,7 +830,10 @@ class TestBayConductorWithMesos(base.TestCase):
             'external_network_id': 'external_network_id',
             'fixed_network': '10.2.0.0/22',
             'cluster_distro': 'ubuntu',
-            'coe': 'mesos'
+            'coe': 'mesos',
+            'http_proxy': 'http_proxy',
+            'https_proxy': 'https_proxy',
+            'no_proxy': 'no_proxy'
         }
         self.bay_dict = {
             'id': 1,
@@ -835,7 +866,10 @@ class TestBayConductorWithMesos(base.TestCase):
             'master_flavor': 'master_flavor_id',
             'slave_flavor': 'flavor_id',
             'number_of_slaves': '1',
-            'fixed_network_cidr': '10.2.0.0/22'
+            'fixed_network_cidr': '10.2.0.0/22',
+            'http_proxy': 'http_proxy',
+            'https_proxy': 'https_proxy',
+            'no_proxy': 'no_proxy'
         }
         self.assertEqual(expected, definition)
 
@@ -844,7 +878,8 @@ class TestBayConductorWithMesos(base.TestCase):
             self,
             mock_objects_baymodel_get_by_uuid):
         not_required = ['image_id', 'master_flavor_id', 'flavor_id',
-                        'dns_nameserver', 'fixed_network']
+                        'dns_nameserver', 'fixed_network', 'http_proxy',
+                        'https_proxy', 'no_proxy']
         for key in not_required:
             self.baymodel_dict[key] = None
 

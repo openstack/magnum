@@ -56,6 +56,9 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertNotIn('fixed_network', response['baymodels'][0])
         self.assertNotIn('docker_volume_size', response['baymodels'][0])
         self.assertNotIn('ssh_authorized_key', response['baymodels'][0])
+        self.assertNotIn('http_proxy', response['baymodels'][0])
+        self.assertNotIn('https_proxy', response['baymodels'][0])
+        self.assertNotIn('no_proxy', response['baymodels'][0])
 
     def test_get_one(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
@@ -70,6 +73,9 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertIn('docker_volume_size', response)
         self.assertIn('ssh_authorized_key', response)
         self.assertIn('coe', response)
+        self.assertIn('http_proxy', response)
+        self.assertIn('https_proxy', response)
+        self.assertIn('no_proxy', response)
 
     def test_get_one_by_name(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
@@ -83,6 +89,9 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertIn('fixed_network', response)
         self.assertIn('docker_volume_size', response)
         self.assertIn('coe', response)
+        self.assertIn('http_proxy', response)
+        self.assertIn('https_proxy', response)
+        self.assertIn('https_proxy', response)
 
     def test_get_one_by_name_not_found(self):
         response = self.get_json(
@@ -125,7 +134,8 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertEqual(baymodel.uuid, response['baymodels'][0]["uuid"])
         for key in ("flavor_id", "master_flavor_id", "dns_nameserver",
                     "keypair_id", "external_network_id", "fixed_network",
-                    "docker_volume_size", "ssh_authorized_key", "coe"):
+                    "docker_volume_size", "ssh_authorized_key", "coe",
+                    "http_proxy", "https_proxy", "no_proxy"):
             self.assertIn(key, response['baymodels'][0])
 
     def test_detail_with_pagination_marker(self):
@@ -144,6 +154,18 @@ class TestListBayModel(api_base.FunctionalTest):
                     "keypair_id", "external_network_id", "fixed_network",
                     "docker_volume_size", "ssh_authorized_key", "coe"):
             self.assertIn(key, response['baymodels'][0])
+            self.assertIn('flavor_id', response['baymodels'][0])
+            self.assertIn('master_flavor_id', response['baymodels'][0])
+            self.assertIn('dns_nameserver', response['baymodels'][0])
+            self.assertIn('keypair_id', response['baymodels'][0])
+            self.assertIn('external_network_id', response['baymodels'][0])
+            self.assertIn('fixed_network', response['baymodels'][0])
+            self.assertIn('docker_volume_size', response['baymodels'][0])
+            self.assertIn('ssh_authorized_key', response['baymodels'][0])
+            self.assertIn('coe', response['baymodels'][0])
+            self.assertIn('http_proxy', response['baymodels'][0])
+            self.assertIn('https_proxy', response['baymodels'][0])
+            self.assertIn('no_proxy', response['baymodels'][0])
 
     def test_detail_against_single(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
@@ -258,6 +280,12 @@ class TestPatch(api_base.FunctionalTest):
                          response['ssh_authorized_key'])
         self.assertEqual(self.baymodel.coe,
                          response['coe'])
+        self.assertEqual(self.baymodel.http_proxy,
+                         response['http_proxy'])
+        self.assertEqual(self.baymodel.https_proxy,
+                         response['https_proxy'])
+        self.assertEqual(self.baymodel.no_proxy,
+                         response['no_proxy'])
 
     def test_remove_singular(self):
         baymodel = obj_utils.create_test_baymodel(self.context,
@@ -284,6 +312,12 @@ class TestPatch(api_base.FunctionalTest):
                          response['ssh_authorized_key'])
         self.assertEqual(self.baymodel.coe,
                          response['coe'])
+        self.assertEqual(self.baymodel.http_proxy,
+                         response['http_proxy'])
+        self.assertEqual(self.baymodel.https_proxy,
+                         response['https_proxy'])
+        self.assertEqual(self.baymodel.no_proxy,
+                         response['no_proxy'])
 
     def test_remove_non_existent_property_fail(self):
         response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
@@ -354,6 +388,12 @@ class TestPatch(api_base.FunctionalTest):
                          response['ssh_authorized_key'])
         self.assertEqual(self.baymodel.coe,
                          response['coe'])
+        self.assertEqual(self.baymodel.http_proxy,
+                         response['http_proxy'])
+        self.assertEqual(self.baymodel.https_proxy,
+                         response['https_proxy'])
+        self.assertEqual(self.baymodel.no_proxy,
+                         response['no_proxy'])
 
     def test_remove_uuid(self):
         response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
@@ -417,7 +457,8 @@ class TestPost(api_base.FunctionalTest):
         fields = ["uuid", "name", "image_id", "flavor_id", "master_flavor_id",
                   "dns_nameserver", "keypair_id", "external_network_id",
                   "cluster_distro", "fixed_network", "apiserver_port",
-                  "docker_volume_size"]
+                  "docker_volume_size", "http_proxy", "https_proxy",
+                  "no_proxy"]
         for field in fields:
             self._create_baymodel_raises_app_error(**{field: 'i' * 256})
 
@@ -425,7 +466,8 @@ class TestPost(api_base.FunctionalTest):
         fields = ["uuid", "name", "image_id", "flavor_id", "master_flavor_id",
                   "dns_nameserver", "keypair_id", "external_network_id",
                   "cluster_distro", "fixed_network", "apiserver_port",
-                  "docker_volume_size", "ssh_authorized_key"]
+                  "docker_volume_size", "ssh_authorized_key",
+                  "http_proxy", "https_proxy", "no_proxy"]
         for field in fields:
             self._create_baymodel_raises_app_error(**{field: ''})
 

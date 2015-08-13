@@ -43,6 +43,21 @@ parameters:
     description: address of a dns nameserver reachable in your environment
     default: 8.8.8.8
 
+  http_proxy:
+    type: string
+    description: http proxy address for docker
+    default: ""
+
+  https_proxy:
+    type: string
+    description: https proxy address for docker
+    default: ""
+
+  no_proxy:
+    type: string
+    description: no proxies for docker
+    default: ""
+
   number_of_nodes:
     type: string
     description: how many swarm nodes to spawn
@@ -164,6 +179,10 @@ resources:
           template: {get_file: fragments/write-heat-params.yaml}
           params:
             "$WAIT_HANDLE": {get_resource: master_wait_handle}
+            "$HTTP_PROXY": {get_param: http_proxy}
+            "$HTTPS_PROXY": {get_param: https_proxy}
+            "$NO_PROXY": {get_param: no_proxy}
+            "$NODE_IP": {get_attr: [swarm_manager_eth0, fixed_ips, 0, ip_address]}
 
   remove_docker_key:
     type: "OS::Heat::SoftwareConfig"
@@ -200,6 +219,9 @@ resources:
             "$NODE_IP": {get_attr: [swarm_manager_eth0, fixed_ips, 0, ip_address]}
             "$DISCOVERY_URL": {get_param: discovery_url}
             "$WAIT_HANDLE": {get_resource: agent_wait_handle}
+            "$HTTP_PROXY": {get_param: http_proxy}
+            "$HTTPS_PROXY": {get_param: https_proxy}
+            "$NO_PROXY": {get_param: no_proxy}
 
   write_swarm_manager_service:
     type: "OS::Heat::SoftwareConfig"
@@ -211,6 +233,9 @@ resources:
           params:
             "$DISCOVERY_URL": {get_param: discovery_url}
             "$WAIT_HANDLE": {get_resource: manager_wait_handle}
+            "$HTTP_PROXY": {get_param: http_proxy}
+            "$HTTPS_PROXY": {get_param: https_proxy}
+            "$NO_PROXY": {get_param: no_proxy}
 
   enable_services:
     type: "OS::Heat::SoftwareConfig"
@@ -234,6 +259,12 @@ resources:
       group: ungrouped
       config: {get_file: fragments/disable-selinux.sh}
 
+  add_proxy:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/add-proxy.sh}
+
   swarm_manager_init:
     type: "OS::Heat::MultipartMime"
     properties:
@@ -241,6 +272,7 @@ resources:
         - config: {get_resource: disable_selinux}
         - config: {get_resource: remove_docker_key}
         - config: {get_resource: write_heat_params}
+        - config: {get_resource: add_proxy}
         - config: {get_resource: write_docker_service}
         - config: {get_resource: write_docker_socket}
         - config: {get_resource: write_docker_tcp_socket}
@@ -309,6 +341,10 @@ resources:
           fixed_subnet_id: {get_resource: fixed_subnet}
           external_network: {get_param: external_network}
           discovery_url: {get_param: discovery_url}
+          http_proxy: {get_param: http_proxy}
+          https_proxy: {get_param: https_proxy}
+          no_proxy: {get_param: no_proxy}
+          swarm_manager_ip: {get_attr: [swarm_manager_floating, floating_ip_address]}
 
 outputs:
 

@@ -16,7 +16,7 @@ write_files:
       ExecStartPre=-/usr/bin/docker rm swarm-manager
       ExecStartPre=/usr/bin/docker pull swarm:0.2.0
       #TODO: roll-back from swarm:0.2.0 to swarm if atomic image can work with latest swarm image
-      ExecStart=/usr/bin/docker run --name swarm-manager -p 2376:2375 swarm:0.2.0 manage -H tcp://0.0.0.0:2375 $DISCOVERY_URL
+      ExecStart=/usr/bin/docker run -e http_proxy=$HTTP_PROXY -e https_proxy=$HTTPS_PROXY -e no_proxy=$NO_PROXY  --name swarm-manager -p 2376:2375 swarm:0.2.0 manage -H tcp://0.0.0.0:2375 $DISCOVERY_URL
       ExecStop=/usr/bin/docker stop swarm-manager
       ExecStartPost=/usr/bin/curl -sf -X PUT -H 'Content-Type: application/json' \
         --data-binary '{"Status": "SUCCESS", "Reason": "Setup complete", "Data": "OK", "UniqueId": "00000"}' \

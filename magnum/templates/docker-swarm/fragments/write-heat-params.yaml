@@ -6,3 +6,9 @@ write_files:
     permissions: "0644"
     content: |
       WAIT_HANDLE="$WAIT_HANDLE"
+      HTTP_PROXY="$HTTP_PROXY"
+      HTTPS_PROXY="$HTTPS_PROXY"
+      NO_PROXY="$NO_PROXY"
+      FIXED_NETWORK_CIDR="$FIXED_NETWORK_CIDR"
+      SWARM_MANAGER_IP="$SWARM_MANAGER_IP"
+      SWARM_NODE_IP="$NODE_IP"

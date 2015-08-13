@@ -47,6 +47,9 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
         'ssh_authorized_key': fields.StringField(nullable=True),
         'cluster_distro': fields.StringField(nullable=True),
         'coe': fields.StringField(nullable=True),
+        'http_proxy': fields.StringField(nullable=True),
+        'https_proxy': fields.StringField(nullable=True),
+        'no_proxy': fields.StringField(nullable=True),
     }
 
     @staticmethod
