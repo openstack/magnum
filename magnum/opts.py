@@ -23,6 +23,7 @@ import magnum.common.clients
 import magnum.common.exception
 import magnum.common.magnum_keystoneclient
 import magnum.common.service
+import magnum.common.x509.config
 import magnum.conductor.config
 import magnum.conductor.handlers.bay_conductor
 import magnum.conductor.handlers.docker_conductor
@@ -50,6 +51,7 @@ def list_opts():
         ('heat_client', magnum.common.clients.heat_client_opts),
         ('glance_client', magnum.common.clients.glance_client_opts),
         ('barbican_client', magnum.common.clients.barbican_client_opts),
+        ('x509', magnum.common.x509.config.x509_opts),
         ('bay_heat', magnum.conductor.handlers.bay_conductor.bay_heat_opts),
         ('certificates',
             itertools.chain(magnum.common.cert_manager.cert_manager_opts,

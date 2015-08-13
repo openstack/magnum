@@ -1063,3 +1063,33 @@
 # This option is deprecated for removal.
 # Its value may be silently ignored in the future.
 #policy_dirs = policy.d
+
+
+[x509]
+
+#
+# From magnum
+#
+
+# Certificate can get the CA flag in x509 extensions. (boolean value)
+#allow_ca = false
+
+# List of allowed x509 extensions. Available values:
+# "authorityKeyIdentifier", "subjectKeyIdentifier",
+# "authorityInfoAccess", "basicConstraints", "cRLDistributionPoints",
+# "certificatePolicies", "extendedKeyUsage", "OCSPNoCheck",
+# "inhibitAnyPolicy", "keyUsage", "nameConstraints", "subjectAltName",
+# "issuerAltName" (list value)
+#allowed_extensions = keyUsage,extendedKeyUsage,subjectAltName,basicConstraints,subjectKeyIdentifier
+
+# List of allowed x509 key usage. Available values: "Digital
+# Signature", "Non Repudiation", "Key Encipherment", "Data
+# Encipherment", "Key Agreement", "Certificate Sign", "CRL Sign",
+# "Encipher Only", "Decipher Only" (list value)
+#allowed_key_usage = Digital Signature,Key Encipherment,Non Repudiation
+
+# Number of days for which a certificate is valid. (integer value)
+#term_of_validity = 1825
+
+# Size of generated private key.  (integer value)
+#rsa_key_size = 2048

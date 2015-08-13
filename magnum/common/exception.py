@@ -479,3 +479,7 @@ class X509KeyPairAlreadyExists(Conflict):
 
 class CertificateStorageException(MagnumException):
     message = _("Could not store certificate: %(msg)s")
+
+
+class CertificateValidationError(Invalid):
+    message = _("Extension '%(extension)s' not allowed")
