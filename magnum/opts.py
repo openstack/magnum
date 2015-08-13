@@ -17,6 +17,8 @@ import itertools
 
 import magnum.api.app
 import magnum.api.auth
+import magnum.common.cert_manager
+from magnum.common.cert_manager import local_cert_manager
 import magnum.common.clients
 import magnum.common.exception
 import magnum.common.magnum_keystoneclient
@@ -49,6 +51,10 @@ def list_opts():
         ('glance_client', magnum.common.clients.glance_client_opts),
         ('barbican_client', magnum.common.clients.barbican_client_opts),
         ('bay_heat', magnum.conductor.handlers.bay_conductor.bay_heat_opts),
+        ('certificates',
+            itertools.chain(magnum.common.cert_manager.cert_manager_opts,
+                            local_cert_manager.local_cert_manager_opts,
+                            )),
         ('kubernetes',
             magnum.conductor.k8s_api.kubernetes_opts),
     ]

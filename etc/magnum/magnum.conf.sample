@@ -330,6 +330,20 @@
 #bay_create_timeout = <None>
 
 
+[certificates]
+
+#
+# From magnum
+#
+
+# Certificate Manager plugin. Defaults to barbican. (string value)
+#cert_manager_type = barbican
+
+# Absolute path of the certificate storage directory. Defaults to
+# /var/lib/magnum/certificates/. (string value)
+#storage_path = /var/lib/magnum/certificates/
+
+
 [conductor]
 
 #

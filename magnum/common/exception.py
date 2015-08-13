@@ -475,3 +475,7 @@ class X509KeyPairNotFound(ResourceNotFound):
 
 class X509KeyPairAlreadyExists(Conflict):
     message = _("A key pair with UUID %(uuid)s already exists.")
+
+
+class CertificateStorageException(MagnumException):
+    message = _("Could not store certificate: %(msg)s")
