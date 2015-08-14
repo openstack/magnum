@@ -22,3 +22,6 @@ sed -i '
   /^KUBELET_ADDRESSES=/ s/=.*/="--machines='""'"/
 ' /etc/kubernetes/controller-manager
 
+sed -i '
+/^FLANNEL_ETCD=/ s/=.*/="http:\/\/127.0.0.1:2379"/
+' /etc/sysconfig/flanneld
