@@ -93,8 +93,8 @@ class BaseMagnumClient(base.TestCase):
             keypair_id='default',
             external_network_id=cls.nic_id,
             image_id=cls.image_id,
-            flavor_id='m1.small',
-            docker_volume_size=5,
+            flavor_id='m1.magnum',
+            docker_volume_size=1,
             coe='kubernetes',
         )
         return baymodel

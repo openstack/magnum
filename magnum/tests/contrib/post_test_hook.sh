@@ -80,6 +80,10 @@ EOF
 echo_summary "Generate a key-pair"
 nova keypair-add default
 
+# Create magnum specific flavor for use in functional tests.
+echo_summary "Create a flavor"
+nova flavor-create  m1.magnum 100 2048 8 1
+
 # Run functional tests
 echo "Running magnum functional test suite"
 sudo -E -H -u jenkins tox -e functional -- --concurrency=1
@@ -88,6 +92,10 @@ EXIT_CODE=$?
 # Delete the keypair used in the functional test.
 echo_summary "Running keypair-delete"
 nova keypair-delete default
+
+# Delete the flavor used in the functional test.
+echo_summary "Running flavor-delete"
+nova flavor-delete m1.magnum
 
 # Save the logs
 sudo mv ../logs/* /opt/stack/logs/
