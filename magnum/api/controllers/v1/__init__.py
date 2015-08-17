@@ -32,6 +32,7 @@ from magnum.api.controllers.v1 import node
 from magnum.api.controllers.v1 import pod
 from magnum.api.controllers.v1 import replicationcontroller as rc
 from magnum.api.controllers.v1 import service
+from magnum.api.controllers.v1 import x509keypair
 from magnum.api import expose
 from magnum.i18n import _
 
@@ -102,6 +103,8 @@ class V1(controllers_base.APIBase):
     services = [link.Link]
     """Links to the services resource"""
 
+    x509keypairs = [link.Link]
+
     @staticmethod
     def convert():
         v1 = V1()
@@ -151,6 +154,12 @@ class V1(controllers_base.APIBase):
                                            pecan.request.host_url,
                                            'services', '',
                                            bookmark=True)]
+        v1.x509keypairs = [link.Link.make_link('self', pecan.request.host_url,
+                                               'x509keypairs', ''),
+                           link.Link.make_link('bookmark',
+                                               pecan.request.host_url,
+                                               'x509keypairs', '',
+                                               bookmark=True)]
         return v1
 
 
@@ -164,6 +173,7 @@ class Controller(rest.RestController):
     pods = pod.PodsController()
     rcs = rc.ReplicationControllersController()
     services = service.ServicesController()
+    x509keypairs = x509keypair.X509KeyPairController()
 
     @expose.expose(V1)
     def get(self):

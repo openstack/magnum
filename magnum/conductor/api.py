@@ -152,6 +152,17 @@ class API(rpc_service.API):
         return self._call('container_exec', container_uuid=container_uuid,
                           command=command)
 
+    # X509KeyPair Operations
+    def x509keypair_create(self, x509keypair):
+        return self._call('x509keypair_create', x509keypair=x509keypair)
+
+    def x509keypair_delete(self, uuid):
+        return self._call('x509keypair_delete', uuid=uuid)
+
+    def x509keypair_list(self, context, limit, marker, sort_key, sort_dir):
+        return objects.X509KeyPair.list(context, limit, marker,
+                                        sort_key, sort_dir)
+
 
 class ListenerAPI(rpc_service.API):
     def __init__(self, context=None, topic=None, server=None, timeout=None):

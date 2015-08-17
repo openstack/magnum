@@ -31,6 +31,8 @@ class RPCAPITestCase(base.DbTestCase):
         self.fake_pod = dbutils.get_test_pod(driver='fake-driver')
         self.fake_rc = dbutils.get_test_rc(driver='fake-driver')
         self.fake_service = dbutils.get_test_service(driver='fake-driver')
+        self.fake_x509keypair = dbutils.get_test_x509keypair(
+            driver='fake-driver')
 
     def _test_rpcapi(self, method, rpc_method, **kwargs):
         rpcapi_cls = kwargs.pop('rpcapi_cls', conductor_rpcapi.API)
@@ -231,3 +233,20 @@ class RPCAPITestCase(base.DbTestCase):
                           'call',
                           rpcapi_cls=conductor_rpcapi.ListenerAPI,
                           version='1.0')
+
+    def test_x509keypair_create(self):
+        self._test_rpcapi('x509keypair_create',
+                          'call',
+                          version='1.0',
+                          x509keypair=self.fake_x509keypair)
+
+    def test_x509keypair_delete(self):
+        self._test_rpcapi('x509keypair_delete',
+                          'call',
+                          version='1.0',
+                          uuid=self.fake_x509keypair['uuid'])
+
+        self._test_rpcapi('x509keypair_delete',
+                          'call',
+                          version='1.1',
+                          uuid=self.fake_x509keypair['name'])
