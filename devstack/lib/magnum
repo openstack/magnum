@@ -175,6 +175,10 @@ function create_magnum_conf {
 
         iniset $MAGNUM_CONF DEFAULT enabled_ssl_apis "$MAGNUM_ENABLED_APIS"
     fi
+
+    if is_service_enabled ceilometer; then
+        iniset $MAGNUM_CONF DEFAULT notification_driver "messaging"
+    fi
 }
 
 function update_heat_policy {
