@@ -21,7 +21,7 @@ Install OS-specific prerequisites::
     sudo apt-get update
     sudo apt-get install -y python-dev libssl-dev python-pip libxml2-dev \
                             libmysqlclient-dev libxslt-dev libpq-dev git \
-                            git-review libffi-dev gettext
+                            git-review libffi-dev gettext build-essential
 
     # Fedora/RHEL:
     sudo yum install -y python-devel openssl-devel python-pip mysql-devel \
