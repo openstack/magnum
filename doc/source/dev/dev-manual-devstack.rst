@@ -81,6 +81,18 @@ http://docs.openstack.org/developer/devstack/configuration.html
 More neutron configuration information can be found at
 http://docs.openstack.org/developer/devstack/guides/neutron.html
 
+Optionally, you can enable ceilometer in devstack. If ceilometer is enabled,
+magnum will periodically send metrics to ceilometer. If you need this feature,
+add the following lines to your `local.conf` file::
+
+    enable_service ceilometer-acompute
+    enable_service ceilometer-acentral
+    enable_service ceilometer-anotification
+    enable_service ceilometer-collector
+    enable_service ceilometer-api
+    enable_service ceilometer-alarm-notifier
+    enable_service ceilometer-alarm-evaluator
+
 Create a local.sh to automatically make necessary networking changes during
 the devstack deployment process. This will allow bays spawned by magnum to
 access the internet through PUBLIC_INTERFACE::
@@ -186,6 +198,10 @@ Configure magnum::
 
     # set public Identity API endpoint
     sudo sed -i "s/#auth_uri\s*=.*/auth_uri=http:\/\/127.0.0.1:5000\/v2.0/" \
+             /etc/magnum/magnum.conf
+
+    # set notification_driver (if using ceilometer)
+    sudo sed -i "s/#notification_driver\s*=.*/notification_driver=messaging/" \
              /etc/magnum/magnum.conf
 
 Clone and install the magnum client::

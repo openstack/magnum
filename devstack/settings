@@ -31,6 +31,15 @@ enable_service h-api
 enable_service h-api-cfn
 enable_service h-api-cw
 
+# Enable Ceilometer services
+enable_service ceilometer-acompute
+enable_service ceilometer-acentral
+enable_service ceilometer-anotification
+enable_service ceilometer-collector
+enable_service ceilometer-api
+enable_service ceilometer-alarm-notifier
+enable_service ceilometer-alarm-evaluator
+
 # Enable Magnum services
 enable_service m-api
 enable_service m-cond
