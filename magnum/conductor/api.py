@@ -162,6 +162,13 @@ class API(rpc_service.API):
     def x509keypair_list(self, context, limit, marker, sort_key, sort_dir):
         return objects.X509KeyPair.list(context, limit, marker,
                                         sort_key, sort_dir)
+    # CA operations
+
+    def sign_certificate(self, bay, certificate):
+        return self._call('sign_certificate', bay=bay, certificate=certificate)
+
+    def get_ca_certificate(self, bay):
+        return self._call('get_ca_certificate', bay=bay)
 
 
 class ListenerAPI(rpc_service.API):

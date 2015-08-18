@@ -83,3 +83,15 @@ def generate_certificates_to_bay(bay):
 
     bay.ca_cert_ref = ca_cert_ref
     bay.magnum_cert_ref = magnum_cert_ref
+
+
+def get_bay_ca_certificate(bay):
+    ca_cert = cert_manager.get_backend().CertManager.get_cert(bay.ca_cert_uuid)
+    return ca_cert.get_certificate()
+
+
+def sign_node_certificate(bay, csr):
+    ca_cert = cert_manager.get_backend().CertManager.get_cert(bay.ca_cert_uuid)
+    node_cert = x509.sign(csr, bay.name, ca_cert.get_private_key(),
+                          ca_cert.get_private_key_passphrase())
+    return node_cert

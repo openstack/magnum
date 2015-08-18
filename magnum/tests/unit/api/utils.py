@@ -44,6 +44,14 @@ def bay_post_data(**kw):
     return remove_internal(bay, internal)
 
 
+def cert_post_data(**kw):
+    return {
+        'bay_uuid': kw.get('bay_uuid', '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'),
+        'csr': kw.get('csr', 'fake-csr'),
+        'pem': kw.get('pem', 'fake-pem')
+    }
+
+
 def pod_post_data(**kw):
     pod = utils.get_test_pod(**kw)
     if 'manifest' not in pod:

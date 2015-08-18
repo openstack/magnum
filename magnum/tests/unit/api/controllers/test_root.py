@@ -73,6 +73,10 @@ class TestRootController(api_base.FunctionalTest):
             u'x509keypairs': [{u'href': u'http://localhost/v1/x509keypairs/',
                                u'rel': u'self'},
                               {u'href': u'http://localhost/x509keypairs/',
+                               u'rel': u'bookmark'}],
+            u'certificates': [{u'href': u'http://localhost/v1/certificates/',
+                               u'rel': u'self'},
+                              {u'href': u'http://localhost/certificates/',
                                u'rel': u'bookmark'}]}
 
         response = self.app.get('/v1/')

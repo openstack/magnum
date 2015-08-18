@@ -18,6 +18,7 @@ import copy
 import mock
 
 from magnum.conductor import api as conductor_rpcapi
+from magnum import objects
 from magnum.tests.unit.db import base
 from magnum.tests.unit.db import utils as dbutils
 
@@ -33,6 +34,8 @@ class RPCAPITestCase(base.DbTestCase):
         self.fake_service = dbutils.get_test_service(driver='fake-driver')
         self.fake_x509keypair = dbutils.get_test_x509keypair(
             driver='fake-driver')
+        self.fake_certificate = objects.Certificate.from_db_bay(self.fake_bay)
+        self.fake_certificate.csr = 'fake-csr'
 
     def _test_rpcapi(self, method, rpc_method, **kwargs):
         rpcapi_cls = kwargs.pop('rpcapi_cls', conductor_rpcapi.API)
@@ -250,3 +253,16 @@ class RPCAPITestCase(base.DbTestCase):
                           'call',
                           version='1.1',
                           uuid=self.fake_x509keypair['name'])
+
+    def test_sign_certificate(self):
+        self._test_rpcapi('sign_certificate',
+                          'call',
+                          version='1.0',
+                          bay=self.fake_bay,
+                          certificate=self.fake_certificate)
+
+    def test_get_ca_certificate(self):
+        self._test_rpcapi('get_ca_certificate',
+                          'call',
+                          version='1.0',
+                          bay=self.fake_bay)

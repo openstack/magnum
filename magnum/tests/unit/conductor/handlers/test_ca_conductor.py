@@ -1,0 +1,57 @@
+# Copyright 2015 NEC Corporation.  All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+from magnum.conductor.handlers import ca_conductor
+from magnum.tests import base
+
+import mock
+from mock import patch
+
+
+class TestSignConductor(base.TestCase):
+    def setUp(self):
+        super(TestSignConductor, self).setUp()
+        self.ca_handler = ca_conductor.Handler()
+
+    @patch.object(ca_conductor, 'cert_manager')
+    def test_sign_certificate(self, mock_cert_manager):
+        mock_bay = mock.MagicMock()
+        mock_certificate = mock.MagicMock()
+        mock_certificate.csr = 'fake-csr'
+        mock_cert_manager.sign_node_certificate.return_value = 'fake-pem'
+
+        actual_cert = self.ca_handler.sign_certificate(self.context,
+                                                       mock_bay,
+                                                       mock_certificate)
+
+        mock_cert_manager.sign_node_certificate.assert_called_once_with(
+            mock_bay, 'fake-csr'
+        )
+        self.assertEqual(actual_cert.pem, 'fake-pem')
+
+    @patch.object(ca_conductor, 'cert_manager')
+    def test_get_ca_certificate(self, mock_cert_manager):
+        mock_bay = mock.MagicMock()
+        mock_bay.uuid = 'bay-uuid'
+        mock_bay.user_id = 'user-id'
+        mock_bay.project_id = 'project-id'
+        mock_cert_manager.get_bay_ca_certificate.return_value = 'fake-pem'
+
+        actual_cert = self.ca_handler.get_ca_certificate(self.context,
+                                                         mock_bay)
+
+        self.assertEqual(actual_cert.bay_uuid, mock_bay.uuid)
+        self.assertEqual(actual_cert.user_id, mock_bay.user_id)
+        self.assertEqual(actual_cert.project_id, mock_bay.project_id)
+        self.assertEqual(actual_cert.pem, 'fake-pem')

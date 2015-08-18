@@ -51,5 +51,8 @@
     "container:detail": "rule:default",
     "container:get": "rule:default",
     "container:get_all": "rule:default",
-    "container:update": "rule:default"
+    "container:update": "rule:default",
+
+    "certificate:create": "rule:default",
+    "certificate:get": "rule:default"
 }

@@ -27,6 +27,7 @@ from magnum.common import rpc_service
 from magnum.common import service as magnum_service
 from magnum.common import short_id
 from magnum.conductor.handlers import bay_conductor
+from magnum.conductor.handlers import ca_conductor
 from magnum.conductor.handlers import conductor_listener
 from magnum.conductor.handlers import docker_conductor
 from magnum.conductor.handlers import k8s_conductor
@@ -56,6 +57,7 @@ def main():
         bay_conductor.Handler(),
         x509keypair_conductor.Handler(),
         conductor_listener.Handler(),
+        ca_conductor.Handler(),
     ]
 
     if (not os.path.isfile(cfg.CONF.bay.k8s_atomic_template_path)
