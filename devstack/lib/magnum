@@ -123,7 +123,6 @@ function create_magnum_conf {
 
     # (Re)create ``magnum.conf``
     rm -f $MAGNUM_CONF
-    iniset $MAGNUM_CONF DEFAULT verbose "True"
     iniset $MAGNUM_CONF DEFAULT debug "$ENABLE_DEBUG_LOG_LEVEL"
     iniset $MAGNUM_CONF oslo_messaging_rabbit rabbit_userid $RABBIT_USERID
     iniset $MAGNUM_CONF oslo_messaging_rabbit rabbit_password $RABBIT_PASSWORD
