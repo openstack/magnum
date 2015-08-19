@@ -60,6 +60,8 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
         'master_count': fields.IntegerField(nullable=True),
         'discovery_url': fields.StringField(nullable=True),
         'master_addresses': fields.ListOfStringsField(nullable=True),
+        'ca_cert_uuid': fields.StringField(nullable=True),
+        'magnum_cert_uuid': fields.StringField(nullable=True),
     }
 
     @staticmethod

@@ -40,7 +40,8 @@ class BayPatchType(types.JsonPatchType):
     @staticmethod
     def internal_attrs():
         internal_attrs = ['/api_address', '/node_addresses',
-                          '/master_addresses', '/stack_id']
+                          '/master_addresses', '/stack_id',
+                          '/ca_cert_uuid', '/magnum_cert_uuid']
         return types.JsonPatchType.internal_attrs() + internal_attrs
 
 
