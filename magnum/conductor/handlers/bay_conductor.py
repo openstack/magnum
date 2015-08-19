@@ -21,6 +21,7 @@ from oslo_service import loopingcall
 from magnum.common import clients
 from magnum.common import exception
 from magnum.common import short_id
+from magnum.conductor.handlers.common import cert_manager
 from magnum.conductor import scale_manager
 from magnum.conductor.template_definition import TemplateDefinition as TDef
 from magnum.conductor import utils as conductor_utils
@@ -130,6 +131,8 @@ class Handler(object):
         osc = clients.OpenStackClients(context)
 
         try:
+            # Generate certificate and set the cert reference to bay
+            cert_manager.generate_certificates_to_bay(bay)
             created_stack = _create_stack(context, osc, bay,
                                           bay_create_timeout)
         except exc.HTTPBadRequest as e:

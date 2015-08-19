@@ -798,14 +798,18 @@ class TestHandler(db_base.DbTestCase):
         bay = objects.Bay.get(self.context, self.bay.uuid)
         self.assertEqual(bay.node_count, 1)
 
+    @patch('magnum.conductor.handlers.common.cert_manager.'
+           'generate_certificates_to_bay')
     @patch('magnum.conductor.handlers.bay_conductor._create_stack')
     @patch('magnum.common.clients.OpenStackClients')
-    def test_create(self, mock_openstack_client_class, mock_create_stack):
+    def test_create(self, mock_openstack_client_class, mock_create_stack,
+                    mock_generate_certificates):
         mock_create_stack.side_effect = exc.HTTPBadRequest
         timeout = 15
         self.assertRaises(exception.InvalidParameterValue,
                           self.handler.bay_create, self.context,
                           self.bay, timeout)
+        mock_generate_certificates.assert_called_once_with(self.bay)
 
     @patch('magnum.common.clients.OpenStackClients')
     def test_bay_delete(self, mock_openstack_client_class):
