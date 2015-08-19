@@ -20,6 +20,7 @@ import magnum.api.auth
 import magnum.common.clients
 import magnum.common.exception
 import magnum.common.magnum_keystoneclient
+import magnum.common.service
 import magnum.conductor.config
 import magnum.conductor.handlers.bay_conductor
 import magnum.conductor.handlers.docker_conductor
@@ -35,7 +36,8 @@ def list_opts():
                          magnum.common.magnum_keystoneclient.trust_opts,
                          magnum.common.paths.PATH_OPTS,
                          magnum.common.utils.UTILS_OPTS,
-                         magnum.common.rpc_service.periodic_opts
+                         magnum.common.rpc_service.periodic_opts,
+                         magnum.common.service.service_opts,
                          )),
         ('api', magnum.api.app.API_SERVICE_OPTS),
         ('bay', magnum.conductor.template_definition.template_def_opts),
