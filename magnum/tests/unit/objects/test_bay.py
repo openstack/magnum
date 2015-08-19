@@ -74,10 +74,11 @@ class TestBayObject(base.DbTestCase):
         with mock.patch.object(self.dbapi, 'get_bay_list',
                                autospec=True) as mock_get_list:
             mock_get_list.return_value = [self.fake_bay]
-            bays = objects.Bay.list_all(self.context)
+            self.context.all_tenants = True
+            bays = objects.Bay.list(self.context)
             mock_get_list.assert_called_once_with(
-                self.context, limit=None, opts={'get_all_tenants': True},
-                marker=None, filters=None, sort_dir=None, sort_key=None)
+                self.context, limit=None, marker=None, filters=None,
+                sort_dir=None, sort_key=None)
             self.assertEqual(mock_get_list.call_count, 1)
             self.assertThat(bays, HasLength(1))
             self.assertIsInstance(bays[0], objects.Bay)

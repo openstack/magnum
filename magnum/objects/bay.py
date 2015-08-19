@@ -151,31 +151,6 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
                                          filters=filters)
         return Bay._from_db_object_list(db_bays, cls, context)
 
-    @base.remotable_classmethod
-    def list_all(cls, context, limit=None, marker=None,
-                 sort_key=None, sort_dir=None, filters=None):
-        """Return all tenants of Bay objects.
-
-        :param context: Security context, should be an admin context.
-        :param limit: maximum number of resources to return in a single result.
-        :param marker: pagination marker for large data sets.
-        :param sort_key: column to sort results by.
-        :param sort_dir: direction to sort. "asc" or "desc".
-        :param filters: filter dict, can includes 'baymodel_id', 'name',
-                        'node_count', 'stack_id', 'api_address',
-                        'node_addresses', 'project_id', 'user_id',
-                        'status'(should be a status list), 'master_count'.
-        :returns: a list of :class:`Bay` object.
-
-        """
-        db_bays = cls.dbapi.get_bay_list(context, limit=limit,
-                                         marker=marker,
-                                         sort_key=sort_key,
-                                         sort_dir=sort_dir,
-                                         filters=filters,
-                                         opts={'get_all_tenants': True})
-        return Bay._from_db_object_list(db_bays, cls, context)
-
     @base.remotable
     def create(self, context=None):
         """Create a Bay record in the DB.

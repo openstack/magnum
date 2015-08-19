@@ -60,7 +60,7 @@ class PeriodicTestCase(base.TestCase):
         self.bay2 = objects.Bay(ctx, **bay2)
         self.bay3 = objects.Bay(ctx, **bay3)
 
-    @mock.patch.object(objects.Bay, 'list_all')
+    @mock.patch.object(objects.Bay, 'list')
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch.object(dbapi.Connection, 'destroy_bay')
     @mock.patch.object(dbapi.Connection, 'update_bay')
@@ -84,7 +84,7 @@ class PeriodicTestCase(base.TestCase):
         mock_db_destroy.assert_called_once_with(self.bay2.uuid)
         self.assertEqual(self.bay3.status, bay_status.UPDATE_COMPLETE)
 
-    @mock.patch.object(objects.Bay, 'list_all')
+    @mock.patch.object(objects.Bay, 'list')
     @mock.patch('magnum.common.clients.OpenStackClients')
     def test_sync_bay_status_not_changes(self, mock_oscc, mock_bay_list):
         mock_heat_client = mock.MagicMock()
@@ -104,7 +104,7 @@ class PeriodicTestCase(base.TestCase):
         self.assertEqual(self.bay2.status, bay_status.DELETE_IN_PROGRESS)
         self.assertEqual(self.bay3.status, bay_status.UPDATE_IN_PROGRESS)
 
-    @mock.patch.object(objects.Bay, 'list_all')
+    @mock.patch.object(objects.Bay, 'list')
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch.object(dbapi.Connection, 'destroy_bay')
     @mock.patch.object(dbapi.Connection, 'update_bay')

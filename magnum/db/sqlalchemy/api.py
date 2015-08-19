@@ -111,13 +111,8 @@ class Connection(api.Connection):
     def __init__(self):
         pass
 
-    def _add_tenant_filters(self, context, query, opts=None):
-        if opts is None:
-            opts = {}
-
-        all_tenants = opts.get('get_all_tenants', False)
-
-        if context.is_admin and all_tenants:
+    def _add_tenant_filters(self, context, query):
+        if context.is_admin and context.all_tenants:
             return query
 
         if context.project_id:
@@ -155,11 +150,9 @@ class Connection(api.Connection):
         return query
 
     def get_bay_list(self, context, filters=None, limit=None, marker=None,
-                     sort_key=None, sort_dir=None, opts=None):
-        if opts is None:
-            opts = {}
+                     sort_key=None, sort_dir=None):
         query = model_query(models.Bay)
-        query = self._add_tenant_filters(context, query, opts=opts)
+        query = self._add_tenant_filters(context, query)
         query = self._add_bays_filters(query, filters)
         return _paginate_query(models.Bay, limit, marker,
                                sort_key, sort_dir, query)
@@ -1028,12 +1021,9 @@ class Connection(api.Connection):
         return query
 
     def get_x509keypair_list(self, context, filters=None, limit=None,
-                             marker=None, sort_key=None, sort_dir=None,
-                             opts=None):
-        if opts is None:
-            opts = {}
+                             marker=None, sort_key=None, sort_dir=None):
         query = model_query(models.X509KeyPair)
-        query = self._add_tenant_filters(context, query, opts=opts)
+        query = self._add_tenant_filters(context, query)
         query = self._add_x509keypairs_filters(query, filters)
         return _paginate_query(models.X509KeyPair, limit, marker,
                                sort_key, sort_dir, query)

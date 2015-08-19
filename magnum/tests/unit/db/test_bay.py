@@ -158,8 +158,8 @@ class DbBayTestCase(base.DbTestCase):
                 project_id=magnum_utils.generate_uuid(),
                 user_id=magnum_utils.generate_uuid())
             uuids.append(six.text_type(bay['uuid']))
-        ctx = context.make_admin_context()
-        res = self.dbapi.get_bay_list(ctx, opts={'get_all_tenants': True})
+        ctx = context.make_admin_context(all_tenants=True)
+        res = self.dbapi.get_bay_list(ctx)
         res_uuids = [r.uuid for r in res]
         self.assertEqual(sorted(uuids), sorted(res_uuids))
 
