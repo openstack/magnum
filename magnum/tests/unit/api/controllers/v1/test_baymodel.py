@@ -55,6 +55,7 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertNotIn('keypair_id', response['baymodels'][0])
         self.assertNotIn('external_network_id', response['baymodels'][0])
         self.assertNotIn('fixed_network', response['baymodels'][0])
+        self.assertNotIn('network_driver', response['baymodels'][0])
         self.assertNotIn('docker_volume_size', response['baymodels'][0])
         self.assertNotIn('ssh_authorized_key', response['baymodels'][0])
         self.assertNotIn('http_proxy', response['baymodels'][0])
@@ -71,6 +72,7 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertIn('keypair_id', response)
         self.assertIn('external_network_id', response)
         self.assertIn('fixed_network', response)
+        self.assertIn('network_driver', response)
         self.assertIn('docker_volume_size', response)
         self.assertIn('ssh_authorized_key', response)
         self.assertIn('coe', response)
@@ -88,6 +90,7 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertIn('keypair_id', response)
         self.assertIn('external_network_id', response)
         self.assertIn('fixed_network', response)
+        self.assertIn('network_driver', response)
         self.assertIn('docker_volume_size', response)
         self.assertIn('coe', response)
         self.assertIn('http_proxy', response)
@@ -136,7 +139,8 @@ class TestListBayModel(api_base.FunctionalTest):
         for key in ("flavor_id", "master_flavor_id", "dns_nameserver",
                     "keypair_id", "external_network_id", "fixed_network",
                     "docker_volume_size", "ssh_authorized_key", "coe",
-                    "http_proxy", "https_proxy", "no_proxy"):
+                    "http_proxy", "https_proxy", "no_proxy",
+                    "network_driver"):
             self.assertIn(key, response['baymodels'][0])
 
     def test_detail_with_pagination_marker(self):
@@ -153,7 +157,8 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertEqual(bm_list[-1].uuid, response['baymodels'][0]['uuid'])
         for key in ("flavor_id", "master_flavor_id", "dns_nameserver",
                     "keypair_id", "external_network_id", "fixed_network",
-                    "docker_volume_size", "ssh_authorized_key", "coe"):
+                    "network_driver", "docker_volume_size",
+                    "ssh_authorized_key", "coe"):
             self.assertIn(key, response['baymodels'][0])
             self.assertIn('flavor_id', response['baymodels'][0])
             self.assertIn('master_flavor_id', response['baymodels'][0])
@@ -229,6 +234,7 @@ class TestPatch(api_base.FunctionalTest):
             image_id='nerdherd',
             apiserver_port=8080,
             fixed_network='private',
+            network_driver='fake_driver',
             docker_volume_size=20,
             ssh_authorized_key='ssh-rsa AAAAB3NzaC1ycEAAAADA'
                                'v0XRqg3tm+jlsOKGO81lPDH+KaSJ'
@@ -275,6 +281,8 @@ class TestPatch(api_base.FunctionalTest):
                          response['apiserver_port'])
         self.assertEqual(self.baymodel.fixed_network,
                          response['fixed_network'])
+        self.assertEqual(self.baymodel.network_driver,
+                         response['network_driver'])
         self.assertEqual(self.baymodel.docker_volume_size,
                          response['docker_volume_size'])
         self.assertEqual(self.baymodel.ssh_authorized_key,
@@ -307,6 +315,8 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(baymodel.apiserver_port, response['apiserver_port'])
         self.assertEqual(self.baymodel.fixed_network,
                          response['fixed_network'])
+        self.assertEqual(self.baymodel.network_driver,
+                         response['network_driver'])
         self.assertEqual(self.baymodel.docker_volume_size,
                          response['docker_volume_size'])
         self.assertEqual(self.baymodel.ssh_authorized_key,
@@ -343,6 +353,8 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(self.baymodel.image_id, response['image_id'])
         self.assertEqual(self.baymodel.apiserver_port,
                          response['apiserver_port'])
+        self.assertEqual(self.baymodel.network_driver,
+                         response['network_driver'])
         self.assertEqual(self.baymodel.docker_volume_size,
                          response['docker_volume_size'])
         self.assertEqual(self.baymodel.coe,
@@ -383,6 +395,8 @@ class TestPatch(api_base.FunctionalTest):
                          response['apiserver_port'])
         self.assertEqual(self.baymodel.fixed_network,
                          response['fixed_network'])
+        self.assertEqual(self.baymodel.network_driver,
+                         response['network_driver'])
         self.assertEqual(self.baymodel.docker_volume_size,
                          response['docker_volume_size'])
         self.assertEqual(self.baymodel.ssh_authorized_key,
@@ -487,7 +501,7 @@ class TestPost(api_base.FunctionalTest):
                   "dns_nameserver", "keypair_id", "external_network_id",
                   "cluster_distro", "fixed_network", "apiserver_port",
                   "docker_volume_size", "http_proxy", "https_proxy",
-                  "no_proxy"]
+                  "no_proxy", "network_driver"]
         for field in fields:
             self._create_baymodel_raises_app_error(**{field: 'i' * 256})
 
@@ -496,7 +510,7 @@ class TestPost(api_base.FunctionalTest):
                   "dns_nameserver", "keypair_id", "external_network_id",
                   "cluster_distro", "fixed_network", "apiserver_port",
                   "docker_volume_size", "ssh_authorized_key",
-                  "http_proxy", "https_proxy", "no_proxy"]
+                  "http_proxy", "https_proxy", "no_proxy", "network_driver"]
         for field in fields:
             self._create_baymodel_raises_app_error(**{field: ''})
 
@@ -542,6 +556,42 @@ class TestPost(api_base.FunctionalTest):
                                            mock_keypair_exists,
                                            mock_image_data):
         mock_keypair_exists.return_value = None
+
+    @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
+    @mock.patch.object(api_baymodel.BayModelsController,
+                       'check_keypair_exists')
+    def test_create_baymodel_with_network_driver(self, mock_keypair_exists,
+                                                 mock_image_data):
+        mock_keypair_exists.return_value = None
+        with mock.patch.object(self.dbapi, 'create_baymodel',
+                               wraps=self.dbapi.create_baymodel) as cc_mock:
+            mock_keypair_exists.return_value = None
+            mock_image_data.return_value = {'name': 'mock_name',
+                                            'os_distro': 'fedora-atomic'}
+            bdict = apiutils.baymodel_post_data(network_driver='libnetwork')
+            response = self.post_json('/baymodels', bdict)
+            self.assertEqual(bdict['network_driver'],
+                             response.json['network_driver'])
+            cc_mock.assert_called_once_with(mock.ANY)
+            self.assertNotIn('id', cc_mock.call_args[0][0])
+
+    @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
+    @mock.patch.object(api_baymodel.BayModelsController,
+                       'check_keypair_exists')
+    def test_create_baymodel_with_no_network_driver(self, mock_keypair_exists,
+                                                    mock_image_data):
+        mock_keypair_exists.return_value = None
+        with mock.patch.object(self.dbapi, 'create_baymodel',
+                               wraps=self.dbapi.create_baymodel) as cc_mock:
+            mock_image_data.return_value = {'name': 'mock_name',
+                                            'os_distro': 'fedora-atomic'}
+            bdict = apiutils.baymodel_post_data()
+            response = self.post_json('/baymodels', bdict)
+            self.assertEqual(bdict['network_driver'],
+                             response.json['network_driver'])
+            cc_mock.assert_called_once_with(mock.ANY)
+            self.assertNotIn('id', cc_mock.call_args[0][0])
+
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
         bdict = apiutils.baymodel_post_data()
