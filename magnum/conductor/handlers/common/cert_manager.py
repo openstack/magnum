@@ -18,6 +18,7 @@ import six
 from magnum.common import cert_manager
 from magnum.common import short_id
 from magnum.common.x509 import operations as x509
+from magnum.i18n import _LW
 
 CONDUCTOR_CLIENT_NAME = six.u('Magnum-Conductor')
 
@@ -95,3 +96,16 @@ def sign_node_certificate(bay, csr):
     node_cert = x509.sign(csr, bay.name, ca_cert.get_private_key(),
                           ca_cert.get_private_key_passphrase())
     return node_cert
+
+
+def delete_certificates_from_bay(bay):
+    """Delete ca cert and magnum client cert from bay
+
+    :param bay: The bay which has certs
+    """
+    for cert_ref in [bay.ca_cert_ref, bay.magnum_cert_ref]:
+        try:
+            if cert_ref:
+                cert_manager.get_backend().CertManager.delete_cert(cert_ref)
+        except Exception:
+            LOG.warn(_LW("Deleting cert is failed: %s") % cert_ref)

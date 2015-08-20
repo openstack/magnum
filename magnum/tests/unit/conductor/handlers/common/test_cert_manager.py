@@ -155,3 +155,38 @@ class CertManagerTestCase(base.BaseTestCase):
         self.CertManager.get_cert.assert_called_once_with(
             mock_bay.ca_cert_ref)
         self.assertEqual(bay_ca_cert, mock.sentinel.certificate)
+
+    def test_delete_certtificate(self):
+        mock_delete_cert = self.CertManager.delete_cert
+        expected_cert_ref = 'cert_ref'
+        expected_ca_cert_ref = 'ca_cert_ref'
+        mock_bay = mock.MagicMock()
+        mock_bay.ca_cert_ref = expected_ca_cert_ref
+        mock_bay.magnum_cert_ref = expected_cert_ref
+
+        cert_manager.delete_certificates_from_bay(mock_bay)
+        mock_delete_cert.assert_any_call(expected_ca_cert_ref)
+        mock_delete_cert.assert_any_call(expected_cert_ref)
+
+    def test_delete_certtificate_if_raise_error(self):
+        mock_delete_cert = self.CertManager.delete_cert
+        expected_cert_ref = 'cert_ref'
+        expected_ca_cert_ref = 'ca_cert_ref'
+        mock_bay = mock.MagicMock()
+        mock_bay.ca_cert_ref = expected_ca_cert_ref
+        mock_bay.magnum_cert_ref = expected_cert_ref
+
+        mock_delete_cert.side_effect = ValueError
+
+        cert_manager.delete_certificates_from_bay(mock_bay)
+        mock_delete_cert.assert_any_call(expected_ca_cert_ref)
+        mock_delete_cert.assert_any_call(expected_cert_ref)
+
+    def test_delete_certtificate_without_cert_ref(self):
+        mock_delete_cert = self.CertManager.delete_cert
+        mock_bay = mock.MagicMock()
+        mock_bay.ca_cert_ref = None
+        mock_bay.magnum_cert_ref = None
+
+        cert_manager.delete_certificates_from_bay(mock_bay)
+        self.assertFalse(mock_delete_cert.called)
