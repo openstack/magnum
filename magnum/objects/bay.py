@@ -59,6 +59,7 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
         'node_count': fields.IntegerField(nullable=True),
         'master_count': fields.IntegerField(nullable=True),
         'discovery_url': fields.StringField(nullable=True),
+        'master_addresses': fields.ListOfStringsField(nullable=True),
     }
 
     @staticmethod
