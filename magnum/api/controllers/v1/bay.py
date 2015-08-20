@@ -80,13 +80,13 @@ class Bay(base.APIBase):
                                   _set_baymodel_id, mandatory=True)
     """The bay model UUID or id"""
 
-    node_count = wtypes.IntegerType(minimum=1)
-    """The node count for this bay"""
+    node_count = wsme.wsattr(wtypes.IntegerType(minimum=1), default=1)
+    """The node count for this bay. Set to 1 for no node_count"""
 
     master_count = wsme.wsattr(wtypes.IntegerType(minimum=1), default=1)
-    """The number of master nodes for this bay"""
+    """The number of master nodes for this bay. Set to 1 for no master_count"""
 
-    bay_create_timeout = wtypes.IntegerType(minimum=0)
+    bay_create_timeout = wsme.wsattr(wtypes.IntegerType(minimum=0), default=0)
     """Timeout for creating the bay in minutes. Set to 0 for no timeout."""
 
     links = wsme.wsattr([link.Link], readonly=True)
@@ -276,8 +276,6 @@ class BaysController(rest.RestController):
             bay_dict['node_count'] = 1
 
         new_bay = objects.Bay(context, **bay_dict)
-        if isinstance(bay.bay_create_timeout, wsme.types.UnsetType):
-            bay.bay_create_timeout = 0
         res_bay = pecan.request.rpcapi.bay_create(new_bay,
                                                   bay.bay_create_timeout)
 
