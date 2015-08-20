@@ -23,6 +23,8 @@ from oslo_service import threadgroup
 from magnum.common import clients
 from magnum.common import context
 from magnum.common import exception
+from magnum.common import rpc
+from magnum.conductor import monitors
 from magnum.i18n import _
 from magnum.i18n import _LI
 from magnum.i18n import _LW
@@ -54,6 +56,7 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
         self.host = conf.host
         self.binary = binary
         super(MagnumPeriodicTasks, self).__init__(conf)
+        self.notifier = rpc.get_notifier()
 
     @periodic_task.periodic_task(run_immediately=True)
     @set_context
@@ -146,6 +149,49 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
         except Exception as e:
             LOG.warn(_LW("Ignore error [%s] when syncing up bay status."), e,
                      exc_info=True)
+
+    @periodic_task.periodic_task(run_immediately=True)
+    @set_context
+    def _send_bay_metrics(self, ctx):
+        LOG.debug('Starting to send bay metrics')
+        for bay in objects.Bay.list(ctx):
+            if bay.status not in [bay_status.CREATE_COMPLETE,
+                                  bay_status.UPDATE_COMPLETE]:
+                continue
+
+            monitor = monitors.create_monitor(ctx, bay)
+            if monitor is None:
+                continue
+
+            try:
+                monitor.pull_data()
+            except Exception as e:
+                LOG.warn(_LW("Skip pulling data from bay %(bay)s due to "
+                             "error: %(e)s"),
+                         {'e': e, 'bay': bay.uuid}, exc_info=True)
+                continue
+
+            metrics = list()
+            for name in monitor.get_metric_names():
+                try:
+                    metric = {
+                        'name': name,
+                        'value': monitor.compute_metric_value(name),
+                        'unit': monitor.get_metric_unit(name),
+                    }
+                    metrics.append(metric)
+                except Exception as e:
+                    LOG.warn(_LW("Skip adding metric %(name)s due to "
+                                 "error: %(e)s"),
+                             {'e': e, 'name': name}, exc_info=True)
+
+            message = dict(metrics=metrics,
+                           user_id=bay.user_id,
+                           project_id=bay.project_id,
+                           resource_id=bay.uuid)
+            LOG.debug("About to send notification: '%s'" % message)
+            self.notifier.info(ctx, "magnum.bay.metrics.update",
+                               message)
 
 
 def setup(conf, binary):

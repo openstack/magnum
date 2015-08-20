@@ -55,10 +55,13 @@ class PeriodicTestCase(base.TestCase):
                                   status=bay_status.DELETE_IN_PROGRESS)
         bay3 = utils.get_test_bay(id=3, stack_id='33',
                                   status=bay_status.UPDATE_IN_PROGRESS)
+        bay4 = utils.get_test_bay(id=4, stack_id='44',
+                                  status=bay_status.CREATE_COMPLETE)
 
         self.bay1 = objects.Bay(ctx, **bay1)
         self.bay2 = objects.Bay(ctx, **bay2)
         self.bay3 = objects.Bay(ctx, **bay3)
+        self.bay4 = objects.Bay(ctx, **bay4)
 
         mock_magnum_service_refresh = mock.Mock()
 
@@ -185,3 +188,119 @@ class PeriodicTestCase(base.TestCase):
         periodic_a.update_magnum_service(None)
 
         self.fake_ms_refresh.assert_called_once_with(mock.ANY)
+
+    @mock.patch('magnum.conductor.monitors.create_monitor')
+    @mock.patch('magnum.objects.Bay.list')
+    @mock.patch('magnum.common.rpc.get_notifier')
+    @mock.patch('magnum.common.context.make_admin_context')
+    def test_send_bay_metrics(self, mock_make_admin_context, mock_get_notifier,
+                              mock_bay_list, mock_create_monitor):
+        """Test if RPC notifier receives the expected message"""
+        mock_make_admin_context.return_value = self.context
+        notifier = mock.MagicMock()
+        mock_get_notifier.return_value = notifier
+        mock_bay_list.return_value = [self.bay1, self.bay2, self.bay3,
+                                      self.bay4]
+        monitor = mock.MagicMock()
+        monitor.get_metric_names.return_value = ['metric1', 'metric2']
+        monitor.compute_metric_value.return_value = 30
+        monitor.get_metric_unit.return_value = '%'
+        mock_create_monitor.return_value = monitor
+
+        periodic.MagnumPeriodicTasks(
+            CONF, 'fake-conductor')._send_bay_metrics(self.context)
+
+        expected_event_type = 'magnum.bay.metrics.update'
+        expected_metrics = [
+            {
+                'name': 'metric1',
+                'value': 30,
+                'unit': '%',
+            },
+            {
+                'name': 'metric2',
+                'value': 30,
+                'unit': '%',
+            },
+        ]
+        expected_msg = {
+            'user_id': self.bay4.user_id,
+            'project_id': self.bay4.project_id,
+            'resource_id': self.bay4.uuid,
+            'metrics': expected_metrics
+        }
+
+        self.assertEqual(mock_create_monitor.call_count, 1)
+        notifier.info.assert_called_once_with(
+            self.context, expected_event_type, expected_msg)
+
+    @mock.patch('magnum.conductor.monitors.create_monitor')
+    @mock.patch('magnum.objects.Bay.list')
+    @mock.patch('magnum.common.rpc.get_notifier')
+    @mock.patch('magnum.common.context.make_admin_context')
+    def test_send_bay_metrics_compute_metric_raise(
+            self, mock_make_admin_context, mock_get_notifier, mock_bay_list,
+            mock_create_monitor):
+        mock_make_admin_context.return_value = self.context
+        notifier = mock.MagicMock()
+        mock_get_notifier.return_value = notifier
+        mock_bay_list.return_value = [self.bay4]
+        monitor = mock.MagicMock()
+        monitor.get_metric_names.return_value = ['metric1', 'metric2']
+        monitor.compute_metric_value.side_effect = Exception(
+            "error on computing metric")
+        mock_create_monitor.return_value = monitor
+
+        periodic.MagnumPeriodicTasks(
+            CONF, 'fake-conductor')._send_bay_metrics(self.context)
+
+        expected_event_type = 'magnum.bay.metrics.update'
+        expected_msg = {
+            'user_id': self.bay4.user_id,
+            'project_id': self.bay4.project_id,
+            'resource_id': self.bay4.uuid,
+            'metrics': []
+        }
+        self.assertEqual(mock_create_monitor.call_count, 1)
+        notifier.info.assert_called_once_with(
+            self.context, expected_event_type, expected_msg)
+
+    @mock.patch('magnum.conductor.monitors.create_monitor')
+    @mock.patch('magnum.objects.Bay.list')
+    @mock.patch('magnum.common.rpc.get_notifier')
+    @mock.patch('magnum.common.context.make_admin_context')
+    def test_send_bay_metrics_pull_data_raise(
+            self, mock_make_admin_context, mock_get_notifier, mock_bay_list,
+            mock_create_monitor):
+        mock_make_admin_context.return_value = self.context
+        notifier = mock.MagicMock()
+        mock_get_notifier.return_value = notifier
+        mock_bay_list.return_value = [self.bay4]
+        monitor = mock.MagicMock()
+        monitor.pull_data.side_effect = Exception("error on pulling data")
+        mock_create_monitor.return_value = monitor
+
+        periodic.MagnumPeriodicTasks(
+            CONF, 'fake-conductor')._send_bay_metrics(self.context)
+
+        self.assertEqual(mock_create_monitor.call_count, 1)
+        self.assertEqual(notifier.info.call_count, 0)
+
+    @mock.patch('magnum.conductor.monitors.create_monitor')
+    @mock.patch('magnum.objects.Bay.list')
+    @mock.patch('magnum.common.rpc.get_notifier')
+    @mock.patch('magnum.common.context.make_admin_context')
+    def test_send_bay_metrics_monitor_none(
+            self, mock_make_admin_context, mock_get_notifier, mock_bay_list,
+            mock_create_monitor):
+        mock_make_admin_context.return_value = self.context
+        notifier = mock.MagicMock()
+        mock_get_notifier.return_value = notifier
+        mock_bay_list.return_value = [self.bay4]
+        mock_create_monitor.return_value = None
+
+        periodic.MagnumPeriodicTasks(
+            CONF, 'fake-conductor')._send_bay_metrics(self.context)
+
+        self.assertEqual(mock_create_monitor.call_count, 1)
+        self.assertEqual(notifier.info.call_count, 0)
