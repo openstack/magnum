@@ -43,6 +43,8 @@ class ContextHook(hooks.PecanHook):
     X-Auth-Token:
         Used for context.auth_token.
 
+    X-Roles:
+        Used for context.roles.
     """
 
     def before(self, state):
@@ -54,6 +56,7 @@ class ContextHook(hooks.PecanHook):
         domain_id = headers.get('X-User-Domain-Id')
         domain_name = headers.get('X-User-Domain-Name')
         auth_token = headers.get('X-Auth-Token')
+        roles = headers.get('X-Roles', '').split(',')
         auth_token_info = state.request.environ.get('keystone.token_info')
 
         auth_url = headers.get('X-Auth-Url')
@@ -70,7 +73,8 @@ class ContextHook(hooks.PecanHook):
             project_name=project,
             project_id=project_id,
             domain_id=domain_id,
-            domain_name=domain_name)
+            domain_name=domain_name,
+            roles=roles)
 
 
 class RPCHook(hooks.PecanHook):
