@@ -225,7 +225,7 @@ def get_test_rc(**kw):
     return {
         'id': kw.get('id', 42),
         'uuid': kw.get('uuid', '10a47dd1-4874-4298-91cf-eff046dbdb8d'),
-        'name': kw.get('name', 'service1'),
+        'name': kw.get('name', 'replication_controller'),
         'project_id': kw.get('project_id', 'fake_project'),
         'user_id': kw.get('user_id', 'fake_user'),
         'images': kw.get('images', ['steak/for-dinner']),
@@ -242,15 +242,16 @@ def create_test_rc(**kw):
     """Create test rc entry in DB and return ReplicationController DB object.
     Function to be used to create test ReplicationController objects in the
     database.
-    :param kw: kwargs with overriding values for service's attributes.
-    :returns: Test Service DB object.
+    :param kw: kwargs with overriding values for
+               replication controller's attributes.
+    :returns: Test ReplicationController DB object.
     """
-    service = get_test_rc(**kw)
+    replication_controller = get_test_rc(**kw)
     # Let DB generate ID if it isn't specified explicitly
     if 'id' not in kw:
-        del service['id']
+        del replication_controller['id']
     dbapi = db_api.get_instance()
-    return dbapi.create_rc(service)
+    return dbapi.create_rc(replication_controller)
 
 
 def get_test_baylock(**kw):
