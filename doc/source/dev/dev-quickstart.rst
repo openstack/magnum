@@ -26,7 +26,7 @@ Install OS-specific prerequisites::
     # Fedora/RHEL:
     sudo yum install -y python-devel openssl-devel python-pip mysql-devel \
                         libxml2-devel libxslt-devel postgresql-devel git \
-                        git-review libffi-devel gettext
+                        git-review libffi-devel gettext gcc
 
     # openSUSE/SLE 12:
     sudo zypper --non-interactive install git git-review libffi-devel \
