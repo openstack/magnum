@@ -229,7 +229,13 @@ nodes that are deleted.
 Heat can be used to see detailed information on the status of a stack or
 specific bay::
 
+To check the list of all bay stacks::
+
     heat stack-list
+
+To check an indvidual bay's stack::
+
+    heat stack-show <stack-name or stack_id>
 
 Monitoring bay status in detail (e.g., creating, updating)::
 
