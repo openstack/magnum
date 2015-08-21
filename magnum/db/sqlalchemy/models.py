@@ -19,7 +19,6 @@ SQLAlchemy models for container service
 import json
 
 from oslo_config import cfg
-from oslo_db import options as db_options
 from oslo_db.sqlalchemy import models
 import six.moves.urllib.parse as urlparse
 from sqlalchemy import Column
@@ -29,21 +28,6 @@ from sqlalchemy import schema
 from sqlalchemy import String
 from sqlalchemy import Text
 from sqlalchemy.types import TypeDecorator, TEXT
-
-from magnum.common import paths
-
-
-sql_opts = [
-    cfg.StrOpt('mysql_engine',
-               default='InnoDB',
-               help='MySQL engine to use.')
-]
-
-_DEFAULT_SQL_CONNECTION = 'sqlite:///' + paths.state_path_def('magnum.sqlite')
-
-
-cfg.CONF.register_opts(sql_opts, 'database')
-db_options.set_defaults(cfg.CONF, _DEFAULT_SQL_CONNECTION, 'magnum.sqlite')
 
 
 def table_args():

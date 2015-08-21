@@ -16,77 +16,48 @@
 
 import os
 
-import alembic
-from alembic import config as alembic_config
-import alembic.migration as alembic_migration
-from oslo_db import exception as db_exc
+from oslo_config import cfg
+from oslo_db.sqlalchemy.migration_cli import manager
 
-from magnum.db.sqlalchemy import api as sqla_api
-from magnum.db.sqlalchemy import models
+_MANAGER = None
 
 
-def _alembic_config():
-    path = os.path.join(os.path.dirname(__file__), 'alembic.ini')
-    config = alembic_config.Config(path)
-    return config
+def get_manager():
+    global _MANAGER
+    if not _MANAGER:
+        alembic_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), 'alembic.ini'))
+        migrate_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), 'alembic'))
+        migration_config = {'alembic_ini_path': alembic_path,
+                            'alembic_repo_path': migrate_path,
+                            'db_url': cfg.CONF.database.connection}
+        _MANAGER = manager.MigrationManager(migration_config)
+
+    return _MANAGER
 
 
-def version(config=None, engine=None):
+def version():
     """Current database version.
 
     :returns: Database version
     :rtype: string
     """
-    if engine is None:
-        engine = sqla_api.get_engine()
-    with engine.connect() as conn:
-        context = alembic_migration.MigrationContext.configure(conn)
-        return context.get_current_revision()
+    return get_manager().version()
 
 
-def upgrade(revision, config=None):
+def upgrade(version):
     """Used for upgrading database.
 
     :param version: Desired database version
     :type version: string
     """
-    revision = revision or 'head'
-    config = config or _alembic_config()
+    version = version or 'head'
 
-    alembic.command.upgrade(config, revision or 'head')
-
-
-def create_schema(config=None, engine=None):
-    """Create database schema from models description.
-
-    Can be used for initial installation instead of upgrade('head').
-    """
-    if engine is None:
-        engine = sqla_api.get_engine()
-
-    # NOTE(viktors): If we will use metadata.create_all() for non empty db
-    #                schema, it will only add the new tables, but leave
-    #                existing as is. So we should avoid of this situation.
-    if version(engine=engine) is not None:
-        raise db_exc.DbMigrationError("DB schema is already under version"
-                                      " control. Use upgrade() instead")
-
-    models.Base.metadata.create_all(engine)
-    stamp('head', config=config)
+    get_manager().upgrade(version)
 
 
-def downgrade(revision, config=None):
-    """Used for downgrading database.
-
-    :param version: Desired database version
-    :type version: string
-    """
-    revision = revision or 'base'
-    config = config or _alembic_config()
-    return alembic.command.downgrade(config, revision)
-
-
-def stamp(revision, config=None):
+def stamp(revision):
     """Stamps database with provided revision.
 
     Don't run any migrations.
@@ -95,11 +66,10 @@ def stamp(revision, config=None):
                      database with most recent revision
     :type revision: string
     """
-    config = config or _alembic_config()
-    return alembic.command.stamp(config, revision=revision)
+    get_manager().stamp(revision)
 
 
-def revision(message=None, autogenerate=False, config=None):
+def revision(message=None, autogenerate=False):
     """Creates template for migration.
 
     :param message: Text that will be used for migration title
@@ -108,6 +78,4 @@ def revision(message=None, autogenerate=False, config=None):
                          state
     :type autogenerate: bool
     """
-    config = config or _alembic_config()
-    return alembic.command.revision(config, message=message,
-                                    autogenerate=autogenerate)
+    return get_manager().revision(message=message, autogenerate=autogenerate)

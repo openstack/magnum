@@ -13,35 +13,31 @@
 
 """Starter script for magnum-db-manage."""
 
-import os
-
 from oslo_config import cfg
-from oslo_db import options
-from oslo_db.sqlalchemy.migration_cli import manager
 from oslo_log import log as logging
 
-from magnum.i18n import _
+from magnum.db import migration
 
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
 
 
-def do_version(mgr):
-    print('Current DB revision is %s' % mgr.version())
+def do_version():
+    print('Current DB revision is %s' % migration.version())
 
 
-def do_upgrade(mgr):
-    mgr.upgrade(CONF.command.revision)
+def do_upgrade():
+    migration.upgrade(CONF.command.revision)
 
 
-def do_stamp(mgr):
-    mgr.stamp(CONF.command.revision)
+def do_stamp():
+    migration.stamp(CONF.command.revision)
 
 
-def do_revision(mgr):
-    mgr.revision(message=CONF.command.message,
-                 autogenerate=CONF.command.autogenerate)
+def do_revision():
+    migration.revision(message=CONF.command.message,
+                       autogenerate=CONF.command.autogenerate)
 
 
 def add_command_parsers(subparsers):
@@ -62,23 +58,6 @@ def add_command_parsers(subparsers):
     parser.set_defaults(func=do_revision)
 
 
-def get_manager():
-    if cfg.CONF.database.connection is None:
-        raise ValueError(
-            _('Could not find parameter database.connection in config file'))
-
-    alembic_path = os.path.abspath(
-        os.path.join(os.path.dirname(__file__),
-                     '..', 'db', 'sqlalchemy', 'alembic.ini'))
-    migrate_path = os.path.abspath(
-        os.path.join(os.path.dirname(__file__),
-                     '..', 'db', 'sqlalchemy', 'alembic'))
-    migration_config = {'alembic_ini_path': alembic_path,
-                        'alembic_repo_path': migrate_path,
-                        'db_url': CONF.database.connection}
-    return manager.MigrationManager(migration_config)
-
-
 def main():
     command_opt = cfg.SubCommandOpt('command',
                                     title='Command',
@@ -86,8 +65,5 @@ def main():
                                     handler=add_command_parsers)
     CONF.register_cli_opt(command_opt)
 
-    # set_defaults() is called to register the db options.
-    options.set_defaults(CONF)
-
     CONF(project='magnum')
-    CONF.command.func(get_manager())
+    CONF.command.func()
