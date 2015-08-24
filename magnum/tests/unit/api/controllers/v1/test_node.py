@@ -247,6 +247,17 @@ class TestPost(api_base.FunctionalTest):
             response.json['created_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_created_at)
 
+    def test_create_node_set_project_id_and_user_id(self):
+        with mock.patch.object(self.dbapi, 'create_node',
+                               wraps=self.dbapi.create_node) as cc_mock:
+            node_dict = apiutils.node_post_data()
+            self.post_json('/nodes', node_dict)
+            cc_mock.assert_called_once_with(mock.ANY)
+            self.assertEqual(cc_mock.call_args[0][0]['project_id'],
+                             self.context.project_id)
+            self.assertEqual(cc_mock.call_args[0][0]['user_id'],
+                             self.context.user_id)
+
     def test_create_node_doesnt_contain_id(self):
         with mock.patch.object(self.dbapi, 'create_node',
                                wraps=self.dbapi.create_node) as cn_mock:

@@ -360,9 +360,8 @@ class ContainersController(rest.RestController):
         """
         container_dict = container.as_dict()
         context = pecan.request.context
-        auth_token = context.auth_token_info['token']
-        container_dict['project_id'] = auth_token['project']['id']
-        container_dict['user_id'] = auth_token['user']['id']
+        container_dict['project_id'] = context.project_id
+        container_dict['user_id'] = context.user_id
         new_container = objects.Container(context, **container_dict)
         new_container.create()
         res_container = pecan.request.rpcapi.container_create(new_container)

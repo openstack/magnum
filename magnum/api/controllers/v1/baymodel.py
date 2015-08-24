@@ -278,9 +278,8 @@ class BayModelsController(rest.RestController):
         """
         baymodel_dict = baymodel.as_dict()
         context = pecan.request.context
-        auth_token = context.auth_token_info['token']
-        baymodel_dict['project_id'] = auth_token['project']['id']
-        baymodel_dict['user_id'] = auth_token['user']['id']
+        baymodel_dict['project_id'] = context.project_id
+        baymodel_dict['user_id'] = context.user_id
         image_data = self._get_image_data(context, baymodel_dict['image_id'])
         if image_data.get('os_distro'):
             baymodel_dict['cluster_distro'] = image_data['os_distro']

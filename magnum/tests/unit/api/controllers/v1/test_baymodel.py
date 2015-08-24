@@ -389,6 +389,21 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(test_time, return_created_at)
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
+    def test_create_baymodel_set_project_id_and_user_id(self, mock_image_data):
+
+        with mock.patch.object(self.dbapi, 'create_baymodel',
+                               wraps=self.dbapi.create_baymodel) as cc_mock:
+            mock_image_data.return_value = {'name': 'mock_name',
+                                            'os_distro': 'fedora-atomic'}
+            bdict = apiutils.baymodel_post_data()
+            self.post_json('/baymodels', bdict)
+            cc_mock.assert_called_once_with(mock.ANY)
+            self.assertEqual(cc_mock.call_args[0][0]['project_id'],
+                             self.context.project_id)
+            self.assertEqual(cc_mock.call_args[0][0]['user_id'],
+                             self.context.user_id)
+
+    @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
     def test_create_baymodel_doesnt_contain_id(self, mock_image_data):
         with mock.patch.object(self.dbapi, 'create_baymodel',
                                wraps=self.dbapi.create_baymodel) as cc_mock:

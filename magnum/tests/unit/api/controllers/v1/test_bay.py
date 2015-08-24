@@ -433,6 +433,18 @@ class TestPost(api_base.FunctionalTest):
             response.json['created_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_created_at)
 
+    def test_create_bay_set_project_id_and_user_id(self):
+        bdict = apiutils.bay_post_data()
+
+        def _simulate_rpc_bay_create(bay, bay_create_timeout):
+            self.assertEqual(bay.project_id, self.context.project_id)
+            self.assertEqual(bay.user_id, self.context.user_id)
+            bay.create()
+            return bay
+        self.mock_bay_create.side_effect = _simulate_rpc_bay_create
+
+        self.post_json('/bays', bdict)
+
     def test_create_bay_doesnt_contain_id(self):
         with mock.patch.object(self.dbapi, 'create_bay',
                                wraps=self.dbapi.create_bay) as cc_mock:
