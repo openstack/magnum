@@ -132,6 +132,7 @@ class Bay(Base):
     status = Column(String(20))
     status_reason = Column(Text)
     discovery_url = Column(String(255))
+    master_addresses = Column(JSONEncodedList)
 
 
 class BayLock(Base):
