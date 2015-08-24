@@ -53,9 +53,10 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
         try:
             LOG.debug('Starting to sync up bay status')
             osc = clients.OpenStackClients(ctx)
-            filters = [bay_status.CREATE_IN_PROGRESS,
-                       bay_status.UPDATE_IN_PROGRESS,
-                       bay_status.DELETE_IN_PROGRESS]
+            status = [bay_status.CREATE_IN_PROGRESS,
+                      bay_status.UPDATE_IN_PROGRESS,
+                      bay_status.DELETE_IN_PROGRESS]
+            filters = {'status': status}
             bays = objects.Bay.list_all(ctx, filters=filters)
             if not bays:
                 return
