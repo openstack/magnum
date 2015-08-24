@@ -20,6 +20,8 @@ from oslo_db import options
 from oslo_db.sqlalchemy.migration_cli import manager
 from oslo_log import log as logging
 
+from magnum.i18n import _
+
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
@@ -63,7 +65,7 @@ def add_command_parsers(subparsers):
 def get_manager():
     if cfg.CONF.database.connection is None:
         raise ValueError(
-            'Database connection not set in /etc/magnum/magnum.conf')
+            _('Could not find parameter database.connection in config file'))
 
     alembic_path = os.path.abspath(
         os.path.join(os.path.dirname(__file__),
