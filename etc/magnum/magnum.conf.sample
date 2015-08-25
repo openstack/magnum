@@ -43,9 +43,11 @@
 # default WARNING level). (boolean value)
 #debug = false
 
-# Print more verbose output (set logging level to INFO instead of
-# default WARNING level). (boolean value)
-#verbose = false
+# If set to false, will disable INFO logging level, making WARNING the
+# default. (boolean value)
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+#verbose = true
 
 # The name of a logging configuration file. This file is appended to
 # any existing logging configuration files. For details about logging

@@ -169,9 +169,6 @@ Configure magnum::
     # enable debugging output
     sudo sed -i "s/#debug\s*=.*/debug=true/" /etc/magnum/magnum.conf
 
-    # enable more verbose output
-    sudo sed -i "s/#verbose\s*=.*/verbose=true/" /etc/magnum/magnum.conf
-
     # set RabbitMQ userid
     sudo sed -i "s/#rabbit_userid\s*=.*/rabbit_userid=stackrabbit/" \
              /etc/magnum/magnum.conf
