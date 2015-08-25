@@ -152,7 +152,8 @@ class JsonPatchType(wtypes.Base):
         method may be overwritten by derived class.
 
         """
-        return ['/created_at', '/id', '/links', '/updated_at', '/uuid']
+        return ['/created_at', '/id', '/links', '/updated_at',
+                '/uuid', '/project_id', '/user_id']
 
     @staticmethod
     def mandatory_attrs():
