@@ -48,6 +48,16 @@ class TestReplicationControllerObject(base.DbTestCase):
             mock_get_rc.assert_called_once_with(self.context, uuid)
             self.assertEqual(self.context, rc._context)
 
+    def test_get_by_name(self):
+        name = self.fake_rc['name']
+        with mock.patch.object(self.dbapi, 'get_rc_by_name',
+                               autospec=True) as mock_get_rc:
+            mock_get_rc.return_value = self.fake_rc
+            rc = objects.ReplicationController.get_by_name(self.context,
+                                                           name)
+            mock_get_rc.assert_called_once_with(self.context, name)
+            self.assertEqual(self.context, rc._context)
+
     def test_list(self):
         with mock.patch.object(self.dbapi, 'get_rc_list',
                                autospec=True) as mock_get_list:

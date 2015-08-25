@@ -49,7 +49,7 @@ class DbRCTestCase(base.DbTestCase):
         self.assertEqual(self.rc.uuid, rc.uuid)
 
     def test_get_rc_by_name(self):
-        res = self.dbapi.get_rc_by_name(self.rc.name)
+        res = self.dbapi.get_rc_by_name(self.context, self.rc.name)
         self.assertEqual(self.rc.name, res.name)
         self.assertEqual(self.rc.uuid, res.uuid)
 
@@ -57,11 +57,11 @@ class DbRCTestCase(base.DbTestCase):
         utils.create_test_rc(bay_uuid=self.bay.uuid,
                              uuid=magnum_utils.generate_uuid())
         self.assertRaises(exception.Conflict, self.dbapi.get_rc_by_name,
-                          self.rc.name)
+                          self.context, self.rc.name)
 
     def test_get_rc_by_name_not_found(self):
         self.assertRaises(exception.ReplicationControllerNotFound,
-                          self.dbapi.get_rc_by_name,
+                          self.dbapi.get_rc_by_name, self.context,
                           'not_found')
 
     def test_get_rc_that_does_not_exist(self):

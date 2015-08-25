@@ -894,9 +894,10 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.ReplicationControllerNotFound(bay=bay_uuid)
 
-    def get_rc_by_name(self, rc_name):
-        query = model_query(models.ReplicationController).filter_by(
-            name=rc_name)
+    def get_rc_by_name(self, context, rc_name):
+        query = model_query(models.ReplicationController)
+        query = self._add_tenant_filters(context, query)
+        query = query.filter_by(name=rc_name)
         try:
             return query.one()
         except MultipleResultsFound:

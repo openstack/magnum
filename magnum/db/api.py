@@ -638,9 +638,10 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_rc_by_name(self, rc_name):
+    def get_rc_by_name(self, context, rc_name):
         """Return a ReplicationController.
 
+        :param context: The security context
         :param rc_name: The name of a ReplicationController.
         :returns: A ReplicationController.
         """
