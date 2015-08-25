@@ -177,13 +177,10 @@ Create a baymodel. This is similar in nature to a flavor and describes
 to magnum how to construct the bay. The coe (Container Orchestration Engine)
 and keypair need to be specified for the baymodel::
 
-    NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
-    echo ${NIC_ID}
-
     magnum baymodel-create --name k8sbaymodel \
                            --image-id fedora-21-atomic-3 \
                            --keypair-id testkey \
-                           --external-network-id ${NIC_ID} \
+                           --external-network-id public \
                            --dns-nameserver 8.8.8.8 \
                            --flavor-id m1.small \
                            --docker-volume-size 5 \
