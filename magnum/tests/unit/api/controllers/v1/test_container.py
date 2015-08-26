@@ -52,6 +52,22 @@ class TestContainerController(api_base.FunctionalTest):
         self.assertEqual(response.status_int, 201)
         self.assertTrue(mock_container_create.called)
 
+    @patch('magnum.conductor.api.API.container_create')
+    def test_create_container_set_project_id_and_user_id(
+            self, mock_container_create):
+        def _create_side_effect(container):
+            self.assertEqual(container.project_id, self.context.project_id)
+            self.assertEqual(container.user_id, self.context.user_id)
+            return container
+        mock_container_create.side_effect = _create_side_effect
+
+        params = ('{"name": "My Docker", "image": "ubuntu",'
+                  '"command": "env",'
+                  '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
+        self.app.post('/v1/containers',
+                      params=params,
+                      content_type='application/json')
+
     @patch('magnum.conductor.api.API.container_show')
     @patch('magnum.conductor.api.API.container_create')
     @patch('magnum.conductor.api.API.container_delete')

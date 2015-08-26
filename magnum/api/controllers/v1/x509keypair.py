@@ -244,9 +244,8 @@ class X509KeyPairController(rest.RestController):
         """
         x509keypair_dict = x509keypair.as_dict()
         context = pecan.request.context
-        auth_token = context.auth_token_info['token']
-        x509keypair_dict['project_id'] = auth_token['project']['id']
-        x509keypair_dict['user_id'] = auth_token['user']['id']
+        x509keypair_dict['project_id'] = context.project_id
+        x509keypair_dict['user_id'] = context.user_id
         x509keypair_obj = objects.X509KeyPair(context, **x509keypair_dict)
         new_x509keypair = pecan.request.rpcapi.x509keypair_create(
             x509keypair_obj)

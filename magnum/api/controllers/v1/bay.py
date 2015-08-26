@@ -268,9 +268,8 @@ class BaysController(rest.RestController):
         """
         bay_dict = bay.as_dict()
         context = pecan.request.context
-        auth_token = context.auth_token_info['token']
-        bay_dict['project_id'] = auth_token['project']['id']
-        bay_dict['user_id'] = auth_token['user']['id']
+        bay_dict['project_id'] = context.project_id
+        bay_dict['user_id'] = context.user_id
         # NOTE(suro-patz): Apply default node_count is 1, None -> 1
         if bay_dict.get('node_count', None) is None:
             bay_dict['node_count'] = 1

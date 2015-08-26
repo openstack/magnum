@@ -366,6 +366,18 @@ class TestPost(api_base.FunctionalTest):
             response.json['created_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_created_at)
 
+    def test_create_service_set_project_id_and_user_id(self):
+        sdict = apiutils.service_post_data()
+
+        def _simulate_rpc_service_create(service):
+            self.assertEqual(service.project_id, self.context.project_id)
+            self.assertEqual(service.user_id, self.context.user_id)
+            service.create()
+            return service
+        self.mock_service_create.side_effect = _simulate_rpc_service_create
+
+        self.post_json('/services', sdict)
+
     def test_create_service_doesnt_contain_id(self):
         with mock.patch.object(self.dbapi, 'create_service',
                                wraps=self.dbapi.create_service) as cc_mock:

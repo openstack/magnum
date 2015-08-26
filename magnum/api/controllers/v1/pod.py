@@ -257,9 +257,8 @@ class PodsController(rest.RestController):
         pod.parse_manifest()
         pod_dict = pod.as_dict()
         context = pecan.request.context
-        auth_token = context.auth_token_info['token']
-        pod_dict['project_id'] = auth_token['project']['id']
-        pod_dict['user_id'] = auth_token['user']['id']
+        pod_dict['project_id'] = context.project_id
+        pod_dict['user_id'] = context.user_id
         pod_obj = objects.Pod(context, **pod_dict)
         new_pod = pecan.request.rpcapi.pod_create(pod_obj)
         # Set the HTTP Location Header

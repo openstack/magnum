@@ -191,6 +191,18 @@ class TestPost(api_base.FunctionalTest):
             response.json['created_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_created_at)
 
+    def test_create_x509keypair_set_project_id_and_user_id(self):
+        cdict = apiutils.x509keypair_post_data()
+
+        def _simulate_keypair_create(x509keypair):
+            self.assertEqual(x509keypair.project_id, self.context.project_id)
+            self.assertEqual(x509keypair.user_id, self.context.user_id)
+            x509keypair.create()
+            return x509keypair
+        self.mock_x509keypair_create.side_effect = _simulate_keypair_create
+
+        self.post_json('/x509keypairs', cdict)
+
     def test_create_x509keypair_doesnt_contain_id(self):
         with mock.patch.object(self.dbapi, 'create_x509keypair',
                                wraps=self.dbapi.create_x509keypair) as cc_mock:

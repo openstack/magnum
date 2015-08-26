@@ -291,9 +291,8 @@ class ReplicationControllersController(rest.RestController):
         rc.parse_manifest()
         rc_dict = rc.as_dict()
         context = pecan.request.context
-        auth_token = context.auth_token_info['token']
-        rc_dict['project_id'] = auth_token['project']['id']
-        rc_dict['user_id'] = auth_token['user']['id']
+        rc_dict['project_id'] = context.project_id
+        rc_dict['user_id'] = context.user_id
         rc_obj = objects.ReplicationController(context, **rc_dict)
         new_rc = pecan.request.rpcapi.rc_create(rc_obj)
         if not new_rc:

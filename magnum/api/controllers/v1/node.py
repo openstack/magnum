@@ -206,9 +206,8 @@ class NodesController(rest.RestController):
         """
         node_dict = node.as_dict()
         context = pecan.request.context
-        auth_token = context.auth_token_info['token']
-        node_dict['project_id'] = auth_token['project']['id']
-        node_dict['user_id'] = auth_token['user']['id']
+        node_dict['project_id'] = context.project_id
+        node_dict['user_id'] = context.user_id
         new_node = objects.Node(context, **node_dict)
         new_node.create()
         # Set the HTTP Location Header

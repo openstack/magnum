@@ -425,6 +425,18 @@ class TestPost(api_base.FunctionalTest):
             response.json['created_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_created_at)
 
+    def test_create_pod_set_project_id_and_user_id(self):
+        pdict = apiutils.pod_post_data()
+
+        def _simulate_rpc_pod_create(pod):
+            self.assertEqual(pod.project_id, self.context.project_id)
+            self.assertEqual(pod.user_id, self.context.user_id)
+            pod.create()
+            return pod
+        self.mock_pod_create.side_effect = _simulate_rpc_pod_create
+
+        self.post_json('/pods', pdict)
+
     def test_create_pod_doesnt_contain_id(self):
         with mock.patch.object(self.dbapi, 'create_pod',
                                wraps=self.dbapi.create_pod) as cc_mock:
