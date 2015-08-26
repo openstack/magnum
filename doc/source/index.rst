@@ -25,7 +25,7 @@ for deploying and managing containers as first class resources in OpenStack.
 * **Source:** http://git.openstack.org/cgit/openstack/magnum
 * **Blueprints:** https://blueprints.launchpad.net/magnum
 * **Bugs:** http://bugs.launchpad.net/magnum
-* **ReST Client:** http://git.openstack.org/cgit/openstack/python-magnumclient
+* **REST Client:** http://git.openstack.org/cgit/openstack/python-magnumclient
 
 Architecture
 ============
@@ -45,20 +45,20 @@ There are several different types of objects in the magnum system:
 * **Container:** A Docker container
 
 Two binaries work together to compose the magnum system.  The first binary
-(accessed by the python-magnumclient code) is the magnum-api ReST server.  The
-ReST server may run as one process or multiple processes.  When a ReST request
+(accessed by the python-magnumclient code) is the magnum-api REST server.  The
+REST server may run as one process or multiple processes.  When a REST request
 is sent to the client API, the request is sent via AMQP to the
-magnum-conductor process.  The ReST server is horizontally scalable.  At this
+magnum-conductor process.  The REST server is horizontally scalable.  At this
 time, the conductor is limited to one process, but we intend to add horizontal
 scalability to the conductor as well.
 
 The magnum-conductor process runs on a controller machine and connects to a
-Kubernetes or Docker ReST API endpoint.  The Kubernetes and Docker ReST API
+Kubernetes or Docker REST API endpoint.  The Kubernetes and Docker REST API
 endpoints are managed by the bay object.
 
 When service or pod objects are created, Kubernetes may be directly contacted
-via the Kubernetes ReST API.  When container objects are acted upon, the
-Docker ReST API may be directly contacted.
+via the Kubernetes REST API.  When container objects are acted upon, the
+Docker REST API may be directly contacted.
 
 Features
 ========
