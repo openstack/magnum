@@ -34,9 +34,25 @@ class BayStatus(fields.Enum):
         super(BayStatus, self).__init__(valid_values=BayStatus.ALL)
 
 
+class ContainerStatus(fields.Enum):
+    ALL = (
+        ERROR, RUNNING, STOPPED, PAUSED, UNKNOWN,
+    ) = (
+        'Error', 'Running', 'Stopped', 'Paused', 'Unknown',
+    )
+
+    def __init__(self):
+        super(ContainerStatus, self).__init__(
+            valid_values=ContainerStatus.ALL)
+
+
 class ListOfDictsField(fields.AutoTypedField):
     AUTO_TYPE = fields.List(fields.Dict(fields.FieldType()))
 
 
 class BayStatusField(fields.BaseEnumField):
     AUTO_TYPE = BayStatus()
+
+
+class ContainerStatusField(fields.BaseEnumField):
+    AUTO_TYPE = ContainerStatus()

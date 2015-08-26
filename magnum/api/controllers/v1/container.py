@@ -32,6 +32,7 @@ from magnum.common import exception
 from magnum.common import policy
 from magnum.i18n import _LE
 from magnum import objects
+from magnum.objects import fields
 
 LOG = logging.getLogger(__name__)
 
@@ -291,7 +292,7 @@ class ContainersController(rest.RestController):
                 LOG.exception(_LE("Error while list container %(uuid)s: "
                                   "%(e)s."),
                               {'uuid': c.uuid, 'e': e})
-                containers[i].status = objects.container.UNKNOWN
+                containers[i].status = fields.ContainerStatus.UNKNOWN
 
         return ContainerCollection.convert_with_links(containers, limit,
                                                       url=resource_url,

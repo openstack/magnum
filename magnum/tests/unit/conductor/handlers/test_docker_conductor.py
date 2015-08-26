@@ -20,7 +20,7 @@ import six
 from magnum.common import exception
 from magnum.conductor.handlers import docker_conductor
 from magnum import objects
-from magnum.objects import container as obj_container
+from magnum.objects import fields
 from magnum.tests import base
 from mock import patch
 
@@ -129,7 +129,7 @@ class TestDockerConductor(base.BaseTestCase):
             name='some-name',
             hostname='some-uuid',
             command=None)
-        self.assertEqual(obj_container.STOPPED, container.status)
+        self.assertEqual(fields.ContainerStatus.STOPPED, container.status)
 
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
     def test_container_create_with_command(self, mock_get_docker_client):
@@ -154,7 +154,7 @@ class TestDockerConductor(base.BaseTestCase):
             name='some-name',
             hostname='some-uuid',
             command='env')
-        self.assertEqual(obj_container.STOPPED, container.status)
+        self.assertEqual(fields.ContainerStatus.STOPPED, container.status)
 
     def test_encode_utf8_unicode(self):
         image = 'some_image:some_tag'
@@ -181,7 +181,8 @@ class TestDockerConductor(base.BaseTestCase):
                 tag='some_tag')
             self.assertFalse(mock_docker.create_container.called)
             mock_init.assert_called_once_with()
-            self.assertEqual(obj_container.ERROR, mock_container.status)
+            self.assertEqual(fields.ContainerStatus.ERROR,
+                             mock_container.status)
 
     def test_find_container_by_name_not_found(self):
         mock_docker = mock.MagicMock()
@@ -282,7 +283,7 @@ class TestDockerConductor(base.BaseTestCase):
         mock_docker.restart.assert_called_once_with(mock_docker_id)
         mock_find_container.assert_called_once_with(mock_docker,
                                                     mock_container_uuid)
-        self.assertEqual(obj_container.RUNNING, mock_container.status)
+        self.assertEqual(fields.ContainerStatus.RUNNING, mock_container.status)
 
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
@@ -323,7 +324,7 @@ class TestDockerConductor(base.BaseTestCase):
         mock_docker.start.assert_called_once_with(mock_docker_id)
         mock_find_container.assert_called_once_with(mock_docker,
                                                     mock_container_uuid)
-        self.assertEqual(obj_container.RUNNING, mock_container.status)
+        self.assertEqual(fields.ContainerStatus.RUNNING, mock_container.status)
 
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
@@ -364,7 +365,7 @@ class TestDockerConductor(base.BaseTestCase):
         mock_docker.stop.assert_called_once_with(mock_docker_id)
         mock_find_container.assert_called_once_with(mock_docker,
                                                     mock_container_uuid)
-        self.assertEqual(obj_container.STOPPED, mock_container.status)
+        self.assertEqual(fields.ContainerStatus.STOPPED, mock_container.status)
 
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
@@ -404,7 +405,7 @@ class TestDockerConductor(base.BaseTestCase):
         mock_docker.pause.assert_called_once_with(mock_docker_id)
         mock_find_container.assert_called_once_with(mock_docker,
                                                     mock_container_uuid)
-        self.assertEqual(obj_container.PAUSED, mock_container.status)
+        self.assertEqual(fields.ContainerStatus.PAUSED, mock_container.status)
 
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
@@ -444,7 +445,7 @@ class TestDockerConductor(base.BaseTestCase):
         mock_docker.unpause.assert_called_once_with(mock_docker_id)
         mock_find_container.assert_called_once_with(mock_docker,
                                                     mock_container_uuid)
-        self.assertEqual(obj_container.RUNNING, mock_container.status)
+        self.assertEqual(fields.ContainerStatus.RUNNING, mock_container.status)
 
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
@@ -505,7 +506,7 @@ class TestDockerConductor(base.BaseTestCase):
                                            'Paused': False}}
         mock_docker.inspect_container.return_value = mock_container_detail
         self.conductor.container_show(None, mock_container_uuid)
-        self.assertEqual(obj_container.RUNNING, mock_container.status)
+        self.assertEqual(fields.ContainerStatus.RUNNING, mock_container.status)
 
     @mock.patch.object(objects.Container, 'get_by_uuid')
     @mock.patch.object(docker_conductor.Handler, '_find_container_by_name')
@@ -525,7 +526,7 @@ class TestDockerConductor(base.BaseTestCase):
                                            'Paused': False}}
         mock_docker.inspect_container.return_value = mock_container_detail
         self.conductor.container_show(None, mock_container_uuid)
-        self.assertEqual(obj_container.STOPPED, mock_container.status)
+        self.assertEqual(fields.ContainerStatus.STOPPED, mock_container.status)
 
     @mock.patch.object(objects.Container, 'get_by_uuid')
     @mock.patch.object(docker_conductor.Handler, '_find_container_by_name')
@@ -545,7 +546,7 @@ class TestDockerConductor(base.BaseTestCase):
                                            'Paused': True}}
         mock_docker.inspect_container.return_value = mock_container_detail
         self.conductor.container_show(None, mock_container_uuid)
-        self.assertEqual(obj_container.PAUSED, mock_container.status)
+        self.assertEqual(fields.ContainerStatus.PAUSED, mock_container.status)
 
     @mock.patch.object(objects.Container, 'get_by_uuid')
     @mock.patch.object(docker_conductor.Handler, '_find_container_by_name')
@@ -565,7 +566,7 @@ class TestDockerConductor(base.BaseTestCase):
                                            'Paused': False}}
         mock_docker.inspect_container.return_value = mock_container_detail
         self.conductor.container_show(None, mock_container_uuid)
-        self.assertEqual(obj_container.ERROR, mock_container.status)
+        self.assertEqual(fields.ContainerStatus.ERROR, mock_container.status)
 
     @mock.patch.object(objects.Container, 'get_by_uuid')
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
@@ -615,7 +616,8 @@ class TestDockerConductor(base.BaseTestCase):
             mock_find_container.assert_called_once_with(mock_docker,
                                                         mock_container_uuid)
             mock_init.assert_called_once_with()
-            self.assertEqual(obj_container.ERROR, mock_container.status)
+            self.assertEqual(fields.ContainerStatus.ERROR,
+                             mock_container.status)
 
     @mock.patch.object(objects.Container, 'get_by_uuid')
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
@@ -634,7 +636,7 @@ class TestDockerConductor(base.BaseTestCase):
         self.conductor.container_show(None, mock_container_uuid)
         mock_find_container.assert_called_once_with(mock_docker,
                                                     mock_container_uuid)
-        self.assertEqual(obj_container.ERROR, mock_container.status)
+        self.assertEqual(fields.ContainerStatus.ERROR, mock_container.status)
 
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
     @mock.patch.object(docker_conductor.Handler, 'get_docker_client')
