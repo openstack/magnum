@@ -229,6 +229,8 @@
 #
 
 # The port for the Magnum API server. (integer value)
+# Minimum value: 1
+# Maximum value: 65535
 #port = 9511
 
 # The listen IP for the Magnum API server. (string value)
@@ -703,6 +705,8 @@
 #k8s_protocol = http
 
 # Default port of the k8s master endpoint. (integer value)
+# Minimum value: 1
+# Maximum value: 65535
 #k8s_port = 8080
 
 

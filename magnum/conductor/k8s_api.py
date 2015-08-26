@@ -14,6 +14,7 @@
 
 from oslo_config import cfg
 
+from magnum.common import config
 from magnum.common.pythonk8sclient.client import ApivbetaApi
 from magnum.common.pythonk8sclient.client import swagger
 from magnum.conductor import utils
@@ -25,9 +26,10 @@ kubernetes_opts = [
                default='http',
                help=_('Default protocol of k8s master endpoint '
                       '(http or https).')),
-    cfg.IntOpt('k8s_port',
-               default=8080,
-               help=_('Default port of the k8s master endpoint.')),
+    cfg.Opt('k8s_port',
+            type=config.PORT_TYPE,
+            default=8080,
+            help=_('Default port of the k8s master endpoint.')),
 ]
 
 cfg.CONF.register_opts(kubernetes_opts, group='kubernetes')
