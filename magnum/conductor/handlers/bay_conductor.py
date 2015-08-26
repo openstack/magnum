@@ -28,7 +28,7 @@ from magnum.i18n import _
 from magnum.i18n import _LE
 from magnum.i18n import _LI
 from magnum import objects
-from magnum.objects.bay import Status as bay_status
+from magnum.objects.fields import BayStatus as bay_status
 
 
 bay_heat_opts = [

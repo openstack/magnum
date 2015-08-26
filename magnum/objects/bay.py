@@ -19,18 +19,7 @@ from magnum.common import exception
 from magnum.common import utils
 from magnum.db import api as dbapi
 from magnum.objects import base
-
-
-class Status(object):
-    CREATE_IN_PROGRESS = 'CREATE_IN_PROGRESS'
-    CREATE_FAILED = 'CREATE_FAILED'
-    CREATE_COMPLETE = 'CREATE_COMPLETE'
-    UPDATE_IN_PROGRESS = 'UPDATE_IN_PROGRESS'
-    UPDATE_FAILED = 'UPDATE_FAILED'
-    UPDATE_COMPLETE = 'UPDATE_COMPLETE'
-    DELETE_IN_PROGRESS = 'DELETE_IN_PROGRESS'
-    DELETE_FAILED = 'DELETE_FAILED'
-    DELETE_COMPLETE = 'DELETE_COMPLETE'
+from magnum.objects import fields as m_fields
 
 
 @base.MagnumObjectRegistry.register
@@ -49,10 +38,7 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
         'user_id': fields.StringField(nullable=True),
         'baymodel_id': fields.StringField(nullable=True),
         'stack_id': fields.StringField(nullable=True),
-        # One of CREATE_IN_PROGRESS|CREATE_FAILED|CREATED
-        #        UPDATE_IN_PROGRESS|UPDATE_FAILED|UPDATED
-        #        DELETE_IN_PROGRESS|DELETE_FAILED|DELETED
-        'status': fields.StringField(nullable=True),
+        'status': m_fields.BayStatusField(nullable=True),
         'status_reason': fields.StringField(nullable=True),
         'api_address': fields.StringField(nullable=True),
         'node_addresses': fields.ListOfStringsField(nullable=True),

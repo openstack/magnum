@@ -15,5 +15,28 @@
 from oslo_versionedobjects import fields
 
 
+class BayStatus(fields.Enum):
+    CREATE_IN_PROGRESS = 'CREATE_IN_PROGRESS'
+    CREATE_FAILED = 'CREATE_FAILED'
+    CREATE_COMPLETE = 'CREATE_COMPLETE'
+    UPDATE_IN_PROGRESS = 'UPDATE_IN_PROGRESS'
+    UPDATE_FAILED = 'UPDATE_FAILED'
+    UPDATE_COMPLETE = 'UPDATE_COMPLETE'
+    DELETE_IN_PROGRESS = 'DELETE_IN_PROGRESS'
+    DELETE_FAILED = 'DELETE_FAILED'
+    DELETE_COMPLETE = 'DELETE_COMPLETE'
+
+    ALL = (CREATE_IN_PROGRESS, CREATE_FAILED, CREATE_COMPLETE,
+           UPDATE_IN_PROGRESS, UPDATE_FAILED, UPDATE_COMPLETE,
+           DELETE_IN_PROGRESS, DELETE_FAILED, DELETE_COMPLETE)
+
+    def __init__(self):
+        super(BayStatus, self).__init__(valid_values=BayStatus.ALL)
+
+
 class ListOfDictsField(fields.AutoTypedField):
     AUTO_TYPE = fields.List(fields.Dict(fields.FieldType()))
+
+
+class BayStatusField(fields.BaseEnumField):
+    AUTO_TYPE = BayStatus()

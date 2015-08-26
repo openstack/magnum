@@ -20,7 +20,7 @@ from magnum.common import context
 from magnum.common.rpc_service import CONF
 from magnum.db.sqlalchemy import api as dbapi
 from magnum import objects
-from magnum.objects.bay import Status as bay_status
+from magnum.objects.fields import BayStatus as bay_status
 from magnum.service import periodic
 from magnum.tests import base
 from magnum.tests.unit.db import utils
