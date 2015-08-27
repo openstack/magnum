@@ -58,6 +58,8 @@ class TestBayConductorWithK8s(base.TestCase):
             'master_count': 1,
             'discovery_url': 'https://discovery.etcd.io/test',
             'master_addresses': ['172.17.2.18'],
+            'ca_cert_uuid': 'xx-xx-xx-xx',
+            'magnum_cert_uuid': 'xx-xx-xx-xx',
         }
 
     @patch('magnum.objects.BayModel.get_by_uuid')

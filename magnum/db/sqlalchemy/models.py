@@ -133,6 +133,8 @@ class Bay(Base):
     status_reason = Column(Text)
     discovery_url = Column(String(255))
     master_addresses = Column(JSONEncodedList)
+    ca_cert_uuid = Column(String(36))
+    magnum_cert_uuid = Column(String(36))
 
 
 class BayLock(Base):
