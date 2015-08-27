@@ -61,6 +61,7 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertNotIn('http_proxy', response['baymodels'][0])
         self.assertNotIn('https_proxy', response['baymodels'][0])
         self.assertNotIn('no_proxy', response['baymodels'][0])
+        self.assertNotIn('labels', response['baymodels'][0])
 
     def test_get_one(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
@@ -79,6 +80,7 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertIn('http_proxy', response)
         self.assertIn('https_proxy', response)
         self.assertIn('no_proxy', response)
+        self.assertIn('labels', response)
 
     def test_get_one_by_name(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
@@ -96,6 +98,7 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertIn('http_proxy', response)
         self.assertIn('https_proxy', response)
         self.assertIn('https_proxy', response)
+        self.assertIn('labels', response)
 
     def test_get_one_by_name_not_found(self):
         response = self.get_json(
@@ -139,7 +142,7 @@ class TestListBayModel(api_base.FunctionalTest):
         for key in ("flavor_id", "master_flavor_id", "dns_nameserver",
                     "keypair_id", "external_network_id", "fixed_network",
                     "docker_volume_size", "ssh_authorized_key", "coe",
-                    "http_proxy", "https_proxy", "no_proxy",
+                    "http_proxy", "https_proxy", "no_proxy", "labels",
                     "network_driver"):
             self.assertIn(key, response['baymodels'][0])
 
@@ -157,7 +160,7 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertEqual(bm_list[-1].uuid, response['baymodels'][0]['uuid'])
         for key in ("flavor_id", "master_flavor_id", "dns_nameserver",
                     "keypair_id", "external_network_id", "fixed_network",
-                    "network_driver", "docker_volume_size",
+                    "network_driver", "docker_volume_size", "labels",
                     "ssh_authorized_key", "coe"):
             self.assertIn(key, response['baymodels'][0])
             self.assertIn('flavor_id', response['baymodels'][0])
@@ -243,7 +246,8 @@ class TestPatch(api_base.FunctionalTest):
                                'KMa71G5/4EOQxuQ/sgW965OOO2Hq'
                                'X8vjlQUnTK0HijrbSTLxp/9kazWW'
                                'FrfsdB8RtZBN digambar@magnum',
-            coe='swarm'
+            coe='swarm',
+            labels={'key1': 'val1', 'key2': 'val2'}
         )
 
     def test_update_not_found(self):
@@ -295,6 +299,8 @@ class TestPatch(api_base.FunctionalTest):
                          response['https_proxy'])
         self.assertEqual(self.baymodel.no_proxy,
                          response['no_proxy'])
+        self.assertEqual(self.baymodel.labels,
+                         response['labels'])
 
     def test_remove_singular(self):
         baymodel = obj_utils.create_test_baymodel(self.context,
@@ -329,6 +335,8 @@ class TestPatch(api_base.FunctionalTest):
                          response['https_proxy'])
         self.assertEqual(self.baymodel.no_proxy,
                          response['no_proxy'])
+        self.assertEqual(self.baymodel.labels,
+                         response['labels'])
 
     def test_remove_non_existent_property_fail(self):
         response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
@@ -359,6 +367,8 @@ class TestPatch(api_base.FunctionalTest):
                          response['docker_volume_size'])
         self.assertEqual(self.baymodel.coe,
                          response['coe'])
+        self.assertEqual(self.baymodel.labels,
+                         response['labels'])
 
     def test_add_root_non_existent(self):
         response = self.patch_json(
@@ -409,6 +419,8 @@ class TestPatch(api_base.FunctionalTest):
                          response['https_proxy'])
         self.assertEqual(self.baymodel.no_proxy,
                          response['no_proxy'])
+        self.assertEqual(self.baymodel.labels,
+                         response['labels'])
 
     def test_remove_uuid(self):
         response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
@@ -501,7 +513,7 @@ class TestPost(api_base.FunctionalTest):
                   "dns_nameserver", "keypair_id", "external_network_id",
                   "cluster_distro", "fixed_network", "apiserver_port",
                   "docker_volume_size", "http_proxy", "https_proxy",
-                  "no_proxy", "network_driver"]
+                  "no_proxy", "network_driver", "labels"]
         for field in fields:
             self._create_baymodel_raises_app_error(**{field: 'i' * 256})
 
@@ -509,7 +521,7 @@ class TestPost(api_base.FunctionalTest):
         fields = ["uuid", "name", "image_id", "flavor_id", "master_flavor_id",
                   "dns_nameserver", "keypair_id", "external_network_id",
                   "cluster_distro", "fixed_network", "apiserver_port",
-                  "docker_volume_size", "ssh_authorized_key",
+                  "docker_volume_size", "ssh_authorized_key", "labels",
                   "http_proxy", "https_proxy", "no_proxy", "network_driver"]
         for field in fields:
             self._create_baymodel_raises_app_error(**{field: ''})
@@ -530,6 +542,24 @@ class TestPost(api_base.FunctionalTest):
         self._create_baymodel_raises_app_error(apiserver_port=0)
         self._create_baymodel_raises_app_error(apiserver_port=1023)
         self._create_baymodel_raises_app_error(apiserver_port='not an int')
+
+    @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
+    @mock.patch.object(api_baymodel.BayModelsController,
+                       'check_keypair_exists')
+    def test_create_baymodel_with_labels(self, mock_keypair_exists,
+                                         mock_image_data):
+        with mock.patch.object(self.dbapi, 'create_baymodel',
+                               wraps=self.dbapi.create_baymodel) as cc_mock:
+            mock_keypair_exists.return_value = None
+            mock_image_data.return_value = {'name': 'mock_name',
+                                            'os_distro': 'fedora-atomic'}
+            bdict = apiutils.baymodel_post_data(labels={'key1': 'val1',
+                                                        'key2': 'val2'})
+            response = self.post_json('/baymodels', bdict)
+            self.assertEqual(bdict['labels'],
+                             response.json['labels'])
+            cc_mock.assert_called_once_with(mock.ANY)
+            self.assertNotIn('id', cc_mock.call_args[0][0])
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
     @mock.patch.object(api_baymodel.BayModelsController,

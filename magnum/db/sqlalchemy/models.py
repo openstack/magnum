@@ -171,6 +171,7 @@ class BayModel(Base):
     https_proxy = Column(String(255))
     no_proxy = Column(String(255))
     registry_enabled = Column(Boolean, default=False)
+    labels = Column(JSONEncodedDict)
 
 
 class Container(Base):

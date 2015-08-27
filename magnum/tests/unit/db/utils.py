@@ -48,6 +48,7 @@ def get_test_baymodel(**kw):
         'coe': kw.get('coe', 'swarm'),
         'created_at': kw.get('created_at'),
         'updated_at': kw.get('updated_at'),
+        'labels': kw.get('labels', {'key1': 'val1', 'key2': 'val2'}),
         'http_proxy': kw.get('http_proxy', 'fake_http_proxy'),
         'https_proxy': kw.get('https_proxy', 'fake_https_proxy'),
         'no_proxy': kw.get('no_proxy', 'fake_no_proxy'),

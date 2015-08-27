@@ -407,6 +407,8 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
 
     def get_params(self, context, baymodel, bay, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
+        label_list = ['flannel_network_cidr', 'flannel_use_vxlan',
+                      'flannel_network_subnetlen']
         scale_mgr = kwargs.pop('scale_manager', None)
         if scale_mgr:
             hosts = self.get_output('kube_minions')
@@ -414,6 +416,9 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
                 scale_mgr.get_removal_nodes(hosts))
 
         extra_params['discovery_url'] = self.get_discovery_url(bay)
+
+        for label in label_list:
+            extra_params[label] = baymodel.labels.get(label)
 
         return super(AtomicK8sTemplateDefinition,
                      self).get_params(context, baymodel, bay,
