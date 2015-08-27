@@ -594,14 +594,6 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_rcs_by_bay_uuid(self, bay_uuid):
-        """List all the ReplicationControllers for a given bay.
-
-        :param bay_uuid: The uuid of a bay.
-        :returns: A list of ReplicationControllers.
-        """
-
-    @abc.abstractmethod
     def create_rc(self, values):
         """Create a new ReplicationController.
 
