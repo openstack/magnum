@@ -272,7 +272,7 @@ a pod for the redis-master::
 Now create a service to provide a discoverable endpoint for the redis
 sentinels in the cluster::
 
-    magnum service-create --manifest ./redis-sentinel-service.yaml --bay k8sbay
+    magnum coe-service-create --manifest ./redis-sentinel-service.yaml --bay k8sbay
 
 To make it a replicated redis cluster create replication controllers for the
 redis slaves and sentinels::
@@ -285,7 +285,7 @@ redis slaves and sentinels::
 
 Full lifecycle and introspection operations for each object are supported.
 For example, magnum bay-create, magnum baymodel-delete, magnum rc-show,
-magnum service-list.
+magnum coe-service-list.
 
 Now run bay-show command to get the IP of the bay host on which the
 redis-master is running::
