@@ -107,7 +107,8 @@ class Service(base.MagnumPersistentObject, base.MagnumObject,
         :param context: Security context
         :returns: a list of class:`Service` object.
         """
-        db_services = cls.dbapi.get_services_by_bay_uuid(bay_uuid)
+        db_services = cls.dbapi.get_services_by_bay_uuid(context,
+                                                         bay_uuid)
         return Service._from_db_object_list(db_services, cls, context)
 
     @base.remotable_classmethod

@@ -106,12 +106,15 @@ class DbRCTestCase(base.DbTestCase):
         self.assertEqual(0, len(rc))
 
     def test_get_rcs_by_bay_uuid(self):
-        rc = self.dbapi.get_rcs_by_bay_uuid(self.bay.uuid)
+        rc = self.dbapi.get_rcs_by_bay_uuid(self.context,
+                                            self.bay.uuid)
         self.assertEqual(self.rc.id, rc[0].id)
 
     def test_get_rcs_by_bay_uuid_that_does_not_exist(self):
-        res = self.dbapi.get_rcs_by_bay_uuid(magnum_utils.generate_uuid())
-        self.assertEqual([], res)
+        self.assertRaises(exception.BayNotFound,
+                          self.dbapi.get_rcs_by_bay_uuid,
+                          self.context,
+                          magnum_utils.generate_uuid())
 
     def test_destroy_rc(self):
         self.dbapi.destroy_rc(self.rc.id)

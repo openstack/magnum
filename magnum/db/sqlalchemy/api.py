@@ -781,7 +781,9 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.ServiceNotFound(service=service_uuid)
 
-    def get_services_by_bay_uuid(self, bay_uuid):
+    def get_services_by_bay_uuid(self, context, bay_uuid):
+        # First verify whether the Bay exists
+        self.get_bay_by_uuid(context, bay_uuid)
         query = model_query(models.Service).filter_by(bay_uuid=bay_uuid)
         try:
             return query.all()
@@ -886,7 +888,9 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.ReplicationControllerNotFound(rc=rc_uuid)
 
-    def get_rcs_by_bay_uuid(self, bay_uuid):
+    def get_rcs_by_bay_uuid(self, context, bay_uuid):
+        # First verify whether the Bay exists
+        self.get_bay_by_uuid(context, bay_uuid)
         query = model_query(models.ReplicationController).filter_by(
             bay_uuid=bay_uuid)
         try:
