@@ -1,5 +1,7 @@
 #cloud-config
 merge_how: dict(recurse_array)+list(append)
+bootcmd:
+  - mkdir -p /etc/systemd/system/docker.service.d
 write_files:
   - path: /etc/systemd/system/docker.service
     owner: "root:root"

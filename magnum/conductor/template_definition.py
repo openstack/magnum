@@ -324,6 +324,12 @@ class BaseTemplateDefinition(TemplateDefinition):
                            baymodel_attr='dns_nameserver')
         self.add_parameter('fixed_network_cidr',
                            baymodel_attr='fixed_network')
+        self.add_parameter('http_proxy',
+                           baymodel_attr='http_proxy')
+        self.add_parameter('https_proxy',
+                           baymodel_attr='https_proxy')
+        self.add_parameter('no_proxy',
+                           baymodel_attr='no_proxy')
 
     @abc.abstractproperty
     def template_path(self):
@@ -449,7 +455,6 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
         self.add_parameter('external_network',
                            baymodel_attr='external_network_id',
                            required=True)
-
         self.add_output('swarm_manager',
                         bay_attr='api_address')
         self.add_output('swarm_nodes_external',

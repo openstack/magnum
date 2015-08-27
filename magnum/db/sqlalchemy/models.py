@@ -173,6 +173,9 @@ class BayModel(Base):
     ssh_authorized_key = Column(Text)
     cluster_distro = Column(String(255))
     coe = Column(String(255))
+    http_proxy = Column(String(255))
+    https_proxy = Column(String(255))
+    no_proxy = Column(String(255))
 
 
 class Container(Base):

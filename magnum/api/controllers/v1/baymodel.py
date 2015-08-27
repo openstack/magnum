@@ -101,6 +101,16 @@ class BayModel(base.APIBase):
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated baymodel links"""
 
+    http_proxy = wtypes.StringType(min_length=1, max_length=255)
+    """http_proxy for the bay """
+
+    https_proxy = wtypes.StringType(min_length=1, max_length=255)
+    """https_proxy for the bay """
+
+    no_proxy = wtypes.StringType(min_length=1, max_length=255)
+    """Its comma separated list of ip for which proxies should not
+       used in the bay"""
+
     def __init__(self, **kwargs):
         self.fields = []
         for field in objects.BayModel.fields:
@@ -146,6 +156,9 @@ class BayModel(base.APIBase):
             cluster_distro='fedora-atomic',
             ssh_authorized_key='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAB',
             coe='kubernetes',
+            http_proxy='http://proxy.com:123',
+            https_proxy='https://proxy.com:123',
+            no_proxy='192.168.0.1,192.168.0.2,192.168.0.3',
             created_at=datetime.datetime.utcnow(),
             updated_at=datetime.datetime.utcnow())
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
