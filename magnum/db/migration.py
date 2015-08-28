@@ -46,7 +46,3 @@ def stamp(version):
 
 def revision(message, autogenerate):
     return get_backend().revision(message, autogenerate)
-
-
-def create_schema():
-    return get_backend().create_schema()
