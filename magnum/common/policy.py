@@ -108,7 +108,7 @@ def enforce_wsgi(api_name, act=None):
                def delete(self, bay_ident):
                    ...
     """
-    def wraper(fn):
+    def wrapper(fn):
         action = "%s:%s" % (api_name, (act or fn.__name__))
 
         @functools.wraps(fn)
@@ -116,4 +116,4 @@ def enforce_wsgi(api_name, act=None):
             enforce(pecan.request.context, action, None)
             return fn(self, *args, **kwargs)
         return handle
-    return wraper
+    return wrapper
