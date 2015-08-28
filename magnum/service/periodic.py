@@ -26,7 +26,7 @@ from magnum.common import exception
 from magnum.i18n import _LI
 from magnum.i18n import _LW
 from magnum import objects
-from magnum.objects.bay import Status as bay_status
+from magnum.objects.fields import BayStatus as bay_status
 
 LOG = log.getLogger(__name__)
 

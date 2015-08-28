@@ -20,7 +20,7 @@ import six
 from magnum.common import context
 from magnum.common import exception
 from magnum.common import utils as magnum_utils
-from magnum.objects.bay import Status as bay_status
+from magnum.objects.fields import BayStatus as bay_status
 from magnum.tests.unit.db import base
 from magnum.tests.unit.db import utils
 
