@@ -24,6 +24,7 @@ ERROR = 'Error'
 RUNNING = 'Running'
 STOPPED = 'Stopped'
 PAUSED = 'Paused'
+UNKNOWN = 'Unknown'
 
 
 @base.MagnumObjectRegistry.register

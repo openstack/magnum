@@ -291,7 +291,7 @@ class ContainersController(rest.RestController):
                 LOG.exception(_LE("Error while list container %(uuid)s: "
                                   "%(e)s."),
                               {'uuid': c.uuid, 'e': e})
-                containers[i].status = 'Unknown'
+                containers[i].status = objects.container.UNKNOWN
 
         return ContainerCollection.convert_with_links(containers, limit,
                                                       url=resource_url,
