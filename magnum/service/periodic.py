@@ -23,6 +23,7 @@ from oslo_service import threadgroup
 from magnum.common import clients
 from magnum.common import context
 from magnum.common import exception
+from magnum.i18n import _
 from magnum.i18n import _LI
 from magnum.i18n import _LW
 from magnum import objects
@@ -74,6 +75,7 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                 if bay.status != stack.stack_status:
                     old_status = bay.status
                     bay.status = stack.stack_status
+                    bay.status_reason = stack.stack_status_reason
                     bay.save()
                     LOG.info(_LI("Sync up bay with id %(id)s from "
                                  "%(old_status)s to %(status)s."),
@@ -95,6 +97,8 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                              {'id': bay.id, 'sid': sid})
                 elif bay.status == bay_status.CREATE_IN_PROGRESS:
                     bay.status = bay_status.CREATE_FAILED
+                    bay.status_reason = _("Stack with id %s not found in "
+                                          "Heat.") % sid
                     bay.save()
                     LOG.info(_LI("Bay with id %(id)s has been set to "
                                  "%(status)s due to stack with id %(sid)s "
@@ -103,6 +107,8 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                               'sid': sid})
                 elif bay.status == bay_status.UPDATE_IN_PROGRESS:
                     bay.status = bay_status.UPDATE_FAILED
+                    bay.status_reason = _("Stack with id %s not found in "
+                                          "Heat.") % sid
                     bay.save()
                     LOG.info(_LI("Bay with id %(id)s has been set to "
                                  "%(status)s due to stack with id %(sid)s "
