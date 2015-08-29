@@ -43,3 +43,24 @@ class TestBayStatus(test_fields.TestField):
 
     def test_stringify_invalid(self):
         self.assertRaises(ValueError, self.field.stringify, 'DELETE_STOPPED')
+
+
+class TestContainerStatus(test_fields.TestField):
+    def setUp(self):
+        super(TestContainerStatus, self).setUp()
+        self.field = fields.ContainerStatusField()
+        self.coerce_good_values = [('Error', 'Error'), ('Running', 'Running'),
+                                   ('Stopped', 'Stopped'),
+                                   ('Paused', 'Paused'),
+                                   ('Unknown', 'Unknown'), ]
+        self.coerce_bad_values = ['DELETED']
+
+        self.to_primitive_values = self.coerce_good_values[0:1]
+        self.from_primitive_values = self.coerce_good_values[0:1]
+
+    def test_stringify(self):
+        self.assertEqual("'Stopped'",
+                         self.field.stringify('Stopped'))
+
+    def test_stringify_invalid(self):
+        self.assertRaises(ValueError, self.field.stringify, 'DELETED')

@@ -25,7 +25,7 @@ from magnum.conductor.handlers.common import docker_client
 from magnum.conductor import utils as conductor_utils
 from magnum.i18n import _LE
 from magnum import objects
-from magnum.objects import container as obj_container
+from magnum.objects import fields
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
@@ -130,10 +130,10 @@ class Handler(object):
             docker.create_container(image, name=name,
                                     hostname=container_uuid,
                                     command=container.command)
-            container.status = obj_container.STOPPED
+            container.status = fields.ContainerStatus.STOPPED
             return container
         except errors.APIError as api_error:
-            container.status = obj_container.ERROR
+            container.status = fields.ContainerStatus.ERROR
             raise exception.ContainerException(
                 "Docker API Error : %s" % str(api_error))
         finally:
@@ -162,26 +162,26 @@ class Handler(object):
             if not docker_id:
                 LOG.exception(_LE("Can not find docker instance with %s,"
                                   "set it to Error status"), container_uuid)
-                container.status = obj_container.ERROR
+                container.status = fields.ContainerStatus.ERROR
                 container.save()
                 return container
             result = docker.inspect_container(docker_id)
             status = result.get('State')
             if status:
                 if status.get('Error') is True:
-                    container.status = obj_container.ERROR
+                    container.status = fields.ContainerStatus.ERROR
                 elif status.get('Running'):
-                    container.status = obj_container.RUNNING
+                    container.status = fields.ContainerStatus.RUNNING
                 elif status.get('Paused'):
-                    container.status = obj_container.PAUSED
+                    container.status = fields.ContainerStatus.PAUSED
                 else:
-                    container.status = obj_container.STOPPED
+                    container.status = fields.ContainerStatus.STOPPED
                 container.save()
             return container
         except errors.APIError as api_error:
             error_message = str(api_error)
             if '404' in error_message:
-                container.status = obj_container.ERROR
+                container.status = fields.ContainerStatus.ERROR
                 container.save()
                 return container
             raise exception.ContainerException(
@@ -204,23 +204,25 @@ class Handler(object):
 
     def container_reboot(self, context, container_uuid):
         return self._container_action(context, container_uuid,
-                                      obj_container.RUNNING, 'restart')
+                                      fields.ContainerStatus.RUNNING,
+                                      'restart')
 
     def container_stop(self, context, container_uuid):
         return self._container_action(context, container_uuid,
-                                      obj_container.STOPPED, 'stop')
+                                      fields.ContainerStatus.STOPPED, 'stop')
 
     def container_start(self, context, container_uuid):
         return self._container_action(context, container_uuid,
-                                      obj_container.RUNNING, 'start')
+                                      fields.ContainerStatus.RUNNING, 'start')
 
     def container_pause(self, context, container_uuid):
         return self._container_action(context, container_uuid,
-                                      obj_container.PAUSED, 'pause')
+                                      fields.ContainerStatus.PAUSED, 'pause')
 
     def container_unpause(self, context, container_uuid):
         return self._container_action(context, container_uuid,
-                                      obj_container.RUNNING, 'unpause')
+                                      fields.ContainerStatus.RUNNING,
+                                      'unpause')
 
     @wrap_container_exception
     def container_logs(self, context, container_uuid):

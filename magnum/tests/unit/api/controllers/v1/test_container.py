@@ -12,6 +12,7 @@
 
 from magnum.common import utils as comm_utils
 from magnum import objects
+from magnum.objects import fields
 from magnum.tests.unit.api import base as api_base
 from magnum.tests.unit.db import utils
 
@@ -253,7 +254,7 @@ class TestContainerController(api_base.FunctionalTest):
                          test_container['uuid'])
 
         self.assertEqual(actual_containers[0].get('status'),
-                         objects.container.UNKNOWN)
+                         fields.ContainerStatus.UNKNOWN)
 
     @patch('magnum.conductor.api.API.container_show')
     @patch('magnum.objects.Container.get_by_uuid')
