@@ -253,7 +253,7 @@ class TestContainerController(api_base.FunctionalTest):
                          test_container['uuid'])
 
         self.assertEqual(actual_containers[0].get('status'),
-                         'Unknown')
+                         objects.container.UNKNOWN)
 
     @patch('magnum.conductor.api.API.container_show')
     @patch('magnum.objects.Container.get_by_uuid')
