@@ -186,6 +186,12 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         self.assertEqual(mock_bay.discovery_url, expected_discovery_url)
         self.assertEqual(discovery_url, expected_discovery_url)
 
+    def test_k8s_get_heat_param(self):
+        k8s_def = tdef.AtomicK8sTemplateDefinition()
+
+        heat_param = k8s_def.get_heat_param(bay_attr='node_count')
+        self.assertEqual(heat_param, 'number_of_minions')
+
 
 class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
 
@@ -246,3 +252,18 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         actual_url = swarm_def.get_discovery_url(mock_bay)
 
         self.assertEqual(mock_bay.discovery_url, actual_url)
+
+    def test_swarm_get_heat_param(self):
+        k8s_def = tdef.AtomicSwarmTemplateDefinition()
+
+        heat_param = k8s_def.get_heat_param(bay_attr='node_count')
+        self.assertEqual(heat_param, 'number_of_nodes')
+
+
+class AtomicMesosTemplateDefinitionTestCase(base.TestCase):
+
+    def test_mesos_get_heat_param(self):
+        k8s_def = tdef.UbuntuMesosTemplateDefinition()
+
+        heat_param = k8s_def.get_heat_param(bay_attr='node_count')
+        self.assertEqual(heat_param, 'number_of_slaves')

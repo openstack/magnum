@@ -299,6 +299,21 @@ class TemplateDefinition(object):
 
         return template_params
 
+    def get_heat_param(self, bay_attr=None, baymodel_attr=None):
+        """Returns stack param name  using bay and baymodel attributes
+        :param bay_attr bay attribute from which it maps to stack attribute
+        :param baymodel_attr baymodel attribute from which it maps
+         to stack attribute
+
+        :return stack parameter name or None
+        """
+        for mapping in self.param_mappings:
+            if (mapping.bay_attr == bay_attr and
+                    mapping.baymodel_attr == baymodel_attr):
+                return mapping.heat_param
+
+        return None
+
     def update_outputs(self, stack, bay):
         for output in self.output_mappings:
             output.set_output(stack, bay)

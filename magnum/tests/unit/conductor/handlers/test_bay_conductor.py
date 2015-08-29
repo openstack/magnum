@@ -536,15 +536,19 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_heat_client.stacks.update.assert_called_once_with(mock_stack_id,
                                                                **expected_args)
 
+    @patch('magnum.conductor.utils.retrieve_baymodel')
     @patch('oslo_config.cfg')
     @patch('magnum.common.clients.OpenStackClients')
-    def setup_poll_test(self, mock_openstack_client, cfg):
+    def setup_poll_test(self, mock_openstack_client, cfg,
+                        mock_retrieve_baymodel):
         cfg.CONF.bay_heat.max_attempts = 10
         bay = mock.MagicMock()
         mock_heat_stack = mock.MagicMock()
         mock_heat_client = mock.MagicMock()
         mock_heat_client.stacks.get.return_value = mock_heat_stack
         mock_openstack_client.heat.return_value = mock_heat_client
+        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
+        mock_retrieve_baymodel.return_value = baymodel
         poller = bay_conductor.HeatPoller(mock_openstack_client, bay)
         return (mock_heat_stack, bay, poller)
 
@@ -690,6 +694,25 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_heat_stack.stack_status = bay_status.CREATE_FAILED
         mock_heat_stack.timeout_mins = 60
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+
+    def test_poll_node_count(self):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+
+        mock_heat_stack.parameters = {'number_of_minions': 1}
+        mock_heat_stack.stack_status = bay_status.CREATE_IN_PROGRESS
+        poller.poll_and_check()
+
+        self.assertEqual(bay.node_count, 1)
+
+    @patch('magnum.conductor.handlers.bay_conductor._update_stack_outputs')
+    def test_poll_node_count_by_update(self, mock_update_stack_outputs):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+
+        mock_heat_stack.parameters = {'number_of_minions': 2}
+        mock_heat_stack.stack_status = bay_status.UPDATE_COMPLETE
+        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+
+        self.assertEqual(bay.node_count, 2)
 
 
 class TestHandler(db_base.DbTestCase):
@@ -881,6 +904,41 @@ class TestBayConductorWithSwarm(base.TestCase):
         }
         self.assertEqual(expected, definition)
 
+    @patch('magnum.conductor.utils.retrieve_baymodel')
+    @patch('oslo_config.cfg')
+    @patch('magnum.common.clients.OpenStackClients')
+    def setup_poll_test(self, mock_openstack_client, cfg,
+                        mock_retrieve_baymodel):
+        cfg.CONF.bay_heat.max_attempts = 10
+        bay = mock.MagicMock()
+        mock_heat_stack = mock.MagicMock()
+        mock_heat_client = mock.MagicMock()
+        mock_heat_client.stacks.get.return_value = mock_heat_stack
+        mock_openstack_client.heat.return_value = mock_heat_client
+        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
+        mock_retrieve_baymodel.return_value = baymodel
+        poller = bay_conductor.HeatPoller(mock_openstack_client, bay)
+        return (mock_heat_stack, bay, poller)
+
+    def test_poll_node_count(self):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+
+        mock_heat_stack.parameters = {'number_of_nodes': 1}
+        mock_heat_stack.stack_status = bay_status.CREATE_IN_PROGRESS
+        poller.poll_and_check()
+
+        self.assertEqual(bay.node_count, 1)
+
+    @patch('magnum.conductor.handlers.bay_conductor._update_stack_outputs')
+    def test_poll_node_count_by_update(self, mock_update_stack_outputs):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+
+        mock_heat_stack.parameters = {'number_of_nodes': 2}
+        mock_heat_stack.stack_status = bay_status.UPDATE_COMPLETE
+        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+
+        self.assertEqual(bay.node_count, 2)
+
 
 class TestBayConductorWithMesos(base.TestCase):
     def setUp(self):
@@ -961,3 +1019,38 @@ class TestBayConductorWithMesos(base.TestCase):
             'number_of_slaves': '1',
         }
         self.assertEqual(expected, definition)
+
+    @patch('magnum.conductor.utils.retrieve_baymodel')
+    @patch('oslo_config.cfg')
+    @patch('magnum.common.clients.OpenStackClients')
+    def setup_poll_test(self, mock_openstack_client, cfg,
+                        mock_retrieve_baymodel):
+        cfg.CONF.bay_heat.max_attempts = 10
+        bay = mock.MagicMock()
+        mock_heat_stack = mock.MagicMock()
+        mock_heat_client = mock.MagicMock()
+        mock_heat_client.stacks.get.return_value = mock_heat_stack
+        mock_openstack_client.heat.return_value = mock_heat_client
+        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
+        mock_retrieve_baymodel.return_value = baymodel
+        poller = bay_conductor.HeatPoller(mock_openstack_client, bay)
+        return (mock_heat_stack, bay, poller)
+
+    def test_poll_node_count(self):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+
+        mock_heat_stack.parameters = {'number_of_slaves': 1}
+        mock_heat_stack.stack_status = bay_status.CREATE_IN_PROGRESS
+        poller.poll_and_check()
+
+        self.assertEqual(bay.node_count, 1)
+
+    @patch('magnum.conductor.handlers.bay_conductor._update_stack_outputs')
+    def test_poll_node_count_by_update(self, mock_update_stack_outputs):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+
+        mock_heat_stack.parameters = {'number_of_slaves': 2}
+        mock_heat_stack.stack_status = bay_status.UPDATE_COMPLETE
+        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+
+        self.assertEqual(bay.node_count, 2)
