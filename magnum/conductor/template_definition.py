@@ -280,12 +280,12 @@ class TemplateDefinition(object):
         return None
 
     def get_params(self, context, baymodel, bay, **kwargs):
-        """Pulls template parameters from Baymodel and Bay.
+        """Pulls template parameters from Baymodel and/or Bay.
 
-        :param context: Context to pull template parameters from
+        :param context: Context to pull template parameters for
         :param baymodel: Baymodel to pull template parameters from
         :param bay: Bay to pull template parameters from
-        :param extra_params: Any extra params to provide to the template
+        :param extra_params: Any extra params to be provided to the template
 
         :return: dict of template parameters
         """
