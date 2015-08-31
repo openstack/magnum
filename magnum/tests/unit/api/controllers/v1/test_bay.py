@@ -17,7 +17,6 @@ from oslo_config import cfg
 from oslo_policy import policy
 from oslo_utils import timeutils
 from six.moves.urllib import parse as urlparse
-from wsme import types as wtypes
 
 from magnum.api.controllers.v1 import bay as api_bay
 from magnum.common import utils
@@ -34,8 +33,12 @@ class TestBayObject(base.TestCase):
     def test_bay_init(self):
         bay_dict = apiutils.bay_post_data(baymodel_id=None)
         del bay_dict['node_count']
+        del bay_dict['master_count']
+        del bay_dict['bay_create_timeout']
         bay = api_bay.Bay(**bay_dict)
-        self.assertEqual(wtypes.Unset, bay.node_count)
+        self.assertEqual(bay.node_count, 1)
+        self.assertEqual(bay.master_count, 1)
+        self.assertEqual(bay.bay_create_timeout, 0)
 
 
 class TestListBay(api_base.FunctionalTest):
