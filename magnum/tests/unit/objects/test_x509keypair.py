@@ -75,10 +75,11 @@ class TestX509KeyPairObject(base.DbTestCase):
         with mock.patch.object(self.dbapi, 'get_x509keypair_list',
                                autospec=True) as mock_get_list:
             mock_get_list.return_value = [self.fake_x509keypair]
-            x509keypairs = objects.X509KeyPair.list_all(self.context)
+            self.context.all_tenants = True
+            x509keypairs = objects.X509KeyPair.list(self.context)
             mock_get_list.assert_called_once_with(
-                self.context, limit=None, opts={'get_all_tenants': True},
-                marker=None, filters=None, sort_dir=None, sort_key=None)
+                self.context, limit=None, marker=None, filters=None,
+                sort_dir=None, sort_key=None)
             self.assertEqual(mock_get_list.call_count, 1)
             self.assertThat(x509keypairs, HasLength(1))
             self.assertIsInstance(x509keypairs[0], objects.X509KeyPair)

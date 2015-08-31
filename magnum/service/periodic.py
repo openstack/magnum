@@ -29,13 +29,14 @@ from magnum.i18n import _LW
 from magnum import objects
 from magnum.objects.fields import BayStatus as bay_status
 
+
 LOG = log.getLogger(__name__)
 
 
 def set_context(func):
     @functools.wraps(func)
     def handler(self, ctx):
-        ctx = context.make_admin_context()
+        ctx = context.make_admin_context(all_tenants=True)
         context.set_ctx(ctx)
         func(self, ctx)
         context.set_ctx(None)
@@ -47,7 +48,6 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
 
     Any periodic task job need to be added into this class
     '''
-
     @periodic_task.periodic_task(run_immediately=True)
     @set_context
     def sync_bay_status(self, ctx):
@@ -58,7 +58,7 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                       bay_status.UPDATE_IN_PROGRESS,
                       bay_status.DELETE_IN_PROGRESS]
             filters = {'status': status}
-            bays = objects.Bay.list_all(ctx, filters=filters)
+            bays = objects.Bay.list(ctx, filters=filters)
             if not bays:
                 return
             sid_to_bay_mapping = {bay.stack_id: bay for bay in bays}

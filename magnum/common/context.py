@@ -22,7 +22,7 @@ class RequestContext(context.RequestContext):
                  project_name=None, project_id=None, is_admin=False,
                  is_public_api=False, read_only=False, show_deleted=False,
                  request_id=None, trust_id=None, auth_token_info=None,
-                 **kwargs):
+                 all_tenants=False, **kwargs):
         """Stores several additional request parameters:
 
         :param domain_id: The ID of the domain.
@@ -41,6 +41,7 @@ class RequestContext(context.RequestContext):
         self.auth_url = auth_url
         self.auth_token_info = auth_token_info
         self.trust_id = trust_id
+        self.all_tenants = all_tenants
 
         super(RequestContext, self).__init__(auth_token=auth_token,
                                              user=user_name,
@@ -66,7 +67,8 @@ class RequestContext(context.RequestContext):
                       'show_deleted': self.show_deleted,
                       'request_id': self.request_id,
                       'trust_id': self.trust_id,
-                      'auth_token_info': self.auth_token_info})
+                      'auth_token_info': self.auth_token_info,
+                      'all_tenants': self.all_tenants})
         return value
 
     @classmethod
@@ -78,7 +80,7 @@ def make_context(*args, **kwargs):
     return RequestContext(*args, **kwargs)
 
 
-def make_admin_context(show_deleted=False):
+def make_admin_context(show_deleted=False, all_tenants=False):
     """Create an administrator context.
 
     :param show_deleted: if True, will show deleted items when query db
@@ -86,7 +88,8 @@ def make_admin_context(show_deleted=False):
     context = RequestContext(user_id=None,
                              project=None,
                              is_admin=True,
-                             show_deleted=show_deleted)
+                             show_deleted=show_deleted,
+                             all_tenants=all_tenants)
     return context
 
 
