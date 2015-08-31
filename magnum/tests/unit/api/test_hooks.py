@@ -43,6 +43,8 @@ class TestContextHook(base.BaseTestCase):
                          fakes.fakeAuthTokenHeaders['X-Auth-Token'])
         self.assertEqual(ctx.project_id,
                          fakes.fakeAuthTokenHeaders['X-Project-Id'])
+        self.assertEqual(ctx.user_name,
+                         fakes.fakeAuthTokenHeaders['X-User-Name'])
         self.assertEqual(ctx.user_id,
                          fakes.fakeAuthTokenHeaders['X-User-Id'])
         self.assertEqual(ctx.auth_url,

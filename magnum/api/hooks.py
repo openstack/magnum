@@ -28,8 +28,8 @@ class ContextHook(hooks.PecanHook):
 
     The following HTTP request headers are used:
 
-    X-User:
-        Used for context.user.
+    X-User-Name:
+        Used for context.user_name.
 
     X-User-Id:
         Used for context.user_id.
@@ -47,14 +47,13 @@ class ContextHook(hooks.PecanHook):
 
     def before(self, state):
         headers = state.request.headers
-        user = headers.get('X-User')
+        user_name = headers.get('X-User-Name')
         user_id = headers.get('X-User-Id')
         project = headers.get('X-Project-Name')
         project_id = headers.get('X-Project-Id')
         domain_id = headers.get('X-User-Domain-Id')
         domain_name = headers.get('X-User-Domain-Name')
-        auth_token = headers.get('X-Storage-Token')
-        auth_token = headers.get('X-Auth-Token', auth_token)
+        auth_token = headers.get('X-Auth-Token')
         auth_token_info = state.request.environ.get('keystone.token_info')
 
         auth_url = headers.get('X-Auth-Url')
@@ -66,7 +65,7 @@ class ContextHook(hooks.PecanHook):
             auth_token=auth_token,
             auth_url=auth_url,
             auth_token_info=auth_token_info,
-            user_name=user,
+            user_name=user_name,
             user_id=user_id,
             project_name=project,
             project_id=project_id,
