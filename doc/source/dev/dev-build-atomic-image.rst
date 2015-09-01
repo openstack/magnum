@@ -74,7 +74,7 @@ address is already in use.
 
 Verify that port tcp/80 is vacant by running this command::
 
-    sudo netstat -antp | grep 80
+    sudo netstat -antp | grep :80
 
 The output should show no process on port 80.  For example, if apache is
 using port 80, you would see something like::
