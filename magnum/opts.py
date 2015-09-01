@@ -26,7 +26,7 @@ import magnum.conductor.handlers.bay_conductor
 import magnum.conductor.handlers.docker_conductor
 import magnum.conductor.handlers.k8s_conductor
 import magnum.conductor.template_definition
-import magnum.db.sqlalchemy.models
+import magnum.db
 
 
 def list_opts():
@@ -42,7 +42,7 @@ def list_opts():
         ('api', magnum.api.app.API_SERVICE_OPTS),
         ('bay', magnum.conductor.template_definition.template_def_opts),
         ('conductor', magnum.conductor.config.SERVICE_OPTS),
-        ('database', magnum.db.sqlalchemy.models.sql_opts),
+        ('database', magnum.db.sql_opts),
         ('docker', magnum.conductor.handlers.docker_conductor.docker_opts),
         ('magnum_client', magnum.common.clients.magnum_client_opts),
         ('heat_client', magnum.common.clients.heat_client_opts),
