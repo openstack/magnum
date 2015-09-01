@@ -238,8 +238,8 @@ REST API impact
 ---------------
 For Nova, none. All new API calls will be implemented in the Containers
 Service. The OpenStack Containers Service API will be a superset of
-functionality offered by the The `Docker API:
-<https://docs.docker.com/reference/api/docker_remote_api_v1.13/>`_
+functionality offered by the, The `Docker Remote API:
+<https://docs.docker.com/reference/api/docker_remote_api/>`_
 with additionals to make is suitable for general use regardless of the backend
 container technology used, and to be compatible with OpenStack multi-tenancy
 and Keystone authentication.
