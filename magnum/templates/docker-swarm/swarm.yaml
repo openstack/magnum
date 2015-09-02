@@ -2,11 +2,11 @@ heat_template_version: 2013-05-23
 
 description: >
   This template will boot a Docker swarm cluster. A swarm cluster is made up
-  of a single manager node, and N agent nodes. Every node in the cluster,
-  including the manager, is running a Docker daemon and a swarm agent
-  advertising it to the cluster. The manager is running an addition swarm
-  manager container listening on port 2376. By default, the cluster is made
-  up of one manager node and one agent node.
+  of a single master node, and N agent nodes. Every node in the cluster,
+  including the master, is running a Docker daemon and a swarm agent
+  advertising it to the cluster. The master is running an addition swarm
+  master container listening on port 2376. By default, the cluster is made
+  up of one master node and one agent node.
 
 parameters:
 
@@ -76,22 +76,10 @@ resources:
   master_wait_condition:
     type: "AWS::CloudFormation::WaitCondition"
     depends_on:
-      - swarm_manager
+      - swarm_master
     properties:
       Handle:
         get_resource: master_wait_handle
-      Timeout: 6000
-
-  manager_wait_handle:
-    type: "AWS::CloudFormation::WaitConditionHandle"
-
-  manager_wait_condition:
-    type: "AWS::CloudFormation::WaitCondition"
-    depends_on:
-      - swarm_manager
-    properties:
-      Handle:
-        get_resource: manager_wait_handle
       Timeout: 6000
 
   agent_wait_handle:
@@ -100,7 +88,7 @@ resources:
   agent_wait_condition:
     type: "AWS::CloudFormation::WaitCondition"
     depends_on:
-      - swarm_manager
+      - swarm_master
     properties:
       Handle:
         get_resource: agent_wait_handle
@@ -182,7 +170,7 @@ resources:
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
-            "$NODE_IP": {get_attr: [swarm_manager_eth0, fixed_ips, 0, ip_address]}
+            "$NODE_IP": {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
 
   remove_docker_key:
     type: "OS::Heat::SoftwareConfig"
@@ -216,23 +204,23 @@ resources:
         str_replace:
           template: {get_file: fragments/write-swarm-agent-service.yaml}
           params:
-            "$NODE_IP": {get_attr: [swarm_manager_eth0, fixed_ips, 0, ip_address]}
+            "$NODE_IP": {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
             "$DISCOVERY_URL": {get_param: discovery_url}
             "$WAIT_HANDLE": {get_resource: agent_wait_handle}
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
 
-  write_swarm_manager_service:
+  write_swarm_master_service:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
       config:
         str_replace:
-          template: {get_file: fragments/write-swarm-manager-service.yaml}
+          template: {get_file: fragments/write-swarm-master-service.yaml}
           params:
             "$DISCOVERY_URL": {get_param: discovery_url}
-            "$WAIT_HANDLE": {get_resource: manager_wait_handle}
+            "$WAIT_HANDLE": {get_resource: master_wait_handle}
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
@@ -265,7 +253,7 @@ resources:
       group: ungrouped
       config: {get_file: fragments/add-proxy.sh}
 
-  swarm_manager_init:
+  swarm_master_init:
     type: "OS::Heat::MultipartMime"
     properties:
       parts:
@@ -277,7 +265,7 @@ resources:
         - config: {get_resource: write_docker_socket}
         - config: {get_resource: write_docker_tcp_socket}
         - config: {get_resource: write_swarm_agent_service}
-        - config: {get_resource: write_swarm_manager_service}
+        - config: {get_resource: write_swarm_master_service}
         - config: {get_resource: enable_services}
         - config: {get_resource: cfn_signal}
 
@@ -287,7 +275,7 @@ resources:
   # side the swarm agent.
   #
 
-  swarm_manager:
+  swarm_master:
     type: "OS::Nova::Server"
     depends_on:
       - extrouter_inside
@@ -299,12 +287,12 @@ resources:
       key_name:
         get_param: ssh_key_name
       user_data_format: RAW
-      user_data: {get_resource: swarm_manager_init}
+      user_data: {get_resource: swarm_master_init}
       networks:
         - port:
-            get_resource: swarm_manager_eth0
+            get_resource: swarm_master_eth0
 
-  swarm_manager_eth0:
+  swarm_master_eth0:
     type: "OS::Neutron::Port"
     properties:
       network_id:
@@ -315,7 +303,7 @@ resources:
         - subnet_id:
             get_resource: fixed_subnet
 
-  swarm_manager_floating:
+  swarm_master_floating:
     type: "OS::Neutron::FloatingIP"
     depends_on:
       - extrouter_inside
@@ -323,7 +311,7 @@ resources:
       floating_network:
         get_param: external_network
       port_id:
-        get_resource: swarm_manager_eth0
+        get_resource: swarm_master_eth0
 
   swarm_nodes:
     type: "OS::Heat::ResourceGroup"
@@ -344,12 +332,12 @@ resources:
           http_proxy: {get_param: http_proxy}
           https_proxy: {get_param: https_proxy}
           no_proxy: {get_param: no_proxy}
-          swarm_manager_ip: {get_attr: [swarm_manager_floating, floating_ip_address]}
+          swarm_master_ip: {get_attr: [swarm_master_floating, floating_ip_address]}
 
 outputs:
 
-  swarm_manager:
-    value: {get_attr: [swarm_manager_floating, floating_ip_address]}
+  swarm_master:
+    value: {get_attr: [swarm_master_floating, floating_ip_address]}
 
   swarm_nodes:
     value: {get_attr: [swarm_nodes, swarm_node_ip]}
