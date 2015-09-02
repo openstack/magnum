@@ -220,6 +220,7 @@ resources:
     properties:
       instance_uuid: {get_resource: kube_minion}
       volume_id: {get_resource: docker_volume}
+      mountpoint: /dev/vdb
 
 outputs:
 
