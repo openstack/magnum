@@ -342,11 +342,10 @@ Create a baymodel. It is very similar to the Kubernetes baymodel, except for
 the absence of some Kubernetes-specific arguments and the use of 'swarm'
 as the coe::
 
-    NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
     magnum baymodel-create --name swarmbaymodel \
                            --image-id fedora-21-atomic-3 \
                            --keypair-id testkey \
-                           --external-network-id ${NIC_ID} \
+                           --external-network-id public \
                            --dns-nameserver 8.8.8.8 \
                            --flavor-id m1.small \
                            --coe swarm
@@ -425,10 +424,9 @@ pre-installed. To build and upload such image, please refer to
 Then, create a baymodel by using 'mesos' as the coe, with the rest of arguments
 similar to the Kubernetes baymodel::
 
-    NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
     magnum baymodel-create --name mesosbaymodel --image-id ubuntu-mesos \
                            --keypair-id testkey \
-                           --external-network-id $NIC_ID \
+                           --external-network-id public \
                            --dns-nameserver 8.8.8.8 --flavor-id m1.small \
                            --coe mesos
 
