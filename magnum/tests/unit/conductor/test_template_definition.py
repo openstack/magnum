@@ -166,6 +166,26 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         mock_get_params.assert_called_once_with(mock_context, mock_baymodel,
                                                 mock_bay, **expected_kwargs)
 
+    @mock.patch('requests.get')
+    def test_k8s_get_discovery_url(self, mock_get):
+        cfg.CONF.set_override('etcd_discovery_service_endpoint_format',
+                              'http://etcd/test?size=%(size)d',
+                              group='bay')
+        expected_discovery_url = 'http://etcd/token'
+        mock_resp = mock.MagicMock()
+        mock_resp.text = expected_discovery_url
+        mock_get.return_value = mock_resp
+        mock_bay = mock.MagicMock()
+        mock_bay.master_count = 10
+        mock_bay.discovery_url = None
+
+        k8s_def = tdef.AtomicK8sTemplateDefinition()
+        discovery_url = k8s_def.get_discovery_url(mock_bay)
+
+        mock_get.assert_called_once_with('http://etcd/test?size=10')
+        self.assertEqual(mock_bay.discovery_url, expected_discovery_url)
+        self.assertEqual(discovery_url, expected_discovery_url)
+
 
 class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
 

@@ -376,11 +376,9 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
         if hasattr(bay, 'discovery_url') and bay.discovery_url:
             discovery_url = bay.discovery_url
         else:
-            # TODO(hongbin): Eliminate hard coding of the size when multiple
-            # masters is supported.
             discovery_endpoint = (
                 cfg.CONF.bay.etcd_discovery_service_endpoint_format %
-                {'size': 1})
+                {'size': bay.master_count})
             discovery_url = requests.get(discovery_endpoint).text
             bay.discovery_url = discovery_url
 
