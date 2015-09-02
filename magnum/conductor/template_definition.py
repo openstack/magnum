@@ -395,8 +395,12 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
                 cfg.CONF.bay.etcd_discovery_service_endpoint_format %
                 {'size': bay.master_count})
             discovery_url = requests.get(discovery_endpoint).text
-            bay.discovery_url = discovery_url
-
+            if not discovery_url:
+                raise exception.InvalidDiscoveryURL(
+                    discovery_url=discovery_url,
+                    discovery_endpoint=discovery_endpoint)
+            else:
+                bay.discovery_url = discovery_url
         return discovery_url
 
     def get_params(self, context, baymodel, bay, **kwargs):

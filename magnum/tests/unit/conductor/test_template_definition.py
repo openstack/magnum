@@ -192,6 +192,19 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         heat_param = k8s_def.get_heat_param(bay_attr='node_count')
         self.assertEqual(heat_param, 'number_of_minions')
 
+    @mock.patch('requests.get')
+    def test_k8s_get_discovery_url_not_found(self, mock_get):
+        mock_resp = mock.MagicMock()
+        mock_resp.text = ''
+        mock_get.return_value = mock_resp
+
+        fake_bay = mock.MagicMock()
+        fake_bay.discovery_url = None
+
+        self.assertRaises(exception.InvalidDiscoveryURL,
+                          tdef.AtomicK8sTemplateDefinition().get_discovery_url,
+                          fake_bay)
+
 
 class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
 

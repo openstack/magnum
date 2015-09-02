@@ -282,6 +282,11 @@ class InvalidName(Invalid):
     message = _("Expected a name but received %(uuid)s.")
 
 
+class InvalidDiscoveryURL(Invalid):
+    message = _("Received invalid discovery URL '%(discovery_url)s' for "
+                "discovery endpoint '%(discovery_endpoint)s'.")
+
+
 class InvalidUuidOrName(Invalid):
     message = _("Expected a name or uuid but received %(uuid)s.")
 
