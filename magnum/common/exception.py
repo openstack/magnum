@@ -495,3 +495,11 @@ class CertificateValidationError(Invalid):
 
 class KeyPairNotFound(ResourceNotFound):
     message = _("Unable to find keypair %(keypair)s.")
+
+
+class MagnumServiceNotFound(ResourceNotFound):
+    message = _("A magnum service %(magnum_service_id)s could not be found.")
+
+
+class MagnumServiceAlreadyExists(Conflict):
+    message = _("A magnum service with ID %(id)s already exists.")

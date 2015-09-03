@@ -56,7 +56,7 @@ CONF.register_opts(periodic_opts)
 
 class Service(service.Service):
 
-    def __init__(self, topic, server, handlers):
+    def __init__(self, topic, server, handlers, binary):
         super(Service, self).__init__()
         serializer = rpc.RequestContextSerializer(
             objects_base.MagnumObjectSerializer())
@@ -66,18 +66,19 @@ class Service(service.Service):
         target = messaging.Target(topic=topic, server=server)
         self._server = messaging.get_rpc_server(transport, target, handlers,
                                                 serializer=serializer)
+        self.binary = binary
 
     def start(self):
         if CONF.periodic_enable:
-            self.tg = periodic.setup(CONF)
+            self.tg = periodic.setup(CONF, self.binary)
         self._server.start()
 
     def wait(self):
         self._server.wait()
 
     @classmethod
-    def create(cls, topic, server, handlers):
-        service_obj = cls(topic, server, handlers)
+    def create(cls, topic, server, handlers, binary):
+        service_obj = cls(topic, server, handlers, binary)
         return service_obj
 
 

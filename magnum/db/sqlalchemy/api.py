@@ -1026,3 +1026,56 @@ class Connection(api.Connection):
         query = self._add_x509keypairs_filters(query, filters)
         return _paginate_query(models.X509KeyPair, limit, marker,
                                sort_key, sort_dir, query)
+
+    def destroy_magnum_service(self, magnum_service_id):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.MagnumService, session=session)
+            query = add_identity_filter(query, magnum_service_id)
+            count = query.delete()
+            if count != 1:
+                raise exception.MagnumServiceNotFound(magnum_service_id)
+
+    def update_magnum_service(self, magnum_service_id, values):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.MagnumService, session=session)
+            query = add_identity_filter(query, magnum_service_id)
+            try:
+                ref = query.with_lockmode('update').one()
+            except NoResultFound:
+                raise exception.MagnumServiceNotFound(magnum_service_id)
+
+            if 'report_count' in values:
+                if values['report_count'] > ref.report_count:
+                    ref.last_seen_up = timeutils.utcnow()
+
+            ref.update(values)
+        return ref
+
+    def get_magnum_service_by_host_and_binary(self, context, host, binary):
+        query = model_query(models.MagnumService)
+        query = query.filter_by(host=host, binary=binary)
+        try:
+            return query.one()
+        except NoResultFound:
+            return None
+
+    def create_magnum_service(self, values):
+        magnum_service = models.MagnumService()
+        magnum_service.update(values)
+        try:
+            magnum_service.save()
+        except db_exc.DBDuplicateEntry:
+            raise exception.MagnumServiceAlreadyExists(id=magnum_service['id'])
+        return magnum_service
+
+    def get_magnum_service_list(self, context, disabled=None, limit=None,
+                                marker=None, sort_key=None, sort_dir=None
+                                ):
+        query = model_query(models.MagnumService)
+        if disabled:
+            query = query.filter_by(disabled=disabled)
+
+        return _paginate_query(models.MagnumService, limit, marker,
+                               sort_key, sort_dir, query)

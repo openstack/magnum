@@ -48,6 +48,33 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
 
     Any periodic task job need to be added into this class
     '''
+
+    def __init__(self, conf, binary):
+        self.magnum_service_ref = None
+        self.host = conf.host
+        self.binary = binary
+        super(MagnumPeriodicTasks, self).__init__(conf)
+
+    @periodic_task.periodic_task(run_immediately=True)
+    @set_context
+    def update_magnum_service(self, ctx):
+        LOG.debug('Update magnum_service')
+        if self.magnum_service_ref:
+            self.magnum_service_ref.report_state_up(ctx)
+        else:
+            self.magnum_service_ref = \
+                objects.MagnumService.get_by_host_and_binary(
+                    ctx, self.host, self.binary)
+            if self.magnum_service_ref is None:
+                magnum_service_dict = {
+                    'host': self.host,
+                    'binary': self.binary
+                }
+                self.magnum_service_ref = objects.MagnumService(
+                    ctx, **magnum_service_dict)
+                self.magnum_service_ref.create(ctx)
+            self.magnum_service_ref.report_state_up(ctx)
+
     @periodic_task.periodic_task(run_immediately=True)
     @set_context
     def sync_bay_status(self, ctx):
@@ -121,9 +148,9 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                      exc_info=True)
 
 
-def setup(conf):
+def setup(conf, binary):
     tg = threadgroup.ThreadGroup()
-    pt = MagnumPeriodicTasks(conf)
+    pt = MagnumPeriodicTasks(conf, binary)
     tg.add_dynamic_timer(
         pt.run_periodic_tasks,
         periodic_interval_max=conf.periodic_interval_max,

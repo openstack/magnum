@@ -23,6 +23,7 @@ from oslo_db.sqlalchemy import models
 import six.moves.urllib.parse as urlparse
 from sqlalchemy import Boolean
 from sqlalchemy import Column
+from sqlalchemy import DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Integer
 from sqlalchemy import schema
@@ -291,3 +292,22 @@ class X509KeyPair(Base):
     private_key = Column(Text())
     project_id = Column(String(255))
     user_id = Column(String(255))
+
+
+class MagnumService(Base):
+    """Represents health status of various magnum services"""
+    __tablename__ = 'magnum_service'
+    __table_args__ = (
+        schema.UniqueConstraint("host", "binary",
+                                name="uniq_magnum_service0host0binary"),
+        table_args()
+    )
+
+    id = Column(Integer, primary_key=True)
+    host = Column(String(255))
+    binary = Column(String(255))
+    disabled = Column(Boolean, default=False)
+    disabled_reason = Column(String(255))
+    last_seen_up = Column(DateTime, nullable=True)
+    forced_down = Column(Boolean, default=False)
+    report_count = Column(Integer, nullable=False, default=0)
