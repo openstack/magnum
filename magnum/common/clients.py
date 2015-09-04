@@ -182,7 +182,7 @@ class OpenStackClients(object):
         endpoint = self.url_for(service_type='key-manager',
                                 endpoint_type=endpoint_type,
                                 region_name=region_name)
-        session = self.keystone()._client.session
+        session = self.keystone().client.session
         self._barbican = barbicanclient.Client(session=session,
                                                endpoint=endpoint)
 
