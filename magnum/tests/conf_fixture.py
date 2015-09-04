@@ -20,7 +20,7 @@ from oslo_log import log
 
 from magnum.common import config
 
-cfg.CONF.register_opt(cfg.StrOpt('host', default='localhost', help='host'))
+cfg.CONF.import_opt('host', 'magnum.common.service')
 log.register_options(cfg.CONF)
 
 
