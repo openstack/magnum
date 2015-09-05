@@ -15,6 +15,7 @@
 from barbicanclient import client as barbicanclient
 from glanceclient.v2 import client as glanceclient
 from heatclient.v1 import client as heatclient
+from novaclient.v2 import client as novaclient
 from oslo_config import cfg
 from oslo_log import log as logging
 
@@ -81,10 +82,22 @@ barbican_client_opts = [
                    'Type of endpoint in Identity service catalog to use '
                    'for communication with the OpenStack service.'))]
 
+nova_client_opts = [
+    cfg.StrOpt('region_name',
+               default=None,
+               help=_('Region in Identity service catalog to use for '
+                      'communication with the OpenStack service.')),
+    cfg.StrOpt('endpoint_type',
+               default='publicURL',
+               help=_(
+                   'Type of endpoint in Identity service catalog to use '
+                   'for communication with the OpenStack service.'))]
+
 cfg.CONF.register_opts(magnum_client_opts, group='magnum_client')
 cfg.CONF.register_opts(heat_client_opts, group='heat_client')
 cfg.CONF.register_opts(glance_client_opts, group='glance_client')
 cfg.CONF.register_opts(barbican_client_opts, group='barbican_client')
+cfg.CONF.register_opts(nova_client_opts, group='nova_client')
 
 
 class OpenStackClients(object):
@@ -96,6 +109,7 @@ class OpenStackClients(object):
         self._heat = None
         self._glance = None
         self._barbican = None
+        self._nova = None
 
     def url_for(self, **kwargs):
         return self.keystone().client.service_catalog.url_for(**kwargs)
@@ -187,3 +201,16 @@ class OpenStackClients(object):
                                                endpoint=endpoint)
 
         return self._barbican
+
+    @exception.wrap_keystone_exception
+    def nova(self):
+        if self._nova:
+            return self._nova
+        endpoint_type = self._get_client_option('nova', 'endpoint_type')
+        region_name = self._get_client_option('nova', 'region_name')
+        endpoint = self.url_for(service_type='compute',
+                                endpoint_type=endpoint_type,
+                                region_name=region_name)
+        self._nova = novaclient.Client(auth_token=self.auth_token)
+        self._nova.client.management_url = endpoint
+        return self._nova

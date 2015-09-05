@@ -483,3 +483,7 @@ class CertificateStorageException(MagnumException):
 
 class CertificateValidationError(Invalid):
     message = _("Extension '%(extension)s' not allowed")
+
+
+class KeyPairNotFound(ResourceNotFound):
+    message = _("Unable to find keypair %(keypair)s.")
