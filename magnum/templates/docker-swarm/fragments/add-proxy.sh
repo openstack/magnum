@@ -35,7 +35,7 @@ declare -x no_proxy=$NO_PROXY
 EOF
     else
         cat>> /etc/bashrc <<EOF
-declare -x no_proxy=$SWARM_MANAGER_IP,$SWARM_NODE_IP
+declare -x no_proxy=$SWARM_MASTER_IP,$SWARM_NODE_IP
 EOF
    fi
 else

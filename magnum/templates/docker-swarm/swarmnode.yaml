@@ -53,9 +53,9 @@ parameters:
     description: no proxies for docker
     default: ""
 
-  swarm_manager_ip:
+  swarm_master_ip:
     type: string
-    description: swarm manager's ip address
+    description: swarm master's ip address
 
 resources:
 
@@ -118,7 +118,7 @@ resources:
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
-            "$SWARM_MANAGER_IP": {get_param: swarm_manager_ip}
+            "$SWARM_MASTER_IP": {get_param: swarm_master_ip}
             "$NODE_IP": {get_attr: [swarm_node_eth0, fixed_ips, 0, ip_address]}
 
   remove_docker_key:
