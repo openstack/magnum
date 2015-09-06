@@ -136,6 +136,35 @@ class TemplateDefinitionTestCase(base.TestCase):
         value = output.get_output_value(mock_stack)
         self.assertIsNone(value)
 
+    def test_update_outputs(self):
+        definition = tdef.TemplateDefinition.get_template_definition(
+            'vm',
+            'fedora-atomic',
+            'kubernetes')
+
+        expected_api_address = 'api_address'
+        expected_node_addresses = ['ex_minion', 'address']
+
+        outputs = [
+            {"output_value": expected_node_addresses,
+             "description": "No description given",
+             "output_key": "kube_minions_external"},
+            {"output_value": expected_api_address,
+             "description": "No description given",
+             "output_key": "api_address"},
+            {"output_value": ['any', 'output'],
+             "description": "No description given",
+             "output_key": "kube_minions"}
+        ]
+        mock_stack = mock.MagicMock()
+        mock_stack.outputs = outputs
+        mock_bay = mock.MagicMock()
+
+        definition.update_outputs(mock_stack, mock_bay)
+
+        self.assertEqual(mock_bay.api_address, expected_api_address)
+        self.assertEqual(mock_bay.node_addresses, expected_node_addresses)
+
 
 class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
 

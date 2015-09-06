@@ -351,35 +351,6 @@ class TestBayConductorWithK8s(base.TestCase):
         self.assertEqual(expected, definition)
         reqget.assert_called_once_with('http://etcd/test?size=1')
 
-    @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_update_stack_outputs(self, mock_objects_baymodel_get_by_uuid):
-        baymodel_dict = self.baymodel_dict
-        baymodel_dict['cluster_distro'] = 'coreos'
-        baymodel = objects.BayModel(self.context, **baymodel_dict)
-        mock_objects_baymodel_get_by_uuid.return_value = baymodel
-        expected_api_address = 'api_address'
-        expected_node_addresses = ['ex_minion', 'address']
-
-        outputs = [
-            {"output_value": expected_node_addresses,
-             "description": "No description given",
-             "output_key": "kube_minions_external"},
-            {"output_value": expected_api_address,
-             "description": "No description given",
-             "output_key": "api_address"},
-            {"output_value": ['any', 'output'],
-             "description": "No description given",
-             "output_key": "kube_minions"}
-        ]
-        mock_stack = mock.MagicMock()
-        mock_stack.outputs = outputs
-        mock_bay = mock.MagicMock()
-
-        bay_conductor._update_stack_outputs(self.context, mock_stack, mock_bay)
-
-        self.assertEqual(mock_bay.api_address, expected_api_address)
-        self.assertEqual(mock_bay.node_addresses, expected_node_addresses)
-
     @patch('magnum.common.short_id.generate_id')
     @patch('heatclient.common.template_utils.get_template_contents')
     @patch('magnum.conductor.handlers.bay_conductor'
@@ -585,8 +556,7 @@ class TestBayConductorWithK8s(base.TestCase):
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
         self.assertEqual(poller.attempts, 2)
 
-    @patch('magnum.conductor.handlers.bay_conductor._update_stack_outputs')
-    def test_poll_done_by_update(self, mock_update_stack_outputs):
+    def test_poll_done_by_update(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = bay_status.UPDATE_COMPLETE
@@ -704,8 +674,7 @@ class TestBayConductorWithK8s(base.TestCase):
 
         self.assertEqual(bay.node_count, 1)
 
-    @patch('magnum.conductor.handlers.bay_conductor._update_stack_outputs')
-    def test_poll_node_count_by_update(self, mock_update_stack_outputs):
+    def test_poll_node_count_by_update(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
         mock_heat_stack.parameters = {'number_of_minions': 2}
@@ -933,8 +902,7 @@ class TestBayConductorWithSwarm(base.TestCase):
 
         self.assertEqual(bay.node_count, 1)
 
-    @patch('magnum.conductor.handlers.bay_conductor._update_stack_outputs')
-    def test_poll_node_count_by_update(self, mock_update_stack_outputs):
+    def test_poll_node_count_by_update(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
         mock_heat_stack.parameters = {'number_of_nodes': 2}
@@ -1049,8 +1017,7 @@ class TestBayConductorWithMesos(base.TestCase):
 
         self.assertEqual(bay.node_count, 1)
 
-    @patch('magnum.conductor.handlers.bay_conductor._update_stack_outputs')
-    def test_poll_node_count_by_update(self, mock_update_stack_outputs):
+    def test_poll_node_count_by_update(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
         mock_heat_stack.parameters = {'number_of_slaves': 2}
