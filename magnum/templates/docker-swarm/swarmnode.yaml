@@ -119,7 +119,6 @@ resources:
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
             "$SWARM_MASTER_IP": {get_param: swarm_master_ip}
-            "$NODE_IP": {get_attr: [swarm_node_eth0, fixed_ips, 0, ip_address]}
 
   remove_docker_key:
     type: "OS::Heat::SoftwareConfig"
