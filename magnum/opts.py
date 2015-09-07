@@ -21,7 +21,6 @@ import magnum.common.cert_manager
 from magnum.common.cert_manager import local_cert_manager
 import magnum.common.clients
 import magnum.common.exception
-import magnum.common.magnum_keystoneclient
 import magnum.common.service
 import magnum.common.x509.config
 import magnum.conductor.config
@@ -36,7 +35,6 @@ def list_opts():
     return [
         ('DEFAULT',
          itertools.chain(magnum.api.auth.AUTH_OPTS,
-                         magnum.common.magnum_keystoneclient.trust_opts,
                          magnum.common.paths.PATH_OPTS,
                          magnum.common.utils.UTILS_OPTS,
                          magnum.common.rpc_service.periodic_opts,
