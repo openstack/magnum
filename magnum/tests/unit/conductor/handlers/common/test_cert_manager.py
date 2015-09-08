@@ -138,7 +138,7 @@ class CertManagerTestCase(base.BaseTestCase):
         bay_ca_cert = cert_manager.sign_node_certificate(mock_bay, mock_csr)
 
         self.CertManager.get_cert.assert_called_once_with(
-            mock_bay.ca_cert_uuid)
+            mock_bay.ca_cert_ref)
         mock_x509_sign.assert_called_once_with(mock_csr, mock_bay.name,
                                                mock.sentinel.priv_key,
                                                passphrase)
@@ -153,5 +153,5 @@ class CertManagerTestCase(base.BaseTestCase):
         bay_ca_cert = cert_manager.get_bay_ca_certificate(mock_bay)
 
         self.CertManager.get_cert.assert_called_once_with(
-            mock_bay.ca_cert_uuid)
+            mock_bay.ca_cert_ref)
         self.assertEqual(bay_ca_cert, mock.sentinel.certificate)
