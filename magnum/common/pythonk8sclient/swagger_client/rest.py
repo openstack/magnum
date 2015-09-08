@@ -23,7 +23,6 @@ import sys
 import io
 import json
 import ssl
-import certifi
 import logging
 
 # python 2 and python 3 compatibility library
@@ -76,10 +75,11 @@ class RESTClientObject(object):
 
         # https pool manager
         # certificates validated using Mozilla’s root certificates
+        # TODO(hongbin): fix the hard-coded ca_certs path
         self.ssl_pool_manager = urllib3.PoolManager(
             num_pools=pools_size,
             cert_reqs=ssl.CERT_REQUIRED,
-            ca_certs=certifi.where()
+            ca_certs='/etc/ssl/certs/ca-certificates.crt'
         )
 
     def agent(self, url):
