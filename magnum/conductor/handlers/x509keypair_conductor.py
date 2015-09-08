@@ -37,6 +37,6 @@ class Handler(object):
         return x509keypair
 
     def x509keypair_delete(self, context, uuid):
-        LOG.debug("Deleting x509keypair_delete %s" % uuid)
+        LOG.debug("Deleting x509keypair %s" % uuid)
         x509keypair = objects.X509KeyPair.get_by_uuid(context, uuid)
         x509keypair.destroy(context)
