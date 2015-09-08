@@ -107,15 +107,6 @@ def _update_stack(context, osc, bay, scale_manager=None):
     return osc.heat().stacks.update(bay.stack_id, **fields)
 
 
-def _update_stack_outputs(context, stack, bay):
-    baymodel = conductor_utils.retrieve_baymodel(context, bay)
-    cluster_distro = baymodel.cluster_distro
-    cluster_coe = baymodel.coe
-    definition = TDef.get_template_definition('vm', cluster_distro,
-                                              cluster_coe)
-    return definition.update_outputs(stack, bay)
-
-
 class Handler(object):
 
     _update_allowed_properties = set(['node_count'])
@@ -242,7 +233,7 @@ class HeatPoller(object):
             raise loopingcall.LoopingCallDone()
         if (stack.stack_status in [bay_status.CREATE_COMPLETE,
                                    bay_status.UPDATE_COMPLETE]):
-            _update_stack_outputs(self.context, stack, self.bay)
+            self.template_def.update_outputs(stack, self.bay)
 
             self.bay.status = stack.stack_status
             self.bay.status_reason = stack.stack_status_reason
