@@ -17,8 +17,8 @@ from oslo_config import cfg
 from magnum.common.x509 import extensions
 from magnum.i18n import _
 
-ALLOWD_EXTENSIONS = ['"%s"' % e.value for e in extensions.Extensions]
-DEFAULR_ALLOWED_EXTENSIONS = [
+ALLOWED_EXTENSIONS = ['"%s"' % e.value for e in extensions.Extensions]
+DEFAULT_ALLOWED_EXTENSIONS = [
     extensions.Extensions.KEY_USAGE.value,
     extensions.Extensions.EXTENDED_KEY_USAGE.value,
     extensions.Extensions.SUBJECT_ALTERNATIVE_NAME.value,
@@ -26,7 +26,7 @@ DEFAULR_ALLOWED_EXTENSIONS = [
     extensions.Extensions.SUBJECT_KEY_IDENTIFIER.value]
 
 ALLOWED_KEY_USAGE = ['"%s"' % e.value[0] for e in extensions.KeyUsages]
-DEFAULR_ALLOWED_KEY_USAGE = [
+DEFAULT_ALLOWED_KEY_USAGE = [
     extensions.KeyUsages.DIGITAL_SIGNATURE.value[0],
     extensions.KeyUsages.KEY_ENCIPHERMENT.value[0],
     extensions.KeyUsages.CONTENT_COMMITMENT.value[0]]
@@ -37,11 +37,11 @@ x509_opts = [
                 default=False,
                 help=_('Certificate can get the CA flag in x509 extensions.')),
     cfg.ListOpt('allowed_extensions',
-                default=DEFAULR_ALLOWED_EXTENSIONS,
+                default=DEFAULT_ALLOWED_EXTENSIONS,
                 help=_('List of allowed x509 extensions. Available values: '
-                       '%s') % ', '.join(ALLOWD_EXTENSIONS)),
+                       '%s') % ', '.join(ALLOWED_EXTENSIONS)),
     cfg.ListOpt('allowed_key_usage',
-                default=DEFAULR_ALLOWED_KEY_USAGE,
+                default=DEFAULT_ALLOWED_KEY_USAGE,
                 help=_('List of allowed x509 key usage. Available values: '
                        '%s') % ', '.join(ALLOWED_KEY_USAGE)),
     cfg.IntOpt('term_of_validity',
