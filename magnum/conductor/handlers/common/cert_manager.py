@@ -86,12 +86,12 @@ def generate_certificates_to_bay(bay):
 
 
 def get_bay_ca_certificate(bay):
-    ca_cert = cert_manager.get_backend().CertManager.get_cert(bay.ca_cert_uuid)
+    ca_cert = cert_manager.get_backend().CertManager.get_cert(bay.ca_cert_ref)
     return ca_cert.get_certificate()
 
 
 def sign_node_certificate(bay, csr):
-    ca_cert = cert_manager.get_backend().CertManager.get_cert(bay.ca_cert_uuid)
+    ca_cert = cert_manager.get_backend().CertManager.get_cert(bay.ca_cert_ref)
     node_cert = x509.sign(csr, bay.name, ca_cert.get_private_key(),
                           ca_cert.get_private_key_passphrase())
     return node_cert
