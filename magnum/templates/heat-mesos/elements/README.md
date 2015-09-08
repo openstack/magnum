@@ -22,6 +22,6 @@ built and uploaded to glance as follows:
     diskimage-builder/bin/disk-image-create ubuntu vm docker mesos \
         -o ubuntu-mesos.qcow2
 
-    glance image-create --name ubuntu-mesos --is-public True \
+    glance image-create --name ubuntu-mesos --visibility public \
         --disk-format=qcow2 --container-format=bare \
         --property os_distro=ubuntu --file=ubuntu-mesos.qcow2
