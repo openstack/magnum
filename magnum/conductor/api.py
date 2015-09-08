@@ -102,18 +102,19 @@ class API(rpc_service.API):
     def rc_create(self, rc):
         return self._call('rc_create', rc=rc)
 
-    def rc_update(self, rc):
-        return self._call('rc_update', rc=rc)
+    def rc_update(self, rc_ident, bay_ident, manifest):
+        return self._call('rc_update', rc_ident=rc_ident,
+                          bay_ident=bay_ident, manifest=manifest)
 
-    def rc_list(self, context, limit, marker, sort_key, sort_dir):
-        return objects.ReplicationController.list(context, limit, marker,
-                                                  sort_key, sort_dir)
+    def rc_list(self, context, bay_ident):
+        return self._call('rc_list', bay_ident=bay_ident)
 
-    def rc_delete(self, uuid):
-        return self._call('rc_delete', uuid=uuid)
+    def rc_delete(self, rc_ident, bay_ident):
+        return self._call('rc_delete', rc_ident=rc_ident, bay_ident=bay_ident)
 
-    def rc_show(self, context, uuid):
-        return objects.ReplicationController.get_by_uuid(context, uuid)
+    def rc_show(self, context, rc_ident, bay_ident):
+        return self._call('rc_show', rc_ident=rc_ident,
+                          bay_ident=bay_ident)
 
     # Container operations
 

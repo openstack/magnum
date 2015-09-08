@@ -157,18 +157,22 @@ class RPCAPITestCase(base.DbTestCase):
         self._test_rpcapi('rc_update',
                           'call',
                           version='1.0',
-                          rc=self.fake_rc)
+                          rc_ident=self.fake_rc['uuid'],
+                          bay_ident=self.fake_rc['bay_uuid'],
+                          manifest={})
 
     def test_rc_delete(self):
         self._test_rpcapi('rc_delete',
                           'call',
                           version='1.0',
-                          uuid=self.fake_rc['uuid'])
+                          rc_ident=self.fake_rc['uuid'],
+                          bay_ident=self.fake_rc['bay_uuid'])
 
         self._test_rpcapi('rc_delete',
                           'call',
                           version='1.1',
-                          uuid=self.fake_rc['name'])
+                          rc_ident=self.fake_rc['uuid'],
+                          bay_ident=self.fake_rc['bay_uuid'])
 
     def test_container_create(self):
         self._test_rpcapi('container_create',

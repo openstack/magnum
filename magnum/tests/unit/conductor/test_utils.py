@@ -21,35 +21,40 @@ from magnum.tests import base
 
 class TestConductorUtils(base.TestCase):
 
-    def _test_retrieve_bay(self, obj, mock_bay_get_by_uuid):
+    def _test_retrieve_bay(self, expected_bay_uuid, mock_bay_get_by_uuid):
         expected_context = 'context'
-        expected_bay_uuid = 'bay_uuid'
-
-        obj.bay_uuid = expected_bay_uuid
-        utils.retrieve_bay(expected_context, obj)
+        utils.retrieve_bay(expected_context, expected_bay_uuid)
         mock_bay_get_by_uuid.assert_called_once_with(expected_context,
                                                      expected_bay_uuid)
 
     @patch('magnum.objects.Bay.get_by_uuid')
     def test_retrieve_bay_from_pod(self,
                                    mock_bay_get_by_uuid):
-        self._test_retrieve_bay(objects.Pod({}), mock_bay_get_by_uuid)
+        pod = objects.Pod({})
+        pod.bay_uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
+        self._test_retrieve_bay(pod.bay_uuid, mock_bay_get_by_uuid)
 
     @patch('magnum.objects.Bay.get_by_uuid')
     def test_retrieve_bay_from_service(self,
                                        mock_bay_get_by_uuid):
-        self._test_retrieve_bay(objects.Service({}), mock_bay_get_by_uuid)
+        service = objects.Service({})
+        service.bay_uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
+        self._test_retrieve_bay(service.bay_uuid, mock_bay_get_by_uuid)
 
     @patch('magnum.objects.Bay.get_by_uuid')
     def test_retrieve_bay_from_rc(self,
                                   mock_bay_get_by_uuid):
-        self._test_retrieve_bay(objects.ReplicationController({}),
+        rc = objects.ReplicationController({})
+        rc.bay_uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
+        self._test_retrieve_bay(rc.bay_uuid,
                                 mock_bay_get_by_uuid)
 
     @patch('magnum.objects.Bay.get_by_uuid')
     def test_retrieve_bay_from_container(self,
                                          mock_bay_get_by_uuid):
-        self._test_retrieve_bay(objects.Container({}), mock_bay_get_by_uuid)
+        container = objects.Container({})
+        container.bay_uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
+        self._test_retrieve_bay(container.bay_uuid, mock_bay_get_by_uuid)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_retrieve_baymodel(self, mock_baymodel_get_by_uuid):

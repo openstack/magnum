@@ -149,6 +149,9 @@ extendedKeyUsage = clientAuth
         resp = self.k8s_api.delete_namespaced_replication_controller(
             name='frontend', body={}, namespace='default')
 
+    """
+    NB : Bug1504379. This is placeholder and will be removed when all
+         the objects-from-bay patches are checked in.
     def test_pods_list(self):
         self.assertIsNotNone(self.cs.pods.list(self.bay.uuid))
 
@@ -157,3 +160,4 @@ extendedKeyUsage = clientAuth
 
     def test_services_list(self):
         self.assertIsNotNone(self.cs.services.list(self.bay.uuid))
+    """
