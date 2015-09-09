@@ -17,6 +17,11 @@
 # Sleep some time until all services are starting
 sleep 5
 
+# Check if a function already exists
+function function_exists {
+    declare -f -F $1 > /dev/null
+}
+
 if ! function_exists echo_summary; then
     function echo_summary {
         echo $@
