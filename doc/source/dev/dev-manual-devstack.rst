@@ -214,7 +214,11 @@ Clone and install the magnum client::
     cd python-magnumclient
     sudo pip install -e .
 
-Configure the database for use with magnum::
+Configure the database for use with magnum. Please note that DB migration
+does not work for SQLite backend. The SQLite database does not
+have any support for the ALTER statement needed by relational schema
+based migration tools. Hence DB Migration will not work for SQLite
+backend::
 
     magnum-db-manage upgrade
 
