@@ -19,6 +19,7 @@ import iso8601
 import netaddr
 from oslo_utils import timeutils
 from oslo_versionedobjects import fields
+from oslo_versionedobjects import fixture
 
 from magnum.common import context as magnum_context
 from magnum.common import exception
@@ -412,6 +413,44 @@ class _TestObject(object):
         self.assertEqual(123, obj.foo)
         self.assertEqual('abc', obj.bar)
         self.assertEqual(set(['foo', 'bar']), obj.obj_what_changed())
+
+
+# This is a static dictionary that holds all fingerprints of the versioned
+# objects registered with the MagnumRegistry. Each fingerprint contains
+# the version of the object and an md5 hash of RPC-critical parts of the
+# object (fields and remotable methods). If either the version or hash
+# change, the static tree needs to be updated.
+# For more information on object version testing, read
+# http://docs.openstack.org/developer/magnum/objects.html
+object_data = {
+    'Bay': '1.0-35edde13ad178e9419e7ea8b6d580bcd',
+    'BayLock': '1.0-7d1eb08cf2070523bd210369c7a2e076',
+    'BayModel': '1.0-06863f04ab4b98307e3d1b736d3137bf',
+    'Certificate': '1.0-2aff667971b85c1edf8d15684fd7d5e2',
+    'Container': '1.0-e12affbba5f8a748882a3ae98aced282',
+    'MyObj': '1.0-b43567e512438205e32f4e95ca616697',
+    'Node': '1.0-30943e6e3387a2fae7490b57c4239a17',
+    'Pod': '1.0-69b579203c6d726be7878c606626e438',
+    'ReplicationController': '1.0-782b7deb9307b2807101541b7e58b8a2',
+    'Service': '1.0-d4b8c0f3a234aec35d273196e18f7ed1',
+    'X509KeyPair': '1.0-fd008eba0fbc390e0e5da247bba4eedd',
+}
+
+
+class TestObjectVersions(test_base.TestCase):
+    def test_versions(self):
+        # Test the versions of current objects with the static tree above.
+        # This ensures that any incompatible object changes require a version
+        # bump.
+        classes = base.MagnumObjectRegistry.obj_classes()
+        checker = fixture.ObjectVersionChecker(obj_classes=classes)
+
+        expected, actual = checker.test_hashes(object_data)
+        self.assertEqual(expected, actual,
+                         "Fields or remotable methods in some objects have "
+                         "changed. Make sure the versions of the objects has "
+                         "been bumped, and update the hashes in the static "
+                         "fingerprints tree (object_data).")
 
 
 class TestObjectSerializer(test_base.TestCase):
