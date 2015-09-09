@@ -15,13 +15,10 @@ is still under active development.
 This session has only been tested on Ubuntu 14.04 (Trusty) and Fedora 20/21.
 We recommend users to select one of them if it is possible.
 
-Clone devstack and barbican::
+Clone devstack::
 
     cd ~
     git clone https://git.openstack.org/openstack-dev/devstack
-    git clone https://git.openstack.org/openstack/barbican
-    cp barbican/contrib/devstack/lib/* devstack/lib/
-    cp barbican/contrib/devstack/extras.d/* devstack/extras.d/
 
 Configure devstack with the minimal settings required to enable heat
 and neutron::
@@ -60,7 +57,7 @@ and neutron::
     enable_service h-api-cw
 
     # Enable barbican services
-    enable_service barbican
+    enable_plugin barbican https://git.openstack.org/openstack/barbican
 
     FIXED_RANGE=10.0.0.0/24
 
