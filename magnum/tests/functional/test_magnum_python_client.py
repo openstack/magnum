@@ -76,11 +76,14 @@ class BaseMagnumClient(base.TestCase):
 
     @classmethod
     def _wait_on_status(cls, bay, wait_status, finish_status):
-        # Check status every 5 seconds for a total of 120 minutes
+        # Check status every 60 seconds for a total of 100 minutes
         for i in range(100):
+            # sleep 1s to wait bay status changes, this will be usefull for
+            # the first time we wait for the status, to avoid another 59s
+            time.sleep(1)
             status = cls.cs.bays.get(bay.uuid).status
             if status in wait_status:
-                time.sleep(60)
+                time.sleep(59)
             elif status in finish_status:
                 break
             else:
@@ -192,15 +195,15 @@ class TestBayResource(BaseMagnumClient):
             # Ensure we delete whether the assert above is true or false
             self.cs.bays.delete(bay.uuid)
 
-        try:
-            self._wait_on_status(bay,
-                                 ["CREATE_COMPLETE",
-                                  "DELETE_IN_PROGRESS"],
-                                 ["DELETE_FAILED", "CREATE_FAILED",
-                                  "DELETE_COMPLETE"])
-        except exceptions.NotFound:
-            # if bay/get fails, the bay has been deleted already
-            pass
+            try:
+                self._wait_on_status(bay,
+                                     ["CREATE_COMPLETE",
+                                      "DELETE_IN_PROGRESS", "CREATE_FAILED"],
+                                     ["DELETE_FAILED",
+                                      "DELETE_COMPLETE"])
+            except exceptions.NotFound:
+                # if bay/get fails, the bay has been deleted already
+                pass
 
 
 class TestKubernetesAPIs(BaseMagnumClient):
@@ -220,9 +223,8 @@ class TestKubernetesAPIs(BaseMagnumClient):
         try:
             cls._wait_on_status(cls.bay,
                                 ["CREATE_COMPLETE",
-                                 "DELETE_IN_PROGRESS"],
-                                ["DELETE_FAILED", "CREATE_FAILED",
-                                 "DELETE_COMPLETE"])
+                                 "DELETE_IN_PROGRESS", "CREATE_FAILED"],
+                                ["DELETE_FAILED", "DELETE_COMPLETE"])
         except exceptions.NotFound:
             pass
         cls._delete_baymodel(cls.baymodel.uuid)
