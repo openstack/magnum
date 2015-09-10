@@ -127,6 +127,7 @@ class Handler(object):
             created_stack = _create_stack(context, osc, bay,
                                           bay_create_timeout)
         except exc.HTTPBadRequest as e:
+            cert_manager.delete_certificates_from_bay(bay)
             raise exception.InvalidParameterValue(message=str(e))
         except Exception:
             raise
@@ -187,6 +188,7 @@ class Handler(object):
             LOG.info(_LI('The stack %s was not be found during bay'
                          ' deletion.') % stack_id)
             try:
+                cert_manager.delete_certificates_from_bay(bay)
                 bay.destroy()
             except exception.BayNotFound:
                 LOG.info(_LI('The bay %s has been deleted by others.') % uuid)
@@ -226,6 +228,7 @@ class HeatPoller(object):
             LOG.info(_LI('Bay has been deleted, stack_id: %s')
                      % self.bay.stack_id)
             try:
+                cert_manager.delete_certificates_from_bay(self.bay)
                 self.bay.destroy()
             except exception.BayNotFound:
                 LOG.info(_LI('The bay %s has been deleted by others.')
