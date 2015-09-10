@@ -27,6 +27,7 @@ from magnum.tests import base
 from magnum.tests.unit.api import base as api_base
 from magnum.tests.unit.api import utils as apiutils
 from magnum.tests.unit.objects import utils as obj_utils
+from novaclient import exceptions as nova_exc
 
 
 class TestBayModelObject(base.TestCase):
@@ -407,9 +408,13 @@ class TestPatch(api_base.FunctionalTest):
 class TestPost(api_base.FunctionalTest):
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
+    @mock.patch.object(api_baymodel.BayModelsController,
+                       'check_keypair_exists')
     @mock.patch('oslo_utils.timeutils.utcnow')
-    def test_create_baymodel(self, mock_utcnow, mock_image_data):
+    def test_create_baymodel(self, mock_utcnow,
+                             mock_keypair_exists, mock_image_data):
         bdict = apiutils.baymodel_post_data()
+        mock_keypair_exists.return_value = None
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
         mock_utcnow.return_value = test_time
         mock_image_data.return_value = {'name': 'mock_name',
@@ -429,10 +434,14 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(test_time, return_created_at)
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
-    def test_create_baymodel_set_project_id_and_user_id(self, mock_image_data):
-
+    @mock.patch.object(api_baymodel.BayModelsController,
+                       'check_keypair_exists')
+    def test_create_baymodel_set_project_id_and_user_id(self,
+                                                        mock_keypair_exists,
+                                                        mock_image_data):
         with mock.patch.object(self.dbapi, 'create_baymodel',
                                wraps=self.dbapi.create_baymodel) as cc_mock:
+            mock_keypair_exists.return_value = None
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.baymodel_post_data()
@@ -444,9 +453,14 @@ class TestPost(api_base.FunctionalTest):
                              self.context.user_id)
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
-    def test_create_baymodel_doesnt_contain_id(self, mock_image_data):
+    @mock.patch.object(api_baymodel.BayModelsController,
+                       'check_keypair_exists')
+    def test_create_baymodel_doesnt_contain_id(self,
+                                               mock_keypair_exists,
+                                               mock_image_data):
         with mock.patch.object(self.dbapi, 'create_baymodel',
                                wraps=self.dbapi.create_baymodel) as cc_mock:
+            mock_keypair_exists.return_value = None
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.baymodel_post_data(image_id='my-image')
@@ -504,10 +518,14 @@ class TestPost(api_base.FunctionalTest):
         self._create_baymodel_raises_app_error(apiserver_port='not an int')
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
+    @mock.patch.object(api_baymodel.BayModelsController,
+                       'check_keypair_exists')
     def test_create_baymodel_with_docker_volume_size(self,
+                                                     mock_keypair_exists,
                                                      mock_image_data):
         with mock.patch.object(self.dbapi, 'create_baymodel',
                                wraps=self.dbapi.create_baymodel) as cc_mock:
+            mock_keypair_exists.return_value = None
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.baymodel_post_data(docker_volume_size=99)
@@ -518,7 +536,12 @@ class TestPost(api_base.FunctionalTest):
             self.assertNotIn('id', cc_mock.call_args[0][0])
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
-    def test_create_baymodel_generate_uuid(self, mock_image_data):
+    @mock.patch.object(api_baymodel.BayModelsController,
+                       'check_keypair_exists')
+    def test_create_baymodel_generate_uuid(self,
+                                           mock_keypair_exists,
+                                           mock_image_data):
+        mock_keypair_exists.return_value = None
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
         bdict = apiutils.baymodel_post_data()
@@ -529,7 +552,12 @@ class TestPost(api_base.FunctionalTest):
         self.assertTrue(utils.is_uuid_like(response.json['uuid']))
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
-    def test_create_baymodel_with_no_os_distro_image(self, mock_image_data):
+    @mock.patch.object(api_baymodel.BayModelsController,
+                       'check_keypair_exists')
+    def test_create_baymodel_with_no_os_distro_image(self,
+                                                     mock_keypair_exists,
+                                                     mock_image_data):
+        mock_keypair_exists.return_value = None
         mock_image_data.return_value = {'name': 'mock_name'}
         bdict = apiutils.baymodel_post_data()
         del bdict['uuid']
@@ -537,7 +565,12 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(404, response.status_int)
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
-    def test_create_baymodel_with_os_distro_image(self, mock_image_data):
+    @mock.patch.object(api_baymodel.BayModelsController,
+                       'check_keypair_exists')
+    def test_create_baymodel_with_os_distro_image(self,
+                                                  mock_keypair_exists,
+                                                  mock_image_data):
+        mock_keypair_exists.return_value = None
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
         bdict = apiutils.baymodel_post_data()
@@ -546,7 +579,12 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(201, response.status_int)
 
     @mock.patch.object(openstack_client, 'glance')
-    def test_create_baymodel_with_image_name(self, mock_glance_client):
+    @mock.patch.object(api_baymodel.BayModelsController,
+                       'check_keypair_exists')
+    def test_create_baymodel_with_image_name(self,
+                                             mock_keypair_exists,
+                                             mock_glance_client):
+        mock_keypair_exists.return_value = None
         mock_images = [{'name': 'mock_name',
                        'os_distro': 'fedora-atomic'}]
         mock_glance = mock.MagicMock()
@@ -558,9 +596,13 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(201, response.status_int)
 
     @mock.patch.object(openstack_client, 'glance')
+    @mock.patch.object(api_baymodel.BayModelsController,
+                       'check_keypair_exists')
     def test_create_baymodel_with_no_exist_image_name(self,
+                                                      mock_keypair_exists,
                                                       mock_glance_client):
         mock_images = []
+        mock_keypair_exists.return_value = None
         mock_glance = mock.MagicMock()
         mock_glance.images.list.return_value = mock_images
         mock_glance_client.return_value = mock_glance
@@ -570,7 +612,12 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(404, response.status_int)
 
     @mock.patch.object(openstack_client, 'glance')
-    def test_create_baymodel_with_multi_image_name(self, mock_glance_client):
+    @mock.patch.object(api_baymodel.BayModelsController,
+                       'check_keypair_exists')
+    def test_create_baymodel_with_multi_image_name(self,
+                                                   mock_keypair_exists,
+                                                   mock_glance_client):
+        mock_keypair_exists.return_value = None
         mock_images = [{'name': 'mock_name',
                        'os_distro': 'fedora-atomic'},
                        {'name': 'mock_name',
@@ -596,7 +643,11 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
-    def test_create_baymodel_with_dns(self, mock_image_data):
+    @mock.patch.object(api_baymodel.BayModelsController,
+                       'check_keypair_exists')
+    def test_create_baymodel_with_dns(self, mock_keypair_exists,
+                                      mock_image_data):
+        mock_keypair_exists.return_value = None
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
         bdict = apiutils.baymodel_post_data()
@@ -604,6 +655,20 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(201, response.status_int)
         self.assertEqual(bdict['dns_nameserver'],
                          response.json['dns_nameserver'])
+
+    @mock.patch.object(openstack_client, 'nova')
+    @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
+    def test_create_baymodel_with_no_exist_keypair(self,
+                                                   mock_image_data,
+                                                   mock_nova_client):
+        mock_nova = mock.MagicMock()
+        mock_nova.keypairs.get.side_effect = nova_exc.NotFound("Test")
+        mock_nova_client.return_value = mock_nova
+        mock_image_data.return_value = {'name': 'mock_name',
+                                        'os_distro': 'fedora-atomic'}
+        bdict = apiutils.baymodel_post_data()
+        response = self.post_json('/baymodels', bdict, expect_errors=True)
+        self.assertEqual(404, response.status_int)
 
 
 class TestDelete(api_base.FunctionalTest):

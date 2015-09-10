@@ -51,6 +51,7 @@ def list_opts():
         ('heat_client', magnum.common.clients.heat_client_opts),
         ('glance_client', magnum.common.clients.glance_client_opts),
         ('barbican_client', magnum.common.clients.barbican_client_opts),
+        ('nova_client', magnum.common.clients.nova_client_opts),
         ('x509', magnum.common.x509.config.x509_opts),
         ('bay_heat', magnum.conductor.handlers.bay_conductor.bay_heat_opts),
         ('certificates',

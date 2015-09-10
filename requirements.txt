@@ -39,6 +39,7 @@ pecan>=1.0.0
 python-barbicanclient>=3.3.0
 python-glanceclient>=0.18.0
 python-heatclient>=0.3.0
+python-novaclient>=2.28.1
 python-keystoneclient>=1.6.0
 requests>=2.5.2
 six>=1.9.0

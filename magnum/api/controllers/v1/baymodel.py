@@ -15,6 +15,7 @@
 import datetime
 
 import glanceclient.exc
+import novaclient.exceptions as nova_exc
 import pecan
 from pecan import rest
 import wsme
@@ -282,6 +283,14 @@ class BayModelsController(rest.RestController):
         rpc_baymodel = api_utils.get_rpc_resource('BayModel', baymodel_ident)
         return BayModel.convert_with_links(rpc_baymodel)
 
+    def check_keypair_exists(self, context, keypair):
+        """Checks the existence of the keypair"""
+        cli = clients.OpenStackClients(context)
+        try:
+            cli.nova().keypairs.get(keypair)
+        except nova_exc.NotFound:
+            raise exception.KeyPairNotFound(keypair=keypair)
+
     @policy.enforce_wsgi("baymodel", "create")
     @expose.expose(BayModel, body=BayModel, status_code=201)
     def post(self, baymodel):
@@ -291,6 +300,7 @@ class BayModelsController(rest.RestController):
         """
         baymodel_dict = baymodel.as_dict()
         context = pecan.request.context
+        self.check_keypair_exists(context, baymodel_dict['keypair_id'])
         baymodel_dict['project_id'] = context.project_id
         baymodel_dict['user_id'] = context.user_id
         image_data = self._get_image_data(context, baymodel_dict['image_id'])

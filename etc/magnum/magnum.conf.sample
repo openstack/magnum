@@ -35,7 +35,7 @@
 # (integer value)
 #periodic_interval_max = 60
 
-# Name of this node.  This can be an opaque identifier. It is not
+# Name of this node. This can be an opaque identifier. It is not
 # necessarily a hostname, FQDN, or IP address. However, the node name
 # must be valid within an AMQP key, and if using ZeroMQ, a valid
 # hostname, FQDN, or IP address. (string value)
@@ -46,7 +46,7 @@
 #
 
 # Print debugging output (set logging level to DEBUG instead of
-# default WARNING level). (boolean value)
+# default INFO level). (boolean value)
 #debug = false
 
 # If set to false, will disable INFO logging level, making WARNING the
@@ -88,8 +88,9 @@
 
 # (Optional) Enables or disables syslog rfc5424 format for logging. If
 # enabled, prefixes the MSG part of the syslog message with APP-NAME
-# (RFC5424). The format without the APP-NAME is deprecated in K, and
-# will be removed in M, along with this option. (boolean value)
+# (RFC5424). The format without the APP-NAME is deprecated in Kilo,
+# and will be removed in Mitaka, along with this option. (boolean
+# value)
 # This option is deprecated for removal.
 # Its value may be silently ignored in the future.
 #use_syslog_rfc_format = true
@@ -115,7 +116,7 @@
 #logging_exception_prefix = %(asctime)s.%(msecs)03d %(process)d ERROR %(name)s %(instance)s
 
 # List of logger=LEVEL pairs. (list value)
-#default_log_levels = amqp=WARN,amqplib=WARN,boto=WARN,qpid=WARN,sqlalchemy=WARN,suds=INFO,oslo.messaging=INFO,iso8601=WARN,requests.packages.urllib3.connectionpool=WARN,urllib3.connectionpool=WARN,websocket=WARN,requests.packages.urllib3.util.retry=WARN,urllib3.util.retry=WARN,keystonemiddleware=WARN,routes.middleware=WARN,stevedore=WARN
+#default_log_levels = amqp=WARN,amqplib=WARN,boto=WARN,qpid=WARN,sqlalchemy=WARN,suds=INFO,oslo.messaging=INFO,iso8601=WARN,requests.packages.urllib3.connectionpool=WARN,urllib3.connectionpool=WARN,websocket=WARN,requests.packages.urllib3.util.retry=WARN,urllib3.util.retry=WARN,keystonemiddleware=WARN,routes.middleware=WARN,stevedore=WARN,taskflow=WARN
 
 # Enables or disables publication of error events. (boolean value)
 #publish_errors = false
@@ -174,8 +175,9 @@
 # Heartbeat time-to-live. (integer value)
 #matchmaker_heartbeat_ttl = 600
 
-# Size of RPC thread pool. (integer value)
-#rpc_thread_pool_size = 64
+# Size of executor thread pool. (integer value)
+# Deprecated group/name - [DEFAULT]/rpc_thread_pool_size
+#executor_thread_pool_size = 64
 
 # The Drivers(s) to handle sending notifications. Possible values are
 # messaging, messagingv2, routing, log, test, noop (multi valued)
@@ -588,6 +590,9 @@
 # Verify HTTPS connections. (boolean value)
 #insecure = false
 
+# The region in which the identity server can be found. (string value)
+#region_name = <None>
+
 # Directory used to cache files related to PKI tokens. (string value)
 #signing_dir = <None>
 
@@ -772,6 +777,21 @@
 #ringfile = /etc/oslo/matchmaker_ring.json
 
 
+[nova_client]
+
+#
+# From magnum
+#
+
+# Region in Identity service catalog to use for communication with the
+# OpenStack service. (string value)
+#region_name = <None>
+
+# Type of endpoint in Identity service catalog to use for
+# communication with the OpenStack service. (string value)
+#endpoint_type = publicURL
+
+
 [oslo_concurrency]
 
 #
@@ -865,7 +885,8 @@
 # keep backward compatible at the same time. This option provides such
 # compatibility - it defaults to False in Liberty and can be turned on
 # for early adopters with a new installations or for testing. Please
-# note, that this option will be removed in M release. (boolean value)
+# note, that this option will be removed in the Mitaka release.
+# (boolean value)
 #send_single_reply = false
 
 # Qpid broker hostname. (string value)
@@ -940,7 +961,8 @@
 # keep backward compatible at the same time. This option provides such
 # compatibility - it defaults to False in Liberty and can be turned on
 # for early adopters with a new installations or for testing. Please
-# note, that this option will be removed in M release. (boolean value)
+# note, that this option will be removed in the Mitaka release.
+# (boolean value)
 #send_single_reply = false
 
 # SSL version to use (valid only if SSL enabled). Valid values are
