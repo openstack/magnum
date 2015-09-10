@@ -83,7 +83,7 @@ class TestCase(base.BaseTestCase):
         self.mock_make_context = p.start()
         self.addCleanup(p.stop)
 
-        self.useFixture(conf_fixture.ConfFixture(cfg.CONF))
+        self.useFixture(conf_fixture.ConfFixture())
 
         self._base_test_obj_backup = copy.copy(
             objects_base.MagnumObjectRegistry._registry._obj_classes)

@@ -20,19 +20,19 @@ from oslo_log import log
 
 from magnum.common import config
 
-cfg.CONF.import_opt('host', 'magnum.common.service')
-log.register_options(cfg.CONF)
+CONF = cfg.CONF
+CONF.import_opt('host', 'magnum.common.service')
+CONF.import_opt('connection', 'oslo_db.options', group='database')
+CONF.import_opt('sqlite_synchronous', 'oslo_db.options', group='database')
 
 
 class ConfFixture(fixtures.Fixture):
     """Fixture to manage global conf settings."""
 
-    def __init__(self, conf):
-        self.conf = conf
-
     def _setUp(self):
-        self.conf.set_default('host', 'fake-mini')
-        self.conf.set_default('connection', "sqlite://", group='database')
-        self.conf.set_default('sqlite_synchronous', False, group='database')
+        log.register_options(cfg.CONF)
+        CONF.set_default('host', 'fake-mini')
+        CONF.set_default('connection', "sqlite://", group='database')
+        CONF.set_default('sqlite_synchronous', False, group='database')
         config.parse_args([], default_config_files=[])
-        self.addCleanup(self.conf.reset)
+        self.addCleanup(CONF.reset)
