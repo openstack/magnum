@@ -41,7 +41,7 @@ enable_service ceilometer-alarm-notifier
 enable_service ceilometer-alarm-evaluator
 
 # Enable barbican services
-enable_service barbican
+enable_plugin barbican https://git.openstack.org/openstack/barbican
 
 # Enable Magnum services
 enable_service m-api
