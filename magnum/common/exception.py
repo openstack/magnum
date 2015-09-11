@@ -444,7 +444,7 @@ class RequiredParameterNotProvided(MagnumException):
 
 
 class Urllib2InvalidScheme(MagnumException):
-    message = _("The urllib2 URL %(url) has an invalid scheme.")
+    message = _("The urllib2 URL %(url)s has an invalid scheme.")
 
 
 class OperationInProgress(Invalid):

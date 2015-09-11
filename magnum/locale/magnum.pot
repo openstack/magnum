@@ -308,7 +308,7 @@ msgid "Required parameter %(heat_param)s not provided."
 msgstr ""
 
 #: magnum/common/exception.py:444
-msgid "The urllib2 URL %(url) has an invalid scheme."
+msgid "The urllib2 URL %(url)s has an invalid scheme."
 msgstr ""
 
 #: magnum/common/exception.py:448
