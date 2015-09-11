@@ -13,6 +13,7 @@
 #    under the License.
 
 import os
+from os import path
 import uuid
 
 from oslo_config import cfg
@@ -162,15 +163,17 @@ class CertManager(cert_manager.CertManager):
             )
 
         try:
-            with open(filename_intermediates, 'r') as int_file:
-                cert_data['intermediates'] = int_file.read()
+            if path.isfile(filename_intermediates):
+                with open(filename_intermediates, 'r') as int_file:
+                    cert_data['intermediates'] = int_file.read()
         except IOError as ioe:
             LOG.error(_LE("Failed to read certificate."))
             raise exception.CertificateStorageException(msg=ioe.message)
 
         try:
-            with open(filename_pkp, 'r') as pass_file:
-                cert_data['private_key_passphrase'] = pass_file.read()
+            if path.isfile(filename_pkp):
+                with open(filename_pkp, 'r') as pass_file:
+                    cert_data['private_key_passphrase'] = pass_file.read()
         except IOError as ioe:
             LOG.error(_LE("Failed to read certificate."))
             raise exception.CertificateStorageException(msg=ioe.message)
@@ -200,8 +203,10 @@ class CertManager(cert_manager.CertManager):
         try:
             os.remove(filename_certificate)
             os.remove(filename_private_key)
-            os.remove(filename_intermediates)
-            os.remove(filename_pkp)
+            if path.isfile(filename_intermediates):
+                os.remove(filename_intermediates)
+            if path.isfile(filename_pkp):
+                os.remove(filename_pkp)
         except IOError as ioe:
             LOG.error(_LE(
                 "Failed to delete certificate {0}."
