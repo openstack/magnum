@@ -13,7 +13,7 @@
 
 # Directory where the magnum python module is installed. (string
 # value)
-#pybasedir = /home/test/magnum/magnum
+#pybasedir = /opt/stack/magnum/magnum
 
 # Directory where magnum binaries are installed. (string value)
 #bindir = $pybasedir/bin
@@ -236,7 +236,7 @@
 # From magnum
 #
 
-# The port for the Magnum API server. (integer value)
+# The port for the Magnum API server. (port number)
 # Minimum value: 1
 # Maximum value: 65535
 #port = 9511
@@ -300,7 +300,7 @@
 #public_swarm_discovery = true
 
 # Url for swarm public discovery endpoint. (string value)
-#public_swarm_discovery_url = https://discovery-stage.hub.docker.com/v1/clusters
+#public_swarm_discovery_url = https://discovery.hub.docker.com/v1/clusters
 
 # Location of template to build a Mesos cluster on Ubuntu. (string
 # value)
@@ -729,7 +729,7 @@
 # value)
 #k8s_protocol = http
 
-# Default port of the k8s master endpoint. (integer value)
+# Default port of the k8s master endpoint. (port number)
 # Minimum value: 1
 # Maximum value: 65535
 #k8s_port = 8080

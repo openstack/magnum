@@ -65,7 +65,7 @@ template_def_opts = [
                 help=_('Indicates Swarm discovery should use public '
                        'endpoint.')),
     cfg.StrOpt('public_swarm_discovery_url',
-               default='https://discovery-stage.hub.docker.com/v1/clusters',
+               default='https://discovery.hub.docker.com/v1/clusters',
                help=_('Url for swarm public discovery endpoint.')),
     cfg.StrOpt('mesos_ubuntu_template_path',
                default=paths.basedir_def('templates/heat-mesos/'
