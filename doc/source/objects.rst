@@ -58,7 +58,7 @@ This results in a unit test failure with the following output::
     testtools.matchers._impl.MismatchError: !=:
     reference = {'Container': '1.0-e12affbba5f8a748882a3ae98aced282'}
     actual    = {'Container': '1.0-22b40e8eed0414561ca921906b189820'}
-    : Fields or remotable methods in some objects have changed. Make sure the versions of the objects has been bumped, and update the hashes in the static fingerprints tree (object_data).
+    : Fields or remotable methods in some objects have changed. Make sure the versions of the objects has been bumped, and update the hashes in the static fingerprints tree (object_data). For more information, read http://docs.openstack.org/developer/magnum/objects.html.
 
 This is an indication that me adding the 'foo' field to Container means I need
 to bump the version of Container, so I increase the version and add a comment
@@ -77,7 +77,7 @@ tell me the fingerprint that I now need to put in the static tree::
     testtools.matchers._impl.MismatchError: !=:
     reference = {'Container': '1.0-e12affbba5f8a748882a3ae98aced282'}
     actual    = {'Container': '1.1-22b40e8eed0414561ca921906b189820'}
-    : Fields or remotable methods in some objects have changed. Make sure the versions of the objects has been bumped, and update the hashes in the static fingerprints tree (object_data).
+    : Fields or remotable methods in some objects have changed. Make sure the versions of the objects has been bumped, and update the hashes in the static fingerprints tree (object_data). For more information, read http://docs.openstack.org/developer/magnum/objects.html.
 
 I can now copy the new fingerprint needed (1.1-22b40e8eed0414561ca921906b189820),
 to the object_data map within magnum/tests/unit/objects/test_objects.py::

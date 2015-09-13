@@ -450,7 +450,9 @@ class TestObjectVersions(test_base.TestCase):
                          "Fields or remotable methods in some objects have "
                          "changed. Make sure the versions of the objects has "
                          "been bumped, and update the hashes in the static "
-                         "fingerprints tree (object_data).")
+                         "fingerprints tree (object_data). For more "
+                         "information, read http://docs.openstack.org/"
+                         "developer/magnum/objects.html.")
 
 
 class TestObjectSerializer(test_base.TestCase):
