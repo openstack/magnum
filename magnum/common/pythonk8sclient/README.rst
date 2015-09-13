@@ -15,21 +15,38 @@ See also
 * swagger-codegen: https://github.com/swagger-api/swagger-codegen
 * Kubernetes swagger-spec: https://github.com/GoogleCloudPlatform/kubernetes/tree/master/api/swagger-spec
 
+Prerequisites
+-------------
+
+You need to install required packages for swagger codegen. Please refer to
+`<https://github.com/swagger-api/swagger-codegen#prerequisites>`_
+
 Steps to generate API client code
 ---------------------------------
 
-Steps to generate Kubernetes client code for v1beta3:
+Steps to generate Kubernetes client code for v1:
 
-* Clone the Kubernetes repo.
+* Clone the Magnum repo::
 
-  git clone https://github.com/GoogleCloudPlatform/kubernetes.git
+    git clone https://github.com/openstack/magnum.git
 
-* Clone the swagger-codegen repo.
+* Clone the swagger-codegen repo. It is recommended to checkout a release
+ (e.g. v2.1.3) instead of using the master branch::
 
-  git clone https://github.com/swagger-api/swagger-codegen.git
+    git clone https://github.com/swagger-api/swagger-codegen.git
+    cd swagger-codegen/
+    git checkout tags/v2.1.3
 
-* Run below command to generate the API client code for Kubernetes.
+* Build swagger-codegen::
 
-  java -jar ./swagger-codegen/modules/swagger-codegen-cli/target/swagger-codegen-cli.jar generate -i ./kubernetes/api/swagger-spec/v1beta3.json -l python -o ./KubernetesClientCode
+    mvn package
+
+* Run below command to generate the API client code for Kubernetes::
+
+    cd ..
+    java -jar ./swagger-codegen/modules/swagger-codegen-cli/target/swagger-codegen-cli.jar \
+        generate \
+        -i ./magnum/magnum/common/pythonk8sclient/templates/v1.json \
+        -l python -o ./KubernetesClientCode
 
 Now you can check the code at location ./KubernetesClientCode.
