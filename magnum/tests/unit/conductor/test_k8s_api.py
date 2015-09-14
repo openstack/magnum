@@ -13,7 +13,6 @@
 # under the License.
 
 from mock import patch
-from oslo_config import cfg
 
 from magnum.conductor import k8s_api
 from magnum import objects
@@ -26,7 +25,6 @@ class TestK8sAPI(base.TestCase):
     def test_retrieve_k8s_api_endpoint(self, mock_bay_get_by_uuid):
         expected_context = 'context'
         expected_api_address = 'api_address'
-        expected_protocol = cfg.CONF.kubernetes.k8s_protocol
 
         resource = objects.Pod({})
         resource.bay_uuid = 'bay_uuid'
@@ -37,9 +35,7 @@ class TestK8sAPI(base.TestCase):
 
         actual_api_endpoint = k8s_api.K8sAPI._retrieve_k8s_api_endpoint(
             expected_context, resource)
-        self.assertEqual("%s://%s" % (expected_protocol,
-                                      expected_api_address),
-                         actual_api_endpoint)
+        self.assertEqual(expected_api_address, actual_api_endpoint)
 
     @patch('magnum.conductor.k8s_api.K8sAPI')
     def test_create_k8s_api(self, mock_k8s_api_cls):

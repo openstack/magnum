@@ -136,22 +136,35 @@ class TemplateDefinitionTestCase(base.TestCase):
         value = output.get_output_value(mock_stack)
         self.assertIsNone(value)
 
+    def test_add_output_with_mapping_type(self):
+        definition = tdef.TemplateDefinition.get_template_definition(
+            'vm',
+            'fedora-atomic',
+            'kubernetes')
+
+        mock_args = [1, 3, 4]
+        mock_kwargs = {'test': 'test'}
+        mock_mapping_type = mock.MagicMock()
+        mock_mapping_type.return_value = mock.MagicMock()
+        definition.add_output(mapping_type=mock_mapping_type, *mock_args,
+                              **mock_kwargs)
+
+        mock_mapping_type.assert_called_once_with(*mock_args, **mock_kwargs)
+        self.assertIn(mock_mapping_type.return_value,
+                      definition.output_mappings)
+
     def test_update_outputs(self):
         definition = tdef.TemplateDefinition.get_template_definition(
             'vm',
             'fedora-atomic',
             'kubernetes')
 
-        expected_api_address = 'api_address'
         expected_node_addresses = ['ex_minion', 'address']
 
         outputs = [
             {"output_value": expected_node_addresses,
              "description": "No description given",
              "output_key": "kube_minions_external"},
-            {"output_value": expected_api_address,
-             "description": "No description given",
-             "output_key": "api_address"},
             {"output_value": ['any', 'output'],
              "description": "No description given",
              "output_key": "kube_minions"}
@@ -159,15 +172,17 @@ class TemplateDefinitionTestCase(base.TestCase):
         mock_stack = mock.MagicMock()
         mock_stack.outputs = outputs
         mock_bay = mock.MagicMock()
+        mock_bay.api_address = None
+        mock_baymodel = mock.MagicMock()
 
-        definition.update_outputs(mock_stack, mock_bay)
+        definition.update_outputs(mock_stack, mock_baymodel, mock_bay)
 
-        self.assertEqual(mock_bay.api_address, expected_api_address)
         self.assertEqual(mock_bay.node_addresses, expected_node_addresses)
 
 
 class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
 
+    @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.conductor.template_definition'
                 '.AtomicK8sTemplateDefinition.get_discovery_url')
     @mock.patch('magnum.conductor.template_definition.BaseTemplateDefinition'
@@ -175,11 +190,17 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
     @mock.patch('magnum.conductor.template_definition.TemplateDefinition'
                 '.get_output')
     def test_k8s_get_params(self, mock_get_output, mock_get_params,
-                            mock_get_discovery_url):
+                            mock_get_discovery_url, mock_osc_class):
         mock_context = mock.MagicMock()
+        mock_context.auth_token = 'AUTH_TOKEN'
         mock_baymodel = mock.MagicMock()
+        mock_baymodel.tls_disabled = False
         mock_bay = mock.MagicMock()
+        mock_bay.uuid = 'bay-xx-xx-xx-xx'
         mock_scale_manager = mock.MagicMock()
+        mock_osc = mock.MagicMock()
+        mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
+        mock_osc_class.return_value = mock_osc
 
         removal_nodes = ['node1', 'node2']
         mock_scale_manager.get_removal_nodes.return_value = removal_nodes
@@ -206,7 +227,62 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
             'flannel_network_subnetlen': flannel_vxlan,
             'auth_url': 'http://192.168.10.10:5000/v2',
             'username': 'fake_user',
-            'tenant_name': 'fake_tenant'}}
+            'tenant_name': 'fake_tenant',
+            'magnum_url': mock_osc.magnum_url.return_value,
+            'user_token': mock_context.auth_token}}
+        mock_get_params.assert_called_once_with(mock_context, mock_baymodel,
+                                                mock_bay, **expected_kwargs)
+
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.conductor.template_definition'
+                '.AtomicK8sTemplateDefinition.get_discovery_url')
+    @mock.patch('magnum.conductor.template_definition.BaseTemplateDefinition'
+                '.get_params')
+    @mock.patch('magnum.conductor.template_definition.TemplateDefinition'
+                '.get_output')
+    def test_k8s_get_params_insecure(self, mock_get_output, mock_get_params,
+                                     mock_get_discovery_url, mock_osc_class):
+        mock_context = mock.MagicMock()
+        mock_context.auth_token = 'AUTH_TOKEN'
+        mock_baymodel = mock.MagicMock()
+        mock_baymodel.tls_disabled = True
+        mock_bay = mock.MagicMock()
+        mock_bay.uuid = 'bay-xx-xx-xx-xx'
+        mock_scale_manager = mock.MagicMock()
+        mock_osc = mock.MagicMock()
+        mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
+        mock_osc_class.return_value = mock_osc
+
+        removal_nodes = ['node1', 'node2']
+        mock_scale_manager.get_removal_nodes.return_value = removal_nodes
+        mock_get_discovery_url.return_value = 'fake_discovery_url'
+
+        mock_context.auth_url = 'http://192.168.10.10:5000/v3'
+        mock_context.user_name = 'fake_user'
+        mock_context.tenant = 'fake_tenant'
+
+        flannel_cidr = mock_baymodel.labels.get('flannel_network_cidr')
+        flannel_subnet = mock_baymodel.labels.get('flannel_network_subnetlen')
+        flannel_vxlan = mock_baymodel.labels.get('flannel_use_vxlan')
+
+        k8s_def = tdef.AtomicK8sTemplateDefinition()
+
+        k8s_def.get_params(mock_context, mock_baymodel, mock_bay,
+                           scale_manager=mock_scale_manager)
+
+        expected_kwargs = {'extra_params': {
+            'minions_to_remove': removal_nodes,
+            'discovery_url': 'fake_discovery_url',
+            'flannel_network_cidr': flannel_cidr,
+            'flannel_use_vxlan': flannel_subnet,
+            'flannel_network_subnetlen': flannel_vxlan,
+            'auth_url': 'http://192.168.10.10:5000/v2',
+            'username': 'fake_user',
+            'tenant_name': 'fake_tenant',
+            'magnum_url': mock_osc.magnum_url.return_value,
+            'user_token': mock_context.auth_token,
+            'loadbalancing_protocol': 'HTTP',
+            'kubernetes_port': 8080}}
         mock_get_params.assert_called_once_with(mock_context, mock_baymodel,
                                                 mock_bay, **expected_kwargs)
 
@@ -248,6 +324,67 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         self.assertRaises(exception.InvalidDiscoveryURL,
                           tdef.AtomicK8sTemplateDefinition().get_discovery_url,
                           fake_bay)
+
+    def test_update_outputs_api_address(self):
+        definition = tdef.TemplateDefinition.get_template_definition(
+            'vm',
+            'fedora-atomic',
+            'kubernetes')
+
+        address = 'updated_address'
+        protocol = 'http'
+        port = '8080'
+        params = {
+            'protocol': protocol,
+            'address': address,
+            'port': port,
+        }
+        expected_api_address = '%(protocol)s://%(address)s:%(port)s' % params
+
+        outputs = [
+            {"output_value": address,
+             "description": "No description given",
+             "output_key": "api_address"},
+        ]
+        mock_stack = mock.MagicMock()
+        mock_stack.outputs = outputs
+        mock_bay = mock.MagicMock()
+        mock_baymodel = mock.MagicMock()
+        mock_baymodel.tls_disabled = True
+
+        definition.update_outputs(mock_stack, mock_baymodel, mock_bay)
+
+        self.assertEqual(mock_bay.api_address, expected_api_address)
+
+    def test_update_outputs_if_baymodel_is_secure(self):
+        definition = tdef.TemplateDefinition.get_template_definition(
+            'vm',
+            'fedora-atomic',
+            'kubernetes')
+
+        address = 'updated_address'
+        protocol = 'https'
+        port = '6443'
+        params = {
+            'protocol': protocol,
+            'address': address,
+            'port': port,
+        }
+        expected_api_address = '%(protocol)s://%(address)s:%(port)s' % params
+
+        outputs = [
+            {"output_value": address,
+             "description": "No description given",
+             "output_key": "api_address"},
+        ]
+        mock_stack = mock.MagicMock()
+        mock_stack.outputs = outputs
+        mock_bay = mock.MagicMock()
+        mock_baymodel = mock.MagicMock()
+        mock_baymodel.tls_disabled = False
+
+        definition.update_outputs(mock_stack, mock_baymodel, mock_bay)
+        self.assertEqual(mock_bay.api_address, expected_api_address)
 
 
 class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):

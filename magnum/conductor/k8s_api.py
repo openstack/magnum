@@ -12,27 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from oslo_config import cfg
-
-from magnum.common import config
 from magnum.common.pythonk8sclient.swagger_client import api_client
 from magnum.common.pythonk8sclient.swagger_client.apis import apiv_api
 from magnum.conductor import utils
-from magnum.i18n import _
-
-
-kubernetes_opts = [
-    cfg.StrOpt('k8s_protocol',
-               default='http',
-               help=_('Default protocol of k8s master endpoint '
-                      '(http or https).')),
-    cfg.Opt('k8s_port',
-            type=config.PORT_TYPE,
-            default=8080,
-            help=_('Default port of the k8s master endpoint.')),
-]
-
-cfg.CONF.register_opts(kubernetes_opts, group='kubernetes')
 
 
 class K8sAPI(apiv_api.ApivApi):
@@ -51,11 +33,7 @@ class K8sAPI(apiv_api.ApivApi):
         if hasattr(obj, 'bay_uuid'):
             obj = utils.retrieve_bay(context, obj)
 
-        params = {
-            'k8s_protocol': cfg.CONF.kubernetes.k8s_protocol,
-            'api_address': obj.api_address
-        }
-        return "%(k8s_protocol)s://%(api_address)s" % params
+        return obj.api_address
 
 
 def create_k8s_api(context, obj):

@@ -103,6 +103,9 @@ class BaseMagnumClient(base.TestCase):
             network_driver='flannel',
             coe=coe,
             labels={"K1": "V1", "K2": "V2"},
+            # TODO(yuanying): Change to `tls_disabled=False`
+            #                 if k8sclient supports TLS.
+            tls_disabled=True,
         )
         return baymodel
 

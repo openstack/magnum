@@ -215,9 +215,9 @@ class HeatPoller(object):
         self.context = self.openstack_client.context
         self.bay = bay
         self.attempts = 0
-        baymodel = conductor_utils.retrieve_baymodel(self.context, bay)
+        self.baymodel = conductor_utils.retrieve_baymodel(self.context, bay)
         self.template_def = TDef.get_template_definition(
-            'vm', baymodel.cluster_distro, baymodel.coe)
+            'vm', self.baymodel.cluster_distro, self.baymodel.coe)
 
     def poll_and_check(self):
         # TODO(yuanying): temporary implementation to update api_address,
@@ -238,7 +238,7 @@ class HeatPoller(object):
             raise loopingcall.LoopingCallDone()
         if (stack.stack_status in [bay_status.CREATE_COMPLETE,
                                    bay_status.UPDATE_COMPLETE]):
-            self.template_def.update_outputs(stack, self.bay)
+            self.template_def.update_outputs(stack, self.baymodel, self.bay)
 
             self.bay.status = stack.stack_status
             self.bay.status_reason = stack.stack_status_reason

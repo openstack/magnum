@@ -29,6 +29,8 @@ from magnum.i18n import _LW
 
 LOG = logging.getLogger(__name__)
 
+KUBE_SECURE_PORT = '6443'
+KUBE_INSECURE_PORT = '8080'
 
 template_def_opts = [
     cfg.StrOpt('k8s_atomic_template_path',
@@ -133,7 +135,7 @@ class OutputMapping(object):
         self.bay_attr = bay_attr
         self.heat_output = heat_output
 
-    def set_output(self, stack, bay):
+    def set_output(self, stack, baymodel, bay):
         if self.bay_attr is None:
             return
 
@@ -278,7 +280,8 @@ class TemplateDefinition(object):
         self.param_mappings.append(param)
 
     def add_output(self, *args, **kwargs):
-        output = OutputMapping(*args, **kwargs)
+        mapping_type = kwargs.pop('mapping_type', OutputMapping)
+        output = mapping_type(*args, **kwargs)
         self.output_mappings.append(output)
 
     def get_output(self, *args, **kwargs):
@@ -325,9 +328,9 @@ class TemplateDefinition(object):
 
         return None
 
-    def update_outputs(self, stack, bay):
+    def update_outputs(self, stack, baymodel, bay):
         for output in self.output_mappings:
-            output.set_output(stack, bay)
+            output.set_output(stack, baymodel, bay)
 
     @abc.abstractproperty
     def template_path(self):
@@ -362,6 +365,28 @@ class BaseTemplateDefinition(TemplateDefinition):
         pass
 
 
+class K8sApiAddressOutputMapping(OutputMapping):
+
+    def set_output(self, stack, baymodel, bay):
+        # TODO(yuanying): port number is hardcoded, this will be fix
+        protocol = 'https'
+        port = KUBE_SECURE_PORT
+        if baymodel.tls_disabled:
+            protocol = 'http'
+            port = KUBE_INSECURE_PORT
+
+        output_value = self.get_output_value(stack)
+        params = {
+            'protocol': protocol,
+            'address': output_value,
+            'port': port,
+        }
+        output_value = "%(protocol)s://%(address)s:%(port)s" % params
+
+        if output_value is not None:
+            setattr(bay, self.bay_attr, output_value)
+
+
 class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
     """Kubernetes template for a Fedora Atomic VM."""
 
@@ -373,6 +398,9 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
 
     def __init__(self):
         super(AtomicK8sTemplateDefinition, self).__init__()
+        self.add_parameter('bay_uuid',
+                           bay_attr='uuid',
+                           param_type=str)
         self.add_parameter('master_flavor',
                            baymodel_attr='master_flavor_id')
         self.add_parameter('minion_flavor',
@@ -390,13 +418,13 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
                            required=True)
         self.add_parameter('network_driver',
                            baymodel_attr='network_driver')
-        # TODO(yuanying): Add below lines if apiserver_port parameter
-        # is supported
-        # self.add_parameter('apiserver_port',
-        #                    baymodel_attr='apiserver_port')
+        self.add_parameter('tls_disabled',
+                           baymodel_attr='tls_disabled',
+                           required=True)
 
         self.add_output('api_address',
-                        bay_attr='api_address')
+                        bay_attr='api_address',
+                        mapping_type=K8sApiAddressOutputMapping)
         self.add_output('kube_minions',
                         bay_attr=None)
         self.add_output('kube_minions_external',
@@ -433,6 +461,13 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
         extra_params['auth_url'] = context.auth_url.replace("v3", "v2")
         extra_params['username'] = context.user_name
         extra_params['tenant_name'] = context.tenant
+        extra_params['user_token'] = context.auth_token
+        osc = clients.OpenStackClients(context)
+        extra_params['magnum_url'] = osc.magnum_url()
+
+        if baymodel.tls_disabled:
+            extra_params['loadbalancing_protocol'] = 'HTTP'
+            extra_params['kubernetes_port'] = 8080
 
         for label in label_list:
             extra_params[label] = baymodel.labels.get(label)

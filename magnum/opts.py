@@ -55,7 +55,5 @@ def list_opts():
         ('certificates',
             itertools.chain(magnum.common.cert_manager.cert_manager_opts,
                             local_cert_manager.local_cert_manager_opts,
-                            )),
-        ('kubernetes',
-            magnum.conductor.k8s_api.kubernetes_opts),
+                            ))
     ]

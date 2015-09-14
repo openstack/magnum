@@ -52,9 +52,10 @@ class TestBayConductorWithK8s(base.TestCase):
             'labels': {'flannel_network_cidr': '10.101.0.0/16',
                        'flannel_network_subnetlen': '26',
                        'flannel_use_vxlan': 'yes'},
-
+            'tls_disabled': False,
         }
         self.bay_dict = {
+            'uuid': 'bay-xx-xx-xx-xx',
             'baymodel_id': 'xx-xx-xx-xx',
             'name': 'bay1',
             'stack_id': 'xx-xx-xx-xx',
@@ -70,6 +71,12 @@ class TestBayConductorWithK8s(base.TestCase):
         self.context.auth_url = 'http://192.168.10.10:5000/v3'
         self.context.user_name = 'fake_user'
         self.context.tenant = 'fake_tenant'
+        osc_patcher = mock.patch('magnum.common.clients.OpenStackClients')
+        self.mock_osc_class = osc_patcher.start()
+        self.addCleanup(osc_patcher.stop)
+        self.mock_osc = mock.MagicMock()
+        self.mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
+        self.mock_osc_class.return_value = self.mock_osc
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition(
@@ -112,6 +119,10 @@ class TestBayConductorWithK8s(base.TestCase):
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
+            'user_token': self.context.auth_token,
+            'bay_uuid': self.bay_dict['uuid'],
+            'magnum_url': self.mock_osc.magnum_url.return_value,
+            'tls_disabled': False,
         }
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -135,6 +146,10 @@ class TestBayConductorWithK8s(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v2',
             'tenant_name': 'fake_tenant',
             'username': 'fake_user',
+            'user_token': self.context.auth_token,
+            'bay_uuid': self.bay_dict['uuid'],
+            'magnum_url': self.mock_osc.magnum_url.return_value,
+            'tls_disabled': False,
         }
         if missing_attr is not None:
             expected.pop(mapping[missing_attr], None)
@@ -186,6 +201,10 @@ class TestBayConductorWithK8s(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v2',
             'tenant_name': 'fake_tenant',
             'username': 'fake_user',
+            'user_token': self.context.auth_token,
+            'bay_uuid': self.bay_dict['uuid'],
+            'magnum_url': self.mock_osc.magnum_url.return_value,
+            'tls_disabled': False,
         }
         self.assertEqual(expected, definition)
 
@@ -234,6 +253,10 @@ class TestBayConductorWithK8s(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v2',
             'tenant_name': 'fake_tenant',
             'username': 'fake_user',
+            'user_token': self.context.auth_token,
+            'bay_uuid': self.bay_dict['uuid'],
+            'magnum_url': self.mock_osc.magnum_url.return_value,
+            'tls_disabled': False,
         }
         self.assertEqual(expected, definition)
 
@@ -322,6 +345,10 @@ class TestBayConductorWithK8s(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v2',
             'tenant_name': 'fake_tenant',
             'username': 'fake_user',
+            'user_token': self.context.auth_token,
+            'bay_uuid': self.bay_dict['uuid'],
+            'magnum_url': self.mock_osc.magnum_url.return_value,
+            'tls_disabled': False,
         }
         self.assertIn('token', definition)
         del definition['token']
@@ -395,6 +422,10 @@ class TestBayConductorWithK8s(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v2',
             'tenant_name': 'fake_tenant',
             'username': 'fake_user',
+            'user_token': self.context.auth_token,
+            'bay_uuid': self.bay_dict['uuid'],
+            'magnum_url': self.mock_osc.magnum_url.return_value,
+            'tls_disabled': False,
         }
         self.assertEqual(expected, definition)
         reqget.assert_called_once_with('http://etcd/test?size=1')
