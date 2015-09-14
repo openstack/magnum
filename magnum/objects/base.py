@@ -62,6 +62,26 @@ class MagnumPersistentObject(object):
     }
 
 
+class MagnumObjectIndirectionAPI(ovoo_base.VersionedObjectIndirectionAPI):
+    def __init__(self):
+        super(MagnumObjectIndirectionAPI, self).__init__()
+        from magnum.conductor import api as conductor_api
+        self._conductor = conductor_api.API()
+
+    def object_action(self, context, objinst, objmethod, args, kwargs):
+        return self._conductor.object_action(context, objinst, objmethod,
+                                             args, kwargs)
+
+    def object_class_action(self, context, objname, objmethod, objver,
+                            args, kwargs):
+        return self._conductor.object_class_action(context, objname, objmethod,
+                                                   objver, args, kwargs)
+
+    def object_backport(self, context, objinst, target_version):
+        return self._conductor.object_backport(context, objinst,
+                                               target_version)
+
+
 class MagnumObjectSerializer(ovoo_base.VersionedObjectSerializer):
     # Base class to use for object hydration
     OBJ_BASE_CLASS = MagnumObject

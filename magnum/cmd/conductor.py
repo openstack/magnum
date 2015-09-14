@@ -30,6 +30,7 @@ from magnum.conductor.handlers import bay_conductor
 from magnum.conductor.handlers import ca_conductor
 from magnum.conductor.handlers import conductor_listener
 from magnum.conductor.handlers import docker_conductor
+from magnum.conductor.handlers import indirection_api
 from magnum.conductor.handlers import k8s_conductor
 from magnum.conductor.handlers import x509keypair_conductor
 from magnum.i18n import _LE
@@ -52,6 +53,7 @@ def main():
 
     conductor_id = short_id.generate_id()
     endpoints = [
+        indirection_api.Handler(),
         docker_conductor.Handler(),
         k8s_conductor.Handler(),
         bay_conductor.Handler(),

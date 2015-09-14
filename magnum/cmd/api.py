@@ -26,6 +26,7 @@ from oslo_reports import guru_meditation_report as gmr
 from magnum.api import app as api_app
 from magnum.common import service
 from magnum.i18n import _LI
+from magnum.objects import base
 from magnum import version
 
 
@@ -36,6 +37,9 @@ def main():
     service.prepare_service(sys.argv)
 
     gmr.TextGuruMeditation.setup_autorun(version)
+
+    # Enable object backporting via the conductor
+    base.MagnumObject.indirection_api = base.MagnumObjectIndirectionAPI()
 
     app = api_app.setup_app()
 

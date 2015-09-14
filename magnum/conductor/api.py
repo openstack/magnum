@@ -153,6 +153,7 @@ class API(rpc_service.API):
                           command=command)
 
     # X509KeyPair Operations
+
     def x509keypair_create(self, x509keypair):
         return self._call('x509keypair_create', x509keypair=x509keypair)
 
@@ -169,6 +170,25 @@ class API(rpc_service.API):
 
     def get_ca_certificate(self, bay):
         return self._call('get_ca_certificate', bay=bay)
+
+    # Versioned Objects indirection API
+
+    def object_class_action(self, context, objname, objmethod, objver,
+                            args, kwargs):
+        "Indirection API callback"
+        return self._client.call(context, 'object_class_action',
+                                 objname=objname, objmethod=objmethod,
+                                 objver=objver, args=args, kwargs=kwargs)
+
+    def object_action(self, context, objinst, objmethod, args, kwargs):
+        "Indirection API callback"
+        return self._client.call(context, 'object_action', objinst=objinst,
+                                 objmethod=objmethod, args=args, kwargs=kwargs)
+
+    def object_backport(self, context, objinst, target_version):
+        "Indirection API callback"
+        return self._client.call(context, 'object_backport', objinst=objinst,
+                                 target_version=target_version)
 
 
 class ListenerAPI(rpc_service.API):
