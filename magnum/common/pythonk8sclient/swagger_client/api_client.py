@@ -17,6 +17,7 @@ Copyright 2015 SmartBear Software
 """
 
 from __future__ import absolute_import
+import __builtin__
 from . import models
 from .rest import RESTClient
 from .rest import ApiException
@@ -257,12 +258,15 @@ class ApiClient(object):
 
             # convert str to class
             # for native types
-            if klass in ['int', 'float', 'str', 'bool',
-                         "date", 'datetime', "object"]:
-                klass = eval(klass)
+            if klass in ['int', 'float', 'str', 'bool', 'object']:
+                klass = getattr(__builtin__, klass)
+            elif klass == 'date':
+                klass = date
+            elif klass == 'datetime':
+                klass = datetime
             # for model types
             else:
-                klass = eval('models.' + klass)
+                klass = getattr(models, klass)
 
         if klass in [int, float, str, bool]:
             return self.__deserialize_primitive(data, klass)
