@@ -52,17 +52,21 @@ class API(rpc_service.API):
     def service_create(self, service):
         return self._call('service_create', service=service)
 
-    def service_update(self, service):
-        return self._call('service_update', service=service)
+    def service_update(self, service_ident, bay_ident, manifest):
+        return self._call('service_update', service_ident=service_ident,
+                          bay_ident=bay_ident, manifest=manifest)
 
-    def service_list(self, context, limit, marker, sort_key, sort_dir):
-        return objects.Service.list(context, limit, marker, sort_key, sort_dir)
+    def service_list(self, context, bay_ident):
+        return self._call('service_list', bay_ident=bay_ident)
 
-    def service_delete(self, uuid):
-        return self._call('service_delete', uuid=uuid)
+    def service_delete(self, service_ident, bay_ident):
+        return self._call('service_delete',
+                          service_ident=service_ident,
+                          bay_ident=bay_ident)
 
-    def service_show(self, context, uuid):
-        return objects.Service.get_by_uuid(context, uuid)
+    def service_show(self, context, service_ident, bay_ident):
+        return self._call('service_show', service_ident=service_ident,
+                          bay_ident=bay_ident)
 
     # Pod Operations
 

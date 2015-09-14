@@ -155,25 +155,34 @@ class TestK8sConductor(base.TestCase):
                     name=mock_pod.name, body={}, namespace='default'))
             mock_pod.destroy.assert_called_once_with(self.context)
 
-    def test_service_create_with_success(self):
-        expected_service = self.mock_service()
-        expected_service.create = mock.MagicMock()
+    @patch('magnum.conductor.k8s_api.create_k8s_api')
+    @patch('ast.literal_eval')
+    def test_service_create_with_success(self, mock_ast, mock_kube_api):
+        fake_service = mock.MagicMock()
+        fake_service.name = 'test-name'
+
+        expected_service = mock.MagicMock()
+        expected_service.bay_uuid = 'test-bay-uuid'
+        expected_service.name = 'test-name'
+        expected_service.uuid = 'test-uuid'
         manifest = {"key": "value"}
         expected_service.manifest = '{"key": "value"}'
+        mock_ast.return_value = {}
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.k8s_api.create_k8s_api_service') as \
+                mock_kube_api:
             self.kube_handler.service_create(self.context, expected_service)
             (mock_kube_api.return_value.create_namespaced_service
                 .assert_called_once_with(body=manifest, namespace='default'))
-            expected_service.create.assert_called_once_with(self.context)
 
     def test_service_create_with_failure(self):
-        expected_service = self.mock_service()
+        expected_service = mock.MagicMock()
         expected_service.create = mock.MagicMock()
         manifest = {"key": "value"}
         expected_service.manifest = '{"key": "value"}'
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.k8s_api.create_k8s_api_service') as \
+                mock_kube_api:
             err = rest.ApiException(status=404)
             (mock_kube_api.return_value.create_namespaced_service
                 .side_effect) = err
@@ -183,49 +192,60 @@ class TestK8sConductor(base.TestCase):
                               self.context, expected_service)
             (mock_kube_api.return_value.create_namespaced_service
                 .assert_called_once_with(body=manifest, namespace='default'))
-            self.assertFalse(expected_service.create.called)
 
     @patch('magnum.conductor.utils.object_has_stack')
-    @patch('magnum.objects.Service.get_by_uuid')
+    @patch('magnum.objects.Service.get_by_name')
+    @patch('magnum.objects.Bay.get_by_name')
     def test_service_delete_with_success(
-            self,
-            mock_service_get_by_uuid,
+            self, mock_bay_get_by_name,
+            mock_service_get_by_name,
             mock_object_has_stack):
+        mock_bay = mock.MagicMock()
+        mock_bay_get_by_name.return_value = mock_bay
+
         mock_service = mock.MagicMock()
         mock_service.name = 'test-service'
         mock_service.uuid = 'test-uuid'
-        mock_service_get_by_uuid.return_value = mock_service
+        mock_service.bay_uuid = 'test-bay-uuid'
+        mock_service_get_by_name.return_value = mock_service
 
         mock_object_has_stack.return_value = True
-        with patch('magnum.conductor.k8s_api.create_k8s_api') as mock_kube_api:
-            self.kube_handler.service_delete(self.context, mock_service.uuid)
-
+        with patch('magnum.conductor.k8s_api.create_k8s_api_service') as \
+                mock_kube_api:
+            self.kube_handler.service_delete(self.context,
+                                             mock_service.name,
+                                             mock_service.bay_uuid)
             (mock_kube_api.return_value.delete_namespaced_service
                 .assert_called_once_with(
                     name=mock_service.name, namespace='default'))
-            mock_service.destroy.assert_called_once_with(self.context)
 
     @patch('magnum.conductor.utils.object_has_stack')
     @patch('magnum.objects.Service.get_by_uuid')
+    @patch('magnum.objects.Bay.get_by_name')
     def test_service_delete_with_failure(
-            self,
+            self, mock_bay_get_by_name,
             mock_service_get_by_uuid,
             mock_object_has_stack):
+        mock_bay = mock.MagicMock()
+        mock_bay_get_by_name.return_value = mock_bay
+
         mock_service = mock.MagicMock()
         mock_service.name = 'test-service'
         mock_service.uuid = 'test-uuid'
+        mock_service.bay_uuid = 'test-bay-uuid'
         mock_service_get_by_uuid.return_value = mock_service
 
         mock_object_has_stack.return_value = True
-        with patch('magnum.conductor.k8s_api.create_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.k8s_api.create_k8s_api_service') as \
+                mock_kube_api:
             err = rest.ApiException(status=500)
             (mock_kube_api.return_value.delete_namespaced_service
                 .side_effect) = err
 
             self.assertRaises(exception.KubernetesAPIFailed,
                               self.kube_handler.service_delete,
-                              self.context, mock_service.uuid)
-
+                              self.context, mock_service.name,
+                              mock_service.bay_uuid)
             (mock_kube_api.return_value.delete_namespaced_service
                 .assert_called_once_with(
                     name=mock_service.name, namespace='default'))
@@ -233,27 +253,33 @@ class TestK8sConductor(base.TestCase):
 
     @patch('magnum.conductor.utils.object_has_stack')
     @patch('magnum.objects.Service.get_by_uuid')
+    @patch('magnum.objects.Bay.get_by_name')
     def test_service_delete_succeeds_when_not_found(
-            self,
+            self, mock_bay_get_by_name,
             mock_service_get_by_uuid,
             mock_object_has_stack):
+        mock_bay = mock.MagicMock()
+        mock_bay_get_by_name.return_value = mock_bay
+
         mock_service = mock.MagicMock()
         mock_service.name = 'test-service'
         mock_service.uuid = 'test-uuid'
+        mock_service.bay_uuid = 'test-bay-uuid'
         mock_service_get_by_uuid.return_value = mock_service
 
         mock_object_has_stack.return_value = True
-        with patch('magnum.conductor.k8s_api.create_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.k8s_api.create_k8s_api_service') as \
+                mock_kube_api:
             err = rest.ApiException(status=404)
             (mock_kube_api.return_value.delete_namespaced_service
                 .side_effect) = err
 
-            self.kube_handler.service_delete(self.context, mock_service.uuid)
-
+            self.kube_handler.service_delete(self.context,
+                                             mock_service.name,
+                                             mock_service.bay_uuid)
             (mock_kube_api.return_value.delete_namespaced_service
                 .assert_called_once_with(
                     name=mock_service.name, namespace='default'))
-            mock_service.destroy.assert_called_once_with(self.context)
 
     @patch('ast.literal_eval')
     def test_rc_create_with_success(self, mock_ast):
@@ -447,44 +473,72 @@ class TestK8sConductor(base.TestCase):
                                          name=name_rc,
                                          namespace='default'))
 
-    def test_service_update_with_success(self):
-        expected_service = self.mock_service()
+    @patch('magnum.objects.Service.get_by_name')
+    @patch('magnum.objects.Service.get_by_uuid')
+    @patch('magnum.objects.Bay.get_by_name')
+    @patch('ast.literal_eval')
+    def test_service_update_with_success(self, mock_ast,
+                                         mock_bay_get_by_name,
+                                         mock_service_get_by_uuid,
+                                         mock_service_get_by_name):
+        mock_bay = mock.MagicMock()
+        mock_bay_get_by_name.return_value = mock_bay
+
+        expected_service = mock.MagicMock()
         expected_service.uuid = 'test-uuid'
         expected_service.name = 'test-name'
-        expected_service.refresh = mock.MagicMock()
-        expected_service.save = mock.MagicMock()
-        manifest = {"key": "value"}
+        expected_service.bay_uuid = 'test-bay-uuid'
         expected_service.manifest = '{"key": "value"}'
+        mock_ast.return_value = {}
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api') as mock_kube_api:
-            self.kube_handler.service_update(self.context, expected_service)
+        mock_service_get_by_name.return_value = expected_service
+        mock_service_get_by_uuid.return_value = expected_service
+        service_name = expected_service.name
+
+        with patch('magnum.conductor.k8s_api.create_k8s_api_service') as \
+                mock_kube_api:
+            self.kube_handler.service_update(self.context,
+                                             expected_service.name,
+                                             expected_service.bay_uuid,
+                                             expected_service.manifest)
             (mock_kube_api.return_value.replace_namespaced_service
-                .assert_called_once_with(
-                    body=manifest, name=expected_service.name,
-                    namespace='default'))
-            expected_service.refresh.assert_called_once_with(self.context)
-            expected_service.save.assert_called_once_with()
+                .assert_called_once_with(body=expected_service.manifest,
+                                         name=service_name,
+                                         namespace='default'))
 
-    def test_service_update_with_failure(self):
-        expected_service = self.mock_service()
+    @patch('magnum.objects.Service.get_by_name')
+    @patch('magnum.objects.Service.get_by_uuid')
+    @patch('magnum.objects.Bay.get_by_name')
+    def test_service_update_with_failure(self, mock_bay_get_by_name,
+                                         mock_service_get_by_uuid,
+                                         mock_service_get_by_name):
+        mock_bay = mock.MagicMock()
+        mock_bay_get_by_name.return_value = mock_bay
+
+        expected_service = mock.MagicMock()
         expected_service.uuid = 'test-uuid'
         expected_service.name = 'test-name'
-        expected_service.refresh = mock.MagicMock()
-        manifest = {"key": "value"}
+        expected_service.bay_uuid = 'test-bay-uuid'
         expected_service.manifest = '{"key": "value"}'
-        with patch('magnum.conductor.k8s_api.create_k8s_api') as mock_kube_api:
+        mock_service_get_by_uuid.return_value = expected_service
+        mock_service_get_by_name.return_value = expected_service
+        service_name = expected_service.name
+
+        with patch('magnum.conductor.k8s_api.create_k8s_api_service') as \
+                mock_kube_api:
             err = rest.ApiException(status=404)
             (mock_kube_api.return_value.replace_namespaced_service
                 .side_effect) = err
 
             self.assertRaises(exception.KubernetesAPIFailed,
                               self.kube_handler.service_update,
-                              self.context, expected_service)
+                              self.context, expected_service.name,
+                              expected_service.bay_uuid,
+                              expected_service.manifest)
             (mock_kube_api.return_value.replace_namespaced_service
-                .assert_called_once_with(
-                    body=manifest, name=expected_service.name,
-                    namespace='default'))
-            self.assertFalse(expected_service.refresh.called)
+                .assert_called_once_with(body=expected_service.manifest,
+                                         name=service_name,
+                                         namespace='default'))
 
     def test_pod_update_with_success(self):
         expected_pod = self.mock_pod()
