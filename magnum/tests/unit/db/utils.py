@@ -50,6 +50,7 @@ def get_test_baymodel(**kw):
         'http_proxy': kw.get('http_proxy', 'fake_http_proxy'),
         'https_proxy': kw.get('https_proxy', 'fake_https_proxy'),
         'no_proxy': kw.get('no_proxy', 'fake_no_proxy'),
+        'registry_enabled': kw.get('registry_enabled', False)
     }
 
 

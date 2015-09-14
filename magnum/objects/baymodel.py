@@ -25,7 +25,8 @@ from magnum.objects import base
 class BayModel(base.MagnumPersistentObject, base.MagnumObject,
                base.MagnumObjectDictCompat):
     # Version 1.0: Initial version
-    VERSION = '1.0'
+    # Version 1.1: Add 'registry_enabled' field
+    VERSION = '1.1'
 
     dbapi = dbapi.get_instance()
 
@@ -50,6 +51,7 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
         'http_proxy': fields.StringField(nullable=True),
         'https_proxy': fields.StringField(nullable=True),
         'no_proxy': fields.StringField(nullable=True),
+        'registry_enabled': fields.BooleanField(default=False)
     }
 
     @staticmethod
