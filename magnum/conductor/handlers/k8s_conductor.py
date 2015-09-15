@@ -221,56 +221,155 @@ class Handler(object):
     # Pod Operations
     def pod_create(self, context, pod):
         LOG.debug("pod_create")
-        self.k8s_api = k8s.create_k8s_api(context, pod)
+        self.k8s_api = k8s.create_k8s_api_pod(context, pod.bay_uuid)
         manifest = k8s_manifest.parse(pod.manifest)
         try:
             resp = self.k8s_api.create_namespaced_pod(body=manifest,
                                                       namespace='default')
         except rest.ApiException as err:
             pod.status = 'failed'
-            if err.status != 409:
-                pod.create(context)
             raise exception.KubernetesAPIFailed(err=err)
-        pod.status = resp.status.phase
-        pod.host = resp.spec.node_name
-        # call the pod object to persist in db
-        # TODO(yuanying): parse pod file and,
-        # - extract pod name and set it
-        # - extract pod labels and set it
-        # When do we get pod labels and name?
-        pod.create(context)
+
+        if resp is None:
+            raise exception.PodCreationFailed(bay_uuid=pod.bay_uuid)
+
+        pod['uuid'] = resp.metadata.uid
+        pod['name'] = resp.metadata.name
+        pod['images'] = [c.image for c in resp.spec.containers]
+        pod['labels'] = ast.literal_eval(resp.metadata.labels)
+        pod['status'] = resp.status.phase
+        pod['host'] = resp.spec.node_name
+
         return pod
 
-    def pod_update(self, context, pod):
-        LOG.debug("pod_update %s", pod.uuid)
-        self.k8s_api = k8s.create_k8s_api(context, pod)
-        manifest = k8s_manifest.parse(pod.manifest)
+    def pod_update(self, context, pod_ident, bay_ident, manifest):
+        LOG.debug("pod_update %s", pod_ident)
+        # Since bay identifier is specified verify whether its a UUID
+        # or Name. If name is specified as bay identifier need to extract
+        # the bay uuid since its needed to get the k8s_api object.
+        if not utils.is_uuid_like(bay_ident):
+            bay = objects.Bay.get_by_name(context, bay_ident)
+            bay_ident = bay.uuid
+
+        bay_uuid = bay_ident
+        self.k8s_api = k8s.create_k8s_api_pod(context, bay_uuid)
+        if utils.is_uuid_like(pod_ident):
+            pod = objects.Pod.get_by_uuid(context, pod_ident,
+                                          bay_uuid, self.k8s_api)
+        else:
+            pod = objects.Pod.get_by_name(context, pod_ident,
+                                          bay_uuid, self.k8s_api)
+        pod_ident = pod.name
         try:
-            self.k8s_api.replace_namespaced_pod(name=str(pod.name),
-                                                body=manifest,
-                                                namespace='default')
+            resp = self.k8s_api.replace_namespaced_pod(name=str(pod_ident),
+                                                       body=manifest,
+                                                       namespace='default')
         except rest.ApiException as err:
             raise exception.KubernetesAPIFailed(err=err)
-        # call the pod object to persist in db
-        pod.refresh(context)
-        pod.save()
+
+        if resp is None:
+            raise exception.PodNotFound(pod=pod.uuid)
+
+        pod['uuid'] = resp.metadata.uid
+        pod['name'] = resp.metadata.name
+        pod['project_id'] = context.project_id
+        pod['user_id'] = context.user_id
+        pod['bay_uuid'] = bay_uuid
+        pod['images'] = [c.image for c in resp.spec.containers]
+        if not resp.metadata.labels:
+            pod['labels'] = {}
+        else:
+            pod['labels'] = ast.literal_eval(resp.metadata.labels)
+        pod['status'] = resp.status.phase
+        pod['host'] = resp.spec.node_name
+
         return pod
 
-    def pod_delete(self, context, uuid):
-        LOG.debug("pod_delete %s", uuid)
-        pod = objects.Pod.get_by_uuid(context, uuid)
-        self.k8s_api = k8s.create_k8s_api(context, pod)
-        if conductor_utils.object_has_stack(context, pod.bay_uuid):
+    def pod_delete(self, context, pod_ident, bay_ident):
+        LOG.debug("pod_delete %s", pod_ident)
+        # Since bay identifier is specified verify whether its a UUID
+        # or Name. If name is specified as bay identifier need to extract
+        # the bay uuid since its needed to get the k8s_api object.
+        if not utils.is_uuid_like(bay_ident):
+            bay = objects.Bay.get_by_name(context, bay_ident)
+            bay_ident = bay.uuid
+
+        bay_uuid = bay_ident
+        self.k8s_api = k8s.create_k8s_api_pod(context, bay_uuid)
+        if utils.is_uuid_like(pod_ident):
+            pod = objects.Pod.get_by_uuid(context, pod_ident,
+                                          bay_uuid, self.k8s_api)
+            pod_name = pod.name
+        else:
+            pod_name = pod_ident
+        if conductor_utils.object_has_stack(context, bay_uuid):
             try:
-                self.k8s_api.delete_namespaced_pod(name=str(pod.name), body={},
+                self.k8s_api.delete_namespaced_pod(name=str(pod_name), body={},
                                                    namespace='default')
             except rest.ApiException as err:
                 if err.status == 404:
                     pass
                 else:
                     raise exception.KubernetesAPIFailed(err=err)
-        # call the pod object to persist in db
-        pod.destroy(context)
+
+    def pod_show(self, context, pod_ident, bay_ident):
+        LOG.debug("pod_show %s", pod_ident)
+        # Since bay identifier is specified verify whether its a UUID
+        # or Name. If name is specified as bay identifier need to extract
+        # the bay uuid since its needed to get the k8s_api object.
+        if not utils.is_uuid_like(bay_ident):
+            bay = objects.Bay.get_by_name(context, bay_ident)
+            bay_ident = bay.uuid
+
+        bay_uuid = bay_ident
+        self.k8s_api = k8s.create_k8s_api_pod(context, bay_uuid)
+        if utils.is_uuid_like(pod_ident):
+            pod = objects.Pod.get_by_uuid(context, pod_ident,
+                                          bay_uuid, self.k8s_api)
+        else:
+            pod = objects.Pod.get_by_name(context, pod_ident,
+                                          bay_uuid, self.k8s_api)
+
+        return pod
+
+    def pod_list(self, context, bay_ident):
+        # Since bay identifier is specified verify whether its a UUID
+        # or Name. If name is specified as bay identifier need to extract
+        # the bay uuid since its needed to get the k8s_api object.
+        if not utils.is_uuid_like(bay_ident):
+            bay = objects.Bay.get_by_name(context, bay_ident)
+            bay_ident = bay.uuid
+
+        bay_uuid = bay_ident
+        self.k8s_api = k8s.create_k8s_api_pod(context, bay_uuid)
+        try:
+            resp = self.k8s_api.list_namespaced_pod(namespace='default')
+        except rest.ApiException as err:
+            raise exception.KubernetesAPIFailed(err=err)
+
+        if resp is None:
+            raise exception.PodListNotFound(bay_uuid=bay_uuid)
+
+        pods = []
+        for pod_entry in resp.items:
+            pod = {}
+            pod['uuid'] = pod_entry.metadata.uid
+            pod['name'] = pod_entry.metadata.name
+            pod['project_id'] = context.project_id
+            pod['user_id'] = context.user_id
+            pod['bay_uuid'] = bay_uuid
+            pod['images'] = [c.image for c in pod_entry.spec.containers]
+            if not pod_entry.metadata.labels:
+                pod['labels'] = {}
+            else:
+                pod['labels'] = ast.literal_eval(pod_entry.metadata.labels)
+            pod['status'] = pod_entry.status.phase
+            pod['host'] = pod_entry.spec.node_name
+
+            pod_obj = objects.Pod(context, **pod)
+            pods.append(pod_obj)
+
+        return pods
 
     # Replication Controller Operations
     def rc_create(self, context, rc):

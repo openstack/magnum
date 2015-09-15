@@ -404,6 +404,14 @@ class PodAlreadyExists(Conflict):
     message = _("A node with UUID %(uuid)s already exists.")
 
 
+class PodListNotFound(ResourceNotFound):
+    message = _("Pod list could not be found for Bay %(bay_uuid)s.")
+
+
+class PodCreationFailed(Invalid):
+    message = _("Pod creation failed in Bay %(bay_uuid)s.")
+
+
 class ReplicationControllerNotFound(ResourceNotFound):
     message = _("ReplicationController %(rc)s could not be found.")
 

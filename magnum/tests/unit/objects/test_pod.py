@@ -13,13 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import mock
-from testtools.matchers import HasLength
-
-from magnum.common import utils as magnum_utils
 from magnum import objects
 from magnum.tests.unit.db import base
 from magnum.tests.unit.db import utils
+
+import mock
 
 
 class TestPodObject(base.DbTestCase):
@@ -28,94 +26,75 @@ class TestPodObject(base.DbTestCase):
         super(TestPodObject, self).setUp()
         self.fake_pod = utils.get_test_pod()
 
-    def test_get_by_id(self):
-        pod_id = self.fake_pod['id']
-        with mock.patch.object(self.dbapi, 'get_pod_by_id',
-                               autospec=True) as mock_get_pod:
-            mock_get_pod.return_value = self.fake_pod
-            pod = objects.Pod.get_by_id(self.context, pod_id)
-            mock_get_pod.assert_called_once_with(self.context, pod_id)
-            self.assertEqual(self.context, pod._context)
-
-    def test_get_by_uuid(self):
+    @mock.patch('magnum.conductor.k8s_api.create_k8s_api')
+    @mock.patch('ast.literal_eval')
+    def test_get_by_uuid(self, mock_ast, mock_kube_api):
         uuid = self.fake_pod['uuid']
-        with mock.patch.object(self.dbapi, 'get_pod_by_uuid',
-                               autospec=True) as mock_get_pod:
-            mock_get_pod.return_value = self.fake_pod
-            pod = objects.Pod.get_by_uuid(self.context, uuid)
-            mock_get_pod.assert_called_once_with(self.context, uuid)
-            self.assertEqual(self.context, pod._context)
+        bay_uuid = self.fake_pod['bay_uuid']
+        mock_ast.return_value = {}
 
-    def test_get_by_name(self):
+        k8s_api_mock = mock.MagicMock()
+        mock_kube_api.return_value = k8s_api_mock
+
+        fake_obj = mock.MagicMock()
+
+        items = [
+            {
+                'metadata': {
+                    'uid': '10a47dd1-4874-4298-91cf-eff046dbdb8d',
+                    'name': 'fake-name',
+                    'labels': {}
+                },
+                'spec': {
+                    'node_name': 'fake-node',
+                    'containers': [
+                        {
+                            'image': 'fake-image'
+                        }
+                    ]
+                },
+                'status': {
+                    'phase': 'CREATED'
+                }
+            }
+        ]
+
+        fake_obj.items = items
+        fake_obj.items[0] = mock.MagicMock()
+        fake_obj.items[0].metadata = mock.MagicMock()
+        fake_obj.items[0].metadata.uid = '10a47dd1-4874-4298-91cf-eff046dbdb8d'
+        fake_obj.items[0].metadata.name = 'fake-name'
+        fake_obj.items[0].spec = mock.MagicMock()
+        fake_obj.items[0].spec.node_name = 'fake-host'
+        fake_obj.items[0].status = mock.MagicMock()
+        fake_obj.items[0].status.phase = 'fake-status'
+        k8s_api_mock.list_namespaced_pod.return_value = fake_obj
+        objects.Pod.get_by_uuid(self.context,
+                                uuid, bay_uuid,
+                                k8s_api_mock)
+        (k8s_api_mock.list_namespaced_pod.assert_called_once_with(
+            namespace='default'))
+
+    @mock.patch('magnum.conductor.k8s_api.create_k8s_api')
+    @mock.patch('ast.literal_eval')
+    def test_get_by_name(self, mock_ast, mock_kube_api):
         name = self.fake_pod['name']
-        with mock.patch.object(self.dbapi, 'get_pod_by_name',
-                               autospec=True) as mock_get_pod:
-            mock_get_pod.return_value = self.fake_pod
-            pod = objects.Pod.get_by_name(self.context, name)
-            mock_get_pod.assert_called_once_with(name)
-            self.assertEqual(self.context, pod._context)
+        bay_uuid = self.fake_pod['bay_uuid']
 
-    def test_list(self):
-        with mock.patch.object(self.dbapi, 'get_pod_list',
-                               autospec=True) as mock_get_list:
-            mock_get_list.return_value = [self.fake_pod]
-            pods = objects.Pod.list(self.context)
-            self.assertEqual(1, mock_get_list.call_count)
-            self.assertThat(pods, HasLength(1))
-            self.assertIsInstance(pods[0], objects.Pod)
-            self.assertEqual(self.context, pods[0]._context)
-
-    def test_create(self):
-        with mock.patch.object(self.dbapi, 'create_pod',
-                               autospec=True) as mock_create_pod:
-            mock_create_pod.return_value = self.fake_pod
-            pod = objects.Pod(self.context, **self.fake_pod)
-            pod.create()
-            mock_create_pod.assert_called_once_with(self.fake_pod)
-            self.assertEqual(self.context, pod._context)
-
-    def test_destroy(self):
-        uuid = self.fake_pod['uuid']
-        with mock.patch.object(self.dbapi, 'get_pod_by_uuid',
-                               autospec=True) as mock_get_pod:
-            mock_get_pod.return_value = self.fake_pod
-            with mock.patch.object(self.dbapi, 'destroy_pod',
-                                   autospec=True) as mock_destroy_pod:
-                pod = objects.Pod.get_by_uuid(self.context, uuid)
-                pod.destroy()
-                mock_get_pod.assert_called_once_with(self.context, uuid)
-                mock_destroy_pod.assert_called_once_with(uuid)
-                self.assertEqual(self.context, pod._context)
-
-    def test_save(self):
-        uuid = self.fake_pod['uuid']
-        with mock.patch.object(self.dbapi, 'get_pod_by_uuid',
-                               autospec=True) as mock_get_pod:
-            mock_get_pod.return_value = self.fake_pod
-            with mock.patch.object(self.dbapi, 'update_pod',
-                                   autospec=True) as mock_update_pod:
-                pod = objects.Pod.get_by_uuid(self.context, uuid)
-                pod.desc = 'test-pod'
-                pod.save()
-
-                mock_get_pod.assert_called_once_with(self.context, uuid)
-                mock_update_pod.assert_called_once_with(
-                    uuid, {'desc': 'test-pod'})
-                self.assertEqual(self.context, pod._context)
-
-    def test_refresh(self):
-        uuid = self.fake_pod['uuid']
-        new_uuid = magnum_utils.generate_uuid()
-        returns = [dict(self.fake_pod, uuid=uuid),
-                   dict(self.fake_pod, uuid=new_uuid)]
-        expected = [mock.call(self.context, uuid),
-                    mock.call(self.context, uuid)]
-        with mock.patch.object(self.dbapi, 'get_pod_by_uuid',
-                               side_effect=returns,
-                               autospec=True) as mock_get_pod:
-            pod = objects.Pod.get_by_uuid(self.context, uuid)
-            self.assertEqual(uuid, pod.uuid)
-            pod.refresh()
-            self.assertEqual(new_uuid, pod.uuid)
-            self.assertEqual(expected, mock_get_pod.call_args_list)
-            self.assertEqual(self.context, pod._context)
+        mock_ast.return_value = {}
+        k8s_api_mock = mock.MagicMock()
+        mock_kube_api.return_value = k8s_api_mock
+        fake_pod = mock.MagicMock()
+        fake_pod.metadata.uid = 'fake-uuid'
+        fake_pod.metadata.name = 'fake-name'
+        fake_pod.spec.containers[0].image = ['fake-image']
+        fake_pod.metadata.labels = {}
+        fake_pod.status.phase = 'fake-status'
+        fake_pod.spec.node_name = 'fake-host'
+        k8s_api_mock.read_namespaced_pod.return_value = fake_pod
+        objects.Pod.get_by_name(self.context,
+                                name, bay_uuid,
+                                k8s_api_mock)
+        (k8s_api_mock.read_namespaced_pod.assert_called_once_with(
+            name=name,
+            namespace='default'))

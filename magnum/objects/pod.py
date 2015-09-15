@@ -12,8 +12,12 @@
 
 from oslo_versionedobjects import fields
 
+from magnum.common import exception
+from magnum.common.pythonk8sclient.swagger_client import rest
 from magnum.db import api as dbapi
 from magnum.objects import base
+
+import ast
 
 
 @base.MagnumObjectRegistry.register
@@ -41,149 +45,78 @@ class Pod(base.MagnumPersistentObject, base.MagnumObject,
         'host': fields.StringField(nullable=True),
     }
 
-    @staticmethod
-    def _from_db_object(pod, db_pod):
-        """Converts a database entity to a formal object."""
-        for field in pod.fields:
-            # ignore manifest_url as it was used for create pod
-            if field == 'manifest_url':
-                continue
-            if field == 'manifest':
-                continue
-            pod[field] = db_pod[field]
-
-        pod.obj_reset_changes()
-        return pod
-
-    @staticmethod
-    def _from_db_object_list(db_objects, cls, context):
-        """Converts a list of database entities to a list of formal objects."""
-        return [Pod._from_db_object(cls(context), obj) for obj in db_objects]
-
     @base.remotable_classmethod
-    def get_by_id(cls, context, pod_id):
-        """Find a pod based on its integer id and return a Pod object.
+    def get_by_uuid(cls, context, uuid, bay_uuid, k8s_api):
+        """Find a pod based on pod uuid and the uuid for a bay.
 
-        :param pod_id: the id of a pod.
         :param context: Security context
-        :returns: a :class:`Pod` object.
-        """
-        db_pod = cls.dbapi.get_pod_by_id(context, pod_id)
-        pod = Pod._from_db_object(cls(context), db_pod)
-        return pod
-
-    @base.remotable_classmethod
-    def get_by_uuid(cls, context, uuid):
-        """Find a pod based on uuid and return a :class:`Pod` object.
-
         :param uuid: the uuid of a pod.
-        :param context: Security context
+        :param bay_uuid: the UUID of the Bay
+        :param k8s_api: k8s API object
+
         :returns: a :class:`Pod` object.
         """
-        db_pod = cls.dbapi.get_pod_by_uuid(context, uuid)
-        pod = Pod._from_db_object(cls(context), db_pod)
-        return pod
+        try:
+            resp = k8s_api.list_namespaced_pod(namespace='default')
+        except rest.ApiException as err:
+            raise exception.KubernetesAPIFailed(err=err)
+
+        if resp is None:
+            raise exception.PodListNotFound(bay_uuid=bay_uuid)
+
+        pod = {}
+        for pod_entry in resp.items:
+            if pod_entry.metadata.uid == uuid:
+                pod['uuid'] = pod_entry.metadata.uid
+                pod['name'] = pod_entry.metadata.name
+                pod['project_id'] = context.project_id
+                pod['user_id'] = context.user_id
+                pod['bay_uuid'] = bay_uuid
+                pod['images'] = [c.image for c in pod_entry.spec.containers]
+                if not pod_entry.metadata.labels:
+                    pod['labels'] = {}
+                else:
+                    pod['labels'] = ast.literal_eval(pod_entry.metadata.labels)
+                pod['status'] = pod_entry.status.phase
+                pod['host'] = pod_entry.spec.node_name
+
+                pod_obj = Pod(context, **pod)
+                return pod_obj
+        raise exception.PodNotFound(pod=uuid)
 
     @base.remotable_classmethod
-    def get_by_name(cls, context, name):
-        """Find a pod based on pod name and return a :class:`Pod` object.
+    def get_by_name(cls, context, name, bay_uuid, k8s_api):
+        """Find a pod based on pod name and the uuid for a bay.
 
+        :param context: Security context
         :param name: the name of a pod.
-        :param context: Security context
+        :param bay_uuid: the UUID of the Bay
+        :param k8s_api: k8s API object
+
         :returns: a :class:`Pod` object.
         """
-        db_pod = cls.dbapi.get_pod_by_name(name)
-        pod = Pod._from_db_object(cls(context), db_pod)
-        return pod
+        try:
+            resp = k8s_api.read_namespaced_pod(name=name,
+                                               namespace='default')
+        except rest.ApiException as err:
+            raise exception.KubernetesAPIFailed(err=err)
 
-    @base.remotable_classmethod
-    def list(cls, context, limit=None, marker=None,
-             sort_key=None, sort_dir=None):
-        """Return a list of Pod objects.
+        if resp is None:
+            raise exception.PodNotFound(pod=name)
 
-        :param context: Security context.
-        :param limit: maximum number of resources to return in a single result.
-        :param marker: pagination marker for large data sets.
-        :param sort_key: column to sort results by.
-        :param sort_dir: direction to sort. "asc" or "desc".
-        :returns: a list of :class:`Pod` object.
+        pod = {}
+        pod['uuid'] = resp.metadata.uid
+        pod['name'] = resp.metadata.name
+        pod['project_id'] = context.project_id
+        pod['user_id'] = context.user_id
+        pod['bay_uuid'] = bay_uuid
+        pod['images'] = [c.image for c in resp.spec.containers]
+        if not resp.metadata.labels:
+            pod['labels'] = {}
+        else:
+            pod['labels'] = ast.literal_eval(resp.metadata.labels)
+        pod['status'] = resp.status.phase
+        pod['host'] = resp.spec.node_name
 
-        """
-        db_pods = cls.dbapi.get_pod_list(context, limit=limit,
-                                         marker=marker,
-                                         sort_key=sort_key,
-                                         sort_dir=sort_dir)
-        return Pod._from_db_object_list(db_pods, cls, context)
-
-    @base.remotable
-    def create(self, context=None):
-        """Create a Pod record in the DB.
-
-        :param context: Security context. NOTE: This should only
-                        be used internally by the indirection_api.
-                        Unfortunately, RPC requires context as the first
-                        argument, even though we don't use it.
-                        A context should be set when instantiating the
-                        object, e.g.: Pod(context)
-
-        """
-        values = self.obj_get_changes()
-        db_pod = self.dbapi.create_pod(values)
-        self._from_db_object(self, db_pod)
-
-    @base.remotable
-    def destroy(self, context=None):
-        """Delete the Pod from the DB.
-
-        :param context: Security context. NOTE: This should only
-                        be used internally by the indirection_api.
-                        Unfortunately, RPC requires context as the first
-                        argument, even though we don't use it.
-                        A context should be set when instantiating the
-                        object, e.g.: Pod(context)
-        """
-        self.dbapi.destroy_pod(self.uuid)
-        self.obj_reset_changes()
-
-    @base.remotable
-    def save(self, context=None):
-        """Save updates to this Pod.
-
-        Updates will be made column by column based on the result
-        of self.what_changed().
-
-        :param context: Security context. NOTE: This should only
-                        be used internally by the indirection_api.
-                        Unfortunately, RPC requires context as the first
-                        argument, even though we don't use it.
-                        A context should be set when instantiating the
-                        object, e.g.: Pod(context)
-        """
-        updates = self.obj_get_changes()
-        self.dbapi.update_pod(self.uuid, updates)
-
-        self.obj_reset_changes()
-
-    @base.remotable
-    def refresh(self, context=None):
-        """Loads updates for this Pod.
-
-        Loads a pod with the same uuid from the database and
-        checks for updated attributes. Updates are applied from
-        the loaded pod column by column, if there are any updates.
-
-        :param context: Security context. NOTE: This should only
-                        be used internally by the indirection_api.
-                        Unfortunately, RPC requires context as the first
-                        argument, even though we don't use it.
-                        A context should be set when instantiating the
-                        object, e.g.: Pod(context)
-        """
-        current = self.__class__.get_by_uuid(self._context, uuid=self.uuid)
-        for field in self.fields:
-            if field == 'manifest_url':
-                continue
-            if field == 'manifest':
-                continue
-            if self.obj_attr_is_set(field) and self[field] != current[field]:
-                self[field] = current[field]
+        pod_obj = Pod(context, **pod)
+        return pod_obj

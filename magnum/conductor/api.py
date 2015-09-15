@@ -73,17 +73,20 @@ class API(rpc_service.API):
     def pod_create(self, pod):
         return self._call('pod_create', pod=pod)
 
-    def pod_list(self, context, limit, marker, sort_key, sort_dir):
-        return objects.Pod.list(context, limit, marker, sort_key, sort_dir)
+    def pod_list(self, context, bay_ident):
+        return self._call('pod_list', bay_ident=bay_ident)
 
-    def pod_update(self, pod):
-        return self._call('pod_update', pod=pod)
+    def pod_update(self, pod_ident, bay_ident, manifest):
+        return self._call('pod_update', pod_ident=pod_ident,
+                          bay_ident=bay_ident, manifest=manifest)
 
-    def pod_delete(self, uuid):
-        return self._call('pod_delete', uuid=uuid)
+    def pod_delete(self, pod_ident, bay_ident):
+        return self._call('pod_delete', pod_ident=pod_ident,
+                          bay_ident=bay_ident)
 
-    def pod_show(self, context, uuid):
-        return objects.Pod.get_by_uuid(context, uuid)
+    def pod_show(self, context, pod_ident, bay_ident):
+        return self._call('pod_show', pod_ident=pod_ident,
+                          bay_ident=bay_ident)
 
     # ReplicationController Operations
 

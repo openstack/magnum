@@ -95,7 +95,7 @@ def create_test_pod(context, **kw):
     attributes.
     """
     pod = get_test_pod(context, **kw)
-    pod.create()
+    pod.manifest = '{"foo": "bar"}'
     return pod
 
 

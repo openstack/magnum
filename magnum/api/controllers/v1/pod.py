@@ -180,15 +180,9 @@ class PodsController(rest.RestController):
 
         limit = api_utils.validate_limit(limit)
         sort_dir = api_utils.validate_sort_dir(sort_dir)
+        context = pecan.request.context
 
-        marker_obj = None
-        if marker:
-            marker_obj = objects.Pod.get_by_uuid(pecan.request.context,
-                                                 marker)
-
-        pods = pecan.request.rpcapi.pod_list(pecan.request.context, limit,
-                                             marker_obj, sort_key=sort_key,
-                                             sort_dir=sort_dir)
+        pods = pecan.request.rpcapi.pod_list(context, bay_ident)
 
         return PodCollection.convert_with_links(pods, limit,
                                                 url=resource_url,
@@ -246,7 +240,8 @@ class PodsController(rest.RestController):
         :param pod_ident: UUID of a pod or logical name of the pod.
         :param bay_ident: UUID or logical name of the Bay.
         """
-        rpc_pod = api_utils.get_rpc_resource('Pod', pod_ident)
+        context = pecan.request.context
+        rpc_pod = pecan.request.rpcapi.pod_show(context, pod_ident, bay_ident)
 
         return Pod.convert_with_links(rpc_pod)
 
@@ -280,35 +275,18 @@ class PodsController(rest.RestController):
         :param bay_ident: UUID or logical name of the Bay.
         :param patch: a json PATCH document to apply to this pod.
         """
-        rpc_pod = api_utils.get_rpc_resource('Pod', pod_ident)
-        # Init manifest and manifest_url field because we don't store them
-        # in database.
-        rpc_pod['manifest'] = None
-        rpc_pod['manifest_url'] = None
+        pod_dict = {}
+        pod_dict['manifest'] = None
+        pod_dict['manifest_url'] = None
         try:
-            pod_dict = rpc_pod.as_dict()
             pod = Pod(**api_utils.apply_jsonpatch(pod_dict, patch))
             if pod.manifest or pod.manifest_url:
                 pod.parse_manifest()
         except api_utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)
 
-        # Update only the fields that have changed
-        for field in objects.Pod.fields:
-            try:
-                patch_val = getattr(pod, field)
-            except AttributeError:
-                # Ignore fields that aren't exposed in the API
-                continue
-            if patch_val == wtypes.Unset:
-                patch_val = None
-            if rpc_pod[field] != patch_val:
-                rpc_pod[field] = patch_val
-
-        if pod.manifest or pod.manifest_url:
-            pecan.request.rpcapi.pod_update(rpc_pod)
-        else:
-            rpc_pod.save()
+        rpc_pod = pecan.request.rpcapi.pod_update(pod_ident, bay_ident,
+                                                  pod.manifest)
         return Pod.convert_with_links(rpc_pod)
 
     @policy.enforce_wsgi("pod")
@@ -320,6 +298,4 @@ class PodsController(rest.RestController):
         :param pod_ident: UUID of a pod or logical name of the pod.
         :param bay_ident: UUID or logical name of the Bay.
         """
-        rpc_pod = api_utils.get_rpc_resource('Pod', pod_ident)
-
-        pecan.request.rpcapi.pod_delete(rpc_pod.uuid)
+        pecan.request.rpcapi.pod_delete(pod_ident, bay_ident)
