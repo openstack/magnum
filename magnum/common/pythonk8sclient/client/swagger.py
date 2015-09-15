@@ -74,7 +74,8 @@ class ApiClient(object):
     url = self.host + resourcePath
 
     mergedHeaderParams = self.defaultHeaders.copy()
-    mergedHeaderParams.update(headerParams)
+    if headerParams:
+        mergedHeaderParams.update(headerParams)
     headers = {}
     if mergedHeaderParams:
       for param, value in mergedHeaderParams.iteritems():
