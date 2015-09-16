@@ -126,9 +126,9 @@ def _generate_certificate(issuer_name, subject_name, extensions, ca_key=None,
         encryption_algorithm = serialization.NoEncryption()
 
     private_key = private_key.private_bytes(
-        encoding = serialization.Encoding.PEM,
-        format = serialization.PrivateFormat.PKCS8,
-        encryption_algorithm = encryption_algorithm
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=encryption_algorithm
     )
 
     keypairs = {
