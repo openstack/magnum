@@ -472,7 +472,7 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
         self.add_parameter('external_network',
                            baymodel_attr='external_network_id',
                            required=True)
-        self.add_output('swarm_manager',
+        self.add_output('swarm_master',
                         bay_attr='api_address')
         self.add_output('swarm_nodes_external',
                         bay_attr='node_addresses')
