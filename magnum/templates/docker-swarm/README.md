@@ -55,21 +55,21 @@ You must provide values for:
 
 ## Interacting with Swarm
 
-The Docker CLI interacts with the cluster through the swarm manager
+The Docker CLI interacts with the cluster through the swarm master
 listening on port 2376.
 
-You can get the ip address of the swarm manager using the `heat
+You can get the ip address of the swarm master using the `heat
 output-show` command:
 
-    $ heat output-show my-swarm-cluster swarm_manager
+    $ heat output-show my-swarm-cluster swarm_master
     "192.168.200.86"
 
-Provide the Docker CLI with the address for the swarm manager.
+Provide the Docker CLI with the address for the swarm master.
 
     $ docker -H tcp://192.168.200.86:2376 info
     Containers: 4
     Nodes: 3
-     swarm-manager: 10.0.0.1:2375
+     swarm-master: 10.0.0.1:2375
      swarm-node1: 10.0.0.2:2375
      swarm-node2: 10.0.0.3:2375
 
