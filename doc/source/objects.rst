@@ -18,12 +18,11 @@ Versioned Objects
 =================
 
 Magnum uses the `oslo.versionedobjects library
-<http://docs.openstack.org/developer/oslo.versionedobjects/index.html>`_
-to construct an object model that
-can be communicated via RPC. These objects have a version history and
-functionality to convert from one version to a previous version. This allows for
-2 different levels of the code to still pass objects to each other, as in the
-case of rolling upgrades.
+<http://docs.openstack.org/developer/oslo.versionedobjects/index.html>`_ to
+construct an object model that can be communicated via RPC. These objects have
+a version history and functionality to convert from one version to a previous
+version. This allows for 2 different levels of the code to still pass objects
+to each other, as in the case of rolling upgrades.
 
 Object Version Testing
 ----------------------
@@ -32,10 +31,9 @@ In order to ensure object versioning consistency is maintained,
 oslo.versionedobjects has a fixture to aid in testing object versioning.
 `oslo.versionedobjects.fixture.ObjectVersionChecker
 <http://docs.openstack.org/developer/oslo.versionedobjects/api/fixture.html#oslo_versionedobjects.fixture.ObjectVersionChecker>`_
-generates fingerprints of
-each object, which is a combination of the current version number of the object,
-along with a hash of the RPC-critical parts of the object (fields and remotable
-methods).
+generates fingerprints of each object, which is a combination of the current
+version number of the object, along with a hash of the RPC-critical parts of
+the object (fields and remotable methods).
 
 The tests hold a static mapping of the fingerprints of all objects. When an
 object is changed, the hash generated in the test will differ from that held in
@@ -71,16 +69,17 @@ saying what I changed in the new version::
         # Version 1.1: Added 'foo' field
         VERSION = '1.1'
 
-Now that I have updated the version, I will run the tests again and let the test
-tell me the fingerprint that I now need to put in the static tree::
+Now that I have updated the version, I will run the tests again and let the
+test tell me the fingerprint that I now need to put in the static tree::
 
     testtools.matchers._impl.MismatchError: !=:
     reference = {'Container': '1.0-e12affbba5f8a748882a3ae98aced282'}
     actual    = {'Container': '1.1-22b40e8eed0414561ca921906b189820'}
     : Fields or remotable methods in some objects have changed. Make sure the versions of the objects has been bumped, and update the hashes in the static fingerprints tree (object_data). For more information, read http://docs.openstack.org/developer/magnum/objects.html.
 
-I can now copy the new fingerprint needed (1.1-22b40e8eed0414561ca921906b189820),
-to the object_data map within magnum/tests/unit/objects/test_objects.py::
+I can now copy the new fingerprint needed
+(1.1-22b40e8eed0414561ca921906b189820), to the object_data map within
+magnum/tests/unit/objects/test_objects.py::
 
     object_data = {
         'Bay': '1.0-35edde13ad178e9419e7ea8b6d580bcd',

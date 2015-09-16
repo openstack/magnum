@@ -179,7 +179,7 @@ Proposed Changes
      flannel, weave, calico, midonet, netplugin, etc..
 
    Here is an example of creating a baymodel that uses Flannel as the
-   Libnetwork driver:
+   Libnetwork driver: ::
 
      magnum baymodel-create --name k8sbaymodel \
                             --image-id fedora-21-atomic-3 \
@@ -205,7 +205,7 @@ Proposed Changes
    named "labels" for supplying driver-specific configuration parameters.
    Labels consist of one or more arbitrary key/value pairs. Here is an
    example of using labels to change default settings of the Flannel
-   Libnetwork driver:
+   Libnetwork driver: ::
 
      magnum baymodel-create --name k8sbaymodel \
                             --image-id fedora-21-atomic-3 \
@@ -307,29 +307,29 @@ Data Model Impact
 
 This document adds the labels and libnetwork-driver attribute to the baymodel
 database table. A migration script will be provided to support the attribute
-being added.
+being added. ::
 
-+-------------------+-----------------+---------------------------------------------+
-|    Attribute      |     Type        |             Description                     |
-+===================+=================+=============================================+
-|     labels        | JSONEncodedDict | One or more arbitrary key/value pairs       |
-+-------------------+-----------------+---------------------------------------------+
-| libnetwork-driver |    string       | Container networking backend implementation |
-+-------------------+-----------------+---------------------------------------------+
+    +-------------------+-----------------+---------------------------------------------+
+    |    Attribute      |     Type        |             Description                     |
+    +===================+=================+=============================================+
+    |     labels        | JSONEncodedDict | One or more arbitrary key/value pairs       |
+    +-------------------+-----------------+---------------------------------------------+
+    | libnetwork-driver |    string       | Container networking backend implementation |
+    +-------------------+-----------------+---------------------------------------------+
 
 REST API Impact
 ---------------
 
 This document adds the labels and libnetwork-driver attribute to the BayModel
-API class.
+API class. ::
 
-+-------------------+-----------------+---------------------------------------------+
-|    Attribute      |     Type        |             Description                     |
-+===================+=================+=============================================+
-|     labels        | JSONEncodedDict | One or more arbitrary key/value pairs       |
-+-------------------+-----------------+---------------------------------------------+
-| libnetwork-driver |    string       | Container networking backend implementation |
-+-------------------+-----------------+---------------------------------------------+
+    +-------------------+-----------------+---------------------------------------------+
+    |    Attribute      |     Type        |             Description                     |
+    +===================+=================+=============================================+
+    |     labels        | JSONEncodedDict | One or more arbitrary key/value pairs       |
+    +-------------------+-----------------+---------------------------------------------+
+    | libnetwork-driver |    string       | Container networking backend implementation |
+    +-------------------+-----------------+---------------------------------------------+
 
 Security Impact
 ---------------

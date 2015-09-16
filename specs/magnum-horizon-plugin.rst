@@ -12,11 +12,11 @@ Launchpad blueprint:
 
 https://blueprints.launchpad.net/magnum/+spec/magnum-horizon-plugin
 
-Currently there is no way for a user to interact with Magnum through a web based
-user interface, as they are used to doing with other OpenStack components. This
-implementation aims to introduce this interface as an extension of Horizon (the
-OpenStack Dashboard) and expose all the features of Magnum in a way familiar to
-users.
+Currently there is no way for a user to interact with Magnum through a web
+based user interface, as they are used to doing with other OpenStack
+components. This implementation aims to introduce this interface as an
+extension of Horizon (the OpenStack Dashboard) and expose all the features of
+Magnum in a way familiar to users.
 
 Problem description
 ===================
@@ -39,9 +39,9 @@ Use Cases
 Proposed change
 ===============
 
-The first step will be to extend the Horizon API to include CRUD operations that
-are needed to interact with Magnum. Assuming that there are no issues here and
-API changes/additions are not required to Magnum, we can begin to
+The first step will be to extend the Horizon API to include CRUD operations
+that are needed to interact with Magnum. Assuming that there are no issues here
+and API changes/additions are not required to Magnum, we can begin to
 design/implement the interface. We will aim to minimize the amount of Magnum
 specific UI code that will need to be maintained by reusing components from
 Horizon. This will also speed up the development significantly.
@@ -50,11 +50,11 @@ It is suggested the initial implementation of Magnum UI will include basic CRUD
 operations on BayModel and Bay resources. This will be the starting point for
 development and upon completion this will represent version 1.
 
-Future direction includes adding CRUD operations for other Magnum features (Pod,
-Container, Service, ReplicationController) and will be tracked by new blueprints
-as they represent significant additional effort. The ultimate goal, a user
-should be able to perform all normal interactions with Magnum through the UI
-with no need for interaction with the python client.
+Future direction includes adding CRUD operations for other Magnum features
+(Pod, Container, Service, ReplicationController) and will be tracked by new
+blueprints as they represent significant additional effort. The ultimate goal,
+a user should be able to perform all normal interactions with Magnum through
+the UI with no need for interaction with the python client.
 
 Suggestions for further improvement include visualising Magnum resources to
 provide a quick overview of how resources are deployed.

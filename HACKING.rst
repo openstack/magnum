@@ -6,7 +6,7 @@ Magnum Style Commandments
 - Step 2: Read on
 
 Magnum Specific Commandments
----------------------------
+----------------------------
 
 - [M301] policy.enforce_wsgi decorator must be the first decorator on a method.
 - [M322] Method's default argument shouldn't be mutable.

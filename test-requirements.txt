@@ -5,6 +5,7 @@
 # Despite above warning added by global sync process, please use
 # ascii betical order.
 
+doc8 # Apache-2.0
 coverage>=3.6
 fixtures>=1.3.1
 hacking<0.11,>=0.10.0 # Apache-2.0

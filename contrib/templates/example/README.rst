@@ -6,37 +6,42 @@ This project is an example to demonstrate the necessary pieces of a Bay
 template. There are three key pieces to a bay template:
 
 1. Heat template - The Heat template that Magnum will use to generate a Bay.
-2. Template definition - Magnum's interface for interacting with the Heat template.
-3. Definition Entry Point - Used to advertise the available template definitions.
+2. Template definition - Magnum's interface for interacting with the Heat
+   template.
+3. Definition Entry Point - Used to advertise the available template
+   definitions.
 
 The Heat Template
 -----------------
 
-The heat template is where most of the real work happens. The result of the Heat
-template should be a full Container Orchestration Environment.
+The heat template is where most of the real work happens. The result of the
+Heat template should be a full Container Orchestration Environment.
 
 The Template Definition
 -----------------------
 
-Template definitions are a mapping of Magnum object attributes and Heat template
-parameters, along with Magnum consumable template outputs. Each definition also
-denotes which Bay Types it can provide. Bay Types are how Magnum determines which
-of the enabled Template Definitions it will use for a given Bay.
+Template definitions are a mapping of Magnum object attributes and Heat
+template parameters, along with Magnum consumable template outputs. Each
+definition also denotes which Bay Types it can provide. Bay Types are how
+Magnum determines which of the enabled Template Definitions it will use for a
+given Bay.
 
 The Definition Entry Point
 --------------------------
 
 Entry points are a standard discovery and import mechanism for Python objects.
-Each Template Definition should have an Entry Point in the `magnum.template_definitions`
-group. This example exposes it's Template Definition as `example_template = example_template:ExampleTemplate`
-in the `magnum.template_definitions` group.
+Each Template Definition should have an Entry Point in the
+`magnum.template_definitions` group. This example exposes it's Template
+Definition as `example_template = example_template:ExampleTemplate` in the
+`magnum.template_definitions` group.
 
 Installing Bay Templates
 ------------------------
 
-Because Bay Templates are basically Python projects, they can be worked with like
-any other Python project. They can be cloned from version control and installed
-or uploaded to a package index and installed via utilities such as pip.
+Because Bay Templates are basically Python projects, they can be worked with
+like any other Python project. They can be cloned from version control and
+installed or uploaded to a package index and installed via utilities such as
+pip.
 
 Enabling a template is as simple as adding it's Entry Point to the
 `enabled_definitions` config option in magnum.conf.::

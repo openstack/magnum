@@ -33,6 +33,7 @@ Install OS-specific prerequisites::
                         libmysqlclient-devel libopenssl-devel libxml2-devel \
                         libxslt-devel postgresql-devel python-devel \
                         gettext-runtime
+
 Install pip::
 
     curl -s https://bootstrap.pypa.io/get-pip.py | sudo python
@@ -223,7 +224,7 @@ Note: Reducing node_count will remove all the existing containers on the
 nodes that are deleted.
 
 Heat can be used to see detailed information on the status of a stack or
-specific bay::
+specific bay:
 
 To check the list of all bay stacks::
 
