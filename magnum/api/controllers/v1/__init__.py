@@ -60,7 +60,7 @@ MIN_VER = controllers_base.Version(
     {controllers_base.Version.string: MIN_VER_STR}, MIN_VER_STR, MAX_VER_STR)
 MAX_VER = controllers_base.Version(
     {controllers_base.Version.string: MAX_VER_STR},
-                       MIN_VER_STR, MAX_VER_STR)
+    MIN_VER_STR, MAX_VER_STR)
 
 
 class MediaType(controllers_base.APIBase):

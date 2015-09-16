@@ -58,8 +58,9 @@ class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject,
 
     @base.remotable_classmethod
     def get(cls, context, x509keypair_id):
-        """Find a x509keypair_id based on its id or uuid and return a
-        X509KeyPair object.
+        """Find a X509KeyPair based on its id or uuid.
+
+        Find X509KeyPair by id or uuid and return a X509KeyPair object.
 
         :param x509keypair_id: the id *or* uuid of a x509keypair.
         :returns: a :class:`X509KeyPair` object.
@@ -73,8 +74,9 @@ class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject,
 
     @base.remotable_classmethod
     def get_by_id(cls, context, x509keypair_id):
-        """Find a x509keypair based on its integer id and return a
-        X509KeyPair object.
+        """Find a X509KeyPair based on its integer id.
+
+        Find X509KeyPair by id and return a X509KeyPair object.
 
         :param x509keypair_id: the id of a x509keypair.
         :returns: a :class:`X509KeyPair` object.

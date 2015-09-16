@@ -12,11 +12,15 @@
 
 
 class Handler(object):
-    '''Listen on an AMQP queue named for the conductor.  Allows individual
-    conductors to communicate with each other for multi-conductor support.
+    '''Listen on an AMQP queue named for the conductor.
+
+    Allows individual conductors to communicate with each other for
+    multi-conductor support.
     '''
     def ping_conductor(self, context):
-        '''Respond affirmatively to confirm that the conductor performing the
+        '''Respond to conductor.
+
+        Respond affirmatively to confirm that the conductor performing the
         action is still alive.
         '''
         return True

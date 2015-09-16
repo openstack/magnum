@@ -63,7 +63,9 @@ class ReplicationController(base.MagnumPersistentObject, base.MagnumObject,
 
     @base.remotable_classmethod
     def get_by_id(cls, context, rc_id):
-        """Find a ReplicationController based on its integer id and return a
+        """Find a ReplicationController based on its integer id.
+
+        Find ReplicationController based on id and return a
         ReplicationController object.
 
         :param rc_id: the id of a ReplicationController.
@@ -75,8 +77,10 @@ class ReplicationController(base.MagnumPersistentObject, base.MagnumObject,
 
     @base.remotable_classmethod
     def get_by_uuid(cls, context, uuid):
-        """Find a ReplicationController based on uuid and return
-        a :class:`ReplicationController` object.
+        """Find a ReplicationController based on uuid.
+
+        Find ReplicationController by uuid and return a
+        :class:`ReplicationController` object.
 
         :param uuid: the uuid of a ReplicationController.
         :param context: Security context
@@ -88,8 +92,10 @@ class ReplicationController(base.MagnumPersistentObject, base.MagnumObject,
 
     @base.remotable_classmethod
     def get_by_name(cls, context, name):
-        """Find a ReplicationController based on name and return
-        a :class:`ReplicationController` object.
+        """Find a ReplicationController based on name.
+
+        Find ReplicationController by name and return a
+        :class:`ReplicationController` object.
 
         :param name: the name of a ReplicationController.
         :param context: Security context

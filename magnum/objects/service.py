@@ -89,6 +89,7 @@ class Service(base.MagnumPersistentObject, base.MagnumObject,
     @base.remotable_classmethod
     def get_by_name(cls, context, name):
         """Find a service based on service name and
+
         return a :class:`Service` object.
 
         :param name: the name of a service.

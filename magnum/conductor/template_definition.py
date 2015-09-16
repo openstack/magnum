@@ -82,7 +82,9 @@ cfg.CONF.register_opts(template_def_opts, group='bay')
 
 
 class ParameterMapping(object):
-    """A ParameterMapping is an association of a Heat parameter name with
+    """A mapping associating heat param and bay/baymodel attr.
+
+    A ParameterMapping is an association of a Heat parameter name with
     an attribute on a Bay, Baymodel, or both.
 
     In the case of both baymodel_attr and bay_attr being set, the Baymodel
@@ -120,7 +122,9 @@ class ParameterMapping(object):
 
 
 class OutputMapping(object):
-    """An OutputMapping is an association of a Heat output with a key
+    """A mapping associating heat outputs and bay attr.
+
+    An OutputMapping is an association of a Heat output with a key
     Magnum understands.
     """
 
@@ -150,7 +154,9 @@ class OutputMapping(object):
 
 @six.add_metaclass(abc.ABCMeta)
 class TemplateDefinition(object):
-    '''A TemplateDefinition is essentially a mapping between Magnum objects
+    '''A mapping between Magnum objects and Heat templates.
+
+    A TemplateDefinition is essentially a mapping between Magnum objects
     and Heat templates. Each TemplateDefinition has a mapping of Heat
     parameters.
     '''
@@ -215,7 +221,9 @@ class TemplateDefinition(object):
 
     @classmethod
     def get_template_definition(cls, server_type, os, coe):
-        '''Returns the enabled TemplateDefinition class for the provided
+        '''Get enabled TemplateDefinitions.
+
+        Returns the enabled TemplateDefinition class for the provided
         bay_type.
 
         With the following classes:
@@ -300,7 +308,9 @@ class TemplateDefinition(object):
         return template_params
 
     def get_heat_param(self, bay_attr=None, baymodel_attr=None):
-        """Returns stack param name  using bay and baymodel attributes
+        """Returns stack param name.
+
+        Return stack param name using bay and baymodel attributes
         :param bay_attr bay attribute from which it maps to stack attribute
         :param baymodel_attr baymodel attribute from which it maps
          to stack attribute

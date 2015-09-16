@@ -86,6 +86,7 @@ class RPCHook(hooks.PecanHook):
 
 class NoExceptionTracebackHook(hooks.PecanHook):
     """Workaround rpc.common: deserialize_remote_exception.
+
     deserialize_remote_exception builds rpc exception traceback into error
     message which is then sent to the client. Such behavior is a security
     concern so this hook is aimed to cut-off traceback from the error message.

@@ -117,6 +117,7 @@ class BayLock(object):
     @contextlib.contextmanager
     def thread_lock(self, bay_uuid):
         """Acquire a lock and release it only if there is an exception.
+
         The release method still needs to be scheduled to be run at the
         end of the thread using the Thread.link method.
         """

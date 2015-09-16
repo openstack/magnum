@@ -96,6 +96,7 @@ def enforce(context, action=None, target=None,
 # decorator) on an API method for it to work correctly
 def enforce_wsgi(api_name, act=None):
     """This is a decorator to simplify wsgi action policy rule check.
+
         :param api_name: The collection name to be evaluate.
         :param act: The function name of wsgi action.
 
