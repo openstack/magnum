@@ -10,10 +10,18 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import logging
+from tempest_lib import base
 
-logging.basicConfig(
-    filename='functional-tests.log',
-    filemode='w',
-    level=logging.DEBUG,
-)
+from magnum.tests.functional.common import config
+
+
+class BaseMagnumTest(base.BaseTestCase):
+    """Sets up configuration required for functional tests"""
+
+    def __init__(self, *args, **kwargs):
+        super(BaseMagnumTest, self).__init__(*args, **kwargs)
+
+    @classmethod
+    def setUpClass(cls):
+        super(BaseMagnumTest, cls).setUpClass()
+        config.Config.setUp()

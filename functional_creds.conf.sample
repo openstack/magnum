@@ -2,6 +2,10 @@
 [auth]
 auth_url = http://127.0.0.1:5000/v2.0
 magnum_url = http://127.0.0.1:9511/v1
+username = demo
+tenant_name = demo
+password = password
+auth_version = v2
 [admin]
 user = admin
 tenant = admin
@@ -9,3 +13,4 @@ pass = secrete
 [magnum]
 image_id = fedora-21-atomic-3
 nic_id = public
+keypair_id = default
