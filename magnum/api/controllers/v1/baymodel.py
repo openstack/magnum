@@ -112,6 +112,9 @@ class BayModel(base.APIBase):
     """Its comma separated list of ip for which proxies should not
        used in the bay"""
 
+    registry_enabled = wsme.wsattr(types.boolean, default=False)
+    """Indicates whether the docker registry is enabled"""
+
     def __init__(self, **kwargs):
         self.fields = []
         for field in objects.BayModel.fields:

@@ -21,6 +21,7 @@ import json
 from oslo_config import cfg
 from oslo_db.sqlalchemy import models
 import six.moves.urllib.parse as urlparse
+from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Integer
@@ -168,6 +169,7 @@ class BayModel(Base):
     http_proxy = Column(String(255))
     https_proxy = Column(String(255))
     no_proxy = Column(String(255))
+    registry_enabled = Column(Boolean, default=False)
 
 
 class Container(Base):
