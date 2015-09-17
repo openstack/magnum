@@ -29,6 +29,7 @@ from magnum.api.controllers.v1 import bay
 from magnum.api.controllers.v1 import baymodel
 from magnum.api.controllers.v1 import certificate
 from magnum.api.controllers.v1 import container
+from magnum.api.controllers.v1 import magnum_services
 from magnum.api.controllers.v1 import node
 from magnum.api.controllers.v1 import pod
 from magnum.api.controllers.v1 import replicationcontroller as rc
@@ -109,6 +110,9 @@ class V1(controllers_base.APIBase):
     certificates = [link.Link]
     """Links to the certificates resource"""
 
+    mservices = [link.Link]
+    """Links to the magnum-services resource"""
+
     @staticmethod
     def convert():
         v1 = V1()
@@ -170,6 +174,12 @@ class V1(controllers_base.APIBase):
                                                pecan.request.host_url,
                                                'certificates', '',
                                                bookmark=True)]
+        v1.mservices = [link.Link.make_link('self', pecan.request.host_url,
+                                            'mservices', ''),
+                        link.Link.make_link('bookmark',
+                                            pecan.request.host_url,
+                                            'mservices', '',
+                                            bookmark=True)]
         return v1
 
 
@@ -185,6 +195,7 @@ class Controller(rest.RestController):
     services = service.ServicesController()
     x509keypairs = x509keypair.X509KeyPairController()
     certificates = certificate.CertificateController()
+    mservices = magnum_services.MagnumServiceController()
 
     @expose.expose(V1)
     def get(self):

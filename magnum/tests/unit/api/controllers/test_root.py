@@ -77,7 +77,11 @@ class TestRootController(api_base.FunctionalTest):
             u'certificates': [{u'href': u'http://localhost/v1/certificates/',
                                u'rel': u'self'},
                               {u'href': u'http://localhost/certificates/',
-                               u'rel': u'bookmark'}]}
+                               u'rel': u'bookmark'}],
+            u'mservices': [{u'href': u'http://localhost/v1/mservices/',
+                            u'rel': u'self'},
+                           {u'href': u'http://localhost/mservices/',
+                            u'rel': u'bookmark'}]}
 
         response = self.app.get('/v1/')
         self.assertEqual(expected, response.json)
