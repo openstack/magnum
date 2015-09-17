@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import mock
 import six
 
 from cryptography.hazmat.backends import default_backend
@@ -173,3 +174,17 @@ class TestX509(base.BaseTestCase):
             self.issuer_name, self.subject_name)
 
         self.assertInClientExtensions(cert)
+
+    @mock.patch('cryptography.x509.load_pem_x509_csr')
+    @mock.patch('six.b')
+    def test_sign_with_unicode_csr(self, mock_six, mock_load_pem):
+        ca_key = self._generate_private_key()
+        private_key = self._generate_private_key()
+        csr_obj = self._build_csr(private_key)
+        csr = csr_obj.public_bytes(serialization.Encoding.PEM)
+        csr = six.u(csr)
+
+        mock_load_pem.return_value = csr_obj
+        operations.sign(csr, self.issuer_name, ca_key,
+                        skip_validation=True)
+        mock_six.assert_called_once_with(csr)

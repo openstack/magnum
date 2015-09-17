@@ -13,6 +13,7 @@
 # under the License.
 
 import datetime
+import six
 import uuid
 
 from cryptography.hazmat.backends import default_backend
@@ -153,10 +154,13 @@ def sign(csr, issuer_name, ca_key, ca_key_password=None,
     :param skip_validation: skip csr validation if true
     :returns: generated certificate
     """
+
     if not isinstance(ca_key, rsa.RSAPrivateKey):
         ca_key = serialization.load_pem_private_key(ca_key,
                                                     password=ca_key_password,
                                                     backend=default_backend())
+    if isinstance(csr, six.text_type):
+        csr = six.b(str(csr))
     if not isinstance(csr, x509.CertificateSigningRequest):
         csr = x509.load_pem_x509_csr(csr, backend=default_backend())
 
