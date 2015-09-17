@@ -17,6 +17,7 @@
     "baymodel:get": "rule:default",
     "baymodel:get_all": "rule:default",
     "baymodel:update": "rule:default",
+    "baymodel:publish": "rule:admin_or_owner",
 
     "node:create": "rule:default",
     "node:delete": "rule:default",

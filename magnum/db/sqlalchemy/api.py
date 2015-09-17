@@ -326,6 +326,10 @@ class Connection(api.Connection):
         query = model_query(models.BayModel)
         query = self._add_tenant_filters(context, query)
         query = self._add_baymodels_filters(query, filters)
+        # include public baymodels
+        public_q = model_query(models.BayModel).filter_by(public=True)
+        query = query.union(public_q)
+
         return _paginate_query(models.BayModel, limit, marker,
                                sort_key, sort_dir, query)
 

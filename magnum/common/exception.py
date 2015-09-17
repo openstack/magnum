@@ -381,6 +381,10 @@ class BayModelReferenced(Invalid):
     message = _("Baymodel %(baymodel)s is referenced by one or multiple bays.")
 
 
+class BaymodelPublishDenied(NotAuthorized):
+    message = _("Not authorized to set public flag for baymodel.")
+
+
 class BayNotFound(ResourceNotFound):
     message = _("Bay %(bay)s could not be found.")
 

@@ -125,6 +125,9 @@ class BayModel(base.APIBase):
     tls_disabled = wsme.wsattr(types.boolean, default=False)
     """Indicates whether the TLS should be disabled"""
 
+    public = wsme.wsattr(types.boolean, default=False)
+    """Indicates whether the baymodel is public or not."""
+
     def __init__(self, **kwargs):
         self.fields = []
         for field in objects.BayModel.fields:
@@ -176,7 +179,8 @@ class BayModel(base.APIBase):
             no_proxy='192.168.0.1,192.168.0.2,192.168.0.3',
             labels={'key1': 'val1', 'key2': 'val2'},
             created_at=datetime.datetime.utcnow(),
-            updated_at=datetime.datetime.utcnow())
+            updated_at=datetime.datetime.utcnow(),
+            public=False),
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 
 
@@ -325,6 +329,12 @@ class BayModelsController(rest.RestController):
         else:
             raise exception.OSDistroFieldNotFound(
                 image_id=baymodel_dict['image_id'])
+        # check permissions for making baymodel public
+        if baymodel_dict['public']:
+            if not policy.enforce(context, "baymodel:publish", None,
+                                  do_raise=False):
+                raise exception.BaymodelPublishDenied()
+
         new_baymodel = objects.BayModel(context, **baymodel_dict)
         new_baymodel.create()
         # Set the HTTP Location Header
@@ -342,8 +352,8 @@ class BayModelsController(rest.RestController):
         :param baymodel_uuid: UUID of a baymodel.
         :param patch: a json PATCH document to apply to this baymodel.
         """
-        rpc_baymodel = objects.BayModel.get_by_uuid(pecan.request.context,
-                                                    baymodel_uuid)
+        context = pecan.request.context
+        rpc_baymodel = objects.BayModel.get_by_uuid(context, baymodel_uuid)
         try:
             baymodel_dict = rpc_baymodel.as_dict()
             baymodel = BayModel(**api_utils.apply_jsonpatch(
@@ -351,6 +361,12 @@ class BayModelsController(rest.RestController):
                 patch))
         except api_utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)
+
+        # check permissions when updating baymodel public flag
+        if rpc_baymodel.public != baymodel.public:
+            if not policy.enforce(context, "baymodel:publish", None,
+                                  do_raise=False):
+                raise exception.BaymodelPublishDenied()
 
         # Update only the fields that have changed
         for field in objects.BayModel.fields:

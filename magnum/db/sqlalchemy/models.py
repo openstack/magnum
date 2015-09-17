@@ -174,6 +174,7 @@ class BayModel(Base):
     registry_enabled = Column(Boolean, default=False)
     labels = Column(JSONEncodedDict)
     tls_disabled = Column(Boolean, default=False)
+    public = Column(Boolean, default=False)
 
 
 class Container(Base):

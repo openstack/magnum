@@ -22,6 +22,7 @@ from wsme import types as wtypes
 
 from magnum.api.controllers.v1 import baymodel as api_baymodel
 from magnum.common.clients import OpenStackClients as openstack_client
+from magnum.common import policy as magnum_policy
 from magnum.common import utils
 from magnum.tests import base
 from magnum.tests.unit.api import base as api_base
@@ -238,6 +239,7 @@ class TestPatch(api_base.FunctionalTest):
             apiserver_port=8080,
             fixed_network='private',
             network_driver='flannel',
+            public=False,
             docker_volume_size=20,
             ssh_authorized_key='ssh-rsa AAAAB3NzaC1ycEAAAADA'
                                'v0XRqg3tm+jlsOKGO81lPDH+KaSJ'
@@ -260,6 +262,26 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
+
+    @mock.patch.object(magnum_policy, 'enforce')
+    def test_update_public_baymodel_success(self, mock_policy):
+        mock_policy.return_value = True
+        response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
+                                   [{'path': '/public', 'value': True,
+                                     'op': 'replace'}])
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(200, response.status_code)
+
+        response = self.get_json('/baymodels/%s' % self.baymodel.uuid)
+        self.assertEqual(True, response['public'])
+
+    @mock.patch.object(magnum_policy, 'enforce')
+    def test_update_public_baymodel_fail(self, mock_policy):
+        mock_policy.return_value = False
+        self.assertRaises(AppError, self.patch_json,
+                          '/baymodels/%s' % self.baymodel.uuid,
+                          [{'path': '/public', 'value': True,
+                            'op': 'replace'}])
 
     @mock.patch('oslo_utils.timeutils.utcnow')
     def test_replace_singular(self, mock_utcnow):
@@ -630,6 +652,66 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(bdict['image_id'],
                          response.json['image_id'])
         self.assertTrue(utils.is_uuid_like(response.json['uuid']))
+
+    @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
+    @mock.patch.object(api_baymodel.BayModelsController,
+                       'check_keypair_exists')
+    @mock.patch.object(magnum_policy, 'enforce')
+    def test_create_baymodel_public_success(self, mock_policy,
+                                            mock_keypair_exists,
+                                            mock_image_data):
+        with mock.patch.object(self.dbapi, 'create_baymodel',
+                               wraps=self.dbapi.create_baymodel) as cc_mock:
+            mock_keypair_exists.return_value = None
+            mock_policy.return_value = True
+            mock_image_data.return_value = {'name': 'mock_name',
+                                            'os_distro': 'fedora-atomic'}
+            bdict = apiutils.baymodel_post_data(public=True)
+            response = self.post_json('/baymodels', bdict)
+            self.assertEqual(True, response.json['public'])
+            mock_policy.assert_called_with(mock.ANY, "baymodel:publish",
+                                           None, do_raise=False)
+            cc_mock.assert_called_once_with(mock.ANY)
+            self.assertNotIn('id', cc_mock.call_args[0][0])
+            self.assertTrue(cc_mock.call_args[0][0]['public'])
+
+    @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
+    @mock.patch.object(api_baymodel.BayModelsController,
+                       'check_keypair_exists')
+    @mock.patch.object(magnum_policy, 'enforce')
+    def test_create_baymodel_public_fail(self, mock_policy,
+                                         mock_keypair_exists,
+                                         mock_image_data):
+        with mock.patch.object(self.dbapi, 'create_baymodel',
+                               wraps=self.dbapi.create_baymodel):
+            mock_keypair_exists.return_value = None
+            # make policy enforcement fail
+            mock_policy.return_value = False
+            mock_image_data.return_value = {'name': 'mock_name',
+                                            'os_distro': 'fedora-atomic'}
+            bdict = apiutils.baymodel_post_data(public=True)
+            self.assertRaises(AppError, self.post_json, '/baymodels', bdict)
+
+    @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
+    @mock.patch.object(api_baymodel.BayModelsController,
+                       'check_keypair_exists')
+    @mock.patch.object(magnum_policy, 'enforce')
+    def test_create_baymodel_public_not_set(self, mock_policy,
+                                            mock_keypair_exists,
+                                            mock_image_data):
+        with mock.patch.object(self.dbapi, 'create_baymodel',
+                               wraps=self.dbapi.create_baymodel) as cc_mock:
+            mock_keypair_exists.return_value = None
+            mock_image_data.return_value = {'name': 'mock_name',
+                                            'os_distro': 'fedora-atomic'}
+            bdict = apiutils.baymodel_post_data(public=False)
+            response = self.post_json('/baymodels', bdict)
+            self.assertEqual(False, response.json['public'])
+            # policy enforcement is called only once for enforce_wsgi
+            mock_policy.assert_called_once_with(mock.ANY, mock.ANY, None)
+            cc_mock.assert_called_once_with(mock.ANY)
+            self.assertNotIn('id', cc_mock.call_args[0][0])
+            self.assertFalse(cc_mock.call_args[0][0]['public'])
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
     @mock.patch.object(api_baymodel.BayModelsController,

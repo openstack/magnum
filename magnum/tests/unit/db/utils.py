@@ -53,7 +53,8 @@ def get_test_baymodel(**kw):
         'https_proxy': kw.get('https_proxy', 'fake_https_proxy'),
         'no_proxy': kw.get('no_proxy', 'fake_no_proxy'),
         'registry_enabled': kw.get('registry_enabled', False),
-        'tls_disabled': kw.get('tls_disabled', False)
+        'tls_disabled': kw.get('tls_disabled', False),
+        'public': kw.get('public', False)
     }
 
 
