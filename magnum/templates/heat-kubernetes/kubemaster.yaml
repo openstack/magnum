@@ -70,6 +70,9 @@ parameters:
   fixed_subnet:
     type: string
     description: Subnet from which to allocate fixed addresses.
+  network_driver:
+    type: string
+    description: network driver to use for instantiating container networks
   wait_condition_timeout:
     type: number
     description : >
@@ -140,6 +143,7 @@ resources:
           template: {get_file: fragments/write-heat-params-master.yaml}
           params:
             "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
+            "$NETWORK_DRIVER": {get_param: network_driver}
             "$FLANNEL_NETWORK_CIDR": {get_param: flannel_network_cidr}
             "$FLANNEL_NETWORK_SUBNETLEN": {get_param: flannel_network_subnetlen}
             "$FLANNEL_USE_VXLAN": {get_param: flannel_use_vxlan}
@@ -158,17 +162,17 @@ resources:
       group: ungrouped
       config: {get_file: fragments/configure-kubernetes-master.sh}
 
-  write_flannel_config:
+  write_network_config:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/write-flannel-config.sh}
+      config: {get_file: fragments/write-network-config.sh}
 
-  flannel_config_service:
+  network_config_service:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/flannel-config.service.yaml}
+      config: {get_file: fragments/network-config-service.sh}
 
   enable_services:
     type: OS::Heat::SoftwareConfig
@@ -216,8 +220,8 @@ resources:
         - config: {get_resource: kube_user}
         - config: {get_resource: configure_kubernetes}
         - config: {get_resource: enable_services}
-        - config: {get_resource: write_flannel_config}
-        - config: {get_resource: flannel_config_service}
+        - config: {get_resource: write_network_config}
+        - config: {get_resource: network_config_service}
         - config: {get_resource: kube_examples}
         - config: {get_resource: master_wc_notify}
 

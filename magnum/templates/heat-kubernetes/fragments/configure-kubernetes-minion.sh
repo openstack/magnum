@@ -27,9 +27,11 @@ sed -i '
 /^KUBE_MASTER=/ s/=.*/="--master='"$KUBE_MASTER_IP"':8080"/
 ' /etc/kubernetes/apiserver
 
+if [ "$NETWORK_DRIVER" == "flannel" ]; then
 sed -i '
 /^FLANNEL_ETCD=/ s|=.*|="http://'"$ETCD_SERVER_IP"':2379"|
 ' /etc/sysconfig/flanneld
+fi
 
 cat >> /etc/environment <<EOF
 KUBERNETES_MASTER=http://$KUBE_MASTER_IP:8080
