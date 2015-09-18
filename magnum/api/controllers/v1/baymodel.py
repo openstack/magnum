@@ -87,6 +87,9 @@ class BayModel(base.APIBase):
     fixed_network = wtypes.StringType(min_length=1, max_length=255)
     """The fixed network name to attach the Bay"""
 
+    network_driver = wtypes.StringType(min_length=1, max_length=255)
+    """The name of the driver used for instantiating container networks"""
+
     apiserver_port = wtypes.IntegerType(minimum=1024, maximum=65535)
     """The API server port for k8s"""
 
@@ -155,6 +158,7 @@ class BayModel(base.APIBase):
             keypair_id='keypair1',
             external_network_id='ffc44e4a-2319-4062-bce0-9ae1c38b05ba',
             fixed_network='private',
+            network_driver='libnetwork',
             apiserver_port=8080,
             docker_volume_size=25,
             cluster_distro='fedora-atomic',

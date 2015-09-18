@@ -375,6 +375,8 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
         self.add_parameter('external_network',
                            baymodel_attr='external_network_id',
                            required=True)
+        self.add_parameter('network_driver',
+                           baymodel_attr='network_driver')
         # TODO(yuanying): Add below lines if apiserver_port parameter
         # is supported
         # self.add_parameter('apiserver_port',
