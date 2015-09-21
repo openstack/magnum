@@ -21,6 +21,7 @@ from oslo_log import log as logging
 
 from magnum.common import exception
 from magnum.common import magnum_keystoneclient
+from magnum.sur import client as senlinclient
 from magnum.i18n import _
 
 
@@ -110,6 +111,7 @@ class OpenStackClients(object):
         self._glance = None
         self._barbican = None
         self._nova = None
+        self._senlin = None
 
     def url_for(self, **kwargs):
         return self.keystone().client.service_catalog.url_for(**kwargs)
@@ -214,3 +216,9 @@ class OpenStackClients(object):
         self._nova = novaclient.Client(auth_token=self.auth_token)
         self._nova.client.management_url = endpoint
         return self._nova
+
+    def senlin(self):
+        if self._senlin:
+            return self._senlin
+        self._senlin = senlinclient.SenlinSURClient().setup_client()
+        return self._senlin
