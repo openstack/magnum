@@ -30,6 +30,7 @@ from magnum.i18n import _LE
 from magnum.i18n import _LI
 from magnum import objects
 from magnum.objects.fields import BayStatus as bay_status
+from magnum.sur import cluster_function as senlinfunc
 
 
 bay_heat_opts = [
@@ -123,6 +124,7 @@ class Handler(object):
 
         try:
             # Generate certificate and set the cert reference to bay
+            senlinfunc.create_cluster(osc)
             cert_manager.generate_certificates_to_bay(bay)
             created_stack = _create_stack(context, osc, bay,
                                           bay_create_timeout)
