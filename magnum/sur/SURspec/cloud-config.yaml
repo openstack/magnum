@@ -1,0 +1,15 @@
+coreos:
+  etcd2:
+    discovery: https://discovery.etcd.io/b705deec97c41a4a2bcd4cbbdfdef67a
+    advertise-client-urls: http://$private_ipv4:2379,http://$private_ipv4:4001
+    initial-advertise-peer-urls: http://$private_ipv4:2380
+    listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    listen-peer-urls: http://$private_ipv4:2380
+  units:
+    - name: etcd2.service
+      command: start
+    - name: fleet.service
+      command: start
+ssh_authorized_keys:
+  - ssh_rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCz/+OGzJRxehqC5BtWxY7nV/i/xh1C/5walMohADRphxvAHsPF2873Xu+H8ZFrYdwYDgj4/5NmMWFUppw8eX8KT/+aIYciuI/C9zLZmZenRL8BDV9h2kFM2UFLxJSPtAh02lvNss2VfiTuCjpjU0eonCtB7r5rx59Bm44Mj6Ug2IdeszBUKBrUuMdn972Mn3wBUGBO14aC3WUkYKoynPMkuvHg2+U1errUzN/znt6fsfsGbbrjfusCf08hnYItlXpmyiXn2HegLYQcL8oUkDx4PTJNa5CqiIbv+sN1e7OidTtANM2/8AkOzNQqMvghCPOb219ZCkSb5vyPSiOSU0ir tennyson@tens
+  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCn2ptExwFH4+Q1P/UHL8kGFlsn4hscbvqT+R3KClKNt2C9bHWyBrqNgvD1qBip5G0cM4VAq6d6QNg3r10Qx0AgVxrL5A2HPFbMfnIyOWh+ZNAoWkf9FZR0YpyQB2AoHLeEZTHlyxL5Q/6+OpytaKfuYnQX8EQLNgkO4bQMlmfawekf8qwzrkZUqTyyorL7th/gX9nQgqxPY63RshkXjcD6LzwbYbeaaXXWUKXhFT2yoK6R1bwk/Pfeu6Hykeuhte2ORTmw3XK7XtNNwwGJMz/NgqurVB+6l1W9lxhsnRQFG94zwzP/IJsYJBTs+LrSCfwynrIQfG6w460p9pRSauPh stack@jack-devstack
