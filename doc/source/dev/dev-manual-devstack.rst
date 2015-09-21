@@ -86,15 +86,9 @@ http://docs.openstack.org/developer/devstack/guides/neutron.html
 
 Optionally, you can enable ceilometer in devstack. If ceilometer is enabled,
 magnum will periodically send metrics to ceilometer. If you need this feature,
-add the following lines to your `local.conf` file::
+add the following line to your `local.conf` file::
 
-    enable_service ceilometer-acompute
-    enable_service ceilometer-acentral
-    enable_service ceilometer-anotification
-    enable_service ceilometer-collector
-    enable_service ceilometer-api
-    enable_service ceilometer-alarm-notifier
-    enable_service ceilometer-alarm-evaluator
+    enable_plugin ceilometer git://git.openstack.org/openstack/ceilometer
 
 Create a local.sh to automatically make necessary networking changes during
 the devstack deployment process. This will allow bays spawned by magnum to
