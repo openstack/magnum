@@ -48,6 +48,9 @@ class TestBayConductorWithK8s(base.TestCase):
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
+            'labels': {'flannel_network_cidr': '10.101.0.0/16',
+                       'flannel_network_subnetlen': '26',
+                       'flannel_use_vxlan': 'yes'},
         }
         self.bay_dict = {
             'baymodel_id': 'xx-xx-xx-xx',
@@ -98,6 +101,9 @@ class TestBayConductorWithK8s(base.TestCase):
             'node_count': 'number_of_minions',
             'master_count': 'number_of_masters',
             'discovery_url': 'discovery_url',
+            'labels': {'flannel_network_cidr': '10.101.0.0/16',
+                       'flannel_network_subnetlen': '26',
+                       'flannel_use_vxlan': 'yes'},
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
@@ -115,6 +121,9 @@ class TestBayConductorWithK8s(base.TestCase):
             'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
             'discovery_url': 'https://discovery.etcd.io/test',
+            'flannel_network_cidr': '10.101.0.0/16',
+            'flannel_network_subnetlen': '26',
+            'flannel_use_vxlan': 'yes',
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
@@ -163,6 +172,9 @@ class TestBayConductorWithK8s(base.TestCase):
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
+            'flannel_network_cidr': '10.101.0.0/16',
+            'flannel_network_subnetlen': '26',
+            'flannel_use_vxlan': 'yes',
         }
         self.assertEqual(expected, definition)
 
@@ -205,6 +217,9 @@ class TestBayConductorWithK8s(base.TestCase):
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
+            'flannel_network_cidr': '10.101.0.0/16',
+            'flannel_network_subnetlen': '26',
+            'flannel_use_vxlan': 'yes',
         }
         self.assertEqual(expected, definition)
 
@@ -286,7 +301,10 @@ class TestBayConductorWithK8s(base.TestCase):
             'discovery_url': 'https://discovery.etcd.io/test',
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
-            'no_proxy': 'no_proxy'
+            'no_proxy': 'no_proxy',
+            'flannel_network_cidr': '10.101.0.0/16',
+            'flannel_network_subnetlen': '26',
+            'flannel_use_vxlan': 'yes',
         }
         self.assertIn('token', definition)
         del definition['token']
@@ -353,7 +371,10 @@ class TestBayConductorWithK8s(base.TestCase):
             'discovery_url': 'https://address/token',
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
-            'no_proxy': 'no_proxy'
+            'no_proxy': 'no_proxy',
+            'flannel_network_cidr': '10.101.0.0/16',
+            'flannel_network_subnetlen': '26',
+            'flannel_use_vxlan': 'yes',
         }
         self.assertEqual(expected, definition)
         reqget.assert_called_once_with('http://etcd/test?size=1')

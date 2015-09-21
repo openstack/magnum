@@ -184,6 +184,11 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         removal_nodes = ['node1', 'node2']
         mock_scale_manager.get_removal_nodes.return_value = removal_nodes
         mock_get_discovery_url.return_value = 'fake_discovery_url'
+
+        flannel_cidr = mock_baymodel.labels.get('flannel_network_cidr')
+        flannel_subnet = mock_baymodel.labels.get('flannel_network_subnetlen')
+        flannel_vxlan = mock_baymodel.labels.get('flannel_use_vxlan')
+
         k8s_def = tdef.AtomicK8sTemplateDefinition()
 
         k8s_def.get_params(mock_context, mock_baymodel, mock_bay,
@@ -191,7 +196,10 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
 
         expected_kwargs = {'extra_params': {
             'minions_to_remove': removal_nodes,
-            'discovery_url': 'fake_discovery_url'}}
+            'discovery_url': 'fake_discovery_url',
+            'flannel_network_cidr': flannel_cidr,
+            'flannel_use_vxlan': flannel_subnet,
+            'flannel_network_subnetlen': flannel_vxlan}}
         mock_get_params.assert_called_once_with(mock_context, mock_baymodel,
                                                 mock_bay, **expected_kwargs)
 

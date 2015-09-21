@@ -27,7 +27,8 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.0: Initial version
     # Version 1.1: Add 'registry_enabled' field
     # Version 1.2: Added 'network_driver' field
-    VERSION = '1.2'
+    # Version 1.3: Added 'labels' attribute
+    VERSION = '1.3'
 
     dbapi = dbapi.get_instance()
 
@@ -53,7 +54,8 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
         'http_proxy': fields.StringField(nullable=True),
         'https_proxy': fields.StringField(nullable=True),
         'no_proxy': fields.StringField(nullable=True),
-        'registry_enabled': fields.BooleanField(default=False)
+        'registry_enabled': fields.BooleanField(default=False),
+        'labels': fields.DictOfStringsField(nullable=True)
     }
 
     @staticmethod

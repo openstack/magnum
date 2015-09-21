@@ -118,6 +118,9 @@ class BayModel(base.APIBase):
     registry_enabled = wsme.wsattr(types.boolean, default=False)
     """Indicates whether the docker registry is enabled"""
 
+    labels = wtypes.DictType(str, str)
+    """One or more key/value pairs"""
+
     def __init__(self, **kwargs):
         self.fields = []
         for field in objects.BayModel.fields:
@@ -167,6 +170,7 @@ class BayModel(base.APIBase):
             http_proxy='http://proxy.com:123',
             https_proxy='https://proxy.com:123',
             no_proxy='192.168.0.1,192.168.0.2,192.168.0.3',
+            labels={'key1': 'val1', 'key2': 'val2'},
             created_at=datetime.datetime.utcnow(),
             updated_at=datetime.datetime.utcnow())
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
