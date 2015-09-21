@@ -4,4 +4,4 @@ source = magnum
 omit = magnum/tests/*,magnum/openstack/*
 
 [report]
-ignore-errors = True
+ignore_errors = True
