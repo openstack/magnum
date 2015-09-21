@@ -8,7 +8,7 @@ import time
 
 from magnum.common.clients import OpenStackClients as OSC
 from magnum.sur.action.clusters import Cluster
-from magnum.sur.action.nodes import Node
+#from magnum.sur.action.nodes import Node
 from magnum.sur.action.profiles import Profile
 
 LOG = logging.getLogger(__name__)
@@ -36,15 +36,15 @@ def create_cluster(OSC):
     LOG.info(cr)
 
     # Create Nodes
-    nr_master = Node.node_create(sc, 'SUR_Node_Master', 'SUR_Cluster',
-                                 'SUR_Master_Profile')
-    time.sleep(1)
-    LOG.info(nr_master)
+    #nr_master = Node.node_create(sc, 'SUR_Node_Master', 'SUR_Cluster',
+    #                             'SUR_Master_Profile')
+    #time.sleep(1)
+    #LOG.info(nr_master)
 
-    nr_minion = Node.node_create(sc, 'SUR_Node_Minion', 'SUR_Cluster',
-                                 'SUR_Minion_Profile')
-    time.sleep(1)
-    LOG.info(nr_minion)
+    #nr_minion = Node.node_create(sc, 'SUR_Node_Minion', 'SUR_Cluster',
+    #                             'SUR_Minion_Profile')
+    #time.sleep(1)
+    #LOG.info(nr_minion)
 
     LOG.info('Complete')
     
