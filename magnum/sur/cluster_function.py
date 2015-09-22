@@ -46,5 +46,5 @@ def create_cluster(OSC):
     #time.sleep(1)
     #LOG.info(nr_minion)
 
-    LOG.info('Complete')
+    #LOG.info('Complete')
     
