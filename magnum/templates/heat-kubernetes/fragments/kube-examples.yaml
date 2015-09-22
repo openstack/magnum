@@ -5,28 +5,29 @@ write_files:
     owner: "root:root"
     permissions: "0644"
     content: |
+      apiVersion: v1
       kind: Pod
-      apiVersion: v1beta1
-      id: web
-      labels:
+      metadata:
+        labels:
+          name: web
         name: web
-      desiredState:
-        manifest:
-          version: v1beta1
-          id: web
-          containers:
-            - name: web
-              image: larsks/thttpd
-              ports:
-                - containerPort: 80
+      spec:
+        containers:
+          - name: web
+            image: larsks/thttpd
+            ports:
+              - containerPort: 80
   - path: /etc/kubernetes/examples/web.service
     owner: "root:root"
     permissions: "0644"
     content: |
+      apiVersion: v1
       kind: Service
-      apiVersion: v1beta1
-      id: web
-      port: 8000
-      selector:
+      metadata:
         name: web
-      containerPort: 80
+      spec:
+        ports:
+          - port: 8000
+        selector:
+          name: web
+        containerPort: 80

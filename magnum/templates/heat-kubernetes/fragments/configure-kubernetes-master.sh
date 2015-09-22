@@ -13,9 +13,10 @@ sed -i '
 
 sed -i '
   /^KUBE_API_ADDRESS=/ s/=.*/="--address=0.0.0.0"/
-  /^KUBE_SERVICE_ADDRESSES=/ s|=.*|="--portal_net='"$PORTAL_NETWORK_CIDR"'"|
-  /^KUBE_API_ARGS=/ s/=.*/="--runtime_config=api\/v1beta3"/
+  /^KUBE_SERVICE_ADDRESSES=/ s|=.*|="--service-cluster-ip-range='"$PORTAL_NETWORK_CIDR"'"|
+  /^KUBE_API_ARGS=/ s/=.*/="--runtime_config=api\/all=true"/
   /^KUBE_ETCD_SERVERS=/ s/=.*/="--etcd_servers=http:\/\/127.0.0.1:2379"/
+  /^KUBE_ADMISSION_CONTROL=/ s/=.*/=""/
 ' /etc/kubernetes/apiserver
 
 sed -i '

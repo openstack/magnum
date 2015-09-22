@@ -37,5 +37,7 @@ cat >> /etc/environment <<EOF
 KUBERNETES_MASTER=http://$KUBE_MASTER_IP:8080
 EOF
 
+sed -i '/^DOCKER_STORAGE_OPTIONS=/ s/=.*/=--storage-driver devicemapper --storage-opt dm.fs=xfs --storage-opt dm.thinpooldev=\/dev\/mapper\/docker-docker--pool --storage-opt dm.use_deferred_removal=true/' /etc/sysconfig/docker-storage
+
 systemctl enable kube-register
 

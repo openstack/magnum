@@ -19,6 +19,7 @@ Includes decorator for re-raising Magnum-type exceptions.
 """
 
 import functools
+import json
 import sys
 import uuid
 
@@ -464,8 +465,15 @@ class OSDistroFieldNotFound(ResourceNotFound):
 
 
 class KubernetesAPIFailed(MagnumException):
-    def __init__(self, message=None, **kwargs):
-        self.__class__.code = kwargs.get('code')
+    def __init__(self, message=None, err=None, **kwargs):
+        if err:
+            if err.body:
+                message = json.loads(err.body)['message']
+            else:
+                message = err.reason
+            self.__class__.code = err.status
+        else:
+            self.__class__.code = kwargs.get('code')
         super(KubernetesAPIFailed, self).__init__(message, **kwargs)
 
 

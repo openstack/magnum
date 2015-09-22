@@ -48,8 +48,8 @@ class ScaleManager(object):
 
         hosts_no_container = list(hosts)
         k8s_api = k8s.create_k8s_api(self.context, bay)
-        for pod in k8s_api.listPod().items:
-            host = pod.spec.host
+        for pod in k8s_api.list_namespaced_pod(namespace='default').items:
+            host = pod.spec.node_name
             if host in hosts_no_container:
                 hosts_no_container.remove(host)
 

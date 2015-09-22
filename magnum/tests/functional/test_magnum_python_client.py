@@ -25,8 +25,8 @@ import time
 
 import fixtures
 
-from magnum.common.pythonk8sclient.client import ApivbetaApi
-from magnum.common.pythonk8sclient.client import swagger
+from magnum.common.pythonk8sclient.swagger_client import api_client
+from magnum.common.pythonk8sclient.swagger_client.apis import apiv_api
 from magnum.tests import base
 from magnumclient.openstack.common.apiclient import exceptions
 from magnumclient.openstack.common import cliutils
@@ -215,8 +215,8 @@ class TestKubernetesAPIs(BaseMagnumClient):
         cls.bay = cls._create_bay('testk8sAPI', cls.baymodel.uuid)
         kube_api_address = cls.cs.bays.get(cls.bay.uuid).api_address
         kube_api_url = 'http://%s' % kube_api_address
-        k8s_client = swagger.ApiClient(kube_api_url)
-        cls.k8s_api = ApivbetaApi.ApivbetaApi(k8s_client)
+        k8s_client = api_client.ApiClient(kube_api_url)
+        cls.k8s_api = apiv_api.ApivApi(k8s_client)
 
     @classmethod
     def tearDownClass(cls):
@@ -231,53 +231,52 @@ class TestKubernetesAPIs(BaseMagnumClient):
         cls._delete_baymodel(cls.baymodel.uuid)
 
     def test_pod_apis(self):
-        pod_manifest = {'apiVersion': 'v1beta3',
+        pod_manifest = {'apiVersion': 'v1',
                         'kind': 'Pod',
                         'metadata': {'color': 'blue', 'name': 'test'},
                         'spec': {'containers': [{'image': 'dockerfile/redis',
                                  'name': 'redis'}]}}
 
-        resp = self.k8s_api.createPod(body=pod_manifest, namespaces='default')
-        self.assertEqual(resp.metadata['name'], 'test')
+        resp = self.k8s_api.create_namespaced_pod(body=pod_manifest,
+                                                  namespace='default')
+        self.assertEqual(resp.metadata.name, 'test')
         self.assertTrue(resp.status.phase)
 
-        resp = self.k8s_api.readPod(name='test', namespaces='default')
-        self.assertEqual(resp.metadata['name'], 'test')
+        resp = self.k8s_api.read_namespaced_pod(name='test',
+                                                namespace='default')
+        self.assertEqual(resp.metadata.name, 'test')
         self.assertTrue(resp.status.phase)
 
-        resp = self.k8s_api.deletePod(name='test', namespaces='default')
-        self.assertFalse(resp.phase)
+        resp = self.k8s_api.delete_namespaced_pod(name='test', body={},
+                                                  namespace='default')
 
     def test_service_apis(self):
-        service_manifest = {'apiVersion': 'v1beta3',
+        service_manifest = {'apiVersion': 'v1',
                             'kind': 'Service',
                             'metadata': {'labels': {'name': 'frontend'},
                                          'name': 'frontend',
-                                         'resourceversion': 'v1beta3'},
+                                         'resourceversion': 'v1'},
                             'spec': {'ports': [{'port': 80,
                                                 'protocol': 'TCP',
                                                 'targetPort': 80}],
                                      'selector': {'name': 'frontend'}}}
 
-        resp = self.k8s_api.createService(body=service_manifest,
-                                          namespaces='default')
-        self.assertEqual(resp.metadata['name'], 'frontend')
+        resp = self.k8s_api.create_namespaced_service(body=service_manifest,
+                                                      namespace='default')
+        self.assertEqual(resp.metadata.name, 'frontend')
         self.assertTrue(resp.status)
 
-        resp = self.k8s_api.readService(name='frontend', namespaces='default')
-        self.assertEqual(resp.metadata['name'], 'frontend')
+        resp = self.k8s_api.read_namespaced_service(name='frontend',
+                                                    namespace='default')
+        self.assertEqual(resp.metadata.name, 'frontend')
         self.assertTrue(resp.status)
 
-        resp = self.k8s_api.deleteService(name='frontend',
-                                          namespaces='default')
-        # TODO(madhuri) Currently the V1beta3_ServiceStatus
-        # has no attribute defined. Uncomment this assertion
-        # when the class is redefined to contain 'phase'.
-        # self.assertTrue(resp.phase)
+        resp = self.k8s_api.delete_namespaced_service(name='frontend',
+                                                      namespace='default')
 
     def test_replication_controller_apis(self):
         rc_manifest = {
-            'apiVersion': 'v1beta3',
+            'apiVersion': 'v1',
             'kind': 'ReplicationController',
             'metadata': {'labels': {'name': 'frontend'},
                          'name': 'frontend'},
@@ -291,16 +290,15 @@ class TestKubernetesAPIs(BaseMagnumClient):
                              'ports': [{'containerPort': 80,
                                         'protocol': 'TCP'}]}]}}}}
 
-        resp = self.k8s_api.createReplicationController(body=rc_manifest,
-                                                        namespaces='default')
-        self.assertEqual(resp.metadata['name'], 'frontend')
+        resp = self.k8s_api.create_namespaced_replication_controller(
+            body=rc_manifest, namespace='default')
+        self.assertEqual(resp.metadata.name, 'frontend')
         self.assertEqual(resp.spec.replicas, 2)
 
-        resp = self.k8s_api.readReplicationController(name='frontend',
-                                                      namespaces='default')
-        self.assertEqual(resp.metadata['name'], 'frontend')
+        resp = self.k8s_api.read_namespaced_replication_controller(
+            name='frontend', namespace='default')
+        self.assertEqual(resp.metadata.name, 'frontend')
         self.assertEqual(resp.spec.replicas, 2)
 
-        resp = self.k8s_api.deleteReplicationController(name='frontend',
-                                                        namespaces='default')
-        self.assertFalse(resp.replicas)
+        resp = self.k8s_api.delete_namespaced_replication_controller(
+            name='frontend', body={}, namespace='default')
