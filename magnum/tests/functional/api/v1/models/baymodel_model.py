@@ -10,10 +10,21 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import logging
+from magnum.tests.functional.common import models
 
-logging.basicConfig(
-    filename='functional-tests.log',
-    filemode='w',
-    level=logging.DEBUG,
-)
+
+class BayModelData(models.BaseModel):
+    """Data that encapsulates  baymodel attributes"""
+    pass
+
+
+class BayModelEntity(models.EntityModel):
+    """Entity Model that represents a single instance of BayModelData"""
+    ENTITY_NAME = 'baymodel'
+    MODEL_TYPE = BayModelData
+
+
+class BayModelCollection(models.CollectionModel):
+    """Collection Model that represents a list of BayModelData objects"""
+    COLLECTION_NAME = 'baymodellists'
+    MODEL_TYPE = BayModelData

@@ -71,6 +71,10 @@ cat <<EOF > $CREDS_FILE
 [auth]
 auth_url = $OS_AUTH_URL
 magnum_url = $BYPASS_URL
+username = $OS_USERNAME
+tenant_name = $OS_TENANT_NAME
+password = $OS_PASSWORD
+auth_version = v2
 [admin]
 user = $OS_USERNAME
 tenant = $OS_TENANT_NAME
@@ -79,6 +83,7 @@ region_name = $OS_REGION_NAME
 [magnum]
 image_id = $IMAGE_ID
 nic_id = $NIC_ID
+keypair_id = default
 EOF
 
 # Create a keypair for use in the functional tests.
