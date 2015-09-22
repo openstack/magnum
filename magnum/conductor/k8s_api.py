@@ -61,7 +61,7 @@ class K8sAPI(apiv_api.ApivApi):
 def create_k8s_api(context, obj):
     """Create a kubernetes API client
 
-    Creates connection with Kubernetes master and creates ApivbetaApi instance
+    Creates connection with Kubernetes master and creates ApivApi instance
     to call Kubernetes APIs.
 
     :param context: The security context
