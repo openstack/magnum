@@ -189,7 +189,7 @@ class Handler(object):
 
     @wrap_container_exception
     def _container_action(self, context, container_uuid, status, docker_func):
-        LOG.debug("container_%s %s" % (status, container_uuid))
+        LOG.debug("%s container %s ..." % (docker_func, container_uuid))
         docker = self.get_docker_client(context, container_uuid)
         try:
             docker_id = self._find_container_by_name(docker, container_uuid)
