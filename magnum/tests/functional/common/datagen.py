@@ -94,7 +94,8 @@ def random_baymodel_data(keypair_id=random_string(), image_id=random_string()):
         "coe": generate_random_coe(),
         "http_proxy": "http://proxy.com:%s" % generate_random_port(),
         "https_proxy": "https://proxy.com:%s" % generate_random_port(),
-        "no_proxy": ",".join(generate_random_ip() for x in range(3))
+        "no_proxy": ",".join(generate_random_ip() for x in range(3)),
+        "network_driver": "flannel",
     }
     model = baymodel_model.BayModelEntity.from_dict(data)
 
