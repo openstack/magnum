@@ -101,3 +101,83 @@ class TestValidation(base.BaseTestCase):
             mock_bay_get_by_uuid, mock_baymodel_get_by_uuid,
             mock_pecan_request, bay_type, allowed_bay_types,
             assert_raised=True)
+
+    def _test_enforce_network_driver_types_post(
+            self,
+            network_driver_type,
+            allowed_network_driver_types,
+            assert_raised=False):
+
+        @v.enforce_network_driver_types(*allowed_network_driver_types)
+        def test(self, baymodel):
+            pass
+
+        baymodel = mock.MagicMock()
+        baymodel.name = 'test_baymodel'
+        baymodel.network_driver = network_driver_type
+
+        if assert_raised:
+            self.assertRaises(exception.InvalidParameterValue,
+                              test, self, baymodel)
+        else:
+            test(self, baymodel)
+
+    def test_enforce_network_driver_types_one_allowed_post(self):
+        self._test_enforce_network_driver_types_post(
+            network_driver_type = 'type1',
+            allowed_network_driver_types = ['type1'])
+
+    def test_enforce_network_driver_types_two_allowed_post(self):
+        self._test_enforce_network_driver_types_post(
+            network_driver_type = 'type1',
+            allowed_network_driver_types = ['type1', 'type2'])
+
+    def test_enforce_network_driver_types_not_allowed_post(self):
+        self._test_enforce_network_driver_types_post(
+            network_driver_type = 'type1',
+            allowed_network_driver_types = ['type2'],
+            assert_raised=True)
+
+    @mock.patch('pecan.request')
+    @mock.patch('magnum.objects.BayModel.get_by_uuid')
+    def _test_enforce_network_driver_types_patch(
+            self,
+            mock_baymodel_get_by_uuid,
+            mock_pecan_request,
+            network_driver_type,
+            allowed_network_driver_types,
+            assert_raised=False):
+
+        @v.enforce_network_driver_types(*allowed_network_driver_types)
+        def test(self, baymodel_uuid):
+            pass
+
+        context = mock_pecan_request.context
+        baymodel_uuid = 'test_uuid'
+        baymodel = mock.MagicMock()
+        baymodel.network_driver = network_driver_type
+        mock_baymodel_get_by_uuid.return_value = baymodel
+
+        if assert_raised:
+            self.assertRaises(exception.InvalidParameterValue,
+                              test, self, baymodel_uuid)
+        else:
+            test(self, baymodel_uuid)
+            mock_baymodel_get_by_uuid.assert_called_once_with(
+                context, baymodel_uuid)
+
+    def test_enforce_network_driver_types_one_allowed_patch(self):
+        self._test_enforce_network_driver_types_patch(
+            network_driver_type = 'type1',
+            allowed_network_driver_types = ['type1'])
+
+    def test_enforce_network_driver_types_two_allowed_patch(self):
+        self._test_enforce_network_driver_types_patch(
+            network_driver_type = 'type1',
+            allowed_network_driver_types = ['type1', 'type2'])
+
+    def test_enforce_network_driver_types_not_allowed_patch(self):
+        self._test_enforce_network_driver_types_patch(
+            network_driver_type = 'type1',
+            allowed_network_driver_types = ['type2'],
+            assert_raised=True)

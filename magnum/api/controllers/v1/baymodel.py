@@ -27,6 +27,7 @@ from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api.controllers.v1 import utils as api_utils
 from magnum.api import expose
+from magnum.api import validation
 from magnum.common import clients
 from magnum.common import exception
 from magnum.common import policy
@@ -304,6 +305,7 @@ class BayModelsController(rest.RestController):
 
     @policy.enforce_wsgi("baymodel", "create")
     @expose.expose(BayModel, body=BayModel, status_code=201)
+    @validation.enforce_network_driver_types('flannel')
     def post(self, baymodel):
         """Create a new baymodel.
 
@@ -330,6 +332,7 @@ class BayModelsController(rest.RestController):
     @policy.enforce_wsgi("baymodel", "update")
     @wsme.validate(types.uuid, [BayModelPatchType])
     @expose.expose(BayModel, types.uuid, body=[BayModelPatchType])
+    @validation.enforce_network_driver_types('flannel')
     def patch(self, baymodel_uuid, patch):
         """Update an existing baymodel.
 

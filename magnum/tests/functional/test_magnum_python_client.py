@@ -99,6 +99,7 @@ class BaseMagnumClient(base.TestCase):
             flavor_id='m1.magnum',
             docker_volume_size=1,
             coe='kubernetes',
+            network_driver='flannel',
         )
         return baymodel
 
