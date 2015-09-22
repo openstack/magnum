@@ -168,6 +168,16 @@ To list the available commands and resources for magnum, use::
 
     magnum help
 
+To list out the health of the internal services, namely conductor, of magnum, use::
+
+    magnum service-list
+
+    +----+------------------------------------+------------------+-------+
+    | id | host                               | binary           | state |
+    +----+------------------------------------+------------------+-------+
+    | 1  | oxy-dev.hq1-0a5a3c02.hq1.abcde.com | magnum-conductor | up    |
+    +----+------------------------------------+------------------+-------+
+
 Create a keypair for use with the baymodel::
 
     test -f ~/.ssh/id_rsa.pub || ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
