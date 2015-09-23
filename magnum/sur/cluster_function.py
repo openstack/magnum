@@ -21,19 +21,23 @@ def create_cluster(OSC):
     sc = OSC.senlin()
 
     # Create Profile
-    pr_master = Profile.profile_create(sc, 'SUR_Master_Profile', 'os.nova.server',
+    pr_master = Profile.profile_create(sc, 'SUR_HEAT_Master_Profile', 'os.heat.stack',
                                 '/opt/stack/magnum/magnum/sur/SURspec/SUR_master.spec',
                                 '1111')
-    pr_minion = Profile.profile_create(sc, 'SUR_Minion_Profile', 'os.nova.server',
-                                '/opt/stack/magnum/magnum/sur/SURspec/SUR_minion.spec',
+    pr_minion = Profile.profile_create(sc, 'SUR_HEAT_Minion_Profile', 'os.heat.stack',
+                                '/opt/stack/magnum/magnum/sur/SURspec/',
                                 '1111')
     time.sleep(1)
-    LOG.info(pr)
+    LOG.info(pr_master)
+    LOG.info(pr_minion)
     
     # Create Cluster
-    cr = Cluster.cluster_create(sc, 'SUR_Cluster', 'SUR_Minion_Profile')
+    cr_master = Cluster.cluster_create(sc, 'SUR_Master_Cluster', 'SUR_HEAT_Master_Profile')
     time.sleep(1)
-    LOG.info(cr)
+    cr_minion = Cluster.cluster_create(sc, 'SUR_Minion_Cluster', 'SUR_HEAT_Minion_Profile')
+    time.sleep(1)
+    LOG.info(cr_master)
+    LOG.info(cr_minion)
 
     # Create Nodes
     #nr_master = Node.node_create(sc, 'SUR_Node_Master', 'SUR_Cluster',
