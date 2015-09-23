@@ -237,7 +237,6 @@ function magnum_register_image {
 # install_magnumclient() - Collect source and prepare
 function install_magnumclient {
     if use_library_from_git "python-magnumclient"; then
-        ERROR_ON_CLONE=False
         git_clone_by_name "python-magnumclient"
         setup_dev_lib "python-magnumclient"
     fi
