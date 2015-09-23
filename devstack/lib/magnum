@@ -228,10 +228,10 @@ function init_magnum {
     create_magnum_cache_dir
 }
 
-# magnum_register_image - Register heat image for magnum with property os-distro
+# magnum_register_image - Register heat image for magnum with property os_distro
 function magnum_register_image {
-    local magnum_image_property="--property os-distro=fedora-atomic"
-    openstack --os-url $GLANCE_SERVICE_PROTOCOL://$GLANCE_HOSTPORT image set $(basename "$MANGUM_GUEST_IMAGE_URL" ".qcow2") $magnum_image_property
+    local magnum_image_property="--property os_distro=fedora-atomic"
+    openstack --os-url $GLANCE_SERVICE_PROTOCOL://$GLANCE_HOSTPORT --os-image-api-version 1 image set $(basename "$MANGUM_GUEST_IMAGE_URL" ".qcow2") $magnum_image_property
 }
 
 # install_magnumclient() - Collect source and prepare
