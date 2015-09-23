@@ -160,7 +160,7 @@ when installing devstack use::
     | 7f5b6a15-f2fd-4552-aec5-952c6f6d4bc7 | cirros-0.3.4-x86_64-uec         | ami         | ami              | 25165824  | active |
     | bd3c0f92-669a-4390-a97d-b3e0a2043362 | cirros-0.3.4-x86_64-uec-kernel  | aki         | aki              | 4979632   | active |
     | 843ce0f7-ae51-4db3-8e74-bcb860d06c55 | cirros-0.3.4-x86_64-uec-ramdisk | ari         | ari              | 3740163   | active |
-    | 02c312e3-2d30-43fd-ab2d-1d25622c0eaa | fedora-21-atomic-3              | qcow2       | bare             | 770179072 | active |
+    | 02c312e3-2d30-43fd-ab2d-1d25622c0eaa | fedora-21-atomic-5              | qcow2       | bare             | 770179072 | active |
     +--------------------------------------+---------------------------------+-------------+------------------+-----------+--------+
 
 To list the available commands and resources for magnum, use::
@@ -177,7 +177,7 @@ to magnum how to construct the bay. The coe (Container Orchestration Engine)
 and keypair need to be specified for the baymodel::
 
     magnum baymodel-create --name k8sbaymodel \
-                           --image-id fedora-21-atomic-3 \
+                           --image-id fedora-21-atomic-5 \
                            --keypair-id testkey \
                            --external-network-id public \
                            --dns-nameserver 8.8.8.8 \
@@ -342,7 +342,7 @@ the absence of some Kubernetes-specific arguments and the use of 'swarm'
 as the coe::
 
     magnum baymodel-create --name swarmbaymodel \
-                           --image-id fedora-21-atomic-3 \
+                           --image-id fedora-21-atomic-5 \
                            --keypair-id testkey \
                            --external-network-id public \
                            --dns-nameserver 8.8.8.8 \

@@ -182,7 +182,7 @@ Proposed Changes
    Libnetwork driver:
 
      magnum baymodel-create --name k8sbaymodel \
-                            --image-id fedora-21-atomic-3 \
+                            --image-id fedora-21-atomic-5 \
                             --keypair-id testkey \
                             --external-network-id 1hsdhs88sddds889 \
                             --dns-nameserver 8.8.8.8 \
@@ -208,7 +208,7 @@ Proposed Changes
    Libnetwork driver:
 
      magnum baymodel-create --name k8sbaymodel \
-                            --image-id fedora-21-atomic-3 \
+                            --image-id fedora-21-atomic-5 \
                             --keypair-id testkey \
                             --external-network-id ${NIC_ID} \
                             --dns-nameserver 8.8.8.8 \
