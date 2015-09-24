@@ -194,6 +194,12 @@ resources:
             "$MAGNUM_URL": {get_param: magnum_url}
             "$INSECURE": {get_param: insecure}
 
+  configure_swarm:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/configure-swarm.sh}
+
   remove_docker_key:
     type: "OS::Heat::SoftwareConfig"
     properties:
@@ -283,6 +289,7 @@ resources:
         - config: {get_resource: disable_selinux}
         - config: {get_resource: remove_docker_key}
         - config: {get_resource: write_heat_params}
+        - config: {get_resource: configure_swarm}
         - config: {get_resource: add_proxy}
         - config: {get_resource: make_cert}
         - config: {get_resource: write_docker_service}
