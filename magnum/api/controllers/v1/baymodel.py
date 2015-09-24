@@ -122,6 +122,9 @@ class BayModel(base.APIBase):
     labels = wtypes.DictType(str, str)
     """One or more key/value pairs"""
 
+    insecure = wsme.wsattr(types.boolean, default=False)
+    """Indicates whether the TLS should be disabled"""
+
     def __init__(self, **kwargs):
         self.fields = []
         for field in objects.BayModel.fields:

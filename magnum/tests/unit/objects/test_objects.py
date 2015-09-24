@@ -426,7 +426,7 @@ class _TestObject(object):
 object_data = {
     'Bay': '1.0-35edde13ad178e9419e7ea8b6d580bcd',
     'BayLock': '1.0-7d1eb08cf2070523bd210369c7a2e076',
-    'BayModel': '1.3-369d7b7f05720780ae4f6c5d983e8c3e',
+    'BayModel': '1.4-68d7979ff1d81f948180fb620e6f84c7',
     'Certificate': '1.0-2aff667971b85c1edf8d15684fd7d5e2',
     'Container': '1.0-e12affbba5f8a748882a3ae98aced282',
     'MyObj': '1.0-b43567e512438205e32f4e95ca616697',

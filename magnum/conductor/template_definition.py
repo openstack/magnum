@@ -20,6 +20,7 @@ from pkg_resources import iter_entry_points
 import requests
 import six
 
+from magnum.common import clients
 from magnum.common import exception
 from magnum.common import paths
 from magnum.i18n import _
@@ -107,16 +108,16 @@ class ParameterMapping(object):
         value = None
 
         if (self.baymodel_attr and
-                getattr(baymodel, self.baymodel_attr, None)):
+                getattr(baymodel, self.baymodel_attr, None) is not None):
             value = getattr(baymodel, self.baymodel_attr)
         elif (self.bay_attr and
-                getattr(bay, self.bay_attr, None)):
+                getattr(bay, self.bay_attr, None) is not None):
             value = getattr(bay, self.bay_attr)
         elif self.required:
             kwargs = dict(heat_param=self.heat_param)
             raise exception.RequiredParameterNotProvided(**kwargs)
 
-        if value:
+        if value is not None:
             value = self.param_type(value)
             params[self.heat_param] = value
 
@@ -481,6 +482,9 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
 
     def __init__(self):
         super(AtomicSwarmTemplateDefinition, self).__init__()
+        self.add_parameter('bay_uuid',
+                           bay_attr='uuid',
+                           param_type=str)
         self.add_parameter('number_of_nodes',
                            bay_attr='node_count',
                            param_type=str)
@@ -488,6 +492,9 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
                            baymodel_attr='flavor_id')
         self.add_parameter('external_network',
                            baymodel_attr='external_network_id',
+                           required=True)
+        self.add_parameter('insecure',
+                           baymodel_attr='insecure',
                            required=True)
         self.add_output('swarm_master',
                         bay_attr='api_address')
@@ -519,6 +526,12 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
     def get_params(self, context, baymodel, bay, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
         extra_params['discovery_url'] = self.get_discovery_url(bay)
+        # HACK(apmelton) - This uses the user's bearer token, ideally
+        # it should be replaced with an actual trust token with only
+        # access to do what the template needs it to do.
+        extra_params['user_token'] = context.auth_token
+        osc = clients.OpenStackClients(context)
+        extra_params['magnum_url'] = osc.magnum_url()
 
         return super(AtomicSwarmTemplateDefinition,
                      self).get_params(context, baymodel, bay,

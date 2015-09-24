@@ -57,6 +57,22 @@ parameters:
     type: string
     description: swarm master's ip address
 
+  user_token:
+    type: string
+    description: token used for communicating back to Magnum for TLS certs
+
+  bay_uuid:
+    type: string
+    description: identifier for the bay this template is generating
+
+  magnum_url:
+    type: string
+    description: endpoint to retrieve TLS certs from
+
+  insecure:
+    type: boolean
+    description: whether or not to disable TLS
+
 resources:
 
   node_wait_handle:
@@ -119,6 +135,11 @@ resources:
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
             "$SWARM_MASTER_IP": {get_param: swarm_master_ip}
+            "$SWARM_NODE_IP": {get_attr: [swarm_node_eth0, fixed_ips, 0, ip_address]}
+            "$BAY_UUID": {get_param: bay_uuid}
+            "$USER_TOKEN": {get_param: user_token}
+            "$MAGNUM_URL": {get_param: magnum_url}
+            "$INSECURE": {get_param: insecure}
 
   remove_docker_key:
     type: "OS::Heat::SoftwareConfig"
@@ -126,23 +147,23 @@ resources:
       group: ungrouped
       config: {get_file: fragments/remove-docker-key.sh}
 
+  make_cert:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/make_cert.py}
+
   write_docker_service:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
-      config: {get_file: fragments/write-docker-service.yaml}
+      config: {get_file: fragments/write-docker-service.sh}
 
   write_docker_socket:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
       config: {get_file: fragments/write-docker-socket.yaml}
-
-  write_docker_tcp_socket:
-    type: "OS::Heat::SoftwareConfig"
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/write-docker-tcp-socket.yaml}
 
   write_swarm_agent_service:
     type: "OS::Heat::SoftwareConfig"
@@ -194,11 +215,11 @@ resources:
         - config: {get_resource: disable_selinux}
         - config: {get_resource: remove_docker_key}
         - config: {get_resource: write_heat_params}
+        - config: {get_resource: make_cert}
         - config: {get_resource: add_proxy}
         - config: {get_resource: write_swarm_agent_service}
         - config: {get_resource: write_docker_service}
         - config: {get_resource: write_docker_socket}
-        - config: {get_resource: write_docker_tcp_socket}
         - config: {get_resource: enable_services}
         - config: {get_resource: cfn_signal}
 

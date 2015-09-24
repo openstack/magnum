@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import uuid
 
 from heatclient import exc
 from oslo_service import loopingcall
@@ -795,18 +796,51 @@ class TestHandler(db_base.DbTestCase):
         bay = objects.Bay.get(self.context, self.bay.uuid)
         self.assertEqual(bay.node_count, 1)
 
-    @patch('magnum.conductor.handlers.common.cert_manager.'
-           'generate_certificates_to_bay')
+    @patch('magnum.conductor.handlers.bay_conductor.HeatPoller')
+    @patch('magnum.conductor.handlers.bay_conductor.cert_manager')
+    @patch('magnum.conductor.handlers.bay_conductor._create_stack')
+    @patch('magnum.conductor.handlers.bay_conductor.uuid')
+    @patch('magnum.common.clients.OpenStackClients')
+    def test_create(self, mock_openstack_client_class, mock_uuid,
+                    mock_create_stack, mock_cert_manager,
+                    mock_heat_poller_class):
+        timeout = 15
+        test_uuid = uuid.uuid4()
+        mock_uuid.uuid4.return_value = test_uuid
+        mock_poller = mock.MagicMock()
+        mock_poller.poll_and_check.return_value = loopingcall.LoopingCallDone()
+        mock_heat_poller_class.return_value = mock_poller
+        mock_openstack_client_class.return_value = mock.sentinel.osc
+
+        def create_stack_side_effect(context, osc, bay, timeout):
+            self.assertEqual(bay.uuid, str(test_uuid))
+            return {'stack': {'id': 'stack-id'}}
+
+        mock_create_stack.side_effect = create_stack_side_effect
+
+        self.handler.bay_create(self.context,
+                                self.bay, timeout)
+
+        mock_create_stack.assert_called_once_with(self.context,
+                                                  mock.sentinel.osc,
+                                                  self.bay, timeout)
+        mock_cert_manager.generate_certificates_to_bay.assert_called_once_with(
+            self.bay)
+
+    @patch('magnum.conductor.handlers.bay_conductor.cert_manager')
     @patch('magnum.conductor.handlers.bay_conductor._create_stack')
     @patch('magnum.common.clients.OpenStackClients')
-    def test_create(self, mock_openstack_client_class, mock_create_stack,
-                    mock_generate_certificates):
+    def test_create_handles_bad_request(self, mock_openstack_client_class,
+                                        mock_create_stack,
+                                        mock_cert_manager):
         mock_create_stack.side_effect = exc.HTTPBadRequest
         timeout = 15
         self.assertRaises(exception.InvalidParameterValue,
                           self.handler.bay_create, self.context,
                           self.bay, timeout)
-        mock_generate_certificates.assert_called_once_with(self.bay)
+        mock_cert_manager.generate_certificates_to_bay.assert_called_once_with(
+            self.bay)
+        mock_cert_manager.delete_certificates_from_bay(self.bay)
 
     @patch('magnum.common.clients.OpenStackClients')
     def test_bay_delete(self, mock_openstack_client_class):
@@ -833,7 +867,8 @@ class TestBayConductorWithSwarm(base.TestCase):
             'coe': 'swarm',
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
-            'no_proxy': 'no_proxy'
+            'no_proxy': 'no_proxy',
+            'insecure': False
         }
         self.bay_dict = {
             'id': 1,
@@ -846,6 +881,12 @@ class TestBayConductorWithSwarm(base.TestCase):
             'node_count': 1,
             'discovery_url': 'token://39987da72f8386e0d0225ae8929e7cb4',
         }
+        osc_patcher = mock.patch('magnum.common.clients.OpenStackClients')
+        self.mock_osc_class = osc_patcher.start()
+        self.addCleanup(osc_patcher.stop)
+        self.mock_osc = mock.MagicMock()
+        self.mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
+        self.mock_osc_class.return_value = self.mock_osc
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_all_values(
@@ -870,7 +911,12 @@ class TestBayConductorWithSwarm(base.TestCase):
             'discovery_url': 'token://39987da72f8386e0d0225ae8929e7cb4',
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
-            'no_proxy': 'no_proxy'
+            'no_proxy': 'no_proxy',
+            'user_token': self.context.auth_token,
+            'bay_uuid': 'some_uuid',
+            'magnum_url': self.mock_osc.magnum_url.return_value,
+            'insecure': False
+
         }
         self.assertEqual(expected, definition)
 
@@ -901,7 +947,11 @@ class TestBayConductorWithSwarm(base.TestCase):
             'ssh_key_name': 'keypair_id',
             'external_network': 'external_network_id',
             'number_of_nodes': '1',
-            'discovery_url': 'test_discovery'
+            'discovery_url': 'test_discovery',
+            'user_token': self.context.auth_token,
+            'bay_uuid': 'some_uuid',
+            'magnum_url': self.mock_osc.magnum_url.return_value,
+            'insecure': False
         }
         self.assertEqual(expected, definition)
 
