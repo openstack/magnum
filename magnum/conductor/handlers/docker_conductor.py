@@ -148,10 +148,9 @@ class Handler(object):
                                         command=container.command)
                 container.status = fields.ContainerStatus.STOPPED
                 return container
-            except errors.APIError as api_error:
+            except errors.APIError:
                 container.status = fields.ContainerStatus.ERROR
-                raise exception.ContainerException(
-                    "Docker API Error : %s" % str(api_error))
+                raise
             finally:
                 container.save()
 
@@ -159,15 +158,11 @@ class Handler(object):
     def container_delete(self, context, container_uuid):
         LOG.debug("container_delete %s" % container_uuid)
         with docker_for_container(context, container_uuid) as docker:
-            try:
-                docker_id = self._find_container_by_name(docker,
-                                                         container_uuid)
-                if not docker_id:
-                    return None
-                return docker.remove_container(docker_id)
-            except errors.APIError as api_error:
-                raise exception.ContainerException(
-                    "Docker API Error : %s" % str(api_error))
+            docker_id = self._find_container_by_name(docker,
+                                                     container_uuid)
+            if not docker_id:
+                return None
+            return docker.remove_container(docker_id)
 
     @wrap_container_exception
     def container_show(self, context, container_uuid):
@@ -203,25 +198,20 @@ class Handler(object):
                     container.status = fields.ContainerStatus.ERROR
                     container.save()
                     return container
-                raise exception.ContainerException(
-                    "Docker API Error : %s" % (error_message))
+                raise
 
     @wrap_container_exception
     def _container_action(self, context, container_uuid, status, docker_func):
         LOG.debug("%s container %s ..." % (docker_func, container_uuid))
         with docker_for_container(context, container_uuid) as docker:
-            try:
-                docker_id = self._find_container_by_name(docker,
-                                                         container_uuid)
-                result = getattr(docker, docker_func)(docker_id)
-                container = objects.Container.get_by_uuid(context,
-                                                          container_uuid)
-                container.status = status
-                container.save()
-                return result
-            except errors.APIError as api_error:
-                raise exception.ContainerException(
-                    "Docker API Error : %s" % str(api_error))
+            docker_id = self._find_container_by_name(docker,
+                                                     container_uuid)
+            result = getattr(docker, docker_func)(docker_id)
+            container = objects.Container.get_by_uuid(context,
+                                                      container_uuid)
+            container.status = status
+            container.save()
+            return result
 
     def container_reboot(self, context, container_uuid):
         return self._container_action(context, container_uuid,
@@ -249,30 +239,22 @@ class Handler(object):
     def container_logs(self, context, container_uuid):
         LOG.debug("container_logs %s" % container_uuid)
         with docker_for_container(context, container_uuid) as docker:
-            try:
-                docker_id = self._find_container_by_name(docker,
-                                                         container_uuid)
-                return {'output': docker.get_container_logs(docker_id)}
-            except errors.APIError as api_error:
-                raise exception.ContainerException(
-                    "Docker API Error : %s" % str(api_error))
+            docker_id = self._find_container_by_name(docker,
+                                                     container_uuid)
+            return {'output': docker.get_container_logs(docker_id)}
 
     @wrap_container_exception
     def container_exec(self, context, container_uuid, command):
         LOG.debug("container_exec %s command %s" %
                   (container_uuid, command))
         with docker_for_container(context, container_uuid) as docker:
-            try:
-                docker_id = self._find_container_by_name(docker,
-                                                         container_uuid)
-                if docker_utils.is_docker_library_version_atleast('1.2.0'):
-                    create_res = docker.exec_create(docker_id, command, True,
-                                                    True, False)
-                    exec_output = docker.exec_start(create_res, False, False,
-                                                    False)
-                else:
-                    exec_output = docker.execute(docker_id, command)
-                return {'output': exec_output}
-            except errors.APIError as api_error:
-                raise exception.ContainerException(
-                    "Docker API Error : %s" % str(api_error))
+            docker_id = self._find_container_by_name(docker,
+                                                     container_uuid)
+            if docker_utils.is_docker_library_version_atleast('1.2.0'):
+                create_res = docker.exec_create(docker_id, command, True,
+                                                True, False)
+                exec_output = docker.exec_start(create_res, False, False,
+                                                False)
+            else:
+                exec_output = docker.execute(docker_id, command)
+            return {'output': exec_output}

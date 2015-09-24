@@ -546,7 +546,7 @@ class TestDockerHandler(base.BaseTestCase):
                 mock_docker_id)
             mock_find_container.assert_called_once_with(self.mock_docker,
                                                         mock_container_uuid)
-            mock_init.assert_called_once_with()
+            mock_init.assert_called_with()
 
     @mock.patch.object(objects.Container, 'get_by_uuid')
     @patch.object(docker_conductor.Handler, '_find_container_by_name')
