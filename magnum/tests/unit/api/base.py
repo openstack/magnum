@@ -12,7 +12,6 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-"""Base classes for API tests."""
 
 # NOTE: Ported from ceilometer/tests/api.py (subsequently moved to
 # ceilometer/tests/api/__init__.py). This should be oslo'ified:
@@ -33,8 +32,10 @@ PATH_PREFIX = '/v1'
 
 
 class FunctionalTest(base.DbTestCase):
-    """Used for functional tests of Pecan controllers where you need to
-    test your literal application and its integration with the
+    """Base class for API tests.
+
+    Pecan controller test. Used for functional tests of Pecan controllers where
+    you need to test your literal application and its integration with the
     framework.
     """
 

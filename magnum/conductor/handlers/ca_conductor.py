@@ -12,7 +12,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-"""Magnum CA RPC handler."""
 
 from oslo_log import log as logging
 
@@ -22,9 +21,10 @@ LOG = logging.getLogger(__name__)
 
 
 class Handler(object):
-    """These are the backend operations.  They are executed by the backend
-         service.  API calls via AMQP (within the ReST API) trigger the
-         handlers to be called.
+    """Magnum CA RPC handler.
+
+    These are the backend operations. They are executed by the backend service.
+    API calls via AMQP (within the ReST API) trigger the handlers to be called.
 
     """
 

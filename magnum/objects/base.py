@@ -54,6 +54,7 @@ class MagnumObjectDictCompat(ovoo_base.VersionedObjectDictCompat):
 
 class MagnumPersistentObject(object):
     """Mixin class for Persistent objects.
+
     This adds the fields that we use in common for all persistent objects.
     """
     fields = {

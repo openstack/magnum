@@ -38,8 +38,7 @@ class BaseMagnumClient(rest_client.RestClient):
 
 
 class MagnumClient(BaseMagnumClient):
-    """Responsible for setting up auth provider for default user
-    """
+    """Responsible for setting up auth provider for default user"""
 
     def get_auth_provider(self):
         mgr = manager.Manager()

@@ -58,6 +58,7 @@ def get_test_baymodel(**kw):
 
 def create_test_baymodel(**kw):
     """Create test baymodel entry in DB and return BayModel DB object.
+
     Function to be used to create test BayModel objects in the database.
     :param kw: kwargs with overriding values for baymodel's attributes.
     :returns: Test BayModel DB object.
@@ -97,6 +98,7 @@ def get_test_bay(**kw):
 
 def create_test_bay(**kw):
     """Create test bay entry in DB and return Bay DB object.
+
     Function to be used to create test Bay objects in the database.
     :param kw: kwargs with overriding values for bay's attributes.
     :returns: Test Bay DB object.
@@ -129,6 +131,7 @@ def get_test_pod(**kw):
 
 def create_test_pod(**kw):
     """Create test pod entry in DB and return Pod DB object.
+
     Function to be used to create test Pod objects in the database.
     :param kw: kwargs with overriding values for pod's attributes.
     :returns: Test Pod DB object.
@@ -160,6 +163,7 @@ def get_test_service(**kw):
 
 def create_test_service(**kw):
     """Create test service entry in DB and return Service DB object.
+
     Function to be used to create test Service objects in the database.
     :param kw: kwargs with overriding values for service's attributes.
     :returns: Test Service DB object.
@@ -188,6 +192,7 @@ def get_test_node(**kw):
 
 def create_test_node(**kw):
     """Create test node entry in DB and return Node DB object.
+
     Function to be used to create test Node objects in the database.
     :param kw: kwargs with overriding values for node's attributes.
     :returns: Test Node DB object.
@@ -218,6 +223,7 @@ def get_test_container(**kw):
 
 def create_test_container(**kw):
     """Create test container entry in DB and return Container DB object.
+
     Function to be used to create test Container objects in the database.
     :param kw: kwargs with overriding values for container's attributes.
     :returns: Test Container DB object.
@@ -249,6 +255,7 @@ def get_test_rc(**kw):
 
 def create_test_rc(**kw):
     """Create test rc entry in DB and return ReplicationController DB object.
+
     Function to be used to create test ReplicationController objects in the
     database.
     :param kw: kwargs with overriding values for
@@ -292,6 +299,7 @@ def get_test_x509keypair(**kw):
 
 def create_test_x509keypair(**kw):
     """Create test x509keypair entry in DB and return X509KeyPair DB object.
+
     Function to be used to create test X509KeyPair objects in the database.
     :param kw: kwargs with overriding values for x509keypair's attributes.
     :returns: Test X509KeyPair DB object.
