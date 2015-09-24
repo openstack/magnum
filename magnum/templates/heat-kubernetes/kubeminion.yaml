@@ -145,6 +145,10 @@ parameters:
       size fo the data segments for the swift dynamic large objects
     default: 5242880
 
+  secgroup_kube_minion_id:
+    type: string
+    description: ID of the security group for kubernetes minion.
+
 resources:
 
   minion_wait_handle:
@@ -156,14 +160,6 @@ resources:
     properties:
       handle: {get_resource: minion_wait_handle}
       timeout: {get_param: wait_condition_timeout}
-
-  secgroup_all_open:
-    type: OS::Neutron::SecurityGroup
-    properties:
-      rules:
-        - protocol: icmp
-        - protocol: tcp
-        - protocol: udp
 
   ######################################################################
   #
@@ -329,7 +325,7 @@ resources:
     properties:
       network: {get_param: fixed_network}
       security_groups:
-        - get_resource: secgroup_all_open
+        - get_param: secgroup_kube_minion_id
       fixed_ips:
         - subnet: {get_param: fixed_subnet}
       replacement_policy: AUTO

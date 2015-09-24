@@ -107,6 +107,12 @@ parameters:
     type: number
     description : >
       timeout for the Wait Conditions
+  secgroup_base_id:
+    type: string
+    description: ID of the security group for base.
+  secgroup_kube_master_id:
+    type: string
+    description: ID of the security group for kubernetes master.
   api_pool_id:
     type: string
     description: ID of the load balancer pool of k8s API server.
@@ -141,38 +147,6 @@ resources:
     properties:
       handle: {get_resource: master_wait_handle}
       timeout: {get_param: wait_condition_timeout}
-
-  ######################################################################
-  #
-  # security groups.  we need to permit network traffic of various
-  # sorts.
-  #
-
-  secgroup_base:
-    type: OS::Neutron::SecurityGroup
-    properties:
-      rules:
-        - protocol: icmp
-        - protocol: tcp
-          port_range_min: 22
-          port_range_max: 22
-
-  secgroup_kubernetes:
-    type: OS::Neutron::SecurityGroup
-    properties:
-      rules:
-        - protocol: tcp
-          port_range_min: 7080
-          port_range_max: 7080
-        - protocol: tcp
-          port_range_min: {get_param: kubernetes_port}
-          port_range_max: {get_param: kubernetes_port}
-        - protocol: tcp
-          port_range_min: 2379
-          port_range_max: 2379
-        - protocol: tcp
-          port_range_min: 2380
-          port_range_max: 2380
 
   ######################################################################
   #
@@ -318,8 +292,8 @@ resources:
     properties:
       network: {get_param: fixed_network}
       security_groups:
-        - {get_resource: secgroup_base}
-        - {get_resource: secgroup_kubernetes}
+        - {get_param: secgroup_base_id}
+        - {get_param: secgroup_kube_master_id}
       fixed_ips:
         - subnet: {get_param: fixed_subnet}
       replacement_policy: AUTO
