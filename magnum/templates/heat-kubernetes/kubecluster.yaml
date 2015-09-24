@@ -115,6 +115,65 @@ parameters:
     description: >
       Discovery URL used for bootstrapping the etcd cluster.
 
+  registry_enabled:
+    type: boolean
+    description: >
+      Indicates whether the docker registry is enabled.
+    default: false
+
+  registry_port:
+    type: number
+    description: port of registry service
+    default: 5000
+
+  registry_username:
+    type: string
+    description: username used by docker registry
+    default: "username"
+
+  registry_password:
+    type: string
+    description: password used by docker registry
+    default: "password"
+
+  registry_domain:
+    type: string
+    description: domain used by docker registry
+    default: "domain"
+
+  registry_trust_id:
+    type: string
+    description: trust_id used by docker registry
+    default: "trust_id"
+
+  registry_auth_url:
+    type: string
+    description: auth_url for keystone
+    default: "auth_url"
+
+  registry_region:
+    type: string
+    description: region of swift service
+    default: "region"
+
+  registry_container:
+    type: string
+    description: >
+      name of swift container which docker registry stores images in
+    default: "container"
+
+  registry_insecure:
+    type: boolean
+    description: >
+      indicates whether to skip TLS verification between registry and backend storage
+    default: true
+
+  registry_chunksize:
+    type: number
+    description: >
+      size fo the data segments for the swift dynamic large objects
+    default: 5242880
+
 resources:
 
   ######################################################################
@@ -253,6 +312,17 @@ resources:
           kube_allow_priv: {get_param: kube_allow_priv}
           docker_volume_size: {get_param: docker_volume_size}
           wait_condition_timeout: {get_param: wait_condition_timeout}
+          registry_enabled: {get_param: registry_enabled}
+          registry_port: {get_param: registry_port}
+          registry_username: {get_param: registry_username}
+          registry_password: {get_param: registry_password}
+          registry_domain: {get_param: registry_domain}
+          registry_trust_id: {get_param: registry_trust_id}
+          registry_auth_url: {get_param: registry_auth_url}
+          registry_region: {get_param: registry_region}
+          registry_container: {get_param: registry_container}
+          registry_insecure: {get_param: registry_insecure}
+          registry_chunksize: {get_param: registry_chunksize}
 
 outputs:
 
@@ -265,6 +335,16 @@ outputs:
     description: >
       This is the API endpoint of the Kubernetes server. Use this to access
       the Kubernetes API from outside the cluster.
+
+  registry_address:
+    value:
+      str_replace:
+        template: localhost:port
+        params:
+          port: {get_param: registry_port}
+    description:
+      This is the url of docker registry server where you can store docker
+      images.
 
   kube_masters:
     value: {get_attr: [kube_masters, kube_master_external_ip]}

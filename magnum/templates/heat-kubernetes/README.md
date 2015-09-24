@@ -31,6 +31,9 @@ You can enable the VXLAN backend for flannel by setting the
 crashes using that backend with CentOS 7.  It seems to work fine with
 Fedora 21.
 
+You can enable docker registry v2 by setting the "registry_enabled"
+parameter to "true".
+
 ## Creating the stack
 
 Creating an environment file `local.yaml` with parameters specific to
@@ -41,6 +44,14 @@ your environment:
       external_network: public
       dns_nameserver: 192.168.200.1
       server_image: centos-7-atomic-20150101
+      registry_enabled: true
+      registry_username: username
+      registry_password: password
+      registry_domain: domain
+      registry_trust_id: trust_id
+      registry_auth_url: auth_url
+      registry_region: region
+      registry_container: container
 
 And then create the stack, referencing that environment file:
 
@@ -50,6 +61,16 @@ You must provide values for:
 
 - `ssh_key_name`
 - `server_image`
+
+If you enable docker registry v2, you must provide values for:
+
+- `registry_username`
+- `registry_password`
+- `registry_domain`
+- `registry_trust_id`
+- `registry_auth_url`
+- `registry_region`
+- `registry_container
 
 ## Interacting with Kubernetes
 
@@ -76,6 +97,10 @@ can get a list of minion addresses by running:
     [
       "192.168.200.182"
     ]
+
+You can get the docker registry v2 address:
+    $ heat output-show my-kube-cluster registry_address
+    localhost:5000
 
 ## Testing
 

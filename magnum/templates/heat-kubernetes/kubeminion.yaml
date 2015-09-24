@@ -61,6 +61,65 @@ parameters:
     description : >
       timeout for the Wait Conditions
 
+  registry_enabled:
+    type: boolean
+    description: >
+      Indicates whether the docker registry is enabled.
+    default: false
+
+  registry_port:
+    type: number
+    description: port of registry service
+    default: 5000
+
+  registry_username:
+    type: string
+    description: username used by docker registry
+    default: "username"
+
+  registry_password:
+    type: string
+    description: password used by docker registry
+    default: "password"
+
+  registry_domain:
+    type: string
+    description: domain used by docker registry
+    default: "domain"
+
+  registry_trust_id:
+    type: string
+    description: trust_id used by docker registry
+    default: "trust_id"
+
+  registry_auth_url:
+    type: string
+    description: auth_url for keystone
+    default: "auth_url"
+
+  registry_region:
+    type: string
+    description: region of swift service
+    default: "region"
+
+  registry_container:
+    type: string
+    description: >
+      name of swift container which docker registry stores images in
+    default: "container"
+
+  registry_insecure:
+    type: boolean
+    description: >
+      indicates whether to skip TLS verification between registry and backend storage
+    default: true
+
+  registry_chunksize:
+    type: number
+    description: >
+      size fo the data segments for the swift dynamic large objects
+    default: 5242880
+
 resources:
 
   minion_wait_handle:
@@ -100,12 +159,29 @@ resources:
             $ETCD_SERVER_IP: {get_param: etcd_server_ip}
             $DOCKER_VOLUME: {get_resource: docker_volume}
             $NETWORK_DRIVER: {get_param: network_driver}
+            $REGISTRY_ENABLED: {get_param: registry_enabled}
+            $REGISTRY_PORT: {get_param: registry_port}
+            $REGISTRY_AUTH_URL: {get_param: registry_auth_url}
+            $REGISTRY_REGION: {get_param: registry_region}
+            $REGISTRY_USERNAME: {get_param: registry_username}
+            $REGISTRY_PASSWORD: {get_param: registry_password}
+            $REGISTRY_DOMAIN: {get_param: registry_domain}
+            $REGISTRY_TRUST_ID: {get_param: registry_trust_id}
+            $REGISTRY_CONTAINER: {get_param: registry_container}
+            $REGISTRY_INSECURE: {get_param: registry_insecure}
+            $REGISTRY_CHUNKSIZE: {get_param: registry_chunksize}
 
   configure_docker_storage:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/configure-docker-storage.sh}
+
+  configure_docker_registry:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/configure-docker-registry.sh}
 
   kube_register:
     type: OS::Heat::SoftwareConfig
@@ -142,6 +218,12 @@ resources:
     properties:
       group: ungrouped
       config: {get_file: fragments/enable-services-minion.sh}
+
+  enable_docker_registry:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/enable-docker-registry.sh}
 
   minion_wc_notify:
     type: OS::Heat::SoftwareConfig
