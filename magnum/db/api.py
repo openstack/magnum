@@ -460,14 +460,6 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_pods_by_bay_uuid(self, bay_uuid):
-        """List all the pods for a given bay.
-
-        :param bay_uuid: The uuid of a bay.
-        :returns: A list of pods.
-        """
-
-    @abc.abstractmethod
     def destroy_pod(self, pod_id):
         """Destroy a pod and all associated interfaces.
 

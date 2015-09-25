@@ -682,13 +682,6 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.PodNotFound(pod=pod_name)
 
-    def get_pods_by_bay_uuid(self, bay_uuid):
-        query = model_query(models.Pod).filter_by(bay_uuid=bay_uuid)
-        try:
-            return query.all()
-        except NoResultFound:
-            raise exception.BayNotFound(bay=bay_uuid)
-
     def destroy_pod(self, pod_id):
         session = get_session()
         with session.begin():
