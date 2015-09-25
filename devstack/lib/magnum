@@ -180,17 +180,16 @@ function create_magnum_conf {
         iniset $MAGNUM_CONF DEFAULT notification_driver "messaging"
     fi
 
-    # Temporary work until barbican is available
-    MAGNUM_LOCAL_CERT_DIR=${MAGNUM_LOCAL_CERT_DIR:-/var/lib/magnum/certificates/}
-    if [[ ! -d $MAGNUM_LOCAL_CERT_DIR ]]; then
-        sudo mkdir -p $MAGNUM_LOCAL_CERT_DIR
-        sudo chown $STACK_USER $MAGNUM_LOCAL_CERT_DIR
-    fi
     if is_service_enabled barbican; then
-      iniset $MAGNUM_CONF certificates cert_manager_type "barbican"
+        iniset $MAGNUM_CONF certificates cert_manager_type "barbican"
     else
-      iniset $MAGNUM_CONF certificates storage_path "$MAGNUM_LOCAL_CERT_DIR"
-      iniset $MAGNUM_CONF certificates cert_manager_type "local"
+        MAGNUM_LOCAL_CERT_DIR=${MAGNUM_LOCAL_CERT_DIR:-/var/lib/magnum/certificates/}
+        if [[ ! -d $MAGNUM_LOCAL_CERT_DIR ]]; then
+            sudo mkdir -p $MAGNUM_LOCAL_CERT_DIR
+            sudo chown $STACK_USER $MAGNUM_LOCAL_CERT_DIR
+        fi
+        iniset $MAGNUM_CONF certificates storage_path "$MAGNUM_LOCAL_CERT_DIR"
+        iniset $MAGNUM_CONF certificates cert_manager_type "local"
     fi
 }
 
