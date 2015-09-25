@@ -148,14 +148,6 @@ class DbPodTestCase(base.DbTestCase):
             'bay_uuid': magnum_utils.generate_uuid()})
         self.assertEqual(0, len(res))
 
-    def test_get_pods_by_bay_uuid(self):
-        res = self.dbapi.get_pods_by_bay_uuid(self.bay.uuid)
-        self.assertEqual(self.pod.id, res[0].id)
-
-    def test_get_pods_by_bay_uuid_that_does_not_exist(self):
-        res = self.dbapi.get_pods_by_bay_uuid(magnum_utils.generate_uuid())
-        self.assertEqual([], res)
-
     def test_destroy_pod(self):
         self.dbapi.destroy_pod(self.pod.id)
         self.assertRaises(exception.PodNotFound,

@@ -20,7 +20,8 @@ from magnum.objects import base
 class Pod(base.MagnumPersistentObject, base.MagnumObject,
           base.MagnumObjectDictCompat):
     # Version 1.0: Initial version
-    VERSION = '1.0'
+    # Version 1.1: Remove unused Pod object API 'list_by_bay_uuid'
+    VERSION = '1.1'
 
     dbapi = dbapi.get_instance()
 
@@ -93,17 +94,6 @@ class Pod(base.MagnumPersistentObject, base.MagnumObject,
         db_pod = cls.dbapi.get_pod_by_name(name)
         pod = Pod._from_db_object(cls(context), db_pod)
         return pod
-
-    @base.remotable_classmethod
-    def list_by_bay_uuid(cls, context, bay_uuid):
-        """Return a list of :class:`Pod` objects associated with a given bay.
-
-        :param bay_uuid: the uuid of a bay.
-        :param context: Security context
-        :returns: a list of class:`Pod` object.
-        """
-        db_pods = cls.dbapi.get_pods_by_bay_uuid(bay_uuid)
-        return Pod._from_db_object_list(db_pods, cls, context)
 
     @base.remotable_classmethod
     def list(cls, context, limit=None, marker=None,
