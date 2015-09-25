@@ -102,6 +102,7 @@ class BaseMagnumClient(base.TestCase):
             docker_volume_size=1,
             network_driver='flannel',
             coe=coe,
+            labels={"K1": "V1", "K2": "V2"},
         )
         return baymodel
 
