@@ -985,6 +985,13 @@ class Connection(api.Connection):
         return _paginate_query(models.X509KeyPair, limit, marker,
                                sort_key, sort_dir, query)
 
+    def get_x509keypair_by_bay_uuid(self, context, bay_uuid):
+        query = model_query(models.X509KeyPair).filter_by(bay_uuid=bay_uuid)
+        try:
+            return query.one()
+        except NoResultFound:
+            raise exception.BayNotFound(bay=bay_uuid)
+
     def destroy_magnum_service(self, magnum_service_id):
         session = get_session()
         with session.begin():

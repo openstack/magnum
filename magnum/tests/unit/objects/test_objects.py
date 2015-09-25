@@ -434,7 +434,7 @@ object_data = {
     'Pod': '1.1-7a31c372f163742845c10a008f47cc15',
     'ReplicationController': '1.0-782b7deb9307b2807101541b7e58b8a2',
     'Service': '1.0-a8cf7e95fced904419164dbcb6d32b38',
-    'X509KeyPair': '1.0-fd008eba0fbc390e0e5da247bba4eedd',
+    'X509KeyPair': '1.1-4aecc268e23e32b8a762d43ba1a4b159',
     'MagnumService': '1.0-2d397ec59b0046bd5ec35cd3e06efeca',
 }
 

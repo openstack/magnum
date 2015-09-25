@@ -12,28 +12,87 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from tempfile import NamedTemporaryFile
+
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
+from oslo_log import log as logging
+
+from magnum.common import cert_manager
 from magnum.common.pythonk8sclient.swagger_client import api_client
 from magnum.common.pythonk8sclient.swagger_client.apis import apiv_api
 from magnum.conductor import utils
 
 
+LOG = logging.getLogger(__name__)
+
+
 class K8sAPI(apiv_api.ApivApi):
 
+    def _create_temp_file_with_content(self, content):
+        """Creates temp file and write content to the file.
+
+        :param content: file content
+        :returns: temp file
+        """
+        try:
+            tmp = NamedTemporaryFile(delete=True)
+            tmp.write(content)
+            tmp.flush()
+        except Exception as err:
+            LOG.error("Error while creating temp file: %s" % err)
+            raise err
+        return tmp
+
     def __init__(self, context, obj):
-        # retrieve the URL of the k8s API endpoint
-        k8s_api_endpoint = self._retrieve_k8s_api_endpoint(context, obj)
+        self.ca_file = None
+        self.cert_file = None
+        self.key_file = None
+
+        bay = utils.retrieve_bay(context, obj)
+        if bay.magnum_cert_ref:
+            self._create_certificate_files(bay)
 
         # build a connection with Kubernetes master
-        client = api_client.ApiClient(k8s_api_endpoint)
+        client = api_client.ApiClient(bay.api_address,
+                                      key_file=self.key_file.name,
+                                      cert_file=self.cert_file.name,
+                                      ca_certs=self.ca_file.name)
 
         super(K8sAPI, self).__init__(client)
 
-    @staticmethod
-    def _retrieve_k8s_api_endpoint(context, obj):
-        if hasattr(obj, 'bay_uuid'):
-            obj = utils.retrieve_bay(context, obj)
+    def _create_certificate_files(self, bay):
+        """Read certificate and key for a bay and stores in files.
 
-        return obj.api_address
+        :param bay: Bay object
+        """
+        magnum_cert_obj = cert_manager.get_backend().CertManager.get_cert(
+            bay.magnum_cert_ref)
+        self.cert_file = self._create_temp_file_with_content(
+            magnum_cert_obj.certificate)
+        private_key = serialization.load_pem_private_key(
+            magnum_cert_obj.private_key,
+            password=magnum_cert_obj.private_key_passphrase,
+            backend=default_backend(),
+        )
+        private_key = private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption())
+        self.key_file = self._create_temp_file_with_content(
+            private_key)
+        ca_cert_obj = cert_manager.get_backend().CertManager.get_cert(
+            bay.ca_cert_ref)
+        self.ca_file = self._create_temp_file_with_content(
+            ca_cert_obj.certificate)
+
+    def __del__(self):
+        if self.ca_file:
+            self.ca_file.close()
+        if self.cert_file:
+            self.cert_file.close()
+        if self.key_file:
+            self.key_file.close()
 
 
 def create_k8s_api(context, obj):

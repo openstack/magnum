@@ -720,6 +720,13 @@ class Connection(object):
         :returns: A list of tuples of the specified columns.
         """
 
+    def get_x509keypair_by_bay_uuid(self, bay_uuid):
+        """Returns the cert for a given bay.
+
+        :param bay_uuid: The uuid of a bay.
+        :returns: A cert.
+        """
+
     @abc.abstractmethod
     def destroy_magnum_service(self, magnum_service_id):
         """Destroys a magnum_service record.

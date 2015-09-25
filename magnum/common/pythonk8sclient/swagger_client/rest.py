@@ -82,7 +82,8 @@ class RESTClientObject(object):
             key_file=key_file,
             cert_file=cert_file,
             cert_reqs=ssl.CERT_REQUIRED,
-            ca_certs=ca_certs)
+            ca_certs=ca_certs,
+            assert_hostname=False)
 
     def agent(self, url):
         """

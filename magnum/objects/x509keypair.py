@@ -22,7 +22,8 @@ from magnum.objects import base
 class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject,
                   base.MagnumObjectDictCompat):
     # Version 1.0: Initial version
-    VERSION = '1.0'
+    # Version 1.1: Added new method get_x509keypair_by_bay_uuid
+    VERSION = '1.1'
 
     dbapi = dbapi.get_instance()
 
@@ -199,3 +200,14 @@ class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject,
         for field in self.fields:
             if self.obj_attr_is_set(field) and self[field] != current[field]:
                 self[field] = current[field]
+
+    @base.remotable_classmethod
+    def get_by_bay_uuid(cls, context, bay_uuid):
+        """Return a :class:`Cert` object associated with a given bay.
+
+        :param bay_uuid: the uuid of a bay.
+        :param context: Security context
+        :returns: a class:`Cert` object.
+        """
+        db_cert = cls.dbapi.get_x509keypair_by_bay_uuid(context, bay_uuid)
+        return X509KeyPair._from_db_object(cls(context), db_cert)
