@@ -210,7 +210,7 @@ resources:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
-      config: {get_file: fragments/make_cert.py}
+      config: {get_file: fragments/make-cert.py}
 
   write_docker_service:
     type: "OS::Heat::SoftwareConfig"
@@ -289,13 +289,13 @@ resources:
         - config: {get_resource: disable_selinux}
         - config: {get_resource: remove_docker_key}
         - config: {get_resource: write_heat_params}
-        - config: {get_resource: configure_swarm}
-        - config: {get_resource: add_proxy}
         - config: {get_resource: make_cert}
         - config: {get_resource: write_docker_service}
         - config: {get_resource: write_docker_socket}
         - config: {get_resource: write_swarm_agent_service}
         - config: {get_resource: write_swarm_master_service}
+        - config: {get_resource: configure_swarm}
+        - config: {get_resource: add_proxy}
         - config: {get_resource: enable_services}
         - config: {get_resource: cfn_signal}
 
