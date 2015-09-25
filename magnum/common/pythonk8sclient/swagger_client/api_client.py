@@ -65,7 +65,8 @@ class ApiClient(object):
     :param header_value: a header value to pass when making calls to the API.
     """
     def __init__(self, host=Configuration().host,
-                 header_name=None, header_value=None, cookie=None):
+                 header_name=None, header_value=None, cookie=None,
+                 key_file=None, cert_file=None, ca_certs=None):
 
         """
         Constructor of the class.
@@ -77,6 +78,9 @@ class ApiClient(object):
         self.cookie = cookie
         # Set default User-Agent.
         self.user_agent = 'Python-Swagger'
+        self.RESTClient = RESTClient(key_file=key_file,
+                                     cert_file=cert_file,
+                                     ca_certs=ca_certs)
 
     @property
     def user_agent(self):
@@ -328,38 +332,38 @@ class ApiClient(object):
     def request(self, method, url, query_params=None, headers=None,
                 post_params=None, body=None):
         """
-        Makes the HTTP request using RESTClient.
+        Makes the HTTP request using instance of rest client.
         """
         if method == "GET":
-            return RESTClient.GET(url,
-                                  query_params=query_params,
-                                  headers=headers)
+            return self.RESTClient.GET(url,
+                                       query_params=query_params,
+                                       headers=headers)
         elif method == "HEAD":
-            return RESTClient.HEAD(url,
-                                   query_params=query_params,
-                                   headers=headers)
+            return self.RESTClient.HEAD(url,
+                                        query_params=query_params,
+                                        headers=headers)
         elif method == "POST":
-            return RESTClient.POST(url,
-                                   query_params=query_params,
-                                   headers=headers,
-                                   post_params=post_params,
-                                   body=body)
+            return self.RESTClient.POST(url,
+                                        query_params=query_params,
+                                        headers=headers,
+                                        post_params=post_params,
+                                        body=body)
         elif method == "PUT":
-            return RESTClient.PUT(url,
-                                  query_params=query_params,
-                                  headers=headers,
-                                  post_params=post_params,
-                                  body=body)
+            return self.RESTClient.PUT(url,
+                                       query_params=query_params,
+                                       headers=headers,
+                                       post_params=post_params,
+                                       body=body)
         elif method == "PATCH":
-            return RESTClient.PATCH(url,
-                                    query_params=query_params,
-                                    headers=headers,
-                                    post_params=post_params,
-                                    body=body)
+            return self.RESTClient.PATCH(url,
+                                         query_params=query_params,
+                                         headers=headers,
+                                         post_params=post_params,
+                                         body=body)
         elif method == "DELETE":
-            return RESTClient.DELETE(url,
-                                     query_params=query_params,
-                                     headers=headers)
+            return self.RESTClient.DELETE(url,
+                                          query_params=query_params,
+                                          headers=headers)
         else:
             raise ValueError(
                 "http method must be `GET`, `HEAD`,"
