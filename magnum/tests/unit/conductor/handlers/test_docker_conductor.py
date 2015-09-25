@@ -542,7 +542,7 @@ class TestDockerConductor(base.BaseTestCase):
         mock_docker_id = '2703ef2b705d'
         mock_find_container.return_value = mock_docker_id
         mock_container_detail = {'State': {'Error': '',
-                                           'Running': False,
+                                           'Running': True,
                                            'Paused': True}}
         mock_docker.inspect_container.return_value = mock_container_detail
         self.conductor.container_show(None, mock_container_uuid)

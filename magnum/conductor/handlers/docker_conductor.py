@@ -170,10 +170,10 @@ class Handler(object):
             if status:
                 if status.get('Error') is True:
                     container.status = fields.ContainerStatus.ERROR
-                elif status.get('Running'):
-                    container.status = fields.ContainerStatus.RUNNING
                 elif status.get('Paused'):
                     container.status = fields.ContainerStatus.PAUSED
+                elif status.get('Running'):
+                    container.status = fields.ContainerStatus.RUNNING
                 else:
                     container.status = fields.ContainerStatus.STOPPED
                 container.save()
