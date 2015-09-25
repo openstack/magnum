@@ -184,6 +184,7 @@ and keypair need to be specified for the baymodel::
                            --dns-nameserver 8.8.8.8 \
                            --flavor-id m1.small \
                            --docker-volume-size 5 \
+                           --network-driver flannel \
                            --coe kubernetes
 
 Create a bay. Use the baymodel name as a template for bay creation.
@@ -257,7 +258,7 @@ Using Kubernetes
 Kubernetes provides a number of examples you can use to check that things are
 working. You may need to clone kubernetes using::
 
-    wget https://github.com/GoogleCloudPlatform/kubernetes/releases/download/v0.15.0/kubernetes.tar.gz
+    wget https://github.com/kubernetes/kubernetes/releases/download/v1.0.1/kubernetes.tar.gz
     tar -xvzf kubernetes.tar.gz
 
 Note: We do not need to install Kubernetes, we just need the example file
@@ -266,7 +267,7 @@ from the tarball.
 Here's how to set up the replicated redis example. First, create
 a pod for the redis-master::
 
-    cd kubernetes/examples/redis/v1beta3
+    cd kubernetes/examples/redis
     magnum pod-create --manifest ./redis-master.yaml --bay k8sbay
 
 Now create a service to provide a discoverable endpoint for the redis
@@ -323,7 +324,7 @@ address 192.168.19.86. To access the redis master::
 Log into one of the other container hosts and access a redis slave from it::
 
     ssh minion@$(nova list | grep 10.0.0.4 | awk '{print $13}')
-    REDIS_ID=$(sudo docker ps | grep redis:v1 | grep k8s_redis | tail -n +2 | awk '{print $1}')
+    REDIS_ID=$(sudo docker ps | grep redis:v1 | grep k8s_redis | awk '{print $1}')
     sudo docker exec -i -t $REDIS_ID redis-cli
 
     127.0.0.1:6379> get replication:test
