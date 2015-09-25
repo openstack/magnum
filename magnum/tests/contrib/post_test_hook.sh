@@ -84,6 +84,7 @@ region_name = $OS_REGION_NAME
 image_id = $IMAGE_ID
 nic_id = $NIC_ID
 keypair_id = default
+flavor_id = m1.magnum
 EOF
 
 # Create a keypair for use in the functional tests.
