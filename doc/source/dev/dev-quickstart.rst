@@ -92,7 +92,7 @@ This session has only been tested on Ubuntu 14.04 (Trusty) and Fedora 20/21.
 We recommend users to select one of them if it is possible.
 
 For in-depth guidance on adding magnum manually to a devstack instance, please
-refer to the :ref:`dev-manual-install` guide.
+refer to the `http://git.openstack.org/cgit/openstack/magnum/tree/doc/source/dev/dev-manual-devstack.rst`_
 
 Clone devstack::
 
@@ -420,7 +420,7 @@ Building and Using a Mesos Bay
 
 Provisioning a mesos bay requires a Ubuntu-based image with some packages
 pre-installed. To build and upload such image, please refer to
-`<http://git.openstack.org/cgit/openstack/magnum/tree/magnum/templates/heat-mesos/elements/README.md>`_
+`http://git.openstack.org/cgit/openstack/magnum/tree/magnum/templates/heat-mesos/README.md`_
 
 Then, create a baymodel by using 'mesos' as the coe, with the rest of arguments
 similar to the Kubernetes baymodel::
@@ -428,7 +428,8 @@ similar to the Kubernetes baymodel::
     magnum baymodel-create --name mesosbaymodel --image-id ubuntu-mesos \
                            --keypair-id testkey \
                            --external-network-id public \
-                           --dns-nameserver 8.8.8.8 --flavor-id m1.small \
+                           --dns-nameserver 8.8.8.8 \
+                           --flavor-id m1.small \
                            --coe mesos
 
 Finally, create the bay. Use the baymodel 'mesosbaymodel' as a template for
@@ -441,21 +442,25 @@ Now that we have a mesos bay we can start interacting with it. First we need
 to make sure the bay's status is 'CREATE_COMPLETE'::
 
     $ magnum bay-show mesosbay
-    +----------------+--------------------------------------+
-    | Property       | Value                                |
-    +----------------+--------------------------------------+
-    | status         | CREATE_COMPLETE                      |
-    | uuid           | ff727f0d-72ca-4e2b-9fef-5ec853d74fdf |
-    | created_at     | 2015-06-09T20:21:43+00:00            |
-    | updated_at     | 2015-06-09T20:28:18+00:00            |
-    | api_address    | 172.24.4.115                         |
-    | baymodel_id    | 92dbda62-32d4-4435-88fc-8f42d514b347 |
-    | node_count     | 2                                    |
-    | node_addresses | [u'172.24.4.116', u'172.24.4.117']   |
-    | status_reason  | Stack CREATE completed successfully  |
-    | discovery_url  | None                                 |
-    | name           | mesosbay                             |
-    +----------------+--------------------------------------+
+    +--------------------+--------------------------------------+
+    | Property           | Value                                |
+    +--------------------+--------------------------------------+
+    | status             | CREATE_COMPLETE                      |
+    | uuid               | ff727f0d-72ca-4e2b-9fef-5ec853d74fdf |
+    | status_reason      | Stack CREATE completed successfully  |
+    | created_at         | 2015-06-09T20:21:43+00:00            |
+    | updated_at         | 2015-06-09T20:28:18+00:00            |
+    | bay_create_timeout | 0                                    |
+    | api_address        | 172.24.4.115                         |
+    | baymodel_id        | 92dbda62-32d4-4435-88fc-8f42d514b347 |
+    | node_count         | 2                                    |
+    | node_addresses     | [u'172.24.4.116', u'172.24.4.117']   |
+    | master_count       | 1                                    |
+    | discovery_url      | None                                 |
+    | status_reason      | Stack CREATE completed successfully  |
+    | discovery_url      | None                                 |
+    | name               | mesosbay                             |
+    +--------------------+--------------------------------------+
 
 Next we will create a container in this bay by using the REST API of Marathon.
 This container will ping the address 8.8.8.8::
@@ -480,8 +485,13 @@ This container will ping the address 8.8.8.8::
     $ curl -X POST -H "Content-Type: application/json" \
         http://${MASTER_IP}:8080/v2/apps -d@mesos.json
 
-Using the Marathon web console (at http://<master>:8080/), you will see the
-application you created.
+To check application and task status::
+
+    $ curl http://${MASTER_IP}:8080/v2/apps
+    $ curl http://${MASTER_IP}:8080/v2/tasks
+
+You can access to the Mesos web page at \http://<master>:5050/ and Marathon web
+console at \http://<master>:8080/.
 
 Building Developer Documentation
 ================================
@@ -498,3 +508,4 @@ creates a virtual environment to run in.
 When complete, the documentation can be accesed from::
 
     doc/build/html/index.html
+
