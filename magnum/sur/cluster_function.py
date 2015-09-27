@@ -8,13 +8,13 @@ import time
 
 from magnum.common.clients import OpenStackClients as OSC
 from magnum.sur.action.clusters import Cluster
-#from magnum.sur.action.nodes import Node
+from magnum.sur.action.nodes import Node
 from magnum.sur.action.profiles import Profile
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-def create_cluster(OSC):
+def create_cluster(OSC, Ctype):
     LOG.info('Creating Request accepted.')
 
     # Client
@@ -22,11 +22,11 @@ def create_cluster(OSC):
 
     # Create Profile
     pr_master = Profile.profile_create(sc, 'SUR_HEAT_Master_Profile', 'os.heat.stack',
-                                '/opt/stack/magnum/magnum/sur/SURspec/SUR_master.spec',
-                                '1111')
+                '/opt/stack/magnum/magnum/sur/SURspec/heat-fedora/?', '1111')
+
     pr_minion = Profile.profile_create(sc, 'SUR_HEAT_Minion_Profile', 'os.heat.stack',
-                                '/opt/stack/magnum/magnum/sur/SURspec/',
-                                '1111')
+                '/opt/stack/magnum/magnum/sur/SURspec/heat-fedora/?', '1111')
+
     time.sleep(1)
     LOG.info(pr_master)
     LOG.info(pr_minion)
@@ -40,15 +40,15 @@ def create_cluster(OSC):
     LOG.info(cr_minion)
 
     # Create Nodes
-    #nr_master = Node.node_create(sc, 'SUR_Node_Master', 'SUR_Cluster',
-    #                             'SUR_Master_Profile')
-    #time.sleep(1)
-    #LOG.info(nr_master)
+    nr_master = Node.node_create(sc, 'SUR_Node_Master', 'SUR_Master_Cluster',
+                                 'SUR_Master_Profile')
+    time.sleep(1)
+    LOG.info(nr_master)
 
-    #nr_minion = Node.node_create(sc, 'SUR_Node_Minion', 'SUR_Cluster',
-    #                             'SUR_Minion_Profile')
-    #time.sleep(1)
-    #LOG.info(nr_minion)
+    nr_minion = Node.node_create(sc, 'SUR_Node_Minion', 'SUR_Minion_Cluster',
+                                 'SUR_Minion_Profile')
+    time.sleep(1)
+    LOG.info(nr_minion)
 
     #LOG.info('Complete')
     

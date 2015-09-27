@@ -93,6 +93,9 @@ def _create_stack(context, osc, bay, bay_create_timeout):
 
     return created_stack
 
+def _create_senlin_stack(context, osc, bay, bay_create_timeout):
+    
+
 
 def _update_stack(context, osc, bay, scale_manager=None):
     template_path, heat_params = _extract_template_definition(
@@ -124,10 +127,10 @@ class Handler(object):
 
         try:
             # Generate certificate and set the cert reference to bay
-            senlinfunc.create_cluster(osc)
+            #senlinfunc.create_cluster(osc)
             cert_manager.generate_certificates_to_bay(bay)
-            created_stack = _create_stack(context, osc, bay,
-                                          bay_create_timeout)
+            created_stack = _create_senlin_stack(context, osc, bay,
+                                                 bay_create_timeout)
         except exc.HTTPBadRequest as e:
             cert_manager.delete_certificates_from_bay(bay)
             raise exception.InvalidParameterValue(message=str(e))
