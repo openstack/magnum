@@ -62,18 +62,22 @@ class TestListPod(api_base.FunctionalTest):
 
     def test_get_one(self):
         pod = obj_utils.create_test_pod(self.context)
-        response = self.get_json('/pods/%s' % pod['uuid'])
+        response = self.get_json(
+            '/pods/%s/%s' % (pod['uuid'], pod['bay_uuid']))
         self.assertEqual(pod.uuid, response['uuid'])
         self._assert_pod_fields(response)
 
     def test_get_one_by_name(self):
         pod = obj_utils.create_test_pod(self.context)
-        response = self.get_json('/pods/%s' % pod['name'])
+        response = self.get_json(
+            '/pods/%s/%s' % (pod['name'], pod['bay_uuid']))
         self.assertEqual(pod.uuid, response['uuid'])
         self._assert_pod_fields(response)
 
     def test_get_one_by_name_not_found(self):
-        response = self.get_json('/pods/not_found', expect_errors=True)
+        response = self.get_json(
+            '/pods/not_found/5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
+            expect_errors=True)
         self.assertEqual(response.status_int, 404)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
@@ -83,7 +87,9 @@ class TestListPod(api_base.FunctionalTest):
                                   uuid=utils.generate_uuid())
         obj_utils.create_test_pod(self.context, name='test_pod',
                                   uuid=utils.generate_uuid())
-        response = self.get_json('/pods/test_pod', expect_errors=True)
+        response = self.get_json(
+            '/pods/test_pod/5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
+            expect_errors=True)
         self.assertEqual(response.status_int, 409)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
@@ -138,13 +144,11 @@ class TestListPod(api_base.FunctionalTest):
     def test_links(self):
         uuid = utils.generate_uuid()
         obj_utils.create_test_pod(self.context, id=1, uuid=uuid)
-        response = self.get_json('/pods/%s' % uuid)
+        response = self.get_json(
+            '/pods/%s/%s' % (uuid, '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'))
         self.assertIn('links', response.keys())
         self.assertEqual(2, len(response['links']))
         self.assertIn(uuid, response['links'][0]['href'])
-        for l in response['links']:
-            bookmark = l['rel'] == 'bookmark'
-            self.assertTrue(self.validate_link(l['href'], bookmark=bookmark))
 
     def test_collection_links(self):
         for id_ in range(5):
@@ -183,16 +187,19 @@ class TestPatch(api_base.FunctionalTest):
         mock_utcnow.return_value = test_time
 
         new_desc = 'pod_example_B_desc'
-        response = self.get_json('/pods/%s' % self.pod.uuid)
+        response = self.get_json(
+            '/pods/%s/%s' % (self.pod.uuid, self.pod.bay_uuid))
         self.assertNotEqual(new_desc, response['desc'])
 
-        response = self.patch_json('/pods/%s' % self.pod.uuid,
-                                   [{'path': '/desc', 'value': new_desc,
-                                     'op': 'replace'}])
+        response = self.patch_json(
+            '/pods/%s/%s' % (self.pod.uuid, self.pod.bay_uuid),
+            [{'path': '/desc', 'value': new_desc,
+              'op': 'replace'}])
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(200, response.status_code)
 
-        response = self.get_json('/pods/%s' % self.pod.uuid)
+        response = self.get_json(
+            '/pods/%s/%s' % (self.pod.uuid, self.pod.bay_uuid))
         self.assertEqual(new_desc, response['desc'])
         return_updated_at = timeutils.parse_isotime(
             response['updated_at']).replace(tzinfo=None)
@@ -201,11 +208,12 @@ class TestPatch(api_base.FunctionalTest):
     def test_replace_bay_uuid(self):
         another_bay = obj_utils.create_test_bay(self.context,
                                                 uuid=utils.generate_uuid())
-        response = self.patch_json('/pods/%s' % self.pod.uuid,
-                                   [{'path': '/bay_uuid',
-                                     'value': another_bay.uuid,
-                                     'op': 'replace'}],
-                                   expect_errors=True)
+        response = self.patch_json(
+            '/pods/%s/%s' % (self.pod.uuid, self.pod.bay_uuid),
+            [{'path': '/bay_uuid',
+              'value': another_bay.uuid,
+              'op': 'replace'}],
+            expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(200, response.status_code)
 
@@ -229,11 +237,12 @@ class TestPatch(api_base.FunctionalTest):
         self.assertTrue(response.json['error_message'])
 
     def test_replace_non_existent_pod(self):
-        response = self.patch_json('/pods/%s' % utils.generate_uuid(),
-                                   [{'path': '/desc',
-                                     'value': 'pod_example_B_desc',
-                                     'op': 'replace'}],
-                                   expect_errors=True)
+        response = self.patch_json(
+            '/pods/%s/%s' % (utils.generate_uuid(), self.pod.bay_uuid),
+            [{'path': '/desc',
+              'value': 'pod_example_B_desc',
+              'op': 'replace'}],
+            expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
@@ -241,10 +250,11 @@ class TestPatch(api_base.FunctionalTest):
     @mock.patch.object(rpcapi.API, 'pod_update')
     @mock.patch.object(api_pod.Pod, 'parse_manifest')
     def test_replace_with_manifest(self, parse_manifest, pod_update):
-        response = self.patch_json('/pods/%s' % self.pod.uuid,
-                                   [{'path': '/manifest',
-                                     'value': '{}',
-                                     'op': 'replace'}])
+        response = self.patch_json(
+            '/pods/%s/%s' % (self.pod.uuid, self.pod.bay_uuid),
+            [{'path': '/manifest',
+              'value': '{}',
+              'op': 'replace'}])
         self.assertEqual(200, response.status_int)
         self.assertEqual('application/json', response.content_type)
         parse_manifest.assert_called_once_with()
@@ -253,18 +263,20 @@ class TestPatch(api_base.FunctionalTest):
     def test_add_ok(self):
         new_desc = 'pod_example_B_desc'
         response = self.patch_json(
-            '/pods/%s' % self.pod.uuid,
+            '/pods/%s/%s' % (self.pod.uuid, self.pod.bay_uuid),
             [{'path': '/desc', 'value': new_desc, 'op': 'add'}])
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(200, response.status_int)
 
-        response = self.get_json('/pods/%s' % self.pod.uuid)
+        response = self.get_json(
+            '/pods/%s/%s' % (self.pod.uuid, self.pod.bay_uuid))
         self.assertEqual(new_desc, response['desc'])
 
     def test_add_multi(self):
         new_status = 'Stopped'
         new_desc = 'pod_example_B_desc'
-        response = self.get_json('/pods/%s' % self.pod.uuid)
+        response = self.get_json(
+            '/pods/%s/%s' % (self.pod.uuid, self.pod.bay_uuid))
         self.assertNotEqual(new_status, response['status'])
         self.assertNotEqual(new_desc, response['desc'])
 
@@ -280,11 +292,13 @@ class TestPatch(api_base.FunctionalTest):
                 'op': 'add'
             }
         ]
-        response = self.patch_json('/pods/%s' % self.pod.uuid, json)
+        response = self.patch_json(
+            '/pods/%s/%s' % (self.pod.uuid, self.pod.bay_uuid), json)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(200, response.status_code)
 
-        response = self.get_json('/pods/%s' % self.pod.uuid)
+        response = self.get_json(
+            '/pods/%s/%s' % (self.pod.uuid, self.pod.bay_uuid))
         self.assertEqual(new_status, response['status'])
         self.assertEqual(new_desc, response['desc'])
 
@@ -298,15 +312,18 @@ class TestPatch(api_base.FunctionalTest):
         self.assertTrue(response.json['error_message'])
 
     def test_remove_ok(self):
-        response = self.get_json('/pods/%s' % self.pod.uuid)
+        response = self.get_json(
+            '/pods/%s/%s' % (self.pod.uuid, self.pod.bay_uuid))
         self.assertIsNotNone(response['desc'])
 
-        response = self.patch_json('/pods/%s' % self.pod.uuid,
-                                   [{'path': '/desc', 'op': 'remove'}])
+        response = self.patch_json(
+            '/pods/%s/%s' % (self.pod.uuid, self.pod.bay_uuid),
+            [{'path': '/desc', 'op': 'remove'}])
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(200, response.status_code)
 
-        response = self.get_json('/pods/%s' % self.pod.uuid)
+        response = self.get_json(
+            '/pods/%s/%s' % (self.pod.uuid, self.pod.bay_uuid))
         self.assertIsNone(response['desc'])
 
     def test_remove_uuid(self):
@@ -347,12 +364,14 @@ class TestPatch(api_base.FunctionalTest):
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
         mock_utcnow.return_value = test_time
 
-        response = self.patch_json('/pods/%s' % self.pod.name,
-                                   [{'path': '/desc', 'op': 'remove'}])
+        response = self.patch_json(
+            '/pods/%s/%s' % (self.pod.name, self.pod.bay_uuid),
+            [{'path': '/desc', 'op': 'remove'}])
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(200, response.status_code)
 
-        response = self.get_json('/pods/%s' % self.pod.uuid)
+        response = self.get_json(
+            '/pods/%s/%s' % (self.pod.uuid, self.pod.bay_uuid))
         self.assertEqual('pod1', response['name'])
         return_updated_at = timeutils.parse_isotime(
             response['updated_at']).replace(tzinfo=None)
@@ -364,7 +383,7 @@ class TestPatch(api_base.FunctionalTest):
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
         mock_utcnow.return_value = test_time
 
-        response = self.patch_json('/pods/%s' % name,
+        response = self.patch_json('/pods/%s/%s' % (name, self.pod.bay_uuid),
                                    [{'path': '/desc', 'op': 'remove'}],
                                    expect_errors=True)
         self.assertEqual('application/json', response.content_type)
@@ -384,7 +403,7 @@ class TestPatch(api_base.FunctionalTest):
                                    [{'path': '/desc', 'op': 'remove'}],
                                    expect_errors=True)
         self.assertEqual('application/json', response.content_type)
-        self.assertEqual(409, response.status_code)
+        self.assertEqual(400, response.status_code)
 
 
 class TestPost(api_base.FunctionalTest):
@@ -512,23 +531,27 @@ class TestDelete(api_base.FunctionalTest):
         pod.destroy()
 
     def test_delete_pod(self):
-        self.delete('/pods/%s' % self.pod.uuid)
-        response = self.get_json('/pods/%s' % self.pod.uuid,
-                                 expect_errors=True)
+        self.delete('/pods/%s/%s' % (self.pod.uuid, self.pod.bay_uuid))
+        response = self.get_json(
+            '/pods/%s/%s' % (self.pod.uuid, self.pod.bay_uuid),
+            expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
     def test_delete_pod_by_name(self):
-        self.delete('/pods/%s' % self.pod.name)
-        response = self.get_json('/pods/%s' % self.pod.name,
-                                 expect_errors=True)
+        self.delete('/pods/%s/%s' % (self.pod.name, self.pod.bay_uuid))
+        response = self.get_json(
+            '/pods/%s/%s' % (self.pod.name, self.pod.bay_uuid),
+            expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
     def test_delete_pod_by_name_not_found(self):
-        response = self.delete('/pods/not_found', expect_errors=True)
+        response = self.delete(
+            '/pods/not_found/5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
+            expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
@@ -538,14 +561,18 @@ class TestDelete(api_base.FunctionalTest):
                                   uuid=utils.generate_uuid())
         obj_utils.create_test_pod(self.context, name='test_pod',
                                   uuid=utils.generate_uuid())
-        response = self.delete('/pods/test_pod', expect_errors=True)
+        response = self.delete(
+            '/pods/test_pod/5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
+            expect_errors=True)
         self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
     def test_delete_pod_not_found(self):
         uuid = utils.generate_uuid()
-        response = self.delete('/pods/%s' % uuid, expect_errors=True)
+        response = self.delete(
+            '/pods/%s/%s' % (uuid, self.pod.bay_uuid),
+            expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
