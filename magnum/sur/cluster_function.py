@@ -22,13 +22,13 @@ def create_cluster(OSC, Ctype):
 
     # Create Profile
     pr_master = Profile.profile_create(sc, 'SUR_HEAT_Master_Profile', 'os.heat.stack',
-                '/opt/stack/magnum/magnum/sur/SURspec/heat-fedora/?', '1111')
+                '/opt/stack/magnum/magnum/sur/SURspec/heat-fedora/kubemaster.yaml', '1111')
 
     pr_minion = Profile.profile_create(sc, 'SUR_HEAT_Minion_Profile', 'os.heat.stack',
-                '/opt/stack/magnum/magnum/sur/SURspec/heat-fedora/?', '1111')
+                '/opt/stack/magnum/magnum/sur/SURspec/heat-fedora/kubeminion.yaml', '1111')
 
     pr_cluster = Profile.profile_create(sc, 'SUR_HEAT_Cluster_Profile', 'os.heat.stack',
-                 '/opt/stack/magnum/magnum/sur/SURspec/heat-fedora/?', '1111')
+                 '/opt/stack/magnum/magnum/sur/SURspec/heat-fedora/kubecluster.yaml', '1111')
 
     time.sleep(1)
     LOG.info(pr_master)
