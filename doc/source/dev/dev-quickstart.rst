@@ -350,6 +350,12 @@ as the coe::
                            --flavor-id m1.small \
                            --coe swarm
 
+Note: If you are using Magnum behind a firewall then see:
+
+.. _Using_Magnum_Behind_Firewall:
+
+http://docs.openstack.org/developer/magnum/magnum-proxy.rst
+
 Finally, create the bay. Use the baymodel 'swarmbaymodel' as a template for
 bay creation. This bay will result in one swarm manager node and two extra
 agent nodes::
