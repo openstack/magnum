@@ -363,6 +363,8 @@ class BaseTemplateDefinition(TemplateDefinition):
 
 
 class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
+    """Kubernetes template for a Fedora Atomic VM."""
+
     provides = [
         {'server_type': 'vm',
          'os': 'fedora-atomic',
@@ -442,6 +444,8 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
 
 
 class CoreOSK8sTemplateDefinition(AtomicK8sTemplateDefinition):
+    """Kubernetes template for CoreOS VM."""
+
     provides = [
         {'server_type': 'vm', 'os': 'coreos', 'coe': 'kubernetes'},
     ]
@@ -476,6 +480,8 @@ class CoreOSK8sTemplateDefinition(AtomicK8sTemplateDefinition):
 
 
 class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
+    """Docker swarm template for a Fedora Atomic VM."""
+
     provides = [
         {'server_type': 'vm', 'os': 'fedora-atomic', 'coe': 'swarm'},
     ]
@@ -544,6 +550,8 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
 
 
 class UbuntuMesosTemplateDefinition(BaseTemplateDefinition):
+    """Mesos template for Ubuntu VM."""
+
     provides = [
         {'server_type': 'vm', 'os': 'ubuntu', 'coe': 'mesos'},
     ]
