@@ -16,6 +16,7 @@ from magnum.common import exception
 from magnum.common import utils
 from magnum.db import api as dbapi
 from magnum.objects import base
+from magnum.objects import fields as m_fields
 
 
 @base.MagnumObjectRegistry.register
@@ -26,7 +27,8 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.2: Added 'network_driver' field
     # Version 1.3: Added 'labels' attribute
     # Version 1.4: Added 'insecure' attribute
-    VERSION = '1.4'
+    # Version 1.5: Changed type of 'coe' from StringField to BayTypeField
+    VERSION = '1.5'
 
     dbapi = dbapi.get_instance()
 
@@ -48,7 +50,7 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
         'docker_volume_size': fields.IntegerField(nullable=True),
         'ssh_authorized_key': fields.StringField(nullable=True),
         'cluster_distro': fields.StringField(nullable=True),
-        'coe': fields.StringField(nullable=True),
+        'coe': m_fields.BayTypeField(nullable=True),
         'http_proxy': fields.StringField(nullable=True),
         'https_proxy': fields.StringField(nullable=True),
         'no_proxy': fields.StringField(nullable=True),

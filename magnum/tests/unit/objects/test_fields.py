@@ -64,3 +64,23 @@ class TestContainerStatus(test_fields.TestField):
 
     def test_stringify_invalid(self):
         self.assertRaises(ValueError, self.field.stringify, 'DELETED')
+
+
+class TestBayType(test_fields.TestField):
+    def setUp(self):
+        super(TestBayType, self).setUp()
+        self.field = fields.BayTypeField()
+        self.coerce_good_values = [('kubernetes', 'kubernetes'),
+                                   ('swarm', 'swarm'),
+                                   ('mesos', 'mesos'), ]
+        self.coerce_bad_values = ['invalid']
+
+        self.to_primitive_values = self.coerce_good_values[0:1]
+        self.from_primitive_values = self.coerce_good_values[0:1]
+
+    def test_stringify(self):
+        self.assertEqual("'kubernetes'",
+                         self.field.stringify('kubernetes'))
+
+    def test_stringify_invalid(self):
+        self.assertRaises(ValueError, self.field.stringify, 'invalid')
