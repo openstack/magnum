@@ -25,7 +25,6 @@ END_SERVICE_TOP
 if [ $INSECURE = 'False'  ]; then
 
 cat >> /etc/systemd/system/swarm-manager.service << END_TLS
-                                  --tls \\
                                   --tlsverify \\
                                   --tlscacert=/etc/docker/ca.crt \\
                                   --tlskey=/etc/docker/server.key \\

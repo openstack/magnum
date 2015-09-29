@@ -99,7 +99,7 @@ is an example for Docker.
 
 ::
 
-    docker -H tcp://<bay_api_address>:2376 --tls --tlsverify \
+    docker -H tcp://<bay_api_address>:2376 --tlsverify \
         --tlscacert ca.crt \
         --tlskey client.key \
         --tlscert client.crt
