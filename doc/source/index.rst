@@ -78,3 +78,4 @@ Developer Info
    dev/dev-quickstart
    dev/dev-manual-devstack
    contributing
+   heat-templates
