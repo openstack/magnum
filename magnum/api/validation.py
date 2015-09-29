@@ -39,19 +39,22 @@ def enforce_bay_types(*bay_types):
     return wrapper
 
 
-def enforce_network_driver_types(*network_driver_types):
+def enforce_network_driver_types(**network_driver_types):
     @decorator.decorator
     def wrapper(func, *args, **kwargs):
         obj = args[1]
         if hasattr(obj, 'network_driver'):
             # Post operation: baymodel API instance has been passed
             driver = obj.network_driver
+            coe = obj.coe
         else:
             # Patch operation: baymodel UUID has been passed
             baymodel = objects.BayModel.get_by_uuid(pecan.request.context,
                                                     obj)
             driver = baymodel.network_driver
-        if driver not in network_driver_types:
+            coe = baymodel.coe
+        if (coe in network_driver_types and
+           driver not in network_driver_types[coe]):
             raise exception.InvalidParameterValue(
                 'Cannot fulfill request with a '
                 '%(network_driver_type)s network_driver, '
