@@ -108,14 +108,14 @@ class TestValidation(base.BaseTestCase):
             allowed_network_driver_types,
             assert_raised=False):
 
-        @v.enforce_network_driver_types(*allowed_network_driver_types)
+        @v.enforce_network_driver_types(**allowed_network_driver_types)
         def test(self, baymodel):
             pass
 
         baymodel = mock.MagicMock()
         baymodel.name = 'test_baymodel'
         baymodel.network_driver = network_driver_type
-
+        baymodel.coe = 'kubernetes'
         if assert_raised:
             self.assertRaises(exception.InvalidParameterValue,
                               test, self, baymodel)
@@ -125,17 +125,17 @@ class TestValidation(base.BaseTestCase):
     def test_enforce_network_driver_types_one_allowed_post(self):
         self._test_enforce_network_driver_types_post(
             network_driver_type = 'type1',
-            allowed_network_driver_types = ['type1'])
+            allowed_network_driver_types = {'kubernetes': ['type1']})
 
     def test_enforce_network_driver_types_two_allowed_post(self):
         self._test_enforce_network_driver_types_post(
             network_driver_type = 'type1',
-            allowed_network_driver_types = ['type1', 'type2'])
+            allowed_network_driver_types = {'kubernetes': ['type1', 'type2']})
 
     def test_enforce_network_driver_types_not_allowed_post(self):
         self._test_enforce_network_driver_types_post(
             network_driver_type = 'type1',
-            allowed_network_driver_types = ['type2'],
+            allowed_network_driver_types = {'kubernetes': ['type2']},
             assert_raised=True)
 
     @mock.patch('pecan.request')
@@ -148,7 +148,7 @@ class TestValidation(base.BaseTestCase):
             allowed_network_driver_types,
             assert_raised=False):
 
-        @v.enforce_network_driver_types(*allowed_network_driver_types)
+        @v.enforce_network_driver_types(**allowed_network_driver_types)
         def test(self, baymodel_uuid):
             pass
 
@@ -156,6 +156,7 @@ class TestValidation(base.BaseTestCase):
         baymodel_uuid = 'test_uuid'
         baymodel = mock.MagicMock()
         baymodel.network_driver = network_driver_type
+        baymodel.coe = 'kubernetes'
         mock_baymodel_get_by_uuid.return_value = baymodel
 
         if assert_raised:
@@ -169,15 +170,15 @@ class TestValidation(base.BaseTestCase):
     def test_enforce_network_driver_types_one_allowed_patch(self):
         self._test_enforce_network_driver_types_patch(
             network_driver_type = 'type1',
-            allowed_network_driver_types = ['type1'])
+            allowed_network_driver_types = {'kubernetes': ['type1']})
 
     def test_enforce_network_driver_types_two_allowed_patch(self):
         self._test_enforce_network_driver_types_patch(
             network_driver_type = 'type1',
-            allowed_network_driver_types = ['type1', 'type2'])
+            allowed_network_driver_types = {'kubernetes': ['type1', 'type2']})
 
     def test_enforce_network_driver_types_not_allowed_patch(self):
         self._test_enforce_network_driver_types_patch(
             network_driver_type = 'type1',
-            allowed_network_driver_types = ['type2'],
+            allowed_network_driver_types = {'kubernetes': ['type2']},
             assert_raised=True)

@@ -308,7 +308,7 @@ class BayModelsController(rest.RestController):
 
     @policy.enforce_wsgi("baymodel", "create")
     @expose.expose(BayModel, body=BayModel, status_code=201)
-    @validation.enforce_network_driver_types('flannel')
+    @validation.enforce_network_driver_types(kubernetes=['flannel'])
     def post(self, baymodel):
         """Create a new baymodel.
 
@@ -335,7 +335,7 @@ class BayModelsController(rest.RestController):
     @policy.enforce_wsgi("baymodel", "update")
     @wsme.validate(types.uuid, [BayModelPatchType])
     @expose.expose(BayModel, types.uuid, body=[BayModelPatchType])
-    @validation.enforce_network_driver_types('flannel')
+    @validation.enforce_network_driver_types(kubernetes=['flannel'])
     def patch(self, baymodel_uuid, patch):
         """Update an existing baymodel.
 
