@@ -1,0 +1,177 @@
+heat_template_version: 2013-05-23
+
+description: >
+  This template will create a group of kubernetes masters with the
+  number of masters specified by the number_of_masters parameter, which
+  defaults to 1.
+
+parameters:
+
+  ssh_key_name:
+    type: string
+    description: name of ssh key to be provisioned on our server
+
+  external_network:
+    type: string
+    description: uuid/name of a network to use for floating ip addresses
+
+  fixed_network:
+    type: string
+    description: name of private network into which servers get deployed
+
+  server_image:
+    type: string
+    default: fedora-k8s
+    description: glance image used to boot the server
+
+  master_flavor:
+    type: string
+    default: baremetal
+    description: flavor to use when booting the server
+
+  portal_network_cidr:
+    type: string
+    description: >
+      address range used by kubernetes for service portals
+    default: 10.254.0.0/16
+
+  flannel_network_cidr:
+    type: string
+    description: network range for flannel overlay network
+    default: 10.100.0.0/16
+
+  flannel_network_subnetlen:
+    type: string
+    description: size of subnet assigned to each minion
+    default: 24
+
+  flannel_use_vxlan:
+    type: string
+    description: >
+      if true use the vxlan backend, otherwise use the default
+      udp backend
+    default: "false"
+    constraints:
+      - allowed_values: ["true", "false"]
+
+  kube_allow_priv:
+    type: string
+    description: >
+      whether or not kubernetes should permit privileged containers.
+    default: "true"
+    constraints:
+      - allowed_values: ["true", "false"]
+
+  wait_condition_timeout:
+    type: number
+    description : >
+      timeout for the Wait Conditions
+    default: 6000
+
+resources:
+
+  master_wait_handle:
+    type: OS::Heat::WaitConditionHandle
+
+  master_wait_condition:
+    type: OS::Heat::WaitCondition
+    depends_on: kube_master
+    properties:
+      handle: {get_resource: master_wait_handle}
+      timeout: {get_param: wait_condition_timeout}
+
+  ######################################################################
+  #
+  # software configs
+  #
+  disable_selinux:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/disable-selinux.sh}
+
+  kube_master_init:
+    type: OS::Heat::MultipartMime
+    properties:
+      parts:
+        - config: {get_resource: disable_selinux}
+        - config: {get_resource: write_heat_params}
+        - config: {get_resource: enable_etcd}
+        - config: {get_resource: configure_kubernetes}
+        - config: {get_resource: enable_services}
+        - config: {get_resource: configure_flannel}
+        - config: {get_resource: master_wc_notify}
+
+  master_wc_notify:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: |
+            #!/bin/bash -v
+            wc_notify --data-binary '{"status": "SUCCESS"}'
+          params:
+            wc_notify: {get_attr: [master_wait_handle, curl_cli]}
+
+  write_heat_params:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/write-heat-params-master.yaml}
+          params:
+            "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
+            "$FLANNEL_NETWORK_CIDR": {get_param: flannel_network_cidr}
+            "$FLANNEL_NETWORK_SUBNETLEN": {get_param: flannel_network_subnetlen}
+            "$FLANNEL_USE_VXLAN": {get_param: flannel_use_vxlan}
+            "$PORTAL_NETWORK_CIDR": {get_param: portal_network_cidr}
+
+  configure_kubernetes:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/configure-kubernetes-master.sh}
+
+  enable_etcd:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/enable-etcd.sh}
+
+  configure_flannel:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/configure-flannel.sh}
+
+  enable_services:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/enable-services-master.sh}
+
+  kube_master_floating:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network:
+        get_param: external_network
+      port_id:
+        get_attr: [kube_master, addresses, {get_param: fixed_network}, 0, port]
+
+  kube_master:
+    type: OS::Nova::Server
+    properties:
+      image: {get_param: server_image}
+      flavor: {get_param: master_flavor}
+      key_name: {get_param: ssh_key_name}
+      networks:
+        - network: {get_param: fixed_network}
+      user_data_format: RAW
+      user_data: {get_resource: kube_master_init}
+
+outputs:
+
+  kube_master_external_ip:
+    value: {get_attr: [kube_master_floating, floating_ip_address]}
