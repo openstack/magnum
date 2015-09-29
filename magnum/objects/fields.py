@@ -46,6 +46,17 @@ class ContainerStatus(fields.Enum):
             valid_values=ContainerStatus.ALL)
 
 
+class BayType(fields.Enum):
+    ALL = (
+        KUBERNETES, SWARM, MESOS,
+    ) = (
+        'kubernetes', 'swarm', 'mesos',
+    )
+
+    def __init__(self):
+        super(BayType, self).__init__(valid_values=BayType.ALL)
+
+
 class ListOfDictsField(fields.AutoTypedField):
     AUTO_TYPE = fields.List(fields.Dict(fields.FieldType()))
 
@@ -56,3 +67,7 @@ class BayStatusField(fields.BaseEnumField):
 
 class ContainerStatusField(fields.BaseEnumField):
     AUTO_TYPE = ContainerStatus()
+
+
+class BayTypeField(fields.BaseEnumField):
+    AUTO_TYPE = BayType()
