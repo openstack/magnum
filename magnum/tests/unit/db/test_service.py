@@ -147,23 +147,6 @@ class DbServiceTestCase(base.DbTestCase):
             'bay_uuid': magnum_utils.generate_uuid()})
         self.assertEqual(0, len(res))
 
-    def test_get_services_by_bay_uuid(self):
-        res = self.dbapi.get_services_by_bay_uuid(self.context,
-                                                  self.bay.uuid)
-        self.assertEqual(self.service.id, res[0].id)
-
-    def test_get_services_by_bay_uuid_that_does_not_exist(self):
-        self.assertRaises(exception.BayNotFound,
-                          self.dbapi.get_services_by_bay_uuid,
-                          self.context,
-                          magnum_utils.generate_uuid())
-
-    def test_destroy_service(self):
-        self.dbapi.destroy_service(self.service.id)
-        self.assertRaises(exception.ServiceNotFound,
-                          self.dbapi.get_service_by_id,
-                          self.context, self.service.id)
-
     def test_destroy_service_by_uuid(self):
         self.assertIsNotNone(self.dbapi.get_service_by_uuid(self.context,
                                                             self.service.uuid))
