@@ -183,7 +183,8 @@ class ServicesController(rest.RestController):
     }
 
     def _get_services_collection(self, marker, limit,
-                                 sort_key, sort_dir, expand=False,
+                                 sort_key, sort_dir,
+                                 bay_uuid, expand=False,
                                  resource_url=None):
 
         limit = api_utils.validate_limit(limit)
@@ -208,24 +209,28 @@ class ServicesController(rest.RestController):
 
     @policy.enforce_wsgi("service")
     @expose.expose(ServiceCollection, types.uuid,
-                   types.uuid, int, wtypes.text, wtypes.text)
+                   types.uuid, int, wtypes.text, wtypes.text,
+                   types.uuid)
     def get_all(self, service_uuid=None, marker=None, limit=None,
-                sort_key='id', sort_dir='asc'):
+                sort_key='id', sort_dir='asc', bay_uuid=None):
         """Retrieve a list of services.
 
         :param marker: pagination marker for large data sets.
         :param limit: maximum number of resources to return in a single result.
         :param sort_key: column to sort results by. Default: id.
         :param sort_dir: direction to sort. "asc" or "desc". Default: asc.
+        :param bay_uuid: UUID of the Bay.
         """
         return self._get_services_collection(marker, limit, sort_key,
-                                             sort_dir)
+                                             sort_dir, bay_uuid)
 
     @policy.enforce_wsgi("service")
     @expose.expose(ServiceCollection, types.uuid,
-                   types.uuid, int, wtypes.text, wtypes.text)
+                   types.uuid, int, wtypes.text, wtypes.text,
+                   types.uuid)
     def detail(self, service_uuid=None, marker=None, limit=None,
-               sort_key='id', sort_dir='asc'):
+               sort_key='id', sort_dir='asc',
+               bay_uuid=None):
         """Retrieve a list of services with detail.
 
         :param service_uuid: UUID of a service, to get only
@@ -234,6 +239,7 @@ class ServicesController(rest.RestController):
         :param limit: maximum number of resources to return in a single result.
         :param sort_key: column to sort results by. Default: id.
         :param sort_dir: direction to sort. "asc" or "desc". Default: asc.
+        :param bay_uuid: UUID of the Bay.
         """
         # NOTE(lucasagomes): /detail should only work agaist collections
         parent = pecan.request.path.split('/')[:-1][-1]
@@ -247,11 +253,13 @@ class ServicesController(rest.RestController):
                                              resource_url)
 
     @policy.enforce_wsgi("service", "get")
-    @expose.expose(Service, types.uuid_or_name)
-    def get_one(self, service_ident):
+    @expose.expose(Service, types.uuid_or_name,
+                   types.uuid)
+    def get_one(self, service_ident, bay_uuid):
         """Retrieve information about the given service.
 
         :param service_ident: UUID or logical name of the service.
+        :param bay_uuid: UUID of the Bay.
         """
         rpc_service = api_utils.get_rpc_resource('Service', service_ident)
 
@@ -281,11 +289,13 @@ class ServicesController(rest.RestController):
 
     @policy.enforce_wsgi("service", "update")
     @wsme.validate(types.uuid, [ServicePatchType])
-    @expose.expose(Service, types.uuid_or_name, body=[ServicePatchType])
-    def patch(self, service_ident, patch):
+    @expose.expose(Service, types.uuid_or_name,
+                   types.uuid, body=[ServicePatchType])
+    def patch(self, service_ident, bay_uuid, patch):
         """Update an existing service.
 
         :param service_ident: UUID or logical name of a service.
+        :param bay_uuid: UUID of the Bay.
         :param patch: a json PATCH document to apply to this service.
         """
         rpc_service = api_utils.get_rpc_resource('Service', service_ident)
@@ -320,11 +330,13 @@ class ServicesController(rest.RestController):
         return Service.convert_with_links(rpc_service)
 
     @policy.enforce_wsgi("service")
-    @expose.expose(None, types.uuid_or_name, status_code=204)
-    def delete(self, service_ident):
+    @expose.expose(None, types.uuid_or_name,
+                   types.uuid, status_code=204)
+    def delete(self, service_ident, bay_uuid):
         """Delete a service.
 
         :param service_ident: UUID or logical name of a service.
+        :param bay_uuid: UUID of the Bay.
         """
         rpc_service = api_utils.get_rpc_resource('Service', service_ident)
 
