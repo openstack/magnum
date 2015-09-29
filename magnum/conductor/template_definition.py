@@ -493,8 +493,8 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
         self.add_parameter('external_network',
                            baymodel_attr='external_network_id',
                            required=True)
-        self.add_parameter('insecure',
-                           baymodel_attr='insecure',
+        self.add_parameter('tls_disabled',
+                           baymodel_attr='tls_disabled',
                            required=True)
         self.add_output('swarm_master',
                         bay_attr='api_address')

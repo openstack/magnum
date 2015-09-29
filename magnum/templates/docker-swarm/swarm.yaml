@@ -80,7 +80,7 @@ parameters:
     description: network range for fixed ip network
     default: "10.0.0.0/24"
 
-  insecure:
+  tls_disabled:
     type: boolean
     description: whether or not to enable TLS
     default: False
@@ -192,7 +192,7 @@ resources:
             "$BAY_UUID": {get_param: bay_uuid}
             "$USER_TOKEN": {get_param: user_token}
             "$MAGNUM_URL": {get_param: magnum_url}
-            "$INSECURE": {get_param: insecure}
+            "$TLS_DISABLED": {get_param: tls_disabled}
 
   configure_swarm:
     type: "OS::Heat::SoftwareConfig"
@@ -252,7 +252,7 @@ resources:
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
-            "$INSECURE": {get_param: insecure}
+            "$TLS_DISABLED": {get_param: tls_disabled}
 
   enable_services:
     type: "OS::Heat::SoftwareConfig"
@@ -366,7 +366,7 @@ resources:
           bay_uuid: {get_param: bay_uuid}
           user_token: {get_param: user_token}
           magnum_url: {get_param: magnum_url}
-          insecure: {get_param: insecure}
+          tls_disabled: {get_param: tls_disabled}
 
 outputs:
 

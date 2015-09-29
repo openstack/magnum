@@ -69,7 +69,7 @@ parameters:
     type: string
     description: endpoint to retrieve TLS certs from
 
-  insecure:
+  tls_disabled:
     type: boolean
     description: whether or not to disable TLS
 
@@ -139,7 +139,7 @@ resources:
             "$BAY_UUID": {get_param: bay_uuid}
             "$USER_TOKEN": {get_param: user_token}
             "$MAGNUM_URL": {get_param: magnum_url}
-            "$INSECURE": {get_param: insecure}
+            "$TLS_DISABLED": {get_param: tls_disabled}
 
   configure_swarm:
     type: "OS::Heat::SoftwareConfig"

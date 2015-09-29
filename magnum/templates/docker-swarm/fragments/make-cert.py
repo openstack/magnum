@@ -133,7 +133,7 @@ def write_server_cert(config, csr_req):
 
 def main():
     config = load_config()
-    if config['INSECURE'] == 'False':
+    if config['TLS_DISABLED'] == 'False':
         create_dirs()
         write_ca_cert(config)
         write_server_key()
