@@ -54,5 +54,7 @@
     "container:update": "rule:default",
 
     "certificate:create": "rule:default",
-    "certificate:get": "rule:default"
+    "certificate:get": "rule:default",
+
+    "magnum-service:get_all": "rule:admin_api"
 }

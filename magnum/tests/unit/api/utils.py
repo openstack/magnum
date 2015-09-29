@@ -12,6 +12,8 @@
 """
 Utils for testing the API service.
 """
+import datetime
+import pytz
 
 from magnum.api.controllers.v1 import bay as bay_controller
 from magnum.api.controllers.v1 import baymodel as baymodel_controller
@@ -148,3 +150,20 @@ def x509keypair_post_data(**kw):
     x509keypair = utils.get_test_x509keypair(**kw)
     internal = x509keypair_controller.X509KeyPairPatchType.internal_attrs()
     return remove_internal(x509keypair, internal)
+
+
+def mservice_get_data(**kw):
+    """Simulate what the RPC layer will get from DB """
+    faketime = datetime.datetime(2001, 1, 1, tzinfo=pytz.UTC)
+    return {
+        'binary': kw.get('binary', 'fake-binary'),
+        'host': kw.get('host', 'fake-host'),
+        'id': kw.get('id', '13'),
+        'report_count': kw.get('report_count', '13'),
+        'disabled': kw.get('disabled', False),
+        'disabled_reason': kw.get('disabled_reason', None),
+        'forced_down': kw.get('forced_down', False),
+        'last_seen_at': kw.get('last_seen_at', faketime),
+        'created_at': kw.get('created_at', faketime),
+        'updated_at': kw.get('updated_at', faketime),
+    }

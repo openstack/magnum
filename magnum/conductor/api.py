@@ -171,6 +171,11 @@ class API(rpc_service.API):
     def get_ca_certificate(self, bay):
         return self._call('get_ca_certificate', bay=bay)
 
+    # magnum-services
+    def magnum_services_list(self, context, limit, marker, sort_key, sort_dir):
+        return objects.MagnumService.list(context, limit, marker, sort_key,
+                                          sort_dir)
+
     # Versioned Objects indirection API
 
     def object_class_action(self, context, objname, objmethod, objver,

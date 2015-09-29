@@ -11,14 +11,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from oslo_config import cfg
 from oslo_utils import timeutils
 
 from magnum.db.sqlalchemy import models
 
+periodic_opts = [
+    cfg.IntOpt('service_down_time',
+               default=180,
+               help='Max interval size between periodic tasks execution in '
+                    'seconds.'),
+]
 
-class API(object):
-    def __init__(self, conf):
-        self.service_down_time = 3 * conf.periodic_interval_max
+CONF = cfg.CONF
+CONF.register_opts(periodic_opts)
+
+
+class ServiceGroup(object):
+    def __init__(self):
+        self.service_down_time = CONF.service_down_time
 
     def service_is_up(self, member):
         if not isinstance(member, models.MagnumService):
@@ -28,6 +39,7 @@ class API(object):
 
         last_heartbeat = (member.get(
             'last_seen_up') or member['updated_at'] or member['created_at'])
-        elapsed = timeutils.delta_seconds(last_heartbeat, timeutils.utcnow())
+        now = timeutils.utcnow(True)
+        elapsed = timeutils.delta_seconds(last_heartbeat, now)
         is_up = abs(elapsed) <= self.service_down_time
         return is_up

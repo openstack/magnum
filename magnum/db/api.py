@@ -770,7 +770,7 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_magnum_service_list(self, context, filters=None, limit=None,
+    def get_magnum_service_list(self, context, disabled=None, limit=None,
                                 marker=None, sort_key=None, sort_dir=None):
         """Get matching magnum_service records.
 
@@ -778,7 +778,7 @@ class Connection(object):
         those match the specified filters.
 
         :param context: The security context
-        :param filters: Filters to apply. Defaults to None.
+        :param disabled: Filters disbaled services. Defaults to None.
         :param limit: Maximum number of magnum_services to return.
         :param marker: the last item of the previous page; we return the next
                        result set.
