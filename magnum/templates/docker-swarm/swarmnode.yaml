@@ -111,12 +111,8 @@ resources:
       rules:
         - protocol: icmp
         - protocol: tcp
-          port_range_min: 22 # ssh
-          port_range_max: 22
-        - protocol: tcp
-          port_range_min: 2375 # docker
-          port_range_max: 2375
         - protocol: udp
+
 
   ######################################################################
   #
