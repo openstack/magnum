@@ -175,7 +175,8 @@ class PodsController(rest.RestController):
     }
 
     def _get_pods_collection(self, marker, limit,
-                             sort_key, sort_dir, expand=False,
+                             sort_key, sort_dir,
+                             bay_uuid, expand=False,
                              resource_url=None):
 
         limit = api_utils.validate_limit(limit)
@@ -198,24 +199,28 @@ class PodsController(rest.RestController):
 
     @policy.enforce_wsgi("pod")
     @expose.expose(PodCollection, types.uuid,
-                   types.uuid, int, wtypes.text, wtypes.text)
+                   types.uuid, int, wtypes.text, wtypes.text,
+                   types.uuid)
     def get_all(self, pod_uuid=None, marker=None, limit=None,
-                sort_key='id', sort_dir='asc'):
+                sort_key='id', sort_dir='asc', bay_uuid=None):
         """Retrieve a list of pods.
 
         :param marker: pagination marker for large data sets.
         :param limit: maximum number of resources to return in a single result.
         :param sort_key: column to sort results by. Default: id.
         :param sort_dir: direction to sort. "asc" or "desc". Default: asc.
+        :param bay_uuid: UUID of the Bay.
         """
         return self._get_pods_collection(marker, limit, sort_key,
-                                         sort_dir)
+                                         sort_dir, bay_uuid)
 
     @policy.enforce_wsgi("pod")
     @expose.expose(PodCollection, types.uuid,
-                   types.uuid, int, wtypes.text, wtypes.text)
+                   types.uuid, int, wtypes.text, wtypes.text,
+                   types.uuid)
     def detail(self, pod_uuid=None, marker=None, limit=None,
-               sort_key='id', sort_dir='asc'):
+               sort_key='id', sort_dir='asc',
+               bay_uuid=None):
         """Retrieve a list of pods with detail.
 
         :param pod_uuid: UUID of a pod, to get only pods for that pod.
@@ -223,6 +228,7 @@ class PodsController(rest.RestController):
         :param limit: maximum number of resources to return in a single result.
         :param sort_key: column to sort results by. Default: id.
         :param sort_dir: direction to sort. "asc" or "desc". Default: asc.
+        :param bay_uuid: UUID of the Bay.
         """
         # NOTE(lucasagomes): /detail should only work agaist collections
         parent = pecan.request.path.split('/')[:-1][-1]
@@ -232,15 +238,18 @@ class PodsController(rest.RestController):
         expand = True
         resource_url = '/'.join(['pods', 'detail'])
         return self._get_pods_collection(marker, limit,
-                                         sort_key, sort_dir, expand,
+                                         sort_key, sort_dir,
+                                         bay_uuid, expand,
                                          resource_url)
 
     @policy.enforce_wsgi("pod", "get")
-    @expose.expose(Pod, types.uuid_or_name)
-    def get_one(self, pod_ident):
+    @expose.expose(Pod, types.uuid_or_name,
+                   types.uuid)
+    def get_one(self, pod_ident, bay_uuid):
         """Retrieve information about the given pod.
 
         :param pod_ident: UUID of a pod or logical name of the pod.
+        :param bay_uuid: UUID of the Bay.
         """
         rpc_pod = api_utils.get_rpc_resource('Pod', pod_ident)
 
@@ -267,11 +276,13 @@ class PodsController(rest.RestController):
 
     @policy.enforce_wsgi("pod", "update")
     @wsme.validate(types.uuid, [PodPatchType])
-    @expose.expose(Pod, types.uuid_or_name, body=[PodPatchType])
-    def patch(self, pod_ident, patch):
+    @expose.expose(Pod, types.uuid_or_name,
+                   types.uuid, body=[PodPatchType])
+    def patch(self, pod_ident, bay_uuid, patch):
         """Update an existing pod.
 
         :param pod_ident: UUID or logical name of a pod.
+        :param bay_uuid: UUID of the Bay.
         :param patch: a json PATCH document to apply to this pod.
         """
         rpc_pod = api_utils.get_rpc_resource('Pod', pod_ident)
@@ -306,11 +317,13 @@ class PodsController(rest.RestController):
         return Pod.convert_with_links(rpc_pod)
 
     @policy.enforce_wsgi("pod")
-    @expose.expose(None, types.uuid_or_name, status_code=204)
-    def delete(self, pod_ident):
+    @expose.expose(None, types.uuid_or_name,
+                   types.uuid, status_code=204)
+    def delete(self, pod_ident, bay_uuid):
         """Delete a pod.
 
         :param pod_ident: UUID of a pod or logical name of the pod.
+        :param bay_uuid: UUID of the Bay.
         """
         rpc_pod = api_utils.get_rpc_resource('Pod', pod_ident)
 
