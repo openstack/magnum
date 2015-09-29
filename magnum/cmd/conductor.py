@@ -72,6 +72,7 @@ def main():
                    'coreos_template': cfg.CONF.bay.k8s_coreos_template_path})
 
     server = rpc_service.Service.create(cfg.CONF.conductor.topic,
-                                        conductor_id, endpoints)
+                                        conductor_id, endpoints,
+                                        binary='magnum-conductor')
     launcher = service.launch(cfg.CONF, server)
     launcher.wait()

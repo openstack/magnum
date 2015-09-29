@@ -60,6 +60,14 @@ class PeriodicTestCase(base.TestCase):
         self.bay2 = objects.Bay(ctx, **bay2)
         self.bay3 = objects.Bay(ctx, **bay3)
 
+        mock_magnum_service_refresh = mock.Mock()
+
+        class FakeMS(object):
+            report_state_up = mock_magnum_service_refresh
+
+        self.fake_ms = FakeMS()
+        self.fake_ms_refresh = mock_magnum_service_refresh
+
     @mock.patch.object(objects.Bay, 'list')
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch.object(dbapi.Connection, 'destroy_bay')
@@ -80,7 +88,8 @@ class PeriodicTestCase(base.TestCase):
         mock_keystone_client.client.project_id = "fake_project"
         mock_osc.keystone.return_value = mock_keystone_client
 
-        periodic.MagnumPeriodicTasks(CONF).sync_bay_status(None)
+        periodic.MagnumPeriodicTasks(CONF,
+                                     'fake-conductor').sync_bay_status(None)
 
         self.assertEqual(self.bay1.status, bay_status.CREATE_COMPLETE)
         self.assertEqual(self.bay1.status_reason, 'fake_reason_11')
@@ -102,7 +111,8 @@ class PeriodicTestCase(base.TestCase):
         mock_osc = mock_oscc.return_value
         mock_osc.heat.return_value = mock_heat_client
         mock_bay_list.return_value = [self.bay1, self.bay2, self.bay3]
-        periodic.MagnumPeriodicTasks(CONF).sync_bay_status(None)
+        periodic.MagnumPeriodicTasks(CONF,
+                                     'fake-conductor').sync_bay_status(None)
 
         self.assertEqual(self.bay1.status, bay_status.CREATE_IN_PROGRESS)
         self.assertEqual(self.bay2.status, bay_status.DELETE_IN_PROGRESS)
@@ -125,7 +135,8 @@ class PeriodicTestCase(base.TestCase):
         mock_keystone_client.client.project_id = "fake_project"
         mock_osc.keystone.return_value = mock_keystone_client
 
-        periodic.MagnumPeriodicTasks(CONF).sync_bay_status(None)
+        periodic.MagnumPeriodicTasks(CONF,
+                                     'fake-conductor').sync_bay_status(None)
 
         self.assertEqual(self.bay1.status, bay_status.CREATE_FAILED)
         self.assertEqual(self.bay1.status_reason, 'Stack with id 11 not '
@@ -134,3 +145,43 @@ class PeriodicTestCase(base.TestCase):
         self.assertEqual(self.bay3.status, bay_status.UPDATE_FAILED)
         self.assertEqual(self.bay3.status_reason, 'Stack with id 33 not '
                          'found in Heat.')
+
+    @mock.patch.object(objects.MagnumService, 'get_by_host_and_binary')
+    @mock.patch.object(objects.MagnumService, 'create')
+    @mock.patch.object(objects.MagnumService, 'report_state_up')
+    def test_update_magnum_service_firsttime(self,
+                                             mock_ms_refresh,
+                                             mock_ms_create,
+                                             mock_ms_get
+                                             ):
+        periodic_a = periodic.MagnumPeriodicTasks(CONF, 'fake-conductor')
+        mock_ms_get.return_value = None
+
+        periodic_a.update_magnum_service(None)
+
+        mock_ms_get.assert_called_once_with(mock.ANY, periodic_a.host,
+                                            periodic_a.binary)
+        mock_ms_create.assert_called_once_with(mock.ANY)
+        mock_ms_refresh.assert_called_once_with(mock.ANY)
+
+    @mock.patch.object(objects.MagnumService, 'get_by_host_and_binary')
+    @mock.patch.object(objects.MagnumService, 'create')
+    def test_update_magnum_service_on_restart(self,
+                                              mock_ms_create,
+                                              mock_ms_get):
+        periodic_a = periodic.MagnumPeriodicTasks(CONF, 'fake-conductor')
+        mock_ms_get.return_value = self.fake_ms
+
+        periodic_a.update_magnum_service(None)
+
+        mock_ms_get.assert_called_once_with(mock.ANY, periodic_a.host,
+                                            periodic_a.binary)
+        self.fake_ms_refresh.assert_called_once_with(mock.ANY)
+
+    def test_update_magnum_service_regular(self):
+        periodic_a = periodic.MagnumPeriodicTasks(CONF, 'fake-conductor')
+        periodic_a.magnum_service_ref = self.fake_ms
+
+        periodic_a.update_magnum_service(None)
+
+        self.fake_ms_refresh.assert_called_once_with(mock.ANY)

@@ -435,6 +435,7 @@ object_data = {
     'ReplicationController': '1.0-782b7deb9307b2807101541b7e58b8a2',
     'Service': '1.0-d4b8c0f3a234aec35d273196e18f7ed1',
     'X509KeyPair': '1.0-fd008eba0fbc390e0e5da247bba4eedd',
+    'MagnumService': '1.0-2d397ec59b0046bd5ec35cd3e06efeca',
 }
 
 

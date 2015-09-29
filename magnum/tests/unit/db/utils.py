@@ -311,3 +311,32 @@ def create_test_x509keypair(**kw):
         del x509keypair['id']
     dbapi = db_api.get_instance()
     return dbapi.create_x509keypair(x509keypair)
+
+
+def get_test_magnum_service(**kw):
+    return {
+        'id': kw.get('', 13),
+        'report_count': kw.get('report_count', 13),
+        'host': kw.get('host', 'fakehost'),
+        'binary': kw.get('binary', 'fake-bin'),
+        'disabled': kw.get('disabled', False),
+        'disabled_reason': kw.get('disabled_reason', 'fake-reason'),
+        'forced_down': kw.get('forced_down', False),
+        'last_seen_up': kw.get('last_seen_up'),
+        'created_at': kw.get('created_at'),
+        'updated_at': kw.get('updated_at'),
+    }
+
+
+def create_test_magnum_service(**kw):
+    """Create test magnum_service entry in DB and return magnum_service DB object.
+
+    :param kw: kwargs with overriding values for magnum_service's attributes.
+    :returns: Test magnum_service DB object.
+    """
+    magnum_service = get_test_magnum_service(**kw)
+    # Let DB generate ID if it isn't specified explicitly
+    if 'id' not in kw:
+        del magnum_service['id']
+    dbapi = db_api.get_instance()
+    return dbapi.create_magnum_service(magnum_service)

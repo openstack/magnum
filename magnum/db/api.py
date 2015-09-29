@@ -735,3 +735,55 @@ class Connection(object):
                          (asc, desc)
         :returns: A list of tuples of the specified columns.
         """
+
+    @abc.abstractmethod
+    def destroy_magnum_service(self, magnum_service_id):
+        """Destroys a magnum_service record.
+
+        :param magnum_service_id: The id of a magnum_service.
+        """
+
+    @abc.abstractmethod
+    def update_magnum_service(self, magnum_service_id, values):
+        """Update properties of a magnum_service.
+
+        :param magnum_service_id: The id of a magnum_service record.
+        """
+
+    @abc.abstractmethod
+    def get_magnum_service_by_host_and_binary(self, context, host, binary):
+        """Return a magnum_service record.
+
+        :param context: The security context
+        :param host: The host where the binary is located.
+        :param binary: The name of the binary.
+        :returns: A magnum_service record.
+        """
+
+    @abc.abstractmethod
+    def create_magnum_service(self, values):
+        """Create a new magnum_service record.
+
+        :param values: A dict containing several items used to identify
+                       and define the magnum_service record.
+        :returns: A magnum_service record.
+        """
+
+    @abc.abstractmethod
+    def get_magnum_service_list(self, context, filters=None, limit=None,
+                                marker=None, sort_key=None, sort_dir=None):
+        """Get matching magnum_service records.
+
+        Return a list of the specified columns for all magnum_services
+        those match the specified filters.
+
+        :param context: The security context
+        :param filters: Filters to apply. Defaults to None.
+        :param limit: Maximum number of magnum_services to return.
+        :param marker: the last item of the previous page; we return the next
+                       result set.
+        :param sort_key: Attribute by which results should be sorted.
+        :param sort_dir: direction in which results should be sorted.
+                         (asc, desc)
+        :returns: A list of tuples of the specified columns.
+        """
