@@ -205,7 +205,8 @@ class ReplicationControllersController(rest.RestController):
     }
 
     def _get_rcs_collection(self, marker, limit,
-                            sort_key, sort_dir, expand=False,
+                            sort_key, sort_dir,
+                            bay_uuid, expand=False,
                             resource_url=None):
 
         limit = api_utils.validate_limit(limit)
@@ -231,24 +232,28 @@ class ReplicationControllersController(rest.RestController):
 
     @policy.enforce_wsgi("rc")
     @expose.expose(ReplicationControllerCollection, types.uuid,
-                   types.uuid, int, wtypes.text, wtypes.text)
+                   types.uuid, int, wtypes.text, wtypes.text,
+                   types.uuid)
     def get_all(self, rc_uuid=None, marker=None, limit=None,
-                sort_key='id', sort_dir='asc'):
+                sort_key='id', sort_dir='asc', bay_uuid=None):
         """Retrieve a list of ReplicationControllers.
 
         :param marker: pagination marker for large data sets.
         :param limit: maximum number of resources to return in a single result.
         :param sort_key: column to sort results by. Default: id.
         :param sort_dir: direction to sort. "asc" or "desc". Default: asc.
+        :param bay_uuid: UUID of the Bay.
         """
         return self._get_rcs_collection(marker, limit, sort_key,
-                                        sort_dir)
+                                        sort_dir, bay_uuid)
 
     @policy.enforce_wsgi("rc")
     @expose.expose(ReplicationControllerCollection, types.uuid,
-                   types.uuid, int, wtypes.text, wtypes.text)
+                   types.uuid, int, wtypes.text, wtypes.text,
+                   types.uuid)
     def detail(self, rc_uuid=None, marker=None, limit=None,
-               sort_key='id', sort_dir='asc'):
+               sort_key='id', sort_dir='asc',
+               bay_uuid=None):
         """Retrieve a list of ReplicationControllers with detail.
 
         :param rc_uuid: UUID of a ReplicationController, to get only
@@ -257,6 +262,7 @@ class ReplicationControllersController(rest.RestController):
         :param limit: maximum number of resources to return in a single result.
         :param sort_key: column to sort results by. Default: id.
         :param sort_dir: direction to sort. "asc" or "desc". Default: asc.
+        :param bay_uuid: UUID of the Bay.
         """
         # NOTE(jay-lau-513): /detail should only work agaist collections
         parent = pecan.request.path.split('/')[:-1][-1]
@@ -266,15 +272,18 @@ class ReplicationControllersController(rest.RestController):
         expand = True
         resource_url = '/'.join(['rcs', 'detail'])
         return self._get_rcs_collection(marker, limit,
-                                        sort_key, sort_dir, expand,
+                                        sort_key, sort_dir,
+                                        bay_uuid, expand,
                                         resource_url)
 
     @policy.enforce_wsgi("rc", "get")
-    @expose.expose(ReplicationController, types.uuid_or_name)
-    def get_one(self, rc_ident):
+    @expose.expose(ReplicationController, types.uuid_or_name,
+                   types.uuid)
+    def get_one(self, rc_ident, bay_uuid):
         """Retrieve information about the given ReplicationController.
 
         :param rc_ident: UUID or logical name of a ReplicationController.
+        :param bay_uuid: UUID of the Bay.
         """
         rpc_rc = api_utils.get_rpc_resource('ReplicationController', rc_ident)
         return ReplicationController.convert_with_links(rpc_rc)
@@ -305,11 +314,12 @@ class ReplicationControllersController(rest.RestController):
     @policy.enforce_wsgi("rc", "update")
     @wsme.validate(types.uuid, [ReplicationControllerPatchType])
     @expose.expose(ReplicationController, types.uuid_or_name,
-                   body=[ReplicationControllerPatchType])
-    def patch(self, rc_ident, patch):
+                   types.uuid, body=[ReplicationControllerPatchType])
+    def patch(self, rc_ident, bay_uuid, patch):
         """Update an existing rc.
 
         :param rc_ident: UUID or logical name of a ReplicationController.
+        :param bay_uuid: UUID of the Bay.
         :param patch: a json PATCH document to apply to this rc.
         """
         rpc_rc = api_utils.get_rpc_resource('ReplicationController', rc_ident)
@@ -345,11 +355,13 @@ class ReplicationControllersController(rest.RestController):
         return ReplicationController.convert_with_links(rpc_rc)
 
     @policy.enforce_wsgi("rc")
-    @expose.expose(None, types.uuid_or_name, status_code=204)
-    def delete(self, rc_ident):
+    @expose.expose(None, types.uuid_or_name,
+                   types.uuid, status_code=204)
+    def delete(self, rc_ident, bay_uuid):
         """Delete a ReplicationController.
 
         :param rc_uuid: UUID of a ReplicationController.
+        :param bay_uuid: UUID of the Bay.
         """
         rpc_rc = api_utils.get_rpc_resource('ReplicationController', rc_ident)
         pecan.request.rpcapi.rc_delete(rpc_rc.uuid)

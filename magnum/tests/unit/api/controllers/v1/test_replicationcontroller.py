@@ -62,19 +62,19 @@ class TestListRC(api_base.FunctionalTest):
 
     def test_get_one(self):
         rc = obj_utils.create_test_rc(self.context)
-        response = self.get_json('/rcs/%s' % rc['uuid'])
+        response = self.get_json('/rcs/%s/%s' % (rc['uuid'], rc['bay_uuid']))
         self.assertEqual(rc.uuid, response['uuid'])
         self._assert_rc_fields(response)
 
     def test_get_one_by_name(self):
         rc = obj_utils.create_test_rc(self.context)
-        response = self.get_json('/rcs/%s' % rc['name'])
+        response = self.get_json('/rcs/%s/%s' % (rc['name'], rc['bay_uuid']))
         self.assertEqual(rc.uuid, response['uuid'])
         self._assert_rc_fields(response)
 
     def test_get_one_by_name_not_found(self):
         response = self.get_json(
-            '/rcs/not_found',
+            '/rcs/not_found/5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
             expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
@@ -87,7 +87,9 @@ class TestListRC(api_base.FunctionalTest):
         obj_utils.create_test_rc(
             self.context, name='test_rc',
             uuid=utils.generate_uuid())
-        response = self.get_json('/rcs/test_rc', expect_errors=True)
+        response = self.get_json(
+            '/rcs/test_rc/5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
+            expect_errors=True)
         self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
@@ -142,13 +144,11 @@ class TestListRC(api_base.FunctionalTest):
     def test_links(self):
         uuid = utils.generate_uuid()
         obj_utils.create_test_rc(self.context, id=1, uuid=uuid)
-        response = self.get_json('/rcs/%s' % uuid)
+        response = self.get_json(
+            '/rcs/%s/%s' % (uuid, '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'))
         self.assertIn('links', response.keys())
         self.assertEqual(2, len(response['links']))
         self.assertIn(uuid, response['links'][0]['href'])
-        for l in response['links']:
-            bookmark = l['rel'] == 'bookmark'
-            self.assertTrue(self.validate_link(l['href'], bookmark=bookmark))
 
     def test_collection_links(self):
         for id_ in range(5):
@@ -189,24 +189,28 @@ class TestPatch(api_base.FunctionalTest):
         mock_utcnow.return_value = test_time
 
         new_image = 'rc_example_B_image'
-        response = self.get_json('/rcs/%s' % self.rc.uuid)
+        response = self.get_json(
+            '/rcs/%s/%s' % (self.rc.uuid, self.rc.bay_uuid))
         self.assertNotEqual(new_image, response['images'][0])
 
-        response = self.patch_json('/rcs/%s' % self.rc.uuid,
-                                   [{'path': '/images/0',
-                                     'value': new_image,
-                                     'op': 'replace'}])
+        response = self.patch_json(
+            '/rcs/%s/%s' % (self.rc.uuid, self.rc.bay_uuid),
+            [{'path': '/images/0',
+              'value': new_image,
+              'op': 'replace'}])
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(200, response.status_code)
 
-        response = self.get_json('/rcs/%s' % self.rc.uuid)
+        response = self.get_json('/rcs/%s/%s' % (self.rc.uuid,
+                                                 self.rc.bay_uuid))
         self.assertEqual(new_image, response['images'][0])
         return_updated_at = timeutils.parse_isotime(
             response['updated_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_updated_at)
 
     def test_replace_bay_uuid(self):
-        response = self.patch_json('/rcs/%s' % self.rc.uuid,
+        response = self.patch_json('/rcs/%s/%s' % (self.rc.uuid,
+                                                   self.rc.bay_uuid),
                                    [{'path': '/bay_uuid',
                                      'value': self.another_bay.uuid,
                                      'op': 'replace'}],
@@ -215,7 +219,8 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(200, response.status_code)
 
     def test_replace_non_existent_bay_uuid(self):
-        response = self.patch_json('/rcs/%s' % self.rc.uuid,
+        response = self.patch_json('/rcs/%s/%s' % (self.rc.uuid,
+                                                   self.rc.bay_uuid),
                                    [{'path': '/bay_uuid',
                                      'value': utils.generate_uuid(),
                                      'op': 'replace'}],
@@ -226,7 +231,7 @@ class TestPatch(api_base.FunctionalTest):
 
     def test_replace_internal_field(self):
         response = self.patch_json(
-            '/rcs/%s' % self.rc.uuid,
+            '/rcs/%s/%s' % (self.rc.uuid, self.rc.bay_uuid),
             [{'path': '/labels', 'value': {}, 'op': 'replace'}],
             expect_errors=True)
         self.assertEqual('application/json', response.content_type)
@@ -234,11 +239,13 @@ class TestPatch(api_base.FunctionalTest):
         self.assertTrue(response.json['error_message'])
 
     def test_replace_non_existent_rc(self):
-        response = self.patch_json('/rcs/%s' % utils.generate_uuid(),
-                                   [{'path': '/images/0',
-                                     'value': 'rc_example_B_image',
-                                     'op': 'replace'}],
-                                   expect_errors=True)
+        response = self.patch_json(
+            '/rcs/%s/%s' % (utils.generate_uuid(),
+                            '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'),
+            [{'path': '/images/0',
+              'value': 'rc_example_B_image',
+              'op': 'replace'}],
+            expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
@@ -246,7 +253,8 @@ class TestPatch(api_base.FunctionalTest):
     @mock.patch.object(rpcapi.API, 'rc_update')
     @mock.patch.object(api_rc.ReplicationController, 'parse_manifest')
     def test_replace_with_manifest(self, parse_manifest, rc_update):
-        response = self.patch_json('/rcs/%s' % self.rc.uuid,
+        response = self.patch_json('/rcs/%s/%s' % (self.rc.uuid,
+                                                   self.rc.bay_uuid),
                                    [{'path': '/manifest',
                                      'value': '{}',
                                      'op': 'replace'}])
@@ -257,19 +265,21 @@ class TestPatch(api_base.FunctionalTest):
 
     def test_add_ok(self):
         new_image = 'rc_example_B_image'
-        response = self.patch_json('/rcs/%s' % self.rc.uuid,
+        response = self.patch_json('/rcs/%s/%s' % (self.rc.uuid,
+                                                   self.rc.bay_uuid),
                                    [{'path': '/images/0',
                                      'value': new_image,
                                      'op': 'add'}])
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(200, response.status_int)
 
-        response = self.get_json('/rcs/%s' % self.rc.uuid)
+        response = self.get_json('/rcs/%s/%s' % (self.rc.uuid,
+                                                 self.rc.bay_uuid))
         self.assertEqual(new_image, response['images'][0])
 
     def test_add_non_existent_property(self):
         response = self.patch_json(
-            '/rcs/%s' % self.rc.uuid,
+            '/rcs/%s/%s' % (self.rc.uuid, self.rc.bay_uuid),
             [{'path': '/foo', 'value': 'bar', 'op': 'add'}],
             expect_errors=True)
         self.assertEqual('application/json', response.content_type)
@@ -277,19 +287,23 @@ class TestPatch(api_base.FunctionalTest):
         self.assertTrue(response.json['error_message'])
 
     def test_remove_ok(self):
-        response = self.get_json('/rcs/%s' % self.rc.uuid)
+        response = self.get_json('/rcs/%s/%s' % (self.rc.uuid,
+                                                 self.rc.bay_uuid))
         self.assertNotEqual(len(response['images']), 0)
 
-        response = self.patch_json('/rcs/%s' % self.rc.uuid,
+        response = self.patch_json('/rcs/%s/%s' % (self.rc.uuid,
+                                                   self.rc.bay_uuid),
                                    [{'path': '/images', 'op': 'remove'}])
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(200, response.status_code)
 
-        response = self.get_json('/rcs/%s' % self.rc.uuid)
+        response = self.get_json('/rcs/%s/%s' % (self.rc.uuid,
+                                                 self.rc.bay_uuid))
         self.assertEqual(len(response['images']), 0)
 
     def test_remove_uuid(self):
-        response = self.patch_json('/rcs/%s' % self.rc.uuid,
+        response = self.patch_json('/rcs/%s/%s' % (self.rc.uuid,
+                                                   self.rc.bay_uuid),
                                    [{'path': '/uuid', 'op': 'remove'}],
                                    expect_errors=True)
         self.assertEqual(400, response.status_int)
@@ -297,7 +311,8 @@ class TestPatch(api_base.FunctionalTest):
         self.assertTrue(response.json['error_message'])
 
     def test_remove_bay_uuid(self):
-        response = self.patch_json('/rcs/%s' % self.rc.uuid,
+        response = self.patch_json('/rcs/%s/%s' % (self.rc.uuid,
+                                                   self.rc.bay_uuid),
                                    [{'path': '/bay_uuid', 'op': 'remove'}],
                                    expect_errors=True)
         self.assertEqual(400, response.status_int)
@@ -305,7 +320,8 @@ class TestPatch(api_base.FunctionalTest):
         self.assertTrue(response.json['error_message'])
 
     def test_remove_internal_field(self):
-        response = self.patch_json('/rcs/%s' % self.rc.uuid,
+        response = self.patch_json('/rcs/%s/%s' % (self.rc.uuid,
+                                                   self.rc.bay_uuid),
                                    [{'path': '/labels', 'op': 'remove'}],
                                    expect_errors=True)
         self.assertEqual(400, response.status_int)
@@ -314,7 +330,7 @@ class TestPatch(api_base.FunctionalTest):
 
     def test_remove_non_existent_property(self):
         response = self.patch_json(
-            '/rcs/%s' % self.rc.uuid,
+            '/rcs/%s/%s' % (self.rc.uuid, self.rc.bay_uuid),
             [{'path': '/non-existent', 'op': 'remove'}],
             expect_errors=True)
         self.assertEqual(400, response.status_code)
@@ -327,14 +343,16 @@ class TestPatch(api_base.FunctionalTest):
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
         mock_utcnow.return_value = test_time
 
-        response = self.patch_json('/rcs/%s' % self.rc.name,
-                                   [{'path': '/images/0',
-                                     'value': new_image,
-                                     'op': 'replace'}])
+        response = self.patch_json(
+            '/rcs/%s/%s' % (self.rc.name, self.rc.bay_uuid),
+            [{'path': '/images/0',
+              'value': new_image,
+              'op': 'replace'}])
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(200, response.status_code)
 
-        response = self.get_json('/rcs/%s' % self.rc.uuid)
+        response = self.get_json('/rcs/%s/%s' % (self.rc.uuid,
+                                                 self.rc.bay_uuid))
         return_updated_at = timeutils.parse_isotime(
             response['updated_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_updated_at)
@@ -346,7 +364,7 @@ class TestPatch(api_base.FunctionalTest):
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
         mock_utcnow.return_value = test_time
 
-        response = self.patch_json('/rcs/%s' % name,
+        response = self.patch_json('/rcs/%s/%s' % (name, self.rc.bay_uuid),
                                    [{'path': '/images/0',
                                      'value': new_image,
                                      'op': 'replace'}],
@@ -365,11 +383,12 @@ class TestPatch(api_base.FunctionalTest):
         obj_utils.create_test_rc(self.context, name='test_rc',
                                  uuid=utils.generate_uuid())
 
-        response = self.patch_json('/rcs/test_rc',
-                                   [{'path': '/images/0',
-                                     'value': new_image,
-                                     'op': 'replace'}],
-                                   expect_errors=True)
+        response = self.patch_json(
+            '/rcs/test_rc/5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
+            [{'path': '/images/0',
+              'value': new_image,
+              'op': 'replace'}],
+            expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(409, response.status_code)
 
@@ -499,8 +518,9 @@ class TestDelete(api_base.FunctionalTest):
         rc.destroy()
 
     def test_delete_rc(self):
-        self.delete('/rcs/%s' % self.rc.uuid)
-        response = self.get_json('/rcs/%s' % self.rc.uuid,
+        self.delete('/rcs/%s/%s' % (self.rc.uuid, self.rc.bay_uuid))
+        response = self.get_json('/rcs/%s/%s' % (self.rc.uuid,
+                                                 self.rc.bay_uuid),
                                  expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
@@ -508,19 +528,22 @@ class TestDelete(api_base.FunctionalTest):
 
     def test_delete_rc_not_found(self):
         uuid = utils.generate_uuid()
-        response = self.delete('/rcs/%s' % uuid, expect_errors=True)
+        response = self.delete('/rcs/%s/%s' % (uuid, self.rc.bay_uuid),
+                               expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
     def test_delete_rc_with_name_not_found(self):
-        response = self.delete('/rcs/not_found', expect_errors=True)
+        response = self.delete(
+            '/rcs/not_found/5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
+            expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
     def test_delete_rc_with_name(self):
-        response = self.delete('/rcs/%s' % self.rc.name,
+        response = self.delete('/rcs/%s/%s' % (self.rc.name, self.rc.bay_uuid),
                                expect_errors=True)
         self.assertEqual(204, response.status_int)
 
@@ -529,8 +552,10 @@ class TestDelete(api_base.FunctionalTest):
                                  uuid=utils.generate_uuid())
         obj_utils.create_test_rc(self.context, name='test_rc',
                                  uuid=utils.generate_uuid())
-        response = self.delete('/rcs/test_rc', expect_errors=True)
-        self.assertEqual(409, response.status_int)
+        response = self.delete(
+            '/rcs/test_rc/5d12f6fd-a196-4bf0-ae4c-1f639a523a5',
+            expect_errors=True)
+        self.assertEqual(400, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
