@@ -22,7 +22,7 @@ ExecStart=/usr/bin/docker run --name swarm-manager \\
                               manage -H tcp://0.0.0.0:2375 \\
 END_SERVICE_TOP
 
-if [ $INSECURE = 'False'  ]; then
+if [ $TLS_DISABLED = 'False'  ]; then
 
 cat >> /etc/systemd/system/swarm-manager.service << END_TLS
                                   --tlsverify \\

@@ -868,7 +868,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
-            'insecure': False
+            'tls_disabled': False
         }
         self.bay_dict = {
             'id': 1,
@@ -915,7 +915,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'user_token': self.context.auth_token,
             'bay_uuid': 'some_uuid',
             'magnum_url': self.mock_osc.magnum_url.return_value,
-            'insecure': False
+            'tls_disabled': False
 
         }
         self.assertEqual(expected, definition)
@@ -951,7 +951,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'user_token': self.context.auth_token,
             'bay_uuid': 'some_uuid',
             'magnum_url': self.mock_osc.magnum_url.return_value,
-            'insecure': False
+            'tls_disabled': False
         }
         self.assertEqual(expected, definition)
 
