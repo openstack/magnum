@@ -101,7 +101,7 @@ class Pod(v1_base.K8sResourceBase):
                      status='Running',
                      host='10.0.0.3',
                      manifest_url='file:///tmp/rc.yaml',
-                     manifest = '''{
+                     manifest='''{
                          "metadata": {
                              "name": "name_of_pod"
                          },

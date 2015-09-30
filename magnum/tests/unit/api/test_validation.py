@@ -124,18 +124,18 @@ class TestValidation(base.BaseTestCase):
 
     def test_enforce_network_driver_types_one_allowed_post(self):
         self._test_enforce_network_driver_types_post(
-            network_driver_type = 'type1',
-            allowed_network_driver_types = {'kubernetes': ['type1']})
+            network_driver_type='type1',
+            allowed_network_driver_types={'kubernetes': ['type1']})
 
     def test_enforce_network_driver_types_two_allowed_post(self):
         self._test_enforce_network_driver_types_post(
-            network_driver_type = 'type1',
-            allowed_network_driver_types = {'kubernetes': ['type1', 'type2']})
+            network_driver_type='type1',
+            allowed_network_driver_types={'kubernetes': ['type1', 'type2']})
 
     def test_enforce_network_driver_types_not_allowed_post(self):
         self._test_enforce_network_driver_types_post(
-            network_driver_type = 'type1',
-            allowed_network_driver_types = {'kubernetes': ['type2']},
+            network_driver_type='type1',
+            allowed_network_driver_types={'kubernetes': ['type2']},
             assert_raised=True)
 
     @mock.patch('pecan.request')
@@ -169,16 +169,16 @@ class TestValidation(base.BaseTestCase):
 
     def test_enforce_network_driver_types_one_allowed_patch(self):
         self._test_enforce_network_driver_types_patch(
-            network_driver_type = 'type1',
-            allowed_network_driver_types = {'kubernetes': ['type1']})
+            network_driver_type='type1',
+            allowed_network_driver_types={'kubernetes': ['type1']})
 
     def test_enforce_network_driver_types_two_allowed_patch(self):
         self._test_enforce_network_driver_types_patch(
-            network_driver_type = 'type1',
-            allowed_network_driver_types = {'kubernetes': ['type1', 'type2']})
+            network_driver_type='type1',
+            allowed_network_driver_types={'kubernetes': ['type1', 'type2']})
 
     def test_enforce_network_driver_types_not_allowed_patch(self):
         self._test_enforce_network_driver_types_patch(
-            network_driver_type = 'type1',
-            allowed_network_driver_types = {'kubernetes': ['type2']},
+            network_driver_type='type1',
+            allowed_network_driver_types={'kubernetes': ['type2']},
             assert_raised=True)
