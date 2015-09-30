@@ -190,7 +190,7 @@ resources:
         str_replace:
           template: {get_file: fragments/enable-services.sh}
           params:
-            "$NODE_SERVICES": "docker-tcp.socket swarm-agent"
+            "$NODE_SERVICES": "docker.socket swarm-agent"
 
   cfn_signal:
     type: "OS::Heat::SoftwareConfig"
