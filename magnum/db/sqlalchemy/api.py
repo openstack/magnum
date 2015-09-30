@@ -876,16 +876,6 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.ReplicationControllerNotFound(rc=rc_uuid)
 
-    def get_rcs_by_bay_uuid(self, context, bay_uuid):
-        # First verify whether the Bay exists
-        self.get_bay_by_uuid(context, bay_uuid)
-        query = model_query(models.ReplicationController).filter_by(
-            bay_uuid=bay_uuid)
-        try:
-            return query.all()
-        except NoResultFound:
-            raise exception.ReplicationControllerNotFound(bay=bay_uuid)
-
     def get_rc_by_name(self, context, rc_name):
         query = model_query(models.ReplicationController)
         query = self._add_tenant_filters(context, query)
