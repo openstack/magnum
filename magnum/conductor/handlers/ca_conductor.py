@@ -41,5 +41,5 @@ class Handler(object):
     def get_ca_certificate(self, context, bay):
         ca_cert = cert_manager.get_bay_ca_certificate(bay)
         certificate = objects.Certificate.from_object_bay(bay)
-        certificate.pem = ca_cert
+        certificate.pem = ca_cert.get_certificate()
         return certificate

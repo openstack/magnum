@@ -46,7 +46,9 @@ class TestSignConductor(base.TestCase):
         mock_bay.uuid = 'bay-uuid'
         mock_bay.user_id = 'user-id'
         mock_bay.project_id = 'project-id'
-        mock_cert_manager.get_bay_ca_certificate.return_value = 'fake-pem'
+        mock_cert = mock.MagicMock()
+        mock_cert.get_certificate.return_value = 'fake-pem'
+        mock_cert_manager.get_bay_ca_certificate.return_value = mock_cert
 
         actual_cert = self.ca_handler.get_ca_certificate(self.context,
                                                          mock_bay)

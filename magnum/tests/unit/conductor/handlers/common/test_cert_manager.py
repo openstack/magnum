@@ -149,14 +149,13 @@ class CertManagerTestCase(base.BaseTestCase):
         mock_bay = mock.MagicMock()
         mock_bay.uuid = "mock_bay_uuid"
         mock_ca_cert = mock.MagicMock()
-        mock_ca_cert.get_certificate.return_value = mock.sentinel.certificate
         self.CertManager.get_cert.return_value = mock_ca_cert
 
         bay_ca_cert = cert_manager.get_bay_ca_certificate(mock_bay)
 
         self.CertManager.get_cert.assert_called_once_with(
             mock_bay.ca_cert_ref, resource_ref=mock_bay.uuid)
-        self.assertEqual(bay_ca_cert, mock.sentinel.certificate)
+        self.assertEqual(bay_ca_cert, mock_ca_cert)
 
     def test_delete_certtificate(self):
         mock_delete_cert = self.CertManager.delete_cert

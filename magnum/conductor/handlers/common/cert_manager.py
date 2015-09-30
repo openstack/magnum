@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import tempfile
+
 from oslo_log import log as logging
 import six
 
@@ -92,7 +94,35 @@ def get_bay_ca_certificate(bay):
         resource_ref=bay.uuid
     )
 
-    return ca_cert.get_certificate()
+    return ca_cert
+
+
+def get_bay_magnum_cert(bay):
+    magnum_cert = cert_manager.get_backend().CertManager.get_cert(
+        bay.magnum_cert_ref,
+        resource_ref=bay.uuid
+    )
+
+    return magnum_cert
+
+
+def create_client_files(bay):
+    ca_cert = get_bay_ca_certificate(bay)
+    magnum_cert = get_bay_magnum_cert(bay)
+
+    ca_cert_file = tempfile.NamedTemporaryFile()
+    ca_cert_file.write(ca_cert.get_certificate())
+    ca_cert_file.flush()
+
+    magnum_key_file = tempfile.NamedTemporaryFile()
+    magnum_key_file.write(magnum_cert.get_decrypted_private_key())
+    magnum_key_file.flush()
+
+    magnum_cert_file = tempfile.NamedTemporaryFile()
+    magnum_cert_file.write(magnum_cert.get_certificate())
+    magnum_cert_file.flush()
+
+    return ca_cert_file, magnum_key_file, magnum_cert_file
 
 
 def sign_node_certificate(bay, csr):

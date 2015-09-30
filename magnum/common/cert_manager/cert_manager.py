@@ -18,6 +18,8 @@ Certificate manager API
 import abc
 import six
 
+from magnum.common.x509 import operations
+
 
 @six.add_metaclass(abc.ABCMeta)
 class Cert(object):
@@ -37,6 +39,11 @@ class Cert(object):
     def get_private_key(self):
         """Returns the private key for the certificate."""
         pass
+
+    def get_decrypted_private_key(self):
+        """Returns the decrypted private key for the certificate."""
+        return operations.decrypt_key(self.get_private_key(),
+                                      self.get_private_key_passphrase())
 
     @abc.abstractmethod
     def get_private_key_passphrase(self):
