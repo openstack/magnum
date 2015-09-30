@@ -77,4 +77,4 @@ class DockerHTTPClient(client.Client):
         self._raise_for_status(res)
 
     def get_container_logs(self, docker_id):
-        return self.attach(docker_id, 1, 1, 0, 1)
+        return self.logs(docker_id)

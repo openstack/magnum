@@ -144,11 +144,10 @@ class DockerClientTestCase(base.BaseTestCase):
         mock_raise_for_status.assert_called_once_with(
             mock_post.return_value)
 
-    @mock.patch.object(docker_py_client.Client, 'attach')
-    def test_get_container_logs(self, mock_attach):
+    @mock.patch.object(docker_py_client.Client, 'logs')
+    def test_get_container_logs(self, mock_logs):
         client = docker_client.DockerHTTPClient()
 
         client.get_container_logs('someid')
 
-        mock_attach.assert_called_once_with('someid',
-                                            1, 1, 0, 1)
+        mock_logs.assert_called_once_with('someid')
