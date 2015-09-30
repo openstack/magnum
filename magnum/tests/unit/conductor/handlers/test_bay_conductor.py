@@ -347,3 +347,34 @@ class TestHeatPoller(base.TestCase):
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
         self.assertEqual(2, bay.node_count)
+
+    @patch('magnum.conductor.handlers.bay_conductor.cert_manager')
+    def test_delete_complete(self, cert_manager):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+        poller._delete_complete()
+        self.assertEqual(1, bay.destroy.call_count)
+        self.assertEqual(1,
+                         cert_manager.delete_certificates_from_bay.call_count)
+
+    def test_create_or_complete(self):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+        mock_heat_stack.stack_status = bay_status.CREATE_COMPLETE
+        mock_heat_stack.stack_status_reason = 'stack complete'
+        poller._create_or_update_complete(mock_heat_stack)
+        self.assertEqual('stack complete', bay.status_reason)
+        self.assertEqual(bay_status.CREATE_COMPLETE, bay.status)
+        self.assertEqual(1, bay.save.call_count)
+
+    def test_sync_bay_status(self):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+        mock_heat_stack.stack_status = bay_status.CREATE_IN_PROGRESS
+        mock_heat_stack.stack_status_reason = 'stack incomplete'
+        poller._sync_bay_status(mock_heat_stack)
+        self.assertEqual('stack incomplete', bay.status_reason)
+        self.assertEqual(bay_status.CREATE_IN_PROGRESS, bay.status)
+
+    @patch('magnum.conductor.handlers.bay_conductor.LOG')
+    def test_bay_failed(self, logger):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+        poller._bay_failed()
+        self.assertEqual(1, logger.error.call_count)
