@@ -44,7 +44,7 @@ class TestContainerController(api_base.FunctionalTest):
         mock_container_create.side_effect = lambda x: x
 
         params = ('{"name": "My Docker", "image": "ubuntu",'
-                  '"command": "env",'
+                  '"command": "env", "memory": "512m",'
                   '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
         response = self.app.post('/v1/containers',
                                  params=params,
@@ -63,7 +63,7 @@ class TestContainerController(api_base.FunctionalTest):
         mock_container_create.side_effect = _create_side_effect
 
         params = ('{"name": "My Docker", "image": "ubuntu",'
-                  '"command": "env",'
+                  '"command": "env", "memory": "512m",'
                   '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
         self.app.post('/v1/containers',
                       params=params,
@@ -79,7 +79,7 @@ class TestContainerController(api_base.FunctionalTest):
         mock_container_create.side_effect = lambda x: x
         # Create a container with a command
         params = ('{"name": "My Docker", "image": "ubuntu",'
-                  '"command": "env",'
+                  '"command": "env", "memory": "512m",'
                   '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
         response = self.app.post('/v1/containers',
                                  params=params,
@@ -97,6 +97,7 @@ class TestContainerController(api_base.FunctionalTest):
         self.assertEqual('My Docker', c.get('name'))
         self.assertEqual('env', c.get('command'))
         self.assertEqual('Stopped', c.get('status'))
+        self.assertEqual('512m', c.get('memory'))
         # Delete the container we created
         response = self.app.delete('/v1/containers/%s' % c.get('uuid'))
         self.assertEqual(response.status_int, 204)
@@ -117,6 +118,43 @@ class TestContainerController(api_base.FunctionalTest):
         mock_container_create.side_effect = lambda x: x
         # Create a container with a command
         params = ('{"name": "My Docker", "image": "ubuntu",'
+                  '"command": "env", "memory": "512m",'
+                  '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
+        response = self.app.post('/v1/containers',
+                                 params=params,
+                                 content_type='application/json')
+        self.assertEqual(response.status_int, 201)
+        # get all containers
+        container = objects.Container.list(self.context)[0]
+        container.status = 'Stopped'
+        mock_container_show.return_value = container
+        response = self.app.get('/v1/containers')
+        self.assertEqual(response.status_int, 200)
+        self.assertEqual(1, len(response.json))
+        c = response.json['containers'][0]
+        self.assertIsNotNone(c.get('uuid'))
+        self.assertEqual('My Docker', c.get('name'))
+        self.assertEqual('env', c.get('command'))
+        self.assertEqual('Stopped', c.get('status'))
+        self.assertEqual('512m', c.get('memory'))
+        # Delete the container we created
+        response = self.app.delete('/v1/containers/%s' % c.get('uuid'))
+        self.assertEqual(response.status_int, 204)
+
+        response = self.app.get('/v1/containers')
+        self.assertEqual(response.status_int, 200)
+        c = response.json['containers']
+        self.assertEqual(0, len(c))
+        self.assertTrue(mock_container_create.called)
+
+    @patch('magnum.conductor.api.API.container_show')
+    @patch('magnum.conductor.api.API.container_create')
+    def test_create_container_without_memory(self,
+                                             mock_container_create,
+                                             mock_container_show):
+        mock_container_create.side_effect = lambda x: x
+        # Create a container with a command
+        params = ('{"name": "My Docker", "image": "ubuntu",'
                   '"command": "env",'
                   '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
         response = self.app.post('/v1/containers',
@@ -135,20 +173,12 @@ class TestContainerController(api_base.FunctionalTest):
         self.assertEqual('My Docker', c.get('name'))
         self.assertEqual('env', c.get('command'))
         self.assertEqual('Stopped', c.get('status'))
-        # Delete the container we created
-        response = self.app.delete('/v1/containers/%s' % c.get('uuid'))
-        self.assertEqual(response.status_int, 204)
-
-        response = self.app.get('/v1/containers')
-        self.assertEqual(response.status_int, 200)
-        c = response.json['containers']
-        self.assertEqual(0, len(c))
-        self.assertTrue(mock_container_create.called)
+        self.assertIsNone(c.get('memory'))
 
     @patch('magnum.conductor.api.API.container_create')
     def test_create_container_without_name(self, mock_container_create):
         # No name param
-        params = ('{"image": "ubuntu", "command": "env",'
+        params = ('{"image": "ubuntu", "command": "env", "memory": "512m",'
                   '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
         self.assertRaises(AppError, self.app.post, '/v1/containers',
                           params=params, content_type='application/json')
@@ -158,7 +188,7 @@ class TestContainerController(api_base.FunctionalTest):
     def test_create_container_invalid_long_name(self, mock_container_create):
         # Long name
         params = ('{"name": "' + 'i' * 256 + '", "image": "ubuntu",'
-                  '"command": "env",'
+                  '"command": "env", "memory": "512m",'
                   '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
         self.assertRaises(AppError, self.app.post, '/v1/containers',
                           params=params, content_type='application/json')
@@ -232,6 +262,7 @@ class TestContainerController(api_base.FunctionalTest):
         self.assertIn('status', actual_containers[0])
         self.assertIn('image', actual_containers[0])
         self.assertIn('command', actual_containers[0])
+        self.assertIn('memory', actual_containers[0])
 
     @patch('magnum.conductor.api.API.container_show')
     @patch('magnum.objects.Container.list')
@@ -570,7 +601,7 @@ class TestContainerEnforcement(api_base.FunctionalTest):
 
     def test_policy_disallow_create(self):
         params = ('{"name": "' + 'i' * 256 + '", "image": "ubuntu",'
-                  '"command": "env",'
+                  '"command": "env", "memory": "512m",'
                   '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
 
         self._common_policy_check(

@@ -165,6 +165,7 @@ class TestDockerHandler(base.BaseTestCase):
         mock_container.uuid = 'some-uuid'
         mock_container.image = 'test_image:some_tag'
         mock_container.command = None
+        mock_container.memory = None
 
         container = self.conductor.container_create(
             None, mock_container)
@@ -177,7 +178,8 @@ class TestDockerHandler(base.BaseTestCase):
             mock_container.image,
             name='some-name',
             hostname='some-uuid',
-            command=None)
+            command=None,
+            mem_limit=None)
         self.assertEqual(fields.ContainerStatus.STOPPED, container.status)
 
     def test_container_create_with_command(self):
@@ -186,6 +188,7 @@ class TestDockerHandler(base.BaseTestCase):
         mock_container.uuid = 'some-uuid'
         mock_container.image = 'test_image:some_tag'
         mock_container.command = 'env'
+        mock_container.memory = None
 
         container = self.conductor.container_create(
             None, mock_container)
@@ -198,7 +201,31 @@ class TestDockerHandler(base.BaseTestCase):
             mock_container.image,
             name='some-name',
             hostname='some-uuid',
-            command='env')
+            command='env',
+            mem_limit=None)
+        self.assertEqual(fields.ContainerStatus.STOPPED, container.status)
+
+    def test_container_create_with_memory(self):
+        mock_container = mock.MagicMock()
+        mock_container.name = 'some-name'
+        mock_container.uuid = 'some-uuid'
+        mock_container.image = 'test_image:some_tag'
+        mock_container.command = None
+        mock_container.memory = '512m'
+
+        container = self.conductor.container_create(
+            None, mock_container)
+
+        utf8_image = self.conductor._encode_utf8(mock_container.image)
+        self.mock_docker.pull.assert_called_once_with('test_image',
+                                                      tag='some_tag')
+        self.mock_docker.inspect_image.assert_called_once_with(utf8_image)
+        self.mock_docker.create_container.assert_called_once_with(
+            mock_container.image,
+            name='some-name',
+            hostname='some-uuid',
+            command=None,
+            mem_limit='512m')
         self.assertEqual(fields.ContainerStatus.STOPPED, container.status)
 
     def test_encode_utf8_unicode(self):
