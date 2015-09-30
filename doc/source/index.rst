@@ -79,3 +79,4 @@ Developer Info
    dev/dev-manual-devstack
    contributing
    heat-templates
+   objects
