@@ -189,14 +189,17 @@ resources:
       config:
         str_replace:
           template: {get_file: fragments/enable-services.sh}
-          params:
+          params: &node_services
             "$NODE_SERVICES": "docker.socket swarm-agent"
 
   cfn_signal:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
-      config: {get_file: fragments/cfn-signal.sh}
+      config:
+        str_replace:
+          template: {get_file: fragments/cfn-signal.sh}
+          params: *node_services
 
   disable_selinux:
     type: "OS::Heat::SoftwareConfig"
