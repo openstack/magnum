@@ -11,6 +11,7 @@
 #    limitations under the License.
 
 """Magnum Docker RPC handler."""
+import contextlib
 
 from docker import errors
 import functools
@@ -21,6 +22,7 @@ import six
 from magnum.common import docker_utils
 from magnum.common import exception
 from magnum.common import utils
+from magnum.conductor.handlers.common import cert_manager
 from magnum.conductor.handlers.common import docker_client
 from magnum.conductor import utils as conductor_utils
 from magnum.i18n import _LE
@@ -72,6 +74,40 @@ def wrap_container_exception(f):
     return functools.wraps(f)(wrapped)
 
 
+@contextlib.contextmanager
+def docker_for_container(context, container):
+    if utils.is_uuid_like(container):
+        container = objects.Container.get_by_uuid(context, container)
+    bay = conductor_utils.retrieve_bay(context, container)
+    baymodel = conductor_utils.retrieve_baymodel(context, bay)
+
+    tcp_url = 'tcp://%s:2376' % bay.api_address
+
+    ca_cert, magnum_key, magnum_cert = None, None, None
+    client_kwargs = dict()
+    if not baymodel.tls_disabled:
+        tcp_url = 'https://%s:2376' % bay.api_address
+        (ca_cert, magnum_key,
+         magnum_cert) = cert_manager.create_client_files(bay)
+        client_kwargs['ca_cert'] = ca_cert.name
+        client_kwargs['client_key'] = magnum_key.name
+        client_kwargs['client_cert'] = magnum_cert.name
+
+    yield docker_client.DockerHTTPClient(
+        tcp_url,
+        CONF.docker.docker_remote_api_version,
+        CONF.docker.default_timeout,
+        **client_kwargs
+    )
+
+    if ca_cert:
+        ca_cert.close()
+    if magnum_key:
+        magnum_key.close()
+    if magnum_cert:
+        magnum_cert.close()
+
+
 class Handler(object):
 
     def __init__(self):
@@ -93,114 +129,99 @@ class Handler(object):
             value = unicode(value)
         return value.encode('utf-8')
 
-    @staticmethod
-    def _docker_for_bay(bay):
-        tcp_url = 'tcp://%s:2376' % bay.api_address
-        return docker_client.DockerHTTPClient(
-            tcp_url,
-            CONF.docker.docker_remote_api_version,
-            CONF.docker.default_timeout
-        )
-
-    @classmethod
-    def _docker_for_container(cls, context, container):
-        bay = conductor_utils.retrieve_bay(context, container)
-        return cls._docker_for_bay(bay)
-
-    @classmethod
-    def get_docker_client(cls, context, container):
-        if utils.is_uuid_like(container):
-            container = objects.Container.get_by_uuid(context, container)
-        return cls._docker_for_container(context, container)
-
     # Container operations
 
     @wrap_container_exception
     def container_create(self, context, container):
-        docker = self.get_docker_client(context, container)
-        name = container.name
-        container_uuid = container.uuid
-        image = container.image
-        LOG.debug('Creating container with image %s name %s'
-                  % (image, name))
-        try:
-            image_repo, image_tag = docker_utils.parse_docker_image(image)
-            docker.pull(image_repo, tag=image_tag)
-            docker.inspect_image(self._encode_utf8(container.image))
-            docker.create_container(image, name=name,
-                                    hostname=container_uuid,
-                                    command=container.command)
-            container.status = fields.ContainerStatus.STOPPED
-            return container
-        except errors.APIError as api_error:
-            container.status = fields.ContainerStatus.ERROR
-            raise exception.ContainerException(
-                "Docker API Error : %s" % str(api_error))
-        finally:
-            container.save()
+        with docker_for_container(context, container) as docker:
+            name = container.name
+            container_uuid = container.uuid
+            image = container.image
+            LOG.debug('Creating container with image %s name %s'
+                      % (image, name))
+            try:
+                image_repo, image_tag = docker_utils.parse_docker_image(image)
+                docker.pull(image_repo, tag=image_tag)
+                docker.inspect_image(self._encode_utf8(container.image))
+                docker.create_container(image, name=name,
+                                        hostname=container_uuid,
+                                        command=container.command)
+                container.status = fields.ContainerStatus.STOPPED
+                return container
+            except errors.APIError as api_error:
+                container.status = fields.ContainerStatus.ERROR
+                raise exception.ContainerException(
+                    "Docker API Error : %s" % str(api_error))
+            finally:
+                container.save()
 
     @wrap_container_exception
     def container_delete(self, context, container_uuid):
         LOG.debug("container_delete %s" % container_uuid)
-        docker = self.get_docker_client(context, container_uuid)
-        try:
-            docker_id = self._find_container_by_name(docker, container_uuid)
-            if not docker_id:
-                return None
-            return docker.remove_container(docker_id)
-        except errors.APIError as api_error:
-            raise exception.ContainerException(
-                "Docker API Error : %s" % str(api_error))
+        with docker_for_container(context, container_uuid) as docker:
+            try:
+                docker_id = self._find_container_by_name(docker,
+                                                         container_uuid)
+                if not docker_id:
+                    return None
+                return docker.remove_container(docker_id)
+            except errors.APIError as api_error:
+                raise exception.ContainerException(
+                    "Docker API Error : %s" % str(api_error))
 
     @wrap_container_exception
     def container_show(self, context, container_uuid):
         LOG.debug("container_show %s" % container_uuid)
-        docker = self.get_docker_client(context, container_uuid)
-        container = objects.Container.get_by_uuid(context, container_uuid)
-        try:
-            docker_id = self._find_container_by_name(docker, container_uuid)
-            if not docker_id:
-                LOG.exception(_LE("Can not find docker instance with %s,"
-                                  "set it to Error status"), container_uuid)
-                container.status = fields.ContainerStatus.ERROR
-                container.save()
-                return container
-            result = docker.inspect_container(docker_id)
-            status = result.get('State')
-            if status:
-                if status.get('Error') is True:
+        with docker_for_container(context, container_uuid) as docker:
+            container = objects.Container.get_by_uuid(context, container_uuid)
+            try:
+                docker_id = self._find_container_by_name(docker,
+                                                         container_uuid)
+                if not docker_id:
+                    LOG.exception(_LE("Can not find docker instance with %s,"
+                                      "set it to Error status"),
+                                  container_uuid)
                     container.status = fields.ContainerStatus.ERROR
-                elif status.get('Paused'):
-                    container.status = fields.ContainerStatus.PAUSED
-                elif status.get('Running'):
-                    container.status = fields.ContainerStatus.RUNNING
-                else:
-                    container.status = fields.ContainerStatus.STOPPED
-                container.save()
-            return container
-        except errors.APIError as api_error:
-            error_message = str(api_error)
-            if '404' in error_message:
-                container.status = fields.ContainerStatus.ERROR
-                container.save()
+                    container.save()
+                    return container
+                result = docker.inspect_container(docker_id)
+                status = result.get('State')
+                if status:
+                    if status.get('Error') is True:
+                        container.status = fields.ContainerStatus.ERROR
+                    elif status.get('Paused'):
+                        container.status = fields.ContainerStatus.PAUSED
+                    elif status.get('Running'):
+                        container.status = fields.ContainerStatus.RUNNING
+                    else:
+                        container.status = fields.ContainerStatus.STOPPED
+                    container.save()
                 return container
-            raise exception.ContainerException(
-                "Docker API Error : %s" % (error_message))
+            except errors.APIError as api_error:
+                error_message = str(api_error)
+                if '404' in error_message:
+                    container.status = fields.ContainerStatus.ERROR
+                    container.save()
+                    return container
+                raise exception.ContainerException(
+                    "Docker API Error : %s" % (error_message))
 
     @wrap_container_exception
     def _container_action(self, context, container_uuid, status, docker_func):
         LOG.debug("%s container %s ..." % (docker_func, container_uuid))
-        docker = self.get_docker_client(context, container_uuid)
-        try:
-            docker_id = self._find_container_by_name(docker, container_uuid)
-            result = getattr(docker, docker_func)(docker_id)
-            container = objects.Container.get_by_uuid(context, container_uuid)
-            container.status = status
-            container.save()
-            return result
-        except errors.APIError as api_error:
-            raise exception.ContainerException(
-                "Docker API Error : %s" % str(api_error))
+        with docker_for_container(context, container_uuid) as docker:
+            try:
+                docker_id = self._find_container_by_name(docker,
+                                                         container_uuid)
+                result = getattr(docker, docker_func)(docker_id)
+                container = objects.Container.get_by_uuid(context,
+                                                          container_uuid)
+                container.status = status
+                container.save()
+                return result
+            except errors.APIError as api_error:
+                raise exception.ContainerException(
+                    "Docker API Error : %s" % str(api_error))
 
     def container_reboot(self, context, container_uuid):
         return self._container_action(context, container_uuid,
@@ -227,29 +248,31 @@ class Handler(object):
     @wrap_container_exception
     def container_logs(self, context, container_uuid):
         LOG.debug("container_logs %s" % container_uuid)
-        docker = self.get_docker_client(context, container_uuid)
-        try:
-            docker_id = self._find_container_by_name(docker, container_uuid)
-            return {'output': docker.get_container_logs(docker_id)}
-        except errors.APIError as api_error:
-            raise exception.ContainerException(
-                "Docker API Error : %s" % str(api_error))
+        with docker_for_container(context, container_uuid) as docker:
+            try:
+                docker_id = self._find_container_by_name(docker,
+                                                         container_uuid)
+                return {'output': docker.get_container_logs(docker_id)}
+            except errors.APIError as api_error:
+                raise exception.ContainerException(
+                    "Docker API Error : %s" % str(api_error))
 
     @wrap_container_exception
     def container_exec(self, context, container_uuid, command):
         LOG.debug("container_exec %s command %s" %
                   (container_uuid, command))
-        docker = self.get_docker_client(context, container_uuid)
-        try:
-            docker_id = self._find_container_by_name(docker, container_uuid)
-            if docker_utils.is_docker_library_version_atleast('1.2.0'):
-                create_res = docker.exec_create(docker_id, command, True,
-                                                True, False)
-                exec_output = docker.exec_start(create_res, False, False,
-                                                False)
-            else:
-                exec_output = docker.execute(docker_id, command)
-            return {'output': exec_output}
-        except errors.APIError as api_error:
-            raise exception.ContainerException(
-                "Docker API Error : %s" % str(api_error))
+        with docker_for_container(context, container_uuid) as docker:
+            try:
+                docker_id = self._find_container_by_name(docker,
+                                                         container_uuid)
+                if docker_utils.is_docker_library_version_atleast('1.2.0'):
+                    create_res = docker.exec_create(docker_id, command, True,
+                                                    True, False)
+                    exec_output = docker.exec_start(create_res, False, False,
+                                                    False)
+                else:
+                    exec_output = docker.execute(docker_id, command)
+                return {'output': exec_output}
+            except errors.APIError as api_error:
+                raise exception.ContainerException(
+                    "Docker API Error : %s" % str(api_error))
