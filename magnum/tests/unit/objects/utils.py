@@ -205,3 +205,16 @@ def create_test_x509keypair(context, **kw):
     x509keypair = get_test_x509keypair(context, **kw)
     x509keypair.create()
     return x509keypair
+
+
+def get_test_magnum_service_object(context, **kw):
+    """Return a test magnum_service object.
+
+    Get a magnum_service from DB layer and return an object with
+    appropriate attributes.
+    """
+    db_magnum_service = db_utils.get_test_magnum_service(**kw)
+    magnum_service = objects.MagnumService(context)
+    for key in db_magnum_service:
+        setattr(magnum_service, key, db_magnum_service[key])
+    return magnum_service

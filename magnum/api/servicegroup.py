@@ -14,7 +14,7 @@
 from oslo_config import cfg
 from oslo_utils import timeutils
 
-from magnum.db.sqlalchemy import models
+from magnum.objects import magnum_service
 
 periodic_opts = [
     cfg.IntOpt('service_down_time',
@@ -32,7 +32,7 @@ class ServiceGroup(object):
         self.service_down_time = CONF.service_down_time
 
     def service_is_up(self, member):
-        if not isinstance(member, models.MagnumService):
+        if not isinstance(member, magnum_service.MagnumService):
             raise TypeError
         if member.get('forced_down'):
             return False
