@@ -194,3 +194,15 @@ def sign(csr, issuer_name, ca_key, ca_key_password=None,
     ).public_bytes(serialization.Encoding.PEM)
 
     return certificate
+
+
+def decrypt_key(encrypted_key, password):
+    private_key = serialization.load_pem_private_key(
+        encrypted_key, password=password, backend=default_backend()
+    )
+    decrypted_pem = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption()
+    )
+    return decrypted_pem
