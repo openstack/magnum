@@ -153,7 +153,7 @@ The Fedora Atomic micro-OS image will automatically be added to glance.  You
 can add additional images manually through glance. To verify the image created
 when installing devstack use::
 
-    glance image-list
+    glance -v image-list
 
     +--------------------------------------+---------------------------------+-------------+------------------+-----------+--------+
     | ID                                   | Name                            | Disk Format | Container Format | Size      | Status |
