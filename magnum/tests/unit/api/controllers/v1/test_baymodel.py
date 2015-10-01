@@ -238,7 +238,6 @@ class TestPatch(api_base.FunctionalTest):
             image_id='nerdherd',
             apiserver_port=8080,
             fixed_network='private',
-            network_driver='flannel',
             public=False,
             docker_volume_size=20,
             ssh_authorized_key='ssh-rsa AAAAB3NzaC1ycEAAAADA'
@@ -620,7 +619,8 @@ class TestPost(api_base.FunctionalTest):
             mock_keypair_exists.return_value = None
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
-            bdict = apiutils.baymodel_post_data(network_driver='flannel')
+            bdict = apiutils.baymodel_post_data(coe='kubernetes',
+                                                network_driver='flannel')
             response = self.post_json('/baymodels', bdict)
             self.assertEqual(bdict['network_driver'],
                              response.json['network_driver'])

@@ -216,6 +216,16 @@ class BayModelsController(rest.RestController):
         'detail': ['GET'],
     }
 
+    # Allowed network driver types per COE. An entry of None in this
+    # dictionary allows the user to leave out the selection of
+    # network-driver, in which case the default network driver for
+    # the chosen COE will be used.
+    _allowed_network_driver_types = {
+        'kubernetes': ['flannel', None],
+        'swarm': [None],
+        'mesos': [None],
+    }
+
     def _get_baymodels_collection(self, marker, limit,
                                   sort_key, sort_dir, expand=False,
                                   resource_url=None):
@@ -312,7 +322,7 @@ class BayModelsController(rest.RestController):
 
     @policy.enforce_wsgi("baymodel", "create")
     @expose.expose(BayModel, body=BayModel, status_code=201)
-    @validation.enforce_network_driver_types(kubernetes=['flannel'])
+    @validation.enforce_network_driver_types(_allowed_network_driver_types)
     def post(self, baymodel):
         """Create a new baymodel.
 
@@ -345,7 +355,7 @@ class BayModelsController(rest.RestController):
     @policy.enforce_wsgi("baymodel", "update")
     @wsme.validate(types.uuid, [BayModelPatchType])
     @expose.expose(BayModel, types.uuid, body=[BayModelPatchType])
-    @validation.enforce_network_driver_types(kubernetes=['flannel'])
+    @validation.enforce_network_driver_types(_allowed_network_driver_types)
     def patch(self, baymodel_uuid, patch):
         """Update an existing baymodel.
 

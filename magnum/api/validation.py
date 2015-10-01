@@ -39,7 +39,7 @@ def enforce_bay_types(*bay_types):
     return wrapper
 
 
-def enforce_network_driver_types(**network_driver_types):
+def enforce_network_driver_types(network_driver_types_dict):
     @decorator.decorator
     def wrapper(func, *args, **kwargs):
         obj = args[1]
@@ -53,16 +53,17 @@ def enforce_network_driver_types(**network_driver_types):
                                                     obj)
             driver = baymodel.network_driver
             coe = baymodel.coe
-        if (coe in network_driver_types and
-           driver not in network_driver_types[coe]):
+        if (coe in network_driver_types_dict and
+           driver not in network_driver_types_dict[coe]):
             raise exception.InvalidParameterValue(
                 'Cannot fulfill request with a '
                 '%(network_driver_type)s network_driver, '
                 'expecting a %(supported_network_driver_types)s '
                 'network_driver.' %
                 {'network_driver_type': driver,
-                 'supported_network_driver_types': '/'
-                 .join(network_driver_types)})
+                 'supported_network_driver_types':
+                 '/'.join([x if x else 'unspecified' for x in
+                           network_driver_types_dict[coe]])})
 
         return func(*args, **kwargs)
 

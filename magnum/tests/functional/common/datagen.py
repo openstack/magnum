@@ -46,6 +46,16 @@ def generate_random_coe():
     return coe_list[random.randrange(0, len(coe_list))]
 
 
+def generate_random_coe_dep_network_driver(coe):
+    allowed_driver_types = {
+        'kubernetes': ['flannel', None],
+        'swarm': [None],
+        'mesos': [None],
+    }
+    driver_types = allowed_driver_types[coe]
+    return driver_types[random.randrange(0, len(driver_types))]
+
+
 def generate_random_port():
     return random.randrange(49152, 65535)
 
@@ -78,6 +88,7 @@ def random_baymodel_data(keypair_id=random_string(), image_id=random_string()):
     :returns: BayModelEntity with generated data
     """
 
+    coe = generate_random_coe()
     data = {
         "name": random_string(),
         "image_id": image_id,
@@ -91,11 +102,11 @@ def random_baymodel_data(keypair_id=random_string(), image_id=random_string()):
         "docker_volume_size": generate_random_docker_volume_size(),
         "cluster_distro": random_string(),
         "ssh_authorized_key": generate_fake_ssh_pubkey(),
-        "coe": generate_random_coe(),
+        "coe": coe,
         "http_proxy": "http://proxy.com:%s" % generate_random_port(),
         "https_proxy": "https://proxy.com:%s" % generate_random_port(),
         "no_proxy": ",".join(generate_random_ip() for x in range(3)),
-        "network_driver": "flannel",
+        "network_driver": generate_random_coe_dep_network_driver(coe),
         "labels": {"K1": "V1", "K2": "V2"},
     }
     model = baymodel_model.BayModelEntity.from_dict(data)
