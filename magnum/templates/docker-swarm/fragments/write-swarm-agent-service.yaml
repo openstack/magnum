@@ -9,12 +9,13 @@ write_files:
       Description=Swarm Agent
       After=docker.service
       Requires=docker.service
+      OnFailure=swarm-agent-failure.service
 
       [Service]
       TimeoutStartSec=0
       ExecStartPre=-/usr/bin/docker kill swarm-agent
       ExecStartPre=-/usr/bin/docker rm swarm-agent
-      ExecStartPre=/usr/bin/docker pull swarm:0.2.0
+      ExecStartPre=-/usr/bin/docker pull swarm:0.2.0
       #TODO: roll-back from swarm:0.2.0 to swarm if atomic image can work with latest swarm image
       ExecStart=/usr/bin/docker run -e http_proxy=$HTTP_PROXY -e https_proxy=$HTTPS_PROXY -e no_proxy=$NO_PROXY  --name swarm-agent swarm:0.2.0 join --addr $NODE_IP:2375 $DISCOVERY_URL
       ExecStop=/usr/bin/docker stop swarm-agent
