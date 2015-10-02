@@ -98,18 +98,6 @@ class Service(base.MagnumPersistentObject, base.MagnumObject,
         return service
 
     @base.remotable_classmethod
-    def list_by_bay_uuid(cls, context, bay_uuid):
-        """Return a list of :class:`Service` objects associated with a given bay.
-
-        :param bay_uuid: the uuid of a bay.
-        :param context: Security context
-        :returns: a list of class:`Service` object.
-        """
-        db_services = cls.dbapi.get_services_by_bay_uuid(context,
-                                                         bay_uuid)
-        return Service._from_db_object_list(db_services, cls, context)
-
-    @base.remotable_classmethod
     def list(cls, context, limit=None, marker=None,
              sort_key=None, sort_dir=None):
         """Return a list of Service objects.

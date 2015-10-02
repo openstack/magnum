@@ -533,14 +533,6 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_services_by_bay_uuid(self, bay_uuid):
-        """List all the services for a given bay.
-
-        :param bay_uuid: The uuid of a bay.
-        :returns: A list of services.
-        """
-
-    @abc.abstractmethod
     def get_service_by_name(self, context, service_name):
         """Return a service.
 
