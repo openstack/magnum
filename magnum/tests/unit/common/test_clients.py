@@ -23,6 +23,12 @@ from magnum.tests import base
 
 class ClientsTest(base.BaseTestCase):
 
+    def setUp(self):
+        super(ClientsTest, self).setUp()
+
+        cfg.CONF.set_override('auth_uri', 'http://server.test:5000/v2.0',
+                              group='keystone_authtoken')
+
     @mock.patch.object(clients.OpenStackClients, 'keystone')
     def test_url_for(self, mock_keystone):
         obj = clients.OpenStackClients(None)
@@ -169,14 +175,14 @@ class ClientsTest(base.BaseTestCase):
         con.auth_url = "keystone_url"
         mock_url.return_value = "url_from_keystone"
         keystone = mock.MagicMock()
-        keystone.client.session = mock.MagicMock()
+        keystone.session = mock.MagicMock()
         mock_keystone.return_value = keystone
         obj = clients.OpenStackClients(con)
         obj._barbican = None
         obj.barbican()
         mock_call.assert_called_once_with(
             endpoint='url_from_keystone',
-            session=keystone.client.session)
+            session=keystone.session)
 
         mock_keystone.assert_called_once_with()
         mock_url.assert_called_once_with(service_type='key-manager',
@@ -211,7 +217,7 @@ class ClientsTest(base.BaseTestCase):
         con.auth_url = "keystone_url"
         mock_url.return_value = "url_from_keystone"
         keystone = mock.MagicMock()
-        keystone.client.session = mock.MagicMock()
+        keystone.session = mock.MagicMock()
         mock_keystone.return_value = keystone
         obj = clients.OpenStackClients(con)
         obj._barbican = None

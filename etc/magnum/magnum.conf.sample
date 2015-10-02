@@ -8,9 +8,6 @@
 # Default value is True. (boolean value)
 #enable_authentication = true
 
-# Subset of trustor roles to be delegated to magnum. (list value)
-#trusts_delegated_roles = magnum_assembly_update
-
 # Directory where the magnum python module is installed. (string
 # value)
 #pybasedir = /opt/stack/magnum/magnum
@@ -240,7 +237,7 @@
 # From magnum
 #
 
-# The port for the Magnum API server. (port number)
+# The port for the Magnum API server. (unknown type)
 # Minimum value: 1
 # Maximum value: 65535
 #port = 9511
@@ -733,7 +730,7 @@
 # value)
 #k8s_protocol = http
 
-# Default port of the k8s master endpoint. (port number)
+# Default port of the k8s master endpoint. (unknown type)
 # Minimum value: 1
 # Maximum value: 65535
 #k8s_port = 8080

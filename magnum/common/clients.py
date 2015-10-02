@@ -20,7 +20,7 @@ from oslo_config import cfg
 from oslo_log import log as logging
 
 from magnum.common import exception
-from magnum.common import magnum_keystoneclient
+from magnum.common import keystone
 from magnum.i18n import _
 
 
@@ -123,7 +123,7 @@ class OpenStackClients(object):
 
     @property
     def auth_url(self):
-        return self.keystone().v3_endpoint
+        return self.keystone().auth_url
 
     @property
     def auth_token(self):
@@ -133,7 +133,7 @@ class OpenStackClients(object):
         if self._keystone:
             return self._keystone
 
-        self._keystone = magnum_keystoneclient.KeystoneClientV3(self.context)
+        self._keystone = keystone.KeystoneClientV3(self.context)
         return self._keystone
 
     def _get_client_option(self, client, option):
@@ -196,7 +196,7 @@ class OpenStackClients(object):
         endpoint = self.url_for(service_type='key-manager',
                                 endpoint_type=endpoint_type,
                                 region_name=region_name)
-        session = self.keystone().client.session
+        session = self.keystone().session
         self._barbican = barbicanclient.Client(session=session,
                                                endpoint=endpoint)
 
