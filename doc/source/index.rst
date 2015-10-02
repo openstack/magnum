@@ -81,3 +81,4 @@ Developer Info
    dev/dev-kubernetes-load-balancer.rst
    contributing
    heat-templates
+   objects
