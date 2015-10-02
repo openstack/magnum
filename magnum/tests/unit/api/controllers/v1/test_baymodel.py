@@ -247,7 +247,7 @@ class TestPatch(api_base.FunctionalTest):
                                'DYucqbeuM7nmJi+8Hb55y1xWoOZI'
                                'KMa71G5/4EOQxuQ/sgW965OOO2Hq'
                                'X8vjlQUnTK0HijrbSTLxp/9kazWW'
-                               'FrfsdB8RtZBN digambar@magnum',
+                               'FrfsdB8RtAAA test1234@magnum',
             coe='swarm',
             labels={'key1': 'val1', 'key2': 'val2'}
         )

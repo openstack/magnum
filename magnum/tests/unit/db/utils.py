@@ -44,7 +44,7 @@ def get_test_baymodel(**kw):
                                      'DYucqbeuM7nmJi+8Hb55y1xWoOZI'
                                      'KMa71G5/4EOQxuQ/sgW965OOO2Hq'
                                      'X8vjlQUnTK0HijrbSTLxp/9kazWW'
-                                     'FrfsdB8RtZBN digambar@magnum'),
+                                     'FrfsdB8RtAAA test1234@magnum'),
         'coe': kw.get('coe', 'swarm'),
         'created_at': kw.get('created_at'),
         'updated_at': kw.get('updated_at'),
