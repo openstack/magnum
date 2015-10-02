@@ -333,57 +333,6 @@ def hash_file(file_like_object):
 
 
 @contextlib.contextmanager
-def temporary_mutation(obj, **kwargs):
-    """Temporarily change object attribute.
-
-    Temporarily set the attr on a particular object to a given value then
-    revert when finished.
-
-    One use of this is to temporarily set the read_deleted flag on a context
-    object:
-
-        with temporary_mutation(context, read_deleted="yes"):
-            do_something_that_needed_deleted_objects()
-    """
-    def is_dict_like(thing):
-        return hasattr(thing, 'has_key')
-
-    def get(thing, attr, default):
-        if is_dict_like(thing):
-            return thing.get(attr, default)
-        else:
-            return getattr(thing, attr, default)
-
-    def set_value(thing, attr, val):
-        if is_dict_like(thing):
-            thing[attr] = val
-        else:
-            setattr(thing, attr, val)
-
-    def delete(thing, attr):
-        if is_dict_like(thing):
-            del thing[attr]
-        else:
-            delattr(thing, attr)
-
-    NOT_PRESENT = object()
-
-    old_values = {}
-    for attr, new_value in kwargs.items():
-        old_values[attr] = get(obj, attr, NOT_PRESENT)
-        set_value(obj, attr, new_value)
-
-    try:
-        yield
-    finally:
-        for attr, old_value in old_values.items():
-            if old_value is NOT_PRESENT:
-                delete(obj, attr)
-            else:
-                set_value(obj, attr, old_value)
-
-
-@contextlib.contextmanager
 def tempdir(**kwargs):
     tempfile.tempdir = CONF.tempdir
     tmpdir = tempfile.mkdtemp(**kwargs)
