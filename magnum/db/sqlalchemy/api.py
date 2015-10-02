@@ -126,24 +126,16 @@ class Connection(api.Connection):
         if filters is None:
             filters = []
 
-        if 'baymodel_id' in filters:
-            query = query.filter_by(baymodel_id=filters['baymodel_id'])
-        if 'name' in filters:
-            query = query.filter_by(name=filters['name'])
-        if 'node_count' in filters:
-            query = query.filter_by(node_count=filters['node_count'])
-        if 'master_count' in filters:
-            query = query.filter_by(master_count=filters['master_count'])
-        if 'stack_id' in filters:
-            query = query.filter_by(stack_id=filters['stack_id'])
-        if 'api_address' in filters:
-            query = query.filter_by(api_address=filters['api_address'])
-        if 'node_addresses' in filters:
-            query = query.filter_by(node_addresses=filters['node_addresses'])
-        if 'project_id' in filters:
-            query = query.filter_by(project_id=filters['project_id'])
-        if 'user_id' in filters:
-            query = query.filter_by(user_id=filters['user_id'])
+        possible_filters = ["baymodel_id", "name", "node_count",
+                            "master_count", "stack_id", "api_address",
+                            "node_addresses", "project_id", "user_id"]
+
+        filter_names = set(filters).intersection(possible_filters)
+        filter_dict = {filter_name: filters[filter_name]
+                       for filter_name in filter_names}
+
+        query = query.filter_by(**filter_dict)
+
         if 'status' in filters:
             query = query.filter(models.Bay.status.in_(filters['status']))
 
@@ -296,30 +288,16 @@ class Connection(api.Connection):
         if filters is None:
             filters = []
 
-        if 'name' in filters:
-            query = query.filter_by(name=filters['name'])
-        if 'image_id' in filters:
-            query = query.filter_by(image_id=filters['image_id'])
-        if 'flavor_id' in filters:
-            query = query.filter_by(flavor_id=filters['flavor_id'])
-        if 'master_flavor_id' in filters:
-            query = query.filter_by(
-                master_flavor_id=filters['master_flavor_id'])
-        if 'keypair_id' in filters:
-            query = query.filter_by(keypair_id=filters['keypair_id'])
-        if 'external_network_id' in filters:
-            query = query.filter_by(
-                external_network_id=filters['external_network_id'])
-        if 'dns_nameserver' in filters:
-            query = query.filter_by(dns_nameserver=filters['dns_nameserver'])
-        if 'project_id' in filters:
-            query = query.filter_by(project_id=filters['project_id'])
-        if 'user_id' in filters:
-            query = query.filter_by(user_id=filters['user_id'])
-        if 'labels' in filters:
-            query = query.filter_by(labels=filters['labels'])
+        possible_filters = ["name", "image_id", "flavor_id",
+                            "master_flavor_id", "keypair_id",
+                            "external_network_id", "dns_nameserver",
+                            "project_id", "user_id", "labels"]
 
-        return query
+        filter_names = set(filters).intersection(possible_filters)
+        filter_dict = {filter_name: filters[filter_name]
+                       for filter_name in filter_names}
+
+        return query.filter_by(**filter_dict)
 
     def get_baymodel_list(self, context, filters=None, limit=None, marker=None,
                           sort_key=None, sort_dir=None):
