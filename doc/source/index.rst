@@ -77,5 +77,7 @@ Developer Info
 
    dev/dev-quickstart
    dev/dev-manual-devstack
+   dev/dev-build-atomic-image.rst
+   dev/dev-kubernetes-load-balancer.rst
    contributing
    heat-templates
