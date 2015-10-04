@@ -22,7 +22,8 @@ from magnum.objects import fields as m_fields
 class Container(base.MagnumPersistentObject, base.MagnumObject,
                 base.MagnumObjectDictCompat):
     # Version 1.0: Initial version
-    VERSION = '1.0'
+    # Version 1.1: Add memory field
+    VERSION = '1.1'
 
     dbapi = dbapi.get_instance()
 
@@ -36,6 +37,7 @@ class Container(base.MagnumPersistentObject, base.MagnumObject,
         'command': fields.StringField(nullable=True),
         'bay_uuid': fields.StringField(nullable=True),
         'status': m_fields.ContainerStatusField(nullable=True),
+        'memory': fields.StringField(nullable=True),
     }
 
     @staticmethod

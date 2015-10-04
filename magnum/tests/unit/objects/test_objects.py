@@ -428,7 +428,7 @@ object_data = {
     'BayLock': '1.0-7d1eb08cf2070523bd210369c7a2e076',
     'BayModel': '1.7-3ceb83f91310437d21f465ce522fc4e7',
     'Certificate': '1.0-2aff667971b85c1edf8d15684fd7d5e2',
-    'Container': '1.0-e12affbba5f8a748882a3ae98aced282',
+    'Container': '1.1-968c62bc65ee08027a2cdbba95f5819c',
     'MyObj': '1.0-b43567e512438205e32f4e95ca616697',
     'Node': '1.0-30943e6e3387a2fae7490b57c4239a17',
     'Pod': '1.1-7a31c372f163742845c10a008f47cc15',

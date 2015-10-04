@@ -145,7 +145,8 @@ class Handler(object):
                 docker.inspect_image(self._encode_utf8(container.image))
                 docker.create_container(image, name=name,
                                         hostname=container_uuid,
-                                        command=container.command)
+                                        command=container.command,
+                                        mem_limit=container.memory)
                 container.status = fields.ContainerStatus.STOPPED
                 return container
             except errors.APIError:

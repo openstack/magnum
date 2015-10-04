@@ -98,11 +98,12 @@ class TestContainerObject(base.DbTestCase):
                                    autospec=True) as mock_update_container:
                 container = objects.Container.get_by_uuid(self.context, uuid)
                 container.image = 'container.img'
+                container.memory = '512m'
                 container.save()
 
                 mock_get_container.assert_called_once_with(self.context, uuid)
                 mock_update_container.assert_called_once_with(
-                    uuid, {'image': 'container.img'})
+                    uuid, {'image': 'container.img', 'memory': '512m'})
                 self.assertEqual(self.context, container._context)
 
     def test_refresh(self):

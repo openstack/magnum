@@ -92,6 +92,9 @@ class Container(base.APIBase):
     status = wtypes.text
     """The status of container"""
 
+    memory = wtypes.text
+    """Memory limit for the container. Example: 512m"""
+
     def __init__(self, **kwargs):
         self.fields = []
         for field in objects.Container.fields:
@@ -105,7 +108,8 @@ class Container(base.APIBase):
     def _convert_with_links(container, url, expand=True):
         if not expand:
             container.unset_fields_except(['uuid', 'name', 'bay_uuid',
-                                           'image', 'command', 'status'])
+                                           'image', 'command', 'status',
+                                           'memory'])
 
         container.links = [link.Link.make_link(
             'self', url,
@@ -129,6 +133,7 @@ class Container(base.APIBase):
                      image='ubuntu',
                      command='env',
                      status='Running',
+                     memory='512m',
                      bay_uuid="fff114da-3bfa-4a0f-a123-c0dffad9718e",
                      created_at=datetime.datetime.utcnow(),
                      updated_at=datetime.datetime.utcnow())
