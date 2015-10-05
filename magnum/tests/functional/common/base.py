@@ -41,18 +41,7 @@ class BaseMagnumTest(base.BaseTestCase):
         if self.ic is not None:
             self.ic.clear_creds()
 
-    def get_clients_with_isolated_creds(self,
-                                        name=None,
-                                        type_of_creds="default",
-                                        request_type=None):
-        """Creates isolated creds.
-
-        :param name: name, will be used for dynamic creds
-        :param type_of_creds: admin, alt or default
-        :param request_type: baymodel or service
-        :returns: MagnumClient -- client with isolated creds.
-        :returns: KeypairClient -- allows for creating of keypairs
-        """
+    def get_credentials(self, name=None, type_of_creds="default"):
         if name is None:
             # Get name of test method
             name = inspect.stack()[1][3]
@@ -66,22 +55,58 @@ class BaseMagnumTest(base.BaseTestCase):
             admin_role=config.Config.admin_role,
             admin_creds=common_creds.get_configured_credentials(
                 'identity_admin'))
+
+        creds = None
         if "admin" == type_of_creds:
             creds = self.ic.get_admin_creds()
+        elif "alt" == type_of_creds:
+            creds = self.ic.get_alt_creds()
+        elif "default" == type_of_creds:
+            creds = self.ic.get_primary_creds()
+        else:
+            creds = self.ic.self.get_credentials(type_of_creds)
+        return creds
+
+    def get_clients(self, creds, type_of_creds, request_type):
+        if "admin" == type_of_creds:
             manager_inst = manager.AdminManager(credentials=creds,
                                                 request_type=request_type)
         elif "alt" == type_of_creds:
-            creds = self.ic.get_alt_creds()
             manager_inst = manager.AltManager(credentials=creds,
                                               request_type=request_type)
         elif "default" == type_of_creds:
-            creds = self.ic.get_primary_creds()
             manager_inst = manager.DefaultManager(credentials=creds,
                                                   request_type=request_type)
         else:
-            creds = self.ic.self.get_credentials(type_of_creds)
             manager_inst = manager.DefaultManager(credentials=creds,
                                                   request_type=request_type)
 
         # create client with isolated creds
         return (manager_inst.client, manager_inst.keypairs_client)
+
+    def get_clients_with_existing_creds(self,
+                                        name=None,
+                                        creds=None,
+                                        type_of_creds="default",
+                                        request_type=None):
+        if creds is None:
+            return self.get_clients_with_isolated_creds(name,
+                                                        type_of_creds,
+                                                        request_type)
+        else:
+            return self.get_clients(creds, type_of_creds, request_type)
+
+    def get_clients_with_new_creds(self,
+                                   name=None,
+                                   type_of_creds="default",
+                                   request_type=None):
+        """Creates isolated creds.
+
+        :param name: name, will be used for dynamic creds
+        :param type_of_creds: admin, alt or default
+        :param request_type: baymodel or service
+        :returns: MagnumClient -- client with isolated creds.
+        :returns: KeypairClient -- allows for creating of keypairs
+        """
+        creds = self.get_credentials(name, type_of_creds)
+        return self.get_clients(creds, type_of_creds, request_type)

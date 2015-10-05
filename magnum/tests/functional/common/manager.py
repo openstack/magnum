@@ -13,6 +13,7 @@
 from tempest import clients
 from tempest.common import credentials_factory as common_creds
 
+from magnum.tests.functional.api.v1.clients import bay_client
 from magnum.tests.functional.api.v1.clients import baymodel_client
 from magnum.tests.functional.api.v1.clients import magnum_service_client
 from magnum.tests.functional.common import client
@@ -27,6 +28,8 @@ class Manager(clients.Manager):
         super(Manager, self).__init__(credentials, 'container')
         if request_type == 'baymodel':
             self.client = baymodel_client.BayModelClient(self.auth_provider)
+        elif request_type == 'bay':
+            self.client = bay_client.BayClient(self.auth_provider)
         elif request_type == 'service':
             self.client = magnum_service_client.MagnumServiceClient(
                 self.auth_provider)

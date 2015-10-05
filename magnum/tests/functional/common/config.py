@@ -82,6 +82,12 @@ class Config(object):
         cls.keypair_id = CONF.magnum.keypair_id
 
     @classmethod
+    def set_flavor_id(cls, config):
+        if 'flavor_id' not in CONF.magnum:
+            raise Exception('config missing flavor_id key')
+        cls.flavor_id = CONF.magnum.flavor_id
+
+    @classmethod
     def setUp(cls):
         cls.set_admin_creds(config)
         cls.set_user_creds(config)
@@ -93,3 +99,4 @@ class Config(object):
         cls.set_image_id(config)
         cls.set_nic_id(config)
         cls.set_keypair_id(config)
+        cls.set_flavor_id(config)

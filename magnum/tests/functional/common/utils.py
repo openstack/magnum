@@ -82,13 +82,15 @@ def parameterized(data):
 
 
 def wait_for_condition(condition, interval=1, timeout=40):
+    start_time = time.time()
     end_time = time.time() + timeout
     while time.time() < end_time:
         result = condition()
         if result:
             return result
         time.sleep(interval)
-    raise Exception("Timed out after {0} seconds".format(timeout))
+    raise Exception("Timed out after %s seconds.  Started " +
+                    "on %s and ended on %s" % (timeout, start_time, end_time))
 
 
 def memoized(func):
