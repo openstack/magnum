@@ -38,10 +38,11 @@ Kubernetes to use.
 In the current implementation, the cluster administrator needs to manually
 perform this step.  We are looking into several ways to let Magnum automate
 this step in a secure manner.  This means that after the Kubernetes cluster is
-initially deployed, the load balancer support is disabled.  If the administrator
-does not want to enable this feature, no further action is required.  All the
-services will be created normally; services that specify the load balancer
-will also be created successfully, but a load balancer will not be created.
+initially deployed, the load balancer support is disabled.  If the
+administrator does not want to enable this feature, no further action is
+required.  All the services will be created normally; services that specify the
+load balancer will also be created successfully, but a load balancer will not
+be created.
 
 To enable the load balancer, log into each master node of your bay and
 perform the following steps:
@@ -85,11 +86,11 @@ perform the following steps:
 
 This only needs to be done once.  The steps can be reversed to disable the
 load balancer feature. Before deleting the Kubernetes cluster, make sure to
-delete all the services that created load balancers. Because the Neutron objects
-created by Kubernetes are not managed by Heat, they will not be deleted by Heat
-and this will cause the bay-delete operation to fail.  If this occurs, delete
-the neutron objects manually (lb-pool, lb-vip, lb-member, lb-healthmonitor) and
-then run bay-delete again.
+delete all the services that created load balancers. Because the Neutron
+objects created by Kubernetes are not managed by Heat, they will not be
+deleted by Heat and this will cause the bay-delete operation to fail. If this
+occurs, delete the neutron objects manually (lb-pool, lb-vip, lb-member,
+lb-healthmonitor) and then run bay-delete again.
 
 Steps for the users
 ===================
@@ -198,8 +199,8 @@ The endpoint for nginx can now be accessed at this floating IP::
 
     http://172.24.4.78:80
 
-NOTE: it is not necessary to indicate port :80 here but it is shown to correlate with
-the port that was specified in the service manifest.
+NOTE: it is not necessary to indicate port :80 here but it is shown to
+correlate with the port that was specified in the service manifest.
 
 How it works
 ============
@@ -235,9 +236,9 @@ These Neutron objects can be verified as follows.  For the load balancer pool::
     | e59ea983-c6e8-4cec-975d-89ade6b59e50 | k8sbayv1-iypacicrskib-etcd_pool-qbpo43ew2m3x | haproxy  | ROUND_ROBIN | HTTP     | True           | ACTIVE |
     +--------------------------------------+----------------------------------------------+----------+-------------+----------+----------------+--------+
 
-Note that 2 load balancers already exist to implement high availability for the cluster (api and ectd).
-The new load balancer for the Kubernetes service uses the TCP protocol and has a name assigned by
-Kubernetes.
+Note that 2 load balancers already exist to implement high availability for the
+cluster (api and ectd). The new load balancer for the Kubernetes service uses
+the TCP protocol and has a name assigned by Kubernetes.
 
 For the members of the pool::
 
@@ -250,8 +251,9 @@ For the members of the pool::
     | f222b60e-e4a9-4767-bc44-ffa66ec22afe | 10.0.0.6 |         31157 |      1 | True           | ACTIVE |
     +--------------------------------------+----------+---------------+--------+----------------+--------+
 
-Again, 2 members already exist for high availability and they serve the master node at 10.0.0.5.
-The new member serves the minion at 10.0.0.6, which hosts the Kubernetes service.
+Again, 2 members already exist for high availability and they serve the master
+node at 10.0.0.5. The new member serves the minion at 10.0.0.6, which hosts the
+Kubernetes service.
 
 For the monitor of the pool::
 
@@ -275,9 +277,10 @@ For the VIP of the pool::
     | fc62cf40-46ad-47bd-aa1e-48339b95b011 | etcd_pool.vip                    | 10.0.0.4 | HTTP     | True           | ACTIVE |
     +--------------------------------------+----------------------------------+----------+----------+----------------+--------+
 
-Note that the VIP is created on the private network of the cluster;  therefore it has an internal
-IP address of 10.0.0.7.  This address is also associated as the "external address" of the Kubernetes
-service.  You can verify in Kubernetes by running the kubectl command::
+Note that the VIP is created on the private network of the cluster;  therefore
+it has an internal IP address of 10.0.0.7.  This address is also associated as
+the "external address" of the Kubernetes service.  You can verify in Kubernetes
+by running the kubectl command::
 
     kubectl get services
     NAME           LABELS                                    SELECTOR    IP(S)            PORT(S)
@@ -285,6 +288,7 @@ service.  You can verify in Kubernetes by running the kubectl command::
     nginxservice   app=nginx                                 app=nginx   10.254.122.191   80/TCP
                                                                          10.0.0.7
 
-On GCE, the networking implementation gives the load balancer an external address automatically.
-On OpenStack, we need to take the additional step of associating a floating IP to the load balancer.
+On GCE, the networking implementation gives the load balancer an external
+address automatically. On OpenStack, we need to take the additional step of
+associating a floating IP to the load balancer.
 

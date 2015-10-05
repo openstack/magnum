@@ -101,9 +101,10 @@ with each case.
 3.1.2.1. Using Magnum script
 ----------------------------
 
-This script will generate both server and client certificates on Kubernetes master
-node. Hence only client certificates needs to be copied to magnum host node.
-To copy these files, the script will make a call to magnum-api to store files.
+This script will generate both server and client certificates on Kubernetes
+master node. Hence only client certificates needs to be copied to magnum host
+node. To copy these files, the script will make a call to magnum-api to store
+files.
 
 3.1.2.2. Using Barbican
 -----------------------
