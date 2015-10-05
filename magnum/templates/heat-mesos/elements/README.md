@@ -1,4 +1,4 @@
 Mesos elements
 ==============
 
-See [README.md](../README.md#disk-image-builder) for instructions.
+See [Building an image](http://docs.openstack.org/developer/magnum/dev/dev-heat-mesos.html) for instructions.

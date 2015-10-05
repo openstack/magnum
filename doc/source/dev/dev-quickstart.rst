@@ -75,7 +75,7 @@ To run only the pep8/flake8 syntax and style checks::
     tox -epep8
 
 To discover and interact with templates, please refer to
-`<http://git.openstack.org/cgit/openstack/magnum/tree/contrib/templates/example/README.rst>`_
+`<http://docs.openstack.org/developer/magnum/dev/dev-bay-template-example.html>`_
 
 Exercising the Services Using Devstack
 ======================================
@@ -92,7 +92,7 @@ This session has only been tested on Ubuntu 14.04 (Trusty) and Fedora 20/21.
 We recommend users to select one of them if it is possible.
 
 For in-depth guidance on adding magnum manually to a devstack instance, please
-refer to the `http://git.openstack.org/cgit/openstack/magnum/tree/doc/source/dev/dev-manual-devstack.rst`_
+refer to the `<http://docs.openstack.org/developer/magnum/dev/dev-manual-devstack.html>`_
 
 Clone devstack::
 
@@ -368,7 +368,7 @@ Note: If you are using Magnum behind a firewall then see:
 
 .. _Using_Magnum_Behind_Firewall:
 
-http://docs.openstack.org/developer/magnum/magnum-proxy.rst
+http://docs.openstack.org/developer/magnum/magnum-proxy.html
 
 Finally, create the bay. Use the baymodel 'swarmbaymodel' as a template for
 bay creation. This bay will result in one swarm manager node and two extra
@@ -439,7 +439,7 @@ Building and Using a Mesos Bay
 
 Provisioning a mesos bay requires a Ubuntu-based image with some packages
 pre-installed. To build and upload such image, please refer to
-`http://git.openstack.org/cgit/openstack/magnum/tree/magnum/templates/heat-mesos/README.md`_
+`<http://docs.openstack.org/developer/magnum/dev/dev-heat-mesos.html>`_
 
 Then, create a baymodel by using 'mesos' as the coe, with the rest of arguments
 similar to the Kubernetes baymodel::
