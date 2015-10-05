@@ -49,6 +49,18 @@ class MagnumClient(BaseMagnumClient):
         )
 
 
+class AdminMagnumClient(BaseMagnumClient):
+    """Responsible for setting up auth provider for admin user"""
+
+    def get_auth_provider(self):
+        mgr = manager.Manager()
+        return mgr.get_auth_provider(
+            username=config.Config.admin_user,
+            password=config.Config.admin_passwd,
+            tenant_name=config.Config.admin_tenant
+        )
+
+
 class ClientMixin(object):
     """Responsible for mapping setting up common client use cases:
 
@@ -62,6 +74,7 @@ class ClientMixin(object):
     def get_clients(cls):
         return {
             'default': MagnumClient(),
+            'admin': AdminMagnumClient(),
         }
 
     def __init__(self, client):
