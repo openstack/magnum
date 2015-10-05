@@ -121,6 +121,13 @@ Kilo, and heat is enabled by the magnum plugin)::
 
 Note: Update PUBLIC_INTERFACE as appropriate for your system.
 
+Optionally, you can enable ceilometer in devstack. If ceilometer is enabled,
+magnum will periodically send metrics to ceilometer::
+
+    cat >> /opt/stack/devstack/local.conf << END
+    enable_plugin ceilometer https://git.openstack.org/openstack/ceilometer
+    END
+
 More devstack configuration information can be found at
 http://docs.openstack.org/developer/devstack/configuration.html
 
