@@ -87,6 +87,18 @@ parameters:
 
 resources:
 
+  cloud_init_wait_handle:
+    type: "AWS::CloudFormation::WaitConditionHandle"
+
+  cloud_init_wait_condition:
+    type: "AWS::CloudFormation::WaitCondition"
+    depends_on:
+      - swarm_master
+    properties:
+      Handle:
+        get_resource: cloud_init_wait_handle
+      Timeout: 6000
+
   master_wait_handle:
     type: "AWS::CloudFormation::WaitConditionHandle"
 
@@ -179,7 +191,7 @@ resources:
         str_replace:
           template: {get_file: fragments/write-heat-params.yaml}
           params:
-            "$WAIT_HANDLE": {get_resource: master_wait_handle}
+            "$WAIT_HANDLE": {get_resource: cloud_init_wait_handle}
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
@@ -213,6 +225,28 @@ resources:
     properties:
       group: ungrouped
       config: {get_file: fragments/write-docker-service.sh}
+
+  write_swarm_agent_failure_service:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/write-bay-failure-service.yaml}
+          params:
+            "$SERVICE": swarm-agent
+            "$WAIT_HANDLE": {get_resource: agent_wait_handle}
+
+  write_swarm_manager_failure_service:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/write-bay-failure-service.yaml}
+          params:
+            "$SERVICE": swarm-manager
+            "$WAIT_HANDLE": {get_resource: master_wait_handle}
 
   write_docker_socket:
     type: "OS::Heat::SoftwareConfig"
@@ -257,17 +291,14 @@ resources:
       config:
         str_replace:
           template: {get_file: fragments/enable-services.sh}
-          params: &node_services
+          params:
             "$NODE_SERVICES": "docker.socket swarm-agent swarm-manager"
 
   cfn_signal:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
-      config:
-        str_replace:
-          template: {get_file: fragments/cfn-signal.sh}
-          params: *node_services
+      config: {get_file: fragments/cfn-signal.sh}
 
   disable_selinux:
     type: "OS::Heat::SoftwareConfig"
@@ -289,6 +320,8 @@ resources:
         - config: {get_resource: remove_docker_key}
         - config: {get_resource: write_heat_params}
         - config: {get_resource: make_cert}
+        - config: {get_resource: write_swarm_agent_failure_service}
+        - config: {get_resource: write_swarm_manager_failure_service}
         - config: {get_resource: write_docker_service}
         - config: {get_resource: write_docker_socket}
         - config: {get_resource: write_swarm_agent_service}

@@ -75,16 +75,16 @@ parameters:
 
 resources:
 
-  node_wait_handle:
+  node_cloud_init_wait_handle:
     type: "AWS::CloudFormation::WaitConditionHandle"
 
-  node_wait_condition:
+  node_cloud_init_wait_condition:
     type: "AWS::CloudFormation::WaitCondition"
     depends_on:
       - swarm_node
     properties:
       Handle:
-        get_resource: node_wait_handle
+        get_resource: node_cloud_init_wait_handle
       Timeout: 6000
 
   node_agent_wait_handle:
@@ -126,7 +126,7 @@ resources:
         str_replace:
           template: {get_file: fragments/write-heat-params.yaml}
           params:
-            "$WAIT_HANDLE": {get_resource: node_wait_handle}
+            "$WAIT_HANDLE": {get_resource: node_cloud_init_wait_handle}
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
@@ -167,6 +167,17 @@ resources:
       group: ungrouped
       config: {get_file: fragments/write-docker-socket.yaml}
 
+  write_swarm_agent_failure_service:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/write-bay-failure-service.yaml}
+          params:
+            "$SERVICE": swarm-agent
+            "$WAIT_HANDLE": {get_resource: node_agent_wait_handle}
+
   write_swarm_agent_service:
     type: "OS::Heat::SoftwareConfig"
     properties:
@@ -189,17 +200,14 @@ resources:
       config:
         str_replace:
           template: {get_file: fragments/enable-services.sh}
-          params: &node_services
+          params:
             "$NODE_SERVICES": "docker.socket swarm-agent"
 
   cfn_signal:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
-      config:
-        str_replace:
-          template: {get_file: fragments/cfn-signal.sh}
-          params: *node_services
+      config: {get_file: fragments/cfn-signal.sh}
 
   disable_selinux:
     type: "OS::Heat::SoftwareConfig"
@@ -221,6 +229,7 @@ resources:
         - config: {get_resource: remove_docker_key}
         - config: {get_resource: write_heat_params}
         - config: {get_resource: make_cert}
+        - config: {get_resource: write_swarm_agent_failure_service}
         - config: {get_resource: write_swarm_agent_service}
         - config: {get_resource: write_docker_service}
         - config: {get_resource: write_docker_socket}

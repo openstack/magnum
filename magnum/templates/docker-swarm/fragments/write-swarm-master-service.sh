@@ -5,12 +5,13 @@ cat > /etc/systemd/system/swarm-manager.service << END_SERVICE_TOP
 Description=Swarm Manager
 After=docker.service
 Requires=docker.service
+OnFailure=swarm-manager-failure.service
 
 [Service]
 TimeoutStartSec=0
 ExecStartPre=-/usr/bin/docker kill swarm-manager
 ExecStartPre=-/usr/bin/docker rm swarm-manager
-ExecStartPre=/usr/bin/docker pull swarm:0.2.0
+ExecStartPre=-/usr/bin/docker pull swarm:0.2.0
 #TODO: roll-back from swarm:0.2.0 to swarm if atomic image can work with latest swarm image
 ExecStart=/usr/bin/docker run --name swarm-manager \\
                               -v /etc/docker:/etc/docker \\
