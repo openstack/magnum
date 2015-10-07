@@ -416,7 +416,7 @@ class ContainersController(rest.RestController):
     def delete(self, container_ident):
         """Delete a container.
 
-        :param container_uuid: UUID of a container.
+        :param container_ident: UUID or Name of a container.
         """
         rpc_container = api_utils.get_rpc_resource('Container',
                                                    container_ident)
