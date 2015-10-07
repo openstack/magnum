@@ -19,7 +19,7 @@ from oslo_config import cfg
 from oslo_log import log
 import six
 
-from magnum.conductor.handlers.common import docker_client
+from magnum.common import docker_utils
 from magnum.i18n import _LW
 from magnum import objects
 from magnum.objects.fields import BayType as bay_type
@@ -39,7 +39,8 @@ CONF.import_opt('default_timeout',
 @six.add_metaclass(abc.ABCMeta)
 class MonitorBase(object):
 
-    def __init__(self, bay):
+    def __init__(self, context, bay):
+        self.context = context
         self.bay = bay
 
     @abc.abstractproperty
@@ -64,8 +65,8 @@ class MonitorBase(object):
 
 class SwarmMonitor(MonitorBase):
 
-    def __init__(self, bay):
-        super(SwarmMonitor, self).__init__(bay)
+    def __init__(self, context, bay):
+        super(SwarmMonitor, self).__init__(context, bay)
         self.data = {}
         self.data['nodes'] = []
         self.data['containers'] = []
@@ -80,27 +81,23 @@ class SwarmMonitor(MonitorBase):
         }
 
     def pull_data(self):
-        # pull data from each bay node
-        nodes = []
-        for node_addr in (self.bay.node_addresses + [self.bay.api_address]):
-            docker = self._docker_client(node_addr)
-            node_info = docker.info()
-            nodes.append(node_info)
-        self.data['nodes'] = nodes
+        with docker_utils.docker_for_bay(self.context,
+                                         self.bay) as docker:
+            system_info = docker.info()
+            self.data['nodes'] = self._parse_node_info(system_info)
 
-        # pull data from each container
-        containers = []
-        docker = self._docker_swarm_client(self.bay)
-        for container in docker.containers(all=True):
-            try:
-                container = docker.inspect_container(container['Id'])
-            except Exception as e:
-                LOG.warn(_LW("Ignore error [%(e)s] when inspecting container "
-                             "%(container_id)s."),
-                         {'e': e, 'container_id': container['Id']},
-                         exc_info=True)
-            containers.append(container)
-        self.data['containers'] = containers
+            # pull data from each container
+            containers = []
+            for container in docker.containers(all=True):
+                try:
+                    container = docker.inspect_container(container['Id'])
+                except Exception as e:
+                    LOG.warn(_LW("Ignore error [%(e)s] when inspecting "
+                                 "container %(container_id)s."),
+                             {'e': e, 'container_id': container['Id']},
+                             exc_info=True)
+                containers.append(container)
+            self.data['containers'] = containers
 
     def compute_memory_util(self):
         mem_total = 0
@@ -115,22 +112,49 @@ class SwarmMonitor(MonitorBase):
         else:
             return mem_reserved * 100 / mem_total
 
-    def _docker_client(self, api_address, port=2375):
-        tcp_url = 'tcp://%s:%s' % (api_address, port)
-        return docker_client.DockerHTTPClient(
-            tcp_url,
-            CONF.docker.docker_remote_api_version,
-            CONF.docker.default_timeout
-        )
+    def _parse_node_info(self, system_info):
+        """Parse system_info to retrieve memory size of each node.
 
-    def _docker_swarm_client(self, bay):
-        return self._docker_client(bay.api_address, port=2376)
+        :param system_info: The output returned by docker.info(). Example:
+            {
+                u'Debug': False,
+                u'NEventsListener': 0,
+                u'DriverStatus': [
+                    [u'\x08Strategy', u'spread'],
+                    [u'\x08Filters', u'...'],
+                    [u'\x08Nodes', u'2'],
+                    [u'node1', u'10.0.0.4:2375'],
+                    [u' \u2514 Containers', u'1'],
+                    [u' \u2514 Reserved CPUs', u'0 / 1'],
+                    [u' \u2514 Reserved Memory', u'0 B / 2.052 GiB'],
+                    [u'node2', u'10.0.0.3:2375'],
+                    [u' \u2514 Containers', u'2'],
+                    [u' \u2514 Reserved CPUs', u'0 / 1'],
+                    [u' \u2514 Reserved Memory', u'0 B / 2.052 GiB']
+                ],
+                u'Containers': 3
+            }
+        :return: Memory size of each node. Excample:
+            [{'MemTotal': 2203318222.848},
+             {'MemTotal': 2203318222.848}]
+        """
+        nodes = []
+        for info in system_info['DriverStatus']:
+            key = info[0]
+            value = info[1]
+            if key == u' \u2514 Reserved Memory':
+                memory = value  # Example: '0 B / 2.052 GiB'
+                memory = memory.split('/')[1].strip()  # Example: '2.052 GiB'
+                memory = memory.split(' ')[0]  # Example: '2.052'
+                memory = float(memory) * 1024 * 1024 * 1024
+                nodes.append({'MemTotal': memory})
+        return nodes
 
 
 def create_monitor(context, bay):
     baymodel = objects.BayModel.get_by_uuid(context, bay.baymodel_id)
     if baymodel.coe == bay_type.SWARM:
-        return SwarmMonitor(bay)
+        return SwarmMonitor(context, bay)
 
     # TODO(hongbin): add support for other bay types
     LOG.debug("Cannot create monitor with bay type '%s'" % baymodel.coe)
