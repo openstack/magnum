@@ -127,3 +127,12 @@ class TestKubernetesAPIs(BaseMagnumClient):
 
         resp = self.k8s_api.delete_namespaced_replication_controller(
             name='frontend', body={}, namespace='default')
+
+    def test_pods_list(self):
+        self.assertTrue(self.cs.pods.list(self.bay.uuid) is not None)
+
+    def test_rcs_list(self):
+        self.assertTrue(self.cs.rcs.list(self.bay.uuid) is not None)
+
+    def test_services_list(self):
+        self.assertTrue(self.cs.services.list(self.bay.uuid) is not None)

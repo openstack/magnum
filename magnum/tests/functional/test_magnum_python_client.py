@@ -26,12 +26,3 @@ class TestListResources(BaseMagnumClient):
 
     def test_nodes_list(self):
         self.assertTrue(self.cs.nodes.list() is not None)
-
-    def test_pods_list(self):
-        self.assertTrue(self.cs.pods.list() is not None)
-
-    def test_rcs_list(self):
-        self.assertTrue(self.cs.rcs.list() is not None)
-
-    def test_services_list(self):
-        self.assertTrue(self.cs.services.list() is not None)
