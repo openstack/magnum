@@ -28,6 +28,7 @@ class TestBayConductorWithSwarm(base.TestCase):
         self.baymodel_dict = {
             'image_id': 'image_id',
             'flavor_id': 'flavor_id',
+            'master_flavor_id': 'master_flavor_id',
             'keypair_id': 'keypair_id',
             'dns_nameserver': 'dns_nameserver',
             'docker_volume_size': 20,
@@ -83,7 +84,8 @@ class TestBayConductorWithSwarm(base.TestCase):
             'external_network': 'external_network_id',
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
-            'server_flavor': 'flavor_id',
+            'master_flavor': 'master_flavor_id',
+            'node_flavor': 'flavor_id',
             'number_of_masters': 1,
             'number_of_nodes': 1,
             'docker_volume_size': 20,
@@ -110,7 +112,8 @@ class TestBayConductorWithSwarm(base.TestCase):
 
         not_required = ['image_id', 'flavor_id', 'dns_nameserver',
                         'docker_volume_size', 'fixed_network', 'http_proxy',
-                        'https_proxy', 'no_proxy', 'network_driver']
+                        'https_proxy', 'no_proxy', 'network_driver',
+                        'master_flavor_id']
         for key in not_required:
             self.baymodel_dict[key] = None
         self.bay_dict['discovery_url'] = 'https://discovery.etcd.io/test'

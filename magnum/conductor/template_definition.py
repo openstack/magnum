@@ -555,7 +555,9 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
                            param_type=str)
         self.add_parameter('number_of_nodes',
                            bay_attr='node_count')
-        self.add_parameter('server_flavor',
+        self.add_parameter('master_flavor',
+                           baymodel_attr='master_flavor_id')
+        self.add_parameter('node_flavor',
                            baymodel_attr='flavor_id')
         self.add_parameter('docker_volume_size',
                            baymodel_attr='docker_volume_size')
