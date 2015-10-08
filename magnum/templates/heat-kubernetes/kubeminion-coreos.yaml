@@ -67,7 +67,7 @@ resources:
 
   minion_wait_condition:
     type: AWS::CloudFormation::WaitCondition
-    depends_on: kube_minion
+    depends_on: kube-minion
     properties:
       Handle:
         get_resource: minion_wait_handle
@@ -194,7 +194,14 @@ resources:
         - config: {get_resource: cfn_signal}
         - config: {get_resource: coreos_params}
 
-  kube_minion:
+  # Important:  the name for the heat resource kube-minion below must
+  # not contain "_" (underscore) because it will be used in the
+  # hostname.  Because DNS domain name does not allow "_", the "_"
+  # will be converted to a "-" and this will make the hostname different
+  # from the Nova instance name.  This in turn will break the load
+  # balancer feature in Kubernetes.
+
+  kube-minion:
     type: OS::Nova::Server
     properties:
       image: {get_param: server_image}
@@ -229,7 +236,7 @@ resources:
   docker_volume_attach:
     type: OS::Cinder::VolumeAttachment
     properties:
-      instance_uuid: {get_resource: kube_minion}
+      instance_uuid: {get_resource: kube-minion}
       volume_id: {get_resource: docker_volume}
       mountpoint: /dev/vdb
 
