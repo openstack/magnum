@@ -11,51 +11,18 @@
 #    limitations under the License.
 
 """Magnum Docker RPC handler."""
-import contextlib
-
 from docker import errors
 import functools
-from oslo_config import cfg
 from oslo_log import log as logging
 import six
 
 from magnum.common import docker_utils
 from magnum.common import exception
-from magnum.common import utils
-from magnum.conductor.handlers.common import cert_manager
-from magnum.conductor.handlers.common import docker_client
-from magnum.conductor import utils as conductor_utils
 from magnum.i18n import _LE
 from magnum import objects
 from magnum.objects import fields
 
 LOG = logging.getLogger(__name__)
-CONF = cfg.CONF
-
-docker_opts = [
-    cfg.StrOpt('docker_remote_api_version',
-               default=docker_client.DEFAULT_DOCKER_REMOTE_API_VERSION,
-               help='Docker remote api version. Override it according to '
-                    'specific docker api version in your environment.'),
-    cfg.IntOpt('default_timeout',
-               default=docker_client.DEFAULT_DOCKER_TIMEOUT,
-               help='Default timeout in seconds for docker client '
-                    'operations.'),
-    cfg.BoolOpt('api_insecure',
-                default=False,
-                help='If set, ignore any SSL validation issues'),
-    cfg.StrOpt('ca_file',
-               help='Location of CA certificates file for '
-                    'securing docker api requests (tlscacert).'),
-    cfg.StrOpt('cert_file',
-               help='Location of TLS certificate file for '
-                    'securing docker api requests (tlscert).'),
-    cfg.StrOpt('key_file',
-               help='Location of TLS private key file for '
-                    'securing docker api requests (tlskey).'),
-]
-
-CONF.register_opts(docker_opts, 'docker')
 
 
 def wrap_container_exception(f):
@@ -72,40 +39,6 @@ def wrap_container_exception(f):
             raise exception.ContainerException(
                 "Docker internal Error: %s" % str(e))
     return functools.wraps(f)(wrapped)
-
-
-@contextlib.contextmanager
-def docker_for_container(context, container):
-    if utils.is_uuid_like(container):
-        container = objects.Container.get_by_uuid(context, container)
-    bay = conductor_utils.retrieve_bay(context, container)
-    baymodel = conductor_utils.retrieve_baymodel(context, bay)
-
-    tcp_url = 'tcp://%s:2376' % bay.api_address
-
-    ca_cert, magnum_key, magnum_cert = None, None, None
-    client_kwargs = dict()
-    if not baymodel.tls_disabled:
-        tcp_url = 'https://%s:2376' % bay.api_address
-        (ca_cert, magnum_key,
-         magnum_cert) = cert_manager.create_client_files(bay)
-        client_kwargs['ca_cert'] = ca_cert.name
-        client_kwargs['client_key'] = magnum_key.name
-        client_kwargs['client_cert'] = magnum_cert.name
-
-    yield docker_client.DockerHTTPClient(
-        tcp_url,
-        CONF.docker.docker_remote_api_version,
-        CONF.docker.default_timeout,
-        **client_kwargs
-    )
-
-    if ca_cert:
-        ca_cert.close()
-    if magnum_key:
-        magnum_key.close()
-    if magnum_cert:
-        magnum_cert.close()
 
 
 class Handler(object):
@@ -133,7 +66,7 @@ class Handler(object):
 
     @wrap_container_exception
     def container_create(self, context, container):
-        with docker_for_container(context, container) as docker:
+        with docker_utils.docker_for_container(context, container) as docker:
             name = container.name
             container_uuid = container.uuid
             image = container.image
@@ -158,7 +91,8 @@ class Handler(object):
     @wrap_container_exception
     def container_delete(self, context, container_uuid):
         LOG.debug("container_delete %s" % container_uuid)
-        with docker_for_container(context, container_uuid) as docker:
+        with docker_utils.docker_for_container(context,
+                                               container_uuid) as docker:
             docker_id = self._find_container_by_name(docker,
                                                      container_uuid)
             if not docker_id:
@@ -168,7 +102,8 @@ class Handler(object):
     @wrap_container_exception
     def container_show(self, context, container_uuid):
         LOG.debug("container_show %s" % container_uuid)
-        with docker_for_container(context, container_uuid) as docker:
+        with docker_utils.docker_for_container(context,
+                                               container_uuid) as docker:
             container = objects.Container.get_by_uuid(context, container_uuid)
             try:
                 docker_id = self._find_container_by_name(docker,
@@ -204,7 +139,8 @@ class Handler(object):
     @wrap_container_exception
     def _container_action(self, context, container_uuid, status, docker_func):
         LOG.debug("%s container %s ..." % (docker_func, container_uuid))
-        with docker_for_container(context, container_uuid) as docker:
+        with docker_utils.docker_for_container(context,
+                                               container_uuid) as docker:
             docker_id = self._find_container_by_name(docker,
                                                      container_uuid)
             result = getattr(docker, docker_func)(docker_id)
@@ -239,7 +175,8 @@ class Handler(object):
     @wrap_container_exception
     def container_logs(self, context, container_uuid):
         LOG.debug("container_logs %s" % container_uuid)
-        with docker_for_container(context, container_uuid) as docker:
+        with docker_utils.docker_for_container(context,
+                                               container_uuid) as docker:
             docker_id = self._find_container_by_name(docker,
                                                      container_uuid)
             return {'output': docker.get_container_logs(docker_id)}
@@ -248,7 +185,8 @@ class Handler(object):
     def container_exec(self, context, container_uuid, command):
         LOG.debug("container_exec %s command %s" %
                   (container_uuid, command))
-        with docker_for_container(context, container_uuid) as docker:
+        with docker_utils.docker_for_container(context,
+                                               container_uuid) as docker:
             docker_id = self._find_container_by_name(docker,
                                                      container_uuid)
             if docker_utils.is_docker_library_version_atleast('1.2.0'):
