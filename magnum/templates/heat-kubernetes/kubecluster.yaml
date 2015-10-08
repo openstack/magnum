@@ -188,7 +188,7 @@ parameters:
   password:
     type: string
     description: >
-      user password, not set in current implementation, only used to 
+      user password, not set in current implementation, only used to
       fill in for Kubernetes config file
     default:
       ChangeMe
@@ -197,6 +197,39 @@ parameters:
     type: string
     description: >
       tenant name
+
+  loadbalancing_protocol:
+    type: string
+    description: >
+      The protocol which is used for load balancing. If you want to change
+      tls_disabled option to 'True', please change this to "HTTP".
+    default: TCP
+    constraints:
+      - allowed_values: ["TCP", "HTTP"]
+
+  tls_disabled:
+    type: boolean
+    description: whether or not to disable TLS
+    default: False
+
+  kubernetes_port:
+    type: number
+    description: >
+      The port which are used by kube-apiserver to provide Kubernetes
+      service.
+    default: 6443
+
+  user_token:
+    type: string
+    description: token used for communicating back to Magnum for TLS certs
+
+  bay_uuid:
+    type: string
+    description: identifier for the bay this template is generating
+
+  magnum_url:
+    type: string
+    description: endpoint to retrieve TLS certs from
 
 resources:
 
@@ -249,12 +282,12 @@ resources:
   api_pool:
     type: OS::Neutron::Pool
     properties:
-      protocol: HTTP
+      protocol: {get_param: loadbalancing_protocol}
       monitors: [{get_resource: api_monitor}]
       subnet: {get_resource: fixed_subnet}
       lb_method: ROUND_ROBIN
       vip:
-        protocol_port: 8080
+        protocol_port: {get_param: kubernetes_port}
 
   api_pool_floating:
     type: OS::Neutron::FloatingIP
@@ -295,6 +328,8 @@ resources:
       resource_def:
         type: kubemaster.yaml
         properties:
+          api_public_address: {get_attr: [api_pool_floating, floating_ip_address]}
+          api_private_address: {get_attr: [api_pool, vip, address]}
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: server_image}
           master_flavor: {get_param: master_flavor}
@@ -307,6 +342,9 @@ resources:
           flannel_use_vxlan: {get_param: flannel_use_vxlan}
           portal_network_cidr: {get_param: portal_network_cidr}
           discovery_url: {get_param: discovery_url}
+          user_token: {get_param: user_token}
+          bay_uuid: {get_param: bay_uuid}
+          magnum_url: {get_param: magnum_url}
           fixed_network: {get_resource: fixed_network}
           fixed_subnet: {get_resource: fixed_subnet}
           api_pool_id: {get_resource: api_pool}
@@ -315,6 +353,8 @@ resources:
           username: {get_param: username}
           password: {get_param: password}
           tenant_name: {get_param: tenant_name}
+          kubernetes_port: {get_param: kubernetes_port}
+          tls_disabled: {get_param: tls_disabled}
 
   ######################################################################
   #
@@ -356,13 +396,18 @@ resources:
           registry_container: {get_param: registry_container}
           registry_insecure: {get_param: registry_insecure}
           registry_chunksize: {get_param: registry_chunksize}
+          user_token: {get_param: user_token}
+          bay_uuid: {get_param: bay_uuid}
+          magnum_url: {get_param: magnum_url}
+          kubernetes_port: {get_param: kubernetes_port}
+          tls_disabled: {get_param: tls_disabled}
 
 outputs:
 
   api_address:
     value:
       str_replace:
-        template: api_ip_address:8080
+        template: api_ip_address
         params:
           api_ip_address: {get_attr: [api_pool_floating, floating_ip_address]}
     description: >

@@ -12,8 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_config import cfg
-
 from magnum.common import exception
 from magnum.common.pythonk8sclient.swagger_client import rest
 from magnum.conductor.handlers import k8s_conductor
@@ -22,12 +20,6 @@ from magnum.tests import base
 
 import mock
 from mock import patch
-
-
-cfg.CONF.import_opt('k8s_protocol', 'magnum.conductor.handlers.k8s_conductor',
-                    group='kubernetes')
-cfg.CONF.import_opt('k8s_port', 'magnum.conductor.handlers.k8s_conductor',
-                    group='kubernetes')
 
 
 class TestK8sConductor(base.TestCase):

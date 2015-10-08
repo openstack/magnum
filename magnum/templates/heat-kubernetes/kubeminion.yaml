@@ -40,6 +40,31 @@ parameters:
       storage
     default: 25
 
+  tls_disabled:
+    type: boolean
+    description: whether or not to enable TLS
+    default: False
+
+  kubernetes_port:
+    type: number
+    description: >
+      The port which are used by kube-apiserver to provide Kubernetes
+      service.
+    default: 6443
+
+  user_token:
+    type: string
+    description: token used for communicating back to Magnum for TLS certs
+
+  bay_uuid:
+    type: string
+    description: identifier for the bay this template is generating
+
+  magnum_url:
+    type: string
+    description: endpoint to retrieve TLS certs from
+
+
   # The following are all generated in the parent template.
   kube_master_ip:
     type: string
@@ -156,6 +181,7 @@ resources:
           params:
             $KUBE_ALLOW_PRIV: {get_param: kube_allow_priv}
             $KUBE_MASTER_IP: {get_param: kube_master_ip}
+            $KUBE_API_PORT: {get_param: kubernetes_port}
             $ETCD_SERVER_IP: {get_param: etcd_server_ip}
             $DOCKER_VOLUME: {get_resource: docker_volume}
             $NETWORK_DRIVER: {get_param: network_driver}
@@ -170,6 +196,22 @@ resources:
             $REGISTRY_CONTAINER: {get_param: registry_container}
             $REGISTRY_INSECURE: {get_param: registry_insecure}
             $REGISTRY_CHUNKSIZE: {get_param: registry_chunksize}
+            $TLS_DISABLED: {get_param: tls_disabled}
+            $BAY_UUID: {get_param: bay_uuid}
+            $USER_TOKEN: {get_param: user_token}
+            $MAGNUM_URL: {get_param: magnum_url}
+
+  write_kubeconfig:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/write-kubeconfig.yaml}
+
+  make_cert:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/make-cert-client.sh}
 
   configure_docker_storage:
     type: OS::Heat::SoftwareConfig
@@ -250,6 +292,8 @@ resources:
         - config: {get_resource: disable_selinux}
         - config: {get_resource: write_heat_params}
         - config: {get_resource: kube_user}
+        - config: {get_resource: write_kubeconfig}
+        - config: {get_resource: make_cert}
         - config: {get_resource: kube_examples}
         - config: {get_resource: configure_docker_storage}
         - config: {get_resource: kube_register}

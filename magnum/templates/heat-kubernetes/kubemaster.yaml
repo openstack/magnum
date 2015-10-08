@@ -63,7 +63,37 @@ parameters:
     description: >
       Discovery URL used for bootstrapping the etcd cluster.
 
+  tls_disabled:
+    type: boolean
+    description: whether or not to enable TLS
+    default: False
+
+  kubernetes_port:
+    type: number
+    description: >
+      The port which are used by kube-apiserver to provide Kubernetes
+      service.
+    default: 6443
+
+  user_token:
+    type: string
+    description: token used for communicating back to Magnum for TLS certs
+
+  bay_uuid:
+    type: string
+    description: identifier for the bay this template is generating
+
+  magnum_url:
+    type: string
+    description: endpoint to retrieve TLS certs from
+
   # The following are all generated in the parent template.
+  api_public_address:
+    type: string
+    description: Public IP address of the Kubernetes master server.
+  api_private_address:
+    type: string
+    description: Private IP address of the Kubernetes master server.
   fixed_network:
     type: string
     description: Network from which to allocate fixed addresses.
@@ -135,8 +165,8 @@ resources:
           port_range_min: 7080
           port_range_max: 7080
         - protocol: tcp
-          port_range_min: 8080
-          port_range_max: 8080
+          port_range_min: {get_param: kubernetes_port}
+          port_range_max: {get_param: kubernetes_port}
         - protocol: tcp
           port_range_min: 2379
           port_range_max: 2379
@@ -158,6 +188,9 @@ resources:
         str_replace:
           template: {get_file: fragments/write-heat-params-master.yaml}
           params:
+            "$KUBE_API_PUBLIC_ADDRESS": {get_param: api_public_address}
+            "$KUBE_API_PRIVATE_ADDRESS": {get_param: api_private_address}
+            "$KUBE_API_PORT": {get_param: kubernetes_port}
             "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
             "$NETWORK_DRIVER": {get_param: network_driver}
             "$FLANNEL_NETWORK_CIDR": {get_param: flannel_network_cidr}
@@ -170,6 +203,16 @@ resources:
             "$PASSWORD": {get_param: password}
             "$TENANT_NAME": {get_param: tenant_name}
             "$CLUSTER_SUBNET": {get_param: fixed_subnet}
+            "$TLS_DISABLED": {get_param: tls_disabled}
+            "$BAY_UUID": {get_param: bay_uuid}
+            "$USER_TOKEN": {get_param: user_token}
+            "$MAGNUM_URL": {get_param: magnum_url}
+
+  make_cert:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/make-cert.sh}
 
   configure_etcd:
     type: OS::Heat::SoftwareConfig
@@ -246,6 +289,7 @@ resources:
         - config: {get_resource: configure_etcd}
         - config: {get_resource: kube_user}
         - config: {get_resource: write_kube_os_config}
+        - config: {get_resource: make_cert}
         - config: {get_resource: configure_kubernetes}
         - config: {get_resource: enable_services}
         - config: {get_resource: write_network_config}
@@ -291,7 +335,7 @@ resources:
     properties:
       pool_id: {get_param: api_pool_id}
       address: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
-      protocol_port: 8080
+      protocol_port: {get_param: kubernetes_port}
 
   etcd_pool_member:
     type: OS::Neutron::PoolMember

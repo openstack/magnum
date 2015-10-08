@@ -38,8 +38,7 @@ class TestKubernetesAPIs(BaseMagnumClient):
         super(TestKubernetesAPIs, cls).setUpClass()
         cls.baymodel = cls._create_baymodel('testk8sAPI')
         cls.bay = cls._create_bay('testk8sAPI', cls.baymodel.uuid)
-        kube_api_address = cls.cs.bays.get(cls.bay.uuid).api_address
-        kube_api_url = 'http://%s' % kube_api_address
+        kube_api_url = cls.cs.bays.get(cls.bay.uuid).api_address
         k8s_client = api_client.ApiClient(kube_api_url)
         cls.k8s_api = apiv_api.ApivApi(k8s_client)
 
