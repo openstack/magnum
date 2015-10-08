@@ -272,6 +272,9 @@ any removed containers can be automatically recovered on your remaining nodes.
 Using Kubernetes
 ================
 
+Note: For the following examples, only one minion node is required in the
+k8s bay created previously.
+
 Kubernetes provides a number of examples you can use to check that things are
 working. You may need to clone kubernetes using::
 
@@ -305,7 +308,10 @@ Full lifecycle and introspection operations for each object are supported.
 For example, magnum bay-create, magnum baymodel-delete, magnum rc-show,
 magnum coe-service-list.
 
-Now run bay-show command to get the IP of the bay host on which the
+Now there are four redis instances (one master and three slaves) running
+across the bay, replicating data between one another.
+
+Run the bay-show command to get the IP of the bay host on which the
 redis-master is running::
 
     magnum bay-show k8sbay
@@ -328,7 +334,7 @@ redis-master is running::
     | name               | k8sbay                                                     |
     +--------------------+------------------------------------------------------------+
 
-The output indicates the redis-master is running on the bay host with IP
+The output here indicates the redis-master is running on the bay host with IP
 address 192.168.19.86. To access the redis master::
 
     ssh minion@192.168.19.86
@@ -339,11 +345,13 @@ address 192.168.19.86. To access the redis master::
     OK
     ^D
 
-    exit
+    exit  # Log out of the host
 
-Log into one of the other container hosts and access a redis slave from it::
+Log into one of the other container hosts and access a redis slave from it.
+You can use `nova list` to enumerate the kube-minions. For this example we
+will use the same host as above::
 
-    ssh minion@$(nova list | grep 10.0.0.4 | awk '{print $13}')
+    ssh minion@192.168.19.86
     REDIS_ID=$(sudo docker ps | grep redis:v1 | grep k8s_redis | awk '{print $1}')
     sudo docker exec -i -t $REDIS_ID redis-cli
 
@@ -351,10 +359,15 @@ Log into one of the other container hosts and access a redis slave from it::
     "true"
     ^D
 
-    exit
+    exit  # Log out of the host
 
-Now there are four redis instances (one master and three slaves) running
-across the bay, replicating data between one another.
+Additional useful commands from a given minion::
+
+    sudo docker ps  # View Docker containers on this minion
+    kubectl get po  # Get pods
+    kubectl get rc  # Get replication controllers
+    kubectl get svc  # Get services
+    kubectl get nodes  # Get nodes
 
 Building and Using a Swarm Bay
 ==============================
