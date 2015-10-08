@@ -248,7 +248,7 @@ To check the list of all bay stacks::
 
     heat stack-list
 
-To check an indvidual bay's stack::
+To check an individual bay's stack::
 
     heat stack-show <stack-name or stack_id>
 
@@ -531,7 +531,7 @@ run tox::
 Note: The first time you run this will take some extra time as it
 creates a virtual environment to run in.
 
-When complete, the documentation can be accesed from::
+When complete, the documentation can be accessed from::
 
     doc/build/html/index.html
 
