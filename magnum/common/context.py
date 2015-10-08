@@ -65,6 +65,7 @@ class RequestContext(context.RequestContext):
                       'is_admin': self.is_admin,
                       'is_public_api': self.is_public_api,
                       'read_only': self.read_only,
+                      'roles': self.roles,
                       'show_deleted': self.show_deleted,
                       'request_id': self.request_id,
                       'trust_id': self.trust_id,
