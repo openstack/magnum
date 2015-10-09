@@ -222,6 +222,8 @@ resources:
 
   mesos_master_floating:
     type: OS::Neutron::FloatingIP
+    depends_on:
+      - extrouter_inside
     properties:
       floating_network: {get_param: external_network}
       port_id: {get_resource: mesos_master_eth0}

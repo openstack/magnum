@@ -291,6 +291,8 @@ resources:
 
   api_pool_floating:
     type: OS::Neutron::FloatingIP
+    depends_on:
+      - extrouter_inside
     properties:
       floating_network: {get_param: external_network}
       port_id: {get_attr: [api_pool, vip, port_id]}
