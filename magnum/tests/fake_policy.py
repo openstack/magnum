@@ -18,7 +18,7 @@ policy_data = """
     "context_is_admin":  "role:admin",
     "admin_or_owner":  "is_admin:True or project_id:%(project_id)s",
     "default": "rule:admin_or_owner",
-    "admin_api": "is_admin:True",
+    "admin_api": "rule:context_is_admin",
 
     "bay:create": "",
     "bay:delete": "",
