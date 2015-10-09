@@ -333,6 +333,28 @@
 #bay_create_timeout = <None>
 
 
+[baymodel]
+
+#
+# From magnum
+#
+
+# Allowed network drivers for kubernetes baymodels. Use 'all' keyword
+# to allow all drivers supported for kubernetes baymodels. Supported
+# network drivers include flannel.
+#kubernetes_allowed_network_drivers = all
+
+# Allowed network drivers for docker swarm baymodels. Use 'all' keyword
+# to allow all drivers supported for swarm baymodels. Supported
+# network drivers include docker.
+#swarm_allowed_network_drivers = all
+
+# Allowed network drivers for mesos baymodels. Use 'all' keyword
+# to allow all drivers supported for mesos baymodels. Supported
+# network drivers include docker.
+#mesos_allowed_network_drivers = all
+
+
 [certificates]
 
 #

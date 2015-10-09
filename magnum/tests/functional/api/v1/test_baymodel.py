@@ -172,3 +172,12 @@ class BayModelTest(base.BaseMagnumTest):
         self.assertRaises(
             exceptions.BadRequest,
             bay_model_client.patch_baymodel, datagen.random_uuid(), gen_model)
+
+    @testtools.testcase.attr('negative')
+    def test_create_baymodel_invalid_network_driver(self):
+        bay_model_client = cli.BayModelClient.as_user('default')
+        gen_model = datagen.random_baymodel_data_w_valid_keypair_and_image_id()
+        gen_model.network_driver = 'invalid_network_driver'
+        self.assertRaises(
+            exceptions.BadRequest,
+            bay_model_client.post_baymodel, gen_model)

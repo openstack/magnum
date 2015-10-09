@@ -544,47 +544,66 @@ class TestPost(api_base.FunctionalTest):
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
     @mock.patch.object(api_baymodel.BayModelsController,
                        'check_keypair_exists')
-    def test_create_baymodel_with_network_driver(self, mock_keypair_exists,
-                                                 mock_image_data):
+    def _test_create_baymodel_network_driver_attr(self,
+                                                  baymodel_dict,
+                                                  baymodel_config_dict,
+                                                  expect_errors,
+                                                  mock_keypair_exists,
+                                                  mock_image_data):
         mock_keypair_exists.return_value = None
-        with mock.patch.object(self.dbapi, 'create_baymodel',
-                               wraps=self.dbapi.create_baymodel) as cc_mock:
-            mock_keypair_exists.return_value = None
-            mock_image_data.return_value = {'name': 'mock_name',
-                                            'os_distro': 'fedora-atomic'}
-            bdict = apiutils.baymodel_post_data(coe='kubernetes',
-                                                network_driver='flannel')
-            response = self.post_json('/baymodels', bdict)
-            self.assertEqual(bdict['network_driver'],
-                             response.json['network_driver'])
-            cc_mock.assert_called_once_with(mock.ANY)
-            self.assertNotIn('id', cc_mock.call_args[0][0])
-
-    @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
-    @mock.patch.object(api_baymodel.BayModelsController,
-                       'check_keypair_exists')
-    def test_create_baymodel_with_no_network_driver(self, mock_keypair_exists,
-                                                    mock_image_data):
-        mock_keypair_exists.return_value = None
-        with mock.patch.object(self.dbapi, 'create_baymodel',
-                               wraps=self.dbapi.create_baymodel) as cc_mock:
-            mock_image_data.return_value = {'name': 'mock_name',
-                                            'os_distro': 'fedora-atomic'}
-            bdict = apiutils.baymodel_post_data()
-            response = self.post_json('/baymodels', bdict)
-            self.assertEqual(bdict['network_driver'],
-                             response.json['network_driver'])
-            cc_mock.assert_called_once_with(mock.ANY)
-            self.assertNotIn('id', cc_mock.call_args[0][0])
-
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
-        bdict = apiutils.baymodel_post_data()
-        del bdict['uuid']
-        response = self.post_json('/baymodels', bdict)
-        self.assertEqual(bdict['image_id'],
-                         response.json['image_id'])
-        self.assertTrue(utils.is_uuid_like(response.json['uuid']))
+        for k, v in baymodel_config_dict.items():
+                    cfg.CONF.set_override(k, v, 'baymodel')
+        with mock.patch.object(self.dbapi, 'create_baymodel',
+                               wraps=self.dbapi.create_baymodel) as cc_mock:
+            bdict = apiutils.baymodel_post_data(**baymodel_dict)
+            response = self.post_json('/baymodels', bdict,
+                                      expect_errors=expect_errors)
+            if expect_errors:
+                self.assertEqual(400, response.status_int)
+            else:
+                self.assertEqual(bdict['network_driver'],
+                                 response.json['network_driver'])
+                self.assertEqual(bdict['image_id'],
+                                 response.json['image_id'])
+                cc_mock.assert_called_once_with(mock.ANY)
+                self.assertNotIn('id', cc_mock.call_args[0][0])
+                self.assertTrue(utils.is_uuid_like(response.json['uuid']))
+
+    def test_create_baymodel_with_network_driver(self):
+        baymodel_dict = {'coe': 'kubernetes', 'network_driver': 'flannel'}
+        config_dict = {}    # Default config
+        expect_errors_flag = False
+        self._test_create_baymodel_network_driver_attr(baymodel_dict,
+                                                       config_dict,
+                                                       expect_errors_flag)
+
+    def test_create_baymodel_with_no_network_driver(self):
+        baymodel_dict = {}
+        config_dict = {}
+        expect_errors_flag = False
+        self._test_create_baymodel_network_driver_attr(baymodel_dict,
+                                                       config_dict,
+                                                       expect_errors_flag)
+
+    def test_create_baymodel_with_network_driver_non_def_config(self):
+        baymodel_dict = {'coe': 'kubernetes', 'network_driver': 'flannel'}
+        config_dict = {
+            'kubernetes_allowed_network_drivers': ['flannel', 'foo']}
+        expect_errors_flag = False
+        self._test_create_baymodel_network_driver_attr(baymodel_dict,
+                                                       config_dict,
+                                                       expect_errors_flag)
+
+    def test_create_baymodel_with_invalid_network_driver(self):
+        baymodel_dict = {'coe': 'kubernetes', 'network_driver': 'bad_driver'}
+        config_dict = {
+            'kubernetes_allowed_network_drivers': ['flannel', 'good_driver']}
+        expect_errors_flag = True
+        self._test_create_baymodel_network_driver_attr(baymodel_dict,
+                                                       config_dict,
+                                                       expect_errors_flag)
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
     @mock.patch.object(api_baymodel.BayModelsController,
