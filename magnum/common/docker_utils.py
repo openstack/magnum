@@ -73,6 +73,12 @@ def docker_for_container(context, container):
     if magnum_utils.is_uuid_like(container):
         container = objects.Container.get_by_uuid(context, container)
     bay = conductor_utils.retrieve_bay(context, container)
+    with docker_for_bay(context, bay) as docker:
+        yield docker
+
+
+@contextlib.contextmanager
+def docker_for_bay(context, bay):
     baymodel = conductor_utils.retrieve_baymodel(context, bay)
 
     tcp_url = 'tcp://%s:2376' % bay.api_address

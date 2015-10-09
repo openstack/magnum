@@ -40,7 +40,7 @@ class MonitorsTestCase(base.TestCase):
         bay = utils.get_test_bay(node_addresses=['1.2.3.4'],
                                  api_address='5.6.7.8')
         self.bay = objects.Bay(self.context, **bay)
-        self.monitor = monitors.SwarmMonitor(self.bay)
+        self.monitor = monitors.SwarmMonitor(self.context, self.bay)
         p = mock.patch('magnum.conductor.monitors.SwarmMonitor.metrics_spec',
                        new_callable=mock.PropertyMock)
         self.mock_metrics_spec = p.start()
@@ -63,35 +63,35 @@ class MonitorsTestCase(base.TestCase):
         monitor = monitors.create_monitor(self.context, self.bay)
         self.assertIsNone(monitor)
 
-    @mock.patch('magnum.conductor.handlers.common.docker_client.'
-                'DockerHTTPClient')
-    def test_swarm_monitor_pull_data_success(self, mock_docker_http_client):
+    @mock.patch('magnum.common.docker_utils.docker_for_bay')
+    def test_swarm_monitor_pull_data_success(self, mock_docker_for_bay):
         mock_docker = mock.MagicMock()
-        mock_docker.info.return_value = 'test_node'
+        mock_docker.info.return_value = {'DriverStatus': [[
+            u' \u2514 Reserved Memory', u'0 B / 1 GiB']]}
         mock_docker.containers.return_value = [mock.MagicMock()]
         mock_docker.inspect_container.return_value = 'test_container'
-        mock_docker_http_client.return_value = mock_docker
+        mock_docker_for_bay.return_value.__enter__.return_value = mock_docker
 
         self.monitor.pull_data()
 
         self.assertEqual(self.monitor.data['nodes'],
-                         ['test_node', 'test_node'])
+                         [{'MemTotal': 1073741824.0}])
         self.assertEqual(self.monitor.data['containers'], ['test_container'])
 
-    @mock.patch('magnum.conductor.handlers.common.docker_client.'
-                'DockerHTTPClient')
-    def test_swarm_monitor_pull_data_raise(self, mock_docker_http_client):
+    @mock.patch('magnum.common.docker_utils.docker_for_bay')
+    def test_swarm_monitor_pull_data_raise(self, mock_docker_for_bay):
         mock_container = mock.MagicMock()
         mock_docker = mock.MagicMock()
-        mock_docker.info.return_value = 'test_node'
+        mock_docker.info.return_value = {'DriverStatus': [[
+            u' \u2514 Reserved Memory', u'0 B / 1 GiB']]}
         mock_docker.containers.return_value = [mock_container]
         mock_docker.inspect_container.side_effect = Exception("inspect error")
-        mock_docker_http_client.return_value = mock_docker
+        mock_docker_for_bay.return_value.__enter__.return_value = mock_docker
 
         self.monitor.pull_data()
 
         self.assertEqual(self.monitor.data['nodes'],
-                         ['test_node', 'test_node'])
+                         [{'MemTotal': 1073741824.0}])
         self.assertEqual(self.monitor.data['containers'], [mock_container])
 
     def test_swarm_monitor_get_metric_names(self):
