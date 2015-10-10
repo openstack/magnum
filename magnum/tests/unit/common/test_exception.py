@@ -61,11 +61,11 @@ class TestException(base.BaseTestCase):
 
     def test_message_is_templated(self):
         ex = TestMagnumException(name="NAME")
-        self.assertEqual(ex.message, "templated NAME")
+        self.assertEqual("templated NAME", ex.message)
 
     def test_custom_message_is_templated(self):
         ex = TestMagnumException(_("custom templated %(name)s"), name="NAME")
-        self.assertEqual(ex.message, "custom templated NAME")
+        self.assertEqual("custom templated NAME", ex.message)
 
     def test_all_exceptions(self):
         for name, obj in inspect.getmembers(exception):

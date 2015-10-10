@@ -81,4 +81,4 @@ class ContextTestCase(base.TestCase):
 
     def test_request_context_sets_is_admin(self):
         ctxt = magnum_context.make_admin_context()
-        self.assertEqual(ctxt.is_admin, True)
+        self.assertEqual(True, ctxt.is_admin)

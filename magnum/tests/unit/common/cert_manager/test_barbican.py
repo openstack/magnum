@@ -67,11 +67,11 @@ class TestBarbicanCert(base.BaseTestCase):
         )
 
         # Validate the cert functions
-        self.assertEqual(cert.get_certificate(), self.certificate)
-        self.assertEqual(cert.get_intermediates(), self.intermediates)
-        self.assertEqual(cert.get_private_key(), self.private_key)
-        self.assertEqual(cert.get_private_key_passphrase(),
-                         self.private_key_passphrase)
+        self.assertEqual(self.certificate, cert.get_certificate())
+        self.assertEqual(self.intermediates, cert.get_intermediates())
+        self.assertEqual(self.private_key, cert.get_private_key())
+        self.assertEqual(self.private_key_passphrase,
+                         cert.get_private_key_passphrase())
 
     def test_barbican_cert_none_values(self):
         container = barbican_client.containers.CertificateContainer(
@@ -87,10 +87,10 @@ class TestBarbicanCert(base.BaseTestCase):
         )
 
         # Validate the cert functions
-        self.assertEqual(cert.get_certificate(), None)
-        self.assertEqual(cert.get_intermediates(), None)
-        self.assertEqual(cert.get_private_key(), None)
-        self.assertEqual(cert.get_private_key_passphrase(), None)
+        self.assertIsNone(cert.get_certificate())
+        self.assertIsNone(cert.get_intermediates())
+        self.assertIsNone(cert.get_private_key())
+        self.assertIsNone(cert.get_private_key_passphrase())
 
 
 class TestBarbicanManager(base.BaseTestCase):
@@ -158,7 +158,7 @@ class TestBarbicanManager(base.BaseTestCase):
         bc.secrets.create.assert_has_calls(calls, any_order=True)
 
         # create_certificate should be called once
-        self.assertEqual(bc.containers.create_certificate.call_count, 1)
+        self.assertEqual(1, bc.containers.create_certificate.call_count)
 
         # Container should be stored once
         self.empty_container.store.assert_called_once_with()
@@ -203,7 +203,7 @@ class TestBarbicanManager(base.BaseTestCase):
         bc.secrets.create.assert_has_calls(calls, any_order=True)
 
         # create_certificate should be called once
-        self.assertEqual(bc.containers.create_certificate.call_count, 1)
+        self.assertEqual(1, bc.containers.create_certificate.call_count)
 
         # Container should be stored once
         self.empty_container.store.assert_called_once_with()
@@ -235,14 +235,14 @@ class TestBarbicanManager(base.BaseTestCase):
 
         # The returned data should be a Cert object with the correct values
         self.assertIsInstance(data, cert_manager.Cert)
-        self.assertEqual(data.get_private_key(),
-                         self.private_key.payload)
-        self.assertEqual(data.get_certificate(),
-                         self.certificate.payload)
-        self.assertEqual(data.get_intermediates(),
-                         self.intermediates.payload)
-        self.assertEqual(data.get_private_key_passphrase(),
-                         self.private_key_passphrase.payload)
+        self.assertEqual(self.private_key.payload,
+                         data.get_private_key())
+        self.assertEqual(self.certificate.payload,
+                         data.get_certificate())
+        self.assertEqual(self.intermediates.payload,
+                         data.get_intermediates())
+        self.assertEqual(self.private_key_passphrase.payload,
+                         data.get_private_key_passphrase())
 
     @patch('magnum.common.clients.OpenStackClients.barbican')
     def test_get_cert_no_registration(self, mock_barbican):
@@ -263,14 +263,14 @@ class TestBarbicanManager(base.BaseTestCase):
 
         # The returned data should be a Cert object with the correct values
         self.assertIsInstance(data, cert_manager.Cert)
-        self.assertEqual(data.get_private_key(),
-                         self.private_key.payload)
-        self.assertEqual(data.get_certificate(),
-                         self.certificate.payload)
-        self.assertEqual(data.get_intermediates(),
-                         self.intermediates.payload)
-        self.assertEqual(data.get_private_key_passphrase(),
-                         self.private_key_passphrase.payload)
+        self.assertEqual(self.private_key.payload,
+                         data.get_private_key())
+        self.assertEqual(self.certificate.payload,
+                         data.get_certificate())
+        self.assertEqual(self.intermediates.payload,
+                         data.get_intermediates())
+        self.assertEqual(self.private_key_passphrase.payload,
+                         data.get_private_key_passphrase())
 
     @patch('magnum.common.clients.OpenStackClients.barbican')
     def test_delete_cert(self, mock_barbican):

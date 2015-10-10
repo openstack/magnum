@@ -21,14 +21,14 @@ class TestYamlUtils(base.BaseTestCase):
 
     def test_load_yaml(self):
         yml_dict = yamlutils.load('a: x\nb: y\n')
-        self.assertEqual(yml_dict, {'a': 'x', 'b': 'y'})
+        self.assertEqual({'a': 'x', 'b': 'y'}, yml_dict)
 
     def test_load_empty_yaml(self):
         self.assertRaises(ValueError, yamlutils.load, '{}')
 
     def test_load_empty_list(self):
         yml_dict = yamlutils.load('[]')
-        self.assertEqual(yml_dict, [])
+        self.assertEqual([], yml_dict)
 
     def test_load_invalid_yaml_syntax(self):
         self.assertRaises(ValueError, yamlutils.load, "}invalid: y'm'l3!")

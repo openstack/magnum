@@ -43,11 +43,11 @@ class TestLocalCert(base.BaseTestCase):
         )
 
         # Validate the cert functions
-        self.assertEqual(cert.get_certificate(), self.certificate)
-        self.assertEqual(cert.get_intermediates(), self.intermediates)
-        self.assertEqual(cert.get_private_key(), self.private_key)
-        self.assertEqual(cert.get_private_key_passphrase(),
-                         self.private_key_passphrase)
+        self.assertEqual(self.certificate, cert.get_certificate())
+        self.assertEqual(self.intermediates, cert.get_intermediates())
+        self.assertEqual(self.private_key, cert.get_private_key())
+        self.assertEqual(self.private_key_passphrase,
+                         cert.get_private_key_passphrase())
 
 
 class TestLocalManager(base.BaseTestCase):
