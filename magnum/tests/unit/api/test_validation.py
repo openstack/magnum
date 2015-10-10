@@ -54,7 +54,7 @@ class TestValidation(base.BaseTestCase):
             mock_bay_get_by_uuid.assert_called_once_with(context, 'bay_uuid')
             mock_baymodel_get_by_uuid.assert_called_once_with(
                 context, 'baymodel_id')
-            self.assertEqual(ret, 'test_object')
+            self.assertEqual('test_object', ret)
 
     @mock.patch('pecan.request')
     @mock.patch('magnum.objects.BayModel.get_by_uuid')

@@ -26,6 +26,6 @@ class TestAppConfig(base.BaseTestCase):
 
         config_d = dict(config.app)
 
-        self.assertEqual(config_d['modules'], api_config.app['modules'])
-        self.assertEqual(config_d['root'], api_config.app['root'])
+        self.assertEqual(api_config.app['modules'], config_d['modules'])
+        self.assertEqual(api_config.app['root'], config_d['root'])
         self.assertIsInstance(config_d['hooks'][0], hooks.ContextHook)

@@ -36,9 +36,9 @@ class TestBayObject(base.TestCase):
         del bay_dict['master_count']
         del bay_dict['bay_create_timeout']
         bay = api_bay.Bay(**bay_dict)
-        self.assertEqual(bay.node_count, 1)
-        self.assertEqual(bay.master_count, 1)
-        self.assertEqual(bay.bay_create_timeout, 0)
+        self.assertEqual(1, bay.node_count)
+        self.assertEqual(1, bay.master_count)
+        self.assertEqual(0, bay.bay_create_timeout)
 
 
 class TestListBay(api_base.FunctionalTest):
@@ -428,8 +428,8 @@ class TestPost(api_base.FunctionalTest):
         # Check location header
         self.assertIsNotNone(response.location)
         expected_location = '/v1/bays/%s' % bdict['uuid']
-        self.assertEqual(urlparse.urlparse(response.location).path,
-                         expected_location)
+        self.assertEqual(expected_location,
+                         urlparse.urlparse(response.location).path)
         self.assertEqual(bdict['uuid'], response.json['uuid'])
         self.assertNotIn('updated_at', response.json.keys)
         return_created_at = timeutils.parse_isotime(
@@ -440,8 +440,8 @@ class TestPost(api_base.FunctionalTest):
         bdict = apiutils.bay_post_data()
 
         def _simulate_rpc_bay_create(bay, bay_create_timeout):
-            self.assertEqual(bay.project_id, self.context.project_id)
-            self.assertEqual(bay.user_id, self.context.user_id)
+            self.assertEqual(self.context.project_id, bay.project_id)
+            self.assertEqual(self.context.user_id, bay.user_id)
             bay.create()
             return bay
         self.mock_bay_create.side_effect = _simulate_rpc_bay_create

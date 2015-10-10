@@ -157,14 +157,14 @@ class TestMultiType(base.FunctionalTest):
 
         vt = types.MultiType(types.UuidType, types.NameType)
         value = vt.validate('name')
-        self.assertEqual(value, 'name')
+        self.assertEqual('name', value)
         uuid = "437319e3-d10f-49ec-84c8-e4abb6118c29"
         value = vt.validate(uuid)
         self.assertEqual(uuid, value)
 
         vt = types.MultiType(types.UuidType, six.integer_types)
         value = vt.validate(10)
-        self.assertEqual(value, 10)
+        self.assertEqual(10, value)
         value = vt.validate(uuid)
         self.assertEqual(uuid, value)
 

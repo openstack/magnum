@@ -372,8 +372,8 @@ class TestPost(api_base.FunctionalTest):
         # Check location header
         self.assertIsNotNone(response.location)
         expected_location = '/v1/services/%s' % sdict['uuid']
-        self.assertEqual(urlparse.urlparse(response.location).path,
-                         expected_location)
+        self.assertEqual(expected_location,
+                         urlparse.urlparse(response.location).path)
         self.assertEqual(sdict['uuid'], response.json['uuid'])
         self.assertNotIn('updated_at', response.json.keys)
         return_created_at = timeutils.parse_isotime(
@@ -384,8 +384,8 @@ class TestPost(api_base.FunctionalTest):
         sdict = apiutils.service_post_data()
 
         def _simulate_rpc_service_create(service):
-            self.assertEqual(service.project_id, self.context.project_id)
-            self.assertEqual(service.user_id, self.context.user_id)
+            self.assertEqual(self.context.project_id, service.project_id)
+            self.assertEqual(self.context.user_id, service.user_id)
             service.create()
             return service
         self.mock_service_create.side_effect = _simulate_rpc_service_create

@@ -183,8 +183,8 @@ class TestPost(api_base.FunctionalTest):
         # Check location header
         self.assertIsNotNone(response.location)
         expected_location = '/v1/x509keypairs/%s' % cdict['uuid']
-        self.assertEqual(urlparse.urlparse(response.location).path,
-                         expected_location)
+        self.assertEqual(expected_location,
+                         urlparse.urlparse(response.location).path)
         self.assertEqual(cdict['uuid'], response.json['uuid'])
         self.assertNotIn('updated_at', response.json.keys)
         return_created_at = timeutils.parse_isotime(
@@ -195,8 +195,8 @@ class TestPost(api_base.FunctionalTest):
         cdict = apiutils.x509keypair_post_data()
 
         def _simulate_keypair_create(x509keypair):
-            self.assertEqual(x509keypair.project_id, self.context.project_id)
-            self.assertEqual(x509keypair.user_id, self.context.user_id)
+            self.assertEqual(self.context.project_id, x509keypair.project_id)
+            self.assertEqual(self.context.user_id, x509keypair.user_id)
             x509keypair.create()
             return x509keypair
         self.mock_x509keypair_create.side_effect = _simulate_keypair_create

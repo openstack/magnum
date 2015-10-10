@@ -299,7 +299,7 @@ class TestPatch(api_base.FunctionalTest):
 
         response = self.get_json('/rcs/%s/%s' % (self.rc.uuid,
                                                  self.rc.bay_uuid))
-        self.assertEqual(len(response['images']), 0)
+        self.assertEqual(0, len(response['images']))
 
     def test_remove_uuid(self):
         response = self.patch_json('/rcs/%s/%s' % (self.rc.uuid,
@@ -423,8 +423,8 @@ class TestPost(api_base.FunctionalTest):
         # Check location header
         self.assertIsNotNone(response.location)
         expected_location = '/v1/rcs/%s' % rc_dict['uuid']
-        self.assertEqual(urlparse.urlparse(response.location).path,
-                         expected_location)
+        self.assertEqual(expected_location,
+                         urlparse.urlparse(response.location).path)
         self.assertEqual(rc_dict['uuid'], response.json['uuid'])
         self.assertNotIn('updated_at', response.json.keys)
         return_created_at = timeutils.parse_isotime(
@@ -435,8 +435,8 @@ class TestPost(api_base.FunctionalTest):
         rc_dict = apiutils.rc_post_data()
 
         def _simulate_rpc_rc_create(rc):
-            self.assertEqual(rc.project_id, self.context.project_id)
-            self.assertEqual(rc.user_id, self.context.user_id)
+            self.assertEqual(self.context.project_id, rc.project_id)
+            self.assertEqual(self.context.user_id, rc.user_id)
             rc.create()
             return rc
         self.mock_rc_create.side_effect = _simulate_rpc_rc_create
