@@ -63,7 +63,7 @@ class TestReplicationControllerObject(base.DbTestCase):
                                autospec=True) as mock_get_list:
             mock_get_list.return_value = [self.fake_rc]
             rcs = objects.ReplicationController.list(self.context)
-            self.assertEqual(mock_get_list.call_count, 1)
+            self.assertEqual(1, mock_get_list.call_count)
             self.assertThat(rcs, HasLength(1))
             self.assertIsInstance(rcs[0], objects.ReplicationController)
             self.assertEqual(self.context, rcs[0]._context)

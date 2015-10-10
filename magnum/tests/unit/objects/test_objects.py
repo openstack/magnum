@@ -98,39 +98,39 @@ class TestUtils(test_base.TestCase):
     def test_datetime_or_none(self):
         naive_dt = datetime.datetime.now()
         dt = timeutils.parse_isotime(timeutils.isotime(naive_dt))
-        self.assertEqual(utils.datetime_or_none(dt), dt)
-        self.assertEqual(utils.datetime_or_none(dt),
-                         naive_dt.replace(tzinfo=iso8601.iso8601.Utc(),
-                                          microsecond=0))
+        self.assertEqual(dt, utils.datetime_or_none(dt))
+        self.assertEqual(naive_dt.replace(tzinfo=iso8601.iso8601.Utc(),
+                                          microsecond=0),
+                         utils.datetime_or_none(dt))
         self.assertIsNone(utils.datetime_or_none(None))
         self.assertRaises(ValueError, utils.datetime_or_none, 'foo')
 
     def test_datetime_or_str_or_none(self):
         dts = timeutils.isotime()
         dt = timeutils.parse_isotime(dts)
-        self.assertEqual(utils.datetime_or_str_or_none(dt), dt)
+        self.assertEqual(dt, utils.datetime_or_str_or_none(dt))
         self.assertIsNone(utils.datetime_or_str_or_none(None))
-        self.assertEqual(utils.datetime_or_str_or_none(dts), dt)
+        self.assertEqual(dt, utils.datetime_or_str_or_none(dts))
         self.assertRaises(ValueError, utils.datetime_or_str_or_none, 'foo')
 
     def test_int_or_none(self):
-        self.assertEqual(utils.int_or_none(1), 1)
-        self.assertEqual(utils.int_or_none('1'), 1)
+        self.assertEqual(1, utils.int_or_none(1))
+        self.assertEqual(1, utils.int_or_none('1'))
         self.assertIsNone(utils.int_or_none(None))
         self.assertRaises(ValueError, utils.int_or_none, 'foo')
 
     def test_str_or_none(self):
         class Obj(object):
             pass
-        self.assertEqual(utils.str_or_none('foo'), 'foo')
-        self.assertEqual(utils.str_or_none(1), '1')
+        self.assertEqual('foo', utils.str_or_none('foo'))
+        self.assertEqual('1', utils.str_or_none(1))
         self.assertIsNone(utils.str_or_none(None))
 
     def test_ip_or_none(self):
         ip4 = netaddr.IPAddress('1.2.3.4', 4)
         ip6 = netaddr.IPAddress('1::2', 6)
-        self.assertEqual(utils.ip_or_none(4)('1.2.3.4'), ip4)
-        self.assertEqual(utils.ip_or_none(6)('1::2'), ip6)
+        self.assertEqual(ip4, utils.ip_or_none(4)('1.2.3.4'))
+        self.assertEqual(ip6, utils.ip_or_none(6)('1::2'))
         self.assertIsNone(utils.ip_or_none(4)(None))
         self.assertIsNone(utils.ip_or_none(6)(None))
         self.assertRaises(netaddr.AddrFormatError, utils.ip_or_none(4), 'foo')
@@ -150,8 +150,8 @@ class TestUtils(test_base.TestCase):
 
     def test_dt_deserializer(self):
         dt = timeutils.parse_isotime('1955-11-05T00:00:00Z')
-        self.assertEqual(utils.dt_deserializer(None, timeutils.isotime(dt)),
-                         dt)
+        self.assertEqual(dt,
+                         utils.dt_deserializer(None, timeutils.isotime(dt)))
         self.assertIsNone(utils.dt_deserializer(None, None))
         self.assertRaises(ValueError, utils.dt_deserializer, None, 'foo')
 
@@ -360,15 +360,15 @@ class _TestObject(object):
     def test_get(self):
         obj = MyObj(self.context, foo=1)
         # Foo has value, should not get the default
-        self.assertEqual(obj.get('foo', 2), 1)
+        self.assertEqual(1, obj.get('foo', 2))
         # Foo has value, should return the value without error
-        self.assertEqual(obj.get('foo'), 1)
+        self.assertEqual(1, obj.get('foo'))
         # Bar is not loaded, so we should get the default
-        self.assertEqual(obj.get('bar', 'not-loaded'), 'not-loaded')
+        self.assertEqual('not-loaded', obj.get('bar', 'not-loaded'))
         # Bar without a default should lazy-load
-        self.assertEqual(obj.get('bar'), 'loaded!')
+        self.assertEqual('loaded!', obj.get('bar'))
         # Bar now has a default, but loaded value should be returned
-        self.assertEqual(obj.get('bar', 'not-loaded'), 'loaded!')
+        self.assertEqual('loaded!', obj.get('bar', 'not-loaded'))
         # Invalid attribute should raise AttributeError
         self.assertRaises(AttributeError, obj.get, 'nothing')
         # ...even with a default
@@ -379,12 +379,12 @@ class _TestObject(object):
         myobj_fields = ['foo', 'bar', 'missing'] + base_fields
         myobj3_fields = ['new_field']
         self.assertTrue(issubclass(TestSubclassedObject, MyObj))
-        self.assertEqual(len(myobj_fields), len(MyObj.fields))
-        self.assertEqual(set(myobj_fields), set(MyObj.fields.keys()))
-        self.assertEqual(len(myobj_fields) + len(myobj3_fields),
-                         len(TestSubclassedObject.fields))
-        self.assertEqual(set(myobj_fields) | set(myobj3_fields),
-                         set(TestSubclassedObject.fields.keys()))
+        self.assertEqual(len(MyObj.fields), len(myobj_fields))
+        self.assertEqual(set(MyObj.fields.keys()), set(myobj_fields))
+        self.assertEqual(len(TestSubclassedObject.fields),
+                         len(myobj_fields) + len(myobj3_fields))
+        self.assertEqual(set(TestSubclassedObject.fields.keys()),
+                         set(myobj_fields) | set(myobj3_fields))
 
     def test_get_changes(self):
         obj = MyObj(self.context)

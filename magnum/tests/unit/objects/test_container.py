@@ -62,7 +62,7 @@ class TestContainerObject(base.DbTestCase):
                                autospec=True) as mock_get_list:
             mock_get_list.return_value = [self.fake_container]
             containers = objects.Container.list(self.context)
-            self.assertEqual(mock_get_list.call_count, 1)
+            self.assertEqual(1, mock_get_list.call_count)
             self.assertThat(containers, HasLength(1))
             self.assertIsInstance(containers[0], objects.Container)
             self.assertEqual(self.context, containers[0]._context)

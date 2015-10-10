@@ -60,7 +60,7 @@ class TestServiceObject(base.DbTestCase):
                                autospec=True) as mock_get_list:
             mock_get_list.return_value = [self.fake_service]
             services = objects.Service.list(self.context)
-            self.assertEqual(mock_get_list.call_count, 1)
+            self.assertEqual(1, mock_get_list.call_count)
             self.assertThat(services, HasLength(1))
             self.assertIsInstance(services[0], objects.Service)
             self.assertEqual(self.context, services[0]._context)

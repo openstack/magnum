@@ -94,11 +94,11 @@ class PeriodicTestCase(base.TestCase):
         periodic.MagnumPeriodicTasks(CONF,
                                      'fake-conductor').sync_bay_status(None)
 
-        self.assertEqual(self.bay1.status, bay_status.CREATE_COMPLETE)
-        self.assertEqual(self.bay1.status_reason, 'fake_reason_11')
+        self.assertEqual(bay_status.CREATE_COMPLETE, self.bay1.status)
+        self.assertEqual('fake_reason_11', self.bay1.status_reason)
         mock_db_destroy.assert_called_once_with(self.bay2.uuid)
-        self.assertEqual(self.bay3.status, bay_status.UPDATE_COMPLETE)
-        self.assertEqual(self.bay3.status_reason, 'fake_reason_33')
+        self.assertEqual(bay_status.UPDATE_COMPLETE, self.bay3.status)
+        self.assertEqual('fake_reason_33', self.bay3.status_reason)
 
     @mock.patch.object(objects.Bay, 'list')
     @mock.patch('magnum.common.clients.OpenStackClients')
@@ -117,9 +117,9 @@ class PeriodicTestCase(base.TestCase):
         periodic.MagnumPeriodicTasks(CONF,
                                      'fake-conductor').sync_bay_status(None)
 
-        self.assertEqual(self.bay1.status, bay_status.CREATE_IN_PROGRESS)
-        self.assertEqual(self.bay2.status, bay_status.DELETE_IN_PROGRESS)
-        self.assertEqual(self.bay3.status, bay_status.UPDATE_IN_PROGRESS)
+        self.assertEqual(bay_status.CREATE_IN_PROGRESS, self.bay1.status)
+        self.assertEqual(bay_status.DELETE_IN_PROGRESS, self.bay2.status)
+        self.assertEqual(bay_status.UPDATE_IN_PROGRESS, self.bay3.status)
 
     @mock.patch.object(objects.Bay, 'list')
     @mock.patch('magnum.common.clients.OpenStackClients')
@@ -141,13 +141,13 @@ class PeriodicTestCase(base.TestCase):
         periodic.MagnumPeriodicTasks(CONF,
                                      'fake-conductor').sync_bay_status(None)
 
-        self.assertEqual(self.bay1.status, bay_status.CREATE_FAILED)
-        self.assertEqual(self.bay1.status_reason, 'Stack with id 11 not '
-                         'found in Heat.')
+        self.assertEqual(bay_status.CREATE_FAILED, self.bay1.status)
+        self.assertEqual('Stack with id 11 not found in Heat.',
+                         self.bay1.status_reason)
         mock_db_destroy.assert_called_once_with(self.bay2.uuid)
-        self.assertEqual(self.bay3.status, bay_status.UPDATE_FAILED)
-        self.assertEqual(self.bay3.status_reason, 'Stack with id 33 not '
-                         'found in Heat.')
+        self.assertEqual(bay_status.UPDATE_FAILED, self.bay3.status)
+        self.assertEqual('Stack with id 33 not found in Heat.',
+                         self.bay3.status_reason)
 
     @mock.patch.object(objects.MagnumService, 'get_by_host_and_binary')
     @mock.patch.object(objects.MagnumService, 'create')
@@ -230,7 +230,7 @@ class PeriodicTestCase(base.TestCase):
             'metrics': expected_metrics
         }
 
-        self.assertEqual(mock_create_monitor.call_count, 1)
+        self.assertEqual(1, mock_create_monitor.call_count)
         notifier.info.assert_called_once_with(
             self.context, expected_event_type, expected_msg)
 
@@ -261,7 +261,7 @@ class PeriodicTestCase(base.TestCase):
             'resource_id': self.bay4.uuid,
             'metrics': []
         }
-        self.assertEqual(mock_create_monitor.call_count, 1)
+        self.assertEqual(1, mock_create_monitor.call_count)
         notifier.info.assert_called_once_with(
             self.context, expected_event_type, expected_msg)
 
@@ -283,8 +283,8 @@ class PeriodicTestCase(base.TestCase):
         periodic.MagnumPeriodicTasks(
             CONF, 'fake-conductor')._send_bay_metrics(self.context)
 
-        self.assertEqual(mock_create_monitor.call_count, 1)
-        self.assertEqual(notifier.info.call_count, 0)
+        self.assertEqual(1, mock_create_monitor.call_count)
+        self.assertEqual(0, notifier.info.call_count)
 
     @mock.patch('magnum.conductor.monitors.create_monitor')
     @mock.patch('magnum.objects.Bay.list')
@@ -302,5 +302,5 @@ class PeriodicTestCase(base.TestCase):
         periodic.MagnumPeriodicTasks(
             CONF, 'fake-conductor')._send_bay_metrics(self.context)
 
-        self.assertEqual(mock_create_monitor.call_count, 1)
-        self.assertEqual(notifier.info.call_count, 0)
+        self.assertEqual(1, mock_create_monitor.call_count)
+        self.assertEqual(0, notifier.info.call_count)
