@@ -67,7 +67,7 @@ def parameterized(data):
             'one': dict(val=1),
         })
         def test_val(self, val):
-            self.assertEqual(self.get_val(), val)
+            self.assertEqual(val, self.get_val())
 
     The above will generate two test cases:
         `test_val_zero` which runs with val=0

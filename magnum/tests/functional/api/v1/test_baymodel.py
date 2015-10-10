@@ -39,14 +39,14 @@ class BayModelTest(base.BaseMagnumTest):
     def _create_baymodel(self, baymodel_model, user='default'):
         resp, model = cli.BayModelClient.as_user(user).post_baymodel(
             baymodel_model)
-        self.assertEqual(resp.status, 201)
+        self.assertEqual(201, resp.status)
         self.baymodels.append((model.uuid, user))
         return resp, model
 
     def _delete_baymodel(self, baymodel_id, user='default'):
         resp, model = cli.BayModelClient.as_user(user).delete_baymodel(
             baymodel_id)
-        self.assertEqual(resp.status, 204)
+        self.assertEqual(204, resp.status)
         return resp, model
 
     @testtools.testcase.attr('positive')
@@ -54,7 +54,7 @@ class BayModelTest(base.BaseMagnumTest):
         gen_model = datagen.random_baymodel_data_w_valid_keypair_and_image_id()
         _, temp_model = self._create_baymodel(gen_model, user='default')
         resp, model = cli.BayModelClient.as_user('default').list_baymodels()
-        self.assertEqual(resp.status, 200)
+        self.assertEqual(200, resp.status)
         self.assertGreater(len(model.baymodels), 0)
         self.assertIn(
             temp_model.uuid, list([x['uuid'] for x in model.baymodels]))
@@ -73,13 +73,13 @@ class BayModelTest(base.BaseMagnumTest):
         bay_model_client = cli.BayModelClient.as_user('default')
         resp, new_model = bay_model_client.patch_baymodel(
             old_model.uuid, patch_model)
-        self.assertEqual(resp.status, 200)
+        self.assertEqual(200, resp.status)
 
         resp, model = cli.BayModelClient.as_user('default').get_baymodel(
             new_model.uuid)
-        self.assertEqual(resp.status, 200)
-        self.assertEqual(new_model.uuid, old_model.uuid)
-        self.assertEqual(new_model.name, model.name)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(old_model.uuid, new_model.uuid)
+        self.assertEqual(model.name, new_model.name)
 
     @testtools.testcase.attr('positive')
     def test_delete_baymodel_by_uuid(self):
@@ -87,7 +87,7 @@ class BayModelTest(base.BaseMagnumTest):
         resp, model = self._create_baymodel(gen_model, user='default')
         resp, _ = cli.BayModelClient.as_user('default').delete_baymodel(
             model.uuid)
-        self.assertEqual(resp.status, 204)
+        self.assertEqual(204, resp.status)
         self.baymodels.remove((model.uuid, 'default'))
 
     @testtools.testcase.attr('positive')
@@ -96,7 +96,7 @@ class BayModelTest(base.BaseMagnumTest):
         resp, model = self._create_baymodel(gen_model, user='default')
         resp, _ = cli.BayModelClient.as_user('default').delete_baymodel(
             model.name)
-        self.assertEqual(resp.status, 204)
+        self.assertEqual(204, resp.status)
         self.baymodels.remove((model.uuid, 'default'))
 
     @testtools.testcase.attr('negative')
