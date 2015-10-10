@@ -78,7 +78,7 @@ class TestListPod(api_base.FunctionalTest):
         response = self.get_json(
             '/pods/not_found/5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
             expect_errors=True)
-        self.assertEqual(response.status_int, 404)
+        self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
@@ -90,7 +90,7 @@ class TestListPod(api_base.FunctionalTest):
         response = self.get_json(
             '/pods/test_pod/5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
             expect_errors=True)
-        self.assertEqual(response.status_int, 409)
+        self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
@@ -436,8 +436,8 @@ class TestPost(api_base.FunctionalTest):
         # Check location header
         self.assertIsNotNone(response.location)
         expected_location = '/v1/pods/%s' % pdict['uuid']
-        self.assertEqual(urlparse.urlparse(response.location).path,
-                         expected_location)
+        self.assertEqual(expected_location,
+                         urlparse.urlparse(response.location).path)
         self.assertEqual(pdict['uuid'], response.json['uuid'])
         self.assertNotIn('updated_at', response.json.keys)
         return_created_at = timeutils.parse_isotime(
@@ -448,8 +448,8 @@ class TestPost(api_base.FunctionalTest):
         pdict = apiutils.pod_post_data()
 
         def _simulate_rpc_pod_create(pod):
-            self.assertEqual(pod.project_id, self.context.project_id)
-            self.assertEqual(pod.user_id, self.context.user_id)
+            self.assertEqual(self.context.project_id, pod.project_id)
+            self.assertEqual(self.context.user_id, pod.user_id)
             pod.create()
             return pod
         self.mock_pod_create.side_effect = _simulate_rpc_pod_create

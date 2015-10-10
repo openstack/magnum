@@ -68,8 +68,8 @@ class TestMagnumServiceController(api_base.FunctionalTest):
         svc_up.return_value = "up"
 
         response = self.get_json('/mservices')
-        self.assertEqual(len(response['mservices']), 1)
-        self.assertEqual(response['mservices'][0]['id'], 1)
+        self.assertEqual(1, len(response['mservices']))
+        self.assertEqual(1, response['mservices'][0]['id'])
 
     @mock.patch.object(rpcapi.API, 'magnum_services_list')
     @mock.patch.object(servicegroup.ServiceGroup, 'service_is_up')
@@ -79,7 +79,7 @@ class TestMagnumServiceController(api_base.FunctionalTest):
         svc_up.return_value = "up"
 
         response = self.get_json('/mservices')
-        self.assertEqual(len(response['mservices']), svc_num)
+        self.assertEqual(svc_num, len(response['mservices']))
         for i in range(svc_num):
             elem = response['mservices'][i]
-            self.assertEqual(elem['id'], i + 1)
+            self.assertEqual(i + 1, elem['id'])

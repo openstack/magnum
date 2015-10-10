@@ -50,15 +50,15 @@ class TestContainerController(api_base.FunctionalTest):
                                  params=params,
                                  content_type='application/json')
 
-        self.assertEqual(response.status_int, 201)
+        self.assertEqual(201, response.status_int)
         self.assertTrue(mock_container_create.called)
 
     @patch('magnum.conductor.api.API.container_create')
     def test_create_container_set_project_id_and_user_id(
             self, mock_container_create):
         def _create_side_effect(container):
-            self.assertEqual(container.project_id, self.context.project_id)
-            self.assertEqual(container.user_id, self.context.user_id)
+            self.assertEqual(self.context.project_id, container.project_id)
+            self.assertEqual(self.context.user_id, container.user_id)
             return container
         mock_container_create.side_effect = _create_side_effect
 
@@ -84,13 +84,13 @@ class TestContainerController(api_base.FunctionalTest):
         response = self.app.post('/v1/containers',
                                  params=params,
                                  content_type='application/json')
-        self.assertEqual(response.status_int, 201)
+        self.assertEqual(201, response.status_int)
         # get all containers
         container = objects.Container.list(self.context)[0]
         container.status = 'Stopped'
         mock_container_show.return_value = container
         response = self.app.get('/v1/containers')
-        self.assertEqual(response.status_int, 200)
+        self.assertEqual(200, response.status_int)
         self.assertEqual(1, len(response.json))
         c = response.json['containers'][0]
         self.assertIsNotNone(c.get('uuid'))
@@ -100,10 +100,10 @@ class TestContainerController(api_base.FunctionalTest):
         self.assertEqual('512m', c.get('memory'))
         # Delete the container we created
         response = self.app.delete('/v1/containers/%s' % c.get('uuid'))
-        self.assertEqual(response.status_int, 204)
+        self.assertEqual(204, response.status_int)
 
         response = self.app.get('/v1/containers')
-        self.assertEqual(response.status_int, 200)
+        self.assertEqual(200, response.status_int)
         c = response.json['containers']
         self.assertEqual(0, len(c))
         self.assertTrue(mock_container_create.called)
@@ -123,13 +123,13 @@ class TestContainerController(api_base.FunctionalTest):
         response = self.app.post('/v1/containers',
                                  params=params,
                                  content_type='application/json')
-        self.assertEqual(response.status_int, 201)
+        self.assertEqual(201, response.status_int)
         # get all containers
         container = objects.Container.list(self.context)[0]
         container.status = 'Stopped'
         mock_container_show.return_value = container
         response = self.app.get('/v1/containers')
-        self.assertEqual(response.status_int, 200)
+        self.assertEqual(200, response.status_int)
         self.assertEqual(1, len(response.json))
         c = response.json['containers'][0]
         self.assertIsNotNone(c.get('uuid'))
@@ -139,10 +139,10 @@ class TestContainerController(api_base.FunctionalTest):
         self.assertEqual('512m', c.get('memory'))
         # Delete the container we created
         response = self.app.delete('/v1/containers/%s' % c.get('uuid'))
-        self.assertEqual(response.status_int, 204)
+        self.assertEqual(204, response.status_int)
 
         response = self.app.get('/v1/containers')
-        self.assertEqual(response.status_int, 200)
+        self.assertEqual(200, response.status_int)
         c = response.json['containers']
         self.assertEqual(0, len(c))
         self.assertTrue(mock_container_create.called)
@@ -160,13 +160,13 @@ class TestContainerController(api_base.FunctionalTest):
         response = self.app.post('/v1/containers',
                                  params=params,
                                  content_type='application/json')
-        self.assertEqual(response.status_int, 201)
+        self.assertEqual(201, response.status_int)
         # get all containers
         container = objects.Container.list(self.context)[0]
         container.status = 'Stopped'
         mock_container_show.return_value = container
         response = self.app.get('/v1/containers')
-        self.assertEqual(response.status_int, 200)
+        self.assertEqual(200, response.status_int)
         self.assertEqual(1, len(response.json))
         c = response.json['containers'][0]
         self.assertIsNotNone(c.get('uuid'))
@@ -208,11 +208,11 @@ class TestContainerController(api_base.FunctionalTest):
         mock_container_list.assert_called_once_with(mock.ANY,
                                                     1000, None, sort_dir='asc',
                                                     sort_key='id')
-        self.assertEqual(response.status_int, 200)
+        self.assertEqual(200, response.status_int)
         actual_containers = response.json['containers']
-        self.assertEqual(len(actual_containers), 1)
-        self.assertEqual(actual_containers[0].get('uuid'),
-                         test_container['uuid'])
+        self.assertEqual(1, len(actual_containers))
+        self.assertEqual(test_container['uuid'],
+                         actual_containers[0].get('uuid'))
 
     @patch('magnum.conductor.api.API.container_show')
     @patch('magnum.objects.Container.list')
@@ -230,7 +230,7 @@ class TestContainerController(api_base.FunctionalTest):
         response = self.app.get('/v1/containers?limit=3&marker=%s'
                                 % container_list[2].uuid)
 
-        self.assertEqual(response.status_int, 200)
+        self.assertEqual(200, response.status_int)
         actual_containers = response.json['containers']
         self.assertEqual(1, len(actual_containers))
         self.assertEqual(container_list[-1].uuid,
@@ -252,7 +252,7 @@ class TestContainerController(api_base.FunctionalTest):
         response = self.app.get('/v1/containers/detail?limit=3&marker=%s'
                                 % container_list[2].uuid)
 
-        self.assertEqual(response.status_int, 200)
+        self.assertEqual(200, response.status_int)
         actual_containers = response.json['containers']
         self.assertEqual(1, len(actual_containers))
         self.assertEqual(container_list[-1].uuid,
@@ -278,14 +278,14 @@ class TestContainerController(api_base.FunctionalTest):
         mock_container_list.assert_called_once_with(mock.ANY,
                                                     1000, None, sort_dir='asc',
                                                     sort_key='id')
-        self.assertEqual(response.status_int, 200)
+        self.assertEqual(200, response.status_int)
         actual_containers = response.json['containers']
-        self.assertEqual(len(actual_containers), 1)
-        self.assertEqual(actual_containers[0].get('uuid'),
-                         test_container['uuid'])
+        self.assertEqual(1, len(actual_containers))
+        self.assertEqual(test_container['uuid'],
+                         actual_containers[0].get('uuid'))
 
-        self.assertEqual(actual_containers[0].get('status'),
-                         fields.ContainerStatus.UNKNOWN)
+        self.assertEqual(fields.ContainerStatus.UNKNOWN,
+                         actual_containers[0].get('status'))
 
     @patch('magnum.conductor.api.API.container_show')
     @patch('magnum.objects.Container.get_by_uuid')
@@ -301,9 +301,9 @@ class TestContainerController(api_base.FunctionalTest):
         mock_container_get_by_uuid.assert_called_once_with(
             mock.ANY,
             test_container['uuid'])
-        self.assertEqual(response.status_int, 200)
-        self.assertEqual(response.json['uuid'],
-                         test_container['uuid'])
+        self.assertEqual(200, response.status_int)
+        self.assertEqual(test_container['uuid'],
+                         response.json['uuid'])
 
     @patch('magnum.conductor.api.API.container_show')
     @patch('magnum.objects.Container.get_by_name')
@@ -319,9 +319,9 @@ class TestContainerController(api_base.FunctionalTest):
         mock_container_get_by_name.assert_called_once_with(
             mock.ANY,
             test_container['name'])
-        self.assertEqual(response.status_int, 200)
-        self.assertEqual(response.json['uuid'],
-                         test_container['uuid'])
+        self.assertEqual(200, response.status_int)
+        self.assertEqual(test_container['uuid'],
+                         response.json['uuid'])
 
     @patch('magnum.objects.Container.get_by_uuid')
     def test_patch_by_uuid(self, mock_container_get_by_uuid):
@@ -339,8 +339,8 @@ class TestContainerController(api_base.FunctionalTest):
                 params=params)
 
             mock_save.assert_called_once_with()
-            self.assertEqual(response.status_int, 200)
-            self.assertEqual(test_container_obj.name, 'new_name')
+            self.assertEqual(200, response.status_int)
+            self.assertEqual('new_name', test_container_obj.name)
 
     @patch('magnum.objects.Container.get_by_name')
     def test_patch_by_name(self, mock_container_get_by_name):
@@ -358,8 +358,8 @@ class TestContainerController(api_base.FunctionalTest):
                 params=params)
 
             mock_save.assert_called_once_with()
-            self.assertEqual(response.status_int, 200)
-            self.assertEqual(test_container_obj.name, 'new_name')
+            self.assertEqual(200, response.status_int)
+            self.assertEqual('new_name', test_container_obj.name)
 
     def _action_test(self, container, action, ident_field):
         test_container_obj = objects.Container(self.context, **container)
@@ -369,7 +369,7 @@ class TestContainerController(api_base.FunctionalTest):
             mock_get_by_indent.return_value = test_container_obj
             response = self.app.put('/v1/containers/%s/%s' % (ident,
                                                               action))
-            self.assertEqual(response.status_int, 200)
+            self.assertEqual(200, response.status_int)
 
             # Only PUT should work, others like GET should fail
             self.assertRaises(AppError, self.app.get,
@@ -467,7 +467,7 @@ class TestContainerController(api_base.FunctionalTest):
         container_uuid = test_container.get('uuid')
         response = self.app.get('/v1/containers/%s/logs' % container_uuid)
 
-        self.assertEqual(response.status_int, 200)
+        self.assertEqual(200, response.status_int)
         mock_container_logs.assert_called_once_with(container_uuid)
 
     @patch('magnum.conductor.api.API.container_logs')
@@ -482,7 +482,7 @@ class TestContainerController(api_base.FunctionalTest):
         container_uuid = test_container.get('uuid')
         response = self.app.get('/v1/containers/%s/logs' % container_name)
 
-        self.assertEqual(response.status_int, 200)
+        self.assertEqual(200, response.status_int)
         mock_container_logs.assert_called_once_with(container_uuid)
 
     @patch('magnum.conductor.api.API.container_logs')
@@ -510,7 +510,7 @@ class TestContainerController(api_base.FunctionalTest):
         url = '/v1/containers/%s/%s' % (container_uuid, 'execute')
         cmd = {'command': 'ls'}
         response = self.app.put(url, cmd)
-        self.assertEqual(response.status_int, 200)
+        self.assertEqual(200, response.status_int)
         mock_container_exec.assert_called_once_with(container_uuid,
                                                     cmd['command'])
 
@@ -528,7 +528,7 @@ class TestContainerController(api_base.FunctionalTest):
         url = '/v1/containers/%s/%s' % (container_name, 'execute')
         cmd = {'command': 'ls'}
         response = self.app.put(url, cmd)
-        self.assertEqual(response.status_int, 200)
+        self.assertEqual(200, response.status_int)
         mock_container_exec.assert_called_once_with(container_uuid,
                                                     cmd['command'])
 
@@ -544,7 +544,7 @@ class TestContainerController(api_base.FunctionalTest):
             container_uuid = test_container.get('uuid')
             response = self.app.delete('/v1/containers/%s' % container_uuid)
 
-            self.assertEqual(response.status_int, 204)
+            self.assertEqual(204, response.status_int)
             mock_container_delete.assert_called_once_with(container_uuid)
             mock_destroy.assert_called_once_with()
 
@@ -561,7 +561,7 @@ class TestContainerController(api_base.FunctionalTest):
             container_uuid = test_container.get('uuid')
             response = self.app.delete('/v1/containers/%s' % container_name)
 
-            self.assertEqual(response.status_int, 204)
+            self.assertEqual(204, response.status_int)
             mock_container_delete.assert_called_once_with(container_uuid)
             mock_destroy.assert_called_once_with()
 

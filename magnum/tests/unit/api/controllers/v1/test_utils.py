@@ -67,7 +67,7 @@ class TestApiUtils(base.FunctionalTest):
 
         mock_get_by_uuid.assert_called_once_with(mock_request.context, uuid)
         self.assertFalse(mock_get_by_name.called)
-        self.assertEqual(returned_bay, mock_bay)
+        self.assertEqual(mock_bay, returned_bay)
 
     @mock.patch('pecan.request')
     @mock.patch('magnum.objects.Bay.get_by_name')
@@ -85,7 +85,7 @@ class TestApiUtils(base.FunctionalTest):
         self.assertFalse(mock_get_by_uuid.called)
         mock_get_by_name.assert_called_once_with(mock_request.context,
                                                  'fake-name')
-        self.assertEqual(returned_bay, mock_bay)
+        self.assertEqual(mock_bay, returned_bay)
 
     @mock.patch.object(common_utils, 'is_uuid_like', return_value=True)
     def test_get_openstack_resource_by_uuid(self, fake_is_uuid_like):

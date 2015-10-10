@@ -32,9 +32,9 @@ class TestCertObject(base.TestCase):
 
         cert = api_cert.Certificate(**cert_dict)
 
-        self.assertEqual(cert.bay_uuid, cert_dict['bay_uuid'])
-        self.assertEqual(cert.csr, cert_dict['csr'])
-        self.assertEqual(cert.pem, cert_dict['pem'])
+        self.assertEqual(cert_dict['bay_uuid'], cert.bay_uuid)
+        self.assertEqual(cert_dict['csr'], cert.csr)
+        self.assertEqual(cert_dict['pem'], cert.pem)
 
 
 class TestGetCertificate(api_base.FunctionalTest):
@@ -57,9 +57,9 @@ class TestGetCertificate(api_base.FunctionalTest):
 
         response = self.get_json('/certificates/%s' % self.bay.uuid)
 
-        self.assertEqual(response['bay_uuid'], self.bay.uuid)
-        self.assertEqual(response['csr'], fake_cert['csr'])
-        self.assertEqual(response['pem'], fake_cert['pem'])
+        self.assertEqual(self.bay.uuid, response['bay_uuid'])
+        self.assertEqual(fake_cert['csr'], response['csr'])
+        self.assertEqual(fake_cert['pem'], response['pem'])
 
     def test_get_one_by_name(self):
         fake_cert = apiutils.cert_post_data()
@@ -69,9 +69,9 @@ class TestGetCertificate(api_base.FunctionalTest):
 
         response = self.get_json('/certificates/%s' % self.bay.name)
 
-        self.assertEqual(response['bay_uuid'], self.bay.uuid)
-        self.assertEqual(response['csr'], fake_cert['csr'])
-        self.assertEqual(response['pem'], fake_cert['pem'])
+        self.assertEqual(self.bay.uuid, response['bay_uuid'])
+        self.assertEqual(fake_cert['csr'], response['csr'])
+        self.assertEqual(fake_cert['pem'], response['pem'])
 
     def test_get_one_by_name_not_found(self):
         response = self.get_json('/certificates/not_found',
@@ -136,8 +136,8 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/certificates', new_cert)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
-        self.assertEqual(response.json['bay_uuid'], new_cert['bay_uuid'])
-        self.assertEqual(response.json['pem'], 'fake-pem')
+        self.assertEqual(new_cert['bay_uuid'], response.json['bay_uuid'])
+        self.assertEqual('fake-pem', response.json['pem'])
 
     def test_create_cert_by_bay_name(self, ):
         new_cert = apiutils.cert_post_data(bay_uuid=self.bay.name)
@@ -147,8 +147,8 @@ class TestPost(api_base.FunctionalTest):
 
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
-        self.assertEqual(response.json['bay_uuid'], self.bay.uuid)
-        self.assertEqual(response.json['pem'], 'fake-pem')
+        self.assertEqual(self.bay.uuid, response.json['bay_uuid'])
+        self.assertEqual('fake-pem', response.json['pem'])
 
     def test_create_cert_bay_not_found(self, ):
         new_cert = apiutils.cert_post_data(bay_uuid='not_found')

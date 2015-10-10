@@ -472,8 +472,8 @@ class TestPost(api_base.FunctionalTest):
         # Check location header
         self.assertIsNotNone(response.location)
         expected_location = '/v1/baymodels/%s' % bdict['uuid']
-        self.assertEqual(urlparse.urlparse(response.location).path,
-                         expected_location)
+        self.assertEqual(expected_location,
+                         urlparse.urlparse(response.location).path)
         self.assertEqual(bdict['uuid'], response.json['uuid'])
         self.assertNotIn('updated_at', response.json.keys)
         return_created_at = timeutils.parse_isotime(
@@ -494,10 +494,10 @@ class TestPost(api_base.FunctionalTest):
             bdict = apiutils.baymodel_post_data()
             self.post_json('/baymodels', bdict)
             cc_mock.assert_called_once_with(mock.ANY)
-            self.assertEqual(cc_mock.call_args[0][0]['project_id'],
-                             self.context.project_id)
-            self.assertEqual(cc_mock.call_args[0][0]['user_id'],
-                             self.context.user_id)
+            self.assertEqual(self.context.project_id,
+                             cc_mock.call_args[0][0]['project_id'])
+            self.assertEqual(self.context.user_id,
+                             cc_mock.call_args[0][0]['user_id'])
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
     @mock.patch.object(api_baymodel.BayModelsController,

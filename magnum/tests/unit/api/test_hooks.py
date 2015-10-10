@@ -39,22 +39,22 @@ class TestContextHook(base.BaseTestCase):
         hook.before(state)
         ctx = state.request.context
         self.assertIsInstance(ctx, magnum_context.RequestContext)
-        self.assertEqual(ctx.auth_token,
-                         fakes.fakeAuthTokenHeaders['X-Auth-Token'])
-        self.assertEqual(ctx.project_id,
-                         fakes.fakeAuthTokenHeaders['X-Project-Id'])
-        self.assertEqual(ctx.user_name,
-                         fakes.fakeAuthTokenHeaders['X-User-Name'])
-        self.assertEqual(ctx.user_id,
-                         fakes.fakeAuthTokenHeaders['X-User-Id'])
-        self.assertEqual(','.join(ctx.roles),
-                         fakes.fakeAuthTokenHeaders['X-Roles'])
-        self.assertEqual(ctx.auth_url,
-                         fakes.fakeAuthTokenHeaders['X-Auth-Url'])
-        self.assertEqual(ctx.domain_name,
-                         fakes.fakeAuthTokenHeaders['X-User-Domain-Name'])
-        self.assertEqual(ctx.domain_id,
-                         fakes.fakeAuthTokenHeaders['X-User-Domain-Id'])
+        self.assertEqual(fakes.fakeAuthTokenHeaders['X-Auth-Token'],
+                         ctx.auth_token)
+        self.assertEqual(fakes.fakeAuthTokenHeaders['X-Project-Id'],
+                         ctx.project_id)
+        self.assertEqual(fakes.fakeAuthTokenHeaders['X-User-Name'],
+                         ctx.user_name)
+        self.assertEqual(fakes.fakeAuthTokenHeaders['X-User-Id'],
+                         ctx.user_id)
+        self.assertEqual(fakes.fakeAuthTokenHeaders['X-Roles'],
+                         ','.join(ctx.roles))
+        self.assertEqual(fakes.fakeAuthTokenHeaders['X-Auth-Url'],
+                         ctx.auth_url)
+        self.assertEqual(fakes.fakeAuthTokenHeaders['X-User-Domain-Name'],
+                         ctx.domain_name)
+        self.assertEqual(fakes.fakeAuthTokenHeaders['X-User-Domain-Id'],
+                         ctx.domain_id)
         self.assertIsNone(ctx.auth_token_info)
 
     def test_context_hook_before_method_auth_info(self):
