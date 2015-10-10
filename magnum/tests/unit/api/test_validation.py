@@ -108,7 +108,7 @@ class TestValidation(base.BaseTestCase):
             allowed_network_driver_types,
             assert_raised=False):
 
-        @v.enforce_network_driver_types(**allowed_network_driver_types)
+        @v.enforce_network_driver_types(allowed_network_driver_types)
         def test(self, baymodel):
             pass
 
@@ -148,7 +148,7 @@ class TestValidation(base.BaseTestCase):
             allowed_network_driver_types,
             assert_raised=False):
 
-        @v.enforce_network_driver_types(**allowed_network_driver_types)
+        @v.enforce_network_driver_types(allowed_network_driver_types)
         def test(self, baymodel_uuid):
             pass
 
