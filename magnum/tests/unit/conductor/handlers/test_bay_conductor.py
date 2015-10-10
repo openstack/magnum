@@ -77,6 +77,8 @@ class TestBayConductorWithK8s(base.TestCase):
         self.mock_osc = mock.MagicMock()
         self.mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
         self.mock_osc_class.return_value = self.mock_osc
+        mock_stack = self.mock_osc.heat.return_value.stacks.get.return_value
+        mock_stack.parameters = {'user_token': 'fake_token'}
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition(
@@ -146,7 +148,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v2',
             'tenant_name': 'fake_tenant',
             'username': 'fake_user',
-            'user_token': self.context.auth_token,
+            'user_token': 'fake_token',
             'bay_uuid': self.bay_dict['uuid'],
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'tls_disabled': False,
@@ -201,7 +203,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v2',
             'tenant_name': 'fake_tenant',
             'username': 'fake_user',
-            'user_token': self.context.auth_token,
+            'user_token': 'fake_token',
             'bay_uuid': self.bay_dict['uuid'],
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'tls_disabled': False,
@@ -253,7 +255,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v2',
             'tenant_name': 'fake_tenant',
             'username': 'fake_user',
-            'user_token': self.context.auth_token,
+            'user_token': 'fake_token',
             'bay_uuid': self.bay_dict['uuid'],
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'tls_disabled': False,
@@ -345,7 +347,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v2',
             'tenant_name': 'fake_tenant',
             'username': 'fake_user',
-            'user_token': self.context.auth_token,
+            'user_token': 'fake_token',
             'bay_uuid': self.bay_dict['uuid'],
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'tls_disabled': False,
@@ -422,7 +424,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v2',
             'tenant_name': 'fake_tenant',
             'username': 'fake_user',
-            'user_token': self.context.auth_token,
+            'user_token': 'fake_token',
             'bay_uuid': self.bay_dict['uuid'],
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'tls_disabled': False,
@@ -937,6 +939,8 @@ class TestBayConductorWithSwarm(base.TestCase):
         self.mock_osc = mock.MagicMock()
         self.mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
         self.mock_osc_class.return_value = self.mock_osc
+        mock_stack = self.mock_osc.heat.return_value.stacks.get.return_value
+        mock_stack.parameters = {'user_token': 'fake_token'}
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_all_values(
@@ -962,7 +966,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
-            'user_token': self.context.auth_token,
+            'user_token': 'fake_token',
             'bay_uuid': 'some_uuid',
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'tls_disabled': False
@@ -998,7 +1002,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'external_network': 'external_network_id',
             'number_of_nodes': '1',
             'discovery_url': 'test_discovery',
-            'user_token': self.context.auth_token,
+            'user_token': 'fake_token',
             'bay_uuid': 'some_uuid',
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'tls_disabled': False
