@@ -45,10 +45,9 @@ class CertManagerTestCase(base.BaseTestCase):
         mock_generate_ca_cert.return_value = expected_ca_cert
 
         self.CertManager.store_cert.return_value = expected_ca_cert_ref
-        self.assertEqual(
-            cert_manager._generate_ca_cert(expected_ca_name),
-            (expected_ca_cert_ref, expected_ca_cert,
-                expected_ca_password))
+        self.assertEqual((expected_ca_cert_ref, expected_ca_cert,
+                          expected_ca_password),
+                         cert_manager._generate_ca_cert(expected_ca_name))
 
         mock_generate_ca_cert.assert_called_once_with(
             expected_ca_name, encryption_password=expected_ca_password)
@@ -78,9 +77,11 @@ class CertManagerTestCase(base.BaseTestCase):
         self.CertManager.store_cert.return_value = expected_cert_ref
 
         self.assertEqual(
+            expected_cert_ref,
             cert_manager._generate_client_cert(
-                expected_ca_name, expected_ca_cert, expected_ca_password),
-            expected_cert_ref)
+                expected_ca_name,
+                expected_ca_cert,
+                expected_ca_password))
 
         mock_generate_cert.assert_called_once_with(
             expected_ca_name,
@@ -117,8 +118,8 @@ class CertManagerTestCase(base.BaseTestCase):
         mock_generate_client_cert.return_value = expected_cert_ref
 
         cert_manager.generate_certificates_to_bay(mock_bay)
-        self.assertEqual(mock_bay.ca_cert_ref, expected_ca_cert_ref)
-        self.assertEqual(mock_bay.magnum_cert_ref, expected_cert_ref)
+        self.assertEqual(expected_ca_cert_ref, mock_bay.ca_cert_ref)
+        self.assertEqual(expected_cert_ref, mock_bay.magnum_cert_ref)
 
         mock_generate_ca_cert.assert_called_once_with(expected_ca_name)
         mock_generate_client_cert.assert_called_once_with(
@@ -143,7 +144,7 @@ class CertManagerTestCase(base.BaseTestCase):
         mock_x509_sign.assert_called_once_with(mock_csr, mock_bay.name,
                                                mock.sentinel.priv_key,
                                                passphrase)
-        self.assertEqual(bay_ca_cert, mock.sentinel.signed_cert)
+        self.assertEqual(mock.sentinel.signed_cert, bay_ca_cert)
 
     def test_get_bay_ca_certificate(self):
         mock_bay = mock.MagicMock()
@@ -155,7 +156,7 @@ class CertManagerTestCase(base.BaseTestCase):
 
         self.CertManager.get_cert.assert_called_once_with(
             mock_bay.ca_cert_ref, resource_ref=mock_bay.uuid)
-        self.assertEqual(bay_ca_cert, mock_ca_cert)
+        self.assertEqual(mock_ca_cert, bay_ca_cert)
 
     def test_delete_certtificate(self):
         mock_delete_cert = self.CertManager.delete_cert

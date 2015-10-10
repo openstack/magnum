@@ -74,9 +74,9 @@ class MonitorsTestCase(base.TestCase):
 
         self.monitor.pull_data()
 
-        self.assertEqual(self.monitor.data['nodes'],
-                         [{'MemTotal': 1073741824.0}])
-        self.assertEqual(self.monitor.data['containers'], ['test_container'])
+        self.assertEqual([{'MemTotal': 1073741824.0}],
+                         self.monitor.data['nodes'])
+        self.assertEqual(['test_container'], self.monitor.data['containers'])
 
     @mock.patch('magnum.common.docker_utils.docker_for_bay')
     def test_swarm_monitor_pull_data_raise(self, mock_docker_for_bay):
@@ -90,24 +90,24 @@ class MonitorsTestCase(base.TestCase):
 
         self.monitor.pull_data()
 
-        self.assertEqual(self.monitor.data['nodes'],
-                         [{'MemTotal': 1073741824.0}])
-        self.assertEqual(self.monitor.data['containers'], [mock_container])
+        self.assertEqual([{'MemTotal': 1073741824.0}],
+                         self.monitor.data['nodes'])
+        self.assertEqual([mock_container], self.monitor.data['containers'])
 
     def test_swarm_monitor_get_metric_names(self):
         names = self.monitor.get_metric_names()
-        self.assertEqual(sorted(names), sorted(['metric1', 'metric2']))
+        self.assertEqual(sorted(['metric1', 'metric2']), sorted(names))
 
     def test_swarm_monitor_get_metric_unit(self):
         unit = self.monitor.get_metric_unit('metric1')
-        self.assertEqual(unit, 'metric1_unit')
+        self.assertEqual('metric1_unit', unit)
 
     def test_swarm_monitor_compute_metric_value(self):
         mock_func = mock.MagicMock()
         mock_func.return_value = 'metric1_value'
         self.monitor.metric1_func = mock_func
         value = self.monitor.compute_metric_value('metric1')
-        self.assertEqual(value, 'metric1_value')
+        self.assertEqual('metric1_value', value)
 
     def test_swarm_monitor_compute_memory_util(self):
         test_data = {
@@ -128,7 +128,7 @@ class MonitorsTestCase(base.TestCase):
         }
         self.monitor.data = test_data
         mem_util = self.monitor.compute_memory_util()
-        self.assertEqual(mem_util, 50)
+        self.assertEqual(50, mem_util)
 
         test_data = {
             'nodes': [],
@@ -136,4 +136,4 @@ class MonitorsTestCase(base.TestCase):
         }
         self.monitor.data = test_data
         mem_util = self.monitor.compute_memory_util()
-        self.assertEqual(mem_util, 0)
+        self.assertEqual(0, mem_util)

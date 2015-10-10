@@ -77,7 +77,7 @@ class HeatTasksTests(base.TestCase):
 
         result = engines.run(flow, store=flow_store)
         heat_client.stacks.create.assert_called_once_with(**flow_store)
-        self.assertEqual(result['new_stack']['stack']['id'], stack_id)
+        self.assertEqual(stack_id, result['new_stack']['stack']['id'])
 
     def test_create_stack_with_error(self):
         heat_client = mock.MagicMock(name='heat_client')

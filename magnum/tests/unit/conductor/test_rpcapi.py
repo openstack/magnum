@@ -58,7 +58,7 @@ class RPCAPITestCase(base.DbTestCase):
 
         def _fake_prepare_method(*args, **kwargs):
             for kwd in kwargs:
-                self.assertEqual(kwargs[kwd], target[kwd])
+                self.assertEqual(target[kwd], kwargs[kwd])
             return rpcapi._client
 
         def _fake_rpc_method(*args, **kwargs):
@@ -73,10 +73,10 @@ class RPCAPITestCase(base.DbTestCase):
             with mock.patch.object(rpcapi._client, rpc_method) as mock_method:
                 mock_method.side_effect = _fake_rpc_method
                 retval = getattr(rpcapi, method)(**kwargs)
-                self.assertEqual(retval, expected_retval)
+                self.assertEqual(expected_retval, retval)
                 expected_args = [None, method, expected_msg]
             for arg, expected_arg in zip(self.fake_args, expected_args):
-                self.assertEqual(arg, expected_arg)
+                self.assertEqual(expected_arg, arg)
 
     def test_bay_create(self):
         self._test_rpcapi('bay_create',

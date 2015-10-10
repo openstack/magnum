@@ -21,4 +21,4 @@ class TestHandler(base.BaseTestCase):
         self.handler = conductor_listener.Handler()
 
     def test_ping_conductor(self):
-        self.assertEqual(self.handler.ping_conductor({}), True)
+        self.assertEqual(True, self.handler.ping_conductor({}))
