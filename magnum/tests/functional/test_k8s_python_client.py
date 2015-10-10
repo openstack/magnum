@@ -63,12 +63,12 @@ class TestKubernetesAPIs(BaseMagnumClient):
 
         resp = self.k8s_api.create_namespaced_pod(body=pod_manifest,
                                                   namespace='default')
-        self.assertEqual(resp.metadata.name, 'test')
+        self.assertEqual('test', resp.metadata.name)
         self.assertTrue(resp.status.phase)
 
         resp = self.k8s_api.read_namespaced_pod(name='test',
                                                 namespace='default')
-        self.assertEqual(resp.metadata.name, 'test')
+        self.assertEqual('test', resp.metadata.name)
         self.assertTrue(resp.status.phase)
 
         resp = self.k8s_api.delete_namespaced_pod(name='test', body={},
@@ -87,12 +87,12 @@ class TestKubernetesAPIs(BaseMagnumClient):
 
         resp = self.k8s_api.create_namespaced_service(body=service_manifest,
                                                       namespace='default')
-        self.assertEqual(resp.metadata.name, 'frontend')
+        self.assertEqual('frontend', resp.metadata.name)
         self.assertTrue(resp.status)
 
         resp = self.k8s_api.read_namespaced_service(name='frontend',
                                                     namespace='default')
-        self.assertEqual(resp.metadata.name, 'frontend')
+        self.assertEqual('frontend', resp.metadata.name)
         self.assertTrue(resp.status)
 
         resp = self.k8s_api.delete_namespaced_service(name='frontend',
@@ -116,13 +116,13 @@ class TestKubernetesAPIs(BaseMagnumClient):
 
         resp = self.k8s_api.create_namespaced_replication_controller(
             body=rc_manifest, namespace='default')
-        self.assertEqual(resp.metadata.name, 'frontend')
-        self.assertEqual(resp.spec.replicas, 2)
+        self.assertEqual('frontend', resp.metadata.name)
+        self.assertEqual(2, resp.spec.replicas)
 
         resp = self.k8s_api.read_namespaced_replication_controller(
             name='frontend', namespace='default')
-        self.assertEqual(resp.metadata.name, 'frontend')
-        self.assertEqual(resp.spec.replicas, 2)
+        self.assertEqual('frontend', resp.metadata.name)
+        self.assertEqual(2, resp.spec.replicas)
 
         resp = self.k8s_api.delete_namespaced_replication_controller(
             name='frontend', body={}, namespace='default')
