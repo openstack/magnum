@@ -22,7 +22,7 @@ class Cluster(object):
                 'name': name,
                 'profile_id': profile_name,
                 'min_size': 0,
-                'max_size': 0,
+                'max_size': 10,
                 'desired_capacity': 0,
                 'parent': None,
                 'metadata': {},

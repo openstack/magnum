@@ -21,29 +21,29 @@ def create_cluster(OSC, Ctype):
     sc = OSC.senlin()
 
     # Create Master Profile
-    pr_master = Profile.profile_create(sc, 'SUR_HEAT_Master_Profile', 'os.heat.stack',
-                '/opt/stack/magnum/magnum/sur/SURspec/heat-fedora/kubemaster.yaml', '1111')
+    Profile.profile_create(sc, 'SUR_HEAT_Master_Profile', 'os.heat.stack',
+            '/opt/stack/magnum/magnum/sur/SURspec/heat-fedora/kubemaster.yaml', '1111')
 
     time.sleep(1)
-    LOG.info(pr_master)
 
     # Create Master Node
-    nr_master = Node.node_create(sc, 'SUR_Node_Master', None, 'SUR_HEAT_Master_Profile')
+    Node.node_create(sc, 'SUR_Node_Master', None, 'SUR_HEAT_Master_Profile')
     time.sleep(1)
-    LOG.info(nr_master)
 
     # Define Minion yaml
 
     # Create Minion Profile
-    pr_minion = Profile.profile_craete(sc, 'SUR_HEAT_Minion_Profile', 'os.heat.stack',
-                '/opt/stack/magnum/magnum/sur/SURspec/heat-fedora/kubeminion.yaml', '1111')
+    Profile.profile_craete(sc, 'SUR_HEAT_Minion_Profile', 'os.heat.stack',
+            '/opt/stack/magnum/magnum/sur/SURspec/heat-fedora/kubeminion.yaml', '1111')
     time.sleep(1)
-    LOG.info(pr_minion)
     
     # Create Cluster
-    cr_cluster = Cluster.cluster_create(sc, 'SUR_HEAT_Cluster', 'SUR_HEAT_Minion_Profile')
+    Cluster.cluster_create(sc, 'SUR_HEAT_Cluster', 'SUR_HEAT_Minion_Profile')
     time.sleep(1)
-    LOG.info(cr_cluster)
+
+    # Master join into Cluster
+    Node.node_join(sc, 'SUR_Node_Master', 'SUR_HEAT_Cluster')
+    time.sleep(1)
 
     #LOG.info('Complete')
     
