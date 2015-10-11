@@ -35,7 +35,7 @@ class TestUrlFetch(base.BaseTestCase):
         mock_response.iter_content.return_value = mock_reader
         mock_request_get.return_value = mock_response
 
-        self.assertEqual(urlfetch.get('http://example.com'), 'abc')
+        self.assertEqual('abc', urlfetch.get('http://example.com'))
 
     @patch('requests.get')
     def test_get_exceed_manifest_size(self,

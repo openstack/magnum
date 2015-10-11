@@ -50,7 +50,7 @@ class TestDockerUtils(base.BaseTestCase):
 
         with docker_utils.docker_for_container(mock.sentinel.context,
                                                mock_container) as docker:
-            self.assertEqual(docker, mock_docker)
+            self.assertEqual(mock_docker, docker)
 
         mock_get_bay_by_uuid.assert_called_once_with(mock.sentinel.context,
                                                      mock_container.bay_uuid)
@@ -95,7 +95,7 @@ class TestDockerUtils(base.BaseTestCase):
 
         with docker_utils.docker_for_container(
                 mock.sentinel.context, mock_container.uuid) as docker:
-            self.assertEqual(docker, mock_docker)
+            self.assertEqual(mock_docker, docker)
 
         mock_get_container_by_uuid.assert_called_once_with(
             mock.sentinel.context, mock_container.uuid
@@ -130,7 +130,7 @@ class TestDockerUtils(base.BaseTestCase):
 
         with docker_utils.docker_for_container(mock.sentinel.context,
                                                mock_container) as docker:
-            self.assertEqual(docker, mock_docker)
+            self.assertEqual(mock_docker, docker)
 
         mock_get_bay_by_uuid.assert_called_once_with(mock.sentinel.context,
                                                      mock_container.bay_uuid)

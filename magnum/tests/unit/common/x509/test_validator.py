@@ -40,7 +40,7 @@ class TestValidators(unittest.TestCase):
 
         actual = [e for e in v.filter_allowed_extensions([key_usage],
                                                          ['keyUsage'])]
-        self.assertEqual(actual, [key_usage])
+        self.assertEqual([key_usage], actual)
 
     def test_filter_allowed_extensions_disallowed_but_not_critical(self):
         key_usage = self._build_key_usage()
@@ -48,7 +48,7 @@ class TestValidators(unittest.TestCase):
         actual = [e for e in v.filter_allowed_extensions([key_usage],
                                                          ['subjectAltName'])]
 
-        self.assertEqual(actual, [])
+        self.assertEqual([], actual)
 
     def test_filter_allowed_extensions_disallowed(self):
         key_usage = self._build_key_usage(critical=True)
@@ -59,8 +59,10 @@ class TestValidators(unittest.TestCase):
     def test_merge_key_usage(self):
         key_usage = self._build_key_usage(critical=True)
 
-        self.assertEqual(v._merge_key_usage(
-            key_usage, ['Digital Signature', 'Key Encipherment']), key_usage)
+        self.assertEqual(key_usage,
+                         v._merge_key_usage(key_usage,
+                                            ['Digital Signature',
+                                             'Key Encipherment']))
 
     def test_merge_key_usage_disallowed_but_not_critical(self):
         key_usage = self._build_key_usage()
@@ -68,8 +70,9 @@ class TestValidators(unittest.TestCase):
             True, False, False, False, False, False, False, False, False)
         expected = c_x509.Extension(expected.oid, False, expected)
 
-        self.assertEqual(v._merge_key_usage(
-            key_usage, ['Digital Signature']), expected)
+        self.assertEqual(expected,
+                         v._merge_key_usage(key_usage,
+                                            ['Digital Signature']))
 
     def test_merge_key_usage_disallowed(self):
         key_usage = self._build_key_usage(critical=True)
@@ -81,7 +84,7 @@ class TestValidators(unittest.TestCase):
         bc = self._build_basic_constraints(ca=True)
         expected = self._build_basic_constraints(ca=False)
 
-        self.assertEqual(v._disallow_ca_in_basic_constraints(bc), expected)
+        self.assertEqual(expected, v._disallow_ca_in_basic_constraints(bc))
 
     def test_disallow_ca_in_basic_constraints(self):
         bc = self._build_basic_constraints(ca=True, critical=True)
@@ -92,29 +95,29 @@ class TestValidators(unittest.TestCase):
     def test_disallow_ca_in_basic_constraints_with_non_ca(self):
         bc = self._build_basic_constraints(ca=False)
 
-        self.assertEqual(v._disallow_ca_in_basic_constraints(bc), bc)
+        self.assertEqual(bc, v._disallow_ca_in_basic_constraints(bc))
 
     def test_remove_ca_key_usage(self):
         contains_ca_key_usage = set([
             "Digital Signature", "Certificate Sign", "CRL Sign"])
 
-        self.assertEqual(v._remove_ca_key_usage(contains_ca_key_usage),
-                         set(["Digital Signature"]))
+        self.assertEqual(set(["Digital Signature"]),
+                         v._remove_ca_key_usage(contains_ca_key_usage))
 
     def test_remove_ca_key_usage_cert_sign(self):
         contains_ca_key_usage = set(["Digital Signature", "Certificate Sign"])
 
-        self.assertEqual(v._remove_ca_key_usage(contains_ca_key_usage),
-                         set(["Digital Signature"]))
+        self.assertEqual(set(["Digital Signature"]),
+                         v._remove_ca_key_usage(contains_ca_key_usage))
 
     def test_remove_ca_key_usage_crl_sign(self):
         contains_ca_key_usage = set(["Digital Signature", "CRL Sign"])
 
-        self.assertEqual(v._remove_ca_key_usage(contains_ca_key_usage),
-                         set(["Digital Signature"]))
+        self.assertEqual(set(["Digital Signature"]),
+                         v._remove_ca_key_usage(contains_ca_key_usage))
 
     def test_remove_ca_key_usage_without_ca_usage(self):
         contains_ca_key_usage = set(["Digital Signature"])
 
-        self.assertEqual(v._remove_ca_key_usage(contains_ca_key_usage),
-                         set(["Digital Signature"]))
+        self.assertEqual(set(["Digital Signature"]),
+                         v._remove_ca_key_usage(contains_ca_key_usage))

@@ -44,4 +44,4 @@ class TestX509Operations(base.BaseTestCase):
             format=serialization.PrivateFormat.PKCS8,
             encryption_algorithm=mock_no_encryption_class.return_value
         )
-        self.assertEqual(actual_decrypted, mock.sentinel.decrypted)
+        self.assertEqual(mock.sentinel.decrypted, actual_decrypted)

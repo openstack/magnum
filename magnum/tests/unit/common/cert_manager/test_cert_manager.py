@@ -43,7 +43,7 @@ class TestCert(base.BaseTestCase):
         mock_x509_ops.decrypt_key.return_value = 'fake-key'
         fake_cert = FakeCert()
         decrypted_key = fake_cert.get_decrypted_private_key()
-        self.assertEqual(decrypted_key, 'fake-key')
+        self.assertEqual('fake-key', decrypted_key)
         mock_x509_ops.decrypt_key.assert_called_once_with('fake-private-key',
                                                           'fake-passphrase')
 
