@@ -14,6 +14,14 @@ class Node(object):
         return sc.get(cls.base_url)
 
     @classmethod
+    def node_show(cls, sc, node):
+        url = cls.base_url + '/' + node
+        args = {
+            
+        } 
+       	return sc.get(url)
+
+    @classmethod
     def node_create(cls, sc, name, cluster_name, profile_name):
         args = {
             'node': {

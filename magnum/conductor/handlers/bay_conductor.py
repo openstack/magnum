@@ -123,8 +123,17 @@ class Handler(object):
         osc = clients.OpenStackClients(context)
 
         try:
+            # Use Senlin to Create a Cluster
+            params = {
+                'master_profile_name': 'SUR_HEAT_Master_Profile',
+                'minion_profile_name': 'SUR_HEAT_Minion_Profile',
+                'master_profile_spec': '/opt/stack/magnum/magnum/sur/SURspec/heat-fedora/master.yaml',
+                'minion_profile_spec': '/opt/stack/magnum/magnum/sur/SURspec/heat-fedora/minion.yaml',
+                'cluster_name': 'SUR_HEAT_Cluster',
+	        'node_count': 2
+            }
+            senlinfunc.create_cluster(osc, **params)
             # Generate certificate and set the cert reference to bay
-            senlinfunc.create_cluster(osc)
             cert_manager.generate_certificates_to_bay(bay)
             #created_stack = _create_senlin_stack(context, osc, bay,
             #                                     bay_create_timeout)
