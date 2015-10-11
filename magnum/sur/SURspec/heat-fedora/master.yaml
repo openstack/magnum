@@ -1,0 +1,9 @@
+type: os.heat.stack
+version: 1.0
+properties:
+  name: kube-master
+  template: heat-kubernetes-split/kubemaster.yaml
+  context:
+    region_name: RegionOne
+  environment:
+    - env.yaml
