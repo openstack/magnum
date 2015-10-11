@@ -21,7 +21,7 @@ def create_cluster(OSC, Ctype):
     sc = OSC.senlin()
 
     # Create Master Profile
-    pr_master = Profile.profile_create(sc, 'SUR_HEAT_Master_Profile', 'os.heat.stack',
+    Profile.profile_create(sc, 'SUR_HEAT_Master_Profile', 'os.heat.stack',
                 '/opt/stack/magnum/magnum/sur/SURspec/heat-fedora/master.yaml', '1111')
     time.sleep(1)
 
@@ -32,7 +32,7 @@ def create_cluster(OSC, Ctype):
     # Define Minion yaml
 
     # Create Minion Profile
-    pr_minion = Profile.profile_craete(sc, 'SUR_HEAT_Minion_Profile', 'os.heat.stack',
+    Profile.profile_craete(sc, 'SUR_HEAT_Minion_Profile', 'os.heat.stack',
                 '/opt/stack/magnum/magnum/sur/SURspec/heat-fedora/minion.yaml', '1111')
     time.sleep(1)
     

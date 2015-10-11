@@ -337,10 +337,18 @@ resources:
 
 outputs:
 
-  kube_master:
+  kube_master_external:
     value: {get_attr: [kube_master_floating, floating_ip_address]}
     description: >
       This is the "public" ip address of the Kubernetes master server.
       Use this address to log in to the Kubernetes master via ssh or
       to access the Kubernetes API from outside the cluster.
 
+  kube_master:
+    value: {get_attr: [kube_master, kube_master_ip]}
+
+  fixed_network_id:
+    value: {get_resource: fixed_network}
+
+  fixed_subnet_id:
+    value: {get_resource: fixed_subnet}
