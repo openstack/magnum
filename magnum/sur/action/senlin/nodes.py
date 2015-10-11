@@ -33,3 +33,13 @@ class Node(object):
     @classmethod
     def node_delete(cls):
         pass
+
+    @classmethod
+    def node_join(cls, sc, node, cluster):
+        url = cls.base_url + '/' + node + '/action'
+	args = {
+            'join': {
+                'cluster_id': cluster
+            }
+        }
+        return sc.put(url, data=json.dumps(args))
