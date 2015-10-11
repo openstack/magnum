@@ -44,16 +44,16 @@ parameters:
   # The following are all generated in the parent template.
   kube_master_ip:
     type: string
-    description: IP address of the Kubernetes master server.
+    description: IP address of the Kubernetes master server. Need to be UPDATE by USER
     default: 10.0.0.3
   fixed_network:
     type: string
-    description: Network from which to allocate fixed addresses.
+    description: Network from which to allocate fixed addresses. Need to be UPDATE by USER
     default: 86af16de-6cc3-4ea0-98b5-96ee3587a177
   fixed_subnet:
     type: string
-    description: Subnet from which to allocate fixed addresses.
-    default: b1a1143c-35f7-4325-89e4-344ab0371a7e 
+    description: Subnet from which to allocate fixed addresses. Need to be UPDATE by USER
+    default: b1a1143c-35f7-4325-89e4-344ab0371a7e
   wait_condition_timeout:
     type: number
     description : >

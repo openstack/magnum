@@ -344,8 +344,8 @@ outputs:
       Use this address to log in to the Kubernetes master via ssh or
       to access the Kubernetes API from outside the cluster.
 
-  kube_master:
-    value: {get_attr: [kube_master, kube_master_ip]}
+  kube_master_internal:
+    value: {get_attr: [kube_master_floating, fixed_ip_address]}
 
   fixed_network_id:
     value: {get_resource: fixed_network}
