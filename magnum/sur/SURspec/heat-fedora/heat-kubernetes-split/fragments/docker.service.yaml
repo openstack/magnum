@@ -1,0 +1,58 @@
+#cloud-config
+merge_how: dict(recurse_array)+list(append)
+bootcmd:
+  - mkdir -p /etc/systemd/system/docker.service.d
+  - mkdir -p /etc/systemd/system/flanneld.service.d
+write_files:
+  - path: /usr/local/bin/flannel-docker-bridge
+    owner: "root:root"
+    permissions: "0755"
+    content: |
+      #!/bin/sh
+      
+      if ! [ "$FLANNEL_SUBNET" ] && [ "$FLANNEL_MTU" ] ; then
+        echo "ERROR: missing required environment variables." >&2
+        exit 1
+      fi
+      
+      mkdir -p /run/flannel/
+      cat > /run/flannel/docker <<EOF
+      DOCKER_NETWORK_OPTIONS="--bip=$FLANNEL_SUBNET --mtu=$FLANNEL_MTU"
+      EOF
+  - path: /etc/systemd/system/flannel-docker-bridge.service
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      After=flanneld.service
+      Before=docker.service
+      Requires=flanneld.service
+
+      [Service]
+      Type=oneshot
+      EnvironmentFile=/run/flannel/subnet.env
+      ExecStart=/usr/local/bin/flannel-docker-bridge
+
+      [Install]
+      WantedBy=docker.service
+  - path: /etc/systemd/system/docker.service.d/flannel.conf
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Requires=flannel-docker-bridge.service
+      After=flannel-docker-bridge.service
+
+      [Service]
+      EnvironmentFile=/run/flannel/docker
+  - path: /etc/systemd/system/flanneld.service.d/flannel-docker-bridge.conf
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Requires=flannel-docker-bridge.service
+      Before=flannel-docker-bridge.service
+
+      [Install]
+      Also=flannel-docker-bridge.service
+

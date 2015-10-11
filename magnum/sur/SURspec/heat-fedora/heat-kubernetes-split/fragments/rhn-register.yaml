@@ -1,0 +1,10 @@
+#cloud-config
+merge_how: dict(recurse_array)+list(append)
+bootcmd:
+  - |
+    if [ "$RHN_REGISTER_HOST" = true -o "$RHN_REGISTER_HOST" = True ]; then
+      echo "registering with RHN"
+      subscription-manager register --auto-attach \
+        --username="$RHN_USERNAME" \
+        --password="$RHN_PASSWORD"
+    fi

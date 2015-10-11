@@ -1,0 +1,9 @@
+#cloud-config
+merge_how: dict(recurse_array)+list(append)
+bootcmd:
+  - |
+    test -f /etc/upgrade-flag ||
+    { rm -rf /var/lib/cloud/instances/*;
+      rpm-ostree upgrade > /var/log/ostree-upgrade.log 2>&1;
+      touch /etc/upgrade-flag;
+      reboot; }
