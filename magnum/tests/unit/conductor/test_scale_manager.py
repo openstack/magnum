@@ -58,7 +58,7 @@ class TestScaleManager(base.TestCase):
                               scale_mgr.get_removal_nodes, mock_heat_output)
         else:
             removal_hosts = scale_mgr.get_removal_nodes(mock_heat_output)
-            self.assertEqual(removal_hosts, expected_removal_hosts)
+            self.assertEqual(expected_removal_hosts, removal_hosts)
 
     @mock.patch('magnum.objects.Bay.get_by_uuid')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager._is_scale_down')

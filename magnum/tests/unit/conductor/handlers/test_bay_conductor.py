@@ -609,8 +609,8 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_heat_stack.stack_status = bay_status.CREATE_IN_PROGRESS
         poller.poll_and_check()
 
-        self.assertEqual(bay.save.call_count, 0)
-        self.assertEqual(poller.attempts, 1)
+        self.assertEqual(0, bay.save.call_count)
+        self.assertEqual(1, poller.attempts)
 
     def test_poll_save(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
@@ -620,10 +620,10 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_heat_stack.stack_status_reason = 'Create failed'
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
-        self.assertEqual(bay.save.call_count, 1)
-        self.assertEqual(bay.status, bay_status.CREATE_FAILED)
-        self.assertEqual(bay.status_reason, 'Create failed')
-        self.assertEqual(poller.attempts, 1)
+        self.assertEqual(1, bay.save.call_count)
+        self.assertEqual(bay_status.CREATE_FAILED, bay.status)
+        self.assertEqual('Create failed', bay.status_reason)
+        self.assertEqual(1, poller.attempts)
 
     def test_poll_done(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
@@ -633,7 +633,7 @@ class TestBayConductorWithK8s(base.TestCase):
 
         mock_heat_stack.stack_status = bay_status.CREATE_FAILED
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
-        self.assertEqual(poller.attempts, 2)
+        self.assertEqual(2, poller.attempts)
 
     def test_poll_done_by_update(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
@@ -642,10 +642,10 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_heat_stack.parameters = {'number_of_minions': 2}
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
-        self.assertEqual(bay.save.call_count, 1)
-        self.assertEqual(bay.status, bay_status.UPDATE_COMPLETE)
-        self.assertEqual(bay.node_count, 2)
-        self.assertEqual(poller.attempts, 1)
+        self.assertEqual(1, bay.save.call_count)
+        self.assertEqual(bay_status.UPDATE_COMPLETE, bay.status)
+        self.assertEqual(2, bay.node_count)
+        self.assertEqual(1, poller.attempts)
 
     def test_poll_done_by_update_failed(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
@@ -654,10 +654,10 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_heat_stack.parameters = {'number_of_minions': 2}
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
-        self.assertEqual(bay.save.call_count, 1)
-        self.assertEqual(bay.status, bay_status.UPDATE_FAILED)
-        self.assertEqual(bay.node_count, 2)
-        self.assertEqual(poller.attempts, 1)
+        self.assertEqual(1, bay.save.call_count)
+        self.assertEqual(bay_status.UPDATE_FAILED, bay.status)
+        self.assertEqual(2, bay.node_count)
+        self.assertEqual(1, poller.attempts)
 
     def test_poll_destroy(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
@@ -665,20 +665,20 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_heat_stack.stack_status = bay_status.DELETE_FAILED
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
         # Destroy method is not called when stack delete failed
-        self.assertEqual(bay.destroy.call_count, 0)
+        self.assertEqual(0, bay.destroy.call_count)
 
         mock_heat_stack.stack_status = bay_status.DELETE_IN_PROGRESS
         poller.poll_and_check()
-        self.assertEqual(bay.destroy.call_count, 0)
-        self.assertEqual(bay.status, bay_status.DELETE_IN_PROGRESS)
+        self.assertEqual(0, bay.destroy.call_count)
+        self.assertEqual(bay_status.DELETE_IN_PROGRESS, bay.status)
 
         mock_heat_stack.stack_status = bay_status.DELETE_COMPLETE
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
         # The bay status should still be DELETE_IN_PROGRESS, because
         # the destroy() method may be failed. If success, this bay record
         # will delete directly, change status is meaningless.
-        self.assertEqual(bay.status, bay_status.DELETE_IN_PROGRESS)
-        self.assertEqual(bay.destroy.call_count, 1)
+        self.assertEqual(bay_status.DELETE_IN_PROGRESS, bay.status)
+        self.assertEqual(1, bay.destroy.call_count)
 
     def test_poll_delete_in_progress_timeout_set(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
@@ -751,7 +751,7 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_heat_stack.stack_status = bay_status.CREATE_IN_PROGRESS
         poller.poll_and_check()
 
-        self.assertEqual(bay.node_count, 1)
+        self.assertEqual(1, bay.node_count)
 
     def test_poll_node_count_by_update(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
@@ -760,7 +760,7 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_heat_stack.stack_status = bay_status.UPDATE_COMPLETE
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
-        self.assertEqual(bay.node_count, 2)
+        self.assertEqual(2, bay.node_count)
 
 
 class TestHandler(db_base.DbTestCase):
@@ -801,7 +801,7 @@ class TestHandler(db_base.DbTestCase):
             self.context, mock_openstack_client, self.bay,
             mock_scale_manager.return_value)
         bay = objects.Bay.get(self.context, self.bay.uuid)
-        self.assertEqual(bay.node_count, 2)
+        self.assertEqual(2, bay.node_count)
 
     @patch('magnum.conductor.handlers.bay_conductor.Handler._poll_and_check')
     @patch('magnum.conductor.handlers.bay_conductor._update_stack')
@@ -825,7 +825,7 @@ class TestHandler(db_base.DbTestCase):
                           self.context, self.bay)
 
         bay = objects.Bay.get(self.context, self.bay.uuid)
-        self.assertEqual(bay.node_count, 1)
+        self.assertEqual(1, bay.node_count)
 
     @patch('magnum.common.clients.OpenStackClients')
     def test_update_bay_with_invalid_params(
@@ -844,7 +844,7 @@ class TestHandler(db_base.DbTestCase):
                           self.context,
                           self.bay)
         bay = objects.Bay.get(self.context, self.bay.uuid)
-        self.assertEqual(bay.node_count, 1)
+        self.assertEqual(1, bay.node_count)
 
     @patch('magnum.conductor.handlers.bay_conductor.HeatPoller')
     @patch('magnum.conductor.handlers.bay_conductor.cert_manager')
@@ -863,7 +863,7 @@ class TestHandler(db_base.DbTestCase):
         mock_openstack_client_class.return_value = mock.sentinel.osc
 
         def create_stack_side_effect(context, osc, bay, timeout):
-            self.assertEqual(bay.uuid, str(test_uuid))
+            self.assertEqual(str(test_uuid), bay.uuid)
             return {'stack': {'id': 'stack-id'}}
 
         mock_create_stack.side_effect = create_stack_side_effect
@@ -1028,7 +1028,7 @@ class TestBayConductorWithSwarm(base.TestCase):
         mock_heat_stack.stack_status = bay_status.CREATE_IN_PROGRESS
         poller.poll_and_check()
 
-        self.assertEqual(bay.node_count, 1)
+        self.assertEqual(1, bay.node_count)
 
     def test_poll_node_count_by_update(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
@@ -1037,7 +1037,7 @@ class TestBayConductorWithSwarm(base.TestCase):
         mock_heat_stack.stack_status = bay_status.UPDATE_COMPLETE
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
-        self.assertEqual(bay.node_count, 2)
+        self.assertEqual(2, bay.node_count)
 
 
 class TestBayConductorWithMesos(base.TestCase):
@@ -1143,7 +1143,7 @@ class TestBayConductorWithMesos(base.TestCase):
         mock_heat_stack.stack_status = bay_status.CREATE_IN_PROGRESS
         poller.poll_and_check()
 
-        self.assertEqual(bay.node_count, 1)
+        self.assertEqual(1, bay.node_count)
 
     def test_poll_node_count_by_update(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
@@ -1152,4 +1152,4 @@ class TestBayConductorWithMesos(base.TestCase):
         mock_heat_stack.stack_status = bay_status.UPDATE_COMPLETE
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
-        self.assertEqual(bay.node_count, 2)
+        self.assertEqual(2, bay.node_count)

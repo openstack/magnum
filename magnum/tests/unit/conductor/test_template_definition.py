@@ -42,12 +42,12 @@ class TemplateDefinitionTestCase(base.TestCase):
         vm_atomic_k8s = defs[('vm', 'fedora-atomic', 'kubernetes')]
         vm_coreos_k8s = defs[('vm', 'coreos', 'kubernetes')]
 
-        self.assertEqual(len(vm_atomic_k8s), 1)
-        self.assertEqual(vm_atomic_k8s['magnum_vm_atomic_k8s'],
-                         tdef.AtomicK8sTemplateDefinition)
-        self.assertEqual(len(vm_coreos_k8s), 1)
-        self.assertEqual(vm_coreos_k8s['magnum_vm_coreos_k8s'],
-                         tdef.CoreOSK8sTemplateDefinition)
+        self.assertEqual(1, len(vm_atomic_k8s))
+        self.assertEqual(tdef.AtomicK8sTemplateDefinition,
+                         vm_atomic_k8s['magnum_vm_atomic_k8s'])
+        self.assertEqual(1, len(vm_coreos_k8s))
+        self.assertEqual(tdef.CoreOSK8sTemplateDefinition,
+                         vm_coreos_k8s['magnum_vm_coreos_k8s'])
 
     def test_get_vm_atomic_kubernetes_definition(self):
         definition = tdef.TemplateDefinition.get_template_definition(
@@ -126,11 +126,11 @@ class TemplateDefinitionTestCase(base.TestCase):
 
         output = tdef.OutputMapping('key1')
         value = output.get_output_value(mock_stack)
-        self.assertEqual(value, 'value1')
+        self.assertEqual('value1', value)
 
         output = tdef.OutputMapping('key2')
         value = output.get_output_value(mock_stack)
-        self.assertEqual(value, ["value2", "value3"])
+        self.assertEqual(["value2", "value3"], value)
 
         output = tdef.OutputMapping('key3')
         value = output.get_output_value(mock_stack)
@@ -177,7 +177,7 @@ class TemplateDefinitionTestCase(base.TestCase):
 
         definition.update_outputs(mock_stack, mock_baymodel, mock_bay)
 
-        self.assertEqual(mock_bay.node_addresses, expected_node_addresses)
+        self.assertEqual(expected_node_addresses, mock_bay.node_addresses)
 
 
 class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
@@ -303,14 +303,14 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         discovery_url = k8s_def.get_discovery_url(mock_bay)
 
         mock_get.assert_called_once_with('http://etcd/test?size=10')
-        self.assertEqual(mock_bay.discovery_url, expected_discovery_url)
-        self.assertEqual(discovery_url, expected_discovery_url)
+        self.assertEqual(expected_discovery_url, mock_bay.discovery_url)
+        self.assertEqual(expected_discovery_url, discovery_url)
 
     def test_k8s_get_heat_param(self):
         k8s_def = tdef.AtomicK8sTemplateDefinition()
 
         heat_param = k8s_def.get_heat_param(bay_attr='node_count')
-        self.assertEqual(heat_param, 'number_of_minions')
+        self.assertEqual('number_of_minions', heat_param)
 
     @mock.patch('requests.get')
     def test_k8s_get_discovery_url_not_found(self, mock_get):
@@ -354,7 +354,7 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
 
         definition.update_outputs(mock_stack, mock_baymodel, mock_bay)
 
-        self.assertEqual(mock_bay.api_address, expected_api_address)
+        self.assertEqual(expected_api_address, mock_bay.api_address)
 
     def test_update_outputs_if_baymodel_is_secure(self):
         definition = tdef.TemplateDefinition.get_template_definition(
@@ -384,7 +384,7 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         mock_baymodel.tls_disabled = False
 
         definition.update_outputs(mock_stack, mock_baymodel, mock_bay)
-        self.assertEqual(mock_bay.api_address, expected_api_address)
+        self.assertEqual(expected_api_address, mock_bay.api_address)
 
 
 class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
@@ -451,7 +451,7 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         swarm_def = tdef.AtomicSwarmTemplateDefinition()
 
         heat_param = swarm_def.get_heat_param(bay_attr='node_count')
-        self.assertEqual(heat_param, 'number_of_nodes')
+        self.assertEqual('number_of_nodes', heat_param)
 
 
 class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
@@ -460,4 +460,4 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
         mesos_def = tdef.UbuntuMesosTemplateDefinition()
 
         heat_param = mesos_def.get_heat_param(bay_attr='node_count')
-        self.assertEqual(heat_param, 'number_of_slaves')
+        self.assertEqual('number_of_slaves', heat_param)

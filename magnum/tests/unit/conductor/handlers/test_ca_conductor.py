@@ -38,7 +38,7 @@ class TestSignConductor(base.TestCase):
         mock_cert_manager.sign_node_certificate.assert_called_once_with(
             mock_bay, 'fake-csr'
         )
-        self.assertEqual(actual_cert.pem, 'fake-pem')
+        self.assertEqual('fake-pem', actual_cert.pem)
 
     @patch.object(ca_conductor, 'cert_manager')
     def test_get_ca_certificate(self, mock_cert_manager):
@@ -53,7 +53,7 @@ class TestSignConductor(base.TestCase):
         actual_cert = self.ca_handler.get_ca_certificate(self.context,
                                                          mock_bay)
 
-        self.assertEqual(actual_cert.bay_uuid, mock_bay.uuid)
-        self.assertEqual(actual_cert.user_id, mock_bay.user_id)
-        self.assertEqual(actual_cert.project_id, mock_bay.project_id)
-        self.assertEqual(actual_cert.pem, 'fake-pem')
+        self.assertEqual(mock_bay.uuid, actual_cert.bay_uuid)
+        self.assertEqual(mock_bay.user_id, actual_cert.user_id)
+        self.assertEqual(mock_bay.project_id, actual_cert.project_id)
+        self.assertEqual('fake-pem', actual_cert.pem)
