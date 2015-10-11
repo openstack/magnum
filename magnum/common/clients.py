@@ -220,5 +220,5 @@ class OpenStackClients(object):
     def senlin(self):
         if self._senlin:
             return self._senlin
-        self._senlin = senlinclient.SenlinSURClient().setup_client()
+        self._senlin = senlinclient.SURClient().setup_client()
         return self._senlin

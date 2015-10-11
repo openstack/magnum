@@ -7,9 +7,9 @@ import logging
 import time
 
 from magnum.common.clients import OpenStackClients as OSC
-from magnum.sur.action.clusters import Cluster
-from magnum.sur.action.nodes import Node
-from magnum.sur.action.profiles import Profile
+from magnum.sur.action.senlin.clusters import Cluster
+from magnum.sur.action.senlin.nodes import Node
+from magnum.sur.action.senlin.profiles import Profile
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
