@@ -66,7 +66,7 @@ class TestX509KeyPairObject(base.DbTestCase):
                                autospec=True) as mock_get_list:
             mock_get_list.return_value = [self.fake_x509keypair]
             x509keypairs = objects.X509KeyPair.list(self.context)
-            self.assertEqual(mock_get_list.call_count, 1)
+            self.assertEqual(1, mock_get_list.call_count)
             self.assertThat(x509keypairs, HasLength(1))
             self.assertIsInstance(x509keypairs[0], objects.X509KeyPair)
             self.assertEqual(self.context, x509keypairs[0]._context)
@@ -80,7 +80,7 @@ class TestX509KeyPairObject(base.DbTestCase):
             mock_get_list.assert_called_once_with(
                 self.context, limit=None, marker=None, filters=None,
                 sort_dir=None, sort_key=None)
-            self.assertEqual(mock_get_list.call_count, 1)
+            self.assertEqual(1, mock_get_list.call_count)
             self.assertThat(x509keypairs, HasLength(1))
             self.assertIsInstance(x509keypairs[0], objects.X509KeyPair)
             self.assertEqual(self.context, x509keypairs[0]._context)
@@ -97,7 +97,7 @@ class TestX509KeyPairObject(base.DbTestCase):
                                                   sort_dir=None,
                                                   filters=filters, limit=None,
                                                   marker=None)
-            self.assertEqual(mock_get_list.call_count, 1)
+            self.assertEqual(1, mock_get_list.call_count)
             self.assertThat(x509keypairs, HasLength(1))
             self.assertIsInstance(x509keypairs[0], objects.X509KeyPair)
             self.assertEqual(self.context, x509keypairs[0]._context)

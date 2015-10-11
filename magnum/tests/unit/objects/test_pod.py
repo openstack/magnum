@@ -60,7 +60,7 @@ class TestPodObject(base.DbTestCase):
                                autospec=True) as mock_get_list:
             mock_get_list.return_value = [self.fake_pod]
             pods = objects.Pod.list(self.context)
-            self.assertEqual(mock_get_list.call_count, 1)
+            self.assertEqual(1, mock_get_list.call_count)
             self.assertThat(pods, HasLength(1))
             self.assertIsInstance(pods[0], objects.Pod)
             self.assertEqual(self.context, pods[0]._context)

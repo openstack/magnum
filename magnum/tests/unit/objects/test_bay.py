@@ -65,7 +65,7 @@ class TestBayObject(base.DbTestCase):
                                autospec=True) as mock_get_list:
             mock_get_list.return_value = [self.fake_bay]
             bays = objects.Bay.list(self.context)
-            self.assertEqual(mock_get_list.call_count, 1)
+            self.assertEqual(1, mock_get_list.call_count)
             self.assertThat(bays, HasLength(1))
             self.assertIsInstance(bays[0], objects.Bay)
             self.assertEqual(self.context, bays[0]._context)
@@ -79,7 +79,7 @@ class TestBayObject(base.DbTestCase):
             mock_get_list.assert_called_once_with(
                 self.context, limit=None, marker=None, filters=None,
                 sort_dir=None, sort_key=None)
-            self.assertEqual(mock_get_list.call_count, 1)
+            self.assertEqual(1, mock_get_list.call_count)
             self.assertThat(bays, HasLength(1))
             self.assertIsInstance(bays[0], objects.Bay)
             self.assertEqual(self.context, bays[0]._context)
@@ -95,7 +95,7 @@ class TestBayObject(base.DbTestCase):
                                                   sort_dir=None,
                                                   filters=filters, limit=None,
                                                   marker=None)
-            self.assertEqual(mock_get_list.call_count, 1)
+            self.assertEqual(1, mock_get_list.call_count)
             self.assertThat(bays, HasLength(1))
             self.assertIsInstance(bays[0], objects.Bay)
             self.assertEqual(self.context, bays[0]._context)

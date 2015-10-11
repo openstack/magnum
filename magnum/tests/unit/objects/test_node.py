@@ -51,7 +51,7 @@ class TestNodeObject(base.DbTestCase):
                                autospec=True) as mock_get_list:
             mock_get_list.return_value = [self.fake_node]
             nodes = objects.Node.list(self.context)
-            self.assertEqual(mock_get_list.call_count, 1)
+            self.assertEqual(1, mock_get_list.call_count)
             self.assertThat(nodes, HasLength(1))
             self.assertIsInstance(nodes[0], objects.Node)
             self.assertEqual(self.context, nodes[0]._context)

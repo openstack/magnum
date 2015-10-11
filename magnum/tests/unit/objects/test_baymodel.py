@@ -66,7 +66,7 @@ class TestBayModelObject(base.DbTestCase):
                                autospec=True) as mock_get_list:
             mock_get_list.return_value = [self.fake_baymodel]
             baymodels = objects.BayModel.list(self.context)
-            self.assertEqual(mock_get_list.call_count, 1)
+            self.assertEqual(1, mock_get_list.call_count)
             self.assertThat(baymodels, HasLength(1))
             self.assertIsInstance(baymodels[0], objects.BayModel)
             self.assertEqual(self.context, baymodels[0]._context)
