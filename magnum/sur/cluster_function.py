@@ -38,6 +38,7 @@ def create_cluster(OSC, **params):
 
     # Client
     sc = OSC.senlin()
+    hc = OSC.heat()
 
     # Create Master Profile
     Profile.profile_create(sc, master_profile_name, 'os.heat.stack',
@@ -50,6 +51,17 @@ def create_cluster(OSC, **params):
 
     # Wait for Node Active
     wait_for_node_active(sc, master_node_name)
+
+    # Get Info from Heat Stack
+    master_stack_id = Node.node_show(sc, master_name)['node']['physical_id']
+    HeatInfo = hc.stacks.get(master_stack_id)['outputs']
+    for p in HeatInfo:
+        if p['output_key'] == 'kube_master_internal':
+            kube_master_internal = p['output_value']
+        if p['output_key'] == 'fixed_network_id':
+            fixed_network_id = p['output_value']
+        if p['output_key'] == 'fixed_subnet_id':
+            fixed_subnet_id = p['output_value']
 
     # Define Minion Yaml
 
