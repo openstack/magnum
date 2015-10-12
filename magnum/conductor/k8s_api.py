@@ -18,8 +18,7 @@ from k8sclient.client import api_client
 from k8sclient.client.apis import apiv_api
 from oslo_log import log as logging
 
-from magnum.conductor.handlers.common import cert_manager
-
+from magnum.conductor.handlers.common.cert_manager import create_client_files
 
 LOG = logging.getLogger(__name__)
 
@@ -47,7 +46,8 @@ class K8sAPI(apiv_api.ApivApi):
         self.key_file = None
 
         if bay.magnum_cert_ref:
-            self._create_certificate_files(bay)
+            (self.ca_file, self.key_file,
+             self.cert_file) = create_client_files(bay)
 
         # build a connection with Kubernetes master
         client = api_client.ApiClient(bay.api_address,
@@ -56,21 +56,6 @@ class K8sAPI(apiv_api.ApivApi):
                                       ca_certs=self.ca_file.name)
 
         super(K8sAPI, self).__init__(client)
-
-    def _create_certificate_files(self, bay):
-        """Read certificate and key for a bay and stores in files.
-
-        :param bay: Bay object
-        """
-        magnum_cert_obj = cert_manager.get_bay_magnum_cert(bay)
-        self.cert_file = self._create_temp_file_with_content(
-            magnum_cert_obj.get_certificate())
-        private_key = magnum_cert_obj.get_decrypted_private_key()
-        self.key_file = self._create_temp_file_with_content(
-            private_key)
-        ca_cert_obj = cert_manager.get_bay_ca_certificate(bay)
-        self.ca_file = self._create_temp_file_with_content(
-            ca_cert_obj.get_certificate())
 
     def __del__(self):
         if self.ca_file:
