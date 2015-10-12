@@ -496,8 +496,6 @@ to make sure the bay's status is 'CREATE_COMPLETE'::
     | node_addresses     | [u'172.24.4.116', u'172.24.4.117']   |
     | master_count       | 1                                    |
     | discovery_url      | None                                 |
-    | status_reason      | Stack CREATE completed successfully  |
-    | discovery_url      | None                                 |
     | name               | mesosbay                             |
     +--------------------+--------------------------------------+
 
