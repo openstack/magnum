@@ -100,13 +100,6 @@ def create_cluster(OSC, **params):
     #time.sleep(1)
 
     # Create Minion Node(s)
-<<<<<<< HEAD
-    #for i in range(node_count):
-    #    Node.node_create(sc, minion_node_name + str(i), cluster_name,
-    #        minion_profile_name)
-    #    time.sleep(5)
-    Node.node_create(sc, minion_node_name, None, minion_profile_name)
-=======
     for i in range(node_count):
         Node.node_create(sc, minion_node_name + str(i), cluster_name,
             minion_profile_name)
@@ -122,5 +115,4 @@ def create_cluster(OSC, **params):
     wb_url = wb['webhook']['url']
     LOG.info('webhook_url=%s' % wb_url)
 
->>>>>>> f0016b8c948c29ca0cac6b0b2e434a9221e72458
     #LOG.info('Complete') 
