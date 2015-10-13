@@ -28,7 +28,11 @@ class SURClient(object):
         self.identity_args['username'] = utils.get_env('OS_USERNAME', 'admin')
         self.identity_args['password'] = utils.get_env('OS_PASSWORD', 'stack')
         self.identity_args['user_id'] = utils.get_env('OS_USER_ID')
+<<<<<<< HEAD
         self.identity_args['auth_url'] = 'http://localhost:5000/v3'
+=======
+        self.identity_args['auth_url'] = utils.get_env('OS_AUTH_URL', 'http://localhost:5000/v3')
+>>>>>>> f0016b8c948c29ca0cac6b0b2e434a9221e72458
         self.identity_args['token'] = utils.get_env('OS_TOKEN', default=None)
         self.identity_args['project_id'] = utils.get_env('OS_PROJECT_ID')
         self.identity_args['project_name'] = utils.get_env('OS_PROJECT_NAME')

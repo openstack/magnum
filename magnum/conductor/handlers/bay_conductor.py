@@ -129,6 +129,8 @@ class Handler(object):
                 'minion_profile_name': 'SUR_HEAT_Minion_Profile',
                 'master_profile_spec': '/opt/stack/magnum/magnum/sur/SURspec/heat-fedora/master.yaml',
                 'minion_profile_spec': '/opt/stack/magnum/magnum/sur/SURspec/heat-fedora/minion.yaml',
+                'si_policy_spec' : '/opt/stack/magnum/magnum/sur/SURspec/scaling_policy.spec',
+                'so_policy_spec' : '/opt/stack/magnum/magnum/sur/SURspec/scaling_policy.spec',
                 'cluster_name': 'SUR_HEAT_Cluster',
 	        'node_count': 2
             }

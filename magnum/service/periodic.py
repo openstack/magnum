@@ -20,6 +20,8 @@ from oslo_log import log
 from oslo_service import periodic_task
 from oslo_service import threadgroup
 
+from magnum.sur import monitor
+
 from magnum.common import clients
 from magnum.common import context
 from magnum.common import exception
@@ -119,6 +121,40 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
         except Exception as e:
             LOG.warn(_LW("Ignore error [%s] when syncing up bay status."), e,
                      exc_info=True)
+
+    @periodic_task.periodic_task(run_immediately=True)
+    @set_context
+    def _send_bay_metrics(self, ctx):
+        LOG.debug('Starting to send bay metrics')
+        for bay in objects.Bay.list(ctx):
+            if bay.status not in [bay_status.CREATE_COMPLETE,
+                                  bay_status.UPDATE_COMPLETE]:
+                continue
+
+            data = None
+            try:
+                data = monitor.pull_data(list(bay.node_addresses))
+            except Exception as e:
+                LOG.warn(_LW("Skip pulling data from bay %(bay)s due to "
+                             "error: %(e)s"),
+                         {'e': e, 'bay': bay.uuid}, exc_info=True)
+                continue
+
+            metrics = []
+            metric = {
+                'name': 'memory_util',
+                'unit': '%',
+                'value': data
+            }
+            metrics.append(metric)
+
+            message = dict(metrics=metrics,
+                           user_id=bay.user_id,
+                           project_id=bay.project_id,
+                           resource_id=bay.uuid)
+            LOG.debug("About to send notification: '%s'" % message)
+            self.notifier.info(ctx, "magnum.bay.metrics.update",
+                               message)
 
 
 def setup(conf):

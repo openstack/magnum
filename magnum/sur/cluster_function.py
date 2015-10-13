@@ -10,6 +10,9 @@ from magnum.common.clients import OpenStackClients as OSC
 from magnum.sur.action.senlin.clusters import Cluster
 from magnum.sur.action.senlin.nodes import Node
 from magnum.sur.action.senlin.profiles import Profile
+from magnum.sur.action.senlin.policies import ScalingInPolicy as SIPolicy
+from magnum.sur.action.senlin.policies import ScalingOutPolicy as SOPolicy
+from magnum.sur.action.senlin.webhooks import Webhook
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -20,6 +23,23 @@ def wait_for_node_active(sc, node):
         if status == 'ACTIVE':
             break
         time.sleep(1)
+
+def attach_policy(sc, **params):
+    cluster_name = params.get('cluster_name', 'sur_cluster')
+
+    # create scaling policy
+    si_policy_name = cluster_name + '_si_policy'
+    so_policy_name = cluster_name + '_so_policy'
+
+    si_policy_spec = params.get('si_policy_spec', None)
+    so_policy_spec = params.get('so_policy_spec', None)
+
+    SIPolicy.policy_create(sc, si_policy_name, si_policy_spec)
+    SOPolicy.policy_create(sc, so_policy_name, so_policy_spec)
+    time.sleep(1)
+
+    Cluster.cluster_policy_attach(sc, cluster_name, si_policy_name)
+    Cluster.cluster_policy_attach(sc, cluster_name, so_policy_name)
 
 def create_cluster(OSC, **params):
     #LOG.info('Creating Request accepted.')
@@ -33,11 +53,13 @@ def create_cluster(OSC, **params):
 
     master_node_name = cluster_name + '_master'
     minion_node_name = cluster_name + '_minion_'
+    webhook_name = cluster_name + '_so_webhook'
 
     node_count = params.get('node_count', 1)
 
     # Client
     sc = OSC.senlin()
+    hc = OSC.heat()
 
     # Create Master Profile
     #Profile.profile_create(sc, master_profile_name, 'os.heat.stack',
@@ -50,6 +72,17 @@ def create_cluster(OSC, **params):
 
     # Wait for Node Active
     #wait_for_node_active(sc, master_node_name)
+
+    # Get Info from Heat Stack
+    master_stack_id = Node.node_show(sc, master_name)['node']['physical_id']
+    HeatInfo = hc.stacks.get(master_stack_id)['outputs']
+    for p in HeatInfo:
+        if p['output_key'] == 'kube_master_internal':
+            kube_master_internal = p['output_value']
+        if p['output_key'] == 'fixed_network_id':
+            fixed_network_id = p['output_value']
+        if p['output_key'] == 'fixed_subnet_id':
+            fixed_subnet_id = p['output_value']
 
     # Define Minion Yaml
 
@@ -67,9 +100,27 @@ def create_cluster(OSC, **params):
     #time.sleep(1)
 
     # Create Minion Node(s)
+<<<<<<< HEAD
     #for i in range(node_count):
     #    Node.node_create(sc, minion_node_name + str(i), cluster_name,
     #        minion_profile_name)
     #    time.sleep(5)
     Node.node_create(sc, minion_node_name, None, minion_profile_name)
+=======
+    for i in range(node_count):
+        Node.node_create(sc, minion_node_name + str(i), cluster_name,
+            minion_profile_name)
+        time.sleep(5)
+
+    # Attach Scaling Policy
+    attach_policy(sc, **params)
+
+    # Create Scale-out Webhook
+    wb = Webhook.cluster_webhook_create(sc, webhook_name, cluster_name, 
+                                        'CLUSTER_SCALE_OUT', {})
+    time.sleep(1)
+    wb_url = wb['webhook']['url']
+    LOG.info('webhook_url=%s' % wb_url)
+
+>>>>>>> f0016b8c948c29ca0cac6b0b2e434a9221e72458
     #LOG.info('Complete') 
