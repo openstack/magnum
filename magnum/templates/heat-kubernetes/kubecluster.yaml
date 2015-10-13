@@ -268,6 +268,46 @@ resources:
 
   ######################################################################
   #
+  # security groups.  we need to permit network traffic of various
+  # sorts.
+  #
+
+  secgroup_base:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      rules:
+        - protocol: icmp
+        - protocol: tcp
+          port_range_min: 22
+          port_range_max: 22
+
+  secgroup_kube_master:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      rules:
+        - protocol: tcp
+          port_range_min: 7080
+          port_range_max: 7080
+        - protocol: tcp
+          port_range_min: 8080
+          port_range_max: 8080
+        - protocol: tcp
+          port_range_min: 2379
+          port_range_max: 2379
+        - protocol: tcp
+          port_range_min: 2380
+          port_range_max: 2380
+
+  secgroup_kube_minion:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      rules:
+        - protocol: icmp
+        - protocol: tcp
+        - protocol: udp
+
+  ######################################################################
+  #
   # load balancers.
   #
 
@@ -357,6 +397,8 @@ resources:
           tenant_name: {get_param: tenant_name}
           kubernetes_port: {get_param: kubernetes_port}
           tls_disabled: {get_param: tls_disabled}
+          secgroup_base_id: {get_resource: secgroup_base}
+          secgroup_kube_master_id: {get_resource: secgroup_kube_master}
 
   ######################################################################
   #
@@ -403,6 +445,7 @@ resources:
           magnum_url: {get_param: magnum_url}
           kubernetes_port: {get_param: kubernetes_port}
           tls_disabled: {get_param: tls_disabled}
+          secgroup_kube_minion_id: {get_resource: secgroup_kube_minion}
 
 outputs:
 
