@@ -155,9 +155,12 @@ on Horizon by navigating to::
 Click on "Allocate IP To Project" and then on "Associate" for the new floating
 IP.
 
-Alternatively, associating a floating IP can be done on the command line as
-follows.  The commands shown below are for illustration purpose and assume
-that there is only service with load balancer running in the bay.
+Alternatively, associating a floating IP can be done on the command line by
+allocating a floating IP, finding the port of the VIP, and associating the
+floating IP to the port.
+The commands shown below are for illustration purpose and assume
+that there is only one service with load balancer running in the bay and
+no other load balancers exist except for those created for the cluster.
 
 First create a floating IP on the public network::
 
@@ -185,7 +188,7 @@ floating IP is shown above, but it can also be queried by::
 
 Next find the VIP for the load balancer::
 
-    VIP_ID=$(neutron lb-vip-list | grep TCP | awk '{print $2}')
+    VIP_ID=$(neutron lb-vip-list | grep TCP | grep -v pool | awk '{print $2}')
 
 Find the port for this VIP::
 
