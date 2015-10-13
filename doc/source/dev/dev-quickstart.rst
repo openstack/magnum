@@ -417,7 +417,7 @@ Next we will create a container in this bay. This container will ping the
 address 8.8.8.8 four times::
 
     magnum container-create --name test-container \
-                            --image cirros \
+                            --image docker.io/cirros:latest \
                             --bay swarmbay \
                             --command "ping -c 4 8.8.8.8"
 
