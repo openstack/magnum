@@ -20,18 +20,15 @@ class RequestContext(context.RequestContext):
     def __init__(self, auth_token=None, auth_url=None, domain_id=None,
                  domain_name=None, user_name=None, user_id=None,
                  project_name=None, project_id=None, roles=None,
-                 is_admin=False, is_public_api=False, read_only=False,
-                 show_deleted=False, request_id=None, trust_id=None,
-                 auth_token_info=None, all_tenants=False, **kwargs):
+                 is_admin=False, read_only=False, show_deleted=False,
+                 request_id=None, trust_id=None, auth_token_info=None,
+                 all_tenants=False, **kwargs):
         """Stores several additional request parameters:
 
         :param domain_id: The ID of the domain.
         :param domain_name: The name of the domain.
-        :param is_public_api: Specifies whether the request should be processed
-                              without authentication.
 
         """
-        self.is_public_api = is_public_api
         self.user_name = user_name
         self.user_id = user_id
         self.project_name = project_name
@@ -63,7 +60,6 @@ class RequestContext(context.RequestContext):
                       'project_name': self.project_name,
                       'project_id': self.project_id,
                       'is_admin': self.is_admin,
-                      'is_public_api': self.is_public_api,
                       'read_only': self.read_only,
                       'roles': self.roles,
                       'show_deleted': self.show_deleted,

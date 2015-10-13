@@ -29,7 +29,6 @@ class ContextTestCase(base.TestCase):
                                              project_id='tenant-id1',
                                              roles=['admin', 'service'],
                                              is_admin=True,
-                                             is_public_api=True,
                                              read_only=True,
                                              show_deleted=True,
                                              request_id='request_id1',
@@ -50,7 +49,6 @@ class ContextTestCase(base.TestCase):
         for role in ctx.roles:
             self.assertTrue(role in ['admin', 'service'])
         self.assertTrue(ctx.is_admin)
-        self.assertTrue(ctx.is_public_api)
         self.assertTrue(ctx.read_only)
         self.assertTrue(ctx.show_deleted)
         self.assertEqual("request_id1", ctx.request_id)
@@ -71,7 +69,6 @@ class ContextTestCase(base.TestCase):
         self.assertEqual(ctx.project_name, ctx2.project_name)
         self.assertEqual(ctx.project_id, ctx2.project_id)
         self.assertEqual(ctx.is_admin, ctx2.is_admin)
-        self.assertEqual(ctx.is_public_api, ctx2.is_public_api)
         self.assertEqual(ctx.read_only, ctx2.read_only)
         self.assertEqual(ctx.roles, ctx2.roles)
         self.assertEqual(ctx.show_deleted, ctx2.show_deleted)
