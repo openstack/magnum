@@ -49,11 +49,11 @@ parameters:
   fixed_network:
     type: string
     description: Network from which to allocate fixed addresses. Need to be UPDATE by USER
-    default: 86af16de-6cc3-4ea0-98b5-96ee3587a177
+    default: 9869ac2b-9701-4bef-b842-6693ee70b1f2
   fixed_subnet:
     type: string
     description: Subnet from which to allocate fixed addresses. Need to be UPDATE by USER
-    default: b1a1143c-35f7-4325-89e4-344ab0371a7e
+    default: 6f6e88a3-acfb-4a1d-aba5-d47fb8c0d55c
   wait_condition_timeout:
     type: number
     description : >

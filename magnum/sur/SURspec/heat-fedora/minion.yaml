@@ -2,7 +2,7 @@ type: os.heat.stack
 version: 1.0
 properties:
   name: kube-minion
-  template: heat-kubernetes-split/kubeminion.yaml
+  template: /opt/stack/magnum/magnum/sur/SURspec/heat-fedora/heat-kubernetes-split/kubeminion.yaml
   context:
     region_name: RegionOne
   environment:

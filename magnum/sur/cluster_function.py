@@ -40,36 +40,36 @@ def create_cluster(OSC, **params):
     sc = OSC.senlin()
 
     # Create Master Profile
-    Profile.profile_create(sc, master_profile_name, 'os.heat.stack',
-                           master_profile_spec, '1111')
-    time.sleep(1)
+    #Profile.profile_create(sc, master_profile_name, 'os.heat.stack',
+    #                       master_profile_spec, '1111')
+    #time.sleep(1)
 
     # Create Master Node
-    Node.node_create(sc, master_node_name, None, master_profile_name)
-    time.sleep(5)
+    #Node.node_create(sc, master_node_name, None, master_profile_name)
+    #time.sleep(5)
 
     # Wait for Node Active
-    wait_for_node_active(sc, master_node_name)
+    #wait_for_node_active(sc, master_node_name)
 
     # Define Minion Yaml
 
     # Create Minion Profile
-    Profile.profile_craete(sc, minion_profile_name, 'os.heat.stack',
+    Profile.profile_create(sc, minion_profile_name, 'os.heat.stack',
                            minion_profile_spec, '1111')
     time.sleep(1)
     
     # Create Cluster
-    Cluster.cluster_create(sc, cluster_name, minion_profile_name)
-    time.sleep(1)
+    #Cluster.cluster_create(sc, cluster_name, minion_profile_name)
+    #time.sleep(1)
 
     # Master join into Cluster
-    Node.node_join(sc, master_node_name, cluster_name)
-    time.sleep(1)
+    #Node.node_join(sc, master_node_name, cluster_name)
+    #time.sleep(1)
 
     # Create Minion Node(s)
-    for i in range(node_count):
-        Node.node_create(sc, minion_node_name + str(i), cluster_name,
-            minion_profile_name)
-        time.sleep(5)
-
+    #for i in range(node_count):
+    #    Node.node_create(sc, minion_node_name + str(i), cluster_name,
+    #        minion_profile_name)
+    #    time.sleep(5)
+    Node.node_create(sc, minion_node_name, None, minion_profile_name)
     #LOG.info('Complete') 

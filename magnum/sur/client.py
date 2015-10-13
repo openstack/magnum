@@ -25,21 +25,21 @@ class SURClient(object):
 
     def _add_identity_args(self):
         self.identity_args = {}
-        self.identity_args['username'] = utils.get_env('OS_USERNAME')
-        self.identity_args['password'] = utils.get_env('OS_PASSWORD')
+        self.identity_args['username'] = utils.get_env('OS_USERNAME', 'admin')
+        self.identity_args['password'] = utils.get_env('OS_PASSWORD', 'stack')
         self.identity_args['user_id'] = utils.get_env('OS_USER_ID')
-        self.identity_args['auth_url'] = utils.get_env('OS_AUTH_URL')
+        self.identity_args['auth_url'] = 'http://localhost:5000/v3'
         self.identity_args['token'] = utils.get_env('OS_TOKEN', default=None)
         self.identity_args['project_id'] = utils.get_env('OS_PROJECT_ID')
         self.identity_args['project_name'] = utils.get_env('OS_PROJECT_NAME')
         self.identity_args['tenant_id'] = utils.get_env('OS_TENANT_ID')
-        self.identity_args['tenant_name'] = utils.get_env('OS_TENANT_NAME')
+        self.identity_args['tenant_name'] = utils.get_env('OS_TENANT_NAME', 'demo')
         self.identity_args['domain_id'] = utils.get_env('OS_DOMAIN_ID')
         self.identity_args['domain_name'] = utils.get_env('OS_DOMAIN_NAME')
         self.identity_args['user_domain_id'] = utils.get_env(
             'OS_USER_DOMAIN_ID')
         self.identity_args['user_domain_name'] = utils.get_env(
-            'OS_USER_DOMAIN_NAME')
+            'OS_USER_DOMAIN_NAME', 'Default')
 
         keystone = ksclient.Client(**self.identity_args)
         self.identity_args['token'] = keystone.auth_token
