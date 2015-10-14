@@ -105,7 +105,7 @@ class SwarmMonitor(MonitorBase):
             mem_total += node['MemTotal']
         mem_reserved = 0
         for container in self.data['containers']:
-            mem_reserved += container['Config']['Memory']
+            mem_reserved += container['HostConfig']['Memory']
 
         if mem_total == 0:
             return 0

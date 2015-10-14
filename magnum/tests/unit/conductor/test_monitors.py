@@ -120,7 +120,7 @@ class MonitorsTestCase(base.TestCase):
             'containers': [
                 {
                     'Name': 'container',
-                    'Config': {
+                    'HostConfig': {
                         'Memory': 10,
                     },
                 },
