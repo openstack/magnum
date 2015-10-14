@@ -25,6 +25,7 @@ from magnum.sur import monitor
 from magnum.common import clients
 from magnum.common import context
 from magnum.common import exception
+from magnum.common import rpc
 from magnum.i18n import _
 from magnum.i18n import _LI
 from magnum.i18n import _LW
@@ -127,13 +128,9 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
     def _send_bay_metrics(self, ctx):
         LOG.debug('Starting to send bay metrics')
         for bay in objects.Bay.list(ctx):
-            if bay.status not in [bay_status.CREATE_COMPLETE,
-                                  bay_status.UPDATE_COMPLETE]:
-                continue
-
             data = None
             try:
-                data = monitor.pull_data(list(bay.node_addresses))
+                data = monitor.pull_data(['172.24.4.15'])
             except Exception as e:
                 LOG.warn(_LW("Skip pulling data from bay %(bay)s due to "
                              "error: %(e)s"),
@@ -153,8 +150,8 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                            project_id=bay.project_id,
                            resource_id=bay.uuid)
             LOG.debug("About to send notification: '%s'" % message)
-            self.notifier.info(ctx, "magnum.bay.metrics.update",
-                               message)
+            rpc.get_notifier().info(ctx, "magnum.bay.metrics.update",
+                                    message)
 
 
 def setup(conf):
