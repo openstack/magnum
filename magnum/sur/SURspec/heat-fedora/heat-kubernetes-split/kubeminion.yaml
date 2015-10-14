@@ -169,6 +169,12 @@ resources:
       group: ungrouped
       config: {get_file: fragments/docker.service.yaml}
 
+  cadvisor_service:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/cadvisor.service.yaml}
+
   enable_services:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -207,6 +213,7 @@ resources:
         - config: {get_resource: kube_register}
         - config: {get_resource: configure_kubernetes_node}
         - config: {get_resource: docker_service}
+	- config: {get_resource: cadvisor_service}
         - config: {get_resource: enable_services}
         - config: {get_resource: node_wc_notify}
 

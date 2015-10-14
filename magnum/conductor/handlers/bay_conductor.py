@@ -125,7 +125,7 @@ class Handler(object):
         try:
             # Generate certificate and set the cert reference to bay
             cert_manager.generate_certificates_to_bay(bay)
-            bay.stack_id = 'SUR_cluster'
+            #bay.stack_id = 'SUR_cluster'
             bay.create()
             # Use Senlin to Create a Cluster
             params = {
@@ -139,7 +139,7 @@ class Handler(object):
                 'cluster_name': 'SUR_HEAT_Cluster',
 	        'node_count': 2
             }
-            senlinfunc.create_cluster(osc, **params, bay)
+            senlinfunc.create_cluster(osc, bay, **params)
             #created_stack = _create_senlin_stack(context, osc, bay,
             #                                     bay_create_timeout)
         except exc.HTTPBadRequest as e:

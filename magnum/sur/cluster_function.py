@@ -45,7 +45,7 @@ def attach_policy(sc, **params):
     Cluster.cluster_policy_attach(sc, cluster_name, si_policy_name)
     Cluster.cluster_policy_attach(sc, cluster_name, so_policy_name)
 
-def create_cluster(OSC, **params, bay):
+def create_cluster(OSC, bay, *params):
     #LOG.info('Creating Request accepted.')
     master_profile_name = params.get('master_profile_name', 'master_profile')
     minion_profile_name = params.get('minion_profile_name', 'minion_profile')
