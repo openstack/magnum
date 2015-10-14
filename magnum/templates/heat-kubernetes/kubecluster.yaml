@@ -297,6 +297,9 @@ resources:
         - protocol: tcp
           port_range_min: 2380
           port_range_max: 2380
+        - protocol: tcp
+          port_range_min: 6443
+          port_range_max: 6443
 
   secgroup_kube_minion:
     type: OS::Neutron::SecurityGroup
