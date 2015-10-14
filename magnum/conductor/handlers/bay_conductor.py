@@ -123,6 +123,10 @@ class Handler(object):
         osc = clients.OpenStackClients(context)
 
         try:
+            # Generate certificate and set the cert reference to bay
+            cert_manager.generate_certificates_to_bay(bay)
+            bay.stack_id = 'SUR_cluster'
+            bay.create()
             # Use Senlin to Create a Cluster
             params = {
                 'master_profile_name': 'SUR_HEAT_Master_Profile',
@@ -135,9 +139,7 @@ class Handler(object):
                 'cluster_name': 'SUR_HEAT_Cluster',
 	        'node_count': 2
             }
-            senlinfunc.create_cluster(osc, **params)
-            # Generate certificate and set the cert reference to bay
-            cert_manager.generate_certificates_to_bay(bay)
+            senlinfunc.create_cluster(osc, **params, bay)
             #created_stack = _create_senlin_stack(context, osc, bay,
             #                                     bay_create_timeout)
         except exc.HTTPBadRequest as e:
@@ -147,8 +149,7 @@ class Handler(object):
             raise
 
         #bay.stack_id = created_stack['stack']['id']
-        bay.stack_id = 'SUR_cluster'
-        bay.create()
+        #bay.create()
 
         #self._poll_and_check(osc, bay)
 

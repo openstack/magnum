@@ -8,6 +8,7 @@ import time
 import yaml
 
 from magnum.common.clients import OpenStackClients as OSC
+from magnum import objects
 from magnum.sur.action.senlin.clusters import Cluster
 from magnum.sur.action.senlin.nodes import Node
 from magnum.sur.action.senlin.profiles import Profile
@@ -42,7 +43,7 @@ def attach_policy(sc, **params):
     Cluster.cluster_policy_attach(sc, cluster_name, si_policy_name)
     Cluster.cluster_policy_attach(sc, cluster_name, so_policy_name)
 
-def create_cluster(OSC, **params):
+def create_cluster(OSC, **params, bay):
     #LOG.info('Creating Request accepted.')
     master_profile_name = params.get('master_profile_name', 'master_profile')
     minion_profile_name = params.get('minion_profile_name', 'minion_profile')
@@ -64,19 +65,19 @@ def create_cluster(OSC, **params):
     hc = OSC.heat()
 
     # Create Master Profile
-    #Profile.profile_create(sc, master_profile_name, 'os.heat.stack',
-    #                       master_profile_spec, '1111')
-    #time.sleep(1)
+    Profile.profile_create(sc, master_profile_name, 'os.heat.stack',
+                           master_profile_spec, '1111')
+    time.sleep(1)
 
     # Create Master Node
-    #Node.node_create(sc, master_node_name, None, master_profile_name)
-    #time.sleep(5)
+    Node.node_create(sc, master_node_name, None, master_profile_name)
+    time.sleep(5)
 
     # Wait for Node Active
-    #wait_for_node_active(sc, master_node_name)
+    wait_for_node_active(sc, master_node_name)
 
     # Get Info from Heat Stack
-    master_stack_id = Node.node_show(sc, master_name)['node']['physical_id']
+    master_stack_id = Node.node_show(sc, master_node_name)['node']['physical_id']
     HeatInfo = hc.stacks.get(master_stack_id)['outputs']
     for p in HeatInfo:
         if p['output_key'] == 'kube_master_internal':
@@ -105,18 +106,26 @@ def create_cluster(OSC, **params):
     time.sleep(1)
     
     # Create Cluster
-    #Cluster.cluster_create(sc, cluster_name, minion_profile_name)
-    #time.sleep(1)
+    Cluster.cluster_create(sc, cluster_name, minion_profile_name)
+    time.sleep(1)
 
     # Master join into Cluster
-    #Node.node_join(sc, master_node_name, cluster_name)
-    #time.sleep(1)
+    Node.node_join(sc, master_node_name, cluster_name)
+    time.sleep(1)
 
     # Create Minion Node(s)
+    # Update Bay Info
     for i in range(node_count):
         Node.node_create(sc, minion_node_name + str(i), cluster_name,
             minion_profile_name)
         time.sleep(5)
+        wait_for_node_active(sc, minion_node_name + str(i))
+        InfoList = Node.node_show(sc, minion_node_name + str(i))['node']['details']['outputs']
+        for p in InfoList:
+            if p['output_key'] == 'kube_node_external_ip':
+                ExtIp = p['output_value']
+        bay.node_addresses.append(ExtIp)
+        bay.save()
 
     # Attach Scaling Policy
     attach_policy(sc, **params)
