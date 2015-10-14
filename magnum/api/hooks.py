@@ -14,11 +14,14 @@
 
 
 from oslo_config import cfg
-from oslo_utils import importutils
 from pecan import hooks
 
 from magnum.common import context
 from magnum.conductor import api as conductor_api
+
+CONF = cfg.CONF
+CONF.import_opt('auth_uri', 'keystonemiddleware.auth_token',
+                group='keystone_authtoken')
 
 
 class ContextHook(hooks.PecanHook):
@@ -57,10 +60,7 @@ class ContextHook(hooks.PecanHook):
         roles = headers.get('X-Roles', '').split(',')
         auth_token_info = state.request.environ.get('keystone.token_info')
 
-        auth_url = headers.get('X-Auth-Url')
-        if auth_url is None:
-            importutils.import_module('keystonemiddleware.auth_token')
-            auth_url = cfg.CONF.keystone_authtoken.auth_uri
+        auth_url = CONF.keystone_authtoken.auth_uri
 
         state.request.context = context.make_context(
             auth_token=auth_token,

@@ -49,8 +49,6 @@ class TestContextHook(base.BaseTestCase):
                          ctx.user_id)
         self.assertEqual(fakes.fakeAuthTokenHeaders['X-Roles'],
                          ','.join(ctx.roles))
-        self.assertEqual(fakes.fakeAuthTokenHeaders['X-Auth-Url'],
-                         ctx.auth_url)
         self.assertEqual(fakes.fakeAuthTokenHeaders['X-User-Domain-Name'],
                          ctx.domain_name)
         self.assertEqual(fakes.fakeAuthTokenHeaders['X-User-Domain-Id'],
