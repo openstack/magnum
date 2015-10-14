@@ -55,6 +55,23 @@ CONF.register_opts(UTILS_OPTS)
 
 LOG = logging.getLogger(__name__)
 
+MEMORY_UNITS = {
+    'Ki': 2 ** 10,
+    'Mi': 2 ** 20,
+    'Gi': 2 ** 30,
+    'Ti': 2 ** 40,
+    'Pi': 2 ** 50,
+    'Ei': 2 ** 60,
+    'm': 10 ** -3,
+    'k': 10 ** 3,
+    'M': 10 ** 6,
+    'G': 10 ** 9,
+    'T': 10 ** 12,
+    'p': 10 ** 15,
+    'E': 10 ** 18,
+    '': 1
+}
+
 
 def _get_root_helper():
     return 'sudo magnum-rootwrap %s' % CONF.rootwrap_config
@@ -518,3 +535,31 @@ def raise_exception_invalid_scheme(url):
     scheme = url.split(':')[0]
     if scheme not in valid_schemes:
         raise exception.Urllib2InvalidScheme(url=url)
+
+
+def get_memory_bytes(memory):
+    """Kubernetes memory format must be in the format of:
+
+        <signedNumber><suffix>
+        signedNumber = digits|digits.digits|digits.|.digits
+        suffix = Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E|''
+        or suffix = E|e<signedNumber>
+        digits = digit | digit<digits>
+        digit = 0|1|2|3|4|5|6|7|8|9
+    """
+    signed_num_regex = r"(^\d+\.\d+)|(^\d+\.)|(\.\d+)|(^\d+)"
+    matched_signed_number = re.search(signed_num_regex, memory)
+    if matched_signed_number is None:
+        raise exception.UnsupportedK8sMemoryFormat()
+    else:
+        signed_number = matched_signed_number.group(0)
+    suffix = memory.replace(signed_number, '', 1)
+    if suffix == '':
+        return float(memory)
+    if re.search(r"^(Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E|'')$", suffix):
+        return float(signed_number) * MEMORY_UNITS[suffix]
+    elif re.search(r"^[E|e][+|-]?(\d+\.\d+$)|(\d+\.$)|(\.\d+$)|(\d+$)",
+                   suffix):
+        return float(signed_number) * (10 ** float(suffix[1:]))
+    else:
+        raise exception.UnsupportedK8sMemoryFormat()

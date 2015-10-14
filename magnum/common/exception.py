@@ -502,3 +502,7 @@ class MagnumServiceNotFound(ResourceNotFound):
 
 class MagnumServiceAlreadyExists(Conflict):
     message = _("A magnum service with ID %(id)s already exists.")
+
+
+class UnsupportedK8sMemoryFormat(MagnumException):
+    message = _("Unsupported memory format for k8s bay.")

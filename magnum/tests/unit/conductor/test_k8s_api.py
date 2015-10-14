@@ -101,7 +101,8 @@ class TestK8sAPI(base.TestCase):
                         side_effect=self._mock_cert_mgr_get_cert):
                     k8s_api.create_k8s_api(context, obj)
 
-        mock_bay_retrieval.assert_called_once_with(context, obj)
+        if cls is not 'Bay':
+            mock_bay_retrieval.assert_called_once_with(context, obj)
 
         mock_api_client.assert_called_once_with(
             bay_obj.api_address,
