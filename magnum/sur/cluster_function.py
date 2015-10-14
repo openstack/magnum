@@ -5,6 +5,7 @@
 import argparse
 import logging
 import time
+import yaml
 
 from magnum.common.clients import OpenStackClients as OSC
 from magnum.sur.action.senlin.clusters import Cluster
@@ -48,7 +49,8 @@ def create_cluster(OSC, **params):
 
     master_profile_spec = params.get('master_profile_spec', None)
     minion_profile_spec = params.get('minion_profile_spec', None)
-
+    minion_template_spec = params.get('minion_template_spec', None)
+    
     cluster_name = params.get('cluster_name', 'sur_cluster')
 
     master_node_name = cluster_name + '_master'
@@ -85,7 +87,18 @@ def create_cluster(OSC, **params):
             fixed_subnet_id = p['output_value']
 
     # Define Minion Yaml
-
+    fr = open(minion_template_spec, 'r')
+    template = yaml.load(fr)
+    fr.close()
+    
+    template['parameters']['kube_master_ip']['default'] = kube_master_internal
+    template['parameters']['fixed_network']['default'] = fixed_network_id
+    template['parameters']['fixed_subnet']['default'] = fixed_subnet_id    
+    
+    fw = open(minion_template_spec, 'w')
+    yaml.dump(template, fw)
+    fw.close()
+    
     # Create Minion Profile
     Profile.profile_create(sc, minion_profile_name, 'os.heat.stack',
                            minion_profile_spec, '1111')
