@@ -2,7 +2,7 @@ type: os.heat.stack
 version: 1.0
 properties:
   name: kube-master
-  template: heat-kubernetes-split/kubemaster.yaml
+  template: /opt/stack/magnum/magnum/sur/SURspec/heat-fedora/heat-kubernetes-split/kubemaster.yaml
   context:
     region_name: RegionOne
   environment:

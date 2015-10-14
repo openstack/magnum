@@ -1,0 +1,23 @@
+# Sample scaling policy that can be attached to a cluster
+type: senlin.policy.scaling
+version: 1.0
+properties:
+  event: CLUSTER_SCALE_IN
+  adjustment:
+    # Adjustment type, valid values include:
+    # EXACT_CAPACITY, CHANGE_IN_CAPACITY, CHANGE_IN_PERCENTAGE
+    type: CHANGE_IN_CAPACITY
+
+    # A number that will be interpreted based on the type setting.
+    number: 1
+   
+    # When type is set CHANGE_IN_PERCENTAGE, min_step specifies
+    # that the cluster size will be changed by at least the number
+    # of nodes specified here.
+    min_step: 1
+
+    # When scaling operation will break the size limitation of
+    # cluster, whether to do best effort scaling, e.g. decrease
+    # cluster size to min_size or increase cluster size to max_size
+    # Default False means reject scaling request directly.
+    best_effort: True
