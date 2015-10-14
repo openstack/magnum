@@ -129,6 +129,7 @@ class Handler(object):
                 'minion_profile_name': 'SUR_HEAT_Minion_Profile',
                 'master_profile_spec': '/opt/stack/magnum/magnum/sur/SURspec/heat-fedora/master.yaml',
                 'minion_profile_spec': '/opt/stack/magnum/magnum/sur/SURspec/heat-fedora/minion.yaml',
+                'minion_template_spec': '/opt/stack/magnum/magnum/sur/SURspec/heat-fedora/heat-kubernetes-split/kubeminion.yaml',
                 'si_policy_spec' : '/opt/stack/magnum/magnum/sur/SURspec/scaling_in_policy.yaml',
                 'so_policy_spec' : '/opt/stack/magnum/magnum/sur/SURspec/scaling_out_policy.yaml',
                 'cluster_name': 'SUR_HEAT_Cluster',
