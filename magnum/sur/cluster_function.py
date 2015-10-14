@@ -9,12 +9,14 @@ import yaml
 
 from magnum.common.clients import OpenStackClients as OSC
 from magnum import objects
+from magnum.sur.client import SURClient
 from magnum.sur.action.senlin.clusters import Cluster
 from magnum.sur.action.senlin.nodes import Node
 from magnum.sur.action.senlin.profiles import Profile
 from magnum.sur.action.senlin.policies import ScalingInPolicy as SIPolicy
 from magnum.sur.action.senlin.policies import ScalingOutPolicy as SOPolicy
 from magnum.sur.action.senlin.webhooks import Webhook
+from magnum.sur.action.ceilometer.alarms import Alarm
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -136,5 +138,21 @@ def create_cluster(OSC, **params, bay):
     time.sleep(1)
     wb_url = wb['webhook']['url']
     LOG.info('webhook_url=%s' % wb_url)
+
+    cc = SURClient('localhost', '8777', '2', 'ceilometer').setup_client()
+    # create ceilometer threshold alarm
+    alarm_args = {
+        'name': 'test_alarm',
+        'meter_name': 'memory_util',
+        'threshold': 70.0,
+        'state': 'alarm',
+        'severity': 'moderate',
+        'enabled': True,
+        'repeat_actions': False,
+        'alarm_actions': [wb_url],
+        'comparison_operator': 'gt',
+        'statistic': 'max'
+    }
+    Alarm.alarm_threshold_create(cc, **alarm_args)
 
     #LOG.info('Complete') 
