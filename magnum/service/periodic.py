@@ -130,7 +130,7 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
         for bay in objects.Bay.list(ctx):
             data = None
             try:
-                data = monitor.pull_data(['172.24.4.15'])
+                data = monitor.pull_data(list(bay.node_addresses))
             except Exception as e:
                 LOG.warn(_LW("Skip pulling data from bay %(bay)s due to "
                              "error: %(e)s"),
