@@ -163,6 +163,7 @@ def create_cluster(OSC, bay, **params):
 
     cc = SURClient('localhost', '8777', '2', 'ceilometer').setup_client()
     # create ceilometer threshold alarm
+    LOG.info('Creating Alarm...')
     alarm_args = {
         'name': 'test_alarm',
         'meter_name': 'memory_util',
@@ -176,5 +177,6 @@ def create_cluster(OSC, bay, **params):
         'statistic': 'max'
     }
     Alarm.alarm_threshold_create(cc, **alarm_args)
+    LOG.info('Complete!')
 
     LOG.info('The program is Complete!') 
