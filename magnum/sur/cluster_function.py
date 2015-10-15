@@ -46,7 +46,7 @@ def attach_policy(sc, **params):
     Cluster.cluster_policy_attach(sc, cluster_name, so_policy_name)
 
 def create_cluster(OSC, bay, **params):
-    #LOG.info('Creating Request accepted.')
+    LOG.info('Creating Request accepted.')
     master_profile_name = params.get('master_profile_name', 'master_profile')
     minion_profile_name = params.get('minion_profile_name', 'minion_profile')
 
@@ -67,18 +67,24 @@ def create_cluster(OSC, bay, **params):
     hc = OSC.heat()
 
     # Create Master Profile
+    LOG.info('Creating Master Profile...')
     Profile.profile_create(sc, master_profile_name, 'os.heat.stack',
                            master_profile_spec, '1111')
+    LOG.info('Complete!')
     time.sleep(1)
 
     # Create Master Node
+    LOG.info('Creating Master Node...')
     Node.node_create(sc, master_node_name, None, master_profile_name)
     time.sleep(5)
+    LOG.info('Complete!')
 
     # Wait for Node Active
+    LOG.info('Waiting for Master being ACTIVE...')
     wait_for_node_active(sc, master_node_name)
 
     # Get Info from Heat Stack
+    LOG.info('Getting Info from HEAT Stack...')
     master_stack_id = Node.node_show(sc, master_node_name)['node']['physical_id']
     HeatInfo = hc.stacks.get(master_stack_id).outputs
     for p in HeatInfo:
@@ -90,6 +96,7 @@ def create_cluster(OSC, bay, **params):
             fixed_subnet_id = p['output_value']
 
     # Define Minion Yaml
+    LOG.info('Define the Minion YAML...')
     fr = open(minion_template_spec, 'r')
     template = yaml.load(fr)
     fr.close()
@@ -103,21 +110,28 @@ def create_cluster(OSC, bay, **params):
     fw.close()
     
     # Create Minion Profile
+    LOG.info('Creating Minion Profile...')
     Profile.profile_create(sc, minion_profile_name, 'os.heat.stack',
                            minion_profile_spec, '1111')
+    LOG.info('Complete!')
     time.sleep(1)
     
     # Create Cluster
+    LOG.info('Creating Senlin Cluster...')
     Cluster.cluster_create(sc, cluster_name, minion_profile_name)
+    LOG.info('Complete!')
     time.sleep(1)
 
     # Master join into Cluster
+    LOG.info('Join Master node into Cluster...')
     Node.node_join(sc, master_node_name, cluster_name)
+    LOG.info('Complete!')
     time.sleep(1)
 
-    addresses = []
     # Create Minion Node(s)
     # Update Bay Info
+    LOG.info('Creating Minion Nodes...')
+    addresses = []
     for i in range(node_count):
         Node.node_create(sc, minion_node_name + str(i), cluster_name,
             minion_profile_name)
@@ -128,14 +142,19 @@ def create_cluster(OSC, bay, **params):
             if p['output_key'] == 'kube_node_external_ip':
                 ExtIp = p['output_value']
         addresses.append(ExtIp)
+    LOG.info('Updating Bay Info...')
     bay.node_addresses = addresses
     bay.status = 'CREATE_COMPLETE'
     bay.save()
+    LOG.info('Complete!')
 
     # Attach Scaling Policy
+    LOG.info('Attaching Scaling Policy...')
     attach_policy(sc, **params)
+    LOG.info('Complete!')
 
     # Create Scale-out Webhook
+    LOG.info('Creating Webhook...')
     wb = Webhook.cluster_webhook_create(sc, webhook_name, cluster_name, 
                                         'CLUSTER_SCALE_OUT', {})
     time.sleep(1)
@@ -158,4 +177,4 @@ def create_cluster(OSC, bay, **params):
     }
     Alarm.alarm_threshold_create(cc, **alarm_args)
 
-    #LOG.info('Complete') 
+    LOG.info('The program is Complete!') 
