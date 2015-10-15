@@ -12,4 +12,7 @@ def pull_data(address_list):
         total_memory += utils.get_machine_memory()
         used_memory += utils.get_containers_memory_usage()
 
+    if total_memory == 0.0:
+        return 0.0
+
     return used_memory / total_memory * 100

@@ -45,7 +45,7 @@ def attach_policy(sc, **params):
     Cluster.cluster_policy_attach(sc, cluster_name, si_policy_name)
     Cluster.cluster_policy_attach(sc, cluster_name, so_policy_name)
 
-def create_cluster(OSC, bay, *params):
+def create_cluster(OSC, bay, **params):
     #LOG.info('Creating Request accepted.')
     master_profile_name = params.get('master_profile_name', 'master_profile')
     minion_profile_name = params.get('minion_profile_name', 'minion_profile')
@@ -80,10 +80,10 @@ def create_cluster(OSC, bay, *params):
 
     # Get Info from Heat Stack
     master_stack_id = Node.node_show(sc, master_node_name)['node']['physical_id']
-    HeatInfo = hc.stacks.get(master_stack_id)['outputs']
+    HeatInfo = hc.stacks.get(master_stack_id).outputs
     for p in HeatInfo:
         if p['output_key'] == 'kube_master_internal':
-            kube_master_internal = p['output_value']
+            kube_master_internal = p['output_value'] 
         if p['output_key'] == 'fixed_network_id':
             fixed_network_id = p['output_value']
         if p['output_key'] == 'fixed_subnet_id':
@@ -94,12 +94,12 @@ def create_cluster(OSC, bay, *params):
     template = yaml.load(fr)
     fr.close()
     
-    template['parameters']['kube_master_ip']['default'] = kube_master_internal
-    template['parameters']['fixed_network']['default'] = fixed_network_id
-    template['parameters']['fixed_subnet']['default'] = fixed_subnet_id    
+    template['parameters']['kube_master_ip']['default'] = kube_master_internal.encode('utf-8')
+    template['parameters']['fixed_network']['default'] = fixed_network_id.encode('utf-8')
+    template['parameters']['fixed_subnet']['default'] = fixed_subnet_id.encode('utf-8')    
     
     fw = open(minion_template_spec, 'w')
-    yaml.dump(template, fw)
+    yaml.dump(template, fw,  allow_unicode=False)
     fw.close()
     
     # Create Minion Profile
@@ -115,6 +115,7 @@ def create_cluster(OSC, bay, *params):
     Node.node_join(sc, master_node_name, cluster_name)
     time.sleep(1)
 
+    addresses = []
     # Create Minion Node(s)
     # Update Bay Info
     for i in range(node_count):
@@ -126,8 +127,10 @@ def create_cluster(OSC, bay, *params):
         for p in InfoList:
             if p['output_key'] == 'kube_node_external_ip':
                 ExtIp = p['output_value']
-        bay.node_addresses.append(ExtIp)
-        bay.save()
+        addresses.append(ExtIp)
+    bay.node_addresses = addresses
+    bay.status = 'CREATE_COMPLETE'
+    bay.save()
 
     # Attach Scaling Policy
     attach_policy(sc, **params)
