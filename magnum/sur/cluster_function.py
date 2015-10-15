@@ -106,7 +106,7 @@ def create_cluster(OSC, bay, **params):
     template['parameters']['fixed_subnet']['default'] = fixed_subnet_id.encode('utf-8')    
     
     fw = open(minion_template_spec, 'w')
-    yaml.dump(template, fw,  allow_unicode=False)
+    yaml.dump(template, fw)
     fw.close()
     
     # Create Minion Profile
