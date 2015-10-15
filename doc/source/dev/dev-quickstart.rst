@@ -116,6 +116,9 @@ Kilo, and heat is enabled by the magnum plugin)::
     # magnum requires the following to be set correctly
     PUBLIC_INTERFACE=eth1
     enable_plugin magnum https://git.openstack.org/openstack/magnum
+    # Enable barbican service and use it to store TLS certificates
+    # For details http://docs.openstack.org/developer/magnum/dev/dev-tls.html
+    enable_plugin barbican https://git.openstack.org/openstack/barbican
     VOLUME_BACKING_FILE_SIZE=20G
     END
 
