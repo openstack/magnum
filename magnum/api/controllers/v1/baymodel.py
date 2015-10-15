@@ -151,6 +151,11 @@ class BayModel(base.APIBase):
     public = wsme.wsattr(types.boolean, default=False)
     """Indicates whether the baymodel is public or not."""
 
+    server_type = wsme.wsattr(wtypes.StringType(min_length=1,
+                                                max_length=255),
+                              default='vm')
+    """Server type for this bay model """
+
     def __init__(self, **kwargs):
         self.fields = []
         for field in objects.BayModel.fields:
@@ -201,6 +206,7 @@ class BayModel(base.APIBase):
             https_proxy='https://proxy.com:123',
             no_proxy='192.168.0.1,192.168.0.2,192.168.0.3',
             labels={'key1': 'val1', 'key2': 'val2'},
+            server_type='vm',
             created_at=timeutils.utcnow(),
             updated_at=timeutils.utcnow(),
             public=False),
