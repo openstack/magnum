@@ -79,6 +79,9 @@ def generate_certificates_to_bay(bay):
     :returns: CA cert uuid and magnum client cert uuid
     """
     issuer_name = bay.name
+    if issuer_name is None:
+        issuer_name = bay.uuid
+
     LOG.debug('Start to generate certificates: %s' % issuer_name)
 
     ca_cert_ref, ca_cert, ca_password = _generate_ca_cert(issuer_name)

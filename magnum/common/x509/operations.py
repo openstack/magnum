@@ -97,6 +97,10 @@ def _generate_self_signed_certificate(subject_name, extensions,
 
 def _generate_certificate(issuer_name, subject_name, extensions, ca_key=None,
                           encryption_password=None, ca_key_password=None):
+
+    if not isinstance(subject_name, six.text_type):
+        subject_name = six.u(subject_name)
+
     private_key = rsa.generate_private_key(
         public_exponent=65537,
         key_size=cfg.CONF.x509.rsa_key_size,
@@ -159,6 +163,10 @@ def sign(csr, issuer_name, ca_key, ca_key_password=None,
         ca_key = serialization.load_pem_private_key(ca_key,
                                                     password=ca_key_password,
                                                     backend=default_backend())
+
+    if not isinstance(issuer_name, six.text_type):
+        issuer_name = six.u(issuer_name)
+
     if isinstance(csr, six.text_type):
         csr = six.b(str(csr))
     if not isinstance(csr, x509.CertificateSigningRequest):

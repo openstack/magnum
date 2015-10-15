@@ -123,6 +123,14 @@ class TestX509(base.BaseTestCase):
         self.assertIn(extended_key_usage, cert.extensions)
         self.assertIn(basic_constraints, cert.extensions)
 
+    def test_generate_ca_certificate_with_bytes_issuer_name(self):
+        issuer_name = six.b("bytes-issuer-name")
+        cert, _ = self._generate_ca_certificate(issuer_name)
+
+        issuer_name = six.u(issuer_name)
+        self.assertHasSubjectName(cert, issuer_name)
+        self.assertHasIssuerName(cert, issuer_name)
+
     def test_generate_ca_certificate_has_publickey(self):
         keypairs = self._generate_ca_certificate(self.issuer_name)
 

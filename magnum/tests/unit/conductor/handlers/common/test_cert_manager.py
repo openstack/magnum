@@ -97,20 +97,16 @@ class CertManagerTestCase(base.BaseTestCase):
             name=expected_name,
         )
 
-    @mock.patch('magnum.conductor.handlers.common.cert_manager.'
-                '_generate_client_cert')
-    @mock.patch('magnum.conductor.handlers.common.cert_manager.'
-                '_generate_ca_cert')
-    def test_generate_certificates(self, mock_generate_ca_cert,
-                                   mock_generate_client_cert):
-        expected_ca_name = 'ca-name'
+    def _test_generate_certificates(self,
+                                    expected_ca_name,
+                                    mock_bay,
+                                    mock_generate_ca_cert,
+                                    mock_generate_client_cert):
         expected_ca_password = 'ca-password'
         expected_ca_cert = {
             'private_key': 'ca_private_key', 'certificate': 'ca_certificate'}
         expected_cert_ref = 'cert_ref'
         expected_ca_cert_ref = 'ca-cert-ref'
-        mock_bay = mock.MagicMock()
-        mock_bay.name = expected_ca_name
 
         mock_generate_ca_cert.return_value = (expected_ca_cert_ref,
                                               expected_ca_cert,
@@ -124,6 +120,37 @@ class CertManagerTestCase(base.BaseTestCase):
         mock_generate_ca_cert.assert_called_once_with(expected_ca_name)
         mock_generate_client_cert.assert_called_once_with(
             expected_ca_name, expected_ca_cert, expected_ca_password)
+
+    @mock.patch('magnum.conductor.handlers.common.cert_manager.'
+                '_generate_client_cert')
+    @mock.patch('magnum.conductor.handlers.common.cert_manager.'
+                '_generate_ca_cert')
+    def test_generate_certificates(self, mock_generate_ca_cert,
+                                   mock_generate_client_cert):
+        expected_ca_name = 'ca-name'
+        mock_bay = mock.MagicMock()
+        mock_bay.name = expected_ca_name
+
+        self._test_generate_certificates(expected_ca_name,
+                                         mock_bay,
+                                         mock_generate_ca_cert,
+                                         mock_generate_client_cert)
+
+    @mock.patch('magnum.conductor.handlers.common.cert_manager.'
+                '_generate_client_cert')
+    @mock.patch('magnum.conductor.handlers.common.cert_manager.'
+                '_generate_ca_cert')
+    def test_generate_certificates_without_name(self, mock_generate_ca_cert,
+                                                mock_generate_client_cert):
+        expected_ca_name = 'ca-uuid'
+        mock_bay = mock.MagicMock()
+        mock_bay.name = None
+        mock_bay.uuid = expected_ca_name
+
+        self._test_generate_certificates(expected_ca_name,
+                                         mock_bay,
+                                         mock_generate_ca_cert,
+                                         mock_generate_client_cert)
 
     @mock.patch('magnum.common.x509.operations.sign')
     def test_sign_node_certificate(self, mock_x509_sign):

@@ -124,8 +124,8 @@ class Handler(object):
 
         try:
             # Generate certificate and set the cert reference to bay
-            cert_manager.generate_certificates_to_bay(bay)
             bay.uuid = uuid.uuid4()
+            cert_manager.generate_certificates_to_bay(bay)
             created_stack = _create_stack(context, osc, bay,
                                           bay_create_timeout)
         except exc.HTTPBadRequest as e:
