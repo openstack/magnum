@@ -1,4 +1,4 @@
-from sur.common.cadvisor_utils import CadvisorUtils
+from magnum.sur.common.cadvisor_utils import CadvisorUtils
 
 from oslo_log import log
 
@@ -26,7 +26,7 @@ def pull_data(address_list):
             break
 
         LOG.info('Pull metrics from %s successfully. [Total Memory=%s, '
-                 'Usage Memory=%s]' % (total_memory_info, used_memory_info))
+                 'Usage Memory=%s]' % (address, total_memory_info, used_memory_info))
         
         total_memory += total_memory_info
         used_memory += used_memory_info
