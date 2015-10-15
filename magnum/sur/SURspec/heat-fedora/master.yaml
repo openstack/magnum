@@ -6,4 +6,4 @@ properties:
   context:
     region_name: RegionOne
   environment:
-    - env.yaml
+    - /opt/stack/magnum/magnum/sur/SURspec/heat-fedora/env.yaml

@@ -15,7 +15,7 @@ class Node(object):
 
     @classmethod
     def node_show(cls, sc, node):
-        url = cls.base_url + '/' + node
+        url = cls.base_url + '/' + node + '/show_details=True'
         args = {
             
         } 
