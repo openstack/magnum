@@ -8,24 +8,35 @@ write_files:
       #!/bin/sh
 
       . /etc/sysconfig/heat-params
-      master_url=http://${KUBE_MASTER_IP}:8080
+      KUBE_PROTOCOL="https"
+      KUBE_CONFIG=""
+      CURL_OPTIONS=""
+      if [ "$TLS_DISABLED" == "True" ]; then
+          KUBE_PROTOCOL="http"
+      else
+          KUBE_CONFIG="--kubeconfig=/srv/kubernetes/kubeconfig.yaml"
+          CURL_OPTIONS="--cacert /srv/kubernetes/ca.crt"
+          CURL_OPTIONS="$CURL_OPTIONS --key /srv/kubernetes/client.key"
+          CURL_OPTIONS="$CURL_OPTIONS --cert /srv/kubernetes/client.crt"
+      fi
+      master_url="$KUBE_PROTOCOL://$KUBE_MASTER_IP:$KUBE_API_PORT"
       nova_instance_name=$(hostname -s)
 
       # wait for master api
-      until curl -o /dev/null -sf "${master_url}/healthz"; do
+      until curl -o /dev/null ${CURL_OPTIONS} -sf "${master_url}/healthz"; do
         echo "waiting for kubernetes master"
         sleep 1
       done
 
       if [ "$1" = "-u" ]; then
       echo "unregistering minion $nova_instance_name"
-      kubectl -s ${master_url} delete node/$nova_instance_name
+      kubectl -s ${master_url} ${KUBE_CONFIG} delete node/$nova_instance_name
       else
       echo "registering minion $nova_instance_name"
       cpu=$(($(nproc) * 1000))
       memory=$(awk '/MemTotal: /{print $2 * 1024}' /proc/meminfo)
 
-      cat <<EOF | kubectl create -s ${master_url} -f-
+      cat <<EOF | kubectl create -s ${master_url} ${KUBE_CONFIG} -f-
       apiVersion: v1
       id: $nova_instance_name
       kind: Node
