@@ -193,11 +193,8 @@ class MagnumException(Exception):
     def __init__(self, message=None, **kwargs):
         self.kwargs = kwargs
 
-        if 'code' not in self.kwargs:
-            try:
-                self.kwargs['code'] = self.code
-            except AttributeError:
-                pass
+        if 'code' not in self.kwargs and hasattr(self, 'code'):
+            self.kwargs['code'] = self.code
 
         if message:
             self.message = message
@@ -207,10 +204,8 @@ class MagnumException(Exception):
         except Exception as e:
             # kwargs doesn't match a variable in the message
             # log the issue and the kwargs
-            LOG.exception(_LE('Exception in string format operation'))
-            for name, value in kwargs.items():
-                LOG.error(_LE("%(name)s: %(value)s") %
-                          {'name': name, 'value': value})
+            LOG.exception(_LE('Exception in string format operation, '
+                              'kwargs: %s') % kwargs)
             try:
                 if CONF.fatal_exception_format_errors:
                     raise e
