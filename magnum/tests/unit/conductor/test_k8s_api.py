@@ -45,10 +45,12 @@ class TestK8sAPI(base.TestCase):
     def _mock_named_file_creation(self, content):
         return TestK8sAPI.file_dict[content]
 
-    def _mock_cert_mgr_get_cert(self, cert_ref):
+    def _mock_cert_mgr_get_cert(self, cert_ref, **kwargs):
         cert_obj = mock.MagicMock()
-        cert_obj.certificate = TestK8sAPI.content_dict[cert_ref]['certificate']
-        cert_obj.private_key = TestK8sAPI.content_dict[cert_ref]['private_key']
+        cert_obj.get_certificate.return_value = (
+            TestK8sAPI.content_dict[cert_ref]['certificate'])
+        cert_obj.get_private_key.return_value = (
+            TestK8sAPI.content_dict[cert_ref]['private_key'])
         return cert_obj
 
     @patch('magnum.conductor.k8s_api.serialization.load_pem_private_key')
