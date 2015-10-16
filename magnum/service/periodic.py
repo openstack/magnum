@@ -98,57 +98,63 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                                             filters={'id': bay_stack_ids})
             sid_to_stack_mapping = {s.id: s for s in stacks}
 
+            # intersection of bays magnum has and heat has
             for sid in (six.viewkeys(sid_to_bay_mapping) &
                         six.viewkeys(sid_to_stack_mapping)):
                 stack = sid_to_stack_mapping[sid]
                 bay = sid_to_bay_mapping[sid]
-                if bay.status != stack.stack_status:
-                    old_status = bay.status
-                    bay.status = stack.stack_status
-                    bay.status_reason = stack.stack_status_reason
-                    bay.save()
-                    LOG.info(_LI("Sync up bay with id %(id)s from "
-                                 "%(old_status)s to %(status)s."),
-                             {'id': bay.id, 'old_status': old_status,
-                              'status': bay.status})
+                self._sync_existing_bay(bay, stack)
 
+            # the stacks that magnum has but heat doesn't have
             for sid in (six.viewkeys(sid_to_bay_mapping) -
                         six.viewkeys(sid_to_stack_mapping)):
                 bay = sid_to_bay_mapping[sid]
-                if bay.status == bay_status.DELETE_IN_PROGRESS:
-                    try:
-                        bay.destroy()
-                    except exception.BayNotFound:
-                        LOG.info(_LI('The bay %s has been deleted by others.')
-                                 % bay.uuid)
-                    LOG.info(_LI("Bay with id %(id)s has been deleted due "
-                                 "to stack with id %(sid)s not found in "
-                                 "Heat."),
-                             {'id': bay.id, 'sid': sid})
-                elif bay.status == bay_status.CREATE_IN_PROGRESS:
-                    bay.status = bay_status.CREATE_FAILED
-                    bay.status_reason = _("Stack with id %s not found in "
-                                          "Heat.") % sid
-                    bay.save()
-                    LOG.info(_LI("Bay with id %(id)s has been set to "
-                                 "%(status)s due to stack with id %(sid)s "
-                                 "not found in Heat."),
-                             {'id': bay.id, 'status': bay.status,
-                              'sid': sid})
-                elif bay.status == bay_status.UPDATE_IN_PROGRESS:
-                    bay.status = bay_status.UPDATE_FAILED
-                    bay.status_reason = _("Stack with id %s not found in "
-                                          "Heat.") % sid
-                    bay.save()
-                    LOG.info(_LI("Bay with id %(id)s has been set to "
-                                 "%(status)s due to stack with id %(sid)s "
-                                 "not found in Heat."),
-                             {'id': bay.id, 'status': bay.status,
-                              'sid': sid})
+                self._sync_missing_heat_stack(bay)
 
         except Exception as e:
             LOG.warn(_LW("Ignore error [%s] when syncing up bay status."), e,
                      exc_info=True)
+
+    def _sync_existing_bay(self, bay, stack):
+        if bay.status != stack.stack_status:
+            old_status = bay.status
+            bay.status = stack.stack_status
+            bay.status_reason = stack.stack_status_reason
+            bay.save()
+            LOG.info(_LI("Sync up bay with id %(id)s from "
+                         "%(old_status)s to %(status)s."),
+                     {'id': bay.id, 'old_status': old_status,
+                      'status': bay.status})
+
+    def _sync_missing_heat_stack(self, bay):
+        if bay.status == bay_status.DELETE_IN_PROGRESS:
+            self._sync_deleted_stack(bay)
+        elif bay.status == bay_status.CREATE_IN_PROGRESS:
+            self._sync_missing_stack(bay, bay_status.CREATE_FAILED)
+        elif bay.status == bay_status.UPDATE_IN_PROGRESS:
+            self._sync_missing_stack(bay, bay_status.UPDATE_FAILED)
+
+    def _sync_deleted_stack(self, bay):
+        try:
+            bay.destroy()
+        except exception.BayNotFound:
+            LOG.info(_LI('The bay %s has been deleted by others.') % bay.uuid)
+        else:
+            LOG.info(_LI("Bay with id %(id)s not found in heat "
+                         "with stack id %(sid)s, with status_reason: "
+                         "%(reason)."), {'id': bay.id, 'sid': bay.stack_id,
+                                         'reason': bay.status_reason})
+
+    def _sync_missing_stack(self, bay, new_status):
+        bay.status = new_status
+        bay.status_reason = _("Stack with id %s not found in "
+                              "Heat.") % bay.stack_id
+        bay.save()
+        LOG.info(_LI("Bay with id %(id)s has been set to "
+                     "%(status)s due to stack with id %(sid)s "
+                     "not found in Heat."),
+                 {'id': bay.id, 'status': bay.status,
+                  'sid': bay.stack_id})
 
     @periodic_task.periodic_task(run_immediately=True)
     @set_context
