@@ -185,6 +185,9 @@ To list out the health of the internal services, namely conductor, of magnum, us
     | 1  | oxy-dev.hq1-0a5a3c02.hq1.abcde.com | magnum-conductor | up    |
     +----+------------------------------------+------------------+-------+
 
+Building a Kubernetes Bay
+=========================
+
 Create a keypair for use with the baymodel::
 
     test -f ~/.ssh/id_rsa.pub || ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
@@ -238,8 +241,13 @@ Bays in the process of updating will have a status of UPDATE_IN_PROGRESS.
 Magnum will update the status to UPDATE_COMPLETE when it is done updating
 the bay.
 
-Note: Reducing node_count will remove all the existing containers on the
-nodes that are deleted.
+Note: Reducing node_count will remove all the existing pods on the nodes that
+are deleted. If you choose to reduce the node_count, magnum will first try to
+remove empty nodes with no pods running on them. If you reduce node_count by
+more than the number of empty nodes, magnum must remove nodes that have running
+pods on them. This action will delete those pods. We strongly recommend using a
+replication controller before reducing the node_count so any removed pods can
+be automatically recovered on your remaining nodes.
 
 Heat can be used to see detailed information on the status of a stack or
 specific bay:
@@ -258,19 +266,8 @@ Monitoring bay status in detail (e.g., creating, updating)::
     echo ${BAY_HEAT_NAME}
     heat resource-list ${BAY_HEAT_NAME}
 
-A bay can be deleted as follows::
-
-    magnum bay-delete k8sbay
-
-Note: If you choose to reduce the node_count, magnum will first try to remove
-empty nodes with no containers running on them. If you reduce node_count by
-more than the number of empty nodes, magnum must remove nodes that have running
-containers on them. This action will delete those containers. We strongly
-recommend using a replication controller before reducing the node_count so
-any removed containers can be automatically recovered on your remaining nodes.
-
-Using Kubernetes
-================
+Using Kubernetes Bay
+====================
 
 Note: For the following examples, only one minion node is required in the
 k8s bay created previously.
@@ -368,6 +365,11 @@ Additional useful commands from a given minion::
     kubectl get rc  # Get replication controllers
     kubectl get svc  # Get services
     kubectl get nodes  # Get nodes
+
+After you finish using the bay, you want to delete it. A bay can be deleted as
+follows::
+
+    magnum bay-delete k8sbay
 
 Building and Using a Swarm Bay
 ==============================
