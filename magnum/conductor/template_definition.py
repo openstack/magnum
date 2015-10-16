@@ -364,6 +364,20 @@ class BaseTemplateDefinition(TemplateDefinition):
     def template_path(self):
         pass
 
+    def _get_user_token(self, context, osc, bay):
+        """Retrieve user token from the Heat stack or context.
+
+        :param context: The security context
+        :param osc: The openstack client
+        :param bay: The bay
+        :return: A user token
+        """
+        if hasattr(bay, 'stack_id'):
+            stack = osc.heat().stacks.get(bay.stack_id)
+            return stack.parameters['user_token']
+        else:
+            return context.auth_token
+
 
 class K8sApiAddressOutputMapping(OutputMapping):
 
@@ -461,8 +475,8 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
         extra_params['auth_url'] = context.auth_url.replace("v3", "v2")
         extra_params['username'] = context.user_name
         extra_params['tenant_name'] = context.tenant
-        extra_params['user_token'] = context.auth_token
         osc = clients.OpenStackClients(context)
+        extra_params['user_token'] = self._get_user_token(context, osc, bay)
         extra_params['magnum_url'] = osc.magnum_url()
 
         if baymodel.tls_disabled:
@@ -574,8 +588,8 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
         # HACK(apmelton) - This uses the user's bearer token, ideally
         # it should be replaced with an actual trust token with only
         # access to do what the template needs it to do.
-        extra_params['user_token'] = context.auth_token
         osc = clients.OpenStackClients(context)
+        extra_params['user_token'] = self._get_user_token(context, osc, bay)
         extra_params['magnum_url'] = osc.magnum_url()
 
         return super(AtomicSwarmTemplateDefinition,

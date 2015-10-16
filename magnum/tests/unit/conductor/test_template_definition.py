@@ -197,6 +197,7 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         mock_baymodel.tls_disabled = False
         mock_bay = mock.MagicMock()
         mock_bay.uuid = 'bay-xx-xx-xx-xx'
+        del mock_bay.stack_id
         mock_scale_manager = mock.MagicMock()
         mock_osc = mock.MagicMock()
         mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
@@ -248,6 +249,7 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         mock_baymodel.tls_disabled = True
         mock_bay = mock.MagicMock()
         mock_bay.uuid = 'bay-xx-xx-xx-xx'
+        del mock_bay.stack_id
         mock_scale_manager = mock.MagicMock()
         mock_osc = mock.MagicMock()
         mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
