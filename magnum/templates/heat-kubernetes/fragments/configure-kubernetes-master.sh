@@ -13,14 +13,14 @@ sed -i '
 
 KUBE_API_ARGS="--runtime_config=api/all=true"
 if [ "$TLS_DISABLED" == "True" ]; then
-  KUBE_API_ADDRESS="--insecure-bind-address=0.0.0.0 --insecure-port=$KUBE_API_PORT"
+    KUBE_API_ADDRESS="--insecure-bind-address=0.0.0.0 --insecure-port=$KUBE_API_PORT"
 else
-  KUBE_API_ADDRESS="--bind_address=0.0.0.0 --secure-port=$KUBE_API_PORT"
-  # insecure port is used internaly
-  KUBE_API_ADDRESS="$KUBE_API_ADDRESS --insecure-port=8080"
-  KUBE_API_ARGS="$KUBE_API_ARGS --tls_cert_file=/srv/kubernetes/server.crt"
-  KUBE_API_ARGS="$KUBE_API_ARGS --tls_private_key_file=/srv/kubernetes/server.key"
-  KUBE_API_ARGS="$KUBE_API_ARGS --client_ca_file=/srv/kubernetes/ca.crt"
+    KUBE_API_ADDRESS="--bind_address=0.0.0.0 --secure-port=$KUBE_API_PORT"
+    # insecure port is used internaly
+    KUBE_API_ADDRESS="$KUBE_API_ADDRESS --insecure-port=8080"
+    KUBE_API_ARGS="$KUBE_API_ARGS --tls_cert_file=/srv/kubernetes/server.crt"
+    KUBE_API_ARGS="$KUBE_API_ARGS --tls_private_key_file=/srv/kubernetes/server.key"
+    KUBE_API_ARGS="$KUBE_API_ARGS --client_ca_file=/srv/kubernetes/ca.crt"
 fi
 
 sed -i '

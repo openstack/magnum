@@ -15,26 +15,26 @@ fi
 KUBE_MASTER_URI="$KUBE_PROTOCOL://$KUBE_MASTER_IP:$KUBE_API_PORT"
 
 sed -i '
-/^KUBE_ALLOW_PRIV=/ s/=.*/="--allow_privileged='"$KUBE_ALLOW_PRIV"'"/
-/^KUBE_ETCD_SERVERS=/ s|=.*|="--etcd_servers=http://'"$ETCD_SERVER_IP"':2379"|
-/^KUBE_MASTER=/ s|=.*|="--master='"$KUBE_MASTER_URI"'"|
+  /^KUBE_ALLOW_PRIV=/ s/=.*/="--allow_privileged='"$KUBE_ALLOW_PRIV"'"/
+  /^KUBE_ETCD_SERVERS=/ s|=.*|="--etcd_servers=http://'"$ETCD_SERVER_IP"':2379"|
+  /^KUBE_MASTER=/ s|=.*|="--master='"$KUBE_MASTER_URI"'"|
 ' /etc/kubernetes/config
 
 sed -i '
-/^KUBELET_ADDRESS=/ s/=.*/="--address=0.0.0.0"/
-/^KUBELET_HOSTNAME=/ s/=.*/=""/
-/^KUBELET_API_SERVER=/ s|=.*|="--api_servers='"$KUBE_MASTER_URI"'"|
-/^KUBELET_ARGS=/ s|=.*|='"$KUBE_CONFIG"'|
+  /^KUBELET_ADDRESS=/ s/=.*/="--address=0.0.0.0"/
+  /^KUBELET_HOSTNAME=/ s/=.*/=""/
+  /^KUBELET_API_SERVER=/ s|=.*|="--api_servers='"$KUBE_MASTER_URI"'"|
+  /^KUBELET_ARGS=/ s|=.*|='"$KUBE_CONFIG"'|
 ' /etc/kubernetes/kubelet
 
 sed -i '
-/^KUBE_PROXY_ARGS=/ s|=.*|='"$KUBE_CONFIG"'|
+  /^KUBE_PROXY_ARGS=/ s|=.*|='"$KUBE_CONFIG"'|
 ' /etc/kubernetes/proxy
 
 if [ "$NETWORK_DRIVER" == "flannel" ]; then
-sed -i '
-/^FLANNEL_ETCD=/ s|=.*|="http://'"$ETCD_SERVER_IP"':2379"|
-' /etc/sysconfig/flanneld
+    sed -i '
+      /^FLANNEL_ETCD=/ s|=.*|="http://'"$ETCD_SERVER_IP"':2379"|
+    ' /etc/sysconfig/flanneld
 fi
 
 cat >> /etc/environment <<EOF

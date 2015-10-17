@@ -2,7 +2,10 @@
 
 . /etc/sysconfig/heat-params
 
-if [ "$NETWORK_DRIVER" == "flannel" ]; then
+if [ "$NETWORK_DRIVER" != "flannel" ]; then
+    exit 0
+fi
+
 . /etc/sysconfig/flanneld
 
 FLANNEL_JSON=/etc/sysconfig/flannel-network.json
@@ -12,11 +15,11 @@ FLANNEL_NETWORK_SUBNETLEN="$FLANNEL_NETWORK_SUBNETLEN"
 FLANNEL_USE_VXLAN="$FLANNEL_USE_VXLAN"
 
 sed -i '
-/^FLANNEL_ETCD=/ s/=.*/="http:\/\/127.0.0.1:2379"/
+  /^FLANNEL_ETCD=/ s/=.*/="http:\/\/127.0.0.1:2379"/
 ' /etc/sysconfig/flanneld
 
 if [ "$FLANNEL_USE_VXLAN" == "true" ]; then
-	use_vxlan=1
+    use_vxlan=1
 fi
 
 # Generate a flannel configuration that we will
@@ -28,7 +31,7 @@ cat > $FLANNEL_JSON <<EOF
 EOF
 
 if [ "$use_vxlan" = 1 ]; then
-cat >> $FLANNEL_JSON <<EOF
+    cat >> $FLANNEL_JSON <<EOF
   ,
   "Backend": {
     "Type": "vxlan"
@@ -39,5 +42,3 @@ fi
 cat >> $FLANNEL_JSON <<EOF
 }
 EOF
-
-fi

@@ -7,8 +7,8 @@ if [ "$HTTP_PROXY" != "" ]; then
 [Service]
 Environment=HTTP_PROXY=$HTTP_PROXY
 EOF
-systemctl daemon-reload
-systemctl --no-block restart docker.service
+    systemctl daemon-reload
+    systemctl --no-block restart docker.service
     if [ -f "/etc/bashrc" ]; then
         cat >> /etc/bashrc <<EOF
 declare -x http_proxy=$HTTP_PROXY
@@ -24,7 +24,7 @@ if [ "$HTTPS_PROXY" != "" ]; then
 declare -x https_proxy=$HTTPS_PROXY
 EOF
     else
-         echo "File /etc/bashrc does not exists, not setting https_proxy"
+        echo "File /etc/bashrc does not exists, not setting https_proxy"
     fi
 fi
 
@@ -37,7 +37,7 @@ EOF
         cat>> /etc/bashrc <<EOF
 declare -x no_proxy=$SWARM_MASTER_IP,$SWARM_NODE_IP
 EOF
-   fi
+    fi
 else
     echo "File /etc/bashrc does not exists, not setting no_proxy"
 fi

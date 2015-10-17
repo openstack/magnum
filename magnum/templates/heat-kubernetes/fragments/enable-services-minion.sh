@@ -15,4 +15,3 @@ for service in docker kubelet kube-proxy; do
     systemctl enable $service
     systemctl --no-block start $service
 done
-

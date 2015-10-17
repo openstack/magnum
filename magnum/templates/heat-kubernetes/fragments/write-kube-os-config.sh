@@ -19,4 +19,3 @@ monitor-delay=1m
 monitor-timeout=30s
 monitor-max-retries=3
 EOF
-

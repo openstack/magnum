@@ -21,7 +21,7 @@ set -o pipefail
 . /etc/sysconfig/heat-params
 
 if [ "$TLS_DISABLED" == "True" ]; then
-  exit 0
+    exit 0
 fi
 
 cert_dir=/srv/kubernetes
@@ -38,8 +38,8 @@ CLIENT_KEY=$cert_dir/client.key
 
 # Get CA certificate for this bay
 curl -X GET \
-    -H "X-Auth-Token: $USER_TOKEN" \
-    $MAGNUM_URL/certificates/$BAY_UUID | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > $CA_CERT
+  -H "X-Auth-Token: $USER_TOKEN" \
+  $MAGNUM_URL/certificates/$BAY_UUID | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > $CA_CERT
 
 # Create config for client's csr
 cat > ${cert_conf_dir}/client.conf <<EOF
@@ -76,7 +76,7 @@ curl -X POST \
     $MAGNUM_URL/certificates | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > ${CLIENT_CERT}
 
 sed -i '
-s|CA_CERT|'"$CA_CERT"'|
-s|CLIENT_CERT|'"$CLIENT_CERT"'|
-s|CLIENT_KEY|'"$CLIENT_KEY"'|
+  s|CA_CERT|'"$CA_CERT"'|
+  s|CLIENT_CERT|'"$CLIENT_CERT"'|
+  s|CLIENT_KEY|'"$CLIENT_KEY"'|
 ' /srv/kubernetes/kubeconfig.yaml

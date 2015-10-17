@@ -2,7 +2,9 @@
 
 . /etc/sysconfig/heat-params
 
-if [ "$NETWORK_DRIVER" == "flannel" ]; then
+if [ "$NETWORK_DRIVER" != "flannel" ]; then
+    exit 0
+fi
 
 . /etc/sysconfig/flanneld
 
@@ -54,4 +56,3 @@ chmod 0644 $FLANNEL_CONFIG_SERVICE
 
 systemctl enable flannel-config
 systemctl start --no-block flannel-config
-fi # end if [ "$NETWORK_DRIVER" == "flannel" ]
