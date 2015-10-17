@@ -161,7 +161,6 @@ value with your name and save it as client.conf
     [req]
     distinguished_name = req_distinguished_name
     req_extensions     = req_ext
-    x509_extensions    = req_ext
     prompt = no
     [req_distinguished_name]
     CN = Your Name
@@ -176,8 +175,6 @@ the CSR.
 
     openssl req -new -days 365 \
         -config client.conf \
-        -reqexts req_ext \
-        -extensions req_ext \
         -key client.key \
         -out client.csr
 
@@ -197,26 +194,36 @@ that Magnum set up.
 
     magnum ca-show --bay secure-k8sbay > ca.crt
 
+You need to get kubectl, a kubernetes CLI tool, to communicate with the bay
+
+::
+
+    wget https://github.com/kubernetes/kubernetes/releases/download/v1.0.4/kubernetes.tar.gz
+    tar -xzvf kubernetes.tar.gz
+    sudo cp -a kubernetes/platforms/linux/amd64/kubectl /usr/bin/kubectl
+
 Now let's run some kubectl commands to check secure communication::
 
-    kubectl version --certificate-authority=ca.crt
-                    --client-key=client.key
+    KUBERNETES_URL=$(magnum bay-show secure-k8sbay |
+                     awk '/ api_address /{print $4}')
+    kubectl version --certificate-authority=ca.crt \
+                    --client-key=client.key \
                     --client-certificate=client.crt -s $KUBERNETES_URL
 
-    Client Version: version.Info{Major:"1", Minor:"0", GitVersion:"v1.0.6", GitCommit:"388061f00f0d9e4d641f9ed4971c775e1654579d", GitTreeState:"clean"}
+    Client Version: version.Info{Major:"1", Minor:"0", GitVersion:"v1.0.4", GitCommit:"65d28d5fd12345592405714c81cd03b9c41d41d9", GitTreeState:"clean"}
     Server Version: version.Info{Major:"1", Minor:"0", GitVersion:"v1.0.4", GitCommit:"65d28d5fd12345592405714c81cd03b9c41d41d9", GitTreeState:"clean"}
 
-    kubectl create -f redis-master.yaml --certificate-authority=ca.crt
-                                        --client-key=client.key
+    kubectl create -f redis-master.yaml --certificate-authority=ca.crt \
+                                        --client-key=client.key \
                                         --client-certificate=client.crt -s $KUBERNETES_URL
 
     pods/test2
 
-    kubectl get pods --certificate-authority=ca.crt
-                     --client-key=client.key
+    kubectl get pods --certificate-authority=ca.crt \
+                     --client-key=client.key \
                      --client-certificate=client.crt -s $KUBERNETES_URL
-    NAME      READY     STATUS    RESTARTS   AGE
-    test2     1/1       Running   0          1m
+    NAME           READY     STATUS    RESTARTS   AGE
+    redis-master   2/2       Running   0          1m
 
 Once you have all of these pieces, you can configure your native client. Below
 is an example for Docker.
