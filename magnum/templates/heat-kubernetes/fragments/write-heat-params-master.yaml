@@ -24,3 +24,6 @@ write_files:
       BAY_UUID="$BAY_UUID"
       USER_TOKEN="$USER_TOKEN"
       MAGNUM_URL="$MAGNUM_URL"
+      HTTP_PROXY="$HTTP_PROXY"
+      HTTPS_PROXY="$HTTPS_PROXY"
+      NO_PROXY="$NO_PROXY"

@@ -135,6 +135,18 @@ parameters:
     type: string
     description: >
       tenant name
+  http_proxy:
+    type: string
+    description: http proxy address for docker
+    default: ""
+  https_proxy:
+    type: string
+    description: https proxy address for docker
+    default: ""
+  no_proxy:
+    type: string
+    description: no proxies for docker
+    default: ""
 
 resources:
 
@@ -181,6 +193,9 @@ resources:
             "$BAY_UUID": {get_param: bay_uuid}
             "$USER_TOKEN": {get_param: user_token}
             "$MAGNUM_URL": {get_param: magnum_url}
+            "$HTTP_PROXY": {get_param: http_proxy}
+            "$HTTPS_PROXY": {get_param: https_proxy}
+            "$NO_PROXY": {get_param: no_proxy}
 
   make_cert:
     type: OS::Heat::SoftwareConfig
@@ -254,6 +269,12 @@ resources:
       group: ungrouped
       config: {get_file: fragments/disable-selinux.sh}
 
+  add_proxy:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/add-proxy.sh}
+
   kube_master_init:
     type: OS::Heat::MultipartMime
     properties:
@@ -265,6 +286,7 @@ resources:
         - config: {get_resource: write_kube_os_config}
         - config: {get_resource: make_cert}
         - config: {get_resource: configure_kubernetes}
+        - config: {get_resource: add_proxy}
         - config: {get_resource: enable_services}
         - config: {get_resource: write_network_config}
         - config: {get_resource: network_config_service}

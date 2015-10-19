@@ -231,6 +231,21 @@ parameters:
     type: string
     description: endpoint to retrieve TLS certs from
 
+  http_proxy:
+    type: string
+    description: http proxy address for docker
+    default: ""
+
+  https_proxy:
+    type: string
+    description: https proxy address for docker
+    default: ""
+
+  no_proxy:
+    type: string
+    description: no proxies for docker
+    default: ""
+
 resources:
 
   ######################################################################
@@ -402,6 +417,9 @@ resources:
           tls_disabled: {get_param: tls_disabled}
           secgroup_base_id: {get_resource: secgroup_base}
           secgroup_kube_master_id: {get_resource: secgroup_kube_master}
+          http_proxy: {get_param: http_proxy}
+          https_proxy: {get_param: https_proxy}
+          no_proxy: {get_param: no_proxy}
 
   ######################################################################
   #
@@ -449,6 +467,9 @@ resources:
           kubernetes_port: {get_param: kubernetes_port}
           tls_disabled: {get_param: tls_disabled}
           secgroup_kube_minion_id: {get_resource: secgroup_kube_minion}
+          http_proxy: {get_param: http_proxy}
+          https_proxy: {get_param: https_proxy}
+          no_proxy: {get_param: no_proxy}
 
 outputs:
 

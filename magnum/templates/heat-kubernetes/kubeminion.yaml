@@ -149,6 +149,21 @@ parameters:
     type: string
     description: ID of the security group for kubernetes minion.
 
+  http_proxy:
+    type: string
+    description: http proxy address for docker
+    default: ""
+
+  https_proxy:
+    type: string
+    description: https proxy address for docker
+    default: ""
+
+  no_proxy:
+    type: string
+    description: no proxies for docker
+    default: ""
+
 resources:
 
   minion_wait_handle:
@@ -196,6 +211,9 @@ resources:
             $BAY_UUID: {get_param: bay_uuid}
             $USER_TOKEN: {get_param: user_token}
             $MAGNUM_URL: {get_param: magnum_url}
+            $HTTP_PROXY: {get_param: http_proxy}
+            $HTTPS_PROXY: {get_param: https_proxy}
+            $NO_PROXY: {get_param: no_proxy}
 
   write_kubeconfig:
     type: OS::Heat::SoftwareConfig
@@ -281,6 +299,12 @@ resources:
       group: ungrouped
       config: {get_file: fragments/disable-selinux.sh}
 
+  add_proxy:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/add-proxy.sh}
+
   kube_minion_init:
     type: OS::Heat::MultipartMime
     properties:
@@ -295,6 +319,7 @@ resources:
         - config: {get_resource: kube_register}
         - config: {get_resource: configure_kubernetes_minion}
         - config: {get_resource: network_service}
+        - config: {get_resource: add_proxy}
         - config: {get_resource: enable_services}
         - config: {get_resource: minion_wc_notify}
 
