@@ -43,16 +43,16 @@ parameters:
   # The following are all generated in the parent template.
   kube_master_ip:
     type: string
-    description: IP address of the Kubernetes master server. Need to be UPDATE by USER
-    default: 10.0.0.3
+    description: IP address of the Kubernetes master server.
+    default:
   fixed_network:
     type: string
-    description: Network from which to allocate fixed addresses. Need to be UPDATE by USER
-    default: 9869ac2b-9701-4bef-b842-6693ee70b1f2
+    description: Network from which to allocate fixed addresses.
+    default:
   fixed_subnet:
     type: string
-    description: Subnet from which to allocate fixed addresses. Need to be UPDATE by USER
-    default: 6f6e88a3-acfb-4a1d-aba5-d47fb8c0d55c
+    description: Subnet from which to allocate fixed addresses.
+    default:
   wait_condition_timeout:
     type: number
     description : >
@@ -162,6 +162,12 @@ resources:
       group: ungrouped
       config: {get_file: fragments/kube-examples.yaml}
 
+  kube_spark:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/kube-spark.yaml}
+  
   docker_service:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -208,11 +214,12 @@ resources:
         - config: {get_resource: write_heat_params}
         - config: {get_resource: kube_user}
         - config: {get_resource: kube_examples}
+        - config: {get_resource: kube_spark}
         - config: {get_resource: configure_docker_storage}
         - config: {get_resource: kube_register}
         - config: {get_resource: configure_kubernetes_node}
         - config: {get_resource: docker_service}
-	- config: {get_resource: cadvisor_service}
+        - config: {get_resource: cadvisor_service}
         - config: {get_resource: enable_services}
         - config: {get_resource: node_wc_notify}
 
