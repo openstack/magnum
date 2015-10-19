@@ -1,5 +1,4 @@
 # SUR 2015/08/20
-# Senlin replacing Heat in Magnum
 # cluster_function for bay_conductor 
 
 import argparse

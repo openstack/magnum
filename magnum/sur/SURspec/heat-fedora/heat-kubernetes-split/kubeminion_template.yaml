@@ -1,0 +1,274 @@
+heat_template_version: 2014-10-16
+
+description: >
+  This is a nested stack that defines a single Kubernetes node, This
+  stack is included by an AutoScalingGroup resource in the parent
+  template (kubecluster.yaml).
+parameters:
+
+  server_image:
+    type: string
+    description: glance image used to boot the server
+
+  node_flavor:
+    type: string
+    default: m1.small
+    description: flavor to use when booting the server
+
+  ssh_key_name:
+    type: string
+    description: name of ssh key to be provisioned on our server
+    default: lars
+
+  external_network:
+    type: string
+    description: uuid/name of a network to use for floating ip addresses
+    default: public
+
+  kube_allow_priv:
+    type: string
+    description: >
+      whether or not kubernetes should permit privileged containers.
+    default: "false"
+    constraints:
+      - allowed_values: ["true", "false"]
+
+  docker_volume_size:
+    type: number
+    description: >
+      size of a cinder volume to allocate to docker for container/image
+      storage
+    default: 5
+
+  # The following are all generated in the parent template.
+  kube_master_ip:
+    type: string
+    description: IP address of the Kubernetes master server. Need to be UPDATE by USER
+    default: 10.0.0.3
+  fixed_network:
+    type: string
+    description: Network from which to allocate fixed addresses. Need to be UPDATE by USER
+    default: 9869ac2b-9701-4bef-b842-6693ee70b1f2
+  fixed_subnet:
+    type: string
+    description: Subnet from which to allocate fixed addresses. Need to be UPDATE by USER
+    default: 6f6e88a3-acfb-4a1d-aba5-d47fb8c0d55c
+  wait_condition_timeout:
+    type: number
+    description : >
+      timeout for the Wait Conditions
+    default: 6000
+  rhn_register_host:
+    type: string
+    description: >
+      whether or not to try registering with RHN
+    default: "false"
+    constraints:
+      - allowed_values: ["true", "false"]
+  rhn_username:
+    type: string
+    description: >
+      username to use for authenticating with RHN
+    default: ''
+  rhn_password:
+    type: string
+    description: >
+      password to use for authenticating with RHN
+    default: ''
+
+resources:
+
+  node_wait_handle:
+    type: OS::Heat::WaitConditionHandle
+
+  node_wait_condition:
+    type: OS::Heat::WaitCondition
+    depends_on: kube_node
+    properties:
+      handle: {get_resource: node_wait_handle}
+      timeout: {get_param: wait_condition_timeout}
+
+  secgroup_all_open:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      rules:
+        - protocol: icmp
+        - protocol: tcp
+        - protocol: udp
+
+  ######################################################################
+  #
+  # software configs.  these are components that are combined into
+  # a multipart MIME user-data archive.
+  #
+
+  write_heat_params:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/write-heat-params.yaml}
+          params:
+            "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
+            "$KUBE_MASTER_IP": {get_param: kube_master_ip}
+            "$DOCKER_VOLUME": {get_resource: docker_volume}
+
+  rhn_register:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/rhn-register.yaml}
+          params:
+            "$RHN_REGISTER_HOST": {get_param: rhn_register_host}
+            "$RHN_USERNAME": {get_param: rhn_username}
+            "$RHN_PASSWORD": {get_param: rhn_password}
+
+  atomic_upgrade:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/atomic-upgrade.yaml}
+
+  configure_docker_storage:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/configure-docker-storage.sh}
+
+  kube_register:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/kube-register.yaml}
+
+  configure_kubernetes_node:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/configure-kubernetes-node.sh}
+
+  kube_user:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/kube-user.yaml}
+
+  kube_examples:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/kube-examples.yaml}
+
+  docker_service:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/docker.service.yaml}
+
+  cadvisor_service:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/cadvisor.service.yaml}
+
+  enable_services:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/enable-services-node.sh}
+
+  node_wc_notify:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: |
+            #!/bin/bash -v
+            wc_notify --data-binary '{"status": "SUCCESS"}'
+          params:
+            wc_notify: {get_attr: [node_wait_handle, curl_cli]}
+
+  disable_selinux:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/disable-selinux.sh}
+
+  kube_node_init:
+    type: OS::Heat::MultipartMime
+    properties:
+      parts:
+        - config: {get_resource: disable_selinux}
+        - config: {get_resource: rhn_register}
+        - config: {get_resource: atomic_upgrade}
+        - config: {get_resource: write_heat_params}
+        - config: {get_resource: kube_user}
+        - config: {get_resource: kube_examples}
+        - config: {get_resource: configure_docker_storage}
+        - config: {get_resource: kube_register}
+        - config: {get_resource: configure_kubernetes_node}
+        - config: {get_resource: docker_service}
+	- config: {get_resource: cadvisor_service}
+        - config: {get_resource: enable_services}
+        - config: {get_resource: node_wc_notify}
+
+  ######################################################################
+  #
+  # a single kubernetes node.
+  #
+
+  kube_node:
+    type: OS::Nova::Server
+    properties:
+      image: {get_param: server_image}
+      flavor: {get_param: node_flavor}
+      key_name: {get_param: ssh_key_name}
+      user_data_format: RAW
+      user_data: {get_resource: kube_node_init}
+      networks:
+        - port: {get_resource: kube_node_eth0}
+
+  kube_node_eth0:
+    type: OS::Neutron::Port
+    properties:
+      network: {get_param: fixed_network}
+      security_groups:
+        - get_resource: secgroup_all_open
+      fixed_ips:
+        - subnet: {get_param: fixed_subnet}
+      replacement_policy: AUTO
+
+  kube_node_floating:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: {get_param: external_network}
+      port_id: {get_resource: kube_node_eth0}
+
+  ######################################################################
+  #
+  # docker storage.  This allocates a cinder volume and attaches it
+  # to the node.
+  #
+
+  docker_volume:
+    type: OS::Cinder::Volume
+    properties:
+      size: {get_param: docker_volume_size}
+
+  docker_volume_attach:
+    type: OS::Cinder::VolumeAttachment
+    properties:
+      instance_uuid: {get_resource: kube_node}
+      volume_id: {get_resource: docker_volume}
+
+outputs:
+
+  kube_node_ip:
+    value: {get_attr: [kube_node_eth0, fixed_ips, 0, ip_address]}
+  kube_node_external_ip:
+    value: {get_attr: [kube_node_floating, floating_ip_address]}
+
