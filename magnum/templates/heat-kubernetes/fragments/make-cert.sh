@@ -45,8 +45,8 @@ SERVER_KEY=$cert_dir/server.key
 
 # Get CA certificate for this bay
 curl -X GET \
-    -H "X-Auth-Token: $USER_TOKEN" \
-    $MAGNUM_URL/certificates/$BAY_UUID | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > ${CA_CERT}
+  -H "X-Auth-Token: $USER_TOKEN" \
+  $MAGNUM_URL/certificates/$BAY_UUID | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > ${CA_CERT}
 
 # Create config for server's csr
 cat > ${cert_conf_dir}/server.conf <<EOF

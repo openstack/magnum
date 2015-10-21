@@ -2,7 +2,9 @@
 
 . /etc/sysconfig/heat-params
 
-if [ "$NETWORK_DRIVER" == "flannel" ]; then
+if [ "$NETWORK_DRIVER" != "flannel" ]; then
+    exit 0
+fi
 
 FLANNEL_DOCKER_BRIDGE_BIN=/usr/local/bin/flannel-docker-bridge
 FLANNEL_DOCKER_BRIDGE_SERVICE=/etc/systemd/system/flannel-docker-bridge.service
@@ -73,5 +75,3 @@ chmod 0644 $FLANNEL_DOCKER_BRIDGE_CONF
 echo "activating service flanneld"
 systemctl enable flanneld
 systemctl --no-block start flanneld
-
-fi

@@ -20,4 +20,6 @@ echo "$myip" > /etc/mesos-slave/ip
 echo "docker,mesos" > /etc/mesos-slave/containerizers
 
 # Amount of time to wait for an executor to register
-echo "$EXECUTOR_REGISTRATION_TIMEOUT" > /etc/mesos-slave/executor_registration_timeout
+cat > /etc/mesos-slave/executor_registration_timeout <<EOF
+$EXECUTOR_REGISTRATION_TIMEOUT
+EOF

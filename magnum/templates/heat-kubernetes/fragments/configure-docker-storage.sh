@@ -23,4 +23,3 @@ vgcreate docker $DOCKER_DEV
 cat > /etc/sysconfig/docker-storage-setup <<EOF
 VG=docker
 EOF
-
