@@ -2,42 +2,39 @@
 
 . /etc/sysconfig/heat-params
 
-if [ "$HTTP_PROXY" != "" ]; then
-    cat > /etc/systemd/system/docker.service.d/proxy.conf <<EOF
-[Service]
-Environment=HTTP_PROXY=$HTTP_PROXY
+DOCKER_PROXY_CONF=/etc/systemd/system/docker.service.d/proxy.conf
+BASH_RC=/etc/bashrc
+
+if [ -n "$HTTP_PROXY" ]; then
+    cat <<EOF | sed "s/^ *//" > $DOCKER_PROXY_CONF
+    [Service]
+    Environment=HTTP_PROXY=$HTTP_PROXY
 EOF
+
     systemctl daemon-reload
     systemctl --no-block restart docker.service
-    if [ -f "/etc/bashrc" ]; then
-        cat >> /etc/bashrc <<EOF
-declare -x http_proxy=$HTTP_PROXY
-EOF
+
+    if [ -f "$BASH_RC" ]; then
+        echo "declare -x http_proxy=$HTTP_PROXY" >> $BASH_RC
     else
-        echo "File /etc/bashrc does not exists, not setting http_proxy"
+        echo "File $BASH_RC does not exist, not setting http_proxy"
     fi
 fi
 
-if [ "$HTTPS_PROXY" != "" ]; then
-    if [ -f "/etc/bashrc" ]; then
-        cat >> /etc/bashrc <<EOF
-declare -x https_proxy=$HTTPS_PROXY
-EOF
+if [ -n "$HTTPS_PROXY" ]; then
+    if [ -f $BASH_RC ]; then
+        echo "declare -x https_proxy=$HTTPS_PROXY" >> $BASH_RC
     else
-        echo "File /etc/bashrc does not exists, not setting https_proxy"
+        echo "File $BASH_RC does not exist, not setting https_proxy"
     fi
 fi
 
-if [ -f "/etc/bashrc" ]; then
+if [ -f "$BASH_RC" ]; then
     if [ -n "$NO_PROXY" ]; then
-        cat >> /etc/bashrc <<EOF
-declare -x no_proxy=$NO_PROXY
-EOF
+        echo "declare -x no_proxy=$NO_PROXY" >> $BASH_RC
     else
-        cat>> /etc/bashrc <<EOF
-declare -x no_proxy=$SWARM_MASTER_IP,$SWARM_NODE_IP
-EOF
+        echo "declare -x no_proxy=$SWARM_MASTER_IP,$SWARM_NODE_IP" >> $BASH_RC
     fi
 else
-    echo "File /etc/bashrc does not exists, not setting no_proxy"
+    echo "File $BASH_RC does not exist, not setting no_proxy"
 fi
