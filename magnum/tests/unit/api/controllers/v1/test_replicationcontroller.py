@@ -555,7 +555,7 @@ class TestDelete(api_base.FunctionalTest):
         response = self.delete(
             '/rcs/test_rc/5d12f6fd-a196-4bf0-ae4c-1f639a523a5',
             expect_errors=True)
-        self.assertEqual(400, response.status_int)
+        self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
