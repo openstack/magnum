@@ -29,6 +29,10 @@ nosetests.xml
 .testrepository
 .venv
 
+# Functional test
+functional-tests.log
+functional_creds.conf
+
 # Translations
 *.mo
 
