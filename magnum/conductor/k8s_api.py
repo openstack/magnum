@@ -22,6 +22,7 @@ from magnum.common import cert_manager
 from magnum.common.pythonk8sclient.swagger_client import api_client
 from magnum.common.pythonk8sclient.swagger_client.apis import apiv_api
 from magnum.conductor import utils
+from magnum.objects.bay import Bay
 
 
 LOG = logging.getLogger(__name__)
@@ -49,7 +50,11 @@ class K8sAPI(apiv_api.ApivApi):
         self.cert_file = None
         self.key_file = None
 
-        bay = utils.retrieve_bay(context, obj)
+        # If the obj is already a Bay we need not retrieve a Bay.
+        if isinstance(obj, Bay):
+            bay = obj
+        else:
+            bay = utils.retrieve_bay(context, obj)
         if bay.magnum_cert_ref:
             self._create_certificate_files(bay)
 
