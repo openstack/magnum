@@ -376,5 +376,5 @@ class TestHeatPoller(base.TestCase):
     @patch('magnum.conductor.handlers.bay_conductor.LOG')
     def test_bay_failed(self, logger):
         mock_heat_stack, bay, poller = self.setup_poll_test()
-        poller._bay_failed()
+        poller._bay_failed(mock_heat_stack)
         self.assertEqual(1, logger.error.call_count)
