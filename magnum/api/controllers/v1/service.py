@@ -208,11 +208,10 @@ class ServicesController(rest.RestController):
                                                     sort_dir=sort_dir)
 
     @policy.enforce_wsgi("service")
-    @expose.expose(ServiceCollection, types.uuid,
-                   types.uuid, int, wtypes.text, wtypes.text,
-                   types.uuid_or_name)
-    def get_all(self, service_uuid=None, marker=None, limit=None,
-                sort_key='id', sort_dir='asc', bay_ident=None):
+    @expose.expose(ServiceCollection, types.uuid, int, wtypes.text,
+                   wtypes.text, types.uuid_or_name)
+    def get_all(self, marker=None, limit=None, sort_key='id',
+                sort_dir='asc', bay_ident=None):
         """Retrieve a list of services.
 
         :param marker: pagination marker for large data sets.
@@ -225,16 +224,12 @@ class ServicesController(rest.RestController):
                                              sort_dir, bay_ident)
 
     @policy.enforce_wsgi("service")
-    @expose.expose(ServiceCollection, types.uuid,
-                   types.uuid, int, wtypes.text, wtypes.text,
-                   types.uuid_or_name)
-    def detail(self, service_uuid=None, marker=None, limit=None,
-               sort_key='id', sort_dir='asc',
-               bay_ident=None):
+    @expose.expose(ServiceCollection, types.uuid, int, wtypes.text,
+                   wtypes.text, types.uuid_or_name)
+    def detail(self, marker=None, limit=None, sort_key='id',
+               sort_dir='asc', bay_ident=None):
         """Retrieve a list of services with detail.
 
-        :param service_uuid: UUID of a service, to get only
-               services for that service.
         :param marker: pagination marker for large data sets.
         :param limit: maximum number of resources to return in a single result.
         :param sort_key: column to sort results by. Default: id.

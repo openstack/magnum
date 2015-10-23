@@ -198,11 +198,10 @@ class PodsController(rest.RestController):
                                                 sort_dir=sort_dir)
 
     @policy.enforce_wsgi("pod")
-    @expose.expose(PodCollection, types.uuid,
-                   types.uuid, int, wtypes.text, wtypes.text,
-                   types.uuid_or_name)
-    def get_all(self, pod_uuid=None, marker=None, limit=None,
-                sort_key='id', sort_dir='asc', bay_ident=None):
+    @expose.expose(PodCollection, types.uuid, int, wtypes.text,
+                   wtypes.text, types.uuid_or_name)
+    def get_all(self, marker=None, limit=None, sort_key='id',
+                sort_dir='asc', bay_ident=None):
         """Retrieve a list of pods.
 
         :param marker: pagination marker for large data sets.
@@ -215,15 +214,12 @@ class PodsController(rest.RestController):
                                          sort_dir, bay_ident)
 
     @policy.enforce_wsgi("pod")
-    @expose.expose(PodCollection, types.uuid,
-                   types.uuid, int, wtypes.text, wtypes.text,
-                   types.uuid)
-    def detail(self, pod_uuid=None, marker=None, limit=None,
-               sort_key='id', sort_dir='asc',
-               bay_ident=None):
+    @expose.expose(PodCollection, types.uuid, int, wtypes.text,
+                   wtypes.text, types.uuid_or_name)
+    def detail(self, marker=None, limit=None, sort_key='id',
+               sort_dir='asc', bay_ident=None):
         """Retrieve a list of pods with detail.
 
-        :param pod_uuid: UUID of a pod, to get only pods for that pod.
         :param marker: pagination marker for large data sets.
         :param limit: maximum number of resources to return in a single result.
         :param sort_key: column to sort results by. Default: id.

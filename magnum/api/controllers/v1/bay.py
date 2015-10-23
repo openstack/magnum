@@ -211,10 +211,10 @@ class BaysController(rest.RestController):
                                                 sort_dir=sort_dir)
 
     @policy.enforce_wsgi("bay")
-    @expose.expose(BayCollection, types.uuid,
-                   types.uuid, int, wtypes.text, wtypes.text)
-    def get_all(self, bay_uuid=None, marker=None, limit=None,
-                sort_key='id', sort_dir='asc'):
+    @expose.expose(BayCollection, types.uuid, int, wtypes.text,
+                   wtypes.text)
+    def get_all(self, marker=None, limit=None, sort_key='id',
+                sort_dir='asc'):
         """Retrieve a list of bays.
 
         :param marker: pagination marker for large data sets.
@@ -226,13 +226,12 @@ class BaysController(rest.RestController):
                                          sort_dir)
 
     @policy.enforce_wsgi("bay")
-    @expose.expose(BayCollection, types.uuid,
-                   types.uuid, int, wtypes.text, wtypes.text)
-    def detail(self, bay_uuid=None, marker=None, limit=None,
-               sort_key='id', sort_dir='asc'):
+    @expose.expose(BayCollection, types.uuid, int, wtypes.text,
+                   wtypes.text)
+    def detail(self, marker=None, limit=None, sort_key='id',
+               sort_dir='asc'):
         """Retrieve a list of bays with detail.
 
-        :param bay_uuid: UUID of a bay, to get only bays for that bay.
         :param marker: pagination marker for large data sets.
         :param limit: maximum number of resources to return in a single result.
         :param sort_key: column to sort results by. Default: id.

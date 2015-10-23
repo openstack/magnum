@@ -306,10 +306,10 @@ class ContainersController(rest.RestController):
                                                       sort_dir=sort_dir)
 
     @policy.enforce_wsgi("container")
-    @expose.expose(ContainerCollection, types.uuid,
-                   types.uuid, int, wtypes.text, wtypes.text)
-    def get_all(self, container_uuid=None, marker=None, limit=None,
-                sort_key='id', sort_dir='asc'):
+    @expose.expose(ContainerCollection, types.uuid, int,
+                   wtypes.text, wtypes.text)
+    def get_all(self, marker=None, limit=None, sort_key='id',
+                sort_dir='asc'):
         """Retrieve a list of containers.
 
         :param marker: pagination marker for large data sets.
@@ -321,14 +321,12 @@ class ContainersController(rest.RestController):
                                                sort_dir)
 
     @policy.enforce_wsgi("container")
-    @expose.expose(ContainerCollection, types.uuid,
-                   types.uuid, int, wtypes.text, wtypes.text)
-    def detail(self, container_uuid=None, marker=None, limit=None,
-               sort_key='id', sort_dir='asc'):
+    @expose.expose(ContainerCollection, types.uuid, int,
+                   wtypes.text, wtypes.text)
+    def detail(self, marker=None, limit=None, sort_key='id',
+               sort_dir='asc'):
         """Retrieve a list of containers with detail.
 
-        :param container_uuid: UUID of a container, to get only containers
-                               for that container.
         :param marker: pagination marker for large data sets.
         :param limit: maximum number of resources to return in a single result.
         :param sort_key: column to sort results by. Default: id.

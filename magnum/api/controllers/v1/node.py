@@ -149,10 +149,10 @@ class NodesController(rest.RestController):
                                                  sort_dir=sort_dir)
 
     @policy.enforce_wsgi("node")
-    @expose.expose(NodeCollection, types.uuid,
-                   types.uuid, int, wtypes.text, wtypes.text)
-    def get_all(self, node_uuid=None, marker=None, limit=None,
-                sort_key='id', sort_dir='asc'):
+    @expose.expose(NodeCollection, types.uuid, int, wtypes.text,
+                   wtypes.text)
+    def get_all(self, marker=None, limit=None, sort_key='id',
+                sort_dir='asc'):
         """Retrieve a list of nodes.
 
         :param marker: pagination marker for large data sets.
@@ -164,13 +164,12 @@ class NodesController(rest.RestController):
                                           sort_dir)
 
     @policy.enforce_wsgi("node")
-    @expose.expose(NodeCollection, types.uuid,
-                   types.uuid, int, wtypes.text, wtypes.text)
-    def detail(self, node_uuid=None, marker=None, limit=None,
-               sort_key='id', sort_dir='asc'):
+    @expose.expose(NodeCollection, types.uuid, int, wtypes.text,
+                   wtypes.text)
+    def detail(self, marker=None, limit=None, sort_key='id',
+               sort_dir='asc'):
         """Retrieve a list of nodes with detail.
 
-        :param node_uuid: UUID of a node, to get only nodes for that node.
         :param marker: pagination marker for large data sets.
         :param limit: maximum number of resources to return in a single result.
         :param sort_key: column to sort results by. Default: id.

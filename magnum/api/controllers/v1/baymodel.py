@@ -263,10 +263,10 @@ class BayModelsController(rest.RestController):
             raise exception.ImageNotAuthorized(image_id=image_ident)
 
     @policy.enforce_wsgi("baymodel")
-    @expose.expose(BayModelCollection, types.uuid,
-                   types.uuid, int, wtypes.text, wtypes.text)
-    def get_all(self, baymodel_uuid=None, marker=None, limit=None,
-                sort_key='id', sort_dir='asc'):
+    @expose.expose(BayModelCollection, types.uuid, int, wtypes.text,
+                   wtypes.text)
+    def get_all(self, marker=None, limit=None, sort_key='id',
+                sort_dir='asc'):
         """Retrieve a list of baymodels.
 
         :param marker: pagination marker for large data sets.
@@ -278,14 +278,12 @@ class BayModelsController(rest.RestController):
                                               sort_dir)
 
     @policy.enforce_wsgi("baymodel")
-    @expose.expose(BayModelCollection, types.uuid,
-                   types.uuid, int, wtypes.text, wtypes.text)
-    def detail(self, baymodel_uuid=None, marker=None, limit=None,
-               sort_key='id', sort_dir='asc'):
+    @expose.expose(BayModelCollection, types.uuid, int, wtypes.text,
+                   wtypes.text)
+    def detail(self, marker=None, limit=None, sort_key='id',
+               sort_dir='asc'):
         """Retrieve a list of baymodels with detail.
 
-        :param baymodel_uuid: UUID of a baymodel, to get only baymodels for
-               that baymodel.
         :param marker: pagination marker for large data sets.
         :param limit: maximum number of resources to return in a single result.
         :param sort_key: column to sort results by. Default: id.
