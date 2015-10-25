@@ -225,6 +225,21 @@ Now let's run some kubectl commands to check secure communication::
     NAME           READY     STATUS    RESTARTS   AGE
     redis-master   2/2       Running   0          1m
 
+You can create kubectl configuration for these flags::
+
+    kubectl config set-cluster secure-k8sbay --server=${KUBERNETES_URL} \
+        --certificate-authority=${PWD}/ca.crt
+    kubectl config set-credentials client --certificate-authority=${PWD}/ca.crt \
+        --client-key=${PWD}/client.key --client-certificate=${PWD}/client.crt
+    kubectl config set-context secure-k8sbay --cluster=secure-k8sbay --user=client
+    kubectl config use-context secure-k8sbay
+
+Now you can use kubectl commands without extra flags::
+
+    kubectl get pods
+    NAME           READY     STATUS    RESTARTS   AGE
+    redis-master   2/2       Running   0          1m
+
 Once you have all of these pieces, you can configure your native client. Below
 is an example for Docker.
 
@@ -233,5 +248,6 @@ is an example for Docker.
     docker -H tcp://192.168.19.86:2376 --tlsverify \
         --tlscacert ca.crt \
         --tlskey client.key \
-        --tlscert client.crt
+        --tlscert client.crt \
         info
+
