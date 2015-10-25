@@ -240,7 +240,7 @@ class HeatPoller(object):
         if stack.stack_status in (bay_status.CREATE_FAILED,
                                   bay_status.DELETE_FAILED,
                                   bay_status.UPDATE_FAILED):
-            self._bay_failed()
+            self._bay_failed(stack)
             raise loopingcall.LoopingCallDone()
         # only check max attempts when the stack is being created when
         # the timeout hasn't been set. If the timeout has been set then
@@ -291,10 +291,10 @@ class HeatPoller(object):
         self.bay.node_count = stack.parameters[stack_nc_param]
         self.bay.save()
 
-    def _bay_failed(self):
+    def _bay_failed(self, stack):
         LOG.error(_LE('Bay error, stack status: %(bay_status)s, '
                       'stack_id: %(stack_id)s, '
                       'reason: %(reason)s') %
-                  {'bay_status': self.bay.stack_status,
+                  {'bay_status': stack.stack_status,
                    'stack_id': self.bay.stack_id,
                    'reason': self.bay.status_reason})
