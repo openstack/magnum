@@ -263,20 +263,6 @@ class TestPatch(api_base.FunctionalTest):
         parse_manifest.assert_called_once_with()
         self.assertTrue(rc_update.is_called)
 
-    def test_add_ok(self):
-        new_image = 'rc_example_B_image'
-        response = self.patch_json('/rcs/%s/%s' % (self.rc.uuid,
-                                                   self.rc.bay_uuid),
-                                   [{'path': '/images/0',
-                                     'value': new_image,
-                                     'op': 'add'}])
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(200, response.status_int)
-
-        response = self.get_json('/rcs/%s/%s' % (self.rc.uuid,
-                                                 self.rc.bay_uuid))
-        self.assertEqual(new_image, response['images'][0])
-
     def test_add_non_existent_property(self):
         response = self.patch_json(
             '/rcs/%s/%s' % (self.rc.uuid, self.rc.bay_uuid),

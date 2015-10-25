@@ -367,30 +367,6 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(400, response.status_code)
         self.assertTrue(response.json['error_message'])
 
-    def test_add_root(self):
-        name = 'bay_model_example_B'
-        response = self.patch_json(
-            '/baymodels/%s' % self.baymodel.uuid,
-            [{'path': '/name', 'value': name, 'op': 'add'}])
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(200, response.status_int)
-
-        response = self.get_json('/baymodels/%s' % self.baymodel.uuid)
-        self.assertEqual(name, response['name'])
-        # Assert nothing else was changed
-        self.assertEqual(self.baymodel.uuid, response['uuid'])
-        self.assertEqual(self.baymodel.image_id, response['image_id'])
-        self.assertEqual(self.baymodel.apiserver_port,
-                         response['apiserver_port'])
-        self.assertEqual(self.baymodel.network_driver,
-                         response['network_driver'])
-        self.assertEqual(self.baymodel.docker_volume_size,
-                         response['docker_volume_size'])
-        self.assertEqual(self.baymodel.coe,
-                         response['coe'])
-        self.assertEqual(self.baymodel.labels,
-                         response['labels'])
-
     def test_add_root_non_existent(self):
         response = self.patch_json(
             '/baymodels/%s' % self.baymodel.uuid,
@@ -399,49 +375,6 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['error_message'])
-
-    def test_add_multi(self):
-        json = [
-            {
-                'path': '/name',
-                'value': 'bay_model_example_B',
-                'op': 'add'
-            },
-            {
-                'path': '/image_id',
-                'value': 'my-image',
-                'op': 'add'
-            }
-        ]
-        response = self.patch_json('/baymodels/%s' % self.baymodel.uuid, json)
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(200, response.status_code)
-
-        response = self.get_json('/baymodels/%s' % self.baymodel.uuid)
-        self.assertEqual('bay_model_example_B', response['name'])
-        self.assertEqual('my-image', response['image_id'])
-        # Assert nothing else was changed
-        self.assertEqual(self.baymodel.uuid, response['uuid'])
-        self.assertEqual(self.baymodel.apiserver_port,
-                         response['apiserver_port'])
-        self.assertEqual(self.baymodel.fixed_network,
-                         response['fixed_network'])
-        self.assertEqual(self.baymodel.network_driver,
-                         response['network_driver'])
-        self.assertEqual(self.baymodel.docker_volume_size,
-                         response['docker_volume_size'])
-        self.assertEqual(self.baymodel.ssh_authorized_key,
-                         response['ssh_authorized_key'])
-        self.assertEqual(self.baymodel.coe,
-                         response['coe'])
-        self.assertEqual(self.baymodel.http_proxy,
-                         response['http_proxy'])
-        self.assertEqual(self.baymodel.https_proxy,
-                         response['https_proxy'])
-        self.assertEqual(self.baymodel.no_proxy,
-                         response['no_proxy'])
-        self.assertEqual(self.baymodel.labels,
-                         response['labels'])
 
     def test_remove_uuid(self):
         response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,

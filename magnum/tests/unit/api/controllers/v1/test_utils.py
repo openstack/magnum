@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import jsonpatch
 import mock
 import wsme
 
@@ -121,3 +122,31 @@ class TestApiUtils(base.FunctionalTest):
         self.assertRaises(exception.Conflict,
                           utils.get_openstack_resource,
                           fake_manager, 'fake_resource', 'fake_resource_type')
+
+    @mock.patch.object(jsonpatch, 'apply_patch')
+    def test_apply_jsonpatch(self, mock_jsonpatch):
+        doc = {'bay_uuid': 'id', 'node_count': 1}
+        patch = [{"path": "/node_count", "value": 2, "op": "replace"}]
+        utils.apply_jsonpatch(doc, patch)
+        mock_jsonpatch.assert_called_once_with(doc, patch)
+
+    def test_apply_jsonpatch_add_attr_not_exist(self):
+        doc = {'bay_uuid': 'id', 'node_count': 1}
+        patch = [{"path": "/fake", "value": 2, "op": "add"}]
+        exc = self.assertRaises(wsme.exc.ClientSideError,
+                                utils.apply_jsonpatch,
+                                doc, patch)
+        self.assertEqual(
+            "Adding a new attribute /fake to the root of the resource is "
+            "not allowed.", exc.message)
+
+    def test_apply_jsonpatch_add_attr_already_exist(self):
+        doc = {'bay_uuid': 'id', 'node_count': 1}
+        patch = [{"path": "/node_count", "value": 2, "op": "add"}]
+        exc = self.assertRaises(wsme.exc.ClientSideError,
+                                utils.apply_jsonpatch,
+                                doc, patch)
+
+        self.assertEqual(
+            "The attribute /node_count has existed, please use "
+            "'replace' operation instead.", exc.message)

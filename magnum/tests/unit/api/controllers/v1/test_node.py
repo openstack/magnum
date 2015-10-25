@@ -175,17 +175,6 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
-    def test_add_ok(self):
-        new_image = 'Ubuntu'
-        response = self.patch_json(
-            '/nodes/%s' % self.node.uuid,
-            [{'path': '/image_id', 'value': new_image, 'op': 'add'}])
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(200, response.status_int)
-
-        response = self.get_json('/nodes/%s' % self.node.uuid)
-        self.assertEqual(new_image, response['image_id'])
-
     def test_add_non_existent_property(self):
         response = self.patch_json(
             '/nodes/%s' % self.node.uuid,
