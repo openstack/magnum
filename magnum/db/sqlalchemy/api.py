@@ -402,9 +402,11 @@ class Connection(api.Connection):
         if filters is None:
             filters = {}
 
-        for key in ['name', 'image', 'project_id', 'user_id', 'memory']:
-            if key in filters:
-                query = query.filter_by(**{key: filters[key]})
+        filter_names = ['name', 'image', 'project_id', 'user_id',
+                        'memory', 'bay_uuid']
+        for name in filter_names:
+            if name in filters:
+                query = query.filter_by(**{name: filters[name]})
 
         return query
 
