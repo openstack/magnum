@@ -37,6 +37,10 @@ asse_equal_end_with_none_re = re.compile(
     r"(.)*assertEqual\((\w|\.|\'|\"|\[|\])+, None\)")
 asse_equal_start_with_none_re = re.compile(
     r"(.)*assertEqual\(None, (\w|\.|\'|\"|\[|\])+\)")
+assert_equal_with_true_re = re.compile(
+    r"assertEqual\(True,")
+assert_equal_with_false_re = re.compile(
+    r"assertEqual\(False,")
 
 
 def check_policy_enforce_decorator(logical_line,
@@ -68,7 +72,20 @@ def no_mutable_default_args(logical_line):
         yield (0, msg)
 
 
+def assert_equal_true_or_false(logical_line):
+    """Check for assertEqual(True, A) or assertEqual(False, A) sentences
+
+    M323
+    """
+    res = (assert_equal_with_true_re.search(logical_line) or
+           assert_equal_with_false_re.search(logical_line))
+    if res:
+        yield (0, "M323: assertEqual(True, A) or assertEqual(False, A) "
+               "sentences not allowed")
+
+
 def factory(register):
     register(check_policy_enforce_decorator)
     register(no_mutable_default_args)
     register(assert_equal_none)
+    register(assert_equal_true_or_false)

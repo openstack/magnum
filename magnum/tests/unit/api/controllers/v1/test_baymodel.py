@@ -272,7 +272,7 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(200, response.status_code)
 
         response = self.get_json('/baymodels/%s' % self.baymodel.uuid)
-        self.assertEqual(True, response['public'])
+        self.assertTrue(response['public'])
 
     @mock.patch.object(magnum_policy, 'enforce')
     def test_update_public_baymodel_fail(self, mock_policy):
@@ -668,7 +668,7 @@ class TestPost(api_base.FunctionalTest):
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.baymodel_post_data(public=True)
             response = self.post_json('/baymodels', bdict)
-            self.assertEqual(True, response.json['public'])
+            self.assertTrue(response.json['public'])
             mock_policy.assert_called_with(mock.ANY, "baymodel:publish",
                                            None, do_raise=False)
             cc_mock.assert_called_once_with(mock.ANY)
@@ -706,7 +706,7 @@ class TestPost(api_base.FunctionalTest):
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.baymodel_post_data(public=False)
             response = self.post_json('/baymodels', bdict)
-            self.assertEqual(False, response.json['public'])
+            self.assertFalse(response.json['public'])
             # policy enforcement is called only once for enforce_wsgi
             mock_policy.assert_called_once_with(mock.ANY, mock.ANY, None)
             cc_mock.assert_called_once_with(mock.ANY)

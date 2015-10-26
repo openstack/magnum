@@ -96,6 +96,21 @@ class HackingTestCase(base.TestCase):
         self.assertEqual(
             len(list(checks.assert_equal_none("self.assertIsNone()"))), 0)
 
+    def test_assert_equal_true_or_false(self):
+        self.assertEqual(1, len(list(checks.assert_equal_true_or_false(
+            "self.assertEqual(True, A)"))))
+
+        self.assertEqual(1, len(list(checks.assert_equal_true_or_false(
+            "self.assertEqual(False, A)"))))
+
+        self.assertEqual(0,
+                         len(list(checks.assert_equal_true_or_false(
+                             "self.assertTrue()"))))
+
+        self.assertEqual(0,
+                         len(list(checks.assert_equal_true_or_false(
+                             "self.assertFalse()"))))
+
     def test_no_mutable_default_args(self):
         self.assertEqual(1, len(list(checks.no_mutable_default_args(
             "def get_info_from_bdm(virt_type, bdm, mapping=[])"))))
