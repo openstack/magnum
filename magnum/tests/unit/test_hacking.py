@@ -86,6 +86,43 @@ class HackingTestCase(base.TestCase):
         self._assert_has_errors(code, checks.check_policy_enforce_decorator,
                                 expected_errors=[(2, 0, "M301")])
 
+    def test_assert_equal_in(self):
+        self.assertEqual(1, len(list(checks.assert_equal_in(
+            "self.assertEqual(a in b, True)"))))
+
+        self.assertEqual(1, len(list(checks.assert_equal_in(
+            "self.assertEqual('str' in 'string', True)"))))
+
+        self.assertEqual(0, len(list(checks.assert_equal_in(
+            "self.assertEqual(any(a==1 for a in b), True)"))))
+
+        self.assertEqual(1, len(list(checks.assert_equal_in(
+            "self.assertEqual(True, a in b)"))))
+
+        self.assertEqual(1, len(list(checks.assert_equal_in(
+            "self.assertEqual(True, 'str' in 'string')"))))
+
+        self.assertEqual(0, len(list(checks.assert_equal_in(
+            "self.assertEqual(True, any(a==1 for a in b))"))))
+
+        self.assertEqual(1, len(list(checks.assert_equal_in(
+            "self.assertEqual(a in b, False)"))))
+
+        self.assertEqual(1, len(list(checks.assert_equal_in(
+            "self.assertEqual('str' in 'string', False)"))))
+
+        self.assertEqual(0, len(list(checks.assert_equal_in(
+            "self.assertEqual(any(a==1 for a in b), False)"))))
+
+        self.assertEqual(1, len(list(checks.assert_equal_in(
+            "self.assertEqual(False, a in b)"))))
+
+        self.assertEqual(1, len(list(checks.assert_equal_in(
+            "self.assertEqual(False, 'str' in 'string')"))))
+
+        self.assertEqual(0, len(list(checks.assert_equal_in(
+            "self.assertEqual(False, any(a==1 for a in b))"))))
+
     def test_assert_equal_none(self):
         self.assertEqual(len(list(checks.assert_equal_none(
             "self.assertEqual(A, None)"))), 1)

@@ -153,20 +153,20 @@ class BayTest(BaseMagnumClient):
     def _test_baymodel_create_and_delete(self, delete=True):
         baymodel = self._create_baymodel('testbay', coe=self.coe)
         list = [item.uuid for item in self.cs.baymodels.list()]
-        self.assertTrue(baymodel.uuid in list)
+        self.assertIn(baymodel.uuid, list)
 
         if not delete:
             return baymodel
         else:
             self.cs.baymodels.delete(baymodel.uuid)
             list = [item.uuid for item in self.cs.baymodels.list()]
-            self.assertTrue(baymodel.uuid not in list)
+            self.assertNotIn(baymodel.uuid, list)
 
     def _test_bay_create_and_delete(self):
         baymodel = self._test_baymodel_create_and_delete(delete=False)
         bay = self._create_bay('testbay', baymodel.uuid)
         list = [item.uuid for item in self.cs.bays.list()]
-        self.assertTrue(bay.uuid in list)
+        self.assertIn(bay.uuid, list)
 
         try:
             self.assertIn(self.cs.bays.get(bay.uuid).status,

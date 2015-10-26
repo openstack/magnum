@@ -18,3 +18,5 @@ Magnum Specific Commandments
   assertIsNotNone(A).
 - [M316] Change assertTrue(isinstance(A, B)) by optimal assert like
   assertIsInstance(A, B).
+- [M334] Change assertTrue/False(A in/not in B, message) to the more specific
+  assertIn/NotIn(A, B, message)

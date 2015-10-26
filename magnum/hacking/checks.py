@@ -33,9 +33,13 @@ Guidelines for writing new hacking checks
 enforce_re = re.compile(r"@policy.enforce_wsgi*")
 decorator_re = re.compile(r"@.*")
 mutable_default_args = re.compile(r"^\s*def .+\((.+=\{\}|.+=\[\])")
-asse_equal_end_with_none_re = re.compile(
+assert_equal_in_end_with_true_or_false_re = re.compile(
+    r"assertEqual\((\w|[][.'\"])+ in (\w|[][.'\", ])+, (True|False)\)")
+assert_equal_in_start_with_true_or_false_re = re.compile(
+    r"assertEqual\((True|False), (\w|[][.'\"])+ in (\w|[][.'\", ])+\)")
+assert_equal_end_with_none_re = re.compile(
     r"(.)*assertEqual\((\w|\.|\'|\"|\[|\])+, None\)")
-asse_equal_start_with_none_re = re.compile(
+assert_equal_start_with_none_re = re.compile(
     r"(.)*assertEqual\(None, (\w|\.|\'|\"|\[|\])+\)")
 assert_equal_with_true_re = re.compile(
     r"assertEqual\(True,")
@@ -65,8 +69,8 @@ def assert_equal_none(logical_line):
     """
     msg = ("M318: assertEqual(A, None) or assertEqual(None, A) "
            "sentences not allowed")
-    res = (asse_equal_start_with_none_re.match(logical_line) or
-           asse_equal_end_with_none_re.match(logical_line))
+    res = (assert_equal_start_with_none_re.match(logical_line) or
+           assert_equal_end_with_none_re.match(logical_line))
     if res:
         yield (0, msg)
 
@@ -106,6 +110,19 @@ def assert_true_isinstance(logical_line):
         yield (0, "M316: assertTrue(isinstance(a, b)) sentences not allowed")
 
 
+def assert_equal_in(logical_line):
+    """Check for assertEqual(True|False, A in B), assertEqual(A in B, True|False)
+
+    M338
+    """
+    res = (assert_equal_in_start_with_true_or_false_re.search(logical_line) or
+           assert_equal_in_end_with_true_or_false_re.search(logical_line))
+    if res:
+        yield (0, "M338: Use assertIn/NotIn(A, B) rather than "
+                  "assertEqual(A in B, True/False) when checking collection "
+                  "contents.")
+
+
 def factory(register):
     register(check_policy_enforce_decorator)
     register(no_mutable_default_args)
@@ -113,3 +130,4 @@ def factory(register):
     register(assert_equal_true_or_false)
     register(assert_equal_not_none)
     register(assert_true_isinstance)
+    register(assert_equal_in)
