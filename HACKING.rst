@@ -9,4 +9,6 @@ Magnum Specific Commandments
 ----------------------------
 
 - [M301] policy.enforce_wsgi decorator must be the first decorator on a method.
+- [M318] Change assertEqual(A, None) or assertEqual(None, A) by optimal assert
+  like assertIsNone(A)
 - [M322] Method's default argument shouldn't be mutable.

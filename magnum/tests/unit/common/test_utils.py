@@ -118,8 +118,8 @@ class UtilsTestCase(base.TestCase):
                           utils.get_ip_version, 'x.x.x.x')
 
     def test_convert_to_list_dict(self):
-        self.assertEqual(None, utils.convert_to_list_dict(None, 'fred'))
-        self.assertEqual(None, utils.convert_to_list_dict('', 'fred'))
+        self.assertIsNone(utils.convert_to_list_dict(None, 'fred'))
+        self.assertIsNone(utils.convert_to_list_dict('', 'fred'))
         self.assertEqual([{'fred': 'list'}],
                          utils.convert_to_list_dict('list', 'fred'))
         self.assertEqual([{'fred': 'first'}, {'fred': 'second'}],
