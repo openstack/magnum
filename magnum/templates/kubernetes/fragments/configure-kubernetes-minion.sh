@@ -20,11 +20,12 @@ sed -i '
   /^KUBE_MASTER=/ s|=.*|="--master='"$KUBE_MASTER_URI"'"|
 ' /etc/kubernetes/config
 
+KUBELET_ARGS="--cadvisor-port=4194 $KUBE_CONFIG"
 sed -i '
   /^KUBELET_ADDRESS=/ s/=.*/="--address=0.0.0.0"/
   /^KUBELET_HOSTNAME=/ s/=.*/=""/
   /^KUBELET_API_SERVER=/ s|=.*|="--api_servers='"$KUBE_MASTER_URI"'"|
-  /^KUBELET_ARGS=/ s|=.*|='"$KUBE_CONFIG"'|
+  /^KUBELET_ARGS=/ s|=.*|='"$KUBELET_ARGS"'|
 ' /etc/kubernetes/kubelet
 
 sed -i '

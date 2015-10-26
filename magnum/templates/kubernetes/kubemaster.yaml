@@ -269,6 +269,12 @@ resources:
       group: ungrouped
       config: {get_file: fragments/kube-system-namespace-service.sh}
 
+  kube_ui_service:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/kube-ui-service.sh}
+
   master_wc_notify:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -311,6 +317,7 @@ resources:
         - config: {get_resource: network_service}
         - config: {get_resource: kube_system_namespace_service}
         - config: {get_resource: enable_kube_podmaster}
+        - config: {get_resource: kube_ui_service}
         - config: {get_resource: kube_examples}
         - config: {get_resource: master_wc_notify}
 
