@@ -14,3 +14,5 @@ Magnum Specific Commandments
 - [M322] Method's default argument shouldn't be mutable.
 - [M323] Change assertEqual(True, A) or assertEqual(False, A) by optimal assert
   like assertTrue(A) or assertFalse(A)
+- [M302] Change assertEqual(A is not None) by optimal assert like
+  assertIsNotNone(A).

@@ -120,3 +120,10 @@ class HackingTestCase(base.TestCase):
 
         self.assertEqual(0, len(list(checks.no_mutable_default_args(
             "defined, undefined = [], {}"))))
+
+    def test_assert_is_not_none(self):
+        self.assertEqual(1, len(list(checks.assert_equal_not_none(
+            "self.assertEqual(A is not None)"))))
+
+        self.assertEqual(0, len(list(checks.assert_equal_not_none(
+            "self.assertIsNone()"))))

@@ -41,6 +41,8 @@ assert_equal_with_true_re = re.compile(
     r"assertEqual\(True,")
 assert_equal_with_false_re = re.compile(
     r"assertEqual\(False,")
+asse_equal_with_is_not_none_re = re.compile(
+    r"assertEqual\(.*?\s+is+\s+not+\s+None\)$")
 
 
 def check_policy_enforce_decorator(logical_line,
@@ -84,8 +86,17 @@ def assert_equal_true_or_false(logical_line):
                "sentences not allowed")
 
 
+def assert_equal_not_none(logical_line):
+    """Check for assertEqual(A is not None) sentences M302"""
+    msg = "M302: assertEqual(A is not None) sentences not allowed."
+    res = asse_equal_with_is_not_none_re.search(logical_line)
+    if res:
+        yield (0, msg)
+
+
 def factory(register):
     register(check_policy_enforce_decorator)
     register(no_mutable_default_args)
     register(assert_equal_none)
     register(assert_equal_true_or_false)
+    register(assert_equal_not_none)

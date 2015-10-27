@@ -16,13 +16,13 @@ from magnum.tests.functional.python_client_base import BaseMagnumClient
 
 class TestListResources(BaseMagnumClient):
     def test_bay_model_list(self):
-        self.assertTrue(self.cs.baymodels.list() is not None)
+        self.assertIsNotNone(self.cs.baymodels.list())
 
     def test_bay_list(self):
-        self.assertTrue(self.cs.bays.list() is not None)
+        self.assertIsNotNone(self.cs.bays.list())
 
     def test_containers_list(self):
-        self.assertTrue(self.cs.containers.list() is not None)
+        self.assertIsNotNone(self.cs.containers.list())
 
     def test_nodes_list(self):
-        self.assertTrue(self.cs.nodes.list() is not None)
+        self.assertIsNotNone(self.cs.nodes.list())

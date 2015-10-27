@@ -128,10 +128,10 @@ class TestKubernetesAPIs(BaseMagnumClient):
             name='frontend', body={}, namespace='default')
 
     def test_pods_list(self):
-        self.assertTrue(self.cs.pods.list(self.bay.uuid) is not None)
+        self.assertIsNotNone(self.cs.pods.list(self.bay.uuid))
 
     def test_rcs_list(self):
-        self.assertTrue(self.cs.rcs.list(self.bay.uuid) is not None)
+        self.assertIsNotNone(self.cs.rcs.list(self.bay.uuid))
 
     def test_services_list(self):
-        self.assertTrue(self.cs.services.list(self.bay.uuid) is not None)
+        self.assertIsNotNone(self.cs.services.list(self.bay.uuid))
