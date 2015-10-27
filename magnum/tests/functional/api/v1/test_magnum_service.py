@@ -38,12 +38,12 @@ class MagnumServiceTest(base.BaseMagnumTest):
         # get json object
         client = cli.MagnumServiceClient.as_user('admin')
         resp, msvcs = client.magnum_service_list()
-        self.assertEqual(resp.status, 200)
+        self.assertEqual(200, resp.status)
         # Note(suro-patz): Following code assumes that we have only
         #                  one service, magnum-conductor enabled, as of now.
-        self.assertEqual(len(msvcs.mservices), 1)
+        self.assertEqual(1, len(msvcs.mservices))
         mcond_svc = msvcs.mservices[0]
         self.assertEqual(mcond_svc['id'], 1)
-        self.assertEqual(mcond_svc['state'], 'up')
-        self.assertEqual(mcond_svc['binary'], 'magnum-conductor')
+        self.assertEqual('up', mcond_svc['state'])
+        self.assertEqual('magnum-conductor', mcond_svc['binary'])
         self.assertGreater(mcond_svc['report_count'], 0)
