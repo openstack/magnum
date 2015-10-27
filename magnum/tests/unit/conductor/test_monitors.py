@@ -53,7 +53,7 @@ class MonitorsTestCase(base.TestCase):
         baymodel.coe = 'swarm'
         mock_baymodel_get_by_uuid.return_value = baymodel
         monitor = monitors.create_monitor(self.context, self.bay)
-        self.assertTrue(isinstance(monitor, monitors.SwarmMonitor))
+        self.assertIsInstance(monitor, monitors.SwarmMonitor)
 
     @mock.patch('magnum.objects.BayModel.get_by_uuid')
     def test_create_monitor_unsupported_coe(self, mock_baymodel_get_by_uuid):
