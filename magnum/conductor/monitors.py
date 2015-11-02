@@ -49,7 +49,7 @@ class MonitorBase(object):
 
     @abc.abstractmethod
     def pull_data(self):
-        """Pull data from bay."""
+        """Pull data for monitoring."""
 
     def get_metric_names(self):
         return self.metrics_spec.keys()
