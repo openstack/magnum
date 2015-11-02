@@ -53,7 +53,7 @@ def apply_jsonpatch(doc, patch):
                 msg = _('Adding a new attribute (%s) to the root of '
                         ' the resource is not allowed')
                 raise wsme.exc.ClientSideError(msg % p['path'])
-    return jsonpatch.apply_patch(doc, jsonpatch.JsonPatch(patch))
+    return jsonpatch.apply_patch(doc, patch)
 
 
 def get_rpc_resource(resource, resource_ident):
