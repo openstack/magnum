@@ -127,3 +127,11 @@ class HackingTestCase(base.TestCase):
 
         self.assertEqual(0, len(list(checks.assert_equal_not_none(
             "self.assertIsNone()"))))
+
+    def test_assert_true_isinstance(self):
+        self.assertEqual(1, len(list(checks.assert_true_isinstance(
+            "self.assertTrue(isinstance(e, "
+            "exception.BuildAbortException))"))))
+
+        self.assertEqual(0, len(list(checks.assert_true_isinstance(
+            "self.assertTrue()"))))

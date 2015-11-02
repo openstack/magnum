@@ -16,3 +16,5 @@ Magnum Specific Commandments
   like assertTrue(A) or assertFalse(A)
 - [M302] Change assertEqual(A is not None) by optimal assert like
   assertIsNotNone(A).
+- [M316] Change assertTrue(isinstance(A, B)) by optimal assert like
+  assertIsInstance(A, B).
