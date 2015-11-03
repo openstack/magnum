@@ -87,88 +87,103 @@ class HackingTestCase(base.TestCase):
                                 expected_errors=[(2, 0, "M301")])
 
     def test_assert_equal_in(self):
-        self.assertEqual(1, len(list(checks.assert_equal_in(
-            "self.assertEqual(a in b, True)"))))
+        errors = [(1, 0, "M338")]
+        check = checks.assert_equal_in
 
-        self.assertEqual(1, len(list(checks.assert_equal_in(
-            "self.assertEqual('str' in 'string', True)"))))
+        code = "self.assertEqual(a in b, True)"
+        self._assert_has_errors(code, check, errors)
 
-        self.assertEqual(0, len(list(checks.assert_equal_in(
-            "self.assertEqual(any(a==1 for a in b), True)"))))
+        code = "self.assertEqual('str' in 'string', True)"
+        self._assert_has_errors(code, check, errors)
 
-        self.assertEqual(1, len(list(checks.assert_equal_in(
-            "self.assertEqual(True, a in b)"))))
+        code = "self.assertEqual(any(a==1 for a in b), True)"
+        self._assert_has_no_errors(code, check)
 
-        self.assertEqual(1, len(list(checks.assert_equal_in(
-            "self.assertEqual(True, 'str' in 'string')"))))
+        code = "self.assertEqual(True, a in b)"
+        self._assert_has_errors(code, check, errors)
 
-        self.assertEqual(0, len(list(checks.assert_equal_in(
-            "self.assertEqual(True, any(a==1 for a in b))"))))
+        code = "self.assertEqual(True, 'str' in 'string')"
+        self._assert_has_errors(code, check, errors)
 
-        self.assertEqual(1, len(list(checks.assert_equal_in(
-            "self.assertEqual(a in b, False)"))))
+        code = "self.assertEqual(True, any(a==1 for a in b))"
+        self._assert_has_no_errors(code, check)
 
-        self.assertEqual(1, len(list(checks.assert_equal_in(
-            "self.assertEqual('str' in 'string', False)"))))
+        code = "self.assertEqual(a in b, False)"
+        self._assert_has_errors(code, check, errors)
 
-        self.assertEqual(0, len(list(checks.assert_equal_in(
-            "self.assertEqual(any(a==1 for a in b), False)"))))
+        code = "self.assertEqual('str' in 'string', False)"
+        self._assert_has_errors(code, check, errors)
 
-        self.assertEqual(1, len(list(checks.assert_equal_in(
-            "self.assertEqual(False, a in b)"))))
+        code = "self.assertEqual(any(a==1 for a in b), False)"
+        self._assert_has_no_errors(code, check)
 
-        self.assertEqual(1, len(list(checks.assert_equal_in(
-            "self.assertEqual(False, 'str' in 'string')"))))
+        code = "self.assertEqual(False, a in b)"
+        self._assert_has_errors(code, check, errors)
 
-        self.assertEqual(0, len(list(checks.assert_equal_in(
-            "self.assertEqual(False, any(a==1 for a in b))"))))
+        code = "self.assertEqual(False, 'str' in 'string')"
+        self._assert_has_errors(code, check, errors)
+
+        code = "self.assertEqual(False, any(a==1 for a in b))"
+        self._assert_has_no_errors(code, check)
 
     def test_assert_equal_none(self):
-        self.assertEqual(len(list(checks.assert_equal_none(
-            "self.assertEqual(A, None)"))), 1)
+        errors = [(1, 0, "M318")]
+        check = checks.assert_equal_none
 
-        self.assertEqual(len(list(checks.assert_equal_none(
-            "self.assertEqual(None, A)"))), 1)
+        code = "self.assertEqual(A, None)"
+        self._assert_has_errors(code, check, errors)
 
-        self.assertEqual(
-            len(list(checks.assert_equal_none("self.assertIsNone()"))), 0)
+        code = "self.assertEqual(None, A)"
+        self._assert_has_errors(code, check, errors)
+
+        code = "self.assertIsNone()"
+        self._assert_has_no_errors(code, check)
 
     def test_assert_equal_true_or_false(self):
-        self.assertEqual(1, len(list(checks.assert_equal_true_or_false(
-            "self.assertEqual(True, A)"))))
+        errors = [(1, 0, "M323")]
+        check = checks.assert_equal_true_or_false
 
-        self.assertEqual(1, len(list(checks.assert_equal_true_or_false(
-            "self.assertEqual(False, A)"))))
+        code = "self.assertEqual(True, A)"
+        self._assert_has_errors(code, check, errors)
 
-        self.assertEqual(0,
-                         len(list(checks.assert_equal_true_or_false(
-                             "self.assertTrue()"))))
+        code = "self.assertEqual(False, A)"
+        self._assert_has_errors(code, check, errors)
 
-        self.assertEqual(0,
-                         len(list(checks.assert_equal_true_or_false(
-                             "self.assertFalse()"))))
+        code = "self.assertTrue()"
+        self._assert_has_no_errors(code, check)
+
+        code = "self.assertFalse()"
+        self._assert_has_no_errors(code, check)
 
     def test_no_mutable_default_args(self):
-        self.assertEqual(1, len(list(checks.no_mutable_default_args(
-            "def get_info_from_bdm(virt_type, bdm, mapping=[])"))))
+        errors = [(1, 0, "M322")]
+        check = checks.no_mutable_default_args
 
-        self.assertEqual(0, len(list(checks.no_mutable_default_args(
-            "defined = []"))))
+        code = "def get_info_from_bdm(virt_type, bdm, mapping=[])"
+        self._assert_has_errors(code, check, errors)
 
-        self.assertEqual(0, len(list(checks.no_mutable_default_args(
-            "defined, undefined = [], {}"))))
+        code = "defined = []"
+        self._assert_has_no_errors(code, check)
+
+        code = "defined, undefined = [], {}"
+        self._assert_has_no_errors(code, check)
 
     def test_assert_is_not_none(self):
-        self.assertEqual(1, len(list(checks.assert_equal_not_none(
-            "self.assertEqual(A is not None)"))))
+        errors = [(1, 0, "M302")]
+        check = checks.assert_equal_not_none
 
-        self.assertEqual(0, len(list(checks.assert_equal_not_none(
-            "self.assertIsNone()"))))
+        code = "self.assertEqual(A is not None)"
+        self._assert_has_errors(code, check, errors)
+
+        code = "self.assertIsNone()"
+        self._assert_has_no_errors(code, check)
 
     def test_assert_true_isinstance(self):
-        self.assertEqual(1, len(list(checks.assert_true_isinstance(
-            "self.assertTrue(isinstance(e, "
-            "exception.BuildAbortException))"))))
+        errors = [(1, 0, "M316")]
+        check = checks.assert_true_isinstance
 
-        self.assertEqual(0, len(list(checks.assert_true_isinstance(
-            "self.assertTrue()"))))
+        code = "self.assertTrue(isinstance(e, exception.BuilAbortException))"
+        self._assert_has_errors(code, check, errors)
+
+        code = "self.assertTrue()"
+        self._assert_has_no_errors(code, check)
