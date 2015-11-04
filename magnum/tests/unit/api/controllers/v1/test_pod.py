@@ -260,48 +260,6 @@ class TestPatch(api_base.FunctionalTest):
         parse_manifest.assert_called_once_with()
         self.assertTrue(pod_update.is_called)
 
-    def test_add_ok(self):
-        new_desc = 'pod_example_B_desc'
-        response = self.patch_json(
-            '/pods/%s/%s' % (self.pod.uuid, self.pod.bay_uuid),
-            [{'path': '/desc', 'value': new_desc, 'op': 'add'}])
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(200, response.status_int)
-
-        response = self.get_json(
-            '/pods/%s/%s' % (self.pod.uuid, self.pod.bay_uuid))
-        self.assertEqual(new_desc, response['desc'])
-
-    def test_add_multi(self):
-        new_status = 'Stopped'
-        new_desc = 'pod_example_B_desc'
-        response = self.get_json(
-            '/pods/%s/%s' % (self.pod.uuid, self.pod.bay_uuid))
-        self.assertNotEqual(new_status, response['status'])
-        self.assertNotEqual(new_desc, response['desc'])
-
-        json = [
-            {
-                'path': '/status',
-                'value': new_status,
-                'op': 'add'
-            },
-            {
-                'path': '/desc',
-                'value': new_desc,
-                'op': 'add'
-            }
-        ]
-        response = self.patch_json(
-            '/pods/%s/%s' % (self.pod.uuid, self.pod.bay_uuid), json)
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(200, response.status_code)
-
-        response = self.get_json(
-            '/pods/%s/%s' % (self.pod.uuid, self.pod.bay_uuid))
-        self.assertEqual(new_status, response['status'])
-        self.assertEqual(new_desc, response['desc'])
-
     def test_add_non_existent_property(self):
         response = self.patch_json(
             '/pods/%s' % self.pod.uuid,
