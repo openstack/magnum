@@ -96,8 +96,11 @@ echo_summary "Create a flavor"
 nova flavor-create  m1.magnum 100 2048 8 1
 
 # Run functional tests
-echo "Running magnum functional test suite"
-sudo -E -H -u jenkins tox -e functional -- --concurrency=1
+
+# Currently we support functional-api, functional-k8s, will support swarm,
+# mesos later.
+echo "Running magnum functional test suite for $1"
+sudo -E -H -u jenkins tox -e functional-$1 -- --concurrency=1
 EXIT_CODE=$?
 
 # Delete the keypair used in the functional test.
