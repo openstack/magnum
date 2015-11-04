@@ -11,6 +11,7 @@
 #    limitations under the License.
 
 from oslo_config import cfg
+from oslo_middleware import cors
 import pecan
 
 from magnum.api import auth
@@ -59,4 +60,14 @@ def setup_app(config=None):
         **app_conf
     )
 
-    return auth.install(app, CONF, config.app.acl_public_routes)
+    app = auth.install(app, CONF, config.app.acl_public_routes)
+
+    # CORS must be the last one.
+    app = cors.CORS(app, CONF)
+    app.set_latent(
+        allow_headers=['X-Auth-Token', 'X-Server-Management-Url'],
+        allow_methods=['GET', 'PUT', 'POST', 'DELETE', 'PATCH'],
+        expose_headers=['X-Auth-Token', 'X-Server-Management-Url']
+    )
+
+    return app
