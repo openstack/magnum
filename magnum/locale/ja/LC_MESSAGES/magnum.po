@@ -1,0 +1,478 @@
+# Shu Muto <shu-mutou@rf.jp.nec.com>, 2015. #zanata
+msgid ""
+msgstr ""
+"Project-Id-Version: magnum 1.0.0.0b2.dev51\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2015-11-04 06:03+0000\n"
+"PO-Revision-Date: 2015-11-02 09:43+0000\n"
+"Last-Translator: Shu Muto <shu-mutou@rf.jp.nec.com>\n"
+"Language: ja\n"
+"Language-Team: Japanese\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.1.1\n"
+
+#, python-format
+msgid "%(client)s connection failed. %(message)s"
+msgstr "%(client)s の接続が失敗しました。%(message)s"
+
+#, python-format
+msgid "%(err)s"
+msgstr "%(err)s"
+
+#, python-format
+msgid "%(operation)s is not supported."
+msgstr "%(operation)s はサポートされていません。"
+
+#, python-format
+msgid "'%s' is a mandatory attribute and can not be removed"
+msgstr "「%s」は必須属性であり、削除できません"
+
+#, python-format
+msgid "'%s' is an internal attribute and can not be updated"
+msgstr "「%s」は内部属性であり、更新できません"
+
+msgid "'add' and 'replace' operations needs value"
+msgstr "'add' と 'replace' 処理には、値が必要です。"
+
+msgid "'manifest' can't be empty"
+msgstr "「マニフェスト」は空にできません"
+
+#, python-format
+msgid "A ReplicationController with UUID %(uuid)s already exists."
+msgstr "UUID %(uuid)s の複製コントローラーは既に存在します。"
+
+#, python-format
+msgid "A baymodel with UUID %(uuid)s already exists."
+msgstr "UUID %(uuid)s のベイモデルは既に存在します。"
+
+#, python-format
+msgid "A container with UUID %(uuid)s already exists."
+msgstr "UUID %(uuid)s のコンテナーは既に存在します。"
+
+msgid "A datetime.datetime is required here"
+msgstr "datetime.datetimeがここに必要です。"
+
+#, python-format
+msgid "A key pair %(keypair)s could not be found."
+msgstr "キーペア %(keypair)s が見つかりませんでした。"
+
+#, python-format
+msgid "A key pair with UUID %(uuid)s already exists."
+msgstr "UUID %(uuid)s のキーペアは既に存在します。"
+
+#, python-format
+msgid "A magnum service %(magnum_service_id)s could not be found."
+msgstr "Magnumサービス %(magnum_service_id)s が見つかりませんでした。"
+
+#, python-format
+msgid "A magnum service with ID %(id)s already exists."
+msgstr "ID %(id)s を持つMagnumサービスは既に存在します。"
+
+#, python-format
+msgid "A node with UUID %(uuid)s already exists."
+msgstr "UUID %(uuid)s のノードは既に存在します。"
+
+#, python-format
+msgid "An object of class %s is required here"
+msgstr "%s クラスのオブジェクトがここに必要です。"
+
+msgid "An unknown exception occurred."
+msgstr "不明な例外が発生しました。"
+
+#, python-format
+msgid "Bay %(bay)s could not be found."
+msgstr "ベイ %(bay)s が見つかりませんでした。"
+
+#, python-format
+msgid "Bay %(bay_name)s already has an operation in progress."
+msgstr "ベイ %(bay_name)s には既に進行中の操作があります。"
+
+#, python-format
+msgid "Bay type (%(server_type)s, %(os)s, %(coe)s) not enabled."
+msgstr "ベイ種別 (%(server_type)s, %(os)s, %(coe)s) が有効になっていません。"
+
+#, python-format
+msgid "Bay type (%(server_type)s, %(os)s, %(coe)s) not supported."
+msgstr "ベイ種別 (%(server_type)s, %(os)s, %(coe)s) はサポートされていません。"
+
+#, python-format
+msgid "Baymodel %(baymodel)s could not be found."
+msgstr "ベイモデル %(baymodel)s が見つかりませんでした。"
+
+#, python-format
+msgid "Baymodel %(baymodel)s is referenced by one or multiple bays."
+msgstr "ベイモデル「%(baymodel)s」は、１つ以上のベイに参照されています。"
+
+#, python-format
+msgid "Cannot call %(method)s on orphaned %(objtype)s object"
+msgstr "孤立 %(objtype)s オブジェクトで %(method)s を呼び出すことはできません"
+
+#, python-format
+msgid "Cannot compile public API routes: %s"
+msgstr "パブリック API ルートをコンパイルできません: %s"
+
+msgid "Cannot overwrite UUID for an existing Bay."
+msgstr "既存のベイの UUID を上書きできません。"
+
+msgid "Cannot overwrite UUID for an existing BayModel."
+msgstr "既存のベイモデルの UUID を上書きできません。"
+
+msgid "Cannot overwrite UUID for an existing Container."
+msgstr "既存のコンテナーの UUID を上書きできません。"
+
+msgid "Cannot overwrite UUID for an existing Node."
+msgstr "既存のノードの UUID を上書きできません。"
+
+msgid "Cannot overwrite UUID for an existing Pod."
+msgstr "既存のポッドの UUID を上書きできません。"
+
+msgid "Cannot overwrite UUID for an existing Service."
+msgstr "既存のサービスの UUID を上書きできません。"
+
+msgid "Cannot overwrite UUID for an existing X509KeyPair."
+msgstr "既存のX509キーペアの UUID を上書きできません。"
+
+msgid "Cannot overwrite UUID for an existing rc."
+msgstr "既存の複製コントローラーの UUID を上書きできません。"
+
+msgid "Certificate can get the CA flag in x509 extensions."
+msgstr "証明書は x509 拡張のCAフラグを取得できます。"
+
+msgid "Certificate could not be read."
+msgstr "証明書は読み込まれませんでした。"
+
+msgid "Conflict."
+msgstr "競合があります。"
+
+#, python-format
+msgid "Container %(container)s could not be found."
+msgstr "コンテナー %(container)s が見つかりませんでした。"
+
+msgid "Container Orchestration Environments are kubernetes or swarm."
+msgstr "コンテナーオーケストレーション環境は、kubernetes か swarm です。"
+
+#, python-format
+msgid "Could not store certificate: %(msg)s"
+msgstr "証明書を保存出来ませんでした: %(msg)s"
+
+#, python-format
+msgid "Couldn't apply patch '%(patch)s'. Reason: %(reason)s"
+msgstr "パッチ「%(patch)s」を適用できませんでした。理由: %(reason)s"
+
+#, python-format
+msgid "Error parsing manifest: %s"
+msgstr "マニフェストの解析エラー: %s"
+
+#, python-format
+msgid "ErrorDocumentMiddleware received an invalid status %s"
+msgstr "ErrorDocumentMiddleware が無効なステータス %s を受け取りました"
+
+#, python-format
+msgid "Expected a MAC address but received %(mac)s."
+msgstr "MAC アドレスが必要ですが、%(mac)s を受け取りました。"
+
+#, python-format
+msgid "Expected a name but received %(uuid)s."
+msgstr "名前が必要ですが、%(uuid)s を受け取りました。"
+
+#, python-format
+msgid "Expected a name or uuid but received %(uuid)s."
+msgstr "名前かUUID が必要ですが、%(uuid)s を受け取りました。"
+
+#, python-format
+msgid "Expected a uuid but received %(uuid)s."
+msgstr "UUID が必要ですが、%(uuid)s を受け取りました。"
+
+#, python-format
+msgid "Expected an uuid or int but received %(identity)s."
+msgstr "UUID または整数が必要ですが、%(identity)s を受け取りました。"
+
+#, python-format
+msgid "Extension '%(extension)s' not allowed"
+msgstr "拡張機能 %(extension)s は許可されていません。"
+
+#, python-format
+msgid "Failed to create a file system. File system %(fs)s is not supported."
+msgstr ""
+"ファイルシステムの作成に失敗しました。ファイルシステム %(fs)s はサポートされ"
+"ていません。"
+
+#, python-format
+msgid "Failed to establish SSH connection to host %(host)s."
+msgstr "ホスト %(host)s への SSH 接続を確立できませんでした。"
+
+#, python-format
+msgid "Failed to retrieve manifest: %s"
+msgstr "マニフェスト %s の取得に失敗しました。"
+
+#, python-format
+msgid ""
+"Field labels list %(labels)s has different number of elements than fields "
+"list %(fields)s"
+msgstr ""
+"フィールドラベルのリスト %(labels)s の要素数がフィールドリスト %(fields)s と"
+"異なります"
+
+msgid "If set, then the server's certificate will not be verified."
+msgstr "設定すると、サーバーの証明書は検査されません。"
+
+#, python-format
+msgid "Image %(image_id)s could not be found."
+msgstr "イメージ %(image_id)s が見つかりませんでした。"
+
+#, python-format
+msgid "Image %(image_id)s doesn't contain os_distro field."
+msgstr "イメージ %(image_id)s は os_distro フィールドを含んでいません。"
+
+#, python-format
+msgid "Instance %(instance)s could not be found."
+msgstr "インスタンス %(instance)s が見つかりませんでした。"
+
+#, python-format
+msgid ""
+"Instance %(instance_uuid)s is already associated with a node, it cannot be "
+"associated with this other node %(node)s"
+msgstr ""
+"インスタンス %(instance_uuid)s は既にノードに関連付けられており、この他のノー"
+"ド %(node)s に関連付けることはできません。"
+
+#, python-format
+msgid "Invalid URL scheme %s"
+msgstr "URL スキーム %s は無効です"
+
+#, python-format
+msgid "Invalid UUID version (%d)"
+msgstr "UUID バージョン (%d) は無効です"
+
+#, python-format
+msgid "Invalid configuration file. %(error_msg)s"
+msgstr "設定ファイルが無効です。%(error_msg)s"
+
+msgid "Invalid private key"
+msgstr "無効な秘密鍵"
+
+msgid "Invalid resource state."
+msgstr "リソース状態が無効です。"
+
+#, python-format
+msgid "Invalid sort direction: %s. Acceptable values are 'asc' or 'desc'"
+msgstr "%s は無効なソート方向です。「asc」または「desc」が有効です。"
+
+#, python-format
+msgid "Invalid value for %s header"
+msgstr "無効な %s ヘッダーの値"
+
+msgid "Limit must be positive"
+msgstr "上限は正の値でなければなりません"
+
+#, python-format
+msgid "List of allowed x509 extensions. Available values: %s"
+msgstr "許可された x509 拡張の一覧です。利用できる値: %s"
+
+#, python-format
+msgid "List of allowed x509 key usage. Available values: %s"
+msgstr "許可された x509 鍵の利用方法の一覧です。利用できる値: %s"
+
+msgid "Location of template to build a Mesos cluster on Ubuntu."
+msgstr "MesosクラスタをUbuntu上に構築するためのテンプレートの場所"
+
+msgid "Location of template to build a k8s cluster on CoreOS."
+msgstr "k8sクラスタをCoreOS上に構築するためのテンプレートの場所"
+
+msgid "Location of template to build a k8s cluster on atomic."
+msgstr "k8sクラスタをatomic上に構築するためのテンプレートの場所"
+
+msgid "Location of template to build a swarm cluster on atomic."
+msgstr "swarmクラスタをatomic上に構築するためのテンプレートの場所"
+
+msgid "Maximum raw byte size of any manifest."
+msgstr "マニフェストの最大容量、元のバイト単位。"
+
+#, python-format
+msgid "Missing arguments: %s"
+msgstr "引数 %s がありません"
+
+#, python-format
+msgid ""
+"Mutually exclusive versions requested. Version %(ver)s requested but not "
+"supported by this service.The supported version range is: [%(min)s, %(max)s]."
+msgstr ""
+"相互排他的なバージョンが要求されました。バージョン %(ver)s が要求されました"
+"が、このサービスではサポートされていません。サポートされるバージョンの範囲は "
+"[%(min)s、%(max)s] です。"
+
+msgid ""
+"Name of this node. This can be an opaque identifier. It is not necessarily a "
+"hostname, FQDN, or IP address. However, the node name must be valid within "
+"an AMQP key, and if using ZeroMQ, a valid hostname, FQDN, or IP address."
+msgstr ""
+"このノードの名前。これには不透明な ID を指定できます。この名前はホスト名、"
+"FQDN、または IP アドレスとは限りません。ただし、ノード名はAMQP鍵の中で有効で"
+"あり、ZeroMQを使用する場合には、有効なホスト名、FQDN、またはIP アドレスでなけ"
+"ればなりません。"
+
+#, python-format
+msgid "Node %(node)s could not be found."
+msgstr "ノード %(node)s が見つかりませんでした。"
+
+#, python-format
+msgid "Node %(node)s is associated with instance %(instance)s."
+msgstr "ノード %(node)s はインスタンス %(instance)s に関連付けられています。"
+
+#, python-format
+msgid "Not authorized for image %(image_id)s."
+msgstr "イメージ %(image_id)s では許可されていません。"
+
+msgid "Not authorized to set public flag for baymodel."
+msgstr "ベイモデルへの公開フラグの設定は許可されていません。"
+
+msgid "Not authorized."
+msgstr "権限がありません。"
+
+msgid "Number of days for which a certificate is valid."
+msgstr "証明書が利用可能な日数です。"
+
+msgid "Optional CA cert file to use in SSL connections."
+msgstr "SSL 接続に使用する CA 証明書ファイル。オプション。"
+
+msgid "Optional PEM-formatted certificate chain file."
+msgstr "PEM 形式の証明書チェーンファイル。オプション。"
+
+msgid "Optional PEM-formatted file that contains the private key."
+msgstr "秘密鍵を含む PEM ファイル。オプション。"
+
+#, python-format
+msgid "Output key '%(output_key)s' is missing from stack %(stack_id)s"
+msgstr ""
+"出力された鍵「%(output_key)s」は、スタック「%(stack_id)s」から見つかりませ"
+"ん。"
+
+#, python-format
+msgid "Pod %(pod)s could not be found."
+msgstr "ポッド %(pod)s が見つかりませんでした。"
+
+msgid "Private Key could not be read."
+msgstr "秘密鍵は読み込まれませんでした。"
+
+#, python-format
+msgid ""
+"Received invalid discovery URL '%(discovery_url)s' for discovery endpoint "
+"'%(discovery_endpoint)s'."
+msgstr ""
+"無効なディスカバリーURL「%(discovery_url)s」をディスカバリーエンドポイント"
+"「%(discovery_endpoint)s」のために受け取りました。"
+
+msgid ""
+"Region in Identity service catalog to use for communication with the "
+"OpenStack service."
+msgstr ""
+"OpenStack サービスとの通信に使用する Identity サービスカタログ内のリージョ"
+"ン。"
+
+#, python-format
+msgid "ReplicationController %(rc)s could not be found."
+msgstr "複製コントローラー %(rc)s が見つかりませんでした。"
+
+msgid "Request not acceptable."
+msgstr "要求は受け入れられませんでした。"
+
+#, python-format
+msgid "Required parameter %(heat_param)s not provided."
+msgstr "必須のパラメータ %(heat_param)s が指定されませんでした。"
+
+msgid "Retrieved Barbican Container is not of the correct type (certificate)."
+msgstr "取得したBarbican コンテナーは、正しい種別（証明書）ではありません。"
+
+#, python-format
+msgid "Service %(service)s could not be found."
+msgstr "サービス %(service)s が見つかりませんでした。"
+
+msgid "Size of generated private key. "
+msgstr "生成された秘密鍵のサイズ"
+
+#, python-format
+msgid "Stack with id %s not found in Heat."
+msgstr "ID %s のスタックがHeatに見つかりません"
+
+#, python-format
+msgid "The %(name)s %(id)s could not be found."
+msgstr "%(name)s %(id)s が見つかりませんでした"
+
+#, python-format
+msgid "The %(name)s already exists."
+msgstr "%(name)s は既に存在します。"
+
+#, python-format
+msgid "The %(name)s resource %(id)s could not be found."
+msgstr "リソース %(name)s %(id)s が見つかりませんでした"
+
+#, python-format
+msgid "The %(name)s resource already exists."
+msgstr "リソース %(name)s は既に存在します。"
+
+msgid "The manifest is not a JSON object or YAML mapping."
+msgstr "マニフェストが JSON オブジェクトでも YAML マッピングでもありません。"
+
+#, python-format
+msgid "The sort_key value \"%(key)s\" is an invalid field for sorting"
+msgstr "sort_key の値「%(key)s」が、並び替えでは使用できないフィールドです"
+
+#, python-format
+msgid "The urllib2 URL %(url)s has an invalid scheme."
+msgstr "urllib2 の URL %(url)s はスキームが無効です。"
+
+msgid ""
+"Type of endpoint in Identity service catalog to use for communication with "
+"the OpenStack service."
+msgstr ""
+"OpenStack サービスとの通信に使用する Identity サービスカタログ内のエンドポイ"
+"ント種別。"
+
+#, python-format
+msgid "Unable to find keypair %(keypair)s."
+msgstr "キーペア「%(keypair)s」が見つかりません。"
+
+msgid "Unacceptable parameters."
+msgstr "受け入れられないパラメーター。"
+
+#, python-format
+msgid "Unsupported object type %(objtype)s"
+msgstr "サポートされないオブジェクト種別 %(objtype)s"
+
+#, python-format
+msgid "Updating a bay when stack status is \"%s\""
+msgstr "スタックの状況が「%s」の時に、ベイを更新しています。"
+
+#, python-format
+msgid "Version %(objver)s of %(objname)s is not supported"
+msgstr "バージョン %(objver)s の %(objname)s はサポートされません"
+
+#, python-format
+msgid ""
+"Version %(ver)s was requested but the minor version is not supported by this "
+"service. The supported version range is: [%(min)s, %(max)s]."
+msgstr ""
+"バージョン %(ver)s が要求されましたが、このサービスでは、マイナーバージョンは"
+"サポートされていません。サポートされるバージョン範囲は [%(min)s、%(max)s] で"
+"す。"
+
+#, python-format
+msgid "Wrong type. Expected '%(type)s', got '%(value)s'"
+msgstr ""
+"種別が正しくありません。「%(type)s」 が期待値でしたが、「%(value)s」が取得さ"
+"れました。"
+
+#, python-format
+msgid "cannot change bay property(ies) %s."
+msgstr "ベイのプロパティ %s を変更できません。"
+
+#, python-format
+msgid "custom templated %(name)s"
+msgstr "カスタムテンプレート化された %(name)s"
+
+#, python-format
+msgid "templated %(name)s"
+msgstr "テンプレート化された %(name)s"
