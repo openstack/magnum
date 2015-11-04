@@ -6,37 +6,61 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: magnum 2015.1.1.dev100\n"
+"Project-Id-Version: magnum 1.0.0.0b2.dev51\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-05-28 09:18+0200\n"
+"POT-Creation-Date: 2015-11-04 06:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 1.3\n"
+"Generated-By: Babel 2.1.1\n"
 
-#: magnum/common/utils.py:444
+#: magnum/common/utils.py:392
 #, python-format
 msgid "Failed to unlink %(path)s, error: %(e)s"
 msgstr ""
 
-#: magnum/common/utils.py:453
+#: magnum/common/utils.py:401
 #, python-format
 msgid "Failed to remove dir %(path)s, error: %(e)s"
 msgstr ""
 
-#: magnum/common/utils.py:469
+#: magnum/common/utils.py:417
 #, python-format
 msgid "Failed to create symlink from %(source)s to %(link)s, error: %(e)s"
 msgstr ""
 
-#: magnum/common/utils.py:483
+#: magnum/common/utils.py:431
 #, python-format
 msgid ""
 "Failed to remove trailing character. Returning original object. Supplied "
 "object is not a string: %s,"
+msgstr ""
+
+#: magnum/common/cert_manager/barbican_cert_manager.py:148
+msgid ""
+"Failed to delete {0} ({1}) during rollback. This is probably not a "
+"problem."
+msgstr ""
+
+#: magnum/common/cert_manager/local_cert_manager.py:92
+msgid ""
+"Storing certificate data on the local filesystem. CertManager type "
+"'local' should be used for testing purpose."
+msgstr ""
+
+#: magnum/common/cert_manager/local_cert_manager.py:130
+msgid ""
+"Loading certificate {0} from the local filesystem. CertManager type "
+"'local' should be used for testing purpose."
+msgstr ""
+
+#: magnum/common/cert_manager/local_cert_manager.py:191
+msgid ""
+"Deleting certificate {0} from the local filesystem. CertManager type "
+"'local' should be used for testing purpose."
 msgstr ""
 
 #: magnum/conductor/bay_lock.py:111
@@ -44,13 +68,41 @@ msgstr ""
 msgid "Lock was already released on bay %s!"
 msgstr ""
 
-#: magnum/openstack/common/loopingcall.py:87
+#: magnum/conductor/monitors.py:95
 #, python-format
-msgid "task %(func_name)r run outlasted interval by %(delay).2f sec"
+msgid "Ignore error [%(e)s] when inspecting container %(container_id)s."
 msgstr ""
 
-#: magnum/openstack/common/service.py:359
+#: magnum/conductor/scale_manager.py:61
 #, python-format
-msgid "pid %d not in child list"
+msgid ""
+"About to remove %(num_removal)d nodes, which is larger than the number of"
+" empty nodes (%(num_empty)d). %(num_non_empty)d non-empty nodes will be "
+"removed."
+msgstr ""
+
+#: magnum/conductor/template_definition.py:154
+#, python-format
+msgid "stack does not have output_key %s"
+msgstr ""
+
+#: magnum/conductor/handlers/common/cert_manager.py:153
+#, python-format
+msgid "Deleting cert is failed: %s"
+msgstr ""
+
+#: magnum/service/periodic.py:115
+#, python-format
+msgid "Ignore error [%s] when syncing up bay status."
+msgstr ""
+
+#: magnum/service/periodic.py:175
+#, python-format
+msgid "Skip pulling data from bay %(bay)s due to error: %(e)s"
+msgstr ""
+
+#: magnum/service/periodic.py:190
+#, python-format
+msgid "Skip adding metric %(name)s due to error: %(e)s"
 msgstr ""
 
