@@ -37,11 +37,6 @@ if is_service_enabled m-api m-cond; then
             create_magnum_accounts
         fi
 
-        # Note(hongbin): This is a temprorary fix. We should investigate why
-        # devstack doesn't populate this config file correctly.
-        LBAAS_AGENT_CONF=/etc/neutron/services/loadbalancer/haproxy/lbaas_agent.ini
-        iniset $LBAAS_AGENT_CONF DEFAULT interface_driver "neutron.agent.linux.interface.OVSInterfaceDriver"
-
     elif [[ "$1" == "stack" && "$2" == "extra" ]]; then
         # Initialize magnum
         init_magnum
