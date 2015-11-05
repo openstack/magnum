@@ -563,7 +563,11 @@ class TestPost(api_base.FunctionalTest):
             if expect_errors:
                 self.assertEqual(400, response.status_int)
             else:
-                self.assertEqual(bdict['network_driver'],
+                expected_driver = bdict.get('network_driver')
+                if not expected_driver:
+                    expected_driver = (
+                        cfg.CONF.baymodel.swarm_default_network_driver)
+                self.assertEqual(expected_driver,
                                  response.json['network_driver'])
                 self.assertEqual(bdict['image_id'],
                                  response.json['image_id'])

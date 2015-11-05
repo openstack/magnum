@@ -14,7 +14,6 @@
 
 import glanceclient.exc
 import novaclient.exceptions as nova_exc
-from oslo_config import cfg
 from oslo_utils import timeutils
 import pecan
 from pecan import rest
@@ -32,29 +31,6 @@ from magnum.common import clients
 from magnum.common import exception
 from magnum.common import policy
 from magnum import objects
-
-
-baymodel_opts = [
-    cfg.ListOpt('kubernetes_allowed_network_drivers',
-                default=['all'],
-                help="Allowed network drivers for kubernetes baymodels. "
-                "Use 'all' keyword to allow all drivers supported "
-                "for kubernetes baymodels. Supported network drivers "
-                "include flannel."),
-    cfg.ListOpt('swarm_allowed_network_drivers',
-                default=['all'],
-                help="Allowed network drivers for docker swarm baymodels. "
-                "Use 'all' keyword to allow all drivers supported "
-                "for swarm baymodels. Supported network drivers "
-                "include docker."),
-    cfg.ListOpt('mesos_allowed_network_drivers',
-                default=['all'],
-                help="Allowed network drivers for mesos baymodels. "
-                "Use 'all' keyword to allow all drivers supported "
-                "for mesos baymodels. Supported network drivers "
-                "include docker.")
-]
-cfg.CONF.register_opts(baymodel_opts, group='baymodel')
 
 
 class BayModelPatchType(types.JsonPatchType):
