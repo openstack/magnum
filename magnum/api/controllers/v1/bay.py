@@ -13,8 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import datetime
-
+from oslo_utils import timeutils
 import pecan
 from pecan import rest
 import wsme
@@ -149,8 +148,8 @@ class Bay(base.APIBase):
                      status_reason="CREATE completed successfully",
                      api_address='172.24.4.3',
                      node_addresses=['172.24.4.4', '172.24.4.5'],
-                     created_at=datetime.datetime.utcnow(),
-                     updated_at=datetime.datetime.utcnow())
+                     created_at=timeutils.utcnow(),
+                     updated_at=timeutils.utcnow())
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 
 

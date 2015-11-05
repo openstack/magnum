@@ -13,9 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import datetime
-
 from oslo_log import log as logging
+from oslo_utils import timeutils
 import pecan
 from pecan import rest
 import wsme
@@ -135,8 +134,8 @@ class Container(base.APIBase):
                      status='Running',
                      memory='512m',
                      bay_uuid="fff114da-3bfa-4a0f-a123-c0dffad9718e",
-                     created_at=datetime.datetime.utcnow(),
-                     updated_at=datetime.datetime.utcnow())
+                     created_at=timeutils.utcnow(),
+                     updated_at=timeutils.utcnow())
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 
 

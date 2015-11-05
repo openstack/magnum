@@ -96,7 +96,7 @@ class TestSubclassedObject(MyObj):
 class TestUtils(test_base.TestCase):
 
     def test_datetime_or_none(self):
-        naive_dt = datetime.datetime.now()
+        naive_dt = timeutils.utcnow()
         dt = timeutils.parse_isotime(timeutils.isotime(naive_dt))
         self.assertEqual(dt, utils.datetime_or_none(dt))
         self.assertEqual(naive_dt.replace(tzinfo=iso8601.iso8601.Utc(),

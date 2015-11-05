@@ -12,10 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import datetime
-
 import glanceclient.exc
 import novaclient.exceptions as nova_exc
+from oslo_utils import timeutils
 import pecan
 from pecan import rest
 import wsme
@@ -178,8 +177,8 @@ class BayModel(base.APIBase):
             https_proxy='https://proxy.com:123',
             no_proxy='192.168.0.1,192.168.0.2,192.168.0.3',
             labels={'key1': 'val1', 'key2': 'val2'},
-            created_at=datetime.datetime.utcnow(),
-            updated_at=datetime.datetime.utcnow(),
+            created_at=timeutils.utcnow(),
+            updated_at=timeutils.utcnow(),
             public=False),
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 

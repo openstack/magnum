@@ -12,8 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import datetime
-
+from oslo_utils import timeutils
 import pecan
 from pecan import rest
 import wsme
@@ -121,7 +120,7 @@ class X509KeyPair(base.APIBase):
         sample = cls(uuid='f978db47-9a37-4e9f-8572-804a10abc0aa',
                      name='MyX509KeyPair',
                      bay_uuid='7ae81bb3-dec3-4289-8d6c-da80bd8001ae',
-                     created_at=datetime.datetime.utcnow(),
+                     created_at=timeutils.utcnow(),
                      ca_cert='AAA....AAA',
                      certificate='BBB....BBB',
                      private_key='CCC....CCC')

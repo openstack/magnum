@@ -13,8 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import datetime
-
+from oslo_utils import timeutils
 import pecan
 from pecan import rest
 import wsme
@@ -90,8 +89,8 @@ class Node(base.APIBase):
                      type='virt',
                      image_id='Fedora-k8s',
                      ironic_node_id='4b6ec4a9-d412-494a-be77-a2fd16361402',
-                     created_at=datetime.datetime.utcnow(),
-                     updated_at=datetime.datetime.utcnow())
+                     created_at=timeutils.utcnow(),
+                     updated_at=timeutils.utcnow())
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 
 

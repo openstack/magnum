@@ -187,3 +187,20 @@ class HackingTestCase(base.TestCase):
 
         code = "self.assertTrue()"
         self._assert_has_no_errors(code, check)
+
+    def test_use_timeunitls_utcow(self):
+        errors = [(1, 0, "M310")]
+        check = checks.use_timeutils_utcnow
+        filename = "magnum/api/controller/v1/baymodel.py"
+
+        code = "datetime.now"
+        self._assert_has_errors(code, check, errors, filename)
+
+        code = "datetime.utcnow"
+        self._assert_has_errors(code, check, errors, filename)
+
+        code = "datetime.aa"
+        self._assert_has_no_errors(code, check, filename)
+
+        code = "aaa"
+        self._assert_has_no_errors(code, check, filename)

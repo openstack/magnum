@@ -123,6 +123,19 @@ def assert_equal_in(logical_line):
                   "contents.")
 
 
+def use_timeutils_utcnow(logical_line, filename):
+    # tools are OK to use the standard datetime module
+    if "/tools/" in filename:
+        return
+
+    msg = "M310: timeutils.utcnow() must be used instead of datetime.%s()"
+    datetime_funcs = ['now', 'utcnow']
+    for f in datetime_funcs:
+        pos = logical_line.find('datetime.%s' % f)
+        if pos != -1:
+            yield (pos, msg % f)
+
+
 def factory(register):
     register(check_policy_enforce_decorator)
     register(no_mutable_default_args)
@@ -131,3 +144,4 @@ def factory(register):
     register(assert_equal_not_none)
     register(assert_true_isinstance)
     register(assert_equal_in)
+    register(use_timeutils_utcnow)

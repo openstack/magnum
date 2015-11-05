@@ -11,8 +11,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import datetime
-
+from oslo_utils import timeutils
 import pecan
 from pecan import rest
 import wsme
@@ -114,8 +113,8 @@ class Pod(v1_base.K8sResourceBase):
                              ]
                          }
                      }''',
-                     created_at=datetime.datetime.utcnow(),
-                     updated_at=datetime.datetime.utcnow())
+                     created_at=timeutils.utcnow(),
+                     updated_at=timeutils.utcnow())
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 
     def parse_manifest(self):
