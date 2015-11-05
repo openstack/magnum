@@ -41,6 +41,10 @@ parameters:
     type: string
     description: network driver to use for instantiating container networks
 
+  flannel_network_cidr:
+    type: string
+    description: network range for flannel overlay network
+
   discovery_url:
     type: string
     description: url provided for node discovery
@@ -272,6 +276,8 @@ resources:
       fixed_ips:
         - subnet_id:
             get_param: fixed_subnet_id
+      allowed_address_pairs:
+        - ip_address: {get_param: flannel_network_cidr}
 
   swarm_node_floating:
     type: "OS::Neutron::FloatingIP"

@@ -26,11 +26,6 @@ work with Juno as well as soon as [#1402894][] is resolved.
 These templates will work with either CentOS Atomic Host or Fedora 21
 Atomic.
 
-You can enable the VXLAN backend for flannel by setting the
-"flannel_use_vxlan" parameter to "true", but I have run into kernel
-crashes using that backend with CentOS 7.  It seems to work fine with
-Fedora 21.
-
 You can enable docker registry v2 by setting the "registry_enabled"
 parameter to "true".
 
@@ -146,4 +141,3 @@ When submitting pull requests:
   stylistic/formatting/cleanup changes.
 
 [github repository]: https://github.com/larsks/heat-kubernetes/
-

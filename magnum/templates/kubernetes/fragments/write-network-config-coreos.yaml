@@ -25,18 +25,13 @@ write_files:
           exit 0
       fi
 
-      backend_type=udp
-      if [ "$FLANNEL_USE_VXLAN" == "true" ]; then
-          backend_type=vxlan
-      fi
-
       FLANNEL_JSON=/etc/sysconfig/flannel-network.json
       cat > $FLANNEL_JSON <<EOF
       {
           "Network": "$FLANNEL_NETWORK_CIDR",
           "Subnetlen": $FLANNEL_NETWORK_SUBNETLEN,
           "Backend": {
-              "Type": "$backend_type"
+              "Type": "$FLANNEL_BACKEND"
           }
       }
       EOF

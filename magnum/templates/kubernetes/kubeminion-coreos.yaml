@@ -63,6 +63,9 @@ parameters:
   fixed_subnet:
     type: string
     description: Subnet from which to allocate fixed addresses.
+  flannel_network_cidr:
+    type: string
+    description: network range for flannel overlay network
 
 resources:
 
@@ -191,6 +194,8 @@ resources:
         - get_resource: secgroup_all_open
       fixed_ips:
         - subnet: {get_param: fixed_subnet}
+      allowed_address_pairs:
+        - ip_address: {get_param: flannel_network_cidr}
       replacement_policy: AUTO
 
   kube_minion_floating:

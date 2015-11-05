@@ -193,7 +193,7 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
 
         flannel_cidr = mock_baymodel.labels.get('flannel_network_cidr')
         flannel_subnet = mock_baymodel.labels.get('flannel_network_subnetlen')
-        flannel_vxlan = mock_baymodel.labels.get('flannel_use_vxlan')
+        flannel_backend = mock_baymodel.labels.get('flannel_backend')
 
         k8s_def = tdef.AtomicK8sTemplateDefinition()
 
@@ -204,8 +204,8 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
             'minions_to_remove': removal_nodes,
             'discovery_url': 'fake_discovery_url',
             'flannel_network_cidr': flannel_cidr,
-            'flannel_use_vxlan': flannel_subnet,
-            'flannel_network_subnetlen': flannel_vxlan,
+            'flannel_network_subnetlen': flannel_subnet,
+            'flannel_backend': flannel_backend,
             'username': 'fake_user',
             'tenant_name': 'fake_tenant',
             'magnum_url': mock_osc.magnum_url.return_value,
@@ -244,7 +244,7 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
 
         flannel_cidr = mock_baymodel.labels.get('flannel_network_cidr')
         flannel_subnet = mock_baymodel.labels.get('flannel_network_subnetlen')
-        flannel_vxlan = mock_baymodel.labels.get('flannel_use_vxlan')
+        flannel_backend = mock_baymodel.labels.get('flannel_backend')
 
         k8s_def = tdef.AtomicK8sTemplateDefinition()
 
@@ -255,8 +255,8 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
             'minions_to_remove': removal_nodes,
             'discovery_url': 'fake_discovery_url',
             'flannel_network_cidr': flannel_cidr,
-            'flannel_use_vxlan': flannel_subnet,
-            'flannel_network_subnetlen': flannel_vxlan,
+            'flannel_network_subnetlen': flannel_subnet,
+            'flannel_backend': flannel_backend,
             'username': 'fake_user',
             'tenant_name': 'fake_tenant',
             'magnum_url': mock_osc.magnum_url.return_value,
@@ -418,7 +418,7 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
 
         flannel_cidr = mock_baymodel.labels.get('flannel_network_cidr')
         flannel_subnet = mock_baymodel.labels.get('flannel_network_subnetlen')
-        flannel_vxlan = mock_baymodel.labels.get('flannel_use_vxlan')
+        flannel_backend = mock_baymodel.labels.get('flannel_backend')
 
         swarm_def = tdef.AtomicSwarmTemplateDefinition()
 
@@ -429,8 +429,8 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
             'user_token': mock_context.auth_token,
             'magnum_url': mock_osc.magnum_url.return_value,
             'flannel_network_cidr': flannel_cidr,
-            'flannel_use_vxlan': flannel_subnet,
-            'flannel_network_subnetlen': flannel_vxlan}}
+            'flannel_backend': flannel_backend,
+            'flannel_network_subnetlen': flannel_subnet}}
         mock_get_params.assert_called_once_with(mock_context, mock_baymodel,
                                                 mock_bay, **expected_kwargs)
 

@@ -225,7 +225,7 @@ Proposed Changes
                             --network-driver flannel \
                             --labels flannel_network_cidr=10.0.0.0/8,\
                                      flannel_network_subnetlen=22,\
-                                     flannel_use_vxlan=vxlan
+                                     flannel_backend=vxlan
 
    With Magnum's current implementation, this document would support
    labels for the Kubernetes COE type. However, labels are applicable
