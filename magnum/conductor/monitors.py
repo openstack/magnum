@@ -17,6 +17,7 @@ import abc
 
 from oslo_config import cfg
 from oslo_log import log
+from oslo_utils import importutils
 import six
 
 from magnum import objects
@@ -32,6 +33,11 @@ CONF.import_opt('docker_remote_api_version',
 CONF.import_opt('default_timeout',
                 'magnum.conductor.handlers.docker_conductor',
                 group='docker')
+
+COE_CLASS_PATH = {
+    bay_type.SWARM: 'magnum.conductor.swarm_monitor.SwarmMonitor',
+    bay_type.KUBERNETES: 'magnum.conductor.k8s_monitor.K8sMonitor'
+}
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -63,12 +69,9 @@ class MonitorBase(object):
 
 def create_monitor(context, bay):
     baymodel = objects.BayModel.get_by_uuid(context, bay.baymodel_id)
-    if baymodel.coe == bay_type.SWARM:
-        from magnum.conductor.swarm_monitor import SwarmMonitor
-        return SwarmMonitor(context, bay)
-    elif baymodel.coe == bay_type.KUBERNETES:
-        from magnum.conductor.k8s_monitor import K8sMonitor
-        return K8sMonitor(context, bay)
+    if baymodel.coe in COE_CLASS_PATH:
+        coe_cls = importutils.import_class(COE_CLASS_PATH[baymodel.coe])
+        return coe_cls(context, bay)
 
     # TODO(hongbin): add support for other bay types
     LOG.debug("Cannot create monitor with bay type '%s'" % baymodel.coe)
