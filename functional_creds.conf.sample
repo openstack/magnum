@@ -9,7 +9,7 @@ auth_version = v2
 [admin]
 user = admin
 tenant = admin
-pass = secrete
+pass = password
 [magnum]
 image_id = fedora-21-atomic-5
 nic_id = public

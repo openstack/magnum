@@ -80,6 +80,7 @@ Developer Info
    dev/dev-build-atomic-image.rst
    dev/dev-kubernetes-load-balancer.rst
    dev/dev-tls.rst
+   dev/dev-functional-test.rst
    contributing
    heat-templates
    objects
