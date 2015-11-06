@@ -10,12 +10,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
 from magnum.common.pythonk8sclient.swagger_client import api_client
 from magnum.common.pythonk8sclient.swagger_client.apis import apiv_api
 from magnum.tests.functional.python_client_base import BayAPITLSTest
 from magnum.tests.functional.python_client_base import BayTest
-from magnumclient.openstack.common.apiclient import exceptions
 
 
 class TestBayModelResource(BayTest):
@@ -63,18 +61,6 @@ extendedKeyUsage = clientAuth
                                           cert_file=cls.cert_file,
                                           ca_certs=cls.ca_file)
         cls.k8s_api = apiv_api.ApivApi(k8s_client)
-
-    @classmethod
-    def tearDownClass(cls):
-        cls._delete_bay(cls.bay.uuid)
-        try:
-            cls._wait_on_status(cls.bay,
-                                ["CREATE_COMPLETE",
-                                 "DELETE_IN_PROGRESS", "CREATE_FAILED"],
-                                ["DELETE_FAILED", "DELETE_COMPLETE"])
-        except exceptions.NotFound:
-            pass
-        cls._delete_baymodel(cls.baymodel.uuid)
 
     def test_pod_apis(self):
         pod_manifest = {'apiVersion': 'v1',

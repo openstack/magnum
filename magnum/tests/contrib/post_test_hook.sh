@@ -80,6 +80,7 @@ image_id = $IMAGE_ID
 nic_id = $NIC_ID
 keypair_id = default
 flavor_id = m1.magnum
+copy_logs = true
 EOF
 
 # Note(eliqiao): Let's keep this only for debugging on gate.
@@ -88,7 +89,8 @@ cat $CREDS_FILE
 
 # Create a keypair for use in the functional tests.
 echo_summary "Generate a key-pair"
-nova keypair-add default
+ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
+nova keypair-add --pub-key ~/.ssh/id_rsa.pub default
 
 # Create magnum specific flavor for use in functional tests.
 echo_summary "Create a flavor"

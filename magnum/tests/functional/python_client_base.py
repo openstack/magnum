@@ -51,6 +51,7 @@ class BaseMagnumClient(base.TestCase):
         nic_id = cliutils.env('NIC_ID')
         flavor_id = cliutils.env('FLAVOR_ID')
         keypair_id = cliutils.env('KEYPAIR_ID')
+        copy_logs = cliutils.env('COPY_LOGS')
 
         config = ConfigParser.RawConfigParser()
         if config.read('functional_creds.conf'):
@@ -65,11 +66,16 @@ class BaseMagnumClient(base.TestCase):
             nic_id = nic_id or config.get('magnum', 'nic_id')
             flavor_id = flavor_id or config.get('magnum', 'flavor_id')
             keypair_id = keypair_id or config.get('magnum', 'keypair_id')
+            try:
+                copy_logs = copy_logs or config.get('magnum', 'copy_logs')
+            except ConfigParser.NoOptionError:
+                pass
 
         cls.image_id = image_id
         cls.nic_id = nic_id
         cls.flavor_id = flavor_id
         cls.keypair_id = keypair_id
+        cls.copy_logs = bool(copy_logs)
         cls.cs = v1client.Client(username=user,
                                  api_key=passwd,
                                  project_id=tenant_id,
@@ -135,12 +141,30 @@ class BaseMagnumClient(base.TestCase):
         return bay
 
     @classmethod
+    def _show_bay(cls, name):
+        bay = cls.cs.bays.get(name)
+        return bay
+
+    @classmethod
     def _delete_baymodel(cls, baymodel_uuid):
         cls.cs.baymodels.delete(baymodel_uuid)
 
     @classmethod
     def _delete_bay(cls, bay_uuid):
         cls.cs.bays.delete(bay_uuid)
+
+    @classmethod
+    def _copy_logs(cls):
+        if not cls.copy_logs:
+            return
+
+        cls.bay = cls._show_bay(cls.bay.uuid)
+        for node_addr in cls.bay.node_addresses:
+            subprocess.call(["magnum/tests/contrib/copy_instance_logs.sh",
+                             node_addr, cls.baymodel.coe, "worker"])
+        for node_addr in getattr(cls.bay, 'master_addresses', []):
+            subprocess.call(["magnum/tests/contrib/copy_instance_logs.sh",
+                             node_addr, cls.baymodel.coe, "master"])
 
 
 class BayTest(BaseMagnumClient):
@@ -207,6 +231,10 @@ class BayAPITLSTest(BaseMagnumClient):
 
     @classmethod
     def tearDownClass(cls):
+        try:
+            cls._copy_logs()
+        except Exception as e:
+            print("WARNING: Failed to copy logs. Error: " + repr(e))
 
         if cls.ca_dir:
             rmtree_without_raise(cls.ca_dir)
