@@ -49,7 +49,6 @@ template_def_opts = [
                default='https://discovery.etcd.io/new?size=%(size)d',
                help=_('Url for etcd public discovery endpoint.')),
     cfg.StrOpt('coreos_discovery_token_url',
-               default=None,
                deprecated_name='discovery_token_url',
                deprecated_group='bay_heat',
                help=_('coreos discovery token url.')),
@@ -59,7 +58,6 @@ template_def_opts = [
                help=_('Location of template to build a swarm '
                       'cluster on atomic.')),
     cfg.StrOpt('swarm_discovery_url_format',
-               default=None,
                help=_('Format string to use for swarm discovery url. '
                       'Available values: bay_id, bay_uuid. '
                       'Example: "etcd://etcd.example.com/\%(bay_uuid)s"')),
