@@ -52,6 +52,14 @@ Install required packages::
 Run the test
 ============
 
-Run this command::
+Test all functional cases::
 
     tox -e functional -- --concurrency=1
+
+Test specified functional case::
+
+    tox -e functional -- --concurrency=1 <test path>
+
+The following is an example for test path::
+
+    magnum.tests.functional.api.v1.test_baymodel.BayModelTest.test_create_baymodel
