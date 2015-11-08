@@ -17,14 +17,12 @@ import pecan
 from magnum.api import auth
 from magnum.api import config as api_config
 from magnum.api import middleware
-from magnum.common import config
 
 # Register options for the service
 API_SERVICE_OPTS = [
-    cfg.Opt('port',
-            type=config.PORT_TYPE,
-            default=9511,
-            help='The port for the Magnum API server.'),
+    cfg.PortOpt('port',
+                default=9511,
+                help='The port for the Magnum API server.'),
     cfg.IPOpt('host',
               default='127.0.0.1',
               help='The listen IP for the Magnum API server.'),

@@ -16,12 +16,9 @@
 #    under the License.
 
 from oslo_config import cfg
-from oslo_config import types
 
 from magnum.common import rpc
 from magnum import version
-
-PORT_TYPE = types.Integer(1, 65535)
 
 
 def parse_args(argv, default_config_files=None):
