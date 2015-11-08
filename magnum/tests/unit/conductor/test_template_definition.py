@@ -153,32 +153,6 @@ class TemplateDefinitionTestCase(base.TestCase):
         self.assertIn(mock_mapping_type.return_value,
                       definition.output_mappings)
 
-    def test_update_outputs(self):
-        definition = tdef.TemplateDefinition.get_template_definition(
-            'vm',
-            'fedora-atomic',
-            'kubernetes')
-
-        expected_node_addresses = ['ex_minion', 'address']
-
-        outputs = [
-            {"output_value": expected_node_addresses,
-             "description": "No description given",
-             "output_key": "kube_minions_external"},
-            {"output_value": ['any', 'output'],
-             "description": "No description given",
-             "output_key": "kube_minions"}
-        ]
-        mock_stack = mock.MagicMock()
-        mock_stack.outputs = outputs
-        mock_bay = mock.MagicMock()
-        mock_bay.api_address = None
-        mock_baymodel = mock.MagicMock()
-
-        definition.update_outputs(mock_stack, mock_baymodel, mock_bay)
-
-        self.assertEqual(expected_node_addresses, mock_bay.node_addresses)
-
 
 class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
 
@@ -328,65 +302,61 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
                           fake_bay)
 
     def test_update_outputs_api_address(self):
-        definition = tdef.TemplateDefinition.get_template_definition(
-            'vm',
-            'fedora-atomic',
-            'kubernetes')
-
-        address = 'updated_address'
-        protocol = 'http'
-        port = '8080'
-        params = {
-            'protocol': protocol,
-            'address': address,
-            'port': port,
-        }
-        expected_api_address = '%(protocol)s://%(address)s:%(port)s' % params
-
-        outputs = [
-            {"output_value": address,
-             "description": "No description given",
-             "output_key": "api_address"},
-        ]
-        mock_stack = mock.MagicMock()
-        mock_stack.outputs = outputs
-        mock_bay = mock.MagicMock()
-        mock_baymodel = mock.MagicMock()
-        mock_baymodel.tls_disabled = True
-
-        definition.update_outputs(mock_stack, mock_baymodel, mock_bay)
-
-        self.assertEqual(expected_api_address, mock_bay.api_address)
+        self._test_update_outputs(tls_disabled=True,
+                                  expected_protocol='http',
+                                  expected_port='8080')
 
     def test_update_outputs_if_baymodel_is_secure(self):
+        self._test_update_outputs(tls_disabled=False,
+                                  expected_protocol='https',
+                                  expected_port='6443')
+
+    def _test_update_outputs(self, tls_disabled, expected_protocol,
+                             expected_port):
         definition = tdef.TemplateDefinition.get_template_definition(
             'vm',
             'fedora-atomic',
             'kubernetes')
 
         address = 'updated_address'
-        protocol = 'https'
-        port = '6443'
         params = {
-            'protocol': protocol,
+            'protocol': expected_protocol,
             'address': address,
-            'port': port,
+            'port': expected_port,
         }
         expected_api_address = '%(protocol)s://%(address)s:%(port)s' % params
+
+        expected_master_addresses = ['ex_master', 'address']
+        expected_node_addresses = ['ex_minion', 'address']
 
         outputs = [
             {"output_value": address,
              "description": "No description given",
              "output_key": "api_address"},
+            {"output_value": ['any', 'output'],
+             "description": "No description given",
+             "output_key": "kube_masters_private"},
+            {"output_value": expected_master_addresses,
+             "description": "No description given",
+             "output_key": "kube_masters"},
+            {"output_value": ['any', 'output'],
+             "description": "No description given",
+             "output_key": "kube_minions_private"},
+            {"output_value": expected_node_addresses,
+             "description": "No description given",
+             "output_key": "kube_minions"},
         ]
         mock_stack = mock.MagicMock()
         mock_stack.outputs = outputs
         mock_bay = mock.MagicMock()
         mock_baymodel = mock.MagicMock()
-        mock_baymodel.tls_disabled = False
+        mock_baymodel.tls_disabled = tls_disabled
 
         definition.update_outputs(mock_stack, mock_baymodel, mock_bay)
+
         self.assertEqual(expected_api_address, mock_bay.api_address)
+        self.assertEqual(expected_master_addresses, mock_bay.master_addresses)
+        self.assertEqual(expected_node_addresses, mock_bay.node_addresses)
 
 
 class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
@@ -455,6 +425,39 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         heat_param = swarm_def.get_heat_param(bay_attr='node_count')
         self.assertEqual('number_of_nodes', heat_param)
 
+    def test_update_outputs(self):
+        swarm_def = tdef.AtomicSwarmTemplateDefinition()
+
+        expected_api_address = 'updated_address'
+        expected_node_addresses = ['ex_minion', 'address']
+
+        outputs = [
+            {"output_value": expected_api_address,
+             "description": "No description given",
+             "output_key": "api_address"},
+            {"output_value": ['any', 'output'],
+             "description": "No description given",
+             "output_key": "swarm_master_private"},
+            {"output_value": ['any', 'output'],
+             "description": "No description given",
+             "output_key": "swarm_master"},
+            {"output_value": ['any', 'output'],
+             "description": "No description given",
+             "output_key": "swarm_nodes_private"},
+            {"output_value": expected_node_addresses,
+             "description": "No description given",
+             "output_key": "swarm_nodes"},
+        ]
+        mock_stack = mock.MagicMock()
+        mock_stack.outputs = outputs
+        mock_bay = mock.MagicMock()
+        mock_baymodel = mock.MagicMock()
+
+        swarm_def.update_outputs(mock_stack, mock_baymodel, mock_bay)
+
+        self.assertEqual(expected_api_address, mock_bay.api_address)
+        self.assertEqual(expected_node_addresses, mock_bay.node_addresses)
+
 
 class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
 
@@ -463,3 +466,36 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
 
         heat_param = mesos_def.get_heat_param(bay_attr='node_count')
         self.assertEqual('number_of_slaves', heat_param)
+
+    def test_update_outputs(self):
+        mesos_def = tdef.UbuntuMesosTemplateDefinition()
+
+        expected_api_address = 'updated_address'
+        expected_node_addresses = ['ex_minion', 'address']
+
+        outputs = [
+            {"output_value": expected_api_address,
+             "description": "No description given",
+             "output_key": "api_address"},
+            {"output_value": ['any', 'output'],
+             "description": "No description given",
+             "output_key": "mesos_master_private"},
+            {"output_value": ['any', 'output'],
+             "description": "No description given",
+             "output_key": "mesos_master"},
+            {"output_value": ['any', 'output'],
+             "description": "No description given",
+             "output_key": "mesos_slaves_private"},
+            {"output_value": expected_node_addresses,
+             "description": "No description given",
+             "output_key": "mesos_slaves"},
+        ]
+        mock_stack = mock.MagicMock()
+        mock_stack.outputs = outputs
+        mock_bay = mock.MagicMock()
+        mock_baymodel = mock.MagicMock()
+
+        mesos_def.update_outputs(mock_stack, mock_baymodel, mock_bay)
+
+        self.assertEqual(expected_api_address, mock_bay.api_address)
+        self.assertEqual(expected_node_addresses, mock_bay.node_addresses)

@@ -402,13 +402,19 @@ resources:
 
 outputs:
 
+  api_address:
+    value: {get_attr: [swarm_master_floating, floating_ip_address]}
+
+  swarm_master_private:
+    value: {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
+
   swarm_master:
     value: {get_attr: [swarm_master_floating, floating_ip_address]}
 
-  swarm_nodes:
+  swarm_nodes_private:
     value: {get_attr: [swarm_nodes, swarm_node_ip]}
 
-  swarm_nodes_external:
+  swarm_nodes:
     value: {get_attr: [swarm_nodes, swarm_node_external_ip]}
 
   discovery_url:

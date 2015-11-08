@@ -250,12 +250,21 @@ resources:
 
 outputs:
 
+  api_address:
+    value: {get_attr: [mesos_master_floating, floating_ip_address]}
+
+  mesos_master_private:
+    value: {get_attr: [mesos_master_eth0, fixed_ips, 0, ip_address]}
+
   mesos_master:
     value: {get_attr: [mesos_master_floating, floating_ip_address]}
     description: >
       This is the "public" ip address of the Mesos master server.  Use this address to
       log in to the Mesos master via ssh or to access the Mesos API
       from outside the cluster.
+
+  mesos_slaves_private:
+    value: {get_attr: [mesos_slaves, mesos_slave_ip]}
 
   mesos_slaves:
     value: {get_attr: [mesos_slaves, mesos_slave_external_ip]}

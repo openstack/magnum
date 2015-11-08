@@ -162,11 +162,17 @@ resources:
 
 outputs:
 
-  kube_master:
+  api_address:
     value: {get_attr: [kube_master, kube_master_external_ip]}
 
-  kube_minions:
+  kube_masters_private:
+    value: {get_attr: [kube_master, kube_master_ip]}
+
+  kube_masters:
+    value: {get_attr: [kube_master, kube_master_external_ip]}
+
+  kube_minions_private:
     value: {get_attr: [kube_minions, kube_node_ip]}
 
-  kube_minions_external:
+  kube_minions:
     value: {get_attr: [kube_minions, kube_node_external_ip]}

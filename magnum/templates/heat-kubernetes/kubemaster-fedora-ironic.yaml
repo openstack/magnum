@@ -206,5 +206,8 @@ resources:
 
 outputs:
 
+  kube_master_ip:
+    value: {get_attr: [kube_master, networks, private, 0]}
+
   kube_master_external_ip:
     value: {get_attr: [kube_master_floating, floating_ip_address]}
