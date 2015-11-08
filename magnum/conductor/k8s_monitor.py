@@ -58,7 +58,7 @@ class K8sMonitor(MonitorBase):
     def _parse_pod_info(self, pods):
         """Parse pods and retrieve memory details about each pod
 
-        :param pods: Thr output k8s_api.list_namespaced_pods()
+        :param pods: The output of k8s_api.list_namespaced_pods()
         For example:
         {
             'items': [{
