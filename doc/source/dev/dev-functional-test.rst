@@ -45,9 +45,11 @@ Create the necessary keypair and flavor::
     source /opt/stack/devstack/openrc demo demo
     nova keypair-add --pub-key ~/.ssh/id_rsa.pub default
 
-Install required packages::
+You may need to explicitly upgrade required packages if you've installed them
+before and their versions become too old::
 
-    sudo pip install -U -r test-requirements.txt
+    UPPER_CONSTRAINTS=/opt/stack/requirements/upper-constraints.txt
+    sudo pip install -c $UPPER_CONSTRAINTS -U -r test-requirements.txt
 
 Run the test
 ============
