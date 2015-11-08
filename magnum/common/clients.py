@@ -29,7 +29,6 @@ LOG = logging.getLogger(__name__)
 
 magnum_client_opts = [
     cfg.StrOpt('region_name',
-               default=None,
                help=_('Region in Identity service catalog to use for '
                       'communication with the OpenStack service.')),
     cfg.StrOpt('endpoint_type',
@@ -40,7 +39,6 @@ magnum_client_opts = [
 
 heat_client_opts = [
     cfg.StrOpt('region_name',
-               default=None,
                help=_('Region in Identity service catalog to use for '
                       'communication with the OpenStack service.')),
     cfg.StrOpt('endpoint_type',
@@ -62,7 +60,6 @@ heat_client_opts = [
 
 glance_client_opts = [
     cfg.StrOpt('region_name',
-               default=None,
                help=_('Region in Identity service catalog to use for '
                       'communication with the OpenStack service.')),
     cfg.StrOpt('endpoint_type',
@@ -73,7 +70,6 @@ glance_client_opts = [
 
 barbican_client_opts = [
     cfg.StrOpt('region_name',
-               default=None,
                help=_('Region in Identity service catalog to use for '
                       'communication with the OpenStack service.')),
     cfg.StrOpt('endpoint_type',
@@ -84,7 +80,6 @@ barbican_client_opts = [
 
 nova_client_opts = [
     cfg.StrOpt('region_name',
-               default=None,
                help=_('Region in Identity service catalog to use for '
                       'communication with the OpenStack service.')),
     cfg.StrOpt('endpoint_type',

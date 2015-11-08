@@ -47,7 +47,6 @@ bay_heat_opts = [
                help=('Sleep time interval between two attempts of querying '
                      'the Heat stack.  This interval is in seconds.')),
     cfg.IntOpt('bay_create_timeout',
-               default=None,
                help=('The length of time to let bay creation continue.  This '
                      'interval is in minutes.  The default is no timeout.'))
 ]
