@@ -97,16 +97,15 @@ class TestUtils(test_base.TestCase):
 
     def test_datetime_or_none(self):
         naive_dt = timeutils.utcnow()
-        dt = timeutils.parse_isotime(timeutils.isotime(naive_dt))
+        dt = timeutils.parse_isotime(datetime.datetime.isoformat(naive_dt))
         self.assertEqual(dt, utils.datetime_or_none(dt))
-        self.assertEqual(naive_dt.replace(tzinfo=iso8601.iso8601.Utc(),
-                                          microsecond=0),
+        self.assertEqual(naive_dt.replace(tzinfo=iso8601.iso8601.Utc()),
                          utils.datetime_or_none(dt))
         self.assertIsNone(utils.datetime_or_none(None))
         self.assertRaises(ValueError, utils.datetime_or_none, 'foo')
 
     def test_datetime_or_str_or_none(self):
-        dts = timeutils.isotime()
+        dts = datetime.datetime.isoformat(timeutils.utcnow())
         dt = timeutils.parse_isotime(dts)
         self.assertEqual(dt, utils.datetime_or_str_or_none(dt))
         self.assertIsNone(utils.datetime_or_str_or_none(None))
@@ -142,16 +141,16 @@ class TestUtils(test_base.TestCase):
 
         obj = Obj()
         obj.bar = timeutils.parse_isotime('1955-11-05T00:00:00Z')
-        self.assertEqual('1955-11-05T00:00:00Z', obj.foo())
+        self.assertEqual('1955-11-05T00:00:00+00:00', obj.foo())
         obj.bar = None
         self.assertIsNone(obj.foo())
         obj.bar = 'foo'
-        self.assertRaises(AttributeError, obj.foo)
+        self.assertRaises(TypeError, obj.foo)
 
     def test_dt_deserializer(self):
         dt = timeutils.parse_isotime('1955-11-05T00:00:00Z')
-        self.assertEqual(dt,
-                         utils.dt_deserializer(None, timeutils.isotime(dt)))
+        self.assertEqual(dt, utils.dt_deserializer(None,
+                         datetime.datetime.isoformat(dt)))
         self.assertIsNone(utils.dt_deserializer(None, None))
         self.assertRaises(ValueError, utils.dt_deserializer, None, 'foo')
 
@@ -334,8 +333,8 @@ class _TestObject(object):
                     'magnum_object.changes':
                         ['created_at', 'updated_at'],
                     'magnum_object.data':
-                        {'created_at': timeutils.isotime(dt),
-                         'updated_at': timeutils.isotime(dt)}
+                        {'created_at': datetime.datetime.isoformat(dt),
+                         'updated_at': datetime.datetime.isoformat(dt)}
                     }
         actual = obj.obj_to_primitive()
         # magnum_object.changes is built from a set and order is undefined
