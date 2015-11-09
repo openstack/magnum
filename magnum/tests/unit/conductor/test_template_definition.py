@@ -301,62 +301,72 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
                           tdef.AtomicK8sTemplateDefinition().get_discovery_url,
                           fake_bay)
 
-    def test_update_outputs_api_address(self):
-        self._test_update_outputs(tls_disabled=True,
-                                  expected_protocol='http',
-                                  expected_port='8080')
+    def _test_update_outputs_api_address(self, coe, params, tls=True):
 
-    def test_update_outputs_if_baymodel_is_secure(self):
-        self._test_update_outputs(tls_disabled=False,
-                                  expected_protocol='https',
-                                  expected_port='6443')
-
-    def _test_update_outputs(self, tls_disabled, expected_protocol,
-                             expected_port):
         definition = tdef.TemplateDefinition.get_template_definition(
             'vm',
             'fedora-atomic',
-            'kubernetes')
-
-        address = 'updated_address'
-        params = {
-            'protocol': expected_protocol,
-            'address': address,
-            'port': expected_port,
-        }
+            coe)
         expected_api_address = '%(protocol)s://%(address)s:%(port)s' % params
 
-        expected_master_addresses = ['ex_master', 'address']
-        expected_node_addresses = ['ex_minion', 'address']
-
         outputs = [
-            {"output_value": address,
+            {"output_value": params['address'],
              "description": "No description given",
-             "output_key": "api_address"},
-            {"output_value": ['any', 'output'],
-             "description": "No description given",
-             "output_key": "kube_masters_private"},
-            {"output_value": expected_master_addresses,
-             "description": "No description given",
-             "output_key": "kube_masters"},
-            {"output_value": ['any', 'output'],
-             "description": "No description given",
-             "output_key": "kube_minions_private"},
-            {"output_value": expected_node_addresses,
-             "description": "No description given",
-             "output_key": "kube_minions"},
+             "output_key": 'api_address'},
         ]
         mock_stack = mock.MagicMock()
         mock_stack.outputs = outputs
         mock_bay = mock.MagicMock()
         mock_baymodel = mock.MagicMock()
-        mock_baymodel.tls_disabled = tls_disabled
+        mock_baymodel.tls_disabled = tls
 
         definition.update_outputs(mock_stack, mock_baymodel, mock_bay)
 
         self.assertEqual(expected_api_address, mock_bay.api_address)
-        self.assertEqual(expected_master_addresses, mock_bay.master_addresses)
-        self.assertEqual(expected_node_addresses, mock_bay.node_addresses)
+
+    def test_update_k8s_outputs_api_address(self):
+        address = 'updated_address'
+        protocol = 'http'
+        port = '8080'
+        params = {
+            'protocol': protocol,
+            'address': address,
+            'port': port,
+        }
+        self._test_update_outputs_api_address('kubernetes', params)
+
+    def test_update_swarm_outputs_api_address(self):
+        address = 'updated_address'
+        protocol = 'tcp'
+        port = '2376'
+        params = {
+            'protocol': protocol,
+            'address': address,
+            'port': port,
+        }
+        self._test_update_outputs_api_address('swarm', params)
+
+    def test_update_k8s_outputs_if_baymodel_is_secure(self):
+        address = 'updated_address'
+        protocol = 'https'
+        port = '6443'
+        params = {
+            'protocol': protocol,
+            'address': address,
+            'port': port,
+        }
+        self._test_update_outputs_api_address('kubernetes', params, tls=False)
+
+    def test_update_swarm_outputs_if_baymodel_is_secure(self):
+        address = 'updated_address'
+        protocol = 'https'
+        port = '2376'
+        params = {
+            'protocol': protocol,
+            'address': address,
+            'port': port,
+        }
+        self._test_update_outputs_api_address('swarm', params, tls=False)
 
 
 class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
@@ -454,7 +464,7 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         mock_baymodel = mock.MagicMock()
 
         swarm_def.update_outputs(mock_stack, mock_baymodel, mock_bay)
-
+        expected_api_address = "tcp://%s:2376" % expected_api_address
         self.assertEqual(expected_api_address, mock_bay.api_address)
         self.assertEqual(expected_node_addresses, mock_bay.node_addresses)
 

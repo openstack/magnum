@@ -31,6 +31,7 @@ LOG = logging.getLogger(__name__)
 
 KUBE_SECURE_PORT = '6443'
 KUBE_INSECURE_PORT = '8080'
+DOCKER_PORT = '2376'
 
 template_def_opts = [
     cfg.StrOpt('k8s_atomic_template_path',
@@ -399,6 +400,25 @@ class K8sApiAddressOutputMapping(OutputMapping):
             setattr(bay, self.bay_attr, output_value)
 
 
+class SwarmApiAddressOutputMapping(OutputMapping):
+
+    def set_output(self, stack, baymodel, bay):
+        protocol = 'https'
+        if baymodel.tls_disabled:
+            protocol = 'tcp'
+
+        output_value = self.get_output_value(stack)
+        params = {
+            'protocol': protocol,
+            'address': output_value,
+            'port': DOCKER_PORT,
+        }
+        output_value = "%(protocol)s://%(address)s:%(port)s" % params
+
+        if output_value is not None:
+            setattr(bay, self.bay_attr, output_value)
+
+
 class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
     """Kubernetes template for a Fedora Atomic VM."""
 
@@ -558,7 +578,8 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
                            baymodel_attr='tls_disabled',
                            required=True)
         self.add_output('api_address',
-                        bay_attr='api_address')
+                        bay_attr='api_address',
+                        mapping_type=SwarmApiAddressOutputMapping)
         self.add_output('swarm_master_private',
                         bay_attr=None)
         self.add_output('swarm_master',
