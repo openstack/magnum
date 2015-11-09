@@ -50,7 +50,7 @@ if is_ssl_enabled_service "magnum" || is_service_enabled tls-proxy; then
 fi
 
 # Public facing bits
-MAGNUM_SERVICE_HOST=${MAGNUM_SERVICE_HOST:-$SERVICE_HOST}
+MAGNUM_SERVICE_HOST=${MAGNUM_SERVICE_HOST:-$HOST_IP}
 MAGNUM_SERVICE_PORT=${MAGNUM_SERVICE_PORT:-9511}
 MAGNUM_SERVICE_PORT_INT=${MAGNUM_SERVICE_PORT_INT:-19511}
 MAGNUM_SERVICE_PROTOCOL=${MAGNUM_SERVICE_PROTOCOL:-$SERVICE_PROTOCOL}
@@ -263,7 +263,7 @@ function start_magnum_api {
 
     run_process m-api "$MAGNUM_BIN_DIR/magnum-api"
     echo "Waiting for magnum-api to start..."
-    if ! wait_for_service $SERVICE_TIMEOUT $service_protocol://$SERVICE_HOST:$service_port; then
+    if ! wait_for_service $SERVICE_TIMEOUT $service_protocol://$MAGNUM_SERVICE_HOST:$service_port; then
         die $LINENO "magnum-api did not start"
     fi
 
