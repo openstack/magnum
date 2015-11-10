@@ -40,7 +40,7 @@ Creating an environment file `local.yaml` with parameters specific to
 your environment:
 
     parameters:
-      ssh_key_name: lars
+      ssh_key_name: testkey
       external_network: public
       dns_nameserver: 192.168.200.1
       server_image: centos-7-atomic-20150101
