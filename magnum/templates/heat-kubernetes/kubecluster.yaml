@@ -496,18 +496,23 @@ outputs:
       This is the url of docker registry server where you can store docker
       images.
 
+  kube_masters_private:
+    value: {get_attr: [kube_masters, kube_master_ip]}
+    description: >
+      This is a list of the "private" addresses of all the Kubernetes masters.
+
   kube_masters:
     value: {get_attr: [kube_masters, kube_master_external_ip]}
     description: >
       This is a list of "public" ip addresses of all Kubernetes master servers.
       Use these addresses to log in to the Kubernetes masters via ssh.
 
-  kube_minions:
+  kube_minions_private:
     value: {get_attr: [kube_minions, kube_minion_ip]}
     description: >
       This is a list of the "private" addresses of all the Kubernetes minions.
 
-  kube_minions_external:
+  kube_minions:
     value: {get_attr: [kube_minions, kube_minion_external_ip]}
     description: >
       This is a list of the "public" addresses of all the Kubernetes minions. Use

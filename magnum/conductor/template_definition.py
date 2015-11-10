@@ -437,10 +437,14 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
         self.add_output('api_address',
                         bay_attr='api_address',
                         mapping_type=K8sApiAddressOutputMapping)
-        self.add_output('kube_minions',
+        self.add_output('kube_minions_private',
                         bay_attr=None)
-        self.add_output('kube_minions_external',
+        self.add_output('kube_minions',
                         bay_attr='node_addresses')
+        self.add_output('kube_masters_private',
+                        bay_attr=None)
+        self.add_output('kube_masters',
+                        bay_attr='master_addresses')
 
     def get_discovery_url(self, bay):
         if hasattr(bay, 'discovery_url') and bay.discovery_url:
@@ -553,9 +557,15 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
         self.add_parameter('tls_disabled',
                            baymodel_attr='tls_disabled',
                            required=True)
-        self.add_output('swarm_master',
+        self.add_output('api_address',
                         bay_attr='api_address')
-        self.add_output('swarm_nodes_external',
+        self.add_output('swarm_master_private',
+                        bay_attr=None)
+        self.add_output('swarm_master',
+                        bay_attr=None)
+        self.add_output('swarm_nodes_private',
+                        bay_attr=None)
+        self.add_output('swarm_nodes',
                         bay_attr='node_addresses')
         self.add_output('discovery_url',
                         bay_attr='discovery_url')
@@ -620,8 +630,14 @@ class UbuntuMesosTemplateDefinition(BaseTemplateDefinition):
         self.add_parameter('slave_flavor',
                            baymodel_attr='flavor_id')
 
-        self.add_output('mesos_master',
+        self.add_output('api_address',
                         bay_attr='api_address')
+        self.add_output('mesos_master_private',
+                        bay_attr=None)
+        self.add_output('mesos_master',
+                        bay_attr=None)
+        self.add_output('mesos_slaves_private',
+                        bay_attr=None)
         self.add_output('mesos_slaves',
                         bay_attr='node_addresses')
 

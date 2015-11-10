@@ -77,7 +77,7 @@ If you enable docker registry v2, you must provide values for:
 You can get the ip address of the Kubernetes master using the `heat
 output-show` command:
 
-    $ heat output-show my-kube-cluster kube_master
+    $ heat output-show my-kube-cluster kube_masters
     "192.168.200.86"
 
 You can ssh into that server as the `minion` user:
@@ -93,7 +93,7 @@ And once logged in you can run `kubectl`, etc:
 You can log into your minions using the `minion` user as well.  You
 can get a list of minion addresses by running:
 
-    $ heat output-show my-kube-cluster kube_minions_external
+    $ heat output-show my-kube-cluster kube_minions
     [
       "192.168.200.182"
     ]
