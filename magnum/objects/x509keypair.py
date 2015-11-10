@@ -109,6 +109,20 @@ class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject,
         return x509keypair
 
     @base.remotable_classmethod
+    def get_by_bay_uuid(cls, context, bay_uuid):
+        """Find a x509keypair based on a bay uuid and return a :class:`X509KeyPair`
+
+        object.
+
+        :param bay_uuid: the uuid of a bay.
+        :param context: Security context.
+        :returns: a :class:`X509KeyPair` object.
+        """
+        db_cert = cls.dbapi.get_x509keypair_by_bay_uuid(context, bay_uuid)
+        x509keypair = X509KeyPair._from_db_object(cls(context), db_cert)
+        return x509keypair
+
+    @base.remotable_classmethod
     def list(cls, context, limit=None, marker=None,
              sort_key=None, sort_dir=None, filters=None):
         """Return a list of X509KeyPair objects.
@@ -119,9 +133,7 @@ class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject,
         :param sort_key: column to sort results by.
         :param sort_dir: direction to sort. "asc" or "desc".
         :param filters: filter dict, can include 'x509keypairmodel_id', 'name',
-                        'node_count', 'stack_id', 'api_address',
-                        'node_addresses', 'project_id', 'user_id',
-                        'status'(should be a status list).
+                        'bay_uuid', 'project_id', 'user_id'.
         :returns: a list of :class:`X509KeyPair` object.
 
         """
@@ -200,14 +212,3 @@ class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject,
         for field in self.fields:
             if self.obj_attr_is_set(field) and self[field] != current[field]:
                 self[field] = current[field]
-
-    @base.remotable_classmethod
-    def get_by_bay_uuid(cls, context, bay_uuid):
-        """Return a :class:`Cert` object associated with a given bay.
-
-        :param bay_uuid: the uuid of a bay.
-        :param context: Security context
-        :returns: a class:`Cert` object.
-        """
-        db_cert = cls.dbapi.get_x509keypair_by_bay_uuid(context, bay_uuid)
-        return X509KeyPair._from_db_object(cls(context), db_cert)
