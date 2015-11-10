@@ -40,7 +40,7 @@ class MonitorsTestCase(base.TestCase):
         super(MonitorsTestCase, self).setUp()
 
         bay = utils.get_test_bay(node_addresses=['1.2.3.4'],
-                                 api_address='5.6.7.8')
+                                 api_address='https://5.6.7.8:2376')
         self.bay = objects.Bay(self.context, **bay)
         self.monitor = swarm_monitor.SwarmMonitor(self.context, self.bay)
         self.k8s_monitor = k8s_monitor.K8sMonitor(self.context, self.bay)

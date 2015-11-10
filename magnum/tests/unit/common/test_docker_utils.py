@@ -33,7 +33,7 @@ class TestDockerUtils(base.BaseTestCase):
                                   mock_docker_client):
         mock_container = mock.MagicMock()
         mock_bay = mock.MagicMock()
-        mock_bay.api_address = '1.2.3.4'
+        mock_bay.api_address = 'https://1.2.3.4:2376'
         mock_get_bay_by_uuid.return_value = mock_bay
         mock_baymodel = mock.MagicMock()
         mock_baymodel.tls_disabled = False
@@ -78,7 +78,7 @@ class TestDockerUtils(base.BaseTestCase):
         mock_container.uuid = '8e48ffb1-754d-4f21-bdd0-1a39bf796389'
         mock_get_container_by_uuid.return_value = mock_container
         mock_bay = mock.MagicMock()
-        mock_bay.api_address = '1.2.3.4'
+        mock_bay.api_address = 'https://1.2.3.4:2376'
         mock_get_bay_by_uuid.return_value = mock_bay
         mock_baymodel = mock.MagicMock()
         mock_baymodel.tls_disabled = False
@@ -120,7 +120,7 @@ class TestDockerUtils(base.BaseTestCase):
                                                mock_docker_client):
         mock_container = mock.MagicMock()
         mock_bay = mock.MagicMock()
-        mock_bay.api_address = '1.2.3.4'
+        mock_bay.api_address = 'tcp://1.2.3.4:2376'
         mock_get_bay_by_uuid.return_value = mock_bay
         mock_baymodel = mock.MagicMock()
         mock_baymodel.tls_disabled = True
