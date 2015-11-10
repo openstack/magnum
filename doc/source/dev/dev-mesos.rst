@@ -32,7 +32,7 @@ of two methods:
 Disk Image Builder
 ^^^^^^^^^^^^^^^^^^
 
-`elements <http://git.openstack.org/cgit/openstack/magnum/tree/magnum/templates/heat-mesos/elements/>`__
+`elements <http://git.openstack.org/cgit/openstack/magnum/tree/magnum/templates/mesos/elements/>`__
 directory contains `diskimage-builder <http://docs.openstack.org/developer/diskimage-builder>`__
 elements to build an image which contains mesos and its frameworks
 required to use the heat template mesoscluster.yaml.
@@ -50,7 +50,7 @@ can be built and uploaded to glance as follows:
     $ git clone https://git.openstack.org/openstack/diskimage-builder.git
     $ git clone https://git.openstack.org/openstack/dib-utils.git
     $ export PATH="${PWD}/dib-utils/bin:$PATH"
-    $ export ELEMENTS_PATH=magnum/magnum/templates/heat-mesos/elements
+    $ export ELEMENTS_PATH=magnum/magnum/templates/mesos/elements
     $ export DIB_RELEASE=trusty
 
     $ diskimage-builder/bin/disk-image-create ubuntu vm docker mesos \
@@ -66,7 +66,7 @@ Docker
 Install docker using ``curl -sSL http://get.docker.com | sudo bash`` or
 use the appropriate system packaging.
 
-Use the provided `Dockerfile <http://git.openstack.org/cgit/openstack/magnum/tree/magnum/templates/heat-mesos/Dockerfile>`__ to build the image (it
+Use the provided `Dockerfile <http://git.openstack.org/cgit/openstack/magnum/tree/magnum/templates/mesos/Dockerfile>`__ to build the image (it
 uses the same DIB scripts as above). The resultant image will be saved
 as ``/tmp/ubuntu-mesos.qcow2``
 

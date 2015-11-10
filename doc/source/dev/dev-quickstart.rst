@@ -464,7 +464,7 @@ Building and Using a Mesos Bay
 
 Provisioning a mesos bay requires a Ubuntu-based image with some packages
 pre-installed. To build and upload such image, please refer to
-`<http://docs.openstack.org/developer/magnum/dev/dev-heat-mesos.html>`_
+`<http://docs.openstack.org/developer/magnum/dev/dev-mesos.html>`_
 
 Then, create a baymodel by using 'mesos' as the coe, with the rest of arguments
 similar to the Kubernetes baymodel::

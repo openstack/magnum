@@ -448,6 +448,6 @@ References
 [5] https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/design/networking.md
 [6] https://github.com/coreos/flannel
 [7] https://github.com/coreos/rkt/blob/master/Documentation/networking.md
-[8] https://github.com/openstack/magnum/blob/master/magnum/templates/heat-kubernetes/kubecluster.yaml
+[8] https://github.com/openstack/magnum/blob/master/magnum/templates/kubernetes/kubecluster.yaml
 [9] https://blueprints.launchpad.net/magnum/+spec/expand-labels-scope
 [10] https://github.com/openstack/kuryr

@@ -13,7 +13,7 @@ An example fedora based image and uploaded to glance with the following:
     git clone https://git.openstack.org/openstack/dib-utils.git
     export PATH="${PWD}/dib-utils/bin:$PATH"
     export ELEMENTS_PATH=tripleo-image-elements/elements:heat-templates/hot/software-config/elements
-    export ELEMENTS_PATH=${ELEMENTS_PATH}:magnum/etc/magnum/templates/heat-kubernetes/elements
+    export ELEMENTS_PATH=${ELEMENTS_PATH}:magnum/etc/magnum/templates/kubernetes/elements
     export DIB_RELEASE=21
     diskimage-builder/bin/disk-image-create baremetal \
       fedora selinux-permissive \
