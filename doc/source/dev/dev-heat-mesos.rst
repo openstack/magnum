@@ -58,7 +58,7 @@ can be built and uploaded to glance as follows:
 
     $ glance image-create --name ubuntu-mesos --visibility public \
         --disk-format=qcow2 --container-format=bare \
-        --property os_distro=ubuntu --file=ubuntu-mesos.qcow2
+        --os-distro=ubuntu --file=ubuntu-mesos.qcow2
 
 Docker
 ^^^^^^
@@ -76,9 +76,9 @@ as ``/tmp/ubuntu-mesos.qcow2``
     $ sudo docker run -v /tmp:/output --rm -ti --privileged magnum/mesos-builder
     ...
     Image file /output/ubuntu-mesos.qcow2 created...
-    $ glance image-create --name ubuntu-mesos --is-public True \
+    $ glance image-create --name ubuntu-mesos --visibility public \
             --disk-format=qcow2 --container-format=bare \
-            --property os_distro=ubuntu --file=/tmp/ubuntu-mesos.qcow2
+            --os-distro=ubuntu --file=/tmp/ubuntu-mesos.qcow2
 
 Creating the stack
 ------------------
