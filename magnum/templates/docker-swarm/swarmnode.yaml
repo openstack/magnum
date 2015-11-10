@@ -276,6 +276,10 @@ outputs:
 
   swarm_node_ip:
     value: {get_attr: [swarm_node_eth0, fixed_ips, 0, ip_address]}
+    description: >
+      This is the "private" address of the Swarm node.
 
   swarm_node_external_ip:
     value: {get_attr: [swarm_node_floating, floating_ip_address]}
+    description: >
+      This is the "public" address of the Swarm node.
