@@ -24,6 +24,6 @@ An example fedora based image and uploaded to glance with the following:
       kubernetes \
       -o fedora-21-kubernetes.qcow2
 
-    KERNEL_ID=`glance image-create --name fedora-k8s-kernel --is-public True --disk-format=aki --container-format=aki --file=fedora-21-kubernetes.vmlinuz | grep id | tr -d '| ' | cut --bytes=3-57`
-    RAMDISK_ID=`glance image-create --name fedora-k8s-ramdisk --is-public True --disk-format=ari --container-format=ari --file=fedora-21-kubernetes.initrd | grep id |  tr -d '| ' | cut --bytes=3-57`
-    BASE_ID=`glance image-create --name fedora-k8s --is-public True --disk-format=qcow2 --container-format=bare --property kernel_id=$KERNEL_ID --property ramdisk_id=$RAMDISK_ID --file=fedora-21-kubernetes.qcow2 | grep -v kernel | grep -v ramdisk | grep id | tr -d '| ' | cut --bytes=3-57`
+    KERNEL_ID=`glance image-create --name fedora-k8s-kernel --visibility public --disk-format=aki --container-format=aki --file=fedora-21-kubernetes.vmlinuz | grep id | tr -d '| ' | cut --bytes=3-57`
+    RAMDISK_ID=`glance image-create --name fedora-k8s-ramdisk --visibility public --disk-format=ari --container-format=ari --file=fedora-21-kubernetes.initrd | grep id |  tr -d '| ' | cut --bytes=3-57`
+    BASE_ID=`glance image-create --name fedora-k8s --visibility public --disk-format=qcow2 --container-format=bare --property kernel_id=$KERNEL_ID --property ramdisk_id=$RAMDISK_ID --file=fedora-21-kubernetes.qcow2 | grep -v kernel | grep -v ramdisk | grep id | tr -d '| ' | cut --bytes=3-57`
