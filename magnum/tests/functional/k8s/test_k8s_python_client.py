@@ -13,7 +13,7 @@
 
 from magnum.common.pythonk8sclient.swagger_client import api_client
 from magnum.common.pythonk8sclient.swagger_client.apis import apiv_api
-from magnum.tests.functional.python_client_base import BaseMagnumClient
+from magnum.tests.functional.python_client_base import BayAPITLSTest
 from magnum.tests.functional.python_client_base import BayTest
 from magnumclient.openstack.common.apiclient import exceptions
 
@@ -22,24 +22,46 @@ class TestBayModelResource(BayTest):
     coe = 'kubernetes'
 
     def test_baymodel_create_and_delete(self):
-        self._test_baymodel_create_and_delete()
+        self._test_baymodel_create_and_delete('test_k8s_baymodel')
 
 
 class TestBayResource(BayTest):
     coe = 'kubernetes'
 
     def test_bay_create_and_delete(self):
-        self._test_bay_create_and_delete()
+        baymodel_uuid = self._test_baymodel_create_and_delete(
+            'test_k8s_baymodel', delete=False, tls_disabled=True)
+        self._test_bay_create_and_delete('test_k8s_bay', baymodel_uuid)
 
 
-class TestKubernetesAPIs(BaseMagnumClient):
+class TestKubernetesAPIs(BayAPITLSTest):
     @classmethod
     def setUpClass(cls):
         super(TestKubernetesAPIs, cls).setUpClass()
-        cls.baymodel = cls._create_baymodel('testk8sAPI')
+
+        cls.baymodel = cls._create_baymodel('testk8sAPI',
+                                            coe='kubernetes',
+                                            tls_disabled=False,
+                                            network_driver='flannel',
+                                            fixed_network='192.168.0.0/24',
+                                            )
         cls.bay = cls._create_bay('testk8sAPI', cls.baymodel.uuid)
-        kube_api_url = cls.cs.bays.get(cls.bay.uuid).api_address
-        k8s_client = api_client.ApiClient(kube_api_url)
+
+        config_contents = """[req]
+distinguished_name = req_distinguished_name
+req_extensions     = req_ext
+prompt = no
+[req_distinguished_name]
+CN = Your Name
+[req_ext]
+extendedKeyUsage = clientAuth
+"""
+        cls._create_tls_ca_files(config_contents)
+        cls.kube_api_url = cls.cs.bays.get(cls.bay.uuid).api_address
+        k8s_client = api_client.ApiClient(cls.kube_api_url,
+                                          key_file=cls.key_file,
+                                          cert_file=cls.cert_file,
+                                          ca_certs=cls.ca_file)
         cls.k8s_api = apiv_api.ApivApi(k8s_client)
 
     @classmethod
