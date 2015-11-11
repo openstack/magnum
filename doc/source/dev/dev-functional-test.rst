@@ -54,13 +54,21 @@ before and their versions become too old::
 Run the test
 ============
 
-Test all functional cases::
+We'v splited functional testing per COE.
 
-    tox -e functional -- --concurrency=1
+Use follow command lines to check what functional testing is supported::
 
-Test specified functional case::
+    cd /opt/stack/magnum
+    cat tox.ini | grep functional- | awk -F: '{print $2}' | sed s/]//
 
-    tox -e functional -- --concurrency=1 <test path>
+To do some specify functional testing, for example, test api functional
+cases::
+
+    tox -e functional-api -- --concurrency=1
+
+Test specified case of api functional cases::
+
+    tox -e functional-api -- --concurrency=1 <test path>
 
 The following is an example for test path::
 
