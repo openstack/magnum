@@ -16,7 +16,7 @@ Type=notify
 EnvironmentFile=-/etc/sysconfig/docker
 EnvironmentFile=-/etc/sysconfig/docker-storage
 EnvironmentFile=-/etc/sysconfig/docker-network
-ExecStart=/usr/bin/docker -d -H fd:// \\
+ExecStart=/usr/bin/docker daemon -H fd:// \\
           -H tcp://0.0.0.0:2375 \\
 END_SERVICE_TOP
 
