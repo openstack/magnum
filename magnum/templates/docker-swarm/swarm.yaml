@@ -404,18 +404,33 @@ outputs:
 
   api_address:
     value: {get_attr: [swarm_master_floating, floating_ip_address]}
+    description: >
+      This is the API endpoint of the Swarm masters. Use this to access
+      the Swarm API server from outside the cluster.
 
   swarm_master_private:
     value: {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
+    description: >
+      This is a list of the "private" addresses of all the Swarm masters.
 
   swarm_master:
     value: {get_attr: [swarm_master_floating, floating_ip_address]}
+    description: >
+      This is a list of "public" ip addresses of all Swarm master.
+      Use these addresses to log into the Swarm masters via ssh.
 
   swarm_nodes_private:
     value: {get_attr: [swarm_nodes, swarm_node_ip]}
+    description: >
+      This is a list of the "private" addresses of all the Swarm nodes.
 
   swarm_nodes:
     value: {get_attr: [swarm_nodes, swarm_node_external_ip]}
+    description: >
+      This is a list of the "public" addresses of all the Swarm nodes. Use
+      these addresses to, e.g., log into the nodes.
 
   discovery_url:
     value: {get_param: discovery_url}
+    description: >
+      This the discovery url for Swarm cluster.
