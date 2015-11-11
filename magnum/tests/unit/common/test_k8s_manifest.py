@@ -25,7 +25,7 @@ class K8sManifestTestCase(base.TestCase):
         {
           "id": "redis-master",
           "kind": "Service",
-          "apiVersion": "v1beta1",
+          "apiVersion": "v1",
           "port": %d,
           "containerPort": %d,
           "selector": {
