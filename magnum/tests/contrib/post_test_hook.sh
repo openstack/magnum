@@ -87,6 +87,10 @@ keypair_id = default
 flavor_id = m1.magnum
 EOF
 
+# Note(eliqiao): Let's keep this only for debugging on gate.
+echo_summary $CREDS_FILE
+cat $CREDS_FILE
+
 # Create a keypair for use in the functional tests.
 echo_summary "Generate a key-pair"
 nova keypair-add default
@@ -95,10 +99,20 @@ nova keypair-add default
 echo_summary "Create a flavor"
 nova flavor-create  m1.magnum 100 2048 8 1
 
-# Run functional tests
+# FIXME(eliqao): workaround for allow 9511 can be accessed from VM.
+# k8s nodes will access m-api (port 9511) to get CA certificate.
+sudo iptables -D openstack-INPUT -j REJECT --reject-with icmp-host-prohibited
+sudo iptables -D openstack-INPUT -m limit --limit 2/min -j LOG --log-prefix "iptables dropped: "
 
+sudo iptables -A openstack-INPUT -s 172.24.4.0/23 -p tcp -m tcp --dport 9511 -j ACCEPT
+sudo iptables -A openstack-INPUT -m limit --limit 2/min -j LOG --log-prefix "iptables dropped: "
+sudo iptables -A openstack-INPUT -j REJECT --reject-with icmp-host-prohibited
+
+
+# Run functional tests
 # Currently we support functional-api, functional-k8s, will support swarm,
 # mesos later.
+
 echo "Running magnum functional test suite for $1"
 sudo -E -H -u jenkins tox -e functional-$1 -- --concurrency=1
 EXIT_CODE=$?
