@@ -156,5 +156,9 @@ outputs:
 
   mesos_slave_ip:
     value: {get_attr: [mesos_slave_eth0, fixed_ips, 0, ip_address]}
+    description: >
+      This is the "private" address of the Mesos agent node.
   mesos_slave_external_ip:
     value: {get_attr: [mesos_slave_floating, floating_ip_address]}
+    description: >
+      This is the "public" address of the Mesos agent node.
