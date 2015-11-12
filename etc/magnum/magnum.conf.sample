@@ -368,17 +368,17 @@
 
 # Allowed network drivers for kubernetes baymodels. Use 'all' keyword
 # to allow all drivers supported for kubernetes baymodels. Supported
-# network drivers include flannel.
+# network drivers include flannel. (list value)
 #kubernetes_allowed_network_drivers = all
 
-# Allowed network drivers for docker swarm baymodels. Use 'all' keyword
-# to allow all drivers supported for swarm baymodels. Supported
-# network drivers include docker.
+# Allowed network drivers for docker swarm baymodels. Use 'all'
+# keyword to allow all drivers supported for swarm baymodels.
+# Supported network drivers include docker. (list value)
 #swarm_allowed_network_drivers = all
 
-# Allowed network drivers for mesos baymodels. Use 'all' keyword
-# to allow all drivers supported for mesos baymodels. Supported
-# network drivers include docker.
+# Allowed network drivers for mesos baymodels. Use 'all' keyword to
+# allow all drivers supported for mesos baymodels. Supported network
+# drivers include docker. (list value)
 #mesos_allowed_network_drivers = all
 
 

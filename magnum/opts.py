@@ -17,6 +17,7 @@ import itertools
 
 import magnum.api.app
 import magnum.api.auth
+import magnum.api.controllers.v1.baymodel
 import magnum.common.cert_manager
 from magnum.common.cert_manager import local_cert_manager
 import magnum.common.clients
@@ -55,5 +56,6 @@ def list_opts():
         ('certificates',
             itertools.chain(magnum.common.cert_manager.cert_manager_opts,
                             local_cert_manager.local_cert_manager_opts,
-                            ))
+                            )),
+        ('baymodel', magnum.api.controllers.v1.baymodel.baymodel_opts),
     ]
