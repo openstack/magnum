@@ -41,3 +41,10 @@ sed -i '
   /^KUBELET_ADDRESSES=/ s/=.*/="--machines='""'"/
   /^KUBE_CONTROLLER_MANAGER_ARGS=/ s/KUBE_CONTROLLER_MANAGER_ARGS.*/#Uncomment the following line to enable Kubernetes Load Balancer feature \n#KUBE_CONTROLLER_MANAGER_ARGS="--cloud_config=\/etc\/sysconfig\/kube_openstack_config --cloud_provider=openstack"/
 ' /etc/kubernetes/controller-manager
+
+KUBE_CONFIG="--register-node=false --config=/etc/kubernetes/manifests"
+sed -i '
+  /^KUBELET_ADDRESS=/ s/=.*/="--address=0.0.0.0"/
+  /^KUBELET_HOSTNAME=/ s/=.*/=""/
+  /^KUBELET_ARGS=/ s|=.*|='"$KUBE_CONFIG"'|
+' /etc/kubernetes/kubelet
