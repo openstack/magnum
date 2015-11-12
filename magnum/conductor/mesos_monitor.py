@@ -1,0 +1,52 @@
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
+from oslo_serialization import jsonutils
+
+from magnum.common import urlfetch
+from magnum.conductor.monitors import MonitorBase
+
+
+class MesosMonitor(MonitorBase):
+
+    def __init__(self, context, bay):
+        super(MesosMonitor, self).__init__(context, bay)
+        self.data = {}
+
+    @property
+    def metrics_spec(self):
+        return {
+            'memory_util': {
+                'unit': '%',
+                'func': 'compute_memory_util',
+            },
+        }
+
+    def _build_url(self, url, protocol='http', port='80', path='/'):
+        return protocol + '://' + url + ':' + port + path
+
+    def pull_data(self):
+        mesos_master_url = self._build_url(self.bay.api_address,
+                                           port='5050',
+                                           path='/state')
+        state_json = jsonutils.loads(urlfetch.get(mesos_master_url))
+        self.data['mem_total'] = 0
+        self.data['mem_used'] = 0
+        for slave in state_json['slaves']:
+            self.data['mem_total'] += slave['resources']['mem']
+            self.data['mem_used'] += slave['used_resources']['mem']
+
+    def compute_memory_util(self):
+        if self.data['mem_total'] == 0:
+            return 0
+        else:
+            return self.data['mem_used'] * 100 / self.data['mem_total']
