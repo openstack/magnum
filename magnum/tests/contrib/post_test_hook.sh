@@ -35,12 +35,7 @@ set -o xtrace
 echo_summary "magnum's post_test_hook.sh was called..."
 (set -o posix; set)
 
-if [[ "$USE_CONSTRAINTS" == "True" ]]; then
-    constraints="-c $REQUIREMENTS_DIR/upper-constraints.txt"
-else
-    constraints=""
-fi
-# XXX(lifeless) This should probably use setup_dev or some such.
+constraints="-c $REQUIREMENTS_DIR/upper-constraints.txt"
 sudo pip install $constraints -U -r requirements.txt -r test-requirements.txt
 
 export MAGNUM_DIR="$BASE/new/magnum"
