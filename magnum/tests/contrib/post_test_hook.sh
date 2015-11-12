@@ -99,16 +99,6 @@ nova keypair-add default
 echo_summary "Create a flavor"
 nova flavor-create  m1.magnum 100 2048 8 1
 
-# FIXME(eliqao): workaround for allow 9511 can be accessed from VM.
-# k8s nodes will access m-api (port 9511) to get CA certificate.
-sudo iptables -D openstack-INPUT -j REJECT --reject-with icmp-host-prohibited
-sudo iptables -D openstack-INPUT -m limit --limit 2/min -j LOG --log-prefix "iptables dropped: "
-
-sudo iptables -A openstack-INPUT -s 172.24.4.0/23 -p tcp -m tcp --dport 9511 -j ACCEPT
-sudo iptables -A openstack-INPUT -m limit --limit 2/min -j LOG --log-prefix "iptables dropped: "
-sudo iptables -A openstack-INPUT -j REJECT --reject-with icmp-host-prohibited
-
-
 # Run functional tests
 # Currently we support functional-api, functional-k8s, will support swarm,
 # mesos later.
