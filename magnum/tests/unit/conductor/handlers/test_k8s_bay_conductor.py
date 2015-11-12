@@ -44,6 +44,7 @@ class TestBayConductorWithK8s(base.TestCase):
                        'flannel_network_subnetlen': '26',
                        'flannel_use_vxlan': 'yes'},
             'tls_disabled': False,
+            'server_type': 'vm'
         }
         self.bay_dict = {
             'uuid': 'bay-xx-xx-xx-xx',

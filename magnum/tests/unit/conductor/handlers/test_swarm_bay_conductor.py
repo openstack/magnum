@@ -38,7 +38,8 @@ class TestBayConductorWithSwarm(base.TestCase):
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
-            'tls_disabled': False
+            'tls_disabled': False,
+            'server_type': 'vm'
         }
         self.bay_dict = {
             'id': 1,

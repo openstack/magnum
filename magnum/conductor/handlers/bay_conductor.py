@@ -61,7 +61,9 @@ def _extract_template_definition(context, bay, scale_manager=None):
     baymodel = conductor_utils.retrieve_baymodel(context, bay)
     cluster_distro = baymodel.cluster_distro
     cluster_coe = baymodel.coe
-    definition = TDef.get_template_definition('vm', cluster_distro,
+    cluster_server_type = baymodel.server_type
+    definition = TDef.get_template_definition(cluster_server_type,
+                                              cluster_distro,
                                               cluster_coe)
     return definition.extract_definition(context, baymodel, bay,
                                          scale_manager=scale_manager)
@@ -216,7 +218,8 @@ class HeatPoller(object):
         self.attempts = 0
         self.baymodel = conductor_utils.retrieve_baymodel(self.context, bay)
         self.template_def = TDef.get_template_definition(
-            'vm', self.baymodel.cluster_distro, self.baymodel.coe)
+            self.baymodel.server_type,
+            self.baymodel.cluster_distro, self.baymodel.coe)
 
     def poll_and_check(self):
         # TODO(yuanying): temporary implementation to update api_address,

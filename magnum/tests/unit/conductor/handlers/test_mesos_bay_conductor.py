@@ -37,7 +37,8 @@ class TestBayConductorWithMesos(base.TestCase):
             'coe': 'mesos',
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
-            'no_proxy': 'no_proxy'
+            'no_proxy': 'no_proxy',
+            'server_type': 'vm'
         }
         self.bay_dict = {
             'id': 1,

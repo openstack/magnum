@@ -30,7 +30,8 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.5: Changed type of 'coe' from StringField to BayTypeField
     # Version 1.6: Change 'insecure' to 'tls_disabled'
     # Version 1.7: Added 'public' field
-    VERSION = '1.7'
+    # Version 1.8: Added 'server_type' field
+    VERSION = '1.8'
 
     dbapi = dbapi.get_instance()
 
@@ -60,6 +61,7 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
         'labels': fields.DictOfStringsField(nullable=True),
         'tls_disabled': fields.BooleanField(default=False),
         'public': fields.BooleanField(default=False),
+        'server_type': fields.StringField(nullable=True),
     }
 
     @staticmethod
