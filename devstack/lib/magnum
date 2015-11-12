@@ -281,6 +281,8 @@ function configure_iptables {
         ROUTE_TO_INTERNET=$(ip route get 8.8.8.8)
         OBOUND_DEV=$(echo ${ROUTE_TO_INTERNET#*dev} | awk '{print $1}')
         sudo iptables -t nat -A POSTROUTING -o $OBOUND_DEV -j MASQUERADE
+        # bay nodes will access m-api (port $MAGNUM_SERVICE_PORT) to get CA certificate.
+        sudo iptables -I INPUT -d $HOST_IP -p tcp --dport $MAGNUM_SERVICE_PORT -j ACCEPT || true
     fi
 }
 
