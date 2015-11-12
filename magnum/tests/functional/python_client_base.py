@@ -205,9 +205,6 @@ class BayTest(BaseMagnumClient):
 class BayAPITLSTest(BaseMagnumClient):
     """Base class of TLS enabled test case."""
 
-    def setUp(self):
-        super(BayAPITLSTest, self).setUp()
-
     @classmethod
     def tearDownClass(cls):
 
@@ -223,6 +220,8 @@ class BayAPITLSTest(BaseMagnumClient):
         except exceptions.NotFound:
             pass
         cls._delete_baymodel(cls.baymodel.uuid)
+
+        super(BayAPITLSTest, cls).tearDownClass()
 
     @classmethod
     def _create_tls_ca_files(cls, client_conf_contents):
