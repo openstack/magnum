@@ -58,8 +58,8 @@ Enabling a template is as simple as adding it's Entry Point to the
 
     (.venv)$ magnum-template-manage list-templates
     Enabled Templates
-      magnum_vm_atomic_k8s: /home/example/.venv/local/lib/python2.7/site-packages/magnum/templates/heat-kubernetes/kubecluster.yaml
-      magnum_vm_coreos_k8s: /home/example/.venv/local/lib/python2.7/site-packages/magnum/templates/heat-kubernetes/kubecluster-coreos.yaml
+      magnum_vm_atomic_k8s: /home/example/.venv/local/lib/python2.7/site-packages/magnum/templates/kubernetes/kubecluster.yaml
+      magnum_vm_coreos_k8s: /home/example/.venv/local/lib/python2.7/site-packages/magnum/templates/kubernetes/kubecluster-coreos.yaml
     Disabled Templates
 
     # Install example template
@@ -71,8 +71,8 @@ Enabling a template is as simple as adding it's Entry Point to the
 
     (.venv)$ magnum-template-manage list-templates
     Enabled Templates
-      magnum_vm_atomic_k8s: /home/example/.venv/local/lib/python2.7/site-packages/magnum/templates/heat-kubernetes/kubecluster.yaml
-      magnum_vm_coreos_k8s: /home/example/.venv/local/lib/python2.7/site-packages/magnum/templates/heat-kubernetes/kubecluster-coreos.yaml
+      magnum_vm_atomic_k8s: /home/example/.venv/local/lib/python2.7/site-packages/magnum/templates/kubernetes/kubecluster.yaml
+      magnum_vm_coreos_k8s: /home/example/.venv/local/lib/python2.7/site-packages/magnum/templates/kubernetes/kubecluster-coreos.yaml
     Disabled Templates
       example_template: /home/example/.venv/local/lib/python2.7/site-packages/ExampleTemplate-0.1-py2.7.egg/example_template/example.yaml
 
@@ -89,8 +89,8 @@ Enabling a template is as simple as adding it's Entry Point to the
     (.venv)$ magnum-template-manage list-templates
     Enabled Templates
       example_template: /home/example/.venv/local/lib/python2.7/site-packages/ExampleTemplate-0.1-py2.7.egg/example_template/example.yaml
-      magnum_vm_atomic_k8s: /home/example/.venv/local/lib/python2.7/site-packages/magnum/templates/heat-kubernetes/kubecluster.yaml
-      magnum_vm_coreos_k8s: /home/example/.venv/local/lib/python2.7/site-packages/magnum/templates/heat-kubernetes/kubecluster-coreos.yaml
+      magnum_vm_atomic_k8s: /home/example/.venv/local/lib/python2.7/site-packages/magnum/templates/kubernetes/kubecluster.yaml
+      magnum_vm_coreos_k8s: /home/example/.venv/local/lib/python2.7/site-packages/magnum/templates/kubernetes/kubecluster-coreos.yaml
     Disabled Templates
 
     # Use --details argument to get more details about each template
@@ -100,10 +100,10 @@ Enabling a template is as simple as adding it's Entry Point to the
       example_template: /home/example/.venv/local/lib/python2.7/site-packages/ExampleTemplate-0.1-py2.7.egg/example_template/example.yaml
          Server_Type  OS       CoE
          vm         example  example_coe
-      magnum_vm_atomic_k8s: /home/example/.venv/local/lib/python2.7/site-packages/magnum/templates/heat-kubernetes/kubecluster.yaml
+      magnum_vm_atomic_k8s: /home/example/.venv/local/lib/python2.7/site-packages/magnum/templates/kubernetes/kubecluster.yaml
          Server_Type   OS             CoE
          vm        fedora-atomic  kubernetes
-      magnum_vm_coreos_k8s: /home/example/.venv/local/lib/python2.7/site-packages/magnum/templates/heat-kubernetes/kubecluster-coreos.yaml
+      magnum_vm_coreos_k8s: /home/example/.venv/local/lib/python2.7/site-packages/magnum/templates/kubernetes/kubecluster-coreos.yaml
          Server_Type  OS      CoE
          vm         coreos  kubernetes
     Disabled Templates

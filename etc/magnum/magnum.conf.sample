@@ -257,6 +257,10 @@
 # starting a service (at DEBUG level). (boolean value)
 #log_options = true
 
+# Specify a timeout after which a gracefully shutdown server will
+# exit. Zero value means endless wait. (integer value)
+#graceful_shutdown_timeout = 0
+
 
 [api]
 
@@ -301,11 +305,11 @@
 # Location of template to build a k8s cluster on atomic. (string
 # value)
 # Deprecated group/name - [bay_heat]/template_path
-#k8s_atomic_template_path = $pybasedir/templates/heat-kubernetes/kubecluster.yaml
+#k8s_atomic_template_path = $pybasedir/templates/kubernetes/kubecluster.yaml
 
 # Location of template to build a k8s cluster on CoreOS. (string
 # value)
-#k8s_coreos_template_path = $pybasedir/templates/heat-kubernetes/kubecluster-coreos.yaml
+#k8s_coreos_template_path = $pybasedir/templates/kubernetes/kubecluster-coreos.yaml
 
 # Url for etcd public discovery endpoint. (string value)
 #etcd_discovery_service_endpoint_format = https://discovery.etcd.io/new?size=%(size)d
@@ -316,7 +320,7 @@
 
 # Location of template to build a swarm cluster on atomic. (string
 # value)
-#swarm_atomic_template_path = $pybasedir/templates/docker-swarm/swarm.yaml
+#swarm_atomic_template_path = $pybasedir/templates/swarm/swarm.yaml
 
 # Format string to use for swarm discovery url. Available values:
 # bay_id, bay_uuid. Example: "etcd://etcd.example.com/\%(bay_uuid)s"
@@ -332,7 +336,7 @@
 
 # Location of template to build a Mesos cluster on Ubuntu. (string
 # value)
-#mesos_ubuntu_template_path = $pybasedir/templates/heat-mesos/mesoscluster.yaml
+#mesos_ubuntu_template_path = $pybasedir/templates/mesos/mesoscluster.yaml
 
 # Enabled bay definition entry points. (list value)
 #enabled_definitions = magnum_vm_atomic_k8s,magnum_vm_coreos_k8s,magnum_vm_atomic_swarm,magnum_vm_ubuntu_mesos

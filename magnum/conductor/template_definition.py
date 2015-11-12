@@ -35,14 +35,14 @@ DOCKER_PORT = '2376'
 
 template_def_opts = [
     cfg.StrOpt('k8s_atomic_template_path',
-               default=paths.basedir_def('templates/heat-kubernetes/'
+               default=paths.basedir_def('templates/kubernetes/'
                                          'kubecluster.yaml'),
                deprecated_name='template_path',
                deprecated_group='bay_heat',
                help=_(
                    'Location of template to build a k8s cluster on atomic.')),
     cfg.StrOpt('k8s_coreos_template_path',
-               default=paths.basedir_def('templates/heat-kubernetes/'
+               default=paths.basedir_def('templates/kubernetes/'
                                          'kubecluster-coreos.yaml'),
                help=_(
                    'Location of template to build a k8s cluster on CoreOS.')),
@@ -54,7 +54,7 @@ template_def_opts = [
                deprecated_group='bay_heat',
                help=_('coreos discovery token url.')),
     cfg.StrOpt('swarm_atomic_template_path',
-               default=paths.basedir_def('templates/docker-swarm/'
+               default=paths.basedir_def('templates/swarm/'
                                          'swarm.yaml'),
                help=_('Location of template to build a swarm '
                       'cluster on atomic.')),
@@ -70,7 +70,7 @@ template_def_opts = [
                default='https://discovery.hub.docker.com/v1/clusters',
                help=_('Url for swarm public discovery endpoint.')),
     cfg.StrOpt('mesos_ubuntu_template_path',
-               default=paths.basedir_def('templates/heat-mesos/'
+               default=paths.basedir_def('templates/mesos/'
                                          'mesoscluster.yaml'),
                help=_('Location of template to build a Mesos cluster '
                       'on Ubuntu.')),
