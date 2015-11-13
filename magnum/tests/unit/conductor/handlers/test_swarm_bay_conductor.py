@@ -39,7 +39,11 @@ class TestBayConductorWithSwarm(base.TestCase):
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
             'tls_disabled': False,
-            'server_type': 'vm'
+            'server_type': 'vm',
+            'network_driver': 'network_driver',
+            'labels': {'flannel_network_cidr': '10.101.0.0/16',
+                       'flannel_network_subnetlen': '26',
+                       'flannel_use_vxlan': 'yes'}
         }
         self.bay_dict = {
             'id': 1,
@@ -89,8 +93,11 @@ class TestBayConductorWithSwarm(base.TestCase):
             'user_token': 'fake_token',
             'bay_uuid': 'some_uuid',
             'magnum_url': self.mock_osc.magnum_url.return_value,
-            'tls_disabled': False
-
+            'tls_disabled': False,
+            'network_driver': 'network_driver',
+            'flannel_network_cidr': '10.101.0.0/16',
+            'flannel_network_subnetlen': '26',
+            'flannel_use_vxlan': 'yes'
         }
         self.assertEqual(expected, definition)
 
@@ -101,7 +108,7 @@ class TestBayConductorWithSwarm(base.TestCase):
 
         not_required = ['image_id', 'flavor_id', 'dns_nameserver',
                         'docker_volume_size', 'fixed_network', 'http_proxy',
-                        'https_proxy', 'no_proxy']
+                        'https_proxy', 'no_proxy', 'network_driver']
         for key in not_required:
             self.baymodel_dict[key] = None
         self.bay_dict['discovery_url'] = 'https://discovery.etcd.io/test'
@@ -122,7 +129,10 @@ class TestBayConductorWithSwarm(base.TestCase):
             'user_token': 'fake_token',
             'bay_uuid': 'some_uuid',
             'magnum_url': self.mock_osc.magnum_url.return_value,
-            'tls_disabled': False
+            'tls_disabled': False,
+            'flannel_network_cidr': u'10.101.0.0/16',
+            'flannel_network_subnetlen': u'26',
+            'flannel_use_vxlan': u'yes'
         }
         self.assertEqual(expected, definition)
 

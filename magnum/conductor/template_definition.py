@@ -565,6 +565,8 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
         self.add_parameter('external_network',
                            baymodel_attr='external_network_id',
                            required=True)
+        self.add_parameter('network_driver',
+                           baymodel_attr='network_driver')
         self.add_parameter('tls_disabled',
                            baymodel_attr='tls_disabled',
                            required=True)
@@ -607,6 +609,12 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
         osc = clients.OpenStackClients(context)
         extra_params['user_token'] = self._get_user_token(context, osc, bay)
         extra_params['magnum_url'] = osc.magnum_url()
+
+        label_list = ['flannel_network_cidr', 'flannel_use_vxlan',
+                      'flannel_network_subnetlen']
+
+        for label in label_list:
+            extra_params[label] = baymodel.labels.get(label)
 
         return super(AtomicSwarmTemplateDefinition,
                      self).get_params(context, baymodel, bay,

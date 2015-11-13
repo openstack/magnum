@@ -397,6 +397,10 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         mock_context.user_name = 'fake_user'
         mock_context.tenant = 'fake_tenant'
 
+        flannel_cidr = mock_baymodel.labels.get('flannel_network_cidr')
+        flannel_subnet = mock_baymodel.labels.get('flannel_network_subnetlen')
+        flannel_vxlan = mock_baymodel.labels.get('flannel_use_vxlan')
+
         swarm_def = tdef.AtomicSwarmTemplateDefinition()
 
         swarm_def.get_params(mock_context, mock_baymodel, mock_bay)
@@ -404,7 +408,10 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         expected_kwargs = {'extra_params': {
             'discovery_url': 'fake_discovery_url',
             'user_token': mock_context.auth_token,
-            'magnum_url': mock_osc.magnum_url.return_value}}
+            'magnum_url': mock_osc.magnum_url.return_value,
+            'flannel_network_cidr': flannel_cidr,
+            'flannel_use_vxlan': flannel_subnet,
+            'flannel_network_subnetlen': flannel_vxlan}}
         mock_get_params.assert_called_once_with(mock_context, mock_baymodel,
                                                 mock_bay, **expected_kwargs)
 
