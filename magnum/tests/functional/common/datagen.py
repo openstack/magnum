@@ -49,8 +49,8 @@ def generate_random_coe():
 def generate_random_coe_dep_network_driver(coe):
     allowed_driver_types = {
         'kubernetes': ['flannel', None],
-        'swarm': [None],
-        'mesos': [None],
+        'swarm': ['docker', None],
+        'mesos': ['docker', None],
     }
     driver_types = allowed_driver_types[coe]
     return driver_types[random.randrange(0, len(driver_types))]

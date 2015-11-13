@@ -21,6 +21,38 @@ from magnum.common import exception
 from magnum import objects
 
 
+baymodel_opts = [
+    cfg.ListOpt('kubernetes_allowed_network_drivers',
+                default=['all'],
+                help="Allowed network drivers for kubernetes baymodels. "
+                "Use 'all' keyword to allow all drivers supported "
+                "for kubernetes baymodels. Supported network drivers "
+                "include flannel."),
+    cfg.StrOpt('kubernetes_default_network_driver',
+               default='flannel',
+               help="Default network driver for kubernetes baymodels."),
+    cfg.ListOpt('swarm_allowed_network_drivers',
+                default=['all'],
+                help="Allowed network drivers for docker swarm baymodels. "
+                "Use 'all' keyword to allow all drivers supported "
+                "for swarm baymodels. Supported network drivers "
+                "include docker."),
+    cfg.StrOpt('swarm_default_network_driver',
+               default='docker',
+               help="Default network driver for docker swarm baymodels."),
+    cfg.ListOpt('mesos_allowed_network_drivers',
+                default=['all'],
+                help="Allowed network drivers for mesos baymodels. "
+                "Use 'all' keyword to allow all drivers supported "
+                "for mesos baymodels. Supported network drivers "
+                "include docker."),
+    cfg.StrOpt('mesos_default_network_driver',
+               default='docker',
+               help="Default network driver for mesos baymodels."),
+]
+cfg.CONF.register_opts(baymodel_opts, group='baymodel')
+
+
 def enforce_bay_types(*bay_types):
     @decorator.decorator
     def wrapper(func, *args, **kwargs):
@@ -62,24 +94,29 @@ def enforce_network_driver_types_update():
 
 
 def _enforce_network_driver_types(baymodel):
-    driver = baymodel.network_driver
-    if driver:
-        validator = Validator.get_coe_validator(baymodel.coe)
-        validator.validate_network_driver(driver)
+    validator = Validator.get_coe_validator(baymodel.coe)
+    if not baymodel.network_driver:
+        baymodel.network_driver = validator.default_driver
+    validator.validate_network_driver(baymodel.network_driver)
 
 
 class Validator(object):
 
-    @staticmethod
-    def get_coe_validator(coe):
-        if coe == 'kubernetes':
-            return K8sValidator()
-        if coe == 'swarm':
-            return SwarmValidator()
-        if coe == 'mesos':
-            return MesosValidator()
-        raise exception.InvalidParameterValue(
-            'Requested COE type %s is not supported.' % coe)
+    validators = {}
+
+    @classmethod
+    def get_coe_validator(cls, coe):
+        if not cls.validators:
+            cls.validators = {
+                'kubernetes': K8sValidator(),
+                'swarm': SwarmValidator(),
+                'mesos': MesosValidator(),
+            }
+        if coe in cls.validators:
+            return cls.validators[coe]
+        else:
+            raise exception.InvalidParameterValue(
+                'Requested COE type %s is not supported.' % coe)
 
     @classmethod
     def validate_network_driver(cls, driver):
@@ -100,32 +137,32 @@ class Validator(object):
     @classmethod
     def _validate_network_driver_allowed(cls, driver):
         """Confirm that driver is allowed via configuration for this COE."""
-        allowed_drivers = cfg.CONF.baymodel[cls.allowed_driver_config]
-        if ('all' not in allowed_drivers and
-           driver not in allowed_drivers):
+        if ('all' not in cls.allowed_drivers and
+           driver not in cls.allowed_drivers):
             raise exception.InvalidParameterValue(
                 'Network driver type %(driver)s is not allowed, '
-                'expecting a %(allowed_drivers)s network driver. '
-                'Check %(config)s configuration.' % {
+                'expecting a %(allowed_drivers)s network driver. ' % {
                     'driver': driver,
                     'allowed_drivers': '/'.join(
-                        allowed_drivers + ['unspecified']),
-                    'config': cls.allowed_driver_config})
+                        cls.allowed_drivers + ['unspecified'])})
 
 
 class K8sValidator(Validator):
 
     supported_drivers = ['flannel']
-    allowed_driver_config = 'kubernetes_allowed_network_drivers'
+    allowed_drivers = cfg.CONF.baymodel.kubernetes_allowed_network_drivers
+    default_driver = cfg.CONF.baymodel.kubernetes_default_network_driver
 
 
 class SwarmValidator(Validator):
 
     supported_drivers = ['docker']
-    allowed_driver_config = 'swarm_allowed_network_drivers'
+    allowed_drivers = cfg.CONF.baymodel.swarm_allowed_network_drivers
+    default_driver = cfg.CONF.baymodel.swarm_default_network_driver
 
 
 class MesosValidator(Validator):
 
     supported_drivers = ['docker']
-    allowed_driver_config = 'mesos_allowed_network_drivers'
+    allowed_drivers = cfg.CONF.baymodel.mesos_allowed_network_drivers
+    default_driver = cfg.CONF.baymodel.mesos_default_network_driver

@@ -122,15 +122,18 @@ class TestValidation(base.BaseTestCase):
         baymodel.network_driver = network_driver_type
         baymodel.coe = coe
 
+        # Reload the validator module so that baymodel configs are
+        # re-evaluated.
+        reload(v)
         validator = v.K8sValidator
         validator.supported_drivers = ['flannel', 'type1', 'type2']
-        validator.allowed_driver_config = 'kubernetes_allowed_network_drivers'
 
         if assert_raised:
             self.assertRaises(exception.InvalidParameterValue,
                               test, self, baymodel)
         else:
             test(self, baymodel)
+        return baymodel
 
     def test_enforce_network_driver_types_one_allowed_create(self):
         self._test_enforce_network_driver_types_create(
@@ -165,6 +168,26 @@ class TestValidation(base.BaseTestCase):
             coe='invalid_coe_type',
             assert_raised=True)
 
+    def test_enforce_network_driver_types_default_create(self):
+        baymodel = self._test_enforce_network_driver_types_create(
+            network_driver_type=None,
+            network_driver_config_dict={})
+        self.assertEqual('flannel', baymodel.network_driver)
+
+    def test_enforce_network_driver_types_default_config_create(self):
+        baymodel = self._test_enforce_network_driver_types_create(
+            network_driver_type=None,
+            network_driver_config_dict={
+                'kubernetes_default_network_driver': 'type1'})
+        self.assertEqual('type1', baymodel.network_driver)
+
+    def test_enforce_network_driver_types_default_invalid_create(self):
+        self._test_enforce_network_driver_types_create(
+            network_driver_type=None,
+            network_driver_config_dict={
+                'kubernetes_default_network_driver': 'invalid_driver'},
+            assert_raised=True)
+
     @mock.patch('pecan.request')
     @mock.patch('magnum.objects.BayModel.get_by_uuid')
     def _test_enforce_network_driver_types_update(
@@ -188,9 +211,11 @@ class TestValidation(base.BaseTestCase):
         baymodel.coe = 'kubernetes'
         mock_baymodel_get_by_uuid.return_value = baymodel
 
+        # Reload the validator module so that baymodel configs are
+        # re-evaluated.
+        reload(v)
         validator = v.K8sValidator
         validator.supported_drivers = ['flannel', 'type1', 'type2']
-        validator.allowed_driver_config = 'kubernetes_allowed_network_drivers'
 
         if assert_raised:
             self.assertRaises(exception.InvalidParameterValue,
