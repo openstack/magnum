@@ -12,6 +12,7 @@ After=network.target docker.socket
 Requires=docker.socket
 
 [Service]
+TimeoutStartSec=300
 Type=notify
 EnvironmentFile=-/etc/sysconfig/docker
 EnvironmentFile=-/etc/sysconfig/docker-storage
