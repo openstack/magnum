@@ -22,6 +22,12 @@ parameters:
     description: name of ssh key to be provisioned on our server
     default: lars
 
+  docker_volume_size:
+    type: number
+    description: >
+      size of a cinder volume to allocate to docker for container/image
+      storage
+
   external_network:
     type: string
     description: uuid/name of a network to use for floating ip addresses
@@ -127,6 +133,7 @@ resources:
           template: {get_file: fragments/write-heat-params.yaml}
           params:
             "$WAIT_HANDLE": {get_resource: node_cloud_init_wait_handle}
+            "$DOCKER_VOLUME": {get_resource: docker_volume}
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
@@ -154,6 +161,12 @@ resources:
     properties:
       group: ungrouped
       config: {get_file: fragments/make-cert.py}
+
+  configure_docker_storage:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/configure-docker-storage.sh}
 
   write_docker_service:
     type: "OS::Heat::SoftwareConfig"
@@ -229,6 +242,7 @@ resources:
         - config: {get_resource: remove_docker_key}
         - config: {get_resource: write_heat_params}
         - config: {get_resource: make_cert}
+        - config: {get_resource: configure_docker_storage}
         - config: {get_resource: write_swarm_agent_failure_service}
         - config: {get_resource: write_swarm_agent_service}
         - config: {get_resource: write_docker_service}
@@ -271,6 +285,24 @@ resources:
         get_param: external_network
       port_id:
         get_resource: swarm_node_eth0
+
+  ######################################################################
+  #
+  # docker storage.  This allocates a cinder volume and attaches it
+  # to the node.
+  #
+
+  docker_volume:
+    type: OS::Cinder::Volume
+    properties:
+      size: {get_param: docker_volume_size}
+
+  docker_volume_attach:
+    type: OS::Cinder::VolumeAttachment
+    properties:
+      instance_uuid: {get_resource: swarm_node}
+      volume_id: {get_resource: docker_volume}
+      mountpoint: /dev/vdb
 
 outputs:
 

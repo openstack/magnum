@@ -31,6 +31,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'flavor_id': 'flavor_id',
             'keypair_id': 'keypair_id',
             'dns_nameserver': 'dns_nameserver',
+            'docker_volume_size': 20,
             'external_network_id': 'external_network_id',
             'fixed_network': '10.2.0.0/22',
             'cluster_distro': 'fedora-atomic',
@@ -80,6 +81,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'server_image': 'image_id',
             'server_flavor': 'flavor_id',
             'number_of_nodes': '1',
+            'docker_volume_size': 20,
             'fixed_network_cidr': '10.2.0.0/22',
             'discovery_url': 'token://39987da72f8386e0d0225ae8929e7cb4',
             'http_proxy': 'http_proxy',
@@ -102,8 +104,8 @@ class TestBayConductorWithSwarm(base.TestCase):
                               'test_discovery', group='bay')
 
         not_required = ['image_id', 'flavor_id', 'dns_nameserver',
-                        'fixed_network', 'http_proxy', 'https_proxy',
-                        'no_proxy']
+                        'docker_volume_size', 'fixed_network', 'http_proxy',
+                        'https_proxy', 'no_proxy']
         for key in not_required:
             self.baymodel_dict[key] = None
         self.bay_dict['discovery_url'] = None

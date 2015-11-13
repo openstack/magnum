@@ -75,6 +75,13 @@ parameters:
     description: how many swarm nodes to spawn
     default: 1
 
+  docker_volume_size:
+    type: number
+    description: >
+      size of a cinder volume to allocate to docker for container/image
+      storage
+    default: 25
+
   fixed_network_cidr:
     type: string
     description: network range for fixed ip network
@@ -192,6 +199,7 @@ resources:
           template: {get_file: fragments/write-heat-params.yaml}
           params:
             "$WAIT_HANDLE": {get_resource: cloud_init_wait_handle}
+            "$DOCKER_VOLUME": {get_resource: docker_volume}
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
@@ -306,6 +314,12 @@ resources:
       group: ungrouped
       config: {get_file: fragments/disable-selinux.sh}
 
+  configure_docker_storage:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/configure-docker-storage.sh}
+
   add_proxy:
     type: "OS::Heat::SoftwareConfig"
     properties:
@@ -320,6 +334,7 @@ resources:
         - config: {get_resource: remove_docker_key}
         - config: {get_resource: write_heat_params}
         - config: {get_resource: make_cert}
+        - config: {get_resource: configure_docker_storage}
         - config: {get_resource: write_swarm_agent_failure_service}
         - config: {get_resource: write_swarm_manager_failure_service}
         - config: {get_resource: write_docker_service}
@@ -387,6 +402,7 @@ resources:
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: server_image}
           server_flavor: {get_param: server_flavor}
+          docker_volume_size: {get_param: docker_volume_size}
           fixed_network_id: {get_resource: fixed_network}
           fixed_subnet_id: {get_resource: fixed_subnet}
           external_network: {get_param: external_network}
@@ -399,6 +415,24 @@ resources:
           user_token: {get_param: user_token}
           magnum_url: {get_param: magnum_url}
           tls_disabled: {get_param: tls_disabled}
+
+  ######################################################################
+  #
+  # docker storage.  This allocates a cinder volume and attaches it
+  # to the master.
+  #
+
+  docker_volume:
+    type: OS::Cinder::Volume
+    properties:
+      size: {get_param: docker_volume_size}
+
+  docker_volume_attach:
+    type: OS::Cinder::VolumeAttachment
+    properties:
+      instance_uuid: {get_resource: swarm_master}
+      volume_id: {get_resource: docker_volume}
+      mountpoint: /dev/vdb
 
 outputs:
 

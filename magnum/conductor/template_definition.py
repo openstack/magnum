@@ -571,6 +571,8 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
                            param_type=str)
         self.add_parameter('server_flavor',
                            baymodel_attr='flavor_id')
+        self.add_parameter('docker_volume_size',
+                           baymodel_attr='docker_volume_size')
         self.add_parameter('external_network',
                            baymodel_attr='external_network_id',
                            required=True)
