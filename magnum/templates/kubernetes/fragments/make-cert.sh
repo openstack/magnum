@@ -63,6 +63,7 @@ EOF
 
 # Generate server's private key and csr
 openssl genrsa -out "${SERVER_KEY}" 4096
+chmod 400 "${SERVER_KEY}"
 openssl req -new -days 1000 \
         -key "${SERVER_KEY}" \
         -out "${SERVER_CSR}" \
@@ -76,3 +77,6 @@ curl -X POST \
     -H "Content-Type: application/json" \
     -d "$csr_req" \
     $MAGNUM_URL/certificates | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > ${SERVER_CERT}
+
+chmod 500 "${cert_dir}"
+chown -R kube:kube "${cert_dir}"
