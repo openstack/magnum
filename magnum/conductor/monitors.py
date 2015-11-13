@@ -36,7 +36,8 @@ CONF.import_opt('default_timeout',
 
 COE_CLASS_PATH = {
     bay_type.SWARM: 'magnum.conductor.swarm_monitor.SwarmMonitor',
-    bay_type.KUBERNETES: 'magnum.conductor.k8s_monitor.K8sMonitor'
+    bay_type.KUBERNETES: 'magnum.conductor.k8s_monitor.K8sMonitor',
+    bay_type.MESOS: 'magnum.conductor.mesos_monitor.MesosMonitor'
 }
 
 
@@ -73,6 +74,5 @@ def create_monitor(context, bay):
         coe_cls = importutils.import_class(COE_CLASS_PATH[baymodel.coe])
         return coe_cls(context, bay)
 
-    # TODO(hongbin): add support for other bay types
     LOG.debug("Cannot create monitor with bay type '%s'" % baymodel.coe)
     return None

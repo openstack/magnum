@@ -15,7 +15,10 @@
 
 import mock
 
+from oslo_serialization import jsonutils
+
 from magnum.conductor import k8s_monitor
+from magnum.conductor import mesos_monitor
 from magnum.conductor import monitors
 from magnum.conductor import swarm_monitor
 from magnum import objects
@@ -44,6 +47,8 @@ class MonitorsTestCase(base.TestCase):
         self.bay = objects.Bay(self.context, **bay)
         self.monitor = swarm_monitor.SwarmMonitor(self.context, self.bay)
         self.k8s_monitor = k8s_monitor.K8sMonitor(self.context, self.bay)
+        self.mesos_monitor = mesos_monitor.MesosMonitor(self.context,
+                                                        self.bay)
         p = mock.patch('magnum.conductor.swarm_monitor.SwarmMonitor.'
                        'metrics_spec', new_callable=mock.PropertyMock)
         self.mock_metrics_spec = p.start()
@@ -65,6 +70,14 @@ class MonitorsTestCase(base.TestCase):
         mock_baymodel_get_by_uuid.return_value = baymodel
         monitor = monitors.create_monitor(self.context, self.bay)
         self.assertIsInstance(monitor, k8s_monitor.K8sMonitor)
+
+    @mock.patch('magnum.objects.BayModel.get_by_uuid')
+    def test_create_monitor_mesos_bay(self, mock_baymodel_get_by_uuid):
+        baymodel = mock.MagicMock()
+        baymodel.coe = 'mesos'
+        mock_baymodel_get_by_uuid.return_value = baymodel
+        monitor = monitors.create_monitor(self.context, self.bay)
+        self.assertIsInstance(monitor, mesos_monitor.MesosMonitor)
 
     @mock.patch('magnum.objects.BayModel.get_by_uuid')
     def test_create_monitor_unsupported_coe(self, mock_baymodel_get_by_uuid):
@@ -215,4 +228,59 @@ class MonitorsTestCase(base.TestCase):
         }
         self.k8s_monitor.data = test_data
         mem_util = self.k8s_monitor.compute_memory_util()
+        self.assertEqual(0, mem_util)
+
+    @mock.patch('magnum.common.urlfetch.get')
+    def test_mesos_monitor_pull_data_success(self, mock_url_get):
+        state_json = {
+            'slaves': [{
+                'resources': {
+                    'mem': 100
+                },
+                'used_resources': {
+                    'mem': 50
+                }
+            }]
+        }
+        state_json = jsonutils.dumps(state_json)
+        mock_url_get.return_value = state_json
+        self.mesos_monitor.pull_data()
+        self.assertEqual(self.mesos_monitor.data['mem_total'],
+                         100)
+        self.assertEqual(self.mesos_monitor.data['mem_used'],
+                         50)
+
+    def test_mesos_monitor_get_metric_names(self):
+        mesos_metric_spec = 'magnum.conductor.mesos_monitor.MesosMonitor.'\
+                            'metrics_spec'
+        with mock.patch(mesos_metric_spec,
+                        new_callable=mock.PropertyMock) as mock_mesos_metric:
+            mock_mesos_metric.return_value = self.test_metrics_spec
+            names = self.mesos_monitor.get_metric_names()
+            self.assertEqual(sorted(['metric1', 'metric2']), sorted(names))
+
+    def test_mesos_monitor_get_metric_unit(self):
+        mesos_metric_spec = 'magnum.conductor.mesos_monitor.MesosMonitor.' \
+                            'metrics_spec'
+        with mock.patch(mesos_metric_spec,
+                        new_callable=mock.PropertyMock) as mock_mesos_metric:
+            mock_mesos_metric.return_value = self.test_metrics_spec
+            unit = self.mesos_monitor.get_metric_unit('metric1')
+            self.assertEqual('metric1_unit', unit)
+
+    def test_mesos_monitor_compute_memory_util(self):
+        test_data = {
+            'mem_total': 100,
+            'mem_used': 50
+        }
+        self.mesos_monitor.data = test_data
+        mem_util = self.mesos_monitor.compute_memory_util()
+        self.assertEqual(50, mem_util)
+
+        test_data = {
+            'mem_total': 0,
+            'pods': 0,
+        }
+        self.mesos_monitor.data = test_data
+        mem_util = self.mesos_monitor.compute_memory_util()
         self.assertEqual(0, mem_util)
