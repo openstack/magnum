@@ -115,6 +115,12 @@ nova keypair-delete default
 echo_summary "Running flavor-delete"
 nova flavor-delete m1.magnum
 
+# Save functional testing log
+sudo cp $MAGNUM_DIR/functional-tests.log /opt/stack/logs/
+
+# Save functional_creds.conf
+sudo cp $CREDS_FILE /opt/stack/logs/
+
 # Save the logs
 sudo mv ../logs/* /opt/stack/logs/
 
