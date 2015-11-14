@@ -11,6 +11,8 @@
 # under the License.
 
 from oslo_config import cfg
+from requests import exceptions as req_exceptions
+import time
 
 from magnum.conductor.handlers.common import docker_client
 from magnum.tests.functional.python_client_base import BayAPITLSTest
@@ -65,13 +67,47 @@ extendedKeyUsage = clientAuth
 """
         url = cls.cs.bays.get(cls.bay.uuid).api_address
         cls._create_tls_ca_files(config_contents)
+
+        # Note(eliqiao): docker_utils.CONF.docker.default_timeout is 10,
+        # tested this default configure option not works on gate, it will
+        # cause container creation failed due to time out.
+        # Debug more found that we need to pull image when the first time to
+        # create a container, set it as 180s.
+
+        docker_api_time_out = 180
         cls.docker_client = docker_client.DockerHTTPClient(
             url,
             CONF.docker.docker_remote_api_version,
-            CONF.docker.default_timeout,
+            docker_api_time_out,
             client_key=cls.key_file,
             client_cert=cls.cert_file,
             ca_cert=cls.ca_file)
+
+        cls.docker_client_non_tls = docker_client.DockerHTTPClient(
+            url,
+            CONF.docker.docker_remote_api_version,
+            docker_api_time_out)
+
+        # Note(eliqiao): In our test cases, docker client or magnum client will
+        # try to connect to swarm service which is running on master node,
+        # the endpoint is bay.api_address(listen port is included), but the
+        # service is not ready right after the bay was created, sleep for an
+        # acceptable time to wait for service being started.
+        # This is required, without this any api call will fail as
+        # 'ConnectionError: [Errno 111] Connection refused'.
+
+        for i in range(30):
+            try:
+                cls.docker_client.containers()
+            except req_exceptions.ConnectionError:
+                time.sleep(2)
+            else:
+                # Note(eliqiao): Right after the connection is ready, wait
+                # for a while (at least 5s) to aovid this error:
+                # docker.errors.APIError: 500 Server Error: Internal
+                # Server Error ("No healthy node available in the cluster")
+                time.sleep(10)
+                break
 
     def _create_container(self, **kwargs):
         name = kwargs.get('name', 'test_container')
@@ -82,6 +118,29 @@ extendedKeyUsage = clientAuth
                                                    command=command)
 
     def test_start_stop_container_from_api(self):
-        # TODO(eliqiao): add test case here
+        # Leverage docker client to create a container on the bay we created,
+        # and try to start and stop it then delete it.
 
-        pass
+        resp = self._create_container(name="test_start_stop",
+                                      command="ping -c 1000 8.8.8.8")
+
+        self.assertIsNotNone(resp)
+        container_id = resp.get('Id')
+        self.docker_client.start(container=container_id)
+
+        resp = self.docker_client.containers()
+        self.assertIsNotNone(resp)
+        resp = self.docker_client.inspect_container(container=container_id)
+        self.assertTrue(resp['State']['Running'])
+
+        self.docker_client.stop(container=container_id)
+        resp = self.docker_client.inspect_container(container=container_id)
+        self.assertFalse(resp['State']['Running'])
+
+        self.docker_client.remove_container(container=container_id)
+        resp = self.docker_client.containers()
+        self.assertEqual([], resp)
+
+    def test_access_with_non_tls_client(self):
+        self.assertRaises(req_exceptions.SSLError,
+                          self.docker_client_non_tls.containers)
