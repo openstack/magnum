@@ -14,8 +14,6 @@
 
 import mock
 
-from oslo_config import cfg
-
 from magnum.common import context
 from magnum.common.rpc_service import CONF
 from magnum.db.sqlalchemy import api as dbapi
@@ -24,16 +22,6 @@ from magnum.objects.fields import BayStatus as bay_status
 from magnum.service import periodic
 from magnum.tests import base
 from magnum.tests.unit.db import utils
-
-periodic_opts = [
-    cfg.BoolOpt('periodic_enable',
-                default=True,
-                help='Enable periodic tasks.'),
-    cfg.IntOpt('periodic_interval_max',
-               default=60,
-               help='Max interval size between periodic tasks execution in '
-                    'seconds.'),
-]
 
 
 class fake_stack(object):
