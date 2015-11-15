@@ -83,7 +83,7 @@ class BaseMagnumClient(base.TestCase):
     def _wait_on_status(cls, bay, wait_status, finish_status):
         # Check status every 60 seconds for a total of 100 minutes
         for i in range(100):
-            # sleep 1s to wait bay status changes, this will be usefull for
+            # sleep 1s to wait bay status changes, this will be useful for
             # the first time we wait for the status, to avoid another 59s
             time.sleep(1)
             status = cls.cs.bays.get(bay.uuid).status

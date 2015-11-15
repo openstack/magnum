@@ -10629,7 +10629,7 @@
      },
      "lastTimestamp": {
       "type": "string",
-      "description": "the time at which the most recent occurance of this event was recorded"
+      "description": "the time at which the most recent occurrence of this event was recorded"
      },
      "count": {
       "type": "integer",

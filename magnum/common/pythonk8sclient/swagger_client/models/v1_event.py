@@ -251,7 +251,7 @@ class V1Event(object):
     def last_timestamp(self):
         """
         Gets the last_timestamp of this V1Event.
-        the time at which the most recent occurance of this event was recorded
+        the time at which the most recent occurrence of this event was recorded
 
         :return: The last_timestamp of this V1Event.
         :rtype: str
@@ -262,7 +262,7 @@ class V1Event(object):
     def last_timestamp(self, last_timestamp):
         """
         Sets the last_timestamp of this V1Event.
-        the time at which the most recent occurance of this event was recorded
+        the time at which the most recent occurrence of this event was recorded
 
         :param last_timestamp: The last_timestamp of this V1Event.
         :type: str
