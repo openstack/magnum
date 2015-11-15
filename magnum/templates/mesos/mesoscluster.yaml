@@ -252,9 +252,14 @@ outputs:
 
   api_address:
     value: {get_attr: [mesos_master_floating, floating_ip_address]}
+    description: >
+      This is the API endpoint of the Mesos master. Use this to access
+      the Mesos API from outside the cluster.
 
   mesos_master_private:
     value: {get_attr: [mesos_master_eth0, fixed_ips, 0, ip_address]}
+    description: >
+      This is a list of the "private" addresses of all the Mesos masters.
 
   mesos_master:
     value: {get_attr: [mesos_master_floating, floating_ip_address]}
@@ -265,8 +270,10 @@ outputs:
 
   mesos_slaves_private:
     value: {get_attr: [mesos_slaves, mesos_slave_ip]}
+    description: >
+      This is a list of the "private" addresses of all the Mesos agents.
 
   mesos_slaves:
     value: {get_attr: [mesos_slaves, mesos_slave_external_ip]}
     description: >
-      This is a list of the addresses of all the Mesos slaves.
+      This is a list of the "public" addresses of all the Mesos agents.
