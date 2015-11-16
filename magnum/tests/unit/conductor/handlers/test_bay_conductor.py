@@ -206,7 +206,7 @@ class TestHeatPoller(base.TestCase):
         mock_heat_stack.stack_status_reason = 'Create failed'
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
-        self.assertEqual(1, bay.save.call_count)
+        self.assertEqual(2, bay.save.call_count)
         self.assertEqual(bay_status.CREATE_FAILED, bay.status)
         self.assertEqual('Create failed', bay.status_reason)
         self.assertEqual(1, poller.attempts)
@@ -240,7 +240,7 @@ class TestHeatPoller(base.TestCase):
         mock_heat_stack.parameters = {'number_of_minions': 2}
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
-        self.assertEqual(1, bay.save.call_count)
+        self.assertEqual(2, bay.save.call_count)
         self.assertEqual(bay_status.UPDATE_FAILED, bay.status)
         self.assertEqual(2, bay.node_count)
         self.assertEqual(1, poller.attempts)
@@ -360,7 +360,7 @@ class TestHeatPoller(base.TestCase):
         mock_heat_stack, bay, poller = self.setup_poll_test()
         mock_heat_stack.stack_status = bay_status.CREATE_COMPLETE
         mock_heat_stack.stack_status_reason = 'stack complete'
-        poller._create_or_update_complete(mock_heat_stack)
+        poller._sync_bay_and_template_status(mock_heat_stack)
         self.assertEqual('stack complete', bay.status_reason)
         self.assertEqual(bay_status.CREATE_COMPLETE, bay.status)
         self.assertEqual(1, bay.save.call_count)
@@ -376,5 +376,6 @@ class TestHeatPoller(base.TestCase):
     @patch('magnum.conductor.handlers.bay_conductor.LOG')
     def test_bay_failed(self, logger):
         mock_heat_stack, bay, poller = self.setup_poll_test()
+        poller._sync_bay_and_template_status(mock_heat_stack)
         poller._bay_failed(mock_heat_stack)
         self.assertEqual(1, logger.error.call_count)
