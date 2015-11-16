@@ -481,7 +481,8 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
         mesos_def = tdef.UbuntuMesosTemplateDefinition()
 
         expected_api_address = 'updated_address'
-        expected_node_addresses = ['ex_minion', 'address']
+        expected_node_addresses = ['ex_slave', 'address']
+        expected_master_addresses = ['ex_master', 'address']
 
         outputs = [
             {"output_value": expected_api_address,
@@ -490,7 +491,7 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
             {"output_value": ['any', 'output'],
              "description": "No description given",
              "output_key": "mesos_master_private"},
-            {"output_value": ['any', 'output'],
+            {"output_value": expected_master_addresses,
              "description": "No description given",
              "output_key": "mesos_master"},
             {"output_value": ['any', 'output'],
@@ -509,3 +510,4 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
 
         self.assertEqual(expected_api_address, mock_bay.api_address)
         self.assertEqual(expected_node_addresses, mock_bay.node_addresses)
+        self.assertEqual(expected_master_addresses, mock_bay.master_addresses)

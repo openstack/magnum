@@ -658,7 +658,7 @@ class UbuntuMesosTemplateDefinition(BaseTemplateDefinition):
         self.add_output('mesos_master_private',
                         bay_attr=None)
         self.add_output('mesos_master',
-                        bay_attr=None)
+                        bay_attr='master_addresses')
         self.add_output('mesos_slaves_private',
                         bay_attr=None)
         self.add_output('mesos_slaves',

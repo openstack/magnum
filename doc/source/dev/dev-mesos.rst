@@ -119,7 +119,9 @@ You can get the ip address of the Mesos master using the
 ::
 
     $ heat output-show my-mesos-cluster mesos_master
-    "192.168.200.86"
+    [
+      "192.168.200.86"
+    ]
 
 You can ssh into that server as the ``ubuntu`` user:
 
@@ -164,7 +166,7 @@ Docker container.
       "cmd": "while sleep 10; do date -u +%T; done"
     }
     END
-    $ MASTER_IP=$(heat output-show my-mesos-cluster mesos_master | tr -d '"')
+    $ MASTER_IP=$(heat output-show my-mesos-cluster api_address | tr -d '"')
     $ curl -X POST -H "Content-Type: application/json" \
         http://${MASTER_IP}:8080/v2/apps -d@app.json
 
