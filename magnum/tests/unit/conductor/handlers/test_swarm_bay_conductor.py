@@ -53,6 +53,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'stack_id': 'xx-xx-xx-xx',
             'api_address': '172.17.2.3',
             'node_addresses': ['172.17.2.4'],
+            'master_count': 1,
             'node_count': 1,
             'discovery_url': 'https://discovery.test.io/123456789',
         }
@@ -83,6 +84,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'server_flavor': 'flavor_id',
+            'number_of_masters': '1',
             'number_of_nodes': '1',
             'docker_volume_size': 20,
             'fixed_network_cidr': '10.2.0.0/22',
@@ -124,6 +126,7 @@ class TestBayConductorWithSwarm(base.TestCase):
         expected = {
             'ssh_key_name': 'keypair_id',
             'external_network': 'external_network_id',
+            'number_of_masters': '1',
             'number_of_nodes': '1',
             'discovery_url': 'https://discovery.etcd.io/test',
             'user_token': 'fake_token',

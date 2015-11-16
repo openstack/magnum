@@ -16,7 +16,7 @@ write_files:
       ExecStartPre=-/usr/bin/docker kill swarm-agent
       ExecStartPre=-/usr/bin/docker rm swarm-agent
       ExecStartPre=-/usr/bin/docker pull swarm:$SWARM_VERSION
-      ExecStart=/usr/bin/docker run -e http_proxy=$HTTP_PROXY -e https_proxy=$HTTPS_PROXY -e no_proxy=$NO_PROXY  --name swarm-agent swarm:$SWARM_VERSION join --addr $NODE_IP:2375 etcd://$SWARM_MASTER_IP:2379/v2/keys/swarm/
+      ExecStart=/usr/bin/docker run -e http_proxy=$HTTP_PROXY -e https_proxy=$HTTPS_PROXY -e no_proxy=$NO_PROXY  --name swarm-agent swarm:$SWARM_VERSION join --addr $NODE_IP:2375 etcd://$ETCD_SERVER_IP:2379/v2/keys/swarm/
       ExecStop=/usr/bin/docker stop swarm-agent
       ExecStartPost=/usr/bin/curl -sf -X PUT -H 'Content-Type: application/json' \
         --data-binary '{"Status": "SUCCESS", "Reason": "Setup complete", "Data": "OK", "UniqueId": "00000"}' \

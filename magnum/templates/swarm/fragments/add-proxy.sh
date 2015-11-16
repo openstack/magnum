@@ -33,7 +33,7 @@ if [ -f "$BASH_RC" ]; then
     if [ -n "$NO_PROXY" ]; then
         echo "declare -x no_proxy=$NO_PROXY" >> $BASH_RC
     else
-        echo "declare -x no_proxy=$SWARM_MASTER_IP,$SWARM_NODE_IP" >> $BASH_RC
+        echo "declare -x no_proxy=$SWARM_API_IP,$ETCD_SERVER_IP,$SWARM_NODE_IP" >> $BASH_RC
     fi
 else
     echo "File $BASH_RC does not exist, not setting no_proxy"

@@ -16,7 +16,7 @@ mkdir -p /etc/systemd/system/docker.service.d
 mkdir -p /etc/systemd/system/flanneld.service.d
 
 sed -i '
-/^FLANNEL_ETCD=/ s|=.*|="http://'"$SWARM_MASTER_IP"':2379"|
+/^FLANNEL_ETCD=/ s|=.*|="http://'"$ETCD_SERVER_IP"':2379"|
 ' $FLANNELD_CONFIG
 
 cat >> $FLANNEL_DOCKER_BRIDGE_BIN <<EOF

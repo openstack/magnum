@@ -12,7 +12,7 @@ FLANNEL_CONFIG_SERVICE=/etc/systemd/system/flannel-config.service
 FLANNEL_JSON=/etc/sysconfig/flannel-network.json
 
 sed -i '
-/^FLANNEL_ETCD=/ s|=.*|="http://'"$SWARM_MASTER_IP"':2379"|
+/^FLANNEL_ETCD=/ s|=.*|="http://'"$ETCD_SERVER_IP"':2379"|
 ' $FLANNELD_CONFIG
 
 . $FLANNELD_CONFIG

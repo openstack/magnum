@@ -55,7 +55,7 @@ template_def_opts = [
                help=_('coreos discovery token url.')),
     cfg.StrOpt('swarm_atomic_template_path',
                default=paths.basedir_def('templates/swarm/'
-                                         'swarm.yaml'),
+                                         'swarmcluster.yaml'),
                help=_('Location of template to build a swarm '
                       'cluster on atomic.')),
     cfg.StrOpt('mesos_ubuntu_template_path',
@@ -558,6 +558,9 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
         self.add_parameter('number_of_nodes',
                            bay_attr='node_count',
                            param_type=str)
+        self.add_parameter('number_of_masters',
+                           bay_attr='master_count',
+                           param_type=str)
         self.add_parameter('server_flavor',
                            baymodel_attr='flavor_id')
         self.add_parameter('docker_volume_size',
@@ -575,8 +578,8 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
                         mapping_type=SwarmApiAddressOutputMapping)
         self.add_output('swarm_master_private',
                         bay_attr=None)
-        self.add_output('swarm_master',
-                        bay_attr=None)
+        self.add_output('swarm_masters',
+                        bay_attr='master_addresses')
         self.add_output('swarm_nodes_private',
                         bay_attr=None)
         self.add_output('swarm_nodes',

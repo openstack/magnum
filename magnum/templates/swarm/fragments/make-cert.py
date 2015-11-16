@@ -72,7 +72,9 @@ def _get_public_ip():
 def _build_subject_alt_names(config):
     subject_alt_names = [
         'IP:%s' % _get_public_ip(),
+        'IP:%s' % config['API_IP_ADDRESS'],
         'IP:%s' % config['SWARM_NODE_IP'],
+        'IP:%s' % config['SWARM_API_IP'],
         'IP:127.0.0.1'
     ]
     return ','.join(subject_alt_names)

@@ -64,9 +64,13 @@ parameters:
     description: no proxies for docker
     default: ""
 
-  swarm_master_ip:
+  swarm_api_ip:
     type: string
-    description: swarm master's ip address
+    description: swarm master's api server ip address
+
+  api_ip_address:
+    type: string
+    description: swarm master's api server public ip address
 
   user_token:
     type: string
@@ -88,6 +92,14 @@ parameters:
     type: string
     description: version of swarm used for swarm cluster
     default: 1.0.0
+
+  secgroup_swarm_node_id:
+    type: string
+    description: ID of the security group for swarm node.
+
+  etcd_server_ip:
+    type: string
+    description: ID of the load balancer pool of etcd serve.
 
 resources:
 
@@ -117,21 +129,6 @@ resources:
 
   ######################################################################
   #
-  # security groups.  we need to permit network traffic of various
-  # sorts.
-  #
-
-  secgroup_node:
-    type: "OS::Neutron::SecurityGroup"
-    properties:
-      rules:
-        - protocol: icmp
-        - protocol: tcp
-        - protocol: udp
-
-
-  ######################################################################
-  #
   # software configs.  these are components that are combined into
   # a multipart MIME user-data archive.
   write_heat_params:
@@ -147,13 +144,15 @@ resources:
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
-            "$SWARM_MASTER_IP": {get_param: swarm_master_ip}
+            "$SWARM_API_IP": {get_param: swarm_api_ip}
             "$SWARM_NODE_IP": {get_attr: [swarm_node_eth0, fixed_ips, 0, ip_address]}
             "$BAY_UUID": {get_param: bay_uuid}
             "$USER_TOKEN": {get_param: user_token}
             "$MAGNUM_URL": {get_param: magnum_url}
             "$TLS_DISABLED": {get_param: tls_disabled}
             "$NETWORK_DRIVER": {get_param: network_driver}
+            "$ETCD_SERVER_IP": {get_param: etcd_server_ip}
+            "$API_IP_ADDRESS": {get_param: api_ip_address}
 
   configure_swarm:
     type: "OS::Heat::SoftwareConfig"
@@ -217,13 +216,13 @@ resources:
           template: {get_file: fragments/write-swarm-agent-service.yaml}
           params:
             "$NODE_IP": {get_attr: [swarm_node_eth0, fixed_ips, 0, ip_address]}
-            "$SWARM_MASTER_IP": {get_param: swarm_master_ip}
             "$DISCOVERY_URL": {get_param: discovery_url}
             "$WAIT_HANDLE": {get_resource: node_agent_wait_handle}
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
             "$SWARM_VERSION": {get_param: swarm_version}
+            "$ETCD_SERVER_IP": {get_param: etcd_server_ip}
 
   enable_services:
     type: "OS::Heat::SoftwareConfig"
@@ -293,7 +292,7 @@ resources:
       network_id:
         get_param: fixed_network_id
       security_groups:
-        - get_resource: secgroup_node
+        - {get_param: secgroup_swarm_node_id}
       fixed_ips:
         - subnet_id:
             get_param: fixed_subnet_id
