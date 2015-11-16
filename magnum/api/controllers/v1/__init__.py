@@ -18,6 +18,7 @@ Version 1 of the Magnum API
 NOTE: IN PROGRESS AND NOT FULLY IMPLEMENTED.
 """
 
+from oslo_log import log as logging
 import pecan
 from pecan import rest
 from webob import exc
@@ -38,6 +39,8 @@ from magnum.api.controllers.v1 import x509keypair
 from magnum.api import expose
 from magnum.i18n import _
 
+
+LOG = logging.getLogger(__name__)
 
 BASE_VERSION = 1
 
@@ -240,6 +243,13 @@ class Controller(rest.RestController):
         self._check_version(version, pecan.response.headers)
         pecan.response.headers[controllers_base.Version.string] = str(version)
         pecan.request.version = version
+        if pecan.request.body:
+            msg = ("Processing request: url: %(url)s, %(method)s, "
+                   "body: %(body)s" %
+                   {'url': pecan.request.url,
+                    'method': pecan.request.method,
+                    'body': pecan.request.body})
+            LOG.debug(msg)
 
         return super(Controller, self)._route(args)
 
