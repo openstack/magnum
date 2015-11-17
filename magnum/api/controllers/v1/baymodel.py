@@ -346,17 +346,17 @@ class BayModelsController(rest.RestController):
         return BayModel.convert_with_links(new_baymodel)
 
     @policy.enforce_wsgi("baymodel", "update")
-    @wsme.validate(types.uuid, [BayModelPatchType])
-    @expose.expose(BayModel, types.uuid, body=[BayModelPatchType])
+    @wsme.validate(types.uuid_or_name, [BayModelPatchType])
+    @expose.expose(BayModel, types.uuid_or_name, body=[BayModelPatchType])
     @validation.enforce_network_driver_types_update()
-    def patch(self, baymodel_uuid, patch):
+    def patch(self, baymodel_ident, patch):
         """Update an existing baymodel.
 
-        :param baymodel_uuid: UUID of a baymodel.
+        :param baymodel_ident: UUID or logic name of a baymodel.
         :param patch: a json PATCH document to apply to this baymodel.
         """
         context = pecan.request.context
-        rpc_baymodel = objects.BayModel.get_by_uuid(context, baymodel_uuid)
+        rpc_baymodel = api_utils.get_rpc_resource('BayModel', baymodel_ident)
         try:
             baymodel_dict = rpc_baymodel.as_dict()
             baymodel = BayModel(**api_utils.apply_jsonpatch(
@@ -391,7 +391,7 @@ class BayModelsController(rest.RestController):
     def delete(self, baymodel_ident):
         """Delete a baymodel.
 
-        :param baymodel_uuid: UUID or logical name of a baymodel.
+        :param baymodel_ident: UUID or logical name of a baymodel.
         """
         rpc_baymodel = api_utils.get_rpc_resource('BayModel', baymodel_ident)
         rpc_baymodel.destroy()

@@ -17,6 +17,7 @@ import decorator
 from oslo_config import cfg
 import pecan
 
+from magnum.api.controllers.v1 import utils as api_utils
 from magnum.common import exception
 from magnum import objects
 
@@ -85,8 +86,8 @@ def enforce_network_driver_types_create():
 def enforce_network_driver_types_update():
     @decorator.decorator
     def wrapper(func, *args, **kwargs):
-        uuid = args[1]
-        baymodel = objects.BayModel.get_by_uuid(pecan.request.context, uuid)
+        baymodel_ident = args[1]
+        baymodel = api_utils.get_rpc_resource('BayModel', baymodel_ident)
         _enforce_network_driver_types(baymodel)
         return func(*args, **kwargs)
 
