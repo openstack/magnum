@@ -58,17 +58,6 @@ template_def_opts = [
                                          'swarm.yaml'),
                help=_('Location of template to build a swarm '
                       'cluster on atomic.')),
-    cfg.StrOpt('swarm_discovery_url_format',
-               help=_('Format string to use for swarm discovery url. '
-                      'Available values: bay_id, bay_uuid. '
-                      'Example: "etcd://etcd.example.com/\%(bay_uuid)s"')),
-    cfg.BoolOpt('public_swarm_discovery',
-                default=True,
-                help=_('Indicates Swarm discovery should use public '
-                       'endpoint.')),
-    cfg.StrOpt('public_swarm_discovery_url',
-               default='https://discovery.hub.docker.com/v1/clusters',
-               help=_('Url for swarm public discovery endpoint.')),
     cfg.StrOpt('mesos_ubuntu_template_path',
                default=paths.basedir_def('templates/mesos/'
                                          'mesoscluster.yaml'),
@@ -593,24 +582,20 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
         self.add_output('discovery_url',
                         bay_attr='discovery_url')
 
-    @staticmethod
-    def get_public_token():
-        token_id = requests.post(cfg.CONF.bay.public_swarm_discovery_url).text
-        return 'token://%s' % token_id
-
-    @staticmethod
-    def parse_discovery_url(bay):
-        strings = dict(bay_id=bay.id, bay_uuid=bay.uuid)
-        return cfg.CONF.bay.swarm_discovery_url_format % strings
-
     def get_discovery_url(self, bay):
         if hasattr(bay, 'discovery_url') and bay.discovery_url:
             discovery_url = bay.discovery_url
-        elif cfg.CONF.bay.public_swarm_discovery:
-            discovery_url = self.get_public_token()
         else:
-            discovery_url = self.parse_discovery_url(bay)
-
+            discovery_endpoint = (
+                cfg.CONF.bay.etcd_discovery_service_endpoint_format %
+                {'size': 1})
+            discovery_url = requests.get(discovery_endpoint).text
+            if not discovery_url:
+                raise exception.InvalidDiscoveryURL(
+                    discovery_url=discovery_url,
+                    discovery_endpoint=discovery_endpoint)
+            else:
+                bay.discovery_url = discovery_url
         return discovery_url
 
     def get_params(self, context, baymodel, bay, **kwargs):

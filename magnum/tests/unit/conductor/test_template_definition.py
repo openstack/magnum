@@ -371,63 +371,74 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
 
 class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
 
-    @mock.patch('requests.post')
-    def test_swarm_discovery_url_public_token(self, mock_post):
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.conductor.template_definition'
+                '.AtomicSwarmTemplateDefinition.get_discovery_url')
+    @mock.patch('magnum.conductor.template_definition.BaseTemplateDefinition'
+                '.get_params')
+    @mock.patch('magnum.conductor.template_definition.TemplateDefinition'
+                '.get_output')
+    def test_swarm_get_params(self, mock_get_output, mock_get_params,
+                              mock_get_discovery_url, mock_osc_class):
+        mock_context = mock.MagicMock()
+        mock_context.auth_token = 'AUTH_TOKEN'
+        mock_baymodel = mock.MagicMock()
+        mock_baymodel.tls_disabled = False
+        mock_bay = mock.MagicMock()
+        mock_bay.uuid = 'bay-xx-xx-xx-xx'
+        del mock_bay.stack_id
+        mock_osc = mock.MagicMock()
+        mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
+        mock_osc_class.return_value = mock_osc
 
+        mock_get_discovery_url.return_value = 'fake_discovery_url'
+
+        mock_context.auth_url = 'http://192.168.10.10:5000/v3'
+        mock_context.user_name = 'fake_user'
+        mock_context.tenant = 'fake_tenant'
+
+        swarm_def = tdef.AtomicSwarmTemplateDefinition()
+
+        swarm_def.get_params(mock_context, mock_baymodel, mock_bay)
+
+        expected_kwargs = {'extra_params': {
+            'discovery_url': 'fake_discovery_url',
+            'user_token': mock_context.auth_token,
+            'magnum_url': mock_osc.magnum_url.return_value}}
+        mock_get_params.assert_called_once_with(mock_context, mock_baymodel,
+                                                mock_bay, **expected_kwargs)
+
+    @mock.patch('requests.get')
+    def test_swarm_get_discovery_url(self, mock_get):
+        cfg.CONF.set_override('etcd_discovery_service_endpoint_format',
+                              'http://etcd/test?size=%(size)d',
+                              group='bay')
+        expected_discovery_url = 'http://etcd/token'
         mock_resp = mock.MagicMock()
-        mock_resp.text = 'some_token'
-        mock_post.return_value = mock_resp
-
+        mock_resp.text = expected_discovery_url
+        mock_get.return_value = mock_resp
         mock_bay = mock.MagicMock()
         mock_bay.discovery_url = None
-        mock_bay.id = 1
-        mock_bay.uuid = 'some_uuid'
 
         swarm_def = tdef.AtomicSwarmTemplateDefinition()
-        actual_url = swarm_def.get_discovery_url(mock_bay)
+        discovery_url = swarm_def.get_discovery_url(mock_bay)
 
-        self.assertEqual('token://some_token', actual_url)
+        mock_get.assert_called_once_with('http://etcd/test?size=1')
+        self.assertEqual(mock_bay.discovery_url, expected_discovery_url)
+        self.assertEqual(discovery_url, expected_discovery_url)
 
-    def test_swarm_discovery_url_format_bay_id(self):
-        cfg.CONF.set_override('public_swarm_discovery', False, group='bay')
-        cfg.CONF.set_override('swarm_discovery_url_format',
-                              'etcd://test.com/bay-%(bay_id)s', group='bay')
+    @mock.patch('requests.get')
+    def test_swarm_get_discovery_url_not_found(self, mock_get):
+        mock_resp = mock.MagicMock()
+        mock_resp.text = ''
+        mock_get.return_value = mock_resp
 
-        mock_bay = mock.MagicMock()
-        mock_bay.discovery_url = None
-        mock_bay.id = 1
-        mock_bay.uuid = 'some_uuid'
+        fake_bay = mock.MagicMock()
+        fake_bay.discovery_url = None
 
-        swarm_def = tdef.AtomicSwarmTemplateDefinition()
-        actual_url = swarm_def.get_discovery_url(mock_bay)
-
-        self.assertEqual('etcd://test.com/bay-1', actual_url)
-
-    def test_swarm_discovery_url_format_bay_uuid(self):
-        cfg.CONF.set_override('public_swarm_discovery', False, group='bay')
-        cfg.CONF.set_override('swarm_discovery_url_format',
-                              'etcd://test.com/bay-%(bay_uuid)s', group='bay')
-
-        mock_bay = mock.MagicMock()
-        mock_bay.discovery_url = None
-        mock_bay.id = 1
-        mock_bay.uuid = 'some_uuid'
-
-        swarm_def = tdef.AtomicSwarmTemplateDefinition()
-        actual_url = swarm_def.get_discovery_url(mock_bay)
-
-        self.assertEqual('etcd://test.com/bay-some_uuid', actual_url)
-
-    def test_swarm_discovery_url_from_bay(self):
-        mock_bay = mock.MagicMock()
-        mock_bay.discovery_url = 'token://some_token'
-        mock_bay.id = 1
-        mock_bay.uuid = 'some_uuid'
-
-        swarm_def = tdef.AtomicSwarmTemplateDefinition()
-        actual_url = swarm_def.get_discovery_url(mock_bay)
-
-        self.assertEqual(mock_bay.discovery_url, actual_url)
+        self.assertRaises(exception.InvalidDiscoveryURL,
+                          tdef.AtomicK8sTemplateDefinition().get_discovery_url,
+                          fake_bay)
 
     def test_swarm_get_heat_param(self):
         swarm_def = tdef.AtomicSwarmTemplateDefinition()

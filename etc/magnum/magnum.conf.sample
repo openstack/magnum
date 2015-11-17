@@ -322,18 +322,6 @@
 # value)
 #swarm_atomic_template_path = $pybasedir/templates/swarm/swarm.yaml
 
-# Format string to use for swarm discovery url. Available values:
-# bay_id, bay_uuid. Example: "etcd://etcd.example.com/\%(bay_uuid)s"
-# (string value)
-#swarm_discovery_url_format = <None>
-
-# Indicates Swarm discovery should use public endpoint. (boolean
-# value)
-#public_swarm_discovery = true
-
-# Url for swarm public discovery endpoint. (string value)
-#public_swarm_discovery_url = https://discovery.hub.docker.com/v1/clusters
-
 # Location of template to build a Mesos cluster on Ubuntu. (string
 # value)
 #mesos_ubuntu_template_path = $pybasedir/templates/mesos/mesoscluster.yaml

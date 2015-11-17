@@ -20,7 +20,6 @@ from magnum.tests import base
 
 import mock
 from mock import patch
-from oslo_config import cfg
 
 
 class TestBayConductorWithSwarm(base.TestCase):
@@ -51,7 +50,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'api_address': '172.17.2.3',
             'node_addresses': ['172.17.2.4'],
             'node_count': 1,
-            'discovery_url': 'token://39987da72f8386e0d0225ae8929e7cb4',
+            'discovery_url': 'https://discovery.test.io/123456789',
         }
         osc_patcher = mock.patch('magnum.common.clients.OpenStackClients')
         self.mock_osc_class = osc_patcher.start()
@@ -83,7 +82,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'number_of_nodes': '1',
             'docker_volume_size': 20,
             'fixed_network_cidr': '10.2.0.0/22',
-            'discovery_url': 'token://39987da72f8386e0d0225ae8929e7cb4',
+            'discovery_url': 'https://discovery.test.io/123456789',
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
@@ -99,16 +98,13 @@ class TestBayConductorWithSwarm(base.TestCase):
     def test_extract_template_definition_only_required(
             self,
             mock_objects_baymodel_get_by_uuid):
-        cfg.CONF.set_override('public_swarm_discovery', False, group='bay')
-        cfg.CONF.set_override('swarm_discovery_url_format',
-                              'test_discovery', group='bay')
 
         not_required = ['image_id', 'flavor_id', 'dns_nameserver',
                         'docker_volume_size', 'fixed_network', 'http_proxy',
                         'https_proxy', 'no_proxy']
         for key in not_required:
             self.baymodel_dict[key] = None
-        self.bay_dict['discovery_url'] = None
+        self.bay_dict['discovery_url'] = 'https://discovery.etcd.io/test'
 
         baymodel = objects.BayModel(self.context, **self.baymodel_dict)
         mock_objects_baymodel_get_by_uuid.return_value = baymodel
@@ -122,7 +118,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'ssh_key_name': 'keypair_id',
             'external_network': 'external_network_id',
             'number_of_nodes': '1',
-            'discovery_url': 'test_discovery',
+            'discovery_url': 'https://discovery.etcd.io/test',
             'user_token': 'fake_token',
             'bay_uuid': 'some_uuid',
             'magnum_url': self.mock_osc.magnum_url.return_value,
