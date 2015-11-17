@@ -131,12 +131,12 @@ class BayModelTest(base.BaseMagnumTest):
             bay_model_client.get_baymodel, 'fooo')
 
     @testtools.testcase.attr('negative')
-    def test_update_baymodel_invalid_uuid(self):
+    def test_update_baymodel_name_not_found(self):
         patch_model = datagen.random_baymodel_name_patch_data()
 
         bay_model_client = cli.BayModelClient.as_user('default')
         self.assertRaises(
-            exceptions.BadRequest,
+            exceptions.NotFound,
             bay_model_client.patch_baymodel, 'fooo', patch_model)
 
     @testtools.testcase.attr('negative')

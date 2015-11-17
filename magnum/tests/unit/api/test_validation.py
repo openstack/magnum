@@ -16,7 +16,6 @@
 import mock
 from oslo_config import cfg
 
-from magnum.api.controllers.v1 import baymodel as api_baymodel    # noqa
 from magnum.api import validation as v
 from magnum.common import exception
 from magnum.tests import base
@@ -189,27 +188,26 @@ class TestValidation(base.BaseTestCase):
             assert_raised=True)
 
     @mock.patch('pecan.request')
-    @mock.patch('magnum.objects.BayModel.get_by_uuid')
+    @mock.patch('magnum.api.controllers.v1.utils.get_rpc_resource')
     def _test_enforce_network_driver_types_update(
             self,
-            mock_baymodel_get_by_uuid,
+            mock_get_rpc_resource,
             mock_pecan_request,
             network_driver_type,
             network_driver_config_dict,
             assert_raised=False):
 
         @v.enforce_network_driver_types_update()
-        def test(self, baymodel_uuid):
+        def test(self, baymodel_ident):
             pass
 
         for key, val in network_driver_config_dict.items():
             cfg.CONF.set_override(key, val, 'baymodel')
-        context = mock_pecan_request.context
-        baymodel_uuid = 'test_uuid'
+        baymodel_ident = 'test_uuid_or_name'
         baymodel = mock.MagicMock()
         baymodel.network_driver = network_driver_type
         baymodel.coe = 'kubernetes'
-        mock_baymodel_get_by_uuid.return_value = baymodel
+        mock_get_rpc_resource.return_value = baymodel
 
         # Reload the validator module so that baymodel configs are
         # re-evaluated.
@@ -219,11 +217,11 @@ class TestValidation(base.BaseTestCase):
 
         if assert_raised:
             self.assertRaises(exception.InvalidParameterValue,
-                              test, self, baymodel_uuid)
+                              test, self, baymodel_ident)
         else:
-            test(self, baymodel_uuid)
-            mock_baymodel_get_by_uuid.assert_called_once_with(
-                context, baymodel_uuid)
+            test(self, baymodel_ident)
+            mock_get_rpc_resource.assert_called_once_with(
+                'BayModel', baymodel_ident)
 
     def test_enforce_network_driver_types_one_allowed_update(self):
         self._test_enforce_network_driver_types_update(
