@@ -22,6 +22,7 @@ from oslo_service import service
 from magnum.common import rpc
 from magnum.objects import base as objects_base
 from magnum.service import periodic
+from magnum.servicegroup import magnum_service_periodic as servicegroup
 
 
 # NOTE(paulczar):
@@ -69,8 +70,10 @@ class Service(service.Service):
         self.binary = binary
 
     def start(self):
+        # NOTE(suro-patz): The parent class has created a threadgroup, already
         if CONF.periodic_enable:
-            self.tg = periodic.setup(CONF, self.binary)
+            periodic.setup(CONF, self.tg)
+        servicegroup.setup(CONF, self.binary, self.tg)
         self._server.start()
 
     def wait(self):
