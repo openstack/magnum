@@ -72,7 +72,7 @@ def is_docker_library_version_atleast(version):
 def docker_for_container(context, container):
     if magnum_utils.is_uuid_like(container):
         container = objects.Container.get_by_uuid(context, container)
-    bay = conductor_utils.retrieve_bay(context, container)
+    bay = conductor_utils.retrieve_bay(context, container.bay_uuid)
     with docker_for_bay(context, bay) as docker:
         yield docker
 

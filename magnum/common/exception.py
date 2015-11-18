@@ -412,6 +412,16 @@ class ReplicationControllerAlreadyExists(Conflict):
     message = _("A ReplicationController with UUID %(uuid)s already exists.")
 
 
+class ReplicationControllerListNotFound(ResourceNotFound):
+    message = _("ReplicationController list could not be found"
+                " for Bay %(bay_uuid)s.")
+
+
+class ReplicationControllerCreationFailed(Invalid):
+    message = _("ReplicationController creation failed"
+                " for Bay %(bay_uuid)s.")
+
+
 class ServiceNotFound(ResourceNotFound):
     message = _("Service %(service)s could not be found.")
 

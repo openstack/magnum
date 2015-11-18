@@ -13,21 +13,21 @@
 # limitations under the License.
 
 from magnum.common import clients
-from magnum import objects
+from magnum.objects import bay
+from magnum.objects import baymodel
 
 
-def retrieve_bay(context, obj):
-    return objects.Bay.get_by_uuid(context, obj.bay_uuid)
+def retrieve_bay(context, bay_uuid):
+    return bay.Bay.get_by_uuid(context, bay_uuid)
 
 
 def retrieve_baymodel(context, bay):
-    return objects.BayModel.get_by_uuid(context, bay.baymodel_id)
+    return baymodel.BayModel.get_by_uuid(context, bay.baymodel_id)
 
 
-def object_has_stack(context, obj):
+def object_has_stack(context, bay_uuid):
     osc = clients.OpenStackClients(context)
-    if hasattr(obj, 'bay_uuid'):
-        obj = retrieve_bay(context, obj)
+    obj = retrieve_bay(context, bay_uuid)
 
     stack = osc.heat().stacks.get(obj.stack_id)
     if (stack.stack_status == 'DELETE_COMPLETE' or

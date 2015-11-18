@@ -149,7 +149,7 @@ def create_test_rc(context, **kw):
     ReplicationController object with appropriate attributes.
     """
     rc = get_test_rc(context, **kw)
-    rc.create()
+    rc.manifest = '{"foo": "bar"}'
     return rc
 
 

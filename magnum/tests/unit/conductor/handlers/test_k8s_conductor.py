@@ -125,9 +125,11 @@ class TestK8sConductor(base.TestCase):
             self.assertRaises(exception.KubernetesAPIFailed,
                               self.kube_handler.pod_delete,
                               self.context, mock_pod.uuid)
-            (mock_kube_api.return_value.delete_namespaced_pod
-                .assert_called_once_with(
-                    name=mock_pod.name, body={}, namespace='default'))
+            (mock_kube_api.return_value.
+             delete_namespaced_pod.
+             assert_called_once_with(name=mock_pod.name,
+                                     body={},
+                                     namespace='default'))
             self.assertFalse(mock_pod.destroy.called)
 
     @patch('magnum.conductor.utils.object_has_stack')
@@ -253,25 +255,30 @@ class TestK8sConductor(base.TestCase):
                     name=mock_service.name, namespace='default'))
             mock_service.destroy.assert_called_once_with(self.context)
 
-    def test_rc_create_with_success(self):
-        expected_rc = self.mock_rc()
-        expected_rc.create = mock.MagicMock()
+    @patch('ast.literal_eval')
+    def test_rc_create_with_success(self, mock_ast):
+        expected_rc = mock.MagicMock()
         manifest = {"key": "value"}
+        expected_rc.name = 'test-name'
+        expected_rc.uuid = 'test-uuid'
+        expected_rc.bay_uuid = 'test-bay-uuid'
         expected_rc.manifest = '{"key": "value"}'
+        mock_ast.return_value = {}
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.k8s_api.create_k8s_api_rc') as \
+                mock_kube_api:
             self.kube_handler.rc_create({}, expected_rc)
             (mock_kube_api.return_value
                 .create_namespaced_replication_controller
                 .assert_called_once_with(body=manifest, namespace='default'))
 
     def test_rc_create_with_failure(self):
-        expected_rc = self.mock_rc()
-        expected_rc.create = mock.MagicMock()
+        expected_rc = mock.MagicMock()
         manifest = {"key": "value"}
         expected_rc.manifest = '{"key": "value"}'
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.k8s_api.create_k8s_api_rc') as \
+                mock_kube_api:
             err = rest.ApiException(status=500)
             (mock_kube_api.return_value
                 .create_namespaced_replication_controller.side_effect) = err
@@ -282,46 +289,57 @@ class TestK8sConductor(base.TestCase):
             (mock_kube_api.return_value
                 .create_namespaced_replication_controller
                 .assert_called_once_with(body=manifest, namespace='default'))
-            self.assertFalse(expected_rc.create.called)
 
     @patch('magnum.conductor.utils.object_has_stack')
-    @patch('magnum.objects.ReplicationController.get_by_uuid')
-    def test_rc_delete_with_success(self,
-                                    mock_rc_get_by_uuid,
+    @patch('magnum.objects.ReplicationController.get_by_name')
+    @patch('magnum.objects.Bay.get_by_name')
+    def test_rc_delete_with_success(self, mock_bay_get_by_name,
+                                    mock_rc_get_by_name,
                                     mock_object_has_stack):
+        mock_bay = mock.MagicMock()
+        mock_bay_get_by_name.return_value = mock_bay
+
         mock_rc = mock.MagicMock()
         mock_rc.name = 'test-rc'
         mock_rc.uuid = 'test-uuid'
-        mock_rc_get_by_uuid.return_value = mock_rc
+        mock_rc_get_by_name.return_value = mock_rc
+        bay_uuid = 'test-bay-uuid'
 
         mock_object_has_stack.return_value = True
-        with patch('magnum.conductor.k8s_api.create_k8s_api') as mock_kube_api:
-            self.kube_handler.rc_delete(self.context, mock_rc.uuid)
-
+        with patch('magnum.conductor.k8s_api.create_k8s_api_rc') as \
+                mock_kube_api:
+            self.kube_handler.rc_delete(self.context, mock_rc.name, bay_uuid)
             (mock_kube_api.return_value
                 .delete_namespaced_replication_controller
                 .assert_called_once_with(name=mock_rc.name, body={},
                                          namespace='default'))
-            mock_rc.destroy.assert_called_once_with(self.context)
 
     @patch('magnum.conductor.utils.object_has_stack')
     @patch('magnum.objects.ReplicationController.get_by_uuid')
-    def test_rc_delete_with_failure(self, mock_rc_get_by_uuid,
+    @patch('magnum.objects.Bay.get_by_name')
+    def test_rc_delete_with_failure(self, mock_bay_get_by_name,
+                                    mock_rc_get_by_uuid,
                                     mock_object_has_stack):
+        mock_bay = mock.MagicMock()
+        mock_bay_get_by_name.return_value = mock_bay
+
         mock_rc = mock.MagicMock()
         mock_rc.name = 'test-rc'
         mock_rc.uuid = 'test-uuid'
+        mock_rc.bay_uuid = 'test-bay-uuid'
         mock_rc_get_by_uuid.return_value = mock_rc
 
         mock_object_has_stack.return_value = True
-        with patch('magnum.conductor.k8s_api.create_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.k8s_api.create_k8s_api_rc') as \
+                mock_kube_api:
             err = rest.ApiException(status=500)
             (mock_kube_api.return_value
                 .delete_namespaced_replication_controller.side_effect) = err
 
             self.assertRaises(exception.KubernetesAPIFailed,
                               self.kube_handler.rc_delete,
-                              self.context, mock_rc.uuid)
+                              self.context, mock_rc.name,
+                              mock_rc.bay_uuid)
 
             (mock_kube_api.return_value
                 .delete_namespaced_replication_controller
@@ -331,56 +349,88 @@ class TestK8sConductor(base.TestCase):
 
     @patch('magnum.conductor.utils.object_has_stack')
     @patch('magnum.objects.ReplicationController.get_by_uuid')
+    @patch('magnum.objects.Bay.get_by_name')
     def test_rc_delete_succeeds_when_not_found(
-            self,
+            self, mock_bay_get_by_name,
             mock_rc_get_by_uuid,
             mock_object_has_stack):
+        mock_bay = mock.MagicMock()
+        mock_bay_get_by_name.return_value = mock_bay
+
         mock_rc = mock.MagicMock()
         mock_rc.name = 'test-rc'
         mock_rc.uuid = 'test-uuid'
+        mock_rc.bay_uuid = 'test-bay-uuid'
         mock_rc_get_by_uuid.return_value = mock_rc
 
         mock_object_has_stack.return_value = True
-        with patch('magnum.conductor.k8s_api.create_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.k8s_api.create_k8s_api_rc') as \
+                mock_kube_api:
             err = rest.ApiException(status=404)
             (mock_kube_api.return_value
                 .delete_namespaced_replication_controller.side_effect) = err
 
-            self.kube_handler.rc_delete(self.context, mock_rc.uuid)
+            self.kube_handler.rc_delete(self.context,
+                                        mock_rc.name,
+                                        mock_rc.bay_uuid)
 
             (mock_kube_api.return_value
                 .delete_namespaced_replication_controller
                 .assert_called_once_with(name=mock_rc.name, body={},
                                          namespace='default'))
-            self.assertTrue(mock_rc.destroy.called)
 
-    def test_rc_update_with_success(self):
-        expected_rc = self.mock_rc()
+    @patch('magnum.objects.ReplicationController.get_by_name')
+    @patch('magnum.objects.ReplicationController.get_by_uuid')
+    @patch('magnum.objects.Bay.get_by_name')
+    @patch('ast.literal_eval')
+    def test_rc_update_with_success(self, mock_ast,
+                                    mock_bay_get_by_name,
+                                    mock_rc_get_by_uuid,
+                                    mock_rc_get_by_name):
+        mock_bay = mock.MagicMock()
+        mock_bay_get_by_name.return_value = mock_bay
+
+        expected_rc = mock.MagicMock()
         expected_rc.uuid = 'test-uuid'
         expected_rc.name = 'test-name'
-        expected_rc.refresh = mock.MagicMock()
-        expected_rc.save = mock.MagicMock()
-        manifest = {"key": "value"}
+        expected_rc.bay_uuid = 'test-bay-uuid'
         expected_rc.manifest = '{"key": "value"}'
+        mock_ast.return_value = {}
+        mock_rc_get_by_uuid.return_value = expected_rc
+        mock_rc_get_by_name.return_value = expected_rc
+        name_rc = expected_rc.name
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api') as mock_kube_api:
-            self.kube_handler.rc_update(self.context, expected_rc)
+        with patch('magnum.conductor.k8s_api.create_k8s_api_rc') as \
+                mock_kube_api:
+            self.kube_handler.rc_update(self.context, expected_rc.name,
+                                        expected_rc.bay_uuid,
+                                        expected_rc.manifest)
             (mock_kube_api.return_value
-                .replace_namespaced_replication_controller
-                .assert_called_once_with(body=manifest, name=expected_rc.name,
-                                         namespace='default'))
-            expected_rc.refresh.assert_called_once_with(self.context)
-            expected_rc.save.assert_called_once_with()
+             .replace_namespaced_replication_controller
+             .assert_called_once_with(body=expected_rc.manifest,
+                                      name=name_rc,
+                                      namespace='default'))
 
-    def test_rc_update_with_failure(self):
-        expected_rc = self.mock_rc()
+    @patch('magnum.objects.ReplicationController.get_by_name')
+    @patch('magnum.objects.ReplicationController.get_by_uuid')
+    @patch('magnum.objects.Bay.get_by_name')
+    def test_rc_update_with_failure(self, mock_bay_get_by_name,
+                                    mock_rc_get_by_uuid,
+                                    mock_rc_get_by_name):
+        mock_bay = mock.MagicMock()
+        mock_bay_get_by_name.return_value = mock_bay
+
+        expected_rc = mock.MagicMock()
         expected_rc.uuid = 'test-uuid'
         expected_rc.name = 'test-name'
-        expected_rc.update = mock.MagicMock()
-        manifest = {"key": "value"}
+        expected_rc.bay_uuid = 'test-bay-uuid'
+        mock_rc_get_by_uuid.return_value = expected_rc
+        mock_rc_get_by_name.return_value = expected_rc
         expected_rc.manifest = '{"key": "value"}'
+        name_rc = expected_rc.name
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.k8s_api.create_k8s_api_rc') as \
+                mock_kube_api:
             err = rest.ApiException(status=404)
             (mock_kube_api.return_value
                 .replace_namespaced_replication_controller
@@ -388,12 +438,14 @@ class TestK8sConductor(base.TestCase):
 
             self.assertRaises(exception.KubernetesAPIFailed,
                               self.kube_handler.rc_update,
-                              self.context, expected_rc)
+                              self.context, expected_rc.name,
+                              expected_rc.bay_uuid,
+                              expected_rc.manifest)
             (mock_kube_api.return_value
                 .replace_namespaced_replication_controller
-                .assert_called_once_with(body=manifest, name=expected_rc.name,
+                .assert_called_once_with(body=expected_rc.manifest,
+                                         name=name_rc,
                                          namespace='default'))
-            self.assertFalse(expected_rc.update.called)
 
     def test_service_update_with_success(self):
         expected_service = self.mock_service()

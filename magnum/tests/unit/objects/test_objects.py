@@ -431,7 +431,7 @@ object_data = {
     'MyObj': '1.0-b43567e512438205e32f4e95ca616697',
     'Node': '1.0-30943e6e3387a2fae7490b57c4239a17',
     'Pod': '1.1-7a31c372f163742845c10a008f47cc15',
-    'ReplicationController': '1.0-782b7deb9307b2807101541b7e58b8a2',
+    'ReplicationController': '1.0-a471c2429c212ed91833cfcf0f934eab',
     'Service': '1.0-a8cf7e95fced904419164dbcb6d32b38',
     'X509KeyPair': '1.1-4aecc268e23e32b8a762d43ba1a4b159',
     'MagnumService': '1.0-2d397ec59b0046bd5ec35cd3e06efeca',
