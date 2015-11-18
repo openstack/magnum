@@ -61,7 +61,7 @@ def generate_random_port():
 
 
 def generate_random_docker_volume_size():
-    return random.randrange(1, 100)
+    return random.randrange(1, 3)
 
 
 def generate_fake_ssh_pubkey():

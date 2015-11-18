@@ -61,15 +61,23 @@ Use follow command lines to check what functional testing is supported::
     cd /opt/stack/magnum
     cat tox.ini | grep functional- | awk -F: '{print $2}' | sed s/]//
 
-To do some specify functional testing, for example, test api functional
+To do some specify functional testing, for example, test kubernetes functional
 cases::
 
-    tox -e functional-api -- --concurrency=1
+    tox -e functional-k8s -- --concurrency=1
 
-Test specified case of api functional cases::
+Test specified case of kubernetes functional cases::
 
-    tox -e functional-api -- --concurrency=1 <test path>
+    tox -e functional-k8s -- --concurrency=1 <test path>
+
 
 The following is an example for test path::
 
-    magnum.tests.functional.api.v1.test_baymodel.BayModelTest.test_create_baymodel
+    magnum.tests.functional.k8s.v1.test_k8s_python_client.TestBayModelResource.test_baymodel_create_and_delete
+
+We also have api tests being added.  To run those, go to
+tempest directory (tempest is installed with devstack by default), install
+magnum, and execute tempest tox::
+
+    cd /opt/stack/tempest
+    tox -eall-plugin magnum.tests.functional.api.v1 -- --concurrency=1
