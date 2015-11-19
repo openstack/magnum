@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import os
+import sys
 
 from glob import glob
 from oslo_config import cfg
@@ -34,4 +35,8 @@ class TestTemplate(base.TestCase):
                     for y in glob(os.path.join(x[0], '*.yaml'))]:
             with open(yml, 'r') as f:
                 yml_contents = f.read()
-                load(yml_contents)
+                try:
+                    load(yml_contents)
+                except Exception:
+                    error_msg = "file: %s: %s" % (yml, sys.exc_info()[1])
+                    self.fail(error_msg)
