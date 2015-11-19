@@ -10,11 +10,18 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from oslo_config import cfg
 
-from magnum.common import docker_utils
 from magnum.conductor.handlers.common import docker_client
 from magnum.tests.functional.python_client_base import BayAPITLSTest
 from magnum.tests.functional.python_client_base import BayTest
+
+
+CONF = cfg.CONF
+CONF.import_opt('docker_remote_api_version', 'magnum.common.docker_utils',
+                group='docker')
+CONF.import_opt('default_timeout', 'magnum.common.docker_utils',
+                group='docker')
 
 
 class TestBayModelResource(BayTest):
@@ -60,8 +67,8 @@ extendedKeyUsage = clientAuth
         cls._create_tls_ca_files(config_contents)
         cls.docker_client = docker_client.DockerHTTPClient(
             url,
-            docker_utils.CONF.docker.docker_remote_api_version,
-            docker_utils.CONF.docker.default_timeout,
+            CONF.docker.docker_remote_api_version,
+            CONF.docker.default_timeout,
             client_key=cls.key_file,
             client_cert=cls.cert_file,
             ca_cert=cls.ca_file)
