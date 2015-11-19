@@ -234,7 +234,7 @@ class HeatPoller(object):
 
         if stack.stack_status in (bay_status.CREATE_COMPLETE,
                                   bay_status.UPDATE_COMPLETE):
-            self._create_or_update_complete(stack)
+            self._sync_bay_and_template_status(stack)
             raise loopingcall.LoopingCallDone()
         elif stack.stack_status != self.bay.status:
             self._sync_bay_status(stack)
@@ -242,6 +242,7 @@ class HeatPoller(object):
         if stack.stack_status in (bay_status.CREATE_FAILED,
                                   bay_status.DELETE_FAILED,
                                   bay_status.UPDATE_FAILED):
+            self._sync_bay_and_template_status(stack)
             self._bay_failed(stack)
             raise loopingcall.LoopingCallDone()
         # only check max attempts when the stack is being created when
@@ -275,16 +276,6 @@ class HeatPoller(object):
             LOG.info(_LI('The bay %s has been deleted by others.')
                      % self.bay.uuid)
 
-    def _create_or_update_complete(self, stack):
-        self.template_def.update_outputs(stack, self.baymodel, self.bay)
-
-        self.bay.status = stack.stack_status
-        self.bay.status_reason = stack.stack_status_reason
-        stack_nc_param = self.template_def.get_heat_param(
-            bay_attr='node_count')
-        self.bay.node_count = stack.parameters[stack_nc_param]
-        self.bay.save()
-
     def _sync_bay_status(self, stack):
         self.bay.status = stack.stack_status
         self.bay.status_reason = stack.stack_status_reason
@@ -292,6 +283,10 @@ class HeatPoller(object):
             bay_attr='node_count')
         self.bay.node_count = stack.parameters[stack_nc_param]
         self.bay.save()
+
+    def _sync_bay_and_template_status(self, stack):
+        self.template_def.update_outputs(stack, self.baymodel, self.bay)
+        self._sync_bay_status(stack)
 
     def _bay_failed(self, stack):
         LOG.error(_LE('Bay error, stack status: %(bay_status)s, '
