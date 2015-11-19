@@ -37,7 +37,7 @@ baymodel_opts = [
                 help="Allowed network drivers for docker swarm baymodels. "
                 "Use 'all' keyword to allow all drivers supported "
                 "for swarm baymodels. Supported network drivers "
-                "include docker."),
+                "include docker and flannel."),
     cfg.StrOpt('swarm_default_network_driver',
                default='docker',
                help="Default network driver for docker swarm baymodels."),
@@ -157,7 +157,7 @@ class K8sValidator(Validator):
 
 class SwarmValidator(Validator):
 
-    supported_drivers = ['docker']
+    supported_drivers = ['docker', 'flannel']
     allowed_drivers = cfg.CONF.baymodel.swarm_allowed_network_drivers
     default_driver = cfg.CONF.baymodel.swarm_default_network_driver
 
