@@ -223,6 +223,7 @@ resources:
           template: {get_file: fragments/write-heat-params.yaml}
           params:
             "$WAIT_HANDLE": {get_resource: cloud_init_wait_handle}
+            "$ETCD_DISCOVERY_URL": {get_param: discovery_url}
             "$DOCKER_VOLUME": {get_resource: docker_volume}
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
@@ -255,6 +256,12 @@ resources:
     properties:
       group: ungrouped
       config: {get_file: fragments/network-service.sh}
+
+  configure_etcd:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/configure-etcd.sh}
 
   configure_swarm:
     type: "OS::Heat::SoftwareConfig"
@@ -316,6 +323,7 @@ resources:
         str_replace:
           template: {get_file: fragments/write-swarm-agent-service.yaml}
           params:
+            "$SWARM_MASTER_IP": {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
             "$NODE_IP": {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
             "$DISCOVERY_URL": {get_param: discovery_url}
             "$WAIT_HANDLE": {get_resource: agent_wait_handle}
@@ -331,6 +339,7 @@ resources:
         str_replace:
           template: {get_file: fragments/write-swarm-master-service.sh}
           params:
+            "$SWARM_MASTER_IP": {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
             "$DISCOVERY_URL": {get_param: discovery_url}
             "$WAIT_HANDLE": {get_resource: master_wait_handle}
             "$HTTP_PROXY": {get_param: http_proxy}
@@ -346,7 +355,7 @@ resources:
         str_replace:
           template: {get_file: fragments/enable-services.sh}
           params:
-            "$NODE_SERVICES": "docker.socket swarm-agent swarm-manager"
+            "$NODE_SERVICES": "etcd docker.socket swarm-agent swarm-manager"
 
   cfn_signal:
     type: "OS::Heat::SoftwareConfig"
@@ -380,10 +389,11 @@ resources:
         - config: {get_resource: remove_docker_key}
         - config: {get_resource: write_heat_params}
         - config: {get_resource: make_cert}
+        - config: {get_resource: configure_etcd}
+        - config: {get_resource: configure_docker_storage}
         - config: {get_resource: write_network_config}
         - config: {get_resource: network_config_service}
         - config: {get_resource: network_service}
-        - config: {get_resource: configure_docker_storage}
         - config: {get_resource: write_swarm_agent_failure_service}
         - config: {get_resource: write_swarm_manager_failure_service}
         - config: {get_resource: write_docker_service}

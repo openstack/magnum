@@ -6,6 +6,7 @@ write_files:
     permissions: "0644"
     content: |
       WAIT_HANDLE="$WAIT_HANDLE"
+      ETCD_DISCOVERY_URL="$ETCD_DISCOVERY_URL"
       DOCKER_VOLUME="$DOCKER_VOLUME"
       HTTP_PROXY="$HTTP_PROXY"
       HTTPS_PROXY="$HTTPS_PROXY"

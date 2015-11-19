@@ -212,6 +212,7 @@ resources:
           template: {get_file: fragments/write-swarm-agent-service.yaml}
           params:
             "$NODE_IP": {get_attr: [swarm_node_eth0, fixed_ips, 0, ip_address]}
+            "$SWARM_MASTER_IP": {get_param: swarm_master_ip}
             "$DISCOVERY_URL": {get_param: discovery_url}
             "$WAIT_HANDLE": {get_resource: node_agent_wait_handle}
             "$HTTP_PROXY": {get_param: http_proxy}
