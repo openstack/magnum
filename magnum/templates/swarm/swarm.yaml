@@ -92,6 +92,30 @@ parameters:
     description: whether or not to enable TLS
     default: False
 
+  network_driver:
+    type: string
+    description: network driver to use for instantiating container networks
+    default: None
+
+  flannel_network_cidr:
+    type: string
+    description: network range for flannel overlay network
+    default: 10.100.0.0/16
+
+  flannel_network_subnetlen:
+    type: string
+    description: size of subnet assigned to each master
+    default: 24
+
+  flannel_use_vxlan:
+    type: string
+    description: >
+      if true use the vxlan backend, otherwise use the default
+      udp backend
+    default: "false"
+    constraints:
+      - allowed_values: ["true", "false"]
+
 resources:
 
   cloud_init_wait_handle:
@@ -209,6 +233,28 @@ resources:
             "$USER_TOKEN": {get_param: user_token}
             "$MAGNUM_URL": {get_param: magnum_url}
             "$TLS_DISABLED": {get_param: tls_disabled}
+            "$NETWORK_DRIVER": {get_param: network_driver}
+            "$FLANNEL_NETWORK_CIDR": {get_param: flannel_network_cidr}
+            "$FLANNEL_NETWORK_SUBNETLEN": {get_param: flannel_network_subnetlen}
+            "$FLANNEL_USE_VXLAN": {get_param: flannel_use_vxlan}
+
+  write_network_config:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/write-network-config.sh}
+
+  network_config_service:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/network-config-service.sh}
+
+  network_service:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/network-service.sh}
 
   configure_swarm:
     type: "OS::Heat::SoftwareConfig"
@@ -334,6 +380,9 @@ resources:
         - config: {get_resource: remove_docker_key}
         - config: {get_resource: write_heat_params}
         - config: {get_resource: make_cert}
+        - config: {get_resource: write_network_config}
+        - config: {get_resource: network_config_service}
+        - config: {get_resource: network_service}
         - config: {get_resource: configure_docker_storage}
         - config: {get_resource: write_swarm_agent_failure_service}
         - config: {get_resource: write_swarm_manager_failure_service}
@@ -415,6 +464,7 @@ resources:
           user_token: {get_param: user_token}
           magnum_url: {get_param: magnum_url}
           tls_disabled: {get_param: tls_disabled}
+          network_driver: {get_param: network_driver}
 
   ######################################################################
   #
