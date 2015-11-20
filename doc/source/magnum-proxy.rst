@@ -32,7 +32,7 @@ your proxy, and make conenctions directly.
 NOTE: You may not express networks/subnets. It only accepts names
 and ip addresses. Bad example: 192.168.0.0/28.
 
-Steps to to configure proxies.
+Steps to configure proxies.
 ==============================
 
 You can specify all three proxy parameteres while creating baymodel of any
