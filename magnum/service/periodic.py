@@ -49,6 +49,16 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
     '''Magnum periodic Task class
 
     Any periodic task job need to be added into this class
+
+    NOTE(suro-patz):
+    - oslo_service.periodic_task runs tasks protected within try/catch
+      block, with default raise_on_error as 'False', in run_periodic_tasks(),
+      which ensures the process does not die, even if a task encounters an
+      Exception.
+    - The periodic tasks here does not necessarily need another
+      try/catch block. The present try/catch block here helps putting
+      magnum-periodic-task-specific log/error message.
+
     '''
 
     def __init__(self, conf, binary):
