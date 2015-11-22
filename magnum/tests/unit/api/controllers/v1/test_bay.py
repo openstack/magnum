@@ -19,6 +19,7 @@ from oslo_utils import timeutils
 from six.moves.urllib import parse as urlparse
 
 from magnum.api.controllers.v1 import bay as api_bay
+from magnum.common import exception
 from magnum.common import utils
 from magnum.conductor import api as rpcapi
 from magnum import objects
@@ -378,11 +379,13 @@ class TestPost(api_base.FunctionalTest):
         bay.create()
         return bay
 
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
     @mock.patch('oslo_utils.timeutils.utcnow')
-    def test_create_bay(self, mock_utcnow):
+    def test_create_bay(self, mock_utcnow, mock_valid_os_res):
         bdict = apiutils.bay_post_data()
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
         mock_utcnow.return_value = test_time
+        mock_valid_os_res.return_value = None
 
         response = self.post_json('/bays', bdict)
         self.assertEqual('application/json', response.content_type)
@@ -398,8 +401,10 @@ class TestPost(api_base.FunctionalTest):
             response.json['created_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_created_at)
 
-    def test_create_bay_set_project_id_and_user_id(self):
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_set_project_id_and_user_id(self, mock_valid_os_res):
         bdict = apiutils.bay_post_data()
+        mock_valid_os_res.return_value = None
 
         def _simulate_rpc_bay_create(bay, bay_create_timeout):
             self.assertEqual(self.context.project_id, bay.project_id)
@@ -410,19 +415,23 @@ class TestPost(api_base.FunctionalTest):
 
         self.post_json('/bays', bdict)
 
-    def test_create_bay_doesnt_contain_id(self):
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_doesnt_contain_id(self, mock_valid_os_res):
         with mock.patch.object(self.dbapi, 'create_bay',
                                wraps=self.dbapi.create_bay) as cc_mock:
             bdict = apiutils.bay_post_data(name='bay_example_A')
+            mock_valid_os_res.return_value = None
             response = self.post_json('/bays', bdict)
             self.assertEqual(bdict['name'], response.json['name'])
             cc_mock.assert_called_once_with(mock.ANY)
             # Check that 'id' is not in first arg of positional args
             self.assertNotIn('id', cc_mock.call_args[0][0])
 
-    def test_create_bay_generate_uuid(self):
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_generate_uuid(self, mock_valid_os_res):
         bdict = apiutils.bay_post_data()
         del bdict['uuid']
+        mock_valid_os_res.return_value = None
 
         response = self.post_json('/bays', bdict)
         self.assertEqual('application/json', response.content_type)
@@ -430,88 +439,111 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(bdict['name'], response.json['name'])
         self.assertTrue(utils.is_uuid_like(response.json['uuid']))
 
-    def test_create_bay_no_baymodel_id(self):
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_no_baymodel_id(self, mock_valid_os_res):
         bdict = apiutils.bay_post_data()
         del bdict['baymodel_id']
+        mock_valid_os_res.return_value = None
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
 
-    def test_create_bay_with_non_existent_baymodel_id(self):
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_with_non_existent_baymodel_id(self,
+                                                      mock_valid_os_res):
         bdict = apiutils.bay_post_data(baymodel_id=utils.generate_uuid())
+        mock_valid_os_res.return_value = None
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['error_message'])
 
-    def test_create_bay_with_baymodel_name(self):
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_with_baymodel_name(self, mock_valid_os_res):
         bdict = apiutils.bay_post_data(baymodel_id=self.baymodel.name)
+        mock_valid_os_res.return_value = None
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
 
-    def test_create_bay_with_node_count_zero(self):
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_with_node_count_zero(self, mock_valid_os_res):
         bdict = apiutils.bay_post_data()
         bdict['node_count'] = 0
+        mock_valid_os_res.return_value = None
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['error_message'])
 
-    def test_create_bay_with_node_count_negative(self):
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_with_node_count_negative(self, mock_valid_os_res):
         bdict = apiutils.bay_post_data()
         bdict['node_count'] = -1
+        mock_valid_os_res.return_value = None
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['error_message'])
 
-    def test_create_bay_with_no_node_count(self):
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_with_no_node_count(self, mock_valid_os_res):
         bdict = apiutils.bay_post_data()
         del bdict['node_count']
+        mock_valid_os_res.return_value = None
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
         self.assertEqual(1, response.json['node_count'])
 
-    def test_create_bay_with_master_count_zero(self):
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_with_master_count_zero(self, mock_valid_os_res):
         bdict = apiutils.bay_post_data()
         bdict['master_count'] = 0
+        mock_valid_os_res.return_value = None
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['error_message'])
 
-    def test_create_bay_with_no_master_count(self):
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_with_no_master_count(self, mock_valid_os_res):
         bdict = apiutils.bay_post_data()
         del bdict['master_count']
+        mock_valid_os_res.return_value = None
         response = self.post_json('/bays', bdict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
         self.assertEqual(1, response.json['master_count'])
 
-    def test_create_bay_with_invalid_long_name(self):
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_with_invalid_long_name(self, mock_valid_os_res):
         bdict = apiutils.bay_post_data(name='x' * 256)
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['error_message'])
 
-    def test_create_bay_with_invalid_empty_name(self):
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_with_invalid_empty_name(self, mock_valid_os_res):
         bdict = apiutils.bay_post_data(name='')
+        mock_valid_os_res.return_value = None
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['error_message'])
 
-    def test_create_bay_with_timeout_none(self):
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_with_timeout_none(self, mock_valid_os_res):
         bdict = apiutils.bay_post_data()
         bdict['bay_create_timeout'] = None
+        mock_valid_os_res.return_value = None
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
 
-    def test_create_bay_with_no_timeout(self):
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_with_no_timeout(self, mock_valid_os_res):
         def _simulate_rpc_bay_create(bay, bay_create_timeout):
             self.assertEqual(0, bay_create_timeout)
             bay.create()
@@ -519,24 +551,39 @@ class TestPost(api_base.FunctionalTest):
         self.mock_bay_create.side_effect = _simulate_rpc_bay_create
         bdict = apiutils.bay_post_data()
         del bdict['bay_create_timeout']
+        mock_valid_os_res.return_value = None
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
 
-    def test_create_bay_with_timeout_negative(self):
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_with_timeout_negative(self, mock_valid_os_res):
         bdict = apiutils.bay_post_data()
         bdict['bay_create_timeout'] = -1
+        mock_valid_os_res.return_value = None
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['error_message'])
 
-    def test_create_bay_with_timeout_zero(self):
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_with_timeout_zero(self, mock_valid_os_res):
         bdict = apiutils.bay_post_data()
         bdict['bay_create_timeout'] = 0
+        mock_valid_os_res.return_value = None
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
+
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_with_invalid_flavor(self,
+                                            mock_valid_os_res):
+        bdict = apiutils.bay_post_data()
+        mock_valid_os_res.side_effect = exception.FlavorNotFound('test-flavor')
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(mock_valid_os_res.called)
+        self.assertEqual(404, response.status_int)
 
 
 class TestDelete(api_base.FunctionalTest):
