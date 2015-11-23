@@ -5,5 +5,5 @@ write_files:
     owner: "root:root"
     permissions: "0644"
     content: |
-      MESOS_MASTER_IP="$MESOS_MASTER_IP"
+      MESOS_MASTERS_IPS="$MESOS_MASTERS_IPS"
       EXECUTOR_REGISTRATION_TIMEOUT="$EXECUTOR_REGISTRATION_TIMEOUT"

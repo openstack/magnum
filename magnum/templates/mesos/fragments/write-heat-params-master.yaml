@@ -1,9 +1,0 @@
-#cloud-config
-merge_how: dict(recurse_array)+list(append)
-write_files:
-  - path: /etc/sysconfig/heat-params
-    owner: "root:root"
-    permissions: "0644"
-    content: |
-      MESOS_MASTER_IP="$MESOS_MASTER_IP"
-      CLUSTER_NAME="$CLUSTER_NAME"

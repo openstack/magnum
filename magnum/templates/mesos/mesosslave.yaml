@@ -40,15 +40,18 @@ parameters:
     default: 5mins
 
   # The following are all generated in the parent template.
-  mesos_master_ip:
+  mesos_masters_ips:
     type: string
-    description: IP address of the Mesos master server.
+    description: IP addresses of the Mesos master servers.
   fixed_network:
     type: string
     description: Network from which to allocate fixed addresses.
   fixed_subnet:
     type: string
     description: Subnet from which to allocate fixed addresses.
+  secgroup_base_id:
+    type: string
+    description: ID of the security group for base.
 
 resources:
 
@@ -84,7 +87,7 @@ resources:
         str_replace:
           template: {get_file: fragments/write-heat-params.yaml}
           params:
-            "$MESOS_MASTER_IP": {get_param: mesos_master_ip}
+            "$MESOS_MASTERS_IPS": {get_param: mesos_masters_ips}
             "$EXECUTOR_REGISTRATION_TIMEOUT": {get_param: executor_registration_timeout}
 
   configure_mesos_slave:
@@ -142,6 +145,7 @@ resources:
       network: {get_param: fixed_network}
       security_groups:
         - get_resource: secgroup_all_open
+        - get_param: secgroup_base_id
       fixed_ips:
         - subnet: {get_param: fixed_subnet}
       replacement_policy: AUTO
