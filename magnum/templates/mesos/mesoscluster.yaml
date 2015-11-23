@@ -66,16 +66,6 @@ parameters:
 
 resources:
 
-  master_wait_handle:
-    type: OS::Heat::WaitConditionHandle
-
-  master_wait_condition:
-    type: OS::Heat::WaitCondition
-    depends_on: mesos_master
-    properties:
-      handle: {get_resource: master_wait_handle}
-      timeout: {get_param: wait_condition_timeout}
-
   ######################################################################
   #
   # network resources.  allocate a network and router for our server.
@@ -143,96 +133,40 @@ resources:
 
   ######################################################################
   #
-  # software configs.  these are components that are combined into
-  # a multipart MIME user-data archive.
+  # Mesos masters. This is a resource group that will create 1 master.
   #
 
-  write_heat_params:
-    type: OS::Heat::SoftwareConfig
+  mesos_masters:
+    type: OS::Heat::ResourceGroup
+    depends_on:
+      - extrouter_inside
     properties:
-      group: ungrouped
-      config:
-        str_replace:
-          template: {get_file: fragments/write-heat-params-master.yaml}
-          params:
-            "$MESOS_MASTER_IP": {get_attr: [mesos_master_eth0, fixed_ips, 0, ip_address]}
-            "$CLUSTER_NAME": {get_param: cluster_name}
-
-  configure_mesos:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/configure-mesos-master.sh}
-
-  start_services:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/start-services-master.sh}
-
-  master_wc_notify:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config:
-        str_replace:
-          template: |
-            #!/bin/bash -v
-            wc_notify --data-binary '{"status": "SUCCESS"}'
-          params:
-            wc_notify: {get_attr: [master_wait_handle, curl_cli]}
-
-  mesos_master_init:
-    type: OS::Heat::MultipartMime
-    properties:
-      parts:
-        - config: {get_resource: write_heat_params}
-        - config: {get_resource: configure_mesos}
-        - config: {get_resource: start_services}
-        - config: {get_resource: master_wc_notify}
+      count: 1
+      resource_def:
+        type: mesosmaster.yaml
+        properties:
+          ssh_key_name: {get_param: ssh_key_name}
+          server_image: {get_param: server_image}
+          master_flavor: {get_param: master_flavor}
+          external_network: {get_param: external_network}
+          cluster_name: {get_param: cluster_name}
+          wait_condition_timeout: {get_param: wait_condition_timeout}
+          fixed_network: {get_resource: fixed_network}
+          fixed_subnet: {get_resource: fixed_subnet}
+          secgroup_base_id: {get_resource: secgroup_base}
+          secgroup_mesos_id: {get_resource: secgroup_mesos}
 
   ######################################################################
   #
-  # Mesos master server.
+  # Mesos slaves. This is a resource group that will initially
+  # create <number_of_slaves> slaves, and needs to be manually scaled.
   #
-
-  mesos_master:
-    type: OS::Nova::Server
-    depends_on:
-      - extrouter_inside
-    properties:
-      image: {get_param: server_image}
-      flavor: {get_param: master_flavor}
-      key_name: {get_param: ssh_key_name}
-      user_data_format: RAW
-      user_data: {get_resource: mesos_master_init}
-      networks:
-        - port: {get_resource: mesos_master_eth0}
-
-  mesos_master_eth0:
-    type: OS::Neutron::Port
-    properties:
-      network: {get_resource: fixed_network}
-      security_groups:
-        - {get_resource: secgroup_base}
-        - {get_resource: secgroup_mesos}
-      fixed_ips:
-        - subnet: {get_resource: fixed_subnet}
-      replacement_policy: AUTO
-
-  mesos_master_floating:
-    type: OS::Neutron::FloatingIP
-    depends_on:
-      - extrouter_inside
-    properties:
-      floating_network: {get_param: external_network}
-      port_id: {get_resource: mesos_master_eth0}
 
   mesos_slaves:
     type: OS::Heat::ResourceGroup
     depends_on:
       - extrouter_inside
-      - master_wait_condition
+      - mesos_masters
     properties:
       count: {get_param: number_of_slaves}
       resource_def:
@@ -243,7 +177,7 @@ resources:
           slave_flavor: {get_param: slave_flavor}
           fixed_network: {get_resource: fixed_network}
           fixed_subnet: {get_resource: fixed_subnet}
-          mesos_master_ip: {get_attr: [mesos_master_eth0, fixed_ips, 0, ip_address]}
+          mesos_master_ip: {'Fn::Select': [0, {get_attr: [mesos_masters, mesos_master_ip]}]}
           external_network: {get_param: external_network}
           wait_condition_timeout: {get_param: wait_condition_timeout}
           executor_registration_timeout: {get_param: executor_registration_timeout}
@@ -251,18 +185,18 @@ resources:
 outputs:
 
   api_address:
-    value: {get_attr: [mesos_master_floating, floating_ip_address]}
+    value: {'Fn::Select': [0, {get_attr: [mesos_masters, mesos_master_external_ip]}]}
     description: >
       This is the API endpoint of the Mesos master. Use this to access
       the Mesos API from outside the cluster.
 
   mesos_master_private:
-    value: {get_attr: [mesos_master_eth0, fixed_ips, 0, ip_address]}
+    value: {get_attr: [mesos_masters, mesos_master_ip]}
     description: >
       This is a list of the "private" addresses of all the Mesos masters.
 
   mesos_master:
-    value: {get_attr: [mesos_master_floating, floating_ip_address]}
+    value: {get_attr: [mesos_masters, mesos_master_external_ip]}
     description: >
       This is the "public" ip address of the Mesos master server.  Use this address to
       log in to the Mesos master via ssh or to access the Mesos API
