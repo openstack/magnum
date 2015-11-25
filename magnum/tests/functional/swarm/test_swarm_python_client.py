@@ -17,6 +17,7 @@ import time
 from magnum.common import docker_utils
 from magnum.tests.functional.python_client_base import BayAPITLSTest
 from magnum.tests.functional.python_client_base import BayTest
+from magnumclient.openstack.common.apiclient import exceptions
 
 
 CONF = cfg.CONF
@@ -144,3 +145,28 @@ extendedKeyUsage = clientAuth
     def test_access_with_non_tls_client(self):
         self.assertRaises(req_exceptions.SSLError,
                           self.docker_client_non_tls.containers)
+
+    def test_start_stop_container_from_cs(self):
+        # Leverage Magnum client to create a container on the bay we created,
+        # and try to start and stop it then delete it.
+
+        container = self.cs.containers.create(name="test_cs_start_stop",
+                                              image="docker.io/cirros",
+                                              bay_uuid=self.bay.uuid,
+                                              command='ping -c 1000 8.8.8.8')
+        self.assertIsNotNone(container)
+        container_uuid = container.uuid
+
+        resp = self.cs.containers.start(container_uuid)
+        self.assertEqual(200, resp[0].status_code)
+
+        container = self.cs.containers.get(container_uuid)
+        self.assertEqual('Running', container.status)
+
+        resp = self.cs.containers.stop(container_uuid)
+        container = self.cs.containers.get(container_uuid)
+        self.assertEqual('Stopped', container.status)
+
+        container = self.cs.containers.delete(container_uuid)
+        self.assertRaises(exceptions.NotFound,
+                          self.cs.containers.get, container_uuid)
