@@ -12,10 +12,6 @@ if is_service_enabled m-api m-cond; then
     if [[ "$1" == "stack" && "$2" == "pre-install" ]]; then
         echo_summary "Before Installing magnum"
         mkdir -p $SCREEN_LOGDIR
-        # TODO: Temp fix for jenkins failure, remove it if newer oslo.versionedobjects release is ok
-        if [[ -n `grep 'oslo.versionedobjects' ${REQUIREMENTS_DIR}/upper-constraints.txt` ]]; then
-            sed -i 's/oslo.versionedobjects===.*/oslo.versionedobjects===0.12.0/g' ${REQUIREMENTS_DIR}/upper-constraints.txt
-        fi
     elif [[ "$1" == "stack" && "$2" == "install" ]]; then
         echo_summary "Installing magnum"
         install_magnum
