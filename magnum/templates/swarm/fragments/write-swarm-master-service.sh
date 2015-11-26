@@ -11,14 +11,14 @@ OnFailure=swarm-manager-failure.service
 TimeoutStartSec=0
 ExecStartPre=-/usr/bin/docker kill swarm-manager
 ExecStartPre=-/usr/bin/docker rm swarm-manager
-ExecStartPre=-/usr/bin/docker pull swarm:1.0.0
+ExecStartPre=-/usr/bin/docker pull swarm:$SWARM_VERSION
 ExecStart=/usr/bin/docker run --name swarm-manager \\
                               -v /etc/docker:/etc/docker \\
                               -p 2376:2375 \\
                               -e http_proxy=$HTTP_PROXY \\
                               -e https_proxy=$HTTPS_PROXY \\
                               -e no_proxy=$NO_PROXY \\
-                              swarm:1.0.0 \\
+                              swarm:$SWARM_VERSION \\
                               manage -H tcp://0.0.0.0:2375 \\
 END_SERVICE_TOP
 
