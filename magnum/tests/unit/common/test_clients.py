@@ -14,6 +14,7 @@ from barbicanclient import client as barbicanclient
 from glanceclient.v2 import client as glanceclient
 from heatclient.v1 import client as heatclient
 import mock
+from novaclient.v2 import client as novaclient
 from oslo_config import cfg
 
 from magnum.common import clients
@@ -224,3 +225,56 @@ class ClientsTest(base.BaseTestCase):
         barbican = obj.barbican()
         barbican_cached = obj.barbican()
         self.assertEqual(barbican, barbican_cached)
+
+    @mock.patch.object(novaclient, 'Client')
+    @mock.patch.object(clients.OpenStackClients, 'url_for')
+    @mock.patch.object(clients.OpenStackClients, 'auth_url')
+    def _test_clients_nova(self, expected_region_name, mock_auth, mock_url,
+                           mock_call):
+        mock_auth.__get__ = mock.Mock(return_value="keystone_url")
+        con = mock.MagicMock()
+        con.auth_token = "3bcc3d3a03f44e3d8377f9247b0ad155"
+        con.auth_url = "keystone_url"
+        mock_url.return_value = "url_from_keystone"
+        obj = clients.OpenStackClients(con)
+        obj._nova = None
+        obj.nova()
+        mock_call.assert_called_once_with(
+            auth_token='3bcc3d3a03f44e3d8377f9247b0ad155')
+        mock_url.assert_called_once_with(service_type='compute',
+                                         endpoint_type='publicURL',
+                                         region_name=expected_region_name)
+
+    def test_clients_nova(self):
+        self._test_clients_nova(None)
+
+    def test_clients_nova_region(self):
+        cfg.CONF.set_override('region_name', 'myregion', group='nova_client')
+        self._test_clients_nova('myregion')
+
+    def test_clients_nova_noauth(self):
+        con = mock.MagicMock()
+        con.auth_token = None
+        con.auth_token_info = None
+        auth_url = mock.PropertyMock(name="auth_url",
+                                     return_value="keystone_url")
+        type(con).auth_url = auth_url
+        con.get_url_for = mock.Mock(name="get_url_for")
+        con.get_url_for.return_value = "url_from_keystone"
+        obj = clients.OpenStackClients(con)
+        obj._nova = None
+        self.assertRaises(exception.AuthorizationFailure, obj.nova)
+
+    @mock.patch.object(clients.OpenStackClients, 'url_for')
+    @mock.patch.object(clients.OpenStackClients, 'auth_url')
+    def test_clients_nova_cached(self, mock_auth, mock_url):
+        mock_auth.__get__ = mock.Mock(return_value="keystone_url")
+        con = mock.MagicMock()
+        con.auth_token = "3bcc3d3a03f44e3d8377f9247b0ad155"
+        con.auth_url = "keystone_url"
+        mock_url.return_value = "url_from_keystone"
+        obj = clients.OpenStackClients(con)
+        obj._nova = None
+        nova = obj.nova()
+        nova_cached = obj.nova()
+        self.assertEqual(nova, nova_cached)
