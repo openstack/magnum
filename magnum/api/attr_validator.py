@@ -1,0 +1,84 @@
+# Copyright 2015 EasyStack, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+
+import six
+
+from magnum.common import clients
+from magnum.common import exception
+from magnum.objects.baymodel import BayModel
+
+
+def validate_image(cli, image):
+    """Validate image"""
+
+    # TODO(houming):this method implement will be added after this
+    # first pathch for bay's OpenStack resources validation is merged.
+    pass
+
+
+def validate_flavor(cli, flavor):
+    """Validate flavor"""
+
+    flavor_id = None
+    flavor_list = cli.nova().flavors.list()
+    for f in flavor_list:
+        if f.name == flavor or f.id == flavor:
+            flavor_id = f.id
+            break
+    if flavor_id is None:
+        raise exception.FlavorNotFound(flavor=flavor)
+
+
+def validate_keypair(cli, keypair):
+    """Validate keypair"""
+
+    # TODO(houming):this method implement will be added after this
+    # first pathch for bay's OpenStack resources validation is merged.
+    pass
+
+
+def validate_external_network(cli, external_network):
+    """Validate public network"""
+
+    # TODO(houming):this method implement will be added after this
+    # first pathch for bay's OpenStack resources validation is merged.
+    pass
+
+
+def validate_fixed_network(cli, fixed_network):
+    """Validate fixed network"""
+
+    # TODO(houming):this method implement will be added after this
+    # first pathch for bay's OpenStack resources validation is merged.
+    pass
+
+
+def validate_os_resources(context, baymodel_id):
+    """Validate baymodel's OpenStack Resources"""
+
+    baymodel = BayModel.get_by_uuid(context, baymodel_id)
+    cli = clients.OpenStackClients(context)
+
+    for attr, validate_method in six.iteritems(validators):
+        if attr in baymodel and baymodel[attr] is not None:
+            validate_method(cli, baymodel[attr])
+
+
+# Dictionary that maintains a list of validation functions
+validators = {'image_id': validate_image,
+              'flavor_id': validate_flavor,
+              'master_flavor_id': validate_flavor,
+              'keypair_id': validate_keypair,
+              'external_network_id': validate_external_network,
+              'fixed_network': validate_fixed_network}

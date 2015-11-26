@@ -516,3 +516,7 @@ class MagnumServiceAlreadyExists(Conflict):
 
 class UnsupportedK8sMemoryFormat(MagnumException):
     message = _("Unsupported memory format for k8s bay.")
+
+
+class FlavorNotFound(ResourceNotFound):
+    message = _("Unable to find flavor %(flavor)s.")
