@@ -170,7 +170,7 @@ Docker container.
     $ curl -X POST -H "Content-Type: application/json" \
         http://${MASTER_IP}:8080/v2/apps -d@app.json
 
-Using the Marathon web console (at http://:8080/), you will see the
+Using the Marathon web console (at http://${MASTER_IP}:8080/), you will see the
 application you created.
 
 License
