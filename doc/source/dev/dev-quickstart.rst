@@ -387,6 +387,7 @@ as the coe::
                            --external-network-id public \
                            --dns-nameserver 8.8.8.8 \
                            --flavor-id m1.small \
+                           --docker-volume-size 5 \
                            --coe swarm
 
 Note: If you are using Magnum behind a firewall then see:
