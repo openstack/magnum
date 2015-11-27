@@ -222,6 +222,7 @@ def get_test_container(**kw):
         'bay_uuid': kw.get('bay_uuid', 'fff114da-3bfa-4a0f-a123-c0dffad9718e'),
         'status': kw.get('state', 'Running'),
         'memory': kw.get('memory', '512m'),
+        'environment': kw.get('environment', {'key1': 'val1', 'key2': 'val2'}),
     }
 
 

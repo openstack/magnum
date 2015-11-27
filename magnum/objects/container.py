@@ -23,7 +23,8 @@ class Container(base.MagnumPersistentObject, base.MagnumObject,
                 base.MagnumObjectDictCompat):
     # Version 1.0: Initial version
     # Version 1.1: Add memory field
-    VERSION = '1.1'
+    # Version 1.2: Add environment field
+    VERSION = '1.2'
 
     dbapi = dbapi.get_instance()
 
@@ -38,6 +39,7 @@ class Container(base.MagnumPersistentObject, base.MagnumObject,
         'bay_uuid': fields.StringField(nullable=True),
         'status': m_fields.ContainerStatusField(nullable=True),
         'memory': fields.StringField(nullable=True),
+        'environment': fields.DictOfStringsField(nullable=True),
     }
 
     @staticmethod

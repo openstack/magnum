@@ -79,7 +79,8 @@ class Handler(object):
                 docker.create_container(image, name=name,
                                         hostname=container_uuid,
                                         command=container.command,
-                                        mem_limit=container.memory)
+                                        mem_limit=container.memory,
+                                        environment=container.environment)
                 container.status = fields.ContainerStatus.STOPPED
                 return container
             except errors.APIError:
