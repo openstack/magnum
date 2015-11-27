@@ -14,7 +14,7 @@ from oslo_config import cfg
 from requests import exceptions as req_exceptions
 import time
 
-from magnum.conductor.handlers.common import docker_client
+from magnum.common import docker_utils
 from magnum.tests.functional.python_client_base import BayAPITLSTest
 from magnum.tests.functional.python_client_base import BayTest
 
@@ -75,7 +75,7 @@ extendedKeyUsage = clientAuth
         # create a container, set it as 180s.
 
         docker_api_time_out = 180
-        cls.docker_client = docker_client.DockerHTTPClient(
+        cls.docker_client = docker_utils.DockerHTTPClient(
             url,
             CONF.docker.docker_remote_api_version,
             docker_api_time_out,
@@ -83,7 +83,7 @@ extendedKeyUsage = clientAuth
             client_cert=cls.cert_file,
             ca_cert=cls.ca_file)
 
-        cls.docker_client_non_tls = docker_client.DockerHTTPClient(
+        cls.docker_client_non_tls = docker_utils.DockerHTTPClient(
             url,
             CONF.docker.docker_remote_api_version,
             docker_api_time_out)
