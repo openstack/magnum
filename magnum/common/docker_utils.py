@@ -14,23 +14,25 @@
 import contextlib
 
 import docker
+from docker import client
+from docker import tls
 from docker.utils import utils
 from oslo_config import cfg
+from oslo_log import log as logging
 
 from magnum.common import utils as magnum_utils
 from magnum.conductor.handlers.common import cert_manager
-from magnum.conductor.handlers.common import docker_client
 from magnum.conductor import utils as conductor_utils
 from magnum import objects
 
 
 docker_opts = [
     cfg.StrOpt('docker_remote_api_version',
-               default=docker_client.DEFAULT_DOCKER_REMOTE_API_VERSION,
+               default='1.17',
                help='Docker remote api version. Override it according to '
                     'specific docker api version in your environment.'),
     cfg.IntOpt('default_timeout',
-               default=docker_client.DEFAULT_DOCKER_TIMEOUT,
+               default=60,
                help='Default timeout in seconds for docker client '
                     'operations.'),
     cfg.BoolOpt('api_insecure',
@@ -46,8 +48,11 @@ docker_opts = [
                help='Location of TLS private key file for '
                     'securing docker api requests (tlskey).'),
 ]
+
 CONF = cfg.CONF
 CONF.register_opts(docker_opts, 'docker')
+
+LOG = logging.getLogger(__name__)
 
 
 def parse_docker_image(image):
@@ -90,7 +95,7 @@ def docker_for_bay(context, bay):
         client_kwargs['client_key'] = magnum_key.name
         client_kwargs['client_cert'] = magnum_cert.name
 
-    yield docker_client.DockerHTTPClient(
+    yield DockerHTTPClient(
         bay.api_address,
         CONF.docker.docker_remote_api_version,
         CONF.docker.default_timeout,
@@ -103,3 +108,57 @@ def docker_for_bay(context, bay):
         magnum_key.close()
     if magnum_cert:
         magnum_cert.close()
+
+
+class DockerHTTPClient(client.Client):
+    def __init__(self, url='unix://var/run/docker.sock',
+                 ver=CONF.docker.docker_remote_api_version,
+                 timeout=CONF.docker.default_timeout,
+                 ca_cert=None,
+                 client_key=None,
+                 client_cert=None):
+
+        if ca_cert and client_key and client_cert:
+            ssl_config = tls.TLSConfig(
+                client_cert=(client_cert, client_key),
+                verify=ca_cert,
+                assert_hostname=False,
+            )
+        else:
+            ssl_config = False
+
+        super(DockerHTTPClient, self).__init__(
+            base_url=url,
+            version=ver,
+            timeout=timeout,
+            tls=ssl_config
+        )
+
+    def list_instances(self, inspect=False):
+        res = []
+        for container in self.containers(all=True):
+            info = self.inspect_container(container['Id'])
+            if not info:
+                continue
+            if inspect:
+                res.append(info)
+            else:
+                res.append(info['Config'].get('Hostname'))
+        return res
+
+    def pause(self, container):
+        if isinstance(container, dict):
+            container = container.get('Id')
+        url = self._url('/containers/{0}/pause'.format(container))
+        res = self._post(url)
+        self._raise_for_status(res)
+
+    def unpause(self, container):
+        if isinstance(container, dict):
+            container = container.get('Id')
+        url = self._url('/containers/{0}/unpause'.format(container))
+        res = self._post(url)
+        self._raise_for_status(res)
+
+    def get_container_logs(self, docker_id):
+        return self.logs(docker_id)
