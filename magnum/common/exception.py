@@ -520,3 +520,7 @@ class UnsupportedK8sMemoryFormat(MagnumException):
 
 class FlavorNotFound(ResourceNotFound):
     message = _("Unable to find flavor %(flavor)s.")
+
+
+class NetworkNotFound(ResourceNotFound):
+    message = _("Unable to find network %(network)s.")
