@@ -4,7 +4,7 @@
 systemctl daemon-reload
 
 echo "starting services"
-for service in etcd docker kube-apiserver kube-proxy kubelet; do
+for service in etcd docker kube-apiserver kubelet; do
     echo "activating service $service"
     systemctl enable $service
     systemctl --no-block start $service

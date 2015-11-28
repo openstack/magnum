@@ -277,6 +277,12 @@ resources:
       group: ungrouped
       config: {get_file: fragments/enable-docker-registry.sh}
 
+  enable_kube_proxy:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/enable-kube-proxy-minion.sh}
+
   minion_wc_notify:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -317,6 +323,7 @@ resources:
         - config: {get_resource: network_service}
         - config: {get_resource: add_proxy}
         - config: {get_resource: enable_services}
+        - config: {get_resource: enable_kube_proxy}
         - config: {get_resource: enable_docker_registry}
         - config: {get_resource: minion_wc_notify}
 
