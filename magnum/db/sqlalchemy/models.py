@@ -196,6 +196,7 @@ class Container(Base):
     bay_uuid = Column(String(36))
     status = Column(String(20))
     memory = Column(String(255))
+    environment = Column(JSONEncodedDict)
 
 
 class Node(Base):

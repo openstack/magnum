@@ -94,6 +94,9 @@ class Container(base.APIBase):
     memory = wtypes.text
     """Memory limit for the container. Example: 512m"""
 
+    environment = wtypes.DictType(str, str)
+    """One or more key/value pairs"""
+
     def __init__(self, **kwargs):
         self.fields = []
         for field in objects.Container.fields:
@@ -108,7 +111,7 @@ class Container(base.APIBase):
         if not expand:
             container.unset_fields_except(['uuid', 'name', 'bay_uuid',
                                            'image', 'command', 'status',
-                                           'memory'])
+                                           'memory', 'environment'])
 
         container.links = [link.Link.make_link(
             'self', url,
@@ -133,6 +136,7 @@ class Container(base.APIBase):
                      command='env',
                      status='Running',
                      memory='512m',
+                     environment={'key1': 'val1', 'key2': 'val2'},
                      bay_uuid="fff114da-3bfa-4a0f-a123-c0dffad9718e",
                      created_at=timeutils.utcnow(),
                      updated_at=timeutils.utcnow())
