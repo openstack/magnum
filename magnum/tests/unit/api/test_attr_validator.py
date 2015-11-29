@@ -47,6 +47,27 @@ class TestAttrValidator(base.BaseTestCase):
                           attr_validator.validate_flavor,
                           mock_os_cli, 'test_flavor')
 
+    def test_validate_external_network_with_valid_network(self):
+        mock_networks = {'networks': [{'name': 'test_ext_net',
+                         'id': 'test_ext_net_id'}]}
+        mock_neutron = mock.MagicMock()
+        mock_neutron.list_networks.return_value = mock_networks
+        mock_os_cli = mock.MagicMock()
+        mock_os_cli.neutron.return_value = mock_neutron
+        attr_validator.validate_external_network(mock_os_cli, 'test_ext_net')
+        self.assertTrue(mock_neutron.list_networks.called)
+
+    def test_validate_external_network_with_invalid_network(self):
+        mock_networks = {'networks': [{'name': 'test_ext_net_not_equal',
+                         'id': 'test_ext_net_id_not_equal'}]}
+        mock_neutron = mock.MagicMock()
+        mock_neutron.list_networks.return_value = mock_networks
+        mock_os_cli = mock.MagicMock()
+        mock_os_cli.neutron.return_value = mock_neutron
+        self.assertRaises(exception.NetworkNotFound,
+                          attr_validator.validate_external_network,
+                          mock_os_cli, 'test_ext_net')
+
     @mock.patch('magnum.objects.baymodel.BayModel.get_by_uuid')
     @mock.patch('magnum.common.clients.OpenStackClients')
     def test_validate_os_resources_with_invalid_flavor(self,

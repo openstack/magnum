@@ -49,11 +49,17 @@ def validate_keypair(cli, keypair):
 
 
 def validate_external_network(cli, external_network):
-    """Validate public network"""
+    """Validate external network"""
 
-    # TODO(houming):this method implement will be added after this
-    # first pathch for bay's OpenStack resources validation is merged.
-    pass
+    network_id = None
+    networks = cli.neutron().list_networks()
+    for net in networks.get('networks'):
+        if (net.get('name') == external_network or
+                net.get('id') == external_network):
+            network_id = net.get('id')
+            break
+    if network_id is None:
+        raise exception.NetworkNotFound(network=external_network)
 
 
 def validate_fixed_network(cli, fixed_network):
