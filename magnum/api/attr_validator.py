@@ -12,9 +12,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from glanceclient import exc as glance_exception
 from novaclient import exceptions as nova_exception
 import six
 
+from magnum.api import utils as api_utils
 from magnum.common import clients
 from magnum.common import exception
 from magnum.objects.baymodel import BayModel
@@ -23,9 +25,16 @@ from magnum.objects.baymodel import BayModel
 def validate_image(cli, image):
     """Validate image"""
 
-    # TODO(houming):this method implement will be added after this
-    # first pathch for bay's OpenStack resources validation is merged.
-    pass
+    try:
+        image_found = api_utils.get_openstack_resource(cli.glance().images,
+                                                       image, 'images')
+    except (glance_exception.NotFound, exception.ResourceNotFound):
+        raise exception.ImageNotFound(image_id=image)
+    except glance_exception.HTTPForbidden:
+        raise exception.ImageNotAuthorized(image_id=image)
+    if not image_found.get('os_distro'):
+        raise exception.OSDistroFieldNotFound(image_id=image)
+    return image_found
 
 
 def validate_flavor(cli, flavor):
