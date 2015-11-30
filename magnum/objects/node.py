@@ -53,6 +53,7 @@ class Node(base.MagnumPersistentObject, base.MagnumObject,
         """Find a node based on its integer id and return a Node object.
 
         :param node_id: the id of a node.
+        :param context: Security context
         :returns: a :class:`Node` object.
         """
         db_node = cls.dbapi.get_node_by_id(context, node_id)

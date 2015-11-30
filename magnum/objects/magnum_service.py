@@ -56,6 +56,7 @@ class MagnumService(base.MagnumPersistentObject, base.MagnumObject,
 
         :param host: The host on which the binary is running.
         :param binary: The name of the binary.
+        :param context: Security context.
         :returns: a :class:`MagnumService` object.
         """
         db_magnum_service = cls.dbapi.get_magnum_service_by_host_and_binary(

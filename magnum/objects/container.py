@@ -62,6 +62,7 @@ class Container(base.MagnumPersistentObject, base.MagnumObject,
         """Find a container based on its integer id and return a Container object.
 
         :param container_id: the id of a container.
+        :param context: Security context
         :returns: a :class:`Container` object.
         """
         db_container = cls.dbapi.get_container_by_id(context, container_id)
@@ -82,11 +83,11 @@ class Container(base.MagnumPersistentObject, base.MagnumObject,
 
     @base.remotable_classmethod
     def get_by_name(cls, context, name):
-        """Find a bay based on name and return a Bay object.
+        """Find a container based on name and return a Container object.
 
-        :param name: the logical name of a bay.
+        :param name: the logical name of a container.
         :param context: Security context
-        :returns: a :class:`Bay` object.
+        :returns: a :class:`Container` object.
         """
         db_bay = cls.dbapi.get_container_by_name(context, name)
         bay = Container._from_db_object(cls(context), db_bay)

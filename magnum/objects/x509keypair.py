@@ -61,6 +61,7 @@ class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject,
         Find X509KeyPair by id or uuid and return a X509KeyPair object.
 
         :param x509keypair_id: the id *or* uuid of a x509keypair.
+        :param context: Security context
         :returns: a :class:`X509KeyPair` object.
         """
         if utils.is_int_like(x509keypair_id):
@@ -77,6 +78,7 @@ class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject,
         Find X509KeyPair by id and return a X509KeyPair object.
 
         :param x509keypair_id: the id of a x509keypair.
+        :param context: Security context
         :returns: a :class:`X509KeyPair` object.
         """
         db_x509keypair = cls.dbapi.get_x509keypair_by_id(context,

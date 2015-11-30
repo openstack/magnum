@@ -69,6 +69,7 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
         """Find a bay based on its id or uuid and return a Bay object.
 
         :param bay_id: the id *or* uuid of a bay.
+        :param context: Security context
         :returns: a :class:`Bay` object.
         """
         if utils.is_int_like(bay_id):
@@ -83,6 +84,7 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
         """Find a bay based on its integer id and return a Bay object.
 
         :param bay_id: the id of a bay.
+        :param context: Security context
         :returns: a :class:`Bay` object.
         """
         db_bay = cls.dbapi.get_bay_by_id(context, bay_id)

@@ -65,6 +65,7 @@ class Service(base.MagnumPersistentObject, base.MagnumObject,
         """Find a service based on its integer id and return a Service object.
 
         :param service_id: the id of a service.
+        :param context: Security context
         :returns: a :class:`Service` object.
         """
         db_service = cls.dbapi.get_service_by_id(context, service_id)

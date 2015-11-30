@@ -65,6 +65,7 @@ class Pod(base.MagnumPersistentObject, base.MagnumObject,
         """Find a pod based on its integer id and return a Pod object.
 
         :param pod_id: the id of a pod.
+        :param context: Security context
         :returns: a :class:`Pod` object.
         """
         db_pod = cls.dbapi.get_pod_by_id(context, pod_id)
