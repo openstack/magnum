@@ -576,8 +576,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(201, response.status_int)
 
     @mock.patch('magnum.api.attr_validator.validate_os_resources')
-    def test_create_bay_with_invalid_flavor(self,
-                                            mock_valid_os_res):
+    def test_create_bay_with_invalid_flavor(self, mock_valid_os_res):
         bdict = apiutils.bay_post_data()
         mock_valid_os_res.side_effect = exception.FlavorNotFound('test-flavor')
         response = self.post_json('/bays', bdict, expect_errors=True)
@@ -586,10 +585,18 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(404, response.status_int)
 
     @mock.patch('magnum.api.attr_validator.validate_os_resources')
-    def test_create_bay_with_invalid_ext_network(self,
-                                                 mock_valid_os_res):
+    def test_create_bay_with_invalid_ext_network(self, mock_valid_os_res):
         bdict = apiutils.bay_post_data()
         mock_valid_os_res.side_effect = exception.NetworkNotFound('test-net')
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(mock_valid_os_res.called)
+        self.assertEqual(404, response.status_int)
+
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_with_invalid_keypair(self, mock_valid_os_res):
+        bdict = apiutils.bay_post_data()
+        mock_valid_os_res.side_effect = exception.KeyPairNotFound('test-key')
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(mock_valid_os_res.called)
