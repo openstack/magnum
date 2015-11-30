@@ -177,9 +177,8 @@ exit 1
                                   "Are you running with a noexec /tmp?")
                 else:
                     raise
-            fp = open(tmpfilename2, 'r')
-            runs = fp.read()
-            fp.close()
+            with open(tmpfilename2, 'r') as fp:
+                runs = fp.read()
             self.assertNotEqual(runs.strip(), 'failure', 'stdin did not '
                                 'always get passed '
                                 'correctly')
