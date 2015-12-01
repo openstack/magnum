@@ -47,9 +47,11 @@ if [[ "$COE" == "kubernetes" ]]; then
     remote_exec $SSH_USER "sudo journalctl -u kube-controller-manager --no-pager" kube-controller-manager.log
     remote_exec $SSH_USER "sudo journalctl -u docker --no-pager" docker.log
     remote_exec $SSH_USER "sudo journalctl -u flanneld --no-pager" flanneld.log
+    remote_exec $SSH_USER "sudo ip a" ipa.log
+    remote_exec $SSH_USER "sudo netstat -an" netstat.log
 elif [[ "$COE" == "swarm" ]]; then
     SSH_USER=fedora
-    remote_exec $SSH_USER "sudo systemctl list-units" systemctl_list_units.log
+    remote_exec $SSH_USER "sudo systemctl --full list-units" systemctl_list_units.log
     remote_exec $SSH_USER "sudo journalctl -u cloud-config --no-pager" cloud-config.log
     remote_exec $SSH_USER "sudo journalctl -u cloud-final --no-pager" cloud-final.log
     remote_exec $SSH_USER "sudo journalctl -u cloud-init-local --no-pager" cloud-init-local.log
@@ -59,6 +61,8 @@ elif [[ "$COE" == "swarm" ]]; then
     remote_exec $SSH_USER "sudo journalctl -u swarm-agent --no-pager" swarm-agent.log
     remote_exec $SSH_USER "sudo journalctl -u docker --no-pager" docker.log
     remote_exec $SSH_USER "sudo journalctl -u flanneld --no-pager" flanneld.log
+    remote_exec $SSH_USER "sudo ip a" ipa.log
+    remote_exec $SSH_USER "sudo netstat -an" netstat.log
 else
     echo "ERROR: Unknown COE '${COE}'"
     EXIT_CODE=1

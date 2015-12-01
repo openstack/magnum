@@ -153,18 +153,21 @@ class BaseMagnumClient(base.TestCase):
     def _delete_bay(cls, bay_uuid):
         cls.cs.bays.delete(bay_uuid)
 
-    @classmethod
-    def _copy_logs(cls):
-        if not cls.copy_logs:
+    def _copy_logs(self, exec_info):
+        if not self.copy_logs:
             return
+        fn = exec_info[2].tb_frame.f_locals['fn']
+        func_name = fn.im_self._get_test_method().__name__
 
-        cls.bay = cls._show_bay(cls.bay.uuid)
-        for node_addr in cls.bay.node_addresses:
+        bay = self._show_bay(self.bay.uuid)
+        for node_addr in bay.node_addresses:
             subprocess.call(["magnum/tests/contrib/copy_instance_logs.sh",
-                             node_addr, cls.baymodel.coe, "worker"])
-        for node_addr in getattr(cls.bay, 'master_addresses', []):
+                             node_addr, self.baymodel.coe,
+                             "worker-" + func_name])
+        for node_addr in getattr(bay, 'master_addresses', []):
             subprocess.call(["magnum/tests/contrib/copy_instance_logs.sh",
-                             node_addr, cls.baymodel.coe, "master"])
+                             node_addr, self.baymodel.coe,
+                             "master-" + func_name])
 
 
 class BayTest(BaseMagnumClient):
@@ -229,12 +232,12 @@ class BayTest(BaseMagnumClient):
 class BayAPITLSTest(BaseMagnumClient):
     """Base class of TLS enabled test case."""
 
+    def setUp(self):
+        super(BayAPITLSTest, self).setUp()
+        self.addOnException(self._copy_logs)
+
     @classmethod
     def tearDownClass(cls):
-        try:
-            cls._copy_logs()
-        except Exception as e:
-            print("WARNING: Failed to copy logs. Error: " + repr(e))
 
         if cls.ca_dir:
             rmtree_without_raise(cls.ca_dir)
