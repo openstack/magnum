@@ -14,6 +14,7 @@
 
 
 import mock
+from novaclient import exceptions as nova_exc
 
 from magnum.api import attr_validator
 from magnum.common import exception
@@ -67,6 +68,24 @@ class TestAttrValidator(base.BaseTestCase):
         self.assertRaises(exception.NetworkNotFound,
                           attr_validator.validate_external_network,
                           mock_os_cli, 'test_ext_net')
+
+    def test_validate_keypair_with_valid_keypair(self):
+        mock_keypair = mock.MagicMock()
+        mock_keypair.id = 'test-keypair'
+        mock_nova = mock.MagicMock()
+        mock_nova.keypairs.get.return_value = mock_keypair
+        mock_os_cli = mock.MagicMock()
+        mock_os_cli.nova.return_value = mock_nova
+        attr_validator.validate_keypair(mock_os_cli, 'test-keypair')
+
+    def test_validate_keypair_with_invalid_keypair(self):
+        mock_nova = mock.MagicMock()
+        mock_nova.keypairs.get.side_effect = nova_exc.NotFound('test-keypair')
+        mock_os_cli = mock.MagicMock()
+        mock_os_cli.nova.return_value = mock_nova
+        self.assertRaises(exception.KeyPairNotFound,
+                          attr_validator.validate_keypair,
+                          mock_os_cli, 'test_keypair')
 
     @mock.patch('magnum.objects.baymodel.BayModel.get_by_uuid')
     @mock.patch('magnum.common.clients.OpenStackClients')

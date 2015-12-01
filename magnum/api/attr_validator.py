@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from novaclient import exceptions as nova_exception
 import six
 
 from magnum.common import clients
@@ -43,9 +44,10 @@ def validate_flavor(cli, flavor):
 def validate_keypair(cli, keypair):
     """Validate keypair"""
 
-    # TODO(houming):this method implement will be added after this
-    # first pathch for bay's OpenStack resources validation is merged.
-    pass
+    try:
+        cli.nova().keypairs.get(keypair)
+    except nova_exception.NotFound:
+        raise exception.KeyPairNotFound(keypair=keypair)
 
 
 def validate_external_network(cli, external_network):
