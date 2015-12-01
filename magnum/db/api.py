@@ -320,7 +320,7 @@ class Connection(object):
 
         :param container_id: The id or uuid of a container.
         :returns: A container.
-        :raises: BayNotFound
+        :raises: ContainerNotFound
         """
 
     @abc.abstractmethod
@@ -472,7 +472,7 @@ class Connection(object):
 
         :param pod_id: The id or uuid of a pod.
         :returns: A pod.
-        :raises: BayNotFound
+        :raises: PodNotFound
         """
 
     @abc.abstractmethod
@@ -554,7 +554,7 @@ class Connection(object):
 
         :param service_id: The id or uuid of a service.
         :returns: A service.
-        :raises: BayNotFound
+        :raises: ServiceNotFound
         """
 
     @abc.abstractmethod
