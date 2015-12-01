@@ -13,13 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import mock
-from testtools.matchers import HasLength
-
-from magnum.common import utils as magnum_utils
 from magnum import objects
 from magnum.tests.unit.db import base
 from magnum.tests.unit.db import utils
+
+import mock
 
 
 class TestServiceObject(base.DbTestCase):
@@ -28,94 +26,75 @@ class TestServiceObject(base.DbTestCase):
         super(TestServiceObject, self).setUp()
         self.fake_service = utils.get_test_service()
 
-    def test_get_by_id(self):
-        service_id = self.fake_service['id']
-        with mock.patch.object(self.dbapi, 'get_service_by_id',
-                               autospec=True) as mock_get_service:
-            mock_get_service.return_value = self.fake_service
-            service = objects.Service.get_by_id(self.context, service_id)
-            mock_get_service.assert_called_once_with(self.context, service_id)
-            self.assertEqual(self.context, service._context)
-
-    def test_get_by_uuid(self):
+    @mock.patch('magnum.conductor.k8s_api.create_k8s_api')
+    @mock.patch('ast.literal_eval')
+    def test_get_by_uuid(self, mock_ast, mock_kube_api):
         uuid = self.fake_service['uuid']
-        with mock.patch.object(self.dbapi, 'get_service_by_uuid',
-                               autospec=True) as mock_get_service:
-            mock_get_service.return_value = self.fake_service
-            service = objects.Service.get_by_uuid(self.context, uuid)
-            mock_get_service.assert_called_once_with(self.context, uuid)
-            self.assertEqual(self.context, service._context)
+        bay_uuid = self.fake_service['bay_uuid']
+        mock_ast.return_value = {}
 
-    def test_get_by_name(self):
+        k8s_api_mock = mock.MagicMock()
+        mock_kube_api.return_value = k8s_api_mock
+
+        fake_obj = mock.MagicMock()
+
+        items = [
+            {
+                'metadata': {
+                    'uid': '10a47dd1-4874-4298-91cf-eff046dbdb8d',
+                    'name': 'fake-name',
+                    'labels': {}
+                },
+                'spec': {
+                    'selector': {},
+                    'cluster_ip': '10.98.100.19',
+                    'ports': [
+                        {
+                            'port': 80
+                        }
+                    ]
+                }
+            }
+        ]
+
+        fake_obj.items = items
+        fake_obj.items[0] = mock.MagicMock()
+        fake_obj.items[0].metadata = mock.MagicMock()
+        fake_obj.items[0].metadata.uid = '10a47dd1-4874-4298-91cf-eff046dbdb8d'
+        fake_obj.items[0].metadata.name = 'fake-name'
+        fake_obj.items[0].spec = mock.MagicMock()
+        fake_obj.items[0].spec.selector = {}
+        fake_obj.items[0].spec.cluster_ip = '10.98.100.19'
+
+        k8s_api_mock.list_namespaced_service.return_value = fake_obj
+
+        objects.Service.get_by_uuid(self.context,
+                                    uuid, bay_uuid,
+                                    k8s_api_mock)
+
+        (k8s_api_mock.list_namespaced_service.assert_called_once_with(
+            namespace='default'))
+
+    @mock.patch('magnum.conductor.k8s_api.create_k8s_api')
+    @mock.patch('ast.literal_eval')
+    def test_get_by_name(self, mock_ast, mock_kube_api):
         name = self.fake_service['name']
-        with mock.patch.object(self.dbapi, 'get_service_by_name',
-                               autospec=True) as mock_get_service:
-            mock_get_service.return_value = self.fake_service
-            service = objects.Service.get_by_name(self.context, name)
-            mock_get_service.assert_called_once_with(self.context, name)
-            self.assertEqual(self.context, service._context)
+        bay_uuid = self.fake_service['bay_uuid']
+        mock_ast.return_value = {}
 
-    def test_list(self):
-        with mock.patch.object(self.dbapi, 'get_service_list',
-                               autospec=True) as mock_get_list:
-            mock_get_list.return_value = [self.fake_service]
-            services = objects.Service.list(self.context)
-            self.assertEqual(1, mock_get_list.call_count)
-            self.assertThat(services, HasLength(1))
-            self.assertIsInstance(services[0], objects.Service)
-            self.assertEqual(self.context, services[0]._context)
-
-    def test_create(self):
-        with mock.patch.object(self.dbapi, 'create_service',
-                               autospec=True) as mock_create_service:
-            mock_create_service.return_value = self.fake_service
-            service = objects.Service(self.context, **self.fake_service)
-            service.create()
-            mock_create_service.assert_called_once_with(self.fake_service)
-            self.assertEqual(self.context, service._context)
-
-    def test_destroy(self):
-        uuid = self.fake_service['uuid']
-        with mock.patch.object(self.dbapi, 'get_service_by_uuid',
-                               autospec=True) as mock_get_service:
-            mock_get_service.return_value = self.fake_service
-            with mock.patch.object(self.dbapi, 'destroy_service',
-                                   autospec=True) as mock_destroy_service:
-                service = objects.Service.get_by_uuid(self.context, uuid)
-                service.destroy()
-                mock_get_service.assert_called_once_with(self.context, uuid)
-                mock_destroy_service.assert_called_once_with(uuid)
-                self.assertEqual(self.context, service._context)
-
-    def test_save(self):
-        uuid = self.fake_service['uuid']
-        with mock.patch.object(self.dbapi, 'get_service_by_uuid',
-                               autospec=True) as mock_get_service:
-            mock_get_service.return_value = self.fake_service
-            with mock.patch.object(self.dbapi, 'update_service',
-                                   autospec=True) as mock_update_service:
-                service = objects.Service.get_by_uuid(self.context, uuid)
-                service.ports = [{'port': 4567}]
-                service.save()
-
-                mock_get_service.assert_called_once_with(self.context, uuid)
-                mock_update_service.assert_called_once_with(
-                    uuid, {'ports': [{'port': 4567}]})
-                self.assertEqual(self.context, service._context)
-
-    def test_refresh(self):
-        uuid = self.fake_service['uuid']
-        new_uuid = magnum_utils.generate_uuid()
-        returns = [dict(self.fake_service, uuid=uuid),
-                   dict(self.fake_service, uuid=new_uuid)]
-        expected = [mock.call(self.context, uuid),
-                    mock.call(self.context, uuid)]
-        with mock.patch.object(self.dbapi, 'get_service_by_uuid',
-                               side_effect=returns,
-                               autospec=True) as mock_get_service:
-            service = objects.Service.get_by_uuid(self.context, uuid)
-            self.assertEqual(uuid, service.uuid)
-            service.refresh()
-            self.assertEqual(new_uuid, service.uuid)
-            self.assertEqual(expected, mock_get_service.call_args_list)
-            self.assertEqual(self.context, service._context)
+        k8s_api_mock = mock.MagicMock()
+        mock_kube_api.return_value = k8s_api_mock
+        fake_service = mock.MagicMock()
+        fake_service.metadata.uid = 'fake-uuid'
+        fake_service.metadata.name = 'fake-name'
+        fake_service.spec.ports.port = ["1234"]
+        fake_service.spec.selector = {}
+        fake_service.spec.cluster_ip = '192.10.10.10'
+        fake_service.metadata.labels = mock_ast.return_value
+        k8s_api_mock.read_namespaced_service.return_value = fake_service
+        objects.Service.get_by_name(self.context,
+                                    name, bay_uuid,
+                                    k8s_api_mock)
+        (k8s_api_mock.read_namespaced_service.assert_called_once_with(
+            name=name,
+            namespace='default'))

@@ -112,17 +112,21 @@ class RPCAPITestCase(base.DbTestCase):
         self._test_rpcapi('service_update',
                           'call',
                           version='1.0',
-                          service=self.fake_service)
+                          service_ident=self.fake_service['uuid'],
+                          bay_ident=self.fake_service['bay_uuid'],
+                          manifest={})
 
     def test_service_delete(self):
         self._test_rpcapi('service_delete',
                           'call',
                           version='1.0',
-                          uuid=self.fake_service['uuid'])
+                          service_ident=self.fake_service['uuid'],
+                          bay_ident=self.fake_service['bay_uuid'])
         self._test_rpcapi('service_delete',
                           'call',
                           version='1.1',
-                          uuid=self.fake_service['name'])
+                          service_ident=self.fake_service['uuid'],
+                          bay_ident=self.fake_service['bay_uuid'])
 
     def test_pod_create(self):
         self._test_rpcapi('pod_create',

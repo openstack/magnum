@@ -430,6 +430,14 @@ class ServiceAlreadyExists(Conflict):
     message = _("A node with UUID %(uuid)s already exists.")
 
 
+class ServiceListNotFound(ResourceNotFound):
+    message = _("Service list could not be found for Bay %(bay_uuid)s.")
+
+
+class ServiceCreationFailed(Invalid):
+    message = _("Service creation failed for Bay %(bay_uuid)s.")
+
+
 class ContainerException(Exception):
     pass
 

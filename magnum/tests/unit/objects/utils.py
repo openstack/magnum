@@ -122,7 +122,7 @@ def create_test_service(context, **kw):
     attributes.
     """
     service = get_test_service(context, **kw)
-    service.create()
+    service.manifest = '{"foo": "bar"}'
     return service
 
 

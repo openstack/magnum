@@ -188,17 +188,9 @@ class ServicesController(rest.RestController):
 
         limit = api_utils.validate_limit(limit)
         sort_dir = api_utils.validate_sort_dir(sort_dir)
+        context = pecan.request.context
 
-        marker_obj = None
-        if marker:
-            marker_obj = objects.Service.get_by_uuid(pecan.request.context,
-                                                     marker)
-
-        services = pecan.request.rpcapi.service_list(pecan.request.context,
-                                                     limit,
-                                                     marker_obj,
-                                                     sort_key=sort_key,
-                                                     sort_dir=sort_dir)
+        services = pecan.request.rpcapi.service_list(context, bay_ident)
 
         return ServiceCollection.convert_with_links(services, limit,
                                                     url=resource_url,
@@ -243,7 +235,8 @@ class ServicesController(rest.RestController):
         expand = True
         resource_url = '/'.join(['services', 'detail'])
         return self._get_services_collection(marker, limit,
-                                             sort_key, sort_dir, expand,
+                                             sort_key, sort_dir,
+                                             bay_ident, expand,
                                              resource_url)
 
     @policy.enforce_wsgi("service", "get")
@@ -255,8 +248,10 @@ class ServicesController(rest.RestController):
         :param service_ident: UUID or logical name of the service.
         :param bay_ident: UUID or logical name of the Bay.
         """
-        rpc_service = api_utils.get_rpc_resource('Service', service_ident)
-
+        context = pecan.request.context
+        rpc_service = pecan.request.rpcapi.service_show(context,
+                                                        service_ident,
+                                                        bay_ident)
         return Service.convert_with_links(rpc_service)
 
     @policy.enforce_wsgi("service", "create")
@@ -292,35 +287,19 @@ class ServicesController(rest.RestController):
         :param bay_ident: UUID or logical name of the Bay.
         :param patch: a json PATCH document to apply to this service.
         """
-        rpc_service = api_utils.get_rpc_resource('Service', service_ident)
-        # Init manifest and manifest_url field because we don't store them
-        # in database.
-        rpc_service['manifest'] = None
-        rpc_service['manifest_url'] = None
+        service_dict = {}
+        service_dict['manifest'] = None
+        service_dict['manifest_url'] = None
         try:
-            service_dict = rpc_service.as_dict()
             service = Service(**api_utils.apply_jsonpatch(service_dict, patch))
             if service.manifest or service.manifest_url:
                 service.parse_manifest()
         except api_utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)
 
-        # Update only the fields that have changed
-        for field in objects.Service.fields:
-            try:
-                patch_val = getattr(service, field)
-            except AttributeError:
-                # Ignore fields that aren't exposed in the API
-                continue
-            if patch_val == wtypes.Unset:
-                patch_val = None
-            if rpc_service[field] != patch_val:
-                rpc_service[field] = patch_val
-
-        if service.manifest or service.manifest_url:
-            pecan.request.rpcapi.service_update(rpc_service)
-        else:
-            rpc_service.save()
+        rpc_service = pecan.request.rpcapi.service_update(service_ident,
+                                                          bay_ident,
+                                                          service.manifest)
         return Service.convert_with_links(rpc_service)
 
     @policy.enforce_wsgi("service")
@@ -332,6 +311,4 @@ class ServicesController(rest.RestController):
         :param service_ident: UUID or logical name of a service.
         :param bay_ident: UUID or logical name of the Bay.
         """
-        rpc_service = api_utils.get_rpc_resource('Service', service_ident)
-
-        pecan.request.rpcapi.service_delete(rpc_service.uuid)
+        pecan.request.rpcapi.service_delete(service_ident, bay_ident)

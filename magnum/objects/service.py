@@ -12,9 +12,13 @@
 
 from oslo_versionedobjects import fields
 
+from magnum.common import exception
+from magnum.common.pythonk8sclient.swagger_client import rest
 from magnum.db import api as dbapi
 from magnum.objects import base
 from magnum.objects import fields as magnum_fields
+
+import ast
 
 
 @base.MagnumObjectRegistry.register
@@ -40,152 +44,94 @@ class Service(base.MagnumPersistentObject, base.MagnumObject,
         'manifest': fields.StringField(nullable=True),
     }
 
-    @staticmethod
-    def _from_db_object(service, db_service):
-        """Converts a database entity to a formal object."""
-        for field in service.fields:
-            # ignore manifest_url as it was used for create service
-            if field == 'manifest_url':
-                continue
-            if field == 'manifest':
-                continue
-            service[field] = db_service[field]
-
-        service.obj_reset_changes()
-        return service
-
-    @staticmethod
-    def _from_db_object_list(db_objects, cls, context):
-        """Converts a list of database entities to a list of formal objects."""
-        return [Service._from_db_object(cls(context), obj)
-                for obj in db_objects]
-
     @base.remotable_classmethod
-    def get_by_id(cls, context, service_id):
-        """Find a service based on its integer id and return a Service object.
+    def get_by_uuid(cls, context, uuid, bay_uuid, k8s_api):
+        """Find a service based on service uuid and UUID of the Bay
 
-        :param service_id: the id of a service.
         :param context: Security context
-        :returns: a :class:`Service` object.
-        """
-        db_service = cls.dbapi.get_service_by_id(context, service_id)
-        service = Service._from_db_object(cls(context), db_service)
-        return service
-
-    @base.remotable_classmethod
-    def get_by_uuid(cls, context, uuid):
-        """Find a service based on uuid and return a :class:`Service` object.
-
         :param uuid: the uuid of a service.
-        :param context: Security context
+        :param bay_uuid: the UUID of the Bay
+        :param k8s_api: k8s API object
+
         :returns: a :class:`Service` object.
         """
-        db_service = cls.dbapi.get_service_by_uuid(context, uuid)
-        service = Service._from_db_object(cls(context), db_service)
-        return service
+        try:
+            resp = k8s_api.list_namespaced_service(namespace='default')
+        except rest.ApiException as err:
+            raise exception.KubernetesAPIFailed(err=err)
+
+        if resp is None:
+            raise exception.ServiceListNotFound(bay_uuid=bay_uuid)
+
+        service = {}
+        for service_entry in resp.items:
+            if service_entry.metadata.uid == uuid:
+                service['uuid'] = service_entry.metadata.uid
+                service['name'] = service_entry.metadata.name
+                service['project_id'] = context.project_id
+                service['user_id'] = context.user_id
+                service['bay_uuid'] = bay_uuid
+                service['labels'] = ast.literal_eval(
+                    service_entry.metadata.labels)
+                if not service_entry.spec.selector:
+                    service['selector'] = {}
+                else:
+                    service['selector'] = ast.literal_eval(
+                        service_entry.spec.selector)
+                service['ip'] = service_entry.spec.cluster_ip
+                service_value = []
+                for p in service_entry.spec.ports:
+                    ports = p.to_dict()
+                    if not ports['name']:
+                        ports['name'] = 'k8s-service'
+                    service_value.append(ports)
+
+                service['ports'] = service_value
+
+                service_obj = Service(context, **service)
+                return service_obj
+        raise exception.ServiceNotFound(service=uuid)
 
     @base.remotable_classmethod
-    def get_by_name(cls, context, name):
-        """Find a service based on service name and
+    def get_by_name(cls, context, name, bay_uuid, k8s_api):
+        """Find a service based on service name and UUID of the Bay
 
-        return a :class:`Service` object.
-
+        :param context: Security context
         :param name: the name of a service.
-        :param context: Security context
+        :param bay_uuid: the UUID of the Bay
+        :param k8s_api: k8s API object
+
         :returns: a :class:`Service` object.
         """
-        db_service = cls.dbapi.get_service_by_name(context, name)
-        service = Service._from_db_object(cls(context), db_service)
-        return service
+        try:
+            resp = k8s_api.read_namespaced_service(name=name,
+                                                   namespace='default')
+        except rest.ApiException as err:
+            raise exception.KubernetesAPIFailed(err=err)
 
-    @base.remotable_classmethod
-    def list(cls, context, limit=None, marker=None,
-             sort_key=None, sort_dir=None):
-        """Return a list of Service objects.
+        if resp is None:
+            raise exception.ServiceNotFound(service=name)
 
-        :param context: Security context.
-        :param limit: maximum number of resources to return in a single result.
-        :param marker: pagination marker for large data sets.
-        :param sort_key: column to sort results by.
-        :param sort_dir: direction to sort. "asc" or "desc".
-        :returns: a list of :class:`Service` object.
+        service = {}
+        service['uuid'] = resp.metadata.uid
+        service['name'] = resp.metadata.name
+        service['project_id'] = context.project_id
+        service['user_id'] = context.user_id
+        service['bay_uuid'] = bay_uuid
+        service['labels'] = ast.literal_eval(resp.metadata.labels)
+        if not resp.spec.selector:
+            service['selector'] = {}
+        else:
+            service['selector'] = ast.literal_eval(resp.spec.selector)
+        service['ip'] = resp.spec.cluster_ip
+        service_value = []
+        for p in resp.spec.ports:
+            ports = p.to_dict()
+            if not ports['name']:
+                ports['name'] = 'k8s-service'
+            service_value.append(ports)
 
-        """
-        db_services = cls.dbapi.get_service_list(context, limit=limit,
-                                                 marker=marker,
-                                                 sort_key=sort_key,
-                                                 sort_dir=sort_dir)
-        return Service._from_db_object_list(db_services, cls, context)
+        service['ports'] = service_value
 
-    @base.remotable
-    def create(self, context=None):
-        """Create a Service record in the DB.
-
-        :param context: Security context. NOTE: This should only
-                        be used internally by the indirection_api.
-                        Unfortunately, RPC requires context as the first
-                        argument, even though we don't use it.
-                        A context should be set when instantiating the
-                        object, e.g.: Service(context)
-
-        """
-        values = self.obj_get_changes()
-        db_service = self.dbapi.create_service(values)
-        self._from_db_object(self, db_service)
-
-    @base.remotable
-    def destroy(self, context=None):
-        """Delete the Service from the DB.
-
-        :param context: Security context. NOTE: This should only
-                        be used internally by the indirection_api.
-                        Unfortunately, RPC requires context as the first
-                        argument, even though we don't use it.
-                        A context should be set when instantiating the
-                        object, e.g.: Service(context)
-        """
-        self.dbapi.destroy_service(self.uuid)
-        self.obj_reset_changes()
-
-    @base.remotable
-    def save(self, context=None):
-        """Save updates to this Service.
-
-        Updates will be made column by column based on the result
-        of self.what_changed().
-
-        :param context: Security context. NOTE: This should only
-                        be used internally by the indirection_api.
-                        Unfortunately, RPC requires context as the first
-                        argument, even though we don't use it.
-                        A context should be set when instantiating the
-                        object, e.g.: Service(context)
-        """
-        updates = self.obj_get_changes()
-        self.dbapi.update_service(self.uuid, updates)
-
-        self.obj_reset_changes()
-
-    @base.remotable
-    def refresh(self, context=None):
-        """Loads updates for this Service.
-
-        Loads a service with the same uuid from the database and
-        checks for updated attributes. Updates are applied from
-        the loaded service column by column, if there are any updates.
-
-        :param context: Security context. NOTE: This should only
-                        be used internally by the indirection_api.
-                        Unfortunately, RPC requires context as the first
-                        argument, even though we don't use it.
-                        A context should be set when instantiating the
-                        object, e.g.: Service(context)
-        """
-        current = self.__class__.get_by_uuid(self._context, uuid=self.uuid)
-        for field in self.fields:
-            if field == 'manifest_url':
-                continue
-            if field == 'manifest':
-                continue
-            if self.obj_attr_is_set(field) and self[field] != current[field]:
-                self[field] = current[field]
+        service_obj = Service(context, **service)
+        return service_obj

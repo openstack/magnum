@@ -40,47 +40,183 @@ class Handler(object):
 
     def service_create(self, context, service):
         LOG.debug("service_create")
-        self.k8s_api = k8s.create_k8s_api(context, service)
+        self.k8s_api = k8s.create_k8s_api_service(context, service.bay_uuid)
         manifest = k8s_manifest.parse(service.manifest)
         try:
-            self.k8s_api.create_namespaced_service(body=manifest,
-                                                   namespace='default')
+            resp = self.k8s_api.create_namespaced_service(body=manifest,
+                                                          namespace='default')
         except rest.ApiException as err:
             raise exception.KubernetesAPIFailed(err=err)
-        # call the service object to persist in db
-        service.create(context)
+
+        if resp is None:
+            raise exception.ServiceCreationFailed(bay_uuid=service.bay_uuid)
+
+        service['uuid'] = resp.metadata.uid
+        service['name'] = resp.metadata.name
+        service['labels'] = ast.literal_eval(resp.metadata.labels)
+        service['selector'] = ast.literal_eval(resp.spec.selector)
+        service['ip'] = resp.spec.cluster_ip
+        service_value = []
+        for p in resp.spec.ports:
+            ports = p.to_dict()
+            if not ports['name']:
+                ports['name'] = 'k8s-service'
+            service_value.append(ports)
+
+        service['ports'] = service_value
+
         return service
 
-    def service_update(self, context, service):
-        LOG.debug("service_update %s", service.uuid)
-        self.k8s_api = k8s.create_k8s_api(context, service)
-        manifest = k8s_manifest.parse(service.manifest)
+    def service_update(self, context, service_ident, bay_ident, manifest):
+        LOG.debug("service_update %s", service_ident)
+        # Since bay identifier is specified verify whether its a UUID
+        # or Name. If name is specified as bay identifier need to extract
+        # the bay uuid since its needed to get the k8s_api object.
+        if not utils.is_uuid_like(bay_ident):
+            bay = objects.Bay.get_by_name(context, bay_ident)
+            bay_ident = bay.uuid
+
+        bay_uuid = bay_ident
+        self.k8s_api = k8s.create_k8s_api_service(context, bay_uuid)
+        if utils.is_uuid_like(service_ident):
+            service = objects.Service.get_by_uuid(context,
+                                                  service_ident,
+                                                  bay_uuid,
+                                                  self.k8s_api)
+        else:
+            service = objects.Service.get_by_name(context,
+                                                  service_ident,
+                                                  bay_uuid,
+                                                  self.k8s_api)
+        service_ident = service.name
         try:
-            self.k8s_api.replace_namespaced_service(name=str(service.name),
-                                                    body=manifest,
-                                                    namespace='default')
+            resp = self.k8s_api.replace_namespaced_service(
+                name=str(service_ident),
+                body=manifest,
+                namespace='default')
         except rest.ApiException as err:
             raise exception.KubernetesAPIFailed(err=err)
-        # call the service object to persist in db
-        service.refresh(context)
-        service.save()
+
+        if resp is None:
+            raise exception.ServiceNotFound(service=service.uuid)
+
+        service['uuid'] = resp.metadata.uid
+        service['name'] = resp.metadata.name
+        service['project_id'] = context.project_id
+        service['user_id'] = context.user_id
+        service['bay_uuid'] = bay_uuid
+        service['labels'] = ast.literal_eval(resp.metadata.labels)
+        if not resp.spec.selector:
+            service['selector'] = {}
+        else:
+            service['selector'] = ast.literal_eval(resp.spec.selector)
+        service['ip'] = resp.spec.cluster_ip
+        service_value = []
+        for p in resp.spec.ports:
+            ports = p.to_dict()
+            if not ports['name']:
+                ports['name'] = 'k8s-service'
+            service_value.append(ports)
+
+        service['ports'] = service_value
+
         return service
 
-    def service_delete(self, context, uuid):
-        LOG.debug("service_delete %s", uuid)
-        service = objects.Service.get_by_uuid(context, uuid)
-        self.k8s_api = k8s.create_k8s_api(context, service)
-        if conductor_utils.object_has_stack(context, service):
+    def service_delete(self, context, service_ident, bay_ident):
+        LOG.debug("service_delete %s", service_ident)
+        # Since bay identifier is specified verify whether its a UUID
+        # or Name. If name is specified as bay identifier need to extract
+        # the bay uuid since its needed to get the k8s_api object.
+        if not utils.is_uuid_like(bay_ident):
+            bay = objects.Bay.get_by_name(context, bay_ident)
+            bay_ident = bay.uuid
+
+        bay_uuid = bay_ident
+        self.k8s_api = k8s.create_k8s_api_service(context, bay_uuid)
+        if utils.is_uuid_like(service_ident):
+            service = objects.Service.get_by_uuid(context, service_ident,
+                                                  bay_uuid, self.k8s_api)
+            service_name = service.name
+        else:
+            service_name = service_ident
+        if conductor_utils.object_has_stack(context, bay_uuid):
             try:
-                self.k8s_api.delete_namespaced_service(name=str(service.name),
+
+                self.k8s_api.delete_namespaced_service(name=str(service_name),
                                                        namespace='default')
             except rest.ApiException as err:
                 if err.status == 404:
                     pass
                 else:
                     raise exception.KubernetesAPIFailed(err=err)
-        # call the service object to persist in db
-        service.destroy(context)
+
+    def service_show(self, context, service_ident, bay_ident):
+        LOG.debug("service_show %s", service_ident)
+        # Since bay identifier is specified verify whether its a UUID
+        # or Name. If name is specified as bay identifier need to extract
+        # the bay uuid since its needed to get the k8s_api object.
+        if not utils.is_uuid_like(bay_ident):
+            bay = objects.Bay.get_by_name(context, bay_ident)
+            bay_ident = bay.uuid
+
+        bay_uuid = bay_ident
+        self.k8s_api = k8s.create_k8s_api_service(context, bay_uuid)
+        if utils.is_uuid_like(service_ident):
+            service = objects.Service.get_by_uuid(context, service_ident,
+                                                  bay_uuid, self.k8s_api)
+        else:
+            service = objects.Service.get_by_name(context, service_ident,
+                                                  bay_uuid, self.k8s_api)
+
+        return service
+
+    def service_list(self, context, bay_ident):
+        # Since bay identifier is specified verify whether its a UUID
+        # or Name. If name is specified as bay identifier need to extract
+        # the bay uuid since its needed to get the k8s_api object.
+        if not utils.is_uuid_like(bay_ident):
+            bay = objects.Bay.get_by_name(context, bay_ident)
+            bay_ident = bay.uuid
+
+        bay_uuid = bay_ident
+        self.k8s_api = k8s.create_k8s_api_service(context, bay_uuid)
+        try:
+            resp = self.k8s_api.list_namespaced_service(namespace='default')
+        except rest.ApiException as err:
+            raise exception.KubernetesAPIFailed(err=err)
+
+        if resp is None:
+            raise exception.ServiceListNotFound(bay_uuid=bay_uuid)
+
+        services = []
+        for service_entry in resp.items:
+            service = {}
+            service['uuid'] = service_entry.metadata.uid
+            service['name'] = service_entry.metadata.name
+            service['project_id'] = context.project_id
+            service['user_id'] = context.user_id
+            service['bay_uuid'] = bay_uuid
+            service['labels'] = ast.literal_eval(
+                service_entry.metadata.labels)
+            if not service_entry.spec.selector:
+                service['selector'] = {}
+            else:
+                service['selector'] = ast.literal_eval(
+                    service_entry.spec.selector)
+            service['ip'] = service_entry.spec.cluster_ip
+            service_value = []
+            for p in service_entry.spec.ports:
+                ports = p.to_dict()
+                if not ports['name']:
+                    ports['name'] = 'k8s-service'
+                service_value.append(ports)
+
+            service['ports'] = service_value
+
+            service_obj = objects.Service(context, **service)
+            services.append(service_obj)
+
+        return services
 
     # Pod Operations
     def pod_create(self, context, pod):
@@ -124,7 +260,7 @@ class Handler(object):
         LOG.debug("pod_delete %s", uuid)
         pod = objects.Pod.get_by_uuid(context, uuid)
         self.k8s_api = k8s.create_k8s_api(context, pod)
-        if conductor_utils.object_has_stack(context, pod):
+        if conductor_utils.object_has_stack(context, pod.bay_uuid):
             try:
                 self.k8s_api.delete_namespaced_pod(name=str(pod.name), body={},
                                                    namespace='default')
