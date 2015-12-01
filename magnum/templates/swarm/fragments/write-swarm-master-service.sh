@@ -20,15 +20,17 @@ ExecStart=/usr/bin/docker run --name swarm-manager \\
                               -e no_proxy=$NO_PROXY \\
                               swarm:$SWARM_VERSION \\
                               manage -H tcp://0.0.0.0:2375 \\
+                              --replication \\
+                              --advertise $NODE_IP:2376 \\
 END_SERVICE_TOP
 
 if [ $TLS_DISABLED = 'False'  ]; then
 
 cat >> /etc/systemd/system/swarm-manager.service << END_TLS
-                                  --tlsverify \\
-                                  --tlscacert=/etc/docker/ca.crt \\
-                                  --tlskey=/etc/docker/server.key \\
-                                  --tlscert=/etc/docker/server.crt \\
+                              --tlsverify \\
+                              --tlscacert=/etc/docker/ca.crt \\
+                              --tlskey=/etc/docker/server.key \\
+                              --tlscert=/etc/docker/server.crt \\
 END_TLS
 
 fi
