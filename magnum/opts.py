@@ -46,6 +46,8 @@ def list_opts():
         ('conductor', magnum.conductor.config.SERVICE_OPTS),
         ('database', magnum.db.sql_opts),
         ('docker', magnum.common.docker_utils.docker_opts),
+        ('docker_registry',
+         magnum.conductor.handlers.bay_conductor.docker_registry_opts),
         ('magnum_client', magnum.common.clients.magnum_client_opts),
         ('heat_client', magnum.common.clients.heat_client_opts),
         ('glance_client', magnum.common.clients.glance_client_opts),

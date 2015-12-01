@@ -83,7 +83,8 @@ class KeystoneClientV3(object):
         return 'token' in auth_token_info
 
     def _get_ks_client(self):
-        kwargs = {'auth_url': self.auth_url}
+        kwargs = {'auth_url': self.auth_url,
+                  'endpoint': self.auth_url}
         if self.context.trust_id:
             kwargs.update(self._get_admin_credentials())
             kwargs['trust_id'] = self.context.trust_id
@@ -112,11 +113,17 @@ class KeystoneClientV3(object):
     def create_trust(self, trustee_user, role_names, impersonation=True):
         trustor_user_id = self.client.auth_ref.user_id
         trustor_project_id = self.client.auth_ref.project_id
-        trust = self.client.trusts.create(trustor_user=trustor_user_id,
-                                          project=trustor_project_id,
-                                          trustee_user=trustee_user,
-                                          impersonation=impersonation,
-                                          role_names=role_names)
+        try:
+            trust = self.client.trusts.create(
+                trustor_user=trustor_user_id,
+                project=trustor_project_id,
+                trustee_user=trustee_user,
+                impersonation=impersonation,
+                role_names=role_names)
+        except Exception as e:
+            LOG.exception(str(e))
+            raise exception.TrustCreateFailed(
+                trustee_user_id=trustee_user)
         return trust
 
     def create_trust_to_admin(self, role_names, impersonation=True):
@@ -124,7 +131,12 @@ class KeystoneClientV3(object):
         return self.create_trust(trustee_user, role_names, impersonation)
 
     def delete_trust(self, trust_id):
+        if trust_id is None:
+            return
         try:
             self.client.trusts.delete(trust_id)
         except kc_exception.NotFound:
             pass
+        except Exception as e:
+            LOG.exception(str(e))
+            raise exception.TrustDeleteFailed(trust_id=trust_id)

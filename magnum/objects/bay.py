@@ -27,7 +27,8 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
           base.MagnumObjectDictCompat):
     # Version 1.0: Initial version
     # Version 1.1: Added 'bay_create_timeout' field
-    VERSION = '1.1'
+    # Version 1.2: Add 'registry_trust_id' field
+    VERSION = '1.2'
 
     dbapi = dbapi.get_instance()
 
@@ -50,6 +51,7 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
         'master_addresses': fields.ListOfStringsField(nullable=True),
         'ca_cert_ref': fields.StringField(nullable=True),
         'magnum_cert_ref': fields.StringField(nullable=True),
+        'registry_trust_id': fields.StringField(nullable=True)
     }
 
     @staticmethod

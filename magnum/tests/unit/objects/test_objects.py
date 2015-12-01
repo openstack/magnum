@@ -423,7 +423,7 @@ class _TestObject(object):
 # For more information on object version testing, read
 # http://docs.openstack.org/developer/magnum/objects.html
 object_data = {
-    'Bay': '1.1-aa9937c7453c0fdb9165bd2a83640ed9',
+    'Bay': '1.2-0749bac339a2cc24dc03f45a4359013d',
     'BayLock': '1.0-7d1eb08cf2070523bd210369c7a2e076',
     'BayModel': '1.8-a4bb0976be245f06edbd1db087a18071',
     'Certificate': '1.0-2aff667971b85c1edf8d15684fd7d5e2',

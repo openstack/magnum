@@ -142,6 +142,10 @@
 # (string value)
 #instance_uuid_format = "[instance: %(uuid)s] "
 
+# Format string for user_identity field of the
+# logging_context_format_string (string value)
+#logging_user_identity_format = %(user)s %(tenant)s %(domain)s %(user_domain)s %(project_domain)s
+
 # Enables or disables fatal status of deprecations. (boolean value)
 #fatal_deprecations = false
 
@@ -194,6 +198,16 @@
 # Shows whether zmq-messaging uses broker or not. (boolean value)
 #zmq_use_broker = true
 
+# Minimal port number for random ports range. (integer value)
+#rpc_zmq_min_port = 49152
+
+# Maximal port number for random ports range. (integer value)
+#rpc_zmq_max_port = 65536
+
+# Number of retries to find free port number before fail with
+# ZMQBindError. (integer value)
+#rpc_zmq_bind_port_retries = 100
+
 # Host to locate redis. (string value)
 #host = 127.0.0.1
 
@@ -210,6 +224,11 @@
 # The Drivers(s) to handle sending notifications. Possible values are
 # messaging, messagingv2, routing, log, test, noop (multi valued)
 #notification_driver =
+
+# A URL representing the messaging driver to use for notifications. If
+# not set, we fall back to the same configuration used for RPC.
+# (string value)
+#notification_transport_url = <None>
 
 # AMQP topic used for OpenStack notifications. (list value)
 # Deprecated group/name - [rpc_notifier2]/topics
@@ -259,7 +278,7 @@
 
 # Specify a timeout after which a gracefully shutdown server will
 # exit. Zero value means endless wait. (integer value)
-#graceful_shutdown_timeout = 0
+#graceful_shutdown_timeout = 60
 
 
 [api]
@@ -320,7 +339,7 @@
 
 # Location of template to build a swarm cluster on atomic. (string
 # value)
-#swarm_atomic_template_path = $pybasedir/templates/swarm/swarm.yaml
+#swarm_atomic_template_path = $pybasedir/templates/swarm/swarmcluster.yaml
 
 # Location of template to build a Mesos cluster on Ubuntu. (string
 # value)
@@ -363,23 +382,23 @@
 # network drivers include flannel. (list value)
 #kubernetes_allowed_network_drivers = all
 
-# Default network driver for kubernetes baymodels.
+# Default network driver for kubernetes baymodels. (string value)
 #kubernetes_default_network_driver = flannel
 
-# Allowed network drivers for docker swarm baymodels. Use 'all' keyword
-# to allow all drivers supported for swarm baymodels. Supported
-# network drivers include docker. (list value)
+# Allowed network drivers for docker swarm baymodels. Use 'all'
+# keyword to allow all drivers supported for swarm baymodels.
+# Supported network drivers include docker and flannel. (list value)
 #swarm_allowed_network_drivers = all
 
-# Default network driver for docker swarm baymodels.
+# Default network driver for docker swarm baymodels. (string value)
 #swarm_default_network_driver = docker
 
-# Allowed network drivers for mesos baymodels. Use 'all' keyword
-# to allow all drivers supported for mesos baymodels. Supported
-# network drivers include docker. (list value)
+# Allowed network drivers for mesos baymodels. Use 'all' keyword to
+# allow all drivers supported for mesos baymodels. Supported network
+# drivers include docker. (list value)
 #mesos_allowed_network_drivers = all
 
-# Default network driver for mesos baymodels.
+# Default network driver for mesos baymodels. (string value)
 #mesos_default_network_driver = docker
 
 
@@ -418,7 +437,7 @@
 #
 
 # Indicate whether this resource may be shared with the domain
-# received in the requests "origin" header. (string value)
+# received in the requests "origin" header. (list value)
 #allowed_origin = <None>
 
 # Indicate that the actual request can include user credentials
@@ -448,7 +467,7 @@
 #
 
 # Indicate whether this resource may be shared with the domain
-# received in the requests "origin" header. (string value)
+# received in the requests "origin" header. (list value)
 #allowed_origin = <None>
 
 # Indicate that the actual request can include user credentials
@@ -596,7 +615,7 @@
 
 # Default timeout in seconds for docker client operations. (integer
 # value)
-#default_timeout = 10
+#default_timeout = 60
 
 # If set, ignore any SSL validation issues (boolean value)
 #api_insecure = false
@@ -612,6 +631,20 @@
 # Location of TLS private key file for securing docker api requests
 # (tlskey). (string value)
 #key_file = <None>
+
+
+[docker_registry]
+
+#
+# From magnum
+#
+
+# User id of the trustee (string value)
+#trustee_user_id = <None>
+
+# The roles which are delegated to the trustee by the trustor. (list
+# value)
+#trust_roles = registry_user
 
 
 [glance_client]
@@ -828,6 +861,14 @@
 
 # Service tenant name. (string value)
 #admin_tenant_name = admin
+
+# Authentication type to load (unknown value)
+# Deprecated group/name - [DEFAULT]/auth_plugin
+#auth_type = <None>
+
+# Config Section from which to load plugin specific options (unknown
+# value)
+#auth_section = <None>
 
 
 [magnum_client]

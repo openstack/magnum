@@ -540,3 +540,11 @@ class FlavorNotFound(ResourceNotFound):
 
 class NetworkNotFound(ResourceNotFound):
     message = _("Unable to find network %(network)s.")
+
+
+class TrustCreateFailed(MagnumException):
+    message = _("Failed to create trust for trustee %(trustee_user_id)s.")
+
+
+class TrustDeleteFailed(MagnumException):
+    message = _("Failed to delete trust %(trust_id)s.")
