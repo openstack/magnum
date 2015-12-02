@@ -39,8 +39,6 @@ def baymodel_post_data(**kw):
 
 def bay_post_data(**kw):
     bay = utils.get_test_bay(**kw)
-    # the timeout property is a part of the request and doesn't persist
-    # in the bay db
     bay['bay_create_timeout'] = kw.get('bay_create_timeout', 15)
     internal = bay_controller.BayPatchType.internal_attrs()
     return remove_internal(bay, internal)

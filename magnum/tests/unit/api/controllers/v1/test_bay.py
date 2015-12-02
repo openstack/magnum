@@ -400,6 +400,8 @@ class TestPost(api_base.FunctionalTest):
         return_created_at = timeutils.parse_isotime(
             response.json['created_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_created_at)
+        self.assertEqual(bdict['bay_create_timeout'],
+                         response.json['bay_create_timeout'])
 
     @mock.patch('magnum.api.attr_validator.validate_os_resources')
     def test_create_bay_set_project_id_and_user_id(self, mock_valid_os_res):

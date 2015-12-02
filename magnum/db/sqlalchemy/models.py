@@ -117,6 +117,7 @@ class Bay(Base):
     master_count = Column(Integer())
     status = Column(String(20))
     status_reason = Column(Text)
+    bay_create_timeout = Column(Integer())
     discovery_url = Column(String(255))
     master_addresses = Column(JSONEncodedList)
     # (yuanying) if we use barbican,

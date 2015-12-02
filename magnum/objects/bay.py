@@ -26,7 +26,8 @@ from magnum.objects import fields as m_fields
 class Bay(base.MagnumPersistentObject, base.MagnumObject,
           base.MagnumObjectDictCompat):
     # Version 1.0: Initial version
-    VERSION = '1.0'
+    # Version 1.1: Added 'bay_create_timeout' field
+    VERSION = '1.1'
 
     dbapi = dbapi.get_instance()
 
@@ -40,6 +41,7 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
         'stack_id': fields.StringField(nullable=True),
         'status': m_fields.BayStatusField(nullable=True),
         'status_reason': fields.StringField(nullable=True),
+        'bay_create_timeout': fields.IntegerField(nullable=True),
         'api_address': fields.StringField(nullable=True),
         'node_addresses': fields.ListOfStringsField(nullable=True),
         'node_count': fields.IntegerField(nullable=True),
