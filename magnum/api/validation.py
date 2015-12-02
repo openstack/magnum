@@ -17,7 +17,7 @@ import decorator
 from oslo_config import cfg
 import pecan
 
-from magnum.api.controllers.v1 import utils as api_utils
+from magnum.api import utils as api_utils
 from magnum.common import exception
 from magnum import objects
 

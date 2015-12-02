@@ -17,7 +17,7 @@ import jsonpatch
 import mock
 import wsme
 
-from magnum.api.controllers.v1 import utils
+from magnum.api import utils
 from magnum.common import exception
 from magnum.common import utils as common_utils
 from magnum.tests.unit.api import base
