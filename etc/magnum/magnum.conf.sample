@@ -861,6 +861,21 @@
 #password =
 
 
+[neutron_client]
+
+#
+# From magnum
+#
+
+# Region in Identity service catalog to use for communication with the
+# OpenStack service. (string value)
+#region_name = <None>
+
+# Type of endpoint in Identity service catalog to use for
+# communication with the OpenStack service. (string value)
+#endpoint_type = publicURL
+
+
 [nova_client]
 
 #
