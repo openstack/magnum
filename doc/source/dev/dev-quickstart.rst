@@ -467,6 +467,13 @@ Provisioning a mesos bay requires a Ubuntu-based image with some packages
 pre-installed. To build and upload such image, please refer to
 `<http://docs.openstack.org/developer/magnum/dev/dev-mesos.html>`_
 
+Alternatively, you can download and upload a pre-built image::
+
+    wget https://fedorapeople.org/groups/magnum/ubuntu-14.04.3-mesos-0.25.0.qcow2
+    glance image-create --name ubuntu-mesos --visibility public \
+                        --disk-format=qcow2 --container-format=bare \
+                        --os-distro=ubuntu --file=ubuntu-14.04.3-mesos-0.25.0.qcow2
+
 Then, create a baymodel by using 'mesos' as the coe, with the rest of arguments
 similar to the Kubernetes baymodel::
 
