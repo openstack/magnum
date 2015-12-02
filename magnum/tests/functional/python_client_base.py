@@ -138,6 +138,10 @@ class BaseMagnumClient(base.TestCase):
                                 [None, "CREATE_IN_PROGRESS"],
                                 ["CREATE_FAILED",
                                  "CREATE_COMPLETE"])
+
+        if cls.cs.bays.get(bay.uuid).status == 'CREATE_FAILED':
+            raise Exception("bay %s created failed" % bay.uuid)
+
         return bay
 
     @classmethod
