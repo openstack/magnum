@@ -430,7 +430,7 @@ object_data = {
     'Container': '1.2-fc9c7d7d89bfa72c0ed7a32597d41e82',
     'MyObj': '1.0-b43567e512438205e32f4e95ca616697',
     'Node': '1.0-30943e6e3387a2fae7490b57c4239a17',
-    'Pod': '1.1-7a31c372f163742845c10a008f47cc15',
+    'Pod': '1.1-39f221ad1dad0eb7f7bee3569d42fa7e',
     'ReplicationController': '1.0-a471c2429c212ed91833cfcf0f934eab',
     'Service': '1.0-f4a1c5a4618708824a553568c1ada0ea',
     'X509KeyPair': '1.1-4aecc268e23e32b8a762d43ba1a4b159',

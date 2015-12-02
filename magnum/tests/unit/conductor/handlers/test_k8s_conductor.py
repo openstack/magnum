@@ -42,118 +42,136 @@ class TestK8sConductor(base.TestCase):
     def mock_baymodel(self):
         return objects.BayModel({})
 
-    def test_pod_create_with_success(self):
-        expected_pod = self.mock_pod()
-        expected_pod.create = mock.MagicMock()
+    @patch('ast.literal_eval')
+    def test_pod_create_with_success(self, mock_ast):
+        expected_pod = mock.MagicMock()
+        expected_pod.uuid = 'test-uuid'
+        expected_pod.name = 'test-name'
+        expected_pod.bay_uuid = 'test-bay-uuid'
+        manifest = {"key": "value"}
         expected_pod.manifest = '{"key": "value"}'
+        mock_ast.return_value = {}
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api') as mock_kube_api:
-            return_value = mock.MagicMock()
-            return_value.status = mock.MagicMock()
-            return_value.status.phase = 'Pending'
-            return_value.spec = mock.MagicMock()
-            return_value.spec.node_name = '10.0.0.3'
-            mock_kube_api.return_value.create_namespaced_pod.return_value = (
-                return_value)
-
+        with patch('magnum.conductor.k8s_api.create_k8s_api_pod') as \
+                mock_kube_api:
             self.kube_handler.pod_create(self.context, expected_pod)
-            self.assertEqual('Pending', expected_pod.status)
-            self.assertEqual('10.0.0.3', expected_pod.host)
-            expected_pod.create.assert_called_once_with(self.context)
+            (mock_kube_api.return_value.create_namespaced_pod
+                .assert_called_once_with(body=manifest, namespace='default'))
 
     def test_pod_create_with_fail(self):
-        expected_pod = self.mock_pod()
-        expected_pod.create = mock.MagicMock()
+        expected_pod = mock.MagicMock()
+        manifest = {"key": "value"}
         expected_pod.manifest = '{"key": "value"}'
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.k8s_api.create_k8s_api_pod') as \
+                mock_kube_api:
             err = rest.ApiException(status=500)
             mock_kube_api.return_value.create_namespaced_pod.side_effect = err
 
-            self.assertRaises(exception.KubernetesAPIFailed, self.kube_handler.
-                              pod_create, self.context, expected_pod)
-            self.assertEqual('failed', expected_pod.status)
-            expected_pod.create.assert_called_once_with(self.context)
+            self.assertRaises(exception.KubernetesAPIFailed,
+                              self.kube_handler.pod_create,
+                              self.context, expected_pod)
+            (mock_kube_api.return_value
+                .create_namespaced_pod
+                .assert_called_once_with(body=manifest,
+                                         namespace='default'))
 
     def test_pod_create_fail_on_existing_pod(self):
-        expected_pod = self.mock_pod()
-        expected_pod.create = mock.MagicMock()
+        expected_pod = mock.MagicMock()
         expected_pod.manifest = '{"key": "value"}'
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.k8s_api.create_k8s_api_pod') as \
+                mock_kube_api:
             err = rest.ApiException(status=409)
             mock_kube_api.return_value.create_namespaced_pod.side_effect = err
 
-            self.assertRaises(exception.KubernetesAPIFailed, self.kube_handler.
-                              pod_create, self.context, expected_pod)
+            self.assertRaises(exception.KubernetesAPIFailed,
+                              self.kube_handler.pod_create,
+                              self.context, expected_pod)
             self.assertEqual('failed', expected_pod.status)
-            self.assertFalse(expected_pod.create.called)
 
     @patch('magnum.conductor.utils.object_has_stack')
     @patch('magnum.objects.Pod.get_by_uuid')
+    @patch('magnum.objects.Bay.get_by_name')
     def test_pod_delete_with_success(self,
+                                     mock_bay_get_by_name,
                                      mock_pod_get_by_uuid,
                                      mock_object_has_stack):
+        mock_bay = mock.MagicMock()
+        mock_bay_get_by_name.return_value = mock_bay
+
         mock_pod = mock.MagicMock()
         mock_pod.name = 'test-pod'
         mock_pod.uuid = 'test-uuid'
+        mock_pod.bay_uuid = 'test-bay-uuid'
         mock_pod_get_by_uuid.return_value = mock_pod
 
         mock_object_has_stack.return_value = True
-        with patch('magnum.conductor.k8s_api.create_k8s_api') as mock_kube_api:
-            self.kube_handler.pod_delete(self.context, mock_pod.uuid)
+        with patch('magnum.conductor.k8s_api.create_k8s_api_pod') as \
+                mock_kube_api:
+            self.kube_handler.pod_delete(self.context,
+                                         mock_pod.name,
+                                         mock_pod.bay_uuid)
 
             (mock_kube_api.return_value.delete_namespaced_pod
                 .assert_called_once_with(
                     name=mock_pod.name, body={}, namespace='default'))
-            mock_pod.destroy.assert_called_once_with(self.context)
 
     @patch('magnum.conductor.utils.object_has_stack')
     @patch('magnum.objects.Pod.get_by_uuid')
-    def test_pod_delete_with_failure(self, mock_pod_get_by_uuid,
+    @patch('magnum.objects.Bay.get_by_name')
+    def test_pod_delete_with_failure(self, mock_bay_get_by_name,
+                                     mock_pod_get_by_uuid,
                                      mock_object_has_stack):
+        mock_bay = mock.MagicMock()
+        mock_bay_get_by_name.return_value = mock_bay
+
         mock_pod = mock.MagicMock()
         mock_pod.name = 'test-pod'
         mock_pod.uuid = 'test-uuid'
         mock_pod_get_by_uuid.return_value = mock_pod
 
         mock_object_has_stack.return_value = True
-        with patch('magnum.conductor.k8s_api.create_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.k8s_api.create_k8s_api_pod') as \
+                mock_kube_api:
             err = rest.ApiException(status=500)
             mock_kube_api.return_value.delete_namespaced_pod.side_effect = err
 
             self.assertRaises(exception.KubernetesAPIFailed,
                               self.kube_handler.pod_delete,
-                              self.context, mock_pod.uuid)
-            (mock_kube_api.return_value.
-             delete_namespaced_pod.
-             assert_called_once_with(name=mock_pod.name,
-                                     body={},
-                                     namespace='default'))
-            self.assertFalse(mock_pod.destroy.called)
+                              self.context, mock_pod.name,
+                              mock_pod.bay_uuid)
+            (mock_kube_api.return_value.delete_namespaced_pod
+                .assert_called_once_with(
+                    name=mock_pod.name, body={}, namespace='default'))
 
     @patch('magnum.conductor.utils.object_has_stack')
     @patch('magnum.objects.Pod.get_by_uuid')
+    @patch('magnum.objects.Bay.get_by_name')
     def test_pod_delete_succeeds_when_not_found(
-            self,
+            self, mock_bay_get_by_name,
             mock_pod_get_by_uuid,
             mock_object_has_stack):
+        mock_bay = mock.MagicMock()
+        mock_bay_get_by_name.return_value = mock_bay
+
         mock_pod = mock.MagicMock()
         mock_pod.name = 'test-pod'
         mock_pod.uuid = 'test-uuid'
         mock_pod_get_by_uuid.return_value = mock_pod
 
         mock_object_has_stack.return_value = True
-        with patch('magnum.conductor.k8s_api.create_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.k8s_api.create_k8s_api_pod') as \
+                mock_kube_api:
             err = rest.ApiException(status=404)
             mock_kube_api.return_value.delete_namespaced_pod.side_effect = err
 
-            self.kube_handler.pod_delete(self.context, mock_pod.uuid)
+            self.kube_handler.pod_delete(self.context, mock_pod.name,
+                                         mock_pod.bay_uuid)
 
             (mock_kube_api.return_value.delete_namespaced_pod
                 .assert_called_once_with(
                     name=mock_pod.name, body={}, namespace='default'))
-            mock_pod.destroy.assert_called_once_with(self.context)
 
     @patch('magnum.conductor.k8s_api.create_k8s_api')
     @patch('ast.literal_eval')
@@ -540,41 +558,67 @@ class TestK8sConductor(base.TestCase):
                                          name=service_name,
                                          namespace='default'))
 
-    def test_pod_update_with_success(self):
-        expected_pod = self.mock_pod()
+    @patch('magnum.objects.Pod.get_by_name')
+    @patch('magnum.objects.Pod.get_by_uuid')
+    @patch('magnum.objects.Bay.get_by_name')
+    @patch('ast.literal_eval')
+    def test_pod_update_with_success(self, mock_ast,
+                                     mock_bay_get_by_name,
+                                     mock_pod_get_by_uuid,
+                                     mock_pod_get_by_name):
+        mock_bay = mock.MagicMock()
+        mock_bay_get_by_name.return_value = mock_bay
+
+        expected_pod = mock.MagicMock()
         expected_pod.uuid = 'test-uuid'
         expected_pod.name = 'test-name'
-        expected_pod.refresh = mock.MagicMock()
-        expected_pod.save = mock.MagicMock()
-        manifest = {"key": "value"}
+        expected_pod.bay_uuid = 'test-bay-uuid'
         expected_pod.manifest = '{"key": "value"}'
+        mock_ast.return_value = {}
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api') as mock_kube_api:
-            self.kube_handler.pod_update(self.context, expected_pod)
+        mock_pod_get_by_uuid.return_value = expected_pod
+        mock_pod_get_by_name.return_value = expected_pod
+        name_pod = expected_pod.name
+
+        with patch('magnum.conductor.k8s_api.create_k8s_api_pod') as \
+                mock_kube_api:
+            self.kube_handler.pod_update(self.context, expected_pod.name,
+                                         expected_pod.bay_uuid,
+                                         expected_pod.manifest)
             (mock_kube_api.return_value.replace_namespaced_pod
                 .assert_called_once_with(
-                    body=manifest, name=expected_pod.name,
+                    body=expected_pod.manifest, name=name_pod,
                     namespace='default'))
-            expected_pod.refresh.assert_called_once_with(self.context)
-            expected_pod.save.assert_called_once_with()
 
-    def test_pod_update_with_failure(self):
-        expected_pod = self.mock_pod()
+    @patch('magnum.objects.Pod.get_by_name')
+    @patch('magnum.objects.Pod.get_by_uuid')
+    @patch('magnum.objects.Bay.get_by_name')
+    def test_pod_update_with_failure(self, mock_bay_get_by_name,
+                                     mock_pod_get_by_uuid,
+                                     mock_pod_get_by_name):
+        mock_bay = mock.MagicMock()
+        mock_bay_get_by_name.return_value = mock_bay
+
+        expected_pod = mock.MagicMock()
         expected_pod.uuid = 'test-uuid'
         expected_pod.name = 'test-name'
-        expected_pod.refresh = mock.MagicMock()
-        manifest = {"key": "value"}
+        expected_pod.bay_uuid = 'test-bay-uuid'
+        mock_pod_get_by_uuid.return_value = expected_pod
+        mock_pod_get_by_name.return_value = expected_pod
         expected_pod.manifest = '{"key": "value"}'
+        name_pod = expected_pod.name
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api') as mock_kube_api:
+        with patch('magnum.conductor.k8s_api.create_k8s_api_pod') as \
+                mock_kube_api:
             err = rest.ApiException(status=404)
             mock_kube_api.return_value.replace_namespaced_pod.side_effect = err
 
             self.assertRaises(exception.KubernetesAPIFailed,
                               self.kube_handler.pod_update,
-                              self.context, expected_pod)
+                              self.context, expected_pod.name,
+                              expected_pod.bay_uuid,
+                              expected_pod.manifest)
             (mock_kube_api.return_value.replace_namespaced_pod
                 .assert_called_once_with(
-                    body=manifest, name=expected_pod.name,
+                    body=expected_pod.manifest, name=name_pod,
                     namespace='default'))
-            self.assertFalse(expected_pod.refresh.called)

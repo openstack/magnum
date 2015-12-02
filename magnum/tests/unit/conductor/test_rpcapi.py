@@ -138,18 +138,22 @@ class RPCAPITestCase(base.DbTestCase):
         self._test_rpcapi('pod_update',
                           'call',
                           version='1.1',
-                          pod=self.fake_pod['name'])
+                          pod_ident=self.fake_pod['uuid'],
+                          bay_ident=self.fake_pod['bay_uuid'],
+                          manifest={})
 
     def test_pod_delete(self):
         self._test_rpcapi('pod_delete',
                           'call',
                           version='1.0',
-                          uuid=self.fake_pod['uuid'])
+                          pod_ident=self.fake_pod['uuid'],
+                          bay_ident=self.fake_pod['bay_uuid'])
 
         self._test_rpcapi('pod_delete',
                           'call',
                           version='1.1',
-                          uuid=self.fake_pod['name'])
+                          pod_ident=self.fake_pod['uuid'],
+                          bay_ident=self.fake_pod['bay_uuid'])
 
     def test_rc_create(self):
         self._test_rpcapi('rc_create',
