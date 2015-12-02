@@ -106,6 +106,7 @@ parameters:
     type: string
     description: password used by docker registry
     default: "password"
+    hidden: true
 
   registry_domain:
     type: string
@@ -116,6 +117,7 @@ parameters:
     type: string
     description: trust_id used by docker registry
     default: "trust_id"
+    hidden: true
 
   registry_auth_url:
     type: string
