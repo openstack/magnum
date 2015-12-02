@@ -97,18 +97,29 @@ extendedKeyUsage = clientAuth
         # This is required, without this any api call will fail as
         # 'ConnectionError: [Errno 111] Connection refused'.
 
-        for i in range(30):
+        bay_is_ready = False
+
+        for i in range(150):
             try:
                 cls.docker_client.containers()
-            except req_exceptions.ConnectionError:
-                time.sleep(2)
-            else:
                 # Note(eliqiao): Right after the connection is ready, wait
                 # for a while (at least 5s) to aovid this error:
                 # docker.errors.APIError: 500 Server Error: Internal
                 # Server Error ("No healthy node available in the cluster")
                 time.sleep(10)
+                bay_is_ready = True
                 break
+            except req_exceptions.ConnectionError:
+                time.sleep(2)
+        # In such case, no need to test below cases on gate, raise a meanful
+        # exception message to indicate ca setup failed after bay creation,
+        # Better to do a `recheck`
+        if not bay_is_ready:
+            msg = ("If you see this error in the functional test, it means "
+                   "the docker service took too long to come up. This may not "
+                   "be an actual error, so an option is to rerun the "
+                   "functional test.")
+            raise Exception(msg)
 
     def _create_container(self, **kwargs):
         name = kwargs.get('name', 'test_container')
