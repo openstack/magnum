@@ -188,7 +188,7 @@ class TestValidation(base.BaseTestCase):
             assert_raised=True)
 
     @mock.patch('pecan.request')
-    @mock.patch('magnum.api.controllers.v1.utils.get_rpc_resource')
+    @mock.patch('magnum.api.utils.get_rpc_resource')
     def _test_enforce_network_driver_types_update(
             self,
             mock_get_rpc_resource,
