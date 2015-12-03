@@ -51,14 +51,6 @@ class PeriodicTestCase(base.TestCase):
         self.bay3 = objects.Bay(ctx, **bay3)
         self.bay4 = objects.Bay(ctx, **bay4)
 
-        mock_magnum_service_refresh = mock.Mock()
-
-        class FakeMS(object):
-            report_state_up = mock_magnum_service_refresh
-
-        self.fake_ms = FakeMS()
-        self.fake_ms_refresh = mock_magnum_service_refresh
-
     @mock.patch.object(objects.Bay, 'list')
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch.object(dbapi.Connection, 'destroy_bay')
@@ -79,8 +71,7 @@ class PeriodicTestCase(base.TestCase):
         mock_keystone_client.client.project_id = "fake_project"
         mock_osc.keystone.return_value = mock_keystone_client
 
-        periodic.MagnumPeriodicTasks(CONF,
-                                     'fake-conductor').sync_bay_status(None)
+        periodic.MagnumPeriodicTasks(CONF).sync_bay_status(None)
 
         self.assertEqual(bay_status.CREATE_COMPLETE, self.bay1.status)
         self.assertEqual('fake_reason_11', self.bay1.status_reason)
@@ -102,8 +93,7 @@ class PeriodicTestCase(base.TestCase):
         mock_osc = mock_oscc.return_value
         mock_osc.heat.return_value = mock_heat_client
         mock_bay_list.return_value = [self.bay1, self.bay2, self.bay3]
-        periodic.MagnumPeriodicTasks(CONF,
-                                     'fake-conductor').sync_bay_status(None)
+        periodic.MagnumPeriodicTasks(CONF).sync_bay_status(None)
 
         self.assertEqual(bay_status.CREATE_IN_PROGRESS, self.bay1.status)
         self.assertEqual(bay_status.DELETE_IN_PROGRESS, self.bay2.status)
@@ -126,8 +116,7 @@ class PeriodicTestCase(base.TestCase):
         mock_keystone_client.client.project_id = "fake_project"
         mock_osc.keystone.return_value = mock_keystone_client
 
-        periodic.MagnumPeriodicTasks(CONF,
-                                     'fake-conductor').sync_bay_status(None)
+        periodic.MagnumPeriodicTasks(CONF).sync_bay_status(None)
 
         self.assertEqual(bay_status.CREATE_FAILED, self.bay1.status)
         self.assertEqual('Stack with id 11 not found in Heat.',
@@ -136,46 +125,6 @@ class PeriodicTestCase(base.TestCase):
         self.assertEqual(bay_status.UPDATE_FAILED, self.bay3.status)
         self.assertEqual('Stack with id 33 not found in Heat.',
                          self.bay3.status_reason)
-
-    @mock.patch.object(objects.MagnumService, 'get_by_host_and_binary')
-    @mock.patch.object(objects.MagnumService, 'create')
-    @mock.patch.object(objects.MagnumService, 'report_state_up')
-    def test_update_magnum_service_firsttime(self,
-                                             mock_ms_refresh,
-                                             mock_ms_create,
-                                             mock_ms_get
-                                             ):
-        periodic_a = periodic.MagnumPeriodicTasks(CONF, 'fake-conductor')
-        mock_ms_get.return_value = None
-
-        periodic_a.update_magnum_service(None)
-
-        mock_ms_get.assert_called_once_with(mock.ANY, periodic_a.host,
-                                            periodic_a.binary)
-        mock_ms_create.assert_called_once_with(mock.ANY)
-        mock_ms_refresh.assert_called_once_with(mock.ANY)
-
-    @mock.patch.object(objects.MagnumService, 'get_by_host_and_binary')
-    @mock.patch.object(objects.MagnumService, 'create')
-    def test_update_magnum_service_on_restart(self,
-                                              mock_ms_create,
-                                              mock_ms_get):
-        periodic_a = periodic.MagnumPeriodicTasks(CONF, 'fake-conductor')
-        mock_ms_get.return_value = self.fake_ms
-
-        periodic_a.update_magnum_service(None)
-
-        mock_ms_get.assert_called_once_with(mock.ANY, periodic_a.host,
-                                            periodic_a.binary)
-        self.fake_ms_refresh.assert_called_once_with(mock.ANY)
-
-    def test_update_magnum_service_regular(self):
-        periodic_a = periodic.MagnumPeriodicTasks(CONF, 'fake-conductor')
-        periodic_a.magnum_service_ref = self.fake_ms
-
-        periodic_a.update_magnum_service(None)
-
-        self.fake_ms_refresh.assert_called_once_with(mock.ANY)
 
     @mock.patch('magnum.conductor.monitors.create_monitor')
     @mock.patch('magnum.objects.Bay.list')
@@ -195,8 +144,7 @@ class PeriodicTestCase(base.TestCase):
         monitor.get_metric_unit.return_value = '%'
         mock_create_monitor.return_value = monitor
 
-        periodic.MagnumPeriodicTasks(
-            CONF, 'fake-conductor')._send_bay_metrics(self.context)
+        periodic.MagnumPeriodicTasks(CONF)._send_bay_metrics(self.context)
 
         expected_event_type = 'magnum.bay.metrics.update'
         expected_metrics = [
@@ -239,8 +187,7 @@ class PeriodicTestCase(base.TestCase):
             "error on computing metric")
         mock_create_monitor.return_value = monitor
 
-        periodic.MagnumPeriodicTasks(
-            CONF, 'fake-conductor')._send_bay_metrics(self.context)
+        periodic.MagnumPeriodicTasks(CONF)._send_bay_metrics(self.context)
 
         expected_event_type = 'magnum.bay.metrics.update'
         expected_msg = {
@@ -268,8 +215,7 @@ class PeriodicTestCase(base.TestCase):
         monitor.pull_data.side_effect = Exception("error on pulling data")
         mock_create_monitor.return_value = monitor
 
-        periodic.MagnumPeriodicTasks(
-            CONF, 'fake-conductor')._send_bay_metrics(self.context)
+        periodic.MagnumPeriodicTasks(CONF)._send_bay_metrics(self.context)
 
         self.assertEqual(1, mock_create_monitor.call_count)
         self.assertEqual(0, notifier.info.call_count)
@@ -287,8 +233,7 @@ class PeriodicTestCase(base.TestCase):
         mock_bay_list.return_value = [self.bay4]
         mock_create_monitor.return_value = None
 
-        periodic.MagnumPeriodicTasks(
-            CONF, 'fake-conductor')._send_bay_metrics(self.context)
+        periodic.MagnumPeriodicTasks(CONF)._send_bay_metrics(self.context)
 
         self.assertEqual(1, mock_create_monitor.call_count)
         self.assertEqual(0, notifier.info.call_count)

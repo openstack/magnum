@@ -18,7 +18,6 @@ import six
 
 from oslo_log import log
 from oslo_service import periodic_task
-from oslo_service import threadgroup
 
 from magnum.common import clients
 from magnum.common import context
@@ -61,32 +60,9 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
 
     '''
 
-    def __init__(self, conf, binary):
-        self.magnum_service_ref = None
-        self.host = conf.host
-        self.binary = binary
+    def __init__(self, conf):
         super(MagnumPeriodicTasks, self).__init__(conf)
         self.notifier = rpc.get_notifier()
-
-    @periodic_task.periodic_task(run_immediately=True)
-    @set_context
-    def update_magnum_service(self, ctx):
-        LOG.debug('Update magnum_service')
-        if self.magnum_service_ref:
-            self.magnum_service_ref.report_state_up(ctx)
-        else:
-            self.magnum_service_ref = \
-                objects.MagnumService.get_by_host_and_binary(
-                    ctx, self.host, self.binary)
-            if self.magnum_service_ref is None:
-                magnum_service_dict = {
-                    'host': self.host,
-                    'binary': self.binary
-                }
-                self.magnum_service_ref = objects.MagnumService(
-                    ctx, **magnum_service_dict)
-                self.magnum_service_ref.create(ctx)
-            self.magnum_service_ref.report_state_up(ctx)
 
     @periodic_task.periodic_task(run_immediately=True)
     @set_context
@@ -210,11 +186,9 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                                message)
 
 
-def setup(conf, binary):
-    tg = threadgroup.ThreadGroup()
-    pt = MagnumPeriodicTasks(conf, binary)
+def setup(conf, tg):
+    pt = MagnumPeriodicTasks(conf)
     tg.add_dynamic_timer(
         pt.run_periodic_tasks,
         periodic_interval_max=conf.periodic_interval_max,
         context=None)
-    return tg
