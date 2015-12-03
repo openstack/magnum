@@ -50,6 +50,7 @@ asse_equal_with_is_not_none_re = re.compile(
 assert_true_isinstance_re = re.compile(
     r"(.)*assertTrue\(isinstance\((\w|\.|\'|\"|\[|\])+, "
     "(\w|\.|\'|\"|\[|\])+\)\)")
+dict_constructor_with_list_copy_re = re.compile(r".*\bdict\((\[)?(\(|\[)")
 
 
 def check_policy_enforce_decorator(logical_line,
@@ -136,6 +137,14 @@ def use_timeutils_utcnow(logical_line, filename):
             yield (pos, msg % f)
 
 
+def dict_constructor_with_list_copy(logical_line):
+    msg = ("M336: Must use a dict comprehension instead of a dict constructor"
+           " with a sequence of key-value pairs."
+           )
+    if dict_constructor_with_list_copy_re.match(logical_line):
+        yield (0, msg)
+
+
 def factory(register):
     register(check_policy_enforce_decorator)
     register(no_mutable_default_args)
@@ -145,3 +154,4 @@ def factory(register):
     register(assert_true_isinstance)
     register(assert_equal_in)
     register(use_timeutils_utcnow)
+    register(dict_constructor_with_list_copy)
