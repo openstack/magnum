@@ -281,9 +281,6 @@ class BaysController(rest.RestController):
                                              bay_dict.get('baymodel_id'))
         bay_dict['project_id'] = context.project_id
         bay_dict['user_id'] = context.user_id
-        # NOTE(suro-patz): Apply default node_count is 1, None -> 1
-        if bay_dict.get('node_count', None) is None:
-            bay_dict['node_count'] = 1
         if bay_dict.get('name', None) is None:
             bay_dict['name'] = None
 
