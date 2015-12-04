@@ -22,3 +22,5 @@ Magnum Specific Commandments
   assertIsInstance(A, B).
 - [M334] Change assertTrue/False(A in/not in B, message) to the more specific
   assertIn/NotIn(A, B, message)
+- [M336] Must use a dict comprehension instead of a dict constructor
+  with a sequence of key-value pairs.

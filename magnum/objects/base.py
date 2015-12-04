@@ -43,9 +43,9 @@ class MagnumObject(ovoo_base.VersionedObject):
     OBJ_PROJECT_NAMESPACE = 'magnum'
 
     def as_dict(self):
-        return dict((k, getattr(self, k))
-                    for k in self.fields
-                    if hasattr(self, k))
+        return {k: getattr(self, k)
+                for k in self.fields
+                if hasattr(self, k)}
 
 
 class MagnumObjectDictCompat(ovoo_base.VersionedObjectDictCompat):

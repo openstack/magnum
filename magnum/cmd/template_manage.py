@@ -39,7 +39,7 @@ def print_rows(rows):
         fields.append('path')
         field_labels.append('Template Path')
 
-    formatters = dict((key, operator.itemgetter(key)) for key in fields)
+    formatters = {key: operator.itemgetter(key) for key in fields}
 
     cliutils.print_list(rows, fields,
                         formatters=formatters,
