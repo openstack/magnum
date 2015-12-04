@@ -299,6 +299,7 @@ resources:
           template: {get_file: fragments/write-swarm-master-service.sh}
           params:
             "$ETCD_SERVER_IP": {get_param: etcd_server_ip}
+            "$NODE_IP": {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
             "$DISCOVERY_URL": {get_param: discovery_url}
             "$WAIT_HANDLE": {get_resource: master_wait_handle}
             "$HTTP_PROXY": {get_param: http_proxy}
