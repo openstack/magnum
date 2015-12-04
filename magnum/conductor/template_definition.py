@@ -366,6 +366,22 @@ class BaseTemplateDefinition(TemplateDefinition):
         else:
             return context.auth_token
 
+    def get_discovery_url(self, bay):
+        if hasattr(bay, 'discovery_url') and bay.discovery_url:
+            discovery_url = bay.discovery_url
+        else:
+            discovery_endpoint = (
+                cfg.CONF.bay.etcd_discovery_service_endpoint_format %
+                {'size': bay.master_count})
+            discovery_url = requests.get(discovery_endpoint).text
+            if not discovery_url:
+                raise exception.InvalidDiscoveryURL(
+                    discovery_url=discovery_url,
+                    discovery_endpoint=discovery_endpoint)
+            else:
+                bay.discovery_url = discovery_url
+        return discovery_url
+
 
 class K8sApiAddressOutputMapping(OutputMapping):
 
@@ -454,22 +470,6 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
                         bay_attr=None)
         self.add_output('kube_masters',
                         bay_attr='master_addresses')
-
-    def get_discovery_url(self, bay):
-        if hasattr(bay, 'discovery_url') and bay.discovery_url:
-            discovery_url = bay.discovery_url
-        else:
-            discovery_endpoint = (
-                cfg.CONF.bay.etcd_discovery_service_endpoint_format %
-                {'size': bay.master_count})
-            discovery_url = requests.get(discovery_endpoint).text
-            if not discovery_url:
-                raise exception.InvalidDiscoveryURL(
-                    discovery_url=discovery_url,
-                    discovery_endpoint=discovery_endpoint)
-            else:
-                bay.discovery_url = discovery_url
-        return discovery_url
 
     def get_params(self, context, baymodel, bay, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
@@ -586,22 +586,6 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
                         bay_attr='node_addresses')
         self.add_output('discovery_url',
                         bay_attr='discovery_url')
-
-    def get_discovery_url(self, bay):
-        if hasattr(bay, 'discovery_url') and bay.discovery_url:
-            discovery_url = bay.discovery_url
-        else:
-            discovery_endpoint = (
-                cfg.CONF.bay.etcd_discovery_service_endpoint_format %
-                {'size': 1})
-            discovery_url = requests.get(discovery_endpoint).text
-            if not discovery_url:
-                raise exception.InvalidDiscoveryURL(
-                    discovery_url=discovery_url,
-                    discovery_endpoint=discovery_endpoint)
-            else:
-                bay.discovery_url = discovery_url
-        return discovery_url
 
     def get_params(self, context, baymodel, bay, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
