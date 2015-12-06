@@ -3,8 +3,8 @@
 cat > /etc/systemd/system/swarm-manager.service << END_SERVICE_TOP
 [Unit]
 Description=Swarm Manager
-After=docker.service
-Requires=docker.service
+After=docker.service etcd.service
+Requires=docker.service etcd.service
 OnFailure=swarm-manager-failure.service
 
 [Service]
