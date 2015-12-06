@@ -30,12 +30,16 @@ def wrap_container_exception(f):
         try:
             return f(self, context, *args, **kwargs)
         except Exception as e:
-            container_uuid = kwargs.get('container_uuid')
-            if container_uuid is not None:
-                LOG.exception(_LE("Error while connect to docker "
-                                  "container %(name)s: %(error)s"),
-                              {'name': container_uuid,
-                               'error': str(e)})
+            container_uuid = None
+            if 'container_uuid' in kwargs:
+                container_uuid = kwargs.get('container_uuid')
+            elif 'container' in kwargs:
+                container_uuid = kwargs.get('container').uuid
+
+            LOG.exception(_LE("Error while connect to docker "
+                              "container %(name)s: %(error)s"),
+                          {'name': container_uuid,
+                           'error': str(e)})
             raise exception.ContainerException(
                 "Docker internal Error: %s" % str(e))
     return functools.wraps(f)(wrapped)

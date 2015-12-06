@@ -150,7 +150,7 @@ class TestDockerHandler(base.BaseTestCase):
             'test_image',
             tag='some_tag')
         self.assertFalse(self.mock_docker.create_container.called)
-        mock_init.assert_called_once_with()
+        mock_init.assert_called_with()
         self.assertEqual(fields.ContainerStatus.ERROR,
                          mock_container.status)
 
@@ -204,7 +204,7 @@ class TestDockerHandler(base.BaseTestCase):
             mock_docker_id)
         mock_find_container.assert_called_once_with(self.mock_docker,
                                                     mock_container_uuid)
-        mock_init.assert_called_once_with()
+        mock_init.assert_called_with()
 
     @mock.patch.object(objects.Container, 'get_by_uuid')
     @mock.patch.object(docker_conductor.Handler, '_find_container_by_name')
@@ -249,7 +249,7 @@ class TestDockerHandler(base.BaseTestCase):
         docker_func.assert_called_once_with(mock_docker_id)
         mock_find_container.assert_called_once_with(self.mock_docker,
                                                     mock_container_uuid)
-        mock_init.assert_called_once_with()
+        mock_init.assert_called_with()
 
     @mock.patch.object(objects.Container, 'get_by_uuid')
     @mock.patch.object(docker_conductor.Handler, '_find_container_by_name')
@@ -487,7 +487,7 @@ class TestDockerHandler(base.BaseTestCase):
                     mock_docker_id, 'ls', True, True, False)
             mock_find_container.assert_called_once_with(self.mock_docker,
                                                         mock_container_uuid)
-            mock_init.assert_called_once_with()
+            mock_init.assert_called_with()
 
     @mock.patch.object(docker_conductor.Handler, '_find_container_by_name')
     def test_container_exec_with_failure(self, mock_find_container):
@@ -525,7 +525,7 @@ class TestDockerHandler(base.BaseTestCase):
             mock_docker_id)
         mock_find_container.assert_called_once_with(self.mock_docker,
                                                     mock_container_uuid)
-        mock_init.assert_called_once_with()
+        mock_init.assert_called_with()
 
     def test_container_common_exception(self):
         self.dfc_context_manager.__enter__.side_effect = Exception("So bad")
