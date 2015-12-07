@@ -385,7 +385,7 @@ class BayNotFound(ResourceNotFound):
 
 
 class BayAlreadyExists(Conflict):
-    message = _("A node with UUID %(uuid)s already exists.")
+    message = _("A bay with UUID %(uuid)s already exists.")
 
 
 class ContainerNotFound(ResourceNotFound):
@@ -401,7 +401,7 @@ class PodNotFound(ResourceNotFound):
 
 
 class PodAlreadyExists(Conflict):
-    message = _("A node with UUID %(uuid)s already exists.")
+    message = _("A pod with UUID %(uuid)s already exists.")
 
 
 class PodListNotFound(ResourceNotFound):
@@ -435,7 +435,7 @@ class ServiceNotFound(ResourceNotFound):
 
 
 class ServiceAlreadyExists(Conflict):
-    message = _("A node with UUID %(uuid)s already exists.")
+    message = _("A service with UUID %(uuid)s already exists.")
 
 
 class ServiceListNotFound(ResourceNotFound):
