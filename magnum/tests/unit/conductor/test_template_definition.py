@@ -495,6 +495,9 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
         heat_param = mesos_def.get_heat_param(bay_attr='node_count')
         self.assertEqual('number_of_slaves', heat_param)
 
+        heat_param = mesos_def.get_heat_param(bay_attr='master_count')
+        self.assertEqual('number_of_masters', heat_param)
+
     def test_update_outputs(self):
         mesos_def = tdef.UbuntuMesosTemplateDefinition()
 
