@@ -320,7 +320,7 @@
 
 # Location of template to build a swarm cluster on atomic. (string
 # value)
-#swarm_atomic_template_path = $pybasedir/templates/swarm/swarm.yaml
+#swarm_atomic_template_path = $pybasedir/templates/swarm/swarmcluster.yaml
 
 # Location of template to build a Mesos cluster on Ubuntu. (string
 # value)

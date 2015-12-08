@@ -2,7 +2,7 @@ heat_template_version: 2013-05-23
 
 description: >
   This template will boot a Docker swarm cluster. A swarm cluster is made up
-  of several master node, and N agent nodes. Every node in the cluster,
+  of several master nodes, and N agent nodes. Every node in the cluster,
   including the master, is running a Docker daemon and a swarm agent
   advertising it to the cluster. The master is running an addition swarm
   master container listening on port 2376. By default, the cluster is made
