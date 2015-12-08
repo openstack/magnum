@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import glanceclient.exc
 from oslo_utils import timeutils
 import pecan
 from pecan import rest
@@ -243,20 +242,6 @@ class BayModelsController(rest.RestController):
                                                      sort_key=sort_key,
                                                      sort_dir=sort_dir)
 
-    def _get_image_data(self, context, image_ident):
-        """Retrieves os_distro and other metadata from the Glance image.
-
-        :param image_ident: image id or name of baymodel.
-        """
-        try:
-            cli = clients.OpenStackClients(context)
-            return api_utils.get_openstack_resource(cli.glance().images,
-                                                    image_ident, 'images')
-        except glanceclient.exc.NotFound:
-            raise exception.ImageNotFound(image_id=image_ident)
-        except glanceclient.exc.HTTPForbidden:
-            raise exception.ImageNotAuthorized(image_id=image_ident)
-
     @policy.enforce_wsgi("baymodel")
     @expose.expose(BayModelCollection, types.uuid, int, wtypes.text,
                    wtypes.text)
@@ -317,14 +302,11 @@ class BayModelsController(rest.RestController):
         context = pecan.request.context
         cli = clients.OpenStackClients(context)
         attr_validator.validate_keypair(cli, baymodel_dict['keypair_id'])
+        image_data = attr_validator.validate_image(cli,
+                                                   baymodel_dict['image_id'])
+        baymodel_dict['cluster_distro'] = image_data['os_distro']
         baymodel_dict['project_id'] = context.project_id
         baymodel_dict['user_id'] = context.user_id
-        image_data = self._get_image_data(context, baymodel_dict['image_id'])
-        if image_data.get('os_distro'):
-            baymodel_dict['cluster_distro'] = image_data['os_distro']
-        else:
-            raise exception.OSDistroFieldNotFound(
-                image_id=baymodel_dict['image_id'])
         # check permissions for making baymodel public
         if baymodel_dict['public']:
             if not policy.enforce(context, "baymodel:publish", None,
