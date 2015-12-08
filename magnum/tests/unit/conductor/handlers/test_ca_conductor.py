@@ -16,7 +16,6 @@ from magnum.conductor.handlers import ca_conductor
 from magnum.tests import base
 
 import mock
-from mock import patch
 
 
 class TestSignConductor(base.TestCase):
@@ -24,7 +23,7 @@ class TestSignConductor(base.TestCase):
         super(TestSignConductor, self).setUp()
         self.ca_handler = ca_conductor.Handler()
 
-    @patch.object(ca_conductor, 'cert_manager')
+    @mock.patch.object(ca_conductor, 'cert_manager')
     def test_sign_certificate(self, mock_cert_manager):
         mock_bay = mock.MagicMock()
         mock_certificate = mock.MagicMock()
@@ -40,7 +39,7 @@ class TestSignConductor(base.TestCase):
         )
         self.assertEqual('fake-pem', actual_cert.pem)
 
-    @patch.object(ca_conductor, 'cert_manager')
+    @mock.patch.object(ca_conductor, 'cert_manager')
     def test_get_ca_certificate(self, mock_cert_manager):
         mock_bay = mock.MagicMock()
         mock_bay.uuid = 'bay-uuid'
