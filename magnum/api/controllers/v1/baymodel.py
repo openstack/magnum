@@ -13,13 +13,13 @@
 #    under the License.
 
 import glanceclient.exc
-import novaclient.exceptions as nova_exc
 from oslo_utils import timeutils
 import pecan
 from pecan import rest
 import wsme
 from wsme import types as wtypes
 
+from magnum.api import attr_validator
 from magnum.api.controllers import base
 from magnum.api.controllers import link
 from magnum.api.controllers.v1 import collection
@@ -305,14 +305,6 @@ class BayModelsController(rest.RestController):
         rpc_baymodel = api_utils.get_rpc_resource('BayModel', baymodel_ident)
         return BayModel.convert_with_links(rpc_baymodel)
 
-    def check_keypair_exists(self, context, keypair):
-        """Checks the existence of the keypair"""
-        cli = clients.OpenStackClients(context)
-        try:
-            cli.nova().keypairs.get(keypair)
-        except nova_exc.NotFound:
-            raise exception.KeyPairNotFound(keypair=keypair)
-
     @policy.enforce_wsgi("baymodel", "create")
     @expose.expose(BayModel, body=BayModel, status_code=201)
     @validation.enforce_network_driver_types_create()
@@ -323,7 +315,8 @@ class BayModelsController(rest.RestController):
         """
         baymodel_dict = baymodel.as_dict()
         context = pecan.request.context
-        self.check_keypair_exists(context, baymodel_dict['keypair_id'])
+        cli = clients.OpenStackClients(context)
+        attr_validator.validate_keypair(cli, baymodel_dict['keypair_id'])
         baymodel_dict['project_id'] = context.project_id
         baymodel_dict['user_id'] = context.user_id
         image_data = self._get_image_data(context, baymodel_dict['image_id'])

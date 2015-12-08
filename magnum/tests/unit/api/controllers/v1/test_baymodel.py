@@ -22,13 +22,13 @@ from wsme import types as wtypes
 
 from magnum.api.controllers.v1 import baymodel as api_baymodel
 from magnum.common.clients import OpenStackClients as openstack_client
+from magnum.common import exception
 from magnum.common import policy as magnum_policy
 from magnum.common import utils
 from magnum.tests import base
 from magnum.tests.unit.api import base as api_base
 from magnum.tests.unit.api import utils as apiutils
 from magnum.tests.unit.objects import utils as obj_utils
-from novaclient import exceptions as nova_exc
 
 
 class TestBayModelObject(base.TestCase):
@@ -388,8 +388,7 @@ class TestPatch(api_base.FunctionalTest):
 class TestPost(api_base.FunctionalTest):
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
-    @mock.patch.object(api_baymodel.BayModelsController,
-                       'check_keypair_exists')
+    @mock.patch('magnum.api.attr_validator.validate_keypair')
     @mock.patch('oslo_utils.timeutils.utcnow')
     def test_create_baymodel(self, mock_utcnow,
                              mock_keypair_exists, mock_image_data):
@@ -414,8 +413,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(test_time, return_created_at)
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
-    @mock.patch.object(api_baymodel.BayModelsController,
-                       'check_keypair_exists')
+    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def test_create_baymodel_set_project_id_and_user_id(self,
                                                         mock_keypair_exists,
                                                         mock_image_data):
@@ -433,8 +431,7 @@ class TestPost(api_base.FunctionalTest):
                              cc_mock.call_args[0][0]['user_id'])
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
-    @mock.patch.object(api_baymodel.BayModelsController,
-                       'check_keypair_exists')
+    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def test_create_baymodel_doesnt_contain_id(self,
                                                mock_keypair_exists,
                                                mock_image_data):
@@ -498,8 +495,7 @@ class TestPost(api_base.FunctionalTest):
         self._create_baymodel_raises_app_error(apiserver_port='not an int')
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
-    @mock.patch.object(api_baymodel.BayModelsController,
-                       'check_keypair_exists')
+    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def test_create_baymodel_with_labels(self, mock_keypair_exists,
                                          mock_image_data):
         with mock.patch.object(self.dbapi, 'create_baymodel',
@@ -516,8 +512,7 @@ class TestPost(api_base.FunctionalTest):
             self.assertNotIn('id', cc_mock.call_args[0][0])
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
-    @mock.patch.object(api_baymodel.BayModelsController,
-                       'check_keypair_exists')
+    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def test_create_baymodel_with_docker_volume_size(self,
                                                      mock_keypair_exists,
                                                      mock_image_data):
@@ -534,16 +529,14 @@ class TestPost(api_base.FunctionalTest):
             self.assertNotIn('id', cc_mock.call_args[0][0])
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
-    @mock.patch.object(api_baymodel.BayModelsController,
-                       'check_keypair_exists')
+    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def test_create_baymodel_generate_uuid(self,
                                            mock_keypair_exists,
                                            mock_image_data):
         mock_keypair_exists.return_value = None
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
-    @mock.patch.object(api_baymodel.BayModelsController,
-                       'check_keypair_exists')
+    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def _test_create_baymodel_network_driver_attr(self,
                                                   baymodel_dict,
                                                   baymodel_config_dict,
@@ -610,8 +603,7 @@ class TestPost(api_base.FunctionalTest):
                                                        expect_errors_flag)
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
-    @mock.patch.object(api_baymodel.BayModelsController,
-                       'check_keypair_exists')
+    @mock.patch('magnum.api.attr_validator.validate_keypair')
     @mock.patch.object(magnum_policy, 'enforce')
     def test_create_baymodel_public_success(self, mock_policy,
                                             mock_keypair_exists,
@@ -632,8 +624,7 @@ class TestPost(api_base.FunctionalTest):
             self.assertTrue(cc_mock.call_args[0][0]['public'])
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
-    @mock.patch.object(api_baymodel.BayModelsController,
-                       'check_keypair_exists')
+    @mock.patch('magnum.api.attr_validator.validate_keypair')
     @mock.patch.object(magnum_policy, 'enforce')
     def test_create_baymodel_public_fail(self, mock_policy,
                                          mock_keypair_exists,
@@ -649,8 +640,7 @@ class TestPost(api_base.FunctionalTest):
             self.assertRaises(AppError, self.post_json, '/baymodels', bdict)
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
-    @mock.patch.object(api_baymodel.BayModelsController,
-                       'check_keypair_exists')
+    @mock.patch('magnum.api.attr_validator.validate_keypair')
     @mock.patch.object(magnum_policy, 'enforce')
     def test_create_baymodel_public_not_set(self, mock_policy,
                                             mock_keypair_exists,
@@ -670,8 +660,7 @@ class TestPost(api_base.FunctionalTest):
             self.assertFalse(cc_mock.call_args[0][0]['public'])
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
-    @mock.patch.object(api_baymodel.BayModelsController,
-                       'check_keypair_exists')
+    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def test_create_baymodel_with_no_os_distro_image(self,
                                                      mock_keypair_exists,
                                                      mock_image_data):
@@ -683,8 +672,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(404, response.status_int)
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
-    @mock.patch.object(api_baymodel.BayModelsController,
-                       'check_keypair_exists')
+    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def test_create_baymodel_with_os_distro_image(self,
                                                   mock_keypair_exists,
                                                   mock_image_data):
@@ -697,8 +685,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(201, response.status_int)
 
     @mock.patch.object(openstack_client, 'glance')
-    @mock.patch.object(api_baymodel.BayModelsController,
-                       'check_keypair_exists')
+    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def test_create_baymodel_with_image_name(self,
                                              mock_keypair_exists,
                                              mock_glance_client):
@@ -714,8 +701,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(201, response.status_int)
 
     @mock.patch.object(openstack_client, 'glance')
-    @mock.patch.object(api_baymodel.BayModelsController,
-                       'check_keypair_exists')
+    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def test_create_baymodel_with_no_exist_image_name(self,
                                                       mock_keypair_exists,
                                                       mock_glance_client):
@@ -730,8 +716,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(404, response.status_int)
 
     @mock.patch.object(openstack_client, 'glance')
-    @mock.patch.object(api_baymodel.BayModelsController,
-                       'check_keypair_exists')
+    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def test_create_baymodel_with_multi_image_name(self,
                                                    mock_keypair_exists,
                                                    mock_glance_client):
@@ -761,8 +746,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
 
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
-    @mock.patch.object(api_baymodel.BayModelsController,
-                       'check_keypair_exists')
+    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def test_create_baymodel_with_dns(self, mock_keypair_exists,
                                       mock_image_data):
         mock_keypair_exists.return_value = None
@@ -774,14 +758,12 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(bdict['dns_nameserver'],
                          response.json['dns_nameserver'])
 
-    @mock.patch.object(openstack_client, 'nova')
     @mock.patch.object(api_baymodel.BayModelsController, '_get_image_data')
+    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def test_create_baymodel_with_no_exist_keypair(self,
-                                                   mock_image_data,
-                                                   mock_nova_client):
-        mock_nova = mock.MagicMock()
-        mock_nova.keypairs.get.side_effect = nova_exc.NotFound("Test")
-        mock_nova_client.return_value = mock_nova
+                                                   mock_keypair_exists,
+                                                   mock_image_data):
+        mock_keypair_exists.side_effect = exception.KeyPairNotFound("Test")
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
         bdict = apiutils.baymodel_post_data()
