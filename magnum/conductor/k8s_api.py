@@ -14,13 +14,11 @@
 
 from tempfile import NamedTemporaryFile
 
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
 from oslo_log import log as logging
 
-from magnum.common import cert_manager
 from magnum.common.pythonk8sclient.swagger_client import api_client
 from magnum.common.pythonk8sclient.swagger_client.apis import apiv_api
+from magnum.conductor.handlers.common import cert_manager
 from magnum.conductor import utils
 from magnum.objects.bay import Bay
 
@@ -72,23 +70,13 @@ class K8sAPI(apiv_api.ApivApi):
 
         :param bay: Bay object
         """
-        magnum_cert_obj = cert_manager.get_backend().CertManager.get_cert(
-            bay.magnum_cert_ref, resource_ref=bay.uuid)
+        magnum_cert_obj = cert_manager.get_bay_magnum_cert(bay)
         self.cert_file = self._create_temp_file_with_content(
             magnum_cert_obj.get_certificate())
-        private_key = serialization.load_pem_private_key(
-            magnum_cert_obj.get_private_key(),
-            password=magnum_cert_obj.get_private_key_passphrase(),
-            backend=default_backend(),
-        )
-        private_key = private_key.private_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PrivateFormat.PKCS8,
-            encryption_algorithm=serialization.NoEncryption())
+        private_key = magnum_cert_obj.get_decrypted_private_key()
         self.key_file = self._create_temp_file_with_content(
             private_key)
-        ca_cert_obj = cert_manager.get_backend().CertManager.get_cert(
-            bay.ca_cert_ref, resource_ref=bay.uuid)
+        ca_cert_obj = cert_manager.get_bay_ca_certificate(bay)
         self.ca_file = self._create_temp_file_with_content(
             ca_cert_obj.get_certificate())
 
@@ -156,25 +144,15 @@ class K8sAPI_Service(apiv_api.ApivApi):
 
         :param bay: Bay object
         """
-        magnum_cert_obj = cert_manager.get_backend().CertManager.get_cert(
-            bay.magnum_cert_ref)
+        magnum_cert_obj = cert_manager.get_bay_magnum_cert(bay)
         self.cert_file = self._create_temp_file_with_content(
-            magnum_cert_obj.certificate)
-        private_key = serialization.load_pem_private_key(
-            magnum_cert_obj.private_key,
-            password=magnum_cert_obj.private_key_passphrase,
-            backend=default_backend(),
-        )
-        private_key = private_key.private_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PrivateFormat.PKCS8,
-            encryption_algorithm=serialization.NoEncryption())
+            magnum_cert_obj.get_certificate())
+        private_key = magnum_cert_obj.get_decrypted_private_key()
         self.key_file = self._create_temp_file_with_content(
             private_key)
-        ca_cert_obj = cert_manager.get_backend().CertManager.get_cert(
-            bay.ca_cert_ref)
+        ca_cert_obj = cert_manager.get_bay_ca_certificate(bay)
         self.ca_file = self._create_temp_file_with_content(
-            ca_cert_obj.certificate)
+            ca_cert_obj.get_certificate())
 
     def __del__(self):
         if self.ca_file:
@@ -240,25 +218,15 @@ class K8sAPI_Pod(apiv_api.ApivApi):
 
         :param bay: Bay object
         """
-        magnum_cert_obj = cert_manager.get_backend().CertManager.get_cert(
-            bay.magnum_cert_ref)
+        magnum_cert_obj = cert_manager.get_bay_magnum_cert(bay)
         self.cert_file = self._create_temp_file_with_content(
-            magnum_cert_obj.certificate)
-        private_key = serialization.load_pem_private_key(
-            magnum_cert_obj.private_key,
-            password=magnum_cert_obj.private_key_passphrase,
-            backend=default_backend(),
-        )
-        private_key = private_key.private_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PrivateFormat.PKCS8,
-            encryption_algorithm=serialization.NoEncryption())
+            magnum_cert_obj.get_certificate())
+        private_key = magnum_cert_obj.get_decrypted_private_key()
         self.key_file = self._create_temp_file_with_content(
             private_key)
-        ca_cert_obj = cert_manager.get_backend().CertManager.get_cert(
-            bay.ca_cert_ref)
+        ca_cert_obj = cert_manager.get_bay_ca_certificate(bay)
         self.ca_file = self._create_temp_file_with_content(
-            ca_cert_obj.certificate)
+            ca_cert_obj.get_certificate())
 
     def __del__(self):
         if self.ca_file:
@@ -324,25 +292,15 @@ class K8sAPI_RC(apiv_api.ApivApi):
 
         :param bay: Bay object
         """
-        magnum_cert_obj = cert_manager.get_backend().CertManager.get_cert(
-            bay.magnum_cert_ref)
+        magnum_cert_obj = cert_manager.get_bay_magnum_cert(bay)
         self.cert_file = self._create_temp_file_with_content(
-            magnum_cert_obj.certificate)
-        private_key = serialization.load_pem_private_key(
-            magnum_cert_obj.private_key,
-            password=magnum_cert_obj.private_key_passphrase,
-            backend=default_backend(),
-        )
-        private_key = private_key.private_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PrivateFormat.PKCS8,
-            encryption_algorithm=serialization.NoEncryption())
+            magnum_cert_obj.get_certificate())
+        private_key = magnum_cert_obj.get_decrypted_private_key()
         self.key_file = self._create_temp_file_with_content(
             private_key)
-        ca_cert_obj = cert_manager.get_backend().CertManager.get_cert(
-            bay.ca_cert_ref)
+        ca_cert_obj = cert_manager.get_bay_ca_certificate(bay)
         self.ca_file = self._create_temp_file_with_content(
-            ca_cert_obj.certificate)
+            ca_cert_obj.get_certificate())
 
     def __del__(self):
         if self.ca_file:
