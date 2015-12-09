@@ -94,7 +94,7 @@ nova keypair-add --pub-key ~/.ssh/id_rsa.pub default
 
 # Create magnum specific flavor for use in functional tests.
 echo_summary "Create a flavor"
-nova flavor-create  m1.magnum 100 2048 8 1
+nova flavor-create  m1.magnum 100 1024 8 1
 
 # Run functional tests
 # Currently we support functional-api, functional-k8s, will support swarm,

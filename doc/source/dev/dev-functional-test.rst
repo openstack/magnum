@@ -40,7 +40,7 @@ Create the necessary keypair and flavor::
 
     source /opt/stack/devstack/openrc admin admin
     nova keypair-add --pub-key ~/.ssh/id_rsa.pub default
-    nova flavor-create  m1.magnum 100 2048 8 1
+    nova flavor-create  m1.magnum 100 1024 8 1
 
     source /opt/stack/devstack/openrc demo demo
     nova keypair-add --pub-key ~/.ssh/id_rsa.pub default

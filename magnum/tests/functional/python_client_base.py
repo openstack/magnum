@@ -117,6 +117,7 @@ class BaseMagnumClient(base.TestCase):
             external_network_id=cls.nic_id,
             image_id=cls.image_id,
             flavor_id=cls.flavor_id,
+            master_flavor_id=cls.flavor_id,
             docker_volume_size=docker_volume_size,
             network_driver=network_driver,
             coe=coe,
