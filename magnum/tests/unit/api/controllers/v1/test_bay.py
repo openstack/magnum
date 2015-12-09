@@ -604,6 +604,33 @@ class TestPost(api_base.FunctionalTest):
         self.assertTrue(mock_valid_os_res.called)
         self.assertEqual(404, response.status_int)
 
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_with_nonexist_image(self, mock_valid_os_res):
+        bdict = apiutils.bay_post_data()
+        mock_valid_os_res.side_effect = exception.ImageNotFound('test-img')
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(mock_valid_os_res.called)
+        self.assertEqual(404, response.status_int)
+
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_with_multi_images_same_name(self, mock_valid_os_res):
+        bdict = apiutils.bay_post_data()
+        mock_valid_os_res.side_effect = exception.Conflict('test-img')
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(mock_valid_os_res.called)
+        self.assertEqual(409, response.status_int)
+
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_with_on_os_distro_image(self, mock_valid_os_res):
+        bdict = apiutils.bay_post_data()
+        mock_valid_os_res.side_effect = exception.OSDistroFieldNotFound('img')
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(mock_valid_os_res.called)
+        self.assertEqual(404, response.status_int)
+
 
 class TestDelete(api_base.FunctionalTest):
 
