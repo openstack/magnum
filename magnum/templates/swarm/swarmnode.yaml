@@ -3,24 +3,21 @@ heat_template_version: 2013-05-23
 description: >
   This is a nested stack that defines a single swarm node,
   based on a vanilla Fedora 20 cloud image.  This stack is included by
-  a ResourceGroup resource in the parent template (swarm.yaml).
+  a ResourceGroup resource in the parent template (swarmcluster.yaml).
 
 parameters:
 
   server_image:
     type: string
-    default: fedora-atomic
     description: glance image used to boot the server
 
   server_flavor:
     type: string
-    default: m1.small
     description: flavor to use when booting the server
 
   ssh_key_name:
     type: string
     description: name of ssh key to be provisioned on our server
-    default: lars
 
   docker_volume_size:
     type: number
@@ -43,7 +40,6 @@ parameters:
   network_driver:
     type: string
     description: network driver to use for instantiating container networks
-    default: None
 
   discovery_url:
     type: string
@@ -52,17 +48,14 @@ parameters:
   http_proxy:
     type: string
     description: http proxy address for docker
-    default: ""
 
   https_proxy:
     type: string
     description: https proxy address for docker
-    default: ""
 
   no_proxy:
     type: string
     description: no proxies for docker
-    default: ""
 
   swarm_api_ip:
     type: string
@@ -91,7 +84,6 @@ parameters:
   swarm_version:
     type: string
     description: version of swarm used for swarm cluster
-    default: 1.0.0
 
   secgroup_swarm_node_id:
     type: string
@@ -99,7 +91,7 @@ parameters:
 
   etcd_server_ip:
     type: string
-    description: ID of the load balancer pool of etcd serve.
+    description: ip address of the load balancer pool of etcd server.
 
 resources:
 

@@ -1,15 +1,12 @@
 heat_template_version: 2013-05-23
 
 description: >
-  This template will boot a Docker swarm master node. A swarm mater node is
+  This is a nested stack that defines swarm master node. A swarm mater node is
   running a Docker daemon and a swarm master container listening on port 2376,
   and a swarm agent advertising it to the cluster.
 
 parameters:
 
-  #
-  # REQUIRED PARAMETERS
-  #
   ssh_key_name:
     type: string
     description: name of ssh key to be provisioned on our server
@@ -103,7 +100,6 @@ parameters:
   swarm_version:
     type: string
     description: version of swarm used for swarm cluster
-    default: 1.0.0
 
   secgroup_swarm_master_id:
     type: string
@@ -124,7 +120,7 @@ parameters:
 
   etcd_server_ip:
     type: string
-    description: ID of the load balancer pool of etcd server.
+    description: ip address of the load balancer pool of etcd server.
 
 resources:
 
