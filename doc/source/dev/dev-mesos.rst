@@ -44,16 +44,19 @@ can be built and uploaded to glance as follows:
 
     $ sudo apt-get update
     $ sudo apt-get install git qemu-utils python-pip
-    $ sudo pip install pyyaml
 
     $ git clone https://git.openstack.org/openstack/magnum
     $ git clone https://git.openstack.org/openstack/diskimage-builder.git
     $ git clone https://git.openstack.org/openstack/dib-utils.git
+    $ git clone https://git.openstack.org/openstack/tripleo-image-elements.git
+    $ git clone https://git.openstack.org/openstack/heat-templates.git
     $ export PATH="${PWD}/dib-utils/bin:$PATH"
-    $ export ELEMENTS_PATH=magnum/magnum/templates/mesos/elements
+    $ export ELEMENTS_PATH=tripleo-image-elements/elements:heat-templates/hot/software-config/elements:magnum/magnum/templates/mesos/elements
     $ export DIB_RELEASE=trusty
 
     $ diskimage-builder/bin/disk-image-create ubuntu vm docker mesos \
+        os-collect-config os-refresh-config os-apply-config \
+        heat-config heat-config-script \
         -o ubuntu-mesos.qcow2
 
     $ glance image-create --name ubuntu-mesos --visibility public \
@@ -93,6 +96,18 @@ your environment:
       external_network: public
       dns_nameserver: 8.8.8.8
       server_image: ubuntu-mesos
+
+The parameters above will create a stack with one master node. If you want to
+create a stack with multiple master nodes (HA mode), create a file like below:
+
+::
+
+    parameters:
+      ssh_key_name: testkey
+      external_network: public
+      dns_nameserver: 8.8.8.8
+      server_image: ubuntu-mesos
+      number_of_masters: 3
 
 And then create the stack, referencing that environment file:
 
