@@ -71,8 +71,8 @@ class TestBayConductorWithMesos(base.TestCase):
             'server_image': 'image_id',
             'master_flavor': 'master_flavor_id',
             'slave_flavor': 'flavor_id',
-            'number_of_slaves': '1',
-            'number_of_masters': '1',
+            'number_of_slaves': 1,
+            'number_of_masters': 1,
             'fixed_network_cidr': '10.2.0.0/22',
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
@@ -101,8 +101,8 @@ class TestBayConductorWithMesos(base.TestCase):
         expected = {
             'ssh_key_name': 'keypair_id',
             'external_network': 'external_network_id',
-            'number_of_slaves': '1',
-            'number_of_masters': '1',
+            'number_of_slaves': 1,
+            'number_of_masters': 1,
         }
         self.assertEqual(expected, definition)
 

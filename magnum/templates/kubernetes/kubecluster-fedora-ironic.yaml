@@ -34,7 +34,7 @@ parameters:
     description: flavor to use when booting the server
 
   number_of_minions:
-    type: string
+    type: number
     description: how many kubernetes minions to spawn
     default: 1
 

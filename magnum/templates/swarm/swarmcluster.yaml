@@ -71,12 +71,12 @@ parameters:
     default: ""
 
   number_of_masters:
-    type: string
+    type: number
     description: how many swarm masters to spawn
     default: 1
 
   number_of_nodes:
-    type: string
+    type: number
     description: how many swarm nodes to spawn
     default: 1
 
