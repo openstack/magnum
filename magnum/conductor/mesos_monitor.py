@@ -34,16 +34,21 @@ class MesosMonitor(MonitorBase):
     def _build_url(self, url, protocol='http', port='80', path='/'):
         return protocol + '://' + url + ':' + port + path
 
+    def _is_leader(self, state):
+        return state['leader'] == state['pid']
+
     def pull_data(self):
-        mesos_master_url = self._build_url(self.bay.api_address,
-                                           port='5050',
-                                           path='/state')
-        state_json = jsonutils.loads(urlfetch.get(mesos_master_url))
         self.data['mem_total'] = 0
         self.data['mem_used'] = 0
-        for slave in state_json['slaves']:
-            self.data['mem_total'] += slave['resources']['mem']
-            self.data['mem_used'] += slave['used_resources']['mem']
+        for master_addr in self.bay.master_addresses:
+            mesos_master_url = self._build_url(master_addr, port='5050',
+                                               path='/state')
+            master = jsonutils.loads(urlfetch.get(mesos_master_url))
+            if self._is_leader(master):
+                for slave in master['slaves']:
+                    self.data['mem_total'] += slave['resources']['mem']
+                    self.data['mem_used'] += slave['used_resources']['mem']
+                break
 
     def compute_memory_util(self):
         if self.data['mem_total'] == 0:

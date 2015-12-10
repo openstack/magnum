@@ -43,7 +43,8 @@ class MonitorsTestCase(base.TestCase):
         super(MonitorsTestCase, self).setUp()
 
         bay = utils.get_test_bay(node_addresses=['1.2.3.4'],
-                                 api_address='https://5.6.7.8:2376')
+                                 api_address='https://5.6.7.8:2376',
+                                 master_addresses=['10.0.0.6'])
         self.bay = objects.Bay(self.context, **bay)
         self.monitor = swarm_monitor.SwarmMonitor(self.context, self.bay)
         self.k8s_monitor = k8s_monitor.K8sMonitor(self.context, self.bay)
@@ -230,9 +231,22 @@ class MonitorsTestCase(base.TestCase):
         mem_util = self.k8s_monitor.compute_memory_util()
         self.assertEqual(0, mem_util)
 
+    def _test_mesos_monitor_pull_data(
+            self, mock_url_get, state_json, expected_mem_total,
+            expected_mem_used):
+        state_json = jsonutils.dumps(state_json)
+        mock_url_get.return_value = state_json
+        self.mesos_monitor.pull_data()
+        self.assertEqual(self.mesos_monitor.data['mem_total'],
+                         expected_mem_total)
+        self.assertEqual(self.mesos_monitor.data['mem_used'],
+                         expected_mem_used)
+
     @mock.patch('magnum.common.urlfetch.get')
     def test_mesos_monitor_pull_data_success(self, mock_url_get):
         state_json = {
+            'leader': 'master@10.0.0.6:5050',
+            'pid': 'master@10.0.0.6:5050',
             'slaves': [{
                 'resources': {
                     'mem': 100
@@ -242,13 +256,21 @@ class MonitorsTestCase(base.TestCase):
                 }
             }]
         }
-        state_json = jsonutils.dumps(state_json)
-        mock_url_get.return_value = state_json
-        self.mesos_monitor.pull_data()
-        self.assertEqual(self.mesos_monitor.data['mem_total'],
-                         100)
-        self.assertEqual(self.mesos_monitor.data['mem_used'],
-                         50)
+        self._test_mesos_monitor_pull_data(mock_url_get, state_json, 100, 50)
+
+    @mock.patch('magnum.common.urlfetch.get')
+    def test_mesos_monitor_pull_data_success_not_leader(self, mock_url_get):
+        state_json = {
+            'leader': 'master@10.0.0.6:5050',
+            'pid': 'master@1.1.1.1:5050',
+            'slaves': []
+        }
+        self._test_mesos_monitor_pull_data(mock_url_get, state_json, 0, 0)
+
+    @mock.patch('magnum.common.urlfetch.get')
+    def test_mesos_monitor_pull_data_success_no_master(self, mock_url_get):
+        self.bay.master_addresses = []
+        self._test_mesos_monitor_pull_data(mock_url_get, {}, 0, 0)
 
     def test_mesos_monitor_get_metric_names(self):
         mesos_metric_spec = 'magnum.conductor.mesos_monitor.MesosMonitor.'\
