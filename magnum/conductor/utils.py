@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from magnum.common import clients
+from magnum.common import utils
 from magnum.objects import bay
 from magnum.objects import baymodel
 
@@ -23,6 +24,14 @@ def retrieve_bay(context, bay_uuid):
 
 def retrieve_baymodel(context, bay):
     return baymodel.BayModel.get_by_uuid(context, bay.baymodel_id)
+
+
+def retrieve_bay_uuid(context, bay_ident):
+    if not utils.is_uuid_like(bay_ident):
+        bay_obj = bay.Bay.get_by_name(context, bay_ident)
+        return bay_obj.uuid
+    else:
+        return bay_ident
 
 
 def object_has_stack(context, bay_uuid):
