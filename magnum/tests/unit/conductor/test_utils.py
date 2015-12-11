@@ -69,3 +69,25 @@ class TestConductorUtils(base.TestCase):
         mock_baymodel_get_by_uuid.assert_called_once_with(
             expected_context,
             expected_baymodel_uuid)
+
+    @patch('magnum.common.utils.is_uuid_like')
+    @patch('magnum.objects.Bay.get_by_name')
+    def test_retrieve_bay_uuid_from_name(self, mock_bay_get_by_name,
+                                         mock_uuid_like):
+        bay = objects.Bay(uuid=1)
+        mock_uuid_like.return_value = False
+        mock_bay_get_by_name.return_value = bay
+        bay_uuid = utils.retrieve_bay_uuid('context', 'fake_name')
+        self.assertEqual('1', bay_uuid)
+
+        mock_uuid_like.assert_called_once_with('fake_name')
+        mock_bay_get_by_name.assert_called_once_with('context', 'fake_name')
+
+    @patch('magnum.common.utils.is_uuid_like')
+    @patch('magnum.objects.Bay.get_by_name')
+    def test_retrieve_bay_uuid_from_uuid(self, mock_bay_get_by_name,
+                                         mock_uuid_like):
+        bay_uuid = utils.retrieve_bay_uuid('context', '1')
+        self.assertEqual('1', bay_uuid)
+        mock_uuid_like.return_value = True
+        mock_bay_get_by_name.assert_not_called()

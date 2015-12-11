@@ -72,11 +72,7 @@ class Handler(object):
         # Since bay identifier is specified verify whether its a UUID
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
-        if not utils.is_uuid_like(bay_ident):
-            bay = objects.Bay.get_by_name(context, bay_ident)
-            bay_ident = bay.uuid
-
-        bay_uuid = bay_ident
+        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
         self.k8s_api = k8s.create_k8s_api_service(context, bay_uuid)
         if utils.is_uuid_like(service_ident):
             service = objects.Service.get_by_uuid(context,
@@ -127,11 +123,7 @@ class Handler(object):
         # Since bay identifier is specified verify whether its a UUID
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
-        if not utils.is_uuid_like(bay_ident):
-            bay = objects.Bay.get_by_name(context, bay_ident)
-            bay_ident = bay.uuid
-
-        bay_uuid = bay_ident
+        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
         self.k8s_api = k8s.create_k8s_api_service(context, bay_uuid)
         if utils.is_uuid_like(service_ident):
             service = objects.Service.get_by_uuid(context, service_ident,
@@ -155,11 +147,7 @@ class Handler(object):
         # Since bay identifier is specified verify whether its a UUID
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
-        if not utils.is_uuid_like(bay_ident):
-            bay = objects.Bay.get_by_name(context, bay_ident)
-            bay_ident = bay.uuid
-
-        bay_uuid = bay_ident
+        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
         self.k8s_api = k8s.create_k8s_api_service(context, bay_uuid)
         if utils.is_uuid_like(service_ident):
             service = objects.Service.get_by_uuid(context, service_ident,
@@ -174,11 +162,7 @@ class Handler(object):
         # Since bay identifier is specified verify whether its a UUID
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
-        if not utils.is_uuid_like(bay_ident):
-            bay = objects.Bay.get_by_name(context, bay_ident)
-            bay_ident = bay.uuid
-
-        bay_uuid = bay_ident
+        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
         self.k8s_api = k8s.create_k8s_api_service(context, bay_uuid)
         try:
             resp = self.k8s_api.list_namespaced_service(namespace='default')
@@ -247,11 +231,7 @@ class Handler(object):
         # Since bay identifier is specified verify whether its a UUID
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
-        if not utils.is_uuid_like(bay_ident):
-            bay = objects.Bay.get_by_name(context, bay_ident)
-            bay_ident = bay.uuid
-
-        bay_uuid = bay_ident
+        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
         self.k8s_api = k8s.create_k8s_api_pod(context, bay_uuid)
         if utils.is_uuid_like(pod_ident):
             pod = objects.Pod.get_by_uuid(context, pod_ident,
@@ -290,11 +270,7 @@ class Handler(object):
         # Since bay identifier is specified verify whether its a UUID
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
-        if not utils.is_uuid_like(bay_ident):
-            bay = objects.Bay.get_by_name(context, bay_ident)
-            bay_ident = bay.uuid
-
-        bay_uuid = bay_ident
+        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
         self.k8s_api = k8s.create_k8s_api_pod(context, bay_uuid)
         if utils.is_uuid_like(pod_ident):
             pod = objects.Pod.get_by_uuid(context, pod_ident,
@@ -317,11 +293,7 @@ class Handler(object):
         # Since bay identifier is specified verify whether its a UUID
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
-        if not utils.is_uuid_like(bay_ident):
-            bay = objects.Bay.get_by_name(context, bay_ident)
-            bay_ident = bay.uuid
-
-        bay_uuid = bay_ident
+        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
         self.k8s_api = k8s.create_k8s_api_pod(context, bay_uuid)
         if utils.is_uuid_like(pod_ident):
             pod = objects.Pod.get_by_uuid(context, pod_ident,
@@ -336,11 +308,7 @@ class Handler(object):
         # Since bay identifier is specified verify whether its a UUID
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
-        if not utils.is_uuid_like(bay_ident):
-            bay = objects.Bay.get_by_name(context, bay_ident)
-            bay_ident = bay.uuid
-
-        bay_uuid = bay_ident
+        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
         self.k8s_api = k8s.create_k8s_api_pod(context, bay_uuid)
         try:
             resp = self.k8s_api.list_namespaced_pod(namespace='default')
@@ -399,11 +367,7 @@ class Handler(object):
         # Since bay identifier is specified verify whether its a UUID
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
-        if not utils.is_uuid_like(bay_ident):
-            bay = objects.Bay.get_by_name(context, bay_ident)
-            bay_ident = bay.uuid
-
-        bay_uuid = bay_ident
+        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
         self.k8s_api = k8s.create_k8s_api_rc(context, bay_uuid)
         if utils.is_uuid_like(rc_ident):
             rc = objects.ReplicationController.get_by_uuid(context, rc_ident,
@@ -440,11 +404,7 @@ class Handler(object):
         # Since bay identifier is specified verify whether its a UUID
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
-        if not utils.is_uuid_like(bay_ident):
-            bay = objects.Bay.get_by_name(context, bay_ident)
-            bay_ident = bay.uuid
-
-        bay_uuid = bay_ident
+        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
         self.k8s_api = k8s.create_k8s_api_rc(context, bay_uuid)
         if utils.is_uuid_like(rc_ident):
             rc = objects.ReplicationController.get_by_uuid(context, rc_ident,
@@ -470,11 +430,7 @@ class Handler(object):
         # Since bay identifier is specified verify whether its a UUID
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
-        if not utils.is_uuid_like(bay_ident):
-            bay = objects.Bay.get_by_name(context, bay_ident)
-            bay_ident = bay.uuid
-
-        bay_uuid = bay_ident
+        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
         self.k8s_api = k8s.create_k8s_api_rc(context, bay_uuid)
         if utils.is_uuid_like(rc_ident):
             rc = objects.ReplicationController.get_by_uuid(context, rc_ident,
@@ -491,11 +447,7 @@ class Handler(object):
         # Since bay identifier is specified verify whether its a UUID
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
-        if not utils.is_uuid_like(bay_ident):
-            bay = objects.Bay.get_by_name(context, bay_ident)
-            bay_ident = bay.uuid
-
-        bay_uuid = bay_ident
+        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
         self.k8s_api = k8s.create_k8s_api_rc(context, bay_uuid)
         try:
             resp = self.k8s_api.list_namespaced_replication_controller(
