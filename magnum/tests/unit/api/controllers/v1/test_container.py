@@ -247,8 +247,8 @@ class TestContainerController(api_base.FunctionalTest):
         response = self.app.get('/v1/containers')
 
         mock_container_list.assert_called_once_with(mock.ANY,
-                                                    1000, None, sort_dir='asc',
-                                                    sort_key='id')
+                                                    1000, None, 'id', 'asc',
+                                                    filters=None)
         self.assertEqual(200, response.status_int)
         actual_containers = response.json['containers']
         self.assertEqual(1, len(actual_containers))
@@ -318,8 +318,8 @@ class TestContainerController(api_base.FunctionalTest):
         response = self.app.get('/v1/containers')
 
         mock_container_list.assert_called_once_with(mock.ANY,
-                                                    1000, None, sort_dir='asc',
-                                                    sort_key='id')
+                                                    1000, None, 'id', 'asc',
+                                                    filters=None)
         self.assertEqual(200, response.status_int)
         actual_containers = response.json['containers']
         self.assertEqual(1, len(actual_containers))
@@ -328,6 +328,29 @@ class TestContainerController(api_base.FunctionalTest):
 
         self.assertEqual(fields.ContainerStatus.UNKNOWN,
                          actual_containers[0].get('status'))
+
+    @patch('magnum.conductor.api.API.container_show')
+    @patch('magnum.conductor.utils.retrieve_bay_uuid')
+    @patch('magnum.objects.Container.list')
+    def test_get_all_containers_with_bay_ident(self, mock_container_list,
+                                               mock_retrive_bay_uuid,
+                                               mock_container_show):
+        test_container = utils.get_test_container()
+        containers = [objects.Container(self.context, **test_container)]
+        mock_container_list.return_value = containers
+        mock_retrive_bay_uuid.return_value = '12'
+        mock_container_show.return_value = containers[0]
+
+        response = self.app.get('/v1/containers/?bay_ident=12')
+
+        mock_container_list.assert_called_once_with(mock.ANY,
+                                                    1000, None, 'id', 'asc',
+                                                    filters={'bay_uuid': '12'})
+        self.assertEqual(200, response.status_int)
+        actual_containers = response.json['containers']
+        self.assertEqual(1, len(actual_containers))
+        self.assertEqual(test_container['uuid'],
+                         actual_containers[0].get('uuid'))
 
     @patch('magnum.conductor.api.API.container_show')
     @patch('magnum.objects.Container.get_by_uuid')
