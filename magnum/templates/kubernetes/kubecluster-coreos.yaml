@@ -45,7 +45,7 @@ parameters:
     default: 8.8.8.8
 
   number_of_minions:
-    type: string
+    type: number
     description: how many kubernetes minions to spawn
     default: 1
 

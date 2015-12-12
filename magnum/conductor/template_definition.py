@@ -348,8 +348,7 @@ class BaseTemplateDefinition(TemplateDefinition):
         self.add_parameter('no_proxy',
                            baymodel_attr='no_proxy')
         self.add_parameter('number_of_masters',
-                           bay_attr='master_count',
-                           param_type=str)
+                           bay_attr='master_count')
 
     @abc.abstractproperty
     def template_path(self):
@@ -446,8 +445,7 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
         self.add_parameter('minion_flavor',
                            baymodel_attr='flavor_id')
         self.add_parameter('number_of_minions',
-                           bay_attr='node_count',
-                           param_type=str)
+                           bay_attr='node_count')
         self.add_parameter('docker_volume_size',
                            baymodel_attr='docker_volume_size')
         self.add_parameter('external_network',
@@ -556,8 +554,7 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
                            bay_attr='uuid',
                            param_type=str)
         self.add_parameter('number_of_nodes',
-                           bay_attr='node_count',
-                           param_type=str)
+                           bay_attr='node_count')
         self.add_parameter('server_flavor',
                            baymodel_attr='flavor_id')
         self.add_parameter('docker_volume_size',
@@ -623,8 +620,7 @@ class UbuntuMesosTemplateDefinition(BaseTemplateDefinition):
                            baymodel_attr='external_network_id',
                            required=True)
         self.add_parameter('number_of_slaves',
-                           bay_attr='node_count',
-                           param_type=str)
+                           bay_attr='node_count')
         self.add_parameter('master_flavor',
                            baymodel_attr='master_flavor_id')
         self.add_parameter('slave_flavor',
