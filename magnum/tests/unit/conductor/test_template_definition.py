@@ -122,7 +122,7 @@ class TemplateDefinitionTestCase(base.TestCase):
         ]
 
         mock_stack = mock.MagicMock()
-        mock_stack.outputs = heat_outputs
+        mock_stack.to_dict.return_value = {'outputs': heat_outputs}
 
         output = tdef.OutputMapping('key1')
         value = output.get_output_value(mock_stack)
@@ -133,6 +133,12 @@ class TemplateDefinitionTestCase(base.TestCase):
         self.assertEqual(["value2", "value3"], value)
 
         output = tdef.OutputMapping('key3')
+        value = output.get_output_value(mock_stack)
+        self.assertIsNone(value)
+
+        # verify stack with no 'outputs' attribute
+        mock_stack.to_dict.return_value = {}
+        output = tdef.OutputMapping('key1')
         value = output.get_output_value(mock_stack)
         self.assertIsNone(value)
 
@@ -315,7 +321,7 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
              "output_key": 'api_address'},
         ]
         mock_stack = mock.MagicMock()
-        mock_stack.outputs = outputs
+        mock_stack.to_dict.return_value = {'outputs': outputs}
         mock_bay = mock.MagicMock()
         mock_baymodel = mock.MagicMock()
         mock_baymodel.tls_disabled = tls
@@ -477,7 +483,7 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
              "output_key": "swarm_nodes"},
         ]
         mock_stack = mock.MagicMock()
-        mock_stack.outputs = outputs
+        mock_stack.to_dict.return_value = {'outputs': outputs}
         mock_bay = mock.MagicMock()
         mock_baymodel = mock.MagicMock()
 
@@ -523,7 +529,7 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
              "output_key": "mesos_slaves"},
         ]
         mock_stack = mock.MagicMock()
-        mock_stack.outputs = outputs
+        mock_stack.to_dict.return_value = {'outputs': outputs}
         mock_bay = mock.MagicMock()
         mock_baymodel = mock.MagicMock()
 
