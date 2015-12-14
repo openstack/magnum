@@ -41,9 +41,7 @@ class TestListService(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestListService, self).setUp()
-        bay = obj_utils.create_test_bay(self.context)
-        obj_utils.create_test_baymodel(self.context, uuid=bay.baymodel_id,
-                                       coe='kubernetes')
+        obj_utils.create_test_bay(self.context, coe='kubernetes')
         self.service = obj_utils.create_test_service(self.context)
 
     @mock.patch.object(rpcapi.API, 'service_list')
@@ -219,11 +217,11 @@ class TestPatch(api_base.FunctionalTest):
     def setUp(self):
         super(TestPatch, self).setUp()
         self.bay = obj_utils.create_test_bay(self.context,
-                                             uuid=utils.generate_uuid())
-        obj_utils.create_test_baymodel(self.context, uuid=self.bay.baymodel_id,
-                                       coe='kubernetes')
+                                             uuid=utils.generate_uuid(),
+                                             coe='kubernetes')
         self.bay2 = obj_utils.create_test_bay(self.context,
-                                              uuid=utils.generate_uuid())
+                                              uuid=utils.generate_uuid(),
+                                              coe='kubernetes')
         self.service = obj_utils.create_test_service(self.context,
                                                      bay_uuid=self.bay.uuid)
 
@@ -408,7 +406,8 @@ class TestPost(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestPost, self).setUp()
-        obj_utils.create_test_bay(self.context)
+        self.test_bay = obj_utils.create_test_bay(self.context,
+                                                  coe='kubernetes')
         self.service_obj = obj_utils.create_test_service(self.context)
         p = mock.patch.object(rpcapi.API, 'service_create')
         self.mock_service_create = p.start()
@@ -416,10 +415,10 @@ class TestPost(api_base.FunctionalTest):
         self.mock_service_create.side_effect = (
             self._simulate_rpc_service_create)
         self.addCleanup(p.stop)
-        p = mock.patch('magnum.objects.BayModel.get_by_uuid')
-        self.mock_baymodel_get_by_uuid = p.start()
-        self.mock_baymodel_get_by_uuid.return_value.coe = 'kubernetes'
-        self.addCleanup(p.stop)
+        self.mock_baymodel_get_by_uuid = obj_utils.get_test_baymodel(
+            self.context,
+            uuid=self.test_bay.baymodel_id,
+            coe='kubernetes')
 
     def _simulate_rpc_service_create(self, service):
         service.create()
@@ -519,9 +518,7 @@ class TestDelete(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestDelete, self).setUp()
-        bay = obj_utils.create_test_bay(self.context)
-        obj_utils.create_test_baymodel(self.context, uuid=bay.baymodel_id,
-                                       coe='kubernetes')
+        obj_utils.create_test_bay(self.context, coe='kubernetes')
         self.service = obj_utils.create_test_service(self.context)
 
     @mock.patch.object(rpcapi.API, 'service_delete')

@@ -134,6 +134,16 @@ class TestHandler(db_base.DbTestCase):
 
         mock_create_stack.side_effect = create_stack_side_effect
 
+        # FixMe(eliqiao): bay_create will call bay.create() again, this so bad
+        # because we have already called it in setUp since other test case will
+        # share the codes in setUp()
+        # But in self.handler.bay_create, we update bay.uuid and bay.stack_id
+        # so bay.create will create a new recored with baymodel_id None,
+        # this is bad because we load BayModel object in Bay object by
+        # baymodel_id. Here update self.bay.baymodel_id so bay.obj_get_changes
+        # will get notice that baymodel_id is updated and will update it
+        # in db.
+        self.bay.baymodel_id = self.baymodel.uuid
         self.handler.bay_create(self.context,
                                 self.bay, timeout)
 
