@@ -46,6 +46,8 @@ if [[ "$COE" == "kubernetes" ]]; then
     remote_exec $SSH_USER "sudo journalctl -u kube-scheduler --no-pager" kube-scheduler.log
     remote_exec $SSH_USER "sudo journalctl -u kube-controller-manager --no-pager" kube-controller-manager.log
     remote_exec $SSH_USER "sudo journalctl -u docker --no-pager" docker.log
+    remote_exec $SSH_USER "sudo docker ps --all=true --no-trunc=true" docker-containers.log
+    remote_exec $SSH_USER "sudo tar zcvf - /var/lib/docker/containers 2>/dev/null" docker-container-configs.tar.gz
     remote_exec $SSH_USER "sudo journalctl -u flanneld --no-pager" flanneld.log
     remote_exec $SSH_USER "sudo ip a" ipa.log
     remote_exec $SSH_USER "sudo netstat -an" netstat.log
@@ -60,6 +62,8 @@ elif [[ "$COE" == "swarm" ]]; then
     remote_exec $SSH_USER "sudo journalctl -u swarm-manager --no-pager" swarm-manager.log
     remote_exec $SSH_USER "sudo journalctl -u swarm-agent --no-pager" swarm-agent.log
     remote_exec $SSH_USER "sudo journalctl -u docker --no-pager" docker.log
+    remote_exec $SSH_USER "sudo docker ps --all=true --no-trunc=true" docker-containers.log
+    remote_exec $SSH_USER "sudo tar zcvf - /var/lib/docker/containers 2>/dev/null" docker-container-configs.tar.gz
     remote_exec $SSH_USER "sudo journalctl -u flanneld --no-pager" flanneld.log
     remote_exec $SSH_USER "sudo ip a" ipa.log
     remote_exec $SSH_USER "sudo netstat -an" netstat.log
