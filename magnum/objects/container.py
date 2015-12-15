@@ -24,7 +24,8 @@ class Container(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.0: Initial version
     # Version 1.1: Add memory field
     # Version 1.2: Add environment field
-    VERSION = '1.2'
+    # Version 1.3: Add filters to list()
+    VERSION = '1.3'
 
     dbapi = dbapi.get_instance()
 
@@ -95,7 +96,7 @@ class Container(base.MagnumPersistentObject, base.MagnumObject,
 
     @base.remotable_classmethod
     def list(cls, context, limit=None, marker=None,
-             sort_key=None, sort_dir=None):
+             sort_key=None, sort_dir=None, filters=None):
         """Return a list of Container objects.
 
         :param context: Security context.
@@ -103,13 +104,17 @@ class Container(base.MagnumPersistentObject, base.MagnumObject,
         :param marker: pagination marker for large data sets.
         :param sort_key: column to sort results by.
         :param sort_dir: direction to sort. "asc" or "desc".
+        :param filters: filters when list containers, the filter name could be
+                        'name', 'image', 'project_id', 'user_id', 'memory',
+                        'bay_uuid'. For example, filters={'bay_uuid': '1'}
         :returns: a list of :class:`Container` object.
 
         """
         db_containers = cls.dbapi.get_container_list(context, limit=limit,
                                                      marker=marker,
                                                      sort_key=sort_key,
-                                                     sort_dir=sort_dir)
+                                                     sort_dir=sort_dir,
+                                                     filters=filters)
         return Container._from_db_object_list(db_containers, cls, context)
 
     @base.remotable

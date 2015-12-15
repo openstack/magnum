@@ -14,6 +14,7 @@
 from oslo_config import cfg
 
 from magnum.common import rpc_service
+from magnum.conductor import utils as conductor_utils
 from magnum import objects
 
 
@@ -112,9 +113,14 @@ class API(rpc_service.API):
     def container_create(self, container):
         return self._call('container_create', container=container)
 
-    def container_list(self, context, limit, marker, sort_key, sort_dir):
+    def container_list(self, context, limit, marker, sort_key, sort_dir,
+                       bay_ident):
+        filters = None
+        if bay_ident is not None:
+            bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
+            filters = {'bay_uuid': bay_uuid}
         return objects.Container.list(context, limit, marker, sort_key,
-                                      sort_dir)
+                                      sort_dir, filters=filters)
 
     def container_delete(self, container_uuid):
         return self._call('container_delete', container_uuid=container_uuid)
