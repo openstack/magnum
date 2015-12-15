@@ -240,6 +240,20 @@ Now you can use kubectl commands without extra flags::
     NAME           READY     STATUS    RESTARTS   AGE
     redis-master   2/2       Running   0          1m
 
+Access to Kubernetes User Interface::
+
+    curl -L ${KUBERNETES_URL}/ui --cacert ca.crt --key client.key \
+        --cert client.crt
+
+    You may also set up kubectl proxy which will use your client certificate to allow you to
+    browse to a local address to use the UI without installing a certificate in your browser.
+
+    kubectl proxy --api-prefix=/ --certificate-authority=ca.crt --client-key=client.key \
+                  --client-certificate=client.crt -s $KUBERNETES_URL
+
+    Open http://localhost:8001/ui in your browser
+
+
 Once you have all of these pieces, you can configure your native client. Below
 is an example for Docker.
 
