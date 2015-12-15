@@ -69,7 +69,7 @@ and neutron::
     OVS_PHYSICAL_BRIDGE=br-ex
 
     # Log all output to files
-    LOGFILE=$HOME/devstack.log
+    LOGFILE=$HOME/logs/devstack.log
     SCREEN_LOGDIR=$HOME/logs
 
     VOLUME_BACKING_FILE_SIZE=20G
