@@ -19,6 +19,7 @@ from oslo_config import cfg
 from magnum.api import validation as v
 from magnum.common import exception
 from magnum.tests import base
+from magnum.tests.unit.objects import utils as obj_utils
 
 
 class TestValidation(base.BaseTestCase):
@@ -26,7 +27,6 @@ class TestValidation(base.BaseTestCase):
     def _test_enforce_bay_types(
             self,
             mock_bay_get_by_uuid,
-            mock_baymodel_get_by_uuid,
             mock_pecan_request,
             bay_type,
             allowed_bay_types,
@@ -43,19 +43,18 @@ class TestValidation(base.BaseTestCase):
         context = mock_pecan_request.context
         bay = mock.MagicMock()
         bay.baymodel_id = 'baymodel_id'
-        baymodel = mock.MagicMock()
-        baymodel.coe = bay_type
+        baymodel = obj_utils.get_test_baymodel(context,
+                                               uuid='baymodel_id',
+                                               coe=bay_type)
+        bay.baymodel = baymodel
 
         mock_bay_get_by_uuid.return_value = bay
-        mock_baymodel_get_by_uuid.return_value = baymodel
 
         if assert_raised:
             self.assertRaises(
                 exception.InvalidParameterValue, test, self, *args)
         else:
             ret = test(self, *args)
-            mock_baymodel_get_by_uuid.assert_called_once_with(
-                context, 'baymodel_id')
             if hasattr(args[0], 'bay_uuid'):
                 mock_bay_get_by_uuid.assert_called_once_with(context,
                                                              args[0].bay_uuid)
@@ -65,120 +64,108 @@ class TestValidation(base.BaseTestCase):
                 self.assertEqual(args[1], ret)
 
     @mock.patch('pecan.request')
-    @mock.patch('magnum.objects.BayModel.get_by_uuid')
     @mock.patch('magnum.objects.Bay.get_by_uuid')
     def test_enforce_bay_types_one_allowed(
             self,
             mock_bay_get_by_uuid,
-            mock_baymodel_get_by_uuid,
             mock_pecan_request):
 
         obj = mock.MagicMock()
         obj.name = 'test_object'
         obj.bay_uuid = 'bay_uuid'
-        bay_type = 'type1'
-        allowed_bay_types = ['type1']
+        bay_type = 'swarm'
+        allowed_bay_types = ['swarm']
         self._test_enforce_bay_types(
-            mock_bay_get_by_uuid, mock_baymodel_get_by_uuid,
-            mock_pecan_request, bay_type, allowed_bay_types, False, obj)
+            mock_bay_get_by_uuid, mock_pecan_request,
+            bay_type, allowed_bay_types, False, obj)
 
     @mock.patch('pecan.request')
-    @mock.patch('magnum.objects.BayModel.get_by_uuid')
     @mock.patch('magnum.objects.Bay.get_by_uuid')
     def test_enforce_bay_types_two_allowed(
             self,
             mock_bay_get_by_uuid,
-            mock_baymodel_get_by_uuid,
             mock_pecan_request):
 
         obj = mock.MagicMock()
         obj.name = 'test_object'
         obj.bay_uuid = 'bay_uuid'
-        bay_type = 'type1'
-        allowed_bay_types = ['type1', 'type2']
+        bay_type = 'swarm'
+        allowed_bay_types = ['swarm', 'mesos']
         self._test_enforce_bay_types(
-            mock_bay_get_by_uuid, mock_baymodel_get_by_uuid,
-            mock_pecan_request, bay_type, allowed_bay_types, False, obj)
+            mock_bay_get_by_uuid, mock_pecan_request,
+            bay_type, allowed_bay_types, False, obj)
 
     @mock.patch('pecan.request')
-    @mock.patch('magnum.objects.BayModel.get_by_uuid')
     @mock.patch('magnum.objects.Bay.get_by_uuid')
     def test_enforce_bay_types_not_allowed(
             self,
             mock_bay_get_by_uuid,
-            mock_baymodel_get_by_uuid,
             mock_pecan_request):
 
         obj = mock.MagicMock()
         obj.name = 'test_object'
         obj.bay_uuid = 'bay_uuid'
-        bay_type = 'type1'
-        allowed_bay_types = ['type2']
+        bay_type = 'swarm'
+        allowed_bay_types = ['mesos']
         self._test_enforce_bay_types(
-            mock_bay_get_by_uuid, mock_baymodel_get_by_uuid,
-            mock_pecan_request, bay_type, allowed_bay_types,
+            mock_bay_get_by_uuid, mock_pecan_request,
+            bay_type, allowed_bay_types,
             True, obj)
 
     @mock.patch('pecan.request')
-    @mock.patch('magnum.objects.BayModel.get_by_uuid')
     @mock.patch('magnum.objects.Bay.get_by_uuid')
     def test_enforce_bay_types_with_bay_uuid(self, mock_bay_get_by_uuid,
-                                             mock_baymodel_get_by_uuid,
                                              mock_pecan_request):
 
         bay_ident = 'e74c40e0-d825-11e2-a28f-0800200c9a66'
 
-        bay_type = 'type1'
-        allowed_bay_types = ['type1']
+        bay_type = 'swarm'
+        allowed_bay_types = ['swarm']
         self._test_enforce_bay_types(
-            mock_bay_get_by_uuid, mock_baymodel_get_by_uuid,
-            mock_pecan_request, bay_type, allowed_bay_types, False,
+            mock_bay_get_by_uuid, mock_pecan_request,
+            bay_type, allowed_bay_types, False,
             None, bay_ident)
 
     @mock.patch('pecan.request')
-    @mock.patch('magnum.objects.BayModel.get_by_uuid')
     @mock.patch('magnum.objects.Bay.get_by_uuid')
-    def test_enforce_bay_types_with_bay_uuid_not_allowed(
-        self, mock_bay_get_by_uuid,
-            mock_baymodel_get_by_uuid, mock_pecan_request):
+    def test_enforce_bay_types_with_bay_uuid_not_allowed(self,
+                                                         mock_bay_get_by_uuid,
+                                                         mock_pecan_request):
 
         bay_ident = 'e74c40e0-d825-11e2-a28f-0800200c9a66'
 
-        bay_type = 'type1'
-        allowed_bay_types = ['type2']
+        bay_type = 'swarm'
+        allowed_bay_types = ['mesos']
         self._test_enforce_bay_types(
-            mock_bay_get_by_uuid, mock_baymodel_get_by_uuid,
-            mock_pecan_request, bay_type, allowed_bay_types, True,
+            mock_bay_get_by_uuid, mock_pecan_request,
+            bay_type, allowed_bay_types, True,
             None, bay_ident)
 
     @mock.patch('pecan.request')
-    @mock.patch('magnum.objects.BayModel.get_by_uuid')
     @mock.patch('magnum.objects.Bay.get_by_name')
     def test_enforce_bay_types_with_bay_name(self, mock_bay_get_by_uuid,
-                                             mock_baymodel_get_by_uuid,
                                              mock_pecan_request):
 
         bay_ident = 'bay_name'
-        bay_type = 'type1'
-        allowed_bay_types = ['type1']
+        bay_type = 'swarm'
+        allowed_bay_types = ['swarm']
         self._test_enforce_bay_types(
-            mock_bay_get_by_uuid, mock_baymodel_get_by_uuid,
-            mock_pecan_request, bay_type, allowed_bay_types, False,
+            mock_bay_get_by_uuid, mock_pecan_request,
+            bay_type, allowed_bay_types, False,
             None, bay_ident)
 
     @mock.patch('pecan.request')
-    @mock.patch('magnum.objects.BayModel.get_by_uuid')
     @mock.patch('magnum.objects.Bay.get_by_name')
-    def test_enforce_bay_types_with_bay_name_not_allowed(
-        self, mock_bay_get_by_uuid,
-            mock_baymodel_get_by_uuid, mock_pecan_request):
+    def test_enforce_bay_types_with_bay_name_not_allowed(self,
+                                                         mock_bay_get_by_uuid,
+                                                         mock_pecan_request):
 
         bay_ident = 'bay_name'
-        bay_type = 'type1'
-        allowed_bay_types = ['type2']
+        bay_type = 'swarm'
+        allowed_bay_types = ['mesos']
         self._test_enforce_bay_types(
-            mock_bay_get_by_uuid, mock_baymodel_get_by_uuid,
-            mock_pecan_request, bay_type, allowed_bay_types, True,
+            mock_bay_get_by_uuid, mock_pecan_request,
+            bay_type, allowed_bay_types, True,
             None, bay_ident)
 
     def _test_enforce_network_driver_types_create(

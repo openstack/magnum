@@ -15,6 +15,7 @@ from magnum import objects
 from magnum.objects import fields
 from magnum.tests.unit.api import base as api_base
 from magnum.tests.unit.db import utils
+from magnum.tests.unit.objects import utils as obj_utils
 
 from oslo_policy import policy
 
@@ -29,15 +30,16 @@ class TestContainerController(api_base.FunctionalTest):
         p = patch('magnum.objects.Bay.get_by_uuid')
         self.mock_bay_get_by_uuid = p.start()
         self.addCleanup(p.stop)
-        p = patch('magnum.objects.BayModel.get_by_uuid')
-        self.mock_baymodel_get_by_uuid = p.start()
-        self.addCleanup(p.stop)
 
         def fake_get_by_uuid(context, uuid):
-            return objects.Bay(self.context, **utils.get_test_bay(uuid=uuid))
+            bay_dict = utils.get_test_bay(uuid=uuid)
+            baymodel = obj_utils.get_test_baymodel(
+                context, coe='swarm', uuid=bay_dict['baymodel_id'])
+            bay = objects.Bay(self.context, **bay_dict)
+            bay.baymodel = baymodel
+            return bay
 
         self.mock_bay_get_by_uuid.side_effect = fake_get_by_uuid
-        self.mock_baymodel_get_by_uuid.return_value.coe = 'swarm'
 
     @patch('magnum.conductor.api.API.container_create')
     def test_create_container(self, mock_container_create):

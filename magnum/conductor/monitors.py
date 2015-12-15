@@ -20,7 +20,6 @@ from oslo_log import log
 from oslo_utils import importutils
 import six
 
-from magnum import objects
 from magnum.objects.fields import BayType as bay_type
 
 
@@ -69,10 +68,9 @@ class MonitorBase(object):
 
 
 def create_monitor(context, bay):
-    baymodel = objects.BayModel.get_by_uuid(context, bay.baymodel_id)
-    if baymodel.coe in COE_CLASS_PATH:
-        coe_cls = importutils.import_class(COE_CLASS_PATH[baymodel.coe])
+    if bay.baymodel.coe in COE_CLASS_PATH:
+        coe_cls = importutils.import_class(COE_CLASS_PATH[bay.baymodel.coe])
         return coe_cls(context, bay)
 
-    LOG.debug("Cannot create monitor with bay type '%s'" % baymodel.coe)
+    LOG.debug("Cannot create monitor with bay type '%s'" % bay.baymodel.coe)
     return None
