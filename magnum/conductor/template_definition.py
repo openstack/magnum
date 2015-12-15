@@ -135,7 +135,7 @@ class OutputMapping(object):
         return self.heat_output == output_key
 
     def get_output_value(self, stack):
-        for output in stack.outputs:
+        for output in stack.to_dict().get('outputs', []):
             if output['output_key'] == self.heat_output:
                 return output['output_value']
 
