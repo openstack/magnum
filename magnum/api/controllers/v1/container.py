@@ -280,19 +280,23 @@ class ContainersController(rest.RestController):
 
     def _get_containers_collection(self, marker, limit,
                                    sort_key, sort_dir, expand=False,
-                                   resource_url=None):
+                                   resource_url=None, bay_ident=None):
 
+        context = pecan.request.context
         limit = api_utils.validate_limit(limit)
         sort_dir = api_utils.validate_sort_dir(sort_dir)
 
         marker_obj = None
         if marker:
-            marker_obj = objects.Container.get_by_uuid(pecan.request.context,
+            marker_obj = objects.Container.get_by_uuid(context,
                                                        marker)
 
-        containers = objects.Container.list(pecan.request.context, limit,
-                                            marker_obj, sort_key=sort_key,
-                                            sort_dir=sort_dir)
+        containers = pecan.request.rpcapi.container_list(context, limit,
+                                                         marker_obj,
+                                                         sort_key=sort_key,
+                                                         sort_dir=sort_dir,
+                                                         bay_ident=bay_ident)
+
         for i, c in enumerate(containers):
             try:
                 containers[i] = pecan.request.rpcapi.container_show(c.uuid)
@@ -310,18 +314,19 @@ class ContainersController(rest.RestController):
 
     @policy.enforce_wsgi("container")
     @expose.expose(ContainerCollection, types.uuid, int,
-                   wtypes.text, wtypes.text)
+                   wtypes.text, wtypes.text, types.uuid_or_name)
     def get_all(self, marker=None, limit=None, sort_key='id',
-                sort_dir='asc'):
+                sort_dir='asc', bay_ident=None):
         """Retrieve a list of containers.
 
         :param marker: pagination marker for large data sets.
         :param limit: maximum number of resources to return in a single result.
         :param sort_key: column to sort results by. Default: id.
         :param sort_dir: direction to sort. "asc" or "desc". Default: asc.
+        :param bay_indent: UUID or logical name of bay.
         """
         return self._get_containers_collection(marker, limit, sort_key,
-                                               sort_dir)
+                                               sort_dir, bay_ident=bay_ident)
 
     @policy.enforce_wsgi("container")
     @expose.expose(ContainerCollection, types.uuid, int,
