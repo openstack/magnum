@@ -278,15 +278,6 @@ def create_test_rc(**kw):
     return dbapi.create_rc(replication_controller)
 
 
-def get_test_baylock(**kw):
-    return {
-        'id': kw.get('id', 42),
-        'bay_uuid': kw.get('bay_uuid', '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'),
-        'conductor_id': kw.get('conductor_id',
-                               '72625085-c507-4410-9b28-cd7cf1fbf1ad'),
-    }
-
-
 def get_test_x509keypair(**kw):
     return {
         'id': kw.get('id', 42),

@@ -83,7 +83,6 @@ magnum/tests/unit/objects/test_objects.py::
 
     object_data = {
         'Bay': '1.0-35edde13ad178e9419e7ea8b6d580bcd',
-        'BayLock': '1.0-7d1eb08cf2070523bd210369c7a2e076',
         'BayModel': '1.0-06863f04ab4b98307e3d1b736d3137bf',
         'Container': '1.1-22b40e8eed0414561ca921906b189820',
         'MyObj': '1.0-b43567e512438205e32f4e95ca616697',
