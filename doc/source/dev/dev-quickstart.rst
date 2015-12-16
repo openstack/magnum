@@ -74,6 +74,10 @@ To run only the pep8/flake8 syntax and style checks::
 
     tox -epep8
 
+To run unit test coverage and check percentage of code covered::
+
+    tox -e cover
+
 To discover and interact with templates, please refer to
 `<http://docs.openstack.org/developer/magnum/dev/dev-bay-template-example.html>`_
 
