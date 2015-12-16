@@ -191,26 +191,29 @@ class PodsController(rest.RestController):
                                                 sort_dir=sort_dir)
 
     @policy.enforce_wsgi("pod")
-    @expose.expose(PodCollection, types.uuid, int, wtypes.text,
-                   wtypes.text, types.uuid_or_name)
-    def get_all(self, marker=None, limit=None, sort_key='id',
-                sort_dir='asc', bay_ident=None):
+    @expose.expose(PodCollection, types.uuid, types.uuid_or_name, int,
+                   wtypes.text, wtypes.text)
+    @validation.enforce_bay_types('kubernetes')
+    def get_all(self, marker=None, bay_ident=None, limit=None, sort_key='id',
+                sort_dir='asc'):
         """Retrieve a list of pods.
 
         :param marker: pagination marker for large data sets.
+        :param bay_ident: UUID or logical name of the Bay.
         :param limit: maximum number of resources to return in a single result.
         :param sort_key: column to sort results by. Default: id.
         :param sort_dir: direction to sort. "asc" or "desc". Default: asc.
-        :param bay_ident: UUID or logical name of the Bay.
+
         """
         return self._get_pods_collection(marker, limit, sort_key,
                                          sort_dir, bay_ident)
 
     @policy.enforce_wsgi("pod")
-    @expose.expose(PodCollection, types.uuid, int, wtypes.text,
-                   wtypes.text, types.uuid_or_name)
-    def detail(self, marker=None, limit=None, sort_key='id',
-               sort_dir='asc', bay_ident=None):
+    @expose.expose(PodCollection, types.uuid, types.uuid_or_name, int,
+                   wtypes.text, wtypes.text)
+    @validation.enforce_bay_types('kubernetes')
+    def detail(self, marker=None, bay_ident=None, limit=None, sort_key='id',
+               sort_dir='asc'):
         """Retrieve a list of pods with detail.
 
         :param marker: pagination marker for large data sets.
@@ -234,6 +237,7 @@ class PodsController(rest.RestController):
     @policy.enforce_wsgi("pod", "get")
     @expose.expose(Pod, types.uuid_or_name,
                    types.uuid_or_name)
+    @validation.enforce_bay_types('kubernetes')
     def get_one(self, pod_ident, bay_ident):
         """Retrieve information about the given pod.
 
@@ -268,6 +272,7 @@ class PodsController(rest.RestController):
     @wsme.validate(types.uuid, [PodPatchType])
     @expose.expose(Pod, types.uuid_or_name,
                    types.uuid_or_name, body=[PodPatchType])
+    @validation.enforce_bay_types('kubernetes')
     def patch(self, pod_ident, bay_ident, patch):
         """Update an existing pod.
 
@@ -292,6 +297,7 @@ class PodsController(rest.RestController):
     @policy.enforce_wsgi("pod")
     @expose.expose(None, types.uuid_or_name,
                    types.uuid_or_name, status_code=204)
+    @validation.enforce_bay_types('kubernetes')
     def delete(self, pod_ident, bay_ident):
         """Delete a pod.
 

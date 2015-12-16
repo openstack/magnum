@@ -199,10 +199,11 @@ class ServicesController(rest.RestController):
                                                     sort_dir=sort_dir)
 
     @policy.enforce_wsgi("service")
-    @expose.expose(ServiceCollection, types.uuid, int, wtypes.text,
-                   wtypes.text, types.uuid_or_name)
-    def get_all(self, marker=None, limit=None, sort_key='id',
-                sort_dir='asc', bay_ident=None):
+    @expose.expose(ServiceCollection, types.uuid, types.uuid_or_name, int,
+                   wtypes.text, wtypes.text)
+    @validation.enforce_bay_types('kubernetes')
+    def get_all(self, marker=None, bay_ident=None, limit=None, sort_key='id',
+                sort_dir='asc'):
         """Retrieve a list of services.
 
         :param marker: pagination marker for large data sets.
@@ -215,10 +216,11 @@ class ServicesController(rest.RestController):
                                              sort_dir, bay_ident)
 
     @policy.enforce_wsgi("service")
-    @expose.expose(ServiceCollection, types.uuid, int, wtypes.text,
-                   wtypes.text, types.uuid_or_name)
-    def detail(self, marker=None, limit=None, sort_key='id',
-               sort_dir='asc', bay_ident=None):
+    @expose.expose(ServiceCollection, types.uuid, types.uuid_or_name, int,
+                   wtypes.text, wtypes.text)
+    @validation.enforce_bay_types('kubernetes')
+    def detail(self, marker=None, bay_ident=None, limit=None, sort_key='id',
+               sort_dir='asc'):
         """Retrieve a list of services with detail.
 
         :param marker: pagination marker for large data sets.
@@ -242,6 +244,7 @@ class ServicesController(rest.RestController):
     @policy.enforce_wsgi("service", "get")
     @expose.expose(Service, types.uuid_or_name,
                    types.uuid_or_name)
+    @validation.enforce_bay_types('kubernetes')
     def get_one(self, service_ident, bay_ident):
         """Retrieve information about the given service.
 
@@ -280,6 +283,7 @@ class ServicesController(rest.RestController):
     @wsme.validate(types.uuid, [ServicePatchType])
     @expose.expose(Service, types.uuid_or_name,
                    types.uuid_or_name, body=[ServicePatchType])
+    @validation.enforce_bay_types('kubernetes')
     def patch(self, service_ident, bay_ident, patch):
         """Update an existing service.
 
@@ -305,6 +309,7 @@ class ServicesController(rest.RestController):
     @policy.enforce_wsgi("service")
     @expose.expose(None, types.uuid_or_name,
                    types.uuid_or_name, status_code=204)
+    @validation.enforce_bay_types('kubernetes')
     def delete(self, service_ident, bay_ident):
         """Delete a service.
 

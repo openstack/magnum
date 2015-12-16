@@ -41,13 +41,16 @@ class TestListRC(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestListRC, self).setUp()
-        obj_utils.create_test_bay(self.context)
+        bay = obj_utils.create_test_bay(self.context)
+        obj_utils.create_test_baymodel(self.context, uuid=bay.baymodel_id,
+                                       coe='kubernetes')
         self.rc = obj_utils.create_test_rc(self.context)
 
     @mock.patch.object(rpcapi.API, 'rc_list')
     def test_empty(self, mock_rc_list):
         mock_rc_list.return_value = []
-        response = self.get_json('/rcs')
+        response = self.get_json('/rcs?bay_ident=5d12f6fd-a196-4bf0-ae4c-'
+                                 '1f639a523a52')
         self.assertEqual([], response['rcs'])
 
     def _assert_rc_fields(self, rc):
@@ -109,7 +112,8 @@ class TestListRC(api_base.FunctionalTest):
             rc_list.append(rc.uuid)
 
         mock_rc_list.return_value = [rc]
-        response = self.get_json('/rcs?limit=3&marker=%s' % rc_list[2])
+        response = self.get_json('/rcs?limit=3&marker=%s&bay_ident=5d12f6fd-'
+                                 'a196-4bf0-ae4c-1f639a523a52' % rc_list[2])
         self.assertEqual(1, len(response['rcs']))
         self.assertEqual(rc_list[-1], response['rcs'][0]['uuid'])
 
@@ -117,7 +121,8 @@ class TestListRC(api_base.FunctionalTest):
     def test_detail(self, mock_rc_list):
         rc = obj_utils.create_test_rc(self.context)
         mock_rc_list.return_value = [rc]
-        response = self.get_json('/rcs/detail')
+        response = self.get_json('/rcs/detail?bay_ident=5d12f6fd-a196-4bf0-'
+                                 'ae4c-1f639a523a52')
         self.assertEqual(rc.uuid, response['rcs'][0]["uuid"])
         self._assert_rc_fields(response['rcs'][0])
 
@@ -130,7 +135,8 @@ class TestListRC(api_base.FunctionalTest):
             rc_list.append(rc.uuid)
 
         mock_rc_list.return_value = [rc]
-        response = self.get_json('/rcs/detail?limit=3&marker=%s'
+        response = self.get_json('/rcs/detail?limit=3&marker=%s&bay_ident='
+                                 '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
                                  % (rc_list[2]))
 
         self.assertEqual(1, len(response['rcs']))
@@ -151,7 +157,8 @@ class TestListRC(api_base.FunctionalTest):
                                           uuid=utils.generate_uuid())
             rc_list.append(rc.uuid)
         mock_rc_list.return_value = [rc]
-        response = self.get_json('/rcs')
+        response = self.get_json('/rcs?bay_ident=5d12f6fd-a196-4bf0-ae4c-'
+                                 '1f639a523a52')
         self.assertEqual(len(rc_list), len(response['rcs']))
         uuids = [r['uuid'] for r in response['rcs']]
         self.assertEqual(sorted(rc_list), sorted(uuids))
@@ -172,7 +179,8 @@ class TestListRC(api_base.FunctionalTest):
             rc = obj_utils.create_test_rc(self.context, id=id_,
                                           uuid=utils.generate_uuid())
         mock_rc_list.return_value = [rc]
-        response = self.get_json('/rcs/?limit=1')
+        response = self.get_json('/rcs/?limit=1&bay_ident=5d12f6fd-a196-4bf0'
+                                 '-ae4c-1f639a523a52')
         self.assertEqual(1, len(response['rcs']))
 
     @mock.patch.object(rpcapi.API, 'rc_list')
@@ -182,7 +190,8 @@ class TestListRC(api_base.FunctionalTest):
             rc = obj_utils.create_test_rc(self.context, id=id_,
                                           uuid=utils.generate_uuid())
         mock_rc_list.return_value = [rc]
-        response = self.get_json('/rcs')
+        response = self.get_json('/rcs?bay_ident=5d12f6fd-a196-4bf0-ae4c-'
+                                 '1f639a523a52')
         self.assertEqual(1, len(response['rcs']))
 
 
@@ -190,7 +199,9 @@ class TestPatch(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestPatch, self).setUp()
-        obj_utils.create_test_bay(self.context)
+        bay = obj_utils.create_test_bay(self.context)
+        obj_utils.create_test_baymodel(self.context, uuid=bay.baymodel_id,
+                                       coe='kubernetes')
         self.rc = obj_utils.create_test_rc(self.context,
                                            images=['rc_example_A_image'])
         self.another_bay = obj_utils.create_test_bay(
@@ -513,7 +524,9 @@ class TestDelete(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestDelete, self).setUp()
-        obj_utils.create_test_bay(self.context)
+        bay = obj_utils.create_test_bay(self.context)
+        obj_utils.create_test_baymodel(self.context, uuid=bay.baymodel_id,
+                                       coe='kubernetes')
         self.rc = obj_utils.create_test_rc(self.context)
 
     @mock.patch.object(rpcapi.API, 'rc_delete')

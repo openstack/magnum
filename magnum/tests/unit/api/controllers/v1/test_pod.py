@@ -41,13 +41,16 @@ class TestListPod(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestListPod, self).setUp()
-        obj_utils.create_test_bay(self.context)
+        bay = obj_utils.create_test_bay(self.context)
+        obj_utils.create_test_baymodel(self.context, uuid=bay.baymodel_id,
+                                       coe='kubernetes')
         self.pod = obj_utils.create_test_pod(self.context)
 
     @mock.patch.object(rpcapi.API, 'pod_list')
     def test_empty(self, mock_pod_list):
         mock_pod_list.return_value = []
-        response = self.get_json('/pods')
+        response = self.get_json('/pods?bay_ident=5d12f6fd-a196-4bf0-ae4c-'
+                                 '1f639a523a52')
         self.assertEqual([], response['pods'])
 
     def _assert_pod_fields(self, pod):
@@ -118,7 +121,8 @@ class TestListPod(api_base.FunctionalTest):
             pod_list.append(pod.uuid)
 
         mock_pod_list.return_value = [pod]
-        response = self.get_json('/pods?limit=3&marker=%s' % pod_list[2])
+        response = self.get_json('/pods?limit=3&marker=%s&bay_ident=5d12f6fd-'
+                                 'a196-4bf0-ae4c-1f639a523a52' % pod_list[2])
         self.assertEqual(1, len(response['pods']))
         self.assertEqual(pod_list[-1], response['pods'][0]['uuid'])
 
@@ -126,7 +130,8 @@ class TestListPod(api_base.FunctionalTest):
     def test_detail(self, mock_pod_list):
         pod = obj_utils.create_test_pod(self.context)
         mock_pod_list.return_value = [pod]
-        response = self.get_json('/pods/detail')
+        response = self.get_json('/pods/detail?bay_ident=5d12f6fd-a196-4bf0-'
+                                 'ae4c-1f639a523a52')
         self.assertEqual(pod.uuid, response['pods'][0]["uuid"])
         self._assert_pod_fields(response['pods'][0])
 
@@ -139,7 +144,8 @@ class TestListPod(api_base.FunctionalTest):
             pod_list.append(pod.uuid)
 
         mock_pod_list.return_value = [pod]
-        response = self.get_json('/pods/detail?limit=3&marker=%s'
+        response = self.get_json('/pods/detail?limit=3&marker=%s&bay_ident='
+                                 '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
                                  % pod_list[2])
         self.assertEqual(1, len(response['pods']))
         self.assertEqual(pod_list[-1], response['pods'][0]['uuid'])
@@ -161,7 +167,8 @@ class TestListPod(api_base.FunctionalTest):
                                             uuid=utils.generate_uuid())
             pod_list.append(pod.uuid)
         mock_pod_list.return_value = [pod]
-        response = self.get_json('/pods')
+        response = self.get_json('/pods?bay_ident=5d12f6fd-a196-4bf0-ae4c-'
+                                 '1f639a523a52')
         self.assertEqual(len(pod_list), len(response['pods']))
         uuids = [p['uuid'] for p in response['pods']]
         self.assertEqual(sorted(pod_list), sorted(uuids))
@@ -183,7 +190,8 @@ class TestListPod(api_base.FunctionalTest):
                                             id=id_,
                                             uuid=utils.generate_uuid())
         mock_pod_list.return_value = [pod]
-        response = self.get_json('/pods/?limit=1')
+        response = self.get_json('/pods/?limit=1&bay_ident=5d12f6fd-a196-'
+                                 '4bf0-ae4c-1f639a523a52')
         self.assertEqual(1, len(response['pods']))
 
     @mock.patch.object(rpcapi.API, 'pod_list')
@@ -193,7 +201,8 @@ class TestListPod(api_base.FunctionalTest):
             pod = obj_utils.create_test_pod(self.context, id=id_,
                                             uuid=utils.generate_uuid())
         mock_pod_list.return_value = [pod]
-        response = self.get_json('/pods')
+        response = self.get_json('/pods?bay_ident=5d12f6fd-a196-4bf0-ae4c-'
+                                 '1f639a523a52')
         self.assertEqual(1, len(response['pods']))
 
 
@@ -201,7 +210,9 @@ class TestPatch(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestPatch, self).setUp()
-        obj_utils.create_test_bay(self.context)
+        bay = obj_utils.create_test_bay(self.context)
+        obj_utils.create_test_baymodel(self.context, uuid=bay.baymodel_id,
+                                       coe='kubernetes')
         self.pod = obj_utils.create_test_pod(self.context,
                                              desc='pod_example_A_desc',
                                              status='Running')
@@ -497,7 +508,9 @@ class TestDelete(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestDelete, self).setUp()
-        obj_utils.create_test_bay(self.context)
+        bay = obj_utils.create_test_bay(self.context)
+        obj_utils.create_test_baymodel(self.context, uuid=bay.baymodel_id,
+                                       coe='kubernetes')
         self.pod = obj_utils.create_test_pod(self.context)
 
     @mock.patch.object(rpcapi.API, 'pod_delete')
