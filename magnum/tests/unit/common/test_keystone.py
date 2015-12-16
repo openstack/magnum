@@ -49,7 +49,8 @@ class KeystoneClientTest(base.BaseTestCase):
         ks_client.client
         self.assertIsNotNone(ks_client._client)
         mock_ks.assert_called_once_with(token='abcd1234',
-                                        auth_url='http://server.test:5000/v3')
+                                        auth_url='http://server.test:5000/v3',
+                                        endpoint='http://server.test:5000/v3')
 
     def test_client_with_no_credentials(self, mock_ks):
         self.ctx.auth_token = None
@@ -65,6 +66,7 @@ class KeystoneClientTest(base.BaseTestCase):
         self.assertIsNotNone(ks_client._client)
         mock_ks.assert_called_once_with(auth_ref={'version': 'v2.0'},
                                         auth_url='http://server.test:5000/v3',
+                                        endpoint='http://server.test:5000/v3',
                                         token='abcd1234')
 
     def test_client_with_v3_auth_token_info(self, mock_ks):
@@ -75,6 +77,7 @@ class KeystoneClientTest(base.BaseTestCase):
         self.assertIsNotNone(ks_client._client)
         mock_ks.assert_called_once_with(auth_ref={'version': 'v3'},
                                         auth_url='http://server.test:5000/v3',
+                                        endpoint='http://server.test:5000/v3',
                                         token='abcd1234')
 
     def test_client_with_invalid_auth_token_info(self, mock_ks):

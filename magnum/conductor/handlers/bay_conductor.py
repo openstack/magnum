@@ -51,8 +51,19 @@ bay_heat_opts = [
                      'interval is in minutes.  The default is no timeout.'))
 ]
 
-cfg.CONF.register_opts(bay_heat_opts, group='bay_heat')
+docker_registry_opts = [
+    cfg.StrOpt('trustee_user_id',
+               default=None,
+               help='User id of the trustee'),
+    cfg.ListOpt('trust_roles',
+                default=['registry_user'],
+                help='The roles which are delegated to the trustee '
+                'by the trustor.')
+]
 
+CONF = cfg.CONF
+CONF.register_opts(bay_heat_opts, group='bay_heat')
+CONF.register_opts(docker_registry_opts, 'docker_registry')
 
 LOG = logging.getLogger(__name__)
 
@@ -122,6 +133,14 @@ class Handler(object):
         LOG.debug('bay_heat bay_create')
 
         osc = clients.OpenStackClients(context)
+
+        baymodel = objects.BayModel.get_by_uuid(context,
+                                                bay.baymodel_id)
+        if baymodel.registry_enabled:
+            trust = osc.keystone().create_trust(
+                CONF.docker_registry.trustee_user_id,
+                CONF.docker_registry.trust_roles)
+            bay.registry_trust_id = trust.id
 
         try:
             # Generate certificate and set the cert reference to bay
@@ -199,6 +218,7 @@ class Handler(object):
         except Exception:
             raise
 
+        osc.keystone().delete_trust(bay.registry_trust_id)
         self._poll_and_check(osc, bay)
 
         return None
