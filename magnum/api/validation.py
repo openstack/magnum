@@ -19,6 +19,7 @@ import pecan
 
 from magnum.api import utils as api_utils
 from magnum.common import exception
+from magnum.common import utils
 from magnum import objects
 
 
@@ -55,10 +56,21 @@ cfg.CONF.register_opts(baymodel_opts, group='baymodel')
 
 
 def enforce_bay_types(*bay_types):
+    """Enforce that bay_type is in supported list."""
     @decorator.decorator
     def wrapper(func, *args, **kwargs):
+        # Note(eliqiao): This decorator has some assumptions
+        # args[1] should be an APIBase instance or
+        # args[2] should be a bay_ident
         obj = args[1]
-        bay = objects.Bay.get_by_uuid(pecan.request.context, obj.bay_uuid)
+        if hasattr(obj, 'bay_uuid'):
+            bay = objects.Bay.get_by_uuid(pecan.request.context, obj.bay_uuid)
+        else:
+            bay_ident = args[2]
+            if utils.is_uuid_like(bay_ident):
+                bay = objects.Bay.get_by_uuid(pecan.request.context, bay_ident)
+            else:
+                bay = objects.Bay.get_by_name(pecan.request.context, bay_ident)
         baymodel = objects.BayModel.get_by_uuid(pecan.request.context,
                                                 bay.baymodel_id)
         if baymodel.coe not in bay_types:

@@ -220,10 +220,11 @@ class ReplicationControllersController(rest.RestController):
             sort_dir=sort_dir)
 
     @policy.enforce_wsgi("rc")
-    @expose.expose(ReplicationControllerCollection, types.uuid, int,
-                   wtypes.text, wtypes.text, types.uuid_or_name)
-    def get_all(self, marker=None, limit=None, sort_key='id',
-                sort_dir='asc', bay_ident=None):
+    @expose.expose(ReplicationControllerCollection, types.uuid,
+                   types.uuid_or_name, int, wtypes.text, wtypes.text)
+    @validation.enforce_bay_types('kubernetes')
+    def get_all(self, marker=None, bay_ident=None, limit=None, sort_key='id',
+                sort_dir='asc'):
         """Retrieve a list of ReplicationControllers.
 
         :param marker: pagination marker for large data sets.
@@ -236,10 +237,11 @@ class ReplicationControllersController(rest.RestController):
                                         sort_dir, bay_ident)
 
     @policy.enforce_wsgi("rc")
-    @expose.expose(ReplicationControllerCollection, types.uuid, int,
-                   wtypes.text, wtypes.text, types.uuid_or_name)
-    def detail(self, marker=None, limit=None, sort_key='id',
-               sort_dir='asc', bay_ident=None):
+    @expose.expose(ReplicationControllerCollection, types.uuid,
+                   types.uuid_or_name, int, wtypes.text, wtypes.text)
+    @validation.enforce_bay_types('kubernetes')
+    def detail(self, marker=None, bay_ident=None, limit=None, sort_key='id',
+               sort_dir='asc'):
         """Retrieve a list of ReplicationControllers with detail.
 
         :param marker: pagination marker for large data sets.
@@ -263,6 +265,7 @@ class ReplicationControllersController(rest.RestController):
     @policy.enforce_wsgi("rc", "get")
     @expose.expose(ReplicationController, types.uuid_or_name,
                    types.uuid_or_name)
+    @validation.enforce_bay_types('kubernetes')
     def get_one(self, rc_ident, bay_ident):
         """Retrieve information about the given ReplicationController.
 
@@ -300,6 +303,7 @@ class ReplicationControllersController(rest.RestController):
     @wsme.validate(types.uuid, [ReplicationControllerPatchType])
     @expose.expose(ReplicationController, types.uuid_or_name,
                    types.uuid_or_name, body=[ReplicationControllerPatchType])
+    @validation.enforce_bay_types('kubernetes')
     def patch(self, rc_ident, bay_ident, patch):
         """Update an existing rc.
 
@@ -326,6 +330,7 @@ class ReplicationControllersController(rest.RestController):
     @policy.enforce_wsgi("rc")
     @expose.expose(None, types.uuid_or_name,
                    types.uuid_or_name, status_code=204)
+    @validation.enforce_bay_types('kubernetes')
     def delete(self, rc_ident, bay_ident):
         """Delete a ReplicationController.
 

@@ -41,13 +41,16 @@ class TestListService(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestListService, self).setUp()
-        obj_utils.create_test_bay(self.context)
+        bay = obj_utils.create_test_bay(self.context)
+        obj_utils.create_test_baymodel(self.context, uuid=bay.baymodel_id,
+                                       coe='kubernetes')
         self.service = obj_utils.create_test_service(self.context)
 
     @mock.patch.object(rpcapi.API, 'service_list')
     def test_empty(self, mock_pod_list):
         mock_pod_list.return_value = []
-        response = self.get_json('/services')
+        response = self.get_json('/services?bay_ident=5d12f6fd-a196-4bf0-ae4c-'
+                                 '1f639a523a52')
         self.assertEqual([], response['services'])
 
     def _assert_service_fields(self, service):
@@ -120,7 +123,8 @@ class TestListService(api_base.FunctionalTest):
             service_list.append(service.uuid)
 
         mock_service_list.return_value = [service]
-        response = self.get_json('/services?limit=3&marker=%s'
+        response = self.get_json('/services?limit=3&marker=%s&bay_ident='
+                                 '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
                                  % service_list[2])
         self.assertEqual(1, len(response['services']))
         self.assertEqual(service_list[-1], response['services'][0]['uuid'])
@@ -129,7 +133,8 @@ class TestListService(api_base.FunctionalTest):
     def test_detail(self, mock_service_list):
         service = obj_utils.create_test_service(self.context)
         mock_service_list.return_value = [service]
-        response = self.get_json('/services/detail')
+        response = self.get_json('/services/detail?bay_ident=5d12f6fd-a196-'
+                                 '4bf0-ae4c-1f639a523a52')
         self.assertEqual(service.uuid, response['services'][0]["uuid"])
         self._assert_service_fields(response['services'][0])
 
@@ -142,7 +147,8 @@ class TestListService(api_base.FunctionalTest):
             service_list.append(service.uuid)
 
         mock_service_list.return_value = [service]
-        response = self.get_json('/services/detail?limit=3&marker=%s'
+        response = self.get_json('/services/detail?limit=3&marker=%s&bay_ident'
+                                 '=5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
                                  % service_list[2])
         self.assertEqual(1, len(response['services']))
         self.assertEqual(service_list[-1], response['services'][0]['uuid'])
@@ -164,7 +170,8 @@ class TestListService(api_base.FunctionalTest):
                                                     uuid=utils.generate_uuid())
             service_list.append(service.uuid)
         mock_service_list.return_value = [service]
-        response = self.get_json('/services')
+        response = self.get_json('/services?bay_ident=5d12f6fd-a196-4bf0-ae4c-'
+                                 '1f639a523a52')
         self.assertEqual(len(service_list), len(response['services']))
         uuids = [s['uuid'] for s in response['services']]
         self.assertEqual(sorted(service_list), sorted(uuids))
@@ -187,7 +194,8 @@ class TestListService(api_base.FunctionalTest):
                 self.context, id=id_,
                 uuid=utils.generate_uuid())
         mock_service_list.return_value = [service]
-        response = self.get_json('/services/?limit=1')
+        response = self.get_json('/services/?limit=1&bay_ident=5d12f6fd-a196-'
+                                 '4bf0-ae4c-1f639a523a52')
         self.assertEqual(1, len(response['services']))
 
         next_marker = response['services'][-1]['uuid']
@@ -201,7 +209,8 @@ class TestListService(api_base.FunctionalTest):
                 self.context, id=id_,
                 uuid=utils.generate_uuid())
             mock_service_list.return_value = [service]
-        response = self.get_json('/services')
+        response = self.get_json('/services?bay_ident=5d12f6fd-a196-4bf0-ae4c-'
+                                 '1f639a523a52')
         self.assertEqual(1, len(response['services']))
 
 
@@ -211,6 +220,8 @@ class TestPatch(api_base.FunctionalTest):
         super(TestPatch, self).setUp()
         self.bay = obj_utils.create_test_bay(self.context,
                                              uuid=utils.generate_uuid())
+        obj_utils.create_test_baymodel(self.context, uuid=self.bay.baymodel_id,
+                                       coe='kubernetes')
         self.bay2 = obj_utils.create_test_bay(self.context,
                                               uuid=utils.generate_uuid())
         self.service = obj_utils.create_test_service(self.context,
@@ -261,13 +272,13 @@ class TestPatch(api_base.FunctionalTest):
         err = rest.ApiException(status=404)
         mock_service_update.side_effect = err
         response = self.patch_json(
-            '/services/%s/%s' % (utils.generate_uuid(),
-                                 '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'),
+            '/services/%s?bay_ident=%s' %
+            (utils.generate_uuid(), '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'),
             [{'path': '/bay_uuid',
               'value': self.bay2.uuid,
               'op': 'replace'}],
             expect_errors=True)
-        self.assertEqual(400, response.status_int)
+        self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
@@ -384,7 +395,7 @@ class TestPatch(api_base.FunctionalTest):
                                       uuid=utils.generate_uuid())
 
         response = self.patch_json(
-            '/services/test_service/5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
+            '/services/test_service?bay_ident=%s' % self.bay.uuid,
             [{'path': '/bay_uuid',
               'value': self.bay2.uuid,
               'op': 'replace'}],
@@ -508,7 +519,9 @@ class TestDelete(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestDelete, self).setUp()
-        obj_utils.create_test_bay(self.context)
+        bay = obj_utils.create_test_bay(self.context)
+        obj_utils.create_test_baymodel(self.context, uuid=bay.baymodel_id,
+                                       coe='kubernetes')
         self.service = obj_utils.create_test_service(self.context)
 
     @mock.patch.object(rpcapi.API, 'service_delete')
