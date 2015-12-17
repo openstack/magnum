@@ -265,7 +265,6 @@ resources:
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: server_image}
           server_flavor: {get_param: server_flavor}
-          docker_volume_size: {get_param: docker_volume_size}
           fixed_network_id: {get_resource: fixed_network}
           fixed_subnet_id: {get_resource: fixed_subnet}
           external_network: {get_param: external_network}
