@@ -50,6 +50,7 @@ source openrc admin admin
 # Bug: #1473600
 unset OS_PROJECT_DOMAIN_ID
 unset OS_USER_DOMAIN_ID
+unset OS_AUTH_TYPE
 popd
 
 # First we test Magnum's command line to see if we can stand up
