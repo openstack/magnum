@@ -122,41 +122,6 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def create_bay_lock(self, bay_uuid, conductor_id):
-        """Create a new baylock.
-
-        This method will fail if the bay has already been locked.
-
-        :param bay_uuid: The uuid of a bay.
-        :param conductor_id: The id of a conductor.
-        :returns: None if success.
-                  Otherwise, the id of the conductor that locks the bay.
-        """
-
-    @abc.abstractmethod
-    def steal_bay_lock(self, bay_uuid, old_conductor_id, new_conductor_id):
-        """Steal lock of a bay.
-
-        Lock the bay with new_conductor_id if the bay is currently locked by
-        old_conductor_id.
-
-        :param bay_uuid: The uuid of a bay.
-        :param old_conductor_id: The id of the old conductor.
-        :param new_conductor_id: The id of the new conductor.
-        :returns: None if success. True if the bay is not locked.
-                  Otherwise, the id of the conductor that locks the bay.
-        """
-
-    @abc.abstractmethod
-    def release_bay_lock(self, bay_uuid, conductor_id):
-        """Release lock of a bay.
-
-        :param bay_uuid: The uuid of a bay.
-        :param conductor_id: The id of a conductor.
-        :returns: None if success. True otherwise.
-        """
-
-    @abc.abstractmethod
     def get_baymodel_list(self, context, filters=None,
                           limit=None, marker=None, sort_key=None,
                           sort_dir=None):

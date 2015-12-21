@@ -13,7 +13,6 @@
 #    under the License.
 
 from magnum.objects import bay
-from magnum.objects import baylock
 from magnum.objects import baymodel
 from magnum.objects import certificate
 from magnum.objects import container
@@ -27,7 +26,6 @@ from magnum.objects import x509keypair
 
 Container = container.Container
 Bay = bay.Bay
-BayLock = baylock.BayLock
 BayModel = baymodel.BayModel
 MagnumService = magnum_service.MagnumService
 Node = node.Node
@@ -37,7 +35,6 @@ Service = service.Service
 X509KeyPair = x509keypair.X509KeyPair
 Certificate = certificate.Certificate
 __all__ = (Bay,
-           BayLock,
            BayModel,
            Container,
            MagnumService,
