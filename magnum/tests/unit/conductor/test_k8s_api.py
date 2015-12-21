@@ -16,7 +16,6 @@ import mock
 from mock import patch
 
 from magnum.conductor import k8s_api
-from magnum import objects
 from magnum.tests import base
 
 
@@ -63,7 +62,7 @@ class TestK8sAPI(base.TestCase):
     @patch('magnum.conductor.handlers.common.cert_manager.get_bay_magnum_cert')
     @patch('magnum.conductor.utils.retrieve_bay')
     @patch('magnum.common.pythonk8sclient.swagger_client.api_client.ApiClient')
-    def _test_create_k8s_api(self, cls,
+    def _test_create_k8s_api(self, bay_uuid,
                              mock_api_client,
                              mock_bay_retrieval,
                              mock_get_bay_magnum_cert,
@@ -86,21 +85,12 @@ class TestK8sAPI(base.TestCase):
             file_hdl.name = TestK8sAPI.file_name[content]
 
         context = 'context'
-
-        obj = getattr(objects, cls)({})
-        if cls is not 'Bay':
-            self.assertFalse(hasattr(obj, 'bay_uuid'))
-            obj.bay_uuid = 'bay-uuid'
-        else:
-            obj = bay_obj
-
         with patch(
             'magnum.conductor.k8s_api.K8sAPI._create_temp_file_with_content',
                 side_effect=self._mock_named_file_creation):
-            k8s_api.create_k8s_api(context, obj)
+            k8s_api.create_k8s_api(context, bay_uuid)
 
-        if cls is not 'Bay':
-            mock_bay_retrieval.assert_called_once_with(context, obj.bay_uuid)
+        mock_bay_retrieval.assert_called_once_with(context, bay_uuid)
 
         mock_api_client.assert_called_once_with(
             bay_obj.api_address,
@@ -109,13 +99,13 @@ class TestK8sAPI(base.TestCase):
             ca_certs='ca-cert-temp-file-name')
 
     def test_create_k8s_api_with_service(self):
-        self._test_create_k8s_api('Service')
+        self._test_create_k8s_api('bay-uuid')
 
     def test_create_k8s_api_with_bay(self):
         self._test_create_k8s_api('Bay')
 
     def test_create_k8s_api_with_pod(self):
-        self._test_create_k8s_api('Pod')
+        self._test_create_k8s_api('bay-uuid')
 
     def test_create_k8s_api_with_rc(self):
-        self._test_create_k8s_api('ReplicationController')
+        self._test_create_k8s_api('bay-uuid')

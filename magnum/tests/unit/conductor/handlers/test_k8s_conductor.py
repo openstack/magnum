@@ -52,7 +52,7 @@ class TestK8sConductor(base.TestCase):
         expected_pod.manifest = '{"key": "value"}'
         mock_ast.return_value = {}
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api_pod') as \
+        with patch('magnum.conductor.k8s_api.create_k8s_api') as \
                 mock_kube_api:
             self.kube_handler.pod_create(self.context, expected_pod)
             (mock_kube_api.return_value.create_namespaced_pod
@@ -63,7 +63,7 @@ class TestK8sConductor(base.TestCase):
         manifest = {"key": "value"}
         expected_pod.manifest = '{"key": "value"}'
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api_pod') as \
+        with patch('magnum.conductor.k8s_api.create_k8s_api') as \
                 mock_kube_api:
             err = rest.ApiException(status=500)
             mock_kube_api.return_value.create_namespaced_pod.side_effect = err
@@ -80,7 +80,7 @@ class TestK8sConductor(base.TestCase):
         expected_pod = mock.MagicMock()
         expected_pod.manifest = '{"key": "value"}'
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api_pod') as \
+        with patch('magnum.conductor.k8s_api.create_k8s_api') as \
                 mock_kube_api:
             err = rest.ApiException(status=409)
             mock_kube_api.return_value.create_namespaced_pod.side_effect = err
@@ -107,7 +107,7 @@ class TestK8sConductor(base.TestCase):
         mock_pod_get_by_uuid.return_value = mock_pod
 
         mock_object_has_stack.return_value = True
-        with patch('magnum.conductor.k8s_api.create_k8s_api_pod') as \
+        with patch('magnum.conductor.k8s_api.create_k8s_api') as \
                 mock_kube_api:
             self.kube_handler.pod_delete(self.context,
                                          mock_pod.name,
@@ -132,7 +132,7 @@ class TestK8sConductor(base.TestCase):
         mock_pod_get_by_uuid.return_value = mock_pod
 
         mock_object_has_stack.return_value = True
-        with patch('magnum.conductor.k8s_api.create_k8s_api_pod') as \
+        with patch('magnum.conductor.k8s_api.create_k8s_api') as \
                 mock_kube_api:
             err = rest.ApiException(status=500)
             mock_kube_api.return_value.delete_namespaced_pod.side_effect = err
@@ -161,7 +161,7 @@ class TestK8sConductor(base.TestCase):
         mock_pod_get_by_uuid.return_value = mock_pod
 
         mock_object_has_stack.return_value = True
-        with patch('magnum.conductor.k8s_api.create_k8s_api_pod') as \
+        with patch('magnum.conductor.k8s_api.create_k8s_api') as \
                 mock_kube_api:
             err = rest.ApiException(status=404)
             mock_kube_api.return_value.delete_namespaced_pod.side_effect = err
@@ -187,7 +187,7 @@ class TestK8sConductor(base.TestCase):
         expected_service.manifest = '{"key": "value"}'
         mock_ast.return_value = {}
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api_service') as \
+        with patch('magnum.conductor.k8s_api.create_k8s_api') as \
                 mock_kube_api:
             self.kube_handler.service_create(self.context, expected_service)
             (mock_kube_api.return_value.create_namespaced_service
@@ -199,7 +199,7 @@ class TestK8sConductor(base.TestCase):
         manifest = {"key": "value"}
         expected_service.manifest = '{"key": "value"}'
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api_service') as \
+        with patch('magnum.conductor.k8s_api.create_k8s_api') as \
                 mock_kube_api:
             err = rest.ApiException(status=404)
             (mock_kube_api.return_value.create_namespaced_service
@@ -228,7 +228,7 @@ class TestK8sConductor(base.TestCase):
         mock_service_get_by_name.return_value = mock_service
 
         mock_object_has_stack.return_value = True
-        with patch('magnum.conductor.k8s_api.create_k8s_api_service') as \
+        with patch('magnum.conductor.k8s_api.create_k8s_api') as \
                 mock_kube_api:
             self.kube_handler.service_delete(self.context,
                                              mock_service.name,
@@ -254,7 +254,7 @@ class TestK8sConductor(base.TestCase):
         mock_service_get_by_uuid.return_value = mock_service
 
         mock_object_has_stack.return_value = True
-        with patch('magnum.conductor.k8s_api.create_k8s_api_service') as \
+        with patch('magnum.conductor.k8s_api.create_k8s_api') as \
                 mock_kube_api:
             err = rest.ApiException(status=500)
             (mock_kube_api.return_value.delete_namespaced_service
@@ -286,7 +286,7 @@ class TestK8sConductor(base.TestCase):
         mock_service_get_by_uuid.return_value = mock_service
 
         mock_object_has_stack.return_value = True
-        with patch('magnum.conductor.k8s_api.create_k8s_api_service') as \
+        with patch('magnum.conductor.k8s_api.create_k8s_api') as \
                 mock_kube_api:
             err = rest.ApiException(status=404)
             (mock_kube_api.return_value.delete_namespaced_service
@@ -309,7 +309,7 @@ class TestK8sConductor(base.TestCase):
         expected_rc.manifest = '{"key": "value"}'
         mock_ast.return_value = {}
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api_rc') as \
+        with patch('magnum.conductor.k8s_api.create_k8s_api') as \
                 mock_kube_api:
             self.kube_handler.rc_create({}, expected_rc)
             (mock_kube_api.return_value
@@ -321,7 +321,7 @@ class TestK8sConductor(base.TestCase):
         manifest = {"key": "value"}
         expected_rc.manifest = '{"key": "value"}'
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api_rc') as \
+        with patch('magnum.conductor.k8s_api.create_k8s_api') as \
                 mock_kube_api:
             err = rest.ApiException(status=500)
             (mock_kube_api.return_value
@@ -350,7 +350,7 @@ class TestK8sConductor(base.TestCase):
         bay_uuid = 'test-bay-uuid'
 
         mock_object_has_stack.return_value = True
-        with patch('magnum.conductor.k8s_api.create_k8s_api_rc') as \
+        with patch('magnum.conductor.k8s_api.create_k8s_api') as \
                 mock_kube_api:
             self.kube_handler.rc_delete(self.context, mock_rc.name, bay_uuid)
             (mock_kube_api.return_value
@@ -374,7 +374,7 @@ class TestK8sConductor(base.TestCase):
         mock_rc_get_by_uuid.return_value = mock_rc
 
         mock_object_has_stack.return_value = True
-        with patch('magnum.conductor.k8s_api.create_k8s_api_rc') as \
+        with patch('magnum.conductor.k8s_api.create_k8s_api') as \
                 mock_kube_api:
             err = rest.ApiException(status=500)
             (mock_kube_api.return_value
@@ -408,7 +408,7 @@ class TestK8sConductor(base.TestCase):
         mock_rc_get_by_uuid.return_value = mock_rc
 
         mock_object_has_stack.return_value = True
-        with patch('magnum.conductor.k8s_api.create_k8s_api_rc') as \
+        with patch('magnum.conductor.k8s_api.create_k8s_api') as \
                 mock_kube_api:
             err = rest.ApiException(status=404)
             (mock_kube_api.return_value
@@ -444,7 +444,7 @@ class TestK8sConductor(base.TestCase):
         mock_rc_get_by_name.return_value = expected_rc
         name_rc = expected_rc.name
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api_rc') as \
+        with patch('magnum.conductor.k8s_api.create_k8s_api') as \
                 mock_kube_api:
             self.kube_handler.rc_update(self.context, expected_rc.name,
                                         expected_rc.bay_uuid,
@@ -473,7 +473,7 @@ class TestK8sConductor(base.TestCase):
         expected_rc.manifest = '{"key": "value"}'
         name_rc = expected_rc.name
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api_rc') as \
+        with patch('magnum.conductor.k8s_api.create_k8s_api') as \
                 mock_kube_api:
             err = rest.ApiException(status=404)
             (mock_kube_api.return_value
@@ -513,7 +513,7 @@ class TestK8sConductor(base.TestCase):
         mock_service_get_by_uuid.return_value = expected_service
         service_name = expected_service.name
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api_service') as \
+        with patch('magnum.conductor.k8s_api.create_k8s_api') as \
                 mock_kube_api:
             self.kube_handler.service_update(self.context,
                                              expected_service.name,
@@ -542,7 +542,7 @@ class TestK8sConductor(base.TestCase):
         mock_service_get_by_name.return_value = expected_service
         service_name = expected_service.name
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api_service') as \
+        with patch('magnum.conductor.k8s_api.create_k8s_api') as \
                 mock_kube_api:
             err = rest.ApiException(status=404)
             (mock_kube_api.return_value.replace_namespaced_service
@@ -580,7 +580,7 @@ class TestK8sConductor(base.TestCase):
         mock_pod_get_by_name.return_value = expected_pod
         name_pod = expected_pod.name
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api_pod') as \
+        with patch('magnum.conductor.k8s_api.create_k8s_api') as \
                 mock_kube_api:
             self.kube_handler.pod_update(self.context, expected_pod.name,
                                          expected_pod.bay_uuid,
@@ -608,7 +608,7 @@ class TestK8sConductor(base.TestCase):
         expected_pod.manifest = '{"key": "value"}'
         name_pod = expected_pod.name
 
-        with patch('magnum.conductor.k8s_api.create_k8s_api_pod') as \
+        with patch('magnum.conductor.k8s_api.create_k8s_api') as \
                 mock_kube_api:
             err = rest.ApiException(status=404)
             mock_kube_api.return_value.replace_namespaced_pod.side_effect = err
