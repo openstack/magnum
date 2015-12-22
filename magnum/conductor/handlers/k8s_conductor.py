@@ -40,7 +40,7 @@ class Handler(object):
 
     def service_create(self, context, service):
         LOG.debug("service_create")
-        self.k8s_api = k8s.create_k8s_api_service(context, service.bay_uuid)
+        self.k8s_api = k8s.create_k8s_api(context, service.bay_uuid)
         manifest = k8s_manifest.parse(service.manifest)
         try:
             resp = self.k8s_api.create_namespaced_service(body=manifest,
@@ -73,7 +73,7 @@ class Handler(object):
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
         bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api_service(context, bay_uuid)
+        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
         if utils.is_uuid_like(service_ident):
             service = objects.Service.get_by_uuid(context,
                                                   service_ident,
@@ -124,7 +124,7 @@ class Handler(object):
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
         bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api_service(context, bay_uuid)
+        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
         if utils.is_uuid_like(service_ident):
             service = objects.Service.get_by_uuid(context, service_ident,
                                                   bay_uuid, self.k8s_api)
@@ -148,7 +148,7 @@ class Handler(object):
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
         bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api_service(context, bay_uuid)
+        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
         if utils.is_uuid_like(service_ident):
             service = objects.Service.get_by_uuid(context, service_ident,
                                                   bay_uuid, self.k8s_api)
@@ -163,7 +163,7 @@ class Handler(object):
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
         bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api_service(context, bay_uuid)
+        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
         try:
             resp = self.k8s_api.list_namespaced_service(namespace='default')
         except rest.ApiException as err:
@@ -205,7 +205,7 @@ class Handler(object):
     # Pod Operations
     def pod_create(self, context, pod):
         LOG.debug("pod_create")
-        self.k8s_api = k8s.create_k8s_api_pod(context, pod.bay_uuid)
+        self.k8s_api = k8s.create_k8s_api(context, pod.bay_uuid)
         manifest = k8s_manifest.parse(pod.manifest)
         try:
             resp = self.k8s_api.create_namespaced_pod(body=manifest,
@@ -232,7 +232,7 @@ class Handler(object):
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
         bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api_pod(context, bay_uuid)
+        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
         if utils.is_uuid_like(pod_ident):
             pod = objects.Pod.get_by_uuid(context, pod_ident,
                                           bay_uuid, self.k8s_api)
@@ -271,7 +271,7 @@ class Handler(object):
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
         bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api_pod(context, bay_uuid)
+        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
         if utils.is_uuid_like(pod_ident):
             pod = objects.Pod.get_by_uuid(context, pod_ident,
                                           bay_uuid, self.k8s_api)
@@ -294,7 +294,7 @@ class Handler(object):
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
         bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api_pod(context, bay_uuid)
+        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
         if utils.is_uuid_like(pod_ident):
             pod = objects.Pod.get_by_uuid(context, pod_ident,
                                           bay_uuid, self.k8s_api)
@@ -309,7 +309,7 @@ class Handler(object):
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
         bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api_pod(context, bay_uuid)
+        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
         try:
             resp = self.k8s_api.list_namespaced_pod(namespace='default')
         except rest.ApiException as err:
@@ -342,7 +342,7 @@ class Handler(object):
     # Replication Controller Operations
     def rc_create(self, context, rc):
         LOG.debug("rc_create")
-        self.k8s_api = k8s.create_k8s_api_rc(context, rc.bay_uuid)
+        self.k8s_api = k8s.create_k8s_api(context, rc.bay_uuid)
         manifest = k8s_manifest.parse(rc.manifest)
         try:
             resp = self.k8s_api.create_namespaced_replication_controller(
@@ -368,7 +368,7 @@ class Handler(object):
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
         bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api_rc(context, bay_uuid)
+        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
         if utils.is_uuid_like(rc_ident):
             rc = objects.ReplicationController.get_by_uuid(context, rc_ident,
                                                            bay_uuid,
@@ -405,7 +405,7 @@ class Handler(object):
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
         bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api_rc(context, bay_uuid)
+        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
         if utils.is_uuid_like(rc_ident):
             rc = objects.ReplicationController.get_by_uuid(context, rc_ident,
                                                            bay_uuid,
@@ -431,7 +431,7 @@ class Handler(object):
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
         bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api_rc(context, bay_uuid)
+        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
         if utils.is_uuid_like(rc_ident):
             rc = objects.ReplicationController.get_by_uuid(context, rc_ident,
                                                            bay_uuid,
@@ -448,7 +448,7 @@ class Handler(object):
         # or Name. If name is specified as bay identifier need to extract
         # the bay uuid since its needed to get the k8s_api object.
         bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api_rc(context, bay_uuid)
+        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
         try:
             resp = self.k8s_api.list_namespaced_replication_controller(
                 namespace='default')
