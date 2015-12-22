@@ -14,7 +14,6 @@
 
 from glanceclient import exc as glance_exception
 from novaclient import exceptions as nova_exception
-import six
 
 from magnum.api import utils as api_utils
 from magnum.common import clients
@@ -87,7 +86,7 @@ def validate_os_resources(context, baymodel_id):
     baymodel = BayModel.get_by_uuid(context, baymodel_id)
     cli = clients.OpenStackClients(context)
 
-    for attr, validate_method in six.iteritems(validators):
+    for attr, validate_method in validators.items():
         if attr in baymodel and baymodel[attr] is not None:
             validate_method(cli, baymodel[attr])
 
