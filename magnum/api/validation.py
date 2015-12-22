@@ -71,13 +71,12 @@ def enforce_bay_types(*bay_types):
                 bay = objects.Bay.get_by_uuid(pecan.request.context, bay_ident)
             else:
                 bay = objects.Bay.get_by_name(pecan.request.context, bay_ident)
-        baymodel = objects.BayModel.get_by_uuid(pecan.request.context,
-                                                bay.baymodel_id)
-        if baymodel.coe not in bay_types:
+
+        if bay.baymodel.coe not in bay_types:
             raise exception.InvalidParameterValue(
                 'Cannot fulfill request with a %(bay_type)s bay, '
                 'expecting a %(supported_bay_types)s bay.' %
-                {'bay_type': baymodel.coe,
+                {'bay_type': bay.baymodel.coe,
                  'supported_bay_types': '/'.join(bay_types)})
 
         return func(*args, **kwargs)

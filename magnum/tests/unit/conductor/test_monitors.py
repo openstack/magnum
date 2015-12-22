@@ -24,6 +24,7 @@ from magnum.conductor import swarm_monitor
 from magnum import objects
 from magnum.tests import base
 from magnum.tests.unit.db import utils
+from magnum.tests.unit.objects import utils as obj_utils
 
 
 class MonitorsTestCase(base.TestCase):
@@ -56,37 +57,23 @@ class MonitorsTestCase(base.TestCase):
         self.mock_metrics_spec.return_value = self.test_metrics_spec
         self.addCleanup(p.stop)
 
-    @mock.patch('magnum.objects.BayModel.get_by_uuid')
-    def test_create_monitor_success(self, mock_baymodel_get_by_uuid):
-        baymodel = mock.MagicMock()
-        baymodel.coe = 'swarm'
-        mock_baymodel_get_by_uuid.return_value = baymodel
+    def test_create_monitor_success(self):
+        self.bay.baymodel = obj_utils.get_test_baymodel(
+            self.context, uuid=self.bay.baymodel_id, coe='swarm')
         monitor = monitors.create_monitor(self.context, self.bay)
         self.assertIsInstance(monitor, swarm_monitor.SwarmMonitor)
 
-    @mock.patch('magnum.objects.BayModel.get_by_uuid')
-    def test_create_monitor_k8s_bay(self, mock_baymodel_get_by_uuid):
-        baymodel = mock.MagicMock()
-        baymodel.coe = 'kubernetes'
-        mock_baymodel_get_by_uuid.return_value = baymodel
+    def test_create_monitor_k8s_bay(self):
+        self.bay.baymodel = obj_utils.get_test_baymodel(
+            self.context, uuid=self.bay.baymodel_id, coe='kubernetes')
         monitor = monitors.create_monitor(self.context, self.bay)
         self.assertIsInstance(monitor, k8s_monitor.K8sMonitor)
 
-    @mock.patch('magnum.objects.BayModel.get_by_uuid')
-    def test_create_monitor_mesos_bay(self, mock_baymodel_get_by_uuid):
-        baymodel = mock.MagicMock()
-        baymodel.coe = 'mesos'
-        mock_baymodel_get_by_uuid.return_value = baymodel
+    def test_create_monitor_mesos_bay(self):
+        self.bay.baymodel = obj_utils.get_test_baymodel(
+            self.context, uuid=self.bay.baymodel_id, coe='mesos')
         monitor = monitors.create_monitor(self.context, self.bay)
         self.assertIsInstance(monitor, mesos_monitor.MesosMonitor)
-
-    @mock.patch('magnum.objects.BayModel.get_by_uuid')
-    def test_create_monitor_unsupported_coe(self, mock_baymodel_get_by_uuid):
-        baymodel = mock.MagicMock()
-        baymodel.coe = 'unsupported'
-        mock_baymodel_get_by_uuid.return_value = baymodel
-        monitor = monitors.create_monitor(self.context, self.bay)
-        self.assertIsNone(monitor)
 
     @mock.patch('magnum.common.docker_utils.docker_for_bay')
     def test_swarm_monitor_pull_data_success(self, mock_docker_for_bay):
