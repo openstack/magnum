@@ -28,52 +28,68 @@ class TestBayObject(base.DbTestCase):
     def setUp(self):
         super(TestBayObject, self).setUp()
         self.fake_bay = utils.get_test_bay()
+        baymodel_id = self.fake_bay['baymodel_id']
+        self.fake_baymodel = objects.BayModel(uuid=baymodel_id)
 
-    def test_get_by_id(self):
+    @mock.patch('magnum.objects.BayModel.get_by_uuid')
+    def test_get_by_id(self, mock_baymodel_get):
         bay_id = self.fake_bay['id']
         with mock.patch.object(self.dbapi, 'get_bay_by_id',
                                autospec=True) as mock_get_bay:
+            mock_baymodel_get.return_value = self.fake_baymodel
             mock_get_bay.return_value = self.fake_bay
             bay = objects.Bay.get(self.context, bay_id)
             mock_get_bay.assert_called_once_with(self.context, bay_id)
             self.assertEqual(self.context, bay._context)
+            self.assertEqual(bay.baymodel_id, bay.baymodel.uuid)
 
-    def test_get_by_uuid(self):
+    @mock.patch('magnum.objects.BayModel.get_by_uuid')
+    def test_get_by_uuid(self, mock_baymodel_get):
         uuid = self.fake_bay['uuid']
         with mock.patch.object(self.dbapi, 'get_bay_by_uuid',
                                autospec=True) as mock_get_bay:
+            mock_baymodel_get.return_value = self.fake_baymodel
             mock_get_bay.return_value = self.fake_bay
             bay = objects.Bay.get(self.context, uuid)
             mock_get_bay.assert_called_once_with(self.context, uuid)
             self.assertEqual(self.context, bay._context)
+            self.assertEqual(bay.baymodel_id, bay.baymodel.uuid)
 
-    def test_get_by_name(self):
+    @mock.patch('magnum.objects.BayModel.get_by_uuid')
+    def test_get_by_name(self, mock_baymodel_get):
         name = self.fake_bay['name']
         with mock.patch.object(self.dbapi, 'get_bay_by_name',
                                autospec=True) as mock_get_bay:
+            mock_baymodel_get.return_value = self.fake_baymodel
             mock_get_bay.return_value = self.fake_bay
             bay = objects.Bay.get_by_name(self.context, name)
             mock_get_bay.assert_called_once_with(self.context, name)
             self.assertEqual(self.context, bay._context)
+            self.assertEqual(bay.baymodel_id, bay.baymodel.uuid)
 
     def test_get_bad_id_and_uuid(self):
         self.assertRaises(exception.InvalidIdentity,
                           objects.Bay.get, self.context, 'not-a-uuid')
 
-    def test_list(self):
+    @mock.patch('magnum.objects.BayModel.get_by_uuid')
+    def test_list(self, mock_baymodel_get):
         with mock.patch.object(self.dbapi, 'get_bay_list',
                                autospec=True) as mock_get_list:
             mock_get_list.return_value = [self.fake_bay]
+            mock_baymodel_get.return_value = self.fake_baymodel
             bays = objects.Bay.list(self.context)
             self.assertEqual(1, mock_get_list.call_count)
             self.assertThat(bays, HasLength(1))
             self.assertIsInstance(bays[0], objects.Bay)
             self.assertEqual(self.context, bays[0]._context)
+            self.assertEqual(bays[0].baymodel_id, bays[0].baymodel.uuid)
 
-    def test_list_all(self):
+    @mock.patch('magnum.objects.BayModel.get_by_uuid')
+    def test_list_all(self, mock_baymodel_get):
         with mock.patch.object(self.dbapi, 'get_bay_list',
                                autospec=True) as mock_get_list:
             mock_get_list.return_value = [self.fake_bay]
+            mock_baymodel_get.return_value = self.fake_baymodel
             self.context.all_tenants = True
             bays = objects.Bay.list(self.context)
             mock_get_list.assert_called_once_with(
@@ -84,10 +100,12 @@ class TestBayObject(base.DbTestCase):
             self.assertIsInstance(bays[0], objects.Bay)
             self.assertEqual(self.context, bays[0]._context)
 
-    def test_list_with_filters(self):
+    @mock.patch('magnum.objects.BayModel.get_by_uuid')
+    def test_list_with_filters(self, mock_baymodel_get):
         with mock.patch.object(self.dbapi, 'get_bay_list',
                                autospec=True) as mock_get_list:
             mock_get_list.return_value = [self.fake_bay]
+            mock_baymodel_get.return_value = self.fake_baymodel
             filters = {'name': 'bay1'}
             bays = objects.Bay.list(self.context, filters=filters)
 
@@ -100,20 +118,24 @@ class TestBayObject(base.DbTestCase):
             self.assertIsInstance(bays[0], objects.Bay)
             self.assertEqual(self.context, bays[0]._context)
 
-    def test_create(self):
+    @mock.patch('magnum.objects.BayModel.get_by_uuid')
+    def test_create(self, mock_baymodel_get):
         with mock.patch.object(self.dbapi, 'create_bay',
                                autospec=True) as mock_create_bay:
+            mock_baymodel_get.return_value = self.fake_baymodel
             mock_create_bay.return_value = self.fake_bay
             bay = objects.Bay(self.context, **self.fake_bay)
             bay.create()
             mock_create_bay.assert_called_once_with(self.fake_bay)
             self.assertEqual(self.context, bay._context)
 
-    def test_destroy(self):
+    @mock.patch('magnum.objects.BayModel.get_by_uuid')
+    def test_destroy(self, mock_baymodel_get):
         uuid = self.fake_bay['uuid']
         with mock.patch.object(self.dbapi, 'get_bay_by_uuid',
                                autospec=True) as mock_get_bay:
             mock_get_bay.return_value = self.fake_bay
+            mock_baymodel_get.return_value = self.fake_baymodel
             with mock.patch.object(self.dbapi, 'destroy_bay',
                                    autospec=True) as mock_destroy_bay:
                 bay = objects.Bay.get_by_uuid(self.context, uuid)
@@ -122,10 +144,12 @@ class TestBayObject(base.DbTestCase):
                 mock_destroy_bay.assert_called_once_with(uuid)
                 self.assertEqual(self.context, bay._context)
 
-    def test_save(self):
+    @mock.patch('magnum.objects.BayModel.get_by_uuid')
+    def test_save(self, mock_baymodel_get):
         uuid = self.fake_bay['uuid']
         with mock.patch.object(self.dbapi, 'get_bay_by_uuid',
                                autospec=True) as mock_get_bay:
+            mock_baymodel_get.return_value = self.fake_baymodel
             mock_get_bay.return_value = self.fake_bay
             with mock.patch.object(self.dbapi, 'update_bay',
                                    autospec=True) as mock_update_bay:
@@ -136,10 +160,12 @@ class TestBayObject(base.DbTestCase):
 
                 mock_get_bay.assert_called_once_with(self.context, uuid)
                 mock_update_bay.assert_called_once_with(
-                    uuid, {'node_count': 10, 'master_count': 5})
+                    uuid, {'node_count': 10, 'master_count': 5,
+                           'baymodel': self.fake_baymodel})
                 self.assertEqual(self.context, bay._context)
 
-    def test_refresh(self):
+    @mock.patch('magnum.objects.BayModel.get_by_uuid')
+    def test_refresh(self, mock_baymodel_get):
         uuid = self.fake_bay['uuid']
         new_uuid = magnum_utils.generate_uuid()
         returns = [dict(self.fake_bay, uuid=uuid),
@@ -149,6 +175,7 @@ class TestBayObject(base.DbTestCase):
         with mock.patch.object(self.dbapi, 'get_bay_by_uuid',
                                side_effect=returns,
                                autospec=True) as mock_get_bay:
+            mock_baymodel_get.return_value = self.fake_baymodel
             bay = objects.Bay.get_by_uuid(self.context, uuid)
             self.assertEqual(uuid, bay.uuid)
             bay.refresh()

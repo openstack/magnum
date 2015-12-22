@@ -19,6 +19,7 @@ from magnum.common import exception
 from magnum.common import utils
 from magnum.db import api as dbapi
 from magnum.objects import base
+from magnum.objects import baymodel
 from magnum.objects import fields as m_fields
 
 
@@ -28,7 +29,8 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.0: Initial version
     # Version 1.1: Added 'bay_create_timeout' field
     # Version 1.2: Add 'registry_trust_id' field
-    VERSION = '1.2'
+    # Version 1.3: Added 'baymodel' field
+    VERSION = '1.3'
 
     dbapi = dbapi.get_instance()
 
@@ -51,14 +53,23 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
         'master_addresses': fields.ListOfStringsField(nullable=True),
         'ca_cert_ref': fields.StringField(nullable=True),
         'magnum_cert_ref': fields.StringField(nullable=True),
-        'registry_trust_id': fields.StringField(nullable=True)
+        'registry_trust_id': fields.StringField(nullable=True),
+        'baymodel': fields.ObjectField('BayModel'),
     }
 
     @staticmethod
     def _from_db_object(bay, db_bay):
         """Converts a database entity to a formal object."""
         for field in bay.fields:
-            bay[field] = db_bay[field]
+            if field != 'baymodel':
+                bay[field] = db_bay[field]
+
+        # Note(eliqiao): The following line needs to be placed outside the
+        # loop because there is a dependency from baymodel to baymodel_id.
+        # The baymodel_id must be populated first in the loop before it can be
+        # used to find the baymodel.
+        bay['baymodel'] = baymodel.BayModel.get_by_uuid(bay._context,
+                                                        bay.baymodel_id)
 
         bay.obj_reset_changes()
         return bay

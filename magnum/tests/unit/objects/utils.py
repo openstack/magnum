@@ -14,6 +14,8 @@
 #    under the License.
 """Magnum object test utilities."""
 
+
+from magnum.common import exception
 from magnum import objects
 from magnum.tests.unit.db import utils as db_utils
 
@@ -41,7 +43,10 @@ def create_test_baymodel(context, **kw):
     attributes.
     """
     baymodel = get_test_baymodel(context, **kw)
-    baymodel.create()
+    try:
+        baymodel.create()
+    except exception.BayModelAlreadyExists:
+        baymodel = objects.BayModel.get(context, baymodel.uuid)
     return baymodel
 
 
@@ -68,6 +73,8 @@ def create_test_bay(context, **kw):
     attributes.
     """
     bay = get_test_bay(context, **kw)
+    create_test_baymodel(context, uuid=bay['baymodel_id'],
+                         coe=kw.get('coe', 'swarm'))
     bay.create()
     return bay
 

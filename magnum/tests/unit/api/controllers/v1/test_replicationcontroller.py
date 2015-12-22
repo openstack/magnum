@@ -41,9 +41,7 @@ class TestListRC(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestListRC, self).setUp()
-        bay = obj_utils.create_test_bay(self.context)
-        obj_utils.create_test_baymodel(self.context, uuid=bay.baymodel_id,
-                                       coe='kubernetes')
+        obj_utils.create_test_bay(self.context, coe='kubernetes')
         self.rc = obj_utils.create_test_rc(self.context)
 
     @mock.patch.object(rpcapi.API, 'rc_list')
@@ -199,9 +197,7 @@ class TestPatch(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestPatch, self).setUp()
-        bay = obj_utils.create_test_bay(self.context)
-        obj_utils.create_test_baymodel(self.context, uuid=bay.baymodel_id,
-                                       coe='kubernetes')
+        obj_utils.create_test_bay(self.context, coe='kubernetes')
         self.rc = obj_utils.create_test_rc(self.context,
                                            images=['rc_example_A_image'])
         self.another_bay = obj_utils.create_test_bay(
@@ -430,16 +426,18 @@ class TestPost(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestPost, self).setUp()
-        obj_utils.create_test_bay(self.context)
+        self.test_bay = obj_utils.create_test_bay(self.context,
+                                                  coe='kubernetes')
         self.rc_obj = obj_utils.create_test_rc(self.context)
         p = mock.patch.object(rpcapi.API, 'rc_create')
         self.mock_rc_create = p.start()
         self.mock_rc_create.return_value = self.rc_obj
         self.addCleanup(p.stop)
         p = mock.patch('magnum.objects.BayModel.get_by_uuid')
-        self.mock_baymodel_get_by_uuid = p.start()
-        self.mock_baymodel_get_by_uuid.return_value.coe = 'kubernetes'
-        self.addCleanup(p.stop)
+        self.mock_baymodel_get_by_uuid = obj_utils.get_test_baymodel(
+            self.context,
+            uuid=self.test_bay.baymodel_id,
+            coe='kubernetes')
 
     @mock.patch('oslo_utils.timeutils.utcnow')
     @mock.patch.object(rpcapi.API, 'rc_create')
@@ -524,9 +522,7 @@ class TestDelete(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestDelete, self).setUp()
-        bay = obj_utils.create_test_bay(self.context)
-        obj_utils.create_test_baymodel(self.context, uuid=bay.baymodel_id,
-                                       coe='kubernetes')
+        obj_utils.create_test_bay(self.context, coe='kubernetes')
         self.rc = obj_utils.create_test_rc(self.context)
 
     @mock.patch.object(rpcapi.API, 'rc_delete')
