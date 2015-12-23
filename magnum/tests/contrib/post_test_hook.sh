@@ -22,46 +22,17 @@ function function_exists {
     declare -f -F $1 > /dev/null
 }
 
-if ! function_exists echo_summary; then
-    function echo_summary {
-        echo $@
-    }
-fi
+# Set up all necessary test data
+function create_test_data {
+    # First we test Magnum's command line to see if we can stand up
+    # a baymodel, bay and a pod
 
-# Save trace setting
-XTRACE=$(set +o | grep xtrace)
-set -o xtrace
+    export NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
+    export IMAGE_ID=$(glance --os-image-api-version 1 image-show fedora-21-atomic-5 | awk '/ id /{print $4}')
 
-echo_summary "magnum's post_test_hook.sh was called..."
-(set -o posix; set)
-
-constraints="-c $REQUIREMENTS_DIR/upper-constraints.txt"
-sudo pip install $constraints -U -r requirements.txt -r test-requirements.txt
-
-export MAGNUM_DIR="$BASE/new/magnum"
-sudo chown -R jenkins:stack $MAGNUM_DIR
-
-# Get admin credentials
-pushd ../devstack
-source openrc admin admin
-# NOTE(hongbin): This is a temporary work around. These variables are for
-# keystone v3, but magnum is using v2 API. Therefore, unset them to make the
-# keystoneclient work.
-# Bug: #1473600
-unset OS_PROJECT_DOMAIN_ID
-unset OS_USER_DOMAIN_ID
-unset OS_AUTH_TYPE
-popd
-
-# First we test Magnum's command line to see if we can stand up
-# a baymodel, bay and a pod
-export NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
-export IMAGE_ID=$(glance --os-image-api-version 1 image-show fedora-21-atomic-5 | awk '/ id /{print $4}')
-
-
-# pass the appropriate variables via a config file
-CREDS_FILE=$MAGNUM_DIR/functional_creds.conf
-cat <<EOF > $CREDS_FILE
+    # pass the appropriate variables via a config file
+    CREDS_FILE=$MAGNUM_DIR/functional_creds.conf
+    cat <<EOF > $CREDS_FILE
 # Credentials for functional testing
 
 [auth]
@@ -84,25 +55,113 @@ flavor_id = m1.magnum
 copy_logs = true
 EOF
 
-# Note(eliqiao): Let's keep this only for debugging on gate.
-echo_summary $CREDS_FILE
-cat $CREDS_FILE
+    # Note(eliqiao): Let's keep this only for debugging on gate.
+    echo_summary $CREDS_FILE
+    cat $CREDS_FILE
 
-# Create a keypair for use in the functional tests.
-echo_summary "Generate a key-pair"
-ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
-nova keypair-add --pub-key ~/.ssh/id_rsa.pub default
+    # Create a keypair for use in the functional tests.
+    echo_summary "Generate a key-pair"
+    ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
+    nova keypair-add  --pub-key ~/.ssh/id_rsa.pub default
 
-# Create magnum specific flavor for use in functional tests.
-echo_summary "Create a flavor"
-nova flavor-create  m1.magnum 100 1024 8 1
+}
+
+function add_flavor {
+    # because of policy.json change in nova, flavor-create is now an admin-only feature
+    # moving this out to only be used by admins
+
+    # Get admin credentials
+    pushd ../devstack
+    source openrc admin admin
+    # NOTE(hongbin): This is a temporary work around. These variables are for
+    # keystone v3, but magnum is using v2 API. Therefore, unset them to make the
+    # keystoneclient work.
+    # Bug: #1473600
+    unset OS_PROJECT_DOMAIN_ID
+    unset OS_USER_DOMAIN_ID
+    unset OS_AUTH_TYPE
+    popd
+
+    # Create magnum specific flavor for use in functional tests.
+    echo_summary "Create a flavor"
+    nova flavor-create  m1.magnum 100 1024 8 1
+}
+
+if ! function_exists echo_summary; then
+    function echo_summary {
+        echo $@
+    }
+fi
+
+# Save trace setting
+XTRACE=$(set +o | grep xtrace)
+set -o xtrace
+
+echo_summary "magnum's post_test_hook.sh was called..."
+(set -o posix; set)
+
+constraints="-c $REQUIREMENTS_DIR/upper-constraints.txt"
+sudo pip install $constraints -U -r requirements.txt -r test-requirements.txt
+
+export MAGNUM_DIR="$BASE/new/magnum"
+sudo chown -R jenkins:stack $MAGNUM_DIR
 
 # Run functional tests
 # Currently we support functional-api, functional-k8s, will support swarm,
 # mesos later.
 
 echo "Running magnum functional test suite for $1"
-sudo -E -H -u jenkins tox -e functional-$1 -- --concurrency=1
+
+# For api, we will run tempest tests
+if [[ "api" == $1 ]]; then
+    # Import devstack functions 'iniset', 'iniget' and 'trueorfalse'
+    source $BASE/new/devstack/functions
+    echo "TEMPEST_SERVICES+=,magnum" >> $localrc_path
+    pushd $BASE/new/tempest
+    sudo chown -R jenkins:stack $BASE/new/tempest
+
+    add_flavor
+
+    # Set demo credentials
+    source $BASE/new/devstack/accrc/demo/demo
+    unset OS_AUTH_TYPE
+
+    create_test_data
+
+    # Set up tempest config with magnum goodness
+    iniset $BASE/new/tempest/etc/tempest.conf magnum image_id $IMAGE_ID
+    iniset $BASE/new/tempest/etc/tempest.conf magnum nic_id $NIC_ID
+    iniset $BASE/new/tempest/etc/tempest.conf magnum keypair_id default
+    iniset $BASE/new/tempest/etc/tempest.conf magnum flavor_id m1.magnum
+
+    # show tempest config with magnum
+    cat etc/tempest.conf
+
+    # Set up concurrency and test regex
+    export MAGNUM_TEMPEST_CONCURRENCY=${MAGNUM_TEMPEST_CONCURRENCY:-1}
+    export MAGNUM_TESTS=${MAGNUM_TESTS:-'magnum.tests.functional.api.v1'}
+
+    echo "Running tempest magnum test suites"
+    sudo -H -u jenkins tox -eall-plugin -- $MAGNUM_TESTS --concurrency=$MAGNUM_TEMPEST_CONCURRENCY
+else
+    # Get admin credentials
+    pushd ../devstack
+    source openrc admin admin
+    # NOTE(hongbin): This is a temporary work around. These variables are for
+    # keystone v3, but magnum is using v2 API. Therefore, unset them to make the
+    # keystoneclient work.
+    # Bug: #1473600
+    unset OS_PROJECT_DOMAIN_ID
+    unset OS_USER_DOMAIN_ID
+    unset OS_AUTH_TYPE
+    popd
+
+    add_flavor
+
+    create_test_data
+
+    sudo -E -H -u jenkins tox -e functional-$1 -- --concurrency=1
+fi
 EXIT_CODE=$?
 
 # Delete the keypair used in the functional test.
