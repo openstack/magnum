@@ -151,7 +151,7 @@ function create_magnum_conf {
 
     if [ -n "$MAGNUM_STATE_PATH" ]; then
         iniset $MAGNUM_CONF DEFAULT state_path "$MAGNUM_STATE_PATH"
-        iniset $MAGNUM_CONF DEFAULT lock_path "$MAGNUM_STATE_PATH"
+        iniset $MAGNUM_CONF oslo_concurrency lock_path "$MAGNUM_STATE_PATH"
     fi
 
     if [ "$SYSLOG" != "False" ]; then
