@@ -10,6 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import os
 import random
 import socket
 import string
@@ -21,6 +22,7 @@ from magnum.tests.functional.api.v1.models import bay_model
 from magnum.tests.functional.api.v1.models import baymodel_model
 from magnum.tests.functional.api.v1.models import baymodelpatch_model
 from magnum.tests.functional.api.v1.models import baypatch_model
+from magnum.tests.functional.api.v1.models import cert_model
 from magnum.tests.functional.common import config
 
 
@@ -282,3 +284,18 @@ def bay_node_count_patch_data(node_count=2):
         "op": "replace"
     }]
     return baypatch_model.BayPatchCollection.from_dict(data)
+
+
+def cert_data(bay_uuid, csr_data=None):
+    if csr_data is None:
+        csr_data = config.Config.csr_location
+    data = {
+        "bay_uuid": bay_uuid
+    }
+    if csr_data is not None and os.path.isfile(csr_data):
+        with open(csr_data, 'r') as f:
+            data['csr'] = f.read()
+
+    model = cert_model.CertEntity.from_dict(data)
+
+    return model

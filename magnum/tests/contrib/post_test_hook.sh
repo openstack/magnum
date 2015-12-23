@@ -59,6 +59,7 @@ keypair_id = default
 flavor_id = m1.magnum2
 master_flavor_id = m1.magnum
 copy_logs = true
+csr_location = $MAGNUM_DIR/default.csr
 EOF
 
     # Note(eliqiao): Let's keep this only for debugging on gate.
@@ -69,6 +70,40 @@ EOF
     echo_summary "Generate a key-pair"
     ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
     nova keypair-add  --pub-key ~/.ssh/id_rsa.pub default
+
+    # create a valid sample csr
+    export CSR_FILE=$MAGNUM_DIR/default.csr
+    cat <<EOF > $CSR_FILE
+-----BEGIN CERTIFICATE REQUEST-----
+MIIByjCCATMCAQAwgYkxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlh
+MRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRMwEQYDVQQKEwpHb29nbGUgSW5jMR8w
+HQYDVQQLExZJbmZvcm1hdGlvbiBUZWNobm9sb2d5MRcwFQYDVQQDEw53d3cuZ29v
+Z2xlLmNvbTCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEApZtYJCHJ4VpVXHfV
+IlstQTlO4qC03hjX+ZkPyvdYd1Q4+qbAeTwXmCUKYHThVRd5aXSqlPzyIBwieMZr
+WFlRQddZ1IzXAlVRDWwAo60KecqeAXnnUK+5fXoTI/UgWshre8tJ+x/TMHaQKR/J
+cIWPhqaQhsJuzZbvAdGA80BLxdMCAwEAAaAAMA0GCSqGSIb3DQEBBQUAA4GBAIhl
+4PvFq+e7ipARgI5ZM+GZx6mpCz44DTo0JkwfRDf+BtrsaC0q68eTf2XhYOsq4fkH
+Q0uA0aVog3f5iJxCa3Hp5gxbJQ6zV6kJ0TEsuaaOhEko9sdpCoPOnRBm2i/XRD2D
+6iNh8f8z0ShGsFqjDgFHyF3o+lUyj+UC6H1QW7bn
+-----END CERTIFICATE REQUEST-----
+EOF
+
+    # create an ivalid sample csr
+    export INVALID_CSR_FILE=$MAGNUM_DIR/invalid.csr
+    cat <<EOF > $INVALID_CSR_FILE
+-----BEGIN CERTIFICATE REQUEST-----
+FAKERFAKERyjCCATMCAQAwgYkxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlh
+MRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRMwEQYDVQQKEwpHb29nbGUgSW5jMR8w
+HQYDVQQLExZJbmZvcm1hdGlvbiBUZWNobm9sb2d5MRcwFQYDVQQDEw53d3cuZ29v
+Z2xlLmNvbTCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEApZtYJCHJ4VpVXHfV
+IlstQTlO4qC03hjX+ZkPyvdYd1Q4+qbAeTwXmCUKYHThVRd5aXSqlPzyIBwieMZr
+WFlRQddZ1IzXAlVRDWwAo60KecqeAXnnUK+5fXoTI/UgWshre8tJ+x/TMHaQKR/J
+cIWPhqaQhsJuzZbvAdGA80BLxdMCAwEAAaAAMA0GCSqGSIb3DQEBBQUAA4GBAIhl
+4PvFq+e7ipARgI5ZM+GZx6mpCz44DTo0JkwfRDf+BtrsaC0q68eTf2XhYOsq4fkH
+Q0uA0aVog3f5iJxCa3Hp5gxbJQ6zV6kJ0TEsuaaOhEko9sdpCoPOnRBm2i/XRD2D
+6iNh8f8z0ShGsFqjDgFHyF3o+lUyj+UC6H1QW7bn
+-----END CERTIFICATE REQUEST-----
+EOF
 
 }
 
@@ -149,6 +184,7 @@ if [[ "api" == "$coe" ]]; then
     iniset $BASE/new/tempest/etc/tempest.conf magnum keypair_id default
     iniset $BASE/new/tempest/etc/tempest.conf magnum flavor_id m1.magnum2
     iniset $BASE/new/tempest/etc/tempest.conf magnum master_flavor_id m1.magnum
+    iniset $BASE/new/tempest/etc/tempest.conf magnum csr_location $CSR_FILE
 
     # show tempest config with magnum
     cat etc/tempest.conf

@@ -35,6 +35,7 @@ class BayTest(base.BaseMagnumTest):
         self.baymodel_client = None
         self.keypairs_client = None
         self.bay_client = None
+        self.cert_client = None
 
     def setUp(self):
         try:
@@ -49,6 +50,10 @@ class BayTest(base.BaseMagnumTest):
                 creds=self.credentials,
                 type_of_creds='default',
                 request_type='bay')
+            (self.cert_client, _) = self.get_clients_with_existing_creds(
+                creds=self.credentials,
+                type_of_creds='default',
+                request_type='cert')
             model = datagen.valid_swarm_baymodel()
             _, self.baymodel = self._create_baymodel(model)
 
@@ -108,12 +113,25 @@ class BayTest(base.BaseMagnumTest):
     def test_create_list_and_delete_bays(self):
         gen_model = datagen.valid_bay_data(
             baymodel_id=self.baymodel.uuid, node_count=1)
+
+        # test bay create
         _, temp_model = self._create_bay(gen_model)
+
+        # test bay list
         resp, model = self.bay_client.list_bays()
         self.assertEqual(resp.status, 200)
         self.assertGreater(len(model.bays), 0)
         self.assertIn(
             temp_model.uuid, list([x['uuid'] for x in model.bays]))
+
+        # test invalid bay update
+        patch_model = datagen.bay_name_patch_data()
+        self.assertRaises(
+            exceptions.BadRequest,
+            self.bay_client.patch_bay,
+            temp_model.uuid, patch_model)
+
+        # test bay delete
         self._delete_bay(temp_model.uuid)
         self.bays.remove(temp_model.uuid)
 
@@ -153,3 +171,39 @@ class BayTest(base.BaseMagnumTest):
         self.assertRaises(
             exceptions.NotFound,
             self.bay_client.delete_bay, data_utils.rand_uuid())
+
+    @testtools.testcase.attr('positive')
+    def test_certificate_sign_and_show(self):
+        first_model = datagen.valid_bay_data(baymodel_id=self.baymodel.uuid,
+                                             name='test')
+        _, bay_model = self._create_bay(first_model)
+
+        # test ca show
+        resp, model = self.cert_client.get_cert(
+            bay_model.uuid)
+        self.LOG.info("cert resp: %s" % resp)
+        self.LOG.info("cert model: %s" % model)
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(model.bay_uuid, bay_model.uuid)
+        self.assertIsNotNone(model.pem)
+        self.assertIn('-----BEGIN CERTIFICATE-----', model.pem)
+        self.assertIn('-----END CERTIFICATE-----', model.pem)
+
+        # test ca sign
+        model = datagen.cert_data(bay_uuid=bay_model.uuid)
+        resp, model = self.cert_client.post_cert(model)
+        self.LOG.info("cert resp: %s" % resp)
+        self.LOG.info("cert model: %s" % model)
+        self.assertEqual(resp.status, 201)
+        self.assertEqual(model.bay_uuid, bay_model.uuid)
+        self.assertIsNotNone(model.pem)
+        self.assertIn('-----BEGIN CERTIFICATE-----', model.pem)
+        self.assertIn('-----END CERTIFICATE-----', model.pem)
+
+        # test ca sign invalid
+        model = datagen.cert_data(bay_uuid=bay_model.uuid,
+                                  csr_data="invalid_path")
+        self.assertRaises(
+            exceptions.ServerFault,
+            self.cert_client.post_cert,
+            model)

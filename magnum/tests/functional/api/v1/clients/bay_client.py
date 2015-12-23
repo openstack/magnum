@@ -111,15 +111,31 @@ class BayClient(client.MagnumClient):
         utils.wait_for_condition(
             lambda: self.does_bay_not_exist(bay_id), 10, 3600)
 
-    def wait_for_created_bay(self, bay_id):
+    def wait_for_created_bay(self, bay_id, delete_on_error=True):
         try:
             utils.wait_for_condition(
                 lambda: self.does_bay_exist(bay_id), 10, 3600)
         except Exception:
-            # In error state.  Clean up the bay id
-            self.delete_bay(bay_id)
-            self.wait_for_bay_to_delete(bay_id)
+            # In error state.  Clean up the bay id if desired
+            if delete_on_error:
+                self.delete_bay(bay_id)
+                self.wait_for_bay_to_delete(bay_id)
             raise
+
+    def wait_for_final_state(self, bay_id):
+        utils.wait_for_condition(
+            lambda: self.is_bay_in_final_state(bay_id), 10, 3600)
+
+    def is_bay_in_final_state(self, bay_id):
+        try:
+            resp, model = self.get_bay(bay_id)
+            if model.status in ['CREATED', 'CREATE_COMPLETE',
+                                'ERROR', 'CREATE_FAILED']:
+                return True
+            else:
+                return False
+        except exceptions.NotFound:
+            return False
 
     def does_bay_exist(self, bay_id):
         try:

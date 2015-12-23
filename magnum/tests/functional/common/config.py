@@ -98,6 +98,12 @@ class Config(object):
         cls.master_flavor_id = CONF.magnum.master_flavor_id
 
     @classmethod
+    def set_csr_location(cls, config):
+        if 'csr_location' not in CONF.magnum:
+            raise Exception('config missing csr_location key')
+        cls.csr_location = CONF.magnum.csr_location
+
+    @classmethod
     def setUp(cls):
         cls.set_admin_creds(config)
         cls.set_user_creds(config)
@@ -112,3 +118,4 @@ class Config(object):
         cls.set_flavor_id(config)
         cls.set_magnum_url(config)
         cls.set_master_flavor_id(config)
+        cls.set_csr_location(config)

@@ -51,4 +51,8 @@ MagnumGroup = [
     cfg.StrOpt("master_flavor_id",
                default="m1.magnum",
                help="Master flavor id to use for baymodels."),
+
+    cfg.StrOpt("csr_location",
+               default="/opt/stack/new/magnum/default.csr",
+               help="CSR location for certificates."),
 ]

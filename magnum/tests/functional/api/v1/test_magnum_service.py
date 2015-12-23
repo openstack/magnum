@@ -39,7 +39,8 @@ class MagnumServiceTest(base.BaseMagnumTest):
         # get json object
         (self.service_client, _) = self.get_clients_with_new_creds(
             type_of_creds='admin',
-            request_type='service')
+            request_type='service',
+            class_cleanup=False)
         resp, msvcs = self.service_client.magnum_service_list()
         self.assertEqual(200, resp.status)
         # Note(suro-patz): Following code assumes that we have only
