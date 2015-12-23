@@ -87,7 +87,7 @@ class DbMagnumServiceTestCase(base.DbTestCase):
         res = self.dbapi.get_magnum_service_list(self.context)
         self.assertEqual(1, len(res))
         res = res[0]
-        for k, v in fake_ms_params.iteritems():
+        for k, v in fake_ms_params.items():
             self.assertEqual(res[k], v)
 
         fake_ms_params['binary'] = 'FakeBin1'
@@ -96,5 +96,5 @@ class DbMagnumServiceTestCase(base.DbTestCase):
         res = self.dbapi.get_magnum_service_list(self.context, disabled=True)
         self.assertEqual(1, len(res))
         res = res[0]
-        for k, v in fake_ms_params.iteritems():
+        for k, v in fake_ms_params.items():
             self.assertEqual(res[k], v)
