@@ -598,3 +598,13 @@ class Urllib2_invalid_scheme(base.TestCase):
 
     def test_raise_exception_invalid_scheme_https(self):
         utils.raise_exception_invalid_scheme(url='https://www.openstack.org')
+
+
+class GeneratePasswordTestCase(base.TestCase):
+    def test_generate_password(self):
+        password = utils.generate_password(length=12)
+        self.assertTrue([c for c in password if c in '0123456789'])
+        self.assertTrue([c for c in password
+                         if c in 'abcdefghijklmnopqrstuvwxyz'])
+        self.assertTrue([c for c in password
+                         if c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'])

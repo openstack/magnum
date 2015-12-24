@@ -31,7 +31,10 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.2: Add 'registry_trust_id' field
     # Version 1.3: Added 'baymodel' field
     # Version 1.4: Added more types of status to bay's status field
-    VERSION = '1.4'
+    # Version 1.5: Reanme 'registry_trust_id' to 'trust_id'
+    #              Add 'trustee_user_name', 'trustee_password',
+    #              'trustee_user_id' field
+    VERSION = '1.5'
 
     dbapi = dbapi.get_instance()
 
@@ -54,8 +57,11 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
         'master_addresses': fields.ListOfStringsField(nullable=True),
         'ca_cert_ref': fields.StringField(nullable=True),
         'magnum_cert_ref': fields.StringField(nullable=True),
-        'registry_trust_id': fields.StringField(nullable=True),
         'baymodel': fields.ObjectField('BayModel'),
+        'trust_id': fields.StringField(nullable=True),
+        'trustee_username': fields.StringField(nullable=True),
+        'trustee_password': fields.StringField(nullable=True),
+        'trustee_user_id': fields.StringField(nullable=True)
     }
 
     @staticmethod

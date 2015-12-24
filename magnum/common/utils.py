@@ -41,6 +41,13 @@ from magnum.i18n import _
 from magnum.i18n import _LE
 from magnum.i18n import _LW
 
+
+# Default symbols to use for passwords. Avoids visually confusing characters.
+# ~6 bits per symbol
+DEFAULT_PASSWORD_SYMBOLS = ['23456789',  # Removed: 0,1
+                            'ABCDEFGHJKLMNPQRSTUVWXYZ',   # Removed: I, O
+                            'abcdefghijkmnopqrstuvwxyz']  # Removed: l
+
 UTILS_OPTS = [
     cfg.StrOpt('rootwrap_config',
                default="/etc/magnum/rootwrap.conf",
@@ -48,6 +55,9 @@ UTILS_OPTS = [
                     'running commands as root.'),
     cfg.StrOpt('tempdir',
                help='Explicitly specify the temporary working directory.'),
+    cfg.ListOpt('password_symbols',
+                default=DEFAULT_PASSWORD_SYMBOLS,
+                help='Symbols to use for passwords')
 ]
 
 CONF = cfg.CONF
@@ -565,3 +575,40 @@ def get_memory_bytes(memory):
         return float(signed_number) * (10 ** float(suffix[1:]))
     else:
         raise exception.UnsupportedK8sMemoryFormat()
+
+
+def generate_password(length, symbolgroups=None):
+    """Generate a random password from the supplied symbol groups.
+
+    At least one symbol from each group will be included. Unpredictable
+    results if length is less than the number of symbol groups.
+
+    Believed to be reasonably secure (with a reasonable password length!)
+
+    """
+
+    if symbolgroups is None:
+        symbolgroups = CONF.password_symbols
+
+    r = random.SystemRandom()
+
+    # NOTE(jerdfelt): Some password policies require at least one character
+    # from each group of symbols, so start off with one random character
+    # from each symbol group
+    password = [r.choice(s) for s in symbolgroups]
+    # If length < len(symbolgroups), the leading characters will only
+    # be from the first length groups. Try our best to not be predictable
+    # by shuffling and then truncating.
+    r.shuffle(password)
+    password = password[:length]
+    length -= len(password)
+
+    # then fill with random characters from all symbol groups
+    symbols = ''.join(symbolgroups)
+    password.extend([r.choice(symbols) for _i in range(length)])
+
+    # finally shuffle to ensure first x characters aren't from a
+    # predictable group
+    r.shuffle(password)
+
+    return ''.join(password)

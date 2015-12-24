@@ -44,7 +44,8 @@ class BayPatchType(types.JsonPatchType):
         internal_attrs = ['/api_address', '/node_addresses',
                           '/master_addresses', '/stack_id',
                           '/ca_cert_ref', '/magnum_cert_ref',
-                          '/registry_trust_id']
+                          '/trust_id', '/trustee_user_name',
+                          '/trustee_password', '/trustee_user_id']
         return types.JsonPatchType.internal_attrs() + internal_attrs
 
 

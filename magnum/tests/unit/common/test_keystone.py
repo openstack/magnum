@@ -111,25 +111,31 @@ class KeystoneClientTest(base.BaseTestCase):
         ks_client = keystone.KeystoneClientV3(self.ctx)
         self.assertIsNone(ks_client.delete_trust(trust_id='atrust123'))
 
-    def test_create_trust(self, mock_ks):
+    def test_create_trust_with_all_roles(self, mock_ks):
         mock_ks.return_value.auth_ref.user_id = '123456'
         mock_ks.return_value.auth_ref.project_id = '654321'
 
+        self.ctx.roles = ['role1', 'role2']
         ks_client = keystone.KeystoneClientV3(self.ctx)
-        ks_client.create_trust(trustee_user='888888',
-                               role_names='xxxx')
+
+        ks_client.create_trust(trustee_user='888888')
 
         mock_ks.return_value.trusts.create.assert_called_once_with(
             trustor_user='123456', project='654321',
-            trustee_user='888888', role_names='xxxx',
+            trustee_user='888888', role_names=['role1', 'role2'],
             impersonation=True)
 
-    @mock.patch.object(keystone.KeystoneClientV3,
-                       'create_trust')
-    def test_create_trust_to_admin(self, mock_create_trust, mock_ks):
-        mock_ks.return_value.auth_ref.user_id = '777777'
+    def test_create_trust_with_limit_roles(self, mock_ks):
+        mock_ks.return_value.auth_ref.user_id = '123456'
+        mock_ks.return_value.auth_ref.project_id = '654321'
 
+        self.ctx.roles = ['role1', 'role2']
         ks_client = keystone.KeystoneClientV3(self.ctx)
-        ks_client.create_trust_to_admin(role_names='xxxx')
 
-        mock_create_trust.assert_called_once_with('777777', 'xxxx', True)
+        cfg.CONF.set_override('roles', ['role3'], group='trust')
+        ks_client.create_trust(trustee_user='888888')
+
+        mock_ks.return_value.trusts.create.assert_called_once_with(
+            trustor_user='123456', project='654321',
+            trustee_user='888888', role_names=['role3'],
+            impersonation=True)

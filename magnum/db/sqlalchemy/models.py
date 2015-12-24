@@ -120,8 +120,12 @@ class Bay(Base):
     bay_create_timeout = Column(Integer())
     discovery_url = Column(String(255))
     master_addresses = Column(JSONEncodedList)
-    # TODO(wanghua): encrypt registry_trust_id in db
-    registry_trust_id = Column(String(255))
+    # TODO(wanghua): encrypt trust_id in db
+    trust_id = Column(String(255))
+    trustee_username = Column(String(255))
+    trustee_user_id = Column(String(255))
+    # TODO(wanghua): encrypt trustee_password in db
+    trustee_password = Column(String(255))
     # (yuanying) if we use barbican,
     # cert_ref size is determined by below format
     # * http(s)://${DOMAIN_NAME}/v1/containers/${UUID}

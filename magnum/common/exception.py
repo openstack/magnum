@@ -547,3 +547,11 @@ class TrustCreateFailed(MagnumException):
 
 class TrustDeleteFailed(MagnumException):
     message = _("Failed to delete trust %(trust_id)s.")
+
+
+class TrusteeCreateFailed(MagnumException):
+    message = _("Failed to create trustee %(username) in domain $(domain_id)")
+
+
+class TrusteeDeleteFailed(MagnumException):
+    message = _("Failed to delete trustee %(trustee_id)")
