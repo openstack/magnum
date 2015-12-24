@@ -12,15 +12,17 @@
 #    under the License.
 
 """Starter script for magnum-template-manage."""
-import operator
+import sys
+
+from cliff import app
+from cliff import commandmanager
+from cliff import lister
 
 from oslo_config import cfg
-from oslo_log import log as logging
 
 from magnum.conductor import template_definition as tdef
-from magnum.openstack.common import cliutils
+from magnum import version
 
-LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
 
 
@@ -28,69 +30,85 @@ def is_enabled(name):
     return name in CONF.bay.enabled_definitions
 
 
-def print_rows(rows):
-    fields = ['name', 'enabled']
-    field_labels = ['Name', 'Enabled']
+class TemplateList(lister.Lister):
+    """List templates"""
 
-    if CONF.command.details:
-        fields.extend(['server_type', 'os', 'coe'])
-        field_labels.extend(['Server_Type', 'OS', 'COE'])
-    if CONF.command.paths:
-        fields.append('path')
-        field_labels.append('Template Path')
+    def _print_rows(self, parsed_args, rows):
+        fields = ['name', 'enabled']
+        field_labels = ['Name', 'Enabled']
 
-    formatters = {key: operator.itemgetter(key) for key in fields}
+        if parsed_args.details:
+            fields.extend(['server_type', 'os', 'coe'])
+            field_labels.extend(['Server_Type', 'OS', 'COE'])
+        if parsed_args.paths:
+            fields.append('path')
+            field_labels.append('Template Path')
+        return field_labels, [tuple([row[field] for field in fields])
+                              for row in rows]
 
-    cliutils.print_list(rows, fields,
-                        formatters=formatters,
-                        field_labels=field_labels)
+    def get_parser(self, prog_name):
+        parser = super(TemplateList, self).get_parser(prog_name)
+        parser.add_argument('-d', '--details',
+                            action='store_true',
+                            dest='details',
+                            help=('display the bay types provided by ')
+                                 ('each template'))
+        parser.add_argument('-p', '--paths',
+                            action='store_true',
+                            dest='paths',
+                            help='display the path to each template file')
+
+        group = parser.add_mutually_exclusive_group()
+        group.add_argument('--enabled', action='store_true', dest='enabled',
+                           help="display only enabled templates")
+        group.add_argument('--disabled', action='store_true', dest='disabled',
+                           help="display only disabled templates")
+
+        return parser
+
+    def take_action(self, parsed_args):
+        rows = []
+
+        for entry_point, cls in tdef.TemplateDefinition.load_entry_points():
+            name = entry_point.name
+            if ((is_enabled(name) and not parsed_args.disabled) or
+                    (not is_enabled(name) and not parsed_args.enabled)):
+                definition = cls()
+                template = dict(name=name, enabled=is_enabled(name),
+                                path=definition.template_path)
+
+                if parsed_args.details:
+                    for bay_type in definition.provides:
+                        row = dict()
+                        row.update(template)
+                        row.update(bay_type)
+                        rows.append(row)
+                else:
+                    rows.append(template)
+
+        return self._print_rows(parsed_args, rows)
 
 
-def list_templates():
-    rows = []
+class TemplateCommandManager(commandmanager.CommandManager):
+    COMMANDS = {
+        "list-templates": TemplateList,
+    }
 
-    for entry_point, cls in tdef.TemplateDefinition.load_entry_points():
-        name = entry_point.name
-        if ((is_enabled(name) and not CONF.command.disabled) or
-                (not is_enabled(name) and not CONF.command.enabled)):
-            definition = cls()
-            template = dict(name=name, enabled=is_enabled(name),
-                            path=definition.template_path)
-
-            if CONF.command.details:
-                for bay_type in definition.provides:
-                    row = dict()
-                    row.update(template)
-                    row.update(bay_type)
-                    rows.append(row)
-            else:
-                rows.append(template)
-
-    print_rows(rows)
+    def load_commands(self, namespace):
+        for name, command_class in self.COMMANDS.items():
+            self.add_command(name, command_class)
 
 
-def add_command_parsers(subparsers):
-    parser = subparsers.add_parser('list-templates')
-    parser.set_defaults(func=list_templates)
-
-    parser.add_argument('-d', '--details', action='store_true',
-                        help='display the bay types provided by each template')
-    parser.add_argument('-p', '--paths', action='store_true',
-                        help='display the path to each template file')
-
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument('--enabled', action='store_true',
-                       help="display only enabled templates")
-    group.add_argument('--disabled', action='store_true',
-                       help="display only disabled templates")
+class TemplateManager(app.App):
+    def __init__(self):
+        super(TemplateManager, self).__init__(
+            description='Magnum Template Manager',
+            version=version.version_info,
+            command_manager=TemplateCommandManager(None),
+            deferred_help=True)
 
 
-def main():
-    command_opt = cfg.SubCommandOpt('command',
-                                    title='Command',
-                                    help='Available commands',
-                                    handler=add_command_parsers)
-    CONF.register_cli_opt(command_opt)
-
-    CONF(project='magnum')
-    CONF.command.func()
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
+    return TemplateManager().run(args)
