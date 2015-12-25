@@ -2,8 +2,7 @@ heat_template_version: 2013-05-23
 
 description: >
   This is a nested stack that defines swarm master node. A swarm mater node is
-  running a Docker daemon and a swarm master container listening on port 2376,
-  and a swarm agent advertising it to the cluster.
+  running a Docker daemon and a swarm manager container listening on port 2376.
 
 parameters:
 
@@ -66,12 +65,6 @@ parameters:
   no_proxy:
     type: string
     description: no proxies for docker
-
-  docker_volume_size:
-    type: number
-    description: >
-      size of a cinder volume to allocate to docker for container/image
-      storage
 
   tls_disabled:
     type: boolean
@@ -148,18 +141,6 @@ resources:
         get_resource: master_wait_handle
       Timeout: 6000
 
-  agent_wait_handle:
-    type: "AWS::CloudFormation::WaitConditionHandle"
-
-  agent_wait_condition:
-    type: "AWS::CloudFormation::WaitCondition"
-    depends_on:
-      - swarm_master
-    properties:
-      Handle:
-        get_resource: agent_wait_handle
-      Timeout: 6000
-
   ######################################################################
   #
   # software configs.  these are components that are combined into
@@ -175,7 +156,6 @@ resources:
           params:
             "$WAIT_HANDLE": {get_resource: cloud_init_wait_handle}
             "$ETCD_DISCOVERY_URL": {get_param: discovery_url}
-            "$DOCKER_VOLUME": {get_resource: docker_volume}
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
@@ -191,7 +171,6 @@ resources:
             "$FLANNEL_USE_VXLAN": {get_param: flannel_use_vxlan}
             "$ETCD_SERVER_IP": {get_param: etcd_server_ip}
             "$API_IP_ADDRESS": {get_param: api_ip_address}
-
 
   write_network_config:
     type: "OS::Heat::SoftwareConfig"
@@ -217,12 +196,6 @@ resources:
       group: ungrouped
       config: {get_file: fragments/configure-etcd.sh}
 
-  configure_swarm:
-    type: "OS::Heat::SoftwareConfig"
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/configure-swarm.sh}
-
   remove_docker_key:
     type: "OS::Heat::SoftwareConfig"
     properties:
@@ -241,17 +214,6 @@ resources:
       group: ungrouped
       config: {get_file: fragments/write-docker-service.sh}
 
-  write_swarm_agent_failure_service:
-    type: "OS::Heat::SoftwareConfig"
-    properties:
-      group: ungrouped
-      config:
-        str_replace:
-          template: {get_file: fragments/write-bay-failure-service.yaml}
-          params:
-            "$SERVICE": swarm-agent
-            "$WAIT_HANDLE": {get_resource: agent_wait_handle}
-
   write_swarm_manager_failure_service:
     type: "OS::Heat::SoftwareConfig"
     properties:
@@ -268,23 +230,6 @@ resources:
     properties:
       group: ungrouped
       config: {get_file: fragments/write-docker-socket.yaml}
-
-  write_swarm_agent_service:
-    type: "OS::Heat::SoftwareConfig"
-    properties:
-      group: ungrouped
-      config:
-        str_replace:
-          template: {get_file: fragments/write-swarm-agent-service.yaml}
-          params:
-            "$ETCD_SERVER_IP": {get_param: etcd_server_ip}
-            "$NODE_IP": {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
-            "$DISCOVERY_URL": {get_param: discovery_url}
-            "$WAIT_HANDLE": {get_resource: agent_wait_handle}
-            "$HTTP_PROXY": {get_param: http_proxy}
-            "$HTTPS_PROXY": {get_param: https_proxy}
-            "$NO_PROXY": {get_param: no_proxy}
-            "$SWARM_VERSION": {get_param: swarm_version}
 
   write_swarm_master_service:
     type: "OS::Heat::SoftwareConfig"
@@ -312,7 +257,7 @@ resources:
         str_replace:
           template: {get_file: fragments/enable-services.sh}
           params:
-            "$NODE_SERVICES": "etcd docker.socket swarm-agent swarm-manager"
+            "$NODE_SERVICES": "etcd docker.socket swarm-manager"
 
   cfn_signal:
     type: "OS::Heat::SoftwareConfig"
@@ -325,12 +270,6 @@ resources:
     properties:
       group: ungrouped
       config: {get_file: fragments/disable-selinux.sh}
-
-  configure_docker_storage:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/configure-docker-storage.sh}
 
   add_proxy:
     type: "OS::Heat::SoftwareConfig"
@@ -347,17 +286,13 @@ resources:
         - config: {get_resource: write_heat_params}
         - config: {get_resource: make_cert}
         - config: {get_resource: configure_etcd}
-        - config: {get_resource: configure_docker_storage}
         - config: {get_resource: write_network_config}
         - config: {get_resource: network_config_service}
         - config: {get_resource: network_service}
-        - config: {get_resource: write_swarm_agent_failure_service}
         - config: {get_resource: write_swarm_manager_failure_service}
         - config: {get_resource: write_docker_service}
         - config: {get_resource: write_docker_socket}
-        - config: {get_resource: write_swarm_agent_service}
         - config: {get_resource: write_swarm_master_service}
-        - config: {get_resource: configure_swarm}
         - config: {get_resource: add_proxy}
         - config: {get_resource: enable_services}
         - config: {get_resource: cfn_signal}
@@ -415,24 +350,6 @@ resources:
       pool_id: {get_param: etcd_pool_id}
       address: {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
       protocol_port: 2379
-
-  ######################################################################
-  #
-  # docker storage.  This allocates a cinder volume and attaches it
-  # to the master.
-  #
-
-  docker_volume:
-    type: OS::Cinder::Volume
-    properties:
-      size: {get_param: docker_volume_size}
-
-  docker_volume_attach:
-    type: OS::Cinder::VolumeAttachment
-    properties:
-      instance_uuid: {get_resource: swarm_master}
-      volume_id: {get_resource: docker_volume}
-      mountpoint: /dev/vdb
 
 outputs:
 
