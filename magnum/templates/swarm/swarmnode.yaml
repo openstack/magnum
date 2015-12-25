@@ -145,6 +145,8 @@ resources:
             "$NETWORK_DRIVER": {get_param: network_driver}
             "$ETCD_SERVER_IP": {get_param: etcd_server_ip}
             "$API_IP_ADDRESS": {get_param: api_ip_address}
+            "$SWARM_VERSION": {get_param: swarm_version}
+            "$AGENT_WAIT_HANDLE": {get_resource: node_agent_wait_handle}
 
   configure_swarm:
     type: "OS::Heat::SoftwareConfig"
@@ -203,18 +205,7 @@ resources:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
-      config:
-        str_replace:
-          template: {get_file: fragments/write-swarm-agent-service.yaml}
-          params:
-            "$NODE_IP": {get_attr: [swarm_node_eth0, fixed_ips, 0, ip_address]}
-            "$DISCOVERY_URL": {get_param: discovery_url}
-            "$WAIT_HANDLE": {get_resource: node_agent_wait_handle}
-            "$HTTP_PROXY": {get_param: http_proxy}
-            "$HTTPS_PROXY": {get_param: https_proxy}
-            "$NO_PROXY": {get_param: no_proxy}
-            "$SWARM_VERSION": {get_param: swarm_version}
-            "$ETCD_SERVER_IP": {get_param: etcd_server_ip}
+      config: {get_file: fragments/write-swarm-agent-service.sh}
 
   enable_services:
     type: "OS::Heat::SoftwareConfig"
