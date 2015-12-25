@@ -45,10 +45,15 @@ parameters:
     default: fedora-atomic
     description: glance image used to boot the server
 
-  server_flavor:
+  master_flavor:
     type: string
     default: m1.small
-    description: flavor to use when booting the server
+    description: flavor to use when booting the swarm master
+
+  node_flavor:
+    type: string
+    default: m1.small
+    description: flavor to use when booting the swarm node
 
   dns_nameserver:
     type: string
@@ -264,7 +269,7 @@ resources:
         properties:
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: server_image}
-          server_flavor: {get_param: server_flavor}
+          server_flavor: {get_param: master_flavor}
           fixed_network_id: {get_resource: fixed_network}
           fixed_subnet_id: {get_resource: fixed_subnet}
           external_network: {get_param: external_network}
@@ -301,7 +306,7 @@ resources:
         properties:
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: server_image}
-          server_flavor: {get_param: server_flavor}
+          server_flavor: {get_param: node_flavor}
           docker_volume_size: {get_param: docker_volume_size}
           fixed_network_id: {get_resource: fixed_network}
           fixed_subnet_id: {get_resource: fixed_subnet}
