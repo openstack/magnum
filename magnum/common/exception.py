@@ -283,6 +283,10 @@ class InvalidDiscoveryURL(Invalid):
                 "discovery endpoint '%(discovery_endpoint)s'.")
 
 
+class GetDiscoveryUrlFailed(MagnumException):
+    message = _("Fail to get discovery url from %(discovery_endpoint)")
+
+
 class InvalidUuidOrName(Invalid):
     message = _("Expected a name or uuid but received %(uuid)s.")
 
