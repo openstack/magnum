@@ -18,14 +18,10 @@ from heatclient.v1 import client as heatclient
 from neutronclient.v2_0 import client as neutronclient
 from novaclient.v2 import client as novaclient
 from oslo_config import cfg
-from oslo_log import log as logging
 
 from magnum.common import exception
 from magnum.common import keystone
 from magnum.i18n import _
-
-
-LOG = logging.getLogger(__name__)
 
 
 magnum_client_opts = [

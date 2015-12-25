@@ -18,7 +18,6 @@ from docker import client
 from docker import tls
 from docker.utils import utils
 from oslo_config import cfg
-from oslo_log import log as logging
 
 from magnum.common import utils as magnum_utils
 from magnum.conductor.handlers.common import cert_manager
@@ -51,8 +50,6 @@ docker_opts = [
 
 CONF = cfg.CONF
 CONF.register_opts(docker_opts, 'docker')
-
-LOG = logging.getLogger(__name__)
 
 
 def parse_docker_image(image):

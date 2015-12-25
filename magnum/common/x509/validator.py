@@ -13,13 +13,10 @@
 # under the License.
 
 from cryptography import x509
-import logging
 from oslo_config import cfg
 
 from magnum.common.exception import CertificateValidationError
 from magnum.common.x509 import extensions
-
-logger = logging.getLogger(__name__)
 
 _CA_KEY_USAGES = [
     extensions.KeyUsages.KEY_CERT_SIGN.value[0],

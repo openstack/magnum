@@ -20,11 +20,7 @@ Based on pecan.middleware.errordocument
 
 import json
 
-from oslo_log import log
-
 from magnum.i18n import _
-
-LOG = log.getLogger(__name__)
 
 
 class ParsableErrorMiddleware(object):

@@ -14,12 +14,10 @@
 """Starter script for magnum-db-manage."""
 
 from oslo_config import cfg
-from oslo_log import log as logging
 
 from magnum.db import migration
 
 
-LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
 
 

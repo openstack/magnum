@@ -18,7 +18,6 @@ from oslo_config import cfg
 from oslo_db import exception as db_exc
 from oslo_db.sqlalchemy import session as db_session
 from oslo_db.sqlalchemy import utils as db_utils
-from oslo_log import log
 from oslo_utils import timeutils
 from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy.orm.exc import NoResultFound
@@ -30,8 +29,6 @@ from magnum.db.sqlalchemy import models
 from magnum.i18n import _
 
 CONF = cfg.CONF
-
-LOG = log.getLogger(__name__)
 
 
 _FACADE = None
