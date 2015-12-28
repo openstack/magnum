@@ -27,8 +27,13 @@ function create_test_data {
     # First we test Magnum's command line to see if we can stand up
     # a baymodel, bay and a pod
 
+    coe=$1
+    local image_name="fedora-21-atomic"
+    if [ $coe == 'mesos' ]; then
+        image_name="ubuntu-14.04"
+    fi
     export NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
-    export IMAGE_ID=$(glance --os-image-api-version 1 image-show fedora-21-atomic-5 | awk '/ id /{print $4}')
+    export IMAGE_ID=$(glance --os-image-api-version 1 image-list | grep $image_name | awk '{print $2}')
 
     # pass the appropriate variables via a config file
     CREDS_FILE=$MAGNUM_DIR/functional_creds.conf
@@ -113,7 +118,10 @@ sudo chown -R jenkins:stack $MAGNUM_DIR
 echo "Running magnum functional test suite for $1"
 
 # For api, we will run tempest tests
-if [[ "api" == $1 ]]; then
+
+coe=$1
+
+if [[ "api" == "$coe" ]]; then
     # Import devstack functions 'iniset', 'iniget' and 'trueorfalse'
     source $BASE/new/devstack/functions
     echo "TEMPEST_SERVICES+=,magnum" >> $localrc_path
@@ -126,7 +134,7 @@ if [[ "api" == $1 ]]; then
     source $BASE/new/devstack/accrc/demo/demo
     unset OS_AUTH_TYPE
 
-    create_test_data
+    create_test_data $coe
 
     # Set up tempest config with magnum goodness
     iniset $BASE/new/tempest/etc/tempest.conf magnum image_id $IMAGE_ID
@@ -158,9 +166,9 @@ else
 
     add_flavor
 
-    create_test_data
+    create_test_data $coe
 
-    sudo -E -H -u jenkins tox -e functional-$1 -- --concurrency=1
+    sudo -E -H -u jenkins tox -e functional-"$coe" -- --concurrency=1
 fi
 EXIT_CODE=$?
 
