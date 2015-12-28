@@ -233,7 +233,17 @@ function init_magnum {
 
 # magnum_register_image - Register heat image for magnum with property os_distro
 function magnum_register_image {
-    local magnum_image_property="--property os_distro=fedora-atomic"
+    local magnum_image_property="--property os_distro="
+
+    local atomic="$(echo $MANGUM_GUEST_IMAGE_URL | grep -o 'atomic' || true;)"
+    if [ ! -z $atomic ]; then
+        magnum_image_property=$magnum_image_property"fedora-atomic"
+    fi
+    local ubuntu="$(echo $MANGUM_GUEST_IMAGE_URL | grep -o "ubuntu" || ture;)"
+    if [ ! -z $ubuntu ]; then
+        magnum_image_property=$magnum_image_property"ubuntu"
+    fi
+
     openstack --os-url $GLANCE_SERVICE_PROTOCOL://$GLANCE_HOSTPORT --os-image-api-version 1 image set $(basename "$MANGUM_GUEST_IMAGE_URL" ".qcow2") $magnum_image_property
 }
 
