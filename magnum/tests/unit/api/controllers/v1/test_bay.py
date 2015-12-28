@@ -66,7 +66,7 @@ class TestListBay(api_base.FunctionalTest):
         self.assertEqual(bay.uuid, response['uuid'])
         for key in ("name", "baymodel_id", "node_count", "status",
                     "api_address", "discovery_url", "node_addresses",
-                    "master_count", "master_addresses"):
+                    "master_count", "master_addresses", "stack_id"):
             self.assertIn(key, response)
 
     def test_get_one_by_name(self):
@@ -75,7 +75,7 @@ class TestListBay(api_base.FunctionalTest):
         self.assertEqual(bay.uuid, response['uuid'])
         for key in ("name", "baymodel_id", "node_count", "status",
                     "api_address", "discovery_url", "node_addresses",
-                    "master_count", "master_addresses"):
+                    "master_count", "master_addresses", "stack_id"):
             self.assertIn(key, response)
 
     def test_get_one_by_name_not_found(self):
@@ -129,7 +129,7 @@ class TestListBay(api_base.FunctionalTest):
         self.assertEqual(bay_list[-1].uuid, response['bays'][0]['uuid'])
         for key in ("name", "baymodel_id", "node_count", "status",
                     "discovery_url", "api_address", "node_addresses",
-                    "master_addresses"):
+                    "master_addresses", "stack_id"):
             self.assertIn(key, response['bays'][0])
 
     def test_detail_against_single(self):

@@ -93,6 +93,9 @@ class Bay(base.APIBase):
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated bay links"""
 
+    stack_id = wsme.wsattr(wtypes.text, readonly=True)
+    """Stack id of the heat stack"""
+
     status = wtypes.text
     """Status of the bay from the heat stack"""
 
@@ -127,7 +130,8 @@ class Bay(base.APIBase):
         if not expand:
             bay.unset_fields_except(['uuid', 'name', 'baymodel_id',
                                      'node_count', 'status',
-                                     'bay_create_timeout', 'master_count'])
+                                     'bay_create_timeout', 'master_count',
+                                     'stack_id'])
 
         bay.links = [link.Link.make_link('self', url,
                                          'bays', bay.uuid),
@@ -149,6 +153,7 @@ class Bay(base.APIBase):
                      node_count=2,
                      master_count=1,
                      bay_create_timeout=15,
+                     stack_id='49dc23f5-ffc9-40c3-9d34-7be7f9e34d63',
                      status="CREATE_COMPLETE",
                      status_reason="CREATE completed successfully",
                      api_address='172.24.4.3',
