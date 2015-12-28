@@ -120,8 +120,8 @@ class KeystoneClientV3(object):
                 trustee_user=trustee_user,
                 impersonation=impersonation,
                 role_names=role_names)
-        except Exception as e:
-            LOG.exception(str(e))
+        except Exception:
+            LOG.exception(_LE('Failed to create trust'))
             raise exception.TrustCreateFailed(
                 trustee_user_id=trustee_user)
         return trust
@@ -137,6 +137,6 @@ class KeystoneClientV3(object):
             self.client.trusts.delete(trust_id)
         except kc_exception.NotFound:
             pass
-        except Exception as e:
-            LOG.exception(str(e))
+        except Exception:
+            LOG.exception(_LE('Failed to delete trust'))
             raise exception.TrustDeleteFailed(trust_id=trust_id)
