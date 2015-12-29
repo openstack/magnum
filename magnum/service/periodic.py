@@ -98,8 +98,9 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                 self._sync_missing_heat_stack(bay)
 
         except Exception as e:
-            LOG.warn(_LW("Ignore error [%s] when syncing up bay status."), e,
-                     exc_info=True)
+            LOG.warning(_LW(
+                "Ignore error [%s] when syncing up bay status."
+            ), e, exc_info=True)
 
     def _sync_existing_bay(self, bay, stack):
         if bay.status != stack.stack_status:
@@ -158,9 +159,9 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
             try:
                 monitor.pull_data()
             except Exception as e:
-                LOG.warn(_LW("Skip pulling data from bay %(bay)s due to "
-                             "error: %(e)s"),
-                         {'e': e, 'bay': bay.uuid}, exc_info=True)
+                LOG.warning(_LW("Skip pulling data from bay %(bay)s due to "
+                                "error: %(e)s"),
+                            {'e': e, 'bay': bay.uuid}, exc_info=True)
                 continue
 
             metrics = list()
@@ -173,9 +174,9 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                     }
                     metrics.append(metric)
                 except Exception as e:
-                    LOG.warn(_LW("Skip adding metric %(name)s due to "
-                                 "error: %(e)s"),
-                             {'e': e, 'name': name}, exc_info=True)
+                    LOG.warning(_LW("Skip adding metric %(name)s due to "
+                                    "error: %(e)s"),
+                                {'e': e, 'name': name}, exc_info=True)
 
             message = dict(metrics=metrics,
                            user_id=bay.user_id,

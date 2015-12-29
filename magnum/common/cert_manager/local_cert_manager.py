@@ -89,7 +89,7 @@ class CertManager(cert_manager.CertManager):
         cert_ref = str(uuid.uuid4())
         filename_base = os.path.join(CONF.certificates.storage_path, cert_ref)
 
-        LOG.warn(_LW(
+        LOG.warning(_LW(
             "Storing certificate data on the local filesystem. "
             "CertManager type 'local' should be used for testing purpose."
         ))
@@ -127,7 +127,7 @@ class CertManager(cert_manager.CertManager):
                  representation of the certificate data
         :raises CertificateStorageException: if certificate retrieval fails
         """
-        LOG.warn(_LW(
+        LOG.warning(_LW(
             "Loading certificate {0} from the local filesystem. "
             "CertManager type 'local' should be used for testing purpose."
         ).format(cert_ref))
@@ -188,7 +188,7 @@ class CertManager(cert_manager.CertManager):
 
         :raises CertificateStorageException: if certificate deletion fails
         """
-        LOG.warn(_LW(
+        LOG.warning(_LW(
             "Deleting certificate {0} from the local filesystem. "
             "CertManager type 'local' should be used for testing purpose."
         ).format(cert_ref))

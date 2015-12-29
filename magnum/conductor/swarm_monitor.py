@@ -51,10 +51,10 @@ class SwarmMonitor(MonitorBase):
                 try:
                     container = docker.inspect_container(container['Id'])
                 except Exception as e:
-                    LOG.warn(_LW("Ignore error [%(e)s] when inspecting "
-                                 "container %(container_id)s."),
-                             {'e': e, 'container_id': container['Id']},
-                             exc_info=True)
+                    LOG.warning(_LW("Ignore error [%(e)s] when inspecting "
+                                    "container %(container_id)s."),
+                                {'e': e, 'container_id': container['Id']},
+                                exc_info=True)
                 containers.append(container)
             self.data['containers'] = containers
 
