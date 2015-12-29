@@ -150,4 +150,4 @@ def delete_certificates_from_bay(bay):
                 cert_manager.get_backend().CertManager.delete_cert(
                     cert_ref, resource_ref=bay.uuid)
         except Exception:
-            LOG.warn(_LW("Deleting cert is failed: %s") % cert_ref)
+            LOG.warning(_LW("Deleting cert is failed: %s") % cert_ref)

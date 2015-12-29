@@ -92,7 +92,7 @@ class KeystoneClientV3(object):
         elif self.context.auth_token_info:
             kwargs['token'] = self.context.auth_token
             if self._is_v2_valid(self.context.auth_token_info):
-                LOG.warn('Keystone v2 is deprecated.')
+                LOG.warning('Keystone v2 is deprecated.')
                 kwargs['auth_ref'] = self.context.auth_token_info['access']
                 kwargs['auth_ref']['version'] = 'v2.0'
             elif self._is_v3_valid(self.context.auth_token_info):
