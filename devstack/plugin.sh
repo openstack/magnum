@@ -18,8 +18,8 @@ if is_service_enabled m-api m-cond; then
 
         # add image to glance
         if [[ "$ENABLED_SERVICES" =~ 'm-api' ]]; then
-            MANGUM_GUEST_IMAGE_URL=${MANGUM_GUEST_IMAGE_URL:-"https://fedorapeople.org/groups/magnum/fedora-21-atomic-5.qcow2"}
-            IMAGE_URLS+=",${MANGUM_GUEST_IMAGE_URL}"
+            MAGNUM_GUEST_IMAGE_URL=${MAGNUM_GUEST_IMAGE_URL:-"https://fedorapeople.org/groups/magnum/fedora-21-atomic-5.qcow2"}
+            IMAGE_URLS+=",${MAGNUM_GUEST_IMAGE_URL}"
         fi
 
         LIBS_FROM_GIT="${LIBS_FROM_GIT},python-magnumclient"
