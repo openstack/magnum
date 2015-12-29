@@ -11,6 +11,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
+import six
 import uuid
 
 from heatclient.common import template_utils
@@ -150,7 +152,7 @@ class Handler(object):
                                           bay_create_timeout)
         except exc.HTTPBadRequest as e:
             cert_manager.delete_certificates_from_bay(bay)
-            raise exception.InvalidParameterValue(message=str(e))
+            raise exception.InvalidParameterValue(message=six.text_type(e))
         except Exception:
             raise
 

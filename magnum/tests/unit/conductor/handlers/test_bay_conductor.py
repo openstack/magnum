@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Copyright 2014 NEC Corporation.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -11,6 +13,8 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
+import six
 import uuid
 
 from heatclient import exc
@@ -167,6 +171,27 @@ class TestHandler(db_base.DbTestCase):
         mock_cert_manager.generate_certificates_to_bay.assert_called_once_with(
             self.bay)
         mock_cert_manager.delete_certificates_from_bay(self.bay)
+
+    @patch('magnum.conductor.handlers.bay_conductor.cert_manager')
+    @patch('magnum.conductor.handlers.bay_conductor._create_stack')
+    @patch('magnum.conductor.handlers.bay_conductor.uuid')
+    def test_create_with_invalid_unicode_name(self,
+                                              mock_uuid,
+                                              mock_create_stack,
+                                              mock_cert_manager):
+        timeout = 15
+        test_uuid = uuid.uuid4()
+        mock_uuid.uuid4.return_value = test_uuid
+        error_message = six.u("""Invalid stack name 测试集群-zoyh253geukk
+                              must contain only alphanumeric or "_-."
+                              characters, must start with alpha""")
+        mock_create_stack.side_effect = exc.HTTPBadRequest(error_message)
+
+        self.assertRaises(exception.InvalidParameterValue,
+                          self.handler.bay_create, self.context,
+                          self.bay, timeout)
+        mock_cert_manager.generate_certificates_to_bay.assert_called_once_with(
+            self.bay)
 
     @patch('magnum.common.clients.OpenStackClients')
     def test_bay_delete(self, mock_openstack_client_class):
