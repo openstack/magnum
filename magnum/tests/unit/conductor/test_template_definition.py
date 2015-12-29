@@ -288,6 +288,21 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         self.assertEqual(expected_discovery_url, mock_bay.discovery_url)
         self.assertEqual(expected_discovery_url, discovery_url)
 
+    @mock.patch('requests.get')
+    def test_k8s_get_discovery_url_fail(self, mock_get):
+        cfg.CONF.set_override('etcd_discovery_service_endpoint_format',
+                              'http://etcd/test?size=%(size)d',
+                              group='bay')
+        mock_get.side_effect = Exception()
+        mock_bay = mock.MagicMock()
+        mock_bay.master_count = 10
+        mock_bay.discovery_url = None
+
+        k8s_def = tdef.AtomicK8sTemplateDefinition()
+
+        self.assertRaises(exception.GetDiscoveryUrlFailed,
+                          k8s_def.get_discovery_url, mock_bay)
+
     def test_k8s_get_heat_param(self):
         k8s_def = tdef.AtomicK8sTemplateDefinition()
 

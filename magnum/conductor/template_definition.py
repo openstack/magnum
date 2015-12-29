@@ -375,7 +375,12 @@ class BaseTemplateDefinition(TemplateDefinition):
             discovery_endpoint = (
                 cfg.CONF.bay.etcd_discovery_service_endpoint_format %
                 {'size': bay.master_count})
-            discovery_url = requests.get(discovery_endpoint).text
+            try:
+                discovery_url = requests.get(discovery_endpoint).text
+            except Exception as err:
+                LOG.error(six.text_type(err))
+                raise exception.GetDiscoveryUrlFailed(
+                    discovery_endpoint=discovery_endpoint)
             if not discovery_url:
                 raise exception.InvalidDiscoveryURL(
                     discovery_url=discovery_url,
