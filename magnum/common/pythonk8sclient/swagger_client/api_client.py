@@ -17,7 +17,6 @@ Copyright 2015 SmartBear Software
 """
 
 from __future__ import absolute_import
-import __builtin__
 from . import models
 from .rest import RESTClient
 from .rest import ApiException
@@ -35,6 +34,7 @@ from datetime import date
 
 # python 2 and python 3 compatibility library
 from six import iteritems
+import six.moves.builtins as __builtin__
 from six.moves.urllib import parse as urlparse
 
 from .configuration import Configuration
