@@ -1,0 +1,47 @@
+#cloud-config
+write_files:
+  - path: /etc/systemd/system/create-kube-namespace.service
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      After=kubelet.service
+      Requires=kubelet.service
+      Description=Create kube-system namespace
+
+      [Service]
+      Type=oneshot
+      ExecStart=/etc/sysconfig/create-kube-namespace.sh
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/sysconfig/create-kube-namespace.sh
+    owner: "root:root"
+    permissions: "0755"
+    content: |
+      #!/bin/sh
+
+      . /etc/sysconfig/heat-params
+      myip=$(ip addr show eth0 |
+             awk '$1 == "inet" {print $2}' | cut -f1 -d/)
+
+      until curl -sf "http://127.0.0.1:8080/healthz"
+      do
+          echo "Waiting for Kubernetes API..."
+          sleep 5
+      done
+
+      KUBE_SYSTEM_JSON=/srv/kubernetes/kube-system-namespace.json
+      mkdir -p $(dirname ${KUBE_SYSTEM_JSON})
+      cat > ${KUBE_SYSTEM_JSON} <<EOF
+      {
+        "apiVersion": "v1",
+        "kind": "Namespace",
+        "metadata": {
+          "name": "kube-system"
+        }
+      }
+      EOF
+
+      curl -XPOST -d@${KUBE_SYSTEM_JSON} "http://127.0.0.1:8080/api/v1/namespaces"

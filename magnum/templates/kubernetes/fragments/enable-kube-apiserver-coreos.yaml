@@ -1,0 +1,84 @@
+#cloud-config
+write_files:
+  - path: /etc/systemd/system/enable-kube-apiserver.service
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Configure Kubernetes API Server
+
+      [Service]
+      Type=oneshot
+      ExecStart=/etc/sysconfig/enable-kube-apiserver.sh
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/sysconfig/enable-kube-apiserver.sh
+    owner: "root:root"
+    permissions: "0755"
+    content: |
+      #!/bin/sh
+
+      . /etc/sysconfig/heat-params
+      myip=$(ip addr show eth0 |
+             awk '$1 == "inet" {print $2}' | cut -f1 -d/)
+
+      # TODO(hongbin): enable TLS
+      TLS_CERT_FILE=
+      TLS_PRIVATE_KEY_FILE=
+      CLIENT_CA_FILE=
+      INSECURE_PORT=${KUBE_API_PORT}
+      SECURE_PORT=0
+      BIND_ADDRESS_CMD="--insecure-bind-address=0.0.0.0"
+      KUBE_CERTS_PATH=/etc/kubernetes/ssl
+      HOST_CERTS_PATH=/usr/share/ca-certificates
+
+      TEMPLATE=/etc/kubernetes/manifests/kube-apiserver.yaml
+      mkdir -p $(dirname ${TEMPLATE})
+      cat > $TEMPLATE <<EOF
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: kube-apiserver
+        namespace: kube-system
+      spec:
+        hostNetwork: true
+        containers:
+        - name: kube-apiserver
+          image: gcr.io/google_containers/hyperkube:v1.0.6
+          command:
+          - /hyperkube
+          - apiserver
+          - ${BIND_ADDRESS_CMD}
+          - --etcd_servers=http://127.0.0.1:2379
+          - --allow-privileged=true
+          - --service-cluster-ip-range=${PORTAL_NETWORK_CIDR}
+          - --secure_port=${SECURE_PORT}
+          - --insecure-port=${INSECURE_PORT}
+          - --tls-cert-file=${TLS_CERT_FILE}
+          - --tls-private-key-file=${TLS_PRIVATE_KEY_FILE}
+          - --client-ca-file=${CLIENT_CA_FILE}
+          - --service-account-key-file=${TLS_PRIVATE_KEY_FILE}
+          ports:
+          - containerPort: 6443
+            hostPort: 6443
+            name: https
+          - containerPort: 8080
+            hostPort: 8080
+            name: local
+          volumeMounts:
+          - mountPath: /etc/kubernetes/ssl
+            name: ssl-certs-kubernetes
+            readOnly: true
+          - mountPath: /etc/ssl/certs
+            name: ssl-certs-host
+            readOnly: true
+        volumes:
+        - hostPath:
+            path: ${KUBE_CERTS_PATH}
+          name: ssl-certs-kubernetes
+        - hostPath:
+            path: ${HOST_CERTS_PATH}
+          name: ssl-certs-host
+      EOF

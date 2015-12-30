@@ -1,0 +1,55 @@
+#cloud-config
+write_files:
+  - path: /etc/systemd/system/enable-network-service.service
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Enable Network Service
+
+      [Service]
+      Type=oneshot
+      ExecStart=/etc/sysconfig/enable-network-service.sh
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/sysconfig/enable-network-service.sh
+    owner: "root:root"
+    permissions: "0755"
+    content: |
+      #!/bin/sh
+
+      . /etc/sysconfig/heat-params
+      if [ "$NETWORK_DRIVER" != "flannel" ]; then
+          exit 0
+      fi
+
+      myip=$(ip addr show eth0 |
+             awk '$1 == "inet" {print $2}' | cut -f1 -d/)
+      ETCD_SERVER_IP=${ETCD_SERVER_IP:-127.0.0.1}
+
+      ENV_FILE=/etc/flannel/options.env
+      mkdir -p $(dirname $ENV_FILE)
+      cat > $ENV_FILE <<EOF
+      FLANNELD_IFACE=$myip
+      FLANNELD_ETCD_ENDPOINTS=http://${ETCD_SERVER_IP}:2379
+      EOF
+
+      DROP_IN_FILE=/etc/systemd/system/flanneld.service.d/40-ExecStartPre-symlink.conf
+      mkdir -p $(dirname $DROP_IN_FILE)
+      cat > $DROP_IN_FILE <<EOF
+      [Service]
+      ExecStartPre=/usr/bin/ln -sf /etc/flannel/options.env /run/flannel/options.env
+      EOF
+
+      DOCKER_FLANNEL_CONF=/etc/systemd/system/docker.service.d/40-flannel.conf
+      mkdir -p $(dirname $DOCKER_FLANNEL_CONF)
+      cat > $DOCKER_FLANNEL_CONF <<EOF
+      [Unit]
+      Requires=flanneld.service
+      After=flanneld.service
+      EOF
+
+      systemctl enable flanneld
+      systemctl --no-block start flanneld

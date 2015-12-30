@@ -29,3 +29,4 @@ write_files:
       HTTP_PROXY="$HTTP_PROXY"
       HTTPS_PROXY="$HTTPS_PROXY"
       NO_PROXY="$NO_PROXY"
+      WAIT_CURL="$WAIT_CURL"
