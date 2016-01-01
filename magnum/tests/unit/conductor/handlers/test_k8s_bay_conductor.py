@@ -150,18 +150,50 @@ class TestBayConductorWithK8s(base.TestCase):
 
         self.assertEqual(expected, definition)
 
-    @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_coreos_with_disovery(
             self,
+            mock_objects_baymodel_get_by_uuid):
+        self.baymodel_dict['cluster_distro'] = 'coreos'
+        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        bay = objects.Bay(self.context, **self.bay_dict)
+
+        (template_path,
+         definition) = bay_conductor._extract_template_definition(self.context,
+                                                                  bay)
+
+        expected = {
+            'ssh_key_name': 'keypair_id',
+            'external_network': 'external_network_id',
+            'dns_nameserver': 'dns_nameserver',
+            'server_image': 'image_id',
+            'minion_flavor': 'flavor_id',
+            'master_flavor': 'master_flavor_id',
+            'number_of_minions': 1,
+            'number_of_masters': 1,
+            'fixed_network_cidr': '10.20.30.0/24',
+            'network_driver': 'network_driver',
+            'discovery_url': 'https://discovery.etcd.io/test',
+            'http_proxy': 'http_proxy',
+            'https_proxy': 'https_proxy',
+            'no_proxy': 'no_proxy',
+            'flannel_network_cidr': '10.101.0.0/16',
+            'flannel_network_subnetlen': '26',
+            'flannel_use_vxlan': 'yes',
+            'tls_disabled': False,
+        }
+        self.assertEqual(expected, definition)
+
+    @patch('requests.get')
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_template_definition_coreos_no_discoveryurl(
+            self,
             mock_objects_baymodel_get_by_uuid,
             reqget):
-        baymodel_dict = self.baymodel_dict
-        baymodel_dict['cluster_distro'] = 'coreos'
-        cfg.CONF.set_override('coreos_discovery_token_url',
-                              'http://tokentest',
-                              group='bay')
-        mock_req = mock.MagicMock(text='/h1/h2/h3')
+        self.baymodel_dict['cluster_distro'] = 'coreos'
+        self.bay_dict['discovery_url'] = None
+        mock_req = mock.MagicMock(text='http://tokentest/h1/h2/h3')
         reqget.return_value = mock_req
         baymodel = objects.BayModel(self.context, **self.baymodel_dict)
         mock_objects_baymodel_get_by_uuid.return_value = baymodel
@@ -182,74 +214,13 @@ class TestBayConductorWithK8s(base.TestCase):
             'number_of_masters': 1,
             'fixed_network_cidr': '10.20.30.0/24',
             'network_driver': 'network_driver',
-            'docker_volume_size': 20,
-            'ssh_authorized_key': 'ssh_authorized_key',
-            'token': 'h3',
-            'discovery_url': 'https://discovery.etcd.io/test',
+            'discovery_url': 'http://tokentest/h1/h2/h3',
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
             'flannel_network_cidr': '10.101.0.0/16',
             'flannel_network_subnetlen': '26',
             'flannel_use_vxlan': 'yes',
-            'auth_url': 'http://192.168.10.10:5000/v2',
-            'tenant_name': 'fake_tenant',
-            'username': 'fake_user',
-            'user_token': 'fake_token',
-            'bay_uuid': self.bay_dict['uuid'],
-            'magnum_url': self.mock_osc.magnum_url.return_value,
-            'tls_disabled': False,
-        }
-        self.assertEqual(expected, definition)
-
-    @patch('uuid.uuid4')
-    @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_extract_template_definition_coreos_no_discoveryurl(
-            self,
-            mock_objects_baymodel_get_by_uuid,
-            mock_uuid):
-        baymodel_dict = self.baymodel_dict
-        baymodel_dict['cluster_distro'] = 'coreos'
-        cfg.CONF.set_override('coreos_discovery_token_url',
-                              None,
-                              group='bay')
-        mock_uuid.return_value = mock.MagicMock(
-            hex='ba3d1866282848ddbedc76112110c208')
-        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
-        mock_objects_baymodel_get_by_uuid.return_value = baymodel
-        bay = objects.Bay(self.context, **self.bay_dict)
-
-        (template_path,
-         definition) = bay_conductor._extract_template_definition(self.context,
-                                                                  bay)
-
-        expected = {
-            'ssh_key_name': 'keypair_id',
-            'external_network': 'external_network_id',
-            'dns_nameserver': 'dns_nameserver',
-            'server_image': 'image_id',
-            'minion_flavor': 'flavor_id',
-            'master_flavor': 'master_flavor_id',
-            'number_of_minions': 1,
-            'number_of_masters': 1,
-            'fixed_network_cidr': '10.20.30.0/24',
-            'network_driver': 'network_driver',
-            'docker_volume_size': 20,
-            'ssh_authorized_key': 'ssh_authorized_key',
-            'token': 'ba3d1866282848ddbedc76112110c208',
-            'discovery_url': 'https://discovery.etcd.io/test',
-            'http_proxy': 'http_proxy',
-            'https_proxy': 'https_proxy',
-            'no_proxy': 'no_proxy',
-            'flannel_network_cidr': '10.101.0.0/16',
-            'flannel_network_subnetlen': '26',
-            'flannel_use_vxlan': 'yes',
-            'auth_url': 'http://192.168.10.10:5000/v2',
-            'tenant_name': 'fake_tenant',
-            'username': 'fake_user',
-            'user_token': 'fake_token',
-            'bay_uuid': self.bay_dict['uuid'],
-            'magnum_url': self.mock_osc.magnum_url.return_value,
             'tls_disabled': False,
         }
         self.assertEqual(expected, definition)
@@ -301,52 +272,6 @@ class TestBayConductorWithK8s(base.TestCase):
         self._test_extract_template_definition(
             mock_objects_baymodel_get_by_uuid,
             missing_attr='master_flavor_id')
-
-    @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_extract_template_definition_without_ssh_authorized_key(
-            self,
-            mock_objects_baymodel_get_by_uuid):
-        baymodel_dict = self.baymodel_dict
-        baymodel_dict['cluster_distro'] = 'coreos'
-        baymodel_dict['ssh_authorized_key'] = None
-        baymodel = objects.BayModel(self.context, **baymodel_dict)
-        mock_objects_baymodel_get_by_uuid.return_value = baymodel
-        bay = objects.Bay(self.context, **self.bay_dict)
-
-        (template_path,
-         definition) = bay_conductor._extract_template_definition(self.context,
-                                                                  bay)
-
-        expected = {
-            'ssh_key_name': 'keypair_id',
-            'external_network': 'external_network_id',
-            'dns_nameserver': 'dns_nameserver',
-            'server_image': 'image_id',
-            'master_flavor': 'master_flavor_id',
-            'minion_flavor': 'flavor_id',
-            'number_of_minions': 1,
-            'number_of_masters': 1,
-            'fixed_network_cidr': '10.20.30.0/24',
-            'network_driver': 'network_driver',
-            'docker_volume_size': 20,
-            'discovery_url': 'https://discovery.etcd.io/test',
-            'http_proxy': 'http_proxy',
-            'https_proxy': 'https_proxy',
-            'no_proxy': 'no_proxy',
-            'flannel_network_cidr': '10.101.0.0/16',
-            'flannel_network_subnetlen': '26',
-            'flannel_use_vxlan': 'yes',
-            'auth_url': 'http://192.168.10.10:5000/v2',
-            'tenant_name': 'fake_tenant',
-            'username': 'fake_user',
-            'user_token': 'fake_token',
-            'bay_uuid': self.bay_dict['uuid'],
-            'magnum_url': self.mock_osc.magnum_url.return_value,
-            'tls_disabled': False,
-        }
-        self.assertIn('token', definition)
-        del definition['token']
-        self.assertEqual(expected, definition)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_without_apiserver_port(

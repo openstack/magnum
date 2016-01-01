@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import abc
-import uuid
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -431,28 +430,17 @@ class SwarmApiAddressOutputMapping(OutputMapping):
             setattr(bay, self.bay_attr, output_value)
 
 
-class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
-    """Kubernetes template for a Fedora Atomic VM."""
-
-    provides = [
-        {'server_type': 'vm',
-         'os': 'fedora-atomic',
-         'coe': 'kubernetes'},
-    ]
+class K8sTemplateDefinition(BaseTemplateDefinition):
+    """Base Kubernetes template."""
 
     def __init__(self):
-        super(AtomicK8sTemplateDefinition, self).__init__()
-        self.add_parameter('bay_uuid',
-                           bay_attr='uuid',
-                           param_type=str)
+        super(K8sTemplateDefinition, self).__init__()
         self.add_parameter('master_flavor',
                            baymodel_attr='master_flavor_id')
         self.add_parameter('minion_flavor',
                            baymodel_attr='flavor_id')
         self.add_parameter('number_of_minions',
                            bay_attr='node_count')
-        self.add_parameter('docker_volume_size',
-                           baymodel_attr='docker_volume_size')
         self.add_parameter('external_network',
                            baymodel_attr='external_network_id',
                            required=True)
@@ -476,8 +464,6 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
 
     def get_params(self, context, baymodel, bay, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
-        label_list = ['flannel_network_cidr', 'flannel_use_vxlan',
-                      'flannel_network_subnetlen']
         scale_mgr = kwargs.pop('scale_manager', None)
         if scale_mgr:
             hosts = self.get_output('kube_minions')
@@ -485,6 +471,38 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
                 scale_mgr.get_removal_nodes(hosts))
 
         extra_params['discovery_url'] = self.get_discovery_url(bay)
+
+        label_list = ['flannel_network_cidr', 'flannel_use_vxlan',
+                      'flannel_network_subnetlen']
+        for label in label_list:
+            extra_params[label] = baymodel.labels.get(label)
+
+        return super(K8sTemplateDefinition,
+                     self).get_params(context, baymodel, bay,
+                                      extra_params=extra_params,
+                                      **kwargs)
+
+
+class AtomicK8sTemplateDefinition(K8sTemplateDefinition):
+    """Kubernetes template for a Fedora Atomic VM."""
+
+    provides = [
+        {'server_type': 'vm',
+         'os': 'fedora-atomic',
+         'coe': 'kubernetes'},
+    ]
+
+    def __init__(self):
+        super(AtomicK8sTemplateDefinition, self).__init__()
+        self.add_parameter('bay_uuid',
+                           bay_attr='uuid',
+                           param_type=str)
+        self.add_parameter('docker_volume_size',
+                           baymodel_attr='docker_volume_size')
+
+    def get_params(self, context, baymodel, bay, **kwargs):
+        extra_params = kwargs.pop('extra_params', {})
+
         # Kubernetes backend code is still using v2 API
         extra_params['auth_url'] = context.auth_url.replace("v3", "v2")
         extra_params['username'] = context.user_name
@@ -497,9 +515,6 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
             extra_params['loadbalancing_protocol'] = 'HTTP'
             extra_params['kubernetes_port'] = 8080
 
-        for label in label_list:
-            extra_params[label] = baymodel.labels.get(label)
-
         return super(AtomicK8sTemplateDefinition,
                      self).get_params(context, baymodel, bay,
                                       extra_params=extra_params,
@@ -510,36 +525,12 @@ class AtomicK8sTemplateDefinition(BaseTemplateDefinition):
         return cfg.CONF.bay.k8s_atomic_template_path
 
 
-class CoreOSK8sTemplateDefinition(AtomicK8sTemplateDefinition):
+class CoreOSK8sTemplateDefinition(K8sTemplateDefinition):
     """Kubernetes template for CoreOS VM."""
 
     provides = [
         {'server_type': 'vm', 'os': 'coreos', 'coe': 'kubernetes'},
     ]
-
-    def __init__(self):
-        super(CoreOSK8sTemplateDefinition, self).__init__()
-        self.add_parameter('ssh_authorized_key',
-                           baymodel_attr='ssh_authorized_key')
-
-    @staticmethod
-    def get_token():
-        discovery_url = cfg.CONF.bay.coreos_discovery_token_url
-        if discovery_url:
-            coreos_token_url = requests.get(discovery_url)
-            token = str(coreos_token_url.text.split('/')[3])
-        else:
-            token = uuid.uuid4().hex
-        return token
-
-    def get_params(self, context, baymodel, bay, **kwargs):
-        extra_params = kwargs.pop('extra_params', {})
-        extra_params['token'] = self.get_token()
-
-        return super(CoreOSK8sTemplateDefinition,
-                     self).get_params(context, baymodel, bay,
-                                      extra_params=extra_params,
-                                      **kwargs)
 
     @property
     def template_path(self):
