@@ -15,6 +15,7 @@
 
 import mock
 from oslo_config import cfg
+from six.moves import reload_module
 
 from magnum.api import validation as v
 from magnum.common import exception
@@ -188,7 +189,7 @@ class TestValidation(base.BaseTestCase):
 
         # Reload the validator module so that baymodel configs are
         # re-evaluated.
-        reload(v)
+        reload_module(v)
         validator = v.K8sValidator
         validator.supported_drivers = ['flannel', 'type1', 'type2']
 
