@@ -14,12 +14,12 @@ import datetime
 
 import mock
 from oslo_config import cfg
-from oslo_policy import policy
 from oslo_utils import timeutils
 from six.moves.urllib import parse as urlparse
 from wsme import types as wtypes
 
 from magnum.api.controllers.v1 import node as api_node
+from magnum.common import exception
 from magnum.common import utils
 from magnum.tests import base
 from magnum.tests.unit.api import base as api_base
@@ -295,22 +295,25 @@ class TestNodePolicyEnforcement(api_base.FunctionalTest):
 
     def _common_policy_check(self, rule, func, *arg, **kwarg):
         self.policy.set_rules({rule: "project:non_fake"})
-        exc = self.assertRaises(policy.PolicyNotAuthorized,
+        exc = self.assertRaises(exception.PolicyNotAuthorized,
                                 func, *arg, **kwarg)
-        self.assertTrue(exc.message.startswith(rule))
-        self.assertTrue(exc.message.endswith("disallowed by policy"))
+        self.assertEqual(
+            "Policy doesn't allow %s to be performed." % rule,
+            exc.format_message())
 
     def test_policy_disallow_get_all(self):
         self._common_policy_check(
-            "node:get_all", self.get_json, '/nodes')
+            "node:get_all", self.get_json, '/nodes', expect_errors=True)
 
     def test_policy_disallow_get_one(self):
         self._common_policy_check(
-            "node:get", self.get_json, '/nodes/111-222-333')
+            "node:get", self.get_json, '/nodes/111-222-333',
+            expect_errors=True)
 
     def test_policy_disallow_detail(self):
         self._common_policy_check(
-            "node:detail", self.get_json, '/nodes/111-222-333/detail')
+            "node:detail", self.get_json, '/nodes/111-222-333/detail',
+            expect_errors=True)
 
     def test_policy_disallow_update(self):
         node = obj_utils.create_test_node(self.context,
@@ -319,16 +322,17 @@ class TestNodePolicyEnforcement(api_base.FunctionalTest):
         self._common_policy_check(
             "node:update", self.patch_json,
             '/nodes/%s' % node.uuid,
-            [{'type': '/type', 'value': "new_type", 'op': 'replace'}])
+            [{'type': '/type', 'value': "new_type", 'op': 'replace'}],
+            expect_errors=True)
 
     def test_policy_disallow_create(self):
         bdict = apiutils.node_post_data(name='node_example_A')
         self._common_policy_check(
-            "node:create", self.post_json, '/nodes', bdict)
+            "node:create", self.post_json, '/nodes', bdict, expect_errors=True)
 
     def test_policy_disallow_delete(self):
         node = obj_utils.create_test_node(self.context,
                                           uuid='137-246-789')
         self._common_policy_check(
             "node:delete", self.delete,
-            '/nodes/%s' % node.uuid)
+            '/nodes/%s' % node.uuid, expect_errors=True)

@@ -76,16 +76,6 @@ class HackingTestCase(base.TestCase):
     def _assert_has_no_errors(self, code, checker, filename=None):
         self._assert_has_errors(code, checker, filename=filename)
 
-    def test_policy_enforce_decorator(self):
-        code = """
-               @some_other_decorator
-               @policy.enforce_wsgi("bay", "create")
-               def my_method():
-                   pass
-               """
-        self._assert_has_errors(code, checks.check_policy_enforce_decorator,
-                                expected_errors=[(2, 0, "M301")])
-
     def test_assert_equal_in(self):
         errors = [(1, 0, "M338")]
         check = checks.assert_equal_in

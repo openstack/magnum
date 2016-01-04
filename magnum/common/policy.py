@@ -20,6 +20,8 @@ from oslo_config import cfg
 from oslo_policy import policy
 import pecan
 
+from magnum.common import exception
+
 
 _ENFORCER = None
 CONF = cfg.CONF
@@ -59,14 +61,14 @@ def init(policy_file=None, rules=None,
     return _ENFORCER
 
 
-def enforce(context, action=None, target=None,
+def enforce(context, rule=None, target=None,
             do_raise=True, exc=None, *args, **kwargs):
 
     """Checks authorization of a rule against the target and credentials.
 
         :param dict context: As much information about the user performing the
                              action as possible.
-        :param action: The rule to evaluate.
+        :param rule: The rule to evaluate.
         :param dict target: As much information about the object being operated
                             on as possible.
         :param do_raise: Whether to raise an exception or not if check
@@ -88,12 +90,10 @@ def enforce(context, action=None, target=None,
     if target is None:
         target = {'project_id': context.project_id,
                   'user_id': context.user_id}
-    return enforcer.enforce(action, target, credentials,
+    return enforcer.enforce(rule, target, credentials,
                             do_raise=do_raise, exc=exc, *args, **kwargs)
 
 
-# NOTE(Shaohe Feng): This decorator MUST appear first (the outermost
-# decorator) on an API method for it to work correctly
 def enforce_wsgi(api_name, act=None):
     """This is a decorator to simplify wsgi action policy rule check.
 
@@ -114,7 +114,8 @@ def enforce_wsgi(api_name, act=None):
 
         @functools.wraps(fn)
         def handle(self, *args, **kwargs):
-            enforce(pecan.request.context, action, None)
+            enforce(pecan.request.context, action,
+                    exc=exception.PolicyNotAuthorized, action=action)
             return fn(self, *args, **kwargs)
         return handle
     return wrapper

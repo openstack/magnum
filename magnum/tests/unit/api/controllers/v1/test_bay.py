@@ -14,7 +14,6 @@ import datetime
 
 import mock
 from oslo_config import cfg
-from oslo_policy import policy
 from oslo_utils import timeutils
 from six.moves.urllib import parse as urlparse
 
@@ -710,22 +709,24 @@ class TestBayPolicyEnforcement(api_base.FunctionalTest):
 
     def _common_policy_check(self, rule, func, *arg, **kwarg):
         self.policy.set_rules({rule: "project:non_fake"})
-        exc = self.assertRaises(policy.PolicyNotAuthorized,
+        exc = self.assertRaises(exception.PolicyNotAuthorized,
                                 func, *arg, **kwarg)
-        self.assertTrue(exc.message.startswith(rule))
-        self.assertTrue(exc.message.endswith("disallowed by policy"))
+        self.assertEqual(
+            "Policy doesn't allow %s to be performed." % rule,
+            exc.format_message())
 
     def test_policy_disallow_get_all(self):
         self._common_policy_check(
-            "bay:get_all", self.get_json, '/bays')
+            "bay:get_all", self.get_json, '/bays', expect_errors=True)
 
     def test_policy_disallow_get_one(self):
         self._common_policy_check(
-            "bay:get", self.get_json, '/bays/111-222-333')
+            "bay:get", self.get_json, '/bays/111-222-333', expect_errors=True)
 
     def test_policy_disallow_detail(self):
         self._common_policy_check(
-            "bay:detail", self.get_json, '/bays/111-222-333/detail')
+            "bay:detail", self.get_json, '/bays/111-222-333/detail',
+            expect_errors=True)
 
     def test_policy_disallow_update(self):
         self.bay = obj_utils.create_test_bay(self.context,
@@ -733,12 +734,13 @@ class TestBayPolicyEnforcement(api_base.FunctionalTest):
                                              node_count=3)
         self._common_policy_check(
             "bay:update", self.patch_json, '/bays/%s' % self.bay.name,
-            [{'path': '/name', 'value': "new_name", 'op': 'replace'}])
+            [{'path': '/name', 'value': "new_name", 'op': 'replace'}],
+            expect_errors=True)
 
     def test_policy_disallow_create(self):
         bdict = apiutils.bay_post_data(name='bay_example_A')
         self._common_policy_check(
-            "bay:create", self.post_json, '/bays', bdict)
+            "bay:create", self.post_json, '/bays', bdict, expect_errors=True)
 
     def _simulate_rpc_bay_delete(self, bay_uuid):
         bay = objects.Bay.get_by_uuid(self.context, bay_uuid)
@@ -750,4 +752,4 @@ class TestBayPolicyEnforcement(api_base.FunctionalTest):
         self.mock_bay_delete.side_effect = self._simulate_rpc_bay_delete
         self.addCleanup(p.stop)
         self._common_policy_check(
-            "bay:delete", self.delete, '/bays/test_bay')
+            "bay:delete", self.delete, '/bays/test_bay', expect_errors=True)

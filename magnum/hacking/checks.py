@@ -30,8 +30,6 @@ Guidelines for writing new hacking checks
 
 """
 
-enforce_re = re.compile(r"@policy.enforce_wsgi*")
-decorator_re = re.compile(r"@.*")
 mutable_default_args = re.compile(r"^\s*def .+\((.+=\{\}|.+=\[\])")
 assert_equal_in_end_with_true_or_false_re = re.compile(
     r"assertEqual\((\w|[][.'\"])+ in (\w|[][.'\", ])+, (True|False)\)")
@@ -51,16 +49,6 @@ assert_true_isinstance_re = re.compile(
     r"(.)*assertTrue\(isinstance\((\w|\.|\'|\"|\[|\])+, "
     "(\w|\.|\'|\"|\[|\])+\)\)")
 dict_constructor_with_list_copy_re = re.compile(r".*\bdict\((\[)?(\(|\[)")
-
-
-def check_policy_enforce_decorator(logical_line,
-                                   previous_logical, blank_before,
-                                   filename):
-    msg = ("M301: the policy.enforce_wsgi decorator must be the "
-           "first decorator on a method.")
-    if (blank_before == 0 and re.match(enforce_re, logical_line)
-            and re.match(decorator_re, previous_logical)):
-        yield(0, msg)
 
 
 def assert_equal_none(logical_line):
@@ -146,7 +134,6 @@ def dict_constructor_with_list_copy(logical_line):
 
 
 def factory(register):
-    register(check_policy_enforce_decorator)
     register(no_mutable_default_args)
     register(assert_equal_none)
     register(assert_equal_true_or_false)
