@@ -29,10 +29,6 @@ from magnum.common import policy
 from magnum import objects
 
 
-# NOTE(dims): We don't depend on oslo*i18n yet
-_ = _LI = _LW = _LE = _LC = lambda x: x
-
-
 class ServicePatchType(v1_base.K8sPatchType):
 
     @staticmethod
