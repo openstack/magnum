@@ -11,6 +11,7 @@
 #    limitations under the License.
 
 import datetime
+import json
 
 import mock
 from oslo_config import cfg
@@ -18,7 +19,6 @@ from six.moves.urllib import parse as urlparse
 from wsme import types as wtypes
 
 from magnum.api.controllers.v1 import service as api_service
-from magnum.common import exception
 from magnum.common.pythonk8sclient.swagger_client import rest
 from magnum.common import utils
 from magnum.conductor import api as rpcapi
@@ -598,24 +598,29 @@ class TestServiceEnforcement(api_base.FunctionalTest):
 
     def _common_policy_check(self, rule, func, *arg, **kwarg):
         self.policy.set_rules({rule: 'project:non_fake'})
-        exc = self.assertRaises(exception.PolicyNotAuthorized,
-                                func, *arg, **kwarg)
-        self.assertEqual(
+        response = func(*arg, **kwarg)
+        self.assertEqual(403, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(
             "Policy doesn't allow %s to be performed." % rule,
-            exc.format_message())
+            json.loads(response.json['error_message'])['faultstring'])
 
     def test_policy_disallow_get_all(self):
         self._common_policy_check(
-            'service:get_all', self.get_json, '/services', expect_errors=True)
+            'service:get_all', self.get_json,
+            '/services?bay_ident=%s' % utils.generate_uuid(),
+            expect_errors=True)
 
     def test_policy_disallow_get_one(self):
         self._common_policy_check(
-            'service:get', self.get_json, '/services/111-222-333',
+            'service:get', self.get_json,
+            '/services/?bay_ident=%s' % utils.generate_uuid(),
             expect_errors=True)
 
     def test_policy_disallow_detail(self):
         self._common_policy_check(
-            'service:detail', self.get_json, '/services/111-222-333/detail',
+            'service:detail', self.get_json,
+            '/services/detail?bay_ident=%s' % utils.generate_uuid(),
             expect_errors=True)
 
     def test_policy_disallow_update(self):
@@ -625,13 +630,14 @@ class TestServiceEnforcement(api_base.FunctionalTest):
 
         self._common_policy_check(
             'service:update', self.patch_json,
-            '/services/%s' % service.uuid,
+            '/services/%s/%s' % (service.uuid, utils.generate_uuid()),
             [{'path': '/bay_uuid',
               'value': utils.generate_uuid(),
               'op': 'replace'}], expect_errors=True)
 
     def test_policy_disallow_create(self):
-        pdict = apiutils.service_post_data()
+        bay = obj_utils.create_test_bay(self.context)
+        pdict = apiutils.service_post_data(bay_uuid=bay.uuid)
         self._common_policy_check(
             'service:create', self.post_json, '/services', pdict,
             expect_errors=True)
@@ -642,4 +648,5 @@ class TestServiceEnforcement(api_base.FunctionalTest):
                                                 uuid=utils.generate_uuid())
         self._common_policy_check(
             'service:delete', self.delete,
-            '/services/%s' % service.uuid, expect_errors=True)
+            '/services/%s/%s' % (service.uuid, utils.generate_uuid()),
+            expect_errors=True)

@@ -190,9 +190,9 @@ class PodsController(rest.RestController):
                                                 sort_key=sort_key,
                                                 sort_dir=sort_dir)
 
-    @policy.enforce_wsgi("pod")
     @expose.expose(PodCollection, types.uuid, types.uuid_or_name, int,
                    wtypes.text, wtypes.text)
+    @policy.enforce_wsgi("pod")
     @validation.enforce_bay_types('kubernetes')
     def get_all(self, marker=None, bay_ident=None, limit=None, sort_key='id',
                 sort_dir='asc'):
@@ -208,9 +208,9 @@ class PodsController(rest.RestController):
         return self._get_pods_collection(marker, limit, sort_key,
                                          sort_dir, bay_ident)
 
-    @policy.enforce_wsgi("pod")
     @expose.expose(PodCollection, types.uuid, types.uuid_or_name, int,
                    wtypes.text, wtypes.text)
+    @policy.enforce_wsgi("pod")
     @validation.enforce_bay_types('kubernetes')
     def detail(self, marker=None, bay_ident=None, limit=None, sort_key='id',
                sort_dir='asc'):
@@ -234,9 +234,9 @@ class PodsController(rest.RestController):
                                          bay_ident, expand,
                                          resource_url)
 
-    @policy.enforce_wsgi("pod", "get")
     @expose.expose(Pod, types.uuid_or_name,
                    types.uuid_or_name)
+    @policy.enforce_wsgi("pod", "get")
     @validation.enforce_bay_types('kubernetes')
     def get_one(self, pod_ident, bay_ident):
         """Retrieve information about the given pod.
@@ -249,8 +249,8 @@ class PodsController(rest.RestController):
 
         return Pod.convert_with_links(rpc_pod)
 
-    @policy.enforce_wsgi("pod", "create")
     @expose.expose(Pod, body=Pod, status_code=201)
+    @policy.enforce_wsgi("pod", "create")
     @validation.enforce_bay_types('kubernetes')
     def post(self, pod):
         """Create a new pod.
@@ -268,10 +268,10 @@ class PodsController(rest.RestController):
         pecan.response.location = link.build_url('pods', new_pod.uuid)
         return Pod.convert_with_links(new_pod)
 
-    @policy.enforce_wsgi("pod", "update")
     @wsme.validate(types.uuid, [PodPatchType])
     @expose.expose(Pod, types.uuid_or_name,
                    types.uuid_or_name, body=[PodPatchType])
+    @policy.enforce_wsgi("pod", "update")
     @validation.enforce_bay_types('kubernetes')
     def patch(self, pod_ident, bay_ident, patch):
         """Update an existing pod.
@@ -294,9 +294,9 @@ class PodsController(rest.RestController):
                                                   pod.manifest)
         return Pod.convert_with_links(rpc_pod)
 
-    @policy.enforce_wsgi("pod")
     @expose.expose(None, types.uuid_or_name,
                    types.uuid_or_name, status_code=204)
+    @policy.enforce_wsgi("pod")
     @validation.enforce_bay_types('kubernetes')
     def delete(self, pod_ident, bay_ident):
         """Delete a pod.

@@ -15,7 +15,8 @@
 
 """Policy Engine For magnum."""
 
-import functools
+import decorator
+import logging
 from oslo_config import cfg
 from oslo_policy import policy
 import pecan
@@ -25,6 +26,8 @@ from magnum.common import exception
 
 _ENFORCER = None
 CONF = cfg.CONF
+
+LOG = logging.getLogger(__name__)
 
 
 # we can get a policy enforcer by this init.
@@ -109,13 +112,10 @@ def enforce_wsgi(api_name, act=None):
                def delete(self, bay_ident):
                    ...
     """
-    def wrapper(fn):
+    @decorator.decorator
+    def wrapper(fn, *args, **kwargs):
         action = "%s:%s" % (api_name, (act or fn.__name__))
-
-        @functools.wraps(fn)
-        def handle(self, *args, **kwargs):
-            enforce(pecan.request.context, action,
-                    exc=exception.PolicyNotAuthorized, action=action)
-            return fn(self, *args, **kwargs)
-        return handle
+        enforce(pecan.request.context, action,
+                exc=exception.PolicyNotAuthorized, action=action)
+        return fn(*args, **kwargs)
     return wrapper

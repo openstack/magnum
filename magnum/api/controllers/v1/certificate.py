@@ -124,8 +124,8 @@ class CertificateController(rest.RestController):
         'detail': ['GET'],
     }
 
-    @policy.enforce_wsgi("certificate", "get")
     @wsme_pecan.wsexpose(Certificate, types.uuid_or_name)
+    @policy.enforce_wsgi("certificate", "get")
     def get_one(self, bay_ident):
         """Retrieve information about the given certificate.
 
@@ -136,8 +136,8 @@ class CertificateController(rest.RestController):
         certificate = pecan.request.rpcapi.get_ca_certificate(rpc_bay)
         return Certificate.convert_with_links(certificate)
 
-    @policy.enforce_wsgi("certificate", "create")
     @wsme_pecan.wsexpose(Certificate, body=Certificate, status_code=201)
+    @policy.enforce_wsgi("certificate", "create")
     def post(self, certificate):
         """Create a new certificate.
 

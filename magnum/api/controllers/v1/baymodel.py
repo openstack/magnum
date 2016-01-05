@@ -242,9 +242,9 @@ class BayModelsController(rest.RestController):
                                                      sort_key=sort_key,
                                                      sort_dir=sort_dir)
 
-    @policy.enforce_wsgi("baymodel")
     @expose.expose(BayModelCollection, types.uuid, int, wtypes.text,
                    wtypes.text)
+    @policy.enforce_wsgi("baymodel")
     def get_all(self, marker=None, limit=None, sort_key='id',
                 sort_dir='asc'):
         """Retrieve a list of baymodels.
@@ -257,9 +257,9 @@ class BayModelsController(rest.RestController):
         return self._get_baymodels_collection(marker, limit, sort_key,
                                               sort_dir)
 
-    @policy.enforce_wsgi("baymodel")
     @expose.expose(BayModelCollection, types.uuid, int, wtypes.text,
                    wtypes.text)
+    @policy.enforce_wsgi("baymodel")
     def detail(self, marker=None, limit=None, sort_key='id',
                sort_dir='asc'):
         """Retrieve a list of baymodels with detail.
@@ -280,8 +280,8 @@ class BayModelsController(rest.RestController):
                                               sort_key, sort_dir, expand,
                                               resource_url)
 
-    @policy.enforce_wsgi("baymodel", "get")
     @expose.expose(BayModel, types.uuid_or_name)
+    @policy.enforce_wsgi("baymodel", "get")
     def get_one(self, baymodel_ident):
         """Retrieve information about the given baymodel.
 
@@ -290,8 +290,8 @@ class BayModelsController(rest.RestController):
         rpc_baymodel = api_utils.get_rpc_resource('BayModel', baymodel_ident)
         return BayModel.convert_with_links(rpc_baymodel)
 
-    @policy.enforce_wsgi("baymodel", "create")
     @expose.expose(BayModel, body=BayModel, status_code=201)
+    @policy.enforce_wsgi("baymodel", "create")
     @validation.enforce_network_driver_types_create()
     def post(self, baymodel):
         """Create a new baymodel.
@@ -320,9 +320,9 @@ class BayModelsController(rest.RestController):
                                                  new_baymodel.uuid)
         return BayModel.convert_with_links(new_baymodel)
 
-    @policy.enforce_wsgi("baymodel", "update")
     @wsme.validate(types.uuid_or_name, [BayModelPatchType])
     @expose.expose(BayModel, types.uuid_or_name, body=[BayModelPatchType])
+    @policy.enforce_wsgi("baymodel", "update")
     @validation.enforce_network_driver_types_update()
     def patch(self, baymodel_ident, patch):
         """Update an existing baymodel.
@@ -361,8 +361,8 @@ class BayModelsController(rest.RestController):
         rpc_baymodel.save()
         return BayModel.convert_with_links(rpc_baymodel)
 
-    @policy.enforce_wsgi("baymodel")
     @expose.expose(None, types.uuid_or_name, status_code=204)
+    @policy.enforce_wsgi("baymodel")
     def delete(self, baymodel_ident):
         """Delete a baymodel.
 

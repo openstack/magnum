@@ -10,10 +10,10 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import json
 import mock
 
 from magnum.api.controllers.v1 import certificate as api_cert
-from magnum.common import exception
 from magnum.common import utils
 from magnum.tests import base
 from magnum.tests.unit.api import base as api_base
@@ -169,11 +169,12 @@ class TestCertPolicyEnforcement(api_base.FunctionalTest):
 
     def _common_policy_check(self, rule, func, *arg, **kwarg):
         self.policy.set_rules({rule: "project:non_fake"})
-        exc = self.assertRaises(exception.PolicyNotAuthorized,
-                                func, *arg, **kwarg)
-        self.assertEqual(
+        response = func(*arg, **kwarg)
+        self.assertEqual(403, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(
             "Policy doesn't allow %s to be performed." % rule,
-            exc.format_message())
+            json.loads(response.json['error_message'])['faultstring'])
 
     def test_policy_disallow_get_one(self):
         self._common_policy_check(
@@ -182,7 +183,8 @@ class TestCertPolicyEnforcement(api_base.FunctionalTest):
             expect_errors=True)
 
     def test_policy_disallow_create(self):
-        cert = apiutils.cert_post_data()
+        bay = obj_utils.create_test_bay(self.context)
+        cert = apiutils.cert_post_data(bay_uuid=bay.uuid)
         self._common_policy_check(
             "certificate:create", self.post_json, '/certificates', cert,
             expect_errors=True)

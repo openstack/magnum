@@ -219,9 +219,9 @@ class ReplicationControllersController(rest.RestController):
             sort_key=sort_key,
             sort_dir=sort_dir)
 
-    @policy.enforce_wsgi("rc")
     @expose.expose(ReplicationControllerCollection, types.uuid,
                    types.uuid_or_name, int, wtypes.text, wtypes.text)
+    @policy.enforce_wsgi("rc")
     @validation.enforce_bay_types('kubernetes')
     def get_all(self, marker=None, bay_ident=None, limit=None, sort_key='id',
                 sort_dir='asc'):
@@ -236,9 +236,9 @@ class ReplicationControllersController(rest.RestController):
         return self._get_rcs_collection(marker, limit, sort_key,
                                         sort_dir, bay_ident)
 
-    @policy.enforce_wsgi("rc")
     @expose.expose(ReplicationControllerCollection, types.uuid,
                    types.uuid_or_name, int, wtypes.text, wtypes.text)
+    @policy.enforce_wsgi("rc")
     @validation.enforce_bay_types('kubernetes')
     def detail(self, marker=None, bay_ident=None, limit=None, sort_key='id',
                sort_dir='asc'):
@@ -262,9 +262,9 @@ class ReplicationControllersController(rest.RestController):
                                         bay_ident, expand,
                                         resource_url)
 
-    @policy.enforce_wsgi("rc", "get")
     @expose.expose(ReplicationController, types.uuid_or_name,
                    types.uuid_or_name)
+    @policy.enforce_wsgi("rc", "get")
     @validation.enforce_bay_types('kubernetes')
     def get_one(self, rc_ident, bay_ident):
         """Retrieve information about the given ReplicationController.
@@ -276,9 +276,9 @@ class ReplicationControllersController(rest.RestController):
         rpc_rc = pecan.request.rpcapi.rc_show(context, rc_ident, bay_ident)
         return ReplicationController.convert_with_links(rpc_rc)
 
-    @policy.enforce_wsgi("rc", "create")
     @expose.expose(ReplicationController, body=ReplicationController,
                    status_code=201)
+    @policy.enforce_wsgi("rc", "create")
     @validation.enforce_bay_types('kubernetes')
     def post(self, rc):
         """Create a new ReplicationController.
@@ -299,10 +299,10 @@ class ReplicationControllersController(rest.RestController):
         pecan.response.location = link.build_url('rcs', new_rc.uuid)
         return ReplicationController.convert_with_links(new_rc)
 
-    @policy.enforce_wsgi("rc", "update")
     @wsme.validate(types.uuid, [ReplicationControllerPatchType])
     @expose.expose(ReplicationController, types.uuid_or_name,
                    types.uuid_or_name, body=[ReplicationControllerPatchType])
+    @policy.enforce_wsgi("rc", "update")
     @validation.enforce_bay_types('kubernetes')
     def patch(self, rc_ident, bay_ident, patch):
         """Update an existing rc.
@@ -327,9 +327,9 @@ class ReplicationControllersController(rest.RestController):
                                                 rc.manifest)
         return ReplicationController.convert_with_links(rpc_rc)
 
-    @policy.enforce_wsgi("rc")
     @expose.expose(None, types.uuid_or_name,
                    types.uuid_or_name, status_code=204)
+    @policy.enforce_wsgi("rc")
     @validation.enforce_bay_types('kubernetes')
     def delete(self, rc_ident, bay_ident):
         """Delete a ReplicationController.
