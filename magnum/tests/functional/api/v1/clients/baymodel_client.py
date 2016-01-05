@@ -14,7 +14,7 @@ from magnum.tests.functional.api.v1.models import baymodel_model
 from magnum.tests.functional.common import client
 
 
-class BayModelClient(client.ClientMixin):
+class BayModelClient(client.MagnumClient):
     """Encapsulates REST calls and maps JSON to/from models"""
 
     @classmethod
@@ -49,7 +49,7 @@ class BayModelClient(client.ClientMixin):
         :returns: response object and BayModelCollection object
         """
 
-        resp, body = self.client.get(self.baymodels_uri(filters), **kwargs)
+        resp, body = self.get(self.baymodels_uri(filters), **kwargs)
         return self.deserialize(resp, body, baymodel_model.BayModelCollection)
 
     def get_baymodel(self, baymodel_id, **kwargs):
@@ -61,7 +61,7 @@ class BayModelClient(client.ClientMixin):
         :returns: response object and BayModelCollection object
         """
 
-        resp, body = self.client.get(self.baymodel_uri(baymodel_id))
+        resp, body = self.get(self.baymodel_uri(baymodel_id))
         return self.deserialize(resp, body, baymodel_model.BayModelEntity)
 
     def post_baymodel(self, model, **kwargs):
@@ -73,7 +73,7 @@ class BayModelClient(client.ClientMixin):
         :returns: response object and BayModelEntity object
         """
 
-        resp, body = self.client.post(
+        resp, body = self.post(
             self.baymodels_uri(),
             body=model.to_json(), **kwargs)
         return self.deserialize(resp, body, baymodel_model.BayModelEntity)
@@ -88,7 +88,7 @@ class BayModelClient(client.ClientMixin):
         :returns: response object and BayModelEntity object
         """
 
-        resp, body = self.client.patch(
+        resp, body = self.patch(
             self.baymodel_uri(baymodel_id),
             body=baymodelpatch_listmodel.to_json(), **kwargs)
         return self.deserialize(resp, body, baymodel_model.BayModelEntity)
@@ -102,4 +102,4 @@ class BayModelClient(client.ClientMixin):
         :returns: response object
         """
 
-        return self.client.delete(self.baymodel_uri(baymodel_id), **kwargs)
+        return self.delete(self.baymodel_uri(baymodel_id), **kwargs)

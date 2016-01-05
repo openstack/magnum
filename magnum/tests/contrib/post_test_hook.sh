@@ -142,14 +142,6 @@ if [[ "api" == "$coe" ]]; then
     iniset $BASE/new/tempest/etc/tempest.conf magnum keypair_id default
     iniset $BASE/new/tempest/etc/tempest.conf magnum flavor_id m1.magnum
 
-    # This is a quick fix in case the other patch fails.  Just to unblock gate
-    iniset $BASE/new/tempest/etc/tempest.conf identity username ${TEMPEST_USERNAME:-demo}
-    iniset $BASE/new/tempest/etc/tempest.conf identity password "${ADMIN_PASSWORD:-secrete}"
-    iniset $BASE/new/tempest/etc/tempest.conf identity tenant_name ${TEMPEST_TENANT_NAME:-demo}
-    iniset $BASE/new/tempest/etc/tempest.conf identity alt_username ${ALT_USERNAME:-alt_demo}
-    iniset $BASE/new/tempest/etc/tempest.conf identity alt_password "${ADMIN_PASSWORD:-secrete}"
-    iniset $BASE/new/tempest/etc/tempest.conf identity alt_tenant_name ${ALT_TENANT_NAME:-alt_demo}
-
     # show tempest config with magnum
     cat etc/tempest.conf
 

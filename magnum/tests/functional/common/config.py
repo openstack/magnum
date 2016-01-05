@@ -49,6 +49,14 @@ class Config(object):
             cls.auth_url = CONF.identity.uri
 
     @classmethod
+    def set_admin_role(cls, config):
+        # admin_role for client authentication
+        if cls.auth_version == 'v3':
+            cls.admin_role = CONF.identity.admin_role
+        else:
+            cls.admin_role = 'admin'
+
+    @classmethod
     def set_region(cls, config):
         if 'region' in CONF.identity:
             cls.region = CONF.identity.region
@@ -79,6 +87,7 @@ class Config(object):
         cls.set_user_creds(config)
         cls.set_auth_version(config)
         cls.set_auth_url(config)
+        cls.set_admin_role(config)
 
         cls.set_region(config)
         cls.set_image_id(config)
