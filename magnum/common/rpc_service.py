@@ -76,8 +76,11 @@ class Service(service.Service):
         servicegroup.setup(CONF, self.binary, self.tg)
         self._server.start()
 
-    def wait(self):
-        self._server.wait()
+    def stop(self):
+        if self._server:
+            self._server.stop()
+            self._server.wait()
+        super(Service, self).stop()
 
     @classmethod
     def create(cls, topic, server, handlers, binary):
