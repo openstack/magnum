@@ -24,3 +24,4 @@ Magnum Specific Commandments
   assertIn/NotIn(A, B, message)
 - [M336] Must use a dict comprehension instead of a dict constructor
   with a sequence of key-value pairs.
+- [M338] Use assertIn/NotIn(A, B) rather than assertEqual(A in B, True/False).
