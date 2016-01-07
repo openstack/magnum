@@ -86,8 +86,8 @@ class MagnumServiceController(rest.RestController):
         super(MagnumServiceController, self).__init__()
         self.servicegroup_api = svcgrp_api.ServiceGroup()
 
-    @policy.enforce_wsgi("magnum-service", "get_all")
     @expose.expose(MagnumServiceCollection)
+    @policy.enforce_wsgi("magnum-service")
     def get_all(self):
         """Retrieve a list of magnum-services.
 

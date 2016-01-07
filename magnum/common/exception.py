@@ -332,6 +332,10 @@ class NotAuthorized(MagnumException):
     code = 403
 
 
+class PolicyNotAuthorized(NotAuthorized):
+    message = _("Policy doesn't allow %(action)s to be performed.")
+
+
 class NotAcceptable(MagnumException):
     # TODO(yuntongjin): We need to set response headers
     # in the API for this exception

@@ -14,7 +14,6 @@ import datetime
 
 import mock
 from oslo_config import cfg
-from oslo_policy import policy
 from oslo_utils import timeutils
 from six.moves.urllib import parse as urlparse
 from webtest.app import AppError
@@ -653,7 +652,7 @@ class TestPost(api_base.FunctionalTest):
             response = self.post_json('/baymodels', bdict)
             self.assertFalse(response.json['public'])
             # policy enforcement is called only once for enforce_wsgi
-            mock_policy.assert_called_once_with(mock.ANY, mock.ANY, None)
+            self.assertEqual(1, mock_policy.call_count)
             cc_mock.assert_called_once_with(mock.ANY)
             self.assertNotIn('id', cc_mock.call_args[0][0])
             self.assertFalse(cc_mock.call_args[0][0]['public'])
@@ -814,22 +813,26 @@ class TestBayModelPolicyEnforcement(api_base.FunctionalTest):
 
     def _common_policy_check(self, rule, func, *arg, **kwarg):
         self.policy.set_rules({rule: "project:non_fake"})
-        exc = self.assertRaises(policy.PolicyNotAuthorized,
+        exc = self.assertRaises(exception.PolicyNotAuthorized,
                                 func, *arg, **kwarg)
-        self.assertTrue(exc.message.startswith(rule))
-        self.assertTrue(exc.message.endswith("disallowed by policy"))
+        self.assertEqual(
+            "Policy doesn't allow %s to be performed." % rule,
+            exc.format_message())
 
     def test_policy_disallow_get_all(self):
         self._common_policy_check(
-            "baymodel:get_all", self.get_json, '/baymodels')
+            "baymodel:get_all", self.get_json, '/baymodels',
+            expect_errors=True)
 
     def test_policy_disallow_get_one(self):
         self._common_policy_check(
-            "baymodel:get", self.get_json, '/baymodels/111-222-333')
+            "baymodel:get", self.get_json, '/baymodels/111-222-333',
+            expect_errors=True)
 
     def test_policy_disallow_detail(self):
         self._common_policy_check(
-            "baymodel:detail", self.get_json, '/baymodels/111-222-333/detail')
+            "baymodel:detail", self.get_json, '/baymodels/111-222-333/detail',
+            expect_errors=True)
 
     def test_policy_disallow_update(self):
         baymodel = obj_utils.create_test_baymodel(self.context,
@@ -838,16 +841,18 @@ class TestBayModelPolicyEnforcement(api_base.FunctionalTest):
         self._common_policy_check(
             "baymodel:update", self.patch_json,
             '/baymodels/%s' % baymodel.name,
-            [{'name': '/name', 'value': "new_name", 'op': 'replace'}])
+            [{'name': '/name', 'value': "new_name", 'op': 'replace'}],
+            expect_errors=True)
 
     def test_policy_disallow_create(self):
         bdict = apiutils.baymodel_post_data(name='bay_model_example_A')
         self._common_policy_check(
-            "baymodel:create", self.post_json, '/baymodels', bdict)
+            "baymodel:create", self.post_json, '/baymodels', bdict,
+            expect_errors=True)
 
     def test_policy_disallow_delete(self):
         baymodel = obj_utils.create_test_baymodel(self.context,
                                                   uuid='137-246-789')
         self._common_policy_check(
             "baymodel:delete", self.delete,
-            '/baymodels/%s' % baymodel.uuid)
+            '/baymodels/%s' % baymodel.uuid, expect_errors=True)

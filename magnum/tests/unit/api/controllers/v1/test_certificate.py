@@ -11,9 +11,9 @@
 #    limitations under the License.
 
 import mock
-from oslo_policy import policy
 
 from magnum.api.controllers.v1 import certificate as api_cert
+from magnum.common import exception
 from magnum.common import utils
 from magnum.tests import base
 from magnum.tests.unit.api import base as api_base
@@ -169,17 +169,20 @@ class TestCertPolicyEnforcement(api_base.FunctionalTest):
 
     def _common_policy_check(self, rule, func, *arg, **kwarg):
         self.policy.set_rules({rule: "project:non_fake"})
-        exc = self.assertRaises(policy.PolicyNotAuthorized,
+        exc = self.assertRaises(exception.PolicyNotAuthorized,
                                 func, *arg, **kwarg)
-        self.assertTrue(exc.message.startswith(rule))
-        self.assertTrue(exc.message.endswith("disallowed by policy"))
+        self.assertEqual(
+            "Policy doesn't allow %s to be performed." % rule,
+            exc.format_message())
 
     def test_policy_disallow_get_one(self):
         self._common_policy_check(
             "certificate:get", self.get_json,
-            '/certificates/ce5da569-4f65-4272-9199-fac8c9fbc9d4')
+            '/certificates/ce5da569-4f65-4272-9199-fac8c9fbc9d4',
+            expect_errors=True)
 
     def test_policy_disallow_create(self):
         cert = apiutils.cert_post_data()
         self._common_policy_check(
-            "certificate:create", self.post_json, '/certificates', cert)
+            "certificate:create", self.post_json, '/certificates', cert,
+            expect_errors=True)
