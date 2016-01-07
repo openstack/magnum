@@ -10,53 +10,40 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from tempest_lib import auth
-from tempest_lib import exceptions
+from tempest import clients
+from tempest.common import credentials_factory as common_creds
 
-import magnum.tests.functional.common.config as config
+from magnum.tests.functional.api.v1.clients import baymodel_client
+from magnum.tests.functional.api.v1.clients import magnum_service_client
+from magnum.tests.functional.common import client
 
 
-class Manager(object):
-
-    """Responsible for providing an auth provider object"""
-
-    def _get_auth_credentials(self, auth_version, **credentials):
-        """Retrieves auth credentials based on passed in creds and version
-
-        :param auth_version: auth version ('v2' or 'v3')
-        :param credentials: credentials dict to validate against
-        :returns: credentials object
-        """
-
-        if credentials is None:
-            raise exceptions.InvalidCredentials(
-                'Credentials must be specified')
-        if auth_version == 'v3':
-            return auth.KeystoneV3Credentials(**credentials)
-        elif auth_version == 'v2':
-            return auth.KeystoneV2Credentials(**credentials)
+class Manager(clients.Manager):
+    def __init__(
+            self,
+            credentials=common_creds.get_configured_credentials(
+                'identity_admin'),
+            request_type=None):
+        super(Manager, self).__init__(credentials, 'container')
+        if request_type == 'baymodel':
+            self.client = baymodel_client.BayModelClient(self.auth_provider)
+        elif request_type == 'service':
+            self.client = magnum_service_client.MagnumServiceClient(
+                self.auth_provider)
         else:
-            raise exceptions.InvalidCredentials('Specify identity version')
+            self.client = client.MagnumClient(self.auth_provider)
 
-    def get_auth_provider(self, **credentials):
-        """Validates credentials and returns auth provider
 
-        Auth provider will contain required security context to pass to magnum
+class DefaultManager(Manager):
+    def __init__(self, credentials, request_type=None):
+        super(DefaultManager, self).__init__(credentials, request_type)
 
-        :param credentials: credentials dict to validate against
-        :returns: auth provider object
-        """
 
-        auth_version = config.Config.auth_version
-        creds = self._get_auth_credentials(auth_version, **credentials)
-        if auth_version == 'v3':
-            auth_provider = auth.KeystoneV3AuthProvider(
-                creds, config.Config.auth_url)
-        elif auth_version == 'v2':
-            auth_provider = auth.KeystoneV2AuthProvider(
-                creds, config.Config.auth_url)
-        else:
-            raise exceptions.InvalidCredentials('Specify identity version')
+class AltManager(Manager):
+    def __init__(self, credentials, request_type=None):
+        super(AltManager, self).__init__(credentials, request_type)
 
-        auth_provider.fill_credentials()
-        return auth_provider
+
+class AdminManager(Manager):
+    def __init__(self, credentials, request_type=None):
+        super(AdminManager, self).__init__(credentials, request_type)

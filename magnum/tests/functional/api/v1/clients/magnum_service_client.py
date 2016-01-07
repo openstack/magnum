@@ -14,7 +14,7 @@ from magnum.tests.functional.api.v1.models import magnum_service_model
 from magnum.tests.functional.common import client
 
 
-class MagnumServiceClient(client.ClientMixin):
+class MagnumServiceClient(client.MagnumClient):
     """Encapsulates REST calls and maps JSON to/from models"""
 
     @classmethod
@@ -39,7 +39,6 @@ class MagnumServiceClient(client.ClientMixin):
         :returns: response object and MagnumServiceCollection object
         """
 
-        resp, body = self.client.get(self.magnum_service_uri(filters),
-                                     **kwargs)
+        resp, body = self.get(self.magnum_service_uri(filters), **kwargs)
         return self.deserialize(resp, body,
                                 magnum_service_model.MagnumServiceCollection)
