@@ -194,9 +194,9 @@ class ServicesController(rest.RestController):
                                                     sort_key=sort_key,
                                                     sort_dir=sort_dir)
 
-    @policy.enforce_wsgi("service")
     @expose.expose(ServiceCollection, types.uuid, types.uuid_or_name, int,
                    wtypes.text, wtypes.text)
+    @policy.enforce_wsgi("service")
     @validation.enforce_bay_types('kubernetes')
     def get_all(self, marker=None, bay_ident=None, limit=None, sort_key='id',
                 sort_dir='asc'):
@@ -211,9 +211,9 @@ class ServicesController(rest.RestController):
         return self._get_services_collection(marker, limit, sort_key,
                                              sort_dir, bay_ident)
 
-    @policy.enforce_wsgi("service")
     @expose.expose(ServiceCollection, types.uuid, types.uuid_or_name, int,
                    wtypes.text, wtypes.text)
+    @policy.enforce_wsgi("service")
     @validation.enforce_bay_types('kubernetes')
     def detail(self, marker=None, bay_ident=None, limit=None, sort_key='id',
                sort_dir='asc'):
@@ -237,9 +237,9 @@ class ServicesController(rest.RestController):
                                              bay_ident, expand,
                                              resource_url)
 
-    @policy.enforce_wsgi("service", "get")
     @expose.expose(Service, types.uuid_or_name,
                    types.uuid_or_name)
+    @policy.enforce_wsgi("service", "get")
     @validation.enforce_bay_types('kubernetes')
     def get_one(self, service_ident, bay_ident):
         """Retrieve information about the given service.
@@ -253,8 +253,8 @@ class ServicesController(rest.RestController):
                                                         bay_ident)
         return Service.convert_with_links(rpc_service)
 
-    @policy.enforce_wsgi("service", "create")
     @expose.expose(Service, body=Service, status_code=201)
+    @policy.enforce_wsgi("service", "create")
     @validation.enforce_bay_types('kubernetes')
     def post(self, service):
         """Create a new service.
@@ -275,10 +275,10 @@ class ServicesController(rest.RestController):
         pecan.response.location = link.build_url('services', new_service.uuid)
         return Service.convert_with_links(new_service)
 
-    @policy.enforce_wsgi("service", "update")
     @wsme.validate(types.uuid, [ServicePatchType])
     @expose.expose(Service, types.uuid_or_name,
                    types.uuid_or_name, body=[ServicePatchType])
+    @policy.enforce_wsgi("service", "update")
     @validation.enforce_bay_types('kubernetes')
     def patch(self, service_ident, bay_ident, patch):
         """Update an existing service.
@@ -302,9 +302,9 @@ class ServicesController(rest.RestController):
                                                           service.manifest)
         return Service.convert_with_links(rpc_service)
 
-    @policy.enforce_wsgi("service")
     @expose.expose(None, types.uuid_or_name,
                    types.uuid_or_name, status_code=204)
+    @policy.enforce_wsgi("service")
     @validation.enforce_bay_types('kubernetes')
     def delete(self, service_ident, bay_ident):
         """Delete a service.

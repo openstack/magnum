@@ -11,6 +11,7 @@
 #    limitations under the License.
 
 import datetime
+import json
 
 import mock
 from oslo_config import cfg
@@ -18,7 +19,6 @@ from six.moves.urllib import parse as urlparse
 from wsme import types as wtypes
 
 from magnum.api.controllers.v1 import replicationcontroller as api_rc
-from magnum.common import exception
 from magnum.common.pythonk8sclient.swagger_client import rest
 from magnum.common import utils
 from magnum.conductor import api as rpcapi
@@ -586,11 +586,12 @@ class TestRCEnforcement(api_base.FunctionalTest):
 
     def _common_policy_check(self, rule, func, *arg, **kwarg):
         self.policy.set_rules({rule: 'project:non_fake'})
-        exc = self.assertRaises(exception.PolicyNotAuthorized,
-                                func, *arg, **kwarg)
-        self.assertEqual(
+        response = func(*arg, **kwarg)
+        self.assertEqual(403, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(
             "Policy doesn't allow %s to be performed." % rule,
-            exc.format_message())
+            json.loads(response.json['error_message'])['faultstring'])
 
     def test_policy_disallow_get_all(self):
         self._common_policy_check(
@@ -598,11 +599,14 @@ class TestRCEnforcement(api_base.FunctionalTest):
 
     def test_policy_disallow_get_one(self):
         self._common_policy_check(
-            'rc:get', self.get_json, '/rcs/111-222-333', expect_errors=True)
+            'rc:get', self.get_json,
+            '/rcs/?bay_ident=%s' % utils.generate_uuid(),
+            expect_errors=True)
 
     def test_policy_disallow_detail(self):
         self._common_policy_check(
-            'rc:detail', self.get_json, '/rcs/111-222-333/detail',
+            'rc:detail', self.get_json,
+            '/rcs/detail?bay_ident=%s' % utils.generate_uuid(),
             expect_errors=True)
 
     def test_policy_disallow_update(self):
@@ -613,12 +617,13 @@ class TestRCEnforcement(api_base.FunctionalTest):
         new_image = 'rc_example_B_image'
         self._common_policy_check(
             'rc:update', self.patch_json,
-            '/rcs/%s' % rc.uuid,
+            '/rcs/%s/%s' % (rc.uuid, utils.generate_uuid()),
             [{'path': '/images/0', 'value': new_image, 'op': 'replace'}],
             expect_errors=True)
 
     def test_policy_disallow_create(self):
-        pdict = apiutils.rc_post_data()
+        bay = obj_utils.create_test_bay(self.context)
+        pdict = apiutils.rc_post_data(bay_uuid=bay.uuid)
         self._common_policy_check(
             'rc:create', self.post_json, '/rcs', pdict, expect_errors=True)
 
@@ -628,4 +633,5 @@ class TestRCEnforcement(api_base.FunctionalTest):
                                       uuid=utils.generate_uuid())
         self._common_policy_check(
             'rc:delete', self.delete,
-            '/rcs/%s' % rc.uuid, expect_errors=True)
+            '/rcs/%s/%s' % (rc.uuid, utils.generate_uuid()),
+            expect_errors=True)

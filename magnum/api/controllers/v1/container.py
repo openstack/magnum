@@ -312,9 +312,9 @@ class ContainersController(rest.RestController):
                                                       sort_key=sort_key,
                                                       sort_dir=sort_dir)
 
-    @policy.enforce_wsgi("container")
     @expose.expose(ContainerCollection, types.uuid, int,
                    wtypes.text, wtypes.text, types.uuid_or_name)
+    @policy.enforce_wsgi("container")
     def get_all(self, marker=None, limit=None, sort_key='id',
                 sort_dir='asc', bay_ident=None):
         """Retrieve a list of containers.
@@ -328,9 +328,9 @@ class ContainersController(rest.RestController):
         return self._get_containers_collection(marker, limit, sort_key,
                                                sort_dir, bay_ident=bay_ident)
 
-    @policy.enforce_wsgi("container")
     @expose.expose(ContainerCollection, types.uuid, int,
                    wtypes.text, wtypes.text)
+    @policy.enforce_wsgi("container")
     def detail(self, marker=None, limit=None, sort_key='id',
                sort_dir='asc'):
         """Retrieve a list of containers with detail.
@@ -350,8 +350,8 @@ class ContainersController(rest.RestController):
                                                sort_key, sort_dir, expand,
                                                resource_url)
 
-    @policy.enforce_wsgi("container", "get")
     @expose.expose(Container, types.uuid_or_name)
+    @policy.enforce_wsgi("container", "get")
     def get_one(self, container_ident):
         """Retrieve information about the given container.
 
@@ -362,8 +362,8 @@ class ContainersController(rest.RestController):
         res_container = pecan.request.rpcapi.container_show(rpc_container.uuid)
         return Container.convert_with_links(res_container)
 
-    @policy.enforce_wsgi("container", "create")
     @expose.expose(Container, body=Container, status_code=201)
+    @policy.enforce_wsgi("container", "create")
     @validation.enforce_bay_types('swarm')
     def post(self, container):
         """Create a new container.
@@ -383,10 +383,10 @@ class ContainersController(rest.RestController):
                                                  res_container.uuid)
         return Container.convert_with_links(res_container)
 
-    @policy.enforce_wsgi("container", "update")
     @wsme.validate(types.uuid, [ContainerPatchType])
     @expose.expose(Container, types.uuid_or_name,
                    body=[ContainerPatchType])
+    @policy.enforce_wsgi("container", "update")
     def patch(self, container_ident, patch):
         """Update an existing container.
 
@@ -417,8 +417,8 @@ class ContainersController(rest.RestController):
         rpc_container.save()
         return Container.convert_with_links(rpc_container)
 
-    @policy.enforce_wsgi("container")
     @expose.expose(None, types.uuid_or_name, status_code=204)
+    @policy.enforce_wsgi("container")
     def delete(self, container_ident):
         """Delete a container.
 

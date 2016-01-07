@@ -11,6 +11,7 @@
 #    limitations under the License.
 
 import datetime
+import json
 
 import mock
 from oslo_config import cfg
@@ -18,7 +19,6 @@ from six.moves.urllib import parse as urlparse
 from wsme import types as wtypes
 
 from magnum.api.controllers.v1 import pod as api_pod
-from magnum.common import exception
 from magnum.common.pythonk8sclient.swagger_client import rest
 from magnum.common import utils
 from magnum.conductor import api as rpcapi
@@ -576,23 +576,29 @@ class TestPodPolicyEnforcement(api_base.FunctionalTest):
 
     def _common_policy_check(self, rule, func, *arg, **kwarg):
         self.policy.set_rules({rule: 'project:non_fake'})
-        exc = self.assertRaises(exception.PolicyNotAuthorized,
-                                func, *arg, **kwarg)
-        self.assertEqual(
+        response = func(*arg, **kwarg)
+        self.assertEqual(403, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(
             "Policy doesn't allow %s to be performed." % rule,
-            exc.format_message())
+            json.loads(response.json['error_message'])['faultstring'])
 
     def test_policy_disallow_get_all(self):
         self._common_policy_check(
-            'pod:get_all', self.get_json, '/pods', expect_errors=True)
+            'pod:get_all', self.get_json,
+            '/pods?bay_ident=%s' % utils.generate_uuid(),
+            expect_errors=True)
 
     def test_policy_disallow_get_one(self):
         self._common_policy_check(
-            'pod:get', self.get_json, '/pods/111-222-333', expect_errors=True)
+            'pod:get', self.get_json,
+            '/pods/?bay_ident=%s' % utils.generate_uuid(),
+            expect_errors=True)
 
     def test_policy_disallow_detail(self):
         self._common_policy_check(
-            'pod:detail', self.get_json, '/pods/111-222-333/detail',
+            'pod:detail', self.get_json,
+            '/pods/detail?bay_ident=%s' % utils.generate_uuid(),
             expect_errors=True)
 
     def test_policy_disallow_update(self):
@@ -602,12 +608,13 @@ class TestPodPolicyEnforcement(api_base.FunctionalTest):
 
         self._common_policy_check(
             'pod:update', self.patch_json,
-            '/pods/%s' % pod.uuid,
+            '/pods/%s/%s' % (pod.uuid, utils.generate_uuid()),
             [{'path': '/desc', 'value': 'new test pod', 'op': 'replace'}],
             expect_errors=True)
 
     def test_policy_disallow_create(self):
-        pdict = apiutils.pod_post_data()
+        bay = obj_utils.create_test_bay(self.context)
+        pdict = apiutils.pod_post_data(bay_uuid=bay.uuid)
         self._common_policy_check(
             'pod:create', self.post_json, '/pods', pdict, expect_errors=True)
 
@@ -617,4 +624,5 @@ class TestPodPolicyEnforcement(api_base.FunctionalTest):
                                         uuid=utils.generate_uuid())
         self._common_policy_check(
             'pod:delete', self.delete,
-            '/pods/%s' % pod.uuid, expect_errors=True)
+            '/pods/%s/%s' % (pod.uuid, utils.generate_uuid()),
+            expect_errors=True)

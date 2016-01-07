@@ -147,9 +147,9 @@ class NodesController(rest.RestController):
                                                  sort_key=sort_key,
                                                  sort_dir=sort_dir)
 
-    @policy.enforce_wsgi("node")
     @expose.expose(NodeCollection, types.uuid, int, wtypes.text,
                    wtypes.text)
+    @policy.enforce_wsgi("node")
     def get_all(self, marker=None, limit=None, sort_key='id',
                 sort_dir='asc'):
         """Retrieve a list of nodes.
@@ -162,9 +162,9 @@ class NodesController(rest.RestController):
         return self._get_nodes_collection(marker, limit, sort_key,
                                           sort_dir)
 
-    @policy.enforce_wsgi("node")
     @expose.expose(NodeCollection, types.uuid, int, wtypes.text,
                    wtypes.text)
+    @policy.enforce_wsgi("node")
     def detail(self, marker=None, limit=None, sort_key='id',
                sort_dir='asc'):
         """Retrieve a list of nodes with detail.
@@ -185,8 +185,8 @@ class NodesController(rest.RestController):
                                           sort_key, sort_dir, expand,
                                           resource_url)
 
-    @policy.enforce_wsgi("node", "get")
     @expose.expose(Node, types.uuid)
+    @policy.enforce_wsgi("node", "get")
     def get_one(self, node_uuid):
         """Retrieve information about the given node.
 
@@ -195,8 +195,8 @@ class NodesController(rest.RestController):
         rpc_node = objects.Node.get_by_uuid(pecan.request.context, node_uuid)
         return Node.convert_with_links(rpc_node)
 
-    @policy.enforce_wsgi("node", "create")
     @expose.expose(Node, body=Node, status_code=201)
+    @policy.enforce_wsgi("node", "create")
     def post(self, node):
         """Create a new node.
 
@@ -212,9 +212,9 @@ class NodesController(rest.RestController):
         pecan.response.location = link.build_url('nodes', new_node.uuid)
         return Node.convert_with_links(new_node)
 
-    @policy.enforce_wsgi("node", "update")
     @wsme.validate(types.uuid, [NodePatchType])
     @expose.expose(Node, types.uuid, body=[NodePatchType])
+    @policy.enforce_wsgi("node", "update")
     def patch(self, node_uuid, patch):
         """Update an existing node.
 
@@ -243,8 +243,8 @@ class NodesController(rest.RestController):
         rpc_node.save()
         return Node.convert_with_links(rpc_node)
 
-    @policy.enforce_wsgi("node", "delete")
     @expose.expose(None, types.uuid, status_code=204)
+    @policy.enforce_wsgi("node", "delete")
     def delete(self, node_uuid):
         """Delete a node.
 

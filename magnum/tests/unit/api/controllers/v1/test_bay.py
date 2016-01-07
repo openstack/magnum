@@ -11,6 +11,7 @@
 #    limitations under the License.
 
 import datetime
+import json
 
 import mock
 from oslo_config import cfg
@@ -709,11 +710,12 @@ class TestBayPolicyEnforcement(api_base.FunctionalTest):
 
     def _common_policy_check(self, rule, func, *arg, **kwarg):
         self.policy.set_rules({rule: "project:non_fake"})
-        exc = self.assertRaises(exception.PolicyNotAuthorized,
-                                func, *arg, **kwarg)
-        self.assertEqual(
+        response = func(*arg, **kwarg)
+        self.assertEqual(403, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(
             "Policy doesn't allow %s to be performed." % rule,
-            exc.format_message())
+            json.loads(response.json['error_message'])['faultstring'])
 
     def test_policy_disallow_get_all(self):
         self._common_policy_check(
@@ -721,11 +723,13 @@ class TestBayPolicyEnforcement(api_base.FunctionalTest):
 
     def test_policy_disallow_get_one(self):
         self._common_policy_check(
-            "bay:get", self.get_json, '/bays/111-222-333', expect_errors=True)
+            "bay:get", self.get_json, '/bays/%s' % utils.generate_uuid(),
+            expect_errors=True)
 
     def test_policy_disallow_detail(self):
         self._common_policy_check(
-            "bay:detail", self.get_json, '/bays/111-222-333/detail',
+            "bay:detail", self.get_json,
+            '/bays/%s/detail' % utils.generate_uuid(),
             expect_errors=True)
 
     def test_policy_disallow_update(self):

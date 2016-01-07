@@ -219,9 +219,9 @@ class BaysController(rest.RestController):
                                                 sort_key=sort_key,
                                                 sort_dir=sort_dir)
 
-    @policy.enforce_wsgi("bay")
     @expose.expose(BayCollection, types.uuid, int, wtypes.text,
                    wtypes.text)
+    @policy.enforce_wsgi("bay")
     def get_all(self, marker=None, limit=None, sort_key='id',
                 sort_dir='asc'):
         """Retrieve a list of bays.
@@ -234,9 +234,9 @@ class BaysController(rest.RestController):
         return self._get_bays_collection(marker, limit, sort_key,
                                          sort_dir)
 
-    @policy.enforce_wsgi("bay")
     @expose.expose(BayCollection, types.uuid, int, wtypes.text,
                    wtypes.text)
+    @policy.enforce_wsgi("bay")
     def detail(self, marker=None, limit=None, sort_key='id',
                sort_dir='asc'):
         """Retrieve a list of bays with detail.
@@ -257,8 +257,8 @@ class BaysController(rest.RestController):
                                          sort_key, sort_dir, expand,
                                          resource_url)
 
-    @policy.enforce_wsgi("bay", "get")
     @expose.expose(Bay, types.uuid_or_name)
+    @policy.enforce_wsgi("bay", "get")
     def get_one(self, bay_ident):
         """Retrieve information about the given bay.
 
@@ -268,8 +268,8 @@ class BaysController(rest.RestController):
 
         return Bay.convert_with_links(rpc_bay)
 
-    @policy.enforce_wsgi("bay", "create")
     @expose.expose(Bay, body=Bay, status_code=201)
+    @policy.enforce_wsgi("bay", "create")
     def post(self, bay):
         """Create a new bay.
 
@@ -293,9 +293,9 @@ class BaysController(rest.RestController):
         pecan.response.location = link.build_url('bays', res_bay.uuid)
         return Bay.convert_with_links(res_bay)
 
-    @policy.enforce_wsgi("bay", "update")
     @wsme.validate(types.uuid, [BayPatchType])
     @expose.expose(Bay, types.uuid_or_name, body=[BayPatchType])
+    @policy.enforce_wsgi("bay", "update")
     def patch(self, bay_ident, patch):
         """Update an existing bay.
 
@@ -324,8 +324,8 @@ class BaysController(rest.RestController):
         res_bay = pecan.request.rpcapi.bay_update(rpc_bay)
         return Bay.convert_with_links(res_bay)
 
-    @policy.enforce_wsgi("bay", "delete")
     @expose.expose(None, types.uuid_or_name, status_code=204)
+    @policy.enforce_wsgi("bay", "delete")
     def delete(self, bay_ident):
         """Delete a bay.
 

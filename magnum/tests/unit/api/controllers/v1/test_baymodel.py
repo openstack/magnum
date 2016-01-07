@@ -11,6 +11,7 @@
 #    limitations under the License.
 
 import datetime
+import json
 
 import mock
 from oslo_config import cfg
@@ -813,11 +814,12 @@ class TestBayModelPolicyEnforcement(api_base.FunctionalTest):
 
     def _common_policy_check(self, rule, func, *arg, **kwarg):
         self.policy.set_rules({rule: "project:non_fake"})
-        exc = self.assertRaises(exception.PolicyNotAuthorized,
-                                func, *arg, **kwarg)
-        self.assertEqual(
+        response = func(*arg, **kwarg)
+        self.assertEqual(403, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(
             "Policy doesn't allow %s to be performed." % rule,
-            exc.format_message())
+            json.loads(response.json['error_message'])['faultstring'])
 
     def test_policy_disallow_get_all(self):
         self._common_policy_check(
@@ -826,22 +828,24 @@ class TestBayModelPolicyEnforcement(api_base.FunctionalTest):
 
     def test_policy_disallow_get_one(self):
         self._common_policy_check(
-            "baymodel:get", self.get_json, '/baymodels/111-222-333',
+            "baymodel:get", self.get_json,
+            '/baymodels/%s' % utils.generate_uuid(),
             expect_errors=True)
 
     def test_policy_disallow_detail(self):
         self._common_policy_check(
-            "baymodel:detail", self.get_json, '/baymodels/111-222-333/detail',
+            "baymodel:detail", self.get_json,
+            '/baymodels/%s/detail' % utils.generate_uuid(),
             expect_errors=True)
 
     def test_policy_disallow_update(self):
         baymodel = obj_utils.create_test_baymodel(self.context,
                                                   name='example_A',
-                                                  uuid="333-444-5555")
+                                                  uuid=utils.generate_uuid())
         self._common_policy_check(
             "baymodel:update", self.patch_json,
             '/baymodels/%s' % baymodel.name,
-            [{'name': '/name', 'value': "new_name", 'op': 'replace'}],
+            [{'path': '/name', 'value': "new_name", 'op': 'replace'}],
             expect_errors=True)
 
     def test_policy_disallow_create(self):
