@@ -2,24 +2,29 @@
 
 . /etc/sysconfig/heat-params
 
-DOCKER_DEV=/dev/disk/by-id/virtio-${DOCKER_VOLUME:0:20}
-
 attempts=60
-while [[ ! -b $DOCKER_DEV && $attempts != 0 ]]; do
-    echo "waiting for disk $DOCKER_DEV"
+while [ ${attempts} -gt 0 ]; do
+    device_name=$(ls /dev/disk/by-id | grep ${DOCKER_VOLUME:0:20}$)
+    if [ -n "${device_name}" ]; then
+        break
+    fi
+    echo "waiting for disk device"
     sleep 0.5
     udevadm trigger
     let attempts--
 done
 
-if ! [ -b $DOCKER_DEV ]; then
-    echo "ERROR: device $DOCKER_DEV does not exist" >&2
+if [ -z "${device_name}" ]; then
+    echo "ERROR: disk device does not exist" >&2
     exit 1
 fi
 
-pvcreate $DOCKER_DEV
-vgcreate docker $DOCKER_DEV
+device_path=/dev/disk/by-id/${device_name}
+pvcreate ${device_path}
+vgcreate docker ${device_path}
 
-cat > /etc/sysconfig/docker-storage-setup <<EOF
+cat > /etc/sysconfig/docker-storage-setup << EOF
 VG=docker
 EOF
+
+sed -i '/^DOCKER_STORAGE_OPTIONS=/ s/=.*/=--storage-driver devicemapper --storage-opt dm.fs=xfs --storage-opt dm.thinpooldev=\/dev\/mapper\/docker-docker--pool --storage-opt dm.use_deferred_removal=true/' /etc/sysconfig/docker-storage

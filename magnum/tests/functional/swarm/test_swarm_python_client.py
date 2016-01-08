@@ -51,7 +51,7 @@ class TestSwarmAPIs(BayAPITLSTest):
                                             coe='swarm',
                                             tls_disabled=False,
                                             network_driver=None,
-                                            docker_volume_size=5,
+                                            docker_volume_size=3,
                                             labels={},
                                             fixed_network='192.168.0.0/24',
                                             dns_nameserver='8.8.8.8')

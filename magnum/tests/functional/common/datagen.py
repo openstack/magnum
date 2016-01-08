@@ -42,7 +42,7 @@ def gen_random_port():
     return random_int(49152, 65535)
 
 
-def gen_docker_volume_size(min_int=1, max_int=3):
+def gen_docker_volume_size(min_int=3, max_int=5):
     return random_int(min_int, max_int)
 
 
@@ -91,7 +91,7 @@ def baymodel_data(**kwargs):
         "coe": "swarm",
         "tls_disabled": False,
         "network_driver": None,
-        "docker_volume_size": 1,
+        "docker_volume_size": 3,
         "labels": {},
         "fixed_network": "192.168.0.0/24",
         "dns_nameserver": "8.8.8.8",
@@ -172,7 +172,7 @@ def valid_swarm_baymodel():
                          flavor_id=config.Config.flavor_id, public=False,
                          dns_nameserver="8.8.8.8", master_flavor_id=None,
                          keypair_id=config.Config.keypair_id, coe="swarm",
-                         docker_volume_size=2, cluster_distro=None,
+                         docker_volume_size=3, cluster_distro=None,
                          ssh_authorized_key=None, external_network_id="public",
                          http_proxy=None, https_proxy=None, no_proxy=None,
                          network_driver=None, labels={}, tls_disabled=False)

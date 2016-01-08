@@ -8,6 +8,7 @@ write_files:
       [Unit]
       Description=Docker Socket for the API
       PartOf=docker.service
+      After=docker-storage-setup.service
 
       [Socket]
       ListenStream=/var/run/docker.sock
