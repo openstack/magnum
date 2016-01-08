@@ -284,7 +284,7 @@ class InvalidDiscoveryURL(Invalid):
 
 
 class GetDiscoveryUrlFailed(MagnumException):
-    message = _("Fail to get discovery url from %(discovery_endpoint)")
+    message = _("Failed to get discovery url from '%(discovery_endpoint)s'.")
 
 
 class InvalidUuidOrName(Invalid):
