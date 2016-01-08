@@ -37,9 +37,7 @@ def wrap_container_exception(f):
                 container_uuid = kwargs.get('container').uuid
 
             LOG.exception(_LE("Error while connect to docker "
-                              "container %(name)s: %(error)s"),
-                          {'name': container_uuid,
-                           'error': str(e)})
+                              "container %s"), container_uuid)
             raise exception.ContainerException(
                 "Docker internal Error: %s" % str(e))
     return functools.wraps(f)(wrapped)
