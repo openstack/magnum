@@ -17,7 +17,8 @@ class TestBayModelResource(BayTest):
     coe = 'mesos'
 
     def test_baymodel_create_and_delete(self):
-        self._test_baymodel_create_and_delete('test_mesos_baymodel')
+        self._test_baymodel_create_and_delete('test_mesos_baymodel',
+                                              network_driver='docker')
 
 
 class TestBayResource(BayTest):
