@@ -14,27 +14,27 @@ KUBE_UI_RC=/srv/kubernetes/manifests/kube-ui-rc.yaml
 apiVersion: v1
 kind: ReplicationController
 metadata:
-  name: kube-ui-v1
+  name: kube-ui-v4
   namespace: kube-system
   labels:
     k8s-app: kube-ui
-    version: v1
+    version: v4
     kubernetes.io/cluster-service: "true"
 spec:
   replicas: 1
   selector:
     k8s-app: kube-ui
-    version: v1
+    version: v4
   template:
     metadata:
       labels:
         k8s-app: kube-ui
-        version: v1
+        version: v4
         kubernetes.io/cluster-service: "true"
     spec:
       containers:
       - name: kube-ui
-        image: gcr.io/google_containers/kube-ui:v1.1
+        image: gcr.io/google_containers/kube-ui:v4
         resources:
           limits:
             cpu: 100m
