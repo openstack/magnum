@@ -11,6 +11,8 @@
 #    limitations under the License.
 
 
+import json
+
 import mock
 
 from magnum.api.controllers.v1 import magnum_services as mservice
@@ -83,3 +85,20 @@ class TestMagnumServiceController(api_base.FunctionalTest):
         for i in range(svc_num):
             elem = response['mservices'][i]
             self.assertEqual(i + 1, elem['id'])
+
+
+class TestMagnumServiceEnforcement(api_base.FunctionalTest):
+
+    def _common_policy_check(self, rule, func, *arg, **kwarg):
+        self.policy.set_rules({rule: 'project:non_fake'})
+        response = func(*arg, **kwarg)
+        self.assertEqual(403, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(
+            "Policy doesn't allow %s to be performed." % rule,
+            json.loads(response.json['error_message'])['faultstring'])
+
+    def test_policy_disallow_get_all(self):
+        self._common_policy_check(
+            'magnum-service:get_all', self.get_json,
+            '/mservices', expect_errors=True)
