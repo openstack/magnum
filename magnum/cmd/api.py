@@ -14,7 +14,6 @@
 
 """Starter script for the Magnum API service."""
 
-import logging as std_logging
 import os
 import sys
 from wsgiref import simple_server
@@ -49,7 +48,7 @@ def main():
 
     LOG.info(_LI('Starting server in PID %s') % os.getpid())
     LOG.debug("Configuration:")
-    cfg.CONF.log_opt_values(LOG, std_logging.DEBUG)
+    cfg.CONF.log_opt_values(LOG, logging.DEBUG)
 
     if host == '0.0.0.0':
         LOG.info(_LI('serving on 0.0.0.0:%(port)s, '
