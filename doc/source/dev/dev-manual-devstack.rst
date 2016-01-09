@@ -75,8 +75,8 @@ and neutron::
     VOLUME_BACKING_FILE_SIZE=20G
     END
 
-Note: Update PUBLIC_INTERFACE and other parameters as appropriate for your
-system.
+**NOTE:** Update PUBLIC_INTERFACE and other parameters as appropriate for
+your system.
 
 More devstack configuration information can be found at
 http://docs.openstack.org/developer/devstack/configuration.html
@@ -106,8 +106,8 @@ Run devstack::
 
     ./stack.sh
 
-Note: If using the m-1 tag or tarball, please use the documentation shipped
-with the milestone as the current master instructions are slightly
+**NOTE:** If using the m-1 tag or tarball, please use the documentation
+shipped with the milestone as the current master instructions are slightly
 incompatible.
 
 Prepare your session to be able to use the various openstack clients including
