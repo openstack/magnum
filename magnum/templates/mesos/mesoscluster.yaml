@@ -69,6 +69,21 @@ parameters:
     description: how many mesos masters to spawn initially
     default: 1
 
+  http_proxy:
+    type: string
+    description: http proxy address for docker
+    default: ""
+
+  https_proxy:
+    type: string
+    description: https proxy address for docker
+    default: ""
+
+  no_proxy:
+    type: string
+    description: no proxies for docker
+    default: ""
+
 resources:
 
   ######################################################################
@@ -268,6 +283,9 @@ resources:
           wait_condition_timeout: {get_param: wait_condition_timeout}
           executor_registration_timeout: {get_param: executor_registration_timeout}
           secgroup_base_id: {get_resource: secgroup_base}
+          http_proxy: {get_param: http_proxy}
+          https_proxy: {get_param: https_proxy}
+          no_proxy: {get_param: no_proxy}
 
 outputs:
 

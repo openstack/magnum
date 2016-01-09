@@ -39,6 +39,21 @@ parameters:
       considering it hung and shutting it down
     default: 5mins
 
+  http_proxy:
+    type: string
+    description: http proxy address for docker
+    default: ""
+
+  https_proxy:
+    type: string
+    description: https proxy address for docker
+    default: ""
+
+  no_proxy:
+    type: string
+    description: no proxies for docker
+    default: ""
+
   # The following are all generated in the parent template.
   mesos_masters_ips:
     type: string
@@ -89,6 +104,9 @@ resources:
           params:
             "$MESOS_MASTERS_IPS": {get_param: mesos_masters_ips}
             "$EXECUTOR_REGISTRATION_TIMEOUT": {get_param: executor_registration_timeout}
+            "$HTTP_PROXY": {get_param: http_proxy}
+            "$HTTPS_PROXY": {get_param: https_proxy}
+            "$NO_PROXY": {get_param: no_proxy}
 
   configure_mesos_slave:
     type: OS::Heat::SoftwareConfig
@@ -113,6 +131,12 @@ resources:
             wc_notify --data-binary '{"status": "SUCCESS"}'
           params:
             wc_notify: {get_attr: [slave_wait_handle, curl_cli]}
+  
+  add_proxy:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/add-proxy.sh}
 
   mesos_slave_init:
     type: OS::Heat::MultipartMime
@@ -120,6 +144,7 @@ resources:
       parts:
         - config: {get_resource: write_heat_params}
         - config: {get_resource: configure_mesos_slave}
+        - config: {get_resource: add_proxy}
         - config: {get_resource: start_services}
         - config: {get_resource: slave_wc_notify}
 
