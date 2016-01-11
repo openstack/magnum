@@ -7,7 +7,7 @@ for using services like docker, kubernetes and mesos. Use these steps
 when your firewall will not allow you to use those services without a
 proxy.
 
-NOTE: This feature only works with Swarm bays.
+**NOTE:** This feature only works with Swarm bays.
 
 Proxy Parameters to define before use
 =====================================
@@ -29,7 +29,7 @@ https://10.11.12.13:8000 or https://abcproxy.com:8000
 A comma separated list of IP addresses or hostnames that should bypass
 your proxy, and make conenctions directly.
 
-NOTE: You may not express networks/subnets. It only accepts names
+**NOTE:** You may not express networks/subnets. It only accepts names
 and ip addresses. Bad example: 192.168.0.0/28.
 
 Steps to configure proxies.
