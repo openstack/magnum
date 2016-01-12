@@ -261,6 +261,20 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
+    def test_update_baymodel_with_bay(self):
+        baymodel = obj_utils.create_test_baymodel(self.context)
+        obj_utils.create_test_bay(self.context, baymodel_id=baymodel.uuid)
+
+        response = self.patch_json('/baymodels/%s' % baymodel.uuid,
+                                   [{'path': '/name',
+                                     'value': 'bay_model_example_B',
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual(400, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(response.json['error_message'])
+        self.assertIn(baymodel.uuid, response.json['error_message'])
+
     @mock.patch.object(magnum_policy, 'enforce')
     def test_update_public_baymodel_success(self, mock_policy):
         mock_policy.return_value = True
