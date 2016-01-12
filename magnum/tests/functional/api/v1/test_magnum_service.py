@@ -33,7 +33,7 @@ class MagnumServiceTest(base.BaseMagnumTest):
     @testtools.testcase.attr('negative')
     def test_magnum_service_list_needs_admin(self):
         # Ensure that policy enforcement does not allow 'default' user
-        (self.service_client, _) = self.get_clients_with_isolated_creds(
+        (self.service_client, _) = self.get_clients_with_new_creds(
             type_of_creds='default',
             request_type='service')
         self.assertRaises(exceptions.ServerFault,
@@ -42,7 +42,7 @@ class MagnumServiceTest(base.BaseMagnumTest):
     @testtools.testcase.attr('positive')
     def test_magnum_service_list(self):
         # get json object
-        (self.service_client, _) = self.get_clients_with_isolated_creds(
+        (self.service_client, _) = self.get_clients_with_new_creds(
             type_of_creds='admin',
             request_type='service')
         resp, msvcs = self.service_client.magnum_service_list()

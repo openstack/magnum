@@ -11,6 +11,7 @@
 # under the License.
 
 
+from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions
 import testtools
 
@@ -31,7 +32,7 @@ class BayModelTest(base.BaseMagnumTest):
     def setUp(self):
         super(BayModelTest, self).setUp()
         (self.baymodel_client,
-         self.keypairs_client) = self.get_clients_with_isolated_creds(
+         self.keypairs_client) = self.get_clients_with_new_creds(
              type_of_creds='default',
              request_type='baymodel')
 
@@ -55,7 +56,7 @@ class BayModelTest(base.BaseMagnumTest):
     @testtools.testcase.attr('positive')
     def test_list_baymodels(self):
         self.keypairs_client.create_keypair(name='default')
-        gen_model = datagen.random_baymodel_data_w_valid_keypair_and_image_id()
+        gen_model = datagen.baymodel_data_with_valid_keypair_and_image_id()
         _, temp_model = self._create_baymodel(gen_model)
         resp, model = self.baymodel_client.list_baymodels()
         self.assertEqual(200, resp.status)
@@ -66,16 +67,16 @@ class BayModelTest(base.BaseMagnumTest):
     @testtools.testcase.attr('positive')
     def test_create_baymodel(self):
         self.keypairs_client.create_keypair(name='default')
-        gen_model = datagen.random_baymodel_data_w_valid_keypair_and_image_id()
+        gen_model = datagen.baymodel_data_with_valid_keypair_and_image_id()
         resp, model = self._create_baymodel(gen_model)
 
     @testtools.testcase.attr('positive')
     def test_update_baymodel_by_uuid(self):
         self.keypairs_client.create_keypair(name='default')
-        gen_model = datagen.random_baymodel_data_w_valid_keypair_and_image_id()
+        gen_model = datagen.baymodel_data_with_valid_keypair_and_image_id()
         resp, old_model = self._create_baymodel(gen_model)
 
-        patch_model = datagen.random_baymodel_name_patch_data()
+        patch_model = datagen.baymodel_name_patch_data()
         resp, new_model = self.baymodel_client.patch_baymodel(
             old_model.uuid, patch_model)
         self.assertEqual(200, resp.status)
@@ -88,7 +89,7 @@ class BayModelTest(base.BaseMagnumTest):
     @testtools.testcase.attr('positive')
     def test_delete_baymodel_by_uuid(self):
         self.keypairs_client.create_keypair(name='default')
-        gen_model = datagen.random_baymodel_data_w_valid_keypair_and_image_id()
+        gen_model = datagen.baymodel_data_with_valid_keypair_and_image_id()
         resp, model = self._create_baymodel(gen_model)
         resp, _ = self.baymodel_client.delete_baymodel(model.uuid)
         self.assertEqual(204, resp.status)
@@ -97,7 +98,7 @@ class BayModelTest(base.BaseMagnumTest):
     @testtools.testcase.attr('positive')
     def test_delete_baymodel_by_name(self):
         self.keypairs_client.create_keypair(name='default')
-        gen_model = datagen.random_baymodel_data_w_valid_keypair_and_image_id()
+        gen_model = datagen.baymodel_data_with_valid_keypair_and_image_id()
         resp, model = self._create_baymodel(gen_model)
         resp, _ = self.baymodel_client.delete_baymodel(model.name)
         self.assertEqual(204, resp.status)
@@ -107,22 +108,22 @@ class BayModelTest(base.BaseMagnumTest):
     def test_get_baymodel_by_uuid_404(self):
         self.assertRaises(
             exceptions.NotFound,
-            self.baymodel_client.get_baymodel, datagen.random_uuid())
+            self.baymodel_client.get_baymodel, data_utils.rand_uuid())
 
     @testtools.testcase.attr('negative')
     def test_update_baymodel_404(self):
-        patch_model = datagen.random_baymodel_name_patch_data()
+        patch_model = datagen.baymodel_name_patch_data()
 
         self.assertRaises(
             exceptions.NotFound,
             self.baymodel_client.patch_baymodel,
-            datagen.random_uuid(), patch_model)
+            data_utils.rand_uuid(), patch_model)
 
     @testtools.testcase.attr('negative')
     def test_delete_baymodel_404(self):
         self.assertRaises(
             exceptions.NotFound,
-            self.baymodel_client.delete_baymodel, datagen.random_uuid())
+            self.baymodel_client.delete_baymodel, data_utils.rand_uuid())
 
     @testtools.testcase.attr('negative')
     def test_get_baymodel_by_name_404(self):
@@ -132,7 +133,7 @@ class BayModelTest(base.BaseMagnumTest):
 
     @testtools.testcase.attr('negative')
     def test_update_baymodel_name_not_found(self):
-        patch_model = datagen.random_baymodel_name_patch_data()
+        patch_model = datagen.baymodel_name_patch_data()
 
         self.assertRaises(
             exceptions.NotFound,
@@ -147,14 +148,14 @@ class BayModelTest(base.BaseMagnumTest):
     @testtools.testcase.attr('negative')
     def test_create_baymodel_missing_image(self):
         self.keypairs_client.create_keypair(name='default')
-        gen_model = datagen.random_baymodel_data_w_valid_keypair()
+        gen_model = datagen.baymodel_data_with_valid_keypair()
         self.assertRaises(
             exceptions.NotFound,
             self.baymodel_client.post_baymodel, gen_model)
 
     @testtools.testcase.attr('negative')
     def test_create_baymodel_missing_keypair(self):
-        gen_model = datagen.random_baymodel_data_w_valid_image_id()
+        gen_model = datagen.baymodel_data_with_valid_image_id()
         self.assertRaises(
             exceptions.NotFound,
             self.baymodel_client.post_baymodel, gen_model)
@@ -163,18 +164,18 @@ class BayModelTest(base.BaseMagnumTest):
     def test_update_baymodel_invalid_patch(self):
         # get json object
         self.keypairs_client.create_keypair(name='default')
-        gen_model = datagen.random_baymodel_data_w_valid_keypair_and_image_id()
+        gen_model = datagen.baymodel_data_with_valid_keypair_and_image_id()
         resp, old_model = self._create_baymodel(gen_model)
 
         self.assertRaises(
             exceptions.BadRequest,
-            self.baymodel_client.patch_baymodel, datagen.random_uuid(),
+            self.baymodel_client.patch_baymodel, data_utils.rand_uuid(),
             gen_model)
 
     @testtools.testcase.attr('negative')
     def test_create_baymodel_invalid_network_driver(self):
         self.keypairs_client.create_keypair(name='default')
-        gen_model = datagen.random_baymodel_data_w_valid_keypair_and_image_id()
+        gen_model = datagen.baymodel_data_with_valid_keypair_and_image_id()
         gen_model.network_driver = 'invalid_network_driver'
         self.assertRaises(
             exceptions.BadRequest,
