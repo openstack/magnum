@@ -7,7 +7,9 @@ for using services like docker, kubernetes and mesos. Use these steps
 when your firewall will not allow you to use those services without a
 proxy.
 
-**NOTE:** This feature only works with Swarm bays.
+**NOTE:** This feature has only been tested with the supported bay type
+and associated image: Kubernetes and Swarm bay using the Fedora Atomic
+image, and Mesos bay using the Ubuntu image.
 
 Proxy Parameters to define before use
 =====================================
@@ -38,6 +40,16 @@ Steps to configure proxies.
 You can specify all three proxy parameteres while creating baymodel of any
 coe type. All of proxy parameters are optional.
 
+    magnum baymodel-create --name k8sbaymodel \
+                       --image-id fedora-21-atomic-5 \
+                       --keypair-id testkey \
+                       --external-network-id public \
+                       --dns-nameserver 8.8.8.8 \
+                       --flavor-id m1.small \
+                       --coe kubernetes \
+                       --http-proxy <http://abc-proxy.com:8080> \
+                       --https-proxy <https://abc-proxy.com:8080> \
+                       --no-proxy <172.24.4.4,172.24.4.9,172.24.4.8>
     magnum baymodel-create --name swarmbaymodel \
                        --image-id fedora-21-atomic-5 \
                        --keypair-id testkey \
@@ -45,6 +57,16 @@ coe type. All of proxy parameters are optional.
                        --dns-nameserver 8.8.8.8 \
                        --flavor-id m1.small \
                        --coe swarm \
+                       --http-proxy <http://abc-proxy.com:8080> \
+                       --https-proxy <https://abc-proxy.com:8080> \
+                       --no-proxy <172.24.4.4,172.24.4.9,172.24.4.8>
+    magnum baymodel-create --name mesosbaymodel \
+                       --image-id ubuntu-mesos \
+                       --keypair-id testkey \
+                       --external-network-id public \
+                       --dns-nameserver 8.8.8.8 \
+                       --flavor-id m1.small \
+                       --coe mesos \
                        --http-proxy <http://abc-proxy.com:8080> \
                        --https-proxy <https://abc-proxy.com:8080> \
                        --no-proxy <172.24.4.4,172.24.4.9,172.24.4.8>
