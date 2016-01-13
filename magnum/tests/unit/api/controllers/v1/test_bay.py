@@ -536,6 +536,15 @@ class TestPost(api_base.FunctionalTest):
         self.assertTrue(response.json['error_message'])
 
     @mock.patch('magnum.api.attr_validator.validate_os_resources')
+    def test_create_bay_without_name(self, mock_valid_os_res):
+        bdict = apiutils.bay_post_data()
+        del bdict['name']
+        mock_valid_os_res.return_value = None
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(201, response.status_int)
+
+    @mock.patch('magnum.api.attr_validator.validate_os_resources')
     def test_create_bay_with_timeout_none(self, mock_valid_os_res):
         bdict = apiutils.bay_post_data()
         bdict['bay_create_timeout'] = None

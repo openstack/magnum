@@ -284,6 +284,8 @@ class BaysController(rest.RestController):
         # NOTE(suro-patz): Apply default node_count is 1, None -> 1
         if bay_dict.get('node_count', None) is None:
             bay_dict['node_count'] = 1
+        if bay_dict.get('name', None) is None:
+            bay_dict['name'] = None
 
         new_bay = objects.Bay(context, **bay_dict)
         res_bay = pecan.request.rpcapi.bay_create(new_bay,
