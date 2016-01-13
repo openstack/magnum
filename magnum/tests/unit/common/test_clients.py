@@ -15,7 +15,7 @@ from glanceclient.v2 import client as glanceclient
 from heatclient.v1 import client as heatclient
 import mock
 from neutronclient.v2_0 import client as neutronclient
-from novaclient.v2 import client as novaclient
+from novaclient import client as novaclient
 from oslo_config import cfg
 
 from magnum.common import clients
@@ -30,6 +30,8 @@ class ClientsTest(base.BaseTestCase):
 
         cfg.CONF.set_override('auth_uri', 'http://server.test:5000/v2.0',
                               group='keystone_authtoken')
+        cfg.CONF.import_opt('api_version', 'magnum.common.clients',
+                            group='nova_client')
 
     @mock.patch.object(clients.OpenStackClients, 'keystone')
     def test_url_for(self, mock_keystone):
@@ -240,8 +242,8 @@ class ClientsTest(base.BaseTestCase):
         obj = clients.OpenStackClients(con)
         obj._nova = None
         obj.nova()
-        mock_call.assert_called_once_with(
-            auth_token='3bcc3d3a03f44e3d8377f9247b0ad155')
+        mock_call.assert_called_once_with(cfg.CONF.nova_client.api_version,
+                                          auth_token=con.auth_token)
         mock_url.assert_called_once_with(service_type='compute',
                                          endpoint_type='publicURL',
                                          region_name=expected_region_name)
