@@ -286,7 +286,7 @@ class BaysController(rest.RestController):
                                              bay_dict.get('baymodel_id'))
         bay_dict['project_id'] = context.project_id
         bay_dict['user_id'] = context.user_id
-        if bay_dict.get('name', None) is None:
+        if bay_dict.get('name') is None:
             bay_dict['name'] = None
 
         new_bay = objects.Bay(context, **bay_dict)
