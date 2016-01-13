@@ -76,7 +76,8 @@ class TestBayConductorWithMesos(base.TestCase):
             'fixed_network_cidr': '10.2.0.0/22',
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
-            'no_proxy': 'no_proxy'
+            'no_proxy': 'no_proxy',
+            'cluster_name': 'bay1'
         }
         self.assertEqual(expected, definition)
 
@@ -103,6 +104,7 @@ class TestBayConductorWithMesos(base.TestCase):
             'external_network': 'external_network_id',
             'number_of_slaves': 1,
             'number_of_masters': 1,
+            'cluster_name': 'bay1'
         }
         self.assertEqual(expected, definition)
 
