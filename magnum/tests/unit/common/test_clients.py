@@ -12,7 +12,7 @@
 
 from barbicanclient import client as barbicanclient
 from glanceclient.v2 import client as glanceclient
-from heatclient.v1 import client as heatclient
+from heatclient import client as heatclient
 import mock
 from neutronclient.v2_0 import client as neutronclient
 from novaclient import client as novaclient
@@ -32,6 +32,8 @@ class ClientsTest(base.BaseTestCase):
                               group='keystone_authtoken')
         cfg.CONF.import_opt('api_version', 'magnum.common.clients',
                             group='nova_client')
+        cfg.CONF.import_opt('api_version', 'magnum.common.clients',
+                            group='heat_client')
 
     @mock.patch.object(clients.OpenStackClients, 'keystone')
     def test_url_for(self, mock_keystone):
@@ -72,6 +74,7 @@ class ClientsTest(base.BaseTestCase):
         obj._heat = None
         obj.heat()
         mock_call.assert_called_once_with(
+            cfg.CONF.heat_client.api_version,
             endpoint='url_from_keystone', username=None,
             cert_file=None, token='3bcc3d3a03f44e3d8377f9247b0ad155',
             auth_url='keystone_url', ca_file=None, key_file=None,

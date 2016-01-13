@@ -690,6 +690,9 @@
 # value)
 #insecure = false
 
+# Version of Heat API to use in heatclient. (string value)
+#api_version = 1
+
 
 [keystone_authtoken]
 

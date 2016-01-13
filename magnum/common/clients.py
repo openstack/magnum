@@ -14,7 +14,7 @@
 
 from barbicanclient import client as barbicanclient
 from glanceclient.v2 import client as glanceclient
-from heatclient.v1 import client as heatclient
+from heatclient import client as heatclient
 from neutronclient.v2_0 import client as neutronclient
 from novaclient import client as novaclient
 from oslo_config import cfg
@@ -53,7 +53,10 @@ heat_client_opts = [
     cfg.BoolOpt('insecure',
                 default=False,
                 help=_("If set, then the server's certificate will not "
-                       "be verified."))]
+                       "be verified.")),
+    cfg.StrOpt('api_version',
+               default='1',
+               help=_('Version of Heat API to use in heatclient.'))]
 
 glance_client_opts = [
     cfg.StrOpt('region_name',
@@ -153,6 +156,7 @@ class OpenStackClients(object):
 
         endpoint_type = self._get_client_option('heat', 'endpoint_type')
         region_name = self._get_client_option('heat', 'region_name')
+        heatclient_version = self._get_client_option('heat', 'api_version')
         endpoint = self.url_for(service_type='orchestration',
                                 endpoint_type=endpoint_type,
                                 region_name=region_name)
@@ -168,7 +172,7 @@ class OpenStackClients(object):
             'key_file': self._get_client_option('heat', 'key_file'),
             'insecure': self._get_client_option('heat', 'insecure')
         }
-        self._heat = heatclient.Client(**args)
+        self._heat = heatclient.Client(heatclient_version, **args)
 
         return self._heat
 
