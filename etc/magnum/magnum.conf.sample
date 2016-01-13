@@ -661,6 +661,9 @@
 # communication with the OpenStack service. (string value)
 #endpoint_type = publicURL
 
+# Version of Glance API to use in glanceclient. (string value)
+#api_version = 2
+
 
 [heat_client]
 
