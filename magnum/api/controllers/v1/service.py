@@ -26,6 +26,7 @@ from magnum.api import validation
 from magnum.common import exception
 from magnum.common import k8s_manifest
 from magnum.common import policy
+from magnum.i18n import _
 from magnum import objects
 
 
@@ -129,12 +130,12 @@ class Service(v1_base.K8sResourceBase):
             self.name = manifest["metadata"]["name"]
         except (KeyError, TypeError):
             raise exception.InvalidParameterValue(
-                "Field metadata['name'] can't be empty in manifest.")
+                _("Field metadata['name'] can't be empty in manifest."))
         try:
             self.ports = manifest["spec"]["ports"][:]
         except (KeyError, TypeError):
             raise exception.InvalidParameterValue(
-                "Field spec['ports'] can't be empty in manifest.")
+                _("Field spec['ports'] can't be empty in manifest."))
 
         if "selector" in manifest["spec"]:
             self.selector = manifest["spec"]["selector"]

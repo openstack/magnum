@@ -20,37 +20,38 @@ import pecan
 from magnum.api import utils as api_utils
 from magnum.common import exception
 from magnum.common import utils
+from magnum.i18n import _
 from magnum import objects
 
 
 baymodel_opts = [
     cfg.ListOpt('kubernetes_allowed_network_drivers',
                 default=['all'],
-                help="Allowed network drivers for kubernetes baymodels. "
-                "Use 'all' keyword to allow all drivers supported "
-                "for kubernetes baymodels. Supported network drivers "
-                "include flannel."),
+                help=_("Allowed network drivers for kubernetes baymodels. "
+                       "Use 'all' keyword to allow all drivers supported "
+                       "for kubernetes baymodels. Supported network drivers "
+                       "include flannel.")),
     cfg.StrOpt('kubernetes_default_network_driver',
                default='flannel',
-               help="Default network driver for kubernetes baymodels."),
+               help=_("Default network driver for kubernetes baymodels.")),
     cfg.ListOpt('swarm_allowed_network_drivers',
                 default=['all'],
-                help="Allowed network drivers for docker swarm baymodels. "
-                "Use 'all' keyword to allow all drivers supported "
-                "for swarm baymodels. Supported network drivers "
-                "include docker and flannel."),
+                help=_("Allowed network drivers for docker swarm baymodels. "
+                       "Use 'all' keyword to allow all drivers supported "
+                       "for swarm baymodels. Supported network drivers "
+                       "include docker and flannel.")),
     cfg.StrOpt('swarm_default_network_driver',
                default='docker',
-               help="Default network driver for docker swarm baymodels."),
+               help=_("Default network driver for docker swarm baymodels.")),
     cfg.ListOpt('mesos_allowed_network_drivers',
                 default=['all'],
-                help="Allowed network drivers for mesos baymodels. "
-                "Use 'all' keyword to allow all drivers supported "
-                "for mesos baymodels. Supported network drivers "
-                "include docker."),
+                help=_("Allowed network drivers for mesos baymodels. "
+                       "Use 'all' keyword to allow all drivers supported "
+                       "for mesos baymodels. Supported network drivers "
+                       "include docker.")),
     cfg.StrOpt('mesos_default_network_driver',
                default='docker',
-               help="Default network driver for mesos baymodels."),
+               help=_("Default network driver for mesos baymodels.")),
 ]
 cfg.CONF.register_opts(baymodel_opts, group='baymodel')
 
@@ -73,9 +74,9 @@ def enforce_bay_types(*bay_types):
                 bay = objects.Bay.get_by_name(pecan.request.context, bay_ident)
 
         if bay.baymodel.coe not in bay_types:
-            raise exception.InvalidParameterValue(
+            raise exception.InvalidParameterValue(_(
                 'Cannot fulfill request with a %(bay_type)s bay, '
-                'expecting a %(supported_bay_types)s bay.' %
+                'expecting a %(supported_bay_types)s bay.') %
                 {'bay_type': bay.baymodel.coe,
                  'supported_bay_types': '/'.join(bay_types)})
 
@@ -128,7 +129,7 @@ class Validator(object):
             return cls.validators[coe]
         else:
             raise exception.InvalidParameterValue(
-                'Requested COE type %s is not supported.' % coe)
+                _('Requested COE type %s is not supported.') % coe)
 
     @classmethod
     def validate_network_driver(cls, driver):
@@ -139,9 +140,9 @@ class Validator(object):
     def _validate_network_driver_supported(cls, driver):
         """Confirm that driver is supported by Magnum for this COE."""
         if driver not in cls.supported_drivers:
-            raise exception.InvalidParameterValue(
+            raise exception.InvalidParameterValue(_(
                 'Network driver type %(driver)s is not supported, '
-                'expecting a %(supported_drivers)s network driver.' % {
+                'expecting a %(supported_drivers)s network driver.') % {
                     'driver': driver,
                     'supported_drivers': '/'.join(
                         cls.supported_drivers + ['unspecified'])})
@@ -151,9 +152,9 @@ class Validator(object):
         """Confirm that driver is allowed via configuration for this COE."""
         if ('all' not in cls.allowed_drivers and
            driver not in cls.allowed_drivers):
-            raise exception.InvalidParameterValue(
+            raise exception.InvalidParameterValue(_(
                 'Network driver type %(driver)s is not allowed, '
-                'expecting a %(allowed_drivers)s network driver. ' % {
+                'expecting a %(allowed_drivers)s network driver. ') % {
                     'driver': driver,
                     'allowed_drivers': '/'.join(
                         cls.allowed_drivers + ['unspecified'])})
