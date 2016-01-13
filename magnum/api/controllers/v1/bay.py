@@ -82,13 +82,13 @@ class Bay(base.APIBase):
     """The bay model UUID or id"""
 
     node_count = wsme.wsattr(wtypes.IntegerType(minimum=1), default=1)
-    """The node count for this bay. Set to 1 for no node_count"""
+    """The node count for this bay. Default to 1 if not set"""
 
     master_count = wsme.wsattr(wtypes.IntegerType(minimum=1), default=1)
-    """The number of master nodes for this bay. Set to 1 for no master_count"""
+    """The number of master nodes for this bay. Default to 1 if not set"""
 
     bay_create_timeout = wsme.wsattr(wtypes.IntegerType(minimum=0), default=0)
-    """Timeout for creating the bay in minutes. Set to 0 for no timeout."""
+    """Timeout for creating the bay in minutes. Default to 0 if not set"""
 
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated bay links"""
