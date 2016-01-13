@@ -79,7 +79,7 @@ class Bay(base.APIBase):
 
     baymodel_id = wsme.wsproperty(wtypes.text, _get_baymodel_id,
                                   _set_baymodel_id, mandatory=True)
-    """The bay model UUID or id"""
+    """The baymodel UUID"""
 
     node_count = wsme.wsattr(wtypes.IntegerType(minimum=1), default=1)
     """The node count for this bay. Set to 1 for no node_count"""
