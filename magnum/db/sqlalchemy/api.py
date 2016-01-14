@@ -21,6 +21,7 @@ from oslo_db.sqlalchemy import utils as db_utils
 from oslo_utils import timeutils
 from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy import sql
 
 from magnum.common import exception
 from magnum.common import utils
@@ -468,9 +469,9 @@ class Connection(api.Connection):
 
         if 'associated' in filters:
             if filters['associated']:
-                query = query.filter(models.Node.ironic_node_id != None)
+                query = query.filter(models.Node.ironic_node_id != sql.null())
             else:
-                query = query.filter(models.Node.ironic_node_id == None)
+                query = query.filter(models.Node.ironic_node_id == sql.null())
         if 'type' in filters:
             query = query.filter_by(type=filters['type'])
         if 'image_id' in filters:
