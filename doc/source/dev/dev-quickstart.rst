@@ -89,7 +89,7 @@ magnum with the devstack environment. Magnum depends on nova, glance, heat and
 neutron to create and schedule virtual machines to simulate bare-metal (full
 bare-metal support is under active development).
 
-Note: Running devstack within a virtual machine with magnum enabled is not
+**NOTE:** Running devstack within a virtual machine with magnum enabled is not
 recommended at this time.
 
 This session has only been tested on Ubuntu 14.04 (Trusty) and Fedora 20/21.
@@ -126,7 +126,7 @@ Kilo, and heat is enabled by the magnum plugin)::
     VOLUME_BACKING_FILE_SIZE=20G
     END
 
-Note: Update PUBLIC_INTERFACE as appropriate for your system.
+**NOTE:** Update PUBLIC_INTERFACE as appropriate for your system.
 
 Optionally, you can enable ceilometer in devstack. If ceilometer is enabled,
 magnum will periodically send metrics to ceilometer::
@@ -146,7 +146,7 @@ Run devstack::
     cd /opt/stack/devstack
     ./stack.sh
 
-Note: This will take a little extra time when the Fedora Atomic micro-OS
+**NOTE:** This will take a little extra time when the Fedora Atomic micro-OS
 image is downloaded for the first time.
 
 At this point, two magnum process (magnum-api and magnum-conductor) will be
@@ -248,13 +248,14 @@ Bays in the process of updating will have a status of UPDATE_IN_PROGRESS.
 Magnum will update the status to UPDATE_COMPLETE when it is done updating
 the bay.
 
-Note: Reducing node_count will remove all the existing pods on the nodes that
-are deleted. If you choose to reduce the node_count, magnum will first try to
-remove empty nodes with no pods running on them. If you reduce node_count by
-more than the number of empty nodes, magnum must remove nodes that have running
-pods on them. This action will delete those pods. We strongly recommend using a
-replication controller before reducing the node_count so any removed pods can
-be automatically recovered on your remaining nodes.
+**NOTE:** Reducing node_count will remove all the existing pods on the nodes
+that are deleted. If you choose to reduce the node_count, magnum will first
+try to remove empty nodes with no pods running on them. If you reduce
+node_count by more than the number of empty nodes, magnum must remove nodes
+that have running pods on them. This action will delete those pods. We
+strongly recommend using a replication controller before reducing the
+node_count so any removed pods can be automatically recovered on your
+remaining nodes.
 
 Heat can be used to see detailed information on the status of a stack or
 specific bay:
@@ -276,7 +277,7 @@ Monitoring bay status in detail (e.g., creating, updating)::
 Using Kubernetes Bay
 ====================
 
-Note: For the following examples, only one minion node is required in the
+**NOTE:** For the following examples, only one minion node is required in the
 k8s bay created previously.
 
 Kubernetes provides a number of examples you can use to check that things are
@@ -285,7 +286,7 @@ working. You may need to clone kubernetes using::
     wget https://github.com/kubernetes/kubernetes/releases/download/v1.0.1/kubernetes.tar.gz
     tar -xvzf kubernetes.tar.gz
 
-Note: We do not need to install Kubernetes, we just need the example file
+**NOTE:** We do not need to install Kubernetes, we just need the example file
 from the tarball.
 
 Here's how to set up the replicated redis example. First, create
@@ -394,7 +395,7 @@ as the coe::
                            --docker-volume-size 5 \
                            --coe swarm
 
-Note: If you are using Magnum behind a firewall then see:
+**NOTE:** If you are using Magnum behind a firewall then see:
 
 .. _Using_Magnum_Behind_Firewall:
 
@@ -556,7 +557,7 @@ run tox::
 
     tox -edocs
 
-Note: The first time you run this will take some extra time as it
+**NOTE:** The first time you run this will take some extra time as it
 creates a virtual environment to run in.
 
 When complete, the documentation can be accessed from::
