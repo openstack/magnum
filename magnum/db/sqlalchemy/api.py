@@ -319,14 +319,13 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.BayModelNotFound(baymodel=baymodel_name)
 
-    def destroy_baymodel(self, baymodel_id):
-        def is_baymodel_referenced(session, baymodel_uuid):
-            """Checks whether the baymodel is referenced by bay(s)."""
-            query = model_query(models.Bay, session=session)
-            query = self._add_bays_filters(query,
-                                           {'baymodel_id': baymodel_uuid})
-            return query.count() != 0
+    def is_baymodel_referenced(self, session, baymodel_uuid):
+        """Checks whether the baymodel is referenced by bay(s)."""
+        query = model_query(models.Bay, session=session)
+        query = self._add_bays_filters(query, {'baymodel_id': baymodel_uuid})
+        return query.count() != 0
 
+    def destroy_baymodel(self, baymodel_id):
         session = get_session()
         with session.begin():
             query = model_query(models.BayModel, session=session)
@@ -337,7 +336,7 @@ class Connection(api.Connection):
             except NoResultFound:
                 raise exception.BayModelNotFound(baymodel=baymodel_id)
 
-            if is_baymodel_referenced(session, baymodel_ref['uuid']):
+            if self.is_baymodel_referenced(session, baymodel_ref['uuid']):
                 raise exception.BayModelReferenced(baymodel=baymodel_id)
 
             query.delete()
@@ -359,6 +358,9 @@ class Connection(api.Connection):
                 ref = query.with_lockmode('update').one()
             except NoResultFound:
                 raise exception.BayModelNotFound(baymodel=baymodel_id)
+
+            if self.is_baymodel_referenced(session, ref['uuid']):
+                raise exception.BayModelReferenced(baymodel=baymodel_id)
 
             ref.update(values)
         return ref
