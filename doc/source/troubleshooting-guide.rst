@@ -9,6 +9,8 @@ the users quickly identify the relevant information, the guide is
 organized as a list of failure symptoms: each has some suggestions
 with pointers to the details for troubleshooting.
 
+A separate section `for developers`_ describes useful techniques such as
+debugging unit tests and gate tests.
 
 ================
 Failure symptoms
@@ -166,3 +168,128 @@ Heat software resource scripts
 ------------------------------
 *To be filled in*
 
+
+==============
+For Developers
+==============
+
+This section is intended to help with issues that developers may
+run into in the course of their development adventures in Magnum.
+
+Troubleshooting in Gate
+-----------------------
+
+Simulating gate tests
+  *Note*: This is adapted from Devstack Gate's `README`_ which
+  is worth a quick read to better understand the following)
+
+  #. Boot a VM like described in the Devstack Gate's `README`_ .
+  #. Provision this VM like so::
+
+      apt-get update \
+      && apt-get upgrade -y \ # Kernel upgrade, as recommended by README, select to keep existing grub config
+      && apt-get install -y git tmux vim \
+      && git clone https://git.openstack.org/openstack-infra/system-config \
+      && system-config/install_puppet.sh && system-config/install_modules.sh \
+      && puppet apply \
+      --modulepath=/root/system-config/modules:/etc/puppet/modules \
+      -e "class { openstack_project::single_use_slave: install_users => false,
+      ssh_key => \"$( cat .ssh/authorized_keys | awk '{print $2}' )\" }" \
+      && echo "jenkins ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
+      && cat ~/.ssh/authorized_keys >> /home/jenkins/.ssh/authorized_keys
+  #. Compare ``~/.ssh/authorized_keys`` and ``/home/jenkins/.ssh/authorized_keys``.  Your original public SSH key should now be in ``/home/jenkins/.ssh/authorized_keys``.  If it's not, explicitly copy it (this can happen if you spin up a using ``--key-name <name>``, for example).
+  #. Assuming all is well up to this point, now it's time to ``reboot`` into the latest kernel
+  #. Once you're done booting into the new kernel, log back in as ``jenkins`` user to continue with setting up the simulation.
+  #. Now it's time to set up the workspace::
+
+      export REPO_URL=https://git.openstack.org
+      export WORKSPACE=/home/jenkins/workspace/testing
+      export ZUUL_URL=/home/jenkins/workspace-cache2
+      export ZUUL_REF=HEAD
+      export ZUUL_BRANCH=master
+      export ZUUL_PROJECT=openstack/magnum
+      mkdir -p $WORKSPACE
+      git clone $REPO_URL/$ZUUL_PROJECT $ZUUL_URL/$ZUUL_PROJECT \
+      && cd $ZUUL_URL/$ZUUL_PROJECT \
+      && git checkout remotes/origin/$ZUUL_BRANCH
+  #. At this point, you may be wanting to test a specific change. If so, you can pull down the changes in ``$ZUUL_URL/$ZUUL_PROJECT`` directory::
+
+      cd $ZUUL_URL/$ZUUL_PROJECT \
+      && git fetch https://review.openstack.org/openstack/magnum refs/changes/83/247083/12 && git checkout FETCH_HEAD
+  #. Now you're ready to pull down the ``devstack-gate`` scripts that will let you run the gate job on your own VM::
+
+      cd $WORKSPACE \
+      && git clone --depth 1 $REPO_URL/openstack-infra/devstack-gate
+  #. And now you can kick off the job using the following script (the ``devstack-gate`` documentation suggests just copying from the job which can be found in the `project-config <https://github.com/openstack-infra/project-config>`_ repository), naturally it should be executable (``chmod u+x <filename>``)::
+
+      #!/bin/bash -xe
+      cat > clonemap.yaml << EOF
+      clonemap:
+        - name: openstack-infra/devstack-gate
+          dest: devstack-gate
+      EOF
+      /usr/zuul-env/bin/zuul-cloner -m clonemap.yaml --cache-dir /opt/git \
+          git://git.openstack.org \
+          openstack-infra/devstack-gate
+      export PYTHONUNBUFFERED=true
+      export DEVSTACK_GATE_TIMEOUT=240 # bump this if you see timeout issues.  Default is 120
+      export DEVSTACK_GATE_TEMPEST=0
+      export DEVSTACK_GATE_NEUTRON=1
+      # Enable tempest for tempest plugin
+      export ENABLED_SERVICES=tempest
+      export BRANCH_OVERRIDE="default"
+      if [ "$BRANCH_OVERRIDE" != "default" ] ; then
+          export OVERRIDE_ZUUL_BRANCH=$BRANCH_OVERRIDE
+      fi
+      export PROJECTS="openstack/magnum $PROJECTS"
+      export PROJECTS="openstack/python-magnumclient $PROJECTS"
+      export PROJECTS="openstack/barbican $PROJECTS"
+      export DEVSTACK_LOCAL_CONFIG="enable_plugin magnum git://git.openstack.org/openstack/magnum"
+      export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ceilometer git://git.openstack.org/openstack/ceilometer"
+      # Keep localrc to be able to set some vars in post_test_hook
+      export KEEP_LOCALRC=1
+      function gate_hook {
+           cd /opt/stack/new/magnum/
+          ./magnum/tests/contrib/gate_hook.sh api # change this to swarm to run swarm functional tests or k8s to run kubernetes functional tests
+      }
+      export -f gate_hook
+      function post_test_hook {
+          source $BASE/new/devstack/accrc/admin/admin
+          cd /opt/stack/new/magnum/
+          ./magnum/tests/contrib/post_test_hook.sh api # change this to swarm to run swarm functional tests or k8s to run kubernetes functional tests
+      }
+      export -f post_test_hook
+      cp devstack-gate/devstack-vm-gate-wrap.sh ./safe-devstack-vm-gate-wrap.sh
+      ./safe-devstack-vm-gate-wrap.sh
+
+Helpful nuances about the Devstack Gate
+  * Main job is in ``project-config``'s `magnum.yaml <https://github.com/openstack-infra/project-config/blob/master/jenkins/jobs/magnum.yaml>`_.
+
+    * Must modify parameters passed in since those are escaped:
+
+      * Anything with ``{}`` should be set as an environment variable
+
+      * Anything with ``{{ }}`` should have those brackets changed to
+        single brackets - ``{}``.
+
+      * As with the documentation for Devstack Gate, you can just create
+        a new file for the job you want, paste in what you want, then
+        ``chmod u+x <filename>`` and run it.
+
+    * Parameters can be found in `projects.yaml <https://github.com/openstack-infra/project-config/blob/master/jenkins/jobs/projects.yaml>`_.
+      This file changes a lot, so it's more reliable to say that you can
+      search for the magnum jobs where you'll see examples of what
+      gets passed in.
+
+  * Three jobs are usually run as a part of Magnum gate, all of with are found in ``project-config``'s `macros.yml <https://github.com/openstack-infra/project-config/blob/master/jenkins/jobs/macros.yaml>`_:
+
+    * link-logs
+
+    * net-info
+
+    * devstack-checkout
+
+  * After you run a job, it's ideal to clean up and start over with a
+    fresh VM to best simulate the Devstack Gate environment.
+
+.. _README: https://github.com/openstack-infra/devstack-gate/blob/master/README.rst#simulating-devstack-gate-tests P
