@@ -632,6 +632,8 @@ class UbuntuMesosTemplateDefinition(BaseTemplateDefinition):
                            baymodel_attr='master_flavor_id')
         self.add_parameter('slave_flavor',
                            baymodel_attr='flavor_id')
+        self.add_parameter('cluster_name',
+                           bay_attr='name')
 
         self.add_output('api_address',
                         bay_attr='api_address')
