@@ -33,7 +33,12 @@ from magnum import objects
 
 
 class BayModelPatchType(types.JsonPatchType):
-    pass
+
+    @staticmethod
+    def mandatory_attrs():
+        return ['/image_id', '/keypair_id', '/external_network_id', '/coe',
+                '/tls_disabled', '/public', '/registry_enabled',
+                '/server_type', '/cluster_distro', '/network_driver']
 
 
 class BayModel(base.APIBase):
