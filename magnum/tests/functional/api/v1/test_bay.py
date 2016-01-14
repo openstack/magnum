@@ -135,16 +135,6 @@ class BayTest(base.BaseMagnumTest):
             self.bay_client.post_bay, gen_model)
 
     @testtools.testcase.attr('negative')
-    def test_create_bay_with_missing_name(self):
-        self.skipTest('This is currently an error! '
-                      'Should throw a 400 instead of a 500')
-        gen_model = datagen.valid_bay_data(baymodel_id=self.baymodel.uuid,
-                                           name=None)
-        self.assertRaises(
-            exceptions.BadRequest,
-            self.bay_client.post_bay, gen_model)
-
-    @testtools.testcase.attr('negative')
     def test_update_bay_name_for_existing_bay(self):
         first_model = datagen.valid_bay_data(baymodel_id=self.baymodel.uuid,
                                              name='test')
