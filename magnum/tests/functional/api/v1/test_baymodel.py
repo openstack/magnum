@@ -37,10 +37,10 @@ class BayModelTest(base.BaseMagnumTest):
              request_type='baymodel')
 
     def tearDown(self):
-        super(BayModelTest, self).tearDown()
         for baymodel_id in self.baymodels:
             self._delete_baymodel(baymodel_id)
             self.baymodels.remove(baymodel_id)
+        super(BayModelTest, self).tearDown()
 
     def _create_baymodel(self, baymodel_model):
         resp, model = self.baymodel_client.post_baymodel(baymodel_model)
