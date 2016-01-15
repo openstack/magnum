@@ -97,7 +97,12 @@ class Bay(base.APIBase):
     """Stack id of the heat stack"""
 
     status = wtypes.text
-    """Status of the bay from the heat stack"""
+    """Status of the bay from the heat stack
+
+    Possible status is one of:
+    'CREATE_IN_PROGRESS', 'CREATE_FAILED', 'CREATE_COMPLETE',
+    'UPDATE_IN_PROGRESS', 'UPDATE_FAILED', 'UPDATE_COMPLETE',
+    'DELETE_IN_PROGRESS', 'DELETE_FAILED', 'DELETE_COMPLETE' """
 
     status_reason = wtypes.text
     """Status reason of the bay from the heat stack"""
