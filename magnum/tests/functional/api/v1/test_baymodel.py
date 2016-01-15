@@ -150,7 +150,7 @@ class BayModelTest(base.BaseMagnumTest):
         self.keypairs_client.create_keypair(name='default')
         gen_model = datagen.baymodel_data_with_valid_keypair()
         self.assertRaises(
-            exceptions.NotFound,
+            exceptions.BadRequest,
             self.baymodel_client.post_baymodel, gen_model)
 
     @testtools.testcase.attr('negative')

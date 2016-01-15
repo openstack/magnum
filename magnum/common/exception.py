@@ -486,7 +486,9 @@ class OperationInProgress(Invalid):
 
 
 class ImageNotFound(ResourceNotFound):
+    """The code here changed to 400 according to the latest document."""
     message = _("Image %(image_id)s could not be found.")
+    code = 400
 
 
 class ImageNotAuthorized(MagnumException):
@@ -494,7 +496,9 @@ class ImageNotAuthorized(MagnumException):
 
 
 class OSDistroFieldNotFound(ResourceNotFound):
+    """The code here changed to 400 according to the latest document."""
     message = _("Image %(image_id)s doesn't contain os_distro field.")
+    code = 400
 
 
 class KubernetesAPIFailed(MagnumException):
@@ -543,11 +547,15 @@ class UnsupportedK8sMemoryFormat(MagnumException):
 
 
 class FlavorNotFound(ResourceNotFound):
+    """The code here changed to 400 according to the latest document."""
     message = _("Unable to find flavor %(flavor)s.")
+    code = 400
 
 
 class NetworkNotFound(ResourceNotFound):
+    """The code here changed to 400 according to the latest document."""
     message = _("Unable to find network %(network)s.")
+    code = 400
 
 
 class TrustCreateFailed(MagnumException):

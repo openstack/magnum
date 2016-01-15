@@ -593,7 +593,7 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(mock_valid_os_res.called)
-        self.assertEqual(404, response.status_int)
+        self.assertEqual(400, response.status_int)
 
     @mock.patch('magnum.api.attr_validator.validate_os_resources')
     def test_create_bay_with_invalid_ext_network(self, mock_valid_os_res):
@@ -602,7 +602,7 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(mock_valid_os_res.called)
-        self.assertEqual(404, response.status_int)
+        self.assertEqual(400, response.status_int)
 
     @mock.patch('magnum.api.attr_validator.validate_os_resources')
     def test_create_bay_with_invalid_keypair(self, mock_valid_os_res):
@@ -620,7 +620,7 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(mock_valid_os_res.called)
-        self.assertEqual(404, response.status_int)
+        self.assertEqual(400, response.status_int)
 
     @mock.patch('magnum.api.attr_validator.validate_os_resources')
     def test_create_bay_with_multi_images_same_name(self, mock_valid_os_res):
@@ -638,7 +638,7 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(mock_valid_os_res.called)
-        self.assertEqual(404, response.status_int)
+        self.assertEqual(400, response.status_int)
 
 
 class TestDelete(api_base.FunctionalTest):
