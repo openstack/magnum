@@ -106,7 +106,7 @@ class BaseMagnumClient(base.TestCase):
         #                just leave them here to make things work.
         #                Plan is to support other kinds of baymodel creation.
         coe = kwargs.pop('coe', 'kubernetes')
-        docker_volume_size = kwargs.pop('docker_volume_size', 1)
+        docker_volume_size = kwargs.pop('docker_volume_size', 3)
         network_driver = kwargs.pop('network_driver', 'flannel')
         labels = kwargs.pop('labels', {"K1": "V1", "K2": "V2"})
         tls_disabled = kwargs.pop('tls_disabled', False)

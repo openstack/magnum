@@ -172,7 +172,7 @@ def valid_swarm_baymodel():
                          flavor_id=config.Config.flavor_id, public=False,
                          dns_nameserver="8.8.8.8", master_flavor_id=None,
                          keypair_id=config.Config.keypair_id, coe="swarm",
-                         docker_volume_size=2, cluster_distro=None,
+                         docker_volume_size=3, cluster_distro=None,
                          ssh_authorized_key=None, external_network_id="public",
                          http_proxy=None, https_proxy=None, no_proxy=None,
                          network_driver=None, labels={}, tls_disabled=False)
