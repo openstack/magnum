@@ -28,6 +28,7 @@ from magnum.api import validation
 from magnum.common import exception
 from magnum.common import k8s_manifest
 from magnum.common import policy
+from magnum.i18n import _
 from magnum import objects
 
 
@@ -142,7 +143,7 @@ class ReplicationController(v1_base.K8sResourceBase):
             self.name = manifest["metadata"]["name"]
         except (KeyError, TypeError):
             raise exception.InvalidParameterValue(
-                "Field metadata['name'] can't be empty in manifest.")
+                _("Field metadata['name'] can't be empty in manifest."))
         try:
             self.replicas = manifest["spec"]["replicas"]
         except (KeyError, TypeError):
@@ -151,22 +152,22 @@ class ReplicationController(v1_base.K8sResourceBase):
             self.selector = manifest["spec"]["selector"]
         except (KeyError, TypeError):
             raise exception.InvalidParameterValue(
-                "Field spec['selector'] can't be empty in manifest.")
+                _("Field spec['selector'] can't be empty in manifest."))
         try:
             self.labels = manifest["spec"]["template"]["metadata"]["labels"]
         except (KeyError, TypeError):
-            raise exception.InvalidParameterValue(
+            raise exception.InvalidParameterValue(_(
                 "Field spec['template']['metadata']['labels'] "
-                "can't be empty in manifest.")
+                "can't be empty in manifest."))
         try:
             images = []
             for cont in manifest["spec"]["template"]["spec"]["containers"]:
                 images.append(cont["image"])
             self.images = images
         except (KeyError, TypeError):
-            raise exception.InvalidParameterValue(
+            raise exception.InvalidParameterValue(_(
                 "Field spec['template']['spec']['containers'] "
-                "can't be empty in manifest.")
+                "can't be empty in manifest."))
 
 
 class ReplicationControllerCollection(collection.Collection):

@@ -27,6 +27,7 @@ from magnum.api import validation
 from magnum.common import exception
 from magnum.common import k8s_manifest
 from magnum.common import policy
+from magnum.i18n import _
 from magnum import objects
 
 
@@ -126,7 +127,7 @@ class Pod(v1_base.K8sResourceBase):
             self.name = manifest["metadata"]["name"]
         except (KeyError, TypeError):
             raise exception.InvalidParameterValue(
-                "Field metadata['name'] can't be empty in manifest.")
+                _("Field metadata['name'] can't be empty in manifest."))
         images = []
         try:
             for container in manifest["spec"]["containers"]:
@@ -134,7 +135,7 @@ class Pod(v1_base.K8sResourceBase):
             self.images = images
         except (KeyError, TypeError):
             raise exception.InvalidParameterValue(
-                "Field spec['containers'] can't be empty in manifest.")
+                _("Field spec['containers'] can't be empty in manifest."))
         if "labels" in manifest["metadata"]:
             self.labels = manifest["metadata"]["labels"]
 
