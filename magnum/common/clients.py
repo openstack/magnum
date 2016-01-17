@@ -16,7 +16,7 @@ from barbicanclient import client as barbicanclient
 from glanceclient.v2 import client as glanceclient
 from heatclient.v1 import client as heatclient
 from neutronclient.v2_0 import client as neutronclient
-from novaclient.v2 import client as novaclient
+from novaclient import client as novaclient
 from oslo_config import cfg
 
 from magnum.common import exception
@@ -83,7 +83,10 @@ nova_client_opts = [
                default='publicURL',
                help=_(
                    'Type of endpoint in Identity service catalog to use '
-                   'for communication with the OpenStack service.'))]
+                   'for communication with the OpenStack service.')),
+    cfg.StrOpt('api_version',
+               default='2',
+               help=_('Version of Nova API to use in novaclient.'))]
 
 neutron_client_opts = [
     cfg.StrOpt('region_name',
@@ -212,10 +215,12 @@ class OpenStackClients(object):
             return self._nova
         endpoint_type = self._get_client_option('nova', 'endpoint_type')
         region_name = self._get_client_option('nova', 'region_name')
+        novaclient_version = self._get_client_option('nova', 'api_version')
         endpoint = self.url_for(service_type='compute',
                                 endpoint_type=endpoint_type,
                                 region_name=region_name)
-        self._nova = novaclient.Client(auth_token=self.auth_token)
+        self._nova = novaclient.Client(novaclient_version,
+                                       auth_token=self.auth_token)
         self._nova.client.management_url = endpoint
         return self._nova
 
