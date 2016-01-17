@@ -159,12 +159,24 @@ resources:
           type: String
         - name: QUORUM
           type: String
+        - name: HTTP_PROXY
+          type: String
+        - name: HTTPS_PROXY
+          type: String
+        - name: NO_PROXY
+          type: String
 
   configure_master:
     type: OS::Heat::SoftwareConfig
     properties:
       group: script
       config: {get_file: fragments/configure-mesos-master.sh}
+
+  add_proxy_master:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config: {get_file: fragments/add-proxy.sh}
 
   start_services_master:
     type: OS::Heat::SoftwareConfig
@@ -186,6 +198,9 @@ resources:
         MESOS_MASTERS_IPS: {list_join: [' ', {get_attr: [mesos_masters, mesos_master_ip]}]}
         CLUSTER_NAME: {get_param: cluster_name}
         NUMBER_OF_MASTERS: {get_param: number_of_masters}
+        HTTP_PROXY: {get_param: http_proxy}
+        HTTPS_PROXY: {get_param: https_proxy}
+        NO_PROXY: {get_param: no_proxy}
 
   configure_master_deployment:
     type: OS::Heat::SoftwareDeploymentGroup
@@ -195,10 +210,18 @@ resources:
       config: {get_resource: configure_master}
       servers: {get_attr: [mesos_masters, attributes, mesos_server_id]}
 
-  start_services_master_deployment:
+  add_proxy_master_deployment:
     type: OS::Heat::SoftwareDeploymentGroup
     depends_on:
       - configure_master_deployment
+    properties:
+      config: {get_resource: add_proxy_master}
+      servers: {get_attr: [mesos_masters, attributes, mesos_server_id]}
+
+  start_services_master_deployment:
+    type: OS::Heat::SoftwareDeploymentGroup
+    depends_on:
+      - add_proxy_master_deployment
     properties:
       config: {get_resource: start_services_master}
       servers: {get_attr: [mesos_masters, attributes, mesos_server_id]}
