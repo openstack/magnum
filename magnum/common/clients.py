@@ -13,7 +13,7 @@
 # under the License.
 
 from barbicanclient import client as barbicanclient
-from glanceclient.v2 import client as glanceclient
+from glanceclient import client as glanceclient
 from heatclient import client as heatclient
 from neutronclient.v2_0 import client as neutronclient
 from novaclient import client as novaclient
@@ -66,7 +66,10 @@ glance_client_opts = [
                default='publicURL',
                help=_(
                    'Type of endpoint in Identity service catalog to use '
-                   'for communication with the OpenStack service.'))]
+                   'for communication with the OpenStack service.')),
+    cfg.StrOpt('api_version',
+               default='2',
+               help=_('Version of Glance API to use in glanceclient.'))]
 
 barbican_client_opts = [
     cfg.StrOpt('region_name',
@@ -183,6 +186,7 @@ class OpenStackClients(object):
 
         endpoint_type = self._get_client_option('glance', 'endpoint_type')
         region_name = self._get_client_option('glance', 'region_name')
+        glanceclient_version = self._get_client_option('glance', 'api_version')
         endpoint = self.url_for(service_type='image',
                                 endpoint_type=endpoint_type,
                                 region_name=region_name)
@@ -193,7 +197,7 @@ class OpenStackClients(object):
             'username': None,
             'password': None,
         }
-        self._glance = glanceclient.Client(**args)
+        self._glance = glanceclient.Client(glanceclient_version, **args)
 
         return self._glance
 
