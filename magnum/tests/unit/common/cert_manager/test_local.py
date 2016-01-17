@@ -60,9 +60,9 @@ class TestLocalManager(base.BaseTestCase):
 
         def _mock_isfile(path):
             _, ext = os.path.splitext(path)
-            if self.intermediates == None and ext == '.int':
+            if self.intermediates is None and ext == '.int':
                 return False
-            if self.private_key_passphrase == None and ext == '.pass':
+            if self.private_key_passphrase is None and ext == '.pass':
                 return False
             return True
         isfile_patcher = mock.patch('os.path.isfile')
