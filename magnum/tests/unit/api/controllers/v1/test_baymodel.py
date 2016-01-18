@@ -694,7 +694,7 @@ class TestPost(api_base.FunctionalTest):
         bdict = apiutils.baymodel_post_data()
         del bdict['uuid']
         response = self.post_json('/baymodels', bdict, expect_errors=True)
-        self.assertEqual(404, response.status_int)
+        self.assertEqual(400, response.status_int)
 
     @mock.patch('magnum.api.attr_validator.validate_image')
     @mock.patch('magnum.api.attr_validator.validate_keypair')
