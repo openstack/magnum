@@ -13,7 +13,6 @@
 
 from tempest_lib import exceptions
 import testtools
-import unittest
 
 from magnum.tests.functional.common import base
 
@@ -26,17 +25,13 @@ class MagnumServiceTest(base.BaseMagnumTest):
         super(MagnumServiceTest, self).__init__(*args, **kwargs)
         self.service_client = None
 
-    # NOTE(suro-patz): The following test fails in lieu of non-admin user
-    #                  available for functional-test-gate.
-    #                  For now, I will keep the test, but skipped.
-    @unittest.skip("Requires non-admin user in functional-test-gate")
     @testtools.testcase.attr('negative')
     def test_magnum_service_list_needs_admin(self):
         # Ensure that policy enforcement does not allow 'default' user
         (self.service_client, _) = self.get_clients_with_new_creds(
             type_of_creds='default',
             request_type='service')
-        self.assertRaises(exceptions.ServerFault,
+        self.assertRaises(exceptions.Forbidden,
                           self.service_client.magnum_service_list)
 
     @testtools.testcase.attr('positive')
