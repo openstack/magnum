@@ -22,6 +22,7 @@ Navigate to Magnum directory::
 
 Prepare a config file for functional test::
 
+    cp /opt/stack/tempest/etc/tempest.conf /opt/stack/magnum/etc/tempest.conf
     cp functional_creds.conf.sample functional_creds.conf
 
     # update the IP address
