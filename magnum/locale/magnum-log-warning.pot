@@ -1,38 +1,38 @@
 # Translations template for magnum.
-# Copyright (C) 2015 ORGANIZATION
+# Copyright (C) 2016 ORGANIZATION
 # This file is distributed under the same license as the magnum project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2015.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: magnum 1.0.0.0b2.dev51\n"
+"Project-Id-Version: magnum 1.1.1.dev262\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-11-04 06:03+0000\n"
+"POT-Creation-Date: 2016-01-18 06:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.1.1\n"
+"Generated-By: Babel 2.2.0\n"
 
-#: magnum/common/utils.py:392
+#: magnum/common/utils.py:409
 #, python-format
 msgid "Failed to unlink %(path)s, error: %(e)s"
 msgstr ""
 
-#: magnum/common/utils.py:401
+#: magnum/common/utils.py:418
 #, python-format
 msgid "Failed to remove dir %(path)s, error: %(e)s"
 msgstr ""
 
-#: magnum/common/utils.py:417
+#: magnum/common/utils.py:434
 #, python-format
 msgid "Failed to create symlink from %(source)s to %(link)s, error: %(e)s"
 msgstr ""
 
-#: magnum/common/utils.py:431
+#: magnum/common/utils.py:448
 #, python-format
 msgid ""
 "Failed to remove trailing character. Returning original object. Supplied "
@@ -63,16 +63,6 @@ msgid ""
 "'local' should be used for testing purpose."
 msgstr ""
 
-#: magnum/conductor/bay_lock.py:111
-#, python-format
-msgid "Lock was already released on bay %s!"
-msgstr ""
-
-#: magnum/conductor/monitors.py:95
-#, python-format
-msgid "Ignore error [%(e)s] when inspecting container %(container_id)s."
-msgstr ""
-
 #: magnum/conductor/scale_manager.py:61
 #, python-format
 msgid ""
@@ -81,7 +71,12 @@ msgid ""
 "removed."
 msgstr ""
 
-#: magnum/conductor/template_definition.py:154
+#: magnum/conductor/swarm_monitor.py:54
+#, python-format
+msgid "Ignore error [%(e)s] when inspecting container %(container_id)s."
+msgstr ""
+
+#: magnum/conductor/template_definition.py:142
 #, python-format
 msgid "stack does not have output_key %s"
 msgstr ""
@@ -91,17 +86,17 @@ msgstr ""
 msgid "Deleting cert is failed: %s"
 msgstr ""
 
-#: magnum/service/periodic.py:115
+#: magnum/service/periodic.py:101
 #, python-format
 msgid "Ignore error [%s] when syncing up bay status."
 msgstr ""
 
-#: magnum/service/periodic.py:175
+#: magnum/service/periodic.py:162
 #, python-format
 msgid "Skip pulling data from bay %(bay)s due to error: %(e)s"
 msgstr ""
 
-#: magnum/service/periodic.py:190
+#: magnum/service/periodic.py:177
 #, python-format
 msgid "Skip adding metric %(name)s due to error: %(e)s"
 msgstr ""

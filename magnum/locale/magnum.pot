@@ -1,28 +1,106 @@
 # Translations template for magnum.
-# Copyright (C) 2015 ORGANIZATION
+# Copyright (C) 2016 ORGANIZATION
 # This file is distributed under the same license as the magnum project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2015.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: magnum 1.0.0.0b2.dev51\n"
+"Project-Id-Version: magnum 1.1.1.dev262\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-11-04 06:03+0000\n"
+"POT-Creation-Date: 2016-01-18 06:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.1.1\n"
+"Generated-By: Babel 2.2.0\n"
+
+#: magnum/api/utils.py:36
+msgid "Limit must be positive"
+msgstr ""
+
+#: magnum/api/utils.py:43
+#, python-format
+msgid "Invalid sort direction: %s. Acceptable values are 'asc' or 'desc'"
+msgstr ""
+
+#: magnum/api/utils.py:54
+#, python-format
+msgid "Adding a new attribute %s to the root of the resource is not allowed."
+msgstr ""
+
+#: magnum/api/utils.py:58
+#, python-format
+msgid "The attribute %s has existed, please use 'replace' operation instead."
+msgstr ""
+
+#: magnum/api/validation.py:30
+msgid ""
+"Allowed network drivers for kubernetes baymodels. Use 'all' keyword to "
+"allow all drivers supported for kubernetes baymodels. Supported network "
+"drivers include flannel."
+msgstr ""
+
+#: magnum/api/validation.py:36
+msgid "Default network driver for kubernetes baymodels."
+msgstr ""
+
+#: magnum/api/validation.py:39
+msgid ""
+"Allowed network drivers for docker swarm baymodels. Use 'all' keyword to "
+"allow all drivers supported for swarm baymodels. Supported network "
+"drivers include docker and flannel."
+msgstr ""
+
+#: magnum/api/validation.py:45
+msgid "Default network driver for docker swarm baymodels."
+msgstr ""
+
+#: magnum/api/validation.py:48
+msgid ""
+"Allowed network drivers for mesos baymodels. Use 'all' keyword to allow "
+"all drivers supported for mesos baymodels. Supported network drivers "
+"include docker."
+msgstr ""
+
+#: magnum/api/validation.py:54
+msgid "Default network driver for mesos baymodels."
+msgstr ""
+
+#: magnum/api/validation.py:77
+#, python-format
+msgid ""
+"Cannot fulfill request with a %(bay_type)s bay, expecting a "
+"%(supported_bay_types)s bay."
+msgstr ""
+
+#: magnum/api/validation.py:132
+#, python-format
+msgid "Requested COE type %s is not supported."
+msgstr ""
+
+#: magnum/api/validation.py:143
+#, python-format
+msgid ""
+"Network driver type %(driver)s is not supported, expecting a "
+"%(supported_drivers)s network driver."
+msgstr ""
+
+#: magnum/api/validation.py:155
+#, python-format
+msgid ""
+"Network driver type %(driver)s is not allowed, expecting a "
+"%(allowed_drivers)s network driver. "
+msgstr ""
 
 #: magnum/api/controllers/base.py:103
 #, python-format
 msgid "Invalid value for %s header"
 msgstr ""
 
-#: magnum/api/controllers/v1/__init__.py:212
+#: magnum/api/controllers/v1/__init__.py:215
 #, python-format
 msgid ""
 "Mutually exclusive versions requested. Version %(ver)s requested but not "
@@ -30,11 +108,37 @@ msgid ""
 "%(max)s]."
 msgstr ""
 
-#: magnum/api/controllers/v1/__init__.py:222
+#: magnum/api/controllers/v1/__init__.py:225
 #, python-format
 msgid ""
 "Version %(ver)s was requested but the minor version is not supported by "
 "this service. The supported version range is: [%(min)s, %(max)s]."
+msgstr ""
+
+#: magnum/api/controllers/v1/pod.py:130
+#: magnum/api/controllers/v1/replicationcontroller.py:146
+#: magnum/api/controllers/v1/service.py:133
+msgid "Field metadata['name'] can't be empty in manifest."
+msgstr ""
+
+#: magnum/api/controllers/v1/pod.py:138
+msgid "Field spec['containers'] can't be empty in manifest."
+msgstr ""
+
+#: magnum/api/controllers/v1/replicationcontroller.py:155
+msgid "Field spec['selector'] can't be empty in manifest."
+msgstr ""
+
+#: magnum/api/controllers/v1/replicationcontroller.py:159
+msgid "Field spec['template']['metadata']['labels'] can't be empty in manifest."
+msgstr ""
+
+#: magnum/api/controllers/v1/replicationcontroller.py:168
+msgid "Field spec['template']['spec']['containers'] can't be empty in manifest."
+msgstr ""
+
+#: magnum/api/controllers/v1/service.py:138
+msgid "Field spec['ports'] can't be empty in manifest."
 msgstr ""
 
 #: magnum/api/controllers/v1/types.py:125
@@ -56,65 +160,58 @@ msgstr ""
 msgid "'add' and 'replace' operations needs value"
 msgstr ""
 
-#: magnum/api/controllers/v1/utils.py:36
-msgid "Limit must be positive"
-msgstr ""
-
-#: magnum/api/controllers/v1/utils.py:43
-#, python-format
-msgid "Invalid sort direction: %s. Acceptable values are 'asc' or 'desc'"
-msgstr ""
-
-#: magnum/api/controllers/v1/utils.py:54
-#, python-format
-msgid "Adding a new attribute %s to the root of the resource is not allowed."
-msgstr ""
-
-#: magnum/api/controllers/v1/utils.py:58
-#, python-format
-msgid "The attribute %s has existed, please use 'replace' operation instead."
-msgstr ""
-
 #: magnum/api/middleware/auth_token.py:41
 #, python-format
 msgid "Cannot compile public API routes: %s"
 msgstr ""
 
-#: magnum/api/middleware/parsable_error.py:46
+#: magnum/api/middleware/parsable_error.py:42
 #, python-format
 msgid "ErrorDocumentMiddleware received an invalid status %s"
 msgstr ""
 
-#: magnum/common/clients.py:33 magnum/common/clients.py:44
-#: magnum/common/clients.py:66 magnum/common/clients.py:77
-#: magnum/common/clients.py:88
+#: magnum/common/clients.py:29 magnum/common/clients.py:39
+#: magnum/common/clients.py:63 magnum/common/clients.py:76
+#: magnum/common/clients.py:86 magnum/common/clients.py:99
 msgid ""
 "Region in Identity service catalog to use for communication with the "
 "OpenStack service."
 msgstr ""
 
-#: magnum/common/clients.py:37 magnum/common/clients.py:48
-#: magnum/common/clients.py:70 magnum/common/clients.py:81
-#: magnum/common/clients.py:92
+#: magnum/common/clients.py:33 magnum/common/clients.py:43
+#: magnum/common/clients.py:67 magnum/common/clients.py:80
+#: magnum/common/clients.py:90 magnum/common/clients.py:103
 msgid ""
 "Type of endpoint in Identity service catalog to use for communication "
 "with the OpenStack service."
 msgstr ""
 
-#: magnum/common/clients.py:52
+#: magnum/common/clients.py:47
 msgid "Optional CA cert file to use in SSL connections."
 msgstr ""
 
-#: magnum/common/clients.py:54
+#: magnum/common/clients.py:49
 msgid "Optional PEM-formatted certificate chain file."
 msgstr ""
 
-#: magnum/common/clients.py:56
+#: magnum/common/clients.py:51
 msgid "Optional PEM-formatted file that contains the private key."
 msgstr ""
 
-#: magnum/common/clients.py:60
+#: magnum/common/clients.py:55
 msgid "If set, then the server's certificate will not be verified."
+msgstr ""
+
+#: magnum/common/clients.py:59
+msgid "Version of Heat API to use in heatclient."
+msgstr ""
+
+#: magnum/common/clients.py:72
+msgid "Version of Glance API to use in glanceclient."
+msgstr ""
+
+#: magnum/common/clients.py:95
+msgid "Version of Nova API to use in novaclient."
 msgstr ""
 
 #: magnum/common/exception.py:92
@@ -191,220 +288,298 @@ msgstr ""
 
 #: magnum/common/exception.py:287
 #, python-format
-msgid "Expected a name or uuid but received %(uuid)s."
+msgid "Failed to get discovery url from '%(discovery_endpoint)s'."
 msgstr ""
 
 #: magnum/common/exception.py:291
 #, python-format
+msgid "Expected a name or uuid but received %(uuid)s."
+msgstr ""
+
+#: magnum/common/exception.py:295
+#, python-format
 msgid "Expected an uuid or int but received %(identity)s."
 msgstr ""
 
-#: magnum/common/exception.py:299
+#: magnum/common/exception.py:303
 msgid "Conflict."
 msgstr ""
 
-#: magnum/common/exception.py:304
+#: magnum/common/exception.py:308
 msgid "Invalid resource state."
 msgstr ""
 
-#: magnum/common/exception.py:310
+#: magnum/common/exception.py:314
 #, python-format
 msgid "%(err)s"
 msgstr ""
 
-#: magnum/common/exception.py:314
+#: magnum/common/exception.py:318
 #, python-format
 msgid ""
 "Instance %(instance_uuid)s is already associated with a node, it cannot "
 "be associated with this other node %(node)s"
 msgstr ""
 
-#: magnum/common/exception.py:319
+#: magnum/common/exception.py:323
 #, python-format
 msgid "Instance %(instance)s could not be found."
 msgstr ""
 
-#: magnum/common/exception.py:323
+#: magnum/common/exception.py:327
 #, python-format
 msgid "Couldn't apply patch '%(patch)s'. Reason: %(reason)s"
 msgstr ""
 
-#: magnum/common/exception.py:327
+#: magnum/common/exception.py:331
 msgid "Not authorized."
 msgstr ""
 
-#: magnum/common/exception.py:334
+#: magnum/common/exception.py:336
+#, python-format
+msgid "Policy doesn't allow %(action)s to be performed."
+msgstr ""
+
+#: magnum/common/exception.py:342
 msgid "Request not acceptable."
 msgstr ""
 
-#: magnum/common/exception.py:339
+#: magnum/common/exception.py:347
 #, python-format
 msgid "Expected a MAC address but received %(mac)s."
 msgstr ""
 
-#: magnum/common/exception.py:343
+#: magnum/common/exception.py:351
 #, python-format
 msgid "Invalid configuration file. %(error_msg)s"
 msgstr ""
 
-#: magnum/common/exception.py:347 magnum/common/exception.py:388
-#: magnum/common/exception.py:404 magnum/common/exception.py:420
+#: magnum/common/exception.py:355
 #, python-format
 msgid "A node with UUID %(uuid)s already exists."
 msgstr ""
 
-#: magnum/common/exception.py:351
+#: magnum/common/exception.py:359
 #, python-format
 msgid "Node %(node)s could not be found."
 msgstr ""
 
-#: magnum/common/exception.py:355
+#: magnum/common/exception.py:363
 #, python-format
 msgid "Node %(node)s is associated with instance %(instance)s."
 msgstr ""
 
-#: magnum/common/exception.py:359
+#: magnum/common/exception.py:367
 #, python-format
 msgid "Failed to establish SSH connection to host %(host)s."
 msgstr ""
 
-#: magnum/common/exception.py:363
+#: magnum/common/exception.py:371
 #, python-format
 msgid "Failed to create a file system. File system %(fs)s is not supported."
 msgstr ""
 
-#: magnum/common/exception.py:368
+#: magnum/common/exception.py:376
 #, python-format
 msgid "Baymodel %(baymodel)s could not be found."
 msgstr ""
 
-#: magnum/common/exception.py:372
+#: magnum/common/exception.py:380
 #, python-format
 msgid "A baymodel with UUID %(uuid)s already exists."
 msgstr ""
 
-#: magnum/common/exception.py:376
+#: magnum/common/exception.py:384
 #, python-format
 msgid "Baymodel %(baymodel)s is referenced by one or multiple bays."
 msgstr ""
 
-#: magnum/common/exception.py:380
+#: magnum/common/exception.py:388
 msgid "Not authorized to set public flag for baymodel."
-msgstr ""
-
-#: magnum/common/exception.py:384
-#, python-format
-msgid "Bay %(bay)s could not be found."
 msgstr ""
 
 #: magnum/common/exception.py:392
 #, python-format
-msgid "Container %(container)s could not be found."
+msgid "Bay %(bay)s could not be found."
 msgstr ""
 
 #: magnum/common/exception.py:396
 #, python-format
-msgid "A container with UUID %(uuid)s already exists."
+msgid "A bay with UUID %(uuid)s already exists."
 msgstr ""
 
 #: magnum/common/exception.py:400
 #, python-format
-msgid "Pod %(pod)s could not be found."
+msgid "Container %(container)s could not be found."
+msgstr ""
+
+#: magnum/common/exception.py:404
+#, python-format
+msgid "A container with UUID %(uuid)s already exists."
 msgstr ""
 
 #: magnum/common/exception.py:408
 #, python-format
-msgid "ReplicationController %(rc)s could not be found."
+msgid "Pod %(pod)s could not be found."
 msgstr ""
 
 #: magnum/common/exception.py:412
 #, python-format
-msgid "A ReplicationController with UUID %(uuid)s already exists."
+msgid "A pod with UUID %(uuid)s already exists."
 msgstr ""
 
 #: magnum/common/exception.py:416
 #, python-format
-msgid "Service %(service)s could not be found."
+msgid "Pod list could not be found for Bay %(bay_uuid)s."
+msgstr ""
+
+#: magnum/common/exception.py:420
+#, python-format
+msgid "Pod creation failed in Bay %(bay_uuid)s."
+msgstr ""
+
+#: magnum/common/exception.py:424
+#, python-format
+msgid "ReplicationController %(rc)s could not be found."
 msgstr ""
 
 #: magnum/common/exception.py:428
 #, python-format
+msgid "A ReplicationController with UUID %(uuid)s already exists."
+msgstr ""
+
+#: magnum/common/exception.py:432
+#, python-format
+msgid "ReplicationController list could not be found for Bay %(bay_uuid)s."
+msgstr ""
+
+#: magnum/common/exception.py:437
+#, python-format
+msgid "ReplicationController creation failed for Bay %(bay_uuid)s."
+msgstr ""
+
+#: magnum/common/exception.py:442
+#, python-format
+msgid "Service %(service)s could not be found."
+msgstr ""
+
+#: magnum/common/exception.py:446
+#, python-format
+msgid "A service with UUID %(uuid)s already exists."
+msgstr ""
+
+#: magnum/common/exception.py:450
+#, python-format
+msgid "Service list could not be found for Bay %(bay_uuid)s."
+msgstr ""
+
+#: magnum/common/exception.py:454
+#, python-format
+msgid "Service creation failed for Bay %(bay_uuid)s."
+msgstr ""
+
+#: magnum/common/exception.py:462
+#, python-format
 msgid "%(operation)s is not supported."
 msgstr ""
 
-#: magnum/common/exception.py:433
+#: magnum/common/exception.py:467
 #, python-format
 msgid "Bay type (%(server_type)s, %(os)s, %(coe)s) not supported."
 msgstr ""
 
-#: magnum/common/exception.py:438
+#: magnum/common/exception.py:472
 #, python-format
 msgid "Bay type (%(server_type)s, %(os)s, %(coe)s) not enabled."
 msgstr ""
 
-#: magnum/common/exception.py:443
+#: magnum/common/exception.py:477
 #, python-format
 msgid "Required parameter %(heat_param)s not provided."
 msgstr ""
 
-#: magnum/common/exception.py:447
+#: magnum/common/exception.py:481
 #, python-format
 msgid "The urllib2 URL %(url)s has an invalid scheme."
 msgstr ""
 
-#: magnum/common/exception.py:451
+#: magnum/common/exception.py:485
 #, python-format
 msgid "Bay %(bay_name)s already has an operation in progress."
 msgstr ""
 
-#: magnum/common/exception.py:455
+#: magnum/common/exception.py:489
 #, python-format
 msgid "Image %(image_id)s could not be found."
 msgstr ""
 
-#: magnum/common/exception.py:459
+#: magnum/common/exception.py:493
 #, python-format
 msgid "Not authorized for image %(image_id)s."
 msgstr ""
 
-#: magnum/common/exception.py:463
+#: magnum/common/exception.py:497
 #, python-format
 msgid "Image %(image_id)s doesn't contain os_distro field."
 msgstr ""
 
-#: magnum/common/exception.py:480
+#: magnum/common/exception.py:514
 #, python-format
 msgid "A key pair %(keypair)s could not be found."
 msgstr ""
 
-#: magnum/common/exception.py:484
+#: magnum/common/exception.py:518
 #, python-format
 msgid "A key pair with UUID %(uuid)s already exists."
 msgstr ""
 
-#: magnum/common/exception.py:488
+#: magnum/common/exception.py:522
 #, python-format
 msgid "Could not store certificate: %(msg)s"
 msgstr ""
 
-#: magnum/common/exception.py:492
+#: magnum/common/exception.py:526
 #, python-format
 msgid "Extension '%(extension)s' not allowed"
 msgstr ""
 
-#: magnum/common/exception.py:496
+#: magnum/common/exception.py:530
 #, python-format
 msgid "Unable to find keypair %(keypair)s."
 msgstr ""
 
-#: magnum/common/exception.py:500
+#: magnum/common/exception.py:534
 #, python-format
 msgid "A magnum service %(magnum_service_id)s could not be found."
 msgstr ""
 
-#: magnum/common/exception.py:504
+#: magnum/common/exception.py:538
 #, python-format
 msgid "A magnum service with ID %(id)s already exists."
+msgstr ""
+
+#: magnum/common/exception.py:542
+msgid "Unsupported memory format for k8s bay."
+msgstr ""
+
+#: magnum/common/exception.py:546
+#, python-format
+msgid "Unable to find flavor %(flavor)s."
+msgstr ""
+
+#: magnum/common/exception.py:550
+#, python-format
+msgid "Unable to find network %(network)s."
+msgstr ""
+
+#: magnum/common/exception.py:554
+#, python-format
+msgid "Failed to create trust for trustee %(trustee_user_id)s."
+msgstr ""
+
+#: magnum/common/exception.py:558
+#, python-format
+msgid "Failed to delete trust %(trust_id)s."
 msgstr ""
 
 #: magnum/common/k8s_manifest.py:41 magnum/common/k8s_manifest.py:54
@@ -447,7 +622,7 @@ msgstr ""
 msgid "Failed to retrieve manifest: %s"
 msgstr ""
 
-#: magnum/common/utils.py:117
+#: magnum/common/utils.py:134
 msgid "Invalid private key"
 msgstr ""
 
@@ -490,15 +665,15 @@ msgstr ""
 msgid "Output key '%(output_key)s' is missing from stack %(stack_id)s"
 msgstr ""
 
-#: magnum/conductor/template_definition.py:41
+#: magnum/conductor/template_definition.py:42
 msgid "Location of template to build a k8s cluster on atomic."
 msgstr ""
 
-#: magnum/conductor/template_definition.py:46
+#: magnum/conductor/template_definition.py:47
 msgid "Location of template to build a k8s cluster on CoreOS."
 msgstr ""
 
-#: magnum/conductor/template_definition.py:50
+#: magnum/conductor/template_definition.py:51
 msgid "Url for etcd public discovery endpoint."
 msgstr ""
 
@@ -510,73 +685,58 @@ msgstr ""
 msgid "Location of template to build a swarm cluster on atomic."
 msgstr ""
 
-#: magnum/conductor/template_definition.py:63
-#, python-format
-msgid ""
-"Format string to use for swarm discovery url. Available values: bay_id, "
-"bay_uuid. Example: \"etcd://etcd.example.com/\\%(bay_uuid)s\""
-msgstr ""
-
-#: magnum/conductor/template_definition.py:68
-msgid "Indicates Swarm discovery should use public endpoint."
-msgstr ""
-
-#: magnum/conductor/template_definition.py:72
-msgid "Url for swarm public discovery endpoint."
-msgstr ""
-
-#: magnum/conductor/template_definition.py:76
+#: magnum/conductor/template_definition.py:64
 msgid "Location of template to build a Mesos cluster on Ubuntu."
 msgstr ""
 
-#: magnum/conductor/template_definition.py:81
+#: magnum/conductor/template_definition.py:69
 msgid "Enabled bay definition entry points."
 msgstr ""
 
-#: magnum/conductor/handlers/bay_conductor.py:147
+#: magnum/conductor/handlers/bay_conductor.py:169
 #, python-format
 msgid "cannot change bay property(ies) %s."
 msgstr ""
 
-#: magnum/conductor/handlers/bay_conductor.py:158
+#: magnum/conductor/handlers/bay_conductor.py:180
 #, python-format
 msgid "Updating a bay when stack status is \"%s\""
 msgstr ""
 
-#: magnum/db/sqlalchemy/api.py:103
+#: magnum/db/sqlalchemy/api.py:101
 #, python-format
 msgid "The sort_key value \"%(key)s\" is an invalid field for sorting"
 msgstr ""
 
-#: magnum/db/sqlalchemy/api.py:234
+#: magnum/db/sqlalchemy/api.py:232
 msgid "Cannot overwrite UUID for an existing Bay."
 msgstr ""
 
-#: magnum/db/sqlalchemy/api.py:383
+#: magnum/db/sqlalchemy/api.py:348
 msgid "Cannot overwrite UUID for an existing BayModel."
 msgstr ""
 
-#: magnum/db/sqlalchemy/api.py:477
+#: magnum/db/sqlalchemy/api.py:445
 msgid "Cannot overwrite UUID for an existing Container."
 msgstr ""
 
-#: magnum/db/sqlalchemy/api.py:573
+#: magnum/db/sqlalchemy/api.py:541
 msgid "Cannot overwrite UUID for an existing Node."
 msgstr ""
 
-#: magnum/db/sqlalchemy/api.py:676
+#: magnum/db/sqlalchemy/api.py:644
 msgid "Cannot overwrite UUID for an existing Pod."
 msgstr ""
 
-#: magnum/db/sqlalchemy/api.py:775
+#: magnum/db/sqlalchemy/api.py:743
 msgid "Cannot overwrite UUID for an existing Service."
 msgstr ""
 
-#: magnum/db/sqlalchemy/api.py:872
+#: magnum/db/sqlalchemy/api.py:840
 msgid "Cannot overwrite UUID for an existing rc."
 msgstr ""
 
-#: magnum/db/sqlalchemy/api.py:946
+#: magnum/db/sqlalchemy/api.py:914
 msgid "Cannot overwrite UUID for an existing X509KeyPair."
 msgstr ""
 
@@ -593,19 +753,7 @@ msgstr ""
 msgid "An object of class %s is required here"
 msgstr ""
 
-#: magnum/openstack/common/cliutils.py:40
-#, python-format
-msgid "Missing arguments: %s"
-msgstr ""
-
-#: magnum/openstack/common/cliutils.py:158
-#, python-format
-msgid ""
-"Field labels list %(labels)s has different number of elements than fields"
-" list %(fields)s"
-msgstr ""
-
-#: magnum/service/periodic.py:150
+#: magnum/service/periodic.py:137
 #, python-format
 msgid "Stack with id %s not found in Heat."
 msgstr ""
