@@ -2,6 +2,8 @@
 
 . /etc/sysconfig/heat-params
 
+echo "Configuring ${NETWORK_DRIVER} network service ..."
+
 if [ "$NETWORK_DRIVER" != "flannel" ]; then
     exit 0
 fi

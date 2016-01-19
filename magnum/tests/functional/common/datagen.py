@@ -42,7 +42,7 @@ def gen_random_port():
     return random_int(49152, 65535)
 
 
-def gen_docker_volume_size(min_int=1, max_int=3):
+def gen_docker_volume_size(min_int=3, max_int=5):
     return random_int(min_int, max_int)
 
 
@@ -91,7 +91,7 @@ def baymodel_data(**kwargs):
         "coe": "swarm",
         "tls_disabled": False,
         "network_driver": None,
-        "docker_volume_size": 1,
+        "docker_volume_size": 3,
         "labels": {},
         "fixed_network": "192.168.0.0/24",
         "dns_nameserver": "8.8.8.8",

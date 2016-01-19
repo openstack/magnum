@@ -10,6 +10,7 @@ Description=Docker Application Container Engine
 Documentation=http://docs.docker.com
 After=network.target docker.socket
 Requires=docker.socket
+Wants=docker-storage-setup.service
 
 [Service]
 TimeoutStartSec=300
@@ -17,6 +18,7 @@ Type=notify
 EnvironmentFile=-/etc/sysconfig/docker
 EnvironmentFile=-/etc/sysconfig/docker-storage
 EnvironmentFile=-/etc/sysconfig/docker-network
+Environment=GOTRACEBACK=crash
 ExecStart=/usr/bin/docker daemon -H fd:// \\
           -H tcp://0.0.0.0:2375 \\
 END_SERVICE_TOP
