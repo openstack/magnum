@@ -194,8 +194,8 @@ Configure magnum::
     sudo sed -i "s/#auth_uri\s*=.*/auth_uri=http:\/\/127.0.0.1:5000\/v2.0/" \
              /etc/magnum/magnum.conf
 
-    # set notification_driver (if using ceilometer)
-    sudo sed -i "s/#notification_driver\s*=.*/notification_driver=messaging/" \
+    # set oslo messaging notifications driver (if using ceilometer)
+    sudo sed -i "s/#driver\s*=.*/driver=messaging/" \
              /etc/magnum/magnum.conf
 
 Clone and install the magnum client::

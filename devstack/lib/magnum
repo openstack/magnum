@@ -177,7 +177,7 @@ function create_magnum_conf {
     fi
 
     if is_service_enabled ceilometer; then
-        iniset $MAGNUM_CONF DEFAULT notification_driver "messaging"
+        iniset $MAGNUM_CONF oslo_messaging_notifications driver "messaging"
     fi
 
     if is_service_enabled barbican; then
