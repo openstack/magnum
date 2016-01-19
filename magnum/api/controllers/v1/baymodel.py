@@ -302,6 +302,7 @@ class BayModelsController(rest.RestController):
     @expose.expose(BayModel, body=BayModel, status_code=201)
     @policy.enforce_wsgi("baymodel", "create")
     @validation.enforce_network_driver_types_create()
+    @validation.enforce_volume_driver_types_create()
     def post(self, baymodel):
         """Create a new baymodel.
 

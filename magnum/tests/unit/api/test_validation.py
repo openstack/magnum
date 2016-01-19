@@ -318,3 +318,33 @@ class TestValidation(base.BaseTestCase):
                 network_driver_type=driver,
                 network_driver_config_dict={
                     'kubernetes_allowed_network_drivers': ['all']})
+
+    def _test_enforce_volume_driver_types_create(
+            self,
+            volume_driver_type,
+            coe='kubernetes',
+            assert_raised=False):
+
+        @v.enforce_volume_driver_types_create()
+        def test(self, baymodel):
+            pass
+
+        baymodel = mock.MagicMock()
+        baymodel.name = 'test_baymodel'
+        baymodel.volume_driver = volume_driver_type
+        baymodel.coe = coe
+
+        if assert_raised:
+            self.assertRaises(exception.InvalidParameterValue,
+                              test, self, baymodel)
+        else:
+            test(self, baymodel)
+
+    def test_enforce_volume_driver_types_valid_create(self):
+        self._test_enforce_volume_driver_types_create(
+            volume_driver_type='cinder')
+
+    def test_enforce_volume_driver_types_invalid_create(self):
+        self._test_enforce_volume_driver_types_create(
+            volume_driver_type='type',
+            assert_raised=True)

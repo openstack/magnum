@@ -108,6 +108,7 @@ class BaseMagnumClient(base.TestCase):
         coe = kwargs.pop('coe', 'kubernetes')
         docker_volume_size = kwargs.pop('docker_volume_size', 3)
         network_driver = kwargs.pop('network_driver', 'flannel')
+        volume_driver = kwargs.pop('volume_driver', 'cinder')
         labels = kwargs.pop('labels', {"K1": "V1", "K2": "V2"})
         tls_disabled = kwargs.pop('tls_disabled', False)
 
@@ -120,6 +121,7 @@ class BaseMagnumClient(base.TestCase):
             master_flavor_id=cls.flavor_id,
             docker_volume_size=docker_volume_size,
             network_driver=network_driver,
+            volume_driver=volume_driver,
             coe=coe,
             labels=labels,
             tls_disabled=tls_disabled,
