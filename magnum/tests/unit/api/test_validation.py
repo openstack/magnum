@@ -264,15 +264,19 @@ class TestValidation(base.BaseTestCase):
             assert_raised=False):
 
         @v.enforce_network_driver_types_update()
-        def test(self, baymodel_ident):
+        def test(self, baymodel_ident, patch):
             pass
 
         for key, val in network_driver_config_dict.items():
             cfg.CONF.set_override(key, val, 'baymodel')
         baymodel_ident = 'test_uuid_or_name'
-        baymodel = mock.MagicMock()
+        patch = [{'path': '/network_driver', 'value': network_driver_type,
+                  'op': 'replace'}]
+        context = mock_pecan_request.context
+        baymodel = obj_utils.get_test_baymodel(context,
+                                               uuid=baymodel_ident,
+                                               coe='kubernetes')
         baymodel.network_driver = network_driver_type
-        baymodel.coe = 'kubernetes'
         mock_get_rpc_resource.return_value = baymodel
 
         # Reload the validator module so that baymodel configs are
@@ -283,9 +287,9 @@ class TestValidation(base.BaseTestCase):
 
         if assert_raised:
             self.assertRaises(exception.InvalidParameterValue,
-                              test, self, baymodel_ident)
+                              test, self, baymodel_ident, patch)
         else:
-            test(self, baymodel_ident)
+            test(self, baymodel_ident, patch)
             mock_get_rpc_resource.assert_called_once_with(
                 'BayModel', baymodel_ident)
 

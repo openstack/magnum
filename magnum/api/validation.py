@@ -99,7 +99,14 @@ def enforce_network_driver_types_update():
     @decorator.decorator
     def wrapper(func, *args, **kwargs):
         baymodel_ident = args[1]
+        patch = args[2]
         baymodel = api_utils.get_rpc_resource('BayModel', baymodel_ident)
+        try:
+            baymodel_dict = api_utils.apply_jsonpatch(baymodel.as_dict(),
+                                                      patch)
+        except api_utils.JSONPATCH_EXCEPTIONS as e:
+            raise exception.PatchError(patch=patch, reason=e)
+        baymodel = objects.BayModel(pecan.request.context, **baymodel_dict)
         _enforce_network_driver_types(baymodel)
         return func(*args, **kwargs)
 
