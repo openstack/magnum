@@ -173,6 +173,28 @@ class CertManagerTestCase(base.BaseTestCase):
                                                passphrase)
         self.assertEqual(mock.sentinel.signed_cert, bay_ca_cert)
 
+    @mock.patch('magnum.common.x509.operations.sign')
+    def test_sign_node_certificate_without_bay_name(self, mock_x509_sign):
+        mock_bay = mock.MagicMock()
+        mock_bay.name = None
+        mock_bay.uuid = "mock_bay_uuid"
+        mock_ca_cert = mock.MagicMock()
+        mock_ca_cert.get_private_key.return_value = mock.sentinel.priv_key
+        passphrase = mock.sentinel.passphrase
+        mock_ca_cert.get_private_key_passphrase.return_value = passphrase
+        self.CertManager.get_cert.return_value = mock_ca_cert
+        mock_csr = mock.MagicMock()
+        mock_x509_sign.return_value = mock.sentinel.signed_cert
+
+        bay_ca_cert = cert_manager.sign_node_certificate(mock_bay, mock_csr)
+
+        self.CertManager.get_cert.assert_called_once_with(
+            mock_bay.ca_cert_ref, resource_ref=mock_bay.uuid)
+        mock_x509_sign.assert_called_once_with(mock_csr, mock_bay.uuid,
+                                               mock.sentinel.priv_key,
+                                               passphrase)
+        self.assertEqual(mock.sentinel.signed_cert, bay_ca_cert)
+
     def test_get_bay_ca_certificate(self):
         mock_bay = mock.MagicMock()
         mock_bay.uuid = "mock_bay_uuid"

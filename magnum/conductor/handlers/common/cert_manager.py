@@ -72,15 +72,22 @@ def _generate_client_cert(issuer_name, ca_cert, ca_password):
     return magnum_cert_ref
 
 
+def _get_issuer_name(bay):
+    issuer_name = bay.name
+    # When user create a Bay without name, the bay.name is None.
+    # We should use bay.uuid as issuer name.
+    if issuer_name is None:
+        issuer_name = bay.uuid
+    return issuer_name
+
+
 def generate_certificates_to_bay(bay):
     """Generate ca_cert and magnum client cert and set to bay
 
     :param bay: The bay to set CA cert and magnum client cert
     :returns: CA cert uuid and magnum client cert uuid
     """
-    issuer_name = bay.name
-    if issuer_name is None:
-        issuer_name = bay.uuid
+    issuer_name = _get_issuer_name(bay)
 
     LOG.debug('Start to generate certificates: %s' % issuer_name)
 
@@ -134,7 +141,9 @@ def sign_node_certificate(bay, csr):
         resource_ref=bay.uuid
     )
 
-    node_cert = x509.sign(csr, bay.name, ca_cert.get_private_key(),
+    node_cert = x509.sign(csr,
+                          _get_issuer_name(bay),
+                          ca_cert.get_private_key(),
                           ca_cert.get_private_key_passphrase())
     return node_cert
 
