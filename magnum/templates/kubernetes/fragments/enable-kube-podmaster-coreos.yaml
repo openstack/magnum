@@ -1,0 +1,77 @@
+#cloud-config
+write_files:
+  - path: /etc/systemd/system/enable-kube-podmaster.service
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Configure Kubernetes Podmaster
+
+      [Service]
+      Type=oneshot
+      ExecStart=/etc/sysconfig/enable-kube-podmaster.sh
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/sysconfig/enable-kube-podmaster.sh
+    owner: "root:root"
+    permissions: "0755"
+    content: |
+      #!/bin/sh
+
+      . /etc/sysconfig/heat-params
+      myip=$(ip addr show eth0 |
+             awk '$1 == "inet" {print $2}' | cut -f1 -d/)
+
+      TEMPLATE=/etc/kubernetes/manifests/kube-podmaster.yaml
+      mkdir -p $(dirname ${TEMPLATE})
+
+      cat > ${TEMPLATE} <<EOF
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: kube-podmaster
+        namespace: kube-system
+      spec:
+        hostNetwork: true
+        containers:
+        - name: scheduler-elector
+          image: gcr.io/google_containers/podmaster:1.1
+          command:
+          - /podmaster
+          - --etcd-servers=http://127.0.0.1:2379
+          - --key=scheduler
+          - --whoami=${ADVERTISE_IP}
+          - --source-file=/src/manifests/kube-scheduler.yaml
+          - --dest-file=/dst/manifests/kube-scheduler.yaml
+          volumeMounts:
+          - mountPath: /src/manifests
+            name: manifest-src
+            readOnly: true
+          - mountPath: /dst/manifests
+            name: manifest-dst
+        - name: controller-manager-elector
+          image: gcr.io/google_containers/podmaster:1.1
+          command:
+          - /podmaster
+          - --etcd-servers=http://127.0.0.1:2379
+          - --key=controller
+          - --whoami=${myip}
+          - --source-file=/src/manifests/kube-controller-manager.yaml
+          - --dest-file=/dst/manifests/kube-controller-manager.yaml
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+          - mountPath: /src/manifests
+            name: manifest-src
+            readOnly: true
+          - mountPath: /dst/manifests
+            name: manifest-dst
+        volumes:
+        - hostPath:
+            path: /srv/kubernetes/manifests
+          name: manifest-src
+        - hostPath:
+            path: /etc/kubernetes/manifests
+          name: manifest-dst
+      EOF

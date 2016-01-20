@@ -1,0 +1,46 @@
+#cloud-config
+write_files:
+  - path: /etc/systemd/system/configure-etcd.service
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Configure etcd
+
+      [Service]
+      Type=oneshot
+      ExecStart=/etc/sysconfig/configure-etcd.sh
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/sysconfig/configure-etcd.sh
+    owner: "root:root"
+    permissions: "0755"
+    content: |
+      #!/bin/sh
+
+      . /etc/sysconfig/heat-params
+      myip=$(ip addr show eth0 |
+             awk '$1 == "inet" {print $2}' | cut -f1 -d/)
+
+      DROP_IN_FILE=/etc/systemd/system/etcd2.service.d/20-configure-etcd.conf
+      mkdir -p $(dirname $DROP_IN_FILE)
+      cat > $DROP_IN_FILE <<EOF
+      [Service]
+      Environment=ETCD_NAME=$myip
+      Environment=ETCD_DATA_DIR=/var/lib/etcd/default.etcd
+      Environment=ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      Environment=ETCD_LISTEN_PEER_URLS=http://$myip:2380
+
+      Environment=ETCD_ADVERTISE_CLIENT_URLS=http://$myip:2379
+      Environment=ETCD_INITIAL_ADVERTISE_PEER_URLS=http://$myip:2380
+      Environment=ETCD_DISCOVERY=$ETCD_DISCOVERY_URL
+      EOF
+
+      if [ -n "$HTTP_PROXY" ]; then
+          echo "Environment=ETCD_DISCOVERY_PROXY=$HTTP_PROXY" >> $DROP_IN_FILE
+      fi
+
+      systemctl enable etcd2
+      systemctl --no-block start etcd2

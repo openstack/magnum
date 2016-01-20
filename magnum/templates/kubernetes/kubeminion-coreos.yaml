@@ -26,14 +26,6 @@ parameters:
     type: string
     description: uuid/name of a network to use for floating ip addresses
 
-  token:
-    type: string
-    description: token is generated from https://discovery.etcd.io/new
-
-  ssh_authorized_key:
-    type: string
-    description: complete ssh key.
-
   kube_allow_priv:
     type: string
     description: >
@@ -42,17 +34,29 @@ parameters:
     constraints:
       - allowed_values: ["true", "false"]
 
-  docker_volume_size:
+  network_driver:
+    type: string
+    description: network driver to use for instantiating container networks
+
+  tls_disabled:
+    type: boolean
+    description: whether or not to enable TLS
+    default: False
+
+  kubernetes_port:
     type: number
     description: >
-      size of a cinder volume to allocate to docker for container/image
-      storage
-    default: 25
+      The port which are used by kube-apiserver to provide Kubernetes
+      service.
+    default: 8080
 
   # The following are all generated in the parent template.
   kube_master_ip:
     type: string
     description: IP address of the Kubernetes master server.
+  etcd_server_ip:
+    type: string
+    description: IP address of the Etcd server.
   fixed_network:
     type: string
     description: Network from which to allocate fixed addresses.
@@ -63,15 +67,14 @@ parameters:
 resources:
 
   minion_wait_handle:
-    type: AWS::CloudFormation::WaitConditionHandle
+    type: OS::Heat::WaitConditionHandle
 
   minion_wait_condition:
-    type: AWS::CloudFormation::WaitCondition
+    type: OS::Heat::WaitCondition
     depends_on: kube-minion
     properties:
-      Handle:
-        get_resource: minion_wait_handle
-      Timeout: 6000
+      handle: {get_resource: minion_wait_handle}
+      timeout: 6000
 
   ######################################################################
   #
@@ -103,89 +106,64 @@ resources:
           params:
             $KUBE_ALLOW_PRIV: {get_param: kube_allow_priv}
             $KUBE_MASTER_IP: {get_param: kube_master_ip}
-            $WAIT_HANDLE: {get_resource: node_wait_handle}
-            $DOCKER_VOLUME: {get_resource: docker_volume}
+            $WAIT_CURL: {get_attr: [minion_wait_handle, curl_cli]}
+            $KUBE_API_PORT: {get_param: kubernetes_port}
+            $TLS_DISABLED: {get_param: tls_disabled}
+            $NETWORK_DRIVER: {get_param: network_driver}
+            $ETCD_SERVER_IP: {get_param: etcd_server_ip}
 
-  coreos_params:
+  enable_network_service:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/enable-network-service-coreos.yaml}
+
+  enable_kubelet:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/enable-kubelet-minion-coreos.yaml}
+
+  enable_kube_proxy:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/enable-kube-proxy-minion-coreos.yaml}
+
+  wc_notify:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/wc-notify-coreos.yaml}
+
+  kube_minion_init:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config:
         str_replace:
-          template: {get_file: fragments/coreos.params.yaml}
+          template: |
+            $write_heat_params
+            $enable_network_service
+            $enable_kubelet
+            $enable_kube_proxy
+            $wc_notify
+            coreos:
+              units:
+                - name: "enable-network-service.service"
+                  command: "start"
+                - name: "enable-kubelet.service"
+                  command: "start"
+                - name: "enable-kube-proxy.service"
+                  command: "start"
+                - name: "wc-notify.service"
+                  command: "start"
           params:
-            token: {get_param: token}
-            ssh_authorized_key: {get_param: ssh_authorized_key}
-
-  add_to_docker_group:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/add-to-docker-group.sh}
-
-  configure_docker_storage:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/configure-docker-storage.sh}
-
-  configure_kubernetes_minion:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/configure-kubernetes-minion.sh}
-
-  kube_user:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/kube-user.yaml}
-
-  kube_examples:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/kube-examples.yaml}
-
-  docker_service:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/docker.service.yaml}
-
-  enable_services:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/enable-services-minion.sh}
-
-  cfn_signal:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/cfn-signal.sh}
-
-  disable_selinux:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/disable-selinux.sh}
-
-  kube_minion_init:
-    type: OS::Heat::MultipartMime
-    properties:
-      parts:
-        - config: {get_resource: disable_selinux}
-        - config: {get_resource: write_heat_params}
-        - config: {get_resource: kube_user}
-        - config: {get_resource: kube_examples}
-        - config: {get_resource: add_to_docker_group}
-        - config: {get_resource: configure_docker_storage}
-        - config: {get_resource: configure_kubernetes_minion}
-        - config: {get_resource: docker_service}
-        - config: {get_resource: enable_services}
-        - config: {get_resource: cfn_signal}
-        - config: {get_resource: coreos_params}
+            "$write_heat_params": {get_attr: [write_heat_params, config]}
+            "$enable_network_service": {get_attr: [enable_network_service, config]}
+            "$enable_kubelet": {get_attr: [enable_kubelet, config]}
+            "$enable_kube_proxy": {get_attr: [enable_kube_proxy, config]}
+            "$wc_notify": {get_attr: [wc_notify, config]}
 
   # Important:  the name for the heat resource kube-minion below must
   # not contain "_" (underscore) because it will be used in the
@@ -220,18 +198,6 @@ resources:
     properties:
       floating_network: {get_param: external_network}
       port_id: {get_resource: kube_minion_eth0}
-
-  docker_volume:
-    type: OS::Cinder::Volume
-    properties:
-      size: {get_param: docker_volume_size}
-
-  docker_volume_attach:
-    type: OS::Cinder::VolumeAttachment
-    properties:
-      instance_uuid: {get_resource: kube-minion}
-      volume_id: {get_resource: docker_volume}
-      mountpoint: /dev/vdb
 
 outputs:
 

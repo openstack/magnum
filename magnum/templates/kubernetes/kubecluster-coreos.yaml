@@ -31,18 +31,20 @@ parameters:
     default: m1.small
     description: flavor to use when booting the server
 
-  token:
+  discovery_url:
     type: string
-    description: token is generated from https://discovery.etcd.io/new
-
-  ssh_authorized_key:
-    type: string
-    description: complete ssh key.
+    description: >
+      Discovery URL used for bootstrapping the etcd cluster.
 
   dns_nameserver:
     type: string
     description: address of a dns nameserver reachable in your environment
     default: 8.8.8.8
+
+  number_of_masters:
+    type: number
+    description: how many kubernetes masters to spawn
+    default: 1
 
   number_of_minions:
     type: number
@@ -87,13 +89,6 @@ parameters:
     constraints:
       - allowed_values: ["true", "false"]
 
-  docker_volume_size:
-    type: number
-    description: >
-      size of a cinder volume to allocate to docker for container/image
-      storage
-    default: 25
-
   minions_to_remove:
     type: comma_delimited_list
     description: >
@@ -103,28 +98,22 @@ parameters:
       be empty when doing a create.
     default: []
 
-  auth_url:
+  network_driver:
     type: string
-    description: >
-      url for kubernetes to authenticate before sending request to neutron
+    description: network driver to use for instantiating container networks
+    default: flannel
 
-  username:
-    type: string
-    description: >
-      user account
+  tls_disabled:
+    type: boolean
+    description: whether or not to disable TLS
+    default: False
 
-  password:
-    type: string
+  kubernetes_port:
+    type: number
     description: >
-      user password, not set in current implementation, only used to
-      fill in for Kubernetes config file
-    default:
-      ChangeMe
-
-  tenant_name:
-    type: string
-    description: >
-      tenant name
+      The port which are used by kube-apiserver to provide Kubernetes
+      service.
+    default: 8080
 
 resources:
 
@@ -187,12 +176,10 @@ resources:
           portal_network_cidr: {get_param: portal_network_cidr}
           fixed_network: {get_resource: fixed_network}
           fixed_subnet: {get_resource: fixed_subnet}
-          token: {get_param: token}
-          ssh_authorized_key: {get_param: ssh_authorized_key}
-          auth_url: {get_param: auth_url}
-          username: {get_param: username}
-          password: {get_param: password}
-          tenant_name: {get_param: tenant_name}
+          discovery_url: {get_param: discovery_url}
+          network_driver: {get_param: network_driver}
+          kubernetes_port: {get_param: kubernetes_port}
+          tls_disabled: {get_param: tls_disabled}
 
   ######################################################################
   #
@@ -216,17 +203,18 @@ resources:
           minion_flavor: {get_param: minion_flavor}
           fixed_network: {get_resource: fixed_network}
           fixed_subnet: {get_resource: fixed_subnet}
-          kube_master_ip: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
+          kube_master_ip: {"Fn::Select": [0, {get_attr: [kube_master, kube_master_ip]}]}
           external_network: {get_param: external_network}
           kube_allow_priv: {get_param: kube_allow_priv}
-          docker_volume_size: {get_param: docker_volume_size}
-          token: {get_param: token}
-          ssh_authorized_key: {get_param: ssh_authorized_key}
+          network_driver: {get_param: network_driver}
+          kubernetes_port: {get_param: kubernetes_port}
+          tls_disabled: {get_param: tls_disabled}
+          etcd_server_ip: {"Fn::Select": [0, {get_attr: [kube_master, kube_master_ip]}]}
 
 outputs:
 
   api_address:
-    value: {get_attr: [kube_master, kube_master_external_ip]}
+    value: {"Fn::Select": [0, {get_attr: [kube_master, kube_master_external_ip]}]}
 
   kube_masters_private:
     value: {get_attr: [kube_master, kube_master_ip]}

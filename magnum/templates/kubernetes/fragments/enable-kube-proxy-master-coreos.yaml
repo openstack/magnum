@@ -1,0 +1,59 @@
+#cloud-config
+write_files:
+  - path: /etc/systemd/system/enable-kube-proxy.service
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Configure Kubernetes Proxy
+
+      [Service]
+      Type=oneshot
+      ExecStart=/etc/sysconfig/enable-kube-proxy-master.sh
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/sysconfig/enable-kube-proxy-master.sh
+    owner: "root:root"
+    permissions: "0755"
+    content: |
+      #!/bin/sh
+
+      . /etc/sysconfig/heat-params
+      myip=$(ip addr show eth0 |
+             awk '$1 == "inet" {print $2}' | cut -f1 -d/)
+
+      # TODO(hongbin): enable TLS
+      HOST_CERTS_PATH=/usr/share/ca-certificates
+
+      TEMPLATE=/etc/kubernetes/manifests/kube-proxy.yaml
+      mkdir -p $(dirname ${TEMPLATE})
+      cat > ${TEMPLATE} <<EOF
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: kube-proxy
+        namespace: kube-system
+      spec:
+        hostNetwork: true
+        containers:
+        - name: kube-proxy
+          image: gcr.io/google_containers/hyperkube:v1.0.6
+          command:
+          - /hyperkube
+          - proxy
+          - --master=http://127.0.0.1:8080
+          - --logtostderr=true
+          - --v=0
+          securityContext:
+            privileged: true
+          volumeMounts:
+          - mountPath: /etc/ssl/certs
+            name: ssl-certs-host
+            readOnly: true
+        volumes:
+        - hostPath:
+            path: ${HOST_CERTS_PATH}
+          name: ssl-certs-host
+      EOF

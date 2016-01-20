@@ -1,0 +1,70 @@
+#cloud-config
+write_files:
+  - path: /etc/systemd/system/enable-kube-controller-manager.service
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Enable Kubernetes Controller Manager
+
+      [Service]
+      Type=oneshot
+      ExecStart=/etc/sysconfig/enable-kube-controller-manager.sh
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/sysconfig/enable-kube-controller-manager.sh
+    owner: "root:root"
+    permissions: "0755"
+    content: |
+      #!/bin/sh
+
+      . /etc/sysconfig/heat-params
+
+      # TODO(hongbin): enable TLS
+      KUBE_CERTS_PATH=/etc/kubernetes/ssl
+      HOST_CERTS_PATH=/usr/share/ca-certificates
+
+      TEMPLATE=/srv/kubernetes/manifests/kube-controller-manager.yaml
+      mkdir -p $(dirname ${TEMPLATE})
+
+      cat > ${TEMPLATE} <<EOF
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: kube-controller-manager
+        namespace: kube-system
+      spec:
+        hostNetwork: true
+        containers:
+        - name: kube-controller-manager
+          image: gcr.io/google_containers/hyperkube:v1.0.6
+          command:
+          - /hyperkube
+          - controller-manager
+          - --master=http://127.0.0.1:8080
+          - --service-account-private-key-file=${SERVICE_ACCOUNT_PRIVATE_KEY_FILE}
+          - --root-ca-file=${ROOT_CA_FILE}
+          livenessProbe:
+            httpGet:
+              host: 127.0.0.1
+              path: /healthz
+              port: 10252
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+          volumeMounts:
+          - mountPath: /etc/kubernetes/ssl
+            name: ssl-certs-kubernetes
+            readOnly: true
+          - mountPath: /etc/ssl/certs
+            name: ssl-certs-host
+            readOnly: true
+        volumes:
+        - hostPath:
+            path: ${KUBE_CERTS_PATH}
+          name: ssl-certs-kubernetes
+        - hostPath:
+            path: ${HOST_CERTS_PATH}
+          name: ssl-certs-host
+      EOF

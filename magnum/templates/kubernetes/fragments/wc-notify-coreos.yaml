@@ -1,0 +1,24 @@
+#cloud-config
+write_files:
+  - path: /etc/systemd/system/wc-notify.service
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Notify Heat
+
+      [Service]
+      Type=oneshot
+      ExecStart=/etc/sysconfig/wc-notify.sh
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/sysconfig/wc-notify.sh
+    owner: "root:root"
+    permissions: "0755"
+    content: |
+      #!/bin/bash -v
+      . /etc/sysconfig/heat-params
+      command="$WAIT_CURL --data-binary '{\"status\": \"SUCCESS\"}'"
+      eval $(echo "$command")
