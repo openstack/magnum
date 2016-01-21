@@ -34,9 +34,25 @@ Contents
 ===========
 Terminology
 ===========
-*To be filled in*
 
-Baymodel, bay, ...
+Bay
+  A bay is the construct in which Magnum launches container orchestration
+  engines. After a bay has been created the user is able to add containers to
+  it either directly, or in the case of the Kubernetes container orchestration
+  engine within pods - a logical construct specific to that implementation. A
+  bay is created based on a baymodel.
+
+Baymodel
+  A baymodel in Magnum is roughly equivalent to a flavor in Nova. It acts as a
+  template that defines options such as the container orchestration engine,
+  keypair and image for use when Magnum is creating bays using the given
+  baymodel.
+
+Container Orchestration Engine (COE)
+  A container orchestration engine manages the lifecycle of one or more
+  containers, logically represented in Magnum as a bay. Magnum supports a
+  number of container orchestration engines, each with their own pros and cons,
+  including Docker Swarm, Kubernetes, and Mesos.
 
 ========
 Overview
