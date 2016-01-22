@@ -113,9 +113,69 @@ Barbican service
 
 Cluster internet access
 -----------------------
-*To be filled in*
+The nodes for Kubernetes, Swarm and Mesos are connected to a private
+Neutron network, so to provide access to the external internet, a router
+connects the private network to a public network.  With devstack, the
+default public network is "public", but this can be replaced by the
+parameter "external-network-id" in the bay model.  The "public" network
+with devstack is actually not a real external network, so it is in turn
+routed to the network interface of the host for devstack.  This is
+configured in the file local.conf with the variable PUBLIC_INTERFACE,
+for example::
 
-(DNS, external network)
+    PUBLIC_INTERFACE=eth1
+
+If the route to the external internet is not set up properly, the ectd
+discovery would fail (if using public discovery) and container images
+cannot be downloaded, among other failures.
+
+First, check for connectivity to the external internet by pinging
+an external IP (the IP shown here is an example; use an IP that
+works in your case)::
+
+    ping 8.8.8.8
+
+**Note:** On the fedora-21-atomic-5 image, ping does not work because
+of a known atomic bug.  You can work around this problem by::
+
+    cp /usr/bin/ping .
+    sudo ./ping 8.8.8.8
+
+If the ping fails, there is no route to the external internet.
+Check the following:
+
+- Is PUBLIC_INTERFACE in devstack/local.conf the correct network
+  interface?  Does this interface have a route to the external internet?
+- If "external-network-id" is specified in the bay model, does this network
+  have a route to the external internet?
+- Is your devstack environment behind a firewall?  This can be the case for some
+  enterprises or countries.  In this case, consider using a `proxy server
+  <https://github.com/openstack/magnum/blob/master/doc/source/magnum-proxy.rst>`_.
+- Is the traffic blocked by the security group? Check the
+  `rules of security group
+  <http://docs.openstack.org/openstack-ops/content/security_groups.html>`_.
+- Is your host NAT'ing your internal network correctly? Check your host
+  `iptables <http://docs.openstack.org/openstack-ops/content/network_troubleshooting.html#iptables>`_.
+- Use *tcpdump* for `networking troubleshooting
+  <http://docs.openstack.org/openstack-ops/content/network_troubleshooting.html#tcpdump>`_.
+  You can run *tcpdump* on the interface *docker0, flannel0* and *eth0* on the
+  node and then run *ping* to see the path of the message from the container.
+
+If ping is successful, check that DNS is working::
+
+    wget google.com
+
+If DNS works, you should get back a few lines of HTML text.
+
+If the name lookup fails, check the following:
+
+- Is the DNS entry correct in the subnet?  Try "neutron subnet-show
+  <subnet-id>" for the private subnet and check dns_nameservers.
+  The IP should be either the default public DNS 8.8.8.8 or the value
+  specified by "dns-nameserver" in the bay model.
+- If you are using your own DNS server by specifying "dns-nameserver"
+  in the bay model, is it reachable and working?
+- More help on `DNS troubleshooting <http://docs.openstack.org/openstack-ops/content/network_troubleshooting.html#debugging_dns_issues>`_.
 
 
 etcd service
