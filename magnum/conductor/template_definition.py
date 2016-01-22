@@ -338,8 +338,6 @@ class BaseTemplateDefinition(TemplateDefinition):
                            baymodel_attr='image_id')
         self.add_parameter('dns_nameserver',
                            baymodel_attr='dns_nameserver')
-        self.add_parameter('fixed_network_cidr',
-                           baymodel_attr='fixed_network')
         self.add_parameter('http_proxy',
                            baymodel_attr='http_proxy')
         self.add_parameter('https_proxy',

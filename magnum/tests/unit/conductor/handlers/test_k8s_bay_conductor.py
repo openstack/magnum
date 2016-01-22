@@ -30,7 +30,6 @@ class TestBayConductorWithK8s(base.TestCase):
             'keypair_id': 'keypair_id',
             'dns_nameserver': 'dns_nameserver',
             'external_network_id': 'external_network_id',
-            'fixed_network': '10.20.30.0/24',
             'network_driver': 'network_driver',
             'docker_volume_size': 20,
             'cluster_distro': 'fedora-atomic',
@@ -100,7 +99,6 @@ class TestBayConductorWithK8s(base.TestCase):
             'image_id': 'server_image',
             'flavor_id': 'minion_flavor',
             'docker_volume_size': 'docker_volume_size',
-            'fixed_network': 'fixed_network_cidr',
             'network_driver': 'network_driver',
             'master_flavor_id': 'master_flavor',
             'apiserver_port': '',
@@ -128,7 +126,6 @@ class TestBayConductorWithK8s(base.TestCase):
             'master_flavor': 'master_flavor_id',
             'number_of_minions': 1,
             'number_of_masters': 1,
-            'fixed_network_cidr': '10.20.30.0/24',
             'docker_volume_size': 20,
             'discovery_url': 'https://discovery.etcd.io/test',
             'flannel_network_cidr': '10.101.0.0/16',
@@ -172,7 +169,6 @@ class TestBayConductorWithK8s(base.TestCase):
             'master_flavor': 'master_flavor_id',
             'number_of_minions': 1,
             'number_of_masters': 1,
-            'fixed_network_cidr': '10.20.30.0/24',
             'network_driver': 'network_driver',
             'discovery_url': 'https://discovery.etcd.io/test',
             'http_proxy': 'http_proxy',
@@ -212,7 +208,6 @@ class TestBayConductorWithK8s(base.TestCase):
             'master_flavor': 'master_flavor_id',
             'number_of_minions': 1,
             'number_of_masters': 1,
-            'fixed_network_cidr': '10.20.30.0/24',
             'network_driver': 'network_driver',
             'discovery_url': 'http://tokentest/h1/h2/h3',
             'http_proxy': 'http_proxy',
@@ -256,14 +251,6 @@ class TestBayConductorWithK8s(base.TestCase):
         self._test_extract_template_definition(
             mock_objects_baymodel_get_by_uuid,
             missing_attr='docker_volume_size')
-
-    @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_extract_template_definition_without_fixed_network(
-            self,
-            mock_objects_baymodel_get_by_uuid):
-        self._test_extract_template_definition(
-            mock_objects_baymodel_get_by_uuid,
-            missing_attr='fixed_network')
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_without_master_flavor(
@@ -328,7 +315,6 @@ class TestBayConductorWithK8s(base.TestCase):
             'minion_flavor': 'flavor_id',
             'number_of_minions': 1,
             'number_of_masters': 1,
-            'fixed_network_cidr': '10.20.30.0/24',
             'network_driver': 'network_driver',
             'docker_volume_size': 20,
             'discovery_url': 'https://address/token',
