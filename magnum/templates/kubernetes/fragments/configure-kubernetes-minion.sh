@@ -42,6 +42,4 @@ cat >> /etc/environment <<EOF
 KUBERNETES_MASTER=$KUBE_MASTER_URI
 EOF
 
-sed -i '/^DOCKER_STORAGE_OPTIONS=/ s/=.*/=--storage-driver devicemapper --storage-opt dm.fs=xfs --storage-opt dm.thinpooldev=\/dev\/mapper\/docker-docker--pool --storage-opt dm.use_deferred_removal=true/' /etc/sysconfig/docker-storage
-
 hostname `hostname | sed 's/.novalocal//'`
