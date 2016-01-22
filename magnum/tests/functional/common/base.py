@@ -13,7 +13,6 @@
 import inspect
 
 from tempest.common import credentials_factory as common_creds
-from tempest.common import dynamic_creds
 from tempest_lib import base
 
 from magnum.tests.functional.common import config
@@ -37,9 +36,9 @@ class BaseMagnumTest(base.BaseTestCase):
         super(BaseMagnumTest, cls).tearDownClass()
 
     def tearDown(self):
-        super(BaseMagnumTest, self).tearDown()
         if self.ic is not None:
             self.ic.clear_creds()
+        super(BaseMagnumTest, self).tearDown()
 
     def get_credentials(self, name=None, type_of_creds="default"):
         if name is None:
@@ -49,12 +48,10 @@ class BaseMagnumTest(base.BaseTestCase):
                 name = name[0:32]
 
         # Choose type of isolated creds
-        self.ic = dynamic_creds.DynamicCredentialProvider(
-            identity_version=config.Config.auth_version,
-            name=name,
-            admin_role=config.Config.admin_role,
-            admin_creds=common_creds.get_configured_credentials(
-                'identity_admin'))
+        self.ic = common_creds.get_credentials_provider(
+            name,
+            identity_version=config.Config.auth_version
+        )
 
         creds = None
         if "admin" == type_of_creds:
@@ -65,6 +62,14 @@ class BaseMagnumTest(base.BaseTestCase):
             creds = self.ic.get_primary_creds()
         else:
             creds = self.ic.self.get_credentials(type_of_creds)
+
+        _, keypairs_client = self.get_clients(
+            creds, type_of_creds, 'keypair_setup')
+        try:
+            keypairs_client.show_keypair(config.Config.keypair_id)
+        except Exception:
+            keypairs_client.create_keypair(name=config.Config.keypair_id)
+
         return creds
 
     def get_clients(self, creds, type_of_creds, request_type):

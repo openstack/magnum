@@ -30,11 +30,15 @@ class BayModelTest(base.BaseMagnumTest):
         self.keypairs_client = None
 
     def setUp(self):
-        super(BayModelTest, self).setUp()
-        (self.baymodel_client,
-         self.keypairs_client) = self.get_clients_with_new_creds(
-             type_of_creds='default',
-             request_type='baymodel')
+        try:
+            super(BayModelTest, self).setUp()
+            (self.baymodel_client,
+             self.keypairs_client) = self.get_clients_with_new_creds(
+                 type_of_creds='default',
+                 request_type='baymodel')
+        except Exception:
+            self.tearDown()
+            raise
 
     def tearDown(self):
         for baymodel_id in self.baymodels:
@@ -55,7 +59,6 @@ class BayModelTest(base.BaseMagnumTest):
 
     @testtools.testcase.attr('positive')
     def test_list_baymodels(self):
-        self.keypairs_client.create_keypair(name='default')
         gen_model = datagen.baymodel_data_with_valid_keypair_and_image_id()
         _, temp_model = self._create_baymodel(gen_model)
         resp, model = self.baymodel_client.list_baymodels()
@@ -66,13 +69,11 @@ class BayModelTest(base.BaseMagnumTest):
 
     @testtools.testcase.attr('positive')
     def test_create_baymodel(self):
-        self.keypairs_client.create_keypair(name='default')
         gen_model = datagen.baymodel_data_with_valid_keypair_and_image_id()
         resp, model = self._create_baymodel(gen_model)
 
     @testtools.testcase.attr('positive')
     def test_update_baymodel_by_uuid(self):
-        self.keypairs_client.create_keypair(name='default')
         gen_model = datagen.baymodel_data_with_valid_keypair_and_image_id()
         resp, old_model = self._create_baymodel(gen_model)
 
@@ -88,7 +89,6 @@ class BayModelTest(base.BaseMagnumTest):
 
     @testtools.testcase.attr('positive')
     def test_delete_baymodel_by_uuid(self):
-        self.keypairs_client.create_keypair(name='default')
         gen_model = datagen.baymodel_data_with_valid_keypair_and_image_id()
         resp, model = self._create_baymodel(gen_model)
         resp, _ = self.baymodel_client.delete_baymodel(model.uuid)
@@ -97,7 +97,6 @@ class BayModelTest(base.BaseMagnumTest):
 
     @testtools.testcase.attr('positive')
     def test_delete_baymodel_by_name(self):
-        self.keypairs_client.create_keypair(name='default')
         gen_model = datagen.baymodel_data_with_valid_keypair_and_image_id()
         resp, model = self._create_baymodel(gen_model)
         resp, _ = self.baymodel_client.delete_baymodel(model.name)
@@ -147,7 +146,6 @@ class BayModelTest(base.BaseMagnumTest):
 
     @testtools.testcase.attr('negative')
     def test_create_baymodel_missing_image(self):
-        self.keypairs_client.create_keypair(name='default')
         gen_model = datagen.baymodel_data_with_valid_keypair()
         self.assertRaises(
             exceptions.BadRequest,
@@ -163,7 +161,6 @@ class BayModelTest(base.BaseMagnumTest):
     @testtools.testcase.attr('negative')
     def test_update_baymodel_invalid_patch(self):
         # get json object
-        self.keypairs_client.create_keypair(name='default')
         gen_model = datagen.baymodel_data_with_valid_keypair_and_image_id()
         resp, old_model = self._create_baymodel(gen_model)
 
@@ -174,7 +171,6 @@ class BayModelTest(base.BaseMagnumTest):
 
     @testtools.testcase.attr('negative')
     def test_create_baymodel_invalid_network_driver(self):
-        self.keypairs_client.create_keypair(name='default')
         gen_model = datagen.baymodel_data_with_valid_keypair_and_image_id()
         gen_model.network_driver = 'invalid_network_driver'
         self.assertRaises(
