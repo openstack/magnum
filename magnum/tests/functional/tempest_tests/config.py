@@ -43,4 +43,8 @@ MagnumGroup = [
     cfg.StrOpt("flavor_id",
                default="m1.magnum",
                help="Flavor id to use for baymodels."),
+
+    cfg.StrOpt("magnum_url",
+               default=None,
+               help="Bypass URL for Magnum to skip service catalog lookup"),
 ]
