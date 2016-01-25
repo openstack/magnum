@@ -251,7 +251,7 @@ class ReplicationControllersController(rest.RestController):
         :param sort_dir: direction to sort. "asc" or "desc". Default: asc.
         :param bay_ident: UUID or logical name of the Bay.
         """
-        # NOTE(jay-lau-513): /detail should only work agaist collections
+        # NOTE(jay-lau-513): /detail should only work against collections
         parent = pecan.request.path.split('/')[:-1][-1]
         if parent != "rcs":
             raise exception.HTTPNotFound
