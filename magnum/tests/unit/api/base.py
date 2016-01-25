@@ -56,6 +56,14 @@ class FunctionalTest(base.DbTestCase):
         self._check_version = p.start()
         self.addCleanup(p.stop)
 
+    def _verify_attrs(self, attrs, response, positive=True):
+        if positive is True:
+            verify_method = self.assertIn
+        else:
+            verify_method = self.assertNotIn
+        for attr in attrs:
+            verify_method(attr, response)
+
     def _make_app(self, enable_acl=False):
         # Determine where we are so we can set up paths in the config
         root_dir = self.get_path()
