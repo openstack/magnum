@@ -1,11 +1,11 @@
-.. _dev-manual-install:
+.. _manual-install:
 
 ==================================
 Manually Adding Magnum to DevStack
 ==================================
 
 If you are getting started with magnum it is recommended you follow the
-:ref:`dev-quickstart` to get up and running with magnum. This guide covers
+:ref:`quickstart` to get up and running with magnum. This guide covers
 a more in-depth process to setup magnum with devstack.
 
 Magnum depends on nova, glance, heat, barbican, and neutron to create and
@@ -235,4 +235,4 @@ Start the conductor service in a new screen::
 Magnum should now be up and running!
 
 Further details on utilizing magnum and deploying containers can be found in
-the guide :ref:`dev-quickstart`.
+the guide :ref:`quickstart`.

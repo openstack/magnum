@@ -1,4 +1,4 @@
-.. _dev-quickstart:
+.. _quickstart:
 
 =====================
 Developer Quick-Start
@@ -79,7 +79,7 @@ To run unit test coverage and check percentage of code covered::
     tox -e cover
 
 To discover and interact with templates, please refer to
-`<http://docs.openstack.org/developer/magnum/dev/dev-bay-template-example.html>`_
+`<http://docs.openstack.org/developer/magnum/dev/bay-template-example.html>`_
 
 Exercising the Services Using Devstack
 ======================================
@@ -96,7 +96,7 @@ This session has only been tested on Ubuntu 14.04 (Trusty) and Fedora 20/21.
 We recommend users to select one of them if it is possible.
 
 For in-depth guidance on adding magnum manually to a devstack instance, please
-refer to the `<http://docs.openstack.org/developer/magnum/dev/dev-manual-devstack.html>`_
+refer to the `<http://docs.openstack.org/developer/magnum/dev/manual-devstack.html>`_
 
 Clone devstack::
 
@@ -121,7 +121,7 @@ Kilo, and heat is enabled by the magnum plugin)::
     PUBLIC_INTERFACE=eth1
     enable_plugin magnum https://git.openstack.org/openstack/magnum
     # Enable barbican service and use it to store TLS certificates
-    # For details http://docs.openstack.org/developer/magnum/dev/dev-tls.html
+    # For details http://docs.openstack.org/developer/magnum/dev/tls.html
     enable_plugin barbican https://git.openstack.org/openstack/barbican
     VOLUME_BACKING_FILE_SIZE=20G
     END
@@ -470,7 +470,7 @@ Building and Using a Mesos Bay
 
 Provisioning a mesos bay requires a Ubuntu-based image with some packages
 pre-installed. To build and upload such image, please refer to
-`<http://docs.openstack.org/developer/magnum/dev/dev-mesos.html>`_
+`<http://docs.openstack.org/developer/magnum/dev/mesos.html>`_
 
 Alternatively, you can download and upload a pre-built image::
 

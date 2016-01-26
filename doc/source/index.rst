@@ -75,12 +75,12 @@ Developer Info
 .. toctree::
    :maxdepth: 1
 
-   dev/dev-quickstart
-   dev/dev-manual-devstack
-   dev/dev-build-atomic-image.rst
-   dev/dev-kubernetes-load-balancer.rst
-   dev/dev-tls.rst
-   dev/dev-functional-test.rst
+   dev/quickstart
+   dev/manual-devstack
+   dev/build-atomic-image.rst
+   dev/kubernetes-load-balancer.rst
+   dev/tls.rst
+   dev/functional-test.rst
    contributing
    heat-templates
    objects

@@ -11,7 +11,7 @@ Prerequisite
 You need to follow the developer quickstart guide to deploy Magnum in a
 devstack environment
 
-`<http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html>`_
+`<http://docs.openstack.org/developer/magnum/dev/quickstart.html>`_
 
 Preparation
 ===========
