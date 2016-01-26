@@ -45,7 +45,7 @@ Overview
 
 Magnum rationale, concept, compelling features
 
-Bay Model
+BayModel
 ---------
 *To be filled in*
 
@@ -102,7 +102,107 @@ Native Client Configuration guide for each COE
 ==========
 Networking
 ==========
-*To be filled in*
+
+There are two components that make up the networking in a cluster.
+
+1. The Neutron infrastructure for the cluster: this includes the
+   private network, subnet, ports, routers, load balancers, etc.
+
+2. The networking model presented to the containers: this is what the
+   containers see in communicating with each other and to the external
+   world. Typically this consists of a driver deployed on each node.
+
+The two components are deployed and managed separately.  The Neutron
+infrastructure is the integration with OpenStack; therefore, it
+is stable and more or less similar across different COE
+types.  The networking model, on the other hand, is specific to the
+COE type and is still under active development in the various
+COE communities, for example,
+`Docker libnetwork <https://github.com/docker/libnetwork>`_ and
+`Kubernetes Container Networking
+<https://github.com/kubernetes/kubernetes/blob/release-1.1/docs/design/networking.md>`_.
+As a result, the implementation for the networking models is evolving and
+new models are likely to be introduced in the future.
+
+For the Neutron infrastructure, the following configuration can
+be set in the baymodel:
+
+external-network-id
+  The external Neutron network ID to connect to this bay. This
+  is used to connect the cluster to the external internet, allowing
+  the nodes in the bay to access external URL for discovery, image
+  download, etc.  If not specified, the default value is "public" and this
+  is valid for a typical devstack.
+
+fixed-network
+  The Neutron network to use as the private network for the bay nodes.
+  If not specified, a new Neutron private network will be created.
+
+dns-nameserver
+  The DNS nameserver to use for this bay.  This is an IP address for
+  the server and it is used to configure the Neutron subnet of the
+  cluster (dns_nameservers).  If not specified, the default DNS is
+  8.8.8.8, the publicly available DNS.
+
+http-proxy, https-proxy, no-proxy
+  The proxy for the nodes in the bay, to be used when the cluster is
+  behind a firewall and containers cannot access URL's on the external
+  internet directly.  For the parameter http-proxy and https-proxy, the
+  value to provide is a URL and it will be set in the environment
+  variable HTTP_PROXY and HTTPS_PROXY respectively in the nodes.  For
+  the parameter no-proxy, the value to provide is an IP or list of IP's
+  separated by comma.  Likewise, the value will be set in the
+  environment variable NO_PROXY in the nodes.
+
+For the networking model to the container, the following configuration
+can be set in the baymodel:
+
+network-driver
+  The network driver name for instantiating container networks.
+  Currently, the following network drivers are supported:
+
+  +--------+-------------+-----------+-------------+
+  | Driver | Kubernetes  |   Swarm   |    Mesos    |
+  +========+=============+===========+=============+
+  | Flannel| supported   | supported | unsupported |
+  +--------+-------------+-----------+-------------+
+  | Docker | unsupported | supported | supported   |
+  +--------+-------------+-----------+-------------+
+
+  If not specified, the default driver is Flannel for Kubernetes, and
+  Docker for Swarm and Mesos.
+
+Particular network driver may require its own set of parameters for
+configuration, and these parameters are specified through the labels
+in the baymodel.  Labels are arbitrary key=value pairs.
+
+When Flannel is specified as the network driver, the following
+optional labels can be added:
+
+flannel_network_cidr
+  IPv4 network in CIDR format to use for the entire Flannel network.
+  If not specified, the default is 10.100.0.0/16.
+
+flannel_network_subnetlen
+  The size of the subnet allocated to each host. If not specified, the
+  default is 24.
+
+flannel_backend
+  The type of backend for Flannel.  Possible values are *udp, vxlan,
+  host-gw*.  If not specified, the default is *udp*.  Selecting the
+  best backend depends on your networking.  Generally, *udp* is
+  the most generally supported backend since there is little
+  requirement on the network, but it typically offers the lowest
+  performance.  The *vxlan* backend performs better, but requires
+  vxlan support in the kernel so the image used to provision the
+  nodes needs to include this support.  The *host-gw* backend offers
+  the best performance since it does not actually encapsulate
+  messages, but it requires all the nodes to be on the same L2
+  network.  The private Neutron network that Magnum creates does
+  meet this requirement;  therefore if the parameter *fixed_network*
+  is not specified in the baymodel, *host-gw* is the best choice for
+  the Flannel backend.
+
 
 =================
 High Availability
