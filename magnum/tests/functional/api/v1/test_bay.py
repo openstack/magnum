@@ -37,35 +37,40 @@ class BayTest(base.BaseMagnumTest):
         self.bay_client = None
 
     def setUp(self):
-        super(BayTest, self).setUp()
-        self.credentials = self.get_credentials(type_of_creds='default')
-        (self.baymodel_client,
-         self.keypairs_client) = self.get_clients_with_existing_creds(
-             creds=self.credentials,
-             type_of_creds='default',
-             request_type='baymodel')
-        (self.bay_client, _) = self.get_clients_with_existing_creds(
-            creds=self.credentials,
-            type_of_creds='default',
-            request_type='bay')
-        model = datagen.valid_swarm_baymodel()
-        _, self.baymodel = self._create_baymodel(model)
+        try:
+            super(BayTest, self).setUp()
+            self.credentials = self.get_credentials(type_of_creds='default')
+            (self.baymodel_client,
+             self.keypairs_client) = self.get_clients_with_existing_creds(
+                 creds=self.credentials,
+                 type_of_creds='default',
+                 request_type='baymodel')
+            (self.bay_client, _) = self.get_clients_with_existing_creds(
+                creds=self.credentials,
+                type_of_creds='default',
+                request_type='bay')
+            model = datagen.valid_swarm_baymodel()
+            _, self.baymodel = self._create_baymodel(model)
 
-        # NOTE (dimtruck) by default tempest sets timeout to 20 mins.
-        # We need more time.
-        test_timeout = 3600
-        self.useFixture(fixtures.Timeout(test_timeout, gentle=True))
+            # NOTE (dimtruck) by default tempest sets timeout to 20 mins.
+            # We need more time.
+            test_timeout = 3600
+            self.useFixture(fixtures.Timeout(test_timeout, gentle=True))
+        except Exception:
+            self.tearDown()
+            raise
 
     def tearDown(self):
-        bay_list = self.bays[:]
-        for bay_id in bay_list:
-            self._delete_bay(bay_id)
-            self.bays.remove(bay_id)
-        self._delete_baymodel(self.baymodel.uuid)
-        super(BayTest, self).tearDown()
+        try:
+            bay_list = self.bays[:]
+            for bay_id in bay_list:
+                self._delete_bay(bay_id)
+                self.bays.remove(bay_id)
+            self._delete_baymodel(self.baymodel.uuid)
+        finally:
+            super(BayTest, self).tearDown()
 
     def _create_baymodel(self, baymodel_model):
-        self.keypairs_client.create_keypair(name='default')
         resp, model = self.baymodel_client.post_baymodel(baymodel_model)
         return resp, model
 
