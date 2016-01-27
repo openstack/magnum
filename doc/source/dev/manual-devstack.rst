@@ -157,7 +157,8 @@ Configure magnum::
     # create the magnum conf directory
     sudo mkdir -p /etc/magnum
 
-    # copy sample config and modify it as necessary
+    # generate sample config file and modify it as necessary
+    tox -egenconfig
     sudo cp etc/magnum/magnum.conf.sample /etc/magnum/magnum.conf
 
     # copy policy.json
