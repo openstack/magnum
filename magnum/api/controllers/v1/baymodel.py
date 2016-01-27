@@ -119,6 +119,9 @@ class BayModel(base.APIBase):
     """Its comma separated list of ip for which proxies should not
        used in the bay"""
 
+    volume_driver = wtypes.StringType(min_length=1, max_length=255)
+    """The name of the driver used for instantiating container volume driver"""
+
     registry_enabled = wsme.wsattr(types.boolean, default=False)
     """Indicates whether the docker registry is enabled"""
 
@@ -177,6 +180,7 @@ class BayModel(base.APIBase):
             external_network_id='ffc44e4a-2319-4062-bce0-9ae1c38b05ba',
             fixed_network='private',
             network_driver='libnetwork',
+            volume_driver='cinder',
             apiserver_port=8080,
             docker_volume_size=25,
             cluster_distro='fedora-atomic',

@@ -33,6 +33,7 @@ def get_test_baymodel(**kw):
                                       'd1f02cfb-d27f-4068-9332-84d907cb0e2e'),
         'fixed_network': kw.get('fixed_network', 'private'),
         'network_driver': kw.get('network_driver'),
+        'volume_driver': kw.get('volume_driver'),
         'dns_nameserver': kw.get('dns_nameserver', '8.8.1.1'),
         'apiserver_port': kw.get('apiserver_port', 8080),
         'docker_volume_size': kw.get('docker_volume_size', 20),

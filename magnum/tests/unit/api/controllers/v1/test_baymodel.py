@@ -52,7 +52,7 @@ class TestListBayModel(api_base.FunctionalTest):
                               'image_id', 'registry_enabled', 'no_proxy',
                               'keypair_id', 'https_proxy', 'tls_disabled',
                               'public', 'labels', 'ssh_authorized_key',
-                              'master_flavor_id',)
+                              'master_flavor_id', 'volume_driver')
 
     def test_empty(self):
         response = self.get_json('/baymodels')
@@ -200,6 +200,7 @@ class TestPatch(api_base.FunctionalTest):
             image_id='nerdherd',
             apiserver_port=8080,
             fixed_network='private',
+            volume_driver='rexray',
             public=False,
             docker_volume_size=20,
             ssh_authorized_key='ssh-rsa AAAAB3NzaC1ycEAAAADA'
@@ -284,6 +285,8 @@ class TestPatch(api_base.FunctionalTest):
                          response['fixed_network'])
         self.assertEqual(self.baymodel.network_driver,
                          response['network_driver'])
+        self.assertEqual(self.baymodel.volume_driver,
+                         response['volume_driver'])
         self.assertEqual(self.baymodel.docker_volume_size,
                          response['docker_volume_size'])
         self.assertEqual(self.baymodel.ssh_authorized_key,
@@ -323,6 +326,8 @@ class TestPatch(api_base.FunctionalTest):
                          response['fixed_network'])
         self.assertEqual(baymodel.network_driver,
                          response['network_driver'])
+        self.assertEqual(baymodel.volume_driver,
+                         response['volume_driver'])
         self.assertEqual(baymodel.docker_volume_size,
                          response['docker_volume_size'])
         self.assertEqual(baymodel.ssh_authorized_key,
@@ -452,7 +457,7 @@ class TestPost(api_base.FunctionalTest):
                   "dns_nameserver", "keypair_id", "external_network_id",
                   "cluster_distro", "fixed_network", "apiserver_port",
                   "docker_volume_size", "http_proxy", "https_proxy",
-                  "no_proxy", "network_driver", "labels"]
+                  "no_proxy", "network_driver", "labels", "volume_driver"]
         for field in fields:
             self._create_baymodel_raises_app_error(**{field: 'i' * 256})
 
@@ -461,7 +466,8 @@ class TestPost(api_base.FunctionalTest):
                   "dns_nameserver", "keypair_id", "external_network_id",
                   "cluster_distro", "fixed_network", "apiserver_port",
                   "docker_volume_size", "ssh_authorized_key", "labels",
-                  "http_proxy", "https_proxy", "no_proxy", "network_driver"]
+                  "http_proxy", "https_proxy", "no_proxy", "network_driver",
+                  "volume_driver"]
         for field in fields:
             self._create_baymodel_raises_app_error(**{field: ''})
 
@@ -589,6 +595,39 @@ class TestPost(api_base.FunctionalTest):
         self._test_create_baymodel_network_driver_attr(baymodel_dict,
                                                        config_dict,
                                                        expect_errors_flag)
+
+    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_keypair')
+    def test_create_baymodel_with_volume_driver(self, mock_keypair_exists,
+                                                mock_image_data):
+        mock_keypair_exists.return_value = None
+        with mock.patch.object(self.dbapi, 'create_baymodel',
+                               wraps=self.dbapi.create_baymodel) as cc_mock:
+            mock_keypair_exists.return_value = None
+            mock_image_data.return_value = {'name': 'mock_name',
+                                            'os_distro': 'fedora-atomic'}
+            bdict = apiutils.baymodel_post_data(volume_driver='rexray')
+            response = self.post_json('/baymodels', bdict)
+            self.assertEqual(bdict['volume_driver'],
+                             response.json['volume_driver'])
+            cc_mock.assert_called_once_with(mock.ANY)
+            self.assertNotIn('id', cc_mock.call_args[0][0])
+
+    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('magnum.api.attr_validator.validate_keypair')
+    def test_create_baymodel_with_no_volume_driver(self, mock_keypair_exists,
+                                                   mock_image_data):
+        mock_keypair_exists.return_value = None
+        with mock.patch.object(self.dbapi, 'create_baymodel',
+                               wraps=self.dbapi.create_baymodel) as cc_mock:
+            mock_image_data.return_value = {'name': 'mock_name',
+                                            'os_distro': 'fedora-atomic'}
+            bdict = apiutils.baymodel_post_data()
+            response = self.post_json('/baymodels', bdict)
+            self.assertEqual(bdict['volume_driver'],
+                             response.json['volume_driver'])
+            cc_mock.assert_called_once_with(mock.ANY)
+            self.assertNotIn('id', cc_mock.call_args[0][0])
 
     @mock.patch('magnum.api.attr_validator.validate_image')
     @mock.patch('magnum.api.attr_validator.validate_keypair')

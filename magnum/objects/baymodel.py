@@ -31,7 +31,8 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.6: Change 'insecure' to 'tls_disabled'
     # Version 1.7: Added 'public' field
     # Version 1.8: Added 'server_type' field
-    VERSION = '1.8'
+    # Version 1.9: Added 'volume_driver' field
+    VERSION = '1.9'
 
     dbapi = dbapi.get_instance()
 
@@ -49,6 +50,7 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
         'external_network_id': fields.StringField(nullable=True),
         'fixed_network': fields.StringField(nullable=True),
         'network_driver': fields.StringField(nullable=True),
+        'volume_driver': fields.StringField(nullable=True),
         'apiserver_port': fields.IntegerField(nullable=True),
         'docker_volume_size': fields.IntegerField(nullable=True),
         'ssh_authorized_key': fields.StringField(nullable=True),
