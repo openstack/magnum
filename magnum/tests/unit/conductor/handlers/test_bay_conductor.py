@@ -97,6 +97,55 @@ class TestHandler(db_base.DbTestCase):
         bay = objects.Bay.get(self.context, self.bay.uuid)
         self.assertEqual(1, bay.node_count)
 
+    @patch('magnum.conductor.scale_manager.ScaleManager')
+    @patch('magnum.conductor.handlers.bay_conductor.Handler._poll_and_check')
+    @patch('magnum.conductor.handlers.bay_conductor._update_stack')
+    @patch('magnum.common.clients.OpenStackClients')
+    def _test_update_bay_status_complete(
+            self, expect_status, mock_openstack_client_class,
+            mock_update_stack, mock_poll_and_check,
+            mock_scale_manager):
+        def side_effect(*args, **kwargs):
+            self.bay.node_count = 2
+            self.bay.save()
+        mock_poll_and_check.side_effect = side_effect
+        mock_heat_stack = mock.MagicMock()
+        mock_heat_stack.stack_status = expect_status
+        mock_heat_client = mock.MagicMock()
+        mock_heat_client.stacks.get.return_value = mock_heat_stack
+        mock_openstack_client = mock_openstack_client_class.return_value
+        mock_openstack_client.heat.return_value = mock_heat_client
+
+        self.bay.node_count = 2
+        self.handler.bay_update(self.context, self.bay)
+
+        mock_update_stack.assert_called_once_with(
+            self.context, mock_openstack_client, self.bay,
+            mock_scale_manager.return_value)
+        bay = objects.Bay.get(self.context, self.bay.uuid)
+        self.assertEqual(2, bay.node_count)
+
+    def test_update_bay_status_update_compelete(self):
+        self._test_update_bay_status_complete(bay_status.UPDATE_COMPLETE)
+
+    def test_update_bay_status_resume_compelete(self):
+        self._test_update_bay_status_complete(bay_status.RESUME_COMPLETE)
+
+    def test_update_bay_status_restore_compelete(self):
+        self._test_update_bay_status_complete(bay_status.RESTORE_COMPLETE)
+
+    def test_update_bay_status_rollback_compelete(self):
+        self._test_update_bay_status_complete(bay_status.ROLLBACK_COMPLETE)
+
+    def test_update_bay_status_snapshot_compelete(self):
+        self._test_update_bay_status_complete(bay_status.SNAPSHOT_COMPLETE)
+
+    def test_update_bay_status_check_compelete(self):
+        self._test_update_bay_status_complete(bay_status.CHECK_COMPLETE)
+
+    def test_update_bay_status_adopt_compelete(self):
+        self._test_update_bay_status_complete(bay_status.ADOPT_COMPLETE)
+
     @patch('magnum.common.clients.OpenStackClients')
     def test_update_bay_with_invalid_params(
             self, mock_openstack_client_class):

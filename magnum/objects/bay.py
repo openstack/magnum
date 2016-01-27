@@ -30,7 +30,8 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.1: Added 'bay_create_timeout' field
     # Version 1.2: Add 'registry_trust_id' field
     # Version 1.3: Added 'baymodel' field
-    VERSION = '1.3'
+    # Version 1.4: Added more types of status to bay's status field
+    VERSION = '1.4'
 
     dbapi = dbapi.get_instance()
 

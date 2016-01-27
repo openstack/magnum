@@ -175,8 +175,17 @@ class Handler(object):
 
         osc = clients.OpenStackClients(context)
         stack = osc.heat().stacks.get(bay.stack_id)
-        if (stack.stack_status != bay_status.CREATE_COMPLETE and
-                stack.stack_status != bay_status.UPDATE_COMPLETE):
+        allow_update_status = (
+            bay_status.CREATE_COMPLETE,
+            bay_status.UPDATE_COMPLETE,
+            bay_status.RESUME_COMPLETE,
+            bay_status.RESTORE_COMPLETE,
+            bay_status.ROLLBACK_COMPLETE,
+            bay_status.SNAPSHOT_COMPLETE,
+            bay_status.CHECK_COMPLETE,
+            bay_status.ADOPT_COMPLETE
+        )
+        if stack.stack_status not in allow_update_status:
             operation = _('Updating a bay when stack status is '
                           '"%s"') % stack.stack_status
             raise exception.NotSupported(operation=operation)
