@@ -132,13 +132,13 @@ class OpenStackClients(object):
         self._neutron = None
 
     def url_for(self, **kwargs):
-        return self.keystone().client.service_catalog.url_for(**kwargs)
+        return self.keystone().session.get_endpoint(**kwargs)
 
     def magnum_url(self):
         endpoint_type = self._get_client_option('magnum', 'endpoint_type')
         region_name = self._get_client_option('magnum', 'region_name')
         return self.url_for(service_type='container',
-                            endpoint_type=endpoint_type,
+                            interface=endpoint_type,
                             region_name=region_name)
 
     def cinder_region_name(self):
@@ -172,7 +172,7 @@ class OpenStackClients(object):
         region_name = self._get_client_option('heat', 'region_name')
         heatclient_version = self._get_client_option('heat', 'api_version')
         endpoint = self.url_for(service_type='orchestration',
-                                endpoint_type=endpoint_type,
+                                interface=endpoint_type,
                                 region_name=region_name)
 
         args = {
@@ -199,7 +199,7 @@ class OpenStackClients(object):
         region_name = self._get_client_option('glance', 'region_name')
         glanceclient_version = self._get_client_option('glance', 'api_version')
         endpoint = self.url_for(service_type='image',
-                                endpoint_type=endpoint_type,
+                                interface=endpoint_type,
                                 region_name=region_name)
         args = {
             'endpoint': endpoint,
@@ -220,7 +220,7 @@ class OpenStackClients(object):
         endpoint_type = self._get_client_option('barbican', 'endpoint_type')
         region_name = self._get_client_option('barbican', 'region_name')
         endpoint = self.url_for(service_type='key-manager',
-                                endpoint_type=endpoint_type,
+                                interface=endpoint_type,
                                 region_name=region_name)
         session = self.keystone().session
         self._barbican = barbicanclient.Client(session=session,
@@ -236,7 +236,7 @@ class OpenStackClients(object):
         region_name = self._get_client_option('nova', 'region_name')
         novaclient_version = self._get_client_option('nova', 'api_version')
         endpoint = self.url_for(service_type='compute',
-                                endpoint_type=endpoint_type,
+                                interface=endpoint_type,
                                 region_name=region_name)
         self._nova = novaclient.Client(novaclient_version,
                                        auth_token=self.auth_token)
@@ -250,7 +250,7 @@ class OpenStackClients(object):
         endpoint_type = self._get_client_option('neutron', 'endpoint_type')
         region_name = self._get_client_option('neutron', 'region_name')
         endpoint = self.url_for(service_type='network',
-                                endpoint_type=endpoint_type,
+                                interface=endpoint_type,
                                 region_name=region_name)
 
         args = {

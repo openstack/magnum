@@ -139,12 +139,22 @@ function create_magnum_conf {
 
     iniset $MAGNUM_CONF oslo_policy policy_file $MAGNUM_POLICY_JSON
 
+    iniset $MAGNUM_CONF keystone_auth auth_type password
+    iniset $MAGNUM_CONF keystone_auth username magnum
+    iniset $MAGNUM_CONF keystone_auth password $SERVICE_PASSWORD
+    iniset $MAGNUM_CONF keystone_auth project_name $SERVICE_PROJECT_NAME
+    iniset $MAGNUM_CONF keystone_auth project_domain_id default
+    iniset $MAGNUM_CONF keystone_auth user_domain_id default
+
+    # FIXME(pauloewerton): keystone_authtoken section is deprecated. Remove it
+    # after deprecation period.
     iniset $MAGNUM_CONF keystone_authtoken admin_user magnum
     iniset $MAGNUM_CONF keystone_authtoken admin_password $SERVICE_PASSWORD
     iniset $MAGNUM_CONF keystone_authtoken admin_tenant_name $SERVICE_PROJECT_NAME
 
     configure_auth_token_middleware $MAGNUM_CONF magnum $MAGNUM_AUTH_CACHE_DIR
 
+    iniset $MAGNUM_CONF keystone_auth auth_url $KEYSTONE_SERVICE_URI/v3
     iniset $MAGNUM_CONF keystone_authtoken auth_uri $KEYSTONE_SERVICE_URI/v3
     iniset $MAGNUM_CONF keystone_authtoken auth_version v3
 
