@@ -216,6 +216,7 @@ resources:
             $HTTP_PROXY: {get_param: http_proxy}
             $HTTPS_PROXY: {get_param: https_proxy}
             $NO_PROXY: {get_param: no_proxy}
+            $WAIT_CURL: {get_attr: [minion_wait_handle, curl_cli]}
 
   write_kubeconfig:
     type: OS::Heat::SoftwareConfig
