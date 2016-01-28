@@ -172,14 +172,14 @@ Proposed Changes
    container networking implementation through a combination of user-facing
    baymodel configuration flags. Configuration parameters that are common
    across Magnum or all networking implementations will be exposed as unique
-   flags. For example, a flag named libnetwork-driver can be used to instruct
-   Magnum which Libnetwork driver to use for implementing a baymodel
-   container/pod network. Libnetwork driver examples may include:
+   flags. For example, a flag named network-driver can be used to instruct
+   Magnum which network driver to use for implementing a baymodel
+   container/pod network. network driver examples may include:
 
      flannel, weave, calico, midonet, netplugin, etc..
 
    Here is an example of creating a baymodel that uses Flannel as the
-   Libnetwork driver: ::
+   network driver: ::
 
      magnum baymodel-create --name k8sbaymodel \
                             --image-id fedora-21-atomic-5 \
@@ -189,23 +189,23 @@ Proposed Changes
                             --flavor-id m1.small \
                             --docker-volume-size 5 \
                             --coe kubernetes \
-                            --libnetwork-driver flannel
+                            --network-driver flannel
 
-   If no libnetwork-driver parameter is supplied by the user, the baymodel is
-   created using the default Libnetwork driver of the specified Magnum COE.
-   Each COE must support a default Libnetwork driver and each driver must
+   If no network-driver parameter is supplied by the user, the baymodel is
+   created using the default network driver of the specified Magnum COE.
+   Each COE must support a default network driver and each driver must
    provide reasonable default configurations that allow users to instantiate
-   a COE without supplying labels. The default Libnetwork driver for each COE
+   a COE without supplying labels. The default network driver for each COE
    should be consistent with existing Magnum default settings. Where current
    defaults do not exist, the defaults should be consistent with upstream
-   Libnetwork driver projects.
+   network driver projects.
 
-2. Each Libnetwork driver supports a range of configuration parameters that
+2. Each network driver supports a range of configuration parameters that
    should be observed by Magnum. This document suggests using an attribute
    named "labels" for supplying driver-specific configuration parameters.
    Labels consist of one or more arbitrary key/value pairs. Here is an
    example of using labels to change default settings of the Flannel
-   Libnetwork driver: ::
+   network driver: ::
 
      magnum baymodel-create --name k8sbaymodel \
                             --image-id fedora-21-atomic-5 \
@@ -215,10 +215,10 @@ Proposed Changes
                             --flavor-id m1.small \
                             --docker-volume-size 5 \
                             --coe kubernetes \
-                            --libnetwork-driver flannel \
-                            --labels network-cidr=10.0.0.0/8,\
-                                     network-subnetlen=22,\
-                                     backend=vxlan
+                            --network-driver flannel \
+                            --labels flannel_network_cidr=10.0.0.0/8,\
+                                     flannel_network_subnetlen=22,\
+                                     flannel_use_vxlan=vxlan
 
    With Magnum's current implementation, this document would support
    labels for the Kubernetes COE type. However, labels are applicable
@@ -233,7 +233,7 @@ Proposed Changes
    Note: Support for daemon-labels was added in Docker 1.4.1. Labels for
    containers and images were introduced in Docker 1.6.0
 
-   If the --libnetwork-driver flag is specified without any labels, default
+   If the --network-driver flag is specified without any labels, default
    configuration values of the driver will be used by the baymodel. These
    defaults are set within the Heat template of the associated COE. Magnum
    should ignore label keys and/or values not understood by any of the
@@ -257,7 +257,7 @@ Proposed Changes
    driver specific configurations should be removed from all top-level
    templates and instead be implemented in one or more template fragments.
    As it relates to container networking, top-level templates should only
-   expose the labels and generalized parameters such as libnetwork-driver.
+   expose the labels and generalized parameters such as network-driver.
    Heat templates, template definitions and definition entry points should
    be suited for composition, allowing for a range of supported labels. This
    document intends to follow the refactor-heat-templates blueprint[3] to
@@ -267,7 +267,7 @@ Proposed Changes
    Magnum Container Networking Model.
 
 7. The spec will not add support for natively managing container networks.
-   Due to each Libnetwork driver supporting different API operations, this
+   Due to each network driver supporting different API operations, this
    document suggests that Magnum not natively manage container networks at
    this time and instead leave this job to native tools. References [4-7]
    provide additional details to common labels operations.
@@ -289,8 +289,8 @@ Alternatives
    support the swarm COE type.
 
 3. Add support for managing container networks. This will require adding
-   abstractions for each supported Libnetwork driver or creating an
-   abstraction layer that covers all possible Libnetwork drivers.
+   abstractions for each supported network driver or creating an
+   abstraction layer that covers all possible network drivers.
 
 4. Use the Kuryr project[10] to provide networking to Magnum containers.
    Kuryr currently contains no documentation or code, so this alternative
@@ -305,7 +305,7 @@ Alternatives
 Data Model Impact
 -----------------
 
-This document adds the labels and libnetwork-driver attribute to the baymodel
+This document adds the labels and network-driver attribute to the baymodel
 database table. A migration script will be provided to support the attribute
 being added. ::
 
@@ -314,13 +314,13 @@ being added. ::
     +===================+=================+=============================================+
     |     labels        | JSONEncodedDict | One or more arbitrary key/value pairs       |
     +-------------------+-----------------+---------------------------------------------+
-    | libnetwork-driver |    string       | Container networking backend implementation |
+    |    network-driver |    string       | Container networking backend implementation |
     +-------------------+-----------------+---------------------------------------------+
 
 REST API Impact
 ---------------
 
-This document adds the labels and libnetwork-driver attribute to the BayModel
+This document adds the labels and network-driver attribute to the BayModel
 API class. ::
 
     +-------------------+-----------------+---------------------------------------------+
@@ -328,13 +328,13 @@ API class. ::
     +===================+=================+=============================================+
     |     labels        | JSONEncodedDict | One or more arbitrary key/value pairs       |
     +-------------------+-----------------+---------------------------------------------+
-    | libnetwork-driver |    string       | Container networking backend implementation |
+    |    network-driver |    string       | Container networking backend implementation |
     +-------------------+-----------------+---------------------------------------------+
 
 Security Impact
 ---------------
 
-Supporting more than one Libnetwork driver increases the attack
+Supporting more than one network driver increases the attack
 footprint of Magnum.
 
 Notifications Impact
@@ -346,18 +346,18 @@ Other End User Impact
 ---------------------
 
 Most end users will never use the labels configuration flag
-and simply use the default Libnetwork driver and associated
+and simply use the default network driver and associated
 configuration options. For those that wish to customize their
 container networking environment, it will be important to understand
-what libnetwork-driver and labels are supported, along with their
+what network-driver and labels are supported, along with their
 associated configuration options, capabilities, etc..
 
 Performance Impact
 ------------------
 
-Performance will depend upon the chosen Libnetwork driver and its
+Performance will depend upon the chosen network driver and its
 associated configuration. For example, when creating a baymodel with
-"--libnetwork-driver flannel" flag, Flannel's default configuration
+"--network-driver flannel" flag, Flannel's default configuration
 will be used. If the default for Flannel is an overlay networking technique
 (i.e. VXLAN), then networking performance will be less than if Flannel used
 the host-gw configuration that does not perform additional packet

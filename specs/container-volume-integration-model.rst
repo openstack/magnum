@@ -185,7 +185,7 @@ We propose extending Magnum as follows.
                             --flavor-id m1.small \
                             --docker-volume-size 5 \
                             --coe swarm\
-                            --libnetwork-driver flannel \
+                            --network-driver flannel \
                             --volume-driver rexray
 
   When a Swarm bay is created with this bay model, the REX-Ray storage
@@ -207,7 +207,7 @@ We propose extending Magnum as follows.
                             --flavor-id m1.small \
                             --docker-volume-size 5 \
                             --coe kubernetes\
-                            --libnetwork-driver flannel \
+                            --network-driver flannel \
                             --volume-driver cinder
 
   When the Kubernetes bay is created using this bay model, the kubelet will be
@@ -232,7 +232,7 @@ volume driver: ::
                             --dns-nameserver 8.8.8.8 \
                             --flavor-id m1.small \
                             --coe mesos\
-                            --libnetwork-driver docker \
+                            --network-driver docker \
                             --volume-driver rexray
 
 When the mesos bay is created using this bay model, the mesos bay will be
