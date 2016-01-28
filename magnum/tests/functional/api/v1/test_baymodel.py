@@ -176,3 +176,11 @@ class BayModelTest(base.BaseMagnumTest):
         self.assertRaises(
             exceptions.BadRequest,
             self.baymodel_client.post_baymodel, gen_model)
+
+    @testtools.testcase.attr('negative')
+    def test_create_baymodel_invalid_volume_driver(self):
+        gen_model = datagen.baymodel_data_with_valid_keypair_and_image_id()
+        gen_model.volume_driver = 'invalid_volume_driver'
+        self.assertRaises(
+            exceptions.BadRequest,
+            self.baymodel_client.post_baymodel, gen_model)

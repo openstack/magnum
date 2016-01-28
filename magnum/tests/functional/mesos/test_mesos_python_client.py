@@ -18,7 +18,8 @@ class TestBayModelResource(BayTest):
 
     def test_baymodel_create_and_delete(self):
         self._test_baymodel_create_and_delete('test_mesos_baymodel',
-                                              network_driver='docker')
+                                              network_driver='docker',
+                                              volume_driver='rexray')
 
 
 class TestBayResource(BayTest):
@@ -27,5 +28,5 @@ class TestBayResource(BayTest):
     def test_bay_create_and_delete(self):
         baymodel_uuid = self._test_baymodel_create_and_delete(
             'test_mesos_baymodel', delete=False, tls_disabled=True,
-            network_driver='docker')
+            network_driver='docker', volume_driver='rexray')
         self._test_bay_create_and_delete('test_mesos_bay', baymodel_uuid)

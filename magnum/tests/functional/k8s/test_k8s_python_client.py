@@ -41,6 +41,7 @@ class TestKubernetesAPIs(BayAPITLSTest):
                                             coe='kubernetes',
                                             tls_disabled=False,
                                             network_driver='flannel',
+                                            volume_driver='cinder',
                                             fixed_network='192.168.0.0/24',
                                             )
         cls.bay = cls._create_bay('testk8sAPI', cls.baymodel.uuid)

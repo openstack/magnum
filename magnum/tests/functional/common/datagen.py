@@ -38,6 +38,16 @@ def gen_coe_dep_network_driver(coe):
     return driver_types[random.randrange(0, len(driver_types))]
 
 
+def gen_coe_dep_volume_driver(coe):
+    allowed_driver_types = {
+        'kubernetes': ['cinder', None],
+        'swarm': ['rexray', None],
+        'mesos': ['rexray', None],
+    }
+    driver_types = allowed_driver_types[coe]
+    return driver_types[random.randrange(0, len(driver_types))]
+
+
 def gen_random_port():
     return random_int(49152, 65535)
 
@@ -91,6 +101,7 @@ def baymodel_data(**kwargs):
         "coe": "swarm",
         "tls_disabled": False,
         "network_driver": None,
+        "volume_driver": None,
         "docker_volume_size": 3,
         "labels": {},
         "fixed_network": "192.168.0.0/24",
@@ -175,7 +186,8 @@ def valid_swarm_baymodel():
                          docker_volume_size=3, cluster_distro=None,
                          ssh_authorized_key=None, external_network_id="public",
                          http_proxy=None, https_proxy=None, no_proxy=None,
-                         network_driver=None, labels={}, tls_disabled=False)
+                         network_driver=None, volume_driver=None, labels={},
+                         tls_disabled=False)
 
 
 def bay_data(name=data_utils.rand_name('bay'),

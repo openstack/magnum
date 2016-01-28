@@ -33,7 +33,8 @@ class TestBayModelResource(BayTest):
     def test_baymodel_create_and_delete(self):
         self._test_baymodel_create_and_delete(
             'test_swarm_baymodel',
-            network_driver=None)
+            network_driver=None,
+            volume_driver=None)
 
 
 class TestSwarmAPIs(BayAPITLSTest):
@@ -51,6 +52,7 @@ class TestSwarmAPIs(BayAPITLSTest):
                                             coe='swarm',
                                             tls_disabled=False,
                                             network_driver=None,
+                                            volume_driver=None,
                                             docker_volume_size=3,
                                             labels={},
                                             fixed_network='192.168.0.0/24',
