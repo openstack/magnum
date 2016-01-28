@@ -54,7 +54,7 @@ class TestValidators(unittest.TestCase):
         key_usage = self._build_key_usage(critical=True)
 
         with self.assertRaises(CertificateValidationError):
-            v.filter_allowed_extensions([key_usage], ['subjectAltName']).next()
+            next(v.filter_allowed_extensions([key_usage], ['subjectAltName']))
 
     def test_merge_key_usage(self):
         key_usage = self._build_key_usage(critical=True)
