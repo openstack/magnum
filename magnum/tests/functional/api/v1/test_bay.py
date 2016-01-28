@@ -140,7 +140,7 @@ class BayTest(base.BaseMagnumTest):
             self.bay_client.post_bay, gen_model)
 
     @testtools.testcase.attr('negative')
-    def test_update_bay_name_for_existing_bay(self):
+    def test_update_bay_baymodel_name_for_existing_bay(self):
         first_model = datagen.valid_bay_data(baymodel_id=self.baymodel.uuid,
                                              name='test')
         _, old_model = self._create_bay(first_model)
@@ -150,6 +150,12 @@ class BayTest(base.BaseMagnumTest):
             exceptions.BadRequest,
             self.bay_client.patch_bay,
             old_model.uuid, patch_model)
+
+        patch_baymodel = datagen.baymodel_name_patch_data()
+        self.assertRaises(
+            exceptions.BadRequest,
+            self.baymodel_client.patch_baymodel,
+            self.baymodel.uuid, patch_baymodel)
 
     @testtools.testcase.attr('negative')
     def test_update_bay_for_nonexisting_bay(self):
