@@ -48,8 +48,8 @@ class MagnumServicePeriodicTestCase(base.TestCase):
 
         mock_ms_get.assert_called_once_with(mock.ANY, p_task.host,
                                             p_task.binary)
-        mock_ms_create.assert_called_once_with(mock.ANY)
-        mock_ms_refresh.assert_called_once_with(mock.ANY)
+        mock_ms_create.assert_called_once_with()
+        mock_ms_refresh.assert_called_once_with()
 
     @mock.patch.object(objects.MagnumService, 'get_by_host_and_binary')
     @mock.patch.object(objects.MagnumService, 'create')
@@ -64,7 +64,7 @@ class MagnumServicePeriodicTestCase(base.TestCase):
 
         mock_ms_get.assert_called_once_with(mock.ANY, p_task.host,
                                             p_task.binary)
-        self.fake_ms_refresh.assert_called_once_with(mock.ANY)
+        self.fake_ms_refresh.assert_called_once_with()
 
     def test_update_magnum_service_regular(self):
         p_task = periodic.MagnumServicePeriodicTasks(CONF,
@@ -73,4 +73,4 @@ class MagnumServicePeriodicTestCase(base.TestCase):
 
         p_task.update_magnum_service(None)
 
-        self.fake_ms_refresh.assert_called_once_with(mock.ANY)
+        self.fake_ms_refresh.assert_called_once_with()
