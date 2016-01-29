@@ -192,17 +192,19 @@ To list out the health of the internal services, namely conductor, of magnum, us
     | 1  | oxy-dev.hq1-0a5a3c02.hq1.abcde.com | magnum-conductor | up    |
     +----+------------------------------------+------------------+-------+
 
-Building a Kubernetes Bay
-=========================
-
 Create a keypair for use with the baymodel::
 
     test -f ~/.ssh/id_rsa.pub || ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
     nova keypair-add --pub-key ~/.ssh/id_rsa.pub testkey
 
+Building a Kubernetes Bay - Based on Fedora Atomic
+==================================================
+
 Create a baymodel. This is similar in nature to a flavor and describes
-to magnum how to construct the bay. The coe (Container Orchestration Engine)
-and keypair need to be specified for the baymodel::
+to magnum how to construct the bay. The baymodel specifies a Fedora Atomic
+image so the bays which use this baymodel will be based on Fedora Atomic.
+The coe (Container Orchestration Engine) and keypair need to be specified
+as well::
 
     magnum baymodel-create --name k8sbaymodel \
                            --image-id fedora-21-atomic-5 \
@@ -273,6 +275,44 @@ Monitoring bay status in detail (e.g., creating, updating)::
     BAY_HEAT_NAME=$(heat stack-list | awk "/\sk8sbay-/{print \$4}")
     echo ${BAY_HEAT_NAME}
     heat resource-list ${BAY_HEAT_NAME}
+
+Building a Kubernetes Bay - Based on CoreOS
+===========================================
+
+You can create a Kubernetes bay based on CoreOS as an alternative to Atomic.
+First, download the official CoreOS image::
+
+    wget http://beta.release.core-os.net/amd64-usr/current/coreos_production_openstack_image.img.bz2
+    bunzip2 coreos_production_openstack_image.img.bz2
+
+Upload the image to glance::
+
+    glance image-create --name CoreOS  \
+                        --visibility public \
+                        --disk-format=qcow2 \
+                        --container-format=bare \
+                        --os-distro=coreos \
+                        --file=coreos_production_openstack_image.img
+
+Create a CoreOS Kubernetes baymodel, which is similar to the Atomic Kubernetes
+baymodel, except for pointing to a different image::
+
+    magnum baymodel-create --name k8sbaymodel-coreos \
+                           --image-id CoreOS \
+                           --keypair-id testkey \
+                           --external-network-id public \
+                           --dns-nameserver 8.8.8.8 \
+                           --flavor-id m1.small \
+                           --network-driver flannel \
+                           --coe kubernetes \
+                           --tls-disabled
+
+Create a CoreOS Kubernetes bay. Use the CoreOS baymodel as a template for bay
+creation::
+
+    magnum bay-create --name k8sbay \
+                      --baymodel k8sbaymodel-coreos \
+                      --node-count 2
 
 Using Kubernetes Bay
 ====================
