@@ -196,3 +196,28 @@ class KeystoneClientV3(object):
         except Exception:
             LOG.exception(_LE('Failed to delete trustee'))
             raise exception.TrusteeDeleteFailed(trustee_id=trustee_id)
+
+    def get_validate_region_name(self, region_name):
+        if region_name is None:
+            message = _("region_name needs to be configured in magnum.conf")
+            raise exception.InvalidParameterValue(message)
+        """matches the region of a public endpoint for the Keystone
+        service."""
+        try:
+            regions = self.client.regions.list()
+        except kc_exception.NotFound:
+            pass
+        except Exception:
+            LOG.exception(_LE('Failed to list regions'))
+            raise exception.RegionsListFailed()
+        region_list = []
+        for region in regions:
+            region_list.append(region.id)
+        if region_name not in region_list:
+            raise exception.InvalidParameterValue(_(
+                'region_name %(region_name)s is invalid, '
+                'expecting a region_name in %(region_name_list)s.') % {
+                    'region_name': region_name,
+                    'region_name_list': '/'.join(
+                        region_list + ['unspecified'])})
+        return region_name

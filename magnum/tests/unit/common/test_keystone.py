@@ -139,3 +139,30 @@ class KeystoneClientTest(base.BaseTestCase):
             trustor_user='123456', project='654321',
             trustee_user='888888', role_names=['role3'],
             impersonation=True)
+
+    def test_get_validate_region_name(self, mock_ks):
+        key = 'region_name'
+        val = 'RegionOne'
+        cfg.CONF.set_override(key, val, 'cinder_client')
+        mock_region = mock.MagicMock()
+        mock_region.id = 'RegionOne'
+        mock_ks.return_value.regions.list.return_value = [mock_region]
+        ks_client = keystone.KeystoneClientV3(self.ctx)
+        region_name = ks_client.get_validate_region_name(val)
+        self.assertEqual('RegionOne', region_name)
+
+    def test_get_validate_region_name_not_found(self, mock_ks):
+        key = 'region_name'
+        val = 'region123'
+        cfg.CONF.set_override(key, val, 'cinder_client')
+        ks_client = keystone.KeystoneClientV3(self.ctx)
+        self.assertRaises(exception.InvalidParameterValue,
+                          ks_client.get_validate_region_name, val)
+
+    def test_get_validate_region_name_is_None(self, mock_ks):
+        key = 'region_name'
+        val = None
+        cfg.CONF.set_override(key, val, 'cinder_client')
+        ks_client = keystone.KeystoneClientV3(self.ctx)
+        self.assertRaises(exception.InvalidParameterValue,
+                          ks_client.get_validate_region_name, val)
