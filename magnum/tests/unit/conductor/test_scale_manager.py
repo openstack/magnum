@@ -59,6 +59,9 @@ class TestScaleManager(base.TestCase):
         else:
             removal_hosts = scale_mgr.get_removal_nodes(mock_heat_output)
             self.assertEqual(expected_removal_hosts, removal_hosts)
+            if num_of_removal > 0:
+                mock_create_k8s_api.assert_called_once_with(mock_context,
+                                                            mock_bay.uuid)
 
     @mock.patch('magnum.objects.Bay.get_by_uuid')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager._is_scale_down')
