@@ -87,6 +87,11 @@ function add_flavor {
     unset OS_AUTH_TYPE
     popd
 
+    # Due to keystone defaulting everything to v3, we need to update to make func tests
+    # work in our gates back to v2
+    export OS_AUTH_URL=http://127.0.0.1:5000/v2.0
+    export OS_IDENTITY_API_VERSION=2.0
+
     # Create magnum specific flavor for use in functional tests.
     echo_summary "Create a flavor"
     nova flavor-create  m1.magnum 100 1024 8 1
