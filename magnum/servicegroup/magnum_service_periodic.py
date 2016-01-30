@@ -51,8 +51,8 @@ class MagnumServicePeriodicTasks(periodic_task.PeriodicTasks):
                 }
                 self.magnum_service_ref = objects.MagnumService(
                     ctx, **magnum_service_dict)
-                self.magnum_service_ref.create(ctx)
-        self.magnum_service_ref.report_state_up(ctx)
+                self.magnum_service_ref.create()
+        self.magnum_service_ref.report_state_up()
 
 
 def setup(conf, binary, tg):
