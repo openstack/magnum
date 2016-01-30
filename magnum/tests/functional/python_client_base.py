@@ -17,13 +17,13 @@ test_magnum
 Tests for `magnum` module.
 """
 
-import ConfigParser
 import os
 import subprocess
 import tempfile
 import time
 
 import fixtures
+from six.moves import configparser
 
 from magnum.common.utils import rmtree_without_raise
 from magnum.tests import base
@@ -53,7 +53,7 @@ class BaseMagnumClient(base.TestCase):
         keypair_id = cliutils.env('KEYPAIR_ID')
         copy_logs = cliutils.env('COPY_LOGS')
 
-        config = ConfigParser.RawConfigParser()
+        config = configparser.RawConfigParser()
         if config.read('functional_creds.conf'):
             # the OR pattern means the environment is preferred for
             # override
@@ -68,7 +68,7 @@ class BaseMagnumClient(base.TestCase):
             keypair_id = keypair_id or config.get('magnum', 'keypair_id')
             try:
                 copy_logs = copy_logs or config.get('magnum', 'copy_logs')
-            except ConfigParser.NoOptionError:
+            except configparser.NoOptionError:
                 pass
 
         cls.image_id = image_id

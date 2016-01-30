@@ -33,6 +33,7 @@ from datetime import datetime
 from datetime import date
 
 # python 2 and python 3 compatibility library
+import six
 from six import iteritems
 import six.moves.builtins as __builtin__
 from six.moves.urllib import parse as urlparse
@@ -184,7 +185,7 @@ class ApiClient(object):
         """
         if isinstance(obj, type(None)):
             return None
-        elif isinstance(obj, (unicode, str, int, float, bool, tuple, file)):
+        elif isinstance(obj, (six.text_type, str, int, float, bool, tuple, file)):
             return obj
         elif isinstance(obj, list):
             return [self.sanitize_for_serialization(sub_obj)
@@ -488,7 +489,7 @@ class ApiClient(object):
         try:
             value = klass(data)
         except UnicodeEncodeError:
-            value = unicode(data)
+            value = six.text_type(data)
         except TypeError:
             value = data
         return value
