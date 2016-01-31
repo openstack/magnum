@@ -51,8 +51,8 @@ class TestListBayModel(api_base.FunctionalTest):
                               'cluster_distro', 'external_network_id',
                               'image_id', 'registry_enabled', 'no_proxy',
                               'keypair_id', 'https_proxy', 'tls_disabled',
-                              'public', 'labels', 'ssh_authorized_key',
-                              'master_flavor_id', 'volume_driver')
+                              'public', 'labels', 'master_flavor_id',
+                              'volume_driver')
 
     def test_empty(self):
         response = self.get_json('/baymodels')
@@ -203,13 +203,6 @@ class TestPatch(api_base.FunctionalTest):
             volume_driver='rexray',
             public=False,
             docker_volume_size=20,
-            ssh_authorized_key='ssh-rsa AAAAB3NzaC1ycEAAAADA'
-                               'v0XRqg3tm+jlsOKGO81lPDH+KaSJ'
-                               'Q7wvmjUqszP/H6NC/m+qiGp/sTis'
-                               'DYucqbeuM7nmJi+8Hb55y1xWoOZI'
-                               'KMa71G5/4EOQxuQ/sgW965OOO2Hq'
-                               'X8vjlQUnTK0HijrbSTLxp/9kazWW'
-                               'FrfsdB8RtAAA test1234@magnum',
             coe='swarm',
             labels={'key1': 'val1', 'key2': 'val2'}
         )
@@ -289,8 +282,6 @@ class TestPatch(api_base.FunctionalTest):
                          response['volume_driver'])
         self.assertEqual(self.baymodel.docker_volume_size,
                          response['docker_volume_size'])
-        self.assertEqual(self.baymodel.ssh_authorized_key,
-                         response['ssh_authorized_key'])
         self.assertEqual(self.baymodel.coe,
                          response['coe'])
         self.assertEqual(self.baymodel.http_proxy,
@@ -330,8 +321,6 @@ class TestPatch(api_base.FunctionalTest):
                          response['volume_driver'])
         self.assertEqual(baymodel.docker_volume_size,
                          response['docker_volume_size'])
-        self.assertEqual(baymodel.ssh_authorized_key,
-                         response['ssh_authorized_key'])
         self.assertEqual(baymodel.coe, response['coe'])
         self.assertEqual(baymodel.http_proxy, response['http_proxy'])
         self.assertEqual(baymodel.https_proxy, response['https_proxy'])
@@ -465,9 +454,8 @@ class TestPost(api_base.FunctionalTest):
         fields = ["uuid", "name", "image_id", "flavor_id", "master_flavor_id",
                   "dns_nameserver", "keypair_id", "external_network_id",
                   "cluster_distro", "fixed_network", "apiserver_port",
-                  "docker_volume_size", "ssh_authorized_key", "labels",
-                  "http_proxy", "https_proxy", "no_proxy", "network_driver",
-                  "volume_driver"]
+                  "docker_volume_size", "labels", "http_proxy", "https_proxy",
+                  "no_proxy", "network_driver", "volume_driver"]
         for field in fields:
             self._create_baymodel_raises_app_error(**{field: ''})
 

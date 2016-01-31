@@ -34,7 +34,6 @@ class TestBayConductorWithK8s(base.TestCase):
             'network_driver': 'network_driver',
             'docker_volume_size': 20,
             'cluster_distro': 'fedora-atomic',
-            'ssh_authorized_key': 'ssh_authorized_key',
             'coe': 'kubernetes',
             'token': None,
             'http_proxy': 'http_proxy',

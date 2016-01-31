@@ -90,9 +90,6 @@ class BayModel(base.APIBase):
     docker_volume_size = wtypes.IntegerType(minimum=1)
     """The size in GB of the docker volume"""
 
-    ssh_authorized_key = wtypes.StringType(min_length=1)
-    """The SSH Authorized Key"""
-
     cluster_distro = wtypes.StringType(min_length=1, max_length=255)
     """The Cluster distro for the bay, ex - coreos, fedora-atomic."""
 
@@ -179,7 +176,6 @@ class BayModel(base.APIBase):
             apiserver_port=8080,
             docker_volume_size=25,
             cluster_distro='fedora-atomic',
-            ssh_authorized_key='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAB',
             coe=fields.BayType.KUBERNETES,
             http_proxy='http://proxy.com:123',
             https_proxy='https://proxy.com:123',

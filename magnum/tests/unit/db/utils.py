@@ -38,14 +38,6 @@ def get_test_baymodel(**kw):
         'apiserver_port': kw.get('apiserver_port', 8080),
         'docker_volume_size': kw.get('docker_volume_size', 20),
         'cluster_distro': kw.get('cluster_distro', 'fedora-atomic'),
-        'ssh_authorized_key': kw.get('ssh_authorized_key',
-                                     'ssh-rsa AAAAB3NzaC1ycEAAAADA'
-                                     'v0XRqg3tm+jlsOKGO81lPDH+KaSJ'
-                                     'Q7wvmjUqszP/H6NC/m+qiGp/sTis'
-                                     'DYucqbeuM7nmJi+8Hb55y1xWoOZI'
-                                     'KMa71G5/4EOQxuQ/sgW965OOO2Hq'
-                                     'X8vjlQUnTK0HijrbSTLxp/9kazWW'
-                                     'FrfsdB8RtAAA test1234@magnum'),
         'coe': kw.get('coe', 'swarm'),
         'created_at': kw.get('created_at'),
         'updated_at': kw.get('updated_at'),

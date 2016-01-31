@@ -74,7 +74,6 @@ Create a baymodel, by default TLS is enabled in Magnum::
     | name                | secure-kubernetes                    |
     | created_at          | 2015-10-08T05:05:10+00:00            |
     | network_driver      | flannel                              |
-    | ssh_authorized_key  | None                                 |
     | coe                 | kubernetes                           |
     | flavor_id           | m1.small                             |
     | dns_nameserver      | 8.8.8.8                              |

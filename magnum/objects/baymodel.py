@@ -32,7 +32,8 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.7: Added 'public' field
     # Version 1.8: Added 'server_type' field
     # Version 1.9: Added 'volume_driver' field
-    VERSION = '1.9'
+    # Version 1.10: Removed 'ssh_authorized_key' field
+    VERSION = '1.10'
 
     dbapi = dbapi.get_instance()
 
@@ -53,7 +54,6 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
         'volume_driver': fields.StringField(nullable=True),
         'apiserver_port': fields.IntegerField(nullable=True),
         'docker_volume_size': fields.IntegerField(nullable=True),
-        'ssh_authorized_key': fields.StringField(nullable=True),
         'cluster_distro': fields.StringField(nullable=True),
         'coe': m_fields.BayTypeField(nullable=True),
         'http_proxy': fields.StringField(nullable=True),
