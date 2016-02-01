@@ -48,10 +48,6 @@ template_def_opts = [
     cfg.StrOpt('etcd_discovery_service_endpoint_format',
                default='https://discovery.etcd.io/new?size=%(size)d',
                help=_('Url for etcd public discovery endpoint.')),
-    cfg.StrOpt('coreos_discovery_token_url',
-               deprecated_name='discovery_token_url',
-               deprecated_group='bay_heat',
-               help=_('coreos discovery token url.')),
     cfg.StrOpt('swarm_atomic_template_path',
                default=paths.basedir_def('templates/swarm/'
                                          'swarmcluster.yaml'),
