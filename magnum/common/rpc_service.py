@@ -106,9 +106,6 @@ class API(object):
                                            serializer=serializer,
                                            timeout=timeout)
 
-    def __del__(self):
-        self._client.transport.cleanup()
-
     def _call(self, method, *args, **kwargs):
         return self._client.call(self._context, method, *args, **kwargs)
 
