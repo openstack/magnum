@@ -428,7 +428,6 @@ object_data = {
     'Certificate': '1.0-2aff667971b85c1edf8d15684fd7d5e2',
     'Container': '1.3-e2d9d2e8a8844d421148cd9fde6c6bd6',
     'MyObj': '1.0-b43567e512438205e32f4e95ca616697',
-    'Node': '1.0-30943e6e3387a2fae7490b57c4239a17',
     'Pod': '1.1-39f221ad1dad0eb7f7bee3569d42fa7e',
     'ReplicationController': '1.0-a471c2429c212ed91833cfcf0f934eab',
     'Service': '1.0-f4a1c5a4618708824a553568c1ada0ea',

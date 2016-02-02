@@ -314,11 +314,6 @@ class InvalidParameterValue(Invalid):
     message = _("%(err)s")
 
 
-class InstanceAssociated(Conflict):
-    message = _("Instance %(instance_uuid)s is already associated with a node,"
-                " it cannot be associated with this other node %(node)s")
-
-
 class InstanceNotFound(ResourceNotFound):
     message = _("Instance %(instance)s could not be found.")
 
@@ -349,18 +344,6 @@ class InvalidMAC(Invalid):
 
 class ConfigInvalid(MagnumException):
     message = _("Invalid configuration file. %(error_msg)s")
-
-
-class NodeAlreadyExists(Conflict):
-    message = _("A node with UUID %(uuid)s already exists.")
-
-
-class NodeNotFound(ResourceNotFound):
-    message = _("Node %(node)s could not be found.")
-
-
-class NodeAssociated(InvalidState):
-    message = _("Node %(node)s is associated with instance %(instance)s.")
 
 
 class SSHConnectFailed(MagnumException):
