@@ -36,6 +36,14 @@ if [ "$NETWORK_DRIVER" == "flannel" ]; then
     sed -i '
       /^FLANNEL_ETCD=/ s|=.*|="http://'"$ETCD_SERVER_IP"':2379"|
     ' /etc/sysconfig/flanneld
+
+    # Make sure etcd has a flannel configuration
+    . /etc/sysconfig/flanneld
+    until curl -sf "$FLANNEL_ETCD/v2/keys/coreos.com/network/config?quorum=false&recursive=false&sorted=false"
+    do
+        echo "Waiting for flannel configuration in etcd..."
+        sleep 5
+    done
 fi
 
 cat >> /etc/environment <<EOF

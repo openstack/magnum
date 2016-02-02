@@ -61,7 +61,7 @@ class BayTest(base.BaseMagnumTest):
 
             # NOTE (dimtruck) by default tempest sets timeout to 20 mins.
             # We need more time.
-            test_timeout = 3600
+            test_timeout = 1800
             self.useFixture(fixtures.Timeout(test_timeout, gentle=True))
         except Exception:
             self.tearDown()

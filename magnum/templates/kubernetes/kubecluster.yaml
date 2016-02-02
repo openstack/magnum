@@ -465,7 +465,6 @@ resources:
     type: OS::Heat::ResourceGroup
     depends_on:
       - extrouter_inside
-      - kube_masters
     properties:
       count: {get_param: number_of_minions}
       removal_policies: [{resource_list: {get_param: minions_to_remove}}]

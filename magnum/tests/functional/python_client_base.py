@@ -27,6 +27,7 @@ from six.moves import configparser
 
 from magnum.common.utils import rmtree_without_raise
 from magnum.tests.functional.common import base
+from magnum.tests.functional.common import utils
 from magnumclient.common.apiclient import exceptions
 from magnumclient.common import cliutils
 from magnumclient.v1 import client as v1client
@@ -91,19 +92,23 @@ class BaseMagnumClient(base.BaseMagnumTest):
                                  magnum_url=magnum_url)
 
     @classmethod
-    def _wait_on_status(cls, bay, wait_status, finish_status):
+    def _wait_on_status(cls, bay, wait_status, finish_status, timeout=6000):
         # Check status every 60 seconds for a total of 100 minutes
-        for i in range(100):
-            # sleep 1s to wait bay status changes, this will be useful for
-            # the first time we wait for the status, to avoid another 59s
-            time.sleep(1)
+
+        def _check_status():
             status = cls.cs.bays.get(bay.uuid).status
+            cls.LOG.debug("Bay status is %s" % status)
             if status in wait_status:
-                time.sleep(59)
+                return False
             elif status in finish_status:
-                break
+                return True
             else:
-                raise Exception("Unknown Status : %s" % status)
+                raise Exception("Unexpected Status: %s" % status)
+
+        # sleep 1s to wait bay status changes, this will be useful for
+        # the first time we wait for the status, to avoid another 59s
+        time.sleep(1)
+        utils.wait_for_condition(_check_status, interval=60, timeout=timeout)
 
     @classmethod
     def _create_baymodel(cls, name, **kwargs):
@@ -157,10 +162,12 @@ class BaseMagnumClient(base.BaseMagnumTest):
         cls.cs.bays.delete(bay_uuid)
 
         try:
-            cls._wait_on_status(cls.bay,
-                                ["CREATE_COMPLETE",
-                                 "DELETE_IN_PROGRESS", "CREATE_FAILED"],
-                                ["DELETE_FAILED", "DELETE_COMPLETE"])
+            cls._wait_on_status(
+                cls.bay,
+                ["CREATE_COMPLETE", "DELETE_IN_PROGRESS", "CREATE_FAILED"],
+                ["DELETE_FAILED", "DELETE_COMPLETE"],
+                timeout=600
+            )
         except exceptions.NotFound:
             pass
         else:
@@ -171,7 +178,9 @@ class BaseMagnumClient(base.BaseMagnumTest):
         self._wait_on_status(
             bay,
             [None, "CREATE_IN_PROGRESS"],
-            ["CREATE_FAILED", "CREATE_COMPLETE"])
+            ["CREATE_FAILED", "CREATE_COMPLETE"],
+            timeout=1800
+        )
 
         if self.cs.bays.get(bay.uuid).status == 'CREATE_FAILED':
             raise Exception("bay %s created failed" % bay.uuid)
