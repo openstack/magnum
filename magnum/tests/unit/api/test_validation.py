@@ -348,3 +348,67 @@ class TestValidation(base.BaseTestCase):
         self._test_enforce_volume_driver_types_create(
             volume_driver_type='type',
             assert_raised=True)
+
+    @mock.patch('pecan.request')
+    @mock.patch('magnum.api.utils.get_rpc_resource')
+    def _test_enforce_volume_driver_types_update(
+            self,
+            mock_get_rpc_resource,
+            mock_pecan_request,
+            volume_driver_type,
+            op,
+            assert_raised=False):
+
+        @v.enforce_volume_driver_types_update()
+        def test(self, baymodel_ident, patch):
+            pass
+
+        baymodel_ident = 'test_uuid_or_name'
+        patch = [{'path': '/volume_driver', 'value': volume_driver_type,
+                  'op': op}]
+        context = mock_pecan_request.context
+        baymodel = obj_utils.get_test_baymodel(context,
+                                               uuid=baymodel_ident,
+                                               coe='kubernetes')
+        mock_get_rpc_resource.return_value = baymodel
+
+        # Reload the validator module so that baymodel configs are
+        # re-evaluated.
+        reload(v)
+        validator = v.K8sValidator
+        validator.supported_drivers = ['cinder']
+
+        if assert_raised:
+            self.assertRaises(exception.InvalidParameterValue,
+                              test, self, baymodel_ident, patch)
+        else:
+            test(self, baymodel_ident, patch)
+            mock_get_rpc_resource.assert_called_once_with(
+                'BayModel', baymodel_ident)
+
+    def test_enforce_volume_driver_types_supported_replace_update(self):
+        self._test_enforce_volume_driver_types_update(
+            volume_driver_type='cinder',
+            op='replace')
+
+    def test_enforce_volume_driver_types_not_supported_replace_update(self):
+        self._test_enforce_volume_driver_types_update(
+            volume_driver_type='type1',
+            op='replace',
+            assert_raised=True)
+
+    def test_enforce_volume_driver_types_supported_add_update(self):
+        self._test_enforce_volume_driver_types_update(
+            volume_driver_type='cinder',
+            op='add')
+
+    def test_enforce_volume_driver_types_not_supported_add_update(self):
+        self._test_enforce_volume_driver_types_update(
+            volume_driver_type='type1',
+            op='add',
+            assert_raised=True)
+
+    def test_enforce_volume_driver_types_remove_update(self):
+        self._test_enforce_volume_driver_types_update(
+            volume_driver_type='cinder',
+            op='remove')

@@ -334,6 +334,7 @@ class BayModelsController(rest.RestController):
     @expose.expose(BayModel, types.uuid_or_name, body=[BayModelPatchType])
     @policy.enforce_wsgi("baymodel", "update")
     @validation.enforce_network_driver_types_update()
+    @validation.enforce_volume_driver_types_update()
     def patch(self, baymodel_ident, patch):
         """Update an existing baymodel.
 
