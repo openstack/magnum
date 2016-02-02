@@ -124,7 +124,7 @@ def enforce_volume_driver_types_create():
     @decorator.decorator
     def wrapper(func, *args, **kwargs):
         baymodel = args[1]
-        _enforce_volume_driver_types(baymodel)
+        _enforce_volume_driver_types(baymodel.as_dict())
         return func(*args, **kwargs)
 
     return wrapper
@@ -141,20 +141,17 @@ def enforce_volume_driver_types_update():
                                                       patch)
         except api_utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)
-        if 'volume_driver' not in baymodel_dict:
-            baymodel_dict['volume_driver'] = None
-        baymodel = objects.BayModel(pecan.request.context, **baymodel_dict)
-        _enforce_volume_driver_types(baymodel)
+        _enforce_volume_driver_types(baymodel_dict)
         return func(*args, **kwargs)
 
     return wrapper
 
 
 def _enforce_volume_driver_types(baymodel):
-    validator = Validator.get_coe_validator(baymodel.coe)
-    if not baymodel.volume_driver:
+    validator = Validator.get_coe_validator(baymodel['coe'])
+    if not baymodel.get('volume_driver'):
         return
-    validator.validate_volume_driver(baymodel.volume_driver)
+    validator.validate_volume_driver(baymodel['volume_driver'])
 
 
 class Validator(object):

@@ -329,10 +329,9 @@ class TestValidation(base.BaseTestCase):
         def test(self, baymodel):
             pass
 
-        baymodel = mock.MagicMock()
-        baymodel.name = 'test_baymodel'
-        baymodel.volume_driver = volume_driver_type
-        baymodel.coe = coe
+        baymodel = obj_utils.get_test_baymodel(
+            {}, name='test_baymodel', coe=coe,
+            volume_driver=volume_driver_type)
 
         if assert_raised:
             self.assertRaises(exception.InvalidParameterValue,
