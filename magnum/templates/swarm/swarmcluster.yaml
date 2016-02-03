@@ -299,7 +299,6 @@ resources:
     type: "OS::Heat::ResourceGroup"
     depends_on:
       - extrouter_inside
-      - swarm_masters
     properties:
       count: {get_param: number_of_nodes}
       resource_def:

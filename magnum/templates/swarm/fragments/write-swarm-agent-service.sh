@@ -41,7 +41,11 @@ SCRIPT=/usr/local/bin/notify-heat
 
 cat > $SCRIPT << EOF
 #!/bin/sh
-until etcdctl --peers $ETCD_SERVER_IP:2379 ls /v2/keys/swarm/docker/swarm/nodes/$myip:2375
+until etcdctl \
+  --peers $ETCD_SERVER_IP:2379 \
+  --timeout 1s \
+  --total-timeout 5s \
+  ls /v2/keys/swarm/docker/swarm/nodes/$myip:2375
 do
     echo "Waiting for swarm agent registration..."
     sleep 5
