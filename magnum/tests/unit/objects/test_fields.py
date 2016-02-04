@@ -32,7 +32,12 @@ class TestBayStatus(test_fields.TestField):
                                    ('DELETE_IN_PROGRESS',
                                     'DELETE_IN_PROGRESS'),
                                    ('DELETE_FAILED', 'DELETE_FAILED'),
-                                   ('DELETE_COMPLETE', 'DELETE_COMPLETE'), ]
+                                   ('RESUME_COMPLETE', 'RESUME_COMPLETE'),
+                                   ('RESTORE_COMPLETE', 'RESTORE_COMPLETE'),
+                                   ('ROLLBACK_COMPLETE', 'ROLLBACK_COMPLETE'),
+                                   ('SNAPSHOT_COMPLETE', 'SNAPSHOT_COMPLETE'),
+                                   ('CHECK_COMPLETE', 'CHECK_COMPLETE'),
+                                   ('ADOPT_COMPLETE', 'ADOPT_COMPLETE')]
         self.coerce_bad_values = ['DELETE_STOPPED']
         self.to_primitive_values = self.coerce_good_values[0:1]
         self.from_primitive_values = self.coerce_good_values[0:1]
