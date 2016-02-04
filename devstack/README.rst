@@ -9,9 +9,8 @@ http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html
 for more information on using devstack and magnum.
 
 Running devstack with magnum for the first time may take a long time as it
-needs to download the Fedora Atomic micro-OS qcow2 image (e.g.,
-``fedora-21-atomic-5.qcow2``). If you already have this image you can copy it
-to /opt/stack/devstack/files first to save time.
+needs to download the Fedora Atomic qcow2 image (see
+http://www.projectatomic.io/download/).
 
 To install magnum into devstack, add the following settings to enable the
 magnum plugin::

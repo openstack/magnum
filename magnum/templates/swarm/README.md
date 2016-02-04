@@ -39,7 +39,7 @@ your environment:
       ssh_key_name: testkey
       external_network: 028d70dd-67b8-4901-8bdd-0c62b06cce2d
       dns_nameserver: 192.168.200.1
-      server_image: fedora-21-atomic-5
+      server_image: fedora-atomic
       discovery_url: token://d8cdfe5128af6e1075b34aa06ff1cc2c
 
 And then create the stack, referencing that environment file:

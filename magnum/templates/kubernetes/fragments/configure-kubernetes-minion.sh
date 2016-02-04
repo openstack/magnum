@@ -39,7 +39,7 @@ if [ "$NETWORK_DRIVER" == "flannel" ]; then
 
     # Make sure etcd has a flannel configuration
     . /etc/sysconfig/flanneld
-    until curl -sf "$FLANNEL_ETCD/v2/keys/coreos.com/network/config?quorum=false&recursive=false&sorted=false"
+    until curl -sf "$FLANNEL_ETCD/v2/keys${FLANNEL_ETCD_KEY}/config?quorum=false&recursive=false&sorted=false"
     do
         echo "Waiting for flannel configuration in etcd..."
         sleep 5

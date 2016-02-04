@@ -140,12 +140,6 @@ works in your case)::
 
     ping 8.8.8.8
 
-**Note:** On the fedora-21-atomic-5 image, ping does not work because
-of a known atomic bug.  You can work around this problem by::
-
-    cp /usr/bin/ping .
-    sudo ./ping 8.8.8.8
-
 If the ping fails, there is no route to the external internet.
 Check the following:
 
