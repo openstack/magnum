@@ -146,25 +146,6 @@ class TestHandler(db_base.DbTestCase):
     def test_update_bay_status_adopt_compelete(self):
         self._test_update_bay_status_complete(bay_status.ADOPT_COMPLETE)
 
-    @patch('magnum.common.clients.OpenStackClients')
-    def test_update_bay_with_invalid_params(
-            self, mock_openstack_client_class):
-        mock_heat_stack = mock.MagicMock()
-        mock_heat_stack.stack_status = bay_status.CREATE_COMPLETE
-        mock_heat_client = mock.MagicMock()
-        mock_heat_client.stacks.get.return_value = mock_heat_stack
-        mock_openstack_client = mock_openstack_client_class.return_value
-        mock_openstack_client.heat.return_value = mock_heat_client
-
-        self.bay.node_count = 2
-        self.bay.api_address = '7.7.7.7'
-        self.assertRaises(exception.InvalidParameterValue,
-                          self.handler.bay_update,
-                          self.context,
-                          self.bay)
-        bay = objects.Bay.get(self.context, self.bay.uuid)
-        self.assertEqual(1, bay.node_count)
-
     @patch('magnum.conductor.handlers.bay_conductor.HeatPoller')
     @patch('magnum.conductor.handlers.bay_conductor.cert_manager')
     @patch('magnum.conductor.handlers.bay_conductor._create_stack')

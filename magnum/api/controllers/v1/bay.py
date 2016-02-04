@@ -26,6 +26,7 @@ from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api import expose
 from magnum.api import utils as api_utils
+from magnum.api.validation import validate_bay_properties
 from magnum.common import exception
 from magnum.common import policy
 from magnum import objects
@@ -324,6 +325,10 @@ class BaysController(rest.RestController):
                 patch_val = None
             if rpc_bay[field] != patch_val:
                 rpc_bay[field] = patch_val
+
+        delta = rpc_bay.obj_what_changed()
+
+        validate_bay_properties(delta)
 
         res_bay = pecan.request.rpcapi.bay_update(rpc_bay)
         return Bay.convert_with_links(res_bay)

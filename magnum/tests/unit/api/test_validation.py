@@ -411,3 +411,10 @@ class TestValidation(base.BaseTestCase):
         self._test_enforce_volume_driver_types_update(
             volume_driver_type='cinder',
             op='remove')
+
+    def test_validate_bay_properties_pass(self):
+        v.validate_bay_properties(set(['node_count']))
+
+    def test_validate_bay_properties_failed(self):
+        self.assertRaises(exception.InvalidParameterValue,
+                          v.validate_bay_properties, set(['name']))
