@@ -10,9 +10,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import time
+
 from oslo_config import cfg
 from requests import exceptions as req_exceptions
-import time
 
 from magnum.common import docker_utils
 from magnum.tests.functional.python_client_base import BayAPITLSTest

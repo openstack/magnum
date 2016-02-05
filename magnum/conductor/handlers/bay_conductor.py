@@ -12,7 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import six
 import uuid
 
 from heatclient.common import template_utils
@@ -20,6 +19,7 @@ from heatclient import exc
 from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_service import loopingcall
+import six
 
 from magnum.common import clients
 from magnum.common import exception

@@ -12,9 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import textwrap
+
 import mock
 import pep8
-import textwrap
 
 from magnum.hacking import checks
 from magnum.tests import base

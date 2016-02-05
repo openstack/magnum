@@ -16,6 +16,7 @@
 Certificate manager API
 """
 import abc
+
 import six
 
 from magnum.common.x509 import operations

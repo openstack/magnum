@@ -11,13 +11,14 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from magnum.conductor.handlers import bay_conductor
-from magnum import objects
-from magnum.tests import base
 
 import mock
 from mock import patch
 from oslo_config import cfg
+
+from magnum.conductor.handlers import bay_conductor
+from magnum import objects
+from magnum.tests import base
 
 
 class TestBayConductorWithK8s(base.TestCase):

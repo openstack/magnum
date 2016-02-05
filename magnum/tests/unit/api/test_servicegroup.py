@@ -11,10 +11,10 @@
 # limitations under the License.
 
 import datetime
-import mock
-import pytz
 
+import mock
 from oslo_utils import timeutils
+import pytz
 
 from magnum.api import servicegroup as svc_grp
 from magnum.tests.unit.api import base as api_base

@@ -12,10 +12,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import mock
+
 from magnum.conductor.handlers import ca_conductor
 from magnum.tests import base
-
-import mock
 
 
 class TestSignConductor(base.TestCase):

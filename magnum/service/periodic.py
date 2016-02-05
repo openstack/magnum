@@ -14,10 +14,10 @@
 # limitations under the License.
 
 import functools
-import six
 
 from oslo_log import log
 from oslo_service import periodic_task
+import six
 
 from magnum.common import clients
 from magnum.common import context

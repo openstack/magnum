@@ -17,7 +17,6 @@ import sys
 from cliff import app
 from cliff import commandmanager
 from cliff import lister
-
 from oslo_config import cfg
 
 from magnum.conductor import template_definition as tdef

@@ -11,6 +11,7 @@
 # under the License.
 
 import inspect
+
 import mock
 
 from magnum.common import exception

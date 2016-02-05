@@ -11,8 +11,10 @@
 #    limitations under the License.
 
 """Magnum Docker RPC handler."""
-from docker import errors
+
 import functools
+
+from docker import errors
 from oslo_log import log as logging
 import six
 

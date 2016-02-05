@@ -12,9 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import mock
-
 from cryptography.hazmat.primitives import serialization
+import mock
 
 from magnum.common.x509 import operations
 from magnum.tests import base
