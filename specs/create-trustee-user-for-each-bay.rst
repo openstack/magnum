@@ -5,10 +5,10 @@ Create a trustee user for each bay
 https://blueprints.launchpad.net/magnum/+spec/create-trustee-user-for-each-bay
 
 Some services which are running in a bay need to access OpenStack services.
-For example, Kubernetes load balancer [1] needs to access Neutron. Docker
-registry [2] needs to access Swift. In order to access OpenStack services,
+For example, Kubernetes load balancer [1]_ needs to access Neutron. Docker
+registry [2]_ needs to access Swift. In order to access OpenStack services,
 we can create a trustee for each bay and delegate a limited set of rights to
-the trustee. [3] and [4] give a brief introduction to Keystone's trusts
+the trustee. [3]_ and [4]_ give a brief introduction to Keystone's trusts
 mechanism.
 
 Problem description
@@ -20,11 +20,12 @@ so we need to pass user credentials into the vms.
 Use Cases
 ---------
 
-1. Kubernetes load balancer needs to access Neutron [1].
+1. Kubernetes load balancer needs to access Neutron [1]_.
 2. For persistent storage, Cloud Provider needs to access Cinder to
-   mount/unmount block storage to the node as volume [5].
-3. TLS cert is generated in the vms and need to be uploaded to Magnum [6][7].
-4. Docker registry needs to access Swift [2].
+   mount/unmount block storage to the node as volume [5]_.
+3. TLS cert is generated in the vms and need to be uploaded to Magnum [6]_ and
+   [7]_.
+4. Docker registry needs to access Swift [2]_.
 
 Project Priority
 ----------------
@@ -52,10 +53,10 @@ follows.
 The roles which are delegated to the trustee should be limited. If the services
 in the bay only need access to Neutron, we should not allow the services to
 access to other OpenStack services. But there is a limitation that a trustor
-must have the role which is delegated to a trustee [4].
+must have the role which is delegated to a trustee [4]_.
 
 Magnum now only allows the user who create the bay to get the certificate to
-avoid the security risk introduced by Docker [8]. For example, if other users
+avoid the security risk introduced by Docker [8]_. For example, if other users
 in the same tenant can get the certificate, then they can use Docker API to
 access the host file system of a bay node and get anything they want::
 
@@ -170,14 +171,14 @@ regarding the service accounts.
 
 References
 ==========
-[1] http://docs.openstack.org/developer/magnum/dev/dev-kubernetes-load-balancer.html
-[2] https://blueprints.launchpad.net/magnum/+spec/registryv2-in-master
-[3] http://blogs.rdoproject.org/5858/role-delegation-in-keystone-trusts
-[4] https://wiki.openstack.org/wiki/Keystone/Trusts
-[5] https://github.com/kubernetes/kubernetes/blob/release-1.1/examples/mysql-cinder-pd/README.md
-[6] https://bugs.launchpad.net/magnum/+bug/1503863
-[7] https://review.openstack.org/#/c/232152/
-[8] https://docs.docker.com/engine/articles/security/#docker-daemon-attack-surface
+.. [1] http://docs.openstack.org/developer/magnum/dev/dev-kubernetes-load-balancer.html
+.. [2] https://blueprints.launchpad.net/magnum/+spec/registryv2-in-master
+.. [3] http://blogs.rdoproject.org/5858/role-delegation-in-keystone-trusts
+.. [4] https://wiki.openstack.org/wiki/Keystone/Trusts
+.. [5] https://github.com/kubernetes/kubernetes/blob/release-1.1/examples/mysql-cinder-pd/README.md
+.. [6] https://bugs.launchpad.net/magnum/+bug/1503863
+.. [7] https://review.openstack.org/#/c/232152/
+.. [8] https://docs.docker.com/engine/articles/security/#docker-daemon-attack-surface
 
 History
 =======
