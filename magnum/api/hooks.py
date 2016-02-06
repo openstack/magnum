@@ -81,9 +81,6 @@ class RPCHook(hooks.PecanHook):
     def before(self, state):
         state.request.rpcapi = conductor_api.API(context=state.request.context)
 
-    def after(self, state):
-        state.request.rpcapi = None
-
 
 class NoExceptionTracebackHook(hooks.PecanHook):
     """Workaround rpc.common: deserialize_remote_exception.
