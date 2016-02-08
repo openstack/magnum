@@ -29,6 +29,7 @@ from magnum.api import utils as api_utils
 from magnum.common import exception
 from magnum.common import policy
 from magnum import objects
+from magnum.objects import fields
 
 
 class BayPatchType(types.JsonPatchType):
@@ -96,13 +97,8 @@ class Bay(base.APIBase):
     stack_id = wsme.wsattr(wtypes.text, readonly=True)
     """Stack id of the heat stack"""
 
-    status = wtypes.text
-    """Status of the bay from the heat stack
-
-    Possible status is one of:
-    'CREATE_IN_PROGRESS', 'CREATE_FAILED', 'CREATE_COMPLETE',
-    'UPDATE_IN_PROGRESS', 'UPDATE_FAILED', 'UPDATE_COMPLETE',
-    'DELETE_IN_PROGRESS', 'DELETE_FAILED', 'DELETE_COMPLETE' """
+    status = wtypes.Enum(str, *fields.BayStatus.ALL)
+    """Status of the bay from the heat stack"""
 
     status_reason = wtypes.text
     """Status reason of the bay from the heat stack"""
@@ -159,7 +155,7 @@ class Bay(base.APIBase):
                      master_count=1,
                      bay_create_timeout=15,
                      stack_id='49dc23f5-ffc9-40c3-9d34-7be7f9e34d63',
-                     status="CREATE_COMPLETE",
+                     status=fields.BayStatus.CREATE_COMPLETE,
                      status_reason="CREATE completed successfully",
                      api_address='172.24.4.3',
                      node_addresses=['172.24.4.4', '172.24.4.5'],
