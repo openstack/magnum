@@ -106,7 +106,8 @@ class BayTest(base.BaseMagnumTest):
     # they time out on the gate (2 hours not enough)
     @testtools.testcase.attr('positive')
     def test_create_list_and_delete_bays(self):
-        gen_model = datagen.valid_bay_data(baymodel_id=self.baymodel.uuid)
+        gen_model = datagen.valid_bay_data(
+            baymodel_id=self.baymodel.uuid, node_count=1)
         _, temp_model = self._create_bay(gen_model)
         resp, model = self.bay_client.list_bays()
         self.assertEqual(resp.status, 200)
@@ -138,24 +139,6 @@ class BayTest(base.BaseMagnumTest):
         self.assertRaises(
             exceptions.BadRequest,
             self.bay_client.post_bay, gen_model)
-
-    @testtools.testcase.attr('negative')
-    def test_update_bay_baymodel_name_for_existing_bay(self):
-        first_model = datagen.valid_bay_data(baymodel_id=self.baymodel.uuid,
-                                             name='test')
-        _, old_model = self._create_bay(first_model)
-
-        patch_model = datagen.bay_name_patch_data()
-        self.assertRaises(
-            exceptions.BadRequest,
-            self.bay_client.patch_bay,
-            old_model.uuid, patch_model)
-
-        patch_baymodel = datagen.baymodel_name_patch_data()
-        self.assertRaises(
-            exceptions.BadRequest,
-            self.baymodel_client.patch_baymodel,
-            self.baymodel.uuid, patch_baymodel)
 
     @testtools.testcase.attr('negative')
     def test_update_bay_for_nonexisting_bay(self):
