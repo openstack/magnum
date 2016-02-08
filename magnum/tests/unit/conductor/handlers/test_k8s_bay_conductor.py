@@ -255,7 +255,9 @@ class TestBayConductorWithK8s(base.TestCase):
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
-            'auth_url': 'http://192.168.10.10:5000/v3'
+            'auth_url': 'http://192.168.10.10:5000/v3',
+            'bay_uuid': self.bay_dict['uuid'],
+            'magnum_url': self.mock_osc.magnum_url.return_value,
         }
         self.assertEqual(expected, definition)
 
@@ -302,7 +304,9 @@ class TestBayConductorWithK8s(base.TestCase):
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
-            'auth_url': 'http://192.168.10.10:5000/v3'
+            'auth_url': 'http://192.168.10.10:5000/v3',
+            'bay_uuid': self.bay_dict['uuid'],
+            'magnum_url': self.mock_osc.magnum_url.return_value,
         }
         self.assertEqual(expected, definition)
 

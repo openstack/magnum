@@ -24,11 +24,16 @@ write_files:
       myip=$(ip addr show eth0 |
              awk '$1 == "inet" {print $2}' | cut -f1 -d/)
 
-      # TODO(hongbin): enable TLS
       HOST_CERTS_PATH=/usr/share/ca-certificates
       KUBE_CERTS_PATH=/etc/kubernetes/ssl
-      KUBE_PROTOCOL="http"
-      KUBE_MASTER_URI="$KUBE_PROTOCOL://$KUBE_MASTER_IP:$KUBE_API_PORT"
+      KUBE_CONFIG_PATH=/etc/kubernetes/config
+      KUBE_PROTOCOL="https"
+      KUBE_CONFIG="${KUBE_CONFIG_PATH}/worker-kubeconfig.yaml"
+      if [ "${TLS_DISABLED}" == "True" ]; then
+        KUBE_PROTOCOL="http"
+        KUBE_CONFIG=
+      fi
+      KUBE_MASTER_URI="${KUBE_PROTOCOL}://${KUBE_MASTER_IP}:${KUBE_API_PORT}"
 
       TEMPLATE=/etc/kubernetes/manifests/kube-proxy.yaml
       mkdir -p $(dirname ${TEMPLATE})
@@ -47,6 +52,7 @@ write_files:
           - /hyperkube
           - proxy
           - --master=${KUBE_MASTER_URI}
+          - --kubeconfig=${KUBE_CONFIG}
           - --logtostderr=true
           - --v=0
           securityContext:
@@ -54,6 +60,9 @@ write_files:
           volumeMounts:
             - mountPath: /etc/ssl/certs
               name: "ssl-certs"
+            - mountPath: /etc/kubernetes/config
+              name: "kubeconfig"
+              readOnly: true
             - mountPath: /etc/kubernetes/ssl
               name: "etc-kube-ssl"
               readOnly: true
@@ -61,6 +70,9 @@ write_files:
           - name: "ssl-certs"
             hostPath:
               path: ${HOST_CERTS_PATH}
+          - name: "kubeconfig"
+            hostPath:
+              path: ${KUBE_CONFIG_PATH}
           - name: "etc-kube-ssl"
             hostPath:
               path: ${KUBE_CERTS_PATH}

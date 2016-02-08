@@ -315,8 +315,7 @@ baymodel, except for pointing to a different image::
                            --dns-nameserver 8.8.8.8 \
                            --flavor-id m1.small \
                            --network-driver flannel \
-                           --coe kubernetes \
-                           --tls-disabled
+                           --coe kubernetes
 
 Create a CoreOS Kubernetes bay. Use the CoreOS baymodel as a template for bay
 creation::
