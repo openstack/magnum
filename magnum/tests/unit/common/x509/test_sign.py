@@ -12,15 +12,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import mock
-import six
-
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 from cryptography import x509 as c_x509
 from cryptography.x509.oid import NameOID
+import mock
+import six
 
 from magnum.common.x509 import operations
 from magnum.tests import base

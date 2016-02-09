@@ -14,7 +14,6 @@ from oslo_versionedobjects import fields
 
 from magnum.db import api as dbapi
 from magnum.objects import base
-
 from magnum.objects import fields as m_fields
 
 

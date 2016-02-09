@@ -12,12 +12,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from magnum.conductor.tasks import heat_tasks
-from magnum.tests import base
-
 import mock
 from taskflow import engines
 from taskflow.patterns import linear_flow
+
+from magnum.conductor.tasks import heat_tasks
+from magnum.tests import base
 
 
 class HeatTasksTests(base.TestCase):

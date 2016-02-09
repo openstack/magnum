@@ -11,15 +11,15 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
+import mock
+from mock import patch
 from oslo_service import loopingcall
 
 from magnum.conductor.handlers import bay_conductor
 from magnum import objects
 from magnum.objects.fields import BayStatus as bay_status
 from magnum.tests import base
-
-import mock
-from mock import patch
 
 
 class TestBayConductorWithMesos(base.TestCase):

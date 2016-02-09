@@ -13,11 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import mock
+
 from magnum import objects
 from magnum.tests.unit.db import base
 from magnum.tests.unit.db import utils
-
-import mock
 
 
 class TestPodObject(base.DbTestCase):

@@ -15,6 +15,7 @@
 
 import jsonpatch
 import mock
+from oslo_config import cfg
 import wsme
 
 from magnum.api import utils
@@ -22,7 +23,6 @@ from magnum.common import exception
 from magnum.common import utils as common_utils
 from magnum.tests.unit.api import base
 
-from oslo_config import cfg
 
 CONF = cfg.CONF
 

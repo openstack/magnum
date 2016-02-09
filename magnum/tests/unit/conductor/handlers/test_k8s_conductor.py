@@ -12,14 +12,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import mock
+from mock import patch
+
 from magnum.common import exception
 from magnum.common.pythonk8sclient.swagger_client import rest
 from magnum.conductor.handlers import k8s_conductor
 from magnum import objects
 from magnum.tests import base
-
-import mock
-from mock import patch
 
 
 class TestK8sConductor(base.TestCase):

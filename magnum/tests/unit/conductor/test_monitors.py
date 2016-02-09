@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import mock
-
 from oslo_serialization import jsonutils
 
 from magnum.conductor import k8s_monitor

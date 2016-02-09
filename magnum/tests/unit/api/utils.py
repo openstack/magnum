@@ -13,6 +13,7 @@
 Utils for testing the API service.
 """
 import datetime
+
 import pytz
 
 from magnum.api.controllers.v1 import bay as bay_controller

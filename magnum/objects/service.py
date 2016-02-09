@@ -10,6 +10,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import ast
+
 from oslo_versionedobjects import fields
 
 from magnum.common import exception
@@ -17,8 +19,6 @@ from magnum.common.pythonk8sclient.swagger_client import rest
 from magnum.db import api as dbapi
 from magnum.objects import base
 from magnum.objects import fields as magnum_fields
-
-import ast
 
 
 @base.MagnumObjectRegistry.register

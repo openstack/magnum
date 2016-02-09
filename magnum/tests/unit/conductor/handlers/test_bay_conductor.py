@@ -18,6 +18,9 @@ import six
 import uuid
 
 from heatclient import exc
+import mock
+from mock import patch
+from oslo_config import cfg
 from oslo_service import loopingcall
 
 from magnum.common import exception
@@ -27,10 +30,6 @@ from magnum.objects.fields import BayStatus as bay_status
 from magnum.tests import base
 from magnum.tests.unit.db import base as db_base
 from magnum.tests.unit.db import utils
-
-import mock
-from mock import patch
-from oslo_config import cfg
 
 
 class TestHandler(db_base.DbTestCase):

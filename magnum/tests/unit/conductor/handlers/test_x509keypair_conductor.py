@@ -12,12 +12,12 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import mock
+from mock import patch
+
 from magnum.conductor.handlers import x509keypair_conductor
 from magnum import objects
 from magnum.tests import base
-
-import mock
-from mock import patch
 
 
 class TestX509KeyPairConductor(base.TestCase):
