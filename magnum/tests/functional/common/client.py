@@ -27,7 +27,8 @@ class MagnumClient(rest_client.RestClient):
         super(MagnumClient, self).__init__(
             auth_provider=auth_provider,
             service='container',
-            region=config.Config.region
+            region=config.Config.region,
+            disable_ssl_certificate_validation=True
         )
 
     @classmethod

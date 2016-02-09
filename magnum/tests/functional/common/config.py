@@ -88,6 +88,10 @@ class Config(object):
         cls.flavor_id = CONF.magnum.flavor_id
 
     @classmethod
+    def set_magnum_url(cls, config):
+        cls.magnum_url = CONF.magnum.get('magnum_url', None)
+
+    @classmethod
     def setUp(cls):
         cls.set_admin_creds(config)
         cls.set_user_creds(config)
@@ -100,3 +104,4 @@ class Config(object):
         cls.set_nic_id(config)
         cls.set_keypair_id(config)
         cls.set_flavor_id(config)
+        cls.set_magnum_url(config)
