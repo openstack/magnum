@@ -135,6 +135,16 @@ magnum will periodically send metrics to ceilometer::
     enable_plugin ceilometer https://git.openstack.org/openstack/ceilometer
     END
 
+If you want to deploy Docker Registry 2.0 in your bay, you should enable swift
+in devstack::
+
+    cat >> /opt/stack/devstack/local.conf << END
+    enable_service s-proxy
+    enable_service s-object
+    enable_service s-container
+    enable_service s-account
+    END
+
 More devstack configuration information can be found at
 http://docs.openstack.org/developer/devstack/configuration.html
 
