@@ -30,7 +30,10 @@ from magnum.tests import policy_fixture
 
 
 CONF = cfg.CONF
-log.register_options(CONF)
+try:
+    log.register_options(CONF)
+except cfg.ArgsAlreadyParsedError:
+    pass
 CONF.set_override('use_stderr', False)
 
 

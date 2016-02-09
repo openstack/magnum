@@ -11,10 +11,14 @@
 # under the License.
 
 import inspect
+import logging
+import os
+import subprocess
 
 from tempest.common import credentials_factory as common_creds
 from tempest_lib import base
 
+import magnum
 from magnum.tests.functional.common import config
 from magnum.tests.functional.common import manager
 
@@ -24,6 +28,7 @@ class BaseMagnumTest(base.BaseTestCase):
 
     ic_class_list = []
     ic_method_list = []
+    LOG = logging.getLogger(__name__)
 
     def __init__(self, *args, **kwargs):
         super(BaseMagnumTest, self).__init__(*args, **kwargs)
@@ -57,6 +62,14 @@ class BaseMagnumTest(base.BaseTestCase):
     def get_credentials(cls, name=None,
                         type_of_creds="default",
                         class_cleanup=False):
+        (creds, _) = cls.get_credentials_with_keypair(name, type_of_creds,
+                                                      class_cleanup)
+        return creds
+
+    @classmethod
+    def get_credentials_with_keypair(cls, name=None,
+                                     type_of_creds="default",
+                                     class_cleanup=False):
         if name is None:
             # Get name of test method
             name = inspect.stack()[1][3]
@@ -86,12 +99,16 @@ class BaseMagnumTest(base.BaseTestCase):
 
         _, keypairs_client = cls.get_clients(
             creds, type_of_creds, 'keypair_setup')
+
+        keypair = None
         try:
             keypairs_client.show_keypair(config.Config.keypair_id)
         except Exception:
-            keypairs_client.create_keypair(name=config.Config.keypair_id)
-
-        return creds
+            keypair_body = keypairs_client.create_keypair(
+                name=config.Config.keypair_id)
+            cls.LOG.debug("Keypair body: %s" % keypair_body)
+            keypair = keypair_body['keypair']['private_key']
+        return (creds, keypair)
 
     @classmethod
     def get_clients(cls, creds, type_of_creds, request_type):
@@ -142,3 +159,53 @@ class BaseMagnumTest(base.BaseTestCase):
         """
         creds = cls.get_credentials(name, type_of_creds, class_cleanup)
         return cls.get_clients(creds, type_of_creds, request_type)
+
+    @classmethod
+    def copy_logs_handler(cls, get_nodes_fn, coe, keypair):
+        """Copy logs closure.
+
+        This method will retrieve all running nodes for a specified bay
+        and copy addresses from there locally.
+
+        :param get_nodes_fn: function that takes no parameters and returns
+            a list of node IPs to get logs from
+        :param coe: the COE type of the nodes
+        """
+
+        if not config.Config.copy_logs:
+            return lambda: None
+
+        def int_copy_logs(exec_info):
+            try:
+                cls.LOG.debug("Copying logs...")
+                fn = exec_info[2].tb_frame.f_locals['fn']
+                func_name = fn.im_self._get_test_method().__name__
+                msg = "Failed to copy logs for bay"
+                nodes_addresses = get_nodes_fn()
+
+                for node_address in nodes_addresses:
+                    log_name = "node-" + func_name
+                    try:
+                        base_path = os.path.split(os.path.dirname(
+                            os.path.abspath(magnum.__file__)))[0]
+                        script = "magnum/tests/contrib/copy_instance_logs.sh"
+                        full_location = os.path.join(base_path, script)
+                        cls.LOG.debug("running %s" % full_location)
+                        cls.LOG.debug("keypair: %s" % keypair)
+                        subprocess.check_call([
+                            full_location,
+                            node_address,
+                            coe,
+                            log_name,
+                            str(keypair)
+                        ])
+                    except Exception:
+                        cls.LOG.exception(msg)
+                        cls.LOG.exception("failed to copy from %s to %s%s-%s" %
+                                          (node_address,
+                                           "/opt/stack/logs/bay-nodes/",
+                                           log_name, node_address))
+            except Exception:
+                cls.LOG.exception(msg)
+
+        return int_copy_logs

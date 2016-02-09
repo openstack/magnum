@@ -22,12 +22,21 @@ SSH_IP=$1
 COE=${2-kubernetes}
 NODE_TYPE=${3-master}
 LOG_PATH=/opt/stack/logs/bay-nodes/${NODE_TYPE}-${SSH_IP}
+KEYPAIR=${4-default}
 
 function remote_exec {
+    local priv_key
+    echo "If private key is specified, save to temp and use that; else, use default"
+    if [[ "$KEYPAIR" == "default" ]]; then
+        priv_key="~/.ssh/id_rsa"
+    else
+        priv_key="$(mktemp id_rsa.$SSH_IP.XXX)"
+        echo -en "$KEYPAIR" > $priv_key
+    fi
     local ssh_user=$1
     local cmd=$2
     local logfile=${LOG_PATH}/$3
-    ssh -o StrictHostKeyChecking=no ${ssh_user}@${SSH_IP} "${cmd}" > ${logfile} 2>&1
+    ssh -i $priv_key -o StrictHostKeyChecking=no ${ssh_user}@${SSH_IP} "${cmd}" > ${logfile} 2>&1
 }
 
 mkdir -p $LOG_PATH
@@ -55,7 +64,7 @@ if [[ "$COE" == "kubernetes" ]]; then
     remote_exec $SSH_USER "sudo cat /etc/sysconfig/docker" docker.sysconfig.env.log
     remote_exec $SSH_USER "sudo cat /etc/sysconfig/docker-storage" docker-storage.sysconfig.env.log
     remote_exec $SSH_USER "sudo cat /etc/sysconfig/docker-network" docker-network.sysconfig.env.log
-    remote_exec $SSH_USER "sudo docker ps --all=true --no-trunc=true" docker-containers.log
+    remote_exec $SSH_USER "sudo timeout 60s docker ps --all=true --no-trunc=true" docker-containers.log
     remote_exec $SSH_USER "sudo tar zcvf - /var/lib/docker/containers 2>/dev/null" docker-container-configs.tar.gz
     remote_exec $SSH_USER "sudo journalctl -u flanneld --no-pager" flanneld.log
     remote_exec $SSH_USER "sudo ip a" ipa.log
@@ -81,7 +90,7 @@ elif [[ "$COE" == "swarm" ]]; then
     remote_exec $SSH_USER "sudo cat /etc/sysconfig/docker" docker.sysconfig.env.log
     remote_exec $SSH_USER "sudo cat /etc/sysconfig/docker-storage" docker-storage.sysconfig.env.log
     remote_exec $SSH_USER "sudo cat /etc/sysconfig/docker-network" docker-network.sysconfig.env.log
-    remote_exec $SSH_USER "sudo docker ps --all=true --no-trunc=true" docker-containers.log
+    remote_exec $SSH_USER "sudo timeout 60s docker ps --all=true --no-trunc=true" docker-containers.log
     remote_exec $SSH_USER "sudo tar zcvf - /var/lib/docker/containers 2>/dev/null" docker-container-configs.tar.gz
     remote_exec $SSH_USER "sudo journalctl -u flanneld --no-pager" flanneld.log
     remote_exec $SSH_USER "sudo ip a" ipa.log
