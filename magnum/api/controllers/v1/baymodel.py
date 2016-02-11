@@ -30,6 +30,7 @@ from magnum.common import clients
 from magnum.common import exception
 from magnum.common import policy
 from magnum import objects
+from magnum.objects import fields
 
 
 class BayModelPatchType(types.JsonPatchType):
@@ -48,24 +49,13 @@ class BayModel(base.APIBase):
     between the internal object model and the API representation of a baymodel.
     """
 
-    _coe = None
-
-    def _get_coe(self):
-        return self._coe
-
-    def _set_coe(self, value):
-        if value and self._coe != value:
-            self._coe = value
-        elif value == wtypes.Unset:
-            self._coe = wtypes.Unset
-
     uuid = types.uuid
     """Unique UUID for this baymodel"""
 
     name = wtypes.StringType(min_length=1, max_length=255)
     """The name of the bay model"""
 
-    coe = wsme.wsproperty(wtypes.text, _get_coe, _set_coe, mandatory=True)
+    coe = wtypes.Enum(str, *fields.BayType.ALL, mondatory=True)
     """The Container Orchestration Engine for this bay model"""
 
     image_id = wsme.wsattr(wtypes.StringType(min_length=1, max_length=255),
@@ -185,7 +175,7 @@ class BayModel(base.APIBase):
             docker_volume_size=25,
             cluster_distro='fedora-atomic',
             ssh_authorized_key='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAB',
-            coe='kubernetes',
+            coe=fields.BayType.KUBERNETES,
             http_proxy='http://proxy.com:123',
             https_proxy='https://proxy.com:123',
             no_proxy='192.168.0.1,192.168.0.2,192.168.0.3',

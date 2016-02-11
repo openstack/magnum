@@ -471,6 +471,12 @@ class TestPost(api_base.FunctionalTest):
         for field in fields:
             self._create_baymodel_raises_app_error(**{field: ''})
 
+    def test_create_baymodel_with_invalid_coe(self):
+        self._create_baymodel_raises_app_error(coe='k8s')
+        self._create_baymodel_raises_app_error(coe='storm')
+        self._create_baymodel_raises_app_error(coe='meson')
+        self._create_baymodel_raises_app_error(coe='osomatsu')
+
     def test_create_baymodel_with_invalid_docker_volume_size(self):
         self._create_baymodel_raises_app_error(docker_volume_size=0)
         self._create_baymodel_raises_app_error(docker_volume_size=-1)
