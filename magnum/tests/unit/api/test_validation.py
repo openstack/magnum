@@ -19,6 +19,7 @@ from six.moves import reload_module
 
 from magnum.api import validation as v
 from magnum.common import exception
+from magnum import objects
 from magnum.tests import base
 from magnum.tests.unit.objects import utils as obj_utils
 
@@ -412,9 +413,11 @@ class TestValidation(base.BaseTestCase):
             volume_driver_type='cinder',
             op='remove')
 
-    def test_validate_bay_properties_pass(self):
-        v.validate_bay_properties(set(['node_count']))
-
-    def test_validate_bay_properties_failed(self):
-        self.assertRaises(exception.InvalidParameterValue,
-                          v.validate_bay_properties, set(['name']))
+    def test_validate_bay_properties(self):
+        allowed_properties = v.bay_update_allowed_properties
+        for field in objects.Bay.fields:
+            if field in allowed_properties:
+                v.validate_bay_properties(set([field]))
+            else:
+                self.assertRaises(exception.InvalidParameterValue,
+                                  v.validate_bay_properties, set([field]))
