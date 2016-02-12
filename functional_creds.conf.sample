@@ -14,4 +14,5 @@ pass = password
 image_id = fedora-21-atomic-5
 nic_id = public
 keypair_id = default
-flavor_id = m1.magnum
+flavor_id = m1.magnum2
+master_flavor_id = m1.magnum

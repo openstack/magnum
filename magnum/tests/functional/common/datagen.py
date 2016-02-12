@@ -181,7 +181,8 @@ def valid_swarm_baymodel():
     return baymodel_data(image_id=config.Config.image_id,
                          fixed_network="192.168.0.0/24",
                          flavor_id=config.Config.flavor_id, public=False,
-                         dns_nameserver="8.8.8.8", master_flavor_id=None,
+                         dns_nameserver="8.8.8.8",
+                         master_flavor_id=config.Config.master_flavor_id,
                          keypair_id=config.Config.keypair_id, coe="swarm",
                          docker_volume_size=3, cluster_distro=None,
                          ssh_authorized_key=None, external_network_id="public",
@@ -223,7 +224,7 @@ def bay_data(name=data_utils.rand_name('bay'),
     return model
 
 
-def valid_bay_data(baymodel_id, name=data_utils.rand_name('bay'), node_count=2,
+def valid_bay_data(baymodel_id, name=data_utils.rand_name('bay'), node_count=1,
                    master_count=1, bay_create_timeout=None):
     """Generates random bay data with valid
 

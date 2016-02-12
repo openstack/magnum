@@ -92,6 +92,12 @@ class Config(object):
         cls.magnum_url = CONF.magnum.get('magnum_url', None)
 
     @classmethod
+    def set_master_flavor_id(cls, config):
+        if 'master_flavor_id' not in CONF.magnum:
+            raise Exception('config missing master_flavor_id key')
+        cls.master_flavor_id = CONF.magnum.master_flavor_id
+
+    @classmethod
     def setUp(cls):
         cls.set_admin_creds(config)
         cls.set_user_creds(config)
@@ -105,3 +111,4 @@ class Config(object):
         cls.set_keypair_id(config)
         cls.set_flavor_id(config)
         cls.set_magnum_url(config)
+        cls.set_master_flavor_id(config)

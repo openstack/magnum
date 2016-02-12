@@ -50,6 +50,7 @@ class BaseMagnumClient(base.TestCase):
         image_id = cliutils.env('IMAGE_ID')
         nic_id = cliutils.env('NIC_ID')
         flavor_id = cliutils.env('FLAVOR_ID')
+        master_flavor_id = cliutils.env('MASTER_FLAVOR_ID')
         keypair_id = cliutils.env('KEYPAIR_ID')
         copy_logs = cliutils.env('COPY_LOGS')
 
@@ -65,6 +66,8 @@ class BaseMagnumClient(base.TestCase):
             image_id = image_id or config.get('magnum', 'image_id')
             nic_id = nic_id or config.get('magnum', 'nic_id')
             flavor_id = flavor_id or config.get('magnum', 'flavor_id')
+            master_flavor_id = master_flavor_id or config.get(
+                'magnum', 'master_flavor_id')
             keypair_id = keypair_id or config.get('magnum', 'keypair_id')
             try:
                 copy_logs = copy_logs or config.get('magnum', 'copy_logs')
@@ -74,6 +77,7 @@ class BaseMagnumClient(base.TestCase):
         cls.image_id = image_id
         cls.nic_id = nic_id
         cls.flavor_id = flavor_id
+        cls.master_flavor_id = master_flavor_id
         cls.keypair_id = keypair_id
         cls.copy_logs = bool(copy_logs)
         cls.cs = v1client.Client(username=user,
@@ -118,7 +122,7 @@ class BaseMagnumClient(base.TestCase):
             external_network_id=cls.nic_id,
             image_id=cls.image_id,
             flavor_id=cls.flavor_id,
-            master_flavor_id=cls.flavor_id,
+            master_flavor_id=cls.master_flavor_id,
             docker_volume_size=docker_volume_size,
             network_driver=network_driver,
             volume_driver=volume_driver,
