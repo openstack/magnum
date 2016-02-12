@@ -16,7 +16,6 @@ from oslo_config import cfg
 from requests import exceptions as req_exceptions
 
 from magnum.common import docker_utils
-from magnum.tests.functional.python_client_base import BayAPITLSTest
 from magnum.tests.functional.python_client_base import BayTest
 from magnumclient.openstack.common.apiclient import exceptions
 
@@ -28,49 +27,26 @@ CONF.import_opt('default_timeout', 'magnum.common.docker_utils',
                 group='docker')
 
 
-class TestBayModelResource(BayTest):
-    coe = 'swarm'
-
-    def test_baymodel_create_and_delete(self):
-        self._test_baymodel_create_and_delete(
-            'test_swarm_baymodel',
-            network_driver=None,
-            volume_driver=None)
-
-
-class TestSwarmAPIs(BayAPITLSTest):
-
+class TestSwarmAPIs(BayTest):
     """This class will cover swarm bay basic functional testing.
 
        Will test all kinds of container action with tls_disabled=False mode.
     """
 
+    coe = "swarm"
+    baymodel_kwargs = {
+        "tls_disabled": False,
+        "network_driver": None,
+        "volume_driver": None,
+        "fixed_network": '192.168.0.0/24',
+        "dns_nameserver": '8.8.8.8',
+        "labels": {}
+    }
+
     @classmethod
     def setUpClass(cls):
         super(TestSwarmAPIs, cls).setUpClass()
-
-        cls.baymodel = cls._create_baymodel('testSwarmApi',
-                                            coe='swarm',
-                                            tls_disabled=False,
-                                            network_driver=None,
-                                            volume_driver=None,
-                                            docker_volume_size=3,
-                                            labels={},
-                                            fixed_network='192.168.0.0/24',
-                                            dns_nameserver='8.8.8.8')
-        cls.bay = cls._create_bay('testSwarmApi', cls.baymodel.uuid)
-
-        config_contents = """[req]
-distinguished_name = req_distinguished_name
-req_extensions     = req_ext
-prompt = no
-[req_distinguished_name]
-CN = Your Name
-[req_ext]
-extendedKeyUsage = clientAuth
-"""
         url = cls.cs.bays.get(cls.bay.uuid).api_address
-        cls._create_tls_ca_files(config_contents)
 
         # Note(eliqiao): docker_utils.CONF.docker.default_timeout is 10,
         # tested this default configure option not works on gate, it will
