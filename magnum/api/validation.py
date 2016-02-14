@@ -56,6 +56,9 @@ baymodel_opts = [
 cfg.CONF.register_opts(baymodel_opts, group='baymodel')
 
 
+bay_update_allowed_properties = set(['node_count'])
+
+
 def enforce_bay_types(*bay_types):
     """Enforce that bay_type is in supported list."""
     @decorator.decorator
@@ -152,6 +155,15 @@ def _enforce_volume_driver_types(baymodel):
     if not baymodel.get('volume_driver'):
         return
     validator.validate_volume_driver(baymodel['volume_driver'])
+
+
+def validate_bay_properties(delta):
+
+    update_disallowed_properties = delta - bay_update_allowed_properties
+    if update_disallowed_properties:
+        err = (_("cannot change bay property(ies) %s.") %
+               ", ".join(update_disallowed_properties))
+        raise exception.InvalidParameterValue(err=err)
 
 
 class Validator(object):

@@ -200,47 +200,47 @@ class TestPatch(api_base.FunctionalTest):
 
     @mock.patch('oslo_utils.timeutils.utcnow')
     def test_replace_ok(self, mock_utcnow):
-        name = 'bay_example_B'
+        new_node_count = 4
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
         mock_utcnow.return_value = test_time
 
         response = self.patch_json('/bays/%s' % self.bay.uuid,
-                                   [{'path': '/name', 'value': name,
+                                   [{'path': '/node_count',
+                                     'value': new_node_count,
                                      'op': 'replace'}])
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(200, response.status_code)
 
         response = self.get_json('/bays/%s' % self.bay.uuid)
-        self.assertEqual(name, response['name'])
+        self.assertEqual(new_node_count, response['node_count'])
         return_updated_at = timeutils.parse_isotime(
             response['updated_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_updated_at)
         # Assert nothing else was changed
         self.assertEqual(self.bay.uuid, response['uuid'])
         self.assertEqual(self.bay.baymodel_id, response['baymodel_id'])
-        self.assertEqual(self.bay.node_count, response['node_count'])
 
     @mock.patch('oslo_utils.timeutils.utcnow')
     def test_replace_ok_by_name(self, mock_utcnow):
-        name = 'bay_example_B'
+        new_node_count = 4
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
         mock_utcnow.return_value = test_time
 
         response = self.patch_json('/bays/%s' % self.bay.name,
-                                   [{'path': '/name', 'value': name,
+                                   [{'path': '/node_count',
+                                     'value': new_node_count,
                                      'op': 'replace'}])
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(200, response.status_code)
 
         response = self.get_json('/bays/%s' % self.bay.uuid)
-        self.assertEqual(name, response['name'])
+        self.assertEqual(new_node_count, response['node_count'])
         return_updated_at = timeutils.parse_isotime(
             response['updated_at']).replace(tzinfo=None)
         self.assertEqual(test_time, return_updated_at)
         # Assert nothing else was changed
         self.assertEqual(self.bay.uuid, response['uuid'])
         self.assertEqual(self.bay.baymodel_id, response['baymodel_id'])
-        self.assertEqual(self.bay.node_count, response['node_count'])
 
     @mock.patch('oslo_utils.timeutils.utcnow')
     def test_replace_ok_by_name_not_found(self, mock_utcnow):
@@ -254,6 +254,18 @@ class TestPatch(api_base.FunctionalTest):
                                    expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(404, response.status_code)
+
+    def test_replace_baymodel_id_failed(self):
+        baymodel = obj_utils.create_test_baymodel(self.context,
+                                                  uuid=utils.generate_uuid())
+        response = self.patch_json('/bays/%s' % self.bay.uuid,
+                                   [{'path': '/baymodel_id',
+                                     'value': baymodel.uuid,
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_code)
+        self.assertTrue(response.json['error_message'])
 
     @mock.patch('oslo_utils.timeutils.utcnow')
     def test_replace_ok_by_name_multiple_bay(self, mock_utcnow):
@@ -271,17 +283,6 @@ class TestPatch(api_base.FunctionalTest):
                                    expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(409, response.status_code)
-
-    def test_replace_baymodel_id(self):
-        baymodel = obj_utils.create_test_baymodel(self.context,
-                                                  uuid=utils.generate_uuid())
-        response = self.patch_json('/bays/%s' % self.bay.uuid,
-                                   [{'path': '/baymodel_id',
-                                     'value': baymodel.uuid,
-                                     'op': 'replace'}],
-                                   expect_errors=True)
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(200, response.status_code)
 
     def test_replace_non_existent_baymodel_id(self):
         response = self.patch_json('/bays/%s' % self.bay.uuid,
@@ -312,6 +313,16 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['error_message'])
 
+    def test_replace_bay_name_failed(self):
+        response = self.patch_json('/bays/%s' % self.bay.uuid,
+                                   [{'path': '/name',
+                                     'value': 'bay_example_B',
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual(400, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(response.json['error_message'])
+
     def test_add_non_existent_property(self):
         response = self.patch_json(
             '/bays/%s' % self.bay.uuid,
@@ -326,16 +337,17 @@ class TestPatch(api_base.FunctionalTest):
         self.assertIsNotNone(response['name'])
 
         response = self.patch_json('/bays/%s' % self.bay.uuid,
-                                   [{'path': '/name', 'op': 'remove'}])
+                                   [{'path': '/node_count', 'op': 'remove'}])
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(200, response.status_code)
 
         response = self.get_json('/bays/%s' % self.bay.uuid)
-        self.assertIsNone(response['name'])
+        # only allow node_count for bay, and default value is 1
+        self.assertEqual(1, response['node_count'])
         # Assert nothing else was changed
         self.assertEqual(self.bay.uuid, response['uuid'])
         self.assertEqual(self.bay.baymodel_id, response['baymodel_id'])
-        self.assertEqual(self.bay.node_count, response['node_count'])
+        self.assertEqual(self.bay.name, response['name'])
         self.assertEqual(self.bay.master_count, response['master_count'])
 
     def test_remove_uuid(self):
