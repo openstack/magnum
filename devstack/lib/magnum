@@ -100,7 +100,7 @@ function configure_magnum {
 #
 # Project              User         Roles
 # ------------------------------------------------------------------
-# SERVICE_TENANT_NAME  magnum         service
+# SERVICE_PROJECT_NAME  magnum         service
 function create_magnum_accounts {
 
     create_service_user "magnum" "admin"
@@ -136,7 +136,7 @@ function create_magnum_conf {
 
     iniset $MAGNUM_CONF keystone_authtoken admin_user magnum
     iniset $MAGNUM_CONF keystone_authtoken admin_password $SERVICE_PASSWORD
-    iniset $MAGNUM_CONF keystone_authtoken admin_tenant_name $SERVICE_TENANT_NAME
+    iniset $MAGNUM_CONF keystone_authtoken admin_tenant_name $SERVICE_PROJECT_NAME
 
     configure_auth_token_middleware $MAGNUM_CONF magnum $MAGNUM_AUTH_CACHE_DIR
 

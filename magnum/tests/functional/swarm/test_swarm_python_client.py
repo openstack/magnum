@@ -17,7 +17,7 @@ from requests import exceptions as req_exceptions
 
 from magnum.common import docker_utils
 from magnum.tests.functional.python_client_base import BayTest
-from magnumclient.openstack.common.apiclient import exceptions
+from magnumclient.common.apiclient import exceptions
 
 
 CONF = cfg.CONF

@@ -27,8 +27,8 @@ from six.moves import configparser
 
 from magnum.common.utils import rmtree_without_raise
 from magnum.tests import base
-from magnumclient.openstack.common.apiclient import exceptions
-from magnumclient.openstack.common import cliutils
+from magnumclient.common.apiclient import exceptions
+from magnumclient.common import cliutils
 from magnumclient.v1 import client as v1client
 
 
