@@ -7,3 +7,5 @@ for service in $NODE_SERVICES; do
     systemctl enable $service
     systemctl --no-block start $service
 done
+
+setenforce 1
