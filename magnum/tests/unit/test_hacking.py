@@ -182,19 +182,18 @@ class HackingTestCase(base.TestCase):
     def test_use_timeunitls_utcow(self):
         errors = [(1, 0, "M310")]
         check = checks.use_timeutils_utcnow
-        filename = "magnum/api/controller/v1/baymodel.py"
 
         code = "datetime.now"
-        self._assert_has_errors(code, check, errors, filename)
+        self._assert_has_errors(code, check, errors)
 
         code = "datetime.utcnow"
-        self._assert_has_errors(code, check, errors, filename)
+        self._assert_has_errors(code, check, errors)
 
         code = "datetime.aa"
-        self._assert_has_no_errors(code, check, filename)
+        self._assert_has_no_errors(code, check)
 
         code = "aaa"
-        self._assert_has_no_errors(code, check, filename)
+        self._assert_has_no_errors(code, check)
 
     def test_dict_constructor_with_list_copy(self):
         self.assertEqual(1, len(list(checks.dict_constructor_with_list_copy(
