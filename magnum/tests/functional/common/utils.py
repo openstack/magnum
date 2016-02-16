@@ -89,8 +89,8 @@ def wait_for_condition(condition, interval=1, timeout=40):
         if result:
             return result
         time.sleep(interval)
-    raise Exception("Timed out after %s seconds.  Started " +
-                    "on %s and ended on %s" % (timeout, start_time, end_time))
+    raise Exception(("Timed out after %s seconds.  Started " +
+                    "on %s and ended on %s") % (timeout, start_time, end_time))
 
 
 def memoized(func):
