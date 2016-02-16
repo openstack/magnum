@@ -14,7 +14,6 @@
 import docker
 from docker import errors
 import mock
-from oslo_config import cfg
 import six
 
 from magnum.common import docker_utils
@@ -23,8 +22,6 @@ from magnum.conductor.handlers import docker_conductor
 from magnum import objects
 from magnum.objects import fields
 from magnum.tests import base
-
-CONF = cfg.CONF
 
 
 class TestDockerHandler(base.BaseTestCase):
