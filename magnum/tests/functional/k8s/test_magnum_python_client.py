@@ -23,6 +23,3 @@ class TestListResources(BaseMagnumClient):
 
     def test_containers_list(self):
         self.assertIsNotNone(self.cs.containers.list())
-
-    def test_nodes_list(self):
-        self.assertIsNotNone(self.cs.nodes.list())

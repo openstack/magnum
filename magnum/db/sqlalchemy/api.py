@@ -21,7 +21,6 @@ from oslo_db.sqlalchemy import utils as db_utils
 from oslo_utils import timeutils
 from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy import sql
 
 from magnum.common import exception
 from magnum.common import utils
@@ -459,110 +458,6 @@ class Connection(api.Connection):
 
             if 'provision_state' in values:
                 values['provision_updated_at'] = timeutils.utcnow()
-
-            ref.update(values)
-        return ref
-
-    def _add_nodes_filters(self, query, filters):
-        if filters is None:
-            filters = {}
-
-        if 'associated' in filters:
-            if filters['associated']:
-                query = query.filter(models.Node.ironic_node_id != sql.null())
-            else:
-                query = query.filter(models.Node.ironic_node_id == sql.null())
-        if 'type' in filters:
-            query = query.filter_by(type=filters['type'])
-        if 'image_id' in filters:
-            query = query.filter_by(image_id=filters['image_id'])
-        if 'project_id' in filters:
-            query = query.filter_by(project_id=filters['project_id'])
-        if 'user_id' in filters:
-            query = query.filter_by(user_id=filters['user_id'])
-
-        return query
-
-    def get_node_list(self, context, filters=None, limit=None, marker=None,
-                      sort_key=None, sort_dir=None):
-        query = model_query(models.Node)
-        query = self._add_tenant_filters(context, query)
-        query = self._add_nodes_filters(query, filters)
-        return _paginate_query(models.Node, limit, marker,
-                               sort_key, sort_dir, query)
-
-    def create_node(self, values):
-        # ensure defaults are present for new nodes
-        if not values.get('uuid'):
-            values['uuid'] = utils.generate_uuid()
-
-        node = models.Node()
-        node.update(values)
-        try:
-            node.save()
-        except db_exc.DBDuplicateEntry as exc:
-            if 'ironic_node_id' in exc.columns:
-                raise exception.InstanceAssociated(
-                    instance_uuid=values['ironic_node_id'],
-                    node=values['uuid'])
-            raise exception.NodeAlreadyExists(uuid=values['uuid'])
-        return node
-
-    def get_node_by_id(self, context, node_id):
-        query = model_query(models.Node)
-        query = self._add_tenant_filters(context, query)
-        query = query.filter_by(id=node_id)
-        try:
-            return query.one()
-        except NoResultFound:
-            raise exception.NodeNotFound(node=node_id)
-
-    def get_node_by_uuid(self, context, node_uuid):
-        query = model_query(models.Node)
-        query = self._add_tenant_filters(context, query)
-        query = query.filter_by(uuid=node_uuid)
-        try:
-            return query.one()
-        except NoResultFound:
-            raise exception.NodeNotFound(node=node_uuid)
-
-    def destroy_node(self, node_id):
-        session = get_session()
-        with session.begin():
-            query = model_query(models.Node, session=session)
-            query = add_identity_filter(query, node_id)
-            count = query.delete()
-            if count != 1:
-                raise exception.NodeNotFound(node_id)
-
-    def update_node(self, node_id, values):
-        # NOTE(dtantsur): this can lead to very strange errors
-        if 'uuid' in values:
-            msg = _("Cannot overwrite UUID for an existing Node.")
-            raise exception.InvalidParameterValue(err=msg)
-
-        try:
-            return self._do_update_node(node_id, values)
-        except db_exc.DBDuplicateEntry:
-            raise exception.InstanceAssociated(
-                instance_uuid=values['ironic_node_id'],
-                node=node_id)
-
-    def _do_update_node(self, node_id, values):
-        session = get_session()
-        with session.begin():
-            query = model_query(models.Node, session=session)
-            query = add_identity_filter(query, node_id)
-            try:
-                ref = query.with_lockmode('update').one()
-            except NoResultFound:
-                raise exception.NodeNotFound(node=node_id)
-
-            # Prevent ironic_node_id overwriting
-            if values.get("ironic_node_id") and ref.ironic_node_id:
-                raise exception.NodeAssociated(
-                    node=node_id,
-                    instance=ref.ironic_node_id)
 
             ref.update(values)
         return ref

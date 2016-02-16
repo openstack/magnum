@@ -31,7 +31,6 @@ from magnum.api.controllers.v1 import baymodel
 from magnum.api.controllers.v1 import certificate
 from magnum.api.controllers.v1 import container
 from magnum.api.controllers.v1 import magnum_services
-from magnum.api.controllers.v1 import node
 from magnum.api.controllers.v1 import pod
 from magnum.api.controllers.v1 import replicationcontroller as rc
 from magnum.api.controllers.v1 import service
@@ -192,7 +191,6 @@ class Controller(rest.RestController):
     bays = bay.BaysController()
     baymodels = baymodel.BayModelsController()
     containers = container.ContainersController()
-    nodes = node.NodesController()
     pods = pod.PodsController()
     rcs = rc.ReplicationControllersController()
     services = service.ServicesController()

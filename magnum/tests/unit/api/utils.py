@@ -18,7 +18,6 @@ import pytz
 
 from magnum.api.controllers.v1 import bay as bay_controller
 from magnum.api.controllers.v1 import baymodel as baymodel_controller
-from magnum.api.controllers.v1 import node as node_controller
 from magnum.api.controllers.v1 import pod as pod_controller
 from magnum.api.controllers.v1 import replicationcontroller as rc_controller
 from magnum.api.controllers.v1 import service as service_controller
@@ -137,12 +136,6 @@ def rc_post_data(**kw):
            }'''
     internal = rc_controller.ReplicationControllerPatchType.internal_attrs()
     return remove_internal(rc, internal)
-
-
-def node_post_data(**kw):
-    node = utils.get_test_node(**kw)
-    internal = node_controller.NodePatchType.internal_attrs()
-    return remove_internal(node, internal)
 
 
 def x509keypair_post_data(**kw):

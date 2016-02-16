@@ -19,13 +19,6 @@
     "baymodel:update": "rule:default",
     "baymodel:publish": "rule:admin_or_owner",
 
-    "node:create": "rule:default",
-    "node:delete": "rule:default",
-    "node:detail": "rule:default",
-    "node:get": "rule:default",
-    "node:get_all": "rule:default",
-    "node:update": "rule:default",
-
     "pod:create": "rule:default",
     "pod:delete": "rule:default",
     "pod:detail": "rule:default",
