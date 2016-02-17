@@ -295,6 +295,10 @@ class InvalidIdentity(Invalid):
     message = _("Expected an uuid or int but received %(identity)s.")
 
 
+class InvalidCsr(Invalid):
+    message = _("Received invalid csr %(csr)s.")
+
+
 class HTTPNotFound(ResourceNotFound):
     pass
 

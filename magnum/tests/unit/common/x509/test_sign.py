@@ -21,6 +21,7 @@ from cryptography.x509.oid import NameOID
 import mock
 import six
 
+from magnum.common import exception
 from magnum.common.x509 import operations
 from magnum.tests import base
 
@@ -195,3 +196,12 @@ class TestX509(base.BaseTestCase):
         operations.sign(csr, self.issuer_name, ca_key,
                         skip_validation=True)
         mock_six.assert_called_once_with(csr)
+
+    def test_sign_with_invalid_csr(self):
+        ca_key = self._generate_private_key()
+        csr = 'test'
+        csr = six.u(csr)
+
+        self.assertRaises(exception.InvalidCsr,
+                          operations.sign,
+                          csr, self.issuer_name, ca_key, skip_validation=True)
