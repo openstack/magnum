@@ -5,6 +5,9 @@
 # PUBLIC_NETWORK_GATEWAY=192.168.1.225
 # PUBLIC_INTERFACE=em1
 # FIXED_RANGE=10.0.0.0/24
+## Log all output to files
+# LOGFILE=$HOME/devstack.log
+# SCREEN_LOGDIR=$HOME/logs
 
 # Neutron settings
 Q_USE_SECGROUP=True
@@ -34,7 +37,3 @@ enable_service h-api-cw
 # Enable Magnum services
 enable_service m-api
 enable_service m-cond
-
-# Log all output to files
-LOGFILE=$HOME/devstack.log
-SCREEN_LOGDIR=$HOME/logs
