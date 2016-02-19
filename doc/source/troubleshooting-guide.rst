@@ -45,6 +45,11 @@ I deploy pods on Kubernetes bay but the status stays "Pending"
   so if the status does not change for a long time, log into the minion
   node and check for `Cluster internet access`_.
 
+I deploy pods and services on Kubernetes bay but the app is not working
+  The pods and services are running and the status looks correct, but
+  if the app is performing communication between pods through services,
+  verify `Kubernetes networking`_.
+
 Swarm bay is created successfully but I cannot deploy containers
   Check the `Swarm services`_ and `etcd service`_ on the master nodes.
 
@@ -176,6 +181,200 @@ If the name lookup fails, check the following:
 - If you are using your own DNS server by specifying "dns-nameserver"
   in the bay model, is it reachable and working?
 - More help on `DNS troubleshooting <http://docs.openstack.org/openstack-ops/content/network_troubleshooting.html#debugging_dns_issues>`_.
+
+
+Kubernetes networking
+---------------------
+
+The networking between pods is different and separate from the neutron
+network set up for the cluster.
+Kubernetes presents a flat network space for the pods and services
+and uses different network drivers to provide this network model.
+
+It is possible for the pods to come up correctly and be able to connect
+to the external internet, but they cannot reach each other.
+In this case, the app in the pods may not be working as expected.
+For example, if you are trying the `redis example
+<https://github.com/kubernetes/kubernetes/blob/release-1.1/examples/redis/README.md>`_,
+the key:value may not be replicated correctly.  In this case, use the
+following steps to verify the inter-pods networking and pinpoint problems.
+
+Since the steps are specific to the network drivers, refer to the
+particular driver being used for the bay.
+
+Using Flannel as network driver
+...............................
+
+Flannel is the default network driver for Kubernetes bays.  Flannel is
+an overlay network that runs on top of the neutron network.  It works by
+encapsulating the messages between pods and forwarding them to the
+correct node that hosts the target pod.
+
+First check the connectivity at the node level.  Log into two
+different minion nodes, e.g. node A and node B, run a docker container
+on each node, attach to the container and find the IP.
+
+For example, on node A::
+
+    sudo docker run -it alpine
+    # ip -f inet -o a | grep eth0 | awk '{print $4}'
+    10.100.54.2/24
+
+Similarly, on node B::
+
+    sudo docker run -it alpine
+    # ip -f inet -o a | grep eth0 | awk '{print $4}'
+    10.100.49.3/24
+
+Check that the containers can see each other by pinging from one to another.
+
+On node A::
+
+    # ping 10.100.49.3
+    PING 10.100.49.3 (10.100.49.3): 56 data bytes
+    64 bytes from 10.100.49.3: seq=0 ttl=60 time=1.868 ms
+    64 bytes from 10.100.49.3: seq=1 ttl=60 time=1.108 ms
+
+Similarly, on node B::
+
+    # ping 10.100.54.2
+    PING 10.100.54.2 (10.100.54.2): 56 data bytes
+    64 bytes from 10.100.54.2: seq=0 ttl=60 time=2.678 ms
+    64 bytes from 10.100.54.2: seq=1 ttl=60 time=1.240 ms
+
+If the ping is not successful, check the following:
+
+- Is neutron working properly?  Try pinging between the VMs.
+
+- Are the docker0 and flannel0 interfaces configured correctly on the
+  nodes? Log into each node and find the Flannel CIDR by::
+
+    cat /run/flannel/subnet.env | grep FLANNEL_SUBNET
+    FLANNEL_SUBNET=10.100.54.1/24
+
+  Then check the interfaces by::
+
+    ifconfig flannel0
+    ifconfig docker0
+
+  The correct configuration should assign flannel0 with the "0" address
+  in the subnet, like *10.100.54.0*, and docker0 with the "1" address, like
+  *10.100.54.1*.
+
+- Verify the IP's assigned to the nodes as found above are in the correct
+  Flannel subnet.  If this is not correct, the docker daemon is not configured
+  correctly with the parameter *--bip*.  Check the systemd service for docker.
+
+- Is Flannel running properly?  check the `flannel service`_.
+
+- Ping and try `tcpdump
+  <http://docs.openstack.org/openstack-ops/content/network_troubleshooting.html#tcpdump>`_
+  on each network interface along the path between two nodes
+  to see how far the message is able to travel.
+  The message path should be as follows:
+
+  1. Source node: docker0
+  2. Source node: flannel0
+  3. Source node: eth0
+  4. Target node: eth0
+  5. Target node: flannel0
+  6. Target node: docker0
+
+If ping works, this means the flannel overlay network is functioning
+correctly.
+
+The containers created by Kubernetes for pods will be on the same IP
+subnet as the containers created directly in Docker as above, so they
+will have the same connectivity.  However, the pods still may not be
+able to reach each other because normally they connect through some
+Kubernetes services rather than directly.  The services are supported
+by the kube-proxy and rules inserted into the iptables, therefore
+their networking paths have some extra hops and there may be problems
+here.
+
+To check the connectivity at the Kubernetes pod level, log into the
+master node and create two pods and a service for one of the pods.
+You can use the examples provided in the directory
+*/etc/kubernetes/examples/* for the first pod and service.  This will
+start up an nginx container and a Kubernetes service to expose the
+endpoint.  Create another manifest for a second pod to test the
+endpoint::
+
+    cat > alpine.yaml << END
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: alpine
+    spec:
+      containers:
+      - name: alpine
+        image: alpine
+        args:
+        - sleep
+        - "1000000"
+    END
+
+    kubectl create -f /etc/kubernetes/examples/pod-nginx-with-label.yaml
+    kubectl create -f /etc/kubernetes/examples/service.yaml
+    kubectl create -f alpine.yaml
+
+Get the endpoint for the nginx-service, which should route message to the pod
+nginx::
+
+    kubectl describe service nginx-service | grep -e IP: -e Port:
+    IP:                     10.254.21.158
+    Port:                   <unnamed>       8000/TCP
+
+Note the IP and port to use for checking below.  Log into the node
+where the *alpine* pod is running.  You can find the hosting node by
+running this command on the master node::
+
+    kubectl get pods -o wide  | grep alpine | awk '{print $6}'
+    k8-gzvjwcooto-0-gsrxhmyjupbi-kube-minion-br73i6ans2b4
+
+To get the IP of the node, query Nova on devstack::
+
+    nova list
+
+On this hosting node, attach to the *alpine* container::
+
+    export DOCKER_ID=`sudo docker ps | grep k8s_alpine | awk '{print $1}'`
+    sudo docker exec -it $DOCKER_ID sh
+
+From the *alpine* pod, you can try to reach the nginx pod through the nginx
+service using the IP and Port found above::
+
+    wget 10.254.21.158:8000
+
+If the connection is successful, you should receive the file *index.html* from
+nginx.
+
+If the connection is not successful, you will get an error message like::xs
+
+    wget: can't connect to remote host (10.100.54.9): No route to host
+
+In this case, check the following:
+
+- Is kube-proxy running on the nodes? It runs as a container on each node.
+  check by logging in the minion nodes and run::
+
+    sudo docker ps | grep k8s_kube-proxy
+
+- Check the log from kube-proxy by running on the minion nodes::
+
+    export PROXY=`sudo docker ps | grep "hyperkube proxy" | awk '{print $1}'`
+    sudo docker logs $PROXY
+
+- Try additional `service debugging
+  <https://github.com/kubernetes/kubernetes/blob/release-1.1/docs/user-guide/debugging-services.md>`_.
+  To see what's going during provisioning::
+
+    kubectl get events
+
+  To get information on a service in question::
+
+    kubectl describe services <service_name>
+
 
 
 etcd service
