@@ -154,12 +154,10 @@ class TestAttrValidator(base.BaseTestCase):
                           attr_validator.validate_image,
                           mock_os_cli, 'fedora-21-atomic-5')
 
-    @mock.patch('magnum.objects.baymodel.BayModel.get_by_uuid')
     @mock.patch('magnum.common.clients.OpenStackClients')
     def test_validate_os_resources_with_invalid_flavor(self,
-                                                       mock_os_cli,
-                                                       mock_baymodel_by_uuid):
-        mock_baymodel_by_uuid.return_value = {'flavor_id': 'test_flavor'}
+                                                       mock_os_cli):
+        mock_baymodel = {'flavor_id': 'test_flavor'}
         mock_flavor = mock.MagicMock()
         mock_flavor.name = 'test_flavor_not_equal'
         mock_flavor.id = 'test_flavor_id_not_equal'
@@ -170,4 +168,4 @@ class TestAttrValidator(base.BaseTestCase):
         mock_context = mock.MagicMock()
         self.assertRaises(exception.FlavorNotFound,
                           attr_validator.validate_os_resources,
-                          mock_context, 'baymodel_id')
+                          mock_context, mock_baymodel)

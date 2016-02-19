@@ -278,10 +278,10 @@ class BaysController(rest.RestController):
 
         :param bay: a bay within the request body.
         """
-        bay_dict = bay.as_dict()
         context = pecan.request.context
-        attr_validator.validate_os_resources(context,
-                                             bay_dict.get('baymodel_id'))
+        baymodel = objects.BayModel.get_by_uuid(context, bay.baymodel_id)
+        attr_validator.validate_os_resources(context, baymodel.as_dict())
+        bay_dict = bay.as_dict()
         bay_dict['project_id'] = context.project_id
         bay_dict['user_id'] = context.user_id
         if bay_dict.get('name') is None:
