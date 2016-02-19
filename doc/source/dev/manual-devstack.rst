@@ -48,6 +48,7 @@ and neutron::
     enable_service q-dhcp
     enable_service q-l3
     enable_service q-meta
+    enable_service q-lbaas
     enable_service neutron
 
     # Enable heat services
