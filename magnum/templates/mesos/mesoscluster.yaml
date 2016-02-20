@@ -111,6 +111,51 @@ parameters:
     default: ""
     hidden: true
 
+  region_name:
+    type: string
+    description: A logically separate section of the cluster
+
+  auth_url:
+    type: string
+    description: >
+      url for mesos to authenticate before sending request
+
+  username:
+    type: string
+    description: user name
+
+  password:
+    type: string
+    description: >
+      user password, not set in current implementation, only used to
+      fill in for Mesos config file
+    default:
+      password
+    hidden: true
+
+  tenant_name:
+    type: string
+    description: >
+      tenant_name is used to isolate access to Compute resources
+
+  volume_driver:
+    type: string
+    description: volume driver to use for container storage
+    default: ""
+
+  domain_name:
+    type: string
+    description: >
+      domain is to define the administrative boundaries for management
+      of Keystone entities
+
+  rexray_preempt:
+    type: string
+    description: >
+      enables any host to take control of a volume irrespective of whether
+      other hosts are using the volume
+    default: "false"
+
 resources:
 
   ######################################################################
@@ -336,6 +381,14 @@ resources:
           http_proxy: {get_param: http_proxy}
           https_proxy: {get_param: https_proxy}
           no_proxy: {get_param: no_proxy}
+          auth_url: {get_param: auth_url}
+          username: {get_param: username}
+          password: {get_param: password}
+          tenant_name: {get_param: tenant_name}
+          volume_driver: {get_param: volume_driver}
+          region_name: {get_param: region_name}
+          domain_name: {get_param: domain_name}
+          rexray_preempt: {get_param: rexray_preempt}
 
 outputs:
 

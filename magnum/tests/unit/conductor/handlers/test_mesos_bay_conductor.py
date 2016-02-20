@@ -38,7 +38,9 @@ class TestBayConductorWithMesos(base.TestCase):
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
-            'server_type': 'vm'
+            'server_type': 'vm',
+            'volume_driver': 'volume_driver',
+            'labels': {'rexray_preempt': 'False'}
         }
         self.bay_dict = {
             'id': 1,
@@ -58,6 +60,16 @@ class TestBayConductorWithMesos(base.TestCase):
         cfg.CONF.set_override('trustee_domain_id',
                               '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
                               group='trust')
+        self.context.auth_url = 'http://192.168.10.10:5000/v3'
+        self.context.user_name = 'mesos_user'
+        self.context.tenant = 'admin'
+        self.context.domain_name = 'domainname'
+        osc_patcher = mock.patch('magnum.common.clients.OpenStackClients')
+        self.mock_osc_class = osc_patcher.start()
+        self.addCleanup(osc_patcher.stop)
+        self.mock_osc = mock.MagicMock()
+        self.mock_osc.cinder_region_name.return_value = 'RegionOne'
+        self.mock_osc_class.return_value = self.mock_osc
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_all_values(
@@ -88,7 +100,14 @@ class TestBayConductorWithMesos(base.TestCase):
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
-            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de'
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
+            'volume_driver': 'volume_driver',
+            'auth_url': 'http://192.168.10.10:5000/v3',
+            'region_name': self.mock_osc.cinder_region_name.return_value,
+            'username': 'mesos_user',
+            'tenant_name': 'admin',
+            'domain_name': 'domainname',
+            'rexray_preempt': 'False'
         }
         self.assertEqual(expected, definition)
 
@@ -98,7 +117,7 @@ class TestBayConductorWithMesos(base.TestCase):
             mock_objects_baymodel_get_by_uuid):
         not_required = ['image_id', 'master_flavor_id', 'flavor_id',
                         'dns_nameserver', 'fixed_network', 'http_proxy',
-                        'https_proxy', 'no_proxy']
+                        'https_proxy', 'no_proxy', 'volume_driver']
         for key in not_required:
             self.baymodel_dict[key] = None
 
@@ -120,7 +139,13 @@ class TestBayConductorWithMesos(base.TestCase):
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
-            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de'
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
+            'auth_url': 'http://192.168.10.10:5000/v3',
+            'region_name': self.mock_osc.cinder_region_name.return_value,
+            'username': 'mesos_user',
+            'tenant_name': 'admin',
+            'domain_name': 'domainname',
+            'rexray_preempt': 'False'
         }
         self.assertEqual(expected, definition)
 

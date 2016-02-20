@@ -634,6 +634,8 @@ class UbuntuMesosTemplateDefinition(BaseTemplateDefinition):
                            baymodel_attr='flavor_id')
         self.add_parameter('cluster_name',
                            bay_attr='name')
+        self.add_parameter('volume_driver',
+                           baymodel_attr='volume_driver')
 
         self.add_output('api_address',
                         bay_attr='api_address')
@@ -645,6 +647,28 @@ class UbuntuMesosTemplateDefinition(BaseTemplateDefinition):
                         bay_attr=None)
         self.add_output('mesos_slaves',
                         bay_attr='node_addresses')
+
+    def get_params(self, context, baymodel, bay, **kwargs):
+        extra_params = kwargs.pop('extra_params', {})
+        # HACK(apmelton) - This uses the user's bearer token, ideally
+        # it should be replaced with an actual trust token with only
+        # access to do what the template needs it to do.
+        osc = clients.OpenStackClients(context)
+        extra_params['auth_url'] = context.auth_url
+        extra_params['username'] = context.user_name
+        extra_params['tenant_name'] = context.tenant
+        extra_params['domain_name'] = context.domain_name
+        extra_params['region_name'] = osc.cinder_region_name()
+
+        label_list = ['rexray_preempt']
+
+        for label in label_list:
+            extra_params[label] = baymodel.labels.get(label)
+
+        return super(UbuntuMesosTemplateDefinition,
+                     self).get_params(context, baymodel, bay,
+                                      extra_params=extra_params,
+                                      **kwargs)
 
     @property
     def template_path(self):

@@ -54,6 +54,51 @@ parameters:
     description: no proxies for docker
     default: ""
 
+  auth_url:
+    type: string
+    description: >
+      url for mesos to authenticate before sending request
+
+  username:
+    type: string
+    description: user name
+
+  password:
+    type: string
+    description: >
+      user password, not set in current implementation, only used to
+      fill in for Kubernetes config file
+    default:
+      password
+    hidden: true
+
+  tenant_name:
+    type: string
+    description: >
+      tenant_name is used to isolate access to Compute resources
+
+  volume_driver:
+    type: string
+    description: volume driver to use for container storage
+    default: ""
+
+  region_name:
+    type: string
+    description: A logically separate section of the cluster
+
+  domain_name:
+    type: string
+    description: >
+      domain is to define the administrative boundaries for management
+      of Keystone entities
+
+  rexray_preempt:
+    type: string
+    description: >
+      enables any host to take control of a volume irrespective of whether
+      other hosts are using the volume
+    default: "false"
+
   # The following are all generated in the parent template.
   mesos_masters_ips:
     type: string
@@ -107,6 +152,14 @@ resources:
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
+            "$AUTH_URL": {get_param: auth_url}
+            "$USERNAME": {get_param: username}
+            "$PASSWORD": {get_param: password}
+            "$TENANT_NAME": {get_param: tenant_name}
+            "$VOLUME_DRIVER": {get_param: volume_driver}
+            "$REGION_NAME": {get_param: region_name}
+            "$DOMAIN_NAME": {get_param: domain_name}
+            "$REXRAY_PREEMPT": {get_param: rexray_preempt}
 
   configure_mesos_slave:
     type: OS::Heat::SoftwareConfig
@@ -131,12 +184,18 @@ resources:
             wc_notify --data-binary '{"status": "SUCCESS"}'
           params:
             wc_notify: {get_attr: [slave_wait_handle, curl_cli]}
-  
+
   add_proxy:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/add-proxy.sh}
+
+  volume_service:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/volume-service.sh}
 
   mesos_slave_init:
     type: OS::Heat::MultipartMime
@@ -145,6 +204,7 @@ resources:
         - config: {get_resource: write_heat_params}
         - config: {get_resource: configure_mesos_slave}
         - config: {get_resource: add_proxy}
+        - config: {get_resource: volume_service}
         - config: {get_resource: start_services}
         - config: {get_resource: slave_wc_notify}
 
