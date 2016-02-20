@@ -208,12 +208,12 @@ class Handler(object):
             osc.heat().stacks.delete(stack_id)
         except exc.HTTPNotFound:
             LOG.info(_LI('The stack %s was not be found during bay'
-                         ' deletion.') % stack_id)
+                         ' deletion.'), stack_id)
             try:
                 cert_manager.delete_certificates_from_bay(bay)
                 bay.destroy()
             except exception.BayNotFound:
-                LOG.info(_LI('The bay %s has been deleted by others.') % uuid)
+                LOG.info(_LI('The bay %s has been deleted by others.'), uuid)
             return None
         except Exception:
             raise

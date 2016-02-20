@@ -95,7 +95,7 @@ class Handler(object):
 
     @wrap_container_exception
     def container_delete(self, context, container_uuid):
-        LOG.debug("container_delete %s" % container_uuid)
+        LOG.debug("container_delete %s", container_uuid)
         with docker_utils.docker_for_container(context,
                                                container_uuid) as docker:
             docker_id = self._find_container_by_name(docker,
@@ -106,7 +106,7 @@ class Handler(object):
 
     @wrap_container_exception
     def container_show(self, context, container_uuid):
-        LOG.debug("container_show %s" % container_uuid)
+        LOG.debug("container_show %s", container_uuid)
         with docker_utils.docker_for_container(context,
                                                container_uuid) as docker:
             container = objects.Container.get_by_uuid(context, container_uuid)
@@ -143,7 +143,7 @@ class Handler(object):
 
     @wrap_container_exception
     def _container_action(self, context, container_uuid, status, docker_func):
-        LOG.debug("%s container %s ..." % (docker_func, container_uuid))
+        LOG.debug("%s container %s ...", (docker_func, container_uuid))
         with docker_utils.docker_for_container(context,
                                                container_uuid) as docker:
             docker_id = self._find_container_by_name(docker,
@@ -179,7 +179,7 @@ class Handler(object):
 
     @wrap_container_exception
     def container_logs(self, context, container_uuid):
-        LOG.debug("container_logs %s" % container_uuid)
+        LOG.debug("container_logs %s", container_uuid)
         with docker_utils.docker_for_container(context,
                                                container_uuid) as docker:
             docker_id = self._find_container_by_name(docker,
@@ -188,7 +188,7 @@ class Handler(object):
 
     @wrap_container_exception
     def container_exec(self, context, container_uuid, command):
-        LOG.debug("container_exec %s command %s" %
+        LOG.debug("container_exec %s command %s",
                   (container_uuid, command))
         with docker_utils.docker_for_container(context,
                                                container_uuid) as docker:

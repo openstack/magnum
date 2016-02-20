@@ -46,16 +46,16 @@ def main():
     host, port = cfg.CONF.api.host, cfg.CONF.api.port
     srv = simple_server.make_server(host, port, app)
 
-    LOG.info(_LI('Starting server in PID %s') % os.getpid())
+    LOG.info(_LI('Starting server in PID %s'), os.getpid())
     LOG.debug("Configuration:")
     cfg.CONF.log_opt_values(LOG, logging.DEBUG)
 
     if host == '0.0.0.0':
         LOG.info(_LI('serving on 0.0.0.0:%(port)s, '
-                     'view at http://127.0.0.1:%(port)s') %
+                     'view at http://127.0.0.1:%(port)s'),
                  dict(port=port))
     else:
-        LOG.info(_LI('serving on http://%(host)s:%(port)s') %
+        LOG.info(_LI('serving on http://%(host)s:%(port)s'),
                  dict(host=host, port=port))
 
     srv.serve_forever()

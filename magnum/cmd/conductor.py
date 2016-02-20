@@ -44,7 +44,7 @@ def main():
 
     gmr.TextGuruMeditation.setup_autorun(version)
 
-    LOG.info(_LI('Starting server in PID %s') % os.getpid())
+    LOG.info(_LI('Starting server in PID %s'), os.getpid())
     LOG.debug("Configuration:")
     cfg.CONF.log_opt_values(LOG, logging.DEBUG)
 
