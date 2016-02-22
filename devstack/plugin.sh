@@ -9,10 +9,7 @@ source $DEST/magnum/devstack/lib/magnum
 (set -o posix; set)
 
 if is_service_enabled m-api m-cond; then
-    if [[ "$1" == "stack" && "$2" == "pre-install" ]]; then
-        echo_summary "Before Installing magnum"
-        mkdir -p $SCREEN_LOGDIR
-    elif [[ "$1" == "stack" && "$2" == "install" ]]; then
+    if [[ "$1" == "stack" && "$2" == "install" ]]; then
         echo_summary "Installing magnum"
         install_magnum
 
