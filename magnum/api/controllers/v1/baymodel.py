@@ -100,14 +100,19 @@ class BayModel(base.APIBase):
     """A list containing a self link and associated baymodel links"""
 
     http_proxy = wtypes.StringType(min_length=1, max_length=255)
-    """http_proxy for the bay """
+    """Address of a proxy that will receive all HTTP requests and relay them.
+       The format is a URL including a port number.
+       """
 
     https_proxy = wtypes.StringType(min_length=1, max_length=255)
-    """https_proxy for the bay """
+    """Address of a proxy that will receive all HTTPS requests and relay them.
+       The format is a URL including a port number.
+       """
 
     no_proxy = wtypes.StringType(min_length=1, max_length=255)
-    """Its comma separated list of ip for which proxies should not
-       used in the bay"""
+    """A comma separated list of ips for which proxies should not
+       used in the bay
+       """
 
     volume_driver = wtypes.StringType(min_length=1, max_length=255)
     """The name of the driver used for instantiating container volume driver"""
