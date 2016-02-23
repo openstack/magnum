@@ -21,7 +21,13 @@ magnum plugin::
      enable_plugin magnum https://github.com/openstack/magnum master
      END
 
+Additionally, you might need additional Neutron configurations for
+your environment.
+Please refer to the devstack documentation [#devstack_neutron]_ for details.
+
 Then run devstack normally::
 
     cd /opt/stack/devstack
     ./stack.sh
+
+.. [#devstack_neutron] http://docs.openstack.org/developer/devstack/guides/neutron.html
