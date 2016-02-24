@@ -42,7 +42,7 @@ def _generate_ca_cert(issuer_name):
         private_key_passphrase=ca_password,
         name=issuer_name,
     )
-    LOG.debug('CA cert is created: %s' % ca_cert_ref)
+    LOG.debug('CA cert is created: %s', ca_cert_ref)
     return ca_cert_ref, ca_cert, ca_password
 
 
@@ -68,7 +68,7 @@ def _generate_client_cert(issuer_name, ca_cert, ca_password):
         private_key_passphrase=client_password,
         name=CONDUCTOR_CLIENT_NAME,
     )
-    LOG.debug('Magnum client cert is created: %s' % magnum_cert_ref)
+    LOG.debug('Magnum client cert is created: %s', magnum_cert_ref)
     return magnum_cert_ref
 
 
@@ -89,7 +89,7 @@ def generate_certificates_to_bay(bay):
     """
     issuer_name = _get_issuer_name(bay)
 
-    LOG.debug('Start to generate certificates: %s' % issuer_name)
+    LOG.debug('Start to generate certificates: %s', issuer_name)
 
     ca_cert_ref, ca_cert, ca_password = _generate_ca_cert(issuer_name)
     magnum_cert_ref = _generate_client_cert(issuer_name, ca_cert, ca_password)
@@ -159,4 +159,4 @@ def delete_certificates_from_bay(bay):
                 cert_manager.get_backend().CertManager.delete_cert(
                     cert_ref, resource_ref=bay.uuid)
         except Exception:
-            LOG.warning(_LW("Deleting cert is failed: %s") % cert_ref)
+            LOG.warning(_LW("Deleting cert is failed: %s"), cert_ref)

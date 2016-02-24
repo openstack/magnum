@@ -38,7 +38,7 @@ class K8sAPI(apiv_api.ApivApi):
             tmp.write(content)
             tmp.flush()
         except Exception as err:
-            LOG.error("Error while creating temp file: %s" % err)
+            LOG.error("Error while creating temp file: %s", err)
             raise err
         return tmp
 

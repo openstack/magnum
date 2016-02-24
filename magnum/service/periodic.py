@@ -125,7 +125,7 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
         try:
             bay.destroy()
         except exception.BayNotFound:
-            LOG.info(_LI('The bay %s has been deleted by others.') % bay.uuid)
+            LOG.info(_LI('The bay %s has been deleted by others.'), bay.uuid)
         else:
             LOG.info(_LI("Bay with id %(id)s not found in heat "
                          "with stack id %(sid)s, with status_reason: "
@@ -182,7 +182,7 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                            user_id=bay.user_id,
                            project_id=bay.project_id,
                            resource_id=bay.uuid)
-            LOG.debug("About to send notification: '%s'" % message)
+            LOG.debug("About to send notification: '%s'", message)
             self.notifier.info(ctx, "magnum.bay.metrics.update",
                                message)
 

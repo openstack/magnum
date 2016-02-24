@@ -177,7 +177,7 @@ class StartController(object):
         container_uuid = api_utils.get_rpc_resource('Container',
                                                     container_ident).uuid
 
-        LOG.debug('Calling conductor.container_start with %s' %
+        LOG.debug('Calling conductor.container_start with %s',
                   container_uuid)
         return pecan.request.rpcapi.container_start(container_uuid)
 
@@ -190,7 +190,7 @@ class StopController(object):
                               % pecan.request.method))
         container_uuid = api_utils.get_rpc_resource('Container',
                                                     container_ident).uuid
-        LOG.debug('Calling conductor.container_stop with %s' %
+        LOG.debug('Calling conductor.container_stop with %s',
                   container_uuid)
         return pecan.request.rpcapi.container_stop(container_uuid)
 
@@ -203,7 +203,7 @@ class RebootController(object):
                               % pecan.request.method))
         container_uuid = api_utils.get_rpc_resource('Container',
                                                     container_ident).uuid
-        LOG.debug('Calling conductor.container_reboot with %s' %
+        LOG.debug('Calling conductor.container_reboot with %s',
                   container_uuid)
         return pecan.request.rpcapi.container_reboot(container_uuid)
 
@@ -216,7 +216,7 @@ class PauseController(object):
                               % pecan.request.method))
         container_uuid = api_utils.get_rpc_resource('Container',
                                                     container_ident).uuid
-        LOG.debug('Calling conductor.container_pause with %s' %
+        LOG.debug('Calling conductor.container_pause with %s',
                   container_uuid)
         return pecan.request.rpcapi.container_pause(container_uuid)
 
@@ -229,7 +229,7 @@ class UnpauseController(object):
                               % pecan.request.method))
         container_uuid = api_utils.get_rpc_resource('Container',
                                                     container_ident).uuid
-        LOG.debug('Calling conductor.container_unpause with %s' %
+        LOG.debug('Calling conductor.container_unpause with %s',
                   container_uuid)
         return pecan.request.rpcapi.container_unpause(container_uuid)
 
@@ -242,7 +242,7 @@ class LogsController(object):
                               % pecan.request.method))
         container_uuid = api_utils.get_rpc_resource('Container',
                                                     container_ident).uuid
-        LOG.debug('Calling conductor.container_logs with %s' %
+        LOG.debug('Calling conductor.container_logs with %s',
                   container_uuid)
         return pecan.request.rpcapi.container_logs(container_uuid)
 

@@ -72,5 +72,5 @@ def create_monitor(context, bay):
         coe_cls = importutils.import_class(COE_CLASS_PATH[bay.baymodel.coe])
         return coe_cls(context, bay)
 
-    LOG.debug("Cannot create monitor with bay type '%s'" % bay.baymodel.coe)
+    LOG.debug("Cannot create monitor with bay type '%s'", bay.baymodel.coe)
     return None
