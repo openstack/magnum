@@ -109,6 +109,7 @@ def baymodel_data(**kwargs):
         "fixed_network": "192.168.0.0/24",
         "dns_nameserver": "8.8.8.8",
         "flavor_id": data_utils.rand_name('bay'),
+        "master_flavor_id": data_utils.rand_name('bay'),
         "external_network_id": str(data_utils.rand_uuid()),
         "keypair_id": data_utils.rand_name('bay'),
         "image_id": data_utils.rand_name('bay')
