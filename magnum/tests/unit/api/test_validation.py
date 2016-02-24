@@ -191,7 +191,7 @@ class TestValidation(base.BaseTestCase):
         # re-evaluated.
         reload_module(v)
         validator = v.K8sValidator
-        validator.supported_drivers = ['flannel', 'type1', 'type2']
+        validator.supported_network_drivers = ['flannel', 'type1', 'type2']
 
         if assert_raised:
             self.assertRaises(exception.InvalidParameterValue,
@@ -283,7 +283,7 @@ class TestValidation(base.BaseTestCase):
         # re-evaluated.
         reload(v)
         validator = v.K8sValidator
-        validator.supported_drivers = ['flannel', 'type1', 'type2']
+        validator.supported_network_drivers = ['flannel', 'type1', 'type2']
 
         if assert_raised:
             self.assertRaises(exception.InvalidParameterValue,
@@ -375,7 +375,7 @@ class TestValidation(base.BaseTestCase):
         # re-evaluated.
         reload(v)
         validator = v.K8sValidator
-        validator.supported_drivers = ['cinder']
+        validator.supported_volume_driver = ['cinder']
 
         if assert_raised:
             self.assertRaises(exception.InvalidParameterValue,
