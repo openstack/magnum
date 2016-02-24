@@ -25,7 +25,8 @@ app = {
         hooks.NoExceptionTracebackHook(),
     ],
     'acl_public_routes': [
-        '/'
+        '/',
+        '/v1',
     ],
 }
 
