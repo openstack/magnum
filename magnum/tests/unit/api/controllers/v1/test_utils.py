@@ -55,7 +55,7 @@ class TestApiUtils(base.FunctionalTest):
     @mock.patch('pecan.request')
     @mock.patch('magnum.objects.Bay.get_by_name')
     @mock.patch('magnum.objects.Bay.get_by_uuid')
-    def test_get_rpc_resource_with_uuid(
+    def test_get_resource_with_uuid(
             self,
             mock_get_by_uuid,
             mock_get_by_name,
@@ -64,7 +64,7 @@ class TestApiUtils(base.FunctionalTest):
         mock_get_by_uuid.return_value = mock_bay
         uuid = common_utils.generate_uuid()
 
-        returned_bay = utils.get_rpc_resource('Bay', uuid)
+        returned_bay = utils.get_resource('Bay', uuid)
 
         mock_get_by_uuid.assert_called_once_with(mock_request.context, uuid)
         self.assertFalse(mock_get_by_name.called)
@@ -73,7 +73,7 @@ class TestApiUtils(base.FunctionalTest):
     @mock.patch('pecan.request')
     @mock.patch('magnum.objects.Bay.get_by_name')
     @mock.patch('magnum.objects.Bay.get_by_uuid')
-    def test_get_rpc_resource_with_name(
+    def test_get_resource_with_name(
             self,
             mock_get_by_uuid,
             mock_get_by_name,
@@ -81,7 +81,7 @@ class TestApiUtils(base.FunctionalTest):
         mock_bay = mock.MagicMock
         mock_get_by_name.return_value = mock_bay
 
-        returned_bay = utils.get_rpc_resource('Bay', 'fake-name')
+        returned_bay = utils.get_resource('Bay', 'fake-name')
 
         self.assertFalse(mock_get_by_uuid.called)
         mock_get_by_name.assert_called_once_with(mock_request.context,

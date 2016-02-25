@@ -286,8 +286,8 @@ class BayModelsController(rest.RestController):
 
         :param baymodel_ident: UUID or logical name of a baymodel.
         """
-        rpc_baymodel = api_utils.get_rpc_resource('BayModel', baymodel_ident)
-        return BayModel.convert_with_links(rpc_baymodel)
+        baymodel = api_utils.get_resource('BayModel', baymodel_ident)
+        return BayModel.convert_with_links(baymodel)
 
     @expose.expose(BayModel, body=BayModel, status_code=201)
     @policy.enforce_wsgi("baymodel", "create")
@@ -332,17 +332,17 @@ class BayModelsController(rest.RestController):
         :param patch: a json PATCH document to apply to this baymodel.
         """
         context = pecan.request.context
-        rpc_baymodel = api_utils.get_rpc_resource('BayModel', baymodel_ident)
+        baymodel = api_utils.get_resource('BayModel', baymodel_ident)
         try:
-            baymodel_dict = rpc_baymodel.as_dict()
-            baymodel = BayModel(**api_utils.apply_jsonpatch(
+            baymodel_dict = baymodel.as_dict()
+            new_baymodel = BayModel(**api_utils.apply_jsonpatch(
                 baymodel_dict,
                 patch))
         except api_utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)
 
         # check permissions when updating baymodel public flag
-        if rpc_baymodel.public != baymodel.public:
+        if baymodel.public != new_baymodel.public:
             if not policy.enforce(context, "baymodel:publish", None,
                                   do_raise=False):
                 raise exception.BaymodelPublishDenied()
@@ -350,17 +350,17 @@ class BayModelsController(rest.RestController):
         # Update only the fields that have changed
         for field in objects.BayModel.fields:
             try:
-                patch_val = getattr(baymodel, field)
+                patch_val = getattr(new_baymodel, field)
             except AttributeError:
                 # Ignore fields that aren't exposed in the API
                 continue
             if patch_val == wtypes.Unset:
                 patch_val = None
-            if rpc_baymodel[field] != patch_val:
-                rpc_baymodel[field] = patch_val
+            if baymodel[field] != patch_val:
+                baymodel[field] = patch_val
 
-        rpc_baymodel.save()
-        return BayModel.convert_with_links(rpc_baymodel)
+        baymodel.save()
+        return BayModel.convert_with_links(baymodel)
 
     @expose.expose(None, types.uuid_or_name, status_code=204)
     @policy.enforce_wsgi("baymodel")
@@ -369,5 +369,5 @@ class BayModelsController(rest.RestController):
 
         :param baymodel_ident: UUID or logical name of a baymodel.
         """
-        rpc_baymodel = api_utils.get_rpc_resource('BayModel', baymodel_ident)
+        rpc_baymodel = api_utils.get_resource('BayModel', baymodel_ident)
         rpc_baymodel.destroy()

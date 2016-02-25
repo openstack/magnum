@@ -61,13 +61,13 @@ def apply_jsonpatch(doc, patch):
     return jsonpatch.apply_patch(doc, patch)
 
 
-def get_rpc_resource(resource, resource_ident):
-    """Get the RPC resource from the uuid or logical name.
+def get_resource(resource, resource_ident):
+    """Get the resource from the uuid or logical name.
 
     :param resource: the resource type.
     :param resource_ident: the UUID or logical name of the resource.
 
-    :returns: The RPC resource.
+    :returns: The resource.
     """
     resource = getattr(objects, resource)
 

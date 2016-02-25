@@ -50,7 +50,7 @@ class X509KeyPair(base.APIBase):
     def _set_bay_uuid(self, value):
         if value and self._bay_uuid != value:
             try:
-                bay = api_utils.get_rpc_resource('Bay', value)
+                bay = api_utils.get_resource('Bay', value)
                 self._bay_uuid = bay.uuid
             except exception.BayNotFound as e:
                 # Change error code because 404 (NotFound) is inappropriate
@@ -228,10 +228,10 @@ class X509KeyPairController(rest.RestController):
         :param x509keypair_ident: UUID of a x509keypair or
         logical name of the x509keypair.
         """
-        rpc_x509keypair = api_utils.get_rpc_resource('X509KeyPair',
-                                                     x509keypair_ident)
+        x509keypair = api_utils.get_resource('X509KeyPair',
+                                             x509keypair_ident)
 
-        return X509KeyPair.convert_with_links(rpc_x509keypair)
+        return X509KeyPair.convert_with_links(x509keypair)
 
     @wsme_pecan.wsexpose(X509KeyPair, body=X509KeyPair, status_code=201)
     def post(self, x509keypair):
@@ -258,7 +258,7 @@ class X509KeyPairController(rest.RestController):
         :param x509keypair_ident: UUID of a x509keypair or logical
         name of the x509keypair.
         """
-        rpc_x509keypair = api_utils.get_rpc_resource('X509KeyPair',
-                                                     x509keypair_ident)
+        x509keypair = api_utils.get_resource('X509KeyPair',
+                                             x509keypair_ident)
 
-        pecan.request.rpcapi.x509keypair_delete(rpc_x509keypair.uuid)
+        pecan.request.rpcapi.x509keypair_delete(x509keypair.uuid)
