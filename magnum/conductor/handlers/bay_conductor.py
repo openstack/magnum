@@ -24,6 +24,7 @@ import six
 from magnum.common import clients
 from magnum.common import exception
 from magnum.common import short_id
+from magnum.common import utils
 from magnum.conductor.handlers.common import cert_manager
 from magnum.conductor import scale_manager
 from magnum.conductor.template_definition import TemplateDefinition as TDef
@@ -53,19 +54,10 @@ bay_heat_opts = [
                      'interval is in minutes.  The default is no timeout.'))
 ]
 
-docker_registry_opts = [
-    cfg.StrOpt('trustee_user_id',
-               default=None,
-               help='User id of the trustee'),
-    cfg.ListOpt('trust_roles',
-                default=['registry_user'],
-                help='The roles which are delegated to the trustee '
-                'by the trustor.')
-]
-
 CONF = cfg.CONF
 CONF.register_opts(bay_heat_opts, group='bay_heat')
-CONF.register_opts(docker_registry_opts, 'docker_registry')
+CONF.import_opt('trustee_domain_id', 'magnum.common.keystone',
+                group='trust')
 
 LOG = logging.getLogger(__name__)
 
@@ -127,6 +119,19 @@ class Handler(object):
     def __init__(self):
         super(Handler, self).__init__()
 
+    @staticmethod
+    def _create_trustee_and_trust(osc, bay):
+        password = utils.generate_password(length=18)
+        trustee = osc.keystone().create_trustee(
+            bay.uuid,
+            password,
+            CONF.trust.trustee_domain_id)
+        bay.trustee_username = trustee.name
+        bay.trustee_user_id = trustee.id
+        bay.trustee_password = password
+        trust = osc.keystone().create_trust(trustee.id)
+        bay.trust_id = trust.id
+
     # Bay Operations
 
     def bay_create(self, context, bay, bay_create_timeout):
@@ -134,17 +139,10 @@ class Handler(object):
 
         osc = clients.OpenStackClients(context)
 
-        baymodel = objects.BayModel.get_by_uuid(context,
-                                                bay.baymodel_id)
-        if baymodel.registry_enabled:
-            trust = osc.keystone().create_trust(
-                CONF.docker_registry.trustee_user_id,
-                CONF.docker_registry.trust_roles)
-            bay.registry_trust_id = trust.id
-
+        bay.uuid = uuid.uuid4()
+        self._create_trustee_and_trust(osc, bay)
         try:
             # Generate certificate and set the cert reference to bay
-            bay.uuid = uuid.uuid4()
             cert_manager.generate_certificates_to_bay(bay)
             created_stack = _create_stack(context, osc, bay,
                                           bay_create_timeout)
@@ -192,10 +190,18 @@ class Handler(object):
 
         return bay
 
+    @staticmethod
+    def _delete_trustee_and_trust(osc, bay):
+        osc.keystone().delete_trust(bay.trust_id)
+        osc.keystone().delete_trustee(bay.trustee_user_id)
+
     def bay_delete(self, context, uuid):
         LOG.debug('bay_heat bay_delete')
         osc = clients.OpenStackClients(context)
         bay = objects.Bay.get_by_uuid(context, uuid)
+
+        self._delete_trustee_and_trust(osc, bay)
+
         stack_id = bay.stack_id
         # NOTE(sdake): This will execute a stack_delete operation.  This will
         # Ignore HTTPNotFound exceptions (stack wasn't present).  In the case
@@ -218,7 +224,6 @@ class Handler(object):
         except Exception:
             raise
 
-        osc.keystone().delete_trust(bay.registry_trust_id)
         self._poll_and_check(osc, bay)
 
         return None

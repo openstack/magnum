@@ -55,6 +55,8 @@ MAGNUM_SERVICE_PORT=${MAGNUM_SERVICE_PORT:-9511}
 MAGNUM_SERVICE_PORT_INT=${MAGNUM_SERVICE_PORT_INT:-19511}
 MAGNUM_SERVICE_PROTOCOL=${MAGNUM_SERVICE_PROTOCOL:-$SERVICE_PROTOCOL}
 
+MAGNUM_TRUSTEE_DOMAIN_ADMIN_PASSWORD=${MAGNUM_TRUSTEE_DOMAIN_ADMIN_PASSWORD:-secret}
+
 # Support entry points installation of console scripts
 if [[ -d $MAGNUM_DIR/bin ]]; then
     MAGNUM_BIN_DIR=$MAGNUM_DIR/bin
@@ -191,6 +193,16 @@ function create_magnum_conf {
         iniset $MAGNUM_CONF certificates storage_path "$MAGNUM_LOCAL_CERT_DIR"
         iniset $MAGNUM_CONF certificates cert_manager_type "local"
     fi
+
+    trustee_domain_id=$(get_or_create_domain magnum 'Owns users and projects created by magnum')
+    trustee_domain_admin_id=$(get_or_create_user trustee_domain_admin $MAGNUM_TRUSTEE_DOMAIN_ADMIN_PASSWORD $trustee_domain_id)
+    openstack --os-auth-url $KEYSTONE_SERVICE_URI_V3 \
+              --os-identity-api-version 3 role add \
+              --user $trustee_domain_admin_id --domain $trustee_domain_id \
+              admin
+    iniset $MAGNUM_CONF trust trustee_domain_id $trustee_domain_id
+    iniset $MAGNUM_CONF trust trustee_domain_admin_id $trustee_domain_admin_id
+    iniset $MAGNUM_CONF trust trustee_domain_admin_password $MAGNUM_TRUSTEE_DOMAIN_ADMIN_PASSWORD
 }
 
 function update_heat_policy {

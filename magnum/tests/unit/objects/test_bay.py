@@ -28,6 +28,10 @@ class TestBayObject(base.DbTestCase):
     def setUp(self):
         super(TestBayObject, self).setUp()
         self.fake_bay = utils.get_test_bay()
+        self.fake_bay['trust_id'] = 'trust_id'
+        self.fake_bay['trustee_username'] = 'trustee_user'
+        self.fake_bay['trustee_user_id'] = 'trustee_user_id'
+        self.fake_bay['trustee_password'] = 'password'
         baymodel_id = self.fake_bay['baymodel_id']
         self.fake_baymodel = objects.BayModel(uuid=baymodel_id)
 

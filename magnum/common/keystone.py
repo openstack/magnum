@@ -10,17 +10,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from keystoneclient.auth.identity import v3
 import keystoneclient.exceptions as kc_exception
+from keystoneclient import session
 from keystoneclient.v3 import client as kc_v3
 from oslo_config import cfg
 from oslo_log import log as logging
 
 from magnum.common import exception
+from magnum.common import utils
+from magnum.i18n import _
 from magnum.i18n import _LE
+
 
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 
+trust_opts = [
+    cfg.StrOpt('trustee_domain_id',
+               help=_('Id of the domain to create trustee for bays')),
+    cfg.StrOpt('trustee_domain_admin_id',
+               help=_('Id of the admin with roles sufficient to manage users'
+                      ' in the trustee_domain')),
+    cfg.StrOpt('trustee_domain_admin_password',
+               help=_('Password of trustee_domain_admin')),
+    cfg.ListOpt('roles',
+                default=[],
+                help=_('The roles which are delegated to the trustee '
+                       'by the trustor'))
+]
+
+CONF.register_opts(trust_opts, group='trust')
 CONF.import_group('keystone_authtoken', 'keystonemiddleware.auth_token')
 
 
@@ -31,6 +51,7 @@ class KeystoneClientV3(object):
         self.context = context
         self._client = None
         self._admin_client = None
+        self._domain_admin_client = None
 
     @property
     def auth_url(self):
@@ -74,6 +95,18 @@ class KeystoneClientV3(object):
                                               **admin_credentials)
         return self._admin_client
 
+    @property
+    def domain_admin_client(self):
+        if not self._domain_admin_client:
+            auth = v3.Password(
+                auth_url=self.auth_url,
+                user_id=CONF.trust.trustee_domain_admin_id,
+                domain_id=CONF.trust.trustee_domain_id,
+                password=CONF.trust.trustee_domain_admin_password)
+            sess = session.Session(auth=auth)
+            self._domain_admin_client = kc_v3.Client(session=sess)
+        return self._domain_admin_client
+
     @staticmethod
     def _is_v2_valid(auth_token_info):
         return 'access' in auth_token_info
@@ -110,25 +143,28 @@ class KeystoneClientV3(object):
 
         return kc_v3.Client(**kwargs)
 
-    def create_trust(self, trustee_user, role_names, impersonation=True):
+    def create_trust(self, trustee_user):
         trustor_user_id = self.client.auth_ref.user_id
         trustor_project_id = self.client.auth_ref.project_id
+
+        # inherit the role of the trustor, unless set CONF.trust.roles
+        if CONF.trust.roles:
+            roles = CONF.trust.roles
+        else:
+            roles = self.context.roles
+
         try:
             trust = self.client.trusts.create(
                 trustor_user=trustor_user_id,
                 project=trustor_project_id,
                 trustee_user=trustee_user,
-                impersonation=impersonation,
-                role_names=role_names)
+                impersonation=True,
+                role_names=roles)
         except Exception:
             LOG.exception(_LE('Failed to create trust'))
             raise exception.TrustCreateFailed(
                 trustee_user_id=trustee_user)
         return trust
-
-    def create_trust_to_admin(self, role_names, impersonation=True):
-        trustee_user = self.admin_client.auth_ref.user_id
-        return self.create_trust(trustee_user, role_names, impersonation)
 
     def delete_trust(self, trust_id):
         if trust_id is None:
@@ -140,3 +176,25 @@ class KeystoneClientV3(object):
         except Exception:
             LOG.exception(_LE('Failed to delete trust'))
             raise exception.TrustDeleteFailed(trust_id=trust_id)
+
+    def create_trustee(self, username, password, domain_id):
+        password = utils.generate_password(length=18)
+        try:
+            user = self.domain_admin_client.users.create(
+                name=username,
+                password=password,
+                domain=domain_id)
+        except Exception:
+            LOG.exception(_LE('Failed to create trustee'))
+            raise exception.TrusteeCreateFailed(username=username,
+                                                domain_id=domain_id)
+        return user
+
+    def delete_trustee(self, trustee_id):
+        try:
+            self.domain_admin_client.users.delete(trustee_id)
+        except kc_exception.NotFound:
+            pass
+        except Exception:
+            LOG.exception(_LE('Failed to delete trustee'))
+            raise exception.TrusteeDeleteFailed(trustee_id=trustee_id)

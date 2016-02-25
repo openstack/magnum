@@ -44,6 +44,23 @@ class TestHandler(db_base.DbTestCase):
         self.bay = objects.Bay(self.context, **bay_dict)
         self.bay.create()
 
+        self.p = patch(
+            'magnum.conductor.handlers.bay_conductor.Handler.'
+            '_create_trustee_and_trust')
+
+        def create_trustee_and_trust(osc, bay):
+            bay.trust_id = 'trust_id'
+            bay.trustee_username = 'user_name'
+            bay.trustee_user_id = 'user_id'
+            bay.trustee_password = 'password'
+
+        self.p.side_effect = create_trustee_and_trust
+        self.p.start()
+
+    def tearDown(self):
+        self.p.stop()
+        super(TestHandler, self).tearDown()
+
     @patch('magnum.conductor.scale_manager.ScaleManager')
     @patch('magnum.conductor.handlers.bay_conductor.Handler._poll_and_check')
     @patch('magnum.conductor.handlers.bay_conductor._update_stack')

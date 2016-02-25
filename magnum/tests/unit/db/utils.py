@@ -96,8 +96,6 @@ def get_test_bay(**kw):
         'node_count': kw.get('node_count', 3),
         'master_count': kw.get('master_count', 3),
         'master_addresses': kw.get('master_addresses', ['172.17.2.18']),
-        'registry_trust_id': kw.get('registry_trust_id',
-                                    '1f2281ac-e532-4e53-bbe6-3c9be24b0504'),
         'created_at': kw.get('created_at'),
         'updated_at': kw.get('updated_at'),
     }
