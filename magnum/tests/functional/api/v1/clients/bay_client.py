@@ -10,6 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from oslo_log import log as logging
 from tempest_lib import exceptions
 
 from magnum.tests.functional.api.v1.models import bay_model
@@ -19,6 +20,8 @@ from magnum.tests.functional.common import utils
 
 class BayClient(client.MagnumClient):
     """Encapsulates REST calls and maps JSON to/from models"""
+
+    LOG = logging.getLogger(__name__)
 
     @classmethod
     def bays_uri(cls, filters=None):
@@ -117,7 +120,9 @@ class BayClient(client.MagnumClient):
                 lambda: self.does_bay_exist(bay_id), 10, 3600)
         except Exception:
             # In error state.  Clean up the bay id if desired
+            self.LOG.error('Bay %s entered an exception state.' % bay_id)
             if delete_on_error:
+                self.LOG.error('We will attempt to delete bays now.')
                 self.delete_bay(bay_id)
                 self.wait_for_bay_to_delete(bay_id)
             raise
@@ -131,29 +136,35 @@ class BayClient(client.MagnumClient):
             resp, model = self.get_bay(bay_id)
             if model.status in ['CREATED', 'CREATE_COMPLETE',
                                 'ERROR', 'CREATE_FAILED']:
+                self.LOG.info('Bay %s succeeded.' % bay_id)
                 return True
             else:
                 return False
         except exceptions.NotFound:
+            self.LOG.warn('Bay %s is not found.' % bay_id)
             return False
 
     def does_bay_exist(self, bay_id):
         try:
             resp, model = self.get_bay(bay_id)
             if model.status in ['CREATED', 'CREATE_COMPLETE']:
+                self.LOG.info('Bay %s is created.' % bay_id)
                 return True
             elif model.status in ['ERROR', 'CREATE_FAILED']:
+                self.LOG.error('Bay %s is in fail state.' % bay_id)
                 raise exceptions.ServerFault(
                     "Got into an error condition: %s for %s" %
                     (model.status, bay_id))
             else:
                 return False
         except exceptions.NotFound:
+            self.LOG.warn('Bay %s is not found.' % bay_id)
             return False
 
     def does_bay_not_exist(self, bay_id):
         try:
             self.get_bay(bay_id)
         except exceptions.NotFound:
+            self.LOG.warn('Bay %s is not found.' % bay_id)
             return True
         return False

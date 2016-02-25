@@ -76,17 +76,19 @@ class BayTest(base.BaseMagnumTest):
             super(BayTest, self).tearDown()
 
     def _create_baymodel(self, baymodel_model):
+        self.LOG.debug('We will create a baymodel for %s' % baymodel_model)
         resp, model = self.baymodel_client.post_baymodel(baymodel_model)
         return resp, model
 
     def _delete_baymodel(self, baymodel_id):
+        self.LOG.debug('We will delete a baymodel for %s' % baymodel_id)
         resp, model = self.baymodel_client.delete_baymodel(baymodel_id)
         return resp, model
 
     def _create_bay(self, bay_model):
+        self.LOG.debug('We will create bay for %s' % bay_model)
         resp, model = self.bay_client.post_bay(bay_model)
-        self.LOG.info('Response: %s' % resp)
-        self.LOG.info('Model: %s ' % model)
+        self.LOG.debug('Response: %s' % resp)
         self.assertEqual(resp.status, 201)
         self.assertIsNotNone(model.uuid)
         self.assertIsNone(model.status)
@@ -97,14 +99,10 @@ class BayTest(base.BaseMagnumTest):
         return resp, model
 
     def _delete_bay(self, bay_id):
+        self.LOG.debug('We will delete a bay for %s' % bay_id)
         resp, model = self.bay_client.delete_bay(bay_id)
         self.assertEqual(resp.status, 204)
         self.bay_client.wait_for_bay_to_delete(bay_id)
-        return resp, model
-
-    def _get_bay_by_id(self, bay_id):
-        resp, model = self.bay_client.get_bay(bay_id)
-        self.assertEqual(resp.status, 404)
         return resp, model
 
     # (dimtruck) Combining all these tests in one because
@@ -181,8 +179,7 @@ class BayTest(base.BaseMagnumTest):
         # test ca show
         resp, model = self.cert_client.get_cert(
             bay_model.uuid)
-        self.LOG.info("cert resp: %s" % resp)
-        self.LOG.info("cert model: %s" % model)
+        self.LOG.debug("cert resp: %s" % resp)
         self.assertEqual(resp.status, 200)
         self.assertEqual(model.bay_uuid, bay_model.uuid)
         self.assertIsNotNone(model.pem)
@@ -192,8 +189,7 @@ class BayTest(base.BaseMagnumTest):
         # test ca sign
         model = datagen.cert_data(bay_uuid=bay_model.uuid)
         resp, model = self.cert_client.post_cert(model)
-        self.LOG.info("cert resp: %s" % resp)
-        self.LOG.info("cert model: %s" % model)
+        self.LOG.debug("cert resp: %s" % resp)
         self.assertEqual(resp.status, 201)
         self.assertEqual(model.bay_uuid, bay_model.uuid)
         self.assertIsNotNone(model.pem)
