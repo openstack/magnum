@@ -3,6 +3,7 @@
     "admin_or_owner":  "is_admin:True or project_id:%(project_id)s",
     "default": "rule:admin_or_owner",
     "admin_api": "rule:context_is_admin",
+    "admin_or_user": "is_admin:True or user_id:%(user_id)s",
 
     "bay:create": "rule:default",
     "bay:delete": "rule:default",
@@ -40,15 +41,15 @@
     "service:get_all": "rule:default",
     "service:update": "rule:default",
 
-    "container:create": "rule:default",
-    "container:delete": "rule:default",
+    "container:create": "rule:admin_or_user",
+    "container:delete": "rule:admin_or_user",
     "container:detail": "rule:default",
     "container:get": "rule:default",
     "container:get_all": "rule:default",
-    "container:update": "rule:default",
+    "container:update": "rule:admin_or_user",
 
-    "certificate:create": "rule:default",
-    "certificate:get": "rule:default",
+    "certificate:create": "rule:admin_or_user",
+    "certificate:get": "rule:admin_or_user",
 
     "magnum-service:get_all": "rule:admin_api"
 }

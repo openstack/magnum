@@ -90,6 +90,8 @@ def enforce(context, rule=None, target=None,
     """
     enforcer = init()
     credentials = context.to_dict()
+    if not exc:
+        exc = exception.PolicyNotAuthorized
     if target is None:
         target = {'project_id': context.project_id,
                   'user_id': context.user_id}

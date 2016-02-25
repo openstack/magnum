@@ -125,30 +125,34 @@ class CertificateController(rest.RestController):
     }
 
     @wsme_pecan.wsexpose(Certificate, types.uuid_or_name)
-    @policy.enforce_wsgi("certificate", "get")
     def get_one(self, bay_ident):
         """Retrieve information about the given certificate.
 
         :param bay_ident: UUID of a bay or
         logical name of the bay.
         """
+        context = pecan.request.context
         bay = api_utils.get_resource('Bay', bay_ident)
+        policy.enforce(context, 'certificate:get', bay,
+                       action='certificate:get')
         certificate = pecan.request.rpcapi.get_ca_certificate(bay)
         return Certificate.convert_with_links(certificate)
 
     @wsme_pecan.wsexpose(Certificate, body=Certificate, status_code=201)
-    @policy.enforce_wsgi("certificate", "create")
     def post(self, certificate):
         """Create a new certificate.
 
         :param certificate: a certificate within the request body.
         """
-        certificate_dict = certificate.as_dict()
         context = pecan.request.context
+        bay = certificate.get_bay()
+        policy.enforce(context, 'certificate:create', bay,
+                       action='certificate:create')
+        certificate_dict = certificate.as_dict()
         certificate_dict['project_id'] = context.project_id
         certificate_dict['user_id'] = context.user_id
         cert_obj = objects.Certificate(context, **certificate_dict)
 
-        new_cert = pecan.request.rpcapi.sign_certificate(certificate.get_bay(),
+        new_cert = pecan.request.rpcapi.sign_certificate(bay,
                                                          cert_obj)
         return Certificate.convert_with_links(new_cert)
