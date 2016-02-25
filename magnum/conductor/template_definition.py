@@ -64,7 +64,9 @@ template_def_opts = [
                 help=_('Enabled bay definition entry points.')),
 ]
 
-cfg.CONF.register_opts(template_def_opts, group='bay')
+CONF = cfg.CONF
+CONF.register_opts(template_def_opts, group='bay')
+CONF.import_opt('trustee_domain_id', 'magnum.common.keystone', group='trust')
 
 
 class ParameterMapping(object):
@@ -346,6 +348,19 @@ class BaseTemplateDefinition(TemplateDefinition):
     @abc.abstractproperty
     def template_path(self):
         pass
+
+    def get_params(self, context, baymodel, bay, **kwargs):
+        extra_params = kwargs.pop('extra_params', {})
+        extra_params['trustee_domain_id'] = CONF.trust.trustee_domain_id
+        extra_params['trustee_user_id'] = bay.trustee_user_id
+        extra_params['trustee_username'] = bay.trustee_username
+        extra_params['trustee_password'] = bay.trustee_password
+        extra_params['trust_id'] = bay.trust_id
+
+        return super(BaseTemplateDefinition,
+                     self).get_params(context, baymodel, bay,
+                                      extra_params=extra_params,
+                                      **kwargs)
 
     def _get_user_token(self, context, osc, bay):
         """Retrieve user token from the Heat stack or context.

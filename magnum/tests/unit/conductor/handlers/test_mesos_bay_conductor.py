@@ -14,6 +14,7 @@
 
 import mock
 from mock import patch
+from oslo_config import cfg
 from oslo_service import loopingcall
 
 from magnum.conductor.handlers import bay_conductor
@@ -49,7 +50,14 @@ class TestBayConductorWithMesos(base.TestCase):
             'node_addresses': ['172.17.2.4'],
             'node_count': 1,
             'master_count': 1,
+            'trustee_username': 'fake_trustee',
+            'trustee_password': 'fake_trustee_password',
+            'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de'
         }
+        cfg.CONF.set_override('trustee_domain_id',
+                              '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
+                              group='trust')
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_all_values(
@@ -75,7 +83,12 @@ class TestBayConductorWithMesos(base.TestCase):
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
-            'cluster_name': 'bay1'
+            'cluster_name': 'bay1',
+            'trustee_domain_id': '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
+            'trustee_username': 'fake_trustee',
+            'trustee_password': 'fake_trustee_password',
+            'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de'
         }
         self.assertEqual(expected, definition)
 
@@ -102,7 +115,12 @@ class TestBayConductorWithMesos(base.TestCase):
             'external_network': 'external_network_id',
             'number_of_slaves': 1,
             'number_of_masters': 1,
-            'cluster_name': 'bay1'
+            'cluster_name': 'bay1',
+            'trustee_domain_id': '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
+            'trustee_username': 'fake_trustee',
+            'trustee_password': 'fake_trustee_password',
+            'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de'
         }
         self.assertEqual(expected, definition)
 

@@ -14,6 +14,7 @@
 
 import mock
 from mock import patch
+from oslo_config import cfg
 from oslo_service import loopingcall
 
 from magnum.conductor.handlers import bay_conductor
@@ -56,7 +57,14 @@ class TestBayConductorWithSwarm(base.TestCase):
             'master_count': 1,
             'node_count': 1,
             'discovery_url': 'https://discovery.test.io/123456789',
+            'trustee_username': 'fake_trustee',
+            'trustee_password': 'fake_trustee_password',
+            'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de'
         }
+        cfg.CONF.set_override('trustee_domain_id',
+                              '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
+                              group='trust')
         osc_patcher = mock.patch('magnum.common.clients.OpenStackClients')
         self.mock_osc_class = osc_patcher.start()
         self.addCleanup(osc_patcher.stop)
@@ -99,7 +107,12 @@ class TestBayConductorWithSwarm(base.TestCase):
             'network_driver': 'network_driver',
             'flannel_network_cidr': '10.101.0.0/16',
             'flannel_network_subnetlen': '26',
-            'flannel_use_vxlan': 'yes'
+            'flannel_use_vxlan': 'yes',
+            'trustee_domain_id': '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
+            'trustee_username': 'fake_trustee',
+            'trustee_password': 'fake_trustee_password',
+            'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de'
         }
         self.assertEqual(expected, definition)
 
@@ -136,7 +149,12 @@ class TestBayConductorWithSwarm(base.TestCase):
             'tls_disabled': False,
             'flannel_network_cidr': u'10.101.0.0/16',
             'flannel_network_subnetlen': u'26',
-            'flannel_use_vxlan': u'yes'
+            'flannel_use_vxlan': u'yes',
+            'trustee_domain_id': '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
+            'trustee_username': 'fake_trustee',
+            'trustee_password': 'fake_trustee_password',
+            'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de'
         }
         self.assertEqual(expected, definition)
 
