@@ -65,6 +65,18 @@ class BayType(fields.Enum):
         super(BayType, self).__init__(valid_values=BayType.ALL)
 
 
+class DockerStorageDriver(fields.Enum):
+    ALL = (
+        DEVICEMAPPER, OVERLAY,
+    ) = (
+        'devicemapper', 'overlay',
+    )
+
+    def __init__(self):
+        super(DockerStorageDriver, self).__init__(
+            valid_values=DockerStorageDriver.ALL)
+
+
 class ListOfDictsField(fields.AutoTypedField):
     AUTO_TYPE = fields.List(fields.Dict(fields.FieldType()))
 
@@ -79,3 +91,7 @@ class ContainerStatusField(fields.BaseEnumField):
 
 class BayTypeField(fields.BaseEnumField):
     AUTO_TYPE = BayType()
+
+
+class DockerStorageDriverField(fields.BaseEnumField):
+    AUTO_TYPE = DockerStorageDriver()

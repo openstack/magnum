@@ -21,11 +21,18 @@ if [ -z "${device_name}" ]; then
 fi
 
 device_path=/dev/disk/by-id/${device_name}
-pvcreate ${device_path}
-vgcreate docker ${device_path}
 
-cat > /etc/sysconfig/docker-storage-setup << EOF
-VG=docker
-EOF
+$configure_docker_storage_driver
 
-sed -i '/^DOCKER_STORAGE_OPTIONS=/ s/=.*/=--storage-driver devicemapper --storage-opt dm.fs=xfs --storage-opt dm.thinpooldev=\/dev\/mapper\/docker-docker--pool --storage-opt dm.use_deferred_removal=true/' /etc/sysconfig/docker-storage
+if [ "$DOCKER_STORAGE_DRIVER" = "overlay" ]; then
+    if [ $(echo -e "$(uname -r)\n3.18" | sort -V | head -1) \
+         = $(uname -r) ]; then
+        ERROR_MESSAGE="OverlayFS requires at least Linux kernel 3.18. Bay node kernel version: $(uname -r)"
+        echo "ERROR: ${ERROR_MESSAGE}" >&2
+        sh -c "${WAIT_CURL} --data-binary '{\"status\": \"FAILURE\", \"reason\": \"${ERROR_MESSAGE}\"}'"
+    else
+        configure_overlay
+    fi
+else
+    configure_devicemapper
+fi

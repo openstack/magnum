@@ -1,0 +1,12 @@
+---
+features:
+  - Add docker-storage-driver parameter to baymodel to
+    allow user select from the supported drivers. Until
+    now, only devicemapper was supported. This release
+    adds support for OverlayFS on Fedora Atomic hosts with
+    kernel version >= 3.18 (Fedora 22 or higher) resulting
+    significant performance improvement. To use OverlayFS,
+    SELinux must be enabled and in enforcing mode on the
+    physical machine, but must be disabled in the container.
+    Thus, if you select overlay for docker-storage-driver
+    SELinux will be disable inside the containers.

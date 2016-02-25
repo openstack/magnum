@@ -33,6 +33,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'keypair_id': 'keypair_id',
             'dns_nameserver': 'dns_nameserver',
             'docker_volume_size': 20,
+            'docker_storage_driver': 'devicemapper',
             'external_network_id': 'external_network_id',
             'cluster_distro': 'fedora-atomic',
             'coe': 'swarm',
@@ -96,6 +97,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'number_of_masters': 1,
             'number_of_nodes': 1,
             'docker_volume_size': 20,
+            'docker_storage_driver': 'devicemapper',
             'discovery_url': 'https://discovery.test.io/123456789',
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
@@ -163,7 +165,8 @@ class TestBayConductorWithSwarm(base.TestCase):
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
-            'auth_url': 'http://192.168.10.10:5000/v3'
+            'auth_url': 'http://192.168.10.10:5000/v3',
+            'docker_storage_driver': 'devicemapper'
         }
         self.assertEqual(expected, definition)
 
@@ -175,7 +178,7 @@ class TestBayConductorWithSwarm(base.TestCase):
         not_required = ['image_id', 'flavor_id', 'dns_nameserver',
                         'docker_volume_size', 'fixed_network', 'http_proxy',
                         'https_proxy', 'no_proxy', 'network_driver',
-                        'master_flavor_id']
+                        'master_flavor_id', 'docker_storage_driver']
         for key in not_required:
             self.baymodel_dict[key] = None
         self.bay_dict['discovery_url'] = 'https://discovery.etcd.io/test'

@@ -120,6 +120,13 @@ parameters:
       storage
     default: 25
 
+  docker_storage_driver:
+    type: string
+    description: docker storage driver name
+    default: "devicemapper"
+    constraints:
+      - allowed_values: ["devicemapper", "overlay"]
+
   loadbalancing_protocol:
     type: string
     description: >
@@ -330,6 +337,7 @@ resources:
           server_image: {get_param: server_image}
           server_flavor: {get_param: master_flavor}
           docker_volume_size: {get_param: docker_volume_size}
+          docker_storage_driver: {get_param: docker_storage_driver}
           fixed_network_id: {get_resource: fixed_network}
           fixed_subnet_id: {get_resource: fixed_subnet}
           external_network: {get_param: external_network}
@@ -370,6 +378,7 @@ resources:
           server_image: {get_param: server_image}
           server_flavor: {get_param: node_flavor}
           docker_volume_size: {get_param: docker_volume_size}
+          docker_storage_driver: {get_param: docker_storage_driver}
           fixed_network_id: {get_resource: fixed_network}
           fixed_subnet_id: {get_resource: fixed_subnet}
           external_network: {get_param: external_network}

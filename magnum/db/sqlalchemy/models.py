@@ -160,6 +160,7 @@ class BayModel(Base):
     dns_nameserver = Column(String(255))
     apiserver_port = Column(Integer())
     docker_volume_size = Column(Integer())
+    docker_storage_driver = Column(String(255))
     cluster_distro = Column(String(255))
     coe = Column(String(255))
     http_proxy = Column(String(255))

@@ -37,6 +37,8 @@ def get_test_baymodel(**kw):
         'dns_nameserver': kw.get('dns_nameserver', '8.8.1.1'),
         'apiserver_port': kw.get('apiserver_port', 8080),
         'docker_volume_size': kw.get('docker_volume_size', 20),
+        'docker_storage_driver': kw.get('docker_storage_driver',
+                                        'devicemapper'),
         'cluster_distro': kw.get('cluster_distro', 'fedora-atomic'),
         'coe': kw.get('coe', 'swarm'),
         'created_at': kw.get('created_at'),
