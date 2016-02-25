@@ -29,6 +29,14 @@ class RequestContext(context.RequestContext):
         :param domain_name: The name of the domain.
 
         """
+        super(RequestContext, self).__init__(auth_token=auth_token,
+                                             user=user_name,
+                                             tenant=project_name,
+                                             is_admin=is_admin,
+                                             read_only=read_only,
+                                             show_deleted=show_deleted,
+                                             request_id=request_id)
+
         self.user_name = user_name
         self.user_id = user_id
         self.project_name = project_name
@@ -40,14 +48,6 @@ class RequestContext(context.RequestContext):
         self.auth_token_info = auth_token_info
         self.trust_id = trust_id
         self.all_tenants = all_tenants
-
-        super(RequestContext, self).__init__(auth_token=auth_token,
-                                             user=user_name,
-                                             tenant=project_name,
-                                             is_admin=is_admin,
-                                             read_only=read_only,
-                                             show_deleted=show_deleted,
-                                             request_id=request_id)
 
     def to_dict(self):
         value = super(RequestContext, self).to_dict()
