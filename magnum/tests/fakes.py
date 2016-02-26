@@ -13,7 +13,6 @@
 import mock
 
 fakeAuthTokenHeaders = {'X-User-Id': u'773a902f022949619b5c2f32cd89d419',
-                        'X-Roles': u'admin, ResellerAdmin, _member_',
                         'X-Project-Id': u'5588aebbcdc24e17a061595f80574376',
                         'X-Project-Name': 'test',
                         'X-User-Name': 'test',
