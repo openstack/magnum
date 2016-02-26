@@ -909,3 +909,19 @@ class Connection(api.Connection):
 
         return _paginate_query(models.MagnumService, limit, marker,
                                sort_key, sort_dir, query)
+
+    def create_quota(self, values):
+        quotas = models.Quota()
+        quotas.update(values)
+        try:
+            quotas.save()
+        except db_exc.DBDuplicateEntry:
+            raise exception.QuotaAlreadyExists(project_id=values['project_id'],
+                                               resource=values['resource'])
+        return quotas
+
+    def quota_get_all_by_project_id(self, project_id):
+        query = model_query(models.Quota)
+        result = query.filter_by(project_id=project_id).all()
+
+        return result
