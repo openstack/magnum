@@ -130,7 +130,7 @@ class TestDockerHandler(base.BaseTestCase):
         image = 'some_image:some_tag'
         unicode_image = six.u(image)
         utf8_image = self.conductor._encode_utf8(unicode_image)
-        self.assertEqual(image, utf8_image)
+        self.assertEqual(unicode_image.encode('utf-8'), utf8_image)
 
     @mock.patch.object(errors.APIError, '__str__')
     def test_container_create_with_failure(self, mock_init):
