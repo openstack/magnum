@@ -76,10 +76,23 @@ Developer Info
 
    dev/quickstart
    dev/manual-devstack
+   dev/bay-template-example.rst
    dev/build-atomic-image.rst
    dev/kubernetes-load-balancer.rst
    dev/tls.rst
+   dev/mesos.rst
    dev/functional-test.rst
+   magnum-proxy.rst
    contributing
    heat-templates
    objects
+   gmr.rst
+
+Work In Progress
+================
+
+.. toctree::
+   :maxdepth: 1
+
+   troubleshooting-guide.rst
+   userguide.rst
