@@ -281,7 +281,7 @@ class TestValidation(base.BaseTestCase):
 
         # Reload the validator module so that baymodel configs are
         # re-evaluated.
-        reload(v)
+        reload_module(v)
         validator = v.K8sValidator
         validator.supported_network_drivers = ['flannel', 'type1', 'type2']
 
@@ -373,7 +373,7 @@ class TestValidation(base.BaseTestCase):
 
         # Reload the validator module so that baymodel configs are
         # re-evaluated.
-        reload(v)
+        reload_module(v)
         validator = v.K8sValidator
         validator.supported_volume_driver = ['cinder']
 
