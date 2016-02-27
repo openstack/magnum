@@ -354,7 +354,7 @@ def file_open(*args, **kwargs):
 def hash_file(file_like_object):
     """Generate a hash for the contents of a file."""
     checksum = hashlib.sha1()
-    for chunk in iter(lambda: file_like_object.read(32768), b''):
+    for chunk in iter(lambda: six.b(file_like_object.read(32768)), b''):
         checksum.update(chunk)
     return checksum.hexdigest()
 
