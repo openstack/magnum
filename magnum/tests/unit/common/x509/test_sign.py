@@ -127,7 +127,7 @@ class TestX509(base.BaseTestCase):
         issuer_name = six.b("bytes-issuer-name")
         cert, _ = self._generate_ca_certificate(issuer_name)
 
-        issuer_name = six.u(issuer_name)
+        issuer_name = issuer_name.decode('utf-8')
         self.assertHasSubjectName(cert, issuer_name)
         self.assertHasIssuerName(cert, issuer_name)
 
@@ -190,7 +190,7 @@ class TestX509(base.BaseTestCase):
         private_key = self._generate_private_key()
         csr_obj = self._build_csr(private_key)
         csr = csr_obj.public_bytes(serialization.Encoding.PEM)
-        csr = six.u(csr)
+        csr = six.text_type(csr.decode('utf-8'))
 
         mock_load_pem.return_value = csr_obj
         operations.sign(csr, self.issuer_name, ca_key,

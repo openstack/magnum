@@ -103,7 +103,7 @@ def _generate_certificate(issuer_name, subject_name, extensions, ca_key=None,
                           encryption_password=None, ca_key_password=None):
 
     if not isinstance(subject_name, six.text_type):
-        subject_name = six.u(subject_name)
+        subject_name = six.text_type(subject_name.decode('utf-8'))
 
     private_key = rsa.generate_private_key(
         public_exponent=65537,
@@ -169,7 +169,7 @@ def sign(csr, issuer_name, ca_key, ca_key_password=None,
                                                     backend=default_backend())
 
     if not isinstance(issuer_name, six.text_type):
-        issuer_name = six.u(issuer_name)
+        issuer_name = six.text_type(issuer_name.decode('utf-8'))
 
     if isinstance(csr, six.text_type):
         csr = six.b(str(csr))
