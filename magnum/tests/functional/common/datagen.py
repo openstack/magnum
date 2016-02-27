@@ -296,6 +296,8 @@ def cert_data(bay_uuid, csr_data=None):
     if csr_data is not None and os.path.isfile(csr_data):
         with open(csr_data, 'r') as f:
             data['csr'] = f.read()
+    else:
+        data['csr'] = csr_data
 
     model = cert_model.CertEntity.from_dict(data)
 

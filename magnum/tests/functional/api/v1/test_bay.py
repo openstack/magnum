@@ -198,8 +198,8 @@ class BayTest(base.BaseMagnumTest):
 
         # test ca sign invalid
         model = datagen.cert_data(bay_uuid=bay_model.uuid,
-                                  csr_data="invalid_path")
+                                  csr_data="invalid_csr")
         self.assertRaises(
-            exceptions.ServerFault,
+            exceptions.BadRequest,
             self.cert_client.post_cert,
             model)
