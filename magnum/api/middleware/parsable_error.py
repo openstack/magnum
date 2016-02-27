@@ -19,6 +19,7 @@ Based on pecan.middleware.errordocument
 """
 
 import json
+import six
 
 from magnum.i18n import _
 
@@ -57,7 +58,8 @@ class ParsableErrorMiddleware(object):
 
         app_iter = self.app(environ, replacement_start_response)
         if (state['status_code'] // 100) not in (2, 3):
-            body = [json.dumps({'error_message': '\n'.join(app_iter)})]
+            body = [six.b(json.dumps({'error_message':
+                          six.b('\n').join(app_iter).decode('utf-8')}))]
             state['headers'].append(('Content-Type', 'application/json'))
             state['headers'].append(('Content-Length', str(len(body[0]))))
         else:
