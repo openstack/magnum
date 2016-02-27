@@ -18,7 +18,6 @@ from oslo_config import cfg
 from oslo_log import log as logging
 
 from magnum.common import exception
-from magnum.common import utils
 from magnum.i18n import _
 from magnum.i18n import _LE
 
@@ -178,7 +177,6 @@ class KeystoneClientV3(object):
             raise exception.TrustDeleteFailed(trust_id=trust_id)
 
     def create_trustee(self, username, password, domain_id):
-        password = utils.generate_password(length=18)
         try:
             user = self.domain_admin_client.users.create(
                 name=username,
