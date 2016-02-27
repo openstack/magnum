@@ -89,7 +89,8 @@ class TestJsonPatchType(base.FunctionalTest):
                          {'path': '/foo', 'op': 'replace', 'value': 'bar'}]
         ret = self._patch_json(valid_patches, False)
         self.assertEqual(200, ret.status_int)
-        self.assertEqual(sorted(valid_patches), sorted(ret.json))
+        self.assertEqual(sorted(valid_patches, key=lambda k: k['op']),
+                         sorted(ret.json, key=lambda k: k['op']))
 
     def test_cannot_update_internal_attr(self):
         patch = [{'path': '/internal', 'op': 'replace', 'value': 'foo'}]
