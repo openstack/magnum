@@ -379,8 +379,72 @@ In this case, check the following:
 
 etcd service
 ------------
-*To be filled in*
 
+The etcd service is used by many other components for key/value pair
+management, therefore if it fails to start, these other components
+will not be running correctly either.
+Check that etcd is running on the master nodes by::
+
+    sudo service etcd status -l
+
+If it is running correctly, you should see that the service is
+successfully deployed::
+
+    Active: active (running) since ....
+
+The log message should show the service being published::
+
+    etcdserver: published {Name:10.0.0.5 ClientURLs:[http://10.0.0.5:2379]} to cluster 3451e4c04ec92893
+
+In some cases, the service may show as *active* but may still be stuck
+in discovery mode and not fully operational.  The log message may show
+something like::
+
+    discovery: waiting for other nodes: error connecting to https://discovery.etcd.io, retrying in 8m32s
+
+If this condition persists, check for `Cluster internet access`_.
+
+If the daemon is not running, the status will show the service as failed,
+something like::
+
+    Active: failed (Result: timeout)
+
+In this case, try restarting etcd by::
+
+    sudo service etcd start
+
+If etcd continues to fail, check the following:
+
+- Check the log for etcd::
+
+    sudo journalctl -u etcd
+
+- etcd requires discovery, and the default discovery method is the
+  public discovery service provided by etcd.io; therefore, a common
+  cause of failure is that this public discovery service is not
+  reachable.  Check by running on the master nodes::
+
+    source /etc/sysconfig/heat-params
+    curl $ETCD_DISCOVERY_URL
+
+  You should receive something like::
+
+    {"action":"get",
+     "node":{"key":"/_etcd/registry/00a6b00064174c92411b0f09ad5466c6",
+             "dir":true,
+             "nodes":[
+               {"key":"/_etcd/registry/00a6b00064174c92411b0f09ad5466c6/7d8a68781a20c0a5",
+                "value":"10.0.0.5=http://10.0.0.5:2380",
+                "modifiedIndex":978239406,
+                "createdIndex":978239406}],
+             "modifiedIndex":978237118,
+             "createdIndex":978237118}
+    }
+
+  The list of master IP is provided by Magnum during cluster deployment,
+  therefore it should match the current IP of the master nodes.
+  If the public discovery service is not reachable, check the
+  `Cluster internet access`_.
 
 flannel service
 ---------------
