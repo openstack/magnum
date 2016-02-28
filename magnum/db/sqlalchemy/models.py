@@ -291,3 +291,18 @@ class MagnumService(Base):
     last_seen_up = Column(DateTime, nullable=True)
     forced_down = Column(Boolean, default=False)
     report_count = Column(Integer, nullable=False, default=0)
+
+
+class Quota(Base):
+    """Represents Quota for a resource within a project"""
+    __tablename__ = 'quotas'
+    __table_args__ = (
+        schema.UniqueConstraint(
+            "project_id", "resource",
+            name='uniq_quotas0project_id0resource'),
+        table_args()
+    )
+    id = Column(Integer, primary_key=True)
+    project_id = Column(String(255))
+    resource = Column(String(255))
+    hard_limit = Column(Integer())

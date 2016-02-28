@@ -671,3 +671,31 @@ class Connection(object):
                          (asc, desc)
         :returns: A list of tuples of the specified columns.
         """
+
+    @abc.abstractmethod
+    def create_quota(self, values):
+        """Create a new Quota record for a resource in a project.
+
+        :param values: A dict containing several items used to identify
+                       and track quota for a resource in a project.
+
+                       ::
+
+                        {
+                         'id': utils.generate_uuid(),
+                         'project_id': 'fake_project',
+                         'resource': 'fake_resource',
+                         'hard_limit': 'fake_hardlimit',
+                        }
+
+        :returns: A quota record.
+        """
+
+    @abc.abstractmethod
+    def quota_get_all_by_project_id(self, project_id):
+        """Gets Quota record for all the resources in a project.
+
+        :param project_id: Project identifier of the project.
+
+        :returns: Quota record for all resources in a project.
+        """

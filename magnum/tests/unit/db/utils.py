@@ -308,3 +308,28 @@ def create_test_magnum_service(**kw):
         del magnum_service['id']
     dbapi = db_api.get_instance()
     return dbapi.create_magnum_service(magnum_service)
+
+
+def get_test_quotas(**kw):
+    return {
+        'id': kw.get('', 18),
+        'project_id': kw.get('project_id', 'fake_project'),
+        'resource': kw.get('resource', 'fake_resource'),
+        'hard_limit': kw.get('hard_limit', 10),
+        'created_at': kw.get('created_at'),
+        'updated_at': kw.get('updated_at'),
+    }
+
+
+def create_test_quotas(**kw):
+    """Create test quotas entry in DB and return quotas DB object.
+
+    :param kw: kwargs with overriding values for quota attributes.
+    :returns: Test quotas DB object.
+    """
+    quotas = get_test_quotas(**kw)
+    # Let DB generate ID if it isn't specified explicitly
+    if 'id' not in kw:
+        del quotas['id']
+    dbapi = db_api.get_instance()
+    return dbapi.create_quota(quotas)
