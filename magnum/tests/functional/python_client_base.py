@@ -26,6 +26,8 @@ import fixtures
 from six.moves import configparser
 
 from heatclient import client as heatclient
+from k8sclient.client import api_client
+from k8sclient.client.apis import apiv_api
 from keystoneclient.v2_0 import client as ksclient
 from magnum.common.utils import rmtree_without_raise
 from magnum.tests.functional.common import base
@@ -224,6 +226,9 @@ extendedKeyUsage = clientAuth
     ca_dir = None
     bay = None
     baymodel = None
+    key_file = None
+    cert_file = None
+    ca_file = None
 
     @classmethod
     def setUpClass(cls):
@@ -337,3 +342,110 @@ extendedKeyUsage = clientAuth
         resp = cls.cs.certificates.get(cls.bay.uuid)
         with open(cls.ca_file, 'w') as f:
             f.write(resp.pem)
+
+
+class BaseK8sTest(BayTest):
+    coe = 'kubernetes'
+
+    @classmethod
+    def setUpClass(cls):
+        super(BaseK8sTest, cls).setUpClass()
+        cls.kube_api_url = cls.cs.bays.get(cls.bay.uuid).api_address
+        k8s_client = api_client.ApiClient(cls.kube_api_url,
+                                          key_file=cls.key_file,
+                                          cert_file=cls.cert_file,
+                                          ca_certs=cls.ca_file)
+        cls.k8s_api = apiv_api.ApivApi(k8s_client)
+
+    def setUp(self):
+        super(BaseK8sTest, self).setUp()
+        self.kube_api_url = self.cs.bays.get(self.bay.uuid).api_address
+        k8s_client = api_client.ApiClient(self.kube_api_url,
+                                          key_file=self.key_file,
+                                          cert_file=self.cert_file,
+                                          ca_certs=self.ca_file)
+        self.k8s_api = apiv_api.ApivApi(k8s_client)
+        # TODO(coreypobrien) https://bugs.launchpad.net/magnum/+bug/1551824
+        utils.wait_for_condition(self._is_api_ready, 5, 600)
+
+    def _is_api_ready(self):
+        try:
+            self.k8s_api.list_namespaced_node()
+            self.LOG.info("API is ready.")
+            return True
+        except Exception:
+            self.LOG.info("API is not ready yet.")
+            return False
+
+    def test_pod_apis(self):
+        pod_manifest = {'apiVersion': 'v1',
+                        'kind': 'Pod',
+                        'metadata': {'color': 'blue', 'name': 'test'},
+                        'spec': {'containers': [{'image': 'dockerfile/redis',
+                                 'name': 'redis'}]}}
+
+        resp = self.k8s_api.create_namespaced_pod(body=pod_manifest,
+                                                  namespace='default')
+        self.assertEqual('test', resp.metadata.name)
+        self.assertTrue(resp.status.phase)
+
+        resp = self.k8s_api.read_namespaced_pod(name='test',
+                                                namespace='default')
+        self.assertEqual('test', resp.metadata.name)
+        self.assertTrue(resp.status.phase)
+
+        resp = self.k8s_api.delete_namespaced_pod(name='test', body={},
+                                                  namespace='default')
+
+    def test_service_apis(self):
+        service_manifest = {'apiVersion': 'v1',
+                            'kind': 'Service',
+                            'metadata': {'labels': {'name': 'frontend'},
+                                         'name': 'frontend',
+                                         'resourceversion': 'v1'},
+                            'spec': {'ports': [{'port': 80,
+                                                'protocol': 'TCP',
+                                                'targetPort': 80}],
+                                     'selector': {'name': 'frontend'}}}
+
+        resp = self.k8s_api.create_namespaced_service(body=service_manifest,
+                                                      namespace='default')
+        self.assertEqual('frontend', resp.metadata.name)
+        self.assertTrue(resp.status)
+
+        resp = self.k8s_api.read_namespaced_service(name='frontend',
+                                                    namespace='default')
+        self.assertEqual('frontend', resp.metadata.name)
+        self.assertTrue(resp.status)
+
+        resp = self.k8s_api.delete_namespaced_service(name='frontend',
+                                                      namespace='default')
+
+    def test_replication_controller_apis(self):
+        rc_manifest = {
+            'apiVersion': 'v1',
+            'kind': 'ReplicationController',
+            'metadata': {'labels': {'name': 'frontend'},
+                         'name': 'frontend'},
+            'spec': {'replicas': 2,
+                     'selector': {'name': 'frontend'},
+                     'template': {'metadata': {
+                         'labels': {'name': 'frontend'}},
+                         'spec': {'containers': [{
+                             'image': 'nginx',
+                             'name': 'nginx',
+                             'ports': [{'containerPort': 80,
+                                        'protocol': 'TCP'}]}]}}}}
+
+        resp = self.k8s_api.create_namespaced_replication_controller(
+            body=rc_manifest, namespace='default')
+        self.assertEqual('frontend', resp.metadata.name)
+        self.assertEqual(2, resp.spec.replicas)
+
+        resp = self.k8s_api.read_namespaced_replication_controller(
+            name='frontend', namespace='default')
+        self.assertEqual('frontend', resp.metadata.name)
+        self.assertEqual(2, resp.spec.replicas)
+
+        resp = self.k8s_api.delete_namespaced_replication_controller(
+            name='frontend', body={}, namespace='default')
