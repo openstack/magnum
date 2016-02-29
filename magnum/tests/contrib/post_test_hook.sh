@@ -185,6 +185,7 @@ if [[ "api" == "$coe" ]]; then
     iniset $BASE/new/tempest/etc/tempest.conf magnum flavor_id m1.magnum2
     iniset $BASE/new/tempest/etc/tempest.conf magnum master_flavor_id m1.magnum
     iniset $BASE/new/tempest/etc/tempest.conf magnum csr_location $CSR_FILE
+    iniset $BASE/new/tempest/etc/tempest.conf magnum copy_logs True
 
     # show tempest config with magnum
     cat etc/tempest.conf

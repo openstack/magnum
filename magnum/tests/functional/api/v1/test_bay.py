@@ -30,7 +30,8 @@ class BayTest(base.BaseMagnumTest):
     def __init__(self, *args, **kwargs):
         super(BayTest, self).__init__(*args, **kwargs)
         self.bays = []
-        self.credentials = None
+        self.creds = None
+        self.keypair = None
         self.baymodel = None
         self.baymodel_client = None
         self.keypairs_client = None
@@ -40,18 +41,19 @@ class BayTest(base.BaseMagnumTest):
     def setUp(self):
         try:
             super(BayTest, self).setUp()
-            self.credentials = self.get_credentials(type_of_creds='default')
+            (self.creds, self.keypair) = self.get_credentials_with_keypair(
+                type_of_creds='default')
             (self.baymodel_client,
-             self.keypairs_client) = self.get_clients_with_existing_creds(
-                 creds=self.credentials,
-                 type_of_creds='default',
-                 request_type='baymodel')
+                self.keypairs_client) = self.get_clients_with_existing_creds(
+                    creds=self.creds,
+                    type_of_creds='default',
+                    request_type='baymodel')
             (self.bay_client, _) = self.get_clients_with_existing_creds(
-                creds=self.credentials,
+                creds=self.creds,
                 type_of_creds='default',
                 request_type='bay')
             (self.cert_client, _) = self.get_clients_with_existing_creds(
-                creds=self.credentials,
+                creds=self.creds,
                 type_of_creds='default',
                 request_type='cert')
             model = datagen.valid_swarm_baymodel()
@@ -91,11 +93,18 @@ class BayTest(base.BaseMagnumTest):
         self.LOG.debug('Response: %s' % resp)
         self.assertEqual(resp.status, 201)
         self.assertIsNotNone(model.uuid)
+        self.bays.append(model.uuid)
         self.assertIsNone(model.status)
         self.assertIsNone(model.status_reason)
         self.assertEqual(model.baymodel_id, self.baymodel.uuid)
-        self.bay_client.wait_for_created_bay(model.uuid)
-        self.bays.append(model.uuid)
+        self.bay_uuid = model.uuid
+        self.addOnException(self.copy_logs_handler(
+            lambda: list(
+                self._get_bay_by_id(self.bay_uuid)[1].node_addresses +
+                self._get_bay_by_id(self.bay_uuid)[1].master_addresses),
+            self.baymodel.coe,
+            self.keypair))
+        self.bay_client.wait_for_created_bay(model.uuid, delete_on_error=False)
         return resp, model
 
     def _delete_bay(self, bay_id):
@@ -103,6 +112,10 @@ class BayTest(base.BaseMagnumTest):
         resp, model = self.bay_client.delete_bay(bay_id)
         self.assertEqual(resp.status, 204)
         self.bay_client.wait_for_bay_to_delete(bay_id)
+        return resp, model
+
+    def _get_bay_by_id(self, bay_id):
+        resp, model = self.bay_client.get_bay(bay_id)
         return resp, model
 
     # (dimtruck) Combining all these tests in one because

@@ -24,15 +24,14 @@ class TestKubernetesAPIs(BayTest):
         "fixed_network": '192.168.0.0/24'
     }
 
-    @classmethod
-    def setUpClass(cls):
-        super(TestKubernetesAPIs, cls).setUpClass()
-        cls.kube_api_url = cls.cs.bays.get(cls.bay.uuid).api_address
-        k8s_client = api_client.ApiClient(cls.kube_api_url,
-                                          key_file=cls.key_file,
-                                          cert_file=cls.cert_file,
-                                          ca_certs=cls.ca_file)
-        cls.k8s_api = apiv_api.ApivApi(k8s_client)
+    def setUp(self):
+        super(TestKubernetesAPIs, self).setUp()
+        self.kube_api_url = self.cs.bays.get(self.bay.uuid).api_address
+        k8s_client = api_client.ApiClient(self.kube_api_url,
+                                          key_file=self.key_file,
+                                          cert_file=self.cert_file,
+                                          ca_certs=self.ca_file)
+        self.k8s_api = apiv_api.ApivApi(k8s_client)
 
     def test_pod_apis(self):
         pod_manifest = {'apiVersion': 'v1',

@@ -26,13 +26,13 @@ import fixtures
 from six.moves import configparser
 
 from magnum.common.utils import rmtree_without_raise
-from magnum.tests import base
+from magnum.tests.functional.common import base
 from magnumclient.common.apiclient import exceptions
 from magnumclient.common import cliutils
 from magnumclient.v1 import client as v1client
 
 
-class BaseMagnumClient(base.TestCase):
+class BaseMagnumClient(base.BaseMagnumTest):
 
     @classmethod
     def setUpClass(cls):
@@ -40,6 +40,7 @@ class BaseMagnumClient(base.TestCase):
         #
         # Support the existence of a functional_creds.conf for
         # testing. This makes it possible to use a config file.
+        super(BaseMagnumClient, cls).setUpClass()
         user = cliutils.env('OS_USERNAME')
         passwd = cliutils.env('OS_PASSWORD')
         tenant = cliutils.env('OS_TENANT_NAME')
@@ -133,21 +134,12 @@ class BaseMagnumClient(base.TestCase):
         return baymodel
 
     @classmethod
-    def _create_bay(cls, name, baymodel_uuid, wait=True):
+    def _create_bay(cls, name, baymodel_uuid):
         bay = cls.cs.bays.create(
             name=name,
             baymodel_id=baymodel_uuid,
             node_count=None,
         )
-
-        if wait:
-            cls._wait_on_status(bay,
-                                [None, "CREATE_IN_PROGRESS"],
-                                ["CREATE_FAILED",
-                                 "CREATE_COMPLETE"])
-
-        if cls.cs.bays.get(bay.uuid).status == 'CREATE_FAILED':
-            raise Exception("bay %s created failed" % bay.uuid)
 
         return bay
 
@@ -175,21 +167,16 @@ class BaseMagnumClient(base.TestCase):
             if cls._show_bay(cls.bay.uuid).status == 'DELETE_FAILED':
                 raise Exception("bay %s delete failed" % cls.bay.uuid)
 
-    def _copy_logs(self, exec_info):
-        if not self.copy_logs:
-            return
-        fn = exec_info[2].tb_frame.f_locals['fn']
-        func_name = fn.im_self._get_test_method().__name__
+    def _wait_for_bay_complete(self, bay):
+        self._wait_on_status(
+            bay,
+            [None, "CREATE_IN_PROGRESS"],
+            ["CREATE_FAILED", "CREATE_COMPLETE"])
 
-        bay = self._show_bay(self.bay.uuid)
-        for node_addr in bay.node_addresses:
-            subprocess.call(["magnum/tests/contrib/copy_instance_logs.sh",
-                             node_addr, self.baymodel.coe,
-                             "worker-" + func_name])
-        for node_addr in getattr(bay, 'master_addresses', []):
-            subprocess.call(["magnum/tests/contrib/copy_instance_logs.sh",
-                             node_addr, self.baymodel.coe,
-                             "master-" + func_name])
+        if self.cs.bays.get(bay.uuid).status == 'CREATE_FAILED':
+            raise Exception("bay %s created failed" % bay.uuid)
+
+        return bay
 
 
 class BayTest(BaseMagnumClient):
@@ -241,6 +228,14 @@ extendedKeyUsage = clientAuth
             test_timeout = 0
         if test_timeout > 0:
             self.useFixture(fixtures.Timeout(test_timeout, gentle=True))
+
+        self.addOnException(
+            self.copy_logs_handler(
+                lambda: list(self.cs.bays.get(self.bay.uuid).node_addresses +
+                             self.cs.bays.get(self.bay.uuid).master_addresses),
+                self.baymodel.coe,
+                'default'))
+        self._wait_for_bay_complete(self.bay)
 
     @classmethod
     def _create_tls_ca_files(cls, client_conf_contents):

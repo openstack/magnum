@@ -16,7 +16,6 @@
 
 import fixtures
 from oslo_config import cfg
-from oslo_log import log
 
 from magnum.common import config
 
@@ -30,7 +29,6 @@ class ConfFixture(fixtures.Fixture):
     """Fixture to manage global conf settings."""
 
     def _setUp(self):
-        log.register_options(cfg.CONF)
         CONF.set_default('host', 'fake-mini')
         CONF.set_default('connection', "sqlite://", group='database')
         CONF.set_default('sqlite_synchronous', False, group='database')

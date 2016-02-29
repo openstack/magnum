@@ -55,4 +55,8 @@ MagnumGroup = [
     cfg.StrOpt("csr_location",
                default="/opt/stack/new/magnum/default.csr",
                help="CSR location for certificates."),
+
+    cfg.StrOpt("copy_logs",
+               default=True,
+               help="Specify whether to copy nova server logs on failure."),
 ]

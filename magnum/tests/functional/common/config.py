@@ -104,6 +104,12 @@ class Config(object):
         cls.csr_location = CONF.magnum.csr_location
 
     @classmethod
+    def set_copy_logs(cls, config):
+        if 'copy_logs' not in CONF.magnum:
+            cls.copy_logs = True
+        cls.copy_logs = CONF.magnum.copy_logs
+
+    @classmethod
     def setUp(cls):
         cls.set_admin_creds(config)
         cls.set_user_creds(config)
@@ -119,3 +125,4 @@ class Config(object):
         cls.set_magnum_url(config)
         cls.set_master_flavor_id(config)
         cls.set_csr_location(config)
+        cls.set_copy_logs(config)

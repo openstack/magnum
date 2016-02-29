@@ -22,11 +22,10 @@ from magnum.tests.functional.common import config
 
 
 class Manager(clients.Manager):
-    def __init__(
-            self,
-            credentials=common_creds.get_configured_credentials(
-                'identity_admin'),
-            request_type=None):
+    def __init__(self, credentials=None, request_type=None):
+        if not credentials:
+            credentials = common_creds.get_configured_credentials(
+                'identity_admin')
         super(Manager, self).__init__(credentials, 'container')
         self.auth_provider.orig_base_url = self.auth_provider.base_url
         self.auth_provider.base_url = self.bypassed_base_url
