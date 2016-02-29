@@ -147,8 +147,11 @@ set -o xtrace
 echo_summary "magnum's post_test_hook.sh was called..."
 (set -o posix; set)
 
+# source it to make sure to get REQUIREMENTS_DIR
+source $BASE/new/devstack/stackrc
+
 constraints="-c $REQUIREMENTS_DIR/upper-constraints.txt"
-sudo pip install $constraints -U -r requirements.txt -r test-requirements.txt
+sudo -H pip install $constraints -U -r requirements.txt -r test-requirements.txt
 
 export MAGNUM_DIR="$BASE/new/magnum"
 sudo chown -R jenkins:stack $MAGNUM_DIR
