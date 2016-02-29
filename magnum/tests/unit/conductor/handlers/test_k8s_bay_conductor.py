@@ -32,6 +32,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'dns_nameserver': 'dns_nameserver',
             'external_network_id': 'external_network_id',
             'network_driver': 'network_driver',
+            'volume_driver': 'volume_driver',
             'docker_volume_size': 20,
             'cluster_distro': 'fedora-atomic',
             'coe': 'kubernetes',
@@ -74,6 +75,7 @@ class TestBayConductorWithK8s(base.TestCase):
         self.addCleanup(osc_patcher.stop)
         self.mock_osc = mock.MagicMock()
         self.mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
+        self.mock_osc.cinder_region_name.return_value = 'RegionOne'
         self.mock_osc_class.return_value = self.mock_osc
         mock_stack = self.mock_osc.heat.return_value.stacks.get.return_value
         mock_stack.parameters = {'user_token': 'fake_token'}
@@ -107,6 +109,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'flavor_id': 'minion_flavor',
             'docker_volume_size': 'docker_volume_size',
             'network_driver': 'network_driver',
+            'volume_driver': 'volume_driver',
             'master_flavor_id': 'master_flavor',
             'apiserver_port': '',
             'node_count': 'number_of_minions',
@@ -127,6 +130,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'ssh_key_name': 'keypair_id',
             'external_network': 'external_network_id',
             'network_driver': 'network_driver',
+            'volume_driver': 'volume_driver',
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'minion_flavor': 'flavor_id',
@@ -146,6 +150,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'user_token': 'fake_token',
             'bay_uuid': self.bay_dict['uuid'],
             'magnum_url': self.mock_osc.magnum_url.return_value,
+            'region_name': self.mock_osc.cinder_region_name.return_value,
             'tls_disabled': False,
             'trustee_domain_id': '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
             'trustee_username': 'fake_trustee',
@@ -182,6 +187,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'number_of_minions': 1,
             'number_of_masters': 1,
             'network_driver': 'network_driver',
+            'volume_driver': 'volume_driver',
             'discovery_url': 'https://discovery.etcd.io/test',
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
@@ -227,6 +233,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'number_of_minions': 1,
             'number_of_masters': 1,
             'network_driver': 'network_driver',
+            'volume_driver': 'volume_driver',
             'discovery_url': 'http://tokentest/h1/h2/h3',
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
@@ -340,6 +347,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'number_of_minions': 1,
             'number_of_masters': 1,
             'network_driver': 'network_driver',
+            'volume_driver': 'volume_driver',
             'docker_volume_size': 20,
             'discovery_url': 'https://address/token',
             'http_proxy': 'http_proxy',
@@ -353,6 +361,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'user_token': 'fake_token',
             'bay_uuid': self.bay_dict['uuid'],
             'magnum_url': self.mock_osc.magnum_url.return_value,
+            'region_name': self.mock_osc.cinder_region_name.return_value,
             'tls_disabled': False,
             'trustee_domain_id': '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
             'trustee_username': 'fake_trustee',

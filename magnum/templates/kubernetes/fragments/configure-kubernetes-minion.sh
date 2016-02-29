@@ -38,6 +38,32 @@ if [ "$NETWORK_DRIVER" == "flannel" ]; then
     ' /etc/sysconfig/flanneld
 fi
 
+if [ "$VOLUME_DRIVER" == "cinder" ]; then
+    CLOUD_CONFIG=/etc/kubernetes/kube_openstack_config
+    KUBERNETES=/etc/kubernetes
+    if [ ! -d ${KUBERNETES} -o ! -f ${CLOUD_CONFIG} ]; then
+        sudo mkdir -p $KUBERNETES
+    fi
+    AUTH_URL=${AUTH_URL/v3/v2}
+cat > $CLOUD_CONFIG <<EOF
+[Global]
+auth-url=$AUTH_URL
+username=$USERNAME
+password=$PASSWORD
+region=$REGION_NAME
+tenant-name=$TENANT_NAME
+EOF
+
+cat << _EOC_ >> /etc/kubernetes/kubelet
+#KUBELET_ARGS="$KUBELET_ARGS --cloud-provider=openstack --cloud-config=/etc/kubernetes/kube_openstack_config"
+_EOC_
+
+    if [ ! -f /usr/bin/udevadm ]; then
+        sudo ln -s /sbin/udevadm /usr/bin/udevadm
+    fi
+
+fi
+
 cat >> /etc/environment <<EOF
 KUBERNETES_MASTER=$KUBE_MASTER_URI
 EOF
