@@ -88,8 +88,7 @@ parameters:
 
   auth_url:
     type: string
-    description: >
-      url for kubernetes to authenticate before sending request to neutron
+    description: url for keystone
 
   username:
     type: string

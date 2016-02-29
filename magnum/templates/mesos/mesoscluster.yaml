@@ -115,11 +115,6 @@ parameters:
     type: string
     description: A logically separate section of the cluster
 
-  auth_url:
-    type: string
-    description: >
-      url for mesos to authenticate before sending request
-
   username:
     type: string
     description: user name
@@ -155,6 +150,10 @@ parameters:
       enables any host to take control of a volume irrespective of whether
       other hosts are using the volume
     default: "false"
+
+  auth_url:
+    type: string
+    description: url for keystone
 
 resources:
 

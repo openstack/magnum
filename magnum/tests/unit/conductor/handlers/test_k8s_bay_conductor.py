@@ -61,7 +61,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
-            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de'
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
         }
         cfg.CONF.set_override('trustee_domain_id',
                               '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
@@ -141,7 +141,6 @@ class TestBayConductorWithK8s(base.TestCase):
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
-            'auth_url': 'http://192.168.10.10:5000/v2',
             'tenant_name': 'fake_tenant',
             'username': 'fake_user',
             'user_token': 'fake_token',
@@ -152,7 +151,8 @@ class TestBayConductorWithK8s(base.TestCase):
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
-            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de'
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
+            'auth_url': 'http://192.168.10.10:5000/v3'
         }
         if missing_attr is not None:
             expected.pop(mapping[missing_attr], None)
@@ -194,7 +194,8 @@ class TestBayConductorWithK8s(base.TestCase):
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
-            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de'
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
+            'auth_url': 'http://192.168.10.10:5000/v3'
         }
         self.assertEqual(expected, definition)
 
@@ -238,7 +239,8 @@ class TestBayConductorWithK8s(base.TestCase):
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
-            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de'
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
+            'auth_url': 'http://192.168.10.10:5000/v3'
         }
         self.assertEqual(expected, definition)
 
@@ -346,7 +348,6 @@ class TestBayConductorWithK8s(base.TestCase):
             'flannel_network_cidr': '10.101.0.0/16',
             'flannel_network_subnetlen': '26',
             'flannel_use_vxlan': 'yes',
-            'auth_url': 'http://192.168.10.10:5000/v2',
             'tenant_name': 'fake_tenant',
             'username': 'fake_user',
             'user_token': 'fake_token',
@@ -357,7 +358,8 @@ class TestBayConductorWithK8s(base.TestCase):
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
-            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de'
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
+            'auth_url': 'http://192.168.10.10:5000/v3'
         }
         self.assertEqual(expected, definition)
         reqget.assert_called_once_with('http://etcd/test?size=1')

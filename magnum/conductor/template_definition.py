@@ -356,6 +356,7 @@ class BaseTemplateDefinition(TemplateDefinition):
         extra_params['trustee_username'] = bay.trustee_username
         extra_params['trustee_password'] = bay.trustee_password
         extra_params['trust_id'] = bay.trust_id
+        extra_params['auth_url'] = context.auth_url
 
         return super(BaseTemplateDefinition,
                      self).get_params(context, baymodel, bay,
@@ -512,8 +513,6 @@ class AtomicK8sTemplateDefinition(K8sTemplateDefinition):
     def get_params(self, context, baymodel, bay, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
 
-        # Kubernetes backend code is still using v2 API
-        extra_params['auth_url'] = context.auth_url.replace("v3", "v2")
         extra_params['username'] = context.user_name
         extra_params['tenant_name'] = context.tenant
         osc = clients.OpenStackClients(context)
