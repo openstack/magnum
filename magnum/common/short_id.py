@@ -51,7 +51,10 @@ def get_id(source_uuid):
     # The first 12 bytes (= 60 bits) of base32-encoded output is our data
     encoded = base64.b32encode(six.b(random_bytes))[:12]
 
-    return encoded.lower()
+    if six.PY3:
+        return encoded.lower().decode('utf-8')
+    else:
+        return encoded.lower()
 
 
 def generate_id():
