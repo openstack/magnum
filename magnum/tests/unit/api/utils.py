@@ -150,8 +150,8 @@ def mservice_get_data(**kw):
     return {
         'binary': kw.get('binary', 'fake-binary'),
         'host': kw.get('host', 'fake-host'),
-        'id': kw.get('id', '13'),
-        'report_count': kw.get('report_count', '13'),
+        'id': kw.get('id', 13),
+        'report_count': kw.get('report_count', 13),
         'disabled': kw.get('disabled', False),
         'disabled_reason': kw.get('disabled_reason', None),
         'forced_down': kw.get('forced_down', False),
