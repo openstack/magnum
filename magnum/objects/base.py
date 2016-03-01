@@ -42,7 +42,7 @@ class MagnumObject(ovoo_base.VersionedObject):
     def as_dict(self):
         return {k: getattr(self, k)
                 for k in self.fields
-                if hasattr(self, k)}
+                if self.obj_attr_is_set(k)}
 
 
 class MagnumObjectDictCompat(ovoo_base.VersionedObjectDictCompat):
