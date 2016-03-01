@@ -336,7 +336,7 @@ class GenericUtilsTestCase(base.TestCase):
         data = 'Mary had a little lamb, its fleece as white as snow'
         flo = six.StringIO(data)
         h1 = utils.hash_file(flo)
-        h2 = hashlib.sha1(data).hexdigest()
+        h2 = hashlib.sha1(six.b(data)).hexdigest()
         self.assertEqual(h1, h2)
 
     def test_is_valid_boolstr(self):
