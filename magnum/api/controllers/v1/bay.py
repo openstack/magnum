@@ -64,7 +64,7 @@ class Bay(base.APIBase):
     def _set_baymodel_id(self, value):
         if value and self._baymodel_id != value:
             try:
-                baymodel = api_utils.get_rpc_resource('BayModel', value)
+                baymodel = api_utils.get_resource('BayModel', value)
                 self._baymodel_id = baymodel.uuid
             except exception.BayModelNotFound as e:
                 # Change error code because 404 (NotFound) is inappropriate
@@ -267,9 +267,9 @@ class BaysController(rest.RestController):
 
         :param bay_ident: UUID of a bay or logical name of the bay.
         """
-        rpc_bay = api_utils.get_rpc_resource('Bay', bay_ident)
+        bay = api_utils.get_resource('Bay', bay_ident)
 
-        return Bay.convert_with_links(rpc_bay)
+        return Bay.convert_with_links(bay)
 
     @expose.expose(Bay, body=Bay, status_code=201)
     @policy.enforce_wsgi("bay", "create")
@@ -304,30 +304,30 @@ class BaysController(rest.RestController):
         :param bay_ident: UUID or logical name of a bay.
         :param patch: a json PATCH document to apply to this bay.
         """
-        rpc_bay = api_utils.get_rpc_resource('Bay', bay_ident)
+        bay = api_utils.get_resource('Bay', bay_ident)
         try:
-            bay_dict = rpc_bay.as_dict()
-            bay = Bay(**api_utils.apply_jsonpatch(bay_dict, patch))
+            bay_dict = bay.as_dict()
+            new_bay = Bay(**api_utils.apply_jsonpatch(bay_dict, patch))
         except api_utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)
 
         # Update only the fields that have changed
         for field in objects.Bay.fields:
             try:
-                patch_val = getattr(bay, field)
+                patch_val = getattr(new_bay, field)
             except AttributeError:
                 # Ignore fields that aren't exposed in the API
                 continue
             if patch_val == wtypes.Unset:
                 patch_val = None
-            if rpc_bay[field] != patch_val:
-                rpc_bay[field] = patch_val
+            if bay[field] != patch_val:
+                bay[field] = patch_val
 
-        delta = rpc_bay.obj_what_changed()
+        delta = bay.obj_what_changed()
 
         validate_bay_properties(delta)
 
-        res_bay = pecan.request.rpcapi.bay_update(rpc_bay)
+        res_bay = pecan.request.rpcapi.bay_update(bay)
         return Bay.convert_with_links(res_bay)
 
     @expose.expose(None, types.uuid_or_name, status_code=204)
@@ -337,6 +337,6 @@ class BaysController(rest.RestController):
 
         :param bay_ident: UUID of a bay or logical name of the bay.
         """
-        rpc_bay = api_utils.get_rpc_resource('Bay', bay_ident)
+        rpc_bay = api_utils.get_resource('Bay', bay_ident)
 
         pecan.request.rpcapi.bay_delete(rpc_bay.uuid)

@@ -174,8 +174,8 @@ class StartController(object):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
-        container_uuid = api_utils.get_rpc_resource('Container',
-                                                    container_ident).uuid
+        container_uuid = api_utils.get_resource('Container',
+                                                container_ident).uuid
 
         LOG.debug('Calling conductor.container_start with %s',
                   container_uuid)
@@ -188,9 +188,9 @@ class StopController(object):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
-        container_uuid = api_utils.get_rpc_resource('Container',
-                                                    container_ident).uuid
-        LOG.debug('Calling conductor.container_stop with %s',
+        container_uuid = api_utils.get_resource('Container',
+                                                container_ident).uuid
+        LOG.debug('Calling conductor.container_stop with %s' %
                   container_uuid)
         return pecan.request.rpcapi.container_stop(container_uuid)
 
@@ -201,9 +201,9 @@ class RebootController(object):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
-        container_uuid = api_utils.get_rpc_resource('Container',
-                                                    container_ident).uuid
-        LOG.debug('Calling conductor.container_reboot with %s',
+        container_uuid = api_utils.get_resource('Container',
+                                                container_ident).uuid
+        LOG.debug('Calling conductor.container_reboot with %s' %
                   container_uuid)
         return pecan.request.rpcapi.container_reboot(container_uuid)
 
@@ -214,9 +214,9 @@ class PauseController(object):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
-        container_uuid = api_utils.get_rpc_resource('Container',
-                                                    container_ident).uuid
-        LOG.debug('Calling conductor.container_pause with %s',
+        container_uuid = api_utils.get_resource('Container',
+                                                container_ident).uuid
+        LOG.debug('Calling conductor.container_pause with %s' %
                   container_uuid)
         return pecan.request.rpcapi.container_pause(container_uuid)
 
@@ -227,9 +227,9 @@ class UnpauseController(object):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
-        container_uuid = api_utils.get_rpc_resource('Container',
-                                                    container_ident).uuid
-        LOG.debug('Calling conductor.container_unpause with %s',
+        container_uuid = api_utils.get_resource('Container',
+                                                container_ident).uuid
+        LOG.debug('Calling conductor.container_unpause with %s' %
                   container_uuid)
         return pecan.request.rpcapi.container_unpause(container_uuid)
 
@@ -240,9 +240,9 @@ class LogsController(object):
         if pecan.request.method != 'GET':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
-        container_uuid = api_utils.get_rpc_resource('Container',
-                                                    container_ident).uuid
-        LOG.debug('Calling conductor.container_logs with %s',
+        container_uuid = api_utils.get_resource('Container',
+                                                container_ident).uuid
+        LOG.debug('Calling conductor.container_logs with %s' %
                   container_uuid)
         return pecan.request.rpcapi.container_logs(container_uuid)
 
@@ -253,8 +253,8 @@ class ExecuteController(object):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
-        container_uuid = api_utils.get_rpc_resource('Container',
-                                                    container_ident).uuid
+        container_uuid = api_utils.get_resource('Container',
+                                                container_ident).uuid
         LOG.debug('Calling conductor.container_exec with %s command %s'
                   % (container_uuid, command))
         return pecan.request.rpcapi.container_exec(container_uuid, command)
@@ -357,9 +357,9 @@ class ContainersController(rest.RestController):
 
         :param container_ident: UUID or name of a container.
         """
-        rpc_container = api_utils.get_rpc_resource('Container',
-                                                   container_ident)
-        res_container = pecan.request.rpcapi.container_show(rpc_container.uuid)
+        container = api_utils.get_resource('Container',
+                                           container_ident)
+        res_container = pecan.request.rpcapi.container_show(container.uuid)
         return Container.convert_with_links(res_container)
 
     @expose.expose(Container, body=Container, status_code=201)
@@ -393,11 +393,11 @@ class ContainersController(rest.RestController):
         :param container_ident: UUID or name of a container.
         :param patch: a json PATCH document to apply to this container.
         """
-        rpc_container = api_utils.get_rpc_resource('Container',
-                                                   container_ident)
+        container = api_utils.get_resource('Container',
+                                           container_ident)
         try:
-            container_dict = rpc_container.as_dict()
-            container = Container(**api_utils.apply_jsonpatch(
+            container_dict = container.as_dict()
+            new_container = Container(**api_utils.apply_jsonpatch(
                 container_dict, patch))
         except api_utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)
@@ -405,17 +405,17 @@ class ContainersController(rest.RestController):
         # Update only the fields that have changed
         for field in objects.Container.fields:
             try:
-                patch_val = getattr(container, field)
+                patch_val = getattr(new_container, field)
             except AttributeError:
                 # Ignore fields that aren't exposed in the API
                 continue
             if patch_val == wtypes.Unset:
                 patch_val = None
-            if rpc_container[field] != patch_val:
-                rpc_container[field] = patch_val
+            if container[field] != patch_val:
+                container[field] = patch_val
 
-        rpc_container.save()
-        return Container.convert_with_links(rpc_container)
+        container.save()
+        return Container.convert_with_links(container)
 
     @expose.expose(None, types.uuid_or_name, status_code=204)
     @policy.enforce_wsgi("container")
@@ -424,7 +424,7 @@ class ContainersController(rest.RestController):
 
         :param container_ident: UUID or Name of a container.
         """
-        rpc_container = api_utils.get_rpc_resource('Container',
-                                                   container_ident)
-        pecan.request.rpcapi.container_delete(rpc_container.uuid)
-        rpc_container.destroy()
+        container = api_utils.get_resource('Container',
+                                           container_ident)
+        pecan.request.rpcapi.container_delete(container.uuid)
+        container.destroy()

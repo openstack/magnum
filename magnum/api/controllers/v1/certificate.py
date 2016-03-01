@@ -47,7 +47,7 @@ class Certificate(base.APIBase):
     def _set_bay_uuid(self, value):
         if value and self._bay_uuid != value:
             try:
-                self._bay = api_utils.get_rpc_resource('Bay', value)
+                self._bay = api_utils.get_resource('Bay', value)
                 self._bay_uuid = self._bay.uuid
             except exception.BayNotFound as e:
                 # Change error code because 404 (NotFound) is inappropriate
@@ -83,7 +83,7 @@ class Certificate(base.APIBase):
 
     def get_bay(self):
         if not self._bay:
-            self._bay = api_utils.get_rpc_resource('Bay', self.bay_uuid)
+            self._bay = api_utils.get_resource('Bay', self.bay_uuid)
         return self._bay
 
     @staticmethod
@@ -132,8 +132,8 @@ class CertificateController(rest.RestController):
         :param bay_ident: UUID of a bay or
         logical name of the bay.
         """
-        rpc_bay = api_utils.get_rpc_resource('Bay', bay_ident)
-        certificate = pecan.request.rpcapi.get_ca_certificate(rpc_bay)
+        bay = api_utils.get_resource('Bay', bay_ident)
+        certificate = pecan.request.rpcapi.get_ca_certificate(bay)
         return Certificate.convert_with_links(certificate)
 
     @wsme_pecan.wsexpose(Certificate, body=Certificate, status_code=201)

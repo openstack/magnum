@@ -23,12 +23,12 @@ from magnum.tests.unit.objects import utils as obj_utils
 
 class TestCertObject(base.TestCase):
 
-    @mock.patch('magnum.api.utils.get_rpc_resource')
-    def test_cert_init(self, mock_get_rpc_resource):
+    @mock.patch('magnum.api.utils.get_resource')
+    def test_cert_init(self, mock_get_resource):
         cert_dict = apiutils.cert_post_data()
         mock_bay = mock.MagicMock()
         mock_bay.uuid = cert_dict['bay_uuid']
-        mock_get_rpc_resource.return_value = mock_bay
+        mock_get_resource.return_value = mock_bay
 
         cert = api_cert.Certificate(**cert_dict)
 

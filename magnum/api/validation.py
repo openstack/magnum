@@ -103,7 +103,7 @@ def enforce_network_driver_types_update():
     def wrapper(func, *args, **kwargs):
         baymodel_ident = args[1]
         patch = args[2]
-        baymodel = api_utils.get_rpc_resource('BayModel', baymodel_ident)
+        baymodel = api_utils.get_resource('BayModel', baymodel_ident)
         try:
             baymodel_dict = api_utils.apply_jsonpatch(baymodel.as_dict(),
                                                       patch)
@@ -138,7 +138,7 @@ def enforce_volume_driver_types_update():
     def wrapper(func, *args, **kwargs):
         baymodel_ident = args[1]
         patch = args[2]
-        baymodel = api_utils.get_rpc_resource('BayModel', baymodel_ident)
+        baymodel = api_utils.get_resource('BayModel', baymodel_ident)
         try:
             baymodel_dict = api_utils.apply_jsonpatch(baymodel.as_dict(),
                                                       patch)

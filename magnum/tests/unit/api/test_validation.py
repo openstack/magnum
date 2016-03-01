@@ -254,10 +254,10 @@ class TestValidation(base.BaseTestCase):
             assert_raised=True)
 
     @mock.patch('pecan.request')
-    @mock.patch('magnum.api.utils.get_rpc_resource')
+    @mock.patch('magnum.api.utils.get_resource')
     def _test_enforce_network_driver_types_update(
             self,
-            mock_get_rpc_resource,
+            mock_get_resource,
             mock_pecan_request,
             network_driver_type,
             network_driver_config_dict,
@@ -277,7 +277,7 @@ class TestValidation(base.BaseTestCase):
                                                uuid=baymodel_ident,
                                                coe='kubernetes')
         baymodel.network_driver = network_driver_type
-        mock_get_rpc_resource.return_value = baymodel
+        mock_get_resource.return_value = baymodel
 
         # Reload the validator module so that baymodel configs are
         # re-evaluated.
@@ -290,7 +290,7 @@ class TestValidation(base.BaseTestCase):
                               test, self, baymodel_ident, patch)
         else:
             test(self, baymodel_ident, patch)
-            mock_get_rpc_resource.assert_called_once_with(
+            mock_get_resource.assert_called_once_with(
                 'BayModel', baymodel_ident)
 
     def test_enforce_network_driver_types_one_allowed_update(self):
@@ -349,10 +349,10 @@ class TestValidation(base.BaseTestCase):
             assert_raised=True)
 
     @mock.patch('pecan.request')
-    @mock.patch('magnum.api.utils.get_rpc_resource')
+    @mock.patch('magnum.api.utils.get_resource')
     def _test_enforce_volume_driver_types_update(
             self,
-            mock_get_rpc_resource,
+            mock_get_resource,
             mock_pecan_request,
             volume_driver_type,
             op,
@@ -369,7 +369,7 @@ class TestValidation(base.BaseTestCase):
         baymodel = obj_utils.get_test_baymodel(context,
                                                uuid=baymodel_ident,
                                                coe='kubernetes')
-        mock_get_rpc_resource.return_value = baymodel
+        mock_get_resource.return_value = baymodel
 
         # Reload the validator module so that baymodel configs are
         # re-evaluated.
@@ -382,7 +382,7 @@ class TestValidation(base.BaseTestCase):
                               test, self, baymodel_ident, patch)
         else:
             test(self, baymodel_ident, patch)
-            mock_get_rpc_resource.assert_called_once_with(
+            mock_get_resource.assert_called_once_with(
                 'BayModel', baymodel_ident)
 
     def test_enforce_volume_driver_types_supported_replace_update(self):
