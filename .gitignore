@@ -58,3 +58,6 @@ ChangeLog
 .*.swp
 .*sw?
 *.DS_Store
+
+# generated config file
+etc/magnum/magnum.conf.sample
