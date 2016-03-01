@@ -68,5 +68,6 @@ class ShortIdTest(testtools.TestCase):
 
         for id in ids:
             self.assertEqual(12, len(id))
-            self.assertFalse(id.translate(None, allowed_chars))
+            s = ''.join(ch for ch in id if ch not in allowed_chars)
+            self.assertEqual(s, '')
             self.assertEqual(1, ids.count(id))
