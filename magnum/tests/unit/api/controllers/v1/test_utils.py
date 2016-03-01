@@ -138,7 +138,7 @@ class TestApiUtils(base.FunctionalTest):
                                 doc, patch)
         self.assertEqual(
             "Adding a new attribute /fake to the root of the resource is "
-            "not allowed.", exc.message)
+            "not allowed.", exc.faultstring)
 
     def test_apply_jsonpatch_add_attr_already_exist(self):
         doc = {'bay_uuid': 'id', 'node_count': 1}
@@ -149,4 +149,4 @@ class TestApiUtils(base.FunctionalTest):
 
         self.assertEqual(
             "The attribute /node_count has existed, please use "
-            "'replace' operation instead.", exc.message)
+            "'replace' operation instead.", exc.faultstring)
