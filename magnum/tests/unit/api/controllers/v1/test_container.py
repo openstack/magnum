@@ -10,7 +10,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import json
 import mock
 from mock import patch
 from webtest.app import AppError
@@ -641,7 +640,7 @@ class TestContainerEnforcement(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(
             "Policy doesn't allow %s to be performed." % rule,
-            json.loads(response.json['error_message'])['faultstring'])
+            response.json['errors'][0]['detail'])
 
     def test_policy_disallow_get_all(self):
         self._common_policy_check(

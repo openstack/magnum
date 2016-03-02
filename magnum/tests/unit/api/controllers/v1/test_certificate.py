@@ -10,7 +10,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import json
 import mock
 
 from magnum.api.controllers.v1 import certificate as api_cert
@@ -79,7 +78,7 @@ class TestGetCertificate(api_base.FunctionalTest):
 
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_get_one_by_name_multiple_bay(self):
         obj_utils.create_test_bay(self.context, name='test_bay',
@@ -92,7 +91,7 @@ class TestGetCertificate(api_base.FunctionalTest):
 
         self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_links(self):
         fake_cert = apiutils.cert_post_data()
@@ -159,7 +158,7 @@ class TestPost(api_base.FunctionalTest):
 
         self.assertEqual(400, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
 
 class TestCertPolicyEnforcement(api_base.FunctionalTest):
@@ -174,7 +173,7 @@ class TestCertPolicyEnforcement(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(
             "Policy doesn't allow %s to be performed." % rule,
-            json.loads(response.json['error_message'])['faultstring'])
+            response.json['errors'][0]['detail'])
 
     def test_policy_disallow_get_one(self):
         self._common_policy_check(
