@@ -113,7 +113,7 @@ class CertManager(cert_manager.CertManager):
                     pass_file.write(private_key_passphrase)
         except IOError as ioe:
             LOG.error(_LE("Failed to store certificate."))
-            raise exception.CertificateStorageException(msg=ioe.message)
+            raise exception.CertificateStorageException(msg=str(ioe))
 
         return cert_ref
 
@@ -168,7 +168,7 @@ class CertManager(cert_manager.CertManager):
                     cert_data['intermediates'] = int_file.read()
         except IOError as ioe:
             LOG.error(_LE("Failed to read certificate."))
-            raise exception.CertificateStorageException(msg=ioe.message)
+            raise exception.CertificateStorageException(msg=str(ioe))
 
         try:
             if path.isfile(filename_pkp):
@@ -176,7 +176,7 @@ class CertManager(cert_manager.CertManager):
                     cert_data['private_key_passphrase'] = pass_file.read()
         except IOError as ioe:
             LOG.error(_LE("Failed to read certificate."))
-            raise exception.CertificateStorageException(msg=ioe.message)
+            raise exception.CertificateStorageException(msg=str(ioe))
 
         return Cert(**cert_data)
 
@@ -211,4 +211,4 @@ class CertManager(cert_manager.CertManager):
             LOG.error(_LE(
                 "Failed to delete certificate {0}."
             ).format(cert_ref))
-            raise exception.CertificateStorageException(msg=ioe.message)
+            raise exception.CertificateStorageException(msg=str(ioe))
