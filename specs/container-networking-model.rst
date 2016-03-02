@@ -82,13 +82,20 @@ These roles are not mutually exclusive. For example:
 Definitions
 -----------
 
-COE: Container Orchestration Engine
-Baymodel: An object that stores template information about the bay which is
-used to create new bays consistently.
-Bay: A Magnum resource that includes at least one host to run containers on,
-and a COE to manage containers created on hosts within the bay.
-Pod: Is the smallest deployable unit that can be created, scheduled, and
-managed within Kubernetes.
+COE
+  Container Orchestration Engine
+
+Baymodel
+  An object that stores template information about the bay which is
+  used to create new bays consistently.
+
+Bay
+  A Magnum resource that includes at least one host to run containers on,
+  and a COE to manage containers created on hosts within the bay.
+
+Pod
+  Is the smallest deployable unit that can be created, scheduled, and
+  managed within Kubernetes.
 
 Additional Magnum definitions can be found in the Magnum Developer
 documentation[2].
