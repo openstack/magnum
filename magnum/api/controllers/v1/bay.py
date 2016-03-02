@@ -211,10 +211,9 @@ class BaysController(rest.RestController):
             marker_obj = objects.Bay.get_by_uuid(pecan.request.context,
                                                  marker)
 
-        bays = pecan.request.rpcapi.bay_list(
-            pecan.request.context, limit,
-            marker_obj, sort_key=sort_key,
-            sort_dir=sort_dir)
+        bays = objects.Bay.list(pecan.request.context, limit,
+                                marker_obj, sort_key=sort_key,
+                                sort_dir=sort_dir)
 
         return BayCollection.convert_with_links(bays, limit,
                                                 url=resource_url,

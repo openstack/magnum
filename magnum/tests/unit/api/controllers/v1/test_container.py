@@ -330,7 +330,7 @@ class TestContainerController(api_base.FunctionalTest):
                          actual_containers[0].get('status'))
 
     @patch('magnum.conductor.api.API.container_show')
-    @patch('magnum.conductor.utils.retrieve_bay_uuid')
+    @patch('magnum.api.utils.get_resource')
     @patch('magnum.objects.Container.list')
     def test_get_all_containers_with_bay_ident(self, mock_container_list,
                                                mock_retrive_bay_uuid,
@@ -338,7 +338,7 @@ class TestContainerController(api_base.FunctionalTest):
         test_container = utils.get_test_container()
         containers = [objects.Container(self.context, **test_container)]
         mock_container_list.return_value = containers
-        mock_retrive_bay_uuid.return_value = '12'
+        mock_retrive_bay_uuid.return_value.uuid = '12'
         mock_container_show.return_value = containers[0]
 
         response = self.app.get('/v1/containers/?bay_ident=12')

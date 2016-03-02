@@ -92,9 +92,11 @@ class MagnumServiceController(rest.RestController):
         """Retrieve a list of magnum-services.
 
         """
-        msvcs = pecan.request.rpcapi.magnum_services_list(
-            pecan.request.context, limit=None,
-            marker=None, sort_key='id',
-            sort_dir='asc')
+        msvcs = objects.MagnumService.list(pecan.request.context,
+                                           limit=None,
+                                           marker=None,
+                                           sort_key='id',
+                                           sort_dir='asc')
+
         return MagnumServiceCollection.convert_db_rec_list_to_collection(
             self.servicegroup_api, msvcs)
