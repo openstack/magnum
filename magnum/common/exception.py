@@ -564,3 +564,7 @@ class TrusteeDeleteFailed(MagnumException):
 class QuotaAlreadyExists(Conflict):
     message = _("Quota for project %(project_id)s already exists "
                 "for resource %(resource)s.")
+
+
+class RegionsListFailed(MagnumException):
+    message = _("Failed to list regions.")

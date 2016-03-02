@@ -104,12 +104,19 @@ neutron_client_opts = [
                    'Type of endpoint in Identity service catalog to use '
                    'for communication with the OpenStack service.'))]
 
+cinder_client_opts = [
+    cfg.StrOpt('region_name',
+               help=_('Region in Identity service catalog to use for '
+                      'communication with the OpenStack service.'))]
+
+
 cfg.CONF.register_opts(magnum_client_opts, group='magnum_client')
 cfg.CONF.register_opts(heat_client_opts, group='heat_client')
 cfg.CONF.register_opts(glance_client_opts, group='glance_client')
 cfg.CONF.register_opts(barbican_client_opts, group='barbican_client')
 cfg.CONF.register_opts(nova_client_opts, group='nova_client')
 cfg.CONF.register_opts(neutron_client_opts, group='neutron_client')
+cfg.CONF.register_opts(cinder_client_opts, group='cinder_client')
 
 
 class OpenStackClients(object):
@@ -133,6 +140,10 @@ class OpenStackClients(object):
         return self.url_for(service_type='container',
                             endpoint_type=endpoint_type,
                             region_name=region_name)
+
+    def cinder_region_name(self):
+        cinder_region_name = self._get_client_option('cinder', 'region_name')
+        return self.keystone().get_validate_region_name(cinder_region_name)
 
     @property
     def auth_url(self):
