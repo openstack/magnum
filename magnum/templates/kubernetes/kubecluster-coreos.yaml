@@ -115,6 +115,33 @@ parameters:
       service.
     default: 8080
 
+  trustee_domain_id:
+    type: string
+    description: domain id of the trustee
+    default: ""
+
+  trustee_user_id:
+    type: string
+    description: user id of the trustee
+    default: ""
+
+  trustee_username:
+    type: string
+    description: username of the trustee
+    default: ""
+
+  trustee_password:
+    type: string
+    description: password of the trustee
+    default: ""
+    hidden: true
+
+  trust_id:
+    type: string
+    description: id of the trust which is used by the trustee
+    default: ""
+    hidden: true
+
 resources:
 
   ######################################################################
