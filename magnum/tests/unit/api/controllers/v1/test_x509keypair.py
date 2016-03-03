@@ -80,7 +80,7 @@ class TestListX509KeyPair(api_base.FunctionalTest):
             expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_get_one_by_name_multiple_x509keypair(self):
         obj_utils.create_test_x509keypair(self.context,
@@ -93,7 +93,7 @@ class TestListX509KeyPair(api_base.FunctionalTest):
                                  expect_errors=True)
         self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_detail(self):
         x509keypair = obj_utils.create_test_x509keypair(self.context)
@@ -236,7 +236,7 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/x509keypairs', cdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_create_x509keypair_with_bay_name(self):
         cdict = apiutils.x509keypair_post_data(bay_uuid=self.bay.name)
@@ -268,20 +268,20 @@ class TestDelete(api_base.FunctionalTest):
                                  expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_delete_x509keypair_not_found(self):
         uuid = utils.generate_uuid()
         response = self.delete('/x509keypairs/%s' % uuid, expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_delete_x509keypair_with_name_not_found(self):
         response = self.delete('/x509keypairs/not_found', expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_delete_x509keypair_with_name(self):
         response = self.delete('/x509keypairs/%s' % self.x509keypair.name,
@@ -299,4 +299,4 @@ class TestDelete(api_base.FunctionalTest):
                                expect_errors=True)
         self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])

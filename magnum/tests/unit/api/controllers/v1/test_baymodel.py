@@ -11,7 +11,6 @@
 #    limitations under the License.
 
 import datetime
-import json
 
 import mock
 from oslo_config import cfg
@@ -89,7 +88,7 @@ class TestListBayModel(api_base.FunctionalTest):
             expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_get_one_by_name_multiple_baymodel(self):
         obj_utils.create_test_baymodel(
@@ -103,7 +102,7 @@ class TestListBayModel(api_base.FunctionalTest):
             expect_errors=True)
         self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_get_all_with_pagination_marker(self):
         bm_list = []
@@ -217,7 +216,7 @@ class TestPatch(api_base.FunctionalTest):
                                    expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_update_baymodel_with_bay(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
@@ -230,8 +229,8 @@ class TestPatch(api_base.FunctionalTest):
                                    expect_errors=True)
         self.assertEqual(400, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
-        self.assertIn(baymodel.uuid, response.json['error_message'])
+        self.assertTrue(response.json['errors'])
+        self.assertIn(baymodel.uuid, response.json['errors'][0]['detail'])
 
     @mock.patch.object(magnum_policy, 'enforce')
     def test_update_public_baymodel_success(self, mock_policy):
@@ -334,7 +333,7 @@ class TestPatch(api_base.FunctionalTest):
                                    expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_code)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_remove_mandatory_property_fail(self):
         mandatory_properties = ('/image_id', '/keypair_id',
@@ -348,7 +347,7 @@ class TestPatch(api_base.FunctionalTest):
                                        expect_errors=True)
             self.assertEqual('application/json', response.content_type)
             self.assertEqual(400, response.status_code)
-            self.assertTrue(response.json['error_message'])
+            self.assertTrue(response.json['errors'])
 
     def test_add_root_non_existent(self):
         response = self.patch_json(
@@ -357,7 +356,7 @@ class TestPatch(api_base.FunctionalTest):
             expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_remove_uuid(self):
         response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
@@ -365,7 +364,7 @@ class TestPatch(api_base.FunctionalTest):
                                    expect_errors=True)
         self.assertEqual(400, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
 
 class TestPost(api_base.FunctionalTest):
@@ -746,7 +745,7 @@ class TestDelete(api_base.FunctionalTest):
                                  expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_delete_baymodel_with_bay(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
@@ -755,15 +754,15 @@ class TestDelete(api_base.FunctionalTest):
                                expect_errors=True)
         self.assertEqual(400, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
-        self.assertIn(baymodel.uuid, response.json['error_message'])
+        self.assertTrue(response.json['errors'])
+        self.assertIn(baymodel.uuid, response.json['errors'][0]['detail'])
 
     def test_delete_baymodel_not_found(self):
         uuid = utils.generate_uuid()
         response = self.delete('/baymodels/%s' % uuid, expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_delete_baymodel_with_name(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
@@ -775,7 +774,7 @@ class TestDelete(api_base.FunctionalTest):
         response = self.delete('/baymodels/not_found', expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_delete_multiple_baymodel_by_name(self):
         obj_utils.create_test_baymodel(self.context, name='test_baymodel',
@@ -785,7 +784,7 @@ class TestDelete(api_base.FunctionalTest):
         response = self.delete('/baymodels/test_baymodel', expect_errors=True)
         self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
 
 class TestBayModelPolicyEnforcement(api_base.FunctionalTest):
@@ -797,7 +796,7 @@ class TestBayModelPolicyEnforcement(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(
             "Policy doesn't allow %s to be performed." % rule,
-            json.loads(response.json['error_message'])['faultstring'])
+            response.json['errors'][0]['detail'])
 
     def test_policy_disallow_get_all(self):
         self._common_policy_check(

@@ -11,7 +11,6 @@
 #    limitations under the License.
 
 import datetime
-import json
 
 import mock
 from oslo_config import cfg
@@ -82,7 +81,7 @@ class TestListRC(api_base.FunctionalTest):
             expect_errors=True)
         self.assertEqual(500, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     @mock.patch.object(rpcapi.API, 'rc_show')
     def test_get_one_by_name_multiple_rc(self, mock_rc_show):
@@ -99,7 +98,7 @@ class TestListRC(api_base.FunctionalTest):
             expect_errors=True)
         self.assertEqual(500, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     @mock.patch.object(rpcapi.API, 'rc_list')
     def test_get_all_with_pagination_marker(self, mock_rc_list):
@@ -257,7 +256,7 @@ class TestPatch(api_base.FunctionalTest):
             expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_code)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_replace_internal_field(self):
         response = self.patch_json(
@@ -266,7 +265,7 @@ class TestPatch(api_base.FunctionalTest):
             expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_code)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_replace_non_existent_rc(self):
         response = self.patch_json(
@@ -278,7 +277,7 @@ class TestPatch(api_base.FunctionalTest):
             expect_errors=True)
         self.assertEqual(400, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     @mock.patch.object(rpcapi.API, 'rc_update')
     @mock.patch.object(api_rc.ReplicationController, 'parse_manifest')
@@ -301,7 +300,7 @@ class TestPatch(api_base.FunctionalTest):
             expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     @mock.patch.object(rpcapi.API, 'rc_update')
     @mock.patch.object(rpcapi.API, 'rc_show')
@@ -331,7 +330,7 @@ class TestPatch(api_base.FunctionalTest):
             expect_errors=True)
         self.assertEqual(400, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_remove_bay_uuid(self):
         response = self.patch_json('/rcs/%s/%s' % (self.rc.uuid,
@@ -340,7 +339,7 @@ class TestPatch(api_base.FunctionalTest):
                                    expect_errors=True)
         self.assertEqual(400, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_remove_internal_field(self):
         response = self.patch_json('/rcs/%s/%s' % (self.rc.uuid,
@@ -349,7 +348,7 @@ class TestPatch(api_base.FunctionalTest):
                                    expect_errors=True)
         self.assertEqual(400, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_remove_non_existent_property(self):
         response = self.patch_json(
@@ -358,7 +357,7 @@ class TestPatch(api_base.FunctionalTest):
             expect_errors=True)
         self.assertEqual(400, response.status_code)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     @mock.patch.object(rpcapi.API, 'rc_show')
     @mock.patch.object(rpcapi.API, 'rc_update')
@@ -491,7 +490,7 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/rcs', rc_dict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_create_rc_with_invalid_manifest(self):
         rc_dict = apiutils.rc_post_data()
@@ -499,7 +498,7 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/rcs', rc_dict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_create_rc_no_manifest(self):
         rc_dict = apiutils.rc_post_data()
@@ -507,7 +506,7 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/rcs', rc_dict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     def test_create_rc_no_id_in_manifest(self):
         rc_dict = apiutils.rc_post_data()
@@ -515,7 +514,7 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/rcs', rc_dict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
 
 class TestDelete(api_base.FunctionalTest):
@@ -536,7 +535,7 @@ class TestDelete(api_base.FunctionalTest):
             expect_errors=True)
         self.assertEqual(500, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     @mock.patch.object(rpcapi.API, 'rc_delete')
     def test_delete_rc_not_found(self, mock_rc_delete):
@@ -547,7 +546,7 @@ class TestDelete(api_base.FunctionalTest):
                                expect_errors=True)
         self.assertEqual(500, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     @mock.patch.object(rpcapi.API, 'rc_delete')
     def test_delete_rc_with_name_not_found(self, mock_rc_delete):
@@ -558,7 +557,7 @@ class TestDelete(api_base.FunctionalTest):
             expect_errors=True)
         self.assertEqual(500, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
     @mock.patch.object(rpcapi.API, 'rc_delete')
     def test_delete_rc_with_name(self, mock_rc_delete):
@@ -579,7 +578,7 @@ class TestDelete(api_base.FunctionalTest):
             expect_errors=True)
         self.assertEqual(500, response.status_int)
         self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['error_message'])
+        self.assertTrue(response.json['errors'])
 
 
 class TestRCEnforcement(api_base.FunctionalTest):
@@ -591,7 +590,7 @@ class TestRCEnforcement(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(
             "Policy doesn't allow %s to be performed." % rule,
-            json.loads(response.json['error_message'])['faultstring'])
+            response.json['errors'][0]['detail'])
 
     def test_policy_disallow_get_all(self):
         self._common_policy_check(

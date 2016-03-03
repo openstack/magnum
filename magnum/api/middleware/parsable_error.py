@@ -57,9 +57,39 @@ class ParsableErrorMiddleware(object):
                 return start_response(status, headers, exc_info)
 
         app_iter = self.app(environ, replacement_start_response)
+
         if (state['status_code'] // 100) not in (2, 3):
-            body = [six.b(json.dumps({'error_message':
-                          six.b('\n').join(app_iter).decode('utf-8')}))]
+            errs = []
+            for err_str in app_iter:
+                err = {}
+                try:
+                    err = json.loads(err_str.decode('utf-8'))
+                except ValueError:
+                    pass
+
+                if 'title' in err and 'description' in err:
+                    title = err['title']
+                    desc = err['description']
+                elif 'faultstring' in err:
+                    title = err['faultstring'].split('.', 1)[0]
+                    desc = err['faultstring']
+                else:
+                    title = ''
+                    desc = ''
+
+                code = err['faultcode'].lower() if 'faultcode' in err else ''
+
+                errs.append({
+                    'request_id': '',
+                    'code': code,
+                    'status': state['status_code'],
+                    'title': title,
+                    'detail': desc,
+                    'links': []
+                })
+
+            body = [six.b(json.dumps({'errors': errs}))]
+
             state['headers'].append(('Content-Type', 'application/json'))
             state['headers'].append(('Content-Length', str(len(body[0]))))
         else:

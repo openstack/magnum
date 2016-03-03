@@ -96,7 +96,6 @@ class TestJsonPatchType(base.FunctionalTest):
         patch = [{'path': '/internal', 'op': 'replace', 'value': 'foo'}]
         ret = self._patch_json(patch, True)
         self.assertEqual(400, ret.status_int)
-        self.assertTrue(ret.json['faultstring'])
 
     def test_mandatory_attr(self):
         patch = [{'op': 'replace', 'path': '/mandatory', 'value': 'foo'}]
@@ -108,43 +107,36 @@ class TestJsonPatchType(base.FunctionalTest):
         patch = [{'op': 'remove', 'path': '/mandatory'}]
         ret = self._patch_json(patch, True)
         self.assertEqual(400, ret.status_int)
-        self.assertTrue(ret.json['faultstring'])
 
     def test_missing_required_fields_path(self):
         missing_path = [{'op': 'remove'}]
         ret = self._patch_json(missing_path, True)
         self.assertEqual(400, ret.status_int)
-        self.assertTrue(ret.json['faultstring'])
 
     def test_missing_required_fields_op(self):
         missing_op = [{'path': '/foo'}]
         ret = self._patch_json(missing_op, True)
         self.assertEqual(400, ret.status_int)
-        self.assertTrue(ret.json['faultstring'])
 
     def test_invalid_op(self):
         patch = [{'path': '/foo', 'op': 'invalid'}]
         ret = self._patch_json(patch, True)
         self.assertEqual(400, ret.status_int)
-        self.assertTrue(ret.json['faultstring'])
 
     def test_invalid_path(self):
         patch = [{'path': 'invalid-path', 'op': 'remove'}]
         ret = self._patch_json(patch, True)
         self.assertEqual(400, ret.status_int)
-        self.assertTrue(ret.json['faultstring'])
 
     def test_cannot_add_with_no_value(self):
         patch = [{'path': '/extra/foo', 'op': 'add'}]
         ret = self._patch_json(patch, True)
         self.assertEqual(400, ret.status_int)
-        self.assertTrue(ret.json['faultstring'])
 
     def test_cannot_replace_with_no_value(self):
         patch = [{'path': '/foo', 'op': 'replace'}]
         ret = self._patch_json(patch, True)
         self.assertEqual(400, ret.status_int)
-        self.assertTrue(ret.json['faultstring'])
 
 
 class TestMultiType(base.FunctionalTest):
