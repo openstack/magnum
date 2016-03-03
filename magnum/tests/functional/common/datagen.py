@@ -110,7 +110,7 @@ def baymodel_data(**kwargs):
         "dns_nameserver": "8.8.8.8",
         "flavor_id": data_utils.rand_name('bay'),
         "master_flavor_id": data_utils.rand_name('bay'),
-        "external_network_id": str(data_utils.rand_uuid()),
+        "external_network_id": "public",
         "keypair_id": data_utils.rand_name('bay'),
         "image_id": data_utils.rand_name('bay')
     }
@@ -136,14 +136,16 @@ def baymodel_name_patch_data(name=data_utils.rand_name('bay')):
     return baymodelpatch_model.BayModelPatchCollection.from_dict(data)
 
 
-def baymodel_data_with_valid_keypair_and_image_id():
-    """Generates random baymodel data with valid keypair and image
+def baymodel_data_with_valid_keypair_image_flavor():
+    """Generates random baymodel data with valid keypair,image and flavor
 
     :returns: BayModelEntity with generated data
     """
 
     return baymodel_data(keypair_id=config.Config.keypair_id,
-                         image_id=config.Config.image_id)
+                         image_id=config.Config.image_id,
+                         flavor_id=config.Config.flavor_id,
+                         master_flavor_id=config.Config.master_flavor_id)
 
 
 def baymodel_data_with_valid_keypair():
@@ -166,13 +168,15 @@ def baymodel_valid_data_with_specific_coe(coe):
                          image_id=config.Config.image_id, coe=coe)
 
 
-def baymodel_data_with_valid_image_id():
+def baymodel_data_with_valid_image_and_flavor():
     """Generates random baymodel data with valid image
 
     :returns: BayModelEntity with generated data
     """
 
-    return baymodel_data(image_id=config.Config.image_id)
+    return baymodel_data(image_id=config.Config.image_id,
+                         flavor_id=config.Config.flavor_id,
+                         master_flavor_id=config.Config.master_flavor_id)
 
 
 def valid_swarm_baymodel():

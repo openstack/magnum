@@ -302,7 +302,7 @@ class BayModelsController(rest.RestController):
         baymodel_dict = baymodel.as_dict()
         context = pecan.request.context
         cli = clients.OpenStackClients(context)
-        attr_validator.validate_keypair(cli, baymodel_dict['keypair_id'])
+        attr_validator.validate_os_resources(context, baymodel_dict)
         image_data = attr_validator.validate_image(cli,
                                                    baymodel_dict['image_id'])
         baymodel_dict['cluster_distro'] = image_data['os_distro']

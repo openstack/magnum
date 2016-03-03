@@ -20,6 +20,7 @@ from six.moves.urllib import parse as urlparse
 from webtest.app import AppError
 from wsme import types as wtypes
 
+from magnum.api import attr_validator
 from magnum.api.controllers.v1 import baymodel as api_baymodel
 from magnum.common import exception
 from magnum.common import policy as magnum_policy
@@ -369,13 +370,17 @@ class TestPatch(api_base.FunctionalTest):
 
 class TestPost(api_base.FunctionalTest):
 
+    def setUp(self):
+        super(TestPost, self).setUp()
+        p = mock.patch.object(attr_validator, 'validate_os_resources')
+        self.mock_valid_os_res = p.start()
+        self.addCleanup(p.stop)
+
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_keypair')
     @mock.patch('oslo_utils.timeutils.utcnow')
     def test_create_baymodel(self, mock_utcnow,
-                             mock_keypair_exists, mock_image_data):
+                             mock_image_data):
         bdict = apiutils.baymodel_post_data()
-        mock_keypair_exists.return_value = None
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
         mock_utcnow.return_value = test_time
         mock_image_data.return_value = {'name': 'mock_name',
@@ -395,13 +400,10 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(test_time, return_created_at)
 
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def test_create_baymodel_set_project_id_and_user_id(self,
-                                                        mock_keypair_exists,
                                                         mock_image_data):
         with mock.patch.object(self.dbapi, 'create_baymodel',
                                wraps=self.dbapi.create_baymodel) as cc_mock:
-            mock_keypair_exists.return_value = None
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.baymodel_post_data()
@@ -413,13 +415,10 @@ class TestPost(api_base.FunctionalTest):
                              cc_mock.call_args[0][0]['user_id'])
 
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def test_create_baymodel_doesnt_contain_id(self,
-                                               mock_keypair_exists,
                                                mock_image_data):
         with mock.patch.object(self.dbapi, 'create_baymodel',
                                wraps=self.dbapi.create_baymodel) as cc_mock:
-            mock_keypair_exists.return_value = None
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.baymodel_post_data(image_id='my-image')
@@ -483,12 +482,9 @@ class TestPost(api_base.FunctionalTest):
         self._create_baymodel_raises_app_error(apiserver_port='not an int')
 
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_keypair')
-    def test_create_baymodel_with_labels(self, mock_keypair_exists,
-                                         mock_image_data):
+    def test_create_baymodel_with_labels(self, mock_image_data):
         with mock.patch.object(self.dbapi, 'create_baymodel',
                                wraps=self.dbapi.create_baymodel) as cc_mock:
-            mock_keypair_exists.return_value = None
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.baymodel_post_data(labels={'key1': 'val1',
@@ -500,13 +496,10 @@ class TestPost(api_base.FunctionalTest):
             self.assertNotIn('id', cc_mock.call_args[0][0])
 
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def test_create_baymodel_with_docker_volume_size(self,
-                                                     mock_keypair_exists,
                                                      mock_image_data):
         with mock.patch.object(self.dbapi, 'create_baymodel',
                                wraps=self.dbapi.create_baymodel) as cc_mock:
-            mock_keypair_exists.return_value = None
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.baymodel_post_data(docker_volume_size=99)
@@ -517,21 +510,17 @@ class TestPost(api_base.FunctionalTest):
             self.assertNotIn('id', cc_mock.call_args[0][0])
 
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def test_create_baymodel_generate_uuid(self,
-                                           mock_keypair_exists,
                                            mock_image_data):
-        mock_keypair_exists.return_value = None
+        # TODO(hongbin): Is this test correct?
+        pass
 
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def _test_create_baymodel_network_driver_attr(self,
                                                   baymodel_dict,
                                                   baymodel_config_dict,
                                                   expect_errors,
-                                                  mock_keypair_exists,
                                                   mock_image_data):
-        mock_keypair_exists.return_value = None
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
         for k, v in baymodel_config_dict.items():
@@ -591,13 +580,10 @@ class TestPost(api_base.FunctionalTest):
                                                        expect_errors_flag)
 
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_keypair')
-    def test_create_baymodel_with_volume_driver(self, mock_keypair_exists,
+    def test_create_baymodel_with_volume_driver(self,
                                                 mock_image_data):
-        mock_keypair_exists.return_value = None
         with mock.patch.object(self.dbapi, 'create_baymodel',
                                wraps=self.dbapi.create_baymodel) as cc_mock:
-            mock_keypair_exists.return_value = None
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.baymodel_post_data(volume_driver='rexray')
@@ -608,10 +594,8 @@ class TestPost(api_base.FunctionalTest):
             self.assertNotIn('id', cc_mock.call_args[0][0])
 
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_keypair')
-    def test_create_baymodel_with_no_volume_driver(self, mock_keypair_exists,
+    def test_create_baymodel_with_no_volume_driver(self,
                                                    mock_image_data):
-        mock_keypair_exists.return_value = None
         with mock.patch.object(self.dbapi, 'create_baymodel',
                                wraps=self.dbapi.create_baymodel) as cc_mock:
             mock_image_data.return_value = {'name': 'mock_name',
@@ -624,14 +608,11 @@ class TestPost(api_base.FunctionalTest):
             self.assertNotIn('id', cc_mock.call_args[0][0])
 
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_keypair')
     @mock.patch.object(magnum_policy, 'enforce')
     def test_create_baymodel_public_success(self, mock_policy,
-                                            mock_keypair_exists,
                                             mock_image_data):
         with mock.patch.object(self.dbapi, 'create_baymodel',
                                wraps=self.dbapi.create_baymodel) as cc_mock:
-            mock_keypair_exists.return_value = None
             mock_policy.return_value = True
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
@@ -645,14 +626,11 @@ class TestPost(api_base.FunctionalTest):
             self.assertTrue(cc_mock.call_args[0][0]['public'])
 
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_keypair')
     @mock.patch.object(magnum_policy, 'enforce')
     def test_create_baymodel_public_fail(self, mock_policy,
-                                         mock_keypair_exists,
                                          mock_image_data):
         with mock.patch.object(self.dbapi, 'create_baymodel',
                                wraps=self.dbapi.create_baymodel):
-            mock_keypair_exists.return_value = None
             # make policy enforcement fail
             mock_policy.return_value = False
             mock_image_data.return_value = {'name': 'mock_name',
@@ -661,14 +639,11 @@ class TestPost(api_base.FunctionalTest):
             self.assertRaises(AppError, self.post_json, '/baymodels', bdict)
 
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_keypair')
     @mock.patch.object(magnum_policy, 'enforce')
     def test_create_baymodel_public_not_set(self, mock_policy,
-                                            mock_keypair_exists,
                                             mock_image_data):
         with mock.patch.object(self.dbapi, 'create_baymodel',
                                wraps=self.dbapi.create_baymodel) as cc_mock:
-            mock_keypair_exists.return_value = None
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.baymodel_post_data(public=False)
@@ -681,11 +656,8 @@ class TestPost(api_base.FunctionalTest):
             self.assertFalse(cc_mock.call_args[0][0]['public'])
 
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def test_create_baymodel_with_no_os_distro_image(self,
-                                                     mock_keypair_exists,
                                                      mock_image_data):
-        mock_keypair_exists.return_value = None
         mock_image_data.side_effect = exception.OSDistroFieldNotFound('img')
         bdict = apiutils.baymodel_post_data()
         del bdict['uuid']
@@ -693,11 +665,8 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
 
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def test_create_baymodel_with_os_distro_image(self,
-                                                  mock_keypair_exists,
                                                   mock_image_data):
-        mock_keypair_exists.return_value = None
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
         bdict = apiutils.baymodel_post_data()
@@ -706,11 +675,8 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(201, response.status_int)
 
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def test_create_baymodel_with_image_name(self,
-                                             mock_keypair_exists,
                                              mock_image_data):
-        mock_keypair_exists.return_value = None
         mock_image = {'name': 'mock_name',
                       'os_distro': 'fedora-atomic'}
         mock_image_data.return_value = mock_image
@@ -720,11 +686,8 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(201, response.status_int)
 
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def test_create_baymodel_with_no_exist_image_name(self,
-                                                      mock_keypair_exists,
                                                       mock_image_data):
-        mock_keypair_exists.return_value = None
         mock_image_data.side_effect = exception.ResourceNotFound('test-img')
         bdict = apiutils.baymodel_post_data()
         del bdict['uuid']
@@ -732,11 +695,8 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(404, response.status_int)
 
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def test_create_baymodel_with_multi_image_name(self,
-                                                   mock_keypair_exists,
                                                    mock_image_data):
-        mock_keypair_exists.return_value = None
         mock_image_data.side_effect = exception.Conflict('Multiple images')
         bdict = apiutils.baymodel_post_data()
         del bdict['uuid']
@@ -756,10 +716,8 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
 
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_keypair')
-    def test_create_baymodel_with_dns(self, mock_keypair_exists,
+    def test_create_baymodel_with_dns(self,
                                       mock_image_data):
-        mock_keypair_exists.return_value = None
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
         bdict = apiutils.baymodel_post_data()
@@ -769,11 +727,9 @@ class TestPost(api_base.FunctionalTest):
                          response.json['dns_nameserver'])
 
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_keypair')
     def test_create_baymodel_with_no_exist_keypair(self,
-                                                   mock_keypair_exists,
                                                    mock_image_data):
-        mock_keypair_exists.side_effect = exception.KeyPairNotFound("Test")
+        self.mock_valid_os_res.side_effect = exception.KeyPairNotFound("Test")
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
         bdict = apiutils.baymodel_post_data()

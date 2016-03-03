@@ -18,7 +18,6 @@ from novaclient import exceptions as nova_exception
 from magnum.api import utils as api_utils
 from magnum.common import clients
 from magnum.common import exception
-from magnum.objects.baymodel import BayModel
 
 
 def validate_image(cli, image):
@@ -39,6 +38,8 @@ def validate_image(cli, image):
 def validate_flavor(cli, flavor):
     """Validate flavor"""
 
+    if flavor is None:
+        return
     flavor_id = None
     flavor_list = cli.nova().flavors.list()
     for f in flavor_list:
@@ -80,10 +81,9 @@ def validate_fixed_network(cli, fixed_network):
     pass
 
 
-def validate_os_resources(context, baymodel_id):
+def validate_os_resources(context, baymodel):
     """Validate baymodel's OpenStack Resources"""
 
-    baymodel = BayModel.get_by_uuid(context, baymodel_id)
     cli = clients.OpenStackClients(context)
 
     for attr, validate_method in validators.items():
