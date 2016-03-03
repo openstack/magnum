@@ -510,6 +510,42 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
 
 class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
 
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.conductor.template_definition.BaseTemplateDefinition'
+                '.get_params')
+    @mock.patch('magnum.conductor.template_definition.TemplateDefinition'
+                '.get_output')
+    def test_mesos_get_params(self, mock_get_output, mock_get_params,
+                              mock_osc_class):
+        mock_context = mock.MagicMock()
+        mock_context.auth_url = 'http://192.168.10.10:5000/v3'
+        mock_context.user_name = 'mesos_user'
+        mock_context.tenant = 'admin'
+        mock_context.domain_name = 'domainname'
+        mock_baymodel = mock.MagicMock()
+        mock_baymodel.tls_disabled = False
+        rexray_preempt = mock_baymodel.labels.get('rexray_preempt')
+        mock_bay = mock.MagicMock()
+        mock_bay.uuid = 'bay-xx-xx-xx-xx'
+        del mock_bay.stack_id
+        mock_osc = mock.MagicMock()
+        mock_osc.cinder_region_name.return_value = 'RegionOne'
+        mock_osc_class.return_value = mock_osc
+
+        mesos_def = tdef.UbuntuMesosTemplateDefinition()
+
+        mesos_def.get_params(mock_context, mock_baymodel, mock_bay)
+
+        expected_kwargs = {'extra_params': {
+            'region_name': mock_osc.cinder_region_name.return_value,
+            'auth_url': 'http://192.168.10.10:5000/v3',
+            'username': 'mesos_user',
+            'tenant_name': 'admin',
+            'domain_name': 'domainname',
+            'rexray_preempt': rexray_preempt}}
+        mock_get_params.assert_called_once_with(mock_context, mock_baymodel,
+                                                mock_bay, **expected_kwargs)
+
     def test_mesos_get_heat_param(self):
         mesos_def = tdef.UbuntuMesosTemplateDefinition()
 
