@@ -23,20 +23,21 @@ COE=${2-kubernetes}
 NODE_TYPE=${3-master}
 LOG_PATH=/opt/stack/logs/bay-nodes/${NODE_TYPE}-${SSH_IP}
 KEYPAIR=${4-default}
+PRIVATE_KEY=
+
+echo "If private key is specified, save to temp and use that; else, use default"
+if [[ "$KEYPAIR" == "default" ]]; then
+    PRIVATE_KEY="~/.ssh/id_rsa"
+else
+    PRIVATE_KEY="$(mktemp id_rsa.$SSH_IP.XXX)"
+    echo -en "$KEYPAIR" > $PRIVATE_KEY
+fi
 
 function remote_exec {
-    local priv_key
-    echo "If private key is specified, save to temp and use that; else, use default"
-    if [[ "$KEYPAIR" == "default" ]]; then
-        priv_key="~/.ssh/id_rsa"
-    else
-        priv_key="$(mktemp id_rsa.$SSH_IP.XXX)"
-        echo -en "$KEYPAIR" > $priv_key
-    fi
     local ssh_user=$1
     local cmd=$2
     local logfile=${LOG_PATH}/$3
-    ssh -i $priv_key -o StrictHostKeyChecking=no ${ssh_user}@${SSH_IP} "${cmd}" > ${logfile} 2>&1
+    ssh -i $PRIVATE_KEY -o StrictHostKeyChecking=no ${ssh_user}@${SSH_IP} "${cmd}" > ${logfile} 2>&1
 }
 
 mkdir -p $LOG_PATH
