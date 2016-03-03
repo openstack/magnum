@@ -144,7 +144,7 @@ class V1(controllers_base.APIBase):
                                             'baymodels', ''),
                         link.Link.make_link('bookmark',
                                             pecan.request.host_url,
-                                            'bays', '',
+                                            'baymodels', '',
                                             bookmark=True)]
         v1.bays = [link.Link.make_link('self', pecan.request.host_url,
                                        'bays', ''),
