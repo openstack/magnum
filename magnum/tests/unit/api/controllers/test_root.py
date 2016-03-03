@@ -56,7 +56,7 @@ class TestRootController(api_base.FunctionalTest):
                            u'rel': u'bookmark'}],
             u'baymodels': [{u'href': u'http://localhost/v1/baymodels/',
                             u'rel': u'self'},
-                           {u'href': u'http://localhost/bays/',
+                           {u'href': u'http://localhost/baymodels/',
                             u'rel': u'bookmark'}],
             u'pods': [{u'href': u'http://localhost/v1/pods/',
                        u'rel': u'self'},
