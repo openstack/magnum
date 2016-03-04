@@ -16,7 +16,7 @@ import socket
 import string
 import struct
 
-from tempest_lib.common.utils import data_utils
+from tempest.lib.common.utils import data_utils
 
 from magnum.tests.functional.api.v1.models import bay_model
 from magnum.tests.functional.api.v1.models import baymodel_model

@@ -11,7 +11,7 @@
 # under the License.
 
 from oslo_log import log as logging
-from tempest_lib import exceptions
+from tempest.lib import exceptions
 
 from magnum.tests.functional.api.v1.models import bay_model
 from magnum.tests.functional.common import client

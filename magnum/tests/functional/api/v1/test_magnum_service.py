@@ -11,7 +11,7 @@
 # under the License.
 
 
-from tempest_lib import exceptions
+from tempest.lib import exceptions
 import testtools
 
 from magnum.tests.functional.common import base
