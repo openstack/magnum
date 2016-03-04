@@ -10,12 +10,13 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import copy
-
 import mock
 from oslo_config import cfg
 from webob import exc as webob_exc
 
+import webtest
+
+from magnum.api import app
 from magnum.api.controllers import v1 as v1_api
 from magnum.tests import base as test_base
 from magnum.tests.unit.api import base as api_base
@@ -84,6 +85,11 @@ class TestRootController(api_base.FunctionalTest):
                            {u'href': u'http://localhost/mservices/',
                             u'rel': u'bookmark'}]}
 
+    def make_app(self, paste_file):
+        file_name = self.get_path(paste_file)
+        cfg.CONF.set_override("api_paste_config", file_name, group="api")
+        return webtest.TestApp(app.load_app())
+
     def test_version(self):
         response = self.app.get('/')
         self.assertEqual(self.root_expected, response.json)
@@ -96,13 +102,10 @@ class TestRootController(api_base.FunctionalTest):
         response = self.app.get('/a/bogus/url', expect_errors=True)
         assert response.status_int == 404
 
-    def test_acl_access_with_all(self):
-        cfg.CONF.set_override("enable_authentication", True)
-
-        config = copy.deepcopy(self.config)
-        # Both / and /v1 and access without auth
-        config["app"]["acl_public_routes"] = ['/', '/v1']
-        app = self._make_app(config=config)
+    def test_noauth(self):
+        # Don't need to auth
+        paste_file = "magnum/tests/unit/api/controllers/noauth-paste.ini"
+        app = self.make_app(paste_file)
 
         response = app.get('/')
         self.assertEqual(self.root_expected, response.json)
@@ -110,13 +113,24 @@ class TestRootController(api_base.FunctionalTest):
         response = app.get('/v1/')
         self.assertEqual(self.v1_expected, response.json)
 
-    def test_acl_access_with_root(self):
-        cfg.CONF.set_override("enable_authentication", True)
+        response = app.get('/v1/baymodels')
+        self.assertEqual(200, response.status_int)
 
-        config = copy.deepcopy(self.config)
+    def test_auth_with_no_public_routes(self):
+        # All apis need auth when access
+        paste_file = "magnum/tests/unit/api/controllers/auth-paste.ini"
+        app = self.make_app(paste_file)
+
+        response = app.get('/', expect_errors=True)
+        self.assertEqual(401, response.status_int)
+
+        response = app.get('/v1/', expect_errors=True)
+        self.assertEqual(401, response.status_int)
+
+    def test_auth_with_root_access(self):
         # Only / can access without auth
-        config["app"]["acl_public_routes"] = ['/']
-        app = self._make_app(config=config)
+        paste_file = "magnum/tests/unit/api/controllers/auth-root-access.ini"
+        app = self.make_app(paste_file)
 
         response = app.get('/')
         self.assertEqual(self.root_expected, response.json)
@@ -124,13 +138,13 @@ class TestRootController(api_base.FunctionalTest):
         response = app.get('/v1/', expect_errors=True)
         self.assertEqual(401, response.status_int)
 
-    def test_acl_access_with_v1(self):
-        cfg.CONF.set_override("enable_authentication", True)
+        response = app.get('/v1/baymodels', expect_errors=True)
+        self.assertEqual(401, response.status_int)
 
-        config = copy.deepcopy(self.config)
+    def test_auth_with_v1_access(self):
         # Only /v1 can access without auth
-        config["app"]["acl_public_routes"] = ['/v1']
-        app = self._make_app(config=config)
+        paste_file = "magnum/tests/unit/api/controllers/auth-v1-access.ini"
+        app = self.make_app(paste_file)
 
         response = app.get('/', expect_errors=True)
         self.assertEqual(401, response.status_int)
@@ -138,17 +152,7 @@ class TestRootController(api_base.FunctionalTest):
         response = app.get('/v1/')
         self.assertEqual(self.v1_expected, response.json)
 
-    def test_acl_with_neither(self):
-        cfg.CONF.set_override("enable_authentication", True)
-
-        config = copy.deepcopy(self.config)
-        config["app"]["acl_public_routes"] = []
-        app = self._make_app(config=config)
-
-        response = app.get('/', expect_errors=True)
-        self.assertEqual(401, response.status_int)
-
-        response = app.get('/v1/', expect_errors=True)
+        response = app.get('/v1/baymodels', expect_errors=True)
         self.assertEqual(401, response.status_int)
 
 

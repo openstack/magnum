@@ -54,8 +54,6 @@ class FunctionalTest(base.DbTestCase):
                 'modules': ['magnum.api'],
                 'static_root': '%s/public' % root_dir,
                 'template_path': '%s/api/templates' % root_dir,
-                'enable_acl': False,
-                'acl_public_routes': ['/', '/v1'],
                 'hooks': [
                     hooks.ContextHook(),
                     hooks.RPCHook(),
@@ -83,11 +81,9 @@ class FunctionalTest(base.DbTestCase):
         for attr in attrs:
             verify_method(attr, response)
 
-    def _make_app(self, config=None, enable_acl=False):
+    def _make_app(self, config=None):
         if not config:
             config = self.config
-
-        config["app"]["enable_acl"] = enable_acl
 
         return pecan.testing.load_test_app(config)
 

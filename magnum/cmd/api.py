@@ -40,7 +40,7 @@ def main():
     # Enable object backporting via the conductor
     base.MagnumObject.indirection_api = base.MagnumObjectIndirectionAPI()
 
-    app = api_app.setup_app()
+    app = api_app.load_app()
 
     # Create the WSGI server and start it
     host, port = cfg.CONF.api.host, cfg.CONF.api.port
