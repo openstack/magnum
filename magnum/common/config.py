@@ -16,6 +16,7 @@
 #    under the License.
 
 from oslo_config import cfg
+from oslo_middleware import cors
 
 from magnum.common import rpc
 from magnum import version
@@ -28,3 +29,34 @@ def parse_args(argv, default_config_files=None):
              version=version.version_info.release_string(),
              default_config_files=default_config_files)
     rpc.init(cfg.CONF)
+
+
+def set_config_defaults():
+    """This method updates all configuration default values."""
+    set_cors_middleware_defaults()
+
+
+def set_cors_middleware_defaults():
+    """Update default configuration options for oslo.middleware."""
+    # CORS Defaults
+    # TODO(krotscheck): Update with https://review.openstack.org/#/c/285368/
+    cfg.set_defaults(cors.CORS_OPTS,
+                     allow_headers=['X-Auth-Token',
+                                    'X-Identity-Status',
+                                    'X-Roles',
+                                    'X-Service-Catalog',
+                                    'X-User-Id',
+                                    'X-Tenant-Id',
+                                    'X-OpenStack-Request-ID',
+                                    'X-Server-Management-Url'],
+                     expose_headers=['X-Auth-Token',
+                                     'X-Subject-Token',
+                                     'X-Service-Token',
+                                     'X-OpenStack-Request-ID',
+                                     'X-Server-Management-Url'],
+                     allow_methods=['GET',
+                                    'PUT',
+                                    'POST',
+                                    'DELETE',
+                                    'PATCH']
+                     )

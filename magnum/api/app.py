@@ -18,6 +18,7 @@ import pecan
 
 from magnum.api import config as api_config
 from magnum.api import middleware
+from magnum.common import config as common_config
 from magnum.i18n import _
 
 # Register options for the service
@@ -58,6 +59,7 @@ def setup_app(config=None):
         config = get_pecan_config()
 
     app_conf = dict(config.app)
+    common_config.set_config_defaults()
 
     app = pecan.make_app(
         app_conf.pop('root'),
