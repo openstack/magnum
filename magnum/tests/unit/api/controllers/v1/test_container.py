@@ -634,7 +634,7 @@ class TestContainerController(api_base.FunctionalTest):
 class TestContainerEnforcement(api_base.FunctionalTest):
 
     def _common_policy_check(self, rule, func, *arg, **kwarg):
-        self.policy.set_rules({rule: 'project:non_fake'})
+        self.policy.set_rules({rule: 'project_id:non_fake'})
         response = func(*arg, **kwarg)
         self.assertEqual(403, response.status_int)
         self.assertEqual('application/json', response.content_type)
@@ -661,21 +661,24 @@ class TestContainerEnforcement(api_base.FunctionalTest):
             expect_errors=True)
 
     def test_policy_disallow_update(self):
-        test_container = utils.get_test_container()
-        container_uuid = test_container.get('uuid')
+        bay = obj_utils.create_test_bay(self.context)
+        container = obj_utils.create_test_container(self.context,
+                                                    bay_uuid=bay.uuid)
         params = [{'path': '/name',
                    'value': 'new_name',
                    'op': 'replace'}]
         self._common_policy_check(
             'container:update', self.app.patch_json,
-            '/v1/containers/%s' % container_uuid, params,
+            '/v1/containers/%s' % container.uuid, params,
             expect_errors=True)
 
-    @patch('magnum.objects.Bay.get_by_uuid')
-    def test_policy_disallow_create(self, mock_get_by_uuid):
+    def test_policy_disallow_create(self):
+        baymodel = obj_utils.create_test_baymodel(self.context)
+        bay = obj_utils.create_test_bay(self.context,
+                                        baymodel_id=baymodel.uuid)
         params = ('{"name": "My Docker", "image": "ubuntu",'
                   '"command": "env", "memory": "512m",'
-                  '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
+                  '"bay_uuid": "%s"}' % bay.uuid)
 
         self._common_policy_check(
             'container:create', self.app.post, '/v1/containers', params=params,
@@ -683,7 +686,10 @@ class TestContainerEnforcement(api_base.FunctionalTest):
             expect_errors=True)
 
     def test_policy_disallow_delete(self):
+        bay = obj_utils.create_test_bay(self.context)
+        container = obj_utils.create_test_container(self.context,
+                                                    bay_uuid=bay.uuid)
         self._common_policy_check(
             'container:delete', self.app.delete,
-            '/v1/containers/%s' % comm_utils.generate_uuid(),
+            '/v1/containers/%s' % container.uuid,
             expect_errors=True)

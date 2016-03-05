@@ -363,7 +363,6 @@ class ContainersController(rest.RestController):
         return Container.convert_with_links(res_container)
 
     @expose.expose(Container, body=Container, status_code=201)
-    @policy.enforce_wsgi("container", "create")
     @validation.enforce_bay_types('swarm')
     def post(self, container):
         """Create a new container.
@@ -372,6 +371,9 @@ class ContainersController(rest.RestController):
         """
         container_dict = container.as_dict()
         context = pecan.request.context
+        bay = api_utils.get_resource('Bay', container_dict['bay_uuid'])
+        policy.enforce(context, 'container:create', bay,
+                       action='container:create')
         container_dict['project_id'] = context.project_id
         container_dict['user_id'] = context.user_id
         new_container = objects.Container(context, **container_dict)
@@ -386,7 +388,6 @@ class ContainersController(rest.RestController):
     @wsme.validate(types.uuid, [ContainerPatchType])
     @expose.expose(Container, types.uuid_or_name,
                    body=[ContainerPatchType])
-    @policy.enforce_wsgi("container", "update")
     def patch(self, container_ident, patch):
         """Update an existing container.
 
@@ -395,6 +396,10 @@ class ContainersController(rest.RestController):
         """
         container = api_utils.get_resource('Container',
                                            container_ident)
+        context = pecan.request.context
+        bay = api_utils.get_resource('Bay', container.bay_uuid)
+        policy.enforce(context, 'container:update', bay,
+                       action='container:update')
         try:
             container_dict = container.as_dict()
             new_container = Container(**api_utils.apply_jsonpatch(
@@ -418,7 +423,6 @@ class ContainersController(rest.RestController):
         return Container.convert_with_links(container)
 
     @expose.expose(None, types.uuid_or_name, status_code=204)
-    @policy.enforce_wsgi("container")
     def delete(self, container_ident):
         """Delete a container.
 
@@ -426,5 +430,9 @@ class ContainersController(rest.RestController):
         """
         container = api_utils.get_resource('Container',
                                            container_ident)
+        context = pecan.request.context
+        bay = api_utils.get_resource('Bay', container.bay_uuid)
+        policy.enforce(context, 'container:delete', bay,
+                       action='container:delete')
         pecan.request.rpcapi.container_delete(container.uuid)
         container.destroy()
