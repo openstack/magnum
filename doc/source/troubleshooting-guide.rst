@@ -265,7 +265,7 @@ If the ping is not successful, check the following:
   Flannel subnet.  If this is not correct, the docker daemon is not configured
   correctly with the parameter *--bip*.  Check the systemd service for docker.
 
-- Is Flannel running properly?  check the `flannel service`_.
+- Is Flannel running properly?  check the `Running Flannel`_.
 
 - Ping and try `tcpdump
   <http://docs.openstack.org/openstack-ops/content/network_troubleshooting.html#tcpdump>`_
@@ -446,10 +446,132 @@ If etcd continues to fail, check the following:
   If the public discovery service is not reachable, check the
   `Cluster internet access`_.
 
-flannel service
+Running Flannel
 ---------------
-*To be filled in*
 
+When deploying a COE, Flannel is available as a network driver for
+certain COE type.  Magnum currently supports Flannel for a Kubernetes
+or Swarm bay.
+
+Flannel provides a flat network space for the containers in the bay:
+they are allocated IP in this network space and they will have connectivity
+to each other.  Therefore, if Flannel fails, some containers will not
+be able to access services from other containers in the bay.  This can be
+confirmed by running *ping* or *curl* from one container to another.
+
+The Flannel daemon is run as a systemd service on each node of the bay.
+To check Flannel, run on each node::
+
+    sudo service flanneld status
+
+If the daemon is running, you should see that the service is successfully
+deployed::
+
+    Active: active (running) since ....
+
+If the daemon is not running, the status will show the service as failed,
+something like::
+
+    Active: failed (Result: timeout) ....
+
+or::
+
+    Active: inactive (dead) ....
+
+Flannel daemon may also be running but not functioning correctly.
+Check the following:
+
+- Check the log for Flannel::
+
+    sudo journalctl -u flanneld
+
+- Since Flannel relies on etcd, a common cause for failure is that the
+  etcd service is not running on the master nodes.  Check the `etcd service`_.
+  If the etcd service failed, once it has been restored successfully, the
+  Flannel service can be restarted by::
+
+    sudo service flanneld restart
+
+- Magnum writes the configuration for Flannel in a local file on each master
+  node.  Check for this file on the master nodes by::
+
+    cat /etc/sysconfig/flannel-network.json
+
+  The content should be something like::
+
+    {
+      "Network": "10.100.0.0/16",
+      "Subnetlen": 24,
+      "Backend": {
+        "Type": "udp"
+      }
+    }
+
+  where the values for the parameters must match the corresponding
+  parameters from the bay model.
+
+  Magnum also loads this configuration into etcd, therefore, verify
+  the configuration in etcd by running *etcdctl* on the master nodes::
+
+    etcdctl get /coreos.com/network/config
+
+- Each node is allocated a segment of the network space.  Check
+  for this segment on each node by::
+
+    grep FLANNEL_SUBNET /run/flannel/subnet.env
+
+  The containers on this node should be assigned an IP in this range.
+  The nodes negotiate for their segment through etcd, and you can use
+  *etcdctl* on the master node to query the network segment associated
+  with each node::
+
+    for s in `etcdctl ls /coreos.com/network/subnets`
+    do
+    echo $s
+    etcdctl get $s
+    done
+
+    /coreos.com/network/subnets/10.100.14.0-24
+    {"PublicIP":"10.0.0.5"}
+    /coreos.com/network/subnets/10.100.61.0-24
+    {"PublicIP":"10.0.0.6"}
+    /coreos.com/network/subnets/10.100.92.0-24
+    {"PublicIP":"10.0.0.7"}
+
+  Alternatively, you can read the full record in ectd by::
+
+    curl http://<master_node_ip>:2379/v2/keys/coreos.com/network/subnets
+
+  You should receive a json snippet that describes all the segments
+  allocated.
+
+- This network segment is passed to Docker via the parameter *--bip*.
+  If this is not configured correctly, Docker would not assign the correct
+  IP in the Flannel network segment to the container.  Check by::
+
+    cat /run/flannel/docker
+    ps -aux | grep docker
+
+- Check the interface for Flannel::
+
+    ifconfig flannel0
+
+  The IP should be the first address in the Flannel subnet for this node.
+
+- Flannel has several different backend implementations and they have
+  specific requirements.  The *udp* backend is the most general and have
+  no requirement on the network.  The *vxlan* backend requires vxlan
+  support in the kernel, so ensure that the image used does provide
+  vxlan support.  The *host-gw* backend requires that all the hosts are
+  on the same L2 network.  This is currently met by the private Neutron
+  subnet created by Magnum;  however, if other network topology is used
+  instead, ensure that this requirement is met if *host-gw* is used.
+
+Current known limitation:  the image fedora-21-atomic-5.qcow2 has
+Flannel version 0.5.0.  This version has known bugs that prevent the
+backend vxland and host-gw to work correctly.  Only the backend udp
+works for this image.  Version 0.5.3 and later should work correctly.
+The image fedora-21-atomic-7.qcow2 has Flannel version 0.5.5.
 
 Kubernetes services
 -------------------
