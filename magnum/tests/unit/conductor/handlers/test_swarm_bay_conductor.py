@@ -73,6 +73,7 @@ class TestBayConductorWithSwarm(base.TestCase):
         self.mock_osc_class.return_value = self.mock_osc
         mock_stack = self.mock_osc.heat.return_value.stacks.get.return_value
         mock_stack.parameters = {'user_token': 'fake_token'}
+        self.context.auth_url = 'http://192.168.10.10:5000/v3'
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_all_values(
@@ -112,7 +113,8 @@ class TestBayConductorWithSwarm(base.TestCase):
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
-            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de'
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
+            'auth_url': 'http://192.168.10.10:5000/v3'
         }
         self.assertEqual(expected, definition)
 
@@ -154,7 +156,8 @@ class TestBayConductorWithSwarm(base.TestCase):
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
-            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de'
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
+            'auth_url': 'http://192.168.10.10:5000/v3'
         }
         self.assertEqual(expected, definition)
 

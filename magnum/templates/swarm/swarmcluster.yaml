@@ -173,6 +173,10 @@ parameters:
     default: ""
     hidden: true
 
+  auth_url:
+    type: string
+    description: url for keystone
+
 resources:
 
   ######################################################################

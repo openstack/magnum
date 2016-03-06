@@ -176,12 +176,6 @@ parameters:
       size fo the data segments for the swift dynamic large objects
     default: 5242880
 
-  auth_url:
-    type: string
-    description: >
-      url for kubernetes to authenticate before sending request to neutron
-      must be v2 since kubernetes backend only suppor v2 at this point
-
   username:
     type: string
     description: >
@@ -275,6 +269,10 @@ parameters:
     description: id of the trust which is used by the trustee
     default: ""
     hidden: true
+
+  auth_url:
+    type: string
+    description: url for keystone
 
 resources:
 
