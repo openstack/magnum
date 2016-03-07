@@ -59,18 +59,18 @@ Pod
   smallest deployable unit that can be created and managed. A pod is a
   co-located group of application containers that run with a shared context.
   When using Magnum, pods are created and managed within bays. Refer to the
-  `Kubernetes User Guide
-  <http://kubernetes.io/v1.0/docs/user-guide/pods.html>`__ for more
-  information.
+  `pods section
+  <http://kubernetes.io/v1.0/docs/user-guide/pods.html>`_ in the `Kubernetes
+  User Guide`_ for more information.
 
 Replication controller
   A replication controller is used to ensure that at any given time a certain
   number of replicas of a pod are running. Pods are automatically created and
   deleted by the replication controller as necessary based on a template to
-  ensure that the defined number of replicas exist. Refer to the `Kubernetes
-  User Guide
-  <http://kubernetes.io/v1.0/docs/user-guide/replication-controller.html>`__
-  for more information.
+  ensure that the defined number of replicas exist. Refer to the `replication
+  controller section
+  <http://kubernetes.io/v1.0/docs/user-guide/replication-controller.html>`_ in
+  the `Kubernetes User Guide`_ for more information.
 
 Service
   A service is an additional layer of abstraction provided by the Kubernetes
@@ -78,9 +78,11 @@ Service
   policy for accessing them. This is useful because pods are created and
   deleted by a replication controller, for example, other pods needing to
   discover them can do so via the service abstraction. Refer to the
-  `Kubernetes User Guide
-  <http://kubernetes.io/v1.0/docs/user-guide/services.html>`__ for more
-  information.
+  `services section
+  <http://kubernetes.io/v1.0/docs/user-guide/services.html>`_ in the
+  `Kubernetes User Guide`_ for more information.
+
+.. _Kubernetes User Guide: http://kubernetes.io/v1.0/docs/user-guide/
 
 ========
 Overview
@@ -100,7 +102,50 @@ Bay
 =============
 Python Client
 =============
-*To be filled in*
+
+Installation
+------------
+
+Follow the instructions in the OpenStack Installation Guide to enable the
+repositories for your distribution:
+
+* `RHEL/CentOS/Fedora
+  <http://docs.openstack.org/liberty/install-guide-rdo/>`_
+* `Ubuntu/Debian
+  <http://docs.openstack.org/liberty/install-guide-ubuntu/>`_
+* `openSUSE/SUSE Linux Enterprise
+  <http://docs.openstack.org/liberty/install-guide-obs/>`_
+
+Install using distribution packages for RHEL/CentOS/Fedora::
+
+    $ sudo yum install python-magnumclient
+
+Install using distribution packages for Ubuntu/Debian::
+
+    $ sudo apt-get install python-magnumclient
+
+Install using distribution packages for OpenSuSE and SuSE Enterprise Linux::
+
+    $ sudo zypper install python-magnumclient
+
+Verifying installation
+----------------------
+
+Execute the `magnum` command with the `--version` argument to confirm that the
+client is installed and in the system path::
+
+    $ magnum --version
+    1.1.0
+
+Note that the version returned may differ from the above, 1.1.0 was the latest
+available version at the time of writing.
+
+Using the command-line client
+-----------------------------
+
+Refer to the `OpenStack Command-Line Interface Reference
+<http://docs.openstack.org/cli-reference/magnum.html>`_ for a full list of the
+commands supported by the `magnum` command-line client.
 
 =================
 Horizon Interface
