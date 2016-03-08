@@ -313,5 +313,171 @@ Storage
 ================
 Image Management
 ================
-*To be filled in*
+
+When a COE is deployed, an image from Glance is used to boot the nodes
+in the cluster and then the software will be configured and started on
+the nodes to bring up the full cluster.  An image is based on a
+particular distro such as Fedora, Ubuntu, etc, and is prebuilt with
+the software specific to the COE such as Kubernetes, Swarm, Mesos.
+The image is tightly coupled with the following in Magnum:
+
+1. Heat templates to orchestrate the configuration.
+
+2. Template definition to map baymodel parameters to Heat
+   template parameters.
+
+3. Set of scripts to configure software.
+
+Collectively, they constitute the driver for a particular COE and a
+particular distro; therefore, developing a new image needs to be done
+in conjunction with developing these other components.  Image can be
+built by various methods such as diskimagebuilder, or in some case, a
+distro image can be used directly.  A number of drivers and the
+associated images is supported in Magnum as reference implementation.
+In this section, we focus mainly on the supported images.
+
+All images must include support for cloud-init and the heat software
+configuration utility:
+
+- os-collect-config
+- os-refresh-config
+- os-apply-config
+- heat-config
+- heat-config-script
+
+Additional software are described as follows.
+
+Kubernetes on Fedora Atomic
+---------------------------
+
+This image is built manually by the instructions provided in this `Atomic guide
+<https://github.com/openstack/magnum/blob/master/doc/source/dev/build-atomic-image.rst>`_
+The Fedora site hosts the current image `fedora-21-atomic-5.qcow2
+<https://fedorapeople.org/groups/magnum/fedora-21-atomic-5.qcow2>`_.
+This image has the following OS/software:
+
++-------------+-----------+
+| OS/software | version   |
++=============+===========+
+| Fedora      | 21        |
++-------------+-----------+
+| Docker      | 1.8.1     |
++-------------+-----------+
+| Kubernetes  | 1.0.4     |
++-------------+-----------+
+| etcd        | 2.0.10    |
++-------------+-----------+
+| Flannel     | 0.5.0     |
++-------------+-----------+
+
+The following software are managed as systemd services:
+
+- kube-apiserver
+- kubelet
+- etcd
+- flannel (if specified as network driver)
+- docker
+
+The following software are managed as Docker containers:
+
+- kube-controller-manager
+- kube-scheduler
+- kube-proxy
+
+The login for this image is *minion*.
+
+Kubernetes on CoreOS
+--------------------
+
+CoreOS publishes a `stock image
+<http://beta.release.core-os.net/amd64-usr/current/coreos_production_openstack_image.img.bz2>`_
+that is being used to deploy Kubernetes.
+This image has the following OS/software:
+
++-------------+-----------+
+| OS/software | version   |
++=============+===========+
+| CoreOS      | 4.3.6     |
++-------------+-----------+
+| Docker      | 1.9.1     |
++-------------+-----------+
+| Kubernetes  | 1.0.6     |
++-------------+-----------+
+| etcd        | 2.2.3     |
++-------------+-----------+
+| Flannel     | 0.5.5     |
++-------------+-----------+
+
+The following software are managed as systemd services:
+
+- kubelet
+- flannel (if specified as network driver)
+- docker
+- etcd
+
+The following software are managed as Docker containers:
+
+- kube-apiserver
+- kube-controller-manager
+- kube-scheduler
+- kube-proxy
+
+The login for this image is *core*.
+
+Kubernetes on Ironic
+--------------------
+
+This image is built manually using diskimagebuilder.  The scripts and instructions
+are included in `Magnum code repo
+<https://github.com/openstack/magnum/tree/master/magnum/templates/kubernetes/elements>`_.
+Currently Ironic is not fully supported yet, therefore more details will be
+provided when this driver has been fully tested.
+
+
+Swarm on Fedora Atomic
+----------------------
+
+This image is the same as the image for Kubernetes on Fedora Atomic and was
+built manually by the instructions provided in this `Atomic guide
+<https://github.com/openstack/magnum/blob/master/doc/source/dev/build-atomic-image.rst>`_
+The Fedora site hosts the current image `fedora-21-atomic-5.qcow2
+<https://fedorapeople.org/groups/magnum/fedora-21-atomic-5.qcow2>`_.
+This image has the following OS/software:
+
++-------------+-----------+
+| OS/software | version   |
++=============+===========+
+| Fedora      | 21        |
++-------------+-----------+
+| Docker      | 1.8.1     |
++-------------+-----------+
+| Kubernetes  | 1.0.4     |
++-------------+-----------+
+| etcd        | 2.0.10    |
++-------------+-----------+
+| Flannel     | 0.5.0     |
++-------------+-----------+
+
+The login for this image is *fedora*.
+
+Mesos on Ubuntu
+---------------
+
+This image is built manually using diskimagebuilder.  The instructions are
+provided in this `Mesos guide
+<https://github.com/openstack/magnum/blob/master/doc/source/dev/mesos.rst>`_.
+The Fedora site hosts the current image `ubuntu-14.04.3-mesos-0.25.0.qcow2
+<https://fedorapeople.org/groups/magnum/ubuntu-14.04.3-mesos-0.25.0.qcow2>`_.
+
++-------------+-----------+
+| OS/software | version   |
++=============+===========+
+| Ubuntu      | 14.04     |
++-------------+-----------+
+| Docker      | 1.8.1     |
++-------------+-----------+
+| Mesos       | 0.25.0    |
++-------------+-----------+
+| Marathon    |           |
++-------------+-----------+
 
