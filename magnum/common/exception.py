@@ -554,11 +554,12 @@ class TrustDeleteFailed(MagnumException):
 
 
 class TrusteeCreateFailed(MagnumException):
-    message = _("Failed to create trustee %(username) in domain $(domain_id)")
+    message = _("Failed to create trustee %(username)s "
+                "in domain %(domain_id)s")
 
 
 class TrusteeDeleteFailed(MagnumException):
-    message = _("Failed to delete trustee %(trustee_id)")
+    message = _("Failed to delete trustee %(trustee_id)s")
 
 
 class QuotaAlreadyExists(Conflict):
