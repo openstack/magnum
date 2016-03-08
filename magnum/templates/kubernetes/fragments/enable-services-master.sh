@@ -9,5 +9,3 @@ for service in etcd docker kube-apiserver kubelet; do
     systemctl enable $service
     systemctl --no-block start $service
 done
-
-setenforce 1
