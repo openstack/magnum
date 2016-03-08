@@ -79,11 +79,13 @@ class TestContainerController(api_base.FunctionalTest):
                                            mock_container_create,
                                            mock_container_show):
         mock_container_create.side_effect = lambda x: x
+        bay = obj_utils.create_test_bay(self.context)
         # Create a container with a command
         params = ('{"name": "My Docker", "image": "ubuntu",'
                   '"command": "env", "memory": "512m",'
-                  '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e",'
-                  '"environment": {"key1": "val1", "key2": "val2"}}')
+                  '"bay_uuid": "%s",'
+                  '"environment": {"key1": "val1", "key2": "val2"}}' %
+                  bay.uuid)
         response = self.app.post('/v1/containers',
                                  params=params,
                                  content_type='application/json')
@@ -161,11 +163,13 @@ class TestContainerController(api_base.FunctionalTest):
                                              mock_container_create,
                                              mock_container_show):
         mock_container_create.side_effect = lambda x: x
+        bay = obj_utils.create_test_bay(self.context)
         # Create a container with a command
         params = ('{"name": "My Docker", "image": "ubuntu",'
                   '"command": "env",'
-                  '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e",'
-                  '"environment": {"key1": "val1", "key2": "val2"}}')
+                  '"bay_uuid": "%s",'
+                  '"environment": {"key1": "val1", "key2": "val2"}}' %
+                  bay.uuid)
         response = self.app.post('/v1/containers',
                                  params=params,
                                  content_type='application/json')
@@ -648,9 +652,10 @@ class TestContainerEnforcement(api_base.FunctionalTest):
             expect_errors=True)
 
     def test_policy_disallow_get_one(self):
+        container = obj_utils.create_test_container(self.context)
         self._common_policy_check(
             'container:get', self.get_json,
-            '/containers/%s' % comm_utils.generate_uuid(),
+            '/containers/%s' % container.uuid,
             expect_errors=True)
 
     def test_policy_disallow_detail(self):
@@ -692,4 +697,37 @@ class TestContainerEnforcement(api_base.FunctionalTest):
         self._common_policy_check(
             'container:delete', self.app.delete,
             '/v1/containers/%s' % container.uuid,
+            expect_errors=True)
+
+    def _owner_check(self, rule, func, *args, **kwargs):
+        self.policy.set_rules({rule: "user_id:%(user_id)s"})
+        response = func(*args, **kwargs)
+        self.assertEqual(403, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(
+            "Policy doesn't allow %s to be performed." % rule,
+            response.json['errors'][0]['detail'])
+
+    def test_policy_only_owner_get_one(self):
+        container = obj_utils.create_test_container(self.context,
+                                                    user_id='another')
+        self._owner_check("container:get", self.get_json,
+                          '/containers/%s' % container.uuid,
+                          expect_errors=True)
+
+    def test_policy_only_owner_update(self):
+        container = obj_utils.create_test_container(self.context,
+                                                    user_id='another')
+        self._owner_check(
+            "container:update", self.patch_json,
+            '/containers/%s' % container.uuid,
+            [{'path': '/name', 'value': "new_name", 'op': 'replace'}],
+            expect_errors=True)
+
+    def test_policy_only_owner_delete(self):
+        container = obj_utils.create_test_container(self.context,
+                                                    user_id='another')
+        self._owner_check(
+            "container:delete", self.delete,
+            '/containers/%s' % container.uuid,
             expect_errors=True)
