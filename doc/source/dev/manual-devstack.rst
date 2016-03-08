@@ -133,6 +133,24 @@ made Atomic images available at https://fedorapeople.org/groups/magnum)::
                         --os-distro fedora-atomic \
                         --container-format bare < fedora-21-atomic-5.qcow2
 
+Create a domain and domain admin for trust::
+
+    TRUSTEE_DOMAIN_ID=$(
+        openstack domain create magnum \
+            --description "Owns users and projects created by magnum" \
+            -f value -c id
+    )
+    TRUSTEE_DOMAIN_ADMIN_ID=$(
+        openstack user create trustee_domain_admin \
+            --password "password" \
+            --domain= ${TRUSTEE_DOMAIN_ID} \
+            --or-show \
+            -f value -c id
+    )
+    openstack --os-identity-api-version 3 role add \
+              --user $TRUSTEE_DOMAIN_ADMIN_ID --domain $TRUSTEE_DOMAIN_ID \
+              admin
+
 Create a keypair for use with the baymodel::
 
     test -f ~/.ssh/id_rsa.pub || ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
@@ -194,6 +212,22 @@ Configure magnum::
 
     # set public Identity API endpoint
     sudo sed -i "s/#auth_uri\s*=.*/auth_uri=http:\/\/127.0.0.1:5000\/v2.0/" \
+             /etc/magnum/magnum.conf
+
+    # set trustee domain id
+    sudo sed -i "s/#trustee_domain_id\s*=.*/trustee_domain_id=${TRUSTEE_DOMAIN_ID}/" \
+             /etc/magnum/magnum.conf
+
+    # set trustee domain admin id
+    sudo sed -i "s/#trustee_domain_admin_id\s*=.*/trustee_domain_admin_id=${TRUSTEE_DOMAIN_ADMIN_ID}/" \
+             /etc/magnum/magnum.conf
+
+    # set trustee domain admin password
+    sudo sed -i "s/#trustee_domain_admin_password\s*=.*/trustee_domain_admin_password=password/" \
+             /etc/magnum/magnum.conf
+
+    # set correct region name to clients
+    sudo sed -i "s/#region_name\s*=.*/region_name=RegionOne/" \
              /etc/magnum/magnum.conf
 
     # set oslo messaging notifications driver (if using ceilometer)
