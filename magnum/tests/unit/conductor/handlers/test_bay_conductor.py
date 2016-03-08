@@ -194,14 +194,15 @@ class TestHandler(db_base.DbTestCase):
         # will get notice that baymodel_id is updated and will update it
         # in db.
         self.bay.baymodel_id = self.baymodel.uuid
-        self.handler.bay_create(self.context,
-                                self.bay, timeout)
+        bay = self.handler.bay_create(self.context,
+                                      self.bay, timeout)
 
         mock_create_stack.assert_called_once_with(self.context,
                                                   mock.sentinel.osc,
                                                   self.bay, timeout)
         mock_cert_manager.generate_certificates_to_bay.assert_called_once_with(
             self.bay)
+        self.assertEqual(bay_status.CREATE_IN_PROGRESS, bay.status)
 
     @patch('magnum.conductor.handlers.bay_conductor.cert_manager')
     @patch('magnum.conductor.handlers.bay_conductor._create_stack')

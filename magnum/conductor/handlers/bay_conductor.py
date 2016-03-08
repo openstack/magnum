@@ -153,6 +153,7 @@ class Handler(object):
             raise
 
         bay.stack_id = created_stack['stack']['id']
+        bay.status = bay_status.CREATE_IN_PROGRESS
         bay.create()
 
         self._poll_and_check(osc, bay)
