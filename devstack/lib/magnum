@@ -212,16 +212,6 @@ function update_heat_policy {
     sed -i 's/\("stacks:global_index":\).*$/\1 "role:admin",/' $HEAT_CONF_DIR/policy.json
 }
 
-function create_magnum_conf_magnum_network {
-    iniset $MAGNUM_CONF DEFAULT network_manager "magnum.network.manager.$NETWORK_MANAGER"
-    iniset $MAGNUM_CONF DEFAULT public_interface "$PUBLIC_INTERFACE"
-    iniset $MAGNUM_CONF DEFAULT vlan_interface "$VLAN_INTERFACE"
-    iniset $MAGNUM_CONF DEFAULT flat_network_bridge "$FLAT_NETWORK_BRIDGE"
-    if [ -n "$FLAT_INTERFACE" ]; then
-        iniset $MAGNUM_CONF DEFAULT flat_interface "$FLAT_INTERFACE"
-    fi
-}
-
 # create_magnum_cache_dir() - Part of the init_magnum() process
 function create_magnum_cache_dir {
     # Create cache dir
