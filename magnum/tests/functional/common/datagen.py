@@ -136,6 +136,21 @@ def baymodel_name_patch_data(name=data_utils.rand_name('bay')):
     return baymodelpatch_model.BayModelPatchCollection.from_dict(data)
 
 
+def baymodel_flavor_patch_data(flavor=data_utils.rand_name('bay')):
+    """Generates random baymodel patch data
+
+    :param flavor: flavor to replace in patch
+    :returns: BayModelPatchCollection with generated data
+    """
+
+    data = [{
+        "path": "/flavor_id",
+        "value": flavor,
+        "op": "replace"
+    }]
+    return baymodelpatch_model.BayModelPatchCollection.from_dict(data)
+
+
 def baymodel_data_with_valid_keypair_image_flavor():
     """Generates random baymodel data with valid keypair,image and flavor
 
