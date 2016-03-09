@@ -46,7 +46,34 @@ class TestSwarmAPIs(BayTest):
     @classmethod
     def setUpClass(cls):
         super(TestSwarmAPIs, cls).setUpClass()
-        url = cls.cs.bays.get(cls.bay.uuid).api_address
+        cls.bay_is_ready = None
+
+    def setUp(self):
+        super(TestSwarmAPIs, self).setUp()
+        if self.bay_is_ready is True:
+            return
+        # Note(eliqiao): In our test cases, docker client or magnum client will
+        # try to connect to swarm service which is running on master node,
+        # the endpoint is bay.api_address(listen port is included), but the
+        # service is not ready right after the bay was created, sleep for an
+        # acceptable time to wait for service being started.
+        # This is required, without this any api call will fail as
+        # 'ConnectionError: [Errno 111] Connection refused'.
+        msg = ("If you see this error in the functional test, it means "
+               "the docker service took too long to come up. This may not "
+               "be an actual error, so an option is to rerun the "
+               "functional test.")
+        if self.bay_is_ready is False:
+            # In such case, no need to test below cases on gate, raise a
+            # meanful exception message to indicate ca setup failed after
+            # bay creation, better to do a `recheck`
+            # We don't need to test since bay is not ready.
+            raise Exception(msg)
+
+        # We don't set bay_is_ready in such case
+        self.bay_is_ready = False
+
+        url = self.cs.bays.get(self.bay.uuid).api_address
 
         # Note(eliqiao): docker_utils.CONF.docker.default_timeout is 10,
         # tested this default configure option not works on gate, it will
@@ -55,54 +82,38 @@ class TestSwarmAPIs(BayTest):
         # create a container, set it as 180s.
 
         docker_api_time_out = 180
-        cls.docker_client = docker_utils.DockerHTTPClient(
+        self.docker_client = docker_utils.DockerHTTPClient(
             url,
             CONF.docker.docker_remote_api_version,
             docker_api_time_out,
-            client_key=cls.key_file,
-            client_cert=cls.cert_file,
-            ca_cert=cls.ca_file)
+            client_key=self.key_file,
+            client_cert=self.cert_file,
+            ca_cert=self.ca_file)
 
-        cls.docker_client_non_tls = docker_utils.DockerHTTPClient(
+        self.docker_client_non_tls = docker_utils.DockerHTTPClient(
             url,
             CONF.docker.docker_remote_api_version,
             docker_api_time_out)
 
-        # Note(eliqiao): In our test cases, docker client or magnum client will
-        # try to connect to swarm service which is running on master node,
-        # the endpoint is bay.api_address(listen port is included), but the
-        # service is not ready right after the bay was created, sleep for an
-        # acceptable time to wait for service being started.
-        # This is required, without this any api call will fail as
-        # 'ConnectionError: [Errno 111] Connection refused'.
-
-        bay_is_ready = False
-
         for i in range(150):
             try:
-                cls.docker_client.containers()
+                self.docker_client.containers()
                 # Note(eliqiao): Right after the connection is ready, wait
                 # for a while (at least 5s) to aovid this error:
                 # docker.errors.APIError: 500 Server Error: Internal
                 # Server Error ("No healthy node available in the cluster")
                 time.sleep(10)
-                bay_is_ready = True
+                self.bay_is_ready = True
                 break
             except req_exceptions.ConnectionError:
                 time.sleep(2)
-        # In such case, no need to test below cases on gate, raise a meanful
-        # exception message to indicate ca setup failed after bay creation,
-        # Better to do a `recheck`
-        if not bay_is_ready:
-            msg = ("If you see this error in the functional test, it means "
-                   "the docker service took too long to come up. This may not "
-                   "be an actual error, so an option is to rerun the "
-                   "functional test.")
+
+        if self.bay_is_ready is False:
             raise Exception(msg)
 
     def _create_container(self, **kwargs):
         name = kwargs.get('name', 'test_container')
-        image = kwargs.get('image', 'docker.io/cirros:latest')
+        image = kwargs.get('image', 'docker.io/cirros')
         command = kwargs.get('command', 'ping -c 1000 8.8.8.8')
         return self.docker_client.create_container(name=name,
                                                    image=image,
@@ -112,7 +123,8 @@ class TestSwarmAPIs(BayTest):
         # Leverage docker client to create a container on the bay we created,
         # and try to start and stop it then delete it.
 
-        resp = self._create_container(name="test_start_stop",
+        resp = self._create_container(name="test_api_start_stop",
+                                      image="docker.io/cirros",
                                       command="ping -c 1000 8.8.8.8")
 
         self.assertIsNotNone(resp)
