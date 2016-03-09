@@ -56,7 +56,7 @@ region_name = $OS_REGION_NAME
 image_id = $IMAGE_ID
 nic_id = $NIC_ID
 keypair_id = default
-flavor_id = m1.magnum2
+flavor_id = s1.magnum
 master_flavor_id = m1.magnum
 copy_logs = true
 csr_location = $MAGNUM_DIR/default.csr
@@ -131,7 +131,7 @@ function add_flavor {
     # Create magnum specific flavor for use in functional tests.
     echo_summary "Create a flavor"
     nova flavor-create  m1.magnum 100 1024 8 1
-    nova flavor-create  m1.magnum2 200 512 8 1
+    nova flavor-create  s1.magnum 200 512 8 1
 }
 
 if ! function_exists echo_summary; then
@@ -185,7 +185,7 @@ if [[ "api" == "$coe" ]]; then
     iniset $BASE/new/tempest/etc/tempest.conf magnum image_id $IMAGE_ID
     iniset $BASE/new/tempest/etc/tempest.conf magnum nic_id $NIC_ID
     iniset $BASE/new/tempest/etc/tempest.conf magnum keypair_id default
-    iniset $BASE/new/tempest/etc/tempest.conf magnum flavor_id m1.magnum2
+    iniset $BASE/new/tempest/etc/tempest.conf magnum flavor_id s1.magnum
     iniset $BASE/new/tempest/etc/tempest.conf magnum master_flavor_id m1.magnum
     iniset $BASE/new/tempest/etc/tempest.conf magnum csr_location $CSR_FILE
     iniset $BASE/new/tempest/etc/tempest.conf magnum copy_logs True
