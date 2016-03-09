@@ -14,8 +14,6 @@
 from oslo_config import cfg
 
 from magnum.common import rpc_service
-from magnum.conductor import utils as conductor_utils
-from magnum import objects
 
 
 # The Backend API class serves as a AMQP client for communicating
@@ -36,14 +34,8 @@ class API(rpc_service.API):
         return self._call('bay_create', bay=bay,
                           bay_create_timeout=bay_create_timeout)
 
-    def bay_list(self, context, limit, marker, sort_key, sort_dir):
-        return objects.Bay.list(context, limit, marker, sort_key, sort_dir)
-
     def bay_delete(self, uuid):
         return self._call('bay_delete', uuid=uuid)
-
-    def bay_show(self, context, uuid):
-        return objects.Bay.get_by_uuid(context, uuid)
 
     def bay_update(self, bay):
         return self._call('bay_update', bay=bay)
@@ -113,15 +105,6 @@ class API(rpc_service.API):
     def container_create(self, container):
         return self._call('container_create', container=container)
 
-    def container_list(self, context, limit, marker, sort_key, sort_dir,
-                       bay_ident):
-        filters = None
-        if bay_ident is not None:
-            bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-            filters = {'bay_uuid': bay_uuid}
-        return objects.Container.list(context, limit, marker, sort_key,
-                                      sort_dir, filters=filters)
-
     def container_delete(self, container_uuid):
         return self._call('container_delete', container_uuid=container_uuid)
 
@@ -158,9 +141,6 @@ class API(rpc_service.API):
     def x509keypair_delete(self, uuid):
         return self._call('x509keypair_delete', uuid=uuid)
 
-    def x509keypair_list(self, context, limit, marker, sort_key, sort_dir):
-        return objects.X509KeyPair.list(context, limit, marker,
-                                        sort_key, sort_dir)
     # CA operations
 
     def sign_certificate(self, bay, certificate):
@@ -168,11 +148,6 @@ class API(rpc_service.API):
 
     def get_ca_certificate(self, bay):
         return self._call('get_ca_certificate', bay=bay)
-
-    # magnum-services
-    def magnum_services_list(self, context, limit, marker, sort_key, sort_dir):
-        return objects.MagnumService.list(context, limit, marker, sort_key,
-                                          sort_dir)
 
     # Versioned Objects indirection API
 

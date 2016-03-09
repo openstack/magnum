@@ -286,16 +286,21 @@ class ContainersController(rest.RestController):
         limit = api_utils.validate_limit(limit)
         sort_dir = api_utils.validate_sort_dir(sort_dir)
 
+        filters = None
         marker_obj = None
         if marker:
             marker_obj = objects.Container.get_by_uuid(context,
                                                        marker)
+        if bay_ident:
+            bay_obj = api_utils.get_resource('Bay', bay_ident)
+            filters = {'bay_uuid': bay_obj.uuid}
 
-        containers = pecan.request.rpcapi.container_list(context, limit,
-                                                         marker_obj,
-                                                         sort_key=sort_key,
-                                                         sort_dir=sort_dir,
-                                                         bay_ident=bay_ident)
+        containers = objects.Container.list(context,
+                                            limit,
+                                            marker_obj,
+                                            sort_key,
+                                            sort_dir,
+                                            filters=filters)
 
         for i, c in enumerate(containers):
             try:

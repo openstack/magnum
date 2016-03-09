@@ -174,7 +174,7 @@ class X509KeyPairController(rest.RestController):
             marker_obj = objects.X509KeyPair.get_by_uuid(pecan.request.context,
                                                          marker)
 
-        x509keypairs = pecan.request.rpcapi.x509keypair_list(
+        x509keypairs = objects.X509KeyPair.list(
             pecan.request.context, limit,
             marker_obj, sort_key=sort_key,
             sort_dir=sort_dir)

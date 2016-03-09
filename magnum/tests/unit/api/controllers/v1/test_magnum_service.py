@@ -14,7 +14,7 @@ import mock
 
 from magnum.api.controllers.v1 import magnum_services as mservice
 from magnum.api import servicegroup as servicegroup
-from magnum.conductor import api as rpcapi
+from magnum import objects
 from magnum.tests import base
 from magnum.tests.unit.api import base as api_base
 from magnum.tests.unit.api import utils as apiutils
@@ -60,7 +60,7 @@ class TestMagnumServiceController(api_base.FunctionalTest):
             reclist.append(rec)
         return reclist
 
-    @mock.patch.object(rpcapi.API, 'magnum_services_list')
+    @mock.patch.object(objects.MagnumService, 'list')
     @mock.patch.object(servicegroup.ServiceGroup, 'service_is_up')
     def test_get_one(self, svc_up, rpc_patcher):
         rpc_patcher.return_value = self._rpc_api_reply()
@@ -70,7 +70,7 @@ class TestMagnumServiceController(api_base.FunctionalTest):
         self.assertEqual(1, len(response['mservices']))
         self.assertEqual(1, response['mservices'][0]['id'])
 
-    @mock.patch.object(rpcapi.API, 'magnum_services_list')
+    @mock.patch.object(objects.MagnumService, 'list')
     @mock.patch.object(servicegroup.ServiceGroup, 'service_is_up')
     def test_get_many(self, svc_up, rpc_patcher):
         svc_num = 5
