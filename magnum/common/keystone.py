@@ -31,7 +31,7 @@ trust_opts = [
     cfg.StrOpt('trustee_domain_admin_id',
                help=_('Id of the admin with roles sufficient to manage users'
                       ' in the trustee_domain')),
-    cfg.StrOpt('trustee_domain_admin_password',
+    cfg.StrOpt('trustee_domain_admin_password', secret=True,
                help=_('Password of trustee_domain_admin')),
     cfg.ListOpt('roles',
                 default=[],
