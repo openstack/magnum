@@ -17,6 +17,7 @@ from tempest_lib.common.utils import data_utils
 from tempest_lib import exceptions
 import testtools
 
+from magnum.objects.fields import BayStatus
 from magnum.tests.functional.common import base
 from magnum.tests.functional.common import datagen
 
@@ -94,7 +95,7 @@ class BayTest(base.BaseMagnumTest):
         self.assertEqual(resp.status, 201)
         self.assertIsNotNone(model.uuid)
         self.bays.append(model.uuid)
-        self.assertIsNone(model.status)
+        self.assertEqual(BayStatus.CREATE_IN_PROGRESS, model.status)
         self.assertIsNone(model.status_reason)
         self.assertEqual(model.baymodel_id, self.baymodel.uuid)
         self.bay_uuid = model.uuid
