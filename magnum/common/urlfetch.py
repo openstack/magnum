@@ -53,7 +53,7 @@ def get(url, allowed_schemes=('http', 'https')):
     if components.scheme not in allowed_schemes:
         raise URLFetchError(_('Invalid URL scheme %s') % components.scheme)
 
-    if components.scheme == 'file':
+    if components.scheme == 'file':  # nosec
         try:
             return urllib.request.urlopen(url).read()
         except urllib.error.URLError as uex:
