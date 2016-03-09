@@ -44,6 +44,7 @@ MAGNUM_AUTH_CACHE_DIR=${MAGNUM_AUTH_CACHE_DIR:-/var/cache/magnum}
 MAGNUM_CONF_DIR=/etc/magnum
 MAGNUM_CONF=$MAGNUM_CONF_DIR/magnum.conf
 MAGNUM_POLICY_JSON=$MAGNUM_CONF_DIR/policy.json
+MAGNUM_API_PASTE=$MAGNUM_CONF_DIR/api-paste.ini
 
 if is_ssl_enabled_service "magnum" || is_service_enabled tls-proxy; then
     MAGNUM_SERVICE_PROTOCOL="https"
@@ -94,6 +95,8 @@ function configure_magnum {
     install_default_policy magnum
     # Rebuild the config file from scratch
     create_magnum_conf
+
+    create_api_paste_conf
 
     update_heat_policy
 }
@@ -204,6 +207,11 @@ function create_magnum_conf {
     iniset $MAGNUM_CONF trust trustee_domain_admin_id $trustee_domain_admin_id
     iniset $MAGNUM_CONF trust trustee_domain_admin_password $MAGNUM_TRUSTEE_DOMAIN_ADMIN_PASSWORD
     iniset $MAGNUM_CONF cinder_client region_name $REGION_NAME
+}
+
+function create_api_paste_conf {
+    # copy api_paste.ini
+    cp $MAGNUM_DIR/etc/magnum/api-paste.ini $MAGNUM_API_PASTE
 }
 
 function update_heat_policy {

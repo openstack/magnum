@@ -9,14 +9,16 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
+import os
 
 from oslo_config import cfg
-from oslo_middleware import cors
+from oslo_log import log
+from paste import deploy
 import pecan
 
-from magnum.api import auth
 from magnum.api import config as api_config
 from magnum.api import middleware
+from magnum.i18n import _
 
 # Register options for the service
 API_SERVICE_OPTS = [
@@ -29,7 +31,11 @@ API_SERVICE_OPTS = [
     cfg.IntOpt('max_limit',
                default=1000,
                help='The maximum number of items returned in a single '
-                    'response from a collection resource.')
+                    'response from a collection resource.'),
+    cfg.StrOpt('api_paste_config',
+               default="api-paste.ini",
+               help="Configuration file for WSGI definition of API."
+               )
 ]
 
 CONF = cfg.CONF
@@ -37,6 +43,8 @@ opt_group = cfg.OptGroup(name='api',
                          title='Options for the magnum-api service')
 CONF.register_group(opt_group)
 CONF.register_opts(API_SERVICE_OPTS, opt_group)
+
+LOG = log.getLogger(__name__)
 
 
 def get_pecan_config():
@@ -58,17 +66,22 @@ def setup_app(config=None):
         **app_conf
     )
 
-    app = auth.install(app, CONF, config.app.acl_public_routes)
-
-    # CORS must be the last one.
-    app = cors.CORS(app, CONF)
-    app.set_latent(
-        allow_headers=['X-Auth-Token', 'X-Identity-Status', 'X-Roles',
-                       'X-Service-Catalog', 'X-User-Id', 'X-Tenant-Id',
-                       'X-OpenStack-Request-ID', 'X-Server-Management-Url'],
-        allow_methods=['GET', 'PUT', 'POST', 'DELETE', 'PATCH'],
-        expose_headers=['X-Auth-Token', 'X-Subject-Token', 'X-Service-Token',
-                        'X-OpenStack-Request-ID', 'X-Server-Management-Url']
-    )
-
     return app
+
+
+def load_app():
+    cfg_file = None
+    cfg_path = cfg.CONF.api.api_paste_config
+    if not os.path.isabs(cfg_path):
+        cfg_file = CONF.find_file(cfg_path)
+    elif os.path.exists(cfg_path):
+        cfg_file = cfg_path
+
+    if not cfg_file:
+        raise cfg.ConfigFilesNotFoundError([cfg.CONF.api_paste_config])
+    LOG.info(_("Full WSGI config used: %s") % cfg_file)
+    return deploy.loadapp("config:" + cfg_file)
+
+
+def app_factory(global_config, **local_conf):
+    return setup_app()

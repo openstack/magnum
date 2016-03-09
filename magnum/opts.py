@@ -16,7 +16,6 @@
 import itertools
 
 import magnum.api.app
-import magnum.api.auth
 import magnum.api.validation
 import magnum.common.cert_manager
 from magnum.common.cert_manager import local_cert_manager
@@ -35,8 +34,7 @@ import magnum.db
 def list_opts():
     return [
         ('DEFAULT',
-         itertools.chain(magnum.api.auth.AUTH_OPTS,
-                         magnum.common.paths.PATH_OPTS,
+         itertools.chain(magnum.common.paths.PATH_OPTS,
                          magnum.common.utils.UTILS_OPTS,
                          magnum.common.rpc_service.periodic_opts,
                          magnum.common.service.service_opts,
