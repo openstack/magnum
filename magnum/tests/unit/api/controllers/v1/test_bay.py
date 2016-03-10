@@ -706,8 +706,9 @@ class TestBayPolicyEnforcement(api_base.FunctionalTest):
             "bay:get_all", self.get_json, '/bays', expect_errors=True)
 
     def test_policy_disallow_get_one(self):
+        self.bay = obj_utils.create_test_bay(self.context)
         self._common_policy_check(
-            "bay:get", self.get_json, '/bays/%s' % utils.generate_uuid(),
+            "bay:get", self.get_json, '/bays/%s' % self.bay.uuid,
             expect_errors=True)
 
     def test_policy_disallow_detail(self):
@@ -739,5 +740,33 @@ class TestBayPolicyEnforcement(api_base.FunctionalTest):
         self.mock_bay_delete = p.start()
         self.mock_bay_delete.side_effect = self._simulate_rpc_bay_delete
         self.addCleanup(p.stop)
+        self.bay = obj_utils.create_test_bay(self.context)
         self._common_policy_check(
-            "bay:delete", self.delete, '/bays/test_bay', expect_errors=True)
+            "bay:delete", self.delete, '/bays/%s' % self.bay.uuid,
+            expect_errors=True)
+
+    def _owner_check(self, rule, func, *args, **kwargs):
+        self.policy.set_rules({rule: "user_id:%(user_id)s"})
+        response = func(*args, **kwargs)
+        self.assertEqual(403, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(
+            "Policy doesn't allow %s to be performed." % rule,
+            response.json['errors'][0]['detail'])
+
+    def test_policy_only_owner_get_one(self):
+        bay = obj_utils.create_test_bay(self.context, user_id='another')
+        self._owner_check("bay:get", self.get_json, '/bays/%s' % bay.uuid,
+                          expect_errors=True)
+
+    def test_policy_only_owner_update(self):
+        bay = obj_utils.create_test_bay(self.context, user_id='another')
+        self._owner_check(
+            "bay:update", self.patch_json, '/bays/%s' % bay.uuid,
+            [{'path': '/name', 'value': "new_name", 'op': 'replace'}],
+            expect_errors=True)
+
+    def test_policy_only_owner_delete(self):
+        bay = obj_utils.create_test_bay(self.context, user_id='another')
+        self._owner_check("bay:delete", self.delete, '/bays/%s' % bay.uuid,
+                          expect_errors=True)

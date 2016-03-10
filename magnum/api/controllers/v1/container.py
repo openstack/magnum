@@ -168,18 +168,23 @@ class ContainerCollection(collection.Collection):
         return sample
 
 
+def check_policy_on_container(container, action):
+    context = pecan.request.context
+    policy.enforce(context, action, container, action=action)
+
+
 class StartController(object):
     @expose.expose(types.uuid_or_name, wtypes.text)
     def _default(self, container_ident):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
-        container_uuid = api_utils.get_resource('Container',
-                                                container_ident).uuid
-
+        container = api_utils.get_resource('Container',
+                                           container_ident)
+        check_policy_on_container(container, "container:start")
         LOG.debug('Calling conductor.container_start with %s',
-                  container_uuid)
-        return pecan.request.rpcapi.container_start(container_uuid)
+                  container.uuid)
+        return pecan.request.rpcapi.container_start(container.uuid)
 
 
 class StopController(object):
@@ -188,11 +193,12 @@ class StopController(object):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
-        container_uuid = api_utils.get_resource('Container',
-                                                container_ident).uuid
+        container = api_utils.get_resource('Container',
+                                           container_ident)
+        check_policy_on_container(container, "container:stop")
         LOG.debug('Calling conductor.container_stop with %s' %
-                  container_uuid)
-        return pecan.request.rpcapi.container_stop(container_uuid)
+                  container.uuid)
+        return pecan.request.rpcapi.container_stop(container.uuid)
 
 
 class RebootController(object):
@@ -201,11 +207,12 @@ class RebootController(object):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
-        container_uuid = api_utils.get_resource('Container',
-                                                container_ident).uuid
+        container = api_utils.get_resource('Container',
+                                           container_ident)
+        check_policy_on_container(container, "container:reboot")
         LOG.debug('Calling conductor.container_reboot with %s' %
-                  container_uuid)
-        return pecan.request.rpcapi.container_reboot(container_uuid)
+                  container.uuid)
+        return pecan.request.rpcapi.container_reboot(container.uuid)
 
 
 class PauseController(object):
@@ -214,11 +221,12 @@ class PauseController(object):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
-        container_uuid = api_utils.get_resource('Container',
-                                                container_ident).uuid
+        container = api_utils.get_resource('Container',
+                                           container_ident)
+        check_policy_on_container(container, "container:pause")
         LOG.debug('Calling conductor.container_pause with %s' %
-                  container_uuid)
-        return pecan.request.rpcapi.container_pause(container_uuid)
+                  container.uuid)
+        return pecan.request.rpcapi.container_pause(container.uuid)
 
 
 class UnpauseController(object):
@@ -227,11 +235,12 @@ class UnpauseController(object):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
-        container_uuid = api_utils.get_resource('Container',
-                                                container_ident).uuid
+        container = api_utils.get_resource('Container',
+                                           container_ident)
+        check_policy_on_container(container, "container:unpause")
         LOG.debug('Calling conductor.container_unpause with %s' %
-                  container_uuid)
-        return pecan.request.rpcapi.container_unpause(container_uuid)
+                  container.uuid)
+        return pecan.request.rpcapi.container_unpause(container.uuid)
 
 
 class LogsController(object):
@@ -240,11 +249,12 @@ class LogsController(object):
         if pecan.request.method != 'GET':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
-        container_uuid = api_utils.get_resource('Container',
-                                                container_ident).uuid
+        container = api_utils.get_resource('Container',
+                                           container_ident)
+        check_policy_on_container(container, "container:logs")
         LOG.debug('Calling conductor.container_logs with %s' %
-                  container_uuid)
-        return pecan.request.rpcapi.container_logs(container_uuid)
+                  container.uuid)
+        return pecan.request.rpcapi.container_logs(container.uuid)
 
 
 class ExecuteController(object):
@@ -253,11 +263,18 @@ class ExecuteController(object):
         if pecan.request.method != 'PUT':
             pecan.abort(405, ('HTTP method %s is not allowed'
                               % pecan.request.method))
-        container_uuid = api_utils.get_resource('Container',
-                                                container_ident).uuid
+        container = api_utils.get_resource('Container',
+                                           container_ident)
+        check_policy_on_container(container, "container:execute")
         LOG.debug('Calling conductor.container_exec with %s command %s'
-                  % (container_uuid, command))
-        return pecan.request.rpcapi.container_exec(container_uuid, command)
+                  % (container.uuid, command))
+        return pecan.request.rpcapi.container_exec(container.uuid, command)
+
+
+def check_policy_on_bay(bay_id, action):
+    context = pecan.request.context
+    bay = api_utils.get_resource('Bay', bay_id)
+    policy.enforce(context, action, bay, action=action)
 
 
 class ContainersController(rest.RestController):
@@ -319,7 +336,6 @@ class ContainersController(rest.RestController):
 
     @expose.expose(ContainerCollection, types.uuid, int,
                    wtypes.text, wtypes.text, types.uuid_or_name)
-    @policy.enforce_wsgi("container")
     def get_all(self, marker=None, limit=None, sort_key='id',
                 sort_dir='asc', bay_ident=None):
         """Retrieve a list of containers.
@@ -330,12 +346,14 @@ class ContainersController(rest.RestController):
         :param sort_dir: direction to sort. "asc" or "desc". Default: asc.
         :param bay_indent: UUID or logical name of bay.
         """
+        context = pecan.request.context
+        policy.enforce(context, "container:get_all",
+                       action="container:get_all")
         return self._get_containers_collection(marker, limit, sort_key,
                                                sort_dir, bay_ident=bay_ident)
 
     @expose.expose(ContainerCollection, types.uuid, int,
                    wtypes.text, wtypes.text)
-    @policy.enforce_wsgi("container")
     def detail(self, marker=None, limit=None, sort_key='id',
                sort_dir='asc'):
         """Retrieve a list of containers with detail.
@@ -345,6 +363,10 @@ class ContainersController(rest.RestController):
         :param sort_key: column to sort results by. Default: id.
         :param sort_dir: direction to sort. "asc" or "desc". Default: asc.
         """
+        context = pecan.request.context
+        policy.enforce(context, "container:detail",
+                       action="container:detail")
+
         parent = pecan.request.path.split('/')[:-1][-1]
         if parent != "containers":
             raise exception.HTTPNotFound
@@ -356,7 +378,6 @@ class ContainersController(rest.RestController):
                                                resource_url)
 
     @expose.expose(Container, types.uuid_or_name)
-    @policy.enforce_wsgi("container", "get")
     def get_one(self, container_ident):
         """Retrieve information about the given container.
 
@@ -364,6 +385,7 @@ class ContainersController(rest.RestController):
         """
         container = api_utils.get_resource('Container',
                                            container_ident)
+        check_policy_on_container(container, "container:get")
         res_container = pecan.request.rpcapi.container_show(container.uuid)
         return Container.convert_with_links(res_container)
 
@@ -375,10 +397,8 @@ class ContainersController(rest.RestController):
         :param container: a container within the request body.
         """
         container_dict = container.as_dict()
+        check_policy_on_bay(container_dict['bay_uuid'], "container:create")
         context = pecan.request.context
-        bay = api_utils.get_resource('Bay', container_dict['bay_uuid'])
-        policy.enforce(context, 'container:create', bay,
-                       action='container:create')
         container_dict['project_id'] = context.project_id
         container_dict['user_id'] = context.user_id
         new_container = objects.Container(context, **container_dict)
@@ -401,10 +421,7 @@ class ContainersController(rest.RestController):
         """
         container = api_utils.get_resource('Container',
                                            container_ident)
-        context = pecan.request.context
-        bay = api_utils.get_resource('Bay', container.bay_uuid)
-        policy.enforce(context, 'container:update', bay,
-                       action='container:update')
+        check_policy_on_container(container, "container:update")
         try:
             container_dict = container.as_dict()
             new_container = Container(**api_utils.apply_jsonpatch(
@@ -435,9 +452,6 @@ class ContainersController(rest.RestController):
         """
         container = api_utils.get_resource('Container',
                                            container_ident)
-        context = pecan.request.context
-        bay = api_utils.get_resource('Bay', container.bay_uuid)
-        policy.enforce(context, 'container:delete', bay,
-                       action='container:delete')
+        check_policy_on_container(container, "container:delete")
         pecan.request.rpcapi.container_delete(container.uuid)
         container.destroy()

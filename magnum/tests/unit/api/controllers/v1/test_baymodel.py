@@ -857,9 +857,10 @@ class TestBayModelPolicyEnforcement(api_base.FunctionalTest):
             expect_errors=True)
 
     def test_policy_disallow_get_one(self):
+        baymodel = obj_utils.create_test_baymodel(self.context)
         self._common_policy_check(
             "baymodel:get", self.get_json,
-            '/baymodels/%s' % utils.generate_uuid(),
+            '/baymodels/%s' % baymodel.uuid,
             expect_errors=True)
 
     def test_policy_disallow_detail(self):
@@ -885,8 +886,38 @@ class TestBayModelPolicyEnforcement(api_base.FunctionalTest):
             expect_errors=True)
 
     def test_policy_disallow_delete(self):
-        baymodel = obj_utils.create_test_baymodel(self.context,
-                                                  uuid='137-246-789')
+        baymodel = obj_utils.create_test_baymodel(self.context)
         self._common_policy_check(
             "baymodel:delete", self.delete,
             '/baymodels/%s' % baymodel.uuid, expect_errors=True)
+
+    def _owner_check(self, rule, func, *args, **kwargs):
+        self.policy.set_rules({rule: "user_id:%(user_id)s"})
+        response = func(*args, **kwargs)
+        self.assertEqual(403, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(
+            "Policy doesn't allow %s to be performed." % rule,
+            response.json['errors'][0]['detail'])
+
+    def test_policy_only_owner_get_one(self):
+        baymodel = obj_utils.create_test_baymodel(self.context,
+                                                  user_id='another')
+        self._owner_check("baymodel:get", self.get_json,
+                          '/baymodels/%s' % baymodel.uuid, expect_errors=True)
+
+    def test_policy_only_owner_update(self):
+        baymodel = obj_utils.create_test_baymodel(self.context,
+                                                  user_id='another')
+        self._owner_check(
+            "baymodel:update", self.patch_json,
+            '/baymodels/%s' % baymodel.uuid,
+            [{'path': '/name', 'value': "new_name", 'op': 'replace'}],
+            expect_errors=True)
+
+    def test_policy_only_owner_delete(self):
+        baymodel = obj_utils.create_test_baymodel(self.context,
+                                                  user_id='another')
+        self._owner_check(
+            "baymodel:delete", self.delete, '/baymodels/%s' % baymodel.uuid,
+            expect_errors=True)

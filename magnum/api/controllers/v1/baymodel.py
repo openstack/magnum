@@ -244,7 +244,6 @@ class BayModelsController(rest.RestController):
 
     @expose.expose(BayModelCollection, types.uuid, int, wtypes.text,
                    wtypes.text)
-    @policy.enforce_wsgi("baymodel")
     def get_all(self, marker=None, limit=None, sort_key='id',
                 sort_dir='asc'):
         """Retrieve a list of baymodels.
@@ -254,12 +253,14 @@ class BayModelsController(rest.RestController):
         :param sort_key: column to sort results by. Default: id.
         :param sort_dir: direction to sort. "asc" or "desc". Default: asc.
         """
+        context = pecan.request.context
+        policy.enforce(context, 'baymodel:get_all',
+                       action='baymodel:get_all')
         return self._get_baymodels_collection(marker, limit, sort_key,
                                               sort_dir)
 
     @expose.expose(BayModelCollection, types.uuid, int, wtypes.text,
                    wtypes.text)
-    @policy.enforce_wsgi("baymodel")
     def detail(self, marker=None, limit=None, sort_key='id',
                sort_dir='asc'):
         """Retrieve a list of baymodels with detail.
@@ -269,6 +270,10 @@ class BayModelsController(rest.RestController):
         :param sort_key: column to sort results by. Default: id.
         :param sort_dir: direction to sort. "asc" or "desc". Default: asc.
         """
+        context = pecan.request.context
+        policy.enforce(context, 'baymodel:detail',
+                       action='baymodel:detail')
+
         # NOTE(lucasagomes): /detail should only work against collections
         parent = pecan.request.path.split('/')[:-1][-1]
         if parent != "baymodels":
@@ -281,17 +286,19 @@ class BayModelsController(rest.RestController):
                                               resource_url)
 
     @expose.expose(BayModel, types.uuid_or_name)
-    @policy.enforce_wsgi("baymodel", "get")
     def get_one(self, baymodel_ident):
         """Retrieve information about the given baymodel.
 
         :param baymodel_ident: UUID or logical name of a baymodel.
         """
+        context = pecan.request.context
         baymodel = api_utils.get_resource('BayModel', baymodel_ident)
+        policy.enforce(context, 'baymodel:get', baymodel,
+                       action='baymodel:get')
+
         return BayModel.convert_with_links(baymodel)
 
     @expose.expose(BayModel, body=BayModel, status_code=201)
-    @policy.enforce_wsgi("baymodel", "create")
     @validation.enforce_network_driver_types_create()
     @validation.enforce_volume_driver_types_create()
     def post(self, baymodel):
@@ -299,6 +306,9 @@ class BayModelsController(rest.RestController):
 
         :param baymodel: a baymodel within the request body.
         """
+        context = pecan.request.context
+        policy.enforce(context, 'baymodel:create',
+                       action='baymodel:create')
         baymodel_dict = baymodel.as_dict()
         context = pecan.request.context
         cli = clients.OpenStackClients(context)
@@ -323,7 +333,6 @@ class BayModelsController(rest.RestController):
 
     @wsme.validate(types.uuid_or_name, [BayModelPatchType])
     @expose.expose(BayModel, types.uuid_or_name, body=[BayModelPatchType])
-    @policy.enforce_wsgi("baymodel", "update")
     @validation.enforce_network_driver_types_update()
     @validation.enforce_volume_driver_types_update()
     def patch(self, baymodel_ident, patch):
@@ -334,6 +343,8 @@ class BayModelsController(rest.RestController):
         """
         context = pecan.request.context
         baymodel = api_utils.get_resource('BayModel', baymodel_ident)
+        policy.enforce(context, 'baymodel:update', baymodel,
+                       action='baymodel:update')
         try:
             baymodel_dict = baymodel.as_dict()
             new_baymodel = BayModel(**api_utils.apply_jsonpatch(
@@ -364,11 +375,13 @@ class BayModelsController(rest.RestController):
         return BayModel.convert_with_links(baymodel)
 
     @expose.expose(None, types.uuid_or_name, status_code=204)
-    @policy.enforce_wsgi("baymodel")
     def delete(self, baymodel_ident):
         """Delete a baymodel.
 
         :param baymodel_ident: UUID or logical name of a baymodel.
         """
-        rpc_baymodel = api_utils.get_resource('BayModel', baymodel_ident)
-        rpc_baymodel.destroy()
+        context = pecan.request.context
+        baymodel = api_utils.get_resource('BayModel', baymodel_ident)
+        policy.enforce(context, 'baymodel:delete', baymodel,
+                       action='baymodel:delete')
+        baymodel.destroy()
