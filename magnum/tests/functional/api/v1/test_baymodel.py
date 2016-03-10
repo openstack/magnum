@@ -86,7 +86,8 @@ class BayModelTest(base.BaseTempestTest):
         gen_model = datagen.baymodel_data_with_valid_keypair_image_flavor()
         resp, old_model = self._create_baymodel(gen_model)
 
-        patch_model = datagen.baymodel_name_patch_data()
+        path = "/name"
+        patch_model = datagen.baymodel_replace_patch_data(path)
         resp, new_model = self.baymodel_client.patch_baymodel(
             old_model.uuid, patch_model)
         self.assertEqual(200, resp.status)
@@ -120,7 +121,8 @@ class BayModelTest(base.BaseTempestTest):
 
     @testtools.testcase.attr('negative')
     def test_update_baymodel_404(self):
-        patch_model = datagen.baymodel_name_patch_data()
+        path = "/name"
+        patch_model = datagen.baymodel_replace_patch_data(path)
 
         self.assertRaises(
             exceptions.NotFound,
@@ -141,7 +143,8 @@ class BayModelTest(base.BaseTempestTest):
 
     @testtools.testcase.attr('negative')
     def test_update_baymodel_name_not_found(self):
-        patch_model = datagen.baymodel_name_patch_data()
+        path = "/name"
+        patch_model = datagen.baymodel_replace_patch_data(path)
 
         self.assertRaises(
             exceptions.NotFound,

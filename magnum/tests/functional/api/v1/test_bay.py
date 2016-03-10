@@ -193,6 +193,38 @@ class BayTest(base.BaseTempestTest):
         self.assertEqual(204, resp.status)
 
     @testtools.testcase.attr('negative')
+    def test_create_bay_with_nonexisting_keypair(self):
+        gen_model = datagen.baymodel_data_with_valid_keypair_image_flavor()
+        resp, baymodel = self._create_baymodel(gen_model)
+        self.assertEqual(201, resp.status)
+        self.assertIsNotNone(baymodel.uuid)
+
+        gen_model = datagen.valid_bay_data(baymodel_id=baymodel.uuid)
+        gen_model.keypair_id = 'aaa'
+        self.assertRaises(
+            exceptions.BadRequest,
+            self.bay_client.post_bay, gen_model)
+
+        resp, _ = self._delete_baymodel(baymodel.uuid)
+        self.assertEqual(204, resp.status)
+
+    @testtools.testcase.attr('negative')
+    def test_create_bay_with_nonexisting_external_network(self):
+        gen_model = datagen.baymodel_data_with_valid_keypair_image_flavor()
+        resp, baymodel = self._create_baymodel(gen_model)
+        self.assertEqual(201, resp.status)
+        self.assertIsNotNone(baymodel.uuid)
+
+        gen_model = datagen.valid_bay_data(baymodel_id=baymodel.uuid)
+        gen_model.external_network_id = 'aaa'
+        self.assertRaises(
+            exceptions.BadRequest,
+            self.bay_client.post_bay, gen_model)
+
+        resp, _ = self._delete_baymodel(baymodel.uuid)
+        self.assertEqual(204, resp.status)
+
+    @testtools.testcase.attr('negative')
     def test_update_bay_for_nonexisting_bay(self):
         patch_model = datagen.bay_name_patch_data()
 

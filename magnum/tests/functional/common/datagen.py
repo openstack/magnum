@@ -121,32 +121,32 @@ def baymodel_data(**kwargs):
     return model
 
 
-def baymodel_name_patch_data(name=data_utils.rand_name('bay')):
+def baymodel_replace_patch_data(path, value=data_utils.rand_name('bay')):
     """Generates random baymodel patch data
 
-    :param name: name to replace in patch
+    :param path: path to replace
+    :param value: value to replace in patch
     :returns: BayModelPatchCollection with generated data
     """
 
     data = [{
-        "path": "/name",
-        "value": name,
+        "path": path,
+        "value": value,
         "op": "replace"
     }]
     return baymodelpatch_model.BayModelPatchCollection.from_dict(data)
 
 
-def baymodel_flavor_patch_data(flavor=data_utils.rand_name('bay')):
-    """Generates random baymodel patch data
+def baymodel_remove_patch_data(path):
+    """Generates baymodel patch data by removing value
 
-    :param flavor: flavor to replace in patch
+    :param path: path to remove
     :returns: BayModelPatchCollection with generated data
     """
 
     data = [{
-        "path": "/flavor_id",
-        "value": flavor,
-        "op": "replace"
+        "path": path,
+        "op": "remove"
     }]
     return baymodelpatch_model.BayModelPatchCollection.from_dict(data)
 
