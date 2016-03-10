@@ -194,12 +194,19 @@ class TestPatch(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestPatch, self).setUp()
+        p = mock.patch.object(attr_validator, 'validate_os_resources')
+        self.mock_valid_os_res = p.start()
+        self.addCleanup(p.stop)
         self.baymodel = obj_utils.create_test_baymodel(
             self.context,
             name='bay_model_example_A',
             image_id='nerdherd',
             apiserver_port=8080,
             fixed_network='private',
+            flavor_id='m1.magnum',
+            master_flavor_id='m1.magnum',
+            external_network_id='public',
+            keypair_id='test',
             volume_driver='rexray',
             public=False,
             docker_volume_size=20,
@@ -292,6 +299,58 @@ class TestPatch(api_base.FunctionalTest):
                          response['no_proxy'])
         self.assertEqual(self.baymodel.labels,
                          response['labels'])
+
+    def test_replace_baymodel_with_no_exist_flavor_id(self):
+        self.mock_valid_os_res.side_effect = exception.FlavorNotFound("aaa")
+        response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
+                                   [{'path': '/flavor_id', 'value': 'aaa',
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_code)
+        self.assertTrue(response.json['errors'])
+
+    def test_replace_baymodel_with_no_exist_keypair_id(self):
+        self.mock_valid_os_res.side_effect = exception.KeyPairNotFound("aaa")
+        response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
+                                   [{'path': '/keypair_id', 'value': 'aaa',
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(404, response.status_code)
+        self.assertTrue(response.json['errors'])
+
+    def test_replace_baymodel_with_no_exist_external_network_id(self):
+        self.mock_valid_os_res.side_effect = exception.NetworkNotFound("aaa")
+        response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
+                                   [{'path': '/external_network_id',
+                                     'value': 'aaa',
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_code)
+        self.assertTrue(response.json['errors'])
+
+    def test_replace_baymodel_with_no_exist_image_id(self):
+        self.mock_valid_os_res.side_effect = exception.ImageNotFound("aaa")
+        response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
+                                   [{'path': '/image_id', 'value': 'aaa',
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_code)
+        self.assertTrue(response.json['errors'])
+
+    def test_create_baymodel_with_no_os_distro_image(self):
+        image_exce = exception.OSDistroFieldNotFound('img')
+        self.mock_valid_os_res.side_effect = image_exce
+        response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
+                                   [{'path': '/image_id', 'value': 'img',
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_code)
+        self.assertTrue(response.json['errors'])
 
     def test_remove_singular(self):
         baymodel = obj_utils.create_test_baymodel(self.context,
