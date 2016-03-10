@@ -736,11 +736,8 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(404, response.status_int)
 
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_os_resources')
     def test_create_baymodel_with_flavor(self,
-                                         mock_valid_os_res,
                                          mock_image_data):
-        mock_valid_os_res.return_value = None
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
         bdict = apiutils.baymodel_post_data()
@@ -752,11 +749,9 @@ class TestPost(api_base.FunctionalTest):
                          response.json['master_flavor_id'])
 
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_os_resources')
     def test_create_baymodel_with_no_exist_flavor(self,
-                                                  mock_valid_os_res,
                                                   mock_image_data):
-        mock_valid_os_res.side_effect = exception.FlavorNotFound("flavor_id")
+        self.mock_valid_os_res.side_effect = exception.FlavorNotFound("flavor")
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
         bdict = apiutils.baymodel_post_data()
@@ -764,9 +759,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
 
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_os_resources')
     def test_create_baymodel_with_external_network(self,
-                                                   mock_valid_os_res,
                                                    mock_image_data):
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
@@ -777,11 +770,9 @@ class TestPost(api_base.FunctionalTest):
                          response.json['external_network_id'])
 
     @mock.patch('magnum.api.attr_validator.validate_image')
-    @mock.patch('magnum.api.attr_validator.validate_os_resources')
     def test_create_baymodel_with_no_exist_external_network(self,
-                                                            mock_valid_os_res,
                                                             mock_image_data):
-        mock_valid_os_res.side_effect = exception.NetworkNotFound("test")
+        self.mock_valid_os_res.side_effect = exception.NetworkNotFound("test")
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
         bdict = apiutils.baymodel_post_data()
