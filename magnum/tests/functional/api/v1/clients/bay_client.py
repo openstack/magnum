@@ -141,7 +141,7 @@ class BayClient(client.MagnumClient):
             else:
                 return False
         except exceptions.NotFound:
-            self.LOG.warn('Bay %s is not found.' % bay_id)
+            self.LOG.warning('Bay %s is not found.' % bay_id)
             return False
 
     def does_bay_exist(self, bay_id):
@@ -158,13 +158,13 @@ class BayClient(client.MagnumClient):
             else:
                 return False
         except exceptions.NotFound:
-            self.LOG.warn('Bay %s is not found.' % bay_id)
+            self.LOG.warning('Bay %s is not found.' % bay_id)
             return False
 
     def does_bay_not_exist(self, bay_id):
         try:
             self.get_bay(bay_id)
         except exceptions.NotFound:
-            self.LOG.warn('Bay %s is not found.' % bay_id)
+            self.LOG.warning('Bay %s is not found.' % bay_id)
             return True
         return False
