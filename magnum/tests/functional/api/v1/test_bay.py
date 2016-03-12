@@ -177,17 +177,8 @@ class BayTest(base.BaseMagnumTest):
         self.assertEqual(resp.status, 201)
         self.assertIsNotNone(baymodel.uuid)
 
-        patch_model = datagen.baymodel_flavor_patch_data()
-        resp, new_model = self.baymodel_client.patch_baymodel(
-            baymodel.uuid, patch_model)
-        self.assertEqual(200, resp.status)
-
-        resp, model = self.baymodel_client.get_baymodel(new_model.uuid)
-        self.assertEqual(200, resp.status)
-        self.assertEqual(baymodel.uuid, new_model.uuid)
-        self.assertEqual(model.flavor_id, new_model.flavor_id)
-
         gen_model = datagen.valid_bay_data(baymodel_id=baymodel.uuid)
+        gen_model.flavor_id = 'aaa'
         self.assertRaises(
             exceptions.BadRequest,
             self.bay_client.post_bay, gen_model)

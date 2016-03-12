@@ -353,6 +353,8 @@ class BayModelsController(rest.RestController):
         except api_utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)
 
+        new_baymodel_dict = new_baymodel.as_dict()
+        attr_validator.validate_os_resources(context, new_baymodel_dict)
         # check permissions when updating baymodel public flag
         if baymodel.public != new_baymodel.public:
             if not policy.enforce(context, "baymodel:publish", None,
