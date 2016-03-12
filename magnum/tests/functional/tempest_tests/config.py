@@ -41,7 +41,7 @@ MagnumGroup = [
                help="Keypair id to use to log into nova instances."),
 
     cfg.StrOpt("flavor_id",
-               default="m1.magnum2",
+               default="s1.magnum",
                help="Flavor id to use for baymodels."),
 
     cfg.StrOpt("magnum_url",
