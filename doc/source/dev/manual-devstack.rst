@@ -27,9 +27,14 @@ and neutron::
     cat > local.conf << END
     [[local|localrc]]
     # Modify to your environment
+    FIXED_RANGE=10.0.0.0/24
     FLOATING_RANGE=192.168.1.224/27
     PUBLIC_NETWORK_GATEWAY=192.168.1.225
     PUBLIC_INTERFACE=em1
+    PHYSICAL_NETWORK=public
+    OVS_PHYSICAL_BRIDGE=br-ex
+    ENABLE_TENANT_VLANS=True
+    TENANT_VLAN_RANGE=1000:1999
 
     # Credentials
     ADMIN_PASSWORD=password
@@ -41,13 +46,13 @@ and neutron::
     enable_service rabbit
 
     # Ensure we are using neutron networking rather than nova networking
-    # (Neutron is enabled by default since Kilo)
     disable_service n-net
     enable_service q-svc
     enable_service q-agt
     enable_service q-dhcp
     enable_service q-l3
     enable_service q-meta
+    # Note: Default template uses LBaaS.
     enable_service q-lbaas
     enable_service neutron
 
@@ -59,19 +64,6 @@ and neutron::
 
     # Enable barbican services
     enable_plugin barbican https://git.openstack.org/openstack/barbican
-
-    FIXED_RANGE=10.0.0.0/24
-
-    Q_USE_SECGROUP=True
-    ENABLE_TENANT_VLANS=True
-    TENANT_VLAN_RANGE=
-
-    PHYSICAL_NETWORK=public
-    OVS_PHYSICAL_BRIDGE=br-ex
-
-    # Log all output to files
-    LOGFILE=$HOME/logs/devstack.log
-    SCREEN_LOGDIR=$HOME/logs
 
     VOLUME_BACKING_FILE_SIZE=20G
     END
