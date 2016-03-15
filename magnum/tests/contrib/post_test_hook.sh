@@ -234,9 +234,6 @@ sudo cp $MAGNUM_DIR/functional-tests.log /opt/stack/logs/
 # Save functional_creds.conf
 sudo cp $CREDS_FILE /opt/stack/logs/
 
-# Save the logs
-sudo mv ../logs/* /opt/stack/logs/
-
 # Restore xtrace
 $XTRACE
 
