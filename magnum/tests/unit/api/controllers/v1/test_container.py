@@ -731,3 +731,26 @@ class TestContainerEnforcement(api_base.FunctionalTest):
             "container:delete", self.delete,
             '/containers/%s' % container.uuid,
             expect_errors=True)
+
+    def test_policy_only_owner_logs(self):
+        container = obj_utils.create_test_container(self.context,
+                                                    user_id='another')
+        self._owner_check("container:logs", self.get_json,
+                          '/containers/logs/%s' % container.uuid,
+                          expect_errors=True)
+
+    def test_policy_only_owner_execute(self):
+        container = obj_utils.create_test_container(self.context,
+                                                    user_id='another')
+        self._owner_check("container:execute", self.put_json,
+                          '/containers/execute/%s/ls' % container.uuid,
+                          {}, expect_errors=True)
+
+    def test_policy_only_owner_actions(self):
+        actions = ['start', 'stop', 'reboot', 'pause', 'unpause']
+        container = obj_utils.create_test_container(self.context,
+                                                    user_id='another')
+        for action in actions:
+            self._owner_check('container:%s' % action, self.put_json,
+                              '/containers/%s/%s' % (action, container.uuid),
+                              {}, expect_errors=True)
