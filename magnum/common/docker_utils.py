@@ -70,6 +70,12 @@ def is_docker_library_version_atleast(version):
     return False
 
 
+def is_docker_api_version_atleast(docker, version):
+    if utils.compare_version(docker.version()['ApiVersion'], version) <= 0:
+        return True
+    return False
+
+
 @contextlib.contextmanager
 def docker_for_container(context, container):
     if magnum_utils.is_uuid_like(container):
