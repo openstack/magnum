@@ -36,6 +36,37 @@ CLIENT_CERT=$cert_dir/client.crt
 CLIENT_CSR=$cert_dir/client.csr
 CLIENT_KEY=$cert_dir/client.key
 
+#Get a token by user credentials and trust
+cat > auth.json << EOF
+{
+    "auth": {
+        "identity": {
+            "methods": [
+                "password"
+            ],
+            "password": {
+                "user": {
+                    "id": "$TRUSTEE_USER_ID",
+                    "password": "$TRUSTEE_PASSWORD"
+                }
+            }
+        },
+        "scope": {
+            "OS-TRUST:trust": {
+                "id": "$TRUST_ID"
+            }
+        }
+    }
+}
+EOF
+
+#trust is introduced in Keystone v3 version
+AUTH_URL=${AUTH_URL/v2.0/v3}
+USER_TOKEN=`curl -s -i -X POST -H "Content-Type: application/json" -d @auth.json \
+                 $AUTH_URL/auth/tokens | grep X-Subject-Token | awk '{print $2}'`
+
+rm -rf auth.json
+
 # Get CA certificate for this bay
 curl -X GET \
   -H "X-Auth-Token: $USER_TOKEN" \
