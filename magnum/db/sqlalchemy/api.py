@@ -292,6 +292,8 @@ class Connection(api.Connection):
     def get_baymodel_by_id(self, context, baymodel_id):
         query = model_query(models.BayModel)
         query = self._add_tenant_filters(context, query)
+        public_q = model_query(models.BayModel).filter_by(public=True)
+        query = query.union(public_q)
         query = query.filter_by(id=baymodel_id)
         try:
             return query.one()
@@ -301,6 +303,8 @@ class Connection(api.Connection):
     def get_baymodel_by_uuid(self, context, baymodel_uuid):
         query = model_query(models.BayModel)
         query = self._add_tenant_filters(context, query)
+        public_q = model_query(models.BayModel).filter_by(public=True)
+        query = query.union(public_q)
         query = query.filter_by(uuid=baymodel_uuid)
         try:
             return query.one()
@@ -310,6 +314,8 @@ class Connection(api.Connection):
     def get_baymodel_by_name(self, context, baymodel_name):
         query = model_query(models.BayModel)
         query = self._add_tenant_filters(context, query)
+        public_q = model_query(models.BayModel).filter_by(public=True)
+        query = query.union(public_q)
         query = query.filter_by(name=baymodel_name)
         try:
             return query.one()
