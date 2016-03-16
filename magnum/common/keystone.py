@@ -187,16 +187,30 @@ class KeystoneClientV3(object):
                 trustee_user_id=trustee_user)
         return trust
 
-    def delete_trust(self, trust_id):
-        if trust_id is None:
+    def delete_trust(self, context, bay):
+        if bay.trust_id is None:
             return
+
+        # Trust can only be deleted by the user who creates it. So when
+        # other users in the same project want to delete the bay, we need
+        # use the trustee which can impersonate the trustor to delete the
+        # trust.
+        if context.user_id == bay.user_id:
+            client = self.client
+        else:
+            auth = ka_v3.Password(auth_url=self.auth_url,
+                                  user_id=bay.trustee_user_id,
+                                  password=bay.trustee_password,
+                                  trust_id=bay.trust_id)
+            sess = ka_session.Session(auth=auth)
+            client = kc_v3.Client(session=sess)
         try:
-            self.client.trusts.delete(trust_id)
+            client.trusts.delete(bay.trust_id)
         except kc_exception.NotFound:
             pass
         except Exception:
             LOG.exception(_LE('Failed to delete trust'))
-            raise exception.TrustDeleteFailed(trust_id=trust_id)
+            raise exception.TrustDeleteFailed(trust_id=bay.trust_id)
 
     def create_trustee(self, username, password, domain_id):
         try:

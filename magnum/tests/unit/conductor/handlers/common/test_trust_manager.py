@@ -84,11 +84,13 @@ class TrustManagerTestCase(base.BaseTestCase):
         mock_bay.trustee_user_id = 'trustee_user_id'
         mock_keystone = mock.MagicMock()
         self.osc.keystone.return_value = mock_keystone
+        context = mock.MagicMock()
 
-        trust_manager.delete_trustee_and_trust(self.osc, mock_bay)
+        trust_manager.delete_trustee_and_trust(self.osc, context,
+                                               mock_bay)
 
         mock_keystone.delete_trust.assert_called_once_with(
-            mock_bay.trust_id,
+            context, mock_bay
         )
         mock_keystone.delete_trustee.assert_called_once_with(
             mock_bay.trustee_user_id,
@@ -100,8 +102,10 @@ class TrustManagerTestCase(base.BaseTestCase):
         mock_bay.trustee_user_id = 'trustee_user_id'
         mock_keystone = mock.MagicMock()
         self.osc.keystone.return_value = mock_keystone
+        context = mock.MagicMock()
 
-        trust_manager.delete_trustee_and_trust(self.osc, mock_bay)
+        trust_manager.delete_trustee_and_trust(self.osc, context,
+                                               mock_bay)
 
         self.assertEqual(0, mock_keystone.delete_trust.call_count)
         mock_keystone.delete_trustee.assert_called_once_with(
@@ -114,10 +118,11 @@ class TrustManagerTestCase(base.BaseTestCase):
         mock_bay.trustee_user_id = None
         mock_keystone = mock.MagicMock()
         self.osc.keystone.return_value = mock_keystone
+        context = mock.MagicMock()
 
-        trust_manager.delete_trustee_and_trust(self.osc, mock_bay)
+        trust_manager.delete_trustee_and_trust(self.osc, context, mock_bay)
 
         mock_keystone.delete_trust.assert_called_once_with(
-            mock_bay.trust_id,
+            context, mock_bay
         )
         self.assertEqual(0, mock_keystone.delete_trustee.call_count)

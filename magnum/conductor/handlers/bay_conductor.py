@@ -199,7 +199,7 @@ class Handler(object):
             LOG.info(_LI('The stack %s was not be found during bay'
                          ' deletion.'), stack_id)
             try:
-                trust_manager.delete_trustee_and_trust(osc, bay)
+                trust_manager.delete_trustee_and_trust(osc, context, bay)
                 cert_manager.delete_certificates_from_bay(bay)
                 bay.destroy()
             except exception.BayNotFound:
@@ -282,6 +282,7 @@ class HeatPoller(object):
                  % self.bay.stack_id)
         try:
             trust_manager.delete_trustee_and_trust(self.openstack_client,
+                                                   self.context,
                                                    self.bay)
             cert_manager.delete_certificates_from_bay(self.bay)
             self.bay.destroy()
