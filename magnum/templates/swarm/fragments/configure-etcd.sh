@@ -2,8 +2,7 @@
 
 . /etc/sysconfig/heat-params
 
-myip=$(ip addr show eth0 |
-awk '$1 == "inet" {print $2}' | cut -f1 -d/)
+myip="$SWARM_NODE_IP"
 
 cat > /etc/etcd/etcd.conf <<EOF
 ETCD_NAME="$myip"
