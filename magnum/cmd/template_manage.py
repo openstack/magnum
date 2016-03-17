@@ -50,8 +50,8 @@ class TemplateList(lister.Lister):
         parser.add_argument('-d', '--details',
                             action='store_true',
                             dest='details',
-                            help=('display the bay types provided by ')
-                                 ('each template'))
+                            help=('display the bay types provided by '
+                                  'each template'))
         parser.add_argument('-p', '--paths',
                             action='store_true',
                             dest='paths',
