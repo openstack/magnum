@@ -137,8 +137,7 @@ class BaseMagnumClient(base.BaseMagnumTest):
     def _create_bay(cls, name, baymodel_uuid):
         bay = cls.cs.bays.create(
             name=name,
-            baymodel_id=baymodel_uuid,
-            node_count=None,
+            baymodel_id=baymodel_uuid
         )
 
         return bay
