@@ -147,6 +147,16 @@ class TestDockerUtils(base.BaseTestCase):
             CONF.docker.docker_remote_api_version,
             CONF.docker.default_timeout)
 
+    def test_is_docker_api_version_atleast(self):
+
+        def fake_version():
+            return {'ApiVersion': '1.18'}
+
+        docker = mock.MagicMock()
+        docker.version.side_effect = fake_version
+        res = docker_utils.is_docker_api_version_atleast(docker, '1.19')
+        self.assertFalse(res)
+
 
 class DockerClientTestCase(base.BaseTestCase):
     def test_docker_client_init(self):

@@ -80,11 +80,18 @@ class Handler(object):
                 image_repo, image_tag = docker_utils.parse_docker_image(image)
                 docker.pull(image_repo, tag=image_tag)
                 docker.inspect_image(self._encode_utf8(container.image))
-                docker.create_container(image, name=name,
-                                        hostname=container_uuid,
-                                        command=container.command,
-                                        mem_limit=container.memory,
-                                        environment=container.environment)
+                kwargs = {'name': name,
+                          'hostname': container_uuid,
+                          'command': container.command,
+                          'environment': container.environment}
+                if docker_utils.is_docker_api_version_atleast(docker, '1.19'):
+                    if container.memory is not None:
+                        kwargs['host_config'] = {'mem_limit':
+                                                 container.memory}
+                else:
+                    kwargs['mem_limit'] = container.memory
+
+                docker.create_container(image, **kwargs)
                 container.status = fields.ContainerStatus.STOPPED
                 return container
             except errors.APIError:

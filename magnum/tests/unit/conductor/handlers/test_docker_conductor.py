@@ -36,9 +36,14 @@ class TestDockerHandler(base.BaseTestCase):
         self.dfc_context_manager.__enter__.return_value = self.mock_docker
         self.addCleanup(dfc_patcher.stop)
 
-    def _test_container_create(
-            self, container_dict, expected_kwargs, expected_image='test_image',
-            expected_tag='some_tag'):
+    @mock.patch.object(docker_utils, 'is_docker_api_version_atleast')
+    def _test_container_create(self, container_dict, expected_kwargs,
+                               mock_version, expected_image='test_image',
+                               expected_tag='some_tag',
+                               api_version='1.18'):
+
+        mock_version.return_value = (float(api_version) > 1.18)
+
         name = container_dict.pop('name')
         mock_container = mock.MagicMock(**container_dict)
         type(mock_container).name = mock.PropertyMock(return_value=name)
@@ -71,6 +76,25 @@ class TestDockerHandler(base.BaseTestCase):
             'environment': None,
         }
         self._test_container_create(container_dict, expected_kwargs)
+
+    def test_container_create_api_1_19(self):
+        container_dict = {
+            'name': 'some-name',
+            'uuid': 'some-uuid',
+            'image': 'test_image:some_tag',
+            'command': None,
+            'memory': 512,
+            'environment': None,
+        }
+        expected_kwargs = {
+            'name': 'some-name',
+            'hostname': 'some-uuid',
+            'command': None,
+            'host_config': {'mem_limit': 512},
+            'environment': None,
+        }
+        self._test_container_create(container_dict, expected_kwargs,
+                                    api_version='1.19')
 
     def test_container_create_with_command(self):
         container_dict = {
