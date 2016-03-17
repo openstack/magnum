@@ -376,12 +376,10 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_generate_id.return_value = 'xx-xx-xx-xx'
         expected_stack_name = 'expected_stack_name-xx-xx-xx-xx'
         expected_template_contents = 'template_contents'
-        exptected_files = []
         dummy_bay_name = 'expected_stack_name'
         expected_timeout = 15
 
-        mock_tpl_files = mock.MagicMock()
-        mock_tpl_files.items.return_value = exptected_files
+        mock_tpl_files = {}
         mock_get_template_contents.return_value = [
             mock_tpl_files, expected_template_contents]
         mock_extract_template_definition.return_value = ('template/path',
@@ -399,7 +397,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'stack_name': expected_stack_name,
             'parameters': {},
             'template': expected_template_contents,
-            'files': dict(exptected_files),
+            'files': {},
             'timeout_mins': expected_timeout
         }
         mock_heat_client.stacks.create.assert_called_once_with(**expected_args)
@@ -417,12 +415,10 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_generate_id.return_value = 'xx-xx-xx-xx'
         expected_stack_name = 'expected_stack_name-xx-xx-xx-xx'
         expected_template_contents = 'template_contents'
-        exptected_files = []
         dummy_bay_name = 'expected_stack_name'
         expected_timeout = cfg.CONF.bay_heat.bay_create_timeout
 
-        mock_tpl_files = mock.MagicMock()
-        mock_tpl_files.items.return_value = exptected_files
+        mock_tpl_files = {}
         mock_get_template_contents.return_value = [
             mock_tpl_files, expected_template_contents]
         mock_extract_template_definition.return_value = ('template/path',
@@ -440,7 +436,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'stack_name': expected_stack_name,
             'parameters': {},
             'template': expected_template_contents,
-            'files': dict(exptected_files),
+            'files': {},
             'timeout_mins': expected_timeout
         }
         mock_heat_client.stacks.create.assert_called_once_with(**expected_args)
@@ -458,13 +454,11 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_generate_id.return_value = 'xx-xx-xx-xx'
         expected_stack_name = 'expected_stack_name-xx-xx-xx-xx'
         expected_template_contents = 'template_contents'
-        exptected_files = []
         dummy_bay_name = 'expected_stack_name'
         bay_timeout = 0
         expected_timeout = None
 
-        mock_tpl_files = mock.MagicMock()
-        mock_tpl_files.items.return_value = exptected_files
+        mock_tpl_files = {}
         mock_get_template_contents.return_value = [
             mock_tpl_files, expected_template_contents]
         mock_extract_template_definition.return_value = ('template/path',
@@ -482,7 +476,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'stack_name': expected_stack_name,
             'parameters': {},
             'template': expected_template_contents,
-            'files': dict(exptected_files),
+            'files': {},
             'timeout_mins': expected_timeout
         }
         mock_heat_client.stacks.create.assert_called_once_with(**expected_args)
@@ -496,10 +490,8 @@ class TestBayConductorWithK8s(base.TestCase):
 
         mock_stack_id = 'xx-xx-xx-xx'
         expected_template_contents = 'template_contents'
-        exptected_files = []
 
-        mock_tpl_files = mock.MagicMock()
-        mock_tpl_files.items.return_value = exptected_files
+        mock_tpl_files = {}
         mock_get_template_contents.return_value = [
             mock_tpl_files, expected_template_contents]
         mock_extract_template_definition.return_value = ('template/path',
@@ -515,7 +507,7 @@ class TestBayConductorWithK8s(base.TestCase):
         expected_args = {
             'parameters': {},
             'template': expected_template_contents,
-            'files': dict(exptected_files)
+            'files': {}
         }
         mock_heat_client.stacks.update.assert_called_once_with(mock_stack_id,
                                                                **expected_args)

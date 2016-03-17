@@ -92,7 +92,7 @@ def _create_stack(context, osc, bay, bay_create_timeout):
         'stack_name': stack_name,
         'parameters': heat_params,
         'template': template,
-        'files': dict(list(tpl_files.items())),
+        'files': tpl_files,
         'timeout_mins': heat_timeout
     }
     created_stack = osc.heat().stacks.create(**fields)
@@ -108,7 +108,7 @@ def _update_stack(context, osc, bay, scale_manager=None):
     fields = {
         'parameters': heat_params,
         'template': template,
-        'files': dict(list(tpl_files.items()))
+        'files': tpl_files
     }
 
     return osc.heat().stacks.update(bay.stack_id, **fields)
