@@ -19,7 +19,6 @@ from oslo_log import log as logging
 from magnum.common.pythonk8sclient.swagger_client import api_client
 from magnum.common.pythonk8sclient.swagger_client.apis import apiv_api
 from magnum.conductor.handlers.common import cert_manager
-from magnum.conductor import utils
 
 
 LOG = logging.getLogger(__name__)
@@ -42,12 +41,11 @@ class K8sAPI(apiv_api.ApivApi):
             raise err
         return tmp
 
-    def __init__(self, context, bay_uuid):
+    def __init__(self, context, bay):
         self.ca_file = None
         self.cert_file = None
         self.key_file = None
 
-        bay = utils.retrieve_bay(context, bay_uuid)
         if bay.magnum_cert_ref:
             self._create_certificate_files(bay)
 
@@ -83,13 +81,13 @@ class K8sAPI(apiv_api.ApivApi):
             self.key_file.close()
 
 
-def create_k8s_api(context, bay_uuid):
+def create_k8s_api(context, bay):
     """Create a kubernetes API client
 
     Creates connection with Kubernetes master and creates ApivApi instance
     to call Kubernetes APIs.
 
     :param context: The security context
-    :param bay_uuid:  Unique identifier for the Bay
+    :param bay:  Bay object
     """
-    return K8sAPI(context, bay_uuid)
+    return K8sAPI(context, bay)

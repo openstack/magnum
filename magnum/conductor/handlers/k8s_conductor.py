@@ -40,7 +40,8 @@ class Handler(object):
 
     def service_create(self, context, service):
         LOG.debug("service_create")
-        self.k8s_api = k8s.create_k8s_api(context, service.bay_uuid)
+        bay = conductor_utils.retrieve_bay(context, service.bay_uuid)
+        self.k8s_api = k8s.create_k8s_api(context, bay)
         manifest = k8s_manifest.parse(service.manifest)
         try:
             resp = self.k8s_api.create_namespaced_service(body=manifest,
@@ -69,20 +70,17 @@ class Handler(object):
 
     def service_update(self, context, service_ident, bay_ident, manifest):
         LOG.debug("service_update %s", service_ident)
-        # Since bay identifier is specified verify whether its a UUID
-        # or Name. If name is specified as bay identifier need to extract
-        # the bay uuid since its needed to get the k8s_api object.
-        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
+        bay = conductor_utils.retrieve_bay(context, bay_ident)
+        self.k8s_api = k8s.create_k8s_api(context, bay)
         if utils.is_uuid_like(service_ident):
             service = objects.Service.get_by_uuid(context,
                                                   service_ident,
-                                                  bay_uuid,
+                                                  bay.uuid,
                                                   self.k8s_api)
         else:
             service = objects.Service.get_by_name(context,
                                                   service_ident,
-                                                  bay_uuid,
+                                                  bay.uuid,
                                                   self.k8s_api)
         service_ident = service.name
         try:
@@ -100,7 +98,7 @@ class Handler(object):
         service['name'] = resp.metadata.name
         service['project_id'] = context.project_id
         service['user_id'] = context.user_id
-        service['bay_uuid'] = bay_uuid
+        service['bay_uuid'] = bay.uuid
         service['labels'] = ast.literal_eval(resp.metadata.labels)
         if not resp.spec.selector:
             service['selector'] = {}
@@ -120,18 +118,15 @@ class Handler(object):
 
     def service_delete(self, context, service_ident, bay_ident):
         LOG.debug("service_delete %s", service_ident)
-        # Since bay identifier is specified verify whether its a UUID
-        # or Name. If name is specified as bay identifier need to extract
-        # the bay uuid since its needed to get the k8s_api object.
-        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
+        bay = conductor_utils.retrieve_bay(context, bay_ident)
+        self.k8s_api = k8s.create_k8s_api(context, bay)
         if utils.is_uuid_like(service_ident):
             service = objects.Service.get_by_uuid(context, service_ident,
-                                                  bay_uuid, self.k8s_api)
+                                                  bay.uuid, self.k8s_api)
             service_name = service.name
         else:
             service_name = service_ident
-        if conductor_utils.object_has_stack(context, bay_uuid):
+        if conductor_utils.object_has_stack(context, bay.uuid):
             try:
 
                 self.k8s_api.delete_namespaced_service(name=str(service_name),
@@ -144,33 +139,27 @@ class Handler(object):
 
     def service_show(self, context, service_ident, bay_ident):
         LOG.debug("service_show %s", service_ident)
-        # Since bay identifier is specified verify whether its a UUID
-        # or Name. If name is specified as bay identifier need to extract
-        # the bay uuid since its needed to get the k8s_api object.
-        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
+        bay = conductor_utils.retrieve_bay(context, bay_ident)
+        self.k8s_api = k8s.create_k8s_api(context, bay)
         if utils.is_uuid_like(service_ident):
             service = objects.Service.get_by_uuid(context, service_ident,
-                                                  bay_uuid, self.k8s_api)
+                                                  bay.uuid, self.k8s_api)
         else:
             service = objects.Service.get_by_name(context, service_ident,
-                                                  bay_uuid, self.k8s_api)
+                                                  bay.uuid, self.k8s_api)
 
         return service
 
     def service_list(self, context, bay_ident):
-        # Since bay identifier is specified verify whether its a UUID
-        # or Name. If name is specified as bay identifier need to extract
-        # the bay uuid since its needed to get the k8s_api object.
-        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
+        bay = conductor_utils.retrieve_bay(context, bay_ident)
+        self.k8s_api = k8s.create_k8s_api(context, bay)
         try:
             resp = self.k8s_api.list_namespaced_service(namespace='default')
         except rest.ApiException as err:
             raise exception.KubernetesAPIFailed(err=err)
 
         if resp is None:
-            raise exception.ServiceListNotFound(bay_uuid=bay_uuid)
+            raise exception.ServiceListNotFound(bay_uuid=bay.uuid)
 
         services = []
         for service_entry in resp.items:
@@ -179,7 +168,7 @@ class Handler(object):
             service['name'] = service_entry.metadata.name
             service['project_id'] = context.project_id
             service['user_id'] = context.user_id
-            service['bay_uuid'] = bay_uuid
+            service['bay_uuid'] = bay.uuid
             service['labels'] = ast.literal_eval(
                 service_entry.metadata.labels)
             if not service_entry.spec.selector:
@@ -205,7 +194,8 @@ class Handler(object):
     # Pod Operations
     def pod_create(self, context, pod):
         LOG.debug("pod_create")
-        self.k8s_api = k8s.create_k8s_api(context, pod.bay_uuid)
+        bay = conductor_utils.retrieve_bay(context, pod.bay_uuid)
+        self.k8s_api = k8s.create_k8s_api(context, bay)
         manifest = k8s_manifest.parse(pod.manifest)
         try:
             resp = self.k8s_api.create_namespaced_pod(body=manifest,
@@ -228,17 +218,14 @@ class Handler(object):
 
     def pod_update(self, context, pod_ident, bay_ident, manifest):
         LOG.debug("pod_update %s", pod_ident)
-        # Since bay identifier is specified verify whether its a UUID
-        # or Name. If name is specified as bay identifier need to extract
-        # the bay uuid since its needed to get the k8s_api object.
-        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
+        bay = conductor_utils.retrieve_bay(context, bay_ident)
+        self.k8s_api = k8s.create_k8s_api(context, bay)
         if utils.is_uuid_like(pod_ident):
             pod = objects.Pod.get_by_uuid(context, pod_ident,
-                                          bay_uuid, self.k8s_api)
+                                          bay.uuid, self.k8s_api)
         else:
             pod = objects.Pod.get_by_name(context, pod_ident,
-                                          bay_uuid, self.k8s_api)
+                                          bay.uuid, self.k8s_api)
         pod_ident = pod.name
         try:
             resp = self.k8s_api.replace_namespaced_pod(name=str(pod_ident),
@@ -254,7 +241,7 @@ class Handler(object):
         pod['name'] = resp.metadata.name
         pod['project_id'] = context.project_id
         pod['user_id'] = context.user_id
-        pod['bay_uuid'] = bay_uuid
+        pod['bay_uuid'] = bay.uuid
         pod['images'] = [c.image for c in resp.spec.containers]
         if not resp.metadata.labels:
             pod['labels'] = {}
@@ -267,18 +254,15 @@ class Handler(object):
 
     def pod_delete(self, context, pod_ident, bay_ident):
         LOG.debug("pod_delete %s", pod_ident)
-        # Since bay identifier is specified verify whether its a UUID
-        # or Name. If name is specified as bay identifier need to extract
-        # the bay uuid since its needed to get the k8s_api object.
-        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
+        bay = conductor_utils.retrieve_bay(context, bay_ident)
+        self.k8s_api = k8s.create_k8s_api(context, bay)
         if utils.is_uuid_like(pod_ident):
             pod = objects.Pod.get_by_uuid(context, pod_ident,
-                                          bay_uuid, self.k8s_api)
+                                          bay.uuid, self.k8s_api)
             pod_name = pod.name
         else:
             pod_name = pod_ident
-        if conductor_utils.object_has_stack(context, bay_uuid):
+        if conductor_utils.object_has_stack(context, bay.uuid):
             try:
                 self.k8s_api.delete_namespaced_pod(name=str(pod_name), body={},
                                                    namespace='default')
@@ -290,33 +274,27 @@ class Handler(object):
 
     def pod_show(self, context, pod_ident, bay_ident):
         LOG.debug("pod_show %s", pod_ident)
-        # Since bay identifier is specified verify whether its a UUID
-        # or Name. If name is specified as bay identifier need to extract
-        # the bay uuid since its needed to get the k8s_api object.
-        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
+        bay = conductor_utils.retrieve_bay(context, bay_ident)
+        self.k8s_api = k8s.create_k8s_api(context, bay)
         if utils.is_uuid_like(pod_ident):
             pod = objects.Pod.get_by_uuid(context, pod_ident,
-                                          bay_uuid, self.k8s_api)
+                                          bay.uuid, self.k8s_api)
         else:
             pod = objects.Pod.get_by_name(context, pod_ident,
-                                          bay_uuid, self.k8s_api)
+                                          bay.uuid, self.k8s_api)
 
         return pod
 
     def pod_list(self, context, bay_ident):
-        # Since bay identifier is specified verify whether its a UUID
-        # or Name. If name is specified as bay identifier need to extract
-        # the bay uuid since its needed to get the k8s_api object.
-        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
+        bay = conductor_utils.retrieve_bay(context, bay_ident)
+        self.k8s_api = k8s.create_k8s_api(context, bay)
         try:
             resp = self.k8s_api.list_namespaced_pod(namespace='default')
         except rest.ApiException as err:
             raise exception.KubernetesAPIFailed(err=err)
 
         if resp is None:
-            raise exception.PodListNotFound(bay_uuid=bay_uuid)
+            raise exception.PodListNotFound(bay_uuid=bay.uuid)
 
         pods = []
         for pod_entry in resp.items:
@@ -325,7 +303,7 @@ class Handler(object):
             pod['name'] = pod_entry.metadata.name
             pod['project_id'] = context.project_id
             pod['user_id'] = context.user_id
-            pod['bay_uuid'] = bay_uuid
+            pod['bay_uuid'] = bay.uuid
             pod['images'] = [c.image for c in pod_entry.spec.containers]
             if not pod_entry.metadata.labels:
                 pod['labels'] = {}
@@ -342,7 +320,8 @@ class Handler(object):
     # Replication Controller Operations
     def rc_create(self, context, rc):
         LOG.debug("rc_create")
-        self.k8s_api = k8s.create_k8s_api(context, rc.bay_uuid)
+        bay = conductor_utils.retrieve_bay(context, rc.bay_uuid)
+        self.k8s_api = k8s.create_k8s_api(context, bay)
         manifest = k8s_manifest.parse(rc.manifest)
         try:
             resp = self.k8s_api.create_namespaced_replication_controller(
@@ -364,18 +343,15 @@ class Handler(object):
 
     def rc_update(self, context, rc_ident, bay_ident, manifest):
         LOG.debug("rc_update %s", rc_ident)
-        # Since bay identifier is specified verify whether its a UUID
-        # or Name. If name is specified as bay identifier need to extract
-        # the bay uuid since its needed to get the k8s_api object.
-        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
+        bay = conductor_utils.retrieve_bay(context, bay_ident)
+        self.k8s_api = k8s.create_k8s_api(context, bay)
         if utils.is_uuid_like(rc_ident):
             rc = objects.ReplicationController.get_by_uuid(context, rc_ident,
-                                                           bay_uuid,
+                                                           bay.uuid,
                                                            self.k8s_api)
         else:
             rc = objects.ReplicationController.get_by_name(context, rc_ident,
-                                                           bay_uuid,
+                                                           bay.uuid,
                                                            self.k8s_api)
         try:
             resp = self.k8s_api.replace_namespaced_replication_controller(
@@ -393,7 +369,7 @@ class Handler(object):
         rc['project_id'] = context.project_id
         rc['user_id'] = context.user_id
         rc['images'] = [c.image for c in resp.spec.template.spec.containers]
-        rc['bay_uuid'] = bay_uuid
+        rc['bay_uuid'] = bay.uuid
         rc['labels'] = ast.literal_eval(resp.metadata.labels)
         rc['replicas'] = resp.status.replicas
 
@@ -401,19 +377,16 @@ class Handler(object):
 
     def rc_delete(self, context, rc_ident, bay_ident):
         LOG.debug("rc_delete %s", rc_ident)
-        # Since bay identifier is specified verify whether its a UUID
-        # or Name. If name is specified as bay identifier need to extract
-        # the bay uuid since its needed to get the k8s_api object.
-        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
+        bay = conductor_utils.retrieve_bay(context, bay_ident)
+        self.k8s_api = k8s.create_k8s_api(context, bay)
         if utils.is_uuid_like(rc_ident):
             rc = objects.ReplicationController.get_by_uuid(context, rc_ident,
-                                                           bay_uuid,
+                                                           bay.uuid,
                                                            self.k8s_api)
             rc_name = rc.name
         else:
             rc_name = rc_ident
-        if conductor_utils.object_has_stack(context, bay_uuid):
+        if conductor_utils.object_has_stack(context, bay.uuid):
             try:
                 self.k8s_api.delete_namespaced_replication_controller(
                     name=str(rc_name),
@@ -427,28 +400,22 @@ class Handler(object):
 
     def rc_show(self, context, rc_ident, bay_ident):
         LOG.debug("rc_show %s", rc_ident)
-        # Since bay identifier is specified verify whether its a UUID
-        # or Name. If name is specified as bay identifier need to extract
-        # the bay uuid since its needed to get the k8s_api object.
-        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
+        bay = conductor_utils.retrieve_bay(context, bay_ident)
+        self.k8s_api = k8s.create_k8s_api(context, bay)
         if utils.is_uuid_like(rc_ident):
             rc = objects.ReplicationController.get_by_uuid(context, rc_ident,
-                                                           bay_uuid,
+                                                           bay.uuid,
                                                            self.k8s_api)
         else:
             rc = objects.ReplicationController.get_by_name(context, rc_ident,
-                                                           bay_uuid,
+                                                           bay.uuid,
                                                            self.k8s_api)
 
         return rc
 
     def rc_list(self, context, bay_ident):
-        # Since bay identifier is specified verify whether its a UUID
-        # or Name. If name is specified as bay identifier need to extract
-        # the bay uuid since its needed to get the k8s_api object.
-        bay_uuid = conductor_utils.retrieve_bay_uuid(context, bay_ident)
-        self.k8s_api = k8s.create_k8s_api(context, bay_uuid)
+        bay = conductor_utils.retrieve_bay(context, bay_ident)
+        self.k8s_api = k8s.create_k8s_api(context, bay)
         try:
             resp = self.k8s_api.list_namespaced_replication_controller(
                 namespace='default')
@@ -457,7 +424,7 @@ class Handler(object):
 
         if resp is None:
             raise exception.ReplicationControllerListNotFound(
-                bay_uuid=bay_uuid)
+                bay_uuid=bay.uuid)
 
         rcs = []
         for entry in resp._items:
@@ -468,7 +435,7 @@ class Handler(object):
             rc['user_id'] = context.user_id
             rc['images'] = [
                 c.image for c in entry.spec.template.spec.containers]
-            rc['bay_uuid'] = bay_uuid
+            rc['bay_uuid'] = bay.uuid
             # Convert string to dictionary
             rc['labels'] = ast.literal_eval(entry.metadata.labels)
             rc['replicas'] = entry.status.replicas

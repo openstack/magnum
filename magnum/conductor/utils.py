@@ -18,8 +18,11 @@ from magnum.objects import bay
 from magnum.objects import baymodel
 
 
-def retrieve_bay(context, bay_uuid):
-    return bay.Bay.get_by_uuid(context, bay_uuid)
+def retrieve_bay(context, bay_ident):
+    if not utils.is_uuid_like(bay_ident):
+        return bay.Bay.get_by_name(context, bay_ident)
+    else:
+        return bay.Bay.get_by_uuid(context, bay_ident)
 
 
 def retrieve_baymodel(context, bay):

@@ -60,19 +60,16 @@ class TestK8sAPI(base.TestCase):
     @patch(
         'magnum.conductor.handlers.common.cert_manager.get_bay_ca_certificate')
     @patch('magnum.conductor.handlers.common.cert_manager.get_bay_magnum_cert')
-    @patch('magnum.conductor.utils.retrieve_bay')
     @patch('magnum.common.pythonk8sclient.swagger_client.api_client.ApiClient')
-    def _test_create_k8s_api(self, bay_uuid,
-                             mock_api_client,
-                             mock_bay_retrieval,
-                             mock_get_bay_magnum_cert,
-                             mock_get_bay_ca_cert):
+    def test_create_k8s_api(self,
+                            mock_api_client,
+                            mock_get_bay_magnum_cert,
+                            mock_get_bay_ca_cert):
         bay_obj = mock.MagicMock()
         bay_obj.uuid = 'bay-uuid'
         bay_obj.api_address = 'fake-k8s-api-endpoint'
         bay_obj.magnum_cert_ref = 'fake-magnum-cert-ref'
         bay_obj.ca_cert_ref = 'fake-ca-cert-ref'
-        mock_bay_retrieval.return_value = bay_obj
 
         mock_get_bay_magnum_cert.return_value = self._mock_cert_mgr_get_cert(
             'fake-magnum-cert-ref')
@@ -88,24 +85,10 @@ class TestK8sAPI(base.TestCase):
         with patch(
             'magnum.conductor.k8s_api.K8sAPI._create_temp_file_with_content',
                 side_effect=self._mock_named_file_creation):
-            k8s_api.create_k8s_api(context, bay_uuid)
-
-        mock_bay_retrieval.assert_called_once_with(context, bay_uuid)
+            k8s_api.create_k8s_api(context, bay_obj)
 
         mock_api_client.assert_called_once_with(
             bay_obj.api_address,
             key_file='priv-key-temp-file-name',
             cert_file='cert-temp-file-name',
             ca_certs='ca-cert-temp-file-name')
-
-    def test_create_k8s_api_with_service(self):
-        self._test_create_k8s_api('bay-uuid')
-
-    def test_create_k8s_api_with_bay(self):
-        self._test_create_k8s_api('Bay')
-
-    def test_create_k8s_api_with_pod(self):
-        self._test_create_k8s_api('bay-uuid')
-
-    def test_create_k8s_api_with_rc(self):
-        self._test_create_k8s_api('bay-uuid')

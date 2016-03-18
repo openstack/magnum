@@ -32,15 +32,15 @@ class TestDockerUtils(base.BaseTestCase):
     @mock.patch('magnum.common.docker_utils.DockerHTTPClient')
     @mock.patch.object(docker_utils, 'cert_manager')
     @mock.patch.object(docker_utils.objects.BayModel, 'get_by_uuid')
-    @mock.patch.object(docker_utils.objects.Bay, 'get_by_uuid')
-    def test_docker_for_container(self, mock_get_bay_by_uuid,
+    @mock.patch.object(docker_utils.objects.Bay, 'get_by_name')
+    def test_docker_for_container(self, mock_get_bay_by_name,
                                   mock_get_baymodel_by_uuid,
                                   mock_cert_manager,
                                   mock_docker_client):
         mock_container = mock.MagicMock()
         mock_bay = mock.MagicMock()
         mock_bay.api_address = 'https://1.2.3.4:2376'
-        mock_get_bay_by_uuid.return_value = mock_bay
+        mock_get_bay_by_name.return_value = mock_bay
         mock_baymodel = mock.MagicMock()
         mock_baymodel.tls_disabled = False
         mock_get_baymodel_by_uuid.return_value = mock_baymodel
@@ -58,7 +58,7 @@ class TestDockerUtils(base.BaseTestCase):
                                                mock_container) as docker:
             self.assertEqual(mock_docker, docker)
 
-        mock_get_bay_by_uuid.assert_called_once_with(mock.sentinel.context,
+        mock_get_bay_by_name.assert_called_once_with(mock.sentinel.context,
                                                      mock_container.bay_uuid)
         mock_get_baymodel_by_uuid.assert_called_once_with(
             mock.sentinel.context, mock_bay.baymodel_id)
@@ -73,10 +73,10 @@ class TestDockerUtils(base.BaseTestCase):
     @mock.patch('magnum.common.docker_utils.DockerHTTPClient')
     @mock.patch.object(docker_utils, 'cert_manager')
     @mock.patch.object(docker_utils.objects.BayModel, 'get_by_uuid')
-    @mock.patch.object(docker_utils.objects.Bay, 'get_by_uuid')
+    @mock.patch.object(docker_utils.objects.Bay, 'get_by_name')
     @mock.patch.object(docker_utils.objects.Container, 'get_by_uuid')
     def test_docker_for_container_uuid(self, mock_get_container_by_uuid,
-                                       mock_get_bay_by_uuid,
+                                       mock_get_bay_by_name,
                                        mock_get_baymodel_by_uuid,
                                        mock_cert_manager,
                                        mock_docker_client):
@@ -85,7 +85,7 @@ class TestDockerUtils(base.BaseTestCase):
         mock_get_container_by_uuid.return_value = mock_container
         mock_bay = mock.MagicMock()
         mock_bay.api_address = 'https://1.2.3.4:2376'
-        mock_get_bay_by_uuid.return_value = mock_bay
+        mock_get_bay_by_name.return_value = mock_bay
         mock_baymodel = mock.MagicMock()
         mock_baymodel.tls_disabled = False
         mock_get_baymodel_by_uuid.return_value = mock_baymodel
@@ -106,7 +106,7 @@ class TestDockerUtils(base.BaseTestCase):
         mock_get_container_by_uuid.assert_called_once_with(
             mock.sentinel.context, mock_container.uuid
         )
-        mock_get_bay_by_uuid.assert_called_once_with(mock.sentinel.context,
+        mock_get_bay_by_name.assert_called_once_with(mock.sentinel.context,
                                                      mock_container.bay_uuid)
         mock_get_baymodel_by_uuid.assert_called_once_with(
             mock.sentinel.context, mock_bay.baymodel_id)
@@ -120,14 +120,14 @@ class TestDockerUtils(base.BaseTestCase):
 
     @mock.patch('magnum.common.docker_utils.DockerHTTPClient')
     @mock.patch.object(docker_utils.objects.BayModel, 'get_by_uuid')
-    @mock.patch.object(docker_utils.objects.Bay, 'get_by_uuid')
-    def test_docker_for_container_tls_disabled(self, mock_get_bay_by_uuid,
+    @mock.patch.object(docker_utils.objects.Bay, 'get_by_name')
+    def test_docker_for_container_tls_disabled(self, mock_get_bay_by_name,
                                                mock_get_baymodel_by_uuid,
                                                mock_docker_client):
         mock_container = mock.MagicMock()
         mock_bay = mock.MagicMock()
         mock_bay.api_address = 'tcp://1.2.3.4:2376'
-        mock_get_bay_by_uuid.return_value = mock_bay
+        mock_get_bay_by_name.return_value = mock_bay
         mock_baymodel = mock.MagicMock()
         mock_baymodel.tls_disabled = True
         mock_get_baymodel_by_uuid.return_value = mock_baymodel
@@ -138,7 +138,7 @@ class TestDockerUtils(base.BaseTestCase):
                                                mock_container) as docker:
             self.assertEqual(mock_docker, docker)
 
-        mock_get_bay_by_uuid.assert_called_once_with(mock.sentinel.context,
+        mock_get_bay_by_name.assert_called_once_with(mock.sentinel.context,
                                                      mock_container.bay_uuid)
         mock_get_baymodel_by_uuid.assert_called_once_with(
             mock.sentinel.context, mock_bay.baymodel_id)

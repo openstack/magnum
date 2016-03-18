@@ -42,8 +42,9 @@ class TestK8sConductor(base.TestCase):
     def mock_baymodel(self):
         return objects.BayModel({})
 
+    @patch('magnum.conductor.utils.retrieve_bay')
     @patch('ast.literal_eval')
-    def test_pod_create_with_success(self, mock_ast):
+    def test_pod_create_with_success(self, mock_ast, mock_retrieve):
         expected_pod = mock.MagicMock()
         expected_pod.uuid = 'test-uuid'
         expected_pod.name = 'test-name'
@@ -58,7 +59,8 @@ class TestK8sConductor(base.TestCase):
             (mock_kube_api.return_value.create_namespaced_pod
                 .assert_called_once_with(body=manifest, namespace='default'))
 
-    def test_pod_create_with_fail(self):
+    @patch('magnum.conductor.utils.retrieve_bay')
+    def test_pod_create_with_fail(self, mock_retrieve):
         expected_pod = mock.MagicMock()
         manifest = {"key": "value"}
         expected_pod.manifest = '{"key": "value"}'
@@ -76,7 +78,8 @@ class TestK8sConductor(base.TestCase):
                 .assert_called_once_with(body=manifest,
                                          namespace='default'))
 
-    def test_pod_create_fail_on_existing_pod(self):
+    @patch('magnum.conductor.utils.retrieve_bay')
+    def test_pod_create_fail_on_existing_pod(self, retrieve_bay):
         expected_pod = mock.MagicMock()
         expected_pod.manifest = '{"key": "value"}'
 
@@ -173,9 +176,13 @@ class TestK8sConductor(base.TestCase):
                 .assert_called_once_with(
                     name=mock_pod.name, body={}, namespace='default'))
 
+    @patch('magnum.objects.Bay.get_by_name')
     @patch('magnum.conductor.k8s_api.create_k8s_api')
     @patch('ast.literal_eval')
-    def test_service_create_with_success(self, mock_ast, mock_kube_api):
+    def test_service_create_with_success(self,
+                                         mock_ast,
+                                         mock_kube_api,
+                                         mock_get_bay):
         fake_service = mock.MagicMock()
         fake_service.name = 'test-name'
 
@@ -193,7 +200,8 @@ class TestK8sConductor(base.TestCase):
             (mock_kube_api.return_value.create_namespaced_service
                 .assert_called_once_with(body=manifest, namespace='default'))
 
-    def test_service_create_with_failure(self):
+    @patch('magnum.objects.Bay.get_by_name')
+    def test_service_create_with_failure(self, mock_get_bay):
         expected_service = mock.MagicMock()
         expected_service.create = mock.MagicMock()
         manifest = {"key": "value"}
@@ -299,8 +307,9 @@ class TestK8sConductor(base.TestCase):
                 .assert_called_once_with(
                     name=mock_service.name, namespace='default'))
 
+    @patch('magnum.conductor.utils.retrieve_bay')
     @patch('ast.literal_eval')
-    def test_rc_create_with_success(self, mock_ast):
+    def test_rc_create_with_success(self, mock_ast, mock_retrieve):
         expected_rc = mock.MagicMock()
         manifest = {"key": "value"}
         expected_rc.name = 'test-name'
@@ -316,7 +325,8 @@ class TestK8sConductor(base.TestCase):
                 .create_namespaced_replication_controller
                 .assert_called_once_with(body=manifest, namespace='default'))
 
-    def test_rc_create_with_failure(self):
+    @patch('magnum.conductor.utils.retrieve_bay')
+    def test_rc_create_with_failure(self, mock_retrieve):
         expected_rc = mock.MagicMock()
         manifest = {"key": "value"}
         expected_rc.manifest = '{"key": "value"}'
