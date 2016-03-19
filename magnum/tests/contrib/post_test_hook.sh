@@ -28,10 +28,18 @@ function create_test_data {
     # a baymodel, bay and a pod
 
     coe=$1
-    local image_name="fedora-21-atomic"
+
     if [ $coe == 'mesos' ]; then
-        image_name="ubuntu-14.04"
+        local image_name="ubuntu-14.04"
+    else
+        local image_name="fedora-21-atomic"
     fi
+
+    # if we have the MAGNUM_IMAGE_NAME setting, use it instead
+    # of the default one. In combination with MAGNUM_GUEST_IMAGE_URL
+    # setting, it allows to perform testing on custom images.
+    image_name=${MAGNUM_IMAGE_NAME:-$image_name}
+
     export NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
     export IMAGE_ID=$(glance --os-image-api-version 1 image-list | grep $image_name | awk '{print $2}')
 
