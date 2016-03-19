@@ -79,6 +79,7 @@ Developer Info
    dev/bay-template-example.rst
    dev/build-atomic-image.rst
    dev/kubernetes-load-balancer.rst
+   dev/container-volume-integration.rst
    dev/tls.rst
    dev/mesos.rst
    dev/functional-test.rst
