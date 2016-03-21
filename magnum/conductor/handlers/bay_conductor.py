@@ -24,8 +24,8 @@ import six
 from magnum.common import clients
 from magnum.common import exception
 from magnum.common import short_id
-from magnum.common import utils
 from magnum.conductor.handlers.common import cert_manager
+from magnum.conductor.handlers.common import trust_manager
 from magnum.conductor import scale_manager
 from magnum.conductor.template_definition import TemplateDefinition as TDef
 from magnum.conductor import utils as conductor_utils
@@ -56,8 +56,6 @@ bay_heat_opts = [
 
 CONF = cfg.CONF
 CONF.register_opts(bay_heat_opts, group='bay_heat')
-CONF.import_opt('trustee_domain_id', 'magnum.common.keystone',
-                group='trust')
 
 LOG = logging.getLogger(__name__)
 
@@ -119,19 +117,6 @@ class Handler(object):
     def __init__(self):
         super(Handler, self).__init__()
 
-    @staticmethod
-    def _create_trustee_and_trust(osc, bay):
-        password = utils.generate_password(length=18)
-        trustee = osc.keystone().create_trustee(
-            bay.uuid,
-            password,
-            CONF.trust.trustee_domain_id)
-        bay.trustee_username = trustee.name
-        bay.trustee_user_id = trustee.id
-        bay.trustee_password = password
-        trust = osc.keystone().create_trust(trustee.id)
-        bay.trust_id = trust.id
-
     # Bay Operations
 
     def bay_create(self, context, bay, bay_create_timeout):
@@ -140,14 +125,16 @@ class Handler(object):
         osc = clients.OpenStackClients(context)
 
         bay.uuid = uuid.uuid4()
-        self._create_trustee_and_trust(osc, bay)
         try:
+            # Create trustee/trust and set them to bay
+            trust_manager.create_trustee_and_trust(osc, bay)
             # Generate certificate and set the cert reference to bay
             cert_manager.generate_certificates_to_bay(bay)
             created_stack = _create_stack(context, osc, bay,
                                           bay_create_timeout)
         except exc.HTTPBadRequest as e:
             cert_manager.delete_certificates_from_bay(bay)
+            trust_manager.delete_trustee_and_trust(osc, bay)
             raise exception.InvalidParameterValue(message=six.text_type(e))
         except Exception:
             raise
@@ -191,17 +178,10 @@ class Handler(object):
 
         return bay
 
-    @staticmethod
-    def _delete_trustee_and_trust(osc, bay):
-        osc.keystone().delete_trust(bay.trust_id)
-        osc.keystone().delete_trustee(bay.trustee_user_id)
-
     def bay_delete(self, context, uuid):
         LOG.debug('bay_heat bay_delete')
         osc = clients.OpenStackClients(context)
         bay = objects.Bay.get_by_uuid(context, uuid)
-
-        self._delete_trustee_and_trust(osc, bay)
 
         stack_id = bay.stack_id
         # NOTE(sdake): This will execute a stack_delete operation.  This will
@@ -217,6 +197,7 @@ class Handler(object):
             LOG.info(_LI('The stack %s was not be found during bay'
                          ' deletion.'), stack_id)
             try:
+                trust_manager.delete_trustee_and_trust(osc, bay)
                 cert_manager.delete_certificates_from_bay(bay)
                 bay.destroy()
             except exception.BayNotFound:
@@ -296,6 +277,8 @@ class HeatPoller(object):
         LOG.info(_LI('Bay has been deleted, stack_id: %s')
                  % self.bay.stack_id)
         try:
+            trust_manager.delete_trustee_and_trust(self.openstack_client,
+                                                   self.bay)
             cert_manager.delete_certificates_from_bay(self.bay)
             self.bay.destroy()
         except exception.BayNotFound:
