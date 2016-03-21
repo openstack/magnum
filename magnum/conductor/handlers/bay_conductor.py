@@ -222,6 +222,8 @@ class Handler(object):
             except exception.BayNotFound:
                 LOG.info(_LI('The bay %s has been deleted by others.'), uuid)
             return None
+        except exc.HTTPConflict:
+            raise exception.OperationInProgress(bay_name=bay.name)
         except Exception:
             raise
 
