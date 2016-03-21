@@ -46,7 +46,7 @@ write_files:
         hostNetwork: true
         containers:
         - name: kube-apiserver
-          image: gcr.io/google_containers/hyperkube:v1.0.6
+          image: gcr.io/google_containers/hyperkube:${KUBE_VERSION}
           command:
           - /hyperkube
           - apiserver
