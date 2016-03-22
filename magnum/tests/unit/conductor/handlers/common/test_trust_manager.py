@@ -16,6 +16,7 @@ import mock
 from mock import patch
 from oslo_config import fixture
 
+from magnum.common import exception
 from magnum.conductor.handlers.common import trust_manager
 from magnum.tests import base
 
@@ -66,6 +67,16 @@ class TrustManagerTestCase(base.BaseTestCase):
         self.assertEqual(mock_trustee.id, mock_bay.trustee_user_id)
         self.assertEqual(mock_password, mock_bay.trustee_password)
         self.assertEqual(mock_trust.id, mock_bay.trust_id)
+
+    @patch('magnum.common.utils.generate_password')
+    def test_create_trustee_and_trust_with_error(self, mock_generate_password):
+        mock_bay = mock.MagicMock()
+        mock_generate_password.side_effect = exception.MagnumException()
+
+        self.assertRaises(exception.TrusteeOrTrustToBayFailed,
+                          trust_manager.create_trustee_and_trust,
+                          self.osc,
+                          mock_bay)
 
     def test_delete_trustee_and_trust(self):
         mock_bay = mock.MagicMock()
