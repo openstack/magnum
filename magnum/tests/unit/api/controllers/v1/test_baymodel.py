@@ -259,6 +259,28 @@ class TestPatch(api_base.FunctionalTest):
                           [{'path': '/public', 'value': True,
                             'op': 'replace'}])
 
+    def test_update_baymodel_with_bay_allow_update(self):
+        baymodel = obj_utils.create_test_baymodel(self.context)
+        obj_utils.create_test_bay(self.context, baymodel_id=baymodel.uuid)
+        response = self.patch_json('/baymodels/%s' % baymodel.uuid,
+                                   [{'path': '/public',
+                                     'value': True,
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual(200, response.status_int)
+        response = self.get_json('/baymodels/%s' % self.baymodel.uuid)
+        self.assertEqual(response['public'], True)
+
+    def test_update_baymodel_with_bay_not_allow_update(self):
+        baymodel = obj_utils.create_test_baymodel(self.context)
+        obj_utils.create_test_bay(self.context, baymodel_id=baymodel.uuid)
+        response = self.patch_json('/baymodels/%s' % baymodel.uuid,
+                                   [{'path': '/name',
+                                     'value': 'new_name',
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual(400, response.status_code)
+
     @mock.patch('oslo_utils.timeutils.utcnow')
     def test_replace_singular(self, mock_utcnow):
         name = 'bay_model_example_B'

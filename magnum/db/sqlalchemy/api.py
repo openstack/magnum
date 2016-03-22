@@ -325,11 +325,17 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.BayModelNotFound(baymodel=baymodel_name)
 
-    def is_baymodel_referenced(self, session, baymodel_uuid):
+    def _is_baymodel_referenced(self, session, baymodel_uuid):
         """Checks whether the baymodel is referenced by bay(s)."""
         query = model_query(models.Bay, session=session)
         query = self._add_bays_filters(query, {'baymodel_id': baymodel_uuid})
         return query.count() != 0
+
+    def _is_publishing_baymodel(self, values):
+        if (len(values) == 1 and
+                'public' in values and values['public'] is True):
+            return True
+        return False
 
     def destroy_baymodel(self, baymodel_id):
         session = get_session()
@@ -342,7 +348,7 @@ class Connection(api.Connection):
             except NoResultFound:
                 raise exception.BayModelNotFound(baymodel=baymodel_id)
 
-            if self.is_baymodel_referenced(session, baymodel_ref['uuid']):
+            if self._is_baymodel_referenced(session, baymodel_ref['uuid']):
                 raise exception.BayModelReferenced(baymodel=baymodel_id)
 
             query.delete()
@@ -365,8 +371,10 @@ class Connection(api.Connection):
             except NoResultFound:
                 raise exception.BayModelNotFound(baymodel=baymodel_id)
 
-            if self.is_baymodel_referenced(session, ref['uuid']):
-                raise exception.BayModelReferenced(baymodel=baymodel_id)
+            if self._is_baymodel_referenced(session, ref['uuid']):
+                # we only allow to update baymodel to be public
+                if not self._is_publishing_baymodel(values):
+                    raise exception.BayModelReferenced(baymodel=baymodel_id)
 
             ref.update(values)
         return ref
