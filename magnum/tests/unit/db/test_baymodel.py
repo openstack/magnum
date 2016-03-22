@@ -85,8 +85,18 @@ class DbBaymodelTestCase(base.DbTestCase):
         baymodel = self.dbapi.get_baymodel_by_id(self.context, bm['id'])
         self.assertEqual(bm['uuid'], baymodel.uuid)
 
+    def test_get_baymodel_by_id_public(self):
+        bm = utils.create_test_baymodel(user_id='not_me', public=True)
+        baymodel = self.dbapi.get_baymodel_by_id(self.context, bm['id'])
+        self.assertEqual(bm['uuid'], baymodel.uuid)
+
     def test_get_baymodel_by_uuid(self):
         bm = utils.create_test_baymodel()
+        baymodel = self.dbapi.get_baymodel_by_uuid(self.context, bm['uuid'])
+        self.assertEqual(bm['id'], baymodel.id)
+
+    def test_get_baymodel_by_uuid_public(self):
+        bm = utils.create_test_baymodel(user_id='not_me', public=True)
         baymodel = self.dbapi.get_baymodel_by_uuid(self.context, bm['uuid'])
         self.assertEqual(bm['id'], baymodel.id)
 
@@ -96,6 +106,12 @@ class DbBaymodelTestCase(base.DbTestCase):
 
     def test_get_baymodel_by_name(self):
         bm = utils.create_test_baymodel()
+        res = self.dbapi.get_baymodel_by_name(self.context, bm['name'])
+        self.assertEqual(bm['id'], res.id)
+        self.assertEqual(bm['uuid'], res.uuid)
+
+    def test_get_baymodel_by_name_public(self):
+        bm = utils.create_test_baymodel(user_id='not_me', public=True)
         res = self.dbapi.get_baymodel_by_name(self.context, bm['name'])
         self.assertEqual(bm['id'], res.id)
         self.assertEqual(bm['uuid'], res.uuid)

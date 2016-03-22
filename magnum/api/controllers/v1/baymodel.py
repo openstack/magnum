@@ -293,8 +293,9 @@ class BayModelsController(rest.RestController):
         """
         context = pecan.request.context
         baymodel = api_utils.get_resource('BayModel', baymodel_ident)
-        policy.enforce(context, 'baymodel:get', baymodel,
-                       action='baymodel:get')
+        if not baymodel.public:
+            policy.enforce(context, 'baymodel:get', baymodel,
+                           action='baymodel:get')
 
         return BayModel.convert_with_links(baymodel)
 
