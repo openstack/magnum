@@ -247,10 +247,12 @@ Configure the keystone endpoint::
                               --description="Magnum Container Service" \
                               container
     openstack endpoint create --region=RegionOne \
-                              --publicurl=http://127.0.0.1:9511/v1 \
-                              --internalurl=http://127.0.0.1:9511/v1 \
-                              --adminurl=http://127.0.0.1:9511/v1 \
-                              magnum
+                              container public http://127.0.0.1:9511/v1
+    openstack endpoint create --region=RegionOne \
+                              container internal http://127.0.0.1:9511/v1
+    openstack endpoint create --region=RegionOne \
+                              container admin http://127.0.0.1:9511/v1
+
 
 Start the API service in a new screen::
 
