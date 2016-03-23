@@ -2,7 +2,7 @@
 
 . /etc/sysconfig/heat-params
 
-function init_templates {
+init_templates () {
     local TEMPLATE=/etc/kubernetes/manifests/kube-podmaster.yaml
     [ -f ${TEMPLATE} ] || {
         echo "TEMPLATE: $TEMPLATE"
@@ -58,7 +58,7 @@ EOF
     local SERVICE_ACCOUNT_PRIVATE_KEY_FILE=/etc/kubernetes/ssl/server.key
     local ROOT_CA_FILE=/etc/kubernetes/ssl/ca.crt
 
-    if [ "${TLS_DISABLED}" == "True" ]; then
+    if [ "${TLS_DISABLED}" = "True" ]; then
         SERVICE_ACCOUNT_PRIVATE_KEY_FILE=
         ROOT_CA_FILE=
     fi
