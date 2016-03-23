@@ -148,20 +148,3 @@ class DockerHTTPClient(client.Client):
             else:
                 res.append(info['Config'].get('Hostname'))
         return res
-
-    def pause(self, container):
-        if isinstance(container, dict):
-            container = container.get('Id')
-        url = self._url('/containers/{0}/pause'.format(container))
-        res = self._post(url)
-        self._raise_for_status(res)
-
-    def unpause(self, container):
-        if isinstance(container, dict):
-            container = container.get('Id')
-        url = self._url('/containers/{0}/unpause'.format(container))
-        res = self._post(url)
-        self._raise_for_status(res)
-
-    def get_container_logs(self, docker_id):
-        return self.logs(docker_id)

@@ -191,7 +191,7 @@ class Handler(object):
                                                container_uuid) as docker:
             docker_id = self._find_container_by_name(docker,
                                                      container_uuid)
-            return {'output': docker.get_container_logs(docker_id)}
+            return {'output': docker.logs(docker_id)}
 
     @wrap_container_exception
     def container_exec(self, context, container_uuid, command):
