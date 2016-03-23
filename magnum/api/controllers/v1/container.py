@@ -196,7 +196,7 @@ class StopController(object):
         container = api_utils.get_resource('Container',
                                            container_ident)
         check_policy_on_container(container, "container:stop")
-        LOG.debug('Calling conductor.container_stop with %s' %
+        LOG.debug('Calling conductor.container_stop with %s',
                   container.uuid)
         return pecan.request.rpcapi.container_stop(container.uuid)
 
@@ -210,7 +210,7 @@ class RebootController(object):
         container = api_utils.get_resource('Container',
                                            container_ident)
         check_policy_on_container(container, "container:reboot")
-        LOG.debug('Calling conductor.container_reboot with %s' %
+        LOG.debug('Calling conductor.container_reboot with %s',
                   container.uuid)
         return pecan.request.rpcapi.container_reboot(container.uuid)
 
@@ -224,7 +224,7 @@ class PauseController(object):
         container = api_utils.get_resource('Container',
                                            container_ident)
         check_policy_on_container(container, "container:pause")
-        LOG.debug('Calling conductor.container_pause with %s' %
+        LOG.debug('Calling conductor.container_pause with %s',
                   container.uuid)
         return pecan.request.rpcapi.container_pause(container.uuid)
 
@@ -238,7 +238,7 @@ class UnpauseController(object):
         container = api_utils.get_resource('Container',
                                            container_ident)
         check_policy_on_container(container, "container:unpause")
-        LOG.debug('Calling conductor.container_unpause with %s' %
+        LOG.debug('Calling conductor.container_unpause with %s',
                   container.uuid)
         return pecan.request.rpcapi.container_unpause(container.uuid)
 
@@ -252,7 +252,7 @@ class LogsController(object):
         container = api_utils.get_resource('Container',
                                            container_ident)
         check_policy_on_container(container, "container:logs")
-        LOG.debug('Calling conductor.container_logs with %s' %
+        LOG.debug('Calling conductor.container_logs with %s',
                   container.uuid)
         return pecan.request.rpcapi.container_logs(container.uuid)
 
@@ -266,8 +266,8 @@ class ExecuteController(object):
         container = api_utils.get_resource('Container',
                                            container_ident)
         check_policy_on_container(container, "container:execute")
-        LOG.debug('Calling conductor.container_exec with %s command %s'
-                  % (container.uuid, command))
+        LOG.debug('Calling conductor.container_exec with %s command %s',
+                  container.uuid, command)
         return pecan.request.rpcapi.container_exec(container.uuid, command)
 
 
