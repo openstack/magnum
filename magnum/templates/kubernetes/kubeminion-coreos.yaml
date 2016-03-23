@@ -50,6 +50,10 @@ parameters:
       service.
     default: 8080
 
+  kube_version:
+    type: string
+    description: version of kubernetes used for kubernetes cluster
+
   # The following are all generated in the parent template.
   kube_master_ip:
     type: string
@@ -111,6 +115,7 @@ resources:
             $TLS_DISABLED: {get_param: tls_disabled}
             $NETWORK_DRIVER: {get_param: network_driver}
             $ETCD_SERVER_IP: {get_param: etcd_server_ip}
+            $KUBE_VERSION: {get_param: kube_version}
 
   enable_network_service:
     type: OS::Heat::SoftwareConfig

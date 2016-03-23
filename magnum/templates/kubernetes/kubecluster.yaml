@@ -274,6 +274,11 @@ parameters:
     type: string
     description: url for keystone
 
+  kube_version:
+    type: string
+    description: version of kubernetes used for kubernetes cluster
+    default: v1.0.6
+
 resources:
 
   ######################################################################
@@ -452,6 +457,7 @@ resources:
           http_proxy: {get_param: http_proxy}
           https_proxy: {get_param: https_proxy}
           no_proxy: {get_param: no_proxy}
+          kube_version: {get_param: kube_version}
 
   ######################################################################
   #
@@ -502,6 +508,7 @@ resources:
           http_proxy: {get_param: http_proxy}
           https_proxy: {get_param: https_proxy}
           no_proxy: {get_param: no_proxy}
+          kube_version: {get_param: kube_version}
 
 outputs:
 

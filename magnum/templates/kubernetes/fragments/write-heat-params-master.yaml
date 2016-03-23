@@ -30,3 +30,4 @@ write_files:
       HTTPS_PROXY="$HTTPS_PROXY"
       NO_PROXY="$NO_PROXY"
       WAIT_CURL="$WAIT_CURL"
+      KUBE_VERSION="$KUBE_VERSION"

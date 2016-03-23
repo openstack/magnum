@@ -76,7 +76,7 @@ metadata:
 spec:
   containers:
   - name: kube-controller-manager
-    image: gcr.io/google_containers/hyperkube:v1.0.6
+    image: gcr.io/google_containers/hyperkube:${KUBE_VERSION}
     command:
     - /hyperkube
     - controller-manager
@@ -122,7 +122,7 @@ spec:
   hostNetwork: true
   containers:
   - name: kube-scheduler
-    image: gcr.io/google_containers/hyperkube:v1.0.6
+    image: gcr.io/google_containers/hyperkube:${KUBE_VERSION}
     command:
     - /hyperkube
     - scheduler

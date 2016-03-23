@@ -146,6 +146,11 @@ parameters:
     type: string
     description: url for keystone
 
+  kube_version:
+    type: string
+    description: version of kubernetes used for kubernetes cluster
+    default: v1.0.6
+
 resources:
 
   ######################################################################
@@ -211,6 +216,7 @@ resources:
           network_driver: {get_param: network_driver}
           kubernetes_port: {get_param: kubernetes_port}
           tls_disabled: {get_param: tls_disabled}
+          kube_version: {get_param: kube_version}
 
   ######################################################################
   #
@@ -240,6 +246,7 @@ resources:
           network_driver: {get_param: network_driver}
           kubernetes_port: {get_param: kubernetes_port}
           tls_disabled: {get_param: tls_disabled}
+          kube_version: {get_param: kube_version}
           etcd_server_ip: {"Fn::Select": [0, {get_attr: [kube_master, kube_master_ip]}]}
 
 outputs:

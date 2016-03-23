@@ -154,6 +154,9 @@ parameters:
     type: string
     description: no proxies for docker
     default: ""
+  kube_version:
+    type: string
+    description: version of kubernetes used for kubernetes cluster
 
 resources:
 
@@ -205,6 +208,7 @@ resources:
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
+            "$KUBE_VERSION": {get_param: kube_version}
             "$WAIT_CURL": {get_attr: [master_wait_handle, curl_cli]}
 
   make_cert:
