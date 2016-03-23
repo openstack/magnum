@@ -132,12 +132,14 @@ class Handler(object):
             cert_manager.generate_certificates_to_bay(bay)
             created_stack = _create_stack(context, osc, bay,
                                           bay_create_timeout)
-        except exc.HTTPBadRequest as e:
+        except Exception as e:
             cert_manager.delete_certificates_from_bay(bay)
             trust_manager.delete_trustee_and_trust(osc, bay)
-            raise exception.InvalidParameterValue(message=six.text_type(e))
-        except Exception:
-            raise
+
+            if isinstance(e, exc.HTTPBadRequest):
+                e = exception.InvalidParameterValue(message=six.text_type(e))
+
+            raise e
 
         bay.stack_id = created_stack['stack']['id']
         bay.status = bay_status.CREATE_IN_PROGRESS

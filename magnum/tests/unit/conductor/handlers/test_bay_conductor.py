@@ -191,6 +191,39 @@ class TestHandler(db_base.DbTestCase):
         mock_trust_manager.create_trustee_and_trust.assert_called_once_with(
             osc, self.bay)
 
+    def _test_create_failed(self,
+                            mock_openstack_client_class,
+                            mock_cert_manager,
+                            mock_trust_manager,
+                            expected_exception,
+                            is_create_cert_called=True,
+                            is_create_trust_called=True):
+        osc = mock.MagicMock()
+        mock_openstack_client_class.return_value = osc
+        timeout = 15
+
+        self.assertRaises(
+            expected_exception,
+            self.handler.bay_create,
+            self.context,
+            self.bay, timeout
+        )
+
+        gctb = mock_cert_manager.generate_certificates_to_bay
+        if is_create_cert_called:
+            gctb.assert_called_once_with(self.bay)
+        else:
+            gctb.assert_not_called()
+        ctat = mock_trust_manager.create_trustee_and_trust
+        if is_create_trust_called:
+            ctat.assert_called_once_with(osc, self.bay)
+        else:
+            ctat.assert_not_called()
+
+        mock_cert_manager.delete_certificates_from_bay(self.bay)
+        mock_trust_manager.delete_trustee_and_trust.assert_called_once_with(
+            osc, self.bay)
+
     @patch('magnum.conductor.handlers.bay_conductor.trust_manager')
     @patch('magnum.conductor.handlers.bay_conductor.cert_manager')
     @patch('magnum.conductor.handlers.bay_conductor._create_stack')
@@ -199,20 +232,49 @@ class TestHandler(db_base.DbTestCase):
                                         mock_create_stack,
                                         mock_cert_manager,
                                         mock_trust_manager):
-        osc = mock.MagicMock()
-        mock_openstack_client_class.return_value = osc
         mock_create_stack.side_effect = exc.HTTPBadRequest
-        timeout = 15
-        self.assertRaises(exception.InvalidParameterValue,
-                          self.handler.bay_create, self.context,
-                          self.bay, timeout)
-        mock_cert_manager.generate_certificates_to_bay.assert_called_once_with(
-            self.bay)
-        mock_cert_manager.delete_certificates_from_bay(self.bay)
-        mock_trust_manager.create_trustee_and_trust.assert_called_once_with(
-            osc, self.bay)
-        mock_trust_manager.delete_trustee_and_trust.assert_called_once_with(
-            osc, self.bay)
+
+        self._test_create_failed(
+            mock_openstack_client_class,
+            mock_cert_manager,
+            mock_trust_manager,
+            exception.InvalidParameterValue
+        )
+
+    @patch('magnum.conductor.handlers.bay_conductor.trust_manager')
+    @patch('magnum.conductor.handlers.bay_conductor.cert_manager')
+    @patch('magnum.common.clients.OpenStackClients')
+    def test_create_with_cert_failed(self, mock_openstack_client_class,
+                                     mock_cert_manager,
+                                     mock_trust_manager):
+        e = exception.CertificatesToBayFailed(bay_uuid='uuid')
+        mock_cert_manager.generate_certificates_to_bay.side_effect = e
+
+        self._test_create_failed(
+            mock_openstack_client_class,
+            mock_cert_manager,
+            mock_trust_manager,
+            exception.CertificatesToBayFailed
+        )
+
+    @patch('magnum.conductor.handlers.bay_conductor.trust_manager')
+    @patch('magnum.conductor.handlers.bay_conductor.cert_manager')
+    @patch('magnum.conductor.handlers.bay_conductor._create_stack')
+    @patch('magnum.common.clients.OpenStackClients')
+    def test_create_with_trust_failed(self, mock_openstack_client_class,
+                                      mock_create_stack,
+                                      mock_cert_manager,
+                                      mock_trust_manager):
+        e = exception.TrusteeOrTrustToBayFailed(bay_uuid='uuid')
+        mock_trust_manager.create_trustee_and_trust.side_effect = e
+
+        self._test_create_failed(
+            mock_openstack_client_class,
+            mock_cert_manager,
+            mock_trust_manager,
+            exception.TrusteeOrTrustToBayFailed,
+            False
+        )
 
     @patch('magnum.conductor.handlers.bay_conductor.trust_manager')
     @patch('magnum.conductor.handlers.bay_conductor.cert_manager')
@@ -225,9 +287,6 @@ class TestHandler(db_base.DbTestCase):
                                               mock_create_stack,
                                               mock_cert_manager,
                                               mock_trust_manager):
-        timeout = 15
-        osc = mock.MagicMock()
-        mock_openstack_client_class.return_value = osc
         test_uuid = uuid.uuid4()
         mock_uuid.uuid4.return_value = test_uuid
         error_message = six.u("""Invalid stack name 测试集群-zoyh253geukk
@@ -235,13 +294,12 @@ class TestHandler(db_base.DbTestCase):
                               characters, must start with alpha""")
         mock_create_stack.side_effect = exc.HTTPBadRequest(error_message)
 
-        self.assertRaises(exception.InvalidParameterValue,
-                          self.handler.bay_create, self.context,
-                          self.bay, timeout)
-        mock_cert_manager.generate_certificates_to_bay.assert_called_once_with(
-            self.bay)
-        mock_trust_manager.create_trustee_and_trust.assert_called_once_with(
-            osc, self.bay)
+        self._test_create_failed(
+            mock_openstack_client_class,
+            mock_cert_manager,
+            mock_trust_manager,
+            exception.InvalidParameterValue
+        )
 
     @patch('magnum.common.clients.OpenStackClients')
     def test_bay_delete(self, mock_openstack_client_class):

@@ -569,3 +569,11 @@ class QuotaAlreadyExists(Conflict):
 
 class RegionsListFailed(MagnumException):
     message = _("Failed to list regions.")
+
+
+class TrusteeOrTrustToBayFailed(MagnumException):
+    message = _("Failed to create trustee or trust for Bay: %(bay_uuid)s")
+
+
+class CertificatesToBayFailed(MagnumException):
+    message = _("Failed to create certificates for Bay: %(bay_uuid)s")

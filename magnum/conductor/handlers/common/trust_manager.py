@@ -13,7 +13,9 @@
 from oslo_config import cfg
 from oslo_log import log as logging
 
+from magnum.common import exception
 from magnum.common import utils
+from magnum.i18n import _LE
 
 CONF = cfg.CONF
 CONF.import_opt('trustee_domain_id', 'magnum.common.keystone',
@@ -23,16 +25,21 @@ LOG = logging.getLogger(__name__)
 
 
 def create_trustee_and_trust(osc, bay):
-    password = utils.generate_password(length=18)
-    trustee = osc.keystone().create_trustee(
-        bay.uuid,
-        password,
-        CONF.trust.trustee_domain_id)
-    bay.trustee_username = trustee.name
-    bay.trustee_user_id = trustee.id
-    bay.trustee_password = password
-    trust = osc.keystone().create_trust(trustee.id)
-    bay.trust_id = trust.id
+    try:
+        password = utils.generate_password(length=18)
+        trustee = osc.keystone().create_trustee(
+            bay.uuid,
+            password,
+            CONF.trust.trustee_domain_id)
+        bay.trustee_username = trustee.name
+        bay.trustee_user_id = trustee.id
+        bay.trustee_password = password
+        trust = osc.keystone().create_trust(trustee.id)
+        bay.trust_id = trust.id
+    except Exception:
+        LOG.exception(_LE('Failed to create trustee and trust for Bay: %s'),
+                      bay.uuid)
+        raise exception.TrusteeOrTrustToBayFailed(bay_uuid=bay.uuid)
 
 
 def delete_trustee_and_trust(osc, bay):

@@ -14,6 +14,7 @@
 
 import mock
 
+from magnum.common import exception
 from magnum.conductor.handlers.common import cert_manager
 from magnum.tests import base
 
@@ -151,6 +152,16 @@ class CertManagerTestCase(base.BaseTestCase):
                                          mock_bay,
                                          mock_generate_ca_cert,
                                          mock_generate_client_cert)
+
+    @mock.patch('magnum.conductor.handlers.common.cert_manager.'
+                '_get_issuer_name')
+    def test_generate_certificates_with_error(self, mock_get_issuer_name):
+        mock_bay = mock.MagicMock()
+        mock_get_issuer_name.side_effect = exception.MagnumException()
+
+        self.assertRaises(exception.CertificatesToBayFailed,
+                          cert_manager.generate_certificates_to_bay,
+                          mock_bay)
 
     @mock.patch('magnum.common.x509.operations.sign')
     def test_sign_node_certificate(self, mock_x509_sign):

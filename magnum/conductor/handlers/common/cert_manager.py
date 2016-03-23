@@ -18,8 +18,10 @@ from oslo_log import log as logging
 import six
 
 from magnum.common import cert_manager
+from magnum.common import exception
 from magnum.common import short_id
 from magnum.common.x509 import operations as x509
+from magnum.i18n import _LE
 from magnum.i18n import _LW
 
 CONDUCTOR_CLIENT_NAME = six.u('Magnum-Conductor')
@@ -87,15 +89,22 @@ def generate_certificates_to_bay(bay):
     :param bay: The bay to set CA cert and magnum client cert
     :returns: CA cert uuid and magnum client cert uuid
     """
-    issuer_name = _get_issuer_name(bay)
+    try:
+        issuer_name = _get_issuer_name(bay)
 
-    LOG.debug('Start to generate certificates: %s', issuer_name)
+        LOG.debug('Start to generate certificates: %s', issuer_name)
 
-    ca_cert_ref, ca_cert, ca_password = _generate_ca_cert(issuer_name)
-    magnum_cert_ref = _generate_client_cert(issuer_name, ca_cert, ca_password)
+        ca_cert_ref, ca_cert, ca_password = _generate_ca_cert(issuer_name)
+        magnum_cert_ref = _generate_client_cert(issuer_name,
+                                                ca_cert,
+                                                ca_password)
 
-    bay.ca_cert_ref = ca_cert_ref
-    bay.magnum_cert_ref = magnum_cert_ref
+        bay.ca_cert_ref = ca_cert_ref
+        bay.magnum_cert_ref = magnum_cert_ref
+    except Exception:
+        LOG.exception(_LE('Failed to generate certificates for Bay: %s'),
+                      bay.uuid)
+        raise exception.CertificatesToBayFailed(bay_uuid=bay.uuid)
 
 
 def get_bay_ca_certificate(bay):
@@ -153,10 +162,11 @@ def delete_certificates_from_bay(bay):
 
     :param bay: The bay which has certs
     """
-    for cert_ref in [bay.ca_cert_ref, bay.magnum_cert_ref]:
+    for cert_ref in ['ca_cert_ref', 'magnum_cert_ref']:
         try:
+            cert_ref = getattr(bay, cert_ref, None)
             if cert_ref:
                 cert_manager.get_backend().CertManager.delete_cert(
                     cert_ref, resource_ref=bay.uuid)
         except Exception:
-            LOG.warning(_LW("Deleting cert is failed: %s"), cert_ref)
+            LOG.warning(_LW("Deleting certs is failed for Bay %s"), bay.uuid)
