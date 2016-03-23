@@ -135,7 +135,7 @@ Create a domain and domain admin for trust::
     TRUSTEE_DOMAIN_ADMIN_ID=$(
         openstack user create trustee_domain_admin \
             --password "password" \
-            --domain= ${TRUSTEE_DOMAIN_ID} \
+            --domain=${TRUSTEE_DOMAIN_ID} \
             --or-show \
             -f value -c id
     )
