@@ -1,0 +1,73 @@
+#!/bin/bash
+
+if [ ${DIB_DEBUG_TRACE:-0} -gt 0 ]; then
+    set -x
+fi
+set -eu
+set -o pipefail
+
+# generate ostree in root
+cd /
+ostree admin os-init fedora-atomic
+ostree remote add --set=gpg-verify=false fedora-atomic ${FEDORA_ATOMIC_TREE_URL}
+ostree pull fedora-atomic ${FEDORA_ATOMIC_TREE_REF}
+ostree remote delete fedora-atomic
+ostree admin deploy --os=fedora-atomic ${FEDORA_ATOMIC_TREE_REF} --karg-proc-cmdline --karg=selinux=0
+
+# copy /etc/fstab to the deployed directory
+SYSROOT=/ostree/deploy/fedora-atomic/deploy/${FEDORA_ATOMIC_TREE_REF}.0
+cp /etc/fstab $SYSROOT/etc/
+
+# need to find the generated images
+DEPLOYED_DIRECTORY=$(find /boot/ostree -name fedora-atomic-* -type d)
+DEPLOYED_ID=${DEPLOYED_DIRECTORY##*-}
+INIT_IMAGE=$(find ${DEPLOYED_DIRECTORY} -name initramfs*.img)
+
+# generate ostree boot
+cat > /etc/grub.d/15_ostree <<EOF
+cat <<EOL
+menuentry 'Fedora 23 (ostree)' --class gnu-linux --class gnu --class os --unrestricted "ostree-0-${DIB_IMAGE_ROOT_FS_UUID}" {
+set gfxpayload=text
+insmod gzio
+insmod part_msdos
+insmod ext2
+search --no-floppy --set=root --label ${DIB_ROOT_LABEL}
+linux16 ${DEPLOYED_DIRECTORY}/vmlinuz root=LABEL=${DIB_ROOT_LABEL} ro nofb nomodeset vga=normal console=tty0 console=ttyS0,115200 no_timer_check rd.shell=0 ostree=/ostree/boot.1/fedora-atomic/${DEPLOYED_ID}/0
+initrd16 ${INIT_IMAGE}
+}
+EOL
+EOF
+chmod +x /etc/grub.d/15_ostree
+
+# start cloud-init on boot
+ln -sf $SYSROOT/usr/lib/systemd/system/cloud-config.service $SYSROOT/etc/systemd/system/multi-user.target.wants/cloud-config.service
+ln -sf $SYSROOT/usr/lib/systemd/system/cloud-final.service $SYSROOT/etc/systemd/system/multi-user.target.wants/cloud-final.service
+ln -sf $SYSROOT/usr/lib/systemd/system/cloud-init.service $SYSROOT/etc/systemd/system/multi-user.target.wants/cloud-init.service
+ln -sf $SYSROOT/usr/lib/systemd/system/cloud-init-local.service $SYSROOT/etc/systemd/system/multi-user.target.wants/cloud-init-local.service
+
+# update docker configuration
+cat > $SYSROOT/etc/sysconfig/docker-storage <<EOF
+DOCKER_STORAGE_OPTIONS="--storage-opt dm.thinpooldev=/dev/mapper/docker-docker--pool"
+EOF
+
+# disabled docker-storage-setup
+rm $SYSROOT/etc/systemd/system/multi-user.target.wants/docker-storage-setup.service
+
+# remove previous entry and generate config
+rm /etc/grub.d/10_linux
+grub2-mkconfig -o /boot/grub2/grub.cfg
+
+# remove non usable images
+rm -rf /boot/vmlinuz*
+rm -rf /boot/initramfs*
+
+# image cleanup
+if [ $DIB_RELEASE -ge 22 ]; then
+    dnf -y remove dracut grubby kernel initscript man-pages redhat-lsb-core selinux-policy selinux-policy-targeted
+    dnf autoremove
+    dnf clean all
+else
+    yum -y remove dracut grubby kernel initscript man-pages redhat-lsb-core selinux-policy selinux-policy-targeted
+    yum autoremove
+    yum clean all
+fi

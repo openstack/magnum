@@ -1,0 +1,2 @@
+export FEDORA_ATOMIC_TREE_URL=${FEDORA_ATOMIC_TREE_URL:-https://dl.fedoraproject.org/pub/fedora/linux/atomic/23/}
+export FEDORA_ATOMIC_TREE_REF=${FEDORA_ATOMIC_TREE_REF:-954bdbeebebfa87b625d9d7bd78c81400bdd6756fcc3205987970af4b64eb678}
