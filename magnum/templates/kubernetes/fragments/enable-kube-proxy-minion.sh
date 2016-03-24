@@ -2,10 +2,10 @@
 
 . /etc/sysconfig/heat-params
 
-function init_templates {
+init_templates () {
     local KUBE_PROTOCOL="https"
     local KUBE_CONFIG="/srv/kubernetes/kubeconfig.yaml"
-    if [ "${TLS_DISABLED}" == "True" ]; then
+    if [ "${TLS_DISABLED}" = "True" ]; then
         KUBE_PROTOCOL="http"
         KUBE_CONFIG=
     fi

@@ -2,7 +2,7 @@
 
 . /etc/sysconfig/heat-params
 
-function init_templates {
+init_templates () {
     local TEMPLATE=/etc/kubernetes/manifests/kube-proxy.yaml
     [ -f ${TEMPLATE} ] || {
         echo "TEMPLATE: $TEMPLATE"
