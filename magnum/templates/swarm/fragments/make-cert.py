@@ -133,10 +133,47 @@ def write_server_cert(config, csr_req):
         fp.write(csr_resp.json()['pem'])
 
 
+def get_user_token(config):
+    creds_str = '''
+{
+    "auth": {
+        "identity": {
+            "methods": [
+                "password"
+            ],
+            "password": {
+                "user": {
+                    "id": "%(trustee_user_id)s",
+                    "password": "%(trustee_password)s"
+                }
+            }
+        },
+        "scope": {
+            "OS-TRUST:trust": {
+                "id": "%(trust_id)s"
+            }
+        }
+    }
+}
+'''
+    params = {
+        'trustee_user_id': config['TRUSTEE_USER_ID'],
+        'trustee_password': config['TRUSTEE_PASSWORD'],
+        'trust_id': config['TRUST_ID']
+    }
+    creds = creds_str % params
+    headers = {'Content-Type': 'application/json'}
+    url = config['AUTH_URL'].replace('v2.0', 'v3') + '/auth/tokens'
+    r = requests.post(url, headers=headers, data=creds)
+    config['USER_TOKEN'] = r.headers['X-Subject-Token']
+    return config
+
+
 def main():
     config = load_config()
     if config['TLS_DISABLED'] == 'False':
         create_dirs()
+        config = get_user_token(config)
         write_ca_cert(config)
         write_server_key()
         csr_req = create_server_csr(config)

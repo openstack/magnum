@@ -363,20 +363,6 @@ class BaseTemplateDefinition(TemplateDefinition):
                                       extra_params=extra_params,
                                       **kwargs)
 
-    def _get_user_token(self, context, osc, bay):
-        """Retrieve user token from the Heat stack or context.
-
-        :param context: The security context
-        :param osc: The openstack client
-        :param bay: The bay
-        :return: A user token
-        """
-        if hasattr(bay, 'stack_id'):
-            stack = osc.heat().stacks.get(bay.stack_id)
-            return stack.parameters['user_token']
-        else:
-            return context.auth_token
-
     def get_discovery_url(self, bay):
         if hasattr(bay, 'discovery_url') and bay.discovery_url:
             discovery_url = bay.discovery_url
@@ -518,7 +504,6 @@ class AtomicK8sTemplateDefinition(K8sTemplateDefinition):
         extra_params['username'] = context.user_name
         extra_params['tenant_name'] = context.tenant
         osc = clients.OpenStackClients(context)
-        extra_params['user_token'] = self._get_user_token(context, osc, bay)
         extra_params['magnum_url'] = osc.magnum_url()
         extra_params['region_name'] = osc.cinder_region_name()
 
@@ -597,7 +582,6 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
         # it should be replaced with an actual trust token with only
         # access to do what the template needs it to do.
         osc = clients.OpenStackClients(context)
-        extra_params['user_token'] = self._get_user_token(context, osc, bay)
         extra_params['magnum_url'] = osc.magnum_url()
 
         label_list = ['flannel_network_cidr', 'flannel_backend',

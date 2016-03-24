@@ -77,8 +77,6 @@ class TestBayConductorWithK8s(base.TestCase):
         self.mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
         self.mock_osc.cinder_region_name.return_value = 'RegionOne'
         self.mock_osc_class.return_value = self.mock_osc
-        mock_stack = self.mock_osc.heat.return_value.stacks.get.return_value
-        mock_stack.parameters = {'user_token': 'fake_token'}
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition(
@@ -121,7 +119,6 @@ class TestBayConductorWithK8s(base.TestCase):
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
-            'user_token': self.context.auth_token,
             'bay_uuid': self.bay_dict['uuid'],
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'tls_disabled': False,
@@ -147,7 +144,6 @@ class TestBayConductorWithK8s(base.TestCase):
             'no_proxy': 'no_proxy',
             'tenant_name': 'fake_tenant',
             'username': 'fake_user',
-            'user_token': 'fake_token',
             'bay_uuid': self.bay_dict['uuid'],
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'region_name': self.mock_osc.cinder_region_name.return_value,
@@ -358,7 +354,6 @@ class TestBayConductorWithK8s(base.TestCase):
             'flannel_backend': 'vxlan',
             'tenant_name': 'fake_tenant',
             'username': 'fake_user',
-            'user_token': 'fake_token',
             'bay_uuid': self.bay_dict['uuid'],
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'region_name': self.mock_osc.cinder_region_name.return_value,
