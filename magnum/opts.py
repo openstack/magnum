@@ -59,4 +59,5 @@ def list_opts():
                             local_cert_manager.local_cert_manager_opts,
                             )),
         ('baymodel', magnum.api.validation.baymodel_opts),
+        ('keystone_auth', magnum.common.keystone.keystone_auth_opts),
     ]

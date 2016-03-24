@@ -10,9 +10,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from keystoneclient.auth.identity import v3
+from keystoneauth1.access import access as ka_access
+from keystoneauth1 import exceptions as ka_exception
+from keystoneauth1.identity import access as ka_access_plugin
+from keystoneauth1.identity import v3 as ka_v3
+from keystoneauth1 import loading as ka_loading
+from keystoneauth1 import session as ka_session
 import keystoneclient.exceptions as kc_exception
-from keystoneclient import session
 from keystoneclient.v3 import client as kc_v3
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -20,9 +24,11 @@ from oslo_log import log as logging
 from magnum.common import exception
 from magnum.i18n import _
 from magnum.i18n import _LE
-
+from magnum.i18n import _LW
 
 CONF = cfg.CONF
+CFG_GROUP = 'keystone_auth'
+CFG_LEGACY_GROUP = 'keystone_authtoken'
 LOG = logging.getLogger(__name__)
 
 trust_opts = [
@@ -39,8 +45,25 @@ trust_opts = [
                        'by the trustor'))
 ]
 
+legacy_session_opts = {
+    'certfile': [cfg.DeprecatedOpt('certfile', CFG_LEGACY_GROUP)],
+    'keyfile': [cfg.DeprecatedOpt('keyfile', CFG_LEGACY_GROUP)],
+    'cafile': [cfg.DeprecatedOpt('cafile', CFG_LEGACY_GROUP)],
+    'insecure': [cfg.DeprecatedOpt('insecure', CFG_LEGACY_GROUP)],
+    'timeout': [cfg.DeprecatedOpt('timeout', CFG_LEGACY_GROUP)],
+}
+
+keystone_auth_opts = (ka_loading.get_auth_common_conf_options() +
+                      ka_loading.get_auth_plugin_conf_options('password'))
+
 CONF.register_opts(trust_opts, group='trust')
+# FIXME(pauloewerton): remove import of authtoken group and legacy options
+# after deprecation period
 CONF.import_group('keystone_authtoken', 'keystonemiddleware.auth_token')
+ka_loading.register_auth_conf_options(CONF, CFG_GROUP)
+ka_loading.register_session_conf_options(CONF, CFG_GROUP,
+                                         deprecated_opts=legacy_session_opts)
+CONF.set_default('auth_type', default='password', group=CFG_GROUP)
 
 
 class KeystoneClientV3(object):
@@ -51,100 +74,99 @@ class KeystoneClientV3(object):
         self._client = None
         self._admin_client = None
         self._domain_admin_client = None
+        self._session = None
 
     @property
     def auth_url(self):
-        v3_auth_url = CONF.keystone_authtoken.auth_uri.replace('v2.0', 'v3')
-        return v3_auth_url
+        # FIXME(pauloewerton): auth_url should be retrieved from keystone_auth
+        # section by default
+        return CONF[CFG_LEGACY_GROUP].auth_uri.replace('v2.0', 'v3')
 
     @property
     def auth_token(self):
-        return self.client.auth_token
+        return self.session.get_token()
 
     @property
     def session(self):
-        return self.client.session
+        if self._session:
+            return self._session
+        auth = self._get_auth()
+        session = self._get_session(auth)
+        self._session = session
+        return session
 
-    @property
-    def admin_session(self):
-        return self.admin_client.session
+    def _get_session(self, auth):
+        session = ka_loading.load_session_from_conf_options(
+            CONF, CFG_GROUP, auth=auth)
+        return session
+
+    def _get_auth(self):
+        if self.context.is_admin or self.context.trust_id:
+            try:
+                auth = ka_loading.load_auth_from_conf_options(CONF, CFG_GROUP)
+            except ka_exception.MissingRequiredOptions:
+                auth = self._get_legacy_auth()
+        elif self.context.auth_token_info:
+            access_info = ka_access.create(body=self.context.auth_token_info,
+                                           auth_token=self.context.auth_token)
+            auth = ka_access_plugin.AccessInfoPlugin(access_info)
+        elif self.context.auth_token:
+            auth = ka_v3.Token(auth_url=self.auth_url,
+                               token=self.context.auth_token)
+        else:
+            LOG.error(_LE('Keystone API connection failed: no password, '
+                          'trust_id or token found.'))
+            raise exception.AuthorizationFailure()
+
+        return auth
+
+    def _get_legacy_auth(self):
+        LOG.warning(_LW('Auth plugin and its options for service user '
+                        'must be provided in [%(new)s] section. '
+                        'Using values from [%(old)s] section is '
+                        'deprecated.') % {'new': CFG_GROUP,
+                                          'old': CFG_LEGACY_GROUP})
+
+        conf = getattr(CONF, CFG_LEGACY_GROUP)
+
+        # FIXME(htruta, pauloewerton): Conductor layer does not have
+        # new v3 variables, such as project_name and project_domain_id.
+        # The use of admin_* variables is related to Identity API v2.0,
+        # which is now deprecated. We should also stop using hard-coded
+        # domain info, as well as variables that refer to `tenant`,
+        # as they are also v2 related.
+        auth = ka_v3.Password(auth_url=self.auth_url,
+                              username=conf.admin_user,
+                              password=conf.admin_password,
+                              project_name=conf.admin_tenant_name,
+                              project_domain_id='default',
+                              user_domain_id='default')
+        return auth
 
     @property
     def client(self):
-        if self.context.is_admin:
-            return self.admin_client
-        else:
-            if not self._client:
-                self._client = self._get_ks_client()
+        if self._client:
             return self._client
-
-    def _get_admin_credentials(self):
-        credentials = {
-            'username': CONF.keystone_authtoken.admin_user,
-            'password': CONF.keystone_authtoken.admin_password,
-            'project_name': CONF.keystone_authtoken.admin_tenant_name
-        }
-        return credentials
-
-    @property
-    def admin_client(self):
-        if not self._admin_client:
-            admin_credentials = self._get_admin_credentials()
-            self._admin_client = kc_v3.Client(auth_url=self.auth_url,
-                                              **admin_credentials)
-        return self._admin_client
+        client = kc_v3.Client(session=self.session,
+                              trust_id=self.context.trust_id)
+        self._client = client
+        return client
 
     @property
     def domain_admin_client(self):
         if not self._domain_admin_client:
-            auth = v3.Password(
+            auth = ka_v3.Password(
                 auth_url=self.auth_url,
                 user_id=CONF.trust.trustee_domain_admin_id,
                 domain_id=CONF.trust.trustee_domain_id,
                 password=CONF.trust.trustee_domain_admin_password)
-            sess = session.Session(auth=auth)
-            self._domain_admin_client = kc_v3.Client(session=sess)
+            session = ka_session.Session(auth=auth)
+            self._domain_admin_client = kc_v3.Client(session=session)
         return self._domain_admin_client
 
-    @staticmethod
-    def _is_v2_valid(auth_token_info):
-        return 'access' in auth_token_info
-
-    @staticmethod
-    def _is_v3_valid(auth_token_info):
-        return 'token' in auth_token_info
-
-    def _get_ks_client(self):
-        kwargs = {'auth_url': self.auth_url,
-                  'endpoint': self.auth_url}
-        if self.context.trust_id:
-            kwargs.update(self._get_admin_credentials())
-            kwargs['trust_id'] = self.context.trust_id
-            kwargs.pop('project_name')
-        elif self.context.auth_token_info:
-            kwargs['token'] = self.context.auth_token
-            if self._is_v2_valid(self.context.auth_token_info):
-                LOG.warning('Keystone v2 is deprecated.')
-                kwargs['auth_ref'] = self.context.auth_token_info['access']
-                kwargs['auth_ref']['version'] = 'v2.0'
-            elif self._is_v3_valid(self.context.auth_token_info):
-                kwargs['auth_ref'] = self.context.auth_token_info['token']
-                kwargs['auth_ref']['version'] = 'v3'
-            else:
-                LOG.error(_LE('Unknown version in auth_token_info'))
-                raise exception.AuthorizationFailure()
-        elif self.context.auth_token:
-            kwargs['token'] = self.context.auth_token
-        else:
-            LOG.error(_LE('Keystone v3 API conntection failed, no password '
-                          'trust or auth_token'))
-            raise exception.AuthorizationFailure()
-
-        return kc_v3.Client(**kwargs)
-
     def create_trust(self, trustee_user):
-        trustor_user_id = self.client.auth_ref.user_id
-        trustor_project_id = self.client.auth_ref.project_id
+        trustor_user_id = self.session.get_user_id()
+        trustor_project_id = self.session.get_project_id()
 
         # inherit the role of the trustor, unless set CONF.trust.roles
         if CONF.trust.roles:

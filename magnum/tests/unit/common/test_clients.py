@@ -40,11 +40,11 @@ class ClientsTest(base.BaseTestCase):
     @mock.patch.object(clients.OpenStackClients, 'keystone')
     def test_url_for(self, mock_keystone):
         obj = clients.OpenStackClients(None)
-        obj.url_for(service_type='fake_service', endpoint_type='fake_endpoint')
+        obj.url_for(service_type='fake_service', interface='fake_endpoint')
 
-        mock_cat = mock_keystone.return_value.client.service_catalog
-        mock_cat.url_for.assert_called_once_with(service_type='fake_service',
-                                                 endpoint_type='fake_endpoint')
+        mock_endpoint = mock_keystone.return_value.session.get_endpoint
+        mock_endpoint.assert_called_once_with(service_type='fake_service',
+                                              interface='fake_endpoint')
 
     @mock.patch.object(clients.OpenStackClients, 'keystone')
     def test_magnum_url(self, mock_keystone):
@@ -57,10 +57,10 @@ class ClientsTest(base.BaseTestCase):
         obj = clients.OpenStackClients(None)
         obj.magnum_url()
 
-        mock_cat = mock_keystone.return_value.client.service_catalog
-        mock_cat.url_for.assert_called_once_with(region_name=fake_region,
-                                                 service_type='container',
-                                                 endpoint_type=fake_endpoint)
+        mock_endpoint = mock_keystone.return_value.session.get_endpoint
+        mock_endpoint.assert_called_once_with(region_name=fake_region,
+                                              service_type='container',
+                                              interface=fake_endpoint)
 
     @mock.patch.object(heatclient, 'Client')
     @mock.patch.object(clients.OpenStackClients, 'url_for')
@@ -82,7 +82,7 @@ class ClientsTest(base.BaseTestCase):
             auth_url='keystone_url', ca_file=None, key_file=None,
             password=None, insecure=False)
         mock_url.assert_called_once_with(service_type='orchestration',
-                                         endpoint_type='publicURL',
+                                         interface='publicURL',
                                          region_name=expected_region_name)
 
     def test_clients_heat(self):
@@ -139,7 +139,7 @@ class ClientsTest(base.BaseTestCase):
             auth_url='keystone_url',
             password=None)
         mock_url.assert_called_once_with(service_type='image',
-                                         endpoint_type='publicURL',
+                                         interface='publicURL',
                                          region_name=expected_region_name)
 
     def test_clients_glance(self):
@@ -196,7 +196,7 @@ class ClientsTest(base.BaseTestCase):
 
         mock_keystone.assert_called_once_with()
         mock_url.assert_called_once_with(service_type='key-manager',
-                                         endpoint_type='publicURL',
+                                         interface='publicURL',
                                          region_name=expected_region_name)
 
     def test_clients_barbican(self):
@@ -251,7 +251,7 @@ class ClientsTest(base.BaseTestCase):
         mock_call.assert_called_once_with(cfg.CONF.nova_client.api_version,
                                           auth_token=con.auth_token)
         mock_url.assert_called_once_with(service_type='compute',
-                                         endpoint_type='publicURL',
+                                         interface='publicURL',
                                          region_name=expected_region_name)
 
     def test_clients_nova(self):
@@ -310,7 +310,7 @@ class ClientsTest(base.BaseTestCase):
             auth_url='keystone_url',
             token='3bcc3d3a03f44e3d8377f9247b0ad155')
         mock_url.assert_called_once_with(service_type='network',
-                                         endpoint_type=fake_endpoint_type,
+                                         interface=fake_endpoint_type,
                                          region_name=expected_region_name)
 
     def test_clients_neutron(self):
