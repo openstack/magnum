@@ -525,7 +525,7 @@ class TestDockerHandler(base.BaseTestCase):
         mock_docker_id = '2703ef2b705d'
         mock_find_container.return_value = mock_docker_id
         self.conductor.container_logs(None, mock_container_uuid)
-        self.mock_docker.get_container_logs.assert_called_once_with(
+        self.mock_docker.logs.assert_called_once_with(
             mock_docker_id)
         mock_find_container.assert_called_once_with(self.mock_docker,
                                                     mock_container_uuid)
@@ -537,12 +537,12 @@ class TestDockerHandler(base.BaseTestCase):
         mock_docker_id = '2703ef2b705d'
         mock_find_container.return_value = mock_docker_id
         mock_init.return_value = 'hit error'
-        self.mock_docker.get_container_logs = mock.Mock(
+        self.mock_docker.logs = mock.Mock(
             side_effect=errors.APIError('Error', '', ''))
         self.assertRaises(exception.ContainerException,
                           self.conductor.container_logs,
                           None, mock_container_uuid)
-        self.mock_docker.get_container_logs.assert_called_once_with(
+        self.mock_docker.logs.assert_called_once_with(
             mock_docker_id)
         mock_find_container.assert_called_once_with(self.mock_docker,
                                                     mock_container_uuid)
