@@ -49,6 +49,8 @@ assert_true_isinstance_re = re.compile(
     r"(.)*assertTrue\(isinstance\((\w|\.|\'|\"|\[|\])+, "
     "(\w|\.|\'|\"|\[|\])+\)\)")
 dict_constructor_with_list_copy_re = re.compile(r".*\bdict\((\[)?(\(|\[)")
+assert_xrange_re = re.compile(
+    r"\s*xrange\s*\(")
 
 
 def assert_equal_none(logical_line):
@@ -112,6 +114,15 @@ def assert_equal_in(logical_line):
                   "contents.")
 
 
+def no_xrange(logical_line):
+    """Disallow 'xrange()'
+
+    M339
+    """
+    if assert_xrange_re.match(logical_line):
+        yield(0, "M339: Do not use xrange().")
+
+
 def use_timeutils_utcnow(logical_line, filename):
     # tools are OK to use the standard datetime module
     if "/tools/" in filename:
@@ -142,3 +153,4 @@ def factory(register):
     register(assert_equal_in)
     register(use_timeutils_utcnow)
     register(dict_constructor_with_list_copy)
+    register(no_xrange)
