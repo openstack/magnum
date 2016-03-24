@@ -74,8 +74,7 @@ class Handler(object):
             name = container.name
             container_uuid = container.uuid
             image = container.image
-            LOG.debug('Creating container with image %s name %s'
-                      % (image, name))
+            LOG.debug('Creating container with image %s name %s', image, name)
             try:
                 image_repo, image_tag = docker_utils.parse_docker_image(image)
                 docker.pull(image_repo, tag=image_tag)
@@ -150,7 +149,7 @@ class Handler(object):
 
     @wrap_container_exception
     def _container_action(self, context, container_uuid, status, docker_func):
-        LOG.debug("%s container %s ...", (docker_func, container_uuid))
+        LOG.debug("%s container %s ...", docker_func, container_uuid)
         with docker_utils.docker_for_container(context,
                                                container_uuid) as docker:
             docker_id = self._find_container_by_name(docker,
@@ -196,7 +195,7 @@ class Handler(object):
     @wrap_container_exception
     def container_exec(self, context, container_uuid, command):
         LOG.debug("container_exec %s command %s",
-                  (container_uuid, command))
+                  container_uuid, command)
         with docker_utils.docker_for_container(context,
                                                container_uuid) as docker:
             docker_id = self._find_container_by_name(docker,
