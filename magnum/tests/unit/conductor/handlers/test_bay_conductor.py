@@ -311,6 +311,16 @@ class TestHandler(db_base.DbTestCase):
         self.assertRaises(exception.BayNotFound,
                           objects.Bay.get, self.context, self.bay.uuid)
 
+    @patch('magnum.common.clients.OpenStackClients')
+    def test_bay_delete_conflict(self, mock_openstack_client_class):
+        osc = mock.MagicMock()
+        mock_openstack_client_class.return_value = osc
+        osc.heat.side_effect = exc.HTTPConflict
+        self.assertRaises(exception.OperationInProgress,
+                          self.handler.bay_delete,
+                          self.context,
+                          self.bay.uuid)
+
 
 class TestHeatPoller(base.TestCase):
 
