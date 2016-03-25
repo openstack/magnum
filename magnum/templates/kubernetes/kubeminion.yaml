@@ -170,6 +170,27 @@ parameters:
     type: string
     description: version of kubenetes used for kubernetes cluster
 
+  trustee_user_id:
+    type: string
+    description: user id of the trustee
+    default: ""
+
+  trustee_password:
+    type: string
+    description: password of the trustee
+    default: ""
+    hidden: true
+
+  trust_id:
+    type: string
+    description: id of the trust which is used by the trustee
+    default: ""
+    hidden: true
+
+  auth_url:
+    type: string
+    description: url for keystone
+
 resources:
 
   minion_wait_handle:
@@ -223,6 +244,10 @@ resources:
             $NO_PROXY: {get_param: no_proxy}
             $KUBE_VERSION: {get_param: kube_version}
             $WAIT_CURL: {get_attr: [minion_wait_handle, curl_cli]}
+            $TRUSTEE_USER_ID: {get_param: trustee_user_id}
+            $TRUSTEE_PASSWORD: {get_param: trustee_password}
+            $TRUST_ID: {get_param: trust_id}
+            $AUTH_URL: {get_param: auth_url}
 
   write_kubeconfig:
     type: OS::Heat::SoftwareConfig
