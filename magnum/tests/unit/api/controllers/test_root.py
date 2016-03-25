@@ -102,6 +102,13 @@ class TestRootController(api_base.FunctionalTest):
         response = self.app.get('/a/bogus/url', expect_errors=True)
         assert response.status_int == 404
 
+    def test_api_paste_file_not_exist(self):
+        cfg.CONF.set_override('api_paste_config', 'non-existent-file',
+                              group='api')
+        with mock.patch.object(cfg.CONF, 'find_file') as ff:
+            ff.return_value = None
+            self.assertRaises(cfg.ConfigFilesNotFoundError, app.load_app)
+
     def test_noauth(self):
         # Don't need to auth
         paste_file = "magnum/tests/unit/api/controllers/noauth-paste.ini"

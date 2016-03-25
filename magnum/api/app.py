@@ -80,7 +80,7 @@ def load_app():
         cfg_file = cfg_path
 
     if not cfg_file:
-        raise cfg.ConfigFilesNotFoundError([cfg.CONF.api_paste_config])
+        raise cfg.ConfigFilesNotFoundError([cfg.CONF.api.api_paste_config])
     LOG.info(_("Full WSGI config used: %s") % cfg_file)
     return deploy.loadapp("config:" + cfg_file)
 
