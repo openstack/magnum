@@ -392,44 +392,6 @@ class TestContainerController(api_base.FunctionalTest):
         self.assertEqual(test_container['uuid'],
                          response.json['uuid'])
 
-    @patch('magnum.objects.Container.get_by_uuid')
-    def test_patch_by_uuid(self, mock_container_get_by_uuid):
-        test_container = utils.get_test_container()
-        test_container_obj = objects.Container(self.context, **test_container)
-        mock_container_get_by_uuid.return_value = test_container_obj
-
-        with patch.object(test_container_obj, 'save') as mock_save:
-            params = [{'path': '/name',
-                       'value': 'new_name',
-                       'op': 'replace'}]
-            container_uuid = test_container.get('uuid')
-            response = self.app.patch_json(
-                '/v1/containers/%s' % container_uuid,
-                params=params)
-
-            mock_save.assert_called_once_with()
-            self.assertEqual(200, response.status_int)
-            self.assertEqual('new_name', test_container_obj.name)
-
-    @patch('magnum.objects.Container.get_by_name')
-    def test_patch_by_name(self, mock_container_get_by_name):
-        test_container = utils.get_test_container()
-        test_container_obj = objects.Container(self.context, **test_container)
-        mock_container_get_by_name.return_value = test_container_obj
-
-        with patch.object(test_container_obj, 'save') as mock_save:
-            params = [{'path': '/name',
-                       'value': 'new_name',
-                       'op': 'replace'}]
-            container_name = test_container.get('name')
-            response = self.app.patch_json(
-                '/v1/containers/%s' % container_name,
-                params=params)
-
-            mock_save.assert_called_once_with()
-            self.assertEqual(200, response.status_int)
-            self.assertEqual('new_name', test_container_obj.name)
-
     def _action_test(self, container, action, ident_field):
         test_container_obj = objects.Container(self.context, **container)
         ident = container.get(ident_field)
@@ -665,18 +627,6 @@ class TestContainerEnforcement(api_base.FunctionalTest):
             '/containers/%s/detail' % comm_utils.generate_uuid(),
             expect_errors=True)
 
-    def test_policy_disallow_update(self):
-        bay = obj_utils.create_test_bay(self.context)
-        container = obj_utils.create_test_container(self.context,
-                                                    bay_uuid=bay.uuid)
-        params = [{'path': '/name',
-                   'value': 'new_name',
-                   'op': 'replace'}]
-        self._common_policy_check(
-            'container:update', self.app.patch_json,
-            '/v1/containers/%s' % container.uuid, params,
-            expect_errors=True)
-
     def test_policy_disallow_create(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
         bay = obj_utils.create_test_bay(self.context,
@@ -714,15 +664,6 @@ class TestContainerEnforcement(api_base.FunctionalTest):
         self._owner_check("container:get", self.get_json,
                           '/containers/%s' % container.uuid,
                           expect_errors=True)
-
-    def test_policy_only_owner_update(self):
-        container = obj_utils.create_test_container(self.context,
-                                                    user_id='another')
-        self._owner_check(
-            "container:update", self.patch_json,
-            '/containers/%s' % container.uuid,
-            [{'path': '/name', 'value': "new_name", 'op': 'replace'}],
-            expect_errors=True)
 
     def test_policy_only_owner_delete(self):
         container = obj_utils.create_test_container(self.context,

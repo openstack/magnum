@@ -410,40 +410,6 @@ class ContainersController(rest.RestController):
                                                  res_container.uuid)
         return Container.convert_with_links(res_container)
 
-    @wsme.validate(types.uuid, [ContainerPatchType])
-    @expose.expose(Container, types.uuid_or_name,
-                   body=[ContainerPatchType])
-    def patch(self, container_ident, patch):
-        """Update an existing container.
-
-        :param container_ident: UUID or name of a container.
-        :param patch: a json PATCH document to apply to this container.
-        """
-        container = api_utils.get_resource('Container',
-                                           container_ident)
-        check_policy_on_container(container, "container:update")
-        try:
-            container_dict = container.as_dict()
-            new_container = Container(**api_utils.apply_jsonpatch(
-                container_dict, patch))
-        except api_utils.JSONPATCH_EXCEPTIONS as e:
-            raise exception.PatchError(patch=patch, reason=e)
-
-        # Update only the fields that have changed
-        for field in objects.Container.fields:
-            try:
-                patch_val = getattr(new_container, field)
-            except AttributeError:
-                # Ignore fields that aren't exposed in the API
-                continue
-            if patch_val == wtypes.Unset:
-                patch_val = None
-            if container[field] != patch_val:
-                container[field] = patch_val
-
-        container.save()
-        return Container.convert_with_links(container)
-
     @expose.expose(None, types.uuid_or_name, status_code=204)
     def delete(self, container_ident):
         """Delete a container.
