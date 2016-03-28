@@ -2,6 +2,15 @@
 
 . /etc/sysconfig/heat-params
 
+if [ -n "${INSECURE_REGISTRY_URL}" ]; then
+    PODMASTER_IMAGE="${INSECURE_REGISTRY_URL}/google_containers/podmaster:1.1"
+    HYPERKUBE_IMAGE="${INSECURE_REGISTRY_URL}/google_containers/hyperkube:${KUBE_VERSION}"
+else
+    PODMASTER_IMAGE="gcr.io/google_containers/podmaster:1.1"
+    HYPERKUBE_IMAGE="gcr.io/google_containers/hyperkube:${KUBE_VERSION}"
+fi
+
+
 init_templates () {
     local TEMPLATE=/etc/kubernetes/manifests/kube-podmaster.yaml
     [ -f ${TEMPLATE} ] || {
@@ -17,7 +26,7 @@ spec:
   hostNetwork: true
   containers:
   - name: scheduler-elector
-    image: gcr.io/google_containers/podmaster:1.1
+    image: ${PODMASTER_IMAGE}
     command:
     - /podmaster
     - --etcd-servers=http://127.0.0.1:2379
@@ -31,7 +40,7 @@ spec:
     - mountPath: /dst/manifests
       name: manifest-dst
   - name: controller-manager-elector
-    image: gcr.io/google_containers/podmaster:1.1
+    image: ${PODMASTER_IMAGE}
     command:
     - /podmaster
     - --etcd-servers=http://127.0.0.1:2379
@@ -76,7 +85,7 @@ metadata:
 spec:
   containers:
   - name: kube-controller-manager
-    image: gcr.io/google_containers/hyperkube:${KUBE_VERSION}
+    image: ${HYPERKUBE_IMAGE}
     command:
     - /hyperkube
     - controller-manager
@@ -122,7 +131,7 @@ spec:
   hostNetwork: true
   containers:
   - name: kube-scheduler
-    image: gcr.io/google_containers/hyperkube:${KUBE_VERSION}
+    image: ${HYPERKUBE_IMAGE}
     command:
     - /hyperkube
     - scheduler

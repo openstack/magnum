@@ -2,6 +2,12 @@
 
 . /etc/sysconfig/heat-params
 
+if [ -n "${INSECURE_REGISTRY_URL}" ]; then
+    HYPERKUBE_IMAGE="${INSECURE_REGISTRY_URL}/google_containers/hyperkube:${KUBE_VERSION}"
+else
+    HYPERKUBE_IMAGE="gcr.io/google_containers/hyperkube:${KUBE_VERSION}"
+fi
+
 init_templates () {
     local KUBE_PROTOCOL="https"
     local KUBE_CONFIG="/srv/kubernetes/kubeconfig.yaml"
@@ -25,7 +31,7 @@ spec:
   hostNetwork: true
   containers:
   - name: kube-proxy
-    image: gcr.io/google_containers/hyperkube:${KUBE_VERSION}
+    image: ${HYPERKUBE_IMAGE}
     command:
     - /hyperkube
     - proxy

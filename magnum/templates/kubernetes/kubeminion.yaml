@@ -187,6 +187,10 @@ parameters:
     type: string
     description: url for keystone
 
+  insecure_registry_url:
+    type: string
+    description: insecure registry url
+
 resources:
 
   minion_wait_handle:
@@ -246,6 +250,7 @@ resources:
             $TRUSTEE_PASSWORD: {get_param: trustee_password}
             $TRUST_ID: {get_param: trust_id}
             $AUTH_URL: {get_param: auth_url}
+            $INSECURE_REGISTRY_URL: {get_param: insecure_registry_url}
 
   write_kubeconfig:
     type: OS::Heat::SoftwareConfig

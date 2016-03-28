@@ -6,7 +6,14 @@
 
 . /etc/sysconfig/heat-params
 
+if [ -n "${INSECURE_REGISTRY_URL}" ]; then
+    KUBEUI_IMAGE="${INSECURE_REGISTRY_URL}/google_containers/kube-ui:v4"
+else
+    KUBEUI_IMAGE="gcr.io/google_containers/kube-ui:v4"
+fi
+
 KUBE_UI_RC=/srv/kubernetes/manifests/kube-ui-rc.yaml
+
 [ -f ${KUBE_UI_RC} ] || {
     echo "Writing File: $KUBE_UI_RC"
     mkdir -p $(dirname ${KUBE_UI_RC})
@@ -34,7 +41,7 @@ spec:
     spec:
       containers:
       - name: kube-ui
-        image: gcr.io/google_containers/kube-ui:v4
+        image: ${KUBEUI_IMAGE}
         resources:
           limits:
             cpu: 100m
