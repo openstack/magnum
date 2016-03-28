@@ -445,7 +445,6 @@ resources:
           fixed_subnet: {get_resource: fixed_subnet}
           api_pool_id: {get_resource: api_pool}
           etcd_pool_id: {get_resource: etcd_pool}
-          auth_url: {get_param: auth_url}
           username: {get_param: username}
           password: {get_param: password}
           tenant_name: {get_param: tenant_name}
