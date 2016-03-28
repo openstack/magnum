@@ -131,6 +131,9 @@ class BayModel(base.APIBase):
                               default='vm')
     """Server type for this bay model """
 
+    insecure_registry = wtypes.StringType(min_length=1, max_length=255)
+    """insecure registry url when create baymodel """
+
     def __init__(self, **kwargs):
         self.fields = []
         for field in objects.BayModel.fields:
@@ -177,6 +180,7 @@ class BayModel(base.APIBase):
             no_proxy='192.168.0.1,192.168.0.2,192.168.0.3',
             labels={'key1': 'val1', 'key2': 'val2'},
             server_type='vm',
+            insecure_registry='10.238.100.100:5000',
             created_at=timeutils.utcnow(),
             updated_at=timeutils.utcnow(),
             public=False),

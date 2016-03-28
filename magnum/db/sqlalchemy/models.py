@@ -170,6 +170,7 @@ class BayModel(Base):
     tls_disabled = Column(Boolean, default=False)
     public = Column(Boolean, default=False)
     server_type = Column(String(255))
+    insecure_registry = Column(String(255))
 
 
 class Container(Base):

@@ -33,7 +33,8 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.8: Added 'server_type' field
     # Version 1.9: Added 'volume_driver' field
     # Version 1.10: Removed 'ssh_authorized_key' field
-    VERSION = '1.10'
+    # Version 1.11: Added 'insecure_registry' field
+    VERSION = '1.11'
 
     dbapi = dbapi.get_instance()
 
@@ -64,6 +65,7 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
         'tls_disabled': fields.BooleanField(default=False),
         'public': fields.BooleanField(default=False),
         'server_type': fields.StringField(nullable=True),
+        'insecure_registry': fields.StringField(nullable=True),
     }
 
     @staticmethod

@@ -49,7 +49,7 @@ class TestListBayModel(api_base.FunctionalTest):
                        'image_id', 'registry_enabled', 'no_proxy',
                        'keypair_id', 'https_proxy', 'tls_disabled',
                        'public', 'labels', 'master_flavor_id',
-                       'volume_driver')
+                       'volume_driver', 'insecure_registry')
 
     def test_empty(self):
         response = self.get_json('/baymodels')

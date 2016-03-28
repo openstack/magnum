@@ -48,7 +48,8 @@ def get_test_baymodel(**kw):
         'registry_enabled': kw.get('registry_enabled', False),
         'tls_disabled': kw.get('tls_disabled', False),
         'public': kw.get('public', False),
-        'server_type': kw.get('server_type', 'vm')
+        'server_type': kw.get('server_type', 'vm'),
+        'insecure_registry': kw.get('insecure_registry', '10.0.0.1:5000'),
     }
 
 
