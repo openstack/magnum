@@ -12,6 +12,7 @@
 
 from magnum.common.pythonk8sclient.swagger_client import api_client
 from magnum.common.pythonk8sclient.swagger_client.apis import apiv_api
+from magnum.tests.functional.common import utils
 from magnum.tests.functional.python_client_base import BayTest
 
 
@@ -32,6 +33,17 @@ class TestKubernetesAPIs(BayTest):
                                           cert_file=self.cert_file,
                                           ca_certs=self.ca_file)
         self.k8s_api = apiv_api.ApivApi(k8s_client)
+        # TODO(coreypobrien) https://bugs.launchpad.net/magnum/+bug/1551824
+        utils.wait_for_condition(self._is_api_ready, 5, 600)
+
+    def _is_api_ready(self):
+        try:
+            self.k8s_api.list_namespaced_node()
+            self.LOG.info("API is ready.")
+            return True
+        except Exception:
+            self.LOG.info("API is not ready yet.")
+            return False
 
     def test_pod_apis(self):
         pod_manifest = {'apiVersion': 'v1',

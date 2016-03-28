@@ -112,12 +112,12 @@ class BayClient(client.MagnumClient):
 
     def wait_for_bay_to_delete(self, bay_id):
         utils.wait_for_condition(
-            lambda: self.does_bay_not_exist(bay_id), 10, 3600)
+            lambda: self.does_bay_not_exist(bay_id), 10, 600)
 
     def wait_for_created_bay(self, bay_id, delete_on_error=True):
         try:
             utils.wait_for_condition(
-                lambda: self.does_bay_exist(bay_id), 10, 3600)
+                lambda: self.does_bay_exist(bay_id), 10, 1800)
         except Exception:
             # In error state.  Clean up the bay id if desired
             self.LOG.error('Bay %s entered an exception state.' % bay_id)
@@ -129,7 +129,7 @@ class BayClient(client.MagnumClient):
 
     def wait_for_final_state(self, bay_id):
         utils.wait_for_condition(
-            lambda: self.is_bay_in_final_state(bay_id), 10, 3600)
+            lambda: self.is_bay_in_final_state(bay_id), 10, 1800)
 
     def is_bay_in_final_state(self, bay_id):
         try:

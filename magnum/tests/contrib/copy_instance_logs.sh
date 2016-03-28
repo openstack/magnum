@@ -49,6 +49,7 @@ if [[ "$COE" == "kubernetes" ]]; then
     remote_exec $SSH_USER "sudo journalctl -u cloud-final --no-pager" cloud-final.log
     remote_exec $SSH_USER "sudo journalctl -u cloud-init-local --no-pager" cloud-init-local.log
     remote_exec $SSH_USER "sudo journalctl -u cloud-init --no-pager" cloud-init.log
+    remote_exec $SSH_USER "sudo cat /var/log/cloud-init-output.log" cloud-init-output.log
     remote_exec $SSH_USER "sudo journalctl -u kubelet --no-pager" kubelet.log
     remote_exec $SSH_USER "sudo journalctl -u kube-proxy --no-pager" kube-proxy.log
     remote_exec $SSH_USER "sudo journalctl -u etcd --no-pager" etcd.log
