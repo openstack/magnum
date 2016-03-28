@@ -29,7 +29,7 @@ https://10.11.12.13:8000 or https://abcproxy.com:8000
 3. no-proxy
 
 A comma separated list of IP addresses or hostnames that should bypass
-your proxy, and make conenctions directly.
+your proxy, and make connections directly.
 
 **NOTE:** You may not express networks/subnets. It only accepts names
 and ip addresses. Bad example: 192.168.0.0/28.
@@ -37,7 +37,7 @@ and ip addresses. Bad example: 192.168.0.0/28.
 Steps to configure proxies.
 ==============================
 
-You can specify all three proxy parameteres while creating baymodel of any
+You can specify all three proxy parameters while creating baymodel of any
 coe type. All of proxy parameters are optional.
 
     magnum baymodel-create --name k8sbaymodel \

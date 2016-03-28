@@ -171,7 +171,7 @@ parameters:
 
   kube_version:
     type: string
-    description: version of kubenetes used for kubernetes cluster
+    description: version of kubernetes used for kubernetes cluster
 
   trustee_user_id:
     type: string

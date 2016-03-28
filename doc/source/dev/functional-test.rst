@@ -113,7 +113,7 @@ All the environments are detailed in Magnum's tox.ini::
     cat tox.ini | grep functional- | awk -F: '{print $2}' | sed s/]//
 
 To run a particular subset of tests, specify that group as a tox environment.
-For example, here is how you would run all of the kubernates tests::
+For example, here is how you would run all of the kubernetes tests::
 
     tox -e functional-k8s
 
