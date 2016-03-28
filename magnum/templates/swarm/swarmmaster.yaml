@@ -88,13 +88,12 @@ parameters:
     type: string
     description: size of subnet assigned to each master
 
-  flannel_use_vxlan:
+  flannel_backend:
     type: string
     description: >
-      if true use the vxlan backend, otherwise use the default
-      udp backend
+      specify the backend for flannel, default udp backend
     constraints:
-      - allowed_values: ["true", "false"]
+      - allowed_values: ["udp", "vxlan", "host-gw"]
 
   swarm_version:
     type: string
@@ -175,7 +174,7 @@ resources:
             "$NETWORK_DRIVER": {get_param: network_driver}
             "$FLANNEL_NETWORK_CIDR": {get_param: flannel_network_cidr}
             "$FLANNEL_NETWORK_SUBNETLEN": {get_param: flannel_network_subnetlen}
-            "$FLANNEL_USE_VXLAN": {get_param: flannel_use_vxlan}
+            "$FLANNEL_BACKEND": {get_param: flannel_backend}
             "$ETCD_SERVER_IP": {get_param: etcd_server_ip}
             "$API_IP_ADDRESS": {get_param: api_ip_address}
             "$SWARM_VERSION": {get_param: swarm_version}
@@ -343,6 +342,8 @@ resources:
       fixed_ips:
         - subnet_id:
             get_param: fixed_subnet_id
+      allowed_address_pairs:
+        - ip_address: {get_param: flannel_network_cidr}
 
   swarm_master_floating:
     type: "OS::Neutron::FloatingIP"

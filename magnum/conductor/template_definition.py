@@ -482,7 +482,7 @@ class K8sTemplateDefinition(BaseTemplateDefinition):
 
         extra_params['discovery_url'] = self.get_discovery_url(bay)
 
-        label_list = ['flannel_network_cidr', 'flannel_use_vxlan',
+        label_list = ['flannel_network_cidr', 'flannel_backend',
                       'flannel_network_subnetlen']
         for label in label_list:
             extra_params[label] = baymodel.labels.get(label)
@@ -597,7 +597,7 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
         extra_params['user_token'] = self._get_user_token(context, osc, bay)
         extra_params['magnum_url'] = osc.magnum_url()
 
-        label_list = ['flannel_network_cidr', 'flannel_use_vxlan',
+        label_list = ['flannel_network_cidr', 'flannel_backend',
                       'flannel_network_subnetlen']
 
         for label in label_list:

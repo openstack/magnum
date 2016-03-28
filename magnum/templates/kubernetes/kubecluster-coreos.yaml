@@ -72,14 +72,13 @@ parameters:
     description: size of subnet assigned to each minion
     default: 24
 
-  flannel_use_vxlan:
+  flannel_backend:
     type: string
     description: >
-      if true use the vxlan backend, otherwise use the default
-      udp backend
-    default: "false"
+      specify the backend for flannel, default udp backend
+    default: "udp"
     constraints:
-      - allowed_values: ["true", "false"]
+      - allowed_values: ["udp", "vxlan", "host-gw"]
 
   kube_allow_priv:
     type: string
@@ -208,7 +207,7 @@ resources:
           kube_allow_priv: {get_param: kube_allow_priv}
           flannel_network_cidr: {get_param: flannel_network_cidr}
           flannel_network_subnetlen: {get_param: flannel_network_subnetlen}
-          flannel_use_vxlan: {get_param: flannel_use_vxlan}
+          flannel_backend: {get_param: flannel_backend}
           portal_network_cidr: {get_param: portal_network_cidr}
           fixed_network: {get_resource: fixed_network}
           fixed_subnet: {get_resource: fixed_subnet}
@@ -240,6 +239,7 @@ resources:
           minion_flavor: {get_param: minion_flavor}
           fixed_network: {get_resource: fixed_network}
           fixed_subnet: {get_resource: fixed_subnet}
+          flannel_network_cidr: {get_param: flannel_network_cidr}
           kube_master_ip: {"Fn::Select": [0, {get_attr: [kube_master, kube_master_ip]}]}
           external_network: {get_param: external_network}
           kube_allow_priv: {get_param: kube_allow_priv}

@@ -44,7 +44,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'network_driver': 'network_driver',
             'labels': {'flannel_network_cidr': '10.101.0.0/16',
                        'flannel_network_subnetlen': '26',
-                       'flannel_use_vxlan': 'yes'}
+                       'flannel_backend': 'vxlan'}
         }
         self.bay_dict = {
             'id': 1,
@@ -108,7 +108,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'network_driver': 'network_driver',
             'flannel_network_cidr': '10.101.0.0/16',
             'flannel_network_subnetlen': '26',
-            'flannel_use_vxlan': 'yes',
+            'flannel_backend': 'vxlan',
             'trustee_domain_id': '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
@@ -151,7 +151,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'tls_disabled': False,
             'flannel_network_cidr': u'10.101.0.0/16',
             'flannel_network_subnetlen': u'26',
-            'flannel_use_vxlan': u'yes',
+            'flannel_backend': u'vxlan',
             'trustee_domain_id': '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',

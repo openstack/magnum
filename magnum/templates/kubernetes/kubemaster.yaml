@@ -56,14 +56,13 @@ parameters:
     description: size of subnet assigned to each master
     default: 24
 
-  flannel_use_vxlan:
+  flannel_backend:
     type: string
     description: >
-      if true use the vxlan backend, otherwise use the default
-      udp backend
-    default: "false"
+      specify the backend for flannel, default udp backend
+    default: "udp"
     constraints:
-      - allowed_values: ["true", "false"]
+      - allowed_values: ["udp", "vxlan", "host-gw"]
 
   discovery_url:
     type: string
@@ -214,7 +213,7 @@ resources:
             "$NETWORK_DRIVER": {get_param: network_driver}
             "$FLANNEL_NETWORK_CIDR": {get_param: flannel_network_cidr}
             "$FLANNEL_NETWORK_SUBNETLEN": {get_param: flannel_network_subnetlen}
-            "$FLANNEL_USE_VXLAN": {get_param: flannel_use_vxlan}
+            "$FLANNEL_BACKEND": {get_param: flannel_backend}
             "$PORTAL_NETWORK_CIDR": {get_param: portal_network_cidr}
             "$ETCD_DISCOVERY_URL": {get_param: discovery_url}
             "$AUTH_URL": {get_param: auth_url}
@@ -399,6 +398,8 @@ resources:
         - {get_param: secgroup_kube_master_id}
       fixed_ips:
         - subnet: {get_param: fixed_subnet}
+      allowed_address_pairs:
+        - ip_address: {get_param: flannel_network_cidr}
       replacement_policy: AUTO
 
   kube_master_floating:
