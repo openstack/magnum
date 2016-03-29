@@ -83,6 +83,7 @@ Developer Info
    dev/tls.rst
    dev/mesos.rst
    dev/functional-test.rst
+   dev/reno.rst
    magnum-proxy.rst
    contributing
    heat-templates
