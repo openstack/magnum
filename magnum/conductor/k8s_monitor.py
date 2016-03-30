@@ -32,6 +32,10 @@ class K8sMonitor(MonitorBase):
                 'unit': '%',
                 'func': 'compute_memory_util',
             },
+            'cpu_util': {
+                'unit': '%',
+                'func': 'compute_cpu_util',
+            },
         }
 
     def pull_data(self):
@@ -41,22 +45,28 @@ class K8sMonitor(MonitorBase):
         pods = k8s_api.list_namespaced_pod('default')
         self.data['pods'] = self._parse_pod_info(pods)
 
-    def compute_memory_util(self):
-        mem_total = 0
+    def _compute_res_util(self, res):
+        res_total = 0
         for node in self.data['nodes']:
-            mem_total += node['Memory']
-        mem_reserved = 0
+            res_total += node[res]
+        res_reserved = 0
 
         for pod in self.data['pods']:
-            mem_reserved += pod['Memory']
+            res_reserved += pod[res]
 
-        if mem_total == 0:
+        if res_total == 0:
             return 0
         else:
-            return mem_reserved * 100 / mem_total
+            return res_reserved * 100 / res_total
+
+    def compute_memory_util(self):
+        return self._compute_res_util('Memory')
+
+    def compute_cpu_util(self):
+        return self._compute_res_util('Cpu')
 
     def _parse_pod_info(self, pods):
-        """Parse pods and retrieve memory details about each pod
+        """Parse pods and retrieve memory and cpu details about each pod
 
         :param pods: The output of k8s_api.list_namespaced_pods()
         For example:
@@ -73,7 +83,8 @@ class K8sMonitor(MonitorBase):
                     'containers': [{
                         'image': 'nginx',
                         'resources': {'requests': None,
-                              'limits': "{u'memory': u'1280e3'}"},
+                              'limits': "{u'cpu': u'500m',
+                                          u'memory': u'1280e3'}"},
                     }],
                 },
                 'api_version': None,
@@ -86,8 +97,8 @@ class K8sMonitor(MonitorBase):
         V1PodList object
 
         :return: Memory size of each pod. Example:
-            [{'Memory': 1280000.0},
-             {'Memory': 1280000.0}]
+            [{'Memory': 1280000.0, cpu: 0.5},
+             {'Memory': 1280000.0, cpu: 0.5}]
         """
         pods = pods.items
         parsed_containers = []
@@ -95,23 +106,27 @@ class K8sMonitor(MonitorBase):
             containers = pod.spec.containers
             for container in containers:
                 memory = 0
+                cpu = 0
                 resources = container.resources
                 limits = resources.limits
                 if limits is not None:
                     # Output of resources.limits is string
                     # for example:
-                    # limits = "{'memory': '1000Ki'}"
+                    # limits = "{cpu': '500m': 'memory': '1000Ki'}"
                     limits = ast.literal_eval(limits)
                     if limits.get('memory', ''):
-                        memory = utils.get_memory_bytes(limits['memory'])
+                        memory = utils.get_k8s_quantity(limits['memory'])
+                    if limits.get('cpu', ''):
+                        cpu = utils.get_k8s_quantity(limits['cpu'])
                 container_dict = {
-                    'Memory': memory
+                    'Memory': memory,
+                    'Cpu': cpu,
                 }
                 parsed_containers.append(container_dict)
         return parsed_containers
 
     def _parse_node_info(self, nodes):
-        """Parse nodes to retrieve memory of each node
+        """Parse nodes to retrieve memory and cpu of each node
 
         :param nodes: The output of k8s_api.list_namespaced_node()
         For example:
@@ -119,7 +134,8 @@ class K8sMonitor(MonitorBase):
             'items': [{
                 'status': {
                     'phase': None,
-                    'capacity': "{u'memory': u'2049852Ki'}",
+                    'capacity': "{u'cpu': u'1',
+                                  u'memory': u'2049852Ki'}",
                 },
             },
             'api_version': None,
@@ -132,9 +148,9 @@ class K8sMonitor(MonitorBase):
         magnum.common.pythonk8sclient.swagger_client.models.v1_node_list.
         V1NodeList object
 
-        :return: Memory size of each node. Excample:
-            [{'Memory': 1024.0},
-             {'Memory': 1024.0}]
+        :return: CPU core number and Memory size of each node. Example:
+            [{'cpu': 1, 'Memory': 1024.0},
+             {'cpu': 1, 'Memory': 1024.0}]
 
         """
         nodes = nodes.items
@@ -142,9 +158,10 @@ class K8sMonitor(MonitorBase):
         for node in nodes:
             # Output of node.status.capacity is strong
             # for example:
-            # capacity = "{'memory': '1000Ki'}"
+            # capacity = "{'cpu': '1', 'memory': '1000Ki'}"
             capacity = ast.literal_eval(node.status.capacity)
-            memory = utils.get_memory_bytes(capacity['memory'])
-            parsed_nodes.append({'Memory': memory})
+            memory = utils.get_k8s_quantity(capacity['memory'])
+            cpu = int(capacity['cpu'])
+            parsed_nodes.append({'Memory': memory, 'Cpu': cpu})
 
         return parsed_nodes

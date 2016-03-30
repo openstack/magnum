@@ -154,7 +154,7 @@ class MonitorsTestCase(base.TestCase):
         mock_nodes = mock.MagicMock()
         mock_node = mock.MagicMock()
         mock_node.status = mock.MagicMock()
-        mock_node.status.capacity = "{'memory': '2000Ki'}"
+        mock_node.status.capacity = "{'memory': '2000Ki', 'cpu': '1'}"
         mock_nodes.items = [mock_node]
         mock_k8s_api.return_value.list_namespaced_node.return_value = (
             mock_nodes)
@@ -163,16 +163,16 @@ class MonitorsTestCase(base.TestCase):
         mock_pod.spec = mock.MagicMock()
         mock_container = mock.MagicMock()
         mock_container.resources = mock.MagicMock()
-        mock_container.resources.limits = "{'memory':'100Mi'}"
+        mock_container.resources.limits = "{'memory': '100Mi', 'cpu': '500m'}"
         mock_pod.spec.containers = [mock_container]
         mock_pods.items = [mock_pod]
         mock_k8s_api.return_value.list_namespaced_pod.return_value = mock_pods
 
         self.k8s_monitor.pull_data()
         self.assertEqual(self.k8s_monitor.data['nodes'],
-                         [{'Memory': 2048000.0}])
+                         [{'Memory': 2048000.0, 'Cpu': 1}])
         self.assertEqual(self.k8s_monitor.data['pods'],
-                         [{'Memory': 104857600.0}])
+                         [{'Memory': 104857600.0, 'Cpu': 0.5}])
 
     def test_k8s_monitor_get_metric_names(self):
         k8s_metric_spec = 'magnum.conductor.k8s_monitor.K8sMonitor.'\
@@ -216,6 +216,31 @@ class MonitorsTestCase(base.TestCase):
         self.k8s_monitor.data = test_data
         mem_util = self.k8s_monitor.compute_memory_util()
         self.assertEqual(0, mem_util)
+
+    def test_k8s_monitor_compute_cpu_util(self):
+        test_data = {
+            'nodes': [
+                {
+                    'Cpu': 1,
+                },
+            ],
+            'pods': [
+                {
+                    'Cpu': 0.5,
+                },
+            ],
+        }
+        self.k8s_monitor.data = test_data
+        cpu_util = self.k8s_monitor.compute_cpu_util()
+        self.assertEqual(50, cpu_util)
+
+        test_data = {
+            'nodes': [],
+            'pods': [],
+        }
+        self.k8s_monitor.data = test_data
+        cpu_util = self.k8s_monitor.compute_cpu_util()
+        self.assertEqual(0, cpu_util)
 
     def _test_mesos_monitor_pull_data(
             self, mock_url_get, state_json, expected_mem_total,

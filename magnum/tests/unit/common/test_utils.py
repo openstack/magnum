@@ -123,14 +123,15 @@ class UtilsTestCase(base.TestCase):
                          utils.convert_to_list_dict(['first', 'second'],
                                                     'fred'))
 
-    def test_get_memory_bytes(self):
-        self.assertEqual(1024000.0, utils.get_memory_bytes('1000Ki'))
-        self.assertEqual(0.001, utils.get_memory_bytes('1E-3'))
-        self.assertEqual(0.5, utils.get_memory_bytes('0.0005k'))
-        self.assertEqual(1300000.0, utils.get_memory_bytes('1.3E+6'))
-        self.assertEqual(1300000.0, utils.get_memory_bytes('1.3E6'))
-        self.assertRaises(exception.UnsupportedK8sMemoryFormat,
-                          utils.get_memory_bytes, '1E1E')
+    def test_get_k8s_quantity(self):
+        self.assertEqual(1024000.0, utils.get_k8s_quantity('1000Ki'))
+        self.assertEqual(0.001, utils.get_k8s_quantity('1E-3'))
+        self.assertEqual(0.5, utils.get_k8s_quantity('0.0005k'))
+        self.assertEqual(0.5, utils.get_k8s_quantity('500m'))
+        self.assertEqual(1300000.0, utils.get_k8s_quantity('1.3E+6'))
+        self.assertEqual(1300000.0, utils.get_k8s_quantity('1.3E6'))
+        self.assertRaises(exception.UnsupportedK8sQuantityFormat,
+                          utils.get_k8s_quantity, '1E1E')
 
 
 class ExecuteTestCase(base.TestCase):
