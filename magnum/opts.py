@@ -60,4 +60,6 @@ def list_opts():
                             )),
         ('baymodel', magnum.api.validation.baymodel_opts),
         ('keystone_auth', magnum.common.keystone.keystone_auth_opts),
+        ('docker_registry',
+         magnum.conductor.template_definition.docker_registry_opts)
     ]

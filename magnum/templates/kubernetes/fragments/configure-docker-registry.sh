@@ -15,12 +15,12 @@ storage:
   cache:
     layerinfo: inmemory
   swift:
-    authurl: "$REGISTRY_AUTH_URL"
-    region: "$REGISTRY_REGION"
-    username: "$REGISTRY_USERNAME"
-    password: "$REGISTRY_PASSWORD"
-    domain: "$REGISTRY_DOMAIN"
-    trustid: "$REGISTRY_TRUST_ID"
+    authurl: "$AUTH_URL"
+    region: "$SWIFT_REGION"
+    username: "$TRUSTEE_USERNAME"
+    password: "$TRUSTEE_PASSWORD"
+    domainid: "$TRUSTEE_DOMAIN_ID"
+    trustid: "$TRUST_ID"
     container: "$REGISTRY_CONTAINER"
     insecureskipverify: $REGISTRY_INSECURE
     chunksize: $REGISTRY_CHUNKSIZE

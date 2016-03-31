@@ -64,8 +64,18 @@ template_def_opts = [
                 help=_('Enabled bay definition entry points.')),
 ]
 
+docker_registry_opts = [
+    cfg.StrOpt('swift_region',
+               help=_('Region name of Swift')),
+    cfg.StrOpt('swift_registry_container',
+               default='docker_registry',
+               help=_('Name of the container in Swift which docker registry '
+                      'stores images in'))
+]
+
 CONF = cfg.CONF
 CONF.register_opts(template_def_opts, group='bay')
+CONF.register_opts(docker_registry_opts, group='docker_registry')
 CONF.import_opt('trustee_domain_id', 'magnum.common.keystone', group='trust')
 
 
@@ -447,6 +457,8 @@ class K8sTemplateDefinition(BaseTemplateDefinition):
         self.add_parameter('tls_disabled',
                            baymodel_attr='tls_disabled',
                            required=True)
+        self.add_parameter('registry_enabled',
+                           baymodel_attr='registry_enabled')
 
         self.add_output('api_address',
                         bay_attr='api_address',
@@ -474,6 +486,11 @@ class K8sTemplateDefinition(BaseTemplateDefinition):
                       'flannel_network_subnetlen']
         for label in label_list:
             extra_params[label] = baymodel.labels.get(label)
+
+        if baymodel.registry_enabled:
+            extra_params['swift_region'] = CONF.docker_registry.swift_region
+            extra_params['registry_container'] = (
+                CONF.docker_registry.swift_registry_container)
 
         return super(K8sTemplateDefinition,
                      self).get_params(context, baymodel, bay,
