@@ -183,9 +183,7 @@ class TestX509(base.BaseTestCase):
 
         self.assertInClientExtensions(cert)
 
-    # Notes(eliqiao): Remove this '_module' after cryptography issue fixed
-    # https://github.com/pyca/cryptography/issues/2844
-    @mock.patch('cryptography.x509._module.load_pem_x509_csr')
+    @mock.patch('cryptography.x509.load_pem_x509_csr')
     @mock.patch('six.b')
     def test_sign_with_unicode_csr(self, mock_six, mock_load_pem):
         ca_key = self._generate_private_key()
