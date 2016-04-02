@@ -29,6 +29,10 @@ class MesosMonitor(MonitorBase):
                 'unit': '%',
                 'func': 'compute_memory_util',
             },
+            'cpu_util': {
+                'unit': '%',
+                'func': 'compute_cpu_util',
+            },
         }
 
     def _build_url(self, url, protocol='http', port='80', path='/'):
@@ -40,6 +44,8 @@ class MesosMonitor(MonitorBase):
     def pull_data(self):
         self.data['mem_total'] = 0
         self.data['mem_used'] = 0
+        self.data['cpu_total'] = 0
+        self.data['cpu_used'] = 0
         for master_addr in self.bay.master_addresses:
             mesos_master_url = self._build_url(master_addr, port='5050',
                                                path='/state')
@@ -48,10 +54,18 @@ class MesosMonitor(MonitorBase):
                 for slave in master['slaves']:
                     self.data['mem_total'] += slave['resources']['mem']
                     self.data['mem_used'] += slave['used_resources']['mem']
+                    self.data['cpu_total'] += slave['resources']['cpus']
+                    self.data['cpu_used'] += slave['used_resources']['cpus']
                 break
 
     def compute_memory_util(self):
-        if self.data['mem_total'] == 0:
+        if self.data['mem_total'] == 0 or self.data['mem_used'] == 0:
             return 0
         else:
             return self.data['mem_used'] * 100 / self.data['mem_total']
+
+    def compute_cpu_util(self):
+        if self.data['cpu_used'] == 0:
+            return 0
+        else:
+            return self.data['cpu_used'] * 100 / self.data['cpu_total']
