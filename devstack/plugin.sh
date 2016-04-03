@@ -15,7 +15,16 @@ if is_service_enabled m-api m-cond; then
 
         # add image to glance
         if [[ "$ENABLED_SERVICES" =~ 'm-api' ]]; then
-            MAGNUM_GUEST_IMAGE_URL=${MAGNUM_GUEST_IMAGE_URL:-"https://fedorapeople.org/groups/magnum/fedora-21-atomic-5.qcow2"}
+            # TODO Add a "latest" link to fedora release process
+            ATOMIC_IMAGE_NAME=$( \
+                wget --spider --level 1 \
+                     --recursive --accept-regex=".*qcow2" \
+                     "https://alt.fedoraproject.org/pub/alt/atomic/stable/Cloud-Images/x86_64/Images/" 2>&1 | \
+                grep qcow2 | \
+                sed 's/.*Cloud-Images\/x86_64\/Images\///' | \
+                head -n 1)
+            echo "Atomic Image: $ATOMIC_IMAGE_NAME"
+            MAGNUM_GUEST_IMAGE_URL=${MAGNUM_GUEST_IMAGE_URL:-"https://download.fedoraproject.org/pub/alt/atomic/stable/Cloud-Images/x86_64/Images/$ATOMIC_IMAGE_NAME"}
             IMAGE_URLS+=",${MAGNUM_GUEST_IMAGE_URL}"
         fi
 

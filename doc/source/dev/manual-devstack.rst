@@ -113,17 +113,15 @@ Magnum has been tested with the Fedora Atomic micro-OS and CoreOS. Magnum will
 likely work with other micro-OS platforms, but each requires individual
 support in the heat template.
 
-Store the Fedora Atomic micro-OS in glance. (The steps for updating Fedora
-Atomic images are a bit detailed. Fortunately one of the core developers has
-made Atomic images available at https://fedorapeople.org/groups/magnum)::
+Store the Fedora Atomic micro-OS in glance. Download the qcow2 Atomic image
+from https://getfedora.org/cloud/download/atomic.html and then upload it to
+glance::
 
-    cd ~
-    wget https://fedorapeople.org/groups/magnum/fedora-21-atomic-5.qcow2
     glance image-create --name fedora-21-atomic-5 \
                         --visibility public \
                         --disk-format qcow2 \
                         --os-distro fedora-atomic \
-                        --container-format bare < fedora-21-atomic-5.qcow2
+                        --container-format bare < fedora-atomic.qcow2
 
 Create a domain and domain admin for trust::
 

@@ -28,11 +28,10 @@ function create_test_data {
     # a baymodel, bay and a pod
 
     coe=$1
-
     if [ $coe == 'mesos' ]; then
         local image_name="ubuntu-14.04"
     else
-        local image_name="fedora-21-atomic"
+        local image_name="atomic"
     fi
 
     # if we have the MAGNUM_IMAGE_NAME setting, use it instead
@@ -41,7 +40,7 @@ function create_test_data {
     image_name=${MAGNUM_IMAGE_NAME:-$image_name}
 
     export NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
-    export IMAGE_ID=$(glance --os-image-api-version 1 image-list | grep $image_name | awk '{print $2}')
+    export IMAGE_ID=$(glance --os-image-api-version 1 image-list | grep -i $image_name | awk '{print $2}')
 
     # pass the appropriate variables via a config file
     CREDS_FILE=$MAGNUM_DIR/functional_creds.conf
