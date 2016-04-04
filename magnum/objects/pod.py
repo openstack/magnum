@@ -12,10 +12,10 @@
 
 import ast
 
+from k8sclient.client import rest
 from oslo_versionedobjects import fields
 
 from magnum.common import exception
-from magnum.common.pythonk8sclient.swagger_client import rest
 from magnum.db import api as dbapi
 from magnum.objects import base
 

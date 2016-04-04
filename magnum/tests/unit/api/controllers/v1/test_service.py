@@ -12,13 +12,13 @@
 
 import datetime
 
+from k8sclient.client import rest
 import mock
 from oslo_config import cfg
 from six.moves.urllib import parse as urlparse
 from wsme import types as wtypes
 
 from magnum.api.controllers.v1 import service as api_service
-from magnum.common.pythonk8sclient.swagger_client import rest
 from magnum.common import utils
 from magnum.conductor import api as rpcapi
 from magnum.tests import base

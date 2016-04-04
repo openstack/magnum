@@ -60,7 +60,7 @@ class TestK8sAPI(base.TestCase):
     @patch(
         'magnum.conductor.handlers.common.cert_manager.get_bay_ca_certificate')
     @patch('magnum.conductor.handlers.common.cert_manager.get_bay_magnum_cert')
-    @patch('magnum.common.pythonk8sclient.swagger_client.api_client.ApiClient')
+    @patch('k8sclient.client.api_client.ApiClient')
     def test_create_k8s_api(self,
                             mock_api_client,
                             mock_get_bay_magnum_cert,

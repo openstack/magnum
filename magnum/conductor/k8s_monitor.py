@@ -93,7 +93,7 @@ class K8sMonitor(MonitorBase):
         }
 
         The above output is the dict form of:
-        magnum.common.pythonk8sclient.swagger_client.models.v1_pod_list.
+        k8sclient.client.models.v1_pod_list.
         V1PodList object
 
         :return: Memory size of each pod. Example:
@@ -145,7 +145,7 @@ class K8sMonitor(MonitorBase):
         }
 
         The above output is the dict form of:
-        magnum.common.pythonk8sclient.swagger_client.models.v1_node_list.
+        k8sclient.client.models.v1_node_list.
         V1NodeList object
 
         :return: CPU core number and Memory size of each node. Example:

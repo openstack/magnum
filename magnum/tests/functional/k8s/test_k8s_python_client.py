@@ -10,8 +10,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from magnum.common.pythonk8sclient.swagger_client import api_client
-from magnum.common.pythonk8sclient.swagger_client.apis import apiv_api
+from k8sclient.client import api_client
+from k8sclient.client.apis import apiv_api
+
 from magnum.tests.functional.common import utils
 from magnum.tests.functional.python_client_base import BayTest
 

@@ -12,11 +12,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from k8sclient.client import rest
 import mock
 from mock import patch
 
 from magnum.common import exception
-from magnum.common.pythonk8sclient.swagger_client import rest
 from magnum.conductor.handlers import k8s_conductor
 from magnum import objects
 from magnum.tests import base

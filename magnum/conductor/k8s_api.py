@@ -14,10 +14,10 @@
 
 from tempfile import NamedTemporaryFile
 
+from k8sclient.client import api_client
+from k8sclient.client.apis import apiv_api
 from oslo_log import log as logging
 
-from magnum.common.pythonk8sclient.swagger_client import api_client
-from magnum.common.pythonk8sclient.swagger_client.apis import apiv_api
 from magnum.conductor.handlers.common import cert_manager
 
 

@@ -11,11 +11,11 @@
 #    limitations under the License.
 
 
+from k8sclient.client import rest
 from oslo_log import log as logging
 
 from magnum.common import exception
 from magnum.common import k8s_manifest
-from magnum.common.pythonk8sclient.swagger_client import rest
 from magnum.common import utils
 from magnum.conductor import k8s_api as k8s
 from magnum.conductor import utils as conductor_utils
