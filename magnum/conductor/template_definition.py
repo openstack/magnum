@@ -456,6 +456,8 @@ class K8sTemplateDefinition(BaseTemplateDefinition):
                            required=True)
         self.add_parameter('network_driver',
                            baymodel_attr='network_driver')
+        self.add_parameter('volume_driver',
+                           baymodel_attr='volume_driver')
         self.add_parameter('tls_disabled',
                            baymodel_attr='tls_disabled',
                            required=True)
@@ -518,6 +520,7 @@ class AtomicK8sTemplateDefinition(K8sTemplateDefinition):
         osc = clients.OpenStackClients(context)
         extra_params['user_token'] = self._get_user_token(context, osc, bay)
         extra_params['magnum_url'] = osc.magnum_url()
+        extra_params['region_name'] = osc.cinder_region_name()
 
         if baymodel.tls_disabled:
             extra_params['loadbalancing_protocol'] = 'HTTP'

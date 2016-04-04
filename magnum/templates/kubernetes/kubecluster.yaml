@@ -175,6 +175,15 @@ parameters:
       size fo the data segments for the swift dynamic large objects
     default: 5242880
 
+  volume_driver:
+    type: string
+    description: volume driver to use for container storage
+    default: ""
+
+  region_name:
+    type: string
+    description: A logically separate section of the cluster
+
   username:
     type: string
     description: >
@@ -504,6 +513,12 @@ resources:
           user_token: {get_param: user_token}
           bay_uuid: {get_param: bay_uuid}
           magnum_url: {get_param: magnum_url}
+          volume_driver: {get_param: volume_driver}
+          region_name: {get_param: region_name}
+          tenant_name: {get_param: tenant_name}
+          auth_url: {get_param: auth_url}
+          username: {get_param: username}
+          password: {get_param: password}
           kubernetes_port: {get_param: kubernetes_port}
           tls_disabled: {get_param: tls_disabled}
           secgroup_kube_minion_id: {get_resource: secgroup_kube_minion}

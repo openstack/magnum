@@ -154,6 +154,36 @@ parameters:
     type: string
     description: ID of the security group for kubernetes minion.
 
+  volume_driver:
+    type: string
+    description: volume driver to use for container storage
+
+  region_name:
+    type: string
+    description: A logically separate section of the cluster
+
+  tenant_name:
+    type: string
+    description: an alternative term for a project
+
+  auth_url:
+    type: string
+    description: >
+      url for kubernetes to authenticate before sending request to neutron
+      must be v2 since kubernetes backend only suppor v2 at this point
+
+  username:
+    type: string
+    description: >
+      user account
+
+  password:
+    type: string
+    description: >
+      user password, not set in current implementation, only used to
+      fill in for Kubernetes config file
+    hidden: true
+
   http_proxy:
     type: string
     description: http proxy address for docker
@@ -242,6 +272,12 @@ resources:
             $BAY_UUID: {get_param: bay_uuid}
             $USER_TOKEN: {get_param: user_token}
             $MAGNUM_URL: {get_param: magnum_url}
+            $AUTH_URL: {get_param: auth_url}
+            $USERNAME: {get_param: username}
+            $PASSWORD: {get_param: password}
+            $VOLUME_DRIVER: {get_param: volume_driver}
+            $REGION_NAME: {get_param: region_name}
+            $TENANT_NAME: {get_param: tenant_name}
             $HTTP_PROXY: {get_param: http_proxy}
             $HTTPS_PROXY: {get_param: https_proxy}
             $NO_PROXY: {get_param: no_proxy}

@@ -181,6 +181,7 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         mock_scale_manager = mock.MagicMock()
         mock_osc = mock.MagicMock()
         mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
+        mock_osc.cinder_region_name.return_value = 'RegionOne'
         mock_osc_class.return_value = mock_osc
 
         removal_nodes = ['node1', 'node2']
@@ -209,6 +210,7 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
             'username': 'fake_user',
             'tenant_name': 'fake_tenant',
             'magnum_url': mock_osc.magnum_url.return_value,
+            'region_name': mock_osc.cinder_region_name.return_value,
             'user_token': mock_context.auth_token}}
         mock_get_params.assert_called_once_with(mock_context, mock_baymodel,
                                                 mock_bay, **expected_kwargs)
@@ -232,6 +234,7 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         mock_scale_manager = mock.MagicMock()
         mock_osc = mock.MagicMock()
         mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
+        mock_osc.cinder_region_name.return_value
         mock_osc_class.return_value = mock_osc
 
         removal_nodes = ['node1', 'node2']
@@ -260,6 +263,7 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
             'username': 'fake_user',
             'tenant_name': 'fake_tenant',
             'magnum_url': mock_osc.magnum_url.return_value,
+            'region_name': mock_osc.cinder_region_name.return_value,
             'user_token': mock_context.auth_token,
             'loadbalancing_protocol': 'HTTP',
             'kubernetes_port': 8080}}
