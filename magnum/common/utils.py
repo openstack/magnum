@@ -549,8 +549,18 @@ def raise_exception_invalid_scheme(url):
         raise exception.Urllib2InvalidScheme(url=url)
 
 
-def get_memory_bytes(memory):
-    """Kubernetes memory format must be in the format of:
+def get_k8s_quantity(quantity):
+    """This function is used to get k8s quantity.
+
+    It supports to get CPU and Memory quantity:
+
+    Kubernetes cpu format must be in the format of:
+
+        <signedNumber>'m'
+        for example:
+        500m = 0.5 core of cpu
+
+    Kubernetes memory format must be in the format of:
 
         <signedNumber><suffix>
         signedNumber = digits|digits.digits|digits.|.digits
@@ -558,23 +568,29 @@ def get_memory_bytes(memory):
         or suffix = E|e<signedNumber>
         digits = digit | digit<digits>
         digit = 0|1|2|3|4|5|6|7|8|9
+
+    :param name: String value of a quantity such as '500m', '1G'
+    :returns: Quantity number
+    :raises: exception.UnsupportedK8sQuantityFormat if the quantity string
+             is a unsupported value
     """
+
     signed_num_regex = r"(^\d+\.\d+)|(^\d+\.)|(\.\d+)|(^\d+)"
-    matched_signed_number = re.search(signed_num_regex, memory)
+    matched_signed_number = re.search(signed_num_regex, quantity)
     if matched_signed_number is None:
-        raise exception.UnsupportedK8sMemoryFormat()
+        raise exception.UnsupportedK8sQuantityFormat()
     else:
         signed_number = matched_signed_number.group(0)
-    suffix = memory.replace(signed_number, '', 1)
+    suffix = quantity.replace(signed_number, '', 1)
     if suffix == '':
-        return float(memory)
+        return float(quantity)
     if re.search(r"^(Ki|Mi|Gi|Ti|Pi|Ei|m|k|M|G|T|P|E|'')$", suffix):
         return float(signed_number) * MEMORY_UNITS[suffix]
     elif re.search(r"^[E|e][+|-]?(\d+\.\d+$)|(\d+\.$)|(\.\d+$)|(\d+$)",
                    suffix):
         return float(signed_number) * (10 ** float(suffix[1:]))
     else:
-        raise exception.UnsupportedK8sMemoryFormat()
+        raise exception.UnsupportedK8sQuantityFormat()
 
 
 def generate_password(length, symbolgroups=None):

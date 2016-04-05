@@ -529,8 +529,8 @@ class MagnumServiceAlreadyExists(Conflict):
     message = _("A magnum service with ID %(id)s already exists.")
 
 
-class UnsupportedK8sMemoryFormat(MagnumException):
-    message = _("Unsupported memory format for k8s bay.")
+class UnsupportedK8sQuantityFormat(MagnumException):
+    message = _("Unsupported quantity format for k8s bay.")
 
 
 class FlavorNotFound(ResourceNotFound):
