@@ -9,14 +9,39 @@ integration in Kubernetes, Swarm and Mesos.
 Using container volume integration in Kubernetes
 ------------------------------------------------
 
-1. Create the baymodel.
+**NOTE:**  The Container Volume Model of Kubernetes needs the kubernetes
+version >= 1.1.1 and docker version >= 1.8.3
+
+1. Store the Fedora Atomic micro-OS in glance
+
+   The steps for updating Fedora Atomic images are a bit detailed.Fortunately
+   one of the core developers has made Atomic images available at
+   https://fedorapeople.org/groups/magnum::
+
+    cd ~
+    wget https://fedorapeople.org/groups/magnum/fedora-23-atomic-7.qcow2
+    glance image-create --name fedora-23-atomic-7 \
+                        --visibility public \
+                        --disk-format qcow2 \
+                        --os-distro fedora-atomic \
+                        --container-format bare < fedora-23-atomic-7.qcow2
+
+2. Edit the file::
+
+    sudo vi /opt/stack/magnum/magnum/templates/kubernetes/kubecluster.yaml
+
+   The default value of the kube_version entries needs to change 'v1.0.6' to
+   'v1.1.8', then restart magnum-conduct service.(Magnum team will make the
+   step automation as soon as possible.)
+
+3. Create the baymodel.
 
    The new attribute volume-driver for a baymodel specifies the volume backend
    driver to use when deploying a bay. The volume-driver value needs to be
    specified as 'cinder' for kubernetes::
 
     magnum baymodel-create --name k8sbaymodel \
-                           --image-id fedora-21-atomic-5 \
+                           --image-id fedora-23-atomic-7 \
                            --keypair-id testkey \
                            --external-network-id public \
                            --dns-nameserver 8.8.8.8 \
@@ -26,14 +51,14 @@ Using container volume integration in Kubernetes
                            --coe kubernetes \
                            --volume-driver cinder
 
-2. Create the bay::
+4. Create the bay::
 
     magnum bay-create --name k8sbay --baymodel k8sbaymodel --node-count 1
 
 To enable the container volume integration in kubernetes, log into each minion
-node of your bay and perform the following step 3, step 4, step 5 and step 6:
+node of your bay and perform the following step 5, step 6, step 7 and step 8:
 
-3. Configure kubelet::
+5. Configure kubelet::
 
     sudo vi /etc/kubernetes/kubelet
 
@@ -43,14 +68,14 @@ node of your bay and perform the following step 3, step 4, step 5 and step 6:
 
    Uncomment the line::
 
-    #KUBELET_ARGS="--config=/etc/kubernetes/manifests --cadvisor-port=4194 --cloud-provider=openstack --cloud-config=/etc/kubernetes/cloud_config"
+    #KUBELET_ARGS="--config=/etc/kubernetes/manifests --cadvisor-port=4194 --cloud-provider=openstack --cloud-config=/etc/kubernetes/kube_openstack_config"
 
 **NOTE:** This is a temporary workaround, and Magnum team is working
 on a long term solution to automate this step.
 
-4. Enter OpenStack user credential::
+6. Enter OpenStack user credential::
 
-    sudo vi /etc/kubernetes/cloud_config
+    sudo vi /etc/kubernetes/kube_openstack_config
 
   The username, tenant-name and region entries have been filled in with the
   Keystone values of the user who created the bay.  Enter the password
@@ -58,17 +83,17 @@ on a long term solution to automate this step.
 
     password=ChangeMe
 
-5. Restart Kubernetes services::
+7. Restart Kubernetes services::
 
     sudo systemctl restart kubelet
 
-6. Run the docker container::
+8. Run the docker container::
 
     sudo docker run -v /usr/local/bin:/target jpetazzo/nsenter
 
 Kubernetes container volume integration has configured by the above steps,
 And you can use the kubernetes container volume now. The following steps is
-an example for container volume integration with kubernetes bay..
+an example for container volume integration with kubernetes bay.
 
 1. Create the cinder volume::
 
