@@ -42,11 +42,11 @@ def create_trustee_and_trust(osc, bay):
         raise exception.TrusteeOrTrustToBayFailed(bay_uuid=bay.uuid)
 
 
-def delete_trustee_and_trust(osc, bay):
+def delete_trustee_and_trust(osc, context, bay):
     try:
         # The bay which is upgraded from Liberty doesn't have trust_id
         if bay.trust_id:
-            osc.keystone().delete_trust(bay.trust_id)
+            osc.keystone().delete_trust(context, bay)
     except Exception:
         # Exceptions are already logged by keystone().delete_trust
         pass
