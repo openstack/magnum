@@ -134,7 +134,7 @@ class Handler(object):
                                           bay_create_timeout)
         except Exception as e:
             cert_manager.delete_certificates_from_bay(bay)
-            trust_manager.delete_trustee_and_trust(osc, bay)
+            trust_manager.delete_trustee_and_trust(osc, context, bay)
 
             if isinstance(e, exc.HTTPBadRequest):
                 e = exception.InvalidParameterValue(message=six.text_type(e))

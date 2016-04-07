@@ -222,7 +222,7 @@ class TestHandler(db_base.DbTestCase):
 
         mock_cert_manager.delete_certificates_from_bay(self.bay)
         mock_trust_manager.delete_trustee_and_trust.assert_called_once_with(
-            osc, self.bay)
+            osc, self.context, self.bay)
 
     @patch('magnum.conductor.handlers.bay_conductor.trust_manager')
     @patch('magnum.conductor.handlers.bay_conductor.cert_manager')
