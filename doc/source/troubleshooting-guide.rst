@@ -507,7 +507,8 @@ Check the following:
   Magnum also loads this configuration into etcd, therefore, verify
   the configuration in etcd by running *etcdctl* on the master nodes::
 
-    etcdctl get /coreos.com/network/config
+    . /etc/sysconfig/flanneld
+    etcdctl get $FLANNEL_ETCD_KEY/config
 
 - Each node is allocated a segment of the network space.  Check
   for this segment on each node by::
@@ -519,17 +520,18 @@ Check the following:
   *etcdctl* on the master node to query the network segment associated
   with each node::
 
-    for s in `etcdctl ls /coreos.com/network/subnets`
+    . /etc/sysconfig/flanneld
+    for s in `etcdctl ls $FLANNEL_ETCD_KEY/subnets`
     do
     echo $s
     etcdctl get $s
     done
 
-    /coreos.com/network/subnets/10.100.14.0-24
+    /atomic.io/network/subnets/10.100.14.0-24
     {"PublicIP":"10.0.0.5"}
-    /coreos.com/network/subnets/10.100.61.0-24
+    /atomic.io/network/subnets/10.100.61.0-24
     {"PublicIP":"10.0.0.6"}
-    /coreos.com/network/subnets/10.100.92.0-24
+    /atomic.io/network/subnets/10.100.92.0-24
     {"PublicIP":"10.0.0.7"}
 
   Alternatively, you can read the full record in ectd by::
