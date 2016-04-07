@@ -69,7 +69,7 @@ Here's a reasonable sample of tempest.conf settings you might need::
     test_accounts_file=/tmp/etc/magnum/accounts.yaml
     admin_username=admin
     admin_password=password
-    admin_tenant_name=admin
+    admin_project_name=admin
 
     [identity]
     disable_ssl_certificate_validation=True
