@@ -87,7 +87,10 @@ prompt = no
 [req_distinguished_name]
 CN = kubernetes.invalid
 [req_ext]
-subjectAltName = ${sans}
+# TODO(hongbin): This is a temporary work-around for a gate breakage.
+# Need to investigate the issue and revert this temporary fix.
+# Bug #1568212 - '\xac\x18\x05\x07' does not appear to be an IPv4 or IPv6 address
+#subjectAltName = ${sans}
 extendedKeyUsage = clientAuth,serverAuth
 EOF
 
