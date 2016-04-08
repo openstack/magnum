@@ -31,6 +31,9 @@ JSONPATCH_EXCEPTIONS = (jsonpatch.JsonPatchException,
                         KeyError)
 
 
+DOCKER_MINIMUM_MEMORY = 4 * 1024 * 1024
+
+
 def validate_limit(limit):
     if limit is not None and limit <= 0:
         raise wsme.exc.ClientSideError(_("Limit must be positive"))
@@ -47,6 +50,21 @@ def validate_sort_dir(sort_dir):
                                          "Acceptable values are "
                                          "'asc' or 'desc'") % sort_dir)
     return sort_dir
+
+
+def validate_docker_memory(mem_str):
+    """Docker require that Minimum memory limit >= 4M."""
+    try:
+        mem = utils.get_docker_quanity(mem_str)
+    except exception.UnsupportedDockerQuantityFormat:
+        raise wsme.exc.ClientSideError(_("Invalid docker memory specified. "
+                                         "Acceptable values are format: "
+                                         "<number>[<unit>],"
+                                         "where unit = b, k, m or g"))
+    if mem < DOCKER_MINIMUM_MEMORY:
+        raise wsme.exc.ClientSideError(_("Docker Minimum memory limit"
+                                         "allowed is %d B.")
+                                       % DOCKER_MINIMUM_MEMORY)
 
 
 def apply_jsonpatch(doc, patch):

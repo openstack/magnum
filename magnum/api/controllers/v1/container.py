@@ -401,6 +401,8 @@ class ContainersController(rest.RestController):
         context = pecan.request.context
         container_dict['project_id'] = context.project_id
         container_dict['user_id'] = context.user_id
+        if 'memory' in container_dict:
+            api_utils.validate_docker_memory(container_dict['memory'])
         new_container = objects.Container(context, **container_dict)
         new_container.create()
         res_container = pecan.request.rpcapi.container_create(new_container)
