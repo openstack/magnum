@@ -24,14 +24,14 @@ class Config(object):
     def set_admin_creds(cls, config):
         cls.admin_user = CONF.auth.admin_username
         cls.admin_passwd = CONF.auth.admin_password
-        cls.admin_tenant = CONF.auth.admin_tenant_name
+        cls.admin_tenant = CONF.auth.admin_project_name
 
     @classmethod
     def set_user_creds(cls, config):
         # normal user creds
         cls.user = CONF.identity.username
         cls.passwd = CONF.identity.password
-        cls.tenant = CONF.identity.tenant_name
+        cls.tenant = CONF.identity.project_name
 
     @classmethod
     def set_auth_version(cls, config):

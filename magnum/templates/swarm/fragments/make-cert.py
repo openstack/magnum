@@ -40,7 +40,11 @@ copy_extensions = copyall
 [req_distinguished_name]
 CN = swarm.invalid
 [req_ext]
-subjectAltName = %(subject_alt_names)s
+# TODO(hongbin): This is a temporary work-around for a gate breakage.
+# Need to investigate the issue and revert this temporary fix.
+# Bug #1568212 - '\xac\x18\x05\x07' does not appear to be an IPv4 or IPv6
+# address
+#subjectAltName = %(subject_alt_names)s
 extendedKeyUsage = clientAuth,serverAuth
 """
 
@@ -99,10 +103,15 @@ def write_server_key():
 
 def _write_csr_config(config):
     with open(SERVER_CONF_PATH, 'w') as fp:
-        params = {
-            'subject_alt_names': _build_subject_alt_names(config)
-        }
-        fp.write(CSR_CONFIG_TEMPLATE % params)
+        # TODO(hongbin): This is a temporary work-around for a gate breakage.
+        # Need to investigate the issue and revert this temporary fix.
+        # Bug #1568212 - '\xac\x18\x05\x07' does not appear to be an IPv4 or
+        # IPv6 address
+        # params = {
+        #    'subject_alt_names': _build_subject_alt_names(config)
+        # }
+        # fp.write(CSR_CONFIG_TEMPLATE % params)
+        fp.write(CSR_CONFIG_TEMPLATE)
 
 
 def create_server_csr(config):
