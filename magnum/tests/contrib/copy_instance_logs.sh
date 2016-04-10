@@ -27,7 +27,7 @@ PRIVATE_KEY=
 
 echo "If private key is specified, save to temp and use that; else, use default"
 if [[ "$KEYPAIR" == "default" ]]; then
-    PRIVATE_KEY="~/.ssh/id_rsa"
+    PRIVATE_KEY=$(readlink -f ~/.ssh/id_rsa)
 else
     PRIVATE_KEY="$(mktemp id_rsa.$SSH_IP.XXX)"
     echo -en "$KEYPAIR" > $PRIVATE_KEY
