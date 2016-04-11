@@ -52,10 +52,6 @@ parameters:
       service.
     default: 6443
 
-  user_token:
-    type: string
-    description: token used for communicating back to Magnum for TLS certs
-
   bay_uuid:
     type: string
     description: identifier for the bay this template is generating
@@ -270,7 +266,6 @@ resources:
             $REGISTRY_CHUNKSIZE: {get_param: registry_chunksize}
             $TLS_DISABLED: {get_param: tls_disabled}
             $BAY_UUID: {get_param: bay_uuid}
-            $USER_TOKEN: {get_param: user_token}
             $MAGNUM_URL: {get_param: magnum_url}
             $AUTH_URL: {get_param: auth_url}
             $USERNAME: {get_param: username}

@@ -25,10 +25,6 @@ parameters:
     type: string
     description: url provided for node discovery
 
-  user_token:
-    type: string
-    description: token used for communicating back to Magnum for TLS certs
-
   bay_uuid:
     type: string
     description: identifier for the bay this template is generating
@@ -310,7 +306,6 @@ resources:
           no_proxy: {get_param: no_proxy}
           swarm_api_ip: {get_attr: [api_pool, vip, address]}
           bay_uuid: {get_param: bay_uuid}
-          user_token: {get_param: user_token}
           magnum_url: {get_param: magnum_url}
           tls_disabled: {get_param: tls_disabled}
           secgroup_swarm_master_id: {get_resource: secgroup_manager}
@@ -324,6 +319,10 @@ resources:
           etcd_server_ip: {get_attr: [etcd_pool, vip, address]}
           api_ip_address: {get_attr: [api_pool_floating, floating_ip_address]}
           swarm_version: {get_param: swarm_version}
+          trustee_user_id: {get_param: trustee_user_id}
+          trustee_password: {get_param: trustee_password}
+          trust_id: {get_param: trust_id}
+          auth_url: {get_param: auth_url}
 
   swarm_nodes:
     type: "OS::Heat::ResourceGroup"
@@ -347,7 +346,6 @@ resources:
           no_proxy: {get_param: no_proxy}
           swarm_api_ip: {get_attr: [api_pool, vip, address]}
           bay_uuid: {get_param: bay_uuid}
-          user_token: {get_param: user_token}
           magnum_url: {get_param: magnum_url}
           tls_disabled: {get_param: tls_disabled}
           secgroup_swarm_node_id: {get_resource: secgroup_manager}
@@ -356,6 +354,10 @@ resources:
           etcd_server_ip: {get_attr: [etcd_pool, vip, address]}
           api_ip_address: {get_attr: [api_pool_floating, floating_ip_address]}
           swarm_version: {get_param: swarm_version}
+          trustee_user_id: {get_param: trustee_user_id}
+          trustee_password: {get_param: trustee_password}
+          trust_id: {get_param: trust_id}
+          auth_url: {get_param: auth_url}
 
 outputs:
 

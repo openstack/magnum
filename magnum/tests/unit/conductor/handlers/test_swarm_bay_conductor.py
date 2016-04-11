@@ -71,8 +71,6 @@ class TestBayConductorWithSwarm(base.TestCase):
         self.mock_osc = mock.MagicMock()
         self.mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
         self.mock_osc_class.return_value = self.mock_osc
-        mock_stack = self.mock_osc.heat.return_value.stacks.get.return_value
-        mock_stack.parameters = {'user_token': 'fake_token'}
         self.context.auth_url = 'http://192.168.10.10:5000/v3'
 
     @patch('magnum.objects.BayModel.get_by_uuid')
@@ -101,7 +99,6 @@ class TestBayConductorWithSwarm(base.TestCase):
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
-            'user_token': 'fake_token',
             'bay_uuid': 'some_uuid',
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'tls_disabled': False,
@@ -145,7 +142,6 @@ class TestBayConductorWithSwarm(base.TestCase):
             'number_of_masters': 1,
             'number_of_nodes': 1,
             'discovery_url': 'https://discovery.etcd.io/test',
-            'user_token': 'fake_token',
             'bay_uuid': 'some_uuid',
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'tls_disabled': False,

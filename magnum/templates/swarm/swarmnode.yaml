@@ -69,10 +69,6 @@ parameters:
     type: string
     description: swarm master's api server public ip address
 
-  user_token:
-    type: string
-    description: token used for communicating back to Magnum for TLS certs
-
   bay_uuid:
     type: string
     description: identifier for the bay this template is generating
@@ -96,6 +92,24 @@ parameters:
   etcd_server_ip:
     type: string
     description: ip address of the load balancer pool of etcd server.
+
+  trustee_user_id:
+    type: string
+    description: user id of the trustee
+
+  trustee_password:
+    type: string
+    description: password of the trustee
+    hidden: true
+
+  trust_id:
+    type: string
+    description: id of the trust which is used by the trustee
+    hidden: true
+
+  auth_url:
+    type: string
+    description: url for keystone
 
 resources:
 
@@ -143,7 +157,6 @@ resources:
             "$SWARM_API_IP": {get_param: swarm_api_ip}
             "$SWARM_NODE_IP": {get_attr: [swarm_node_eth0, fixed_ips, 0, ip_address]}
             "$BAY_UUID": {get_param: bay_uuid}
-            "$USER_TOKEN": {get_param: user_token}
             "$MAGNUM_URL": {get_param: magnum_url}
             "$TLS_DISABLED": {get_param: tls_disabled}
             "$NETWORK_DRIVER": {get_param: network_driver}
@@ -151,6 +164,10 @@ resources:
             "$API_IP_ADDRESS": {get_param: api_ip_address}
             "$SWARM_VERSION": {get_param: swarm_version}
             "$AGENT_WAIT_HANDLE": {get_resource: node_agent_wait_handle}
+            "$TRUSTEE_USER_ID": {get_param: trustee_user_id}
+            "$TRUSTEE_PASSWORD": {get_param: trustee_password}
+            "$TRUST_ID": {get_param: trust_id}
+            "$AUTH_URL": {get_param: auth_url}
 
   remove_docker_key:
     type: "OS::Heat::SoftwareConfig"
