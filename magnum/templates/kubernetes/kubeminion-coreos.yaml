@@ -9,18 +9,15 @@ parameters:
 
   server_image:
     type: string
-    default: CoreOS
     description: glance image used to boot the server
 
   minion_flavor:
     type: string
-    default: m1.small
     description: flavor to use when booting the server
 
   ssh_key_name:
     type: string
     description: name of ssh key to be provisioned on our server
-    default: testkey
 
   external_network:
     type: string
@@ -30,7 +27,6 @@ parameters:
     type: string
     description: >
       whether or not kubernetes should permit privileged containers.
-    default: "false"
     constraints:
       - allowed_values: ["true", "false"]
 
@@ -41,32 +37,33 @@ parameters:
   tls_disabled:
     type: boolean
     description: whether or not to enable TLS
-    default: False
 
   kubernetes_port:
     type: number
     description: >
       The port which are used by kube-apiserver to provide Kubernetes
       service.
-    default: 8080
 
   kube_version:
     type: string
     description: version of kubernetes used for kubernetes cluster
 
-  # The following are all generated in the parent template.
   kube_master_ip:
     type: string
     description: IP address of the Kubernetes master server.
+
   etcd_server_ip:
     type: string
     description: IP address of the Etcd server.
+
   fixed_network:
     type: string
     description: Network from which to allocate fixed addresses.
+
   fixed_subnet:
     type: string
     description: Subnet from which to allocate fixed addresses.
+
   flannel_network_cidr:
     type: string
     description: network range for flannel overlay network

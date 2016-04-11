@@ -13,7 +13,6 @@ parameters:
 
   master_flavor:
     type: string
-    default: m1.small
     description: flavor to use when booting the server
 
   ssh_key_name:
@@ -24,19 +23,22 @@ parameters:
     type: string
     description: uuid/name of a network to use for floating ip addresses
 
-  # The following are all generated in the parent template.
   fixed_network:
     type: string
     description: Network from which to allocate fixed addresses.
+
   fixed_subnet:
     type: string
     description: Subnet from which to allocate fixed addresses.
+
   secgroup_base_id:
     type: string
     description: ID of the security group for base.
+
   secgroup_mesos_id:
     type: string
     description: ID of the security group for mesos master.
+
   api_pool_id:
     type: string
     description: ID of the load balancer pool of Marathon.

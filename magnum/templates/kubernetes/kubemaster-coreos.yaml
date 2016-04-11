@@ -13,7 +13,6 @@ parameters:
 
   master_flavor:
     type: string
-    default: m1.small
     description: flavor to use when booting the server
 
   ssh_key_name:
@@ -23,7 +22,6 @@ parameters:
   external_network:
     type: string
     description: uuid/name of a network to use for floating ip addresses
-    default: public
 
   discovery_url:
     type: string
@@ -33,37 +31,31 @@ parameters:
   dns_nameserver:
     type: string
     description: address of a dns nameserver reachable in your environment
-    default: 8.8.8.8
 
   portal_network_cidr:
     type: string
     description: >
       address range used by kubernetes for service portals
-    default: 10.254.0.0/16
 
   kube_allow_priv:
     type: string
     description: >
       whether or not kubernetes should permit privileged containers.
-    default: "true"
     constraints:
       - allowed_values: ["true", "false"]
 
   flannel_network_cidr:
     type: string
     description: network range for flannel overlay network
-    default: 10.100.0.0/16
 
   flannel_network_subnetlen:
     type: string
     description: size of subnet assigned to each master
-    default: 24
 
   flannel_backend:
     type: string
     description: >
       specify the backend for flannel, default udp backend
-    default: "udp"
     constraints:
       - allowed_values: ["udp", "vxlan", "host-gw"]
 
@@ -77,7 +69,6 @@ parameters:
 
   wait_condition_timeout:
     type: number
-    default: 6000
     description : >
       timeout for the Wait Conditions
 
@@ -88,14 +79,12 @@ parameters:
   tls_disabled:
     type: boolean
     description: whether or not to enable TLS
-    default: False
 
   kubernetes_port:
     type: number
     description: >
       The port which are used by kube-apiserver to provide Kubernetes
       service.
-    default: 8080
 
   kube_version:
     type: string

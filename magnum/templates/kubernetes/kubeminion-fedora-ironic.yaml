@@ -13,13 +13,11 @@ parameters:
 
   minion_flavor:
     type: string
-    default: m1.small
     description: flavor to use when booting the server
 
   ssh_key_name:
     type: string
     description: name of ssh key to be provisioned on our server
-    default: lars
 
   external_network:
     type: string
@@ -29,20 +27,19 @@ parameters:
     type: string
     description: >
       whether or not kubernetes should permit privileged containers.
-    default: "false"
     constraints:
       - allowed_values: ["true", "false"]
 
-  # The following are all generated in the parent template.
   kube_master_ip:
     type: string
     description: IP address of the Kubernetes master server.
+
   fixed_network:
     type: string
     description: Network from which to allocate fixed addresses.
+
   wait_condition_timeout:
     type: number
-    default: 6000
     description : >
       timeout for the Wait Conditions
 

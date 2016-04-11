@@ -119,18 +119,15 @@ parameters:
   trustee_user_id:
     type: string
     description: user id of the trustee
-    default: ""
 
   trustee_password:
     type: string
     description: password of the trustee
-    default: ""
     hidden: true
 
   trust_id:
     type: string
     description: id of the trust which is used by the trustee
-    default: ""
     hidden: true
 
   auth_url:

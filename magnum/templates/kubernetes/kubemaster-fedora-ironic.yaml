@@ -21,35 +21,29 @@ parameters:
 
   server_image:
     type: string
-    default: fedora-k8s
     description: glance image used to boot the server
 
   master_flavor:
     type: string
-    default: baremetal
     description: flavor to use when booting the server
 
   portal_network_cidr:
     type: string
     description: >
       address range used by kubernetes for service portals
-    default: 10.254.0.0/16
 
   flannel_network_cidr:
     type: string
     description: network range for flannel overlay network
-    default: 10.100.0.0/16
 
   flannel_network_subnetlen:
     type: string
     description: size of subnet assigned to each minion
-    default: 24
 
   flannel_backend:
     type: string
     description: >
       specify the backend for flannel, default udp backend
-    default: "udp"
     constraints:
       - allowed_values: ["udp", "vxlan", "host-gw"]
 
@@ -57,7 +51,6 @@ parameters:
     type: string
     description: >
       whether or not kubernetes should permit privileged containers.
-    default: "true"
     constraints:
       - allowed_values: ["true", "false"]
 
@@ -65,7 +58,6 @@ parameters:
     type: number
     description : >
       timeout for the Wait Conditions
-    default: 6000
 
   auth_url:
     type: string

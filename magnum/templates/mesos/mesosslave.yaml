@@ -9,12 +9,10 @@ parameters:
 
   server_image:
     type: string
-    default: ubuntu-mesos
     description: glance image used to boot the server
 
   slave_flavor:
     type: string
-    default: m1.small
     description: flavor to use when booting the server
 
   ssh_key_name:
@@ -23,12 +21,10 @@ parameters:
 
   external_network:
     type: string
-    default: public
     description: uuid/name of a network to use for floating ip addresses
 
   wait_condition_timeout:
     type: number
-    default: 6000
     description : >
       timeout for the Wait Conditions
 
@@ -37,22 +33,18 @@ parameters:
     description: >
       Amount of time to wait for an executor to register with the slave before
       considering it hung and shutting it down
-    default: 5mins
 
   http_proxy:
     type: string
     description: http proxy address for docker
-    default: ""
 
   https_proxy:
     type: string
     description: https proxy address for docker
-    default: ""
 
   no_proxy:
     type: string
     description: no proxies for docker
-    default: ""
 
   auth_url:
     type: string
@@ -68,8 +60,6 @@ parameters:
     description: >
       user password, not set in current implementation, only used to
       fill in for Kubernetes config file
-    default:
-      password
     hidden: true
 
   tenant_name:
@@ -80,7 +70,6 @@ parameters:
   volume_driver:
     type: string
     description: volume driver to use for container storage
-    default: ""
 
   region_name:
     type: string
@@ -97,18 +86,19 @@ parameters:
     description: >
       enables any host to take control of a volume irrespective of whether
       other hosts are using the volume
-    default: "false"
 
-  # The following are all generated in the parent template.
   mesos_masters_ips:
     type: string
     description: IP addresses of the Mesos master servers.
+
   fixed_network:
     type: string
     description: Network from which to allocate fixed addresses.
+
   fixed_subnet:
     type: string
     description: Subnet from which to allocate fixed addresses.
+
   secgroup_base_id:
     type: string
     description: ID of the security group for base.

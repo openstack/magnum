@@ -13,13 +13,11 @@ parameters:
 
   minion_flavor:
     type: string
-    default: m1.small
     description: flavor to use when booting the server
 
   ssh_key_name:
     type: string
     description: name of ssh key to be provisioned on our server
-    default: lars
 
   external_network:
     type: string
@@ -29,7 +27,6 @@ parameters:
     type: string
     description: >
       whether or not kubernetes should permit privileged containers.
-    default: "false"
     constraints:
       - allowed_values: ["true", "false"]
 
@@ -38,19 +35,16 @@ parameters:
     description: >
       size of a cinder volume to allocate to docker for container/image
       storage
-    default: 25
 
   tls_disabled:
     type: boolean
     description: whether or not to enable TLS
-    default: False
 
   kubernetes_port:
     type: number
     description: >
       The port which are used by kube-apiserver to provide Kubernetes
       service.
-    default: 6443
 
   bay_uuid:
     type: string
@@ -60,26 +54,30 @@ parameters:
     type: string
     description: endpoint to retrieve TLS certs from
 
-
-  # The following are all generated in the parent template.
   kube_master_ip:
     type: string
     description: IP address of the Kubernetes master server.
+
   etcd_server_ip:
     type: string
     description: IP address of the Etcd server.
+
   fixed_network:
     type: string
     description: Network from which to allocate fixed addresses.
+
   fixed_subnet:
     type: string
     description: Subnet from which to allocate fixed addresses.
+
   network_driver:
     type: string
     description: network driver to use for instantiating container networks
+
   flannel_network_cidr:
     type: string
     description: network range for flannel overlay network
+
   wait_condition_timeout:
     type: number
     description : >
@@ -89,62 +87,51 @@ parameters:
     type: boolean
     description: >
       Indicates whether the docker registry is enabled.
-    default: false
 
   registry_port:
     type: number
     description: port of registry service
-    default: 5000
 
   registry_username:
     type: string
     description: username used by docker registry
-    default: "username"
 
   registry_password:
     type: string
     description: password used by docker registry
-    default: "password"
     hidden: true
 
   registry_domain:
     type: string
     description: domain used by docker registry
-    default: "domain"
 
   registry_trust_id:
     type: string
     description: trust_id used by docker registry
-    default: "trust_id"
     hidden: true
 
   registry_auth_url:
     type: string
     description: auth_url for keystone
-    default: "auth_url"
 
   registry_region:
     type: string
     description: region of swift service
-    default: "region"
 
   registry_container:
     type: string
     description: >
       name of swift container which docker registry stores images in
-    default: "container"
 
   registry_insecure:
     type: boolean
     description: >
       indicates whether to skip TLS verification between registry and backend storage
-    default: true
 
   registry_chunksize:
     type: number
     description: >
       size fo the data segments for the swift dynamic large objects
-    default: 5242880
 
   secgroup_kube_minion_id:
     type: string
@@ -183,17 +170,14 @@ parameters:
   http_proxy:
     type: string
     description: http proxy address for docker
-    default: ""
 
   https_proxy:
     type: string
     description: https proxy address for docker
-    default: ""
 
   no_proxy:
     type: string
     description: no proxies for docker
-    default: ""
 
   kube_version:
     type: string
@@ -202,18 +186,15 @@ parameters:
   trustee_user_id:
     type: string
     description: user id of the trustee
-    default: ""
 
   trustee_password:
     type: string
     description: password of the trustee
-    default: ""
     hidden: true
 
   trust_id:
     type: string
     description: id of the trust which is used by the trustee
-    default: ""
     hidden: true
 
   auth_url:
