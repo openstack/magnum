@@ -126,7 +126,7 @@ class CertificateController(rest.RestController):
 
     @wsme_pecan.wsexpose(Certificate, types.uuid_or_name)
     def get_one(self, bay_ident):
-        """Retrieve information about the given certificate.
+        """Retrieve CA information about the given bay.
 
         :param bay_ident: UUID of a bay or
         logical name of the bay.
@@ -140,7 +140,7 @@ class CertificateController(rest.RestController):
 
     @wsme_pecan.wsexpose(Certificate, body=Certificate, status_code=201)
     def post(self, certificate):
-        """Create a new certificate.
+        """Sign a new certificate by the CA.
 
         :param certificate: a certificate within the request body.
         """
