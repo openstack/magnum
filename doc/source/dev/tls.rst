@@ -183,7 +183,7 @@ to Magnum to get it signed.
 
 ::
 
-    magnum ca-sign --bay secure-k8sbay --csr client.csr > client.crt
+    magnum ca-sign secure-k8sbay client.csr > client.crt
 
 The final piece you need to retrieve is the CA certificate for the bay. This
 is used by your native client to ensure you're only communicating with hosts
@@ -191,7 +191,7 @@ that Magnum set up.
 
 ::
 
-    magnum ca-show --bay secure-k8sbay > ca.crt
+    magnum ca-show secure-k8sbay > ca.crt
 
 You need to get kubectl, a kubernetes CLI tool, to communicate with the bay
 
