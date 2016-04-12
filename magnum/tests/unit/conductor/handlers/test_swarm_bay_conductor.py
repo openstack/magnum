@@ -48,7 +48,7 @@ class TestBayConductorWithSwarm(base.TestCase):
         }
         self.bay_dict = {
             'id': 1,
-            'uuid': 'some_uuid',
+            'uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
             'baymodel_id': 'xx-xx-xx-xx',
             'name': 'bay1',
             'stack_id': 'xx-xx-xx-xx',
@@ -99,7 +99,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
-            'bay_uuid': 'some_uuid',
+            'bay_uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'tls_disabled': False,
             'network_driver': 'network_driver',
@@ -142,7 +142,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'number_of_masters': 1,
             'number_of_nodes': 1,
             'discovery_url': 'https://discovery.etcd.io/test',
-            'bay_uuid': 'some_uuid',
+            'bay_uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'tls_disabled': False,
             'flannel_network_cidr': u'10.101.0.0/16',

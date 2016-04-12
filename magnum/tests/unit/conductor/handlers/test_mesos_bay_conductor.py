@@ -44,7 +44,7 @@ class TestBayConductorWithMesos(base.TestCase):
         }
         self.bay_dict = {
             'id': 1,
-            'uuid': 'some_uuid',
+            'uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
             'baymodel_id': 'xx-xx-xx-xx',
             'name': 'bay1',
             'stack_id': 'xx-xx-xx-xx',
