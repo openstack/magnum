@@ -160,8 +160,8 @@ Testing
 Docker containers can be deployed via Marathon's REST API. Marathon is a
 mesos framework for long running applications.
 
-We can 'post' a JSON app description to http://:8080/apps to deploy a
-Docker container.
+We can 'post' a JSON app description to ``http://${MASTER_IP}:8080/apps`` to deploy a
+Docker container. In this example, the ``${MASTER_IP}`` is 192.168.200.86.
 
 ::
 
@@ -185,7 +185,7 @@ Docker container.
     $ curl -X POST -H "Content-Type: application/json" \
         http://${MASTER_IP}:8080/v2/apps -d@app.json
 
-Using the Marathon web console (at http://${MASTER_IP}:8080/), you will see the
+Using the Marathon web console (at ``http://${MASTER_IP}:8080/``), you will see the
 application you created.
 
 License
