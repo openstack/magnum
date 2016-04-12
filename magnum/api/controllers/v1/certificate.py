@@ -17,11 +17,11 @@ import pecan
 from pecan import rest
 import wsme
 from wsme import types as wtypes
-import wsmeext.pecan as wsme_pecan
 
 from magnum.api.controllers import base
 from magnum.api.controllers import link
 from magnum.api.controllers.v1 import types
+from magnum.api import expose
 from magnum.api import utils as api_utils
 from magnum.common import exception
 from magnum.common import policy
@@ -124,7 +124,7 @@ class CertificateController(rest.RestController):
         'detail': ['GET'],
     }
 
-    @wsme_pecan.wsexpose(Certificate, types.uuid_or_name)
+    @expose.expose(Certificate, types.uuid_or_name)
     def get_one(self, bay_ident):
         """Retrieve CA information about the given bay.
 
@@ -138,7 +138,7 @@ class CertificateController(rest.RestController):
         certificate = pecan.request.rpcapi.get_ca_certificate(bay)
         return Certificate.convert_with_links(certificate)
 
-    @wsme_pecan.wsexpose(Certificate, body=Certificate, status_code=201)
+    @expose.expose(Certificate, body=Certificate, status_code=201)
     def post(self, certificate):
         """Sign a new certificate by the CA.
 
