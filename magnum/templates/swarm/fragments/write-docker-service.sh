@@ -23,7 +23,7 @@ ExecStart=/usr/bin/docker daemon -H fd:// \\
           -H tcp://0.0.0.0:2375 \\
 END_SERVICE_TOP
 
-if [ $TLS_DISABLED == 'False'  ]; then
+if [ "$TLS_DISABLED" = 'False'  ]; then
 
 cat >> /etc/systemd/system/docker.service << END_TLS
           --tlsverify \\
