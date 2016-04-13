@@ -243,7 +243,7 @@ function create_magnum_cache_dir {
 # init_magnum() - Initialize databases, etc.
 function init_magnum {
     # Only do this step once on the API node for an entire cluster.
-    if is_service_enabled $DATABASE_BACKENDS && is_service_enabled m-api; then
+    if is_service_enabled $DATABASE_BACKENDS && is_service_enabled magnum-api; then
         # (Re)create magnum database
         recreate_database magnum
 
@@ -293,7 +293,7 @@ function start_magnum_api {
         service_protocol="http"
     fi
 
-    run_process m-api "$MAGNUM_BIN_DIR/magnum-api"
+    run_process magnum-api "$MAGNUM_BIN_DIR/magnum-api"
     echo "Waiting for magnum-api to start..."
     if ! wait_for_service $SERVICE_TIMEOUT $service_protocol://$MAGNUM_SERVICE_HOST:$service_port; then
         die $LINENO "magnum-api did not start"
@@ -313,7 +313,7 @@ function configure_iptables {
         ROUTE_TO_INTERNET=$(ip route get 8.8.8.8)
         OBOUND_DEV=$(echo ${ROUTE_TO_INTERNET#*dev} | awk '{print $1}')
         sudo iptables -t nat -A POSTROUTING -o $OBOUND_DEV -j MASQUERADE
-        # bay nodes will access m-api (port $MAGNUM_SERVICE_PORT) to get CA certificate.
+        # bay nodes will access magnum-api (port $MAGNUM_SERVICE_PORT) to get CA certificate.
         sudo iptables -I INPUT -d $HOST_IP -p tcp --dport $MAGNUM_SERVICE_PORT -j ACCEPT || true
         sudo iptables -I INPUT -d $HOST_IP -p tcp --dport $KEYSTONE_SERVICE_PORT -j ACCEPT || true
     fi
@@ -325,12 +325,12 @@ function start_magnum {
 
     # ``run_process`` checks ``is_service_enabled``, it is not needed here
     start_magnum_api
-    run_process m-cond "$MAGNUM_BIN_DIR/magnum-conductor"
+    run_process magnum-cond "$MAGNUM_BIN_DIR/magnum-conductor"
 }
 
 # stop_magnum() - Stop running processes (non-screen)
 function stop_magnum {
-    for serv in m-api m-cond; do
+    for serv in magnum-api magnum-cond; do
         stop_process $serv
     done
 }
