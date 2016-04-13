@@ -123,6 +123,7 @@ Kilo, and heat is enabled by the magnum plugin)::
     # Enable barbican service and use it to store TLS certificates
     # For details http://docs.openstack.org/developer/magnum/dev/tls.html
     enable_plugin barbican https://git.openstack.org/openstack/barbican
+    enable_plugin neutron-lbaas https://git.openstack.org/openstack/neutron-lbaas
     VOLUME_BACKING_FILE_SIZE=20G
     END
 
