@@ -4,14 +4,15 @@
 
 attempts=60
 while [ ${attempts} -gt 0 ]; do
-    device_name=$(ls /dev/disk/by-id | grep ${DOCKER_VOLUME:0:20}$)
+    id=$(echo $DOCKER_VOLUME | awk  '{ string=substr($0, 1, 20); print string; }')
+    device_name=$(ls /dev/disk/by-id | grep $id)
     if [ -n "${device_name}" ]; then
         break
     fi
     echo "waiting for disk device"
     sleep 0.5
     udevadm trigger
-    let attempts--
+    attempts=$((attempts-1))
 done
 
 if [ -z "${device_name}" ]; then
