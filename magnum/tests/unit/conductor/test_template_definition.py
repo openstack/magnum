@@ -524,6 +524,13 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
         mock_baymodel = mock.MagicMock()
         mock_baymodel.tls_disabled = False
         rexray_preempt = mock_baymodel.labels.get('rexray_preempt')
+        mesos_slave_isolation = mock_baymodel.labels.get(
+            'mesos_slave_isolation')
+        mesos_slave_work_dir = mock_baymodel.labels.get('mesos_slave_work_dir')
+        mesos_slave_image_providers = mock_baymodel.labels.get(
+            'image_providers')
+        mesos_slave_executor_environment_variables = mock_baymodel.labels.get(
+            'mesos_slave_executor_environment_variables')
         mock_bay = mock.MagicMock()
         mock_bay.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
         del mock_bay.stack_id
@@ -541,7 +548,12 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
             'username': 'mesos_user',
             'tenant_name': 'admin',
             'domain_name': 'domainname',
-            'rexray_preempt': rexray_preempt}}
+            'rexray_preempt': rexray_preempt,
+            'mesos_slave_isolation': mesos_slave_isolation,
+            'mesos_slave_work_dir': mesos_slave_work_dir,
+            'mesos_slave_executor_environment_variables':
+                mesos_slave_executor_environment_variables,
+            'mesos_slave_image_providers': mesos_slave_image_providers}}
         mock_get_params.assert_called_once_with(mock_context, mock_baymodel,
                                                 mock_bay, **expected_kwargs)
 

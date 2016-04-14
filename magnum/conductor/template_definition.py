@@ -646,7 +646,10 @@ class UbuntuMesosTemplateDefinition(BaseTemplateDefinition):
         extra_params['domain_name'] = context.domain_name
         extra_params['region_name'] = osc.cinder_region_name()
 
-        label_list = ['rexray_preempt']
+        label_list = ['rexray_preempt', 'mesos_slave_isolation',
+                      'mesos_slave_image_providers',
+                      'mesos_slave_work_dir',
+                      'mesos_slave_executor_environment_variables']
 
         for label in label_list:
             extra_params[label] = baymodel.labels.get(label)
