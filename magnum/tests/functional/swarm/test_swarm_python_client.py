@@ -39,7 +39,6 @@ class TestSwarmAPIs(BayTest):
         "network_driver": None,
         "volume_driver": None,
         "fixed_network": '192.168.0.0/24',
-        "dns_nameserver": '8.8.8.8',
         "labels": {}
     }
 

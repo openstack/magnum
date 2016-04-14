@@ -54,6 +54,7 @@ class BaseMagnumClient(base.BaseMagnumTest):
         flavor_id = cliutils.env('FLAVOR_ID')
         master_flavor_id = cliutils.env('MASTER_FLAVOR_ID')
         keypair_id = cliutils.env('KEYPAIR_ID')
+        dns_nameserver = cliutils.env('DNS_NAMESERVER')
         copy_logs = cliutils.env('COPY_LOGS')
 
         config = configparser.RawConfigParser()
@@ -71,6 +72,8 @@ class BaseMagnumClient(base.BaseMagnumTest):
             master_flavor_id = master_flavor_id or config.get(
                 'magnum', 'master_flavor_id')
             keypair_id = keypair_id or config.get('magnum', 'keypair_id')
+            dns_nameserver = dns_nameserver or config.get(
+                'magnum', 'dns_nameserver')
             try:
                 copy_logs = copy_logs or config.get('magnum', 'copy_logs')
             except configparser.NoOptionError:
@@ -81,6 +84,7 @@ class BaseMagnumClient(base.BaseMagnumTest):
         cls.flavor_id = flavor_id
         cls.master_flavor_id = master_flavor_id
         cls.keypair_id = keypair_id
+        cls.dns_nameserver = dns_nameserver
         cls.copy_logs = bool(copy_logs)
         cls.cs = v1client.Client(username=user,
                                  api_key=passwd,
@@ -132,6 +136,7 @@ class BaseMagnumClient(base.BaseMagnumTest):
             docker_volume_size=docker_volume_size,
             network_driver=network_driver,
             volume_driver=volume_driver,
+            dns_nameserver=cls.dns_nameserver,
             coe=coe,
             labels=labels,
             tls_disabled=tls_disabled,

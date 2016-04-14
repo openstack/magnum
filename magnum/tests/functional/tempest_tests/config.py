@@ -56,6 +56,10 @@ MagnumGroup = [
                default="/opt/stack/new/magnum/default.csr",
                help="CSR location for certificates."),
 
+    cfg.StrOpt("dns_nameserver",
+               default="8.8.8.8",
+               help="DNS nameserver to use for baymodels."),
+
     cfg.StrOpt("copy_logs",
                default=True,
                help="Specify whether to copy nova server logs on failure."),

@@ -67,6 +67,7 @@ flavor_id = s1.magnum
 master_flavor_id = m1.magnum
 copy_logs = true
 csr_location = $MAGNUM_DIR/default.csr
+dns_nameserver = 8.8.8.8
 EOF
 
     # Note(eliqiao): Let's keep this only for debugging on gate.
