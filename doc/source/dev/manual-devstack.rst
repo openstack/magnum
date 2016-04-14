@@ -64,6 +64,7 @@ and neutron::
 
     # Enable barbican services
     enable_plugin barbican https://git.openstack.org/openstack/barbican
+    enable_plugin neutron-lbaas https://git.openstack.org/openstack/neutron-lbaas
 
     VOLUME_BACKING_FILE_SIZE=20G
     END
