@@ -7,7 +7,7 @@ echo "configuring kubernetes (minion)"
 ETCD_SERVER_IP=${ETCD_SERVER_IP:-$KUBE_MASTER_IP}
 KUBE_PROTOCOL="https"
 KUBE_CONFIG=""
-if [ "$TLS_DISABLED" == "True" ]; then
+if [ "$TLS_DISABLED" = "True" ]; then
     KUBE_PROTOCOL="http"
 else
     KUBE_CONFIG="--kubeconfig=/srv/kubernetes/kubeconfig.yaml"
@@ -32,7 +32,7 @@ sed -i '
   /^KUBE_PROXY_ARGS=/ s|=.*|='"$KUBE_CONFIG"'|
 ' /etc/kubernetes/proxy
 
-if [ "$NETWORK_DRIVER" == "flannel" ]; then
+if [ "$NETWORK_DRIVER" = "flannel" ]; then
     sed -i '
       /^FLANNEL_ETCD=/ s|=.*|="http://'"$ETCD_SERVER_IP"':2379"|
     ' /etc/sysconfig/flanneld
@@ -46,13 +46,13 @@ if [ "$NETWORK_DRIVER" == "flannel" ]; then
     done
 fi
 
-if [ "$VOLUME_DRIVER" == "cinder" ]; then
+if [ "$VOLUME_DRIVER" = "cinder" ]; then
     CLOUD_CONFIG=/etc/kubernetes/kube_openstack_config
     KUBERNETES=/etc/kubernetes
     if [ ! -d ${KUBERNETES} -o ! -f ${CLOUD_CONFIG} ]; then
         sudo mkdir -p $KUBERNETES
     fi
-    AUTH_URL=${AUTH_URL/v3/v2}
+    AUTH_URL=$(echo "$AUTH_URL" | tr -s "v3" "v2")
 cat > $CLOUD_CONFIG <<EOF
 [Global]
 auth-url=$AUTH_URL
