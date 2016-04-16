@@ -185,7 +185,7 @@ class BaseMagnumTest(base.BaseTestCase):
 
         def int_copy_logs(exec_info):
             try:
-                cls.LOG.debug("Copying logs...")
+                cls.LOG.info("Copying logs...")
                 fn = exec_info[2].tb_frame.f_locals['fn']
                 func_name = fn.im_self._get_test_method().__name__
                 msg = "Failed to copy logs for bay"
@@ -199,6 +199,8 @@ class BaseMagnumTest(base.BaseTestCase):
                 full_location = os.path.join(base_path, COPY_LOG_HELPER)
 
                 def do_copy_logs(prefix, nodes_address):
+                    cls.LOG.info("copy logs from : %s" %
+                                 ','.join(nodes_address))
                     log_name = prefix + "-" + func_name
                     for node_address in nodes_address:
                         try:
@@ -212,7 +214,7 @@ class BaseMagnumTest(base.BaseTestCase):
                                 str(keypair)
                             ])
                         except Exception:
-                            cls.LOG.exception(msg)
+                            cls.LOG.error(msg)
                             cls.LOG.exception(
                                 "failed to copy from %s to %s%s-%s" %
                                 (node_address, "/opt/stack/logs/bay-nodes/",

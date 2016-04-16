@@ -25,6 +25,8 @@ import time
 import fixtures
 from six.moves import configparser
 
+from heatclient import client as heatclient
+from keystoneclient.v2_0 import client as ksclient
 from magnum.common.utils import rmtree_without_raise
 from magnum.tests.functional.common import base
 from magnum.tests.functional.common import utils
@@ -94,6 +96,14 @@ class BaseMagnumClient(base.BaseMagnumTest):
                                  service_type='container',
                                  region_name=region_name,
                                  magnum_url=magnum_url)
+        cls.keystone = ksclient.Client(username=user,
+                                       password=passwd,
+                                       tenant_name=tenant,
+                                       auth_url=auth_url)
+        token = cls.keystone.auth_token
+        heat_endpoint = cls.keystone.service_catalog.url_for(
+            service_type='orchestration')
+        cls.heat = heatclient.Client('1', token=token, endpoint=heat_endpoint)
 
     @classmethod
     def _wait_on_status(cls, bay, wait_status, finish_status, timeout=6000):
@@ -248,11 +258,40 @@ extendedKeyUsage = clientAuth
 
         self.addOnException(
             self.copy_logs_handler(
-                lambda: list([self.cs.bays.get(self.bay.uuid).master_addresses,
-                             self.cs.bays.get(self.bay.uuid).node_addresses]),
+                self._get_nodes,
                 self.baymodel.coe,
                 'default'))
         self._wait_for_bay_complete(self.bay)
+
+    def _get_nodes(self):
+        nodes = self._get_nodes_from_bay()
+        if not nodes:
+            self.LOG.info("the list of nodes from bay is empty")
+            nodes = self._get_nodes_from_stack()
+        return nodes
+
+    def _get_nodes_from_bay(self):
+        nodes = []
+        nodes.append(self.cs.bays.get(self.bay.uuid).master_addresses)
+        nodes.append(self.cs.bays.get(self.bay.uuid).node_addresses)
+        return nodes
+
+    def _get_nodes_from_stack(self):
+        nodes = []
+        stack = self.heat.stacks.get(self.bay.stack_id)
+        stack_outputs = stack.to_dict().get('outputs', [])
+        output_keys = []
+        if self.baymodel.coe == "kubernetes":
+            output_keys = ["kube_masters", "kube_minions"]
+        elif self.baymodel.coe == "swarm":
+            output_keys = ["swarm_masters", "swarm_nodes"]
+        elif self.baymodel.coe == "mesos":
+            output_keys = ["mesos_master", "mesos_slaves"]
+        for output in stack_outputs:
+            for key in output_keys:
+                if output['output_key'] == key:
+                    nodes.append(output['output_value'])
+        return nodes
 
     @classmethod
     def _create_tls_ca_files(cls, client_conf_contents):
