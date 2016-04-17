@@ -148,7 +148,7 @@ parameters:
   kube_version:
     type: string
     description: version of kubernetes used for kubernetes cluster
-    default: v1.0.6
+    default: v1.2.0
 
 resources:
 
