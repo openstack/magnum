@@ -1,14 +1,14 @@
-# Translations template for magnum.
+# Translations template for PROJECT.
 # Copyright (C) 2016 ORGANIZATION
-# This file is distributed under the same license as the magnum project.
+# This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: magnum 1.1.1.dev262\n"
+"Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-01-18 06:03+0000\n"
+"POT-Creation-Date: 2016-04-17 06:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,12 +17,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.2.0\n"
 
-#: magnum/api/controllers/v1/container.py:304
+#: magnum/api/controllers/v1/container.py:326
 #, python-format
 msgid "Error while list container %(uuid)s: %(e)s."
 msgstr ""
 
-#: magnum/cmd/conductor.py:67
+#: magnum/cmd/conductor.py:66
 #, python-format
 msgid ""
 "The Heat template can not be found for either k8s atomic "
@@ -40,33 +40,41 @@ msgstr ""
 msgid "Exception in string format operation, kwargs: %s"
 msgstr ""
 
-#: magnum/common/keystone.py:102
-msgid "Unknown version in auth_token_info"
+#: magnum/common/keystone.py:117
+msgid "Keystone API connection failed: no password, trust_id or token found."
 msgstr ""
 
-#: magnum/common/keystone.py:107
-msgid "Keystone v3 API conntection failed, no password trust or auth_token"
-msgstr ""
-
-#: magnum/common/keystone.py:124
+#: magnum/common/keystone.py:185
 msgid "Failed to create trust"
 msgstr ""
 
-#: magnum/common/keystone.py:141
+#: magnum/common/keystone.py:212
 msgid "Failed to delete trust"
 msgstr ""
 
-#: magnum/common/utils.py:362
+#: magnum/common/keystone.py:222
+msgid "Failed to create trustee"
+msgstr ""
+
+#: magnum/common/keystone.py:233
+msgid "Failed to delete trustee"
+msgstr ""
+
+#: magnum/common/keystone.py:247
+msgid "Failed to list regions"
+msgstr ""
+
+#: magnum/common/utils.py:372
 #, python-format
 msgid "Could not remove tmpdir: %s"
 msgstr ""
 
-#: magnum/common/utils.py:393
+#: magnum/common/utils.py:403
 #, python-format
 msgid "Failed to make file system. File system %s is not supported."
 msgstr ""
 
-#: magnum/common/utils.py:397
+#: magnum/common/utils.py:407
 #, python-format
 msgid "Failed to create a file system in %(path)s. Error: %(error)s"
 msgstr ""
@@ -108,28 +116,42 @@ msgstr ""
 msgid "Failed to delete certificate {0}."
 msgstr ""
 
-#: magnum/conductor/handlers/bay_conductor.py:276
-#: magnum/conductor/handlers/bay_conductor.py:284
+#: magnum/common/x509/operations.py:180
+msgid "Received invalid csr {0}."
+msgstr ""
+
+#: magnum/conductor/handlers/bay_conductor.py:265
+#: magnum/conductor/handlers/bay_conductor.py:273
 #, python-format
 msgid ""
 "Bay check exit after %(attempts)s attempts,stack_id: %(id)s, "
 "stack_status: %(status)s"
 msgstr ""
 
-#: magnum/conductor/handlers/bay_conductor.py:314
+#: magnum/conductor/handlers/bay_conductor.py:306
 #, python-format
 msgid ""
 "Bay error, stack status: %(bay_status)s, stack_id: %(stack_id)s, reason: "
 "%(reason)s"
 msgstr ""
 
-#: magnum/conductor/handlers/docker_conductor.py:39
+#: magnum/conductor/handlers/docker_conductor.py:41
 #, python-format
 msgid "Error while connect to docker container %s"
 msgstr ""
 
-#: magnum/conductor/handlers/docker_conductor.py:115
+#: magnum/conductor/handlers/docker_conductor.py:123
 #, python-format
 msgid "Can not find docker instance with %s,set it to Error status"
+msgstr ""
+
+#: magnum/conductor/handlers/common/cert_manager.py:105
+#, python-format
+msgid "Failed to generate certificates for Bay: %s"
+msgstr ""
+
+#: magnum/conductor/handlers/common/trust_manager.py:40
+#, python-format
+msgid "Failed to create trustee and trust for Bay: %s"
 msgstr ""
 

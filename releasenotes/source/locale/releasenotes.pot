@@ -1,0 +1,52 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2016, Magnum developers
+# This file is distributed under the same license as the Magnum Release Notes package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Magnum Release Notes 2.0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-04-17 06:02+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# 3c86871de11a487da2c3b88c37afd6e7
+#: ../source/index.rst:7
+msgid "Welcome to Magnum Release Notes's documentation!"
+msgstr ""
+
+# 09fc2eb21d6a4838905167ebcc459357
+#: ../source/index.rst:9
+msgid "Contents:"
+msgstr ""
+
+# 7e422ef14c644cfe989a91a6681d94c4
+#: ../source/index.rst:17
+msgid "Indices and tables"
+msgstr ""
+
+# 44c995d7bcb7427c8700e1f8ea56bb8a
+#: ../source/index.rst:19
+msgid ":ref:`genindex`"
+msgstr ""
+
+# 8a33faa8433d4c108d203d3fed2bac91
+#: ../source/index.rst:20
+msgid ":ref:`modindex`"
+msgstr ""
+
+# 875d36137afe48d9b2dd70b2bc02e828
+#: ../source/index.rst:21
+msgid ":ref:`search`"
+msgstr ""
+
+# b51ab76c29f74aea82381a63de49cfb5
+#: ../source/unreleased.rst:3
+msgid "Current Series Release Notes"
+msgstr ""
