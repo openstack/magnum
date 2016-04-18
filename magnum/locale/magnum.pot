@@ -1,14 +1,14 @@
-# Translations template for PROJECT.
+# Translations template for magnum.
 # Copyright (C) 2016 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
+# This file is distributed under the same license as the magnum project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-04-17 06:03+0000\n"
+"Project-Id-Version: magnum 2.0.1.dev120\n"
+"Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
+"POT-Creation-Date: 2016-04-18 06:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -746,6 +746,14 @@ msgstr ""
 
 #: magnum/conductor/template_definition.py:64
 msgid "Enabled bay definition entry points."
+msgstr ""
+
+#: magnum/conductor/template_definition.py:69
+msgid "Region name of Swift"
+msgstr ""
+
+#: magnum/conductor/template_definition.py:72
+msgid "Name of the container in Swift which docker registry stores images in"
 msgstr ""
 
 #: magnum/conductor/handlers/bay_conductor.py:168
