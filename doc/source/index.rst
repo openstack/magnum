@@ -98,3 +98,4 @@ Work In Progress
 
    troubleshooting-guide.rst
    userguide.rst
+   configuring.rst
