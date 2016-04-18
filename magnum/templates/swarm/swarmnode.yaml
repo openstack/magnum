@@ -147,7 +147,7 @@ resources:
       group: ungrouped
       config:
         str_replace:
-          template: {get_file: fragments/write-heat-params.yaml}
+          template: {get_file: fragments/write-heat-params-node.yaml}
           params:
             "$WAIT_HANDLE": {get_resource: node_cloud_init_wait_handle}
             "$DOCKER_VOLUME": {get_resource: docker_volume}

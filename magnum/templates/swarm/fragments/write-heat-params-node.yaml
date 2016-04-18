@@ -1,0 +1,26 @@
+#cloud-config
+merge_how: dict(recurse_array)+list(append)
+write_files:
+  - path: /etc/sysconfig/heat-params
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      WAIT_HANDLE="$WAIT_HANDLE"
+      DOCKER_VOLUME="$DOCKER_VOLUME"
+      HTTP_PROXY="$HTTP_PROXY"
+      HTTPS_PROXY="$HTTPS_PROXY"
+      NO_PROXY="$NO_PROXY"
+      SWARM_API_IP="$SWARM_API_IP"
+      SWARM_NODE_IP="$SWARM_NODE_IP"
+      BAY_UUID="$BAY_UUID"
+      MAGNUM_URL="$MAGNUM_URL"
+      TLS_DISABLED="$TLS_DISABLED"
+      NETWORK_DRIVER="$NETWORK_DRIVER"
+      ETCD_SERVER_IP="$ETCD_SERVER_IP"
+      API_IP_ADDRESS="$API_IP_ADDRESS"
+      SWARM_VERSION="$SWARM_VERSION"
+      AGENT_WAIT_HANDLE="$AGENT_WAIT_HANDLE"
+      TRUSTEE_USER_ID="$TRUSTEE_USER_ID"
+      TRUSTEE_PASSWORD="$TRUSTEE_PASSWORD"
+      TRUST_ID="$TRUST_ID"
+      AUTH_URL="$AUTH_URL"
