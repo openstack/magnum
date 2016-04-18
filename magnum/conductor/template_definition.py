@@ -578,6 +578,8 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
         self.add_parameter('tls_disabled',
                            baymodel_attr='tls_disabled',
                            required=True)
+        self.add_parameter('registry_enabled',
+                           baymodel_attr='registry_enabled')
         self.add_output('api_address',
                         bay_attr='api_address',
                         mapping_type=SwarmApiAddressOutputMapping)
@@ -606,6 +608,11 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
 
         for label in label_list:
             extra_params[label] = baymodel.labels.get(label)
+
+        if baymodel.registry_enabled:
+            extra_params['swift_region'] = CONF.docker_registry.swift_region
+            extra_params['registry_container'] = (
+                CONF.docker_registry.swift_registry_container)
 
         return super(AtomicSwarmTemplateDefinition,
                      self).get_params(context, baymodel, bay,

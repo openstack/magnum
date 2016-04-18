@@ -93,9 +93,17 @@ parameters:
     type: string
     description: ip address of the load balancer pool of etcd server.
 
+  trustee_domain_id:
+    type: string
+    description: domain id of the trustee
+
   trustee_user_id:
     type: string
     description: user id of the trustee
+
+  trustee_username:
+    type: string
+    description: username of the trustee
 
   trustee_password:
     type: string
@@ -110,6 +118,34 @@ parameters:
   auth_url:
     type: string
     description: url for keystone
+
+  registry_enabled:
+    type: boolean
+    description: >
+      Indicates whether the docker registry is enabled.
+
+  registry_port:
+    type: number
+    description: port of registry service
+
+  swift_region:
+    type: string
+    description: region of swift service
+
+  registry_container:
+    type: string
+    description: >
+      name of swift container which docker registry stores images in
+
+  registry_insecure:
+    type: boolean
+    description: >
+      indicates whether to skip TLS verification between registry and backend storage
+
+  registry_chunksize:
+    type: number
+    description: >
+      size fo the data segments for the swift dynamic large objects
 
 resources:
 
@@ -164,10 +200,18 @@ resources:
             "$API_IP_ADDRESS": {get_param: api_ip_address}
             "$SWARM_VERSION": {get_param: swarm_version}
             "$AGENT_WAIT_HANDLE": {get_resource: node_agent_wait_handle}
+            "$TRUSTEE_DOMAIN_ID": {get_param: trustee_domain_id}
             "$TRUSTEE_USER_ID": {get_param: trustee_user_id}
+            "$TRUSTEE_USERNAME": {get_param: trustee_username}
             "$TRUSTEE_PASSWORD": {get_param: trustee_password}
             "$TRUST_ID": {get_param: trust_id}
             "$AUTH_URL": {get_param: auth_url}
+            "$REGISTRY_ENABLED": {get_param: registry_enabled}
+            "$REGISTRY_PORT": {get_param: registry_port}
+            "$SWIFT_REGION": {get_param: swift_region}
+            "$REGISTRY_CONTAINER": {get_param: registry_container}
+            "$REGISTRY_INSECURE": {get_param: registry_insecure}
+            "$REGISTRY_CHUNKSIZE": {get_param: registry_chunksize}
 
   remove_docker_key:
     type: "OS::Heat::SoftwareConfig"
@@ -186,6 +230,12 @@ resources:
     properties:
       group: ungrouped
       config: {get_file: fragments/configure-docker-storage.sh}
+
+  configure_docker_registry:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/configure-docker-registry.sh}
 
   write_docker_service:
     type: "OS::Heat::SoftwareConfig"
@@ -221,6 +271,12 @@ resources:
     properties:
       group: ungrouped
       config: {get_file: fragments/write-swarm-agent-service.sh}
+
+  enable_docker_registry:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/enable-docker-registry.sh}
 
   enable_services:
     type: "OS::Heat::SoftwareConfig"
@@ -260,11 +316,13 @@ resources:
         - config: {get_resource: make_cert}
         - config: {get_resource: network_service}
         - config: {get_resource: configure_docker_storage}
+        - config: {get_resource: configure_docker_registry}
         - config: {get_resource: write_swarm_agent_failure_service}
         - config: {get_resource: write_swarm_agent_service}
         - config: {get_resource: write_docker_service}
         - config: {get_resource: write_docker_socket}
         - config: {get_resource: add_proxy}
+        - config: {get_resource: enable_docker_registry}
         - config: {get_resource: enable_services}
         - config: {get_resource: cfn_signal}
 

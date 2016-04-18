@@ -40,6 +40,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
             'tls_disabled': False,
+            'registry_enabled': False,
             'server_type': 'vm',
             'network_driver': 'network_driver',
             'labels': {'flannel_network_cidr': '10.101.0.0/16',
@@ -102,6 +103,57 @@ class TestBayConductorWithSwarm(base.TestCase):
             'bay_uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'tls_disabled': False,
+            'registry_enabled': False,
+            'network_driver': 'network_driver',
+            'flannel_network_cidr': '10.101.0.0/16',
+            'flannel_network_subnetlen': '26',
+            'flannel_backend': 'vxlan',
+            'trustee_domain_id': '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
+            'trustee_username': 'fake_trustee',
+            'trustee_password': 'fake_trustee_password',
+            'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
+            'auth_url': 'http://192.168.10.10:5000/v3'
+        }
+        self.assertEqual(expected, definition)
+
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_template_definition_with_registry(
+            self,
+            mock_objects_baymodel_get_by_uuid):
+        self.baymodel_dict['registry_enabled'] = True
+        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        bay = objects.Bay(self.context, **self.bay_dict)
+
+        cfg.CONF.set_override('swift_region',
+                              'RegionOne',
+                              group='docker_registry')
+
+        (template_path,
+         definition) = bay_conductor._extract_template_definition(self.context,
+                                                                  bay)
+
+        expected = {
+            'ssh_key_name': 'keypair_id',
+            'external_network': 'external_network_id',
+            'dns_nameserver': 'dns_nameserver',
+            'server_image': 'image_id',
+            'master_flavor': 'master_flavor_id',
+            'node_flavor': 'flavor_id',
+            'number_of_masters': 1,
+            'number_of_nodes': 1,
+            'docker_volume_size': 20,
+            'discovery_url': 'https://discovery.test.io/123456789',
+            'http_proxy': 'http_proxy',
+            'https_proxy': 'https_proxy',
+            'no_proxy': 'no_proxy',
+            'bay_uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
+            'magnum_url': self.mock_osc.magnum_url.return_value,
+            'tls_disabled': False,
+            'registry_enabled': True,
+            'registry_container': 'docker_registry',
+            'swift_region': 'RegionOne',
             'network_driver': 'network_driver',
             'flannel_network_cidr': '10.101.0.0/16',
             'flannel_network_subnetlen': '26',
@@ -145,6 +197,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'bay_uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'tls_disabled': False,
+            'registry_enabled': False,
             'flannel_network_cidr': u'10.101.0.0/16',
             'flannel_network_subnetlen': u'26',
             'flannel_backend': u'vxlan',
