@@ -1,14 +1,14 @@
-# Translations template for magnum.
+# Translations template for PROJECT.
 # Copyright (C) 2016 ORGANIZATION
-# This file is distributed under the same license as the magnum project.
+# This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: magnum 1.1.1.dev262\n"
+"Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-01-18 06:03+0000\n"
+"POT-Creation-Date: 2016-04-17 06:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,22 +17,29 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.2.0\n"
 
-#: magnum/common/utils.py:409
+#: magnum/common/keystone.py:124
+#, python-format
+msgid ""
+"Auth plugin and its options for service user must be provided in "
+"[%(new)s] section. Using values from [%(old)s] section is deprecated."
+msgstr ""
+
+#: magnum/common/utils.py:419
 #, python-format
 msgid "Failed to unlink %(path)s, error: %(e)s"
 msgstr ""
 
-#: magnum/common/utils.py:418
+#: magnum/common/utils.py:428
 #, python-format
 msgid "Failed to remove dir %(path)s, error: %(e)s"
 msgstr ""
 
-#: magnum/common/utils.py:434
+#: magnum/common/utils.py:444
 #, python-format
 msgid "Failed to create symlink from %(source)s to %(link)s, error: %(e)s"
 msgstr ""
 
-#: magnum/common/utils.py:448
+#: magnum/common/utils.py:458
 #, python-format
 msgid ""
 "Failed to remove trailing character. Returning original object. Supplied "
@@ -76,14 +83,14 @@ msgstr ""
 msgid "Ignore error [%(e)s] when inspecting container %(container_id)s."
 msgstr ""
 
-#: magnum/conductor/template_definition.py:142
+#: magnum/conductor/template_definition.py:139
 #, python-format
 msgid "stack does not have output_key %s"
 msgstr ""
 
-#: magnum/conductor/handlers/common/cert_manager.py:153
+#: magnum/conductor/handlers/common/cert_manager.py:172
 #, python-format
-msgid "Deleting cert is failed: %s"
+msgid "Deleting certs is failed for Bay %s"
 msgstr ""
 
 #: magnum/service/periodic.py:101
