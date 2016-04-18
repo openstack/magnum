@@ -203,7 +203,7 @@ def valid_swarm_baymodel():
     return baymodel_data(image_id=config.Config.image_id,
                          fixed_network="192.168.0.0/24",
                          flavor_id=config.Config.flavor_id, public=False,
-                         dns_nameserver="8.8.8.8",
+                         dns_nameserver=config.Config.dns_nameserver,
                          master_flavor_id=config.Config.master_flavor_id,
                          keypair_id=config.Config.keypair_id, coe="swarm",
                          docker_volume_size=3, cluster_distro=None,
