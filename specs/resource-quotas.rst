@@ -68,7 +68,7 @@ Mitaka.
 
 When a project is created and if the Magnum service is running, the default
 quota for Magnum resources will be set by the values configured in magnum.conf.
-Other Openstack projects like Nova [3], Cinder [4] follow a similar pattern
+Other Openstack projects like Nova [2]_, Cinder [3]_ follow a similar pattern
 and we will also do so and hence won't have a seperate CLI for quota-create.
 Later if the user wants to change the Quota of the resource option will be
 provided to do so using magnum quota-update. In situation where all of the
@@ -114,7 +114,7 @@ At present there is not quota infrastructure in Magnum.
 Adding Quota Management layer at the Orchestration layer, Heat, could be an
 alternative. Doing so will give a finer view of resource consumption at the
 IaaS layer which can be used while provisioning Magnum resources which
-depend on the IaaS layer [1].
+depend on the IaaS layer [1]_.
 
 Data model impact
 -----------------
@@ -247,8 +247,6 @@ None
 References
 ==========
 
-[1] http://lists.openstack.org/pipermail/openstack-dev/2015-December/082266.html
-
-[2] https://github.com/openstack/nova/blob/master/nova/quota.py
-
-[3] https://github.com/openstack/nova/blob/master/cinder/quota.py
+.. [1] http://lists.openstack.org/pipermail/openstack-dev/2015-December/082266.html
+.. [2] https://github.com/openstack/nova/blob/master/nova/quota.py
+.. [3] https://github.com/openstack/nova/blob/master/cinder/quota.py

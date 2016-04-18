@@ -39,7 +39,7 @@ In this area, the support for container volume is undergoing rapid change
 to bring more integration with open source software and third party
 storage solutions.
 
-A clear evidence of this growth is the many plugin volume drivers [1][3]
+A clear evidence of this growth is the many plugin volume drivers [1]_ [4]_
 such as NFS, GlusterFS, EBS, etc. They provide different functionality, use
 different storage backend and have different requirements. The COE's are
 naturally motivated to be flexible and allow as many choices as possible for
@@ -93,7 +93,7 @@ Volume plugin
   COE specific code that supports the functionality of a type of volume.
 
 Additional Magnum definitions can be found in the Magnum Developer
-documentation[7].
+documentation[7]_ .
 
 Use Cases
 ----------
@@ -173,8 +173,8 @@ We propose extending Magnum as follows.
 
      rexray, flocker, nfs, glusterfs, etc..
 
-  Here is an example of creating a Docker Swarm baymodel that uses rexray[5][6]
-  as the volume driver: ::
+  Here is an example of creating a Docker Swarm baymodel that uses rexray [5]_
+  [6]_ as the volume driver: ::
 
 
      magnum baymodel-create --name swarmbaymodel \
@@ -193,11 +193,11 @@ We propose extending Magnum as follows.
   then the REX-Ray volume plugin will be registered in Docker. When a container
   is created with rexray as the volume driver, the container will have full
   access to the REX-Ray capabilities such as creating, mounting, deleting
-  volumes [6]. REX-Ray in turn will interface with Cinder to manage the volumes
-  in OpenStack.
+  volumes [6]_. REX-Ray in turn will interface with Cinder to manage the
+  volumes in OpenStack.
 
-  Here is an example of creating a Kubernetes baymodel that uses Cinder [2][3]
-  as the volume driver: ::
+  Here is an example of creating a Kubernetes baymodel that uses Cinder [2]_
+  [3]_ as the volume driver: ::
 
     magnum baymodel-create --name k8sbaymodel \
                             --image-id fedora-21-atomic-5 \
@@ -237,7 +237,7 @@ volume driver: ::
 
 When the mesos bay is created using this bay model, the mesos bay will be
 configured so that an existing Cinder volume can be mounted in a container
-by configuring the parameters to mount the cinder volume  in the json file. ::
+by configuring the parameters to mount the cinder volume in the json file. ::
 
     "parameters": [
        { "key": "volume-driver", "value": "rexray" },
@@ -378,7 +378,7 @@ performance.
 An example of the second case is a docker swarm bay with
 "--volume-driver rexray" where the rexray driver's storage provider is
 OpenStack cinder. The resulting performance for container may vary depending
-on the storage backends. As listed in [8], Cinder supports many storage
+on the storage backends. As listed in [8]_ , Cinder supports many storage
 drivers. Besides this, different container volume driver can also cause
 performance variance.
 
@@ -403,11 +403,11 @@ High-Availablity Impact
 
 Kubernetes does support pod high-availability through the replication
 controller, however, this doesn't work when a pod with volume attached
-fails. Refer the link [11] for details.
+fails. Refer the link [11]_  for details.
 
 Docker swarm doesn't support the containers reschduling when a node fails, so
 volume can not be automatically detached by volume driver. Refer the
-link [12] for details.
+link [12]_  for details.
 
 Mesos supports the application high-availability when a node fails, which
 means application would be started on new node, and volumes can be
@@ -484,29 +484,17 @@ configuration flags introduced by this document. Additionally, background
 information on how to use these flags will be included.
 
 References
+==========
 
-[1] http://kubernetes.io/v1.1/docs/user-guide/volumes.html
-
-[2] http://kubernetes.io/v1.1/examples/mysql-cinder-pd/
-
-[3] https://github.com/kubernetes/kubernetes/tree/master/pkg/volume/cinder
-
-[3] http://docs.docker.com/engine/extend/plugins/
-
-[4] https://docs.docker.com/engine/userguide/dockervolumes/
-
-[5] https://github.com/emccode/rexray
-
-[6] http://rexray.readthedocs.org/en/stable/user-guide/storage-providers/openstack
-
-[7] http://docs.openstack.org/developer/magnum/
-
-[8] http://docs.openstack.org/liberty/config-reference/content/section_volume-drivers.html
-
-[9] http://docs.openstack.org/admin-guide-cloud/blockstorage_multi_backend.html#
-
-[10] http://docs.openstack.org/user-guide-admin/dashboard_manage_volumes.html
-
-[11] https://github.com/kubernetes/kubernetes/issues/14642
-
-[12] https://github.com/docker/swarm/issues/1488
+.. [1] http://kubernetes.io/v1.1/docs/user-guide/volumes.html
+.. [2] http://kubernetes.io/v1.1/examples/mysql-cinder-pd/
+.. [3] https://github.com/kubernetes/kubernetes/tree/master/pkg/volume/cinder
+.. [4] http://docs.docker.com/engine/extend/plugins/
+.. [5] https://github.com/emccode/rexray
+.. [6] http://rexray.readthedocs.org/en/stable/user-guide/storage-providers/openstack
+.. [7] http://docs.openstack.org/developer/magnum/
+.. [8] http://docs.openstack.org/liberty/config-reference/content/section_volume-drivers.html
+.. [9] http://docs.openstack.org/admin-guide-cloud/blockstorage_multi_backend.html#
+.. [10] http://docs.openstack.org/user-guide-admin/dashboard_manage_volumes.html
+.. [11] https://github.com/kubernetes/kubernetes/issues/14642
+.. [12] https://github.com/docker/swarm/issues/1488

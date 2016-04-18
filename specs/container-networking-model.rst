@@ -29,7 +29,7 @@ Problem Description
 The container networking ecosystem is undergoing rapid changes. The
 networking tools and techniques used in today's container deployments are
 different than twelve months ago and will continue to evolve. For example,
-Flannel[6], Kubernetes preferred networking implementation, was initially
+Flannel [6]_, Kubernetes preferred networking implementation, was initially
 released in July of 2014 and was not considered preferred until early 2015.
 
 Furthermore, the various container orchestration engines have not
@@ -98,7 +98,7 @@ Pod
   managed within Kubernetes.
 
 Additional Magnum definitions can be found in the Magnum Developer
-documentation[2].
+documentation [2]_.
 
 Use Cases
 ----------
@@ -170,7 +170,7 @@ As a CP:
 Proposed Changes
 ================
 
-1. Currently, Magnum supports Flannel[6] as the only multi-host container
+1. Currently, Magnum supports Flannel [6]_ as the only multi-host container
    networking implementation. Although Flannel has become widely accepted
    for providing networking capabilities to Kubernetes-based container
    clusters, other networking tools exist and future tools may develop.
@@ -233,7 +233,7 @@ Proposed Changes
    support labels as a mechanism for providing custom metadata. The labels
    attribute within Magnum should be extended beyond Kubernetes pods, so a
    single mechanism can be used to pass arbitrary metadata throughout the
-   entire system. A blueprint[2] has been registered to expand the scope
+   entire system. A blueprint [2]_ has been registered to expand the scope
    of labels for Magnum. This document intends on adhering to the
    expand-labels-scope blueprint.
 
@@ -252,7 +252,7 @@ Proposed Changes
 
 3. Update python-magnumclient to understand the new Container Networking
    Model attributes. The client should also be updated to support passing
-   the --labels flag according to the expand-labels-scope blueprint[2].
+   the --labels flag according to the expand-labels-scope blueprint [2]_.
 
 4. Update the conductor template definitions to support the new Container
    Networking Model attributes.
@@ -260,14 +260,14 @@ Proposed Changes
 5. Refactor Heat templates to support the Magnum Container Networking Model.
    Currently, Heat templates embed Flannel-specific configuration within
    top-level templates. For example, the top-level Kubernetes Heat
-   template[8] contains the flannel_network_subnetlen parameter. Network
+   template [8]_ contains the flannel_network_subnetlen parameter. Network
    driver specific configurations should be removed from all top-level
    templates and instead be implemented in one or more template fragments.
    As it relates to container networking, top-level templates should only
    expose the labels and generalized parameters such as network-driver.
    Heat templates, template definitions and definition entry points should
    be suited for composition, allowing for a range of supported labels. This
-   document intends to follow the refactor-heat-templates blueprint[3] to
+   document intends to follow the refactor-heat-templates blueprint [3]_ to
    achieve this goal.
 
 6. Update unit and functional tests to support the new attributes of the
@@ -276,10 +276,11 @@ Proposed Changes
 7. The spec will not add support for natively managing container networks.
    Due to each network driver supporting different API operations, this
    document suggests that Magnum not natively manage container networks at
-   this time and instead leave this job to native tools. References [4-7]
+   this time and instead leave this job to native tools. References [4]_ [5]_
+   [6]_ [7]_.
    provide additional details to common labels operations.
 
-8. Since implementing the expand-labels-scope blueprint[2] may take a while,
+8. Since implementing the expand-labels-scope blueprint [2]_ may take a while,
    exposing network functionality through baymodel configuration parameters
    should be considered as an interim solution.
 
@@ -299,7 +300,7 @@ Alternatives
    abstractions for each supported network driver or creating an
    abstraction layer that covers all possible network drivers.
 
-4. Use the Kuryr project[10] to provide networking to Magnum containers.
+4. Use the Kuryr project [10]_ to provide networking to Magnum containers.
    Kuryr currently contains no documentation or code, so this alternative
    is highly unlikely if the Magnum community requires a pluggable
    container networking implementation in the near future. However, Kuryr
@@ -422,14 +423,11 @@ following blueprints, it's highly recommended that the Magnum Container
 Networking Model be developed in concert with the blueprints to maintain
 development continuity within the project.
 
-1. Common Plugin Framework Blueprint:
-   https://blueprints.launchpad.net/magnum/+spec/common-plugin-framework
+1. Common Plugin Framework Blueprint [1]_.
 
-2. Expand the Scope of Labels Blueprint:
-   https://blueprints.launchpad.net/magnum/+spec/expand-labels-scope
+2. Expand the Scope of Labels Blueprint [9]_.
 
-3. Refactor Heat Templates, Definitions and Entry Points Blueprint:
-   https://blueprints.launchpad.net/magnum/+spec/refactor-heat-templates
+3. Refactor Heat Templates, Definitions and Entry Points Blueprint [3]_.
 
 Testing
 =======
@@ -448,13 +446,13 @@ information on how to use these flags will be included.
 References
 ==========
 
-[1] https://blueprints.launchpad.net/magnum/+spec/common-plugin-framework
-[2] http://docs.openstack.org/developer/magnum/
-[3] https://blueprints.launchpad.net/magnum/+spec/refactor-heat-templates
-[4] https://github.com/docker/libnetwork/blob/master/docs/design.md
-[5] https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/design/networking.md
-[6] https://github.com/coreos/flannel
-[7] https://github.com/coreos/rkt/blob/master/Documentation/networking.md
-[8] https://github.com/openstack/magnum/blob/master/magnum/templates/kubernetes/kubecluster.yaml
-[9] https://blueprints.launchpad.net/magnum/+spec/expand-labels-scope
-[10] https://github.com/openstack/kuryr
+.. [1] https://blueprints.launchpad.net/magnum/+spec/common-plugin-framework
+.. [2] http://docs.openstack.org/developer/magnum/
+.. [3] https://blueprints.launchpad.net/magnum/+spec/refactor-heat-templates
+.. [4] https://github.com/docker/libnetwork/blob/master/docs/design.md
+.. [5] https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/design/networking.md
+.. [6] https://github.com/coreos/flannel
+.. [7] https://github.com/coreos/rkt/blob/master/Documentation/networking.md
+.. [8] https://github.com/openstack/magnum/blob/master/magnum/templates/kubernetes/kubecluster.yaml
+.. [9] https://blueprints.launchpad.net/magnum/+spec/expand-labels-scope
+.. [10] https://github.com/openstack/kuryr
