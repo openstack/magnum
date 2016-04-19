@@ -20,6 +20,7 @@ import six
 
 from magnum.common import docker_utils
 from magnum.common import exception
+from magnum.common import utils as magnum_utils
 from magnum.i18n import _LE
 from magnum import objects
 from magnum.objects import fields
@@ -85,8 +86,9 @@ class Handler(object):
                           'environment': container.environment}
                 if docker_utils.is_docker_api_version_atleast(docker, '1.19'):
                     if container.memory is not None:
-                        kwargs['host_config'] = {'mem_limit':
-                                                 container.memory}
+                        kwargs['host_config'] = {
+                            'Memory':
+                            magnum_utils.get_docker_quanity(container.memory)}
                 else:
                     kwargs['mem_limit'] = container.memory
 

@@ -82,6 +82,13 @@ MEMORY_UNITS = {
     '': 1
 }
 
+DOCKER_MEMORY_UNITS = {
+    'b': 1,
+    'k': 2 ** 10,
+    'm': 2 ** 20,
+    'g': 2 ** 30,
+}
+
 
 def _get_root_helper():
     return 'sudo magnum-rootwrap %s' % CONF.rootwrap_config
@@ -591,6 +598,35 @@ def get_k8s_quantity(quantity):
         return float(signed_number) * (10 ** float(suffix[1:]))
     else:
         raise exception.UnsupportedK8sQuantityFormat()
+
+
+def get_docker_quanity(quantity):
+    """This function is used to get swarm Memory quantity.
+
+     Memory format must be in the format of:
+
+        <unsignedNumber><suffix>
+        suffix = b | k | m | g
+
+    eg:  100m = 104857600
+    :raises: exception.UnsupportedDockerQuantityFormat if the quantity string
+             is a unsupported value
+    """
+    matched_unsigned_number = re.search(r"(^\d+)", quantity)
+
+    if matched_unsigned_number is None:
+        raise exception.UnsupportedDockerQuantityFormat()
+    else:
+        unsigned_number = matched_unsigned_number.group(0)
+
+    suffix = quantity.replace(unsigned_number, '', 1)
+    if suffix == '':
+        return int(quantity)
+
+    if re.search(r"^(b|k|m|g)$", suffix):
+        return int(unsigned_number) * DOCKER_MEMORY_UNITS[suffix]
+
+    raise exception.UnsupportedDockerQuantityFormat()
 
 
 def generate_password(length, symbolgroups=None):

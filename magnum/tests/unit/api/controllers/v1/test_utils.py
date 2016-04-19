@@ -150,3 +150,12 @@ class TestApiUtils(base.FunctionalTest):
         self.assertEqual(
             "The attribute /node_count has existed, please use "
             "'replace' operation instead.", exc.faultstring)
+
+    def test_validate_docker_memory(self):
+        utils.validate_docker_memory('512m')
+        utils.validate_docker_memory('512g')
+        self.assertRaises(wsme.exc.ClientSideError,
+                          utils.validate_docker_memory, "512gg")
+        # Docker require that Minimum memory limit >= 4M
+        self.assertRaises(wsme.exc.ClientSideError,
+                          utils.validate_docker_memory, "3m")

@@ -230,14 +230,30 @@ class TestContainerController(api_base.FunctionalTest):
         self.assertTrue(mock_container_create.not_called)
 
     @patch('magnum.conductor.api.API.container_create')
-    def test_create_container_invalid_long_name(self, mock_container_create):
+    def _test_create_container_invalid_params(self, params,
+                                              mock_container_create):
+        self.assertRaises(AppError, self.app.post, '/v1/containers',
+                          params=params, content_type='application/json')
+        self.assertTrue(mock_container_create.not_called)
+
+    def test_create_container_invalid_long_name(self):
         # Long name
         params = ('{"name": "' + 'i' * 256 + '", "image": "ubuntu",'
                   '"command": "env", "memory": "512m",'
                   '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
-        self.assertRaises(AppError, self.app.post, '/v1/containers',
-                          params=params, content_type='application/json')
-        self.assertTrue(mock_container_create.not_called)
+        self._test_create_container_invalid_params(params)
+
+    def test_create_container_no_memory_unit(self):
+        params = ('{"name": "ubuntu", "image": "ubuntu",'
+                  '"command": "env", "memory": "512",'
+                  '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
+        self._test_create_container_invalid_params(params)
+
+    def test_create_container_bad_memory_unit(self):
+        params = ('{"name": "ubuntu", "image": "ubuntu",'
+                  '"command": "env", "memory": "512S",'
+                  '"bay_uuid": "fff114da-3bfa-4a0f-a123-c0dffad9718e"}')
+        self._test_create_container_invalid_params(params)
 
     @patch('magnum.conductor.api.API.container_show')
     @patch('magnum.objects.Container.list')

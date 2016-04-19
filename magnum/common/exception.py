@@ -533,6 +533,10 @@ class UnsupportedK8sQuantityFormat(MagnumException):
     message = _("Unsupported quantity format for k8s bay.")
 
 
+class UnsupportedDockerQuantityFormat(MagnumException):
+    message = _("Unsupported quantity format for Swarm bay.")
+
+
 class FlavorNotFound(ResourceNotFound):
     """The code here changed to 400 according to the latest document."""
     message = _("Unable to find flavor %(flavor)s.")

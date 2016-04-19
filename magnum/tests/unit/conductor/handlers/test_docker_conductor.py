@@ -83,14 +83,14 @@ class TestDockerHandler(base.BaseTestCase):
             'uuid': 'some-uuid',
             'image': 'test_image:some_tag',
             'command': None,
-            'memory': 512,
+            'memory': '100m',
             'environment': None,
         }
         expected_kwargs = {
             'name': 'some-name',
             'hostname': 'some-uuid',
             'command': None,
-            'host_config': {'mem_limit': 512},
+            'host_config': {'Memory': 100 * 1024 * 1024},
             'environment': None,
         }
         self._test_container_create(container_dict, expected_kwargs,
