@@ -319,13 +319,7 @@ resources:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config:
-        str_replace:
-          template: |
-            #!/bin/bash -v
-            wc_notify --data-binary '{"status": "SUCCESS"}'
-          params:
-            wc_notify: {get_attr: [master_wait_handle, curl_cli]}
+      config: {get_file: fragments/wc-notify-master.sh}
 
   disable_selinux:
     type: OS::Heat::SoftwareConfig
