@@ -8,13 +8,13 @@ echo_summary "magnum's plugin.sh was called..."
 source $DEST/magnum/devstack/lib/magnum
 (set -o posix; set)
 
-if is_service_enabled m-api m-cond; then
+if is_service_enabled magnum-api magnum-cond; then
     if [[ "$1" == "stack" && "$2" == "install" ]]; then
         echo_summary "Installing magnum"
         install_magnum
 
         # add image to glance
-        if [[ "$ENABLED_SERVICES" =~ 'm-api' ]]; then
+        if [[ "$ENABLED_SERVICES" =~ 'magnum-api' ]]; then
             # TODO Add a "latest" link to fedora release process
             # TODO(hongbin): Uncomment below when the mirror become stable
             #ATOMIC_IMAGE_NAME=$( \
