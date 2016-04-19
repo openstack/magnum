@@ -161,6 +161,10 @@ class BaseMagnumTest(base.BaseTestCase):
         return cls.get_clients(creds, type_of_creds, request_type)
 
     @classmethod
+    def get_copy_logs(cls):
+        return config.Config.copy_logs
+
+    @classmethod
     def copy_logs_handler(cls, get_nodes_fn, coe, keypair):
         """Copy logs closure.
 
@@ -172,8 +176,8 @@ class BaseMagnumTest(base.BaseTestCase):
         :param coe: the COE type of the nodes
         """
 
-        if not config.Config.copy_logs:
-            return lambda: None
+        if not cls.get_copy_logs():
+            return lambda exec_info: None
 
         def int_copy_logs(exec_info):
             try:

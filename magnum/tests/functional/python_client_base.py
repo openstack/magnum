@@ -85,7 +85,7 @@ class BaseMagnumClient(base.BaseMagnumTest):
         cls.master_flavor_id = master_flavor_id
         cls.keypair_id = keypair_id
         cls.dns_nameserver = dns_nameserver
-        cls.copy_logs = bool(copy_logs)
+        cls.copy_logs = str(copy_logs).lower() == 'true'
         cls.cs = v1client.Client(username=user,
                                  api_key=passwd,
                                  project_id=tenant_id,
@@ -177,6 +177,10 @@ class BaseMagnumClient(base.BaseMagnumTest):
         else:
             if cls._show_bay(cls.bay.uuid).status == 'DELETE_FAILED':
                 raise Exception("bay %s delete failed" % cls.bay.uuid)
+
+    @classmethod
+    def get_copy_logs(cls):
+        return cls.copy_logs
 
     def _wait_for_bay_complete(self, bay):
         self._wait_on_status(

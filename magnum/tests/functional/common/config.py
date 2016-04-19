@@ -113,7 +113,7 @@ class Config(object):
     def set_copy_logs(cls, config):
         if 'copy_logs' not in CONF.magnum:
             cls.copy_logs = True
-        cls.copy_logs = CONF.magnum.copy_logs
+        cls.copy_logs = str(CONF.magnum.copy_logs).lower() == 'true'
 
     @classmethod
     def setUp(cls):
