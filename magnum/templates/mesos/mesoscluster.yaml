@@ -155,6 +155,38 @@ parameters:
     type: string
     description: url for keystone
 
+  mesos_slave_isolation:
+    type: string
+    description: >
+      Isolation mechanisms to use, e.g., `posix/cpu,posix/mem`, or
+      `cgroups/cpu,cgroups/mem`, or network/port_mapping (configure with flag:
+      `--with-network-isolator` to enable), or `cgroups/devices/gpus/nvidia`
+      for nvidia specific gpu isolation (configure with flag: `--enable-nvidia
+      -gpu-support` to enable), or `external`, or load an alternate isolator
+      module using the `--modules` flag. Note that this flag is only relevant
+      for the Mesos Containerizer.
+    default: ""
+
+  mesos_slave_work_dir:
+    type: string
+    description: directory path to place framework work directories
+    default: ""
+
+  mesos_slave_image_providers:
+    type: string
+    description: >
+      Comma separated list of supported image providers e.g.,
+      APPC,DOCKER
+    default: ""
+
+  mesos_slave_executor_environment_variables:
+    type: string
+    description: >
+      JSON object representing the environment variables that should be passed
+      to the executor, and thus subsequently task(s). By default the executor,
+      executor will inherit the agent's environment variables.
+    default: ""
+
 resources:
 
   ######################################################################
@@ -388,6 +420,10 @@ resources:
           region_name: {get_param: region_name}
           domain_name: {get_param: domain_name}
           rexray_preempt: {get_param: rexray_preempt}
+          mesos_slave_isolation: {get_param: mesos_slave_isolation}
+          mesos_slave_work_dir: {get_param: mesos_slave_work_dir}
+          mesos_slave_image_providers: {get_param: mesos_slave_image_providers}
+          mesos_slave_executor_environment_variables: {get_param: mesos_slave_executor_environment_variables}
 
 outputs:
 

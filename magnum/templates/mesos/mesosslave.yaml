@@ -87,6 +87,34 @@ parameters:
       enables any host to take control of a volume irrespective of whether
       other hosts are using the volume
 
+  mesos_slave_isolation:
+    type: string
+    description: >
+      Isolation mechanisms to use, e.g., `posix/cpu,posix/mem`, or
+      `cgroups/cpu,cgroups/mem`, or network/port_mapping (configure with flag:
+      `--with-network-isolator` to enable), or `cgroups/devices/gpus/nvidia`
+      for nvidia specific gpu isolation (configure with flag: `--enable-nvidia
+      -gpu-support` to enable), or `external`, or load an alternate isolator
+      module using the `--modules` flag. Note that this flag is only relevant
+      for the Mesos Containerizer.
+
+  mesos_slave_work_dir:
+    type: string
+    description: directory path to place framework work directories
+
+  mesos_slave_image_providers:
+    type: string
+    description: >
+      Comma separated list of supported image providers e.g.,
+      APPC,DOCKER
+
+  mesos_slave_executor_environment_variables:
+    type: string
+    description: >
+      JSON object representing the environment variables that should be passed
+      to the executor, and thus subsequently task(s). By default the executor,
+      executor will inherit the agent's environment variables.
+
   mesos_masters_ips:
     type: string
     description: IP addresses of the Mesos master servers.
@@ -150,6 +178,10 @@ resources:
             "$REGION_NAME": {get_param: region_name}
             "$DOMAIN_NAME": {get_param: domain_name}
             "$REXRAY_PREEMPT": {get_param: rexray_preempt}
+            "$ISOLATION": {get_param: mesos_slave_isolation}
+            "$WORK_DIR": {get_param: mesos_slave_work_dir}
+            "$IMAGE_PROVIDERS": {get_param: mesos_slave_image_providers}
+            "$EXECUTOR_ENVIRONMENT_VARIABLES": {get_param: mesos_slave_executor_environment_variables}
 
   configure_mesos_slave:
     type: OS::Heat::SoftwareConfig

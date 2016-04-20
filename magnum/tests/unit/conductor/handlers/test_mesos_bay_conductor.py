@@ -40,7 +40,13 @@ class TestBayConductorWithMesos(base.TestCase):
             'no_proxy': 'no_proxy',
             'server_type': 'vm',
             'volume_driver': 'volume_driver',
-            'labels': {'rexray_preempt': 'False'}
+            'labels': {'rexray_preempt': 'False',
+                       'mesos_slave_isolation':
+                           'docker/runtime,filesystem/linux',
+                       'mesos_slave_image_providers': 'docker',
+                       'mesos_slave_executor_environment_variables': '{}',
+                       'mesos_slave_work_dir': '/tmp/mesos/slave'
+                       }
         }
         self.bay_dict = {
             'id': 1,
@@ -107,7 +113,11 @@ class TestBayConductorWithMesos(base.TestCase):
             'username': 'mesos_user',
             'tenant_name': 'admin',
             'domain_name': 'domainname',
-            'rexray_preempt': 'False'
+            'rexray_preempt': 'False',
+            'mesos_slave_executor_environment_variables': '{}',
+            'mesos_slave_isolation': 'docker/runtime,filesystem/linux',
+            'mesos_slave_work_dir': '/tmp/mesos/slave',
+            'mesos_slave_image_providers': 'docker'
         }
         self.assertEqual(expected, definition)
 
@@ -145,7 +155,11 @@ class TestBayConductorWithMesos(base.TestCase):
             'username': 'mesos_user',
             'tenant_name': 'admin',
             'domain_name': 'domainname',
-            'rexray_preempt': 'False'
+            'rexray_preempt': 'False',
+            'mesos_slave_isolation': 'docker/runtime,filesystem/linux',
+            'mesos_slave_executor_environment_variables': '{}',
+            'mesos_slave_work_dir': '/tmp/mesos/slave',
+            'mesos_slave_image_providers': 'docker'
         }
         self.assertEqual(expected, definition)
 

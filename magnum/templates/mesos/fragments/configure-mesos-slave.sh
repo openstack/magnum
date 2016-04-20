@@ -30,3 +30,23 @@ echo "docker,mesos" > /etc/mesos-slave/containerizers
 cat > /etc/mesos-slave/executor_registration_timeout <<EOF
 $EXECUTOR_REGISTRATION_TIMEOUT
 EOF
+
+if [ -n "$ISOLATION" ]; then
+    echo "$ISOLATION" > /etc/mesos-slave/isolation
+fi
+
+if [ -n "$WORK_DIR" ]; then
+    echo "$WORK_DIR" > /etc/mesos-slave/work_dir
+fi
+
+if [ -n "$IMAGE_PROVIDERS" ]; then
+    if [ -n "$ISOLATION" ]; then
+        echo "$IMAGE_PROVIDERS" > /etc/mesos-slave/image_providers
+    else
+        echo "isolation doesn't exist, not setting image_providers"
+    fi
+fi
+
+if [ -n "$EXECUTOR_ENVIRONMENT_VARIABLES" ]; then
+    echo "$EXECUTOR_ENVIRONMENT_VARIABLES" > /etc/mesos-slave/executor_environment_variables
+fi
