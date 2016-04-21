@@ -1,7 +1,8 @@
 heat_template_version: 2014-10-16
 
 description: >
-  This template will boot a Mesos cluster with one or more slaves
+  This template will boot a Mesos cluster with one or more masters
+  (as specified by number_of_masters, default is 1) and one or more agents
   (as specified by the number_of_slaves parameter, which
   defaults to 1).
 
@@ -24,12 +25,12 @@ parameters:
   master_flavor:
     type: string
     default: m1.small
-    description: flavor to use when booting the server
+    description: flavor to use when booting the master server
 
   slave_flavor:
     type: string
     default: m1.small
-    description: flavor to use when booting the server
+    description: flavor to use when booting the agent server
 
   dns_nameserver:
     type: string
@@ -113,7 +114,7 @@ parameters:
 
   region_name:
     type: string
-    description: A logically separate section of the cluster
+    description: a logically separate section of the cluster
 
   username:
     type: string
@@ -351,6 +352,7 @@ resources:
       lb_method: ROUND_ROBIN
       vip:
         protocol_port: 8080
+      description: API pool for Mesos bay
 
   api_pool_floating:
     type: OS::Neutron::FloatingIP
@@ -362,7 +364,8 @@ resources:
 
   ######################################################################
   #
-  # Mesos masters. This is a resource group that will create 1 master.
+  # Mesos masters. This is a resource group that will create
+  # <number_of_masters> masters.
   #
 
   mesos_masters:
