@@ -101,8 +101,8 @@ class BayTest(base.BaseMagnumTest):
         self.bay_uuid = model.uuid
         self.addOnException(self.copy_logs_handler(
             lambda: list(
-                self._get_bay_by_id(self.bay_uuid)[1].node_addresses +
-                self._get_bay_by_id(self.bay_uuid)[1].master_addresses),
+                [self._get_bay_by_id(self.bay_uuid)[1].master_addresses,
+                 self._get_bay_by_id(self.bay_uuid)[1].node_addresses]),
             self.baymodel.coe,
             self.keypair))
         self.bay_client.wait_for_created_bay(model.uuid, delete_on_error=False)
