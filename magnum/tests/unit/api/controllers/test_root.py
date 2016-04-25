@@ -14,6 +14,12 @@ import mock
 from oslo_config import cfg
 from webob import exc as webob_exc
 
+try:
+    import configparser as ConfigParser
+except ImportError:
+    import ConfigParser
+import shutil
+import tempfile
 import webtest
 
 from magnum.api import app
@@ -161,6 +167,49 @@ class TestRootController(api_base.FunctionalTest):
 
         response = app.get('/v1/baymodels', expect_errors=True)
         self.assertEqual(401, response.status_int)
+
+
+class TestHeathcheck(api_base.FunctionalTest):
+    def setUp(self):
+        self.addCleanup(self.remove_files)
+        super(TestHeathcheck, self).setUp()
+
+        # Create Temporary file
+        self.tempdir = tempfile.mkdtemp()
+        paste_ini = "magnum/tests/unit/api/controllers/auth-paste.ini"
+
+        # Read current file and create new one
+        config = ConfigParser.RawConfigParser()
+        config.read(self.get_path(paste_ini))
+        config.set('filter:healthcheck',
+                   'disable_by_file_path',
+                   self.tempdir + "/disable")
+        with open(self.tempdir + "/paste.ini", 'wt') as configfile:
+            config.write(configfile)
+
+        # Set config and create app
+        cfg.CONF.set_override("api_paste_config",
+                              self.tempdir + "/paste.ini",
+                              group="api")
+        self.app = webtest.TestApp(app.load_app())
+
+    def remove_files(self):
+        shutil.rmtree(self.tempdir, ignore_errors=True)
+
+    def test_healthcheck_enabled(self):
+        # Check the healthcheck works
+        response = self.app.get('/healthcheck')
+        self.assertEqual(200, response.status_int)
+        self.assertEqual(b"OK", response.body)
+
+    def test_healthcheck_disable_file(self):
+        # Create the file that disables healthcheck
+        fo = open(self.tempdir + "/disable", 'a')
+        fo.close()
+
+        response = self.app.get('/healthcheck', expect_errors=True)
+        self.assertEqual(503, response.status_int)
+        self.assertEqual(b"DISABLED BY FILE", response.body)
 
 
 class TestV1Routing(api_base.FunctionalTest):
