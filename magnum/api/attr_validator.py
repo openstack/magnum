@@ -40,14 +40,11 @@ def validate_flavor(cli, flavor):
 
     if flavor is None:
         return
-    flavor_id = None
     flavor_list = cli.nova().flavors.list()
     for f in flavor_list:
         if f.name == flavor or f.id == flavor:
-            flavor_id = f.id
-            break
-    if flavor_id is None:
-        raise exception.FlavorNotFound(flavor=flavor)
+            return
+    raise exception.FlavorNotFound(flavor=flavor)
 
 
 def validate_keypair(cli, keypair):
@@ -62,15 +59,12 @@ def validate_keypair(cli, keypair):
 def validate_external_network(cli, external_network):
     """Validate external network"""
 
-    network_id = None
     networks = cli.neutron().list_networks()
     for net in networks.get('networks'):
         if (net.get('name') == external_network or
                 net.get('id') == external_network):
-            network_id = net.get('id')
-            break
-    if network_id is None:
-        raise exception.NetworkNotFound(network=external_network)
+            return
+    raise exception.NetworkNotFound(network=external_network)
 
 
 def validate_fixed_network(cli, fixed_network):
