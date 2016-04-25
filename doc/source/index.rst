@@ -64,9 +64,10 @@ Features
 
 * Abstractions for bays, containers, nodes, pods, replication controllers, and
   services
-* Integration with Kubernetes and Docker for backend container technology
+* Integration with Kubernetes, Swarm, Mesos for backend container technology
 * Integration with Keystone for multi-tenant security
 * Integration with Neutron for Kubernetes multi-tenancy network security
+* Integration with Cinder to provide volume service for containers
 
 Developer Info
 ==============
