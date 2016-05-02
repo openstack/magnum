@@ -145,9 +145,10 @@ the volume ID in the pod manifest as follows::
         volumeID: $ID
         fsType: ext4
 
-3. Create a pod with container::
+3. Create a pod with container. Please refer to the quickstart guide on how to
+   connect to Kubernetes running on the launched bay.::
 
-    magnum pod-create --manifest ./nginx-cinder.yaml --bay k8sbay
+    kubectl create -f ./nginx-cinder.yaml
 
 You can log in the container to check if existing the mountPath, and check
 if your cinder volume status is 'in-use' by running the command 'cinder list'.

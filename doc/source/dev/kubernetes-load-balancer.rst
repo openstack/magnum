@@ -138,11 +138,12 @@ Create a file (e.g nginx-service.yaml) describing a service for the nginx pod::
       type: LoadBalancer
 
 Assuming that a Kubernetes bay named k8sbayv1 has been created, deploy the pod
-and service by the commands::
+and service by the commands. Please refer to the quickstart guide on how to
+connect to Kubernetes running on the launched bay.::
 
-    magnum pod-create --manifest nginx.yaml --bay k8sbayv1
+    kubectl create -f nginx.yaml
 
-    magnum coe-service-create --manifest nginx-service.yaml --bay k8sbayv1
+    kubectl create -f nginx-service.yaml
 
 For more details on verifying the load balancer in OpenStack, refer to the
 following section on how it works.
