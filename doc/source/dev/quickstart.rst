@@ -180,14 +180,14 @@ when installing devstack use::
 
     glance -v image-list
 
-    +--------------------------------------+---------------------------------+-------------+------------------+-----------+--------+
-    | ID                                   | Name                            | Disk Format | Container Format | Size      | Status |
-    +--------------------------------------+---------------------------------+-------------+------------------+-----------+--------+
-    | 7f5b6a15-f2fd-4552-aec5-952c6f6d4bc7 | cirros-0.3.4-x86_64-uec         | ami         | ami              | 25165824  | active |
-    | bd3c0f92-669a-4390-a97d-b3e0a2043362 | cirros-0.3.4-x86_64-uec-kernel  | aki         | aki              | 4979632   | active |
-    | 843ce0f7-ae51-4db3-8e74-bcb860d06c55 | cirros-0.3.4-x86_64-uec-ramdisk | ari         | ari              | 3740163   | active |
-    | 02c312e3-2d30-43fd-ab2d-1d25622c0eaa | fedora-atomic                   | qcow2       | bare             | 770179072 | active |
-    +--------------------------------------+---------------------------------+-------------+------------------+-----------+--------+
+    +--------------------------------------+---------------------------------+-------------+------------------+-----------+--------+----------------------------------+
+    | ID                                   | Name                            | Disk_format | Container_format | Size      | Status | Owner                            |
+    +--------------------------------------+---------------------------------+-------------+------------------+-----------+--------+----------------------------------+
+    | 090de3a2-2c0c-42d5-b5a3-cfcddd6d011b | cirros-0.3.4-x86_64-uec         | ami         | ami              | 25165824  | active | f98b9727094d40c78b1ed40e3bc91e80 |
+    | 9501d296-f0aa-4c0e-bc24-2a680f8741f0 | cirros-0.3.4-x86_64-uec-kernel  | aki         | aki              | 4979632   | active | f98b9727094d40c78b1ed40e3bc91e80 |
+    | 01478d1a-59e0-4f36-b69e-0eaf5821ee46 | cirros-0.3.4-x86_64-uec-ramdisk | ari         | ari              | 3740163   | active | f98b9727094d40c78b1ed40e3bc91e80 |
+    | f14d6ee3-9e53-4f22-ba42-44e95810c294 | fedora-atomic-latest            | qcow2       | bare             | 507928064 | active | f98b9727094d40c78b1ed40e3bc91e80 |
+    +--------------------------------------+---------------------------------+-------------+------------------+-----------+--------+----------------------------------+
 
 To list the available commands and resources for magnum, use::
 
@@ -218,7 +218,7 @@ The coe (Container Orchestration Engine) and keypair need to be specified
 as well::
 
     magnum baymodel-create --name k8sbaymodel \
-                           --image-id fedora-atomic \
+                           --image-id fedora-atomic-latest \
                            --keypair-id testkey \
                            --external-network-id public \
                            --dns-nameserver 8.8.8.8 \
@@ -438,7 +438,7 @@ the absence of some Kubernetes-specific arguments and the use of 'swarm'
 as the coe::
 
     magnum baymodel-create --name swarmbaymodel \
-                           --image-id fedora-atomic \
+                           --image-id fedora-atomic-latest \
                            --keypair-id testkey \
                            --external-network-id public \
                            --dns-nameserver 8.8.8.8 \
