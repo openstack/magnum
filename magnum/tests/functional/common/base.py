@@ -16,7 +16,7 @@ import os
 import subprocess
 
 from tempest.common import credentials_factory as common_creds
-from tempest_lib import base
+from tempest.lib import base
 
 import magnum
 from magnum.tests.functional.common import config

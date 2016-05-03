@@ -14,7 +14,7 @@ import abc
 
 import six
 from six.moves.urllib import parse
-from tempest_lib.common import rest_client
+from tempest.lib.common import rest_client
 
 from magnum.tests.functional.common import config
 
