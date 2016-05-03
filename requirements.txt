@@ -18,7 +18,7 @@ docker-py<1.8.0,>=1.6.0 # Apache-2.0
 enum34;python_version=='2.7' or python_version=='2.6' or python_version=='3.3' # BSD
 eventlet!=0.18.3,>=0.18.2 # MIT
 greenlet>=0.3.2 # MIT
-iso8601>=0.1.9 # MIT
+iso8601>=0.1.11 # MIT
 jsonpatch>=1.1 # BSD
 keystoneauth1>=2.1.0 # Apache-2.0
 keystonemiddleware!=4.1.0,>=4.0.0 # Apache-2.0
