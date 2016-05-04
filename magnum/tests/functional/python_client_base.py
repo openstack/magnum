@@ -248,8 +248,8 @@ extendedKeyUsage = clientAuth
 
         self.addOnException(
             self.copy_logs_handler(
-                lambda: list(self.cs.bays.get(self.bay.uuid).node_addresses +
-                             self.cs.bays.get(self.bay.uuid).master_addresses),
+                lambda: list([self.cs.bays.get(self.bay.uuid).master_addresses,
+                             self.cs.bays.get(self.bay.uuid).node_addresses]),
                 self.baymodel.coe,
                 'default'))
         self._wait_for_bay_complete(self.bay)

@@ -23,6 +23,9 @@ from magnum.tests.functional.common import config
 from magnum.tests.functional.common import manager
 
 
+COPY_LOG_HELPER = "magnum/tests/contrib/copy_instance_logs.sh"
+
+
 class BaseMagnumTest(base.BaseTestCase):
     """Sets up configuration required for functional tests"""
 
@@ -172,7 +175,8 @@ class BaseMagnumTest(base.BaseTestCase):
         and copy addresses from there locally.
 
         :param get_nodes_fn: function that takes no parameters and returns
-            a list of node IPs to get logs from
+            a list of node IPs which are in such form:
+                [[master_nodes], [slave_nodes]].
         :param coe: the COE type of the nodes
         """
 
@@ -187,28 +191,35 @@ class BaseMagnumTest(base.BaseTestCase):
                 msg = "Failed to copy logs for bay"
                 nodes_addresses = get_nodes_fn()
 
-                for node_address in nodes_addresses:
-                    log_name = "node-" + func_name
-                    try:
-                        base_path = os.path.split(os.path.dirname(
-                            os.path.abspath(magnum.__file__)))[0]
-                        script = "magnum/tests/contrib/copy_instance_logs.sh"
-                        full_location = os.path.join(base_path, script)
-                        cls.LOG.debug("running %s" % full_location)
-                        cls.LOG.debug("keypair: %s" % keypair)
-                        subprocess.check_call([
-                            full_location,
-                            node_address,
-                            coe,
-                            log_name,
-                            str(keypair)
-                        ])
-                    except Exception:
-                        cls.LOG.exception(msg)
-                        cls.LOG.exception("failed to copy from %s to %s%s-%s" %
-                                          (node_address,
-                                           "/opt/stack/logs/bay-nodes/",
-                                           log_name, node_address))
+                master_nodes = nodes_addresses[0]
+                slave_nodes = nodes_addresses[1]
+
+                base_path = os.path.split(os.path.dirname(
+                    os.path.abspath(magnum.__file__)))[0]
+                full_location = os.path.join(base_path, COPY_LOG_HELPER)
+
+                def do_copy_logs(prefix, nodes_address):
+                    log_name = prefix + "-" + func_name
+                    for node_address in nodes_address:
+                        try:
+                            cls.LOG.debug("running %s" % full_location)
+                            cls.LOG.debug("keypair: %s" % keypair)
+                            subprocess.check_call([
+                                full_location,
+                                node_address,
+                                coe,
+                                log_name,
+                                str(keypair)
+                            ])
+                        except Exception:
+                            cls.LOG.exception(msg)
+                            cls.LOG.exception(
+                                "failed to copy from %s to %s%s-%s" %
+                                (node_address, "/opt/stack/logs/bay-nodes/",
+                                 log_name, node_address))
+
+                do_copy_logs('master', master_nodes)
+                do_copy_logs('node', slave_nodes)
             except Exception:
                 cls.LOG.exception(msg)
 
