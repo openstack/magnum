@@ -33,14 +33,13 @@ parameters:
     type: string
     description: endpoint to retrieve TLS certs from
 
+  server_image:
+    type: string
+    description: glance image used to boot the server
+
   #
   # OPTIONAL PARAMETERS
   #
-  server_image:
-    type: string
-    default: fedora-atomic
-    description: glance image used to boot the server
-
   master_flavor:
     type: string
     default: m1.small
