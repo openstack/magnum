@@ -89,20 +89,56 @@ class TestAttrValidator(base.BaseTestCase):
                           mock_os_cli, 'test_keypair')
 
     def test_validate_labels_main_isolation_invalid(self):
-        fake_labels_validators_input = {'mesos_slave_isolation': 'abc'}
+        fake_labels = {'mesos_slave_isolation': 'abc'}
         self.assertRaises(exception.InvalidParameterValue,
                           attr_validator.validate_labels,
-                          fake_labels_validators_input)
+                          fake_labels)
 
     def test_validate_labels_isolation_valid(self):
-        fake_isolation = 'filesystem/posix,filesystem/linux'
-        attr_validator.validate_labels_isolation(fake_isolation)
+        fake_labels = {'mesos_slave_isolation':
+                       'filesystem/posix,filesystem/linux'}
+        attr_validator.validate_labels_isolation(fake_labels)
+
+    def test_validate_labels_main_with_valid_providers_none_isolation(self):
+        fake_labels = {'mesos_slave_image_providers': 'docker'}
+        self.assertRaises(exception.RequiredParameterNotProvided,
+                          attr_validator.validate_labels,
+                          fake_labels)
+
+    def test_validate_labels_with_valid_providers_invalid_isolation(self):
+        fake_labels = {'mesos_slave_image_providers': 'docker',
+                       'mesos_slave_isolation': 'abc'}
+        self.assertRaises(exception.RequiredParameterNotProvided,
+                          attr_validator.validate_labels_image_providers,
+                          fake_labels)
+
+    def test_validate_labels_with_invalid_providers(self):
+        fake_labels = {'mesos_slave_image_providers': 'abc'}
+        self.assertRaises(exception.InvalidParameterValue,
+                          attr_validator.validate_labels_image_providers,
+                          fake_labels)
+
+    def test_validate_labels_with_valid_providers_none_isolation(self):
+        fake_labels = {'mesos_slave_image_providers': 'docker'}
+        self.assertRaises(exception.RequiredParameterNotProvided,
+                          attr_validator.validate_labels_image_providers,
+                          fake_labels)
+
+    def test_validate_labels_with_valid_providers_valid_isolation(self):
+        fake_labels = {'mesos_slave_image_providers': 'docker',
+                       'mesos_slave_isolation': 'docker/runtime'}
+        attr_validator.validate_labels_image_providers(fake_labels)
+
+    def test_validate_labels_with_valid_isolation(self):
+        fake_labels = {'mesos_slave_isolation':
+                       'filesystem/posix,filesystem/linux'}
+        attr_validator.validate_labels_isolation(fake_labels)
 
     def test_validate_labels_isolation_invalid(self):
-        fake_isolation = 'filesystem'
+        fake_labels = {'mesos_slave_isolation': 'filesystem'}
         self.assertRaises(exception.InvalidParameterValue,
                           attr_validator.validate_labels_isolation,
-                          fake_isolation)
+                          fake_labels)
 
     @mock.patch('magnum.api.utils.get_openstack_resource')
     def test_validate_image_with_valid_image_by_name(self, mock_os_res):
