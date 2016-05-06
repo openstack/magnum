@@ -28,10 +28,6 @@ parameters:
     description: >
       Discovery URL used for bootstrapping the etcd cluster.
 
-  dns_nameserver:
-    type: string
-    description: address of a dns nameserver reachable in your environment
-
   portal_network_cidr:
     type: string
     description: >

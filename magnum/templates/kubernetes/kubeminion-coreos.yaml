@@ -68,6 +68,11 @@ parameters:
     type: string
     description: network range for flannel overlay network
 
+  wait_condition_timeout:
+    type: number
+    description: >
+      timeout for the Wait Conditions
+
 resources:
 
   minion_wait_handle:
@@ -78,7 +83,7 @@ resources:
     depends_on: kube-minion
     properties:
       handle: {get_resource: minion_wait_handle}
-      timeout: 6000
+      timeout: {get_param: wait_condition_timeout}
 
   ######################################################################
   #
