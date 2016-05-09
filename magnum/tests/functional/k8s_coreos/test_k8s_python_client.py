@@ -13,23 +13,10 @@
 from magnum.tests.functional import python_client_base as base
 
 
-class TestKubernetesAPIs(base.BaseK8sTest):
+class TestCoreosKubernetesAPIs(base.BaseK8sTest):
     baymodel_kwargs = {
-        "tls_disabled": False,
+        "tls_disabled": True,
         "network_driver": 'flannel',
-        "volume_driver": 'cinder',
+        "volume_driver": None,
         "fixed_network": '192.168.0.0/24'
     }
-
-    """
-    NB : Bug1504379. This is placeholder and will be removed when all
-         the objects-from-bay patches are checked in.
-    def test_pods_list(self):
-        self.assertIsNotNone(self.cs.pods.list(self.bay.uuid))
-
-    def test_rcs_list(self):
-        self.assertIsNotNone(self.cs.rcs.list(self.bay.uuid))
-
-    def test_services_list(self):
-        self.assertIsNotNone(self.cs.services.list(self.bay.uuid))
-    """

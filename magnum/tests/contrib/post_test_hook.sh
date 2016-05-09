@@ -30,6 +30,8 @@ function create_test_data {
     coe=$1
     if [ $coe == 'mesos' ]; then
         local image_name="ubuntu-14.04"
+    elif [ $coe == 'k8s-coreos' ]; then
+        local image_name="coreos"
     else
         local image_name="atomic"
     fi
@@ -138,8 +140,8 @@ function add_flavor {
 
     # Create magnum specific flavor for use in functional tests.
     echo_summary "Create a flavor"
-    nova flavor-create  m1.magnum 100 1024 8 1
-    nova flavor-create  s1.magnum 200 512 8 1
+    nova flavor-create  m1.magnum 100 1024 10 1
+    nova flavor-create  s1.magnum 200 512 10 1
 }
 
 if ! function_exists echo_summary; then

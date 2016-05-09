@@ -272,6 +272,10 @@ function magnum_register_image {
     if [ ! -z "$ubuntu" ]; then
         magnum_image_property=$magnum_image_property"ubuntu"
     fi
+    local coreos="$(echo $MAGNUM_GUEST_IMAGE_URL | grep -io "coreos" || true;)"
+    if [ ! -z "$coreos" ]; then
+        magnum_image_property=$magnum_image_property"coreos"
+    fi
 
     openstack --os-url $GLANCE_SERVICE_PROTOCOL://$GLANCE_HOSTPORT --os-image-api-version 1 image set $(basename "$MAGNUM_GUEST_IMAGE_URL" ".qcow2") $magnum_image_property
 }
