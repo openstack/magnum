@@ -88,6 +88,22 @@ class TestAttrValidator(base.BaseTestCase):
                           attr_validator.validate_keypair,
                           mock_os_cli, 'test_keypair')
 
+    def test_validate_labels_main_isolation_invalid(self):
+        fake_labels_validators_input = {'mesos_slave_isolation': 'abc'}
+        self.assertRaises(exception.InvalidParameterValue,
+                          attr_validator.validate_labels,
+                          fake_labels_validators_input)
+
+    def test_validate_labels_isolation_valid(self):
+        fake_isolation = 'filesystem/posix,filesystem/linux'
+        attr_validator.validate_labels_isolation(fake_isolation)
+
+    def test_validate_labels_isolation_invalid(self):
+        fake_isolation = 'filesystem'
+        self.assertRaises(exception.InvalidParameterValue,
+                          attr_validator.validate_labels_isolation,
+                          fake_isolation)
+
     @mock.patch('magnum.api.utils.get_openstack_resource')
     def test_validate_image_with_valid_image_by_name(self, mock_os_res):
         mock_image = {'name': 'fedora-21-atomic-5',

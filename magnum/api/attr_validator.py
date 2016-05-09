@@ -18,6 +18,13 @@ from novaclient import exceptions as nova_exception
 from magnum.api import utils as api_utils
 from magnum.common import clients
 from magnum.common import exception
+from magnum.i18n import _
+
+SUPPORTED_ISOLATION = ['filesystem/posix', 'filesystem/linux',
+                       'filesystem/shared', 'posix/cpu',
+                       'posix/mem', 'posix/disk', 'cgroups/cpu',
+                       'cgroups/mem', 'docker/runtime',
+                       'namespaces/pid']
 
 
 def validate_image(cli, image):
@@ -75,6 +82,44 @@ def validate_fixed_network(cli, fixed_network):
     pass
 
 
+def validate_labels(labels):
+    """"Validate labels"""
+
+    for attr, validate_method in labels_validators.items():
+        if labels.get(attr) is not None:
+            validate_method(labels[attr])
+
+
+def validate_labels_isolation(mesos_slave_isolation):
+    """Validate mesos_slave_isolation"""
+    mesos_slave_isolation_list = mesos_slave_isolation.split(',')
+    unsupported_isolations = set(mesos_slave_isolation_list) - set(
+        SUPPORTED_ISOLATION)
+    if (len(unsupported_isolations) > 0):
+        raise exception.InvalidParameterValue(_(
+            'property "labels/mesos_salve_isolation" with value '
+            '"%(isolation_val)s" is not supported, supported values are: '
+            '%(supported_isolation)s') % {
+                'isolation_val': ', '.join(list(unsupported_isolations)),
+                'supported_isolation': ', '.join(
+                    SUPPORTED_ISOLATION + ['unspecified'])})
+
+
+def validate_labels_image_providers(mesos_slave_image_providers):
+    """Validate mesos_slave_image_providers"""
+    # TODO(wangqun):this method implement will be added after this
+    # first patch validate_labels is merged.
+    pass
+
+
+def validate_labels_executor_environment_variables(
+        mesos_slave_executor_environment_variables):
+    """Validate executor_environment_variables"""
+    # TODO(wangqun):this method implement will be added after this
+    # first patch validate_labels is merged.
+    pass
+
+
 def validate_os_resources(context, baymodel):
     """Validate baymodel's OpenStack Resources"""
 
@@ -82,7 +127,10 @@ def validate_os_resources(context, baymodel):
 
     for attr, validate_method in validators.items():
         if attr in baymodel and baymodel[attr] is not None:
-            validate_method(cli, baymodel[attr])
+            if attr != 'labels':
+                validate_method(cli, baymodel[attr])
+            else:
+                validate_method(baymodel[attr])
 
 
 # Dictionary that maintains a list of validation functions
@@ -91,4 +139,11 @@ validators = {'image_id': validate_image,
               'master_flavor_id': validate_flavor,
               'keypair_id': validate_keypair,
               'external_network_id': validate_external_network,
-              'fixed_network': validate_fixed_network}
+              'fixed_network': validate_fixed_network,
+              'labels': validate_labels}
+
+labels_validators = {'mesos_slave_isolation': validate_labels_isolation,
+                     'mesos_slave_image_providers':
+                     validate_labels_image_providers,
+                     'mesos_slave_executor_environment_variables':
+                     validate_labels_executor_environment_variables}
