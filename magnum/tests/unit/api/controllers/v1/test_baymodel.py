@@ -41,9 +41,6 @@ class TestBayModelObject(base.TestCase):
 
 class TestListBayModel(api_base.FunctionalTest):
 
-    _baymodel_attrs = ('apiserver_port', 'name', 'tls_disabled',
-                       'registry_enabled', 'image_id', 'coe', 'server_type',
-                       'public',)
     _expand_baymodel_attrs = ('name', 'apiserver_port', 'network_driver',
                               'coe', 'flavor_id', 'fixed_network',
                               'dns_nameserver', 'http_proxy',
@@ -62,13 +59,8 @@ class TestListBayModel(api_base.FunctionalTest):
         baymodel = obj_utils.create_test_baymodel(self.context)
         response = self.get_json('/baymodels')
         self.assertEqual(baymodel.uuid, response['baymodels'][0]["uuid"])
-        self._verify_attrs(self._baymodel_attrs, response['baymodels'][0])
-
-        # Verify attrs that should not appear from response
-        none_attrs = (set(self._expand_baymodel_attrs) -
-                      set(self._baymodel_attrs))
-        self._verify_attrs(none_attrs, response['baymodels'][0],
-                           positive=False)
+        self._verify_attrs(self._expand_baymodel_attrs,
+                           response['baymodels'][0])
 
     def test_get_one(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
