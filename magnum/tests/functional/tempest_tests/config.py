@@ -29,7 +29,7 @@ magnum_group = cfg.OptGroup(name="magnum", title="Magnum Options")
 
 MagnumGroup = [
     cfg.StrOpt("image_id",
-               default="fedora-atomic",
+               default="fedora-atomic-latest",
                help="Image id to be used for baymodel."),
 
     cfg.StrOpt("nic_id",

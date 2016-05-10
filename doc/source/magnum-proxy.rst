@@ -41,7 +41,7 @@ You can specify all three proxy parameters while creating baymodel of any
 coe type. All of proxy parameters are optional.
 
     magnum baymodel-create --name k8sbaymodel \
-                       --image-id fedora-atomic \
+                       --image-id fedora-atomic-latest \
                        --keypair-id testkey \
                        --external-network-id public \
                        --dns-nameserver 8.8.8.8 \
@@ -51,7 +51,7 @@ coe type. All of proxy parameters are optional.
                        --https-proxy <https://abc-proxy.com:8080> \
                        --no-proxy <172.24.4.4,172.24.4.9,172.24.4.8>
     magnum baymodel-create --name swarmbaymodel \
-                       --image-id fedora-atomic \
+                       --image-id fedora-atomic-latest \
                        --keypair-id testkey \
                        --external-network-id public \
                        --dns-nameserver 8.8.8.8 \

@@ -45,7 +45,7 @@ Create a baymodel, by default TLS is enabled in Magnum::
     magnum baymodel-create --name secure-kubernetes \
                            --keypair-id default \
                            --external-network-id public \
-                           --image-id fedora-atomic \
+                           --image-id fedora-atomic-latest \
                            --flavor-id m1.small \
                            --docker-volume-size 1 \
                            --coe kubernetes \
@@ -68,7 +68,7 @@ Create a baymodel, by default TLS is enabled in Magnum::
     | docker_volume_size  | 1                                    |
     | external_network_id | public                               |
     | cluster_distro      | fedora-atomic                        |
-    | image_id            | fedora-atomic                        |
+    | image_id            | fedora-atomic-latest                 |
     | registry_enabled    | False                                |
     | apiserver_port      | None                                 |
     | name                | secure-kubernetes                    |
