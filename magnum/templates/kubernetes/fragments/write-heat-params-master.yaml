@@ -5,6 +5,7 @@ write_files:
     owner: "root:root"
     permissions: "0644"
     content: |
+      KUBE_API_PUBLIC_ADDRESS="$KUBE_API_PUBLIC_ADDRESS"
       KUBE_API_PRIVATE_ADDRESS="$KUBE_API_PRIVATE_ADDRESS"
       KUBE_API_PORT="$KUBE_API_PORT"
       KUBE_NODE_IP="$KUBE_NODE_IP"
