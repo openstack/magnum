@@ -24,6 +24,9 @@ My bay-create takes a really long time
   fail with a timeout, but since heat has a long default timeout, you can
   look at the `heat stacks`_ and check the WaitConditionHandle resources.
 
+My bay-create fails with error: "Failed to create trustee XXX in domain XXX"
+  Check the `trustee for bay`_
+
 Kubernetes bay-create fails
   Check the `heat stacks`_, log into the master nodes and check the
   `Kubernetes services`_ and `etcd service`_.
@@ -104,6 +107,73 @@ node where the failure occurred and check the respective `Kubernetes
 services`_, `Swarm services`_ or `Mesos services`_.  If the failure is in
 other scripts, look for them as `Heat software resource scripts`_.
 
+
+Trustee for bay
+---------------
+When a user creates a bay, Magnum will dynamically create a service account
+for the creating bay. The service account will be used by the bay to access
+the OpenStack services (i.e. Neutron, Swift, etc.). A trust relationship
+will be created between the user who created the bay (the "trustor") and the
+service account created for the bay (the "trustee"). For details, please refer
+<http://git.openstack.org/cgit/openstack/magnum/tree/specs/create-trustee-user-for-each-bay.rst>`_.
+
+If Magnum fails to create the trustee, check the magnum config file (usually
+in /etc/magnum/magnum.conf). Make sure 'trustee_*' and 'auth_uri' are set and
+their values are correct:
+
+    [keystone_authtoken]
+    auth_uri = http://controller:5000/v3
+    ...
+
+    [trust]
+    trustee_domain_admin_password = XXX
+    trustee_domain_admin_id = XXX
+    trustee_domain_id = XXX
+
+If the 'trust' group is missing, you might need to create the trustee domain
+and the domain admin:
+
+.. code-block:: bash
+
+    source /opt/stack/devstack/accrc/admin/admin
+    export OS_IDENTITY_API_VERSION=3
+    unset OS_AUTH_TYPE
+    openstack domain create magnum
+    openstack user create trustee_domain_admin --password=secret \
+        --domain=magnum
+    openstack role add --user=trustee_domain_admin --domain=magnum admin
+
+    source /opt/stack/devstack/functions
+    export MAGNUM_CONF=/etc/magnum/magnum.conf
+    iniset $MAGNUM_CONF trust trustee_domain_id \
+        $(openstack domain show magnum | awk '/ id /{print $4}')
+    iniset $MAGNUM_CONF trust trustee_domain_admin_id \
+        $(openstack user show trustee_domain_admin | awk '/ id /{print $4}')
+    iniset $MAGNUM_CONF trust trustee_domain_admin_password secret
+
+Then, restart magnum-api and magnum-cond to pick up the new configuration.
+If the problem still exists, you might want to manually verify your domain
+admin credential to ensure it has the right privilege. To do that, run the
+script below with the credentials replaced. If it fails, that means the
+credential you provided is invalid.
+
+.. code-block:: python
+
+    from keystoneauth1.identity import v3 as ka_v3
+    from keystoneauth1 import session as ka_session
+    from keystoneclient.v3 import client as kc_v3
+
+    auth = ka_v3.Password(
+        auth_url=YOUR_AUTH_URI,
+        user_id=YOUR_TRUSTEE_DOMAIN_ADMIN_ID,
+        domain_id=YOUR_TRUSTEE_DOMAIN_ID,
+        password=YOUR_TRUSTEE_DOMAIN_ADMIN_PASSWORD)
+    )
+    session = ka_session.Session(auth=auth)
+    domain_admin_client = kc_v3.Client(session=session)
+    user = domain_admin_client.users.create(
+        name='anyname',
+        password='anypass')
 
 
 TLS
