@@ -25,7 +25,7 @@ if [ "$TLS_DISABLED" == "True" ]; then
 fi
 
 cert_ip=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
-sans="IP:${cert_ip},IP:${KUBE_API_PRIVATE_ADDRESS},IP:127.0.0.1"
+sans="IP:${cert_ip},IP:${KUBE_API_PUBLIC_ADDRESS},IP:${KUBE_API_PRIVATE_ADDRESS},IP:127.0.0.1"
 MASTER_HOSTNAME=${MASTER_HOSTNAME:-}
 if [[ -n "${MASTER_HOSTNAME}" ]]; then
   sans="${sans},DNS:${MASTER_HOSTNAME}"
