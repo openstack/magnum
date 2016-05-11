@@ -48,5 +48,6 @@ if [ -n "$IMAGE_PROVIDERS" ]; then
 fi
 
 if [ -n "$EXECUTOR_ENVIRONMENT_VARIABLES" ]; then
-    echo "$EXECUTOR_ENVIRONMENT_VARIABLES" > /etc/mesos-slave/executor_environment_variables
+    echo "$EXECUTOR_ENVIRONMENT_VARIABLES" > /etc/executor_environment_variables
+    echo "file:///etc/executor_environment_variables" > /etc/mesos-slave/executor_environment_variables
 fi

@@ -180,7 +180,7 @@ parameters:
       APPC,DOCKER
     default: ""
 
-  mesos_slave_executor_environment_variables:
+  mesos_slave_executor_env_variables:
     type: string
     description: >
       JSON object representing the environment variables that should be passed
@@ -426,7 +426,7 @@ resources:
           mesos_slave_isolation: {get_param: mesos_slave_isolation}
           mesos_slave_work_dir: {get_param: mesos_slave_work_dir}
           mesos_slave_image_providers: {get_param: mesos_slave_image_providers}
-          mesos_slave_executor_environment_variables: {get_param: mesos_slave_executor_environment_variables}
+          mesos_slave_executor_env_variables: {get_param: mesos_slave_executor_env_variables}
 
 outputs:
 

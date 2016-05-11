@@ -44,7 +44,7 @@ class TestBayConductorWithMesos(base.TestCase):
                        'mesos_slave_isolation':
                            'docker/runtime,filesystem/linux',
                        'mesos_slave_image_providers': 'docker',
-                       'mesos_slave_executor_environment_variables': '{}',
+                       'mesos_slave_executor_env_variables': '{}',
                        'mesos_slave_work_dir': '/tmp/mesos/slave'
                        }
         }
@@ -114,7 +114,7 @@ class TestBayConductorWithMesos(base.TestCase):
             'tenant_name': 'admin',
             'domain_name': 'domainname',
             'rexray_preempt': 'False',
-            'mesos_slave_executor_environment_variables': '{}',
+            'mesos_slave_executor_env_variables': '{}',
             'mesos_slave_isolation': 'docker/runtime,filesystem/linux',
             'mesos_slave_work_dir': '/tmp/mesos/slave',
             'mesos_slave_image_providers': 'docker'
@@ -157,7 +157,7 @@ class TestBayConductorWithMesos(base.TestCase):
             'domain_name': 'domainname',
             'rexray_preempt': 'False',
             'mesos_slave_isolation': 'docker/runtime,filesystem/linux',
-            'mesos_slave_executor_environment_variables': '{}',
+            'mesos_slave_executor_env_variables': '{}',
             'mesos_slave_work_dir': '/tmp/mesos/slave',
             'mesos_slave_image_providers': 'docker'
         }

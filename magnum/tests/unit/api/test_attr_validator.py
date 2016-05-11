@@ -129,6 +129,20 @@ class TestAttrValidator(base.BaseTestCase):
                        'mesos_slave_isolation': 'docker/runtime'}
         attr_validator.validate_labels_image_providers(fake_labels)
 
+    def test_validate_labels_with_environment_variables_valid_json(self):
+        contents = '{"step": "upgrade", "interface": "deploy"}'
+        fack_labels = {'mesos_slave_executor_env_variables': contents}
+        attr_validator.validate_labels_executor_env_variables(
+            fack_labels)
+
+    def test_validate_labels_with_environment_variables_bad_json(self):
+        fack_labels = {'mesos_slave_executor_env_variables': 'step'}
+        self.assertRaisesRegex(
+            exception.InvalidParameterValue,
+            "Json format error",
+            attr_validator.validate_labels_executor_env_variables,
+            fack_labels)
+
     def test_validate_labels_with_valid_isolation(self):
         fake_labels = {'mesos_slave_isolation':
                        'filesystem/posix,filesystem/linux'}
