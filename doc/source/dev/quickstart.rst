@@ -420,7 +420,7 @@ will use the same host as above::
 Additional useful commands from a given minion::
 
     sudo docker ps  # View Docker containers on this minion
-    kubectl get po  # Get pods
+    kubectl get pods  # Get pods
     kubectl get rc  # Get replication controllers
     kubectl get svc  # Get services
     kubectl get nodes  # Get nodes
