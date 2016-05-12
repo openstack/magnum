@@ -92,7 +92,7 @@ class BayTest(base.BaseMagnumTest):
         self.LOG.debug('We will create bay for %s' % bay_model)
         resp, model = self.bay_client.post_bay(bay_model)
         self.LOG.debug('Response: %s' % resp)
-        self.assertEqual(resp.status, 201)
+        self.assertEqual(201, resp.status)
         self.assertIsNotNone(model.uuid)
         self.bays.append(model.uuid)
         self.assertEqual(BayStatus.CREATE_IN_PROGRESS, model.status)
@@ -111,7 +111,7 @@ class BayTest(base.BaseMagnumTest):
     def _delete_bay(self, bay_id):
         self.LOG.debug('We will delete a bay for %s' % bay_id)
         resp, model = self.bay_client.delete_bay(bay_id)
-        self.assertEqual(resp.status, 204)
+        self.assertEqual(204, resp.status)
         self.bay_client.wait_for_bay_to_delete(bay_id)
         return resp, model
 
@@ -131,7 +131,7 @@ class BayTest(base.BaseMagnumTest):
 
         # test bay list
         resp, model = self.bay_client.list_bays()
-        self.assertEqual(resp.status, 200)
+        self.assertEqual(200, resp.status)
         self.assertGreater(len(model.bays), 0)
         self.assertIn(
             temp_model.uuid, list([x['uuid'] for x in model.bays]))
@@ -174,7 +174,7 @@ class BayTest(base.BaseMagnumTest):
     def test_create_bay_with_nonexisting_flavor(self):
         gen_model = datagen.baymodel_data_with_valid_keypair_image_flavor()
         resp, baymodel = self._create_baymodel(gen_model)
-        self.assertEqual(resp.status, 201)
+        self.assertEqual(201, resp.status)
         self.assertIsNotNone(baymodel.uuid)
 
         gen_model = datagen.valid_bay_data(baymodel_id=baymodel.uuid)
@@ -184,7 +184,7 @@ class BayTest(base.BaseMagnumTest):
             self.bay_client.post_bay, gen_model)
 
         resp, _ = self._delete_baymodel(baymodel.uuid)
-        self.assertEqual(resp.status, 204)
+        self.assertEqual(204, resp.status)
 
     @testtools.testcase.attr('negative')
     def test_update_bay_for_nonexisting_bay(self):
@@ -210,7 +210,7 @@ class BayTest(base.BaseMagnumTest):
         resp, model = self.cert_client.get_cert(
             bay_model.uuid)
         self.LOG.debug("cert resp: %s" % resp)
-        self.assertEqual(resp.status, 200)
+        self.assertEqual(200, resp.status)
         self.assertEqual(model.bay_uuid, bay_model.uuid)
         self.assertIsNotNone(model.pem)
         self.assertIn('-----BEGIN CERTIFICATE-----', model.pem)
@@ -220,7 +220,7 @@ class BayTest(base.BaseMagnumTest):
         model = datagen.cert_data(bay_uuid=bay_model.uuid)
         resp, model = self.cert_client.post_cert(model)
         self.LOG.debug("cert resp: %s" % resp)
-        self.assertEqual(resp.status, 201)
+        self.assertEqual(201, resp.status)
         self.assertEqual(model.bay_uuid, bay_model.uuid)
         self.assertIsNotNone(model.pem)
         self.assertIn('-----BEGIN CERTIFICATE-----', model.pem)
