@@ -16,9 +16,11 @@
 import copy
 import os
 
+import fixtures
 import mock
 from oslo_config import cfg
 from oslo_log import log
+import oslo_messaging
 from oslotest import base
 import pecan
 import testscenarios
@@ -26,6 +28,7 @@ import testscenarios
 from magnum.common import context as magnum_context
 from magnum.objects import base as objects_base
 from magnum.tests import conf_fixture
+from magnum.tests import fake_notifier
 from magnum.tests import policy_fixture
 
 
@@ -66,6 +69,11 @@ class TestCase(base.BaseTestCase):
             user_id='fake_user')
 
         self.policy = self.useFixture(policy_fixture.PolicyFixture())
+
+        self.useFixture(fixtures.MockPatchObject(
+            oslo_messaging, 'Notifier',
+            fake_notifier.FakeNotifier))
+        self.addCleanup(fake_notifier.reset)
 
         def make_context(*args, **kwargs):
             # If context hasn't been constructed with token_info
