@@ -22,9 +22,15 @@ write_files:
 
       . /etc/sysconfig/heat-params
 
-      # TODO(hongbin): enable TLS
       KUBE_CERTS_PATH=/etc/kubernetes/ssl
       HOST_CERTS_PATH=/usr/share/ca-certificates
+
+      SERVICE_ACCOUNT_PRIVATE_KEY_FILE=${KUBE_CERTS_PATH}/apiserver-key.pem
+      ROOT_CA_FILE=${KUBE_CERTS_PATH}/ca.pem
+      if [ "${TLS_DISABLED}" == "True" ]; then
+        SERVICE_ACCOUNT_PRIVATE_KEY_FILE=
+        ROOT_CA_FILE=
+      fi
 
       TEMPLATE=/srv/kubernetes/manifests/kube-controller-manager.yaml
       mkdir -p $(dirname ${TEMPLATE})

@@ -1,0 +1,134 @@
+#cloud-config
+write_files:
+  - path: /etc/systemd/system/make-cert.service
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Make TLS certificates
+
+      [Service]
+      Type=oneshot
+      ExecStart=/etc/sysconfig/make-cert.sh
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/sysconfig/make-cert.sh
+    owner: "root:root"
+    permissions: "0755"
+    content: |
+      #!/bin/bash
+
+      # Parse the JSON response that contains the TLS certificate, and print
+      # out the certificate content.
+      function parse_json_response {
+        json_response=$1
+        # {..,"pem": "ABCD",..} -> ABCD
+        key=$(echo "$json_response" | sed 's/^.*"pem": "\([^"]*\)".*$/\1/')
+        # decode newline characters
+        key=$(echo "$key" | sed 's/\\n/\n/g')
+        echo "$key"
+      }
+
+      . /etc/sysconfig/heat-params
+
+      set -o errexit
+      set -o nounset
+      set -o pipefail
+
+      if [ "$TLS_DISABLED" == "True" ]; then
+        exit 0
+      fi
+
+      cert_ip=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+      cert_private_ip=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+      sans="IP:${cert_ip},IP:${cert_private_ip},IP:127.0.0.1"
+      MASTER_HOSTNAME=${MASTER_HOSTNAME:-}
+      if [[ -n "${MASTER_HOSTNAME}" ]]; then
+        sans="${sans},DNS:${MASTER_HOSTNAME}"
+      fi
+
+      cert_dir=/etc/kubernetes/ssl
+      cert_conf_dir=${cert_dir}/conf
+
+      mkdir -p "$cert_dir"
+      mkdir -p "$cert_conf_dir"
+
+      CA_CERT=$cert_dir/ca.pem
+      SERVER_CERT=$cert_dir/apiserver.pem
+      SERVER_CSR=$cert_dir/apiserver.pem
+      SERVER_KEY=$cert_dir/apiserver-key.pem
+
+      #Get a token by user credentials and trust
+      cat > auth.json << EOF
+      {
+          "auth": {
+              "identity": {
+                  "methods": [
+                      "password"
+                  ],
+                  "password": {
+                      "user": {
+                          "id": "$TRUSTEE_USER_ID",
+                          "password": "$TRUSTEE_PASSWORD"
+                      }
+                  }
+              },
+              "scope": {
+                  "OS-TRUST:trust": {
+                      "id": "$TRUST_ID"
+                  }
+              }
+          }
+      }
+      EOF
+
+      #trust is introduced in Keystone v3 version
+      AUTH_URL=${AUTH_URL/v2.0/v3}
+      USER_TOKEN=`curl -s -i -X POST -H "Content-Type: application/json" -d @auth.json \
+                       $AUTH_URL/auth/tokens | grep X-Subject-Token | awk '{print $2}'`
+
+      rm -rf auth.json
+
+      # Get CA certificate for this bay
+      ca_cert_json=$(curl -X GET \
+        -H "X-Auth-Token: $USER_TOKEN" \
+        $MAGNUM_URL/certificates/$BAY_UUID)
+      parse_json_response "${ca_cert_json}" > ${CA_CERT}
+
+      # Create config for server's csr
+      cat > ${cert_conf_dir}/openssl.cnf <<EOF
+      [req]
+      distinguished_name = req_distinguished_name
+      req_extensions     = req_ext
+      prompt = no
+      [req_distinguished_name]
+      CN = kube-apiserver
+      [req_ext]
+      subjectAltName = ${sans}
+      extendedKeyUsage = clientAuth,serverAuth
+      EOF
+
+      # Generate server's private key and csr
+      openssl genrsa -out "${SERVER_KEY}" 4096
+      chmod 400 "${SERVER_KEY}"
+      openssl req -new -days 10000 \
+              -key "${SERVER_KEY}" \
+              -out "${SERVER_CSR}" \
+              -reqexts req_ext \
+              -config "${cert_conf_dir}/openssl.cnf"
+
+      # encode newline (\n) characters
+      csr=$(cat $SERVER_CSR | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g')
+      csr_req="{\"bay_uuid\": \"$BAY_UUID\", \"csr\": \"$csr\"}"
+      # Send csr to Magnum to have it signed
+      server_cert_json=$(curl -X POST \
+          -H "X-Auth-Token: $USER_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d "$csr_req" \
+          $MAGNUM_URL/certificates)
+      parse_json_response "${server_cert_json}" > ${SERVER_CERT}
+
+      chmod 600 ${cert_dir}/*-key.pem
+      chown root:root ${cert_dir}/*-key.pem

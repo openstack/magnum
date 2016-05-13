@@ -24,15 +24,23 @@ write_files:
       myip=$(ip addr show eth0 |
              awk '$1 == "inet" {print $2}' | cut -f1 -d/)
 
-      # TODO(hongbin): enable TLS
-      TLS_CERT_FILE=
-      TLS_PRIVATE_KEY_FILE=
-      CLIENT_CA_FILE=
-      INSECURE_PORT=${KUBE_API_PORT}
-      SECURE_PORT=0
-      BIND_ADDRESS_CMD="--insecure-bind-address=0.0.0.0"
       KUBE_CERTS_PATH=/etc/kubernetes/ssl
       HOST_CERTS_PATH=/usr/share/ca-certificates
+
+      TLS_CERT_FILE=${KUBE_CERTS_PATH}/apiserver.pem
+      TLS_PRIVATE_KEY_FILE=${KUBE_CERTS_PATH}/apiserver-key.pem
+      CLIENT_CA_FILE=${KUBE_CERTS_PATH}/ca.pem
+      INSECURE_PORT=8080
+      SECURE_PORT=${KUBE_API_PORT}
+      BIND_ADDRESS_CMD="--bind-address=0.0.0.0"
+      if [ "${TLS_DISABLED}" == "True" ]; then
+        TLS_CERT_FILE=
+        TLS_PRIVATE_KEY_FILE=
+        CLIENT_CA_FILE=
+        INSECURE_PORT=${KUBE_API_PORT}
+        SECURE_PORT=0
+        BIND_ADDRESS_CMD="--insecure-bind-address=0.0.0.0"
+      fi
 
       TEMPLATE=/etc/kubernetes/manifests/kube-apiserver.yaml
       mkdir -p $(dirname ${TEMPLATE})

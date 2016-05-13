@@ -459,6 +459,9 @@ class K8sTemplateDefinition(BaseTemplateDefinition):
                            required=True)
         self.add_parameter('registry_enabled',
                            baymodel_attr='registry_enabled')
+        self.add_parameter('bay_uuid',
+                           bay_attr='uuid',
+                           param_type=str)
 
         self.add_output('api_address',
                         bay_attr='api_address',
@@ -481,6 +484,12 @@ class K8sTemplateDefinition(BaseTemplateDefinition):
                 scale_mgr.get_removal_nodes(hosts))
 
         extra_params['discovery_url'] = self.get_discovery_url(bay)
+        osc = clients.OpenStackClients(context)
+        extra_params['magnum_url'] = osc.magnum_url()
+
+        if baymodel.tls_disabled:
+            extra_params['loadbalancing_protocol'] = 'HTTP'
+            extra_params['kubernetes_port'] = 8080
 
         label_list = ['flannel_network_cidr', 'flannel_backend',
                       'flannel_network_subnetlen']
@@ -509,9 +518,6 @@ class AtomicK8sTemplateDefinition(K8sTemplateDefinition):
 
     def __init__(self):
         super(AtomicK8sTemplateDefinition, self).__init__()
-        self.add_parameter('bay_uuid',
-                           bay_attr='uuid',
-                           param_type=str)
         self.add_parameter('docker_volume_size',
                            baymodel_attr='docker_volume_size')
 
@@ -521,12 +527,7 @@ class AtomicK8sTemplateDefinition(K8sTemplateDefinition):
         extra_params['username'] = context.user_name
         extra_params['tenant_name'] = context.tenant
         osc = clients.OpenStackClients(context)
-        extra_params['magnum_url'] = osc.magnum_url()
         extra_params['region_name'] = osc.cinder_region_name()
-
-        if baymodel.tls_disabled:
-            extra_params['loadbalancing_protocol'] = 'HTTP'
-            extra_params['kubernetes_port'] = 8080
 
         return super(AtomicK8sTemplateDefinition,
                      self).get_params(context, baymodel, bay,

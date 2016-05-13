@@ -81,10 +81,40 @@ parameters:
     description: >
       The port which are used by kube-apiserver to provide Kubernetes
       service.
+    default: 6443
 
   kube_version:
     type: string
     description: version of kubernetes used for kubernetes cluster
+
+  bay_uuid:
+    type: string
+    description: identifier for the bay this template is generating
+
+  magnum_url:
+    type: string
+    description: endpoint to retrieve TLS certs from
+
+  trustee_user_id:
+    type: string
+    description: user id of the trustee
+    default: ""
+
+  trustee_password:
+    type: string
+    description: password of the trustee
+    default: ""
+    hidden: true
+
+  trust_id:
+    type: string
+    description: id of the trust which is used by the trustee
+    default: ""
+    hidden: true
+
+  auth_url:
+    type: string
+    description: url for keystone
 
 resources:
 
@@ -159,12 +189,24 @@ resources:
             "$KUBE_API_PORT": {get_param: kubernetes_port}
             "$TLS_DISABLED": {get_param: tls_disabled}
             "$KUBE_VERSION": {get_param: kube_version}
+            "$BAY_UUID": {get_param: bay_uuid}
+            "$MAGNUM_URL": {get_param: magnum_url}
+            "$TRUSTEE_USER_ID": {get_param: trustee_user_id}
+            "$TRUSTEE_PASSWORD": {get_param: trustee_password}
+            "$TRUST_ID": {get_param: trust_id}
+            "$AUTH_URL": {get_param: auth_url}
 
   configure_etcd:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config: {get_file: fragments/configure-etcd-coreos.yaml}
+
+  make_cert:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/make-cert-coreos.yaml}
 
   write_network_config:
     type: OS::Heat::SoftwareConfig
@@ -234,6 +276,7 @@ resources:
         str_replace:
           template: |
             $write_heat_params
+            $make_cert
             $configure_etcd
             $write_network_config
             $enable_network_service
@@ -247,6 +290,8 @@ resources:
             $wc_notify
             coreos:
               units:
+                - name: "make-cert.service"
+                  command: "start"
                 - name: "configure-etcd.service"
                   command: "start"
                 - name: "write-network-config.service"
@@ -271,6 +316,7 @@ resources:
                   command: "start"
           params:
             "$write_heat_params": {get_attr: [write_heat_params, config]}
+            "$make_cert": {get_attr: [make_cert, config]}
             "$configure_etcd": {get_attr: [configure_etcd, config]}
             "$write_network_config": {get_attr: [write_network_config, config]}
             "$enable_network_service": {get_attr: [enable_network_service, config]}

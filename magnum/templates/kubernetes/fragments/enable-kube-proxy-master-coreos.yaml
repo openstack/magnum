@@ -24,7 +24,6 @@ write_files:
       myip=$(ip addr show eth0 |
              awk '$1 == "inet" {print $2}' | cut -f1 -d/)
 
-      # TODO(hongbin): enable TLS
       HOST_CERTS_PATH=/usr/share/ca-certificates
 
       TEMPLATE=/etc/kubernetes/manifests/kube-proxy.yaml

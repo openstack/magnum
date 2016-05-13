@@ -107,12 +107,29 @@ parameters:
     description: whether or not to disable TLS
     default: False
 
+  loadbalancing_protocol:
+    type: string
+    description: >
+      The protocol which is used for load balancing. If you want to change
+      tls_disabled option to 'True', please change this to "HTTP".
+    default: TCP
+    constraints:
+      - allowed_values: ["TCP", "HTTP"]
+
   kubernetes_port:
     type: number
     description: >
       The port which are used by kube-apiserver to provide Kubernetes
       service.
-    default: 8080
+    default: 6443
+
+  bay_uuid:
+    type: string
+    description: identifier for the bay this template is generating
+
+  magnum_url:
+    type: string
+    description: endpoint to retrieve TLS certs from
 
   trustee_domain_id:
     type: string
@@ -234,6 +251,12 @@ resources:
           tls_disabled: {get_param: tls_disabled}
           kube_version: {get_param: kube_version}
           wait_condition_timeout: {get_param: wait_condition_timeout}
+          bay_uuid: {get_param: bay_uuid}
+          magnum_url: {get_param: magnum_url}
+          trustee_user_id: {get_param: trustee_user_id}
+          trustee_password: {get_param: trustee_password}
+          trust_id: {get_param: trust_id}
+          auth_url: {get_param: auth_url}
 
   ######################################################################
   #
@@ -267,6 +290,12 @@ resources:
           kube_version: {get_param: kube_version}
           etcd_server_ip: {"Fn::Select": [0, {get_attr: [kube_master, kube_master_ip]}]}
           wait_condition_timeout: {get_param: wait_condition_timeout}
+          bay_uuid: {get_param: bay_uuid}
+          magnum_url: {get_param: magnum_url}
+          trustee_user_id: {get_param: trustee_user_id}
+          trustee_password: {get_param: trustee_password}
+          trust_id: {get_param: trust_id}
+          auth_url: {get_param: auth_url}
 
 outputs:
 
