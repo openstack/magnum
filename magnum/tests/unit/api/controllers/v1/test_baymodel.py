@@ -41,15 +41,15 @@ class TestBayModelObject(base.TestCase):
 
 class TestListBayModel(api_base.FunctionalTest):
 
-    _expand_baymodel_attrs = ('name', 'apiserver_port', 'network_driver',
-                              'coe', 'flavor_id', 'fixed_network',
-                              'dns_nameserver', 'http_proxy',
-                              'docker_volume_size', 'server_type',
-                              'cluster_distro', 'external_network_id',
-                              'image_id', 'registry_enabled', 'no_proxy',
-                              'keypair_id', 'https_proxy', 'tls_disabled',
-                              'public', 'labels', 'master_flavor_id',
-                              'volume_driver')
+    _baymodel_attrs = ('name', 'apiserver_port', 'network_driver',
+                       'coe', 'flavor_id', 'fixed_network',
+                       'dns_nameserver', 'http_proxy',
+                       'docker_volume_size', 'server_type',
+                       'cluster_distro', 'external_network_id',
+                       'image_id', 'registry_enabled', 'no_proxy',
+                       'keypair_id', 'https_proxy', 'tls_disabled',
+                       'public', 'labels', 'master_flavor_id',
+                       'volume_driver')
 
     def test_empty(self):
         response = self.get_json('/baymodels')
@@ -59,20 +59,20 @@ class TestListBayModel(api_base.FunctionalTest):
         baymodel = obj_utils.create_test_baymodel(self.context)
         response = self.get_json('/baymodels')
         self.assertEqual(baymodel.uuid, response['baymodels'][0]["uuid"])
-        self._verify_attrs(self._expand_baymodel_attrs,
+        self._verify_attrs(self._baymodel_attrs,
                            response['baymodels'][0])
 
     def test_get_one(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
         response = self.get_json('/baymodels/%s' % baymodel['uuid'])
         self.assertEqual(baymodel.uuid, response['uuid'])
-        self._verify_attrs(self._expand_baymodel_attrs, response)
+        self._verify_attrs(self._baymodel_attrs, response)
 
     def test_get_one_by_name(self):
         baymodel = obj_utils.create_test_baymodel(self.context)
         response = self.get_json('/baymodels/%s' % baymodel['name'])
         self.assertEqual(baymodel.uuid, response['uuid'])
-        self._verify_attrs(self._expand_baymodel_attrs, response)
+        self._verify_attrs(self._baymodel_attrs, response)
 
     def test_get_one_by_name_not_found(self):
         response = self.get_json(
@@ -113,7 +113,7 @@ class TestListBayModel(api_base.FunctionalTest):
         baymodel = obj_utils.create_test_baymodel(self.context)
         response = self.get_json('/baymodels/detail')
         self.assertEqual(baymodel.uuid, response['baymodels'][0]["uuid"])
-        self._verify_attrs(self._expand_baymodel_attrs,
+        self._verify_attrs(self._baymodel_attrs,
                            response['baymodels'][0])
 
     def test_detail_with_pagination_marker(self):
@@ -128,7 +128,7 @@ class TestListBayModel(api_base.FunctionalTest):
                                  % bm_list[2].uuid)
         self.assertEqual(1, len(response['baymodels']))
         self.assertEqual(bm_list[-1].uuid, response['baymodels'][0]['uuid'])
-        self._verify_attrs(self._expand_baymodel_attrs,
+        self._verify_attrs(self._baymodel_attrs,
                            response['baymodels'][0])
 
     def test_detail_against_single(self):
