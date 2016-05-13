@@ -141,11 +141,7 @@ class BayModel(base.APIBase):
             setattr(self, field, kwargs.get(field, wtypes.Unset))
 
     @staticmethod
-    def _convert_with_links(baymodel, url, expand=True):
-        if not expand:
-            baymodel.unset_fields_except(['uuid', 'name', 'image_id',
-                                          'apiserver_port', 'coe'])
-
+    def _convert_with_links(baymodel, url):
         baymodel.links = [link.Link.make_link('self', url,
                                               'baymodels', baymodel.uuid),
                           link.Link.make_link('bookmark', url,
@@ -154,13 +150,12 @@ class BayModel(base.APIBase):
         return baymodel
 
     @classmethod
-    def convert_with_links(cls, rpc_baymodel, expand=True):
+    def convert_with_links(cls, rpc_baymodel):
         baymodel = BayModel(**rpc_baymodel.as_dict())
-        return cls._convert_with_links(baymodel, pecan.request.host_url,
-                                       expand)
+        return cls._convert_with_links(baymodel, pecan.request.host_url)
 
     @classmethod
-    def sample(cls, expand=True):
+    def sample(cls):
         sample = cls(
             uuid='27e3153e-d5bf-4b7e-b517-fb518e17f34c',
             name='example',
@@ -185,7 +180,7 @@ class BayModel(base.APIBase):
             created_at=timeutils.utcnow(),
             updated_at=timeutils.utcnow(),
             public=False),
-        return cls._convert_with_links(sample, 'http://localhost:9511', expand)
+        return cls._convert_with_links(sample, 'http://localhost:9511')
 
 
 class BayModelCollection(collection.Collection):
@@ -198,10 +193,9 @@ class BayModelCollection(collection.Collection):
         self._type = 'baymodels'
 
     @staticmethod
-    def convert_with_links(rpc_baymodels, limit, url=None, expand=False,
-                           **kwargs):
+    def convert_with_links(rpc_baymodels, limit, url=None, **kwargs):
         collection = BayModelCollection()
-        collection.baymodels = [BayModel.convert_with_links(p, expand)
+        collection.baymodels = [BayModel.convert_with_links(p)
                                 for p in rpc_baymodels]
         collection.next = collection.get_next(limit, url=url, **kwargs)
         return collection
@@ -209,7 +203,7 @@ class BayModelCollection(collection.Collection):
     @classmethod
     def sample(cls):
         sample = cls()
-        sample.baymodels = [BayModel.sample(expand=False)]
+        sample.baymodels = [BayModel.sample()]
         return sample
 
 
@@ -221,8 +215,7 @@ class BayModelsController(rest.RestController):
     }
 
     def _get_baymodels_collection(self, marker, limit,
-                                  sort_key, sort_dir, expand=False,
-                                  resource_url=None):
+                                  sort_key, sort_dir, resource_url=None):
 
         limit = api_utils.validate_limit(limit)
         sort_dir = api_utils.validate_sort_dir(sort_dir)
@@ -238,7 +231,6 @@ class BayModelsController(rest.RestController):
 
         return BayModelCollection.convert_with_links(baymodels, limit,
                                                      url=resource_url,
-                                                     expand=expand,
                                                      sort_key=sort_key,
                                                      sort_dir=sort_dir)
 
@@ -279,11 +271,9 @@ class BayModelsController(rest.RestController):
         if parent != "baymodels":
             raise exception.HTTPNotFound
 
-        expand = True
         resource_url = '/'.join(['baymodels', 'detail'])
         return self._get_baymodels_collection(marker, limit,
-                                              sort_key, sort_dir, expand,
-                                              resource_url)
+                                              sort_key, sort_dir, resource_url)
 
     @expose.expose(BayModel, types.uuid_or_name)
     def get_one(self, baymodel_ident):
