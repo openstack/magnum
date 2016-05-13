@@ -25,6 +25,7 @@ SUPPORTED_ISOLATION = ['filesystem/posix', 'filesystem/linux',
                        'posix/mem', 'posix/disk', 'cgroups/cpu',
                        'cgroups/mem', 'docker/runtime',
                        'namespaces/pid']
+SUPPORTED_IMAGE_PROVIDERS = ['docker', 'appc']
 
 
 def validate_image(cli, image):
@@ -87,11 +88,12 @@ def validate_labels(labels):
 
     for attr, validate_method in labels_validators.items():
         if labels.get(attr) is not None:
-            validate_method(labels[attr])
+            validate_method(labels)
 
 
-def validate_labels_isolation(mesos_slave_isolation):
+def validate_labels_isolation(labels):
     """Validate mesos_slave_isolation"""
+    mesos_slave_isolation = labels.get('mesos_slave_isolation')
     mesos_slave_isolation_list = mesos_slave_isolation.split(',')
     unsupported_isolations = set(mesos_slave_isolation_list) - set(
         SUPPORTED_ISOLATION)
@@ -105,15 +107,38 @@ def validate_labels_isolation(mesos_slave_isolation):
                     SUPPORTED_ISOLATION + ['unspecified'])})
 
 
-def validate_labels_image_providers(mesos_slave_image_providers):
+def validate_labels_image_providers(labels):
     """Validate mesos_slave_image_providers"""
-    # TODO(wangqun):this method implement will be added after this
-    # first patch validate_labels is merged.
-    pass
+    mesos_slave_image_providers = labels.get('mesos_slave_image_providers')
+    mesos_slave_image_providers_list = mesos_slave_image_providers.split(',')
+    isolation_with_valid_data = False
+    for image_providers_val in mesos_slave_image_providers_list:
+        image_providers_val = image_providers_val.lower()
+        if image_providers_val not in SUPPORTED_IMAGE_PROVIDERS:
+            raise exception.InvalidParameterValue(_(
+                'property "labels/mesos_slave_image_providers" with value '
+                '"%(image_providers)s" is not supported, supported values '
+                'are: %(supported_image_providers)s') % {
+                'image_providers': image_providers_val,
+                'supported_image_providers': ', '.join(
+                    SUPPORTED_IMAGE_PROVIDERS + ['unspecified'])})
+
+        if image_providers_val == 'docker':
+            mesos_slave_isolation = labels.get('mesos_slave_isolation')
+            if mesos_slave_isolation is not None:
+                mesos_slave_isolation_list = mesos_slave_isolation.split(',')
+                for isolations_val in mesos_slave_isolation_list:
+                    if isolations_val == 'docker/runtime':
+                        isolation_with_valid_data = True
+            if mesos_slave_isolation is None or not isolation_with_valid_data:
+                raise exception.RequiredParameterNotProvided(_(
+                    "Docker runtime isolator has to be specified if 'docker' "
+                    "is included in 'mesos_slave_image_providers' Please add "
+                    "'docker/runtime' to 'mesos_slave_isolation' labels "
+                    "flags"))
 
 
-def validate_labels_executor_environment_variables(
-        mesos_slave_executor_environment_variables):
+def validate_labels_executor_environment_variables(labels):
     """Validate executor_environment_variables"""
     # TODO(wangqun):this method implement will be added after this
     # first patch validate_labels is merged.
