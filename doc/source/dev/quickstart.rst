@@ -335,33 +335,81 @@ working. You may need to clone kubernetes using::
 
     wget https://github.com/kubernetes/kubernetes/releases/download/v1.0.1/kubernetes.tar.gz
     tar -xvzf kubernetes.tar.gz
+    sudo cp -a kubernetes/platforms/linux/amd64/kubectl /usr/bin/kubectl
 
-**NOTE:** We do not need to install Kubernetes, we just need the example file
-from the tarball.
+We first need to setup the certs to allow Kubernetes to authenticate our
+connection. See tls.rst for more info on using TLS keys/certs which are setup
+below.
 
-Here's how to set up the replicated redis example. First, create
-a pod for the redis-master::
+To generate an RSA key, you will use the 'genrsa' command of the 'openssl'
+tool.::
+
+    openssl genrsa -out client.key 4096
+
+To generate a CSR for client authentication, openssl requires a config file
+that specifies a few values.::
+
+    $ cat > client.conf << END
+    [req]
+    distinguished_name = req_distinguished_name
+    req_extensions     = req_ext
+    prompt = no
+    [req_distinguished_name]
+    CN = Your Name
+    [req_ext]
+    extendedKeyUsage = clientAuth
+    END
+
+Once you have client.conf, you can run the openssl 'req' command to generate
+the CSR.::
+
+    openssl req -new -days 365 \
+        -config client.conf \
+        -key client.key \
+        -out client.csr
+
+Now that you have your client CSR, you can use the Magnum CLI to send it off
+to Magnum to get it signed and also download the signing cert.::
+
+    magnum ca-sign secure-k8sbay client.csr > client.crt
+    magnum ca-show secure-k8sbay > ca.crt
+
+Here's how to set up the replicated redis example. Now we create a pod for the
+redis-master::
+
+    KUBERNETES_URL=$(magnum bay-show k8sbay |
+                     awk '/ api_address /{print $4}')
+
+    # Set kubectl to use the correct certs
+    kubectl config set-cluster k8sbay --server=${KUBERNETES_URL} \
+        --certificate-authority=ca.crt
+    kubectl config set-credentials client --certificate-authority=ca.crt \
+        --client-key=./client.key --client-certificate=client.crt
+    kubectl config set-context k8sbay --cluster=secure-k8sbay --user=client
+    kubectl config use-context k8sbay
+
+    # Test the cert and connection works
+    kubectl version
 
     cd kubernetes/examples/redis
-    magnum pod-create --manifest ./redis-master.yaml --bay k8sbay
+    kubectl create -f ./redis-master.yaml
 
 Now create a service to provide a discoverable endpoint for the redis
 sentinels in the cluster::
 
-    magnum coe-service-create --manifest ./redis-sentinel-service.yaml --bay k8sbay
+    kubectl create -f ./redis-sentinel-service.yaml
 
 To make it a replicated redis cluster create replication controllers for the
 redis slaves and sentinels::
 
     sed -i 's/\(replicas: \)1/\1 2/' redis-controller.yaml
-    magnum rc-create --manifest ./redis-controller.yaml --bay k8sbay
+    kubectl create -f ./redis-controller.yaml
 
     sed -i 's/\(replicas: \)1/\1 2/' redis-sentinel-controller.yaml
-    magnum rc-create --manifest ./redis-sentinel-controller.yaml --bay k8sbay
+    kubectl create -f ./redis-sentinel-controller.yaml
 
 Full lifecycle and introspection operations for each object are supported.
-For example, magnum bay-create, magnum baymodel-delete, magnum rc-show,
-magnum coe-service-list.
+For example, magnum bay-create, magnum baymodel-delete.
 
 Now there are four redis instances (one master and three slaves) running
 across the bay, replicating data between one another.
@@ -474,32 +522,57 @@ Now that we have a swarm bay we can start interacting with it::
     | name          | swarmbay                                 |
     +---------------+------------------------------------------+
 
-Next we will create a container in this bay. This container will ping the
+We now need to setup the docker CLI to use the swarm bay we have created with
+the appropriate credentials.
+
+Create a dir to store certs and cd into it. The `DOCKER_CERT_PATH` env variable
+is consumed by docker which expects ca.pem, key.pem and cert.pem to be in that
+directory.::
+
+    export DOCKER_CERT_PATH=~/.docker
+    mkdir -p ${DOCKER_CERT_PATH}
+    cd ${DOCKER_CERT_PATH}
+
+Generate an RSA key.::
+
+    openssl genrsa -out key.pem 4096
+
+Create openssl config to help generated a CSR.::
+
+    $ cat > client.conf << END
+    [req]
+    distinguished_name = req_distinguished_name
+    req_extensions     = req_ext
+    prompt = no
+    [req_distinguished_name]
+    CN = Your Name
+    [req_ext]
+    extendedKeyUsage = clientAuth
+    END
+
+Run the openssl 'req' command to generate the CSR.::
+
+    openssl req -new -days 365 \
+        -config client.conf \
+        -key key.pem \
+        -out client.csr
+
+Now that you have your client CSR use the Magnum CLI to get it signed and also
+download the signing cert.::
+
+    magnum ca-sign swarmbay client.csr > cert.pem
+    magnum ca-show swarmbay > ca.pem
+
+Set the correct host to use. This env var is consumed by docker.::
+
+    DOCKER_HOST=$(magnum bay-show swarmbay | awk '/ api_address /{print $4}')
+
+Next we will create a container in this swarm bay. This container will ping the
 address 8.8.8.8 four times::
 
-    magnum container-create --name test-container \
-                            --image docker.io/cirros:latest \
-                            --bay swarmbay \
-                            --command "ping -c 4 8.8.8.8"
+    docker run --rm -it cirros:latest ping -c 4 8.8.8.8
 
-    +------------+----------------------------------------+
-    | Property   | Value                                  |
-    +------------+----------------------------------------+
-    | uuid       | 25485358-ae9b-49d1-a1e1-1af0a7c3f911   |
-    | links      | ...                                    |
-    | bay_uuid   | eda91c1e-6103-45d4-ab09-3f316310fa8e   |
-    | updated_at | None                                   |
-    | image      | cirros                                 |
-    | command    | ping -c 4 8.8.8.8                      |
-    | created_at | 2015-04-22T20:21:11+00:00              |
-    | name       | test-container                         |
-    +------------+----------------------------------------+
-
-At this point the container exists but it has not been started yet. To start
-it and check its output run the following::
-
-    magnum container-start test-container
-    magnum container-logs test-container
+You should see a similar output to::
 
     PING 8.8.8.8 (8.8.8.8): 56 data bytes
     64 bytes from 8.8.8.8: seq=0 ttl=40 time=25.513 ms
@@ -510,10 +583,6 @@ it and check its output run the following::
     --- 8.8.8.8 ping statistics ---
     4 packets transmitted, 4 packets received, 0% packet loss
     round-trip min/avg/max = 25.226/25.340/25.513 ms
-
-Now that we're done with the container we can delete it::
-
-    magnum container-delete test-container
 
 Building and Using a Mesos Bay
 ==============================
