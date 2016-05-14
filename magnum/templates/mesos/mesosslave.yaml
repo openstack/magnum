@@ -2,7 +2,7 @@ heat_template_version: 2014-10-16
 
 description: >
   This is a nested stack that defines a single Mesos slave, This stack is
-  included by an ResourceGroup resource in the parent template
+  included by a ResourceGroup resource in the parent template
   (mesoscluster.yaml).
 
 parameters:
@@ -31,7 +31,7 @@ parameters:
   executor_registration_timeout:
     type: string
     description: >
-      Amount of time to wait for an executor to register with the slave before
+      Amount of time to wait for an executor to register with the agent before
       considering it hung and shutting it down
 
   http_proxy:
@@ -232,7 +232,7 @@ resources:
 
   ######################################################################
   #
-  # a single mesos slave.
+  # a single Mesos agent.
   #
 
   mesos_slave:
