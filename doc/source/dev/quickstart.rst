@@ -371,8 +371,8 @@ the CSR.::
 Now that you have your client CSR, you can use the Magnum CLI to send it off
 to Magnum to get it signed and also download the signing cert.::
 
-    magnum ca-sign secure-k8sbay client.csr > client.crt
-    magnum ca-show secure-k8sbay > ca.crt
+    magnum ca-sign --bay k8sbay --csr client.csr > client.crt
+    magnum ca-show --bay k8sbay > ca.crt
 
 Here's how to set up the replicated redis example. Now we create a pod for the
 redis-master::
@@ -382,10 +382,10 @@ redis-master::
 
     # Set kubectl to use the correct certs
     kubectl config set-cluster k8sbay --server=${KUBERNETES_URL} \
-        --certificate-authority=ca.crt
-    kubectl config set-credentials client --certificate-authority=ca.crt \
-        --client-key=./client.key --client-certificate=client.crt
-    kubectl config set-context k8sbay --cluster=secure-k8sbay --user=client
+        --certificate-authority=$(pwd)/ca.crt
+    kubectl config set-credentials client --certificate-authority=$(pwd)/ca.crt \
+        --client-key=$(pwd)/client.key --client-certificate=$(pwd)/client.crt
+    kubectl config set-context k8sbay --cluster=k8sbay --user=client
     kubectl config use-context k8sbay
 
     # Test the cert and connection works
