@@ -12,6 +12,7 @@
 
 import time
 
+from docker import errors
 from oslo_config import cfg
 from requests import exceptions as req_exceptions
 
@@ -69,9 +70,6 @@ class TestSwarmAPIs(BayTest):
             # We don't need to test since bay is not ready.
             raise Exception(msg)
 
-        # We don't set bay_is_ready in such case
-        self.bay_is_ready = False
-
         url = self.cs.bays.get(self.bay.uuid).api_address
 
         # Note(eliqiao): docker_utils.CONF.docker.default_timeout is 10,
@@ -94,53 +92,59 @@ class TestSwarmAPIs(BayTest):
             CONF.docker.docker_remote_api_version,
             docker_api_time_out)
 
+    def _container_operation(self, func, *args, **kwargs):
+        # NOTE(hongbin): Swarm bay occasionally aborts the connection, so we
+        # re-try the operation several times here. In long-term, we need to
+        # investigate the cause of this issue. See bug #1583337.
         for i in range(150):
             try:
-                self.docker_client.containers()
-                # Note(eliqiao): Right after the connection is ready, wait
-                # for a while (at least 5s) to aovid this error:
-                # docker.errors.APIError: 500 Server Error: Internal
-                # Server Error ("No healthy node available in the cluster")
-                time.sleep(10)
-                self.bay_is_ready = True
-                break
+                self.LOG.info("Calling function " + func.__name__)
+                return func(*args, **kwargs)
             except req_exceptions.ConnectionError:
-                time.sleep(2)
+                self.LOG.info("Connection aborted on calling Swarm API. "
+                              "Will retry in 2 seconds.")
+            except errors.APIError as e:
+                if e.response.status_code != 500:
+                    raise
+                self.LOG.info("Internal Server Error: " + str(e))
+            time.sleep(2)
 
-        if self.bay_is_ready is False:
-            raise Exception(msg)
+        raise Exception("Cannot connect to Swarm API.")
 
     def _create_container(self, **kwargs):
-        name = kwargs.get('name', 'test_container')
         image = kwargs.get('image', 'docker.io/cirros')
         command = kwargs.get('command', 'ping -c 1000 8.8.8.8')
-        return self.docker_client.create_container(name=name,
-                                                   image=image,
-                                                   command=command)
+        return self._container_operation(self.docker_client.create_container,
+                                         image=image, command=command)
 
     def test_start_stop_container_from_api(self):
         # Leverage docker client to create a container on the bay we created,
         # and try to start and stop it then delete it.
 
-        resp = self._create_container(name="test_api_start_stop",
-                                      image="docker.io/cirros",
+        resp = self._create_container(image="docker.io/cirros",
                                       command="ping -c 1000 8.8.8.8")
 
-        self.assertIsNotNone(resp)
-        container_id = resp.get('Id')
-        self.docker_client.start(container=container_id)
+        resp = self._container_operation(self.docker_client.containers,
+                                         all=True)
+        container_id = resp[0].get('Id')
+        self._container_operation(self.docker_client.start,
+                                  container=container_id)
 
-        resp = self.docker_client.containers()
-        self.assertIsNotNone(resp)
-        resp = self.docker_client.inspect_container(container=container_id)
+        resp = self._container_operation(self.docker_client.containers)
+        self.assertEqual(1, len(resp))
+        resp = self._container_operation(self.docker_client.inspect_container,
+                                         container=container_id)
         self.assertTrue(resp['State']['Running'])
 
-        self.docker_client.stop(container=container_id)
-        resp = self.docker_client.inspect_container(container=container_id)
+        self._container_operation(self.docker_client.stop,
+                                  container=container_id)
+        resp = self._container_operation(self.docker_client.inspect_container,
+                                         container=container_id)
         self.assertFalse(resp['State']['Running'])
 
-        self.docker_client.remove_container(container=container_id)
-        resp = self.docker_client.containers()
+        self._container_operation(self.docker_client.remove_container,
+                                  container=container_id)
+        resp = self._container_operation(self.docker_client.containers)
         self.assertEqual([], resp)
 
     def test_access_with_non_tls_client(self):
