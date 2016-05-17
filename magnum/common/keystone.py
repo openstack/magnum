@@ -15,7 +15,6 @@ from keystoneauth1 import exceptions as ka_exception
 from keystoneauth1.identity import access as ka_access_plugin
 from keystoneauth1.identity import v3 as ka_v3
 from keystoneauth1 import loading as ka_loading
-from keystoneauth1 import session as ka_session
 import keystoneclient.exceptions as kc_exception
 from keystoneclient.v3 import client as kc_v3
 from oslo_config import cfg
@@ -160,7 +159,12 @@ class KeystoneClientV3(object):
                 user_id=CONF.trust.trustee_domain_admin_id,
                 domain_id=CONF.trust.trustee_domain_id,
                 password=CONF.trust.trustee_domain_admin_password)
-            session = ka_session.Session(auth=auth)
+            session = ka_loading.session.Session().load_from_options(
+                auth=auth,
+                insecure=CONF[CFG_LEGACY_GROUP].insecure,
+                cacert=CONF[CFG_LEGACY_GROUP].cafile,
+                key=CONF[CFG_LEGACY_GROUP].keyfile,
+                cert=CONF[CFG_LEGACY_GROUP].certfile)
             self._domain_admin_client = kc_v3.Client(session=session)
         return self._domain_admin_client
 
@@ -202,7 +206,13 @@ class KeystoneClientV3(object):
                                   user_id=bay.trustee_user_id,
                                   password=bay.trustee_password,
                                   trust_id=bay.trust_id)
-            sess = ka_session.Session(auth=auth)
+
+            sess = ka_loading.session.Session().load_from_options(
+                auth=auth,
+                insecure=CONF[CFG_LEGACY_GROUP].insecure,
+                cacert=CONF[CFG_LEGACY_GROUP].cafile,
+                key=CONF[CFG_LEGACY_GROUP].keyfile,
+                cert=CONF[CFG_LEGACY_GROUP].certfile)
             client = kc_v3.Client(session=sess)
         try:
             client.trusts.delete(bay.trust_id)

@@ -125,7 +125,7 @@ class KeystoneClientTest(base.TestCase):
         bay.trust_id = 'atrust123'
         self.assertIsNone(ks_client.delete_trust(self.ctx, bay))
 
-    @mock.patch('magnum.common.keystone.ka_session.Session')
+    @mock.patch('keystoneauth1.session.Session')
     def test_create_trust_with_all_roles(self, mock_session, mock_ks):
         mock_session.return_value.get_user_id.return_value = '123456'
         mock_session.return_value.get_project_id.return_value = '654321'
@@ -140,7 +140,7 @@ class KeystoneClientTest(base.TestCase):
             trustee_user='888888', role_names=['role1', 'role2'],
             impersonation=True)
 
-    @mock.patch('magnum.common.keystone.ka_session.Session')
+    @mock.patch('keystoneauth1.session.Session')
     def test_create_trust_with_limit_roles(self, mock_session, mock_ks):
         mock_session.return_value.get_user_id.return_value = '123456'
         mock_session.return_value.get_project_id.return_value = '654321'
