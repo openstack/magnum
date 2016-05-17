@@ -54,36 +54,6 @@ Container Orchestration Engine (COE)
   number of container orchestration engines, each with their own pros and cons,
   including Docker Swarm, Kubernetes, and Mesos.
 
-Pod
-  When using the Kubernetes container orchestration engine, a pod is the
-  smallest deployable unit that can be created and managed. A pod is a
-  co-located group of application containers that run with a shared context.
-  When using Magnum, pods are created and managed within bays. Refer to the
-  `pods section
-  <http://kubernetes.io/v1.0/docs/user-guide/pods.html>`_ in the `Kubernetes
-  User Guide`_ for more information.
-
-Replication controller
-  A replication controller is used to ensure that at any given time a certain
-  number of replicas of a pod are running. Pods are automatically created and
-  deleted by the replication controller as necessary based on a template to
-  ensure that the defined number of replicas exist. Refer to the `replication
-  controller section
-  <http://kubernetes.io/v1.0/docs/user-guide/replication-controller.html>`_ in
-  the `Kubernetes User Guide`_ for more information.
-
-Service
-  A service is an additional layer of abstraction provided by the Kubernetes
-  container orchestration engine which defines a logical set of pods and a
-  policy for accessing them. This is useful because pods are created and
-  deleted by a replication controller, for example, other pods needing to
-  discover them can do so via the service abstraction. Refer to the
-  `services section
-  <http://kubernetes.io/v1.0/docs/user-guide/services.html>`_ in the
-  `Kubernetes User Guide`_ for more information.
-
-.. _Kubernetes User Guide: http://kubernetes.io/v1.0/docs/user-guide/
-
 ========
 Overview
 ========
@@ -169,7 +139,38 @@ Native clients
 ==========
 Kubernetes
 ==========
-*To be filled in*
+Kubernetes uses a range of terminology that we refer to in this guide. We
+define these common terms for your reference:
+
+Pod
+  When using the Kubernetes container orchestration engine, a pod is the
+  smallest deployable unit that can be created and managed. A pod is a
+  co-located group of application containers that run with a shared context.
+  When using Magnum, pods are created and managed within bays. Refer to the
+  `pods section
+  <http://kubernetes.io/v1.0/docs/user-guide/pods.html>`_ in the `Kubernetes
+  User Guide`_ for more information.
+
+Replication controller
+  A replication controller is used to ensure that at any given time a certain
+  number of replicas of a pod are running. Pods are automatically created and
+  deleted by the replication controller as necessary based on a template to
+  ensure that the defined number of replicas exist. Refer to the `replication
+  controller section
+  <http://kubernetes.io/v1.0/docs/user-guide/replication-controller.html>`_ in
+  the `Kubernetes User Guide`_ for more information.
+
+Service
+  A service is an additional layer of abstraction provided by the Kubernetes
+  container orchestration engine which defines a logical set of pods and a
+  policy for accessing them. This is useful because pods are created and
+  deleted by a replication controller, for example, other pods needing to
+  discover them can do so via the service abstraction. Refer to the
+  `services section
+  <http://kubernetes.io/v1.0/docs/user-guide/services.html>`_ in the
+  `Kubernetes User Guide`_ for more information.
+
+.. _Kubernetes User Guide: http://kubernetes.io/v1.0/docs/user-guide/
 
 =====
 Swarm
