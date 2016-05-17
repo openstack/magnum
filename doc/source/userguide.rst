@@ -351,24 +351,25 @@ Additional software are described as follows.
 Kubernetes on Fedora Atomic
 ---------------------------
 
-This image is built manually by the instructions provided in this `Atomic guide
-<https://github.com/openstack/magnum/blob/master/doc/source/dev/build-atomic-image.rst>`_
-The Fedora site hosts the current image `fedora-21-atomic-5.qcow2
-<https://fedorapeople.org/groups/magnum/fedora-21-atomic-5.qcow2>`_.
-This image has the following OS/software:
+This image can be downloaded from the `public Atomic site
+<https://alt.fedoraproject.org/pub/alt/atomic/stable/Cloud-Images/x86_64/Images/>`_
+or can be built locally using diskimagebuilder.  Details can be found in the
+`fedora-atomic element
+<https://github.com/openstack/magnum/tree/master/magnum/elements/fedora-atomic>`_
+The image currently has the following OS/software:
 
 +-------------+-----------+
 | OS/software | version   |
 +=============+===========+
-| Fedora      | 21        |
+| Fedora      | 23        |
 +-------------+-----------+
-| Docker      | 1.8.1     |
+| Docker      | 1.9.1     |
 +-------------+-----------+
-| Kubernetes  | 1.0.4     |
+| Kubernetes  | 1.2.0     |
 +-------------+-----------+
-| etcd        | 2.0.10    |
+| etcd        | 2.2.1     |
 +-------------+-----------+
-| Flannel     | 0.5.0     |
+| Flannel     | 0.5.4     |
 +-------------+-----------+
 
 The following software are managed as systemd services:
@@ -438,28 +439,8 @@ provided when this driver has been fully tested.
 Swarm on Fedora Atomic
 ----------------------
 
-This image is the same as the image for Kubernetes on Fedora Atomic and was
-built manually by the instructions provided in this `Atomic guide
-<https://github.com/openstack/magnum/blob/master/doc/source/dev/build-atomic-image.rst>`_
-The Fedora site hosts the current image `fedora-21-atomic-5.qcow2
-<https://fedorapeople.org/groups/magnum/fedora-21-atomic-5.qcow2>`_.
-This image has the following OS/software:
-
-+-------------+-----------+
-| OS/software | version   |
-+=============+===========+
-| Fedora      | 21        |
-+-------------+-----------+
-| Docker      | 1.8.1     |
-+-------------+-----------+
-| Kubernetes  | 1.0.4     |
-+-------------+-----------+
-| etcd        | 2.0.10    |
-+-------------+-----------+
-| Flannel     | 0.5.0     |
-+-------------+-----------+
-
-The login for this image is *fedora*.
+This image is the same as the image for `Kubernetes on Fedora Atomic`_
+described above.  The login for this image is *fedora*.
 
 Mesos on Ubuntu
 ---------------
@@ -479,6 +460,6 @@ The Fedora site hosts the current image `ubuntu-14.04.3-mesos-0.25.0.qcow2
 +-------------+-----------+
 | Mesos       | 0.25.0    |
 +-------------+-----------+
-| Marathon    |           |
+| Marathon    | 0.11.1    |
 +-------------+-----------+
 

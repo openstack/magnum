@@ -78,7 +78,6 @@ Developer Info
    dev/quickstart
    dev/manual-devstack
    dev/bay-template-example.rst
-   dev/build-atomic-image.rst
    dev/kubernetes-load-balancer.rst
    dev/container-volume-integration.rst
    dev/tls.rst
