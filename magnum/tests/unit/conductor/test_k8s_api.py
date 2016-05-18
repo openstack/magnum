@@ -13,9 +13,7 @@
 # under the License.
 
 import mock
-from mock import patch
 
-from magnum.conductor import k8s_api
 from magnum.tests import base
 
 
@@ -43,9 +41,6 @@ class TestK8sAPI(base.TestCase):
         'private-key-content': 'priv-key-temp-file-name'
     }
 
-    def _mock_named_file_creation(self, content):
-        return TestK8sAPI.file_dict[content]
-
     def _mock_cert_mgr_get_cert(self, cert_ref, **kwargs):
         cert_obj = mock.MagicMock()
         cert_obj.get_certificate.return_value = (
@@ -56,39 +51,3 @@ class TestK8sAPI(base.TestCase):
             TestK8sAPI.content_dict[cert_ref]['decrypted_private_key'])
 
         return cert_obj
-
-    @patch(
-        'magnum.conductor.handlers.common.cert_manager.get_bay_ca_certificate')
-    @patch('magnum.conductor.handlers.common.cert_manager.get_bay_magnum_cert')
-    @patch('k8sclient.client.api_client.ApiClient')
-    def test_create_k8s_api(self,
-                            mock_api_client,
-                            mock_get_bay_magnum_cert,
-                            mock_get_bay_ca_cert):
-        bay_obj = mock.MagicMock()
-        bay_obj.uuid = 'bay-uuid'
-        bay_obj.api_address = 'fake-k8s-api-endpoint'
-        bay_obj.magnum_cert_ref = 'fake-magnum-cert-ref'
-        bay_obj.ca_cert_ref = 'fake-ca-cert-ref'
-
-        mock_get_bay_magnum_cert.return_value = self._mock_cert_mgr_get_cert(
-            'fake-magnum-cert-ref')
-        mock_get_bay_ca_cert.return_value = self._mock_cert_mgr_get_cert(
-            'fake-ca-cert-ref')
-
-        file_dict = TestK8sAPI.file_dict
-        for content in file_dict.keys():
-            file_hdl = file_dict[content]
-            file_hdl.name = TestK8sAPI.file_name[content]
-
-        context = 'context'
-        with patch(
-            'magnum.conductor.k8s_api.K8sAPI._create_temp_file_with_content',
-                side_effect=self._mock_named_file_creation):
-            k8s_api.create_k8s_api(context, bay_obj)
-
-        mock_api_client.assert_called_once_with(
-            bay_obj.api_address,
-            key_file='priv-key-temp-file-name',
-            cert_file='cert-temp-file-name',
-            ca_certs='ca-cert-temp-file-name')
