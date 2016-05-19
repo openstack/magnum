@@ -20,7 +20,7 @@ sed -i '
   /^KUBE_MASTER=/ s|=.*|="--master='"$KUBE_MASTER_URI"'"|
 ' /etc/kubernetes/config
 
-KUBELET_ARGS="--config=/etc/kubernetes/manifests --cadvisor-port=4194 ${KUBE_CONFIG}"
+KUBELET_ARGS="--config=/etc/kubernetes/manifests --cadvisor-port=4194 --hostname-override=$KUBE_NODE_IP ${KUBE_CONFIG}"
 sed -i '
   /^KUBELET_ADDRESS=/ s/=.*/="--address=0.0.0.0"/
   /^KUBELET_HOSTNAME=/ s/=.*/=""/

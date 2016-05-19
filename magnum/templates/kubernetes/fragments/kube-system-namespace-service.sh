@@ -47,6 +47,7 @@ Requires=kubelet.service
 
 [Service]
 Type=oneshot
+Environment=HOME=/root
 EnvironmentFile=-/etc/kubernetes/config
 ExecStart=${KUBE_SYSTEM_BIN}
 
