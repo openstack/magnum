@@ -137,28 +137,24 @@ parameters:
 resources:
 
   cloud_init_wait_handle:
-    type: "AWS::CloudFormation::WaitConditionHandle"
+    type: "OS::Heat::WaitConditionHandle"
 
   cloud_init_wait_condition:
-    type: "AWS::CloudFormation::WaitCondition"
-    depends_on:
-      - swarm_master
+    type: "OS::Heat::WaitCondition"
+    depends_on: swarm_master
     properties:
-      Handle:
-        get_resource: cloud_init_wait_handle
-      Timeout: 6000
+      handle: {get_resource: cloud_init_wait_handle}
+      timeout: 6000
 
   master_wait_handle:
-    type: "AWS::CloudFormation::WaitConditionHandle"
+    type: "OS::Heat::WaitConditionHandle"
 
   master_wait_condition:
-    type: "AWS::CloudFormation::WaitCondition"
-    depends_on:
-      - swarm_master
+    type: "OS::Heat::WaitCondition"
+    depends_on: swarm_master
     properties:
-      Handle:
-        get_resource: master_wait_handle
-      Timeout: 6000
+      handle: {get_resource: master_wait_handle}
+      timeout: 6000
 
   ######################################################################
   #
@@ -173,7 +169,8 @@ resources:
         str_replace:
           template: {get_file: fragments/write-heat-params-master.yaml}
           params:
-            "$WAIT_HANDLE": {get_resource: cloud_init_wait_handle}
+            "$WAIT_HANDLE_ENDPOINT": {get_attr: [cloud_init_wait_handle, endpoint]}
+            "$WAIT_HANDLE_TOKEN": {get_attr: [cloud_init_wait_handle, token]}
             "$DOCKER_VOLUME": {get_resource: docker_volume}
             "$ETCD_DISCOVERY_URL": {get_param: discovery_url}
             "$HTTP_PROXY": {get_param: http_proxy}
@@ -253,7 +250,8 @@ resources:
           template: {get_file: fragments/write-bay-failure-service.yaml}
           params:
             "$SERVICE": swarm-manager
-            "$WAIT_HANDLE": {get_resource: master_wait_handle}
+            "$WAIT_HANDLE_ENDPOINT": {get_attr: [master_wait_handle, endpoint]}
+            "$WAIT_HANDLE_TOKEN": {get_attr: [master_wait_handle, token]}
 
   write_docker_socket:
     type: "OS::Heat::SoftwareConfig"
@@ -272,7 +270,8 @@ resources:
             "$ETCD_SERVER_IP": {get_param: etcd_server_ip}
             "$NODE_IP": {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
             "$DISCOVERY_URL": {get_param: discovery_url}
-            "$WAIT_HANDLE": {get_resource: master_wait_handle}
+            "$WAIT_HANDLE_ENDPOINT": {get_attr: [master_wait_handle, endpoint]}
+            "$WAIT_HANDLE_TOKEN": {get_attr: [master_wait_handle, token]}
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}

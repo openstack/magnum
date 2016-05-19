@@ -10,6 +10,6 @@ DATA="OK"
 
 data=$(echo '{"Status": "'${STATUS}'", "Reason": "'$REASON'", "Data": "'${DATA}'", "UniqueId": "00000"}')
 
-curl -sf -X PUT -H 'Content-Type: application/json' \
-    --data-binary "$data" \
-    "$WAIT_HANDLE"
+curl -i -X POST -H "Content-Type: application/json" -H "X-Auth-Token: $WAIT_HANDLE_TOKEN" \
+    --data-binary "'$data'" \
+    "$WAIT_HANDLE_ENDPOINT"
