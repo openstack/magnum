@@ -19,7 +19,7 @@ Contents
 #. `Overview`_
 #. `Python Client`_
 #. `Horizon Interface`_
-#. `Choosing COE`_
+#. `Choosing a COE`_
 #. `Native clients`_
 #. `Kubernetes`_
 #. `Swarm`_
@@ -122,14 +122,50 @@ Horizon Interface
 =================
 *To be filled in with screenshots*
 
-============
-Choosing COE
-============
-*To be filled in*
+==============
+Choosing a COE
+==============
+Magnum supports a variety of COE options, and allows more to be added over time
+as they gain popularity. As an operator, you may choose to support the full
+variety of options, or you may want to offer a subset of the available choices.
+Given multiple choices, your users can run one or more bays, and each may use
+a different COE. For example, I might have multiple bays that use Kubernetes,
+and just one bay that uses Swarm. All of these bays can run concurrently, even
+though they use different COE software.
 
-Buyer's guide with example use case, can use this as model:
+Choosing which COE to use depends on what tools you want to use to manage your
+containers once you start your app. If you want to use the Docker tools, you
+may want to use the Swarm bay type. Swarm will spread your containers across
+the various nodes in your bay automatically. It does not monitor the health of
+your containers, so it can't restart them for you if they stop. It will not
+automatically scale your app for you (as of Swarm version 1.2.2). You may view
+this as a plus. If you prefer to manage your application yourself, you might
+prefer swarm over the other COE options.
 
-http://www.openstack.org/software/project-navigator
+Kubernetes (as of v1.2) is more sophisticated than Swarm (as of v1.2.2). It
+offers an attractive YAML file description of a pod, which is a grouping of
+containers that run together as part of a distributed application. This file
+format allows you to model your application deployment using a declarative
+style. It has support for autoscaling and fault recovery, as well as features
+that allow for sophisticated software deployments, including canary deploys
+and blue/green deploys. Kubernetes is very popular, especially for web
+applications.
+
+Apache Mesos is a COE that has been around longer than Kubernetes or Swarm. It
+allows for a variety of different frameworks to be used along with it,
+including Marathon, Aurora, Chronos, Hadoop, and `a number of others.
+<http://mesos.apache.org/documentation/latest/frameworks/>`_
+
+The Apache Mesos framework design can be used to run alternate COE software
+directly on Mesos. Although this approach is not widely used yet, it may soon
+be possible to run Mesos with Kubernetes and Swarm as frameworks, allowing
+you to share the resources of a bay between multiple different COEs. Until
+this option matures, we encourage Magnum users to create multiple bays, and
+use the COE in each bay that best fits the anticipated workload.
+
+Finding the right COE for your workload is up to you, but Magnum offers you a
+choice to select among the prevailing leading options. Once you decide, see
+the next sections for examples of how to create a bay with your desired COE.
 
 ==============
 Native clients
