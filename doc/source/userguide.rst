@@ -345,7 +345,293 @@ Include Autoscaling
 =======
 Storage
 =======
+
+Currently Cinder provides the block storage to the containers, and the
+storage is made available in two ways: as ephemeral storage and as
+persistent storage.
+
+Ephemeral storage
+-----------------
+
+The filesystem for the container consists of multiple layers from the
+image and a top layer that holds the modification made by the
+container.  This top layer requires storage space and the storage is
+configured in the Docker daemon through a number of storage options.
+When the container is removed, the storage allocated to the particular
+container is also deleted.
+
+To manage this space in a flexible manner independent of the Nova
+instance flavor, Magnum creates a separate Cinder block volume for each
+node in the bay, mounts it to the node and configures it to be used as
+ephemeral storage.  Users can specify the size of the Cinder volume with
+the baymodel attribute 'docker-volume-size'.  The default size is 5GB.
+Currently the block size is fixed at bay creation time, but future
+lifecycle operations may allow modifying the block size during the
+life of the bay.
+
+To use the Cinder block storage, there is a number of Docker
+storage drivers available.  Only 'devicemapper' is supported as the
+storage driver but other drivers such as 'OverlayFS' are being
+considered.  There are important trade-off between the choices
+for the storage drivers that should be considered.  For instance,
+'OperlayFS' may offer better performance, but it may not support
+the filesystem metadata needed to use SELinux, which is required
+to support strong isolation between containers running in the same
+bay. Using the 'devicemapper' driver does allow the use of SELinux.
+
+
+Persistent storage
+------------------
+
+In some use cases, data read/written by a container needs to persist
+so that it can be accessed later.  To persist the data, a Cinder
+volume with a filesystem on it can be mounted on a host and be made
+available to the container, then be unmounted when the container exits.
+
+Docker provides the 'volume' feature for this purpose: the user
+invokes the 'volume create' command, specifying a particular volume
+driver to perform the actual work.  Then this volume can be mounted
+when a container is created.  A number of third-party volume drivers
+support OpenStack Cinder as the backend, for example Rexray and
+Flocker.  Magnum currently supports Rexray as the volume driver for
+Swarm and Mesos.  Other drivers are being considered.
+
+Kubernetes allows a previously created Cinder block to be mounted to
+a pod and this is done by specifying the block ID in the pod yaml file.
+When the pod is scheduled on a node, Kubernetes will interface with
+Cinder to request the volume to be mounted on this node, then
+Kubernetes will launch the Docker container with the proper options to
+make the filesystem on the Cinder volume accessible to the container
+in the pod.  When the pod exits, Kubernetes will again send a request
+to Cinder to unmount the volume's filesystem, making it avaiable to be
+mounted on other nodes.
+
+Magnum supports these features to use Cinder as persistent storage
+using the baymodel attribute 'volume-driver' and the support matrix
+for the COE types is summarized as follows:
+
++--------+-------------+-------------+-------------+
+| Driver | Kubernetes  |    Swarm    |    Mesos    |
++========+=============+=============+=============+
+| cinder | supported   | unsupported | unsupported |
++--------+-------------+-------------+-------------+
+| rexray | unsupported | supported   | supported   |
++--------+-------------+-------------+-------------+
+
+Following are some examples for using Cinder as persistent storage.
+
+Using Cinder in Kubernetes
+++++++++++++++++++++++++++
+
+**NOTE:** This feature requires Kubernetes version 1.1.1 or above and
+Docker version 1.8.3 or above.  The public Fedora image from Atomic
+currently meets this requirement.
+
+**NOTE:** The following steps are a temporary workaround, and Magnum's
+development team is working on a long term solution to automate these steps.
+
+1. Create the baymodel.
+
+   Specify 'cinder' as the volume-driver for Kubernetes::
+
+    magnum baymodel-create --name k8sbaymodel \
+                           --image-id fedora-23-atomic-7 \
+                           --keypair-id testkey \
+                           --external-network-id public \
+                           --dns-nameserver 8.8.8.8 \
+                           --flavor-id m1.small \
+                           --docker-volume-size 5 \
+                           --network-driver flannel \
+                           --coe kubernetes \
+                           --volume-driver cinder
+
+2. Create the bay::
+
+    magnum bay-create --name k8sbay --baymodel k8sbaymodel --node-count 1
+
+
+3. Configure kubelet.
+
+   To allow Kubernetes to interface with Cinder, log into each minion
+   node of your bay and perform step 4 through 6::
+
+    sudo vi /etc/kubernetes/kubelet
+
+   Comment out the line::
+
+    #KUBELET_ARGS=--config=/etc/kubernetes/manifests --cadvisor-port=4194
+
+   Uncomment the line::
+
+    #KUBELET_ARGS="--config=/etc/kubernetes/manifests --cadvisor-port=4194 --cloud-provider=openstack --cloud-config=/etc/kubernetes/kube_openstack_config"
+
+
+4. Enter OpenStack user credential::
+
+    sudo vi /etc/kubernetes/kube_openstack_config
+
+  The username, tenant-name and region entries have been filled in with the
+  Keystone values of the user who created the bay.  Enter the password
+  of this user on the entry for password::
+
+    password=ChangeMe
+
+5. Restart Kubernetes services::
+
+    sudo systemctl restart kubelet
+
+   On restart, the new configuration enables the Kubernetes cloud provider
+   plugin for OpenStack, along with the necessary credential for kubelet
+   to authenticate with Keystone and to make request to OpenStack services.
+
+6. Install nsenter::
+
+    sudo docker run -v /usr/local/bin:/target jpetazzo/nsenter
+
+   The nsenter utility is used by Kubernetes to run new processes within
+   existing kernel namespaces. This allows the kubelet agent to manage storage
+   for pods.
+
+Kubernetes is now ready to use Cinder for persistent storage.
+Following is an example illustrating how Cinder is used in a pod.
+
+1. Create the cinder volume::
+
+    cinder create --display-name=test-repo 1
+
+    ID=$(cinder create --display-name=test-repo 1 | awk -F'|' '$2~/^[[:space:]]*id/ {print $3}')
+
+   The command will generate the volume with a ID. The volume ID will be specified in
+   Step 2.
+
+2. Create a pod in this bay and mount this cinder volume to the pod.
+   Create a file (e.g nginx-cinder.yaml) describing the pod::
+
+    cat > nginx-cinder.yaml << END
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: aws-web
+    spec:
+      containers:
+        - name: web
+          image: nginx
+          ports:
+            - name: web
+              containerPort: 80
+              hostPort: 8081
+              protocol: TCP
+          volumeMounts:
+            - name: html-volume
+              mountPath: "/usr/share/nginx/html"
+      volumes:
+        - name: html-volume
+          cinder:
+            # Enter the volume ID below
+            volumeID: $ID
+            fsType: ext4
+    END
+
+**NOTE:** The Cinder volume ID needs to be configured in the yaml file
+so the existing Cinder volume can be mounted in a pod by specifying
+the volume ID in the pod manifest as follows::
+
+    volumes:
+    - name: html-volume
+      cinder:
+        volumeID: $ID
+        fsType: ext4
+
+3. Create the pod by the normal Kubernetes interface::
+
+    kubectl create -f nginx-cinder.yaml
+
+You can start a shell in the container to check that the mountPath exists,
+and on an OpenStack client you can run the command 'cinder list' to verify
+that the cinder volume status is 'in-use'.
+
+
+Using Cinder in Swarm
++++++++++++++++++++++
 *To be filled in*
+
+
+Using Cinder in Mesos
++++++++++++++++++++++
+
+1. Create the baymodel.
+
+   Specify 'rexray' as the volume-driver for Mesos.  As an option, you
+   can specify in a label the attributes 'rexray_preempt' to enable
+   any host to take control of a volume regardless if other
+   hosts are using the volume. If this is set to false, the driver
+   will ensure data safety by locking the volume::
+
+    magnum baymodel-create --name mesosbaymodel \
+                           --image-id ubuntu-mesos \
+                           --keypair-id testkey \
+                           --external-network-id public \
+                           --dns-nameserver 8.8.8.8 \
+                           --master-flavor-id m1.magnum \
+                           --docker-volume-size 4 \
+                           --tls-disabled \
+                           --flavor-id m1.magnum \
+                           --coe mesos \
+                           --volume-driver rexray \
+                           --labels rexray-preempt=true
+
+2. Create the Mesos bay::
+
+    magnum bay-create --name mesosbay --baymodel mesosbaymodel --node-count 1
+
+3. Create the cinder volume and configure this bay::
+
+    cinder create --display-name=redisdata 1
+
+   Create the following file ::
+
+    cat > mesos.json << END
+    {
+      "id": "redis",
+      "container": {
+        "docker": {
+        "image": "redis",
+        "network": "BRIDGE",
+        "portMappings": [
+          { "containerPort": 80, "hostPort": 0, "protocol": "tcp"}
+        ],
+        "parameters": [
+           { "key": "volume-driver", "value": "rexray" },
+           { "key": "volume", "value": "redisdata:/data" }
+        ]
+        }
+     },
+     "cpus": 0.2,
+     "mem": 32.0,
+     "instances": 1
+    }
+    END
+
+**NOTE:** When the Mesos bay is created using this baymodel, the Mesos bay
+will be configured so that a filesystem on an existing cinder volume can
+be mounted in a container by configuring the parameters to mount the cinder
+volume in the json file ::
+
+    "parameters": [
+       { "key": "volume-driver", "value": "rexray" },
+       { "key": "volume", "value": "redisdata:/data" }
+    ]
+
+4. Create the container using Marathon REST API ::
+
+    MASTER_IP=$(magnum bay-show mesosbay | awk '/ api_address /{print $4}')
+    curl -X POST -H "Content-Type: application/json" \
+    http://${MASTER_IP}:8080/v2/apps -d@mesos.json
+
+You can log into the container to check that the mountPath exists, and
+you can run the command 'cinder list' to verify that your cinder
+volume status is 'in-use'.
+
 
 ================
 Image Management
