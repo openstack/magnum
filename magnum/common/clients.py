@@ -137,7 +137,7 @@ class OpenStackClients(object):
     def magnum_url(self):
         endpoint_type = self._get_client_option('magnum', 'endpoint_type')
         region_name = self._get_client_option('magnum', 'region_name')
-        return self.url_for(service_type='container',
+        return self.url_for(service_type='container-infra',
                             interface=endpoint_type,
                             region_name=region_name)
 

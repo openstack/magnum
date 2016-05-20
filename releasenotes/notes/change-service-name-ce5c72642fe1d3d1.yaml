@@ -1,0 +1,5 @@
+---
+upgrade:
+  - Magnum default service type changed from "container" to
+    "container-infra". It is recommended to update the service
+    type at Keystone service catalog accordingly.
