@@ -19,7 +19,7 @@ from cliff import commandmanager
 from cliff import lister
 from oslo_config import cfg
 
-from magnum.conductor import template_definition as tdef
+from magnum.drivers.common import template_def as tdef
 from magnum import version
 
 CONF = cfg.CONF

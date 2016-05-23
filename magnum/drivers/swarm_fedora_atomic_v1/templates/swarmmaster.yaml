@@ -237,7 +237,7 @@ resources:
       config:
         str_replace:
           params:
-            $configure_docker_storage_driver: {get_file: ../common/fragments/configure_docker_storage_driver_atomic.sh}
+            $configure_docker_storage_driver: {get_file: fragments/configure_docker_storage_driver_atomic.sh}
           template: {get_file: fragments/configure-docker-storage.sh}
 
   make_cert:
@@ -423,4 +423,3 @@ outputs:
     value: {get_attr: [swarm_master_floating, floating_ip_address]}
     description: >
       This is the "public" ip addresses of Swarm master.
-
