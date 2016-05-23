@@ -30,6 +30,7 @@ Contents
 #. `Scaling`_
 #. `Storage`_
 #. `Image Management`_
+#. `Notification`_
 
 ===========
 Terminology
@@ -785,3 +786,152 @@ The Fedora site hosts the current image `ubuntu-14.04.3-mesos-0.25.0.qcow2
 | Marathon    | 0.11.1    |
 +-------------+-----------+
 
+============
+Notification
+============
+
+Magnum provides notifications about usage data so that 3rd party applications
+can use the data for auditing, billing, monitoring, or quota purposes. This
+document describes the current inclusions and exclusions for Magnum
+notifications.
+
+Magnum uses Cloud Auditing Data Federation (`CADF`_) Notification as its
+notification format for better support of auditing, details about CADF are
+documented below.
+
+Auditing with CADF
+------------------
+
+Magnum uses the `PyCADF`_ library to emit CADF notifications, these events
+adhere to the DMTF `CADF`_ specification. This standard provides auditing
+capabilities for compliance with security, operational, and business processes
+and supports normalized and categorized event data for federation and
+aggregation.
+
+.. _PyCADF: http://docs.openstack.org/developer/pycadf
+.. _CADF: http://www.dmtf.org/standards/cadf
+
+Below table describes the event model components and semantics for
+each component:
+
++-----------------+----------------------------------------------------------+
+| model component |  CADF Definition                                         |
++=================+==========================================================+
+| OBSERVER        |  The RESOURCE that generates the CADF Event Record based |
+|                 |  on its observation (directly or indirectly) of the      |
+|                 |  Actual Event.                                           |
++-----------------+----------------------------------------------------------+
+| INITIATOR       |  The RESOURCE that initiated, originated, or instigated  |
+|                 |  the event's ACTION, according to the OBSERVER.          |
++-----------------+----------------------------------------------------------+
+| ACTION          |  The operation or activity the INITIATOR has performed,  |
+|                 |  has attempted to perform or has pending against the     |
+|                 |  event's TARGET, according to the OBSERVER.              |
++-----------------+----------------------------------------------------------+
+| TARGET          |  The RESOURCE against which the ACTION of a CADF Event   |
+|                 |  Record was performed, attempted, or is pending,         |
+|                 |  according to the OBSERVER.                              |
++-----------------+----------------------------------------------------------+
+| OUTCOME         |  The result or status of the ACTION against the TARGET,  |
+|                 |  according to the OBSERVER.                              |
++-----------------+----------------------------------------------------------+
+
+The ``payload`` portion of a CADF Notification is a CADF ``event``, which
+is represented as a JSON dictionary. For example:
+
+.. code-block:: javascript
+
+    {
+        "typeURI": "http://schemas.dmtf.org/cloud/audit/1.0/event",
+        "initiator": {
+            "typeURI": "service/security/account/user",
+            "host": {
+                "agent": "curl/7.22.0(x86_64-pc-linux-gnu)",
+                "address": "127.0.0.1"
+            },
+            "id": "<initiator_id>"
+        },
+        "target": {
+            "typeURI": "<target_uri>",
+            "id": "openstack:1c2fc591-facb-4479-a327-520dade1ea15"
+        },
+        "observer": {
+            "typeURI": "service/security",
+            "id": "openstack:3d4a50a9-2b59-438b-bf19-c231f9c7625a"
+        },
+        "eventType": "activity",
+        "eventTime": "2014-02-14T01:20:47.932842+00:00",
+        "action": "<action>",
+        "outcome": "success",
+        "id": "openstack:f5352d7b-bee6-4c22-8213-450e7b646e9f",
+    }
+
+Where the following are defined:
+
+* ``<initiator_id>``: ID of the user that performed the operation
+* ``<target_uri>``: CADF specific target URI, (i.e.:  data/security/project)
+* ``<action>``: The action being performed, typically:
+  ``<operation>``. ``<resource_type>``
+
+Additionally there may be extra keys present depending on the operation being
+performed, these will be discussed below.
+
+Note, the ``eventType`` property of the CADF payload is different from the
+``event_type`` property of a notifications. The former (``eventType``) is a
+CADF keyword which designates the type of event that is being measured, this
+can be: `activity`, `monitor` or `control`. Whereas the latter
+(``event_type``) is described in previous sections as:
+`magnum.<resource_type>.<operation>`
+
+Supported Events
+----------------
+
+The following table displays the corresponding relationship between resource
+types and operations.
+
++---------------+----------------------------+-------------------------+
+| resource type |    supported operations    |       typeURI           |
++===============+============================+=========================+
+| bay           |  create, update, delete    |    service/magnum/bay   |
++---------------+----------------------------+-------------------------+
+
+Example Notification - Bay Create
+---------------------------------
+
+The following is an example of a notification that is sent when a bay is
+created. This example can be applied for any ``create``, ``update`` or
+``delete`` event that is seen in the table above. The ``<action>`` and
+``typeURI`` fields will be change.
+
+.. code-block:: javascript
+
+    {
+        "event_type": "magnum.bay.created",
+        "message_id": "0156ee79-b35f-4cef-ac37-d4a85f231c69",
+        "payload": {
+            "typeURI": "http://schemas.dmtf.org/cloud/audit/1.0/event",
+            "initiator": {
+                "typeURI": "service/security/account/user",
+                "id": "c9f76d3c31e142af9291de2935bde98a",
+                "user_id": "0156ee79-b35f-4cef-ac37-d4a85f231c69",
+                "project_id": "3d4a50a9-2b59-438b-bf19-c231f9c7625a"
+            },
+            "target": {
+                "typeURI": "service/magnum/bay",
+                "id": "openstack:1c2fc591-facb-4479-a327-520dade1ea15"
+            },
+            "observer": {
+                "typeURI": "service/magnum/bay",
+                "id": "openstack:3d4a50a9-2b59-438b-bf19-c231f9c7625a"
+            },
+            "eventType": "activity",
+            "eventTime": "2015-05-20T01:20:47.932842+00:00",
+            "action": "create",
+            "outcome": "success",
+            "id": "openstack:f5352d7b-bee6-4c22-8213-450e7b646e9f",
+            "resource_info": "671da331c47d4e29bb6ea1d270154ec3"
+        }
+        "priority": "INFO",
+        "publisher_id": "magnum.host1234",
+        "timestamp": "2016-05-20 15:03:45.960280"
+    }
