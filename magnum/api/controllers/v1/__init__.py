@@ -29,11 +29,7 @@ from magnum.api.controllers import link
 from magnum.api.controllers.v1 import bay
 from magnum.api.controllers.v1 import baymodel
 from magnum.api.controllers.v1 import certificate
-from magnum.api.controllers.v1 import container
 from magnum.api.controllers.v1 import magnum_services
-from magnum.api.controllers.v1 import pod
-from magnum.api.controllers.v1 import replicationcontroller as rc
-from magnum.api.controllers.v1 import service
 from magnum.api.controllers.v1 import x509keypair
 from magnum.api import expose
 from magnum.i18n import _
@@ -89,23 +85,11 @@ class V1(controllers_base.APIBase):
     links = [link.Link]
     """Links that point to a specific URL for this version and documentation"""
 
-    pods = [link.Link]
-    """Links to the pods resource"""
-
-    rcs = [link.Link]
-    """Links to the rcs resource"""
-
     baymodels = [link.Link]
     """Links to the baymodels resource"""
 
     bays = [link.Link]
     """Links to the bays resource"""
-
-    containers = [link.Link]
-    """Links to the containers resource"""
-
-    services = [link.Link]
-    """Links to the services resource"""
 
     x509keypairs = [link.Link]
 
@@ -128,18 +112,6 @@ class V1(controllers_base.APIBase):
                                         bookmark=True, type='text/html')]
         v1.media_types = [MediaType('application/json',
                           'application/vnd.openstack.magnum.v1+json')]
-        v1.pods = [link.Link.make_link('self', pecan.request.host_url,
-                                       'pods', ''),
-                   link.Link.make_link('bookmark',
-                                       pecan.request.host_url,
-                                       'pods', '',
-                                       bookmark=True)]
-        v1.rcs = [link.Link.make_link('self', pecan.request.host_url,
-                                      'rcs', ''),
-                  link.Link.make_link('bookmark',
-                                      pecan.request.host_url,
-                                      'rcs', '',
-                                      bookmark=True)]
         v1.baymodels = [link.Link.make_link('self', pecan.request.host_url,
                                             'baymodels', ''),
                         link.Link.make_link('bookmark',
@@ -152,18 +124,6 @@ class V1(controllers_base.APIBase):
                                        pecan.request.host_url,
                                        'bays', '',
                                        bookmark=True)]
-        v1.containers = [link.Link.make_link('self', pecan.request.host_url,
-                                             'containers', ''),
-                         link.Link.make_link('bookmark',
-                                             pecan.request.host_url,
-                                             'containers', '',
-                                             bookmark=True)]
-        v1.services = [link.Link.make_link('self', pecan.request.host_url,
-                                           'services', ''),
-                       link.Link.make_link('bookmark',
-                                           pecan.request.host_url,
-                                           'services', '',
-                                           bookmark=True)]
         v1.x509keypairs = [link.Link.make_link('self', pecan.request.host_url,
                                                'x509keypairs', ''),
                            link.Link.make_link('bookmark',
@@ -190,10 +150,6 @@ class Controller(rest.RestController):
 
     bays = bay.BaysController()
     baymodels = baymodel.BayModelsController()
-    containers = container.ContainersController()
-    pods = pod.PodsController()
-    rcs = rc.ReplicationControllersController()
-    services = service.ServicesController()
     x509keypairs = x509keypair.X509KeyPairController()
     certificates = certificate.CertificateController()
     mservices = magnum_services.MagnumServiceController()
