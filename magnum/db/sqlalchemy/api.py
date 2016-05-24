@@ -18,13 +18,13 @@ from oslo_config import cfg
 from oslo_db import exception as db_exc
 from oslo_db.sqlalchemy import session as db_session
 from oslo_db.sqlalchemy import utils as db_utils
+from oslo_utils import strutils
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
 from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from magnum.common import exception
-from magnum.common import utils
 from magnum.db import api
 from magnum.db.sqlalchemy import models
 from magnum.i18n import _
@@ -78,7 +78,7 @@ def add_identity_filter(query, value):
     :param value: Value for filtering results by.
     :return: Modified query.
     """
-    if utils.is_int_like(value):
+    if strutils.is_int_like(value):
         return query.filter_by(id=value)
     elif uuidutils.is_uuid_like(value):
         return query.filter_by(uuid=value)

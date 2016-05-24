@@ -190,14 +190,6 @@ def delete_if_exists(pathname):
             raise
 
 
-def is_int_like(val):
-    """Check if a value looks like an int."""
-    try:
-        return str(int(val)) == str(val)
-    except Exception:
-        return False
-
-
 def is_valid_boolstr(val):
     """Check if the provided string is a valid bool string or not."""
     boolstrs = ('true', 'false', 'yes', 'no', 'y', 'n', '1', '0')

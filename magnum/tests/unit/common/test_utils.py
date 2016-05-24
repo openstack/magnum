@@ -497,27 +497,6 @@ class MkfsTestCase(base.TestCase):
                           'ext4', '/my/block/dev', 'ext4-vol')
 
 
-class IntLikeTestCase(base.TestCase):
-
-    def test_is_int_like(self):
-        self.assertTrue(utils.is_int_like(1))
-        self.assertTrue(utils.is_int_like("1"))
-        self.assertTrue(utils.is_int_like("514"))
-        self.assertTrue(utils.is_int_like("0"))
-
-        self.assertFalse(utils.is_int_like(1.1))
-        self.assertFalse(utils.is_int_like("1.1"))
-        self.assertFalse(utils.is_int_like("1.1.1"))
-        self.assertFalse(utils.is_int_like(None))
-        self.assertFalse(utils.is_int_like("0."))
-        self.assertFalse(utils.is_int_like("aaaaaa"))
-        self.assertFalse(utils.is_int_like("...."))
-        self.assertFalse(utils.is_int_like("1g"))
-        self.assertFalse(
-            utils.is_int_like("0cc3346e-9fef-4445-abe6-5d2b2690ec64"))
-        self.assertFalse(utils.is_int_like("a1"))
-
-
 class TempFilesTestCase(base.TestCase):
 
     def test_tempdir(self):

@@ -10,11 +10,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_utils import strutils
 from oslo_utils import uuidutils
 from oslo_versionedobjects import fields
 
 from magnum.common import exception
-from magnum.common import utils
 from magnum.db import api as dbapi
 from magnum.objects import base
 from magnum.objects import fields as m_fields
@@ -92,7 +92,7 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
         :param context: Security context
         :returns: a :class:`BayModel` object.
         """
-        if utils.is_int_like(baymodel_id):
+        if strutils.is_int_like(baymodel_id):
             return cls.get_by_id(context, baymodel_id)
         elif uuidutils.is_uuid_like(baymodel_id):
             return cls.get_by_uuid(context, baymodel_id)

@@ -10,11 +10,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_utils import strutils
 from oslo_utils import uuidutils
 from oslo_versionedobjects import fields
 
 from magnum.common import exception
-from magnum.common import utils
 from magnum.db import api as dbapi
 from magnum.objects import base
 
@@ -65,7 +65,7 @@ class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject,
         :param context: Security context
         :returns: a :class:`X509KeyPair` object.
         """
-        if utils.is_int_like(x509keypair_id):
+        if strutils.is_int_like(x509keypair_id):
             return cls.get_by_id(context, x509keypair_id)
         elif uuidutils.is_uuid_like(x509keypair_id):
             return cls.get_by_uuid(context, x509keypair_id)
