@@ -29,9 +29,14 @@ class Config(object):
     @classmethod
     def set_user_creds(cls, config):
         # normal user creds
-        cls.user = CONF.identity.username
-        cls.passwd = CONF.identity.password
-        cls.tenant = CONF.identity.project_name
+        # Fixme(eliqiao): this is quick workaround to passing tempest
+        # legacy credentials provider is removed by tempest
+        # I8c24cd17f643083dde71ab2bd2a38417c54aeccb.
+        # TODO(eliqiao): find a way to using an accounts.yaml file
+        # check Ia5132c5cb32355d6f26b8acdd92a0e55a2c19f41
+        cls.user = CONF.auth.admin_username
+        cls.passwd = CONF.auth.admin_password
+        cls.tenant = CONF.auth.admin_project_name
 
     @classmethod
     def set_auth_version(cls, config):
