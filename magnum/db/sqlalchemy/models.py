@@ -194,27 +194,6 @@ class Container(Base):
     environment = Column(JSONEncodedDict)
 
 
-class Pod(Base):
-    """Represents a pod."""
-
-    __tablename__ = 'pod'
-    __table_args__ = (
-        schema.UniqueConstraint('uuid', name='uniq_pod0uuid'),
-        table_args()
-    )
-    id = Column(Integer, primary_key=True)
-    uuid = Column(String(36))
-    name = Column(String(255))
-    desc = Column(String(255))
-    bay_uuid = Column(String(36))
-    images = Column(JSONEncodedList)
-    labels = Column(JSONEncodedDict)
-    status = Column(String(255))
-    project_id = Column(String(255))
-    user_id = Column(String(255))
-    host = Column(String(255))
-
-
 class Service(Base):
     """Represents a software service."""
 

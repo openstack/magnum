@@ -28,13 +28,6 @@ class TestConductorUtils(base.TestCase):
                                                      expected_bay_uuid)
 
     @patch('magnum.objects.Bay.get_by_uuid')
-    def test_retrieve_bay_from_pod(self,
-                                   mock_bay_get_by_uuid):
-        pod = objects.Pod({})
-        pod.bay_uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
-        self._test_retrieve_bay(pod.bay_uuid, mock_bay_get_by_uuid)
-
-    @patch('magnum.objects.Bay.get_by_uuid')
     def test_retrieve_bay_from_service(self,
                                        mock_bay_get_by_uuid):
         service = objects.Service({})

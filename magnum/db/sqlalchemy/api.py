@@ -193,11 +193,6 @@ class Connection(api.Connection):
     def destroy_bay(self, bay_id):
         def destroy_bay_resources(session, bay_uuid):
             """Checks whether the bay does not have resources."""
-            query = model_query(models.Pod, session=session)
-            query = self._add_pods_filters(query, {'bay_uuid': bay_uuid})
-            if query.count() != 0:
-                query.delete()
-
             query = model_query(models.Service, session=session)
             query = self._add_services_filters(query, {'bay_uuid': bay_uuid})
             if query.count() != 0:
@@ -470,101 +465,6 @@ class Connection(api.Connection):
                 ref = query.with_lockmode('update').one()
             except NoResultFound:
                 raise exception.ContainerNotFound(container=container_id)
-
-            if 'provision_state' in values:
-                values['provision_updated_at'] = timeutils.utcnow()
-
-            ref.update(values)
-        return ref
-
-    def _add_pods_filters(self, query, filters):
-        if filters is None:
-            filters = {}
-
-        if 'bay_uuid' in filters:
-            query = query.filter_by(bay_uuid=filters['bay_uuid'])
-        if 'name' in filters:
-            query = query.filter_by(name=filters['name'])
-        if 'status' in filters:
-            query = query.filter_by(status=filters['status'])
-
-        return query
-
-    def get_pod_list(self, context, filters=None, limit=None, marker=None,
-                     sort_key=None, sort_dir=None):
-        query = model_query(models.Pod)
-        query = self._add_tenant_filters(context, query)
-        query = self._add_pods_filters(query, filters)
-        return _paginate_query(models.Pod, limit, marker,
-                               sort_key, sort_dir, query)
-
-    def create_pod(self, values):
-        # ensure defaults are present for new pods
-        if not values.get('uuid'):
-            values['uuid'] = uuidutils.generate_uuid()
-
-        pod = models.Pod()
-        pod.update(values)
-        try:
-            pod.save()
-        except db_exc.DBDuplicateEntry:
-            raise exception.PodAlreadyExists(uuid=values['uuid'])
-        return pod
-
-    def get_pod_by_id(self, context, pod_id):
-        query = model_query(models.Pod)
-        query = self._add_tenant_filters(context, query)
-        query = query.filter_by(id=pod_id)
-        try:
-            return query.one()
-        except NoResultFound:
-            raise exception.PodNotFound(pod=pod_id)
-
-    def get_pod_by_uuid(self, context, pod_uuid):
-        query = model_query(models.Pod)
-        query = self._add_tenant_filters(context, query)
-        query = query.filter_by(uuid=pod_uuid)
-        try:
-            return query.one()
-        except NoResultFound:
-            raise exception.PodNotFound(pod=pod_uuid)
-
-    def get_pod_by_name(self, pod_name):
-        query = model_query(models.Pod).filter_by(name=pod_name)
-        try:
-            return query.one()
-        except MultipleResultsFound:
-            raise exception.Conflict('Multiple pods exist with same name.'
-                                     ' Please use the pod uuid instead.')
-        except NoResultFound:
-            raise exception.PodNotFound(pod=pod_name)
-
-    def destroy_pod(self, pod_id):
-        session = get_session()
-        with session.begin():
-            query = model_query(models.Pod, session=session)
-            query = add_identity_filter(query, pod_id)
-            count = query.delete()
-            if count != 1:
-                raise exception.PodNotFound(pod_id)
-
-    def update_pod(self, pod_id, values):
-        # NOTE(dtantsur): this can lead to very strange errors
-        if 'uuid' in values:
-            msg = _("Cannot overwrite UUID for an existing Pod.")
-            raise exception.InvalidParameterValue(err=msg)
-
-        return self._do_update_pod(pod_id, values)
-
-    def _do_update_pod(self, pod_id, values):
-        session = get_session()
-        with session.begin():
-            query = model_query(models.Pod, session=session)
-            query = add_identity_filter(query, pod_id)
-            try:
-                ref = query.with_lockmode('update').one()
-            except NoResultFound:
-                raise exception.PodNotFound(pod=pod_id)
 
             if 'provision_state' in values:
                 values['provision_updated_at'] = timeutils.utcnow()

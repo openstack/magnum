@@ -34,13 +34,6 @@ policy_data = """
     "baymodel:get_all": "",
     "baymodel:update": "",
 
-    "pod:create": "",
-    "pod:delete": "",
-    "pod:detail": "",
-    "pod:get": "",
-    "pod:get_all": "",
-    "pod:update": "",
-
     "rc:create": "",
     "rc:delete": "",
     "rc:detail": "",

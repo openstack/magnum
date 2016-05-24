@@ -61,26 +61,6 @@ class API(rpc_service.API):
         return self._call('service_show', service_ident=service_ident,
                           bay_ident=bay_ident)
 
-    # Pod Operations
-
-    def pod_create(self, pod):
-        return self._call('pod_create', pod=pod)
-
-    def pod_list(self, context, bay_ident):
-        return self._call('pod_list', bay_ident=bay_ident)
-
-    def pod_update(self, pod_ident, bay_ident, manifest):
-        return self._call('pod_update', pod_ident=pod_ident,
-                          bay_ident=bay_ident, manifest=manifest)
-
-    def pod_delete(self, pod_ident, bay_ident):
-        return self._call('pod_delete', pod_ident=pod_ident,
-                          bay_ident=bay_ident)
-
-    def pod_show(self, context, pod_ident, bay_ident):
-        return self._call('pod_show', pod_ident=pod_ident,
-                          bay_ident=bay_ident)
-
     # ReplicationController Operations
 
     def rc_create(self, rc):

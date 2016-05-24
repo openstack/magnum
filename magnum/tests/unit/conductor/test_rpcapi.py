@@ -29,7 +29,6 @@ class RPCAPITestCase(base.DbTestCase):
         super(RPCAPITestCase, self).setUp()
         self.fake_bay = dbutils.get_test_bay(driver='fake-driver')
         self.fake_container = dbutils.get_test_container(driver='fake-driver')
-        self.fake_pod = dbutils.get_test_pod(driver='fake-driver')
         self.fake_rc = dbutils.get_test_rc(driver='fake-driver')
         self.fake_service = dbutils.get_test_service(driver='fake-driver')
         self.fake_x509keypair = dbutils.get_test_x509keypair(
@@ -127,33 +126,6 @@ class RPCAPITestCase(base.DbTestCase):
                           version='1.1',
                           service_ident=self.fake_service['uuid'],
                           bay_ident=self.fake_service['bay_uuid'])
-
-    def test_pod_create(self):
-        self._test_rpcapi('pod_create',
-                          'call',
-                          version='1.0',
-                          pod=self.fake_pod)
-
-    def test_pod_update(self):
-        self._test_rpcapi('pod_update',
-                          'call',
-                          version='1.1',
-                          pod_ident=self.fake_pod['uuid'],
-                          bay_ident=self.fake_pod['bay_uuid'],
-                          manifest={})
-
-    def test_pod_delete(self):
-        self._test_rpcapi('pod_delete',
-                          'call',
-                          version='1.0',
-                          pod_ident=self.fake_pod['uuid'],
-                          bay_ident=self.fake_pod['bay_uuid'])
-
-        self._test_rpcapi('pod_delete',
-                          'call',
-                          version='1.1',
-                          pod_ident=self.fake_pod['uuid'],
-                          bay_ident=self.fake_pod['bay_uuid'])
 
     def test_rc_create(self):
         self._test_rpcapi('rc_create',

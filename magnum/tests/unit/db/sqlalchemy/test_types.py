@@ -23,40 +23,44 @@ from magnum.tests.unit.db import base
 class SqlAlchemyCustomTypesTestCase(base.DbTestCase):
 
     def test_JSONEncodedDict_default_value(self):
-        # Create pod w/o labels
-        pod1_id = uuidutils.generate_uuid()
-        self.dbapi.create_pod({'uuid': pod1_id})
-        pod1 = sa_api.model_query(models.Pod).filter_by(uuid=pod1_id).one()
-        self.assertEqual({}, pod1.labels)
+        # Create rc w/o labels
+        rc1_id = uuidutils.generate_uuid()
+        self.dbapi.create_rc({'uuid': rc1_id})
+        rc1 = sa_api.model_query(
+            models.ReplicationController).filter_by(uuid=rc1_id).one()
+        self.assertEqual({}, rc1.labels)
 
-        # Create pod with labels
-        pod2_id = uuidutils.generate_uuid()
-        self.dbapi.create_pod({'uuid': pod2_id, 'labels': {'bar': 'foo'}})
-        pod2 = sa_api.model_query(models.Pod).filter_by(uuid=pod2_id).one()
-        self.assertEqual('foo', pod2.labels['bar'])
+        # Create rc with labels
+        rc2_id = uuidutils.generate_uuid()
+        self.dbapi.create_rc({'uuid': rc2_id, 'labels': {'bar': 'foo'}})
+        rc2 = sa_api.model_query(
+            models.ReplicationController).filter_by(uuid=rc2_id).one()
+        self.assertEqual('foo', rc2.labels['bar'])
 
     def test_JSONEncodedDict_type_check(self):
         self.assertRaises(db_exc.DBError,
-                          self.dbapi.create_pod,
+                          self.dbapi.create_rc,
                           {'labels':
                            ['this is not a dict']})
 
     def test_JSONEncodedList_default_value(self):
-        # Create pod w/o images
-        pod1_id = uuidutils.generate_uuid()
-        self.dbapi.create_pod({'uuid': pod1_id})
-        pod1 = sa_api.model_query(models.Pod).filter_by(uuid=pod1_id).one()
-        self.assertEqual([], pod1.images)
+        # Create rc w/o images
+        rc1_id = uuidutils.generate_uuid()
+        self.dbapi.create_rc({'uuid': rc1_id})
+        rc1 = sa_api.model_query(
+            models.ReplicationController).filter_by(uuid=rc1_id).one()
+        self.assertEqual([], rc1.images)
 
-        # Create pod with images
-        pod2_id = uuidutils.generate_uuid()
-        self.dbapi.create_pod({'uuid': pod2_id,
-                               'images': ['myimage1', 'myimage2']})
-        pod2 = sa_api.model_query(models.Pod).filter_by(uuid=pod2_id).one()
-        self.assertEqual(['myimage1', 'myimage2'], pod2.images)
+        # Create rc with images
+        rc2_id = uuidutils.generate_uuid()
+        self.dbapi.create_rc({'uuid': rc2_id,
+                              'images': ['myimage1', 'myimage2']})
+        rc2 = sa_api.model_query(
+            models.ReplicationController).filter_by(uuid=rc2_id).one()
+        self.assertEqual(['myimage1', 'myimage2'], rc2.images)
 
     def test_JSONEncodedList_type_check(self):
         self.assertRaises(db_exc.DBError,
-                          self.dbapi.create_pod,
+                          self.dbapi.create_rc,
                           {'images':
                            {'this is not a list': 'test'}})
