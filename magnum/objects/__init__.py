@@ -18,7 +18,6 @@ from magnum.objects import certificate
 from magnum.objects import container
 from magnum.objects import magnum_service
 from magnum.objects import replicationcontroller as rc
-from magnum.objects import service
 from magnum.objects import x509keypair
 
 
@@ -27,7 +26,6 @@ Bay = bay.Bay
 BayModel = baymodel.BayModel
 MagnumService = magnum_service.MagnumService
 ReplicationController = rc.ReplicationController
-Service = service.Service
 X509KeyPair = x509keypair.X509KeyPair
 Certificate = certificate.Certificate
 __all__ = (Bay,
@@ -35,6 +33,5 @@ __all__ = (Bay,
            Container,
            MagnumService,
            ReplicationController,
-           Service,
            X509KeyPair,
            Certificate)

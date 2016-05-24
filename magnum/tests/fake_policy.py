@@ -41,13 +41,6 @@ policy_data = """
     "rc:get_all": "",
     "rc:update": "",
 
-    "service:create": "",
-    "service:delete": "",
-    "service:detail": "",
-    "service:get": "",
-    "service:get_all": "",
-    "service:update": "",
-
     "container:create": "",
     "container:delete": "",
     "container:detail": "",

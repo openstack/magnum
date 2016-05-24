@@ -111,38 +111,6 @@ def create_test_bay(**kw):
     return dbapi.create_bay(bay)
 
 
-def get_test_service(**kw):
-    return {
-        'id': kw.get('id', 42),
-        'uuid': kw.get('uuid', '10a47dd1-4874-4298-91cf-eff046dbdb8d'),
-        'name': kw.get('name', 'service1'),
-        'project_id': kw.get('project_id', 'fake_project'),
-        'user_id': kw.get('user_id', 'fake_user'),
-        'bay_uuid': kw.get('bay_uuid', '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'),
-        'labels': kw.get('labels', {'name': 'foo'}),
-        'selector': kw.get('selector', {'name': 'foo'}),
-        'ip': kw.get('ip', '172.17.2.2'),
-        'ports': kw.get('ports', [{'port': 80}]),
-        'created_at': kw.get('created_at'),
-        'updated_at': kw.get('updated_at'),
-    }
-
-
-def create_test_service(**kw):
-    """Create test service entry in DB and return Service DB object.
-
-    Function to be used to create test Service objects in the database.
-    :param kw: kwargs with overriding values for service's attributes.
-    :returns: Test Service DB object.
-    """
-    service = get_test_service(**kw)
-    # Let DB generate ID if it isn't specified explicitly
-    if 'id' not in kw:
-        del service['id']
-    dbapi = db_api.get_instance()
-    return dbapi.create_service(service)
-
-
 def get_test_container(**kw):
     return {
         'id': kw.get('id', 42),

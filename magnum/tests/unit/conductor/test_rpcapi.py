@@ -30,7 +30,6 @@ class RPCAPITestCase(base.DbTestCase):
         self.fake_bay = dbutils.get_test_bay(driver='fake-driver')
         self.fake_container = dbutils.get_test_container(driver='fake-driver')
         self.fake_rc = dbutils.get_test_rc(driver='fake-driver')
-        self.fake_service = dbutils.get_test_service(driver='fake-driver')
         self.fake_certificate = objects.Certificate.from_db_bay(self.fake_bay)
         self.fake_certificate.csr = 'fake-csr'
 
@@ -98,32 +97,6 @@ class RPCAPITestCase(base.DbTestCase):
                           'call',
                           version='1.1',
                           bay=self.fake_bay['name'])
-
-    def test_service_create(self):
-        self._test_rpcapi('service_create',
-                          'call',
-                          version='1.0',
-                          service=self.fake_service)
-
-    def test_service_update(self):
-        self._test_rpcapi('service_update',
-                          'call',
-                          version='1.0',
-                          service_ident=self.fake_service['uuid'],
-                          bay_ident=self.fake_service['bay_uuid'],
-                          manifest={})
-
-    def test_service_delete(self):
-        self._test_rpcapi('service_delete',
-                          'call',
-                          version='1.0',
-                          service_ident=self.fake_service['uuid'],
-                          bay_ident=self.fake_service['bay_uuid'])
-        self._test_rpcapi('service_delete',
-                          'call',
-                          version='1.1',
-                          service_ident=self.fake_service['uuid'],
-                          bay_ident=self.fake_service['bay_uuid'])
 
     def test_rc_create(self):
         self._test_rpcapi('rc_create',

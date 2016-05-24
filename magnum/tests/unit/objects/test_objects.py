@@ -363,7 +363,6 @@ object_data = {
     'Container': '1.3-e2d9d2e8a8844d421148cd9fde6c6bd6',
     'MyObj': '1.0-b43567e512438205e32f4e95ca616697',
     'ReplicationController': '1.0-a471c2429c212ed91833cfcf0f934eab',
-    'Service': '1.0-f4a1c5a4618708824a553568c1ada0ea',
     'X509KeyPair': '1.2-d81950af36c59a71365e33ce539d24f9',
     'MagnumService': '1.0-2d397ec59b0046bd5ec35cd3e06efeca',
 }

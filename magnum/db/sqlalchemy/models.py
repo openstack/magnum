@@ -195,26 +195,6 @@ class Container(Base):
     environment = Column(JSONEncodedDict)
 
 
-class Service(Base):
-    """Represents a software service."""
-
-    __tablename__ = 'service'
-    __table_args__ = (
-        schema.UniqueConstraint('uuid', name='uniq_service0uuid'),
-        table_args()
-    )
-    id = Column(Integer, primary_key=True)
-    uuid = Column(String(36))
-    name = Column(String(255))
-    bay_uuid = Column(String(36))
-    labels = Column(JSONEncodedDict)
-    selector = Column(JSONEncodedDict)
-    ip = Column(String(36))
-    ports = Column(JSONEncodedList)
-    project_id = Column(String(255))
-    user_id = Column(String(255))
-
-
 class ReplicationController(Base):
     """Represents a pod replication controller."""
 
