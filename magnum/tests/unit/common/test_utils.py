@@ -14,17 +14,13 @@
 #    under the License.
 
 import errno
-import hashlib
 import os
 import os.path
 import shutil
 import tempfile
 
 import mock
-import netaddr
 from oslo_concurrency import processutils
-import six
-import six.moves.builtins as __builtin__
 
 from magnum.common import exception
 from magnum.common import utils
@@ -32,95 +28,6 @@ from magnum.tests import base
 
 
 class UtilsTestCase(base.TestCase):
-
-    def test_random_alnum(self):
-        s = utils.random_alnum(10)
-        self.assertEqual(10, len(s))
-        s = utils.random_alnum(100)
-        self.assertEqual(100, len(s))
-
-    def test_unlink(self):
-        with mock.patch.object(os, "unlink") as unlink_mock:
-            unlink_mock.return_value = None
-            utils.unlink_without_raise("/fake/path")
-            unlink_mock.assert_called_once_with("/fake/path")
-
-    def test_unlink_ENOENT(self):
-        with mock.patch.object(os, "unlink") as unlink_mock:
-            unlink_mock.side_effect = OSError(errno.ENOENT)
-            utils.unlink_without_raise("/fake/path")
-            unlink_mock.assert_called_once_with("/fake/path")
-
-    def test_create_link(self):
-        with mock.patch.object(os, "symlink") as symlink_mock:
-            symlink_mock.return_value = None
-            utils.create_link_without_raise("/fake/source", "/fake/link")
-            symlink_mock.assert_called_once_with("/fake/source", "/fake/link")
-
-    def test_create_link_EEXIST(self):
-        with mock.patch.object(os, "symlink") as symlink_mock:
-            symlink_mock.side_effect = OSError(errno.EEXIST)
-            utils.create_link_without_raise("/fake/source", "/fake/link")
-            symlink_mock.assert_called_once_with("/fake/source", "/fake/link")
-
-    def test_generate_uid(self):
-        topic = 'test'
-        size = 8
-        s = utils.generate_uid(topic)
-        self.assertEqual(len(topic) + size + 1, len(s))
-        self.assertEqual(topic, s[:len(topic)])
-        size = 22
-        s = utils.generate_uid(topic, size)
-        self.assertEqual(len(topic) + size + 1, len(s))
-
-    def test_valid_ipv4(self):
-        self.assertTrue(utils.is_valid_ipv4('10.0.0.1'))
-        self.assertTrue(utils.is_valid_ipv4('255.255.255.255'))
-
-    def test_invalid_ipv4(self):
-        self.assertFalse(utils.is_valid_ipv4(''))
-        self.assertFalse(utils.is_valid_ipv4('x.x.x.x'))
-        self.assertFalse(utils.is_valid_ipv4('256.256.256.256'))
-        self.assertFalse(utils.is_valid_ipv4(
-                         'AA42:0000:0000:0000:0202:B3FF:FE1E:8329'))
-
-    def test_valid_ipv6(self):
-        self.assertTrue(utils.is_valid_ipv6(
-                        'AA42:0000:0000:0000:0202:B3FF:FE1E:8329'))
-        self.assertTrue(utils.is_valid_ipv6(
-                        'AA42::0202:B3FF:FE1E:8329'))
-
-    def test_invalid_ipv6(self):
-        self.assertFalse(utils.is_valid_ipv6(''))
-        self.assertFalse(utils.is_valid_ipv6('10.0.0.1'))
-        self.assertFalse(utils.is_valid_ipv6('AA42::0202:B3FF:FE1E:'))
-
-    def test_valid_cidr(self):
-        self.assertTrue(utils.is_valid_cidr('10.0.0.0/24'))
-        self.assertTrue(utils.is_valid_cidr('10.0.0.1/32'))
-        self.assertTrue(utils.is_valid_cidr('0.0.0.0/0'))
-
-    def test_invalid_cidr(self):
-        self.assertFalse(utils.is_valid_cidr('10.0.0.1'))
-        self.assertFalse(utils.is_valid_cidr('10.0.0.1/33'))
-
-    def test_valid_network(self):
-        self.assertEqual('IPv4', utils.get_ip_version('10.0.0.1'))
-        self.assertEqual('IPv6', utils.get_ip_version(
-                         'AA42:0000:0000:0000:0202:B3FF:FE1E:8329'))
-
-    def test_invalid_network(self):
-        self.assertRaises(netaddr.core.AddrFormatError,
-                          utils.get_ip_version, 'x.x.x.x')
-
-    def test_convert_to_list_dict(self):
-        self.assertIsNone(utils.convert_to_list_dict(None, 'fred'))
-        self.assertIsNone(utils.convert_to_list_dict('', 'fred'))
-        self.assertEqual([{'fred': 'list'}],
-                         utils.convert_to_list_dict('list', 'fred'))
-        self.assertEqual([{'fred': 'first'}, {'fred': 'second'}],
-                         utils.convert_to_list_dict(['first', 'second'],
-                                                    'fred'))
 
     def test_get_k8s_quantity(self):
         self.assertEqual(1024000.0, utils.get_k8s_quantity('1000Ki'))
@@ -276,134 +183,6 @@ grep foo
             utils.execute('foo', run_as_root=False)
             execute_mock.assert_called_once_with('foo', run_as_root=False)
 
-
-class GenericUtilsTestCase(base.TestCase):
-    def test_hostname_unicode_sanitization(self):
-        hostname = u"\u7684.test.example.com"
-        self.assertEqual("test.example.com",
-                         utils.sanitize_hostname(hostname))
-
-    def test_hostname_sanitize_periods(self):
-        hostname = "....test.example.com..."
-        self.assertEqual("test.example.com",
-                         utils.sanitize_hostname(hostname))
-
-    def test_hostname_sanitize_dashes(self):
-        hostname = "----test.example.com---"
-        self.assertEqual("test.example.com",
-                         utils.sanitize_hostname(hostname))
-
-    def test_hostname_sanitize_characters(self):
-        hostname = "(#@&$!(@*--#&91)(__=+--test-host.example!!.com-0+"
-        self.assertEqual("91----test-host.example.com-0",
-                         utils.sanitize_hostname(hostname))
-
-    def test_hostname_translate(self):
-        hostname = "<}\x1fh\x10e\x08l\x02l\x05o\x12!{>"
-        self.assertEqual("hello", utils.sanitize_hostname(hostname))
-
-    def test_read_cached_file(self):
-        with mock.patch.object(os.path, "getmtime") as getmtime_mock:
-            getmtime_mock.return_value = 1
-
-            cache_data = {"data": 1123, "mtime": 1}
-            data = utils.read_cached_file("/this/is/a/fake", cache_data)
-            self.assertEqual(cache_data["data"], data)
-            getmtime_mock.assert_called_once_with(mock.ANY)
-
-    def test_read_modified_cached_file(self):
-        with mock.patch.object(os.path, "getmtime") as getmtime_mock:
-            with mock.patch.object(__builtin__, 'open') as open_mock:
-                getmtime_mock.return_value = 2
-                fake_contents = "lorem ipsum"
-                fake_file = mock.Mock()
-                fake_file.read.return_value = fake_contents
-                fake_context_manager = mock.MagicMock()
-                fake_context_manager.__enter__.return_value = fake_file
-                fake_context_manager.__exit__.return_value = None
-                open_mock.return_value = fake_context_manager
-
-                cache_data = {"data": 1123, "mtime": 1}
-                self.reload_called = False
-
-                def test_reload(reloaded_data):
-                    self.assertEqual(fake_contents, reloaded_data)
-                    self.reload_called = True
-
-                data = utils.read_cached_file("/this/is/a/fake",
-                                              cache_data,
-                                              reload_func=test_reload)
-
-                self.assertEqual(fake_contents, data)
-                self.assertTrue(self.reload_called)
-                getmtime_mock.assert_called_once_with(mock.ANY)
-                open_mock.assert_called_once_with(mock.ANY)
-                fake_file.read.assert_called_once_with()
-                fake_context_manager.__exit__.assert_called_once_with(mock.ANY,
-                                                                      mock.ANY,
-                                                                      mock.ANY)
-                fake_context_manager.__enter__.assert_called_once_with()
-
-    def test_hash_file(self):
-        data = 'Mary had a little lamb, its fleece as white as snow'
-        flo = six.StringIO(data)
-        h1 = utils.hash_file(flo)
-        h2 = hashlib.sha1(six.b(data)).hexdigest()
-        self.assertEqual(h1, h2)
-
-    def test_is_valid_boolstr(self):
-        self.assertTrue(utils.is_valid_boolstr('true'))
-        self.assertTrue(utils.is_valid_boolstr('false'))
-        self.assertTrue(utils.is_valid_boolstr('yes'))
-        self.assertTrue(utils.is_valid_boolstr('no'))
-        self.assertTrue(utils.is_valid_boolstr('y'))
-        self.assertTrue(utils.is_valid_boolstr('n'))
-        self.assertTrue(utils.is_valid_boolstr('1'))
-        self.assertTrue(utils.is_valid_boolstr('0'))
-
-        self.assertFalse(utils.is_valid_boolstr('maybe'))
-        self.assertFalse(utils.is_valid_boolstr('only on tuesdays'))
-
-    def test_is_valid_ipv6_cidr(self):
-        self.assertTrue(utils.is_valid_ipv6_cidr("2600::/64"))
-        self.assertTrue(utils.is_valid_ipv6_cidr(
-            "abcd:ef01:2345:6789:abcd:ef01:192.168.254.254/48"))
-        self.assertTrue(utils.is_valid_ipv6_cidr(
-            "0000:0000:0000:0000:0000:0000:0000:0001/32"))
-        self.assertTrue(utils.is_valid_ipv6_cidr(
-            "0000:0000:0000:0000:0000:0000:0000:0001"))
-        self.assertFalse(utils.is_valid_ipv6_cidr("foo"))
-        self.assertFalse(utils.is_valid_ipv6_cidr("127.0.0.1"))
-
-    def test_get_shortened_ipv6(self):
-        self.assertEqual("abcd:ef01:2345:6789:abcd:ef01:c0a8:fefe",
-                         utils.get_shortened_ipv6(
-                             "abcd:ef01:2345:6789:abcd:ef01:192.168.254.254"))
-        self.assertEqual("::1",
-                         utils.get_shortened_ipv6(
-                             "0000:0000:0000:0000:0000:0000:0000:0001"))
-        self.assertEqual("caca::caca:0:babe:201:102",
-                         utils.get_shortened_ipv6(
-                             "caca:0000:0000:caca:0000:babe:0201:0102"))
-        self.assertRaises(netaddr.AddrFormatError, utils.get_shortened_ipv6,
-                          "127.0.0.1")
-        self.assertRaises(netaddr.AddrFormatError, utils.get_shortened_ipv6,
-                          "failure")
-
-    def test_get_shortened_ipv6_cidr(self):
-        self.assertEqual("2600::/64",
-                         utils.get_shortened_ipv6_cidr(
-                             "2600:0000:0000:0000:0000:0000:0000:0000/64"))
-        self.assertEqual("2600::/64",
-                         utils.get_shortened_ipv6_cidr(
-                             "2600::1/64"))
-        self.assertRaises(netaddr.AddrFormatError,
-                          utils.get_shortened_ipv6_cidr,
-                          "127.0.0.1")
-        self.assertRaises(netaddr.AddrFormatError,
-                          utils.get_shortened_ipv6_cidr,
-                          "failure")
-
     def test_is_valid_mac(self):
         self.assertTrue(utils.is_valid_mac("52:54:00:cf:2d:31"))
         self.assertTrue(utils.is_valid_mac(u"52:54:00:cf:2d:31"))
@@ -444,57 +223,6 @@ class GenericUtilsTestCase(base.TestCase):
         # In the case of raising an exception safe_rstrip() should return the
         # original value.
         self.assertEqual(value, utils.safe_rstrip(value))
-
-
-class MkfsTestCase(base.TestCase):
-
-    @mock.patch.object(utils, 'execute')
-    def test_mkfs(self, execute_mock):
-        utils.mkfs('ext4', '/my/block/dev')
-        utils.mkfs('msdos', '/my/msdos/block/dev')
-        utils.mkfs('swap', '/my/swap/block/dev')
-
-        expected = [mock.call('mkfs', '-t', 'ext4', '-F', '/my/block/dev',
-                              run_as_root=True,
-                              use_standard_locale=True),
-                    mock.call('mkfs', '-t', 'msdos', '/my/msdos/block/dev',
-                              run_as_root=True,
-                              use_standard_locale=True),
-                    mock.call('mkswap', '/my/swap/block/dev',
-                              run_as_root=True,
-                              use_standard_locale=True)]
-        self.assertEqual(expected, execute_mock.call_args_list)
-
-    @mock.patch.object(utils, 'execute')
-    def test_mkfs_with_label(self, execute_mock):
-        utils.mkfs('ext4', '/my/block/dev', 'ext4-vol')
-        utils.mkfs('msdos', '/my/msdos/block/dev', 'msdos-vol')
-        utils.mkfs('swap', '/my/swap/block/dev', 'swap-vol')
-
-        expected = [mock.call('mkfs', '-t', 'ext4', '-F', '-L', 'ext4-vol',
-                              '/my/block/dev', run_as_root=True,
-                              use_standard_locale=True),
-                    mock.call('mkfs', '-t', 'msdos', '-n', 'msdos-vol',
-                              '/my/msdos/block/dev', run_as_root=True,
-                              use_standard_locale=True),
-                    mock.call('mkswap', '-L', 'swap-vol',
-                              '/my/swap/block/dev', run_as_root=True,
-                              use_standard_locale=True)]
-        self.assertEqual(expected, execute_mock.call_args_list)
-
-    @mock.patch.object(utils, 'execute',
-                       side_effect=processutils.ProcessExecutionError(
-                           stderr=os.strerror(errno.ENOENT)))
-    def test_mkfs_with_unsupported_fs(self, execute_mock):
-        self.assertRaises(exception.FileSystemNotSupported,
-                          utils.mkfs, 'foo', '/my/block/dev')
-
-    @mock.patch.object(utils, 'execute',
-                       side_effect=processutils.ProcessExecutionError(
-                           stderr='fake'))
-    def test_mkfs_with_unexpected_error(self, execute_mock):
-        self.assertRaises(processutils.ProcessExecutionError, utils.mkfs,
-                          'ext4', '/my/block/dev', 'ext4-vol')
 
 
 class TempFilesTestCase(base.TestCase):
@@ -538,38 +266,6 @@ class TempFilesTestCase(base.TestCase):
 
         rmtree_mock.assert_called_once_with(tempdir_created)
         self.assertTrue(log_mock.error.called)
-
-
-class Urllib2_invalid_scheme(base.TestCase):
-    def test_raise_exception_invalid_scheme_file(self):
-        self.assertRaises(
-            exception.Urllib2InvalidScheme,
-            utils.raise_exception_invalid_scheme,
-            'file:///etc/passwd')
-
-    def test_raise_exception_invalid_scheme_starting_colon(self):
-        self.assertRaises(
-            exception.Urllib2InvalidScheme,
-            utils.raise_exception_invalid_scheme,
-            ':///etc/passwd')
-
-    def test_raise_exception_invalid_scheme_None(self):
-        self.assertRaises(
-            exception.Urllib2InvalidScheme,
-            utils.raise_exception_invalid_scheme,
-            None)
-
-    def test_raise_exception_invalid_scheme_empty_string(self):
-        self.assertRaises(
-            exception.Urllib2InvalidScheme,
-            utils.raise_exception_invalid_scheme,
-            '')
-
-    def test_raise_exception_invalid_scheme_http(self):
-        utils.raise_exception_invalid_scheme(url='http://www.openstack.org')
-
-    def test_raise_exception_invalid_scheme_https(self):
-        utils.raise_exception_invalid_scheme(url='https://www.openstack.org')
 
 
 class GeneratePasswordTestCase(base.TestCase):

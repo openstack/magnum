@@ -15,7 +15,15 @@
 """Magnum object test utilities."""
 
 
+import datetime
+
+import iso8601
+import netaddr
+from oslo_utils import timeutils
+import six
+
 from magnum.common import exception
+from magnum.i18n import _
 from magnum import objects
 from magnum.tests.unit.db import utils as db_utils
 
@@ -222,3 +230,68 @@ def get_test_container(context, **kw):
     for key in db_container:
         setattr(container, key, db_container[key])
     return container
+
+
+def datetime_or_none(dt):
+    """Validate a datetime or None value."""
+    if dt is None:
+        return None
+    elif isinstance(dt, datetime.datetime):
+        if dt.utcoffset() is None:
+            # NOTE(danms): Legacy objects from sqlalchemy are stored in UTC,
+            # but are returned without a timezone attached.
+            # As a transitional aid, assume a tz-naive object is in UTC.
+            return dt.replace(tzinfo=iso8601.iso8601.Utc())
+        else:
+            return dt
+    raise ValueError(_("A datetime.datetime is required here"))
+
+
+def datetime_or_str_or_none(val):
+    if isinstance(val, six.string_types):
+        return timeutils.parse_isotime(val)
+    return datetime_or_none(val)
+
+
+def int_or_none(val):
+    """Attempt to parse an integer value, or None."""
+    if val is None:
+        return val
+    else:
+        return int(val)
+
+
+def str_or_none(val):
+    """Attempt to stringify a value to unicode, or None."""
+    if val is None:
+        return val
+    else:
+        return six.text_type(val)
+
+
+def ip_or_none(version):
+    """Return a version-specific IP address validator."""
+    def validator(val, version=version):
+        if val is None:
+            return val
+        else:
+            return netaddr.IPAddress(val, version=version)
+    return validator
+
+
+def dt_serializer(name):
+    """Return a datetime serializer for a named attribute."""
+    def serializer(self, name=name):
+        if getattr(self, name) is not None:
+            return datetime.datetime.isoformat(getattr(self, name))
+        else:
+            return None
+    return serializer
+
+
+def dt_deserializer(instance, val):
+    """A deserializer method for datetime attributes."""
+    if val is None:
+        return None
+    else:
+        return timeutils.parse_isotime(val)
