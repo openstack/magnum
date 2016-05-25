@@ -15,6 +15,7 @@
 
 import jsonpatch
 from oslo_config import cfg
+from oslo_utils import uuidutils
 import pecan
 import wsme
 
@@ -92,7 +93,7 @@ def get_resource(resource, resource_ident):
     """
     resource = getattr(objects, resource)
 
-    if utils.is_uuid_like(resource_ident):
+    if uuidutils.is_uuid_like(resource_ident):
         return resource.get_by_uuid(pecan.request.context, resource_ident)
 
     return resource.get_by_name(pecan.request.context, resource_ident)
@@ -109,7 +110,7 @@ def get_openstack_resource(manager, resource_ident, resource_type):
     :raises: ResourceNotFound if the openstack resource is not exist.
              Conflict if multi openstack resources have same name.
     """
-    if utils.is_uuid_like(resource_ident):
+    if uuidutils.is_uuid_like(resource_ident):
         resource_data = manager.get(resource_ident)
     else:
         filters = {'name': resource_ident}

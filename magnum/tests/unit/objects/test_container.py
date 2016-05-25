@@ -14,9 +14,9 @@
 #    under the License.
 
 import mock
+from oslo_utils import uuidutils
 from testtools.matchers import HasLength
 
-from magnum.common import utils as magnum_utils
 from magnum import objects
 from magnum.tests.unit.db import base
 from magnum.tests.unit.db import utils
@@ -125,7 +125,7 @@ class TestContainerObject(base.DbTestCase):
 
     def test_refresh(self):
         uuid = self.fake_container['uuid']
-        new_uuid = magnum_utils.generate_uuid()
+        new_uuid = uuidutils.generate_uuid()
         returns = [dict(self.fake_container, uuid=uuid),
                    dict(self.fake_container, uuid=new_uuid)]
         expected = [mock.call(self.context, uuid),

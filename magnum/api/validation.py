@@ -15,11 +15,11 @@
 
 import decorator
 from oslo_config import cfg
+from oslo_utils import uuidutils
 import pecan
 
 from magnum.api import utils as api_utils
 from magnum.common import exception
-from magnum.common import utils
 from magnum.i18n import _
 from magnum import objects
 
@@ -71,7 +71,7 @@ def enforce_bay_types(*bay_types):
             bay = objects.Bay.get_by_uuid(pecan.request.context, obj.bay_uuid)
         else:
             bay_ident = args[2]
-            if utils.is_uuid_like(bay_ident):
+            if uuidutils.is_uuid_like(bay_ident):
                 bay = objects.Bay.get_by_uuid(pecan.request.context, bay_ident)
             else:
                 bay = objects.Bay.get_by_name(pecan.request.context, bay_ident)

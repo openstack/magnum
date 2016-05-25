@@ -14,11 +14,10 @@
 #    under the License.
 
 """Tests for manipulating Baymodel via the DB API"""
-
+from oslo_utils import uuidutils
 import six
 
 from magnum.common import exception
-from magnum.common import utils as magnum_utils
 from magnum.tests.unit.db import base
 from magnum.tests.unit.db import utils
 
@@ -32,7 +31,7 @@ class DbBaymodelTestCase(base.DbTestCase):
         uuids = []
         for i in range(1, 6):
             bm = utils.create_test_baymodel(id=i,
-                                            uuid=magnum_utils.generate_uuid())
+                                            uuid=uuidutils.generate_uuid())
             uuids.append(six.text_type(bm['uuid']))
         res = self.dbapi.get_baymodel_list(self.context)
         res_uuids = [r.uuid for r in res]
@@ -41,7 +40,7 @@ class DbBaymodelTestCase(base.DbTestCase):
     def test_get_baymodel_list_sorted(self):
         uuids = []
         for _ in range(5):
-            bm = utils.create_test_baymodel(uuid=magnum_utils.generate_uuid())
+            bm = utils.create_test_baymodel(uuid=uuidutils.generate_uuid())
             uuids.append(six.text_type(bm['uuid']))
         res = self.dbapi.get_baymodel_list(self.context, sort_key='uuid')
         res_uuids = [r.uuid for r in res]
@@ -56,12 +55,12 @@ class DbBaymodelTestCase(base.DbTestCase):
         bm1 = utils.create_test_baymodel(
             id=1,
             name='bm-one',
-            uuid=magnum_utils.generate_uuid(),
+            uuid=uuidutils.generate_uuid(),
             image_id='image1')
         bm2 = utils.create_test_baymodel(
             id=2,
             name='bm-two',
-            uuid=magnum_utils.generate_uuid(),
+            uuid=uuidutils.generate_uuid(),
             image_id='image2')
 
         res = self.dbapi.get_baymodel_list(self.context,
@@ -119,11 +118,11 @@ class DbBaymodelTestCase(base.DbTestCase):
     def test_get_baymodel_by_name_multiple_baymodel(self):
         utils.create_test_baymodel(
             id=1, name='bm',
-            uuid=magnum_utils.generate_uuid(),
+            uuid=uuidutils.generate_uuid(),
             image_id='image1')
         utils.create_test_baymodel(
             id=2, name='bm',
-            uuid=magnum_utils.generate_uuid(),
+            uuid=uuidutils.generate_uuid(),
             image_id='image2')
         self.assertRaises(exception.Conflict, self.dbapi.get_baymodel_by_name,
                           self.context, 'bm')
@@ -156,7 +155,7 @@ class DbBaymodelTestCase(base.DbTestCase):
                           self.context, bm['id'])
 
     def test_destroy_baymodel_by_uuid(self):
-        uuid = magnum_utils.generate_uuid()
+        uuid = uuidutils.generate_uuid()
         utils.create_test_baymodel(uuid=uuid)
         self.assertIsNotNone(self.dbapi.get_baymodel_by_uuid(self.context,
                                                              uuid))
@@ -176,7 +175,7 @@ class DbBaymodelTestCase(base.DbTestCase):
                           self.dbapi.destroy_baymodel, bm['id'])
 
     def test_create_baymodel_already_exists(self):
-        uuid = magnum_utils.generate_uuid()
+        uuid = uuidutils.generate_uuid()
         utils.create_test_baymodel(id=1, uuid=uuid)
         self.assertRaises(exception.BayModelAlreadyExists,
                           utils.create_test_baymodel,

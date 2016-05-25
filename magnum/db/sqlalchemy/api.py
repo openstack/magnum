@@ -19,6 +19,7 @@ from oslo_db import exception as db_exc
 from oslo_db.sqlalchemy import session as db_session
 from oslo_db.sqlalchemy import utils as db_utils
 from oslo_utils import timeutils
+from oslo_utils import uuidutils
 from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -79,7 +80,7 @@ def add_identity_filter(query, value):
     """
     if utils.is_int_like(value):
         return query.filter_by(id=value)
-    elif utils.is_uuid_like(value):
+    elif uuidutils.is_uuid_like(value):
         return query.filter_by(uuid=value)
     else:
         raise exception.InvalidIdentity(identity=value)
@@ -149,7 +150,7 @@ class Connection(api.Connection):
     def create_bay(self, values):
         # ensure defaults are present for new bays
         if not values.get('uuid'):
-            values['uuid'] = utils.generate_uuid()
+            values['uuid'] = uuidutils.generate_uuid()
 
         bay = models.Bay()
         bay.update(values)
@@ -279,7 +280,7 @@ class Connection(api.Connection):
     def create_baymodel(self, values):
         # ensure defaults are present for new baymodels
         if not values.get('uuid'):
-            values['uuid'] = utils.generate_uuid()
+            values['uuid'] = uuidutils.generate_uuid()
 
         baymodel = models.BayModel()
         baymodel.update(values)
@@ -402,7 +403,7 @@ class Connection(api.Connection):
     def create_container(self, values):
         # ensure defaults are present for new containers
         if not values.get('uuid'):
-            values['uuid'] = utils.generate_uuid()
+            values['uuid'] = uuidutils.generate_uuid()
 
         container = models.Container()
         container.update(values)
@@ -500,7 +501,7 @@ class Connection(api.Connection):
     def create_pod(self, values):
         # ensure defaults are present for new pods
         if not values.get('uuid'):
-            values['uuid'] = utils.generate_uuid()
+            values['uuid'] = uuidutils.generate_uuid()
 
         pod = models.Pod()
         pod.update(values)
@@ -597,7 +598,7 @@ class Connection(api.Connection):
     def create_service(self, values):
         # ensure defaults are present for new services
         if not values.get('uuid'):
-            values['uuid'] = utils.generate_uuid()
+            values['uuid'] = uuidutils.generate_uuid()
 
         service = models.Service()
         service.update(values)
@@ -694,7 +695,7 @@ class Connection(api.Connection):
     def create_rc(self, values):
         # ensure defaults are present for new ReplicationController
         if not values.get('uuid'):
-            values['uuid'] = utils.generate_uuid()
+            values['uuid'] = uuidutils.generate_uuid()
 
         rc = models.ReplicationController()
         rc.update(values)
@@ -767,7 +768,7 @@ class Connection(api.Connection):
     def create_x509keypair(self, values):
         # ensure defaults are present for new x509keypairs
         if not values.get('uuid'):
-            values['uuid'] = utils.generate_uuid()
+            values['uuid'] = uuidutils.generate_uuid()
 
         x509keypair = models.X509KeyPair()
         x509keypair.update(values)

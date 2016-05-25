@@ -15,11 +15,11 @@
 
 """Tests for manipulating X509KeyPairs via the DB API"""
 
+from oslo_utils import uuidutils
 import six
 
 from magnum.common import context
 from magnum.common import exception
-from magnum.common import utils as magnum_utils
 from magnum.tests.unit.db import base
 from magnum.tests.unit.db import utils
 
@@ -70,25 +70,25 @@ class DbX509KeyPairTestCase(base.DbTestCase):
         uuids = []
         for i in range(1, 6):
             x509keypair = utils.create_test_x509keypair(
-                uuid=magnum_utils.generate_uuid())
+                uuid=uuidutils.generate_uuid())
             uuids.append(six.text_type(x509keypair['uuid']))
         res = self.dbapi.get_x509keypair_list(self.context)
         res_uuids = [r.uuid for r in res]
         self.assertEqual(sorted(uuids), sorted(res_uuids))
 
     def test_get_x509keypair_list_with_filters(self):
-        bay1 = utils.get_test_bay(id=1, uuid=magnum_utils.generate_uuid())
-        bay2 = utils.get_test_bay(id=2, uuid=magnum_utils.generate_uuid())
+        bay1 = utils.get_test_bay(id=1, uuid=uuidutils.generate_uuid())
+        bay2 = utils.get_test_bay(id=2, uuid=uuidutils.generate_uuid())
         self.dbapi.create_bay(bay1)
         self.dbapi.create_bay(bay2)
 
         x509keypair1 = utils.create_test_x509keypair(
             name='x509keypair-one',
-            uuid=magnum_utils.generate_uuid(),
+            uuid=uuidutils.generate_uuid(),
             bay_uuid=bay1['uuid'])
         x509keypair2 = utils.create_test_x509keypair(
             name='x509keypair-two',
-            uuid=magnum_utils.generate_uuid(),
+            uuid=uuidutils.generate_uuid(),
             bay_uuid=bay2['uuid'])
         x509keypair3 = utils.create_test_x509keypair(
             name='x509keypair-three',
@@ -115,9 +115,9 @@ class DbX509KeyPairTestCase(base.DbTestCase):
         uuids = []
         for i in range(1, 6):
             x509keypair = utils.create_test_x509keypair(
-                uuid=magnum_utils.generate_uuid(),
-                project_id=magnum_utils.generate_uuid(),
-                user_id=magnum_utils.generate_uuid())
+                uuid=uuidutils.generate_uuid(),
+                project_id=uuidutils.generate_uuid(),
+                user_id=uuidutils.generate_uuid())
             uuids.append(six.text_type(x509keypair['uuid']))
         ctx = context.make_admin_context(all_tenants=True)
         res = self.dbapi.get_x509keypair_list(ctx)
@@ -128,7 +128,7 @@ class DbX509KeyPairTestCase(base.DbTestCase):
         utils.create_test_x509keypair()
         self.assertEqual(1, len(self.dbapi.get_x509keypair_list(self.context)))
         res = self.dbapi.get_x509keypair_list(self.context, filters={
-            'bay_uuid': magnum_utils.generate_uuid()})
+            'bay_uuid': uuidutils.generate_uuid()})
         self.assertEqual(0, len(res))
 
     def test_destroy_x509keypair(self):

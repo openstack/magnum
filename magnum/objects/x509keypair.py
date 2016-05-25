@@ -10,6 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_utils import uuidutils
 from oslo_versionedobjects import fields
 
 from magnum.common import exception
@@ -66,7 +67,7 @@ class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject,
         """
         if utils.is_int_like(x509keypair_id):
             return cls.get_by_id(context, x509keypair_id)
-        elif utils.is_uuid_like(x509keypair_id):
+        elif uuidutils.is_uuid_like(x509keypair_id):
             return cls.get_by_uuid(context, x509keypair_id)
         else:
             raise exception.InvalidIdentity(identity=x509keypair_id)

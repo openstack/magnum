@@ -26,7 +26,6 @@ import random
 import re
 import shutil
 import tempfile
-import uuid
 
 import netaddr
 from oslo_concurrency import processutils
@@ -469,23 +468,6 @@ def safe_rstrip(value, chars=None):
         return value
 
     return value.rstrip(chars) or value
-
-
-def generate_uuid():
-    return str(uuid.uuid4())
-
-
-def is_uuid_like(val):
-    """Returns validation of a value as a UUID.
-
-    For our purposes, a UUID is a canonical form string:
-    aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
-
-    """
-    try:
-        return str(uuid.UUID(val)) == val
-    except (TypeError, ValueError, AttributeError):
-        return False
 
 
 def mount(src, dest, *args):

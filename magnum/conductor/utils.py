@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from oslo_utils import uuidutils
 from pycadf import cadftaxonomy as taxonomy
 from pycadf import cadftype
 from pycadf import eventfactory
@@ -19,13 +20,12 @@ from pycadf import resource
 
 from magnum.common import clients
 from magnum.common import rpc
-from magnum.common import utils
 from magnum.objects import bay
 from magnum.objects import baymodel
 
 
 def retrieve_bay(context, bay_ident):
-    if not utils.is_uuid_like(bay_ident):
+    if not uuidutils.is_uuid_like(bay_ident):
         return bay.Bay.get_by_name(context, bay_ident)
     else:
         return bay.Bay.get_by_uuid(context, bay_ident)
@@ -36,7 +36,7 @@ def retrieve_baymodel(context, bay):
 
 
 def retrieve_bay_uuid(context, bay_ident):
-    if not utils.is_uuid_like(bay_ident):
+    if not uuidutils.is_uuid_like(bay_ident):
         bay_obj = bay.Bay.get_by_name(context, bay_ident)
         return bay_obj.uuid
     else:

@@ -10,6 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_utils import uuidutils
 from oslo_versionedobjects import fields
 
 from magnum.common import exception
@@ -93,7 +94,7 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
         """
         if utils.is_int_like(baymodel_id):
             return cls.get_by_id(context, baymodel_id)
-        elif utils.is_uuid_like(baymodel_id):
+        elif uuidutils.is_uuid_like(baymodel_id):
             return cls.get_by_uuid(context, baymodel_id)
         else:
             raise exception.InvalidIdentity(identity=baymodel_id)

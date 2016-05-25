@@ -17,10 +17,10 @@ import datetime
 import mock
 from oslo_config import cfg
 from oslo_utils import timeutils
+from oslo_utils import uuidutils
 from six.moves.urllib import parse as urlparse
 
 from magnum.api.controllers.v1 import x509keypair as api_x509keypair
-from magnum.common import utils
 from magnum.conductor import api as rpcapi
 from magnum import objects
 from magnum.tests import base
@@ -85,10 +85,10 @@ class TestListX509KeyPair(api_base.FunctionalTest):
     def test_get_one_by_name_multiple_x509keypair(self):
         obj_utils.create_test_x509keypair(self.context,
                                           name='test_x509keypair',
-                                          uuid=utils.generate_uuid())
+                                          uuid=uuidutils.generate_uuid())
         obj_utils.create_test_x509keypair(self.context,
                                           name='test_x509keypair',
-                                          uuid=utils.generate_uuid())
+                                          uuid=uuidutils.generate_uuid())
         response = self.get_json('/x509keypairs/test_x509keypair',
                                  expect_errors=True)
         self.assertEqual(409, response.status_int)
@@ -116,7 +116,7 @@ class TestListX509KeyPair(api_base.FunctionalTest):
         for id_ in range(5):
             x509keypair = obj_utils.create_test_x509keypair(
                 self.context, id=id_,
-                uuid=utils.generate_uuid())
+                uuid=uuidutils.generate_uuid())
             keypair_list.append(x509keypair.uuid)
         response = self.get_json('/x509keypairs')
         self.assertEqual(len(keypair_list), len(response['x509keypairs']))
@@ -124,7 +124,7 @@ class TestListX509KeyPair(api_base.FunctionalTest):
         self.assertEqual(sorted(keypair_list), sorted(uuids))
 
     def test_links(self):
-        uuid = utils.generate_uuid()
+        uuid = uuidutils.generate_uuid()
         obj_utils.create_test_x509keypair(self.context, id=1, uuid=uuid)
         response = self.get_json('/x509keypairs/%s' % uuid)
         self.assertIn('links', response.keys())
@@ -137,7 +137,7 @@ class TestListX509KeyPair(api_base.FunctionalTest):
     def test_collection_links(self):
         for id_ in range(5):
             obj_utils.create_test_x509keypair(self.context, id=id_,
-                                              uuid=utils.generate_uuid())
+                                              uuid=uuidutils.generate_uuid())
         response = self.get_json('/x509keypairs/?limit=3')
         self.assertEqual(3, len(response['x509keypairs']))
 
@@ -148,7 +148,7 @@ class TestListX509KeyPair(api_base.FunctionalTest):
         cfg.CONF.set_override('max_limit', 3, 'api')
         for id_ in range(5):
             obj_utils.create_test_x509keypair(self.context, id=id_,
-                                              uuid=utils.generate_uuid())
+                                              uuid=uuidutils.generate_uuid())
         response = self.get_json('/x509keypairs')
         self.assertEqual(3, len(response['x509keypairs']))
 
@@ -222,7 +222,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
         self.assertEqual(cdict['name'], response.json['name'])
-        self.assertTrue(utils.is_uuid_like(response.json['uuid']))
+        self.assertTrue(uuidutils.is_uuid_like(response.json['uuid']))
 
     def test_create_x509keypair_no_bay_uuid(self):
         cdict = apiutils.x509keypair_post_data()
@@ -232,7 +232,8 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
 
     def test_create_x509keypair_with_non_existent_bay_uuid(self):
-        cdict = apiutils.x509keypair_post_data(bay_uuid=utils.generate_uuid())
+        cdict = apiutils.x509keypair_post_data(
+            bay_uuid=uuidutils.generate_uuid())
         response = self.post_json('/x509keypairs', cdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
@@ -271,7 +272,7 @@ class TestDelete(api_base.FunctionalTest):
         self.assertTrue(response.json['errors'])
 
     def test_delete_x509keypair_not_found(self):
-        uuid = utils.generate_uuid()
+        uuid = uuidutils.generate_uuid()
         response = self.delete('/x509keypairs/%s' % uuid, expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
@@ -291,10 +292,10 @@ class TestDelete(api_base.FunctionalTest):
     def test_delete_multiple_x509keypair_by_name(self):
         obj_utils.create_test_x509keypair(self.context,
                                           name='test_x509keypair',
-                                          uuid=utils.generate_uuid())
+                                          uuid=uuidutils.generate_uuid())
         obj_utils.create_test_x509keypair(self.context,
                                           name='test_x509keypair',
-                                          uuid=utils.generate_uuid())
+                                          uuid=uuidutils.generate_uuid())
         response = self.delete('/x509keypairs/test_x509keypair',
                                expect_errors=True)
         self.assertEqual(409, response.status_int)

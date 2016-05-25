@@ -14,10 +14,10 @@
 #    under the License.
 
 import mock
+from oslo_utils import uuidutils
 from testtools.matchers import HasLength
 
 from magnum.common import exception
-from magnum.common import utils as magnum_utils
 from magnum import objects
 from magnum.tests.unit.db import base
 from magnum.tests.unit.db import utils
@@ -171,7 +171,7 @@ class TestBayObject(base.DbTestCase):
     @mock.patch('magnum.objects.BayModel.get_by_uuid')
     def test_refresh(self, mock_baymodel_get):
         uuid = self.fake_bay['uuid']
-        new_uuid = magnum_utils.generate_uuid()
+        new_uuid = uuidutils.generate_uuid()
         returns = [dict(self.fake_bay, uuid=uuid),
                    dict(self.fake_bay, uuid=new_uuid)]
         expected = [mock.call(self.context, uuid),
