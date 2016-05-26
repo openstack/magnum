@@ -26,7 +26,7 @@ class Manager(clients.Manager):
         if not credentials:
             credentials = common_creds.get_configured_credentials(
                 'identity_admin')
-        super(Manager, self).__init__(credentials, 'container')
+        super(Manager, self).__init__(credentials, 'container-infra')
         self.auth_provider.orig_base_url = self.auth_provider.base_url
         self.auth_provider.base_url = self.bypassed_base_url
         if request_type == 'baymodel':
@@ -42,7 +42,8 @@ class Manager(clients.Manager):
             self.client = client.MagnumClient(self.auth_provider)
 
     def bypassed_base_url(self, filters, auth_data=None):
-        if config.Config.magnum_url and filters['service'] == 'container':
+        if (config.Config.magnum_url and
+                filters['service'] == 'container-infra'):
             return config.Config.magnum_url
         return self.auth_provider.orig_base_url(filters, auth_data=auth_data)
 

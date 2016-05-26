@@ -243,14 +243,14 @@ backend::
 Configure the keystone endpoint::
 
     openstack service create --name=magnum \
-                              --description="Magnum Container Service" \
-                              container
+                              --description="Container Infrastructure Management Service" \
+                              container-infra
     openstack endpoint create --region=RegionOne \
-                              container public http://127.0.0.1:9511/v1
+                              container-infra public http://127.0.0.1:9511/v1
     openstack endpoint create --region=RegionOne \
-                              container internal http://127.0.0.1:9511/v1
+                              container-infra internal http://127.0.0.1:9511/v1
     openstack endpoint create --region=RegionOne \
-                              container admin http://127.0.0.1:9511/v1
+                              container-infra admin http://127.0.0.1:9511/v1
 
 
 Start the API service in a new screen::

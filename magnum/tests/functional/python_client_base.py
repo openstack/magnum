@@ -95,7 +95,7 @@ class BaseMagnumClient(base.BaseMagnumTest):
                                  project_id=tenant_id,
                                  project_name=tenant,
                                  auth_url=auth_url,
-                                 service_type='container',
+                                 service_type='container-infra',
                                  region_name=region_name,
                                  magnum_url=magnum_url)
         cls.keystone = ksclient.Client(username=user,

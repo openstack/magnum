@@ -59,7 +59,7 @@ class ClientsTest(base.BaseTestCase):
 
         mock_endpoint = mock_keystone.return_value.session.get_endpoint
         mock_endpoint.assert_called_once_with(region_name=fake_region,
-                                              service_type='container',
+                                              service_type='container-infra',
                                               interface=fake_endpoint)
 
     @mock.patch.object(heatclient, 'Client')
