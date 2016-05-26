@@ -132,17 +132,17 @@ class UtilsTestCase(base.TestCase):
         self.assertRaises(exception.UnsupportedK8sQuantityFormat,
                           utils.get_k8s_quantity, '1E1E')
 
-    def test_get_docker_quanity(self):
-        self.assertEqual(512, utils.get_docker_quanity('512'))
-        self.assertEqual(512, utils.get_docker_quanity('512b'))
-        self.assertEqual(512 * 1024, utils.get_docker_quanity('512k'))
-        self.assertEqual(512 * 1024 * 1024, utils.get_docker_quanity('512m'))
+    def test_get_docker_quantity(self):
+        self.assertEqual(512, utils.get_docker_quantity('512'))
+        self.assertEqual(512, utils.get_docker_quantity('512b'))
+        self.assertEqual(512 * 1024, utils.get_docker_quantity('512k'))
+        self.assertEqual(512 * 1024 * 1024, utils.get_docker_quantity('512m'))
         self.assertEqual(512 * 1024 * 1024 * 1024,
-                         utils.get_docker_quanity('512g'))
+                         utils.get_docker_quantity('512g'))
         self.assertRaises(exception.UnsupportedDockerQuantityFormat,
-                          utils.get_docker_quanity, '512bb')
+                          utils.get_docker_quantity, '512bb')
         self.assertRaises(exception.UnsupportedDockerQuantityFormat,
-                          utils.get_docker_quanity, '512B')
+                          utils.get_docker_quantity, '512B')
 
 
 class ExecuteTestCase(base.TestCase):

@@ -88,7 +88,7 @@ class Handler(object):
                     if container.memory is not None:
                         kwargs['host_config'] = {
                             'Memory':
-                            magnum_utils.get_docker_quanity(container.memory)}
+                            magnum_utils.get_docker_quantity(container.memory)}
                 else:
                     kwargs['mem_limit'] = container.memory
 
