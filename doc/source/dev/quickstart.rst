@@ -275,17 +275,17 @@ specific bay:
 
 To check the list of all bay stacks::
 
-    heat stack-list
+    openstack stack list
 
 To check an individual bay's stack::
 
-    heat stack-show <stack-name or stack_id>
+    openstack stack show <stack-name or stack_id>
 
 Monitoring bay status in detail (e.g., creating, updating)::
 
-    BAY_HEAT_NAME=$(heat stack-list | awk "/\sk8sbay-/{print \$4}")
+    BAY_HEAT_NAME=$(openstack stack list | awk "/\sk8sbay-/{print \$4}")
     echo ${BAY_HEAT_NAME}
-    heat resource-list ${BAY_HEAT_NAME}
+    openstack stack resource list ${BAY_HEAT_NAME}
 
 Building a Kubernetes Bay - Based on CoreOS
 ===========================================
@@ -423,24 +423,25 @@ redis-master is running::
     | Property           | Value                                                      |
     +--------------------+------------------------------------------------------------+
     | status             | CREATE_COMPLETE                                            |
-    | uuid               | 481685d2-bc16-4daf-9aac-9e830c7da3f7                       |
+    | uuid               | cff82cd0-189c-4ede-a9cb-2c0af6997709                       |
     | status_reason      | Stack CREATE completed successfully                        |
-    | created_at         | 2015-09-22T20:02:39+00:00                                  |
-    | updated_at         | 2015-09-22T20:05:00+00:00                                  |
+    | created_at         | 2016-05-26T17:45:57+00:00                                  |
+    | updated_at         | 2016-05-26T17:50:02+00:00                                  |
     | bay_create_timeout | 0                                                          |
-    | api_address        | 192.168.19.84:8080                                         |
-    | baymodel_id        | 194a4b7e-0125-4956-8660-7551469ae1ed                       |
+    | api_address        | https://172.24.4.4:6443                                    |
+    | baymodel_id        | e73298e7-e621-4d42-b35b-7a1952b97158                       |
+    | master_addresses   | ['172.24.4.6']                                             |
     | node_count         | 1                                                          |
-    | node_addresses     | [u'192.168.19.86']                                         |
+    | node_addresses     | ['172.24.4.5']                                             |
     | master_count       | 1                                                          |
-    | discovery_url      | https://discovery.etcd.io/373452625d4f52263904584b9d3616b1 |
+    | discovery_url      | https://discovery.etcd.io/4caaa65f297d4d49ef0a085a7aecf8e0 |
     | name               | k8sbay                                                     |
     +--------------------+------------------------------------------------------------+
 
 The output here indicates the redis-master is running on the bay host with IP
-address 192.168.19.86. To access the redis master::
+address 172.24.4.5. To access the redis master::
 
-    ssh minion@192.168.19.86
+    ssh minion@172.24.4.5
     REDIS_ID=$(sudo docker ps | grep redis:v1 | grep k8s_master | awk '{print $1}')
     sudo docker exec -i -t $REDIS_ID redis-cli
 
@@ -454,7 +455,7 @@ Log into one of the other container hosts and access a redis slave from it.
 You can use `nova list` to enumerate the kube-minions. For this example we
 will use the same host as above::
 
-    ssh minion@192.168.19.86
+    ssh minion@172.24.4.5
     REDIS_ID=$(sudo docker ps | grep redis:v1 | grep k8s_redis | awk '{print $1}')
     sudo docker exec -i -t $REDIS_ID redis-cli
 
