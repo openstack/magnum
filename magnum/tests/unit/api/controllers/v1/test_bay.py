@@ -76,6 +76,29 @@ class TestListBay(api_base.FunctionalTest):
         self.assertEqual(bay.uuid, response['uuid'])
         self._verify_attrs(self._expand_bay_attrs, response)
 
+    @mock.patch('magnum.common.clients.OpenStackClients.heat')
+    def test_get_one_failed_bay(self, mock_heat):
+        fake_resources = mock.MagicMock()
+        fake_resources.resource_name = 'fake_name'
+        fake_resources.resource_status_reason = 'fake_reason'
+
+        ht = mock.MagicMock()
+        ht.resources.list.return_value = [fake_resources]
+        mock_heat.return_value = ht
+
+        bay = obj_utils.create_test_bay(self.context, status='CREATE_FAILED')
+        response = self.get_json('/bays/%s' % bay['uuid'])
+        self.assertEqual(bay.uuid, response['uuid'])
+        self.assertEqual({'fake_name': 'fake_reason'}, response['bay_faults'])
+
+    @mock.patch('magnum.common.clients.OpenStackClients.heat')
+    def test_get_one_failed_bay_heatclient_exception(self, mock_heat):
+        mock_heat.resources.list.side_effect = Exception('fake')
+        bay = obj_utils.create_test_bay(self.context, status='CREATE_FAILED')
+        response = self.get_json('/bays/%s' % bay['uuid'])
+        self.assertEqual(bay.uuid, response['uuid'])
+        self.assertEqual({}, response['bay_faults'])
+
     def test_get_one_by_name(self):
         bay = obj_utils.create_test_bay(self.context)
         response = self.get_json('/bays/%s' % bay['name'])

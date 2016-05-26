@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
 from oslo_utils import timeutils
 import pecan
 from pecan import rest
@@ -27,10 +28,14 @@ from magnum.api.controllers.v1 import types
 from magnum.api import expose
 from magnum.api import utils as api_utils
 from magnum.api.validation import validate_bay_properties
+from magnum.common import clients
 from magnum.common import exception
 from magnum.common import policy
+from magnum.i18n import _LW
 from magnum import objects
 from magnum.objects import fields
+
+LOG = logging.getLogger(__name__)
 
 
 class BayPatchType(types.JsonPatchType):
@@ -116,6 +121,9 @@ class Bay(base.APIBase):
 
     master_addresses = wsme.wsattr([wtypes.text], readonly=True)
     """IP addresses of cluster master nodes"""
+
+    bay_faults = wsme.wsattr(wtypes.DictType(str, wtypes.text))
+    """Fault info collected from the heat resources of this bay"""
 
     def __init__(self, **kwargs):
         super(Bay, self).__init__()
@@ -264,6 +272,30 @@ class BaysController(rest.RestController):
                                          sort_key, sort_dir, expand,
                                          resource_url)
 
+    def _collect_fault_info(self, context, bay):
+        """Collect fault info from heat resources of given bay
+
+        and store them into bay.bay_faults.
+        """
+        osc = clients.OpenStackClients(context)
+        filters = {'status': 'FAILED'}
+        try:
+            # TODO(yuywz): We should set 'nested_depth=2' when
+            # calling heat().resources.list() after Heat bug
+            # https://bugs.launchpad.net/heat/+bug/1588130 fixed.
+            failed_resources = osc.heat().resources.list(
+                bay.stack_id, filters=filters)
+        except Exception as e:
+            failed_resources = []
+            LOG.warning(_LW("Failed to retrieve failed resources for "
+                            "bay %(bay)s from Heat stack %(stack)s "
+                            "due to error: %(e)s"),
+                        {'bay': bay.uuid, 'stack': bay.stack_id, 'e': e},
+                        exc_info=True)
+
+        return {res.resource_name: res.resource_status_reason
+                for res in failed_resources}
+
     @expose.expose(Bay, types.uuid_or_name)
     def get_one(self, bay_ident):
         """Retrieve information about the given bay.
@@ -275,7 +307,12 @@ class BaysController(rest.RestController):
         policy.enforce(context, 'bay:get', bay,
                        action='bay:get')
 
-        return Bay.convert_with_links(bay)
+        bay = Bay.convert_with_links(bay)
+
+        if bay.status in fields.BayStatus.STATUS_FAILED:
+            bay.bay_faults = self._collect_fault_info(context, bay)
+
+        return bay
 
     @expose.expose(Bay, body=Bay, status_code=201)
     def post(self, bay):

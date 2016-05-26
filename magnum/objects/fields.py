@@ -38,6 +38,8 @@ class BayStatus(fields.Enum):
            RESUME_COMPLETE, RESTORE_COMPLETE, ROLLBACK_COMPLETE,
            SNAPSHOT_COMPLETE, CHECK_COMPLETE, ADOPT_COMPLETE)
 
+    STATUS_FAILED = (CREATE_FAILED, UPDATE_FAILED, DELETE_FAILED)
+
     def __init__(self):
         super(BayStatus, self).__init__(valid_values=BayStatus.ALL)
 
