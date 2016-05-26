@@ -11,9 +11,9 @@
 #    limitations under the License.
 
 import mock
+from oslo_utils import uuidutils
 
 from magnum.api.controllers.v1 import certificate as api_cert
-from magnum.common import utils
 from magnum.tests import base
 from magnum.tests.unit.api import base as api_base
 from magnum.tests.unit.api import utils as api_utils
@@ -82,9 +82,9 @@ class TestGetCertificate(api_base.FunctionalTest):
 
     def test_get_one_by_name_multiple_bay(self):
         obj_utils.create_test_bay(self.context, name='test_bay',
-                                  uuid=utils.generate_uuid())
+                                  uuid=uuidutils.generate_uuid())
         obj_utils.create_test_bay(self.context, name='test_bay',
-                                  uuid=utils.generate_uuid())
+                                  uuid=uuidutils.generate_uuid())
 
         response = self.get_json('/certificates/test_bay',
                                  expect_errors=True)

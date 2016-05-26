@@ -16,11 +16,11 @@
 import jsonpatch
 import mock
 from oslo_config import cfg
+from oslo_utils import uuidutils
 import wsme
 
 from magnum.api import utils
 from magnum.common import exception
-from magnum.common import utils as common_utils
 from magnum.tests.unit.api import base
 
 
@@ -62,7 +62,7 @@ class TestApiUtils(base.FunctionalTest):
             mock_request):
         mock_bay = mock.MagicMock
         mock_get_by_uuid.return_value = mock_bay
-        uuid = common_utils.generate_uuid()
+        uuid = uuidutils.generate_uuid()
 
         returned_bay = utils.get_resource('Bay', uuid)
 
@@ -88,7 +88,7 @@ class TestApiUtils(base.FunctionalTest):
                                                  'fake-name')
         self.assertEqual(mock_bay, returned_bay)
 
-    @mock.patch.object(common_utils, 'is_uuid_like', return_value=True)
+    @mock.patch.object(uuidutils, 'is_uuid_like', return_value=True)
     def test_get_openstack_resource_by_uuid(self, fake_is_uuid_like):
         fake_manager = mock.MagicMock()
         fake_manager.get.return_value = 'fake_resource_data'
@@ -97,7 +97,7 @@ class TestApiUtils(base.FunctionalTest):
                                                      'fake_resource_type')
         self.assertEqual('fake_resource_data', resource_data)
 
-    @mock.patch.object(common_utils, 'is_uuid_like', return_value=False)
+    @mock.patch.object(uuidutils, 'is_uuid_like', return_value=False)
     def test_get_openstack_resource_by_name(self, fake_is_uuid_like):
         fake_manager = mock.MagicMock()
         fake_manager.list.return_value = ['fake_resource_data']
@@ -106,7 +106,7 @@ class TestApiUtils(base.FunctionalTest):
                                                      'fake_resource_type')
         self.assertEqual('fake_resource_data', resource_data)
 
-    @mock.patch.object(common_utils, 'is_uuid_like', return_value=False)
+    @mock.patch.object(uuidutils, 'is_uuid_like', return_value=False)
     def test_get_openstack_resource_non_exist(self, fake_is_uuid_like):
         fake_manager = mock.MagicMock()
         fake_manager.list.return_value = []
@@ -114,7 +114,7 @@ class TestApiUtils(base.FunctionalTest):
                           utils.get_openstack_resource,
                           fake_manager, 'fake_resource', 'fake_resource_type')
 
-    @mock.patch.object(common_utils, 'is_uuid_like', return_value=False)
+    @mock.patch.object(uuidutils, 'is_uuid_like', return_value=False)
     def test_get_openstack_resource_multi_exist(self, fake_is_uuid_like):
         fake_manager = mock.MagicMock()
         fake_manager.list.return_value = ['fake_resource_data1',

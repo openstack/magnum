@@ -13,10 +13,10 @@
 
 from k8sclient.client import rest
 from oslo_log import log as logging
+from oslo_utils import uuidutils
 
 from magnum.common import exception
 from magnum.common import k8s_manifest
-from magnum.common import utils
 from magnum.conductor import k8s_api as k8s
 from magnum.conductor import utils as conductor_utils
 from magnum import objects
@@ -72,7 +72,7 @@ class Handler(object):
         LOG.debug("service_update %s", service_ident)
         bay = conductor_utils.retrieve_bay(context, bay_ident)
         self.k8s_api = k8s.create_k8s_api(context, bay)
-        if utils.is_uuid_like(service_ident):
+        if uuidutils.is_uuid_like(service_ident):
             service = objects.Service.get_by_uuid(context,
                                                   service_ident,
                                                   bay.uuid,
@@ -120,7 +120,7 @@ class Handler(object):
         LOG.debug("service_delete %s", service_ident)
         bay = conductor_utils.retrieve_bay(context, bay_ident)
         self.k8s_api = k8s.create_k8s_api(context, bay)
-        if utils.is_uuid_like(service_ident):
+        if uuidutils.is_uuid_like(service_ident):
             service = objects.Service.get_by_uuid(context, service_ident,
                                                   bay.uuid, self.k8s_api)
             service_name = service.name
@@ -141,7 +141,7 @@ class Handler(object):
         LOG.debug("service_show %s", service_ident)
         bay = conductor_utils.retrieve_bay(context, bay_ident)
         self.k8s_api = k8s.create_k8s_api(context, bay)
-        if utils.is_uuid_like(service_ident):
+        if uuidutils.is_uuid_like(service_ident):
             service = objects.Service.get_by_uuid(context, service_ident,
                                                   bay.uuid, self.k8s_api)
         else:
@@ -220,7 +220,7 @@ class Handler(object):
         LOG.debug("pod_update %s", pod_ident)
         bay = conductor_utils.retrieve_bay(context, bay_ident)
         self.k8s_api = k8s.create_k8s_api(context, bay)
-        if utils.is_uuid_like(pod_ident):
+        if uuidutils.is_uuid_like(pod_ident):
             pod = objects.Pod.get_by_uuid(context, pod_ident,
                                           bay.uuid, self.k8s_api)
         else:
@@ -256,7 +256,7 @@ class Handler(object):
         LOG.debug("pod_delete %s", pod_ident)
         bay = conductor_utils.retrieve_bay(context, bay_ident)
         self.k8s_api = k8s.create_k8s_api(context, bay)
-        if utils.is_uuid_like(pod_ident):
+        if uuidutils.is_uuid_like(pod_ident):
             pod = objects.Pod.get_by_uuid(context, pod_ident,
                                           bay.uuid, self.k8s_api)
             pod_name = pod.name
@@ -276,7 +276,7 @@ class Handler(object):
         LOG.debug("pod_show %s", pod_ident)
         bay = conductor_utils.retrieve_bay(context, bay_ident)
         self.k8s_api = k8s.create_k8s_api(context, bay)
-        if utils.is_uuid_like(pod_ident):
+        if uuidutils.is_uuid_like(pod_ident):
             pod = objects.Pod.get_by_uuid(context, pod_ident,
                                           bay.uuid, self.k8s_api)
         else:
@@ -345,7 +345,7 @@ class Handler(object):
         LOG.debug("rc_update %s", rc_ident)
         bay = conductor_utils.retrieve_bay(context, bay_ident)
         self.k8s_api = k8s.create_k8s_api(context, bay)
-        if utils.is_uuid_like(rc_ident):
+        if uuidutils.is_uuid_like(rc_ident):
             rc = objects.ReplicationController.get_by_uuid(context, rc_ident,
                                                            bay.uuid,
                                                            self.k8s_api)
@@ -379,7 +379,7 @@ class Handler(object):
         LOG.debug("rc_delete %s", rc_ident)
         bay = conductor_utils.retrieve_bay(context, bay_ident)
         self.k8s_api = k8s.create_k8s_api(context, bay)
-        if utils.is_uuid_like(rc_ident):
+        if uuidutils.is_uuid_like(rc_ident):
             rc = objects.ReplicationController.get_by_uuid(context, rc_ident,
                                                            bay.uuid,
                                                            self.k8s_api)
@@ -402,7 +402,7 @@ class Handler(object):
         LOG.debug("rc_show %s", rc_ident)
         bay = conductor_utils.retrieve_bay(context, bay_ident)
         self.k8s_api = k8s.create_k8s_api(context, bay)
-        if utils.is_uuid_like(rc_ident):
+        if uuidutils.is_uuid_like(rc_ident):
             rc = objects.ReplicationController.get_by_uuid(context, rc_ident,
                                                            bay.uuid,
                                                            self.k8s_api)

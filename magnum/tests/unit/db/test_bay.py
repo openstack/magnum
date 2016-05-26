@@ -14,12 +14,11 @@
 #    under the License.
 
 """Tests for manipulating Bays via the DB API"""
-
+from oslo_utils import uuidutils
 import six
 
 from magnum.common import context
 from magnum.common import exception
-from magnum.common import utils as magnum_utils
 from magnum.objects.fields import BayStatus as bay_status
 from magnum.tests.unit.db import base
 from magnum.tests.unit.db import utils
@@ -68,7 +67,7 @@ class DbBayTestCase(base.DbTestCase):
     def test_get_bay_list(self):
         uuids = []
         for i in range(1, 6):
-            bay = utils.create_test_bay(uuid=magnum_utils.generate_uuid())
+            bay = utils.create_test_bay(uuid=uuidutils.generate_uuid())
             uuids.append(six.text_type(bay['uuid']))
         res = self.dbapi.get_bay_list(self.context)
         res_uuids = [r.uuid for r in res]
@@ -77,7 +76,7 @@ class DbBayTestCase(base.DbTestCase):
     def test_get_bay_list_sorted(self):
         uuids = []
         for _ in range(5):
-            bay = utils.create_test_bay(uuid=magnum_utils.generate_uuid())
+            bay = utils.create_test_bay(uuid=uuidutils.generate_uuid())
             uuids.append(six.text_type(bay.uuid))
         res = self.dbapi.get_bay_list(self.context, sort_key='uuid')
         res_uuids = [r.uuid for r in res]
@@ -89,19 +88,19 @@ class DbBayTestCase(base.DbTestCase):
                           sort_key='foo')
 
     def test_get_bay_list_with_filters(self):
-        bm1 = utils.get_test_baymodel(id=1, uuid=magnum_utils.generate_uuid())
-        bm2 = utils.get_test_baymodel(id=2, uuid=magnum_utils.generate_uuid())
+        bm1 = utils.get_test_baymodel(id=1, uuid=uuidutils.generate_uuid())
+        bm2 = utils.get_test_baymodel(id=2, uuid=uuidutils.generate_uuid())
         self.dbapi.create_baymodel(bm1)
         self.dbapi.create_baymodel(bm2)
 
         bay1 = utils.create_test_bay(
             name='bay-one',
-            uuid=magnum_utils.generate_uuid(),
+            uuid=uuidutils.generate_uuid(),
             baymodel_id=bm1['uuid'],
             status=bay_status.CREATE_IN_PROGRESS)
         bay2 = utils.create_test_bay(
             name='bay-two',
-            uuid=magnum_utils.generate_uuid(),
+            uuid=uuidutils.generate_uuid(),
             baymodel_id=bm2['uuid'],
             node_count=1,
             master_count=1,
@@ -154,9 +153,9 @@ class DbBayTestCase(base.DbTestCase):
         uuids = []
         for i in range(1, 6):
             bay = utils.create_test_bay(
-                uuid=magnum_utils.generate_uuid(),
-                project_id=magnum_utils.generate_uuid(),
-                user_id=magnum_utils.generate_uuid())
+                uuid=uuidutils.generate_uuid(),
+                project_id=uuidutils.generate_uuid(),
+                user_id=uuidutils.generate_uuid())
             uuids.append(six.text_type(bay['uuid']))
         ctx = context.make_admin_context(all_tenants=True)
         res = self.dbapi.get_bay_list(ctx)
@@ -167,7 +166,7 @@ class DbBayTestCase(base.DbTestCase):
         utils.create_test_bay()
         self.assertEqual(1, len(self.dbapi.get_bay_list(self.context)))
         res = self.dbapi.get_bay_list(self.context, filters={
-            'baymodel_id': magnum_utils.generate_uuid()})
+            'baymodel_id': uuidutils.generate_uuid()})
         self.assertEqual(0, len(res))
 
     def test_destroy_bay(self):
@@ -272,7 +271,7 @@ class DbBayTestCase(base.DbTestCase):
         self.assertEqual(new_nc, res.node_count)
 
     def test_update_bay_not_found(self):
-        bay_uuid = magnum_utils.generate_uuid()
+        bay_uuid = uuidutils.generate_uuid()
         self.assertRaises(exception.BayNotFound, self.dbapi.update_bay,
                           bay_uuid, {'node_count': 5})
 

@@ -71,7 +71,7 @@ class Connection(object):
                        ::
 
                         {
-                         'uuid': utils.generate_uuid(),
+                         'uuid': uuidutils.generate_uuid(),
                          'name': 'example',
                          'type': 'virt'
                         }
@@ -154,7 +154,7 @@ class Connection(object):
                        ::
 
                         {
-                         'uuid': utils.generate_uuid(),
+                         'uuid': uuidutils.generate_uuid(),
                          'name': 'example',
                          'type': 'virt'
                         }
@@ -238,7 +238,7 @@ class Connection(object):
                        ::
 
                         {
-                         'uuid': utils.generate_uuid(),
+                         'uuid': uuidutils.generate_uuid(),
                          'name': 'example',
                          'type': 'virt'
                         }
@@ -319,7 +319,7 @@ class Connection(object):
                        ::
 
                         {
-                         'uuid': utils.generate_uuid(),
+                         'uuid': uuidutils.generate_uuid(),
                          'name': 'example',
                          'type': 'virt'
                         }
@@ -400,7 +400,7 @@ class Connection(object):
                        ::
 
                         {
-                         'uuid': utils.generate_uuid(),
+                         'uuid': uuidutils.generate_uuid(),
                          'name': 'example',
                          'type': 'virt'
                         }
@@ -481,7 +481,7 @@ class Connection(object):
                        ::
 
                         {
-                         'uuid': utils.generate_uuid(),
+                         'uuid': uuidutils.generate_uuid(),
                          'name': 'example',
                          'images': '["myimage"]'
                         }
@@ -542,7 +542,7 @@ class Connection(object):
                        ::
 
                         {
-                         'uuid': utils.generate_uuid(),
+                         'uuid': uuidutils.generate_uuid(),
                          'name': 'example',
                          'ca_cert': 'AAA...',
                          'certificate': 'BBB...',
@@ -682,7 +682,7 @@ class Connection(object):
                        ::
 
                         {
-                         'id': utils.generate_uuid(),
+                         'id': uuidutils.generate_uuid(),
                          'project_id': 'fake_project',
                          'resource': 'fake_resource',
                          'hard_limit': 'fake_hardlimit',

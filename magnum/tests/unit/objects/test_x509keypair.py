@@ -14,10 +14,10 @@
 #    under the License.
 
 import mock
+from oslo_utils import uuidutils
 from testtools.matchers import HasLength
 
 from magnum.common import exception
-from magnum.common import utils as magnum_utils
 from magnum import objects
 from magnum.tests.unit.db import base
 from magnum.tests.unit.db import utils
@@ -148,7 +148,7 @@ class TestX509KeyPairObject(base.DbTestCase):
 
     def test_refresh(self):
         uuid = self.fake_x509keypair['uuid']
-        new_uuid = magnum_utils.generate_uuid()
+        new_uuid = uuidutils.generate_uuid()
         returns = [dict(self.fake_x509keypair, uuid=uuid),
                    dict(self.fake_x509keypair, uuid=new_uuid)]
         expected = [mock.call(self.context, uuid),

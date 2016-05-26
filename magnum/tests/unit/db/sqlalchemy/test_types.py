@@ -13,8 +13,8 @@
 """Tests for custom SQLAlchemy types via Magnum DB."""
 
 from oslo_db import exception as db_exc
+from oslo_utils import uuidutils
 
-from magnum.common import utils as magnum_utils
 import magnum.db.sqlalchemy.api as sa_api
 from magnum.db.sqlalchemy import models
 from magnum.tests.unit.db import base
@@ -24,13 +24,13 @@ class SqlAlchemyCustomTypesTestCase(base.DbTestCase):
 
     def test_JSONEncodedDict_default_value(self):
         # Create pod w/o labels
-        pod1_id = magnum_utils.generate_uuid()
+        pod1_id = uuidutils.generate_uuid()
         self.dbapi.create_pod({'uuid': pod1_id})
         pod1 = sa_api.model_query(models.Pod).filter_by(uuid=pod1_id).one()
         self.assertEqual({}, pod1.labels)
 
         # Create pod with labels
-        pod2_id = magnum_utils.generate_uuid()
+        pod2_id = uuidutils.generate_uuid()
         self.dbapi.create_pod({'uuid': pod2_id, 'labels': {'bar': 'foo'}})
         pod2 = sa_api.model_query(models.Pod).filter_by(uuid=pod2_id).one()
         self.assertEqual('foo', pod2.labels['bar'])
@@ -43,13 +43,13 @@ class SqlAlchemyCustomTypesTestCase(base.DbTestCase):
 
     def test_JSONEncodedList_default_value(self):
         # Create pod w/o images
-        pod1_id = magnum_utils.generate_uuid()
+        pod1_id = uuidutils.generate_uuid()
         self.dbapi.create_pod({'uuid': pod1_id})
         pod1 = sa_api.model_query(models.Pod).filter_by(uuid=pod1_id).one()
         self.assertEqual([], pod1.images)
 
         # Create pod with images
-        pod2_id = magnum_utils.generate_uuid()
+        pod2_id = uuidutils.generate_uuid()
         self.dbapi.create_pod({'uuid': pod2_id,
                                'images': ['myimage1', 'myimage2']})
         pod2 = sa_api.model_query(models.Pod).filter_by(uuid=pod2_id).one()

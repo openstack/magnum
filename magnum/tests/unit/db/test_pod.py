@@ -14,11 +14,10 @@
 #    under the License.
 
 """Tests for manipulating Pods via the DB API"""
-
+from oslo_utils import uuidutils
 import six
 
 from magnum.common import exception
-from magnum.common import utils as magnum_utils
 from magnum.tests.unit.db import base
 from magnum.tests.unit.db import utils as utils
 
@@ -55,7 +54,7 @@ class DbPodTestCase(base.DbTestCase):
 
     def test_get_pod_by_name_multiple_pods(self):
         utils.create_test_pod(bay_uuid=self.bay.uuid,
-                              uuid=magnum_utils.generate_uuid())
+                              uuid=uuidutils.generate_uuid())
         self.assertRaises(exception.Conflict, self.dbapi.get_pod_by_name,
                           self.pod.name)
 
@@ -70,7 +69,7 @@ class DbPodTestCase(base.DbTestCase):
         self.assertRaises(exception.PodNotFound,
                           self.dbapi.get_pod_by_uuid,
                           self.context,
-                          magnum_utils.generate_uuid())
+                          uuidutils.generate_uuid())
         self.assertRaises(exception.PodNotFound,
                           self.dbapi.get_pod_by_name,
                           'bad-name')
@@ -78,7 +77,7 @@ class DbPodTestCase(base.DbTestCase):
     def test_get_pod_list(self):
         uuids = [self.pod.uuid]
         for i in range(1, 6):
-            pod = utils.create_test_pod(uuid=magnum_utils.generate_uuid(),
+            pod = utils.create_test_pod(uuid=uuidutils.generate_uuid(),
                                         bay_uuid=self.bay.uuid)
             uuids.append(six.text_type(pod.uuid))
         res = self.dbapi.get_pod_list(self.context)
@@ -88,7 +87,7 @@ class DbPodTestCase(base.DbTestCase):
     def test_get_pod_list_sorted(self):
         uuids = [self.pod.uuid]
         for _ in range(5):
-            pod = utils.create_test_pod(uuid=magnum_utils.generate_uuid())
+            pod = utils.create_test_pod(uuid=uuidutils.generate_uuid())
             uuids.append(six.text_type(pod.uuid))
         res = self.dbapi.get_pod_list(self.context, sort_key='uuid')
         res_uuids = [r.uuid for r in res]
@@ -100,19 +99,19 @@ class DbPodTestCase(base.DbTestCase):
                           sort_key='foo')
 
     def test_get_pod_list_with_filters(self):
-        bay1 = utils.get_test_bay(id=11, uuid=magnum_utils.generate_uuid())
-        bay2 = utils.get_test_bay(id=12, uuid=magnum_utils.generate_uuid())
+        bay1 = utils.get_test_bay(id=11, uuid=uuidutils.generate_uuid())
+        bay2 = utils.get_test_bay(id=12, uuid=uuidutils.generate_uuid())
         self.dbapi.create_bay(bay1)
         self.dbapi.create_bay(bay2)
 
         pod1 = utils.create_test_pod(
             name='pod-one',
-            uuid=magnum_utils.generate_uuid(),
+            uuid=uuidutils.generate_uuid(),
             bay_uuid=bay1['uuid'],
             status='status1')
         pod2 = utils.create_test_pod(
             name='pod-two',
-            uuid=magnum_utils.generate_uuid(),
+            uuid=uuidutils.generate_uuid(),
             bay_uuid=bay2['uuid'],
             status='status2')
 
@@ -145,7 +144,7 @@ class DbPodTestCase(base.DbTestCase):
                                       {'bay_uuid': self.bay.uuid})
         self.assertEqual(1, len(res))
         res = self.dbapi.get_pod_list(self.context, filters={
-            'bay_uuid': magnum_utils.generate_uuid()})
+            'bay_uuid': uuidutils.generate_uuid()})
         self.assertEqual(0, len(res))
 
     def test_destroy_pod(self):
@@ -164,7 +163,7 @@ class DbPodTestCase(base.DbTestCase):
     def test_destroy_pod_that_does_not_exist(self):
         self.assertRaises(exception.PodNotFound,
                           self.dbapi.destroy_pod,
-                          magnum_utils.generate_uuid())
+                          uuidutils.generate_uuid())
 
     def test_update_pod(self):
         old_name = self.pod.name
@@ -174,7 +173,7 @@ class DbPodTestCase(base.DbTestCase):
         self.assertEqual(new_name, res.name)
 
     def test_update_pod_not_found(self):
-        pod_uuid = magnum_utils.generate_uuid()
+        pod_uuid = uuidutils.generate_uuid()
         self.assertRaises(exception.PodNotFound, self.dbapi.update_pod,
                           pod_uuid, {'status': 'Running'})
 

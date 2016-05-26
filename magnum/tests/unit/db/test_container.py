@@ -14,11 +14,10 @@
 #    under the License.
 
 """Tests for manipulating Containers via the DB API"""
-
+from oslo_utils import uuidutils
 import six
 
 from magnum.common import exception
-from magnum.common import utils as magnum_utils
 from magnum.tests.unit.db import base
 from magnum.tests.unit.db import utils
 
@@ -59,13 +58,13 @@ class DbContainerTestCase(base.DbTestCase):
         self.assertRaises(exception.ContainerNotFound,
                           self.dbapi.get_container_by_uuid,
                           self.context,
-                          magnum_utils.generate_uuid())
+                          uuidutils.generate_uuid())
 
     def test_get_container_list(self):
         uuids = []
         for i in range(1, 6):
             container = utils.create_test_container(
-                uuid=magnum_utils.generate_uuid())
+                uuid=uuidutils.generate_uuid())
             uuids.append(six.text_type(container['uuid']))
         res = self.dbapi.get_container_list(self.context)
         res_uuids = [r.uuid for r in res]
@@ -75,7 +74,7 @@ class DbContainerTestCase(base.DbTestCase):
         uuids = []
         for _ in range(5):
             container = utils.create_test_container(
-                uuid=magnum_utils.generate_uuid())
+                uuid=uuidutils.generate_uuid())
             uuids.append(six.text_type(container.uuid))
         res = self.dbapi.get_container_list(self.context, sort_key='uuid')
         res_uuids = [r.uuid for r in res]
@@ -89,12 +88,12 @@ class DbContainerTestCase(base.DbTestCase):
     def test_get_container_list_with_filters(self):
         container1 = utils.create_test_container(
             name='container-one',
-            uuid=magnum_utils.generate_uuid(),
-            bay_uuid=magnum_utils.generate_uuid())
+            uuid=uuidutils.generate_uuid(),
+            bay_uuid=uuidutils.generate_uuid())
         container2 = utils.create_test_container(
             name='container-two',
-            uuid=magnum_utils.generate_uuid(),
-            bay_uuid=magnum_utils.generate_uuid())
+            uuid=uuidutils.generate_uuid(),
+            bay_uuid=uuidutils.generate_uuid())
 
         res = self.dbapi.get_container_list(self.context,
                                             filters={'name': 'container-one'})
@@ -130,7 +129,7 @@ class DbContainerTestCase(base.DbTestCase):
     def test_destroy_container_that_does_not_exist(self):
         self.assertRaises(exception.ContainerNotFound,
                           self.dbapi.destroy_container,
-                          magnum_utils.generate_uuid())
+                          uuidutils.generate_uuid())
 
     def test_update_container(self):
         container = utils.create_test_container()
@@ -143,7 +142,7 @@ class DbContainerTestCase(base.DbTestCase):
         self.assertEqual(new_image, res.image)
 
     def test_update_container_not_found(self):
-        container_uuid = magnum_utils.generate_uuid()
+        container_uuid = uuidutils.generate_uuid()
         new_image = 'new-image'
         self.assertRaises(exception.ContainerNotFound,
                           self.dbapi.update_container,

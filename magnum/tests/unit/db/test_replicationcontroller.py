@@ -15,10 +15,10 @@
 
 """Tests for manipulating Services via the DB API"""
 
+from oslo_utils import uuidutils
 import six
 
 from magnum.common import exception
-from magnum.common import utils as magnum_utils
 from magnum.tests.unit.db import base
 from magnum.tests.unit.db import utils as utils
 
@@ -55,7 +55,7 @@ class DbRCTestCase(base.DbTestCase):
 
     def test_get_rc_by_name_multiple_rcs(self):
         utils.create_test_rc(bay_uuid=self.bay.uuid,
-                             uuid=magnum_utils.generate_uuid())
+                             uuid=uuidutils.generate_uuid())
         self.assertRaises(exception.Conflict, self.dbapi.get_rc_by_name,
                           self.context, self.rc.name)
 
@@ -70,14 +70,14 @@ class DbRCTestCase(base.DbTestCase):
         self.assertRaises(exception.ReplicationControllerNotFound,
                           self.dbapi.get_rc_by_uuid,
                           self.context,
-                          magnum_utils.generate_uuid())
+                          uuidutils.generate_uuid())
 
     def test_get_rc_list(self):
         uuids = [self.rc.uuid]
         for i in range(1, 6):
             rc = utils.create_test_rc(
                 bay_uuid=self.bay.uuid,
-                uuid=magnum_utils.generate_uuid())
+                uuid=uuidutils.generate_uuid())
             uuids.append(six.text_type(rc.uuid))
         rc = self.dbapi.get_rc_list(self.context)
         rc_uuids = [r.uuid for r in rc]
@@ -86,7 +86,7 @@ class DbRCTestCase(base.DbTestCase):
     def test_get_rc_list_sorted(self):
         uuids = [self.rc.uuid]
         for _ in range(5):
-            rc = utils.create_test_rc(uuid=magnum_utils.generate_uuid())
+            rc = utils.create_test_rc(uuid=uuidutils.generate_uuid())
             uuids.append(six.text_type(rc.uuid))
         res = self.dbapi.get_rc_list(self.context, sort_key='uuid')
         res_uuids = [r.uuid for r in res]
@@ -102,7 +102,7 @@ class DbRCTestCase(base.DbTestCase):
                                     'bay_uuid': self.bay.uuid})
         self.assertEqual(1, len(rc))
         rc = self.dbapi.get_rc_list(self.context, filters={
-            'bay_uuid': magnum_utils.generate_uuid()})
+            'bay_uuid': uuidutils.generate_uuid()})
         self.assertEqual(0, len(rc))
 
     def test_destroy_rc(self):
@@ -121,7 +121,7 @@ class DbRCTestCase(base.DbTestCase):
     def test_destroy_rc_that_does_not_exist(self):
         self.assertRaises(exception.ReplicationControllerNotFound,
                           self.dbapi.destroy_rc,
-                          magnum_utils.generate_uuid())
+                          uuidutils.generate_uuid())
 
     def test_update_rc(self):
         old_name = self.rc.name
@@ -131,7 +131,7 @@ class DbRCTestCase(base.DbTestCase):
         self.assertEqual(new_name, res.name)
 
     def test_update_rc_not_found(self):
-        rc_uuid = magnum_utils.generate_uuid()
+        rc_uuid = uuidutils.generate_uuid()
         self.assertRaises(exception.ReplicationControllerNotFound,
                           self.dbapi.update_rc,
                           rc_uuid, {'replica': 4})

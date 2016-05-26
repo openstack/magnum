@@ -15,10 +15,10 @@
 
 """Tests for manipulating Services via the DB API"""
 
+from oslo_utils import uuidutils
 import six
 
 from magnum.common import exception
-from magnum.common import utils as magnum_utils
 from magnum.tests.unit.db import base
 from magnum.tests.unit.db import utils as utils
 
@@ -55,7 +55,7 @@ class DbServiceTestCase(base.DbTestCase):
 
     def test_get_service_by_name_multiple_service(self):
         utils.create_test_service(bay_uuid=self.bay.uuid,
-                                  uuid=magnum_utils.generate_uuid())
+                                  uuid=uuidutils.generate_uuid())
         self.assertRaises(exception.Conflict, self.dbapi.get_service_by_name,
                           self.context, self.service.name)
 
@@ -70,14 +70,14 @@ class DbServiceTestCase(base.DbTestCase):
         self.assertRaises(exception.ServiceNotFound,
                           self.dbapi.get_service_by_uuid,
                           self.context,
-                          magnum_utils.generate_uuid())
+                          uuidutils.generate_uuid())
 
     def test_get_service_list(self):
         uuids = [self.service.uuid]
         for i in range(1, 6):
             service = utils.create_test_service(
                 bay_uuid=self.bay.uuid,
-                uuid=magnum_utils.generate_uuid())
+                uuid=uuidutils.generate_uuid())
             uuids.append(six.text_type(service.uuid))
         res = self.dbapi.get_service_list(self.context)
         res_uuids = [r.uuid for r in res]
@@ -87,7 +87,7 @@ class DbServiceTestCase(base.DbTestCase):
         uuids = [self.service.uuid]
         for _ in range(5):
             service = utils.create_test_service(
-                uuid=magnum_utils.generate_uuid())
+                uuid=uuidutils.generate_uuid())
             uuids.append(six.text_type(service.uuid))
         res = self.dbapi.get_service_list(self.context, sort_key='uuid')
         res_uuids = [r.uuid for r in res]
@@ -99,19 +99,19 @@ class DbServiceTestCase(base.DbTestCase):
                           sort_key='foo')
 
     def test_get_service_list_with_filters(self):
-        bay1 = utils.get_test_bay(id=11, uuid=magnum_utils.generate_uuid())
-        bay2 = utils.get_test_bay(id=12, uuid=magnum_utils.generate_uuid())
+        bay1 = utils.get_test_bay(id=11, uuid=uuidutils.generate_uuid())
+        bay2 = utils.get_test_bay(id=12, uuid=uuidutils.generate_uuid())
         self.dbapi.create_bay(bay1)
         self.dbapi.create_bay(bay2)
 
         service1 = utils.create_test_service(
             name='service-one',
-            uuid=magnum_utils.generate_uuid(),
+            uuid=uuidutils.generate_uuid(),
             bay_uuid=bay1['uuid'],
             ports=[{'port': 8000}])
         service2 = utils.create_test_service(
             name='service-two',
-            uuid=magnum_utils.generate_uuid(),
+            uuid=uuidutils.generate_uuid(),
             bay_uuid=bay2['uuid'],
             ports=[{'port': 8001}])
 
@@ -144,7 +144,7 @@ class DbServiceTestCase(base.DbTestCase):
                                           'bay_uuid': self.bay.uuid})
         self.assertEqual(1, len(res))
         res = self.dbapi.get_service_list(self.context, filters={
-            'bay_uuid': magnum_utils.generate_uuid()})
+            'bay_uuid': uuidutils.generate_uuid()})
         self.assertEqual(0, len(res))
 
     def test_destroy_service_by_uuid(self):
@@ -158,7 +158,7 @@ class DbServiceTestCase(base.DbTestCase):
     def test_destroy_service_that_does_not_exist(self):
         self.assertRaises(exception.ServiceNotFound,
                           self.dbapi.destroy_service,
-                          magnum_utils.generate_uuid())
+                          uuidutils.generate_uuid())
 
     def test_update_service(self):
         old_name = self.service.name
@@ -168,7 +168,7 @@ class DbServiceTestCase(base.DbTestCase):
         self.assertEqual(new_name, res.name)
 
     def test_update_service_not_found(self):
-        service_uuid = magnum_utils.generate_uuid()
+        service_uuid = uuidutils.generate_uuid()
         self.assertRaises(exception.ServiceNotFound, self.dbapi.update_service,
                           service_uuid, {'port': 80})
 

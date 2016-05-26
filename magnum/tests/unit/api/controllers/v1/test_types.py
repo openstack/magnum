@@ -12,6 +12,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from oslo_utils import uuidutils
 
 import mock
 import six
@@ -41,7 +42,7 @@ class TestUuidType(base.FunctionalTest):
 
     def test_valid_uuid(self):
         test_uuid = '1a1a1a1a-2b2b-3c3c-4d4d-5e5e5e5e5e5e'
-        with mock.patch.object(utils, 'is_uuid_like') as uuid_mock:
+        with mock.patch.object(uuidutils, 'is_uuid_like') as uuid_mock:
             types.UuidType.validate(test_uuid)
             uuid_mock.assert_called_once_with(test_uuid)
 
