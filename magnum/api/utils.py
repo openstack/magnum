@@ -56,7 +56,7 @@ def validate_sort_dir(sort_dir):
 def validate_docker_memory(mem_str):
     """Docker require that Minimum memory limit >= 4M."""
     try:
-        mem = utils.get_docker_quanity(mem_str)
+        mem = utils.get_docker_quantity(mem_str)
     except exception.UnsupportedDockerQuantityFormat:
         raise wsme.exc.ClientSideError(_("Invalid docker memory specified. "
                                          "Acceptable values are format: "

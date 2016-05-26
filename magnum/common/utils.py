@@ -582,7 +582,7 @@ def get_k8s_quantity(quantity):
         raise exception.UnsupportedK8sQuantityFormat()
 
 
-def get_docker_quanity(quantity):
+def get_docker_quantity(quantity):
     """This function is used to get swarm Memory quantity.
 
      Memory format must be in the format of:
