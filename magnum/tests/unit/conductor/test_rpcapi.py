@@ -31,8 +31,6 @@ class RPCAPITestCase(base.DbTestCase):
         self.fake_container = dbutils.get_test_container(driver='fake-driver')
         self.fake_rc = dbutils.get_test_rc(driver='fake-driver')
         self.fake_service = dbutils.get_test_service(driver='fake-driver')
-        self.fake_x509keypair = dbutils.get_test_x509keypair(
-            driver='fake-driver')
         self.fake_certificate = objects.Certificate.from_db_bay(self.fake_bay)
         self.fake_certificate.csr = 'fake-csr'
 
@@ -220,23 +218,6 @@ class RPCAPITestCase(base.DbTestCase):
                           'call',
                           rpcapi_cls=conductor_rpcapi.ListenerAPI,
                           version='1.0')
-
-    def test_x509keypair_create(self):
-        self._test_rpcapi('x509keypair_create',
-                          'call',
-                          version='1.0',
-                          x509keypair=self.fake_x509keypair)
-
-    def test_x509keypair_delete(self):
-        self._test_rpcapi('x509keypair_delete',
-                          'call',
-                          version='1.0',
-                          uuid=self.fake_x509keypair['uuid'])
-
-        self._test_rpcapi('x509keypair_delete',
-                          'call',
-                          version='1.1',
-                          uuid=self.fake_x509keypair['name'])
 
     def test_sign_certificate(self):
         self._test_rpcapi('sign_certificate',

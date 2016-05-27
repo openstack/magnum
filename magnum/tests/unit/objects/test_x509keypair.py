@@ -48,15 +48,6 @@ class TestX509KeyPairObject(base.DbTestCase):
             mock_get_x509keypair.assert_called_once_with(self.context, uuid)
             self.assertEqual(self.context, x509keypair._context)
 
-    def test_get_by_name(self):
-        name = self.fake_x509keypair['name']
-        with mock.patch.object(self.dbapi, 'get_x509keypair_by_name',
-                               autospec=True) as mock_get_x509keypair:
-            mock_get_x509keypair.return_value = self.fake_x509keypair
-            x509keypair = objects.X509KeyPair.get_by_name(self.context, name)
-            mock_get_x509keypair.assert_called_once_with(self.context, name)
-            self.assertEqual(self.context, x509keypair._context)
-
     def test_get_bad_id_and_uuid(self):
         self.assertRaises(exception.InvalidIdentity,
                           objects.X509KeyPair.get, self.context, 'not-a-uuid')
@@ -80,23 +71,6 @@ class TestX509KeyPairObject(base.DbTestCase):
             mock_get_list.assert_called_once_with(
                 self.context, limit=None, marker=None, filters=None,
                 sort_dir=None, sort_key=None)
-            self.assertEqual(1, mock_get_list.call_count)
-            self.assertThat(x509keypairs, HasLength(1))
-            self.assertIsInstance(x509keypairs[0], objects.X509KeyPair)
-            self.assertEqual(self.context, x509keypairs[0]._context)
-
-    def test_list_with_filters(self):
-        with mock.patch.object(self.dbapi, 'get_x509keypair_list',
-                               autospec=True) as mock_get_list:
-            mock_get_list.return_value = [self.fake_x509keypair]
-            filters = {'name': 'x509keypair1'}
-            x509keypairs = objects.X509KeyPair.list(self.context,
-                                                    filters=filters)
-
-            mock_get_list.assert_called_once_with(self.context, sort_key=None,
-                                                  sort_dir=None,
-                                                  filters=filters, limit=None,
-                                                  marker=None)
             self.assertEqual(1, mock_get_list.call_count)
             self.assertThat(x509keypairs, HasLength(1))
             self.assertIsInstance(x509keypairs[0], objects.X509KeyPair)

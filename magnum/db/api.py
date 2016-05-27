@@ -463,10 +463,10 @@ class Connection(object):
 
                         {
                          'uuid': uuidutils.generate_uuid(),
-                         'name': 'example',
-                         'ca_cert': 'AAA...',
-                         'certificate': 'BBB...',
-                         'private_key': 'CCC...',
+                         'certificate': 'AAA...',
+                         'private_key': 'BBB...',
+                         'private_key_passphrase': 'CCC...',
+                         'intermediates': 'DDD...',
                         }
         :returns: A X509KeyPair.
         """
@@ -486,15 +486,6 @@ class Connection(object):
 
         :param context: The security context
         :param x509keypair_uuid: The uuid of a x509keypair.
-        :returns: A x509keypair.
-        """
-
-    @abc.abstractmethod
-    def get_x509keypair_by_name(self, context, x509keypair_name):
-        """Return a x509keypair.
-
-        :param context: The security context
-        :param x509keypair_name: The name of a x509keypair.
         :returns: A x509keypair.
         """
 
@@ -531,13 +522,6 @@ class Connection(object):
         :param sort_dir: direction in which results should be sorted.
                          (asc, desc)
         :returns: A list of tuples of the specified columns.
-        """
-
-    def get_x509keypair_by_bay_uuid(self, bay_uuid):
-        """Returns the cert for a given bay.
-
-        :param bay_uuid: The uuid of a bay.
-        :returns: A cert.
         """
 
     @abc.abstractmethod

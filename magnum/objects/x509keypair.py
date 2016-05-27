@@ -24,18 +24,19 @@ class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject,
                   base.MagnumObjectDictCompat):
     # Version 1.0: Initial version
     # Version 1.1: Added new method get_x509keypair_by_bay_uuid
-    VERSION = '1.1'
+    # Version 1.2: Remove bay_uuid, name, ca_cert and add intermediates
+    #              and private_key_passphrase
+    VERSION = '1.2'
 
     dbapi = dbapi.get_instance()
 
     fields = {
         'id': fields.IntegerField(),
         'uuid': fields.UUIDField(nullable=True),
-        'name': fields.StringField(nullable=True),
-        'bay_uuid': fields.StringField(nullable=True),
-        'ca_cert': fields.StringField(nullable=True),
         'certificate': fields.StringField(nullable=True),
         'private_key': fields.StringField(nullable=True),
+        'intermediates': fields.StringField(nullable=True),
+        'private_key_passphrase': fields.StringField(nullable=True),
         'project_id': fields.StringField(nullable=True),
         'user_id': fields.StringField(nullable=True),
     }
@@ -100,32 +101,6 @@ class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject,
         return x509keypair
 
     @base.remotable_classmethod
-    def get_by_name(cls, context, name):
-        """Find a x509keypair based on name and return a X509KeyPair object.
-
-        :param name: the logical name of a x509keypair.
-        :param context: Security context
-        :returns: a :class:`X509KeyPair` object.
-        """
-        db_x509keypair = cls.dbapi.get_x509keypair_by_name(context, name)
-        x509keypair = X509KeyPair._from_db_object(cls(context), db_x509keypair)
-        return x509keypair
-
-    @base.remotable_classmethod
-    def get_by_bay_uuid(cls, context, bay_uuid):
-        """Find a x509keypair based on a bay uuid and return a :class:`X509KeyPair`
-
-        object.
-
-        :param bay_uuid: the uuid of a bay.
-        :param context: Security context.
-        :returns: a :class:`X509KeyPair` object.
-        """
-        db_cert = cls.dbapi.get_x509keypair_by_bay_uuid(context, bay_uuid)
-        x509keypair = X509KeyPair._from_db_object(cls(context), db_cert)
-        return x509keypair
-
-    @base.remotable_classmethod
     def list(cls, context, limit=None, marker=None,
              sort_key=None, sort_dir=None, filters=None):
         """Return a list of X509KeyPair objects.
@@ -135,8 +110,8 @@ class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject,
         :param marker: pagination marker for large data sets.
         :param sort_key: column to sort results by.
         :param sort_dir: direction to sort. "asc" or "desc".
-        :param filters: filter dict, can include 'x509keypairmodel_id', 'name',
-                        'bay_uuid', 'project_id', 'user_id'.
+        :param filters: filter dict, can include 'x509keypairmodel_id',
+                        'project_id', 'user_id'.
         :returns: a list of :class:`X509KeyPair` object.
 
         """
