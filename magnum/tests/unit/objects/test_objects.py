@@ -15,17 +15,13 @@
 import datetime
 import gettext
 
-import iso8601
 import mock
-import netaddr
-from oslo_utils import timeutils
 from oslo_versionedobjects import fields
 from oslo_versionedobjects import fixture
 
 from magnum.common import context as magnum_context
 from magnum.common import exception
 from magnum.objects import base
-from magnum.objects import utils
 from magnum.tests import base as test_base
 
 gettext.install('magnum')
@@ -91,68 +87,6 @@ class MyObj2(object):
 
 class TestSubclassedObject(MyObj):
     fields = {'new_field': fields.StringField()}
-
-
-class TestUtils(test_base.TestCase):
-
-    def test_datetime_or_none(self):
-        naive_dt = timeutils.utcnow()
-        dt = timeutils.parse_isotime(datetime.datetime.isoformat(naive_dt))
-        self.assertEqual(dt, utils.datetime_or_none(dt))
-        self.assertEqual(naive_dt.replace(tzinfo=iso8601.iso8601.Utc()),
-                         utils.datetime_or_none(dt))
-        self.assertIsNone(utils.datetime_or_none(None))
-        self.assertRaises(ValueError, utils.datetime_or_none, 'foo')
-
-    def test_datetime_or_str_or_none(self):
-        dts = datetime.datetime.isoformat(timeutils.utcnow())
-        dt = timeutils.parse_isotime(dts)
-        self.assertEqual(dt, utils.datetime_or_str_or_none(dt))
-        self.assertIsNone(utils.datetime_or_str_or_none(None))
-        self.assertEqual(dt, utils.datetime_or_str_or_none(dts))
-        self.assertRaises(ValueError, utils.datetime_or_str_or_none, 'foo')
-
-    def test_int_or_none(self):
-        self.assertEqual(1, utils.int_or_none(1))
-        self.assertEqual(1, utils.int_or_none('1'))
-        self.assertIsNone(utils.int_or_none(None))
-        self.assertRaises(ValueError, utils.int_or_none, 'foo')
-
-    def test_str_or_none(self):
-        class Obj(object):
-            pass
-        self.assertEqual('foo', utils.str_or_none('foo'))
-        self.assertEqual('1', utils.str_or_none(1))
-        self.assertIsNone(utils.str_or_none(None))
-
-    def test_ip_or_none(self):
-        ip4 = netaddr.IPAddress('1.2.3.4', 4)
-        ip6 = netaddr.IPAddress('1::2', 6)
-        self.assertEqual(ip4, utils.ip_or_none(4)('1.2.3.4'))
-        self.assertEqual(ip6, utils.ip_or_none(6)('1::2'))
-        self.assertIsNone(utils.ip_or_none(4)(None))
-        self.assertIsNone(utils.ip_or_none(6)(None))
-        self.assertRaises(netaddr.AddrFormatError, utils.ip_or_none(4), 'foo')
-        self.assertRaises(netaddr.AddrFormatError, utils.ip_or_none(6), 'foo')
-
-    def test_dt_serializer(self):
-        class Obj(object):
-            foo = utils.dt_serializer('bar')
-
-        obj = Obj()
-        obj.bar = timeutils.parse_isotime('1955-11-05T00:00:00Z')
-        self.assertEqual('1955-11-05T00:00:00+00:00', obj.foo())
-        obj.bar = None
-        self.assertIsNone(obj.foo())
-        obj.bar = 'foo'
-        self.assertRaises(TypeError, obj.foo)
-
-    def test_dt_deserializer(self):
-        dt = timeutils.parse_isotime('1955-11-05T00:00:00Z')
-        self.assertEqual(dt, utils.dt_deserializer(None,
-                         datetime.datetime.isoformat(dt)))
-        self.assertIsNone(utils.dt_deserializer(None, None))
-        self.assertRaises(ValueError, utils.dt_deserializer, None, 'foo')
 
 
 class _TestObject(object):
