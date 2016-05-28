@@ -192,22 +192,6 @@ class DbBayTestCase(base.DbTestCase):
                           self.dbapi.destroy_bay,
                           '12345678-9999-0000-aaaa-123456789012')
 
-    def test_destroy_bay_that_has_pods(self):
-        bay = utils.create_test_bay()
-        pod = utils.create_test_pod(bay_uuid=bay.uuid)
-        self.assertEqual(bay.uuid, pod.bay_uuid)
-        self.dbapi.destroy_bay(bay.id)
-        self.assertRaises(exception.PodNotFound,
-                          self.dbapi.get_pod_by_id, self.context, pod.id)
-
-    def test_destroy_bay_that_has_pods_by_uuid(self):
-        bay = utils.create_test_bay()
-        pod = utils.create_test_pod(bay_uuid=bay.uuid)
-        self.assertEqual(bay.uuid, pod.bay_uuid)
-        self.dbapi.destroy_bay(bay.uuid)
-        self.assertRaises(exception.PodNotFound,
-                          self.dbapi.get_pod_by_id, self.context, pod.id)
-
     def test_destroy_bay_that_has_services(self):
         bay = utils.create_test_bay()
         service = utils.create_test_service(bay_uuid=bay.uuid)

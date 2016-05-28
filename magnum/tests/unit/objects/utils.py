@@ -87,33 +87,6 @@ def create_test_bay(context, **kw):
     return bay
 
 
-def get_test_pod(context, **kw):
-    """Return a Pod object with appropriate attributes.
-
-    NOTE: The object leaves the attributes marked as changed, such
-    that a create() could be used to commit it to the DB.
-    """
-    db_pod = db_utils.get_test_pod(**kw)
-    # Let DB generate ID if it isn't specified explicitly
-    if 'id' not in kw:
-        del db_pod['id']
-    pod = objects.Pod(context)
-    for key in db_pod:
-        setattr(pod, key, db_pod[key])
-    return pod
-
-
-def create_test_pod(context, **kw):
-    """Create and return a test pod object.
-
-    Create a pod in the DB and return a Pod object with appropriate
-    attributes.
-    """
-    pod = get_test_pod(context, **kw)
-    pod.manifest = '{"foo": "bar"}'
-    return pod
-
-
 def get_test_service(context, **kw):
     """Return a Service object with appropriate attributes.
 

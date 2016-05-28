@@ -109,39 +109,6 @@ def create_test_bay(**kw):
     return dbapi.create_bay(bay)
 
 
-def get_test_pod(**kw):
-    return {
-        'id': kw.get('id', 42),
-        'uuid': kw.get('uuid', '10a47dd1-4874-4298-91cf-eff046dbdb8d'),
-        'name': kw.get('name', 'pod1'),
-        'project_id': kw.get('project_id', 'fake_project'),
-        'user_id': kw.get('user_id', 'fake_user'),
-        'desc': kw.get('desc', 'test pod'),
-        'bay_uuid': kw.get('bay_uuid', '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'),
-        'images': kw.get('images', ['MyImage']),
-        'labels': kw.get('labels', {'name': 'foo'}),
-        'status': kw.get('status', 'Running'),
-        'host': kw.get('host', '10.0.0.3'),
-        'created_at': kw.get('created_at'),
-        'updated_at': kw.get('updated_at'),
-    }
-
-
-def create_test_pod(**kw):
-    """Create test pod entry in DB and return Pod DB object.
-
-    Function to be used to create test Pod objects in the database.
-    :param kw: kwargs with overriding values for pod's attributes.
-    :returns: Test Pod DB object.
-    """
-    pod = get_test_pod(**kw)
-    # Let DB generate ID if it isn't specified explicitly
-    if 'id' not in kw:
-        del pod['id']
-    dbapi = db_api.get_instance()
-    return dbapi.create_pod(pod)
-
-
 def get_test_service(**kw):
     return {
         'id': kw.get('id', 42),

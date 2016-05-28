@@ -647,12 +647,6 @@ class TestDelete(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['errors'])
 
-    def test_delete_bay_with_pods(self):
-        obj_utils.create_test_pod(self.context, bay_uuid=self.bay.uuid)
-        response = self.delete('/bays/%s' % self.bay.uuid,
-                               expect_errors=True)
-        self.assertEqual(204, response.status_int)
-
     def test_delete_bay_with_services(self):
         obj_utils.create_test_service(self.context, bay_uuid=self.bay.uuid)
         response = self.delete('/bays/%s' % self.bay.uuid,
