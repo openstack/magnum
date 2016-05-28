@@ -108,7 +108,7 @@ parameters:
       Comma separated list of supported image providers e.g.,
       APPC,DOCKER
 
-  mesos_slave_executor_environment_variables:
+  mesos_slave_executor_env_variables:
     type: string
     description: >
       JSON object representing the environment variables that should be passed
@@ -181,7 +181,7 @@ resources:
             "$ISOLATION": {get_param: mesos_slave_isolation}
             "$WORK_DIR": {get_param: mesos_slave_work_dir}
             "$IMAGE_PROVIDERS": {get_param: mesos_slave_image_providers}
-            "$EXECUTOR_ENVIRONMENT_VARIABLES": {get_param: mesos_slave_executor_environment_variables}
+            "$EXECUTOR_ENVIRONMENT_VARIABLES": {get_param: mesos_slave_executor_env_variables}
 
   configure_mesos_slave:
     type: OS::Heat::SoftwareConfig

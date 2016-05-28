@@ -14,11 +14,13 @@
 
 from glanceclient import exc as glance_exception
 from novaclient import exceptions as nova_exception
+from oslo_serialization import jsonutils as json
 
 from magnum.api import utils as api_utils
 from magnum.common import clients
 from magnum.common import exception
 from magnum.i18n import _
+
 
 SUPPORTED_ISOLATION = ['filesystem/posix', 'filesystem/linux',
                        'filesystem/shared', 'posix/cpu',
@@ -138,11 +140,15 @@ def validate_labels_image_providers(labels):
                     "flags"))
 
 
-def validate_labels_executor_environment_variables(labels):
+def validate_labels_executor_env_variables(labels):
     """Validate executor_environment_variables"""
-    # TODO(wangqun):this method implement will be added after this
-    # first patch validate_labels is merged.
-    pass
+    mesos_slave_executor_env_val = labels.get(
+        'mesos_slave_executor_env_variables')
+    try:
+        json.loads(mesos_slave_executor_env_val)
+    except ValueError:
+        err = (_("Json format error"))
+        raise exception.InvalidParameterValue(err)
 
 
 def validate_os_resources(context, baymodel):
@@ -170,5 +176,5 @@ validators = {'image_id': validate_image,
 labels_validators = {'mesos_slave_isolation': validate_labels_isolation,
                      'mesos_slave_image_providers':
                      validate_labels_image_providers,
-                     'mesos_slave_executor_environment_variables':
-                     validate_labels_executor_environment_variables}
+                     'mesos_slave_executor_env_variables':
+                     validate_labels_executor_env_variables}

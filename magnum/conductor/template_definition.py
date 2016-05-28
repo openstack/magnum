@@ -674,7 +674,7 @@ class UbuntuMesosTemplateDefinition(BaseTemplateDefinition):
         label_list = ['rexray_preempt', 'mesos_slave_isolation',
                       'mesos_slave_image_providers',
                       'mesos_slave_work_dir',
-                      'mesos_slave_executor_environment_variables']
+                      'mesos_slave_executor_env_variables']
 
         for label in label_list:
             extra_params[label] = baymodel.labels.get(label)
