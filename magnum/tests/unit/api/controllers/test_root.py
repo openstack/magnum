@@ -10,6 +10,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+import fixtures
 import mock
 from oslo_config import cfg
 from webob import exc as webob_exc
@@ -19,7 +20,6 @@ try:
 except ImportError:
     import ConfigParser
 import shutil
-import tempfile
 import webtest
 
 from magnum.api import app
@@ -159,7 +159,7 @@ class TestHeathcheck(api_base.FunctionalTest):
         super(TestHeathcheck, self).setUp()
 
         # Create Temporary file
-        self.tempdir = tempfile.mkdtemp()
+        self.tempdir = self.useFixture(fixtures.TempDir()).path
         paste_ini = "magnum/tests/unit/api/controllers/auth-paste.ini"
 
         # Read current file and create new one

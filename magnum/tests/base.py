@@ -93,6 +93,7 @@ class TestCase(base.BaseTestCase):
         self.addCleanup(p.stop)
 
         self.useFixture(conf_fixture.ConfFixture())
+        self.useFixture(fixtures.NestedTempfile())
 
         self._base_test_obj_backup = copy.copy(
             objects_base.MagnumObjectRegistry._registry._obj_classes)
