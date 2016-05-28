@@ -77,7 +77,7 @@ fi
 # Test if any magnum services are enabled
 # is_magnum_enabled
 function is_magnum_enabled {
-    [[ ,${ENABLED_SERVICES} =~ ,"m-" ]] && return 0
+    [[ ,${ENABLED_SERVICES} =~ ,"magnum-" ]] && return 0
     return 1
 }
 # cleanup_magnum() - Remove residual data files, anything left over from previous
