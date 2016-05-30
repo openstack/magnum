@@ -15,13 +15,16 @@
 from barbicanclient import client as barbicanclient
 from glanceclient import client as glanceclient
 from heatclient import client as heatclient
+from keystoneauth1.exceptions import catalog
 from neutronclient.v2_0 import client as neutronclient
 from novaclient import client as novaclient
 from oslo_config import cfg
+from oslo_log import log as logging
 
 from magnum.common import exception
 from magnum.common import keystone
 from magnum.i18n import _
+from magnum.i18n import _LW
 
 
 magnum_client_opts = [
@@ -118,6 +121,8 @@ cfg.CONF.register_opts(nova_client_opts, group='nova_client')
 cfg.CONF.register_opts(neutron_client_opts, group='neutron_client')
 cfg.CONF.register_opts(cinder_client_opts, group='cinder_client')
 
+LOG = logging.getLogger(__name__)
+
 
 class OpenStackClients(object):
     """Convenience class to create and cache client instances."""
@@ -137,9 +142,17 @@ class OpenStackClients(object):
     def magnum_url(self):
         endpoint_type = self._get_client_option('magnum', 'endpoint_type')
         region_name = self._get_client_option('magnum', 'region_name')
-        return self.url_for(service_type='container-infra',
-                            interface=endpoint_type,
-                            region_name=region_name)
+        try:
+            return self.url_for(service_type='container-infra',
+                                interface=endpoint_type,
+                                region_name=region_name)
+        except catalog.EndpointNotFound:
+            url = self.url_for(service_type='container',
+                               interface=endpoint_type,
+                               region_name=region_name)
+            LOG.warning(_LW('Service type "container" is deprecated and will '
+                            'be removed in a subsequent release'))
+            return url
 
     def cinder_region_name(self):
         cinder_region_name = self._get_client_option('cinder', 'region_name')
