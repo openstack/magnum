@@ -65,9 +65,6 @@ class TestBayConductorWithK8s(base.TestCase):
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
         }
-        cfg.CONF.set_override('trustee_domain_id',
-                              '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
-                              group='trust')
         self.context.auth_url = 'http://192.168.10.10:5000/v3'
         self.context.user_name = 'fake_user'
         self.context.tenant = 'fake_tenant'
@@ -77,6 +74,9 @@ class TestBayConductorWithK8s(base.TestCase):
         self.mock_osc = mock.MagicMock()
         self.mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
         self.mock_osc.cinder_region_name.return_value = 'RegionOne'
+        self.mock_keystone = mock.MagicMock()
+        self.mock_keystone.trustee_domain_id = 'trustee_domain_id'
+        self.mock_osc.keystone.return_value = self.mock_keystone
         self.mock_osc_class.return_value = self.mock_osc
 
     @patch('magnum.objects.BayModel.get_by_uuid')
@@ -150,7 +150,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'region_name': self.mock_osc.cinder_region_name.return_value,
             'tls_disabled': False,
             'registry_enabled': False,
-            'trustee_domain_id': '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
+            'trustee_domain_id': self.mock_keystone.trustee_domain_id,
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
@@ -207,7 +207,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'tenant_name': 'fake_tenant',
             'tls_disabled': False,
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
-            'trustee_domain_id': '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
+            'trustee_domain_id': self.mock_keystone.trustee_domain_id,
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
             'trustee_username': 'fake_trustee',
@@ -250,7 +250,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'flannel_backend': 'vxlan',
             'tls_disabled': False,
             'registry_enabled': False,
-            'trustee_domain_id': '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
+            'trustee_domain_id': self.mock_keystone.trustee_domain_id,
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
@@ -299,7 +299,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'flannel_backend': 'vxlan',
             'tls_disabled': False,
             'registry_enabled': False,
-            'trustee_domain_id': '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
+            'trustee_domain_id': self.mock_keystone.trustee_domain_id,
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
@@ -422,7 +422,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'region_name': self.mock_osc.cinder_region_name.return_value,
             'tls_disabled': False,
             'registry_enabled': False,
-            'trustee_domain_id': '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
+            'trustee_domain_id': self.mock_keystone.trustee_domain_id,
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',

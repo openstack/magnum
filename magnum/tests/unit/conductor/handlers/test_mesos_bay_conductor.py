@@ -14,7 +14,6 @@
 
 import mock
 from mock import patch
-from oslo_config import cfg
 from oslo_service import loopingcall
 
 from magnum.conductor.handlers import bay_conductor
@@ -63,9 +62,6 @@ class TestBayConductorWithMesos(base.TestCase):
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
         }
-        cfg.CONF.set_override('trustee_domain_id',
-                              '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
-                              group='trust')
         self.context.auth_url = 'http://192.168.10.10:5000/v3'
         self.context.user_name = 'mesos_user'
         self.context.tenant = 'admin'
@@ -75,6 +71,9 @@ class TestBayConductorWithMesos(base.TestCase):
         self.addCleanup(osc_patcher.stop)
         self.mock_osc = mock.MagicMock()
         self.mock_osc.cinder_region_name.return_value = 'RegionOne'
+        self.mock_keystone = mock.MagicMock()
+        self.mock_keystone.trustee_domain_id = 'trustee_domain_id'
+        self.mock_osc.keystone.return_value = self.mock_keystone
         self.mock_osc_class.return_value = self.mock_osc
 
     @patch('magnum.objects.BayModel.get_by_uuid')
@@ -102,7 +101,7 @@ class TestBayConductorWithMesos(base.TestCase):
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
             'cluster_name': 'bay1',
-            'trustee_domain_id': '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
+            'trustee_domain_id': self.mock_keystone.trustee_domain_id,
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
@@ -145,7 +144,7 @@ class TestBayConductorWithMesos(base.TestCase):
             'number_of_slaves': 1,
             'number_of_masters': 1,
             'cluster_name': 'bay1',
-            'trustee_domain_id': '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
+            'trustee_domain_id': self.mock_keystone.trustee_domain_id,
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',

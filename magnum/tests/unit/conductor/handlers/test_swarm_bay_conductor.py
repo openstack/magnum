@@ -63,14 +63,14 @@ class TestBayConductorWithSwarm(base.TestCase):
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de'
         }
-        cfg.CONF.set_override('trustee_domain_id',
-                              '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
-                              group='trust')
         osc_patcher = mock.patch('magnum.common.clients.OpenStackClients')
         self.mock_osc_class = osc_patcher.start()
         self.addCleanup(osc_patcher.stop)
         self.mock_osc = mock.MagicMock()
         self.mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
+        self.mock_keystone = mock.MagicMock()
+        self.mock_keystone.trustee_domain_id = 'trustee_domain_id'
+        self.mock_osc.keystone.return_value = self.mock_keystone
         self.mock_osc_class.return_value = self.mock_osc
         self.context.auth_url = 'http://192.168.10.10:5000/v3'
 
@@ -108,7 +108,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'flannel_network_cidr': '10.101.0.0/16',
             'flannel_network_subnetlen': '26',
             'flannel_backend': 'vxlan',
-            'trustee_domain_id': '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
+            'trustee_domain_id': self.mock_keystone.trustee_domain_id,
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
@@ -158,7 +158,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'flannel_network_cidr': '10.101.0.0/16',
             'flannel_network_subnetlen': '26',
             'flannel_backend': 'vxlan',
-            'trustee_domain_id': '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
+            'trustee_domain_id': self.mock_keystone.trustee_domain_id,
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
@@ -201,7 +201,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'flannel_network_cidr': u'10.101.0.0/16',
             'flannel_network_subnetlen': u'26',
             'flannel_backend': u'vxlan',
-            'trustee_domain_id': '3527620c-b220-4f37-9ebc-6e63a81a9b2f',
+            'trustee_domain_id': self.mock_keystone.trustee_domain_id,
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',

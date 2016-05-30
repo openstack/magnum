@@ -156,6 +156,43 @@ class KeystoneClientTest(base.TestCase):
             trustee_user='888888', role_names=['role3'],
             impersonation=True)
 
+    @mock.patch('magnum.common.keystone.KeystoneClientV3.trustee_domain_id')
+    def test_create_trustee(self, mock_tdi, mock_ks):
+        expected_username = '_username'
+        expected_password = '_password'
+        expected_domain = '_expected_trustee_domain_id'
+        mock_tdi.__get__ = mock.MagicMock(return_value=expected_domain)
+
+        ks_client = keystone.KeystoneClientV3(self.ctx)
+        ks_client.create_trustee(
+            username=expected_username,
+            password=expected_password,
+        )
+        mock_ks.return_value.users.create.assert_called_once_with(
+            name=expected_username,
+            password=expected_password,
+            domain=expected_domain,
+        )
+
+    @mock.patch('magnum.common.keystone.KeystoneClientV3.domain_admin_auth')
+    @mock.patch('magnum.common.keystone.KeystoneClientV3.domain_admin_session')
+    def test_trustee_domain_id(self, mock_session, mock_auth, mock_ks):
+        expected_domain_id = '_expected_domain_id'
+        _mock_session = mock.MagicMock()
+        mock_session.__get__ = mock.MagicMock(return_value=_mock_session)
+        _mock_auth = mock.MagicMock()
+        mock_auth.__get__ = mock.MagicMock(return_value=_mock_auth)
+        mock_access = mock.MagicMock()
+        mock_access.domain_id = expected_domain_id
+        _mock_auth.get_access.return_value = mock_access
+
+        ks_client = keystone.KeystoneClientV3(self.ctx)
+        self.assertEqual(expected_domain_id, ks_client.trustee_domain_id)
+
+        _mock_auth.get_access.assert_called_once_with(
+            _mock_session
+        )
+
     def test_get_validate_region_name(self, mock_ks):
         key = 'region_name'
         val = 'RegionOne'

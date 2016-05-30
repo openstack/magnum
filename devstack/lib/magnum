@@ -216,8 +216,8 @@ function create_magnum_conf {
               --os-identity-api-version 3 role add \
               --user $trustee_domain_admin_id --domain $trustee_domain_id \
               admin
-    iniset $MAGNUM_CONF trust trustee_domain_id $trustee_domain_id
-    iniset $MAGNUM_CONF trust trustee_domain_admin_id $trustee_domain_admin_id
+    iniset $MAGNUM_CONF trust trustee_domain_name magnum
+    iniset $MAGNUM_CONF trust trustee_domain_admin_name trustee_domain_admin
     iniset $MAGNUM_CONF trust trustee_domain_admin_password $MAGNUM_TRUSTEE_DOMAIN_ADMIN_PASSWORD
     iniset $MAGNUM_CONF cinder_client region_name $REGION_NAME
 
