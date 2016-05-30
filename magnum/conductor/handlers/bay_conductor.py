@@ -229,7 +229,7 @@ class Handler(object):
                 context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_PENDING)
             osc.heat().stacks.delete(stack_id)
         except exc.HTTPNotFound:
-            LOG.info(_LI('The stack %s was not be found during bay'
+            LOG.info(_LI('The stack %s was not found during bay'
                          ' deletion.'), stack_id)
             try:
                 trust_manager.delete_trustee_and_trust(osc, context, bay)

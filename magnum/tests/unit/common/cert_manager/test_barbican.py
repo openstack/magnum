@@ -276,31 +276,11 @@ class TestBarbicanManager(base.BaseTestCase):
     def test_delete_cert(self, mock_barbican):
         # Mock out the client
         bc = mock.MagicMock()
-        mock_barbican.return_value = bc
-
-        # Attempt to deregister as a consumer
-        bcm.CertManager.delete_cert(
-            cert_ref=self.container_ref,
-            resource_ref=self.container_ref,
-            service_name='Magnum'
-        )
-
-        # remove_consumer should be called once with the container_ref
-        bc.containers.remove_consumer.assert_called_once_with(
-            container_ref=self.container_ref,
-            url=self.container_ref,
-            name='Magnum'
-        )
-
-    @patch('magnum.common.clients.OpenStackClients.barbican')
-    def test_actually_delete_cert(self, mock_barbican):
-        # Mock out the client
-        bc = mock.MagicMock()
         bc.containers.get.return_value = self.container
         mock_barbican.return_value = bc
 
-        # Attempt to store a cert
-        bcm.CertManager._actually_delete_cert(
+        # Attempt to delete a cert
+        bcm.CertManager.delete_cert(
             cert_ref=self.container_ref
         )
 

@@ -448,8 +448,9 @@ class TestHandler(db_base.DbTestCase):
             template='some template yaml',
             timeout_mins=timeout)
 
+    @patch('magnum.conductor.handlers.bay_conductor.cert_manager')
     @patch('magnum.common.clients.OpenStackClients')
-    def test_bay_delete(self, mock_openstack_client_class):
+    def test_bay_delete(self, mock_openstack_client_class, cert_manager):
         osc = mock.MagicMock()
         mock_openstack_client_class.return_value = osc
         osc.heat.side_effect = exc.HTTPNotFound
@@ -465,12 +466,16 @@ class TestHandler(db_base.DbTestCase):
             'magnum.bay.delete', notifications[1].event_type)
         self.assertEqual(
             taxonomy.OUTCOME_SUCCESS, notifications[1].payload['outcome'])
+        self.assertEqual(1,
+                         cert_manager.delete_certificates_from_bay.call_count)
         # The bay has been destroyed
         self.assertRaises(exception.BayNotFound,
                           objects.Bay.get, self.context, self.bay.uuid)
 
+    @patch('magnum.conductor.handlers.bay_conductor.cert_manager')
     @patch('magnum.common.clients.OpenStackClients')
-    def test_bay_delete_conflict(self, mock_openstack_client_class):
+    def test_bay_delete_conflict(self, mock_openstack_client_class,
+                                 cert_manager):
         osc = mock.MagicMock()
         mock_openstack_client_class.return_value = osc
         osc.heat.side_effect = exc.HTTPConflict
@@ -489,6 +494,8 @@ class TestHandler(db_base.DbTestCase):
             'magnum.bay.delete', notifications[1].event_type)
         self.assertEqual(
             taxonomy.OUTCOME_FAILURE, notifications[1].payload['outcome'])
+        self.assertEqual(0,
+                         cert_manager.delete_certificates_from_bay.call_count)
 
 
 class TestHeatPoller(base.TestCase):
