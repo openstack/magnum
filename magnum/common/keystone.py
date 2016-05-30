@@ -71,7 +71,6 @@ class KeystoneClientV3(object):
     def __init__(self, context):
         self.context = context
         self._client = None
-        self._admin_client = None
         self._domain_admin_client = None
         self._session = None
 
