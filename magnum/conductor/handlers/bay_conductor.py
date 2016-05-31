@@ -130,13 +130,13 @@ class Handler(object):
             # Create trustee/trust and set them to bay
             trust_manager.create_trustee_and_trust(osc, bay)
             # Generate certificate and set the cert reference to bay
-            cert_manager.generate_certificates_to_bay(bay)
+            cert_manager.generate_certificates_to_bay(bay, context=context)
             conductor_utils.notify_about_bay_operation(
                 context, taxonomy.ACTION_CREATE, taxonomy.OUTCOME_PENDING)
             created_stack = _create_stack(context, osc, bay,
                                           bay_create_timeout)
         except Exception as e:
-            cert_manager.delete_certificates_from_bay(bay)
+            cert_manager.delete_certificates_from_bay(bay, context=context)
             trust_manager.delete_trustee_and_trust(osc, context, bay)
             conductor_utils.notify_about_bay_operation(
                 context, taxonomy.ACTION_CREATE, taxonomy.OUTCOME_FAILURE)
@@ -212,7 +212,7 @@ class Handler(object):
                          ' deletion.'), stack_id)
             try:
                 trust_manager.delete_trustee_and_trust(osc, context, bay)
-                cert_manager.delete_certificates_from_bay(bay)
+                cert_manager.delete_certificates_from_bay(bay, context=context)
                 bay.destroy()
             except exception.BayNotFound:
                 LOG.info(_LI('The bay %s has been deleted by others.'), uuid)
@@ -227,7 +227,6 @@ class Handler(object):
             conductor_utils.notify_about_bay_operation(
                 context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_FAILURE)
             raise
-
         self._poll_and_check(osc, bay)
 
         return None
@@ -319,7 +318,8 @@ class HeatPoller(object):
             trust_manager.delete_trustee_and_trust(self.openstack_client,
                                                    self.context,
                                                    self.bay)
-            cert_manager.delete_certificates_from_bay(self.bay)
+            cert_manager.delete_certificates_from_bay(self.bay,
+                                                      context=self.context)
             self.bay.destroy()
         except exception.BayNotFound:
             LOG.info(_LI('The bay %s has been deleted by others.')

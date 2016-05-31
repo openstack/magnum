@@ -34,12 +34,13 @@ class Handler(object):
     def sign_certificate(self, context, bay, certificate):
         LOG.debug("Creating self signed x509 certificate")
         signed_cert = cert_manager.sign_node_certificate(bay,
-                                                         certificate.csr)
+                                                         certificate.csr,
+                                                         context=context)
         certificate.pem = signed_cert
         return certificate
 
     def get_ca_certificate(self, context, bay):
-        ca_cert = cert_manager.get_bay_ca_certificate(bay)
+        ca_cert = cert_manager.get_bay_ca_certificate(bay, context=context)
         certificate = objects.Certificate.from_object_bay(bay)
         certificate.pem = ca_cert.get_certificate()
         return certificate
