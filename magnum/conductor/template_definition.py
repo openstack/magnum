@@ -462,6 +462,8 @@ class K8sTemplateDefinition(BaseTemplateDefinition):
         self.add_parameter('bay_uuid',
                            bay_attr='uuid',
                            param_type=str)
+        self.add_parameter('insecure_registry_url',
+                           baymodel_attr='insecure_registry')
 
         self.add_output('api_address',
                         bay_attr='api_address',

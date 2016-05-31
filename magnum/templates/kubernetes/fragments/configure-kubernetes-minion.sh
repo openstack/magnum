@@ -21,6 +21,12 @@ sed -i '
 ' /etc/kubernetes/config
 
 KUBELET_ARGS="--config=/etc/kubernetes/manifests --cadvisor-port=4194 --hostname-override=$KUBE_NODE_IP ${KUBE_CONFIG}"
+
+if [ -n "${INSECURE_REGISTRY_URL}" ]; then
+    KUBELET_ARGS="${KUBELET_ARGS} --pod-infra-container-image=${INSECURE_REGISTRY_URL}/google_containers/pause\:0.8.0"
+    echo "INSECURE_REGISTRY='--insecure-registry ${INSECURE_REGISTRY_URL}'" >> /etc/sysconfig/docker
+fi
+
 sed -i '
   /^KUBELET_ADDRESS=/ s/=.*/="--address=0.0.0.0"/
   /^KUBELET_HOSTNAME=/ s/=.*/=""/

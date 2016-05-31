@@ -45,7 +45,8 @@ class TestBayConductorWithK8s(base.TestCase):
                        'flannel_backend': 'vxlan'},
             'tls_disabled': False,
             'server_type': 'vm',
-            'registry_enabled': False
+            'registry_enabled': False,
+            'insecure_registry': '10.0.0.1:5000',
         }
         self.bay_dict = {
             'uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
@@ -123,6 +124,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'bay_uuid': self.bay_dict['uuid'],
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'tls_disabled': False,
+            'insecure_registry': '10.0.0.1:5000',
         }
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -155,7 +157,8 @@ class TestBayConductorWithK8s(base.TestCase):
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
-            'auth_url': 'http://192.168.10.10:5000/v3'
+            'auth_url': 'http://192.168.10.10:5000/v3',
+            'insecure_registry_url': '10.0.0.1:5000',
         }
         if missing_attr is not None:
             expected.pop(mapping[missing_attr], None)
@@ -212,7 +215,8 @@ class TestBayConductorWithK8s(base.TestCase):
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
             'trustee_username': 'fake_trustee',
             'username': 'fake_user',
-            'volume_driver': 'volume_driver'
+            'volume_driver': 'volume_driver',
+            'insecure_registry_url': '10.0.0.1:5000',
         }
 
         self.assertEqual(expected, definition)
@@ -258,6 +262,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v3',
             'bay_uuid': self.bay_dict['uuid'],
             'magnum_url': self.mock_osc.magnum_url.return_value,
+            'insecure_registry_url': '10.0.0.1:5000',
         }
         self.assertEqual(expected, definition)
 
@@ -307,6 +312,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v3',
             'bay_uuid': self.bay_dict['uuid'],
             'magnum_url': self.mock_osc.magnum_url.return_value,
+            'insecure_registry_url': '10.0.0.1:5000',
         }
         self.assertEqual(expected, definition)
 
@@ -427,7 +433,8 @@ class TestBayConductorWithK8s(base.TestCase):
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
-            'auth_url': 'http://192.168.10.10:5000/v3'
+            'auth_url': 'http://192.168.10.10:5000/v3',
+            'insecure_registry_url': '10.0.0.1:5000',
         }
         self.assertEqual(expected, definition)
         reqget.assert_called_once_with('http://etcd/test?size=1')
