@@ -350,7 +350,7 @@ class KubernetesAPIFailed(MagnumException):
 
 
 class X509KeyPairNotFound(ResourceNotFound):
-    message = _("A key pair %(keypair)s could not be found.")
+    message = _("A key pair %(x509keypair)s could not be found.")
 
 
 class X509KeyPairAlreadyExists(Conflict):

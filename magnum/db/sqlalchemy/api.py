@@ -687,19 +687,6 @@ class Connection(api.Connection):
         except NoResultFound:
             raise exception.X509KeyPairNotFound(x509keypair=x509keypair_id)
 
-    def get_x509keypair_by_name(self, context, x509keypair_name):
-        query = model_query(models.X509KeyPair)
-        query = self._add_tenant_filters(context, query)
-        query = query.filter_by(name=x509keypair_name)
-        try:
-            return query.one()
-        except MultipleResultsFound:
-            raise exception.Conflict('Multiple x509keypairs exist with '
-                                     'same name. Please use the x509keypair '
-                                     'uuid instead.')
-        except NoResultFound:
-            raise exception.X509KeyPairNotFound(x509keypair=x509keypair_name)
-
     def get_x509keypair_by_uuid(self, context, x509keypair_uuid):
         query = model_query(models.X509KeyPair)
         query = self._add_tenant_filters(context, query)
@@ -746,10 +733,6 @@ class Connection(api.Connection):
         if filters is None:
             filters = {}
 
-        if 'bay_uuid' in filters:
-            query = query.filter_by(bay_uuid=filters['bay_uuid'])
-        if 'name' in filters:
-            query = query.filter_by(name=filters['name'])
         if 'project_id' in filters:
             query = query.filter_by(project_id=filters['project_id'])
         if 'user_id' in filters:
@@ -764,13 +747,6 @@ class Connection(api.Connection):
         query = self._add_x509keypairs_filters(query, filters)
         return _paginate_query(models.X509KeyPair, limit, marker,
                                sort_key, sort_dir, query)
-
-    def get_x509keypair_by_bay_uuid(self, context, bay_uuid):
-        query = model_query(models.X509KeyPair).filter_by(bay_uuid=bay_uuid)
-        try:
-            return query.one()
-        except NoResultFound:
-            raise exception.BayNotFound(bay=bay_uuid)
 
     def destroy_magnum_service(self, magnum_service_id):
         session = get_session()

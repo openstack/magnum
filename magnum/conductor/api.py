@@ -113,14 +113,6 @@ class API(rpc_service.API):
         return self._call('container_exec', container_uuid=container_uuid,
                           command=command)
 
-    # X509KeyPair Operations
-
-    def x509keypair_create(self, x509keypair):
-        return self._call('x509keypair_create', x509keypair=x509keypair)
-
-    def x509keypair_delete(self, uuid):
-        return self._call('x509keypair_delete', uuid=uuid)
-
     # CA operations
 
     def sign_certificate(self, bay, certificate):

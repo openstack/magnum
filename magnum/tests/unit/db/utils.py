@@ -212,15 +212,14 @@ def get_test_x509keypair(**kw):
     return {
         'id': kw.get('id', 42),
         'uuid': kw.get('uuid', '72625085-c507-4410-9b28-cd7cf1fbf1ad'),
-        'name': kw.get('name', 'x509keypair1'),
         'project_id': kw.get('project_id', 'fake_project'),
         'user_id': kw.get('user_id', 'fake_user'),
-        'bay_uuid': kw.get('bay_uuid',
-                           '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'),
-        'ca_cert': kw.get('ca_cert', 'client_ca'),
         'certificate': kw.get('certificate',
                               'certificate'),
         'private_key': kw.get('private_key', 'private_key'),
+        'private_key_passphrase': kw.get('private_key_passphrase',
+                                         'private_key_passphrase'),
+        'intermediates': kw.get('intermediates', 'intermediates'),
         'created_at': kw.get('created_at'),
         'updated_at': kw.get('updated_at'),
     }

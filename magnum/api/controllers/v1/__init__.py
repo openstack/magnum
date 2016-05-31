@@ -30,7 +30,6 @@ from magnum.api.controllers.v1 import bay
 from magnum.api.controllers.v1 import baymodel
 from magnum.api.controllers.v1 import certificate
 from magnum.api.controllers.v1 import magnum_services
-from magnum.api.controllers.v1 import x509keypair
 from magnum.api import expose
 from magnum.i18n import _
 
@@ -91,8 +90,6 @@ class V1(controllers_base.APIBase):
     bays = [link.Link]
     """Links to the bays resource"""
 
-    x509keypairs = [link.Link]
-
     certificates = [link.Link]
     """Links to the certificates resource"""
 
@@ -124,12 +121,6 @@ class V1(controllers_base.APIBase):
                                        pecan.request.host_url,
                                        'bays', '',
                                        bookmark=True)]
-        v1.x509keypairs = [link.Link.make_link('self', pecan.request.host_url,
-                                               'x509keypairs', ''),
-                           link.Link.make_link('bookmark',
-                                               pecan.request.host_url,
-                                               'x509keypairs', '',
-                                               bookmark=True)]
         v1.certificates = [link.Link.make_link('self', pecan.request.host_url,
                                                'certificates', ''),
                            link.Link.make_link('bookmark',
@@ -150,7 +141,6 @@ class Controller(rest.RestController):
 
     bays = bay.BaysController()
     baymodels = baymodel.BayModelsController()
-    x509keypairs = x509keypair.X509KeyPairController()
     certificates = certificate.CertificateController()
     mservices = magnum_services.MagnumServiceController()
 

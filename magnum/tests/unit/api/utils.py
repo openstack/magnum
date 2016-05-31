@@ -18,7 +18,6 @@ import pytz
 
 from magnum.api.controllers.v1 import bay as bay_controller
 from magnum.api.controllers.v1 import baymodel as baymodel_controller
-from magnum.api.controllers.v1 import x509keypair as x509keypair_controller
 from magnum.tests.unit.db import utils
 
 
@@ -47,12 +46,6 @@ def cert_post_data(**kw):
         'csr': kw.get('csr', 'fake-csr'),
         'pem': kw.get('pem', 'fake-pem')
     }
-
-
-def x509keypair_post_data(**kw):
-    x509keypair = utils.get_test_x509keypair(**kw)
-    internal = x509keypair_controller.X509KeyPairPatchType.internal_attrs()
-    return remove_internal(x509keypair, internal)
 
 
 def mservice_get_data(**kw):

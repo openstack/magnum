@@ -244,11 +244,10 @@ class X509KeyPair(Base):
     )
     id = Column(Integer, primary_key=True)
     uuid = Column(String(36))
-    name = Column(String(255))
-    bay_uuid = Column(String(36))
-    ca_cert = Column(Text())
     certificate = Column(Text())
     private_key = Column(Text())
+    private_key_passphrase = Column(Text())
+    intermediates = Column(Text())
     project_id = Column(String(255))
     user_id = Column(String(255))
 
