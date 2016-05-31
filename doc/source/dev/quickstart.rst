@@ -560,12 +560,17 @@ Run the openssl 'req' command to generate the CSR.::
 Now that you have your client CSR use the Magnum CLI to get it signed and also
 download the signing cert.::
 
-    magnum ca-sign swarmbay client.csr > cert.pem
-    magnum ca-show swarmbay > ca.pem
+    magnum ca-sign --bay swarmbay --csr client.csr > cert.pem
+    magnum ca-show --bay swarmbay > ca.pem
 
-Set the correct host to use. This env var is consumed by docker.::
+Set the CLI to use TLS . This env var is consumed by docker.::
 
-    DOCKER_HOST=$(magnum bay-show swarmbay | awk '/ api_address /{print $4}')
+    export DOCKER_TLS_VERIFY="1"
+
+Set the correct host to use which is the public ip address of swarm API server
+endpoint. This env var is consumed by docker.::
+
+    export DOCKER_HOST=$(magnum bay-show swarmbay | awk '/ api_address /{print substr($4,9)}')
 
 Next we will create a container in this swarm bay. This container will ping the
 address 8.8.8.8 four times::
