@@ -25,6 +25,12 @@ parameters:
       size of a cinder volume to allocate to docker for container/image
       storage
 
+  docker_storage_driver:
+    type: string
+    description: docker storage driver name
+    constraints:
+      - allowed_values: ["devicemapper", "overlay"]
+
   external_network:
     type: string
     description: uuid/name of a network to use for floating ip addresses
@@ -184,6 +190,7 @@ resources:
             "$WAIT_HANDLE_ENDPOINT": {get_attr: [node_cloud_init_wait_handle, endpoint]}
             "$WAIT_HANDLE_TOKEN": {get_attr: [node_cloud_init_wait_handle, token]}
             "$DOCKER_VOLUME": {get_resource: docker_volume}
+            "$DOCKER_STORAGE_DRIVER": {get_param: docker_storage_driver}
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
@@ -227,7 +234,11 @@ resources:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/configure-docker-storage.sh}
+      config:
+        str_replace:
+          params:
+            $configure_docker_storage_driver: {get_file: ../common/fragments/configure_docker_storage_driver_atomic.sh}
+          template: {get_file: fragments/configure-docker-storage.sh}
 
   configure_docker_registry:
     type: OS::Heat::SoftwareConfig

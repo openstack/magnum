@@ -522,6 +522,8 @@ class AtomicK8sTemplateDefinition(K8sTemplateDefinition):
         super(AtomicK8sTemplateDefinition, self).__init__()
         self.add_parameter('docker_volume_size',
                            baymodel_attr='docker_volume_size')
+        self.add_parameter('docker_storage_driver',
+                           baymodel_attr='docker_storage_driver')
 
     def get_params(self, context, baymodel, bay, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
@@ -583,6 +585,8 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
                            required=True)
         self.add_parameter('registry_enabled',
                            baymodel_attr='registry_enabled')
+        self.add_parameter('docker_storage_driver',
+                           baymodel_attr='docker_storage_driver')
         self.add_output('api_address',
                         bay_attr='api_address',
                         mapping_type=SwarmApiAddressOutputMapping)

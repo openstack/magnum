@@ -36,6 +36,13 @@ parameters:
       size of a cinder volume to allocate to docker for container/image
       storage
 
+  docker_storage_driver:
+    type: string
+    description: docker storage driver name
+    default: "devicemapper"
+    constraints:
+      - allowed_values: ["devicemapper", "overlay"]
+
   tls_disabled:
     type: boolean
     description: whether or not to enable TLS
@@ -223,6 +230,7 @@ resources:
             $KUBE_NODE_IP: {get_attr: [kube_minion_eth0, fixed_ips, 0, ip_address]}
             $ETCD_SERVER_IP: {get_param: etcd_server_ip}
             $DOCKER_VOLUME: {get_resource: docker_volume}
+            $DOCKER_STORAGE_DRIVER: {get_param: docker_storage_driver}
             $NETWORK_DRIVER: {get_param: network_driver}
             $REGISTRY_ENABLED: {get_param: registry_enabled}
             $REGISTRY_PORT: {get_param: registry_port}
@@ -268,7 +276,11 @@ resources:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/configure-docker-storage.sh}
+      config:
+        str_replace:
+          params:
+            $configure_docker_storage_driver: {get_file: ../common/fragments/configure_docker_storage_driver_atomic.sh}
+          template: {get_file: fragments/configure-docker-storage.sh}
 
   configure_docker_registry:
     type: OS::Heat::SoftwareConfig

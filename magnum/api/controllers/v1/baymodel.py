@@ -134,6 +134,9 @@ class BayModel(base.APIBase):
     insecure_registry = wtypes.StringType(min_length=1, max_length=255)
     """insecure registry url when create baymodel """
 
+    docker_storage_driver = wtypes.Enum(str, *fields.DockerStorageDriver.ALL)
+    """Docker storage driver"""
+
     def __init__(self, **kwargs):
         self.fields = []
         for field in objects.BayModel.fields:
@@ -173,6 +176,7 @@ class BayModel(base.APIBase):
             volume_driver='cinder',
             apiserver_port=8080,
             docker_volume_size=25,
+            docker_storage_driver='devicemapper',
             cluster_distro='fedora-atomic',
             coe=fields.BayType.KUBERNETES,
             http_proxy='http://proxy.com:123',

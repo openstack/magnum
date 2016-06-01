@@ -34,6 +34,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'network_driver': 'network_driver',
             'volume_driver': 'volume_driver',
             'docker_volume_size': 20,
+            'docker_storage_driver': 'devicemapper',
             'cluster_distro': 'fedora-atomic',
             'coe': 'kubernetes',
             'token': None,
@@ -108,6 +109,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'image_id': 'server_image',
             'flavor_id': 'minion_flavor',
             'docker_volume_size': 'docker_volume_size',
+            'docker_storage_driver': 'docker_storage_driver',
             'network_driver': 'network_driver',
             'volume_driver': 'volume_driver',
             'master_flavor_id': 'master_flavor',
@@ -138,6 +140,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'number_of_minions': 1,
             'number_of_masters': 1,
             'docker_volume_size': 20,
+            'docker_storage_driver': 'devicemapper',
             'discovery_url': 'https://discovery.etcd.io/test',
             'flannel_network_cidr': '10.101.0.0/16',
             'flannel_network_subnetlen': '26',
@@ -187,6 +190,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'bay_uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
             'discovery_url': 'https://discovery.etcd.io/test',
             'dns_nameserver': 'dns_nameserver',
+            'docker_storage_driver': 'devicemapper',
             'docker_volume_size': 20,
             'external_network': 'external_network_id',
             'flannel_backend': 'vxlan',
@@ -349,6 +353,14 @@ class TestBayConductorWithK8s(base.TestCase):
             missing_attr='docker_volume_size')
 
     @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_template_definition_without_docker_storage_driver(
+            self,
+            mock_objects_baymodel_get_by_uuid):
+        self._test_extract_template_definition(
+            mock_objects_baymodel_get_by_uuid,
+            missing_attr='docker_storage_driver')
+
+    @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_without_master_flavor(
             self,
             mock_objects_baymodel_get_by_uuid):
@@ -414,6 +426,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'network_driver': 'network_driver',
             'volume_driver': 'volume_driver',
             'docker_volume_size': 20,
+            'docker_storage_driver': 'devicemapper',
             'discovery_url': 'https://address/token',
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',

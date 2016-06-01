@@ -41,6 +41,13 @@ parameters:
       size of a cinder volume to allocate to docker for container/image
       storage
 
+  docker_storage_driver:
+    type: string
+    description: docker storage driver name
+    default: "devicemapper"
+    constraints:
+      - allowed_values: ["devicemapper", "overlay"]
+
   flannel_network_cidr:
     type: string
     description: network range for flannel overlay network
@@ -206,6 +213,7 @@ resources:
             "$KUBE_NODE_IP": {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
             "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
             "$DOCKER_VOLUME": {get_resource: docker_volume}
+            "$DOCKER_STORAGE_DRIVER": {get_param: docker_storage_driver}
             "$NETWORK_DRIVER": {get_param: network_driver}
             "$FLANNEL_NETWORK_CIDR": {get_param: flannel_network_cidr}
             "$FLANNEL_NETWORK_SUBNETLEN": {get_param: flannel_network_subnetlen}
@@ -240,7 +248,11 @@ resources:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/configure-docker-storage.sh}
+      config:
+        str_replace:
+          params:
+            $configure_docker_storage_driver: {get_file: ../common/fragments/configure_docker_storage_driver_atomic.sh}
+          template: {get_file: fragments/configure-docker-storage.sh}
 
   configure_etcd:
     type: OS::Heat::SoftwareConfig
