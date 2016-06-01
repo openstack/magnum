@@ -11,6 +11,6 @@ write_files:
       [Service]
       Type=simple
       TimeoutStartSec=0
-      ExecStart=/usr/bin/curl -sf -X PUT -H 'Content-Type: application/json' \
-        --data-binary '{"Status": "FAILURE", "Reason": "$SERVICE service failed to start.", "Data": "OK", "UniqueId": "00000"}' \
-        "$WAIT_HANDLE"
+      ExecStart=/usr/bin/curl -i -X POST -H 'Content-Type: application/json' -H 'X-Auth-Token: $WAIT_HANDLE_TOKEN' \
+        --data-binary "'"'{"Status": "FAILURE", "Reason": "$SERVICE service failed to start.", "Data": "OK", "UniqueId": "00000"}'"'" \
+        "$WAIT_HANDLE_ENDPOINT"
