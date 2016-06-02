@@ -25,7 +25,6 @@ import magnum.common.service
 import magnum.common.x509.config
 import magnum.conductor.config
 import magnum.conductor.handlers.bay_conductor
-import magnum.conductor.handlers.docker_conductor
 import magnum.conductor.handlers.k8s_conductor
 import magnum.db
 import magnum.drivers.common.template_def

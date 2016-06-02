@@ -27,10 +27,10 @@ LOG = log.getLogger(__name__)
 
 CONF = cfg.CONF
 CONF.import_opt('docker_remote_api_version',
-                'magnum.conductor.handlers.docker_conductor',
+                'magnum.common.docker_utils',
                 group='docker')
 CONF.import_opt('default_timeout',
-                'magnum.conductor.handlers.docker_conductor',
+                'magnum.common.docker_utils',
                 group='docker')
 
 COE_CLASS_PATH = {

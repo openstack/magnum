@@ -59,39 +59,6 @@ class API(rpc_service.API):
         return self._call('rc_show', rc_ident=rc_ident,
                           bay_ident=bay_ident)
 
-    # Container operations
-
-    def container_create(self, container):
-        return self._call('container_create', container=container)
-
-    def container_delete(self, container_uuid):
-        return self._call('container_delete', container_uuid=container_uuid)
-
-    def container_show(self, container_uuid):
-        return self._call('container_show', container_uuid=container_uuid)
-
-    def container_reboot(self, container_uuid):
-        return self._call('container_reboot', container_uuid=container_uuid)
-
-    def container_stop(self, container_uuid):
-        return self._call('container_stop', container_uuid=container_uuid)
-
-    def container_start(self, container_uuid):
-        return self._call('container_start', container_uuid=container_uuid)
-
-    def container_pause(self, container_uuid):
-        return self._call('container_pause', container_uuid=container_uuid)
-
-    def container_unpause(self, container_uuid):
-        return self._call('container_unpause', container_uuid=container_uuid)
-
-    def container_logs(self, container_uuid):
-        return self._call('container_logs', container_uuid=container_uuid)
-
-    def container_exec(self, container_uuid, command):
-        return self._call('container_exec', container_uuid=container_uuid,
-                          command=command)
-
     # CA operations
 
     def sign_certificate(self, bay, certificate):
