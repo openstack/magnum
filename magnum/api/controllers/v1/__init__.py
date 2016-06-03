@@ -48,14 +48,15 @@ BASE_VERSION = 1
 #
 
 # v1.1: API at the point in time when microversioning support was added
-MIN_VER_STR = '1.1'
+MIN_VER_STR = 'magnum 1.1'
 
 # v1.1: Add API changelog here
-MAX_VER_STR = '1.1'
+MAX_VER_STR = 'magnum 1.1'
 
 
 MIN_VER = controllers_base.Version(
-    {controllers_base.Version.string: MIN_VER_STR}, MIN_VER_STR, MAX_VER_STR)
+    {controllers_base.Version.string: MIN_VER_STR},
+    MIN_VER_STR, MAX_VER_STR)
 MAX_VER = controllers_base.Version(
     {controllers_base.Version.string: MAX_VER_STR},
     MIN_VER_STR, MAX_VER_STR)

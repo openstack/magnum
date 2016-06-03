@@ -25,7 +25,7 @@ fakeAuthTokenHeaders = {'X-User-Id': u'773a902f022949619b5c2f32cd89d419',
                         'X-User-Domain-Name': 'domain',
                         'X-Project-Domain-Id': 'project_domain_id',
                         'X-User-Domain-Id': 'user_domain_id',
-                        'X-OpenStack-Magnum-API-Version': '1.0'
+                        'X-OpenStack-API-Version': 'magnum 1.0'
                         }
 
 

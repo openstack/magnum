@@ -53,14 +53,16 @@ class APIBase(wtypes.Base):
 class Version(object):
     """API Version object."""
 
-    string = 'X-OpenStack-Magnum-API-Version'
+    string = 'X-OpenStack-API-Version'
     """HTTP Header string carrying the requested version"""
 
-    min_string = 'X-OpenStack-Magnum-API-Minimum-Version'
+    min_string = 'X-OpenStack-API-Minimum-Version'
     """HTTP response header"""
 
-    max_string = 'X-OpenStack-Magnum-API-Maximum-Version'
+    max_string = 'X-OpenStack-API-Maximum-Version'
     """HTTP response header"""
+
+    service_string = 'magnum'
 
     def __init__(self, headers, default_version, latest_version):
         """Create an API Version object from the supplied headers.
@@ -87,15 +89,23 @@ class Version(object):
         :returns: a tuple of (major, minor) version numbers
         :raises: webob.HTTPNotAcceptable
         """
-        version_str = headers.get(Version.string, default_version)
 
-        if version_str.lower() == 'latest':
-            parse_str = latest_version
-        else:
-            parse_str = version_str
+        version_hdr = headers.get(Version.string, default_version)
 
         try:
-            version = tuple(int(i) for i in parse_str.split('.'))
+            version_service, version_str = version_hdr.split()
+        except ValueError:
+            raise exc.HTTPNotAcceptable(_(
+                "Invalid service type for %s header") % Version.string)
+
+        if version_str.lower() == 'latest':
+            version_service, version_str = latest_version.split()
+
+        if version_service != Version.service_string:
+            raise exc.HTTPNotAcceptable(_(
+                "Invalid service type for %s header") % Version.string)
+        try:
+            version = tuple(int(i) for i in version_str.split('.'))
         except ValueError:
             version = ()
 
