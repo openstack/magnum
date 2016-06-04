@@ -1,0 +1,15 @@
+[Unit]
+Description=Openstack Magnum Conductor Service
+After=syslog.target network.target qpidd.service mysqld.service tgtd.service
+
+[Service]
+Type=simple
+User=magnum
+ExecStart=/var/lib/magnum/env/bin/magnum-conductor
+PrivateTmp=true
+NotifyAccess=all
+KillMode=process
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

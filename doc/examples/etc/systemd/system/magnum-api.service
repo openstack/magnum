@@ -1,0 +1,15 @@
+[Unit]
+Description=OpenStack Magnum API Service
+After=syslog.target network.target
+
+[Service]
+Type=simple
+User=magnum
+ExecStart=/var/lib/magnum/env/bin/magnum-api
+PrivateTmp=true
+NotifyAccess=all
+KillMode=process
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
