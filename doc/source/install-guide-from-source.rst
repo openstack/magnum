@@ -56,18 +56,18 @@ service, you must create a database, service credentials, and API endpoints.
 
         CREATE DATABASE magnum;
 
-      * Grant proper access to the ``magnum`` database:
+   * Grant proper access to the ``magnum`` database:
 
-        .. code-block:: console
+     .. code-block:: console
 
-           GRANT ALL PRIVILEGES ON magnum.* TO 'magnum'@'controller' \
-             IDENTIFIED BY 'MAGNUM_DBPASS';
-           GRANT ALL PRIVILEGES ON magnum.* TO 'magnum'@'%' \
-             IDENTIFIED BY 'MAGNUM_DBPASS';
+        GRANT ALL PRIVILEGES ON magnum.* TO 'magnum'@'controller' \
+          IDENTIFIED BY 'MAGNUM_DBPASS';
+        GRANT ALL PRIVILEGES ON magnum.* TO 'magnum'@'%' \
+          IDENTIFIED BY 'MAGNUM_DBPASS';
 
-        Replace ``MAGNUM_DBPASS`` with a suitable password.
+     Replace ``MAGNUM_DBPASS`` with a suitable password.
 
-     * Exit the database access client.
+   * Exit the database access client.
 
 #. Source the ``admin`` credentials to gain access to
    admin-only CLI commands:
@@ -276,20 +276,20 @@ Install and configure components
               -g magnum \
               magnum
 
-    * Create directories:
+   * Create directories:
 
-      .. code-block:: console
+     .. code-block:: console
 
-         # mkdir -p /var/log/magnum
-         # mkdir -p /etc/magnum
+        # mkdir -p /var/log/magnum
+        # mkdir -p /etc/magnum
 
-    * Set ownership to directories:
+   * Set ownership to directories:
 
-      .. code-block:: console
+     .. code-block:: console
 
-         # chown magnum:magnum /var/log/magnum
-         # chown magnum:magnum /var/lib/magnum
-         # chown magnum:magnum /etc/magnum
+        # chown magnum:magnum /var/log/magnum
+        # chown magnum:magnum /var/lib/magnum
+        # chown magnum:magnum /etc/magnum
 
 3. Install virtualenv and python prerequisites:
 
