@@ -193,11 +193,6 @@ class Connection(api.Connection):
     def destroy_bay(self, bay_id):
         def destroy_bay_resources(session, bay_uuid):
             """Checks whether the bay does not have resources."""
-            query = model_query(models.Service, session=session)
-            query = self._add_services_filters(query, {'bay_uuid': bay_uuid})
-            if query.count() != 0:
-                query.delete()
-
             query = model_query(models.ReplicationController, session=session)
             query = self._add_rcs_filters(query, {'bay_uuid': bay_uuid})
             if query.count() != 0:
@@ -465,105 +460,6 @@ class Connection(api.Connection):
                 ref = query.with_lockmode('update').one()
             except NoResultFound:
                 raise exception.ContainerNotFound(container=container_id)
-
-            if 'provision_state' in values:
-                values['provision_updated_at'] = timeutils.utcnow()
-
-            ref.update(values)
-        return ref
-
-    def _add_services_filters(self, query, filters):
-        if filters is None:
-            filters = {}
-
-        if 'bay_uuid' in filters:
-            query = query.filter_by(bay_uuid=filters['bay_uuid'])
-        if 'name' in filters:
-            query = query.filter_by(name=filters['name'])
-        if 'ip' in filters:
-            query = query.filter_by(ip=filters['ip'])
-        if 'ports' in filters:
-            query = query.filter_by(ports=filters['ports'])
-
-        return query
-
-    def get_service_list(self, context, filters=None, limit=None, marker=None,
-                         sort_key=None, sort_dir=None):
-        query = model_query(models.Service)
-        query = self._add_tenant_filters(context, query)
-        query = self._add_services_filters(query, filters)
-        return _paginate_query(models.Service, limit, marker,
-                               sort_key, sort_dir, query)
-
-    def create_service(self, values):
-        # ensure defaults are present for new services
-        if not values.get('uuid'):
-            values['uuid'] = uuidutils.generate_uuid()
-
-        service = models.Service()
-        service.update(values)
-        try:
-            service.save()
-        except db_exc.DBDuplicateEntry:
-            raise exception.ServiceAlreadyExists(uuid=values['uuid'])
-        return service
-
-    def get_service_by_id(self, context, service_id):
-        query = model_query(models.Service)
-        query = self._add_tenant_filters(context, query)
-        query = query.filter_by(id=service_id)
-        try:
-            return query.one()
-        except NoResultFound:
-            raise exception.ServiceNotFound(service=service_id)
-
-    def get_service_by_uuid(self, context, service_uuid):
-        query = model_query(models.Service)
-        query = self._add_tenant_filters(context, query)
-        query = query.filter_by(uuid=service_uuid)
-        try:
-            return query.one()
-        except NoResultFound:
-            raise exception.ServiceNotFound(service=service_uuid)
-
-    def get_service_by_name(self, context, service_name):
-        query = model_query(models.Service)
-        query = self._add_tenant_filters(context, query)
-        query = query.filter_by(name=service_name)
-        try:
-            return query.one()
-        except MultipleResultsFound:
-            raise exception.Conflict('Multiple services exist with same name.'
-                                     ' Please use the service uuid instead.')
-        except NoResultFound:
-            raise exception.ServiceNotFound(service=service_name)
-
-    def destroy_service(self, service_id):
-        session = get_session()
-        with session.begin():
-            query = model_query(models.Service, session=session)
-            query = add_identity_filter(query, service_id)
-            count = query.delete()
-            if count != 1:
-                raise exception.ServiceNotFound(service_id)
-
-    def update_service(self, service_id, values):
-        # NOTE(dtantsur): this can lead to very strange errors
-        if 'uuid' in values:
-            msg = _("Cannot overwrite UUID for an existing Service.")
-            raise exception.InvalidParameterValue(err=msg)
-
-        return self._do_update_service(service_id, values)
-
-    def _do_update_service(self, service_id, values):
-        session = get_session()
-        with session.begin():
-            query = model_query(models.Service, session=session)
-            query = add_identity_filter(query, service_id)
-            try:
-                ref = query.with_lockmode('update').one()
-            except NoResultFound:
-                raise exception.ServiceNotFound(service=service_id)
 
             if 'provision_state' in values:
                 values['provision_updated_at'] = timeutils.utcnow()

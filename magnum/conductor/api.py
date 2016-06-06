@@ -40,27 +40,6 @@ class API(rpc_service.API):
     def bay_update(self, bay):
         return self._call('bay_update', bay=bay)
 
-    # Service Operations
-
-    def service_create(self, service):
-        return self._call('service_create', service=service)
-
-    def service_update(self, service_ident, bay_ident, manifest):
-        return self._call('service_update', service_ident=service_ident,
-                          bay_ident=bay_ident, manifest=manifest)
-
-    def service_list(self, context, bay_ident):
-        return self._call('service_list', bay_ident=bay_ident)
-
-    def service_delete(self, service_ident, bay_ident):
-        return self._call('service_delete',
-                          service_ident=service_ident,
-                          bay_ident=bay_ident)
-
-    def service_show(self, context, service_ident, bay_ident):
-        return self._call('service_show', service_ident=service_ident,
-                          bay_ident=bay_ident)
-
     # ReplicationController Operations
 
     def rc_create(self, rc):
