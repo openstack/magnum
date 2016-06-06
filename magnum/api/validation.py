@@ -168,18 +168,14 @@ def validate_bay_properties(delta):
 
 class Validator(object):
 
-    validators = {}
-
     @classmethod
     def get_coe_validator(cls, coe):
-        if not cls.validators:
-            cls.validators = {
-                'kubernetes': K8sValidator(),
-                'swarm': SwarmValidator(),
-                'mesos': MesosValidator(),
-            }
-        if coe in cls.validators:
-            return cls.validators[coe]
+        if coe == 'kubernetes':
+            return K8sValidator()
+        elif coe == 'swarm':
+            return SwarmValidator()
+        elif coe == 'mesos':
+            return MesosValidator()
         else:
             raise exception.InvalidParameterValue(
                 _('Requested COE type %s is not supported.') % coe)
