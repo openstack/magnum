@@ -10,16 +10,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_config import cfg
 from oslo_log import log as logging
 
 from magnum.common import exception
 from magnum.common import utils
 from magnum.i18n import _LE
-
-CONF = cfg.CONF
-CONF.import_opt('trustee_domain_id', 'magnum.common.keystone',
-                group='trust')
 
 LOG = logging.getLogger(__name__)
 
@@ -30,7 +25,7 @@ def create_trustee_and_trust(osc, bay):
         trustee = osc.keystone().create_trustee(
             bay.uuid,
             password,
-            CONF.trust.trustee_domain_id)
+        )
         bay.trustee_username = trustee.name
         bay.trustee_user_id = trustee.id
         bay.trustee_password = password

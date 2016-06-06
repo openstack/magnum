@@ -14,7 +14,6 @@
 
 import mock
 from mock import patch
-from oslo_config import fixture
 
 from magnum.common import exception
 from magnum.conductor.handlers.common import trust_manager
@@ -35,7 +34,6 @@ class TrustManagerTestCase(base.BaseTestCase):
     @patch('magnum.common.utils.generate_password')
     def test_create_trustee_and_trust(self, mock_generate_password):
         mock_password = "password_mock"
-        mock_trustee_domain_id = 'trustee_domain_id_mock'
         mock_generate_password.return_value = mock_password
         mock_bay = mock.MagicMock()
         mock_bay.uuid = 'mock_bay_uuid'
@@ -47,8 +45,6 @@ class TrustManagerTestCase(base.BaseTestCase):
         mock_trust.id = 'mock_trust_id'
 
         self.osc.keystone.return_value = mock_keystone
-        fixture.Config().config(group='trust',
-                                trustee_domain_id=mock_trustee_domain_id)
 
         mock_keystone.create_trustee.return_value = mock_trustee
         mock_keystone.create_trust.return_value = mock_trust
@@ -58,7 +54,6 @@ class TrustManagerTestCase(base.BaseTestCase):
         mock_keystone.create_trustee.assert_called_once_with(
             mock_bay.uuid,
             mock_password,
-            mock_trustee_domain_id,
         )
         mock_keystone.create_trust.assert_called_once_with(
             mock_trustee.id,

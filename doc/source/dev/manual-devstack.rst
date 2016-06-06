@@ -206,11 +206,11 @@ Configure magnum::
              /etc/magnum/magnum.conf
 
     # set trustee domain id
-    sudo sed -i "s/#trustee_domain_id\s*=.*/trustee_domain_id=${TRUSTEE_DOMAIN_ID}/" \
+    sudo sed -i "s/#trustee_domain_name\s*=.*/trustee_domain_name=magnum/" \
              /etc/magnum/magnum.conf
 
     # set trustee domain admin id
-    sudo sed -i "s/#trustee_domain_admin_id\s*=.*/trustee_domain_admin_id=${TRUSTEE_DOMAIN_ADMIN_ID}/" \
+    sudo sed -i "s/#trustee_domain_admin_name\s*=.*/trustee_domain_admin_name=trustee_domain_admin/" \
              /etc/magnum/magnum.conf
 
     # set trustee domain admin password

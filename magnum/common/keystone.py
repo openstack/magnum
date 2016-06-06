@@ -33,9 +33,20 @@ LOG = logging.getLogger(__name__)
 trust_opts = [
     cfg.StrOpt('trustee_domain_id',
                help=_('Id of the domain to create trustee for bays')),
+    cfg.StrOpt('trustee_domain_name',
+               help=_('Name of the domain to create trustee for bays')),
     cfg.StrOpt('trustee_domain_admin_id',
                help=_('Id of the admin with roles sufficient to manage users'
                       ' in the trustee_domain')),
+    cfg.StrOpt('trustee_domain_admin_name',
+               help=_('Name of the admin with roles sufficient to manage users'
+                      ' in the trustee_domain')),
+    cfg.StrOpt('trustee_domain_admin_domain_id',
+               help=_('Id of the domain admin user\'s domain.'
+                      ' trustee_domain_id is used by default')),
+    cfg.StrOpt('trustee_domain_admin_domain_name',
+               help=_('Name of the domain admin user\'s domain.'
+                      ' trustee_domain_name is used by default')),
     cfg.StrOpt('trustee_domain_admin_password', secret=True,
                help=_('Password of trustee_domain_admin')),
     cfg.ListOpt('roles',
@@ -71,7 +82,10 @@ class KeystoneClientV3(object):
     def __init__(self, context):
         self.context = context
         self._client = None
+        self._domain_admin_auth = None
+        self._domain_admin_session = None
         self._domain_admin_client = None
+        self._trustee_domain_id = None
         self._session = None
 
     @property
@@ -151,21 +165,61 @@ class KeystoneClientV3(object):
         return client
 
     @property
-    def domain_admin_client(self):
-        if not self._domain_admin_client:
-            auth = ka_v3.Password(
+    def domain_admin_auth(self):
+        user_domain_id = (
+            CONF.trust.trustee_domain_admin_domain_id or
+            CONF.trust.trustee_domain_id
+        )
+        user_domain_name = (
+            CONF.trust.trustee_domain_admin_domain_name or
+            CONF.trust.trustee_domain_name
+        )
+        if not self._domain_admin_auth:
+            self._domain_admin_auth = ka_v3.Password(
                 auth_url=self.auth_url,
                 user_id=CONF.trust.trustee_domain_admin_id,
+                username=CONF.trust.trustee_domain_admin_name,
+                user_domain_id=user_domain_id,
+                user_domain_name=user_domain_name,
                 domain_id=CONF.trust.trustee_domain_id,
+                domain_name=CONF.trust.trustee_domain_name,
                 password=CONF.trust.trustee_domain_admin_password)
+        return self._domain_admin_auth
+
+    @property
+    def domain_admin_session(self):
+        if not self._domain_admin_session:
             session = ka_loading.session.Session().load_from_options(
-                auth=auth,
+                auth=self.domain_admin_auth,
                 insecure=CONF[CFG_LEGACY_GROUP].insecure,
                 cacert=CONF[CFG_LEGACY_GROUP].cafile,
                 key=CONF[CFG_LEGACY_GROUP].keyfile,
                 cert=CONF[CFG_LEGACY_GROUP].certfile)
-            self._domain_admin_client = kc_v3.Client(session=session)
+            self._domain_admin_session = session
+        return self._domain_admin_session
+
+    @property
+    def domain_admin_client(self):
+        if not self._domain_admin_client:
+            self._domain_admin_client = kc_v3.Client(
+                session=self.domain_admin_session
+            )
         return self._domain_admin_client
+
+    @property
+    def trustee_domain_id(self):
+        if not self._trustee_domain_id:
+            try:
+                access = self.domain_admin_auth.get_access(
+                    self.domain_admin_session
+                )
+            except kc_exception.Unauthorized:
+                LOG.error(_LE("Keystone client authentication failed"))
+                raise exception.AuthorizationFailure()
+
+            self._trustee_domain_id = access.domain_id
+
+        return self._trustee_domain_id
 
     def create_trust(self, trustee_user):
         trustor_user_id = self.session.get_user_id()
@@ -221,7 +275,8 @@ class KeystoneClientV3(object):
             LOG.exception(_LE('Failed to delete trust'))
             raise exception.TrustDeleteFailed(trust_id=bay.trust_id)
 
-    def create_trustee(self, username, password, domain_id):
+    def create_trustee(self, username, password):
+        domain_id = self.trustee_domain_id
         try:
             user = self.domain_admin_client.users.create(
                 name=username,

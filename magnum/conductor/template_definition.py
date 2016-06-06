@@ -76,7 +76,6 @@ docker_registry_opts = [
 CONF = cfg.CONF
 CONF.register_opts(template_def_opts, group='bay')
 CONF.register_opts(docker_registry_opts, group='docker_registry')
-CONF.import_opt('trustee_domain_id', 'magnum.common.keystone', group='trust')
 
 
 class ParameterMapping(object):
@@ -339,6 +338,8 @@ class TemplateDefinition(object):
 class BaseTemplateDefinition(TemplateDefinition):
     def __init__(self):
         super(BaseTemplateDefinition, self).__init__()
+        self._osc = None
+
         self.add_parameter('ssh_key_name',
                            baymodel_attr='keypair_id',
                            required=True)
@@ -359,9 +360,16 @@ class BaseTemplateDefinition(TemplateDefinition):
     def template_path(self):
         pass
 
+    def get_osc(self, context):
+        if not self._osc:
+            self._osc = clients.OpenStackClients(context)
+        return self._osc
+
     def get_params(self, context, baymodel, bay, **kwargs):
+        osc = self.get_osc(context)
+
         extra_params = kwargs.pop('extra_params', {})
-        extra_params['trustee_domain_id'] = CONF.trust.trustee_domain_id
+        extra_params['trustee_domain_id'] = osc.keystone().trustee_domain_id
         extra_params['trustee_user_id'] = bay.trustee_user_id
         extra_params['trustee_username'] = bay.trustee_username
         extra_params['trustee_password'] = bay.trustee_password
@@ -486,7 +494,7 @@ class K8sTemplateDefinition(BaseTemplateDefinition):
                 scale_mgr.get_removal_nodes(hosts))
 
         extra_params['discovery_url'] = self.get_discovery_url(bay)
-        osc = clients.OpenStackClients(context)
+        osc = self.get_osc(context)
         extra_params['magnum_url'] = osc.magnum_url()
 
         if baymodel.tls_disabled:
@@ -530,7 +538,7 @@ class AtomicK8sTemplateDefinition(K8sTemplateDefinition):
 
         extra_params['username'] = context.user_name
         extra_params['tenant_name'] = context.tenant
-        osc = clients.OpenStackClients(context)
+        osc = self.get_osc(context)
         extra_params['region_name'] = osc.cinder_region_name()
 
         return super(AtomicK8sTemplateDefinition,
@@ -607,7 +615,7 @@ class AtomicSwarmTemplateDefinition(BaseTemplateDefinition):
         # HACK(apmelton) - This uses the user's bearer token, ideally
         # it should be replaced with an actual trust token with only
         # access to do what the template needs it to do.
-        osc = clients.OpenStackClients(context)
+        osc = self.get_osc(context)
         extra_params['magnum_url'] = osc.magnum_url()
 
         label_list = ['flannel_network_cidr', 'flannel_backend',
@@ -670,7 +678,7 @@ class UbuntuMesosTemplateDefinition(BaseTemplateDefinition):
         # HACK(apmelton) - This uses the user's bearer token, ideally
         # it should be replaced with an actual trust token with only
         # access to do what the template needs it to do.
-        osc = clients.OpenStackClients(context)
+        osc = self.get_osc(context)
         extra_params['auth_url'] = context.auth_url
         extra_params['username'] = context.user_name
         extra_params['tenant_name'] = context.tenant
