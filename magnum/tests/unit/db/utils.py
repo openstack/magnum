@@ -73,7 +73,7 @@ def create_test_baymodel(**kw):
 
 
 def get_test_bay(**kw):
-    return {
+    attrs = {
         'id': kw.get('id', 42),
         'uuid': kw.get('uuid', '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'),
         'name': kw.get('name', 'bay1'),
@@ -96,6 +96,14 @@ def get_test_bay(**kw):
         'created_at': kw.get('created_at'),
         'updated_at': kw.get('updated_at'),
     }
+
+    # Only add Keystone trusts related attributes on demand since they may
+    # break other tests.
+    for attr in ['trustee_username', 'trustee_password', 'trust_id']:
+        if attr in kw:
+            attrs[attr] = kw[attr]
+
+    return attrs
 
 
 def create_test_bay(**kw):

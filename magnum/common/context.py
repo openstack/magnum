@@ -11,7 +11,10 @@
 # under the License.
 
 from eventlet.green import threading
+from oslo_config import cfg
 from oslo_context import context
+
+CONF = cfg.CONF
 
 
 class RequestContext(context.RequestContext):
@@ -19,14 +22,19 @@ class RequestContext(context.RequestContext):
 
     def __init__(self, auth_token=None, auth_url=None, domain_id=None,
                  domain_name=None, user_name=None, user_id=None,
+                 user_domain_name=None, user_domain_id=None,
                  project_name=None, project_id=None, roles=None,
                  is_admin=False, read_only=False, show_deleted=False,
                  request_id=None, trust_id=None, auth_token_info=None,
-                 all_tenants=False, **kwargs):
+                 all_tenants=False, password=None, **kwargs):
         """Stores several additional request parameters:
 
         :param domain_id: The ID of the domain.
         :param domain_name: The name of the domain.
+        :param user_domain_id: The ID of the domain to
+                               authenticate a user against.
+        :param user_domain_name: The name of the domain to
+                                 authenticate a user against.
 
         """
         super(RequestContext, self).__init__(auth_token=auth_token,
@@ -43,11 +51,14 @@ class RequestContext(context.RequestContext):
         self.project_id = project_id
         self.domain_id = domain_id
         self.domain_name = domain_name
+        self.user_domain_id = user_domain_id
+        self.user_domain_name = user_domain_name
         self.roles = roles
         self.auth_url = auth_url
         self.auth_token_info = auth_token_info
         self.trust_id = trust_id
         self.all_tenants = all_tenants
+        self.password = password
 
     def to_dict(self):
         value = super(RequestContext, self).to_dict()
@@ -55,6 +66,8 @@ class RequestContext(context.RequestContext):
                       'auth_url': self.auth_url,
                       'domain_id': self.domain_id,
                       'domain_name': self.domain_name,
+                      'user_domain_id': self.user_domain_id,
+                      'user_domain_name': self.user_domain_name,
                       'user_name': self.user_name,
                       'user_id': self.user_id,
                       'project_name': self.project_name,
@@ -66,6 +79,7 @@ class RequestContext(context.RequestContext):
                       'request_id': self.request_id,
                       'trust_id': self.trust_id,
                       'auth_token_info': self.auth_token_info,
+                      'password': self.password,
                       'all_tenants': self.all_tenants})
         return value
 
@@ -88,6 +102,21 @@ def make_admin_context(show_deleted=False, all_tenants=False):
                              is_admin=True,
                              show_deleted=show_deleted,
                              all_tenants=all_tenants)
+    return context
+
+
+def make_bay_context(bay, show_deleted=False):
+    """Create a user context based on a bay's stored Keystone trust.
+
+    :param bay: the bay supplying the Keystone trust to use
+    :param show_deleted: if True, will show deleted items when query db
+    """
+    context = RequestContext(user_name=bay.trustee_username,
+                             password=bay.trustee_password,
+                             trust_id=bay.trust_id,
+                             show_deleted=show_deleted,
+                             user_domain_id=CONF.trust.trustee_domain_id,
+                             user_domain_name=CONF.trust.trustee_domain_name)
     return context
 
 

@@ -1025,8 +1025,34 @@ High Availability
 =======
 Scaling
 =======
-*To be filled in*
 
+Performance tuning for periodic task
+------------------------------------
+
+Magnum's periodic task performs a `stack-get` operation on the Heat stack
+underlying each of its bays. If you have a large amount of bays this can create
+considerable load on the Heat API. To reduce that load you can configure Magnum
+to perform one global `stack-list` per periodic task instead instead of one per
+bay. This is disabled by default, both from the Heat and Magnum side since it
+causes a security issue, though: any user in any tenant holding the `admin`
+role can perform a global `stack-list` operation if Heat is configured to allow
+it for Magnum. If you want to enable it nonetheless, proceed as follows:
+
+1. Set `periodic_global_stack_list` in magnum.conf to `True`
+   (`False` by default).
+
+2. Update heat policy to allow magnum list stacks. To this end, edit your heat
+   policy file, usually etc/heat/policy.json``:
+
+   .. code-block:: ini
+
+      ...
+      stacks:global_index: "role:admin",
+
+   Now restart heat.
+
+
+*To be filled in*
 Include auto scaling
 
 =======
