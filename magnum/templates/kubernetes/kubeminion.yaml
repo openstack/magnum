@@ -134,12 +134,6 @@ parameters:
     type: string
     description: an alternative term for a project
 
-  auth_url:
-    type: string
-    description: >
-      url for kubernetes to authenticate before sending request to neutron
-      must be v2 since kubernetes backend only suppor v2 at this point
-
   username:
     type: string
     description: >
@@ -192,7 +186,9 @@ parameters:
 
   auth_url:
     type: string
-    description: url for keystone
+    description: >
+      url for keystone, must be v2 since k8s backend only support v2
+      at this point
 
   insecure_registry_url:
     type: string
@@ -241,7 +237,6 @@ resources:
             $TLS_DISABLED: {get_param: tls_disabled}
             $BAY_UUID: {get_param: bay_uuid}
             $MAGNUM_URL: {get_param: magnum_url}
-            $AUTH_URL: {get_param: auth_url}
             $USERNAME: {get_param: username}
             $PASSWORD: {get_param: password}
             $VOLUME_DRIVER: {get_param: volume_driver}
