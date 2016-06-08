@@ -391,6 +391,49 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         }
         self._test_update_outputs_api_address('swarm', params, tls=False)
 
+    def _test_update_outputs_none_api_address(self, coe, params, tls=True):
+
+        definition = tdef.TemplateDefinition.get_template_definition(
+            'vm',
+            'fedora-atomic',
+            coe)
+
+        outputs = [
+            {"output_value": params['address'],
+             "description": "No description given",
+             "output_key": 'api_address'},
+        ]
+        mock_stack = mock.MagicMock()
+        mock_stack.to_dict.return_value = {'outputs': outputs}
+        mock_bay = mock.MagicMock()
+        mock_bay.api_address = 'none_api_address'
+        mock_baymodel = mock.MagicMock()
+        mock_baymodel.tls_disabled = tls
+
+        definition.update_outputs(mock_stack, mock_baymodel, mock_bay)
+
+        self.assertEqual('none_api_address', mock_bay.api_address)
+
+    def test_update_k8s_outputs_none_api_address(self):
+        protocol = 'http'
+        port = '8080'
+        params = {
+            'protocol': protocol,
+            'address': None,
+            'port': port,
+        }
+        self._test_update_outputs_none_api_address('kubernetes', params)
+
+    def test_update_swarm_outputs_none_api_address(self):
+        protocol = 'tcp'
+        port = '2376'
+        params = {
+            'protocol': protocol,
+            'address': None,
+            'port': port,
+        }
+        self._test_update_outputs_none_api_address('swarm', params)
+
 
 class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
 

@@ -406,42 +406,46 @@ class BaseTemplateDefinition(TemplateDefinition):
 class K8sApiAddressOutputMapping(OutputMapping):
 
     def set_output(self, stack, baymodel, bay):
-        # TODO(yuanying): port number is hardcoded, this will be fix
-        protocol = 'https'
-        port = KUBE_SECURE_PORT
-        if baymodel.tls_disabled:
-            protocol = 'http'
-            port = KUBE_INSECURE_PORT
+        if self.bay_attr is None:
+            return
 
         output_value = self.get_output_value(stack)
-        params = {
-            'protocol': protocol,
-            'address': output_value,
-            'port': port,
-        }
-        output_value = "%(protocol)s://%(address)s:%(port)s" % params
-
         if output_value is not None:
-            setattr(bay, self.bay_attr, output_value)
+            # TODO(yuanying): port number is hardcoded, this will be fix
+            protocol = 'https'
+            port = KUBE_SECURE_PORT
+            if baymodel.tls_disabled:
+                protocol = 'http'
+                port = KUBE_INSECURE_PORT
+
+            params = {
+                'protocol': protocol,
+                'address': output_value,
+                'port': port,
+            }
+            value = "%(protocol)s://%(address)s:%(port)s" % params
+            setattr(bay, self.bay_attr, value)
 
 
 class SwarmApiAddressOutputMapping(OutputMapping):
 
     def set_output(self, stack, baymodel, bay):
-        protocol = 'https'
-        if baymodel.tls_disabled:
-            protocol = 'tcp'
+        if self.bay_attr is None:
+            return
 
         output_value = self.get_output_value(stack)
-        params = {
-            'protocol': protocol,
-            'address': output_value,
-            'port': DOCKER_PORT,
-        }
-        output_value = "%(protocol)s://%(address)s:%(port)s" % params
-
         if output_value is not None:
-            setattr(bay, self.bay_attr, output_value)
+            protocol = 'https'
+            if baymodel.tls_disabled:
+                protocol = 'tcp'
+
+            params = {
+                'protocol': protocol,
+                'address': output_value,
+                'port': DOCKER_PORT,
+            }
+            value = "%(protocol)s://%(address)s:%(port)s" % params
+            setattr(bay, self.bay_attr, value)
 
 
 class K8sTemplateDefinition(BaseTemplateDefinition):
