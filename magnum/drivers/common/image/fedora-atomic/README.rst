@@ -40,10 +40,10 @@ How to generate Fedora Atomic image
 To generate an atomic image for Fedora 23 these commands can be
 executed::
 
-    export ELEMENTS_PATH=/path/to/diskimage-builder/elements:/path/to/magnum/elements
+    export ELEMENTS_PATH=/path/to/diskimage-builder/elements:/path/to/magnum/drivers/driver_name/image
     export DIB_RELEASE=23     # this can be switched to the desired version
     export DIB_IMAGE_SIZE=2   # we need to give a bit more space to loopback device
-    disk-image-create fedora-atomic
+    disk-image-create fedora-atomic -o fedora-atomic
 
 This element can consume already published trees, but you can use it
 to consume your own generated trees. Documentation about creating own trees
