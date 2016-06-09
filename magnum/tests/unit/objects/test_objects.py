@@ -16,11 +16,11 @@ import datetime
 import gettext
 
 import mock
+from oslo_versionedobjects import exception as object_exception
 from oslo_versionedobjects import fields
 from oslo_versionedobjects import fixture
 
 from magnum.common import context as magnum_context
-from magnum.common import exception
 from magnum.objects import base
 from magnum.tests import base as test_base
 
@@ -28,7 +28,8 @@ gettext.install('magnum')
 
 
 @base.MagnumObjectRegistry.register
-class MyObj(base.MagnumObject):
+class MyObj(base.MagnumPersistentObject, base.MagnumObject,
+            base.MagnumObjectDictCompat):
     VERSION = '1.0'
 
     fields = {'foo': fields.IntegerField(),
@@ -71,7 +72,7 @@ class MyObj(base.MagnumObject):
     @base.remotable
     def modify_save_modify(self, context):
         self.bar = 'meow'
-        self.save()
+        self.save(context)
         self.foo = 42
 
 
@@ -85,6 +86,7 @@ class MyObj2(object):
         pass
 
 
+@base.MagnumObjectRegistry.register_if(False)
 class TestSubclassedObject(MyObj):
     fields = {'new_field': fields.StringField()}
 
@@ -93,14 +95,14 @@ class _TestObject(object):
     def test_hydration_type_error(self):
         primitive = {'magnum_object.name': 'MyObj',
                      'magnum_object.namespace': 'magnum',
-                     'magnum_object.version': '1.5',
+                     'magnum_object.version': '1.0',
                      'magnum_object.data': {'foo': 'a'}}
         self.assertRaises(ValueError, MyObj.obj_from_primitive, primitive)
 
     def test_hydration(self):
         primitive = {'magnum_object.name': 'MyObj',
                      'magnum_object.namespace': 'magnum',
-                     'magnum_object.version': '1.5',
+                     'magnum_object.version': '1.0',
                      'magnum_object.data': {'foo': 1}}
         obj = MyObj.obj_from_primitive(primitive)
         self.assertEqual(1, obj.foo)
@@ -108,15 +110,15 @@ class _TestObject(object):
     def test_hydration_bad_ns(self):
         primitive = {'magnum_object.name': 'MyObj',
                      'magnum_object.namespace': 'foo',
-                     'magnum_object.version': '1.5',
+                     'magnum_object.version': '1.0',
                      'magnum_object.data': {'foo': 1}}
-        self.assertRaises(exception.UnsupportedObjectError,
+        self.assertRaises(object_exception.UnsupportedObjectError,
                           MyObj.obj_from_primitive, primitive)
 
     def test_dehydration(self):
         expected = {'magnum_object.name': 'MyObj',
                     'magnum_object.namespace': 'magnum',
-                    'magnum_object.version': '1.5',
+                    'magnum_object.version': '1.0',
                     'magnum_object.data': {'foo': 1}}
         obj = MyObj(self.context)
         obj.foo = 1
@@ -149,15 +151,19 @@ class _TestObject(object):
         self.assertEqual('loaded!', obj.bar)
 
     def test_load_in_base(self):
-        class Foo(base.MagnumObject):
+        @base.MagnumObjectRegistry.register_if(False)
+        class Foo(base.MagnumPersistentObject, base.MagnumObject,
+                  base.MagnumObjectDictCompat):
             fields = {'foobar': fields.IntegerField()}
         obj = Foo(self.context)
         # NOTE(danms): Can't use assertRaisesRegexp() because of py26
         raised = False
+        ex = None
         try:
             obj.foobar
-        except NotImplementedError as ex:
+        except NotImplementedError as e:
             raised = True
+            ex = e
         self.assertTrue(raised)
         self.assertIn('foobar', str(ex))
 
@@ -186,7 +192,7 @@ class _TestObject(object):
         self.assertEqual(set(), obj2.obj_what_changed())
 
     def test_unknown_objtype(self):
-        self.assertRaises(exception.UnsupportedObjectError,
+        self.assertRaises(object_exception.UnsupportedObjectError,
                           base.MagnumObject.obj_class_from_name, 'foo', '1.0')
 
     def test_with_alternate_context(self):
@@ -195,14 +201,12 @@ class _TestObject(object):
         obj = MyObj.query(context1)
         obj.update_test(context2)
         self.assertEqual('alternate-context', obj.bar)
-        self.assertRemotes()
 
     def test_orphaned_object(self):
         obj = MyObj.query(self.context)
         obj._context = None
-        self.assertRaises(exception.OrphanedObjectError,
+        self.assertRaises(object_exception.OrphanedObjectError,
                           obj.update_test)
-        self.assertRemotes()
 
     def test_changed_1(self):
         obj = MyObj.query(self.context)
@@ -211,26 +215,23 @@ class _TestObject(object):
         obj.update_test(self.context)
         self.assertEqual(set(['foo', 'bar']), obj.obj_what_changed())
         self.assertEqual(123, obj.foo)
-        self.assertRemotes()
 
     def test_changed_2(self):
         obj = MyObj.query(self.context)
         obj.foo = 123
         self.assertEqual(set(['foo']), obj.obj_what_changed())
-        obj.save()
+        obj.save(self.context)
         self.assertEqual(set([]), obj.obj_what_changed())
         self.assertEqual(123, obj.foo)
-        self.assertRemotes()
 
     def test_changed_3(self):
         obj = MyObj.query(self.context)
         obj.foo = 123
         self.assertEqual(set(['foo']), obj.obj_what_changed())
-        obj.refresh()
+        obj.refresh(self.context)
         self.assertEqual(set([]), obj.obj_what_changed())
         self.assertEqual(321, obj.foo)
         self.assertEqual('refreshed', obj.bar)
-        self.assertRemotes()
 
     def test_changed_4(self):
         obj = MyObj.query(self.context)
@@ -240,24 +241,22 @@ class _TestObject(object):
         self.assertEqual(set(['foo']), obj.obj_what_changed())
         self.assertEqual(42, obj.foo)
         self.assertEqual('meow', obj.bar)
-        self.assertRemotes()
 
     def test_static_result(self):
         obj = MyObj.query(self.context)
         self.assertEqual('bar', obj.bar)
-        result = obj.marco()
+        result = obj.marco(self.context)
         self.assertEqual('polo', result)
-        self.assertRemotes()
 
     def test_updates(self):
         obj = MyObj.query(self.context)
         self.assertEqual(1, obj.foo)
-        obj.update_test()
+        obj.update_test(self.context)
         self.assertEqual('updated', obj.bar)
-        self.assertRemotes()
 
     def test_base_attributes(self):
         dt = datetime.datetime(1955, 11, 5)
+        datatime = fields.DateTimeField()
         obj = MyObj(self.context)
         obj.created_at = dt
         obj.updated_at = dt
@@ -267,8 +266,8 @@ class _TestObject(object):
                     'magnum_object.changes':
                         ['created_at', 'updated_at'],
                     'magnum_object.data':
-                        {'created_at': datetime.datetime.isoformat(dt),
-                         'updated_at': datetime.datetime.isoformat(dt)}
+                        {'created_at': datatime.stringify(dt),
+                         'updated_at': datatime.stringify(dt)}
                     }
         actual = obj.obj_to_primitive()
         # magnum_object.changes is built from a set and order is undefined
@@ -308,7 +307,7 @@ class _TestObject(object):
         self.assertRaises(AttributeError, obj.get, 'nothing', 3)
 
     def test_object_inheritance(self):
-        base_fields = list(base.MagnumObject.fields.keys())
+        base_fields = list(base.MagnumPersistentObject.fields.keys())
         myobj_fields = ['foo', 'bar', 'missing'] + base_fields
         myobj3_fields = ['new_field']
         self.assertTrue(issubclass(TestSubclassedObject, MyObj))
@@ -330,7 +329,9 @@ class _TestObject(object):
         self.assertEqual({}, obj.obj_get_changes())
 
     def test_obj_fields(self):
-        class TestObj(base.MagnumObject):
+        @base.MagnumObjectRegistry.register_if(False)
+        class TestObj(base.MagnumPersistentObject, base.MagnumObject,
+                      base.MagnumObjectDictCompat):
             fields = {'foo': fields.IntegerField()}
             obj_extra_fields = ['bar']
 
@@ -349,6 +350,10 @@ class _TestObject(object):
         self.assertEqual(set(['foo', 'bar']), obj.obj_what_changed())
 
 
+class TestObject(test_base.TestCase, _TestObject):
+    pass
+
+
 # This is a static dictionary that holds all fingerprints of the versioned
 # objects registered with the MagnumRegistry. Each fingerprint contains
 # the version of the object and an md5 hash of RPC-critical parts of the
@@ -362,6 +367,7 @@ object_data = {
     'Certificate': '1.0-2aff667971b85c1edf8d15684fd7d5e2',
     'Container': '1.3-e2d9d2e8a8844d421148cd9fde6c6bd6',
     'MyObj': '1.0-b43567e512438205e32f4e95ca616697',
+    'MyObj': '1.0-34c4b1aadefd177b13f9a2f894cc23cd',
     'ReplicationController': '1.0-a471c2429c212ed91833cfcf0f934eab',
     'X509KeyPair': '1.2-d81950af36c59a71365e33ce539d24f9',
     'MagnumService': '1.0-2d397ec59b0046bd5ec35cd3e06efeca',
