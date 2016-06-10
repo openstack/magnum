@@ -280,11 +280,8 @@ class BaysController(rest.RestController):
         osc = clients.OpenStackClients(context)
         filters = {'status': 'FAILED'}
         try:
-            # TODO(yuywz): We should set 'nested_depth=2' when
-            # calling heat().resources.list() after Heat bug
-            # https://bugs.launchpad.net/heat/+bug/1588130 fixed.
             failed_resources = osc.heat().resources.list(
-                bay.stack_id, filters=filters)
+                bay.stack_id, nested_depth=2, filters=filters)
         except Exception as e:
             failed_resources = []
             LOG.warning(_LW("Failed to retrieve failed resources for "
