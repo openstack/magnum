@@ -183,7 +183,7 @@ to Magnum to get it signed.
 
 ::
 
-    magnum ca-sign secure-k8sbay client.csr > client.crt
+    magnum ca-sign --bay secure-k8sbay --csr client.csr > client.crt
 
 The final piece you need to retrieve is the CA certificate for the bay. This
 is used by your native client to ensure you're only communicating with hosts
@@ -191,13 +191,13 @@ that Magnum set up.
 
 ::
 
-    magnum ca-show secure-k8sbay > ca.crt
+    magnum ca-show --bay secure-k8sbay > ca.crt
 
 You need to get kubectl, a kubernetes CLI tool, to communicate with the bay
 
 ::
 
-    wget https://github.com/kubernetes/kubernetes/releases/download/v1.0.4/kubernetes.tar.gz
+    wget https://github.com/kubernetes/kubernetes/releases/download/v1.2.0/kubernetes.tar.gz
     tar -xzvf kubernetes.tar.gz
     sudo cp -a kubernetes/platforms/linux/amd64/kubectl /usr/bin/kubectl
 
@@ -209,8 +209,8 @@ Now let's run some kubectl commands to check secure communication::
                     --client-key=client.key \
                     --client-certificate=client.crt -s $KUBERNETES_URL
 
-    Client Version: version.Info{Major:"1", Minor:"0", GitVersion:"v1.0.4", GitCommit:"65d28d5fd12345592405714c81cd03b9c41d41d9", GitTreeState:"clean"}
-    Server Version: version.Info{Major:"1", Minor:"0", GitVersion:"v1.0.4", GitCommit:"65d28d5fd12345592405714c81cd03b9c41d41d9", GitTreeState:"clean"}
+    Client Version: version.Info{Major:"1", Minor:"0", GitVersion:"v1.2.0", GitCommit:"cffae0523cfa80ddf917aba69f08508b91f603d5", GitTreeState:"clean"}
+    Server Version: version.Info{Major:"1", Minor:"0", GitVersion:"v1.2.0", GitCommit:"cffae0523cfa80ddf917aba69f08508b91f603d5", GitTreeState:"clean"}
 
     kubectl create -f redis-master.yaml --certificate-authority=ca.crt \
                                         --client-key=client.key \
@@ -263,4 +263,3 @@ is an example for Docker.
         --tlskey client.key \
         --tlscert client.crt \
         info
-
