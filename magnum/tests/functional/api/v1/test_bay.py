@@ -74,7 +74,8 @@ class BayTest(base.BaseMagnumTest):
             for bay_id in bay_list:
                 self._delete_bay(bay_id)
                 self.bays.remove(bay_id)
-            self._delete_baymodel(self.baymodel.uuid)
+            if self.baymodel:
+                self._delete_baymodel(self.baymodel.uuid)
         finally:
             super(BayTest, self).tearDown()
 

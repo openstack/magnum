@@ -116,17 +116,17 @@ class BaseMagnumTest(base.BaseTestCase):
     @classmethod
     def get_clients(cls, creds, type_of_creds, request_type):
         if "admin" == type_of_creds:
-            manager_inst = manager.AdminManager(credentials=creds,
+            manager_inst = manager.AdminManager(credentials=creds.credentials,
                                                 request_type=request_type)
         elif "alt" == type_of_creds:
-            manager_inst = manager.AltManager(credentials=creds,
+            manager_inst = manager.AltManager(credentials=creds.credentials,
                                               request_type=request_type)
         elif "default" == type_of_creds:
-            manager_inst = manager.DefaultManager(credentials=creds,
-                                                  request_type=request_type)
+            manager_inst = manager.DefaultManager(
+                credentials=creds.credentials, request_type=request_type)
         else:
-            manager_inst = manager.DefaultManager(credentials=creds,
-                                                  request_type=request_type)
+            manager_inst = manager.DefaultManager(
+                credentials=creds.credentials, request_type=request_type)
 
         # create client with isolated creds
         return (manager_inst.client, manager_inst.keypairs_client)
