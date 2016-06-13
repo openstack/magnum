@@ -224,7 +224,7 @@ baymodel and specified on the bay-create command, for example::
 
     magnum bay-create --name k8sbay \
                       --baymodel k8sbaymodel \
-                      --master-count 2 \
+                      --master-count 3 \
                       --node-count 8
 
 Refer to the `Baymodel`_ and `Bay`_ sections for the full list of parameters.
@@ -326,10 +326,116 @@ Refer to the document `Kubernetes external load balancer
 <https://github.com/openstack/magnum/blob/master/doc/source/dev/kubernetes-load-balancer.rst>`_
 for more details.
 
+
 =====
 Swarm
 =====
-*To be filled in*
+
+A Swarm bay is a pool of servers running Docker daemon that is
+managed as a single Docker host.  One or more Swarm managers accepts
+the standard Docker API and manage this pool of servers.
+Magnum deploys a Swarm bay using parameters defined in
+the baymodel and specified on the 'bay-create' command, for example::
+
+    magnum baymodel-create --name swarmbaymodel \
+                           --image-id fedora-atomic-latest \
+                           --keypair-id testkey \
+                           --external-network-id public \
+                           --dns-nameserver 8.8.8.8 \
+                           --flavor-id m1.small \
+                           --docker-volume-size 5 \
+                           --coe swarm
+
+    magnum bay-create --name swarmbay \
+                      --baymodel swarmbaymodel \
+                      --master-count 3 \
+                      --node-count 8
+
+Refer to the `Baymodel`_ and `Bay`_ sections for the full list of parameters.
+Following are further details relevant to Swarm:
+
+What runs on the servers
+  There are two types of servers in the Swarm bay: managers and nodes.
+  The Docker daemon runs on all servers.  On the servers for manager,
+  the Swarm manager is run as a Docker container on port 2376 and this
+  is initiated by the systemd service swarm-manager.  Etcd is also run
+  on the manager servers for discovery of the node servers in the bay.
+  On the servers for node, the Swarm agent is run as a Docker
+  container on port 2375 and this is initiated by the systemd service
+  swarm-agent.  On start up, the agents will register themselves in
+  etcd and the managers will discover the new node to manage.
+
+Number of managers (master-count)
+  Specified in the bay-create command to indicate how many servers will
+  run as managers in the bay.  Having more than one will provide high
+  availability.  The managers will be in a load balancer pool and the
+  load balancer virtual IP address (VIP) will serve as the Swarm API
+  endpoint.  A floating IP associated with the load balancer VIP will
+  serve as the external Swarm API endpoint.  The managers accept
+  the standard Docker API and perform the corresponding operation on the
+  servers in the pool.  For instance, when a new container is created,
+  the managers will select one of the servers based on some strategy
+  and schedule the containers there.
+
+Number of nodes (node-count)
+  Specified in the bay-create command to indicate how many servers will
+  run as nodes in the bay to host your Docker containers.  These servers
+  will register themselves in etcd for discovery by the managers, and
+  interact with the managers.  Docker daemon is run locally to host
+  containers from users.
+
+Network driver (network-driver)
+  Specified in the baymodel to select the network driver.  The supported
+  drivers are 'docker' and 'flannel', with 'docker' as the default.
+  With the 'docker' driver, containers are connected to the 'docker0'
+  bridge on each node and are assigned local IP address.  With the
+  'flannel' driver, containers are connected to a flat overlay network
+  and are assigned IP address by Flannel.  Refer to the `Networking`_
+  section for more details.
+
+Volume driver (volume-driver)
+  Specified in the baymodel to select the volume driver to provide
+  persistent storage for containers.  The supported volume driver is
+  'rexray'.  The default is no volume driver.  When 'rexray' or other
+  volume driver is deployed, you can use the Docker 'volume' command to
+  create, mount, unmount, delete volumes in containers.  Cinder block
+  storage is used as the backend to support this feature.
+  Refer to the `Storage`_ section for more details.
+
+Storage driver (docker-storage-driver)
+  Specified in the baymodel to select the Docker storage driver.  The
+  supported storage driver are 'devicemapper' and 'overlay', with
+  'devicemapper' being the default.  You may get better performance with
+  the 'overlay' driver depending on your use patterns, with the requirement
+  that SELinux must be disabled inside the containers, although it still runs
+  in enforcing mode on the bay servers.  Magnum will create a Cinder volume
+  for each node and attach it as a device.  Then depending on the driver,
+  additional configuration is performed to make the volume available to
+  the particular driver.  For instance, 'devicemapper' uses LVM; therefore
+  Magnum will create physical volume and logical volume using the attached
+  device.  Refer to the `Storage`_ section for more details.
+
+Image (image-id)
+  Specified in the baymodel to indicate the image to boot the servers
+  for the Swarm manager and node.
+  The image binary is loaded in Glance with the attribute
+  'os_distro = fedora-atomic'.
+  Current supported image is Fedora Atomic (download from `Fedora
+  <https://alt.fedoraproject.org/pub/alt/atomic/stable/Cloud-Images/x86_64/Images>`_ )
+
+TLS (tls-disabled)
+  Transport Layer Security is enabled by default to secure the Swarm API for
+  access by both the users and Magnum.  You will need a key and a
+  signed certificate to access the Swarm API and CLI.  Magnum
+  handles its own key and certificate when interfacing with the
+  Swarm bay.  In development mode, TLS can be disabled.  Refer to
+  the 'Transport Layer Security'_ section for details on how to create your
+  key and have Magnum sign your certificate.
+
+Log into the servers
+  You can log into the manager and node servers with the account 'fedora' and
+  the keypair specified in the baymodel.
+
 
 =====
 Mesos
