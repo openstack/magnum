@@ -137,9 +137,8 @@ class K8sMonitor(MonitorBase):
                     'capacity': "{u'cpu': u'1',
                                   u'memory': u'2049852Ki'}",
                 },
-            },
-            'api_version': None,
             }],
+            'api_version': None,
             'kind': 'NodeList',
             'api_version': 'v1',
         }

@@ -309,7 +309,6 @@ class BayModelsController(rest.RestController):
         policy.enforce(context, 'baymodel:create',
                        action='baymodel:create')
         baymodel_dict = baymodel.as_dict()
-        context = pecan.request.context
         cli = clients.OpenStackClients(context)
         attr_validator.validate_os_resources(context, baymodel_dict)
         image_data = attr_validator.validate_image(cli,
