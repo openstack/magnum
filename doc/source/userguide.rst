@@ -209,6 +209,123 @@ Service
 
 .. _Kubernetes User Guide: http://kubernetes.io/v1.0/docs/user-guide/
 
+When Magnum deploys a Kubernetes bay, it uses parameters defined in the
+baymodel and specified on the bay-create command, for example::
+
+    magnum baymodel-create --name k8sbaymodel \
+                           --image-id fedora-atomic-latest \
+                           --keypair-id testkey \
+                           --external-network-id public \
+                           --dns-nameserver 8.8.8.8 \
+                           --flavor-id m1.small \
+                           --docker-volume-size 5 \
+                           --network-driver flannel \
+                           --coe kubernetes
+
+    magnum bay-create --name k8sbay \
+                      --baymodel k8sbaymodel \
+                      --master-count 2 \
+                      --node-count 8
+
+Refer to the `Baymodel`_ and `Bay`_ sections for the full list of parameters.
+Following are further details relevant to a Kubernetes bay:
+
+Number of masters (master-count)
+  Specified in the bay-create command to indicate how many servers will
+  run as master in the bay.  Having more than one will provide high
+  availability.  The masters will be in a load balancer pool and the
+  virtual IP address (VIP) of the load balancer will serve as the
+  Kubernetes API endpoint.  For external access, a floating IP
+  associated with this VIP is available and this is the endpoint
+  shown for Kubernetes in the 'bay-show' command.
+
+Number of nodes (node-count)
+  Specified in the bay-create command to indicate how many servers will
+  run as node in the bay to host the users' pods.  The nodes are registered
+  in Kubernetes using the Nova instance name.
+
+Network driver (network-driver)
+  Specified in the baymodel to select the network driver.
+  The supported and default network driver is 'flannel', an overlay
+  network providing a flat network for all pods.  Refer to the
+  `Networking`_ section for more details.
+
+Volume driver (volume-driver)
+  Specified in the baymodel to select the volume driver.  The supported
+  volume driver is 'cinder', allowing Cinder volumes to be mounted in
+  containers for use as persistent storage.  Data written to these volumes
+  will persist after the container exits and can be accessed again from other
+  containers, while data written to the union file system hosting the container
+  will be deleted.  Refer to the `Storage`_ section for more details.
+
+Storage driver (docker-storage-driver)
+  Specified in the baymodel to select the Docker storage driver.  The
+  supported storage drivers are 'devicemapper' and 'overlay', with
+  'devicemapper' being the default.  You may get better performance with
+  the overlay driver depending on your use patterns, with the requirement
+  that SELinux must be disabled inside the containers, although it still runs
+  in enforcing mode on the bay servers.  Magnum will create a Cinder volume
+  for each node, mount it on the node and configure it as a logical
+  volume named 'docker'.  The Docker daemon will run the selected device
+  driver to manage this logical volume and host the container writable
+  layer there.  Refer to the `Storage`_ section for more details.
+
+Image (image-id)
+  Specified in the baymodel to indicate the image to boot the servers.
+  The image binary is loaded in Glance with the attribute
+  'os_distro = fedora-atomic'.
+  Current supported images are Fedora Atomic (download from `Fedora
+  <https://alt.fedoraproject.org/pub/alt/atomic/stable/Cloud-Images/x86_64/Images>`_ )
+  and CoreOS (download from `CoreOS
+  <http://beta.release.core-os.net/amd64-usr/current/coreos_production_openstack_image.img.bz2>`_ )
+
+TLS (tls-disabled)
+  Transport Layer Security is enabled by default, so you need a key and
+  signed certificate to access the Kubernetes API and CLI.  Magnum
+  handles its own key and certificate when interfacing with the
+  Kubernetes bay.  In development mode, TLS can be disabled.  Refer to
+  the 'Transport Layer Security'_ section for more details.
+
+What runs on the servers
+  The servers for Kubernetes master host containers in the 'kube-system'
+  name space to run the Kubernetes proxy, scheduler and controller manager.
+  The masters will not host users' pods.  Kubernetes API server, docker
+  daemon, etcd and flannel run as systemd services.  The servers for
+  Kubernetes node also host a container in the 'kube-system' name space
+  to run the Kubernetes proxy, while Kubernetes kubelet, docker daemon
+  and flannel run as systemd services.
+
+Log into the servers
+  You can log into the master servers using the login 'minion' and the
+  keypair specified in the baymodel.
+
+External load balancer for services
+-----------------------------------
+
+All Kubernetes pods and services created in the bay are assigned IP
+addresses on a private container network so they can access each other
+and the external internet.  However, these IP addresses are not
+accessible from an external network.
+
+To publish a service endpoint externally so that the service can be
+accessed from the external network, Kubernetes provides the external
+load balancer feature.  This is done by simply specifying in the
+service manifest the attribute "type: LoadBalancer".  Magnum enables
+and configures the Kubernetes plugin for OpenStack so that it can
+interface with Neutron and manage the necessary networking resources.
+
+When the service is created, Kubernetes will add an external load
+balancer in front of the service so that the service will have an
+external IP address in addition to the internal IP address on the
+container network.  The service endpoint can then be accessed with
+this external IP address.  Kubernetes handles all the life cycle
+operations when pods are modified behind the service and when the
+service is deleted.
+
+Refer to the document `Kubernetes external load balancer
+<https://github.com/openstack/magnum/blob/master/doc/source/dev/kubernetes-load-balancer.rst>`_
+for more details.
+
 =====
 Swarm
 =====
