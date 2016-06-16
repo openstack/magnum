@@ -14,11 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+. /etc/sysconfig/heat-params
+
 set -o errexit
 set -o nounset
 set -o pipefail
-
-. /etc/sysconfig/heat-params
 
 if [ "$TLS_DISABLED" == "True" ]; then
     exit 0
