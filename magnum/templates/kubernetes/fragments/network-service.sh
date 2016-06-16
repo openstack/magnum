@@ -14,7 +14,7 @@ FLANNEL_DOCKER_BRIDGE_CONF=/etc/systemd/system/flanneld.service.d/flannel-docker
 mkdir -p /etc/systemd/system/docker.service.d
 mkdir -p /etc/systemd/system/flanneld.service.d
 
-cat >> $FLANNEL_DOCKER_BRIDGE_BIN <<EOF
+cat >> $FLANNEL_DOCKER_BRIDGE_BIN <<EOF1
 #!/bin/sh
 
 if ! [ "\$FLANNEL_SUBNET" ] && [ "\$FLANNEL_MTU" ] ; then
@@ -23,9 +23,10 @@ if ! [ "\$FLANNEL_SUBNET" ] && [ "\$FLANNEL_MTU" ] ; then
 fi
 
 mkdir -p /run/flannel/
-cat > /run/flannel/docker <<EOF
+cat > /run/flannel/docker <<EOF2
 DOCKER_NETWORK_OPTIONS="--bip=\$FLANNEL_SUBNET --mtu=\$FLANNEL_MTU"
-EOF
+EOF2
+EOF1
 
 chown root:root $FLANNEL_DOCKER_BRIDGE_BIN
 chmod 0755 $FLANNEL_DOCKER_BRIDGE_BIN
