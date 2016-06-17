@@ -551,6 +551,7 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
+        self.assertIsNotNone(response.json['name'])
 
     def test_create_bay_with_timeout_none(self):
         bdict = apiutils.bay_post_data()
