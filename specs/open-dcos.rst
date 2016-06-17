@@ -46,7 +46,7 @@ framework named as Marathon running on top of Mesos. Compared with Open DC/OS,
 the current Mesos Bay lack the following features:
 
 1. App Store for application management. The Open DC/OS has a universe to
-   to provide app store functions.
+   provide app store functions.
 
 2. Different container technology support. The Open DC/OS support different
    container technologies, such as docker, AppC etc, and may introduce OCI
