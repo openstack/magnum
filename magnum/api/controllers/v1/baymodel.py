@@ -28,6 +28,7 @@ from magnum.api import utils as api_utils
 from magnum.api import validation
 from magnum.common import clients
 from magnum.common import exception
+from magnum.common import name_generator
 from magnum.common import policy
 from magnum import objects
 from magnum.objects import fields
@@ -222,6 +223,13 @@ class BayModelsController(rest.RestController):
         'detail': ['GET'],
     }
 
+    def _generate_name_for_baymodel(self, context):
+        '''Generate a random name like: zeta-22-model.'''
+
+        name_gen = name_generator.NameGenerator()
+        name = name_gen.generate()
+        return name + '-model'
+
     def _get_baymodels_collection(self, marker, limit,
                                   sort_key, sort_dir, resource_url=None):
 
@@ -321,6 +329,12 @@ class BayModelsController(rest.RestController):
             if not policy.enforce(context, "baymodel:publish", None,
                                   do_raise=False):
                 raise exception.BaymodelPublishDenied()
+
+        # NOTE(yuywz): We will generate a random human-readable name for
+        # baymodel if the name is not spcified by user.
+        arg_name = baymodel_dict.get('name')
+        name = arg_name or self._generate_name_for_baymodel(context)
+        baymodel_dict['name'] = name
 
         new_baymodel = objects.BayModel(context, **baymodel_dict)
         new_baymodel.create()

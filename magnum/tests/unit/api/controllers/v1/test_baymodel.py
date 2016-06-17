@@ -853,6 +853,18 @@ class TestPost(api_base.FunctionalTest):
         response = self.post_json('/baymodels', bdict, expect_errors=True)
         self.assertEqual(400, response.status_int)
 
+    @mock.patch('magnum.api.attr_validator.validate_image')
+    def test_create_baymodel_without_name(self, mock_image_data):
+        with mock.patch.object(self.dbapi, 'create_baymodel',
+                               wraps=self.dbapi.create_baymodel):
+            mock_image_data.return_value = {'name': 'mock_name',
+                                            'os_distro': 'fedora-atomic'}
+            bdict = apiutils.baymodel_post_data()
+            bdict.pop('name')
+            resp = self.post_json('/baymodels', bdict)
+            self.assertEqual(201, resp.status_int)
+            self.assertIsNotNone(resp.json['name'])
+
 
 class TestDelete(api_base.FunctionalTest):
 

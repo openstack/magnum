@@ -30,6 +30,7 @@ from magnum.api import utils as api_utils
 from magnum.api.validation import validate_bay_properties
 from magnum.common import clients
 from magnum.common import exception
+from magnum.common import name_generator
 from magnum.common import policy
 from magnum.i18n import _LW
 from magnum import objects
@@ -207,6 +208,12 @@ class BaysController(rest.RestController):
         'detail': ['GET'],
     }
 
+    def _generate_name_for_bay(self, context):
+        '''Generate a random name like: zeta-22-bay.'''
+        name_gen = name_generator.NameGenerator()
+        name = name_gen.generate()
+        return name + '-bay'
+
     def _get_bays_collection(self, marker, limit,
                              sort_key, sort_dir, expand=False,
                              resource_url=None):
@@ -325,8 +332,10 @@ class BaysController(rest.RestController):
         bay_dict = bay.as_dict()
         bay_dict['project_id'] = context.project_id
         bay_dict['user_id'] = context.user_id
-        if bay_dict.get('name') is None:
-            bay_dict['name'] = None
+        # NOTE(yuywz): We will generate a random human-readable name for
+        # bay if the name is not spcified by user.
+        name = bay_dict.get('name') or self._generate_name_for_bay(context)
+        bay_dict['name'] = name
 
         new_bay = objects.Bay(context, **bay_dict)
         res_bay = pecan.request.rpcapi.bay_create(new_bay,
