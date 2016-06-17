@@ -142,7 +142,7 @@ class InvalidUUID(Invalid):
 
 
 class InvalidName(Invalid):
-    message = _("Expected a name but received %(uuid)s.")
+    message = _("Expected a name but received %(name)s.")
 
 
 class InvalidDiscoveryURL(Invalid):
