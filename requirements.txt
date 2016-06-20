@@ -20,7 +20,7 @@ eventlet!=0.18.3,>=0.18.2 # MIT
 greenlet>=0.3.2 # MIT
 iso8601>=0.1.11 # MIT
 jsonpatch>=1.1 # BSD
-keystoneauth1>=2.1.0 # Apache-2.0
+keystoneauth1>=2.7.0 # Apache-2.0
 keystonemiddleware!=4.1.0,!=4.5.0,>=4.0.0 # Apache-2.0
 netaddr!=0.7.16,>=0.7.12 # BSD
 oslo.concurrency>=3.8.0 # Apache-2.0
