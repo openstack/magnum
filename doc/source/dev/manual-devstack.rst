@@ -174,6 +174,9 @@ Configure magnum::
     # copy policy.json
     sudo cp etc/magnum/policy.json /etc/magnum/policy.json
 
+    # copy api-paste.ini
+    sudo cp etc/magnum/api-paste.ini /etc/magnum/api-paste.ini
+
     # enable debugging output
     sudo sed -i "s/#debug\s*=.*/debug=true/" /etc/magnum/magnum.conf
 
@@ -187,14 +190,6 @@ Configure magnum::
 
     # set SQLAlchemy connection string to connect to MySQL
     sudo sed -i "s/#connection\s*=.*/connection=mysql:\/\/root:password@localhost\/magnum/" \
-             /etc/magnum/magnum.conf
-
-    # set Keystone account username
-    sudo sed -i "s/#admin_user\s*=.*/admin_user=admin/" \
-             /etc/magnum/magnum.conf
-
-    # set Keystone account password
-    sudo sed -i "s/#admin_password\s*=.*/admin_password=password/" \
              /etc/magnum/magnum.conf
 
     # set admin Identity API endpoint
