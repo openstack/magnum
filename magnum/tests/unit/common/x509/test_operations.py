@@ -25,7 +25,7 @@ class TestX509Operations(base.BaseTestCase):
 
     @mock.patch.object(serialization, 'NoEncryption')
     @mock.patch.object(operations, 'default_backend')
-    @mock.patch.object(serialization, 'load_pem_private_key')
+    @mock.patch.object(operations, '_load_pem_private_key')
     def test_decrypt_key(self, mock_load_pem_private_key,
                          mock_default_backend, mock_no_encryption_class):
         mock_private_key = mock.MagicMock()
@@ -36,8 +36,7 @@ class TestX509Operations(base.BaseTestCase):
                                                   mock.sentinel.passphrase)
 
         mock_load_pem_private_key.assert_called_once_with(
-            mock.sentinel.key, password=mock.sentinel.passphrase,
-            backend=mock_default_backend.return_value)
+            mock.sentinel.key, mock.sentinel.passphrase)
         mock_private_key.private_bytes.assert_called_once_with(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.PKCS8,

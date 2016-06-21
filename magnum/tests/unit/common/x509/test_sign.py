@@ -72,6 +72,13 @@ class TestX509(base.BaseTestCase):
             serialization.PublicFormat.SubjectPublicKeyInfo
         )
 
+    def _private_bytes(self, private_key):
+        return private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption()
+        )
+
     def _generate_private_key(self):
         return rsa.generate_private_key(
             public_exponent=65537,
@@ -182,6 +189,23 @@ class TestX509(base.BaseTestCase):
             self.issuer_name, self.subject_name)
 
         self.assertInClientExtensions(cert)
+
+    def test_load_pem_private_key_with_bytes_private_key(self):
+        private_key = self._generate_private_key()
+        private_key = self._private_bytes(private_key)
+
+        self.assertIsInstance(private_key, six.binary_type)
+        private_key = operations._load_pem_private_key(private_key)
+        self.assertIsInstance(private_key, rsa.RSAPrivateKey)
+
+    def test_load_pem_private_key_with_unicode_private_key(self):
+        private_key = self._generate_private_key()
+        private_key = self._private_bytes(private_key)
+        private_key = six.text_type(private_key.decode('utf-8'))
+
+        self.assertIsInstance(private_key, six.text_type)
+        private_key = operations._load_pem_private_key(private_key)
+        self.assertIsInstance(private_key, rsa.RSAPrivateKey)
 
     @mock.patch('cryptography.x509.load_pem_x509_csr')
     @mock.patch('six.b')

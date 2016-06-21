@@ -151,6 +151,22 @@ def _generate_certificate(issuer_name, subject_name, extensions, ca_key=None,
     return keypairs
 
 
+def _load_pem_private_key(ca_key, ca_key_password=None):
+    if not isinstance(ca_key, rsa.RSAPrivateKey):
+        if isinstance(ca_key, six.text_type):
+            ca_key = six.b(str(ca_key))
+        if isinstance(ca_key_password, six.text_type):
+            ca_key_password = six.b(str(ca_key_password))
+
+        ca_key = serialization.load_pem_private_key(
+            ca_key,
+            password=ca_key_password,
+            backend=default_backend()
+        )
+
+    return ca_key
+
+
 def sign(csr, issuer_name, ca_key, ca_key_password=None,
          skip_validation=False):
     """Sign a given csr
@@ -163,10 +179,7 @@ def sign(csr, issuer_name, ca_key, ca_key_password=None,
     :returns: generated certificate
     """
 
-    if not isinstance(ca_key, rsa.RSAPrivateKey):
-        ca_key = serialization.load_pem_private_key(ca_key,
-                                                    password=ca_key_password,
-                                                    backend=default_backend())
+    ca_key = _load_pem_private_key(ca_key, ca_key_password)
 
     if not isinstance(issuer_name, six.text_type):
         issuer_name = six.text_type(issuer_name.decode('utf-8'))
@@ -213,9 +226,8 @@ def sign(csr, issuer_name, ca_key, ca_key_password=None,
 
 
 def decrypt_key(encrypted_key, password):
-    private_key = serialization.load_pem_private_key(
-        encrypted_key, password=password, backend=default_backend()
-    )
+    private_key = _load_pem_private_key(encrypted_key, password)
+
     decrypted_pem = private_key.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
