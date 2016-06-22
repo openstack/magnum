@@ -42,7 +42,7 @@ executed::
 
     export ELEMENTS_PATH=/path/to/diskimage-builder/elements:/path/to/magnum/drivers/driver_name/image
     export DIB_RELEASE=23     # this can be switched to the desired version
-    export DIB_IMAGE_SIZE=2   # we need to give a bit more space to loopback device
+    export DIB_IMAGE_SIZE=2.2 # we need to give a bit more space to loopback device
     disk-image-create fedora-atomic -o fedora-atomic
 
 This element can consume already published trees, but you can use it
@@ -58,7 +58,7 @@ FEDORA_ATOMIC_TREE_URL
   :Required: Yes
   :Description: Url for the public fedora-atomic tree to use. It can
                 reference to own published trees.
-  :Default: `https://dl.fedoraproject.org/pub/fedora/linux/atomic/23/ <https://dl.fedoraproject.org/pub/fedora/linux/atomic/23/>`_
+  :Default: `https://kojipkgs.fedoraproject.org/atomic/23/ <https://kojipkgs.fedoraproject.org/atomic/23/>`_
 
 
 FEDORA_ATOMIC_TREE_REF
