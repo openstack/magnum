@@ -21,23 +21,39 @@ from magnum.tests import base
 
 class TestScaleManager(base.TestCase):
 
+    @mock.patch('magnum.objects.Cluster.get_by_uuid')
+    def test_get_scale_manager(self, mock_cluster_get):
+        mock_context = mock.MagicMock()
+        mock_osc = mock.MagicMock()
+        k8s_cluster = mock.MagicMock()
+        k8s_cluster.baymodel.coe = 'kubernetes'
+        mesos_cluster = mock.MagicMock()
+        mesos_cluster.baymodel.coe = 'mesos'
+        invalid_cluster = mock.MagicMock()
+        invalid_cluster.baymodel.coe = 'fake'
+
+        mgr = scale_manager.get_scale_manager(
+            mock_context, mock_osc, k8s_cluster)
+        self.assertIsInstance(mgr, scale_manager.K8sScaleManager)
+
+        mgr = scale_manager.get_scale_manager(
+            mock_context, mock_osc, mesos_cluster)
+        self.assertIsInstance(mgr, scale_manager.MesosScaleManager)
+
+        mgr = scale_manager.get_scale_manager(
+            mock_context, mock_osc, invalid_cluster)
+        self.assertIsNone(mgr)
+
     def _test_get_removal_nodes(
-            self, mock_create_k8s_api, mock_get_num_of_removal,
+            self, mock_get_hosts, mock_get_num_of_removal,
             mock_is_scale_down, mock_get_by_uuid, is_scale_down,
-            num_of_removal, all_hosts, pod_hosts, expected_removal_hosts):
+            num_of_removal, all_hosts, container_hosts,
+            expected_removal_hosts):
 
         mock_is_scale_down.return_value = is_scale_down
         mock_get_num_of_removal.return_value = num_of_removal
 
-        pods = list()
-        for h in pod_hosts:
-            pod = mock.MagicMock()
-            pod.spec.node_name = h
-            pods.append(pod)
-
-        mock_k8s_api = mock.MagicMock()
-        mock_k8s_api.list_namespaced_pod.return_value.items = pods
-        mock_create_k8s_api.return_value = mock_k8s_api
+        mock_get_hosts.return_value = container_hosts
 
         mock_heat_output = mock.MagicMock()
         mock_heat_output.get_output_value.return_value = all_hosts
@@ -60,119 +76,168 @@ class TestScaleManager(base.TestCase):
             removal_hosts = scale_mgr.get_removal_nodes(mock_heat_output)
             self.assertEqual(expected_removal_hosts, removal_hosts)
             if num_of_removal > 0:
-                mock_create_k8s_api.assert_called_once_with(mock_context,
-                                                            mock_cluster)
+                mock_get_hosts.assert_called_once_with(mock_context,
+                                                       mock_cluster)
 
     @mock.patch('magnum.objects.Cluster.get_by_uuid')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager._is_scale_down')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager.'
                 '_get_num_of_removal')
-    @mock.patch('magnum.conductor.k8s_api.create_k8s_api')
-    def test_get_removal_nodes_no_pod(
-            self, mock_create_k8s_api, mock_get_num_of_removal,
+    @mock.patch('magnum.conductor.scale_manager.ScaleManager.'
+                '_get_hosts_with_container')
+    def test_get_removal_nodes_no_container_host(
+            self, mock_get_hosts, mock_get_num_of_removal,
             mock_is_scale_down, mock_get_by_uuid):
 
         is_scale_down = True
         num_of_removal = 1
-        hosts = ['10.0.0.3', '10.0.0.4']
-        pods = []
+        all_hosts = ['10.0.0.3']
+        container_hosts = set()
         expected_removal_hosts = ['10.0.0.3']
         self._test_get_removal_nodes(
-            mock_create_k8s_api, mock_get_num_of_removal, mock_is_scale_down,
-            mock_get_by_uuid, is_scale_down, num_of_removal, hosts, pods,
-            expected_removal_hosts)
+            mock_get_hosts, mock_get_num_of_removal, mock_is_scale_down,
+            mock_get_by_uuid, is_scale_down, num_of_removal, all_hosts,
+            container_hosts, expected_removal_hosts)
 
     @mock.patch('magnum.objects.Cluster.get_by_uuid')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager._is_scale_down')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager.'
                 '_get_num_of_removal')
-    @mock.patch('magnum.conductor.k8s_api.create_k8s_api')
-    def test_get_removal_nodes_one_pod(
-            self, mock_create_k8s_api, mock_get_num_of_removal,
+    @mock.patch('magnum.conductor.scale_manager.ScaleManager.'
+                '_get_hosts_with_container')
+    def test_get_removal_nodes_one_container_host(
+            self, mock_get_hosts, mock_get_num_of_removal,
             mock_is_scale_down, mock_get_by_uuid):
 
         is_scale_down = True
         num_of_removal = 1
-        hosts = ['10.0.0.3', '10.0.0.4']
-        pods = ['10.0.0.3']
+        all_hosts = ['10.0.0.3', '10.0.0.4']
+        container_hosts = set(['10.0.0.3'])
         expected_removal_hosts = ['10.0.0.4']
         self._test_get_removal_nodes(
-            mock_create_k8s_api, mock_get_num_of_removal, mock_is_scale_down,
-            mock_get_by_uuid, is_scale_down, num_of_removal, hosts, pods,
-            expected_removal_hosts)
+            mock_get_hosts, mock_get_num_of_removal, mock_is_scale_down,
+            mock_get_by_uuid, is_scale_down, num_of_removal, all_hosts,
+            container_hosts, expected_removal_hosts)
 
     @mock.patch('magnum.objects.Cluster.get_by_uuid')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager._is_scale_down')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager.'
                 '_get_num_of_removal')
-    @mock.patch('magnum.conductor.k8s_api.create_k8s_api')
-    def test_get_removal_nodes_two_pods(
-            self, mock_create_k8s_api, mock_get_num_of_removal,
+    @mock.patch('magnum.conductor.scale_manager.ScaleManager.'
+                '_get_hosts_with_container')
+    def test_get_removal_nodes_two_container_hosts(
+            self, mock_get_hosts, mock_get_num_of_removal,
             mock_is_scale_down, mock_get_by_uuid):
 
         is_scale_down = True
         num_of_removal = 1
-        hosts = ['10.0.0.3', '10.0.0.4']
-        pods = ['10.0.0.3', '10.0.0.4']
+        all_hosts = ['10.0.0.3', '10.0.0.4']
+        container_hosts = set(['10.0.0.3', '10.0.0.4'])
         expected_removal_hosts = []
         self._test_get_removal_nodes(
-            mock_create_k8s_api, mock_get_num_of_removal, mock_is_scale_down,
-            mock_get_by_uuid, is_scale_down, num_of_removal, hosts, pods,
-            expected_removal_hosts)
+            mock_get_hosts, mock_get_num_of_removal, mock_is_scale_down,
+            mock_get_by_uuid, is_scale_down, num_of_removal, all_hosts,
+            container_hosts, expected_removal_hosts)
 
     @mock.patch('magnum.objects.Cluster.get_by_uuid')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager._is_scale_down')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager.'
                 '_get_num_of_removal')
-    @mock.patch('magnum.conductor.k8s_api.create_k8s_api')
-    def test_get_removal_nodes_three_pods(
-            self, mock_create_k8s_api, mock_get_num_of_removal,
+    @mock.patch('magnum.conductor.scale_manager.ScaleManager.'
+                '_get_hosts_with_container')
+    def test_get_removal_nodes_three_container_hosts(
+            self, mock_get_hosts, mock_get_num_of_removal,
             mock_is_scale_down, mock_get_by_uuid):
 
         is_scale_down = True
         num_of_removal = 1
-        hosts = ['10.0.0.3', '10.0.0.4']
-        pods = ['10.0.0.3', '10.0.0.4', '10.0.0.5']
+        all_hosts = ['10.0.0.3', '10.0.0.4']
+        container_hosts = set(['10.0.0.3', '10.0.0.4', '10.0.0.5'])
         expected_removal_hosts = []
         self._test_get_removal_nodes(
-            mock_create_k8s_api, mock_get_num_of_removal, mock_is_scale_down,
-            mock_get_by_uuid, is_scale_down, num_of_removal, hosts, pods,
-            expected_removal_hosts)
+            mock_get_hosts, mock_get_num_of_removal, mock_is_scale_down,
+            mock_get_by_uuid, is_scale_down, num_of_removal, all_hosts,
+            container_hosts, expected_removal_hosts)
 
     @mock.patch('magnum.objects.Cluster.get_by_uuid')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager._is_scale_down')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager.'
                 '_get_num_of_removal')
-    @mock.patch('magnum.conductor.k8s_api.create_k8s_api')
+    @mock.patch('magnum.conductor.scale_manager.ScaleManager.'
+                '_get_hosts_with_container')
     def test_get_removal_nodes_scale_up(
-            self, mock_create_k8s_api, mock_get_num_of_removal,
+            self, mock_get_hosts, mock_get_num_of_removal,
             mock_is_scale_down, mock_get_by_uuid):
 
         is_scale_down = False
         num_of_removal = -1
-        hosts = ['10.0.0.3', '10.0.0.4']
-        pods = []
+        all_hosts = ['10.0.0.3', '10.0.0.4']
+        container_hosts = set()
         expected_removal_hosts = []
         self._test_get_removal_nodes(
-            mock_create_k8s_api, mock_get_num_of_removal, mock_is_scale_down,
-            mock_get_by_uuid, is_scale_down, num_of_removal, hosts, pods,
-            expected_removal_hosts)
+            mock_get_hosts, mock_get_num_of_removal, mock_is_scale_down,
+            mock_get_by_uuid, is_scale_down, num_of_removal, all_hosts,
+            container_hosts, expected_removal_hosts)
 
     @mock.patch('magnum.objects.Cluster.get_by_uuid')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager._is_scale_down')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager.'
                 '_get_num_of_removal')
-    @mock.patch('magnum.conductor.k8s_api.create_k8s_api')
+    @mock.patch('magnum.conductor.scale_manager.ScaleManager.'
+                '_get_hosts_with_container')
     def test_get_removal_nodes_with_none_hosts(
-            self, mock_create_k8s_api, mock_get_num_of_removal,
+            self, mock_get_hosts, mock_get_num_of_removal,
             mock_is_scale_down, mock_get_by_uuid):
 
         is_scale_down = True
         num_of_removal = 1
-        hosts = None
-        pods = []
+        all_hosts = None
+        container_hosts = set()
         expected_removal_hosts = None
         self._test_get_removal_nodes(
-            mock_create_k8s_api, mock_get_num_of_removal, mock_is_scale_down,
-            mock_get_by_uuid, is_scale_down, num_of_removal, hosts, pods,
-            expected_removal_hosts)
+            mock_get_hosts, mock_get_num_of_removal, mock_is_scale_down,
+            mock_get_by_uuid, is_scale_down, num_of_removal, all_hosts,
+            container_hosts, expected_removal_hosts)
+
+
+class TestK8sScaleManager(base.TestCase):
+
+    @mock.patch('magnum.objects.Cluster.get_by_uuid')
+    @mock.patch('magnum.conductor.k8s_api.create_k8s_api')
+    def test_get_hosts_with_container(self, mock_create_api, mock_get):
+        pods = mock.MagicMock()
+        pod_1 = mock.MagicMock()
+        pod_1.spec.node_name = 'node1'
+        pod_2 = mock.MagicMock()
+        pod_2.spec.node_name = 'node2'
+        pods.items = [pod_1, pod_2]
+        mock_api = mock.MagicMock()
+        mock_api.list_namespaced_pod.return_value = pods
+        mock_create_api.return_value = mock_api
+
+        mgr = scale_manager.K8sScaleManager(
+            mock.MagicMock(), mock.MagicMock(), mock.MagicMock())
+        hosts = mgr._get_hosts_with_container(
+            mock.MagicMock(), mock.MagicMock())
+        self.assertEqual(hosts, {'node1', 'node2'})
+
+
+class TestMesosScaleManager(base.TestCase):
+
+    @mock.patch('magnum.objects.Cluster.get_by_uuid')
+    @mock.patch('marathon.MarathonClient')
+    @mock.patch('marathon.MarathonClient.list_tasks')
+    def test_get_hosts_with_container(self, mock_list_tasks,
+                                      mock_client,  mock_get):
+        task_1 = mock.MagicMock()
+        task_1.host = 'node1'
+        task_2 = mock.MagicMock()
+        task_2.host = 'node2'
+        tasks = [task_1, task_2]
+        mock_list_tasks.return_value = tasks
+
+        mgr = scale_manager.MesosScaleManager(
+            mock.MagicMock(), mock.MagicMock(), mock.MagicMock())
+        hosts = mgr._get_hosts_with_container(
+            mock.MagicMock(), mock.MagicMock())
+        self.assertEqual(hosts, {'node1', 'node2'})
