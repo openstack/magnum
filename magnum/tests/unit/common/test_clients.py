@@ -137,7 +137,7 @@ class ClientsTest(base.BaseTestCase):
             endpoint='url_from_keystone', username=None,
             token='3bcc3d3a03f44e3d8377f9247b0ad155',
             auth_url='keystone_url',
-            password=None)
+            password=None, cacert=None, cert=None, key=None, insecure=False)
         mock_url.assert_called_once_with(service_type='image',
                                          endpoint_type='publicURL',
                                          region_name=expected_region_name)
@@ -249,7 +249,8 @@ class ClientsTest(base.BaseTestCase):
         obj._nova = None
         obj.nova()
         mock_call.assert_called_once_with(cfg.CONF.nova_client.api_version,
-                                          auth_token=con.auth_token)
+                                          auth_token=con.auth_token,
+                                          cacert=None, insecure=False)
         mock_url.assert_called_once_with(service_type='compute',
                                          endpoint_type='publicURL',
                                          region_name=expected_region_name)
@@ -308,7 +309,8 @@ class ClientsTest(base.BaseTestCase):
             endpoint_url='url_from_keystone',
             endpoint_type=fake_endpoint_type,
             auth_url='keystone_url',
-            token='3bcc3d3a03f44e3d8377f9247b0ad155')
+            token='3bcc3d3a03f44e3d8377f9247b0ad155',
+            ca_cert=None, insecure=False)
         mock_url.assert_called_once_with(service_type='network',
                                          endpoint_type=fake_endpoint_type,
                                          region_name=expected_region_name)
