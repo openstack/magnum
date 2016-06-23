@@ -45,11 +45,6 @@ ln -sf $SYSROOT/usr/lib/systemd/system/cloud-final.service $SYSROOT/etc/systemd/
 ln -sf $SYSROOT/usr/lib/systemd/system/cloud-init.service $SYSROOT/etc/systemd/system/multi-user.target.wants/cloud-init.service
 ln -sf $SYSROOT/usr/lib/systemd/system/cloud-init-local.service $SYSROOT/etc/systemd/system/multi-user.target.wants/cloud-init-local.service
 
-# update docker configuration
-cat > $SYSROOT/etc/sysconfig/docker-storage <<EOF
-DOCKER_STORAGE_OPTIONS="--storage-opt dm.thinpooldev=/dev/mapper/docker-docker--pool"
-EOF
-
 # disabled docker-storage-setup
 rm $SYSROOT/etc/systemd/system/multi-user.target.wants/docker-storage-setup.service
 
