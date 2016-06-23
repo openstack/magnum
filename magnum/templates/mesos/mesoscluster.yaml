@@ -188,6 +188,15 @@ parameters:
       executor will inherit the agent's environment variables.
     default: ""
 
+  slaves_to_remove:
+    type: comma_delimited_list
+    description: >
+      List of slaves to be removed when doing an update. Individual slave may
+      be referenced several ways: (1) The resource name (e.g.['1', '3']),
+      (2) The private IP address ['10.0.0.4', '10.0.0.6']. Note: the list should
+      be empty when doing a create.
+    default: []
+
 resources:
 
   ######################################################################
@@ -399,6 +408,7 @@ resources:
       - extrouter_inside
     properties:
       count: {get_param: number_of_slaves}
+      removal_policies: [{resource_list: {get_param: slaves_to_remove}}]
       resource_def:
         type: mesosslave.yaml
         properties:

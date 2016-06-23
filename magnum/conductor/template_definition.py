@@ -697,6 +697,12 @@ class UbuntuMesosTemplateDefinition(BaseTemplateDefinition):
         for label in label_list:
             extra_params[label] = baymodel.labels.get(label)
 
+        scale_mgr = kwargs.pop('scale_manager', None)
+        if scale_mgr:
+            hosts = self.get_output('mesos_slaves_private')
+            extra_params['slaves_to_remove'] = (
+                scale_mgr.get_removal_nodes(hosts))
+
         return super(UbuntuMesosTemplateDefinition,
                      self).get_params(context, baymodel, bay,
                                       extra_params=extra_params,
