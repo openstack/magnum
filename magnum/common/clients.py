@@ -26,6 +26,18 @@ from magnum.common import keystone
 from magnum.i18n import _
 from magnum.i18n import _LW
 
+common_security_opts = [
+    cfg.StrOpt('ca_file',
+               help=_('Optional CA cert file to use in SSL connections.')),
+    cfg.StrOpt('cert_file',
+               help=_('Optional PEM-formatted certificate chain file.')),
+    cfg.StrOpt('key_file',
+               help=_('Optional PEM-formatted file that contains the '
+                      'private key.')),
+    cfg.BoolOpt('insecure',
+                default=False,
+                help=_("If set, then the server's certificate will not "
+                       "be verified."))]
 
 magnum_client_opts = [
     cfg.StrOpt('region_name',
@@ -46,17 +58,6 @@ heat_client_opts = [
                help=_(
                    'Type of endpoint in Identity service catalog to use '
                    'for communication with the OpenStack service.')),
-    cfg.StrOpt('ca_file',
-               help=_('Optional CA cert file to use in SSL connections.')),
-    cfg.StrOpt('cert_file',
-               help=_('Optional PEM-formatted certificate chain file.')),
-    cfg.StrOpt('key_file',
-               help=_('Optional PEM-formatted file that contains the '
-                      'private key.')),
-    cfg.BoolOpt('insecure',
-                default=False,
-                help=_("If set, then the server's certificate will not "
-                       "be verified.")),
     cfg.StrOpt('api_version',
                default='1',
                help=_('Version of Heat API to use in heatclient.'))]
@@ -120,6 +121,11 @@ cfg.CONF.register_opts(barbican_client_opts, group='barbican_client')
 cfg.CONF.register_opts(nova_client_opts, group='nova_client')
 cfg.CONF.register_opts(neutron_client_opts, group='neutron_client')
 cfg.CONF.register_opts(cinder_client_opts, group='cinder_client')
+
+cfg.CONF.register_opts(common_security_opts, group='heat_client')
+cfg.CONF.register_opts(common_security_opts, group='glance_client')
+cfg.CONF.register_opts(common_security_opts, group='nova_client')
+cfg.CONF.register_opts(common_security_opts, group='neutron_client')
 
 LOG = logging.getLogger(__name__)
 
@@ -220,6 +226,10 @@ class OpenStackClients(object):
             'token': self.auth_token,
             'username': None,
             'password': None,
+            'cacert': self._get_client_option('glance', 'ca_file'),
+            'cert': self._get_client_option('glance', 'cert_file'),
+            'key': self._get_client_option('glance', 'key_file'),
+            'insecure': self._get_client_option('glance', 'insecure')
         }
         self._glance = glanceclient.Client(glanceclient_version, **args)
 
@@ -251,8 +261,13 @@ class OpenStackClients(object):
         endpoint = self.url_for(service_type='compute',
                                 interface=endpoint_type,
                                 region_name=region_name)
+        args = {
+            'cacert': self._get_client_option('nova', 'ca_file'),
+            'insecure': self._get_client_option('nova', 'insecure')
+        }
+
         self._nova = novaclient.Client(novaclient_version,
-                                       auth_token=self.auth_token)
+                                       auth_token=self.auth_token, **args)
         self._nova.client.management_url = endpoint
         return self._nova
 
@@ -271,6 +286,8 @@ class OpenStackClients(object):
             'token': self.auth_token,
             'endpoint_url': endpoint,
             'endpoint_type': endpoint_type,
+            'ca_cert': self._get_client_option('neutron', 'ca_file'),
+            'insecure': self._get_client_option('neutron', 'insecure')
         }
         self._neutron = neutronclient.Client(**args)
         return self._neutron
