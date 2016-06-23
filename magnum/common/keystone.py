@@ -127,9 +127,11 @@ class KeystoneClientV3(object):
                 LOG.warning('Keystone v2 is deprecated.')
                 kwargs['auth_ref'] = self.context.auth_token_info['access']
                 kwargs['auth_ref']['version'] = 'v2.0'
+                kwargs['auth_ref']['auth_token'] = self.context.auth_token
             elif self._is_v3_valid(self.context.auth_token_info):
                 kwargs['auth_ref'] = self.context.auth_token_info['token']
                 kwargs['auth_ref']['version'] = 'v3'
+                kwargs['auth_ref']['auth_token'] = self.context.auth_token
             else:
                 LOG.error(_LE('Unknown version in auth_token_info'))
                 raise exception.AuthorizationFailure()

@@ -64,7 +64,8 @@ class KeystoneClientTest(base.BaseTestCase):
         ks_client = keystone.KeystoneClientV3(self.ctx)
         ks_client.client
         self.assertIsNotNone(ks_client._client)
-        mock_ks.assert_called_once_with(auth_ref={'version': 'v2.0'},
+        mock_ks.assert_called_once_with(auth_ref={'version': 'v2.0',
+                                                  'auth_token': 'abcd1234'},
                                         auth_url='http://server.test:5000/v3',
                                         endpoint='http://server.test:5000/v3',
                                         token='abcd1234')
@@ -75,7 +76,8 @@ class KeystoneClientTest(base.BaseTestCase):
         ks_client = keystone.KeystoneClientV3(self.ctx)
         ks_client.client
         self.assertIsNotNone(ks_client._client)
-        mock_ks.assert_called_once_with(auth_ref={'version': 'v3'},
+        mock_ks.assert_called_once_with(auth_ref={'version': 'v3',
+                                                  'auth_token': 'abcd1234'},
                                         auth_url='http://server.test:5000/v3',
                                         endpoint='http://server.test:5000/v3',
                                         token='abcd1234')
