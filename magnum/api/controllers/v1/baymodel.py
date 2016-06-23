@@ -137,6 +137,11 @@ class BayModel(base.APIBase):
     docker_storage_driver = wtypes.Enum(str, *fields.DockerStorageDriver.ALL)
     """Docker storage driver"""
 
+    master_lb_enabled = wsme.wsattr(types.boolean, default=False)
+    """Indicates whether created bays should have a load balancer for master
+       nodes or not.
+       """
+
     def __init__(self, **kwargs):
         self.fields = []
         for field in objects.BayModel.fields:
@@ -187,7 +192,8 @@ class BayModel(base.APIBase):
             insecure_registry='10.238.100.100:5000',
             created_at=timeutils.utcnow(),
             updated_at=timeutils.utcnow(),
-            public=False),
+            public=False,
+            master_lb_enabled=False)
         return cls._convert_with_links(sample, 'http://localhost:9511')
 
 

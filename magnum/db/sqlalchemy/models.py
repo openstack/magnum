@@ -172,6 +172,7 @@ class BayModel(Base):
     public = Column(Boolean, default=False)
     server_type = Column(String(255))
     insecure_registry = Column(String(255))
+    master_lb_enabled = Column(Boolean, default=False)
 
 
 class Container(Base):
