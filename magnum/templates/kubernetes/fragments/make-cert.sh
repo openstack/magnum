@@ -33,7 +33,6 @@ fi
 
 cert_dir=/srv/kubernetes
 cert_conf_dir=${cert_dir}/conf
-cert_group=root
 
 mkdir -p "$cert_dir"
 mkdir -p "$cert_conf_dir"
