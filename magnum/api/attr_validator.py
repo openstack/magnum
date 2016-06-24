@@ -164,6 +164,12 @@ def validate_os_resources(context, baymodel):
                 validate_method(baymodel[attr])
 
 
+def validate_master_count(bay, baymodel):
+    if bay['master_count'] > 1 and not baymodel['master_lb_enabled']:
+        raise exception.InvalidParameterValue(_(
+            "master_count must be 1 when master_lb_enabled is False"))
+
+
 # Dictionary that maintains a list of validation functions
 validators = {'image_id': validate_image,
               'flavor_id': validate_flavor,

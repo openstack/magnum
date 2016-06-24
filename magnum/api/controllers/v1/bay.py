@@ -329,6 +329,7 @@ class BaysController(rest.RestController):
                        action='bay:create')
         baymodel = objects.BayModel.get_by_uuid(context, bay.baymodel_id)
         attr_validator.validate_os_resources(context, baymodel.as_dict())
+        attr_validator.validate_master_count(bay.as_dict(), baymodel.as_dict())
         bay_dict = bay.as_dict()
         bay_dict['project_id'] = context.project_id
         bay_dict['user_id'] = context.user_id

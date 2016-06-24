@@ -1,0 +1,12 @@
+# Environment file to enable LBaaS in a Kubernetes cluster by mapping
+# LBaaS-related resource types to the real LBaaS resource types.
+resource_registry:
+  "Magnum::ApiGatewaySwitcher": ../fragments/api_gateway_switcher_pool.yaml
+
+  # kubecluster.yaml
+  "Magnum::Optional::Neutron::Pool": "OS::Neutron::Pool"
+  "Magnum::Optional::Neutron::Pool::FloatingIP": "OS::Neutron::FloatingIP"
+  "Magnum::Optional::Neutron::Pool::HealthMonitor": "OS::Neutron::HealthMonitor"
+
+  # kubemaster.yaml
+  "Magnum::Optional::Neutron::PoolMember": "OS::Neutron::PoolMember"
