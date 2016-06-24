@@ -367,6 +367,87 @@ class TestHandler(db_base.DbTestCase):
         self.assertEqual(
             taxonomy.OUTCOME_FAILURE, notifications[1].payload['outcome'])
 
+    @patch('magnum.conductor.handlers.bay_conductor.HeatPoller')
+    @patch('heatclient.common.template_utils'
+           '.process_multiple_environments_and_files')
+    @patch('heatclient.common.template_utils.get_template_contents')
+    @patch('magnum.conductor.handlers.bay_conductor'
+           '._extract_template_definition')
+    @patch('magnum.conductor.handlers.bay_conductor.trust_manager')
+    @patch('magnum.conductor.handlers.bay_conductor.cert_manager')
+    @patch('magnum.conductor.handlers.bay_conductor.short_id')
+    @patch('magnum.conductor.handlers.bay_conductor.uuid')
+    @patch('magnum.common.clients.OpenStackClients')
+    def test_create_with_environment(self,
+                                     mock_openstack_client_class,
+                                     mock_uuid,
+                                     mock_short_id,
+                                     mock_cert_manager,
+                                     mock_trust_manager,
+                                     mock_extract_tmpl_def,
+                                     mock_get_template_contents,
+                                     mock_process_mult,
+                                     mock_heat_poller_class):
+        timeout = 15
+        self.bay.baymodel_id = self.baymodel.uuid
+        test_uuid = uuid.uuid4()
+        mock_uuid.uuid4.return_value = test_uuid
+        bay_name = self.bay.name
+        mock_short_id.generate_id.return_value = 'short_id'
+        mock_poller = mock.MagicMock()
+        mock_poller.poll_and_check.return_value = loopingcall.LoopingCallDone()
+        mock_heat_poller_class.return_value = mock_poller
+
+        mock_extract_tmpl_def.return_value = (
+            'the/template/path.yaml',
+            {'heat_param_1': 'foo', 'heat_param_2': 'bar'},
+            ['env_file_1', 'env_file_2'])
+
+        mock_get_template_contents.return_value = (
+            {'tmpl_file_1': 'some content',
+             'tmpl_file_2': 'some more content'},
+            'some template yaml')
+
+        def do_mock_process_mult(env_paths=None, env_list_tracker=None):
+            self.assertEqual(env_list_tracker, [])
+            for f in env_paths:
+                env_list_tracker.append('file:///' + f)
+            env_map = {path: 'content of ' + path for path in env_list_tracker}
+            return (env_map, None)
+
+        mock_process_mult.side_effect = do_mock_process_mult
+
+        mock_hc = mock.Mock()
+        mock_hc.stacks.create.return_value = {'stack': {'id': 'stack-id'}}
+
+        osc = mock.Mock()
+        osc.heat.return_value = mock_hc
+        mock_openstack_client_class.return_value = osc
+
+        self.handler.bay_create(self.context, self.bay, timeout)
+
+        mock_extract_tmpl_def.assert_called_once_with(self.context, self.bay)
+        mock_get_template_contents.assert_called_once_with(
+            'the/template/path.yaml')
+        mock_process_mult.assert_called_once_with(
+            env_paths=['the/template/env_file_1', 'the/template/env_file_2'],
+            env_list_tracker=mock.ANY)
+        mock_hc.stacks.create.assert_called_once_with(
+            environment_files=['file:///the/template/env_file_1',
+                               'file:///the/template/env_file_2'],
+            files={
+                'tmpl_file_1': 'some content',
+                'tmpl_file_2': 'some more content',
+                'file:///the/template/env_file_1':
+                    'content of file:///the/template/env_file_1',
+                'file:///the/template/env_file_2':
+                    'content of file:///the/template/env_file_2'
+            },
+            parameters={'heat_param_1': 'foo', 'heat_param_2': 'bar'},
+            stack_name=('%s-short_id' % bay_name),
+            template='some template yaml',
+            timeout_mins=timeout)
+
     @patch('magnum.common.clients.OpenStackClients')
     def test_bay_delete(self, mock_openstack_client_class):
         osc = mock.MagicMock()
