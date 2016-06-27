@@ -216,7 +216,7 @@ class TestHandler(db_base.DbTestCase):
                                                   mock.sentinel.osc,
                                                   self.bay, timeout)
         mock_cert_manager.generate_certificates_to_bay.assert_called_once_with(
-            self.bay)
+            self.bay, context=self.context)
         self.assertEqual(bay_status.CREATE_IN_PROGRESS, bay.status)
         mock_trust_manager.create_trustee_and_trust.assert_called_once_with(
             osc, self.bay)
@@ -241,7 +241,7 @@ class TestHandler(db_base.DbTestCase):
 
         gctb = mock_cert_manager.generate_certificates_to_bay
         if is_create_cert_called:
-            gctb.assert_called_once_with(self.bay)
+            gctb.assert_called_once_with(self.bay, context=self.context)
         else:
             gctb.assert_not_called()
         ctat = mock_trust_manager.create_trustee_and_trust

@@ -47,7 +47,7 @@ class K8sAPI(apiv_api.ApivApi):
 
         if bay.magnum_cert_ref:
             (self.ca_file, self.key_file,
-             self.cert_file) = create_client_files(bay)
+             self.cert_file) = create_client_files(bay, context)
 
         # build a connection with Kubernetes master
         client = api_client.ApiClient(bay.api_address,

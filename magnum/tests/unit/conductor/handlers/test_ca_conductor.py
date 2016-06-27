@@ -35,7 +35,7 @@ class TestSignConductor(base.TestCase):
                                                        mock_certificate)
 
         mock_cert_manager.sign_node_certificate.assert_called_once_with(
-            mock_bay, 'fake-csr'
+            mock_bay, 'fake-csr', context=self.context
         )
         self.assertEqual('fake-pem', actual_cert.pem)
 
