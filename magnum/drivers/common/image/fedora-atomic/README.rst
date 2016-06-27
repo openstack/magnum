@@ -29,7 +29,7 @@ For CentOS and Fedora < 22, use::
 
 For Fedora >= 22, use::
 
-    dnf install python-dev build-essential python-pip kpartx python-lzma qemu-utils yum yum-utils python-yaml
+    dnf install python-devel @development-tools python-pip kpartx python-backports-lzma @virtualization yum yum-utils python-yaml
 
 diskimage-builder can be installed using pip::
 
