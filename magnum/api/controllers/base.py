@@ -62,7 +62,7 @@ class Version(object):
     max_string = 'X-OpenStack-API-Maximum-Version'
     """HTTP response header"""
 
-    service_string = 'magnum'
+    service_string = 'container-infra'
 
     def __init__(self, headers, default_version, latest_version):
         """Create an API Version object from the supplied headers.

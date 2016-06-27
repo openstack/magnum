@@ -22,9 +22,11 @@ class TestVersion(test_base.TestCase):
     def setUp(self):
         super(TestVersion, self).setUp()
         self.a = base.Version(
-            {base.Version.string: "magnum 2.0"}, "magnum 2.0", "magnum 2.1")
+            {base.Version.string: "container-infra 2.0"},
+            "container-infra 2.0", "container-infra 2.1")
         self.b = base.Version(
-            {base.Version.string: "magnum 2.0"}, "magnum 2.0", "magnum 2.1")
+            {base.Version.string: "container-infra 2.0"},
+            "container-infra 2.0", "container-infra 2.1")
 
     def test__lt__with_higher_major_version(self):
         self.a.major = 2
@@ -105,32 +107,34 @@ class TestVersion(test_base.TestCase):
 
     def test_parse_headers_ok(self):
         version = base.Version.parse_headers(
-            {base.Version.string: 'magnum 123.456'}, mock.ANY, mock.ANY)
+            {base.Version.string: 'container-infra 123.456'},
+            mock.ANY, mock.ANY)
         self.assertEqual((123, 456), version)
 
     def test_parse_headers_latest(self):
         for s in ['magnum latest', 'magnum LATEST']:
             version = base.Version.parse_headers(
-                {base.Version.string: s}, mock.ANY, 'magnum 1.9')
+                {base.Version.string: s}, mock.ANY, 'container-infra 1.9')
             self.assertEqual((1, 9), version)
 
     def test_parse_headers_bad_length(self):
         self.assertRaises(
             exc.HTTPNotAcceptable,
             base.Version.parse_headers,
-            {base.Version.string: 'magnum 1'},
+            {base.Version.string: 'container-infra 1'},
             mock.ANY,
             mock.ANY)
         self.assertRaises(
             exc.HTTPNotAcceptable,
             base.Version.parse_headers,
-            {base.Version.string: 'magnum 1.2.3'},
+            {base.Version.string: 'container-infra 1.2.3'},
             mock.ANY,
             mock.ANY)
 
     def test_parse_no_header(self):
         # this asserts that the minimum version string is applied
-        version = base.Version.parse_headers({}, 'magnum 1.1', 'magnum 1.5')
+        version = base.Version.parse_headers({}, 'container-infra 1.1',
+                                             'container-infra 1.5')
         self.assertEqual((1, 1), version)
 
     def test_parse_incorrect_service_type(self):
@@ -138,11 +142,11 @@ class TestVersion(test_base.TestCase):
             exc.HTTPNotAcceptable,
             base.Version.parse_headers,
             {base.Version.string: '1.1'},
-            'magnum 1.1',
-            'magnum 1.1')
+            'container-infra 1.1',
+            'container-infra 1.1')
         self.assertRaises(
             exc.HTTPNotAcceptable,
             base.Version.parse_headers,
             {base.Version.string: 'nova 1.1'},
-            'magnum 1.1',
-            'magnum 1.1')
+            'container-infra 1.1',
+            'container-infra 1.1')
