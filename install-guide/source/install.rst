@@ -36,5 +36,7 @@ magnum related metrics. See `OpenStack Install Guides
    accordingly.
 
 .. toctree::
+   :maxdepth: 2
 
+   install-obs.rst
    install-rdo.rst
