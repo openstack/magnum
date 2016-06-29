@@ -64,7 +64,176 @@ Magnum rationale, concept, compelling features
 
 BayModel
 ---------
+A baymodel is a collection of parameters to describe how a bay can be
+constructed.  Some parameters are relevant to the infrastructure of
+the bay, while others are for the particular COE.  In a typical
+workflow, a user would create a baymodel, then create one or more bays
+using the baymodel.  A cloud provider can also define a number of
+baymodels and provide them to the users.  A baymodel cannot be updated
+or deleted if a bay using this baymodel still exists.
+
+The definition and usage of the parameters of a baymodel are as follows.
+They are loosely grouped as: mandatory, infrastructure, COE specific.
+
+--coe \<coe\>
+  Specify the Container Orchestration Engine to use.  Supported
+  COE's include 'kubernetes', 'swarm', 'mesos'.  If your environment
+  has additional bay drivers installed, refer to the bay driver
+  documentation for the new COE names.  This is a mandatory parameter
+  and there is no default value.
+
+--image-id \<image-id\>
+  The name or UUID of the base image in Glance to boot the servers for
+  the bay.  The image must have the attribute 'os-distro' defined
+  as appropriate for the bay driver.  For the currently supported
+  images, the os-distro names are:
+
+  +------------+-----------------------+
+  | COE        |  os-distro            |
+  +============+=======================+
+  | kubernetes | fedora-atomic, coreos |
+  | swarm      | fedora-atomic         |
+  | mesos      | ubuntu                |
+  +------------+-----------------------+
+
+  This is a mandatory parameter and there is no default value.
+
+--keypair-id \<keypair-id\>
+  The name or UUID of the SSH keypair to configure in the bay servers
+  for ssh access.  You will need the key to be able to ssh to the
+  servers in the bay.  The login name is specific to the bay
+  driver.  This is a mandatory parameter and there is no default value.
+
+--external-network-id \<external-network-id\>
+  The name or network ID of a Neutron network to provide connectivity
+  to the external internet for the bay.  This network must have a
+  route to external internet.  The servers in the bay will be
+  connected to a private network and Magnum will create a router
+  between this private network and the external network.  This will
+  allow the servers to download images, access discovery service, etc,
+  and the containers to install packages, etc.  In the opposite
+  direction, floating IP's will be allocated from the external network
+  to provide access from the external internet to servers and the
+  container services hosted in the bay.  This is a mandatory parameter
+  and there is no default value.
+
+--name \<name\>
+  Name of the baymodel to create.  The name does not have to be
+  unique.  If multiple baymodels have the same name, you will need to
+  use the UUID to select the baymodel when creating a bay or updating,
+  deleting a baymodel.  If a name is not specified, a random name will
+  be generated using a string and a number, for example "pi-13-model".
+
+--public
+  Access to a baymodel is normally limited to the admin, owner or users
+  within the same tenant as the owners.  Setting this flag
+  makes the baymodel public and accessible by other users.  The default is
+  not public.
+
+--server-type \<server-type\>
+  The servers in the bay can be VM or baremetal.  This parameter selects
+  the type of server to create for the bay.  The default is 'vm' and
+  currently this is the only supported server type.
+
+--network-driver \<network-driver\>
+  The name of a network driver for providing the networks for the
+  containers.  Note that this is different and separate from the Neutron
+  network for the bay.  The operation and networking model are specific
+  to the particular driver; refer to the `Networking`_ section for more
+  details.  Supported network drivers and the default driver are:
+
+  +------------+-----------------+---------+
+  | COE        | network-driver  | default |
+  +============+=================+=========+
+  | kubernetes | flannel         | flannel |
+  | swarm      | docker, flannel | docker  |
+  | mesos      | docker          | docker  |
+  +------------+-----------------+---------+
+
+--volume-driver \<volume-driver\>
+  The name of a volume driver for managing the persistent storage for
+  the containers.  The functionality supported are specific to the
+  driver.  Supported volume drivers and the default driver are:
+
+  +------------+-----------------+-----------+
+  | COE        | volume-driver   | default   |
+  +============+=================+===========+
+  | kubernetes | cinder          | no driver |
+  | swarm      | rexray          | no driver |
+  | mesos      | rexray          | no driver |
+  +------------+-----------------+-----------+
+
+--dns-nameserver \<dns-nameserver\>
+  The DNS nameserver for the servers and containers in the bay to use.
+  This is configured in the private Neutron network for the bay.  The
+  default is '8.8.8.8'.
+
+--flavor-id \<flavor-id\>
+  The nova flavor id for booting the node servers.  The default
+  is 'm1.small'.
+
+--master-flavor-id \<master-flavor-id\>
+  The nova flavor id for booting the master or manager servers.  The
+  default is 'm1.small'.
+
+--http-proxy \<http-proxy\>
+  The IP address for a proxy to use when direct http access from the
+  servers to sites on the external internet is blocked.  This may
+  happen in certain countries or enterprises, and the proxy allows the
+  servers and containers to access these sites.  The format is a URL
+  including a port number.  The default is 'None'.
+
+--https-proxy \<https-proxy\>
+  The IP address for a proxy to use when direct https access from the
+  servers to sites on the external internet is blocked.  This may
+  happen in certain countries or enterprises, and the proxy allows the
+  servers and containers to access these sites.  The format is a URL
+  including a port number.  The default is 'None'.
+
+--no-proxy \<no-proxy\>
+  When a proxy server is used, some sites should not go through the
+  proxy and should be accessed normally.  In this case, you can
+  specify these sites as a comma separated list of IP's.  The default
+  is 'None'.
+
+--docker-volume-size \<docker-volume-size\>
+  The size in GB for the local storage on each server for the Docker
+  daemon to cache the images and host the containers.  Cinder volumes
+  provide the storage.  The default is 25 GB.
+
+--docker-storage-driver \<docker-storage-driver\>
+  The name of a driver to manage the storage for the images and the
+  container's writable layer.  The supported drivers are 'devicemapper'
+  and 'overlay'.  The default is 'devicemapper'.
+
+--labels \<KEY1=VALUE1,KEY2=VALUE2;KEY3=VALUE3...\>
+  Arbitrary labels in the form of key=value pairs.  The accepted keys
+  and valid values are defined in the bay drivers.  They are used as a
+  way to pass additional parameters that are specific to a bay driver.
+  Refer to the subsection on labels for a list of the supported
+  key/value pairs and their usage.
+
+--tls-disabled
+  Transport Layer Security (TLS) is normally enabled to secure the
+  bay.  In some cases, users may want to disable TLS in the bay, for
+  instance during development or to troubleshoot certain problems.
+  Specifying this parameter will disable TLS so that users can access
+  the COE endpoints without a certificate.  The default is TLS
+  enabled.
+
+--registry-enabled
+  Docker images by default are pulled from the public Docker registry,
+  but in some cases, users may want to use a private registry.  This
+  option provides an alternative registry based on the Registry V2:
+  Magnum will create a local registry in the bay backed by swift to
+  host the images.  Refer to
+  `Docker Registry 2.0 <https://github.com/docker/distribution>`_
+  for more details.  The default is to use the public registry.
+
+Labels
+------
 *To be filled in*
+
 
 Bay
 ---
