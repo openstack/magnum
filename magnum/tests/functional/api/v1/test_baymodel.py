@@ -15,11 +15,11 @@ from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions
 import testtools
 
-from magnum.tests.functional.common import base
+from magnum.tests.functional.api import base
 from magnum.tests.functional.common import datagen
 
 
-class BayModelTest(base.BaseMagnumTest):
+class BayModelTest(base.BaseTempestTest):
 
     """Tests for baymodel CRUD."""
 

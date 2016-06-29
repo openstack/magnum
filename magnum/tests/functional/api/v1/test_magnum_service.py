@@ -14,10 +14,10 @@
 from tempest.lib import exceptions
 import testtools
 
-from magnum.tests.functional.common import base
+from magnum.tests.functional.api import base
 
 
-class MagnumServiceTest(base.BaseMagnumTest):
+class MagnumServiceTest(base.BaseTempestTest):
 
     """Tests for magnum-service ."""
 
