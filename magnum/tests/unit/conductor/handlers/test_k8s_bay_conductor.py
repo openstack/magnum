@@ -101,8 +101,9 @@ class TestBayConductorWithK8s(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_conductor._extract_template_definition(self.context,
-                                                                  bay)
+         definition,
+         env_files) = bay_conductor._extract_template_definition(self.context,
+                                                                 bay)
 
         mapping = {
             'dns_nameserver': 'dns_nameserver',
@@ -167,6 +168,7 @@ class TestBayConductorWithK8s(base.TestCase):
             expected.pop(mapping[missing_attr], None)
 
         self.assertEqual(expected, definition)
+        self.assertEqual([], env_files)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_with_registry(
@@ -182,8 +184,9 @@ class TestBayConductorWithK8s(base.TestCase):
                               group='docker_registry')
 
         (template_path,
-         definition) = bay_conductor._extract_template_definition(self.context,
-                                                                  bay)
+         definition,
+         env_files) = bay_conductor._extract_template_definition(self.context,
+                                                                 bay)
 
         expected = {
             'auth_url': 'http://192.168.10.10:5000/v3',
@@ -224,6 +227,7 @@ class TestBayConductorWithK8s(base.TestCase):
         }
 
         self.assertEqual(expected, definition)
+        self.assertEqual([], env_files)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_coreos_with_disovery(
@@ -235,8 +239,9 @@ class TestBayConductorWithK8s(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_conductor._extract_template_definition(self.context,
-                                                                  bay)
+         definition,
+         env_files) = bay_conductor._extract_template_definition(self.context,
+                                                                 bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -269,6 +274,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'insecure_registry_url': '10.0.0.1:5000',
         }
         self.assertEqual(expected, definition)
+        self.assertEqual([], env_files)
 
     @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
@@ -285,8 +291,9 @@ class TestBayConductorWithK8s(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_conductor._extract_template_definition(self.context,
-                                                                  bay)
+         definition,
+         env_files) = bay_conductor._extract_template_definition(self.context,
+                                                                 bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -319,6 +326,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'insecure_registry_url': '10.0.0.1:5000',
         }
         self.assertEqual(expected, definition)
+        self.assertEqual([], env_files)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_without_dns(
@@ -411,8 +419,9 @@ class TestBayConductorWithK8s(base.TestCase):
         reqget.return_value = mock_req
 
         (template_path,
-         definition) = bay_conductor._extract_template_definition(self.context,
-                                                                  bay)
+         definition,
+         env_files) = bay_conductor._extract_template_definition(self.context,
+                                                                 bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -450,6 +459,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'insecure_registry_url': '10.0.0.1:5000',
         }
         self.assertEqual(expected, definition)
+        self.assertEqual([], env_files)
         reqget.assert_called_once_with('http://etcd/test?size=1')
 
     @patch('magnum.common.short_id.generate_id')
@@ -471,7 +481,7 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_get_template_contents.return_value = [
             mock_tpl_files, expected_template_contents]
         mock_extract_template_definition.return_value = ('template/path',
-                                                         {})
+                                                         {}, [])
         mock_heat_client = mock.MagicMock()
         mock_osc = mock.MagicMock()
         mock_osc.heat.return_value = mock_heat_client
@@ -486,6 +496,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'parameters': {},
             'template': expected_template_contents,
             'files': {},
+            'environment_files': [],
             'timeout_mins': expected_timeout
         }
         mock_heat_client.stacks.create.assert_called_once_with(**expected_args)
@@ -510,7 +521,7 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_get_template_contents.return_value = [
             mock_tpl_files, expected_template_contents]
         mock_extract_template_definition.return_value = ('template/path',
-                                                         {})
+                                                         {}, [])
         mock_heat_client = mock.MagicMock()
         mock_osc = mock.MagicMock()
         mock_osc.heat.return_value = mock_heat_client
@@ -525,6 +536,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'parameters': {},
             'template': expected_template_contents,
             'files': {},
+            'environment_files': [],
             'timeout_mins': expected_timeout
         }
         mock_heat_client.stacks.create.assert_called_once_with(**expected_args)
@@ -550,7 +562,7 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_get_template_contents.return_value = [
             mock_tpl_files, expected_template_contents]
         mock_extract_template_definition.return_value = ('template/path',
-                                                         {})
+                                                         {}, [])
         mock_heat_client = mock.MagicMock()
         mock_osc = mock.MagicMock()
         mock_osc.heat.return_value = mock_heat_client
@@ -565,6 +577,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'parameters': {},
             'template': expected_template_contents,
             'files': {},
+            'environment_files': [],
             'timeout_mins': expected_timeout
         }
         mock_heat_client.stacks.create.assert_called_once_with(**expected_args)
@@ -583,7 +596,7 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_get_template_contents.return_value = [
             mock_tpl_files, expected_template_contents]
         mock_extract_template_definition.return_value = ('template/path',
-                                                         {})
+                                                         {}, [])
         mock_heat_client = mock.MagicMock()
         mock_osc = mock.MagicMock()
         mock_osc.heat.return_value = mock_heat_client
@@ -595,7 +608,8 @@ class TestBayConductorWithK8s(base.TestCase):
         expected_args = {
             'parameters': {},
             'template': expected_template_contents,
-            'files': {}
+            'files': {},
+            'environment_files': []
         }
         mock_heat_client.stacks.update.assert_called_once_with(mock_stack_id,
                                                                **expected_args)

@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import os
 import uuid
 
 from heatclient.common import template_utils
@@ -73,10 +74,25 @@ def _extract_template_definition(context, bay, scale_manager=None):
                                          scale_manager=scale_manager)
 
 
+def _get_env_files(template_path, env_rel_paths):
+    template_dir = os.path.dirname(template_path)
+    env_abs_paths = [os.path.join(template_dir, f) for f in env_rel_paths]
+    environment_files = []
+    env_map, merged_env = (
+        template_utils.process_multiple_environments_and_files(
+            env_paths=env_abs_paths, env_list_tracker=environment_files))
+    return environment_files, env_map
+
+
 def _create_stack(context, osc, bay, bay_create_timeout):
-    template_path, heat_params = _extract_template_definition(context, bay)
+    template_path, heat_params, env_files = (
+        _extract_template_definition(context, bay))
 
     tpl_files, template = template_utils.get_template_contents(template_path)
+
+    environment_files, env_map = _get_env_files(template_path, env_files)
+    tpl_files.update(env_map)
+
     # Make sure no duplicate stack name
     stack_name = '%s-%s' % (bay.name, short_id.generate_id())
     if bay_create_timeout:
@@ -90,6 +106,7 @@ def _create_stack(context, osc, bay, bay_create_timeout):
     fields = {
         'stack_name': stack_name,
         'parameters': heat_params,
+        'environment_files': environment_files,
         'template': template,
         'files': tpl_files,
         'timeout_mins': heat_timeout
@@ -100,12 +117,16 @@ def _create_stack(context, osc, bay, bay_create_timeout):
 
 
 def _update_stack(context, osc, bay, scale_manager=None):
-    template_path, heat_params = _extract_template_definition(
+    template_path, heat_params, env_files = _extract_template_definition(
         context, bay, scale_manager=scale_manager)
 
     tpl_files, template = template_utils.get_template_contents(template_path)
+    environment_files, env_map = _get_env_files(template_path, env_files)
+    tpl_files.update(env_map)
+
     fields = {
         'parameters': heat_params,
+        'environment_files': environment_files,
         'template': template,
         'files': tpl_files
     }

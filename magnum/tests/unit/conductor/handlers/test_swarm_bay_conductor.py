@@ -84,8 +84,9 @@ class TestBayConductorWithSwarm(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_conductor._extract_template_definition(self.context,
-                                                                  bay)
+         definition,
+         env_files) = bay_conductor._extract_template_definition(self.context,
+                                                                 bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -118,6 +119,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v3'
         }
         self.assertEqual(expected, definition)
+        self.assertEqual([], env_files)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_with_registry(
@@ -133,8 +135,9 @@ class TestBayConductorWithSwarm(base.TestCase):
                               group='docker_registry')
 
         (template_path,
-         definition) = bay_conductor._extract_template_definition(self.context,
-                                                                  bay)
+         definition,
+         env_files) = bay_conductor._extract_template_definition(self.context,
+                                                                 bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -169,6 +172,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'docker_storage_driver': 'devicemapper'
         }
         self.assertEqual(expected, definition)
+        self.assertEqual([], env_files)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_only_required(
@@ -188,8 +192,9 @@ class TestBayConductorWithSwarm(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_conductor._extract_template_definition(self.context,
-                                                                  bay)
+         definition,
+         env_files) = bay_conductor._extract_template_definition(self.context,
+                                                                 bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -212,6 +217,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v3'
         }
         self.assertEqual(expected, definition)
+        self.assertEqual([], env_files)
 
     @patch('magnum.conductor.utils.retrieve_baymodel')
     @patch('oslo_config.cfg')

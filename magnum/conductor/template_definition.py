@@ -305,6 +305,18 @@ class TemplateDefinition(object):
 
         return template_params
 
+    def get_env_files(self, baymodel):
+        """Collects stack environment files based upon Baymodel attributes.
+
+        Base implementation returns no files (empty list). Meant to be
+        overridden by subclasses.
+
+        :param baymodel: Baymodel to collect environment files for
+
+        :return: list of relative paths to environment files
+        """
+        return []
+
     def get_heat_param(self, bay_attr=None, baymodel_attr=None):
         """Returns stack param name.
 
@@ -331,8 +343,9 @@ class TemplateDefinition(object):
         pass
 
     def extract_definition(self, context, baymodel, bay, **kwargs):
-        return self.template_path, self.get_params(context, baymodel, bay,
-                                                   **kwargs)
+        return (self.template_path,
+                self.get_params(context, baymodel, bay, **kwargs),
+                self.get_env_files(baymodel))
 
 
 class BaseTemplateDefinition(TemplateDefinition):

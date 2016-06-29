@@ -85,8 +85,9 @@ class TestBayConductorWithMesos(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_conductor._extract_template_definition(self.context,
-                                                                  bay)
+         definition,
+         env_files) = bay_conductor._extract_template_definition(self.context,
+                                                                 bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -119,6 +120,7 @@ class TestBayConductorWithMesos(base.TestCase):
             'mesos_slave_image_providers': 'docker'
         }
         self.assertEqual(expected, definition)
+        self.assertEqual([], env_files)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_only_required(
@@ -135,8 +137,9 @@ class TestBayConductorWithMesos(base.TestCase):
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
-         definition) = bay_conductor._extract_template_definition(self.context,
-                                                                  bay)
+         definition,
+         env_files) = bay_conductor._extract_template_definition(self.context,
+                                                                 bay)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -161,6 +164,7 @@ class TestBayConductorWithMesos(base.TestCase):
             'mesos_slave_image_providers': 'docker'
         }
         self.assertEqual(expected, definition)
+        self.assertEqual([], env_files)
 
     @patch('magnum.conductor.utils.retrieve_baymodel')
     @patch('oslo_config.cfg')
