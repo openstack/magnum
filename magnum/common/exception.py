@@ -154,6 +154,19 @@ class GetDiscoveryUrlFailed(MagnumException):
     message = _("Failed to get discovery url from '%(discovery_endpoint)s'.")
 
 
+class InvalidBayDiscoveryURL(Invalid):
+    message = _("Invalid discovery URL '%(discovery_url)s'.")
+
+
+class InvalidClusterSize(Invalid):
+    message = _("Expected cluster size %(expect_size)d but get cluster "
+                "size %(size)d from '%(discovery_url)s'.")
+
+
+class GetClusterSizeFailed(MagnumException):
+    message = _("Failed to get the size of cluster from '%(discovery_url)s'.")
+
+
 class InvalidIdentity(Invalid):
     message = _("Expected an uuid or int but received %(identity)s.")
 

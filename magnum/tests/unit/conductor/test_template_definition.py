@@ -14,6 +14,7 @@
 
 import mock
 from oslo_config import cfg
+from requests import exceptions as req_exceptions
 
 from magnum.common import exception
 from magnum.conductor import template_definition as tdef
@@ -271,6 +272,50 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
                                                 mock_bay, **expected_kwargs)
 
     @mock.patch('requests.get')
+    def test_k8s_validate_discovery_url(self, mock_get):
+        expected_result = str('{"action":"get","node":{"key":"test","value":'
+                              '"1","modifiedIndex":10,"createdIndex":10}}')
+        mock_resp = mock.MagicMock()
+        mock_resp.text = expected_result
+        mock_get.return_value = mock_resp
+
+        k8s_def = tdef.AtomicK8sTemplateDefinition()
+        k8s_def.validate_discovery_url('http://etcd/test', 1)
+
+    @mock.patch('requests.get')
+    def test_k8s_validate_discovery_url_fail(self, mock_get):
+        mock_get.side_effect = req_exceptions.RequestException()
+
+        k8s_def = tdef.AtomicK8sTemplateDefinition()
+        self.assertRaises(exception.GetClusterSizeFailed,
+                          k8s_def.validate_discovery_url,
+                          'http://etcd/test', 1)
+
+    @mock.patch('requests.get')
+    def test_k8s_validate_discovery_url_invalid(self, mock_get):
+        mock_resp = mock.MagicMock()
+        mock_resp.text = str('{"action":"get"}')
+        mock_get.return_value = mock_resp
+
+        k8s_def = tdef.AtomicK8sTemplateDefinition()
+        self.assertRaises(exception.InvalidBayDiscoveryURL,
+                          k8s_def.validate_discovery_url,
+                          'http://etcd/test', 1)
+
+    @mock.patch('requests.get')
+    def test_k8s_validate_discovery_url_unexpect_size(self, mock_get):
+        expected_result = str('{"action":"get","node":{"key":"test","value":'
+                              '"1","modifiedIndex":10,"createdIndex":10}}')
+        mock_resp = mock.MagicMock()
+        mock_resp.text = expected_result
+        mock_get.return_value = mock_resp
+
+        k8s_def = tdef.AtomicK8sTemplateDefinition()
+        self.assertRaises(exception.InvalidClusterSize,
+                          k8s_def.validate_discovery_url,
+                          'http://etcd/test', 5)
+
+    @mock.patch('requests.get')
     def test_k8s_get_discovery_url(self, mock_get):
         cfg.CONF.set_override('etcd_discovery_service_endpoint_format',
                               'http://etcd/test?size=%(size)d',
@@ -295,7 +340,7 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         cfg.CONF.set_override('etcd_discovery_service_endpoint_format',
                               'http://etcd/test?size=%(size)d',
                               group='bay')
-        mock_get.side_effect = Exception()
+        mock_get.side_effect = req_exceptions.RequestException()
         mock_bay = mock.MagicMock()
         mock_bay.master_count = 10
         mock_bay.discovery_url = None
@@ -480,6 +525,50 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
             'flannel_network_subnetlen': flannel_subnet}}
         mock_get_params.assert_called_once_with(mock_context, mock_baymodel,
                                                 mock_bay, **expected_kwargs)
+
+    @mock.patch('requests.get')
+    def test_swarm_validate_discovery_url(self, mock_get):
+        expected_result = str('{"action":"get","node":{"key":"test","value":'
+                              '"1","modifiedIndex":10,"createdIndex":10}}')
+        mock_resp = mock.MagicMock()
+        mock_resp.text = expected_result
+        mock_get.return_value = mock_resp
+
+        k8s_def = tdef.AtomicK8sTemplateDefinition()
+        k8s_def.validate_discovery_url('http://etcd/test', 1)
+
+    @mock.patch('requests.get')
+    def test_swarm_validate_discovery_url_fail(self, mock_get):
+        mock_get.side_effect = req_exceptions.RequestException()
+
+        k8s_def = tdef.AtomicK8sTemplateDefinition()
+        self.assertRaises(exception.GetClusterSizeFailed,
+                          k8s_def.validate_discovery_url,
+                          'http://etcd/test', 1)
+
+    @mock.patch('requests.get')
+    def test_swarm_validate_discovery_url_invalid(self, mock_get):
+        mock_resp = mock.MagicMock()
+        mock_resp.text = str('{"action":"get"}')
+        mock_get.return_value = mock_resp
+
+        k8s_def = tdef.AtomicK8sTemplateDefinition()
+        self.assertRaises(exception.InvalidBayDiscoveryURL,
+                          k8s_def.validate_discovery_url,
+                          'http://etcd/test', 1)
+
+    @mock.patch('requests.get')
+    def test_swarm_validate_discovery_url_unexpect_size(self, mock_get):
+        expected_result = str('{"action":"get","node":{"key":"test","value":'
+                              '"1","modifiedIndex":10,"createdIndex":10}}')
+        mock_resp = mock.MagicMock()
+        mock_resp.text = expected_result
+        mock_get.return_value = mock_resp
+
+        k8s_def = tdef.AtomicK8sTemplateDefinition()
+        self.assertRaises(exception.InvalidClusterSize,
+                          k8s_def.validate_discovery_url,
+                          'http://etcd/test', 5)
 
     @mock.patch('requests.get')
     def test_swarm_get_discovery_url(self, mock_get):
