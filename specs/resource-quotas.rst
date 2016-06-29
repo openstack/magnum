@@ -40,7 +40,7 @@ a. Ability to know current resource consumption.
 b. Ability to prohibit overuse by a project.
 c. Prevent situation where users in the project get starved because users in
    other project consume all the resource. Alice feels something like
-   "Quota Management" would help to gurantee "fairness".
+   "Quota Management" would help to guarantee "fairness".
 d. Prevent DOS kind of attack, abuse or error by users where an excessive
    amount of resources are created.
 
@@ -69,7 +69,7 @@ Mitaka.
 When a project is created and if the Magnum service is running, the default
 quota for Magnum resources will be set by the values configured in magnum.conf.
 Other Openstack projects like Nova [2]_, Cinder [3]_ follow a similar pattern
-and we will also do so and hence won't have a seperate CLI for quota-create.
+and we will also do so and hence won't have a separate CLI for quota-create.
 Later if the user wants to change the Quota of the resource option will be
 provided to do so using magnum quota-update. In situation where all of the
 quota for a specific Magnum resource (Bay) have been consumed and is
@@ -90,7 +90,7 @@ computing the available quota. For example, 'in-progress' field in the Quota
 usages table will be updated when the resource(Bay) creation is initiated and
 is in progress. Lets say the quota hardlimit is 5 and 3 Bay's have already been
 created and two new requests come in to create new Bays. Since we have 3 Bays
-already created the 'used' field will be set to 3. Now the 'in-progres'
+already created the 'used' field will be set to 3. Now the 'in-progress'
 field will be set to 2 till the time the Bay creation is successful. Once
 the Bay creation is done this field will be reset to 0, and the 'used'
 count will be updated from 3 to 5. So at this moment, hardlimit is 5, used
