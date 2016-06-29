@@ -67,7 +67,7 @@ proof-of-concept at a lower cost of code changes with a configurable option.
 This will enable developers and operators to have a taste of the feature,
 before bringing in the heavier dependencies and changes proposed in phase-1.
 
-A reference implemetation for the phase-0 items, has been put for review[2].
+A reference implementation for the phase-0 items, has been put for review[2].
 
 Following is the summary of the design -
 
