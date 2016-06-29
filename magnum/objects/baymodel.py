@@ -36,7 +36,8 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.10: Removed 'ssh_authorized_key' field
     # Version 1.11: Added 'insecure_registry' field
     # Version 1.12: Added 'docker_storage_driver' field
-    VERSION = '1.12'
+    # Version 1.13: Added 'master_lb_enabled' field
+    VERSION = '1.13'
 
     dbapi = dbapi.get_instance()
 
@@ -70,6 +71,7 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
         'public': fields.BooleanField(default=False),
         'server_type': fields.StringField(nullable=True),
         'insecure_registry': fields.StringField(nullable=True),
+        'master_lb_enabled': fields.BooleanField(default=False),
     }
 
     @staticmethod
