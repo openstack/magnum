@@ -32,6 +32,7 @@ def get_test_baymodel(**kw):
         'external_network_id': kw.get('external_network_id',
                                       'd1f02cfb-d27f-4068-9332-84d907cb0e2e'),
         'fixed_network': kw.get('fixed_network', 'private'),
+        'fixed_subnet': kw.get('fixed_network', 'private-subnet'),
         'network_driver': kw.get('network_driver'),
         'volume_driver': kw.get('volume_driver'),
         'dns_nameserver': kw.get('dns_nameserver', '8.8.1.1'),

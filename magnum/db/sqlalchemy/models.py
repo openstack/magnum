@@ -155,6 +155,7 @@ class BayModel(Base):
     keypair_id = Column(String(255))
     external_network_id = Column(String(255))
     fixed_network = Column(String(255))
+    fixed_subnet = Column(String(255))
     network_driver = Column(String(255))
     volume_driver = Column(String(255))
     dns_nameserver = Column(String(255))

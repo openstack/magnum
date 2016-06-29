@@ -37,7 +37,7 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.11: Added 'insecure_registry' field
     # Version 1.12: Added 'docker_storage_driver' field
     # Version 1.13: Added 'master_lb_enabled' field
-    VERSION = '1.13'
+    VERSION = '1.14'
 
     dbapi = dbapi.get_instance()
 
@@ -54,6 +54,7 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
         'dns_nameserver': fields.StringField(nullable=True),
         'external_network_id': fields.StringField(nullable=True),
         'fixed_network': fields.StringField(nullable=True),
+        'fixed_subnet': fields.StringField(nullable=True),
         'network_driver': fields.StringField(nullable=True),
         'volume_driver': fields.StringField(nullable=True),
         'apiserver_port': fields.IntegerField(nullable=True),

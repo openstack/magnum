@@ -82,6 +82,9 @@ class BayModel(base.APIBase):
     fixed_network = wtypes.StringType(min_length=1, max_length=255)
     """The fixed network name to attach the Bay"""
 
+    fixed_subnet = wtypes.StringType(min_length=1, max_length=255)
+    """The fixed subnet name to attach the Bay"""
+
     network_driver = wtypes.StringType(min_length=1, max_length=255)
     """The name of the driver used for instantiating container networks"""
 
@@ -178,6 +181,7 @@ class BayModel(base.APIBase):
             keypair_id='keypair1',
             external_network_id='ffc44e4a-2319-4062-bce0-9ae1c38b05ba',
             fixed_network='private',
+            fixed_subnet='private-subnet',
             network_driver='libnetwork',
             volume_driver='cinder',
             apiserver_port=8080,

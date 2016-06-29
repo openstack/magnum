@@ -363,7 +363,7 @@ class TestObject(test_base.TestCase, _TestObject):
 # http://docs.openstack.org/developer/magnum/objects.html
 object_data = {
     'Bay': '1.5-a3b9292ef5d35175b93ca46ba3baec2d',
-    'BayModel': '1.13-dd8deda88d7ee7e8911fb900e0f75a1e',
+    'BayModel': '1.14-ae175b4aaba2c60df37cac63ef734853',
     'Certificate': '1.0-2aff667971b85c1edf8d15684fd7d5e2',
     'Container': '1.3-e2d9d2e8a8844d421148cd9fde6c6bd6',
     'MyObj': '1.0-b43567e512438205e32f4e95ca616697',
