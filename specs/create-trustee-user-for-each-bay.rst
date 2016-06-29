@@ -63,7 +63,7 @@ access the host file system of a bay node and get anything they want::
     docker run --rm -v /:/hostroot ubuntu /bin/bash \
                -c "cat /hostroot/etc/passwd"
 
-If Keystone doesn't allow to create new serivce accounts when LDAP is used as
+If Keystone doesn't allow to create new service accounts when LDAP is used as
 the backend for Keystone, we can use a pre-create service account for all
 bays. In this situation, all the bays use the same service account and
 different trust. We should add an config option to choose this method.
