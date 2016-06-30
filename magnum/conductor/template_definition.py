@@ -12,11 +12,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 import abc
+import ast
 
 from oslo_config import cfg
 from oslo_log import log as logging
 from pkg_resources import iter_entry_points
 import requests
+from requests import exceptions as req_exceptions
 import six
 
 from magnum.common import clients
@@ -394,8 +396,48 @@ class BaseTemplateDefinition(TemplateDefinition):
                                       extra_params=extra_params,
                                       **kwargs)
 
+    def validate_discovery_url(self, discovery_url, expect_size):
+        url = str(discovery_url)
+        if url[len(url)-1] == '/':
+            url += '_config/size'
+        else:
+            url += '/_config/size'
+
+        try:
+            result = requests.get(url).text
+        except req_exceptions.RequestException as err:
+            LOG.error(six.text_type(err))
+            raise exception.GetClusterSizeFailed(
+                discovery_url=discovery_url)
+
+        try:
+            result = ast.literal_eval(result)
+        except (ValueError, SyntaxError):
+            raise exception.InvalidBayDiscoveryURL(
+                discovery_url=discovery_url)
+
+        node_value = result.get('node', None)
+        if node_value is None:
+            raise exception.InvalidBayDiscoveryURL(
+                discovery_url=discovery_url)
+
+        value = node_value.get('value', None)
+        if value is None:
+            raise exception.InvalidBayDiscoveryURL(
+                discovery_url=discovery_url)
+        elif int(value) != expect_size:
+            raise exception.InvalidClusterSize(
+                expect_size=expect_size,
+                size=int(value),
+                discovery_url=discovery_url)
+
     def get_discovery_url(self, bay):
         if hasattr(bay, 'discovery_url') and bay.discovery_url:
+            if getattr(bay, 'master_count', None) is not None:
+                self.validate_discovery_url(bay.discovery_url,
+                                            bay.master_count)
+            else:
+                self.validate_discovery_url(bay.discovery_url, 1)
             discovery_url = bay.discovery_url
         else:
             discovery_endpoint = (
@@ -403,7 +445,7 @@ class BaseTemplateDefinition(TemplateDefinition):
                 {'size': bay.master_count})
             try:
                 discovery_url = requests.get(discovery_endpoint).text
-            except Exception as err:
+            except req_exceptions.RequestException as err:
                 LOG.error(six.text_type(err))
                 raise exception.GetDiscoveryUrlFailed(
                     discovery_endpoint=discovery_endpoint)

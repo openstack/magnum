@@ -81,16 +81,19 @@ class TestBayConductorWithK8s(base.TestCase):
         self.mock_osc.keystone.return_value = self.mock_keystone
         self.mock_osc_class.return_value = self.mock_osc
 
+    @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition(
             self,
-            mock_objects_baymodel_get_by_uuid):
+            mock_objects_baymodel_get_by_uuid,
+            mock_get):
         self._test_extract_template_definition(
-            mock_objects_baymodel_get_by_uuid)
+            mock_objects_baymodel_get_by_uuid, mock_get)
 
     def _test_extract_template_definition(
             self,
             mock_objects_baymodel_get_by_uuid,
+            mock_get,
             missing_attr=None):
         if missing_attr in self.baymodel_dict:
             self.baymodel_dict[missing_attr] = None
@@ -98,6 +101,11 @@ class TestBayConductorWithK8s(base.TestCase):
             self.bay_dict[missing_attr] = None
         baymodel = objects.BayModel(self.context, **self.baymodel_dict)
         mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        expected_result = str('{"action":"get","node":{"key":"test","value":'
+                              '"1","modifiedIndex":10,"createdIndex":10}}')
+        mock_resp = mock.MagicMock()
+        mock_resp.text = expected_result
+        mock_get.return_value = mock_resp
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
@@ -170,13 +178,20 @@ class TestBayConductorWithK8s(base.TestCase):
         self.assertEqual(expected, definition)
         self.assertEqual([], env_files)
 
+    @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_with_registry(
             self,
-            mock_objects_baymodel_get_by_uuid):
+            mock_objects_baymodel_get_by_uuid,
+            mock_get):
         self.baymodel_dict['registry_enabled'] = True
         baymodel = objects.BayModel(self.context, **self.baymodel_dict)
         mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        expected_result = str('{"action":"get","node":{"key":"test","value":'
+                              '"1","modifiedIndex":10,"createdIndex":10}}')
+        mock_resp = mock.MagicMock()
+        mock_resp.text = expected_result
+        mock_get.return_value = mock_resp
         bay = objects.Bay(self.context, **self.bay_dict)
 
         cfg.CONF.set_override('swift_region',
@@ -229,13 +244,20 @@ class TestBayConductorWithK8s(base.TestCase):
         self.assertEqual(expected, definition)
         self.assertEqual([], env_files)
 
+    @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_coreos_with_disovery(
             self,
-            mock_objects_baymodel_get_by_uuid):
+            mock_objects_baymodel_get_by_uuid,
+            mock_get):
         self.baymodel_dict['cluster_distro'] = 'coreos'
         baymodel = objects.BayModel(self.context, **self.baymodel_dict)
         mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        expected_result = str('{"action":"get","node":{"key":"test","value":'
+                              '"1","modifiedIndex":10,"createdIndex":10}}')
+        mock_resp = mock.MagicMock()
+        mock_resp.text = expected_result
+        mock_get.return_value = mock_resp
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
@@ -328,76 +350,103 @@ class TestBayConductorWithK8s(base.TestCase):
         self.assertEqual(expected, definition)
         self.assertEqual([], env_files)
 
+    @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_without_dns(
             self,
-            mock_objects_baymodel_get_by_uuid):
+            mock_objects_baymodel_get_by_uuid,
+            mock_get):
         self._test_extract_template_definition(
             mock_objects_baymodel_get_by_uuid,
+            mock_get,
             missing_attr='dns_nameserver')
 
+    @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_without_server_image(
             self,
-            mock_objects_baymodel_get_by_uuid):
+            mock_objects_baymodel_get_by_uuid,
+            mock_get):
         self._test_extract_template_definition(
             mock_objects_baymodel_get_by_uuid,
+            mock_get,
             missing_attr='image_id')
 
+    @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_without_minion_flavor(
             self,
-            mock_objects_baymodel_get_by_uuid):
+            mock_objects_baymodel_get_by_uuid,
+            mock_get):
         self._test_extract_template_definition(
             mock_objects_baymodel_get_by_uuid,
+            mock_get,
             missing_attr='flavor_id')
 
+    @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_without_docker_volume_size(
             self,
-            mock_objects_baymodel_get_by_uuid):
+            mock_objects_baymodel_get_by_uuid,
+            mock_get):
         self._test_extract_template_definition(
             mock_objects_baymodel_get_by_uuid,
+            mock_get,
             missing_attr='docker_volume_size')
 
+    @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_without_docker_storage_driver(
             self,
-            mock_objects_baymodel_get_by_uuid):
+            mock_objects_baymodel_get_by_uuid,
+            mock_get):
         self._test_extract_template_definition(
             mock_objects_baymodel_get_by_uuid,
+            mock_get,
             missing_attr='docker_storage_driver')
 
+    @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_without_master_flavor(
             self,
-            mock_objects_baymodel_get_by_uuid):
+            mock_objects_baymodel_get_by_uuid,
+            mock_get):
         self._test_extract_template_definition(
             mock_objects_baymodel_get_by_uuid,
+            mock_get,
             missing_attr='master_flavor_id')
 
+    @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_without_apiserver_port(
             self,
-            mock_objects_baymodel_get_by_uuid):
+            mock_objects_baymodel_get_by_uuid,
+            mock_get):
         self._test_extract_template_definition(
             mock_objects_baymodel_get_by_uuid,
+            mock_get,
             missing_attr='apiserver_port')
 
+    @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_without_node_count(
             self,
-            mock_objects_baymodel_get_by_uuid):
+            mock_objects_baymodel_get_by_uuid,
+            mock_get):
         self._test_extract_template_definition(
             mock_objects_baymodel_get_by_uuid,
+            mock_get,
             missing_attr='node_count')
 
+    @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_without_master_count(
             self,
-            mock_objects_baymodel_get_by_uuid):
+            mock_objects_baymodel_get_by_uuid,
+            mock_get):
         self._test_extract_template_definition(
             mock_objects_baymodel_get_by_uuid,
+            mock_get,
             missing_attr='master_count')
 
     @patch('requests.get')

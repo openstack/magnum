@@ -75,12 +75,19 @@ class TestBayConductorWithSwarm(base.TestCase):
         self.mock_osc_class.return_value = self.mock_osc
         self.context.auth_url = 'http://192.168.10.10:5000/v3'
 
+    @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_all_values(
             self,
-            mock_objects_baymodel_get_by_uuid):
+            mock_objects_baymodel_get_by_uuid,
+            mock_get):
         baymodel = objects.BayModel(self.context, **self.baymodel_dict)
         mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        expected_result = str('{"action":"get","node":{"key":"test","value":'
+                              '"1","modifiedIndex":10,"createdIndex":10}}')
+        mock_resp = mock.MagicMock()
+        mock_resp.text = expected_result
+        mock_get.return_value = mock_resp
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
@@ -121,13 +128,20 @@ class TestBayConductorWithSwarm(base.TestCase):
         self.assertEqual(expected, definition)
         self.assertEqual([], env_files)
 
+    @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_with_registry(
             self,
-            mock_objects_baymodel_get_by_uuid):
+            mock_objects_baymodel_get_by_uuid,
+            mock_get):
         self.baymodel_dict['registry_enabled'] = True
         baymodel = objects.BayModel(self.context, **self.baymodel_dict)
         mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        expected_result = str('{"action":"get","node":{"key":"test","value":'
+                              '"1","modifiedIndex":10,"createdIndex":10}}')
+        mock_resp = mock.MagicMock()
+        mock_resp.text = expected_result
+        mock_get.return_value = mock_resp
         bay = objects.Bay(self.context, **self.bay_dict)
 
         cfg.CONF.set_override('swift_region',
@@ -174,10 +188,12 @@ class TestBayConductorWithSwarm(base.TestCase):
         self.assertEqual(expected, definition)
         self.assertEqual([], env_files)
 
+    @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_only_required(
             self,
-            mock_objects_baymodel_get_by_uuid):
+            mock_objects_baymodel_get_by_uuid,
+            mock_get):
 
         not_required = ['image_id', 'flavor_id', 'dns_nameserver',
                         'docker_volume_size', 'fixed_network', 'http_proxy',
@@ -189,6 +205,11 @@ class TestBayConductorWithSwarm(base.TestCase):
 
         baymodel = objects.BayModel(self.context, **self.baymodel_dict)
         mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        expected_result = str('{"action":"get","node":{"key":"test","value":'
+                              '"1","modifiedIndex":10,"createdIndex":10}}')
+        mock_resp = mock.MagicMock()
+        mock_resp.text = expected_result
+        mock_get.return_value = mock_resp
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
