@@ -584,9 +584,14 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
         mock_osc.cinder_region_name.return_value = 'RegionOne'
         mock_osc_class.return_value = mock_osc
 
+        removal_nodes = ['node1', 'node2']
+        mock_scale_manager = mock.MagicMock()
+        mock_scale_manager.get_removal_nodes.return_value = removal_nodes
+
         mesos_def = tdef.UbuntuMesosTemplateDefinition()
 
-        mesos_def.get_params(mock_context, mock_baymodel, mock_bay)
+        mesos_def.get_params(mock_context, mock_baymodel, mock_bay,
+                             scale_manager=mock_scale_manager)
 
         expected_kwargs = {'extra_params': {
             'region_name': mock_osc.cinder_region_name.return_value,
@@ -599,7 +604,8 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
             'mesos_slave_work_dir': mesos_slave_work_dir,
             'mesos_slave_executor_env_variables':
                 mesos_slave_executor_env_variables,
-            'mesos_slave_image_providers': mesos_slave_image_providers}}
+            'mesos_slave_image_providers': mesos_slave_image_providers,
+            'slaves_to_remove': removal_nodes}}
         mock_get_params.assert_called_once_with(mock_context, mock_baymodel,
                                                 mock_bay, **expected_kwargs)
 
