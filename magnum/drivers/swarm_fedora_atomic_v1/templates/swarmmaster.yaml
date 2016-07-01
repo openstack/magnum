@@ -49,10 +49,12 @@ parameters:
   swarm_api_ip:
     type: string
     description: swarm master's api server ip address
+    default: ""
 
   api_ip_address:
     type: string
     description: swarm master's api server public ip address
+    default: ""
 
   server_image:
     type: string
@@ -121,6 +123,7 @@ parameters:
   etcd_server_ip:
     type: string
     description: ip address of the load balancer pool of etcd server.
+    default: ""
 
   trustee_user_id:
     type: string
@@ -164,6 +167,26 @@ resources:
 
   ######################################################################
   #
+  # resource that exposes the IPs of either the kube master or the API
+  # LBaaS pool depending on whether LBaaS is enabled for the bay.
+  #
+
+  api_address_switch:
+    type: Magnum::ApiGatewaySwitcher
+    properties:
+      pool_public_ip: {get_param: api_ip_address}
+      pool_private_ip: {get_param: swarm_api_ip}
+      master_public_ip: {get_attr: [swarm_master_floating, floating_ip_address]}
+      master_private_ip: {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
+
+  etcd_address_switch:
+    type: Magnum::ApiGatewaySwitcher
+    properties:
+      pool_private_ip: {get_param: etcd_server_ip}
+      master_private_ip: {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
+
+  ######################################################################
+  #
   # software configs.  these are components that are combined into
   # a multipart MIME user-data archive.
   #
@@ -183,7 +206,7 @@ resources:
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
-            "$SWARM_API_IP": {get_param: swarm_api_ip}
+            "$SWARM_API_IP": {get_attr: [api_address_switch, private_ip]}
             "$SWARM_NODE_IP": {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
             "$BAY_UUID": {get_param: bay_uuid}
             "$MAGNUM_URL": {get_param: magnum_url}
@@ -192,8 +215,8 @@ resources:
             "$FLANNEL_NETWORK_CIDR": {get_param: flannel_network_cidr}
             "$FLANNEL_NETWORK_SUBNETLEN": {get_param: flannel_network_subnetlen}
             "$FLANNEL_BACKEND": {get_param: flannel_backend}
-            "$ETCD_SERVER_IP": {get_param: etcd_server_ip}
-            "$API_IP_ADDRESS": {get_param: api_ip_address}
+            "$ETCD_SERVER_IP": {get_attr: [etcd_address_switch, private_ip]}
+            "$API_IP_ADDRESS": {get_attr: [api_address_switch, public_ip]}
             "$SWARM_VERSION": {get_param: swarm_version}
             "$TRUSTEE_USER_ID": {get_param: trustee_user_id}
             "$TRUSTEE_PASSWORD": {get_param: trustee_password}
@@ -278,7 +301,7 @@ resources:
         str_replace:
           template: {get_file: fragments/write-swarm-master-service.sh}
           params:
-            "$ETCD_SERVER_IP": {get_param: etcd_server_ip}
+            "$ETCD_SERVER_IP": {get_attr: [etcd_address_switch, private_ip]}
             "$NODE_IP": {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
             "$DISCOVERY_URL": {get_param: discovery_url}
             "$WAIT_HANDLE_ENDPOINT": {get_attr: [master_wait_handle, endpoint]}
@@ -381,14 +404,14 @@ resources:
         get_resource: swarm_master_eth0
 
   api_pool_member:
-    type: OS::Neutron::PoolMember
+    type: Magnum::Optional::Neutron::PoolMember
     properties:
       pool_id: {get_param: api_pool_id}
       address: {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
       protocol_port: {get_param: swarm_port}
 
   etcd_pool_member:
-    type: OS::Neutron::PoolMember
+    type: Magnum::Optional::Neutron::PoolMember
     properties:
       pool_id: {get_param: etcd_pool_id}
       address: {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}

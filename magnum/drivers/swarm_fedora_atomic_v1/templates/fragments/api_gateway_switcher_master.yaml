@@ -1,0 +1,32 @@
+heat_template_version: 2013-05-23
+
+description: >
+  This is a template resource that accepts public and private IPs from both
+  a Neutron LBaaS Pool and a master node. It connects the master inputs
+  to its outputs, essentially acting as one state of a multiplexer.
+
+parameters:
+
+  pool_public_ip:
+    type: string
+    default: ""
+
+  pool_private_ip:
+    type: string
+    default: ""
+
+  master_public_ip:
+    type: string
+    default: ""
+
+  master_private_ip:
+    type: string
+    default: ""
+
+outputs:
+
+  public_ip:
+    value: {get_param: master_public_ip}
+
+  private_ip:
+    value: {get_param: master_private_ip}
