@@ -19,6 +19,7 @@ Contents
 #. `Overview`_
 #. `Python Client`_
 #. `Horizon Interface`_
+#. `Bay Drivers`
 #. `Choosing a COE`_
 #. `Native clients`_
 #. `Kubernetes`_
@@ -291,6 +292,110 @@ commands supported by the `magnum` command-line client.
 Horizon Interface
 =================
 *To be filled in with screenshots*
+
+===========
+Bay Drivers
+===========
+
+A bay driver is a collection of python code, heat templates, scripts,
+images, and documents for a particular COE on a particular
+distro.  Magnum presents the concept of baymodels and bays.  The
+implementation for a particular bay type is provided by the bay driver.
+In other words, the bay driver provisions and manages the infrastructure
+for the COE.  Magnum includes default drivers for the following
+COE and distro pairs:
+
++------------+---------------+
+| COE        |  distro       |
++============+===============+
+| Kubernetes | Fedora Atomic |
++------------+---------------+
+| Kubernetes | CoreOS        |
++------------+---------------+
+| Swarm      | Fedora Atomic |
++------------+---------------+
+| Mesos      | Ubuntu        |
++------------+---------------+
+
+Magnum is designed to accommodate new bay drivers to support custom
+COE's and this section describes how a new bay driver can be
+constructed and enabled in Magnum.
+
+
+Directory structure
+-------------------
+
+Magnum expects the components to be organized in the following
+directory structure under the directory 'drivers'::
+
+  COE_Distro/
+     image/
+     templates/
+     api.py
+     driver.py
+     monitor.py
+     scale.py
+     template_def.py
+     version.py
+
+The minimum required components are:
+
+driver.py
+  Python code that implements the controller operations for
+  the particular COE.  The driver must implement:
+  Currently supported: ``bay_create``, ``bay_update``, ``bay_delete``.
+
+templates
+  A directory of orchestration templates for managing the lifecycle
+  of bays, including creation, configuration, update, and deletion.
+  Currently only Heat templates are supported, but in the future
+  other orchestration mechanism such as Ansible may be supported.
+
+template_def.py
+  Python code that maps the parameters from the baymodel to the
+  input parameters for the orchestration and invokes
+  the orchestration in the templates directory.
+
+version.py
+  Tracks the latest version of the driver in this directory.
+  This is defined by a ``version`` attribute and is represented in the
+  form of ``1.0.0``. It should also include a ``Driver`` attribute with
+  descriptive name such as ``fedora_swarm_atomic``.
+
+
+The remaining components are optional:
+
+image
+  Instructions for obtaining or building an image suitable for the COE.
+
+api.py
+  Python code to interface with the COE.
+
+monitor.py
+  Python code to monitor the resource utilization of the bay.
+
+scale.py
+  Python code to scale the bay by adding or removing nodes.
+
+
+
+Sample bay driver
+-----------------
+
+To help developers in creating new COE drivers, a minimal bay driver
+is provided as an example.  The 'docker' bay driver will simply deploy
+a single VM running Ubuntu with the latest Docker version installed.
+It is not a true cluster, but the simplicity will help to illustrate
+the key concepts.
+
+*To be filled in*
+
+
+
+Installing a bay driver
+-----------------------
+*To be filled in*
+
 
 ==============
 Choosing a COE
