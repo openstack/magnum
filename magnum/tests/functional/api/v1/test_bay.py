@@ -114,6 +114,9 @@ class BayTest(base.BaseMagnumTest):
         resp, model = self.bay_client.delete_bay(bay_id)
         self.assertEqual(204, resp.status)
         self.bay_client.wait_for_bay_to_delete(bay_id)
+        self.assertRaises(
+            exceptions.NotFound,
+            self.cert_client.get_cert, bay_id)
         return resp, model
 
     def _get_bay_by_id(self, bay_id):

@@ -190,34 +190,7 @@ class CertManager(cert_manager.CertManager):
     @staticmethod
     def delete_cert(cert_ref, service_name='Magnum', resource_ref=None,
                     **kwargs):
-        """Deregister as a consumer for the specified cert.
-
-        :param cert_ref: the UUID of the cert to retrieve
-        :param service_name: Friendly name for the consuming service
-        :param resource_ref: Full HATEOAS reference to the consuming resource
-
-        :raises Exception: if deregistration fails
-        """
-        connection = get_admin_clients().barbican()
-
-        LOG.info(_LI(
-            "Deregistering as a consumer of {0} in Barbican."
-        ).format(cert_ref))
-        try:
-            connection.containers.remove_consumer(
-                container_ref=cert_ref,
-                name=service_name,
-                url=resource_ref
-            )
-        except Exception:
-            with excutils.save_and_reraise_exception():
-                LOG.exception(_LE(
-                    "Error deregistering as a consumer of {0}"
-                ).format(cert_ref))
-
-    @staticmethod
-    def _actually_delete_cert(cert_ref):
-        """Deletes the specified cert. Very dangerous. Do not recommend.
+        """Deletes the specified cert.
 
         :param cert_ref: the UUID of the cert to delete
         :raises Exception: if certificate deletion fails
