@@ -383,7 +383,7 @@ drivers. Besides this, different container volume driver can also cause
 performance variance.
 
 
-High-Availablity Impact
+High-Availability Impact
 ------------------------------
 
 
