@@ -383,7 +383,7 @@ drivers. Besides this, different container volume driver can also cause
 performance variance.
 
 
-High-Availablity Impact
+High-Availability Impact
 ------------------------------
 
 
@@ -405,7 +405,7 @@ Kubernetes does support pod high-availability through the replication
 controller, however, this doesn't work when a pod with volume attached
 fails. Refer the link [11]_  for details.
 
-Docker swarm doesn't support the containers reschduling when a node fails, so
+Docker swarm doesn't support the containers rescheduling when a node fails, so
 volume can not be automatically detached by volume driver. Refer the
 link [12]_  for details.
 
