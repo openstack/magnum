@@ -605,7 +605,7 @@ class TestBayConductorWithK8s(base.TestCase):
         expected_template_contents = 'template_contents'
         dummy_bay_name = 'expected_stack_name'
         bay_timeout = 0
-        expected_timeout = None
+        expected_timeout = cfg.CONF.bay_heat.bay_create_timeout
 
         mock_tpl_files = {}
         mock_get_template_contents.return_value = [

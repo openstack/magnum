@@ -52,8 +52,9 @@ bay_heat_opts = [
                help=('Sleep time interval between two attempts of querying '
                      'the Heat stack.  This interval is in seconds.')),
     cfg.IntOpt('bay_create_timeout',
-               help=('The length of time to let bay creation continue.  This '
-                     'interval is in minutes.  The default is no timeout.'))
+               default=60,
+               help=('The length of time to let bay creation continue. This '
+                     'interval is in minutes. The default is 60 minutes.'))
 ]
 
 CONF = cfg.CONF
@@ -97,8 +98,6 @@ def _create_stack(context, osc, bay, bay_create_timeout):
     stack_name = '%s-%s' % (bay.name, short_id.generate_id())
     if bay_create_timeout:
         heat_timeout = bay_create_timeout
-    elif bay_create_timeout == 0:
-        heat_timeout = None
     else:
         # no bay_create_timeout value was passed in to the request
         # so falling back on configuration file value
