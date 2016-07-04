@@ -421,7 +421,7 @@ Kubernetes (as of v1.2) is more sophisticated than Swarm (as of v1.2.2). It
 offers an attractive YAML file description of a pod, which is a grouping of
 containers that run together as part of a distributed application. This file
 format allows you to model your application deployment using a declarative
-style. It has support for autoscaling and fault recovery, as well as features
+style. It has support for auto scaling and fault recovery, as well as features
 that allow for sophisticated software deployments, including canary deploys
 and blue/green deploys. Kubernetes is very popular, especially for web
 applications.
@@ -838,7 +838,7 @@ Scaling
 =======
 *To be filled in*
 
-Include Autoscaling
+Include auto scaling
 
 =======
 Storage
@@ -901,7 +901,7 @@ Cinder to request the volume to be mounted on this node, then
 Kubernetes will launch the Docker container with the proper options to
 make the filesystem on the Cinder volume accessible to the container
 in the pod.  When the pod exits, Kubernetes will again send a request
-to Cinder to unmount the volume's filesystem, making it avaiable to be
+to Cinder to unmount the volume's filesystem, making it available to be
 mounted on other nodes.
 
 Magnum supports these features to use Cinder as persistent storage

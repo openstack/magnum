@@ -143,7 +143,7 @@ Magnum-conductor will maintain a job-queue. Job-queue is indexed by bay-id and
 container-id. A job-queue entry would contain the sequence of operations
 requested for a given bay-id and container-id, in temporal order. A
 greenthread will execute the tasks/operations in order for a given job-queue
-entry, till the queue empties. Using a greethread in this fashion saves us
+entry, till the queue empties. Using a greenthread in this fashion saves us
 from the cost and complexity of locking, along with functional correctness.
 When request for new operation comes in, it gets appended to the corresponding
 queue entry.
@@ -291,7 +291,7 @@ None
 Performance impact
 ------------------
 
-Asynchrnous mode of operation helps in scalability. Hence, it improves
+Asynchronous mode of operation helps in scalability. Hence, it improves
 responsiveness and reduces the turn around time in a significant
 proportion. A small test on devstack, comparing both the modes,
 demonstrate this with numbers.[1]

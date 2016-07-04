@@ -61,7 +61,7 @@ the current Mesos Bay lack the following features:
 
 4. Better network management. The Open DC/OS is planning to introduce CNI
    network isolator in next release, the CNI network isolator is leveraging CNI
-   technolgies to manage network for containers.
+   technologies to manage network for containers.
 
 5. Loosely coupled with docker daemon. The Open DC/OS can work well for docker
    container even if docker daemon is not running. The docker daemon now have
@@ -142,7 +142,7 @@ Work Items
 1. Build VM image for Open DC/OS Bay.
 2. Add Open DC/OS Bay driver.
 3. Add Heat template for Open DC/OS Bay.
-4. Add Open DC/OS Bay montior.
+4. Add Open DC/OS Bay monitor.
 5. Document how to use the Open DC/OS Bay.
 
 Dependencies
