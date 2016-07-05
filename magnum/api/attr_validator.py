@@ -69,12 +69,23 @@ def validate_keypair(cli, keypair):
 def validate_external_network(cli, external_network):
     """Validate external network"""
 
-    networks = cli.neutron().list_networks()
+    count = 0
+    ext_filter = {'router:external': True}
+    networks = cli.neutron().list_networks(**ext_filter)
     for net in networks.get('networks'):
         if (net.get('name') == external_network or
                 net.get('id') == external_network):
-            return
-    raise exception.NetworkNotFound(network=external_network)
+            count = count + 1
+
+    if count == 0:
+        # Unable to find the external network.
+        # Or the network is private.
+        raise exception.ExternalNetworkNotFound(network=external_network)
+
+    if count > 1:
+        msg = _("Multiple external networks exist with same name '%s'. "
+                "Please use the external network ID instead.")
+        raise exception.Conflict(msg % external_network)
 
 
 def validate_fixed_network(cli, fixed_network):
