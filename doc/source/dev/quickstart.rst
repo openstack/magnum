@@ -427,7 +427,7 @@ redis-master is running::
     | status_reason      | Stack CREATE completed successfully                        |
     | created_at         | 2016-05-26T17:45:57+00:00                                  |
     | updated_at         | 2016-05-26T17:50:02+00:00                                  |
-    | bay_create_timeout | 0                                                          |
+    | bay_create_timeout | 60                                                          |
     | api_address        | https://172.24.4.4:6443                                    |
     | baymodel_id        | e73298e7-e621-4d42-b35b-7a1952b97158                       |
     | master_addresses   | ['172.24.4.6']                                             |
@@ -632,7 +632,7 @@ to make sure the bay's status is 'CREATE_COMPLETE'::
     | status_reason      | Stack CREATE completed successfully  |
     | created_at         | 2015-06-09T20:21:43+00:00            |
     | updated_at         | 2015-06-09T20:28:18+00:00            |
-    | bay_create_timeout | 0                                    |
+    | bay_create_timeout | 60                                    |
     | api_address        | 172.24.4.115                         |
     | baymodel_id        | 92dbda62-32d4-4435-88fc-8f42d514b347 |
     | node_count         | 2                                    |

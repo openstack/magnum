@@ -18,6 +18,7 @@ Tests for `magnum` module.
 """
 
 import os
+from oslo_config import cfg
 import subprocess
 import tempfile
 import time
@@ -252,14 +253,16 @@ extendedKeyUsage = clientAuth
     def setUp(self):
         super(BayTest, self).setUp()
 
-        test_timeout = os.environ.get('OS_TEST_TIMEOUT', 0)
+        test_timeout = os.environ.get('OS_TEST_TIMEOUT', 60)
         try:
             test_timeout = int(test_timeout)
         except ValueError:
-            # If timeout value is invalid do not set a timeout.
-            test_timeout = 0
-        if test_timeout > 0:
-            self.useFixture(fixtures.Timeout(test_timeout, gentle=True))
+            # If timeout value is invalid, set a default timeout.
+            test_timeout = cfg.CONF.bay_heat.bay_create_timeout
+        if test_timeout <= 0:
+            test_timeout = cfg.CONF.bay_heat.bay_create_timeout
+
+        self.useFixture(fixtures.Timeout(test_timeout, gentle=True))
 
         self.addOnException(
             self.copy_logs_handler(

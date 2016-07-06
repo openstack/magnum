@@ -39,7 +39,7 @@ class TestBayObject(base.TestCase):
         bay = api_bay.Bay(**bay_dict)
         self.assertEqual(1, bay.node_count)
         self.assertEqual(1, bay.master_count)
-        self.assertEqual(0, bay.bay_create_timeout)
+        self.assertEqual(60, bay.bay_create_timeout)
 
 
 class TestListBay(api_base.FunctionalTest):
@@ -562,7 +562,7 @@ class TestPost(api_base.FunctionalTest):
 
     def test_create_bay_with_no_timeout(self):
         def _simulate_rpc_bay_create(bay, bay_create_timeout):
-            self.assertEqual(0, bay_create_timeout)
+            self.assertEqual(60, bay_create_timeout)
             bay.create()
             return bay
         self.mock_bay_create.side_effect = _simulate_rpc_bay_create

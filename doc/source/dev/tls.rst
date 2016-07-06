@@ -96,7 +96,7 @@ Now create a bay. Use the baymodel name as a template for bay creation::
     | status_reason      | None                                                       |
     | created_at         | 2015-10-08T04:19:14+00:00                                  |
     | updated_at         | None                                                       |
-    | bay_create_timeout | 0                                                          |
+    | bay_create_timeout | 60                                                          |
     | api_address        | None                                                       |
     | baymodel_id        | da2825a0-6d09-4208-b39e-b2db666f1118                       |
     | node_count         | 1                                                          |
@@ -117,7 +117,7 @@ Now run bay-show command to get the IP of the bay host::
     | status_reason      | Stack CREATE completed successfully                        |
     | created_at         | 2015-10-08T04:19:14+00:00                                  |
     | updated_at         | 2015-10-08T04:21:00+00:00                                  |
-    | bay_create_timeout | 0                                                          |
+    | bay_create_timeout | 60                                                          |
     | api_address        | https://192.168.19.86:6443                                 |
     | baymodel_id        | da2825a0-6d09-4208-b39e-b2db666f1118                       |
     | node_count         | 1                                                          |
