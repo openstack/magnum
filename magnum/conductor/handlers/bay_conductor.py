@@ -29,8 +29,8 @@ from magnum.common import short_id
 from magnum.conductor.handlers.common import cert_manager
 from magnum.conductor.handlers.common import trust_manager
 from magnum.conductor import scale_manager
-from magnum.conductor.template_definition import TemplateDefinition as TDef
 from magnum.conductor import utils as conductor_utils
+from magnum.drivers.common.template_def import TemplateDefinition as TDef
 from magnum.i18n import _
 from magnum.i18n import _LE
 from magnum.i18n import _LI

@@ -11,7 +11,7 @@
 # under the License.
 
 
-from magnum.conductor import template_definition as tdef
+from magnum.drivers.common import template_def as tdef
 from magnum.tests import base
 
 

@@ -14,22 +14,25 @@
 
 import mock
 from oslo_config import cfg
-from requests import exceptions as req_exceptions
 
 from magnum.common import exception
 from magnum.conductor import template_definition as tdef
+from magnum.drivers.common import template_def as cmn_tdef
+from magnum.drivers.swarm_fedora_atomic_v1 import template_def as swarm_tdef
 from magnum.tests import base
+
+from requests import exceptions as req_exceptions
 
 
 class TemplateDefinitionTestCase(base.TestCase):
 
-    @mock.patch.object(tdef, 'iter_entry_points')
+    @mock.patch.object(cmn_tdef, 'iter_entry_points')
     def test_load_entry_points(self, mock_iter_entry_points):
         mock_entry_point = mock.MagicMock()
         mock_entry_points = [mock_entry_point]
         mock_iter_entry_points.return_value = mock_entry_points.__iter__()
 
-        entry_points = tdef.TemplateDefinition.load_entry_points()
+        entry_points = cmn_tdef.TemplateDefinition.load_entry_points()
 
         for (expected_entry_point,
              (actual_entry_point, loaded_cls)) in zip(mock_entry_points,
@@ -38,7 +41,7 @@ class TemplateDefinitionTestCase(base.TestCase):
             expected_entry_point.load.assert_called_once_with(require=False)
 
     def test_get_template_definitions(self):
-        defs = tdef.TemplateDefinition.get_template_definitions()
+        defs = cmn_tdef.TemplateDefinition.get_template_definitions()
 
         vm_atomic_k8s = defs[('vm', 'fedora-atomic', 'kubernetes')]
         vm_coreos_k8s = defs[('vm', 'coreos', 'kubernetes')]
@@ -51,7 +54,7 @@ class TemplateDefinitionTestCase(base.TestCase):
                          vm_coreos_k8s['magnum_vm_coreos_k8s'])
 
     def test_get_vm_atomic_kubernetes_definition(self):
-        definition = tdef.TemplateDefinition.get_template_definition(
+        definition = cmn_tdef.TemplateDefinition.get_template_definition(
             'vm',
             'fedora-atomic',
             'kubernetes')
@@ -60,7 +63,7 @@ class TemplateDefinitionTestCase(base.TestCase):
                               tdef.AtomicK8sTemplateDefinition)
 
     def test_get_vm_coreos_kubernetes_definition(self):
-        definition = tdef.TemplateDefinition.get_template_definition(
+        definition = cmn_tdef.TemplateDefinition.get_template_definition(
             'vm',
             'coreos',
             'kubernetes')
@@ -69,16 +72,16 @@ class TemplateDefinitionTestCase(base.TestCase):
                               tdef.CoreOSK8sTemplateDefinition)
 
     def test_get_vm_atomic_swarm_definition(self):
-        definition = tdef.TemplateDefinition.get_template_definition(
+        definition = cmn_tdef.TemplateDefinition.get_template_definition(
             'vm',
             'fedora-atomic',
             'swarm')
 
         self.assertIsInstance(definition,
-                              tdef.AtomicSwarmTemplateDefinition)
+                              swarm_tdef.AtomicSwarmTemplateDefinition)
 
     def test_get_vm_ubuntu_mesos_definition(self):
-        definition = tdef.TemplateDefinition.get_template_definition(
+        definition = cmn_tdef.TemplateDefinition.get_template_definition(
             'vm',
             'ubuntu',
             'mesos')
@@ -88,7 +91,7 @@ class TemplateDefinitionTestCase(base.TestCase):
 
     def test_get_definition_not_supported(self):
         self.assertRaises(exception.BayTypeNotSupported,
-                          tdef.TemplateDefinition.get_template_definition,
+                          cmn_tdef.TemplateDefinition.get_template_definition,
                           'vm', 'not_supported', 'kubernetes')
 
     def test_get_definition_not_enabled(self):
@@ -96,12 +99,12 @@ class TemplateDefinitionTestCase(base.TestCase):
                               ['magnum_vm_atomic_k8s'],
                               group='bay')
         self.assertRaises(exception.BayTypeNotEnabled,
-                          tdef.TemplateDefinition.get_template_definition,
+                          cmn_tdef.TemplateDefinition.get_template_definition,
                           'vm', 'coreos', 'kubernetes')
 
     def test_required_param_not_set(self):
-        param = tdef.ParameterMapping('test', baymodel_attr='test',
-                                      required=True)
+        param = cmn_tdef.ParameterMapping('test', baymodel_attr='test',
+                                          required=True)
         mock_baymodel = mock.MagicMock()
         mock_baymodel.test = None
 
@@ -125,26 +128,26 @@ class TemplateDefinitionTestCase(base.TestCase):
         mock_stack = mock.MagicMock()
         mock_stack.to_dict.return_value = {'outputs': heat_outputs}
 
-        output = tdef.OutputMapping('key1')
+        output = cmn_tdef.OutputMapping('key1')
         value = output.get_output_value(mock_stack)
         self.assertEqual('value1', value)
 
-        output = tdef.OutputMapping('key2')
+        output = cmn_tdef.OutputMapping('key2')
         value = output.get_output_value(mock_stack)
         self.assertEqual(["value2", "value3"], value)
 
-        output = tdef.OutputMapping('key3')
+        output = cmn_tdef.OutputMapping('key3')
         value = output.get_output_value(mock_stack)
         self.assertIsNone(value)
 
         # verify stack with no 'outputs' attribute
         mock_stack.to_dict.return_value = {}
-        output = tdef.OutputMapping('key1')
+        output = cmn_tdef.OutputMapping('key1')
         value = output.get_output_value(mock_stack)
         self.assertIsNone(value)
 
     def test_add_output_with_mapping_type(self):
-        definition = tdef.TemplateDefinition.get_template_definition(
+        definition = cmn_tdef.TemplateDefinition.get_template_definition(
             'vm',
             'fedora-atomic',
             'kubernetes')
@@ -166,9 +169,9 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.conductor.template_definition'
                 '.AtomicK8sTemplateDefinition.get_discovery_url')
-    @mock.patch('magnum.conductor.template_definition.BaseTemplateDefinition'
+    @mock.patch('magnum.drivers.common.template_def.BaseTemplateDefinition'
                 '.get_params')
-    @mock.patch('magnum.conductor.template_definition.TemplateDefinition'
+    @mock.patch('magnum.drivers.common.template_def.TemplateDefinition'
                 '.get_output')
     def test_k8s_get_params(self, mock_get_output, mock_get_params,
                             mock_get_discovery_url, mock_osc_class):
@@ -219,9 +222,9 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.conductor.template_definition'
                 '.AtomicK8sTemplateDefinition.get_discovery_url')
-    @mock.patch('magnum.conductor.template_definition.BaseTemplateDefinition'
+    @mock.patch('magnum.drivers.common.template_def.BaseTemplateDefinition'
                 '.get_params')
-    @mock.patch('magnum.conductor.template_definition.TemplateDefinition'
+    @mock.patch('magnum.drivers.common.template_def.TemplateDefinition'
                 '.get_output')
     def test_k8s_get_params_insecure(self, mock_get_output, mock_get_params,
                                      mock_get_discovery_url, mock_osc_class):
@@ -371,7 +374,7 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
 
     def _test_update_outputs_api_address(self, coe, params, tls=True):
 
-        definition = tdef.TemplateDefinition.get_template_definition(
+        definition = cmn_tdef.TemplateDefinition.get_template_definition(
             'vm',
             'fedora-atomic',
             coe)
@@ -438,7 +441,7 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
 
     def _test_update_outputs_none_api_address(self, coe, params, tls=True):
 
-        definition = tdef.TemplateDefinition.get_template_definition(
+        definition = cmn_tdef.TemplateDefinition.get_template_definition(
             'vm',
             'fedora-atomic',
             coe)
@@ -483,11 +486,11 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
 class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
 
     @mock.patch('magnum.common.clients.OpenStackClients')
-    @mock.patch('magnum.conductor.template_definition'
+    @mock.patch('magnum.drivers.swarm_fedora_atomic_v1.template_def'
                 '.AtomicSwarmTemplateDefinition.get_discovery_url')
-    @mock.patch('magnum.conductor.template_definition.BaseTemplateDefinition'
+    @mock.patch('magnum.drivers.common.template_def.BaseTemplateDefinition'
                 '.get_params')
-    @mock.patch('magnum.conductor.template_definition.TemplateDefinition'
+    @mock.patch('magnum.drivers.common.template_def.TemplateDefinition'
                 '.get_output')
     def test_swarm_get_params(self, mock_get_output, mock_get_params,
                               mock_get_discovery_url, mock_osc_class):
@@ -513,7 +516,7 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         flannel_subnet = mock_baymodel.labels.get('flannel_network_subnetlen')
         flannel_backend = mock_baymodel.labels.get('flannel_backend')
 
-        swarm_def = tdef.AtomicSwarmTemplateDefinition()
+        swarm_def = swarm_tdef.AtomicSwarmTemplateDefinition()
 
         swarm_def.get_params(mock_context, mock_baymodel, mock_bay)
 
@@ -582,7 +585,7 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         mock_bay = mock.MagicMock()
         mock_bay.discovery_url = None
 
-        swarm_def = tdef.AtomicSwarmTemplateDefinition()
+        swarm_def = swarm_tdef.AtomicSwarmTemplateDefinition()
         discovery_url = swarm_def.get_discovery_url(mock_bay)
 
         mock_get.assert_called_once_with('http://etcd/test?size=1')
@@ -603,13 +606,13 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
                           fake_bay)
 
     def test_swarm_get_heat_param(self):
-        swarm_def = tdef.AtomicSwarmTemplateDefinition()
+        swarm_def = swarm_tdef.AtomicSwarmTemplateDefinition()
 
         heat_param = swarm_def.get_heat_param(bay_attr='node_count')
         self.assertEqual('number_of_nodes', heat_param)
 
     def test_update_outputs(self):
-        swarm_def = tdef.AtomicSwarmTemplateDefinition()
+        swarm_def = swarm_tdef.AtomicSwarmTemplateDefinition()
 
         expected_api_address = 'updated_address'
         expected_node_addresses = ['ex_minion', 'address']
@@ -645,9 +648,9 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
 class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
 
     @mock.patch('magnum.common.clients.OpenStackClients')
-    @mock.patch('magnum.conductor.template_definition.BaseTemplateDefinition'
+    @mock.patch('magnum.drivers.common.template_def.BaseTemplateDefinition'
                 '.get_params')
-    @mock.patch('magnum.conductor.template_definition.TemplateDefinition'
+    @mock.patch('magnum.drivers.common.template_def.TemplateDefinition'
                 '.get_output')
     def test_mesos_get_params(self, mock_get_output, mock_get_params,
                               mock_osc_class):
