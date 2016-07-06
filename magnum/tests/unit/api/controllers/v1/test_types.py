@@ -37,6 +37,16 @@ class TestMacAddressType(base.FunctionalTest):
         self.assertRaises(exception.InvalidMAC,
                           types.MacAddressType.validate, 'invalid-mac')
 
+    def test_frombasetype(self):
+        test_mac = 'aa:bb:cc:11:22:33'
+        with mock.patch.object(utils, 'validate_and_normalize_mac') as m_mock:
+            types.MacAddressType.frombasetype(test_mac)
+            m_mock.assert_called_once_with(test_mac)
+
+    def test_frombasetype_no_value(self):
+        test_mac = None
+        self.assertEqual(None, types.MacAddressType.frombasetype(test_mac))
+
 
 class TestUuidType(base.FunctionalTest):
 
@@ -207,6 +217,10 @@ class TestBooleanType(base.FunctionalTest):
         self.assertRaises(exception.Invalid, v.validate, "invalid-value")
         self.assertRaises(exception.Invalid, v.validate, "01")
 
+    def test_frombasetype_no_value(self):
+        v = types.BooleanType()
+        self.assertEqual(None, v.frombasetype(None))
+
 
 class TestNameType(base.FunctionalTest):
 
@@ -217,3 +231,10 @@ class TestNameType(base.FunctionalTest):
     def test_invalid_name(self):
         self.assertRaises(exception.InvalidName, types.NameType.validate, None)
         self.assertRaises(exception.InvalidName, types.NameType.validate, '')
+
+    def test_frombasetype_no_value(self):
+        self.assertEqual('name', types.NameType.frombasetype('name'))
+        self.assertEqual(1234, types.NameType.frombasetype(1234))
+
+    def test_frombasetype(self):
+        self.assertEqual(None, types.NameType.frombasetype(None))

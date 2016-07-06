@@ -36,6 +36,16 @@ class TestMagnumServiceObject(base.DbTestCase):
                                                             'fake-bin')
             self.assertEqual(self.context, ms._context)
 
+    def test_get_by_host_and_binary_no_service(self):
+        with mock.patch.object(self.dbapi, 'create_magnum_service',
+                               autospec=True) as mock_get_magnum_service:
+            mock_get_magnum_service.return_value = None
+            ms = objects.MagnumService.get_by_host_and_binary(self.context,
+                                                              'fake-host',
+                                                              'fake-bin')
+
+            self.assertIsNone(ms)
+
     def test_create(self):
         with mock.patch.object(self.dbapi, 'create_magnum_service',
                                autospec=True) as mock_create_magnum_service:

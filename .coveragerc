@@ -5,3 +5,6 @@ omit = magnum/tests/*,magnum/openstack/*
 
 [report]
 ignore_errors = True
+exclude_lines =
+    @abc.abstract
+    pass
