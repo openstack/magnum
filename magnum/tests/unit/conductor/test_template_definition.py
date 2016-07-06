@@ -18,6 +18,7 @@ from oslo_config import cfg
 from magnum.common import exception
 from magnum.conductor import template_definition as tdef
 from magnum.drivers.common import template_def as cmn_tdef
+from magnum.drivers.k8s_fedora_atomic_v1 import template_def as k8sa_tdef
 from magnum.drivers.mesos_ubuntu_v1 import template_def as mesos_tdef
 from magnum.drivers.swarm_fedora_atomic_v1 import template_def as swarm_tdef
 from magnum.tests import base
@@ -48,7 +49,7 @@ class TemplateDefinitionTestCase(base.TestCase):
         vm_coreos_k8s = defs[('vm', 'coreos', 'kubernetes')]
 
         self.assertEqual(1, len(vm_atomic_k8s))
-        self.assertEqual(tdef.AtomicK8sTemplateDefinition,
+        self.assertEqual(k8sa_tdef.AtomicK8sTemplateDefinition,
                          vm_atomic_k8s['magnum_vm_atomic_k8s'])
         self.assertEqual(1, len(vm_coreos_k8s))
         self.assertEqual(tdef.CoreOSK8sTemplateDefinition,
@@ -61,7 +62,7 @@ class TemplateDefinitionTestCase(base.TestCase):
             'kubernetes')
 
         self.assertIsInstance(definition,
-                              tdef.AtomicK8sTemplateDefinition)
+                              k8sa_tdef.AtomicK8sTemplateDefinition)
 
     def test_get_vm_coreos_kubernetes_definition(self):
         definition = cmn_tdef.TemplateDefinition.get_template_definition(
@@ -168,7 +169,7 @@ class TemplateDefinitionTestCase(base.TestCase):
 class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
 
     @mock.patch('magnum.common.clients.OpenStackClients')
-    @mock.patch('magnum.conductor.template_definition'
+    @mock.patch('magnum.drivers.k8s_fedora_atomic_v1.template_def'
                 '.AtomicK8sTemplateDefinition.get_discovery_url')
     @mock.patch('magnum.drivers.common.template_def.BaseTemplateDefinition'
                 '.get_params')
@@ -202,7 +203,7 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         flannel_subnet = mock_baymodel.labels.get('flannel_network_subnetlen')
         flannel_backend = mock_baymodel.labels.get('flannel_backend')
 
-        k8s_def = tdef.AtomicK8sTemplateDefinition()
+        k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
         k8s_def.get_params(mock_context, mock_baymodel, mock_bay,
                            scale_manager=mock_scale_manager)
@@ -221,8 +222,8 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
                                                 mock_bay, **expected_kwargs)
 
     @mock.patch('magnum.common.clients.OpenStackClients')
-    @mock.patch('magnum.conductor.template_definition'
-                '.AtomicK8sTemplateDefinition.get_discovery_url')
+    @mock.patch('magnum.drivers.common.template_def'
+                '.BaseTemplateDefinition.get_discovery_url')
     @mock.patch('magnum.drivers.common.template_def.BaseTemplateDefinition'
                 '.get_params')
     @mock.patch('magnum.drivers.common.template_def.TemplateDefinition'
@@ -255,7 +256,7 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         flannel_subnet = mock_baymodel.labels.get('flannel_network_subnetlen')
         flannel_backend = mock_baymodel.labels.get('flannel_backend')
 
-        k8s_def = tdef.AtomicK8sTemplateDefinition()
+        k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
         k8s_def.get_params(mock_context, mock_baymodel, mock_bay,
                            scale_manager=mock_scale_manager)
@@ -283,14 +284,14 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         mock_resp.text = expected_result
         mock_get.return_value = mock_resp
 
-        k8s_def = tdef.AtomicK8sTemplateDefinition()
+        k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
         k8s_def.validate_discovery_url('http://etcd/test', 1)
 
     @mock.patch('requests.get')
     def test_k8s_validate_discovery_url_fail(self, mock_get):
         mock_get.side_effect = req_exceptions.RequestException()
 
-        k8s_def = tdef.AtomicK8sTemplateDefinition()
+        k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
         self.assertRaises(exception.GetClusterSizeFailed,
                           k8s_def.validate_discovery_url,
                           'http://etcd/test', 1)
@@ -301,7 +302,7 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         mock_resp.text = str('{"action":"get"}')
         mock_get.return_value = mock_resp
 
-        k8s_def = tdef.AtomicK8sTemplateDefinition()
+        k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
         self.assertRaises(exception.InvalidBayDiscoveryURL,
                           k8s_def.validate_discovery_url,
                           'http://etcd/test', 1)
@@ -314,7 +315,7 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         mock_resp.text = expected_result
         mock_get.return_value = mock_resp
 
-        k8s_def = tdef.AtomicK8sTemplateDefinition()
+        k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
         self.assertRaises(exception.InvalidClusterSize,
                           k8s_def.validate_discovery_url,
                           'http://etcd/test', 5)
@@ -332,7 +333,7 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         mock_bay.master_count = 10
         mock_bay.discovery_url = None
 
-        k8s_def = tdef.AtomicK8sTemplateDefinition()
+        k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
         discovery_url = k8s_def.get_discovery_url(mock_bay)
 
         mock_get.assert_called_once_with('http://etcd/test?size=10')
@@ -349,13 +350,13 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         mock_bay.master_count = 10
         mock_bay.discovery_url = None
 
-        k8s_def = tdef.AtomicK8sTemplateDefinition()
+        k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
         self.assertRaises(exception.GetDiscoveryUrlFailed,
                           k8s_def.get_discovery_url, mock_bay)
 
     def test_k8s_get_heat_param(self):
-        k8s_def = tdef.AtomicK8sTemplateDefinition()
+        k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
         heat_param = k8s_def.get_heat_param(bay_attr='node_count')
         self.assertEqual('number_of_minions', heat_param)
@@ -369,9 +370,10 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
         fake_bay = mock.MagicMock()
         fake_bay.discovery_url = None
 
-        self.assertRaises(exception.InvalidDiscoveryURL,
-                          tdef.AtomicK8sTemplateDefinition().get_discovery_url,
-                          fake_bay)
+        self.assertRaises(
+            exception.InvalidDiscoveryURL,
+            k8sa_tdef.AtomicK8sTemplateDefinition().get_discovery_url,
+            fake_bay)
 
     def _test_update_outputs_api_address(self, coe, params, tls=True):
 
@@ -538,14 +540,14 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         mock_resp.text = expected_result
         mock_get.return_value = mock_resp
 
-        k8s_def = tdef.AtomicK8sTemplateDefinition()
+        k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
         k8s_def.validate_discovery_url('http://etcd/test', 1)
 
     @mock.patch('requests.get')
     def test_swarm_validate_discovery_url_fail(self, mock_get):
         mock_get.side_effect = req_exceptions.RequestException()
 
-        k8s_def = tdef.AtomicK8sTemplateDefinition()
+        k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
         self.assertRaises(exception.GetClusterSizeFailed,
                           k8s_def.validate_discovery_url,
                           'http://etcd/test', 1)
@@ -556,7 +558,7 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         mock_resp.text = str('{"action":"get"}')
         mock_get.return_value = mock_resp
 
-        k8s_def = tdef.AtomicK8sTemplateDefinition()
+        k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
         self.assertRaises(exception.InvalidBayDiscoveryURL,
                           k8s_def.validate_discovery_url,
                           'http://etcd/test', 1)
@@ -569,7 +571,7 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         mock_resp.text = expected_result
         mock_get.return_value = mock_resp
 
-        k8s_def = tdef.AtomicK8sTemplateDefinition()
+        k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
         self.assertRaises(exception.InvalidClusterSize,
                           k8s_def.validate_discovery_url,
                           'http://etcd/test', 5)
@@ -602,9 +604,10 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         fake_bay = mock.MagicMock()
         fake_bay.discovery_url = None
 
-        self.assertRaises(exception.InvalidDiscoveryURL,
-                          tdef.AtomicK8sTemplateDefinition().get_discovery_url,
-                          fake_bay)
+        self.assertRaises(
+            exception.InvalidDiscoveryURL,
+            k8sa_tdef.AtomicK8sTemplateDefinition().get_discovery_url,
+            fake_bay)
 
     def test_swarm_get_heat_param(self):
         swarm_def = swarm_tdef.AtomicSwarmTemplateDefinition()

@@ -1,0 +1,117 @@
+#cloud-config
+merge_how: dict(recurse_array)+list(append)
+write_files:
+  - path: /etc/kubernetes/examples/replication-controller.yaml
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      apiVersion: v1
+      kind: ReplicationController
+      metadata:
+        name: nginx-controller
+      spec:
+        replicas: 2
+        # selector identifies the set of pods that this
+        # replication controller is responsible for managing
+        selector:
+          name: nginx
+        # template defines the 'cookie cutter' used for creating
+        # new pods when necessary
+        template:
+          metadata:
+            labels:
+              # Important: these labels need to match the selector above
+              # The api server enforces this constraint.
+              name: nginx
+          spec:
+            containers:
+              - name: nginx
+                image: nginx
+                ports:
+                  - containerPort: 80
+
+  - path: /etc/kubernetes/examples/pod-nginx-with-label.yaml
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: nginx
+        labels:
+          app: nginx
+      spec:
+        containers:
+        - name: nginx
+          image: nginx
+          ports:
+          - containerPort: 80
+
+  - path: /etc/kubernetes/examples/service.yaml
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: nginx-service
+      spec:
+        ports:
+        - port: 8000 # the port that this service should serve on
+          # the container on each pod to connect to, can be a name
+          # (e.g. 'www') or a number (e.g. 80)
+          targetPort: 80
+          protocol: TCP
+        # just like the selector in the replication controller,
+        # but this time it identifies the set of pods to load balance
+        # traffic to.
+        selector:
+          app: nginx
+
+  - path: /etc/kubernetes/examples/README.md
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      Kubernetes 101 (http://kubernetes.io/v1.0/docs/user-guide/walkthrough/README.html)
+      ==================================================================================
+
+      List all nodes:
+
+          kubectl get nodes
+
+      Replication Controllers:
+
+          kubectl create -f /etc/kubernetes/examples/replication-controller.yaml
+          kubectl get rc
+          kubectl delete rc nginx-controller
+
+      Pods:
+
+          kubectl create -f /etc/kubernetes/examples/pod-nginx-with-label.yaml
+          kubectl get pods
+          curl http://$(kubectl get pod nginx -o=template -t={{.status.podIP}})
+
+      Services:
+
+          kubectl create -f /etc/kubernetes/examples/service.yaml
+          kubectl get services
+
+          export SERVICE_IP=$(kubectl get service nginx-service -o=template -t={{.spec.clusterIP}})
+          export SERVICE_PORT=$(kubectl get service nginx-service -o=template '-t={{(index .spec.ports 0).port}}')
+          curl http://${SERVICE_IP}:${SERVICE_PORT}
+
+          kubectl delete service nginx-service
+
+      Troubleshooting:
+
+          kubectl get events
+
+          kubectl describe rc nginx-controller
+
+          kubectl describe pod nginx
+
+          kubectl describe service nginx-service
+
+          kubectl exec nginx env
+
+          kubectl exec -ti nginx -- bash

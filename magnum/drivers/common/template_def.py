@@ -33,13 +33,6 @@ LOG = logging.getLogger(__name__)
 
 
 template_def_opts = [
-    cfg.StrOpt('k8s_atomic_template_path',
-               default=paths.basedir_def('templates/kubernetes/'
-                                         'kubecluster.yaml'),
-               deprecated_name='template_path',
-               deprecated_group='bay_heat',
-               help=_(
-                   'Location of template to build a k8s cluster on atomic.')),
     cfg.StrOpt('k8s_coreos_template_path',
                default=paths.basedir_def('templates/kubernetes/'
                                          'kubecluster-coreos.yaml'),
