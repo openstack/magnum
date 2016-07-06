@@ -18,6 +18,7 @@ from oslo_config import cfg
 from magnum.common import exception
 from magnum.conductor import template_definition as tdef
 from magnum.drivers.common import template_def as cmn_tdef
+from magnum.drivers.mesos_ubuntu_v1 import template_def as mesos_tdef
 from magnum.drivers.swarm_fedora_atomic_v1 import template_def as swarm_tdef
 from magnum.tests import base
 
@@ -87,7 +88,7 @@ class TemplateDefinitionTestCase(base.TestCase):
             'mesos')
 
         self.assertIsInstance(definition,
-                              tdef.UbuntuMesosTemplateDefinition)
+                              mesos_tdef.UbuntuMesosTemplateDefinition)
 
     def test_get_definition_not_supported(self):
         self.assertRaises(exception.BayTypeNotSupported,
@@ -680,7 +681,7 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
         mock_scale_manager = mock.MagicMock()
         mock_scale_manager.get_removal_nodes.return_value = removal_nodes
 
-        mesos_def = tdef.UbuntuMesosTemplateDefinition()
+        mesos_def = mesos_tdef.UbuntuMesosTemplateDefinition()
 
         mesos_def.get_params(mock_context, mock_baymodel, mock_bay,
                              scale_manager=mock_scale_manager)
@@ -702,7 +703,7 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
                                                 mock_bay, **expected_kwargs)
 
     def test_mesos_get_heat_param(self):
-        mesos_def = tdef.UbuntuMesosTemplateDefinition()
+        mesos_def = mesos_tdef.UbuntuMesosTemplateDefinition()
 
         heat_param = mesos_def.get_heat_param(bay_attr='node_count')
         self.assertEqual('number_of_slaves', heat_param)
@@ -711,7 +712,7 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
         self.assertEqual('number_of_masters', heat_param)
 
     def test_update_outputs(self):
-        mesos_def = tdef.UbuntuMesosTemplateDefinition()
+        mesos_def = mesos_tdef.UbuntuMesosTemplateDefinition()
 
         expected_api_address = 'updated_address'
         expected_node_addresses = ['ex_slave', 'address']

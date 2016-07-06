@@ -48,11 +48,6 @@ template_def_opts = [
     cfg.StrOpt('etcd_discovery_service_endpoint_format',
                default='https://discovery.etcd.io/new?size=%(size)d',
                help=_('Url for etcd public discovery endpoint.')),
-    cfg.StrOpt('mesos_ubuntu_template_path',
-               default=paths.basedir_def('templates/mesos/'
-                                         'mesoscluster.yaml'),
-               help=_('Location of template to build a Mesos cluster '
-                      'on Ubuntu.')),
     cfg.ListOpt('enabled_definitions',
                 default=['magnum_vm_atomic_k8s', 'magnum_vm_coreos_k8s',
                          'magnum_vm_atomic_swarm', 'magnum_vm_ubuntu_mesos'],

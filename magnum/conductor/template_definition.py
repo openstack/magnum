@@ -40,11 +40,6 @@ template_def_opts = [
     cfg.StrOpt('etcd_discovery_service_endpoint_format',
                default='https://discovery.etcd.io/new?size=%(size)d',
                help=_('Url for etcd public discovery endpoint.')),
-    cfg.StrOpt('mesos_ubuntu_template_path',
-               default=paths.basedir_def('templates/mesos/'
-                                         'mesoscluster.yaml'),
-               help=_('Location of template to build a Mesos cluster '
-                      'on Ubuntu.')),
     cfg.ListOpt('enabled_definitions',
                 default=['magnum_vm_atomic_k8s', 'magnum_vm_coreos_k8s',
                          'magnum_vm_atomic_swarm', 'magnum_vm_ubuntu_mesos'],
@@ -206,73 +201,3 @@ class CoreOSK8sTemplateDefinition(K8sTemplateDefinition):
     @property
     def template_path(self):
         return cfg.CONF.bay.k8s_coreos_template_path
-
-
-class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
-    """Mesos template for Ubuntu VM."""
-
-    provides = [
-        {'server_type': 'vm', 'os': 'ubuntu', 'coe': 'mesos'},
-    ]
-
-    def __init__(self):
-        super(UbuntuMesosTemplateDefinition, self).__init__()
-        self.add_parameter('external_network',
-                           baymodel_attr='external_network_id',
-                           required=True)
-        self.add_parameter('number_of_slaves',
-                           bay_attr='node_count')
-        self.add_parameter('master_flavor',
-                           baymodel_attr='master_flavor_id')
-        self.add_parameter('slave_flavor',
-                           baymodel_attr='flavor_id')
-        self.add_parameter('cluster_name',
-                           bay_attr='name')
-        self.add_parameter('volume_driver',
-                           baymodel_attr='volume_driver')
-
-        self.add_output('api_address',
-                        bay_attr='api_address')
-        self.add_output('mesos_master_private',
-                        bay_attr=None)
-        self.add_output('mesos_master',
-                        bay_attr='master_addresses')
-        self.add_output('mesos_slaves_private',
-                        bay_attr=None)
-        self.add_output('mesos_slaves',
-                        bay_attr='node_addresses')
-
-    def get_params(self, context, baymodel, bay, **kwargs):
-        extra_params = kwargs.pop('extra_params', {})
-        # HACK(apmelton) - This uses the user's bearer token, ideally
-        # it should be replaced with an actual trust token with only
-        # access to do what the template needs it to do.
-        osc = self.get_osc(context)
-        extra_params['auth_url'] = context.auth_url
-        extra_params['username'] = context.user_name
-        extra_params['tenant_name'] = context.tenant
-        extra_params['domain_name'] = context.domain_name
-        extra_params['region_name'] = osc.cinder_region_name()
-
-        label_list = ['rexray_preempt', 'mesos_slave_isolation',
-                      'mesos_slave_image_providers',
-                      'mesos_slave_work_dir',
-                      'mesos_slave_executor_env_variables']
-
-        for label in label_list:
-            extra_params[label] = baymodel.labels.get(label)
-
-        scale_mgr = kwargs.pop('scale_manager', None)
-        if scale_mgr:
-            hosts = self.get_output('mesos_slaves_private')
-            extra_params['slaves_to_remove'] = (
-                scale_mgr.get_removal_nodes(hosts))
-
-        return super(UbuntuMesosTemplateDefinition,
-                     self).get_params(context, baymodel, bay,
-                                      extra_params=extra_params,
-                                      **kwargs)
-
-    @property
-    def template_path(self):
-        return cfg.CONF.bay.mesos_ubuntu_template_path
