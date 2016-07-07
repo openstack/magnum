@@ -294,7 +294,7 @@ extendedKeyUsage = clientAuth
         elif self.baymodel.coe == "swarm":
             output_keys = ["swarm_masters", "swarm_nodes"]
         elif self.baymodel.coe == "mesos":
-            output_keys = ["mesos_master", "mesos_slaves"]
+            output_keys = ["mesos_master", "mesos_agents"]
         for output in stack_outputs:
             for key in output_keys:
                 if output['output_key'] == key:

@@ -144,12 +144,12 @@ You can ssh into that server as the ``ubuntu`` user:
 
     $ ssh ubuntu@192.168.200.86
 
-You can log into your slaves using the ``ubuntu`` user as well. You can
-get a list of slaves addresses by running:
+You can log into your agents using the ``ubuntu`` user as well. You can
+get a list of agents addresses by running:
 
 ::
 
-    $ heat output-show my-mesos-cluster mesos_slaves
+    $ heat output-show my-mesos-cluster mesos_agents
     [
       "192.168.200.182"
     ]
