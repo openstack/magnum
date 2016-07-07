@@ -223,6 +223,7 @@ resources:
             $KUBE_ALLOW_PRIV: {get_param: kube_allow_priv}
             $KUBE_MASTER_IP: {get_param: kube_master_ip}
             $KUBE_API_PORT: {get_param: kubernetes_port}
+            $KUBE_NODE_PUBLIC_IP: {get_attr: [kube_minion_floating, floating_ip_address]}
             $KUBE_NODE_IP: {get_attr: [kube_minion_eth0, fixed_ips, 0, ip_address]}
             $ETCD_SERVER_IP: {get_param: etcd_server_ip}
             $DOCKER_VOLUME: {get_resource: docker_volume}

@@ -210,6 +210,7 @@ resources:
             "$KUBE_API_PUBLIC_ADDRESS": {get_param: api_public_address}
             "$KUBE_API_PRIVATE_ADDRESS": {get_param: api_private_address}
             "$KUBE_API_PORT": {get_param: kubernetes_port}
+            "$KUBE_NODE_PUBLIC_IP": {get_attr: [kube_master_floating, floating_ip_address]}
             "$KUBE_NODE_IP": {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
             "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
             "$DOCKER_VOLUME": {get_resource: docker_volume}
