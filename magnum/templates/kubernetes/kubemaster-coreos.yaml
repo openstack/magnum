@@ -45,7 +45,7 @@ parameters:
     description: network range for flannel overlay network
 
   flannel_network_subnetlen:
-    type: string
+    type: number
     description: size of subnet assigned to each master
 
   flannel_backend:
