@@ -110,7 +110,7 @@ def baymodel_data(**kwargs):
         "dns_nameserver": "8.8.8.8",
         "flavor_id": data_utils.rand_name('bay'),
         "master_flavor_id": data_utils.rand_name('bay'),
-        "external_network_id": "public",
+        "external_network_id": config.Config.nic_id,
         "keypair_id": data_utils.rand_name('bay'),
         "image_id": data_utils.rand_name('bay')
     }
@@ -207,7 +207,7 @@ def valid_swarm_baymodel():
                          master_flavor_id=config.Config.master_flavor_id,
                          keypair_id=config.Config.keypair_id, coe="swarm",
                          docker_volume_size=3, cluster_distro=None,
-                         external_network_id="public",
+                         external_network_id=config.Config.nic_id,
                          http_proxy=None, https_proxy=None, no_proxy=None,
                          network_driver=None, volume_driver=None, labels={},
                          tls_disabled=False)
