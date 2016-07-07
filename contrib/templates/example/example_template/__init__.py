@@ -15,10 +15,10 @@
 
 import os
 
-from magnum.conductor import template_definition
+from magnum.drivers.common import template_def
 
 
-class ExampleTemplate(template_definition.BaseTemplateDefinition):
+class ExampleTemplate(template_def.BaseTemplateDefinition):
     provides = [
         {'server_type': 'vm', 'os': 'example', 'coe': 'example_coe'},
         {'server_type': 'vm', 'os': 'example2', 'coe': 'example_coe'},
