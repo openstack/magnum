@@ -21,7 +21,6 @@ NOTE: IN PROGRESS AND NOT FULLY IMPLEMENTED.
 from oslo_log import log as logging
 import pecan
 from pecan import rest
-from webob import exc
 from wsme import types as wtypes
 
 from magnum.api.controllers import base as controllers_base
@@ -31,6 +30,7 @@ from magnum.api.controllers.v1 import baymodel
 from magnum.api.controllers.v1 import certificate
 from magnum.api.controllers.v1 import magnum_services
 from magnum.api import expose
+from magnum.api import http_error
 from magnum.i18n import _
 
 
@@ -157,32 +157,41 @@ class Controller(rest.RestController):
             headers = {}
         # ensure that major version in the URL matches the header
         if version.major != BASE_VERSION:
-            raise exc.HTTPNotAcceptable(_(
+            raise http_error.HTTPNotAcceptableAPIVersion(_(
                 "Mutually exclusive versions requested. Version %(ver)s "
                 "requested but not supported by this service."
                 "The supported version range is: "
                 "[%(min)s, %(max)s].") % {'ver': version,
                                           'min': MIN_VER_STR,
                                           'max': MAX_VER_STR},
-                headers=headers)
+                headers=headers,
+                max_version=str(MAX_VER),
+                min_version=str(MIN_VER))
         # ensure the minor version is within the supported range
         if version < MIN_VER or version > MAX_VER:
-            raise exc.HTTPNotAcceptable(_(
+            raise http_error.HTTPNotAcceptableAPIVersion(_(
                 "Version %(ver)s was requested but the minor version is not "
                 "supported by this service. The supported version range is: "
                 "[%(min)s, %(max)s].") % {'ver': version, 'min': MIN_VER_STR,
-                                          'max': MAX_VER_STR}, headers=headers)
+                                          'max': MAX_VER_STR},
+                headers=headers,
+                max_version=str(MAX_VER),
+                min_version=str(MIN_VER))
 
     @pecan.expose()
     def _route(self, args):
         version = controllers_base.Version(
             pecan.request.headers, MIN_VER_STR, MAX_VER_STR)
 
-        # Always set the min and max headers
+        # Always set the basic version headers
         pecan.response.headers[
             controllers_base.Version.min_string] = MIN_VER_STR
         pecan.response.headers[
             controllers_base.Version.max_string] = MAX_VER_STR
+        pecan.response.headers[
+            controllers_base.Version.string] = " ".join(
+            [controllers_base.Version.service_string, str(version)])
+        pecan.response.headers["vary"] = controllers_base.Version.string
 
         # assert that requested version is supported
         self._check_version(version, pecan.response.headers)

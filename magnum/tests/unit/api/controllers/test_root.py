@@ -32,16 +32,16 @@ class TestRootController(api_base.FunctionalTest):
     def setUp(self):
         super(TestRootController, self).setUp()
         self.root_expected = {
-            u'default_version':
-            {u'id': u'v1', u'links':
-             [{u'href': u'http://localhost/v1/', u'rel': u'self'}]},
             u'description': u'Magnum is an OpenStack project which '
             'aims to provide container management.',
             u'name': u'OpenStack Magnum API',
             u'versions': [{u'id': u'v1',
                           u'links':
                               [{u'href': u'http://localhost/v1/',
-                                u'rel': u'self'}]}]}
+                                u'rel': u'self'}],
+                           u'status': u'CURRENT',
+                           u'max_version': u'1.1',
+                           u'min_version': u'1.1'}]}
 
         self.v1_expected = {
             u'media_types':
