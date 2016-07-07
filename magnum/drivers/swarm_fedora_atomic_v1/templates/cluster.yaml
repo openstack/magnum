@@ -382,7 +382,6 @@ resources:
           fixed_network_id: {get_resource: fixed_network}
           fixed_subnet_id: {get_resource: fixed_subnet}
           external_network: {get_param: external_network}
-          discovery_url: {get_param: discovery_url}
           http_proxy: {get_param: http_proxy}
           https_proxy: {get_param: https_proxy}
           no_proxy: {get_param: no_proxy}

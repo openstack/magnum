@@ -280,7 +280,6 @@ resources:
           params:
             "$ETCD_SERVER_IP": {get_param: etcd_server_ip}
             "$NODE_IP": {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
-            "$DISCOVERY_URL": {get_param: discovery_url}
             "$WAIT_HANDLE_ENDPOINT": {get_attr: [master_wait_handle, endpoint]}
             "$WAIT_HANDLE_TOKEN": {get_attr: [master_wait_handle, token]}
             "$HTTP_PROXY": {get_param: http_proxy}
