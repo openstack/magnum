@@ -1,0 +1,12 @@
+# Environment file to disable LBaaS in a Mesos cluster by mapping
+# LBaaS-related resource types to OS::Heat::None
+resource_registry:
+  "Magnum::ApiGatewaySwitcher": ../fragments/api_gateway_switcher_master.yaml
+
+  # mesoscluster.yaml
+  "Magnum::Optional::Neutron::Pool": "OS::Heat::None"
+  "Magnum::Optional::Neutron::Pool::FloatingIP": "OS::Heat::None"
+  "Magnum::Optional::Neutron::Pool::HealthMonitor": "OS::Heat::None"
+
+  # mesosmaster.yaml
+  "Magnum::Optional::Neutron::PoolMember": "OS::Heat::None"
