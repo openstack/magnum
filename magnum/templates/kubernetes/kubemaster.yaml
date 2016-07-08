@@ -445,6 +445,10 @@ outputs:
 
   kube_master_ip:
     value: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
+    description: >
+      This is the "private" IP address of the Kubernetes master node.
 
   kube_master_external_ip:
     value: {get_attr: [kube_master_floating, floating_ip_address]}
+    description: >
+      This is the "public" IP address of the Kubernetes master node.

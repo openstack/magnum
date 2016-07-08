@@ -190,15 +190,29 @@ outputs:
 
   api_address:
     value: {get_attr: [kube_master, kube_master_external_ip]}
+    description: >
+      This is the API endpoint of the Kubernetes cluster. Use this to access
+      the Kubernetes API.
 
   kube_masters_private:
     value: {get_attr: [kube_master, kube_master_ip]}
+    description: >
+      This is a list of the "private" IP addresses of all the Kubernetes masters.
 
   kube_masters:
     value: {get_attr: [kube_master, kube_master_external_ip]}
+    description: >
+      This is a list of the "public" IP addresses of all the Kubernetes masters.
+      Use these IP addresses to log in to the Kubernetes masters via ssh or to access
+      the Kubernetes API.
 
   kube_minions_private:
     value: {get_attr: [kube_minions, kube_node_ip]}
+    description: >
+      This is a list of the "private" IP addresses of all the Kubernetes minions.
 
   kube_minions:
     value: {get_attr: [kube_minions, kube_node_external_ip]}
+    description: >
+      This is a list of the "public" IP addresses of all the Kubernetes minions.
+      Use these IP addresses to log in to the Kubernetes minions via ssh.
