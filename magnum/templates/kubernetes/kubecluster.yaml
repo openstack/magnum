@@ -535,8 +535,8 @@ outputs:
         params:
           api_ip_address: {get_attr: [api_address_switch, public_ip]}
     description: >
-      This is the API endpoint of the Kubernetes server. Use this to access
-      the Kubernetes API from outside the cluster.
+      This is the API endpoint of the Kubernetes cluster. Use this to access
+      the Kubernetes API.
 
   registry_address:
     value:
@@ -551,21 +551,21 @@ outputs:
   kube_masters_private:
     value: {get_attr: [kube_masters, kube_master_ip]}
     description: >
-      This is a list of the "private" addresses of all the Kubernetes masters.
+      This is a list of the "private" IP addresses of all the Kubernetes masters.
 
   kube_masters:
     value: {get_attr: [kube_masters, kube_master_external_ip]}
     description: >
-      This is a list of "public" ip addresses of all Kubernetes master servers.
-      Use these addresses to log in to the Kubernetes masters via ssh.
+      This is a list of the "public" IP addresses of all the Kubernetes masters.
+      Use these IP addresses to log in to the Kubernetes masters via ssh.
 
   kube_minions_private:
     value: {get_attr: [kube_minions, kube_minion_ip]}
     description: >
-      This is a list of the "private" addresses of all the Kubernetes minions.
+      This is a list of the "private" IP addresses of all the Kubernetes minions.
 
   kube_minions:
     value: {get_attr: [kube_minions, kube_minion_external_ip]}
     description: >
-      This is a list of the "public" addresses of all the Kubernetes minions. Use
-      these addresses to, e.g., log into the minions.
+      This is a list of the "public" IP addresses of all the Kubernetes minions.
+      Use these IP addresses to log in to the Kubernetes minions via ssh.
