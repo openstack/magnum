@@ -50,7 +50,7 @@ parameters:
     default: 10.100.0.0/16
 
   flannel_network_subnetlen:
-    type: string
+    type: number
     description: size of subnet assigned to each minion
     default: 24
 
