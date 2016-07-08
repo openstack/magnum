@@ -48,10 +48,10 @@ BASE_VERSION = 1
 #
 
 # v1.1: API at the point in time when microversioning support was added
-MIN_VER_STR = 'magnum 1.1'
+MIN_VER_STR = 'container-infra 1.1'
 
 # v1.1: Add API changelog here
-MAX_VER_STR = 'magnum 1.1'
+MAX_VER_STR = 'container-infra 1.1'
 
 
 MIN_VER = controllers_base.Version(
