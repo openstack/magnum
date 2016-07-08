@@ -76,7 +76,7 @@ class Bay(base.APIBase):
                 # Change error code because 404 (NotFound) is inappropriate
                 # response for a POST request to create a Bay
                 e.code = 400  # BadRequest
-                raise e
+                raise
         elif value == wtypes.Unset:
             self._baymodel_id = wtypes.Unset
 
