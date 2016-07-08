@@ -51,10 +51,6 @@ parameters:
     type: string
     description: network range for flannel overlay network
 
-  discovery_url:
-    type: string
-    description: url provided for node discovery
-
   http_proxy:
     type: string
     description: http proxy address for docker
