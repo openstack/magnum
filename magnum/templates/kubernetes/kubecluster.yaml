@@ -350,7 +350,7 @@ resources:
   #
 
   api_monitor:
-    type: OS::Neutron::HealthMonitor
+    type: Magnum::Optional::Neutron::Pool::HealthMonitor
     properties:
       type: TCP
       delay: 5
@@ -358,7 +358,7 @@ resources:
       timeout: 5
 
   api_pool:
-    type: OS::Neutron::Pool
+    type: Magnum::Optional::Neutron::Pool
     properties:
       protocol: {get_param: loadbalancing_protocol}
       monitors: [{get_resource: api_monitor}]
@@ -368,7 +368,7 @@ resources:
         protocol_port: {get_param: kubernetes_port}
 
   api_pool_floating:
-    type: OS::Neutron::FloatingIP
+    type: Magnum::Optional::Neutron::Pool::FloatingIP
     depends_on:
       - extrouter_inside
     properties:
@@ -376,7 +376,7 @@ resources:
       port_id: {get_attr: [api_pool, vip, port_id]}
 
   etcd_monitor:
-    type: OS::Neutron::HealthMonitor
+    type: Magnum::Optional::Neutron::Pool::HealthMonitor
     properties:
       type: TCP
       delay: 5
@@ -384,7 +384,7 @@ resources:
       timeout: 5
 
   etcd_pool:
-    type: OS::Neutron::Pool
+    type: Magnum::Optional::Neutron::Pool
     properties:
       protocol: HTTP
       monitors: [{get_resource: etcd_monitor}]
@@ -392,6 +392,26 @@ resources:
       lb_method: ROUND_ROBIN
       vip:
         protocol_port: 2379
+
+  ######################################################################
+  #
+  # resources that expose the IPs of either the kube master or a given
+  # LBaaS pool depending on whether LBaaS is enabled for the bay.
+  #
+
+  api_address_switch:
+    type: Magnum::ApiGatewaySwitcher
+    properties:
+      pool_public_ip: {get_attr: [api_pool_floating, floating_ip_address]}
+      pool_private_ip: {get_attr: [api_pool, vip, address]}
+      master_public_ip: {get_attr: [kube_masters, resource.0.kube_master_external_ip]}
+      master_private_ip: {get_attr: [kube_masters, resource.0.kube_master_ip]}
+
+  etcd_address_switch:
+    type: Magnum::ApiGatewaySwitcher
+    properties:
+      pool_private_ip: {get_attr: [etcd_pool, vip, address]}
+      master_private_ip: {get_attr: [kube_masters, resource.0.kube_master_ip]}
 
   ######################################################################
   #
@@ -470,8 +490,8 @@ resources:
           fixed_subnet: {get_resource: fixed_subnet}
           network_driver: {get_param: network_driver}
           flannel_network_cidr: {get_param: flannel_network_cidr}
-          kube_master_ip: {get_attr: [api_pool, vip, address]}
-          etcd_server_ip: {get_attr: [etcd_pool, vip, address]}
+          kube_master_ip: {get_attr: [api_address_switch, private_ip]}
+          etcd_server_ip: {get_attr: [etcd_address_switch, private_ip]}
           external_network: {get_param: external_network}
           kube_allow_priv: {get_param: kube_allow_priv}
           docker_volume_size: {get_param: docker_volume_size}
@@ -513,7 +533,7 @@ outputs:
       str_replace:
         template: api_ip_address
         params:
-          api_ip_address: {get_attr: [api_pool_floating, floating_ip_address]}
+          api_ip_address: {get_attr: [api_address_switch, public_ip]}
     description: >
       This is the API endpoint of the Kubernetes server. Use this to access
       the Kubernetes API from outside the cluster.

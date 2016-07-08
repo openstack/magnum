@@ -48,6 +48,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'server_type': 'vm',
             'registry_enabled': False,
             'insecure_registry': '10.0.0.1:5000',
+            'master_lb_enabled': False,
         }
         self.bay_dict = {
             'uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
@@ -176,7 +177,7 @@ class TestBayConductorWithK8s(base.TestCase):
             expected.pop(mapping[missing_attr], None)
 
         self.assertEqual(expected, definition)
-        self.assertEqual([], env_files)
+        self.assertEqual(['environments/no_master_lb.yaml'], env_files)
 
     @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
@@ -242,7 +243,7 @@ class TestBayConductorWithK8s(base.TestCase):
         }
 
         self.assertEqual(expected, definition)
-        self.assertEqual([], env_files)
+        self.assertEqual(['environments/no_master_lb.yaml'], env_files)
 
     @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
@@ -296,7 +297,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'insecure_registry_url': '10.0.0.1:5000',
         }
         self.assertEqual(expected, definition)
-        self.assertEqual([], env_files)
+        self.assertEqual(['environments/no_master_lb.yaml'], env_files)
 
     @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
@@ -348,7 +349,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'insecure_registry_url': '10.0.0.1:5000',
         }
         self.assertEqual(expected, definition)
-        self.assertEqual([], env_files)
+        self.assertEqual(['environments/no_master_lb.yaml'], env_files)
 
     @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
@@ -508,7 +509,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'insecure_registry_url': '10.0.0.1:5000',
         }
         self.assertEqual(expected, definition)
-        self.assertEqual([], env_files)
+        self.assertEqual(['environments/no_master_lb.yaml'], env_files)
         reqget.assert_called_once_with('http://etcd/test?size=1')
 
     @patch('magnum.common.short_id.generate_id')

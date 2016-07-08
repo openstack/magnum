@@ -89,10 +89,12 @@ parameters:
   api_public_address:
     type: string
     description: Public IP address of the Kubernetes master server.
+    default: ""
 
   api_private_address:
     type: string
     description: Private IP address of the Kubernetes master server.
+    default: ""
 
   fixed_network:
     type: string
@@ -195,6 +197,20 @@ resources:
 
   ######################################################################
   #
+  # resource that exposes the IPs of either the kube master or the API
+  # LBaaS pool depending on whether LBaaS is enabled for the bay.
+  #
+
+  api_address_switch:
+    type: Magnum::ApiGatewaySwitcher
+    properties:
+      pool_public_ip: {get_param: api_public_address}
+      pool_private_ip: {get_param: api_private_address}
+      master_public_ip: {get_attr: [kube_master_floating, floating_ip_address]}
+      master_private_ip: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
+
+  ######################################################################
+  #
   # software configs.  these are components that are combined into
   # a multipart MIME user-data archive.
   #
@@ -207,8 +223,8 @@ resources:
         str_replace:
           template: {get_file: fragments/write-heat-params-master.yaml}
           params:
-            "$KUBE_API_PUBLIC_ADDRESS": {get_param: api_public_address}
-            "$KUBE_API_PRIVATE_ADDRESS": {get_param: api_private_address}
+            "$KUBE_API_PUBLIC_ADDRESS": {get_attr: [api_address_switch, public_ip]}
+            "$KUBE_API_PRIVATE_ADDRESS": {get_attr: [api_address_switch, private_ip]}
             "$KUBE_API_PORT": {get_param: kubernetes_port}
             "$KUBE_NODE_IP": {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
             "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
@@ -410,14 +426,14 @@ resources:
       port_id: {get_resource: kube_master_eth0}
 
   api_pool_member:
-    type: OS::Neutron::PoolMember
+    type: Magnum::Optional::Neutron::PoolMember
     properties:
       pool_id: {get_param: api_pool_id}
       address: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
       protocol_port: {get_param: kubernetes_port}
 
   etcd_pool_member:
-    type: OS::Neutron::PoolMember
+    type: Magnum::Optional::Neutron::PoolMember
     properties:
       pool_id: {get_param: etcd_pool_id}
       address: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}

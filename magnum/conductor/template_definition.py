@@ -156,6 +156,12 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                                       extra_params=extra_params,
                                       **kwargs)
 
+    def get_env_files(self, baymodel):
+        if baymodel.master_lb_enabled:
+            return ['environments/with_master_lb.yaml']
+        else:
+            return ['environments/no_master_lb.yaml']
+
 
 class AtomicK8sTemplateDefinition(K8sTemplateDefinition):
     """Kubernetes template for a Fedora Atomic VM."""

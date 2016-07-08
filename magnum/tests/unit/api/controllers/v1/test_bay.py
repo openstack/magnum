@@ -640,6 +640,24 @@ class TestPost(api_base.FunctionalTest):
         self.assertTrue(self.mock_valid_os_res.called)
         self.assertEqual(400, response.status_int)
 
+    def test_create_bay_with_no_lb_one_node(self):
+        baymodel = obj_utils.create_test_baymodel(
+            self.context, name='foo', uuid='foo', master_lb_enabled=False)
+        bdict = apiutils.bay_post_data(baymodel_id=baymodel.name,
+                                       master_count=1)
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(201, response.status_int)
+
+    def test_create_bay_with_no_lb_multi_node(self):
+        baymodel = obj_utils.create_test_baymodel(
+            self.context, name='foo', uuid='foo', master_lb_enabled=False)
+        bdict = apiutils.bay_post_data(baymodel_id=baymodel.name,
+                                       master_count=3)
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_int)
+
 
 class TestDelete(api_base.FunctionalTest):
 
