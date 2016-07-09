@@ -214,7 +214,7 @@ Building a Kubernetes Bay - Based on Fedora Atomic
 Create a baymodel. This is similar in nature to a flavor and describes
 to magnum how to construct the bay. The baymodel specifies a Fedora Atomic
 image so the bays which use this baymodel will be based on Fedora Atomic.
-The coe (Container Orchestration Engine) and keypair need to be specified
+The COE (Container Orchestration Engine) and keypair need to be specified
 as well::
 
     magnum baymodel-create --name k8sbaymodel \
@@ -483,7 +483,7 @@ Building and Using a Swarm Bay
 
 Create a baymodel. It is very similar to the Kubernetes baymodel, except for
 the absence of some Kubernetes-specific arguments and the use of 'swarm'
-as the coe::
+as the COE::
 
     magnum baymodel-create --name swarmbaymodel \
                            --image-id fedora-atomic-latest \
@@ -604,7 +604,7 @@ Alternatively, you can download and upload a pre-built image::
                         --disk-format=qcow2 --container-format=bare \
                         --os-distro=ubuntu --file=ubuntu-14.04.3-mesos-0.25.0.qcow2
 
-Then, create a baymodel by using 'mesos' as the coe, with the rest of arguments
+Then, create a baymodel by using 'mesos' as the COE, with the rest of arguments
 similar to the Kubernetes baymodel::
 
     magnum baymodel-create --name mesosbaymodel --image-id ubuntu-mesos \
