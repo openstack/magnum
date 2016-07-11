@@ -164,7 +164,8 @@ class Handler(object):
             if isinstance(e, exc.HTTPBadRequest):
                 e = exception.InvalidParameterValue(message=six.text_type(e))
 
-            raise e
+                raise e
+            raise
 
         bay.stack_id = created_stack['stack']['id']
         bay.status = bay_status.CREATE_IN_PROGRESS

@@ -89,18 +89,18 @@ class MagnumException(Exception):
 
         try:
             self.message = self.message % kwargs
-        except Exception as e:
+        except Exception:
             # kwargs doesn't match a variable in the message
             # log the issue and the kwargs
             LOG.exception(_LE('Exception in string format operation, '
                               'kwargs: %s') % kwargs)
             try:
                 if CONF.fatal_exception_format_errors:
-                    raise e
+                    raise
             except cfg.NoSuchOptError:
                 # Note: work around for Bug: #1447873
                 if CONF.oslo_versionedobjects.fatal_exception_format_errors:
-                    raise e
+                    raise
 
         super(MagnumException, self).__init__(self.message)
 
