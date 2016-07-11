@@ -17,7 +17,6 @@
 
 import decorator
 from oslo_config import cfg
-from oslo_log import log as logging
 from oslo_policy import policy
 import pecan
 
@@ -26,8 +25,6 @@ from magnum.common import exception
 
 _ENFORCER = None
 CONF = cfg.CONF
-
-LOG = logging.getLogger(__name__)
 
 
 # we can get a policy enforcer by this init.
