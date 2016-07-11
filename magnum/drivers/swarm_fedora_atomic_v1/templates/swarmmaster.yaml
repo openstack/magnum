@@ -177,6 +177,7 @@ resources:
           params:
             "$WAIT_HANDLE_ENDPOINT": {get_attr: [cloud_init_wait_handle, endpoint]}
             "$WAIT_HANDLE_TOKEN": {get_attr: [cloud_init_wait_handle, token]}
+            "$WAIT_CURL": {get_attr: [master_wait_handle, curl_cli]}
             "$DOCKER_VOLUME": {get_resource: docker_volume}
             "$DOCKER_STORAGE_DRIVER": {get_param: docker_storage_driver}
             "$ETCD_DISCOVERY_URL": {get_param: discovery_url}
