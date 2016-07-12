@@ -59,6 +59,8 @@ class AtomicSwarmTemplateDefinition(template_def.BaseTemplateDefinition):
                            cluster_template_attr='flavor_id')
         self.add_parameter('docker_volume_size',
                            cluster_template_attr='docker_volume_size')
+        self.add_parameter('volume_driver',
+                           cluster_template_attr='volume_driver')
         self.add_parameter('external_network',
                            cluster_template_attr='external_network_id',
                            required=True)
@@ -98,7 +100,9 @@ class AtomicSwarmTemplateDefinition(template_def.BaseTemplateDefinition):
         extra_params['magnum_url'] = osc.magnum_url()
 
         label_list = ['flannel_network_cidr', 'flannel_backend',
-                      'flannel_network_subnetlen']
+                      'flannel_network_subnetlen', 'rexray_preempt']
+
+        extra_params['auth_url'] = context.auth_url
 
         for label in label_list:
             extra_params[label] = cluster_template.labels.get(label)

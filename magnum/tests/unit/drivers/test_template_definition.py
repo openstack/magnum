@@ -716,6 +716,7 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         flannel_cidr = mock_baymodel.labels.get('flannel_network_cidr')
         flannel_subnet = mock_baymodel.labels.get('flannel_network_subnetlen')
         flannel_backend = mock_baymodel.labels.get('flannel_backend')
+        rexray_preempt = mock_baymodel.labels.get('rexray_preempt')
 
         swarm_def = swarm_tdef.AtomicSwarmTemplateDefinition()
 
@@ -726,7 +727,9 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
             'magnum_url': mock_osc.magnum_url.return_value,
             'flannel_network_cidr': flannel_cidr,
             'flannel_backend': flannel_backend,
-            'flannel_network_subnetlen': flannel_subnet}}
+            'flannel_network_subnetlen': flannel_subnet,
+            'auth_url': 'http://192.168.10.10:5000/v3',
+            'rexray_preempt': rexray_preempt}}
         mock_get_params.assert_called_once_with(mock_context, mock_baymodel,
                                                 mock_bay, **expected_kwargs)
 

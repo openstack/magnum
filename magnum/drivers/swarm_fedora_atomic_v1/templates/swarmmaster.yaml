@@ -143,6 +143,18 @@ parameters:
     type: string
     description: url for keystone
 
+  volume_driver:
+    type: string
+    description: volume driver to use for container storage
+    default: ""
+
+  rexray_preempt:
+    type: string
+    description: >
+      enables any host to take control of a volume irrespective of whether
+      other hosts are using the volume
+    default: "false"
+
 resources:
 
   master_wait_handle:
@@ -213,6 +225,8 @@ resources:
             "$TRUSTEE_PASSWORD": {get_param: trustee_password}
             "$TRUST_ID": {get_param: trust_id}
             "$AUTH_URL": {get_param: auth_url}
+            "$VOLUME_DRIVER": {get_param: volume_driver}
+            "$REXRAY_PREEMPT": {get_param: rexray_preempt}
 
   write_network_config:
     type: "OS::Heat::SoftwareConfig"
@@ -330,6 +344,12 @@ resources:
       group: ungrouped
       config: {get_file: fragments/add-proxy.sh}
 
+  volume_service:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/volume-service.sh}
+
   swarm_master_init:
     type: "OS::Heat::MultipartMime"
     properties:
@@ -350,6 +370,7 @@ resources:
         - config: {get_resource: add_proxy}
         - config: {get_resource: enable_services}
         - config: {get_resource: cfn_signal}
+        - config: {get_resource: volume_service}
 
   ######################################################################
   #
