@@ -268,7 +268,7 @@ resources:
       config:
         str_replace:
           params:
-            $configure_docker_storage_driver: {get_file: ../common/fragments/configure_docker_storage_driver_atomic.sh}
+            $configure_docker_storage_driver: {get_file: ../../common/fragments/configure_docker_storage_driver_atomic.sh}
           template: {get_file: fragments/configure-docker-storage.sh}
 
   configure_etcd:
