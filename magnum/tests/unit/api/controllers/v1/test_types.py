@@ -45,7 +45,7 @@ class TestMacAddressType(base.FunctionalTest):
 
     def test_frombasetype_no_value(self):
         test_mac = None
-        self.assertEqual(None, types.MacAddressType.frombasetype(test_mac))
+        self.assertIsNone(types.MacAddressType.frombasetype(test_mac))
 
 
 class TestUuidType(base.FunctionalTest):
@@ -219,7 +219,7 @@ class TestBooleanType(base.FunctionalTest):
 
     def test_frombasetype_no_value(self):
         v = types.BooleanType()
-        self.assertEqual(None, v.frombasetype(None))
+        self.assertIsNone(v.frombasetype(None))
 
 
 class TestNameType(base.FunctionalTest):
@@ -237,4 +237,4 @@ class TestNameType(base.FunctionalTest):
         self.assertEqual(1234, types.NameType.frombasetype(1234))
 
     def test_frombasetype(self):
-        self.assertEqual(None, types.NameType.frombasetype(None))
+        self.assertIsNone(types.NameType.frombasetype(None))
