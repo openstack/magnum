@@ -22,7 +22,6 @@ import six
 
 from magnum.common import clients
 from magnum.common import exception
-from magnum.common import paths
 from magnum.i18n import _
 from magnum.i18n import _LW
 
@@ -33,11 +32,6 @@ LOG = logging.getLogger(__name__)
 
 
 template_def_opts = [
-    cfg.StrOpt('k8s_coreos_template_path',
-               default=paths.basedir_def('templates/kubernetes/'
-                                         'kubecluster-coreos.yaml'),
-               help=_(
-                   'Location of template to build a k8s cluster on CoreOS.')),
     cfg.StrOpt('etcd_discovery_service_endpoint_format',
                default='https://discovery.etcd.io/new?size=%(size)d',
                help=_('Url for etcd public discovery endpoint.')),

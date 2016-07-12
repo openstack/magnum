@@ -16,8 +16,8 @@ import mock
 from oslo_config import cfg
 
 from magnum.common import exception
-from magnum.conductor import template_definition as tdef
 from magnum.drivers.common import template_def as cmn_tdef
+from magnum.drivers.k8s_coreos_v1 import template_def as k8s_coreos_tdef
 from magnum.drivers.k8s_fedora_atomic_v1 import template_def as k8sa_tdef
 from magnum.drivers.mesos_ubuntu_v1 import template_def as mesos_tdef
 from magnum.drivers.swarm_fedora_atomic_v1 import template_def as swarm_tdef
@@ -52,7 +52,7 @@ class TemplateDefinitionTestCase(base.TestCase):
         self.assertEqual(k8sa_tdef.AtomicK8sTemplateDefinition,
                          vm_atomic_k8s['magnum_vm_atomic_k8s'])
         self.assertEqual(1, len(vm_coreos_k8s))
-        self.assertEqual(tdef.CoreOSK8sTemplateDefinition,
+        self.assertEqual(k8s_coreos_tdef.CoreOSK8sTemplateDefinition,
                          vm_coreos_k8s['magnum_vm_coreos_k8s'])
 
     def test_get_vm_atomic_kubernetes_definition(self):
@@ -71,7 +71,7 @@ class TemplateDefinitionTestCase(base.TestCase):
             'kubernetes')
 
         self.assertIsInstance(definition,
-                              tdef.CoreOSK8sTemplateDefinition)
+                              k8s_coreos_tdef.CoreOSK8sTemplateDefinition)
 
     def test_get_vm_atomic_swarm_definition(self):
         definition = cmn_tdef.TemplateDefinition.get_template_definition(

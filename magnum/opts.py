@@ -27,8 +27,8 @@ import magnum.conductor.config
 import magnum.conductor.handlers.bay_conductor
 import magnum.conductor.handlers.docker_conductor
 import magnum.conductor.handlers.k8s_conductor
-import magnum.conductor.template_definition
 import magnum.db
+import magnum.drivers.common.template_def
 
 
 def list_opts():
@@ -40,7 +40,7 @@ def list_opts():
                          magnum.common.service.service_opts,
                          )),
         ('api', magnum.api.app.API_SERVICE_OPTS),
-        ('bay', magnum.conductor.template_definition.template_def_opts),
+        ('bay', magnum.drivers.common.template_def.template_def_opts),
         ('conductor', magnum.conductor.config.SERVICE_OPTS),
         ('database', magnum.db.sql_opts),
         ('docker', magnum.common.docker_utils.docker_opts),
@@ -61,5 +61,5 @@ def list_opts():
         ('baymodel', magnum.api.validation.baymodel_opts),
         ('keystone_auth', magnum.common.keystone.keystone_auth_opts),
         ('docker_registry',
-         magnum.conductor.template_definition.docker_registry_opts)
+         magnum.drivers.common.template_def.docker_registry_opts)
     ]
