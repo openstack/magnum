@@ -31,12 +31,24 @@ class Version(base.APIBase):
     links = [link.Link]
     """A Link that point to a specific version of the API"""
 
+    status = wtypes.text
+    """The current status of the version: CURRENT, SUPPORTED, UNSUPPORTED"""
+
+    max_version = wtypes.text
+    """The max microversion supported by this version"""
+
+    min_version = wtypes.text
+    """The min microversion supported by this version"""
+
     @staticmethod
-    def convert(id):
+    def convert(id, status, max, min):
         version = Version()
         version.id = id
         version.links = [link.Link.make_link('self', pecan.request.host_url,
                                              id, '', bookmark=True)]
+        version.status = status
+        version.max_version = max
+        version.min_version = min
         return version
 
 
@@ -51,17 +63,13 @@ class Root(base.APIBase):
     versions = [Version]
     """Links to all the versions available in this API"""
 
-    default_version = Version
-    """A link to the default version of the API"""
-
     @staticmethod
     def convert():
         root = Root()
         root.name = "OpenStack Magnum API"
         root.description = ("Magnum is an OpenStack project which aims to "
                             "provide container management.")
-        root.versions = [Version.convert('v1')]
-        root.default_version = Version.convert('v1')
+        root.versions = [Version.convert('v1', "CURRENT", "1.1", "1.1")]
         return root
 
 
