@@ -335,7 +335,8 @@ class TestPatch(api_base.FunctionalTest):
         self.assertTrue(response.json['errors'])
 
     def test_replace_baymodel_with_no_exist_external_network_id(self):
-        self.mock_valid_os_res.side_effect = exception.NetworkNotFound("aaa")
+        self.mock_valid_os_res.side_effect = exception.ExternalNetworkNotFound(
+            "aaa")
         response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
                                    [{'path': '/external_network_id',
                                      'value': 'aaa',
@@ -846,7 +847,8 @@ class TestPost(api_base.FunctionalTest):
     @mock.patch('magnum.api.attr_validator.validate_image')
     def test_create_baymodel_with_no_exist_external_network(self,
                                                             mock_image_data):
-        self.mock_valid_os_res.side_effect = exception.NetworkNotFound("test")
+        self.mock_valid_os_res.side_effect = exception.ExternalNetworkNotFound(
+            "test")
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
         bdict = apiutils.baymodel_post_data()

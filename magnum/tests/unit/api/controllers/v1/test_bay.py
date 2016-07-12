@@ -598,7 +598,7 @@ class TestPost(api_base.FunctionalTest):
 
     def test_create_bay_with_invalid_ext_network(self):
         bdict = apiutils.bay_post_data()
-        self.mock_valid_os_res.side_effect = exception.NetworkNotFound(
+        self.mock_valid_os_res.side_effect = exception.ExternalNetworkNotFound(
             'test-net')
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)

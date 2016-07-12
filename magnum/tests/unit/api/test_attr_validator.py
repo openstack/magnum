@@ -59,6 +59,18 @@ class TestAttrValidator(base.BaseTestCase):
         attr_validator.validate_external_network(mock_os_cli, 'test_ext_net')
         self.assertTrue(mock_neutron.list_networks.called)
 
+    def test_validate_external_network_with_multiple_valid_network(self):
+        mock_networks = {'networks':
+                         [{'name': 'test_ext_net', 'id': 'test_ext_net_id1'},
+                          {'name': 'test_ext_net', 'id': 'test_ext_net_id2'}]}
+        mock_neutron = mock.MagicMock()
+        mock_neutron.list_networks.return_value = mock_networks
+        mock_os_cli = mock.MagicMock()
+        mock_os_cli.neutron.return_value = mock_neutron
+        self.assertRaises(exception.Conflict,
+                          attr_validator.validate_external_network,
+                          mock_os_cli, 'test_ext_net')
+
     def test_validate_external_network_with_invalid_network(self):
         mock_networks = {'networks': [{'name': 'test_ext_net_not_equal',
                          'id': 'test_ext_net_id_not_equal'}]}
@@ -66,7 +78,7 @@ class TestAttrValidator(base.BaseTestCase):
         mock_neutron.list_networks.return_value = mock_networks
         mock_os_cli = mock.MagicMock()
         mock_os_cli.neutron.return_value = mock_neutron
-        self.assertRaises(exception.NetworkNotFound,
+        self.assertRaises(exception.ExternalNetworkNotFound,
                           attr_validator.validate_external_network,
                           mock_os_cli, 'test_ext_net')
 

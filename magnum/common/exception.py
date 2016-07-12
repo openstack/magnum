@@ -404,9 +404,10 @@ class FlavorNotFound(ResourceNotFound):
     code = 400
 
 
-class NetworkNotFound(ResourceNotFound):
+class ExternalNetworkNotFound(ResourceNotFound):
     """The code here changed to 400 according to the latest document."""
-    message = _("Unable to find network %(network)s.")
+    """"Ensure the network is not private."""
+    message = _("Unable to find external network %(network)s.")
     code = 400
 
 
