@@ -104,7 +104,7 @@ Run devstack::
 shipped with the milestone as the current master instructions are slightly
 incompatible.
 
-Prepare your session to be able to use the various openstack clients including
+Prepare your session to be able to use the various OpenStack clients including
 magnum, neutron, and glance. Create a new shell, and source the devstack openrc
 script::
 
