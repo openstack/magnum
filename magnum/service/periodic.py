@@ -129,8 +129,8 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
         else:
             LOG.info(_LI("Bay with id %(id)s not found in heat "
                          "with stack id %(sid)s, with status_reason: "
-                         "%(reason)."), {'id': bay.id, 'sid': bay.stack_id,
-                                         'reason': bay.status_reason})
+                         "%(reason)s."), {'id': bay.id, 'sid': bay.stack_id,
+                                          'reason': bay.status_reason})
 
     def _sync_missing_stack(self, bay, new_status):
         bay.status = new_status
