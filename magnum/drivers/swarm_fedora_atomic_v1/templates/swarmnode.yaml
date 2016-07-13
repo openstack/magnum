@@ -201,6 +201,7 @@ resources:
             "$SWARM_VERSION": {get_param: swarm_version}
             "$AGENT_WAIT_HANDLE_ENDPOINT": {get_attr: [node_agent_wait_handle, endpoint]}
             "$AGENT_WAIT_HANDLE_TOKEN": {get_attr: [node_agent_wait_handle, token]}
+            "$WAIT_CURL": {get_attr: [node_agent_wait_handle, curl_cli]}
             "$TRUSTEE_DOMAIN_ID": {get_param: trustee_domain_id}
             "$TRUSTEE_USER_ID": {get_param: trustee_user_id}
             "$TRUSTEE_USERNAME": {get_param: trustee_username}
