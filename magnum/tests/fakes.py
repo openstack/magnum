@@ -25,7 +25,7 @@ fakeAuthTokenHeaders = {'X-User-Id': u'773a902f022949619b5c2f32cd89d419',
                         'X-User-Domain-Name': 'domain',
                         'X-Project-Domain-Id': 'project_domain_id',
                         'X-User-Domain-Id': 'user_domain_id',
-                        'X-OpenStack-API-Version': 'container-infra 1.0'
+                        'OpenStack-API-Version': 'container-infra 1.0'
                         }
 
 

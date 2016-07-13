@@ -53,13 +53,13 @@ class APIBase(wtypes.Base):
 class Version(object):
     """API Version object."""
 
-    string = 'X-OpenStack-API-Version'
+    string = 'OpenStack-API-Version'
     """HTTP Header string carrying the requested version"""
 
-    min_string = 'X-OpenStack-API-Minimum-Version'
+    min_string = 'OpenStack-API-Minimum-Version'
     """HTTP response header"""
 
-    max_string = 'X-OpenStack-API-Maximum-Version'
+    max_string = 'OpenStack-API-Maximum-Version'
     """HTTP response header"""
 
     service_string = 'container-infra'
