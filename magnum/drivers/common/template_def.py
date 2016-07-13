@@ -223,7 +223,7 @@ class TemplateDefinition(object):
 
         :param server_type: The server_type the bay definition
                                    will build on
-        :param os: The operation system the bay definition will build on
+        :param os: The operating system the bay definition will build on
         :param coe: The Container Orchestration Environment the bay will
                     produce
 
