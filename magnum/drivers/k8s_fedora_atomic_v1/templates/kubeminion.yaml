@@ -441,6 +441,6 @@ outputs:
       This is the "public" IP address of the Kubernetes minion node.
 
   OS::stack_id:
-    value: {get_attr: [kube_minion_eth0, fixed_ips, 0, ip_address]}
+    value: {get_param: "OS::stack_id"}
     description: >
       This is a id of the stack which creates from this template.
