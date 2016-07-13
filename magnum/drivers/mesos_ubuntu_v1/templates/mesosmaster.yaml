@@ -78,7 +78,7 @@ resources:
       port_id: {get_resource: mesos_master_eth0}
 
   api_pool_member:
-    type: OS::Neutron::PoolMember
+    type: Magnum::Optional::Neutron::PoolMember
     properties:
       pool_id: {get_param: api_pool_id}
       address: {get_attr: [mesos_master_eth0, fixed_ips, 0, ip_address]}

@@ -45,7 +45,8 @@ class TestBayConductorWithMesos(base.TestCase):
                        'mesos_slave_image_providers': 'docker',
                        'mesos_slave_executor_env_variables': '{}',
                        'mesos_slave_work_dir': '/tmp/mesos/slave'
-                       }
+                       },
+            'master_lb_enabled': False,
         }
         self.bay_dict = {
             'id': 1,
@@ -120,7 +121,7 @@ class TestBayConductorWithMesos(base.TestCase):
             'mesos_slave_image_providers': 'docker'
         }
         self.assertEqual(expected, definition)
-        self.assertEqual([], env_files)
+        self.assertEqual(['environments/no_master_lb.yaml'], env_files)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_only_required(
@@ -164,7 +165,102 @@ class TestBayConductorWithMesos(base.TestCase):
             'mesos_slave_image_providers': 'docker'
         }
         self.assertEqual(expected, definition)
-        self.assertEqual([], env_files)
+        self.assertEqual(['environments/no_master_lb.yaml'], env_files)
+
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_template_definition_with_lb(
+            self,
+            mock_objects_baymodel_get_by_uuid):
+        self.baymodel_dict['master_lb_enabled'] = True
+        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        bay = objects.Bay(self.context, **self.bay_dict)
+
+        (template_path,
+         definition,
+         env_files) = bay_conductor._extract_template_definition(self.context,
+                                                                 bay)
+
+        expected = {
+            'ssh_key_name': 'keypair_id',
+            'external_network': 'external_network_id',
+            'dns_nameserver': 'dns_nameserver',
+            'server_image': 'image_id',
+            'master_flavor': 'master_flavor_id',
+            'slave_flavor': 'flavor_id',
+            'number_of_slaves': 1,
+            'number_of_masters': 1,
+            'http_proxy': 'http_proxy',
+            'https_proxy': 'https_proxy',
+            'no_proxy': 'no_proxy',
+            'cluster_name': 'bay1',
+            'trustee_domain_id': self.mock_keystone.trustee_domain_id,
+            'trustee_username': 'fake_trustee',
+            'trustee_password': 'fake_trustee_password',
+            'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
+            'volume_driver': 'volume_driver',
+            'auth_url': 'http://192.168.10.10:5000/v3',
+            'region_name': self.mock_osc.cinder_region_name.return_value,
+            'username': 'mesos_user',
+            'tenant_name': 'admin',
+            'domain_name': 'domainname',
+            'rexray_preempt': 'False',
+            'mesos_slave_executor_env_variables': '{}',
+            'mesos_slave_isolation': 'docker/runtime,filesystem/linux',
+            'mesos_slave_work_dir': '/tmp/mesos/slave',
+            'mesos_slave_image_providers': 'docker'
+        }
+        self.assertEqual(expected, definition)
+        self.assertEqual(['environments/with_master_lb.yaml'], env_files)
+
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_template_definition_multi_master(
+            self,
+            mock_objects_baymodel_get_by_uuid):
+        self.baymodel_dict['master_lb_enabled'] = True
+        self.bay_dict['master_count'] = 2
+        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        bay = objects.Bay(self.context, **self.bay_dict)
+
+        (template_path,
+         definition,
+         env_files) = bay_conductor._extract_template_definition(self.context,
+                                                                 bay)
+
+        expected = {
+            'ssh_key_name': 'keypair_id',
+            'external_network': 'external_network_id',
+            'dns_nameserver': 'dns_nameserver',
+            'server_image': 'image_id',
+            'master_flavor': 'master_flavor_id',
+            'slave_flavor': 'flavor_id',
+            'number_of_slaves': 1,
+            'number_of_masters': 2,
+            'http_proxy': 'http_proxy',
+            'https_proxy': 'https_proxy',
+            'no_proxy': 'no_proxy',
+            'cluster_name': 'bay1',
+            'trustee_domain_id': self.mock_keystone.trustee_domain_id,
+            'trustee_username': 'fake_trustee',
+            'trustee_password': 'fake_trustee_password',
+            'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
+            'volume_driver': 'volume_driver',
+            'auth_url': 'http://192.168.10.10:5000/v3',
+            'region_name': self.mock_osc.cinder_region_name.return_value,
+            'username': 'mesos_user',
+            'tenant_name': 'admin',
+            'domain_name': 'domainname',
+            'rexray_preempt': 'False',
+            'mesos_slave_executor_env_variables': '{}',
+            'mesos_slave_isolation': 'docker/runtime,filesystem/linux',
+            'mesos_slave_work_dir': '/tmp/mesos/slave',
+            'mesos_slave_image_providers': 'docker'
+        }
+        self.assertEqual(expected, definition)
+        self.assertEqual(['environments/with_master_lb.yaml'], env_files)
 
     @patch('magnum.conductor.utils.retrieve_baymodel')
     @patch('oslo_config.cfg')

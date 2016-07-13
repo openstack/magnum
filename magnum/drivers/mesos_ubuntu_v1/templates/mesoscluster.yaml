@@ -345,7 +345,7 @@ resources:
   #
 
   api_monitor:
-    type: OS::Neutron::HealthMonitor
+    type: Magnum::Optional::Neutron::Pool::HealthMonitor
     properties:
       type: TCP
       delay: 5
@@ -353,7 +353,7 @@ resources:
       timeout: 5
 
   api_pool:
-    type: OS::Neutron::Pool
+    type: Magnum::Optional::Neutron::Pool
     properties:
       protocol: HTTP
       monitors: [{get_resource: api_monitor}]
@@ -364,12 +364,24 @@ resources:
       description: API pool for Mesos bay
 
   api_pool_floating:
-    type: OS::Neutron::FloatingIP
+    type: Magnum::Optional::Neutron::Pool::FloatingIP
     depends_on:
       - extrouter_inside
     properties:
       floating_network: {get_param: external_network}
       port_id: {get_attr: [api_pool, vip, port_id]}
+
+  ######################################################################
+  #
+  # resources that expose the IPs of either the mesos master or a given
+  # LBaaS pool depending on whether LBaaS is enabled for the bay.
+  #
+
+  api_address_switch:
+    type: Magnum::ApiGatewaySwitcher
+    properties:
+      pool_public_ip: {get_attr: [api_pool_floating, floating_ip_address]}
+      master_public_ip: {get_attr: [mesos_masters, resource.0.mesos_master_external_ip]}
 
   ######################################################################
   #
@@ -441,7 +453,7 @@ resources:
 outputs:
 
   api_address:
-    value: {get_attr: [api_pool_floating, floating_ip_address]}
+    value: {get_attr: [api_address_switch, public_ip]}
     description: >
       This is the API endpoint of the Mesos master. Use this to access
       the Mesos API from outside the cluster.
