@@ -13,13 +13,10 @@
 #    under the License.
 
 from oslo_config import cfg
-from oslo_log import log as logging
 
 from magnum.common.cert_manager import cert_manager
 from magnum import objects
 
-
-LOG = logging.getLogger(__name__)
 
 CONF = cfg.CONF
 
