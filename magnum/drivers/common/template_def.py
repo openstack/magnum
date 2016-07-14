@@ -36,8 +36,9 @@ template_def_opts = [
                default='https://discovery.etcd.io/new?size=%(size)d',
                help=_('Url for etcd public discovery endpoint.')),
     cfg.ListOpt('enabled_definitions',
-                default=['magnum_vm_atomic_k8s', 'magnum_vm_coreos_k8s',
-                         'magnum_vm_atomic_swarm', 'magnum_vm_ubuntu_mesos'],
+                default=['magnum_vm_atomic_k8s', 'magnum_bm_fedora_k8s',
+                         'magnum_vm_coreos_k8s', 'magnum_vm_atomic_swarm',
+                         'magnum_vm_ubuntu_mesos'],
                 help=_('Enabled bay definition entry points.')),
 ]
 

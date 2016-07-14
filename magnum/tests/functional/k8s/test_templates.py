@@ -18,7 +18,7 @@ from magnum.tests import base
 class TestTemplates(base.TestCase):
     def test_templates_list(self):
         entry_points = list(tdef.TemplateDefinition.load_entry_points())
-        self.assertEqual(4, len(entry_points))
+        self.assertEqual(5, len(entry_points))
 
         templates = []
         for entry_point, def_class in entry_points:
@@ -27,5 +27,6 @@ class TestTemplates(base.TestCase):
         self.assertEqual(['AtomicK8sTemplateDefinition',
                           'AtomicSwarmTemplateDefinition',
                           'CoreOSK8sTemplateDefinition',
+                          'FedoraK8sIronicTemplateDefinition',
                           'UbuntuMesosTemplateDefinition'],
                          sorted(templates))

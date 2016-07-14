@@ -2,7 +2,12 @@
 
 . /etc/sysconfig/heat-params
 
-myip="$KUBE_NODE_IP"
+if [ -z "$KUBE_NODE_IP" ]; then
+  # FIXME(yuanying): Set KUBE_NODE_IP correctly
+  KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+fi
+
+myip="${KUBE_NODE_IP}"
 
 cat > /etc/etcd/etcd.conf <<EOF
 ETCD_NAME="$myip"

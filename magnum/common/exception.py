@@ -175,6 +175,10 @@ class InvalidCsr(Invalid):
     message = _("Received invalid csr %(csr)s.")
 
 
+class InvalidSubnet(Invalid):
+    message = _("Received invalid subnet %(subnet)s.")
+
+
 class HTTPNotFound(ResourceNotFound):
     pass
 

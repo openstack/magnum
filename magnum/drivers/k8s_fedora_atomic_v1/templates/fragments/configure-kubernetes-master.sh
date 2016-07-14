@@ -3,6 +3,12 @@
 . /etc/sysconfig/heat-params
 
 echo "configuring kubernetes (master)"
+
+if [ -z "$KUBE_NODE_IP" ]; then
+  # FIXME(yuanying): Set KUBE_NODE_IP correctly
+  KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+fi
+
 sed -i '
   /^ETCD_LISTEN_CLIENT_URLS=/ s/=.*/="http:\/\/0.0.0.0:2379"/
 ' /etc/etcd/etcd.conf
