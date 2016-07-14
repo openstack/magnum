@@ -89,15 +89,15 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   as appropriate for the bay driver.  For the currently supported
   images, the os-distro names are:
 
-  +------------+-----------------------+
-  | COE        |  os-distro            |
-  +============+=======================+
-  | kubernetes | fedora-atomic, coreos |
-  | swarm      | fedora-atomic         |
-  | mesos      | ubuntu                |
-  +------------+-----------------------+
+  ========== =====================
+  COE        os-distro
+  ========== =====================
+  Kubernetes Fedora-atomic, CoreOS
+  Swarm      Fedora-atomic
+  Mesos      Ubuntu
+  ========== =====================
 
-  This is a mandatory parameter and there is no default value.
+This is a mandatory parameter and there is no default value.
 
 --keypair-id \<keypair-id\>
   The name or UUID of the SSH keypair to configure in the bay servers
@@ -143,26 +143,26 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   to the particular driver; refer to the `Networking`_ section for more
   details.  Supported network drivers and the default driver are:
 
-  +------------+-----------------+---------+
-  | COE        | network-driver  | default |
-  +============+=================+=========+
-  | kubernetes | flannel         | flannel |
-  | swarm      | docker, flannel | docker  |
-  | mesos      | docker          | docker  |
-  +------------+-----------------+---------+
+  ===========  =================  ========
+  COE           Network-Driver    Default
+  ===========  =================  ========
+  Kubernetes   Flannel            Flannel
+  Swarm        Docker, Flannel    Flannel
+  Mesos        Docker             Docker
+  ===========  =================  ========
 
 --volume-driver \<volume-driver\>
   The name of a volume driver for managing the persistent storage for
   the containers.  The functionality supported are specific to the
   driver.  Supported volume drivers and the default driver are:
 
-  +------------+-----------------+-----------+
-  | COE        | volume-driver   | default   |
-  +============+=================+===========+
-  | kubernetes | cinder          | no driver |
-  | swarm      | rexray          | no driver |
-  | mesos      | rexray          | no driver |
-  +------------+-----------------+-----------+
+  ============= ============= ===========
+  COE           Volume-Driver Default
+  ============= ============= ===========
+  Kubernetes    Cinder        No Driver
+  Swarm         Rexray        No Driver
+  Mesos         Rexray        No Driver
+  ============= ============= ===========
 
 --dns-nameserver \<dns-nameserver\>
   The DNS nameserver for the servers and containers in the bay to use.
