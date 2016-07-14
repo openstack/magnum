@@ -138,6 +138,8 @@ class BaseMagnumClient(base.BaseMagnumTest):
         volume_driver = kwargs.pop('volume_driver', 'cinder')
         labels = kwargs.pop('labels', {"K1": "V1", "K2": "V2"})
         tls_disabled = kwargs.pop('tls_disabled', False)
+        fixed_subnet = kwargs.pop('fixed_subnet', None)
+        server_type = kwargs.pop('server_type', 'vm')
 
         baymodel = cls.cs.baymodels.create(
             name=name,
@@ -153,6 +155,8 @@ class BaseMagnumClient(base.BaseMagnumTest):
             coe=coe,
             labels=labels,
             tls_disabled=tls_disabled,
+            fixed_subnet=fixed_subnet,
+            server_type=server_type,
             **kwargs)
         return baymodel
 
@@ -200,7 +204,7 @@ class BaseMagnumClient(base.BaseMagnumTest):
             bay,
             [None, "CREATE_IN_PROGRESS"],
             ["CREATE_FAILED", "CREATE_COMPLETE"],
-            timeout=1800
+            timeout=self.bay_complete_timeout
         )
 
         if self.cs.bays.get(bay.uuid).status == 'CREATE_FAILED':
@@ -230,6 +234,8 @@ extendedKeyUsage = clientAuth
     key_file = None
     cert_file = None
     ca_file = None
+
+    bay_complete_timeout = 1800
 
     @classmethod
     def setUpClass(cls):

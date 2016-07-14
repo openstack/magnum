@@ -67,9 +67,7 @@ else
     MAGNUM_BIN_DIR=$(get_python_exec_prefix)
 fi
 
-if is_service_enabled ir-api; then
-    MAGNUM_CONFIGURE_IPTABLES=${MAGNUM_CONFIGURE_IPTABLES:-False}
-fi
+MAGNUM_CONFIGURE_IPTABLES=${MAGNUM_CONFIGURE_IPTABLES:-True}
 
 # Functions
 # ---------
@@ -270,8 +268,28 @@ function magnum_register_image {
     if [ ! -z "$coreos" ]; then
         magnum_image_property=$magnum_image_property"coreos"
     fi
+    # os_distro property for fedora ironic image
+    local fedora_ironic="$(echo $MAGNUM_GUEST_IMAGE_URL | grep -i "ironic" \
+                                                        | grep -io "fedora" || true;)"
+    if [ ! -z "$fedora_ironic" ]; then
+        magnum_image_property=$magnum_image_property"fedora"
+    fi
 
-    openstack --os-url $GLANCE_SERVICE_PROTOCOL://$GLANCE_HOSTPORT --os-image-api-version 1 image set $(basename "$MAGNUM_GUEST_IMAGE_URL" ".qcow2") $magnum_image_property
+    # get the image name
+    local image_filename=$(basename "$MAGNUM_GUEST_IMAGE_URL")
+    local image_name=""
+    for extension in "tgz" "img" "qcow2" "iso" "vhd" "vhdx" "tar.gz" "img.gz" "img.bz2" "vhd.gz" "vhdx.gz"
+    do
+        if [ $(expr match "${image_filename}" ".*\.${extension}$") -ne 0 ]; then
+            image_name=$(basename "$image_filename" ".${extension}")
+            break
+        fi
+    done
+    if [ -z ${image_name} ]; then
+        echo "Unknown image extension in $image_filename, supported extensions: tgz, img, qcow2, iso, vhd, vhdx, tar.gz, img.gz, img.bz2, vhd.gz, vhdx.gz"; false
+    fi
+
+    openstack --os-url $GLANCE_SERVICE_PROTOCOL://$GLANCE_HOSTPORT --os-image-api-version 1 image set $image_name $magnum_image_property
 }
 
 # install_magnumclient() - Collect source and prepare
