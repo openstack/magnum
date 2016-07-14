@@ -22,7 +22,7 @@ iso8601>=0.1.9 # MIT
 jsonpatch>=1.1 # BSD
 keystonemiddleware!=4.1.0,>=4.0.0 # Apache-2.0
 netaddr!=0.7.16,>=0.7.12 # BSD
-oslo.concurrency>=3.5.0 # Apache-2.0
+oslo.concurrency>=3.7.1 # Apache-2.0
 oslo.config>=3.7.0 # Apache-2.0
 oslo.context>=0.2.0 # Apache-2.0
 oslo.db>=4.1.0 # Apache-2.0
@@ -46,7 +46,7 @@ python-neutronclient!=4.1.0,>=2.6.0 # Apache-2.0
 python-novaclient!=2.33.0,>=2.29.0 # Apache-2.0
 python-keystoneclient!=1.8.0,!=2.1.0,<3.0.0,>=1.6.0 # Apache-2.0
 requests!=2.9.0,>=2.8.1 # Apache-2.0
-setuptools>=16.0 # PSF/ZPL
+setuptools!=24.0.0,>=16.0 # PSF/ZPL
 six>=1.9.0 # MIT
 stevedore>=1.5.0 # Apache-2.0
 taskflow>=1.26.0 # Apache-2.0
