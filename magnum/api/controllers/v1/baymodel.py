@@ -14,7 +14,6 @@
 
 from oslo_utils import timeutils
 import pecan
-from pecan import rest
 import wsme
 from wsme import types as wtypes
 
@@ -226,7 +225,7 @@ class BayModelCollection(collection.Collection):
         return sample
 
 
-class BayModelsController(rest.RestController):
+class BayModelsController(base.Controller):
     """REST controller for BayModels."""
 
     _custom_actions = {

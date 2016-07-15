@@ -19,6 +19,7 @@ from wsme import types as wtypes
 from magnum.api.controllers import base
 from magnum.api.controllers import link
 from magnum.api.controllers import v1
+from magnum.api.controllers import versions
 from magnum.api import expose
 
 
@@ -69,7 +70,9 @@ class Root(base.APIBase):
         root.name = "OpenStack Magnum API"
         root.description = ("Magnum is an OpenStack project which aims to "
                             "provide container management.")
-        root.versions = [Version.convert('v1', "CURRENT", "1.1", "1.1")]
+        root.versions = [Version.convert('v1', "CURRENT",
+                                         versions.CURRENT_MAX_VER,
+                                         versions.BASE_VER)]
         return root
 
 

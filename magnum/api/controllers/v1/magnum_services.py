@@ -11,7 +11,6 @@
 #    under the License.
 
 import pecan
-from pecan import rest
 import wsme
 from wsme import types as wtypes
 
@@ -79,7 +78,7 @@ class MagnumServiceCollection(collection.Collection):
         return collection
 
 
-class MagnumServiceController(rest.RestController):
+class MagnumServiceController(base.Controller):
     """REST controller for magnum-services."""
 
     def __init__(self, **kwargs):

@@ -184,6 +184,11 @@ class Conflict(MagnumException):
     code = 409
 
 
+class ApiVersionsIntersect(MagnumException):
+    message = _("Version of %(name)s %(min_ver)s %(max_ver)s intersects "
+                "with another versions.")
+
+
 # Cannot be templated as the error syntax varies.
 # msg needs to be constructed when raised.
 class InvalidParameterValue(Invalid):

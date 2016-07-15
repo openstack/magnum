@@ -20,7 +20,6 @@ NOTE: IN PROGRESS AND NOT FULLY IMPLEMENTED.
 
 from oslo_log import log as logging
 import pecan
-from pecan import rest
 from wsme import types as wtypes
 
 from magnum.api.controllers import base as controllers_base
@@ -29,6 +28,7 @@ from magnum.api.controllers.v1 import bay
 from magnum.api.controllers.v1 import baymodel
 from magnum.api.controllers.v1 import certificate
 from magnum.api.controllers.v1 import magnum_services
+from magnum.api.controllers import versions as ver
 from magnum.api import expose
 from magnum.api import http_error
 from magnum.i18n import _
@@ -38,28 +38,14 @@ LOG = logging.getLogger(__name__)
 
 BASE_VERSION = 1
 
-# NOTE(yuntong): v1.0 is reserved to indicate Kilo's API, but is not presently
-#             supported by the API service. All changes between Kilo and the
-#             point where we added microversioning are considered backwards-
-#             compatible, but are not specifically discoverable at this time.
-#
-#             The v1.1 version indicates this "initial" version as being
-#             different from Kilo (v1.0), and includes the following changes:
-#
+MIN_VER_STR = '%s %s' % (ver.Version.service_string, ver.BASE_VER)
 
-# v1.1: API at the point in time when microversioning support was added
-MIN_VER_STR = 'container-infra 1.1'
+MAX_VER_STR = '%s %s' % (ver.Version.service_string, ver.CURRENT_MAX_VER)
 
-# v1.1: Add API changelog here
-MAX_VER_STR = 'container-infra 1.1'
-
-
-MIN_VER = controllers_base.Version(
-    {controllers_base.Version.string: MIN_VER_STR},
-    MIN_VER_STR, MAX_VER_STR)
-MAX_VER = controllers_base.Version(
-    {controllers_base.Version.string: MAX_VER_STR},
-    MIN_VER_STR, MAX_VER_STR)
+MIN_VER = ver.Version({ver.Version.string: MIN_VER_STR},
+                      MIN_VER_STR, MAX_VER_STR)
+MAX_VER = ver.Version({ver.Version.string: MAX_VER_STR},
+                      MIN_VER_STR, MAX_VER_STR)
 
 
 class MediaType(controllers_base.APIBase):
@@ -137,7 +123,7 @@ class V1(controllers_base.APIBase):
         return v1
 
 
-class Controller(rest.RestController):
+class Controller(controllers_base.Controller):
     """Version 1 API controller root."""
 
     bays = bay.BaysController()
@@ -180,22 +166,18 @@ class Controller(rest.RestController):
 
     @pecan.expose()
     def _route(self, args):
-        version = controllers_base.Version(
+        version = ver.Version(
             pecan.request.headers, MIN_VER_STR, MAX_VER_STR)
 
         # Always set the basic version headers
-        pecan.response.headers[
-            controllers_base.Version.min_string] = MIN_VER_STR
-        pecan.response.headers[
-            controllers_base.Version.max_string] = MAX_VER_STR
-        pecan.response.headers[
-            controllers_base.Version.string] = " ".join(
-            [controllers_base.Version.service_string, str(version)])
-        pecan.response.headers["vary"] = controllers_base.Version.string
+        pecan.response.headers[ver.Version.min_string] = MIN_VER_STR
+        pecan.response.headers[ver.Version.max_string] = MAX_VER_STR
+        pecan.response.headers[ver.Version.string] = " ".join(
+            [ver.Version.service_string, str(version)])
+        pecan.response.headers["vary"] = ver.Version.string
 
         # assert that requested version is supported
         self._check_version(version, pecan.response.headers)
-        pecan.response.headers[controllers_base.Version.string] = str(version)
         pecan.request.version = version
         if pecan.request.body:
             msg = ("Processing request: url: %(url)s, %(method)s, "
@@ -206,5 +188,6 @@ class Controller(rest.RestController):
             LOG.debug(msg)
 
         return super(Controller, self)._route(args)
+
 
 __all__ = (Controller)

@@ -14,7 +14,6 @@
 
 from oslo_utils import timeutils
 import pecan
-from pecan import rest
 import wsme
 from wsme import types as wtypes
 
@@ -114,7 +113,7 @@ class Certificate(base.APIBase):
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 
 
-class CertificateController(rest.RestController):
+class CertificateController(base.Controller):
     """REST controller for Certificate."""
 
     def __init__(self):
