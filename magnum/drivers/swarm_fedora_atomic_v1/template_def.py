@@ -112,6 +112,12 @@ class AtomicSwarmTemplateDefinition(template_def.BaseTemplateDefinition):
                                       extra_params=extra_params,
                                       **kwargs)
 
+    def get_env_files(self, baymodel):
+        if baymodel.master_lb_enabled:
+            return ['environments/with_master_lb.yaml']
+        else:
+            return ['environments/no_master_lb.yaml']
+
     @property
     def template_path(self):
         return os.path.join(os.path.dirname(os.path.realpath(__file__)),

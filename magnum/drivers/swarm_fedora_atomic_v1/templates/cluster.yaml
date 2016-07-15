@@ -274,7 +274,7 @@ resources:
   #
 
   api_monitor:
-    type: OS::Neutron::HealthMonitor
+    type: Magnum::Optional::Neutron::Pool::HealthMonitor
     properties:
       type: TCP
       delay: 5
@@ -282,7 +282,7 @@ resources:
       timeout: 5
 
   api_pool:
-    type: OS::Neutron::Pool
+    type: Magnum::Optional::Neutron::Pool
     properties:
       protocol: {get_param: loadbalancing_protocol}
       monitors: [{get_resource: api_monitor}]
@@ -292,7 +292,7 @@ resources:
         protocol_port: {get_param: swarm_port}
 
   api_pool_floating:
-    type: OS::Neutron::FloatingIP
+    type: Magnum::Optional::Neutron::Pool::FloatingIP
     depends_on:
       - extrouter_inside
     properties:
@@ -300,7 +300,7 @@ resources:
       port_id: {get_attr: [api_pool, vip, port_id]}
 
   etcd_monitor:
-    type: OS::Neutron::HealthMonitor
+    type: Magnum::Optional::Neutron::Pool::HealthMonitor
     properties:
       type: TCP
       delay: 5
@@ -308,7 +308,7 @@ resources:
       timeout: 5
 
   etcd_pool:
-    type: OS::Neutron::Pool
+    type: Magnum::Optional::Neutron::Pool
     properties:
       protocol: HTTP
       monitors: [{get_resource: etcd_monitor}]
@@ -316,6 +316,26 @@ resources:
       lb_method: ROUND_ROBIN
       vip:
         protocol_port: 2379
+
+  ######################################################################
+  #
+  # resources that expose the IPs of either the swarm master or a given
+  # LBaaS pool depending on whether LBaaS is enabled for the bay.
+  #
+
+  api_address_switch:
+    type: Magnum::ApiGatewaySwitcher
+    properties:
+      pool_public_ip: {get_attr: [api_pool_floating, floating_ip_address]}
+      pool_private_ip: {get_attr: [api_pool, vip, address]}
+      master_public_ip: {get_attr: [swarm_masters, resource.0.swarm_master_external_ip]}
+      master_private_ip: {get_attr: [swarm_masters, resource.0.swarm_master_ip]}
+
+  etcd_address_switch:
+    type: Magnum::ApiGatewaySwitcher
+    properties:
+      pool_private_ip: {get_attr: [etcd_pool, vip, address]}
+      master_private_ip: {get_attr: [swarm_masters, resource.0.swarm_master_ip]}
 
   ######################################################################
   #
@@ -385,15 +405,15 @@ resources:
           http_proxy: {get_param: http_proxy}
           https_proxy: {get_param: https_proxy}
           no_proxy: {get_param: no_proxy}
-          swarm_api_ip: {get_attr: [api_pool, vip, address]}
+          swarm_api_ip: {get_attr: [api_address_switch, private_ip]}
           bay_uuid: {get_param: bay_uuid}
           magnum_url: {get_param: magnum_url}
           tls_disabled: {get_param: tls_disabled}
           secgroup_swarm_node_id: {get_resource: secgroup_manager}
           flannel_network_cidr: {get_param: flannel_network_cidr}
           network_driver: {get_param: network_driver}
-          etcd_server_ip: {get_attr: [etcd_pool, vip, address]}
-          api_ip_address: {get_attr: [api_pool_floating, floating_ip_address]}
+          etcd_server_ip: {get_attr: [etcd_address_switch, private_ip]}
+          api_ip_address: {get_attr: [api_address_switch, public_ip]}
           swarm_version: {get_param: swarm_version}
           trustee_domain_id: {get_param: trustee_domain_id}
           trustee_user_id: {get_param: trustee_user_id}
@@ -415,7 +435,7 @@ outputs:
       str_replace:
         template: api_ip_address
         params:
-          api_ip_address: {get_attr: [api_pool_floating, floating_ip_address]}
+          api_ip_address: {get_attr: [api_address_switch, public_ip]}
     description: >
       This is the API endpoint of the Swarm masters. Use this to access
       the Swarm API server from outside the cluster.

@@ -46,7 +46,8 @@ class TestBayConductorWithSwarm(base.TestCase):
             'network_driver': 'network_driver',
             'labels': {'flannel_network_cidr': '10.101.0.0/16',
                        'flannel_network_subnetlen': '26',
-                       'flannel_backend': 'vxlan'}
+                       'flannel_backend': 'vxlan'},
+            'master_lb_enabled': False,
         }
         self.bay_dict = {
             'id': 1,
@@ -126,7 +127,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v3'
         }
         self.assertEqual(expected, definition)
-        self.assertEqual([], env_files)
+        self.assertEqual(['environments/no_master_lb.yaml'], env_files)
 
     @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
@@ -186,7 +187,7 @@ class TestBayConductorWithSwarm(base.TestCase):
             'docker_storage_driver': 'devicemapper'
         }
         self.assertEqual(expected, definition)
-        self.assertEqual([], env_files)
+        self.assertEqual(['environments/no_master_lb.yaml'], env_files)
 
     @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
@@ -238,7 +239,116 @@ class TestBayConductorWithSwarm(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v3'
         }
         self.assertEqual(expected, definition)
-        self.assertEqual([], env_files)
+        self.assertEqual(['environments/no_master_lb.yaml'], env_files)
+
+    @patch('requests.get')
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_template_definition_with_lb(
+            self,
+            mock_objects_baymodel_get_by_uuid,
+            mock_get):
+        self.baymodel_dict['master_lb_enabled'] = True
+        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        expected_result = str('{"action":"get","node":{"key":"test","value":'
+                              '"1","modifiedIndex":10,"createdIndex":10}}')
+        mock_resp = mock.MagicMock()
+        mock_resp.text = expected_result
+        mock_get.return_value = mock_resp
+        bay = objects.Bay(self.context, **self.bay_dict)
+
+        (template_path,
+         definition,
+         env_files) = bay_conductor._extract_template_definition(self.context,
+                                                                 bay)
+
+        expected = {
+            'ssh_key_name': 'keypair_id',
+            'external_network': 'external_network_id',
+            'dns_nameserver': 'dns_nameserver',
+            'server_image': 'image_id',
+            'master_flavor': 'master_flavor_id',
+            'node_flavor': 'flavor_id',
+            'number_of_masters': 1,
+            'number_of_nodes': 1,
+            'docker_volume_size': 20,
+            'docker_storage_driver': 'devicemapper',
+            'discovery_url': 'https://discovery.test.io/123456789',
+            'http_proxy': 'http_proxy',
+            'https_proxy': 'https_proxy',
+            'no_proxy': 'no_proxy',
+            'bay_uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
+            'magnum_url': self.mock_osc.magnum_url.return_value,
+            'tls_disabled': False,
+            'registry_enabled': False,
+            'network_driver': 'network_driver',
+            'flannel_network_cidr': '10.101.0.0/16',
+            'flannel_network_subnetlen': '26',
+            'flannel_backend': 'vxlan',
+            'trustee_domain_id': self.mock_keystone.trustee_domain_id,
+            'trustee_username': 'fake_trustee',
+            'trustee_password': 'fake_trustee_password',
+            'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
+            'auth_url': 'http://192.168.10.10:5000/v3'
+        }
+        self.assertEqual(expected, definition)
+        self.assertEqual(['environments/with_master_lb.yaml'], env_files)
+
+    @patch('requests.get')
+    @patch('magnum.objects.BayModel.get_by_uuid')
+    def test_extract_template_definition_multi_master(
+            self,
+            mock_objects_baymodel_get_by_uuid,
+            mock_get):
+        self.baymodel_dict['master_lb_enabled'] = True
+        self.bay_dict['master_count'] = 2
+        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
+        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        expected_result = str('{"action":"get","node":{"key":"test","value":'
+                              '"2","modifiedIndex":10,"createdIndex":10}}')
+        mock_resp = mock.MagicMock()
+        mock_resp.text = expected_result
+        mock_get.return_value = mock_resp
+        bay = objects.Bay(self.context, **self.bay_dict)
+
+        (template_path,
+         definition,
+         env_files) = bay_conductor._extract_template_definition(self.context,
+                                                                 bay)
+
+        expected = {
+            'ssh_key_name': 'keypair_id',
+            'external_network': 'external_network_id',
+            'dns_nameserver': 'dns_nameserver',
+            'server_image': 'image_id',
+            'master_flavor': 'master_flavor_id',
+            'node_flavor': 'flavor_id',
+            'number_of_masters': 2,
+            'number_of_nodes': 1,
+            'docker_volume_size': 20,
+            'docker_storage_driver': 'devicemapper',
+            'discovery_url': 'https://discovery.test.io/123456789',
+            'http_proxy': 'http_proxy',
+            'https_proxy': 'https_proxy',
+            'no_proxy': 'no_proxy',
+            'bay_uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
+            'magnum_url': self.mock_osc.magnum_url.return_value,
+            'tls_disabled': False,
+            'registry_enabled': False,
+            'network_driver': 'network_driver',
+            'flannel_network_cidr': '10.101.0.0/16',
+            'flannel_network_subnetlen': '26',
+            'flannel_backend': 'vxlan',
+            'trustee_domain_id': self.mock_keystone.trustee_domain_id,
+            'trustee_username': 'fake_trustee',
+            'trustee_password': 'fake_trustee_password',
+            'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
+            'auth_url': 'http://192.168.10.10:5000/v3'
+        }
+        self.assertEqual(expected, definition)
+        self.assertEqual(['environments/with_master_lb.yaml'], env_files)
 
     @patch('magnum.conductor.utils.retrieve_baymodel')
     @patch('oslo_config.cfg')
