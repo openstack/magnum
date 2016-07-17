@@ -12,6 +12,7 @@
 
 import yaml
 
+from magnum.i18n import _LE
 
 if hasattr(yaml, 'CSafeDumper'):
     yaml_dumper = yaml.CSafeDumper
@@ -23,15 +24,17 @@ def load(s):
     try:
         yml_dict = yaml.safe_load(s)
     except yaml.YAMLError as exc:
-        msg = 'An error occurred during YAML parsing.'
+        msg = _LE('An error occurred during YAML parsing.')
         if hasattr(exc, 'problem_mark'):
-            msg += ' Error position: (%s:%s)' % (exc.problem_mark.line + 1,
-                                                 exc.problem_mark.column + 1)
+            msg += _LE(' Error position: '
+                       '(%(l)s:%(c)s)') % {'l': exc.problem_mark.line + 1,
+                                           'c': exc.problem_mark.column + 1}
         raise ValueError(msg)
     if not isinstance(yml_dict, dict) and not isinstance(yml_dict, list):
-        raise ValueError('The source is not a YAML mapping or list.')
+        raise ValueError(_LE('The source is not a YAML mapping or list.'))
     if isinstance(yml_dict, dict) and len(yml_dict) < 1:
-        raise ValueError('Could not find any element in your YAML mapping.')
+        raise ValueError(_LE('Could not find any element in your YAML '
+                             'mapping.'))
     return yml_dict
 
 
