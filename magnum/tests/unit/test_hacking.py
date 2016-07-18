@@ -166,7 +166,7 @@ class HackingTestCase(base.TestCase):
         code = "self.assertEqual(A is not None)"
         self._assert_has_errors(code, check, errors)
 
-        code = "self.assertIsNone()"
+        code = "self.assertIsNotNone()"
         self._assert_has_no_errors(code, check)
 
     def test_assert_true_isinstance(self):
