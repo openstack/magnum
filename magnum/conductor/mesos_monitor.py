@@ -51,11 +51,11 @@ class MesosMonitor(MonitorBase):
                                                path='/state')
             master = jsonutils.loads(urlfetch.get(mesos_master_url))
             if self._is_leader(master):
-                for slave in master['slaves']:
-                    self.data['mem_total'] += slave['resources']['mem']
-                    self.data['mem_used'] += slave['used_resources']['mem']
-                    self.data['cpu_total'] += slave['resources']['cpus']
-                    self.data['cpu_used'] += slave['used_resources']['cpus']
+                for agent in master['agents']:
+                    self.data['mem_total'] += agent['resources']['mem']
+                    self.data['mem_used'] += agent['used_resources']['mem']
+                    self.data['cpu_total'] += agent['resources']['cpus']
+                    self.data['cpu_used'] += agent['used_resources']['cpus']
                 break
 
     def compute_memory_util(self):

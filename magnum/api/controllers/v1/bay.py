@@ -118,7 +118,7 @@ class Bay(base.APIBase):
     """Api address of cluster master node"""
 
     node_addresses = wsme.wsattr([wtypes.text], readonly=True)
-    """IP addresses of cluster slave nodes"""
+    """IP addresses of cluster agent nodes"""
 
     master_addresses = wsme.wsattr([wtypes.text], readonly=True)
     """IP addresses of cluster master nodes"""

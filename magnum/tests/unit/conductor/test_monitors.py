@@ -262,7 +262,7 @@ class MonitorsTestCase(base.TestCase):
         state_json = {
             'leader': 'master@10.0.0.6:5050',
             'pid': 'master@10.0.0.6:5050',
-            'slaves': [{
+            'agents': [{
                 'resources': {
                     'mem': 100,
                     'cpus': 1,
@@ -281,7 +281,7 @@ class MonitorsTestCase(base.TestCase):
         state_json = {
             'leader': 'master@10.0.0.6:5050',
             'pid': 'master@1.1.1.1:5050',
-            'slaves': []
+            'agents': []
         }
         self._test_mesos_monitor_pull_data(mock_url_get, state_json,
                                            0, 0, 0, 0)

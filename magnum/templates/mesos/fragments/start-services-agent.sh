@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# Start slave services
-for service in docker mesos-slave; do
+# Start agent services
+for service in docker mesos-agent; do
     echo "starting service $service"
     service $service start
     rm -f /etc/init/$service.override
