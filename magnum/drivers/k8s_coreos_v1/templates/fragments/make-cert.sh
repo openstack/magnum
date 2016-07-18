@@ -82,8 +82,10 @@ EOF
 
 #trust is introduced in Keystone v3 version
 AUTH_URL=${AUTH_URL/v2.0/v3}
-USER_TOKEN=`curl -s -i -X POST -H "Content-Type: application/json" -d "$auth_json" \
-                 $AUTH_URL/auth/tokens | grep X-Subject-Token | awk '{print $2}'`
+content_type='Content-Type: application/json'
+url="$AUTH_URL/auth/tokens"
+USER_TOKEN=`curl -s -i -X POST -H "$content_type" -d "$auth_json" $url \
+    | grep X-Subject-Token | awk '{print $2}' | tr -d '[[:space:]]'`
 
 # Get CA certificate for this bay
 curl -X GET \
