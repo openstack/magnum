@@ -28,7 +28,8 @@ from magnum.i18n import _
 #             Add details of new api versions here:
 
 BASE_VER = '1.1'
-CURRENT_MAX_VER = '1.2'
+CURRENT_MAX_VER = '1.3'
+# 1.3 Add bay rollback support
 # 1.2 Async bay operations support
 # 1.1 Initial version
 

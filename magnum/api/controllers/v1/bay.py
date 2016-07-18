@@ -386,7 +386,7 @@ class BaysController(base.Controller):
         res_bay = pecan.request.rpcapi.bay_update(bay)
         return Bay.convert_with_links(res_bay)
 
-    @base.Controller.api_version("1.2")   # noqa
+    @base.Controller.api_version("1.2", "1.2")   # noqa
     @wsme.validate(types.uuid, [BayPatchType])
     @expose.expose(BayID, types.uuid_or_name, body=[BayPatchType],
                    status_code=202)
@@ -398,6 +398,21 @@ class BaysController(base.Controller):
         """
         bay = self._patch(bay_ident, patch)
         pecan.request.rpcapi.bay_update_async(bay)
+        return BayID(bay.uuid)
+
+    @base.Controller.api_version("1.3")   # noqa
+    @wsme.validate(types.uuid, bool, [BayPatchType])
+    @expose.expose(BayID, types.uuid_or_name, bool, body=[BayPatchType],
+                   status_code=202)
+    def patch(self, bay_ident, rollback=False, patch=None):
+        """Update an existing bay.
+
+        :param bay_ident: UUID or logical name of a bay.
+        :param rollback: whether to rollback bay on update failure.
+        :param patch: a json PATCH document to apply to this bay.
+        """
+        bay = self._patch(bay_ident, patch)
+        pecan.request.rpcapi.bay_update_async(bay, rollback=rollback)
         return BayID(bay.uuid)
 
     def _patch(self, bay_ident, patch):

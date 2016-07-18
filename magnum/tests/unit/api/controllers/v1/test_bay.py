@@ -216,7 +216,7 @@ class TestPatch(api_base.FunctionalTest):
         self.mock_bay_update.side_effect = self._simulate_rpc_bay_update
         self.addCleanup(p.stop)
 
-    def _simulate_rpc_bay_update(self, bay):
+    def _simulate_rpc_bay_update(self, bay, rollback=False):
         bay.save()
         return bay
 
@@ -354,6 +354,17 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['errors'])
+
+    @mock.patch.object(rpcapi.API, 'bay_update_async')
+    def test_update_bay_with_rollback_enabled(self, mock_update):
+        response = self.patch_json(
+            '/bays/%s/?rollback=True' % self.bay.name,
+            [{'path': '/node_count', 'value': 4,
+              'op': 'replace'}],
+            headers={'OpenStack-API-Version': 'container-infra 1.3'})
+
+        mock_update.assert_called_once_with(mock.ANY, rollback=True)
+        self.assertEqual(202, response.status_code)
 
     def test_remove_ok(self):
         response = self.get_json('/bays/%s' % self.bay.uuid)

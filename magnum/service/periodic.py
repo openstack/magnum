@@ -75,7 +75,8 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
             osc = clients.OpenStackClients(ctx)
             status = [bay_status.CREATE_IN_PROGRESS,
                       bay_status.UPDATE_IN_PROGRESS,
-                      bay_status.DELETE_IN_PROGRESS]
+                      bay_status.DELETE_IN_PROGRESS,
+                      bay_status.ROLLBACK_IN_PROGRESS]
             filters = {'status': status}
             bays = objects.Bay.list(ctx, filters=filters)
             if not bays:

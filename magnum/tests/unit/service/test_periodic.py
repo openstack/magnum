@@ -57,11 +57,15 @@ class PeriodicTestCase(base.TestCase):
         trust_attrs.update({'id': 4, 'stack_id': '44',
                            'status': bay_status.CREATE_COMPLETE})
         bay4 = utils.get_test_bay(**trust_attrs)
+        trust_attrs.update({'id': 5, 'stack_id': '55',
+                           'status': bay_status.ROLLBACK_IN_PROGRESS})
+        bay5 = utils.get_test_bay(**trust_attrs)
 
         self.bay1 = objects.Bay(ctx, **bay1)
         self.bay2 = objects.Bay(ctx, **bay2)
         self.bay3 = objects.Bay(ctx, **bay3)
         self.bay4 = objects.Bay(ctx, **bay4)
+        self.bay5 = objects.Bay(ctx, **bay5)
 
     @mock.patch.object(objects.Bay, 'list')
     @mock.patch('magnum.common.clients.OpenStackClients')
@@ -74,8 +78,10 @@ class PeriodicTestCase(base.TestCase):
                             stack_status_reason='fake_reason_11')
         stack3 = fake_stack(id='33', stack_status=bay_status.UPDATE_COMPLETE,
                             stack_status_reason='fake_reason_33')
-        mock_heat_client.stacks.list.return_value = [stack1, stack3]
-        get_stacks = {'11': stack1, '33': stack3}
+        stack5 = fake_stack(id='55', stack_status=bay_status.ROLLBACK_COMPLETE,
+                            stack_status_reason='fake_reason_55')
+        mock_heat_client.stacks.list.return_value = [stack1, stack3, stack5]
+        get_stacks = {'11': stack1, '33': stack3, '55': stack5}
 
         def stack_get_sideefect(arg):
             if arg == '22':
@@ -85,7 +91,8 @@ class PeriodicTestCase(base.TestCase):
         mock_heat_client.stacks.get.side_effect = stack_get_sideefect
         mock_osc = mock_oscc.return_value
         mock_osc.heat.return_value = mock_heat_client
-        mock_bay_list.return_value = [self.bay1, self.bay2, self.bay3]
+        mock_bay_list.return_value = [self.bay1, self.bay2, self.bay3,
+                                      self.bay5]
 
         mock_keystone_client = mock.MagicMock()
         mock_keystone_client.client.project_id = "fake_project"
@@ -98,6 +105,8 @@ class PeriodicTestCase(base.TestCase):
         mock_db_destroy.assert_called_once_with(self.bay2.uuid)
         self.assertEqual(bay_status.UPDATE_COMPLETE, self.bay3.status)
         self.assertEqual('fake_reason_33', self.bay3.status_reason)
+        self.assertEqual(bay_status.ROLLBACK_COMPLETE, self.bay5.status)
+        self.assertEqual('fake_reason_55', self.bay5.status_reason)
 
     @mock.patch.object(objects.Bay, 'list')
     @mock.patch('magnum.common.clients.OpenStackClients')
@@ -136,7 +145,9 @@ class PeriodicTestCase(base.TestCase):
                             stack_status=bay_status.DELETE_IN_PROGRESS)
         stack3 = fake_stack(id='33',
                             stack_status=bay_status.UPDATE_IN_PROGRESS)
-        get_stacks = {'11': stack1, '22': stack2, '33': stack3}
+        stack5 = fake_stack(id='55',
+                            stack_status=bay_status.ROLLBACK_IN_PROGRESS)
+        get_stacks = {'11': stack1, '22': stack2, '33': stack3, '55': stack5}
 
         def stack_get_sideefect(arg):
             if arg == '22':
@@ -144,15 +155,18 @@ class PeriodicTestCase(base.TestCase):
             return get_stacks[arg]
 
         mock_heat_client.stacks.get.side_effect = stack_get_sideefect
-        mock_heat_client.stacks.list.return_value = [stack1, stack2, stack3]
+        mock_heat_client.stacks.list.return_value = [stack1, stack2, stack3,
+                                                     stack5]
         mock_osc = mock_oscc.return_value
         mock_osc.heat.return_value = mock_heat_client
-        mock_bay_list.return_value = [self.bay1, self.bay2, self.bay3]
+        mock_bay_list.return_value = [self.bay1, self.bay2, self.bay3,
+                                      self.bay5]
         periodic.MagnumPeriodicTasks(CONF).sync_bay_status(None)
 
         self.assertEqual(bay_status.CREATE_IN_PROGRESS, self.bay1.status)
         self.assertEqual(bay_status.DELETE_IN_PROGRESS, self.bay2.status)
         self.assertEqual(bay_status.UPDATE_IN_PROGRESS, self.bay3.status)
+        self.assertEqual(bay_status.ROLLBACK_IN_PROGRESS, self.bay5.status)
 
     @mock.patch.object(objects.Bay, 'list')
     @mock.patch('magnum.common.clients.OpenStackClients')

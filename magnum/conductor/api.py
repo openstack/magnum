@@ -47,8 +47,8 @@ class API(rpc_service.API):
     def bay_update(self, bay):
         return self._call('bay_update', bay=bay)
 
-    def bay_update_async(self, bay):
-        self._cast('bay_update', bay=bay)
+    def bay_update_async(self, bay, rollback=False):
+        self._cast('bay_update', bay=bay, rollback=rollback)
 
     # CA operations
 

@@ -35,7 +35,8 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.5: Reanme 'registry_trust_id' to 'trust_id'
     #              Add 'trustee_user_name', 'trustee_password',
     #              'trustee_user_id' field
-    VERSION = '1.5'
+    # Version 1.6: Add rollback support for Bay
+    VERSION = '1.6'
 
     dbapi = dbapi.get_instance()
 
