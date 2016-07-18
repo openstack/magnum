@@ -21,6 +21,7 @@ from six.moves import urllib
 
 from magnum.common import exception
 from magnum.i18n import _
+from magnum.i18n import _LE
 from magnum.i18n import _LI
 
 URLFETCH_OPTS = [
@@ -76,8 +77,9 @@ def get(url, allowed_schemes=('http', 'https')):
         for chunk in reader:
             result += chunk
             if len(result) > cfg.CONF.max_manifest_size:
-                raise URLFetchError("Manifest exceeds maximum allowed size (%s"
-                                    " bytes)" % cfg.CONF.max_manifest_size)
+                raise URLFetchError(_LE("Manifest exceeds maximum allowed"
+                                        "size (%s bytes)") %
+                                    cfg.CONF.max_manifest_size)
         return result
 
     except exceptions.RequestException as ex:
