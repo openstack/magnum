@@ -23,16 +23,16 @@ parameters:
   master_flavor:
     type: string
     default: m1.small
-    description: flavor to use when booting the server
+    description: flavor to use when booting the server for master nodes
 
   minion_flavor:
     type: string
     default: m1.small
-    description: flavor to use when booting the server
+    description: flavor to use when booting the server for minions
 
   dns_nameserver:
     type: string
-    description: address of a dns nameserver reachable in your environment
+    description: address of a DNS nameserver reachable in your environment
     default: 8.8.8.8
 
   number_of_masters:

@@ -3,13 +3,13 @@ heat_template_version: 2013-05-23
 description: >
   This template will boot a coreos cluster with one or more minions (as
   specified by the number_of_minions parameter, which defaults to 1) and one
-  master node. Mutliple masters is work in progress.
+  master node. Allowing multiple masters is a work in progress.
 
 parameters:
 
   ssh_key_name:
     type: string
-    description: name of ssh key to be provisioned on our server
+    description: name of ssh key to be provisioned on the servers
 
   external_network:
     type: string
@@ -19,17 +19,17 @@ parameters:
   server_image:
     type: string
     default: CoreOS
-    description: glance image used to boot the server
+    description: glance image used to boot the servers
 
   master_flavor:
     type: string
     default: m1.small
-    description: flavor to use when booting the server
+    description: flavor to use when booting the server for master node
 
   minion_flavor:
     type: string
     default: m1.small
-    description: flavor to use when booting the server
+    description: flavor to use when booting the servers for minions
 
   discovery_url:
     type: string
