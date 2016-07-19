@@ -318,6 +318,7 @@ class BayModelsController(rest.RestController):
     @expose.expose(BayModel, body=BayModel, status_code=201)
     @validation.enforce_network_driver_types_create()
     @validation.enforce_volume_driver_types_create()
+    @validation.enforce_volume_storage_size_create()
     def post(self, baymodel):
         """Create a new baymodel.
 
