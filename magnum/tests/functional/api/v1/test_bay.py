@@ -13,6 +13,7 @@
 import fixtures
 
 from oslo_log import log as logging
+from oslo_utils import uuidutils
 from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions
 import testtools
@@ -90,16 +91,21 @@ class BayTest(base.BaseTempestTest):
         resp, model = self.baymodel_client.delete_baymodel(baymodel_id)
         return resp, model
 
-    def _create_bay(self, bay_model):
+    def _create_bay(self, bay_model, is_async=False):
         self.LOG.debug('We will create bay for %s' % bay_model)
-        resp, model = self.bay_client.post_bay(bay_model)
+        headers = {'Content-Type': 'application/json',
+                   'Accept': 'application/json'}
+        if is_async:
+            headers["OpenStack-API-Version"] = "container-infra 1.2"
+        resp, model = self.bay_client.post_bay(bay_model, headers=headers)
         self.LOG.debug('Response: %s' % resp)
-        self.assertEqual(201, resp.status)
+        if is_async:
+            self.assertEqual(202, resp.status)
+        else:
+            self.assertEqual(201, resp.status)
         self.assertIsNotNone(model.uuid)
+        self.assertTrue(uuidutils.is_uuid_like(model.uuid))
         self.bays.append(model.uuid)
-        self.assertEqual(BayStatus.CREATE_IN_PROGRESS, model.status)
-        self.assertIsNone(model.status_reason)
-        self.assertEqual(model.baymodel_id, self.baymodel.uuid)
         self.bay_uuid = model.uuid
         if config.Config.copy_logs:
             self.addOnException(self.copy_logs_handler(
@@ -134,6 +140,8 @@ class BayTest(base.BaseTempestTest):
 
         # test bay create
         _, temp_model = self._create_bay(gen_model)
+        self.assertEqual(BayStatus.CREATE_IN_PROGRESS, temp_model.status)
+        self.assertIsNone(temp_model.status_reason)
 
         # test bay list
         resp, model = self.bay_client.list_bays()
@@ -148,6 +156,26 @@ class BayTest(base.BaseTempestTest):
             exceptions.BadRequest,
             self.bay_client.patch_bay,
             temp_model.uuid, patch_model)
+
+        # test bay delete
+        self._delete_bay(temp_model.uuid)
+        self.bays.remove(temp_model.uuid)
+
+    @testtools.testcase.attr('positive')
+    def test_create_delete_bays_async(self):
+        gen_model = datagen.valid_bay_data(
+            baymodel_id=self.baymodel.uuid, node_count=1)
+
+        # test bay create
+        _, temp_model = self._create_bay(gen_model, is_async=True)
+        self.assertNotIn('status', temp_model)
+
+        # test bay list
+        resp, model = self.bay_client.list_bays()
+        self.assertEqual(200, resp.status)
+        self.assertGreater(len(model.bays), 0)
+        self.assertIn(
+            temp_model.uuid, list([x['uuid'] for x in model.bays]))
 
         # test bay delete
         self._delete_bay(temp_model.uuid)

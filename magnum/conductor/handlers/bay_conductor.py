@@ -13,7 +13,6 @@
 # under the License.
 
 import os
-import uuid
 
 from heatclient.common import template_utils
 from heatclient import exc
@@ -145,7 +144,6 @@ class Handler(object):
 
         osc = clients.OpenStackClients(context)
 
-        bay.uuid = uuid.uuid4()
         try:
             # Create trustee/trust and set them to bay
             trust_manager.create_trustee_and_trust(osc, bay)

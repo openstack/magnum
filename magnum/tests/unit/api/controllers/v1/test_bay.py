@@ -16,7 +16,6 @@ import mock
 from oslo_config import cfg
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
-from six.moves.urllib import parse as urlparse
 
 from magnum.api import attr_validator
 from magnum.api.controllers.v1 import bay as api_bay
@@ -428,10 +427,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(201, response.status_int)
         # Check location header
         self.assertIsNotNone(response.location)
-        expected_location = '/v1/bays/%s' % bdict['uuid']
-        self.assertEqual(expected_location,
-                         urlparse.urlparse(response.location).path)
-        self.assertEqual(bdict['uuid'], response.json['uuid'])
+        self.assertTrue(uuidutils.is_uuid_like(response.json['uuid']))
         self.assertNotIn('updated_at', response.json.keys)
         return_created_at = timeutils.parse_isotime(
             response.json['created_at']).replace(tzinfo=None)

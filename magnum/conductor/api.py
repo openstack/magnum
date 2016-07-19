@@ -34,11 +34,21 @@ class API(rpc_service.API):
         return self._call('bay_create', bay=bay,
                           bay_create_timeout=bay_create_timeout)
 
+    def bay_create_async(self, bay, bay_create_timeout):
+        self._cast('bay_create', bay=bay,
+                   bay_create_timeout=bay_create_timeout)
+
     def bay_delete(self, uuid):
         return self._call('bay_delete', uuid=uuid)
 
+    def bay_delete_async(self, uuid):
+        self._cast('bay_delete', uuid=uuid)
+
     def bay_update(self, bay):
         return self._call('bay_update', bay=bay)
+
+    def bay_update_async(self, bay):
+        self._cast('bay_update', bay=bay)
 
     # CA operations
 
