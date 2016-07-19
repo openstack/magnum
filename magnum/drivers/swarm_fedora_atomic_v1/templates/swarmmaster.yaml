@@ -167,7 +167,7 @@ resources:
 
   ######################################################################
   #
-  # resource that exposes the IPs of either the kube master or the API
+  # resource that exposes the IPs of either the Swarm master or the API
   # LBaaS pool depending on whether LBaaS is enabled for the bay.
   #
 
