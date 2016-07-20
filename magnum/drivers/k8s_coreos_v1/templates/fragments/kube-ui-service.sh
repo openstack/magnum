@@ -99,7 +99,7 @@ KUBE_UI_SERVICE=/etc/systemd/system/kube-ui.service
 [Unit]
 After=kube-system-namespace
 Requires=kubelet.service
-Requires=kube-system-namespace.service
+Wants=kube-system-namespace.service
 
 [Service]
 Type=oneshot
