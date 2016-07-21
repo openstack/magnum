@@ -528,7 +528,7 @@ class TestPost(api_base.FunctionalTest):
                   "dns_nameserver", "keypair_id", "external_network_id",
                   "cluster_distro", "fixed_network", "apiserver_port",
                   "docker_volume_size", "labels", "http_proxy", "https_proxy",
-                  "no_proxy", "network_driver", "volume_driver"]
+                  "no_proxy", "network_driver", "volume_driver", "coe"]
         for field in fields:
             self._create_baymodel_raises_app_error(**{field: ''})
 
