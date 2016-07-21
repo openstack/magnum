@@ -541,6 +541,12 @@ class TestPost(api_base.FunctionalTest):
     def test_create_baymodel_with_invalid_docker_volume_size(self):
         self._create_baymodel_raises_app_error(docker_volume_size=0)
         self._create_baymodel_raises_app_error(docker_volume_size=-1)
+        self._create_baymodel_raises_app_error(
+            docker_volume_size=1,
+            docker_storage_driver="devicemapper")
+        self._create_baymodel_raises_app_error(
+            docker_volume_size=2,
+            docker_storage_driver="devicemapper")
         self._create_baymodel_raises_app_error(docker_volume_size='notanint')
 
     def test_create_baymodel_with_invalid_dns_nameserver(self):
@@ -577,6 +583,20 @@ class TestPost(api_base.FunctionalTest):
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.baymodel_post_data(docker_volume_size=99)
+            response = self.post_json('/baymodels', bdict)
+            self.assertEqual(bdict['docker_volume_size'],
+                             response.json['docker_volume_size'])
+            cc_mock.assert_called_once_with(mock.ANY)
+            self.assertNotIn('id', cc_mock.call_args[0][0])
+
+    @mock.patch('magnum.api.attr_validator.validate_image')
+    def test_create_baymodel_with_overlay(self, mock_image_data):
+        with mock.patch.object(self.dbapi, 'create_baymodel',
+                               wraps=self.dbapi.create_baymodel) as cc_mock:
+            mock_image_data.return_value = {'name': 'mock_name',
+                                            'os_distro': 'fedora-atomic'}
+            bdict = apiutils.baymodel_post_data(
+                docker_volume_size=1, docker_storage_driver="overlay")
             response = self.post_json('/baymodels', bdict)
             self.assertEqual(bdict['docker_volume_size'],
                              response.json['docker_volume_size'])

@@ -200,7 +200,9 @@ This is a mandatory parameter and there is no default value.
 --docker-volume-size \<docker-volume-size\>
   The size in GB for the local storage on each server for the Docker
   daemon to cache the images and host the containers.  Cinder volumes
-  provide the storage.  The default is 25 GB.
+  provide the storage.  The default is 25 GB. For the 'devicemapper'
+  storage driver, the minimum value is 3GB. For the 'overlay' storage
+  driver, the minimum value is 1GB.
 
 --docker-storage-driver \<docker-storage-driver\>
   The name of a driver to manage the storage for the images and the

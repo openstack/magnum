@@ -133,6 +133,16 @@ def enforce_volume_driver_types_create():
     return wrapper
 
 
+def enforce_volume_storage_size_create():
+    @decorator.decorator
+    def wrapper(func, *args, **kwargs):
+        baymodel = args[1]
+        _enforce_volume_storage_size(baymodel.as_dict())
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
 def enforce_volume_driver_types_update():
     @decorator.decorator
     def wrapper(func, *args, **kwargs):
@@ -155,6 +165,19 @@ def _enforce_volume_driver_types(baymodel):
     if not baymodel.get('volume_driver'):
         return
     validator.validate_volume_driver(baymodel['volume_driver'])
+
+
+def _enforce_volume_storage_size(baymodel):
+    if not baymodel.get('docker_volume_size'):
+        return
+    volume_size = baymodel.get('docker_volume_size')
+    storage_driver = baymodel.get('docker_storage_driver')
+    if storage_driver == 'devicemapper':
+        if volume_size < 3:
+            raise exception.InvalidParameterValue(
+                'docker volume size %s GB is not valid, '
+                'expecting minimum value 3GB for %s storage '
+                'driver.') % (volume_size, storage_driver)
 
 
 def validate_bay_properties(delta):
