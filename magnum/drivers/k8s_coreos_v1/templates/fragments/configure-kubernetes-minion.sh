@@ -58,7 +58,7 @@ if [ "$VOLUME_DRIVER" = "cinder" ]; then
     if [ ! -d ${KUBERNETES} -o ! -f ${CLOUD_CONFIG} ]; then
         sudo mkdir -p $KUBERNETES
     fi
-    AUTH_URL=$(echo "$AUTH_URL" | tr -s "v3" "v2")
+    AUTH_URL=$(echo "$AUTH_URL" | sed 's/v3/v2/')
 cat > $CLOUD_CONFIG <<EOF
 [Global]
 auth-url=$AUTH_URL
