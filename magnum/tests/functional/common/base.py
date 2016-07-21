@@ -58,6 +58,9 @@ class BaseMagnumTest(base.BaseTestCase):
                 full_location = os.path.join(base_path, COPY_LOG_HELPER)
 
                 def do_copy_logs(prefix, nodes_address):
+                    if not nodes_address:
+                        return
+
                     cls.LOG.info("copy logs from : %s" %
                                  ','.join(nodes_address))
                     log_name = prefix + "-" + func_name
