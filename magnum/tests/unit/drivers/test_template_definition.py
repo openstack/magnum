@@ -433,7 +433,7 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
 
     def test_update_swarm_outputs_if_baymodel_is_secure(self):
         address = 'updated_address'
-        protocol = 'https'
+        protocol = 'tcp'
         port = '2376'
         params = {
             'protocol': protocol,

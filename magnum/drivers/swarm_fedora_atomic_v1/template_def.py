@@ -28,12 +28,10 @@ class SwarmApiAddressOutputMapping(template_def.OutputMapping):
 
         output_value = self.get_output_value(stack)
         if output_value is not None:
-            protocol = 'https'
-            if baymodel.tls_disabled:
-                protocol = 'tcp'
-
+            # Note(rocha): protocol should always be tcp as the docker
+            # command client does not handle https (see bug #1604812).
             params = {
-                'protocol': protocol,
+                'protocol': 'tcp',
                 'address': output_value,
                 'port': DOCKER_PORT,
             }
