@@ -42,18 +42,12 @@ spec:
     securityContext:
       privileged: true
     volumeMounts:
-    - mountPath: /etc/ssl/certs
-      name: ssl-certs-host
-      readOnly: true
     - mountPath: /srv/kubernetes
       name: "srv-kube"
       readOnly: true
   volumes:
   - hostPath:
-      path: /etc/ssl/certs
-    name: ssl-certs-host
-  - hostPath:
-        path: "/srv/kubernetes"
+      path: "/srv/kubernetes"
     name: "srv-kube"
 EOF
     }

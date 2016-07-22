@@ -47,12 +47,4 @@ write_files:
           - --v=0
           securityContext:
             privileged: true
-          volumeMounts:
-          - mountPath: /etc/ssl/certs
-            name: ssl-certs-host
-            readOnly: true
-        volumes:
-        - hostPath:
-            path: ${HOST_CERTS_PATH}
-          name: ssl-certs-host
       EOF

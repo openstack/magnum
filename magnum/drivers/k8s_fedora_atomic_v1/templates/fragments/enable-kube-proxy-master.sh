@@ -32,14 +32,6 @@ spec:
     - --v=0
     securityContext:
       privileged: true
-    volumeMounts:
-    - mountPath: /etc/ssl/certs
-      name: ssl-certs-host
-      readOnly: true
-  volumes:
-  - hostPath:
-      path: /etc/ssl/certs
-    name: ssl-certs-host
 EOF
     }
 }
