@@ -282,7 +282,7 @@ resources:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/configure-docker-registry.sh}
+      config: {get_file: ../../common/templates/fragments/configure-docker-registry.sh}
 
   configure_kubernetes_minion:
     type: OS::Heat::SoftwareConfig

@@ -229,7 +229,7 @@ resources:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/configure-docker-registry.sh}
+      config: {get_file: ../../common/templates/fragments/configure-docker-registry.sh}
 
   write_docker_service:
     type: "OS::Heat::SoftwareConfig"
