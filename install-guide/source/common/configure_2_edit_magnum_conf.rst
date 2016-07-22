@@ -1,4 +1,4 @@
-2. Edit the ``/etc/magnum/magnum.conf``:
+2. Edit the ``/etc/magnum/magnum.conf`` file:
 
    * In the ``[api]`` section, configure the host:
 
@@ -8,7 +8,7 @@
         ...
         host = controller
 
-   * In the ``[certificates]`` section, select ``barbican`` (or ``local`` if
+   * In the ``[certificates]`` section, select ``barbican`` (or ``x509keypair`` if
      you don't have barbican installed):
 
      * Use barbican to store certificates:
@@ -21,18 +21,15 @@
 
      .. important::
 
-       Barbican is recommended for production environments, local store should
-       be used for evaluation purposes.
+        Barbican is recommended for production environments.
 
-     * To use local store for certificates, you have to specify the directory
-       to use:
+     * To store x509 certificates in magnum's database:
 
        .. code-block:: ini
 
           [certificates]
           ...
-          cert_manager_type = local
-          storage_path = /var/lib/magnum/certificates/
+          cert_manager_type = x509keypair
 
    * In the ``[cinder_client]`` section, configure the region name:
 
@@ -53,7 +50,7 @@
      Replace ``MAGNUM_DBPASS`` with the password you chose for
      the magnum database.
 
-   * In the ``[keystone_authtoken]`` and ``trust`` sections, configure
+   * In the ``[keystone_authtoken]`` and ``[trust]`` sections, configure
      Identity service access:
 
      .. code-block:: ini
@@ -73,23 +70,13 @@
 
         [trust]
         ...
-        trustee_domain_id = 66e0469de9c04eda9bc368e001676d20
-        trustee_domain_admin_id = 529b81cf35094beb9784c6d06c090c2b
+        trustee_domain_name = magnum
+        trustee_domain_admin_name = magnum_domain_admin
         trustee_domain_admin_password = DOMAIN_ADMIN_PASS
 
-     ``trustee_domain_id`` is the id of the ``magnum`` domain and
-     ``trustee_domain_admin_id`` is the id of the ``magnum_domain_admin`` user.
      Replace MAGNUM_PASS with the password you chose for the magnum user in the
      Identity service and DOMAIN_ADMIN_PASS with the password you chose for the
      ``magnum_domain_admin`` user.
-
-   * In the ``[oslo_concurrency]`` section, configure the ``lock_path``:
-
-     .. code-block:: ini
-
-        [oslo_concurrency]
-        ...
-        lock_path = /var/lib/magnum/tmp
 
    * In the ``[oslo_messaging_notifications]`` section, configure the
      ``driver``:
@@ -114,25 +101,4 @@
      Replace RABBIT_PASS with the password you chose for the openstack account
      in RabbitMQ.
 
-   .. note::
 
-      Make sure that ``/etc/magnum/magnum.conf`` still have the correct
-      permissions. You can set the permissions again with:
-
-      # chown magnum:magnum /etc/magnum/magnum.conf
-
-3. Populate Magnum database:
-
-   .. code-block:: console
-
-      # su -s /bin/sh -c "magnum-db-manage upgrade" magnum
-
-4. Update heat policy to allow magnum list stacks. Edit your heat policy file,
-   usually ``/etc/heat/policy.json``:
-
-   .. code-block:: ini
-
-      ...
-      stacks:global_index: "role:admin",
-
-   Now restart heat.
