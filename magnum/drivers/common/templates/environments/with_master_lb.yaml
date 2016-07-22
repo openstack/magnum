@@ -1,12 +1,12 @@
-# Environment file to enable LBaaS in a Mesos cluster by mapping
+# Environment file to enable LBaaS in a cluster by mapping
 # LBaaS-related resource types to the real LBaaS resource types.
 resource_registry:
   "Magnum::ApiGatewaySwitcher": ../fragments/api_gateway_switcher_pool.yaml
 
-  # mesoscluster.yaml
+  # Cluster template
   "Magnum::Optional::Neutron::Pool": "OS::Neutron::Pool"
   "Magnum::Optional::Neutron::Pool::FloatingIP": "OS::Neutron::FloatingIP"
   "Magnum::Optional::Neutron::Pool::HealthMonitor": "OS::Neutron::HealthMonitor"
 
-  # mesosmaster.yaml
+  # Master node template
   "Magnum::Optional::Neutron::PoolMember": "OS::Neutron::PoolMember"

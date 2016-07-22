@@ -127,7 +127,9 @@ class TestBayConductorWithSwarm(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v3'
         }
         self.assertEqual(expected, definition)
-        self.assertEqual(['environments/no_master_lb.yaml'], env_files)
+        self.assertEqual(
+            ['../../common/templates/environments/no_master_lb.yaml'],
+            env_files)
 
     @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
@@ -187,7 +189,9 @@ class TestBayConductorWithSwarm(base.TestCase):
             'docker_storage_driver': 'devicemapper'
         }
         self.assertEqual(expected, definition)
-        self.assertEqual(['environments/no_master_lb.yaml'], env_files)
+        self.assertEqual(
+            ['../../common/templates/environments/no_master_lb.yaml'],
+            env_files)
 
     @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
@@ -239,7 +243,9 @@ class TestBayConductorWithSwarm(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v3'
         }
         self.assertEqual(expected, definition)
-        self.assertEqual(['environments/no_master_lb.yaml'], env_files)
+        self.assertEqual(
+            ['../../common/templates/environments/no_master_lb.yaml'],
+            env_files)
 
     @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
@@ -293,7 +299,9 @@ class TestBayConductorWithSwarm(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v3'
         }
         self.assertEqual(expected, definition)
-        self.assertEqual(['environments/with_master_lb.yaml'], env_files)
+        self.assertEqual(
+            ['../../common/templates/environments/with_master_lb.yaml'],
+            env_files)
 
     @patch('requests.get')
     @patch('magnum.objects.BayModel.get_by_uuid')
@@ -348,7 +356,9 @@ class TestBayConductorWithSwarm(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v3'
         }
         self.assertEqual(expected, definition)
-        self.assertEqual(['environments/with_master_lb.yaml'], env_files)
+        self.assertEqual(
+            ['../../common/templates/environments/with_master_lb.yaml'],
+            env_files)
 
     @patch('magnum.conductor.utils.retrieve_baymodel')
     @patch('oslo_config.cfg')

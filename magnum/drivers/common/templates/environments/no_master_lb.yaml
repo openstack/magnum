@@ -1,12 +1,12 @@
-# Environment file to disable LBaaS in a Kubernetes cluster by mapping
+# Environment file to disable LBaaS in a cluster by mapping
 # LBaaS-related resource types to OS::Heat::None
 resource_registry:
   "Magnum::ApiGatewaySwitcher": ../fragments/api_gateway_switcher_master.yaml
 
-  # kubecluster.yaml
+  # Cluster template
   "Magnum::Optional::Neutron::Pool": "OS::Heat::None"
   "Magnum::Optional::Neutron::Pool::FloatingIP": "OS::Heat::None"
   "Magnum::Optional::Neutron::Pool::HealthMonitor": "OS::Heat::None"
 
-  # kubemaster.yaml
+  # Master node template
   "Magnum::Optional::Neutron::PoolMember": "OS::Heat::None"
