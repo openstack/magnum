@@ -716,7 +716,194 @@ Log into the servers
 =====
 Mesos
 =====
-*To be filled in*
+
+A Mesos bay consists of a pool of servers running as Mesos agents,
+managed by a set of servers running as Mesos masters.  Mesos manages
+the resources from the agents but does not itself deploy containers.
+Instead, one of more Mesos frameworks running on the Mesos bay would
+accept user requests on their own endpoint, using their particular
+API.  These frameworks would then negotiate the resources with Mesos
+and the containers are deployed on the servers where the resources are
+offered.
+
+Magnum deploys a Mesos bay using parameters defined in the baymodel
+and specified on the 'bay-create' command, for example::
+
+    magnum baymodel-create --name mesosbaymodel \
+                           --image-id ubuntu-mesos \
+                           --keypair-id testkey \
+                           --external-network-id public \
+                           --dns-nameserver 8.8.8.8 \
+                           --flavor-id m1.small \
+                           --coe mesos
+
+    magnum bay-create --name mesosbay \
+                      --baymodel mesosbaymodel \
+                      --master-count 3 \
+                      --node-count 8
+
+Refer to the `Baymodel`_ and `Bay`_ sections for the full list of
+parameters.  Following are further details relevant to Mesos:
+
+What runs on the servers
+  There are two types of servers in the Mesos bay: masters and agents.
+  The Docker daemon runs on all servers.  On the servers for master,
+  the Mesos master is run as a process on port 5050 and this is
+  initiated by the upstart service 'mesos-master'.  Zookeeper is also
+  run on the master servers, initiated by the upstart service
+  'zookeeper'.  Zookeeper is used by the master servers for electing
+  the leader among the masters, and by the agent servers and
+  frameworks to determine the current leader.  The framework Marathon
+  is run as a process on port 8080 on the master servers, initiated by
+  the upstart service 'marathon'.  On the servers for agent, the Mesos
+  agent is run as a process initiated by the upstart service
+  'mesos-agent'.
+
+Number of master (master-count)
+  Specified in the bay-create command to indicate how many servers
+  will run as masters in the bay.  Having more than one will provide
+  high availability.  If the load balancer option is specified, the
+  masters will be in a load balancer pool and the load balancer
+  virtual IP address (VIP) will serve as the Mesos API endpoint.  A
+  floating IP associated with the load balancer VIP will serve as the
+  external Mesos API endpoint.
+
+Number of agents (node-count)
+  Specified in the bay-create command to indicate how many servers
+  will run as Mesos agent in the bay.  Docker daemon is run locally to
+  host containers from users.  The agents report their available
+  resources to the master and accept request from the master to deploy
+  tasks from the frameworks.  In this case, the tasks will be to
+  run Docker containers.
+
+Network driver (network-driver)
+  Specified in the baymodel to select the network driver.  Currently
+  'docker' is the only supported driver: containers are connected to
+  the 'docker0' bridge on each node and are assigned local IP address.
+  Refer to the `Networking`_ section for more details.
+
+Volume driver (volume-driver)
+  Specified in the baymodel to select the volume driver to provide
+  persistent storage for containers.  The supported volume driver is
+  'rexray'.  The default is no volume driver.  When 'rexray' or other
+  volume driver is deployed, you can use the Docker 'volume' command to
+  create, mount, unmount, delete volumes in containers.  Cinder block
+  storage is used as the backend to support this feature.
+  Refer to the `Storage`_ section for more details.
+
+Storage driver (docker-storage-driver)
+  This is currently not supported for Mesos.
+
+Image (image-id)
+
+  Specified in the baymodel to indicate the image to boot the servers
+  for the Mesos master and agent.  The image binary is loaded in
+  Glance with the attribute 'os_distro = ubuntu'.  You can download
+  the `ready-built image
+  <https://fedorapeople.org/groups/magnum/ubuntu-14.04.3-mesos-0.25.0.qcow2>`_,
+  or you can create the image as described below in the `Building
+  Mesos image`_ section.
+
+TLS (tls-disabled)
+  Transport Layer Security is currently not implemented yet for Mesos.
+
+Log into the servers
+  You can log into the manager and node servers with the account
+  'ubuntu' and the keypair specified in the baymodel.
+
+
+Building Mesos image
+--------------------
+
+The boot image for Mesos bay is an Ubuntu 14.04 base image with the
+following middleware pre-installed:
+
+-  ``docker``
+-  ``zookeeper``
+-  ``mesos``
+-  ``marathon``
+
+The bay driver provides two ways to create this image, as follows.
+
+Diskimage-builder
+++++++++++++++++++
+
+To run the `diskimage-builder
+<http://docs.openstack.org/developer/diskimage-builder>`__ tool
+manually, use the provided `elements
+<http://git.openstack.org/cgit/openstack/magnum/tree/magnum/drivers/mesos_ubuntu_v1/image/mesos/>`__.
+Following are the typical steps to use the diskimage-builder tool on
+an Ubuntu server::
+
+    $ sudo apt-get update
+    $ sudo apt-get install git qemu-utils python-pip
+
+    $ git clone https://git.openstack.org/openstack/magnum
+    $ git clone https://git.openstack.org/openstack/diskimage-builder.git
+    $ git clone https://git.openstack.org/openstack/dib-utils.git
+    $ git clone https://git.openstack.org/openstack/tripleo-image-elements.git
+    $ git clone https://git.openstack.org/openstack/heat-templates.git
+    $ export PATH="${PWD}/dib-utils/bin:$PATH"
+    $ export ELEMENTS_PATH=tripleo-image-elements/elements:heat-templates/hot/software-config/elements:magnum/magnum/drivers/mesos_ubuntu_v1/image/mesos
+    $ export DIB_RELEASE=trusty
+
+    $ diskimage-builder/bin/disk-image-create ubuntu vm docker mesos \
+        os-collect-config os-refresh-config os-apply-config \
+        heat-config heat-config-script \
+        -o ubuntu-14.04.3-mesos-0.25.0.qcow2
+
+Dockerfile
+++++++++++
+
+To build the image as above but within a Docker container, use the
+provided `Dockerfile
+<http://git.openstack.org/cgit/openstack/magnum/tree/magnum/drivers/mesos_ubuntu_v1/image/Dockerfile>`__. The
+output image will be saved as '/tmp/ubuntu-mesos.qcow2'.
+Following are the typical steps to run a Docker container to build the image::
+
+    $ git clone https://git.openstack.org/openstack/magnum
+    $ cd magnum/magnum/drivers/mesos_ubuntu_v1/image
+    $ sudo docker build -t magnum/mesos-builder .
+    $ sudo docker run -v /tmp:/output --rm -ti --privileged magnum/mesos-builder
+    ...
+    Image file /output/ubuntu-mesos.qcow2 created...
+
+
+Using Marathon
+--------------
+
+Marathon is a Mesos framework for long running applications.  Docker
+containers can be deployed via Marathon's REST API.  To get the
+endpoint for Marathon, run the bay-show command and look for the
+property 'api_address'.  Marathon's endpoint is port 8080 on this IP
+address, so the web console can be accessed at::
+
+    http://<api_address>:8080/
+
+Refer to Marathon documentation for details on running applications.
+For example, you can 'post' a JSON app description to
+``http://<api_address>:8080/apps`` to deploy a Docker container::
+
+    $ cat > app.json << END
+    {
+      "container": {
+        "type": "DOCKER",
+        "docker": {
+          "image": "libmesos/ubuntu"
+        }
+      },
+      "id": "ubuntu",
+      "instances": 1,
+      "cpus": 0.5,
+      "mem": 512,
+      "uris": [],
+      "cmd": "while sleep 10; do date -u +%T; done"
+    }
+    END
+    $ API_ADDRESS=$(magnum bay-show mesosbay | awk '/ api_address /{print $4}')
+    $ curl -X POST -H "Content-Type: application/json" \
+        http://${API_ADDRESS}:8080/v2/apps -d@app.json
+
 
 ========================
 Transport Layer Security
