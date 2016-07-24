@@ -189,6 +189,19 @@ class HackingTestCase(base.TestCase):
         code = "range(45)"
         self._assert_has_no_errors(code, check)
 
+    def test_no_log_warn(self):
+        errors = [(1, 0, "M352")]
+        check = checks.no_log_warn
+        code = """
+                  LOG.warn("LOG.warn is deprecated")
+               """
+        self._assert_has_errors(code, check, errors)
+
+        code = """
+                  LOG.warning("LOG.warn is deprecated")
+               """
+        self._assert_has_no_errors(code, check)
+
     def test_use_timeunitls_utcow(self):
         errors = [(1, 0, "M310")]
         check = checks.use_timeutils_utcnow
