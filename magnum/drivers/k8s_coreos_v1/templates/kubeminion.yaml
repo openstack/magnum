@@ -3,7 +3,7 @@ heat_template_version: 2014-10-16
 description: >
   This is a nested stack that defines a single Kubernetes minion,
   based on a CoreOS cloud image.  This stack is included by a ResourceGroup
-  resource in the parent template (kubecluster-coreos.yaml).
+  resource in the parent template (kubecluster.yaml).
 
 parameters:
 
@@ -164,37 +164,37 @@ resources:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/write-kubeconfig-coreos.yaml}
+      config: {get_file: fragments/write-kubeconfigs.yaml}
 
   make_cert:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/make-cert-client-coreos.yaml}
+      config: {get_file: fragments/make-cert-clients.yaml}
 
   enable_network_service:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-network-service-coreos.yaml}
+      config: {get_file: fragments/enable-network-services.yaml}
 
   enable_kubelet:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-kubelet-minion-coreos.yaml}
+      config: {get_file: fragments/enable-kubelet-minions.yaml}
 
   enable_kube_proxy:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-kube-proxy-minion-coreos.yaml}
+      config: {get_file: fragments/enable-kube-proxy-minions.yaml}
 
   wc_notify:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/wc-notify-coreos.yaml}
+      config: {get_file: fragments/wc-notifys.yaml}
 
   kube_minion_init:
     type: OS::Heat::SoftwareConfig

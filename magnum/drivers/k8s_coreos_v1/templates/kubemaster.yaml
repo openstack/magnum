@@ -3,7 +3,7 @@ heat_template_version: 2014-10-16
 description: >
     This is a nested stack that defines a Kubernetes master. This stack is
     included by an ResourceGroup resource in the parent template
-    (kubecluster-coreos.yaml).
+    (kubeclusters.yaml).
 
 parameters:
 
@@ -202,73 +202,73 @@ resources:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/configure-etcd-coreos.yaml}
+      config: {get_file: fragments/configure-etcds.yaml}
 
   make_cert:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/make-cert-coreos.yaml}
+      config: {get_file: fragments/make-certs.yaml}
 
   write_network_config:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/write-network-config-coreos.yaml}
+      config: {get_file: fragments/write-network-configs.yaml}
 
   enable_network_service:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-network-service-coreos.yaml}
+      config: {get_file: fragments/enable-network-services.yaml}
 
   enable_kubelet:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-kubelet-master-coreos.yaml}
+      config: {get_file: fragments/enable-kubelet-masters.yaml}
 
   enable_kube_apiserver:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-kube-apiserver-coreos.yaml}
+      config: {get_file: fragments/enable-kube-apiservers.yaml}
 
   create_kube_namespace:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/create-kube-namespace-coreos.yaml}
+      config: {get_file: fragments/create-kube-namespaces.yaml}
 
   enable_kube_proxy:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-kube-proxy-master-coreos.yaml}
+      config: {get_file: fragments/enable-kube-proxy-masters.yaml}
 
   enable_kube_controller_manager:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-kube-controller-manager-coreos.yaml}
+      config: {get_file: fragments/enable-kube-controller-managers.yaml}
 
   enable_kube_scheduler:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-kube-scheduler-coreos.yaml}
+      config: {get_file: fragments/enable-kube-schedulers.yaml}
 
   enable_kube_podmaster:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-kube-podmaster-coreos.yaml}
+      config: {get_file: fragments/enable-kube-podmasters.yaml}
 
   wc_notify:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/wc-notify-coreos.yaml}
+      config: {get_file: fragments/wc-notifys.yaml}
 
   kube_master_init:
     type: OS::Heat::SoftwareConfig
