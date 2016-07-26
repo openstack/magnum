@@ -90,7 +90,7 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
         extra_params = kwargs.pop('extra_params', {})
         scale_mgr = kwargs.pop('scale_manager', None)
         if scale_mgr:
-            hosts = self.get_output('kube_minions')
+            hosts = self.get_output('kube_minions_private')
             extra_params['minions_to_remove'] = (
                 scale_mgr.get_removal_nodes(hosts))
 
