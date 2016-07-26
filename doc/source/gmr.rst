@@ -64,7 +64,7 @@ First import the module:
 .. code-block:: python
 
       from oslo_reports import guru_meditation_report as gmr
-      from nova import version
+      from magnum import version
 
 Then, register any additional sections (optional):
 
