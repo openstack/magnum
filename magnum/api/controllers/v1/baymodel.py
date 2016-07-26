@@ -56,7 +56,7 @@ class BayModel(base.APIBase):
     name = wtypes.StringType(min_length=1, max_length=255)
     """The name of the bay model"""
 
-    coe = wtypes.Enum(str, *fields.BayType.ALL, mondatory=True)
+    coe = wtypes.Enum(str, *fields.BayType.ALL, mandatory=True)
     """The Container Orchestration Engine for this bay model"""
 
     image_id = wsme.wsattr(wtypes.StringType(min_length=1, max_length=255),
