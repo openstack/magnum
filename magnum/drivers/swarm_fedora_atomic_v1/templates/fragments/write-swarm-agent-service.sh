@@ -50,9 +50,9 @@ do
     sleep 5
 done
 
-curl -i -X POST -H 'Content-Type: application/json' -H 'X-Auth-Token: $AGENT_WAIT_HANDLE_TOKEN' \
+curl -i -X POST -H 'Content-Type: application/json' -H 'X-Auth-Token: $WAIT_HANDLE_TOKEN' \
     --data-binary "'"'{"Status": "SUCCESS", "Reason": "Swarm agent ready", "Data": "OK", "UniqueId": "00000"}'"'" \
-    "$AGENT_WAIT_HANDLE_ENDPOINT"
+    "$WAIT_HANDLE_ENDPOINT"
 EOF
 
 chown root:root $SCRIPT

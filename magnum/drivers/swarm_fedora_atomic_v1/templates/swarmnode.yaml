@@ -151,24 +151,14 @@ parameters:
 
 resources:
 
-  node_cloud_init_wait_handle:
+  node_wait_handle:
     type: "OS::Heat::WaitConditionHandle"
 
-  node_cloud_init_wait_condition:
+  node_wait_condition:
     type: "OS::Heat::WaitCondition"
     depends_on: swarm_node
     properties:
-      handle: {get_resource: node_cloud_init_wait_handle}
-      timeout: 6000
-
-  node_agent_wait_handle:
-    type: "OS::Heat::WaitConditionHandle"
-
-  node_agent_wait_condition:
-    type: "OS::Heat::WaitCondition"
-    depends_on: swarm_node
-    properties:
-      handle: {get_resource: node_agent_wait_handle}
+      handle: {get_resource: node_wait_handle}
       timeout: 6000
 
   ######################################################################
@@ -183,8 +173,9 @@ resources:
         str_replace:
           template: {get_file: fragments/write-heat-params-node.yaml}
           params:
-            "$WAIT_HANDLE_ENDPOINT": {get_attr: [node_cloud_init_wait_handle, endpoint]}
-            "$WAIT_HANDLE_TOKEN": {get_attr: [node_cloud_init_wait_handle, token]}
+            "$WAIT_HANDLE_ENDPOINT": {get_attr: [node_wait_handle, endpoint]}
+            "$WAIT_HANDLE_TOKEN": {get_attr: [node_wait_handle, token]}
+            "$WAIT_CURL": {get_attr: [node_wait_handle, curl_cli]}
             "$DOCKER_VOLUME": {get_resource: docker_volume}
             "$DOCKER_STORAGE_DRIVER": {get_param: docker_storage_driver}
             "$HTTP_PROXY": {get_param: http_proxy}
@@ -199,9 +190,6 @@ resources:
             "$ETCD_SERVER_IP": {get_param: etcd_server_ip}
             "$API_IP_ADDRESS": {get_param: api_ip_address}
             "$SWARM_VERSION": {get_param: swarm_version}
-            "$AGENT_WAIT_HANDLE_ENDPOINT": {get_attr: [node_agent_wait_handle, endpoint]}
-            "$AGENT_WAIT_HANDLE_TOKEN": {get_attr: [node_agent_wait_handle, token]}
-            "$WAIT_CURL": {get_attr: [node_agent_wait_handle, curl_cli]}
             "$TRUSTEE_DOMAIN_ID": {get_param: trustee_domain_id}
             "$TRUSTEE_USER_ID": {get_param: trustee_user_id}
             "$TRUSTEE_USERNAME": {get_param: trustee_username}
@@ -270,8 +258,8 @@ resources:
           template: {get_file: fragments/write-bay-failure-service.yaml}
           params:
             "$SERVICE": swarm-agent
-            "$WAIT_HANDLE_ENDPOINT": {get_attr: [node_agent_wait_handle, endpoint]}
-            "$WAIT_HANDLE_TOKEN": {get_attr: [node_agent_wait_handle, token]}
+            "$WAIT_HANDLE_ENDPOINT": {get_attr: [node_wait_handle, endpoint]}
+            "$WAIT_HANDLE_TOKEN": {get_attr: [node_wait_handle, token]}
 
   write_swarm_agent_service:
     type: "OS::Heat::SoftwareConfig"

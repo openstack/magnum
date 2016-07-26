@@ -145,16 +145,6 @@ parameters:
 
 resources:
 
-  cloud_init_wait_handle:
-    type: "OS::Heat::WaitConditionHandle"
-
-  cloud_init_wait_condition:
-    type: "OS::Heat::WaitCondition"
-    depends_on: swarm_master
-    properties:
-      handle: {get_resource: cloud_init_wait_handle}
-      timeout: 6000
-
   master_wait_handle:
     type: "OS::Heat::WaitConditionHandle"
 
@@ -198,8 +188,8 @@ resources:
         str_replace:
           template: {get_file: fragments/write-heat-params-master.yaml}
           params:
-            "$WAIT_HANDLE_ENDPOINT": {get_attr: [cloud_init_wait_handle, endpoint]}
-            "$WAIT_HANDLE_TOKEN": {get_attr: [cloud_init_wait_handle, token]}
+            "$WAIT_HANDLE_ENDPOINT": {get_attr: [master_wait_handle, endpoint]}
+            "$WAIT_HANDLE_TOKEN": {get_attr: [master_wait_handle, token]}
             "$WAIT_CURL": {get_attr: [master_wait_handle, curl_cli]}
             "$DOCKER_VOLUME": {get_resource: docker_volume}
             "$DOCKER_STORAGE_DRIVER": {get_param: docker_storage_driver}
