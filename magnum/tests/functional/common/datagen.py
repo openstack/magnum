@@ -163,13 +163,36 @@ def baymodel_data_with_valid_keypair_image_flavor():
                          master_flavor_id=config.Config.master_flavor_id)
 
 
-def baymodel_data_with_valid_keypair():
-    """Generates random baymodel data with valid keypair
+def baymodel_data_with_missing_image():
+    """Generates random baymodel data with missing image
 
     :returns: BayModelEntity with generated data
     """
 
-    return baymodel_data(keypair_id=config.Config.keypair_id)
+    return baymodel_data(keypair_id=config.Config.keypair_id,
+                         flavor_id=config.Config.flavor_id,
+                         master_flavor_id=config.Config.master_flavor_id)
+
+
+def baymodel_data_with_missing_flavor():
+    """Generates random baymodel data with missing flavor
+
+    :returns: BayModelEntity with generated data
+    """
+
+    return baymodel_data(keypair_id=config.Config.keypair_id,
+                         image_id=config.Config.image_id)
+
+
+def baymodel_data_with_missing_keypair():
+    """Generates random baymodel data with missing keypair
+
+    :returns: BayModelEntity with generated data
+    """
+
+    return baymodel_data(image_id=config.Config.image_id,
+                         flavor_id=config.Config.flavor_id,
+                         master_flavor_id=config.Config.master_flavor_id)
 
 
 def baymodel_valid_data_with_specific_coe(coe):
@@ -181,17 +204,6 @@ def baymodel_valid_data_with_specific_coe(coe):
 
     return baymodel_data(keypair_id=config.Config.keypair_id,
                          image_id=config.Config.image_id, coe=coe)
-
-
-def baymodel_data_with_valid_image_and_flavor():
-    """Generates random baymodel data with valid image
-
-    :returns: BayModelEntity with generated data
-    """
-
-    return baymodel_data(image_id=config.Config.image_id,
-                         flavor_id=config.Config.flavor_id,
-                         master_flavor_id=config.Config.master_flavor_id)
 
 
 def valid_swarm_baymodel():

@@ -146,14 +146,21 @@ class BayModelTest(base.BaseMagnumTest):
 
     @testtools.testcase.attr('negative')
     def test_create_baymodel_missing_image(self):
-        gen_model = datagen.baymodel_data_with_valid_keypair()
+        gen_model = datagen.baymodel_data_with_missing_image()
+        self.assertRaises(
+            exceptions.BadRequest,
+            self.baymodel_client.post_baymodel, gen_model)
+
+    @testtools.testcase.attr('negative')
+    def test_create_baymodel_missing_flavor(self):
+        gen_model = datagen.baymodel_data_with_missing_flavor()
         self.assertRaises(
             exceptions.BadRequest,
             self.baymodel_client.post_baymodel, gen_model)
 
     @testtools.testcase.attr('negative')
     def test_create_baymodel_missing_keypair(self):
-        gen_model = datagen.baymodel_data_with_valid_image_and_flavor()
+        gen_model = datagen.baymodel_data_with_missing_keypair()
         self.assertRaises(
             exceptions.NotFound,
             self.baymodel_client.post_baymodel, gen_model)
