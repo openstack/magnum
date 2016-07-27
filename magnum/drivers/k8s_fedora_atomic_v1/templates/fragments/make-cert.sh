@@ -24,12 +24,25 @@ if [ "$TLS_DISABLED" == "True" ]; then
   exit 0
 fi
 
-cert_ip=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
-sans="IP:${cert_ip},IP:${KUBE_API_PUBLIC_ADDRESS},IP:${KUBE_API_PRIVATE_ADDRESS},IP:127.0.0.1"
+if [[ -z "${KUBE_NODE_PUBLIC_IP}" ]]; then
+    KUBE_NODE_PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+fi
+if [[ -z "${KUBE_NODE_IP}" ]]; then
+    KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+fi
+
+sans="IP:${KUBE_NODE_PUBLIC_IP},IP:${KUBE_NODE_IP}"
+if [[ "${KUBE_NODE_PUBLIC_IP}" != "${KUBE_API_PUBLIC_ADDRESS}" ]] && [[ "${KUBE_API_PUBLIC_ADDRESS}" ]]; then
+    sans="${sans},IP:${KUBE_API_PUBLIC_ADDRESS}"
+fi
+if [[ "${KUBE_NODE_IP}" != "${KUBE_API_PRIVATE_ADDRESS}" ]] && [[ "${KUBE_API_PRIVATE_ADDRESS}" ]]; then
+    sans="${sans},IP:${KUBE_API_PRIVATE_ADDRESS}"
+fi
 MASTER_HOSTNAME=${MASTER_HOSTNAME:-}
 if [[ -n "${MASTER_HOSTNAME}" ]]; then
-  sans="${sans},DNS:${MASTER_HOSTNAME}"
+    sans="${sans},DNS:${MASTER_HOSTNAME}"
 fi
+sans="${sans},IP:127.0.0.1"
 
 cert_dir=/srv/kubernetes
 cert_conf_dir=${cert_dir}/conf
