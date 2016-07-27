@@ -150,9 +150,9 @@ class AtomicK8sTemplateDefinition(K8sTemplateDefinition):
 
     def get_env_files(self, baymodel):
         if baymodel.master_lb_enabled:
-            return ['environments/with_master_lb.yaml']
+            return ['../../common/templates/environments/with_master_lb.yaml']
         else:
-            return ['environments/no_master_lb.yaml']
+            return ['../../common/templates/environments/no_master_lb.yaml']
 
     @property
     def template_path(self):

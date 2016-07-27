@@ -121,7 +121,9 @@ class TestBayConductorWithMesos(base.TestCase):
             'mesos_agent_image_providers': 'docker'
         }
         self.assertEqual(expected, definition)
-        self.assertEqual(['environments/no_master_lb.yaml'], env_files)
+        self.assertEqual(
+            ['../../common/templates/environments/no_master_lb.yaml'],
+            env_files)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_only_required(
@@ -165,7 +167,9 @@ class TestBayConductorWithMesos(base.TestCase):
             'mesos_agent_image_providers': 'docker'
         }
         self.assertEqual(expected, definition)
-        self.assertEqual(['environments/no_master_lb.yaml'], env_files)
+        self.assertEqual(
+            ['../../common/templates/environments/no_master_lb.yaml'],
+            env_files)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_with_lb(
@@ -212,7 +216,9 @@ class TestBayConductorWithMesos(base.TestCase):
             'mesos_agent_image_providers': 'docker'
         }
         self.assertEqual(expected, definition)
-        self.assertEqual(['environments/with_master_lb.yaml'], env_files)
+        self.assertEqual(
+            ['../../common/templates/environments/with_master_lb.yaml'],
+            env_files)
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_extract_template_definition_multi_master(
@@ -260,7 +266,9 @@ class TestBayConductorWithMesos(base.TestCase):
             'mesos_agent_image_providers': 'docker'
         }
         self.assertEqual(expected, definition)
-        self.assertEqual(['environments/with_master_lb.yaml'], env_files)
+        self.assertEqual(
+            ['../../common/templates/environments/with_master_lb.yaml'],
+            env_files)
 
     @patch('magnum.conductor.utils.retrieve_baymodel')
     @patch('oslo_config.cfg')
