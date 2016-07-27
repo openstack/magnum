@@ -130,6 +130,19 @@ class HackingTestCase(base.TestCase):
         code = "self.assertIsNone()"
         self._assert_has_no_errors(code, check)
 
+    def test_assert_not_equal_none(self):
+        errors = [(1, 0, "M319")]
+        check = checks.assert_not_equal_none
+
+        code = "self.assertNotEqual(A, None)"
+        self._assert_has_errors(code, check, errors)
+
+        code = "self.assertNotEqual(None, A)"
+        self._assert_has_errors(code, check, errors)
+
+        code = "self.assertIsNotNone()"
+        self._assert_has_no_errors(code, check)
+
     def test_assert_equal_true_or_false(self):
         errors = [(1, 0, "M323")]
         check = checks.assert_equal_true_or_false
