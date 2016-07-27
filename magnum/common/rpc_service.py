@@ -42,6 +42,13 @@ TRANSPORT_ALIASES = {
 }
 
 periodic_opts = [
+    cfg.BoolOpt('periodic_global_stack_list',
+                default=False,
+                help="List Heat stacks globally when syncing bays. "
+                     "Default is to do retrieve each bay's stack  "
+                     "individually. Reduces number of requests against "
+                     "Heat API if enabled but requires changes to Heat's "
+                     "policy.json."),
     cfg.BoolOpt('periodic_enable',
                 default=True,
                 help='Enable periodic tasks.'),

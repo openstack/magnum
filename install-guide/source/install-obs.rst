@@ -22,8 +22,6 @@ Install and configure components
 
 .. include:: common/configure_3_populate_database.rst
 
-.. include:: common/configure_4_update_heat_policy.rst
-
 Finalize installation
 ---------------------
 

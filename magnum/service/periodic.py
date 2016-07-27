@@ -15,6 +15,8 @@
 
 import functools
 
+from heatclient import exc as heat_exc
+from oslo_config import cfg
 from oslo_log import log
 from oslo_service import periodic_task
 import six
@@ -31,6 +33,7 @@ from magnum import objects
 from magnum.objects.fields import BayStatus as bay_status
 
 
+CONF = cfg.CONF
 LOG = log.getLogger(__name__)
 
 
@@ -80,8 +83,14 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
             sid_to_bay_mapping = {bay.stack_id: bay for bay in bays}
             bay_stack_ids = sid_to_bay_mapping.keys()
 
-            stacks = osc.heat().stacks.list(global_tenant=True,
-                                            filters={'id': bay_stack_ids})
+            if CONF.periodic_global_stack_list:
+                stacks = osc.heat().stacks.list(global_tenant=True,
+                                                filters={'id': bay_stack_ids})
+            else:
+                ret = self._get_bay_stacks(bays, sid_to_bay_mapping,
+                                           bay_stack_ids)
+                [stacks, bays, bay_stack_ids, sid_to_bay_mapping] = ret
+
             sid_to_stack_mapping = {s.id: s for s in stacks}
 
             # intersection of bays magnum has and heat has
@@ -101,6 +110,36 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
             LOG.warning(_LW(
                 "Ignore error [%s] when syncing up bay status."
             ), e, exc_info=True)
+
+    def _get_bay_stacks(self, bays, sid_to_bay_mapping, bay_stack_ids):
+        stacks = []
+
+        _bays = bays
+        _sid_to_bay_mapping = sid_to_bay_mapping
+        _bay_stack_ids = bay_stack_ids
+
+        for bay in _bays:
+            try:
+                # Create client with bay's trustee user context
+                bosc = clients.OpenStackClients(
+                    context.make_bay_context(bay))
+                stack = bosc.heat().stacks.get(bay.stack_id)
+                stacks.append(stack)
+            # No need to do anything in this case
+            except heat_exc.HTTPNotFound:
+                pass
+            except Exception as e:
+                # Any other exception means we do not perform any
+                # action on this bay in the current sync run, so remove
+                # it from all records.
+                LOG.warning("Exception while attempting to retrieve "
+                            "Heat stack %s for bay %s. Traceback "
+                            "follows.")
+                LOG.warning(e)
+                _sid_to_bay_mapping.pop(bay.stack_id)
+                _bay_stack_ids.remove(bay.stack_id)
+                _bays.remove(bay)
+        return [stacks, _bays, _bay_stack_ids, _sid_to_bay_mapping]
 
     def _sync_existing_bay(self, bay, stack):
         if bay.status != stack.stack_status:

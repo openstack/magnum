@@ -466,17 +466,7 @@ Install and configure components
 
       # su -s /bin/sh -c "/var/lib/magnum/env/bin/magnum-db-manage upgrade" magnum
 
-9. Update heat policy to allow magnum list stacks. Edit your heat policy file,
-   usually ``/etc/heat/policy.json``:
-
-   .. code-block:: ini
-
-      ...
-      stacks:global_index: "role:admin",
-
-   Now restart heat.
-
-10. Set magnum for log rotation:
+9. Set magnum for log rotation:
 
    .. code-block:: console
 
