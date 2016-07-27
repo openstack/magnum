@@ -144,6 +144,20 @@ def dict_constructor_with_list_copy(logical_line):
         yield (0, msg)
 
 
+def no_log_warn(logical_line):
+    """Disallow 'LOG.warn('
+
+    Deprecated LOG.warn(), instead use LOG.warning
+    https://bugs.launchpad.net/magnum/+bug/1508442
+
+    M352
+    """
+
+    msg = ("M352: LOG.warn is deprecated, please use LOG.warning!")
+    if "LOG.warn(" in logical_line:
+        yield (0, msg)
+
+
 def factory(register):
     register(no_mutable_default_args)
     register(assert_equal_none)
@@ -154,3 +168,4 @@ def factory(register):
     register(use_timeutils_utcnow)
     register(dict_constructor_with_list_copy)
     register(no_xrange)
+    register(no_log_warn)
