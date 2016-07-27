@@ -243,42 +243,17 @@ resources:
   # etc, as parameters), but I wanted to minmize the amount of
   # configuration necessary to make this go.
 
-  fixed_network:
-    type: "OS::Neutron::Net"
-
-  # This is the subnet on which we will deploy our server.
-  fixed_subnet:
-    type: "OS::Neutron::Subnet"
+  network:
+    type: ../../common/templates/network.yaml
     properties:
-      cidr: {get_param: fixed_network_cidr}
-      network_id:
-        get_resource: fixed_network
-      dns_nameservers:
-        - get_param: dns_nameserver
-
-  # create a router attached to the external network provided as a
-  # parameter to this stack.
-  extrouter:
-    type: "OS::Neutron::Router"
-    properties:
-      external_gateway_info:
-        network:
-          get_param: external_network
-
-  # attached fixed_subnet to our extrouter router.
-  extrouter_inside:
-    type: "OS::Neutron::RouterInterface"
-    properties:
-      router_id:
-        get_resource: extrouter
-      subnet_id:
-        get_resource:
-          fixed_subnet
+      fixed_network_cidr: {get_param: fixed_network_cidr}
+      dns_nameserver: {get_param: dns_nameserver}
+      external_network: {get_param: external_network}
 
   api_lb:
     type: ../../common/templates/lb.yaml
     properties:
-      fixed_subnet: {get_resource: fixed_subnet}
+      fixed_subnet: {get_attr: [network, fixed_subnet]}
       external_network: {get_param: external_network}
       protocol: {get_param: loadbalancing_protocol}
       port: {get_param: swarm_port}
@@ -286,7 +261,7 @@ resources:
   etcd_lb:
     type: ../../common/templates/lb.yaml
     properties:
-      fixed_subnet: {get_resource: fixed_subnet}
+      fixed_subnet: {get_attr: [network, fixed_subnet]}
       external_network: {get_param: external_network}
       protocol: HTTP
       port: 2379
@@ -335,7 +310,7 @@ resources:
   swarm_masters:
     type: "OS::Heat::ResourceGroup"
     depends_on:
-      - extrouter_inside
+      - network
     properties:
       count: {get_param: number_of_masters}
       resource_def:
@@ -346,8 +321,8 @@ resources:
           server_flavor: {get_param: master_flavor}
           docker_volume_size: {get_param: docker_volume_size}
           docker_storage_driver: {get_param: docker_storage_driver}
-          fixed_network_id: {get_resource: fixed_network}
-          fixed_subnet_id: {get_resource: fixed_subnet}
+          fixed_network_id: {get_attr: [network, fixed_network]}
+          fixed_subnet_id: {get_attr: [network, fixed_subnet]}
           external_network: {get_param: external_network}
           discovery_url: {get_param: discovery_url}
           http_proxy: {get_param: http_proxy}
@@ -379,7 +354,7 @@ resources:
   swarm_nodes:
     type: "OS::Heat::ResourceGroup"
     depends_on:
-      - extrouter_inside
+      - network
     properties:
       count: {get_param: number_of_nodes}
       resource_def:
@@ -390,8 +365,8 @@ resources:
           server_flavor: {get_param: node_flavor}
           docker_volume_size: {get_param: docker_volume_size}
           docker_storage_driver: {get_param: docker_storage_driver}
-          fixed_network_id: {get_resource: fixed_network}
-          fixed_subnet_id: {get_resource: fixed_subnet}
+          fixed_network_id: {get_attr: [network, fixed_network]}
+          fixed_subnet_id: {get_attr: [network, fixed_subnet]}
           external_network: {get_param: external_network}
           http_proxy: {get_param: http_proxy}
           https_proxy: {get_param: https_proxy}

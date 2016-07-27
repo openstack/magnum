@@ -273,35 +273,18 @@ resources:
   # address lookup in Kubernetes to work properly
   #
 
-  fixed_network:
-    type: OS::Neutron::Net
+  network:
+    type: ../../common/templates/network.yaml
     properties:
-      name: private
-
-  fixed_subnet:
-    type: OS::Neutron::Subnet
-    properties:
-      cidr: {get_param: fixed_network_cidr}
-      network: {get_resource: fixed_network}
-      dns_nameservers:
-        - {get_param: dns_nameserver}
-
-  extrouter:
-    type: OS::Neutron::Router
-    properties:
-      external_gateway_info:
-        network: {get_param: external_network}
-
-  extrouter_inside:
-    type: OS::Neutron::RouterInterface
-    properties:
-      router_id: {get_resource: extrouter}
-      subnet: {get_resource: fixed_subnet}
+      fixed_network_cidr: {get_param: fixed_network_cidr}
+      dns_nameserver: {get_param: dns_nameserver}
+      external_network: {get_param: external_network}
+      fixed_network_name: private
 
   api_lb:
     type: ../../common/templates/lb.yaml
     properties:
-      fixed_subnet: {get_resource: fixed_subnet}
+      fixed_subnet: {get_attr: [network, fixed_subnet]}
       external_network: {get_param: external_network}
       protocol: {get_param: loadbalancing_protocol}
       port: {get_param: kubernetes_port}
@@ -309,7 +292,7 @@ resources:
   etcd_lb:
     type: ../../common/templates/lb.yaml
     properties:
-      fixed_subnet: {get_resource: fixed_subnet}
+      fixed_subnet: {get_attr: [network, fixed_subnet]}
       external_network: {get_param: external_network}
       protocol: HTTP
       port: 2379
@@ -396,7 +379,7 @@ resources:
   kube_masters:
     type: OS::Heat::ResourceGroup
     depends_on:
-      - extrouter_inside
+      - network
     properties:
       count: {get_param: number_of_masters}
       resource_def:
@@ -420,8 +403,8 @@ resources:
           discovery_url: {get_param: discovery_url}
           cluster_uuid: {get_param: cluster_uuid}
           magnum_url: {get_param: magnum_url}
-          fixed_network: {get_resource: fixed_network}
-          fixed_subnet: {get_resource: fixed_subnet}
+          fixed_network: {get_attr: [network, fixed_network]}
+          fixed_subnet: {get_attr: [network, fixed_subnet]}
           api_pool_id: {get_attr: [api_lb, pool_id]}
           etcd_pool_id: {get_attr: [etcd_lb, pool_id]}
           username: {get_param: username}
@@ -449,7 +432,7 @@ resources:
   kube_minions:
     type: OS::Heat::ResourceGroup
     depends_on:
-      - extrouter_inside
+      - network
     properties:
       count: {get_param: number_of_minions}
       removal_policies: [{resource_list: {get_param: minions_to_remove}}]
@@ -459,8 +442,8 @@ resources:
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: server_image}
           minion_flavor: {get_param: minion_flavor}
-          fixed_network: {get_resource: fixed_network}
-          fixed_subnet: {get_resource: fixed_subnet}
+          fixed_network: {get_attr: [network, fixed_network]}
+          fixed_subnet: {get_attr: [network, fixed_subnet]}
           network_driver: {get_param: network_driver}
           flannel_network_cidr: {get_param: flannel_network_cidr}
           kube_master_ip: {get_attr: [api_address_lb_switch, private_ip]}

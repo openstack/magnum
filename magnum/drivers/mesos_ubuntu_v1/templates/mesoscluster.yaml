@@ -204,33 +204,17 @@ resources:
   # network resources.  allocate a network and router for our server.
   #
 
-  fixed_network:
-    type: OS::Neutron::Net
-
-  fixed_subnet:
-    type: OS::Neutron::Subnet
+  network:
+    type: ../../common/templates/network.yaml
     properties:
-      cidr: {get_param: fixed_network_cidr}
-      network: {get_resource: fixed_network}
-      dns_nameservers:
-        - {get_param: dns_nameserver}
-
-  extrouter:
-    type: OS::Neutron::Router
-    properties:
-      external_gateway_info:
-        network: {get_param: external_network}
-
-  extrouter_inside:
-    type: OS::Neutron::RouterInterface
-    properties:
-      router_id: {get_resource: extrouter}
-      subnet: {get_resource: fixed_subnet}
+      fixed_network_cidr: {get_param: fixed_network_cidr}
+      dns_nameserver: {get_param: dns_nameserver}
+      external_network: {get_param: external_network}
 
   api_lb:
     type: ../../common/templates/lb.yaml
     properties:
-      fixed_subnet: {get_resource: fixed_subnet}
+      fixed_subnet: {get_attr: [network, fixed_subnet]}
       external_network: {get_param: external_network}
       protocol: HTTP
       port: 8080
@@ -373,7 +357,7 @@ resources:
   mesos_masters:
     type: OS::Heat::ResourceGroup
     depends_on:
-      - extrouter_inside
+      - network
     properties:
       count: {get_param: number_of_masters}
       resource_def:
@@ -383,8 +367,8 @@ resources:
           server_image: {get_param: server_image}
           master_flavor: {get_param: master_flavor}
           external_network: {get_param: external_network}
-          fixed_network: {get_resource: fixed_network}
-          fixed_subnet: {get_resource: fixed_subnet}
+          fixed_network: {get_attr: [network, fixed_network]}
+          fixed_subnet: {get_attr: [network, fixed_subnet]}
           secgroup_mesos_id: {get_resource: secgroup_master}
           api_pool_id: {get_attr: [api_lb, pool_id]}
 
@@ -397,7 +381,7 @@ resources:
   mesos_slaves:
     type: OS::Heat::ResourceGroup
     depends_on:
-      - extrouter_inside
+      - network
     properties:
       count: {get_param: number_of_slaves}
       removal_policies: [{resource_list: {get_param: slaves_to_remove}}]
@@ -407,8 +391,8 @@ resources:
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: server_image}
           slave_flavor: {get_param: slave_flavor}
-          fixed_network: {get_resource: fixed_network}
-          fixed_subnet: {get_resource: fixed_subnet}
+          fixed_network: {get_attr: [network, fixed_network]}
+          fixed_subnet: {get_attr: [network, fixed_subnet]}
           mesos_masters_ips: {list_join: [' ', {get_attr: [mesos_masters, mesos_master_ip]}]}
           external_network: {get_param: external_network}
           wait_condition_timeout: {get_param: wait_condition_timeout}
