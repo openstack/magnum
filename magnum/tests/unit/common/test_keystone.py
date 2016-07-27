@@ -50,7 +50,8 @@ class KeystoneClientTest(base.BaseTestCase):
         self.assertIsNotNone(ks_client._client)
         mock_ks.assert_called_once_with(token='abcd1234',
                                         auth_url='http://server.test:5000/v3',
-                                        endpoint='http://server.test:5000/v3')
+                                        endpoint='http://server.test:5000/v3',
+                                        verify=True)
 
     def test_client_with_no_credentials(self, mock_ks):
         self.ctx.auth_token = None
@@ -68,7 +69,7 @@ class KeystoneClientTest(base.BaseTestCase):
                                                   'auth_token': 'abcd1234'},
                                         auth_url='http://server.test:5000/v3',
                                         endpoint='http://server.test:5000/v3',
-                                        token='abcd1234')
+                                        token='abcd1234', verify=True)
 
     def test_client_with_v3_auth_token_info(self, mock_ks):
         self.ctx.auth_token_info = {'token': {}}
@@ -80,7 +81,7 @@ class KeystoneClientTest(base.BaseTestCase):
                                                   'auth_token': 'abcd1234'},
                                         auth_url='http://server.test:5000/v3',
                                         endpoint='http://server.test:5000/v3',
-                                        token='abcd1234')
+                                        token='abcd1234', verify=True)
 
     def test_client_with_invalid_auth_token_info(self, mock_ks):
         self.ctx.auth_token_info = {'not_this': 'urg'}
@@ -99,7 +100,7 @@ class KeystoneClientTest(base.BaseTestCase):
         mock_ks.assert_called_once_with(auth_url='http://server.test:5000/v3',
                                         username='magnum',
                                         password='verybadpass',
-                                        project_name='service')
+                                        project_name='service', verify=True)
 
     def test_delete_trust(self, mock_ks):
         mock_ks.return_value.trusts.delete.return_value = None

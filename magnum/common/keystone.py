@@ -36,7 +36,11 @@ trust_opts = [
     cfg.ListOpt('roles',
                 default=[],
                 help=_('The roles which are delegated to the trustee '
-                       'by the trustor'))
+                       'by the trustor')),
+    cfg.BoolOpt('insecure',
+                default=False,
+                help=_("If set, then the server's certificate will not "
+                       "be verified."))
 ]
 
 CONF.register_opts(trust_opts, group='trust')
@@ -91,19 +95,22 @@ class KeystoneClientV3(object):
         if not self._admin_client:
             admin_credentials = self._get_admin_credentials()
             self._admin_client = kc_v3.Client(auth_url=self.auth_url,
+                                              verify=not CONF.trust.insecure,
                                               **admin_credentials)
         return self._admin_client
 
     @property
     def domain_admin_client(self):
+        verify = not CONF.trust.insecure
         if not self._domain_admin_client:
             auth = v3.Password(
                 auth_url=self.auth_url,
                 user_id=CONF.trust.trustee_domain_admin_id,
                 domain_id=CONF.trust.trustee_domain_id,
                 password=CONF.trust.trustee_domain_admin_password)
-            sess = session.Session(auth=auth)
-            self._domain_admin_client = kc_v3.Client(session=sess)
+            sess = session.Session(auth=auth, verify=verify)
+            self._domain_admin_client = kc_v3.Client(session=sess,
+                                                     verify=verify)
         return self._domain_admin_client
 
     @staticmethod
@@ -142,7 +149,7 @@ class KeystoneClientV3(object):
                           'trust or auth_token'))
             raise exception.AuthorizationFailure()
 
-        return kc_v3.Client(**kwargs)
+        return kc_v3.Client(verify=not CONF.trust.insecure, **kwargs)
 
     def create_trust(self, trustee_user):
         trustor_user_id = self.client.auth_ref.user_id
