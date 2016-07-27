@@ -206,7 +206,7 @@ def baymodel_valid_data_with_specific_coe(coe):
                          image_id=config.Config.image_id, coe=coe)
 
 
-def valid_swarm_baymodel():
+def valid_swarm_baymodel(is_public=False):
     """Generates a valid swarm baymodel with valid data
 
     :returns: BayModelEntity with generated data
@@ -214,7 +214,7 @@ def valid_swarm_baymodel():
 
     return baymodel_data(image_id=config.Config.image_id,
                          fixed_network="192.168.0.0/24",
-                         flavor_id=config.Config.flavor_id, public=False,
+                         flavor_id=config.Config.flavor_id, public=is_public,
                          dns_nameserver=config.Config.dns_nameserver,
                          master_flavor_id=config.Config.master_flavor_id,
                          keypair_id=config.Config.keypair_id, coe="swarm",
