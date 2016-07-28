@@ -65,7 +65,7 @@ class MesosMonitor(MonitorBase):
             return self.data['mem_used'] * 100 / self.data['mem_total']
 
     def compute_cpu_util(self):
-        if self.data['cpu_used'] == 0:
+        if self.data['cpu_total'] == 0 or self.data['cpu_used'] == 0:
             return 0
         else:
             return self.data['cpu_used'] * 100 / self.data['cpu_total']

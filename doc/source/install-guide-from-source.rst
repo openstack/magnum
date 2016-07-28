@@ -111,12 +111,12 @@ service, you must create a database, service credentials, and API endpoints.
      .. code-block:: console
 
         $ openstack service create --name magnum \
-          --description "Container Infrastructure Management Service" \
+          --description "OpenStack Container Infrastructure Management Service" \
           container-infra
         +-------------+-------------------------------------------------------+
         | Field       | Value                                                 |
         +-------------+-------------------------------------------------------+
-        | description | OpenStack Container Infrastructure Management service |
+        | description | OpenStack Container Infrastructure Management Service |
         | enabled     | True                                                  |
         | id          | 194faf83e8fd4e028e5ff75d3d8d0df2                      |
         | name        | magnum                                                |
