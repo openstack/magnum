@@ -29,6 +29,7 @@ Guidelines for writing new hacking checks
  - Add test cases for each new rule to magnum/tests/unit/test_hacking.py
 
 """
+UNDERSCORE_IMPORT_FILES = []
 
 mutable_default_args = re.compile(r"^\s*def .+\((.+=\{\}|.+=\[\])")
 assert_equal_in_end_with_true_or_false_re = re.compile(
@@ -55,6 +56,12 @@ assert_true_isinstance_re = re.compile(
 dict_constructor_with_list_copy_re = re.compile(r".*\bdict\((\[)?(\(|\[)")
 assert_xrange_re = re.compile(
     r"\s*xrange\s*\(")
+custom_underscore_check = re.compile(r"(.)*_\s*=\s*(.)*")
+underscore_import_check = re.compile(r"(.)*import _(.)*")
+translated_log = re.compile(
+    r"(.)*LOG\.(audit|error|info|critical|exception)"
+    "\(\s*_\(\s*('|\")")
+string_translation = re.compile(r"[^_]*_\(\s*('|\")")
 
 
 def assert_equal_none(logical_line):
@@ -175,6 +182,27 @@ def no_log_warn(logical_line):
         yield (0, msg)
 
 
+def check_explicit_underscore_import(logical_line, filename):
+    """Check for explicit import of the _ function
+
+    We need to ensure that any files that are using the _() function
+    to translate logs are explicitly importing the _ function.  We
+    can't trust unit test to catch whether the import has been
+    added so we need to check for it here.
+    """
+
+    # Build a list of the files that have _ imported.  No further
+    # checking needed once it is found.
+    if filename in UNDERSCORE_IMPORT_FILES:
+        pass
+    elif (underscore_import_check.match(logical_line) or
+          custom_underscore_check.match(logical_line)):
+        UNDERSCORE_IMPORT_FILES.append(filename)
+    elif (translated_log.match(logical_line) or
+          string_translation.match(logical_line)):
+        yield(0, "M340: Found use of _() without explicit import of _ !")
+
+
 def factory(register):
     register(no_mutable_default_args)
     register(assert_equal_none)
@@ -187,3 +215,4 @@ def factory(register):
     register(dict_constructor_with_list_copy)
     register(no_xrange)
     register(no_log_warn)
+    register(check_explicit_underscore_import)
