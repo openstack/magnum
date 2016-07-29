@@ -538,6 +538,97 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['errors'])
 
+    def test_create_bay_with_invalid_integer_name(self):
+        bdict = apiutils.bay_post_data(name='123456')
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_int)
+        self.assertTrue(response.json['errors'])
+
+    def test_create_bay_with_invalid_integer_str_name(self):
+        bdict = apiutils.bay_post_data(name='123456test_bay')
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_int)
+        self.assertTrue(response.json['errors'])
+
+    def test_create_bay_with_hyphen_invalid_at_start_name(self):
+        bdict = apiutils.bay_post_data(name='-test_bay')
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_int)
+        self.assertTrue(response.json['errors'])
+
+    def test_create_bay_with_period_invalid_at_start_name(self):
+        bdict = apiutils.bay_post_data(name='.test_bay')
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_int)
+        self.assertTrue(response.json['errors'])
+
+    def test_create_bay_with_underscore_invalid_at_start_name(self):
+        bdict = apiutils.bay_post_data(name='_test_bay')
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_int)
+        self.assertTrue(response.json['errors'])
+
+    def test_create_bay_with_valid_str_int_name(self):
+        bdict = apiutils.bay_post_data(name='test_bay123456')
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(201, response.status_int)
+        self.assertEqual(response.json['name'], bdict['name'])
+
+    def test_create_bay_with_hyphen_valid_name(self):
+        bdict = apiutils.bay_post_data(name='test-bay')
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(201, response.status_int)
+        self.assertEqual(response.json['name'], bdict['name'])
+
+    def test_create_bay_with_period_valid_name(self):
+        bdict = apiutils.bay_post_data(name='test.bay')
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(201, response.status_int)
+        self.assertEqual(response.json['name'], bdict['name'])
+
+    def test_create_bay_with_period_at_end_valid_name(self):
+        bdict = apiutils.bay_post_data(name='testbay.')
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(201, response.status_int)
+        self.assertEqual(response.json['name'], bdict['name'])
+
+    def test_create_bay_with_hyphen_at_end_valid_name(self):
+        bdict = apiutils.bay_post_data(name='testbay-')
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(201, response.status_int)
+        self.assertEqual(response.json['name'], bdict['name'])
+
+    def test_create_bay_with_underscore_at_end_valid_name(self):
+        bdict = apiutils.bay_post_data(name='testbay_')
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(201, response.status_int)
+        self.assertEqual(response.json['name'], bdict['name'])
+
+    def test_create_bay_with_mix_special_char_valid_name(self):
+        bdict = apiutils.bay_post_data(name='test.-_bay')
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(201, response.status_int)
+        self.assertEqual(response.json['name'], bdict['name'])
+
+    def test_create_bay_with_capital_letter_start_valid_name(self):
+        bdict = apiutils.bay_post_data(name='Testbay')
+        response = self.post_json('/bays', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(201, response.status_int)
+        self.assertEqual(response.json['name'], bdict['name'])
+
     def test_create_bay_with_invalid_empty_name(self):
         bdict = apiutils.bay_post_data(name='')
         response = self.post_json('/bays', bdict, expect_errors=True)
