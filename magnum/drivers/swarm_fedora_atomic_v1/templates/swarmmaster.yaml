@@ -252,7 +252,7 @@ resources:
         str_replace:
           params:
             $configure_docker_storage_driver: {get_file: ../../common/templates/fragments/configure_docker_storage_driver_atomic.sh}
-          template: {get_file: fragments/configure-docker-storage.sh}
+          template: {get_file: ../../common/templates/fragments/configure-docker-storage.sh}
 
   make_cert:
     type: "OS::Heat::SoftwareConfig"
