@@ -394,43 +394,42 @@ class TestPatch(api_base.FunctionalTest):
         self.assertTrue(response.json['errors'])
 
     def test_remove_singular(self):
-        cluster_template = obj_utils.create_test_cluster_template(
-            self.context,
-            uuid=uuidutils.generate_uuid())
         response = self.get_json('/clustertemplates/%s' %
-                                 cluster_template.uuid)
+                                 self.cluster_template.uuid)
         self.assertIsNotNone(response['dns_nameserver'])
 
         response = self.patch_json('/clustertemplates/%s' %
-                                   cluster_template.uuid,
+                                   self.cluster_template.uuid,
                                    [{'path': '/dns_nameserver',
                                      'op': 'remove'}])
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(200, response.status_code)
 
         response = self.get_json('/clustertemplates/%s' %
-                                 cluster_template.uuid)
+                                 self.cluster_template.uuid)
         self.assertIsNone(response['dns_nameserver'])
         # Assert nothing else was changed
-        self.assertEqual(cluster_template.uuid, response['uuid'])
-        self.assertEqual(cluster_template.name, response['name'])
-        self.assertEqual(cluster_template.apiserver_port,
+        self.assertEqual(self.cluster_template.uuid, response['uuid'])
+        self.assertEqual(self.cluster_template.name, response['name'])
+        self.assertEqual(self.cluster_template.apiserver_port,
                          response['apiserver_port'])
-        self.assertEqual(cluster_template.image_id,
+        self.assertEqual(self.cluster_template.image_id,
                          response['image_id'])
-        self.assertEqual(cluster_template.fixed_network,
+        self.assertEqual(self.cluster_template.fixed_network,
                          response['fixed_network'])
-        self.assertEqual(cluster_template.network_driver,
+        self.assertEqual(self.cluster_template.network_driver,
                          response['network_driver'])
-        self.assertEqual(cluster_template.volume_driver,
+        self.assertEqual(self.cluster_template.volume_driver,
                          response['volume_driver'])
-        self.assertEqual(cluster_template.docker_volume_size,
+        self.assertEqual(self.cluster_template.docker_volume_size,
                          response['docker_volume_size'])
-        self.assertEqual(cluster_template.coe, response['coe'])
-        self.assertEqual(cluster_template.http_proxy, response['http_proxy'])
-        self.assertEqual(cluster_template.https_proxy, response['https_proxy'])
-        self.assertEqual(cluster_template.no_proxy, response['no_proxy'])
-        self.assertEqual(cluster_template.labels, response['labels'])
+        self.assertEqual(self.cluster_template.coe, response['coe'])
+        self.assertEqual(self.cluster_template.http_proxy,
+                         response['http_proxy'])
+        self.assertEqual(self.cluster_template.https_proxy,
+                         response['https_proxy'])
+        self.assertEqual(self.cluster_template.no_proxy, response['no_proxy'])
+        self.assertEqual(self.cluster_template.labels, response['labels'])
 
     def test_remove_non_existent_property_fail(self):
         response = self.patch_json('/clustertemplates/%s' %
@@ -443,10 +442,10 @@ class TestPatch(api_base.FunctionalTest):
         self.assertTrue(response.json['errors'])
 
     def test_remove_mandatory_property_fail(self):
-        mandatory_properties = ('/image_id', '/keypair_id',
-                                '/external_network_id', '/coe',
+        mandatory_properties = ('/image_id', '/keypair_id', '/coe',
+                                '/external_network_id', '/server_type',
                                 '/tls_disabled', '/public',
-                                '/registry_enabled', '/server_type',
+                                '/registry_enabled',
                                 '/cluster_distro', '/network_driver')
         for p in mandatory_properties:
             response = self.patch_json('/clustertemplates/%s' %

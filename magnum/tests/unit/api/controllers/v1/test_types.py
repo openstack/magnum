@@ -18,6 +18,7 @@ import mock
 import six
 import webtest
 import wsme
+from wsme import types as wtypes
 
 from magnum.api.controllers.v1 import types
 from magnum.common import exception
@@ -61,12 +62,15 @@ class TestUuidType(base.FunctionalTest):
                           types.UuidType.validate, 'invalid-uuid')
 
 
+class MyBaseType(object):
+    """Helper class, patched by objects of type MyPatchType"""
+    mandatory = wsme.wsattr(wtypes.text, mandatory=True)
+
+
 class MyPatchType(types.JsonPatchType):
     """Helper class for TestJsonPatchType tests."""
-
-    @staticmethod
-    def mandatory_attrs():
-        return ['/mandatory']
+    _api_base = MyBaseType
+    _extra_non_removable_attrs = {'/non_removable'}
 
     @staticmethod
     def internal_attrs():
@@ -108,16 +112,32 @@ class TestJsonPatchType(base.FunctionalTest):
         ret = self._patch_json(patch, True)
         self.assertEqual(400, ret.status_int)
 
-    def test_mandatory_attr(self):
-        patch = [{'op': 'replace', 'path': '/mandatory', 'value': 'foo'}]
+    def test_cannot_remove_internal_attr(self):
+        patch = [{'path': '/internal', 'op': 'remove'}]
+        ret = self._patch_json(patch, True)
+        self.assertEqual(400, ret.status_int)
+
+    def test_cannot_add_internal_attr(self):
+        patch = [{'path': '/internal', 'op': 'add', 'value': 'foo'}]
+        ret = self._patch_json(patch, True)
+        self.assertEqual(400, ret.status_int)
+
+    def test_update_mandatory_attr(self):
+        patch = [{'path': '/mandatory', 'op': 'replace', 'value': 'foo'}]
         ret = self._patch_json(patch, False)
         self.assertEqual(200, ret.status_int)
         self.assertEqual(patch, ret.json)
 
     def test_cannot_remove_mandatory_attr(self):
-        patch = [{'op': 'remove', 'path': '/mandatory'}]
+        patch = [{'path': '/mandatory', 'op': 'remove'}]
         ret = self._patch_json(patch, True)
         self.assertEqual(400, ret.status_int)
+
+    def test_cannot_remove_extra_non_removable_attr(self):
+        patch = [{'path': '/non_removable', 'op': 'remove'}]
+        ret = self._patch_json(patch, True)
+        self.assertEqual(400, ret.status_int)
+        self.assertTrue(ret.json['faultstring'])
 
     def test_missing_required_fields_path(self):
         missing_path = [{'op': 'remove'}]

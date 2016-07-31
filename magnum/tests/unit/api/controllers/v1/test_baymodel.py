@@ -368,39 +368,37 @@ class TestPatch(api_base.FunctionalTest):
         self.assertTrue(response.json['errors'])
 
     def test_remove_singular(self):
-        baymodel = obj_utils.create_test_baymodel(
-            self.context,
-            uuid=uuidutils.generate_uuid())
-        response = self.get_json('/baymodels/%s' % baymodel.uuid)
+        response = self.get_json('/baymodels/%s' % self.baymodel.uuid)
         self.assertIsNotNone(response['dns_nameserver'])
 
-        response = self.patch_json('/baymodels/%s' % baymodel.uuid,
+        response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
                                    [{'path': '/dns_nameserver',
                                      'op': 'remove'}])
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(200, response.status_code)
 
-        response = self.get_json('/baymodels/%s' % baymodel.uuid)
+        response = self.get_json('/baymodels/%s' % self.baymodel.uuid)
         self.assertIsNone(response['dns_nameserver'])
         # Assert nothing else was changed
-        self.assertEqual(baymodel.uuid, response['uuid'])
-        self.assertEqual(baymodel.name, response['name'])
-        self.assertEqual(baymodel.apiserver_port, response['apiserver_port'])
-        self.assertEqual(baymodel.image_id,
+        self.assertEqual(self.baymodel.uuid, response['uuid'])
+        self.assertEqual(self.baymodel.name, response['name'])
+        self.assertEqual(self.baymodel.apiserver_port,
+                         response['apiserver_port'])
+        self.assertEqual(self.baymodel.image_id,
                          response['image_id'])
-        self.assertEqual(baymodel.fixed_network,
+        self.assertEqual(self.baymodel.fixed_network,
                          response['fixed_network'])
-        self.assertEqual(baymodel.network_driver,
+        self.assertEqual(self.baymodel.network_driver,
                          response['network_driver'])
-        self.assertEqual(baymodel.volume_driver,
+        self.assertEqual(self.baymodel.volume_driver,
                          response['volume_driver'])
-        self.assertEqual(baymodel.docker_volume_size,
+        self.assertEqual(self.baymodel.docker_volume_size,
                          response['docker_volume_size'])
-        self.assertEqual(baymodel.coe, response['coe'])
-        self.assertEqual(baymodel.http_proxy, response['http_proxy'])
-        self.assertEqual(baymodel.https_proxy, response['https_proxy'])
-        self.assertEqual(baymodel.no_proxy, response['no_proxy'])
-        self.assertEqual(baymodel.labels, response['labels'])
+        self.assertEqual(self.baymodel.coe, response['coe'])
+        self.assertEqual(self.baymodel.http_proxy, response['http_proxy'])
+        self.assertEqual(self.baymodel.https_proxy, response['https_proxy'])
+        self.assertEqual(self.baymodel.no_proxy, response['no_proxy'])
+        self.assertEqual(self.baymodel.labels, response['labels'])
 
     def test_remove_non_existent_property_fail(self):
         response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,
@@ -411,10 +409,10 @@ class TestPatch(api_base.FunctionalTest):
         self.assertTrue(response.json['errors'])
 
     def test_remove_mandatory_property_fail(self):
-        mandatory_properties = ('/image_id', '/keypair_id',
-                                '/external_network_id', '/coe',
+        mandatory_properties = ('/image_id', '/keypair_id', '/coe',
+                                '/external_network_id', '/server_type',
                                 '/tls_disabled', '/public',
-                                '/registry_enabled', '/server_type',
+                                '/registry_enabled',
                                 '/cluster_distro', '/network_driver')
         for p in mandatory_properties:
             response = self.patch_json('/baymodels/%s' % self.baymodel.uuid,

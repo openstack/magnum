@@ -40,21 +40,6 @@ from magnum.objects import fields
 LOG = logging.getLogger(__name__)
 
 
-class ClusterPatchType(types.JsonPatchType):
-    @staticmethod
-    def mandatory_attrs():
-        return ['/cluster_template_id']
-
-    @staticmethod
-    def internal_attrs():
-        internal_attrs = ['/api_address', '/node_addresses',
-                          '/master_addresses', '/stack_id',
-                          '/ca_cert_ref', '/magnum_cert_ref',
-                          '/trust_id', '/trustee_user_name',
-                          '/trustee_password', '/trustee_user_id']
-        return types.JsonPatchType.internal_attrs() + internal_attrs
-
-
 class ClusterID(wtypes.Base):
     """API representation of a cluster ID
 
@@ -235,6 +220,19 @@ class Cluster(base.APIBase):
             del d['faults']
 
         return d
+
+
+class ClusterPatchType(types.JsonPatchType):
+    _api_base = Cluster
+
+    @staticmethod
+    def internal_attrs():
+        internal_attrs = ['/api_address', '/node_addresses',
+                          '/master_addresses', '/stack_id',
+                          '/ca_cert_ref', '/magnum_cert_ref',
+                          '/trust_id', '/trustee_user_name',
+                          '/trustee_password', '/trustee_user_id']
+        return types.JsonPatchType.internal_attrs() + internal_attrs
 
 
 class ClusterCollection(collection.Collection):
