@@ -90,6 +90,7 @@ spec:
     - /hyperkube
     - controller-manager
     - --master=http://127.0.0.1:8080
+    - --leader-elect=true
     - --service-account-private-key-file=${SERVICE_ACCOUNT_PRIVATE_KEY_FILE}
     - --root-ca-file=${ROOT_CA_FILE}
     livenessProbe:
@@ -136,6 +137,7 @@ spec:
     - /hyperkube
     - scheduler
     - --master=http://127.0.0.1:8080
+    - --leader-elect=true
     livenessProbe:
       httpGet:
         host: 127.0.0.1
