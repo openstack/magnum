@@ -258,3 +258,32 @@ class HackingTestCase(base.TestCase):
 
         self.assertEqual(0, len(list(checks.dict_constructor_with_list_copy(
             "      self._render_dict(xml, data_el, data.__dict__)"))))
+
+    def test_check_explicit_underscore_import(self):
+        self.assertEqual(len(list(checks.check_explicit_underscore_import(
+            "LOG.info(_('My info message'))",
+            "magnum/tests/other_files.py"))), 1)
+        self.assertEqual(len(list(checks.check_explicit_underscore_import(
+            "msg = _('My message')",
+            "magnum/tests/other_files.py"))), 1)
+        self.assertEqual(len(list(checks.check_explicit_underscore_import(
+            "from magnum.i18n import _",
+            "magnum/tests/other_files.py"))), 0)
+        self.assertEqual(len(list(checks.check_explicit_underscore_import(
+            "LOG.info(_('My info message'))",
+            "magnum/tests/other_files.py"))), 0)
+        self.assertEqual(len(list(checks.check_explicit_underscore_import(
+            "msg = _('My message')",
+            "magnum/tests/other_files.py"))), 0)
+        self.assertEqual(len(list(checks.check_explicit_underscore_import(
+            "from magnum.i18n import _, _LW",
+            "magnum/tests/other_files2.py"))), 0)
+        self.assertEqual(len(list(checks.check_explicit_underscore_import(
+            "msg = _('My message')",
+            "magnum/tests/other_files2.py"))), 0)
+        self.assertEqual(len(list(checks.check_explicit_underscore_import(
+            "_ = translations.ugettext",
+            "magnum/tests/other_files3.py"))), 0)
+        self.assertEqual(len(list(checks.check_explicit_underscore_import(
+            "msg = _('My message')",
+            "magnum/tests/other_files3.py"))), 0)
