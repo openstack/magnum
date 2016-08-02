@@ -83,9 +83,10 @@ class Bay(base.APIBase):
     uuid = types.uuid
     """Unique UUID for this bay"""
 
-    name = wtypes.StringType(min_length=1, max_length=255,
+    name = wtypes.StringType(min_length=1, max_length=242,
                              pattern='^[a-zA-Z][a-zA-Z0-9_.-]*$')
-    """Name of this bay"""
+    """Name of this bay, max length is limited to 242 because of heat stack
+    requires max length limit to 255, and Magnum amend a uuid length"""
 
     baymodel_id = wsme.wsproperty(wtypes.text, _get_baymodel_id,
                                   _set_baymodel_id, mandatory=True)
