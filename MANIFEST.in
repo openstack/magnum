@@ -1,9 +1,0 @@
-include AUTHORS
-include ChangeLog
-exclude .gitignore
-exclude .gitreview
-
-include magnum/db/sqlalchemy/alembic.ini
-include magnum/db/sqlalchemy/alembic/script.py.mako
-
-global-exclude *.pyc
