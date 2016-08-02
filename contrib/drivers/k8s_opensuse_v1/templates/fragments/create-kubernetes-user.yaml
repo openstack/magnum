@@ -1,0 +1,9 @@
+#cloud-config
+system_info:
+  default_user:
+    name: kubernetes
+    lock_passwd: true
+    gecos: Kubernetes Interactive User
+    groups: [wheel, systemd-journal]
+    sudo: ["ALL=(ALL) NOPASSWD:ALL"]
+    shell: /bin/bash
