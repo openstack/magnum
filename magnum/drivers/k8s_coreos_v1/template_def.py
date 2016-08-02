@@ -122,10 +122,12 @@ class CoreOSK8sTemplateDefinition(K8sTemplateDefinition):
     """Kubernetes template for CoreOS VM."""
 
     provides = [
-        {'server_type': 'vm', 'os': 'coreos', 'coe': 'kubernetes'},
+        {'server_type': 'vm',
+         'os': 'coreos',
+         'coe': 'kubernetes'},
     ]
 
     @property
     def template_path(self):
         return os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                            'templates/kubecluster-coreos.yaml')
+                            'templates/kubecluster.yaml')

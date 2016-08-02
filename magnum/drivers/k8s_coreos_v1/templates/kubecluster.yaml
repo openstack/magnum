@@ -232,7 +232,7 @@ resources:
     properties:
       count: 1
       resource_def:
-        type: kubemaster-coreos.yaml
+        type: kubemaster.yaml
         properties:
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: server_image}
@@ -273,7 +273,7 @@ resources:
       count: {get_param: number_of_minions}
       removal_policies: [{resource_list: {get_param: minions_to_remove}}]
       resource_def:
-        type: kubeminion-coreos.yaml
+        type: kubeminion.yaml
         properties:
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: server_image}
