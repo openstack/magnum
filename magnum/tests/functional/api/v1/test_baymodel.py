@@ -73,6 +73,15 @@ class BayModelTest(base.BaseMagnumTest):
         resp, model = self._create_baymodel(gen_model)
 
     @testtools.testcase.attr('positive')
+    def test_create_get_public_baymodel(self):
+        gen_model = datagen.valid_swarm_baymodel(is_public=True)
+        resp, model = self._create_baymodel(gen_model)
+
+        resp, model = self.baymodel_client.get_baymodel(model.uuid)
+        self.assertEqual(200, resp.status)
+        self.assertTrue(model.public)
+
+    @testtools.testcase.attr('positive')
     def test_update_baymodel_by_uuid(self):
         gen_model = datagen.baymodel_data_with_valid_keypair_image_flavor()
         resp, old_model = self._create_baymodel(gen_model)
