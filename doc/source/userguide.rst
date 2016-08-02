@@ -908,9 +908,391 @@ For example, you can 'post' a JSON app description to
 ========================
 Transport Layer Security
 ========================
-*To be filled in*
 
-Native Client Configuration guide for each COE
+Magnum uses TLS to secure communication between a bay's services and
+the outside world.  TLS is a complex subject, and many guides on it
+exist already.  This guide will not attempt to fully describe TLS, but
+instead will only cover the necessary steps to get a client set up to
+talk to a Bay with TLS. A more in-depth guide on TLS can be found in
+the `OpenSSL Cookbook
+<https://www.feistyduck.com/books/openssl-cookbook/>`_ by Ivan Ristić.
+
+TLS is employed at 3 points in a bay:
+
+1. By Magnum to communicate with the bay API endpoint
+
+2. By the bay worker nodes to communicate with the master nodes
+
+3. By the end-user when they use the native client libraries to
+   interact with the Bay.  This applies to both a CLI or a program
+   that uses a client for the particular bay.  Each client needs a
+   valid certificate to authenticate and communicate with a Bay.
+
+The first two cases are implemented internally by Magnum and are not
+exposed to the users, while the last case involves the users and is
+described in more details below.
+
+
+Deploying a secure bay
+----------------------
+
+Current TLS support is summarized below:
+
++------------+-------------+
+| COE        | TLS support |
++============+=============+
+| Kubernetes | yes         |
++------------+-------------+
+| Swarm      | yes         |
++------------+-------------+
+| Mesos      | no          |
++------------+-------------+
+
+For bay type with TLS support, e.g. Kubernetes and Swarm, TLS is
+enabled by default.  To disable TLS in Magnum, you can specify the
+parameter '--tls-disabled' in the baymodel.  Please note it is not
+recommended to disable TLS due to security reasons.
+
+In the following example, Kubernetes is used to illustrate a secure
+bay, but the steps are similar for other bay types that have TLS
+support.
+
+First, create a baymodel; by default TLS is enabled in
+Magnum, therefore it does not need to be specified via a parameter::
+
+    magnum baymodel-create --name secure-kubernetes \
+                           --keypair-id default \
+                           --external-network-id public \
+                           --image-id fedora-atomic-latest \
+                           --dns-nameserver 8.8.8.8 \
+                           --flavor-id m1.small \
+                           --docker-volume-size 3 \
+                           --coe kubernetes \
+                           --network-driver flannel
+
+    +-----------------------+--------------------------------------+
+    | Property              | Value                                |
+    +-----------------------+--------------------------------------+
+    | insecure_registry     | None                                 |
+    | http_proxy            | None                                 |
+    | updated_at            | None                                 |
+    | master_flavor_id      | None                                 |
+    | uuid                  | 5519b24a-621c-413c-832f-c30424528b31 |
+    | no_proxy              | None                                 |
+    | https_proxy           | None                                 |
+    | tls_disabled          | False                                |
+    | keypair_id            | time4funkey                          |
+    | public                | False                                |
+    | labels                | {}                                   |
+    | docker_volume_size    | 5                                    |
+    | server_type           | vm                                   |
+    | external_network_id   | public                               |
+    | cluster_distro        | fedora-atomic                        |
+    | image_id              | fedora-atomic-latest                 |
+    | volume_driver         | None                                 |
+    | registry_enabled      | False                                |
+    | docker_storage_driver | devicemapper                         |
+    | apiserver_port        | None                                 |
+    | name                  | secure-kubernetes                    |
+    | created_at            | 2016-07-25T23:09:50+00:00            |
+    | network_driver        | flannel                              |
+    | fixed_network         | None                                 |
+    | coe                   | kubernetes                           |
+    | flavor_id             | m1.small                             |
+    | dns_nameserver        | 8.8.8.8                              |
+    +-----------------------+--------------------------------------+
+
+
+Now create a bay. Use the baymodel name as a template for bay creation::
+
+    magnum bay-create --name secure-k8sbay \
+                      --baymodel secure-kubernetes \
+                      --node-count 1
+
+    +--------------------+------------------------------------------------------------+
+    | Property           | Value                                                      |
+    +--------------------+------------------------------------------------------------+
+    | status             | CREATE_IN_PROGRESS                                         |
+    | uuid               | 3968ffd5-678d-4555-9737-35f191340fda                       |
+    | stack_id           | c96b66dd-2109-4ae2-b510-b3428f1e8761                       |
+    | status_reason      | None                                                       |
+    | created_at         | 2016-07-25T23:14:06+00:00                                  |
+    | updated_at         | None                                                       |
+    | bay_create_timeout | 0                                                          |
+    | api_address        | None                                                       |
+    | baymodel_id        | 5519b24a-621c-413c-832f-c30424528b31                       |
+    | master_addresses   | None                                                       |
+    | node_count         | 1                                                          |
+    | node_addresses     | None                                                       |
+    | master_count       | 1                                                          |
+    | discovery_url      | https://discovery.etcd.io/ba52a8178e7364d43a323ee4387cf28e |
+    | name               | secure-k8sbay                                              |
+    +--------------------+------------------------------------------------------------+
+
+
+Now run bay-show command to get the details of the bay and verify that the
+api_address is 'https'::
+
+    magnum bay-show secure-k8sbay
+    +--------------------+------------------------------------------------------------+
+    | Property           | Value                                                      |
+    +--------------------+------------------------------------------------------------+
+    | status             | CREATE_COMPLETE                                            |
+    | uuid               | 04952c60-a338-437f-a7e7-d016d1d00e65                       |
+    | stack_id           | b7bf72ce-b08e-4768-8201-e63a99346898                       |
+    | status_reason      | Stack CREATE completed successfully                        |
+    | created_at         | 2016-07-25T23:14:06+00:00                                  |
+    | updated_at         | 2016-07-25T23:14:10+00:00                                  |
+    | bay_create_timeout | 60                                                         |
+    | api_address        | https://192.168.19.86:6443                                 |
+    | baymodel_id        | da2825a0-6d09-4208-b39e-b2db666f1118                       |
+    | master_addresses   | ['192.168.19.87']                                          |
+    | node_count         | 1                                                          |
+    | node_addresses     | ['192.168.19.88']                                          |
+    | master_count       | 1                                                          |
+    | discovery_url      | https://discovery.etcd.io/3b7fb09733429d16679484673ba3bfd5 |
+    | name               | secure-k8sbay                                              |
+    +--------------------+------------------------------------------------------------+
+
+You can see the api_address contains https in the URL, showing that
+the Kubernetes services are configured securely with SSL certificates
+and now any communication to kube-apiserver will be over https.
+
+
+Interfacing with a secure bay
+-----------------------------
+
+To communicate with the API endpoint of a secure bay, you will need so
+supply 3 SSL artifacts:
+
+1. Your client key
+2. A certificate for your client key that has been signed by a
+   Certificate Authority (CA)
+3. The certificate of the CA
+
+There are two ways to obtain these 3 artifacts.
+
+Automated
++++++++++
+
+Magnum provides the command 'bay-config' to help the user in setting
+up the environment and artifacts for TLS, for example::
+
+    magnum bay-config swarmbay --dir mybayconfig
+
+This will display the necessary environment variables, which you
+can add to your environment::
+
+    export DOCKER_HOST=tcp://172.24.4.5:2376
+    export DOCKER_CERT_PATH=mybayconfig
+    export DOCKER_TLS_VERIFY=True
+
+And the artifacts are placed in the directory specified::
+
+    ca.pem
+    cert.pem
+    key.pem
+
+You can now use the native client to interact with the COE.
+
+
+Manual
+++++++
+
+You can create the key and certificates manually using the following steps.
+
+Client Key
+  Your personal private key is essentially a cryptographically generated
+  string of bytes. It should be protected in the same manner as a
+  password. To generate an RSA key, you can use the 'genrsa' command of
+  the 'openssl' tool::
+
+      openssl genrsa -out key.pem 4096
+
+  This command generates a 4096 byte RSA key at key.pem.
+
+Signed Certificate
+  To authenticate your key, you need to have it signed by a CA.  First
+  generate the Certificate Signing Request (CSR).  The CSR will be
+  used by Magnum to generate a signed certificate that you will use to
+  communicate with the Bay.  To generate a CSR, openssl requires a
+  config file that specifies a few values.  Using the example template
+  below, you can fill in the 'CN' value with your name and save it as
+  client.conf::
+
+      $ cat > client.conf << END
+      [req]
+      distinguished_name = req_distinguished_name
+      req_extensions     = req_ext
+      prompt = no
+      [req_distinguished_name]
+      CN = Your Name
+      [req_ext]
+      extendedKeyUsage = clientAuth
+      END
+
+  Once you have client.conf, you can run the openssl 'req' command to
+  generate the CSR::
+
+      openssl req -new -days 365 \
+          -config client.conf \
+          -key key.pem \
+          -out client.csr
+
+  Now that you have your client CSR, you can use the Magnum CLI to
+  send it off to Magnum to get it signed::
+
+      magnum ca-sign --bay secure-k8sbay --csr client.csr > cert.pem
+
+Certificate Authority
+  The final artifact you need to retrieve is the CA certificate for
+  the bay. This is used by your native client to ensure you are only
+  communicating with hosts that Magnum set up::
+
+      magnum ca-show --bay secure-k8sbay > ca.pem
+
+
+User Examples
+-------------
+
+Here are some examples for using the CLI on a secure Kubernetes and
+Swarm bay.  You can perform all the TLS set up automatically by::
+
+    eval $(magnum bay-config <bay-name>)
+
+Or you can perform the manual steps as described above and specify
+the TLS options on the CLI.  The SSL artifacts are assumed to be
+saved in local files as follows::
+
+- key.pem: your SSL key
+- cert.pem: signed certificate
+- ca.pem: certificate for bay CA
+
+For Kubernetes, you need to get 'kubectl', a kubernetes CLI tool, to
+communicate with the bay::
+
+    wget https://github.com/kubernetes/kubernetes/releases/download/v1.2.0/kubernetes.tar.gz
+    tar -xzvf kubernetes.tar.gz
+    sudo cp -a kubernetes/platforms/linux/amd64/kubectl /usr/bin/kubectl
+
+Now let's run some 'kubectl' commands to check the secure communication.
+If you used 'bay-config', then you can simply run the 'kubectl' command
+without having to specify the TLS options since they have been defined
+in the environment::
+
+    kubectl version
+    Client Version: version.Info{Major:"1", Minor:"0", GitVersion:"v1.2.0", GitCommit:"cffae0523cfa80ddf917aba69f08508b91f603d5", GitTreeState:"clean"}
+    Server Version: version.Info{Major:"1", Minor:"0", GitVersion:"v1.2.0", GitCommit:"cffae0523cfa80ddf917aba69f08508b91f603d5", GitTreeState:"clean"}
+
+You can specify the TLS options manually as follows::
+
+    KUBERNETES_URL=$(magnum bay-show secure-k8sbay |
+                     awk '/ api_address /{print $4}')
+    kubectl version --certificate-authority=ca.pem \
+                    --client-key=key.pem \
+                    --client-certificate=cert.pem -s $KUBERNETES_URL
+
+    kubectl create -f redis-master.yaml --certificate-authority=ca.pem \
+                                        --client-key=key.pem \
+                                        --client-certificate=cert.pem -s $KUBERNETES_URL
+
+    pods/test2
+
+    kubectl get pods --certificate-authority=ca.pem \
+                     --client-key=key.pem \
+                     --client-certificate=cert.pem -s $KUBERNETES_URL
+    NAME           READY     STATUS    RESTARTS   AGE
+    redis-master   2/2       Running   0          1m
+
+Beside using the environment variables, you can also configure 'kubectl'
+to remember the TLS options::
+
+    kubectl config set-cluster secure-k8sbay --server=${KUBERNETES_URL} \
+        --certificate-authority=${PWD}/ca.pem
+    kubectl config set-credentials client --certificate-authority=${PWD}/ca.pem \
+        --client-key=${PWD}/key.pem --client-certificate=${PWD}/cert.pem
+    kubectl config set-context secure-k8sbay --cluster=secure-k8sbay --user=client
+    kubectl config use-context secure-k8sbay
+
+Then you can use 'kubectl' commands without the certificates::
+
+    kubectl get pods
+    NAME           READY     STATUS    RESTARTS   AGE
+    redis-master   2/2       Running   0          1m
+
+Access to Kubernetes User Interface::
+
+    curl -L ${KUBERNETES_URL}/ui --cacert ca.pem --key key.pem \
+        --cert cert.pem
+
+You may also set up 'kubectl' proxy which will use your client
+certificates to allow you to browse to a local address to use the UI
+without installing a certificate in your browser::
+
+    kubectl proxy --api-prefix=/ --certificate-authority=ca.pem --client-key=key.pem \
+                  --client-certificate=cert.pem -s $KUBERNETES_URL
+
+You can then open http://localhost:8001/ui in your browser.
+
+The examples for Docker are similar.  With 'bay-config' set up,
+you can just run docker commands without TLS options.  To specify the
+TLS options manually::
+
+    docker -H tcp://192.168.19.86:2376 --tlsverify \
+           --tlscacert ca.pem \
+           --tlskey key.pem \
+           --tlscert cert.pem \
+           info
+
+
+Storing the certificates
+------------------------
+
+Magnum generates and maintains a certificate for each bay so that it
+can also communicate securely with the bay.  As a result, it is
+necessary to store the certificates in a secure manner.  Magnum
+provides the following methods for storing the certificates and this
+is configured in /etc/magnum/magnum.conf in the section [certificates]
+with the parameter 'cert_manager_type'.
+
+1. Barbican:
+   Barbican is a service in OpenStack for storing secrets.  It is used
+   by Magnum to store the certificates when cert_manager_type is
+   configured as::
+
+     cert_manager_type = barbican
+
+   This is the recommended configuration for a production environment.
+   Magnum will interface with Barbican to store and retrieve
+   certificates, delegating the task of securing the certificates to
+   Barbican.
+
+2. Magnum database:
+   In some cases, a user may want an alternative to storing the
+   certificates that does not require Barbican.  This can be a
+   development environment, or a private cloud that has been secured
+   by other means.  Magnum can store the certificates in its own
+   database; this is done with the configuration::
+
+     cert_manager_type = x509keypair
+
+   This storage mode is only as secure as the controller server that
+   hosts the database for the OpenStack services.
+
+3. Local store:
+   As another alternative that does not require Barbican, Magnum can
+   simply store the certificates on the local host filesystem where the
+   conductor is running, using the configuration::
+
+     cert_manager_type = local
+
+   Note that this mode is only supported when there is a single Magnum
+   conductor running since the certificates are stored locally.  The
+   'local' mode is not recommended for a production environment.
+
+For the nodes, the certificates for communicating with the masters are
+stored locally and the nodes are assumed to be secured.
+
 
 ==========
 Networking
