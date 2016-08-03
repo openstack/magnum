@@ -154,30 +154,6 @@ def get_test_magnum_service_object(context, **kw):
     return magnum_service
 
 
-def create_test_container(context, **kw):
-    """Create and return a test container object.
-
-    Create a container in the DB and return a container object with
-    appropriate attributes.
-    """
-    container = get_test_container(context, **kw)
-    container.create()
-    return container
-
-
-def get_test_container(context, **kw):
-    """Return a test container object with appropriate attributes.
-
-    NOTE: The object leaves the attributes marked as changed, such
-    that a create() could be used to commit it to the DB.
-    """
-    db_container = db_utils.get_test_container(**kw)
-    container = objects.Container(context)
-    for key in db_container:
-        setattr(container, key, db_container[key])
-    return container
-
-
 def datetime_or_none(dt):
     """Validate a datetime or None value."""
     if dt is None:

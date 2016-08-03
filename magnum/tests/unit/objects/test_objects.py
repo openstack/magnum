@@ -365,7 +365,6 @@ object_data = {
     'Bay': '1.5-a3b9292ef5d35175b93ca46ba3baec2d',
     'BayModel': '1.14-ae175b4aaba2c60df37cac63ef734853',
     'Certificate': '1.0-2aff667971b85c1edf8d15684fd7d5e2',
-    'Container': '1.3-e2d9d2e8a8844d421148cd9fde6c6bd6',
     'MyObj': '1.0-b43567e512438205e32f4e95ca616697',
     'MyObj': '1.0-34c4b1aadefd177b13f9a2f894cc23cd',
     'ReplicationController': '1.0-a471c2429c212ed91833cfcf0f934eab',

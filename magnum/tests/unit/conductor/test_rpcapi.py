@@ -28,7 +28,6 @@ class RPCAPITestCase(base.DbTestCase):
     def setUp(self):
         super(RPCAPITestCase, self).setUp()
         self.fake_bay = dbutils.get_test_bay(driver='fake-driver')
-        self.fake_container = dbutils.get_test_container(driver='fake-driver')
         self.fake_rc = dbutils.get_test_rc(driver='fake-driver')
         self.fake_certificate = objects.Certificate.from_db_bay(self.fake_bay)
         self.fake_certificate.csr = 'fake-csr'
@@ -124,67 +123,6 @@ class RPCAPITestCase(base.DbTestCase):
                           version='1.1',
                           rc_ident=self.fake_rc['uuid'],
                           bay_ident=self.fake_rc['bay_uuid'])
-
-    def test_container_create(self):
-        self._test_rpcapi('container_create',
-                          'call',
-                          version='1.0',
-                          container=self.fake_container)
-
-    def test_container_delete(self):
-        self._test_rpcapi('container_delete',
-                          'call',
-                          version='1.0',
-                          container_uuid=self.fake_container['uuid'])
-
-    def test_container_show(self):
-        self._test_rpcapi('container_show',
-                          'call',
-                          version='1.0',
-                          container_uuid=self.fake_container['uuid'])
-
-    def test_container_reboot(self):
-        self._test_rpcapi('container_reboot',
-                          'call',
-                          version='1.0',
-                          container_uuid=self.fake_container['uuid'])
-
-    def test_container_stop(self):
-        self._test_rpcapi('container_stop',
-                          'call',
-                          version='1.0',
-                          container_uuid=self.fake_container['uuid'])
-
-    def test_container_start(self):
-        self._test_rpcapi('container_start',
-                          'call',
-                          version='1.0',
-                          container_uuid=self.fake_container['uuid'])
-
-    def test_container_pause(self):
-        self._test_rpcapi('container_pause',
-                          'call',
-                          version='1.0',
-                          container_uuid=self.fake_container['uuid'])
-
-    def test_container_unpause(self):
-        self._test_rpcapi('container_unpause',
-                          'call',
-                          version='1.0',
-                          container_uuid=self.fake_container['uuid'])
-
-    def test_container_logs(self):
-        self._test_rpcapi('container_logs',
-                          'call',
-                          version='1.0',
-                          container_uuid=self.fake_container['uuid'])
-
-    def test_container_exec(self):
-        self._test_rpcapi('container_exec',
-                          'call',
-                          version='1.0',
-                          container_uuid=self.fake_container['uuid'],
-                          command=self.fake_container['command'])
 
     def test_ping_conductor(self):
         self._test_rpcapi('ping_conductor',

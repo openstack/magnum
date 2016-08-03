@@ -18,11 +18,9 @@ from docker import client
 from docker import tls
 from docker.utils import utils
 from oslo_config import cfg
-from oslo_utils import uuidutils
 
 from magnum.conductor.handlers.common import cert_manager
 from magnum.conductor import utils as conductor_utils
-from magnum import objects
 
 
 docker_opts = [
@@ -74,15 +72,6 @@ def is_docker_api_version_atleast(docker, version):
     if utils.compare_version(docker.version()['ApiVersion'], version) <= 0:
         return True
     return False
-
-
-@contextlib.contextmanager
-def docker_for_container(context, container):
-    if uuidutils.is_uuid_like(container):
-        container = objects.Container.get_by_uuid(context, container)
-    bay = conductor_utils.retrieve_bay(context, container.bay_uuid)
-    with docker_for_bay(context, bay) as docker:
-        yield docker
 
 
 @contextlib.contextmanager

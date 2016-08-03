@@ -39,13 +39,6 @@ policy_data = """
     "rc:detail": "",
     "rc:get": "",
     "rc:get_all": "",
-    "rc:update": "",
-
-    "container:create": "",
-    "container:delete": "",
-    "container:detail": "",
-    "container:get": "",
-    "container:get_all": "",
-    "container:update": ""
+    "rc:update": ""
 }
 """
