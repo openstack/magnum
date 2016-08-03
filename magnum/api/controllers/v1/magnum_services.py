@@ -21,6 +21,7 @@ from magnum.api import expose
 from magnum.api import servicegroup as svcgrp_api
 from magnum.common import policy
 from magnum import objects
+from magnum.objects import fields
 
 
 class MagnumService(base.APIBase):
@@ -31,7 +32,7 @@ class MagnumService(base.APIBase):
     binary = wtypes.StringType(min_length=1, max_length=255)
     """Name of the binary"""
 
-    state = wtypes.StringType(min_length=1, max_length=255)
+    state = wtypes.Enum(str, *fields.MagnumServiceState.ALL)
     """State of the binary"""
 
     id = wsme.wsattr(wtypes.IntegerType(minimum=1))

@@ -79,12 +79,28 @@ class DockerStorageDriver(fields.Enum):
             valid_values=DockerStorageDriver.ALL)
 
 
+class MagnumServiceState(fields.Enum):
+    ALL = (
+        up, down
+    ) = (
+        'up', 'down',
+    )
+
+    def __init__(self):
+        super(MagnumServiceState, self).__init__(
+            valid_values=MagnumServiceState.ALL)
+
+
 class ListOfDictsField(fields.AutoTypedField):
     AUTO_TYPE = fields.List(fields.Dict(fields.FieldType()))
 
 
 class BayStatusField(fields.BaseEnumField):
     AUTO_TYPE = BayStatus()
+
+
+class MagnumServiceField(fields.BaseEnumField):
+    AUTO_TYPE = MagnumServiceState()
 
 
 class ContainerStatusField(fields.BaseEnumField):
