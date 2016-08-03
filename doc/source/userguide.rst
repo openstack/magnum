@@ -19,7 +19,7 @@ Contents
 #. `Overview`_
 #. `Python Client`_
 #. `Horizon Interface`_
-#. `Bay Drivers`
+#. `Bay Drivers`_
 #. `Choosing a COE`_
 #. `Native clients`_
 #. `Kubernetes`_
