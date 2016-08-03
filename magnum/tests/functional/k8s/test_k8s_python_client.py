@@ -20,16 +20,3 @@ class TestKubernetesAPIs(base.BaseK8sTest):
         "volume_driver": 'cinder',
         "fixed_network": '192.168.0.0/24'
     }
-
-    """
-    NB : Bug1504379. This is placeholder and will be removed when all
-         the objects-from-bay patches are checked in.
-    def test_pods_list(self):
-        self.assertIsNotNone(self.cs.pods.list(self.bay.uuid))
-
-    def test_rcs_list(self):
-        self.assertIsNotNone(self.cs.rcs.list(self.bay.uuid))
-
-    def test_services_list(self):
-        self.assertIsNotNone(self.cs.services.list(self.bay.uuid))
-    """
