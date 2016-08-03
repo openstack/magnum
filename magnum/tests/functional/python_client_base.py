@@ -264,11 +264,12 @@ extendedKeyUsage = clientAuth
 
         self.useFixture(fixtures.Timeout(test_timeout, gentle=True))
 
-        self.addOnException(
-            self.copy_logs_handler(
-                self._get_nodes,
-                self.baymodel.coe,
-                'default'))
+        if self.copy_logs:
+            self.addOnException(
+                self.copy_logs_handler(
+                    self._get_nodes,
+                    self.baymodel.coe,
+                    'default'))
         self._wait_for_bay_complete(self.bay)
 
     def _get_nodes(self):

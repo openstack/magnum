@@ -18,11 +18,12 @@ from tempest.lib import exceptions
 import testtools
 
 from magnum.objects.fields import BayStatus
-from magnum.tests.functional.common import base
+from magnum.tests.functional.api import base
+from magnum.tests.functional.common import config
 from magnum.tests.functional.common import datagen
 
 
-class BayTest(base.BaseMagnumTest):
+class BayTest(base.BaseTempestTest):
 
     """Tests for bay CRUD."""
 
@@ -100,12 +101,13 @@ class BayTest(base.BaseMagnumTest):
         self.assertIsNone(model.status_reason)
         self.assertEqual(model.baymodel_id, self.baymodel.uuid)
         self.bay_uuid = model.uuid
-        self.addOnException(self.copy_logs_handler(
-            lambda: list(
-                [self._get_bay_by_id(self.bay_uuid)[1].master_addresses,
-                 self._get_bay_by_id(self.bay_uuid)[1].node_addresses]),
-            self.baymodel.coe,
-            self.keypair))
+        if config.Config.copy_logs:
+            self.addOnException(self.copy_logs_handler(
+                lambda: list(
+                    [self._get_bay_by_id(self.bay_uuid)[1].master_addresses,
+                     self._get_bay_by_id(self.bay_uuid)[1].node_addresses]),
+                self.baymodel.coe,
+                self.keypair))
         self.bay_client.wait_for_created_bay(model.uuid, delete_on_error=False)
         return resp, model
 
