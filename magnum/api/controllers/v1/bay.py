@@ -16,7 +16,6 @@
 from oslo_log import log as logging
 from oslo_utils import timeutils
 import pecan
-from pecan import rest
 import wsme
 from wsme import types as wtypes
 
@@ -201,7 +200,7 @@ class BayCollection(collection.Collection):
         return sample
 
 
-class BaysController(rest.RestController):
+class BaysController(base.Controller):
     """REST controller for Bays."""
     def __init__(self):
         super(BaysController, self).__init__()

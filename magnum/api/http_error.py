@@ -29,7 +29,7 @@ class HTTPNotAcceptableAPIVersion(exc.HTTPNotAcceptable):
     #
     # differences from webob.exc.HTTPNotAcceptable:
     #
-    # - additional max and min version paramters
+    # - additional max and min version parameters
     # - additional error info for code, title, and links
     code = 406
     title = 'Not Acceptable'
