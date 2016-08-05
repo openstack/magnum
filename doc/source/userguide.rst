@@ -818,7 +818,7 @@ What runs on the servers
   and flannel run as systemd services.
 
 Log into the servers
-  You can log into the master servers using the login 'minion' and the
+  You can log into the master servers using the login 'fedora' and the
   keypair specified in the baymodel.
 
 External load balancer for services
@@ -2049,7 +2049,7 @@ The following software are managed as Docker containers:
 - kube-scheduler
 - kube-proxy
 
-The login for this image is *minion*.
+The login for this image is *fedora*.
 
 Kubernetes on CoreOS
 --------------------

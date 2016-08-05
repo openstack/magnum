@@ -441,7 +441,7 @@ redis-master is running::
 The output here indicates the redis-master is running on the bay host with IP
 address 172.24.4.5. To access the redis master::
 
-    ssh minion@172.24.4.5
+    ssh fedora@172.24.4.5
     REDIS_ID=$(sudo docker ps | grep redis:v1 | grep k8s_master | awk '{print $1}')
     sudo docker exec -i -t $REDIS_ID redis-cli
 
@@ -455,7 +455,7 @@ Log into one of the other container hosts and access a redis slave from it.
 You can use `nova list` to enumerate the kube-minions. For this example we
 will use the same host as above::
 
-    ssh minion@172.24.4.5
+    ssh fedora@172.24.4.5
     REDIS_ID=$(sudo docker ps | grep redis:v1 | grep k8s_redis | awk '{print $1}')
     sudo docker exec -i -t $REDIS_ID redis-cli
 

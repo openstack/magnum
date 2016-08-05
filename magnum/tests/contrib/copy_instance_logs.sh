@@ -43,7 +43,7 @@ function remote_exec {
 mkdir -p $LOG_PATH
 
 if [[ "$COE" == "kubernetes" ]]; then
-    SSH_USER=minion
+    SSH_USER=fedora
     remote_exec $SSH_USER "sudo systemctl --full list-units --no-pager" systemctl_list_units.log
     remote_exec $SSH_USER "sudo journalctl -u cloud-config --no-pager" cloud-config.log
     remote_exec $SSH_USER "sudo journalctl -u cloud-final --no-pager" cloud-final.log

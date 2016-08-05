@@ -75,9 +75,9 @@ output-show` command:
     $ heat output-show my-kube-cluster kube_masters
     "192.168.200.86"
 
-You can ssh into that server as the `minion` user:
+You can ssh into that server as the `fedora` user:
 
-    $ ssh minion@192.168.200.86
+    $ ssh fedora@192.168.200.86
 
 And once logged in you can run `kubectl`, etc:
 
@@ -85,7 +85,7 @@ And once logged in you can run `kubectl`, etc:
     NAME                LABELS       STATUS
     10.0.0.4            <none>       Ready
 
-You can log into your minions using the `minion` user as well.  You
+You can log into your minions using the `fedora` user as well.  You
 can get a list of minion addresses by running:
 
     $ heat output-show my-kube-cluster kube_minions

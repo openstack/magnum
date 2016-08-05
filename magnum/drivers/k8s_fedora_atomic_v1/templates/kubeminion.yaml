@@ -290,12 +290,6 @@ resources:
       group: ungrouped
       config: {get_file: fragments/configure-kubernetes-minion.sh}
 
-  kube_user:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/kube-user.yaml}
-
   kube_examples:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -356,7 +350,6 @@ resources:
       parts:
         - config: {get_resource: disable_selinux}
         - config: {get_resource: write_heat_params}
-        - config: {get_resource: kube_user}
         - config: {get_resource: write_kubeconfig}
         - config: {get_resource: make_cert}
         - config: {get_resource: kube_examples}
