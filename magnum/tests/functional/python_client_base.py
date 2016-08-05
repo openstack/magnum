@@ -274,9 +274,12 @@ extendedKeyUsage = clientAuth
 
     def _get_nodes(self):
         nodes = self._get_nodes_from_bay()
-        if not nodes:
+        if not [x for x in nodes if x]:
             self.LOG.info("the list of nodes from bay is empty")
             nodes = self._get_nodes_from_stack()
+            if not [x for x in nodes if x]:
+                self.LOG.info("the list of nodes from stack is empty")
+        self.LOG.info("Nodes are: %s" % nodes)
         return nodes
 
     def _get_nodes_from_bay(self):
