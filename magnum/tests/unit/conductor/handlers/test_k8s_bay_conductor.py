@@ -49,6 +49,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'registry_enabled': False,
             'insecure_registry': '10.0.0.1:5000',
             'master_lb_enabled': False,
+            'floating_ip_enabled': False,
         }
         self.bay_dict = {
             'uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
@@ -178,7 +179,8 @@ class TestBayConductorWithK8s(base.TestCase):
 
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/no_master_lb.yaml'],
+            ['../../common/templates/environments/no_master_lb.yaml',
+             '../../common/templates/environments/disable_floating_ip.yaml'],
             env_files)
 
     @patch('requests.get')
@@ -246,7 +248,8 @@ class TestBayConductorWithK8s(base.TestCase):
 
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/no_master_lb.yaml'],
+            ['../../common/templates/environments/no_master_lb.yaml',
+             '../../common/templates/environments/disable_floating_ip.yaml'],
             env_files)
 
     @patch('requests.get')
@@ -518,7 +521,8 @@ class TestBayConductorWithK8s(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/no_master_lb.yaml'],
+            ['../../common/templates/environments/no_master_lb.yaml',
+             '../../common/templates/environments/disable_floating_ip.yaml'],
             env_files)
         reqget.assert_called_once_with('http://etcd/test?size=1')
 

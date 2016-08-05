@@ -15,6 +15,7 @@
 from neutronclient.common import exceptions as n_exception
 from neutronclient.neutron import v2_0 as neutronV20
 import os
+from oslo_log import log as logging
 
 from magnum.common import exception
 from magnum.drivers.common import template_def
@@ -23,6 +24,8 @@ from oslo_config import cfg
 CONF = cfg.CONF
 KUBE_SECURE_PORT = '6443'
 KUBE_INSECURE_PORT = '8080'
+
+LOG = logging.getLogger(__name__)
 
 
 class K8sApiAddressOutputMapping(template_def.OutputMapping):
@@ -47,6 +50,34 @@ class K8sApiAddressOutputMapping(template_def.OutputMapping):
             }
             value = "%(protocol)s://%(address)s:%(port)s" % params
             setattr(bay, self.bay_attr, value)
+
+
+class ServerAddressOutputMapping(template_def.OutputMapping):
+
+    public_ip_output_key = None
+    private_ip_output_key = None
+
+    def __init__(self, dummy_arg, bay_attr=None):
+        self.bay_attr = bay_attr
+        self.heat_output = self.public_ip_output_key
+
+    def set_output(self, stack, baymodel, bay):
+        if not baymodel.floating_ip_enabled:
+            self.heat_output = self.private_ip_output_key
+
+        LOG.debug("Using heat_output: %s", self.heat_output)
+        super(ServerAddressOutputMapping,
+              self).set_output(stack, baymodel, bay)
+
+
+class MasterAddressOutputMapping(ServerAddressOutputMapping):
+    public_ip_output_key = 'kube_masters'
+    private_ip_output_key = 'kube_masters_private'
+
+
+class NodeAddressOutputMapping(ServerAddressOutputMapping):
+    public_ip_output_key = 'kube_minions'
+    private_ip_output_key = 'kube_minions_private'
 
 
 class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
@@ -84,11 +115,13 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
         self.add_output('kube_minions_private',
                         bay_attr=None)
         self.add_output('kube_minions',
-                        bay_attr='node_addresses')
+                        bay_attr='node_addresses',
+                        mapping_type=NodeAddressOutputMapping)
         self.add_output('kube_masters_private',
                         bay_attr=None)
         self.add_output('kube_masters',
-                        bay_attr='master_addresses')
+                        bay_attr='master_addresses',
+                        mapping_type=MasterAddressOutputMapping)
 
     def get_params(self, context, baymodel, bay, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
@@ -152,10 +185,21 @@ class AtomicK8sTemplateDefinition(K8sTemplateDefinition):
                                       **kwargs)
 
     def get_env_files(self, baymodel):
+        env_files = []
         if baymodel.master_lb_enabled:
-            return ['../../common/templates/environments/with_master_lb.yaml']
+            env_files.append(
+                '../../common/templates/environments/with_master_lb.yaml')
         else:
-            return ['../../common/templates/environments/no_master_lb.yaml']
+            env_files.append(
+                '../../common/templates/environments/no_master_lb.yaml')
+        if baymodel.floating_ip_enabled:
+            env_files.append(
+                '../../common/templates/environments/enable_floating_ip.yaml')
+        else:
+            env_files.append(
+                '../../common/templates/environments/disable_floating_ip.yaml')
+
+        return env_files
 
     @property
     def template_path(self):
