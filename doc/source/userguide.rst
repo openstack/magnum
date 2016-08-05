@@ -63,8 +63,10 @@ Overview
 
 Magnum rationale, concept, compelling features
 
+========
 BayModel
----------
+========
+
 A baymodel is a collection of parameters to describe how a bay can be
 constructed.  Some parameters are relevant to the infrastructure of
 the bay, while others are for the particular COE.  In a typical
@@ -238,9 +240,253 @@ Labels
 *To be filled in*
 
 
+===
 Bay
----
-*To be filled in*
+===
+
+A bay is an instance of the baymodel of a COE.  Magnum deploys a bay
+by referring to the attributes defined in the particular baymodel as
+well as a few additional parameters for the bay.  Magnum deploys the
+orchestration templates provided by the bay driver to create and
+configure all the necessary infrastructure.  When ready, the bay is a
+fully operational COE that can host containers.
+
+Infrastructure
+--------------
+
+The infrastructure of the bay consists of the resources provided by
+the various OpenStack services.  Existing infrastructure, including
+infrastructure external to OpenStack, can also be used by the bay,
+such as DNS, public network, public discovery service, Docker registry.
+The actual resources created depends on the COE type and the options
+specified; therefore you need to refer to the bay driver documentation
+of the COE for specific details.  For instance, the option
+'--master-lb-enabled' in the baymodel will cause a load balancer pool
+along with the health monitor and floating IP to be created.  It is
+important to distinguish resources in the IaaS level from resources in
+the PaaS level.  For instance, the infrastructure networking in
+OpenStack IaaS is different and separate from the container networking
+in Kubernetes or Swarm PaaS.
+
+Typical infrastructure includes the following.
+
+Servers
+  The servers host the containers in the bay and these servers can be
+  VM or bare metal.  VM's are provided by Nova.  Since multiple VM's
+  are hosted on a physical server, the VM's provide the isolation
+  needed for containers between different tenants running on the same
+  physical server.  Bare metal servers are provided by Ironic and are
+  used when peak performance with virtually no overhead is needed for
+  the containers.
+
+Identity
+  Keystone provides the authentication and authorization for managing
+  the bay infrastructure.
+
+Network
+  Networking among the servers is provided by Neutron.  Since COE
+  currently are not multi-tenant, isolation for multi-tenancy on the
+  networking level is done by using a private network for each bay.
+  As a result, containers belonging to one tenant will not be
+  accessible to containers or servers of another tenant.  Other
+  networking resources may also be used, such as load balancer and
+  routers.  Networking among containers can be provided by Kuryr if
+  needed.
+
+Storage
+  Cinder provides the block storage that is used for both hosting the
+  containers as well as persistent storage for the containers.
+
+Security
+  Barbican provides the storage of secrets such as certificates used
+  in the bay Transport Layer Security (TLS).
+
+
+Life cycle
+----------
+
+The set of life cycle operations on the bay is one of the key value
+that Magnum provides, enabling bays to be managed painlessly on
+OpenStack.  The current operations are the basic CRUD operations, but
+more advanced operations are under discussion in the community and
+will be implemented as needed.
+
+**NOTE** The OpenStack resources created for a bay are fully
+accessible to the bay owner.  Care should be taken when modifying or
+reusing these resources to avoid impacting Magnum operations in
+unexpected manners.  For instance, if you launch your own Nova
+instance on the bay private network, Magnum would not be aware of this
+instance.  Therefore, the bay-delete operation will fail because
+Magnum would not delete the extra Nova insance and the private Neutron
+network cannot be removed while a Nova instance is still attached.
+
+**NOTE** Currently Heat nested templates are used to create the
+resources; therefore if an error occurs, you can troubleshoot through
+Heat.
+
+Create
+++++++
+
+The 'bay-create' command deploys a bay, for example::
+
+    magnum bay-create --name mybay \
+                      --baymodel mymodel \
+                      --node-count 8 \
+                      --master-count 3
+
+If the bay fails to be created, the infrastructure created so far may
+be retained or deleted depending on the particular orchestration
+engine.  As a common practice, a failed bay is retained during
+development for troubleshooting, but they are automatically deleted
+in production.  The current bay drivers use Heat templates and
+the resources of a failed 'bay-create' are retained.
+
+The definition and usage of the parameters for 'bay-create' are as
+follows:
+
+--baymodel \<baymodel\>
+  The ID or name of the baymodel to use.  This is a mandatory
+  parameter.  Once a baymodel is used to create a bay, it cannot
+  be deleted or modified until all bays that use the baymodel have
+  been deleted.
+
+--name \<name\>
+  Name of the bay to create.  If a name is not specified, a random
+  name will be generated using a string and a number, for example
+  "gamma-7-bay".
+
+--node-count \<node-count\>
+  The number of servers that will serve as node in the bay.
+  The default is 1.
+
+--master-count \<master-count\>
+  The number of servers that will serve as master for the bay.  The
+  default is 1.  Set to more than 1 master to enable High
+  Availability.  If the option '--master-lb-enabled' is specified in
+  the baymodel, the master servers will be placed in a load balancer
+  pool.
+
+--discovery-url \<discovery-url\>
+  The custom discovery url for node discovery.  This is used by the
+  COE to discover the servers that have been created to host the
+  containers.  The actual discovery mechanism varies with the COE.  In
+  some cases, Magnum fills in the server info in the discovery
+  service.  In other cases, if the discovery-url is not specified,
+  Magnum will use the public discovery service at::
+
+    https://discovery.etcd.io
+
+  In this case, Magnum will generate a unique url here for each bay
+  and store the info for the servers.
+
+--timeout \<timeout\>
+  The timeout for bay creation in minutes. The value expected is a
+  positive integer and the default is 60 minutes.  If the timeout is
+  reached during bay-create, the operation will be aborted and the bay
+  status will be set to 'CREATE_FAILED'.
+
+List
+++++
+
+The 'bay-list' command lists all the bays that belong to the tenant,
+for example::
+
+    magnum bay-list
+
+Show
+++++
+
+The 'bay-show' command prints all the details of a bay, for
+example::
+
+    magnum bay-show mybay
+
+The properties include those not specified by users that have been
+assigned default values and properties from new resources that
+have been created for the bay.
+
+Update
+++++++
+
+A bay can be modified using the 'bay-update' command, for example::
+
+    magnum bay-update mybay replace node_count=8
+
+The parameters are positional and their definition and usage are as
+follows.
+
+\<bay\>
+  This is the first parameter, specifying the UUID or name of the bay
+  to update.
+
+\<op\>
+  This is the second parameter, specifying the desired change to be
+  made to the bay attributes.  The allowed changes are 'add',
+  'replace' and 'remove'.
+
+\<attribute=value\>
+  This is the third parameter, specifying the targeted attributes in
+  the bay as a list separated by blank space.  To add or replace an
+  attribute, you need to specify the value for the attribute.  To
+  remove an attribute, you only need to specify the name of the
+  attribute.  Currently the only attribute that can be replaced or
+  removed is 'node_count'.  The attributes 'name', 'master_count' and
+  'discovery_url' cannot be replaced or delete.  The table below
+  summarizes the possible change to a bay.
+
+  +---------------+-----+------------------+-----------------------+
+  | Attribute     | add | replace          | remove                |
+  +===============+=====+==================+=======================+
+  | node_count    | no  | add/remove nodes | reset to default of 1 |
+  +---------------+-----+------------------+-----------------------+
+  | master_count  | no  | no               |  no                   |
+  +---------------+-----+------------------+-----------------------+
+  | name          | no  | no               |  no                   |
+  +---------------+-----+------------------+-----------------------+
+  | discovery_url | no  | no               |  no                   |
+  +---------------+-----+------------------+-----------------------+
+
+The 'bay-update' operation cannot be initiated when another operation
+is in progress.
+
+**NOTE:** The attribute names in bay-update are slightly different
+from the corresponding names in the bay-create command: the dash '-'
+is replaced by an underscore '_'.  For instance, 'node-count' in
+bay-create is 'node_count' in bay-update.
+
+Scale
++++++
+
+Scaling a bay means adding servers to or removing servers from the bay.
+Currently, this is done through the 'bay-update' operation by modifying
+the node-count attribute, for example::
+
+    magnum bay-update mybay replace node_count=2
+
+When some nodes are removed, Magnum will attempt to find nodes with no
+containers to remove.  If some nodes with containers must be removed,
+Magnum will log a warning message.
+
+Delete
+++++++
+
+The 'bay-delete' operation removes the bay by deleting all resources
+such as servers, network, storage;  for example::
+
+    magnum bay-delete mybay
+
+The only parameter for the bay-delete command is the ID or name of the
+bay to delete.  Multiple bays can be specified, separated by a blank
+space.
+
+If the operation fails, there may be some remaining resources that
+have not been deleted yet.  In this case, you can troubleshoot through
+Heat.  If the templates are deleted manually in Heat, you can delete
+the bay in Magnum to clean up the bay from Magnum database.
+
+The 'bay-delete' operation can be initiated when another operation is
+still in progress.
+
 
 =============
 Python Client
