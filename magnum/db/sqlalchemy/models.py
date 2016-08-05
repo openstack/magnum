@@ -177,6 +177,7 @@ class BayModel(Base):
     server_type = Column(String(255))
     insecure_registry = Column(String(255))
     master_lb_enabled = Column(Boolean, default=False)
+    floating_ip_enabled = Column(Boolean, default=True)
 
 
 class X509KeyPair(Base):
