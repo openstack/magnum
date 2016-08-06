@@ -229,7 +229,7 @@ function create_api_paste_conf {
 function update_heat_policy {
     # enable stacks global_index search so that magnum can use
     # list(global_tenant=True)
-    sed -i 's/\("stacks:global_index":\).*$/\1 "role:admin",/' $HEAT_CONF_DIR/policy.json
+    sed -i 's/\("stacks:global_index":\).*$/\1 "rule:context_is_admin",/' $HEAT_CONF_DIR/policy.json
 }
 
 # create_magnum_cache_dir() - Part of the init_magnum() process
