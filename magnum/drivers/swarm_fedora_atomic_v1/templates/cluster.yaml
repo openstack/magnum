@@ -281,7 +281,26 @@ resources:
   # sorts.
   #
 
-  secgroup_manager:
+  secgroup_swarm_manager:
+    type: "OS::Neutron::SecurityGroup"
+    properties:
+      rules:
+        - protocol: icmp
+        - protocol: tcp
+          port_range_min: 22
+          port_range_max: 22
+        - protocol: tcp
+          port_range_min: 2376
+          port_range_max: 2376
+        - protocol: tcp
+          remote_ip_prefix: {get_param: fixed_network_cidr}
+          port_range_min: 1
+          port_range_max: 65535
+        - protocol: udp
+          port_range_min: 53
+          port_range_max: 53
+
+  secgroup_swarm_node:
     type: "OS::Neutron::SecurityGroup"
     properties:
       rules:
@@ -409,7 +428,7 @@ resources:
           cluster_uuid: {get_param: cluster_uuid}
           magnum_url: {get_param: magnum_url}
           tls_disabled: {get_param: tls_disabled}
-          secgroup_swarm_master_id: {get_resource: secgroup_manager}
+          secgroup_swarm_master_id: {get_resource: secgroup_swarm_manager}
           network_driver: {get_param: network_driver}
           flannel_network_cidr: {get_param: flannel_network_cidr}
           flannel_network_subnetlen: {get_param: flannel_network_subnetlen}
@@ -452,7 +471,7 @@ resources:
           cluster_uuid: {get_param: cluster_uuid}
           magnum_url: {get_param: magnum_url}
           tls_disabled: {get_param: tls_disabled}
-          secgroup_swarm_node_id: {get_resource: secgroup_manager}
+          secgroup_swarm_node_id: {get_resource: secgroup_swarm_node}
           flannel_network_cidr: {get_param: flannel_network_cidr}
           network_driver: {get_param: network_driver}
           etcd_server_ip: {get_attr: [etcd_address_switch, private_ip]}
