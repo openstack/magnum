@@ -238,73 +238,73 @@ resources:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/configure-etcds.yaml}
+      config: {get_file: fragments/configure-etcd.yaml}
 
   make_cert:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/make-certs.yaml}
+      config: {get_file: fragments/make-cert.yaml}
 
   write_network_config:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/write-network-configs.yaml}
+      config: {get_file: fragments/write-network-config.yaml}
 
   enable_network_service:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-network-services.yaml}
+      config: {get_file: fragments/enable-network-service.yaml}
 
   enable_kubelet:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-kubelet-masters.yaml}
+      config: {get_file: fragments/enable-kubelet-master.yaml}
 
   enable_kube_apiserver:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-kube-apiservers.yaml}
+      config: {get_file: fragments/enable-kube-apiserver.yaml}
 
   create_kube_namespace:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/create-kube-namespaces.yaml}
+      config: {get_file: fragments/create-kube-namespace.yaml}
 
   enable_kube_proxy:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-kube-proxy-masters.yaml}
+      config: {get_file: fragments/enable-kube-proxy-master.yaml}
 
   enable_kube_controller_manager:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-kube-controller-managers.yaml}
+      config: {get_file: fragments/enable-kube-controller-manager.yaml}
 
   enable_kube_scheduler:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-kube-schedulers.yaml}
+      config: {get_file: fragments/enable-kube-scheduler.yaml}
 
   enable_kube_podmaster:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-kube-podmasters.yaml}
+      config: {get_file: fragments/enable-kube-podmaster.yaml}
 
   wc_notify:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/wc-notifys.yaml}
+      config: {get_file: fragments/wc-notify.yaml}
 
   kube_master_init:
     type: OS::Heat::SoftwareConfig
