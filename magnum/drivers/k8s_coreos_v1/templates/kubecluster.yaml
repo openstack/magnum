@@ -221,19 +221,90 @@ resources:
 
   ######################################################################
   #
-  # kubernetes masters. This is a resource group that will create
-  # 1 master.
+  # load balancers.
   #
 
-  kube_master:
+  api_monitor:
+    type: Magnum::Optional::Neutron::Pool::HealthMonitor
+    properties:
+      type: TCP
+      delay: 5
+      max_retries: 5
+      timeout: 5
+
+  api_pool:
+    type: Magnum::Optional::Neutron::Pool
+    properties:
+      protocol: {get_param: loadbalancing_protocol}
+      monitors: [{get_resource: api_monitor}]
+      subnet: {get_resource: fixed_subnet}
+      lb_method: ROUND_ROBIN
+      vip:
+        protocol_port: {get_param: kubernetes_port}
+
+  api_pool_floating:
+    type: Magnum::Optional::Neutron::Pool::FloatingIP
+    depends_on:
+      - extrouter_inside
+    properties:
+      floating_network: {get_param: external_network}
+      port_id: {get_attr: [api_pool, vip, port_id]}
+
+  etcd_monitor:
+    type: Magnum::Optional::Neutron::Pool::HealthMonitor
+    properties:
+      type: TCP
+      delay: 5
+      max_retries: 5
+      timeout: 5
+
+  etcd_pool:
+    type: Magnum::Optional::Neutron::Pool
+    properties:
+      protocol: HTTP
+      monitors: [{get_resource: etcd_monitor}]
+      subnet: {get_resource: fixed_subnet}
+      lb_method: ROUND_ROBIN
+      vip:
+        protocol_port: 2379
+
+  ######################################################################
+  #
+  # resources that expose the IPs of either the kube master or a given
+  # LBaaS pool depending on whether LBaaS is enabled for the bay.
+  #
+
+  api_address_switch:
+    type: Magnum::ApiGatewaySwitcher
+    properties:
+      pool_public_ip: {get_attr: [api_pool_floating, floating_ip_address]}
+      pool_private_ip: {get_attr: [api_pool, vip, address]}
+      master_public_ip: {get_attr: [kube_masters, resource.0.kube_master_external_ip]}
+      master_private_ip: {get_attr: [kube_masters, resource.0.kube_master_ip]}
+
+  etcd_address_switch:
+    type: Magnum::ApiGatewaySwitcher
+    properties:
+      pool_private_ip: {get_attr: [etcd_pool, vip, address]}
+      master_private_ip: {get_attr: [kube_masters, resource.0.kube_master_ip]}
+
+  ######################################################################
+  #
+  # kubernetes masters. This is a resource group that will create
+  # <number_of_masters> master.
+  #
+
+  kube_masters:
     type: OS::Heat::ResourceGroup
     depends_on:
       - extrouter_inside
     properties:
-      count: 1
+      count: {get_param: number_of_masters}
       resource_def:
         type: kubemaster.yaml
         properties:
+          api_public_address: {get_attr: [api_pool_floating, floating_ip_address]}
+          api_private_address: {get_attr: [api_pool, vip, address]}
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: server_image}
           master_flavor: {get_param: master_flavor}
@@ -252,6 +323,8 @@ resources:
           kube_version: {get_param: kube_version}
           wait_condition_timeout: {get_param: wait_condition_timeout}
           bay_uuid: {get_param: bay_uuid}
+          api_pool_id: {get_resource: api_pool}
+          etcd_pool_id: {get_resource: etcd_pool}
           magnum_url: {get_param: magnum_url}
           trustee_user_id: {get_param: trustee_user_id}
           trustee_password: {get_param: trustee_password}
@@ -268,7 +341,7 @@ resources:
     type: OS::Heat::ResourceGroup
     depends_on:
       - extrouter_inside
-      - kube_master
+      - kube_masters
     properties:
       count: {get_param: number_of_minions}
       removal_policies: [{resource_list: {get_param: minions_to_remove}}]
@@ -281,14 +354,14 @@ resources:
           fixed_network: {get_resource: fixed_network}
           fixed_subnet: {get_resource: fixed_subnet}
           flannel_network_cidr: {get_param: flannel_network_cidr}
-          kube_master_ip: {"Fn::Select": [0, {get_attr: [kube_master, kube_master_ip]}]}
+          kube_master_ip: {get_attr: [api_address_switch, private_ip]}
           external_network: {get_param: external_network}
           kube_allow_priv: {get_param: kube_allow_priv}
           network_driver: {get_param: network_driver}
           kubernetes_port: {get_param: kubernetes_port}
           tls_disabled: {get_param: tls_disabled}
           kube_version: {get_param: kube_version}
-          etcd_server_ip: {"Fn::Select": [0, {get_attr: [kube_master, kube_master_ip]}]}
+          etcd_server_ip: {get_attr: [etcd_address_switch, private_ip]}
           wait_condition_timeout: {get_param: wait_condition_timeout}
           bay_uuid: {get_param: bay_uuid}
           magnum_url: {get_param: magnum_url}
@@ -300,18 +373,22 @@ resources:
 outputs:
 
   api_address:
-    value: {"Fn::Select": [0, {get_attr: [kube_master, kube_master_external_ip]}]}
+    value:
+      str_replace:
+        template: api_ip_address
+        params:
+          api_ip_address: {get_attr: [api_address_switch, public_ip]}
     description: >
       This is the API endpoint of the Kubernetes cluster. Use this to access
       the Kubernetes API.
 
   kube_masters_private:
-    value: {get_attr: [kube_master, kube_master_ip]}
+    value: {get_attr: [kube_masters, kube_master_ip]}
     description: >
       This is a list of the "private" IP addresses of all the Kubernetes masters.
 
   kube_masters:
-    value: {get_attr: [kube_master, kube_master_external_ip]}
+    value: {get_attr: [kube_masters, kube_master_external_ip]}
     description: >
       This is a list of the "public" IP addresses of all the Kubernetes masters.
       Use these IP addresses to log in to the Kubernetes masters via ssh or to access
