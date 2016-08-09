@@ -367,7 +367,6 @@ object_data = {
     'Certificate': '1.0-2aff667971b85c1edf8d15684fd7d5e2',
     'MyObj': '1.0-b43567e512438205e32f4e95ca616697',
     'MyObj': '1.0-34c4b1aadefd177b13f9a2f894cc23cd',
-    'ReplicationController': '1.0-a471c2429c212ed91833cfcf0f934eab',
     'X509KeyPair': '1.2-d81950af36c59a71365e33ce539d24f9',
     'MagnumService': '1.0-2d397ec59b0046bd5ec35cd3e06efeca',
 }

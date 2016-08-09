@@ -87,33 +87,6 @@ def create_test_bay(context, **kw):
     return bay
 
 
-def get_test_rc(context, **kw):
-    """Return a ReplicationController object with appropriate attributes.
-
-    NOTE: The object leaves the attributes marked as changed, such
-    that a create() could be used to commit it to the DB.
-    """
-    db_rc = db_utils.get_test_rc(**kw)
-    # Let DB generate ID if it isn't specified explicitly
-    if 'id' not in kw:
-        del db_rc['id']
-    rc = objects.ReplicationController(context)
-    for key in db_rc:
-        setattr(rc, key, db_rc[key])
-    return rc
-
-
-def create_test_rc(context, **kw):
-    """Create and return a test ReplicationController object.
-
-    Create a replication controller in the DB and return a
-    ReplicationController object with appropriate attributes.
-    """
-    rc = get_test_rc(context, **kw)
-    rc.manifest = '{"foo": "bar"}'
-    return rc
-
-
 def get_test_x509keypair(context, **kw):
     """Return a X509KeyPair object with appropriate attributes.
 

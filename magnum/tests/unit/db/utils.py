@@ -121,40 +121,6 @@ def create_test_bay(**kw):
     return dbapi.create_bay(bay)
 
 
-def get_test_rc(**kw):
-    return {
-        'id': kw.get('id', 42),
-        'uuid': kw.get('uuid', '10a47dd1-4874-4298-91cf-eff046dbdb8d'),
-        'name': kw.get('name', 'replication_controller'),
-        'project_id': kw.get('project_id', 'fake_project'),
-        'user_id': kw.get('user_id', 'fake_user'),
-        'images': kw.get('images', ['steak/for-dinner']),
-        'bay_uuid': kw.get('bay_uuid', '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'),
-        'labels': kw.get('labels', {'name': 'foo'}),
-        'replicas': kw.get('replicas', 3),
-        'manifest_url': kw.get('file:///tmp/rc.yaml'),
-        'created_at': kw.get('created_at'),
-        'updated_at': kw.get('updated_at'),
-    }
-
-
-def create_test_rc(**kw):
-    """Create test rc entry in DB and return ReplicationController DB object.
-
-    Function to be used to create test ReplicationController objects in the
-    database.
-    :param kw: kwargs with overriding values for
-               replication controller's attributes.
-    :returns: Test ReplicationController DB object.
-    """
-    replication_controller = get_test_rc(**kw)
-    # Let DB generate ID if it isn't specified explicitly
-    if 'id' not in kw:
-        del replication_controller['id']
-    dbapi = db_api.get_instance()
-    return dbapi.create_rc(replication_controller)
-
-
 def get_test_x509keypair(**kw):
     return {
         'id': kw.get('id', 42),

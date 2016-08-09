@@ -40,25 +40,6 @@ class API(rpc_service.API):
     def bay_update(self, bay):
         return self._call('bay_update', bay=bay)
 
-    # ReplicationController Operations
-
-    def rc_create(self, rc):
-        return self._call('rc_create', rc=rc)
-
-    def rc_update(self, rc_ident, bay_ident, manifest):
-        return self._call('rc_update', rc_ident=rc_ident,
-                          bay_ident=bay_ident, manifest=manifest)
-
-    def rc_list(self, context, bay_ident):
-        return self._call('rc_list', bay_ident=bay_ident)
-
-    def rc_delete(self, rc_ident, bay_ident):
-        return self._call('rc_delete', rc_ident=rc_ident, bay_ident=bay_ident)
-
-    def rc_show(self, context, rc_ident, bay_ident):
-        return self._call('rc_show', rc_ident=rc_ident,
-                          bay_ident=bay_ident)
-
     # CA operations
 
     def sign_certificate(self, bay, certificate):

@@ -87,7 +87,6 @@ magnum/tests/unit/objects/test_objects.py::
         'Container': '1.1-22b40e8eed0414561ca921906b189820',
         'MyObj': '1.0-b43567e512438205e32f4e95ca616697',
         'Pod': '1.0-69b579203c6d726be7878c606626e438',
-        'ReplicationController': '1.0-782b7deb9307b2807101541b7e58b8a2',
         'Service': '1.0-d4b8c0f3a234aec35d273196e18f7ed1',
         'X509KeyPair': '1.0-fd008eba0fbc390e0e5da247bba4eedd',
     }
