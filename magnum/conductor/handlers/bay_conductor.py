@@ -234,7 +234,7 @@ class Handler(object):
                 trust_manager.delete_trustee_and_trust(osc, context, bay)
                 cert_manager.delete_certificates_from_bay(bay, context=context)
                 bay.destroy()
-            except exception.BayNotFound:
+            except exception.ClusterNotFound:
                 LOG.info(_LI('The bay %s has been deleted by others.'), uuid)
             conductor_utils.notify_about_bay_operation(
                 context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_SUCCESS)
@@ -348,7 +348,7 @@ class HeatPoller(object):
             cert_manager.delete_certificates_from_bay(self.bay,
                                                       context=self.context)
             self.bay.destroy()
-        except exception.BayNotFound:
+        except exception.ClusterNotFound:
             LOG.info(_LI('The bay %s has been deleted by others.')
                      % self.bay.uuid)
 

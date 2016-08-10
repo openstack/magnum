@@ -456,7 +456,7 @@ class TestHandler(db_base.DbTestCase):
         self.assertEqual(1,
                          cert_manager.delete_certificates_from_bay.call_count)
         # The bay has been destroyed
-        self.assertRaises(exception.BayNotFound,
+        self.assertRaises(exception.ClusterNotFound,
                           objects.Bay.get, self.context, self.bay.uuid)
 
     @patch('magnum.conductor.handlers.bay_conductor.cert_manager')

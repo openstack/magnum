@@ -79,9 +79,9 @@ class BaseMagnumTest(base.BaseTestCase):
                             ])
                         except Exception:
                             cls.LOG.error(msg)
-                            msg = (_LE("failed to copy from %{node_address}s "
-                                       "to %{base_path}s%{log_name}s-"
-                                       "%{node_address}s") %
+                            msg = (_LE("failed to copy from %(node_address)s "
+                                       "to %(base_path)s%(log_name)s-"
+                                       "%(node_address)s") %
                                    {'node_address': node_address,
                                     'base_path': "/opt/stack/logs/bay-nodes/",
                                     'log_name': log_name})

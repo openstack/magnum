@@ -20,6 +20,21 @@
     "baymodel:update": "rule:default",
     "baymodel:publish": "rule:admin_or_owner",
 
+    "cluster:create": "rule:default",
+    "cluster:delete": "rule:default",
+    "cluster:detail": "rule:default",
+    "cluster:get": "rule:default",
+    "cluster:get_all": "rule:default",
+    "cluster:update": "rule:default",
+
+    "clustertemplate:create": "rule:default",
+    "clustertemplate:delete": "rule:default",
+    "clustertemplate:detail": "rule:default",
+    "clustertemplate:get": "rule:default",
+    "clustertemplate:get_all": "rule:default",
+    "clustertemplate:update": "rule:default",
+    "clustertemplate:publish": "rule:admin_or_owner",
+
     "rc:create": "rule:default",
     "rc:delete": "rule:default",
     "rc:detail": "rule:default",

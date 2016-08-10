@@ -34,7 +34,7 @@ class DbBayTestCase(base.DbTestCase):
 
     def test_create_bay_already_exists(self):
         utils.create_test_bay()
-        self.assertRaises(exception.BayAlreadyExists,
+        self.assertRaises(exception.ClusterAlreadyExists,
                           utils.create_test_bay)
 
     def test_get_bay_by_id(self):
@@ -56,10 +56,10 @@ class DbBayTestCase(base.DbTestCase):
         self.assertEqual(bay.uuid, res.uuid)
 
     def test_get_bay_that_does_not_exist(self):
-        self.assertRaises(exception.BayNotFound,
+        self.assertRaises(exception.ClusterNotFound,
                           self.dbapi.get_bay_by_id,
                           self.context, 999)
-        self.assertRaises(exception.BayNotFound,
+        self.assertRaises(exception.ClusterNotFound,
                           self.dbapi.get_bay_by_uuid,
                           self.context,
                           '12345678-9999-0000-aaaa-123456789012')
@@ -174,7 +174,7 @@ class DbBayTestCase(base.DbTestCase):
         self.assertIsNotNone(self.dbapi.get_bay_by_id(self.context,
                                                       bay.id))
         self.dbapi.destroy_bay(bay.id)
-        self.assertRaises(exception.BayNotFound,
+        self.assertRaises(exception.ClusterNotFound,
                           self.dbapi.get_bay_by_id,
                           self.context, bay.id)
 
@@ -183,12 +183,12 @@ class DbBayTestCase(base.DbTestCase):
         self.assertIsNotNone(self.dbapi.get_bay_by_uuid(self.context,
                                                         bay.uuid))
         self.dbapi.destroy_bay(bay.uuid)
-        self.assertRaises(exception.BayNotFound,
+        self.assertRaises(exception.ClusterNotFound,
                           self.dbapi.get_bay_by_uuid, self.context,
                           bay.uuid)
 
     def test_destroy_bay_that_does_not_exist(self):
-        self.assertRaises(exception.BayNotFound,
+        self.assertRaises(exception.ClusterNotFound,
                           self.dbapi.destroy_bay,
                           '12345678-9999-0000-aaaa-123456789012')
 
@@ -202,7 +202,7 @@ class DbBayTestCase(base.DbTestCase):
 
     def test_update_bay_not_found(self):
         bay_uuid = uuidutils.generate_uuid()
-        self.assertRaises(exception.BayNotFound, self.dbapi.update_bay,
+        self.assertRaises(exception.ClusterNotFound, self.dbapi.update_bay,
                           bay_uuid, {'node_count': 5})
 
     def test_update_bay_uuid(self):

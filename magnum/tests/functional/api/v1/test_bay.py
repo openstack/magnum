@@ -18,7 +18,6 @@ from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions
 import testtools
 
-from magnum.objects.fields import BayStatus
 from magnum.tests.functional.api import base
 from magnum.tests.functional.common import config
 from magnum.tests.functional.common import datagen
@@ -131,56 +130,6 @@ class BayTest(base.BaseTempestTest):
         resp, model = self.bay_client.get_bay(bay_id)
         return resp, model
 
-    # (dimtruck) Combining all these tests in one because
-    # they time out on the gate (2 hours not enough)
-    @testtools.testcase.attr('positive')
-    def test_create_list_and_delete_bays(self):
-        gen_model = datagen.valid_bay_data(
-            baymodel_id=self.baymodel.uuid, node_count=1)
-
-        # test bay create
-        _, temp_model = self._create_bay(gen_model)
-        self.assertEqual(BayStatus.CREATE_IN_PROGRESS, temp_model.status)
-        self.assertIsNone(temp_model.status_reason)
-
-        # test bay list
-        resp, model = self.bay_client.list_bays()
-        self.assertEqual(200, resp.status)
-        self.assertGreater(len(model.bays), 0)
-        self.assertIn(
-            temp_model.uuid, list([x['uuid'] for x in model.bays]))
-
-        # test invalid bay update
-        patch_model = datagen.bay_name_patch_data()
-        self.assertRaises(
-            exceptions.BadRequest,
-            self.bay_client.patch_bay,
-            temp_model.uuid, patch_model)
-
-        # test bay delete
-        self._delete_bay(temp_model.uuid)
-        self.bays.remove(temp_model.uuid)
-
-    @testtools.testcase.attr('positive')
-    def test_create_delete_bays_async(self):
-        gen_model = datagen.valid_bay_data(
-            baymodel_id=self.baymodel.uuid, node_count=1)
-
-        # test bay create
-        _, temp_model = self._create_bay(gen_model, is_async=True)
-        self.assertNotIn('status', temp_model)
-
-        # test bay list
-        resp, model = self.bay_client.list_bays()
-        self.assertEqual(200, resp.status)
-        self.assertGreater(len(model.bays), 0)
-        self.assertIn(
-            temp_model.uuid, list([x['uuid'] for x in model.bays]))
-
-        # test bay delete
-        self._delete_bay(temp_model.uuid)
-        self.bays.remove(temp_model.uuid)
-
     @testtools.testcase.attr('negative')
     def test_create_bay_for_nonexisting_baymodel(self):
         gen_model = datagen.valid_bay_data(baymodel_id='this-does-not-exist')
@@ -265,37 +214,3 @@ class BayTest(base.BaseTempestTest):
         self.assertRaises(
             exceptions.NotFound,
             self.bay_client.delete_bay, data_utils.rand_uuid())
-
-    @testtools.testcase.attr('positive')
-    def test_certificate_sign_and_show(self):
-        first_model = datagen.valid_bay_data(baymodel_id=self.baymodel.uuid,
-                                             name='test')
-        _, bay_model = self._create_bay(first_model)
-
-        # test ca show
-        resp, model = self.cert_client.get_cert(
-            bay_model.uuid)
-        self.LOG.debug("cert resp: %s" % resp)
-        self.assertEqual(200, resp.status)
-        self.assertEqual(model.bay_uuid, bay_model.uuid)
-        self.assertIsNotNone(model.pem)
-        self.assertIn('-----BEGIN CERTIFICATE-----', model.pem)
-        self.assertIn('-----END CERTIFICATE-----', model.pem)
-
-        # test ca sign
-        model = datagen.cert_data(bay_uuid=bay_model.uuid)
-        resp, model = self.cert_client.post_cert(model)
-        self.LOG.debug("cert resp: %s" % resp)
-        self.assertEqual(201, resp.status)
-        self.assertEqual(model.bay_uuid, bay_model.uuid)
-        self.assertIsNotNone(model.pem)
-        self.assertIn('-----BEGIN CERTIFICATE-----', model.pem)
-        self.assertIn('-----END CERTIFICATE-----', model.pem)
-
-        # test ca sign invalid
-        model = datagen.cert_data(bay_uuid=bay_model.uuid,
-                                  csr_data="invalid_csr")
-        self.assertRaises(
-            exceptions.BadRequest,
-            self.cert_client.post_cert,
-            model)

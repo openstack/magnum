@@ -118,7 +118,7 @@ class Connection(object):
 
         :param bay_id: The id or uuid of a bay.
         :returns: A bay.
-        :raises: BayNotFound
+        :raises: ClusterNotFound
         """
 
     @abc.abstractmethod
@@ -201,7 +201,7 @@ class Connection(object):
 
         :param baymodel_id: The id or uuid of a baymodel.
         :returns: A baymodel.
-        :raises: BayModelNotFound
+        :raises: ClusterTemplateNotFound
         """
 
     @abc.abstractmethod

@@ -33,7 +33,7 @@ from magnum import objects
 from magnum.objects import fields
 
 
-class BayModelPatchType(types.JsonPatchType):
+class ClusterTemplatePatchType(types.JsonPatchType):
 
     @staticmethod
     def mandatory_attrs():
@@ -42,31 +42,32 @@ class BayModelPatchType(types.JsonPatchType):
                 '/server_type', '/cluster_distro', '/network_driver']
 
 
-class BayModel(base.APIBase):
-    """API representation of a baymodel.
+class ClusterTemplate(base.APIBase):
+    """API representation of a clustertemplate.
 
     This class enforces type checking and value constraints, and converts
-    between the internal object model and the API representation of a baymodel.
+    between the internal object model and the API representation of
+    a clustertemplate.
     """
 
     uuid = types.uuid
-    """Unique UUID for this baymodel"""
+    """Unique UUID for this clustertemplate"""
 
     name = wtypes.StringType(min_length=1, max_length=255)
-    """The name of the bay model"""
+    """The name of the clustertemplate"""
 
     coe = wtypes.Enum(str, *fields.BayType.ALL, mandatory=True)
-    """The Container Orchestration Engine for this bay model"""
+    """The Container Orchestration Engine for this clustertemplate"""
 
     image_id = wsme.wsattr(wtypes.StringType(min_length=1, max_length=255),
                            mandatory=True)
-    """The image name or UUID to use as a base image for this baymodel"""
+    """The image name or UUID to use as an image for this clustertemplate"""
 
     flavor_id = wtypes.StringType(min_length=1, max_length=255)
-    """The flavor of this bay model"""
+    """The flavor of this clustertemplate"""
 
     master_flavor_id = wtypes.StringType(min_length=1, max_length=255)
-    """The flavor of the master node for this bay model"""
+    """The flavor of the master node for this clustertemplate"""
 
     dns_nameserver = wtypes.IPv4AddressType()
     """The DNS nameserver address"""
@@ -76,13 +77,13 @@ class BayModel(base.APIBase):
     """The name or id of the nova ssh keypair"""
 
     external_network_id = wtypes.StringType(min_length=1, max_length=255)
-    """The external network to attach the Bay"""
+    """The external network to attach the cluster"""
 
     fixed_network = wtypes.StringType(min_length=1, max_length=255)
-    """The fixed network name to attach the Bay"""
+    """The fixed network name to attach the cluster"""
 
     fixed_subnet = wtypes.StringType(min_length=1, max_length=255)
-    """The fixed subnet name to attach the Bay"""
+    """The fixed subnet name to attach the cluster"""
 
     network_driver = wtypes.StringType(min_length=1, max_length=255)
     """The name of the driver used for instantiating container networks"""
@@ -94,10 +95,10 @@ class BayModel(base.APIBase):
     """The size in GB of the docker volume"""
 
     cluster_distro = wtypes.StringType(min_length=1, max_length=255)
-    """The Cluster distro for the bay, ex - coreos, fedora-atomic."""
+    """The Cluster distro for the cluster, ex - coreos, fedora-atomic."""
 
     links = wsme.wsattr([link.Link], readonly=True)
-    """A list containing a self link and associated baymodel links"""
+    """A list containing a self link and associated clustertemplate links"""
 
     http_proxy = wtypes.StringType(min_length=1, max_length=255)
     """Address of a proxy that will receive all HTTP requests and relay them.
@@ -111,7 +112,7 @@ class BayModel(base.APIBase):
 
     no_proxy = wtypes.StringType(min_length=1, max_length=255)
     """A comma separated list of ips for which proxies should not
-       used in the bay
+       used in the cluster
        """
 
     volume_driver = wtypes.StringType(min_length=1, max_length=255)
@@ -127,15 +128,15 @@ class BayModel(base.APIBase):
     """Indicates whether the TLS should be disabled"""
 
     public = wsme.wsattr(types.boolean, default=False)
-    """Indicates whether the baymodel is public or not."""
+    """Indicates whether the clustertemplate is public or not."""
 
     server_type = wsme.wsattr(wtypes.StringType(min_length=1,
                                                 max_length=255),
                               default='vm')
-    """Server type for this bay model """
+    """Server type for this clustertemplate """
 
     insecure_registry = wtypes.StringType(min_length=1, max_length=255)
-    """insecure registry url when create baymodel """
+    """insecure registry url when create clustertemplate """
 
     docker_storage_driver = wtypes.Enum(str, *fields.DockerStorageDriver.ALL)
     """Docker storage driver"""
@@ -158,18 +159,21 @@ class BayModel(base.APIBase):
             setattr(self, field, kwargs.get(field, wtypes.Unset))
 
     @staticmethod
-    def _convert_with_links(baymodel, url):
-        baymodel.links = [link.Link.make_link('self', url,
-                                              'baymodels', baymodel.uuid),
-                          link.Link.make_link('bookmark', url,
-                                              'baymodels', baymodel.uuid,
-                                              bookmark=True)]
-        return baymodel
+    def _convert_with_links(cluster_template, url):
+        cluster_template.links = [link.Link.make_link('self', url,
+                                                      'clustertemplates',
+                                                      cluster_template.uuid),
+                                  link.Link.make_link('bookmark', url,
+                                                      'clustertemplates',
+                                                      cluster_template.uuid,
+                                                      bookmark=True)]
+        return cluster_template
 
     @classmethod
     def convert_with_links(cls, rpc_baymodel):
-        baymodel = BayModel(**rpc_baymodel.as_dict())
-        return cls._convert_with_links(baymodel, pecan.request.host_url)
+        cluster_template = ClusterTemplate(**rpc_baymodel.as_dict())
+        return cls._convert_with_links(cluster_template,
+                                       pecan.request.host_url)
 
     @classmethod
     def sample(cls):
@@ -201,51 +205,51 @@ class BayModel(base.APIBase):
             updated_at=timeutils.utcnow(),
             public=False,
             master_lb_enabled=False,
-            floating_ip_enabled=True,
-        )
+            floating_ip_enabled=True)
         return cls._convert_with_links(sample, 'http://localhost:9511')
 
 
-class BayModelCollection(collection.Collection):
-    """API representation of a collection of baymodels."""
+class ClusterTemplateCollection(collection.Collection):
+    """API representation of a collection of clustertemplates."""
 
-    baymodels = [BayModel]
-    """A list containing baymodels objects"""
+    clustertemplates = [ClusterTemplate]
+    """A list containing clustertemplates objects"""
 
     def __init__(self, **kwargs):
-        self._type = 'baymodels'
+        self._type = 'clustertemplates'
 
     @staticmethod
     def convert_with_links(rpc_baymodels, limit, url=None, **kwargs):
-        collection = BayModelCollection()
-        collection.baymodels = [BayModel.convert_with_links(p)
-                                for p in rpc_baymodels]
+        collection = ClusterTemplateCollection()
+        collection.clustertemplates = [ClusterTemplate.convert_with_links(p)
+                                       for p in rpc_baymodels]
         collection.next = collection.get_next(limit, url=url, **kwargs)
         return collection
 
     @classmethod
     def sample(cls):
         sample = cls()
-        sample.baymodels = [BayModel.sample()]
+        sample.clustertemplates = [ClusterTemplate.sample()]
         return sample
 
 
-class BayModelsController(base.Controller):
-    """REST controller for BayModels."""
+class ClusterTemplatesController(base.Controller):
+    """REST controller for ClusterTemplates."""
 
     _custom_actions = {
         'detail': ['GET'],
     }
 
-    def _generate_name_for_baymodel(self, context):
-        '''Generate a random name like: zeta-22-model.'''
+    def _generate_name_for_cluster_template(self, context):
+        """Generate a random name like: zeta-22-model."""
 
         name_gen = name_generator.NameGenerator()
         name = name_gen.generate()
-        return name + '-model'
+        return name + '-template'
 
-    def _get_baymodels_collection(self, marker, limit,
-                                  sort_key, sort_dir, resource_url=None):
+    def _get_cluster_templates_collection(self, marker, limit,
+                                          sort_key, sort_dir,
+                                          resource_url=None):
 
         limit = api_utils.validate_limit(limit)
         sort_dir = api_utils.validate_sort_dir(sort_dir)
@@ -255,16 +259,18 @@ class BayModelsController(base.Controller):
             marker_obj = objects.BayModel.get_by_uuid(pecan.request.context,
                                                       marker)
 
-        baymodels = objects.BayModel.list(pecan.request.context, limit,
-                                          marker_obj, sort_key=sort_key,
-                                          sort_dir=sort_dir)
+        cluster_templates = objects.BayModel.list(pecan.request.context, limit,
+                                                  marker_obj,
+                                                  sort_key=sort_key,
+                                                  sort_dir=sort_dir)
 
-        return BayModelCollection.convert_with_links(baymodels, limit,
-                                                     url=resource_url,
-                                                     sort_key=sort_key,
-                                                     sort_dir=sort_dir)
+        return ClusterTemplateCollection.convert_with_links(cluster_templates,
+                                                            limit,
+                                                            url=resource_url,
+                                                            sort_key=sort_key,
+                                                            sort_dir=sort_dir)
 
-    @expose.expose(BayModelCollection, types.uuid, int, wtypes.text,
+    @expose.expose(ClusterTemplateCollection, types.uuid, int, wtypes.text,
                    wtypes.text)
     def get_all(self, marker=None, limit=None, sort_key='id',
                 sort_dir='asc'):
@@ -276,16 +282,16 @@ class BayModelsController(base.Controller):
         :param sort_dir: direction to sort. "asc" or "desc". Default: asc.
         """
         context = pecan.request.context
-        policy.enforce(context, 'baymodel:get_all',
-                       action='baymodel:get_all')
-        return self._get_baymodels_collection(marker, limit, sort_key,
-                                              sort_dir)
+        policy.enforce(context, 'clustertemplate:get_all',
+                       action='clustertemplate:get_all')
+        return self._get_cluster_templates_collection(marker, limit, sort_key,
+                                                      sort_dir)
 
-    @expose.expose(BayModelCollection, types.uuid, int, wtypes.text,
+    @expose.expose(ClusterTemplateCollection, types.uuid, int, wtypes.text,
                    wtypes.text)
     def detail(self, marker=None, limit=None, sort_key='id',
                sort_dir='asc'):
-        """Retrieve a list of baymodels with detail.
+        """Retrieve a list of clustertemplates with detail.
 
         :param marker: pagination marker for large data sets.
         :param limit: maximum number of resources to return in a single result.
@@ -293,124 +299,136 @@ class BayModelsController(base.Controller):
         :param sort_dir: direction to sort. "asc" or "desc". Default: asc.
         """
         context = pecan.request.context
-        policy.enforce(context, 'baymodel:detail',
-                       action='baymodel:detail')
+        policy.enforce(context, 'clustertemplate:detail',
+                       action='clustertemplate:detail')
 
         # NOTE(lucasagomes): /detail should only work against collections
         parent = pecan.request.path.split('/')[:-1][-1]
-        if parent != "baymodels":
+        if parent != "clustertemplates":
             raise exception.HTTPNotFound
 
-        resource_url = '/'.join(['baymodels', 'detail'])
-        return self._get_baymodels_collection(marker, limit,
-                                              sort_key, sort_dir, resource_url)
+        resource_url = '/'.join(['clustertemplates', 'detail'])
+        return self._get_cluster_templates_collection(marker, limit,
+                                                      sort_key, sort_dir,
+                                                      resource_url)
 
-    @expose.expose(BayModel, types.uuid_or_name)
-    def get_one(self, baymodel_ident):
-        """Retrieve information about the given baymodel.
+    @expose.expose(ClusterTemplate, types.uuid_or_name)
+    def get_one(self, cluster_template_ident):
+        """Retrieve information about the given clustertemplate.
 
-        :param baymodel_ident: UUID or logical name of a baymodel.
+        :param cluster_template_ident: UUID or logical name of a
+        clustertemplate.
         """
         context = pecan.request.context
-        baymodel = api_utils.get_resource('BayModel', baymodel_ident)
-        if not baymodel.public:
-            policy.enforce(context, 'baymodel:get', baymodel,
-                           action='baymodel:get')
+        cluster_template = api_utils.get_resource('BayModel',
+                                                  cluster_template_ident)
+        if not cluster_template.public:
+            policy.enforce(context, 'clustertemplate:get', cluster_template,
+                           action='clustertemplate:get')
 
-        return BayModel.convert_with_links(baymodel)
+        return ClusterTemplate.convert_with_links(cluster_template)
 
-    @expose.expose(BayModel, body=BayModel, status_code=201)
+    @expose.expose(ClusterTemplate, body=ClusterTemplate, status_code=201)
     @validation.enforce_network_driver_types_create()
     @validation.enforce_volume_driver_types_create()
     @validation.enforce_volume_storage_size_create()
-    def post(self, baymodel):
-        """Create a new baymodel.
+    def post(self, cluster_template):
+        """Create a new cluster_template.
 
-        :param baymodel: a baymodel within the request body.
+        :param cluster_template: a cluster_template within the request body.
         """
         context = pecan.request.context
-        policy.enforce(context, 'baymodel:create',
-                       action='baymodel:create')
-        baymodel_dict = baymodel.as_dict()
+        policy.enforce(context, 'clustertemplate:create',
+                       action='clustertemplate:create')
+        cluster_template_dict = cluster_template.as_dict()
         cli = clients.OpenStackClients(context)
-        attr_validator.validate_os_resources(context, baymodel_dict)
+        attr_validator.validate_os_resources(context, cluster_template_dict)
         image_data = attr_validator.validate_image(cli,
-                                                   baymodel_dict['image_id'])
-        baymodel_dict['cluster_distro'] = image_data['os_distro']
-        baymodel_dict['project_id'] = context.project_id
-        baymodel_dict['user_id'] = context.user_id
-        # check permissions for making baymodel public
-        if baymodel_dict['public']:
-            if not policy.enforce(context, "baymodel:publish", None,
+                                                   cluster_template_dict[
+                                                       'image_id'])
+        cluster_template_dict['cluster_distro'] = image_data['os_distro']
+        cluster_template_dict['project_id'] = context.project_id
+        cluster_template_dict['user_id'] = context.user_id
+        # check permissions for making cluster_template public
+        if cluster_template_dict['public']:
+            if not policy.enforce(context, "clustertemplate:publish", None,
                                   do_raise=False):
                 raise exception.ClusterTemplatePublishDenied()
 
         # NOTE(yuywz): We will generate a random human-readable name for
-        # baymodel if the name is not spcified by user.
-        arg_name = baymodel_dict.get('name')
-        name = arg_name or self._generate_name_for_baymodel(context)
-        baymodel_dict['name'] = name
+        # cluster_template if the name is not specified by user.
+        arg_name = cluster_template_dict.get('name')
+        name = arg_name or self._generate_name_for_cluster_template(context)
+        cluster_template_dict['name'] = name
 
-        new_baymodel = objects.BayModel(context, **baymodel_dict)
-        new_baymodel.create()
+        new_cluster_template = objects.BayModel(context,
+                                                **cluster_template_dict)
+        new_cluster_template.create()
         # Set the HTTP Location Header
-        pecan.response.location = link.build_url('baymodels',
-                                                 new_baymodel.uuid)
-        return BayModel.convert_with_links(new_baymodel)
+        pecan.response.location = link.build_url('clustertemplates',
+                                                 new_cluster_template.uuid)
+        return ClusterTemplate.convert_with_links(new_cluster_template)
 
-    @wsme.validate(types.uuid_or_name, [BayModelPatchType])
-    @expose.expose(BayModel, types.uuid_or_name, body=[BayModelPatchType])
+    @wsme.validate(types.uuid_or_name, [ClusterTemplatePatchType])
+    @expose.expose(ClusterTemplate, types.uuid_or_name,
+                   body=[ClusterTemplatePatchType])
     @validation.enforce_network_driver_types_update()
     @validation.enforce_volume_driver_types_update()
-    def patch(self, baymodel_ident, patch):
-        """Update an existing baymodel.
+    def patch(self, cluster_template_ident, patch):
+        """Update an existing cluster_template.
 
-        :param baymodel_ident: UUID or logic name of a baymodel.
-        :param patch: a json PATCH document to apply to this baymodel.
+        :param cluster_template_ident: UUID or logic name of a
+        cluster_template.
+        :param patch: a json PATCH document to apply to this
+        cluster_template.
         """
         context = pecan.request.context
-        baymodel = api_utils.get_resource('BayModel', baymodel_ident)
-        policy.enforce(context, 'baymodel:update', baymodel,
-                       action='baymodel:update')
+        cluster_template = api_utils.get_resource('BayModel',
+                                                  cluster_template_ident)
+        policy.enforce(context, 'clustertemplate:update', cluster_template,
+                       action='clustertemplate:update')
         try:
-            baymodel_dict = baymodel.as_dict()
-            new_baymodel = BayModel(**api_utils.apply_jsonpatch(
-                baymodel_dict,
+            cluster_template_dict = cluster_template.as_dict()
+            new_cluster_template = ClusterTemplate(**api_utils.apply_jsonpatch(
+                cluster_template_dict,
                 patch))
         except api_utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)
 
-        new_baymodel_dict = new_baymodel.as_dict()
-        attr_validator.validate_os_resources(context, new_baymodel_dict)
+        new_cluster_template_dict = new_cluster_template.as_dict()
+        attr_validator.validate_os_resources(context,
+                                             new_cluster_template_dict)
         # check permissions when updating baymodel public flag
-        if baymodel.public != new_baymodel.public:
-            if not policy.enforce(context, "baymodel:publish", None,
+        if cluster_template.public != new_cluster_template.public:
+            if not policy.enforce(context, "clustertemplate:publish", None,
                                   do_raise=False):
                 raise exception.ClusterTemplatePublishDenied()
 
         # Update only the fields that have changed
         for field in objects.BayModel.fields:
             try:
-                patch_val = getattr(new_baymodel, field)
+                patch_val = getattr(new_cluster_template, field)
             except AttributeError:
                 # Ignore fields that aren't exposed in the API
                 continue
             if patch_val == wtypes.Unset:
                 patch_val = None
-            if baymodel[field] != patch_val:
-                baymodel[field] = patch_val
+            if cluster_template[field] != patch_val:
+                cluster_template[field] = patch_val
 
-        baymodel.save()
-        return BayModel.convert_with_links(baymodel)
+        cluster_template.save()
+        return ClusterTemplate.convert_with_links(cluster_template)
 
     @expose.expose(None, types.uuid_or_name, status_code=204)
-    def delete(self, baymodel_ident):
-        """Delete a baymodel.
+    def delete(self, cluster_template_ident):
+        """Delete a cluster_template.
 
-        :param baymodel_ident: UUID or logical name of a baymodel.
+        :param cluster_template_ident: UUID or logical name of a
+         cluster_template.
         """
         context = pecan.request.context
-        baymodel = api_utils.get_resource('BayModel', baymodel_ident)
-        policy.enforce(context, 'baymodel:delete', baymodel,
-                       action='baymodel:delete')
-        baymodel.destroy()
+        cluster_template = api_utils.get_resource('BayModel',
+                                                  cluster_template_ident)
+        policy.enforce(context, 'clustertemplate:delete', cluster_template,
+                       action='clustertemplate:delete')
+        cluster_template.destroy()

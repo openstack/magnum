@@ -16,6 +16,8 @@ from tempest.common import credentials_factory as common_creds
 from magnum.tests.functional.api.v1.clients import bay_client
 from magnum.tests.functional.api.v1.clients import baymodel_client
 from magnum.tests.functional.api.v1.clients import cert_client
+from magnum.tests.functional.api.v1.clients import cluster_client
+from magnum.tests.functional.api.v1.clients import cluster_template_client
 from magnum.tests.functional.api.v1.clients import magnum_service_client
 from magnum.tests.functional.common import client
 from magnum.tests.functional.common import config
@@ -29,17 +31,21 @@ class Manager(clients.Manager):
         super(Manager, self).__init__(credentials, 'container-infra')
         self.auth_provider.orig_base_url = self.auth_provider.base_url
         self.auth_provider.base_url = self.bypassed_base_url
+        auth = self.auth_provider
         if request_type == 'baymodel':
-            self.client = baymodel_client.BayModelClient(self.auth_provider)
+            self.client = baymodel_client.BayModelClient(auth)
         elif request_type == 'bay':
-            self.client = bay_client.BayClient(self.auth_provider)
+            self.client = bay_client.BayClient(auth)
         elif request_type == 'cert':
-            self.client = cert_client.CertClient(self.auth_provider)
+            self.client = cert_client.CertClient(auth)
+        elif request_type == 'cluster_template':
+            self.client = cluster_template_client.ClusterTemplateClient(auth)
+        elif request_type == 'cluster':
+            self.client = cluster_client.ClusterClient(auth)
         elif request_type == 'service':
-            self.client = magnum_service_client.MagnumServiceClient(
-                self.auth_provider)
+            self.client = magnum_service_client.MagnumServiceClient(auth)
         else:
-            self.client = client.MagnumClient(self.auth_provider)
+            self.client = client.MagnumClient(auth)
 
     def bypassed_base_url(self, filters, auth_data=None):
         if (config.Config.magnum_url and

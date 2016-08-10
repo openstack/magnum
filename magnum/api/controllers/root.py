@@ -69,7 +69,7 @@ class Root(base.APIBase):
         root = Root()
         root.name = "OpenStack Magnum API"
         root.description = ("Magnum is an OpenStack project which aims to "
-                            "provide container management.")
+                            "provide container cluster management.")
         root.versions = [Version.convert('v1', "CURRENT",
                                          versions.CURRENT_MAX_VER,
                                          versions.BASE_VER)]
