@@ -36,7 +36,19 @@ class TestAttrValidator(base.BaseTestCase):
         attr_validator.validate_flavor(mock_os_cli, 'test_flavor')
         self.assertTrue(mock_nova.flavors.list.called)
 
-    def test_validate_flavor_with_invaild_flavor(self):
+    def test_validate_flavor_with_none_flavor(self):
+        mock_flavor = mock.MagicMock()
+        mock_flavor.name = 'test_flavor'
+        mock_flavor.id = 'test_flavor_id'
+        mock_flavors = [mock_flavor]
+        mock_nova = mock.MagicMock()
+        mock_nova.flavors.list.return_value = mock_flavors
+        mock_os_cli = mock.MagicMock()
+        mock_os_cli.nova.return_value = mock_nova
+        attr_validator.validate_flavor(mock_os_cli, None)
+        self.assertFalse(mock_nova.flavors.list.called)
+
+    def test_validate_flavor_with_invalid_flavor(self):
         mock_flavor = mock.MagicMock()
         mock_flavor.name = 'test_flavor_not_equal'
         mock_flavor.id = 'test_flavor_id_not_equal'
@@ -100,7 +112,11 @@ class TestAttrValidator(base.BaseTestCase):
                           attr_validator.validate_keypair,
                           mock_os_cli, 'test_keypair')
 
-    def test_validate_labels_main_isolation_invalid(self):
+    def test_validate_labels_main_no_label(self):
+        fake_labels = {}
+        attr_validator.validate_labels(fake_labels)
+
+    def test_validate_labels_main_isolation_invalid_label(self):
         fake_labels = {'mesos_agent_isolation': 'abc'}
         self.assertRaises(exception.InvalidParameterValue,
                           attr_validator.validate_labels,
@@ -123,6 +139,10 @@ class TestAttrValidator(base.BaseTestCase):
         self.assertRaises(exception.RequiredParameterNotProvided,
                           attr_validator.validate_labels_image_providers,
                           fake_labels)
+
+    def test_validate_labels_with_valid_providers_invalid_providers(self):
+        fake_labels = {'mesos_agent_image_providers': 'appc'}
+        attr_validator.validate_labels_image_providers(fake_labels)
 
     def test_validate_labels_with_invalid_providers(self):
         fake_labels = {'mesos_agent_image_providers': 'abc'}
@@ -177,6 +197,17 @@ class TestAttrValidator(base.BaseTestCase):
         self.assertTrue(mock_os_res.called)
 
     @mock.patch('magnum.api.utils.get_openstack_resource')
+    def test_validate_image_with_forbidden_image(self, mock_os_res):
+        def glance_side_effect(cli, image, name):
+            raise glance_exception.HTTPForbidden()
+
+        mock_os_res.side_effect = glance_side_effect
+        mock_os_cli = mock.MagicMock()
+        self.assertRaises(exception.ImageNotAuthorized,
+                          attr_validator.validate_image, mock_os_cli,
+                          'fedora-21-atomic-5')
+
+    @mock.patch('magnum.api.utils.get_openstack_resource')
     def test_validate_image_with_valid_image_by_id(self, mock_os_res):
         mock_image = {'name': 'fedora-21-atomic-5',
                       'id': 'e33f0988-1730-405e-8401-30cbc8535302',
@@ -222,7 +253,7 @@ class TestAttrValidator(base.BaseTestCase):
                           mock_os_cli, 'fedora-21-atomic-5')
 
     @mock.patch('magnum.api.utils.get_openstack_resource')
-    def test_validate_image_with_empty_os_distro(self, mock_os_res):
+    def test_validate_image_when_user_forbidden(self, mock_os_res):
         mock_image = {'name': 'fedora-21-atomic-5',
                       'id': 'e33f0988-1730-405e-8401-30cbc8535302',
                       'os_distro': ''}
@@ -247,3 +278,21 @@ class TestAttrValidator(base.BaseTestCase):
         self.assertRaises(exception.FlavorNotFound,
                           attr_validator.validate_os_resources,
                           mock_context, mock_baymodel)
+
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.api.attr_validator.validate_labels')
+    def test_validate_os_resources_with_label(self, mock_validate_labels,
+                                              mock_os_cli):
+        mock_baymodel = {'labels': {'mesos_agent_isolation': 'abc'}}
+        mock_context = mock.MagicMock()
+        self.assertRaises(exception.InvalidParameterValue,
+                          attr_validator.validate_os_resources, mock_context,
+                          mock_baymodel)
+
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.api.attr_validator.validators')
+    def test_validate_os_resources_without_validator(self, mock_validators,
+                                                     mock_os_cli):
+        mock_baymodel = {}
+        mock_context = mock.MagicMock()
+        attr_validator.validate_os_resources(mock_context, mock_baymodel)
