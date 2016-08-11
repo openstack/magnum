@@ -49,10 +49,13 @@ write_files:
       fi
 
       sans="IP:${KUBE_NODE_PUBLIC_IP},IP:${KUBE_NODE_IP}"
-      if [[ "${KUBE_NODE_PUBLIC_IP}" != "${KUBE_API_PUBLIC_ADDRESS}" ]] && [[ "${KUBE_API_PUBLIC_ADDRESS}"]]; then
+      if [ "${KUBE_NODE_PUBLIC_IP}" != "${KUBE_API_PUBLIC_ADDRESS}" ] \
+        && [ -n "${KUBE_API_PUBLIC_ADDRESS}" ]; then
+
         sans="${sans},IP:${KUBE_API_PUBLIC_ADDRESS}"
       fi
-      if [[ "${KUBE_NODE_IP}" != "${KUBE_API_PRIVATE_ADDRESS}" ]] && [[ "${KUBE_API_PRIVATE_ADDRESS}"]]; then
+      if [ "${KUBE_NODE_IP}" != "${KUBE_API_PRIVATE_ADDRESS}" ] \
+        && [ -n "${KUBE_API_PRIVATE_ADDRESS}" ]; then
         sans="${sans},IP:${KUBE_API_PRIVATE_ADDRESS}"
       fi
       MASTER_HOSTNAME=${MASTER_HOSTNAME:-}
