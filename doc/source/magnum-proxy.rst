@@ -7,9 +7,9 @@ for using services like docker, kubernetes and mesos. Use these steps
 when your firewall will not allow you to use those services without a
 proxy.
 
-**NOTE:** This feature has only been tested with the supported bay type
-and associated image: Kubernetes and Swarm bay using the Fedora Atomic
-image, and Mesos bay using the Ubuntu image.
+**NOTE:** This feature has only been tested with the supported cluster type
+and associated image: Kubernetes and Swarm use the Fedora Atomic
+image, and Mesos uses the Ubuntu image.
 
 Proxy Parameters to define before use
 =====================================
@@ -37,10 +37,10 @@ and ip addresses. Bad example: 192.168.0.0/28.
 Steps to configure proxies.
 ==============================
 
-You can specify all three proxy parameters while creating baymodel of any
-coe type. All of proxy parameters are optional.
+You can specify all three proxy parameters while creating ClusterTemplate of
+any coe type. All of proxy parameters are optional.
 
-    magnum baymodel-create --name k8sbaymodel \
+    magnum cluster-template-create --name k8s-cluster-template \
                        --image-id fedora-atomic-latest \
                        --keypair-id testkey \
                        --external-network-id public \
@@ -50,7 +50,7 @@ coe type. All of proxy parameters are optional.
                        --http-proxy <http://abc-proxy.com:8080> \
                        --https-proxy <https://abc-proxy.com:8080> \
                        --no-proxy <172.24.4.4,172.24.4.9,172.24.4.8>
-    magnum baymodel-create --name swarmbaymodel \
+    magnum cluster-template-create --name swarm-cluster-template \
                        --image-id fedora-atomic-latest \
                        --keypair-id testkey \
                        --external-network-id public \
@@ -60,7 +60,7 @@ coe type. All of proxy parameters are optional.
                        --http-proxy <http://abc-proxy.com:8080> \
                        --https-proxy <https://abc-proxy.com:8080> \
                        --no-proxy <172.24.4.4,172.24.4.9,172.24.4.8>
-    magnum baymodel-create --name mesosbaymodel \
+    magnum cluster-template-create --name mesos-cluster-template \
                        --image-id ubuntu-mesos \
                        --keypair-id testkey \
                        --external-network-id public \

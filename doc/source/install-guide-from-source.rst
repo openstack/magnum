@@ -30,7 +30,7 @@ magnum related metrics. See `OpenStack Install Guides
 
 .. important::
 
-   Magnum creates VM clusters on the Compute service (nova), called bays. These
+   Magnum creates groupings of Nova compute instances, called clusters. These
    VMs must have basic Internet connectivity and must be able to reach magnum's
    API server. Make sure that Compute and Network services are configured
    accordingly.
@@ -176,8 +176,7 @@ service, you must create a database, service credentials, and API endpoints.
       +--------------+----------------------------------+
 
 #. Magnum requires additional information in the Identity service to
-   manage COE clusters (bays). To add this information, complete these
-   steps:
+   manage clusters. To add this information, complete these steps:
 
    * Create the ``magnum`` domain that contains projects and users:
 

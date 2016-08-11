@@ -85,7 +85,7 @@ add the following line to your `local.conf` file::
     enable_plugin ceilometer git://git.openstack.org/openstack/ceilometer
 
 Create a local.sh to automatically make necessary networking changes during
-the devstack deployment process. This will allow bays spawned by magnum to
+the devstack deployment process. This will allow clusters spawned by magnum to
 access the internet through PUBLIC_INTERFACE::
 
     cat > local.sh << 'END_LOCAL_SH'
@@ -142,7 +142,7 @@ Create a domain and domain admin for trust::
               --user $TRUSTEE_DOMAIN_ADMIN_ID --domain $TRUSTEE_DOMAIN_ID \
               admin
 
-Create a keypair for use with the baymodel::
+Create a keypair for use with the ClusterTemplate::
 
     test -f ~/.ssh/id_rsa.pub || ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
     nova keypair-add --pub-key ~/.ssh/id_rsa.pub testkey
