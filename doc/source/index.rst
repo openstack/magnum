@@ -39,8 +39,6 @@ There are several different types of objects in the magnum system:
   machine
 * **Service:** An abstraction which defines a logical set of pods and a policy
   by which to access them
-* **ReplicationController:** An abstraction for managing a group of pods to
-  ensure a specified number of resources are running
 * **Container:** A Docker container
 
 Two binaries work together to compose the magnum system.  The first binary

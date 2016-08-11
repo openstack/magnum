@@ -27,14 +27,6 @@ class TestConductorUtils(base.TestCase):
         mock_bay_get_by_uuid.assert_called_once_with(expected_context,
                                                      expected_bay_uuid)
 
-    @patch('magnum.objects.Bay.get_by_uuid')
-    def test_retrieve_bay_from_rc(self,
-                                  mock_bay_get_by_uuid):
-        rc = objects.ReplicationController({})
-        rc.bay_uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
-        self._test_retrieve_bay(rc.bay_uuid,
-                                mock_bay_get_by_uuid)
-
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_retrieve_baymodel(self, mock_baymodel_get_by_uuid):
         expected_context = 'context'

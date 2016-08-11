@@ -191,24 +191,16 @@ class Connection(api.Connection):
             raise exception.BayNotFound(bay=bay_uuid)
 
     def destroy_bay(self, bay_id):
-        def destroy_bay_resources(session, bay_uuid):
-            """Checks whether the bay does not have resources."""
-            query = model_query(models.ReplicationController, session=session)
-            query = self._add_rcs_filters(query, {'bay_uuid': bay_uuid})
-            if query.count() != 0:
-                query.delete()
-
         session = get_session()
         with session.begin():
             query = model_query(models.Bay, session=session)
             query = add_identity_filter(query, bay_id)
 
             try:
-                bay_ref = query.one()
+                query.one()
             except NoResultFound:
                 raise exception.BayNotFound(bay=bay_id)
 
-            destroy_bay_resources(session, bay_ref['uuid'])
             query.delete()
 
     def update_bay(self, bay_id, values):
@@ -361,100 +353,6 @@ class Connection(api.Connection):
                 # we only allow to update baymodel to be public
                 if not self._is_publishing_baymodel(values):
                     raise exception.BayModelReferenced(baymodel=baymodel_id)
-
-            ref.update(values)
-        return ref
-
-    def _add_rcs_filters(self, query, filters):
-        if filters is None:
-            filters = {}
-
-        if 'bay_uuid' in filters:
-            query = query.filter_by(bay_uuid=filters['bay_uuid'])
-        if 'name' in filters:
-            query = query.filter_by(name=filters['name'])
-        if 'replicas' in filters:
-            query = query.filter_by(replicas=filters['replicas'])
-
-        return query
-
-    def get_rc_list(self, context, filters=None, limit=None, marker=None,
-                    sort_key=None, sort_dir=None):
-        query = model_query(models.ReplicationController)
-        query = self._add_tenant_filters(context, query)
-        query = self._add_rcs_filters(query, filters)
-        return _paginate_query(models.ReplicationController, limit, marker,
-                               sort_key, sort_dir, query)
-
-    def create_rc(self, values):
-        # ensure defaults are present for new ReplicationController
-        if not values.get('uuid'):
-            values['uuid'] = uuidutils.generate_uuid()
-
-        rc = models.ReplicationController()
-        rc.update(values)
-        try:
-            rc.save()
-        except db_exc.DBDuplicateEntry:
-            raise exception.ReplicationControllerAlreadyExists(
-                uuid=values['uuid'])
-        return rc
-
-    def get_rc_by_id(self, context, rc_id):
-        query = model_query(models.ReplicationController)
-        query = self._add_tenant_filters(context, query)
-        query = query.filter_by(id=rc_id)
-        try:
-            return query.one()
-        except NoResultFound:
-            raise exception.ReplicationControllerNotFound(rc=rc_id)
-
-    def get_rc_by_uuid(self, context, rc_uuid):
-        query = model_query(models.ReplicationController)
-        query = self._add_tenant_filters(context, query)
-        query = query.filter_by(uuid=rc_uuid)
-        try:
-            return query.one()
-        except NoResultFound:
-            raise exception.ReplicationControllerNotFound(rc=rc_uuid)
-
-    def get_rc_by_name(self, context, rc_name):
-        query = model_query(models.ReplicationController)
-        query = self._add_tenant_filters(context, query)
-        query = query.filter_by(name=rc_name)
-        try:
-            return query.one()
-        except MultipleResultsFound:
-            raise exception.Conflict('Multiple rcs exist with same name.'
-                                     ' Please use the rc uuid instead.')
-        except NoResultFound:
-            raise exception.ReplicationControllerNotFound(rc=rc_name)
-
-    def destroy_rc(self, rc_id):
-        session = get_session()
-        with session.begin():
-            query = model_query(models.ReplicationController, session=session)
-            query = add_identity_filter(query, rc_id)
-            count = query.delete()
-            if count != 1:
-                raise exception.ReplicationControllerNotFound(rc_id)
-
-    def update_rc(self, rc_id, values):
-        if 'uuid' in values:
-            msg = _("Cannot overwrite UUID for an existing rc.")
-            raise exception.InvalidParameterValue(err=msg)
-
-        return self._do_update_rc(rc_id, values)
-
-    def _do_update_rc(self, rc_id, values):
-        session = get_session()
-        with session.begin():
-            query = model_query(models.ReplicationController, session=session)
-            query = add_identity_filter(query, rc_id)
-            try:
-                ref = query.with_lockmode('update').one()
-            except NoResultFound:
-                raise exception.ReplicationControllerNotFound(rc=rc_id)
 
             ref.update(values)
         return ref

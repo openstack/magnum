@@ -41,10 +41,6 @@ msgid "'manifest' can't be empty"
 msgstr "「マニフェスト」は空にできません"
 
 #, python-format
-msgid "A ReplicationController with UUID %(uuid)s already exists."
-msgstr "UUID %(uuid)s の複製コントローラーは既に存在します。"
-
-#, python-format
 msgid "A baymodel with UUID %(uuid)s already exists."
 msgstr "UUID %(uuid)s のベイモデルは既に存在します。"
 
@@ -340,10 +336,6 @@ msgid ""
 msgstr ""
 "OpenStack サービスとの通信に使用する Identity サービスカタログ内のリージョ"
 "ン。"
-
-#, python-format
-msgid "ReplicationController %(rc)s could not be found."
-msgstr "複製コントローラー %(rc)s が見つかりませんでした。"
 
 msgid "Request not acceptable."
 msgstr "要求は受け入れられませんでした。"

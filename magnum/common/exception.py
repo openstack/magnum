@@ -273,24 +273,6 @@ class PodCreationFailed(Invalid):
     message = _("Pod creation failed in Bay %(bay_uuid)s.")
 
 
-class ReplicationControllerNotFound(ResourceNotFound):
-    message = _("ReplicationController %(rc)s could not be found.")
-
-
-class ReplicationControllerAlreadyExists(Conflict):
-    message = _("A ReplicationController with UUID %(uuid)s already exists.")
-
-
-class ReplicationControllerListNotFound(ResourceNotFound):
-    message = _("ReplicationController list could not be found"
-                " for Bay %(bay_uuid)s.")
-
-
-class ReplicationControllerCreationFailed(Invalid):
-    message = _("ReplicationController creation failed"
-                " for Bay %(bay_uuid)s.")
-
-
 class ServiceNotFound(ResourceNotFound):
     message = _("Service %(service)s could not be found.")
 

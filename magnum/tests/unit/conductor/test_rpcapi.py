@@ -28,7 +28,6 @@ class RPCAPITestCase(base.DbTestCase):
     def setUp(self):
         super(RPCAPITestCase, self).setUp()
         self.fake_bay = dbutils.get_test_bay(driver='fake-driver')
-        self.fake_rc = dbutils.get_test_rc(driver='fake-driver')
         self.fake_certificate = objects.Certificate.from_db_bay(self.fake_bay)
         self.fake_certificate.csr = 'fake-csr'
 
@@ -96,33 +95,6 @@ class RPCAPITestCase(base.DbTestCase):
                           'call',
                           version='1.1',
                           bay=self.fake_bay['name'])
-
-    def test_rc_create(self):
-        self._test_rpcapi('rc_create',
-                          'call',
-                          version='1.0',
-                          rc=self.fake_rc)
-
-    def test_rc_update(self):
-        self._test_rpcapi('rc_update',
-                          'call',
-                          version='1.0',
-                          rc_ident=self.fake_rc['uuid'],
-                          bay_ident=self.fake_rc['bay_uuid'],
-                          manifest={})
-
-    def test_rc_delete(self):
-        self._test_rpcapi('rc_delete',
-                          'call',
-                          version='1.0',
-                          rc_ident=self.fake_rc['uuid'],
-                          bay_ident=self.fake_rc['bay_uuid'])
-
-        self._test_rpcapi('rc_delete',
-                          'call',
-                          version='1.1',
-                          rc_ident=self.fake_rc['uuid'],
-                          bay_ident=self.fake_rc['bay_uuid'])
 
     def test_ping_conductor(self):
         self._test_rpcapi('ping_conductor',

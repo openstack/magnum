@@ -192,24 +192,6 @@ class DbBayTestCase(base.DbTestCase):
                           self.dbapi.destroy_bay,
                           '12345678-9999-0000-aaaa-123456789012')
 
-    def test_destroy_bay_that_has_rc(self):
-        bay = utils.create_test_bay()
-        rc = utils.create_test_rc(bay_uuid=bay.uuid)
-        self.assertEqual(bay.uuid, rc.bay_uuid)
-        self.dbapi.destroy_bay(bay.id)
-        self.assertRaises(exception.ReplicationControllerNotFound,
-                          self.dbapi.get_rc_by_id,
-                          self.context, rc.id)
-
-    def test_destroy_bay_that_has_rc_by_uuid(self):
-        bay = utils.create_test_bay()
-        rc = utils.create_test_rc(bay_uuid=bay.uuid)
-        self.assertEqual(bay.uuid, rc.bay_uuid)
-        self.dbapi.destroy_bay(bay.uuid)
-        self.assertRaises(exception.ReplicationControllerNotFound,
-                          self.dbapi.get_rc_by_id,
-                          self.context, rc.id)
-
     def test_update_bay(self):
         bay = utils.create_test_bay()
         old_nc = bay.node_count
