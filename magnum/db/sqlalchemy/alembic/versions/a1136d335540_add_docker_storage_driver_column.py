@@ -30,6 +30,7 @@ docker_storage_driver_enum = sa.Enum('devicemapper', 'overlay',
 
 
 def upgrade():
+    docker_storage_driver_enum.create(op.get_bind(), checkfirst=True)
     op.add_column('baymodel', sa.Column('docker_storage_driver',
                                         docker_storage_driver_enum,
                                         nullable=True))
