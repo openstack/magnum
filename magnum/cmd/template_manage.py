@@ -110,4 +110,7 @@ class TemplateManager(app.App):
 def main(args=None):
     if args is None:
         args = sys.argv[1:]
+    CONF([],
+         project='magnum',
+         version=version.version_info.release_string())
     return TemplateManager().run(args)
