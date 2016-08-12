@@ -82,6 +82,21 @@ class BayModelTest(base.BaseTempestTest):
         self.assertTrue(model.public)
 
     @testtools.testcase.attr('positive')
+    def test_update_baymodel_public_by_uuid(self):
+        path = "/public"
+        gen_model = datagen.baymodel_data_with_valid_keypair_image_flavor()
+        resp, old_model = self._create_baymodel(gen_model)
+
+        patch_model = datagen.baymodel_replace_patch_data(path, value=True)
+        resp, new_model = self.baymodel_client.patch_baymodel(
+            old_model.uuid, patch_model)
+        self.assertEqual(200, resp.status)
+
+        resp, model = self.baymodel_client.get_baymodel(new_model.uuid)
+        self.assertEqual(200, resp.status)
+        self.assertTrue(model.public)
+
+    @testtools.testcase.attr('positive')
     def test_update_baymodel_by_uuid(self):
         gen_model = datagen.baymodel_data_with_valid_keypair_image_flavor()
         resp, old_model = self._create_baymodel(gen_model)

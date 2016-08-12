@@ -106,6 +106,7 @@ def baymodel_data(**kwargs):
         "volume_driver": None,
         "docker_volume_size": 3,
         "labels": {},
+        "public": False,
         "fixed_network": "192.168.0.0/24",
         "dns_nameserver": "8.8.8.8",
         "flavor_id": data_utils.rand_name('bay'),
