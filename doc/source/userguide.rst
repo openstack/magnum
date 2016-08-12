@@ -1675,7 +1675,7 @@ it for Magnum. If you want to enable it nonetheless, proceed as follows:
    .. code-block:: ini
 
       ...
-      stacks:global_index: "role:admin",
+      stacks:global_index: "rule:context_is_admin",
 
    Now restart heat.
 
