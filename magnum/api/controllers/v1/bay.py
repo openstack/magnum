@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import uuid
+
 from oslo_log import log as logging
 from oslo_utils import timeutils
 import pecan
@@ -52,6 +54,13 @@ class BayPatchType(types.JsonPatchType):
                           '/trust_id', '/trustee_user_name',
                           '/trustee_password', '/trustee_user_id']
         return types.JsonPatchType.internal_attrs() + internal_attrs
+
+
+class BayID(wtypes.Base):
+    uuid = types.uuid
+
+    def __init__(self, uuid):
+        self.uuid = uuid
 
 
 class Bay(base.APIBase):
@@ -319,12 +328,33 @@ class BaysController(base.Controller):
 
         return bay
 
+    @base.Controller.api_version("1.1", "1.1")
     @expose.expose(Bay, body=Bay, status_code=201)
     def post(self, bay):
         """Create a new bay.
 
         :param bay: a bay within the request body.
         """
+        new_bay = self._post(bay)
+        res_bay = pecan.request.rpcapi.bay_create(new_bay,
+                                                  bay.bay_create_timeout)
+
+        # Set the HTTP Location Header
+        pecan.response.location = link.build_url('bays', res_bay.uuid)
+        return Bay.convert_with_links(res_bay)
+
+    @base.Controller.api_version("1.2")  # noqa
+    @expose.expose(BayID, body=Bay, status_code=202)
+    def post(self, bay):
+        """Create a new bay.
+
+        :param bay: a bay within the request body.
+        """
+        new_bay = self._post(bay)
+        pecan.request.rpcapi.bay_create_async(new_bay, bay.bay_create_timeout)
+        return BayID(new_bay.uuid)
+
+    def _post(self, bay):
         context = pecan.request.context
         policy.enforce(context, 'bay:create',
                        action='bay:create')
@@ -340,13 +370,10 @@ class BaysController(base.Controller):
         bay_dict['name'] = name
 
         new_bay = objects.Bay(context, **bay_dict)
-        res_bay = pecan.request.rpcapi.bay_create(new_bay,
-                                                  bay.bay_create_timeout)
+        new_bay.uuid = uuid.uuid4()
+        return new_bay
 
-        # Set the HTTP Location Header
-        pecan.response.location = link.build_url('bays', res_bay.uuid)
-        return Bay.convert_with_links(res_bay)
-
+    @base.Controller.api_version("1.1", "1.1")
     @wsme.validate(types.uuid, [BayPatchType])
     @expose.expose(Bay, types.uuid_or_name, body=[BayPatchType])
     def patch(self, bay_ident, patch):
@@ -355,6 +382,25 @@ class BaysController(base.Controller):
         :param bay_ident: UUID or logical name of a bay.
         :param patch: a json PATCH document to apply to this bay.
         """
+        bay = self._patch(bay_ident, patch)
+        res_bay = pecan.request.rpcapi.bay_update(bay)
+        return Bay.convert_with_links(res_bay)
+
+    @base.Controller.api_version("1.2")   # noqa
+    @wsme.validate(types.uuid, [BayPatchType])
+    @expose.expose(BayID, types.uuid_or_name, body=[BayPatchType],
+                   status_code=202)
+    def patch(self, bay_ident, patch):
+        """Update an existing bay.
+
+        :param bay_ident: UUID or logical name of a bay.
+        :param patch: a json PATCH document to apply to this bay.
+        """
+        bay = self._patch(bay_ident, patch)
+        pecan.request.rpcapi.bay_update_async(bay)
+        return BayID(bay.uuid)
+
+    def _patch(self, bay_ident, patch):
         context = pecan.request.context
         bay = api_utils.get_resource('Bay', bay_ident)
         policy.enforce(context, 'bay:update', bay,
@@ -380,19 +426,33 @@ class BaysController(base.Controller):
         delta = bay.obj_what_changed()
 
         validate_bay_properties(delta)
+        return bay
 
-        res_bay = pecan.request.rpcapi.bay_update(bay)
-        return Bay.convert_with_links(res_bay)
-
+    @base.Controller.api_version("1.1", "1.1")
     @expose.expose(None, types.uuid_or_name, status_code=204)
     def delete(self, bay_ident):
         """Delete a bay.
 
         :param bay_ident: UUID of a bay or logical name of the bay.
         """
+        bay = self._delete(bay_ident)
+
+        pecan.request.rpcapi.bay_delete(bay.uuid)
+
+    @base.Controller.api_version("1.2")  # noqa
+    @expose.expose(None, types.uuid_or_name, status_code=204)
+    def delete(self, bay_ident):
+        """Delete a bay.
+
+        :param bay_ident: UUID of a bay or logical name of the bay.
+        """
+        bay = self._delete(bay_ident)
+
+        pecan.request.rpcapi.bay_delete_async(bay.uuid)
+
+    def _delete(self, bay_ident):
         context = pecan.request.context
         bay = api_utils.get_resource('Bay', bay_ident)
         policy.enforce(context, 'bay:delete', bay,
                        action='bay:delete')
-
-        pecan.request.rpcapi.bay_delete(bay.uuid)
+        return bay

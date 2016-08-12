@@ -15,7 +15,6 @@
 # under the License.
 
 import six
-import uuid
 
 from heatclient import exc
 import mock
@@ -172,14 +171,11 @@ class TestHandler(db_base.DbTestCase):
     @patch('magnum.conductor.handlers.bay_conductor.trust_manager')
     @patch('magnum.conductor.handlers.bay_conductor.cert_manager')
     @patch('magnum.conductor.handlers.bay_conductor._create_stack')
-    @patch('magnum.conductor.handlers.bay_conductor.uuid')
     @patch('magnum.common.clients.OpenStackClients')
-    def test_create(self, mock_openstack_client_class, mock_uuid,
+    def test_create(self, mock_openstack_client_class,
                     mock_create_stack, mock_cert_manager, mock_trust_manager,
                     mock_heat_poller_class):
         timeout = 15
-        test_uuid = uuid.uuid4()
-        mock_uuid.uuid4.return_value = test_uuid
         mock_poller = mock.MagicMock()
         mock_poller.poll_and_check.return_value = loopingcall.LoopingCallDone()
         mock_heat_poller_class.return_value = mock_poller
@@ -187,7 +183,6 @@ class TestHandler(db_base.DbTestCase):
         mock_openstack_client_class.return_value = osc
 
         def create_stack_side_effect(context, osc, bay, timeout):
-            self.assertEqual(str(test_uuid), bay.uuid)
             return {'stack': {'id': 'stack-id'}}
 
         mock_create_stack.side_effect = create_stack_side_effect
@@ -334,16 +329,12 @@ class TestHandler(db_base.DbTestCase):
     @patch('magnum.conductor.handlers.bay_conductor.trust_manager')
     @patch('magnum.conductor.handlers.bay_conductor.cert_manager')
     @patch('magnum.conductor.handlers.bay_conductor._create_stack')
-    @patch('magnum.conductor.handlers.bay_conductor.uuid')
     @patch('magnum.common.clients.OpenStackClients')
     def test_create_with_invalid_unicode_name(self,
                                               mock_openstack_client_class,
-                                              mock_uuid,
                                               mock_create_stack,
                                               mock_cert_manager,
                                               mock_trust_manager):
-        test_uuid = uuid.uuid4()
-        mock_uuid.uuid4.return_value = test_uuid
         error_message = six.u("""Invalid stack name 测试集群-zoyh253geukk
                               must contain only alphanumeric or "_-."
                               characters, must start with alpha""")
@@ -376,11 +367,9 @@ class TestHandler(db_base.DbTestCase):
     @patch('magnum.conductor.handlers.bay_conductor.trust_manager')
     @patch('magnum.conductor.handlers.bay_conductor.cert_manager')
     @patch('magnum.conductor.handlers.bay_conductor.short_id')
-    @patch('magnum.conductor.handlers.bay_conductor.uuid')
     @patch('magnum.common.clients.OpenStackClients')
     def test_create_with_environment(self,
                                      mock_openstack_client_class,
-                                     mock_uuid,
                                      mock_short_id,
                                      mock_cert_manager,
                                      mock_trust_manager,
@@ -390,8 +379,6 @@ class TestHandler(db_base.DbTestCase):
                                      mock_heat_poller_class):
         timeout = 15
         self.bay.baymodel_id = self.baymodel.uuid
-        test_uuid = uuid.uuid4()
-        mock_uuid.uuid4.return_value = test_uuid
         bay_name = self.bay.name
         mock_short_id.generate_id.return_value = 'short_id'
         mock_poller = mock.MagicMock()

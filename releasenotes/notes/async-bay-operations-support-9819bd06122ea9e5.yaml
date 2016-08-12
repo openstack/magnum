@@ -1,0 +1,16 @@
+---
+features:
+  - Current implementation of magnum bay operations are
+    synchronous and as a result API requests are blocked
+    until response from HEAT service is received. This release
+    adds support for asynchronous bay operations (bay-create,
+    bay-update, and bay-delete). Please note that with this
+    change, bay-create, bay-update API calls will return bay uuid
+    instead of bay object and also return HTTP status code 202
+    instead of 201. Microversion 1.2 is added for new behavior.
+
+upgrade:
+  - Magnum bay operations API default behavior changed from
+    synchronous to asynchronous. User can specify
+    OpenStack-API-Version 1.1 in request header for synchronous
+    bay operations.
