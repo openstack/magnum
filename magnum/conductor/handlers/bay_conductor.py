@@ -246,6 +246,9 @@ class Handler(object):
             conductor_utils.notify_about_bay_operation(
                 context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_FAILURE)
             raise
+
+        bay.status = bay_status.DELETE_IN_PROGRESS
+
         self._poll_and_check(osc, bay)
 
         return None
