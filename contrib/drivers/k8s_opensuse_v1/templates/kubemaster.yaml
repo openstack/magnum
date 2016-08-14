@@ -1,0 +1,280 @@
+heat_template_version: 2013-05-23
+
+description: >
+  This is a nested stack that defines a single Kubernetes master, This stack is
+  included by an ResourceGroup resource in the parent template
+  (kubecluster.yaml).
+
+parameters:
+
+  server_image:
+    type: string
+    description: glance image used to boot the server
+
+  master_flavor:
+    type: string
+    default: m1.small
+    description: flavor to use when booting the server
+
+  ssh_key_name:
+    type: string
+    description: name of ssh key to be provisioned on our server
+    default: lars
+
+  external_network:
+    type: string
+    description: uuid/name of a network to use for floating ip addresses
+
+  portal_network_cidr:
+    type: string
+    description: >
+      address range used by kubernetes for service portals
+    default: 10.254.0.0/16
+
+  kube_allow_priv:
+    type: string
+    description: >
+      whether or not kubernetes should permit privileged containers.
+    default: "false"
+    constraints:
+      - allowed_values: ["true", "false"]
+
+  flannel_network_cidr:
+    type: string
+    description: network range for flannel overlay network
+    default: 10.100.0.0/16
+
+  flannel_network_subnetlen:
+    type: string
+    description: size of subnet assigned to each master
+    default: 24
+
+  flannel_backend:
+    type: string
+    description: >
+      specify the backend for flannel, default udp backend
+    constraints:
+      - allowed_values: ["udp", "vxlan", "host-gw"]
+
+  discovery_url:
+    type: string
+    description: >
+      Discovery URL used for bootstrapping the etcd cluster.
+
+  tls_disabled:
+    type: boolean
+    description: whether or not to enable TLS
+    default: False
+
+  kubernetes_port:
+    type: number
+    description: >
+      The port which are used by kube-apiserver to provide Kubernetes
+      service.
+    default: 6443
+
+  bay_uuid:
+    type: string
+    description: identifier for the bay this template is generating
+
+  magnum_url:
+    type: string
+    description: endpoint to retrieve TLS certs from
+
+  # The following are all generated in the parent template.
+  api_public_address:
+    type: string
+    description: Public IP address of the Kubernetes master server.
+  api_private_address:
+    type: string
+    description: Private IP address of the Kubernetes master server.
+  fixed_network:
+    type: string
+    description: Network from which to allocate fixed addresses.
+  fixed_subnet:
+    type: string
+    description: Subnet from which to allocate fixed addresses.
+  network_driver:
+    type: string
+    description: network driver to use for instantiating container networks
+  wait_condition_timeout:
+    type: number
+    description : >
+      timeout for the Wait Conditions
+  secgroup_base_id:
+    type: string
+    description: ID of the security group for base.
+  secgroup_kube_master_id:
+    type: string
+    description: ID of the security group for kubernetes master.
+  api_pool_id:
+    type: string
+    description: ID of the load balancer pool of k8s API server.
+  etcd_pool_id:
+    type: string
+    description: ID of the load balancer pool of etcd server.
+  auth_url:
+    type: string
+    description: >
+      url for kubernetes to authenticate before sending request to neutron
+  username:
+    type: string
+    description: >
+      user account
+  password:
+    type: string
+    description: >
+      user password
+  tenant_name:
+    type: string
+    description: >
+      tenant name
+
+resources:
+
+  master_wait_handle:
+    type: OS::Heat::WaitConditionHandle
+
+  master_wait_condition:
+    type: OS::Heat::WaitCondition
+    depends_on: kube_master
+    properties:
+      handle: {get_resource: master_wait_handle}
+      timeout: {get_param: wait_condition_timeout}
+
+  ######################################################################
+  #
+  # software configs.  these are components that are combined into
+  # a multipart MIME user-data archive.
+  #
+
+  write_heat_params:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/write-heat-params-master.yaml}
+          params:
+            "$KUBE_NODE_PUBLIC_IP": {get_attr: [kube_master_floating, floating_ip_address]}
+            "$KUBE_NODE_IP": {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
+            "$KUBE_API_PORT": {get_param: kubernetes_port}
+            "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
+            "$NETWORK_DRIVER": {get_param: network_driver}
+            "$FLANNEL_NETWORK_CIDR": {get_param: flannel_network_cidr}
+            "$FLANNEL_NETWORK_SUBNETLEN": {get_param: flannel_network_subnetlen}
+            "$FLANNEL_BACKEND": {get_param: flannel_backend}
+            "$PORTAL_NETWORK_CIDR": {get_param: portal_network_cidr}
+            "$ETCD_DISCOVERY_URL": {get_param: discovery_url}
+            "$AUTH_URL": {get_param: auth_url}
+            "$USERNAME": {get_param: username}
+            "$PASSWORD": {get_param: password}
+            "$TENANT_NAME": {get_param: tenant_name}
+            "$CLUSTER_SUBNET": {get_param: fixed_subnet}
+            "$TLS_DISABLED": {get_param: tls_disabled}
+            "$BAY_UUID": {get_param: bay_uuid}
+            "$MAGNUM_URL": {get_param: magnum_url}
+
+  configure_etcd:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/configure-etcd.sh}
+
+  configure_flanneld:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/configure-flanneld-master.sh}
+
+  create_kubernetes_user:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/create-kubernetes-user.yaml}
+
+  configure_kubernetes:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/configure-kubernetes-master.sh}
+
+  master_wc_notify:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: |
+            #!/bin/bash -v
+            wc_notify --data-binary '{"status": "SUCCESS"}'
+          params:
+            wc_notify: {get_attr: [master_wait_handle, curl_cli]}
+
+  kube_master_init:
+    type: OS::Heat::MultipartMime
+    properties:
+      parts:
+        - config: {get_resource: write_heat_params}
+        - config: {get_resource: configure_etcd}
+        - config: {get_resource: configure_flanneld}
+        - config: {get_resource: create_kubernetes_user}
+        - config: {get_resource: configure_kubernetes}
+        - config: {get_resource: master_wc_notify}
+
+  ######################################################################
+  #
+  # a single kubernetes master.
+  #
+
+  kube_master:
+    type: OS::Nova::Server
+    properties:
+      name: kube_master
+      image: {get_param: server_image}
+      flavor: {get_param: master_flavor}
+      key_name: {get_param: ssh_key_name}
+      user_data_format: RAW
+      user_data: {get_resource: kube_master_init}
+      config_drive: true
+      networks:
+        - port: {get_resource: kube_master_eth0}
+
+  kube_master_eth0:
+    type: OS::Neutron::Port
+    properties:
+      network: {get_param: fixed_network}
+      security_groups:
+        - {get_param: secgroup_base_id}
+        - {get_param: secgroup_kube_master_id}
+      fixed_ips:
+        - subnet: {get_param: fixed_subnet}
+      replacement_policy: AUTO
+
+  kube_master_floating:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: {get_param: external_network}
+      port_id: {get_resource: kube_master_eth0}
+
+  api_pool_member:
+    type: OS::Neutron::PoolMember
+    properties:
+      pool_id: {get_param: api_pool_id}
+      address: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
+      protocol_port: {get_param: kubernetes_port}
+
+  etcd_pool_member:
+    type: OS::Neutron::PoolMember
+    properties:
+      pool_id: {get_param: etcd_pool_id}
+      address: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
+      protocol_port: 2379
+
+outputs:
+
+  kube_master_ip:
+    value: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
+
+  kube_master_external_ip:
+    value: {get_attr: [kube_master_floating, floating_ip_address]}

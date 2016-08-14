@@ -1,0 +1,513 @@
+heat_template_version: 2013-05-23
+
+description: >
+  This template will boot a Kubernetes cluster with one or more
+  minions (as specified by the number_of_minions parameter, which
+  defaults to 1).
+
+parameters:
+
+  ssh_key_name:
+    type: string
+    description: name of ssh key to be provisioned on our server
+
+  external_network:
+    type: string
+    description: uuid/name of a network to use for floating ip addresses
+    default: public
+
+  server_image:
+    type: string
+    description: glance image used to boot the server
+
+  master_flavor:
+    type: string
+    default: m1.small
+    description: flavor to use when booting the server
+
+  minion_flavor:
+    type: string
+    default: m1.small
+    description: flavor to use when booting the server
+
+  dns_nameserver:
+    type: string
+    description: address of a dns nameserver reachable in your environment
+    default: 8.8.8.8
+
+  number_of_masters:
+    type: number
+    description: how many kubernetes masters to spawn
+    default: 1
+
+  number_of_minions:
+    type: number
+    description: how many kubernetes minions to spawn
+    default: 1
+
+  fixed_network_cidr:
+    type: string
+    description: network range for fixed ip network
+    default: 10.0.0.0/24
+
+  portal_network_cidr:
+    type: string
+    description: >
+      address range used by kubernetes for service portals
+    default: 10.254.0.0/16
+
+  network_driver:
+    type: string
+    description: network driver to use for instantiating container networks
+    default: flannel
+
+  flannel_network_cidr:
+    type: string
+    description: network range for flannel overlay network
+    default: 10.100.0.0/16
+
+  flannel_network_subnetlen:
+    type: string
+    description: size of subnet assigned to each minion
+    default: 24
+
+  flannel_backend:
+    type: string
+    description: >
+      specify the backend for flannel, default udp backend
+    default: "udp"
+    constraints:
+      - allowed_values: ["udp", "vxlan", "host-gw"]
+
+  kube_allow_priv:
+    type: string
+    description: >
+      whether or not kubernetes should permit privileged containers.
+    default: "true"
+    constraints:
+      - allowed_values: ["true", "false"]
+
+  docker_volume_size:
+    type: number
+    description: >
+      size of a cinder volume to allocate to docker for container/image
+      storage
+    default: 25
+
+  wait_condition_timeout:
+    type: number
+    description: >
+      timeout for the Wait Conditions
+    default: 600
+
+  minions_to_remove:
+    type: comma_delimited_list
+    description: >
+      List of minions to be removed when doing an update. Individual minion may
+      be referenced several ways: (1) The resource name (e.g. ['1', '3']),
+      (2) The private IP address ['10.0.0.4', '10.0.0.6']. Note: the list should
+      be empty when doing an create.
+    default: []
+
+  discovery_url:
+    type: string
+    description: >
+      Discovery URL used for bootstrapping the etcd cluster.
+
+  registry_enabled:
+    type: boolean
+    description: >
+      Indicates whether the docker registry is enabled.
+    default: false
+
+  registry_port:
+    type: number
+    description: port of registry service
+    default: 5000
+
+  registry_username:
+    type: string
+    description: username used by docker registry
+    default: "username"
+
+  registry_password:
+    type: string
+    description: password used by docker registry
+    default: "password"
+    hidden: true
+
+  registry_domain:
+    type: string
+    description: domain used by docker registry
+    default: "domain"
+
+  registry_trust_id:
+    type: string
+    description: trust_id used by docker registry
+    default: "trust_id"
+    hidden: true
+
+  registry_auth_url:
+    type: string
+    description: auth_url for keystone
+    default: "auth_url"
+
+  registry_region:
+    type: string
+    description: region of swift service
+    default: "region"
+
+  registry_container:
+    type: string
+    description: >
+      name of swift container which docker registry stores images in
+    default: "container"
+
+  registry_insecure:
+    type: boolean
+    description: >
+      indicates whether to skip TLS verification between registry and backend storage
+    default: true
+
+  registry_chunksize:
+    type: number
+    description: >
+      size fo the data segments for the swift dynamic large objects
+    default: 5242880
+
+  auth_url:
+    type: string
+    description: >
+      url for kubernetes to authenticate before sending request to neutron
+      must be v2 since kubernetes backend only suppor v2 at this point
+
+  username:
+    type: string
+    description: >
+      user account
+
+  password:
+    type: string
+    description: >
+      user password, not set in current implementation, only used to
+      fill in for Kubernetes config file
+    default:
+      ChangeMe
+
+  tenant_name:
+    type: string
+    description: >
+      tenant name
+
+  loadbalancing_protocol:
+    type: string
+    description: >
+      The protocol which is used for load balancing. If you want to change
+      tls_disabled option to 'True', please change this to "HTTP".
+    default: TCP
+    constraints:
+      - allowed_values: ["TCP", "HTTP"]
+
+  tls_disabled:
+    type: boolean
+    description: whether or not to disable TLS
+    default: False
+
+  kubernetes_port:
+    type: number
+    description: >
+      The port which are used by kube-apiserver to provide Kubernetes
+      service.
+    default: 6443
+
+  bay_uuid:
+    type: string
+    description: identifier for the bay this template is generating
+
+  magnum_url:
+    type: string
+    description: endpoint to retrieve TLS certs from
+
+  trustee_domain_id:
+    type: string
+    description: domain id of the trustee
+    default: ""
+
+  trustee_user_id:
+    type: string
+    description: user id of the trustee
+    default: ""
+
+  trustee_username:
+    type: string
+    description: username of the trustee
+    default: ""
+
+  trustee_password:
+    type: string
+    description: password of the trustee
+    default: ""
+    hidden: true
+
+  trust_id:
+    type: string
+    description: id of the trust which is used by the trustee
+    default: ""
+    hidden: true
+
+resources:
+
+  ######################################################################
+  #
+  # network resources.  allocate a network and router for our server.
+  # Important: the Load Balancer feature in Kubernetes requires that
+  # the name for the fixed_network must be "private" for the
+  # address lookup in Kubernetes to work properly
+  #
+
+  fixed_network:
+    type: OS::Neutron::Net
+    properties:
+      name: private
+
+  fixed_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      cidr: {get_param: fixed_network_cidr}
+      network: {get_resource: fixed_network}
+      dns_nameservers:
+        - {get_param: dns_nameserver}
+
+  extrouter:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: {get_param: external_network}
+
+  extrouter_inside:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: {get_resource: extrouter}
+      subnet: {get_resource: fixed_subnet}
+
+  ######################################################################
+  #
+  # security groups.  we need to permit network traffic of various
+  # sorts.
+  #
+
+  secgroup_base:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      rules:
+        - protocol: icmp
+        - protocol: tcp
+          port_range_min: 22
+          port_range_max: 22
+
+  secgroup_kube_master:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      rules:
+        - protocol: tcp
+          port_range_min: 7080
+          port_range_max: 7080
+        - protocol: tcp
+          port_range_min: 8080
+          port_range_max: 8080
+        - protocol: tcp
+          port_range_min: 2379
+          port_range_max: 2379
+        - protocol: tcp
+          port_range_min: 2380
+          port_range_max: 2380
+        - protocol: tcp
+          port_range_min: 6443
+          port_range_max: 6443
+
+  secgroup_kube_minion:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      rules:
+        - protocol: icmp
+        - protocol: tcp
+        - protocol: udp
+
+  ######################################################################
+  #
+  # load balancers.
+  #
+
+  api_monitor:
+    type: OS::Neutron::HealthMonitor
+    properties:
+      type: TCP
+      delay: 5
+      max_retries: 5
+      timeout: 5
+
+  api_pool:
+    type: OS::Neutron::Pool
+    properties:
+      protocol: {get_param: loadbalancing_protocol}
+      monitors: [{get_resource: api_monitor}]
+      subnet: {get_resource: fixed_subnet}
+      lb_method: ROUND_ROBIN
+      vip:
+        protocol_port: {get_param: kubernetes_port}
+
+  api_pool_floating:
+    type: OS::Neutron::FloatingIP
+    depends_on:
+      - extrouter_inside
+    properties:
+      floating_network: {get_param: external_network}
+      port_id: {get_attr: [api_pool, vip, port_id]}
+
+  etcd_monitor:
+    type: OS::Neutron::HealthMonitor
+    properties:
+      type: TCP
+      delay: 5
+      max_retries: 5
+      timeout: 5
+
+  etcd_pool:
+    type: OS::Neutron::Pool
+    properties:
+      protocol: HTTP
+      monitors: [{get_resource: etcd_monitor}]
+      subnet: {get_resource: fixed_subnet}
+      lb_method: ROUND_ROBIN
+      vip:
+        protocol_port: 2379
+
+  ######################################################################
+  #
+  # kubernetes masters. This is a resource group that will create
+  # <number_of_masters> masters.
+  #
+
+  kube_masters:
+    type: OS::Heat::ResourceGroup
+    depends_on:
+      - extrouter_inside
+    properties:
+      count: {get_param: number_of_masters}
+      resource_def:
+        type: kubemaster.yaml
+        properties:
+          api_public_address: {get_attr: [api_pool_floating, floating_ip_address]}
+          api_private_address: {get_attr: [api_pool, vip, address]}
+          ssh_key_name: {get_param: ssh_key_name}
+          server_image: {get_param: server_image}
+          master_flavor: {get_param: master_flavor}
+          external_network: {get_param: external_network}
+          kube_allow_priv: {get_param: kube_allow_priv}
+          wait_condition_timeout: {get_param: wait_condition_timeout}
+          network_driver: {get_param: network_driver}
+          flannel_backend: {get_param: flannel_backend}
+          flannel_network_cidr: {get_param: flannel_network_cidr}
+          flannel_network_subnetlen: {get_param: flannel_network_subnetlen}
+          portal_network_cidr: {get_param: portal_network_cidr}
+          discovery_url: {get_param: discovery_url}
+          bay_uuid: {get_param: bay_uuid}
+          magnum_url: {get_param: magnum_url}
+          fixed_network: {get_resource: fixed_network}
+          fixed_subnet: {get_resource: fixed_subnet}
+          api_pool_id: {get_resource: api_pool}
+          etcd_pool_id: {get_resource: etcd_pool}
+          auth_url: {get_param: auth_url}
+          username: {get_param: username}
+          password: {get_param: password}
+          tenant_name: {get_param: tenant_name}
+          kubernetes_port: {get_param: kubernetes_port}
+          tls_disabled: {get_param: tls_disabled}
+          secgroup_base_id: {get_resource: secgroup_base}
+          secgroup_kube_master_id: {get_resource: secgroup_kube_master}
+
+  ######################################################################
+  #
+  # kubernetes minions. This is an resource group that will initially
+  # create <number_of_minions> minions, and needs to be manually scaled.
+  #
+
+  kube_minions:
+    type: OS::Heat::ResourceGroup
+    depends_on:
+      - extrouter_inside
+      - kube_masters
+    properties:
+      count: {get_param: number_of_minions}
+      removal_policies: [{resource_list: {get_param: minions_to_remove}}]
+      resource_def:
+        type: kubeminion.yaml
+        properties:
+          ssh_key_name: {get_param: ssh_key_name}
+          server_image: {get_param: server_image}
+          minion_flavor: {get_param: minion_flavor}
+          fixed_network: {get_resource: fixed_network}
+          fixed_subnet: {get_resource: fixed_subnet}
+          network_driver: {get_param: network_driver}
+          kube_master_ip: {get_attr: [api_pool, vip, address]}
+          etcd_server_ip: {get_attr: [etcd_pool, vip, address]}
+          external_network: {get_param: external_network}
+          kube_allow_priv: {get_param: kube_allow_priv}
+          docker_volume_size: {get_param: docker_volume_size}
+          wait_condition_timeout: {get_param: wait_condition_timeout}
+          registry_enabled: {get_param: registry_enabled}
+          registry_port: {get_param: registry_port}
+          registry_username: {get_param: registry_username}
+          registry_password: {get_param: registry_password}
+          registry_domain: {get_param: registry_domain}
+          registry_trust_id: {get_param: registry_trust_id}
+          registry_auth_url: {get_param: registry_auth_url}
+          registry_region: {get_param: registry_region}
+          registry_container: {get_param: registry_container}
+          registry_insecure: {get_param: registry_insecure}
+          registry_chunksize: {get_param: registry_chunksize}
+          bay_uuid: {get_param: bay_uuid}
+          magnum_url: {get_param: magnum_url}
+          kubernetes_port: {get_param: kubernetes_port}
+          tls_disabled: {get_param: tls_disabled}
+          secgroup_kube_minion_id: {get_resource: secgroup_kube_minion}
+          kube_minion_id: 'kube_minion_%index%'
+
+outputs:
+
+  api_address:
+    value:
+      str_replace:
+        template: api_ip_address
+        params:
+          api_ip_address: {get_attr: [api_pool_floating, floating_ip_address]}
+    description: >
+      This is the API endpoint of the Kubernetes server. Use this to access
+      the Kubernetes API from outside the cluster.
+
+  registry_address:
+    value:
+      str_replace:
+        template: localhost:port
+        params:
+          port: {get_param: registry_port}
+    description:
+      This is the url of docker registry server where you can store docker
+      images.
+
+  kube_masters:
+    value: {get_attr: [kube_masters, kube_master_external_ip]}
+    description: >
+      This is a list of "public" ip addresses of all Kubernetes master servers.
+      Use these addresses to log in to the Kubernetes masters via ssh.
+
+  kube_minions:
+    value: {get_attr: [kube_minions, kube_minion_ip]}
+    description: >
+      This is a list of the "private" addresses of all the Kubernetes minions.
+
+  kube_minions_external:
+    value: {get_attr: [kube_minions, kube_minion_external_ip]}
+    description: >
+      This is a list of the "public" addresses of all the Kubernetes minions. Use
+      these addresses to, e.g., log into the minions.
