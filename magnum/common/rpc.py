@@ -27,6 +27,9 @@ __all__ = [
     'TRANSPORT_ALIASES',
 ]
 
+import socket
+
+
 from oslo_config import cfg
 import oslo_messaging as messaging
 from oslo_serialization import jsonutils
@@ -143,6 +146,9 @@ def get_server(target, endpoints, serializer=None):
 
 def get_notifier(service='container-infra', host=None, publisher_id=None):
     assert NOTIFIER is not None
+    myhost = CONF.host
+    if myhost is None:
+        myhost = socket.getfqdn()
     if not publisher_id:
-        publisher_id = "%s.%s" % (service, host or CONF.host)
+        publisher_id = "%s.%s" % (service, host or myhost)
     return NOTIFIER.prepare(publisher_id=publisher_id)
