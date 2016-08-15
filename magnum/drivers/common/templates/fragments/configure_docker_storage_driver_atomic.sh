@@ -15,7 +15,7 @@ configure_overlay () {
 
     rm -rf /var/lib/docker/*
 
-    mkfs.xfs ${device_path}
+    mkfs.xfs -f ${device_path}
     echo "${device_path} /var/lib/docker xfs defaults 0 0" >> /etc/fstab
     mount -a
 
@@ -31,7 +31,7 @@ configure_overlay () {
 configure_devicemapper () {
     clear_docker_storage_congiguration
 
-    pvcreate ${device_path}
+    pvcreate -f ${device_path}
     vgcreate docker ${device_path}
 
     echo "VG=docker" > /etc/sysconfig/docker-storage-setup

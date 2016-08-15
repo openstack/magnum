@@ -4,6 +4,11 @@
 
 echo "configuring kubernetes (minion)"
 
+if [ -z "$KUBE_NODE_IP" ]; then
+  # FIXME(yuanying): Set KUBE_NODE_IP correctly
+  KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+fi
+
 ETCD_SERVER_IP=${ETCD_SERVER_IP:-$KUBE_MASTER_IP}
 KUBE_PROTOCOL="https"
 KUBE_CONFIG=""

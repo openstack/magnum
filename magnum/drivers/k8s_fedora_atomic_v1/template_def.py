@@ -12,8 +12,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from neutronclient.common import exceptions as n_exception
+from neutronclient.neutron import v2_0 as neutronV20
 import os
 
+from magnum.common import exception
 from magnum.drivers.common import template_def
 from oslo_config import cfg
 
@@ -158,3 +161,60 @@ class AtomicK8sTemplateDefinition(K8sTemplateDefinition):
     def template_path(self):
         return os.path.join(os.path.dirname(os.path.realpath(__file__)),
                             'templates/kubecluster.yaml')
+
+
+class FedoraK8sIronicTemplateDefinition(AtomicK8sTemplateDefinition):
+    """Kubernetes template for a Fedora Baremetal."""
+
+    provides = [
+        {'server_type': 'bm',
+         'os': 'fedora',
+         'coe': 'kubernetes'},
+    ]
+
+    def __init__(self):
+        super(FedoraK8sIronicTemplateDefinition, self).__init__()
+        self.add_parameter('fixed_subnet',
+                           baymodel_attr='fixed_subnet',
+                           param_type=str,
+                           required=True)
+
+    def get_fixed_network_id(self, osc, baymodel):
+        try:
+            subnet = neutronV20.find_resource_by_name_or_id(
+                osc.neutron(),
+                'subnet',
+                baymodel.fixed_subnet
+            )
+        except n_exception.NeutronException as e:
+            # NOTE(yuanying): NeutronCLIError doesn't have status_code
+            # if subnet name is duplicated, NeutronClientNoUniqueMatch
+            # (which is kind of NeutronCLIError) will be raised.
+            if getattr(e, 'status_code', 400) < 500:
+                raise exception.InvalidSubnet(message=("%s" % e))
+            else:
+                raise e
+
+        if subnet['ip_version'] != 4:
+            raise exception.InvalidSubnet(
+                message="Subnet IP version should be 4"
+            )
+
+        return subnet['network_id']
+
+    def get_params(self, context, baymodel, bay, **kwargs):
+        extra_params = kwargs.pop('extra_params', {})
+
+        osc = self.get_osc(context)
+        extra_params['fixed_network'] = self.get_fixed_network_id(osc,
+                                                                  baymodel)
+
+        return super(FedoraK8sIronicTemplateDefinition,
+                     self).get_params(context, baymodel, bay,
+                                      extra_params=extra_params,
+                                      **kwargs)
+
+    @property
+    def template_path(self):
+        return os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                            'templates/kubecluster-fedora-ironic.yaml')
