@@ -19,6 +19,7 @@ from k8sclient.client.apis import apiv_api
 from oslo_log import log as logging
 
 from magnum.conductor.handlers.common.cert_manager import create_client_files
+from magnum.i18n import _LE
 
 LOG = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ class K8sAPI(apiv_api.ApivApi):
             tmp.write(content)
             tmp.flush()
         except Exception as err:
-            LOG.error("Error while creating temp file: %s", err)
+            LOG.error(_LE("Error while creating temp file: %s"), err)
             raise
         return tmp
 
