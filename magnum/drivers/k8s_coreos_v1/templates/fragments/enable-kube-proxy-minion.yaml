@@ -24,7 +24,7 @@ write_files:
       myip=$(ip addr show eth0 |
              awk '$1 == "inet" {print $2}' | cut -f1 -d/)
 
-      HOST_CERTS_PATH=/usr/share/ca-certificates
+      KUBE_CERTS_PATH=/etc/kubernetes/ssl
       KUBE_CONFIG_PATH=/etc/kubernetes/config
       KUBE_PROTOCOL="https"
       KUBE_CONFIG="${KUBE_CONFIG_PATH}/worker-kubeconfig.yaml"
@@ -57,10 +57,17 @@ write_files:
           securityContext:
             privileged: true
           volumeMounts:
+            - mountPath: /etc/kubernetes/config
               name: "kubeconfig"
+              readOnly: true
+            - mountPath: /etc/kubernetes/ssl
+              name: "etc-kube-ssl"
               readOnly: true
         volumes:
           - name: "kubeconfig"
             hostPath:
               path: ${KUBE_CONFIG_PATH}
+          - name: "etc-kube-ssl"
+            hostPath:
+              path: ${KUBE_CERTS_PATH}
       EOF
