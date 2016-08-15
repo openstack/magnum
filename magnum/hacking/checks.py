@@ -15,6 +15,8 @@
 
 import re
 
+import pep8
+
 """
 Guidelines for writing new hacking checks
 
@@ -56,6 +58,14 @@ assert_true_isinstance_re = re.compile(
 dict_constructor_with_list_copy_re = re.compile(r".*\bdict\((\[)?(\(|\[)")
 assert_xrange_re = re.compile(
     r"\s*xrange\s*\(")
+log_translation = re.compile(
+    r"(.)*LOG\.(audit|error|critical)\(\s*('|\")")
+log_translation_info = re.compile(
+    r"(.)*LOG\.(info)\(\s*(_\(|'|\")")
+log_translation_exception = re.compile(
+    r"(.)*LOG\.(exception)\(\s*(_\(|'|\")")
+log_translation_LW = re.compile(
+    r"(.)*LOG\.(warning|warn)\(\s*(_\(|'|\")")
 custom_underscore_check = re.compile(r"(.)*_\s*=\s*(.)*")
 underscore_import_check = re.compile(r"(.)*import _(.)*")
 translated_log = re.compile(
@@ -123,6 +133,23 @@ def assert_true_isinstance(logical_line):
     """
     if assert_true_isinstance_re.match(logical_line):
         yield (0, "M316: assertTrue(isinstance(a, b)) sentences not allowed")
+
+
+def validate_log_translations(logical_line, physical_line, filename=None):
+    if pep8.noqa(physical_line):
+        return
+    msg = "M328: LOG.info messages require translations `_LI()`!"
+    if log_translation_info.match(logical_line):
+        yield (0, msg)
+    msg = "M329: LOG.exception messages require translations `_LE()`!"
+    if log_translation_exception.match(logical_line):
+        yield (0, msg)
+    msg = "M330: LOG.warning, LOG.warn messages require translations `_LW()`!"
+    if log_translation_LW.match(logical_line):
+        yield (0, msg)
+    msg = "M321: Log messages require translations!"
+    if log_translation.match(logical_line):
+        yield (0, msg)
 
 
 def assert_equal_in(logical_line):
@@ -215,4 +242,5 @@ def factory(register):
     register(dict_constructor_with_list_copy)
     register(no_xrange)
     register(no_log_warn)
+    register(validate_log_translations)
     register(check_explicit_underscore_import)

@@ -17,6 +17,8 @@ import subprocess
 from tempest.lib import base
 
 import magnum
+from magnum.i18n import _LE
+from magnum.i18n import _LI
 
 
 COPY_LOG_HELPER = "magnum/tests/contrib/copy_instance_logs.sh"
@@ -44,10 +46,10 @@ class BaseMagnumTest(base.BaseTestCase):
         """
         def int_copy_logs(exec_info):
             try:
-                cls.LOG.info("Copying logs...")
+                cls.LOG.info(_LI("Copying logs..."))
                 fn = exec_info[2].tb_frame.f_locals['fn']
                 func_name = fn.im_self._get_test_method().__name__
-                msg = "Failed to copy logs for bay"
+                msg = (_LE("Failed to copy logs for bay"))
                 nodes_addresses = get_nodes_fn()
 
                 master_nodes = nodes_addresses[0]
@@ -61,8 +63,8 @@ class BaseMagnumTest(base.BaseTestCase):
                     if not nodes_address:
                         return
 
-                    cls.LOG.info("copy logs from : %s" %
-                                 ','.join(nodes_address))
+                    msg = _LI("copy logs from : %s") % ','.join(nodes_address)
+                    cls.LOG.info(msg)
                     log_name = prefix + "-" + func_name
                     for node_address in nodes_address:
                         try:
@@ -77,10 +79,13 @@ class BaseMagnumTest(base.BaseTestCase):
                             ])
                         except Exception:
                             cls.LOG.error(msg)
-                            cls.LOG.exception(
-                                "failed to copy from %s to %s%s-%s" %
-                                (node_address, "/opt/stack/logs/bay-nodes/",
-                                 log_name, node_address))
+                            msg = (_LE("failed to copy from %{node_address}s "
+                                       "to %{base_path}s%{log_name}s-"
+                                       "%{node_address}s") %
+                                   {'node_address': node_address,
+                                    'base_path': "/opt/stack/logs/bay-nodes/",
+                                    'log_name': log_name})
+                            cls.LOG.exception(msg)
 
                 do_copy_logs('master', master_nodes)
                 do_copy_logs('node', agent_nodes)

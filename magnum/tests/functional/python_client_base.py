@@ -31,6 +31,7 @@ from k8sclient.client import api_client
 from k8sclient.client.apis import apiv_api
 from keystoneclient.v2_0 import client as ksclient
 from magnum.common.utils import rmtree_without_raise
+from magnum.i18n import _LI
 from magnum.tests.functional.common import base
 from magnum.tests.functional.common import utils
 from magnumclient.common.apiclient import exceptions
@@ -275,11 +276,11 @@ extendedKeyUsage = clientAuth
     def _get_nodes(self):
         nodes = self._get_nodes_from_bay()
         if not [x for x in nodes if x]:
-            self.LOG.info("the list of nodes from bay is empty")
+            self.LOG.info(_LI("the list of nodes from bay is empty"))
             nodes = self._get_nodes_from_stack()
             if not [x for x in nodes if x]:
-                self.LOG.info("the list of nodes from stack is empty")
-        self.LOG.info("Nodes are: %s" % nodes)
+                self.LOG.info(_LI("the list of nodes from stack is empty"))
+        self.LOG.info(_LI("Nodes are: %s") % nodes)
         return nodes
 
     def _get_nodes_from_bay(self):
@@ -378,10 +379,10 @@ class BaseK8sTest(BayTest):
     def _is_api_ready(self):
         try:
             self.k8s_api.list_namespaced_node()
-            self.LOG.info("API is ready.")
+            self.LOG.info(_LI("API is ready."))
             return True
         except Exception:
-            self.LOG.info("API is not ready yet.")
+            self.LOG.info(_LI("API is not ready yet."))
             return False
 
     def test_pod_apis(self):

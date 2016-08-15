@@ -132,9 +132,10 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                 # Any other exception means we do not perform any
                 # action on this bay in the current sync run, so remove
                 # it from all records.
-                LOG.warning("Exception while attempting to retrieve "
-                            "Heat stack %s for bay %s. Traceback "
-                            "follows.")
+                LOG.warning(_LW("Exception while attempting to retrieve "
+                                "Heat stack %(stack_id)s for bay %(bay_id)s. "
+                                "Traceback follows."),
+                            {'stack_id': bay.stack_id, 'bay_id': bay.id})
                 LOG.warning(e)
                 _sid_to_bay_mapping.pop(bay.stack_id)
                 _bay_stack_ids.remove(bay.stack_id)

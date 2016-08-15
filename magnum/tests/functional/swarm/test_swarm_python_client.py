@@ -17,6 +17,7 @@ from oslo_config import cfg
 from requests import exceptions as req_exceptions
 
 from magnum.common import docker_utils
+from magnum.i18n import _LI
 from magnum.tests.functional.python_client_base import BayTest
 
 
@@ -97,15 +98,15 @@ class TestSwarmAPIs(BayTest):
         # investigate the cause of this issue. See bug #1583337.
         for i in range(150):
             try:
-                self.LOG.info("Calling function " + func.__name__)
+                self.LOG.info(_LI("Calling function ") + func.__name__)
                 return func(*args, **kwargs)
             except req_exceptions.ConnectionError:
-                self.LOG.info("Connection aborted on calling Swarm API. "
-                              "Will retry in 2 seconds.")
+                self.LOG.info(_LI("Connection aborted on calling Swarm API. "
+                                  "Will retry in 2 seconds."))
             except errors.APIError as e:
                 if e.response.status_code != 500:
                     raise
-                self.LOG.info("Internal Server Error: " + str(e))
+                self.LOG.info(_LI("Internal Server Error: ") + str(e))
             time.sleep(2)
 
         raise Exception("Cannot connect to Swarm API.")
