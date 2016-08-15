@@ -28,12 +28,27 @@ function create_test_data {
     # a baymodel, bay and a pod
 
     coe=$1
+    special=$2
     if [ $coe == 'mesos' ]; then
         local image_name="ubuntu-14.04"
+        local container_format="bare"
     elif [ $coe == 'k8s-coreos' ]; then
         local image_name="coreos"
+        local container_format="bare"
+    elif [ "${coe}${special}" == 'k8s-ironic' ]; then
+        local bm_flavor_id=$(openstack flavor show baremetal -f value -c id)
+        die_if_not_set $LINENO bm_flavor_id "Failed to get id of baremetal flavor"
+
+        # NOTE(yuanying): Workaround fix for ironic issue
+        # cf. https://bugs.launchpad.net/ironic/+bug/1596421
+        echo "alter table ironic.nodes modify instance_info LONGTEXT;" | mysql -uroot -p${MYSQL_PASSWORD} ironic
+        # NOTE(yuanying): Ironic instances need to connect to Internet
+        neutron subnet-update private-subnet --dns-nameserver 8.8.8.8
+
+        local container_format="ami"
     else
         local image_name="atomic"
+        local container_format="bare"
     fi
 
     # if we have the MAGNUM_IMAGE_NAME setting, use it instead
@@ -42,7 +57,12 @@ function create_test_data {
     image_name=${MAGNUM_IMAGE_NAME:-$image_name}
 
     export NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
-    export IMAGE_ID=$(glance --os-image-api-version 1 image-list | grep -i $image_name | awk '{print $2}')
+
+    # We need to filter by container_format to get the appropriate
+    # image. Specifically, when we provide kernel and ramdisk images
+    # we need to select the 'ami' image. Otherwise, when we have
+    # qcow2 images, the format is 'bare'.
+    export IMAGE_ID=$(glance --os-image-api-version 1 image-list | grep $container_format | grep -i $image_name | awk '{print $2}')
 
     # pass the appropriate variables via a config file
     CREDS_FILE=$MAGNUM_DIR/functional_creds.conf
@@ -65,8 +85,8 @@ region_name = $OS_REGION_NAME
 image_id = $IMAGE_ID
 nic_id = $NIC_ID
 keypair_id = default
-flavor_id = s1.magnum
-master_flavor_id = m1.magnum
+flavor_id = ${bm_flavor_id:-s1.magnum}
+master_flavor_id = ${bm_flavor_id:-m1.magnum}
 copy_logs = true
 csr_location = $MAGNUM_DIR/default.csr
 dns_nameserver = 8.8.8.8
@@ -175,6 +195,7 @@ echo "Running magnum functional test suite for $1"
 # For api, we will run tempest tests
 
 coe=$1
+special=$2
 
 if [[ "api" == "$coe" ]]; then
     # Import devstack functions 'iniset', 'iniget' and 'trueorfalse'
@@ -224,9 +245,10 @@ else
 
     add_flavor
 
-    create_test_data $coe
+    create_test_data $coe $special
 
-    sudo -E -H -u jenkins tox -e functional-"$coe" -- --concurrency=1
+    target="${coe}${special}"
+    sudo -E -H -u jenkins tox -e functional-"$target" -- --concurrency=1
 fi
 EXIT_CODE=$?
 
