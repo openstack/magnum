@@ -36,4 +36,7 @@ class MagnumTempestPlugin(plugins.TempestPlugin):
                                   magnum_config.MagnumGroup)
 
     def get_opt_lists(self):
-        return [(magnum_config.magnum_group.name, magnum_config.MagnumGroup)]
+        return [
+            (magnum_config.magnum_group.name, magnum_config.MagnumGroup),
+            ('service_available', magnum_config.ServiceAvailableGroup)
+        ]
