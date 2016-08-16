@@ -76,7 +76,7 @@ class TestHandler(db_base.DbTestCase):
 
         mock_update_stack.assert_called_once_with(
             self.context, mock_openstack_client, self.bay,
-            mock_scale_manager.return_value)
+            mock_scale_manager.return_value, False)
         bay = objects.Bay.get(self.context, self.bay.uuid)
         self.assertEqual(2, bay.node_count)
 
@@ -142,7 +142,7 @@ class TestHandler(db_base.DbTestCase):
 
         mock_update_stack.assert_called_once_with(
             self.context, mock_openstack_client, self.bay,
-            mock_scale_manager.return_value)
+            mock_scale_manager.return_value, False)
         bay = objects.Bay.get(self.context, self.bay.uuid)
         self.assertEqual(2, bay.node_count)
 
@@ -602,6 +602,30 @@ class TestHeatPoller(base.TestCase):
         self.assertEqual(2, bay.save.call_count)
         self.assertEqual(bay_status.UPDATE_FAILED, bay.status)
         self.assertEqual(2, bay.node_count)
+        self.assertEqual(1, poller.attempts)
+
+    def test_poll_done_by_rollback_complete(self):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+
+        mock_heat_stack.stack_status = bay_status.ROLLBACK_COMPLETE
+        mock_heat_stack.parameters = {'number_of_minions': 1}
+        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+
+        self.assertEqual(2, bay.save.call_count)
+        self.assertEqual(bay_status.ROLLBACK_COMPLETE, bay.status)
+        self.assertEqual(1, bay.node_count)
+        self.assertEqual(1, poller.attempts)
+
+    def test_poll_done_by_rollback_failed(self):
+        mock_heat_stack, bay, poller = self.setup_poll_test()
+
+        mock_heat_stack.stack_status = bay_status.ROLLBACK_FAILED
+        mock_heat_stack.parameters = {'number_of_minions': 1}
+        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+
+        self.assertEqual(2, bay.save.call_count)
+        self.assertEqual(bay_status.ROLLBACK_FAILED, bay.status)
+        self.assertEqual(1, bay.node_count)
         self.assertEqual(1, poller.attempts)
 
     def test_poll_destroy(self):

@@ -669,7 +669,8 @@ class TestBayConductorWithK8s(base.TestCase):
             'parameters': {},
             'template': expected_template_contents,
             'files': {},
-            'environment_files': []
+            'environment_files': [],
+            'disable_rollback': True
         }
         mock_heat_client.stacks.update.assert_called_once_with(mock_stack_id,
                                                                **expected_args)

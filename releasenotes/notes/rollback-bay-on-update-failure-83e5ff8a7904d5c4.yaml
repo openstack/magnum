@@ -1,0 +1,7 @@
+---
+features:
+  - Add Microversion 1.3 to support Magnum bay rollback,
+    user can enable rollback on bay update failure by
+    setting 'OpenStack-API-Version' to 'container-infra 1.3'
+    in request header and passing 'rollback=True' param
+    in bay update request.

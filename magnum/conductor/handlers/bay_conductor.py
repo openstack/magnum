@@ -114,7 +114,7 @@ def _create_stack(context, osc, bay, bay_create_timeout):
     return created_stack
 
 
-def _update_stack(context, osc, bay, scale_manager=None):
+def _update_stack(context, osc, bay, scale_manager=None, rollback=False):
     template_path, heat_params, env_files = _extract_template_definition(
         context, bay, scale_manager=scale_manager)
 
@@ -126,7 +126,8 @@ def _update_stack(context, osc, bay, scale_manager=None):
         'parameters': heat_params,
         'environment_files': environment_files,
         'template': template,
-        'files': tpl_files
+        'files': tpl_files,
+        'disable_rollback': not rollback
     }
 
     return osc.heat().stacks.update(bay.stack_id, **fields)
@@ -173,7 +174,7 @@ class Handler(object):
 
         return bay
 
-    def bay_update(self, context, bay):
+    def bay_update(self, context, bay, rollback=False):
         LOG.debug('bay_heat bay_update')
 
         osc = clients.OpenStackClients(context)
@@ -204,7 +205,7 @@ class Handler(object):
         conductor_utils.notify_about_bay_operation(
             context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_PENDING)
 
-        _update_stack(context, osc, bay, manager)
+        _update_stack(context, osc, bay, manager, rollback)
         self._poll_and_check(osc, bay)
 
         return bay
@@ -280,9 +281,11 @@ class HeatPoller(object):
             bay_status.DELETE_COMPLETE: taxonomy.ACTION_DELETE,
             bay_status.CREATE_COMPLETE: taxonomy.ACTION_CREATE,
             bay_status.UPDATE_COMPLETE: taxonomy.ACTION_UPDATE,
+            bay_status.ROLLBACK_COMPLETE: taxonomy.ACTION_UPDATE,
             bay_status.CREATE_FAILED: taxonomy.ACTION_CREATE,
             bay_status.DELETE_FAILED: taxonomy.ACTION_DELETE,
-            bay_status.UPDATE_FAILED: taxonomy.ACTION_UPDATE
+            bay_status.UPDATE_FAILED: taxonomy.ACTION_UPDATE,
+            bay_status.ROLLBACK_FAILED: taxonomy.ACTION_UPDATE
         }
         # poll_and_check is detached and polling long time to check status,
         # so another user/client can call delete bay/stack.
@@ -305,7 +308,9 @@ class HeatPoller(object):
 
         if stack.stack_status in (bay_status.CREATE_FAILED,
                                   bay_status.DELETE_FAILED,
-                                  bay_status.UPDATE_FAILED):
+                                  bay_status.UPDATE_FAILED,
+                                  bay_status.ROLLBACK_COMPLETE,
+                                  bay_status.ROLLBACK_FAILED):
             self._sync_bay_and_template_status(stack)
             self._bay_failed(stack)
             conductor_utils.notify_about_bay_operation(
