@@ -338,8 +338,9 @@ working. You may need to clone kubernetes using::
     sudo cp -a kubernetes/platforms/linux/amd64/kubectl /usr/bin/kubectl
 
 We first need to setup the certs to allow Kubernetes to authenticate our
-connection. See tls.rst for more info on using TLS keys/certs which are setup
-below.
+connection.   Please refer to
+`<http://docs.openstack.org/developer/magnum/userguide.html#transport-layer-security>`_
+for more info on using TLS keys/certs which are setup below.
 
 To generate an RSA key, you will use the 'genrsa' command of the 'openssl'
 tool.::

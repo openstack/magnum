@@ -77,8 +77,6 @@ Developer Info
    dev/manual-devstack
    dev/bay-template-example.rst
    dev/kubernetes-load-balancer.rst
-   dev/tls.rst
-   dev/mesos.rst
    dev/functional-test.rst
    dev/reno.rst
    magnum-proxy.rst

@@ -6,11 +6,12 @@ This guide is intended for users who use Magnum to deploy and manage clusters
 of hosts for a Container Orchestration Engine.  It describes the infrastructure
 that Magnum creates and how to work with them.
 
-Section 1-3 describe Magnum itself, including an overview, the CLI and Horizon
-interface.  Section 4-8 describe the Container Orchestration Engine's supported
-along with a guide on how to select one that best meets your needs.  Section
-9-14 describe the low level OpenStack infrastructure that is created and
-managed by Magnum to support the Container Orchestration Engine's.
+Section 1-3 describe Magnum itself, including an overview, the CLI and
+Horizon interface.  Section 4-9 describe the Container Orchestration
+Engine (COE) supported along with a guide on how to select one that
+best meets your needs and how to develop a driver for a new COE.
+Section 10-15 describe the low level OpenStack infrastructure that is
+created and managed by Magnum to support the COE's.
 
 ========
 Contents
@@ -109,16 +110,17 @@ This is a mandatory parameter and there is no default value.
 
 --external-network-id \<external-network-id\>
   The name or network ID of a Neutron network to provide connectivity
-  to the external internet for the bay.  This network must have a
-  route to external internet.  The servers in the bay will be
-  connected to a private network and Magnum will create a router
-  between this private network and the external network.  This will
-  allow the servers to download images, access discovery service, etc,
-  and the containers to install packages, etc.  In the opposite
-  direction, floating IP's will be allocated from the external network
-  to provide access from the external internet to servers and the
-  container services hosted in the bay.  This is a mandatory parameter
-  and there is no default value.
+  to the external internet for the bay.  This network must be an
+  external network, i.e. its attribute 'router:external' must be
+  'True'.  The servers in the bay will be connected to a private
+  network and Magnum will create a router between this private network
+  and the external network.  This will allow the servers to download
+  images, access discovery service, etc, and the containers to install
+  packages, etc.  In the opposite direction, floating IP's will be
+  allocated from the external network to provide access from the
+  external internet to servers and the container services hosted in
+  the bay.  This is a mandatory parameter and there is no default
+  value.
 
 --name \<name\>
   Name of the baymodel to create.  The name does not have to be
@@ -235,6 +237,16 @@ This is a mandatory parameter and there is no default value.
   `Docker Registry 2.0 <https://github.com/docker/distribution>`_
   for more details.  The default is to use the public registry.
 
+--master-lb-enabled
+  Since multiple masters may exist in a bay, a load balancer is
+  created to provide the API endpoint for the bay and to direct
+  requests to the masters.  In some cases, such as when the LBaaS
+  service is not available, this option can be set to 'false' to
+  create a bay without the load balancer.  In this case, one of the
+  masters will serve as the API endpoint.  The default is 'true',
+  i.e. to create the load balancer for the bay.
+
+
 Labels
 ------
 *To be filled in*
@@ -317,12 +329,15 @@ reusing these resources to avoid impacting Magnum operations in
 unexpected manners.  For instance, if you launch your own Nova
 instance on the bay private network, Magnum would not be aware of this
 instance.  Therefore, the bay-delete operation will fail because
-Magnum would not delete the extra Nova insance and the private Neutron
+Magnum would not delete the extra Nova instance and the private Neutron
 network cannot be removed while a Nova instance is still attached.
 
 **NOTE** Currently Heat nested templates are used to create the
 resources; therefore if an error occurs, you can troubleshoot through
-Heat.
+Heat.  For more help on Heat stack troubleshooting, refer to the
+`Troubleshooting Guide
+<https://github.com/openstack/magnum/blob/master/doc/source/troubleshooting-guide.rst#heat-stacks>`_.
+
 
 Create
 ++++++
@@ -334,12 +349,14 @@ The 'bay-create' command deploys a bay, for example::
                       --node-count 8 \
                       --master-count 3
 
+The 'bay-create' operation is asynchronous; therefore you can initiate
+another 'bay-create' operation while the current bay is being created.
 If the bay fails to be created, the infrastructure created so far may
 be retained or deleted depending on the particular orchestration
 engine.  As a common practice, a failed bay is retained during
-development for troubleshooting, but they are automatically deleted
-in production.  The current bay drivers use Heat templates and
-the resources of a failed 'bay-create' are retained.
+development for troubleshooting, but they are automatically deleted in
+production.  The current bay drivers use Heat templates and the
+resources of a failed 'bay-create' are retained.
 
 The definition and usage of the parameters for 'bay-create' are as
 follows:
@@ -1340,6 +1357,15 @@ And the artifacts are placed in the directory specified::
     key.pem
 
 You can now use the native client to interact with the COE.
+The variables and artifacts are unique to the bay.
+
+The parameters for 'bay-config' are as follows:
+
+--dir \<dirname\>
+  Directory to save the certificate and config files.
+
+--force
+  Overwrite existing files in the directory specified.
 
 
 Manual
@@ -2109,8 +2135,7 @@ Mesos on Ubuntu
 ---------------
 
 This image is built manually using diskimagebuilder.  The instructions are
-provided in this `Mesos guide
-<https://github.com/openstack/magnum/blob/master/doc/source/dev/mesos.rst>`_.
+provided in the section `Diskimage-builder`_.
 The Fedora site hosts the current image `ubuntu-14.04.3-mesos-0.25.0.qcow2
 <https://fedorapeople.org/groups/magnum/ubuntu-14.04.3-mesos-0.25.0.qcow2>`_.
 
