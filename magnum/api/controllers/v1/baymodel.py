@@ -43,30 +43,30 @@ class BayModelPatchType(types.JsonPatchType):
 
 
 class BayModel(base.APIBase):
-    """API representation of a baymodel.
+    """API representation of a Baymodel.
 
     This class enforces type checking and value constraints, and converts
-    between the internal object model and the API representation of a baymodel.
+    between the internal object model and the API representation of a Baymodel.
     """
 
     uuid = types.uuid
-    """Unique UUID for this baymodel"""
+    """Unique UUID for this Baymodel"""
 
     name = wtypes.StringType(min_length=1, max_length=255)
-    """The name of the bay model"""
+    """The name of the Baymodel"""
 
     coe = wtypes.Enum(str, *fields.BayType.ALL, mandatory=True)
     """The Container Orchestration Engine for this bay model"""
 
     image_id = wsme.wsattr(wtypes.StringType(min_length=1, max_length=255),
                            mandatory=True)
-    """The image name or UUID to use as a base image for this baymodel"""
+    """The image name or UUID to use as a base image for this Baymodel"""
 
     flavor_id = wtypes.StringType(min_length=1, max_length=255)
-    """The flavor of this bay model"""
+    """The flavor of this Baymodel"""
 
     master_flavor_id = wtypes.StringType(min_length=1, max_length=255)
-    """The flavor of the master node for this bay model"""
+    """The flavor of the master node for this Baymodel"""
 
     dns_nameserver = wtypes.IPv4AddressType()
     """The DNS nameserver address"""
@@ -76,13 +76,13 @@ class BayModel(base.APIBase):
     """The name or id of the nova ssh keypair"""
 
     external_network_id = wtypes.StringType(min_length=1, max_length=255)
-    """The external network to attach the Bay"""
+    """The external network to attach to the Bay"""
 
     fixed_network = wtypes.StringType(min_length=1, max_length=255)
-    """The fixed network name to attach the Bay"""
+    """The fixed network name to attach to the Bay"""
 
     fixed_subnet = wtypes.StringType(min_length=1, max_length=255)
-    """The fixed subnet name to attach the Bay"""
+    """The fixed subnet name to attach to the Bay"""
 
     network_driver = wtypes.StringType(min_length=1, max_length=255)
     """The name of the driver used for instantiating container networks"""
@@ -94,10 +94,10 @@ class BayModel(base.APIBase):
     """The size in GB of the docker volume"""
 
     cluster_distro = wtypes.StringType(min_length=1, max_length=255)
-    """The Cluster distro for the bay, ex - coreos, fedora-atomic."""
+    """The Cluster distro for the bay, e.g. coreos, fedora-atomic, etc."""
 
     links = wsme.wsattr([link.Link], readonly=True)
-    """A list containing a self link and associated baymodel links"""
+    """A list containing a self link and associated Baymodel links"""
 
     http_proxy = wtypes.StringType(min_length=1, max_length=255)
     """Address of a proxy that will receive all HTTP requests and relay them.
@@ -110,12 +110,12 @@ class BayModel(base.APIBase):
        """
 
     no_proxy = wtypes.StringType(min_length=1, max_length=255)
-    """A comma separated list of ips for which proxies should not
+    """A comma separated list of IPs for which proxies should not be
        used in the bay
        """
 
     volume_driver = wtypes.StringType(min_length=1, max_length=255)
-    """The name of the driver used for instantiating container volume driver"""
+    """The name of the driver used for instantiating container volumes"""
 
     registry_enabled = wsme.wsattr(types.boolean, default=False)
     """Indicates whether the docker registry is enabled"""
@@ -124,18 +124,18 @@ class BayModel(base.APIBase):
     """One or more key/value pairs"""
 
     tls_disabled = wsme.wsattr(types.boolean, default=False)
-    """Indicates whether the TLS should be disabled"""
+    """Indicates whether TLS should be disabled"""
 
     public = wsme.wsattr(types.boolean, default=False)
-    """Indicates whether the baymodel is public or not."""
+    """Indicates whether the Baymodel is public or not."""
 
     server_type = wsme.wsattr(wtypes.StringType(min_length=1,
                                                 max_length=255),
                               default='vm')
-    """Server type for this bay model """
+    """Server type for this bay model"""
 
     insecure_registry = wtypes.StringType(min_length=1, max_length=255)
-    """insecure registry url when create baymodel """
+    """Insecure registry URL when creating a Baymodel"""
 
     docker_storage_driver = wtypes.Enum(str, *fields.DockerStorageDriver.ALL)
     """Docker storage driver"""
@@ -207,10 +207,10 @@ class BayModel(base.APIBase):
 
 
 class BayModelCollection(collection.Collection):
-    """API representation of a collection of baymodels."""
+    """API representation of a collection of Baymodels."""
 
     baymodels = [BayModel]
-    """A list containing baymodels objects"""
+    """A list containing Baymodel objects"""
 
     def __init__(self, **kwargs):
         self._type = 'baymodels'
@@ -231,7 +231,7 @@ class BayModelCollection(collection.Collection):
 
 
 class BayModelsController(base.Controller):
-    """REST controller for BayModels."""
+    """REST controller for Baymodels."""
 
     _custom_actions = {
         'detail': ['GET'],
@@ -268,7 +268,7 @@ class BayModelsController(base.Controller):
                    wtypes.text)
     def get_all(self, marker=None, limit=None, sort_key='id',
                 sort_dir='asc'):
-        """Retrieve a list of baymodels.
+        """Retrieve a list of Baymodels.
 
         :param marker: pagination marker for large data sets.
         :param limit: maximum number of resources to return in a single result.
@@ -285,7 +285,7 @@ class BayModelsController(base.Controller):
                    wtypes.text)
     def detail(self, marker=None, limit=None, sort_key='id',
                sort_dir='asc'):
-        """Retrieve a list of baymodels with detail.
+        """Retrieve a list of Baymodels with detail.
 
         :param marker: pagination marker for large data sets.
         :param limit: maximum number of resources to return in a single result.
@@ -307,7 +307,7 @@ class BayModelsController(base.Controller):
 
     @expose.expose(BayModel, types.uuid_or_name)
     def get_one(self, baymodel_ident):
-        """Retrieve information about the given baymodel.
+        """Retrieve information about the given Baymodel.
 
         :param baymodel_ident: UUID or logical name of a baymodel.
         """
@@ -324,9 +324,9 @@ class BayModelsController(base.Controller):
     @validation.enforce_volume_driver_types_create()
     @validation.enforce_volume_storage_size_create()
     def post(self, baymodel):
-        """Create a new baymodel.
+        """Create a new Baymodel.
 
-        :param baymodel: a baymodel within the request body.
+        :param baymodel: a Baymodel within the request body.
         """
         context = pecan.request.context
         policy.enforce(context, 'baymodel:create',
@@ -363,10 +363,10 @@ class BayModelsController(base.Controller):
     @validation.enforce_network_driver_types_update()
     @validation.enforce_volume_driver_types_update()
     def patch(self, baymodel_ident, patch):
-        """Update an existing baymodel.
+        """Update an existing Baymodel.
 
-        :param baymodel_ident: UUID or logic name of a baymodel.
-        :param patch: a json PATCH document to apply to this baymodel.
+        :param baymodel_ident: UUID or logic name of a Baymodel.
+        :param patch: a json PATCH document to apply to this Baymodel.
         """
         context = pecan.request.context
         baymodel = api_utils.get_resource('BayModel', baymodel_ident)
@@ -405,9 +405,9 @@ class BayModelsController(base.Controller):
 
     @expose.expose(None, types.uuid_or_name, status_code=204)
     def delete(self, baymodel_ident):
-        """Delete a baymodel.
+        """Delete a Baymodel.
 
-        :param baymodel_ident: UUID or logical name of a baymodel.
+        :param baymodel_ident: UUID or logical name of a Baymodel.
         """
         context = pecan.request.context
         baymodel = api_utils.get_resource('BayModel', baymodel_ident)
