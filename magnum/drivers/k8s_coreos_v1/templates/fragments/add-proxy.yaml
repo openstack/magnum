@@ -1,0 +1,46 @@
+#cloud-config
+write_files:
+  - path: /etc/systemd/system/add-proxy.service
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Configure proxy
+
+      [Service]
+      Type=oneshot
+      ExecStart=/etc/sysconfig/add-proxy.sh
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/sysconfig/add-proxy.sh
+    owner: "root:root"
+    permissions: "0755"
+    content: |
+      #!/bin/sh
+
+      . /etc/sysconfig/heat-params
+
+      DOCKER_PROXY_CONF=/etc/systemd/system/docker.service.d/http-proxy.conf
+      ENVIRONMENT=/etc/environment
+
+      mkdir -p /etc/systemd/system/docker.service.d
+
+      if [ -n "$HTTP_PROXY" ]; then
+          cat <<EOF | sed "s/^ *//" > $DOCKER_PROXY_CONF
+          HTTP_PROXY=$HTTP_PROXY
+      EOF
+        echo "http_proxy=$HTTP_PROXY" >> $ENVIRONMENT
+
+        systemctl daemon-reload
+        systemctl --no-block restart docker.service
+      fi
+
+      if [ -n "$HTTPS_PROXY" ]; then
+        echo "https_proxy=$HTTPS_PROXY" >> $ENVIRONMENT
+      fi
+
+      if [ -n "$NO_PROXY" ]; then
+          echo "no_proxy=$NO_PROXY" >> ENVIRONMENT
+      fi
