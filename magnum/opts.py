@@ -15,12 +15,12 @@
 
 import itertools
 
-import magnum.api.app
 import magnum.api.validation
 import magnum.common.cert_manager
 from magnum.common.cert_manager import local_cert_manager
 import magnum.common.clients
 import magnum.common.exception
+import magnum.common.rpc_service
 import magnum.common.service
 import magnum.common.x509.config
 import magnum.conductor.config
@@ -37,7 +37,6 @@ def list_opts():
                          magnum.common.rpc_service.periodic_opts,
                          magnum.common.service.service_opts,
                          )),
-        ('api', magnum.api.app.API_SERVICE_OPTS),
         ('cluster', magnum.drivers.common.template_def.template_def_opts),
         ('conductor', magnum.conductor.config.SERVICE_OPTS),
         ('database', magnum.db.sql_opts),
