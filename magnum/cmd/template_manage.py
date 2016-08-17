@@ -17,12 +17,12 @@ import sys
 from cliff import app
 from cliff import commandmanager
 from cliff import lister
-from oslo_config import cfg
 
+import magnum.conf
 from magnum.drivers.common import template_def as tdef
 from magnum import version
 
-CONF = cfg.CONF
+CONF = magnum.conf.CONF
 
 
 def is_enabled(name):

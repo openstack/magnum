@@ -15,10 +15,10 @@
 import abc
 import mock
 from neutronclient.common import exceptions as n_exception
-from oslo_config import cfg
 import six
 
 from magnum.common import exception
+import magnum.conf
 from magnum.drivers.common import template_def as cmn_tdef
 from magnum.drivers.k8s_coreos_v1 import template_def as k8s_coreos_tdef
 from magnum.drivers.k8s_fedora_atomic_v1 import template_def as k8sa_tdef
@@ -28,6 +28,8 @@ from magnum.drivers.swarm_fedora_atomic_v1 import template_def as swarm_tdef
 from magnum.tests import base
 
 from requests import exceptions as req_exceptions
+
+CONF = magnum.conf.CONF
 
 
 class TemplateDefinitionTestCase(base.TestCase):
@@ -110,9 +112,9 @@ class TemplateDefinitionTestCase(base.TestCase):
                           'vm', 'not_supported', 'kubernetes')
 
     def test_get_definition_not_enabled(self):
-        cfg.CONF.set_override('enabled_definitions',
-                              ['magnum_vm_atomic_k8s'],
-                              group='cluster')
+        CONF.set_override('enabled_definitions',
+                          ['magnum_vm_atomic_k8s'],
+                          group='cluster')
         self.assertRaises(exception.ClusterTypeNotEnabled,
                           cmn_tdef.TemplateDefinition.get_template_definition,
                           'vm', 'coreos', 'kubernetes')
@@ -391,9 +393,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
 
     @mock.patch('requests.get')
     def test_k8s_get_discovery_url(self, mock_get):
-        cfg.CONF.set_override('etcd_discovery_service_endpoint_format',
-                              'http://etcd/test?size=%(size)d',
-                              group='cluster')
+        CONF.set_override('etcd_discovery_service_endpoint_format',
+                          'http://etcd/test?size=%(size)d',
+                          group='cluster')
         expected_discovery_url = 'http://etcd/token'
         mock_resp = mock.MagicMock()
         mock_resp.text = expected_discovery_url
@@ -411,9 +413,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
 
     @mock.patch('requests.get')
     def test_k8s_get_discovery_url_fail(self, mock_get):
-        cfg.CONF.set_override('etcd_discovery_service_endpoint_format',
-                              'http://etcd/test?size=%(size)d',
-                              group='cluster')
+        CONF.set_override('etcd_discovery_service_endpoint_format',
+                          'http://etcd/test?size=%(size)d',
+                          group='cluster')
         mock_get.side_effect = req_exceptions.RequestException()
         mock_cluster = mock.MagicMock()
         mock_cluster.master_count = 10
@@ -793,9 +795,9 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
 
     @mock.patch('requests.get')
     def test_swarm_get_discovery_url(self, mock_get):
-        cfg.CONF.set_override('etcd_discovery_service_endpoint_format',
-                              'http://etcd/test?size=%(size)d',
-                              group='cluster')
+        CONF.set_override('etcd_discovery_service_endpoint_format',
+                          'http://etcd/test?size=%(size)d',
+                          group='cluster')
         expected_discovery_url = 'http://etcd/token'
         mock_resp = mock.MagicMock()
         mock_resp.text = expected_discovery_url

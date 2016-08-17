@@ -25,7 +25,6 @@ import magnum.common.x509.config
 import magnum.conductor.config
 import magnum.conductor.handlers.cluster_conductor
 import magnum.db
-import magnum.drivers.common.template_def
 
 
 def list_opts():
@@ -36,7 +35,6 @@ def list_opts():
                          magnum.common.rpc_service.periodic_opts,
                          magnum.common.service.service_opts,
                          )),
-        ('cluster', magnum.drivers.common.template_def.template_def_opts),
         ('conductor', magnum.conductor.config.SERVICE_OPTS),
         ('database', magnum.db.sql_opts),
         ('docker', magnum.common.docker_utils.docker_opts),
