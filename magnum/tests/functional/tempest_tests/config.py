@@ -54,7 +54,9 @@ MagnumGroup = [
 
     cfg.StrOpt("csr_location",
                default="/opt/stack/new/magnum/default.csr",
-               help="CSR location for certificates."),
+               deprecated_for_removal=True,
+               help="CSR location for certificates. This option is no "
+               "longer used for anything."),
 
     cfg.StrOpt("dns_nameserver",
                default="8.8.8.8",
