@@ -16,11 +16,13 @@ from heatclient import client as heatclient
 import mock
 from neutronclient.v2_0 import client as neutronclient
 from novaclient import client as novaclient
-from oslo_config import cfg
 
 from magnum.common import clients
 from magnum.common import exception
+import magnum.conf
 from magnum.tests import base
+
+CONF = magnum.conf.CONF
 
 
 class ClientsTest(base.BaseTestCase):
@@ -28,14 +30,14 @@ class ClientsTest(base.BaseTestCase):
     def setUp(self):
         super(ClientsTest, self).setUp()
 
-        cfg.CONF.set_override('auth_uri', 'http://server.test:5000/v2.0',
-                              group='keystone_authtoken')
-        cfg.CONF.import_opt('api_version', 'magnum.common.clients',
-                            group='nova_client')
-        cfg.CONF.import_opt('api_version', 'magnum.common.clients',
-                            group='heat_client')
-        cfg.CONF.import_opt('api_version', 'magnum.common.clients',
-                            group='glance_client')
+        CONF.set_override('auth_uri', 'http://server.test:5000/v2.0',
+                          group='keystone_authtoken')
+        CONF.import_opt('api_version', 'magnum.common.clients',
+                        group='nova_client')
+        CONF.import_opt('api_version', 'magnum.common.clients',
+                        group='heat_client')
+        CONF.import_opt('api_version', 'magnum.common.clients',
+                        group='glance_client')
 
     @mock.patch.object(clients.OpenStackClients, 'keystone')
     def test_url_for(self, mock_keystone):
@@ -50,10 +52,10 @@ class ClientsTest(base.BaseTestCase):
     def test_magnum_url(self, mock_keystone):
         fake_region = 'fake_region'
         fake_endpoint = 'fake_endpoint'
-        cfg.CONF.set_override('region_name', fake_region,
-                              group='magnum_client')
-        cfg.CONF.set_override('endpoint_type', fake_endpoint,
-                              group='magnum_client')
+        CONF.set_override('region_name', fake_region,
+                          group='magnum_client')
+        CONF.set_override('endpoint_type', fake_endpoint,
+                          group='magnum_client')
         obj = clients.OpenStackClients(None)
         obj.magnum_url()
 
@@ -76,7 +78,7 @@ class ClientsTest(base.BaseTestCase):
         obj._heat = None
         obj.heat()
         mock_call.assert_called_once_with(
-            cfg.CONF.heat_client.api_version,
+            CONF.heat_client.api_version,
             endpoint='url_from_keystone', username=None,
             cert_file=None, token='3bcc3d3a03f44e3d8377f9247b0ad155',
             auth_url='keystone_url', ca_file=None, key_file=None,
@@ -89,7 +91,7 @@ class ClientsTest(base.BaseTestCase):
         self._test_clients_heat(None)
 
     def test_clients_heat_region(self):
-        cfg.CONF.set_override('region_name', 'myregion', group='heat_client')
+        CONF.set_override('region_name', 'myregion', group='heat_client')
         self._test_clients_heat('myregion')
 
     def test_clients_heat_noauth(self):
@@ -133,7 +135,7 @@ class ClientsTest(base.BaseTestCase):
         obj._glance = None
         obj.glance()
         mock_call.assert_called_once_with(
-            cfg.CONF.glance_client.api_version,
+            CONF.glance_client.api_version,
             endpoint='url_from_keystone', username=None,
             token='3bcc3d3a03f44e3d8377f9247b0ad155',
             auth_url='keystone_url',
@@ -146,7 +148,7 @@ class ClientsTest(base.BaseTestCase):
         self._test_clients_glance(None)
 
     def test_clients_glance_region(self):
-        cfg.CONF.set_override('region_name', 'myregion', group='glance_client')
+        CONF.set_override('region_name', 'myregion', group='glance_client')
         self._test_clients_glance('myregion')
 
     def test_clients_glance_noauth(self):
@@ -203,8 +205,8 @@ class ClientsTest(base.BaseTestCase):
         self._test_clients_barbican(None)
 
     def test_clients_barbican_region(self):
-        cfg.CONF.set_override('region_name', 'myregion',
-                              group='barbican_client')
+        CONF.set_override('region_name', 'myregion',
+                          group='barbican_client')
         self._test_clients_barbican('myregion')
 
     def test_clients_barbican_noauth(self):
@@ -248,7 +250,7 @@ class ClientsTest(base.BaseTestCase):
         obj = clients.OpenStackClients(con)
         obj._nova = None
         obj.nova()
-        mock_call.assert_called_once_with(cfg.CONF.nova_client.api_version,
+        mock_call.assert_called_once_with(CONF.nova_client.api_version,
                                           auth_token=con.auth_token,
                                           cacert=None, insecure=False)
         mock_url.assert_called_once_with(service_type='compute',
@@ -259,7 +261,7 @@ class ClientsTest(base.BaseTestCase):
         self._test_clients_nova(None)
 
     def test_clients_nova_region(self):
-        cfg.CONF.set_override('region_name', 'myregion', group='nova_client')
+        CONF.set_override('region_name', 'myregion', group='nova_client')
         self._test_clients_nova('myregion')
 
     def test_clients_nova_noauth(self):
@@ -295,8 +297,8 @@ class ClientsTest(base.BaseTestCase):
     def _test_clients_neutron(self, expected_region_name, mock_auth, mock_url,
                               mock_call):
         fake_endpoint_type = 'fake_endpoint_type'
-        cfg.CONF.set_override('endpoint_type', fake_endpoint_type,
-                              group='neutron_client')
+        CONF.set_override('endpoint_type', fake_endpoint_type,
+                          group='neutron_client')
         mock_auth.__get__ = mock.Mock(return_value="keystone_url")
         con = mock.MagicMock()
         con.auth_token = "3bcc3d3a03f44e3d8377f9247b0ad155"
@@ -319,8 +321,8 @@ class ClientsTest(base.BaseTestCase):
         self._test_clients_neutron(None)
 
     def test_clients_neutron_region(self):
-        cfg.CONF.set_override('region_name', 'myregion',
-                              group='neutron_client')
+        CONF.set_override('region_name', 'myregion',
+                          group='neutron_client')
         self._test_clients_neutron('myregion')
 
     def test_clients_neutron_noauth(self):
