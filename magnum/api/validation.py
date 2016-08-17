@@ -14,56 +14,17 @@
 # limitations under the License.
 
 import decorator
-from oslo_config import cfg
+
 from oslo_utils import uuidutils
 import pecan
 
 from magnum.api import utils as api_utils
 from magnum.common import exception
+import magnum.conf
 from magnum.i18n import _
 from magnum import objects
 
-
-cluster_template_opts = [
-    cfg.ListOpt('kubernetes_allowed_network_drivers',
-                default=['all'],
-                help=_("Allowed network drivers for kubernetes "
-                       "cluster-templates. Use 'all' keyword to allow all "
-                       "drivers supported for kubernetes cluster-templates. "
-                       "Supported network drivers include flannel."),
-                deprecated_group='baymodel'),
-    cfg.StrOpt('kubernetes_default_network_driver',
-               default='flannel',
-               help=_("Default network driver for kubernetes "
-                      "cluster-templates."),
-               deprecated_group='baymodel'),
-    cfg.ListOpt('swarm_allowed_network_drivers',
-                default=['all'],
-                help=_("Allowed network drivers for docker swarm "
-                       "cluster-templates. Use 'all' keyword to allow all "
-                       "drivers supported for swarm cluster-templates. "
-                       "Supported network drivers include docker and flannel."
-                       ),
-                deprecated_group='baymodel'),
-    cfg.StrOpt('swarm_default_network_driver',
-               default='docker',
-               help=_("Default network driver for docker swarm "
-                      "cluster-templates."),
-               deprecated_group='baymodel'),
-    cfg.ListOpt('mesos_allowed_network_drivers',
-                default=['all'],
-                help=_("Allowed network drivers for mesos cluster-templates. "
-                       "Use 'all' keyword to allow all drivers supported "
-                       "for mesos cluster-templates. Supported network "
-                       "drivers include docker."),
-                deprecated_group='baymodel'),
-    cfg.StrOpt('mesos_default_network_driver',
-               default='docker',
-               help=_("Default network driver for mesos cluster-templates."),
-               deprecated_group='baymodel'),
-]
-cfg.CONF.register_opts(cluster_template_opts, group='cluster_template')
-
+CONF = magnum.conf.CONF
 
 cluster_update_allowed_properties = set(['node_count'])
 
@@ -297,9 +258,9 @@ class K8sValidator(Validator):
     supported_network_drivers = ['flannel']
     supported_server_types = ['vm', 'bm']
     allowed_network_drivers = (
-        cfg.CONF.cluster_template.kubernetes_allowed_network_drivers)
+        CONF.cluster_template.kubernetes_allowed_network_drivers)
     default_network_driver = (
-        cfg.CONF.cluster_template.kubernetes_default_network_driver)
+        CONF.cluster_template.kubernetes_default_network_driver)
 
     supported_volume_driver = ['cinder']
 
@@ -308,9 +269,9 @@ class SwarmValidator(Validator):
 
     supported_network_drivers = ['docker', 'flannel']
     supported_server_types = ['vm', 'bm']
-    allowed_network_drivers = (cfg.CONF.cluster_template.
+    allowed_network_drivers = (CONF.cluster_template.
                                swarm_allowed_network_drivers)
-    default_network_driver = (cfg.CONF.cluster_template.
+    default_network_driver = (CONF.cluster_template.
                               swarm_default_network_driver)
 
     supported_volume_driver = ['rexray']
@@ -320,9 +281,9 @@ class MesosValidator(Validator):
 
     supported_network_drivers = ['docker']
     supported_server_types = ['vm', 'bm']
-    allowed_network_drivers = (cfg.CONF.cluster_template.
+    allowed_network_drivers = (CONF.cluster_template.
                                mesos_allowed_network_drivers)
-    default_network_driver = (cfg.CONF.cluster_template.
+    default_network_driver = (CONF.cluster_template.
                               mesos_default_network_driver)
 
     supported_volume_driver = ['rexray']

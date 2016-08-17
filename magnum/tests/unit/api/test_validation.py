@@ -14,14 +14,16 @@
 # limitations under the License.
 
 import mock
-from oslo_config import cfg
 from six.moves import reload_module
 
 from magnum.api import validation as v
 from magnum.common import exception
+import magnum.conf
 from magnum import objects
 from magnum.tests import base
 from magnum.tests.unit.objects import utils as obj_utils
+
+CONF = magnum.conf.CONF
 
 
 class TestValidation(base.BaseTestCase):
@@ -181,7 +183,7 @@ class TestValidation(base.BaseTestCase):
             pass
 
         for key, val in network_driver_config_dict.items():
-            cfg.CONF.set_override(key, val, 'cluster_template')
+            CONF.set_override(key, val, 'cluster_template')
 
         cluster_template = mock.MagicMock()
         cluster_template.name = 'test_cluster_template'
@@ -269,7 +271,7 @@ class TestValidation(base.BaseTestCase):
             pass
 
         for key, val in network_driver_config_dict.items():
-            cfg.CONF.set_override(key, val, 'cluster_template')
+            CONF.set_override(key, val, 'cluster_template')
 
         cluster_template_ident = 'test_uuid_or_name'
 
