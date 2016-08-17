@@ -11,22 +11,21 @@
 #    limitations under the License.
 
 """API for interfacing with Magnum Backend."""
-from oslo_config import cfg
 
 from magnum.common import rpc_service
+import magnum.conf
 
+CONF = magnum.conf.CONF
 
 # The Backend API class serves as a AMQP client for communicating
 # on a topic exchange specific to the conductors.  This allows the ReST
 # API to trigger operations on the conductors
 
+
 class API(rpc_service.API):
     def __init__(self, transport=None, context=None, topic=None):
-        if topic is None:
-            cfg.CONF.import_opt('topic', 'magnum.conductor.config',
-                                group='conductor')
         super(API, self).__init__(transport, context,
-                                  topic=cfg.CONF.conductor.topic)
+                                  topic=CONF.conductor.topic)
 
     # Cluster Operations
 
