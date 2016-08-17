@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import mock
 from mock import patch
 
 from magnum.conductor import utils
@@ -26,6 +27,12 @@ class TestConductorUtils(base.TestCase):
         utils.retrieve_bay(expected_context, expected_bay_uuid)
         mock_bay_get_by_uuid.assert_called_once_with(expected_context,
                                                      expected_bay_uuid)
+
+    def get_fake_id(self):
+        return '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
+
+    def _get_type_uri(self):
+        return 'service/security/account/user'
 
     @patch('magnum.objects.BayModel.get_by_uuid')
     def test_retrieve_baymodel(self, mock_baymodel_get_by_uuid):
@@ -64,3 +71,135 @@ class TestConductorUtils(base.TestCase):
         self.assertEqual('5d12f6fd-a196-4bf0-ae4c-1f639a523a52', bay_uuid)
         mock_uuid_like.return_value = True
         mock_bay_get_by_name.assert_not_called()
+
+    def _get_heat_stacks_get_mock_obj(self, status):
+        mock_stack = mock.MagicMock()
+        mock_osc = mock.MagicMock()
+        mock_stack_obj = mock.MagicMock()
+        mock_stack_obj.stack_status = status
+        stack_get = mock.MagicMock()
+        stack_get.get.return_value = mock_stack_obj
+        mock_stack.stacks = stack_get
+        mock_osc.heat.return_value = mock_stack
+        return mock_osc
+
+    @patch('magnum.conductor.utils.retrieve_bay')
+    @patch('magnum.conductor.utils.clients.OpenStackClients')
+    def test_object_has_stack_invalid_status(self, mock_oscs,
+                                             mock_retrieve_bay):
+
+        mock_osc = self._get_heat_stacks_get_mock_obj("INVALID_STATUS")
+        mock_oscs.return_value = mock_osc
+        self.assertTrue(utils.object_has_stack('context', self.get_fake_id()))
+        mock_retrieve_bay.assert_called_with('context', self.get_fake_id())
+
+    @patch('magnum.conductor.utils.retrieve_bay')
+    @patch('magnum.conductor.utils.clients.OpenStackClients')
+    def test_object_has_stack_delete_in_progress(self, mock_oscs,
+                                                 mock_retrieve_bay):
+
+        mock_osc = self._get_heat_stacks_get_mock_obj("DELETE_IN_PROGRESS")
+        mock_oscs.return_value = mock_osc
+        self.assertFalse(utils.object_has_stack('context', self.get_fake_id()))
+        mock_retrieve_bay.assert_called_with('context', self.get_fake_id())
+
+    @patch('magnum.conductor.utils.retrieve_bay')
+    @patch('magnum.conductor.utils.clients.OpenStackClients')
+    def test_object_has_stack_delete_complete_status(self, mock_oscs,
+                                                     mock_retrieve_bay):
+        mock_osc = self._get_heat_stacks_get_mock_obj("DELETE_COMPLETE")
+        mock_oscs.return_value = mock_osc
+        self.assertFalse(utils.object_has_stack('context', self.get_fake_id()))
+        mock_retrieve_bay.assert_called_with('context', self.get_fake_id())
+
+    @patch('magnum.objects.Bay.get_by_uuid')
+    def test_retrieve_bay_uuid(self, mock_get_by_uuid):
+        mock_get_by_uuid.return_value = True
+        utils.retrieve_bay('context', '5d12f6fd-a196-4bf0-ae4c-1f639a523a52')
+        self.assertTrue(mock_get_by_uuid.called)
+
+    @patch('magnum.objects.Bay.get_by_name')
+    def test_retrieve_bay_name(self, mock_get_by_name):
+        mock_get_by_name.return_value = mock.MagicMock()
+        utils.retrieve_bay('context', '1')
+        self.assertTrue(mock_get_by_name.called)
+
+    @patch('magnum.conductor.utils.resource.Resource')
+    def test_get_request_audit_info_with_none_context(self, mock_resource):
+        mock_resource.return_value = 'resource'
+        result = utils._get_request_audit_info(context=None)
+        self.assertTrue(mock_resource.called)
+        self.assertEqual(result, 'resource')
+
+    def _assert_for_user_project_domain_resource(self, result, ctxt, mock_res):
+        mock_res.assert_called_once_with(typeURI=self._get_type_uri())
+        self.assertEqual(result.user_id, ctxt.user_id)
+        self.assertEqual(result.project_id, ctxt.project_id)
+        self.assertEqual(result.domain_id, ctxt.domain_id)
+
+    def _get_context(self, user_id=None, project_id=None, domain_id=None):
+        context = self.mock_make_context()
+        context.user_id = user_id
+        context.project_id = project_id
+        context.domain_id = domain_id
+        return context
+
+    @patch('magnum.conductor.utils.resource.Resource')
+    def test_get_request_audit_info_with_none_userid(self, mock_resource):
+        context = self._get_context(project_id='test_project_id',
+                                    domain_id='test_domain_id')
+
+        mock_resource.return_value = context
+        result = utils._get_request_audit_info(context)
+        self._assert_for_user_project_domain_resource(result, context,
+                                                      mock_resource)
+
+    @patch('magnum.conductor.utils.resource.Resource')
+    def test_get_request_audit_info_with_none_projectid(self, mock_resource):
+        context = self._get_context(user_id='test_user_id',
+                                    domain_id='test_domain_id')
+
+        mock_resource.return_value = context
+        result = utils._get_request_audit_info(context)
+        self._assert_for_user_project_domain_resource(result, context,
+                                                      mock_resource)
+
+    @patch('magnum.conductor.utils.resource.Resource')
+    def test_get_request_audit_info_with_none_domainid(self, mock_resource):
+        context = self._get_context(user_id='test_user_id',
+                                    project_id='test_project_id')
+
+        mock_resource.return_value = context
+        result = utils._get_request_audit_info(context)
+        self._assert_for_user_project_domain_resource(result, context,
+                                                      mock_resource)
+
+    @patch('magnum.conductor.utils.resource.Resource')
+    def test_get_request_audit_info_with_none_domainid_userid(self,
+                                                              mock_resource):
+
+        context = self._get_context(project_id='test_project_id')
+        mock_resource.return_value = context
+        result = utils._get_request_audit_info(context)
+        self._assert_for_user_project_domain_resource(result, context,
+                                                      mock_resource)
+
+    @patch('magnum.conductor.utils.resource.Resource')
+    def test_get_request_audit_info_with_none_userid_projectid(self,
+                                                               mock_resource):
+
+        context = self._get_context(domain_id='test_domain_id')
+        mock_resource.return_value = context
+        result = utils._get_request_audit_info(context)
+        self._assert_for_user_project_domain_resource(result, context,
+                                                      mock_resource)
+
+    @patch('magnum.conductor.utils.resource.Resource')
+    def test_get_request_audit_info_with_none_domain_project_id(self,
+                                                                mock_resource):
+
+        context = self._get_context(user_id='test_user_id')
+        mock_resource.return_value = context
+        result = utils._get_request_audit_info(context)
+        self._assert_for_user_project_domain_resource(result, context,
+                                                      mock_resource)
