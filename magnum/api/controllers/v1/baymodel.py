@@ -145,6 +145,9 @@ class BayModel(base.APIBase):
        nodes or not.
        """
 
+    floating_ip_enabled = wsme.wsattr(types.boolean, default=True)
+    """Indicates whether created bays should have a floating ip or not."""
+
     def __init__(self, **kwargs):
         self.fields = []
         for field in objects.BayModel.fields:
@@ -197,7 +200,9 @@ class BayModel(base.APIBase):
             created_at=timeutils.utcnow(),
             updated_at=timeutils.utcnow(),
             public=False,
-            master_lb_enabled=False)
+            master_lb_enabled=False,
+            floating_ip_enabled=True,
+        )
         return cls._convert_with_links(sample, 'http://localhost:9511')
 
 

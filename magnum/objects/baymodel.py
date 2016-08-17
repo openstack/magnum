@@ -37,7 +37,9 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.11: Added 'insecure_registry' field
     # Version 1.12: Added 'docker_storage_driver' field
     # Version 1.13: Added 'master_lb_enabled' field
-    VERSION = '1.14'
+    # Version 1.14: Added 'fixed_subnet' field
+    # Version 1.15: Added 'floating_ip_enabled' field
+    VERSION = '1.15'
 
     dbapi = dbapi.get_instance()
 
@@ -73,6 +75,7 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
         'server_type': fields.StringField(nullable=True),
         'insecure_registry': fields.StringField(nullable=True),
         'master_lb_enabled': fields.BooleanField(default=False),
+        'floating_ip_enabled': fields.BooleanField(default=True),
     }
 
     @staticmethod
