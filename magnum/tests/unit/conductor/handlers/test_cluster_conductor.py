@@ -19,18 +19,20 @@ import six
 from heatclient import exc
 import mock
 from mock import patch
-from oslo_config import cfg
 from oslo_service import loopingcall
 from pycadf import cadftaxonomy as taxonomy
 
 from magnum.common import exception
 from magnum.conductor.handlers import cluster_conductor
+import magnum.conf
 from magnum import objects
 from magnum.objects.fields import ClusterStatus as cluster_status
 from magnum.tests import base
 from magnum.tests import fake_notifier
 from magnum.tests.unit.db import base as db_base
 from magnum.tests.unit.db import utils
+
+CONF = magnum.conf.CONF
 
 
 class TestHandler(db_base.DbTestCase):
@@ -689,14 +691,14 @@ class TestHeatPoller(base.TestCase):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = cluster_status.DELETE_IN_PROGRESS
-        poller.attempts = cfg.CONF.cluster_heat.max_attempts
+        poller.attempts = CONF.cluster_heat.max_attempts
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
     def test_poll_create_in_prog_max_att_reached_no_timeout(self):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = cluster_status.CREATE_IN_PROGRESS
-        poller.attempts = cfg.CONF.cluster_heat.max_attempts
+        poller.attempts = CONF.cluster_heat.max_attempts
         mock_heat_stack.timeout_mins = None
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
@@ -704,7 +706,7 @@ class TestHeatPoller(base.TestCase):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = cluster_status.CREATE_IN_PROGRESS
-        poller.attempts = cfg.CONF.cluster_heat.max_attempts
+        poller.attempts = CONF.cluster_heat.max_attempts
         mock_heat_stack.timeout_mins = 60
         # since the timeout is set the max attempts gets ignored since
         # the timeout will eventually stop the poller either when
@@ -715,7 +717,7 @@ class TestHeatPoller(base.TestCase):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = cluster_status.CREATE_FAILED
-        poller.attempts = cfg.CONF.cluster_heat.max_attempts
+        poller.attempts = CONF.cluster_heat.max_attempts
         mock_heat_stack.timeout_mins = 60
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 

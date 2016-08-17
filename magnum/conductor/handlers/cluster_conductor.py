@@ -16,7 +16,6 @@ import os
 
 from heatclient.common import template_utils
 from heatclient import exc
-from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_service import loopingcall
 from oslo_utils import importutils
@@ -30,6 +29,7 @@ from magnum.conductor.handlers.common import cert_manager
 from magnum.conductor.handlers.common import trust_manager
 from magnum.conductor import scale_manager
 from magnum.conductor import utils as conductor_utils
+import magnum.conf
 from magnum.drivers.common import template_def
 from magnum.i18n import _
 from magnum.i18n import _LE
@@ -37,33 +37,7 @@ from magnum.i18n import _LI
 from magnum import objects
 from magnum.objects import fields
 
-
-cluster_heat_opts = [
-    cfg.IntOpt('max_attempts',
-               default=2000,
-               help=('Number of attempts to query the Heat stack for '
-                     'finding out the status of the created stack and '
-                     'getting template outputs.  This value is ignored '
-                     'during cluster creation if timeout is set as the poll '
-                     'will continue until cluster creation either ends '
-                     'or times out.'),
-               deprecated_group='bay_heat'),
-    cfg.IntOpt('wait_interval',
-               default=1,
-               help=('Sleep time interval between two attempts of querying '
-                     'the Heat stack.  This interval is in seconds.'),
-               deprecated_group='bay_heat'),
-    cfg.IntOpt('create_timeout',
-               default=60,
-               help=('The length of time to let cluster creation continue. '
-                     'This interval is in minutes. The default is 60 minutes.'
-                     ),
-               deprecated_group='bay_heat',
-               deprecated_name='bay_create_timeout')
-]
-
-CONF = cfg.CONF
-CONF.register_opts(cluster_heat_opts, group='cluster_heat')
+CONF = magnum.conf.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -108,7 +82,7 @@ def _create_stack(context, osc, cluster, create_timeout):
     else:
         # no create_timeout value was passed in to the request
         # so falling back on configuration file value
-        heat_timeout = cfg.CONF.cluster_heat.create_timeout
+        heat_timeout = CONF.cluster_heat.create_timeout
     fields = {
         'stack_name': stack_name,
         'parameters': heat_params,
@@ -270,7 +244,7 @@ class Handler(object):
     def _poll_and_check(self, osc, cluster):
         poller = HeatPoller(osc, cluster)
         lc = loopingcall.FixedIntervalLoopingCall(f=poller.poll_and_check)
-        lc.start(cfg.CONF.cluster_heat.wait_interval, True)
+        lc.start(CONF.cluster_heat.wait_interval, True)
 
 
 class HeatPoller(object):
@@ -338,18 +312,18 @@ class HeatPoller(object):
         # the loop will end when the stack completes or the timeout occurs
         if stack.stack_status == fields.ClusterStatus.CREATE_IN_PROGRESS:
             if (stack.timeout_mins is None and
-               self.attempts > cfg.CONF.cluster_heat.max_attempts):
+               self.attempts > CONF.cluster_heat.max_attempts):
                 LOG.error(_LE('Cluster check exit after %(attempts)s attempts,'
                               'stack_id: %(id)s, stack_status: %(status)s') %
-                          {'attempts': cfg.CONF.cluster_heat.max_attempts,
+                          {'attempts': CONF.cluster_heat.max_attempts,
                            'id': self.cluster.stack_id,
                            'status': stack.stack_status})
                 raise loopingcall.LoopingCallDone()
         else:
-            if self.attempts > cfg.CONF.cluster_heat.max_attempts:
+            if self.attempts > CONF.cluster_heat.max_attempts:
                 LOG.error(_LE('Cluster check exit after %(attempts)s attempts,'
                               'stack_id: %(id)s, stack_status: %(status)s') %
-                          {'attempts': cfg.CONF.cluster_heat.max_attempts,
+                          {'attempts': CONF.cluster_heat.max_attempts,
                            'id': self.cluster.stack_id,
                            'status': stack.stack_status})
                 raise loopingcall.LoopingCallDone()
