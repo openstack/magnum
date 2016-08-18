@@ -19,7 +19,7 @@ import os
 
 from oslo_config import cfg
 
-PATH_OPTS = [
+path_opts = [
     cfg.StrOpt('pybasedir',
                default=os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                     '../')),
@@ -31,9 +31,6 @@ PATH_OPTS = [
                default='$pybasedir',
                help="Top-level directory for maintaining magnum's state."),
 ]
-
-CONF = cfg.CONF
-CONF.register_opts(PATH_OPTS)
 
 
 def basedir_def(*args):
@@ -51,16 +48,11 @@ def state_path_def(*args):
     return os.path.join('$state_path', *args)
 
 
-def basedir_rel(*args):
-    """Return a path relative to $pybasedir."""
-    return os.path.join(CONF.pybasedir, *args)
+def register_opts(conf):
+    conf.register_opts(path_opts)
 
 
-def bindir_rel(*args):
-    """Return a path relative to $bindir."""
-    return os.path.join(CONF.bindir, *args)
-
-
-def state_path_rel(*args):
-    """Return a path relative to $state_path."""
-    return os.path.join(CONF.state_path, *args)
+def list_opts():
+    return {
+        "DEFAULT": path_opts
+    }
