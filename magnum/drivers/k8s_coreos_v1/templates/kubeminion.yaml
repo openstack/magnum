@@ -164,37 +164,37 @@ resources:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/write-kubeconfigs.yaml}
+      config: {get_file: fragments/write-kubeconfig.yaml}
 
   make_cert:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/make-cert-clients.yaml}
+      config: {get_file: fragments/make-cert-client.yaml}
 
   enable_network_service:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-network-services.yaml}
+      config: {get_file: fragments/enable-network-service.yaml}
 
   enable_kubelet:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-kubelet-minions.yaml}
+      config: {get_file: fragments/enable-kubelet-minion.yaml}
 
   enable_kube_proxy:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-kube-proxy-minions.yaml}
+      config: {get_file: fragments/enable-kube-proxy-minion.yaml}
 
   wc_notify:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/wc-notifys.yaml}
+      config: {get_file: fragments/wc-notify.yaml}
 
   kube_minion_init:
     type: OS::Heat::SoftwareConfig
