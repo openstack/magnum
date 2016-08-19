@@ -178,7 +178,7 @@ class TestBayConductorWithK8s(base.TestCase):
 
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['common/environments/no_master_lb.yaml'],
+            ['../../common/templates/environments/no_master_lb.yaml'],
             env_files)
 
     @patch('requests.get')
@@ -246,7 +246,7 @@ class TestBayConductorWithK8s(base.TestCase):
 
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['common/environments/no_master_lb.yaml'],
+            ['../../common/templates/environments/no_master_lb.yaml'],
             env_files)
 
     @patch('requests.get')
@@ -302,7 +302,7 @@ class TestBayConductorWithK8s(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['common/environments/no_master_lb.yaml'],
+            ['../../common/templates/environments/no_master_lb.yaml'],
             env_files)
 
     @patch('requests.get')
@@ -356,7 +356,7 @@ class TestBayConductorWithK8s(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['common/environments/no_master_lb.yaml'],
+            ['../../common/templates/environments/no_master_lb.yaml'],
             env_files)
 
     @patch('requests.get')
@@ -518,7 +518,7 @@ class TestBayConductorWithK8s(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['common/environments/no_master_lb.yaml'],
+            ['../../common/templates/environments/no_master_lb.yaml'],
             env_files)
         reqget.assert_called_once_with('http://etcd/test?size=1')
 

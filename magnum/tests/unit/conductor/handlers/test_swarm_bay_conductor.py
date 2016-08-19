@@ -128,7 +128,7 @@ class TestBayConductorWithSwarm(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['common/environments/no_master_lb.yaml'],
+            ['../../common/templates/environments/no_master_lb.yaml'],
             env_files)
 
     @patch('requests.get')
@@ -190,7 +190,7 @@ class TestBayConductorWithSwarm(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['common/environments/no_master_lb.yaml'],
+            ['../../common/templates/environments/no_master_lb.yaml'],
             env_files)
 
     @patch('requests.get')
@@ -244,7 +244,7 @@ class TestBayConductorWithSwarm(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['common/environments/no_master_lb.yaml'],
+            ['../../common/templates/environments/no_master_lb.yaml'],
             env_files)
 
     @patch('requests.get')
@@ -300,7 +300,7 @@ class TestBayConductorWithSwarm(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['common/environments/with_master_lb.yaml'],
+            ['../../common/templates/environments/with_master_lb.yaml'],
             env_files)
 
     @patch('requests.get')
@@ -357,7 +357,7 @@ class TestBayConductorWithSwarm(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['common/environments/with_master_lb.yaml'],
+            ['../../common/templates/environments/with_master_lb.yaml'],
             env_files)
 
     @patch('magnum.conductor.utils.retrieve_baymodel')
