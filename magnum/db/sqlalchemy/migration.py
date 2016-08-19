@@ -16,9 +16,11 @@
 
 import os
 
-from oslo_config import cfg
 from oslo_db.sqlalchemy.migration_cli import manager
 
+import magnum.conf
+
+CONF = magnum.conf.CONF
 _MANAGER = None
 
 
@@ -31,7 +33,7 @@ def get_manager():
             os.path.join(os.path.dirname(__file__), 'alembic'))
         migration_config = {'alembic_ini_path': alembic_path,
                             'alembic_repo_path': migrate_path,
-                            'db_url': cfg.CONF.database.connection}
+                            'db_url': CONF.database.connection}
         _MANAGER = manager.MigrationManager(migration_config)
 
     return _MANAGER

@@ -16,8 +16,8 @@
 """Magnum DB test base class."""
 
 import fixtures
-from oslo_config import cfg
 
+import magnum.conf
 from magnum.db import api as dbapi
 from magnum.db.sqlalchemy import api as sqla_api
 from magnum.db.sqlalchemy import migration
@@ -25,7 +25,7 @@ from magnum.db.sqlalchemy import models
 from magnum.tests import base
 
 
-CONF = cfg.CONF
+CONF = magnum.conf.CONF
 
 _DB_CACHE = None
 
