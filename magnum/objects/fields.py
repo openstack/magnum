@@ -95,6 +95,18 @@ class MagnumServiceState(fields.Enum):
             valid_values=MagnumServiceState.ALL)
 
 
+class MagnumServiceBinary(fields.Enum):
+    ALL = (
+        magnum_conductor
+    ) = (
+        'magnum-conductor',
+    )
+
+    def __init__(self):
+        super(MagnumServiceBinary, self).__init__(
+            valid_values=MagnumServiceBinary.ALL)
+
+
 class ListOfDictsField(fields.AutoTypedField):
     AUTO_TYPE = fields.List(fields.Dict(fields.FieldType()))
 
@@ -105,6 +117,10 @@ class BayStatusField(fields.BaseEnumField):
 
 class MagnumServiceField(fields.BaseEnumField):
     AUTO_TYPE = MagnumServiceState()
+
+
+class MagnumServiceBinaryField(fields.BaseEnumField):
+    AUTO_TYPE = MagnumServiceBinary()
 
 
 class ContainerStatusField(fields.BaseEnumField):
