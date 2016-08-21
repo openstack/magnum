@@ -157,7 +157,7 @@ class Connection(api.Connection):
         try:
             bay.save()
         except db_exc.DBDuplicateEntry:
-            raise exception.BayAlreadyExists(uuid=values['uuid'])
+            raise exception.ClusterAlreadyExists(uuid=values['uuid'])
         return bay
 
     def get_bay_by_id(self, context, bay_id):
@@ -167,7 +167,7 @@ class Connection(api.Connection):
         try:
             return query.one()
         except NoResultFound:
-            raise exception.BayNotFound(bay=bay_id)
+            raise exception.ClusterNotFound(cluster=bay_id)
 
     def get_bay_by_name(self, context, bay_name):
         query = model_query(models.Bay)
@@ -179,7 +179,7 @@ class Connection(api.Connection):
             raise exception.Conflict('Multiple bays exist with same name.'
                                      ' Please use the bay uuid instead.')
         except NoResultFound:
-            raise exception.BayNotFound(bay=bay_name)
+            raise exception.ClusterNotFound(cluster=bay_name)
 
     def get_bay_by_uuid(self, context, bay_uuid):
         query = model_query(models.Bay)
@@ -188,7 +188,7 @@ class Connection(api.Connection):
         try:
             return query.one()
         except NoResultFound:
-            raise exception.BayNotFound(bay=bay_uuid)
+            raise exception.ClusterNotFound(cluster=bay_uuid)
 
     def destroy_bay(self, bay_id):
         session = get_session()
@@ -199,7 +199,7 @@ class Connection(api.Connection):
             try:
                 query.one()
             except NoResultFound:
-                raise exception.BayNotFound(bay=bay_id)
+                raise exception.ClusterNotFound(cluster=bay_id)
 
             query.delete()
 
@@ -219,7 +219,7 @@ class Connection(api.Connection):
             try:
                 ref = query.with_lockmode('update').one()
             except NoResultFound:
-                raise exception.BayNotFound(bay=bay_id)
+                raise exception.ClusterNotFound(cluster=bay_id)
 
             if 'provision_state' in values:
                 values['provision_updated_at'] = timeutils.utcnow()
@@ -264,7 +264,7 @@ class Connection(api.Connection):
         try:
             baymodel.save()
         except db_exc.DBDuplicateEntry:
-            raise exception.BayModelAlreadyExists(uuid=values['uuid'])
+            raise exception.ClusterTemplateAlreadyExists(uuid=values['uuid'])
         return baymodel
 
     def get_baymodel_by_id(self, context, baymodel_id):
@@ -276,7 +276,8 @@ class Connection(api.Connection):
         try:
             return query.one()
         except NoResultFound:
-            raise exception.BayModelNotFound(baymodel=baymodel_id)
+            raise exception.ClusterTemplateNotFound(
+                clustertemplate=baymodel_id)
 
     def get_baymodel_by_uuid(self, context, baymodel_uuid):
         query = model_query(models.BayModel)
@@ -287,7 +288,8 @@ class Connection(api.Connection):
         try:
             return query.one()
         except NoResultFound:
-            raise exception.BayModelNotFound(baymodel=baymodel_uuid)
+            raise exception.ClusterTemplateNotFound(
+                clustertemplate=baymodel_uuid)
 
     def get_baymodel_by_name(self, context, baymodel_name):
         query = model_query(models.BayModel)
@@ -301,7 +303,8 @@ class Connection(api.Connection):
             raise exception.Conflict('Multiple baymodels exist with same name.'
                                      ' Please use the baymodel uuid instead.')
         except NoResultFound:
-            raise exception.BayModelNotFound(baymodel=baymodel_name)
+            raise exception.ClusterTemplateNotFound(
+                clustertemplate=baymodel_name)
 
     def _is_baymodel_referenced(self, session, baymodel_uuid):
         """Checks whether the baymodel is referenced by bay(s)."""
@@ -324,10 +327,12 @@ class Connection(api.Connection):
             try:
                 baymodel_ref = query.one()
             except NoResultFound:
-                raise exception.BayModelNotFound(baymodel=baymodel_id)
+                raise exception.ClusterTemplateNotFound(
+                    clustertemplate=baymodel_id)
 
             if self._is_baymodel_referenced(session, baymodel_ref['uuid']):
-                raise exception.BayModelReferenced(baymodel=baymodel_id)
+                raise exception.ClusterTemplateReferenced(
+                    clustertemplate=baymodel_id)
 
             query.delete()
 
@@ -347,12 +352,14 @@ class Connection(api.Connection):
             try:
                 ref = query.with_lockmode('update').one()
             except NoResultFound:
-                raise exception.BayModelNotFound(baymodel=baymodel_id)
+                raise exception.ClusterTemplateNotFound(
+                    clustertemplate=baymodel_id)
 
             if self._is_baymodel_referenced(session, ref['uuid']):
                 # we only allow to update baymodel to be public
                 if not self._is_publishing_baymodel(values):
-                    raise exception.BayModelReferenced(baymodel=baymodel_id)
+                    raise exception.ClusterTemplateReferenced(
+                        clustertemplate=baymodel_id)
 
             ref.update(values)
         return ref

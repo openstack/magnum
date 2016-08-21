@@ -229,28 +229,29 @@ class FileSystemNotSupported(MagnumException):
                 "File system %(fs)s is not supported.")
 
 
-class BayModelNotFound(ResourceNotFound):
-    message = _("Baymodel %(baymodel)s could not be found.")
+class ClusterTemplateNotFound(ResourceNotFound):
+    message = _("ClusterTemplate %(clustertemplate)s could not be found.")
 
 
-class BayModelAlreadyExists(Conflict):
-    message = _("A baymodel with UUID %(uuid)s already exists.")
+class ClusterTemplateAlreadyExists(Conflict):
+    message = _("A ClusterTemplate with UUID %(uuid)s already exists.")
 
 
-class BayModelReferenced(Invalid):
-    message = _("Baymodel %(baymodel)s is referenced by one or multiple bays.")
+class ClusterTemplateReferenced(Invalid):
+    message = _("ClusterTemplate %(clustertemplate)s is referenced by one or"
+                " multiple clusters.")
 
 
-class BaymodelPublishDenied(NotAuthorized):
-    message = _("Not authorized to set public flag for baymodel.")
+class ClusterTemplatePublishDenied(NotAuthorized):
+    message = _("Not authorized to set public flag for cluster template.")
 
 
-class BayNotFound(ResourceNotFound):
-    message = _("Bay %(bay)s could not be found.")
+class ClusterNotFound(ResourceNotFound):
+    message = _("Cluster %(cluster)s could not be found.")
 
 
-class BayAlreadyExists(Conflict):
-    message = _("A bay with UUID %(uuid)s already exists.")
+class ClusterAlreadyExists(Conflict):
+    message = _("A cluster with UUID %(uuid)s already exists.")
 
 
 class ContainerNotFound(ResourceNotFound):

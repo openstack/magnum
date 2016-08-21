@@ -165,7 +165,7 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
     def _sync_deleted_stack(self, bay):
         try:
             bay.destroy()
-        except exception.BayNotFound:
+        except exception.ClusterNotFound:
             LOG.info(_LI('The bay %s has been deleted by others.'), bay.uuid)
         else:
             LOG.info(_LI("Bay with id %(id)s not found in heat "

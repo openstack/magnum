@@ -100,7 +100,7 @@ class DbBaymodelTestCase(base.DbTestCase):
         self.assertEqual(bm['id'], baymodel.id)
 
     def test_get_baymodel_that_does_not_exist(self):
-        self.assertRaises(exception.BayModelNotFound,
+        self.assertRaises(exception.ClusterTemplateNotFound,
                           self.dbapi.get_baymodel_by_id, self.context, 666)
 
     def test_get_baymodel_by_name(self):
@@ -128,7 +128,7 @@ class DbBaymodelTestCase(base.DbTestCase):
                           self.context, 'bm')
 
     def test_get_baymodel_by_name_not_found(self):
-        self.assertRaises(exception.BayModelNotFound,
+        self.assertRaises(exception.ClusterTemplateNotFound,
                           self.dbapi.get_baymodel_by_name,
                           self.context, 'not_found')
 
@@ -138,7 +138,7 @@ class DbBaymodelTestCase(base.DbTestCase):
         self.assertEqual('updated-model', res.name)
 
     def test_update_baymodel_that_does_not_exist(self):
-        self.assertRaises(exception.BayModelNotFound,
+        self.assertRaises(exception.ClusterTemplateNotFound,
                           self.dbapi.update_baymodel, 666, {'name': ''})
 
     def test_update_baymodel_uuid(self):
@@ -150,7 +150,7 @@ class DbBaymodelTestCase(base.DbTestCase):
     def test_destroy_baymodel(self):
         bm = utils.create_test_baymodel()
         self.dbapi.destroy_baymodel(bm['id'])
-        self.assertRaises(exception.BayModelNotFound,
+        self.assertRaises(exception.ClusterTemplateNotFound,
                           self.dbapi.get_baymodel_by_id,
                           self.context, bm['id'])
 
@@ -160,23 +160,23 @@ class DbBaymodelTestCase(base.DbTestCase):
         self.assertIsNotNone(self.dbapi.get_baymodel_by_uuid(self.context,
                                                              uuid))
         self.dbapi.destroy_baymodel(uuid)
-        self.assertRaises(exception.BayModelNotFound,
+        self.assertRaises(exception.ClusterTemplateNotFound,
                           self.dbapi.get_baymodel_by_uuid, self.context, uuid)
 
     def test_destroy_baymodel_that_does_not_exist(self):
-        self.assertRaises(exception.BayModelNotFound,
+        self.assertRaises(exception.ClusterTemplateNotFound,
                           self.dbapi.destroy_baymodel, 666)
 
     def test_destroy_baymodel_that_referenced_by_bays(self):
         bm = utils.create_test_baymodel()
         bay = utils.create_test_bay(baymodel_id=bm['uuid'])
         self.assertEqual(bm['uuid'], bay.baymodel_id)
-        self.assertRaises(exception.BayModelReferenced,
+        self.assertRaises(exception.ClusterTemplateReferenced,
                           self.dbapi.destroy_baymodel, bm['id'])
 
     def test_create_baymodel_already_exists(self):
         uuid = uuidutils.generate_uuid()
         utils.create_test_baymodel(id=1, uuid=uuid)
-        self.assertRaises(exception.BayModelAlreadyExists,
+        self.assertRaises(exception.ClusterTemplateAlreadyExists,
                           utils.create_test_baymodel,
                           id=2, uuid=uuid)

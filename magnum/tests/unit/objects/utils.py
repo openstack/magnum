@@ -53,7 +53,7 @@ def create_test_baymodel(context, **kw):
     baymodel = get_test_baymodel(context, **kw)
     try:
         baymodel.create()
-    except exception.BayModelAlreadyExists:
+    except exception.ClusterTemplateAlreadyExists:
         baymodel = objects.BayModel.get(context, baymodel.uuid)
     return baymodel
 
@@ -85,6 +85,42 @@ def create_test_bay(context, **kw):
                          coe=kw.get('coe', 'swarm'))
     bay.create()
     return bay
+
+
+def get_test_cluster_template(context, **kw):
+    """Return a ClusterTemplate object with appropriate attributes.
+
+    NOTE: Object model is the same for ClusterTemplate and
+    BayModel
+    """
+    return get_test_baymodel(context, **kw)
+
+
+def create_test_cluster_template(context, **kw):
+    """Create and return a test ClusterTemplate object.
+
+    NOTE: Object model is the same for ClusterTemplate and
+    BayModel
+    """
+    return create_test_baymodel(context, **kw)
+
+
+def get_test_cluster(context, **kw):
+    """Return a Cluster object with appropriate attributes.
+
+    NOTE: Object model is the same for Cluster and
+    Bay
+    """
+    return get_test_bay(context, **kw)
+
+
+def create_test_cluster(context, **kw):
+    """Create and return a test cluster object.
+
+    NOTE: Object model is the same for Cluster and
+    Bay
+    """
+    return create_test_bay(context, **kw)
 
 
 def get_test_x509keypair(context, **kw):

@@ -48,7 +48,7 @@ class Certificate(base.APIBase):
             try:
                 self._bay = api_utils.get_resource('Bay', value)
                 self._bay_uuid = self._bay.uuid
-            except exception.BayNotFound as e:
+            except exception.ClusterNotFound as e:
                 # Change error code because 404 (NotFound) is inappropriate
                 # response for a POST request to create a Bay
                 e.code = 400  # BadRequest

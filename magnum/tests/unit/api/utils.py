@@ -18,6 +18,8 @@ import pytz
 
 from magnum.api.controllers.v1 import bay as bay_controller
 from magnum.api.controllers.v1 import baymodel as baymodel_controller
+from magnum.api.controllers.v1 import cluster as cluster_controller
+from magnum.api.controllers.v1 import cluster_template as cluster_tmp_ctrl
 from magnum.tests.unit.db import utils
 
 
@@ -33,11 +35,28 @@ def baymodel_post_data(**kw):
     return remove_internal(baymodel, internal)
 
 
+def cluster_template_post_data(**kw):
+    cluster_template = utils.get_test_baymodel(**kw)
+    internal = cluster_tmp_ctrl.ClusterTemplatePatchType.internal_attrs()
+    return remove_internal(cluster_template, internal)
+
+
 def bay_post_data(**kw):
     bay = utils.get_test_bay(**kw)
     bay['bay_create_timeout'] = kw.get('bay_create_timeout', 15)
     internal = bay_controller.BayPatchType.internal_attrs()
     return remove_internal(bay, internal)
+
+
+def cluster_post_data(**kw):
+    cluster = utils.get_test_bay(**kw)
+    cluster['create_timeout'] = kw.get('create_timeout', 15)
+    cluster['cluster_template_id'] = kw.get('cluster_template_id',
+                                            cluster['baymodel_id'])
+    del cluster['bay_create_timeout']
+    del cluster['baymodel_id']
+    internal = cluster_controller.ClusterPatchType.internal_attrs()
+    return remove_internal(cluster, internal)
 
 
 def cert_post_data(**kw):

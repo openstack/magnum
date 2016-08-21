@@ -33,20 +33,20 @@ class TestRootController(api_base.FunctionalTest):
         super(TestRootController, self).setUp()
         self.root_expected = {
             u'description': u'Magnum is an OpenStack project which '
-            'aims to provide container management.',
+                            'aims to provide container cluster management.',
             u'name': u'OpenStack Magnum API',
             u'versions': [{u'id': u'v1',
-                          u'links':
-                              [{u'href': u'http://localhost/v1/',
-                                u'rel': u'self'}],
+                           u'links':
+                               [{u'href': u'http://localhost/v1/',
+                                 u'rel': u'self'}],
                            u'status': u'CURRENT',
                            u'max_version': u'1.3',
                            u'min_version': u'1.1'}]}
 
         self.v1_expected = {
             u'media_types':
-            [{u'base': u'application/json',
-              u'type': u'application/vnd.openstack.magnum.v1+json'}],
+                [{u'base': u'application/json',
+                  u'type': u'application/vnd.openstack.magnum.v1+json'}],
             u'links': [{u'href': u'http://localhost/v1/',
                         u'rel': u'self'},
                        {u'href':
@@ -61,6 +61,15 @@ class TestRootController(api_base.FunctionalTest):
                             u'rel': u'self'},
                            {u'href': u'http://localhost/baymodels/',
                             u'rel': u'bookmark'}],
+            u'clusters': [{u'href': u'http://localhost/v1/clusters/',
+                           u'rel': u'self'},
+                          {u'href': u'http://localhost/clusters/',
+                           u'rel': u'bookmark'}],
+            u'clustertemplates':
+                [{u'href': u'http://localhost/v1/clustertemplates/',
+                  u'rel': u'self'},
+                 {u'href': u'http://localhost/clustertemplates/',
+                  u'rel': u'bookmark'}],
             u'id': u'v1',
             u'certificates': [{u'href': u'http://localhost/v1/certificates/',
                                u'rel': u'self'},
@@ -199,7 +208,6 @@ class TestHeathcheck(api_base.FunctionalTest):
 
 
 class TestV1Routing(api_base.FunctionalTest):
-
     def test_route_checks_version(self):
         self.get_json('/')
         self._check_version.assert_called_once_with(mock.ANY,
@@ -207,7 +215,6 @@ class TestV1Routing(api_base.FunctionalTest):
 
 
 class TestCheckVersions(test_base.TestCase):
-
     def setUp(self):
         super(TestCheckVersions, self).setUp()
 

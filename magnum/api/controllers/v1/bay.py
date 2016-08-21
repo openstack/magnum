@@ -80,7 +80,7 @@ class Bay(base.APIBase):
             try:
                 baymodel = api_utils.get_resource('BayModel', value)
                 self._baymodel_id = baymodel.uuid
-            except exception.BayModelNotFound as e:
+            except exception.ClusterTemplateNotFound as e:
                 # Change error code because 404 (NotFound) is inappropriate
                 # response for a POST request to create a Bay
                 e.code = 400  # BadRequest
