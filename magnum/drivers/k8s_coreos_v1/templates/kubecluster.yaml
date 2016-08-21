@@ -131,6 +131,21 @@ parameters:
     type: string
     description: endpoint to retrieve TLS certs from
 
+  http_proxy:
+    type: string
+    description: http proxy address for docker
+    default: ""
+
+  https_proxy:
+    type: string
+    description: https proxy address for docker
+    default: ""
+
+  no_proxy:
+    type: string
+    description: no proxies for docker
+    default: ""
+
   trustee_domain_id:
     type: string
     description: domain id of the trustee
@@ -320,6 +335,9 @@ resources:
           network_driver: {get_param: network_driver}
           kubernetes_port: {get_param: kubernetes_port}
           tls_disabled: {get_param: tls_disabled}
+          http_proxy: {get_param: http_proxy}
+          https_proxy: {get_param: https_proxy}
+          no_proxy: {get_param: no_proxy}
           kube_version: {get_param: kube_version}
           wait_condition_timeout: {get_param: wait_condition_timeout}
           bay_uuid: {get_param: bay_uuid}
@@ -360,6 +378,9 @@ resources:
           network_driver: {get_param: network_driver}
           kubernetes_port: {get_param: kubernetes_port}
           tls_disabled: {get_param: tls_disabled}
+          http_proxy: {get_param: http_proxy}
+          https_proxy: {get_param: https_proxy}
+          no_proxy: {get_param: no_proxy}
           kube_version: {get_param: kube_version}
           etcd_server_ip: {get_attr: [etcd_address_switch, private_ip]}
           wait_condition_timeout: {get_param: wait_condition_timeout}

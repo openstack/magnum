@@ -113,6 +113,18 @@ parameters:
     description: Private IP address of the Kubernetes master server.
     default: ""
 
+  http_proxy:
+    type: string
+    description: http proxy address for docker
+
+  https_proxy:
+    type: string
+    description: https proxy address for docker
+
+  no_proxy:
+    type: string
+    description: no proxies for docker
+
   trustee_user_id:
     type: string
     description: user id of the trustee
@@ -227,6 +239,9 @@ resources:
             "$KUBE_VERSION": {get_param: kube_version}
             "$BAY_UUID": {get_param: bay_uuid}
             "$MAGNUM_URL": {get_param: magnum_url}
+            "$HTTP_PROXY": {get_param: http_proxy}
+            "$HTTPS_PROXY": {get_param: https_proxy}
+            "$NO_PROXY": {get_param: no_proxy}
             "$TRUSTEE_USER_ID": {get_param: trustee_user_id}
             "$TRUSTEE_PASSWORD": {get_param: trustee_password}
             "$TRUST_ID": {get_param: trust_id}
@@ -306,6 +321,12 @@ resources:
       group: ungrouped
       config: {get_file: fragments/wc-notify.yaml}
 
+  add_proxy:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/add-proxy.yaml}
+
   kube_master_init:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -315,6 +336,7 @@ resources:
           template: |
             $write_heat_params
             $make_cert
+            $add_proxy
             $configure_etcd
             $write_network_config
             $enable_network_service
@@ -329,6 +351,8 @@ resources:
             coreos:
               units:
                 - name: "make-cert.service"
+                  command: "start"
+                - name: "add-proxy.service"
                   command: "start"
                 - name: "configure-etcd.service"
                   command: "start"
@@ -355,6 +379,7 @@ resources:
           params:
             "$write_heat_params": {get_attr: [write_heat_params, config]}
             "$make_cert": {get_attr: [make_cert, config]}
+            "$add_proxy": {get_attr: [add_proxy, config]}
             "$configure_etcd": {get_attr: [configure_etcd, config]}
             "$write_network_config": {get_attr: [write_network_config, config]}
             "$enable_network_service": {get_attr: [enable_network_service, config]}

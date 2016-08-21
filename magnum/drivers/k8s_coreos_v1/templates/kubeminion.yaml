@@ -82,6 +82,18 @@ parameters:
     description: >
       timeout for the Wait Conditions
 
+  http_proxy:
+    type: string
+    description: http proxy address for docker
+
+  https_proxy:
+    type: string
+    description: https proxy address for docker
+
+  no_proxy:
+    type: string
+    description: no proxies for docker
+
   trustee_user_id:
     type: string
     description: user id of the trustee
@@ -143,22 +155,25 @@ resources:
         str_replace:
           template: {get_file: fragments/write-heat-params.yaml}
           params:
-            $KUBE_ALLOW_PRIV: {get_param: kube_allow_priv}
-            $KUBE_MASTER_IP: {get_param: kube_master_ip}
-            $KUBE_NODE_PUBLIC_IP: {get_attr: [kube_minion_floating, floating_ip_address]}
-            $KUBE_NODE_IP: {get_attr: [kube_minion_eth0, fixed_ips, 0, ip_address]}
-            $WAIT_CURL: {get_attr: [minion_wait_handle, curl_cli]}
-            $KUBE_API_PORT: {get_param: kubernetes_port}
-            $TLS_DISABLED: {get_param: tls_disabled}
-            $NETWORK_DRIVER: {get_param: network_driver}
-            $ETCD_SERVER_IP: {get_param: etcd_server_ip}
-            $KUBE_VERSION: {get_param: kube_version}
-            $BAY_UUID: {get_param: bay_uuid}
-            $MAGNUM_URL: {get_param: magnum_url}
-            $TRUSTEE_USER_ID: {get_param: trustee_user_id}
-            $TRUSTEE_PASSWORD: {get_param: trustee_password}
-            $TRUST_ID: {get_param: trust_id}
-            $AUTH_URL: {get_param: auth_url}
+            "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
+            "$KUBE_MASTER_IP": {get_param: kube_master_ip}
+            "$KUBE_NODE_PUBLIC_IP": {get_attr: [kube_minion_floating, floating_ip_address]}
+            "$KUBE_NODE_IP": {get_attr: [kube_minion_eth0, fixed_ips, 0, ip_address]}
+            "$WAIT_CURL": {get_attr: [minion_wait_handle, curl_cli]}
+            "$KUBE_API_PORT": {get_param: kubernetes_port}
+            "$TLS_DISABLED": {get_param: tls_disabled}
+            "$NETWORK_DRIVER": {get_param: network_driver}
+            "$ETCD_SERVER_IP": {get_param: etcd_server_ip}
+            "$KUBE_VERSION": {get_param: kube_version}
+            "$BAY_UUID": {get_param: bay_uuid}
+            "$MAGNUM_URL": {get_param: magnum_url}
+            "$HTTP_PROXY": {get_param: http_proxy}
+            "$HTTPS_PROXY": {get_param: https_proxy}
+            "$NO_PROXY": {get_param: no_proxy}
+            "$TRUSTEE_USER_ID": {get_param: trustee_user_id}
+            "$TRUSTEE_PASSWORD": {get_param: trustee_password}
+            "$TRUST_ID": {get_param: trust_id}
+            "$AUTH_URL": {get_param: auth_url}
 
   write_kubeconfig:
     type: OS::Heat::SoftwareConfig
@@ -196,6 +211,12 @@ resources:
       group: ungrouped
       config: {get_file: fragments/wc-notify.yaml}
 
+  add_proxy:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/add-proxy.yaml}
+
   kube_minion_init:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -206,6 +227,7 @@ resources:
             $write_heat_params
             $write_kubeconfig
             $make_cert
+            $add_proxy
             $enable_network_service
             $enable_kubelet
             $enable_kube_proxy
@@ -213,6 +235,8 @@ resources:
             coreos:
               units:
                 - name: "make-cert.service"
+                  command: "start"
+                - name: "add-proxy.service"
                   command: "start"
                 - name: "enable-network-service.service"
                   command: "start"
@@ -226,6 +250,7 @@ resources:
             "$write_heat_params": {get_attr: [write_heat_params, config]}
             "$write_kubeconfig": {get_attr: [write_kubeconfig, config]}
             "$make_cert": {get_attr: [make_cert, config]}
+            "$add_proxy": {get_attr: [add_proxy, config]}
             "$enable_network_service": {get_attr: [enable_network_service, config]}
             "$enable_kubelet": {get_attr: [enable_kubelet, config]}
             "$enable_kube_proxy": {get_attr: [enable_kube_proxy, config]}
