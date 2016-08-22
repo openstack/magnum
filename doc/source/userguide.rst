@@ -249,7 +249,51 @@ This is a mandatory parameter and there is no default value.
 
 Labels
 ------
-*To be filled in*
+
+Labels is a general method to specify supplemental parameters that are
+specific to certain COE or associated with certain options.  Their
+format is key/value pair and their meaning is interpreted by the
+drivers that uses them.  The drivers do validate the key/value pairs.
+Their usage is explained in details in the appropriate sections,
+however, since there are many possible labels, the following table
+provides a summary to help give a clearer picture.  The label keys in
+the table are linked to more details elsewhere in the user guide.
+
++---------------------------------------+--------------------+---------------+
+| label key                             | label value        | default       |
++=======================================+====================+===============+
+| `flannel_network_cidr`_               | IPv4 CIDR          | 10.100.0.0/16 |
+|                                       |                    |               |
++---------------------------------------+--------------------+---------------+
+| `flannel_backend`_                    | - udp              | udp           |
+|                                       | - vxlan            |               |
+|                                       | - host-gw          |               |
++---------------------------------------+--------------------+---------------+
+| `flannel_network_subnetlen`_          | size of subnet to  | 24            |
+|                                       | assign to node     |               |
++---------------------------------------+--------------------+---------------+
+| `rexray_preempt`_                     | - true             | false         |
+|                                       | - false            |               |
++---------------------------------------+--------------------+---------------+
+| `mesos_agent_isolation`_              | - filesystem/posix | ""            |
+|                                       | - filesystem/linux |               |
+|                                       | - filesystem/shared|               |
+|                                       | - posix/cpu        |               |
+|                                       | - posix/mem        |               |
+|                                       | - posix/disk       |               |
+|                                       | - cgroups/cpu      |               |
+|                                       | - cgroups/mem      |               |
+|                                       | - docker/runtime   |               |
+|                                       | - namespaces/pid   |               |
++---------------------------------------+--------------------+---------------+
+| `mesos_agent_image_providers`_        | - appc             | ""            |
+|                                       | - docker           |               |
+|                                       | - appc,docker      |               |
++---------------------------------------+--------------------+---------------+
+| `mesos_agent_work_dir`_               | (directory name)   | ""            |
++---------------------------------------+--------------------+---------------+
+| `mesos_agent_executor_env_variables`_ | (file name)        | ""            |
++---------------------------------------+--------------------+---------------+
 
 
 ===
@@ -1074,6 +1118,85 @@ Log into the servers
   You can log into the manager and node servers with the account
   'ubuntu' and the keypair specified in the baymodel.
 
+In addition to the common attributes in the baymodel, you can specify
+the following attributes that are specific to Mesos by using the
+labels attribute.
+
+_`rexray_preempt`
+  When the volume driver 'rexray' is used, you can mount a data volume
+  backed by Cinder to a host to be accessed by a container.  In this
+  case, the label 'rexray_preempt' can optionally be set to True or
+  False to enable any host to take control of the volume regardless of
+  whether other hosts are using the volume.  This will in effect
+  unmount the volume from the current host and remount it on the new
+  host.  If this label is set to false, then rexray will ensure data
+  safety for locking the volume before remounting.  The default value
+  is False.
+
+_`mesos_agent_isolation`
+  This label corresponds to the Mesos parameter for agent
+  '--isolation'.  The isolators are needed to provide proper isolation
+  according to the runtime configurations specified in the container
+  image.  For more details, refer to the `Mesos configuration
+  <http://mesos.apache.org/documentation/latest/configuration/>`_
+  and the `Mesos container image support
+  <http://mesos.apache.org/documentation/latest/container-image/>`_.
+  Valid values for this label are:
+
+  - filesystem/posix
+  - filesystem/linux
+  - filesystem/shared
+  - posix/cpu
+  - posix/mem
+  - posix/disk
+  - cgroups/cpu
+  - cgroups/mem
+  - docker/runtime
+  - namespaces/pid
+
+_`mesos_agent_image_providers`
+  This label corresponds to the Mesos parameter for agent
+  '--image_providers', which tells Mesos containerizer what
+  types of container images are allowed.
+  For more details, refer to the `Mesos configuration
+  <http://mesos.apache.org/documentation/latest/configuration/>`_ and
+  the `Mesos container image support
+  <http://mesos.apache.org/documentation/latest/container-image/>`_.
+  Valid values are:
+
+  - appc
+  - docker
+  - appc,docker
+
+_`mesos_agent_work_dir`
+  This label corresponds to the Mesos parameter '--work_dir' for agent.
+  For more details, refer to the `Mesos configuration
+  <http://mesos.apache.org/documentation/latest/configuration/>`_.
+  Valid value is a directory path to use as the work directory for
+  the framework, for example::
+
+    mesos_agent_work_dir=/tmp/mesos
+
+_`mesos_agent_executor_env_variables`
+  This label corresponds to the Mesos parameter for agent
+  '--executor_environment_variables', which passes additional
+  environment variables to the executor and subsequent tasks.
+  For more details, refer to the `Mesos configuration
+  <http://mesos.apache.org/documentation/latest/configuration/>`_.
+  Valid value is the name of a json file, for example::
+
+     mesos_agent_executor_env_variables=/home/ubuntu/test.json
+
+  The json file should contain environment variables, for example::
+
+    {
+       "PATH": "/bin:/usr/bin",
+       "LD_LIBRARY_PATH": "/usr/local/lib"
+    }
+
+  By default the executor will inherit the agent's environment
+  variables.
+
 
 Building Mesos image
 --------------------
@@ -1646,15 +1769,15 @@ in the baymodel.  Labels are arbitrary key=value pairs.
 When Flannel is specified as the network driver, the following
 optional labels can be added:
 
-flannel_network_cidr
+_`flannel_network_cidr`
   IPv4 network in CIDR format to use for the entire Flannel network.
   If not specified, the default is 10.100.0.0/16.
 
-flannel_network_subnetlen
+_`flannel_network_subnetlen`
   The size of the subnet allocated to each host. If not specified, the
   default is 24.
 
-flannel_backend
+_`flannel_backend`
   The type of backend for Flannel.  Possible values are *udp, vxlan,
   host-gw*.  If not specified, the default is *udp*.  Selecting the
   best backend depends on your networking.  Generally, *udp* is
