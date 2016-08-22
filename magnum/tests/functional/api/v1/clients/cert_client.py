@@ -20,25 +20,25 @@ class CertClient(client.MagnumClient):
     url = "/certificates"
 
     @classmethod
-    def cert_uri(cls, bay_id):
-        """Construct bay uri
+    def cert_uri(cls, cluster_id):
+        """Construct cluster uri
 
-        :param bay_id: bay uuid or name
+        :param cluster_id: cluster uuid or name
         :returns: url string
         """
 
-        return "{0}/{1}".format(cls.url, bay_id)
+        return "{0}/{1}".format(cls.url, cluster_id)
 
-    def get_cert(self, bay_id, **kwargs):
-        """Makes GET /certificates/bay_id request and returns CertEntity
+    def get_cert(self, cluster_id, **kwargs):
+        """Makes GET /certificates/cluster_id request and returns CertEntity
 
         Abstracts REST call to return a single cert based on uuid or name
 
-        :param bay_id: bay uuid or name
-        :returns: response object and BayCollection object
+        :param cluster_id: cluster uuid or name
+        :returns: response object and ClusterCollection object
         """
 
-        resp, body = self.get(self.cert_uri(bay_id))
+        resp, body = self.get(self.cert_uri(cluster_id))
         return self.deserialize(resp, body, cert_model.CertEntity)
 
     def post_cert(self, model, **kwargs):

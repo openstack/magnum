@@ -35,30 +35,34 @@ class Certificate(base.APIBase):
     certificate.
     """
 
-    _bay_uuid = None
-    """uuid or logical name of bay"""
+    _cluster_uuid = None
+    """uuid or logical name of cluster"""
 
-    _bay = None
+    _cluster = None
 
-    def _get_bay_uuid(self):
-        return self._bay_uuid
+    def _get_cluster_uuid(self):
+        return self._cluster_uuid
 
-    def _set_bay_uuid(self, value):
-        if value and self._bay_uuid != value:
+    def _set_cluster_uuid(self, value):
+        if value and self._cluster_uuid != value:
             try:
-                self._bay = api_utils.get_resource('Bay', value)
-                self._bay_uuid = self._bay.uuid
+                self._cluster = api_utils.get_resource('Bay', value)
+                self._cluster_uuid = self._cluster.uuid
             except exception.ClusterNotFound as e:
                 # Change error code because 404 (NotFound) is inappropriate
                 # response for a POST request to create a Bay
                 e.code = 400  # BadRequest
                 raise
         elif value == wtypes.Unset:
-            self._bay_uuid = wtypes.Unset
+            self._cluster_uuid = wtypes.Unset
 
-    bay_uuid = wsme.wsproperty(wtypes.text, _get_bay_uuid,
-                               _set_bay_uuid, mandatory=True)
+    bay_uuid = wsme.wsproperty(wtypes.text, _get_cluster_uuid,
+                               _set_cluster_uuid)
     """The bay UUID or id"""
+
+    cluster_uuid = wsme.wsproperty(wtypes.text, _get_cluster_uuid,
+                                   _set_cluster_uuid)
+    """The cluster UUID or id"""
 
     links = wsme.wsattr([link.Link], readonly=True)
     """A list containing a self link and associated certificate links"""
@@ -80,15 +84,22 @@ class Certificate(base.APIBase):
             self.fields.append(field)
             setattr(self, field, kwargs.get(field, wtypes.Unset))
 
-    def get_bay(self):
-        if not self._bay:
-            self._bay = api_utils.get_resource('Bay', self.bay_uuid)
-        return self._bay
+        # set the attribute for cluster_uuid
+        self.fields.append('cluster_uuid')
+        if 'cluster_uuid' in kwargs.keys():
+            setattr(self, 'cluster_uuid', kwargs.get('cluster_uuid',
+                                                     wtypes.Unset))
+
+    def get_cluster(self):
+        if not self._cluster:
+            self._cluster = api_utils.get_resource('Bay', self.cluster_uuid)
+        return self._cluster
 
     @staticmethod
     def _convert_with_links(certificate, url, expand=True):
         if not expand:
-            certificate.unset_fields_except(['bay_uuid', 'csr', 'pem'])
+            certificate.unset_fields_except(['bay_uuid', 'cluster_uuid',
+                                             'csr', 'pem'])
 
         certificate.links = [link.Link.make_link('self', url,
                                                  'certificates',
@@ -108,6 +119,7 @@ class Certificate(base.APIBase):
     @classmethod
     def sample(cls, expand=True):
         sample = cls(bay_uuid='7ae81bb3-dec3-4289-8d6c-da80bd8001ae',
+                     cluster_uuid='7ae81bb3-dec3-4289-8d6c-da80bd8001ae',
                      created_at=timeutils.utcnow(),
                      csr='AAA....AAA')
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
@@ -124,17 +136,17 @@ class CertificateController(base.Controller):
     }
 
     @expose.expose(Certificate, types.uuid_or_name)
-    def get_one(self, bay_ident):
-        """Retrieve CA information about the given bay.
+    def get_one(self, cluster_ident):
+        """Retrieve CA information about the given cluster.
 
-        :param bay_ident: UUID of a bay or
-        logical name of the bay.
+        :param cluster_ident: UUID of a cluster or
+        logical name of the cluster.
         """
         context = pecan.request.context
-        bay = api_utils.get_resource('Bay', bay_ident)
-        policy.enforce(context, 'certificate:get', bay,
+        cluster = api_utils.get_resource('Bay', cluster_ident)
+        policy.enforce(context, 'certificate:get', cluster,
                        action='certificate:get')
-        certificate = pecan.request.rpcapi.get_ca_certificate(bay)
+        certificate = pecan.request.rpcapi.get_ca_certificate(cluster)
         return Certificate.convert_with_links(certificate)
 
     @expose.expose(Certificate, body=Certificate, status_code=201)
@@ -144,14 +156,14 @@ class CertificateController(base.Controller):
         :param certificate: a certificate within the request body.
         """
         context = pecan.request.context
-        bay = certificate.get_bay()
-        policy.enforce(context, 'certificate:create', bay,
+        cluster = certificate.get_cluster()
+        policy.enforce(context, 'certificate:create', cluster,
                        action='certificate:create')
         certificate_dict = certificate.as_dict()
         certificate_dict['project_id'] = context.project_id
         certificate_dict['user_id'] = context.user_id
         cert_obj = objects.Certificate(context, **certificate_dict)
 
-        new_cert = pecan.request.rpcapi.sign_certificate(bay,
+        new_cert = pecan.request.rpcapi.sign_certificate(cluster,
                                                          cert_obj)
         return Certificate.convert_with_links(new_cert)

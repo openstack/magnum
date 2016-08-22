@@ -182,7 +182,7 @@ Q0uA0aVog3f5iJxCa3Hp5gxbJQ6zV6kJ0TEsuaaOhEko9sdpCoPOnRBm2i/XRD2D
         resp, cert_model = self.cert_client.post_cert(cert_data_model)
         self.LOG.debug("cert resp: %s" % resp)
         self.assertEqual(201, resp.status)
-        self.assertEqual(cert_model.bay_uuid, cluster_model.uuid)
+        self.assertEqual(cert_model.cluster_uuid, cluster_model.uuid)
         self.assertIsNotNone(cert_model.pem)
         self.assertIn('-----BEGIN CERTIFICATE-----', cert_model.pem)
         self.assertIn('-----END CERTIFICATE-----', cert_model.pem)
