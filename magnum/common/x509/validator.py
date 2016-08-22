@@ -13,31 +13,31 @@
 # under the License.
 
 from cryptography import x509
-from oslo_config import cfg
 
 from magnum.common import exception
 from magnum.common.x509 import extensions
+import magnum.conf
 
 _CA_KEY_USAGES = [
     extensions.KeyUsages.KEY_CERT_SIGN.value[0],
     extensions.KeyUsages.CRL_SIGN.value[0]
 ]
 
-cfg.CONF.import_group('x509', 'magnum.common.x509.config')
+CONF = magnum.conf.CONF
 
 
 def filter_extensions(extensions):
     filtered_extensions = []
-    allowed_key_usage = set(cfg.CONF.x509.allowed_key_usage)
-    if not cfg.CONF.x509.allow_ca:
+    allowed_key_usage = set(CONF.x509.allowed_key_usage)
+    if not CONF.x509.allow_ca:
         allowed_key_usage = _remove_ca_key_usage(allowed_key_usage)
 
     for ext in filter_allowed_extensions(extensions,
-                                         cfg.CONF.x509.allowed_extensions):
+                                         CONF.x509.allowed_extensions):
         if ext.oid == x509.OID_KEY_USAGE:
             ext = _merge_key_usage(ext, allowed_key_usage)
         elif ext.oid == x509.OID_BASIC_CONSTRAINTS:
-            if not cfg.CONF.x509.allow_ca:
+            if not CONF.x509.allow_ca:
                 ext = _disallow_ca_in_basic_constraints(ext)
 
         filtered_extensions.append(ext)
