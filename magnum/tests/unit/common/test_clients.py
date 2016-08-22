@@ -32,12 +32,6 @@ class ClientsTest(base.BaseTestCase):
 
         CONF.set_override('auth_uri', 'http://server.test:5000/v2.0',
                           group='keystone_authtoken')
-        CONF.import_opt('api_version', 'magnum.common.clients',
-                        group='nova_client')
-        CONF.import_opt('api_version', 'magnum.common.clients',
-                        group='heat_client')
-        CONF.import_opt('api_version', 'magnum.common.clients',
-                        group='glance_client')
 
     @mock.patch.object(clients.OpenStackClients, 'keystone')
     def test_url_for(self, mock_keystone):

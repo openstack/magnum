@@ -21,39 +21,15 @@ from oslo_config import cfg
 from oslo_log import log as logging
 
 from magnum.common import exception
+import magnum.conf
 from magnum.i18n import _
 from magnum.i18n import _LE
 from magnum.i18n import _LW
 
-CONF = cfg.CONF
+CONF = magnum.conf.CONF
 CFG_GROUP = 'keystone_auth'
 CFG_LEGACY_GROUP = 'keystone_authtoken'
 LOG = logging.getLogger(__name__)
-
-trust_opts = [
-    cfg.StrOpt('trustee_domain_id',
-               help=_('Id of the domain to create trustee for clusters')),
-    cfg.StrOpt('trustee_domain_name',
-               help=_('Name of the domain to create trustee for s')),
-    cfg.StrOpt('trustee_domain_admin_id',
-               help=_('Id of the admin with roles sufficient to manage users'
-                      ' in the trustee_domain')),
-    cfg.StrOpt('trustee_domain_admin_name',
-               help=_('Name of the admin with roles sufficient to manage users'
-                      ' in the trustee_domain')),
-    cfg.StrOpt('trustee_domain_admin_domain_id',
-               help=_('Id of the domain admin user\'s domain.'
-                      ' trustee_domain_id is used by default')),
-    cfg.StrOpt('trustee_domain_admin_domain_name',
-               help=_('Name of the domain admin user\'s domain.'
-                      ' trustee_domain_name is used by default')),
-    cfg.StrOpt('trustee_domain_admin_password', secret=True,
-               help=_('Password of trustee_domain_admin')),
-    cfg.ListOpt('roles',
-                default=[],
-                help=_('The roles which are delegated to the trustee '
-                       'by the trustor'))
-]
 
 legacy_session_opts = {
     'certfile': [cfg.DeprecatedOpt('certfile', CFG_LEGACY_GROUP)],
@@ -66,7 +42,6 @@ legacy_session_opts = {
 keystone_auth_opts = (ka_loading.get_auth_common_conf_options() +
                       ka_loading.get_auth_plugin_conf_options('password'))
 
-CONF.register_opts(trust_opts, group='trust')
 # FIXME(pauloewerton): remove import of authtoken group and legacy options
 # after deprecation period
 CONF.import_group('keystone_authtoken', 'keystonemiddleware.auth_token')

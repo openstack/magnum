@@ -11,11 +11,7 @@
 # under the License.
 
 import mock
-from oslo_config import cfg
 from oslo_config import fixture
-
-cfg.CONF.import_group('keystone_authtoken',
-                      'keystonemiddleware.auth_token')
 
 from keystoneauth1 import exceptions as ka_exception
 from keystoneauth1 import identity as ka_identity
@@ -23,8 +19,11 @@ import keystoneclient.exceptions as kc_exception
 
 from magnum.common import exception
 from magnum.common import keystone
+import magnum.conf
 from magnum.tests import base
 from magnum.tests import utils
+
+CONF = magnum.conf.CONF
 
 
 @mock.patch('keystoneclient.v3.client.Client')
@@ -148,7 +147,7 @@ class KeystoneClientTest(base.TestCase):
         self.ctx.roles = ['role1', 'role2']
         ks_client = keystone.KeystoneClientV3(self.ctx)
 
-        cfg.CONF.set_override('roles', ['role3'], group='trust')
+        CONF.set_override('roles', ['role3'], group='trust')
         ks_client.create_trust(trustee_user='888888')
 
         mock_ks.return_value.trusts.create.assert_called_once_with(
@@ -196,7 +195,7 @@ class KeystoneClientTest(base.TestCase):
     def test_get_validate_region_name(self, mock_ks):
         key = 'region_name'
         val = 'RegionOne'
-        cfg.CONF.set_override(key, val, 'cinder_client')
+        CONF.set_override(key, val, 'cinder_client')
         mock_region = mock.MagicMock()
         mock_region.id = 'RegionOne'
         mock_ks.return_value.regions.list.return_value = [mock_region]
@@ -207,7 +206,7 @@ class KeystoneClientTest(base.TestCase):
     def test_get_validate_region_name_not_found(self, mock_ks):
         key = 'region_name'
         val = 'region123'
-        cfg.CONF.set_override(key, val, 'cinder_client')
+        CONF.set_override(key, val, 'cinder_client')
         ks_client = keystone.KeystoneClientV3(self.ctx)
         self.assertRaises(exception.InvalidParameterValue,
                           ks_client.get_validate_region_name, val)
@@ -215,7 +214,7 @@ class KeystoneClientTest(base.TestCase):
     def test_get_validate_region_name_is_None(self, mock_ks):
         key = 'region_name'
         val = None
-        cfg.CONF.set_override(key, val, 'cinder_client')
+        CONF.set_override(key, val, 'cinder_client')
         ks_client = keystone.KeystoneClientV3(self.ctx)
         self.assertRaises(exception.InvalidParameterValue,
                           ks_client.get_validate_region_name, val)
