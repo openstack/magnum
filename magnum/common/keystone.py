@@ -17,38 +17,17 @@ from keystoneauth1.identity import v3 as ka_v3
 from keystoneauth1 import loading as ka_loading
 import keystoneclient.exceptions as kc_exception
 from keystoneclient.v3 import client as kc_v3
-from oslo_config import cfg
 from oslo_log import log as logging
 
 from magnum.common import exception
 import magnum.conf
+from magnum.conf import keystone as ksconf
 from magnum.i18n import _
 from magnum.i18n import _LE
 from magnum.i18n import _LW
 
 CONF = magnum.conf.CONF
-CFG_GROUP = 'keystone_auth'
-CFG_LEGACY_GROUP = 'keystone_authtoken'
 LOG = logging.getLogger(__name__)
-
-legacy_session_opts = {
-    'certfile': [cfg.DeprecatedOpt('certfile', CFG_LEGACY_GROUP)],
-    'keyfile': [cfg.DeprecatedOpt('keyfile', CFG_LEGACY_GROUP)],
-    'cafile': [cfg.DeprecatedOpt('cafile', CFG_LEGACY_GROUP)],
-    'insecure': [cfg.DeprecatedOpt('insecure', CFG_LEGACY_GROUP)],
-    'timeout': [cfg.DeprecatedOpt('timeout', CFG_LEGACY_GROUP)],
-}
-
-keystone_auth_opts = (ka_loading.get_auth_common_conf_options() +
-                      ka_loading.get_auth_plugin_conf_options('password'))
-
-# FIXME(pauloewerton): remove import of authtoken group and legacy options
-# after deprecation period
-CONF.import_group('keystone_authtoken', 'keystonemiddleware.auth_token')
-ka_loading.register_auth_conf_options(CONF, CFG_GROUP)
-ka_loading.register_session_conf_options(CONF, CFG_GROUP,
-                                         deprecated_opts=legacy_session_opts)
-CONF.set_default('auth_type', default='password', group=CFG_GROUP)
 
 
 class KeystoneClientV3(object):
@@ -67,7 +46,7 @@ class KeystoneClientV3(object):
     def auth_url(self):
         # FIXME(pauloewerton): auth_url should be retrieved from keystone_auth
         # section by default
-        return CONF[CFG_LEGACY_GROUP].auth_uri.replace('v2.0', 'v3')
+        return CONF[ksconf.CFG_LEGACY_GROUP].auth_uri.replace('v2.0', 'v3')
 
     @property
     def auth_token(self):
@@ -84,13 +63,14 @@ class KeystoneClientV3(object):
 
     def _get_session(self, auth):
         session = ka_loading.load_session_from_conf_options(
-            CONF, CFG_GROUP, auth=auth)
+            CONF, ksconf.CFG_GROUP, auth=auth)
         return session
 
     def _get_auth(self):
         if self.context.is_admin:
             try:
-                auth = ka_loading.load_auth_from_conf_options(CONF, CFG_GROUP)
+                auth = ka_loading.load_auth_from_conf_options(
+                    CONF, ksconf.CFG_GROUP)
             except ka_exception.MissingRequiredOptions:
                 auth = self._get_legacy_auth()
         elif self.context.auth_token_info:
@@ -123,10 +103,10 @@ class KeystoneClientV3(object):
         LOG.warning(_LW('Auth plugin and its options for service user '
                         'must be provided in [%(new)s] section. '
                         'Using values from [%(old)s] section is '
-                        'deprecated.') % {'new': CFG_GROUP,
-                                          'old': CFG_LEGACY_GROUP})
+                        'deprecated.') % {'new': ksconf.CFG_GROUP,
+                                          'old': ksconf.CFG_LEGACY_GROUP})
 
-        conf = getattr(CONF, CFG_LEGACY_GROUP)
+        conf = getattr(CONF, ksconf.CFG_LEGACY_GROUP)
 
         # FIXME(htruta, pauloewerton): Conductor layer does not have
         # new v3 variables, such as project_name and project_domain_id.
@@ -178,10 +158,10 @@ class KeystoneClientV3(object):
         if not self._domain_admin_session:
             session = ka_loading.session.Session().load_from_options(
                 auth=self.domain_admin_auth,
-                insecure=CONF[CFG_LEGACY_GROUP].insecure,
-                cacert=CONF[CFG_LEGACY_GROUP].cafile,
-                key=CONF[CFG_LEGACY_GROUP].keyfile,
-                cert=CONF[CFG_LEGACY_GROUP].certfile)
+                insecure=CONF[ksconf.CFG_LEGACY_GROUP].insecure,
+                cacert=CONF[ksconf.CFG_LEGACY_GROUP].cafile,
+                key=CONF[ksconf.CFG_LEGACY_GROUP].keyfile,
+                cert=CONF[ksconf.CFG_LEGACY_GROUP].certfile)
             self._domain_admin_session = session
         return self._domain_admin_session
 
@@ -249,10 +229,10 @@ class KeystoneClientV3(object):
 
             sess = ka_loading.session.Session().load_from_options(
                 auth=auth,
-                insecure=CONF[CFG_LEGACY_GROUP].insecure,
-                cacert=CONF[CFG_LEGACY_GROUP].cafile,
-                key=CONF[CFG_LEGACY_GROUP].keyfile,
-                cert=CONF[CFG_LEGACY_GROUP].certfile)
+                insecure=CONF[ksconf.CFG_LEGACY_GROUP].insecure,
+                cacert=CONF[ksconf.CFG_LEGACY_GROUP].cafile,
+                key=CONF[ksconf.CFG_LEGACY_GROUP].keyfile,
+                cert=CONF[ksconf.CFG_LEGACY_GROUP].certfile)
             client = kc_v3.Client(session=sess)
         try:
             client.trusts.delete(cluster.trust_id)

@@ -13,16 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import magnum.common.exception
 import magnum.common.x509.config
-import magnum.db
 import magnum.drivers.common.template_def
 
 
 def list_opts():
     return [
         ('x509', magnum.common.x509.config.x509_opts),
-        ('keystone_auth', magnum.common.keystone.keystone_auth_opts),
         ('docker_registry',
          magnum.drivers.common.template_def.docker_registry_opts)
     ]
