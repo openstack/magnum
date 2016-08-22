@@ -14,18 +14,13 @@
 
 from docker import client as docker_py_client
 import mock
-from oslo_config import cfg
 
 from magnum.common import docker_utils
+import magnum.conf
 from magnum.tests import base
 
 
-CONF = cfg.CONF
-
-CONF.import_opt('docker_remote_api_version', 'magnum.common.docker_utils',
-                group='docker')
-CONF.import_opt('default_timeout', 'magnum.common.docker_utils',
-                group='docker')
+CONF = magnum.conf.CONF
 
 
 class TestDockerUtils(base.BaseTestCase):

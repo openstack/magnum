@@ -17,37 +17,13 @@ import docker
 from docker import client
 from docker import tls
 from docker.utils import utils
-from oslo_config import cfg
 
 from magnum.conductor.handlers.common import cert_manager
 from magnum.conductor import utils as conductor_utils
+import magnum.conf
 
 
-docker_opts = [
-    cfg.StrOpt('docker_remote_api_version',
-               default='1.20',
-               help='Docker remote api version. Override it according to '
-                    'specific docker api version in your environment.'),
-    cfg.IntOpt('default_timeout',
-               default=60,
-               help='Default timeout in seconds for docker client '
-                    'operations.'),
-    cfg.BoolOpt('api_insecure',
-                default=False,
-                help='If set, ignore any SSL validation issues'),
-    cfg.StrOpt('ca_file',
-               help='Location of CA certificates file for '
-                    'securing docker api requests (tlscacert).'),
-    cfg.StrOpt('cert_file',
-               help='Location of TLS certificate file for '
-                    'securing docker api requests (tlscert).'),
-    cfg.StrOpt('key_file',
-               help='Location of TLS private key file for '
-                    'securing docker api requests (tlskey).'),
-]
-
-CONF = cfg.CONF
-CONF.register_opts(docker_opts, 'docker')
+CONF = magnum.conf.CONF
 
 
 def parse_docker_image(image):

@@ -13,19 +13,15 @@
 import time
 
 from docker import errors
-from oslo_config import cfg
 from requests import exceptions as req_exceptions
 
 from magnum.common import docker_utils
+import magnum.conf
 from magnum.i18n import _LI
 from magnum.tests.functional.python_client_base import ClusterTest
 
 
-CONF = cfg.CONF
-CONF.import_opt('docker_remote_api_version', 'magnum.common.docker_utils',
-                group='docker')
-CONF.import_opt('default_timeout', 'magnum.common.docker_utils',
-                group='docker')
+CONF = magnum.conf.CONF
 
 
 class TestSwarmAPIs(ClusterTest):
