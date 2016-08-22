@@ -16,7 +16,6 @@
 import functools
 
 from heatclient import exc as heat_exc
-from oslo_config import cfg
 from oslo_log import log
 from oslo_service import periodic_task
 import six
@@ -26,6 +25,7 @@ from magnum.common import context
 from magnum.common import exception
 from magnum.common import rpc
 from magnum.conductor import monitors
+import magnum.conf
 from magnum.i18n import _
 from magnum.i18n import _LI
 from magnum.i18n import _LW
@@ -33,7 +33,7 @@ from magnum import objects
 from magnum.objects import fields
 
 
-CONF = cfg.CONF
+CONF = magnum.conf.CONF
 LOG = log.getLogger(__name__)
 
 
