@@ -20,7 +20,6 @@ from magnum.common.cert_manager import local_cert_manager
 import magnum.common.exception
 import magnum.common.rpc_service
 import magnum.common.service
-import magnum.common.utils
 import magnum.common.x509.config
 import magnum.db
 import magnum.drivers.common.template_def
@@ -29,8 +28,7 @@ import magnum.drivers.common.template_def
 def list_opts():
     return [
         ('DEFAULT',
-         itertools.chain(magnum.common.utils.UTILS_OPTS,
-                         magnum.common.rpc_service.periodic_opts,
+         itertools.chain(magnum.common.rpc_service.periodic_opts,
                          magnum.common.service.service_opts,
                          )),
         ('docker', magnum.common.docker_utils.docker_opts),
