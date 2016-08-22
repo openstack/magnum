@@ -17,7 +17,7 @@ from oslo_config import cfg
 
 from magnum.conf import api
 from magnum.conf import barbican
-# from magnum.conf import certificates
+from magnum.conf import certificates
 from magnum.conf import cinder
 from magnum.conf import cluster
 from magnum.conf import cluster_heat
@@ -44,7 +44,7 @@ barbican.register_opts(CONF)
 cluster.register_opts(CONF)
 cluster_templates.register_opts(CONF)
 cluster_heat.register_opts(CONF)
-# certificates.register_opts(CONF)
+certificates.register_opts(CONF)
 cinder.register_opts(CONF)
 conductor.register_opts(CONF)
 database.register_opts(CONF)
