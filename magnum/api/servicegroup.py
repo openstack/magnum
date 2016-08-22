@@ -11,20 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from oslo_config import cfg
 from oslo_utils import timeutils
 
+import magnum.conf
 from magnum.objects import magnum_service
 
-periodic_opts = [
-    cfg.IntOpt('service_down_time',
-               default=180,
-               help='Max interval size between periodic tasks execution in '
-                    'seconds.'),
-]
-
-CONF = cfg.CONF
-CONF.register_opts(periodic_opts)
+CONF = magnum.conf.CONF
 
 
 class ServiceGroup(object):

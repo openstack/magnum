@@ -10,8 +10,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import itertools
+
 from oslo_config import cfg
 
+from magnum.i18n import _
 
 # Default symbols to use for passwords. Avoids visually confusing characters.
 # ~6 bits per symbol
@@ -31,12 +34,31 @@ utils_opts = [
                 help='Symbols to use for passwords')
 ]
 
+periodic_opts = [
+    cfg.IntOpt('service_down_time',
+               default=180,
+               help='Max interval size between periodic tasks execution in '
+                    'seconds.'),
+]
+
+urlfetch_opts = [
+    cfg.IntOpt('max_manifest_size',
+               default=524288,
+               help=_('Maximum raw byte size of any manifest.'))
+]
+
+ALL_OPTS = list(itertools.chain(
+    utils_opts,
+    periodic_opts,
+    urlfetch_opts
+))
+
 
 def register_opts(conf):
-    conf.register_opts(utils_opts)
+    conf.register_opts(ALL_OPTS)
 
 
 def list_opts():
     return {
-        "DEFAULT": utils_opts
+        "DEFAULT": ALL_OPTS
     }
