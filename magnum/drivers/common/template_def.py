@@ -14,7 +14,6 @@
 import abc
 import ast
 
-from oslo_config import cfg
 from oslo_log import log as logging
 import requests
 import six
@@ -22,7 +21,6 @@ import six
 from magnum.common import clients
 from magnum.common import exception
 import magnum.conf
-from magnum.i18n import _
 from magnum.i18n import _LW
 
 from requests import exceptions as req_exceptions
@@ -32,17 +30,7 @@ LOG = logging.getLogger(__name__)
 COMMON_TEMPLATES_PATH = "../../common/templates/"
 COMMON_ENV_PATH = COMMON_TEMPLATES_PATH + "environments/"
 
-docker_registry_opts = [
-    cfg.StrOpt('swift_region',
-               help=_('Region name of Swift')),
-    cfg.StrOpt('swift_registry_container',
-               default='docker_registry',
-               help=_('Name of the container in Swift which docker registry '
-                      'stores images in'))
-]
-
 CONF = magnum.conf.CONF
-CONF.register_opts(docker_registry_opts, group='docker_registry')
 
 
 class ParameterMapping(object):
@@ -310,7 +298,7 @@ class BaseTemplateDefinition(TemplateDefinition):
             discovery_url = cluster.discovery_url
         else:
             discovery_endpoint = (
-                cfg.CONF.cluster.etcd_discovery_service_endpoint_format %
+                CONF.cluster.etcd_discovery_service_endpoint_format %
                 {'size': cluster.master_count})
             try:
                 discovery_url = requests.get(discovery_endpoint).text

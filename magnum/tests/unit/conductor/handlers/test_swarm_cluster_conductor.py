@@ -14,15 +14,17 @@
 
 import mock
 from mock import patch
-from oslo_config import cfg
 from oslo_service import loopingcall
 
 from magnum.conductor.handlers import cluster_conductor
+import magnum.conf
 from magnum.drivers.common import driver
 from magnum.drivers.swarm_fedora_atomic_v1 import driver as swarm_dr
 from magnum import objects
 from magnum.objects.fields import ClusterStatus as cluster_status
 from magnum.tests import base
+
+CONF = magnum.conf.CONF
 
 
 class TestClusterConductorWithSwarm(base.TestCase):
@@ -166,9 +168,9 @@ class TestClusterConductorWithSwarm(base.TestCase):
         mock_driver.return_value = swarm_dr.Driver()
         cluster = objects.Cluster(self.context, **self.cluster_dict)
 
-        cfg.CONF.set_override('swift_region',
-                              'RegionOne',
-                              group='docker_registry')
+        CONF.set_override('swift_region',
+                          'RegionOne',
+                          group='docker_registry')
 
         (template_path,
          definition,

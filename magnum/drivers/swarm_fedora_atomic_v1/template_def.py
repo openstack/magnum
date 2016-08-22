@@ -14,9 +14,6 @@
 import os
 
 from magnum.drivers.common import swarm_fedora_template_def as sftd
-from oslo_config import cfg
-
-CONF = cfg.CONF
 
 
 class AtomicSwarmTemplateDefinition(sftd.SwarmFedoraTemplateDefinition):

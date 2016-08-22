@@ -13,11 +13,11 @@
 # under the License.
 import os
 
+import magnum.conf
 from magnum.drivers.common import k8s_template_def
 from magnum.drivers.common import template_def
-from oslo_config import cfg
 
-CONF = cfg.CONF
+CONF = magnum.conf.CONF
 
 
 class CoreOSK8sTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
