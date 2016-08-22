@@ -43,31 +43,31 @@ class ClusterTemplatePatchType(types.JsonPatchType):
 
 
 class ClusterTemplate(base.APIBase):
-    """API representation of a clustertemplate.
+    """API representation of a ClusterTemplate.
 
     This class enforces type checking and value constraints, and converts
     between the internal object model and the API representation of
-    a clustertemplate.
+    a ClusterTemplate.
     """
 
     uuid = types.uuid
-    """Unique UUID for this clustertemplate"""
+    """Unique UUID for this ClusterTemplate"""
 
     name = wtypes.StringType(min_length=1, max_length=255)
-    """The name of the clustertemplate"""
+    """The name of the ClusterTemplate"""
 
     coe = wtypes.Enum(str, *fields.BayType.ALL, mandatory=True)
     """The Container Orchestration Engine for this clustertemplate"""
 
     image_id = wsme.wsattr(wtypes.StringType(min_length=1, max_length=255),
                            mandatory=True)
-    """The image name or UUID to use as an image for this clustertemplate"""
+    """The image name or UUID to use as an image for this ClusterTemplate"""
 
     flavor_id = wtypes.StringType(min_length=1, max_length=255)
-    """The flavor of this clustertemplate"""
+    """The flavor of this ClusterTemplate"""
 
     master_flavor_id = wtypes.StringType(min_length=1, max_length=255)
-    """The flavor of the master node for this clustertemplate"""
+    """The flavor of the master node for this ClusterTemplate"""
 
     dns_nameserver = wtypes.IPv4AddressType()
     """The DNS nameserver address"""
@@ -77,13 +77,13 @@ class ClusterTemplate(base.APIBase):
     """The name or id of the nova ssh keypair"""
 
     external_network_id = wtypes.StringType(min_length=1, max_length=255)
-    """The external network to attach the cluster"""
+    """The external network to attach to the Cluster"""
 
     fixed_network = wtypes.StringType(min_length=1, max_length=255)
-    """The fixed network name to attach the cluster"""
+    """The fixed network name to attach to the Cluster"""
 
     fixed_subnet = wtypes.StringType(min_length=1, max_length=255)
-    """The fixed subnet name to attach the cluster"""
+    """The fixed subnet name to attach to the Cluster"""
 
     network_driver = wtypes.StringType(min_length=1, max_length=255)
     """The name of the driver used for instantiating container networks"""
@@ -95,10 +95,10 @@ class ClusterTemplate(base.APIBase):
     """The size in GB of the docker volume"""
 
     cluster_distro = wtypes.StringType(min_length=1, max_length=255)
-    """The Cluster distro for the cluster, ex - coreos, fedora-atomic."""
+    """The Cluster distro for the Cluster, e.g. coreos, fedora-atomic, etc."""
 
     links = wsme.wsattr([link.Link], readonly=True)
-    """A list containing a self link and associated clustertemplate links"""
+    """A list containing a self link and associated ClusterTemplate links"""
 
     http_proxy = wtypes.StringType(min_length=1, max_length=255)
     """Address of a proxy that will receive all HTTP requests and relay them.
@@ -111,12 +111,12 @@ class ClusterTemplate(base.APIBase):
        """
 
     no_proxy = wtypes.StringType(min_length=1, max_length=255)
-    """A comma separated list of ips for which proxies should not
+    """A comma separated list of IPs for which proxies should not be
        used in the cluster
        """
 
     volume_driver = wtypes.StringType(min_length=1, max_length=255)
-    """The name of the driver used for instantiating container volume driver"""
+    """The name of the driver used for instantiating container volumes"""
 
     registry_enabled = wsme.wsattr(types.boolean, default=False)
     """Indicates whether the docker registry is enabled"""
@@ -128,26 +128,26 @@ class ClusterTemplate(base.APIBase):
     """Indicates whether the TLS should be disabled"""
 
     public = wsme.wsattr(types.boolean, default=False)
-    """Indicates whether the clustertemplate is public or not."""
+    """Indicates whether the ClusterTemplate is public or not."""
 
     server_type = wsme.wsattr(wtypes.StringType(min_length=1,
                                                 max_length=255),
                               default='vm')
-    """Server type for this clustertemplate """
+    """Server type for this ClusterTemplate """
 
     insecure_registry = wtypes.StringType(min_length=1, max_length=255)
-    """insecure registry url when create clustertemplate """
+    """Insecure registry URL when creating a ClusterTemplate """
 
     docker_storage_driver = wtypes.Enum(str, *fields.DockerStorageDriver.ALL)
     """Docker storage driver"""
 
     master_lb_enabled = wsme.wsattr(types.boolean, default=False)
-    """Indicates whether created bays should have a load balancer for master
+    """Indicates whether created clusters should have a load balancer for master
        nodes or not.
        """
 
     floating_ip_enabled = wsme.wsattr(types.boolean, default=True)
-    """Indicates whether created bays should have a floating ip or not."""
+    """Indicates whether created clusters should have a floating ip or not."""
 
     def __init__(self, **kwargs):
         self.fields = []
@@ -170,8 +170,8 @@ class ClusterTemplate(base.APIBase):
         return cluster_template
 
     @classmethod
-    def convert_with_links(cls, rpc_baymodel):
-        cluster_template = ClusterTemplate(**rpc_baymodel.as_dict())
+    def convert_with_links(cls, rpc_cluster_template):
+        cluster_template = ClusterTemplate(**rpc_cluster_template.as_dict())
         return cls._convert_with_links(cluster_template,
                                        pecan.request.host_url)
 
@@ -210,19 +210,19 @@ class ClusterTemplate(base.APIBase):
 
 
 class ClusterTemplateCollection(collection.Collection):
-    """API representation of a collection of clustertemplates."""
+    """API representation of a collection of ClusterTemplates."""
 
     clustertemplates = [ClusterTemplate]
-    """A list containing clustertemplates objects"""
+    """A list containing ClusterTemplates objects"""
 
     def __init__(self, **kwargs):
         self._type = 'clustertemplates'
 
     @staticmethod
-    def convert_with_links(rpc_baymodels, limit, url=None, **kwargs):
+    def convert_with_links(rpc_cluster_templates, limit, url=None, **kwargs):
         collection = ClusterTemplateCollection()
         collection.clustertemplates = [ClusterTemplate.convert_with_links(p)
-                                       for p in rpc_baymodels]
+                                       for p in rpc_cluster_templates]
         collection.next = collection.get_next(limit, url=url, **kwargs)
         return collection
 
@@ -274,7 +274,7 @@ class ClusterTemplatesController(base.Controller):
                    wtypes.text)
     def get_all(self, marker=None, limit=None, sort_key='id',
                 sort_dir='asc'):
-        """Retrieve a list of baymodels.
+        """Retrieve a list of ClusterTemplates.
 
         :param marker: pagination marker for large data sets.
         :param limit: maximum number of resources to return in a single result.
@@ -291,7 +291,7 @@ class ClusterTemplatesController(base.Controller):
                    wtypes.text)
     def detail(self, marker=None, limit=None, sort_key='id',
                sort_dir='asc'):
-        """Retrieve a list of clustertemplates with detail.
+        """Retrieve a list of ClusterTemplates with detail.
 
         :param marker: pagination marker for large data sets.
         :param limit: maximum number of resources to return in a single result.
@@ -314,10 +314,10 @@ class ClusterTemplatesController(base.Controller):
 
     @expose.expose(ClusterTemplate, types.uuid_or_name)
     def get_one(self, cluster_template_ident):
-        """Retrieve information about the given clustertemplate.
+        """Retrieve information about the given ClusterTemplate.
 
         :param cluster_template_ident: UUID or logical name of a
-        clustertemplate.
+        ClusterTemplate.
         """
         context = pecan.request.context
         cluster_template = api_utils.get_resource('BayModel',
@@ -333,9 +333,9 @@ class ClusterTemplatesController(base.Controller):
     @validation.enforce_volume_driver_types_create()
     @validation.enforce_volume_storage_size_create()
     def post(self, cluster_template):
-        """Create a new cluster_template.
+        """Create a new ClusterTemplate.
 
-        :param cluster_template: a cluster_template within the request body.
+        :param cluster_template: a ClusterTemplate within the request body.
         """
         context = pecan.request.context
         policy.enforce(context, 'clustertemplate:create',
@@ -375,12 +375,12 @@ class ClusterTemplatesController(base.Controller):
     @validation.enforce_network_driver_types_update()
     @validation.enforce_volume_driver_types_update()
     def patch(self, cluster_template_ident, patch):
-        """Update an existing cluster_template.
+        """Update an existing ClusterTemplate.
 
         :param cluster_template_ident: UUID or logic name of a
-        cluster_template.
+        ClusterTemplate.
         :param patch: a json PATCH document to apply to this
-        cluster_template.
+        ClusterTemplate.
         """
         context = pecan.request.context
         cluster_template = api_utils.get_resource('BayModel',
@@ -398,7 +398,7 @@ class ClusterTemplatesController(base.Controller):
         new_cluster_template_dict = new_cluster_template.as_dict()
         attr_validator.validate_os_resources(context,
                                              new_cluster_template_dict)
-        # check permissions when updating baymodel public flag
+        # check permissions when updating ClusterTemplate public flag
         if cluster_template.public != new_cluster_template.public:
             if not policy.enforce(context, "clustertemplate:publish", None,
                                   do_raise=False):
@@ -421,10 +421,10 @@ class ClusterTemplatesController(base.Controller):
 
     @expose.expose(None, types.uuid_or_name, status_code=204)
     def delete(self, cluster_template_ident):
-        """Delete a cluster_template.
+        """Delete a ClusterTemplate.
 
         :param cluster_template_ident: UUID or logical name of a
-         cluster_template.
+         ClusterTemplate.
         """
         context = pecan.request.context
         cluster_template = api_utils.get_resource('BayModel',

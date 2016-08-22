@@ -74,7 +74,7 @@ class Cluster(base.APIBase):
     """API representation of a cluster.
 
     This class enforces type checking and value constraints, and converts
-    between the internal object model and the API representation of a bay.
+    between the internal object model and the API representation of a Cluster.
     """
 
     _cluster_template_id = None
@@ -89,7 +89,7 @@ class Cluster(base.APIBase):
                 self._cluster_template_id = cluster_template.uuid
             except exception.ClusterTemplateNotFound as e:
                 # Change error code because 404 (NotFound) is inappropriate
-                # response for a POST request to create a Bay
+                # response for a POST request to create a Cluster
                 e.code = 400  # BadRequest
                 raise
         elif value == wtypes.Unset:
@@ -194,8 +194,8 @@ class Cluster(base.APIBase):
         return cluster
 
     @classmethod
-    def convert_with_links(cls, rpc_bay, expand=True):
-        cluster = Cluster(**rpc_bay.as_dict())
+    def convert_with_links(cls, rpc_cluster, expand=True):
+        cluster = Cluster(**rpc_cluster.as_dict())
         return cls._convert_with_links(cluster, pecan.request.host_url, expand)
 
     @classmethod
@@ -247,10 +247,11 @@ class ClusterCollection(collection.Collection):
         self._type = 'clusters'
 
     @staticmethod
-    def convert_with_links(rpc_bays, limit, url=None, expand=False, **kwargs):
+    def convert_with_links(rpc_clusters, limit, url=None, expand=False,
+                           **kwargs):
         collection = ClusterCollection()
         collection.clusters = [Cluster.convert_with_links(p, expand)
-                               for p in rpc_bays]
+                               for p in rpc_clusters]
         collection.next = collection.get_next(limit, url=url, **kwargs)
         return collection
 
@@ -272,7 +273,7 @@ class ClustersController(base.Controller):
     }
 
     def _generate_name_for_cluster(self, context):
-        """Generate a random name like: zeta-22-bay."""
+        """Generate a random name like: zeta-22-cluster."""
         name_gen = name_generator.NameGenerator()
         name = name_gen.generate()
         return name + '-cluster'
@@ -365,13 +366,13 @@ class ClustersController(base.Controller):
                 for res in failed_resources}
 
     @expose.expose(Cluster, types.uuid_or_name)
-    def get_one(self, bay_ident):
-        """Retrieve information about the given bay.
+    def get_one(self, cluster_ident):
+        """Retrieve information about the given Cluster.
 
-        :param bay_ident: UUID of a bay or logical name of the bay.
+        :param cluster_ident: UUID or logical name of the Cluster.
         """
         context = pecan.request.context
-        cluster = api_utils.get_resource('Bay', bay_ident)
+        cluster = api_utils.get_resource('Bay', cluster_ident)
         policy.enforce(context, 'cluster:get', cluster,
                        action='cluster:get')
 
@@ -415,15 +416,36 @@ class ClustersController(base.Controller):
 
         return ClusterID(new_cluster.uuid)
 
+    @base.Controller.api_version("1.1", "1.2")
     @wsme.validate(types.uuid, [ClusterPatchType])
     @expose.expose(ClusterID, types.uuid_or_name, body=[ClusterPatchType],
                    status_code=202)
     def patch(self, cluster_ident, patch):
-        """Update an existing bay.
+        """Update an existing Cluster.
 
-        :param cluster_ident: UUID or logical name of a bay.
-        :param patch: a json PATCH document to apply to this bay.
+        :param cluster_ident: UUID or logical name of a cluster.
+        :param patch: a json PATCH document to apply to this cluster.
         """
+        cluster = self._patch(cluster_ident, patch)
+        pecan.request.rpcapi.bay_update_async(cluster)
+        return ClusterID(cluster.uuid)
+
+    @base.Controller.api_version("1.3")  # noqa
+    @wsme.validate(types.uuid, bool, [ClusterPatchType])
+    @expose.expose(ClusterID, types.uuid_or_name, bool,
+                   body=[ClusterPatchType], status_code=202)
+    def patch(self, cluster_ident, rollback=False, patch=None):
+        """Update an existing Cluster.
+
+        :param cluster_ident: UUID or logical name of a cluster.
+        :param rollback: whether to rollback cluster on update failure.
+        :param patch: a json PATCH document to apply to this cluster.
+        """
+        cluster = self._patch(cluster_ident, patch)
+        pecan.request.rpcapi.bay_update_async(cluster, rollback)
+        return ClusterID(cluster.uuid)
+
+    def _patch(self, cluster_ident, patch):
         context = pecan.request.context
         cluster = api_utils.get_resource('Bay', cluster_ident)
         policy.enforce(context, 'cluster:update', cluster,
@@ -450,9 +472,7 @@ class ClustersController(base.Controller):
         delta = cluster.obj_what_changed()
 
         validate_bay_properties(delta)
-
-        pecan.request.rpcapi.bay_update_async(cluster)
-        return ClusterID(cluster.uuid)
+        return cluster
 
     @expose.expose(None, types.uuid_or_name, status_code=204)
     def delete(self, cluster_ident):

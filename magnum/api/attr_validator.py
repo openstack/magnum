@@ -96,7 +96,7 @@ def validate_fixed_network(cli, fixed_network):
     """Validate fixed network"""
 
     # TODO(houming):this method implement will be added after this
-    # first pathch for bay's OpenStack resources validation is merged.
+    # first pathch for Cluster's OpenStack resources validation is merged.
     pass
 
 
@@ -166,21 +166,22 @@ def validate_labels_executor_env_variables(labels):
         raise exception.InvalidParameterValue(err)
 
 
-def validate_os_resources(context, baymodel):
-    """Validate baymodel's OpenStack Resources"""
+def validate_os_resources(context, cluster_template):
+    """Validate ClusterTemplate's OpenStack Resources"""
 
     cli = clients.OpenStackClients(context)
 
     for attr, validate_method in validators.items():
-        if attr in baymodel and baymodel[attr] is not None:
+        if attr in cluster_template and cluster_template[attr] is not None:
             if attr != 'labels':
-                validate_method(cli, baymodel[attr])
+                validate_method(cli, cluster_template[attr])
             else:
-                validate_method(baymodel[attr])
+                validate_method(cluster_template[attr])
 
 
-def validate_master_count(bay, baymodel):
-    if bay['master_count'] > 1 and not baymodel['master_lb_enabled']:
+def validate_master_count(cluster, cluster_template):
+    if cluster['master_count'] > 1 and \
+            not cluster_template['master_lb_enabled']:
         raise exception.InvalidParameterValue(_(
             "master_count must be 1 when master_lb_enabled is False"))
 

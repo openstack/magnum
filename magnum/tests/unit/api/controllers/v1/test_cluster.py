@@ -227,7 +227,7 @@ class TestPatch(api_base.FunctionalTest):
         self.mock_bay_update.side_effect = self._simulate_rpc_bay_update
         self.addCleanup(p.stop)
 
-    def _simulate_rpc_bay_update(self, bay):
+    def _simulate_rpc_bay_update(self, bay, rollback=False):
         bay.save()
         return bay
 
