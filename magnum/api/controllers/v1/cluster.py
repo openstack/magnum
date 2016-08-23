@@ -121,6 +121,13 @@ class Cluster(base.APIBase):
     api_address = wsme.wsattr(wtypes.text, readonly=True)
     """Api address of cluster master node"""
 
+    coe_version = wsme.wsattr(wtypes.text, readonly=True)
+    """Version of the COE software currently running in this cluster.
+    Example: swarm version or kubernetes version."""
+
+    container_version = wsme.wsattr(wtypes.text, readonly=True)
+    """Version of the container software. Example: docker version."""
+
     node_addresses = wsme.wsattr([wtypes.text], readonly=True)
     """IP addresses of cluster agent nodes"""
 
@@ -198,7 +205,9 @@ class Cluster(base.APIBase):
                      api_address='172.24.4.3',
                      node_addresses=['172.24.4.4', '172.24.4.5'],
                      created_at=timeutils.utcnow(),
-                     updated_at=timeutils.utcnow())
+                     updated_at=timeutils.utcnow(),
+                     coe_version=None,
+                     container_version=None)
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 
     def as_dict(self):
@@ -405,6 +414,8 @@ class ClustersController(base.Controller):
         name = cluster_dict.get('name') or \
             self._generate_name_for_cluster(context)
         cluster_dict['name'] = name
+        cluster_dict['coe_version'] = None
+        cluster_dict['container_version'] = None
 
         new_cluster = objects.Bay(context, **cluster_dict)
         new_cluster.uuid = uuid.uuid4()

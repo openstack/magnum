@@ -88,6 +88,10 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
             return ['../../common/templates/environments/no_master_lb.yaml']
 
     @property
+    def driver_module_path(self):
+        return __name__[:__name__.rindex('.')]
+
+    @property
     def template_path(self):
         return os.path.join(os.path.dirname(os.path.realpath(__file__)),
                             'templates/mesoscluster.yaml')

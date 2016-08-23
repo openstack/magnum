@@ -14,3 +14,4 @@
 
 version = '1.0.0'
 driver = 'swarm_atomic'
+container_version = '1.9.1'

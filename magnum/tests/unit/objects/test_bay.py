@@ -32,6 +32,8 @@ class TestBayObject(base.DbTestCase):
         self.fake_bay['trustee_username'] = 'trustee_user'
         self.fake_bay['trustee_user_id'] = 'trustee_user_id'
         self.fake_bay['trustee_password'] = 'password'
+        self.fake_bay['coe_version'] = 'fake-coe-version'
+        self.fake_bay['container_version'] = 'fake-container-version'
         baymodel_id = self.fake_bay['baymodel_id']
         self.fake_baymodel = objects.BayModel(uuid=baymodel_id)
 

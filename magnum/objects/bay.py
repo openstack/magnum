@@ -36,7 +36,8 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
     #              Add 'trustee_user_name', 'trustee_password',
     #              'trustee_user_id' field
     # Version 1.6: Add rollback support for Bay
-    VERSION = '1.6'
+    # Version 1.7: Added 'coe_version'  and 'container_version' fields
+    VERSION = '1.7'
 
     dbapi = dbapi.get_instance()
 
@@ -63,7 +64,9 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
         'trust_id': fields.StringField(nullable=True),
         'trustee_username': fields.StringField(nullable=True),
         'trustee_password': fields.StringField(nullable=True),
-        'trustee_user_id': fields.StringField(nullable=True)
+        'trustee_user_id': fields.StringField(nullable=True),
+        'coe_version': fields.StringField(nullable=True),
+        'container_version': fields.StringField(nullable=True)
     }
 
     @staticmethod

@@ -111,6 +111,13 @@ class Bay(base.APIBase):
     api_address = wsme.wsattr(wtypes.text, readonly=True)
     """Api address of cluster master node"""
 
+    coe_version = wsme.wsattr(wtypes.text, readonly=True)
+    """Version of the COE software currently running in this cluster.
+    Example: swarm version or kubernetes version."""
+
+    container_version = wsme.wsattr(wtypes.text, readonly=True)
+    """Version of the container software. Example: docker version."""
+
     node_addresses = wsme.wsattr([wtypes.text], readonly=True)
     """IP addresses of cluster agent nodes"""
 
@@ -165,7 +172,9 @@ class Bay(base.APIBase):
                      api_address='172.24.4.3',
                      node_addresses=['172.24.4.4', '172.24.4.5'],
                      created_at=timeutils.utcnow(),
-                     updated_at=timeutils.utcnow())
+                     updated_at=timeutils.utcnow(),
+                     coe_version=None,
+                     container_version=None)
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 
 
@@ -365,6 +374,8 @@ class BaysController(base.Controller):
         # bay if the name is not spcified by user.
         name = bay_dict.get('name') or self._generate_name_for_bay(context)
         bay_dict['name'] = name
+        bay_dict['coe_version'] = None
+        bay_dict['container_version'] = None
 
         new_bay = objects.Bay(context, **bay_dict)
         new_bay.uuid = uuid.uuid4()

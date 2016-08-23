@@ -318,6 +318,10 @@ class TemplateDefinition(object):
             output.set_output(stack, baymodel, bay)
 
     @abc.abstractproperty
+    def driver_module_path(self):
+        pass
+
+    @abc.abstractproperty
     def template_path(self):
         pass
 
@@ -347,6 +351,10 @@ class BaseTemplateDefinition(TemplateDefinition):
                            baymodel_attr='no_proxy')
         self.add_parameter('number_of_masters',
                            bay_attr='master_count')
+
+    @property
+    def driver_module_path(self):
+        pass
 
     @abc.abstractproperty
     def template_path(self):

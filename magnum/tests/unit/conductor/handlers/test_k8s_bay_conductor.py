@@ -67,6 +67,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
+            'coe_version': 'fake-version',
         }
         self.context.auth_url = 'http://192.168.10.10:5000/v3'
         self.context.user_name = 'fake_user'
@@ -172,6 +173,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
             'auth_url': 'http://192.168.10.10:5000/v3',
             'insecure_registry_url': '10.0.0.1:5000',
+            'kube_version': 'fake-version',
         }
         if missing_attr is not None:
             expected.pop(mapping[missing_attr], None)
@@ -242,6 +244,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'username': 'fake_user',
             'volume_driver': 'volume_driver',
             'insecure_registry_url': '10.0.0.1:5000',
+            'kube_version': 'fake-version',
         }
 
         self.assertEqual(expected, definition)
@@ -299,6 +302,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'bay_uuid': self.bay_dict['uuid'],
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'insecure_registry_url': '10.0.0.1:5000',
+            'kube_version': 'fake-version',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -353,6 +357,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'bay_uuid': self.bay_dict['uuid'],
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'insecure_registry_url': '10.0.0.1:5000',
+            'kube_version': 'fake-version',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -515,6 +520,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
             'auth_url': 'http://192.168.10.10:5000/v3',
             'insecure_registry_url': '10.0.0.1:5000',
+            'kube_version': 'fake-version',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

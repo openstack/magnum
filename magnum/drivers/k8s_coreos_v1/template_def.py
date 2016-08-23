@@ -73,6 +73,8 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                            param_type=str)
         self.add_parameter('insecure_registry_url',
                            baymodel_attr='insecure_registry')
+        self.add_parameter('kube_version',
+                           bay_attr='coe_version')
 
         self.add_output('api_address',
                         bay_attr='api_address',
@@ -132,6 +134,10 @@ class CoreOSK8sTemplateDefinition(K8sTemplateDefinition):
             return ['../../common/templates/environments/with_master_lb.yaml']
         else:
             return ['../../common/templates/environments/no_master_lb.yaml']
+
+    @property
+    def driver_module_path(self):
+        return __name__[:__name__.rindex('.')]
 
     @property
     def template_path(self):
