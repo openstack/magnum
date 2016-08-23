@@ -1,0 +1,6 @@
+---
+upgrade:
+  - Magnum now support SSL for API service. User can enable SSL for API
+    via new 3 config options 'enabled_ssl', 'ssl_cert_file' and 'ssl_key_file'.
+  - Change default API development service from wsgiref simple_server to
+    werkzeug for better supporting SSL.

@@ -18,21 +18,79 @@ from magnum.cmd import api
 from magnum.tests import base
 
 
+# NOTE(hieulq): need to mock MagnumObject, otherwise other test cases
+# will be failed because of setting wrong ovo indirection api
+@mock.patch('magnum.objects.base.MagnumObject')
 class TestMagnumAPI(base.TestCase):
 
-    # NOTE(hieulq): need to mock MagnumObject, otherwise other test cases
-    # will be failed because of setting wrong ovo indirection api
-    @mock.patch('magnum.objects.base.MagnumObject')
-    @mock.patch('wsgiref.simple_server.make_server')
+    @mock.patch('werkzeug.serving.run_simple')
     @mock.patch.object(api, 'api_app')
     @mock.patch('magnum.common.service.prepare_service')
-    def test_api(self, mock_prep, mock_app, mock_make, mock_base):
+    def test_api_http(self, mock_prep, mock_app, mock_run, mock_base):
         api.main()
 
         app = mock_app.load_app.return_value
-        server = mock_make.return_value
         mock_prep.assert_called_once_with(mock.ANY)
         mock_app.load_app.assert_called_once_with()
-        mock_make.assert_called_once_with(base.CONF.api.host,
-                                          base.CONF.api.port, app)
-        server.serve_forever.assert_called_once_with()
+        mock_run.assert_called_once_with(base.CONF.api.host,
+                                         base.CONF.api.port,
+                                         app, ssl_context=None)
+
+    @mock.patch('os.path.exists')
+    @mock.patch('werkzeug.serving.run_simple')
+    @mock.patch.object(api, 'api_app')
+    @mock.patch('magnum.common.service.prepare_service')
+    def test_api_https_no_cert(self, mock_prep, mock_app, mock_run,
+                               mock_exist, mock_base):
+        self.config(enabled_ssl=True,
+                    ssl_cert_file='tmp_crt',
+                    group='api')
+        mock_exist.return_value = False
+
+        self.assertRaises(RuntimeError, api.main)
+        mock_prep.assert_called_once_with(mock.ANY)
+        mock_app.load_app.assert_called_once_with()
+        mock_run.assert_not_called()
+        mock_exist.assert_called_once_with('tmp_crt')
+
+    @mock.patch('os.path.exists')
+    @mock.patch('werkzeug.serving.run_simple')
+    @mock.patch.object(api, 'api_app')
+    @mock.patch('magnum.common.service.prepare_service')
+    def test_api_https_no_key(self, mock_prep, mock_app, mock_run,
+                              mock_exist, mock_base):
+        self.config(enabled_ssl=True,
+                    ssl_cert_file='tmp_crt',
+                    ssl_key_file='tmp_key',
+                    group='api')
+        mock_exist.side_effect = [True, False]
+
+        self.assertRaises(RuntimeError, api.main)
+        mock_prep.assert_called_once_with(mock.ANY)
+        mock_app.load_app.assert_called_once_with()
+        mock_run.assert_not_called()
+        mock_exist.assert_has_calls([mock.call('tmp_crt'),
+                                     mock.call('tmp_key')])
+
+    @mock.patch('os.path.exists')
+    @mock.patch('werkzeug.serving.run_simple')
+    @mock.patch.object(api, 'api_app')
+    @mock.patch('magnum.common.service.prepare_service')
+    def test_api_https(self, mock_prep, mock_app, mock_run,
+                       mock_exist, mock_base):
+        self.config(enabled_ssl=True,
+                    ssl_cert_file='tmp_crt',
+                    ssl_key_file='tmp_key',
+                    group='api')
+        mock_exist.side_effect = [True, True]
+
+        api.main()
+
+        app = mock_app.load_app.return_value
+        mock_prep.assert_called_once_with(mock.ANY)
+        mock_app.load_app.assert_called_once_with()
+        mock_exist.assert_has_calls([mock.call('tmp_crt'),
+                                     mock.call('tmp_key')])
+        mock_run.assert_called_once_with(base.CONF.api.host,
+                                         base.CONF.api.port, app,
+                                         ssl_context=('tmp_crt', 'tmp_key'))
