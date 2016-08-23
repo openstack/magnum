@@ -69,14 +69,14 @@ LOG = logging.getLogger(__name__)
 
 
 def _extract_template_definition(context, bay, scale_manager=None):
-    baymodel = conductor_utils.retrieve_baymodel(context, bay)
-    cluster_distro = baymodel.cluster_distro
-    cluster_coe = baymodel.coe
-    cluster_server_type = baymodel.server_type
+    cluster_template = conductor_utils.retrieve_cluster_template(context, bay)
+    cluster_distro = cluster_template.cluster_distro
+    cluster_coe = cluster_template.coe
+    cluster_server_type = cluster_template.server_type
     definition = TDef.get_template_definition(cluster_server_type,
                                               cluster_distro,
                                               cluster_coe)
-    return definition.extract_definition(context, baymodel, bay,
+    return definition.extract_definition(context, cluster_template, bay,
                                          scale_manager=scale_manager)
 
 
@@ -275,10 +275,11 @@ class HeatPoller(object):
         self.context = self.openstack_client.context
         self.bay = bay
         self.attempts = 0
-        self.baymodel = conductor_utils.retrieve_baymodel(self.context, bay)
+        self.cluster_template = conductor_utils.retrieve_cluster_template(
+            self.context, bay)
         self.template_def = TDef.get_template_definition(
-            self.baymodel.server_type,
-            self.baymodel.cluster_distro, self.baymodel.coe)
+            self.cluster_template.server_type,
+            self.cluster_template.cluster_distro, self.cluster_template.coe)
 
     def poll_and_check(self):
         # TODO(yuanying): temporary implementation to update api_address,
@@ -374,9 +375,9 @@ class HeatPoller(object):
         if stack_param:
             self.bay.coe_version = stack.parameters[stack_param]
 
-        tdef = TDef.get_template_definition(self.baymodel.server_type,
-                                            self.baymodel.cluster_distro,
-                                            self.baymodel.coe)
+        tdef = TDef.get_template_definition(
+            self.cluster_template.server_type,
+            self.cluster_template.cluster_distro, self.cluster_template.coe)
 
         version_module_path = tdef.driver_module_path+'.version'
         try:
@@ -387,7 +388,8 @@ class HeatPoller(object):
         self.bay.container_version = container_version
 
     def _sync_bay_and_template_status(self, stack):
-        self.template_def.update_outputs(stack, self.baymodel, self.bay)
+        self.template_def.update_outputs(stack, self.cluster_template,
+                                         self.bay)
         self.get_version_info(stack)
         self._sync_bay_status(stack)
 

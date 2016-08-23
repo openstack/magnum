@@ -20,7 +20,7 @@ from oslo_versionedobjects import fields
 from magnum.common import exception
 from magnum.db import api as dbapi
 from magnum.objects import base
-from magnum.objects import baymodel
+from magnum.objects import cluster_template
 from magnum.objects import fields as m_fields
 
 
@@ -32,12 +32,14 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.2: Add 'registry_trust_id' field
     # Version 1.3: Added 'baymodel' field
     # Version 1.4: Added more types of status to bay's status field
-    # Version 1.5: Reanme 'registry_trust_id' to 'trust_id'
+    # Version 1.5: Rename 'registry_trust_id' to 'trust_id'
     #              Add 'trustee_user_name', 'trustee_password',
     #              'trustee_user_id' field
     # Version 1.6: Add rollback support for Bay
     # Version 1.7: Added 'coe_version'  and 'container_version' fields
-    VERSION = '1.7'
+    # Version 1.8: Rename 'baymodel' to 'cluster_template'
+
+    VERSION = '1.8'
 
     dbapi = dbapi.get_instance()
 
@@ -60,7 +62,7 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
         'master_addresses': fields.ListOfStringsField(nullable=True),
         'ca_cert_ref': fields.StringField(nullable=True),
         'magnum_cert_ref': fields.StringField(nullable=True),
-        'baymodel': fields.ObjectField('BayModel'),
+        'cluster_template': fields.ObjectField('ClusterTemplate'),
         'trust_id': fields.StringField(nullable=True),
         'trustee_username': fields.StringField(nullable=True),
         'trustee_password': fields.StringField(nullable=True),
@@ -73,15 +75,15 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
     def _from_db_object(bay, db_bay):
         """Converts a database entity to a formal object."""
         for field in bay.fields:
-            if field != 'baymodel':
+            if field != 'cluster_template':
                 bay[field] = db_bay[field]
 
         # Note(eliqiao): The following line needs to be placed outside the
-        # loop because there is a dependency from baymodel to baymodel_id.
-        # The baymodel_id must be populated first in the loop before it can be
-        # used to find the baymodel.
-        bay['baymodel'] = baymodel.BayModel.get_by_uuid(bay._context,
-                                                        bay.baymodel_id)
+        # loop because there is a dependency from cluster_template to
+        # baymodel_id. The baymodel_id must be populated first in the loop
+        # before it can be used to find the cluster_template.
+        bay['cluster_template'] = cluster_template.ClusterTemplate.get_by_uuid(
+            bay._context, bay.baymodel_id)
 
         bay.obj_reset_changes()
         return bay

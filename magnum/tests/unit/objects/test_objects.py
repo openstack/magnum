@@ -362,8 +362,8 @@ class TestObject(test_base.TestCase, _TestObject):
 # For more information on object version testing, read
 # http://docs.openstack.org/developer/magnum/objects.html
 object_data = {
-    'Bay': '1.7-88cb12f991721fe31602dc3fd7acd654',
-    'BayModel': '1.15-9b961246b348aa380783dae14014e423',
+    'Bay': '1.8-a6109e08d32dc59d3ad100697e06d8da',
+    'ClusterTemplate': '1.16-29dfb88bff54a412b05f9a651f4758a6',
     'Certificate': '1.1-1924dc077daa844f0f9076332ef96815',
     'MyObj': '1.0-b43567e512438205e32f4e95ca616697',
     'MyObj': '1.0-34c4b1aadefd177b13f9a2f894cc23cd',

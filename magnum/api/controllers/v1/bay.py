@@ -62,7 +62,7 @@ class Bay(base.APIBase):
     def _set_baymodel_id(self, value):
         if value and self._baymodel_id != value:
             try:
-                baymodel = api_utils.get_resource('BayModel', value)
+                baymodel = api_utils.get_resource('ClusterTemplate', value)
                 self._baymodel_id = baymodel.uuid
             except exception.ClusterTemplateNotFound as e:
                 # Change error code because 404 (NotFound) is inappropriate
@@ -364,7 +364,8 @@ class BaysController(base.Controller):
         context = pecan.request.context
         policy.enforce(context, 'bay:create',
                        action='bay:create')
-        baymodel = objects.BayModel.get_by_uuid(context, bay.baymodel_id)
+        baymodel = objects.ClusterTemplate.get_by_uuid(context,
+                                                       bay.baymodel_id)
         attr_validator.validate_os_resources(context, baymodel.as_dict())
         attr_validator.validate_master_count(bay.as_dict(), baymodel.as_dict())
         bay_dict = bay.as_dict()

@@ -266,7 +266,7 @@ class TestAttrValidator(base.BaseTestCase):
     @mock.patch('magnum.common.clients.OpenStackClients')
     def test_validate_os_resources_with_invalid_flavor(self,
                                                        mock_os_cli):
-        mock_baymodel = {'flavor_id': 'test_flavor'}
+        mock_cluster_template = {'flavor_id': 'test_flavor'}
         mock_flavor = mock.MagicMock()
         mock_flavor.name = 'test_flavor_not_equal'
         mock_flavor.id = 'test_flavor_id_not_equal'
@@ -277,22 +277,23 @@ class TestAttrValidator(base.BaseTestCase):
         mock_context = mock.MagicMock()
         self.assertRaises(exception.FlavorNotFound,
                           attr_validator.validate_os_resources,
-                          mock_context, mock_baymodel)
+                          mock_context, mock_cluster_template)
 
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.api.attr_validator.validate_labels')
     def test_validate_os_resources_with_label(self, mock_validate_labels,
                                               mock_os_cli):
-        mock_baymodel = {'labels': {'mesos_slave_isolation': 'abc'}}
+        mock_cluster_template = {'labels': {'mesos_slave_isolation': 'abc'}}
         mock_context = mock.MagicMock()
         self.assertRaises(exception.InvalidParameterValue,
                           attr_validator.validate_os_resources, mock_context,
-                          mock_baymodel)
+                          mock_cluster_template)
 
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.api.attr_validator.validators')
     def test_validate_os_resources_without_validator(self, mock_validators,
                                                      mock_os_cli):
-        mock_baymodel = {}
+        mock_cluster_template = {}
         mock_context = mock.MagicMock()
-        attr_validator.validate_os_resources(mock_context, mock_baymodel)
+        attr_validator.validate_os_resources(mock_context,
+                                             mock_cluster_template)

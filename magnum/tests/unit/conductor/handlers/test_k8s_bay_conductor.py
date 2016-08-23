@@ -24,7 +24,7 @@ from magnum.tests import base
 class TestBayConductorWithK8s(base.TestCase):
     def setUp(self):
         super(TestBayConductorWithK8s, self).setUp()
-        self.baymodel_dict = {
+        self.cluster_template_dict = {
             'image_id': 'image_id',
             'flavor_id': 'flavor_id',
             'master_flavor_id': 'master_flavor_id',
@@ -85,25 +85,27 @@ class TestBayConductorWithK8s(base.TestCase):
         self.mock_osc_class.return_value = self.mock_osc
 
     @patch('requests.get')
-    @patch('magnum.objects.BayModel.get_by_uuid')
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     def test_extract_template_definition(
             self,
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self._test_extract_template_definition(
-            mock_objects_baymodel_get_by_uuid, mock_get)
+            mock_objects_cluster_template_get_by_uuid, mock_get)
 
     def _test_extract_template_definition(
             self,
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get,
             missing_attr=None):
-        if missing_attr in self.baymodel_dict:
-            self.baymodel_dict[missing_attr] = None
+        if missing_attr in self.cluster_template_dict:
+            self.cluster_template_dict[missing_attr] = None
         elif missing_attr in self.bay_dict:
             self.bay_dict[missing_attr] = None
-        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
-        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        cluster_template = objects.ClusterTemplate(
+            self.context, **self.cluster_template_dict)
+        mock_objects_cluster_template_get_by_uuid.return_value = \
+            cluster_template
         expected_result = str('{"action":"get","node":{"key":"test","value":'
                               '"1","modifiedIndex":10,"createdIndex":10}}')
         mock_resp = mock.MagicMock()
@@ -186,14 +188,16 @@ class TestBayConductorWithK8s(base.TestCase):
             env_files)
 
     @patch('requests.get')
-    @patch('magnum.objects.BayModel.get_by_uuid')
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     def test_extract_template_definition_with_registry(
             self,
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get):
-        self.baymodel_dict['registry_enabled'] = True
-        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
-        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        self.cluster_template_dict['registry_enabled'] = True
+        cluster_template = objects.ClusterTemplate(
+            self.context, **self.cluster_template_dict)
+        mock_objects_cluster_template_get_by_uuid.return_value = \
+            cluster_template
         expected_result = str('{"action":"get","node":{"key":"test","value":'
                               '"1","modifiedIndex":10,"createdIndex":10}}')
         mock_resp = mock.MagicMock()
@@ -256,14 +260,16 @@ class TestBayConductorWithK8s(base.TestCase):
             env_files)
 
     @patch('requests.get')
-    @patch('magnum.objects.BayModel.get_by_uuid')
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     def test_extract_template_definition_coreos_with_disovery(
             self,
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get):
-        self.baymodel_dict['cluster_distro'] = 'coreos'
-        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
-        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        self.cluster_template_dict['cluster_distro'] = 'coreos'
+        cluster_template = objects.ClusterTemplate(
+            self.context, **self.cluster_template_dict)
+        mock_objects_cluster_template_get_by_uuid.return_value = \
+            cluster_template
         expected_result = str('{"action":"get","node":{"key":"test","value":'
                               '"1","modifiedIndex":10,"createdIndex":10}}')
         mock_resp = mock.MagicMock()
@@ -313,17 +319,19 @@ class TestBayConductorWithK8s(base.TestCase):
             env_files)
 
     @patch('requests.get')
-    @patch('magnum.objects.BayModel.get_by_uuid')
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     def test_extract_template_definition_coreos_no_discoveryurl(
             self,
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             reqget):
-        self.baymodel_dict['cluster_distro'] = 'coreos'
+        self.cluster_template_dict['cluster_distro'] = 'coreos'
         self.bay_dict['discovery_url'] = None
         mock_req = mock.MagicMock(text='http://tokentest/h1/h2/h3')
         reqget.return_value = mock_req
-        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
-        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        cluster_template = objects.ClusterTemplate(
+            self.context, **self.cluster_template_dict)
+        mock_objects_cluster_template_get_by_uuid.return_value = \
+            cluster_template
         bay = objects.Bay(self.context, **self.bay_dict)
 
         (template_path,
@@ -368,112 +376,114 @@ class TestBayConductorWithK8s(base.TestCase):
             env_files)
 
     @patch('requests.get')
-    @patch('magnum.objects.BayModel.get_by_uuid')
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     def test_extract_template_definition_without_dns(
             self,
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self._test_extract_template_definition(
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get,
             missing_attr='dns_nameserver')
 
     @patch('requests.get')
-    @patch('magnum.objects.BayModel.get_by_uuid')
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     def test_extract_template_definition_without_server_image(
             self,
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self._test_extract_template_definition(
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get,
             missing_attr='image_id')
 
     @patch('requests.get')
-    @patch('magnum.objects.BayModel.get_by_uuid')
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     def test_extract_template_definition_without_minion_flavor(
             self,
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self._test_extract_template_definition(
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get,
             missing_attr='flavor_id')
 
     @patch('requests.get')
-    @patch('magnum.objects.BayModel.get_by_uuid')
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     def test_extract_template_definition_without_docker_volume_size(
             self,
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self._test_extract_template_definition(
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get,
             missing_attr='docker_volume_size')
 
     @patch('requests.get')
-    @patch('magnum.objects.BayModel.get_by_uuid')
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     def test_extract_template_definition_without_docker_storage_driver(
             self,
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self._test_extract_template_definition(
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get,
             missing_attr='docker_storage_driver')
 
     @patch('requests.get')
-    @patch('magnum.objects.BayModel.get_by_uuid')
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     def test_extract_template_definition_without_master_flavor(
             self,
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self._test_extract_template_definition(
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get,
             missing_attr='master_flavor_id')
 
     @patch('requests.get')
-    @patch('magnum.objects.BayModel.get_by_uuid')
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     def test_extract_template_definition_without_apiserver_port(
             self,
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self._test_extract_template_definition(
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get,
             missing_attr='apiserver_port')
 
     @patch('requests.get')
-    @patch('magnum.objects.BayModel.get_by_uuid')
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     def test_extract_template_definition_without_node_count(
             self,
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self._test_extract_template_definition(
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get,
             missing_attr='node_count')
 
     @patch('requests.get')
-    @patch('magnum.objects.BayModel.get_by_uuid')
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     def test_extract_template_definition_without_master_count(
             self,
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self._test_extract_template_definition(
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get,
             missing_attr='master_count')
 
     @patch('requests.get')
-    @patch('magnum.objects.BayModel.get_by_uuid')
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     def test_extract_template_definition_without_discovery_url(
             self,
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             reqget):
-        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
-        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        cluster_template = objects.ClusterTemplate(
+            self.context, **self.cluster_template_dict)
+        mock_objects_cluster_template_get_by_uuid.return_value = \
+            cluster_template
         bay_dict = self.bay_dict
         bay_dict['discovery_url'] = None
         bay = objects.Bay(self.context, **bay_dict)

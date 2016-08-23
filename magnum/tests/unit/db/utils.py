@@ -18,7 +18,7 @@
 from magnum.db import api as db_api
 
 
-def get_test_baymodel(**kw):
+def get_test_cluster_template(**kw):
     return {
         'id': kw.get('id', 32),
         'project_id': kw.get('project_id', 'fake_project'),
@@ -58,19 +58,19 @@ def get_test_baymodel(**kw):
     }
 
 
-def create_test_baymodel(**kw):
-    """Create test baymodel entry in DB and return BayModel DB object.
+def create_test_cluster_template(**kw):
+    """Create and return test ClusterTemplate DB object.
 
-    Function to be used to create test BayModel objects in the database.
-    :param kw: kwargs with overriding values for baymodel's attributes.
-    :returns: Test BayModel DB object.
+    Function to be used to create test ClusterTemplate objects in the database.
+    :param kw: kwargs with overriding values for ClusterTemplate's attributes.
+    :returns: Test ClusterTemplate DB object.
     """
-    baymodel = get_test_baymodel(**kw)
+    cluster_template = get_test_cluster_template(**kw)
     # Let DB generate ID if it isn't specified explicitly
     if 'id' not in kw:
-        del baymodel['id']
+        del cluster_template['id']
     dbapi = db_api.get_instance()
-    return dbapi.create_baymodel(baymodel)
+    return dbapi.create_cluster_template(cluster_template)
 
 
 def get_test_bay(**kw):

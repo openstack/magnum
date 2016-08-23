@@ -21,8 +21,8 @@ from magnum.objects import fields as m_fields
 
 
 @base.MagnumObjectRegistry.register
-class BayModel(base.MagnumPersistentObject, base.MagnumObject,
-               base.MagnumObjectDictCompat):
+class ClusterTemplate(base.MagnumPersistentObject, base.MagnumObject,
+                      base.MagnumObjectDictCompat):
     # Version 1.0: Initial version
     # Version 1.1: Add 'registry_enabled' field
     # Version 1.2: Added 'network_driver' field
@@ -39,7 +39,8 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.13: Added 'master_lb_enabled' field
     # Version 1.14: Added 'fixed_subnet' field
     # Version 1.15: Added 'floating_ip_enabled' field
-    VERSION = '1.15'
+    # Version 1.16: Renamed the class from "BayModel' to 'ClusterTemplate'
+    VERSION = '1.16'
 
     dbapi = dbapi.get_instance()
 
@@ -79,123 +80,129 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
     }
 
     @staticmethod
-    def _from_db_object(baymodel, db_baymodel):
+    def _from_db_object(cluster_template, db_cluster_template):
         """Converts a database entity to a formal object."""
-        for field in baymodel.fields:
-            baymodel[field] = db_baymodel[field]
+        for field in cluster_template.fields:
+            cluster_template[field] = db_cluster_template[field]
 
-        baymodel.obj_reset_changes()
-        return baymodel
+        cluster_template.obj_reset_changes()
+        return cluster_template
 
     @staticmethod
     def _from_db_object_list(db_objects, cls, context):
         """Converts a list of database entities to a list of formal objects."""
-        return [BayModel._from_db_object(cls(context), obj) for obj in
+        return [ClusterTemplate._from_db_object(cls(context), obj) for obj in
                 db_objects]
 
     @base.remotable_classmethod
-    def get(cls, context, baymodel_id):
-        """Find a baymodel based on its id or uuid and return a BayModel object.
+    def get(cls, context, cluster_template_id):
+        """Find and return ClusterTemplate object based on its id or uuid.
 
-        :param baymodel_id: the id *or* uuid of a baymodel.
+        :param cluster_template_id: the id *or* uuid of a ClusterTemplate.
         :param context: Security context
-        :returns: a :class:`BayModel` object.
+        :returns: a :class:`ClusterTemplate` object.
         """
-        if strutils.is_int_like(baymodel_id):
-            return cls.get_by_id(context, baymodel_id)
-        elif uuidutils.is_uuid_like(baymodel_id):
-            return cls.get_by_uuid(context, baymodel_id)
+        if strutils.is_int_like(cluster_template_id):
+            return cls.get_by_id(context, cluster_template_id)
+        elif uuidutils.is_uuid_like(cluster_template_id):
+            return cls.get_by_uuid(context, cluster_template_id)
         else:
-            raise exception.InvalidIdentity(identity=baymodel_id)
+            raise exception.InvalidIdentity(identity=cluster_template_id)
 
     @base.remotable_classmethod
-    def get_by_id(cls, context, baymodel_id):
-        """Find a baymodel based on its integer id and return a BayModel object.
+    def get_by_id(cls, context, cluster_template_id):
+        """Find and return ClusterTemplate object based on its integer id.
 
-        :param baymodel_id: the id of a baymodel.
+        :param cluster_template_id: the id of a ClusterTemplate.
         :param context: Security context
-        :returns: a :class:`BayModel` object.
+        :returns: a :class:`ClusterTemplate` object.
         """
-        db_baymodel = cls.dbapi.get_baymodel_by_id(context, baymodel_id)
-        baymodel = BayModel._from_db_object(cls(context), db_baymodel)
-        return baymodel
+        db_cluster_template = cls.dbapi.get_cluster_template_by_id(
+            context, cluster_template_id)
+        cluster_template = ClusterTemplate._from_db_object(cls(context),
+                                                           db_cluster_template)
+        return cluster_template
 
     @base.remotable_classmethod
     def get_by_uuid(cls, context, uuid):
-        """Find a baymodel based on uuid and return a :class:`BayModel` object.
+        """Find and return ClusterTemplate object based on uuid.
 
-        :param uuid: the uuid of a baymodel.
+        :param uuid: the uuid of a ClusterTemplate.
         :param context: Security context
-        :returns: a :class:`BayModel` object.
+        :returns: a :class:`ClusterTemplate` object.
         """
-        db_baymodel = cls.dbapi.get_baymodel_by_uuid(context, uuid)
-        baymodel = BayModel._from_db_object(cls(context), db_baymodel)
-        return baymodel
+        db_cluster_template = cls.dbapi.get_cluster_template_by_uuid(
+            context, uuid)
+        cluster_template = ClusterTemplate._from_db_object(cls(context),
+                                                           db_cluster_template)
+        return cluster_template
 
     @base.remotable_classmethod
     def get_by_name(cls, context, name):
-        """Find a baymodel based on name and return a :class:`BayModel` object.
+        """Find and return ClusterTemplate object based on name.
 
-        :param name: the name of a baymodel.
+        :param name: the name of a ClusterTemplate.
         :param context: Security context
-        :returns: a :class:`BayModel` object.
+        :returns: a :class:`ClusterTemplate` object.
         """
-        db_baymodel = cls.dbapi.get_baymodel_by_name(context, name)
-        baymodel = BayModel._from_db_object(cls(context), db_baymodel)
-        return baymodel
+        db_cluster_template = cls.dbapi.get_cluster_template_by_name(context,
+                                                                     name)
+        cluster_template = ClusterTemplate._from_db_object(cls(context),
+                                                           db_cluster_template)
+        return cluster_template
 
     @base.remotable_classmethod
     def list(cls, context, limit=None, marker=None,
              sort_key=None, sort_dir=None):
-        """Return a list of BayModel objects.
+        """Return a list of ClusterTemplate objects.
 
         :param context: Security context.
         :param limit: maximum number of resources to return in a single result.
         :param marker: pagination marker for large data sets.
         :param sort_key: column to sort results by.
         :param sort_dir: direction to sort. "asc" or "desc".
-        :returns: a list of :class:`BayModel` object.
+        :returns: a list of :class:`ClusterTemplate` object.
 
         """
-        db_baymodels = cls.dbapi.get_baymodel_list(context, limit=limit,
-                                                   marker=marker,
-                                                   sort_key=sort_key,
-                                                   sort_dir=sort_dir)
-        return BayModel._from_db_object_list(db_baymodels, cls, context)
+        db_cluster_templates = cls.dbapi.get_cluster_template_list(
+            context, limit=limit, marker=marker, sort_key=sort_key,
+            sort_dir=sort_dir)
+        return ClusterTemplate._from_db_object_list(db_cluster_templates,
+                                                    cls, context)
 
     @base.remotable
     def create(self, context=None):
-        """Create a BayModel record in the DB.
+        """Create a ClusterTemplate record in the DB.
 
         :param context: Security context. NOTE: This should only
                         be used internally by the indirection_api.
                         Unfortunately, RPC requires context as the first
                         argument, even though we don't use it.
                         A context should be set when instantiating the
-                        object, e.g.: BayModel(context)
+                        object, e.g.: ClusterTemplate(context)
 
         """
         values = self.obj_get_changes()
-        db_baymodel = self.dbapi.create_baymodel(values)
-        self._from_db_object(self, db_baymodel)
+        db_cluster_template = self.dbapi.create_cluster_template(values)
+        self._from_db_object(self, db_cluster_template)
 
     @base.remotable
     def destroy(self, context=None):
-        """Delete the BayModel from the DB.
+        """Delete the ClusterTemplate from the DB.
 
         :param context: Security context. NOTE: This should only
                         be used internally by the indirection_api.
                         Unfortunately, RPC requires context as the first
                         argument, even though we don't use it.
                         A context should be set when instantiating the
-                        object, e.g.: BayModel(context)
+                        object, e.g.: ClusterTemplate(context)
         """
-        self.dbapi.destroy_baymodel(self.uuid)
+        self.dbapi.destroy_cluster_template(self.uuid)
         self.obj_reset_changes()
 
     @base.remotable
     def save(self, context=None):
-        """Save updates to this BayModel.
+        """Save updates to this ClusterTemplate.
 
         Updates will be made column by column based on the result
         of self.what_changed().
@@ -205,27 +212,27 @@ class BayModel(base.MagnumPersistentObject, base.MagnumObject,
                         Unfortunately, RPC requires context as the first
                         argument, even though we don't use it.
                         A context should be set when instantiating the
-                        object, e.g.: BayModel(context)
+                        object, e.g.: ClusterTemplate(context)
         """
         updates = self.obj_get_changes()
-        self.dbapi.update_baymodel(self.uuid, updates)
+        self.dbapi.update_cluster_template(self.uuid, updates)
 
         self.obj_reset_changes()
 
     @base.remotable
     def refresh(self, context=None):
-        """Loads updates for this BayModel.
+        """Loads updates for this ClusterTemplate.
 
-        Loads a baymodel with the same uuid from the database and
+        Loads a ClusterTemplate with the same uuid from the database and
         checks for updated attributes. Updates are applied from
-        the loaded baymodel column by column, if there are any updates.
+        the loaded ClusterTemplate column by column, if there are any updates.
 
         :param context: Security context. NOTE: This should only
                         be used internally by the indirection_api.
                         Unfortunately, RPC requires context as the first
                         argument, even though we don't use it.
                         A context should be set when instantiating the
-                        object, e.g.: BayModel(context)
+                        object, e.g.: ClusterTemplate(context)
         """
         current = self.__class__.get_by_uuid(self._context, uuid=self.uuid)
         for field in self.fields:

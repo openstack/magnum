@@ -28,34 +28,36 @@ from magnum import objects
 from magnum.tests.unit.db import utils as db_utils
 
 
-def get_test_baymodel(context, **kw):
-    """Return a BayModel object with appropriate attributes.
+def get_test_cluster_template(context, **kw):
+    """Return a ClusterTemplate object with appropriate attributes.
 
     NOTE: The object leaves the attributes marked as changed, such
     that a create() could be used to commit it to the DB.
     """
-    db_baymodel = db_utils.get_test_baymodel(**kw)
+    db_cluster_template = db_utils.get_test_cluster_template(**kw)
+    cluster_template = objects.ClusterTemplate(context)
     # Let DB generate ID if it isn't specified explicitly
     if 'id' not in kw:
-        del db_baymodel['id']
-    baymodel = objects.BayModel(context)
-    for key in db_baymodel:
-        setattr(baymodel, key, db_baymodel[key])
-    return baymodel
+        del db_cluster_template['id']
+
+    for key in db_cluster_template:
+        setattr(cluster_template, key, db_cluster_template[key])
+    return cluster_template
 
 
-def create_test_baymodel(context, **kw):
-    """Create and return a test baymodel object.
+def create_test_cluster_template(context, **kw):
+    """Create and return a test ClusterTemplate object.
 
-    Create a baymodel in the DB and return a BayModel object with appropriate
-    attributes.
+    Create a ClusterTemplate in the DB and return a ClusterTemplate object
+    with appropriate attributes.
     """
-    baymodel = get_test_baymodel(context, **kw)
+    cluster_template = get_test_cluster_template(context, **kw)
     try:
-        baymodel.create()
+        cluster_template.create()
     except exception.ClusterTemplateAlreadyExists:
-        baymodel = objects.BayModel.get(context, baymodel.uuid)
-    return baymodel
+        cluster_template = objects.ClusterTemplate.get(context,
+                                                       cluster_template.uuid)
+    return cluster_template
 
 
 def get_test_bay(context, **kw):
@@ -81,28 +83,10 @@ def create_test_bay(context, **kw):
     attributes.
     """
     bay = get_test_bay(context, **kw)
-    create_test_baymodel(context, uuid=bay['baymodel_id'],
-                         coe=kw.get('coe', 'swarm'))
+    create_test_cluster_template(context, uuid=bay['baymodel_id'],
+                                 coe=kw.get('coe', 'swarm'))
     bay.create()
     return bay
-
-
-def get_test_cluster_template(context, **kw):
-    """Return a ClusterTemplate object with appropriate attributes.
-
-    NOTE: Object model is the same for ClusterTemplate and
-    BayModel
-    """
-    return get_test_baymodel(context, **kw)
-
-
-def create_test_cluster_template(context, **kw):
-    """Create and return a test ClusterTemplate object.
-
-    NOTE: Object model is the same for ClusterTemplate and
-    BayModel
-    """
-    return create_test_baymodel(context, **kw)
 
 
 def get_test_cluster(context, **kw):

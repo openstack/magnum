@@ -34,19 +34,20 @@ class TestConductorUtils(base.TestCase):
     def _get_type_uri(self):
         return 'service/security/account/user'
 
-    @patch('magnum.objects.BayModel.get_by_uuid')
-    def test_retrieve_baymodel(self, mock_baymodel_get_by_uuid):
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    def test_retrieve_cluster_template(self,
+                                       mock_cluster_template_get_by_uuid):
         expected_context = 'context'
-        expected_baymodel_uuid = 'baymodel_uuid'
+        expected_cluster_template_uuid = 'ClusterTemplate_uuid'
 
         bay = objects.Bay({})
-        bay.baymodel_id = expected_baymodel_uuid
+        bay.baymodel_id = expected_cluster_template_uuid
 
-        utils.retrieve_baymodel(expected_context, bay)
+        utils.retrieve_cluster_template(expected_context, bay)
 
-        mock_baymodel_get_by_uuid.assert_called_once_with(
+        mock_cluster_template_get_by_uuid.assert_called_once_with(
             expected_context,
-            expected_baymodel_uuid)
+            expected_cluster_template_uuid)
 
     @patch('oslo_utils.uuidutils.is_uuid_like')
     @patch('magnum.objects.Bay.get_by_name')

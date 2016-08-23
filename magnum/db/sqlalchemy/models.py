@@ -141,10 +141,10 @@ class Bay(Base):
     magnum_cert_ref = Column(String(512))
 
 
-class BayModel(Base):
-    """Represents a bay model."""
+class ClusterTemplate(Base):
+    """Represents a ClusterTemplate."""
 
-    __tablename__ = 'baymodel'
+    __tablename__ = 'cluster_template'
     __table_args__ = (
         schema.UniqueConstraint('uuid', name='uniq_baymodel0uuid'),
         table_args()

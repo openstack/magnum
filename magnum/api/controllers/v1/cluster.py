@@ -70,7 +70,8 @@ class Cluster(base.APIBase):
     def _set_cluster_template_id(self, value):
         if value and self._cluster_template_id != value:
             try:
-                cluster_template = api_utils.get_resource('BayModel', value)
+                cluster_template = api_utils.get_resource('ClusterTemplate',
+                                                          value)
                 self._cluster_template_id = cluster_template.uuid
             except exception.ClusterTemplateNotFound as e:
                 # Change error code because 404 (NotFound) is inappropriate
@@ -400,7 +401,8 @@ class ClustersController(base.Controller):
         policy.enforce(context, 'cluster:create',
                        action='cluster:create')
         temp_id = cluster.cluster_template_id
-        cluster_template = objects.BayModel.get_by_uuid(context, temp_id)
+        cluster_template = objects.ClusterTemplate.get_by_uuid(context,
+                                                               temp_id)
         cluster_dict = cluster.as_dict()
 
         attr_validator.validate_os_resources(context,

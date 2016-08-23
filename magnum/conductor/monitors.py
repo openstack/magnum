@@ -68,9 +68,11 @@ class MonitorBase(object):
 
 
 def create_monitor(context, bay):
-    if bay.baymodel.coe in COE_CLASS_PATH:
-        coe_cls = importutils.import_class(COE_CLASS_PATH[bay.baymodel.coe])
+    if bay.cluster_template.coe in COE_CLASS_PATH:
+        coe_cls = importutils.import_class(
+            COE_CLASS_PATH[bay.cluster_template.coe])
         return coe_cls(context, bay)
 
-    LOG.debug("Cannot create monitor with bay type '%s'", bay.baymodel.coe)
+    LOG.debug("Cannot create monitor with bay type '%s'",
+              bay.cluster_template.coe)
     return None

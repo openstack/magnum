@@ -44,11 +44,10 @@ class TestValidation(base.BaseTestCase):
 
         context = mock_pecan_request.context
         bay = mock.MagicMock()
-        bay.baymodel_id = 'baymodel_id'
-        baymodel = obj_utils.get_test_baymodel(context,
-                                               uuid='baymodel_id',
-                                               coe=bay_type)
-        bay.baymodel = baymodel
+        bay.baymodel_id = 'cluster_template_id'
+        cluster_template = obj_utils.get_test_cluster_template(
+            context, uuid='cluster_template_id', coe=bay_type)
+        bay.cluster_template = cluster_template
 
         mock_bay_get_by_uuid.return_value = bay
 
@@ -178,17 +177,18 @@ class TestValidation(base.BaseTestCase):
             assert_raised=False):
 
         @v.enforce_network_driver_types_create()
-        def test(self, baymodel):
+        def test(self, cluster_template):
             pass
 
         for key, val in network_driver_config_dict.items():
             cfg.CONF.set_override(key, val, 'cluster_template')
-        baymodel = mock.MagicMock()
-        baymodel.name = 'test_cluster_template'
-        baymodel.network_driver = network_driver_type
-        baymodel.coe = coe
 
-        # Reload the validator module so that baymodel configs are
+        cluster_template = mock.MagicMock()
+        cluster_template.name = 'test_cluster_template'
+        cluster_template.network_driver = network_driver_type
+        cluster_template.coe = coe
+
+        # Reload the validator module so that ClusterTemplate configs are
         # re-evaluated.
         reload_module(v)
         validator = v.K8sValidator
@@ -196,10 +196,10 @@ class TestValidation(base.BaseTestCase):
 
         if assert_raised:
             self.assertRaises(exception.InvalidParameterValue,
-                              test, self, baymodel)
+                              test, self, cluster_template)
         else:
-            test(self, baymodel)
-        return baymodel
+            test(self, cluster_template)
+        return cluster_template
 
     def test_enforce_network_driver_types_one_allowed_create(self):
         self._test_enforce_network_driver_types_create(
@@ -235,17 +235,17 @@ class TestValidation(base.BaseTestCase):
             assert_raised=True)
 
     def test_enforce_network_driver_types_default_create(self):
-        baymodel = self._test_enforce_network_driver_types_create(
+        cluster_template = self._test_enforce_network_driver_types_create(
             network_driver_type=None,
             network_driver_config_dict={})
-        self.assertEqual('flannel', baymodel.network_driver)
+        self.assertEqual('flannel', cluster_template.network_driver)
 
     def test_enforce_network_driver_types_default_config_create(self):
-        baymodel = self._test_enforce_network_driver_types_create(
+        cluster_template = self._test_enforce_network_driver_types_create(
             network_driver_type=None,
             network_driver_config_dict={
                 'kubernetes_default_network_driver': 'type1'})
-        self.assertEqual('type1', baymodel.network_driver)
+        self.assertEqual('type1', cluster_template.network_driver)
 
     def test_enforce_network_driver_types_default_invalid_create(self):
         self._test_enforce_network_driver_types_create(
@@ -265,22 +265,23 @@ class TestValidation(base.BaseTestCase):
             assert_raised=False):
 
         @v.enforce_network_driver_types_update()
-        def test(self, baymodel_ident, patch):
+        def test(self, cluster_template_ident, patch):
             pass
 
         for key, val in network_driver_config_dict.items():
             cfg.CONF.set_override(key, val, 'cluster_template')
-        baymodel_ident = 'test_uuid_or_name'
+
+        cluster_template_ident = 'test_uuid_or_name'
+
         patch = [{'path': '/network_driver', 'value': network_driver_type,
                   'op': 'replace'}]
         context = mock_pecan_request.context
-        baymodel = obj_utils.get_test_baymodel(context,
-                                               uuid=baymodel_ident,
-                                               coe='kubernetes')
-        baymodel.network_driver = network_driver_type
-        mock_get_resource.return_value = baymodel
+        cluster_template = obj_utils.get_test_cluster_template(
+            context, uuid=cluster_template_ident, coe='kubernetes')
+        cluster_template.network_driver = network_driver_type
+        mock_get_resource.return_value = cluster_template
 
-        # Reload the validator module so that baymodel configs are
+        # Reload the validator module so that ClusterTemplate configs are
         # re-evaluated.
         reload_module(v)
         validator = v.K8sValidator
@@ -288,11 +289,11 @@ class TestValidation(base.BaseTestCase):
 
         if assert_raised:
             self.assertRaises(exception.InvalidParameterValue,
-                              test, self, baymodel_ident, patch)
+                              test, self, cluster_template_ident, patch)
         else:
-            test(self, baymodel_ident, patch)
+            test(self, cluster_template_ident, patch)
             mock_get_resource.assert_called_once_with(
-                'BayModel', baymodel_ident)
+                'ClusterTemplate', cluster_template_ident)
 
     def test_enforce_network_driver_types_one_allowed_update(self):
         self._test_enforce_network_driver_types_update(
@@ -327,18 +328,18 @@ class TestValidation(base.BaseTestCase):
             assert_raised=False):
 
         @v.enforce_volume_driver_types_create()
-        def test(self, baymodel):
+        def test(self, cluster_template):
             pass
 
-        baymodel = obj_utils.get_test_baymodel(
-            {}, name='test_baymodel', coe=coe,
+        cluster_template = obj_utils.get_test_cluster_template(
+            {}, name='test_cluster_template', coe=coe,
             volume_driver=volume_driver_type)
 
         if assert_raised:
             self.assertRaises(exception.InvalidParameterValue,
-                              test, self, baymodel)
+                              test, self, cluster_template)
         else:
-            test(self, baymodel)
+            test(self, cluster_template)
 
     def test_enforce_volume_driver_types_valid_create(self):
         self._test_enforce_volume_driver_types_create(
@@ -360,19 +361,18 @@ class TestValidation(base.BaseTestCase):
             assert_raised=False):
 
         @v.enforce_volume_driver_types_update()
-        def test(self, baymodel_ident, patch):
+        def test(self, cluster_template_ident, patch):
             pass
 
-        baymodel_ident = 'test_uuid_or_name'
+        cluster_template_ident = 'test_uuid_or_name'
         patch = [{'path': '/volume_driver', 'value': volume_driver_type,
                   'op': op}]
         context = mock_pecan_request.context
-        baymodel = obj_utils.get_test_baymodel(context,
-                                               uuid=baymodel_ident,
-                                               coe='kubernetes')
-        mock_get_resource.return_value = baymodel
+        cluster_template = obj_utils.get_test_cluster_template(
+            context, uuid=cluster_template_ident, coe='kubernetes')
+        mock_get_resource.return_value = cluster_template
 
-        # Reload the validator module so that baymodel configs are
+        # Reload the validator module so that ClusterTemplate configs are
         # re-evaluated.
         reload_module(v)
         validator = v.K8sValidator
@@ -380,11 +380,11 @@ class TestValidation(base.BaseTestCase):
 
         if assert_raised:
             self.assertRaises(exception.InvalidParameterValue,
-                              test, self, baymodel_ident, patch)
+                              test, self, cluster_template_ident, patch)
         else:
-            test(self, baymodel_ident, patch)
+            test(self, cluster_template_ident, patch)
             mock_get_resource.assert_called_once_with(
-                'BayModel', baymodel_ident)
+                'ClusterTemplate', cluster_template_ident)
 
     def test_enforce_volume_driver_types_supported_replace_update(self):
         self._test_enforce_volume_driver_types_update(

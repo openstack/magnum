@@ -227,7 +227,7 @@ class Connection(api.Connection):
             ref.update(values)
         return ref
 
-    def _add_baymodels_filters(self, query, filters):
+    def _add_cluster_template_filters(self, query, filters):
         if filters is None:
             filters = {}
 
@@ -242,124 +242,127 @@ class Connection(api.Connection):
 
         return query.filter_by(**filter_dict)
 
-    def get_baymodel_list(self, context, filters=None, limit=None, marker=None,
-                          sort_key=None, sort_dir=None):
-        query = model_query(models.BayModel)
+    def get_cluster_template_list(self, context, filters=None, limit=None,
+                                  marker=None, sort_key=None, sort_dir=None):
+        query = model_query(models.ClusterTemplate)
         query = self._add_tenant_filters(context, query)
-        query = self._add_baymodels_filters(query, filters)
-        # include public baymodels
-        public_q = model_query(models.BayModel).filter_by(public=True)
+        query = self._add_cluster_template_filters(query, filters)
+        # include public ClusterTemplates
+        public_q = model_query(models.ClusterTemplate).filter_by(public=True)
         query = query.union(public_q)
 
-        return _paginate_query(models.BayModel, limit, marker,
+        return _paginate_query(models.ClusterTemplate, limit, marker,
                                sort_key, sort_dir, query)
 
-    def create_baymodel(self, values):
-        # ensure defaults are present for new baymodels
+    def create_cluster_template(self, values):
+        # ensure defaults are present for new ClusterTemplates
         if not values.get('uuid'):
             values['uuid'] = uuidutils.generate_uuid()
 
-        baymodel = models.BayModel()
-        baymodel.update(values)
+        cluster_template = models.ClusterTemplate()
+        cluster_template.update(values)
         try:
-            baymodel.save()
+            cluster_template.save()
         except db_exc.DBDuplicateEntry:
             raise exception.ClusterTemplateAlreadyExists(uuid=values['uuid'])
-        return baymodel
+        return cluster_template
 
-    def get_baymodel_by_id(self, context, baymodel_id):
-        query = model_query(models.BayModel)
+    def get_cluster_template_by_id(self, context, cluster_template_id):
+        query = model_query(models.ClusterTemplate)
         query = self._add_tenant_filters(context, query)
-        public_q = model_query(models.BayModel).filter_by(public=True)
+        public_q = model_query(models.ClusterTemplate).filter_by(public=True)
         query = query.union(public_q)
-        query = query.filter_by(id=baymodel_id)
+        query = query.filter_by(id=cluster_template_id)
         try:
             return query.one()
         except NoResultFound:
             raise exception.ClusterTemplateNotFound(
-                clustertemplate=baymodel_id)
+                clustertemplate=cluster_template_id)
 
-    def get_baymodel_by_uuid(self, context, baymodel_uuid):
-        query = model_query(models.BayModel)
+    def get_cluster_template_by_uuid(self, context, cluster_template_uuid):
+        query = model_query(models.ClusterTemplate)
         query = self._add_tenant_filters(context, query)
-        public_q = model_query(models.BayModel).filter_by(public=True)
+        public_q = model_query(models.ClusterTemplate).filter_by(public=True)
         query = query.union(public_q)
-        query = query.filter_by(uuid=baymodel_uuid)
+        query = query.filter_by(uuid=cluster_template_uuid)
         try:
             return query.one()
         except NoResultFound:
             raise exception.ClusterTemplateNotFound(
-                clustertemplate=baymodel_uuid)
+                clustertemplate=cluster_template_uuid)
 
-    def get_baymodel_by_name(self, context, baymodel_name):
-        query = model_query(models.BayModel)
+    def get_cluster_template_by_name(self, context, cluster_template_name):
+        query = model_query(models.ClusterTemplate)
         query = self._add_tenant_filters(context, query)
-        public_q = model_query(models.BayModel).filter_by(public=True)
+        public_q = model_query(models.ClusterTemplate).filter_by(public=True)
         query = query.union(public_q)
-        query = query.filter_by(name=baymodel_name)
+        query = query.filter_by(name=cluster_template_name)
         try:
             return query.one()
         except MultipleResultsFound:
-            raise exception.Conflict('Multiple baymodels exist with same name.'
-                                     ' Please use the baymodel uuid instead.')
+            raise exception.Conflict('Multiple ClusterTemplates exist with'
+                                     ' same name. Please use the '
+                                     'ClusterTemplate uuid instead.')
         except NoResultFound:
             raise exception.ClusterTemplateNotFound(
-                clustertemplate=baymodel_name)
+                clustertemplate=cluster_template_name)
 
-    def _is_baymodel_referenced(self, session, baymodel_uuid):
-        """Checks whether the baymodel is referenced by bay(s)."""
+    def _is_cluster_template_referenced(self, session, cluster_template_uuid):
+        """Checks whether the ClusterTemplate is referenced by cluster(s)."""
         query = model_query(models.Bay, session=session)
-        query = self._add_bays_filters(query, {'baymodel_id': baymodel_uuid})
+        query = self._add_bays_filters(query, {'baymodel_id':
+                                               cluster_template_uuid})
         return query.count() != 0
 
-    def _is_publishing_baymodel(self, values):
+    def _is_publishing_cluster_template(self, values):
         if (len(values) == 1 and
                 'public' in values and values['public'] is True):
             return True
         return False
 
-    def destroy_baymodel(self, baymodel_id):
+    def destroy_cluster_template(self, cluster_template_id):
         session = get_session()
         with session.begin():
-            query = model_query(models.BayModel, session=session)
-            query = add_identity_filter(query, baymodel_id)
+            query = model_query(models.ClusterTemplate, session=session)
+            query = add_identity_filter(query, cluster_template_id)
 
             try:
-                baymodel_ref = query.one()
+                cluster_template_ref = query.one()
             except NoResultFound:
                 raise exception.ClusterTemplateNotFound(
-                    clustertemplate=baymodel_id)
+                    clustertemplate=cluster_template_id)
 
-            if self._is_baymodel_referenced(session, baymodel_ref['uuid']):
+            if self._is_cluster_template_referenced(
+                    session, cluster_template_ref['uuid']):
                 raise exception.ClusterTemplateReferenced(
-                    clustertemplate=baymodel_id)
+                    clustertemplate=cluster_template_id)
 
             query.delete()
 
-    def update_baymodel(self, baymodel_id, values):
+    def update_cluster_template(self, cluster_template_id, values):
         # NOTE(dtantsur): this can lead to very strange errors
         if 'uuid' in values:
-            msg = _("Cannot overwrite UUID for an existing BayModel.")
+            msg = _("Cannot overwrite UUID for an existing ClusterTemplate.")
             raise exception.InvalidParameterValue(err=msg)
 
-        return self._do_update_baymodel(baymodel_id, values)
+        return self._do_update_cluster_template(cluster_template_id, values)
 
-    def _do_update_baymodel(self, baymodel_id, values):
+    def _do_update_cluster_template(self, cluster_template_id, values):
         session = get_session()
         with session.begin():
-            query = model_query(models.BayModel, session=session)
-            query = add_identity_filter(query, baymodel_id)
+            query = model_query(models.ClusterTemplate, session=session)
+            query = add_identity_filter(query, cluster_template_id)
             try:
                 ref = query.with_lockmode('update').one()
             except NoResultFound:
                 raise exception.ClusterTemplateNotFound(
-                    clustertemplate=baymodel_id)
+                    clustertemplate=cluster_template_id)
 
-            if self._is_baymodel_referenced(session, ref['uuid']):
-                # we only allow to update baymodel to be public
-                if not self._is_publishing_baymodel(values):
+            if self._is_cluster_template_referenced(session, ref['uuid']):
+                # we only allow to update ClusterTemplate to be public
+                if not self._is_publishing_cluster_template(values):
                     raise exception.ClusterTemplateReferenced(
-                        clustertemplate=baymodel_id)
+                        clustertemplate=cluster_template_id)
 
             ref.update(values)
         return ref
