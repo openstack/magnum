@@ -79,6 +79,8 @@ Developer Info
    dev/kubernetes-load-balancer.rst
    dev/functional-test.rst
    dev/reno.rst
+   dev/api_microversion.rst
+   api_microversion_history.rst
    magnum-proxy.rst
    contributing
    heat-templates
