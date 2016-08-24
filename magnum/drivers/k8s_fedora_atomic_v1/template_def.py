@@ -188,16 +188,16 @@ class AtomicK8sTemplateDefinition(K8sTemplateDefinition):
         env_files = []
         if baymodel.master_lb_enabled:
             env_files.append(
-                '../../common/templates/environments/with_master_lb.yaml')
+                template_def.COMMON_ENV_PATH + 'with_master_lb.yaml')
         else:
             env_files.append(
-                '../../common/templates/environments/no_master_lb.yaml')
+                template_def.COMMON_ENV_PATH + 'no_master_lb.yaml')
         if baymodel.floating_ip_enabled:
             env_files.append(
-                '../../common/templates/environments/enable_floating_ip.yaml')
+                template_def.COMMON_ENV_PATH + 'enable_floating_ip.yaml')
         else:
             env_files.append(
-                '../../common/templates/environments/disable_floating_ip.yaml')
+                template_def.COMMON_ENV_PATH + 'disable_floating_ip.yaml')
 
         return env_files
 

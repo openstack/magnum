@@ -30,6 +30,8 @@ from requests import exceptions as req_exceptions
 
 LOG = logging.getLogger(__name__)
 
+COMMON_TEMPLATES_PATH = "../../common/templates/"
+COMMON_ENV_PATH = COMMON_TEMPLATES_PATH + "environments/"
 
 template_def_opts = [
     cfg.StrOpt('etcd_discovery_service_endpoint_format',
