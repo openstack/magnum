@@ -28,7 +28,8 @@ class RPCAPITestCase(base.DbTestCase):
     def setUp(self):
         super(RPCAPITestCase, self).setUp()
         self.fake_bay = dbutils.get_test_bay(driver='fake-driver')
-        self.fake_certificate = objects.Certificate.from_db_bay(self.fake_bay)
+        self.fake_certificate = objects.Certificate.from_db_cluster(
+            self.fake_bay)
         self.fake_certificate.csr = 'fake-csr'
 
     def _test_rpcapi(self, method, rpc_method, **kwargs):
@@ -106,11 +107,11 @@ class RPCAPITestCase(base.DbTestCase):
         self._test_rpcapi('sign_certificate',
                           'call',
                           version='1.0',
-                          bay=self.fake_bay,
+                          cluster=self.fake_bay,
                           certificate=self.fake_certificate)
 
     def test_get_ca_certificate(self):
         self._test_rpcapi('get_ca_certificate',
                           'call',
                           version='1.0',
-                          bay=self.fake_bay)
+                          cluster=self.fake_bay)

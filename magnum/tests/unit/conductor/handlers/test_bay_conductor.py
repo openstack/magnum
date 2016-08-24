@@ -173,7 +173,7 @@ class TestHandler(db_base.DbTestCase):
     @patch('magnum.conductor.handlers.bay_conductor._create_stack')
     @patch('magnum.common.clients.OpenStackClients')
     def test_create(self, mock_openstack_client_class,
-                    mock_create_stack, mock_cert_manager, mock_trust_manager,
+                    mock_create_stack, mock_cm, mock_trust_manager,
                     mock_heat_poller_class):
         timeout = 15
         mock_poller = mock.MagicMock()
@@ -210,7 +210,7 @@ class TestHandler(db_base.DbTestCase):
         mock_create_stack.assert_called_once_with(self.context,
                                                   mock.sentinel.osc,
                                                   self.bay, timeout)
-        mock_cert_manager.generate_certificates_to_bay.assert_called_once_with(
+        mock_cm.generate_certificates_to_cluster.assert_called_once_with(
             self.bay, context=self.context)
         self.assertEqual(bay_status.CREATE_IN_PROGRESS, bay.status)
         mock_trust_manager.create_trustee_and_trust.assert_called_once_with(
@@ -234,7 +234,7 @@ class TestHandler(db_base.DbTestCase):
             self.bay, timeout
         )
 
-        gctb = mock_cert_manager.generate_certificates_to_bay
+        gctb = mock_cert_manager.generate_certificates_to_cluster
         if is_create_cert_called:
             gctb.assert_called_once_with(self.bay, context=self.context)
         else:
@@ -245,7 +245,7 @@ class TestHandler(db_base.DbTestCase):
         else:
             ctat.assert_not_called()
 
-        mock_cert_manager.delete_certificates_from_bay(self.bay)
+        mock_cert_manager.delete_certificates_from_cluster(self.bay)
         mock_trust_manager.delete_trustee_and_trust.assert_called_once_with(
             osc, self.context, self.bay)
 
@@ -283,14 +283,14 @@ class TestHandler(db_base.DbTestCase):
     def test_create_with_cert_failed(self, mock_openstack_client_class,
                                      mock_cert_manager,
                                      mock_trust_manager):
-        e = exception.CertificatesToBayFailed(bay_uuid='uuid')
-        mock_cert_manager.generate_certificates_to_bay.side_effect = e
+        e = exception.CertificatesToClusterFailed(cluster_uuid='uuid')
+        mock_cert_manager.generate_certificates_to_cluster.side_effect = e
 
         self._test_create_failed(
             mock_openstack_client_class,
             mock_cert_manager,
             mock_trust_manager,
-            exception.CertificatesToBayFailed
+            exception.CertificatesToClusterFailed
         )
 
         notifications = fake_notifier.NOTIFICATIONS
@@ -453,9 +453,9 @@ class TestHandler(db_base.DbTestCase):
             'magnum.bay.delete', notifications[1].event_type)
         self.assertEqual(
             taxonomy.OUTCOME_SUCCESS, notifications[1].payload['outcome'])
-        self.assertEqual(1,
-                         cert_manager.delete_certificates_from_bay.call_count)
-        # The bay has been destroyed
+        self.assertEqual(
+            1, cert_manager.delete_certificates_from_cluster.call_count)
+        # The cluster has been destroyed
         self.assertRaises(exception.ClusterNotFound,
                           objects.Bay.get, self.context, self.bay.uuid)
 
@@ -481,8 +481,8 @@ class TestHandler(db_base.DbTestCase):
             'magnum.bay.delete', notifications[1].event_type)
         self.assertEqual(
             taxonomy.OUTCOME_FAILURE, notifications[1].payload['outcome'])
-        self.assertEqual(0,
-                         cert_manager.delete_certificates_from_bay.call_count)
+        self.assertEqual(
+            0, cert_manager.delete_certificates_from_cluster.call_count)
 
 
 class TestHeatPoller(base.TestCase):
@@ -738,8 +738,8 @@ class TestHeatPoller(base.TestCase):
         mock_heat_stack, bay, poller = self.setup_poll_test()
         poller._delete_complete()
         self.assertEqual(1, bay.destroy.call_count)
-        self.assertEqual(1,
-                         cert_manager.delete_certificates_from_bay.call_count)
+        self.assertEqual(
+            1, cert_manager.delete_certificates_from_cluster.call_count)
         self.assertEqual(1,
                          trust_manager.delete_trustee_and_trust.call_count)
 

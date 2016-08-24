@@ -76,23 +76,23 @@ def _generate_client_cert(issuer_name, ca_cert, ca_password, context=None):
     return magnum_cert_ref
 
 
-def _get_issuer_name(bay):
-    issuer_name = bay.name
-    # When user create a Bay without name, the bay.name is None.
-    # We should use bay.uuid as issuer name.
+def _get_issuer_name(cluster):
+    issuer_name = cluster.name
+    # When user create a Cluster without name, the cluster.name is None.
+    # We should use cluster.uuid as issuer name.
     if issuer_name is None:
-        issuer_name = bay.uuid
+        issuer_name = cluster.uuid
     return issuer_name
 
 
-def generate_certificates_to_bay(bay, context=None):
-    """Generate ca_cert and magnum client cert and set to bay
+def generate_certificates_to_cluster(cluster, context=None):
+    """Generate ca_cert and magnum client cert and set to cluster
 
-    :param bay: The bay to set CA cert and magnum client cert
+    :param cluster: The cluster to set CA cert and magnum client cert
     :returns: CA cert uuid and magnum client cert uuid
     """
     try:
-        issuer_name = _get_issuer_name(bay)
+        issuer_name = _get_issuer_name(cluster)
 
         LOG.debug('Start to generate certificates: %s', issuer_name)
 
@@ -103,37 +103,37 @@ def generate_certificates_to_bay(bay, context=None):
                                                 ca_password,
                                                 context=context)
 
-        bay.ca_cert_ref = ca_cert_ref
-        bay.magnum_cert_ref = magnum_cert_ref
+        cluster.ca_cert_ref = ca_cert_ref
+        cluster.magnum_cert_ref = magnum_cert_ref
     except Exception:
-        LOG.exception(_LE('Failed to generate certificates for Bay: %s'),
-                      bay.uuid)
-        raise exception.CertificatesToBayFailed(bay_uuid=bay.uuid)
+        LOG.exception(_LE('Failed to generate certificates for Cluster: %s'),
+                      cluster.uuid)
+        raise exception.CertificatesToClusterFailed(cluster_uuid=cluster.uuid)
 
 
-def get_bay_ca_certificate(bay, context=None):
+def get_cluster_ca_certificate(cluster, context=None):
     ca_cert = cert_manager.get_backend().CertManager.get_cert(
-        bay.ca_cert_ref,
-        resource_ref=bay.uuid,
+        cluster.ca_cert_ref,
+        resource_ref=cluster.uuid,
         context=context
     )
 
     return ca_cert
 
 
-def get_bay_magnum_cert(bay, context=None):
+def get_cluster_magnum_cert(cluster, context=None):
     magnum_cert = cert_manager.get_backend().CertManager.get_cert(
-        bay.magnum_cert_ref,
-        resource_ref=bay.uuid,
+        cluster.magnum_cert_ref,
+        resource_ref=cluster.uuid,
         context=context
     )
 
     return magnum_cert
 
 
-def create_client_files(bay, context=None):
-    ca_cert = get_bay_ca_certificate(bay, context)
-    magnum_cert = get_bay_magnum_cert(bay, context)
+def create_client_files(cluster, context=None):
+    ca_cert = get_cluster_ca_certificate(cluster, context)
+    magnum_cert = get_cluster_magnum_cert(cluster, context)
 
     ca_cert_file = tempfile.NamedTemporaryFile()
     ca_cert_file.write(ca_cert.get_certificate())
@@ -150,30 +150,31 @@ def create_client_files(bay, context=None):
     return ca_cert_file, magnum_key_file, magnum_cert_file
 
 
-def sign_node_certificate(bay, csr, context=None):
+def sign_node_certificate(cluster, csr, context=None):
     ca_cert = cert_manager.get_backend().CertManager.get_cert(
-        bay.ca_cert_ref,
-        resource_ref=bay.uuid,
+        cluster.ca_cert_ref,
+        resource_ref=cluster.uuid,
         context=context
     )
 
     node_cert = x509.sign(csr,
-                          _get_issuer_name(bay),
+                          _get_issuer_name(cluster),
                           ca_cert.get_private_key(),
                           ca_cert.get_private_key_passphrase())
     return node_cert
 
 
-def delete_certificates_from_bay(bay, context=None):
-    """Delete ca cert and magnum client cert from bay
+def delete_certificates_from_cluster(cluster, context=None):
+    """Delete ca cert and magnum client cert from cluster
 
-    :param bay: The bay which has certs
+    :param cluster: The cluster which has certs
     """
     for cert_ref in ['ca_cert_ref', 'magnum_cert_ref']:
         try:
-            cert_ref = getattr(bay, cert_ref, None)
+            cert_ref = getattr(cluster, cert_ref, None)
             if cert_ref:
                 cert_manager.get_backend().CertManager.delete_cert(
-                    cert_ref, resource_ref=bay.uuid, context=context)
+                    cert_ref, resource_ref=cluster.uuid, context=context)
         except Exception:
-            LOG.warning(_LW("Deleting certs is failed for Bay %s"), bay.uuid)
+            LOG.warning(_LW("Deleting certs is failed for Cluster %s"),
+                        cluster.uuid)

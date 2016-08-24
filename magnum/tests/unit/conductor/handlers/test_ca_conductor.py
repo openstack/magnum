@@ -25,34 +25,34 @@ class TestSignConductor(base.TestCase):
 
     @mock.patch.object(ca_conductor, 'cert_manager')
     def test_sign_certificate(self, mock_cert_manager):
-        mock_bay = mock.MagicMock()
+        mock_cluster = mock.MagicMock()
         mock_certificate = mock.MagicMock()
         mock_certificate.csr = 'fake-csr'
         mock_cert_manager.sign_node_certificate.return_value = 'fake-pem'
 
         actual_cert = self.ca_handler.sign_certificate(self.context,
-                                                       mock_bay,
+                                                       mock_cluster,
                                                        mock_certificate)
 
         mock_cert_manager.sign_node_certificate.assert_called_once_with(
-            mock_bay, 'fake-csr', context=self.context
+            mock_cluster, 'fake-csr', context=self.context
         )
         self.assertEqual('fake-pem', actual_cert.pem)
 
     @mock.patch.object(ca_conductor, 'cert_manager')
     def test_get_ca_certificate(self, mock_cert_manager):
-        mock_bay = mock.MagicMock()
-        mock_bay.uuid = 'bay-uuid'
-        mock_bay.user_id = 'user-id'
-        mock_bay.project_id = 'project-id'
+        mock_cluster = mock.MagicMock()
+        mock_cluster.uuid = 'cluster-uuid'
+        mock_cluster.user_id = 'user-id'
+        mock_cluster.project_id = 'project-id'
         mock_cert = mock.MagicMock()
         mock_cert.get_certificate.return_value = 'fake-pem'
-        mock_cert_manager.get_bay_ca_certificate.return_value = mock_cert
+        mock_cert_manager.get_cluster_ca_certificate.return_value = mock_cert
 
         actual_cert = self.ca_handler.get_ca_certificate(self.context,
-                                                         mock_bay)
+                                                         mock_cluster)
 
-        self.assertEqual(mock_bay.uuid, actual_cert.bay_uuid)
-        self.assertEqual(mock_bay.user_id, actual_cert.user_id)
-        self.assertEqual(mock_bay.project_id, actual_cert.project_id)
+        self.assertEqual(mock_cluster.uuid, actual_cert.cluster_uuid)
+        self.assertEqual(mock_cluster.user_id, actual_cert.user_id)
+        self.assertEqual(mock_cluster.project_id, actual_cert.project_id)
         self.assertEqual('fake-pem', actual_cert.pem)

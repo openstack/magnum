@@ -102,7 +102,7 @@ class CertManagerTestCase(base.BaseTestCase):
 
     def _test_generate_certificates(self,
                                     expected_ca_name,
-                                    mock_bay,
+                                    mock_cluster,
                                     mock_generate_ca_cert,
                                     mock_generate_client_cert):
         expected_ca_password = 'ca-password'
@@ -116,9 +116,9 @@ class CertManagerTestCase(base.BaseTestCase):
                                               expected_ca_password)
         mock_generate_client_cert.return_value = expected_cert_ref
 
-        cert_manager.generate_certificates_to_bay(mock_bay)
-        self.assertEqual(expected_ca_cert_ref, mock_bay.ca_cert_ref)
-        self.assertEqual(expected_cert_ref, mock_bay.magnum_cert_ref)
+        cert_manager.generate_certificates_to_cluster(mock_cluster)
+        self.assertEqual(expected_ca_cert_ref, mock_cluster.ca_cert_ref)
+        self.assertEqual(expected_cert_ref, mock_cluster.magnum_cert_ref)
 
         mock_generate_ca_cert.assert_called_once_with(expected_ca_name,
                                                       context=None)
@@ -133,11 +133,11 @@ class CertManagerTestCase(base.BaseTestCase):
     def test_generate_certificates(self, mock_generate_ca_cert,
                                    mock_generate_client_cert):
         expected_ca_name = 'ca-name'
-        mock_bay = mock.MagicMock()
-        mock_bay.name = expected_ca_name
+        mock_cluster = mock.MagicMock()
+        mock_cluster.name = expected_ca_name
 
         self._test_generate_certificates(expected_ca_name,
-                                         mock_bay,
+                                         mock_cluster,
                                          mock_generate_ca_cert,
                                          mock_generate_client_cert)
 
@@ -148,29 +148,29 @@ class CertManagerTestCase(base.BaseTestCase):
     def test_generate_certificates_without_name(self, mock_generate_ca_cert,
                                                 mock_generate_client_cert):
         expected_ca_name = 'ca-uuid'
-        mock_bay = mock.MagicMock()
-        mock_bay.name = None
-        mock_bay.uuid = expected_ca_name
+        mock_cluster = mock.MagicMock()
+        mock_cluster.name = None
+        mock_cluster.uuid = expected_ca_name
 
         self._test_generate_certificates(expected_ca_name,
-                                         mock_bay,
+                                         mock_cluster,
                                          mock_generate_ca_cert,
                                          mock_generate_client_cert)
 
     @mock.patch('magnum.conductor.handlers.common.cert_manager.'
                 '_get_issuer_name')
     def test_generate_certificates_with_error(self, mock_get_issuer_name):
-        mock_bay = mock.MagicMock()
+        mock_cluster = mock.MagicMock()
         mock_get_issuer_name.side_effect = exception.MagnumException()
 
-        self.assertRaises(exception.CertificatesToBayFailed,
-                          cert_manager.generate_certificates_to_bay,
-                          mock_bay)
+        self.assertRaises(exception.CertificatesToClusterFailed,
+                          cert_manager.generate_certificates_to_cluster,
+                          mock_cluster)
 
     @mock.patch('magnum.common.x509.operations.sign')
     def test_sign_node_certificate(self, mock_x509_sign):
-        mock_bay = mock.MagicMock()
-        mock_bay.uuid = "mock_bay_uuid"
+        mock_cluster = mock.MagicMock()
+        mock_cluster.uuid = "mock_cluster_uuid"
         mock_ca_cert = mock.MagicMock()
         mock_ca_cert.get_private_key.return_value = mock.sentinel.priv_key
         passphrase = mock.sentinel.passphrase
@@ -179,21 +179,22 @@ class CertManagerTestCase(base.BaseTestCase):
         mock_csr = mock.MagicMock()
         mock_x509_sign.return_value = mock.sentinel.signed_cert
 
-        bay_ca_cert = cert_manager.sign_node_certificate(mock_bay, mock_csr)
+        cluster_ca_cert = cert_manager.sign_node_certificate(mock_cluster,
+                                                             mock_csr)
 
         self.CertManager.get_cert.assert_called_once_with(
-            mock_bay.ca_cert_ref, resource_ref=mock_bay.uuid,
+            mock_cluster.ca_cert_ref, resource_ref=mock_cluster.uuid,
             context=None)
-        mock_x509_sign.assert_called_once_with(mock_csr, mock_bay.name,
+        mock_x509_sign.assert_called_once_with(mock_csr, mock_cluster.name,
                                                mock.sentinel.priv_key,
                                                passphrase)
-        self.assertEqual(mock.sentinel.signed_cert, bay_ca_cert)
+        self.assertEqual(mock.sentinel.signed_cert, cluster_ca_cert)
 
     @mock.patch('magnum.common.x509.operations.sign')
-    def test_sign_node_certificate_without_bay_name(self, mock_x509_sign):
-        mock_bay = mock.MagicMock()
-        mock_bay.name = None
-        mock_bay.uuid = "mock_bay_uuid"
+    def test_sign_node_certificate_without_cluster_name(self, mock_x509_sign):
+        mock_cluster = mock.MagicMock()
+        mock_cluster.name = None
+        mock_cluster.uuid = "mock_cluster_uuid"
         mock_ca_cert = mock.MagicMock()
         mock_ca_cert.get_private_key.return_value = mock.sentinel.priv_key
         passphrase = mock.sentinel.passphrase
@@ -202,67 +203,70 @@ class CertManagerTestCase(base.BaseTestCase):
         mock_csr = mock.MagicMock()
         mock_x509_sign.return_value = mock.sentinel.signed_cert
 
-        bay_ca_cert = cert_manager.sign_node_certificate(mock_bay, mock_csr)
+        cluster_ca_cert = cert_manager.sign_node_certificate(mock_cluster,
+                                                             mock_csr)
 
         self.CertManager.get_cert.assert_called_once_with(
-            mock_bay.ca_cert_ref, resource_ref=mock_bay.uuid, context=None)
-        mock_x509_sign.assert_called_once_with(mock_csr, mock_bay.uuid,
+            mock_cluster.ca_cert_ref, resource_ref=mock_cluster.uuid,
+            context=None)
+        mock_x509_sign.assert_called_once_with(mock_csr, mock_cluster.uuid,
                                                mock.sentinel.priv_key,
                                                passphrase)
-        self.assertEqual(mock.sentinel.signed_cert, bay_ca_cert)
+        self.assertEqual(mock.sentinel.signed_cert, cluster_ca_cert)
 
-    def test_get_bay_ca_certificate(self):
-        mock_bay = mock.MagicMock()
-        mock_bay.uuid = "mock_bay_uuid"
+    def test_get_cluster_ca_certificate(self):
+        mock_cluster = mock.MagicMock()
+        mock_cluster.uuid = "mock_cluster_uuid"
         mock_ca_cert = mock.MagicMock()
         self.CertManager.get_cert.return_value = mock_ca_cert
 
-        bay_ca_cert = cert_manager.get_bay_ca_certificate(mock_bay)
+        cluster_ca_cert = cert_manager.get_cluster_ca_certificate(mock_cluster)
 
         self.CertManager.get_cert.assert_called_once_with(
-            mock_bay.ca_cert_ref, resource_ref=mock_bay.uuid, context=None)
-        self.assertEqual(mock_ca_cert, bay_ca_cert)
+            mock_cluster.ca_cert_ref, resource_ref=mock_cluster.uuid,
+            context=None)
+        self.assertEqual(mock_ca_cert, cluster_ca_cert)
 
     def test_delete_certtificate(self):
         mock_delete_cert = self.CertManager.delete_cert
         expected_cert_ref = 'cert_ref'
         expected_ca_cert_ref = 'ca_cert_ref'
-        mock_bay = mock.MagicMock()
-        mock_bay.uuid = "mock_bay_uuid"
-        mock_bay.ca_cert_ref = expected_ca_cert_ref
-        mock_bay.magnum_cert_ref = expected_cert_ref
+        mock_cluster = mock.MagicMock()
+        mock_cluster.uuid = "mock_cluster_uuid"
+        mock_cluster.ca_cert_ref = expected_ca_cert_ref
+        mock_cluster.magnum_cert_ref = expected_cert_ref
 
-        cert_manager.delete_certificates_from_bay(mock_bay)
+        cert_manager.delete_certificates_from_cluster(mock_cluster)
         mock_delete_cert.assert_any_call(expected_ca_cert_ref,
-                                         resource_ref=mock_bay.uuid,
+                                         resource_ref=mock_cluster.uuid,
                                          context=None)
         mock_delete_cert.assert_any_call(expected_cert_ref,
-                                         resource_ref=mock_bay.uuid,
+                                         resource_ref=mock_cluster.uuid,
                                          context=None)
 
     def test_delete_certtificate_if_raise_error(self):
         mock_delete_cert = self.CertManager.delete_cert
         expected_cert_ref = 'cert_ref'
         expected_ca_cert_ref = 'ca_cert_ref'
-        mock_bay = mock.MagicMock()
-        mock_bay.ca_cert_ref = expected_ca_cert_ref
-        mock_bay.magnum_cert_ref = expected_cert_ref
+        mock_cluster = mock.MagicMock()
+        mock_cluster.ca_cert_ref = expected_ca_cert_ref
+        mock_cluster.magnum_cert_ref = expected_cert_ref
 
         mock_delete_cert.side_effect = ValueError
 
-        cert_manager.delete_certificates_from_bay(mock_bay)
+        cert_manager.delete_certificates_from_cluster(mock_cluster)
         mock_delete_cert.assert_any_call(expected_ca_cert_ref,
-                                         resource_ref=mock_bay.uuid,
+                                         resource_ref=mock_cluster.uuid,
                                          context=None)
         mock_delete_cert.assert_any_call(expected_cert_ref,
-                                         resource_ref=mock_bay.uuid,
+                                         resource_ref=mock_cluster.uuid,
                                          context=None)
 
     def test_delete_certtificate_without_cert_ref(self):
         mock_delete_cert = self.CertManager.delete_cert
-        mock_bay = mock.MagicMock()
-        mock_bay.ca_cert_ref = None
-        mock_bay.magnum_cert_ref = None
+        mock_cluster = mock.MagicMock()
+        mock_cluster.ca_cert_ref = None
+        mock_cluster.magnum_cert_ref = None
 
-        cert_manager.delete_certificates_from_bay(mock_bay)
+        cert_manager.delete_certificates_from_cluster(mock_cluster)
         self.assertFalse(mock_delete_cert.called)

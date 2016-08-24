@@ -359,6 +359,7 @@ extendedKeyUsage = clientAuth
 
         # magnum ca-show --cluster secure-k8scluster > ca.crt
         resp = cls.cs.certificates.get(cls.cluster.uuid)
+
         with open(cls.ca_file, 'w') as f:
             f.write(resp.pem)
 
