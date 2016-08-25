@@ -23,12 +23,6 @@ CONF = cfg.CONF
 class CoreOSK8sTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
     """Kubernetes template for CoreOS VM."""
 
-    provides = [
-        {'server_type': 'vm',
-         'os': 'coreos',
-         'coe': 'kubernetes'},
-    ]
-
     def __init__(self):
         super(CoreOSK8sTemplateDefinition, self).__init__()
         self.add_output('kube_minions',

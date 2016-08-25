@@ -22,10 +22,6 @@ CONF = cfg.CONF
 class AtomicSwarmTemplateDefinition(sftd.SwarmFedoraTemplateDefinition):
     """Docker swarm template for a Fedora Atomic VM."""
 
-    provides = [
-        {'server_type': 'vm', 'os': 'fedora-atomic', 'coe': 'swarm'},
-    ]
-
     @property
     def driver_module_path(self):
         return __name__[:__name__.rindex('.')]

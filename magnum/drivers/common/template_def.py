@@ -16,7 +16,6 @@ import ast
 
 from oslo_config import cfg
 from oslo_log import log as logging
-from pkg_resources import iter_entry_points
 import requests
 import six
 
@@ -126,117 +125,10 @@ class TemplateDefinition(object):
     and Heat templates. Each TemplateDefinition has a mapping of Heat
     parameters.
     '''
-    definitions = None
-    provides = list()
 
     def __init__(self):
         self.param_mappings = list()
         self.output_mappings = list()
-
-    @staticmethod
-    def load_entry_points():
-        for entry_point in iter_entry_points('magnum.template_definitions'):
-            yield entry_point, entry_point.load(require=False)
-
-    @classmethod
-    def get_template_definitions(cls):
-        '''Retrieves cluster definitions from python entry_points.
-
-        Example:
-
-        With the following classes:
-        class TemplateDefinition1(TemplateDefinition):
-            provides = [
-                ('server_type1', 'os1', 'coe1')
-            ]
-
-        class TemplateDefinition2(TemplateDefinition):
-            provides = [
-                ('server_type2', 'os2', 'coe2')
-            ]
-
-        And the following entry_points:
-
-        magnum.template_definitions =
-            template_name_1 = some.python.path:TemplateDefinition1
-            template_name_2 = some.python.path:TemplateDefinition2
-
-        get_template_definitions will return:
-            {
-                (server_type1, os1, coe1):
-                    {'template_name_1': TemplateDefinition1},
-                (server_type2, os2, coe2):
-                    {'template_name_2': TemplateDefinition2}
-            }
-
-        :return: dict
-        '''
-
-        if not cls.definitions:
-            cls.definitions = dict()
-            for entry_point, def_class in cls.load_entry_points():
-                for cluster_type in def_class.provides:
-                    cluster_type_tuple = (cluster_type['server_type'],
-                                          cluster_type['os'],
-                                          cluster_type['coe'])
-                    providers = cls.definitions.setdefault(cluster_type_tuple,
-                                                           dict())
-                    providers[entry_point.name] = def_class
-
-        return cls.definitions
-
-    @classmethod
-    def get_template_definition(cls, server_type, os, coe):
-        '''Get enabled TemplateDefinitions.
-
-        Returns the enabled TemplateDefinition class for the provided
-        cluster_type.
-
-        With the following classes:
-        class TemplateDefinition1(TemplateDefinition):
-            provides = [
-                ('server_type1', 'os1', 'coe1')
-            ]
-
-        class TemplateDefinition2(TemplateDefinition):
-            provides = [
-                ('server_type2', 'os2', 'coe2')
-            ]
-
-        And the following entry_points:
-
-        magnum.template_definitions =
-            template_name_1 = some.python.path:TemplateDefinition1
-            template_name_2 = some.python.path:TemplateDefinition2
-
-        get_template_name_1_definition('server_type2', 'os2', 'coe2')
-        will return: TemplateDefinition2
-
-        :param server_type: The server_type the cluster definition
-                                   will build on
-        :param os: The operating system the cluster definition will build on
-        :param coe: The Container Orchestration Environment the cluster will
-                    produce
-
-        :return: class
-        '''
-
-        definition_map = cls.get_template_definitions()
-        cluster_type = (server_type, os, coe)
-
-        if cluster_type not in definition_map:
-            raise exception.ClusterTypeNotSupported(
-                server_type=server_type,
-                os=os,
-                coe=coe)
-        type_definitions = definition_map[cluster_type]
-
-        for name in CONF.cluster.enabled_definitions:
-            if name in type_definitions:
-                return type_definitions[name]()
-
-        raise exception.ClusterTypeNotEnabled(
-            server_type=server_type, os=os, coe=coe)
 
     def add_parameter(self, *args, **kwargs):
         param = ParameterMapping(*args, **kwargs)

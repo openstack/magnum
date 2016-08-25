@@ -17,6 +17,8 @@ from mock import patch
 from oslo_service import loopingcall
 
 from magnum.conductor.handlers import cluster_conductor
+from magnum.drivers.common import driver
+from magnum.drivers.mesos_ubuntu_v1 import driver as mesos_dr
 from magnum import objects
 from magnum.objects.fields import ClusterStatus as cluster_status
 from magnum.tests import base
@@ -78,19 +80,22 @@ class TestClusterConductorWithMesos(base.TestCase):
         self.mock_osc_class.return_value = self.mock_osc
 
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_all_values(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid):
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+        mock_driver.return_value = mesos_dr.Driver()
 
         (template_path,
          definition,
-         env_files) = cluster_conductor._extract_template_definition(
-            self.context, cluster)
+         env_files) = driver._extract_template_definition(self.context,
+                                                          cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -128,8 +133,10 @@ class TestClusterConductorWithMesos(base.TestCase):
             env_files)
 
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_only_required(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid):
         not_required = ['image_id', 'master_flavor_id', 'flavor_id',
                         'dns_nameserver', 'fixed_network', 'http_proxy',
@@ -142,11 +149,12 @@ class TestClusterConductorWithMesos(base.TestCase):
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+        mock_driver.return_value = mesos_dr.Driver()
 
         (template_path,
          definition,
-         env_files) = cluster_conductor._extract_template_definition(
-            self.context, cluster)
+         env_files) = driver._extract_template_definition(self.context,
+                                                          cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -176,8 +184,10 @@ class TestClusterConductorWithMesos(base.TestCase):
             env_files)
 
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_with_lb(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid):
         self.cluster_template_dict['master_lb_enabled'] = True
         cluster_template = objects.ClusterTemplate(
@@ -185,11 +195,12 @@ class TestClusterConductorWithMesos(base.TestCase):
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+        mock_driver.return_value = mesos_dr.Driver()
 
         (template_path,
          definition,
-         env_files) = cluster_conductor._extract_template_definition(
-            self.context, cluster)
+         env_files) = driver._extract_template_definition(self.context,
+                                                          cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -227,8 +238,10 @@ class TestClusterConductorWithMesos(base.TestCase):
             env_files)
 
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_multi_master(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid):
         self.cluster_template_dict['master_lb_enabled'] = True
         self.cluster_dict['master_count'] = 2
@@ -237,11 +250,12 @@ class TestClusterConductorWithMesos(base.TestCase):
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+        mock_driver.return_value = mesos_dr.Driver()
 
         (template_path,
          definition,
-         env_files) = cluster_conductor._extract_template_definition(
-            self.context, cluster)
+         env_files) = driver._extract_template_definition(self.context,
+                                                          cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -281,7 +295,8 @@ class TestClusterConductorWithMesos(base.TestCase):
     @patch('magnum.conductor.utils.retrieve_cluster_template')
     @patch('magnum.conf.CONF')
     @patch('magnum.common.clients.OpenStackClients')
-    def setup_poll_test(self, mock_openstack_client, mock_conf,
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
+    def setup_poll_test(self, mock_driver, mock_openstack_client, mock_conf,
                         mock_retrieve_cluster_template):
         mock_conf.cluster_heat.max_attempts = 10
 
@@ -290,10 +305,12 @@ class TestClusterConductorWithMesos(base.TestCase):
         mock_heat_client = mock.MagicMock()
         mock_heat_client.stacks.get.return_value = mock_heat_stack
         mock_openstack_client.heat.return_value = mock_heat_client
+        mock_driver.return_value = mesos_dr.Driver()
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
         mock_retrieve_cluster_template.return_value = cluster_template
-        poller = cluster_conductor.HeatPoller(mock_openstack_client, cluster)
+        poller = cluster_conductor.HeatPoller(mock_openstack_client, cluster,
+                                              mesos_dr.Driver())
         poller.get_version_info = mock.MagicMock()
         return (mock_heat_stack, cluster, poller)
 

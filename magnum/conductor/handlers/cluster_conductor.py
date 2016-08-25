@@ -12,9 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import os
-
-from heatclient.common import template_utils
 from heatclient import exc
 from oslo_log import log as logging
 from oslo_service import loopingcall
@@ -24,13 +21,12 @@ import six
 
 from magnum.common import clients
 from magnum.common import exception
-from magnum.common import short_id
 from magnum.conductor.handlers.common import cert_manager
 from magnum.conductor.handlers.common import trust_manager
 from magnum.conductor import scale_manager
 from magnum.conductor import utils as conductor_utils
 import magnum.conf
-from magnum.drivers.common import template_def
+from magnum.drivers.common import driver
 from magnum.i18n import _
 from magnum.i18n import _LE
 from magnum.i18n import _LI
@@ -40,79 +36,6 @@ from magnum.objects import fields
 CONF = magnum.conf.CONF
 
 LOG = logging.getLogger(__name__)
-
-
-def _extract_template_definition(context, cluster, scale_manager=None):
-    cluster_template = conductor_utils.retrieve_cluster_template(context,
-                                                                 cluster)
-    cluster_distro = cluster_template.cluster_distro
-    cluster_coe = cluster_template.coe
-    cluster_server_type = cluster_template.server_type
-    definition = template_def.TemplateDefinition.get_template_definition(
-        cluster_server_type,
-        cluster_distro,
-        cluster_coe)
-    return definition.extract_definition(context, cluster_template, cluster,
-                                         scale_manager=scale_manager)
-
-
-def _get_env_files(template_path, env_rel_paths):
-    template_dir = os.path.dirname(template_path)
-    env_abs_paths = [os.path.join(template_dir, f) for f in env_rel_paths]
-    environment_files = []
-    env_map, merged_env = (
-        template_utils.process_multiple_environments_and_files(
-            env_paths=env_abs_paths, env_list_tracker=environment_files))
-    return environment_files, env_map
-
-
-def _create_stack(context, osc, cluster, create_timeout):
-    template_path, heat_params, env_files = (
-        _extract_template_definition(context, cluster))
-
-    tpl_files, template = template_utils.get_template_contents(template_path)
-
-    environment_files, env_map = _get_env_files(template_path, env_files)
-    tpl_files.update(env_map)
-
-    # Make sure no duplicate stack name
-    stack_name = '%s-%s' % (cluster.name, short_id.generate_id())
-    if create_timeout:
-        heat_timeout = create_timeout
-    else:
-        # no create_timeout value was passed in to the request
-        # so falling back on configuration file value
-        heat_timeout = CONF.cluster_heat.create_timeout
-    fields = {
-        'stack_name': stack_name,
-        'parameters': heat_params,
-        'environment_files': environment_files,
-        'template': template,
-        'files': tpl_files,
-        'timeout_mins': heat_timeout
-    }
-    created_stack = osc.heat().stacks.create(**fields)
-
-    return created_stack
-
-
-def _update_stack(context, osc, cluster, scale_manager=None, rollback=False):
-    template_path, heat_params, env_files = _extract_template_definition(
-        context, cluster, scale_manager=scale_manager)
-
-    tpl_files, template = template_utils.get_template_contents(template_path)
-    environment_files, env_map = _get_env_files(template_path, env_files)
-    tpl_files.update(env_map)
-
-    fields = {
-        'parameters': heat_params,
-        'environment_files': environment_files,
-        'template': template,
-        'files': tpl_files,
-        'disable_rollback': not rollback
-    }
-
-    return osc.heat().stacks.update(cluster.stack_id, **fields)
 
 
 class Handler(object):
@@ -135,8 +58,14 @@ class Handler(object):
                                                           context=context)
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_CREATE, taxonomy.OUTCOME_PENDING)
-            created_stack = _create_stack(context, osc, cluster,
-                                          create_timeout)
+            # Get driver
+            ct = conductor_utils.retrieve_cluster_template(context, cluster)
+            cluster_driver = driver.Driver.get_driver(ct.server_type,
+                                                      ct.cluster_distro,
+                                                      ct.coe)
+            # Create cluster
+            created_stack = cluster_driver.create_stack(context, osc, cluster,
+                                                        create_timeout)
         except Exception as e:
             cluster.status = fields.ClusterStatus.CREATE_FAILED
             cluster.status_reason = six.text_type(e)
@@ -154,7 +83,7 @@ class Handler(object):
         cluster.status = fields.ClusterStatus.CREATE_IN_PROGRESS
         cluster.create()
 
-        self._poll_and_check(osc, cluster)
+        self._poll_and_check(osc, cluster, cluster_driver)
 
         return cluster
 
@@ -189,8 +118,14 @@ class Handler(object):
         conductor_utils.notify_about_cluster_operation(
             context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_PENDING)
 
-        _update_stack(context, osc, cluster, manager, rollback)
-        self._poll_and_check(osc, cluster)
+        # Get driver
+        ct = conductor_utils.retrieve_cluster_template(context, cluster)
+        cluster_driver = driver.Driver.get_driver(ct.server_type,
+                                                  ct.cluster_distro,
+                                                  ct.coe)
+        # Create cluster
+        cluster_driver.update_stack(context, osc, cluster, manager, rollback)
+        self._poll_and_check(osc, cluster, cluster_driver)
 
         return cluster
 
@@ -241,26 +176,23 @@ class Handler(object):
 
         return None
 
-    def _poll_and_check(self, osc, cluster):
-        poller = HeatPoller(osc, cluster)
+    def _poll_and_check(self, osc, cluster, cluster_driver=None):
+        poller = HeatPoller(osc, cluster, cluster_driver)
         lc = loopingcall.FixedIntervalLoopingCall(f=poller.poll_and_check)
         lc.start(CONF.cluster_heat.wait_interval, True)
 
 
 class HeatPoller(object):
 
-    def __init__(self, openstack_client, cluster):
+    def __init__(self, openstack_client, cluster, cluster_driver=None):
         self.openstack_client = openstack_client
         self.context = self.openstack_client.context
         self.cluster = cluster
         self.attempts = 0
         self.cluster_template = conductor_utils.retrieve_cluster_template(
             self.context, cluster)
-        self.template_def = \
-            template_def.TemplateDefinition.get_template_definition(
-                self.cluster_template.server_type,
-                self.cluster_template.cluster_distro,
-                self.cluster_template.coe)
+        if cluster_driver:
+            self.template_def = cluster_driver.get_template_definition()
 
     def poll_and_check(self):
         # TODO(yuanying): temporary implementation to update api_address,
@@ -356,11 +288,7 @@ class HeatPoller(object):
         if stack_param:
             self.cluster.coe_version = stack.parameters[stack_param]
 
-        tdef = template_def.TemplateDefinition.get_template_definition(
-            self.cluster_template.server_type,
-            self.cluster_template.cluster_distro, self.cluster_template.coe)
-
-        version_module_path = tdef.driver_module_path+'.version'
+        version_module_path = self.template_def.driver_module_path+'.version'
         try:
             ver = importutils.import_module(version_module_path)
             container_version = ver.container_version
