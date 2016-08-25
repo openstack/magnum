@@ -1,6 +1,56 @@
+request_id:
+  type: UUID
+  in: header
+  required: true
+  description: |
+    A unique ID for tracking service request. The request ID associated
+    with the request by default appears in the service logs.
+binary:
+  type: string
+  in: body
+  required: true
+  description: |
+    The name of the binary form of the Magnum service.
+created_at:
+  description: |
+    The date and time when the resource was created.
+
+    The date and time stamp format is `ISO 8601
+    <https://en.wikipedia.org/wiki/ISO_8601>`_:
+
+    ::
+
+       CCYY-MM-DDThh:mm:ss±hh:mm
+
+    For example, ``2015-08-27T09:49:58-05:00``.
+
+    The ``±hh:mm`` value, if included, is the time zone as an offset
+    from UTC.
+  in: body
+  required: true
+  type: string
 description:
   description: |
     Descriptive text about the Magnum service.
+  in: body
+  required: true
+  type: string
+disabled_reason:
+  description: |
+    The disable reason of the service, ``null`` if the service is enabled or
+    disabled without reason provided.
+  in: body
+  required: true
+  type: string
+host:
+  description: |
+    The host for the service.
+  in: body
+  required: true
+  type: string
+id_s:
+  description: |
+    The ID of the Magnum service.
   in: body
   required: true
   type: string
@@ -13,19 +63,51 @@ links:
   in: body
   required: true
   type: array
+mservices:
+  description: |
+    A list of Magnum services.
+  in: body
+  required: true
+  type: array
 name:
   description: |
     Name of the Container Infrastructure Management API.
   in: body
   required: true
   type: string
-request_id:
-  type: UUID
-  in: header
-  required: true
+report_count:
   description: |
-    A unique ID for tracking service request. The request ID associated
-    with the request by default appears in the service logs.
+    The total number of report.
+  in: body
+  required: true
+  type: integer
+state:
+  description: |
+    The current state of Magnum services.
+  in: body
+  required: true
+  type: string
+updated_at:
+  description: |
+    The date and time when the resource was updated.
+
+    The date and time stamp format is `ISO 8601
+    <https://en.wikipedia.org/wiki/ISO_8601>`_:
+
+    ::
+
+       CCYY-MM-DDThh:mm:ss±hh:mm
+
+    For example, ``2015-08-27T09:49:58-05:00``.
+
+    The ``±hh:mm`` value, if included, is the time zone as an offset
+    from UTC. In the previous example, the offset value is ``-05:00``.
+
+    If the ``updated_at`` date and time stamp is not set, its value is
+    ``null``.
+  in: body
+  required: true
+  type: string
 version:
   description: |
     The version.
@@ -65,3 +147,4 @@ version_status:
     - ``CURRENT``: this is the preferred version of the API to use
     - ``SUPPORTED``: this is an older, but still supported version of the API
     - ``DEPRECATED``: a deprecated version of the API that is slated for removal
+
