@@ -61,7 +61,8 @@ def cluster_post_data(**kw):
 
 def cert_post_data(**kw):
     return {
-        'bay_uuid': kw.get('bay_uuid', '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'),
+        'cluster_uuid': kw.get('cluster_uuid',
+                               '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'),
         'csr': kw.get('csr', 'fake-csr'),
         'pem': kw.get('pem', 'fake-pem')
     }

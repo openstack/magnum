@@ -322,11 +322,11 @@ def bay_node_count_patch_data(node_count=2):
     return baypatch_model.BayPatchCollection.from_dict(data)
 
 
-def cert_data(bay_uuid, csr_data):
+def cert_data(cluster_uuid, csr_data):
     data = {
-        "bay_uuid": bay_uuid,
-        "csr": csr_data,
-    }
+        "cluster_uuid": cluster_uuid,
+        "csr": csr_data}
+
     model = cert_model.CertEntity.from_dict(data)
 
     return model
