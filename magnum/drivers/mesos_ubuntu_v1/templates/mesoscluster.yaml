@@ -2,8 +2,8 @@ heat_template_version: 2014-10-16
 
 description: >
   This template will boot a Mesos cluster with one or more masters
-  (as specified by number_of_masters, default is 1) and one or more agents
-  (as specified by the number_of_agents parameter, which
+  (as specified by number_of_masters, default is 1) and one or more slaves
+  (as specified by the number_of_slaves parameter, which
   defaults to 1).
 
 parameters:
@@ -27,19 +27,19 @@ parameters:
     default: m1.small
     description: flavor to use when booting the master server
 
-  agent_flavor:
+  slave_flavor:
     type: string
     default: m1.small
-    description: flavor to use when booting the agent server
+    description: flavor to use when booting the slave server
 
   dns_nameserver:
     type: string
     description: address of a dns nameserver reachable in your environment
     default: 8.8.8.8
 
-  number_of_agents:
+  number_of_slaves:
     type: number
-    description: how many mesos agents to spawn initially
+    description: how many mesos slaves to spawn initially
     default: 1
 
   fixed_network_cidr:
@@ -61,7 +61,7 @@ parameters:
   executor_registration_timeout:
     type: string
     description: >
-      Amount of time to wait for an executor to register with the agent before
+      Amount of time to wait for an executor to register with the slave before
       considering it hung and shutting it down
     default: 5mins
 
@@ -156,7 +156,7 @@ parameters:
     type: string
     description: url for keystone
 
-  mesos_agent_isolation:
+  mesos_slave_isolation:
     type: string
     description: >
       Isolation mechanisms to use, e.g., `posix/cpu,posix/mem`, or
@@ -168,30 +168,30 @@ parameters:
       for the Mesos Containerizer.
     default: ""
 
-  mesos_agent_work_dir:
+  mesos_slave_work_dir:
     type: string
     description: directory path to place framework work directories
     default: ""
 
-  mesos_agent_image_providers:
+  mesos_slave_image_providers:
     type: string
     description: >
       Comma separated list of supported image providers e.g.,
       APPC,DOCKER
     default: ""
 
-  mesos_agent_executor_env_variables:
+  mesos_slave_executor_env_variables:
     type: string
     description: >
       JSON object representing the environment variables that should be passed
       to the executor, and thus subsequently task(s). By default the executor,
-      executor will inherit the agent's environment variables.
+      executor will inherit the slave's environment variables.
     default: ""
 
-  agents_to_remove:
+  slaves_to_remove:
     type: comma_delimited_list
     description: >
-      List of agents to be removed when doing an update. Individual agent may
+      List of slaves to be removed when doing an update. Individual slave may
       be referenced several ways: (1) The resource name (e.g.['1', '3']),
       (2) The private IP address ['10.0.0.4', '10.0.0.6']. Note: the list should
       be empty when doing a create.
@@ -410,23 +410,23 @@ resources:
 
   ######################################################################
   #
-  # Mesos agents. This is a resource group that will initially
-  # create <number_of_agents> agents, and needs to be manually scaled.
+  # Mesos slaves. This is a resource group that will initially
+  # create <number_of_slaves> slaves, and needs to be manually scaled.
   #
 
-  mesos_agents:
+  mesos_slaves:
     type: OS::Heat::ResourceGroup
     depends_on:
       - extrouter_inside
     properties:
-      count: {get_param: number_of_agents}
-      removal_policies: [{resource_list: {get_param: agents_to_remove}}]
+      count: {get_param: number_of_slaves}
+      removal_policies: [{resource_list: {get_param: slaves_to_remove}}]
       resource_def:
-        type: mesosagent.yaml
+        type: mesosslave.yaml
         properties:
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: server_image}
-          agent_flavor: {get_param: agent_flavor}
+          slave_flavor: {get_param: slave_flavor}
           fixed_network: {get_resource: fixed_network}
           fixed_subnet: {get_resource: fixed_subnet}
           mesos_masters_ips: {list_join: [' ', {get_attr: [mesos_masters, mesos_master_ip]}]}
@@ -445,10 +445,10 @@ resources:
           region_name: {get_param: region_name}
           domain_name: {get_param: domain_name}
           rexray_preempt: {get_param: rexray_preempt}
-          mesos_agent_isolation: {get_param: mesos_agent_isolation}
-          mesos_agent_work_dir: {get_param: mesos_agent_work_dir}
-          mesos_agent_image_providers: {get_param: mesos_agent_image_providers}
-          mesos_agent_executor_env_variables: {get_param: mesos_agent_executor_env_variables}
+          mesos_slave_isolation: {get_param: mesos_slave_isolation}
+          mesos_slave_work_dir: {get_param: mesos_slave_work_dir}
+          mesos_slave_image_providers: {get_param: mesos_slave_image_providers}
+          mesos_slave_executor_env_variables: {get_param: mesos_slave_executor_env_variables}
 
 outputs:
 
@@ -470,12 +470,12 @@ outputs:
       log in to the Mesos master via ssh or to access the Mesos API
       from outside the cluster.
 
-  mesos_agent_private:
-    value: {get_attr: [mesos_agents, mesos_agent_ip]}
+  mesos_slave_private:
+    value: {get_attr: [mesos_slaves, mesos_slave_ip]}
     description: >
-      This is a list of the "private" addresses of all the Mesos agents.
+      This is a list of the "private" addresses of all the Mesos slaves.
 
-  mesos_agents:
-    value: {get_attr: [mesos_agents, mesos_agent_external_ip]}
+  mesos_slaves:
+    value: {get_attr: [mesos_slaves, mesos_slave_external_ip]}
     description: >
-      This is a list of the "public" addresses of all the Mesos agents.
+      This is a list of the "public" addresses of all the Mesos slaves.

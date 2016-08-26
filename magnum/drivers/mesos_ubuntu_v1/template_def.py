@@ -28,11 +28,11 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
         self.add_parameter('external_network',
                            baymodel_attr='external_network_id',
                            required=True)
-        self.add_parameter('number_of_agents',
+        self.add_parameter('number_of_slaves',
                            bay_attr='node_count')
         self.add_parameter('master_flavor',
                            baymodel_attr='master_flavor_id')
-        self.add_parameter('agent_flavor',
+        self.add_parameter('slave_flavor',
                            baymodel_attr='flavor_id')
         self.add_parameter('cluster_name',
                            bay_attr='name')
@@ -45,9 +45,9 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
                         bay_attr=None)
         self.add_output('mesos_master',
                         bay_attr='master_addresses')
-        self.add_output('mesos_agents_private',
+        self.add_output('mesos_slaves_private',
                         bay_attr=None)
-        self.add_output('mesos_agents',
+        self.add_output('mesos_slaves',
                         bay_attr='node_addresses')
 
     def get_params(self, context, baymodel, bay, **kwargs):
@@ -62,18 +62,18 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
         extra_params['domain_name'] = context.domain_name
         extra_params['region_name'] = osc.cinder_region_name()
 
-        label_list = ['rexray_preempt', 'mesos_agent_isolation',
-                      'mesos_agent_image_providers',
-                      'mesos_agent_work_dir',
-                      'mesos_agent_executor_env_variables']
+        label_list = ['rexray_preempt', 'mesos_slave_isolation',
+                      'mesos_slave_image_providers',
+                      'mesos_slave_work_dir',
+                      'mesos_slave_executor_env_variables']
 
         for label in label_list:
             extra_params[label] = baymodel.labels.get(label)
 
         scale_mgr = kwargs.pop('scale_manager', None)
         if scale_mgr:
-            hosts = self.get_output('mesos_agents_private')
-            extra_params['agents_to_remove'] = (
+            hosts = self.get_output('mesos_slaves_private')
+            extra_params['slaves_to_remove'] = (
                 scale_mgr.get_removal_nodes(hosts))
 
         return super(UbuntuMesosTemplateDefinition,
