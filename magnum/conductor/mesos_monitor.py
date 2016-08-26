@@ -13,10 +13,10 @@
 from oslo_serialization import jsonutils
 
 from magnum.common import urlfetch
-from magnum.conductor.monitors import MonitorBase
+from magnum.conductor import monitors
 
 
-class MesosMonitor(MonitorBase):
+class MesosMonitor(monitors.MonitorBase):
 
     def __init__(self, context, bay):
         super(MesosMonitor, self).__init__(context, bay)

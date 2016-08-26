@@ -12,10 +12,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from enum import Enum
+import enum
 
 
-class Extensions(Enum):
+class Extensions(enum.Enum):
     __order__ = ('AUTHORITY_KEY_IDENTIFIER SUBJECT_KEY_IDENTIFIER '
                  'AUTHORITY_INFORMATION_ACCESS BASIC_CONSTRAINTS '
                  'CRL_DISTRIBUTION_POINTS CERTIFICATE_POLICIES '
@@ -38,7 +38,7 @@ class Extensions(Enum):
     ISSUER_ALTERNATIVE_NAME = "issuerAltName"
 
 
-class KeyUsages(Enum):
+class KeyUsages(enum.Enum):
     __order__ = ('DIGITAL_SIGNATURE CONTENT_COMMITMENT KEY_ENCIPHERMENT '
                  'DATA_ENCIPHERMENT KEY_AGREEMENT KEY_CERT_SIGN '
                  'CRL_SIGN ENCIPHER_ONLY DECIPHER_ONLY')

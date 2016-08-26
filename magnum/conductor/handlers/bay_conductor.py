@@ -30,12 +30,12 @@ from magnum.conductor.handlers.common import cert_manager
 from magnum.conductor.handlers.common import trust_manager
 from magnum.conductor import scale_manager
 from magnum.conductor import utils as conductor_utils
-from magnum.drivers.common.template_def import TemplateDefinition as TDef
+from magnum.drivers.common import template_def
 from magnum.i18n import _
 from magnum.i18n import _LE
 from magnum.i18n import _LI
 from magnum import objects
-from magnum.objects.fields import BayStatus as bay_status
+from magnum.objects import fields
 
 
 cluster_heat_opts = [
@@ -73,9 +73,10 @@ def _extract_template_definition(context, bay, scale_manager=None):
     cluster_distro = cluster_template.cluster_distro
     cluster_coe = cluster_template.coe
     cluster_server_type = cluster_template.server_type
-    definition = TDef.get_template_definition(cluster_server_type,
-                                              cluster_distro,
-                                              cluster_coe)
+    definition = template_def.TemplateDefinition.get_template_definition(
+        cluster_server_type,
+        cluster_distro,
+        cluster_coe)
     return definition.extract_definition(context, cluster_template, bay,
                                          scale_manager=scale_manager)
 
@@ -173,7 +174,7 @@ class Handler(object):
             raise
 
         bay.stack_id = created_stack['stack']['id']
-        bay.status = bay_status.CREATE_IN_PROGRESS
+        bay.status = fields.BayStatus.CREATE_IN_PROGRESS
         bay.create()
 
         self._poll_and_check(osc, bay)
@@ -186,14 +187,14 @@ class Handler(object):
         osc = clients.OpenStackClients(context)
         stack = osc.heat().stacks.get(bay.stack_id)
         allow_update_status = (
-            bay_status.CREATE_COMPLETE,
-            bay_status.UPDATE_COMPLETE,
-            bay_status.RESUME_COMPLETE,
-            bay_status.RESTORE_COMPLETE,
-            bay_status.ROLLBACK_COMPLETE,
-            bay_status.SNAPSHOT_COMPLETE,
-            bay_status.CHECK_COMPLETE,
-            bay_status.ADOPT_COMPLETE
+            fields.BayStatus.CREATE_COMPLETE,
+            fields.BayStatus.UPDATE_COMPLETE,
+            fields.BayStatus.RESUME_COMPLETE,
+            fields.BayStatus.RESTORE_COMPLETE,
+            fields.BayStatus.ROLLBACK_COMPLETE,
+            fields.BayStatus.SNAPSHOT_COMPLETE,
+            fields.BayStatus.CHECK_COMPLETE,
+            fields.BayStatus.ADOPT_COMPLETE
         )
         if stack.stack_status not in allow_update_status:
             conductor_utils.notify_about_bay_operation(
@@ -255,7 +256,7 @@ class Handler(object):
                 context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_FAILURE)
             raise
 
-        bay.status = bay_status.DELETE_IN_PROGRESS
+        bay.status = fields.BayStatus.DELETE_IN_PROGRESS
         bay.save()
 
         self._poll_and_check(osc, bay)
@@ -277,9 +278,11 @@ class HeatPoller(object):
         self.attempts = 0
         self.cluster_template = conductor_utils.retrieve_cluster_template(
             self.context, bay)
-        self.template_def = TDef.get_template_definition(
-            self.cluster_template.server_type,
-            self.cluster_template.cluster_distro, self.cluster_template.coe)
+        self.template_def = \
+            template_def.TemplateDefinition.get_template_definition(
+                self.cluster_template.server_type,
+                self.cluster_template.cluster_distro,
+                self.cluster_template.coe)
 
     def poll_and_check(self):
         # TODO(yuanying): temporary implementation to update api_address,
@@ -287,26 +290,26 @@ class HeatPoller(object):
         stack = self.openstack_client.heat().stacks.get(self.bay.stack_id)
         self.attempts += 1
         status_to_event = {
-            bay_status.DELETE_COMPLETE: taxonomy.ACTION_DELETE,
-            bay_status.CREATE_COMPLETE: taxonomy.ACTION_CREATE,
-            bay_status.UPDATE_COMPLETE: taxonomy.ACTION_UPDATE,
-            bay_status.ROLLBACK_COMPLETE: taxonomy.ACTION_UPDATE,
-            bay_status.CREATE_FAILED: taxonomy.ACTION_CREATE,
-            bay_status.DELETE_FAILED: taxonomy.ACTION_DELETE,
-            bay_status.UPDATE_FAILED: taxonomy.ACTION_UPDATE,
-            bay_status.ROLLBACK_FAILED: taxonomy.ACTION_UPDATE
+            fields.BayStatus.DELETE_COMPLETE: taxonomy.ACTION_DELETE,
+            fields.BayStatus.CREATE_COMPLETE: taxonomy.ACTION_CREATE,
+            fields.BayStatus.UPDATE_COMPLETE: taxonomy.ACTION_UPDATE,
+            fields.BayStatus.ROLLBACK_COMPLETE: taxonomy.ACTION_UPDATE,
+            fields.BayStatus.CREATE_FAILED: taxonomy.ACTION_CREATE,
+            fields.BayStatus.DELETE_FAILED: taxonomy.ACTION_DELETE,
+            fields.BayStatus.UPDATE_FAILED: taxonomy.ACTION_UPDATE,
+            fields.BayStatus.ROLLBACK_FAILED: taxonomy.ACTION_UPDATE
         }
         # poll_and_check is detached and polling long time to check status,
         # so another user/client can call delete bay/stack.
-        if stack.stack_status == bay_status.DELETE_COMPLETE:
+        if stack.stack_status == fields.BayStatus.DELETE_COMPLETE:
             self._delete_complete()
             conductor_utils.notify_about_bay_operation(
                 self.context, status_to_event[stack.stack_status],
                 taxonomy.OUTCOME_SUCCESS)
             raise loopingcall.LoopingCallDone()
 
-        if stack.stack_status in (bay_status.CREATE_COMPLETE,
-                                  bay_status.UPDATE_COMPLETE):
+        if stack.stack_status in (fields.BayStatus.CREATE_COMPLETE,
+                                  fields.BayStatus.UPDATE_COMPLETE):
             self._sync_bay_and_template_status(stack)
             conductor_utils.notify_about_bay_operation(
                 self.context, status_to_event[stack.stack_status],
@@ -315,11 +318,11 @@ class HeatPoller(object):
         elif stack.stack_status != self.bay.status:
             self._sync_bay_status(stack)
 
-        if stack.stack_status in (bay_status.CREATE_FAILED,
-                                  bay_status.DELETE_FAILED,
-                                  bay_status.UPDATE_FAILED,
-                                  bay_status.ROLLBACK_COMPLETE,
-                                  bay_status.ROLLBACK_FAILED):
+        if stack.stack_status in (fields.BayStatus.CREATE_FAILED,
+                                  fields.BayStatus.DELETE_FAILED,
+                                  fields.BayStatus.UPDATE_FAILED,
+                                  fields.BayStatus.ROLLBACK_COMPLETE,
+                                  fields.BayStatus.ROLLBACK_FAILED):
             self._sync_bay_and_template_status(stack)
             self._bay_failed(stack)
             conductor_utils.notify_about_bay_operation(
@@ -329,7 +332,7 @@ class HeatPoller(object):
         # only check max attempts when the stack is being created when
         # the timeout hasn't been set. If the timeout has been set then
         # the loop will end when the stack completes or the timeout occurs
-        if stack.stack_status == bay_status.CREATE_IN_PROGRESS:
+        if stack.stack_status == fields.BayStatus.CREATE_IN_PROGRESS:
             if (stack.timeout_mins is None and
                self.attempts > cfg.CONF.cluster_heat.max_attempts):
                 LOG.error(_LE('Bay check exit after %(attempts)s attempts,'
@@ -375,7 +378,7 @@ class HeatPoller(object):
         if stack_param:
             self.bay.coe_version = stack.parameters[stack_param]
 
-        tdef = TDef.get_template_definition(
+        tdef = template_def.TemplateDefinition.get_template_definition(
             self.cluster_template.server_type,
             self.cluster_template.cluster_distro, self.cluster_template.coe)
 

@@ -16,13 +16,13 @@
 from oslo_log import log
 
 from magnum.common import docker_utils
-from magnum.conductor.monitors import MonitorBase
+from magnum.conductor import monitors
 from magnum.i18n import _LW
 
 LOG = log.getLogger(__name__)
 
 
-class SwarmMonitor(MonitorBase):
+class SwarmMonitor(monitors.MonitorBase):
 
     def __init__(self, context, bay):
         super(SwarmMonitor, self).__init__(context, bay)

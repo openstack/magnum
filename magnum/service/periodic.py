@@ -30,7 +30,7 @@ from magnum.i18n import _
 from magnum.i18n import _LI
 from magnum.i18n import _LW
 from magnum import objects
-from magnum.objects.fields import BayStatus as bay_status
+from magnum.objects import fields
 
 
 CONF = cfg.CONF
@@ -73,10 +73,10 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
         try:
             LOG.debug('Starting to sync up bay status')
             osc = clients.OpenStackClients(ctx)
-            status = [bay_status.CREATE_IN_PROGRESS,
-                      bay_status.UPDATE_IN_PROGRESS,
-                      bay_status.DELETE_IN_PROGRESS,
-                      bay_status.ROLLBACK_IN_PROGRESS]
+            status = [fields.BayStatus.CREATE_IN_PROGRESS,
+                      fields.BayStatus.UPDATE_IN_PROGRESS,
+                      fields.BayStatus.DELETE_IN_PROGRESS,
+                      fields.BayStatus.ROLLBACK_IN_PROGRESS]
             filters = {'status': status}
             bays = objects.Bay.list(ctx, filters=filters)
             if not bays:
@@ -155,12 +155,12 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                       'status': bay.status})
 
     def _sync_missing_heat_stack(self, bay):
-        if bay.status == bay_status.DELETE_IN_PROGRESS:
+        if bay.status == fields.BayStatus.DELETE_IN_PROGRESS:
             self._sync_deleted_stack(bay)
-        elif bay.status == bay_status.CREATE_IN_PROGRESS:
-            self._sync_missing_stack(bay, bay_status.CREATE_FAILED)
-        elif bay.status == bay_status.UPDATE_IN_PROGRESS:
-            self._sync_missing_stack(bay, bay_status.UPDATE_FAILED)
+        elif bay.status == fields.BayStatus.CREATE_IN_PROGRESS:
+            self._sync_missing_stack(bay, fields.BayStatus.CREATE_FAILED)
+        elif bay.status == fields.BayStatus.UPDATE_IN_PROGRESS:
+            self._sync_missing_stack(bay, fields.BayStatus.UPDATE_FAILED)
 
     def _sync_deleted_stack(self, bay):
         try:
@@ -189,8 +189,8 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
     def _send_bay_metrics(self, ctx):
         LOG.debug('Starting to send bay metrics')
         for bay in objects.Bay.list(ctx):
-            if bay.status not in [bay_status.CREATE_COMPLETE,
-                                  bay_status.UPDATE_COMPLETE]:
+            if bay.status not in [fields.BayStatus.CREATE_COMPLETE,
+                                  fields.BayStatus.UPDATE_COMPLETE]:
                 continue
 
             monitor = monitors.create_monitor(ctx, bay)

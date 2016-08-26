@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from tempfile import NamedTemporaryFile
+import tempfile
 
 from k8sclient.client import api_client
 from k8sclient.client.apis import apiv_api
@@ -33,7 +33,7 @@ class K8sAPI(apiv_api.ApivApi):
         :returns: temp file
         """
         try:
-            tmp = NamedTemporaryFile(delete=True)
+            tmp = tempfile.NamedTemporaryFile(delete=True)
             tmp.write(content)
             tmp.flush()
         except Exception as err:
