@@ -391,22 +391,15 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(self.cluster_obj.master_count,
                          response['master_count'])
 
-    def test_remove_uuid(self):
-        response = self.patch_json('/clusters/%s' % self.cluster_obj.uuid,
-                                   [{'path': '/uuid', 'op': 'remove'}],
-                                   expect_errors=True)
-        self.assertEqual(400, response.status_int)
-        self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['errors'])
-
-    def test_remove_cluster_template_id(self):
-        response = self.patch_json('/clusters/%s' % self.cluster_obj.uuid,
-                                   [{'path': '/cluster_template_id',
-                                     'op': 'remove'}],
-                                   expect_errors=True)
-        self.assertEqual(400, response.status_int)
-        self.assertEqual('application/json', response.content_type)
-        self.assertTrue(response.json['errors'])
+    def test_remove_mandatory_property_fail(self):
+        mandatory_properties = ('/uuid', '/cluster_template_id')
+        for p in mandatory_properties:
+            response = self.patch_json('/clusters/%s' % self.cluster_obj.uuid,
+                                       [{'path': p, 'op': 'remove'}],
+                                       expect_errors=True)
+            self.assertEqual(400, response.status_int)
+            self.assertEqual('application/json', response.content_type)
+            self.assertTrue(response.json['errors'])
 
     def test_remove_non_existent_property(self):
         response = self.patch_json(

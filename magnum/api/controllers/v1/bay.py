@@ -40,22 +40,6 @@ from magnum.objects import fields
 LOG = logging.getLogger(__name__)
 
 
-class BayPatchType(types.JsonPatchType):
-
-    @staticmethod
-    def mandatory_attrs():
-        return ['/baymodel_id']
-
-    @staticmethod
-    def internal_attrs():
-        internal_attrs = ['/api_address', '/node_addresses',
-                          '/master_addresses', '/stack_id',
-                          '/ca_cert_ref', '/magnum_cert_ref',
-                          '/trust_id', '/trustee_user_name',
-                          '/trustee_password', '/trustee_user_id']
-        return types.JsonPatchType.internal_attrs() + internal_attrs
-
-
 class BayID(wtypes.Base):
     uuid = types.uuid
 
@@ -183,6 +167,19 @@ class Bay(base.APIBase):
                      created_at=timeutils.utcnow(),
                      updated_at=timeutils.utcnow())
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
+
+
+class BayPatchType(types.JsonPatchType):
+    _api_base = Bay
+
+    @staticmethod
+    def internal_attrs():
+        internal_attrs = ['/api_address', '/node_addresses',
+                          '/master_addresses', '/stack_id',
+                          '/ca_cert_ref', '/magnum_cert_ref',
+                          '/trust_id', '/trustee_user_name',
+                          '/trustee_password', '/trustee_user_id']
+        return types.JsonPatchType.internal_attrs() + internal_attrs
 
 
 class BayCollection(collection.Collection):

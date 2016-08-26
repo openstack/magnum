@@ -33,15 +33,6 @@ from magnum import objects
 from magnum.objects import fields
 
 
-class ClusterTemplatePatchType(types.JsonPatchType):
-
-    @staticmethod
-    def mandatory_attrs():
-        return ['/image_id', '/keypair_id', '/external_network_id', '/coe',
-                '/tls_disabled', '/public', '/registry_enabled',
-                '/server_type', '/cluster_distro', '/network_driver']
-
-
 class ClusterTemplate(base.APIBase):
     """API representation of a clustertemplate.
 
@@ -207,6 +198,14 @@ class ClusterTemplate(base.APIBase):
             master_lb_enabled=False,
             floating_ip_enabled=True)
         return cls._convert_with_links(sample, 'http://localhost:9511')
+
+
+class ClusterTemplatePatchType(types.JsonPatchType):
+    _api_base = ClusterTemplate
+    _extra_non_removable_attrs = {'/network_driver', '/external_network_id',
+                                  '/tls_disabled', '/public', '/server_type',
+                                  '/coe', '/registry_enabled',
+                                  '/cluster_distro'}
 
 
 class ClusterTemplateCollection(collection.Collection):

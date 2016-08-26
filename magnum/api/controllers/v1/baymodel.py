@@ -33,15 +33,6 @@ from magnum import objects
 from magnum.objects import fields
 
 
-class BayModelPatchType(types.JsonPatchType):
-
-    @staticmethod
-    def mandatory_attrs():
-        return ['/image_id', '/keypair_id', '/external_network_id', '/coe',
-                '/tls_disabled', '/public', '/registry_enabled',
-                '/server_type', '/cluster_distro', '/network_driver']
-
-
 class BayModel(base.APIBase):
     """API representation of a baymodel.
 
@@ -204,6 +195,14 @@ class BayModel(base.APIBase):
             floating_ip_enabled=True,
         )
         return cls._convert_with_links(sample, 'http://localhost:9511')
+
+
+class BayModelPatchType(types.JsonPatchType):
+    _api_base = BayModel
+    _extra_non_removable_attrs = {'/network_driver', '/external_network_id',
+                                  '/tls_disabled', '/public', '/server_type',
+                                  '/coe', '/registry_enabled',
+                                  '/cluster_distro'}
 
 
 class BayModelCollection(collection.Collection):
