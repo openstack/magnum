@@ -6,7 +6,10 @@ if [ "$VOLUME_DRIVER" != "rexray" ]; then
     exit 0
 fi
 
-curl -sSL https://dl.bintray.com/emccode/rexray/install | sh -
+# NOTE(yatin): "openstack" storageDriver is not supported in latest version
+# of rexray. So use stable version 0.3.3. Once it is supported by rexray:
+# http://rexray.readthedocs.io/en/stable/, we can revert this commit.
+curl -sSL https://dl.bintray.com/emccode/rexray/install | bash -s -- stable 0.3.3
 
 CLOUD_CONFIG=/etc/rexray/config.yml
 CLOUD=/etc/rexray
