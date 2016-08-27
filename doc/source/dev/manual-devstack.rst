@@ -52,9 +52,18 @@ and neutron::
     enable_service q-dhcp
     enable_service q-l3
     enable_service q-meta
-    # Note: Default template uses LBaaS.
-    enable_service q-lbaas
     enable_service neutron
+
+    # Disable LBaaS(v1) service
+    disable_service q-lbaas
+
+    # Enable LBaaS(v2) services
+    enable_service q-lbaasv2
+    enable_service octavia
+    enable_service o-cw
+    enable_service o-hk
+    enable_service o-hm
+    enable_service o-api
 
     # Enable heat services
     enable_service h-eng
@@ -65,6 +74,7 @@ and neutron::
     # Enable barbican services
     enable_plugin barbican https://git.openstack.org/openstack/barbican
     enable_plugin neutron-lbaas https://git.openstack.org/openstack/neutron-lbaas
+    enable_plugin octavia https://git.openstack.org/openstack/octavia
 
     VOLUME_BACKING_FILE_SIZE=20G
     END

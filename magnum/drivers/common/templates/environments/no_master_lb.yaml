@@ -4,9 +4,11 @@ resource_registry:
   "Magnum::ApiGatewaySwitcher": ../fragments/api_gateway_switcher_master.yaml
 
   # Cluster template
-  "Magnum::Optional::Neutron::Pool": "OS::Heat::None"
-  "Magnum::Optional::Neutron::Pool::FloatingIP": "OS::Heat::None"
-  "Magnum::Optional::Neutron::Pool::HealthMonitor": "OS::Heat::None"
+  "Magnum::Optional::Neutron::LBaaS::LoadBalancer": "OS::Heat::None"
+  "Magnum::Optional::Neutron::LBaaS::Listener": "OS::Heat::None"
+  "Magnum::Optional::Neutron::LBaaS::Pool": "OS::Heat::None"
+  "Magnum::Optional::Neutron::LBaaS::HealthMonitor": "OS::Heat::None"
+  "Magnum::Optional::Neutron::FloatingIP": "OS::Heat::None"
 
   # Master node template
-  "Magnum::Optional::Neutron::PoolMember": "OS::Heat::None"
+  "Magnum::Optional::Neutron::LBaaS::PoolMember": "OS::Heat::None"

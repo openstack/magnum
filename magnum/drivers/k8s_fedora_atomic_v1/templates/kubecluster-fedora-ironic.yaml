@@ -328,48 +328,67 @@ resources:
   #
   # load balancers.
   #
-
-  api_monitor:
-    type: Magnum::Optional::Neutron::Pool::HealthMonitor
+  api_loadbalancer:
+    type: Magnum::Optional::Neutron::LBaaS::LoadBalancer
     properties:
-      type: TCP
-      delay: 5
-      max_retries: 5
-      timeout: 5
+      vip_subnet: {get_param: fixed_subnet}
+
+  api_listener:
+    type: Magnum::Optional::Neutron::LBaaS::Listener
+    properties:
+      loadbalancer: {get_resource: api_loadbalancer}
+      protocol: {get_param: loadbalancing_protocol}
+      protocol_port: {get_param: kubernetes_port}
 
   api_pool:
-    type: Magnum::Optional::Neutron::Pool
+    type: Magnum::Optional::Neutron::LBaaS::Pool
     properties:
+      lb_algorithm: ROUND_ROBIN
+      listener: {get_resource: api_listener}
       protocol: {get_param: loadbalancing_protocol}
-      monitors: [{get_resource: api_monitor}]
-      subnet: {get_param: fixed_subnet}
-      lb_method: ROUND_ROBIN
-      vip:
-        protocol_port: {get_param: kubernetes_port}
 
-  api_pool_floating:
-    type: Magnum::Optional::Neutron::Pool::FloatingIP
-    properties:
-      floating_network: {get_param: external_network}
-      port_id: {get_attr: [api_pool, vip, port_id]}
-
-  etcd_monitor:
-    type: Magnum::Optional::Neutron::Pool::HealthMonitor
+  api_monitor:
+    type: Magnum::Optional::Neutron::LBaaS::HealthMonitor
     properties:
       type: TCP
       delay: 5
       max_retries: 5
       timeout: 5
+      pool: { get_resource: api_pool }
+
+  api_pool_floating:
+    type: Magnum::Optional::Neutron::FloatingIP
+    properties:
+      floating_network: {get_param: external_network}
+      port_id: {get_attr: [api_loadbalancer, vip_port_id]}
+
+  etcd_loadbalancer:
+    type: Magnum::Optional::Neutron::LBaaS::LoadBalancer
+    properties:
+      vip_subnet: {get_param: fixed_subnet}
+
+  etcd_listener:
+    type: Magnum::Optional::Neutron::LBaaS::Listener
+    properties:
+      loadbalancer: {get_resource: etcd_loadbalancer}
+      protocol: HTTP
+      protocol_port: 2379
 
   etcd_pool:
-    type: Magnum::Optional::Neutron::Pool
+    type: Magnum::Optional::Neutron::LBaaS::Pool
     properties:
+      lb_algorithm: ROUND_ROBIN
+      listener: {get_resource: etcd_listener}
       protocol: HTTP
-      monitors: [{get_resource: etcd_monitor}]
-      subnet: {get_param: fixed_subnet}
-      lb_method: ROUND_ROBIN
-      vip:
-        protocol_port: 2379
+
+  etcd_monitor:
+    type: Magnum::Optional::Neutron::LBaaS::HealthMonitor
+    properties:
+      type: TCP
+      delay: 5
+      max_retries: 5
+      timeout: 5
+      pool: { get_resource: etcd_pool }
 
   ######################################################################
   #
@@ -381,14 +400,14 @@ resources:
     type: Magnum::ApiGatewaySwitcher
     properties:
       pool_public_ip: {get_attr: [api_pool_floating, floating_ip_address]}
-      pool_private_ip: {get_attr: [api_pool, vip, address]}
+      pool_private_ip: {get_attr: [api_loadbalancer, vip_address]}
       master_public_ip: {get_attr: [kube_masters, resource.0.kube_master_external_ip]}
       master_private_ip: {get_attr: [kube_masters, resource.0.kube_master_ip]}
 
   etcd_address_switch:
     type: Magnum::ApiGatewaySwitcher
     properties:
-      pool_private_ip: {get_attr: [etcd_pool, vip, address]}
+      pool_private_ip: {get_attr: [etcd_loadbalancer, vip_address]}
       master_private_ip: {get_attr: [kube_masters, resource.0.kube_master_ip]}
 
   ######################################################################
@@ -405,7 +424,7 @@ resources:
         type: kubemaster-fedora-ironic.yaml
         properties:
           api_public_address: {get_attr: [api_pool_floating, floating_ip_address]}
-          api_private_address: {get_attr: [api_pool, vip, address]}
+          api_private_address: {get_attr: [api_loadbalancer, vip_address]}
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: server_image}
           master_flavor: {get_param: master_flavor}

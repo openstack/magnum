@@ -78,7 +78,8 @@ To run unit test coverage and check percentage of code covered::
 
     tox -e cover
 
-
+To discover and interact with templates, please refer to
+`<http://docs.openstack.org/developer/magnum/dev/bay-template-example.html>`_
 
 Exercising the Services Using Devstack
 ======================================
@@ -123,6 +124,17 @@ Kilo, and heat is enabled by the magnum plugin)::
     # For details http://docs.openstack.org/developer/magnum/dev/tls.html
     enable_plugin barbican https://git.openstack.org/openstack/barbican
     enable_plugin neutron-lbaas https://git.openstack.org/openstack/neutron-lbaas
+    enable_plugin octavia https://git.openstack.org/openstack/octavia
+
+    # Disable LBaaS(v1) service
+    disable_service q-lbaas
+    # Enable LBaaS(v2) services
+    enable_service q-lbaasv2
+    enable_service octavia
+    enable_service o-cw
+    enable_service o-hk
+    enable_service o-hm
+    enable_service o-api
     VOLUME_BACKING_FILE_SIZE=20G
     END
 

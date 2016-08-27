@@ -4,9 +4,11 @@ resource_registry:
   "Magnum::ApiGatewaySwitcher": ../fragments/api_gateway_switcher_pool.yaml
 
   # Cluster template
-  "Magnum::Optional::Neutron::Pool": "OS::Neutron::Pool"
-  "Magnum::Optional::Neutron::Pool::FloatingIP": "OS::Neutron::FloatingIP"
-  "Magnum::Optional::Neutron::Pool::HealthMonitor": "OS::Neutron::HealthMonitor"
+  "Magnum::Optional::Neutron::LBaaS::LoadBalancer": "OS::Neutron::LBaaS::LoadBalancer"
+  "Magnum::Optional::Neutron::LBaaS::Listener": "OS::Neutron::LBaaS::Listener"
+  "Magnum::Optional::Neutron::LBaaS::Pool": "OS::Neutron::LBaaS::Pool"
+  "Magnum::Optional::Neutron::LBaaS::HealthMonitor": "OS::Neutron::LBaaS::HealthMonitor"
+  "Magnum::Optional::Neutron::FloatingIP": "OS::Neutron::FloatingIP"
 
   # Master node template
-  "Magnum::Optional::Neutron::PoolMember": "OS::Neutron::PoolMember"
+  "Magnum::Optional::Neutron::LBaaS::PoolMember": "OS::Neutron::LBaaS::PoolMember"

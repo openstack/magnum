@@ -415,17 +415,19 @@ resources:
         get_resource: swarm_master_eth0
 
   api_pool_member:
-    type: Magnum::Optional::Neutron::PoolMember
+    type: Magnum::Optional::Neutron::LBaaS::PoolMember
     properties:
-      pool_id: {get_param: api_pool_id}
+      pool: {get_param: api_pool_id}
       address: {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
+      subnet: { get_param: fixed_subnet_id }
       protocol_port: {get_param: swarm_port}
 
   etcd_pool_member:
-    type: Magnum::Optional::Neutron::PoolMember
+    type: Magnum::Optional::Neutron::LBaaS::PoolMember
     properties:
-      pool_id: {get_param: etcd_pool_id}
+      pool: {get_param: etcd_pool_id}
       address: {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
+      subnet: { get_param: fixed_subnet_id }
       protocol_port: 2379
 
   ######################################################################

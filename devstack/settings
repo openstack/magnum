@@ -22,8 +22,6 @@ enable_service q-agt
 enable_service q-dhcp
 enable_service q-l3
 enable_service q-meta
-# Note: Default template uses LBaaS.
-enable_service q-lbaas
 enable_service neutron
 
 # Enable Heat services
@@ -31,6 +29,16 @@ enable_service h-eng
 enable_service h-api
 enable_service h-api-cfn
 enable_service h-api-cw
+
+# Disable LBaaS(v1) service
+disable_service q-lbaas
+# Enable LBaaS(v2) services
+enable_service q-lbaasv2
+enable_service octavia
+enable_service o-cw
+enable_service o-hk
+enable_service o-hm
+enable_service o-api
 
 # Enable Magnum services
 enable_service magnum-api

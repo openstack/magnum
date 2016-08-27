@@ -287,50 +287,69 @@ resources:
   #
   # load balancers.
   #
+  api_loadbalancer:
+    type: Magnum::Optional::Neutron::LBaaS::LoadBalancer
+    properties:
+      vip_subnet: {get_resource: fixed_subnet}
+
+  api_listener:
+    type: Magnum::Optional::Neutron::LBaaS::Listener
+    properties:
+      loadbalancer: {get_resource: api_loadbalancer}
+      protocol: {get_param: loadbalancing_protocol}
+      protocol_port: {get_param: swarm_port}
+
+  api_pool:
+    type: Magnum::Optional::Neutron::LBaaS::Pool
+    properties:
+      lb_algorithm: ROUND_ROBIN
+      listener: {get_resource: api_listener}
+      protocol: {get_param: loadbalancing_protocol}
 
   api_monitor:
-    type: Magnum::Optional::Neutron::Pool::HealthMonitor
+    type: Magnum::Optional::Neutron::LBaaS::HealthMonitor
     properties:
       type: TCP
       delay: 5
       max_retries: 5
       timeout: 5
-
-  api_pool:
-    type: Magnum::Optional::Neutron::Pool
-    properties:
-      protocol: {get_param: loadbalancing_protocol}
-      monitors: [{get_resource: api_monitor}]
-      subnet: {get_resource: fixed_subnet}
-      lb_method: ROUND_ROBIN
-      vip:
-        protocol_port: {get_param: swarm_port}
+      pool: { get_resource: api_pool }
 
   api_pool_floating:
-    type: Magnum::Optional::Neutron::Pool::FloatingIP
+    type: Magnum::Optional::Neutron::FloatingIP
     depends_on:
       - extrouter_inside
     properties:
       floating_network: {get_param: external_network}
-      port_id: {get_attr: [api_pool, vip, port_id]}
+      port_id: {get_attr: [api_loadbalancer, vip_port_id]}
+
+  etcd_loadbalancer:
+    type: Magnum::Optional::Neutron::LBaaS::LoadBalancer
+    properties:
+      vip_subnet: {get_resource: fixed_subnet}
+
+  etcd_listener:
+    type: Magnum::Optional::Neutron::LBaaS::Listener
+    properties:
+      loadbalancer: {get_resource: etcd_loadbalancer}
+      protocol: HTTP
+      protocol_port: 2379
+
+  etcd_pool:
+    type: Magnum::Optional::Neutron::LBaaS::Pool
+    properties:
+      lb_algorithm: ROUND_ROBIN
+      listener: {get_resource: etcd_listener}
+      protocol: HTTP
 
   etcd_monitor:
-    type: Magnum::Optional::Neutron::Pool::HealthMonitor
+    type: Magnum::Optional::Neutron::LBaaS::HealthMonitor
     properties:
       type: TCP
       delay: 5
       max_retries: 5
       timeout: 5
-
-  etcd_pool:
-    type: Magnum::Optional::Neutron::Pool
-    properties:
-      protocol: HTTP
-      monitors: [{get_resource: etcd_monitor}]
-      subnet: {get_resource: fixed_subnet}
-      lb_method: ROUND_ROBIN
-      vip:
-        protocol_port: 2379
+      pool: { get_resource: etcd_pool }
 
   ######################################################################
   #
@@ -342,14 +361,14 @@ resources:
     type: Magnum::ApiGatewaySwitcher
     properties:
       pool_public_ip: {get_attr: [api_pool_floating, floating_ip_address]}
-      pool_private_ip: {get_attr: [api_pool, vip, address]}
+      pool_private_ip: {get_attr: [api_loadbalancer, vip_address]}
       master_public_ip: {get_attr: [swarm_masters, resource.0.swarm_master_external_ip]}
       master_private_ip: {get_attr: [swarm_masters, resource.0.swarm_master_ip]}
 
   etcd_address_switch:
     type: Magnum::ApiGatewaySwitcher
     properties:
-      pool_private_ip: {get_attr: [etcd_pool, vip, address]}
+      pool_private_ip: {get_attr: [etcd_loadbalancer, vip_address]}
       master_private_ip: {get_attr: [swarm_masters, resource.0.swarm_master_ip]}
 
   ######################################################################
@@ -380,7 +399,7 @@ resources:
           http_proxy: {get_param: http_proxy}
           https_proxy: {get_param: https_proxy}
           no_proxy: {get_param: no_proxy}
-          swarm_api_ip: {get_attr: [api_pool, vip, address]}
+          swarm_api_ip: {get_attr: [api_loadbalancer, vip_address]}
           cluster_uuid: {get_param: cluster_uuid}
           magnum_url: {get_param: magnum_url}
           tls_disabled: {get_param: tls_disabled}
@@ -392,7 +411,7 @@ resources:
           swarm_port: {get_param: swarm_port}
           api_pool_id: {get_resource: api_pool}
           etcd_pool_id: {get_resource: etcd_pool}
-          etcd_server_ip: {get_attr: [etcd_pool, vip, address]}
+          etcd_server_ip: {get_attr: [etcd_loadbalancer, vip_address]}
           api_ip_address: {get_attr: [api_pool_floating, floating_ip_address]}
           swarm_version: {get_param: swarm_version}
           trustee_user_id: {get_param: trustee_user_id}
