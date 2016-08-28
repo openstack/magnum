@@ -24,12 +24,6 @@ enable_service q-l3
 enable_service q-meta
 enable_service neutron
 
-# Enable Heat services
-enable_service h-eng
-enable_service h-api
-enable_service h-api-cfn
-enable_service h-api-cw
-
 # Disable LBaaS(v1) service
 disable_service q-lbaas
 # Enable LBaaS(v2) services

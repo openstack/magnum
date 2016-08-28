@@ -108,7 +108,7 @@ Clone devstack::
 
 We will run devstack with minimal local.conf settings required to enable
 magnum, heat, and neutron (neutron is enabled by default in devstack since
-Kilo, and heat is enabled by the magnum plugin)::
+Kilo, and heat must be enabled by yourself)::
 
     cat > /opt/stack/devstack/local.conf << END
     [[local|localrc]]
@@ -123,6 +123,7 @@ Kilo, and heat is enabled by the magnum plugin)::
     # Enable barbican service and use it to store TLS certificates
     # For details http://docs.openstack.org/developer/magnum/dev/tls.html
     enable_plugin barbican https://git.openstack.org/openstack/barbican
+    enable_plugin heat https://git.openstack.org/openstack/heat
     enable_plugin neutron-lbaas https://git.openstack.org/openstack/neutron-lbaas
     enable_plugin octavia https://git.openstack.org/openstack/octavia
 
@@ -139,6 +140,7 @@ Kilo, and heat is enabled by the magnum plugin)::
     END
 
 **NOTE:** Update PUBLIC_INTERFACE as appropriate for your system.
+**NOTE:** Enable heat plugin is necessary.
 
 Optionally, you can enable ceilometer in devstack. If ceilometer is enabled,
 magnum will periodically send metrics to ceilometer::
@@ -727,4 +729,3 @@ creates a virtual environment to run in.
 When complete, the documentation can be accessed from::
 
     doc/build/html/index.html
-

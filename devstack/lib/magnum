@@ -97,8 +97,6 @@ function configure_magnum {
     create_magnum_conf
 
     create_api_paste_conf
-
-    update_heat_policy
 }
 
 # create_magnum_accounts() - Set up common required magnum accounts
@@ -222,12 +220,6 @@ function create_magnum_conf {
 function create_api_paste_conf {
     # copy api_paste.ini
     cp $MAGNUM_DIR/etc/magnum/api-paste.ini $MAGNUM_API_PASTE
-}
-
-function update_heat_policy {
-    # enable stacks global_index search so that magnum can use
-    # list(global_tenant=True)
-    sed -i 's/\("stacks:global_index":\).*$/\1 "rule:context_is_admin",/' $HEAT_CONF_DIR/policy.json
 }
 
 # create_magnum_cache_dir() - Part of the init_magnum() process
