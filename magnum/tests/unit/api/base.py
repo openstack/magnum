@@ -47,13 +47,10 @@ class FunctionalTest(base.DbTestCase):
                               group='keystone_authtoken')
 
         # Determine where we are so we can set up paths in the config
-        root_dir = self.get_path()
         self.config = {
             'app': {
                 'root': 'magnum.api.controllers.root.RootController',
                 'modules': ['magnum.api'],
-                'static_root': '%s/public' % root_dir,
-                'template_path': '%s/api/templates' % root_dir,
                 'hooks': [
                     hooks.ContextHook(),
                     hooks.RPCHook(),
