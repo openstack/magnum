@@ -1,10 +1,9 @@
 [run]
 branch = True
 source = magnum
-omit = magnum/tests/*,magnum/openstack/*
+omit = magnum/tests/*
 
 [report]
 ignore_errors = True
 exclude_lines =
-    @abc.abstract
     pass
