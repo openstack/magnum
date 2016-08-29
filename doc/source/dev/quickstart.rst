@@ -78,8 +78,7 @@ To run unit test coverage and check percentage of code covered::
 
     tox -e cover
 
-To discover and interact with templates, please refer to
-`<http://docs.openstack.org/developer/magnum/dev/bay-template-example.html>`_
+
 
 Exercising the Services Using Devstack
 ======================================
@@ -136,8 +135,8 @@ magnum will periodically send metrics to ceilometer::
     enable_plugin ceilometer https://git.openstack.org/openstack/ceilometer
     END
 
-If you want to deploy Docker Registry 2.0 in your bay, you should enable swift
-in devstack::
+If you want to deploy Docker Registry 2.0 in your cluster, you should enable
+swift in devstack::
 
     cat >> /opt/stack/devstack/local.conf << END
     enable_service s-proxy
@@ -193,7 +192,8 @@ To list the available commands and resources for magnum, use::
 
     magnum help
 
-To list out the health of the internal services, namely conductor, of magnum, use::
+To list out the health of the internal services, namely conductor, of magnum,
+use::
 
     magnum service-list
 
@@ -203,21 +203,21 @@ To list out the health of the internal services, namely conductor, of magnum, us
     | 1  | oxy-dev.hq1-0a5a3c02.hq1.abcde.com | magnum-conductor | up    |
     +----+------------------------------------+------------------+-------+
 
-Create a keypair for use with the baymodel::
+Create a keypair for use with the ClusterTemplate::
 
     test -f ~/.ssh/id_rsa.pub || ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
     nova keypair-add --pub-key ~/.ssh/id_rsa.pub testkey
 
-Building a Kubernetes Bay - Based on Fedora Atomic
-==================================================
+Building a Kubernetes Cluster - Based on Fedora Atomic
+======================================================
 
-Create a baymodel. This is similar in nature to a flavor and describes
-to magnum how to construct the bay. The baymodel specifies a Fedora Atomic
-image so the bays which use this baymodel will be based on Fedora Atomic.
-The COE (Container Orchestration Engine) and keypair need to be specified
-as well::
+Create a ClusterTemplate. This is similar in nature to a flavor and describes
+to magnum how to construct the cluster. The ClusterTemplate specifies a Fedora
+Atomic image so the clusters which use this ClusterTemplate will be based on
+Fedora Atomic. The COE (Container Orchestration Engine) and keypair need to
+be specified as well::
 
-    magnum baymodel-create --name k8sbaymodel \
+    magnum cluster-template-create --name k8s-cluster-template \
                            --image-id fedora-atomic-latest \
                            --keypair-id testkey \
                            --external-network-id public \
@@ -227,39 +227,43 @@ as well::
                            --network-driver flannel \
                            --coe kubernetes
 
-Create a bay. Use the baymodel name as a template for bay creation.
-This bay will result in one master kubernetes node and one minion node::
+Create a cluster. Use the ClusterTemplate name as a template for cluster
+creation. This cluster will result in one master kubernetes node and one minion
+node::
 
-    magnum bay-create --name k8sbay --baymodel k8sbaymodel --node-count 1
+    magnum cluster-create --name k8s-cluster \
+                          --cluster-template k8s-cluster-template \
+                          --node-count 1
 
-Bays will have an initial status of CREATE_IN_PROGRESS.  Magnum will update
-the status to CREATE_COMPLETE when it is done creating the bay.  Do not create
-containers, pods, services, or replication controllers before magnum finishes
-creating the bay. They will likely not be created, and may cause magnum to
-become confused.
+Clusters will have an initial status of CREATE_IN_PROGRESS.  Magnum will update
+the status to CREATE_COMPLETE when it is done creating the cluster.  Do not
+create containers, pods, services, or replication controllers before magnum
+finishes creating the cluster. They will likely not be created, and may cause
+magnum to become confused.
 
-The existing bays can be listed as follows::
+The existing clusters can be listed as follows::
 
-    magnum bay-list
+    magnum cluster-list
 
-    +--------------------------------------+---------+------------+-----------------+
-    | uuid                                 | name    | node_count | status          |
-    +--------------------------------------+---------+------------+-----------------+
-    | 9dccb1e6-02dc-4e2b-b897-10656c5339ce | k8sbay  | 1          | CREATE_COMPLETE |
-    +--------------------------------------+---------+------------+-----------------+
+    +--------------------------------------+-------------+------------+-----------------+
+    | uuid                                 | name        | node_count | status          |
+    +--------------------------------------+-------------+------------+-----------------+
+    | 9dccb1e6-02dc-4e2b-b897-10656c5339ce | k8s-cluster | 1          | CREATE_COMPLETE |
+    +--------------------------------------+-------------+------------+-----------------+
 
-More detailed information for a given bay is obtained via::
+More detailed information for a given cluster is obtained via::
 
-    magnum bay-show k8sbay
+    magnum cluster-show k8s-cluster
 
-After a bay is created, you can dynamically add/remove node(s) to/from the bay
-by updating the node_count attribute. For example, to add one more node::
+After a cluster is created, you can dynamically add/remove node(s) to/from the
+cluster by updating the node_count attribute. For example, to add one more
+node::
 
-    magnum bay-update k8sbay replace node_count=2
+    magnum cluster-update k8s-cluster replace node_count=2
 
-Bays in the process of updating will have a status of UPDATE_IN_PROGRESS.
+Clusters in the process of updating will have a status of UPDATE_IN_PROGRESS.
 Magnum will update the status to UPDATE_COMPLETE when it is done updating
-the bay.
+the cluster.
 
 **NOTE:** Reducing node_count will remove all the existing pods on the nodes
 that are deleted. If you choose to reduce the node_count, magnum will first
@@ -271,27 +275,28 @@ node_count so any removed pods can be automatically recovered on your
 remaining nodes.
 
 Heat can be used to see detailed information on the status of a stack or
-specific bay:
+specific cluster:
 
-To check the list of all bay stacks::
+To check the list of all cluster stacks::
 
     openstack stack list
 
-To check an individual bay's stack::
+To check an individual cluster's stack::
 
     openstack stack show <stack-name or stack_id>
 
-Monitoring bay status in detail (e.g., creating, updating)::
+Monitoring cluster status in detail (e.g., creating, updating)::
 
-    BAY_HEAT_NAME=$(openstack stack list | awk "/\sk8sbay-/{print \$4}")
-    echo ${BAY_HEAT_NAME}
-    openstack stack resource list ${BAY_HEAT_NAME}
+    CLUSTER_HEAT_NAME=$(openstack stack list | \
+                        awk "/\sk8s-cluster-/{print \$4}")
+    echo ${CLUSTER_HEAT_NAME}
+    openstack stack resource list ${CLUSTER_HEAT_NAME}
 
-Building a Kubernetes Bay - Based on CoreOS
-===========================================
+Building a Kubernetes Cluster - Based on CoreOS
+===============================================
 
-You can create a Kubernetes bay based on CoreOS as an alternative to Atomic.
-First, download the official CoreOS image::
+You can create a Kubernetes cluster based on CoreOS as an alternative to
+Atomic. First, download the official CoreOS image::
 
     wget http://beta.release.core-os.net/amd64-usr/current/coreos_production_openstack_image.img.bz2
     bunzip2 coreos_production_openstack_image.img.bz2
@@ -305,10 +310,10 @@ Upload the image to glance::
                         --os-distro=coreos \
                         --file=coreos_production_openstack_image.img
 
-Create a CoreOS Kubernetes baymodel, which is similar to the Atomic Kubernetes
-baymodel, except for pointing to a different image::
+Create a CoreOS Kubernetes ClusterTemplate, which is similar to the Atomic
+Kubernetes ClusterTemplate, except for pointing to a different image::
 
-    magnum baymodel-create --name k8sbaymodel-coreos \
+    magnum cluster-template-create --name k8s-cluster-template-coreos \
                            --image-id CoreOS \
                            --keypair-id testkey \
                            --external-network-id public \
@@ -317,18 +322,18 @@ baymodel, except for pointing to a different image::
                            --network-driver flannel \
                            --coe kubernetes
 
-Create a CoreOS Kubernetes bay. Use the CoreOS baymodel as a template for bay
-creation::
+Create a CoreOS Kubernetes cluster. Use the CoreOS ClusterTemplate as a
+template for cluster creation::
 
-    magnum bay-create --name k8sbay \
-                      --baymodel k8sbaymodel-coreos \
+    magnum cluster-create --name k8s-cluster \
+                      --cluster-template k8scluster-template-coreos \
                       --node-count 2
 
-Using Kubernetes Bay
-====================
+Using a Kubernetes Cluster
+==========================
 
 **NOTE:** For the following examples, only one minion node is required in the
-k8s bay created previously.
+k8s cluster created previously.
 
 Kubernetes provides a number of examples you can use to check that things are
 working. You may need to clone kubernetes using::
@@ -372,22 +377,22 @@ the CSR.::
 Now that you have your client CSR, you can use the Magnum CLI to send it off
 to Magnum to get it signed and also download the signing cert.::
 
-    magnum ca-sign --bay k8sbay --csr client.csr > client.crt
-    magnum ca-show --bay k8sbay > ca.crt
+    magnum ca-sign --cluster k8s-cluster --csr client.csr > client.crt
+    magnum ca-show --cluster k8s-cluster > ca.crt
 
 Here's how to set up the replicated redis example. Now we create a pod for the
 redis-master::
 
-    KUBERNETES_URL=$(magnum bay-show k8sbay |
+    KUBERNETES_URL=$(magnum cluster-show k8s-cluster |
                      awk '/ api_address /{print $4}')
 
     # Set kubectl to use the correct certs
-    kubectl config set-cluster k8sbay --server=${KUBERNETES_URL} \
+    kubectl config set-cluster k8s-cluster --server=${KUBERNETES_URL} \
         --certificate-authority=$(pwd)/ca.crt
     kubectl config set-credentials client --certificate-authority=$(pwd)/ca.crt \
         --client-key=$(pwd)/client.key --client-certificate=$(pwd)/client.crt
-    kubectl config set-context k8sbay --cluster=k8sbay --user=client
-    kubectl config use-context k8sbay
+    kubectl config set-context k8s-cluster --cluster=k8s-cluster --user=client
+    kubectl config use-context k8s-cluster
 
     # Test the cert and connection works
     kubectl version
@@ -410,37 +415,38 @@ redis slaves and sentinels::
     kubectl create -f ./redis-sentinel-controller.yaml
 
 Full lifecycle and introspection operations for each object are supported.
-For example, magnum bay-create, magnum baymodel-delete.
+For example, magnum cluster-create, magnum cluster-template-delete.
 
 Now there are four redis instances (one master and three slaves) running
-across the bay, replicating data between one another.
+across the cluster, replicating data between one another.
 
-Run the bay-show command to get the IP of the bay host on which the
+Run the cluster-show command to get the IP of the cluster host on which the
 redis-master is running::
 
-    magnum bay-show k8sbay
+    magnum cluster-show k8s-cluster
 
     +--------------------+------------------------------------------------------------+
     | Property           | Value                                                      |
     +--------------------+------------------------------------------------------------+
     | status             | CREATE_COMPLETE                                            |
     | uuid               | cff82cd0-189c-4ede-a9cb-2c0af6997709                       |
+    | stack_id           | 7947844a-8e18-4c79-b591-ecf0f6067641                       |
     | status_reason      | Stack CREATE completed successfully                        |
     | created_at         | 2016-05-26T17:45:57+00:00                                  |
     | updated_at         | 2016-05-26T17:50:02+00:00                                  |
-    | bay_create_timeout | 60                                                          |
+    | create_timeout     | 60                                                         |
     | api_address        | https://172.24.4.4:6443                                    |
-    | baymodel_id        | e73298e7-e621-4d42-b35b-7a1952b97158                       |
+    | cluster_template_id| e73298e7-e621-4d42-b35b-7a1952b97158                       |
     | master_addresses   | ['172.24.4.6']                                             |
     | node_count         | 1                                                          |
     | node_addresses     | ['172.24.4.5']                                             |
     | master_count       | 1                                                          |
     | discovery_url      | https://discovery.etcd.io/4caaa65f297d4d49ef0a085a7aecf8e0 |
-    | name               | k8sbay                                                     |
+    | name               | k8s-cluster                                                |
     +--------------------+------------------------------------------------------------+
 
-The output here indicates the redis-master is running on the bay host with IP
-address 172.24.4.5. To access the redis master::
+The output here indicates the redis-master is running on the cluster host with
+IP address 172.24.4.5. To access the redis master::
 
     ssh fedora@172.24.4.5
     REDIS_ID=$(sudo docker ps | grep redis:v1 | grep k8s_master | awk '{print $1}')
@@ -474,19 +480,19 @@ Additional useful commands from a given minion::
     kubectl get svc  # Get services
     kubectl get nodes  # Get nodes
 
-After you finish using the bay, you want to delete it. A bay can be deleted as
-follows::
+After you finish using the cluster, you want to delete it. A cluster can be
+deleted as follows::
 
-    magnum bay-delete k8sbay
+    magnum cluster-delete k8s-cluster
 
-Building and Using a Swarm Bay
-==============================
+Building and Using a Swarm Cluster
+==================================
 
-Create a baymodel. It is very similar to the Kubernetes baymodel, except for
-the absence of some Kubernetes-specific arguments and the use of 'swarm'
-as the COE::
+Create a ClusterTemplate. It is very similar to the Kubernetes ClusterTemplate,
+except for the absence of some Kubernetes-specific arguments and the use of
+'swarm' as the COE::
 
-    magnum baymodel-create --name swarmbaymodel \
+    magnum cluster-template-create --name swarm-cluster-template \
                            --image-id fedora-atomic-latest \
                            --keypair-id testkey \
                            --external-network-id public \
@@ -501,31 +507,40 @@ as the COE::
 
 http://docs.openstack.org/developer/magnum/magnum-proxy.html
 
-Finally, create the bay. Use the baymodel 'swarmbaymodel' as a template for
-bay creation. This bay will result in one swarm manager node and two extra
-agent nodes::
+Finally, create the cluster. Use the ClusterTemplate 'swarm-cluster-template'
+as a template for cluster creation. This cluster will result in one swarm
+manager node and two extra agent nodes::
 
-    magnum bay-create --name swarmbay --baymodel swarmbaymodel --node-count 2
+    magnum cluster-create --name swarm-cluster \
+                          --cluster-template swarm-cluster-template \
+                          --node-count 2
 
-Now that we have a swarm bay we can start interacting with it::
+Now that we have a swarm cluster we can start interacting with it::
 
-    magnum bay-show swarmbay
+    magnum cluster-show swarm-cluster
 
-    +---------------+------------------------------------------+
-    | Property      | Value                                    |
-    +---------------+------------------------------------------+
-    | status        | CREATE_COMPLETE                          |
-    | uuid          | eda91c1e-6103-45d4-ab09-3f316310fa8e     |
-    | created_at    | 2015-04-20T19:05:27+00:00                |
-    | updated_at    | 2015-04-20T19:06:08+00:00                |
-    | baymodel_id   | a93ee8bd-fec9-4ea7-ac65-c66c1dba60af     |
-    | node_count    | 2                                        |
-    | discovery_url |                                          |
-    | name          | swarmbay                                 |
-    +---------------+------------------------------------------+
+    +--------------------+------------------------------------------------------------+
+    | Property           | Value                                                      |
+    +--------------------+------------------------------------------------------------+
+    | status             | CREATE_COMPLETE                                            |
+    | uuid               | eda91c1e-6103-45d4-ab09-3f316310fa8e                       |
+    | stack_id           | 7947844a-8e18-4c79-b591-ecf0f6067641                       |
+    | status_reason      | Stack CREATE completed successfully                        |
+    | created_at         | 2015-04-20T19:05:27+00:00                                  |
+    | updated_at         | 2015-04-20T19:06:08+00:00                                  |
+    | create_timeout     | 60                                                         |
+    | api_address        | https://172.24.4.4:6443                                    |
+    | cluster_template_id| e73298e7-e621-4d42-b35b-7a1952b97158                       |
+    | master_addresses   | ['172.24.4.6']                                             |
+    | node_count         | 2                                                          |
+    | node_addresses     | ['172.24.4.5']                                             |
+    | master_count       | 1                                                          |
+    | discovery_url      | https://discovery.etcd.io/4caaa65f297d4d49ef0a085a7aecf8e0 |
+    | name               | swarm-cluster                                              |
+    +--------------------+------------------------------------------------------------+
 
-We now need to setup the docker CLI to use the swarm bay we have created with
-the appropriate credentials.
+We now need to setup the docker CLI to use the swarm cluster we have created
+with the appropriate credentials.
 
 Create a dir to store certs and cd into it. The `DOCKER_CERT_PATH` env variable
 is consumed by docker which expects ca.pem, key.pem and cert.pem to be in that
@@ -562,8 +577,8 @@ Run the openssl 'req' command to generate the CSR.::
 Now that you have your client CSR use the Magnum CLI to get it signed and also
 download the signing cert.::
 
-    magnum ca-sign --bay swarmbay --csr client.csr > cert.pem
-    magnum ca-show --bay swarmbay > ca.pem
+    magnum ca-sign --cluster swarm-cluster --csr client.csr > cert.pem
+    magnum ca-show --cluster swarm-cluster > ca.pem
 
 Set the CLI to use TLS . This env var is consumed by docker.::
 
@@ -572,10 +587,10 @@ Set the CLI to use TLS . This env var is consumed by docker.::
 Set the correct host to use which is the public ip address of swarm API server
 endpoint. This env var is consumed by docker.::
 
-    export DOCKER_HOST=$(magnum bay-show swarmbay | awk '/ api_address /{print substr($4,9)}')
+    export DOCKER_HOST=$(magnum cluster-show swarm-cluster | awk '/ api_address /{print substr($4,9)}')
 
-Next we will create a container in this swarm bay. This container will ping the
-address 8.8.8.8 four times::
+Next we will create a container in this swarm cluster. This container will ping
+the address 8.8.8.8 four times::
 
     docker run --rm -it cirros:latest ping -c 4 8.8.8.8
 
@@ -591,10 +606,10 @@ You should see a similar output to::
     4 packets transmitted, 4 packets received, 0% packet loss
     round-trip min/avg/max = 25.226/25.340/25.513 ms
 
-Building and Using a Mesos Bay
-==============================
+Building and Using a Mesos Cluster
+==================================
 
-Provisioning a mesos bay requires a Ubuntu-based image with some packages
+Provisioning a mesos cluster requires a Ubuntu-based image with some packages
 pre-installed. To build and upload such image, please refer to
 `<http://docs.openstack.org/developer/magnum/dev/mesos.html>`_
 
@@ -605,46 +620,51 @@ Alternatively, you can download and upload a pre-built image::
                         --disk-format=qcow2 --container-format=bare \
                         --os-distro=ubuntu --file=ubuntu-14.04.3-mesos-0.25.0.qcow2
 
-Then, create a baymodel by using 'mesos' as the COE, with the rest of arguments
-similar to the Kubernetes baymodel::
+Then, create a ClusterTemplate by using 'mesos' as the COE, with the rest of
+arguments similar to the Kubernetes ClusterTemplate::
 
-    magnum baymodel-create --name mesosbaymodel --image-id ubuntu-mesos \
+    magnum cluster-template-create --name mesos-cluster-template --image-id ubuntu-mesos \
                            --keypair-id testkey \
                            --external-network-id public \
                            --dns-nameserver 8.8.8.8 \
                            --flavor-id m1.small \
                            --coe mesos
 
-Finally, create the bay. Use the baymodel 'mesosbaymodel' as a template for
-bay creation. This bay will result in one mesos master node and two mesos
-slave nodes::
+Finally, create the cluster. Use the ClusterTemplate 'mesos-cluster-template'
+as a template for cluster creation. This cluster will result in one mesos
+master node and two mesos slave nodes::
 
-    magnum bay-create --name mesosbay --baymodel mesosbaymodel --node-count 2
+    magnum cluster-create --name mesos-cluster \
+                          --cluster-template mesos-cluster-template \
+                          --node-count 2
 
-Now that we have a mesos bay we can start interacting with it. First we need
-to make sure the bay's status is 'CREATE_COMPLETE'::
+Now that we have a mesos cluster we can start interacting with it. First we
+need to make sure the cluster's status is 'CREATE_COMPLETE'::
 
-    $ magnum bay-show mesosbay
-    +--------------------+--------------------------------------+
-    | Property           | Value                                |
-    +--------------------+--------------------------------------+
-    | status             | CREATE_COMPLETE                      |
-    | uuid               | ff727f0d-72ca-4e2b-9fef-5ec853d74fdf |
-    | status_reason      | Stack CREATE completed successfully  |
-    | created_at         | 2015-06-09T20:21:43+00:00            |
-    | updated_at         | 2015-06-09T20:28:18+00:00            |
-    | bay_create_timeout | 60                                    |
-    | api_address        | 172.24.4.115                         |
-    | baymodel_id        | 92dbda62-32d4-4435-88fc-8f42d514b347 |
-    | node_count         | 2                                    |
-    | node_addresses     | [u'172.24.4.116', u'172.24.4.117']   |
-    | master_count       | 1                                    |
-    | discovery_url      | None                                 |
-    | name               | mesosbay                             |
-    +--------------------+--------------------------------------+
+    $ magnum cluster-show mesos-cluster
 
-Next we will create a container in this bay by using the REST API of Marathon.
-This container will ping the address 8.8.8.8::
+    +--------------------+------------------------------------------------------------+
+    | Property           | Value                                                      |
+    +--------------------+------------------------------------------------------------+
+    | status             | CREATE_COMPLETE                                            |
+    | uuid               | ff727f0d-72ca-4e2b-9fef-5ec853d74fdf                       |
+    | stack_id           | 7947844a-8e18-4c79-b591-ecf0f6067641                       |
+    | status_reason      | Stack CREATE completed successfully                        |
+    | created_at         | 2015-06-09T20:21:43+00:00                                  |
+    | updated_at         | 2015-06-09T20:28:18+00:00                                  |
+    | create_timeout     | 60                                                         |
+    | api_address        | https://172.24.4.115:6443                                  |
+    | cluster_template_id| 92dbda62-32d4-4435-88fc-8f42d514b347                       |
+    | master_addresses   | ['172.24.4.115']                                           |
+    | node_count         | 2                                                          |
+    | node_addresses     | ['172.24.4.116', '172.24.4.117']                           |
+    | master_count       | 1                                                          |
+    | discovery_url      | None                                                       |
+    | name               | mesos-cluster                                              |
+    +--------------------+------------------------------------------------------------+
+
+Next we will create a container in this cluster by using the REST API of
+Marathon. This container will ping the address 8.8.8.8::
 
     $ cat > mesos.json << END
     {
@@ -662,7 +682,7 @@ This container will ping the address 8.8.8.8::
       "cmd": "ping 8.8.8.8"
     }
     END
-    $ MASTER_IP=$(magnum bay-show mesosbay | awk '/ api_address /{print $4}')
+    $ MASTER_IP=$(magnum cluster-show mesos-cluster | awk '/ api_address /{print $4}')
     $ curl -X POST -H "Content-Type: application/json" \
         http://${MASTER_IP}:8080/v2/apps -d@mesos.json
 

@@ -44,7 +44,7 @@ required.  All the services will be created normally; services that specify the
 load balancer will also be created successfully, but a load balancer will not
 be created.
 
-To enable the load balancer, log into each master node of your bay and
+To enable the load balancer, log into each master node of your cluster and
 perform the following steps:
 
 1. Configure kube-apiserver::
@@ -72,7 +72,7 @@ perform the following steps:
     sudo vi /etc/sysconfig/kube_openstack_config
 
    The username and tenant-name entries have been filled in with the
-   Keystone values of the user who created the bay.  Enter the password
+   Keystone values of the user who created the cluster.  Enter the password
    of this user on the entry for password::
 
     password=ChangeMe
@@ -88,9 +88,9 @@ This only needs to be done once.  The steps can be reversed to disable the
 load balancer feature. Before deleting the Kubernetes cluster, make sure to
 delete all the services that created load balancers. Because the Neutron
 objects created by Kubernetes are not managed by Heat, they will not be
-deleted by Heat and this will cause the bay-delete operation to fail. If this
-occurs, delete the neutron objects manually (lb-pool, lb-vip, lb-member,
-lb-healthmonitor) and then run bay-delete again.
+deleted by Heat and this will cause the cluster-delete operation to fail. If
+this occurs, delete the neutron objects manually (lb-pool, lb-vip, lb-member,
+lb-healthmonitor) and then run cluster-delete again.
 
 Steps for the users
 ===================
@@ -137,9 +137,9 @@ Create a file (e.g nginx-service.yaml) describing a service for the nginx pod::
         app: nginx
       type: LoadBalancer
 
-Assuming that a Kubernetes bay named k8sbayv1 has been created, deploy the pod
-and service by the commands. Please refer to the quickstart guide on how to
-connect to Kubernetes running on the launched bay.::
+Assuming that a Kubernetes cluster named k8sclusterv1 has been created, deploy
+the pod and service by the commands. Please refer to the quickstart guide on
+how to connect to Kubernetes running on the launched cluster.::
 
     kubectl create -f nginx.yaml
 
@@ -160,7 +160,7 @@ Alternatively, associating a floating IP can be done on the command line by
 allocating a floating IP, finding the port of the VIP, and associating the
 floating IP to the port.
 The commands shown below are for illustration purpose and assume
-that there is only one service with load balancer running in the bay and
+that there is only one service with load balancer running in the cluster and
 no other load balancers exist except for those created for the cluster.
 
 First create a floating IP on the public network::
@@ -232,13 +232,13 @@ with Neutron in this sequence:
 These Neutron objects can be verified as follows.  For the load balancer pool::
 
     neutron lb-pool-list
-    +--------------------------------------+----------------------------------------------+----------+-------------+----------+----------------+--------+
-    | id                                   | name                                         | provider | lb_method   | protocol | admin_state_up | status |
-    +--------------------------------------+----------------------------------------------+----------+-------------+----------+----------------+--------+
-    | 241357b3-2a8f-442e-b534-bde7cd6ba7e4 | a1f03e40f634011e59c9efa163eae8ab             | haproxy  | ROUND_ROBIN | TCP      | True           | ACTIVE |
-    | 82b39251-1455-4eb6-a81e-802b54c2df29 | k8sbayv1-iypacicrskib-api_pool-fydshw7uvr7h  | haproxy  | ROUND_ROBIN | HTTP     | True           | ACTIVE |
-    | e59ea983-c6e8-4cec-975d-89ade6b59e50 | k8sbayv1-iypacicrskib-etcd_pool-qbpo43ew2m3x | haproxy  | ROUND_ROBIN | HTTP     | True           | ACTIVE |
-    +--------------------------------------+----------------------------------------------+----------+-------------+----------+----------------+--------+
+    +--------------------------------------+--------------------------------------------------+----------+-------------+----------+----------------+--------+
+    | id                                   | name                                             | provider | lb_method   | protocol | admin_state_up | status |
+    +--------------------------------------+--------------------------------------------------+----------+-------------+----------+----------------+--------+
+    | 241357b3-2a8f-442e-b534-bde7cd6ba7e4 | a1f03e40f634011e59c9efa163eae8ab                 | haproxy  | ROUND_ROBIN | TCP      | True           | ACTIVE |
+    | 82b39251-1455-4eb6-a81e-802b54c2df29 | k8sclusterv1-iypacicrskib-api_pool-fydshw7uvr7h  | haproxy  | ROUND_ROBIN | HTTP     | True           | ACTIVE |
+    | e59ea983-c6e8-4cec-975d-89ade6b59e50 | k8sclusterv1-iypacicrskib-etcd_pool-qbpo43ew2m3x | haproxy  | ROUND_ROBIN | HTTP     | True           | ACTIVE |
+    +--------------------------------------+--------------------------------------------------+----------+-------------+----------+----------------+--------+
 
 Note that 2 load balancers already exist to implement high availability for the
 cluster (api and ectd). The new load balancer for the Kubernetes service uses

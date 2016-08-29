@@ -20,7 +20,7 @@ Contents
 #. `Overview`_
 #. `Python Client`_
 #. `Horizon Interface`_
-#. `Bay Drivers`_
+#. `Cluster Drivers`_
 #. `Choosing a COE`_
 #. `Native clients`_
 #. `Kubernetes`_
@@ -38,22 +38,22 @@ Contents
 Terminology
 ===========
 
-Bay
-  A bay is the construct in which Magnum launches container orchestration
-  engines. After a bay has been created the user is able to add containers to
-  it either directly, or in the case of the Kubernetes container orchestration
-  engine within pods - a logical construct specific to that implementation. A
-  bay is created based on a baymodel.
+Cluster (previously Bay)
+  A cluster is the construct in which Magnum launches container orchestration
+  engines. After a cluster has been created the user is able to add containers
+  to it either directly, or in the case of the Kubernetes container
+  orchestration engine within pods - a logical construct specific to that
+  implementation. A cluster is created based on a ClusterTemplate.
 
-Baymodel
-  A baymodel in Magnum is roughly equivalent to a flavor in Nova. It acts as a
-  template that defines options such as the container orchestration engine,
-  keypair and image for use when Magnum is creating bays using the given
-  baymodel.
+ClusterTemplate (previously BayModel)
+  A ClusterTemplate in Magnum is roughly equivalent to a flavor in Nova. It
+  acts as a template that defines options such as the container orchestration
+  engine, keypair and image for use when Magnum is creating clusters using
+  the given ClusterTemplate.
 
 Container Orchestration Engine (COE)
   A container orchestration engine manages the lifecycle of one or more
-  containers, logically represented in Magnum as a bay. Magnum supports a
+  containers, logically represented in Magnum as a cluster. Magnum supports a
   number of container orchestration engines, each with their own pros and cons,
   including Docker Swarm, Kubernetes, and Mesos.
 
@@ -64,32 +64,33 @@ Overview
 
 Magnum rationale, concept, compelling features
 
-========
-BayModel
-========
+===============
+ClusterTemplate
+===============
 
-A baymodel is a collection of parameters to describe how a bay can be
-constructed.  Some parameters are relevant to the infrastructure of
-the bay, while others are for the particular COE.  In a typical
-workflow, a user would create a baymodel, then create one or more bays
-using the baymodel.  A cloud provider can also define a number of
-baymodels and provide them to the users.  A baymodel cannot be updated
-or deleted if a bay using this baymodel still exists.
+A ClusterTemplate (previously known as BayModel) is a collection of parameters
+to describe how a cluster can be constructed.  Some parameters are relevant to
+the infrastructure of the cluster, while others are for the particular COE.  In
+a typical workflow, a user would create a ClusterTemplate, then create one or
+more clusters using the ClusterTemplate.  A cloud provider can also define a
+number of ClusterTemplates and provide them to the users.  A ClusterTemplate
+cannot be updated or deleted if a cluster using this ClusterTemplate still
+exists.
 
-The definition and usage of the parameters of a baymodel are as follows.
+The definition and usage of the parameters of a ClusterTemplate are as follows.
 They are loosely grouped as: mandatory, infrastructure, COE specific.
 
 --coe \<coe\>
   Specify the Container Orchestration Engine to use.  Supported
   COE's include 'kubernetes', 'swarm', 'mesos'.  If your environment
-  has additional bay drivers installed, refer to the bay driver
+  has additional cluster drivers installed, refer to the cluster driver
   documentation for the new COE names.  This is a mandatory parameter
   and there is no default value.
 
 --image-id \<image-id\>
   The name or UUID of the base image in Glance to boot the servers for
-  the bay.  The image must have the attribute 'os-distro' defined
-  as appropriate for the bay driver.  For the currently supported
+  the cluster.  The image must have the attribute 'os-distro' defined
+  as appropriate for the cluster driver.  For the currently supported
   images, the os-distro names are:
 
   ========== =====================
@@ -103,47 +104,48 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
 This is a mandatory parameter and there is no default value.
 
 --keypair-id \<keypair-id\>
-  The name or UUID of the SSH keypair to configure in the bay servers
+  The name or UUID of the SSH keypair to configure in the cluster servers
   for ssh access.  You will need the key to be able to ssh to the
-  servers in the bay.  The login name is specific to the bay
+  servers in the cluster.  The login name is specific to the cluster
   driver.  This is a mandatory parameter and there is no default value.
 
 --external-network-id \<external-network-id\>
   The name or network ID of a Neutron network to provide connectivity
-  to the external internet for the bay.  This network must be an
+  to the external internet for the cluster.  This network must be an
   external network, i.e. its attribute 'router:external' must be
-  'True'.  The servers in the bay will be connected to a private
+  'True'.  The servers in the cluster will be connected to a private
   network and Magnum will create a router between this private network
   and the external network.  This will allow the servers to download
   images, access discovery service, etc, and the containers to install
   packages, etc.  In the opposite direction, floating IP's will be
   allocated from the external network to provide access from the
   external internet to servers and the container services hosted in
-  the bay.  This is a mandatory parameter and there is no default
+  the cluster.  This is a mandatory parameter and there is no default
   value.
 
 --name \<name\>
-  Name of the baymodel to create.  The name does not have to be
-  unique.  If multiple baymodels have the same name, you will need to
-  use the UUID to select the baymodel when creating a bay or updating,
-  deleting a baymodel.  If a name is not specified, a random name will
-  be generated using a string and a number, for example "pi-13-model".
+  Name of the ClusterTemplate to create.  The name does not have to be
+  unique.  If multiple ClusterTemplates have the same name, you will need to
+  use the UUID to select the ClusterTemplate when creating a cluster or
+  updating, deleting a ClusterTemplate.  If a name is not specified, a random
+  name will be generated using a string and a number, for example
+  "pi-13-model".
 
 --public
-  Access to a baymodel is normally limited to the admin, owner or users
+  Access to a ClusterTemplate is normally limited to the admin, owner or users
   within the same tenant as the owners.  Setting this flag
-  makes the baymodel public and accessible by other users.  The default is
-  not public.
+  makes the ClusterTemplate public and accessible by other users.  The default
+  is not public.
 
 --server-type \<server-type\>
-  The servers in the bay can be VM or baremetal.  This parameter selects
-  the type of server to create for the bay.  The default is 'vm' and
+  The servers in the cluster can be VM or baremetal.  This parameter selects
+  the type of server to create for the cluster.  The default is 'vm' and
   currently this is the only supported server type.
 
 --network-driver \<network-driver\>
   The name of a network driver for providing the networks for the
   containers.  Note that this is different and separate from the Neutron
-  network for the bay.  The operation and networking model are specific
+  network for the cluster.  The operation and networking model are specific
   to the particular driver; refer to the `Networking`_ section for more
   details.  Supported network drivers and the default driver are:
 
@@ -169,8 +171,8 @@ This is a mandatory parameter and there is no default value.
   ============= ============= ===========
 
 --dns-nameserver \<dns-nameserver\>
-  The DNS nameserver for the servers and containers in the bay to use.
-  This is configured in the private Neutron network for the bay.  The
+  The DNS nameserver for the servers and containers in the cluster to use.
+  This is configured in the private Neutron network for the cluster.  The
   default is '8.8.8.8'.
 
 --flavor-id \<flavor-id\>
@@ -215,15 +217,15 @@ This is a mandatory parameter and there is no default value.
 
 --labels \<KEY1=VALUE1,KEY2=VALUE2;KEY3=VALUE3...\>
   Arbitrary labels in the form of key=value pairs.  The accepted keys
-  and valid values are defined in the bay drivers.  They are used as a
-  way to pass additional parameters that are specific to a bay driver.
+  and valid values are defined in the cluster drivers.  They are used as a
+  way to pass additional parameters that are specific to a cluster driver.
   Refer to the subsection on labels for a list of the supported
   key/value pairs and their usage.
 
 --tls-disabled
   Transport Layer Security (TLS) is normally enabled to secure the
-  bay.  In some cases, users may want to disable TLS in the bay, for
-  instance during development or to troubleshoot certain problems.
+  cluster.  In some cases, users may want to disable TLS in the cluster,
+  for instance during development or to troubleshoot certain problems.
   Specifying this parameter will disable TLS so that users can access
   the COE endpoints without a certificate.  The default is TLS
   enabled.
@@ -232,7 +234,7 @@ This is a mandatory parameter and there is no default value.
   Docker images by default are pulled from the public Docker registry,
   but in some cases, users may want to use a private registry.  This
   option provides an alternative registry based on the Registry V2:
-  Magnum will create a local registry in the bay backed by swift to
+  Magnum will create a local registry in the cluster backed by swift to
   host the images.  Refer to
   `Docker Registry 2.0 <https://github.com/docker/distribution>`_
   for more details.  The default is to use the public registry.
@@ -296,28 +298,29 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 
 
-===
-Bay
-===
+=======
+Cluster
+=======
 
-A bay is an instance of the baymodel of a COE.  Magnum deploys a bay
-by referring to the attributes defined in the particular baymodel as
-well as a few additional parameters for the bay.  Magnum deploys the
-orchestration templates provided by the bay driver to create and
-configure all the necessary infrastructure.  When ready, the bay is a
-fully operational COE that can host containers.
+A cluster (previously known as bay) is an instance of the ClusterTemplate
+of a COE.  Magnum deploys a cluster by referring to the attributes
+defined in the particular ClusterTemplate as well as a few additional
+parameters for the cluster.  Magnum deploys the orchestration templates
+provided by the cluster driver to create and configure all the necessary
+infrastructure.  When ready, the cluster is a fully operational COE that
+can host containers.
 
 Infrastructure
 --------------
 
-The infrastructure of the bay consists of the resources provided by
+The infrastructure of the cluster consists of the resources provided by
 the various OpenStack services.  Existing infrastructure, including
-infrastructure external to OpenStack, can also be used by the bay,
+infrastructure external to OpenStack, can also be used by the cluster,
 such as DNS, public network, public discovery service, Docker registry.
 The actual resources created depends on the COE type and the options
-specified; therefore you need to refer to the bay driver documentation
+specified; therefore you need to refer to the cluster driver documentation
 of the COE for specific details.  For instance, the option
-'--master-lb-enabled' in the baymodel will cause a load balancer pool
+'--master-lb-enabled' in the ClusterTemplate will cause a load balancer pool
 along with the health monitor and floating IP to be created.  It is
 important to distinguish resources in the IaaS level from resources in
 the PaaS level.  For instance, the infrastructure networking in
@@ -327,7 +330,7 @@ in Kubernetes or Swarm PaaS.
 Typical infrastructure includes the following.
 
 Servers
-  The servers host the containers in the bay and these servers can be
+  The servers host the containers in the cluster and these servers can be
   VM or bare metal.  VM's are provided by Nova.  Since multiple VM's
   are hosted on a physical server, the VM's provide the isolation
   needed for containers between different tenants running on the same
@@ -337,12 +340,12 @@ Servers
 
 Identity
   Keystone provides the authentication and authorization for managing
-  the bay infrastructure.
+  the cluster infrastructure.
 
 Network
   Networking among the servers is provided by Neutron.  Since COE
   currently are not multi-tenant, isolation for multi-tenancy on the
-  networking level is done by using a private network for each bay.
+  networking level is done by using a private network for each cluster.
   As a result, containers belonging to one tenant will not be
   accessible to containers or servers of another tenant.  Other
   networking resources may also be used, such as load balancer and
@@ -355,24 +358,24 @@ Storage
 
 Security
   Barbican provides the storage of secrets such as certificates used
-  in the bay Transport Layer Security (TLS).
+  for Transport Layer Security (TLS) within the cluster.
 
 
 Life cycle
 ----------
 
-The set of life cycle operations on the bay is one of the key value
-that Magnum provides, enabling bays to be managed painlessly on
+The set of life cycle operations on the cluster is one of the key value
+that Magnum provides, enabling clusters to be managed painlessly on
 OpenStack.  The current operations are the basic CRUD operations, but
 more advanced operations are under discussion in the community and
 will be implemented as needed.
 
-**NOTE** The OpenStack resources created for a bay are fully
-accessible to the bay owner.  Care should be taken when modifying or
+**NOTE** The OpenStack resources created for a cluster are fully
+accessible to the cluster owner.  Care should be taken when modifying or
 reusing these resources to avoid impacting Magnum operations in
 unexpected manners.  For instance, if you launch your own Nova
 instance on the bay private network, Magnum would not be aware of this
-instance.  Therefore, the bay-delete operation will fail because
+instance.  Therefore, the cluster-delete operation will fail because
 Magnum would not delete the extra Nova instance and the private Neutron
 network cannot be removed while a Nova instance is still attached.
 
@@ -383,48 +386,56 @@ Heat.  For more help on Heat stack troubleshooting, refer to the
 <https://github.com/openstack/magnum/blob/master/doc/source/troubleshooting-guide.rst#heat-stacks>`_.
 
 
+
 Create
 ++++++
 
-The 'bay-create' command deploys a bay, for example::
+**NOTE** bay-<command> are the deprecated versions of these commands and are
+still support in current release. They will be removed in a future version.
+Any references to the term bay will be replaced in the parameters when using
+the 'bay' versions of the commands. For example, in 'bay-create' --baymodel
+is used as the baymodel parameter for this command instead of
+--cluster-template.
 
-    magnum bay-create --name mybay \
-                      --baymodel mymodel \
+The 'cluster-create' command deploys a cluster, for example::
+
+    magnum cluster-create --name mycluster \
+                      --cluster-template mytemplate \
                       --node-count 8 \
                       --master-count 3
 
-The 'bay-create' operation is asynchronous; therefore you can initiate
-another 'bay-create' operation while the current bay is being created.
-If the bay fails to be created, the infrastructure created so far may
+The 'cluster-create' operation is asynchronous; therefore you can initiate
+another 'cluster-create' operation while the current cluster is being created.
+If the cluster fails to be created, the infrastructure created so far may
 be retained or deleted depending on the particular orchestration
-engine.  As a common practice, a failed bay is retained during
+engine.  As a common practice, a failed cluster is retained during
 development for troubleshooting, but they are automatically deleted in
-production.  The current bay drivers use Heat templates and the
-resources of a failed 'bay-create' are retained.
+production.  The current cluster drivers use Heat templates and the
+resources of a failed 'cluster-create' are retained.
 
-The definition and usage of the parameters for 'bay-create' are as
+The definition and usage of the parameters for 'cluster-create' are as
 follows:
 
---baymodel \<baymodel\>
-  The ID or name of the baymodel to use.  This is a mandatory
-  parameter.  Once a baymodel is used to create a bay, it cannot
-  be deleted or modified until all bays that use the baymodel have
+--cluster-template \<cluster-template\>
+  The ID or name of the ClusterTemplate to use.  This is a mandatory
+  parameter.  Once a ClusterTemplate is used to create a cluster, it cannot
+  be deleted or modified until all clusters that use the ClusterTemplate have
   been deleted.
 
 --name \<name\>
-  Name of the bay to create.  If a name is not specified, a random
+  Name of the cluster to create.  If a name is not specified, a random
   name will be generated using a string and a number, for example
-  "gamma-7-bay".
+  "gamma-7-cluster".
 
 --node-count \<node-count\>
-  The number of servers that will serve as node in the bay.
+  The number of servers that will serve as node in the cluster.
   The default is 1.
 
 --master-count \<master-count\>
-  The number of servers that will serve as master for the bay.  The
-  default is 1.  Set to more than 1 master to enable High
+  The number of servers that will serve as master for the cluster.
+  The default is 1.  Set to more than 1 master to enable High
   Availability.  If the option '--master-lb-enabled' is specified in
-  the baymodel, the master servers will be placed in a load balancer
+  the ClusterTemplate, the master servers will be placed in a load balancer
   pool.
 
 --discovery-url \<discovery-url\>
@@ -437,63 +448,63 @@ follows:
 
     https://discovery.etcd.io
 
-  In this case, Magnum will generate a unique url here for each bay
+  In this case, Magnum will generate a unique url here for each cluster
   and store the info for the servers.
 
 --timeout \<timeout\>
-  The timeout for bay creation in minutes. The value expected is a
+  The timeout for cluster creation in minutes. The value expected is a
   positive integer and the default is 60 minutes.  If the timeout is
-  reached during bay-create, the operation will be aborted and the bay
-  status will be set to 'CREATE_FAILED'.
+  reached during cluster-create, the operation will be aborted and the
+  cluster status will be set to 'CREATE_FAILED'.
 
 List
 ++++
 
-The 'bay-list' command lists all the bays that belong to the tenant,
+The 'cluster-list' command lists all the clusters that belong to the tenant,
 for example::
 
-    magnum bay-list
+    magnum cluster-list
 
 Show
 ++++
 
-The 'bay-show' command prints all the details of a bay, for
+The 'cluster-show' command prints all the details of a cluster, for
 example::
 
-    magnum bay-show mybay
+    magnum cluster-show mycluster
 
 The properties include those not specified by users that have been
 assigned default values and properties from new resources that
-have been created for the bay.
+have been created for the cluster.
 
 Update
 ++++++
 
-A bay can be modified using the 'bay-update' command, for example::
+A cluster can be modified using the 'cluster-update' command, for example::
 
-    magnum bay-update mybay replace node_count=8
+    magnum cluster-update mycluster replace node_count=8
 
 The parameters are positional and their definition and usage are as
 follows.
 
-\<bay\>
-  This is the first parameter, specifying the UUID or name of the bay
+\<cluster\>
+  This is the first parameter, specifying the UUID or name of the cluster
   to update.
 
 \<op\>
   This is the second parameter, specifying the desired change to be
-  made to the bay attributes.  The allowed changes are 'add',
+  made to the cluster attributes.  The allowed changes are 'add',
   'replace' and 'remove'.
 
 \<attribute=value\>
   This is the third parameter, specifying the targeted attributes in
-  the bay as a list separated by blank space.  To add or replace an
+  the cluster as a list separated by blank space.  To add or replace an
   attribute, you need to specify the value for the attribute.  To
   remove an attribute, you only need to specify the name of the
   attribute.  Currently the only attribute that can be replaced or
   removed is 'node_count'.  The attributes 'name', 'master_count' and
   'discovery_url' cannot be replaced or delete.  The table below
-  summarizes the possible change to a bay.
+  summarizes the possible change to a cluster.
 
   +---------------+-----+------------------+-----------------------+
   | Attribute     | add | replace          | remove                |
@@ -507,22 +518,22 @@ follows.
   | discovery_url | no  | no               |  no                   |
   +---------------+-----+------------------+-----------------------+
 
-The 'bay-update' operation cannot be initiated when another operation
+The 'cluster-update' operation cannot be initiated when another operation
 is in progress.
 
-**NOTE:** The attribute names in bay-update are slightly different
-from the corresponding names in the bay-create command: the dash '-'
+**NOTE:** The attribute names in cluster-update are slightly different
+from the corresponding names in the cluster-create command: the dash '-'
 is replaced by an underscore '_'.  For instance, 'node-count' in
-bay-create is 'node_count' in bay-update.
+cluster-create is 'node_count' in cluster-update.
 
 Scale
 +++++
 
-Scaling a bay means adding servers to or removing servers from the bay.
-Currently, this is done through the 'bay-update' operation by modifying
+Scaling a cluster means adding servers to or removing servers from the cluster.
+Currently, this is done through the 'cluster-update' operation by modifying
 the node-count attribute, for example::
 
-    magnum bay-update mybay replace node_count=2
+    magnum cluster-update mycluster replace node_count=2
 
 When some nodes are removed, Magnum will attempt to find nodes with no
 containers to remove.  If some nodes with containers must be removed,
@@ -531,21 +542,21 @@ Magnum will log a warning message.
 Delete
 ++++++
 
-The 'bay-delete' operation removes the bay by deleting all resources
+The 'cluster-delete' operation removes the cluster by deleting all resources
 such as servers, network, storage;  for example::
 
-    magnum bay-delete mybay
+    magnum cluster-delete mycluster
 
-The only parameter for the bay-delete command is the ID or name of the
-bay to delete.  Multiple bays can be specified, separated by a blank
+The only parameter for the cluster-delete command is the ID or name of the
+cluster to delete.  Multiple clusters can be specified, separated by a blank
 space.
 
 If the operation fails, there may be some remaining resources that
 have not been deleted yet.  In this case, you can troubleshoot through
 Heat.  If the templates are deleted manually in Heat, you can delete
-the bay in Magnum to clean up the bay from Magnum database.
+the cluster in Magnum to clean up the cluster from Magnum database.
 
-The 'bay-delete' operation can be initiated when another operation is
+The 'cluster-delete' operation can be initiated when another operation is
 still in progress.
 
 
@@ -602,15 +613,15 @@ Horizon Interface
 =================
 *To be filled in with screenshots*
 
-===========
-Bay Drivers
-===========
+===============
+Cluster Drivers
+===============
 
-A bay driver is a collection of python code, heat templates, scripts,
+A cluster driver is a collection of python code, heat templates, scripts,
 images, and documents for a particular COE on a particular
-distro.  Magnum presents the concept of baymodels and bays.  The
-implementation for a particular bay type is provided by the bay driver.
-In other words, the bay driver provisions and manages the infrastructure
+distro.  Magnum presents the concept of ClusterTemplates and clusters.  The
+implementation for a particular cluster type is provided by the cluster driver.
+In other words, the cluster driver provisions and manages the infrastructure
 for the COE.  Magnum includes default drivers for the following
 COE and distro pairs:
 
@@ -626,8 +637,8 @@ COE and distro pairs:
 | Mesos      | Ubuntu        |
 +------------+---------------+
 
-Magnum is designed to accommodate new bay drivers to support custom
-COE's and this section describes how a new bay driver can be
+Magnum is designed to accommodate new cluster drivers to support custom
+COE's and this section describes how a new cluster driver can be
 constructed and enabled in Magnum.
 
 
@@ -652,16 +663,17 @@ The minimum required components are:
 driver.py
   Python code that implements the controller operations for
   the particular COE.  The driver must implement:
-  Currently supported: ``bay_create``, ``bay_update``, ``bay_delete``.
+  Currently supported:
+  ``cluster_create``, ``cluster_update``, ``cluster_delete``.
 
 templates
   A directory of orchestration templates for managing the lifecycle
-  of bays, including creation, configuration, update, and deletion.
+  of clusters, including creation, configuration, update, and deletion.
   Currently only Heat templates are supported, but in the future
   other orchestration mechanism such as Ansible may be supported.
 
 template_def.py
-  Python code that maps the parameters from the baymodel to the
+  Python code that maps the parameters from the ClusterTemplate to the
   input parameters for the orchestration and invokes
   the orchestration in the templates directory.
 
@@ -681,18 +693,18 @@ api.py
   Python code to interface with the COE.
 
 monitor.py
-  Python code to monitor the resource utilization of the bay.
+  Python code to monitor the resource utilization of the cluster.
 
 scale.py
-  Python code to scale the bay by adding or removing nodes.
+  Python code to scale the cluster by adding or removing nodes.
 
 
 
-Sample bay driver
------------------
+Sample cluster driver
+---------------------
 
-To help developers in creating new COE drivers, a minimal bay driver
-is provided as an example.  The 'docker' bay driver will simply deploy
+To help developers in creating new COE drivers, a minimal cluster driver
+is provided as an example.  The 'docker' cluster driver will simply deploy
 a single VM running Ubuntu with the latest Docker version installed.
 It is not a true cluster, but the simplicity will help to illustrate
 the key concepts.
@@ -701,8 +713,8 @@ the key concepts.
 
 
 
-Installing a bay driver
------------------------
+Installing a cluster driver
+---------------------------
 *To be filled in*
 
 
@@ -712,19 +724,19 @@ Choosing a COE
 Magnum supports a variety of COE options, and allows more to be added over time
 as they gain popularity. As an operator, you may choose to support the full
 variety of options, or you may want to offer a subset of the available choices.
-Given multiple choices, your users can run one or more bays, and each may use
-a different COE. For example, I might have multiple bays that use Kubernetes,
-and just one bay that uses Swarm. All of these bays can run concurrently, even
-though they use different COE software.
+Given multiple choices, your users can run one or more clusters, and each may
+use a different COE. For example, I might have multiple clusters that use
+Kubernetes, and just one cluster that uses Swarm. All of these clusters can
+run concurrently, even though they use different COE software.
 
 Choosing which COE to use depends on what tools you want to use to manage your
 containers once you start your app. If you want to use the Docker tools, you
-may want to use the Swarm bay type. Swarm will spread your containers across
-the various nodes in your bay automatically. It does not monitor the health of
-your containers, so it can't restart them for you if they stop. It will not
-automatically scale your app for you (as of Swarm version 1.2.2). You may view
-this as a plus. If you prefer to manage your application yourself, you might
-prefer swarm over the other COE options.
+may want to use the Swarm cluster type. Swarm will spread your containers
+across the various nodes in your cluster automatically. It does not monitor
+the health of your containers, so it can't restart them for you if they stop.
+It will not automatically scale your app for you (as of Swarm version 1.2.2).
+You may view this as a plus. If you prefer to manage your application yourself,
+you might prefer swarm over the other COE options.
 
 Kubernetes (as of v1.2) is more sophisticated than Swarm (as of v1.2.2). It
 offers an attractive YAML file description of a pod, which is a grouping of
@@ -743,13 +755,14 @@ including Marathon, Aurora, Chronos, Hadoop, and `a number of others.
 The Apache Mesos framework design can be used to run alternate COE software
 directly on Mesos. Although this approach is not widely used yet, it may soon
 be possible to run Mesos with Kubernetes and Swarm as frameworks, allowing
-you to share the resources of a bay between multiple different COEs. Until
-this option matures, we encourage Magnum users to create multiple bays, and
-use the COE in each bay that best fits the anticipated workload.
+you to share the resources of a cluster between multiple different COEs. Until
+this option matures, we encourage Magnum users to create multiple clusters, and
+use the COE in each cluster that best fits the anticipated workload.
 
 Finding the right COE for your workload is up to you, but Magnum offers you a
 choice to select among the prevailing leading options. Once you decide, see
-the next sections for examples of how to create a bay with your desired COE.
+the next sections for examples of how to create a cluster with your desired
+COE.
 
 ==============
 Native clients
@@ -766,7 +779,7 @@ Pod
   When using the Kubernetes container orchestration engine, a pod is the
   smallest deployable unit that can be created and managed. A pod is a
   co-located group of application containers that run with a shared context.
-  When using Magnum, pods are created and managed within bays. Refer to the
+  When using Magnum, pods are created and managed within clusters. Refer to the
   `pods section
   <http://kubernetes.io/v1.0/docs/user-guide/pods.html>`_ in the `Kubernetes
   User Guide`_ for more information.
@@ -792,49 +805,49 @@ Service
 
 .. _Kubernetes User Guide: http://kubernetes.io/v1.0/docs/user-guide/
 
-When Magnum deploys a Kubernetes bay, it uses parameters defined in the
-baymodel and specified on the bay-create command, for example::
+When Magnum deploys a Kubernetes cluster, it uses parameters defined in the
+ClusterTemplate and specified on the cluster-create command, for example::
 
-    magnum baymodel-create --name k8sbaymodel \
-                           --image-id fedora-atomic-latest \
-                           --keypair-id testkey \
-                           --external-network-id public \
-                           --dns-nameserver 8.8.8.8 \
-                           --flavor-id m1.small \
-                           --docker-volume-size 5 \
-                           --network-driver flannel \
-                           --coe kubernetes
+    magnum cluster-template-create --name k8s-cluster-template \
+                               --image-id fedora-atomic-latest \
+                               --keypair-id testkey \
+                               --external-network-id public \
+                               --dns-nameserver 8.8.8.8 \
+                               --flavor-id m1.small \
+                               --docker-volume-size 5 \
+                               --network-driver flannel \
+                               --coe kubernetes
 
-    magnum bay-create --name k8sbay \
-                      --baymodel k8sbaymodel \
-                      --master-count 3 \
-                      --node-count 8
+    magnum cluster-create --name k8s-cluster \
+                          --cluster-template k8s-cluster-template \
+                          --master-count 3 \
+                          --node-count 8
 
-Refer to the `Baymodel`_ and `Bay`_ sections for the full list of parameters.
-Following are further details relevant to a Kubernetes bay:
+Refer to the `ClusterTemplate`_ and `Cluster`_ sections for the full list of
+parameters. Following are further details relevant to a Kubernetes cluster:
 
 Number of masters (master-count)
-  Specified in the bay-create command to indicate how many servers will
-  run as master in the bay.  Having more than one will provide high
+  Specified in the cluster-create command to indicate how many servers will
+  run as master in the cluster.  Having more than one will provide high
   availability.  The masters will be in a load balancer pool and the
   virtual IP address (VIP) of the load balancer will serve as the
   Kubernetes API endpoint.  For external access, a floating IP
   associated with this VIP is available and this is the endpoint
-  shown for Kubernetes in the 'bay-show' command.
+  shown for Kubernetes in the 'cluster-show' command.
 
 Number of nodes (node-count)
-  Specified in the bay-create command to indicate how many servers will
-  run as node in the bay to host the users' pods.  The nodes are registered
+  Specified in the cluster-create command to indicate how many servers will
+  run as node in the cluster to host the users' pods.  The nodes are registered
   in Kubernetes using the Nova instance name.
 
 Network driver (network-driver)
-  Specified in the baymodel to select the network driver.
+  Specified in the ClusterTemplate to select the network driver.
   The supported and default network driver is 'flannel', an overlay
   network providing a flat network for all pods.  Refer to the
   `Networking`_ section for more details.
 
 Volume driver (volume-driver)
-  Specified in the baymodel to select the volume driver.  The supported
+  Specified in the ClusterTemplate to select the volume driver.  The supported
   volume driver is 'cinder', allowing Cinder volumes to be mounted in
   containers for use as persistent storage.  Data written to these volumes
   will persist after the container exits and can be accessed again from other
@@ -842,19 +855,19 @@ Volume driver (volume-driver)
   will be deleted.  Refer to the `Storage`_ section for more details.
 
 Storage driver (docker-storage-driver)
-  Specified in the baymodel to select the Docker storage driver.  The
+  Specified in the ClusterTemplate to select the Docker storage driver.  The
   supported storage drivers are 'devicemapper' and 'overlay', with
   'devicemapper' being the default.  You may get better performance with
   the overlay driver depending on your use patterns, with the requirement
   that SELinux must be disabled inside the containers, although it still runs
-  in enforcing mode on the bay servers.  Magnum will create a Cinder volume
+  in enforcing mode on the cluster servers.  Magnum will create a Cinder volume
   for each node, mount it on the node and configure it as a logical
   volume named 'docker'.  The Docker daemon will run the selected device
   driver to manage this logical volume and host the container writable
   layer there.  Refer to the `Storage`_ section for more details.
 
 Image (image-id)
-  Specified in the baymodel to indicate the image to boot the servers.
+  Specified in the ClusterTemplate to indicate the image to boot the servers.
   The image binary is loaded in Glance with the attribute
   'os_distro = fedora-atomic'.
   Current supported images are Fedora Atomic (download from `Fedora
@@ -866,7 +879,7 @@ TLS (tls-disabled)
   Transport Layer Security is enabled by default, so you need a key and
   signed certificate to access the Kubernetes API and CLI.  Magnum
   handles its own key and certificate when interfacing with the
-  Kubernetes bay.  In development mode, TLS can be disabled.  Refer to
+  Kubernetes cluster.  In development mode, TLS can be disabled.  Refer to
   the 'Transport Layer Security'_ section for more details.
 
 What runs on the servers
@@ -880,12 +893,12 @@ What runs on the servers
 
 Log into the servers
   You can log into the master servers using the login 'fedora' and the
-  keypair specified in the baymodel.
+  keypair specified in the ClusterTemplate.
 
 External load balancer for services
 -----------------------------------
 
-All Kubernetes pods and services created in the bay are assigned IP
+All Kubernetes pods and services created in the cluster are assigned IP
 addresses on a private container network so they can access each other
 and the external internet.  However, these IP addresses are not
 accessible from an external network.
@@ -914,43 +927,44 @@ for more details.
 Swarm
 =====
 
-A Swarm bay is a pool of servers running Docker daemon that is
+A Swarm cluster is a pool of servers running Docker daemon that is
 managed as a single Docker host.  One or more Swarm managers accepts
 the standard Docker API and manage this pool of servers.
-Magnum deploys a Swarm bay using parameters defined in
-the baymodel and specified on the 'bay-create' command, for example::
+Magnum deploys a Swarm cluster using parameters defined in
+the ClusterTemplate and specified on the 'cluster-create' command, for
+example::
 
-    magnum baymodel-create --name swarmbaymodel \
-                           --image-id fedora-atomic-latest \
-                           --keypair-id testkey \
-                           --external-network-id public \
-                           --dns-nameserver 8.8.8.8 \
-                           --flavor-id m1.small \
-                           --docker-volume-size 5 \
-                           --coe swarm
+    magnum cluster-template-create --name swarm-cluster-template \
+                               --image-id fedora-atomic-latest \
+                               --keypair-id testkey \
+                               --external-network-id public \
+                               --dns-nameserver 8.8.8.8 \
+                               --flavor-id m1.small \
+                               --docker-volume-size 5 \
+                               --coe swarm
 
-    magnum bay-create --name swarmbay \
-                      --baymodel swarmbaymodel \
+    magnum cluster-create --name swarm-cluster \
+                      --cluster-template swarm-cluster-template \
                       --master-count 3 \
                       --node-count 8
 
-Refer to the `Baymodel`_ and `Bay`_ sections for the full list of parameters.
-Following are further details relevant to Swarm:
+Refer to the `ClusterTemplate`_ and `Cluster`_ sections for the full list of
+parameters. Following are further details relevant to Swarm:
 
 What runs on the servers
-  There are two types of servers in the Swarm bay: managers and nodes.
+  There are two types of servers in the Swarm cluster: managers and nodes.
   The Docker daemon runs on all servers.  On the servers for manager,
   the Swarm manager is run as a Docker container on port 2376 and this
   is initiated by the systemd service swarm-manager.  Etcd is also run
-  on the manager servers for discovery of the node servers in the bay.
+  on the manager servers for discovery of the node servers in the cluster.
   On the servers for node, the Swarm agent is run as a Docker
   container on port 2375 and this is initiated by the systemd service
   swarm-agent.  On start up, the agents will register themselves in
   etcd and the managers will discover the new node to manage.
 
 Number of managers (master-count)
-  Specified in the bay-create command to indicate how many servers will
-  run as managers in the bay.  Having more than one will provide high
+  Specified in the cluster-create command to indicate how many servers will
+  run as managers in the cluster.  Having more than one will provide high
   availability.  The managers will be in a load balancer pool and the
   load balancer virtual IP address (VIP) will serve as the Swarm API
   endpoint.  A floating IP associated with the load balancer VIP will
@@ -961,14 +975,14 @@ Number of managers (master-count)
   and schedule the containers there.
 
 Number of nodes (node-count)
-  Specified in the bay-create command to indicate how many servers will
-  run as nodes in the bay to host your Docker containers.  These servers
+  Specified in the cluster-create command to indicate how many servers will
+  run as nodes in the cluster to host your Docker containers.  These servers
   will register themselves in etcd for discovery by the managers, and
   interact with the managers.  Docker daemon is run locally to host
   containers from users.
 
 Network driver (network-driver)
-  Specified in the baymodel to select the network driver.  The supported
+  Specified in the ClusterTemplate to select the network driver.  The supported
   drivers are 'docker' and 'flannel', with 'docker' as the default.
   With the 'docker' driver, containers are connected to the 'docker0'
   bridge on each node and are assigned local IP address.  With the
@@ -977,7 +991,7 @@ Network driver (network-driver)
   section for more details.
 
 Volume driver (volume-driver)
-  Specified in the baymodel to select the volume driver to provide
+  Specified in the ClusterTemplate to select the volume driver to provide
   persistent storage for containers.  The supported volume driver is
   'rexray'.  The default is no volume driver.  When 'rexray' or other
   volume driver is deployed, you can use the Docker 'volume' command to
@@ -986,12 +1000,12 @@ Volume driver (volume-driver)
   Refer to the `Storage`_ section for more details.
 
 Storage driver (docker-storage-driver)
-  Specified in the baymodel to select the Docker storage driver.  The
+  Specified in the ClusterTemplate to select the Docker storage driver.  The
   supported storage driver are 'devicemapper' and 'overlay', with
   'devicemapper' being the default.  You may get better performance with
   the 'overlay' driver depending on your use patterns, with the requirement
   that SELinux must be disabled inside the containers, although it still runs
-  in enforcing mode on the bay servers.  Magnum will create a Cinder volume
+  in enforcing mode on the cluster servers.  Magnum will create a Cinder volume
   for each node and attach it as a device.  Then depending on the driver,
   additional configuration is performed to make the volume available to
   the particular driver.  For instance, 'devicemapper' uses LVM; therefore
@@ -999,7 +1013,7 @@ Storage driver (docker-storage-driver)
   device.  Refer to the `Storage`_ section for more details.
 
 Image (image-id)
-  Specified in the baymodel to indicate the image to boot the servers
+  Specified in the ClusterTemplate to indicate the image to boot the servers
   for the Swarm manager and node.
   The image binary is loaded in Glance with the attribute
   'os_distro = fedora-atomic'.
@@ -1011,32 +1025,32 @@ TLS (tls-disabled)
   access by both the users and Magnum.  You will need a key and a
   signed certificate to access the Swarm API and CLI.  Magnum
   handles its own key and certificate when interfacing with the
-  Swarm bay.  In development mode, TLS can be disabled.  Refer to
+  Swarm cluster.  In development mode, TLS can be disabled.  Refer to
   the 'Transport Layer Security'_ section for details on how to create your
   key and have Magnum sign your certificate.
 
 Log into the servers
   You can log into the manager and node servers with the account 'fedora' and
-  the keypair specified in the baymodel.
+  the keypair specified in the ClusterTemplate.
 
 
 =====
 Mesos
 =====
 
-A Mesos bay consists of a pool of servers running as Mesos agents,
+A Mesos cluster consists of a pool of servers running as Mesos agents,
 managed by a set of servers running as Mesos masters.  Mesos manages
 the resources from the agents but does not itself deploy containers.
-Instead, one of more Mesos frameworks running on the Mesos bay would
+Instead, one of more Mesos frameworks running on the Mesos cluster would
 accept user requests on their own endpoint, using their particular
 API.  These frameworks would then negotiate the resources with Mesos
 and the containers are deployed on the servers where the resources are
 offered.
 
-Magnum deploys a Mesos bay using parameters defined in the baymodel
-and specified on the 'bay-create' command, for example::
+Magnum deploys a Mesos cluster using parameters defined in the ClusterTemplate
+and specified on the 'cluster-create' command, for example::
 
-    magnum baymodel-create --name mesosbaymodel \
+    magnum cluster-template-create --name mesos-cluster-template \
                            --image-id ubuntu-mesos \
                            --keypair-id testkey \
                            --external-network-id public \
@@ -1044,16 +1058,16 @@ and specified on the 'bay-create' command, for example::
                            --flavor-id m1.small \
                            --coe mesos
 
-    magnum bay-create --name mesosbay \
-                      --baymodel mesosbaymodel \
+    magnum cluster-create --name mesos-cluster \
+                      --cluster-template mesos-cluster-template \
                       --master-count 3 \
                       --node-count 8
 
-Refer to the `Baymodel`_ and `Bay`_ sections for the full list of
+Refer to the `ClusterTemplate`_ and `Cluster`_ sections for the full list of
 parameters.  Following are further details relevant to Mesos:
 
 What runs on the servers
-  There are two types of servers in the Mesos bay: masters and agents.
+  There are two types of servers in the Mesos cluster: masters and agents.
   The Docker daemon runs on all servers.  On the servers for master,
   the Mesos master is run as a process on port 5050 and this is
   initiated by the upstart service 'mesos-master'.  Zookeeper is also
@@ -1067,8 +1081,8 @@ What runs on the servers
   'mesos-agent'.
 
 Number of master (master-count)
-  Specified in the bay-create command to indicate how many servers
-  will run as masters in the bay.  Having more than one will provide
+  Specified in the cluster-create command to indicate how many servers
+  will run as masters in the cluster.  Having more than one will provide
   high availability.  If the load balancer option is specified, the
   masters will be in a load balancer pool and the load balancer
   virtual IP address (VIP) will serve as the Mesos API endpoint.  A
@@ -1076,21 +1090,21 @@ Number of master (master-count)
   external Mesos API endpoint.
 
 Number of agents (node-count)
-  Specified in the bay-create command to indicate how many servers
-  will run as Mesos agent in the bay.  Docker daemon is run locally to
+  Specified in the cluster-create command to indicate how many servers
+  will run as Mesos agent in the cluster.  Docker daemon is run locally to
   host containers from users.  The agents report their available
   resources to the master and accept request from the master to deploy
   tasks from the frameworks.  In this case, the tasks will be to
   run Docker containers.
 
 Network driver (network-driver)
-  Specified in the baymodel to select the network driver.  Currently
+  Specified in the ClusterTemplate to select the network driver.  Currently
   'docker' is the only supported driver: containers are connected to
   the 'docker0' bridge on each node and are assigned local IP address.
   Refer to the `Networking`_ section for more details.
 
 Volume driver (volume-driver)
-  Specified in the baymodel to select the volume driver to provide
+  Specified in the ClusterTemplate to select the volume driver to provide
   persistent storage for containers.  The supported volume driver is
   'rexray'.  The default is no volume driver.  When 'rexray' or other
   volume driver is deployed, you can use the Docker 'volume' command to
@@ -1103,7 +1117,7 @@ Storage driver (docker-storage-driver)
 
 Image (image-id)
 
-  Specified in the baymodel to indicate the image to boot the servers
+  Specified in the ClusterTemplate to indicate the image to boot the servers
   for the Mesos master and agent.  The image binary is loaded in
   Glance with the attribute 'os_distro = ubuntu'.  You can download
   the `ready-built image
@@ -1116,7 +1130,7 @@ TLS (tls-disabled)
 
 Log into the servers
   You can log into the manager and node servers with the account
-  'ubuntu' and the keypair specified in the baymodel.
+  'ubuntu' and the keypair specified in the ClusterTemplate.
 
 In addition to the common attributes in the baymodel, you can specify
 the following attributes that are specific to Mesos by using the
@@ -1201,7 +1215,7 @@ _`mesos_agent_executor_env_variables`
 Building Mesos image
 --------------------
 
-The boot image for Mesos bay is an Ubuntu 14.04 base image with the
+The boot image for Mesos cluster is an Ubuntu 14.04 base image with the
 following middleware pre-installed:
 
 -  ``docker``
@@ -1209,10 +1223,10 @@ following middleware pre-installed:
 -  ``mesos``
 -  ``marathon``
 
-The bay driver provides two ways to create this image, as follows.
+The cluster driver provides two ways to create this image, as follows.
 
 Diskimage-builder
-++++++++++++++++++
++++++++++++++++++
 
 To run the `diskimage-builder
 <http://docs.openstack.org/developer/diskimage-builder>`__ tool
@@ -1243,8 +1257,8 @@ Dockerfile
 
 To build the image as above but within a Docker container, use the
 provided `Dockerfile
-<http://git.openstack.org/cgit/openstack/magnum/tree/magnum/drivers/mesos_ubuntu_v1/image/Dockerfile>`__. The
-output image will be saved as '/tmp/ubuntu-mesos.qcow2'.
+<http://git.openstack.org/cgit/openstack/magnum/tree/magnum/drivers/mesos_ubuntu_v1/image/Dockerfile>`__.
+The output image will be saved as '/tmp/ubuntu-mesos.qcow2'.
 Following are the typical steps to run a Docker container to build the image::
 
     $ git clone https://git.openstack.org/openstack/magnum
@@ -1260,7 +1274,7 @@ Using Marathon
 
 Marathon is a Mesos framework for long running applications.  Docker
 containers can be deployed via Marathon's REST API.  To get the
-endpoint for Marathon, run the bay-show command and look for the
+endpoint for Marathon, run the cluster-show command and look for the
 property 'api_address'.  Marathon's endpoint is port 8080 on this IP
 address, so the web console can be accessed at::
 
@@ -1286,7 +1300,7 @@ For example, you can 'post' a JSON app description to
       "cmd": "while sleep 10; do date -u +%T; done"
     }
     END
-    $ API_ADDRESS=$(magnum bay-show mesosbay | awk '/ api_address /{print $4}')
+    $ API_ADDRESS=$(magnum cluster-show mesoscluster | awk '/ api_address /{print $4}')
     $ curl -X POST -H "Content-Type: application/json" \
         http://${API_ADDRESS}:8080/v2/apps -d@app.json
 
@@ -1295,32 +1309,32 @@ For example, you can 'post' a JSON app description to
 Transport Layer Security
 ========================
 
-Magnum uses TLS to secure communication between a bay's services and
+Magnum uses TLS to secure communication between a cluster's services and
 the outside world.  TLS is a complex subject, and many guides on it
 exist already.  This guide will not attempt to fully describe TLS, but
 instead will only cover the necessary steps to get a client set up to
-talk to a Bay with TLS. A more in-depth guide on TLS can be found in
+talk to a cluster with TLS. A more in-depth guide on TLS can be found in
 the `OpenSSL Cookbook
 <https://www.feistyduck.com/books/openssl-cookbook/>`_ by Ivan Ristić.
 
-TLS is employed at 3 points in a bay:
+TLS is employed at 3 points in a cluster:
 
-1. By Magnum to communicate with the bay API endpoint
+1. By Magnum to communicate with the cluster API endpoint
 
-2. By the bay worker nodes to communicate with the master nodes
+2. By the cluster worker nodes to communicate with the master nodes
 
 3. By the end-user when they use the native client libraries to
-   interact with the Bay.  This applies to both a CLI or a program
-   that uses a client for the particular bay.  Each client needs a
-   valid certificate to authenticate and communicate with a Bay.
+   interact with the cluster.  This applies to both a CLI or a program
+   that uses a client for the particular cluster.  Each client needs a
+   valid certificate to authenticate and communicate with a cluster.
 
 The first two cases are implemented internally by Magnum and are not
 exposed to the users, while the last case involves the users and is
 described in more details below.
 
 
-Deploying a secure bay
-----------------------
+Deploying a secure cluster
+--------------------------
 
 Current TLS support is summarized below:
 
@@ -1334,27 +1348,27 @@ Current TLS support is summarized below:
 | Mesos      | no          |
 +------------+-------------+
 
-For bay type with TLS support, e.g. Kubernetes and Swarm, TLS is
+For cluster type with TLS support, e.g. Kubernetes and Swarm, TLS is
 enabled by default.  To disable TLS in Magnum, you can specify the
-parameter '--tls-disabled' in the baymodel.  Please note it is not
+parameter '--tls-disabled' in the ClusterTemplate.  Please note it is not
 recommended to disable TLS due to security reasons.
 
 In the following example, Kubernetes is used to illustrate a secure
-bay, but the steps are similar for other bay types that have TLS
+cluster, but the steps are similar for other cluster types that have TLS
 support.
 
-First, create a baymodel; by default TLS is enabled in
+First, create a ClusterTemplate; by default TLS is enabled in
 Magnum, therefore it does not need to be specified via a parameter::
 
-    magnum baymodel-create --name secure-kubernetes \
-                           --keypair-id default \
-                           --external-network-id public \
-                           --image-id fedora-atomic-latest \
-                           --dns-nameserver 8.8.8.8 \
-                           --flavor-id m1.small \
-                           --docker-volume-size 3 \
-                           --coe kubernetes \
-                           --network-driver flannel
+    magnum cluster-template-create --name secure-kubernetes \
+                               --keypair-id default \
+                               --external-network-id public \
+                               --image-id fedora-atomic-latest \
+                               --dns-nameserver 8.8.8.8 \
+                               --flavor-id m1.small \
+                               --docker-volume-size 3 \
+                               --coe kubernetes \
+                               --network-driver flannel
 
     +-----------------------+--------------------------------------+
     | Property              | Value                                |
@@ -1389,11 +1403,12 @@ Magnum, therefore it does not need to be specified via a parameter::
     +-----------------------+--------------------------------------+
 
 
-Now create a bay. Use the baymodel name as a template for bay creation::
+Now create a cluster. Use the ClusterTemplate name as a template for cluster
+creation::
 
-    magnum bay-create --name secure-k8sbay \
-                      --baymodel secure-kubernetes \
-                      --node-count 1
+    magnum cluster-create --name secure-k8s-cluster \
+                          --cluster-template secure-kubernetes \
+                          --node-count 1
 
     +--------------------+------------------------------------------------------------+
     | Property           | Value                                                      |
@@ -1404,22 +1419,22 @@ Now create a bay. Use the baymodel name as a template for bay creation::
     | status_reason      | None                                                       |
     | created_at         | 2016-07-25T23:14:06+00:00                                  |
     | updated_at         | None                                                       |
-    | bay_create_timeout | 0                                                          |
+    | create_timeout     | 0                                                          |
     | api_address        | None                                                       |
-    | baymodel_id        | 5519b24a-621c-413c-832f-c30424528b31                       |
+    | cluster_template_id| 5519b24a-621c-413c-832f-c30424528b31                       |
     | master_addresses   | None                                                       |
     | node_count         | 1                                                          |
     | node_addresses     | None                                                       |
     | master_count       | 1                                                          |
     | discovery_url      | https://discovery.etcd.io/ba52a8178e7364d43a323ee4387cf28e |
-    | name               | secure-k8sbay                                              |
+    | name               | secure-k8s-cluster                                          |
     +--------------------+------------------------------------------------------------+
 
 
-Now run bay-show command to get the details of the bay and verify that the
-api_address is 'https'::
+Now run cluster-show command to get the details of the cluster and verify that
+the api_address is 'https'::
 
-    magnum bay-show secure-k8sbay
+    magnum cluster-show secure-k8scluster
     +--------------------+------------------------------------------------------------+
     | Property           | Value                                                      |
     +--------------------+------------------------------------------------------------+
@@ -1429,15 +1444,15 @@ api_address is 'https'::
     | status_reason      | Stack CREATE completed successfully                        |
     | created_at         | 2016-07-25T23:14:06+00:00                                  |
     | updated_at         | 2016-07-25T23:14:10+00:00                                  |
-    | bay_create_timeout | 60                                                         |
+    | create_timeout     | 60                                                         |
     | api_address        | https://192.168.19.86:6443                                 |
-    | baymodel_id        | da2825a0-6d09-4208-b39e-b2db666f1118                       |
+    | cluster_template_id| da2825a0-6d09-4208-b39e-b2db666f1118                       |
     | master_addresses   | ['192.168.19.87']                                          |
     | node_count         | 1                                                          |
     | node_addresses     | ['192.168.19.88']                                          |
     | master_count       | 1                                                          |
     | discovery_url      | https://discovery.etcd.io/3b7fb09733429d16679484673ba3bfd5 |
-    | name               | secure-k8sbay                                              |
+    | name               | secure-k8s-cluster                                          |
     +--------------------+------------------------------------------------------------+
 
 You can see the api_address contains https in the URL, showing that
@@ -1445,10 +1460,10 @@ the Kubernetes services are configured securely with SSL certificates
 and now any communication to kube-apiserver will be over https.
 
 
-Interfacing with a secure bay
------------------------------
+Interfacing with a secure cluster
+---------------------------------
 
-To communicate with the API endpoint of a secure bay, you will need so
+To communicate with the API endpoint of a secure cluster, you will need so
 supply 3 SSL artifacts:
 
 1. Your client key
@@ -1461,16 +1476,16 @@ There are two ways to obtain these 3 artifacts.
 Automated
 +++++++++
 
-Magnum provides the command 'bay-config' to help the user in setting
+Magnum provides the command 'cluster-config' to help the user in setting
 up the environment and artifacts for TLS, for example::
 
-    magnum bay-config swarmbay --dir mybayconfig
+    magnum cluster-config swarm-cluster --dir myclusterconfig
 
 This will display the necessary environment variables, which you
 can add to your environment::
 
     export DOCKER_HOST=tcp://172.24.4.5:2376
-    export DOCKER_CERT_PATH=mybayconfig
+    export DOCKER_CERT_PATH=myclusterconfig
     export DOCKER_TLS_VERIFY=True
 
 And the artifacts are placed in the directory specified::
@@ -1510,7 +1525,7 @@ Signed Certificate
   To authenticate your key, you need to have it signed by a CA.  First
   generate the Certificate Signing Request (CSR).  The CSR will be
   used by Magnum to generate a signed certificate that you will use to
-  communicate with the Bay.  To generate a CSR, openssl requires a
+  communicate with the cluster.  To generate a CSR, openssl requires a
   config file that specifies a few values.  Using the example template
   below, you can fill in the 'CN' value with your name and save it as
   client.conf::
@@ -1537,23 +1552,23 @@ Signed Certificate
   Now that you have your client CSR, you can use the Magnum CLI to
   send it off to Magnum to get it signed::
 
-      magnum ca-sign --bay secure-k8sbay --csr client.csr > cert.pem
+      magnum ca-sign --cluster secure-k8s-cluster --csr client.csr > cert.pem
 
 Certificate Authority
   The final artifact you need to retrieve is the CA certificate for
-  the bay. This is used by your native client to ensure you are only
+  the cluster. This is used by your native client to ensure you are only
   communicating with hosts that Magnum set up::
 
-      magnum ca-show --bay secure-k8sbay > ca.pem
+      magnum ca-show --cluster secure-k8s-cluster > ca.pem
 
 
 User Examples
 -------------
 
 Here are some examples for using the CLI on a secure Kubernetes and
-Swarm bay.  You can perform all the TLS set up automatically by::
+Swarm cluster.  You can perform all the TLS set up automatically by::
 
-    eval $(magnum bay-config <bay-name>)
+    eval $(magnum cluster-config <cluster-name>)
 
 Or you can perform the manual steps as described above and specify
 the TLS options on the CLI.  The SSL artifacts are assumed to be
@@ -1561,17 +1576,18 @@ saved in local files as follows::
 
 - key.pem: your SSL key
 - cert.pem: signed certificate
-- ca.pem: certificate for bay CA
+- ca.pem: certificate for cluster CA
+
 
 For Kubernetes, you need to get 'kubectl', a kubernetes CLI tool, to
-communicate with the bay::
+communicate with the cluster::
 
     wget https://github.com/kubernetes/kubernetes/releases/download/v1.2.0/kubernetes.tar.gz
     tar -xzvf kubernetes.tar.gz
     sudo cp -a kubernetes/platforms/linux/amd64/kubectl /usr/bin/kubectl
 
 Now let's run some 'kubectl' commands to check the secure communication.
-If you used 'bay-config', then you can simply run the 'kubectl' command
+If you used 'cluster-config', then you can simply run the 'kubectl' command
 without having to specify the TLS options since they have been defined
 in the environment::
 
@@ -1581,7 +1597,7 @@ in the environment::
 
 You can specify the TLS options manually as follows::
 
-    KUBERNETES_URL=$(magnum bay-show secure-k8sbay |
+    KUBERNETES_URL=$(magnum cluster-show secure-k8s-cluster |
                      awk '/ api_address /{print $4}')
     kubectl version --certificate-authority=ca.pem \
                     --client-key=key.pem \
@@ -1602,12 +1618,12 @@ You can specify the TLS options manually as follows::
 Beside using the environment variables, you can also configure 'kubectl'
 to remember the TLS options::
 
-    kubectl config set-cluster secure-k8sbay --server=${KUBERNETES_URL} \
+    kubectl config set-cluster secure-k8s-cluster --server=${KUBERNETES_URL} \
         --certificate-authority=${PWD}/ca.pem
     kubectl config set-credentials client --certificate-authority=${PWD}/ca.pem \
         --client-key=${PWD}/key.pem --client-certificate=${PWD}/cert.pem
-    kubectl config set-context secure-k8sbay --cluster=secure-k8sbay --user=client
-    kubectl config use-context secure-k8sbay
+    kubectl config set-context secure-k8scluster --cluster=secure-k8scluster --user=client
+    kubectl config use-context secure-k8scluster
 
 Then you can use 'kubectl' commands without the certificates::
 
@@ -1629,7 +1645,7 @@ without installing a certificate in your browser::
 
 You can then open http://localhost:8001/ui in your browser.
 
-The examples for Docker are similar.  With 'bay-config' set up,
+The examples for Docker are similar.  With 'cluster-config' set up,
 you can just run docker commands without TLS options.  To specify the
 TLS options manually::
 
@@ -1643,8 +1659,8 @@ TLS options manually::
 Storing the certificates
 ------------------------
 
-Magnum generates and maintains a certificate for each bay so that it
-can also communicate securely with the bay.  As a result, it is
+Magnum generates and maintains a certificate for each cluster so that it
+can also communicate securely with the cluster.  As a result, it is
 necessary to store the certificates in a secure manner.  Magnum
 provides the following methods for storing the certificates and this
 is configured in /etc/magnum/magnum.conf in the section [certificates]
@@ -1715,27 +1731,27 @@ As a result, the implementation for the networking models is evolving and
 new models are likely to be introduced in the future.
 
 For the Neutron infrastructure, the following configuration can
-be set in the baymodel:
+be set in the ClusterTemplate:
 
 external-network-id
-  The external Neutron network ID to connect to this bay. This
+  The external Neutron network ID to connect to this cluster. This
   is used to connect the cluster to the external internet, allowing
-  the nodes in the bay to access external URL for discovery, image
+  the nodes in the cluster to access external URL for discovery, image
   download, etc.  If not specified, the default value is "public" and this
   is valid for a typical devstack.
 
 fixed-network
-  The Neutron network to use as the private network for the bay nodes.
+  The Neutron network to use as the private network for the cluster nodes.
   If not specified, a new Neutron private network will be created.
 
 dns-nameserver
-  The DNS nameserver to use for this bay.  This is an IP address for
+  The DNS nameserver to use for this cluster.  This is an IP address for
   the server and it is used to configure the Neutron subnet of the
   cluster (dns_nameservers).  If not specified, the default DNS is
   8.8.8.8, the publicly available DNS.
 
 http-proxy, https-proxy, no-proxy
-  The proxy for the nodes in the bay, to be used when the cluster is
+  The proxy for the nodes in the cluster, to be used when the cluster is
   behind a firewall and containers cannot access URL's on the external
   internet directly.  For the parameter http-proxy and https-proxy, the
   value to provide is a URL and it will be set in the environment
@@ -1745,7 +1761,7 @@ http-proxy, https-proxy, no-proxy
   environment variable NO_PROXY in the nodes.
 
 For the networking model to the container, the following configuration
-can be set in the baymodel:
+can be set in the ClusterTemplate:
 
 network-driver
   The network driver name for instantiating container networks.
@@ -1764,7 +1780,7 @@ network-driver
 
 Particular network driver may require its own set of parameters for
 configuration, and these parameters are specified through the labels
-in the baymodel.  Labels are arbitrary key=value pairs.
+in the ClusterTemplate.  Labels are arbitrary key=value pairs.
 
 When Flannel is specified as the network driver, the following
 optional labels can be added:
@@ -1790,7 +1806,7 @@ _`flannel_backend`
   messages, but it requires all the nodes to be on the same L2
   network.  The private Neutron network that Magnum creates does
   meet this requirement;  therefore if the parameter *fixed_network*
-  is not specified in the baymodel, *host-gw* is the best choice for
+  is not specified in the ClusterTemplate, *host-gw* is the best choice for
   the Flannel backend.
 
 
@@ -1807,13 +1823,14 @@ Performance tuning for periodic task
 ------------------------------------
 
 Magnum's periodic task performs a `stack-get` operation on the Heat stack
-underlying each of its bays. If you have a large amount of bays this can create
-considerable load on the Heat API. To reduce that load you can configure Magnum
-to perform one global `stack-list` per periodic task instead instead of one per
-bay. This is disabled by default, both from the Heat and Magnum side since it
-causes a security issue, though: any user in any tenant holding the `admin`
-role can perform a global `stack-list` operation if Heat is configured to allow
-it for Magnum. If you want to enable it nonetheless, proceed as follows:
+underlying each of its clusters. If you have a large amount of clusters this
+can create considerable load on the Heat API. To reduce that load you can
+configure Magnum to perform one global `stack-list` per periodic task instead
+of one per cluster. This is disabled by default, both from the Heat and Magnum
+side since it causes a security issue, though: any user in any tenant holding
+the `admin` role can perform a global `stack-list` operation if Heat is
+configured to allow it for Magnum. If you want to enable it nonetheless,
+proceed as follows:
 
 1. Set `periodic_global_stack_list` in magnum.conf to `True`
    (`False` by default).
@@ -1852,12 +1869,12 @@ container is also deleted.
 
 To manage this space in a flexible manner independent of the Nova
 instance flavor, Magnum creates a separate Cinder block volume for each
-node in the bay, mounts it to the node and configures it to be used as
+node in the cluster, mounts it to the node and configures it to be used as
 ephemeral storage.  Users can specify the size of the Cinder volume with
-the baymodel attribute 'docker-volume-size'.  The default size is 5GB.
-Currently the block size is fixed at bay creation time, but future
+the ClusterTemplate attribute 'docker-volume-size'.  The default size is 5GB.
+Currently the block size is fixed at cluster creation time, but future
 lifecycle operations may allow modifying the block size during the
-life of the bay.
+life of the cluster.
 
 To use the Cinder block storage, there is a number of Docker
 storage drivers available.  Only 'devicemapper' is supported as the
@@ -1867,7 +1884,7 @@ for the storage drivers that should be considered.  For instance,
 'OperlayFS' may offer better performance, but it may not support
 the filesystem metadata needed to use SELinux, which is required
 to support strong isolation between containers running in the same
-bay. Using the 'devicemapper' driver does allow the use of SELinux.
+cluster. Using the 'devicemapper' driver does allow the use of SELinux.
 
 
 Persistent storage
@@ -1897,7 +1914,7 @@ to Cinder to unmount the volume's filesystem, making it available to be
 mounted on other nodes.
 
 Magnum supports these features to use Cinder as persistent storage
-using the baymodel attribute 'volume-driver' and the support matrix
+using the ClusterTemplate attribute 'volume-driver' and the support matrix
 for the COE types is summarized as follows:
 
 +--------+-------------+-------------+-------------+
@@ -1920,30 +1937,32 @@ currently meets this requirement.
 **NOTE:** The following steps are a temporary workaround, and Magnum's
 development team is working on a long term solution to automate these steps.
 
-1. Create the baymodel.
+1. Create the ClusterTemplate.
 
    Specify 'cinder' as the volume-driver for Kubernetes::
 
-    magnum baymodel-create --name k8sbaymodel \
-                           --image-id fedora-23-atomic-7 \
-                           --keypair-id testkey \
-                           --external-network-id public \
-                           --dns-nameserver 8.8.8.8 \
-                           --flavor-id m1.small \
-                           --docker-volume-size 5 \
-                           --network-driver flannel \
-                           --coe kubernetes \
-                           --volume-driver cinder
+    magnum cluster-template-create --name k8s-cluster-template \
+                               --image-id fedora-23-atomic-7 \
+                               --keypair-id testkey \
+                               --external-network-id public \
+                               --dns-nameserver 8.8.8.8 \
+                               --flavor-id m1.small \
+                               --docker-volume-size 5 \
+                               --network-driver flannel \
+                               --coe kubernetes \
+                               --volume-driver cinder
 
-2. Create the bay::
+2. Create the cluster::
 
-    magnum bay-create --name k8sbay --baymodel k8sbaymodel --node-count 1
+    magnum cluster-create --name k8s-cluster \
+                          --cluster-template k8s-cluster-template \
+                          --node-count 1
 
 
 3. Configure kubelet.
 
    To allow Kubernetes to interface with Cinder, log into each minion
-   node of your bay and perform step 4 through 6::
+   node of your cluster and perform step 4 through 6::
 
     sudo vi /etc/kubernetes/kubelet
 
@@ -1961,7 +1980,7 @@ development team is working on a long term solution to automate these steps.
     sudo vi /etc/kubernetes/kube_openstack_config
 
   The username, tenant-name and region entries have been filled in with the
-  Keystone values of the user who created the bay.  Enter the password
+  Keystone values of the user who created the cluster.  Enter the password
   of this user on the entry for password::
 
     password=ChangeMe
@@ -1991,10 +2010,10 @@ Following is an example illustrating how Cinder is used in a pod.
 
     ID=$(cinder create --display-name=test-repo 1 | awk -F'|' '$2~/^[[:space:]]*id/ {print $3}')
 
-   The command will generate the volume with a ID. The volume ID will be specified in
-   Step 2.
+   The command will generate the volume with a ID. The volume ID will be
+   specified in Step 2.
 
-2. Create a pod in this bay and mount this cinder volume to the pod.
+2. Create a pod in this cluster and mount this cinder volume to the pod.
    Create a file (e.g nginx-cinder.yaml) describing the pod::
 
     cat > nginx-cinder.yaml << END
@@ -2049,7 +2068,7 @@ Using Cinder in Swarm
 Using Cinder in Mesos
 +++++++++++++++++++++
 
-1. Create the baymodel.
+1. Create the ClusterTemplate.
 
    Specify 'rexray' as the volume-driver for Mesos.  As an option, you
    can specify in a label the attributes 'rexray_preempt' to enable
@@ -2057,24 +2076,26 @@ Using Cinder in Mesos
    hosts are using the volume. If this is set to false, the driver
    will ensure data safety by locking the volume::
 
-    magnum baymodel-create --name mesosbaymodel \
-                           --image-id ubuntu-mesos \
-                           --keypair-id testkey \
-                           --external-network-id public \
-                           --dns-nameserver 8.8.8.8 \
-                           --master-flavor-id m1.magnum \
-                           --docker-volume-size 4 \
-                           --tls-disabled \
-                           --flavor-id m1.magnum \
-                           --coe mesos \
-                           --volume-driver rexray \
-                           --labels rexray-preempt=true
+    magnum cluster-template-create --name mesos-cluster-template \
+                               --image-id ubuntu-mesos \
+                               --keypair-id testkey \
+                               --external-network-id public \
+                               --dns-nameserver 8.8.8.8 \
+                               --master-flavor-id m1.magnum \
+                               --docker-volume-size 4 \
+                               --tls-disabled \
+                               --flavor-id m1.magnum \
+                               --coe mesos \
+                               --volume-driver rexray \
+                               --labels rexray-preempt=true
 
-2. Create the Mesos bay::
+2. Create the Mesos cluster::
 
-    magnum bay-create --name mesosbay --baymodel mesosbaymodel --node-count 1
+    magnum cluster-create --name mesos-cluster \
+                          --cluster-template mesos-cluster-template \
+                          --node-count 1
 
-3. Create the cinder volume and configure this bay::
+3. Create the cinder volume and configure this cluster::
 
     cinder create --display-name=redisdata 1
 
@@ -2102,10 +2123,10 @@ Using Cinder in Mesos
     }
     END
 
-**NOTE:** When the Mesos bay is created using this baymodel, the Mesos bay
-will be configured so that a filesystem on an existing cinder volume can
-be mounted in a container by configuring the parameters to mount the cinder
-volume in the json file ::
+**NOTE:** When the Mesos cluster is created using this ClusterTemplate, the
+Mesos cluster will be configured so that a filesystem on an existing cinder
+volume can be mounted in a container by configuring the parameters to mount
+the cinder volume in the json file ::
 
     "parameters": [
        { "key": "volume-driver", "value": "rexray" },
@@ -2114,7 +2135,7 @@ volume in the json file ::
 
 4. Create the container using Marathon REST API ::
 
-    MASTER_IP=$(magnum bay-show mesosbay | awk '/ api_address /{print $4}')
+    MASTER_IP=$(magnum cluster-show mesoscluster | awk '/ api_address /{print $4}')
     curl -X POST -H "Content-Type: application/json" \
     http://${MASTER_IP}:8080/v2/apps -d@mesos.json
 
@@ -2136,7 +2157,7 @@ The image is tightly coupled with the following in Magnum:
 
 1. Heat templates to orchestrate the configuration.
 
-2. Template definition to map baymodel parameters to Heat
+2. Template definition to map ClusterTemplate parameters to Heat
    template parameters.
 
 3. Set of scripts to configure software.
@@ -2241,8 +2262,8 @@ The login for this image is *core*.
 Kubernetes on Ironic
 --------------------
 
-This image is built manually using diskimagebuilder.  The scripts and instructions
-are included in `Magnum code repo
+This image is built manually using diskimagebuilder.  The scripts and
+instructions are included in `Magnum code repo
 <https://github.com/openstack/magnum/tree/master/magnum/templates/kubernetes/elements>`_.
 Currently Ironic is not fully supported yet, therefore more details will be
 provided when this driver has been fully tested.
@@ -2375,18 +2396,21 @@ Supported Events
 ----------------
 
 The following table displays the corresponding relationship between resource
-types and operations.
+types and operations. The bay type is deprecated and will be removed in a
+future version. Cluster is the new equivalent term.
 
 +---------------+----------------------------+-------------------------+
 | resource type |    supported operations    |       typeURI           |
 +===============+============================+=========================+
-| bay           |  create, update, delete    |    service/magnum/bay   |
+| bay           |  create, update, delete    |  service/magnum/bay     |
++---------------+----------------------------+-------------------------+
+| cluster       |  create, update, delete    |  service/magnum/cluster |
 +---------------+----------------------------+-------------------------+
 
-Example Notification - Bay Create
----------------------------------
+Example Notification - Cluster Create
+-------------------------------------
 
-The following is an example of a notification that is sent when a bay is
+The following is an example of a notification that is sent when a cluster is
 created. This example can be applied for any ``create``, ``update`` or
 ``delete`` event that is seen in the table above. The ``<action>`` and
 ``typeURI`` fields will be change.
@@ -2394,7 +2418,7 @@ created. This example can be applied for any ``create``, ``update`` or
 .. code-block:: javascript
 
     {
-        "event_type": "magnum.bay.created",
+        "event_type": "magnum.cluster.created",
         "message_id": "0156ee79-b35f-4cef-ac37-d4a85f231c69",
         "payload": {
             "typeURI": "http://schemas.dmtf.org/cloud/audit/1.0/event",
@@ -2405,11 +2429,11 @@ created. This example can be applied for any ``create``, ``update`` or
                 "project_id": "3d4a50a9-2b59-438b-bf19-c231f9c7625a"
             },
             "target": {
-                "typeURI": "service/magnum/bay",
+                "typeURI": "service/magnum/cluster",
                 "id": "openstack:1c2fc591-facb-4479-a327-520dade1ea15"
             },
             "observer": {
-                "typeURI": "service/magnum/bay",
+                "typeURI": "service/magnum/cluster",
                 "id": "openstack:3d4a50a9-2b59-438b-bf19-c231f9c7625a"
             },
             "eventType": "activity",

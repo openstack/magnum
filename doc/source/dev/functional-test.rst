@@ -39,7 +39,7 @@ If you're using devstack, you can copy and modify the devstack configuration::
     source /opt/stack/devstack/openrc demo demo
     iniset functional_creds.conf auth password $OS_PASSWORD
 
-Set the DNS name server to be used in your bay nodes (e.g. 8.8.8.8)::
+Set the DNS name server to be used by your cluster nodes (e.g. 8.8.8.8)::
 
     # update DNS name server
     source /opt/stack/devstack/openrc demo demo
