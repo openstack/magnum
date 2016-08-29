@@ -8,12 +8,24 @@ request_id:
     with the request by default appears in the service logs.
 
 # Path params
+bay_ident:
+  type: string
+  in: path
+  required: true
+  description: |
+    The UUID or name of bays in Magnum.
 baymodel_ident:
   description: |
     The UUID or name of baymodels in Magnum.
   in: path
   required: true
   type: string
+cluster_ident:
+  type: string
+  in: path
+  required: true
+  description: |
+    The UUID or name of clusters in Magnum.
 clustertemplate_ident:
   type: string
   in: path
@@ -22,18 +34,41 @@ clustertemplate_ident:
     The UUID or name of cluster templates in Magnum.
 
 # Body params
+api_address:
+  description: |
+    The endpoint URL of COE API exposed to end-users.
+  in: body
+  format: uri
+  required: true
+  type: string
 apiserver_port:
   type: integer
   in: body
   required: true
   description: |
     The exposed port of COE API server.
-bay_cluster_id:
+bay_create_timeout:
+  type: integer
+  in: body
+  required: true
+  description: |
+    The timeout for bay creation in minutes. The value expected is a
+    positive integer and the default is 60 minutes. If the timeout is reached
+    during bay creation process, the operation will be aborted and the
+    bay status will be set to ``CREATE_FAILED``.
+bay_id:
   type: UUID
   in: body
   required: true
   description: |
-    The UUID of the bay/cluster.
+    The UUID of the bay.
+bay_list:
+  type: array
+  in: body
+  required: true
+  description: |
+    The list of all bays in Magnum.
+    The list of all clusters in Magnum.
 baymodel_id:
   type: UUID
   in: body
@@ -59,6 +94,18 @@ cluster_distro:
   description: |
     Display the attribute ``os-distro`` defined as appropriate metadata in
     image for the bay/cluster driver.
+cluster_id:
+  type: UUID
+  in: body
+  required: true
+  description: |
+    The UUID of the cluster.
+cluster_list:
+  type: array
+  in: body
+  required: true
+  description: |
+    The list of all clusters in Magnum.
 clustertemplate_id:
   type: UUID
   in: body
@@ -80,6 +127,22 @@ coe:
     include ``kubernetes``, ``swarm``, ``mesos``. If your environment has
     additional bay/cluster drivers installed, refer to the bay/cluster driver
     documentation for the new COE names.
+coe_version:
+  type: string
+  in: body
+  required: true
+  description: |
+    Version info of chosen COE in bay/cluster for helping client in picking
+    the right version of client.
+create_timeout:
+  type: integer
+  in: body
+  required: true
+  description: |
+    The timeout for cluster creation in minutes. The value expected is a
+    positive integer and the default is 60 minutes. If the timeout is reached
+    during cluster creation process, the operation will be aborted and the
+    cluster status will be set to ``CREATE_FAILED``.
 created_at:
   description: |
     The date and time when the resource was created.
@@ -118,6 +181,25 @@ disabled_reason:
     The disable reason of the service, ``null`` if the service is enabled or
     disabled without reason provided.
   in: body
+  required: true
+  type: string
+discovery_url:
+  description: |
+    The custom discovery url for node discovery. This is used by the COE to
+    discover the servers that have been created to host the containers. The
+    actual discovery mechanism varies with the COE. In some cases, Magnum fills
+    in the server info in the discovery service. In other cases, if the
+    ``discovery_url`` is not specified, Magnum will use the public discovery
+    service at:
+
+    ::
+
+       https://discovery.etcd.io
+
+    In this case, Magnum will generate a unique url here for each bay and
+    store the info for the servers.
+  in: body
+  format: uri
   required: true
   type: string
 dns_nameserver:
@@ -260,6 +342,21 @@ links:
   in: body
   required: true
   type: array
+master_addresses:
+  description: |
+    List of floating IP of all master nodes.
+  in: body
+  required: true
+  type: array
+master_count:
+  description: |
+    The number of servers that will serve as master for the bay/cluster. The
+    default is 1. Set to more than 1 master to enable High Availability. If
+    the option ``master-lb-enabled`` is specified in the baymodel/cluster
+    template, the master servers will be placed in a load balancer pool.
+  in: body
+  required: true
+  type: integer
 master_flavor_id:
   description: |
     The flavor of the master node for this baymodel/cluster template.
@@ -307,6 +404,19 @@ no_proxy:
   in: body
   required: false
   type: string
+node_addresses:
+  description: |
+    List of floating IP of all servers that serve as node.
+  in: body
+  required: true
+  type: array
+node_count:
+  description: |
+    The number of servers that will serve as node in the bay/cluster. The
+    default is 1.
+  in: body
+  required: true
+  type: integer
 op:
   description: |
     The operation used to modify resource's attributes. Supported operations
@@ -360,9 +470,27 @@ server_type:
   in: body
   required: true
   type: string
+stack_id:
+  description: |
+    The reference UUID of orchestration stack from Heat orchestration service.
+  in: body
+  required: true
+  type: UUID
 state:
   description: |
     The current state of Magnum services.
+  in: body
+  required: true
+  type: string
+status:
+  description: |
+    The current state of the bay/cluster.
+  in: body
+  required: true
+  type: string
+status_reason:
+  description: |
+    The reason of bay/cluster current status.
   in: body
   required: true
   type: string

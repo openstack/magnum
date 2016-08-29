@@ -1,0 +1,8 @@
+{
+   "name":"k8s",
+   "discovery_url":null,
+   "master_count":2,
+   "baymodel_id":"0562d357-8641-4759-8fed-8173f02c9633",
+   "node_count":2,
+   "bay_create_timeout":60
+}

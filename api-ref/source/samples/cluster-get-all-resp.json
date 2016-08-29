@@ -1,0 +1,24 @@
+{
+   "clusters":[
+      {
+         "status":"CREATE_IN_PROGRESS",
+         "cluster_template_id":"0562d357-8641-4759-8fed-8173f02c9633",
+         "uuid":"731387cf-a92b-4c36-981e-3271d63e5597",
+         "links":[
+            {
+               "href":"http://10.164.180.104:9511/v1/bays/731387cf-a92b-4c36-981e-3271d63e5597",
+               "rel":"self"
+            },
+            {
+               "href":"http://10.164.180.104:9511/bays/731387cf-a92b-4c36-981e-3271d63e5597",
+               "rel":"bookmark"
+            }
+         ],
+         "stack_id":"31c1ee6c-081e-4f39-9f0f-f1d87a7defa1",
+         "master_count":1,
+         "create_timeout":60,
+         "node_count":1,
+         "name":"k8s"
+      }
+   ]
+}
