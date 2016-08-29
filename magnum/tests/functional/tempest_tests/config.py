@@ -30,7 +30,7 @@ magnum_group = cfg.OptGroup(name="magnum", title="Magnum Options")
 MagnumGroup = [
     cfg.StrOpt("image_id",
                default="fedora-atomic-latest",
-               help="Image id to be used for baymodel."),
+               help="Image id to be used for ClusterTemplate."),
 
     cfg.StrOpt("nic_id",
                default="public",
@@ -42,7 +42,7 @@ MagnumGroup = [
 
     cfg.StrOpt("flavor_id",
                default="s1.magnum",
-               help="Flavor id to use for baymodels."),
+               help="Flavor id to use for ClusterTemplate."),
 
     cfg.StrOpt("magnum_url",
                default=None,
@@ -50,7 +50,7 @@ MagnumGroup = [
 
     cfg.StrOpt("master_flavor_id",
                default="m1.magnum",
-               help="Master flavor id to use for baymodels."),
+               help="Master flavor id to use for ClusterTemplate."),
 
     cfg.StrOpt("csr_location",
                default="/opt/stack/new/magnum/default.csr",
@@ -60,7 +60,7 @@ MagnumGroup = [
 
     cfg.StrOpt("dns_nameserver",
                default="8.8.8.8",
-               help="DNS nameserver to use for baymodels."),
+               help="DNS nameserver to use for ClusterTemplate."),
 
     cfg.StrOpt("copy_logs",
                default=True,

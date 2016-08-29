@@ -156,7 +156,7 @@ class ClusterTest(base.BaseTempestTest):
             cluster_model.uuid)
         self.LOG.debug("cert resp: %s" % resp)
         self.assertEqual(200, resp.status)
-        self.assertEqual(cert_model.bay_uuid, cluster_model.uuid)
+        self.assertEqual(cert_model.cluster_uuid, cluster_model.uuid)
         self.assertIsNotNone(cert_model.pem)
         self.assertIn('-----BEGIN CERTIFICATE-----', cert_model.pem)
         self.assertIn('-----END CERTIFICATE-----', cert_model.pem)

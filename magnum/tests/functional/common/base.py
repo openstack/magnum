@@ -36,7 +36,7 @@ class BaseMagnumTest(base.BaseTestCase):
     def copy_logs_handler(cls, get_nodes_fn, coe, keypair):
         """Copy logs closure.
 
-        This method will retrieve all running nodes for a specified bay
+        This method will retrieve all running nodes for a specified cluster
         and copy addresses from there locally.
 
         :param get_nodes_fn: function that takes no parameters and returns
@@ -49,7 +49,7 @@ class BaseMagnumTest(base.BaseTestCase):
                 cls.LOG.info(_LI("Copying logs..."))
                 fn = exec_info[2].tb_frame.f_locals['fn']
                 func_name = fn.im_self._get_test_method().__name__
-                msg = (_LE("Failed to copy logs for bay"))
+                msg = (_LE("Failed to copy logs for cluster"))
                 nodes_addresses = get_nodes_fn()
 
                 master_nodes = nodes_addresses[0]
@@ -79,12 +79,13 @@ class BaseMagnumTest(base.BaseTestCase):
                             ])
                         except Exception:
                             cls.LOG.error(msg)
-                            msg = (_LE("failed to copy from %(node_address)s "
-                                       "to %(base_path)s%(log_name)s-"
-                                       "%(node_address)s") %
-                                   {'node_address': node_address,
-                                    'base_path': "/opt/stack/logs/bay-nodes/",
-                                    'log_name': log_name})
+                            msg = (
+                                _LE("failed to copy from %(node_address)s "
+                                    "to %(base_path)s%(log_name)s-"
+                                    "%(node_address)s") %
+                                {'node_address': node_address,
+                                 'base_path': "/opt/stack/logs/cluster-nodes/",
+                                 'log_name': log_name})
                             cls.LOG.exception(msg)
 
                 do_copy_logs('master', master_nodes)

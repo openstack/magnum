@@ -15,8 +15,8 @@ from magnum.tests.functional.python_client_base import BaseMagnumClient
 
 
 class TestListResources(BaseMagnumClient):
-    def test_bay_model_list(self):
-        self.assertIsNotNone(self.cs.baymodels.list())
+    def test_cluster_model_list(self):
+        self.assertIsNotNone(self.cs.cluster_templates.list())
 
-    def test_bay_list(self):
-        self.assertIsNotNone(self.cs.bays.list())
+    def test_cluster_list(self):
+        self.assertIsNotNone(self.cs.clusters.list())

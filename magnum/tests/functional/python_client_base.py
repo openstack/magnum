@@ -110,12 +110,13 @@ class BaseMagnumClient(base.BaseMagnumTest):
         cls.heat = heatclient.Client('1', token=token, endpoint=heat_endpoint)
 
     @classmethod
-    def _wait_on_status(cls, bay, wait_status, finish_status, timeout=6000):
+    def _wait_on_status(cls, cluster, wait_status, finish_status,
+                        timeout=6000):
         # Check status every 60 seconds for a total of 100 minutes
 
         def _check_status():
-            status = cls.cs.bays.get(bay.uuid).status
-            cls.LOG.debug("Bay status is %s" % status)
+            status = cls.cs.clusters.get(cluster.uuid).status
+            cls.LOG.debug("Cluster status is %s" % status)
             if status in wait_status:
                 return False
             elif status in finish_status:
@@ -123,16 +124,17 @@ class BaseMagnumClient(base.BaseMagnumTest):
             else:
                 raise Exception("Unexpected Status: %s" % status)
 
-        # sleep 1s to wait bay status changes, this will be useful for
+        # sleep 1s to wait cluster status changes, this will be useful for
         # the first time we wait for the status, to avoid another 59s
         time.sleep(1)
         utils.wait_for_condition(_check_status, interval=60, timeout=timeout)
 
     @classmethod
-    def _create_baymodel(cls, name, **kwargs):
+    def _create_cluster_template(cls, name, **kwargs):
         # TODO(eliqiao): We don't want these to be have default values,
         #                just leave them here to make things work.
-        #                Plan is to support other kinds of baymodel creation.
+        #                Plan is to support other kinds of ClusterTemplate
+        #                creation.
         coe = kwargs.pop('coe', 'kubernetes')
         docker_volume_size = kwargs.pop('docker_volume_size', 3)
         network_driver = kwargs.pop('network_driver', 'flannel')
@@ -142,7 +144,7 @@ class BaseMagnumClient(base.BaseMagnumTest):
         fixed_subnet = kwargs.pop('fixed_subnet', None)
         server_type = kwargs.pop('server_type', 'vm')
 
-        baymodel = cls.cs.baymodels.create(
+        cluster_template = cls.cs.cluster_templates.create(
             name=name,
             keypair_id=cls.keypair_id,
             external_network_id=cls.nic_id,
@@ -159,33 +161,33 @@ class BaseMagnumClient(base.BaseMagnumTest):
             fixed_subnet=fixed_subnet,
             server_type=server_type,
             **kwargs)
-        return baymodel
+        return cluster_template
 
     @classmethod
-    def _create_bay(cls, name, baymodel_uuid):
-        bay = cls.cs.bays.create(
+    def _create_cluster(cls, name, cluster_template_uuid):
+        cluster = cls.cs.clusters.create(
             name=name,
-            baymodel_id=baymodel_uuid
+            cluster_template_id=cluster_template_uuid
         )
 
-        return bay
+        return cluster
 
     @classmethod
-    def _show_bay(cls, name):
-        bay = cls.cs.bays.get(name)
-        return bay
+    def _show_cluster(cls, name):
+        cluster = cls.cs.clusters.get(name)
+        return cluster
 
     @classmethod
-    def _delete_baymodel(cls, baymodel_uuid):
-        cls.cs.baymodels.delete(baymodel_uuid)
+    def _delete_cluster_template(cls, cluster_template_uuid):
+        cls.cs.cluster_templates.delete(cluster_template_uuid)
 
     @classmethod
-    def _delete_bay(cls, bay_uuid):
-        cls.cs.bays.delete(bay_uuid)
+    def _delete_cluster(cls, cluster_uuid):
+        cls.cs.clusters.delete(cluster_uuid)
 
         try:
             cls._wait_on_status(
-                cls.bay,
+                cls.cluster,
                 ["CREATE_COMPLETE", "DELETE_IN_PROGRESS", "CREATE_FAILED"],
                 ["DELETE_FAILED", "DELETE_COMPLETE"],
                 timeout=600
@@ -193,32 +195,32 @@ class BaseMagnumClient(base.BaseMagnumTest):
         except exceptions.NotFound:
             pass
         else:
-            if cls._show_bay(cls.bay.uuid).status == 'DELETE_FAILED':
-                raise Exception("bay %s delete failed" % cls.bay.uuid)
+            if cls._show_cluster(cls.clustser.uuid).status == 'DELETE_FAILED':
+                raise Exception("Cluster %s delete failed" % cls.cluster.uuid)
 
     @classmethod
     def get_copy_logs(cls):
         return cls.copy_logs
 
-    def _wait_for_bay_complete(self, bay):
+    def _wait_for_cluster_complete(self, cluster):
         self._wait_on_status(
-            bay,
+            cluster,
             [None, "CREATE_IN_PROGRESS"],
             ["CREATE_FAILED", "CREATE_COMPLETE"],
-            timeout=self.bay_complete_timeout
+            timeout=self.cluster_complete_timeout
         )
 
-        if self.cs.bays.get(bay.uuid).status == 'CREATE_FAILED':
-            raise Exception("bay %s created failed" % bay.uuid)
+        if self.cs.clusters.get(cluster.uuid).status == 'CREATE_FAILED':
+            raise Exception("Cluster %s created failed" % cluster.uuid)
 
-        return bay
+        return cluster
 
 
-class BayTest(BaseMagnumClient):
+class ClusterTest(BaseMagnumClient):
 
     # NOTE (eliqiao) coe should be specified in subclasses
     coe = None
-    baymodel_kwargs = {}
+    cluster_template_kwargs = {}
     config_contents = """[req]
 distinguished_name = req_distinguished_name
 req_extensions     = req_ext
@@ -230,35 +232,36 @@ extendedKeyUsage = clientAuth
 """
 
     ca_dir = None
-    bay = None
-    baymodel = None
+    cluster = None
+    cluster_template = None
     key_file = None
     cert_file = None
     ca_file = None
 
-    bay_complete_timeout = 1800
+    cluster_complete_timeout = 1800
 
     @classmethod
     def setUpClass(cls):
-        super(BayTest, cls).setUpClass()
-        cls.baymodel = cls._create_baymodel(
-            cls.__name__, coe=cls.coe, **cls.baymodel_kwargs)
-        cls.bay = cls._create_bay(cls.__name__, cls.baymodel.uuid)
-        if not cls.baymodel_kwargs.get('tls_disabled', False):
+        super(ClusterTest, cls).setUpClass()
+        cls.cluster_template = cls._create_cluster_template(
+            cls.__name__, coe=cls.coe, **cls.cluster_template_kwargs)
+        cls.cluster = cls._create_cluster(cls.__name__,
+                                          cls.cluster_template.uuid)
+        if not cls.cluster_template_kwargs.get('tls_disabled', False):
             cls._create_tls_ca_files(cls.config_contents)
 
     @classmethod
     def tearDownClass(cls):
         if cls.ca_dir:
             rmtree_without_raise(cls.ca_dir)
-        if cls.bay:
-            cls._delete_bay(cls.bay.uuid)
-        if cls.baymodel:
-            cls._delete_baymodel(cls.baymodel.uuid)
-        super(BayTest, cls).tearDownClass()
+        if cls.cluster:
+            cls._delete_cluster(cls.cluster.uuid)
+        if cls.cluster_template:
+            cls._delete_cluster_template(cls.cluster_template.uuid)
+        super(ClusterTest, cls).tearDownClass()
 
     def setUp(self):
-        super(BayTest, self).setUp()
+        super(ClusterTest, self).setUp()
 
         test_timeout = os.environ.get('OS_TEST_TIMEOUT', 60)
         try:
@@ -275,37 +278,38 @@ extendedKeyUsage = clientAuth
             self.addOnException(
                 self.copy_logs_handler(
                     self._get_nodes,
-                    self.baymodel.coe,
+                    self.cluster_template.coe,
                     'default'))
-        self._wait_for_bay_complete(self.bay)
+        self._wait_for_cluster_complete(self.cluster)
 
     def _get_nodes(self):
-        nodes = self._get_nodes_from_bay()
+        nodes = self._get_nodes_from_cluster()
         if not [x for x in nodes if x]:
-            self.LOG.info(_LI("the list of nodes from bay is empty"))
+            self.LOG.info(_LI("the list of nodes from cluster is empty"))
             nodes = self._get_nodes_from_stack()
             if not [x for x in nodes if x]:
                 self.LOG.info(_LI("the list of nodes from stack is empty"))
         self.LOG.info(_LI("Nodes are: %s") % nodes)
         return nodes
 
-    def _get_nodes_from_bay(self):
+    def _get_nodes_from_cluster(self):
         nodes = []
-        nodes.append(self.cs.bays.get(self.bay.uuid).master_addresses)
-        nodes.append(self.cs.bays.get(self.bay.uuid).node_addresses)
+        nodes.append(self.cs.clusters.get(self.cluster.uuid).master_addresses)
+        nodes.append(self.cs.clusters.get(self.cluster.uuid).node_addresses)
         return nodes
 
     def _get_nodes_from_stack(self):
         nodes = []
-        stack = self.heat.stacks.get(self.bay.stack_id)
+        stack = self.heat.stacks.get(self.cluster.stack_id)
         stack_outputs = stack.to_dict().get('outputs', [])
         output_keys = []
-        if self.baymodel.coe == "kubernetes":
+        if self.cluster_template.coe == "kubernetes":
             output_keys = ["kube_masters", "kube_minions"]
-        elif self.baymodel.coe == "swarm":
+        elif self.cluster_template.coe == "swarm":
             output_keys = ["swarm_masters", "swarm_nodes"]
-        elif self.baymodel.coe == "mesos":
+        elif self.cluster_template.coe == "mesos":
             output_keys = ["mesos_master", "mesos_slaves"]
+
         for output in stack_outputs:
             for key in output_keys:
                 if output['output_key'] == key:
@@ -345,26 +349,27 @@ extendedKeyUsage = clientAuth
         with open(cls.csr_file, 'r') as f:
             csr_content = f.read()
 
-        # magnum ca-sign --bay secure-k8sbay --csr client.csr > client.crt
-        resp = cls.cs.certificates.create(bay_uuid=cls.bay.uuid,
+        # magnum ca-sign --cluster secure-k8scluster --csr client.csr \
+        # > client.crt
+        resp = cls.cs.certificates.create(cluster_uuid=cls.cluster.uuid,
                                           csr=csr_content)
 
         with open(cls.cert_file, 'w') as f:
             f.write(resp.pem)
 
-        # magnum ca-show --bay secure-k8sbay > ca.crt
-        resp = cls.cs.certificates.get(cls.bay.uuid)
+        # magnum ca-show --cluster secure-k8scluster > ca.crt
+        resp = cls.cs.certificates.get(cls.cluster.uuid)
         with open(cls.ca_file, 'w') as f:
             f.write(resp.pem)
 
 
-class BaseK8sTest(BayTest):
+class BaseK8sTest(ClusterTest):
     coe = 'kubernetes'
 
     @classmethod
     def setUpClass(cls):
         super(BaseK8sTest, cls).setUpClass()
-        cls.kube_api_url = cls.cs.bays.get(cls.bay.uuid).api_address
+        cls.kube_api_url = cls.cs.clusters.get(cls.cluster.uuid).api_address
         k8s_client = api_client.ApiClient(cls.kube_api_url,
                                           key_file=cls.key_file,
                                           cert_file=cls.cert_file,
@@ -373,7 +378,7 @@ class BaseK8sTest(BayTest):
 
     def setUp(self):
         super(BaseK8sTest, self).setUp()
-        self.kube_api_url = self.cs.bays.get(self.bay.uuid).api_address
+        self.kube_api_url = self.cs.clusters.get(self.cluster.uuid).api_address
         k8s_client = api_client.ApiClient(self.kube_api_url,
                                           key_file=self.key_file,
                                           cert_file=self.cert_file,

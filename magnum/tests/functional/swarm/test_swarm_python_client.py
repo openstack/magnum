@@ -18,7 +18,7 @@ from requests import exceptions as req_exceptions
 
 from magnum.common import docker_utils
 from magnum.i18n import _LI
-from magnum.tests.functional.python_client_base import BayTest
+from magnum.tests.functional.python_client_base import ClusterTest
 
 
 CONF = cfg.CONF
@@ -28,14 +28,14 @@ CONF.import_opt('default_timeout', 'magnum.common.docker_utils',
                 group='docker')
 
 
-class TestSwarmAPIs(BayTest):
-    """This class will cover swarm bay basic functional testing.
+class TestSwarmAPIs(ClusterTest):
+    """This class will cover swarm cluster basic functional testing.
 
        Will test all kinds of container action with tls_disabled=False mode.
     """
 
     coe = "swarm"
-    baymodel_kwargs = {
+    cluster_template_kwargs = {
         "tls_disabled": False,
         "network_driver": None,
         "volume_driver": None,
@@ -46,31 +46,31 @@ class TestSwarmAPIs(BayTest):
     @classmethod
     def setUpClass(cls):
         super(TestSwarmAPIs, cls).setUpClass()
-        cls.bay_is_ready = None
+        cls.cluster_is_ready = None
 
     def setUp(self):
         super(TestSwarmAPIs, self).setUp()
-        if self.bay_is_ready is True:
+        if self.cluster_is_ready is True:
             return
         # Note(eliqiao): In our test cases, docker client or magnum client will
         # try to connect to swarm service which is running on master node,
-        # the endpoint is bay.api_address(listen port is included), but the
-        # service is not ready right after the bay was created, sleep for an
-        # acceptable time to wait for service being started.
+        # the endpoint is cluster.api_address(listen port is included), but the
+        # service is not ready right after the cluster was created, sleep for
+        # an acceptable time to wait for service being started.
         # This is required, without this any api call will fail as
         # 'ConnectionError: [Errno 111] Connection refused'.
         msg = ("If you see this error in the functional test, it means "
                "the docker service took too long to come up. This may not "
                "be an actual error, so an option is to rerun the "
                "functional test.")
-        if self.bay_is_ready is False:
+        if self.cluster_is_ready is False:
             # In such case, no need to test below cases on gate, raise a
             # meanful exception message to indicate ca setup failed after
-            # bay creation, better to do a `recheck`
-            # We don't need to test since bay is not ready.
+            # cluster creation, better to do a `recheck`
+            # We don't need to test since cluster is not ready.
             raise Exception(msg)
 
-        url = self.cs.bays.get(self.bay.uuid).api_address
+        url = self.cs.clusters.get(self.cluster.uuid).api_address
 
         # Note(eliqiao): docker_utils.CONF.docker.default_timeout is 10,
         # tested this default configure option not works on gate, it will
@@ -93,9 +93,9 @@ class TestSwarmAPIs(BayTest):
             docker_api_time_out)
 
     def _container_operation(self, func, *args, **kwargs):
-        # NOTE(hongbin): Swarm bay occasionally aborts the connection, so we
-        # re-try the operation several times here. In long-term, we need to
-        # investigate the cause of this issue. See bug #1583337.
+        # NOTE(hongbin): Swarm cluster occasionally aborts the connection,
+        # so we re-try the operation several times here. In long-term, we
+        # need to investigate the cause of this issue. See bug #1583337.
         for i in range(150):
             try:
                 self.LOG.info(_LI("Calling function ") + func.__name__)
@@ -118,8 +118,8 @@ class TestSwarmAPIs(BayTest):
                                          image=image, command=command)
 
     def test_start_stop_container_from_api(self):
-        # Leverage docker client to create a container on the bay we created,
-        # and try to start and stop it then delete it.
+        # Leverage docker client to create a container on the cluster we
+        # created, and try to start and stop it then delete it.
 
         resp = self._create_container(image="docker.io/cirros",
                                       command="ping -c 1000 8.8.8.8")

@@ -390,7 +390,7 @@ def cluster_template_remove_patch_data(path):
     """Generates ClusterTempalte patch data by removing value
 
     :param path: path to remove
-    :returns: BayModelPatchCollection with generated data
+    :returns: ClusterTemplatePatchCollection with generated data
     """
 
     data = [{
