@@ -1,3 +1,4 @@
+# Header params
 request_id:
   type: UUID
   in: header
@@ -5,18 +6,80 @@ request_id:
   description: |
     A unique ID for tracking service request. The request ID associated
     with the request by default appears in the service logs.
+
+# Path params
+baymodel_ident:
+  description: |
+    The UUID or name of baymodels in Magnum.
+  in: path
+  required: true
+  type: string
+clustertemplate_ident:
+  type: string
+  in: path
+  required: true
+  description: |
+    The UUID or name of cluster templates in Magnum.
+
+# Body params
+apiserver_port:
+  type: integer
+  in: body
+  required: true
+  description: |
+    The exposed port of COE API server.
 bay_cluster_id:
   type: UUID
   in: body
   required: true
   description: |
     The UUID of the bay/cluster.
+baymodel_id:
+  type: UUID
+  in: body
+  required: true
+  description: |
+    The UUID of the baymodel.
+baymodel_list:
+  type: array
+  in: body
+  required: true
+  description: |
+    The list of all baymodels in Magnum.
 binary:
   type: string
   in: body
   required: true
   description: |
     The name of the binary form of the Magnum service.
+cluster_distro:
+  type: string
+  in: body
+  required: true
+  description: |
+    Display the attribute ``os-distro`` defined as appropriate metadata in
+    image for the bay/cluster driver.
+clustertemplate_id:
+  type: UUID
+  in: body
+  required: true
+  description: |
+    The UUID of the cluster template.
+clustertemplate_list:
+  type: array
+  in: body
+  required: true
+  description: |
+    The list of all cluster templates in Magnum.
+coe:
+  type: string
+  in: body
+  required: true
+  description: |
+    Specify the Container Orchestration Engine to use. Supported COEs
+    include ``kubernetes``, ``swarm``, ``mesos``. If your environment has
+    additional bay/cluster drivers installed, refer to the bay/cluster driver
+    documentation for the new COE names.
 created_at:
   description: |
     The date and time when the resource was created.
@@ -57,11 +120,101 @@ disabled_reason:
   in: body
   required: true
   type: string
+dns_nameserver:
+  description: |
+    The DNS nameserver for the servers and containers in the bay/cluster to
+    use. This is configured in the private Neutron network for the bay/cluster.
+    The default is ``8.8.8.8``.
+  in: body
+  required: true
+  type: string
+docker_storage_driver:
+  description: |
+    The name of a driver to manage the storage for the images and the
+    container's writable layer. The supported drivers are ``devicemapper`` and
+    ``overlay``. The default is ``devicemapper``.
+  in: body
+  required: true
+  type: string
+docker_volume_size:
+  description: |
+    The size in GB for the local storage on each server for the Docker daemon
+    to cache the images and host the containers. Cinder volumes provide the
+    storage. The default is 25 GB. For the ``devicemapper`` storage driver,
+    the minimum value is 3GB. For the ``overlay`` storage driver, the minimum
+    value is 1GB.
+  in: body
+  required: true
+  type: integer
+external_network_id:
+  description: |
+    The name or network ID of a Neutron network to provide connectivity to the
+    external internet for the bay/cluster. This network must be an external
+    network, i.e. its attribute ``router:external`` must be ``True``. The
+    servers in the bay/cluster will be connected to a private network and
+    Magnum will create a router between this private network and the external
+    network. This will allow the servers to download images, access discovery
+    service, etc, and the containers to install packages, etc. In the opposite
+    direction, floating IPs will be allocated from the external network to
+    provide access from the external internet to servers and the container
+    services hosted in the bay/cluster.
+  in: body
+  required: true
+  type: string
+fixed_network:
+  description: |
+    The name or network ID of a Neutron network to provide connectivity to
+    the internal network for the bay/cluster.
+  in: body
+  required: false
+  type: string
+fixed_subnet:
+  description: |
+    Fixed subnet that are using to allocate network address for nodes in
+    bay/cluster.
+  in: body
+  required: false
+  type: string
+flavor_id:
+  description: |
+    The nova flavor ID or name for booting the node servers. The default is
+    ``m1.small``.
+  in: body
+  required: true
+  type: string
+floating_ip_enabled:
+  description: |
+    Whether enable or not using the floating IP of cloud provider. Some
+    cloud providers used floating IP, some used public IP, thus Magnum
+    provide this option for specifying the choice of using floating IP.
+  in: body
+  required: true
+  type: boolean
 host:
   description: |
     The host for the service.
   in: body
   required: true
+  type: string
+http_proxy:
+  description: |
+    The IP address for a proxy to use when direct http access from the servers
+    to sites on the external internet is blocked. This may happen in certain
+    countries or enterprises, and the proxy allows the servers and
+    containers to access these sites. The format is a URL including a port
+    number. The default is ``None``.
+  in: body
+  required: false
+  type: string
+https_proxy:
+  description: |
+    The IP address for a proxy to use when direct https access from the
+    servers to sites on the external internet is blocked. This may happen in
+    certain countries or enterprises, and the proxy allows the servers and
+    containers to access these sites. The format is a URL including a port
+    number. The default is ``None``.
+  in: body
+  required: false
   type: string
 id_s:
   description: |
@@ -69,12 +222,62 @@ id_s:
   in: body
   required: true
   type: string
+image_id:
+  description: |
+    The name or UUID of the base image in Glance to boot the servers for the
+    bay/cluster. The image must have the attribute ``os-distro`` defined as
+    appropriate for the bay/cluster driver.
+  in: body
+  required: true
+  type: string
+insecure_registry:
+  description: |
+    The URL pointing to users's own private insecure docker registry to
+    deploy and run docker containers.
+  in: body
+  required: true
+  type: string
+keypair_id:
+  description: |
+    The name or UUID of the SSH keypair to configure in the bay/cluster servers
+    for ssh access. Users will need the key to be able to ssh to the servers in
+    the bay/cluster. The login name is specific to the bay/cluster driver, for
+    example with fedora-atomic image, default login name is ``fedora``.
+  in: body
+  required: true
+  type: string
+labels:
+  description: |
+    Arbitrary labels in the form of ``key=value`` pairs. The accepted keys and
+    valid values are defined in the bay/cluster drivers. They are used as a way
+    to pass additional parameters that are specific to a bay/cluster driver.
+  in: body
+  required: false
+  type: array
 links:
   description: |
     Links to the resources in question.
   in: body
   required: true
   type: array
+master_flavor_id:
+  description: |
+    The flavor of the master node for this baymodel/cluster template.
+  in: body
+  required: false
+  type: string
+master_lb_enabled:
+  description: |
+    Since multiple masters may exist in a bay/cluster, a Neutron load balancer
+    is created to provide the API endpoint for the bay/cluster and to direct
+    requests to the masters. In some cases, such as when the LBaaS service is
+    not available, this option can be set to ``false`` to create a bay/cluster
+    without the load balancer. In this case, one of the masters will serve as
+    the API endpoint. The default is ``true``, i.e. to create the load
+    balancer for the bay.
+  in: body
+  required: true
+  type: boolean
 mservices:
   description: |
     A list of Magnum services.
@@ -83,7 +286,38 @@ mservices:
   type: array
 name:
   description: |
-    Name of the Container Infrastructure Management API.
+    Name of the resource.
+  in: body
+  required: true
+  type: string
+network_driver:
+  description: |
+    The name of a network driver for providing the networks for the containers.
+    Note that this is different and separate from the Neutron network for the
+    bay/cluster. The operation and networking model are specific to the
+    particular driver.
+  in: body
+  required: true
+  type: string
+no_proxy:
+  description: |
+    When a proxy server is used, some sites should not go through the proxy
+    and should be accessed normally. In this case, users can specify these
+    sites as a comma separated list of IPs. The default is ``None``.
+  in: body
+  required: false
+  type: string
+op:
+  description: |
+    The operation used to modify resource's attributes. Supported operations
+    are following: ``add``, ``replace`` and ``remove``. In case of
+    ``remove``, users only need to provide ``path`` for deleting attribute.
+  in: body
+  required: true
+  type: string
+path:
+  description: |
+    Resource attribute's name.
   in: body
   required: true
   type: string
@@ -93,18 +327,55 @@ pem:
   in: body
   required: true
   type: string
+public_type:
+  description: |
+    Access to a baymodel/cluster template is normally limited to the admin,
+    owner or users within the same tenant as the owners. Setting this flag
+    makes the baymodel/cluster template public and accessible by other users.
+    The default is not public.
+  in: body
+  required: true
+  type: boolean
+registry_enabled:
+  description: |
+    Docker images by default are pulled from the public Docker registry,
+    but in some cases, users may want to use a private registry. This option
+    provides an alternative registry based on the Registry V2: Magnum will
+    create a local registry in the bay/cluster backed by swift to host the
+    images. The default is to use the public registry.
+  in: body
+  required: false
+  type: boolean
 report_count:
   description: |
     The total number of report.
   in: body
   required: true
   type: integer
+server_type:
+  description: |
+    The servers in the bay/cluster can be ``vm`` or ``baremetal``. This
+    parameter selects the type of server to create for the bay/cluster.
+    The default is ``vm``.
+  in: body
+  required: true
+  type: string
 state:
   description: |
     The current state of Magnum services.
   in: body
   required: true
   type: string
+tls_disabled:
+  description: |
+    Transport Layer Security (TLS) is normally enabled to secure the
+    bay/cluster. In some cases, users may want to disable TLS in the
+    bay/cluster, for instance during development or to troubleshoot certain
+    problems. Specifying this parameter will disable TLS so that users can
+    access the COE endpoints without a certificate. The default is TLS enabled.
+  in: body
+  required: true
+  type: boolean
 updated_at:
   description: |
     The date and time when the resource was updated.
@@ -123,6 +394,12 @@ updated_at:
 
     If the ``updated_at`` date and time stamp is not set, its value is
     ``null``.
+  in: body
+  required: true
+  type: string
+value:
+  description: |
+    Resource attribute's value.
   in: body
   required: true
   type: string
@@ -165,4 +442,10 @@ version_status:
     - ``CURRENT``: this is the preferred version of the API to use
     - ``SUPPORTED``: this is an older, but still supported version of the API
     - ``DEPRECATED``: a deprecated version of the API that is slated for removal
-
+volume_driver:
+  type: string
+  in: body
+  required: true
+  description: >
+    The name of a volume driver for managing the persistent storage for
+    the containers. The functionality supported are specific to the driver.

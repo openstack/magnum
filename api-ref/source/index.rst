@@ -9,6 +9,7 @@
 .. include:: versions.inc
 .. include:: urls.inc
 .. include:: bays_clusters.inc
-.. include:: baymodels_clustertemplates.inc
+.. include:: baymodels.inc
+.. include:: clustertemplates.inc
 .. include:: certificates.inc
 .. include:: mservices.inc
