@@ -1,0 +1,5 @@
+---
+features:
+  - Auto generate name for cluster and cluster-template. If users create
+    a cluster/cluster-template without specifying a name, the name will be
+    auto-generated.

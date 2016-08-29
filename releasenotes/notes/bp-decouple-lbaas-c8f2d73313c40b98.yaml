@@ -1,0 +1,6 @@
+---
+features:
+  - Decouple the hard requirement on neutron-lbaas. Introduce a new property
+    master_lb_enabled in cluster template. This property will determines if
+    a cluster's master nodes should be load balanced. Set the value to false
+    if neutron-lbaas is not installed.
