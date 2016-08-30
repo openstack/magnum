@@ -83,9 +83,9 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
 
     def get_env_files(self, baymodel):
         if baymodel.master_lb_enabled:
-            return ['../../common/templates/environments/with_master_lb.yaml']
+            return [template_def.COMMON_ENV_PATH + 'with_master_lb.yaml']
         else:
-            return ['../../common/templates/environments/no_master_lb.yaml']
+            return [template_def.COMMON_ENV_PATH + 'no_master_lb.yaml']
 
     @property
     def template_path(self):
