@@ -12,9 +12,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import abc
 import mock
 from neutronclient.common import exceptions as n_exception
 from oslo_config import cfg
+import six
 
 from magnum.common import exception
 from magnum.drivers.common import template_def as cmn_tdef
@@ -176,7 +178,56 @@ class TemplateDefinitionTestCase(base.TestCase):
                       definition.output_mappings)
 
 
-class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
+@six.add_metaclass(abc.ABCMeta)
+class BaseTemplateDefinitionTestCase(base.TestCase):
+
+    @abc.abstractmethod
+    def get_definition(self):
+        """Returns the template definition."""
+        pass
+
+    def _test_update_outputs_server_addrtess(
+        self,
+        floating_ip_enabled=True,
+        public_ip_output_key='kube_masters',
+        private_ip_output_key='kube_masters_private',
+        bay_attr='master_addresses',
+    ):
+
+        definition = self.get_definition()
+
+        expected_address = expected_public_address = ['public']
+        expected_private_address = ['private']
+        if not floating_ip_enabled:
+            expected_address = expected_private_address
+
+        outputs = [
+            {"output_value": expected_public_address,
+             "description": "No description given",
+             "output_key": public_ip_output_key},
+            {"output_value": expected_private_address,
+             "description": "No description given",
+             "output_key": private_ip_output_key},
+        ]
+        mock_stack = mock.MagicMock()
+        mock_stack.to_dict.return_value = {'outputs': outputs}
+        mock_bay = mock.MagicMock()
+        mock_baymodel = mock.MagicMock()
+        mock_baymodel.floating_ip_enabled = floating_ip_enabled
+
+        definition.update_outputs(mock_stack, mock_baymodel, mock_bay)
+
+        self.assertEqual(expected_address, getattr(mock_bay, bay_attr))
+
+
+class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
+
+    def get_definition(self):
+        return cmn_tdef.TemplateDefinition.get_template_definition(
+            'vm',
+            'fedora-atomic',
+            'kubernetes',
+        )
 
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.drivers.k8s_fedora_atomic_v1.template_def'
@@ -494,6 +545,36 @@ class AtomicK8sTemplateDefinitionTestCase(base.TestCase):
             'port': port,
         }
         self._test_update_outputs_none_api_address('swarm', params)
+
+    def test_update_outputs_master_address(self):
+        self._test_update_outputs_server_addrtess(
+            public_ip_output_key='kube_masters',
+            private_ip_output_key='kube_masters_private',
+            bay_attr='master_addresses',
+        )
+
+    def test_update_outputs_node_address(self):
+        self._test_update_outputs_server_addrtess(
+            public_ip_output_key='kube_minions',
+            private_ip_output_key='kube_minions_private',
+            bay_attr='node_addresses',
+        )
+
+    def test_update_outputs_master_address_fip_disabled(self):
+        self._test_update_outputs_server_addrtess(
+            floating_ip_enabled=False,
+            public_ip_output_key='kube_masters',
+            private_ip_output_key='kube_masters_private',
+            bay_attr='master_addresses',
+        )
+
+    def test_update_outputs_node_address_fip_disabled(self):
+        self._test_update_outputs_server_addrtess(
+            floating_ip_enabled=False,
+            public_ip_output_key='kube_minions',
+            private_ip_output_key='kube_minions_private',
+            bay_attr='node_addresses',
+        )
 
 
 class FedoraK8sIronicTemplateDefinitionTestCase(base.TestCase):

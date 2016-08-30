@@ -414,7 +414,7 @@ resources:
       replacement_policy: AUTO
 
   kube_master_floating:
-    type: OS::Neutron::FloatingIP
+    type: Magnum::Optional::KubeMaster::Neutron::FloatingIP
     properties:
       floating_network: {get_param: external_network}
       port_id: {get_resource: kube_master_eth0}

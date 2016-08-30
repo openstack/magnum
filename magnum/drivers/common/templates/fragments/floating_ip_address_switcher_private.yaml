@@ -1,0 +1,21 @@
+heat_template_version: 2014-10-16
+
+description: >
+  This is a template resource that accepts public and private IPs.
+  It connects private ip address to its outputs, essentially acting as
+  one state of a multiplexer.
+
+parameters:
+
+  public_ip:
+    type: string
+    default: ""
+
+  private_ip:
+    type: string
+    default: ""
+
+outputs:
+
+  ip_address:
+    value: {get_param: private_ip}

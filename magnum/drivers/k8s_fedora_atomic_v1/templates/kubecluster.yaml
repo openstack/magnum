@@ -399,7 +399,7 @@ resources:
   # LBaaS pool depending on whether LBaaS is enabled for the bay.
   #
 
-  api_address_switch:
+  api_address_lb_switch:
     type: Magnum::ApiGatewaySwitcher
     properties:
       pool_public_ip: {get_attr: [api_pool_floating, floating_ip_address]}
@@ -407,11 +407,23 @@ resources:
       master_public_ip: {get_attr: [kube_masters, resource.0.kube_master_external_ip]}
       master_private_ip: {get_attr: [kube_masters, resource.0.kube_master_ip]}
 
-  etcd_address_switch:
+  etcd_address_lb_switch:
     type: Magnum::ApiGatewaySwitcher
     properties:
       pool_private_ip: {get_attr: [etcd_pool, vip, address]}
       master_private_ip: {get_attr: [kube_masters, resource.0.kube_master_ip]}
+
+  ######################################################################
+  #
+  # resources that expose the IPs of either floating ip or a given
+  # fixed ip depending on whether FloatingIP is enabled for the bay.
+  #
+
+  api_address_floating_switch:
+    type: Magnum::FloatingIPAddressSwitcher
+    properties:
+      public_ip: {get_attr: [api_address_lb_switch, public_ip]}
+      private_ip: {get_attr: [api_address_lb_switch, private_ip]}
 
   ######################################################################
   #
@@ -490,8 +502,8 @@ resources:
           fixed_subnet: {get_resource: fixed_subnet}
           network_driver: {get_param: network_driver}
           flannel_network_cidr: {get_param: flannel_network_cidr}
-          kube_master_ip: {get_attr: [api_address_switch, private_ip]}
-          etcd_server_ip: {get_attr: [etcd_address_switch, private_ip]}
+          kube_master_ip: {get_attr: [api_address_lb_switch, private_ip]}
+          etcd_server_ip: {get_attr: [etcd_address_lb_switch, private_ip]}
           external_network: {get_param: external_network}
           kube_allow_priv: {get_param: kube_allow_priv}
           docker_volume_size: {get_param: docker_volume_size}
@@ -533,7 +545,7 @@ outputs:
       str_replace:
         template: api_ip_address
         params:
-          api_ip_address: {get_attr: [api_address_switch, public_ip]}
+          api_ip_address: {get_attr: [api_address_floating_switch, ip_address]}
     description: >
       This is the API endpoint of the Kubernetes cluster. Use this to access
       the Kubernetes API.
