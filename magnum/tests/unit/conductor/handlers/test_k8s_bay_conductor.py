@@ -480,7 +480,7 @@ class TestBayConductorWithK8s(base.TestCase):
 
         cfg.CONF.set_override('etcd_discovery_service_endpoint_format',
                               'http://etcd/test?size=%(size)d',
-                              group='bay')
+                              group='cluster')
         mock_req = mock.MagicMock(text='https://address/token')
         reqget.return_value = mock_req
 
@@ -585,7 +585,7 @@ class TestBayConductorWithK8s(base.TestCase):
         expected_stack_name = 'expected_stack_name-xx-xx-xx-xx'
         expected_template_contents = 'template_contents'
         dummy_bay_name = 'expected_stack_name'
-        expected_timeout = cfg.CONF.bay_heat.bay_create_timeout
+        expected_timeout = cfg.CONF.cluster_heat.create_timeout
 
         mock_tpl_files = {}
         mock_get_template_contents.return_value = [
@@ -626,7 +626,7 @@ class TestBayConductorWithK8s(base.TestCase):
         expected_template_contents = 'template_contents'
         dummy_bay_name = 'expected_stack_name'
         bay_timeout = 0
-        expected_timeout = cfg.CONF.bay_heat.bay_create_timeout
+        expected_timeout = cfg.CONF.cluster_heat.create_timeout
 
         mock_tpl_files = {}
         mock_get_template_contents.return_value = [

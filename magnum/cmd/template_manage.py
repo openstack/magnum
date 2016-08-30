@@ -26,7 +26,7 @@ CONF = cfg.CONF
 
 
 def is_enabled(name):
-    return name in CONF.bay.enabled_definitions
+    return name in CONF.cluster.enabled_definitions
 
 
 class TemplateList(lister.Lister):

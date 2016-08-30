@@ -265,9 +265,9 @@ extendedKeyUsage = clientAuth
             test_timeout = int(test_timeout)
         except ValueError:
             # If timeout value is invalid, set a default timeout.
-            test_timeout = cfg.CONF.bay_heat.bay_create_timeout
+            test_timeout = cfg.CONF.cluster_heat.create_timeout
         if test_timeout <= 0:
-            test_timeout = cfg.CONF.bay_heat.bay_create_timeout
+            test_timeout = cfg.CONF.cluster_heat.create_timeout
 
         self.useFixture(fixtures.Timeout(test_timeout, gentle=True))
 

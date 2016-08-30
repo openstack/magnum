@@ -492,7 +492,7 @@ class TestHeatPoller(base.TestCase):
     @patch('magnum.common.clients.OpenStackClients')
     def setup_poll_test(self, mock_openstack_client, cfg,
                         mock_retrieve_baymodel):
-        cfg.CONF.bay_heat.max_attempts = 10
+        cfg.CONF.cluster_heat.max_attempts = 10
         bay = mock.MagicMock()
         baymodel_dict = utils.get_test_baymodel(coe='kubernetes')
         mock_heat_stack = mock.MagicMock()
@@ -663,14 +663,14 @@ class TestHeatPoller(base.TestCase):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = bay_status.DELETE_IN_PROGRESS
-        poller.attempts = cfg.CONF.bay_heat.max_attempts
+        poller.attempts = cfg.CONF.cluster_heat.max_attempts
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
     def test_poll_create_in_prog_max_att_reached_no_timeout(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = bay_status.CREATE_IN_PROGRESS
-        poller.attempts = cfg.CONF.bay_heat.max_attempts
+        poller.attempts = cfg.CONF.cluster_heat.max_attempts
         mock_heat_stack.timeout_mins = None
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
@@ -678,7 +678,7 @@ class TestHeatPoller(base.TestCase):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = bay_status.CREATE_IN_PROGRESS
-        poller.attempts = cfg.CONF.bay_heat.max_attempts
+        poller.attempts = cfg.CONF.cluster_heat.max_attempts
         mock_heat_stack.timeout_mins = 60
         # since the timeout is set the max attempts gets ignored since
         # the timeout will eventually stop the poller either when
@@ -689,7 +689,7 @@ class TestHeatPoller(base.TestCase):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = bay_status.CREATE_FAILED
-        poller.attempts = cfg.CONF.bay_heat.max_attempts
+        poller.attempts = cfg.CONF.cluster_heat.max_attempts
         mock_heat_stack.timeout_mins = 60
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
