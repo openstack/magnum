@@ -59,7 +59,7 @@ class MagnumService(base.APIBase):
 class MagnumServiceCollection(collection.Collection):
 
     mservices = [MagnumService]
-    """A list containing bays objects"""
+    """A list containing service objects"""
 
     def __init__(self, **kwargs):
         super(MagnumServiceCollection, self).__init__()

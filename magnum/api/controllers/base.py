@@ -142,12 +142,12 @@ class Controller(rest.RestController):
 
         Example:
             @base.Controller.api_version("1.1", "1.2")
-            @expose.expose(Bay, types.uuid_or_name)
+            @expose.expose(Cluster, types.uuid_or_name)
             def get_one(self, bay_ident):
             {...code for versions 1.1 to 1.2...}
 
             @base.Controller.api_version("1.3")
-            @expose.expose(Bay, types.uuid_or_name)
+            @expose.expose(Cluster, types.uuid_or_name)
             def get_one(self, bay_ident):
             {...code for versions 1.3 to latest}
 
