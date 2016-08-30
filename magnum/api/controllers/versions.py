@@ -27,11 +27,19 @@ from magnum.i18n import _
 #
 #             Add details of new api versions here:
 
+#
+# For each newly added microversion change, update the API version history
+# string below with a one or two line description. Also update
+# rest_api_version_history.rst for extra information on microversion.
+REST_API_VERSION_HISTORY = """REST API Version History:
+
+    * 1.1 - Initial version
+    * 1.2 - Async bay operations support
+    * 1.3 - Add bay rollback support
+"""
+
 BASE_VER = '1.1'
 CURRENT_MAX_VER = '1.3'
-# 1.3 Add bay rollback support
-# 1.2 Async bay operations support
-# 1.1 Initial version
 
 
 class Version(object):
