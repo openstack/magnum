@@ -249,6 +249,7 @@ class Handler(object):
             raise
 
         bay.status = bay_status.DELETE_IN_PROGRESS
+        bay.save()
 
         self._poll_and_check(osc, bay)
 
