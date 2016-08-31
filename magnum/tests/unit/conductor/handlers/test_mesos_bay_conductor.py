@@ -40,11 +40,11 @@ class TestBayConductorWithMesos(base.TestCase):
             'server_type': 'vm',
             'volume_driver': 'volume_driver',
             'labels': {'rexray_preempt': 'False',
-                       'mesos_agent_isolation':
+                       'mesos_slave_isolation':
                        'docker/runtime,filesystem/linux',
-                       'mesos_agent_image_providers': 'docker',
-                       'mesos_agent_executor_env_variables': '{}',
-                       'mesos_agent_work_dir': '/tmp/mesos/agent'
+                       'mesos_slave_image_providers': 'docker',
+                       'mesos_slave_executor_env_variables': '{}',
+                       'mesos_slave_work_dir': '/tmp/mesos/slave'
                        },
             'master_lb_enabled': False,
         }
@@ -96,8 +96,8 @@ class TestBayConductorWithMesos(base.TestCase):
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'master_flavor': 'master_flavor_id',
-            'agent_flavor': 'flavor_id',
-            'number_of_agents': 1,
+            'slave_flavor': 'flavor_id',
+            'number_of_slaves': 1,
             'number_of_masters': 1,
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
@@ -115,10 +115,10 @@ class TestBayConductorWithMesos(base.TestCase):
             'tenant_name': 'admin',
             'domain_name': 'domainname',
             'rexray_preempt': 'False',
-            'mesos_agent_executor_env_variables': '{}',
-            'mesos_agent_isolation': 'docker/runtime,filesystem/linux',
-            'mesos_agent_work_dir': '/tmp/mesos/agent',
-            'mesos_agent_image_providers': 'docker'
+            'mesos_slave_executor_env_variables': '{}',
+            'mesos_slave_isolation': 'docker/runtime,filesystem/linux',
+            'mesos_slave_work_dir': '/tmp/mesos/slave',
+            'mesos_slave_image_providers': 'docker'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -147,7 +147,7 @@ class TestBayConductorWithMesos(base.TestCase):
         expected = {
             'ssh_key_name': 'keypair_id',
             'external_network': 'external_network_id',
-            'number_of_agents': 1,
+            'number_of_slaves': 1,
             'number_of_masters': 1,
             'cluster_name': 'bay1',
             'trustee_domain_id': self.mock_keystone.trustee_domain_id,
@@ -161,10 +161,10 @@ class TestBayConductorWithMesos(base.TestCase):
             'tenant_name': 'admin',
             'domain_name': 'domainname',
             'rexray_preempt': 'False',
-            'mesos_agent_isolation': 'docker/runtime,filesystem/linux',
-            'mesos_agent_executor_env_variables': '{}',
-            'mesos_agent_work_dir': '/tmp/mesos/agent',
-            'mesos_agent_image_providers': 'docker'
+            'mesos_slave_isolation': 'docker/runtime,filesystem/linux',
+            'mesos_slave_executor_env_variables': '{}',
+            'mesos_slave_work_dir': '/tmp/mesos/slave',
+            'mesos_slave_image_providers': 'docker'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -191,8 +191,8 @@ class TestBayConductorWithMesos(base.TestCase):
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'master_flavor': 'master_flavor_id',
-            'agent_flavor': 'flavor_id',
-            'number_of_agents': 1,
+            'slave_flavor': 'flavor_id',
+            'number_of_slaves': 1,
             'number_of_masters': 1,
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
@@ -210,10 +210,10 @@ class TestBayConductorWithMesos(base.TestCase):
             'tenant_name': 'admin',
             'domain_name': 'domainname',
             'rexray_preempt': 'False',
-            'mesos_agent_executor_env_variables': '{}',
-            'mesos_agent_isolation': 'docker/runtime,filesystem/linux',
-            'mesos_agent_work_dir': '/tmp/mesos/agent',
-            'mesos_agent_image_providers': 'docker'
+            'mesos_slave_executor_env_variables': '{}',
+            'mesos_slave_isolation': 'docker/runtime,filesystem/linux',
+            'mesos_slave_work_dir': '/tmp/mesos/slave',
+            'mesos_slave_image_providers': 'docker'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -241,8 +241,8 @@ class TestBayConductorWithMesos(base.TestCase):
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'master_flavor': 'master_flavor_id',
-            'agent_flavor': 'flavor_id',
-            'number_of_agents': 1,
+            'slave_flavor': 'flavor_id',
+            'number_of_slaves': 1,
             'number_of_masters': 2,
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
@@ -260,10 +260,10 @@ class TestBayConductorWithMesos(base.TestCase):
             'tenant_name': 'admin',
             'domain_name': 'domainname',
             'rexray_preempt': 'False',
-            'mesos_agent_executor_env_variables': '{}',
-            'mesos_agent_isolation': 'docker/runtime,filesystem/linux',
-            'mesos_agent_work_dir': '/tmp/mesos/agent',
-            'mesos_agent_image_providers': 'docker'
+            'mesos_slave_executor_env_variables': '{}',
+            'mesos_slave_isolation': 'docker/runtime,filesystem/linux',
+            'mesos_slave_work_dir': '/tmp/mesos/slave',
+            'mesos_slave_image_providers': 'docker'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -289,7 +289,7 @@ class TestBayConductorWithMesos(base.TestCase):
     def test_poll_node_count(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
-        mock_heat_stack.parameters = {'number_of_agents': 1}
+        mock_heat_stack.parameters = {'number_of_slaves': 1}
         mock_heat_stack.stack_status = bay_status.CREATE_IN_PROGRESS
         poller.poll_and_check()
 
@@ -298,7 +298,7 @@ class TestBayConductorWithMesos(base.TestCase):
     def test_poll_node_count_by_update(self):
         mock_heat_stack, bay, poller = self.setup_poll_test()
 
-        mock_heat_stack.parameters = {'number_of_agents': 2}
+        mock_heat_stack.parameters = {'number_of_slaves': 2}
         mock_heat_stack.stack_status = bay_status.UPDATE_COMPLETE
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 

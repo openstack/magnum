@@ -41,7 +41,7 @@ class BaseMagnumTest(base.BaseTestCase):
 
         :param get_nodes_fn: function that takes no parameters and returns
             a list of node IPs which are in such form:
-                [[master_nodes], [agent_nodes]].
+                [[master_nodes], [slave_nodes]].
         :param coe: the COE type of the nodes
         """
         def int_copy_logs(exec_info):
@@ -53,7 +53,7 @@ class BaseMagnumTest(base.BaseTestCase):
                 nodes_addresses = get_nodes_fn()
 
                 master_nodes = nodes_addresses[0]
-                agent_nodes = nodes_addresses[1]
+                slave_nodes = nodes_addresses[1]
 
                 base_path = os.path.split(os.path.dirname(
                     os.path.abspath(magnum.__file__)))[0]
@@ -88,7 +88,7 @@ class BaseMagnumTest(base.BaseTestCase):
                             cls.LOG.exception(msg)
 
                 do_copy_logs('master', master_nodes)
-                do_copy_logs('node', agent_nodes)
+                do_copy_logs('node', slave_nodes)
             except Exception:
                 cls.LOG.exception(msg)
 

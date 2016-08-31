@@ -864,13 +864,13 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
         mock_baymodel = mock.MagicMock()
         mock_baymodel.tls_disabled = False
         rexray_preempt = mock_baymodel.labels.get('rexray_preempt')
-        mesos_agent_isolation = mock_baymodel.labels.get(
-            'mesos_agent_isolation')
-        mesos_agent_work_dir = mock_baymodel.labels.get('mesos_agent_work_dir')
-        mesos_agent_image_providers = mock_baymodel.labels.get(
+        mesos_slave_isolation = mock_baymodel.labels.get(
+            'mesos_slave_isolation')
+        mesos_slave_work_dir = mock_baymodel.labels.get('mesos_slave_work_dir')
+        mesos_slave_image_providers = mock_baymodel.labels.get(
             'image_providers')
-        mesos_agent_executor_env_variables = mock_baymodel.labels.get(
-            'mesos_agent_executor_env_variables')
+        mesos_slave_executor_env_variables = mock_baymodel.labels.get(
+            'mesos_slave_executor_env_variables')
         mock_bay = mock.MagicMock()
         mock_bay.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
         del mock_bay.stack_id
@@ -894,12 +894,12 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
             'tenant_name': 'admin',
             'domain_name': 'domainname',
             'rexray_preempt': rexray_preempt,
-            'mesos_agent_isolation': mesos_agent_isolation,
-            'mesos_agent_work_dir': mesos_agent_work_dir,
-            'mesos_agent_executor_env_variables':
-                mesos_agent_executor_env_variables,
-            'mesos_agent_image_providers': mesos_agent_image_providers,
-            'agents_to_remove': removal_nodes}}
+            'mesos_slave_isolation': mesos_slave_isolation,
+            'mesos_slave_work_dir': mesos_slave_work_dir,
+            'mesos_slave_executor_env_variables':
+                mesos_slave_executor_env_variables,
+            'mesos_slave_image_providers': mesos_slave_image_providers,
+            'slaves_to_remove': removal_nodes}}
         mock_get_params.assert_called_once_with(mock_context, mock_baymodel,
                                                 mock_bay, **expected_kwargs)
 
@@ -907,7 +907,7 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
         mesos_def = mesos_tdef.UbuntuMesosTemplateDefinition()
 
         heat_param = mesos_def.get_heat_param(bay_attr='node_count')
-        self.assertEqual('number_of_agents', heat_param)
+        self.assertEqual('number_of_slaves', heat_param)
 
         heat_param = mesos_def.get_heat_param(bay_attr='master_count')
         self.assertEqual('number_of_masters', heat_param)
@@ -916,7 +916,7 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
         mesos_def = mesos_tdef.UbuntuMesosTemplateDefinition()
 
         expected_api_address = 'updated_address'
-        expected_node_addresses = ['ex_agent', 'address']
+        expected_node_addresses = ['ex_slave', 'address']
         expected_master_addresses = ['ex_master', 'address']
 
         outputs = [
@@ -931,10 +931,10 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
              "output_key": "mesos_master"},
             {"output_value": ['any', 'output'],
              "description": "No description given",
-             "output_key": "mesos_agents_private"},
+             "output_key": "mesos_slaves_private"},
             {"output_value": expected_node_addresses,
              "description": "No description given",
-             "output_key": "mesos_agents"},
+             "output_key": "mesos_slaves"},
         ]
         mock_stack = mock.MagicMock()
         mock_stack.to_dict.return_value = {'outputs': outputs}

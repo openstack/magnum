@@ -1,7 +1,7 @@
 heat_template_version: 2014-10-16
 
 description: >
-  This is a nested stack that defines a single Mesos agent, This stack is
+  This is a nested stack that defines a single Mesos slave, This stack is
   included by a ResourceGroup resource in the parent template
   (mesoscluster.yaml).
 
@@ -11,7 +11,7 @@ parameters:
     type: string
     description: glance image used to boot the server
 
-  agent_flavor:
+  slave_flavor:
     type: string
     description: flavor to use when booting the server
 
@@ -31,7 +31,7 @@ parameters:
   executor_registration_timeout:
     type: string
     description: >
-      Amount of time to wait for an executor to register with the agent before
+      Amount of time to wait for an executor to register with the slave before
       considering it hung and shutting it down
 
   http_proxy:
@@ -87,7 +87,7 @@ parameters:
       enables any host to take control of a volume irrespective of whether
       other hosts are using the volume
 
-  mesos_agent_isolation:
+  mesos_slave_isolation:
     type: string
     description: >
       Isolation mechanisms to use, e.g., `posix/cpu,posix/mem`, or
@@ -98,22 +98,22 @@ parameters:
       module using the `--modules` flag. Note that this flag is only relevant
       for the Mesos Containerizer.
 
-  mesos_agent_work_dir:
+  mesos_slave_work_dir:
     type: string
     description: directory path to place framework work directories
 
-  mesos_agent_image_providers:
+  mesos_slave_image_providers:
     type: string
     description: >
       Comma separated list of supported image providers e.g.,
       APPC,DOCKER
 
-  mesos_agent_executor_env_variables:
+  mesos_slave_executor_env_variables:
     type: string
     description: >
       JSON object representing the environment variables that should be passed
       to the executor, and thus subsequently task(s). By default the executor,
-      executor will inherit the agent's environment variables.
+      executor will inherit the slave's environment variables.
 
   mesos_masters_ips:
     type: string
@@ -133,14 +133,14 @@ parameters:
 
 resources:
 
-  agent_wait_handle:
+  slave_wait_handle:
     type: OS::Heat::WaitConditionHandle
 
-  agent_wait_condition:
+  slave_wait_condition:
     type: OS::Heat::WaitCondition
-    depends_on: mesos_agent
+    depends_on: mesos_slave
     properties:
-      handle: {get_resource: agent_wait_handle}
+      handle: {get_resource: slave_wait_handle}
       timeout: {get_param: wait_condition_timeout}
 
   secgroup_all_open:
@@ -178,24 +178,24 @@ resources:
             "$REGION_NAME": {get_param: region_name}
             "$DOMAIN_NAME": {get_param: domain_name}
             "$REXRAY_PREEMPT": {get_param: rexray_preempt}
-            "$ISOLATION": {get_param: mesos_agent_isolation}
-            "$WORK_DIR": {get_param: mesos_agent_work_dir}
-            "$IMAGE_PROVIDERS": {get_param: mesos_agent_image_providers}
-            "$EXECUTOR_ENVIRONMENT_VARIABLES": {get_param: mesos_agent_executor_env_variables}
+            "$ISOLATION": {get_param: mesos_slave_isolation}
+            "$WORK_DIR": {get_param: mesos_slave_work_dir}
+            "$IMAGE_PROVIDERS": {get_param: mesos_slave_image_providers}
+            "$EXECUTOR_ENVIRONMENT_VARIABLES": {get_param: mesos_slave_executor_env_variables}
 
-  configure_mesos_agent:
+  configure_mesos_slave:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/configure-mesos-agent.sh}
+      config: {get_file: fragments/configure-mesos-slave.sh}
 
   start_services:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/start-services-agent.sh}
+      config: {get_file: fragments/start-services-slave.sh}
 
-  agent_wc_notify:
+  slave_wc_notify:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
@@ -205,7 +205,7 @@ resources:
             #!/bin/bash -v
             wc_notify --data-binary '{"status": "SUCCESS"}'
           params:
-            wc_notify: {get_attr: [agent_wait_handle, curl_cli]}
+            wc_notify: {get_attr: [slave_wait_handle, curl_cli]}
 
   add_proxy:
     type: OS::Heat::SoftwareConfig
@@ -219,34 +219,34 @@ resources:
       group: ungrouped
       config: {get_file: fragments/volume-service.sh}
 
-  mesos_agent_init:
+  mesos_slave_init:
     type: OS::Heat::MultipartMime
     properties:
       parts:
         - config: {get_resource: write_heat_params}
-        - config: {get_resource: configure_mesos_agent}
+        - config: {get_resource: configure_mesos_slave}
         - config: {get_resource: add_proxy}
         - config: {get_resource: volume_service}
         - config: {get_resource: start_services}
-        - config: {get_resource: agent_wc_notify}
+        - config: {get_resource: slave_wc_notify}
 
   ######################################################################
   #
-  # a single Mesos agent.
+  # a single Mesos slave.
   #
 
-  mesos_agent:
+  mesos_slave:
     type: OS::Nova::Server
     properties:
       image: {get_param: server_image}
-      flavor: {get_param: agent_flavor}
+      flavor: {get_param: slave_flavor}
       key_name: {get_param: ssh_key_name}
       user_data_format: RAW
-      user_data: {get_resource: mesos_agent_init}
+      user_data: {get_resource: mesos_slave_init}
       networks:
-        - port: {get_resource: mesos_agent_eth0}
+        - port: {get_resource: mesos_slave_eth0}
 
-  mesos_agent_eth0:
+  mesos_slave_eth0:
     type: OS::Neutron::Port
     properties:
       network: {get_param: fixed_network}
@@ -257,19 +257,19 @@ resources:
         - subnet: {get_param: fixed_subnet}
       replacement_policy: AUTO
 
-  mesos_agent_floating:
+  mesos_slave_floating:
     type: OS::Neutron::FloatingIP
     properties:
       floating_network: {get_param: external_network}
-      port_id: {get_resource: mesos_agent_eth0}
+      port_id: {get_resource: mesos_slave_eth0}
 
 outputs:
 
-  mesos_agent_ip:
-    value: {get_attr: [mesos_agent_eth0, fixed_ips, 0, ip_address]}
+  mesos_slave_ip:
+    value: {get_attr: [mesos_slave_eth0, fixed_ips, 0, ip_address]}
     description: >
-      This is the "private" address of the Mesos agent node.
-  mesos_agent_external_ip:
-    value: {get_attr: [mesos_agent_floating, floating_ip_address]}
+      This is the "private" address of the Mesos slave node.
+  mesos_slave_external_ip:
+    value: {get_attr: [mesos_slave_floating, floating_ip_address]}
     description: >
-      This is the "public" address of the Mesos agent node.
+      This is the "public" address of the Mesos slave node.

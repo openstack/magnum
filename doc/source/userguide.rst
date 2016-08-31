@@ -277,7 +277,7 @@ the table are linked to more details elsewhere in the user guide.
 | `rexray_preempt`_                     | - true             | false         |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
-| `mesos_agent_isolation`_              | - filesystem/posix | ""            |
+| `mesos_slave_isolation`_              | - filesystem/posix | ""            |
 |                                       | - filesystem/linux |               |
 |                                       | - filesystem/shared|               |
 |                                       | - posix/cpu        |               |
@@ -288,13 +288,13 @@ the table are linked to more details elsewhere in the user guide.
 |                                       | - docker/runtime   |               |
 |                                       | - namespaces/pid   |               |
 +---------------------------------------+--------------------+---------------+
-| `mesos_agent_image_providers`_        | - appc             | ""            |
+| `mesos_slave_image_providers`_        | - appc             | ""            |
 |                                       | - docker           |               |
 |                                       | - appc,docker      |               |
 +---------------------------------------+--------------------+---------------+
-| `mesos_agent_work_dir`_               | (directory name)   | ""            |
+| `mesos_slave_work_dir`_               | (directory name)   | ""            |
 +---------------------------------------+--------------------+---------------+
-| `mesos_agent_executor_env_variables`_ | (file name)        | ""            |
+| `mesos_slave_executor_env_variables`_ | (file name)        | ""            |
 +---------------------------------------+--------------------+---------------+
 
 
@@ -1038,9 +1038,9 @@ Log into the servers
 Mesos
 =====
 
-A Mesos cluster consists of a pool of servers running as Mesos agents,
+A Mesos cluster consists of a pool of servers running as Mesos slaves,
 managed by a set of servers running as Mesos masters.  Mesos manages
-the resources from the agents but does not itself deploy containers.
+the resources from the slaves but does not itself deploy containers.
 Instead, one of more Mesos frameworks running on the Mesos cluster would
 accept user requests on their own endpoint, using their particular
 API.  These frameworks would then negotiate the resources with Mesos
@@ -1067,18 +1067,18 @@ Refer to the `ClusterTemplate`_ and `Cluster`_ sections for the full list of
 parameters.  Following are further details relevant to Mesos:
 
 What runs on the servers
-  There are two types of servers in the Mesos cluster: masters and agents.
+  There are two types of servers in the Mesos cluster: masters and slaves.
   The Docker daemon runs on all servers.  On the servers for master,
   the Mesos master is run as a process on port 5050 and this is
   initiated by the upstart service 'mesos-master'.  Zookeeper is also
   run on the master servers, initiated by the upstart service
   'zookeeper'.  Zookeeper is used by the master servers for electing
-  the leader among the masters, and by the agent servers and
+  the leader among the masters, and by the slave servers and
   frameworks to determine the current leader.  The framework Marathon
   is run as a process on port 8080 on the master servers, initiated by
-  the upstart service 'marathon'.  On the servers for agent, the Mesos
-  agent is run as a process initiated by the upstart service
-  'mesos-agent'.
+  the upstart service 'marathon'.  On the servers for slave, the Mesos
+  slave is run as a process initiated by the upstart service
+  'mesos-slave'.
 
 Number of master (master-count)
   Specified in the cluster-create command to indicate how many servers
@@ -1091,8 +1091,8 @@ Number of master (master-count)
 
 Number of agents (node-count)
   Specified in the cluster-create command to indicate how many servers
-  will run as Mesos agent in the cluster.  Docker daemon is run locally to
-  host containers from users.  The agents report their available
+  will run as Mesos slave in the cluster.  Docker daemon is run locally to
+  host containers from users.  The slaves report their available
   resources to the master and accept request from the master to deploy
   tasks from the frameworks.  In this case, the tasks will be to
   run Docker containers.
@@ -1118,7 +1118,7 @@ Storage driver (docker-storage-driver)
 Image (image-id)
 
   Specified in the ClusterTemplate to indicate the image to boot the servers
-  for the Mesos master and agent.  The image binary is loaded in
+  for the Mesos master and slave.  The image binary is loaded in
   Glance with the attribute 'os_distro = ubuntu'.  You can download
   the `ready-built image
   <https://fedorapeople.org/groups/magnum/ubuntu-14.04.3-mesos-0.25.0.qcow2>`_,
@@ -1147,8 +1147,8 @@ _`rexray_preempt`
   safety for locking the volume before remounting.  The default value
   is False.
 
-_`mesos_agent_isolation`
-  This label corresponds to the Mesos parameter for agent
+_`mesos_slave_isolation`
+  This label corresponds to the Mesos parameter for slave
   '--isolation'.  The isolators are needed to provide proper isolation
   according to the runtime configurations specified in the container
   image.  For more details, refer to the `Mesos configuration
@@ -1168,7 +1168,7 @@ _`mesos_agent_isolation`
   - docker/runtime
   - namespaces/pid
 
-_`mesos_agent_image_providers`
+_`mesos_slave_image_providers`
   This label corresponds to the Mesos parameter for agent
   '--image_providers', which tells Mesos containerizer what
   types of container images are allowed.
@@ -1182,24 +1182,24 @@ _`mesos_agent_image_providers`
   - docker
   - appc,docker
 
-_`mesos_agent_work_dir`
-  This label corresponds to the Mesos parameter '--work_dir' for agent.
+_`mesos_slave_work_dir`
+  This label corresponds to the Mesos parameter '--work_dir' for slave.
   For more details, refer to the `Mesos configuration
   <http://mesos.apache.org/documentation/latest/configuration/>`_.
   Valid value is a directory path to use as the work directory for
   the framework, for example::
 
-    mesos_agent_work_dir=/tmp/mesos
+    mesos_slave_work_dir=/tmp/mesos
 
-_`mesos_agent_executor_env_variables`
-  This label corresponds to the Mesos parameter for agent
+_`mesos_slave_executor_env_variables`
+  This label corresponds to the Mesos parameter for slave
   '--executor_environment_variables', which passes additional
   environment variables to the executor and subsequent tasks.
   For more details, refer to the `Mesos configuration
   <http://mesos.apache.org/documentation/latest/configuration/>`_.
   Valid value is the name of a json file, for example::
 
-     mesos_agent_executor_env_variables=/home/ubuntu/test.json
+     mesos_slave_executor_env_variables=/home/ubuntu/test.json
 
   The json file should contain environment variables, for example::
 
@@ -1208,7 +1208,7 @@ _`mesos_agent_executor_env_variables`
        "LD_LIBRARY_PATH": "/usr/local/lib"
     }
 
-  By default the executor will inherit the agent's environment
+  By default the executor will inherit the slave's environment
   variables.
 
 
