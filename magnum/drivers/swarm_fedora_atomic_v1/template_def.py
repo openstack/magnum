@@ -71,6 +71,9 @@ class AtomicSwarmTemplateDefinition(template_def.BaseTemplateDefinition):
                            baymodel_attr='registry_enabled')
         self.add_parameter('docker_storage_driver',
                            baymodel_attr='docker_storage_driver')
+        self.add_parameter('swarm_version',
+                           bay_attr='coe_version')
+
         self.add_output('api_address',
                         bay_attr='api_address',
                         mapping_type=SwarmApiAddressOutputMapping)
@@ -115,6 +118,10 @@ class AtomicSwarmTemplateDefinition(template_def.BaseTemplateDefinition):
             return [template_def.COMMON_ENV_PATH + 'with_master_lb.yaml']
         else:
             return [template_def.COMMON_ENV_PATH + 'no_master_lb.yaml']
+
+    @property
+    def driver_module_path(self):
+        return __name__[:__name__.rindex('.')]
 
     @property
     def template_path(self):

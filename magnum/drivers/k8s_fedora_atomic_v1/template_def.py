@@ -108,6 +108,8 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                            param_type=str)
         self.add_parameter('insecure_registry_url',
                            baymodel_attr='insecure_registry')
+        self.add_parameter('kube_version',
+                           bay_attr='coe_version')
 
         self.add_output('api_address',
                         bay_attr='api_address',
@@ -202,6 +204,10 @@ class AtomicK8sTemplateDefinition(K8sTemplateDefinition):
         return env_files
 
     @property
+    def driver_module_path(self):
+        return __name__[:__name__.rindex('.')]
+
+    @property
     def template_path(self):
         return os.path.join(os.path.dirname(os.path.realpath(__file__)),
                             'templates/kubecluster.yaml')
@@ -257,6 +263,10 @@ class FedoraK8sIronicTemplateDefinition(AtomicK8sTemplateDefinition):
                      self).get_params(context, baymodel, bay,
                                       extra_params=extra_params,
                                       **kwargs)
+
+    @property
+    def driver_module_path(self):
+        return __name__[:__name__.rindex('.')]
 
     @property
     def template_path(self):

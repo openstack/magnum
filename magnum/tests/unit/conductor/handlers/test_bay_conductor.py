@@ -502,6 +502,7 @@ class TestHeatPoller(base.TestCase):
         baymodel = objects.BayModel(self.context, **baymodel_dict)
         mock_retrieve_baymodel.return_value = baymodel
         poller = bay_conductor.HeatPoller(mock_openstack_client, bay)
+        poller.get_version_info = mock.MagicMock()
         return (mock_heat_stack, bay, poller)
 
     def test_poll_and_check_send_notification(self):

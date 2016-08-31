@@ -13,5 +13,5 @@
 #    limitations under the License.
 
 version = '1.0.0'
-driver = 'k8s_fedora_atomic'
+driver = 'mesos_ubuntu'
 container_version = '1.9.1'

@@ -284,6 +284,7 @@ class TestBayConductorWithMesos(base.TestCase):
         baymodel = objects.BayModel(self.context, **self.baymodel_dict)
         mock_retrieve_baymodel.return_value = baymodel
         poller = bay_conductor.HeatPoller(mock_openstack_client, bay)
+        poller.get_version_info = mock.MagicMock()
         return (mock_heat_stack, bay, poller)
 
     def test_poll_node_count(self):

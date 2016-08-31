@@ -19,6 +19,7 @@ from heatclient import exc
 from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_service import loopingcall
+from oslo_utils import importutils
 from pycadf import cadftaxonomy as taxonomy
 import six
 
@@ -361,8 +362,27 @@ class HeatPoller(object):
         self.bay.node_count = stack.parameters[stack_nc_param]
         self.bay.save()
 
+    def get_version_info(self, stack):
+        stack_param = self.template_def.get_heat_param(
+            bay_attr='coe_version')
+        if stack_param:
+            self.bay.coe_version = stack.parameters[stack_param]
+
+        tdef = TDef.get_template_definition(self.baymodel.server_type,
+                                            self.baymodel.cluster_distro,
+                                            self.baymodel.coe)
+
+        version_module_path = tdef.driver_module_path+'.version'
+        try:
+            ver = importutils.import_module(version_module_path)
+            container_version = ver.container_version
+        except Exception:
+            container_version = None
+        self.bay.container_version = container_version
+
     def _sync_bay_and_template_status(self, stack):
         self.template_def.update_outputs(stack, self.baymodel, self.bay)
+        self.get_version_info(stack)
         self._sync_bay_status(stack)
 
     def _bay_failed(self, stack):

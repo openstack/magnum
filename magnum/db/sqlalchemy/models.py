@@ -129,6 +129,8 @@ class Bay(Base):
     trustee_user_id = Column(String(255))
     # TODO(wanghua): encrypt trustee_password in db
     trustee_password = Column(String(255))
+    coe_version = Column(String(255))
+    container_version = Column(String(255))
     # (yuanying) if we use barbican,
     # cert_ref size is determined by below format
     # * http(s)://${DOMAIN_NAME}/v1/containers/${UUID}

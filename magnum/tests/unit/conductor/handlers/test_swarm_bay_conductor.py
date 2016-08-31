@@ -63,7 +63,8 @@ class TestBayConductorWithSwarm(base.TestCase):
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
-            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de'
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
+            'coe_version': 'fake-version'
         }
         osc_patcher = mock.patch('magnum.common.clients.OpenStackClients')
         self.mock_osc_class = osc_patcher.start()
@@ -124,7 +125,8 @@ class TestBayConductorWithSwarm(base.TestCase):
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
-            'auth_url': 'http://192.168.10.10:5000/v3'
+            'auth_url': 'http://192.168.10.10:5000/v3',
+            'swarm_version': 'fake-version'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -186,7 +188,8 @@ class TestBayConductorWithSwarm(base.TestCase):
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
             'auth_url': 'http://192.168.10.10:5000/v3',
-            'docker_storage_driver': 'devicemapper'
+            'docker_storage_driver': 'devicemapper',
+            'swarm_version': 'fake-version'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -240,7 +243,8 @@ class TestBayConductorWithSwarm(base.TestCase):
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
-            'auth_url': 'http://192.168.10.10:5000/v3'
+            'auth_url': 'http://192.168.10.10:5000/v3',
+            'swarm_version': 'fake-version'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -296,7 +300,8 @@ class TestBayConductorWithSwarm(base.TestCase):
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
-            'auth_url': 'http://192.168.10.10:5000/v3'
+            'auth_url': 'http://192.168.10.10:5000/v3',
+            'swarm_version': 'fake-version'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -353,7 +358,8 @@ class TestBayConductorWithSwarm(base.TestCase):
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
-            'auth_url': 'http://192.168.10.10:5000/v3'
+            'auth_url': 'http://192.168.10.10:5000/v3',
+            'swarm_version': 'fake-version'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -374,6 +380,7 @@ class TestBayConductorWithSwarm(base.TestCase):
         baymodel = objects.BayModel(self.context, **self.baymodel_dict)
         mock_retrieve_baymodel.return_value = baymodel
         poller = bay_conductor.HeatPoller(mock_openstack_client, bay)
+        poller.get_version_info = mock.MagicMock()
         return (mock_heat_stack, bay, poller)
 
     def test_poll_node_count(self):
