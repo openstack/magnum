@@ -10,16 +10,16 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from magnum.tests.functional.python_client_base import BayTest
+from magnum.tests.functional.python_client_base import ClusterTest
 
 
-class TestBayResource(BayTest):
+class TestClusterResource(ClusterTest):
     coe = 'mesos'
-    baymodel_kwargs = {
+    cluster_template_kwargs = {
         "tls_disabled": True,
         "network_driver": 'docker',
         "volume_driver": 'rexray'
     }
 
-    def test_bay_create_and_delete(self):
+    def test_cluster_create_and_delete(self):
         pass

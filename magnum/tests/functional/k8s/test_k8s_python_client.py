@@ -14,7 +14,7 @@ from magnum.tests.functional import python_client_base as base
 
 
 class TestKubernetesAPIs(base.BaseK8sTest):
-    baymodel_kwargs = {
+    cluster_template_kwargs = {
         "tls_disabled": False,
         "network_driver": 'flannel',
         "volume_driver": 'cinder',

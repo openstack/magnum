@@ -153,7 +153,7 @@ class BaseTempestTest(base.BaseMagnumTest):
 
         :param name: name, will be used for dynamic creds
         :param type_of_creds: admin, alt or default
-        :param request_type: baymodel or service
+        :param request_type: ClusterTemplate or service
         :returns: MagnumClient -- client with isolated creds.
         :returns: KeypairClient -- allows for creating of keypairs
         """

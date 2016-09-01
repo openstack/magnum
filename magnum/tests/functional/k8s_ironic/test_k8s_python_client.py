@@ -14,8 +14,8 @@ from magnum.tests.functional import python_client_base as base
 
 
 class TestFedoraKubernetesIronicAPIs(base.BaseK8sTest):
-    bay_complete_timeout = 3200
-    baymodel_kwargs = {
+    cluster_complete_timeout = 3200
+    cluster_template_kwargs = {
         "tls_disabled": True,
         "network_driver": 'flannel',
         "volume_driver": None,
