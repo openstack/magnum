@@ -436,11 +436,13 @@ redis-master is running::
     | updated_at         | 2016-05-26T17:50:02+00:00                                  |
     | create_timeout     | 60                                                         |
     | api_address        | https://172.24.4.4:6443                                    |
+    | coe_version        | v1.2.0                                                     |
     | cluster_template_id| e73298e7-e621-4d42-b35b-7a1952b97158                       |
     | master_addresses   | ['172.24.4.6']                                             |
     | node_count         | 1                                                          |
     | node_addresses     | ['172.24.4.5']                                             |
     | master_count       | 1                                                          |
+    | container_version  | 1.9.1                                                      |
     | discovery_url      | https://discovery.etcd.io/4caaa65f297d4d49ef0a085a7aecf8e0 |
     | name               | k8s-cluster                                                |
     +--------------------+------------------------------------------------------------+
@@ -530,11 +532,13 @@ Now that we have a swarm cluster we can start interacting with it::
     | updated_at         | 2015-04-20T19:06:08+00:00                                  |
     | create_timeout     | 60                                                         |
     | api_address        | https://172.24.4.4:6443                                    |
+    | coe_version        | 1.0.0                                                      |
     | cluster_template_id| e73298e7-e621-4d42-b35b-7a1952b97158                       |
     | master_addresses   | ['172.24.4.6']                                             |
     | node_count         | 2                                                          |
     | node_addresses     | ['172.24.4.5']                                             |
     | master_count       | 1                                                          |
+    | container_version  | 1.9.1                                                      |
     | discovery_url      | https://discovery.etcd.io/4caaa65f297d4d49ef0a085a7aecf8e0 |
     | name               | swarm-cluster                                              |
     +--------------------+------------------------------------------------------------+
@@ -654,11 +658,13 @@ need to make sure the cluster's status is 'CREATE_COMPLETE'::
     | updated_at         | 2015-06-09T20:28:18+00:00                                  |
     | create_timeout     | 60                                                         |
     | api_address        | https://172.24.4.115:6443                                  |
+    | coe_version        | -                                                          |
     | cluster_template_id| 92dbda62-32d4-4435-88fc-8f42d514b347                       |
     | master_addresses   | ['172.24.4.115']                                           |
     | node_count         | 2                                                          |
     | node_addresses     | ['172.24.4.116', '172.24.4.117']                           |
     | master_count       | 1                                                          |
+    | container_version  | 1.9.1                                                      |
     | discovery_url      | None                                                       |
     | name               | mesos-cluster                                              |
     +--------------------+------------------------------------------------------------+

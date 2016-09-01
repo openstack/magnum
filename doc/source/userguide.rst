@@ -1421,11 +1421,13 @@ creation::
     | updated_at         | None                                                       |
     | create_timeout     | 0                                                          |
     | api_address        | None                                                       |
+    | coe_version        | -                                                          |
     | cluster_template_id| 5519b24a-621c-413c-832f-c30424528b31                       |
     | master_addresses   | None                                                       |
     | node_count         | 1                                                          |
     | node_addresses     | None                                                       |
     | master_count       | 1                                                          |
+    | container_version  | -                                                          |
     | discovery_url      | https://discovery.etcd.io/ba52a8178e7364d43a323ee4387cf28e |
     | name               | secure-k8s-cluster                                          |
     +--------------------+------------------------------------------------------------+
@@ -1445,12 +1447,14 @@ the api_address is 'https'::
     | created_at         | 2016-07-25T23:14:06+00:00                                  |
     | updated_at         | 2016-07-25T23:14:10+00:00                                  |
     | create_timeout     | 60                                                         |
+    | coe_version        | v1.2.0                                                     |
     | api_address        | https://192.168.19.86:6443                                 |
     | cluster_template_id| da2825a0-6d09-4208-b39e-b2db666f1118                       |
     | master_addresses   | ['192.168.19.87']                                          |
     | node_count         | 1                                                          |
     | node_addresses     | ['192.168.19.88']                                          |
     | master_count       | 1                                                          |
+    | container_version  | 1.9.1                                                      |
     | discovery_url      | https://discovery.etcd.io/3b7fb09733429d16679484673ba3bfd5 |
     | name               | secure-k8s-cluster                                          |
     +--------------------+------------------------------------------------------------+

@@ -14,4 +14,4 @@
 
 version = '1.0.0'
 driver = 'k8s_coreos'
-container_version = '1.9.0'
+container_version = '1.11.2'
