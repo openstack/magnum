@@ -1,0 +1,15 @@
+{
+   "pem":"-----BEGIN CERTIFICATE-----\nMIIDxDCCAqygAwIBAgIRALgUbIjdKUy8lqErJmCxVfkwDQYJKoZIhvcNAQELBQAw\n-----END CERTIFICATE-----\n",
+   "bay_uuid":"0b4b766f-1500-44b3-9804-5a6e12fe6df4",
+   "links":[
+      {
+         "href":"http://10.164.180.104:9511/v1/certificates/0b4b766f-1500-44b3-9804-5a6e12fe6df4",
+         "rel":"self"
+      },
+      {
+         "href":"http://10.164.180.104:9511/certificates/0b4b766f-1500-44b3-9804-5a6e12fe6df4",
+         "rel":"bookmark"
+      }
+   ],
+   "csr":"-----BEGIN CERTIFICATE REQUEST-----\nMIIEfzCCAmcCAQAwFDESMBAGA1UEAxMJWW91ciBOYW1lMIICIjANBgkqhkiG9w0B\n-----END CERTIFICATE REQUEST-----\n"
+}

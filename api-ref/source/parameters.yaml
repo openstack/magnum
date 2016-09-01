@@ -5,6 +5,12 @@ request_id:
   description: |
     A unique ID for tracking service request. The request ID associated
     with the request by default appears in the service logs.
+bay_cluster_id:
+  type: UUID
+  in: body
+  required: true
+  description: |
+    The UUID of the bay/cluster.
 binary:
   type: string
   in: body
@@ -26,6 +32,15 @@ created_at:
 
     The ``±hh:mm`` value, if included, is the time zone as an offset
     from UTC.
+  in: body
+  required: true
+  type: string
+csr:
+  description: |
+    Certificate Signing Request (CSR) for authenticating client key.
+
+    The CSR will be used by Magnum to generate a signed certificate
+    that client will use to communicate with the Bay/Cluster.
   in: body
   required: true
   type: string
@@ -56,10 +71,7 @@ id_s:
   type: string
 links:
   description: |
-    Links to the resources in question. See `API Guide / Links and
-    References
-    <http://docs.openstack.org/developer/nova/v2/links_and_references.html>`_
-    for more info.
+    Links to the resources in question.
   in: body
   required: true
   type: array
@@ -72,6 +84,12 @@ mservices:
 name:
   description: |
     Name of the Container Infrastructure Management API.
+  in: body
+  required: true
+  type: string
+pem:
+  description: |
+    CA certificate for the bay/cluster.
   in: body
   required: true
   type: string
