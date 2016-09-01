@@ -371,7 +371,7 @@ class TestBayConductorWithSwarm(base.TestCase):
     @patch('magnum.common.clients.OpenStackClients')
     def setup_poll_test(self, mock_openstack_client, cfg,
                         mock_retrieve_baymodel):
-        cfg.CONF.bay_heat.max_attempts = 10
+        cfg.CONF.cluster_heat.max_attempts = 10
         bay = mock.MagicMock()
         mock_heat_stack = mock.MagicMock()
         mock_heat_client = mock.MagicMock()

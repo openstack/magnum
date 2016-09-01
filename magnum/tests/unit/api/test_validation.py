@@ -182,9 +182,9 @@ class TestValidation(base.BaseTestCase):
             pass
 
         for key, val in network_driver_config_dict.items():
-            cfg.CONF.set_override(key, val, 'baymodel')
+            cfg.CONF.set_override(key, val, 'cluster_template')
         baymodel = mock.MagicMock()
-        baymodel.name = 'test_baymodel'
+        baymodel.name = 'test_cluster_template'
         baymodel.network_driver = network_driver_type
         baymodel.coe = coe
 
@@ -269,7 +269,7 @@ class TestValidation(base.BaseTestCase):
             pass
 
         for key, val in network_driver_config_dict.items():
-            cfg.CONF.set_override(key, val, 'baymodel')
+            cfg.CONF.set_override(key, val, 'cluster_template')
         baymodel_ident = 'test_uuid_or_name'
         patch = [{'path': '/network_driver', 'value': network_driver_type,
                   'op': 'replace'}]

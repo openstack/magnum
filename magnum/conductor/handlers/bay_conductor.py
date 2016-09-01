@@ -38,27 +38,32 @@ from magnum import objects
 from magnum.objects.fields import BayStatus as bay_status
 
 
-bay_heat_opts = [
+cluster_heat_opts = [
     cfg.IntOpt('max_attempts',
                default=2000,
                help=('Number of attempts to query the Heat stack for '
                      'finding out the status of the created stack and '
                      'getting template outputs.  This value is ignored '
-                     'during bay creation if timeout is set as the poll '
-                     'will continue until bay creation either ends '
-                     'or times out.')),
+                     'during cluster creation if timeout is set as the poll '
+                     'will continue until cluster creation either ends '
+                     'or times out.'),
+               deprecated_group='bay_heat'),
     cfg.IntOpt('wait_interval',
                default=1,
                help=('Sleep time interval between two attempts of querying '
-                     'the Heat stack.  This interval is in seconds.')),
-    cfg.IntOpt('bay_create_timeout',
+                     'the Heat stack.  This interval is in seconds.'),
+               deprecated_group='bay_heat'),
+    cfg.IntOpt('create_timeout',
                default=60,
-               help=('The length of time to let bay creation continue. This '
-                     'interval is in minutes. The default is 60 minutes.'))
+               help=('The length of time to let cluster creation continue. '
+                     'This interval is in minutes. The default is 60 minutes.'
+                     ),
+               deprecated_group='bay_heat',
+               deprecated_name='bay_create_timeout')
 ]
 
 CONF = cfg.CONF
-CONF.register_opts(bay_heat_opts, group='bay_heat')
+CONF.register_opts(cluster_heat_opts, group='cluster_heat')
 
 LOG = logging.getLogger(__name__)
 
@@ -101,7 +106,7 @@ def _create_stack(context, osc, bay, bay_create_timeout):
     else:
         # no bay_create_timeout value was passed in to the request
         # so falling back on configuration file value
-        heat_timeout = cfg.CONF.bay_heat.bay_create_timeout
+        heat_timeout = cfg.CONF.cluster_heat.create_timeout
     fields = {
         'stack_name': stack_name,
         'parameters': heat_params,
@@ -259,7 +264,7 @@ class Handler(object):
     def _poll_and_check(self, osc, bay):
         poller = HeatPoller(osc, bay)
         lc = loopingcall.FixedIntervalLoopingCall(f=poller.poll_and_check)
-        lc.start(cfg.CONF.bay_heat.wait_interval, True)
+        lc.start(cfg.CONF.cluster_heat.wait_interval, True)
 
 
 class HeatPoller(object):
@@ -324,18 +329,18 @@ class HeatPoller(object):
         # the loop will end when the stack completes or the timeout occurs
         if stack.stack_status == bay_status.CREATE_IN_PROGRESS:
             if (stack.timeout_mins is None and
-               self.attempts > cfg.CONF.bay_heat.max_attempts):
+               self.attempts > cfg.CONF.cluster_heat.max_attempts):
                 LOG.error(_LE('Bay check exit after %(attempts)s attempts,'
                               'stack_id: %(id)s, stack_status: %(status)s') %
-                          {'attempts': cfg.CONF.bay_heat.max_attempts,
+                          {'attempts': cfg.CONF.cluster_heat.max_attempts,
                            'id': self.bay.stack_id,
                            'status': stack.stack_status})
                 raise loopingcall.LoopingCallDone()
         else:
-            if self.attempts > cfg.CONF.bay_heat.max_attempts:
+            if self.attempts > cfg.CONF.cluster_heat.max_attempts:
                 LOG.error(_LE('Bay check exit after %(attempts)s attempts,'
                               'stack_id: %(id)s, stack_status: %(status)s') %
-                          {'attempts': cfg.CONF.bay_heat.max_attempts,
+                          {'attempts': cfg.CONF.cluster_heat.max_attempts,
                            'id': self.bay.stack_id,
                            'status': stack.stack_status})
                 raise loopingcall.LoopingCallDone()

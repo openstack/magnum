@@ -29,14 +29,14 @@ import sqlalchemy as sa
 from magnum.i18n import _
 
 
-bay_heat_opts = [
+cluster_heat_opts = [
     cfg.StrOpt('cluster_coe',
                default='kubernetes',
                help=_('Container Orchestration Environments are '
-                      'kubernetes or swarm.'))
+                      'kubernetes or swarm.'),
+               deprecated_group='bay_heat')
 ]
-
-cfg.CONF.register_opts(bay_heat_opts, group='bay_heat')
+cfg.CONF.register_opts(cluster_heat_opts, group='cluster_heat')
 
 
 def upgrade():
@@ -45,7 +45,8 @@ def upgrade():
 
     baymodel = sa.sql.table('baymodel',
                             sa.sql.column('coe', sa.String(length=255)))
+
     op.execute(
         baymodel.update().values({
-            'coe': op.inline_literal(cfg.CONF.bay_heat.cluster_coe)})
+            'coe': op.inline_literal(cfg.CONF.cluster_heat.cluster_coe)})
     )

@@ -616,7 +616,7 @@ class TestPost(api_base.FunctionalTest):
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
         for k, v in baymodel_config_dict.items():
-                    cfg.CONF.set_override(k, v, 'baymodel')
+                    cfg.CONF.set_override(k, v, 'cluster_template')
         with mock.patch.object(self.dbapi, 'create_baymodel',
                                wraps=self.dbapi.create_baymodel) as cc_mock:
             bdict = apiutils.baymodel_post_data(**baymodel_dict)
@@ -628,7 +628,7 @@ class TestPost(api_base.FunctionalTest):
                 expected_driver = bdict.get('network_driver')
                 if not expected_driver:
                     expected_driver = (
-                        cfg.CONF.baymodel.swarm_default_network_driver)
+                        cfg.CONF.cluster_template.swarm_default_network_driver)
                 self.assertEqual(expected_driver,
                                  response.json['network_driver'])
                 self.assertEqual(bdict['image_id'],

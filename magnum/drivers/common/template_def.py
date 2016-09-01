@@ -36,12 +36,14 @@ COMMON_ENV_PATH = COMMON_TEMPLATES_PATH + "environments/"
 template_def_opts = [
     cfg.StrOpt('etcd_discovery_service_endpoint_format',
                default='https://discovery.etcd.io/new?size=%(size)d',
-               help=_('Url for etcd public discovery endpoint.')),
+               help=_('Url for etcd public discovery endpoint.'),
+               deprecated_group='bay'),
     cfg.ListOpt('enabled_definitions',
                 default=['magnum_vm_atomic_k8s', 'magnum_bm_fedora_k8s',
                          'magnum_vm_coreos_k8s', 'magnum_vm_atomic_swarm',
                          'magnum_vm_ubuntu_mesos'],
-                help=_('Enabled bay definition entry points.')),
+                help=_('Enabled cluster definition entry points.'),
+                deprecated_group='bay'),
 ]
 
 docker_registry_opts = [
@@ -54,7 +56,7 @@ docker_registry_opts = [
 ]
 
 CONF = cfg.CONF
-CONF.register_opts(template_def_opts, group='bay')
+CONF.register_opts(template_def_opts, group='cluster')
 CONF.register_opts(docker_registry_opts, group='docker_registry')
 CONF.import_opt('trustee_domain_id', 'magnum.common.keystone', group='trust')
 
@@ -243,7 +245,7 @@ class TemplateDefinition(object):
                 coe=coe)
         type_definitions = definition_map[bay_type]
 
-        for name in cfg.CONF.bay.enabled_definitions:
+        for name in cfg.CONF.cluster.enabled_definitions:
             if name in type_definitions:
                 return type_definitions[name]()
 
@@ -428,7 +430,7 @@ class BaseTemplateDefinition(TemplateDefinition):
             discovery_url = bay.discovery_url
         else:
             discovery_endpoint = (
-                cfg.CONF.bay.etcd_discovery_service_endpoint_format %
+                cfg.CONF.cluster.etcd_discovery_service_endpoint_format %
                 {'size': bay.master_count})
             try:
                 discovery_url = requests.get(discovery_endpoint).text

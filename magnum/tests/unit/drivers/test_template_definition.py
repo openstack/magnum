@@ -111,7 +111,7 @@ class TemplateDefinitionTestCase(base.TestCase):
     def test_get_definition_not_enabled(self):
         cfg.CONF.set_override('enabled_definitions',
                               ['magnum_vm_atomic_k8s'],
-                              group='bay')
+                              group='cluster')
         self.assertRaises(exception.BayTypeNotEnabled,
                           cmn_tdef.TemplateDefinition.get_template_definition,
                           'vm', 'coreos', 'kubernetes')
@@ -385,7 +385,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
     def test_k8s_get_discovery_url(self, mock_get):
         cfg.CONF.set_override('etcd_discovery_service_endpoint_format',
                               'http://etcd/test?size=%(size)d',
-                              group='bay')
+                              group='cluster')
         expected_discovery_url = 'http://etcd/token'
         mock_resp = mock.MagicMock()
         mock_resp.text = expected_discovery_url
@@ -405,7 +405,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
     def test_k8s_get_discovery_url_fail(self, mock_get):
         cfg.CONF.set_override('etcd_discovery_service_endpoint_format',
                               'http://etcd/test?size=%(size)d',
-                              group='bay')
+                              group='cluster')
         mock_get.side_effect = req_exceptions.RequestException()
         mock_bay = mock.MagicMock()
         mock_bay.master_count = 10
@@ -778,7 +778,7 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
     def test_swarm_get_discovery_url(self, mock_get):
         cfg.CONF.set_override('etcd_discovery_service_endpoint_format',
                               'http://etcd/test?size=%(size)d',
-                              group='bay')
+                              group='cluster')
         expected_discovery_url = 'http://etcd/token'
         mock_resp = mock.MagicMock()
         mock_resp.text = expected_discovery_url
