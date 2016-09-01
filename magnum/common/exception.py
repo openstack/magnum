@@ -433,5 +433,5 @@ class TrusteeOrTrustToBayFailed(MagnumException):
     message = _("Failed to create trustee or trust for Bay: %(bay_uuid)s")
 
 
-class CertificatesToBayFailed(MagnumException):
-    message = _("Failed to create certificates for Bay: %(bay_uuid)s")
+class CertificatesToClusterFailed(MagnumException):
+    message = _("Failed to create certificates for Cluster: %(cluster_uuid)s")

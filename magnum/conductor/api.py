@@ -52,11 +52,12 @@ class API(rpc_service.API):
 
     # CA operations
 
-    def sign_certificate(self, bay, certificate):
-        return self._call('sign_certificate', bay=bay, certificate=certificate)
+    def sign_certificate(self, cluster, certificate):
+        return self._call('sign_certificate', cluster=cluster,
+                          certificate=certificate)
 
-    def get_ca_certificate(self, bay):
-        return self._call('get_ca_certificate', bay=bay)
+    def get_ca_certificate(self, cluster):
+        return self._call('get_ca_certificate', cluster=cluster)
 
     # Versioned Objects indirection API
 

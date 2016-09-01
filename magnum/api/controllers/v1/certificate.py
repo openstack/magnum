@@ -84,11 +84,9 @@ class Certificate(base.APIBase):
             self.fields.append(field)
             setattr(self, field, kwargs.get(field, wtypes.Unset))
 
-        # set the attribute for cluster_uuid
-        self.fields.append('cluster_uuid')
-        if 'cluster_uuid' in kwargs.keys():
-            setattr(self, 'cluster_uuid', kwargs.get('cluster_uuid',
-                                                     wtypes.Unset))
+        # set the attribute for bay_uuid for backwards compatibility
+        self.fields.append('bay_uuid')
+        setattr(self, 'bay_uuid', kwargs.get('bay_uuid',  self._cluster_uuid))
 
     def get_cluster(self):
         if not self._cluster:
@@ -103,10 +101,10 @@ class Certificate(base.APIBase):
 
         certificate.links = [link.Link.make_link('self', url,
                                                  'certificates',
-                                                 certificate.bay_uuid),
+                                                 certificate.cluster_uuid),
                              link.Link.make_link('bookmark', url,
                                                  'certificates',
-                                                 certificate.bay_uuid,
+                                                 certificate.cluster_uuid,
                                                  bookmark=True)]
         return certificate
 

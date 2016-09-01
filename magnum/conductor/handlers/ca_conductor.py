@@ -31,16 +31,17 @@ class Handler(object):
     def __init__(self):
         super(Handler, self).__init__()
 
-    def sign_certificate(self, context, bay, certificate):
+    def sign_certificate(self, context, cluster, certificate):
         LOG.debug("Creating self signed x509 certificate")
-        signed_cert = cert_manager.sign_node_certificate(bay,
+        signed_cert = cert_manager.sign_node_certificate(cluster,
                                                          certificate.csr,
                                                          context=context)
         certificate.pem = signed_cert
         return certificate
 
-    def get_ca_certificate(self, context, bay):
-        ca_cert = cert_manager.get_bay_ca_certificate(bay, context=context)
-        certificate = objects.Certificate.from_object_bay(bay)
+    def get_ca_certificate(self, context, cluster):
+        ca_cert = cert_manager.get_cluster_ca_certificate(cluster,
+                                                          context=context)
+        certificate = objects.Certificate.from_object_cluster(cluster)
         certificate.pem = ca_cert.get_certificate()
         return certificate

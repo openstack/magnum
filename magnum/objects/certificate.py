@@ -22,24 +22,25 @@ from magnum.objects import base
 class Certificate(base.MagnumPersistentObject, base.MagnumObject,
                   base.MagnumObjectDictCompat):
     # Version 1.0: Initial version
-    VERSION = '1.0'
+    # Version 1.1: Rename bay_uuid to cluster_uuid
+    VERSION = '1.1'
 
     fields = {
         'project_id': fields.StringField(nullable=True),
         'user_id': fields.StringField(nullable=True),
-        'bay_uuid': fields.StringField(nullable=True),
+        'cluster_uuid': fields.StringField(nullable=True),
         'csr': fields.StringField(nullable=True),
         'pem': fields.StringField(nullable=True),
     }
 
     @classmethod
-    def from_object_bay(cls, bay):
-        return cls(project_id=bay.project_id,
-                   user_id=bay.user_id,
-                   bay_uuid=bay.uuid)
+    def from_object_cluster(cls, cluster):
+        return cls(project_id=cluster.project_id,
+                   user_id=cluster.user_id,
+                   cluster_uuid=cluster.uuid)
 
     @classmethod
-    def from_db_bay(cls, bay):
-        return cls(project_id=bay['project_id'],
-                   user_id=bay['user_id'],
-                   bay_uuid=bay['uuid'])
+    def from_db_cluster(cls, cluster):
+        return cls(project_id=cluster['project_id'],
+                   user_id=cluster['user_id'],
+                   cluster_uuid=cluster['uuid'])
