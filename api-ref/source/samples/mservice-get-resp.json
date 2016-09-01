@@ -1,0 +1,14 @@
+{
+   "mservices":[
+      {
+         "binary":"magnum-conductor",
+         "created_at":"2016-08-23T10:52:13+00:00",
+         "state":"up",
+         "report_count":2179,
+         "updated_at":"2016-08-25T01:13:16+00:00",
+         "host":"magnum-manager",
+         "disabled_reason":null,
+         "id":1
+      }
+   ]
+}
