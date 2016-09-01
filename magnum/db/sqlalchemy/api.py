@@ -454,7 +454,8 @@ class Connection(api.Connection):
             query = add_identity_filter(query, magnum_service_id)
             count = query.delete()
             if count != 1:
-                raise exception.MagnumServiceNotFound(magnum_service_id)
+                raise exception.MagnumServiceNotFound(
+                    magnum_service_id=magnum_service_id)
 
     def update_magnum_service(self, magnum_service_id, values):
         session = get_session()
@@ -464,7 +465,8 @@ class Connection(api.Connection):
             try:
                 ref = query.with_lockmode('update').one()
             except NoResultFound:
-                raise exception.MagnumServiceNotFound(magnum_service_id)
+                raise exception.MagnumServiceNotFound(
+                    magnum_service_id=magnum_service_id)
 
             if 'report_count' in values:
                 if values['report_count'] > ref.report_count:
