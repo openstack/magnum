@@ -30,7 +30,7 @@ LOG = logging.getLogger(__name__)
 
 class K8sApiAddressOutputMapping(template_def.OutputMapping):
 
-    def set_output(self, stack, baymodel, bay):
+    def set_output(self, stack, cluster_template, bay):
         if self.bay_attr is None:
             return
 
@@ -39,7 +39,7 @@ class K8sApiAddressOutputMapping(template_def.OutputMapping):
             # TODO(yuanying): port number is hardcoded, this will be fix
             protocol = 'https'
             port = KUBE_SECURE_PORT
-            if baymodel.tls_disabled:
+            if cluster_template.tls_disabled:
                 protocol = 'http'
                 port = KUBE_INSECURE_PORT
 
@@ -61,13 +61,13 @@ class ServerAddressOutputMapping(template_def.OutputMapping):
         self.bay_attr = bay_attr
         self.heat_output = self.public_ip_output_key
 
-    def set_output(self, stack, baymodel, bay):
-        if not baymodel.floating_ip_enabled:
+    def set_output(self, stack, cluster_template, bay):
+        if not cluster_template.floating_ip_enabled:
             self.heat_output = self.private_ip_output_key
 
         LOG.debug("Using heat_output: %s", self.heat_output)
         super(ServerAddressOutputMapping,
-              self).set_output(stack, baymodel, bay)
+              self).set_output(stack, cluster_template, bay)
 
 
 class MasterAddressOutputMapping(ServerAddressOutputMapping):
@@ -86,28 +86,28 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
     def __init__(self):
         super(K8sTemplateDefinition, self).__init__()
         self.add_parameter('master_flavor',
-                           baymodel_attr='master_flavor_id')
+                           cluster_template_attr='master_flavor_id')
         self.add_parameter('minion_flavor',
-                           baymodel_attr='flavor_id')
+                           cluster_template_attr='flavor_id')
         self.add_parameter('number_of_minions',
                            bay_attr='node_count')
         self.add_parameter('external_network',
-                           baymodel_attr='external_network_id',
+                           cluster_template_attr='external_network_id',
                            required=True)
         self.add_parameter('network_driver',
-                           baymodel_attr='network_driver')
+                           cluster_template_attr='network_driver')
         self.add_parameter('volume_driver',
-                           baymodel_attr='volume_driver')
+                           cluster_template_attr='volume_driver')
         self.add_parameter('tls_disabled',
-                           baymodel_attr='tls_disabled',
+                           cluster_template_attr='tls_disabled',
                            required=True)
         self.add_parameter('registry_enabled',
-                           baymodel_attr='registry_enabled')
+                           cluster_template_attr='registry_enabled')
         self.add_parameter('bay_uuid',
                            bay_attr='uuid',
                            param_type=str)
         self.add_parameter('insecure_registry_url',
-                           baymodel_attr='insecure_registry')
+                           cluster_template_attr='insecure_registry')
         self.add_parameter('kube_version',
                            bay_attr='coe_version')
 
@@ -125,7 +125,7 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                         bay_attr='master_addresses',
                         mapping_type=MasterAddressOutputMapping)
 
-    def get_params(self, context, baymodel, bay, **kwargs):
+    def get_params(self, context, cluster_template, bay, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
         scale_mgr = kwargs.pop('scale_manager', None)
         if scale_mgr:
@@ -137,22 +137,22 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
         osc = self.get_osc(context)
         extra_params['magnum_url'] = osc.magnum_url()
 
-        if baymodel.tls_disabled:
+        if cluster_template.tls_disabled:
             extra_params['loadbalancing_protocol'] = 'HTTP'
             extra_params['kubernetes_port'] = 8080
 
         label_list = ['flannel_network_cidr', 'flannel_backend',
                       'flannel_network_subnetlen']
         for label in label_list:
-            extra_params[label] = baymodel.labels.get(label)
+            extra_params[label] = cluster_template.labels.get(label)
 
-        if baymodel.registry_enabled:
+        if cluster_template.registry_enabled:
             extra_params['swift_region'] = CONF.docker_registry.swift_region
             extra_params['registry_container'] = (
                 CONF.docker_registry.swift_registry_container)
 
         return super(K8sTemplateDefinition,
-                     self).get_params(context, baymodel, bay,
+                     self).get_params(context, cluster_template, bay,
                                       extra_params=extra_params,
                                       **kwargs)
 
@@ -169,11 +169,11 @@ class AtomicK8sTemplateDefinition(K8sTemplateDefinition):
     def __init__(self):
         super(AtomicK8sTemplateDefinition, self).__init__()
         self.add_parameter('docker_volume_size',
-                           baymodel_attr='docker_volume_size')
+                           cluster_template_attr='docker_volume_size')
         self.add_parameter('docker_storage_driver',
-                           baymodel_attr='docker_storage_driver')
+                           cluster_template_attr='docker_storage_driver')
 
-    def get_params(self, context, baymodel, bay, **kwargs):
+    def get_params(self, context, cluster_template, bay, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
 
         extra_params['username'] = context.user_name
@@ -182,19 +182,19 @@ class AtomicK8sTemplateDefinition(K8sTemplateDefinition):
         extra_params['region_name'] = osc.cinder_region_name()
 
         return super(AtomicK8sTemplateDefinition,
-                     self).get_params(context, baymodel, bay,
+                     self).get_params(context, cluster_template, bay,
                                       extra_params=extra_params,
                                       **kwargs)
 
-    def get_env_files(self, baymodel):
+    def get_env_files(self, cluster_template):
         env_files = []
-        if baymodel.master_lb_enabled:
+        if cluster_template.master_lb_enabled:
             env_files.append(
                 template_def.COMMON_ENV_PATH + 'with_master_lb.yaml')
         else:
             env_files.append(
                 template_def.COMMON_ENV_PATH + 'no_master_lb.yaml')
-        if baymodel.floating_ip_enabled:
+        if cluster_template.floating_ip_enabled:
             env_files.append(
                 template_def.COMMON_ENV_PATH + 'enable_floating_ip.yaml')
         else:
@@ -225,16 +225,16 @@ class FedoraK8sIronicTemplateDefinition(AtomicK8sTemplateDefinition):
     def __init__(self):
         super(FedoraK8sIronicTemplateDefinition, self).__init__()
         self.add_parameter('fixed_subnet',
-                           baymodel_attr='fixed_subnet',
+                           cluster_template_attr='fixed_subnet',
                            param_type=str,
                            required=True)
 
-    def get_fixed_network_id(self, osc, baymodel):
+    def get_fixed_network_id(self, osc, cluster_template):
         try:
             subnet = neutronV20.find_resource_by_name_or_id(
                 osc.neutron(),
                 'subnet',
-                baymodel.fixed_subnet
+                cluster_template.fixed_subnet
             )
         except n_exception.NeutronException as e:
             # NOTE(yuanying): NeutronCLIError doesn't have status_code
@@ -252,16 +252,15 @@ class FedoraK8sIronicTemplateDefinition(AtomicK8sTemplateDefinition):
 
         return subnet['network_id']
 
-    def get_params(self, context, baymodel, bay, **kwargs):
-        extra_params = kwargs.pop('extra_params', {})
+    def get_params(self, context, cluster_template, bay, **kwargs):
+        ep = kwargs.pop('extra_params', {})
 
         osc = self.get_osc(context)
-        extra_params['fixed_network'] = self.get_fixed_network_id(osc,
-                                                                  baymodel)
+        ep['fixed_network'] = self.get_fixed_network_id(osc, cluster_template)
 
         return super(FedoraK8sIronicTemplateDefinition,
-                     self).get_params(context, baymodel, bay,
-                                      extra_params=extra_params,
+                     self).get_params(context, cluster_template, bay,
+                                      extra_params=ep,
                                       **kwargs)
 
     @property

@@ -62,33 +62,34 @@ CONF.import_opt('trustee_domain_id', 'magnum.common.keystone', group='trust')
 
 
 class ParameterMapping(object):
-    """A mapping associating heat param and bay/baymodel attr.
+    """A mapping associating heat param and bay/cluster_template attr.
 
     A ParameterMapping is an association of a Heat parameter name with
-    an attribute on a Bay, Baymodel, or both.
+    an attribute on a Bay, ClusterTemplate, or both.
 
-    In the case of both baymodel_attr and bay_attr being set, the Baymodel
-    will be checked first and then Bay if the attribute isn't set on the
-    Baymodel.
+    In the case of both cluster_template_attr and bay_attr being set, the
+    ClusterTemplate will be checked first and then Bay if the attribute isn't
+    set on the ClusterTemplate.
 
     Parameters can also be set as 'required'. If a required parameter
     isn't set, a RequiredArgumentNotProvided exception will be raised.
     """
-    def __init__(self, heat_param, baymodel_attr=None,
+    def __init__(self, heat_param, cluster_template_attr=None,
                  bay_attr=None, required=False,
                  param_type=lambda x: x):
         self.heat_param = heat_param
-        self.baymodel_attr = baymodel_attr
+        self.cluster_template_attr = cluster_template_attr
         self.bay_attr = bay_attr
         self.required = required
         self.param_type = param_type
 
-    def set_param(self, params, baymodel, bay):
+    def set_param(self, params, cluster_template, bay):
         value = None
 
-        if (self.baymodel_attr and
-                getattr(baymodel, self.baymodel_attr, None) is not None):
-            value = getattr(baymodel, self.baymodel_attr)
+        if (self.cluster_template_attr and
+                getattr(cluster_template, self.cluster_template_attr, None)
+                is not None):
+            value = getattr(cluster_template, self.cluster_template_attr)
         elif (self.bay_attr and
                 getattr(bay, self.bay_attr, None) is not None):
             value = getattr(bay, self.bay_attr)
@@ -112,7 +113,7 @@ class OutputMapping(object):
         self.bay_attr = bay_attr
         self.heat_output = heat_output
 
-    def set_output(self, stack, baymodel, bay):
+    def set_output(self, stack, cluster_template, bay):
         if self.bay_attr is None:
             return
 
@@ -268,11 +269,12 @@ class TemplateDefinition(object):
 
         return None
 
-    def get_params(self, context, baymodel, bay, **kwargs):
-        """Pulls template parameters from Baymodel and/or Bay.
+    def get_params(self, context, cluster_template, bay, **kwargs):
+        """Pulls template parameters from ClusterTemplate and/or Bay.
 
         :param context: Context to pull template parameters for
-        :param baymodel: Baymodel to pull template parameters from
+        :param cluster_template: ClusterTemplate to pull template parameters
+         from
         :param bay: Bay to pull template parameters from
         :param extra_params: Any extra params to be provided to the template
 
@@ -281,45 +283,45 @@ class TemplateDefinition(object):
         template_params = dict()
 
         for mapping in self.param_mappings:
-            mapping.set_param(template_params, baymodel, bay)
+            mapping.set_param(template_params, cluster_template, bay)
 
         if 'extra_params' in kwargs:
             template_params.update(kwargs.get('extra_params'))
 
         return template_params
 
-    def get_env_files(self, baymodel):
-        """Collects stack environment files based upon Baymodel attributes.
+    def get_env_files(self, cluster_template):
+        """Gets stack environment files based upon ClusterTemplate attributes.
 
         Base implementation returns no files (empty list). Meant to be
         overridden by subclasses.
 
-        :param baymodel: Baymodel to collect environment files for
+        :param cluster_template: ClusterTemplate to grab environment files for
 
         :return: list of relative paths to environment files
         """
         return []
 
-    def get_heat_param(self, bay_attr=None, baymodel_attr=None):
+    def get_heat_param(self, bay_attr=None, cluster_template_attr=None):
         """Returns stack param name.
 
-        Return stack param name using bay and baymodel attributes
+        Return stack param name using bay and cluster_template attributes
         :param bay_attr bay attribute from which it maps to stack attribute
-        :param baymodel_attr baymodel attribute from which it maps
-         to stack attribute
+        :param cluster_template_attr cluster_template attribute from which it
+         maps to stack attribute
 
         :return stack parameter name or None
         """
         for mapping in self.param_mappings:
             if (mapping.bay_attr == bay_attr and
-                    mapping.baymodel_attr == baymodel_attr):
+                    mapping.cluster_template_attr == cluster_template_attr):
                 return mapping.heat_param
 
         return None
 
-    def update_outputs(self, stack, baymodel, bay):
+    def update_outputs(self, stack, cluster_template, bay):
         for output in self.output_mappings:
-            output.set_output(stack, baymodel, bay)
+            output.set_output(stack, cluster_template, bay)
 
     @abc.abstractproperty
     def driver_module_path(self):
@@ -329,10 +331,10 @@ class TemplateDefinition(object):
     def template_path(self):
         pass
 
-    def extract_definition(self, context, baymodel, bay, **kwargs):
+    def extract_definition(self, context, cluster_template, bay, **kwargs):
         return (self.template_path,
-                self.get_params(context, baymodel, bay, **kwargs),
-                self.get_env_files(baymodel))
+                self.get_params(context, cluster_template, bay, **kwargs),
+                self.get_env_files(cluster_template))
 
 
 class BaseTemplateDefinition(TemplateDefinition):
@@ -341,18 +343,18 @@ class BaseTemplateDefinition(TemplateDefinition):
         self._osc = None
 
         self.add_parameter('ssh_key_name',
-                           baymodel_attr='keypair_id',
+                           cluster_template_attr='keypair_id',
                            required=True)
         self.add_parameter('server_image',
-                           baymodel_attr='image_id')
+                           cluster_template_attr='image_id')
         self.add_parameter('dns_nameserver',
-                           baymodel_attr='dns_nameserver')
+                           cluster_template_attr='dns_nameserver')
         self.add_parameter('http_proxy',
-                           baymodel_attr='http_proxy')
+                           cluster_template_attr='http_proxy')
         self.add_parameter('https_proxy',
-                           baymodel_attr='https_proxy')
+                           cluster_template_attr='https_proxy')
         self.add_parameter('no_proxy',
-                           baymodel_attr='no_proxy')
+                           cluster_template_attr='no_proxy')
         self.add_parameter('number_of_masters',
                            bay_attr='master_count')
 
@@ -369,7 +371,7 @@ class BaseTemplateDefinition(TemplateDefinition):
             self._osc = clients.OpenStackClients(context)
         return self._osc
 
-    def get_params(self, context, baymodel, bay, **kwargs):
+    def get_params(self, context, cluster_template, bay, **kwargs):
         osc = self.get_osc(context)
 
         extra_params = kwargs.pop('extra_params', {})
@@ -381,7 +383,7 @@ class BaseTemplateDefinition(TemplateDefinition):
         extra_params['auth_url'] = context.auth_url
 
         return super(BaseTemplateDefinition,
-                     self).get_params(context, baymodel, bay,
+                     self).get_params(context, cluster_template, bay,
                                       extra_params=extra_params,
                                       **kwargs)
 
