@@ -8,7 +8,7 @@ RUN \
 
 WORKDIR /build
 
-ENV PATH="/build/dib-utils/bin:$PATH" ELEMENTS_PATH="magnum/magnum/templates/mesos/elements" DIB_RELEASE=trusty
+ENV PATH="/build/dib-utils/bin:$PATH" ELEMENTS_PATH="magnum/magnum/drivers/mesos_ubuntu_v1/image" DIB_RELEASE=trusty
 
 RUN git clone https://git.openstack.org/openstack/magnum
 RUN git clone https://git.openstack.org/openstack/diskimage-builder.git
