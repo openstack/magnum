@@ -611,7 +611,7 @@ Building and Using a Mesos Cluster
 
 Provisioning a mesos cluster requires a Ubuntu-based image with some packages
 pre-installed. To build and upload such image, please refer to
-`<http://docs.openstack.org/developer/magnum/dev/mesos.html>`_
+`<http://docs.openstack.org/developer/magnum/userguide.html#building-mesos-image>`_
 
 Alternatively, you can download and upload a pre-built image::
 
