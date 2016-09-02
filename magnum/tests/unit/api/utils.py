@@ -30,13 +30,13 @@ def remove_internal(values, internal):
 
 
 def baymodel_post_data(**kw):
-    baymodel = utils.get_test_baymodel(**kw)
+    baymodel = utils.get_test_cluster_template(**kw)
     internal = baymodel_controller.BayModelPatchType.internal_attrs()
     return remove_internal(baymodel, internal)
 
 
 def cluster_template_post_data(**kw):
-    cluster_template = utils.get_test_baymodel(**kw)
+    cluster_template = utils.get_test_cluster_template(**kw)
     internal = cluster_tmp_ctrl.ClusterTemplatePatchType.internal_attrs()
     return remove_internal(cluster_template, internal)
 

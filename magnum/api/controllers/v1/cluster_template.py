@@ -142,7 +142,7 @@ class ClusterTemplate(base.APIBase):
 
     def __init__(self, **kwargs):
         self.fields = []
-        for field in objects.BayModel.fields:
+        for field in objects.ClusterTemplate.fields:
             # Skip fields we do not expose.
             if not hasattr(self, field):
                 continue
@@ -255,13 +255,12 @@ class ClusterTemplatesController(base.Controller):
 
         marker_obj = None
         if marker:
-            marker_obj = objects.BayModel.get_by_uuid(pecan.request.context,
-                                                      marker)
+            marker_obj = objects.ClusterTemplate.get_by_uuid(
+                pecan.request.context, marker)
 
-        cluster_templates = objects.BayModel.list(pecan.request.context, limit,
-                                                  marker_obj,
-                                                  sort_key=sort_key,
-                                                  sort_dir=sort_dir)
+        cluster_templates = objects.ClusterTemplate.list(
+            pecan.request.context, limit, marker_obj, sort_key=sort_key,
+            sort_dir=sort_dir)
 
         return ClusterTemplateCollection.convert_with_links(cluster_templates,
                                                             limit,
@@ -319,7 +318,7 @@ class ClusterTemplatesController(base.Controller):
         ClusterTemplate.
         """
         context = pecan.request.context
-        cluster_template = api_utils.get_resource('BayModel',
+        cluster_template = api_utils.get_resource('ClusterTemplate',
                                                   cluster_template_ident)
         if not cluster_template.public:
             policy.enforce(context, 'clustertemplate:get', cluster_template,
@@ -360,8 +359,8 @@ class ClusterTemplatesController(base.Controller):
         name = arg_name or self._generate_name_for_cluster_template(context)
         cluster_template_dict['name'] = name
 
-        new_cluster_template = objects.BayModel(context,
-                                                **cluster_template_dict)
+        new_cluster_template = objects.ClusterTemplate(context,
+                                                       **cluster_template_dict)
         new_cluster_template.create()
         # Set the HTTP Location Header
         pecan.response.location = link.build_url('clustertemplates',
@@ -382,7 +381,7 @@ class ClusterTemplatesController(base.Controller):
         ClusterTemplate.
         """
         context = pecan.request.context
-        cluster_template = api_utils.get_resource('BayModel',
+        cluster_template = api_utils.get_resource('ClusterTemplate',
                                                   cluster_template_ident)
         policy.enforce(context, 'clustertemplate:update', cluster_template,
                        action='clustertemplate:update')
@@ -404,7 +403,7 @@ class ClusterTemplatesController(base.Controller):
                 raise exception.ClusterTemplatePublishDenied()
 
         # Update only the fields that have changed
-        for field in objects.BayModel.fields:
+        for field in objects.ClusterTemplate.fields:
             try:
                 patch_val = getattr(new_cluster_template, field)
             except AttributeError:
@@ -426,7 +425,7 @@ class ClusterTemplatesController(base.Controller):
          ClusterTemplate.
         """
         context = pecan.request.context
-        cluster_template = api_utils.get_resource('BayModel',
+        cluster_template = api_utils.get_resource('ClusterTemplate',
                                                   cluster_template_ident)
         policy.enforce(context, 'clustertemplate:delete', cluster_template,
                        action='clustertemplate:delete')

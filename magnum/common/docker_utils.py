@@ -76,11 +76,11 @@ def is_docker_api_version_atleast(docker, version):
 
 @contextlib.contextmanager
 def docker_for_bay(context, bay):
-    baymodel = conductor_utils.retrieve_baymodel(context, bay)
+    cluster_template = conductor_utils.retrieve_cluster_template(context, bay)
 
     ca_cert, magnum_key, magnum_cert = None, None, None
     client_kwargs = dict()
-    if not baymodel.tls_disabled:
+    if not cluster_template.tls_disabled:
         (ca_cert, magnum_key,
          magnum_cert) = cert_manager.create_client_files(bay)
         client_kwargs['ca_cert'] = ca_cert.name

@@ -23,24 +23,24 @@ from magnum.tests.unit.db import base
 class SqlAlchemyCustomTypesTestCase(base.DbTestCase):
 
     def test_JSONEncodedDict_default_value(self):
-        # Create baymodel w/o labels
-        baymodel1_id = uuidutils.generate_uuid()
-        self.dbapi.create_baymodel({'uuid': baymodel1_id})
-        baymodel1 = sa_api.model_query(
-            models.BayModel).filter_by(uuid=baymodel1_id).one()
-        self.assertEqual({}, baymodel1.labels)
+        # Create ClusterTemplate w/o labels
+        cluster_template1_id = uuidutils.generate_uuid()
+        self.dbapi.create_cluster_template({'uuid': cluster_template1_id})
+        cluster_template1 = sa_api.model_query(
+            models.ClusterTemplate).filter_by(uuid=cluster_template1_id).one()
+        self.assertEqual({}, cluster_template1.labels)
 
-        # Create baymodel with labels
-        baymodel2_id = uuidutils.generate_uuid()
-        self.dbapi.create_baymodel(
-            {'uuid': baymodel2_id, 'labels': {'bar': 'foo'}})
-        baymodel2 = sa_api.model_query(
-            models.BayModel).filter_by(uuid=baymodel2_id).one()
-        self.assertEqual('foo', baymodel2.labels['bar'])
+        # Create ClusterTemplate with labels
+        cluster_template2_id = uuidutils.generate_uuid()
+        self.dbapi.create_cluster_template(
+            {'uuid': cluster_template2_id, 'labels': {'bar': 'foo'}})
+        cluster_template2 = sa_api.model_query(
+            models.ClusterTemplate).filter_by(uuid=cluster_template2_id).one()
+        self.assertEqual('foo', cluster_template2.labels['bar'])
 
     def test_JSONEncodedDict_type_check(self):
         self.assertRaises(db_exc.DBError,
-                          self.dbapi.create_baymodel,
+                          self.dbapi.create_cluster_template,
                           {'labels':
                            ['this is not a dict']})
 

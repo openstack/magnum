@@ -56,20 +56,20 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertEqual([], response['baymodels'])
 
     def test_one(self):
-        baymodel = obj_utils.create_test_baymodel(self.context)
+        baymodel = obj_utils.create_test_cluster_template(self.context)
         response = self.get_json('/baymodels')
         self.assertEqual(baymodel.uuid, response['baymodels'][0]["uuid"])
         self._verify_attrs(self._baymodel_attrs,
                            response['baymodels'][0])
 
     def test_get_one(self):
-        baymodel = obj_utils.create_test_baymodel(self.context)
+        baymodel = obj_utils.create_test_cluster_template(self.context)
         response = self.get_json('/baymodels/%s' % baymodel['uuid'])
         self.assertEqual(baymodel.uuid, response['uuid'])
         self._verify_attrs(self._baymodel_attrs, response)
 
     def test_get_one_by_name(self):
-        baymodel = obj_utils.create_test_baymodel(self.context)
+        baymodel = obj_utils.create_test_cluster_template(self.context)
         response = self.get_json('/baymodels/%s' % baymodel['name'])
         self.assertEqual(baymodel.uuid, response['uuid'])
         self._verify_attrs(self._baymodel_attrs, response)
@@ -83,10 +83,10 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertTrue(response.json['errors'])
 
     def test_get_one_by_name_multiple_baymodel(self):
-        obj_utils.create_test_baymodel(
+        obj_utils.create_test_cluster_template(
             self.context, name='test_baymodel',
             uuid=uuidutils.generate_uuid())
-        obj_utils.create_test_baymodel(
+        obj_utils.create_test_cluster_template(
             self.context, name='test_baymodel',
             uuid=uuidutils.generate_uuid())
         response = self.get_json(
@@ -99,7 +99,7 @@ class TestListBayModel(api_base.FunctionalTest):
     def test_get_all_with_pagination_marker(self):
         bm_list = []
         for id_ in range(4):
-            baymodel = obj_utils.create_test_baymodel(
+            baymodel = obj_utils.create_test_cluster_template(
                 self.context, id=id_,
                 uuid=uuidutils.generate_uuid())
             bm_list.append(baymodel)
@@ -110,7 +110,7 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertEqual(bm_list[-1].uuid, response['baymodels'][0]['uuid'])
 
     def test_detail(self):
-        baymodel = obj_utils.create_test_baymodel(self.context)
+        baymodel = obj_utils.create_test_cluster_template(self.context)
         response = self.get_json('/baymodels/detail')
         self.assertEqual(baymodel.uuid, response['baymodels'][0]["uuid"])
         self._verify_attrs(self._baymodel_attrs,
@@ -119,7 +119,7 @@ class TestListBayModel(api_base.FunctionalTest):
     def test_detail_with_pagination_marker(self):
         bm_list = []
         for id_ in range(4):
-            baymodel = obj_utils.create_test_baymodel(
+            baymodel = obj_utils.create_test_cluster_template(
                 self.context, id=id_,
                 uuid=uuidutils.generate_uuid())
             bm_list.append(baymodel)
@@ -132,7 +132,7 @@ class TestListBayModel(api_base.FunctionalTest):
                            response['baymodels'][0])
 
     def test_detail_against_single(self):
-        baymodel = obj_utils.create_test_baymodel(self.context)
+        baymodel = obj_utils.create_test_cluster_template(self.context)
         response = self.get_json('/baymodels/%s/detail' % baymodel['uuid'],
                                  expect_errors=True)
         self.assertEqual(404, response.status_int)
@@ -140,7 +140,7 @@ class TestListBayModel(api_base.FunctionalTest):
     def test_many(self):
         bm_list = []
         for id_ in range(5):
-            baymodel = obj_utils.create_test_baymodel(
+            baymodel = obj_utils.create_test_cluster_template(
                 self.context, id=id_,
                 uuid=uuidutils.generate_uuid())
             bm_list.append(baymodel.uuid)
@@ -151,7 +151,7 @@ class TestListBayModel(api_base.FunctionalTest):
 
     def test_links(self):
         uuid = uuidutils.generate_uuid()
-        obj_utils.create_test_baymodel(self.context, id=1, uuid=uuid)
+        obj_utils.create_test_cluster_template(self.context, id=1, uuid=uuid)
         response = self.get_json('/baymodels/%s' % uuid)
         self.assertIn('links', response.keys())
         self.assertEqual(2, len(response['links']))
@@ -162,8 +162,8 @@ class TestListBayModel(api_base.FunctionalTest):
 
     def test_collection_links(self):
         for id_ in range(5):
-            obj_utils.create_test_baymodel(self.context, id=id_,
-                                           uuid=uuidutils.generate_uuid())
+            obj_utils.create_test_cluster_template(
+                self.context, id=id_, uuid=uuidutils.generate_uuid())
         response = self.get_json('/baymodels/?limit=3')
         self.assertEqual(3, len(response['baymodels']))
 
@@ -173,8 +173,8 @@ class TestListBayModel(api_base.FunctionalTest):
     def test_collection_links_default_limit(self):
         cfg.CONF.set_override('max_limit', 3, 'api')
         for id_ in range(5):
-            obj_utils.create_test_baymodel(self.context, id=id_,
-                                           uuid=uuidutils.generate_uuid())
+            obj_utils.create_test_cluster_template(
+                self.context, id=id_, uuid=uuidutils.generate_uuid())
         response = self.get_json('/baymodels')
         self.assertEqual(3, len(response['baymodels']))
 
@@ -189,7 +189,7 @@ class TestPatch(api_base.FunctionalTest):
         p = mock.patch.object(attr_validator, 'validate_os_resources')
         self.mock_valid_os_res = p.start()
         self.addCleanup(p.stop)
-        self.baymodel = obj_utils.create_test_baymodel(
+        self.baymodel = obj_utils.create_test_cluster_template(
             self.context,
             name='bay_model_example_A',
             image_id='nerdherd',
@@ -218,7 +218,7 @@ class TestPatch(api_base.FunctionalTest):
         self.assertTrue(response.json['errors'])
 
     def test_update_baymodel_with_bay(self):
-        baymodel = obj_utils.create_test_baymodel(self.context)
+        baymodel = obj_utils.create_test_cluster_template(self.context)
         obj_utils.create_test_bay(self.context, baymodel_id=baymodel.uuid)
 
         response = self.patch_json('/baymodels/%s' % baymodel.uuid,
@@ -252,7 +252,7 @@ class TestPatch(api_base.FunctionalTest):
                             'op': 'replace'}])
 
     def test_update_baymodel_with_bay_allow_update(self):
-        baymodel = obj_utils.create_test_baymodel(self.context)
+        baymodel = obj_utils.create_test_cluster_template(self.context)
         obj_utils.create_test_bay(self.context, baymodel_id=baymodel.uuid)
         response = self.patch_json('/baymodels/%s' % baymodel.uuid,
                                    [{'path': '/public',
@@ -264,7 +264,7 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(response['public'], True)
 
     def test_update_baymodel_with_bay_not_allow_update(self):
-        baymodel = obj_utils.create_test_baymodel(self.context)
+        baymodel = obj_utils.create_test_cluster_template(self.context)
         obj_utils.create_test_bay(self.context, baymodel_id=baymodel.uuid)
         response = self.patch_json('/baymodels/%s' % baymodel.uuid,
                                    [{'path': '/name',
@@ -474,8 +474,9 @@ class TestPost(api_base.FunctionalTest):
     @mock.patch('magnum.api.attr_validator.validate_image')
     def test_create_baymodel_set_project_id_and_user_id(self,
                                                         mock_image_data):
-        with mock.patch.object(self.dbapi, 'create_baymodel',
-                               wraps=self.dbapi.create_baymodel) as cc_mock:
+        with mock.patch.object(
+                self.dbapi, 'create_cluster_template',
+                wraps=self.dbapi.create_cluster_template) as cc_mock:
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.baymodel_post_data()
@@ -489,8 +490,9 @@ class TestPost(api_base.FunctionalTest):
     @mock.patch('magnum.api.attr_validator.validate_image')
     def test_create_baymodel_doesnt_contain_id(self,
                                                mock_image_data):
-        with mock.patch.object(self.dbapi, 'create_baymodel',
-                               wraps=self.dbapi.create_baymodel) as cc_mock:
+        with mock.patch.object(
+                self.dbapi, 'create_cluster_template',
+                wraps=self.dbapi.create_cluster_template) as cc_mock:
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.baymodel_post_data(image_id='my-image')
@@ -502,8 +504,9 @@ class TestPost(api_base.FunctionalTest):
 
     def _create_baymodel_raises_app_error(self, **kwargs):
         # Create mock for db and image data
-        with mock.patch.object(self.dbapi, 'create_baymodel',
-                               wraps=self.dbapi.create_baymodel) as cc_mock,\
+        with mock.patch.object(
+                self.dbapi, 'create_cluster_template',
+                wraps=self.dbapi.create_cluster_template) as cc_mock,\
             mock.patch('magnum.api.attr_validator.validate_image')\
                 as mock_image_data:
             mock_image_data.return_value = {'name': 'mock_name',
@@ -561,8 +564,9 @@ class TestPost(api_base.FunctionalTest):
 
     @mock.patch('magnum.api.attr_validator.validate_image')
     def test_create_baymodel_with_labels(self, mock_image_data):
-        with mock.patch.object(self.dbapi, 'create_baymodel',
-                               wraps=self.dbapi.create_baymodel) as cc_mock:
+        with mock.patch.object(
+                self.dbapi, 'create_cluster_template',
+                wraps=self.dbapi.create_cluster_template) as cc_mock:
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.baymodel_post_data(labels={'key1': 'val1',
@@ -576,8 +580,9 @@ class TestPost(api_base.FunctionalTest):
     @mock.patch('magnum.api.attr_validator.validate_image')
     def test_create_baymodel_with_docker_volume_size(self,
                                                      mock_image_data):
-        with mock.patch.object(self.dbapi, 'create_baymodel',
-                               wraps=self.dbapi.create_baymodel) as cc_mock:
+        with mock.patch.object(
+                self.dbapi, 'create_cluster_template',
+                wraps=self.dbapi.create_cluster_template) as cc_mock:
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.baymodel_post_data(docker_volume_size=99)
@@ -589,8 +594,9 @@ class TestPost(api_base.FunctionalTest):
 
     @mock.patch('magnum.api.attr_validator.validate_image')
     def test_create_baymodel_with_overlay(self, mock_image_data):
-        with mock.patch.object(self.dbapi, 'create_baymodel',
-                               wraps=self.dbapi.create_baymodel) as cc_mock:
+        with mock.patch.object(
+                self.dbapi, 'create_cluster_template',
+                wraps=self.dbapi.create_cluster_template) as cc_mock:
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.baymodel_post_data(
@@ -617,8 +623,10 @@ class TestPost(api_base.FunctionalTest):
                                         'os_distro': 'fedora-atomic'}
         for k, v in baymodel_config_dict.items():
                     cfg.CONF.set_override(k, v, 'cluster_template')
-        with mock.patch.object(self.dbapi, 'create_baymodel',
-                               wraps=self.dbapi.create_baymodel) as cc_mock:
+        with mock.patch.object(
+                self.dbapi, 'create_cluster_template',
+                wraps=self.dbapi.create_cluster_template) as cc_mock:
+
             bdict = apiutils.baymodel_post_data(**baymodel_dict)
             response = self.post_json('/baymodels', bdict,
                                       expect_errors=expect_errors)
@@ -674,8 +682,9 @@ class TestPost(api_base.FunctionalTest):
     @mock.patch('magnum.api.attr_validator.validate_image')
     def test_create_baymodel_with_volume_driver(self,
                                                 mock_image_data):
-        with mock.patch.object(self.dbapi, 'create_baymodel',
-                               wraps=self.dbapi.create_baymodel) as cc_mock:
+        with mock.patch.object(
+                self.dbapi, 'create_cluster_template',
+                wraps=self.dbapi.create_cluster_template) as cc_mock:
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.baymodel_post_data(volume_driver='rexray')
@@ -688,8 +697,9 @@ class TestPost(api_base.FunctionalTest):
     @mock.patch('magnum.api.attr_validator.validate_image')
     def test_create_baymodel_with_no_volume_driver(self,
                                                    mock_image_data):
-        with mock.patch.object(self.dbapi, 'create_baymodel',
-                               wraps=self.dbapi.create_baymodel) as cc_mock:
+        with mock.patch.object(
+                self.dbapi, 'create_cluster_template',
+                wraps=self.dbapi.create_cluster_template) as cc_mock:
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.baymodel_post_data()
@@ -703,8 +713,9 @@ class TestPost(api_base.FunctionalTest):
     @mock.patch.object(magnum_policy, 'enforce')
     def test_create_baymodel_public_success(self, mock_policy,
                                             mock_image_data):
-        with mock.patch.object(self.dbapi, 'create_baymodel',
-                               wraps=self.dbapi.create_baymodel) as cc_mock:
+        with mock.patch.object(
+                self.dbapi, 'create_cluster_template',
+                wraps=self.dbapi.create_cluster_template) as cc_mock:
             mock_policy.return_value = True
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
@@ -721,8 +732,8 @@ class TestPost(api_base.FunctionalTest):
     @mock.patch.object(magnum_policy, 'enforce')
     def test_create_baymodel_public_fail(self, mock_policy,
                                          mock_image_data):
-        with mock.patch.object(self.dbapi, 'create_baymodel',
-                               wraps=self.dbapi.create_baymodel):
+        with mock.patch.object(self.dbapi, 'create_cluster_template',
+                               wraps=self.dbapi.create_cluster_template):
             # make policy enforcement fail
             mock_policy.return_value = False
             mock_image_data.return_value = {'name': 'mock_name',
@@ -734,8 +745,9 @@ class TestPost(api_base.FunctionalTest):
     @mock.patch.object(magnum_policy, 'enforce')
     def test_create_baymodel_public_not_set(self, mock_policy,
                                             mock_image_data):
-        with mock.patch.object(self.dbapi, 'create_baymodel',
-                               wraps=self.dbapi.create_baymodel) as cc_mock:
+        with mock.patch.object(
+                self.dbapi, 'create_cluster_template',
+                wraps=self.dbapi.create_cluster_template) as cc_mock:
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.baymodel_post_data(public=False)
@@ -875,8 +887,8 @@ class TestPost(api_base.FunctionalTest):
 
     @mock.patch('magnum.api.attr_validator.validate_image')
     def test_create_baymodel_without_name(self, mock_image_data):
-        with mock.patch.object(self.dbapi, 'create_baymodel',
-                               wraps=self.dbapi.create_baymodel):
+        with mock.patch.object(self.dbapi, 'create_cluster_template',
+                               wraps=self.dbapi.create_cluster_template):
             mock_image_data.return_value = {'name': 'mock_name',
                                             'os_distro': 'fedora-atomic'}
             bdict = apiutils.baymodel_post_data()
@@ -889,7 +901,7 @@ class TestPost(api_base.FunctionalTest):
 class TestDelete(api_base.FunctionalTest):
 
     def test_delete_baymodel(self):
-        baymodel = obj_utils.create_test_baymodel(self.context)
+        baymodel = obj_utils.create_test_cluster_template(self.context)
         self.delete('/baymodels/%s' % baymodel.uuid)
         response = self.get_json('/baymodels/%s' % baymodel.uuid,
                                  expect_errors=True)
@@ -898,7 +910,7 @@ class TestDelete(api_base.FunctionalTest):
         self.assertTrue(response.json['errors'])
 
     def test_delete_baymodel_with_bay(self):
-        baymodel = obj_utils.create_test_baymodel(self.context)
+        baymodel = obj_utils.create_test_cluster_template(self.context)
         obj_utils.create_test_bay(self.context, baymodel_id=baymodel.uuid)
         response = self.delete('/baymodels/%s' % baymodel.uuid,
                                expect_errors=True)
@@ -915,7 +927,7 @@ class TestDelete(api_base.FunctionalTest):
         self.assertTrue(response.json['errors'])
 
     def test_delete_baymodel_with_name(self):
-        baymodel = obj_utils.create_test_baymodel(self.context)
+        baymodel = obj_utils.create_test_cluster_template(self.context)
         response = self.delete('/baymodels/%s' % baymodel['name'],
                                expect_errors=True)
         self.assertEqual(204, response.status_int)
@@ -927,10 +939,10 @@ class TestDelete(api_base.FunctionalTest):
         self.assertTrue(response.json['errors'])
 
     def test_delete_multiple_baymodel_by_name(self):
-        obj_utils.create_test_baymodel(self.context, name='test_baymodel',
-                                       uuid=uuidutils.generate_uuid())
-        obj_utils.create_test_baymodel(self.context, name='test_baymodel',
-                                       uuid=uuidutils.generate_uuid())
+        obj_utils.create_test_cluster_template(
+            self.context, name='test_baymodel', uuid=uuidutils.generate_uuid())
+        obj_utils.create_test_cluster_template(
+            self.context, name='test_baymodel', uuid=uuidutils.generate_uuid())
         response = self.delete('/baymodels/test_baymodel', expect_errors=True)
         self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
@@ -954,7 +966,7 @@ class TestBayModelPolicyEnforcement(api_base.FunctionalTest):
             expect_errors=True)
 
     def test_policy_disallow_get_one(self):
-        baymodel = obj_utils.create_test_baymodel(self.context)
+        baymodel = obj_utils.create_test_cluster_template(self.context)
         self._common_policy_check(
             "baymodel:get", self.get_json,
             '/baymodels/%s' % baymodel.uuid,
@@ -967,7 +979,7 @@ class TestBayModelPolicyEnforcement(api_base.FunctionalTest):
             expect_errors=True)
 
     def test_policy_disallow_update(self):
-        baymodel = obj_utils.create_test_baymodel(
+        baymodel = obj_utils.create_test_cluster_template(
             self.context,
             name='example_A',
             uuid=uuidutils.generate_uuid())
@@ -984,7 +996,7 @@ class TestBayModelPolicyEnforcement(api_base.FunctionalTest):
             expect_errors=True)
 
     def test_policy_disallow_delete(self):
-        baymodel = obj_utils.create_test_baymodel(self.context)
+        baymodel = obj_utils.create_test_cluster_template(self.context)
         self._common_policy_check(
             "baymodel:delete", self.delete,
             '/baymodels/%s' % baymodel.uuid, expect_errors=True)
@@ -999,14 +1011,14 @@ class TestBayModelPolicyEnforcement(api_base.FunctionalTest):
             response.json['errors'][0]['detail'])
 
     def test_policy_only_owner_get_one(self):
-        baymodel = obj_utils.create_test_baymodel(self.context,
-                                                  user_id='another')
+        baymodel = obj_utils.create_test_cluster_template(self.context,
+                                                          user_id='another')
         self._owner_check("baymodel:get", self.get_json,
                           '/baymodels/%s' % baymodel.uuid, expect_errors=True)
 
     def test_policy_only_owner_update(self):
-        baymodel = obj_utils.create_test_baymodel(self.context,
-                                                  user_id='another')
+        baymodel = obj_utils.create_test_cluster_template(self.context,
+                                                          user_id='another')
         self._owner_check(
             "baymodel:update", self.patch_json,
             '/baymodels/%s' % baymodel.uuid,
@@ -1014,8 +1026,8 @@ class TestBayModelPolicyEnforcement(api_base.FunctionalTest):
             expect_errors=True)
 
     def test_policy_only_owner_delete(self):
-        baymodel = obj_utils.create_test_baymodel(self.context,
-                                                  user_id='another')
+        baymodel = obj_utils.create_test_cluster_template(self.context,
+                                                          user_id='another')
         self._owner_check(
             "baymodel:delete", self.delete, '/baymodels/%s' % baymodel.uuid,
             expect_errors=True)

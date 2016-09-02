@@ -85,11 +85,11 @@ def enforce_bay_types(*bay_types):
             else:
                 bay = objects.Bay.get_by_name(pecan.request.context, bay_ident)
 
-        if bay.baymodel.coe not in bay_types:
+        if bay.cluster_template.coe not in bay_types:
             raise exception.InvalidParameterValue(_(
                 'Cannot fulfill request with a %(bay_type)s bay, '
                 'expecting a %(supported_bay_types)s bay.') %
-                {'bay_type': bay.baymodel.coe,
+                {'bay_type': bay.cluster_template.coe,
                  'supported_bay_types': '/'.join(bay_types)})
 
         return func(*args, **kwargs)
@@ -100,8 +100,8 @@ def enforce_bay_types(*bay_types):
 def enforce_network_driver_types_create():
     @decorator.decorator
     def wrapper(func, *args, **kwargs):
-        baymodel = args[1]
-        _enforce_network_driver_types(baymodel)
+        cluster_template = args[1]
+        _enforce_network_driver_types(cluster_template)
         return func(*args, **kwargs)
 
     return wrapper
@@ -110,33 +110,35 @@ def enforce_network_driver_types_create():
 def enforce_network_driver_types_update():
     @decorator.decorator
     def wrapper(func, *args, **kwargs):
-        baymodel_ident = args[1]
+        cluster_template_ident = args[1]
         patch = args[2]
-        baymodel = api_utils.get_resource('BayModel', baymodel_ident)
+        cluster_template = api_utils.get_resource('ClusterTemplate',
+                                                  cluster_template_ident)
         try:
-            baymodel_dict = api_utils.apply_jsonpatch(baymodel.as_dict(),
-                                                      patch)
+            cluster_template_dict = api_utils.apply_jsonpatch(
+                cluster_template.as_dict(), patch)
         except api_utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)
-        baymodel = objects.BayModel(pecan.request.context, **baymodel_dict)
-        _enforce_network_driver_types(baymodel)
+        cluster_template = objects.ClusterTemplate(pecan.request.context,
+                                                   **cluster_template_dict)
+        _enforce_network_driver_types(cluster_template)
         return func(*args, **kwargs)
 
     return wrapper
 
 
-def _enforce_network_driver_types(baymodel):
-    validator = Validator.get_coe_validator(baymodel.coe)
-    if not baymodel.network_driver:
-        baymodel.network_driver = validator.default_network_driver
-    validator.validate_network_driver(baymodel.network_driver)
+def _enforce_network_driver_types(cluster_template):
+    validator = Validator.get_coe_validator(cluster_template.coe)
+    if not cluster_template.network_driver:
+        cluster_template.network_driver = validator.default_network_driver
+    validator.validate_network_driver(cluster_template.network_driver)
 
 
 def enforce_volume_driver_types_create():
     @decorator.decorator
     def wrapper(func, *args, **kwargs):
-        baymodel = args[1]
-        _enforce_volume_driver_types(baymodel.as_dict())
+        cluster_template = args[1]
+        _enforce_volume_driver_types(cluster_template.as_dict())
         return func(*args, **kwargs)
 
     return wrapper
@@ -145,8 +147,8 @@ def enforce_volume_driver_types_create():
 def enforce_volume_storage_size_create():
     @decorator.decorator
     def wrapper(func, *args, **kwargs):
-        baymodel = args[1]
-        _enforce_volume_storage_size(baymodel.as_dict())
+        cluster_template = args[1]
+        _enforce_volume_storage_size(cluster_template.as_dict())
         return func(*args, **kwargs)
 
     return wrapper
@@ -155,32 +157,33 @@ def enforce_volume_storage_size_create():
 def enforce_volume_driver_types_update():
     @decorator.decorator
     def wrapper(func, *args, **kwargs):
-        baymodel_ident = args[1]
+        cluster_template_ident = args[1]
         patch = args[2]
-        baymodel = api_utils.get_resource('BayModel', baymodel_ident)
+        cluster_template = api_utils.get_resource('ClusterTemplate',
+                                                  cluster_template_ident)
         try:
-            baymodel_dict = api_utils.apply_jsonpatch(baymodel.as_dict(),
-                                                      patch)
+            cluster_template_dict = api_utils.apply_jsonpatch(
+                cluster_template.as_dict(), patch)
         except api_utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)
-        _enforce_volume_driver_types(baymodel_dict)
+        _enforce_volume_driver_types(cluster_template_dict)
         return func(*args, **kwargs)
 
     return wrapper
 
 
-def _enforce_volume_driver_types(baymodel):
-    validator = Validator.get_coe_validator(baymodel['coe'])
-    if not baymodel.get('volume_driver'):
+def _enforce_volume_driver_types(cluster_template):
+    validator = Validator.get_coe_validator(cluster_template['coe'])
+    if not cluster_template.get('volume_driver'):
         return
-    validator.validate_volume_driver(baymodel['volume_driver'])
+    validator.validate_volume_driver(cluster_template['volume_driver'])
 
 
-def _enforce_volume_storage_size(baymodel):
-    if not baymodel.get('docker_volume_size'):
+def _enforce_volume_storage_size(cluster_template):
+    if not cluster_template.get('docker_volume_size'):
         return
-    volume_size = baymodel.get('docker_volume_size')
-    storage_driver = baymodel.get('docker_storage_driver')
+    volume_size = cluster_template.get('docker_volume_size')
+    storage_driver = cluster_template.get('docker_storage_driver')
     if storage_driver == 'devicemapper':
         if volume_size < 3:
             raise exception.InvalidParameterValue(

@@ -38,9 +38,10 @@ class TestHandler(db_base.DbTestCase):
     def setUp(self):
         super(TestHandler, self).setUp()
         self.handler = bay_conductor.Handler()
-        baymodel_dict = utils.get_test_baymodel()
-        self.baymodel = objects.BayModel(self.context, **baymodel_dict)
-        self.baymodel.create()
+        cluster_template_dict = utils.get_test_cluster_template()
+        self.cluster_template = objects.ClusterTemplate(
+            self.context, **cluster_template_dict)
+        self.cluster_template.create()
         bay_dict = utils.get_test_bay(node_count=1)
         self.bay = objects.Bay(self.context, **bay_dict)
         self.bay.create()
@@ -196,7 +197,7 @@ class TestHandler(db_base.DbTestCase):
         # baymodel_id. Here update self.bay.baymodel_id so bay.obj_get_changes
         # will get notice that baymodel_id is updated and will update it
         # in db.
-        self.bay.baymodel_id = self.baymodel.uuid
+        self.bay.baymodel_id = self.cluster_template.uuid
         bay = self.handler.bay_create(self.context,
                                       self.bay, timeout)
 
@@ -378,7 +379,7 @@ class TestHandler(db_base.DbTestCase):
                                      mock_process_mult,
                                      mock_heat_poller_class):
         timeout = 15
-        self.bay.baymodel_id = self.baymodel.uuid
+        self.bay.baymodel_id = self.cluster_template.uuid
         bay_name = self.bay.name
         mock_short_id.generate_id.return_value = 'short_id'
         mock_poller = mock.MagicMock()
@@ -487,20 +488,23 @@ class TestHandler(db_base.DbTestCase):
 
 class TestHeatPoller(base.TestCase):
 
-    @patch('magnum.conductor.utils.retrieve_baymodel')
+    @patch('magnum.conductor.utils.retrieve_cluster_template')
     @patch('oslo_config.cfg')
     @patch('magnum.common.clients.OpenStackClients')
     def setup_poll_test(self, mock_openstack_client, cfg,
-                        mock_retrieve_baymodel):
+                        mock_retrieve_cluster_template):
         cfg.CONF.cluster_heat.max_attempts = 10
+
         bay = mock.MagicMock()
-        baymodel_dict = utils.get_test_baymodel(coe='kubernetes')
+        cluster_template_dict = utils.get_test_cluster_template(
+            coe='kubernetes')
         mock_heat_stack = mock.MagicMock()
         mock_heat_client = mock.MagicMock()
         mock_heat_client.stacks.get.return_value = mock_heat_stack
         mock_openstack_client.heat.return_value = mock_heat_client
-        baymodel = objects.BayModel(self.context, **baymodel_dict)
-        mock_retrieve_baymodel.return_value = baymodel
+        cluster_template = objects.ClusterTemplate(self.context,
+                                                   **cluster_template_dict)
+        mock_retrieve_cluster_template.return_value = cluster_template
         poller = bay_conductor.HeatPoller(mock_openstack_client, bay)
         poller.get_version_info = mock.MagicMock()
         return (mock_heat_stack, bay, poller)

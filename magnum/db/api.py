@@ -122,18 +122,18 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_baymodel_list(self, context, filters=None,
-                          limit=None, marker=None, sort_key=None,
-                          sort_dir=None):
-        """Get matching baymodels.
+    def get_cluster_template_list(self, context, filters=None,
+                                  limit=None, marker=None, sort_key=None,
+                                  sort_dir=None):
+        """Get matching ClusterTemplates.
 
-        Return a list of the specified columns for all baymodels that match the
-        specified filters.
+        Return a list of the specified columns for all ClusterTemplates that
+        match the specified filters.
 
         :param context: The security context
         :param filters: Filters to apply. Defaults to None.
 
-        :param limit: Maximum number of baymodels to return.
+        :param limit: Maximum number of ClusterTemplates to return.
         :param marker: the last item of the previous page; we return the next
                        result set.
         :param sort_key: Attribute by which results should be sorted.
@@ -143,12 +143,13 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def create_baymodel(self, values):
-        """Create a new baymodel.
+    def create_cluster_template(self, values):
+        """Create a new ClusterTemplate.
 
         :param values: A dict containing several items used to identify
-                       and track the baymodel, and several dicts which are
-                       passed into the Drivers when managing this baymodel.
+                       and track the ClusterTemplate, and several dicts which
+                       are passed into the Drivers when managing this
+                       ClusterTemplate.
                        For example:
 
                        ::
@@ -158,49 +159,49 @@ class Connection(object):
                          'name': 'example',
                          'type': 'virt'
                         }
-        :returns: A baymodel.
+        :returns: A ClusterTemplate.
         """
 
     @abc.abstractmethod
-    def get_baymodel_by_id(self, context, baymodel_id):
-        """Return a baymodel.
+    def get_cluster_template_by_id(self, context, cluster_template_id):
+        """Return a ClusterTemplate.
 
         :param context: The security context
-        :param baymodel_id: The id of a baymodel.
-        :returns: A baymodel.
+        :param cluster_template_id: The id of a ClusterTemplate.
+        :returns: A ClusterTemplate.
         """
 
     @abc.abstractmethod
-    def get_baymodel_by_uuid(self, context, baymodel_uuid):
-        """Return a baymodel.
+    def get_cluster_template_by_uuid(self, context, cluster_template_uuid):
+        """Return a ClusterTemplate.
 
         :param context: The security context
-        :param baymodel_uuid: The uuid of a baymodel.
-        :returns: A baymodel.
+        :param cluster_template_uuid: The uuid of a ClusterTemplate.
+        :returns: A ClusterTemplate.
         """
 
     @abc.abstractmethod
-    def get_baymodel_by_name(self, context, baymodel_name):
-        """Return a baymodel.
+    def get_cluster_template_by_name(self, context, cluster_template_name):
+        """Return a ClusterTemplate.
 
         :param context: The security context
-        :param baymodel_name: The name of a baymodel.
-        :returns: A baymodel.
+        :param cluster_template_name: The name of a ClusterTemplate.
+        :returns: A ClusterTemplate.
         """
 
     @abc.abstractmethod
-    def destroy_baymodel(self, baymodel_id):
-        """Destroy a baymodel and all associated interfaces.
+    def destroy_cluster_template(self, cluster_template_id):
+        """Destroy a ClusterTemplate and all associated interfaces.
 
-        :param baymodel_id: The id or uuid of a baymodel.
+        :param cluster_template_id: The id or uuid of a ClusterTemplate.
         """
 
     @abc.abstractmethod
-    def update_baymodel(self, baymodel_id, values):
-        """Update properties of a baymodel.
+    def update_cluster_template(self, cluster_template_id, values):
+        """Update properties of a ClusterTemplate.
 
-        :param baymodel_id: The id or uuid of a baymodel.
-        :returns: A baymodel.
+        :param cluster_template_id: The id or uuid of a ClusterTemplate.
+        :returns: A ClusterTemplate.
         :raises: ClusterTemplateNotFound
         """
 

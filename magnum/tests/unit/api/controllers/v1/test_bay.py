@@ -53,7 +53,7 @@ class TestListBay(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestListBay, self).setUp()
-        obj_utils.create_test_baymodel(self.context)
+        obj_utils.create_test_cluster_template(self.context)
 
     def test_empty(self):
         response = self.get_json('/bays')
@@ -207,7 +207,8 @@ class TestPatch(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestPatch, self).setUp()
-        self.baymodel = obj_utils.create_test_baymodel(self.context)
+        self.cluster_template = obj_utils.create_test_cluster_template(
+            self.context)
         self.bay = obj_utils.create_test_bay(self.context,
                                              name='bay_example_A',
                                              node_count=3)
@@ -278,12 +279,12 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(404, response.status_code)
 
     def test_replace_baymodel_id_failed(self):
-        baymodel = obj_utils.create_test_baymodel(
+        cluster_template = obj_utils.create_test_cluster_template(
             self.context,
             uuid=uuidutils.generate_uuid())
         response = self.patch_json('/bays/%s' % self.bay.uuid,
                                    [{'path': '/baymodel_id',
-                                     'value': baymodel.uuid,
+                                     'value': cluster_template.uuid,
                                      'op': 'replace'}],
                                    expect_errors=True)
         self.assertEqual('application/json', response.content_type)
@@ -408,7 +409,8 @@ class TestPost(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestPost, self).setUp()
-        self.baymodel = obj_utils.create_test_baymodel(self.context)
+        self.cluster_template = obj_utils.create_test_cluster_template(
+            self.context)
         p = mock.patch.object(rpcapi.API, 'bay_create')
         self.mock_bay_create = p.start()
         self.mock_bay_create.side_effect = self._simulate_rpc_bay_create
@@ -487,7 +489,7 @@ class TestPost(api_base.FunctionalTest):
         self.assertTrue(response.json['errors'])
 
     def test_create_bay_with_baymodel_name(self):
-        bdict = apiutils.bay_post_data(baymodel_id=self.baymodel.name)
+        bdict = apiutils.bay_post_data(baymodel_id=self.cluster_template.name)
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
@@ -733,18 +735,18 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
 
     def test_create_bay_with_no_lb_one_node(self):
-        baymodel = obj_utils.create_test_baymodel(
+        cluster_template = obj_utils.create_test_cluster_template(
             self.context, name='foo', uuid='foo', master_lb_enabled=False)
-        bdict = apiutils.bay_post_data(baymodel_id=baymodel.name,
+        bdict = apiutils.bay_post_data(baymodel_id=cluster_template.name,
                                        master_count=1)
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
 
     def test_create_bay_with_no_lb_multi_node(self):
-        baymodel = obj_utils.create_test_baymodel(
+        cluster_template = obj_utils.create_test_cluster_template(
             self.context, name='foo', uuid='foo', master_lb_enabled=False)
-        bdict = apiutils.bay_post_data(baymodel_id=baymodel.name,
+        bdict = apiutils.bay_post_data(baymodel_id=cluster_template.name,
                                        master_count=3)
         response = self.post_json('/bays', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
@@ -755,7 +757,8 @@ class TestDelete(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestDelete, self).setUp()
-        self.baymodel = obj_utils.create_test_baymodel(self.context)
+        self.cluster_template = obj_utils.create_test_cluster_template(
+            self.context)
         self.bay = obj_utils.create_test_bay(self.context)
         p = mock.patch.object(rpcapi.API, 'bay_delete')
         self.mock_bay_delete = p.start()
@@ -807,7 +810,7 @@ class TestBayPolicyEnforcement(api_base.FunctionalTest):
 
     def setUp(self):
         super(TestBayPolicyEnforcement, self).setUp()
-        obj_utils.create_test_baymodel(self.context)
+        obj_utils.create_test_cluster_template(self.context)
 
     def _common_policy_check(self, rule, func, *arg, **kwarg):
         self.policy.set_rules({rule: "project:non_fake"})

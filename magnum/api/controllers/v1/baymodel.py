@@ -141,7 +141,7 @@ class BayModel(base.APIBase):
 
     def __init__(self, **kwargs):
         self.fields = []
-        for field in objects.BayModel.fields:
+        for field in objects.ClusterTemplate.fields:
             # Skip fields we do not expose.
             if not hasattr(self, field):
                 continue
@@ -251,12 +251,12 @@ class BayModelsController(base.Controller):
 
         marker_obj = None
         if marker:
-            marker_obj = objects.BayModel.get_by_uuid(pecan.request.context,
-                                                      marker)
+            marker_obj = objects.ClusterTemplate.get_by_uuid(
+                pecan.request.context, marker)
 
-        baymodels = objects.BayModel.list(pecan.request.context, limit,
-                                          marker_obj, sort_key=sort_key,
-                                          sort_dir=sort_dir)
+        baymodels = objects.ClusterTemplate.list(pecan.request.context, limit,
+                                                 marker_obj, sort_key=sort_key,
+                                                 sort_dir=sort_dir)
 
         return BayModelCollection.convert_with_links(baymodels, limit,
                                                      url=resource_url,
@@ -311,7 +311,7 @@ class BayModelsController(base.Controller):
         :param baymodel_ident: UUID or logical name of a baymodel.
         """
         context = pecan.request.context
-        baymodel = api_utils.get_resource('BayModel', baymodel_ident)
+        baymodel = api_utils.get_resource('ClusterTemplate', baymodel_ident)
         if not baymodel.public:
             policy.enforce(context, 'baymodel:get', baymodel,
                            action='baymodel:get')
@@ -350,7 +350,7 @@ class BayModelsController(base.Controller):
         name = arg_name or self._generate_name_for_baymodel(context)
         baymodel_dict['name'] = name
 
-        new_baymodel = objects.BayModel(context, **baymodel_dict)
+        new_baymodel = objects.ClusterTemplate(context, **baymodel_dict)
         new_baymodel.create()
         # Set the HTTP Location Header
         pecan.response.location = link.build_url('baymodels',
@@ -368,7 +368,7 @@ class BayModelsController(base.Controller):
         :param patch: a json PATCH document to apply to this baymodel.
         """
         context = pecan.request.context
-        baymodel = api_utils.get_resource('BayModel', baymodel_ident)
+        baymodel = api_utils.get_resource('ClusterTemplate', baymodel_ident)
         policy.enforce(context, 'baymodel:update', baymodel,
                        action='baymodel:update')
         try:
@@ -388,7 +388,7 @@ class BayModelsController(base.Controller):
                 raise exception.ClusterTemplatePublishDenied()
 
         # Update only the fields that have changed
-        for field in objects.BayModel.fields:
+        for field in objects.ClusterTemplate.fields:
             try:
                 patch_val = getattr(new_baymodel, field)
             except AttributeError:
@@ -409,7 +409,7 @@ class BayModelsController(base.Controller):
         :param baymodel_ident: UUID or logical name of a baymodel.
         """
         context = pecan.request.context
-        baymodel = api_utils.get_resource('BayModel', baymodel_ident)
+        baymodel = api_utils.get_resource('ClusterTemplate', baymodel_ident)
         policy.enforce(context, 'baymodel:delete', baymodel,
                        action='baymodel:delete')
         baymodel.destroy()

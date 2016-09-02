@@ -26,7 +26,7 @@ from magnum.tests import base
 class TestBayConductorWithSwarm(base.TestCase):
     def setUp(self):
         super(TestBayConductorWithSwarm, self).setUp()
-        self.baymodel_dict = {
+        self.cluster_template_dict = {
             'image_id': 'image_id',
             'flavor_id': 'flavor_id',
             'master_flavor_id': 'master_flavor_id',
@@ -78,13 +78,15 @@ class TestBayConductorWithSwarm(base.TestCase):
         self.context.auth_url = 'http://192.168.10.10:5000/v3'
 
     @patch('requests.get')
-    @patch('magnum.objects.BayModel.get_by_uuid')
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     def test_extract_template_definition_all_values(
             self,
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get):
-        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
-        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        cluster_template = objects.ClusterTemplate(
+            self.context, **self.cluster_template_dict)
+        mock_objects_cluster_template_get_by_uuid.return_value = \
+            cluster_template
         expected_result = str('{"action":"get","node":{"key":"test","value":'
                               '"1","modifiedIndex":10,"createdIndex":10}}')
         mock_resp = mock.MagicMock()
@@ -134,14 +136,16 @@ class TestBayConductorWithSwarm(base.TestCase):
             env_files)
 
     @patch('requests.get')
-    @patch('magnum.objects.BayModel.get_by_uuid')
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     def test_extract_template_definition_with_registry(
             self,
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get):
-        self.baymodel_dict['registry_enabled'] = True
-        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
-        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        self.cluster_template_dict['registry_enabled'] = True
+        cluster_template = objects.ClusterTemplate(
+            self.context, **self.cluster_template_dict)
+        mock_objects_cluster_template_get_by_uuid.return_value = \
+            cluster_template
         expected_result = str('{"action":"get","node":{"key":"test","value":'
                               '"1","modifiedIndex":10,"createdIndex":10}}')
         mock_resp = mock.MagicMock()
@@ -197,10 +201,10 @@ class TestBayConductorWithSwarm(base.TestCase):
             env_files)
 
     @patch('requests.get')
-    @patch('magnum.objects.BayModel.get_by_uuid')
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     def test_extract_template_definition_only_required(
             self,
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get):
 
         not_required = ['image_id', 'flavor_id', 'dns_nameserver',
@@ -208,11 +212,13 @@ class TestBayConductorWithSwarm(base.TestCase):
                         'https_proxy', 'no_proxy', 'network_driver',
                         'master_flavor_id', 'docker_storage_driver']
         for key in not_required:
-            self.baymodel_dict[key] = None
+            self.cluster_template_dict[key] = None
         self.bay_dict['discovery_url'] = 'https://discovery.etcd.io/test'
 
-        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
-        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        cluster_template = objects.ClusterTemplate(
+            self.context, **self.cluster_template_dict)
+        mock_objects_cluster_template_get_by_uuid.return_value = \
+            cluster_template
         expected_result = str('{"action":"get","node":{"key":"test","value":'
                               '"1","modifiedIndex":10,"createdIndex":10}}')
         mock_resp = mock.MagicMock()
@@ -252,14 +258,16 @@ class TestBayConductorWithSwarm(base.TestCase):
             env_files)
 
     @patch('requests.get')
-    @patch('magnum.objects.BayModel.get_by_uuid')
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     def test_extract_template_definition_with_lb(
             self,
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get):
-        self.baymodel_dict['master_lb_enabled'] = True
-        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
-        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        self.cluster_template_dict['master_lb_enabled'] = True
+        cluster_template = objects.ClusterTemplate(
+            self.context, **self.cluster_template_dict)
+        mock_objects_cluster_template_get_by_uuid.return_value = \
+            cluster_template
         expected_result = str('{"action":"get","node":{"key":"test","value":'
                               '"1","modifiedIndex":10,"createdIndex":10}}')
         mock_resp = mock.MagicMock()
@@ -309,15 +317,17 @@ class TestBayConductorWithSwarm(base.TestCase):
             env_files)
 
     @patch('requests.get')
-    @patch('magnum.objects.BayModel.get_by_uuid')
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     def test_extract_template_definition_multi_master(
             self,
-            mock_objects_baymodel_get_by_uuid,
+            mock_objects_cluster_template_get_by_uuid,
             mock_get):
-        self.baymodel_dict['master_lb_enabled'] = True
+        self.cluster_template_dict['master_lb_enabled'] = True
         self.bay_dict['master_count'] = 2
-        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
-        mock_objects_baymodel_get_by_uuid.return_value = baymodel
+        cluster_template = objects.ClusterTemplate(
+            self.context, **self.cluster_template_dict)
+        mock_objects_cluster_template_get_by_uuid.return_value = \
+            cluster_template
         expected_result = str('{"action":"get","node":{"key":"test","value":'
                               '"2","modifiedIndex":10,"createdIndex":10}}')
         mock_resp = mock.MagicMock()
@@ -366,19 +376,22 @@ class TestBayConductorWithSwarm(base.TestCase):
             ['../../common/templates/environments/with_master_lb.yaml'],
             env_files)
 
-    @patch('magnum.conductor.utils.retrieve_baymodel')
+    @patch('magnum.conductor.utils.retrieve_cluster_template')
     @patch('oslo_config.cfg')
     @patch('magnum.common.clients.OpenStackClients')
     def setup_poll_test(self, mock_openstack_client, cfg,
-                        mock_retrieve_baymodel):
+                        mock_retrieve_cluster_template):
         cfg.CONF.cluster_heat.max_attempts = 10
+
         bay = mock.MagicMock()
         mock_heat_stack = mock.MagicMock()
         mock_heat_client = mock.MagicMock()
         mock_heat_client.stacks.get.return_value = mock_heat_stack
         mock_openstack_client.heat.return_value = mock_heat_client
-        baymodel = objects.BayModel(self.context, **self.baymodel_dict)
-        mock_retrieve_baymodel.return_value = baymodel
+        cluster_template = objects.ClusterTemplate(
+            self.context, **self.cluster_template_dict)
+        mock_retrieve_cluster_template.return_value = \
+            cluster_template
         poller = bay_conductor.HeatPoller(mock_openstack_client, bay)
         poller.get_version_info = mock.MagicMock()
         return (mock_heat_stack, bay, poller)

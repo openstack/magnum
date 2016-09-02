@@ -57,19 +57,19 @@ class MonitorsTestCase(base.TestCase):
         self.addCleanup(p.stop)
 
     def test_create_monitor_success(self):
-        self.bay.baymodel = obj_utils.get_test_baymodel(
+        self.bay.cluster_template = obj_utils.get_test_cluster_template(
             self.context, uuid=self.bay.baymodel_id, coe='swarm')
         monitor = monitors.create_monitor(self.context, self.bay)
         self.assertIsInstance(monitor, swarm_monitor.SwarmMonitor)
 
     def test_create_monitor_k8s_bay(self):
-        self.bay.baymodel = obj_utils.get_test_baymodel(
+        self.bay.cluster_template = obj_utils.get_test_cluster_template(
             self.context, uuid=self.bay.baymodel_id, coe='kubernetes')
         monitor = monitors.create_monitor(self.context, self.bay)
         self.assertIsInstance(monitor, k8s_monitor.K8sMonitor)
 
     def test_create_monitor_mesos_bay(self):
-        self.bay.baymodel = obj_utils.get_test_baymodel(
+        self.bay.cluster_template = obj_utils.get_test_cluster_template(
             self.context, uuid=self.bay.baymodel_id, coe='mesos')
         monitor = monitors.create_monitor(self.context, self.bay)
         self.assertIsInstance(monitor, mesos_monitor.MesosMonitor)

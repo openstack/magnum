@@ -88,20 +88,22 @@ class DbBayTestCase(base.DbTestCase):
                           sort_key='foo')
 
     def test_get_bay_list_with_filters(self):
-        bm1 = utils.get_test_baymodel(id=1, uuid=uuidutils.generate_uuid())
-        bm2 = utils.get_test_baymodel(id=2, uuid=uuidutils.generate_uuid())
-        self.dbapi.create_baymodel(bm1)
-        self.dbapi.create_baymodel(bm2)
+        ct1 = utils.get_test_cluster_template(id=1,
+                                              uuid=uuidutils.generate_uuid())
+        ct2 = utils.get_test_cluster_template(id=2,
+                                              uuid=uuidutils.generate_uuid())
+        self.dbapi.create_cluster_template(ct1)
+        self.dbapi.create_cluster_template(ct2)
 
         bay1 = utils.create_test_bay(
             name='bay-one',
             uuid=uuidutils.generate_uuid(),
-            baymodel_id=bm1['uuid'],
+            baymodel_id=ct1['uuid'],
             status=bay_status.CREATE_IN_PROGRESS)
         bay2 = utils.create_test_bay(
             name='bay-two',
             uuid=uuidutils.generate_uuid(),
-            baymodel_id=bm2['uuid'],
+            baymodel_id=ct2['uuid'],
             node_count=1,
             master_count=1,
             status=bay_status.UPDATE_IN_PROGRESS)
@@ -112,11 +114,11 @@ class DbBayTestCase(base.DbTestCase):
             status=bay_status.DELETE_IN_PROGRESS)
 
         res = self.dbapi.get_bay_list(self.context,
-                                      filters={'baymodel_id': bm1['uuid']})
+                                      filters={'baymodel_id': ct1['uuid']})
         self.assertEqual([bay1.id], [r.id for r in res])
 
         res = self.dbapi.get_bay_list(self.context,
-                                      filters={'baymodel_id': bm2['uuid']})
+                                      filters={'baymodel_id': ct2['uuid']})
         self.assertEqual([bay2.id], [r.id for r in res])
 
         res = self.dbapi.get_bay_list(self.context,

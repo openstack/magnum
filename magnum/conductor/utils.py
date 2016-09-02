@@ -21,7 +21,7 @@ from pycadf import resource
 from magnum.common import clients
 from magnum.common import rpc
 from magnum.objects import bay
-from magnum.objects import baymodel
+from magnum.objects import cluster_template
 
 
 def retrieve_bay(context, bay_ident):
@@ -31,8 +31,9 @@ def retrieve_bay(context, bay_ident):
         return bay.Bay.get_by_uuid(context, bay_ident)
 
 
-def retrieve_baymodel(context, bay):
-    return baymodel.BayModel.get_by_uuid(context, bay.baymodel_id)
+def retrieve_cluster_template(context, bay):
+    return cluster_template.ClusterTemplate.get_by_uuid(context,
+                                                        bay.baymodel_id)
 
 
 def retrieve_bay_uuid(context, bay_ident):
