@@ -22,7 +22,7 @@ DOCKER_PORT = '2376'
 
 class SwarmApiAddressOutputMapping(template_def.OutputMapping):
 
-    def set_output(self, stack, baymodel, bay):
+    def set_output(self, stack, cluster_template, bay):
         if self.bay_attr is None:
             return
 
@@ -54,23 +54,23 @@ class AtomicSwarmTemplateDefinition(template_def.BaseTemplateDefinition):
         self.add_parameter('number_of_nodes',
                            bay_attr='node_count')
         self.add_parameter('master_flavor',
-                           baymodel_attr='master_flavor_id')
+                           cluster_template_attr='master_flavor_id')
         self.add_parameter('node_flavor',
-                           baymodel_attr='flavor_id')
+                           cluster_template_attr='flavor_id')
         self.add_parameter('docker_volume_size',
-                           baymodel_attr='docker_volume_size')
+                           cluster_template_attr='docker_volume_size')
         self.add_parameter('external_network',
-                           baymodel_attr='external_network_id',
+                           cluster_template_attr='external_network_id',
                            required=True)
         self.add_parameter('network_driver',
-                           baymodel_attr='network_driver')
+                           cluster_template_attr='network_driver')
         self.add_parameter('tls_disabled',
-                           baymodel_attr='tls_disabled',
+                           cluster_template_attr='tls_disabled',
                            required=True)
         self.add_parameter('registry_enabled',
-                           baymodel_attr='registry_enabled')
+                           cluster_template_attr='registry_enabled')
         self.add_parameter('docker_storage_driver',
-                           baymodel_attr='docker_storage_driver')
+                           cluster_template_attr='docker_storage_driver')
         self.add_parameter('swarm_version',
                            bay_attr='coe_version')
 
@@ -88,7 +88,7 @@ class AtomicSwarmTemplateDefinition(template_def.BaseTemplateDefinition):
         self.add_output('discovery_url',
                         bay_attr='discovery_url')
 
-    def get_params(self, context, baymodel, bay, **kwargs):
+    def get_params(self, context, cluster_template, bay, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
         extra_params['discovery_url'] = self.get_discovery_url(bay)
         # HACK(apmelton) - This uses the user's bearer token, ideally
@@ -101,20 +101,20 @@ class AtomicSwarmTemplateDefinition(template_def.BaseTemplateDefinition):
                       'flannel_network_subnetlen']
 
         for label in label_list:
-            extra_params[label] = baymodel.labels.get(label)
+            extra_params[label] = cluster_template.labels.get(label)
 
-        if baymodel.registry_enabled:
+        if cluster_template.registry_enabled:
             extra_params['swift_region'] = CONF.docker_registry.swift_region
             extra_params['registry_container'] = (
                 CONF.docker_registry.swift_registry_container)
 
         return super(AtomicSwarmTemplateDefinition,
-                     self).get_params(context, baymodel, bay,
+                     self).get_params(context, cluster_template, bay,
                                       extra_params=extra_params,
                                       **kwargs)
 
-    def get_env_files(self, baymodel):
-        if baymodel.master_lb_enabled:
+    def get_env_files(self, cluster_template):
+        if cluster_template.master_lb_enabled:
             return [template_def.COMMON_ENV_PATH + 'with_master_lb.yaml']
         else:
             return [template_def.COMMON_ENV_PATH + 'no_master_lb.yaml']

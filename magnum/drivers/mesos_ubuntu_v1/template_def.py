@@ -26,18 +26,18 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
     def __init__(self):
         super(UbuntuMesosTemplateDefinition, self).__init__()
         self.add_parameter('external_network',
-                           baymodel_attr='external_network_id',
+                           cluster_template_attr='external_network_id',
                            required=True)
         self.add_parameter('number_of_slaves',
                            bay_attr='node_count')
         self.add_parameter('master_flavor',
-                           baymodel_attr='master_flavor_id')
+                           cluster_template_attr='master_flavor_id')
         self.add_parameter('slave_flavor',
-                           baymodel_attr='flavor_id')
+                           cluster_template_attr='flavor_id')
         self.add_parameter('cluster_name',
                            bay_attr='name')
         self.add_parameter('volume_driver',
-                           baymodel_attr='volume_driver')
+                           cluster_template_attr='volume_driver')
 
         self.add_output('api_address',
                         bay_attr='api_address')
@@ -50,7 +50,7 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
         self.add_output('mesos_slaves',
                         bay_attr='node_addresses')
 
-    def get_params(self, context, baymodel, bay, **kwargs):
+    def get_params(self, context, cluster_template, bay, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
         # HACK(apmelton) - This uses the user's bearer token, ideally
         # it should be replaced with an actual trust token with only
@@ -68,7 +68,7 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
                       'mesos_slave_executor_env_variables']
 
         for label in label_list:
-            extra_params[label] = baymodel.labels.get(label)
+            extra_params[label] = cluster_template.labels.get(label)
 
         scale_mgr = kwargs.pop('scale_manager', None)
         if scale_mgr:
@@ -77,12 +77,12 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
                 scale_mgr.get_removal_nodes(hosts))
 
         return super(UbuntuMesosTemplateDefinition,
-                     self).get_params(context, baymodel, bay,
+                     self).get_params(context, cluster_template, bay,
                                       extra_params=extra_params,
                                       **kwargs)
 
-    def get_env_files(self, baymodel):
-        if baymodel.master_lb_enabled:
+    def get_env_files(self, cluster_template):
+        if cluster_template.master_lb_enabled:
             return [template_def.COMMON_ENV_PATH + 'with_master_lb.yaml']
         else:
             return [template_def.COMMON_ENV_PATH + 'no_master_lb.yaml']

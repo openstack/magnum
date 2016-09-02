@@ -24,7 +24,7 @@ KUBE_INSECURE_PORT = '8080'
 
 class K8sApiAddressOutputMapping(template_def.OutputMapping):
 
-    def set_output(self, stack, baymodel, bay):
+    def set_output(self, stack, cluster_template, bay):
         if self.bay_attr is None:
             return
 
@@ -33,7 +33,7 @@ class K8sApiAddressOutputMapping(template_def.OutputMapping):
             # TODO(yuanying): port number is hardcoded, this will be fix
             protocol = 'https'
             port = KUBE_SECURE_PORT
-            if baymodel.tls_disabled:
+            if cluster_template.tls_disabled:
                 protocol = 'http'
                 port = KUBE_INSECURE_PORT
 
@@ -87,7 +87,7 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
         self.add_output('kube_masters',
                         bay_attr='master_addresses')
 
-    def get_params(self, context, baymodel, bay, **kwargs):
+    def get_params(self, context, cluster_template, bay, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
         scale_mgr = kwargs.pop('scale_manager', None)
         if scale_mgr:
@@ -99,22 +99,22 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
         osc = self.get_osc(context)
         extra_params['magnum_url'] = osc.magnum_url()
 
-        if baymodel.tls_disabled:
+        if cluster_template.tls_disabled:
             extra_params['loadbalancing_protocol'] = 'HTTP'
             extra_params['kubernetes_port'] = 8080
 
         label_list = ['flannel_network_cidr', 'flannel_backend',
                       'flannel_network_subnetlen']
         for label in label_list:
-            extra_params[label] = baymodel.labels.get(label)
+            extra_params[label] = cluster_template.labels.get(label)
 
-        if baymodel.registry_enabled:
+        if cluster_template.registry_enabled:
             extra_params['swift_region'] = CONF.docker_registry.swift_region
             extra_params['registry_container'] = (
                 CONF.docker_registry.swift_registry_container)
 
         return super(K8sTemplateDefinition,
-                     self).get_params(context, baymodel, bay,
+                     self).get_params(context, cluster_template, bay,
                                       extra_params=extra_params,
                                       **kwargs)
 
@@ -133,14 +133,14 @@ class JeOSK8sTemplateDefinition(K8sTemplateDefinition):
         self.add_parameter('docker_volume_size',
                            baymodel_attr='docker_volume_size')
 
-    def get_params(self, context, baymodel, bay, **kwargs):
+    def get_params(self, context, cluster_template, bay, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
 
         extra_params['username'] = context.user_name
         extra_params['tenant_name'] = context.tenant
 
         return super(JeOSK8sTemplateDefinition,
-                     self).get_params(context, baymodel, bay,
+                     self).get_params(context, cluster_template, bay,
                                       extra_params=extra_params,
                                       **kwargs)
 

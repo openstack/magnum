@@ -117,7 +117,7 @@ class TemplateDefinitionTestCase(base.TestCase):
                           'vm', 'coreos', 'kubernetes')
 
     def test_required_param_not_set(self):
-        param = cmn_tdef.ParameterMapping('test', baymodel_attr='test',
+        param = cmn_tdef.ParameterMapping('test', cluster_template_attr='test',
                                           required=True)
         mock_baymodel = mock.MagicMock()
         mock_baymodel.test = None
