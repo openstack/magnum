@@ -11,6 +11,7 @@ prelude: >
 
     [1] https://review.openstack.org/#/q/topic:bp/rename-bay-to-cluster
     [2] https://review.openstack.org/#/c/362660/
+
 deprecations:
   - The 'bay' group has been renamed to 'cluster' and all
     options in the former 'bay' group have been moved to
@@ -18,7 +19,7 @@ deprecations:
   - The 'bay_heat' group has been renamed to 'cluster_heat'
     and all options in the former 'bay_heat' group have been
     moved to 'cluster_heat'.
- -  The 'bay_create_timeout' option in the former 'bay_heat'
+  - The 'bay_create_timeout' option in the former 'bay_heat'
     group has been renamed to 'create_timeout' inside the
     'cluster_heat' group.
   - The 'baymodel' group has been renamed to 'cluster_template'
