@@ -2,7 +2,7 @@ FROM ubuntu:trusty
 
 RUN \
   apt-get -yqq update && \
-  apt-get -yqq install git qemu-utils python-pip uuid-runtime curl sudo parted wget && \
+  apt-get -yqq install git qemu-utils python-dev python-pip uuid-runtime curl sudo kpartx parted wget && \
   pip install pyyaml && \
   mkdir /output
 
