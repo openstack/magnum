@@ -1,0 +1,24 @@
+#!/bin/bash
+
+if [ ${DIB_DEBUG_TRACE:-0} -gt 0 ]; then
+    set -x
+fi
+set -eu
+set -o pipefail
+
+# Install the Docker engine, daemon, and service.
+#
+# The supported versions of Docker are:
+# 1.7.x
+# 1.8.x
+# 1.9.x
+# 1.10.x
+# 1.11.x
+# Docker 1.12.x is NOT supported.
+# Docker 1.9.x - 1.11.x is recommended for stability reasons.
+# https://github.com/docker/docker/issues/9718
+#
+# See DC/OS installtion guide for details
+# https://dcos.io/docs/1.8/administration/installing/custom/system-requirements/install-docker-centos/
+#
+sudo -E yum install -y docker-engine-1.11.2

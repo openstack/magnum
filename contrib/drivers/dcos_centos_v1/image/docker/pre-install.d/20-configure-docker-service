@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if [ ${DIB_DEBUG_TRACE:-0} -gt 0 ]; then
+    set -x
+fi
+set -eu
+set -o pipefail
+
+# Configure yum to use the Docker yum repo
+sudo tee /etc/yum.repos.d/docker.repo <<-'EOF'
+[dockerrepo]
+name=Docker Repository
+baseurl=https://yum.dockerproject.org/repo/main/centos/7/
+enabled=1
+gpgcheck=1
+gpgkey=https://yum.dockerproject.org/gpg
+EOF
+
+# Configure systemd to run the Docker Daemon with OverlayFS
+# Manage Docker on CentOS with systemd.
+# systemd handles starting Docker on boot and restarting it when it crashes.
+#
+# Docker 1.11.x will be installed, so issue for Docker 1.12.x on Centos7
+# won't happen.
+# https://github.com/docker/docker/issues/22847
+# https://github.com/docker/docker/issues/25098
+#
+sudo mkdir -p /etc/systemd/system/docker.service.d
+sudo tee /etc/systemd/system/docker.service.d/override.conf <<- 'EOF'
+[Service]
+ExecStart=
+ExecStart=/usr/bin/docker daemon --storage-driver=overlay -H fd://
+EOF

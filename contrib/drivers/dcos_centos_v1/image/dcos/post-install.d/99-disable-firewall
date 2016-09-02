@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ ${DIB_DEBUG_TRACE:-0} -gt 0 ]; then
+    set -x
+fi
+set -eu
+set -o pipefail
+
+# CentOS-7 introduced firewalld, which is a wrapper around iptables
+# and can conflict with Docker.
+# See https://docs.docker.com/v1.6/installation/centos/#firewalld
+sudo systemctl disable firewalld
