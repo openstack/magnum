@@ -1846,8 +1846,122 @@ proceed as follows:
    Now restart heat.
 
 
-*To be filled in*
-Include auto scaling
+Containers and nodes
+--------------------
+
+Scaling containers and nodes refers to increasing or decreasing
+allocated system resources.  Scaling is a broad topic and involves
+many dimensions.  In the context of Magnum in this guide, we consider
+the following issues:
+
+- Scaling containers and scaling cluster nodes (infrastructure)
+- Manual and automatic scaling
+
+Since this is an active area of development, a complete solution
+covering all issues does not exist yet, but partial solutions are
+emerging.
+
+Scaling containers involves managing the number of instances of the
+container by replicating or deleting instances.  This can be used to
+respond to change in the workload being supported by the application;
+in this case, it is typically driven by certain metrics relevant to the
+application such as response time, etc.  Other use cases include
+rolling upgrade, where a new version of a service can gradually be
+scaled up while the older version is gradually scaled down.  Scaling
+containers is supported at the COE level and is specific to each COE
+as well as the version of the COE.  You will need to refer to the
+documentation for the proper COE version for full details, but
+following are some pointers for reference.
+
+For Kubernetes, pods are scaled manually by setting the count in the
+replication controller.  Kubernetes version 1.3 and later also
+supports `autoscaling
+<http://blog.kubernetes.io/2016/07/autoscaling-in-kubernetes.html>`_.
+For Docker, the tool 'Docker Compose' provides the command
+`docker-compose scale
+<https://docs.docker.com/compose/reference/scale/>`_ which lets you
+manually set the number of instances of a container.  For Swarm
+version 1.12 and later, services can also be scaled manually through
+the command `docker service scale
+<https://docs.docker.com/engine/swarm/swarm-tutorial/scale-service/>`_.
+Automatic scaling for Swarm is not yet available.  Mesos manages the
+resources and does not support scaling directly; instead, this is
+provided by frameworks running within Mesos.  With the Marathon
+framework currently supported in the Mesos cluster, you can use the
+`scale operation
+<https://mesosphere.github.io/marathon/docs/application-basics.html>`_
+on the Marathon UI or through a REST API call to manually set the
+attribute 'instance' for a container.
+
+Scaling the cluster nodes involves managing the number of nodes in the
+cluster by adding more nodes or removing nodes.  There is no direct
+correlation between the number of nodes and the number of containers
+that can be hosted since the resources consumed (memory, CPU, etc)
+depend on the containers.  However, if a certain resource is exhausted
+in the cluster, adding more nodes would add more resources for hosting
+more containers.  As part of the infrastructure management, Magnum
+supports manual scaling through the attribute 'node_count' in the
+cluster, so you can scale the cluster simply by changing this
+attribute::
+
+  magnum cluster-update mycluster replace node_count=2
+
+Refer to the section `Scale`_ lifecycle operation for more details.
+
+Adding nodes to a cluster is straightforward: Magnum deploys
+additional VMs or baremetal servers through the heat templates and
+invokes the COE-specific mechanism for registering the new nodes to
+update the available resources in the cluster.  Afterward, it is up to
+the COE or user to re-balance the workload by launching new container
+instances or re-launching dead instances on the new nodes.
+
+Removing nodes from a cluster requires some more care to ensure
+continuous operation of the containers since the nodes being removed
+may be actively hosting some containers.  Magnum performs a simple
+heuristic that is specific to the COE to find the best node candidates
+for removal, as follows:
+
+Kubernetes
+  Magnum scans the pods in the namespace 'Default' to determine the
+  nodes that are *not* hosting any (empty nodes).  If the number of
+  nodes to be removed is equal or less than the number of these empty
+  nodes, these nodes will be removed from the cluster.  If the number
+  of nodes to be removed is larger than the number of empty nodes, a
+  warning message will be sent to the Magnum log and the empty nodes
+  along with additional nodes will be removed from the cluster.  The
+  additional nodes are selected randomly and the pods running on them
+  will be deleted without warning.  For this reason, a good practice
+  is to manage the pods through the replication controller so that the
+  deleted pods will be relaunched elsewhere in the cluster.  Note also
+  that even when only the empty nodes are removed, there is no
+  guarantee that no pod will be deleted because there is no locking to
+  ensure that Kubernetes will not launch new pods on these nodes after
+  Magnum has scanned the pods.
+
+Swarm
+  No node selection heuristic is currently supported.  If you decrease
+  the node_count, a node will be chosen by magnum without
+  consideration of what containers are running on the selected node.
+
+Mesos
+  No node selection heuristic is currently supported.  If you decrease
+  the node_count, a node will be chosen by magnum without
+  consideration of what containers are running on the selected node.
+
+
+Currently, scaling containers and scaling cluster nodes are handled
+separately, but in many use cases, there are interactions between the
+two operations.  For instance, scaling up the containers may exhaust
+the available resources in the cluster, thereby requiring scaling up
+the cluster nodes as well.  Many complex issues are involved in
+managing this interaction.  A presentation at the OpenStack Tokyo
+Summit 2015 covered some of these issues along with some early
+proposals, `Exploring Magnum and Senlin integration for autoscaling
+containers
+<https://www.openstack.org/summit/tokyo-2015/videos/presentation/
+exploring-magnum-and-senlin-integration-for-autoscaling-containers>`_.
+This remains an active area of discussion and research.
+
 
 =======
 Storage
