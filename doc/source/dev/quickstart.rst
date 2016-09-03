@@ -326,7 +326,7 @@ Create a CoreOS Kubernetes cluster. Use the CoreOS ClusterTemplate as a
 template for cluster creation::
 
     magnum cluster-create --name k8s-cluster \
-                      --cluster-template k8scluster-template-coreos \
+                      --cluster-template k8s-cluster-template-coreos \
                       --node-count 2
 
 Using a Kubernetes Cluster
