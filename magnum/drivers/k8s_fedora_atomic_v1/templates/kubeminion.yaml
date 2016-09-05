@@ -312,7 +312,7 @@ resources:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-docker-registry.sh}
+      config: {get_file: ../../common/templates/fragments/enable-docker-registry.sh}
 
   enable_kube_proxy:
     type: OS::Heat::SoftwareConfig
