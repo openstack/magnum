@@ -1,0 +1,9 @@
+---
+features:
+  - Add configuration for overlay networks for the docker
+    network driver in swarm. To use this feature, users need
+    to create a swarm cluster with network_driver set to 'docker'.
+    After the cluster is created, users can create an overlay network
+    (docker network create -d overlay mynetwork) and use it when
+    launching a new container (docker run --net=mynetwork ...).
+
