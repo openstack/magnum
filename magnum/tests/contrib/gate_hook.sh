@@ -21,8 +21,11 @@ special=$2
 export PROJECTS="openstack/barbican $PROJECTS"
 export DEVSTACK_LOCAL_CONFIG="enable_plugin magnum git://git.openstack.org/openstack/magnum"
 export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ceilometer git://git.openstack.org/openstack/ceilometer"
-export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin neutron-lbaas https://git.openstack.org/openstack/neutron-lbaas"
-export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin octavia https://github.com/openstack/octavia"
+
+if [ "${coe}${special}" != "k8s-ironic" ]; then
+    export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin neutron-lbaas https://git.openstack.org/openstack/neutron-lbaas"
+    export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin octavia https://github.com/openstack/octavia"
+fi
 
 if [ "$coe" = "mesos" ]; then
     echo "MAGNUM_GUEST_IMAGE_URL=https://fedorapeople.org/groups/magnum/ubuntu-14.04.3-mesos-0.25.0.qcow2" >> $BASE/new/devstack/localrc
@@ -38,16 +41,16 @@ elif [ "${coe}${special}" = "k8s-ironic" ]; then
     # NOTE(strigazi) keep cinder
     # export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service cinder c-sch c-api c-vol"
 
-    # Enable LBaaS(v2) and disable LBaaS(v1)
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service q-lbaas"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_service q-lbaasv2"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_service octavia"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_service o-cw"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_service o-hk"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_service o-hm"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_service o-api"
-
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ironic git://git.openstack.org/openstack/ironic"
+
+    # Disable LBaaS(v1) and LBaaS(v2)
+    export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service q-lbaas"
+    export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service q-lbaasv2"
+    export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service octavia"
+    export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service o-cw"
+    export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service o-hk"
+    export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service o-hm"
+    export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service o-api"
 
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_DEPLOY_DRIVER=pxe_ssh"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_BAREMETAL_BASIC_OPS=True"
