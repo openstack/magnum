@@ -12,13 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_config import cfg
-
 from magnum.common.cert_manager import cert_manager
 from magnum import objects
-
-
-CONF = cfg.CONF
 
 
 class Cert(cert_manager.Cert):

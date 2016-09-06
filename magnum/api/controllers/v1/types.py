@@ -168,7 +168,7 @@ class JsonPatchType(wtypes.Base):
                 '/uuid', '/project_id', '/user_id']
 
     @classmethod
-    def non_removable_attrs(self):
+    def non_removable_attrs(cls):
         """Returns a set of names of attributes that may not be removed.
 
         Attributes whose 'mandatory' property is True are automatically added
@@ -176,15 +176,15 @@ class JsonPatchType(wtypes.Base):
         field _extra_non_removable_attrs in subclasses, with a set of the form
         {'/foo', '/bar'}.
         """
-        if self._non_removable_attrs is None:
-            self._non_removable_attrs = self._extra_non_removable_attrs.copy()
-            if self._api_base:
-                fields = inspect.getmembers(self._api_base,
+        if cls._non_removable_attrs is None:
+            cls._non_removable_attrs = cls._extra_non_removable_attrs.copy()
+            if cls._api_base:
+                fields = inspect.getmembers(cls._api_base,
                                             lambda a: not inspect.isroutine(a))
                 for name, field in fields:
                     if getattr(field, 'mandatory', False):
-                        self._non_removable_attrs.add('/%s' % name)
-        return self._non_removable_attrs
+                        cls._non_removable_attrs.add('/%s' % name)
+        return cls._non_removable_attrs
 
     @staticmethod
     def validate(patch):
