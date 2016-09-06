@@ -36,7 +36,17 @@ API_SERVICE_OPTS = [
     cfg.StrOpt('api_paste_config',
                default="api-paste.ini",
                help="Configuration file for WSGI definition of API."
-               )
+               ),
+    cfg.StrOpt('ssl_cert_file',
+               help="This option allows setting path to the SSL certificate "
+                    "of API server. "),
+    cfg.StrOpt('ssl_key_file',
+               help="This option specifies the path to the file where SSL "
+                    "private key of API server is stored when SSL is in "
+                    "effect. "),
+    cfg.BoolOpt('enabled_ssl',
+                default=False,
+                help='Enable SSL Magnum API service')
 ]
 
 CONF = cfg.CONF

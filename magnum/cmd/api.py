@@ -16,20 +16,39 @@
 
 import os
 import sys
-from wsgiref import simple_server
 
 from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_reports import guru_meditation_report as gmr
+from werkzeug import serving
 
 from magnum.api import app as api_app
 from magnum.common import service
+from magnum.i18n import _
 from magnum.i18n import _LI
 from magnum.objects import base
 from magnum import version
 
-
+CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
+
+
+def _get_ssl_configs(use_ssl):
+    if use_ssl:
+        cert_file = CONF.api.ssl_cert_file
+        key_file = CONF.api.ssl_key_file
+
+        if cert_file and not os.path.exists(cert_file):
+            raise RuntimeError(
+                _("Unable to find cert_file : %s") % cert_file)
+
+        if key_file and not os.path.exists(key_file):
+            raise RuntimeError(
+                _("Unable to find key_file : %s") % key_file)
+
+        return cert_file, key_file
+    else:
+        return None
 
 
 def main():
@@ -42,15 +61,18 @@ def main():
 
     app = api_app.load_app()
 
+    # SSL configuration
+    use_ssl = CONF.api.enabled_ssl
+
     # Create the WSGI server and start it
     host, port = cfg.CONF.api.host, cfg.CONF.api.port
-    srv = simple_server.make_server(host, port, app)
 
     LOG.info(_LI('Starting server in PID %s'), os.getpid())
     LOG.debug("Configuration:")
     cfg.CONF.log_opt_values(LOG, logging.DEBUG)
 
-    LOG.info(_LI('serving on http://%(host)s:%(port)s'),
-             dict(host=host, port=port))
+    LOG.info(_LI('Serving on %(proto)s://%(host)s:%(port)s'),
+             dict(proto="https" if use_ssl else "http", host=host, port=port))
 
-    srv.serve_forever()
+    serving.run_simple(host, port, app,
+                       ssl_context=_get_ssl_configs(use_ssl))
