@@ -154,7 +154,7 @@ class GetDiscoveryUrlFailed(MagnumException):
     message = _("Failed to get discovery url from '%(discovery_endpoint)s'.")
 
 
-class InvalidBayDiscoveryURL(Invalid):
+class InvalidClusterDiscoveryURL(Invalid):
     message = _("Invalid discovery URL '%(discovery_url)s'.")
 
 
@@ -271,11 +271,11 @@ class PodAlreadyExists(Conflict):
 
 
 class PodListNotFound(ResourceNotFound):
-    message = _("Pod list could not be found for Bay %(bay_uuid)s.")
+    message = _("Pod list could not be found for Cluster %(cluster_uuid)s.")
 
 
 class PodCreationFailed(Invalid):
-    message = _("Pod creation failed in Bay %(bay_uuid)s.")
+    message = _("Pod creation failed in Cluster %(cluster_uuid)s.")
 
 
 class ServiceNotFound(ResourceNotFound):
@@ -287,11 +287,12 @@ class ServiceAlreadyExists(Conflict):
 
 
 class ServiceListNotFound(ResourceNotFound):
-    message = _("Service list could not be found for Bay %(bay_uuid)s.")
+    message = _("Service list could not be found for Cluster "
+                "%(cluster_uuid)s.")
 
 
 class ServiceCreationFailed(Invalid):
-    message = _("Service creation failed for Bay %(bay_uuid)s.")
+    message = _("Service creation failed for Cluster %(cluster_uuid)s.")
 
 
 class ContainerException(Exception):
@@ -303,13 +304,13 @@ class NotSupported(MagnumException):
     code = 400
 
 
-class BayTypeNotSupported(MagnumException):
-    message = _("Bay type (%(server_type)s, %(os)s, %(coe)s)"
+class ClusterTypeNotSupported(MagnumException):
+    message = _("Cluster type (%(server_type)s, %(os)s, %(coe)s)"
                 " not supported.")
 
 
-class BayTypeNotEnabled(MagnumException):
-    message = _("Bay type (%(server_type)s, %(os)s, %(coe)s)"
+class ClusterTypeNotEnabled(MagnumException):
+    message = _("Cluster type (%(server_type)s, %(os)s, %(coe)s)"
                 " not enabled.")
 
 
@@ -322,7 +323,8 @@ class Urllib2InvalidScheme(MagnumException):
 
 
 class OperationInProgress(Invalid):
-    message = _("Bay %(bay_name)s already has an operation in progress.")
+    message = _("Cluster %(cluster_name)s already has an operation in "
+                "progress.")
 
 
 class ImageNotFound(ResourceNotFound):
@@ -383,11 +385,11 @@ class MagnumServiceAlreadyExists(Conflict):
 
 
 class UnsupportedK8sQuantityFormat(MagnumException):
-    message = _("Unsupported quantity format for k8s bay.")
+    message = _("Unsupported quantity format for k8s cluster.")
 
 
 class UnsupportedDockerQuantityFormat(MagnumException):
-    message = _("Unsupported quantity format for Swarm bay.")
+    message = _("Unsupported quantity format for Swarm cluster.")
 
 
 class FlavorNotFound(ResourceNotFound):
@@ -429,8 +431,9 @@ class RegionsListFailed(MagnumException):
     message = _("Failed to list regions.")
 
 
-class TrusteeOrTrustToBayFailed(MagnumException):
-    message = _("Failed to create trustee or trust for Bay: %(bay_uuid)s")
+class TrusteeOrTrustToClusterFailed(MagnumException):
+    message = _("Failed to create trustee or trust for Cluster: "
+                "%(cluster_uuid)s")
 
 
 class CertificatesToClusterFailed(MagnumException):

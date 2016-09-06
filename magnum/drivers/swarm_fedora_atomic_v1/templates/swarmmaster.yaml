@@ -30,9 +30,9 @@ parameters:
     type: string
     description: url provided for node discovery
 
-  bay_uuid:
+  cluster_uuid:
     type: string
-    description: identifier for the bay this template is generating
+    description: identifier for the cluster this template is generating
 
   magnum_url:
     type: string
@@ -170,7 +170,7 @@ resources:
   ######################################################################
   #
   # resource that exposes the IPs of either the Swarm master or the API
-  # LBaaS pool depending on whether LBaaS is enabled for the bay.
+  # LBaaS pool depending on whether LBaaS is enabled for the cluster.
   #
 
   api_address_switch:
@@ -211,7 +211,7 @@ resources:
             "$NO_PROXY": {get_param: no_proxy}
             "$SWARM_API_IP": {get_attr: [api_address_switch, private_ip]}
             "$SWARM_NODE_IP": {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
-            "$BAY_UUID": {get_param: bay_uuid}
+            "$CLUSTER_UUID": {get_param: cluster_uuid}
             "$MAGNUM_URL": {get_param: magnum_url}
             "$TLS_DISABLED": {get_param: tls_disabled}
             "$NETWORK_DRIVER": {get_param: network_driver}
@@ -286,7 +286,7 @@ resources:
       group: ungrouped
       config:
         str_replace:
-          template: {get_file: fragments/write-bay-failure-service.yaml}
+          template: {get_file: fragments/write-cluster-failure-service.yaml}
           params:
             "$SERVICE": swarm-manager
             "$WAIT_HANDLE_ENDPOINT": {get_attr: [master_wait_handle, endpoint]}

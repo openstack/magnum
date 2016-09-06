@@ -112,18 +112,18 @@ class KeystoneClientTest(base.TestCase):
     def test_delete_trust(self, mock_ks):
         mock_ks.return_value.trusts.delete.return_value = None
         ks_client = keystone.KeystoneClientV3(self.ctx)
-        bay = mock.MagicMock()
-        bay.trust_id = 'atrust123'
-        self.assertIsNone(ks_client.delete_trust(self.ctx, bay))
+        cluster = mock.MagicMock()
+        cluster.trust_id = 'atrust123'
+        self.assertIsNone(ks_client.delete_trust(self.ctx, cluster))
         mock_ks.return_value.trusts.delete.assert_called_once_with('atrust123')
 
     def test_delete_trust_not_found(self, mock_ks):
         mock_delete = mock_ks.return_value.trusts.delete
         mock_delete.side_effect = kc_exception.NotFound()
         ks_client = keystone.KeystoneClientV3(self.ctx)
-        bay = mock.MagicMock()
-        bay.trust_id = 'atrust123'
-        self.assertIsNone(ks_client.delete_trust(self.ctx, bay))
+        cluster = mock.MagicMock()
+        cluster.trust_id = 'atrust123'
+        self.assertIsNone(ks_client.delete_trust(self.ctx, cluster))
 
     @mock.patch('keystoneauth1.session.Session')
     def test_create_trust_with_all_roles(self, mock_session, mock_ks):

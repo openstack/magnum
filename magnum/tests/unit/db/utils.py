@@ -24,7 +24,7 @@ def get_test_cluster_template(**kw):
         'project_id': kw.get('project_id', 'fake_project'),
         'user_id': kw.get('user_id', 'fake_user'),
         'uuid': kw.get('uuid', 'e74c40e0-d825-11e2-a28f-0800200c9a66'),
-        'name': kw.get('name', 'baymodel1'),
+        'name': kw.get('name', 'clustermodel1'),
         'image_id': kw.get('image_id', 'ubuntu'),
         'flavor_id': kw.get('flavor_id', 'm1.small'),
         'master_flavor_id': kw.get('master_flavor_id', 'm1.small'),
@@ -73,22 +73,22 @@ def create_test_cluster_template(**kw):
     return dbapi.create_cluster_template(cluster_template)
 
 
-def get_test_bay(**kw):
+def get_test_cluster(**kw):
     attrs = {
         'id': kw.get('id', 42),
         'uuid': kw.get('uuid', '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'),
-        'name': kw.get('name', 'bay1'),
+        'name': kw.get('name', 'cluster1'),
         'discovery_url': kw.get('discovery_url', None),
         'ca_cert_ref': kw.get('ca_cert_ref', None),
         'magnum_cert_ref': kw.get('magnum_cert_ref', None),
         'project_id': kw.get('project_id', 'fake_project'),
         'user_id': kw.get('user_id', 'fake_user'),
-        'baymodel_id': kw.get('baymodel_id',
-                              'e74c40e0-d825-11e2-a28f-0800200c9a66'),
+        'cluster_template_id': kw.get('cluster_template_id',
+                                      'e74c40e0-d825-11e2-a28f-0800200c9a66'),
         'stack_id': kw.get('stack_id', '047c6319-7abd-4bd9-a033-8c6af0173cd0'),
         'status': kw.get('status', 'CREATE_IN_PROGRESS'),
         'status_reason': kw.get('status_reason', 'Completed successfully'),
-        'bay_create_timeout': kw.get('bay_create_timeout', 60),
+        'create_timeout': kw.get('create_timeout', 60),
         'api_address': kw.get('api_address', '172.17.2.3'),
         'node_addresses': kw.get('node_addresses', ['172.17.2.4']),
         'node_count': kw.get('node_count', 3),
@@ -107,19 +107,19 @@ def get_test_bay(**kw):
     return attrs
 
 
-def create_test_bay(**kw):
-    """Create test bay entry in DB and return Bay DB object.
+def create_test_cluster(**kw):
+    """Create test cluster entry in DB and return Cluster DB object.
 
-    Function to be used to create test Bay objects in the database.
-    :param kw: kwargs with overriding values for bay's attributes.
-    :returns: Test Bay DB object.
+    Function to be used to create test Cluster objects in the database.
+    :param kw: kwargs with overriding values for cluster's attributes.
+    :returns: Test Cluster DB object.
     """
-    bay = get_test_bay(**kw)
+    cluster = get_test_cluster(**kw)
     # Let DB generate ID if it isn't specified explicitly
     if 'id' not in kw:
-        del bay['id']
+        del cluster['id']
     dbapi = db_api.get_instance()
-    return dbapi.create_bay(bay)
+    return dbapi.create_cluster(cluster)
 
 
 def get_test_x509keypair(**kw):

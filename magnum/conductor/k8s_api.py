@@ -41,17 +41,17 @@ class K8sAPI(apiv_api.ApivApi):
             raise
         return tmp
 
-    def __init__(self, context, bay):
+    def __init__(self, context, cluster):
         self.ca_file = None
         self.cert_file = None
         self.key_file = None
 
-        if bay.magnum_cert_ref:
+        if cluster.magnum_cert_ref:
             (self.ca_file, self.key_file,
-             self.cert_file) = create_client_files(bay, context)
+             self.cert_file) = create_client_files(cluster, context)
 
         # build a connection with Kubernetes master
-        client = api_client.ApiClient(bay.api_address,
+        client = api_client.ApiClient(cluster.api_address,
                                       key_file=self.key_file.name,
                                       cert_file=self.cert_file.name,
                                       ca_certs=self.ca_file.name)
@@ -67,13 +67,13 @@ class K8sAPI(apiv_api.ApivApi):
             self.key_file.close()
 
 
-def create_k8s_api(context, bay):
+def create_k8s_api(context, cluster):
     """Create a kubernetes API client
 
     Creates connection with Kubernetes master and creates ApivApi instance
     to call Kubernetes APIs.
 
     :param context: The security context
-    :param bay:  Bay object
+    :param cluster:  Cluster object
     """
-    return K8sAPI(context, bay)
+    return K8sAPI(context, cluster)

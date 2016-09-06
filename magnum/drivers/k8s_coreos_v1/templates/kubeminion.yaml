@@ -45,9 +45,9 @@ parameters:
       service.
     default: 6443
 
-  bay_uuid:
+  cluster_uuid:
     type: string
-    description: identifier for the bay this template is generating
+    description: identifier for the cluster this template is generating
 
   magnum_url:
     type: string
@@ -165,7 +165,7 @@ resources:
             "$NETWORK_DRIVER": {get_param: network_driver}
             "$ETCD_SERVER_IP": {get_param: etcd_server_ip}
             "$KUBE_VERSION": {get_param: kube_version}
-            "$BAY_UUID": {get_param: bay_uuid}
+            "$CLUSTER_UUID": {get_param: cluster_uuid}
             "$MAGNUM_URL": {get_param: magnum_url}
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}

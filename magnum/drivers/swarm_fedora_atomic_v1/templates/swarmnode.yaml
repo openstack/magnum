@@ -71,9 +71,9 @@ parameters:
     type: string
     description: swarm master's api server public ip address
 
-  bay_uuid:
+  cluster_uuid:
     type: string
-    description: identifier for the bay this template is generating
+    description: identifier for the cluster this template is generating
 
   magnum_url:
     type: string
@@ -195,7 +195,7 @@ resources:
             "$NO_PROXY": {get_param: no_proxy}
             "$SWARM_API_IP": {get_param: swarm_api_ip}
             "$SWARM_NODE_IP": {get_attr: [swarm_node_eth0, fixed_ips, 0, ip_address]}
-            "$BAY_UUID": {get_param: bay_uuid}
+            "$CLUSTER_UUID": {get_param: cluster_uuid}
             "$MAGNUM_URL": {get_param: magnum_url}
             "$TLS_DISABLED": {get_param: tls_disabled}
             "$NETWORK_DRIVER": {get_param: network_driver}
@@ -269,7 +269,7 @@ resources:
       group: ungrouped
       config:
         str_replace:
-          template: {get_file: fragments/write-bay-failure-service.yaml}
+          template: {get_file: fragments/write-cluster-failure-service.yaml}
           params:
             "$SERVICE": swarm-agent
             "$WAIT_HANDLE_ENDPOINT": {get_attr: [node_wait_handle, endpoint]}

@@ -46,11 +46,11 @@ class Certificate(base.APIBase):
     def _set_cluster_uuid(self, value):
         if value and self._cluster_uuid != value:
             try:
-                self._cluster = api_utils.get_resource('Bay', value)
+                self._cluster = api_utils.get_resource('Cluster', value)
                 self._cluster_uuid = self._cluster.uuid
             except exception.ClusterNotFound as e:
                 # Change error code because 404 (NotFound) is inappropriate
-                # response for a POST request to create a Bay
+                # response for a POST request to create a Cluster
                 e.code = 400  # BadRequest
                 raise
         elif value == wtypes.Unset:
@@ -90,7 +90,8 @@ class Certificate(base.APIBase):
 
     def get_cluster(self):
         if not self._cluster:
-            self._cluster = api_utils.get_resource('Bay', self.cluster_uuid)
+            self._cluster = api_utils.get_resource('Cluster',
+                                                   self.cluster_uuid)
         return self._cluster
 
     @staticmethod
@@ -141,7 +142,7 @@ class CertificateController(base.Controller):
         logical name of the cluster.
         """
         context = pecan.request.context
-        cluster = api_utils.get_resource('Bay', cluster_ident)
+        cluster = api_utils.get_resource('Cluster', cluster_ident)
         policy.enforce(context, 'certificate:get', cluster,
                        action='certificate:get')
         certificate = pecan.request.rpcapi.get_ca_certificate(cluster)

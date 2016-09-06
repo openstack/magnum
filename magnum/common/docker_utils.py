@@ -75,20 +75,21 @@ def is_docker_api_version_atleast(docker, version):
 
 
 @contextlib.contextmanager
-def docker_for_bay(context, bay):
-    cluster_template = conductor_utils.retrieve_cluster_template(context, bay)
+def docker_for_cluster(context, cluster):
+    cluster_template = conductor_utils.retrieve_cluster_template(
+        context, cluster)
 
     ca_cert, magnum_key, magnum_cert = None, None, None
     client_kwargs = dict()
     if not cluster_template.tls_disabled:
         (ca_cert, magnum_key,
-         magnum_cert) = cert_manager.create_client_files(bay)
+         magnum_cert) = cert_manager.create_client_files(cluster)
         client_kwargs['ca_cert'] = ca_cert.name
         client_kwargs['client_key'] = magnum_key.name
         client_kwargs['client_cert'] = magnum_cert.name
 
     yield DockerHTTPClient(
-        bay.api_address,
+        cluster.api_address,
         CONF.docker.docker_remote_api_version,
         CONF.docker.default_timeout,
         **client_kwargs

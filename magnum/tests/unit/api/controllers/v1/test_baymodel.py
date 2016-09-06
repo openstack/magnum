@@ -219,7 +219,8 @@ class TestPatch(api_base.FunctionalTest):
 
     def test_update_baymodel_with_bay(self):
         baymodel = obj_utils.create_test_cluster_template(self.context)
-        obj_utils.create_test_bay(self.context, baymodel_id=baymodel.uuid)
+        obj_utils.create_test_cluster(self.context,
+                                      cluster_template_id=baymodel.uuid)
 
         response = self.patch_json('/baymodels/%s' % baymodel.uuid,
                                    [{'path': '/name',
@@ -253,7 +254,8 @@ class TestPatch(api_base.FunctionalTest):
 
     def test_update_baymodel_with_bay_allow_update(self):
         baymodel = obj_utils.create_test_cluster_template(self.context)
-        obj_utils.create_test_bay(self.context, baymodel_id=baymodel.uuid)
+        obj_utils.create_test_cluster(self.context,
+                                      cluster_template_id=baymodel.uuid)
         response = self.patch_json('/baymodels/%s' % baymodel.uuid,
                                    [{'path': '/public',
                                      'value': True,
@@ -265,7 +267,8 @@ class TestPatch(api_base.FunctionalTest):
 
     def test_update_baymodel_with_bay_not_allow_update(self):
         baymodel = obj_utils.create_test_cluster_template(self.context)
-        obj_utils.create_test_bay(self.context, baymodel_id=baymodel.uuid)
+        obj_utils.create_test_cluster(self.context,
+                                      cluster_template_id=baymodel.uuid)
         response = self.patch_json('/baymodels/%s' % baymodel.uuid,
                                    [{'path': '/name',
                                      'value': 'new_name',
@@ -911,7 +914,8 @@ class TestDelete(api_base.FunctionalTest):
 
     def test_delete_baymodel_with_bay(self):
         baymodel = obj_utils.create_test_cluster_template(self.context)
-        obj_utils.create_test_bay(self.context, baymodel_id=baymodel.uuid)
+        obj_utils.create_test_cluster(self.context,
+                                      cluster_template_id=baymodel.uuid)
         response = self.delete('/baymodels/%s' % baymodel.uuid,
                                expect_errors=True)
         self.assertEqual(400, response.status_int)

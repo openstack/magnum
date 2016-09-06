@@ -18,8 +18,8 @@ from magnum.conductor import monitors
 
 class MesosMonitor(monitors.MonitorBase):
 
-    def __init__(self, context, bay):
-        super(MesosMonitor, self).__init__(context, bay)
+    def __init__(self, context, cluster):
+        super(MesosMonitor, self).__init__(context, cluster)
         self.data = {}
 
     @property
@@ -46,7 +46,7 @@ class MesosMonitor(monitors.MonitorBase):
         self.data['mem_used'] = 0
         self.data['cpu_total'] = 0
         self.data['cpu_used'] = 0
-        for master_addr in self.bay.master_addresses:
+        for master_addr in self.cluster.master_addresses:
             mesos_master_url = self._build_url(master_addr, port='5050',
                                                path='/state')
             master = jsonutils.loads(urlfetch.get(mesos_master_url))

@@ -361,7 +361,7 @@ resources:
       lb_method: ROUND_ROBIN
       vip:
         protocol_port: 8080
-      description: API pool for Mesos bay
+      description: API pool for Mesos cluster
 
   api_pool_floating:
     type: Magnum::Optional::Neutron::Pool::FloatingIP

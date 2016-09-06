@@ -25,7 +25,7 @@ function function_exists {
 # Set up all necessary test data
 function create_test_data {
     # First we test Magnum's command line to see if we can stand up
-    # a baymodel, bay and a pod
+    # a cluster_template, cluster and a pod
 
     coe=$1
     special=$2

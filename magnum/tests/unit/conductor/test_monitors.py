@@ -42,14 +42,14 @@ class MonitorsTestCase(base.TestCase):
     def setUp(self):
         super(MonitorsTestCase, self).setUp()
 
-        bay = utils.get_test_bay(node_addresses=['1.2.3.4'],
-                                 api_address='https://5.6.7.8:2376',
-                                 master_addresses=['10.0.0.6'])
-        self.bay = objects.Bay(self.context, **bay)
-        self.monitor = swarm_monitor.SwarmMonitor(self.context, self.bay)
-        self.k8s_monitor = k8s_monitor.K8sMonitor(self.context, self.bay)
+        cluster = utils.get_test_cluster(node_addresses=['1.2.3.4'],
+                                         api_address='https://5.6.7.8:2376',
+                                         master_addresses=['10.0.0.6'])
+        self.cluster = objects.Cluster(self.context, **cluster)
+        self.monitor = swarm_monitor.SwarmMonitor(self.context, self.cluster)
+        self.k8s_monitor = k8s_monitor.K8sMonitor(self.context, self.cluster)
         self.mesos_monitor = mesos_monitor.MesosMonitor(self.context,
-                                                        self.bay)
+                                                        self.cluster)
         p = mock.patch('magnum.conductor.swarm_monitor.SwarmMonitor.'
                        'metrics_spec', new_callable=mock.PropertyMock)
         self.mock_metrics_spec = p.start()
@@ -57,31 +57,32 @@ class MonitorsTestCase(base.TestCase):
         self.addCleanup(p.stop)
 
     def test_create_monitor_success(self):
-        self.bay.cluster_template = obj_utils.get_test_cluster_template(
-            self.context, uuid=self.bay.baymodel_id, coe='swarm')
-        monitor = monitors.create_monitor(self.context, self.bay)
+        self.cluster.cluster_template = obj_utils.get_test_cluster_template(
+            self.context, uuid=self.cluster.cluster_template_id, coe='swarm')
+        monitor = monitors.create_monitor(self.context, self.cluster)
         self.assertIsInstance(monitor, swarm_monitor.SwarmMonitor)
 
-    def test_create_monitor_k8s_bay(self):
-        self.bay.cluster_template = obj_utils.get_test_cluster_template(
-            self.context, uuid=self.bay.baymodel_id, coe='kubernetes')
-        monitor = monitors.create_monitor(self.context, self.bay)
+    def test_create_monitor_k8s_cluster(self):
+        self.cluster.cluster_template = obj_utils.get_test_cluster_template(
+            self.context, uuid=self.cluster.cluster_template_id,
+            coe='kubernetes')
+        monitor = monitors.create_monitor(self.context, self.cluster)
         self.assertIsInstance(monitor, k8s_monitor.K8sMonitor)
 
-    def test_create_monitor_mesos_bay(self):
-        self.bay.cluster_template = obj_utils.get_test_cluster_template(
-            self.context, uuid=self.bay.baymodel_id, coe='mesos')
-        monitor = monitors.create_monitor(self.context, self.bay)
+    def test_create_monitor_mesos_cluster(self):
+        self.cluster.cluster_template = obj_utils.get_test_cluster_template(
+            self.context, uuid=self.cluster.cluster_template_id, coe='mesos')
+        monitor = monitors.create_monitor(self.context, self.cluster)
         self.assertIsInstance(monitor, mesos_monitor.MesosMonitor)
 
-    @mock.patch('magnum.common.docker_utils.docker_for_bay')
-    def test_swarm_monitor_pull_data_success(self, mock_docker_for_bay):
+    @mock.patch('magnum.common.docker_utils.docker_for_cluster')
+    def test_swarm_monitor_pull_data_success(self, mock_docker_cluster):
         mock_docker = mock.MagicMock()
         mock_docker.info.return_value = {'DriverStatus': [[
             u' \u2514 Reserved Memory', u'0 B / 1 GiB']]}
         mock_docker.containers.return_value = [mock.MagicMock()]
         mock_docker.inspect_container.return_value = 'test_container'
-        mock_docker_for_bay.return_value.__enter__.return_value = mock_docker
+        mock_docker_cluster.return_value.__enter__.return_value = mock_docker
 
         self.monitor.pull_data()
 
@@ -89,15 +90,15 @@ class MonitorsTestCase(base.TestCase):
                          self.monitor.data['nodes'])
         self.assertEqual(['test_container'], self.monitor.data['containers'])
 
-    @mock.patch('magnum.common.docker_utils.docker_for_bay')
-    def test_swarm_monitor_pull_data_raise(self, mock_docker_for_bay):
+    @mock.patch('magnum.common.docker_utils.docker_for_cluster')
+    def test_swarm_monitor_pull_data_raise(self, mock_docker_cluster):
         mock_container = mock.MagicMock()
         mock_docker = mock.MagicMock()
         mock_docker.info.return_value = {'DriverStatus': [[
             u' \u2514 Reserved Memory', u'0 B / 1 GiB']]}
         mock_docker.containers.return_value = [mock_container]
         mock_docker.inspect_container.side_effect = Exception("inspect error")
-        mock_docker_for_bay.return_value.__enter__.return_value = mock_docker
+        mock_docker_cluster.return_value.__enter__.return_value = mock_docker
 
         self.monitor.pull_data()
 
@@ -288,7 +289,7 @@ class MonitorsTestCase(base.TestCase):
 
     @mock.patch('magnum.common.urlfetch.get')
     def test_mesos_monitor_pull_data_success_no_master(self, mock_url_get):
-        self.bay.master_addresses = []
+        self.cluster.master_addresses = []
         self._test_mesos_monitor_pull_data(mock_url_get, {}, 0, 0, 0, 0)
 
     def test_mesos_monitor_get_metric_names(self):

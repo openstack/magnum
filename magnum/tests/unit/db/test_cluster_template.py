@@ -178,10 +178,10 @@ class DbClusterTemplateTestCase(base.DbTestCase):
         self.assertRaises(exception.ClusterTemplateNotFound,
                           self.dbapi.destroy_cluster_template, 666)
 
-    def test_destroy_cluster_template_that_referenced_by_bays(self):
+    def test_destroy_cluster_template_that_referenced_by_clusters(self):
         ct = utils.create_test_cluster_template()
-        bay = utils.create_test_bay(cluster_template_id=ct['uuid'])
-        self.assertEqual(ct['uuid'], bay.baymodel_id)
+        cluster = utils.create_test_cluster(cluster_template_id=ct['uuid'])
+        self.assertEqual(ct['uuid'], cluster.cluster_template_id)
         self.assertRaises(exception.ClusterTemplateReferenced,
                           self.dbapi.destroy_cluster_template, ct['id'])
 

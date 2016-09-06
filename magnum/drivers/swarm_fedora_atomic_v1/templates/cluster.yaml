@@ -25,9 +25,9 @@ parameters:
     type: string
     description: url provided for node discovery
 
-  bay_uuid:
+  cluster_uuid:
     type: string
-    description: identifier for the bay this template is generating
+    description: identifier for the cluster this template is generating
 
   magnum_url:
     type: string
@@ -335,7 +335,7 @@ resources:
   ######################################################################
   #
   # resources that expose the IPs of either the swarm master or a given
-  # LBaaS pool depending on whether LBaaS is enabled for the bay.
+  # LBaaS pool depending on whether LBaaS is enabled for the cluster.
   #
 
   api_address_switch:
@@ -381,7 +381,7 @@ resources:
           https_proxy: {get_param: https_proxy}
           no_proxy: {get_param: no_proxy}
           swarm_api_ip: {get_attr: [api_pool, vip, address]}
-          bay_uuid: {get_param: bay_uuid}
+          cluster_uuid: {get_param: cluster_uuid}
           magnum_url: {get_param: magnum_url}
           tls_disabled: {get_param: tls_disabled}
           secgroup_swarm_master_id: {get_resource: secgroup_manager}
@@ -423,7 +423,7 @@ resources:
           https_proxy: {get_param: https_proxy}
           no_proxy: {get_param: no_proxy}
           swarm_api_ip: {get_attr: [api_address_switch, private_ip]}
-          bay_uuid: {get_param: bay_uuid}
+          cluster_uuid: {get_param: cluster_uuid}
           magnum_url: {get_param: magnum_url}
           tls_disabled: {get_param: tls_disabled}
           secgroup_swarm_node_id: {get_resource: secgroup_manager}

@@ -16,15 +16,15 @@ import mock
 from mock import patch
 from oslo_service import loopingcall
 
-from magnum.conductor.handlers import bay_conductor
+from magnum.conductor.handlers import cluster_conductor
 from magnum import objects
-from magnum.objects.fields import BayStatus as bay_status
+from magnum.objects.fields import ClusterStatus as cluster_status
 from magnum.tests import base
 
 
-class TestBayConductorWithMesos(base.TestCase):
+class TestClusterConductorWithMesos(base.TestCase):
     def setUp(self):
-        super(TestBayConductorWithMesos, self).setUp()
+        super(TestClusterConductorWithMesos, self).setUp()
         self.cluster_template_dict = {
             'image_id': 'image_id',
             'flavor_id': 'flavor_id',
@@ -48,11 +48,11 @@ class TestBayConductorWithMesos(base.TestCase):
                        },
             'master_lb_enabled': False,
         }
-        self.bay_dict = {
+        self.cluster_dict = {
             'id': 1,
             'uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
-            'baymodel_id': 'xx-xx-xx-xx',
-            'name': 'bay1',
+            'cluster_template_id': 'xx-xx-xx-xx',
+            'name': 'cluster1',
             'stack_id': 'xx-xx-xx-xx',
             'api_address': '172.17.2.3',
             'node_addresses': ['172.17.2.4'],
@@ -85,12 +85,12 @@ class TestBayConductorWithMesos(base.TestCase):
             self.context, **self.cluster_template_dict)
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
-        bay = objects.Bay(self.context, **self.bay_dict)
+        cluster = objects.Cluster(self.context, **self.cluster_dict)
 
         (template_path,
          definition,
-         env_files) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+         env_files) = cluster_conductor._extract_template_definition(
+            self.context, cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -104,7 +104,7 @@ class TestBayConductorWithMesos(base.TestCase):
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
-            'cluster_name': 'bay1',
+            'cluster_name': 'cluster1',
             'trustee_domain_id': self.mock_keystone.trustee_domain_id,
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
@@ -141,19 +141,19 @@ class TestBayConductorWithMesos(base.TestCase):
             self.context, **self.cluster_template_dict)
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
-        bay = objects.Bay(self.context, **self.bay_dict)
+        cluster = objects.Cluster(self.context, **self.cluster_dict)
 
         (template_path,
          definition,
-         env_files) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+         env_files) = cluster_conductor._extract_template_definition(
+            self.context, cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
             'external_network': 'external_network_id',
             'number_of_slaves': 1,
             'number_of_masters': 1,
-            'cluster_name': 'bay1',
+            'cluster_name': 'cluster1',
             'trustee_domain_id': self.mock_keystone.trustee_domain_id,
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
@@ -184,12 +184,12 @@ class TestBayConductorWithMesos(base.TestCase):
             self.context, **self.cluster_template_dict)
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
-        bay = objects.Bay(self.context, **self.bay_dict)
+        cluster = objects.Cluster(self.context, **self.cluster_dict)
 
         (template_path,
          definition,
-         env_files) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+         env_files) = cluster_conductor._extract_template_definition(
+            self.context, cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -203,7 +203,7 @@ class TestBayConductorWithMesos(base.TestCase):
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
-            'cluster_name': 'bay1',
+            'cluster_name': 'cluster1',
             'trustee_domain_id': self.mock_keystone.trustee_domain_id,
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
@@ -231,17 +231,17 @@ class TestBayConductorWithMesos(base.TestCase):
             self,
             mock_objects_cluster_template_get_by_uuid):
         self.cluster_template_dict['master_lb_enabled'] = True
-        self.bay_dict['master_count'] = 2
+        self.cluster_dict['master_count'] = 2
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
-        bay = objects.Bay(self.context, **self.bay_dict)
+        cluster = objects.Cluster(self.context, **self.cluster_dict)
 
         (template_path,
          definition,
-         env_files) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+         env_files) = cluster_conductor._extract_template_definition(
+            self.context, cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -255,7 +255,7 @@ class TestBayConductorWithMesos(base.TestCase):
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
-            'cluster_name': 'bay1',
+            'cluster_name': 'cluster1',
             'trustee_domain_id': self.mock_keystone.trustee_domain_id,
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
@@ -285,7 +285,7 @@ class TestBayConductorWithMesos(base.TestCase):
                         mock_retrieve_cluster_template):
         cfg.CONF.cluster_heat.max_attempts = 10
 
-        bay = mock.MagicMock()
+        cluster = mock.MagicMock()
         mock_heat_stack = mock.MagicMock()
         mock_heat_client = mock.MagicMock()
         mock_heat_client.stacks.get.return_value = mock_heat_stack
@@ -293,24 +293,24 @@ class TestBayConductorWithMesos(base.TestCase):
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
         mock_retrieve_cluster_template.return_value = cluster_template
-        poller = bay_conductor.HeatPoller(mock_openstack_client, bay)
+        poller = cluster_conductor.HeatPoller(mock_openstack_client, cluster)
         poller.get_version_info = mock.MagicMock()
-        return (mock_heat_stack, bay, poller)
+        return (mock_heat_stack, cluster, poller)
 
     def test_poll_node_count(self):
-        mock_heat_stack, bay, poller = self.setup_poll_test()
+        mock_heat_stack, cluster, poller = self.setup_poll_test()
 
         mock_heat_stack.parameters = {'number_of_slaves': 1}
-        mock_heat_stack.stack_status = bay_status.CREATE_IN_PROGRESS
+        mock_heat_stack.stack_status = cluster_status.CREATE_IN_PROGRESS
         poller.poll_and_check()
 
-        self.assertEqual(1, bay.node_count)
+        self.assertEqual(1, cluster.node_count)
 
     def test_poll_node_count_by_update(self):
-        mock_heat_stack, bay, poller = self.setup_poll_test()
+        mock_heat_stack, cluster, poller = self.setup_poll_test()
 
         mock_heat_stack.parameters = {'number_of_slaves': 2}
-        mock_heat_stack.stack_status = bay_status.UPDATE_COMPLETE
+        mock_heat_stack.stack_status = cluster_status.UPDATE_COMPLETE
         self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
-        self.assertEqual(2, bay.node_count)
+        self.assertEqual(2, cluster.node_count)

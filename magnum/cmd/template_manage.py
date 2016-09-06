@@ -50,7 +50,7 @@ class TemplateList(lister.Lister):
         parser.add_argument('-d', '--details',
                             action='store_true',
                             dest='details',
-                            help=('display the bay types provided by '
+                            help=('display the cluster types provided by '
                                   'each template'))
         parser.add_argument('-p', '--paths',
                             action='store_true',
@@ -77,10 +77,10 @@ class TemplateList(lister.Lister):
                                 path=definition.template_path)
 
                 if parsed_args.details:
-                    for bay_type in definition.provides:
+                    for cluster_type in definition.provides:
                         row = dict()
                         row.update(template)
-                        row.update(bay_type)
+                        row.update(cluster_type)
                         rows.append(row)
                 else:
                     rows.append(template)

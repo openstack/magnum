@@ -20,33 +20,33 @@ from pycadf import resource
 
 from magnum.common import clients
 from magnum.common import rpc
-from magnum.objects import bay
+from magnum.objects import cluster
 from magnum.objects import cluster_template
 
 
-def retrieve_bay(context, bay_ident):
-    if not uuidutils.is_uuid_like(bay_ident):
-        return bay.Bay.get_by_name(context, bay_ident)
+def retrieve_cluster(context, cluster_ident):
+    if not uuidutils.is_uuid_like(cluster_ident):
+        return cluster.Cluster.get_by_name(context, cluster_ident)
     else:
-        return bay.Bay.get_by_uuid(context, bay_ident)
+        return cluster.Cluster.get_by_uuid(context, cluster_ident)
 
 
-def retrieve_cluster_template(context, bay):
-    return cluster_template.ClusterTemplate.get_by_uuid(context,
-                                                        bay.baymodel_id)
+def retrieve_cluster_template(context, cluster):
+    return cluster_template.ClusterTemplate.get_by_uuid(
+        context, cluster.cluster_template_id)
 
 
-def retrieve_bay_uuid(context, bay_ident):
-    if not uuidutils.is_uuid_like(bay_ident):
-        bay_obj = bay.Bay.get_by_name(context, bay_ident)
-        return bay_obj.uuid
+def retrieve_cluster_uuid(context, cluster_ident):
+    if not uuidutils.is_uuid_like(cluster_ident):
+        cluster_obj = cluster.Cluster.get_by_name(context, cluster_ident)
+        return cluster_obj.uuid
     else:
-        return bay_ident
+        return cluster_ident
 
 
-def object_has_stack(context, bay_uuid):
+def object_has_stack(context, cluster_uuid):
     osc = clients.OpenStackClients(context)
-    obj = retrieve_bay(context, bay_uuid)
+    obj = retrieve_cluster(context, cluster_uuid)
 
     stack = osc.heat().stacks.get(obj.stack_id)
     if (stack.stack_status == 'DELETE_COMPLETE' or
@@ -86,8 +86,8 @@ def _get_request_audit_info(context):
     return initiator
 
 
-def notify_about_bay_operation(context, action, outcome):
-    """Send a notification about bay operation.
+def notify_about_cluster_operation(context, action, outcome):
+    """Send a notification about cluster operation.
 
     :param action: CADF action being audited
     :param outcome: CADF outcome
@@ -98,10 +98,10 @@ def notify_about_bay_operation(context, action, outcome):
         outcome=outcome,
         action=action,
         initiator=_get_request_audit_info(context),
-        target=resource.Resource(typeURI='service/magnum/bay'),
-        observer=resource.Resource(typeURI='service/magnum/bay'))
+        target=resource.Resource(typeURI='service/magnum/cluster'),
+        observer=resource.Resource(typeURI='service/magnum/cluster'))
     service = 'magnum'
-    event_type = '%(service)s.bay.%(action)s' % {
+    event_type = '%(service)s.cluster.%(action)s' % {
         'service': service, 'action': action}
     payload = event.as_dict()
 

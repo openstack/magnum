@@ -28,7 +28,7 @@ from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api import expose
 from magnum.api import utils as api_utils
-from magnum.api.validation import validate_bay_properties
+from magnum.api.validation import validate_cluster_properties
 from magnum.common import clients
 from magnum.common import exception
 from magnum.common import name_generator
@@ -66,7 +66,7 @@ class Bay(base.APIBase):
                 self._baymodel_id = baymodel.uuid
             except exception.ClusterTemplateNotFound as e:
                 # Change error code because 404 (NotFound) is inappropriate
-                # response for a POST request to create a Bay
+                # response for a POST request to create a Cluster
                 e.code = 400  # BadRequest
                 raise
         elif value == wtypes.Unset:
@@ -99,7 +99,7 @@ class Bay(base.APIBase):
     stack_id = wsme.wsattr(wtypes.text, readonly=True)
     """Stack id of the heat stack"""
 
-    status = wtypes.Enum(str, *fields.BayStatus.ALL)
+    status = wtypes.Enum(str, *fields.ClusterStatus.ALL)
     """Status of the bay from the heat stack"""
 
     status_reason = wtypes.text
@@ -131,12 +131,42 @@ class Bay(base.APIBase):
         super(Bay, self).__init__()
 
         self.fields = []
-        for field in objects.Bay.fields:
+        for field in objects.Cluster.fields:
             # Skip fields we do not expose.
             if not hasattr(self, field):
                 continue
             self.fields.append(field)
             setattr(self, field, kwargs.get(field, wtypes.Unset))
+
+        # Set the renamed attributes for bay backwards compatibility
+        self.fields.append('baymodel_id')
+        if 'baymodel_id' in kwargs.keys():
+            setattr(self, 'cluster_template_id',
+                    kwargs.get('baymodel_id', None))
+            setattr(self, 'baymodel_id',
+                    kwargs.get('baymodel_id', None))
+        else:
+            setattr(self, 'baymodel_id', kwargs.get('cluster_template_id',
+                                                    None))
+
+        self.fields.append('bay_create_timeout')
+        if 'bay_create_timeout' in kwargs.keys():
+            setattr(self, 'create_timeout',
+                    kwargs.get('bay_create_timeout', wtypes.Unset))
+            setattr(self, 'bay_create_timeout',
+                    kwargs.get('bay_create_timeout', wtypes.Unset))
+        else:
+            setattr(self, 'bay_create_timeout', kwargs.get('create_timeout',
+                                                           wtypes.Unset))
+
+        self.fields.append('bay_faults')
+        if 'bay_faults' in kwargs.keys():
+            setattr(self, 'faults',
+                    kwargs.get('bay_faults', wtypes.Unset))
+            setattr(self, 'bay_faults',
+                    kwargs.get('bay_faults', wtypes.Unset))
+        else:
+            setattr(self, 'bay_faults', kwargs.get('faults', wtypes.Unset))
 
     @staticmethod
     def _convert_with_links(bay, url, expand=True):
@@ -167,7 +197,7 @@ class Bay(base.APIBase):
                      master_count=1,
                      bay_create_timeout=15,
                      stack_id='49dc23f5-ffc9-40c3-9d34-7be7f9e34d63',
-                     status=fields.BayStatus.CREATE_COMPLETE,
+                     status=fields.ClusterStatus.CREATE_COMPLETE,
                      status_reason="CREATE completed successfully",
                      api_address='172.24.4.3',
                      node_addresses=['172.24.4.4', '172.24.4.5'],
@@ -176,6 +206,24 @@ class Bay(base.APIBase):
                      coe_version=None,
                      container_version=None)
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
+
+    def as_dict(self):
+        """Render this object as a dict of its fields."""
+
+        # Override this for old bay values
+        d = super(Bay, self).as_dict()
+
+        d['cluster_template_id'] = d['baymodel_id']
+        del d['baymodel_id']
+
+        d['create_timeout'] = d['bay_create_timeout']
+        del d['bay_create_timeout']
+
+        if 'bay_faults' in d.keys():
+            d['faults'] = d['bay_faults']
+            del d['bay_faults']
+
+        return d
 
 
 class BayPatchType(types.JsonPatchType):
@@ -239,12 +287,12 @@ class BaysController(base.Controller):
 
         marker_obj = None
         if marker:
-            marker_obj = objects.Bay.get_by_uuid(pecan.request.context,
-                                                 marker)
+            marker_obj = objects.Cluster.get_by_uuid(pecan.request.context,
+                                                     marker)
 
-        bays = objects.Bay.list(pecan.request.context, limit,
-                                marker_obj, sort_key=sort_key,
-                                sort_dir=sort_dir)
+        bays = objects.Cluster.list(pecan.request.context, limit,
+                                    marker_obj, sort_key=sort_key,
+                                    sort_dir=sort_dir)
 
         return BayCollection.convert_with_links(bays, limit,
                                                 url=resource_url,
@@ -323,13 +371,13 @@ class BaysController(base.Controller):
         :param bay_ident: UUID of a bay or logical name of the bay.
         """
         context = pecan.request.context
-        bay = api_utils.get_resource('Bay', bay_ident)
+        bay = api_utils.get_resource('Cluster', bay_ident)
         policy.enforce(context, 'bay:get', bay,
                        action='bay:get')
 
         bay = Bay.convert_with_links(bay)
 
-        if bay.status in fields.BayStatus.STATUS_FAILED:
+        if bay.status in fields.ClusterStatus.STATUS_FAILED:
             bay.bay_faults = self._collect_fault_info(context, bay)
 
         return bay
@@ -342,8 +390,8 @@ class BaysController(base.Controller):
         :param bay: a bay within the request body.
         """
         new_bay = self._post(bay)
-        res_bay = pecan.request.rpcapi.bay_create(new_bay,
-                                                  bay.bay_create_timeout)
+        res_bay = pecan.request.rpcapi.cluster_create(new_bay,
+                                                      bay.bay_create_timeout)
 
         # Set the HTTP Location Header
         pecan.response.location = link.build_url('bays', res_bay.uuid)
@@ -357,7 +405,8 @@ class BaysController(base.Controller):
         :param bay: a bay within the request body.
         """
         new_bay = self._post(bay)
-        pecan.request.rpcapi.bay_create_async(new_bay, bay.bay_create_timeout)
+        pecan.request.rpcapi.cluster_create_async(new_bay,
+                                                  bay.bay_create_timeout)
         return BayID(new_bay.uuid)
 
     def _post(self, bay):
@@ -378,7 +427,7 @@ class BaysController(base.Controller):
         bay_dict['coe_version'] = None
         bay_dict['container_version'] = None
 
-        new_bay = objects.Bay(context, **bay_dict)
+        new_bay = objects.Cluster(context, **bay_dict)
         new_bay.uuid = uuid.uuid4()
         return new_bay
 
@@ -392,7 +441,7 @@ class BaysController(base.Controller):
         :param patch: a json PATCH document to apply to this bay.
         """
         bay = self._patch(bay_ident, patch)
-        res_bay = pecan.request.rpcapi.bay_update(bay)
+        res_bay = pecan.request.rpcapi.cluster_update(bay)
         return Bay.convert_with_links(res_bay)
 
     @base.Controller.api_version("1.2", "1.2")   # noqa
@@ -406,7 +455,7 @@ class BaysController(base.Controller):
         :param patch: a json PATCH document to apply to this bay.
         """
         bay = self._patch(bay_ident, patch)
-        pecan.request.rpcapi.bay_update_async(bay)
+        pecan.request.rpcapi.cluster_update_async(bay)
         return BayID(bay.uuid)
 
     @base.Controller.api_version("1.3")   # noqa
@@ -421,12 +470,12 @@ class BaysController(base.Controller):
         :param patch: a json PATCH document to apply to this bay.
         """
         bay = self._patch(bay_ident, patch)
-        pecan.request.rpcapi.bay_update_async(bay, rollback=rollback)
+        pecan.request.rpcapi.cluster_update_async(bay, rollback=rollback)
         return BayID(bay.uuid)
 
     def _patch(self, bay_ident, patch):
         context = pecan.request.context
-        bay = api_utils.get_resource('Bay', bay_ident)
+        bay = api_utils.get_resource('Cluster', bay_ident)
         policy.enforce(context, 'bay:update', bay,
                        action='bay:update')
         try:
@@ -436,7 +485,7 @@ class BaysController(base.Controller):
             raise exception.PatchError(patch=patch, reason=e)
 
         # Update only the fields that have changed
-        for field in objects.Bay.fields:
+        for field in objects.Cluster.fields:
             try:
                 patch_val = getattr(new_bay, field)
             except AttributeError:
@@ -449,7 +498,7 @@ class BaysController(base.Controller):
 
         delta = bay.obj_what_changed()
 
-        validate_bay_properties(delta)
+        validate_cluster_properties(delta)
         return bay
 
     @base.Controller.api_version("1.1", "1.1")
@@ -461,7 +510,7 @@ class BaysController(base.Controller):
         """
         bay = self._delete(bay_ident)
 
-        pecan.request.rpcapi.bay_delete(bay.uuid)
+        pecan.request.rpcapi.cluster_delete(bay.uuid)
 
     @base.Controller.api_version("1.2")  # noqa
     @expose.expose(None, types.uuid_or_name, status_code=204)
@@ -472,11 +521,11 @@ class BaysController(base.Controller):
         """
         bay = self._delete(bay_ident)
 
-        pecan.request.rpcapi.bay_delete_async(bay.uuid)
+        pecan.request.rpcapi.cluster_delete_async(bay.uuid)
 
     def _delete(self, bay_ident):
         context = pecan.request.context
-        bay = api_utils.get_resource('Bay', bay_ident)
+        bay = api_utils.get_resource('Cluster', bay_ident)
         policy.enforce(context, 'bay:delete', bay,
                        action='bay:delete')
         return bay

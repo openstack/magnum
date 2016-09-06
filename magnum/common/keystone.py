@@ -32,9 +32,9 @@ LOG = logging.getLogger(__name__)
 
 trust_opts = [
     cfg.StrOpt('trustee_domain_id',
-               help=_('Id of the domain to create trustee for bays')),
+               help=_('Id of the domain to create trustee for clusters')),
     cfg.StrOpt('trustee_domain_name',
-               help=_('Name of the domain to create trustee for bays')),
+               help=_('Name of the domain to create trustee for s')),
     cfg.StrOpt('trustee_domain_admin_id',
                help=_('Id of the admin with roles sufficient to manage users'
                       ' in the trustee_domain')),
@@ -256,21 +256,21 @@ class KeystoneClientV3(object):
                 trustee_user_id=trustee_user)
         return trust
 
-    def delete_trust(self, context, bay):
-        if bay.trust_id is None:
+    def delete_trust(self, context, cluster):
+        if cluster.trust_id is None:
             return
 
         # Trust can only be deleted by the user who creates it. So when
-        # other users in the same project want to delete the bay, we need
+        # other users in the same project want to delete the cluster, we need
         # use the trustee which can impersonate the trustor to delete the
         # trust.
-        if context.user_id == bay.user_id:
+        if context.user_id == cluster.user_id:
             client = self.client
         else:
             auth = ka_v3.Password(auth_url=self.auth_url,
-                                  user_id=bay.trustee_user_id,
-                                  password=bay.trustee_password,
-                                  trust_id=bay.trust_id)
+                                  user_id=cluster.trustee_user_id,
+                                  password=cluster.trustee_password,
+                                  trust_id=cluster.trust_id)
 
             sess = ka_loading.session.Session().load_from_options(
                 auth=auth,
@@ -280,12 +280,12 @@ class KeystoneClientV3(object):
                 cert=CONF[CFG_LEGACY_GROUP].certfile)
             client = kc_v3.Client(session=sess)
         try:
-            client.trusts.delete(bay.trust_id)
+            client.trusts.delete(cluster.trust_id)
         except kc_exception.NotFound:
             pass
         except Exception:
             LOG.exception(_LE('Failed to delete trust'))
-            raise exception.TrustDeleteFailed(trust_id=bay.trust_id)
+            raise exception.TrustDeleteFailed(trust_id=cluster.trust_id)
 
     def create_trustee(self, username, password):
         domain_id = self.trustee_domain_id

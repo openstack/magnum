@@ -104,11 +104,11 @@ def enforce_wsgi(api_name, act=None):
 
        example:
            from magnum.common import policy
-           class BaysController(rest.RestController):
+           class ClustersController(rest.RestController):
                ....
-               @policy.enforce_wsgi("bay", "delete")
+               @policy.enforce_wsgi("cluster", "delete")
                @wsme_pecan.wsexpose(None, types.uuid_or_name, status_code=204)
-               def delete(self, bay_ident):
+               def delete(self, cluster_ident):
                    ...
     """
     @decorator.decorator

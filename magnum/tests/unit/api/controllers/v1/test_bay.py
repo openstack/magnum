@@ -16,6 +16,7 @@ import mock
 from oslo_config import cfg
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
+from wsme import types as wtypes
 
 from magnum.api import attr_validator
 from magnum.api.controllers.v1 import bay as api_bay
@@ -40,6 +41,29 @@ class TestBayObject(base.TestCase):
         self.assertEqual(1, bay.master_count)
         self.assertEqual(60, bay.bay_create_timeout)
 
+        # test unset value for baymodel_id
+        bay.baymodel_id = wtypes.Unset
+        self.assertEqual(wtypes.Unset, bay.baymodel_id)
+
+        # test backwards compatibility of bay fields with new objects
+        bay_dict['bay_create_timeout'] = 15
+        bay_dict['bay_faults'] = {'testfault': 'fault'}
+        bay = api_bay.Bay(**bay_dict)
+        self.assertEqual(15, bay.bay_create_timeout)
+        self.assertEqual(15, bay.create_timeout)
+        self.assertIn('testfault', bay.bay_faults)
+        self.assertIn('testfault', bay.faults)
+
+    def test_as_dict_faults(self):
+        bay_dict = apiutils.bay_post_data(baymodel_id=None)
+        del bay_dict['node_count']
+        del bay_dict['master_count']
+        del bay_dict['bay_create_timeout']
+        bay = api_bay.Bay(**bay_dict)
+        bay.bay_faults = {'testfault': 'fault'}
+        dict = bay.as_dict()
+        self.assertEqual({'testfault': 'fault'}, dict['faults'])
+
 
 class TestListBay(api_base.FunctionalTest):
 
@@ -60,7 +84,7 @@ class TestListBay(api_base.FunctionalTest):
         self.assertEqual([], response['bays'])
 
     def test_one(self):
-        bay = obj_utils.create_test_bay(self.context)
+        bay = obj_utils.create_test_cluster(self.context)
         response = self.get_json('/bays')
         self.assertEqual(bay.uuid, response['bays'][0]["uuid"])
         self._verify_attrs(self._bay_attrs, response['bays'][0])
@@ -70,7 +94,7 @@ class TestListBay(api_base.FunctionalTest):
         self._verify_attrs(none_attrs, response['bays'][0], positive=False)
 
     def test_get_one(self):
-        bay = obj_utils.create_test_bay(self.context)
+        bay = obj_utils.create_test_cluster(self.context)
         response = self.get_json('/bays/%s' % bay['uuid'])
         self.assertEqual(bay.uuid, response['uuid'])
         self._verify_attrs(self._expand_bay_attrs, response)
@@ -85,7 +109,8 @@ class TestListBay(api_base.FunctionalTest):
         ht.resources.list.return_value = [fake_resources]
         mock_heat.return_value = ht
 
-        bay = obj_utils.create_test_bay(self.context, status='CREATE_FAILED')
+        bay = obj_utils.create_test_cluster(self.context,
+                                            status='CREATE_FAILED')
         response = self.get_json('/bays/%s' % bay['uuid'])
         self.assertEqual(bay.uuid, response['uuid'])
         self.assertEqual({'fake_name': 'fake_reason'}, response['bay_faults'])
@@ -93,13 +118,14 @@ class TestListBay(api_base.FunctionalTest):
     @mock.patch('magnum.common.clients.OpenStackClients.heat')
     def test_get_one_failed_bay_heatclient_exception(self, mock_heat):
         mock_heat.resources.list.side_effect = Exception('fake')
-        bay = obj_utils.create_test_bay(self.context, status='CREATE_FAILED')
+        bay = obj_utils.create_test_cluster(self.context,
+                                            status='CREATE_FAILED')
         response = self.get_json('/bays/%s' % bay['uuid'])
         self.assertEqual(bay.uuid, response['uuid'])
         self.assertEqual({}, response['bay_faults'])
 
     def test_get_one_by_name(self):
-        bay = obj_utils.create_test_bay(self.context)
+        bay = obj_utils.create_test_cluster(self.context)
         response = self.get_json('/bays/%s' % bay['name'])
         self.assertEqual(bay.uuid, response['uuid'])
         self._verify_attrs(self._expand_bay_attrs, response)
@@ -113,10 +139,10 @@ class TestListBay(api_base.FunctionalTest):
         self.assertTrue(response.json['errors'])
 
     def test_get_one_by_name_multiple_bay(self):
-        obj_utils.create_test_bay(self.context, name='test_bay',
-                                  uuid=uuidutils.generate_uuid())
-        obj_utils.create_test_bay(self.context, name='test_bay',
-                                  uuid=uuidutils.generate_uuid())
+        obj_utils.create_test_cluster(self.context, name='test_bay',
+                                      uuid=uuidutils.generate_uuid())
+        obj_utils.create_test_cluster(self.context, name='test_bay',
+                                      uuid=uuidutils.generate_uuid())
         response = self.get_json('/bays/test_bay', expect_errors=True)
         self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
@@ -125,8 +151,8 @@ class TestListBay(api_base.FunctionalTest):
     def test_get_all_with_pagination_marker(self):
         bay_list = []
         for id_ in range(4):
-            bay = obj_utils.create_test_bay(self.context, id=id_,
-                                            uuid=uuidutils.generate_uuid())
+            bay = obj_utils.create_test_cluster(self.context, id=id_,
+                                                uuid=uuidutils.generate_uuid())
             bay_list.append(bay)
 
         response = self.get_json('/bays?limit=3&marker=%s'
@@ -135,7 +161,7 @@ class TestListBay(api_base.FunctionalTest):
         self.assertEqual(bay_list[-1].uuid, response['bays'][0]['uuid'])
 
     def test_detail(self):
-        bay = obj_utils.create_test_bay(self.context)
+        bay = obj_utils.create_test_cluster(self.context)
         response = self.get_json('/bays/detail')
         self.assertEqual(bay.uuid, response['bays'][0]["uuid"])
         self._verify_attrs(self._expand_bay_attrs, response['bays'][0])
@@ -143,8 +169,8 @@ class TestListBay(api_base.FunctionalTest):
     def test_detail_with_pagination_marker(self):
         bay_list = []
         for id_ in range(4):
-            bay = obj_utils.create_test_bay(self.context, id=id_,
-                                            uuid=uuidutils.generate_uuid())
+            bay = obj_utils.create_test_cluster(self.context, id=id_,
+                                                uuid=uuidutils.generate_uuid())
             bay_list.append(bay)
 
         response = self.get_json('/bays/detail?limit=3&marker=%s'
@@ -154,7 +180,7 @@ class TestListBay(api_base.FunctionalTest):
         self._verify_attrs(self._expand_bay_attrs, response['bays'][0])
 
     def test_detail_against_single(self):
-        bay = obj_utils.create_test_bay(self.context)
+        bay = obj_utils.create_test_cluster(self.context)
         response = self.get_json('/bays/%s/detail' % bay['uuid'],
                                  expect_errors=True)
         self.assertEqual(404, response.status_int)
@@ -162,8 +188,8 @@ class TestListBay(api_base.FunctionalTest):
     def test_many(self):
         bm_list = []
         for id_ in range(5):
-            bay = obj_utils.create_test_bay(self.context, id=id_,
-                                            uuid=uuidutils.generate_uuid())
+            bay = obj_utils.create_test_cluster(self.context, id=id_,
+                                                uuid=uuidutils.generate_uuid())
             bm_list.append(bay.uuid)
         response = self.get_json('/bays')
         self.assertEqual(len(bm_list), len(response['bays']))
@@ -172,7 +198,7 @@ class TestListBay(api_base.FunctionalTest):
 
     def test_links(self):
         uuid = uuidutils.generate_uuid()
-        obj_utils.create_test_bay(self.context, id=1, uuid=uuid)
+        obj_utils.create_test_cluster(self.context, id=1, uuid=uuid)
         response = self.get_json('/bays/%s' % uuid)
         self.assertIn('links', response.keys())
         self.assertEqual(2, len(response['links']))
@@ -183,8 +209,8 @@ class TestListBay(api_base.FunctionalTest):
 
     def test_collection_links(self):
         for id_ in range(5):
-            obj_utils.create_test_bay(self.context, id=id_,
-                                      uuid=uuidutils.generate_uuid())
+            obj_utils.create_test_cluster(self.context, id=id_,
+                                          uuid=uuidutils.generate_uuid())
         response = self.get_json('/bays/?limit=3')
         self.assertEqual(3, len(response['bays']))
 
@@ -194,8 +220,8 @@ class TestListBay(api_base.FunctionalTest):
     def test_collection_links_default_limit(self):
         cfg.CONF.set_override('max_limit', 3, 'api')
         for id_ in range(5):
-            obj_utils.create_test_bay(self.context, id=id_,
-                                      uuid=uuidutils.generate_uuid())
+            obj_utils.create_test_cluster(self.context, id=id_,
+                                          uuid=uuidutils.generate_uuid())
         response = self.get_json('/bays')
         self.assertEqual(3, len(response['bays']))
 
@@ -209,10 +235,10 @@ class TestPatch(api_base.FunctionalTest):
         super(TestPatch, self).setUp()
         self.cluster_template = obj_utils.create_test_cluster_template(
             self.context)
-        self.bay = obj_utils.create_test_bay(self.context,
-                                             name='bay_example_A',
-                                             node_count=3)
-        p = mock.patch.object(rpcapi.API, 'bay_update')
+        self.bay = obj_utils.create_test_cluster(self.context,
+                                                 name='bay_example_A',
+                                                 node_count=3)
+        p = mock.patch.object(rpcapi.API, 'cluster_update')
         self.mock_bay_update = p.start()
         self.mock_bay_update.side_effect = self._simulate_rpc_bay_update
         self.addCleanup(p.stop)
@@ -241,7 +267,7 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(test_time, return_updated_at)
         # Assert nothing else was changed
         self.assertEqual(self.bay.uuid, response['uuid'])
-        self.assertEqual(self.bay.baymodel_id, response['baymodel_id'])
+        self.assertEqual(self.bay.cluster_template_id, response['baymodel_id'])
 
     @mock.patch('oslo_utils.timeutils.utcnow')
     def test_replace_ok_by_name(self, mock_utcnow):
@@ -263,7 +289,7 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(test_time, return_updated_at)
         # Assert nothing else was changed
         self.assertEqual(self.bay.uuid, response['uuid'])
-        self.assertEqual(self.bay.baymodel_id, response['baymodel_id'])
+        self.assertEqual(self.bay.cluster_template_id, response['baymodel_id'])
 
     @mock.patch('oslo_utils.timeutils.utcnow')
     def test_replace_ok_by_name_not_found(self, mock_utcnow):
@@ -296,10 +322,10 @@ class TestPatch(api_base.FunctionalTest):
         test_time = datetime.datetime(2000, 1, 1, 0, 0)
         mock_utcnow.return_value = test_time
 
-        obj_utils.create_test_bay(self.context, name='test_bay',
-                                  uuid=uuidutils.generate_uuid())
-        obj_utils.create_test_bay(self.context, name='test_bay',
-                                  uuid=uuidutils.generate_uuid())
+        obj_utils.create_test_cluster(self.context, name='test_bay',
+                                      uuid=uuidutils.generate_uuid())
+        obj_utils.create_test_cluster(self.context, name='test_bay',
+                                      uuid=uuidutils.generate_uuid())
 
         response = self.patch_json('/bays/test_bay',
                                    [{'path': '/name', 'value': 'test_bay',
@@ -356,7 +382,17 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['errors'])
 
-    @mock.patch.object(rpcapi.API, 'bay_update_async')
+    @mock.patch.object(rpcapi.API, 'cluster_update_async')
+    def test_update_bay_async(self, mock_update):
+        response = self.patch_json(
+            '/bays/%s' % self.bay.name,
+            [{'path': '/node_count', 'value': 4,
+              'op': 'replace'}],
+            headers={'OpenStack-API-Version': 'container-infra 1.2'})
+
+        self.assertEqual(202, response.status_code)
+
+    @mock.patch.object(rpcapi.API, 'cluster_update_async')
     def test_update_bay_with_rollback_enabled(self, mock_update):
         response = self.patch_json(
             '/bays/%s/?rollback=True' % self.bay.name,
@@ -381,7 +417,7 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(1, response['node_count'])
         # Assert nothing else was changed
         self.assertEqual(self.bay.uuid, response['uuid'])
-        self.assertEqual(self.bay.baymodel_id, response['baymodel_id'])
+        self.assertEqual(self.bay.cluster_template_id, response['baymodel_id'])
         self.assertEqual(self.bay.name, response['name'])
         self.assertEqual(self.bay.master_count, response['master_count'])
 
@@ -411,7 +447,7 @@ class TestPost(api_base.FunctionalTest):
         super(TestPost, self).setUp()
         self.cluster_template = obj_utils.create_test_cluster_template(
             self.context)
-        p = mock.patch.object(rpcapi.API, 'bay_create')
+        p = mock.patch.object(rpcapi.API, 'cluster_create')
         self.mock_bay_create = p.start()
         self.mock_bay_create.side_effect = self._simulate_rpc_bay_create
         self.addCleanup(p.stop)
@@ -455,8 +491,8 @@ class TestPost(api_base.FunctionalTest):
         self.post_json('/bays', bdict)
 
     def test_create_bay_doesnt_contain_id(self):
-        with mock.patch.object(self.dbapi, 'create_bay',
-                               wraps=self.dbapi.create_bay) as cc_mock:
+        with mock.patch.object(self.dbapi, 'create_cluster',
+                               wraps=self.dbapi.create_cluster) as cc_mock:
             bdict = apiutils.bay_post_data(name='bay_example_A')
             response = self.post_json('/bays', bdict)
             self.assertEqual(bdict['name'], response.json['name'])
@@ -759,14 +795,14 @@ class TestDelete(api_base.FunctionalTest):
         super(TestDelete, self).setUp()
         self.cluster_template = obj_utils.create_test_cluster_template(
             self.context)
-        self.bay = obj_utils.create_test_bay(self.context)
-        p = mock.patch.object(rpcapi.API, 'bay_delete')
+        self.bay = obj_utils.create_test_cluster(self.context)
+        p = mock.patch.object(rpcapi.API, 'cluster_delete')
         self.mock_bay_delete = p.start()
         self.mock_bay_delete.side_effect = self._simulate_rpc_bay_delete
         self.addCleanup(p.stop)
 
     def _simulate_rpc_bay_delete(self, bay_uuid):
-        bay = objects.Bay.get_by_uuid(self.context, bay_uuid)
+        bay = objects.Cluster.get_by_uuid(self.context, bay_uuid)
         bay.destroy()
 
     def test_delete_bay(self):
@@ -796,10 +832,10 @@ class TestDelete(api_base.FunctionalTest):
         self.assertEqual(204, response.status_int)
 
     def test_delete_multiple_bay_by_name(self):
-        obj_utils.create_test_bay(self.context, name='test_bay',
-                                  uuid=uuidutils.generate_uuid())
-        obj_utils.create_test_bay(self.context, name='test_bay',
-                                  uuid=uuidutils.generate_uuid())
+        obj_utils.create_test_cluster(self.context, name='test_bay',
+                                      uuid=uuidutils.generate_uuid())
+        obj_utils.create_test_cluster(self.context, name='test_bay',
+                                      uuid=uuidutils.generate_uuid())
         response = self.delete('/bays/test_bay', expect_errors=True)
         self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
@@ -826,7 +862,7 @@ class TestBayPolicyEnforcement(api_base.FunctionalTest):
             "bay:get_all", self.get_json, '/bays', expect_errors=True)
 
     def test_policy_disallow_get_one(self):
-        self.bay = obj_utils.create_test_bay(self.context)
+        self.bay = obj_utils.create_test_cluster(self.context)
         self._common_policy_check(
             "bay:get", self.get_json, '/bays/%s' % self.bay.uuid,
             expect_errors=True)
@@ -838,9 +874,9 @@ class TestBayPolicyEnforcement(api_base.FunctionalTest):
             expect_errors=True)
 
     def test_policy_disallow_update(self):
-        self.bay = obj_utils.create_test_bay(self.context,
-                                             name='bay_example_A',
-                                             node_count=3)
+        self.bay = obj_utils.create_test_cluster(self.context,
+                                                 name='bay_example_A',
+                                                 node_count=3)
         self._common_policy_check(
             "bay:update", self.patch_json, '/bays/%s' % self.bay.name,
             [{'path': '/name', 'value': "new_name", 'op': 'replace'}],
@@ -852,15 +888,15 @@ class TestBayPolicyEnforcement(api_base.FunctionalTest):
             "bay:create", self.post_json, '/bays', bdict, expect_errors=True)
 
     def _simulate_rpc_bay_delete(self, bay_uuid):
-        bay = objects.Bay.get_by_uuid(self.context, bay_uuid)
+        bay = objects.Cluster.get_by_uuid(self.context, bay_uuid)
         bay.destroy()
 
     def test_policy_disallow_delete(self):
-        p = mock.patch.object(rpcapi.API, 'bay_delete')
+        p = mock.patch.object(rpcapi.API, 'cluster_delete')
         self.mock_bay_delete = p.start()
         self.mock_bay_delete.side_effect = self._simulate_rpc_bay_delete
         self.addCleanup(p.stop)
-        self.bay = obj_utils.create_test_bay(self.context)
+        self.bay = obj_utils.create_test_cluster(self.context)
         self._common_policy_check(
             "bay:delete", self.delete, '/bays/%s' % self.bay.uuid,
             expect_errors=True)
@@ -875,18 +911,18 @@ class TestBayPolicyEnforcement(api_base.FunctionalTest):
             response.json['errors'][0]['detail'])
 
     def test_policy_only_owner_get_one(self):
-        bay = obj_utils.create_test_bay(self.context, user_id='another')
+        bay = obj_utils.create_test_cluster(self.context, user_id='another')
         self._owner_check("bay:get", self.get_json, '/bays/%s' % bay.uuid,
                           expect_errors=True)
 
     def test_policy_only_owner_update(self):
-        bay = obj_utils.create_test_bay(self.context, user_id='another')
+        bay = obj_utils.create_test_cluster(self.context, user_id='another')
         self._owner_check(
             "bay:update", self.patch_json, '/bays/%s' % bay.uuid,
             [{'path': '/name', 'value': "new_name", 'op': 'replace'}],
             expect_errors=True)
 
     def test_policy_only_owner_delete(self):
-        bay = obj_utils.create_test_bay(self.context, user_id='another')
+        bay = obj_utils.create_test_cluster(self.context, user_id='another')
         self._owner_check("bay:delete", self.delete, '/bays/%s' % bay.uuid,
                           expect_errors=True)

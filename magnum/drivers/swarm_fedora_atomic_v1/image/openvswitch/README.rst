@@ -45,15 +45,15 @@ locations:
 These files are typically installed in the same locations on the
 Neutron controller node.  The policy.json file is copied into the
 Docker image because it is fairly static and does not require
-customization for the bay.  If it is changed in the Neutron master
+customization for the cluster.  If it is changed in the Neutron master
 repo, you just need to rebuild the Docker image to update the file.
-Magnum will create the other 2 files on each bay node in the
+Magnum will create the other 2 files on each cluster node in the
 directory /etc/kuryr and map them to the proper directories in
 the container using the Docker -v option.
 
 Since Openvswitch needs to operate on the host network name space,
 the Docker container will need the -net=host option.
-The /var/run/openvswitch directory is also mapped to the bay node
+The /var/run/openvswitch directory is also mapped to the cluster node
 so that the Kuryr container can talk to openvswitch.
 To run the image from Fedora Atomic::
 

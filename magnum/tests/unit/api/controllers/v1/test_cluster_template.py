@@ -228,8 +228,8 @@ class TestPatch(api_base.FunctionalTest):
 
     def test_update_cluster_template_with_cluster(self):
         cluster_template = obj_utils.create_test_cluster_template(self.context)
-        obj_utils.create_test_cluster(self.context,
-                                      baymodel_id=cluster_template.uuid)
+        obj_utils.create_test_cluster(
+            self.context, cluster_template_id=cluster_template.uuid)
 
         response = self.patch_json('/clustertemplates/%s' %
                                    cluster_template.uuid,
@@ -267,8 +267,8 @@ class TestPatch(api_base.FunctionalTest):
 
     def test_update_cluster_template_with_cluster_allow_update(self):
         cluster_template = obj_utils.create_test_cluster_template(self.context)
-        obj_utils.create_test_cluster(self.context,
-                                      baymodel_id=cluster_template.uuid)
+        obj_utils.create_test_cluster(
+            self.context, cluster_template_id=cluster_template.uuid)
         response = self.patch_json('/clustertemplates/%s' %
                                    cluster_template.uuid,
                                    [{'path': '/public',
@@ -282,8 +282,8 @@ class TestPatch(api_base.FunctionalTest):
 
     def test_update_cluster_template_with_cluster_not_allow_update(self):
         cluster_template = obj_utils.create_test_cluster_template(self.context)
-        obj_utils.create_test_cluster(self.context,
-                                      baymodel_id=cluster_template.uuid)
+        obj_utils.create_test_cluster(
+            self.context, cluster_template_id=cluster_template.uuid)
         response = self.patch_json('/clustertemplates/%s' %
                                    cluster_template.uuid,
                                    [{'path': '/name',
@@ -963,8 +963,8 @@ class TestDelete(api_base.FunctionalTest):
 
     def test_delete_cluster_template_with_cluster(self):
         cluster_template = obj_utils.create_test_cluster_template(self.context)
-        obj_utils.create_test_cluster(self.context,
-                                      baymodel_id=cluster_template.uuid)
+        obj_utils.create_test_cluster(
+            self.context, cluster_template_id=cluster_template.uuid)
         response = self.delete('/clustertemplates/%s' % cluster_template.uuid,
                                expect_errors=True)
         self.assertEqual(400, response.status_int)

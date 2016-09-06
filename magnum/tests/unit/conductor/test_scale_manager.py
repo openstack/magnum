@@ -49,9 +49,9 @@ class TestScaleManager(base.TestCase):
         mock_osc.heat.return_value = mock_heat_client
 
         mock_context = mock.MagicMock()
-        mock_bay = mock.MagicMock()
+        mock_cluster = mock.MagicMock()
         scale_mgr = scale_manager.ScaleManager(mock_context, mock_osc,
-                                               mock_bay)
+                                               mock_cluster)
 
         if expected_removal_hosts is None:
             self.assertRaises(exception.MagnumException,
@@ -61,9 +61,9 @@ class TestScaleManager(base.TestCase):
             self.assertEqual(expected_removal_hosts, removal_hosts)
             if num_of_removal > 0:
                 mock_create_k8s_api.assert_called_once_with(mock_context,
-                                                            mock_bay)
+                                                            mock_cluster)
 
-    @mock.patch('magnum.objects.Bay.get_by_uuid')
+    @mock.patch('magnum.objects.Cluster.get_by_uuid')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager._is_scale_down')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager.'
                 '_get_num_of_removal')
@@ -82,7 +82,7 @@ class TestScaleManager(base.TestCase):
             mock_get_by_uuid, is_scale_down, num_of_removal, hosts, pods,
             expected_removal_hosts)
 
-    @mock.patch('magnum.objects.Bay.get_by_uuid')
+    @mock.patch('magnum.objects.Cluster.get_by_uuid')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager._is_scale_down')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager.'
                 '_get_num_of_removal')
@@ -101,7 +101,7 @@ class TestScaleManager(base.TestCase):
             mock_get_by_uuid, is_scale_down, num_of_removal, hosts, pods,
             expected_removal_hosts)
 
-    @mock.patch('magnum.objects.Bay.get_by_uuid')
+    @mock.patch('magnum.objects.Cluster.get_by_uuid')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager._is_scale_down')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager.'
                 '_get_num_of_removal')
@@ -120,7 +120,7 @@ class TestScaleManager(base.TestCase):
             mock_get_by_uuid, is_scale_down, num_of_removal, hosts, pods,
             expected_removal_hosts)
 
-    @mock.patch('magnum.objects.Bay.get_by_uuid')
+    @mock.patch('magnum.objects.Cluster.get_by_uuid')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager._is_scale_down')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager.'
                 '_get_num_of_removal')
@@ -139,7 +139,7 @@ class TestScaleManager(base.TestCase):
             mock_get_by_uuid, is_scale_down, num_of_removal, hosts, pods,
             expected_removal_hosts)
 
-    @mock.patch('magnum.objects.Bay.get_by_uuid')
+    @mock.patch('magnum.objects.Cluster.get_by_uuid')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager._is_scale_down')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager.'
                 '_get_num_of_removal')
@@ -158,7 +158,7 @@ class TestScaleManager(base.TestCase):
             mock_get_by_uuid, is_scale_down, num_of_removal, hosts, pods,
             expected_removal_hosts)
 
-    @mock.patch('magnum.objects.Bay.get_by_uuid')
+    @mock.patch('magnum.objects.Cluster.get_by_uuid')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager._is_scale_down')
     @mock.patch('magnum.conductor.scale_manager.ScaleManager.'
                 '_get_num_of_removal')

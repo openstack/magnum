@@ -21,7 +21,7 @@ echo "Magnum's copy_instance_logs.sh was called..."
 SSH_IP=$1
 COE=${2-kubernetes}
 NODE_TYPE=${3-master}
-LOG_PATH=/opt/stack/logs/bay-nodes/${NODE_TYPE}-${SSH_IP}
+LOG_PATH=/opt/stack/logs/cluster-nodes/${NODE_TYPE}-${SSH_IP}
 KEYPAIR=${4-default}
 PRIVATE_KEY=
 

@@ -222,14 +222,14 @@ class TestPatch(api_base.FunctionalTest):
             self.context)
         self.cluster_obj = obj_utils.create_test_cluster(
             self.context, name='cluster_example_A', node_count=3)
-        p = mock.patch.object(rpcapi.API, 'bay_update_async')
-        self.mock_bay_update = p.start()
-        self.mock_bay_update.side_effect = self._simulate_rpc_bay_update
+        p = mock.patch.object(rpcapi.API, 'cluster_update_async')
+        self.mock_cluster_update = p.start()
+        self.mock_cluster_update.side_effect = self._sim_rpc_cluster_update
         self.addCleanup(p.stop)
 
-    def _simulate_rpc_bay_update(self, bay, rollback=False):
-        bay.save()
-        return bay
+    def _sim_rpc_cluster_update(self, cluster, rollback=False):
+        cluster.save()
+        return cluster
 
     @mock.patch('oslo_utils.timeutils.utcnow')
     def test_replace_ok(self, mock_utcnow):
@@ -251,7 +251,7 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(test_time, return_updated_at)
         # Assert nothing else was changed
         self.assertEqual(self.cluster_obj.uuid, response['uuid'])
-        self.assertEqual(self.cluster_obj.baymodel_id,
+        self.assertEqual(self.cluster_obj.cluster_template_id,
                          response['cluster_template_id'])
 
     @mock.patch('oslo_utils.timeutils.utcnow')
@@ -274,7 +274,7 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(test_time, return_updated_at)
         # Assert nothing else was changed
         self.assertEqual(self.cluster_obj.uuid, response['uuid'])
-        self.assertEqual(self.cluster_obj.baymodel_id,
+        self.assertEqual(self.cluster_obj.cluster_template_id,
                          response['cluster_template_id'])
 
     @mock.patch('oslo_utils.timeutils.utcnow')
@@ -385,7 +385,7 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(1, response['node_count'])
         # Assert nothing else was changed
         self.assertEqual(self.cluster_obj.uuid, response['uuid'])
-        self.assertEqual(self.cluster_obj.baymodel_id,
+        self.assertEqual(self.cluster_obj.cluster_template_id,
                          response['cluster_template_id'])
         self.assertEqual(self.cluster_obj.name, response['name'])
         self.assertEqual(self.cluster_obj.master_count,
@@ -416,17 +416,17 @@ class TestPost(api_base.FunctionalTest):
         super(TestPost, self).setUp()
         self.cluster_template = obj_utils.create_test_cluster_template(
             self.context)
-        p = mock.patch.object(rpcapi.API, 'bay_create_async')
-        self.mock_bay_create = p.start()
-        self.mock_bay_create.side_effect = self._simulate_rpc_bay_create
+        p = mock.patch.object(rpcapi.API, 'cluster_create_async')
+        self.mock_cluster_create = p.start()
+        self.mock_cluster_create.side_effect = self._simulate_cluster_create
         self.addCleanup(p.stop)
         p = mock.patch.object(attr_validator, 'validate_os_resources')
         self.mock_valid_os_res = p.start()
         self.addCleanup(p.stop)
 
-    def _simulate_rpc_bay_create(self, bay, bay_create_timeout):
-        bay.create()
-        return bay
+    def _simulate_cluster_create(self, cluster, create_timeout):
+        cluster.create()
+        return cluster
 
     @mock.patch('oslo_utils.timeutils.utcnow')
     def test_create_cluster(self, mock_utcnow):
@@ -442,19 +442,19 @@ class TestPost(api_base.FunctionalTest):
     def test_create_cluster_set_project_id_and_user_id(self):
         bdict = apiutils.cluster_post_data()
 
-        def _simulate_rpc_bay_create(bay, bay_create_timeout):
-            self.assertEqual(self.context.project_id, bay.project_id)
-            self.assertEqual(self.context.user_id, bay.user_id)
-            bay.create()
-            return bay
+        def _simulate_rpc_cluster_create(cluster, create_timeout):
+            self.assertEqual(self.context.project_id, cluster.project_id)
+            self.assertEqual(self.context.user_id, cluster.user_id)
+            cluster.create()
+            return cluster
 
-        self.mock_bay_create.side_effect = _simulate_rpc_bay_create
+        self.mock_cluster_create.side_effect = _simulate_rpc_cluster_create
 
         self.post_json('/clusters', bdict)
 
     def test_create_cluster_doesnt_contain_id(self):
-        with mock.patch.object(self.dbapi, 'create_bay',
-                               wraps=self.dbapi.create_bay) as cc_mock:
+        with mock.patch.object(self.dbapi, 'create_cluster',
+                               wraps=self.dbapi.create_cluster) as cc_mock:
             bdict = apiutils.cluster_post_data(name='cluster_example_A')
             response = self.post_json('/clusters', bdict)
             cc_mock.assert_called_once_with(mock.ANY)
@@ -643,12 +643,12 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(202, response.status_int)
 
     def test_create_cluster_with_no_timeout(self):
-        def _simulate_rpc_bay_create(bay, bay_create_timeout):
-            self.assertEqual(60, bay_create_timeout)
-            bay.create()
-            return bay
+        def _simulate_rpc_cluster_create(cluster, create_timeout):
+            self.assertEqual(60, create_timeout)
+            cluster.create()
+            return cluster
 
-        self.mock_bay_create.side_effect = _simulate_rpc_bay_create
+        self.mock_cluster_create.side_effect = _simulate_rpc_cluster_create
         bdict = apiutils.cluster_post_data()
         del bdict['create_timeout']
         response = self.post_json('/clusters', bdict, expect_errors=True)
@@ -748,14 +748,14 @@ class TestDelete(api_base.FunctionalTest):
         self.cluster_template = obj_utils.create_test_cluster_template(
             self.context)
         self.cluster = obj_utils.create_test_cluster(self.context)
-        p = mock.patch.object(rpcapi.API, 'bay_delete_async')
-        self.mock_bay_delete = p.start()
-        self.mock_bay_delete.side_effect = self._simulate_rpc_bay_delete
+        p = mock.patch.object(rpcapi.API, 'cluster_delete_async')
+        self.mock_cluster_delete = p.start()
+        self.mock_cluster_delete.side_effect = self._simulate_cluster_delete
         self.addCleanup(p.stop)
 
-    def _simulate_rpc_bay_delete(self, bay_uuid):
-        bay = objects.Bay.get_by_uuid(self.context, bay_uuid)
-        bay.destroy()
+    def _simulate_cluster_delete(self, cluster_uuid):
+        cluster = objects.Cluster.get_by_uuid(self.context, cluster_uuid)
+        cluster.destroy()
 
     def test_delete_cluster(self):
         self.delete('/clusters/%s' % self.cluster.uuid)
@@ -840,14 +840,14 @@ class TestClusterPolicyEnforcement(api_base.FunctionalTest):
             "cluster:create", self.post_json, '/clusters', bdict,
             expect_errors=True)
 
-    def _simulate_rpc_bay_delete(self, bay_uuid):
-        bay = objects.Bay.get_by_uuid(self.context, bay_uuid)
-        bay.destroy()
+    def _simulate_cluster_delete(self, cluster_uuid):
+        cluster = objects.Cluster.get_by_uuid(self.context, cluster_uuid)
+        cluster.destroy()
 
     def test_policy_disallow_delete(self):
-        p = mock.patch.object(rpcapi.API, 'bay_delete')
-        self.mock_bay_delete = p.start()
-        self.mock_bay_delete.side_effect = self._simulate_rpc_bay_delete
+        p = mock.patch.object(rpcapi.API, 'cluster_delete')
+        self.mock_cluster_delete = p.start()
+        self.mock_cluster_delete.side_effect = self._simulate_cluster_delete
         self.addCleanup(p.stop)
         self.cluster = obj_utils.create_test_cluster(self.context)
         self._common_policy_check(
