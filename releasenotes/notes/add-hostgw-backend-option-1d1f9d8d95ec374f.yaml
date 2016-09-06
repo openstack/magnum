@@ -1,0 +1,10 @@
+---
+features:
+  - Add flannel's host-gw backend option. Magnum deploys cluster over a
+    dedicated neutron private network by using flannel. Flannel's host-gw
+    backend gives the best performance in this topopolgy (private layer2) since
+    there is no packet processing overhead, no reduction to MTU, scales to many
+    hosts as well as the alternatives. The label "flannel_use_vxlan" was
+    repurposed when the network driver is flannel. First, rename the label
+    flannel_use_vxlan to flannel_backend. Second, redefine the value of this
+    label from "yes/no" to "udp/vxlan/host-gw".

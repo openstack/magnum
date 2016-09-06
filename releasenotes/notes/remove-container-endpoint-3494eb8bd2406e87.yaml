@@ -1,0 +1,20 @@
+---
+prelude: |
+    Magnum service type and mission statement was changed [1].
+
+    Change service type from "Container service" to "Container Infrastructure
+    Management service". In addition, the mission statement is changed to
+    "To provide a set of services for provisioning, scaling, and managing
+    container orchestration engines."
+
+    The intend is to narrow the scope of the Magnum project to focus on
+    integrating container orchestration engines (COEs) with OpenStack.
+    API features intended to uniformly create, manage, and delete
+    individual containers across any COE will be removed from Magnum's
+    API, and will be re-introduced as a separate project called Zun.
+
+    [1] https://review.openstack.org/#/c/311476/
+upgrade:
+  - All container/pod/service/replication controller operations were removed.
+    Users are recommended to use the COE's native tool (i.e. docker, kubectl)
+    to do the equivalent of the removed operations.

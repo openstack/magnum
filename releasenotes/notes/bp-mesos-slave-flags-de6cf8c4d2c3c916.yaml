@@ -1,0 +1,7 @@
+---
+features:
+  - >
+      Enable Mesos cluster to export more slave flags via labels in
+      cluster template. Add the following labels: mesos_slave_isolation,
+      mesos_slave_image_providers, mesos_slave_work_dir,
+      and mesos_slave_executor_environment_variables.

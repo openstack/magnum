@@ -1,0 +1,6 @@
+---
+features:
+  - Decouple the hard requirement on barbican. Introduce a new certificate
+    store called x509keypair. If x509keypair is used, TLS certificates will
+    be stored at magnum's database instead of barbican. To do that, set the
+    value of the config ``cert_manager_type`` as ``x509keypair``.

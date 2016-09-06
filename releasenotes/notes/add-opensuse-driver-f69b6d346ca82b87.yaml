@@ -1,0 +1,5 @@
+---
+features:
+  - Add support for a new OpenSUSE driver for running k8s cluster on OpenSUSE.
+    This driver is experimental for now, and operators need to get it from
+    /contrib folder.

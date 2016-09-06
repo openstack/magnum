@@ -1,0 +1,10 @@
+---
+security:
+  - Fix global stack list in periodic task. In before, magnum's periodic task
+    performs a `stack-list` operation across all tenants. This is disabled
+    by Heat by default since it causes a security issue. At this release,
+    magnum performs a `stack-get` operation on each Heat stack by default.
+    This might not be scalable and operators have an option to fall back to
+    `stack-list` by setting the config `periodic_global_stack_list` to
+    `True` (`False` by default) and updating the heat policy file (usually
+    /etc/heat/policy.json) to allow magnum list stacks.

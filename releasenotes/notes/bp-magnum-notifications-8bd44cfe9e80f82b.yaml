@@ -1,0 +1,7 @@
+---
+features:
+  - Emit notifications when there is an event on a cluster. An event could be
+    a status change of the cluster due to an operation issued by end-users
+    (i.e. users create, update or delete the cluster). Notifications are sent
+    by using oslo.notify and PyCADF. Ceilometer can capture the events and
+    generate samples for auditing, billing, monitoring, or quota purposes.
