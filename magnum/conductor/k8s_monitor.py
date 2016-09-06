@@ -14,10 +14,10 @@ import ast
 
 from magnum.common import utils
 from magnum.conductor import k8s_api as k8s
-from magnum.conductor.monitors import MonitorBase
+from magnum.conductor import monitors
 
 
-class K8sMonitor(MonitorBase):
+class K8sMonitor(monitors.MonitorBase):
 
     def __init__(self, context, bay):
         super(K8sMonitor, self).__init__(context, bay)

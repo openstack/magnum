@@ -21,7 +21,6 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 from cryptography import x509
-from cryptography.x509 import Extension
 from oslo_config import cfg
 from oslo_log import log as logging
 
@@ -70,13 +69,13 @@ def _build_client_extentions():
     # Digital Signature and Key Encipherment are enabled
     key_usage = x509.KeyUsage(True, False, True, False, False, False, False,
                               False, False)
-    key_usage = Extension(key_usage.oid, True, key_usage)
+    key_usage = x509.Extension(key_usage.oid, True, key_usage)
     extended_key_usage = x509.ExtendedKeyUsage([x509.OID_CLIENT_AUTH])
-    extended_key_usage = Extension(extended_key_usage.oid, False,
-                                   extended_key_usage)
+    extended_key_usage = x509.Extension(extended_key_usage.oid, False,
+                                        extended_key_usage)
     basic_constraints = x509.BasicConstraints(ca=False, path_length=None)
-    basic_constraints = Extension(basic_constraints.oid, True,
-                                  basic_constraints)
+    basic_constraints = x509.Extension(basic_constraints.oid, True,
+                                       basic_constraints)
 
     return [key_usage, extended_key_usage, basic_constraints]
 
@@ -85,10 +84,10 @@ def _build_ca_extentions():
     # Certificate Sign is enabled
     key_usage = x509.KeyUsage(False, False, False, False, False, True, False,
                               False, False)
-    key_usage = Extension(key_usage.oid, True, key_usage)
+    key_usage = x509.Extension(key_usage.oid, True, key_usage)
     basic_constraints = x509.BasicConstraints(ca=True, path_length=0)
-    basic_constraints = Extension(basic_constraints.oid, True,
-                                  basic_constraints)
+    basic_constraints = x509.Extension(basic_constraints.oid, True,
+                                       basic_constraints)
 
     return [basic_constraints, key_usage]
 

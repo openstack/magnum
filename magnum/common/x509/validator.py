@@ -15,7 +15,7 @@
 from cryptography import x509
 from oslo_config import cfg
 
-from magnum.common.exception import CertificateValidationError
+from magnum.common import exception
 from magnum.common.x509 import extensions
 
 _CA_KEY_USAGES = [
@@ -55,7 +55,7 @@ def filter_allowed_extensions(extensions, allowed_extensions=None):
             yield ext
         else:
             if ext.critical:
-                raise CertificateValidationError(extension=ext)
+                raise exception.CertificateValidationError(extension=ext)
 
 
 def _merge_key_usage(key_usage, allowed_key_usage):
@@ -74,7 +74,8 @@ def _merge_key_usage(key_usage, allowed_key_usage):
         if value:
             if k not in allowed_key_usage:
                 if critical:
-                    raise CertificateValidationError(extension=key_usage)
+                    raise exception.CertificateValidationError(
+                        extension=key_usage)
                 else:
                     value = False
         usages.append(value)
@@ -95,7 +96,8 @@ def _remove_ca_key_usage(allowed_key_usage):
 def _disallow_ca_in_basic_constraints(basic_constraints):
     if basic_constraints.value.ca:
         if basic_constraints.critical:
-            raise CertificateValidationError(extension=basic_constraints)
+            raise exception.CertificateValidationError(
+                extension=basic_constraints)
 
         bc = x509.BasicConstraints(False, None)
         return x509.Extension(bc.oid, False, bc)

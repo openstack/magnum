@@ -20,7 +20,7 @@ from oslo_log import log
 from oslo_utils import importutils
 import six
 
-from magnum.objects.fields import BayType as bay_type
+from magnum.objects import fields
 
 
 LOG = log.getLogger(__name__)
@@ -34,9 +34,9 @@ CONF.import_opt('default_timeout',
                 group='docker')
 
 COE_CLASS_PATH = {
-    bay_type.SWARM: 'magnum.conductor.swarm_monitor.SwarmMonitor',
-    bay_type.KUBERNETES: 'magnum.conductor.k8s_monitor.K8sMonitor',
-    bay_type.MESOS: 'magnum.conductor.mesos_monitor.MesosMonitor'
+    fields.BayType.SWARM: 'magnum.conductor.swarm_monitor.SwarmMonitor',
+    fields.BayType.KUBERNETES: 'magnum.conductor.k8s_monitor.K8sMonitor',
+    fields.BayType.MESOS: 'magnum.conductor.mesos_monitor.MesosMonitor'
 }
 
 

@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from random import Random
+import random
 
 
 class NameGenerator(object):
@@ -23,7 +23,7 @@ class NameGenerator(object):
                'phi', 'chi', 'psi', 'omega']
 
     def __init__(self):
-        self.random = Random()
+        self.random = random.Random()
 
     def generate(self):
         '''Generate a random name compose of a Greek leter and
