@@ -1,0 +1,10 @@
+---
+features:
+  - Integrate Docker Swarm Fedora Atomic driver with the
+    Block Storage Service (cinder). The rexray volume
+    driver was added based on rexray v0.4. Users can
+    create and attach volumes using docker's navive
+    client and they will authenticate using the per
+    cluster trustee user. Rexray can be either added
+    in the Fedora Atomic image or can be used running
+    in a container.

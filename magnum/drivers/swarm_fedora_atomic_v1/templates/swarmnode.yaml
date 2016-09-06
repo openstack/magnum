@@ -149,6 +149,18 @@ parameters:
     description: >
       size fo the data segments for the swift dynamic large objects
 
+  volume_driver:
+    type: string
+    description: volume driver to use for container storage
+    default: ""
+
+  rexray_preempt:
+    type: string
+    description: >
+      enables any host to take control of a volume irrespective of whether
+      other hosts are using the volume
+    default: "false"
+
 resources:
 
   node_wait_handle:
@@ -202,6 +214,8 @@ resources:
             "$REGISTRY_CONTAINER": {get_param: registry_container}
             "$REGISTRY_INSECURE": {get_param: registry_insecure}
             "$REGISTRY_CHUNKSIZE": {get_param: registry_chunksize}
+            "$VOLUME_DRIVER": {get_param: volume_driver}
+            "$REXRAY_PREEMPT": {get_param: rexray_preempt}
 
   remove_docker_key:
     type: "OS::Heat::SoftwareConfig"
@@ -301,6 +315,12 @@ resources:
       group: ungrouped
       config: {get_file: fragments/add-proxy.sh}
 
+  volume_service:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/volume-service.sh}
+
   swarm_node_init:
     type: "OS::Heat::MultipartMime"
     properties:
@@ -320,6 +340,7 @@ resources:
         - config: {get_resource: enable_docker_registry}
         - config: {get_resource: enable_services}
         - config: {get_resource: cfn_signal}
+        - config: {get_resource: volume_service}
 
   swarm_node:
     type: "OS::Nova::Server"
