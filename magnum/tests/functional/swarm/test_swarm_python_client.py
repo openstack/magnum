@@ -71,6 +71,9 @@ class TestSwarmAPIs(ClusterTest):
             raise Exception(msg)
 
         url = self.cs.clusters.get(self.cluster.uuid).api_address
+        # FIXME (strigazi) until we upgrade to docker-py 1.8.0 use
+        # only the https protocol instead of tcp.
+        https_url = url.replace('tcp', 'https')
 
         # Note(eliqiao): docker_utils.CONF.docker.default_timeout is 10,
         # tested this default configure option not works on gate, it will
@@ -80,7 +83,7 @@ class TestSwarmAPIs(ClusterTest):
 
         docker_api_time_out = 180
         self.docker_client = docker_utils.DockerHTTPClient(
-            url,
+            https_url,
             CONF.docker.docker_remote_api_version,
             docker_api_time_out,
             client_key=self.key_file,
@@ -88,7 +91,7 @@ class TestSwarmAPIs(ClusterTest):
             ca_cert=self.ca_file)
 
         self.docker_client_non_tls = docker_utils.DockerHTTPClient(
-            url,
+            https_url,
             CONF.docker.docker_remote_api_version,
             docker_api_time_out)
 
