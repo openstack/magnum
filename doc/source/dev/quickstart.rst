@@ -591,7 +591,7 @@ Set the CLI to use TLS . This env var is consumed by docker.::
 Set the correct host to use which is the public ip address of swarm API server
 endpoint. This env var is consumed by docker.::
 
-    export DOCKER_HOST=$(magnum cluster-show swarm-cluster | awk '/ api_address /{print substr($4,9)}')
+    export DOCKER_HOST=$(magnum cluster-show swarm-cluster | awk '/ api_address /{print substr($4,7)}')
 
 Next we will create a container in this swarm cluster. This container will ping
 the address 8.8.8.8 four times::
