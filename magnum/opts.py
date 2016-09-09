@@ -24,7 +24,7 @@ import magnum.common.exception
 import magnum.common.service
 import magnum.common.x509.config
 import magnum.conductor.config
-import magnum.conductor.handlers.bay_conductor
+import magnum.conductor.handlers.cluster_conductor
 import magnum.db
 import magnum.drivers.common.template_def
 
@@ -52,7 +52,7 @@ def list_opts():
         ('neutron_client', magnum.common.clients.neutron_client_opts),
         ('x509', magnum.common.x509.config.x509_opts),
         ('cluster_heat',
-            magnum.conductor.handlers.bay_conductor.cluster_heat_opts),
+            magnum.conductor.handlers.cluster_conductor.cluster_heat_opts),
         ('certificates',
             itertools.chain(magnum.common.cert_manager.cert_manager_opts,
                             local_cert_manager.local_cert_manager_opts,

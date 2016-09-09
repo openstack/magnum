@@ -24,8 +24,8 @@ KUBE_INSECURE_PORT = '8080'
 
 class K8sApiAddressOutputMapping(template_def.OutputMapping):
 
-    def set_output(self, stack, cluster_template, bay):
-        if self.bay_attr is None:
+    def set_output(self, stack, cluster_template, cluster):
+        if self.cluster_attr is None:
             return
 
         output_value = self.get_output_value(stack)
@@ -43,7 +43,7 @@ class K8sApiAddressOutputMapping(template_def.OutputMapping):
                 'port': port,
             }
             value = "%(protocol)s://%(address)s:%(port)s" % params
-            setattr(bay, self.bay_attr, value)
+            setattr(cluster, self.cluster_attr, value)
 
 
 class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
@@ -56,7 +56,7 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
         self.add_parameter('minion_flavor',
                            cluster_template_attr='flavor_id')
         self.add_parameter('number_of_minions',
-                           bay_attr='node_count')
+                           cluster_attr='node_count')
         self.add_parameter('external_network',
                            cluster_template_attr='external_network_id',
                            required=True)
@@ -69,23 +69,23 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                            required=True)
         self.add_parameter('registry_enabled',
                            cluster_template_attr='registry_enabled')
-        self.add_parameter('bay_uuid',
-                           bay_attr='uuid',
+        self.add_parameter('cluster_uuid',
+                           cluster_attr='uuid',
                            param_type=str)
         self.add_parameter('insecure_registry_url',
                            cluster_template_attr='insecure_registry')
         self.add_parameter('kube_version',
-                           bay_attr='coe_version')
+                           cluster_attr='coe_version')
 
         self.add_output('api_address',
-                        bay_attr='api_address',
+                        cluster_attr='api_address',
                         mapping_type=K8sApiAddressOutputMapping)
         self.add_output('kube_minions_private',
-                        bay_attr=None)
+                        cluster_attr=None)
         self.add_output('kube_masters_private',
-                        bay_attr=None)
+                        cluster_attr=None)
 
-    def get_params(self, context, cluster_template, bay, **kwargs):
+    def get_params(self, context, cluster_template, cluster, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
         scale_mgr = kwargs.pop('scale_manager', None)
         if scale_mgr:
@@ -93,7 +93,7 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
             extra_params['minions_to_remove'] = (
                 scale_mgr.get_removal_nodes(hosts))
 
-        extra_params['discovery_url'] = self.get_discovery_url(bay)
+        extra_params['discovery_url'] = self.get_discovery_url(cluster)
         osc = self.get_osc(context)
         extra_params['magnum_url'] = osc.magnum_url()
 
@@ -112,6 +112,6 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                 CONF.docker_registry.swift_registry_container)
 
         return super(K8sTemplateDefinition,
-                     self).get_params(context, cluster_template, bay,
+                     self).get_params(context, cluster_template, cluster,
                                       extra_params=extra_params,
                                       **kwargs)

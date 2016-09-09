@@ -65,32 +65,35 @@ cluster_template_opts = [
 cfg.CONF.register_opts(cluster_template_opts, group='cluster_template')
 
 
-bay_update_allowed_properties = set(['node_count'])
+cluster_update_allowed_properties = set(['node_count'])
 
 
-def enforce_bay_types(*bay_types):
-    """Enforce that bay_type is in supported list."""
+def enforce_cluster_types(*cluster_types):
+    """Enforce that cluster_type is in supported list."""
     @decorator.decorator
     def wrapper(func, *args, **kwargs):
         # Note(eliqiao): This decorator has some assumptions
         # args[1] should be an APIBase instance or
-        # args[2] should be a bay_ident
+        # args[2] should be a cluster_ident
         obj = args[1]
-        if hasattr(obj, 'bay_uuid'):
-            bay = objects.Bay.get_by_uuid(pecan.request.context, obj.bay_uuid)
+        if hasattr(obj, 'cluster_uuid'):
+            cluster = objects.Cluster.get_by_uuid(pecan.request.context,
+                                                  obj.cluster_uuid)
         else:
-            bay_ident = args[2]
-            if uuidutils.is_uuid_like(bay_ident):
-                bay = objects.Bay.get_by_uuid(pecan.request.context, bay_ident)
+            cluster_ident = args[2]
+            if uuidutils.is_uuid_like(cluster_ident):
+                cluster = objects.Cluster.get_by_uuid(pecan.request.context,
+                                                      cluster_ident)
             else:
-                bay = objects.Bay.get_by_name(pecan.request.context, bay_ident)
+                cluster = objects.Cluster.get_by_name(pecan.request.context,
+                                                      cluster_ident)
 
-        if bay.cluster_template.coe not in bay_types:
+        if cluster.cluster_template.coe not in cluster_types:
             raise exception.InvalidParameterValue(_(
-                'Cannot fulfill request with a %(bay_type)s bay, '
-                'expecting a %(supported_bay_types)s bay.') %
-                {'bay_type': bay.cluster_template.coe,
-                 'supported_bay_types': '/'.join(bay_types)})
+                'Cannot fulfill request with a %(cluster_type)s cluster, '
+                'expecting a %(supported_cluster_types)s cluster.') %
+                {'cluster_type': cluster.cluster_template.coe,
+                 'supported_cluster_types': '/'.join(cluster_types)})
 
         return func(*args, **kwargs)
 
@@ -192,11 +195,11 @@ def _enforce_volume_storage_size(cluster_template):
                 'driver.') % (volume_size, storage_driver)
 
 
-def validate_bay_properties(delta):
+def validate_cluster_properties(delta):
 
-    update_disallowed_properties = delta - bay_update_allowed_properties
+    update_disallowed_properties = delta - cluster_update_allowed_properties
     if update_disallowed_properties:
-        err = (_("cannot change bay property(ies) %s.") %
+        err = (_("cannot change cluster property(ies) %s.") %
                ", ".join(update_disallowed_properties))
         raise exception.InvalidParameterValue(err=err)
 

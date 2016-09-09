@@ -28,7 +28,7 @@ from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api import expose
 from magnum.api import utils as api_utils
-from magnum.api.validation import validate_bay_properties
+from magnum.api.validation import validate_cluster_properties
 from magnum.common import clients
 from magnum.common import exception
 from magnum.common import name_generator
@@ -110,7 +110,7 @@ class Cluster(base.APIBase):
     stack_id = wsme.wsattr(wtypes.text, readonly=True)
     """Stack id of the heat stack"""
 
-    status = wtypes.Enum(str, *fields.BayStatus.ALL)
+    status = wtypes.Enum(str, *fields.ClusterStatus.ALL)
     """Status of the cluster from the heat stack"""
 
     status_reason = wtypes.text
@@ -141,35 +141,12 @@ class Cluster(base.APIBase):
     def __init__(self, **kwargs):
         super(Cluster, self).__init__()
         self.fields = []
-        for field in objects.Bay.fields:
+        for field in objects.Cluster.fields:
             # Skip fields we do not expose.
             if not hasattr(self, field):
                 continue
             self.fields.append(field)
             setattr(self, field, kwargs.get(field, wtypes.Unset))
-
-        # Set the renamed attributes for clusters
-        self.fields.append('cluster_template_id')
-        if 'cluster_template_id' in kwargs.keys():
-            setattr(self, 'cluster_template_id',
-                    kwargs.get('cluster_template_id', wtypes.Unset))
-        else:
-            setattr(self, 'cluster_template_id', kwargs.get('baymodel_id',
-                                                            wtypes.Unset))
-
-        self.fields.append('create_timeout')
-        if 'create_timeout' in kwargs.keys():
-            setattr(self, 'create_timeout', kwargs.get('create_timeout',
-                                                       wtypes.Unset))
-        else:
-            setattr(self, 'create_timeout', kwargs.get('bay_create_timeout',
-                                                       wtypes.Unset))
-
-        self.fields.append('faults')
-        if 'faults' in kwargs.keys():
-            setattr(self, 'faults', kwargs.get('faults', wtypes.Unset))
-        else:
-            setattr(self, 'faults', kwargs.get('bay_faults', wtypes.Unset))
 
     @staticmethod
     def _convert_with_links(cluster, url, expand=True):
@@ -180,9 +157,9 @@ class Cluster(base.APIBase):
                                          'stack_id'])
 
         cluster.links = [link.Link.make_link('self', url,
-                                             'bays', cluster.uuid),
+                                             'clusters', cluster.uuid),
                          link.Link.make_link('bookmark', url,
-                                             'bays', cluster.uuid,
+                                             'clusters', cluster.uuid,
                                              bookmark=True)]
         return cluster
 
@@ -201,7 +178,7 @@ class Cluster(base.APIBase):
                      master_count=1,
                      create_timeout=15,
                      stack_id='49dc23f5-ffc9-40c3-9d34-7be7f9e34d63',
-                     status=fields.BayStatus.CREATE_COMPLETE,
+                     status=fields.ClusterStatus.CREATE_COMPLETE,
                      status_reason="CREATE completed successfully",
                      api_address='172.24.4.3',
                      node_addresses=['172.24.4.4', '172.24.4.5'],
@@ -210,26 +187,6 @@ class Cluster(base.APIBase):
                      coe_version=None,
                      container_version=None)
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
-
-    def as_dict(self):
-        """Render this object as a dict of its fields."""
-
-        # Override this for updated cluster values
-        d = super(Cluster, self).as_dict()
-
-        if 'cluster_template_id' in d.keys():
-            d['baymodel_id'] = d['cluster_template_id']
-            del d['cluster_template_id']
-
-        if 'create_timeout' in d.keys():
-            d['bay_create_timeout'] = d['create_timeout']
-            del d['create_timeout']
-
-        if 'faults' in d.keys():
-            d['bay_faults'] = d['faults']
-            del d['faults']
-
-        return d
 
 
 class ClusterPatchType(types.JsonPatchType):
@@ -295,12 +252,12 @@ class ClustersController(base.Controller):
 
         marker_obj = None
         if marker:
-            marker_obj = objects.Bay.get_by_uuid(pecan.request.context,
-                                                 marker)
+            marker_obj = objects.Cluster.get_by_uuid(pecan.request.context,
+                                                     marker)
 
-        clusters = objects.Bay.list(pecan.request.context, limit,
-                                    marker_obj, sort_key=sort_key,
-                                    sort_dir=sort_dir)
+        clusters = objects.Cluster.list(pecan.request.context, limit,
+                                        marker_obj, sort_key=sort_key,
+                                        sort_dir=sort_dir)
 
         return ClusterCollection.convert_with_links(clusters, limit,
                                                     url=resource_url,
@@ -380,13 +337,13 @@ class ClustersController(base.Controller):
         :param cluster_ident: UUID or logical name of the Cluster.
         """
         context = pecan.request.context
-        cluster = api_utils.get_resource('Bay', cluster_ident)
+        cluster = api_utils.get_resource('Cluster', cluster_ident)
         policy.enforce(context, 'cluster:get', cluster,
                        action='cluster:get')
 
         cluster = Cluster.convert_with_links(cluster)
 
-        if cluster.status in fields.BayStatus.STATUS_FAILED:
+        if cluster.status in fields.ClusterStatus.STATUS_FAILED:
             cluster.faults = self._collect_fault_info(context, cluster)
 
         return cluster
@@ -420,10 +377,10 @@ class ClustersController(base.Controller):
         cluster_dict['coe_version'] = None
         cluster_dict['container_version'] = None
 
-        new_cluster = objects.Bay(context, **cluster_dict)
+        new_cluster = objects.Cluster(context, **cluster_dict)
         new_cluster.uuid = uuid.uuid4()
-        pecan.request.rpcapi.bay_create_async(new_cluster,
-                                              cluster.create_timeout)
+        pecan.request.rpcapi.cluster_create_async(new_cluster,
+                                                  cluster.create_timeout)
 
         return ClusterID(new_cluster.uuid)
 
@@ -438,7 +395,7 @@ class ClustersController(base.Controller):
         :param patch: a json PATCH document to apply to this cluster.
         """
         cluster = self._patch(cluster_ident, patch)
-        pecan.request.rpcapi.bay_update_async(cluster)
+        pecan.request.rpcapi.cluster_update_async(cluster)
         return ClusterID(cluster.uuid)
 
     @base.Controller.api_version("1.3")  # noqa
@@ -453,12 +410,12 @@ class ClustersController(base.Controller):
         :param patch: a json PATCH document to apply to this cluster.
         """
         cluster = self._patch(cluster_ident, patch)
-        pecan.request.rpcapi.bay_update_async(cluster, rollback)
+        pecan.request.rpcapi.cluster_update_async(cluster, rollback)
         return ClusterID(cluster.uuid)
 
     def _patch(self, cluster_ident, patch):
         context = pecan.request.context
-        cluster = api_utils.get_resource('Bay', cluster_ident)
+        cluster = api_utils.get_resource('Cluster', cluster_ident)
         policy.enforce(context, 'cluster:update', cluster,
                        action='cluster:update')
         try:
@@ -469,7 +426,7 @@ class ClustersController(base.Controller):
             raise exception.PatchError(patch=patch, reason=e)
 
         # Update only the fields that have changed
-        for field in objects.Bay.fields:
+        for field in objects.Cluster.fields:
             try:
                 patch_val = getattr(new_cluster, field)
             except AttributeError:
@@ -482,7 +439,7 @@ class ClustersController(base.Controller):
 
         delta = cluster.obj_what_changed()
 
-        validate_bay_properties(delta)
+        validate_cluster_properties(delta)
         return cluster
 
     @expose.expose(None, types.uuid_or_name, status_code=204)
@@ -492,8 +449,8 @@ class ClustersController(base.Controller):
         :param cluster_ident: UUID of cluster or logical name of the cluster.
         """
         context = pecan.request.context
-        cluster = api_utils.get_resource('Bay', cluster_ident)
+        cluster = api_utils.get_resource('Cluster', cluster_ident)
         policy.enforce(context, 'cluster:delete', cluster,
                        action='cluster:delete')
 
-        pecan.request.rpcapi.bay_delete_async(cluster.uuid)
+        pecan.request.rpcapi.cluster_delete_async(cluster.uuid)

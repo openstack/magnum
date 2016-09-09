@@ -26,148 +26,148 @@ from magnum.tests.unit.objects import utils as obj_utils
 
 class TestValidation(base.BaseTestCase):
 
-    def _test_enforce_bay_types(
+    def _test_enforce_cluster_types(
             self,
-            mock_bay_get_by_uuid,
+            mock_cluster_get_by_uuid,
             mock_pecan_request,
-            bay_type,
-            allowed_bay_types,
+            cluster_type,
+            allowed_cluster_types,
             assert_raised=False,
             *args):
 
-        @v.enforce_bay_types(*allowed_bay_types)
+        @v.enforce_cluster_types(*allowed_cluster_types)
         def test(self, *args):
-            if hasattr(args[0], 'bay_uuid'):
+            if hasattr(args[0], 'cluster_uuid'):
                 return args[0].name
             else:
                 return args[1]
 
         context = mock_pecan_request.context
-        bay = mock.MagicMock()
-        bay.baymodel_id = 'cluster_template_id'
+        cluster = mock.MagicMock()
+        cluster.cluster_template_id = 'cluster_template_id'
         cluster_template = obj_utils.get_test_cluster_template(
-            context, uuid='cluster_template_id', coe=bay_type)
-        bay.cluster_template = cluster_template
+            context, uuid='cluster_template_id', coe=cluster_type)
+        cluster.cluster_template = cluster_template
 
-        mock_bay_get_by_uuid.return_value = bay
+        mock_cluster_get_by_uuid.return_value = cluster
 
         if assert_raised:
             self.assertRaises(
                 exception.InvalidParameterValue, test, self, *args)
         else:
             ret = test(self, *args)
-            if hasattr(args[0], 'bay_uuid'):
-                mock_bay_get_by_uuid.assert_called_once_with(context,
-                                                             args[0].bay_uuid)
+            if hasattr(args[0], 'cluster_uuid'):
+                mock_cluster_get_by_uuid.assert_called_once_with(
+                    context, args[0].cluster_uuid)
                 self.assertEqual(args[0].name, ret)
             else:
-                mock_bay_get_by_uuid.assert_called_once_with(context, args[1])
+                mock_cluster_get_by_uuid.assert_called_once_with(
+                    context, args[1])
                 self.assertEqual(args[1], ret)
 
     @mock.patch('pecan.request')
-    @mock.patch('magnum.objects.Bay.get_by_uuid')
-    def test_enforce_bay_types_one_allowed(
+    @mock.patch('magnum.objects.Cluster.get_by_uuid')
+    def test_enforce_cluster_types_one_allowed(
             self,
-            mock_bay_get_by_uuid,
+            mock_cluster_get_by_uuid,
             mock_pecan_request):
 
         obj = mock.MagicMock()
         obj.name = 'test_object'
-        obj.bay_uuid = 'bay_uuid'
-        bay_type = 'swarm'
-        allowed_bay_types = ['swarm']
-        self._test_enforce_bay_types(
-            mock_bay_get_by_uuid, mock_pecan_request,
-            bay_type, allowed_bay_types, False, obj)
+        obj.cluster_uuid = 'cluster_uuid'
+        cluster_type = 'swarm'
+        allowed_cluster_types = ['swarm']
+        self._test_enforce_cluster_types(
+            mock_cluster_get_by_uuid, mock_pecan_request,
+            cluster_type, allowed_cluster_types, False, obj)
 
     @mock.patch('pecan.request')
-    @mock.patch('magnum.objects.Bay.get_by_uuid')
-    def test_enforce_bay_types_two_allowed(
+    @mock.patch('magnum.objects.Cluster.get_by_uuid')
+    def test_enforce_cluster_types_two_allowed(
             self,
-            mock_bay_get_by_uuid,
+            mock_cluster_get_by_uuid,
             mock_pecan_request):
 
         obj = mock.MagicMock()
         obj.name = 'test_object'
-        obj.bay_uuid = 'bay_uuid'
-        bay_type = 'swarm'
-        allowed_bay_types = ['swarm', 'mesos']
-        self._test_enforce_bay_types(
-            mock_bay_get_by_uuid, mock_pecan_request,
-            bay_type, allowed_bay_types, False, obj)
+        obj.cluster_uuid = 'cluster_uuid'
+        cluster_type = 'swarm'
+        allowed_cluster_types = ['swarm', 'mesos']
+        self._test_enforce_cluster_types(
+            mock_cluster_get_by_uuid, mock_pecan_request,
+            cluster_type, allowed_cluster_types, False, obj)
 
     @mock.patch('pecan.request')
-    @mock.patch('magnum.objects.Bay.get_by_uuid')
-    def test_enforce_bay_types_not_allowed(
+    @mock.patch('magnum.objects.Cluster.get_by_uuid')
+    def test_enforce_cluster_types_not_allowed(
             self,
-            mock_bay_get_by_uuid,
+            mock_cluster_get_by_uuid,
             mock_pecan_request):
 
         obj = mock.MagicMock()
         obj.name = 'test_object'
-        obj.bay_uuid = 'bay_uuid'
-        bay_type = 'swarm'
-        allowed_bay_types = ['mesos']
-        self._test_enforce_bay_types(
-            mock_bay_get_by_uuid, mock_pecan_request,
-            bay_type, allowed_bay_types,
+        obj.cluster_uuid = 'cluster_uuid'
+        cluster_type = 'swarm'
+        allowed_cluster_types = ['mesos']
+        self._test_enforce_cluster_types(
+            mock_cluster_get_by_uuid, mock_pecan_request,
+            cluster_type, allowed_cluster_types,
             True, obj)
 
     @mock.patch('pecan.request')
-    @mock.patch('magnum.objects.Bay.get_by_uuid')
-    def test_enforce_bay_types_with_bay_uuid(self, mock_bay_get_by_uuid,
-                                             mock_pecan_request):
+    @mock.patch('magnum.objects.Cluster.get_by_uuid')
+    def test_enforce_cluster_types_with_cluster_uuid(self,
+                                                     mock_cluster_get_by_uuid,
+                                                     mock_pecan_request):
 
-        bay_ident = 'e74c40e0-d825-11e2-a28f-0800200c9a66'
+        cluster_ident = 'e74c40e0-d825-11e2-a28f-0800200c9a66'
 
-        bay_type = 'swarm'
-        allowed_bay_types = ['swarm']
-        self._test_enforce_bay_types(
-            mock_bay_get_by_uuid, mock_pecan_request,
-            bay_type, allowed_bay_types, False,
-            None, bay_ident)
-
-    @mock.patch('pecan.request')
-    @mock.patch('magnum.objects.Bay.get_by_uuid')
-    def test_enforce_bay_types_with_bay_uuid_not_allowed(self,
-                                                         mock_bay_get_by_uuid,
-                                                         mock_pecan_request):
-
-        bay_ident = 'e74c40e0-d825-11e2-a28f-0800200c9a66'
-
-        bay_type = 'swarm'
-        allowed_bay_types = ['mesos']
-        self._test_enforce_bay_types(
-            mock_bay_get_by_uuid, mock_pecan_request,
-            bay_type, allowed_bay_types, True,
-            None, bay_ident)
+        cluster_type = 'swarm'
+        allowed_cluster_types = ['swarm']
+        self._test_enforce_cluster_types(
+            mock_cluster_get_by_uuid, mock_pecan_request,
+            cluster_type, allowed_cluster_types, False,
+            None, cluster_ident)
 
     @mock.patch('pecan.request')
-    @mock.patch('magnum.objects.Bay.get_by_name')
-    def test_enforce_bay_types_with_bay_name(self, mock_bay_get_by_uuid,
-                                             mock_pecan_request):
+    @mock.patch('magnum.objects.Cluster.get_by_uuid')
+    def test_enforce_cluster_types_with_cluster_uuid_not_allowed(
+            self, mock_cluster_get_by_uuid, mock_pecan_request):
 
-        bay_ident = 'bay_name'
-        bay_type = 'swarm'
-        allowed_bay_types = ['swarm']
-        self._test_enforce_bay_types(
-            mock_bay_get_by_uuid, mock_pecan_request,
-            bay_type, allowed_bay_types, False,
-            None, bay_ident)
+        cluster_ident = 'e74c40e0-d825-11e2-a28f-0800200c9a66'
+
+        cluster_type = 'swarm'
+        allowed_cluster_types = ['mesos']
+        self._test_enforce_cluster_types(
+            mock_cluster_get_by_uuid, mock_pecan_request,
+            cluster_type, allowed_cluster_types, True,
+            None, cluster_ident)
 
     @mock.patch('pecan.request')
-    @mock.patch('magnum.objects.Bay.get_by_name')
-    def test_enforce_bay_types_with_bay_name_not_allowed(self,
-                                                         mock_bay_get_by_uuid,
-                                                         mock_pecan_request):
+    @mock.patch('magnum.objects.Cluster.get_by_name')
+    def test_enforce_cluster_types_with_cluster_name(
+            self, mock_cluster_get_by_uuid, mock_pecan_request):
 
-        bay_ident = 'bay_name'
-        bay_type = 'swarm'
-        allowed_bay_types = ['mesos']
-        self._test_enforce_bay_types(
-            mock_bay_get_by_uuid, mock_pecan_request,
-            bay_type, allowed_bay_types, True,
-            None, bay_ident)
+        cluster_ident = 'cluster_name'
+        cluster_type = 'swarm'
+        allowed_cluster_types = ['swarm']
+        self._test_enforce_cluster_types(
+            mock_cluster_get_by_uuid, mock_pecan_request,
+            cluster_type, allowed_cluster_types, False,
+            None, cluster_ident)
+
+    @mock.patch('pecan.request')
+    @mock.patch('magnum.objects.Cluster.get_by_name')
+    def test_enforce_cluster_types_with_cluster_name_not_allowed(
+            self, mock_cluster_get_by_uuid, mock_pecan_request):
+
+        cluster_ident = 'cluster_name'
+        cluster_type = 'swarm'
+        allowed_cluster_types = ['mesos']
+        self._test_enforce_cluster_types(
+            mock_cluster_get_by_uuid, mock_pecan_request,
+            cluster_type, allowed_cluster_types, True,
+            None, cluster_ident)
 
     def _test_enforce_network_driver_types_create(
             self,
@@ -413,11 +413,11 @@ class TestValidation(base.BaseTestCase):
             volume_driver_type='cinder',
             op='remove')
 
-    def test_validate_bay_properties(self):
-        allowed_properties = v.bay_update_allowed_properties
-        for field in objects.Bay.fields:
+    def test_validate_cluster_properties(self):
+        allowed_properties = v.cluster_update_allowed_properties
+        for field in objects.Cluster.fields:
             if field in allowed_properties:
-                v.validate_bay_properties(set([field]))
+                v.validate_cluster_properties(set([field]))
             else:
                 self.assertRaises(exception.InvalidParameterValue,
-                                  v.validate_bay_properties, set([field]))
+                                  v.validate_cluster_properties, set([field]))

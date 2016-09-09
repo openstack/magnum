@@ -27,9 +27,9 @@ class RPCAPITestCase(base.DbTestCase):
 
     def setUp(self):
         super(RPCAPITestCase, self).setUp()
-        self.fake_bay = dbutils.get_test_bay(driver='fake-driver')
+        self.fake_cluster = dbutils.get_test_cluster(driver='fake-driver')
         self.fake_certificate = objects.Certificate.from_db_cluster(
-            self.fake_bay)
+            self.fake_cluster)
         self.fake_certificate.csr = 'fake-csr'
 
     def _test_rpcapi(self, method, rpc_method, **kwargs):
@@ -73,29 +73,29 @@ class RPCAPITestCase(base.DbTestCase):
             for arg, expected_arg in zip(self.fake_args, expected_args):
                 self.assertEqual(expected_arg, arg)
 
-    def test_bay_create(self):
-        self._test_rpcapi('bay_create',
+    def test_cluster_create(self):
+        self._test_rpcapi('cluster_create',
                           'call',
                           version='1.0',
-                          bay=self.fake_bay,
-                          bay_create_timeout=15)
+                          cluster=self.fake_cluster,
+                          create_timeout=15)
 
-    def test_bay_delete(self):
-        self._test_rpcapi('bay_delete',
+    def test_cluster_delete(self):
+        self._test_rpcapi('cluster_delete',
                           'call',
                           version='1.0',
-                          uuid=self.fake_bay['uuid'])
+                          uuid=self.fake_cluster['uuid'])
 
-        self._test_rpcapi('bay_delete',
+        self._test_rpcapi('cluster_delete',
                           'call',
                           version='1.1',
-                          uuid=self.fake_bay['name'])
+                          uuid=self.fake_cluster['name'])
 
-    def test_bay_update(self):
-        self._test_rpcapi('bay_update',
+    def test_cluster_update(self):
+        self._test_rpcapi('cluster_update',
                           'call',
                           version='1.1',
-                          bay=self.fake_bay['name'])
+                          cluster=self.fake_cluster['name'])
 
     def test_ping_conductor(self):
         self._test_rpcapi('ping_conductor',
@@ -107,11 +107,11 @@ class RPCAPITestCase(base.DbTestCase):
         self._test_rpcapi('sign_certificate',
                           'call',
                           version='1.0',
-                          cluster=self.fake_bay,
+                          cluster=self.fake_cluster,
                           certificate=self.fake_certificate)
 
     def test_get_ca_certificate(self):
         self._test_rpcapi('get_ca_certificate',
                           'call',
                           version='1.0',
-                          cluster=self.fake_bay)
+                          cluster=self.fake_cluster)

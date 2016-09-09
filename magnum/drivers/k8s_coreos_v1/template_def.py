@@ -32,9 +32,9 @@ class CoreOSK8sTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
     def __init__(self):
         super(CoreOSK8sTemplateDefinition, self).__init__()
         self.add_output('kube_minions',
-                        bay_attr='node_addresses')
+                        cluster_attr='node_addresses')
         self.add_output('kube_masters',
-                        bay_attr='master_addresses')
+                        cluster_attr='master_addresses')
 
     def get_env_files(self, cluster_template):
         if cluster_template.master_lb_enabled:

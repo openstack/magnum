@@ -69,140 +69,149 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
 
     @periodic_task.periodic_task(run_immediately=True)
     @set_context
-    def sync_bay_status(self, ctx):
+    def sync_cluster_status(self, ctx):
         try:
-            LOG.debug('Starting to sync up bay status')
+            LOG.debug('Starting to sync up cluster status')
             osc = clients.OpenStackClients(ctx)
-            status = [fields.BayStatus.CREATE_IN_PROGRESS,
-                      fields.BayStatus.UPDATE_IN_PROGRESS,
-                      fields.BayStatus.DELETE_IN_PROGRESS,
-                      fields.BayStatus.ROLLBACK_IN_PROGRESS]
+            status = [fields.ClusterStatus.CREATE_IN_PROGRESS,
+                      fields.ClusterStatus.UPDATE_IN_PROGRESS,
+                      fields.ClusterStatus.DELETE_IN_PROGRESS,
+                      fields.ClusterStatus.ROLLBACK_IN_PROGRESS]
             filters = {'status': status}
-            bays = objects.Bay.list(ctx, filters=filters)
-            if not bays:
+            clusters = objects.Cluster.list(ctx, filters=filters)
+            if not clusters:
                 return
-            sid_to_bay_mapping = {bay.stack_id: bay for bay in bays}
-            bay_stack_ids = sid_to_bay_mapping.keys()
+            sid_to_cluster_mapping = {cluster.stack_id:
+                                      cluster for cluster in clusters}
+            cluster_stack_ids = sid_to_cluster_mapping.keys()
 
             if CONF.periodic_global_stack_list:
-                stacks = osc.heat().stacks.list(global_tenant=True,
-                                                filters={'id': bay_stack_ids})
+                stacks = osc.heat().stacks.list(
+                    global_tenant=True, filters={'id': cluster_stack_ids})
             else:
-                ret = self._get_bay_stacks(bays, sid_to_bay_mapping,
-                                           bay_stack_ids)
-                [stacks, bays, bay_stack_ids, sid_to_bay_mapping] = ret
+                ret = self._get_cluster_stacks(
+                    clusters, sid_to_cluster_mapping, cluster_stack_ids)
+                [stacks, clusters, cluster_stack_ids,
+                 sid_to_cluster_mapping] = ret
 
             sid_to_stack_mapping = {s.id: s for s in stacks}
 
-            # intersection of bays magnum has and heat has
-            for sid in (six.viewkeys(sid_to_bay_mapping) &
+            # intersection of clusters magnum has and heat has
+            for sid in (six.viewkeys(sid_to_cluster_mapping) &
                         six.viewkeys(sid_to_stack_mapping)):
                 stack = sid_to_stack_mapping[sid]
-                bay = sid_to_bay_mapping[sid]
-                self._sync_existing_bay(bay, stack)
+                cluster = sid_to_cluster_mapping[sid]
+                self._sync_existing_cluster(cluster, stack)
 
             # the stacks that magnum has but heat doesn't have
-            for sid in (six.viewkeys(sid_to_bay_mapping) -
+            for sid in (six.viewkeys(sid_to_cluster_mapping) -
                         six.viewkeys(sid_to_stack_mapping)):
-                bay = sid_to_bay_mapping[sid]
-                self._sync_missing_heat_stack(bay)
+                cluster = sid_to_cluster_mapping[sid]
+                self._sync_missing_heat_stack(cluster)
 
         except Exception as e:
             LOG.warning(_LW(
-                "Ignore error [%s] when syncing up bay status."
+                "Ignore error [%s] when syncing up cluster status."
             ), e, exc_info=True)
 
-    def _get_bay_stacks(self, bays, sid_to_bay_mapping, bay_stack_ids):
+    def _get_cluster_stacks(
+            self, clusters, sid_to_cluster_mapping, cluster_stack_ids):
         stacks = []
 
-        _bays = bays
-        _sid_to_bay_mapping = sid_to_bay_mapping
-        _bay_stack_ids = bay_stack_ids
+        _clusters = clusters
+        _sid_to_cluster_mapping = sid_to_cluster_mapping
+        _cluster_stack_ids = cluster_stack_ids
 
-        for bay in _bays:
+        for cluster in _clusters:
             try:
-                # Create client with bay's trustee user context
+                # Create client with cluster's trustee user context
                 bosc = clients.OpenStackClients(
-                    context.make_bay_context(bay))
-                stack = bosc.heat().stacks.get(bay.stack_id)
+                    context.make_cluster_context(cluster))
+                stack = bosc.heat().stacks.get(cluster.stack_id)
                 stacks.append(stack)
             # No need to do anything in this case
             except heat_exc.HTTPNotFound:
                 pass
             except Exception as e:
                 # Any other exception means we do not perform any
-                # action on this bay in the current sync run, so remove
+                # action on this cluster in the current sync run, so remove
                 # it from all records.
-                LOG.warning(_LW("Exception while attempting to retrieve "
-                                "Heat stack %(stack_id)s for bay %(bay_id)s. "
-                                "Traceback follows."),
-                            {'stack_id': bay.stack_id, 'bay_id': bay.id})
+                LOG.warning(
+                    _LW("Exception while attempting to retrieve "
+                        "Heat stack %(stack_id)s for cluster %(cluster_id)s. "
+                        "Traceback follows."),
+                    {'stack_id': cluster.stack_id, 'cluster_id': cluster.id})
                 LOG.warning(e)
-                _sid_to_bay_mapping.pop(bay.stack_id)
-                _bay_stack_ids.remove(bay.stack_id)
-                _bays.remove(bay)
-        return [stacks, _bays, _bay_stack_ids, _sid_to_bay_mapping]
+                _sid_to_cluster_mapping.pop(cluster.stack_id)
+                _cluster_stack_ids.remove(cluster.stack_id)
+                _clusters.remove(cluster)
+        return [stacks, _clusters, _cluster_stack_ids, _sid_to_cluster_mapping]
 
-    def _sync_existing_bay(self, bay, stack):
-        if bay.status != stack.stack_status:
-            old_status = bay.status
-            bay.status = stack.stack_status
-            bay.status_reason = stack.stack_status_reason
-            bay.save()
-            LOG.info(_LI("Sync up bay with id %(id)s from "
+    def _sync_existing_cluster(self, cluster, stack):
+        if cluster.status != stack.stack_status:
+            old_status = cluster.status
+            cluster.status = stack.stack_status
+            cluster.status_reason = stack.stack_status_reason
+            cluster.save()
+            LOG.info(_LI("Sync up cluster with id %(id)s from "
                          "%(old_status)s to %(status)s."),
-                     {'id': bay.id, 'old_status': old_status,
-                      'status': bay.status})
+                     {'id': cluster.id, 'old_status': old_status,
+                      'status': cluster.status})
 
-    def _sync_missing_heat_stack(self, bay):
-        if bay.status == fields.BayStatus.DELETE_IN_PROGRESS:
-            self._sync_deleted_stack(bay)
-        elif bay.status == fields.BayStatus.CREATE_IN_PROGRESS:
-            self._sync_missing_stack(bay, fields.BayStatus.CREATE_FAILED)
-        elif bay.status == fields.BayStatus.UPDATE_IN_PROGRESS:
-            self._sync_missing_stack(bay, fields.BayStatus.UPDATE_FAILED)
+    def _sync_missing_heat_stack(self, cluster):
+        if cluster.status == fields.ClusterStatus.DELETE_IN_PROGRESS:
+            self._sync_deleted_stack(cluster)
+        elif cluster.status == fields.ClusterStatus.CREATE_IN_PROGRESS:
+            self._sync_missing_stack(cluster,
+                                     fields.ClusterStatus.CREATE_FAILED)
+        elif cluster.status == fields.ClusterStatus.UPDATE_IN_PROGRESS:
+            self._sync_missing_stack(cluster,
+                                     fields.ClusterStatus.UPDATE_FAILED)
 
-    def _sync_deleted_stack(self, bay):
+    def _sync_deleted_stack(self, cluster):
         try:
-            bay.destroy()
+            cluster.destroy()
         except exception.ClusterNotFound:
-            LOG.info(_LI('The bay %s has been deleted by others.'), bay.uuid)
+            LOG.info(_LI('The cluster %s has been deleted by others.'),
+                     cluster.uuid)
         else:
-            LOG.info(_LI("Bay with id %(id)s not found in heat "
+            LOG.info(_LI("cluster with id %(id)s not found in heat "
                          "with stack id %(sid)s, with status_reason: "
-                         "%(reason)s."), {'id': bay.id, 'sid': bay.stack_id,
-                                          'reason': bay.status_reason})
+                         "%(reason)s."), {'id': cluster.id,
+                                          'sid': cluster.stack_id,
+                                          'reason': cluster.status_reason})
 
-    def _sync_missing_stack(self, bay, new_status):
-        bay.status = new_status
-        bay.status_reason = _("Stack with id %s not found in "
-                              "Heat.") % bay.stack_id
-        bay.save()
-        LOG.info(_LI("Bay with id %(id)s has been set to "
+    def _sync_missing_stack(self, cluster, new_status):
+        cluster.status = new_status
+        cluster.status_reason = _("Stack with id %s not found in "
+                                  "Heat.") % cluster.stack_id
+        cluster.save()
+        LOG.info(_LI("Cluster with id %(id)s has been set to "
                      "%(status)s due to stack with id %(sid)s "
                      "not found in Heat."),
-                 {'id': bay.id, 'status': bay.status,
-                  'sid': bay.stack_id})
+                 {'id': cluster.id, 'status': cluster.status,
+                  'sid': cluster.stack_id})
 
     @periodic_task.periodic_task(run_immediately=True)
     @set_context
-    def _send_bay_metrics(self, ctx):
-        LOG.debug('Starting to send bay metrics')
-        for bay in objects.Bay.list(ctx):
-            if bay.status not in [fields.BayStatus.CREATE_COMPLETE,
-                                  fields.BayStatus.UPDATE_COMPLETE]:
+    def _send_cluster_metrics(self, ctx):
+        LOG.debug('Starting to send cluster metrics')
+        for cluster in objects.Cluster.list(ctx):
+            if cluster.status not in [fields.ClusterStatus.CREATE_COMPLETE,
+                                      fields.ClusterStatus.UPDATE_COMPLETE]:
                 continue
 
-            monitor = monitors.create_monitor(ctx, bay)
+            monitor = monitors.create_monitor(ctx, cluster)
             if monitor is None:
                 continue
 
             try:
                 monitor.pull_data()
             except Exception as e:
-                LOG.warning(_LW("Skip pulling data from bay %(bay)s due to "
-                                "error: %(e)s"),
-                            {'e': e, 'bay': bay.uuid}, exc_info=True)
+                LOG.warning(
+                    _LW("Skip pulling data from cluster %(cluster)s due to "
+                        "error: %(e)s"),
+                    {'e': e, 'cluster': cluster.uuid}, exc_info=True)
                 continue
 
             metrics = list()
@@ -220,11 +229,11 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                                 {'e': e, 'name': name}, exc_info=True)
 
             message = dict(metrics=metrics,
-                           user_id=bay.user_id,
-                           project_id=bay.project_id,
-                           resource_id=bay.uuid)
+                           user_id=cluster.user_id,
+                           project_id=cluster.project_id,
+                           resource_id=cluster.uuid)
             LOG.debug("About to send notification: '%s'", message)
-            self.notifier.info(ctx, "magnum.bay.metrics.update",
+            self.notifier.info(ctx, "magnum.cluster.metrics.update",
                                message)
 
 

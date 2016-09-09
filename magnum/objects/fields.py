@@ -15,7 +15,7 @@
 from oslo_versionedobjects import fields
 
 
-class BayStatus(fields.Enum):
+class ClusterStatus(fields.Enum):
     CREATE_IN_PROGRESS = 'CREATE_IN_PROGRESS'
     CREATE_FAILED = 'CREATE_FAILED'
     CREATE_COMPLETE = 'CREATE_COMPLETE'
@@ -45,7 +45,7 @@ class BayStatus(fields.Enum):
                      DELETE_FAILED, ROLLBACK_FAILED)
 
     def __init__(self):
-        super(BayStatus, self).__init__(valid_values=BayStatus.ALL)
+        super(ClusterStatus, self).__init__(valid_values=ClusterStatus.ALL)
 
 
 class ContainerStatus(fields.Enum):
@@ -60,7 +60,7 @@ class ContainerStatus(fields.Enum):
             valid_values=ContainerStatus.ALL)
 
 
-class BayType(fields.Enum):
+class ClusterType(fields.Enum):
     ALL = (
         KUBERNETES, SWARM, MESOS,
     ) = (
@@ -68,7 +68,7 @@ class BayType(fields.Enum):
     )
 
     def __init__(self):
-        super(BayType, self).__init__(valid_values=BayType.ALL)
+        super(ClusterType, self).__init__(valid_values=ClusterType.ALL)
 
 
 class DockerStorageDriver(fields.Enum):
@@ -99,8 +99,8 @@ class ListOfDictsField(fields.AutoTypedField):
     AUTO_TYPE = fields.List(fields.Dict(fields.FieldType()))
 
 
-class BayStatusField(fields.BaseEnumField):
-    AUTO_TYPE = BayStatus()
+class ClusterStatusField(fields.BaseEnumField):
+    AUTO_TYPE = ClusterStatus()
 
 
 class MagnumServiceField(fields.BaseEnumField):
@@ -111,8 +111,8 @@ class ContainerStatusField(fields.BaseEnumField):
     AUTO_TYPE = ContainerStatus()
 
 
-class BayTypeField(fields.BaseEnumField):
-    AUTO_TYPE = BayType()
+class ClusterTypeField(fields.BaseEnumField):
+    AUTO_TYPE = ClusterType()
 
 
 class DockerStorageDriverField(fields.BaseEnumField):

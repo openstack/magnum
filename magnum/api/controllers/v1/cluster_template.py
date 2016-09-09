@@ -47,7 +47,7 @@ class ClusterTemplate(base.APIBase):
     name = wtypes.StringType(min_length=1, max_length=255)
     """The name of the ClusterTemplate"""
 
-    coe = wtypes.Enum(str, *fields.BayType.ALL, mandatory=True)
+    coe = wtypes.Enum(str, *fields.ClusterType.ALL, mandatory=True)
     """The Container Orchestration Engine for this clustertemplate"""
 
     image_id = wsme.wsattr(wtypes.StringType(min_length=1, max_length=255),
@@ -185,7 +185,7 @@ class ClusterTemplate(base.APIBase):
             docker_volume_size=25,
             docker_storage_driver='devicemapper',
             cluster_distro='fedora-atomic',
-            coe=fields.BayType.KUBERNETES,
+            coe=fields.ClusterType.KUBERNETES,
             http_proxy='http://proxy.com:123',
             https_proxy='https://proxy.com:123',
             no_proxy='192.168.0.1,192.168.0.2,192.168.0.3',

@@ -40,7 +40,8 @@ class ClusterTemplate(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.14: Added 'fixed_subnet' field
     # Version 1.15: Added 'floating_ip_enabled' field
     # Version 1.16: Renamed the class from "BayModel' to 'ClusterTemplate'
-    VERSION = '1.16'
+    # Version 1.17: 'coe' field type change to ClusterTypeField
+    VERSION = '1.17'
 
     dbapi = dbapi.get_instance()
 
@@ -65,7 +66,7 @@ class ClusterTemplate(base.MagnumPersistentObject, base.MagnumObject,
         'docker_storage_driver': m_fields.DockerStorageDriverField(
             nullable=True),
         'cluster_distro': fields.StringField(nullable=True),
-        'coe': m_fields.BayTypeField(nullable=True),
+        'coe': m_fields.ClusterTypeField(nullable=True),
         'http_proxy': fields.StringField(nullable=True),
         'https_proxy': fields.StringField(nullable=True),
         'no_proxy': fields.StringField(nullable=True),

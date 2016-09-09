@@ -17,10 +17,10 @@ from oslo_versionedobjects.tests import test_fields
 from magnum.objects import fields
 
 
-class TestBayStatus(test_fields.TestField):
+class TestClusterStatus(test_fields.TestField):
     def setUp(self):
-        super(TestBayStatus, self).setUp()
-        self.field = fields.BayStatusField()
+        super(TestClusterStatus, self).setUp()
+        self.field = fields.ClusterStatusField()
         self.coerce_good_values = [('CREATE_IN_PROGRESS',
                                     'CREATE_IN_PROGRESS'),
                                    ('CREATE_FAILED', 'CREATE_FAILED'),
@@ -71,10 +71,10 @@ class TestContainerStatus(test_fields.TestField):
         self.assertRaises(ValueError, self.field.stringify, 'DELETED')
 
 
-class TestBayType(test_fields.TestField):
+class TestClusterType(test_fields.TestField):
     def setUp(self):
-        super(TestBayType, self).setUp()
-        self.field = fields.BayTypeField()
+        super(TestClusterType, self).setUp()
+        self.field = fields.ClusterTypeField()
         self.coerce_good_values = [('kubernetes', 'kubernetes'),
                                    ('swarm', 'swarm'),
                                    ('mesos', 'mesos'), ]

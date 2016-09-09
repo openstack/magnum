@@ -19,8 +19,8 @@ from magnum.conductor import monitors
 
 class K8sMonitor(monitors.MonitorBase):
 
-    def __init__(self, context, bay):
-        super(K8sMonitor, self).__init__(context, bay)
+    def __init__(self, context, cluster):
+        super(K8sMonitor, self).__init__(context, cluster)
         self.data = {}
         self.data['nodes'] = []
         self.data['pods'] = []
@@ -39,7 +39,7 @@ class K8sMonitor(monitors.MonitorBase):
         }
 
     def pull_data(self):
-        k8s_api = k8s.create_k8s_api(self.context, self.bay)
+        k8s_api = k8s.create_k8s_api(self.context, self.cluster)
         nodes = k8s_api.list_namespaced_node()
         self.data['nodes'] = self._parse_node_info(nodes)
         pods = k8s_api.list_namespaced_pod('default')

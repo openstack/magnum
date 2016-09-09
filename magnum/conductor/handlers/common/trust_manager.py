@@ -19,36 +19,39 @@ from magnum.i18n import _LE
 LOG = logging.getLogger(__name__)
 
 
-def create_trustee_and_trust(osc, bay):
+def create_trustee_and_trust(osc, cluster):
     try:
         password = utils.generate_password(length=18)
         trustee = osc.keystone().create_trustee(
-            bay.uuid,
+            cluster.uuid,
             password,
         )
-        bay.trustee_username = trustee.name
-        bay.trustee_user_id = trustee.id
-        bay.trustee_password = password
+        cluster.trustee_username = trustee.name
+        cluster.trustee_user_id = trustee.id
+        cluster.trustee_password = password
         trust = osc.keystone().create_trust(trustee.id)
-        bay.trust_id = trust.id
+        cluster.trust_id = trust.id
     except Exception:
-        LOG.exception(_LE('Failed to create trustee and trust for Bay: %s'),
-                      bay.uuid)
-        raise exception.TrusteeOrTrustToBayFailed(bay_uuid=bay.uuid)
+        LOG.exception(
+            _LE('Failed to create trustee and trust for Cluster: %s'),
+            cluster.uuid)
+        raise exception.TrusteeOrTrustToClusterFailed(
+            cluster_uuid=cluster.uuid)
 
 
-def delete_trustee_and_trust(osc, context, bay):
+def delete_trustee_and_trust(osc, context, cluster):
     try:
-        # The bay which is upgraded from Liberty doesn't have trust_id
-        if bay.trust_id:
-            osc.keystone().delete_trust(context, bay)
+        # The cluster which is upgraded from Liberty doesn't have trust_id
+        if cluster.trust_id:
+            osc.keystone().delete_trust(context, cluster)
     except Exception:
         # Exceptions are already logged by keystone().delete_trust
         pass
     try:
-        # The bay which is upgraded from Liberty doesn't have trustee_user_id
-        if bay.trustee_user_id:
-            osc.keystone().delete_trustee(bay.trustee_user_id)
+        # The cluster which is upgraded from Liberty doesn't have
+        # trustee_user_id
+        if cluster.trustee_user_id:
+            osc.keystone().delete_trustee(cluster.trustee_user_id)
     except Exception:
         # Exceptions are already logged by keystone().delete_trustee
         pass

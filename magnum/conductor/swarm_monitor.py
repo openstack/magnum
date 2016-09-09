@@ -24,8 +24,8 @@ LOG = log.getLogger(__name__)
 
 class SwarmMonitor(monitors.MonitorBase):
 
-    def __init__(self, context, bay):
-        super(SwarmMonitor, self).__init__(context, bay)
+    def __init__(self, context, cluster):
+        super(SwarmMonitor, self).__init__(context, cluster)
         self.data = {}
         self.data['nodes'] = []
         self.data['containers'] = []
@@ -40,8 +40,8 @@ class SwarmMonitor(monitors.MonitorBase):
         }
 
     def pull_data(self):
-        with docker_utils.docker_for_bay(self.context,
-                                         self.bay) as docker:
+        with docker_utils.docker_for_cluster(self.context,
+                                             self.cluster) as docker:
             system_info = docker.info()
             self.data['nodes'] = self._parse_node_info(system_info)
 

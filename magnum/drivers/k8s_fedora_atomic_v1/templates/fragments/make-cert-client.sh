@@ -67,10 +67,10 @@ url="$AUTH_URL/auth/tokens"
 USER_TOKEN=`curl -s -i -X POST -H "$content_type" -d "$auth_json" $url \
     | grep X-Subject-Token | awk '{print $2}' | tr -d '[[:space:]]'`
 
-# Get CA certificate for this bay
+# Get CA certificate for this cluster
 curl -X GET \
   -H "X-Auth-Token: $USER_TOKEN" \
-  $MAGNUM_URL/certificates/$BAY_UUID | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > $CA_CERT
+  $MAGNUM_URL/certificates/$CLUSTER_UUID | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > $CA_CERT
 
 # Create config for client's csr
 cat > ${cert_conf_dir}/client.conf <<EOF
@@ -100,7 +100,7 @@ openssl req -new -days 1000 \
         -config "${cert_conf_dir}/client.conf"
 
 # Send csr to Magnum to have it signed
-csr_req=$(python -c "import json; fp = open('${CLIENT_CSR}'); print json.dumps({'bay_uuid': '$BAY_UUID', 'csr': fp.read()}); fp.close()")
+csr_req=$(python -c "import json; fp = open('${CLIENT_CSR}'); print json.dumps({'cluster_uuid': '$CLUSTER_UUID', 'csr': fp.read()}); fp.close()")
 curl -X POST \
     -H "X-Auth-Token: $USER_TOKEN" \
     -H "Content-Type: application/json" \

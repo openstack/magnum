@@ -60,51 +60,33 @@ def create_test_cluster_template(context, **kw):
     return cluster_template
 
 
-def get_test_bay(context, **kw):
-    """Return a Bay object with appropriate attributes.
+def get_test_cluster(context, **kw):
+    """Return a Cluster object with appropriate attributes.
 
     NOTE: The object leaves the attributes marked as changed, such
     that a create() could be used to commit it to the DB.
     """
-    db_bay = db_utils.get_test_bay(**kw)
+    db_cluster = db_utils.get_test_cluster(**kw)
     # Let DB generate ID if it isn't specified explicitly
     if 'id' not in kw:
-        del db_bay['id']
-    bay = objects.Bay(context)
-    for key in db_bay:
-        setattr(bay, key, db_bay[key])
-    return bay
-
-
-def create_test_bay(context, **kw):
-    """Create and return a test bay object.
-
-    Create a bay in the DB and return a Bay object with appropriate
-    attributes.
-    """
-    bay = get_test_bay(context, **kw)
-    create_test_cluster_template(context, uuid=bay['baymodel_id'],
-                                 coe=kw.get('coe', 'swarm'))
-    bay.create()
-    return bay
-
-
-def get_test_cluster(context, **kw):
-    """Return a Cluster object with appropriate attributes.
-
-    NOTE: Object model is the same for Cluster and
-    Bay
-    """
-    return get_test_bay(context, **kw)
+        del db_cluster['id']
+    cluster = objects.Cluster(context)
+    for key in db_cluster:
+        setattr(cluster, key, db_cluster[key])
+    return cluster
 
 
 def create_test_cluster(context, **kw):
-    """Create and return a test cluster object.
+    """Create and return a test Cluster object.
 
-    NOTE: Object model is the same for Cluster and
-    Bay
+    Create a Cluster in the DB and return a Cluster object with appropriate
+    attributes.
     """
-    return create_test_bay(context, **kw)
+    cluster = get_test_cluster(context, **kw)
+    create_test_cluster_template(context, uuid=cluster['cluster_template_id'],
+                                 coe=kw.get('coe', 'swarm'))
+    cluster.create()
+    return cluster
 
 
 def get_test_x509keypair(context, **kw):

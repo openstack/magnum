@@ -121,7 +121,7 @@ class TestRootController(api_base.FunctionalTest):
         response = app.get('/v1/')
         self.assertEqual(self.v1_expected, response.json)
 
-        response = app.get('/v1/baymodels')
+        response = app.get('/v1/clustertemplates')
         self.assertEqual(200, response.status_int)
 
     def test_auth_with_no_public_routes(self):
@@ -146,7 +146,7 @@ class TestRootController(api_base.FunctionalTest):
         response = app.get('/v1/', expect_errors=True)
         self.assertEqual(401, response.status_int)
 
-        response = app.get('/v1/baymodels', expect_errors=True)
+        response = app.get('/v1/clustermodels', expect_errors=True)
         self.assertEqual(401, response.status_int)
 
     def test_auth_with_v1_access(self):
@@ -160,7 +160,7 @@ class TestRootController(api_base.FunctionalTest):
         response = app.get('/v1/')
         self.assertEqual(self.v1_expected, response.json)
 
-        response = app.get('/v1/baymodels', expect_errors=True)
+        response = app.get('/v1/clustertemplates', expect_errors=True)
         self.assertEqual(401, response.status_int)
 
 

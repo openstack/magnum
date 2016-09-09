@@ -32,17 +32,17 @@ class ServerAddressOutputMapping(template_def.OutputMapping):
     public_ip_output_key = None
     private_ip_output_key = None
 
-    def __init__(self, dummy_arg, bay_attr=None):
-        self.bay_attr = bay_attr
+    def __init__(self, dummy_arg, cluster_attr=None):
+        self.cluster_attr = cluster_attr
         self.heat_output = self.public_ip_output_key
 
-    def set_output(self, stack, cluster_template, bay):
+    def set_output(self, stack, cluster_template, cluster):
         if not cluster_template.floating_ip_enabled:
             self.heat_output = self.private_ip_output_key
 
         LOG.debug("Using heat_output: %s", self.heat_output)
         super(ServerAddressOutputMapping,
-              self).set_output(stack, cluster_template, bay)
+              self).set_output(stack, cluster_template, cluster)
 
 
 class MasterAddressOutputMapping(ServerAddressOutputMapping):
@@ -71,13 +71,13 @@ class AtomicK8sTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
         self.add_parameter('docker_storage_driver',
                            cluster_template_attr='docker_storage_driver')
         self.add_output('kube_minions',
-                        bay_attr='node_addresses',
+                        cluster_attr='node_addresses',
                         mapping_type=NodeAddressOutputMapping)
         self.add_output('kube_masters',
-                        bay_attr='master_addresses',
+                        cluster_attr='master_addresses',
                         mapping_type=MasterAddressOutputMapping)
 
-    def get_params(self, context, cluster_template, bay, **kwargs):
+    def get_params(self, context, cluster_template, cluster, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
 
         extra_params['username'] = context.user_name
@@ -86,7 +86,7 @@ class AtomicK8sTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
         extra_params['region_name'] = osc.cinder_region_name()
 
         return super(AtomicK8sTemplateDefinition,
-                     self).get_params(context, cluster_template, bay,
+                     self).get_params(context, cluster_template, cluster,
                                       extra_params=extra_params,
                                       **kwargs)
 
@@ -156,14 +156,14 @@ class FedoraK8sIronicTemplateDefinition(AtomicK8sTemplateDefinition):
 
         return subnet['network_id']
 
-    def get_params(self, context, cluster_template, bay, **kwargs):
+    def get_params(self, context, cluster_template, cluster, **kwargs):
         ep = kwargs.pop('extra_params', {})
 
         osc = self.get_osc(context)
         ep['fixed_network'] = self.get_fixed_network_id(osc, cluster_template)
 
         return super(FedoraK8sIronicTemplateDefinition,
-                     self).get_params(context, cluster_template, bay,
+                     self).get_params(context, cluster_template, cluster,
                                       extra_params=ep,
                                       **kwargs)
 

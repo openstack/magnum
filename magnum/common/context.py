@@ -105,15 +105,15 @@ def make_admin_context(show_deleted=False, all_tenants=False):
     return context
 
 
-def make_bay_context(bay, show_deleted=False):
-    """Create a user context based on a bay's stored Keystone trust.
+def make_cluster_context(cluster, show_deleted=False):
+    """Create a user context based on a cluster's stored Keystone trust.
 
-    :param bay: the bay supplying the Keystone trust to use
+    :param cluster: the cluster supplying the Keystone trust to use
     :param show_deleted: if True, will show deleted items when query db
     """
-    context = RequestContext(user_name=bay.trustee_username,
-                             password=bay.trustee_password,
-                             trust_id=bay.trust_id,
+    context = RequestContext(user_name=cluster.trustee_username,
+                             password=cluster.trustee_password,
+                             trust_id=cluster.trust_id,
                              show_deleted=show_deleted,
                              user_domain_id=CONF.trust.trustee_domain_id,
                              user_domain_name=CONF.trust.trustee_domain_name)

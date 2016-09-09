@@ -104,7 +104,7 @@ class TemplateDefinitionTestCase(base.TestCase):
                               mesos_tdef.UbuntuMesosTemplateDefinition)
 
     def test_get_definition_not_supported(self):
-        self.assertRaises(exception.BayTypeNotSupported,
+        self.assertRaises(exception.ClusterTypeNotSupported,
                           cmn_tdef.TemplateDefinition.get_template_definition,
                           'vm', 'not_supported', 'kubernetes')
 
@@ -112,18 +112,18 @@ class TemplateDefinitionTestCase(base.TestCase):
         cfg.CONF.set_override('enabled_definitions',
                               ['magnum_vm_atomic_k8s'],
                               group='cluster')
-        self.assertRaises(exception.BayTypeNotEnabled,
+        self.assertRaises(exception.ClusterTypeNotEnabled,
                           cmn_tdef.TemplateDefinition.get_template_definition,
                           'vm', 'coreos', 'kubernetes')
 
     def test_required_param_not_set(self):
         param = cmn_tdef.ParameterMapping('test', cluster_template_attr='test',
                                           required=True)
-        mock_baymodel = mock.MagicMock()
-        mock_baymodel.test = None
+        mock_cluster_template = mock.MagicMock()
+        mock_cluster_template.test = None
 
         self.assertRaises(exception.RequiredParameterNotProvided,
-                          param.set_param, {}, mock_baymodel, None)
+                          param.set_param, {}, mock_cluster_template, None)
 
     def test_output_mapping(self):
         heat_outputs = [
@@ -191,7 +191,7 @@ class BaseTemplateDefinitionTestCase(base.TestCase):
         floating_ip_enabled=True,
         public_ip_output_key='kube_masters',
         private_ip_output_key='kube_masters_private',
-        bay_attr='master_addresses',
+        cluster_attr='master_addresses',
     ):
 
         definition = self.get_definition()
@@ -211,13 +211,14 @@ class BaseTemplateDefinitionTestCase(base.TestCase):
         ]
         mock_stack = mock.MagicMock()
         mock_stack.to_dict.return_value = {'outputs': outputs}
-        mock_bay = mock.MagicMock()
-        mock_baymodel = mock.MagicMock()
-        mock_baymodel.floating_ip_enabled = floating_ip_enabled
+        mock_cluster = mock.MagicMock()
+        mock_cluster_template = mock.MagicMock()
+        mock_cluster_template.floating_ip_enabled = floating_ip_enabled
 
-        definition.update_outputs(mock_stack, mock_baymodel, mock_bay)
+        definition.update_outputs(mock_stack, mock_cluster_template,
+                                  mock_cluster)
 
-        self.assertEqual(expected_address, getattr(mock_bay, bay_attr))
+        self.assertEqual(expected_address, getattr(mock_cluster, cluster_attr))
 
 
 class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
@@ -240,12 +241,12 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
                             mock_get_discovery_url, mock_osc_class):
         mock_context = mock.MagicMock()
         mock_context.auth_token = 'AUTH_TOKEN'
-        mock_baymodel = mock.MagicMock()
-        mock_baymodel.tls_disabled = False
-        mock_baymodel.registry_enabled = False
-        mock_bay = mock.MagicMock()
-        mock_bay.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
-        del mock_bay.stack_id
+        mock_cluster_template = mock.MagicMock()
+        mock_cluster_template.tls_disabled = False
+        mock_cluster_template.registry_enabled = False
+        mock_cluster = mock.MagicMock()
+        mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
+        del mock_cluster.stack_id
         mock_scale_manager = mock.MagicMock()
         mock_osc = mock.MagicMock()
         mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
@@ -260,13 +261,14 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         mock_context.user_name = 'fake_user'
         mock_context.tenant = 'fake_tenant'
 
-        flannel_cidr = mock_baymodel.labels.get('flannel_network_cidr')
-        flannel_subnet = mock_baymodel.labels.get('flannel_network_subnetlen')
-        flannel_backend = mock_baymodel.labels.get('flannel_backend')
+        flannel_cidr = mock_cluster_template.labels.get('flannel_network_cidr')
+        flannel_subnet = mock_cluster_template.labels.get(
+            'flannel_network_subnetlen')
+        flannel_backend = mock_cluster_template.labels.get('flannel_backend')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
-        k8s_def.get_params(mock_context, mock_baymodel, mock_bay,
+        k8s_def.get_params(mock_context, mock_cluster_template, mock_cluster,
                            scale_manager=mock_scale_manager)
 
         expected_kwargs = {'extra_params': {
@@ -279,8 +281,10 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'tenant_name': 'fake_tenant',
             'magnum_url': mock_osc.magnum_url.return_value,
             'region_name': mock_osc.cinder_region_name.return_value}}
-        mock_get_params.assert_called_once_with(mock_context, mock_baymodel,
-                                                mock_bay, **expected_kwargs)
+        mock_get_params.assert_called_once_with(mock_context,
+                                                mock_cluster_template,
+                                                mock_cluster,
+                                                **expected_kwargs)
 
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.drivers.common.template_def'
@@ -293,12 +297,12 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
                                      mock_get_discovery_url, mock_osc_class):
         mock_context = mock.MagicMock()
         mock_context.auth_token = 'AUTH_TOKEN'
-        mock_baymodel = mock.MagicMock()
-        mock_baymodel.tls_disabled = True
-        mock_baymodel.registry_enabled = False
-        mock_bay = mock.MagicMock()
-        mock_bay.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
-        del mock_bay.stack_id
+        mock_cluster_template = mock.MagicMock()
+        mock_cluster_template.tls_disabled = True
+        mock_cluster_template.registry_enabled = False
+        mock_cluster = mock.MagicMock()
+        mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
+        del mock_cluster.stack_id
         mock_scale_manager = mock.MagicMock()
         mock_osc = mock.MagicMock()
         mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
@@ -313,13 +317,14 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         mock_context.user_name = 'fake_user'
         mock_context.tenant = 'fake_tenant'
 
-        flannel_cidr = mock_baymodel.labels.get('flannel_network_cidr')
-        flannel_subnet = mock_baymodel.labels.get('flannel_network_subnetlen')
-        flannel_backend = mock_baymodel.labels.get('flannel_backend')
+        flannel_cidr = mock_cluster_template.labels.get('flannel_network_cidr')
+        flannel_subnet = mock_cluster_template.labels.get(
+            'flannel_network_subnetlen')
+        flannel_backend = mock_cluster_template.labels.get('flannel_backend')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
-        k8s_def.get_params(mock_context, mock_baymodel, mock_bay,
+        k8s_def.get_params(mock_context, mock_cluster_template, mock_cluster,
                            scale_manager=mock_scale_manager)
 
         expected_kwargs = {'extra_params': {
@@ -334,8 +339,10 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'region_name': mock_osc.cinder_region_name.return_value,
             'loadbalancing_protocol': 'HTTP',
             'kubernetes_port': 8080}}
-        mock_get_params.assert_called_once_with(mock_context, mock_baymodel,
-                                                mock_bay, **expected_kwargs)
+        mock_get_params.assert_called_once_with(mock_context,
+                                                mock_cluster_template,
+                                                mock_cluster,
+                                                **expected_kwargs)
 
     @mock.patch('requests.get')
     def test_k8s_validate_discovery_url(self, mock_get):
@@ -364,7 +371,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         mock_get.return_value = mock_resp
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
-        self.assertRaises(exception.InvalidBayDiscoveryURL,
+        self.assertRaises(exception.InvalidClusterDiscoveryURL,
                           k8s_def.validate_discovery_url,
                           'http://etcd/test', 1)
 
@@ -390,15 +397,15 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         mock_resp = mock.MagicMock()
         mock_resp.text = expected_discovery_url
         mock_get.return_value = mock_resp
-        mock_bay = mock.MagicMock()
-        mock_bay.master_count = 10
-        mock_bay.discovery_url = None
+        mock_cluster = mock.MagicMock()
+        mock_cluster.master_count = 10
+        mock_cluster.discovery_url = None
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
-        discovery_url = k8s_def.get_discovery_url(mock_bay)
+        discovery_url = k8s_def.get_discovery_url(mock_cluster)
 
         mock_get.assert_called_once_with('http://etcd/test?size=10')
-        self.assertEqual(expected_discovery_url, mock_bay.discovery_url)
+        self.assertEqual(expected_discovery_url, mock_cluster.discovery_url)
         self.assertEqual(expected_discovery_url, discovery_url)
 
     @mock.patch('requests.get')
@@ -407,19 +414,19 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
                               'http://etcd/test?size=%(size)d',
                               group='cluster')
         mock_get.side_effect = req_exceptions.RequestException()
-        mock_bay = mock.MagicMock()
-        mock_bay.master_count = 10
-        mock_bay.discovery_url = None
+        mock_cluster = mock.MagicMock()
+        mock_cluster.master_count = 10
+        mock_cluster.discovery_url = None
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
         self.assertRaises(exception.GetDiscoveryUrlFailed,
-                          k8s_def.get_discovery_url, mock_bay)
+                          k8s_def.get_discovery_url, mock_cluster)
 
     def test_k8s_get_heat_param(self):
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
-        heat_param = k8s_def.get_heat_param(bay_attr='node_count')
+        heat_param = k8s_def.get_heat_param(cluster_attr='node_count')
         self.assertEqual('number_of_minions', heat_param)
 
     @mock.patch('requests.get')
@@ -428,13 +435,13 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         mock_resp.text = ''
         mock_get.return_value = mock_resp
 
-        fake_bay = mock.MagicMock()
-        fake_bay.discovery_url = None
+        fake_cluster = mock.MagicMock()
+        fake_cluster.discovery_url = None
 
         self.assertRaises(
             exception.InvalidDiscoveryURL,
             k8sa_tdef.AtomicK8sTemplateDefinition().get_discovery_url,
-            fake_bay)
+            fake_cluster)
 
     def _test_update_outputs_api_address(self, coe, params, tls=True):
 
@@ -451,13 +458,14 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         ]
         mock_stack = mock.MagicMock()
         mock_stack.to_dict.return_value = {'outputs': outputs}
-        mock_bay = mock.MagicMock()
-        mock_baymodel = mock.MagicMock()
-        mock_baymodel.tls_disabled = tls
+        mock_cluster = mock.MagicMock()
+        mock_cluster_template = mock.MagicMock()
+        mock_cluster_template.tls_disabled = tls
 
-        definition.update_outputs(mock_stack, mock_baymodel, mock_bay)
+        definition.update_outputs(mock_stack, mock_cluster_template,
+                                  mock_cluster)
 
-        self.assertEqual(expected_api_address, mock_bay.api_address)
+        self.assertEqual(expected_api_address, mock_cluster.api_address)
 
     def test_update_k8s_outputs_api_address(self):
         address = 'updated_address'
@@ -481,7 +489,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         }
         self._test_update_outputs_api_address('swarm', params)
 
-    def test_update_k8s_outputs_if_baymodel_is_secure(self):
+    def test_update_k8s_outputs_if_cluster_template_is_secure(self):
         address = 'updated_address'
         protocol = 'https'
         port = '6443'
@@ -492,7 +500,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         }
         self._test_update_outputs_api_address('kubernetes', params, tls=False)
 
-    def test_update_swarm_outputs_if_baymodel_is_secure(self):
+    def test_update_swarm_outputs_if_cluster_template_is_secure(self):
         address = 'updated_address'
         protocol = 'tcp'
         port = '2376'
@@ -517,14 +525,15 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         ]
         mock_stack = mock.MagicMock()
         mock_stack.to_dict.return_value = {'outputs': outputs}
-        mock_bay = mock.MagicMock()
-        mock_bay.api_address = 'none_api_address'
-        mock_baymodel = mock.MagicMock()
-        mock_baymodel.tls_disabled = tls
+        mock_cluster = mock.MagicMock()
+        mock_cluster.api_address = 'none_api_address'
+        mock_cluster_template = mock.MagicMock()
+        mock_cluster_template.tls_disabled = tls
 
-        definition.update_outputs(mock_stack, mock_baymodel, mock_bay)
+        definition.update_outputs(mock_stack, mock_cluster_template,
+                                  mock_cluster)
 
-        self.assertEqual('none_api_address', mock_bay.api_address)
+        self.assertEqual('none_api_address', mock_cluster.api_address)
 
     def test_update_k8s_outputs_none_api_address(self):
         protocol = 'http'
@@ -550,14 +559,14 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         self._test_update_outputs_server_addrtess(
             public_ip_output_key='kube_masters',
             private_ip_output_key='kube_masters_private',
-            bay_attr='master_addresses',
+            cluster_attr='master_addresses',
         )
 
     def test_update_outputs_node_address(self):
         self._test_update_outputs_server_addrtess(
             public_ip_output_key='kube_minions',
             private_ip_output_key='kube_minions_private',
-            bay_attr='node_addresses',
+            cluster_attr='node_addresses',
         )
 
     def test_update_outputs_master_address_fip_disabled(self):
@@ -565,7 +574,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             floating_ip_enabled=False,
             public_ip_output_key='kube_masters',
             private_ip_output_key='kube_masters_private',
-            bay_attr='master_addresses',
+            cluster_attr='master_addresses',
         )
 
     def test_update_outputs_node_address_fip_disabled(self):
@@ -573,7 +582,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             floating_ip_enabled=False,
             public_ip_output_key='kube_minions',
             private_ip_output_key='kube_minions_private',
-            bay_attr='node_addresses',
+            cluster_attr='node_addresses',
         )
 
 
@@ -586,11 +595,12 @@ class FedoraK8sIronicTemplateDefinitionTestCase(base.TestCase):
             'kubernetes'
         )
 
-    def assert_neutron_find(self, mock_neutron_v20_find, osc, baymodel):
+    def assert_neutron_find(self, mock_neutron_v20_find,
+                            osc, cluster_template):
         mock_neutron_v20_find.assert_called_once_with(
             osc.neutron(),
             'subnet',
-            baymodel.fixed_subnet
+            cluster_template.fixed_subnet
         )
 
     def assert_raises_from_get_fixed_network_id(
@@ -601,14 +611,14 @@ class FedoraK8sIronicTemplateDefinitionTestCase(base.TestCase):
     ):
         definition = self.get_definition()
         osc = mock.MagicMock()
-        baymodel = mock.MagicMock()
+        cluster_template = mock.MagicMock()
         mock_neutron_v20_find.side_effect = exeption_from_neutron_client
 
         self.assertRaises(
             expected_exception_class,
             definition.get_fixed_network_id,
             osc,
-            baymodel
+            cluster_template
         )
 
     @mock.patch('neutronclient.neutron.v2_0.find_resource_by_name_or_id')
@@ -616,7 +626,7 @@ class FedoraK8sIronicTemplateDefinitionTestCase(base.TestCase):
         expected_network_id = 'expected_network_id'
 
         osc = mock.MagicMock()
-        baymodel = mock.MagicMock()
+        cluster_template = mock.MagicMock()
         definition = self.get_definition()
         mock_neutron_v20_find.return_value = {
             'ip_version': 4,
@@ -625,15 +635,15 @@ class FedoraK8sIronicTemplateDefinitionTestCase(base.TestCase):
 
         self.assertEqual(
             expected_network_id,
-            definition.get_fixed_network_id(osc, baymodel)
+            definition.get_fixed_network_id(osc, cluster_template)
         )
-        self.assert_neutron_find(mock_neutron_v20_find, osc, baymodel)
+        self.assert_neutron_find(mock_neutron_v20_find, osc, cluster_template)
 
     @mock.patch('neutronclient.neutron.v2_0.find_resource_by_name_or_id')
     def test_get_fixed_network_id_with_invalid_ip_ver(self,
                                                       mock_neutron_v20_find):
         osc = mock.MagicMock()
-        baymodel = mock.MagicMock()
+        cluster_template = mock.MagicMock()
         definition = self.get_definition()
         mock_neutron_v20_find.return_value = {
             'ip_version': 6,
@@ -644,7 +654,7 @@ class FedoraK8sIronicTemplateDefinitionTestCase(base.TestCase):
             exception.InvalidSubnet,
             definition.get_fixed_network_id,
             osc,
-            baymodel
+            cluster_template
         )
 
     @mock.patch('neutronclient.neutron.v2_0.find_resource_by_name_or_id')
@@ -697,12 +707,12 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
                               mock_get_discovery_url, mock_osc_class):
         mock_context = mock.MagicMock()
         mock_context.auth_token = 'AUTH_TOKEN'
-        mock_baymodel = mock.MagicMock()
-        mock_baymodel.tls_disabled = False
-        mock_baymodel.registry_enabled = False
-        mock_bay = mock.MagicMock()
-        mock_bay.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
-        del mock_bay.stack_id
+        mock_cluster_template = mock.MagicMock()
+        mock_cluster_template.tls_disabled = False
+        mock_cluster_template.registry_enabled = False
+        mock_cluster = mock.MagicMock()
+        mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
+        del mock_cluster.stack_id
         mock_osc = mock.MagicMock()
         mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
         mock_osc_class.return_value = mock_osc
@@ -713,14 +723,15 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         mock_context.user_name = 'fake_user'
         mock_context.tenant = 'fake_tenant'
 
-        flannel_cidr = mock_baymodel.labels.get('flannel_network_cidr')
-        flannel_subnet = mock_baymodel.labels.get('flannel_network_subnetlen')
-        flannel_backend = mock_baymodel.labels.get('flannel_backend')
-        rexray_preempt = mock_baymodel.labels.get('rexray_preempt')
+        flannel_cidr = mock_cluster_template.labels.get('flannel_network_cidr')
+        flannel_subnet = mock_cluster_template.labels.get(
+            'flannel_network_subnetlen')
+        flannel_backend = mock_cluster_template.labels.get('flannel_backend')
+        rexray_preempt = mock_cluster_template.labels.get('rexray_preempt')
 
         swarm_def = swarm_tdef.AtomicSwarmTemplateDefinition()
 
-        swarm_def.get_params(mock_context, mock_baymodel, mock_bay)
+        swarm_def.get_params(mock_context, mock_cluster_template, mock_cluster)
 
         expected_kwargs = {'extra_params': {
             'discovery_url': 'fake_discovery_url',
@@ -730,8 +741,10 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
             'flannel_network_subnetlen': flannel_subnet,
             'auth_url': 'http://192.168.10.10:5000/v3',
             'rexray_preempt': rexray_preempt}}
-        mock_get_params.assert_called_once_with(mock_context, mock_baymodel,
-                                                mock_bay, **expected_kwargs)
+        mock_get_params.assert_called_once_with(mock_context,
+                                                mock_cluster_template,
+                                                mock_cluster,
+                                                **expected_kwargs)
 
     @mock.patch('requests.get')
     def test_swarm_validate_discovery_url(self, mock_get):
@@ -760,7 +773,7 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         mock_get.return_value = mock_resp
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
-        self.assertRaises(exception.InvalidBayDiscoveryURL,
+        self.assertRaises(exception.InvalidClusterDiscoveryURL,
                           k8s_def.validate_discovery_url,
                           'http://etcd/test', 1)
 
@@ -786,14 +799,14 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         mock_resp = mock.MagicMock()
         mock_resp.text = expected_discovery_url
         mock_get.return_value = mock_resp
-        mock_bay = mock.MagicMock()
-        mock_bay.discovery_url = None
+        mock_cluster = mock.MagicMock()
+        mock_cluster.discovery_url = None
 
         swarm_def = swarm_tdef.AtomicSwarmTemplateDefinition()
-        discovery_url = swarm_def.get_discovery_url(mock_bay)
+        discovery_url = swarm_def.get_discovery_url(mock_cluster)
 
         mock_get.assert_called_once_with('http://etcd/test?size=1')
-        self.assertEqual(mock_bay.discovery_url, expected_discovery_url)
+        self.assertEqual(mock_cluster.discovery_url, expected_discovery_url)
         self.assertEqual(discovery_url, expected_discovery_url)
 
     @mock.patch('requests.get')
@@ -802,18 +815,18 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         mock_resp.text = ''
         mock_get.return_value = mock_resp
 
-        fake_bay = mock.MagicMock()
-        fake_bay.discovery_url = None
+        fake_cluster = mock.MagicMock()
+        fake_cluster.discovery_url = None
 
         self.assertRaises(
             exception.InvalidDiscoveryURL,
             k8sa_tdef.AtomicK8sTemplateDefinition().get_discovery_url,
-            fake_bay)
+            fake_cluster)
 
     def test_swarm_get_heat_param(self):
         swarm_def = swarm_tdef.AtomicSwarmTemplateDefinition()
 
-        heat_param = swarm_def.get_heat_param(bay_attr='node_count')
+        heat_param = swarm_def.get_heat_param(cluster_attr='node_count')
         self.assertEqual('number_of_nodes', heat_param)
 
     def test_update_outputs(self):
@@ -841,13 +854,14 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         ]
         mock_stack = mock.MagicMock()
         mock_stack.to_dict.return_value = {'outputs': outputs}
-        mock_bay = mock.MagicMock()
-        mock_baymodel = mock.MagicMock()
+        mock_cluster = mock.MagicMock()
+        mock_cluster_template = mock.MagicMock()
 
-        swarm_def.update_outputs(mock_stack, mock_baymodel, mock_bay)
+        swarm_def.update_outputs(mock_stack, mock_cluster_template,
+                                 mock_cluster)
         expected_api_address = "tcp://%s:2376" % expected_api_address
-        self.assertEqual(expected_api_address, mock_bay.api_address)
-        self.assertEqual(expected_node_addresses, mock_bay.node_addresses)
+        self.assertEqual(expected_api_address, mock_cluster.api_address)
+        self.assertEqual(expected_node_addresses, mock_cluster.node_addresses)
 
 
 class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
@@ -864,19 +878,20 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
         mock_context.user_name = 'mesos_user'
         mock_context.tenant = 'admin'
         mock_context.domain_name = 'domainname'
-        mock_baymodel = mock.MagicMock()
-        mock_baymodel.tls_disabled = False
-        rexray_preempt = mock_baymodel.labels.get('rexray_preempt')
-        mesos_slave_isolation = mock_baymodel.labels.get(
+        mock_cluster_template = mock.MagicMock()
+        mock_cluster_template.tls_disabled = False
+        rexray_preempt = mock_cluster_template.labels.get('rexray_preempt')
+        mesos_slave_isolation = mock_cluster_template.labels.get(
             'mesos_slave_isolation')
-        mesos_slave_work_dir = mock_baymodel.labels.get('mesos_slave_work_dir')
-        mesos_slave_image_providers = mock_baymodel.labels.get(
+        mesos_slave_work_dir = mock_cluster_template.labels.get(
+            'mesos_slave_work_dir')
+        mesos_slave_image_providers = mock_cluster_template.labels.get(
             'image_providers')
-        mesos_slave_executor_env_variables = mock_baymodel.labels.get(
+        mesos_slave_executor_env_variables = mock_cluster_template.labels.get(
             'mesos_slave_executor_env_variables')
-        mock_bay = mock.MagicMock()
-        mock_bay.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
-        del mock_bay.stack_id
+        mock_cluster = mock.MagicMock()
+        mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
+        del mock_cluster.stack_id
         mock_osc = mock.MagicMock()
         mock_osc.cinder_region_name.return_value = 'RegionOne'
         mock_osc_class.return_value = mock_osc
@@ -887,7 +902,7 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
 
         mesos_def = mesos_tdef.UbuntuMesosTemplateDefinition()
 
-        mesos_def.get_params(mock_context, mock_baymodel, mock_bay,
+        mesos_def.get_params(mock_context, mock_cluster_template, mock_cluster,
                              scale_manager=mock_scale_manager)
 
         expected_kwargs = {'extra_params': {
@@ -903,16 +918,18 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
                 mesos_slave_executor_env_variables,
             'mesos_slave_image_providers': mesos_slave_image_providers,
             'slaves_to_remove': removal_nodes}}
-        mock_get_params.assert_called_once_with(mock_context, mock_baymodel,
-                                                mock_bay, **expected_kwargs)
+        mock_get_params.assert_called_once_with(mock_context,
+                                                mock_cluster_template,
+                                                mock_cluster,
+                                                **expected_kwargs)
 
     def test_mesos_get_heat_param(self):
         mesos_def = mesos_tdef.UbuntuMesosTemplateDefinition()
 
-        heat_param = mesos_def.get_heat_param(bay_attr='node_count')
+        heat_param = mesos_def.get_heat_param(cluster_attr='node_count')
         self.assertEqual('number_of_slaves', heat_param)
 
-        heat_param = mesos_def.get_heat_param(bay_attr='master_count')
+        heat_param = mesos_def.get_heat_param(cluster_attr='master_count')
         self.assertEqual('number_of_masters', heat_param)
 
     def test_update_outputs(self):
@@ -941,11 +958,13 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
         ]
         mock_stack = mock.MagicMock()
         mock_stack.to_dict.return_value = {'outputs': outputs}
-        mock_bay = mock.MagicMock()
-        mock_baymodel = mock.MagicMock()
+        mock_cluster = mock.MagicMock()
+        mock_cluster_template = mock.MagicMock()
 
-        mesos_def.update_outputs(mock_stack, mock_baymodel, mock_bay)
+        mesos_def.update_outputs(mock_stack, mock_cluster_template,
+                                 mock_cluster)
 
-        self.assertEqual(expected_api_address, mock_bay.api_address)
-        self.assertEqual(expected_node_addresses, mock_bay.node_addresses)
-        self.assertEqual(expected_master_addresses, mock_bay.master_addresses)
+        self.assertEqual(expected_api_address, mock_cluster.api_address)
+        self.assertEqual(expected_node_addresses, mock_cluster.node_addresses)
+        self.assertEqual(expected_master_addresses,
+                         mock_cluster.master_addresses)

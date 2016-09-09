@@ -204,9 +204,9 @@ parameters:
       service.
     default: 6443
 
-  bay_uuid:
+  cluster_uuid:
     type: string
-    description: identifier for the bay this template is generating
+    description: identifier for the cluster this template is generating
 
   magnum_url:
     type: string
@@ -396,7 +396,7 @@ resources:
   ######################################################################
   #
   # resources that expose the IPs of either the kube master or a given
-  # LBaaS pool depending on whether LBaaS is enabled for the bay.
+  # LBaaS pool depending on whether LBaaS is enabled for the cluster.
   #
 
   api_address_lb_switch:
@@ -416,7 +416,7 @@ resources:
   ######################################################################
   #
   # resources that expose the IPs of either floating ip or a given
-  # fixed ip depending on whether FloatingIP is enabled for the bay.
+  # fixed ip depending on whether FloatingIP is enabled for the cluster.
   #
 
   api_address_floating_switch:
@@ -456,7 +456,7 @@ resources:
           flannel_backend: {get_param: flannel_backend}
           portal_network_cidr: {get_param: portal_network_cidr}
           discovery_url: {get_param: discovery_url}
-          bay_uuid: {get_param: bay_uuid}
+          cluster_uuid: {get_param: cluster_uuid}
           magnum_url: {get_param: magnum_url}
           fixed_network: {get_resource: fixed_network}
           fixed_subnet: {get_resource: fixed_subnet}
@@ -515,7 +515,7 @@ resources:
           registry_container: {get_param: registry_container}
           registry_insecure: {get_param: registry_insecure}
           registry_chunksize: {get_param: registry_chunksize}
-          bay_uuid: {get_param: bay_uuid}
+          cluster_uuid: {get_param: cluster_uuid}
           magnum_url: {get_param: magnum_url}
           volume_driver: {get_param: volume_driver}
           region_name: {get_param: region_name}

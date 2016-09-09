@@ -29,28 +29,28 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
                            cluster_template_attr='external_network_id',
                            required=True)
         self.add_parameter('number_of_slaves',
-                           bay_attr='node_count')
+                           cluster_attr='node_count')
         self.add_parameter('master_flavor',
                            cluster_template_attr='master_flavor_id')
         self.add_parameter('slave_flavor',
                            cluster_template_attr='flavor_id')
         self.add_parameter('cluster_name',
-                           bay_attr='name')
+                           cluster_attr='name')
         self.add_parameter('volume_driver',
                            cluster_template_attr='volume_driver')
 
         self.add_output('api_address',
-                        bay_attr='api_address')
+                        cluster_attr='api_address')
         self.add_output('mesos_master_private',
-                        bay_attr=None)
+                        cluster_attr=None)
         self.add_output('mesos_master',
-                        bay_attr='master_addresses')
+                        cluster_attr='master_addresses')
         self.add_output('mesos_slaves_private',
-                        bay_attr=None)
+                        cluster_attr=None)
         self.add_output('mesos_slaves',
-                        bay_attr='node_addresses')
+                        cluster_attr='node_addresses')
 
-    def get_params(self, context, cluster_template, bay, **kwargs):
+    def get_params(self, context, cluster_template, cluster, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
         # HACK(apmelton) - This uses the user's bearer token, ideally
         # it should be replaced with an actual trust token with only
@@ -77,7 +77,7 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
                 scale_mgr.get_removal_nodes(hosts))
 
         return super(UbuntuMesosTemplateDefinition,
-                     self).get_params(context, cluster_template, bay,
+                     self).get_params(context, cluster_template, cluster,
                                       extra_params=extra_params,
                                       **kwargs)
 

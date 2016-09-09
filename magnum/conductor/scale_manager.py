@@ -27,18 +27,18 @@ LOG = logging.getLogger(__name__)
 
 class ScaleManager(object):
 
-    def __init__(self, context, osclient, bay):
+    def __init__(self, context, osclient, cluster):
         self.context = context
         self.osclient = osclient
-        self.old_bay = objects.Bay.get_by_uuid(context, bay.uuid)
-        self.new_bay = bay
+        self.old_cluster = objects.Cluster.get_by_uuid(context, cluster.uuid)
+        self.new_cluster = cluster
 
     def get_removal_nodes(self, hosts_output):
         if not self._is_scale_down():
             return list()
 
-        bay = self.new_bay
-        stack = self.osclient.heat().stacks.get(bay.stack_id)
+        cluster = self.new_cluster
+        stack = self.osclient.heat().stacks.get(cluster.stack_id)
         hosts = hosts_output.get_output_value(stack)
         if hosts is None:
             raise exception.MagnumException(_(
@@ -47,7 +47,7 @@ class ScaleManager(object):
                                    'stack_id': stack.id})
 
         hosts_no_container = list(hosts)
-        k8s_api = k8s.create_k8s_api(self.context, bay)
+        k8s_api = k8s.create_k8s_api(self.context, cluster)
         for pod in k8s_api.list_namespaced_pod(namespace='default').items:
             host = pod.spec.node_name
             if host in hosts_no_container:
@@ -72,7 +72,7 @@ class ScaleManager(object):
         return hosts_to_remove
 
     def _is_scale_down(self):
-        return self.new_bay.node_count < self.old_bay.node_count
+        return self.new_cluster.node_count < self.old_cluster.node_count
 
     def _get_num_of_removal(self):
-        return self.old_bay.node_count - self.new_bay.node_count
+        return self.old_cluster.node_count - self.new_cluster.node_count

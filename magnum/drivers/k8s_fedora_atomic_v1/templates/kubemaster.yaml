@@ -78,9 +78,9 @@ parameters:
       The port which are used by kube-apiserver to provide Kubernetes
       service.
 
-  bay_uuid:
+  cluster_uuid:
     type: string
-    description: identifier for the bay this template is generating
+    description: identifier for the cluster this template is generating
 
   magnum_url:
     type: string
@@ -198,7 +198,7 @@ resources:
   ######################################################################
   #
   # resource that exposes the IPs of either the kube master or the API
-  # LBaaS pool depending on whether LBaaS is enabled for the bay.
+  # LBaaS pool depending on whether LBaaS is enabled for the cluster.
   #
 
   api_address_switch:
@@ -243,7 +243,7 @@ resources:
             "$TENANT_NAME": {get_param: tenant_name}
             "$CLUSTER_SUBNET": {get_param: fixed_subnet}
             "$TLS_DISABLED": {get_param: tls_disabled}
-            "$BAY_UUID": {get_param: bay_uuid}
+            "$CLUSTER_UUID": {get_param: cluster_uuid}
             "$MAGNUM_URL": {get_param: magnum_url}
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}

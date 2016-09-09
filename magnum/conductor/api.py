@@ -28,27 +28,27 @@ class API(rpc_service.API):
         super(API, self).__init__(transport, context,
                                   topic=cfg.CONF.conductor.topic)
 
-    # Bay Operations
+    # Cluster Operations
 
-    def bay_create(self, bay, bay_create_timeout):
-        return self._call('bay_create', bay=bay,
-                          bay_create_timeout=bay_create_timeout)
+    def cluster_create(self, cluster, create_timeout):
+        return self._call('cluster_create', cluster=cluster,
+                          create_timeout=create_timeout)
 
-    def bay_create_async(self, bay, bay_create_timeout):
-        self._cast('bay_create', bay=bay,
-                   bay_create_timeout=bay_create_timeout)
+    def cluster_create_async(self, cluster, create_timeout):
+        self._cast('cluster_create', cluster=cluster,
+                   create_timeout=create_timeout)
 
-    def bay_delete(self, uuid):
-        return self._call('bay_delete', uuid=uuid)
+    def cluster_delete(self, uuid):
+        return self._call('cluster_delete', uuid=uuid)
 
-    def bay_delete_async(self, uuid):
-        self._cast('bay_delete', uuid=uuid)
+    def cluster_delete_async(self, uuid):
+        self._cast('cluster_delete', uuid=uuid)
 
-    def bay_update(self, bay):
-        return self._call('bay_update', bay=bay)
+    def cluster_update(self, cluster):
+        return self._call('cluster_update', cluster=cluster)
 
-    def bay_update_async(self, bay, rollback=False):
-        self._cast('bay_update', bay=bay, rollback=rollback)
+    def cluster_update_async(self, cluster, rollback=False):
+        self._cast('cluster_update', cluster=cluster, rollback=rollback)
 
     # CA operations
 

@@ -68,8 +68,9 @@ CONF.register_opts(cluster_heat_opts, group='cluster_heat')
 LOG = logging.getLogger(__name__)
 
 
-def _extract_template_definition(context, bay, scale_manager=None):
-    cluster_template = conductor_utils.retrieve_cluster_template(context, bay)
+def _extract_template_definition(context, cluster, scale_manager=None):
+    cluster_template = conductor_utils.retrieve_cluster_template(context,
+                                                                 cluster)
     cluster_distro = cluster_template.cluster_distro
     cluster_coe = cluster_template.coe
     cluster_server_type = cluster_template.server_type
@@ -77,7 +78,7 @@ def _extract_template_definition(context, bay, scale_manager=None):
         cluster_server_type,
         cluster_distro,
         cluster_coe)
-    return definition.extract_definition(context, cluster_template, bay,
+    return definition.extract_definition(context, cluster_template, cluster,
                                          scale_manager=scale_manager)
 
 
@@ -91,9 +92,9 @@ def _get_env_files(template_path, env_rel_paths):
     return environment_files, env_map
 
 
-def _create_stack(context, osc, bay, bay_create_timeout):
+def _create_stack(context, osc, cluster, create_timeout):
     template_path, heat_params, env_files = (
-        _extract_template_definition(context, bay))
+        _extract_template_definition(context, cluster))
 
     tpl_files, template = template_utils.get_template_contents(template_path)
 
@@ -101,11 +102,11 @@ def _create_stack(context, osc, bay, bay_create_timeout):
     tpl_files.update(env_map)
 
     # Make sure no duplicate stack name
-    stack_name = '%s-%s' % (bay.name, short_id.generate_id())
-    if bay_create_timeout:
-        heat_timeout = bay_create_timeout
+    stack_name = '%s-%s' % (cluster.name, short_id.generate_id())
+    if create_timeout:
+        heat_timeout = create_timeout
     else:
-        # no bay_create_timeout value was passed in to the request
+        # no create_timeout value was passed in to the request
         # so falling back on configuration file value
         heat_timeout = cfg.CONF.cluster_heat.create_timeout
     fields = {
@@ -121,9 +122,9 @@ def _create_stack(context, osc, bay, bay_create_timeout):
     return created_stack
 
 
-def _update_stack(context, osc, bay, scale_manager=None, rollback=False):
+def _update_stack(context, osc, cluster, scale_manager=None, rollback=False):
     template_path, heat_params, env_files = _extract_template_definition(
-        context, bay, scale_manager=scale_manager)
+        context, cluster, scale_manager=scale_manager)
 
     tpl_files, template = template_utils.get_template_contents(template_path)
     environment_files, env_map = _get_env_files(template_path, env_files)
@@ -137,7 +138,7 @@ def _update_stack(context, osc, bay, scale_manager=None, rollback=False):
         'disable_rollback': not rollback
     }
 
-    return osc.heat().stacks.update(bay.stack_id, **fields)
+    return osc.heat().stacks.update(cluster.stack_id, **fields)
 
 
 class Handler(object):
@@ -145,26 +146,28 @@ class Handler(object):
     def __init__(self):
         super(Handler, self).__init__()
 
-    # Bay Operations
+    # Cluster Operations
 
-    def bay_create(self, context, bay, bay_create_timeout):
-        LOG.debug('bay_heat bay_create')
+    def cluster_create(self, context, cluster, create_timeout):
+        LOG.debug('cluster_heat cluster_create')
 
         osc = clients.OpenStackClients(context)
 
         try:
-            # Create trustee/trust and set them to bay
-            trust_manager.create_trustee_and_trust(osc, bay)
-            # Generate certificate and set the cert reference to bay
-            cert_manager.generate_certificates_to_cluster(bay, context=context)
-            conductor_utils.notify_about_bay_operation(
+            # Create trustee/trust and set them to cluster
+            trust_manager.create_trustee_and_trust(osc, cluster)
+            # Generate certificate and set the cert reference to cluster
+            cert_manager.generate_certificates_to_cluster(cluster,
+                                                          context=context)
+            conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_CREATE, taxonomy.OUTCOME_PENDING)
-            created_stack = _create_stack(context, osc, bay,
-                                          bay_create_timeout)
+            created_stack = _create_stack(context, osc, cluster,
+                                          create_timeout)
         except Exception as e:
-            cert_manager.delete_certificates_from_cluster(bay, context=context)
-            trust_manager.delete_trustee_and_trust(osc, context, bay)
-            conductor_utils.notify_about_bay_operation(
+            cert_manager.delete_certificates_from_cluster(cluster,
+                                                          context=context)
+            trust_manager.delete_trustee_and_trust(osc, context, cluster)
+            conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_CREATE, taxonomy.OUTCOME_FAILURE)
 
             if isinstance(e, exc.HTTPBadRequest):
@@ -173,111 +176,112 @@ class Handler(object):
                 raise e
             raise
 
-        bay.stack_id = created_stack['stack']['id']
-        bay.status = fields.BayStatus.CREATE_IN_PROGRESS
-        bay.create()
+        cluster.stack_id = created_stack['stack']['id']
+        cluster.status = fields.ClusterStatus.CREATE_IN_PROGRESS
+        cluster.create()
 
-        self._poll_and_check(osc, bay)
+        self._poll_and_check(osc, cluster)
 
-        return bay
+        return cluster
 
-    def bay_update(self, context, bay, rollback=False):
-        LOG.debug('bay_heat bay_update')
+    def cluster_update(self, context, cluster, rollback=False):
+        LOG.debug('cluster_heat cluster_update')
 
         osc = clients.OpenStackClients(context)
-        stack = osc.heat().stacks.get(bay.stack_id)
+        stack = osc.heat().stacks.get(cluster.stack_id)
         allow_update_status = (
-            fields.BayStatus.CREATE_COMPLETE,
-            fields.BayStatus.UPDATE_COMPLETE,
-            fields.BayStatus.RESUME_COMPLETE,
-            fields.BayStatus.RESTORE_COMPLETE,
-            fields.BayStatus.ROLLBACK_COMPLETE,
-            fields.BayStatus.SNAPSHOT_COMPLETE,
-            fields.BayStatus.CHECK_COMPLETE,
-            fields.BayStatus.ADOPT_COMPLETE
+            fields.ClusterStatus.CREATE_COMPLETE,
+            fields.ClusterStatus.UPDATE_COMPLETE,
+            fields.ClusterStatus.RESUME_COMPLETE,
+            fields.ClusterStatus.RESTORE_COMPLETE,
+            fields.ClusterStatus.ROLLBACK_COMPLETE,
+            fields.ClusterStatus.SNAPSHOT_COMPLETE,
+            fields.ClusterStatus.CHECK_COMPLETE,
+            fields.ClusterStatus.ADOPT_COMPLETE
         )
         if stack.stack_status not in allow_update_status:
-            conductor_utils.notify_about_bay_operation(
+            conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE)
-            operation = _('Updating a bay when stack status is '
+            operation = _('Updating a cluster when stack status is '
                           '"%s"') % stack.stack_status
             raise exception.NotSupported(operation=operation)
 
-        delta = bay.obj_what_changed()
+        delta = cluster.obj_what_changed()
         if not delta:
-            return bay
+            return cluster
 
-        manager = scale_manager.ScaleManager(context, osc, bay)
+        manager = scale_manager.ScaleManager(context, osc, cluster)
 
-        conductor_utils.notify_about_bay_operation(
+        conductor_utils.notify_about_cluster_operation(
             context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_PENDING)
 
-        _update_stack(context, osc, bay, manager, rollback)
-        self._poll_and_check(osc, bay)
+        _update_stack(context, osc, cluster, manager, rollback)
+        self._poll_and_check(osc, cluster)
 
-        return bay
+        return cluster
 
-    def bay_delete(self, context, uuid):
-        LOG.debug('bay_heat bay_delete')
+    def cluster_delete(self, context, uuid):
+        LOG.debug('cluster_heat cluster_delete')
         osc = clients.OpenStackClients(context)
-        bay = objects.Bay.get_by_uuid(context, uuid)
+        cluster = objects.Cluster.get_by_uuid(context, uuid)
 
-        stack_id = bay.stack_id
+        stack_id = cluster.stack_id
         # NOTE(sdake): This will execute a stack_delete operation.  This will
         # Ignore HTTPNotFound exceptions (stack wasn't present).  In the case
-        # that Heat couldn't find the stack representing the bay, likely a user
-        # has deleted the stack outside the context of Magnum.  Therefore the
-        # contents of the bay are forever lost.
+        # that Heat couldn't find the stack representing the cluster, likely a
+        # user has deleted the stack outside the context of Magnum.  Therefore
+        # the contents of the cluster are forever lost.
         #
         # If the exception is unhandled, the original exception will be raised.
         try:
-            conductor_utils.notify_about_bay_operation(
+            conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_PENDING)
             osc.heat().stacks.delete(stack_id)
         except exc.HTTPNotFound:
-            LOG.info(_LI('The stack %s was not found during bay'
+            LOG.info(_LI('The stack %s was not found during cluster'
                          ' deletion.'), stack_id)
             try:
-                trust_manager.delete_trustee_and_trust(osc, context, bay)
-                cert_manager.delete_certificates_from_cluster(bay,
+                trust_manager.delete_trustee_and_trust(osc, context, cluster)
+                cert_manager.delete_certificates_from_cluster(cluster,
                                                               context=context)
-                bay.destroy()
+                cluster.destroy()
             except exception.ClusterNotFound:
-                LOG.info(_LI('The bay %s has been deleted by others.'), uuid)
-            conductor_utils.notify_about_bay_operation(
+                LOG.info(_LI('The cluster %s has been deleted by others.'),
+                         uuid)
+            conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_SUCCESS)
             return None
         except exc.HTTPConflict:
-            conductor_utils.notify_about_bay_operation(
+            conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_FAILURE)
-            raise exception.OperationInProgress(bay_name=bay.name)
+            raise exception.OperationInProgress(cluster_name=cluster.name)
         except Exception:
-            conductor_utils.notify_about_bay_operation(
+            conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_FAILURE)
             raise
 
-        bay.status = fields.BayStatus.DELETE_IN_PROGRESS
-        bay.save()
+        cluster.status = fields.ClusterStatus.DELETE_IN_PROGRESS
+        cluster.save()
 
-        self._poll_and_check(osc, bay)
+        self._poll_and_check(osc, cluster)
 
         return None
 
-    def _poll_and_check(self, osc, bay):
-        poller = HeatPoller(osc, bay)
+    def _poll_and_check(self, osc, cluster):
+        poller = HeatPoller(osc, cluster)
         lc = loopingcall.FixedIntervalLoopingCall(f=poller.poll_and_check)
         lc.start(cfg.CONF.cluster_heat.wait_interval, True)
 
 
 class HeatPoller(object):
 
-    def __init__(self, openstack_client, bay):
+    def __init__(self, openstack_client, cluster):
         self.openstack_client = openstack_client
         self.context = self.openstack_client.context
-        self.bay = bay
+        self.cluster = cluster
         self.attempts = 0
         self.cluster_template = conductor_utils.retrieve_cluster_template(
-            self.context, bay)
+            self.context, cluster)
         self.template_def = \
             template_def.TemplateDefinition.get_template_definition(
                 self.cluster_template.server_type,
@@ -286,97 +290,97 @@ class HeatPoller(object):
 
     def poll_and_check(self):
         # TODO(yuanying): temporary implementation to update api_address,
-        # node_addresses and bay status
-        stack = self.openstack_client.heat().stacks.get(self.bay.stack_id)
+        # node_addresses and cluster status
+        stack = self.openstack_client.heat().stacks.get(self.cluster.stack_id)
         self.attempts += 1
         status_to_event = {
-            fields.BayStatus.DELETE_COMPLETE: taxonomy.ACTION_DELETE,
-            fields.BayStatus.CREATE_COMPLETE: taxonomy.ACTION_CREATE,
-            fields.BayStatus.UPDATE_COMPLETE: taxonomy.ACTION_UPDATE,
-            fields.BayStatus.ROLLBACK_COMPLETE: taxonomy.ACTION_UPDATE,
-            fields.BayStatus.CREATE_FAILED: taxonomy.ACTION_CREATE,
-            fields.BayStatus.DELETE_FAILED: taxonomy.ACTION_DELETE,
-            fields.BayStatus.UPDATE_FAILED: taxonomy.ACTION_UPDATE,
-            fields.BayStatus.ROLLBACK_FAILED: taxonomy.ACTION_UPDATE
+            fields.ClusterStatus.DELETE_COMPLETE: taxonomy.ACTION_DELETE,
+            fields.ClusterStatus.CREATE_COMPLETE: taxonomy.ACTION_CREATE,
+            fields.ClusterStatus.UPDATE_COMPLETE: taxonomy.ACTION_UPDATE,
+            fields.ClusterStatus.ROLLBACK_COMPLETE: taxonomy.ACTION_UPDATE,
+            fields.ClusterStatus.CREATE_FAILED: taxonomy.ACTION_CREATE,
+            fields.ClusterStatus.DELETE_FAILED: taxonomy.ACTION_DELETE,
+            fields.ClusterStatus.UPDATE_FAILED: taxonomy.ACTION_UPDATE,
+            fields.ClusterStatus.ROLLBACK_FAILED: taxonomy.ACTION_UPDATE
         }
         # poll_and_check is detached and polling long time to check status,
-        # so another user/client can call delete bay/stack.
-        if stack.stack_status == fields.BayStatus.DELETE_COMPLETE:
+        # so another user/client can call delete cluster/stack.
+        if stack.stack_status == fields.ClusterStatus.DELETE_COMPLETE:
             self._delete_complete()
-            conductor_utils.notify_about_bay_operation(
+            conductor_utils.notify_about_cluster_operation(
                 self.context, status_to_event[stack.stack_status],
                 taxonomy.OUTCOME_SUCCESS)
             raise loopingcall.LoopingCallDone()
 
-        if stack.stack_status in (fields.BayStatus.CREATE_COMPLETE,
-                                  fields.BayStatus.UPDATE_COMPLETE):
-            self._sync_bay_and_template_status(stack)
-            conductor_utils.notify_about_bay_operation(
+        if stack.stack_status in (fields.ClusterStatus.CREATE_COMPLETE,
+                                  fields.ClusterStatus.UPDATE_COMPLETE):
+            self._sync_cluster_and_template_status(stack)
+            conductor_utils.notify_about_cluster_operation(
                 self.context, status_to_event[stack.stack_status],
                 taxonomy.OUTCOME_SUCCESS)
             raise loopingcall.LoopingCallDone()
-        elif stack.stack_status != self.bay.status:
-            self._sync_bay_status(stack)
+        elif stack.stack_status != self.cluster.status:
+            self._sync_cluster_status(stack)
 
-        if stack.stack_status in (fields.BayStatus.CREATE_FAILED,
-                                  fields.BayStatus.DELETE_FAILED,
-                                  fields.BayStatus.UPDATE_FAILED,
-                                  fields.BayStatus.ROLLBACK_COMPLETE,
-                                  fields.BayStatus.ROLLBACK_FAILED):
-            self._sync_bay_and_template_status(stack)
-            self._bay_failed(stack)
-            conductor_utils.notify_about_bay_operation(
+        if stack.stack_status in (fields.ClusterStatus.CREATE_FAILED,
+                                  fields.ClusterStatus.DELETE_FAILED,
+                                  fields.ClusterStatus.UPDATE_FAILED,
+                                  fields.ClusterStatus.ROLLBACK_COMPLETE,
+                                  fields.ClusterStatus.ROLLBACK_FAILED):
+            self._sync_cluster_and_template_status(stack)
+            self._cluster_failed(stack)
+            conductor_utils.notify_about_cluster_operation(
                 self.context, status_to_event[stack.stack_status],
                 taxonomy.OUTCOME_FAILURE)
             raise loopingcall.LoopingCallDone()
         # only check max attempts when the stack is being created when
         # the timeout hasn't been set. If the timeout has been set then
         # the loop will end when the stack completes or the timeout occurs
-        if stack.stack_status == fields.BayStatus.CREATE_IN_PROGRESS:
+        if stack.stack_status == fields.ClusterStatus.CREATE_IN_PROGRESS:
             if (stack.timeout_mins is None and
                self.attempts > cfg.CONF.cluster_heat.max_attempts):
-                LOG.error(_LE('Bay check exit after %(attempts)s attempts,'
+                LOG.error(_LE('Cluster check exit after %(attempts)s attempts,'
                               'stack_id: %(id)s, stack_status: %(status)s') %
                           {'attempts': cfg.CONF.cluster_heat.max_attempts,
-                           'id': self.bay.stack_id,
+                           'id': self.cluster.stack_id,
                            'status': stack.stack_status})
                 raise loopingcall.LoopingCallDone()
         else:
             if self.attempts > cfg.CONF.cluster_heat.max_attempts:
-                LOG.error(_LE('Bay check exit after %(attempts)s attempts,'
+                LOG.error(_LE('Cluster check exit after %(attempts)s attempts,'
                               'stack_id: %(id)s, stack_status: %(status)s') %
                           {'attempts': cfg.CONF.cluster_heat.max_attempts,
-                           'id': self.bay.stack_id,
+                           'id': self.cluster.stack_id,
                            'status': stack.stack_status})
                 raise loopingcall.LoopingCallDone()
 
     def _delete_complete(self):
-        LOG.info(_LI('Bay has been deleted, stack_id: %s')
-                 % self.bay.stack_id)
+        LOG.info(_LI('Cluster has been deleted, stack_id: %s')
+                 % self.cluster.stack_id)
         try:
             trust_manager.delete_trustee_and_trust(self.openstack_client,
                                                    self.context,
-                                                   self.bay)
-            cert_manager.delete_certificates_from_cluster(self.bay,
+                                                   self.cluster)
+            cert_manager.delete_certificates_from_cluster(self.cluster,
                                                           context=self.context)
-            self.bay.destroy()
+            self.cluster.destroy()
         except exception.ClusterNotFound:
-            LOG.info(_LI('The bay %s has been deleted by others.')
-                     % self.bay.uuid)
+            LOG.info(_LI('The cluster %s has been deleted by others.')
+                     % self.cluster.uuid)
 
-    def _sync_bay_status(self, stack):
-        self.bay.status = stack.stack_status
-        self.bay.status_reason = stack.stack_status_reason
+    def _sync_cluster_status(self, stack):
+        self.cluster.status = stack.stack_status
+        self.cluster.status_reason = stack.stack_status_reason
         stack_nc_param = self.template_def.get_heat_param(
-            bay_attr='node_count')
-        self.bay.node_count = stack.parameters[stack_nc_param]
-        self.bay.save()
+            cluster_attr='node_count')
+        self.cluster.node_count = stack.parameters[stack_nc_param]
+        self.cluster.save()
 
     def get_version_info(self, stack):
         stack_param = self.template_def.get_heat_param(
-            bay_attr='coe_version')
+            cluster_attr='coe_version')
         if stack_param:
-            self.bay.coe_version = stack.parameters[stack_param]
+            self.cluster.coe_version = stack.parameters[stack_param]
 
         tdef = template_def.TemplateDefinition.get_template_definition(
             self.cluster_template.server_type,
@@ -388,18 +392,18 @@ class HeatPoller(object):
             container_version = ver.container_version
         except Exception:
             container_version = None
-        self.bay.container_version = container_version
+        self.cluster.container_version = container_version
 
-    def _sync_bay_and_template_status(self, stack):
+    def _sync_cluster_and_template_status(self, stack):
         self.template_def.update_outputs(stack, self.cluster_template,
-                                         self.bay)
+                                         self.cluster)
         self.get_version_info(stack)
-        self._sync_bay_status(stack)
+        self._sync_cluster_status(stack)
 
-    def _bay_failed(self, stack):
-        LOG.error(_LE('Bay error, stack status: %(bay_status)s, '
+    def _cluster_failed(self, stack):
+        LOG.error(_LE('Cluster error, stack status: %(cluster_status)s, '
                       'stack_id: %(stack_id)s, '
                       'reason: %(reason)s') %
-                  {'bay_status': stack.stack_status,
-                   'stack_id': self.bay.stack_id,
-                   'reason': self.bay.status_reason})
+                  {'cluster_status': stack.stack_status,
+                   'stack_id': self.cluster.stack_id,
+                   'reason': self.cluster.status_reason})

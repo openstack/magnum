@@ -85,7 +85,7 @@ write_files:
 
       ca_cert_json=$(curl -X GET \
         -H "X-Auth-Token: $USER_TOKEN" \
-        $MAGNUM_URL/certificates/$BAY_UUID)
+        $MAGNUM_URL/certificates/$CLUSTER_UUID)
       parse_json_response "${ca_cert_json}" > ${CA_CERT}
 
       # Create config for client's csr
@@ -117,7 +117,7 @@ write_files:
 
       # encode newline (\n) characters
       csr=$(cat $CLIENT_CSR | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g')
-      csr_req="{\"bay_uuid\": \"$BAY_UUID\", \"csr\": \"$csr\"}"
+      csr_req="{\"cluster_uuid\": \"$CLUSTER_UUID\", \"csr\": \"$csr\"}"
       # Send csr to Magnum to have it signed
       client_cert_json=$(curl -X POST \
           -H "X-Auth-Token: $USER_TOKEN" \

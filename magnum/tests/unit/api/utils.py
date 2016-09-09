@@ -42,19 +42,18 @@ def cluster_template_post_data(**kw):
 
 
 def bay_post_data(**kw):
-    bay = utils.get_test_bay(**kw)
+    bay = utils.get_test_cluster(**kw)
+    bay['baymodel_id'] = kw.get('baymodel_id', bay['cluster_template_id'])
     bay['bay_create_timeout'] = kw.get('bay_create_timeout', 15)
+    del bay['cluster_template_id']
+    del bay['create_timeout']
     internal = bay_controller.BayPatchType.internal_attrs()
     return remove_internal(bay, internal)
 
 
 def cluster_post_data(**kw):
-    cluster = utils.get_test_bay(**kw)
+    cluster = utils.get_test_cluster(**kw)
     cluster['create_timeout'] = kw.get('create_timeout', 15)
-    cluster['cluster_template_id'] = kw.get('cluster_template_id',
-                                            cluster['baymodel_id'])
-    del cluster['bay_create_timeout']
-    del cluster['baymodel_id']
     internal = cluster_controller.ClusterPatchType.internal_attrs()
     return remove_internal(cluster, internal)
 

@@ -47,9 +47,9 @@ parameters:
       The port which are used by kube-apiserver to provide Kubernetes
       service.
 
-  bay_uuid:
+  cluster_uuid:
     type: string
-    description: identifier for the bay this template is generating
+    description: identifier for the cluster this template is generating
 
   magnum_url:
     type: string
@@ -228,7 +228,7 @@ resources:
             $REGISTRY_INSECURE: {get_param: registry_insecure}
             $REGISTRY_CHUNKSIZE: {get_param: registry_chunksize}
             $TLS_DISABLED: {get_param: tls_disabled}
-            $BAY_UUID: {get_param: bay_uuid}
+            $CLUSTER _UUID: {get_param: cluster_uuid}
             $MAGNUM_URL: {get_param: magnum_url}
             $USERNAME: {get_param: username}
             $PASSWORD: {get_param: password}

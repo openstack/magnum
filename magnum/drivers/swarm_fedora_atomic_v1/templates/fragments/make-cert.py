@@ -81,10 +81,10 @@ def _build_subject_alt_names(config):
 
 
 def write_ca_cert(config):
-    bay_cert_url = '%s/certificates/%s' % (config['MAGNUM_URL'],
-                                           config['BAY_UUID'])
+    cluster_cert_url = '%s/certificates/%s' % (config['MAGNUM_URL'],
+                                               config['CLUSTER_UUID'])
     headers = {'X-Auth-Token': config['USER_TOKEN']}
-    ca_cert_resp = requests.get(bay_cert_url,
+    ca_cert_resp = requests.get(cluster_cert_url,
                                 headers=headers)
 
     with open(CA_CERT_PATH, 'w') as fp:
@@ -116,7 +116,7 @@ def create_server_csr(config):
                      '-config', SERVER_CONF_PATH])
 
     with open(SERVER_CSR_PATH, 'r') as fp:
-        return {'bay_uuid': config['BAY_UUID'], 'csr': fp.read()}
+        return {'cluster_uuid': config['CLUSTER_UUID'], 'csr': fp.read()}
 
 
 def write_server_cert(config, csr_req):

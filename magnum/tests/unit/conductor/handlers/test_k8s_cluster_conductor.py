@@ -16,14 +16,14 @@ import mock
 from mock import patch
 from oslo_config import cfg
 
-from magnum.conductor.handlers import bay_conductor
+from magnum.conductor.handlers import cluster_conductor
 from magnum import objects
 from magnum.tests import base
 
 
-class TestBayConductorWithK8s(base.TestCase):
+class TestClusterConductorWithK8s(base.TestCase):
     def setUp(self):
-        super(TestBayConductorWithK8s, self).setUp()
+        super(TestClusterConductorWithK8s, self).setUp()
         self.cluster_template_dict = {
             'image_id': 'image_id',
             'flavor_id': 'flavor_id',
@@ -51,10 +51,10 @@ class TestBayConductorWithK8s(base.TestCase):
             'master_lb_enabled': False,
             'floating_ip_enabled': False,
         }
-        self.bay_dict = {
+        self.cluster_dict = {
             'uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
-            'baymodel_id': 'xx-xx-xx-xx',
-            'name': 'bay1',
+            'cluster_template_id': 'xx-xx-xx-xx',
+            'name': 'cluster1',
             'stack_id': 'xx-xx-xx-xx',
             'api_address': '172.17.2.3',
             'node_addresses': ['172.17.2.4'],
@@ -100,8 +100,8 @@ class TestBayConductorWithK8s(base.TestCase):
             missing_attr=None):
         if missing_attr in self.cluster_template_dict:
             self.cluster_template_dict[missing_attr] = None
-        elif missing_attr in self.bay_dict:
-            self.bay_dict[missing_attr] = None
+        elif missing_attr in self.cluster_dict:
+            self.cluster_dict[missing_attr] = None
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
         mock_objects_cluster_template_get_by_uuid.return_value = \
@@ -111,12 +111,12 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_resp = mock.MagicMock()
         mock_resp.text = expected_result
         mock_get.return_value = mock_resp
-        bay = objects.Bay(self.context, **self.bay_dict)
+        cluster = objects.Cluster(self.context, **self.cluster_dict)
 
         (template_path,
          definition,
-         env_files) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+         env_files) = cluster_conductor._extract_template_definition(
+            self.context, cluster)
 
         mapping = {
             'dns_nameserver': 'dns_nameserver',
@@ -137,7 +137,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
-            'bay_uuid': self.bay_dict['uuid'],
+            'cluster_uuid': self.cluster_dict['uuid'],
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'tls_disabled': False,
             'insecure_registry': '10.0.0.1:5000',
@@ -164,7 +164,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'no_proxy': 'no_proxy',
             'tenant_name': 'fake_tenant',
             'username': 'fake_user',
-            'bay_uuid': self.bay_dict['uuid'],
+            'cluster_uuid': self.cluster_dict['uuid'],
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'region_name': self.mock_osc.cinder_region_name.return_value,
             'tls_disabled': False,
@@ -203,7 +203,7 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_resp = mock.MagicMock()
         mock_resp.text = expected_result
         mock_get.return_value = mock_resp
-        bay = objects.Bay(self.context, **self.bay_dict)
+        cluster = objects.Cluster(self.context, **self.cluster_dict)
 
         cfg.CONF.set_override('swift_region',
                               'RegionOne',
@@ -211,12 +211,12 @@ class TestBayConductorWithK8s(base.TestCase):
 
         (template_path,
          definition,
-         env_files) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+         env_files) = cluster_conductor._extract_template_definition(
+            self.context, cluster)
 
         expected = {
             'auth_url': 'http://192.168.10.10:5000/v3',
-            'bay_uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
+            'cluster_uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
             'discovery_url': 'https://discovery.etcd.io/test',
             'dns_nameserver': 'dns_nameserver',
             'docker_storage_driver': 'devicemapper',
@@ -275,12 +275,12 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_resp = mock.MagicMock()
         mock_resp.text = expected_result
         mock_get.return_value = mock_resp
-        bay = objects.Bay(self.context, **self.bay_dict)
+        cluster = objects.Cluster(self.context, **self.cluster_dict)
 
         (template_path,
          definition,
-         env_files) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+         env_files) = cluster_conductor._extract_template_definition(
+            self.context, cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -308,7 +308,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
             'auth_url': 'http://192.168.10.10:5000/v3',
-            'bay_uuid': self.bay_dict['uuid'],
+            'cluster_uuid': self.cluster_dict['uuid'],
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'insecure_registry_url': '10.0.0.1:5000',
             'kube_version': 'fake-version',
@@ -325,19 +325,19 @@ class TestBayConductorWithK8s(base.TestCase):
             mock_objects_cluster_template_get_by_uuid,
             reqget):
         self.cluster_template_dict['cluster_distro'] = 'coreos'
-        self.bay_dict['discovery_url'] = None
+        self.cluster_dict['discovery_url'] = None
         mock_req = mock.MagicMock(text='http://tokentest/h1/h2/h3')
         reqget.return_value = mock_req
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
-        bay = objects.Bay(self.context, **self.bay_dict)
+        cluster = objects.Cluster(self.context, **self.cluster_dict)
 
         (template_path,
          definition,
-         env_files) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+         env_files) = cluster_conductor._extract_template_definition(
+            self.context, cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -365,7 +365,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
             'auth_url': 'http://192.168.10.10:5000/v3',
-            'bay_uuid': self.bay_dict['uuid'],
+            'cluster_uuid': self.cluster_dict['uuid'],
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'insecure_registry_url': '10.0.0.1:5000',
             'kube_version': 'fake-version',
@@ -484,9 +484,9 @@ class TestBayConductorWithK8s(base.TestCase):
             self.context, **self.cluster_template_dict)
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
-        bay_dict = self.bay_dict
-        bay_dict['discovery_url'] = None
-        bay = objects.Bay(self.context, **bay_dict)
+        cluster_dict = self.cluster_dict
+        cluster_dict['discovery_url'] = None
+        cluster = objects.Cluster(self.context, **cluster_dict)
 
         cfg.CONF.set_override('etcd_discovery_service_endpoint_format',
                               'http://etcd/test?size=%(size)d',
@@ -496,8 +496,8 @@ class TestBayConductorWithK8s(base.TestCase):
 
         (template_path,
          definition,
-         env_files) = bay_conductor._extract_template_definition(self.context,
-                                                                 bay)
+         env_files) = cluster_conductor._extract_template_definition(
+            self.context, cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -521,7 +521,7 @@ class TestBayConductorWithK8s(base.TestCase):
             'flannel_backend': 'vxlan',
             'tenant_name': 'fake_tenant',
             'username': 'fake_user',
-            'bay_uuid': self.bay_dict['uuid'],
+            'cluster_uuid': self.cluster_dict['uuid'],
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'region_name': self.mock_osc.cinder_region_name.return_value,
             'tls_disabled': False,
@@ -544,7 +544,7 @@ class TestBayConductorWithK8s(base.TestCase):
 
     @patch('magnum.common.short_id.generate_id')
     @patch('heatclient.common.template_utils.get_template_contents')
-    @patch('magnum.conductor.handlers.bay_conductor'
+    @patch('magnum.conductor.handlers.cluster_conductor'
            '._extract_template_definition')
     def test_create_stack(self,
                           mock_extract_template_definition,
@@ -554,7 +554,7 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_generate_id.return_value = 'xx-xx-xx-xx'
         expected_stack_name = 'expected_stack_name-xx-xx-xx-xx'
         expected_template_contents = 'template_contents'
-        dummy_bay_name = 'expected_stack_name'
+        dummy_cluster_name = 'expected_stack_name'
         expected_timeout = 15
 
         mock_tpl_files = {}
@@ -565,11 +565,11 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_heat_client = mock.MagicMock()
         mock_osc = mock.MagicMock()
         mock_osc.heat.return_value = mock_heat_client
-        mock_bay = mock.MagicMock()
-        mock_bay.name = dummy_bay_name
+        mock_cluster = mock.MagicMock()
+        mock_cluster.name = dummy_cluster_name
 
-        bay_conductor._create_stack(self.context, mock_osc,
-                                    mock_bay, expected_timeout)
+        cluster_conductor._create_stack(self.context, mock_osc,
+                                        mock_cluster, expected_timeout)
 
         expected_args = {
             'stack_name': expected_stack_name,
@@ -583,7 +583,7 @@ class TestBayConductorWithK8s(base.TestCase):
 
     @patch('magnum.common.short_id.generate_id')
     @patch('heatclient.common.template_utils.get_template_contents')
-    @patch('magnum.conductor.handlers.bay_conductor'
+    @patch('magnum.conductor.handlers.cluster_conductor'
            '._extract_template_definition')
     def test_create_stack_no_timeout_specified(
             self,
@@ -594,7 +594,7 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_generate_id.return_value = 'xx-xx-xx-xx'
         expected_stack_name = 'expected_stack_name-xx-xx-xx-xx'
         expected_template_contents = 'template_contents'
-        dummy_bay_name = 'expected_stack_name'
+        dummy_cluster_name = 'expected_stack_name'
         expected_timeout = cfg.CONF.cluster_heat.create_timeout
 
         mock_tpl_files = {}
@@ -605,11 +605,11 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_heat_client = mock.MagicMock()
         mock_osc = mock.MagicMock()
         mock_osc.heat.return_value = mock_heat_client
-        mock_bay = mock.MagicMock()
-        mock_bay.name = dummy_bay_name
+        mock_cluster = mock.MagicMock()
+        mock_cluster.name = dummy_cluster_name
 
-        bay_conductor._create_stack(self.context, mock_osc,
-                                    mock_bay, None)
+        cluster_conductor._create_stack(self.context, mock_osc,
+                                        mock_cluster, None)
 
         expected_args = {
             'stack_name': expected_stack_name,
@@ -623,7 +623,7 @@ class TestBayConductorWithK8s(base.TestCase):
 
     @patch('magnum.common.short_id.generate_id')
     @patch('heatclient.common.template_utils.get_template_contents')
-    @patch('magnum.conductor.handlers.bay_conductor'
+    @patch('magnum.conductor.handlers.cluster_conductor'
            '._extract_template_definition')
     def test_create_stack_timeout_is_zero(
             self,
@@ -634,8 +634,8 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_generate_id.return_value = 'xx-xx-xx-xx'
         expected_stack_name = 'expected_stack_name-xx-xx-xx-xx'
         expected_template_contents = 'template_contents'
-        dummy_bay_name = 'expected_stack_name'
-        bay_timeout = 0
+        dummy_cluster_name = 'expected_stack_name'
+        cluster_timeout = 0
         expected_timeout = cfg.CONF.cluster_heat.create_timeout
 
         mock_tpl_files = {}
@@ -646,11 +646,11 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_heat_client = mock.MagicMock()
         mock_osc = mock.MagicMock()
         mock_osc.heat.return_value = mock_heat_client
-        mock_bay = mock.MagicMock()
-        mock_bay.name = dummy_bay_name
+        mock_cluster = mock.MagicMock()
+        mock_cluster.name = dummy_cluster_name
 
-        bay_conductor._create_stack(self.context, mock_osc,
-                                    mock_bay, bay_timeout)
+        cluster_conductor._create_stack(self.context, mock_osc,
+                                        mock_cluster, cluster_timeout)
 
         expected_args = {
             'stack_name': expected_stack_name,
@@ -663,7 +663,7 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_heat_client.stacks.create.assert_called_once_with(**expected_args)
 
     @patch('heatclient.common.template_utils.get_template_contents')
-    @patch('magnum.conductor.handlers.bay_conductor'
+    @patch('magnum.conductor.handlers.cluster_conductor'
            '._extract_template_definition')
     def test_update_stack(self,
                           mock_extract_template_definition,
@@ -680,10 +680,10 @@ class TestBayConductorWithK8s(base.TestCase):
         mock_heat_client = mock.MagicMock()
         mock_osc = mock.MagicMock()
         mock_osc.heat.return_value = mock_heat_client
-        mock_bay = mock.MagicMock()
-        mock_bay.stack_id = mock_stack_id
+        mock_cluster = mock.MagicMock()
+        mock_cluster.stack_id = mock_stack_id
 
-        bay_conductor._update_stack({}, mock_osc, mock_bay)
+        cluster_conductor._update_stack({}, mock_osc, mock_cluster)
 
         expected_args = {
             'parameters': {},

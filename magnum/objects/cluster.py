@@ -20,13 +20,13 @@ from oslo_versionedobjects import fields
 from magnum.common import exception
 from magnum.db import api as dbapi
 from magnum.objects import base
-from magnum.objects import cluster_template
+from magnum.objects.cluster_template import ClusterTemplate
 from magnum.objects import fields as m_fields
 
 
 @base.MagnumObjectRegistry.register
-class Bay(base.MagnumPersistentObject, base.MagnumObject,
-          base.MagnumObjectDictCompat):
+class Cluster(base.MagnumPersistentObject, base.MagnumObject,
+              base.MagnumObjectDictCompat):
     # Version 1.0: Initial version
     # Version 1.1: Added 'bay_create_timeout' field
     # Version 1.2: Add 'registry_trust_id' field
@@ -38,8 +38,11 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.6: Add rollback support for Bay
     # Version 1.7: Added 'coe_version'  and 'container_version' fields
     # Version 1.8: Rename 'baymodel' to 'cluster_template'
+    # Version 1.9: Rename table name from 'bay' to 'cluster'
+    #              Rename 'baymodel_id' to 'cluster_template_id'
+    #              Rename 'bay_create_timeout' to 'create_timeout'
 
-    VERSION = '1.8'
+    VERSION = '1.9'
 
     dbapi = dbapi.get_instance()
 
@@ -49,11 +52,11 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
         'name': fields.StringField(nullable=True),
         'project_id': fields.StringField(nullable=True),
         'user_id': fields.StringField(nullable=True),
-        'baymodel_id': fields.StringField(nullable=True),
+        'cluster_template_id': fields.StringField(nullable=True),
         'stack_id': fields.StringField(nullable=True),
-        'status': m_fields.BayStatusField(nullable=True),
+        'status': m_fields.ClusterStatusField(nullable=True),
         'status_reason': fields.StringField(nullable=True),
-        'bay_create_timeout': fields.IntegerField(nullable=True),
+        'create_timeout': fields.IntegerField(nullable=True),
         'api_address': fields.StringField(nullable=True),
         'node_addresses': fields.ListOfStringsField(nullable=True),
         'node_count': fields.IntegerField(nullable=True),
@@ -72,135 +75,136 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
     }
 
     @staticmethod
-    def _from_db_object(bay, db_bay):
+    def _from_db_object(cluster, db_cluster):
         """Converts a database entity to a formal object."""
-        for field in bay.fields:
+        for field in cluster.fields:
             if field != 'cluster_template':
-                bay[field] = db_bay[field]
+                cluster[field] = db_cluster[field]
 
         # Note(eliqiao): The following line needs to be placed outside the
         # loop because there is a dependency from cluster_template to
-        # baymodel_id. The baymodel_id must be populated first in the loop
-        # before it can be used to find the cluster_template.
-        bay['cluster_template'] = cluster_template.ClusterTemplate.get_by_uuid(
-            bay._context, bay.baymodel_id)
+        # cluster_template_id. The cluster_template_id must be populated
+        # first in the loop before it can be used to find the cluster_template.
+        cluster['cluster_template'] = ClusterTemplate.get_by_uuid(
+            cluster._context, cluster.cluster_template_id)
 
-        bay.obj_reset_changes()
-        return bay
+        cluster.obj_reset_changes()
+        return cluster
 
     @staticmethod
     def _from_db_object_list(db_objects, cls, context):
         """Converts a list of database entities to a list of formal objects."""
-        return [Bay._from_db_object(cls(context), obj) for obj in db_objects]
+        return [Cluster._from_db_object(cls(context), obj)
+                for obj in db_objects]
 
     @base.remotable_classmethod
-    def get(cls, context, bay_id):
-        """Find a bay based on its id or uuid and return a Bay object.
+    def get(cls, context, cluster_id):
+        """Find a cluster based on its id or uuid and return a Cluster object.
 
-        :param bay_id: the id *or* uuid of a bay.
+        :param cluster_id: the id *or* uuid of a cluster.
         :param context: Security context
-        :returns: a :class:`Bay` object.
+        :returns: a :class:`Cluster` object.
         """
-        if strutils.is_int_like(bay_id):
-            return cls.get_by_id(context, bay_id)
-        elif uuidutils.is_uuid_like(bay_id):
-            return cls.get_by_uuid(context, bay_id)
+        if strutils.is_int_like(cluster_id):
+            return cls.get_by_id(context, cluster_id)
+        elif uuidutils.is_uuid_like(cluster_id):
+            return cls.get_by_uuid(context, cluster_id)
         else:
-            raise exception.InvalidIdentity(identity=bay_id)
+            raise exception.InvalidIdentity(identity=cluster_id)
 
     @base.remotable_classmethod
-    def get_by_id(cls, context, bay_id):
-        """Find a bay based on its integer id and return a Bay object.
+    def get_by_id(cls, context, cluster_id):
+        """Find a cluster based on its integer id and return a Cluster object.
 
-        :param bay_id: the id of a bay.
+        :param cluster_id: the id of a cluster.
         :param context: Security context
-        :returns: a :class:`Bay` object.
+        :returns: a :class:`Cluster` object.
         """
-        db_bay = cls.dbapi.get_bay_by_id(context, bay_id)
-        bay = Bay._from_db_object(cls(context), db_bay)
-        return bay
+        db_cluster = cls.dbapi.get_cluster_by_id(context, cluster_id)
+        cluster = Cluster._from_db_object(cls(context), db_cluster)
+        return cluster
 
     @base.remotable_classmethod
     def get_by_uuid(cls, context, uuid):
-        """Find a bay based on uuid and return a :class:`Bay` object.
+        """Find a cluster based on uuid and return a :class:`Cluster` object.
 
-        :param uuid: the uuid of a bay.
+        :param uuid: the uuid of a cluster.
         :param context: Security context
-        :returns: a :class:`Bay` object.
+        :returns: a :class:`Cluster` object.
         """
-        db_bay = cls.dbapi.get_bay_by_uuid(context, uuid)
-        bay = Bay._from_db_object(cls(context), db_bay)
-        return bay
+        db_cluster = cls.dbapi.get_cluster_by_uuid(context, uuid)
+        cluster = Cluster._from_db_object(cls(context), db_cluster)
+        return cluster
 
     @base.remotable_classmethod
     def get_by_name(cls, context, name):
-        """Find a bay based on name and return a Bay object.
+        """Find a cluster based on name and return a Cluster object.
 
-        :param name: the logical name of a bay.
+        :param name: the logical name of a cluster.
         :param context: Security context
-        :returns: a :class:`Bay` object.
+        :returns: a :class:`Cluster` object.
         """
-        db_bay = cls.dbapi.get_bay_by_name(context, name)
-        bay = Bay._from_db_object(cls(context), db_bay)
-        return bay
+        db_cluster = cls.dbapi.get_cluster_by_name(context, name)
+        cluster = Cluster._from_db_object(cls(context), db_cluster)
+        return cluster
 
     @base.remotable_classmethod
     def list(cls, context, limit=None, marker=None,
              sort_key=None, sort_dir=None, filters=None):
-        """Return a list of Bay objects.
+        """Return a list of Cluster objects.
 
         :param context: Security context.
         :param limit: maximum number of resources to return in a single result.
         :param marker: pagination marker for large data sets.
         :param sort_key: column to sort results by.
         :param sort_dir: direction to sort. "asc" or "desc".
-        :param filters: filter dict, can includes 'baymodel_id', 'name',
-                        'node_count', 'stack_id', 'api_address',
+        :param filters: filter dict, can includes 'cluster_template_id',
+                        'name', 'node_count', 'stack_id', 'api_address',
                         'node_addresses', 'project_id', 'user_id',
                         'status'(should be a status list), 'master_count'.
-        :returns: a list of :class:`Bay` object.
+        :returns: a list of :class:`Cluster` object.
 
         """
-        db_bays = cls.dbapi.get_bay_list(context, limit=limit,
-                                         marker=marker,
-                                         sort_key=sort_key,
-                                         sort_dir=sort_dir,
-                                         filters=filters)
-        return Bay._from_db_object_list(db_bays, cls, context)
+        db_clusters = cls.dbapi.get_cluster_list(context, limit=limit,
+                                                 marker=marker,
+                                                 sort_key=sort_key,
+                                                 sort_dir=sort_dir,
+                                                 filters=filters)
+        return Cluster._from_db_object_list(db_clusters, cls, context)
 
     @base.remotable
     def create(self, context=None):
-        """Create a Bay record in the DB.
+        """Create a Cluster record in the DB.
 
         :param context: Security context. NOTE: This should only
                         be used internally by the indirection_api.
                         Unfortunately, RPC requires context as the first
                         argument, even though we don't use it.
                         A context should be set when instantiating the
-                        object, e.g.: Bay(context)
+                        object, e.g.: Cluster(context)
 
         """
         values = self.obj_get_changes()
-        db_bay = self.dbapi.create_bay(values)
-        self._from_db_object(self, db_bay)
+        db_cluster = self.dbapi.create_cluster(values)
+        self._from_db_object(self, db_cluster)
 
     @base.remotable
     def destroy(self, context=None):
-        """Delete the Bay from the DB.
+        """Delete the Cluster from the DB.
 
         :param context: Security context. NOTE: This should only
                         be used internally by the indirection_api.
                         Unfortunately, RPC requires context as the first
                         argument, even though we don't use it.
                         A context should be set when instantiating the
-                        object, e.g.: Bay(context)
+                        object, e.g.: Cluster(context)
         """
-        self.dbapi.destroy_bay(self.uuid)
+        self.dbapi.destroy_cluster(self.uuid)
         self.obj_reset_changes()
 
     @base.remotable
     def save(self, context=None):
-        """Save updates to this Bay.
+        """Save updates to this Cluster.
 
         Updates will be made column by column based on the result
         of self.what_changed().
@@ -210,27 +214,27 @@ class Bay(base.MagnumPersistentObject, base.MagnumObject,
                         Unfortunately, RPC requires context as the first
                         argument, even though we don't use it.
                         A context should be set when instantiating the
-                        object, e.g.: Bay(context)
+                        object, e.g.: Cluster(context)
         """
         updates = self.obj_get_changes()
-        self.dbapi.update_bay(self.uuid, updates)
+        self.dbapi.update_cluster(self.uuid, updates)
 
         self.obj_reset_changes()
 
     @base.remotable
     def refresh(self, context=None):
-        """Loads updates for this Bay.
+        """Loads updates for this Cluster.
 
-        Loads a bay with the same uuid from the database and
+        Loads a Cluster with the same uuid from the database and
         checks for updated attributes. Updates are applied from
-        the loaded bay column by column, if there are any updates.
+        the loaded Cluster column by column, if there are any updates.
 
         :param context: Security context. NOTE: This should only
                         be used internally by the indirection_api.
                         Unfortunately, RPC requires context as the first
                         argument, even though we don't use it.
                         A context should be set when instantiating the
-                        object, e.g.: Bay(context)
+                        object, e.g.: Cluster(context)
         """
         current = self.__class__.get_by_uuid(self._context, uuid=self.uuid)
         for field in self.fields:

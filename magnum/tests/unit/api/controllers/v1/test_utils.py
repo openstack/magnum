@@ -53,40 +53,40 @@ class TestApiUtils(base.FunctionalTest):
                           'fake-sort')
 
     @mock.patch('pecan.request')
-    @mock.patch('magnum.objects.Bay.get_by_name')
-    @mock.patch('magnum.objects.Bay.get_by_uuid')
+    @mock.patch('magnum.objects.Cluster.get_by_name')
+    @mock.patch('magnum.objects.Cluster.get_by_uuid')
     def test_get_resource_with_uuid(
             self,
             mock_get_by_uuid,
             mock_get_by_name,
             mock_request):
-        mock_bay = mock.MagicMock
-        mock_get_by_uuid.return_value = mock_bay
+        mock_cluster = mock.MagicMock
+        mock_get_by_uuid.return_value = mock_cluster
         uuid = uuidutils.generate_uuid()
 
-        returned_bay = utils.get_resource('Bay', uuid)
+        returned_cluster = utils.get_resource('Cluster', uuid)
 
         mock_get_by_uuid.assert_called_once_with(mock_request.context, uuid)
         self.assertFalse(mock_get_by_name.called)
-        self.assertEqual(mock_bay, returned_bay)
+        self.assertEqual(mock_cluster, returned_cluster)
 
     @mock.patch('pecan.request')
-    @mock.patch('magnum.objects.Bay.get_by_name')
-    @mock.patch('magnum.objects.Bay.get_by_uuid')
+    @mock.patch('magnum.objects.Cluster.get_by_name')
+    @mock.patch('magnum.objects.Cluster.get_by_uuid')
     def test_get_resource_with_name(
             self,
             mock_get_by_uuid,
             mock_get_by_name,
             mock_request):
-        mock_bay = mock.MagicMock
-        mock_get_by_name.return_value = mock_bay
+        mock_cluster = mock.MagicMock
+        mock_get_by_name.return_value = mock_cluster
 
-        returned_bay = utils.get_resource('Bay', 'fake-name')
+        returned_cluster = utils.get_resource('Cluster', 'fake-name')
 
         self.assertFalse(mock_get_by_uuid.called)
         mock_get_by_name.assert_called_once_with(mock_request.context,
                                                  'fake-name')
-        self.assertEqual(mock_bay, returned_bay)
+        self.assertEqual(mock_cluster, returned_cluster)
 
     @mock.patch.object(uuidutils, 'is_uuid_like', return_value=True)
     def test_get_openstack_resource_by_uuid(self, fake_is_uuid_like):
@@ -125,13 +125,13 @@ class TestApiUtils(base.FunctionalTest):
 
     @mock.patch.object(jsonpatch, 'apply_patch')
     def test_apply_jsonpatch(self, mock_jsonpatch):
-        doc = {'bay_uuid': 'id', 'node_count': 1}
+        doc = {'cluster_uuid': 'id', 'node_count': 1}
         patch = [{"path": "/node_count", "value": 2, "op": "replace"}]
         utils.apply_jsonpatch(doc, patch)
         mock_jsonpatch.assert_called_once_with(doc, patch)
 
     def test_apply_jsonpatch_add_attr_not_exist(self):
-        doc = {'bay_uuid': 'id', 'node_count': 1}
+        doc = {'cluster_uuid': 'id', 'node_count': 1}
         patch = [{"path": "/fake", "value": 2, "op": "add"}]
         exc = self.assertRaises(wsme.exc.ClientSideError,
                                 utils.apply_jsonpatch,
@@ -141,7 +141,7 @@ class TestApiUtils(base.FunctionalTest):
             "not allowed.", exc.faultstring)
 
     def test_apply_jsonpatch_add_attr_already_exist(self):
-        doc = {'bay_uuid': 'id', 'node_count': 1}
+        doc = {'cluster_uuid': 'id', 'node_count': 1}
         patch = [{"path": "/node_count", "value": 2, "op": "add"}]
         exc = self.assertRaises(wsme.exc.ClientSideError,
                                 utils.apply_jsonpatch,

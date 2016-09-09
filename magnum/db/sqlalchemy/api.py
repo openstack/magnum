@@ -120,11 +120,11 @@ class Connection(api.Connection):
 
         return query
 
-    def _add_bays_filters(self, query, filters):
+    def _add_clusters_filters(self, query, filters):
         if filters is None:
             filters = {}
 
-        possible_filters = ["baymodel_id", "name", "node_count",
+        possible_filters = ["cluster_template_id", "name", "node_count",
                             "master_count", "stack_id", "api_address",
                             "node_addresses", "project_id", "user_id"]
 
@@ -135,91 +135,91 @@ class Connection(api.Connection):
         query = query.filter_by(**filter_dict)
 
         if 'status' in filters:
-            query = query.filter(models.Bay.status.in_(filters['status']))
+            query = query.filter(models.Cluster.status.in_(filters['status']))
 
         return query
 
-    def get_bay_list(self, context, filters=None, limit=None, marker=None,
-                     sort_key=None, sort_dir=None):
-        query = model_query(models.Bay)
+    def get_cluster_list(self, context, filters=None, limit=None, marker=None,
+                         sort_key=None, sort_dir=None):
+        query = model_query(models.Cluster)
         query = self._add_tenant_filters(context, query)
-        query = self._add_bays_filters(query, filters)
-        return _paginate_query(models.Bay, limit, marker,
+        query = self._add_clusters_filters(query, filters)
+        return _paginate_query(models.Cluster, limit, marker,
                                sort_key, sort_dir, query)
 
-    def create_bay(self, values):
-        # ensure defaults are present for new bays
+    def create_cluster(self, values):
+        # ensure defaults are present for new clusters
         if not values.get('uuid'):
             values['uuid'] = uuidutils.generate_uuid()
 
-        bay = models.Bay()
-        bay.update(values)
+        cluster = models.Cluster()
+        cluster.update(values)
         try:
-            bay.save()
+            cluster.save()
         except db_exc.DBDuplicateEntry:
             raise exception.ClusterAlreadyExists(uuid=values['uuid'])
-        return bay
+        return cluster
 
-    def get_bay_by_id(self, context, bay_id):
-        query = model_query(models.Bay)
+    def get_cluster_by_id(self, context, cluster_id):
+        query = model_query(models.Cluster)
         query = self._add_tenant_filters(context, query)
-        query = query.filter_by(id=bay_id)
+        query = query.filter_by(id=cluster_id)
         try:
             return query.one()
         except NoResultFound:
-            raise exception.ClusterNotFound(cluster=bay_id)
+            raise exception.ClusterNotFound(cluster=cluster_id)
 
-    def get_bay_by_name(self, context, bay_name):
-        query = model_query(models.Bay)
+    def get_cluster_by_name(self, context, cluster_name):
+        query = model_query(models.Cluster)
         query = self._add_tenant_filters(context, query)
-        query = query.filter_by(name=bay_name)
+        query = query.filter_by(name=cluster_name)
         try:
             return query.one()
         except MultipleResultsFound:
-            raise exception.Conflict('Multiple bays exist with same name.'
-                                     ' Please use the bay uuid instead.')
+            raise exception.Conflict('Multiple clusters exist with same name.'
+                                     ' Please use the cluster uuid instead.')
         except NoResultFound:
-            raise exception.ClusterNotFound(cluster=bay_name)
+            raise exception.ClusterNotFound(cluster=cluster_name)
 
-    def get_bay_by_uuid(self, context, bay_uuid):
-        query = model_query(models.Bay)
+    def get_cluster_by_uuid(self, context, cluster_uuid):
+        query = model_query(models.Cluster)
         query = self._add_tenant_filters(context, query)
-        query = query.filter_by(uuid=bay_uuid)
+        query = query.filter_by(uuid=cluster_uuid)
         try:
             return query.one()
         except NoResultFound:
-            raise exception.ClusterNotFound(cluster=bay_uuid)
+            raise exception.ClusterNotFound(cluster=cluster_uuid)
 
-    def destroy_bay(self, bay_id):
+    def destroy_cluster(self, cluster_id):
         session = get_session()
         with session.begin():
-            query = model_query(models.Bay, session=session)
-            query = add_identity_filter(query, bay_id)
+            query = model_query(models.Cluster, session=session)
+            query = add_identity_filter(query, cluster_id)
 
             try:
                 query.one()
             except NoResultFound:
-                raise exception.ClusterNotFound(cluster=bay_id)
+                raise exception.ClusterNotFound(cluster=cluster_id)
 
             query.delete()
 
-    def update_bay(self, bay_id, values):
+    def update_cluster(self, cluster_id, values):
         # NOTE(dtantsur): this can lead to very strange errors
         if 'uuid' in values:
-            msg = _("Cannot overwrite UUID for an existing Bay.")
+            msg = _("Cannot overwrite UUID for an existing Cluster.")
             raise exception.InvalidParameterValue(err=msg)
 
-        return self._do_update_bay(bay_id, values)
+        return self._do_update_cluster(cluster_id, values)
 
-    def _do_update_bay(self, bay_id, values):
+    def _do_update_cluster(self, cluster_id, values):
         session = get_session()
         with session.begin():
-            query = model_query(models.Bay, session=session)
-            query = add_identity_filter(query, bay_id)
+            query = model_query(models.Cluster, session=session)
+            query = add_identity_filter(query, cluster_id)
             try:
                 ref = query.with_lockmode('update').one()
             except NoResultFound:
-                raise exception.ClusterNotFound(cluster=bay_id)
+                raise exception.ClusterNotFound(cluster=cluster_id)
 
             if 'provision_state' in values:
                 values['provision_updated_at'] = timeutils.utcnow()
@@ -309,9 +309,9 @@ class Connection(api.Connection):
 
     def _is_cluster_template_referenced(self, session, cluster_template_uuid):
         """Checks whether the ClusterTemplate is referenced by cluster(s)."""
-        query = model_query(models.Bay, session=session)
-        query = self._add_bays_filters(query, {'baymodel_id':
-                                               cluster_template_uuid})
+        query = model_query(models.Cluster, session=session)
+        query = self._add_clusters_filters(query, {'cluster_template_id':
+                                                   cluster_template_uuid})
         return query.count() != 0
 
     def _is_publishing_cluster_template(self, values):

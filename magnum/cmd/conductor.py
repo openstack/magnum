@@ -25,8 +25,8 @@ from oslo_service import service
 from magnum.common import rpc_service
 from magnum.common import service as magnum_service
 from magnum.common import short_id
-from magnum.conductor.handlers import bay_conductor
 from magnum.conductor.handlers import ca_conductor
+from magnum.conductor.handlers import cluster_conductor
 from magnum.conductor.handlers import conductor_listener
 from magnum.conductor.handlers import indirection_api
 from magnum.i18n import _LI
@@ -49,7 +49,7 @@ def main():
     conductor_id = short_id.generate_id()
     endpoints = [
         indirection_api.Handler(),
-        bay_conductor.Handler(),
+        cluster_conductor.Handler(),
         conductor_listener.Handler(),
         ca_conductor.Handler(),
     ]
