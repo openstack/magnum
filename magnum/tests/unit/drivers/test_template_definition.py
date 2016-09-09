@@ -22,6 +22,7 @@ from magnum.common import exception
 from magnum.drivers.common import template_def as cmn_tdef
 from magnum.drivers.k8s_coreos_v1 import template_def as k8s_coreos_tdef
 from magnum.drivers.k8s_fedora_atomic_v1 import template_def as k8sa_tdef
+from magnum.drivers.k8s_fedora_ironic_v1 import template_def as k8si_tdef
 from magnum.drivers.mesos_ubuntu_v1 import template_def as mesos_tdef
 from magnum.drivers.swarm_fedora_atomic_v1 import template_def as swarm_tdef
 from magnum.tests import base
@@ -74,7 +75,7 @@ class TemplateDefinitionTestCase(base.TestCase):
             'kubernetes')
 
         self.assertIsInstance(definition,
-                              k8sa_tdef.FedoraK8sIronicTemplateDefinition)
+                              k8si_tdef.FedoraK8sIronicTemplateDefinition)
 
     def test_get_vm_coreos_kubernetes_definition(self):
         definition = cmn_tdef.TemplateDefinition.get_template_definition(

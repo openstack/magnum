@@ -421,7 +421,7 @@ resources:
     properties:
       count: {get_param: number_of_masters}
       resource_def:
-        type: kubemaster-fedora-ironic.yaml
+        type: kubemaster.yaml
         properties:
           api_public_address: {get_attr: [api_pool_floating, floating_ip_address]}
           api_private_address: {get_attr: [api_loadbalancer, vip_address]}
@@ -473,7 +473,7 @@ resources:
       count: {get_param: number_of_minions}
       removal_policies: [{resource_list: {get_param: minions_to_remove}}]
       resource_def:
-        type: kubeminion-fedora-ironic.yaml
+        type: kubeminion.yaml
         properties:
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: server_image}
