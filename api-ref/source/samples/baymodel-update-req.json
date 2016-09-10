@@ -1,0 +1,12 @@
+[
+   {
+      "path":"/master_lb_enabled",
+      "value":"True",
+      "op":"replace"
+   },
+   {
+      "path":"/registry_enabled",
+      "value":"True",
+      "op":"replace"
+   }
+]

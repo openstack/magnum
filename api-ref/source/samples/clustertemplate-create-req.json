@@ -1,0 +1,27 @@
+{
+   "labels":{
+
+   },
+   "fixed_subnet":null,
+   "master_flavor_id":null,
+   "no_proxy":"10.0.0.0/8,172.0.0.0/8,192.0.0.0/8,localhost",
+   "https_proxy":"http://10.164.177.169:8080",
+   "tls_disabled":false,
+   "keypair_id":"kp",
+   "public":false,
+   "http_proxy":"http://10.164.177.169:8080",
+   "docker_volume_size":3,
+   "server_type":"vm",
+   "external_network_id":"public",
+   "image_id":"fedora-atomic-latest",
+   "volume_driver":"cinder",
+   "registry_enabled":false,
+   "docker_storage_driver":"devicemapper",
+   "name":"k8s-bm2",
+   "network_driver":"flannel",
+   "fixed_network":null,
+   "coe":"kubernetes",
+   "flavor_id":"m1.small",
+   "master_lb_enabled":true,
+   "dns_nameserver":"8.8.8.8"
+}

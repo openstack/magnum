@@ -36,6 +36,16 @@
          "rel":"bookmark"
       }
    ],
+   "clustertemplates":[
+      {
+         "href":"http://10.164.180.104:9511/v1/clustertemplates/",
+         "rel":"self"
+      },
+      {
+         "href":"http://10.164.180.104:9511/clustertemplates/",
+         "rel":"bookmark"
+      }
+   ],
    "certificates":[
       {
          "href":"http://10.164.180.104:9511/v1/certificates/",
@@ -43,6 +53,16 @@
       },
       {
          "href":"http://10.164.180.104:9511/certificates/",
+         "rel":"bookmark"
+      }
+   ],
+   "clusters":[
+      {
+         "href":"http://10.164.180.104:9511/v1/clusters/",
+         "rel":"self"
+      },
+      {
+         "href":"http://10.164.180.104:9511/clusters/",
          "rel":"bookmark"
       }
    ],
