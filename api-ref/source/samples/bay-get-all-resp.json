@@ -1,0 +1,24 @@
+{
+   "bays":[
+      {
+         "status":"CREATE_COMPLETE",
+         "uuid":"746e779a-751a-456b-a3e9-c883d734946f",
+         "links":[
+            {
+               "href":"http://10.164.180.104:9511/v1/bays/746e779a-751a-456b-a3e9-c883d734946f",
+               "rel":"self"
+            },
+            {
+               "href":"http://10.164.180.104:9511/bays/746e779a-751a-456b-a3e9-c883d734946f",
+               "rel":"bookmark"
+            }
+         ],
+         "stack_id":"9c6f1169-7300-4d08-a444-d2be38758719",
+         "master_count":1,
+         "baymodel_id":"0562d357-8641-4759-8fed-8173f02c9633",
+         "node_count":1,
+         "bay_create_timeout":60,
+         "name":"k8s"
+      }
+   ]
+}

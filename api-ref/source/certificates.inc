@@ -30,7 +30,12 @@ Request
 
 .. rest_parameters:: parameters.yaml
 
-  - bay_uuid: bay_cluster_id
+  - bay_uuid: bay_id
+
+.. note::
+
+   After Newton, all terms related bay/baymodel will be renamed to cluster
+   and cluster template.
 
 Response
 --------
@@ -39,8 +44,13 @@ Response
 
   - X-Openstack-Request-Id: request_id
   - pem: pem
-  - bay_uuid: bay_cluster_id
+  - bay_uuid: bay_id
   - links: links
+
+.. note::
+
+   After Newton, all terms related bay/baymodel will be renamed to cluster
+   and cluster template.
 
 Response Example
 ----------------
@@ -73,8 +83,13 @@ Request
 
 .. rest_parameters:: parameters.yaml
 
-  - bay_uuid: bay_cluster_id
+  - bay_uuid: bay_id
   - csr: csr
+
+.. note::
+
+   After Newton, all terms related bay/baymodel will be renamed to cluster
+   and cluster template.
 
 Request Example
 ----------------
@@ -89,9 +104,14 @@ Response
 
   - X-Openstack-Request-Id: request_id
   - pem: pem
-  - bay_uuid: bay_cluster_id
+  - bay_uuid: bay_id
   - links: links
   - csr: csr
+
+.. note::
+
+   After Newton, all terms related bay/baymodel will be renamed to cluster
+   and cluster template.
 
 Response Example
 ----------------
