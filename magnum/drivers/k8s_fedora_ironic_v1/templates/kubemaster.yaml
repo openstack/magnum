@@ -215,7 +215,7 @@ resources:
       group: ungrouped
       config:
         str_replace:
-          template: {get_file: fragments/write-heat-params-master.yaml}
+          template: {get_file: ../../common/templates/kubernetes/fragments/write-heat-params-master.yaml}
           params:
             "$KUBE_API_PUBLIC_ADDRESS": {get_attr: [api_address_switch, public_ip]}
             "$KUBE_API_PRIVATE_ADDRESS": {get_attr: [api_address_switch, private_ip]}
@@ -252,7 +252,7 @@ resources:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/make-cert.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/make-cert.sh}
 
   configure_docker_storage:
     type: OS::Heat::SoftwareConfig
@@ -268,91 +268,91 @@ resources:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/configure-etcd.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/configure-etcd.sh}
 
   write_kube_os_config:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/write-kube-os-config.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/write-kube-os-config.sh}
 
   configure_kubernetes:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/configure-kubernetes-master.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-master.sh}
 
   write_network_config:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/write-network-config.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/write-network-config.sh}
 
   network_config_service:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/network-config-service.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/network-config-service.sh}
 
   enable_services:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-services-master.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/enable-services-master.sh}
 
   kube_examples:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/kube-examples.yaml}
+      config: {get_file: ../../common/templates/kubernetes/fragments/kube-examples.yaml}
 
   network_service:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/network-service.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/network-service.sh}
 
   enable_kube_podmaster:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-kube-podmaster.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/enable-kube-podmaster.sh}
 
   kube_system_namespace_service:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/kube-system-namespace-service.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/kube-system-namespace-service.sh}
 
   kube_ui_service:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/kube-ui-service.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/kube-ui-service.sh}
 
   enable_kube_proxy:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-kube-proxy-master.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/enable-kube-proxy-master.sh}
 
   master_wc_notify:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/wc-notify-master.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/wc-notify-master.sh}
 
   disable_selinux:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/disable-selinux.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/disable-selinux.sh}
 
   add_proxy:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/add-proxy.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/add-proxy.sh}
 
   kube_master_init:
     type: OS::Heat::MultipartMime
