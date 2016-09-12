@@ -24,6 +24,7 @@ write_files:
 
       KUBE_CERTS_PATH=/etc/kubernetes/ssl
       HOST_CERTS_PATH=/usr/share/ca-certificates
+      SYSCONFIG_PATH=/etc/sysconfig
 
       SERVICE_ACCOUNT_PRIVATE_KEY_FILE=${KUBE_CERTS_PATH}/apiserver-key.pem
       ROOT_CA_FILE=${KUBE_CERTS_PATH}/ca.pem
@@ -67,6 +68,9 @@ write_files:
           - mountPath: /etc/ssl/certs
             name: ssl-certs-host
             readOnly: true
+          - mountPath: /etc/sysconfig
+            name: sysconfig
+            readOnly: true
         volumes:
         - hostPath:
             path: ${KUBE_CERTS_PATH}
@@ -74,4 +78,7 @@ write_files:
         - hostPath:
             path: ${HOST_CERTS_PATH}
           name: ssl-certs-host
+        - hostPath:
+            path: ${SYSCONFIG_PATH}
+          name: sysconfig
       EOF

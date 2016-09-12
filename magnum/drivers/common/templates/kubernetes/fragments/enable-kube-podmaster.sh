@@ -107,6 +107,9 @@ spec:
     - mountPath: /etc/ssl/certs
       name: ssl-certs-host
       readOnly: true
+    - mountPath: /etc/sysconfig
+      name: sysconfig
+      readOnly: true
   hostNetwork: true
   volumes:
   - hostPath:
@@ -115,6 +118,9 @@ spec:
   - hostPath:
       path: /etc/ssl/certs
     name: ssl-certs-host
+  - hostPath:
+      path: /etc/sysconfig
+    name: sysconfig
 EOF
     }
 
