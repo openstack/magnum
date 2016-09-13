@@ -107,3 +107,22 @@ class TestMagnumServiceBinary(test_fields.TestField):
 
     def test_stringify_invalid(self):
         self.assertRaises(ValueError, self.field.stringify, 'invalid')
+
+
+class TestServerType(test_fields.TestField):
+    def setUp(self):
+        super(TestServerType, self).setUp()
+        self.field = fields.ServerTypeField()
+        self.coerce_good_values = [('vm', 'vm'),
+                                   ('bm', 'bm'), ]
+        self.coerce_bad_values = ['invalid']
+
+        self.to_primitive_values = self.coerce_good_values[0:1]
+        self.from_primitive_values = self.coerce_good_values[0:1]
+
+    def test_stringify(self):
+        self.assertEqual("'vm'",
+                         self.field.stringify('vm'))
+
+    def test_stringify_invalid(self):
+        self.assertRaises(ValueError, self.field.stringify, 'invalid')

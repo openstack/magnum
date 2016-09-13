@@ -121,8 +121,7 @@ class ClusterTemplate(base.APIBase):
     public = wsme.wsattr(types.boolean, default=False)
     """Indicates whether the ClusterTemplate is public or not."""
 
-    server_type = wsme.wsattr(wtypes.StringType(min_length=1,
-                                                max_length=255),
+    server_type = wsme.wsattr(wtypes.Enum(str, *fields.ServerType.ALL),
                               default='vm')
     """Server type for this ClusterTemplate """
 
@@ -327,6 +326,7 @@ class ClusterTemplatesController(base.Controller):
         return ClusterTemplate.convert_with_links(cluster_template)
 
     @expose.expose(ClusterTemplate, body=ClusterTemplate, status_code=201)
+    @validation.enforce_server_type()
     @validation.enforce_network_driver_types_create()
     @validation.enforce_volume_driver_types_create()
     @validation.enforce_volume_storage_size_create()

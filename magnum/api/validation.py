@@ -137,6 +137,21 @@ def _enforce_network_driver_types(cluster_template):
     validator.validate_network_driver(cluster_template.network_driver)
 
 
+def enforce_server_type():
+    @decorator.decorator
+    def wrapper(func, *args, **kwargs):
+        cluster_template = args[1]
+        _enforce_server_type(cluster_template)
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+def _enforce_server_type(cluster_template):
+    validator = Validator.get_coe_validator(cluster_template.coe)
+    validator.validate_server_type(cluster_template.server_type)
+
+
 def enforce_volume_driver_types_create():
     @decorator.decorator
     def wrapper(func, *args, **kwargs):
@@ -261,10 +276,26 @@ class Validator(object):
                     'supported_volume_driver': '/'.join(
                         cls.supported_volume_driver + ['unspecified'])})
 
+    @classmethod
+    def validate_server_type(cls, server_type):
+        cls._validate_server_type(server_type)
+
+    @classmethod
+    def _validate_server_type(cls, server_type):
+        """Confirm that server type is supported by Magnum for this COE."""
+        if server_type not in cls.supported_server_types:
+            raise exception.InvalidParameterValue(_(
+                'Server type %(server_type)s is not supported, '
+                'expecting a %(supported_server_types)s server type.') % {
+                    'server_type': server_type,
+                    'supported_server_types': '/'.join(
+                        cls.supported_server_types + ['unspecified'])})
+
 
 class K8sValidator(Validator):
 
     supported_network_drivers = ['flannel']
+    supported_server_types = ['vm', 'bm']
     allowed_network_drivers = (
         cfg.CONF.cluster_template.kubernetes_allowed_network_drivers)
     default_network_driver = (
@@ -276,6 +307,7 @@ class K8sValidator(Validator):
 class SwarmValidator(Validator):
 
     supported_network_drivers = ['docker', 'flannel']
+    supported_server_types = ['vm', 'bm']
     allowed_network_drivers = (cfg.CONF.cluster_template.
                                swarm_allowed_network_drivers)
     default_network_driver = (cfg.CONF.cluster_template.
@@ -287,6 +319,7 @@ class SwarmValidator(Validator):
 class MesosValidator(Validator):
 
     supported_network_drivers = ['docker']
+    supported_server_types = ['vm', 'bm']
     allowed_network_drivers = (cfg.CONF.cluster_template.
                                mesos_allowed_network_drivers)
     default_network_driver = (cfg.CONF.cluster_template.

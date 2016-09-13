@@ -350,6 +350,39 @@ class TestValidation(base.BaseTestCase):
             volume_driver_type='type',
             assert_raised=True)
 
+    def _test_enforce_server_type(
+            self,
+            server_type,
+            coe='kubernetes',
+            assert_raised=False):
+
+        @v.enforce_server_type()
+        def test(self, cluster_template):
+            pass
+
+        cluster_template = obj_utils.get_test_cluster_template(
+            {}, name='test_cluster_template', coe=coe,
+            server_type=server_type)
+
+        if assert_raised:
+            self.assertRaises(exception.InvalidParameterValue,
+                              test, self, cluster_template)
+        else:
+            test(self, cluster_template)
+
+    def test_enforce_server_type_valid_vm(self):
+        self._test_enforce_server_type(
+            server_type='vm')
+
+    def test_enforce_server_type_valid_bm(self):
+        self._test_enforce_server_type(
+            server_type='bm')
+
+    def test_enforce_server_type_invalid(self):
+        self._test_enforce_server_type(
+            server_type='invalid',
+            assert_raised=True)
+
     @mock.patch('pecan.request')
     @mock.patch('magnum.api.utils.get_resource')
     def _test_enforce_volume_driver_types_update(

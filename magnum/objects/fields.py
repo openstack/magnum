@@ -83,6 +83,18 @@ class DockerStorageDriver(fields.Enum):
             valid_values=DockerStorageDriver.ALL)
 
 
+class ServerType(fields.Enum):
+    ALL = (
+        VM, BM,
+    ) = (
+        'vm', 'bm',
+    )
+
+    def __init__(self):
+        super(ServerType, self).__init__(
+            valid_values=ServerType.ALL)
+
+
 class MagnumServiceState(fields.Enum):
     ALL = (
         up, down
@@ -133,3 +145,7 @@ class ClusterTypeField(fields.BaseEnumField):
 
 class DockerStorageDriverField(fields.BaseEnumField):
     AUTO_TYPE = DockerStorageDriver()
+
+
+class ServerTypeField(fields.BaseEnumField):
+    AUTO_TYPE = ServerType()
