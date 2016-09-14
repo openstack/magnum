@@ -13,14 +13,11 @@
 # under the License.
 
 import os
-from oslo_log import log as logging
 
 from magnum.drivers.common import k8s_fedora_template_def as kftd
 from oslo_config import cfg
 
 CONF = cfg.CONF
-
-LOG = logging.getLogger(__name__)
 
 
 class AtomicK8sTemplateDefinition(kftd.K8sFedoraTemplateDefinition):
