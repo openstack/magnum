@@ -504,7 +504,7 @@ Finalize installation
         # cp doc/examples/etc/systemd/system/magnum-conductor.service \
           /etc/systemd/system/magnum-conductor.service
 
-#. Start magnum-api and magnum-conductor
+#. Start magnum-api and magnum-conductor:
 
    * Ubuntu 14.04 (trusty):
 
@@ -526,7 +526,7 @@ Finalize installation
         # systemctl start magnum-api
         # systemctl start magnum-conductor
 
-#. Verify that magnum-api and magnum-conductor services are running
+#. Verify that magnum-api and magnum-conductor services are running:
 
    * Ubuntu 14.04 (trusty):
 
@@ -542,3 +542,22 @@ Finalize installation
 
         # systemctl status magnum-api
         # systemctl status magnum-conductor
+
+#. Install the command-line client:
+
+   .. code-block:: console
+
+      # cd /var/lib/magnum
+      # git clone https://git.openstack.org/openstack/python-magnumclient.git
+      # cd python-magnumclient
+      # su -s /bin/sh -c "/var/lib/magnum/env/bin/pip install -r requirements.txt" magnum
+      # su -s /bin/sh -c "/var/lib/magnum/env/bin/python setup.py install" magnum
+
+Next Steps
+----------
+
+Since you have the Container Infrastructure Management service running, you
+can `Verify Operation <http://docs.openstack.org/project-install-guide/
+container-infrastructure-management/draft/verify.html>`__ and `Launch an
+instance <http://docs.openstack.org/project-install-guide/
+container-infrastructure-management/draft/launch-instance.html>`__.
