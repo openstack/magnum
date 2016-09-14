@@ -164,9 +164,9 @@ class Handler(object):
             created_stack = _create_stack(context, osc, cluster,
                                           create_timeout)
         except Exception as e:
-            cert_manager.delete_certificates_from_cluster(cluster,
-                                                          context=context)
-            trust_manager.delete_trustee_and_trust(osc, context, cluster)
+            cluster.status = fields.ClusterStatus.CREATE_FAILED
+            cluster.status_reason = six.text_type(e)
+            cluster.create()
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_CREATE, taxonomy.OUTCOME_FAILURE)
 
