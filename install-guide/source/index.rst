@@ -8,6 +8,7 @@ Container Infrastructure Management service
    get_started.rst
    install.rst
    verify.rst
+   launch-instance.rst
    next-steps.rst
 
 The Container Infrastructure Management service codenamed (magnum) is an
