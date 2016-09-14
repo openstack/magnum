@@ -139,8 +139,7 @@ service, you must create a database, service credentials, and API endpoints.
       +--------------+----------------------------------+
 
 #. Magnum requires additional information in the Identity service to
-   manage COE clusters (bays). To add this information, complete these
-   steps:
+   manage COE clusters. To add this information, complete these steps:
 
    * Create the ``magnum`` domain that contains projects and users:
 
