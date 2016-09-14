@@ -34,18 +34,18 @@ class JeOSK8sTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
         self.add_parameter('docker_volume_size',
                            cluster_template_attr='docker_volume_size')
         self.add_output('kube_minions',
-                        bay_attr='node_addresses')
+                        cluster_attr='node_addresses')
         self.add_output('kube_masters',
-                        bay_attr='master_addresses')
+                        cluster_attr='master_addresses')
 
-    def get_params(self, context, cluster_template, bay, **kwargs):
+    def get_params(self, context, cluster_template, cluster, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
 
         extra_params['username'] = context.user_name
         extra_params['tenant_name'] = context.tenant
 
         return super(JeOSK8sTemplateDefinition,
-                     self).get_params(context, cluster_template, bay,
+                     self).get_params(context, cluster_template, cluster,
                                       extra_params=extra_params,
                                       **kwargs)
 
