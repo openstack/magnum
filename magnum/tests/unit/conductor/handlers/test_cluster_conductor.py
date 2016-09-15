@@ -232,6 +232,7 @@ class TestHandler(db_base.DbTestCase):
                             mock_openstack_client_class,
                             mock_cert_manager,
                             mock_trust_manager,
+                            mock_cluster_create,
                             expected_exception,
                             is_create_cert_called=True,
                             is_create_trust_called=True):
@@ -256,11 +257,9 @@ class TestHandler(db_base.DbTestCase):
             ctat.assert_called_once_with(osc, self.cluster)
         else:
             ctat.assert_not_called()
+        mock_cluster_create.assert_called_once_with()
 
-        mock_cert_manager.delete_certificates_from_cluster(self.cluster)
-        mock_trust_manager.delete_trustee_and_trust.assert_called_once_with(
-            osc, self.context, self.cluster)
-
+    @patch('magnum.objects.Cluster.create')
     @patch('magnum.conductor.handlers.cluster_conductor.trust_manager')
     @patch('magnum.conductor.handlers.cluster_conductor.cert_manager')
     @patch('magnum.conductor.handlers.cluster_conductor._create_stack')
@@ -268,13 +267,15 @@ class TestHandler(db_base.DbTestCase):
     def test_create_handles_bad_request(self, mock_openstack_client_class,
                                         mock_create_stack,
                                         mock_cert_manager,
-                                        mock_trust_manager):
+                                        mock_trust_manager,
+                                        mock_cluster_create):
         mock_create_stack.side_effect = exc.HTTPBadRequest
 
         self._test_create_failed(
             mock_openstack_client_class,
             mock_cert_manager,
             mock_trust_manager,
+            mock_cluster_create,
             exception.InvalidParameterValue
         )
 
@@ -289,12 +290,14 @@ class TestHandler(db_base.DbTestCase):
         self.assertEqual(
             taxonomy.OUTCOME_FAILURE, notifications[1].payload['outcome'])
 
+    @patch('magnum.objects.Cluster.create')
     @patch('magnum.conductor.handlers.cluster_conductor.trust_manager')
     @patch('magnum.conductor.handlers.cluster_conductor.cert_manager')
     @patch('magnum.common.clients.OpenStackClients')
     def test_create_with_cert_failed(self, mock_openstack_client_class,
                                      mock_cert_manager,
-                                     mock_trust_manager):
+                                     mock_trust_manager,
+                                     mock_cluster_create):
         e = exception.CertificatesToClusterFailed(cluster_uuid='uuid')
         mock_cert_manager.generate_certificates_to_cluster.side_effect = e
 
@@ -302,6 +305,7 @@ class TestHandler(db_base.DbTestCase):
             mock_openstack_client_class,
             mock_cert_manager,
             mock_trust_manager,
+            mock_cluster_create,
             exception.CertificatesToClusterFailed
         )
 
@@ -312,6 +316,7 @@ class TestHandler(db_base.DbTestCase):
         self.assertEqual(
             taxonomy.OUTCOME_FAILURE, notifications[0].payload['outcome'])
 
+    @patch('magnum.objects.Cluster.create')
     @patch('magnum.conductor.handlers.cluster_conductor.trust_manager')
     @patch('magnum.conductor.handlers.cluster_conductor.cert_manager')
     @patch('magnum.conductor.handlers.cluster_conductor._create_stack')
@@ -319,7 +324,8 @@ class TestHandler(db_base.DbTestCase):
     def test_create_with_trust_failed(self, mock_openstack_client_class,
                                       mock_create_stack,
                                       mock_cert_manager,
-                                      mock_trust_manager):
+                                      mock_trust_manager,
+                                      mock_cluster_create):
         e = exception.TrusteeOrTrustToClusterFailed(cluster_uuid='uuid')
         mock_trust_manager.create_trustee_and_trust.side_effect = e
 
@@ -327,6 +333,7 @@ class TestHandler(db_base.DbTestCase):
             mock_openstack_client_class,
             mock_cert_manager,
             mock_trust_manager,
+            mock_cluster_create,
             exception.TrusteeOrTrustToClusterFailed,
             False
         )
@@ -338,6 +345,7 @@ class TestHandler(db_base.DbTestCase):
         self.assertEqual(
             taxonomy.OUTCOME_FAILURE, notifications[0].payload['outcome'])
 
+    @patch('magnum.objects.Cluster.create')
     @patch('magnum.conductor.handlers.cluster_conductor.trust_manager')
     @patch('magnum.conductor.handlers.cluster_conductor.cert_manager')
     @patch('magnum.conductor.handlers.cluster_conductor._create_stack')
@@ -346,7 +354,8 @@ class TestHandler(db_base.DbTestCase):
                                               mock_openstack_client_class,
                                               mock_create_stack,
                                               mock_cert_manager,
-                                              mock_trust_manager):
+                                              mock_trust_manager,
+                                              mock_cluster_create):
         error_message = six.u("""Invalid stack name 测试集群-zoyh253geukk
                               must contain only alphanumeric or "_-."
                               characters, must start with alpha""")
@@ -356,6 +365,7 @@ class TestHandler(db_base.DbTestCase):
             mock_openstack_client_class,
             mock_cert_manager,
             mock_trust_manager,
+            mock_cluster_create,
             exception.InvalidParameterValue
         )
 
