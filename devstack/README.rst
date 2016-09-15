@@ -17,6 +17,7 @@ magnum plugin::
 
      cat > /opt/stack/devstack/local.conf << END
      [[local|localrc]]
+     enable_plugin heat https://github.com/openstack/heat master
      enable_plugin magnum https://github.com/openstack/magnum master
      END
 

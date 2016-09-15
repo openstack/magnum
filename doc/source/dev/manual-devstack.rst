@@ -65,12 +65,8 @@ and neutron::
     enable_service o-hm
     enable_service o-api
 
-    # Enable heat services
-    enable_service h-eng
-    enable_service h-api
-    enable_service h-api-cfn
-    enable_service h-api-cw
-
+    # Enable heat plugin
+    enable_plugin heat https://git.openstack.org/openstack/heat
     # Enable barbican services
     enable_plugin barbican https://git.openstack.org/openstack/barbican
     enable_plugin neutron-lbaas https://git.openstack.org/openstack/neutron-lbaas
@@ -81,6 +77,7 @@ and neutron::
 
 **NOTE:** Update PUBLIC_INTERFACE and other parameters as appropriate for
 your system.
+**NOTE:** Enable heat plugin is necessary.
 
 More devstack configuration information can be found at
 http://docs.openstack.org/developer/devstack/configuration.html
