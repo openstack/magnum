@@ -77,10 +77,23 @@ parameters:
   network_driver:
     type: string
     description: network driver to use for instantiating container networks
+
   wait_condition_timeout:
     type: number
     description : >
       timeout for the Wait Conditions
+
+  http_proxy:
+    type: string
+    description: http proxy address for docker
+
+  https_proxy:
+    type: string
+    description: https proxy address for docker
+
+  no_proxy:
+    type: string
+    description: no proxies for docker
 
   registry_enabled:
     type: boolean
@@ -195,6 +208,9 @@ resources:
             $TLS_DISABLED: {get_param: tls_disabled}
             $CLUSTER_UUID: {get_param: cluster_uuid}
             $MAGNUM_URL: {get_param: magnum_url}
+            $HTTP_PROXY: {get_param: http_proxy}
+            $HTTPS_PROXY: {get_param: https_proxy}
+            $NO_PROXY: {get_param: no_proxy}
             $NODE_FIXED_IP: {get_attr: [kube_minion_eth0, fixed_ips, 0, ip_address]}
 
   configure_flanneld:
@@ -221,6 +237,12 @@ resources:
       group: ungrouped
       config: {get_file: fragments/configure-kubernetes-minion.sh}
 
+  add_proxy:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/add-proxy.sh}
+
   minion_wc_notify:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -242,6 +264,7 @@ resources:
         - config: {get_resource: configure_docker}
         - config: {get_resource: create_kubernetes_user}
         - config: {get_resource: configure_kubernetes}
+        - config: {get_resource: add_proxy}
         - config: {get_resource: minion_wc_notify}
 
   ######################################################################
