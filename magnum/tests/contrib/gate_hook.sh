@@ -20,7 +20,6 @@ special=$2
 
 export PROJECTS="openstack/barbican $PROJECTS"
 export DEVSTACK_LOCAL_CONFIG="enable_plugin heat git://git.openstack.org/openstack/heat"
-export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin magnum git://git.openstack.org/openstack/magnum"
 export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ceilometer git://git.openstack.org/openstack/ceilometer"
 
 if [ "${coe}${special}" != "k8s-ironic" ]; then
@@ -82,5 +81,8 @@ else
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_GUEST_IMAGE_URL='http://tarballs.openstack.org/magnum/images/fedora-atomic-f23-dib.qcow2'"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_IMAGE_NAME='fedora-atomic-f23-dib'"
 fi
+
+# Enable magnum plugin in the last step
+export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin magnum git://git.openstack.org/openstack/magnum"
 
 $BASE/new/devstack-gate/devstack-vm-gate.sh
