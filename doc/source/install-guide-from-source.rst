@@ -23,16 +23,18 @@ barbican <http://docs.openstack.org/project-install-guide/key-manager/
 draft/>`__, or you can save them in magnum's database.
 
 Optionally, you can install the following components:
-* `Load Balancer as a Service (LBaaS v2) <http://docs.openstack.org/
-networking-guide/config-lbaas.html>`__ to create clusters with multiple
-masters
-* `Bare Metal service <http://docs.openstack.org/project-install-guide/
-baremetal/draft/>`__ to create baremetal clusters
-* `Object Storage service <http://docs.openstack.org/project-install-guide/
-object-storage/draft/>`__ to make private Docker registries available to users
-* `Telemetry Data Collection service <http://docs.openstack.org/
-project-install-guide/telemetry/draft/>`__ to periodically send magnum-related
-metrics
+
+- `Load Balancer as a Service (LBaaS v2) <http://docs.openstack.org/
+  networking-guide/config-lbaas.html>`__ to create clusters with multiple
+  masters
+- `Bare Metal service <http://docs.openstack.org/project-install-guide/
+  baremetal/draft/>`__ to create baremetal clusters
+- `Object Storage service <http://docs.openstack.org/project-install-guide/
+  object-storage/draft/>`__ to make private Docker registries available to
+  users
+- `Telemetry Data Collection service <http://docs.openstack.org/
+  project-install-guide/telemetry/draft/>`__ to periodically send
+  magnum-related metrics
 
 .. important::
 
