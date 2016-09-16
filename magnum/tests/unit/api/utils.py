@@ -71,7 +71,7 @@ def mservice_get_data(**kw):
     """Simulate what the RPC layer will get from DB """
     faketime = datetime.datetime(2001, 1, 1, tzinfo=pytz.UTC)
     return {
-        'binary': kw.get('binary', 'fake-binary'),
+        'binary': kw.get('binary', 'magnum-conductor'),
         'host': kw.get('host', 'fake-host'),
         'id': kw.get('id', 13),
         'report_count': kw.get('report_count', 13),
