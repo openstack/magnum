@@ -68,6 +68,12 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
             'coe_version': 'fake-version'
         }
+
+        # We need this due to volume_driver=rexray
+        cfg.CONF.set_override('cluster_user_trust',
+                              True,
+                              group='trust')
+
         osc_patcher = mock.patch('magnum.common.clients.OpenStackClients')
         self.mock_osc_class = osc_patcher.start()
         self.addCleanup(osc_patcher.stop)
@@ -257,7 +263,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
-            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
+            'trust_id': '',
             'auth_url': 'http://192.168.10.10:5000/v3',
             'swarm_version': 'fake-version',
             'rexray_preempt': 'False'

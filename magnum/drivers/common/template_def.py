@@ -23,6 +23,7 @@ import six
 from magnum.common import clients
 from magnum.common import exception
 from magnum.i18n import _
+from magnum.i18n import _LE
 from magnum.i18n import _LW
 
 from requests import exceptions as req_exceptions
@@ -380,7 +381,20 @@ class BaseTemplateDefinition(TemplateDefinition):
         extra_params['trustee_user_id'] = cluster.trustee_user_id
         extra_params['trustee_username'] = cluster.trustee_username
         extra_params['trustee_password'] = cluster.trustee_password
-        extra_params['trust_id'] = cluster.trust_id
+
+        # Only pass trust ID into the template when it is needed.
+        if (cluster_template.volume_driver == 'rexray' or
+                cluster_template.registry_enabled):
+            if CONF.trust.cluster_user_trust:
+                extra_params['trust_id'] = cluster.trust_id
+            else:
+                missing_setting = ('trust/cluster_user_trust = True')
+                msg = _LE('This cluster can only be created with %s in '
+                          'magnum.conf')
+                raise exception.ConfigInvalid(msg % missing_setting)
+        else:
+            extra_params['trust_id'] = ""
+
         extra_params['auth_url'] = context.auth_url
 
         return super(BaseTemplateDefinition,

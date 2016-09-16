@@ -191,6 +191,11 @@ class TestHandler(db_base.DbTestCase):
         mock_poller.poll_and_check.return_value = loopingcall.LoopingCallDone()
         mock_heat_poller_class.return_value = mock_poller
         osc = mock.sentinel.osc
+
+        def return_keystone():
+            return self.keystone_client
+
+        osc.keystone = return_keystone
         mock_openstack_client_class.return_value = osc
 
         def create_stack_side_effect(context, osc, cluster, timeout):

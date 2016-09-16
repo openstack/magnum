@@ -3,7 +3,7 @@ merge_how: dict(recurse_array)+list(append)
 write_files:
   - path: /etc/sysconfig/heat-params
     owner: "root:root"
-    permissions: "0644"
+    permissions: "0600"
     content: |
       WAIT_HANDLE_ENDPOINT="$WAIT_HANDLE_ENDPOINT"
       WAIT_HANDLE_TOKEN="$WAIT_HANDLE_TOKEN"

@@ -22,15 +22,20 @@ LOG = logging.getLogger(__name__)
 def create_trustee_and_trust(osc, cluster):
     try:
         password = utils.generate_password(length=18)
+
         trustee = osc.keystone().create_trustee(
-            cluster.uuid,
+            "%s_%s" % (cluster.uuid, cluster.project_id),
             password,
         )
+
         cluster.trustee_username = trustee.name
         cluster.trustee_user_id = trustee.id
         cluster.trustee_password = password
-        trust = osc.keystone().create_trust(trustee.id)
+
+        trust = osc.keystone().create_trust(
+            cluster.trustee_user_id)
         cluster.trust_id = trust.id
+
     except Exception:
         LOG.exception(
             _LE('Failed to create trustee and trust for Cluster: %s'),
@@ -41,9 +46,11 @@ def create_trustee_and_trust(osc, cluster):
 
 def delete_trustee_and_trust(osc, context, cluster):
     try:
+        kst = osc.keystone()
+
         # The cluster which is upgraded from Liberty doesn't have trust_id
         if cluster.trust_id:
-            osc.keystone().delete_trust(context, cluster)
+            kst.delete_trust(context, cluster)
     except Exception:
         # Exceptions are already logged by keystone().delete_trust
         pass

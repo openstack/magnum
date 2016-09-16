@@ -37,6 +37,7 @@ class TrustManagerTestCase(base.BaseTestCase):
         mock_generate_password.return_value = mock_password
         mock_cluster = mock.MagicMock()
         mock_cluster.uuid = 'mock_cluster_uuid'
+        mock_cluster.project_id = 'mock_cluster_project_id'
         mock_keystone = mock.MagicMock()
         mock_trustee = mock.MagicMock()
         mock_trustee.id = 'mock_trustee_id'
@@ -52,7 +53,7 @@ class TrustManagerTestCase(base.BaseTestCase):
         trust_manager.create_trustee_and_trust(self.osc, mock_cluster)
 
         mock_keystone.create_trustee.assert_called_once_with(
-            mock_cluster.uuid,
+            '%s_%s' % (mock_cluster.uuid, mock_cluster.project_id),
             mock_password,
         )
         mock_keystone.create_trust.assert_called_once_with(

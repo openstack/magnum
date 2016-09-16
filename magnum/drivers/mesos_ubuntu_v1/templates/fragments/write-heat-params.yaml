@@ -3,7 +3,7 @@ merge_how: dict(recurse_array)+list(append)
 write_files:
   - path: /etc/sysconfig/heat-params
     owner: "root:root"
-    permissions: "0644"
+    permissions: "0600"
     content: |
       MESOS_MASTERS_IPS="$MESOS_MASTERS_IPS"
       EXECUTOR_REGISTRATION_TIMEOUT="$EXECUTOR_REGISTRATION_TIMEOUT"

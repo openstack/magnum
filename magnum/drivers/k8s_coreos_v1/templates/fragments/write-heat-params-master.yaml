@@ -3,7 +3,7 @@ merge_how: dict(recurse_array)+list(append)
 write_files:
   - path: /etc/sysconfig/heat-params
     owner: "root:root"
-    permissions: "0644"
+    permissions: "0600"
     content: |
       KUBE_API_PUBLIC_ADDRESS="$KUBE_API_PUBLIC_ADDRESS"
       KUBE_API_PRIVATE_ADDRESS="$KUBE_API_PRIVATE_ADDRESS"
