@@ -71,11 +71,6 @@ auth_json=$(cat << EOF
                     "password": "$TRUSTEE_PASSWORD"
                 }
             }
-        },
-        "scope": {
-            "OS-TRUST:trust": {
-                "id": "$TRUST_ID"
-            }
         }
     }
 }
