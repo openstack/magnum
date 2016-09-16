@@ -26,6 +26,7 @@ import pecan
 import testscenarios
 
 from magnum.common import context as magnum_context
+from magnum.common import keystone as magnum_keystone
 from magnum.objects import base as objects_base
 from magnum.tests import conf_fixture
 from magnum.tests import fake_notifier
@@ -63,10 +64,17 @@ class TestCase(base.BaseTestCase):
                 }
             }
         }
+
+        trustee_domain_id = '12345678-9012-3456-7890-123456789abc'
+
         self.context = magnum_context.RequestContext(
             auth_token_info=token_info,
             project_id='fake_project',
             user_id='fake_user')
+
+        self.global_mocks = {}
+
+        self.keystone_client = magnum_keystone.KeystoneClientV3(self.context)
 
         self.policy = self.useFixture(policy_fixture.PolicyFixture())
 
@@ -89,8 +97,21 @@ class TestCase(base.BaseTestCase):
 
         p = mock.patch.object(magnum_context, 'make_context',
                               side_effect=make_context)
+
+        self.global_mocks['magnum.common.context.make_context'] = p
+
+        q = mock.patch.object(magnum_keystone.KeystoneClientV3,
+                              'trustee_domain_id',
+                              return_value=trustee_domain_id)
+
+        self.global_mocks[
+            'magnum.common.keystone.KeystoneClientV3.trustee_domain_id'] = q
+
         self.mock_make_context = p.start()
         self.addCleanup(p.stop)
+
+        self.mock_make_trustee_domain_id = q.start()
+        self.addCleanup(q.stop)
 
         self.useFixture(conf_fixture.ConfFixture())
         self.useFixture(fixtures.NestedTempfile())
@@ -103,6 +124,12 @@ class TestCase(base.BaseTestCase):
             pecan.set_config({}, overwrite=True)
 
         self.addCleanup(reset_pecan)
+
+    def start_global(self, name):
+        self.global_mocks[name].start()
+
+    def stop_global(self, name):
+        self.global_mocks[name].stop()
 
     def _restore_obj_registry(self):
         objects_base.MagnumObjectRegistry._registry._obj_classes \

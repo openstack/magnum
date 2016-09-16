@@ -204,6 +204,7 @@ class KeystoneClientV3(object):
                 project=trustor_project_id,
                 trustee_user=trustee_user,
                 impersonation=True,
+                delegation_depth=0,
                 role_names=roles)
         except Exception:
             LOG.exception(_LE('Failed to create trust'))

@@ -20,6 +20,8 @@ from oslo_config import cfg
 from oslo_policy import policy
 import pecan
 
+from magnum.common import clients
+from magnum.common import context
 from magnum.common import exception
 
 
@@ -92,8 +94,18 @@ def enforce(context, rule=None, target=None,
     if target is None:
         target = {'project_id': context.project_id,
                   'user_id': context.user_id}
+    add_policy_attributes(target)
     return enforcer.enforce(rule, target, credentials,
                             do_raise=do_raise, exc=exc, *args, **kwargs)
+
+
+def add_policy_attributes(target):
+    """Adds extra information for policy enforcement to raw target object"""
+    admin_context = context.make_admin_context()
+    admin_osc = clients.OpenStackClients(admin_context)
+    trustee_domain_id = admin_osc.keystone().trustee_domain_id
+    target['trustee_domain_id'] = trustee_domain_id
+    return target
 
 
 def enforce_wsgi(api_name, act=None):

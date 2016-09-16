@@ -55,6 +55,19 @@ class KeystoneClientTest(base.TestCase):
                     admin_tenant_name='service',
                     group=ksconf.CFG_LEGACY_GROUP)
 
+        # Disable global mocking for trustee_domain_id
+        self.stop_global(
+            'magnum.common.keystone.KeystoneClientV3.trustee_domain_id')
+
+    def tearDown(self):
+        # Re-enable global mocking for trustee_domain_id. We need this because
+        # mock blows up when trying to stop an already stopped patch (which it
+        # will do due to the addCleanup() in base.TestCase).
+        self.start_global(
+            'magnum.common.keystone.KeystoneClientV3.trustee_domain_id')
+
+        super(KeystoneClientTest, self).tearDown()
+
     def test_client_with_password(self, mock_ks):
         self.ctx.is_admin = True
         ks_client = keystone.KeystoneClientV3(self.ctx)
@@ -136,6 +149,7 @@ class KeystoneClientTest(base.TestCase):
         ks_client.create_trust(trustee_user='888888')
 
         mock_ks.return_value.trusts.create.assert_called_once_with(
+            delegation_depth=0,
             trustor_user='123456', project='654321',
             trustee_user='888888', role_names=['role1', 'role2'],
             impersonation=True)
@@ -152,6 +166,7 @@ class KeystoneClientTest(base.TestCase):
         ks_client.create_trust(trustee_user='888888')
 
         mock_ks.return_value.trusts.create.assert_called_once_with(
+            delegation_depth=0,
             trustor_user='123456', project='654321',
             trustee_user='888888', role_names=['role3'],
             impersonation=True)
