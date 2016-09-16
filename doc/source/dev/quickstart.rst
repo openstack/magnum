@@ -119,13 +119,16 @@ Kilo, and heat must be enabled by yourself)::
     ADMIN_PASSWORD=password
     # magnum requires the following to be set correctly
     PUBLIC_INTERFACE=eth1
-    enable_plugin magnum https://git.openstack.org/openstack/magnum
+
     # Enable barbican service and use it to store TLS certificates
     # For details http://docs.openstack.org/developer/magnum/dev/tls.html
     enable_plugin barbican https://git.openstack.org/openstack/barbican
     enable_plugin heat https://git.openstack.org/openstack/heat
     enable_plugin neutron-lbaas https://git.openstack.org/openstack/neutron-lbaas
     enable_plugin octavia https://git.openstack.org/openstack/octavia
+
+    # Enable magnum plugin after dependent plugins
+    enable_plugin magnum https://git.openstack.org/openstack/magnum
 
     # Disable LBaaS(v1) service
     disable_service q-lbaas
