@@ -545,15 +545,62 @@ Finalize installation
         # systemctl status magnum-api
         # systemctl status magnum-conductor
 
-#. Install the command-line client:
+Install the command-line client
+-------------------------------
+
+#. Install OS-specific prerequisites:
+
+   * Fedora 21/RHEL 7/CentOS 7
+
+     .. code-block:: console
+
+        # yum install python-devel openssl-devel python-virtualenv \
+                      libffi-devel git gcc
+
+   * Fedora 22 or higher
+
+     .. code-block:: console
+
+        # dnf install python-devel openssl-devel python-virtualenv \
+                      libffi-devel git gcc
+
+   * Ubuntu/Debian
+
+     .. code-block:: console
+
+        # apt-get update
+        # apt-get install python-dev libssl-dev python-virtualenv \
+                          libffi-dev git gcc
+
+   * openSUSE Leap 42.1
+
+     .. code-block:: console
+
+        # zypper install python-devel libopenssl-devel python-virtualenv \
+                         libffi-devel git gcc
+
+#. Install the client in a virtual environment:
 
    .. code-block:: console
 
-      # cd /var/lib/magnum
-      # git clone https://git.openstack.org/openstack/python-magnumclient.git
-      # cd python-magnumclient
-      # su -s /bin/sh -c "/var/lib/magnum/env/bin/pip install -r requirements.txt" magnum
-      # su -s /bin/sh -c "/var/lib/magnum/env/bin/python setup.py install" magnum
+      $ cd ~
+      $ git clone https://git.openstack.org/openstack/python-magnumclient.git
+      $ cd python-magnumclient
+      $ virtualenv .magnumclient-env
+      $ .magnumclient-env/bin/pip install -r requirements.txt
+      $ .magnumclient-env/bin/python setup.py install
+
+#. Now, you can export the client in your PATH:
+
+   .. code-block:: console
+
+      $ export PATH=$PATH:${PWD}/.magnumclient-env/bin/magnum
+
+   .. note::
+
+      The command-line client can be installed on the controller node or
+      on a different host than the service. It is good practice to install it
+      as a non-root user.
 
 Next Steps
 ----------
