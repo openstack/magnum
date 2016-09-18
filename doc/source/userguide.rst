@@ -22,7 +22,7 @@ Contents
 #. `Horizon Interface`_
 #. `Cluster Drivers`_
 #. `Choosing a COE`_
-#. `Native clients`_
+#. `Native Clients`_
 #. `Kubernetes`_
 #. `Swarm`_
 #. `Mesos`_
@@ -611,7 +611,47 @@ commands supported by the `magnum` command-line client.
 =================
 Horizon Interface
 =================
-*To be filled in with screenshots*
+
+Magnum provides a Horizon plugin so that users can access the Container
+Infrastructure Management service through the OpenStack browser-based
+graphical UI.  The plugin is available from
+`magnum-ui <https://github.com/openstack/magnum-ui>`_.  It is not
+installed by default in the standard Horizon service, but you can
+follow the instruction for `installing a Horizon plugin
+<http://docs.openstack.org/developer/horizon/tutorials/
+plugin.html#installing-your-plugin>`_.
+
+In Horizon, the container infrastructure panel is part of the
+'Project' view and it currently supports the following operations:
+
+- View list of cluster templates
+- View details of a cluster template
+- Create a cluster template
+- Delete a cluster template
+- View list of clusters
+- View details of a cluster
+- Create a cluster
+- Delete a cluster
+- Get the Certificate Authority for a cluster
+- Sign a user key and obtain a signed certificate for accessing the secured
+  COE API endpoint in a cluster.
+
+Other operations are not yet supported and the CLI should be used for these.
+
+Following is the screenshot of the Horizon view showing the list of cluster
+templates.
+
+.. image:: images/cluster-template.png
+
+Following is the screenshot of the Horizon view showing the details of a
+cluster template.
+
+.. image:: images/cluster-template-details.png
+
+Following is the screenshot of the dialog to create a new cluster.
+
+.. image:: images/cluster-create.png
+
 
 ===============
 Cluster Drivers
@@ -765,9 +805,78 @@ the next sections for examples of how to create a cluster with your desired
 COE.
 
 ==============
-Native clients
+Native Clients
 ==============
-*To be filled in*
+
+Magnum preserves the native user experience with a COE and does not
+provide a separate API or client.  This means you will need to use the
+native client for the particular cluster type to interface with the
+clusters.  In the typical case, there are two clients to consider:
+
+COE level
+  This is the orchestration or management level such as Kubernetes,
+  Swarm, Mesos and its frameworks.
+
+Container level
+  This is the low level container operation.  Currently it is
+  Docker for all clusters.
+
+The clients can be CLI and/or browser-based.  You will need to refer
+to the documentation for the specific native client and appropriate
+version for details, but following are some pointers for reference.
+
+Kubernetes CLI is the tool 'kubectl', which can be simply copied from
+a node in the cluster or downloaded from the Kubernetes release.  For
+instance, if the cluster is running Kubernetes release 1.2.0, the
+binary for 'kubectl' can be downloaded as and set up locally as
+follows::
+
+    curl -O https://storage.googleapis.com/kubernetes-release/release/v1.2.0/bin/linux/amd64/kubectl
+    chmod +x kubectl
+    sudo mv kubectl /usr/local/bin/kubectl
+
+Kubernetes also provides a browser UI if the cluster has the
+Kubernetes UI running; it can be accessed at::
+
+    http://<api_address>/UI
+    where the api_address can obtained from the command 'cluster-show'.
+
+For Swarm, the main CLI is 'docker', along with associated tools
+such as 'docker-compose', etc.  Specific version of the binaries can
+be obtained from the `Docker Engine installation
+<https://docs.docker.com/engine/installation/binaries/>`_.
+
+Mesos cluster uses the Marathon framework and details on the Marathon
+UI can be found in the section `Using Marathon`_.
+
+Depending on the client requirement, you may need to use a version of
+the client that matches the version in the cluster.  To determine the
+version of the COE and container, use the command 'cluster-show' and
+look for the attribute *coe_version* and *container_version*::
+
+    magnum cluster-show k8s-cluster
+    +--------------------+------------------------------------------------------------+
+    | Property           | Value                                                      |
+    +--------------------+------------------------------------------------------------+
+    | status             | CREATE_COMPLETE                                            |
+    | uuid               | 04952c60-a338-437f-a7e7-d016d1d00e65                       |
+    | stack_id           | b7bf72ce-b08e-4768-8201-e63a99346898                       |
+    | status_reason      | Stack CREATE completed successfully                        |
+    | created_at         | 2016-07-25T23:14:06+00:00                                  |
+    | updated_at         | 2016-07-25T23:14:10+00:00                                  |
+    | create_timeout     | 60                                                         |
+    | coe_version        | v1.2.0                                                     |
+    | api_address        | https://192.168.19.86:6443                                 |
+    | cluster_template_id| da2825a0-6d09-4208-b39e-b2db666f1118                       |
+    | master_addresses   | ['192.168.19.87']                                          |
+    | node_count         | 1                                                          |
+    | node_addresses     | ['192.168.19.88']                                          |
+    | master_count       | 1                                                          |
+    | container_version  | 1.9.1                                                      |
+    | discovery_url      | https://discovery.etcd.io/3b7fb09733429d16679484673ba3bfd5 |
+    | name               | k8s-cluster                                                |
+    +--------------------+------------------------------------------------------------+
+
 
 ==========
 Kubernetes
