@@ -130,6 +130,9 @@ Kilo, and heat must be enabled by yourself)::
     # Enable magnum plugin after dependent plugins
     enable_plugin magnum https://git.openstack.org/openstack/magnum
 
+    # Optional:  uncomment to enable the Magnum UI plugin in Horizon
+    #enable_plugin magnum-ui https://github.com/openstack/magnum-ui
+
     # Disable LBaaS(v1) service
     disable_service q-lbaas
     # Enable LBaaS(v2) services
