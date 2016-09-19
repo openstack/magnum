@@ -639,10 +639,10 @@ pre-installed. To build and upload such image, please refer to
 
 Alternatively, you can download and upload a pre-built image::
 
-    wget https://fedorapeople.org/groups/magnum/ubuntu-14.04.3-mesos-0.25.0.qcow2
+    wget https://fedorapeople.org/groups/magnum/ubuntu-mesos-newton.qcow2
     glance image-create --name ubuntu-mesos --visibility public \
                         --disk-format=qcow2 --container-format=bare \
-                        --os-distro=ubuntu --file=ubuntu-14.04.3-mesos-0.25.0.qcow2
+                        --os-distro=ubuntu --file=ubuntu-mesos-newton.qcow2
 
 Then, create a ClusterTemplate by using 'mesos' as the COE, with the rest of
 arguments similar to the Kubernetes ClusterTemplate::

@@ -30,7 +30,7 @@ function create_test_data {
     coe=$1
     special=$2
     if [ $coe == 'mesos' ]; then
-        local image_name="ubuntu-14.04"
+        local image_name="ubuntu.*mesos"
         local container_format="bare"
     elif [ $coe == 'k8s-coreos' ]; then
         local image_name="coreos"
