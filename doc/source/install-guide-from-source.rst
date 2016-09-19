@@ -409,9 +409,9 @@ Install and configure components
         memcached_servers = controller:11211
         auth_version = v3
         auth_uri = http://controller:5000/v3
-        project_domain_id = default
+        project_domain_name = default
         project_name = service
-        user_domain_id = default
+        user_domain_name = default
         password = MAGNUM_PASS
         username = magnum
         auth_url = http://controller:35357
@@ -419,13 +419,13 @@ Install and configure components
 
         [trust]
         ...
-        trustee_domain_id = 66e0469de9c04eda9bc368e001676d20
-        trustee_domain_admin_id = 529b81cf35094beb9784c6d06c090c2b
+        trustee_domain_name = magnum
+        trustee_domain_admin_name = magnum_domain_admin
         trustee_domain_admin_password = DOMAIN_ADMIN_PASS
 
-     ``trustee_domain_id`` is the id of the ``magnum`` domain and
-     ``trustee_domain_admin_id`` is the id of the ``magnum_domain_admin`` user.
-     Replace MAGNUM_PASS with the password you chose for the magnum user in the
+     ``trustee_domain_name`` is the name of the ``magnum`` domain and
+     ``trustee_domain_admin_name`` is the name of the ``magnum_domain_admin``
+     user. Replace MAGNUM_PASS with the password you chose for the magnum user in the
      Identity service and DOMAIN_ADMIN_PASS with the password you chose for the
      ``magnum_domain_admin`` user.
 
