@@ -809,7 +809,7 @@ When Magnum deploys a Kubernetes cluster, it uses parameters defined in the
 ClusterTemplate and specified on the cluster-create command, for example::
 
     magnum cluster-template-create --name k8s-cluster-template \
-                               --image-id fedora-atomic-latest \
+                               --image-id fedora-atomic-newton \
                                --keypair-id testkey \
                                --external-network-id public \
                                --dns-nameserver 8.8.8.8 \
@@ -935,7 +935,7 @@ the ClusterTemplate and specified on the 'cluster-create' command, for
 example::
 
     magnum cluster-template-create --name swarm-cluster-template \
-                               --image-id fedora-atomic-latest \
+                               --image-id fedora-atomic-newton \
                                --keypair-id testkey \
                                --external-network-id public \
                                --dns-nameserver 8.8.8.8 \
@@ -1363,7 +1363,7 @@ Magnum, therefore it does not need to be specified via a parameter::
     magnum cluster-template-create --name secure-kubernetes \
                                --keypair-id default \
                                --external-network-id public \
-                               --image-id fedora-atomic-latest \
+                               --image-id fedora-atomic-newton \
                                --dns-nameserver 8.8.8.8 \
                                --flavor-id m1.small \
                                --docker-volume-size 3 \
@@ -1388,7 +1388,7 @@ Magnum, therefore it does not need to be specified via a parameter::
     | server_type           | vm                                   |
     | external_network_id   | public                               |
     | cluster_distro        | fedora-atomic                        |
-    | image_id              | fedora-atomic-latest                 |
+    | image_id              | fedora-atomic-newton                 |
     | volume_driver         | None                                 |
     | registry_enabled      | False                                |
     | docker_storage_driver | devicemapper                         |

@@ -11,7 +11,7 @@ user = admin
 tenant = admin
 pass = password
 [magnum]
-image_id = fedora-atomic-latest
+image_id = fedora-atomic-newton
 nic_id = public
 keypair_id = default
 flavor_id = s1.magnum

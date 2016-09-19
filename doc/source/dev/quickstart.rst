@@ -205,7 +205,7 @@ when installing devstack use::
     | 090de3a2-2c0c-42d5-b5a3-cfcddd6d011b | cirros-0.3.4-x86_64-uec         | ami         | ami              | 25165824  | active | f98b9727094d40c78b1ed40e3bc91e80 |
     | 9501d296-f0aa-4c0e-bc24-2a680f8741f0 | cirros-0.3.4-x86_64-uec-kernel  | aki         | aki              | 4979632   | active | f98b9727094d40c78b1ed40e3bc91e80 |
     | 01478d1a-59e0-4f36-b69e-0eaf5821ee46 | cirros-0.3.4-x86_64-uec-ramdisk | ari         | ari              | 3740163   | active | f98b9727094d40c78b1ed40e3bc91e80 |
-    | f14d6ee3-9e53-4f22-ba42-44e95810c294 | fedora-atomic-latest            | qcow2       | bare             | 507928064 | active | f98b9727094d40c78b1ed40e3bc91e80 |
+    | f14d6ee3-9e53-4f22-ba42-44e95810c294 | fedora-atomic-newton            | qcow2       | bare             | 507928064 | active | f98b9727094d40c78b1ed40e3bc91e80 |
     +--------------------------------------+---------------------------------+-------------+------------------+-----------+--------+----------------------------------+
 
 To list the available commands and resources for magnum, use::
@@ -238,7 +238,7 @@ Fedora Atomic. The COE (Container Orchestration Engine) and keypair need to
 be specified as well::
 
     magnum cluster-template-create --name k8s-cluster-template \
-                           --image-id fedora-atomic-latest \
+                           --image-id fedora-atomic-newton \
                            --keypair-id testkey \
                            --external-network-id public \
                            --dns-nameserver 8.8.8.8 \
@@ -515,7 +515,7 @@ except for the absence of some Kubernetes-specific arguments and the use of
 'swarm' as the COE::
 
     magnum cluster-template-create --name swarm-cluster-template \
-                           --image-id fedora-atomic-latest \
+                           --image-id fedora-atomic-newton \
                            --keypair-id testkey \
                            --external-network-id public \
                            --dns-nameserver 8.8.8.8 \

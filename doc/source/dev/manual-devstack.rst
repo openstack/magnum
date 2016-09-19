@@ -122,14 +122,14 @@ likely work with other micro-OS platforms, but each requires individual
 support in the heat template.
 
 Store the Fedora Atomic micro-OS in glance. Download the qcow2 Atomic image
-from https://fedorapeople.org/groups/magnum/fedora-atomic-latest.qcow2 and
+from https://fedorapeople.org/groups/magnum/fedora-atomic-newton.qcow2 and
 then upload it to glance::
 
-    glance image-create --name fedora-atomic-latest \
+    glance image-create --name fedora-atomic-newton \
                         --visibility public \
                         --disk-format qcow2 \
                         --os-distro fedora-atomic \
-                        --container-format bare < fedora-atomic-latest.qcow2
+                        --container-format bare < fedora-atomic-newton.qcow2
 
 Create a domain and domain admin for trust::
 

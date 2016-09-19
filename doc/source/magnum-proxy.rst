@@ -41,7 +41,7 @@ You can specify all three proxy parameters while creating ClusterTemplate of
 any coe type. All of proxy parameters are optional.
 
     magnum cluster-template-create --name k8s-cluster-template \
-                       --image-id fedora-atomic-latest \
+                       --image-id fedora-atomic-newton \
                        --keypair-id testkey \
                        --external-network-id public \
                        --dns-nameserver 8.8.8.8 \
@@ -51,7 +51,7 @@ any coe type. All of proxy parameters are optional.
                        --https-proxy <https://abc-proxy.com:8080> \
                        --no-proxy <172.24.4.4,172.24.4.9,172.24.4.8>
     magnum cluster-template-create --name swarm-cluster-template \
-                       --image-id fedora-atomic-latest \
+                       --image-id fedora-atomic-newton \
                        --keypair-id testkey \
                        --external-network-id public \
                        --dns-nameserver 8.8.8.8 \
