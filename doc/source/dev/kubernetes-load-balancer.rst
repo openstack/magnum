@@ -44,6 +44,40 @@ required.  All the services will be created normally; services that specify the
 load balancer will also be created successfully, but a load balancer will not
 be created.
 
+Note that different versions of Kubernetes require different versions of
+Neutron LBaaS plugin running on the OpenStack instance::
+
+     ============================  ==============================
+     Kubernetes Version on Master  Neutron LBaaS Version Required
+     ============================  ==============================
+     1.2                           LBaaS v1
+     1.3 or later                  LBaaS v2
+     ============================  ==============================
+
+Before enabling the Kubernetes load balancer feature, confirm that the
+OpenStack instance is running the required version of Neutron LBaaS plugin.
+To determine if your OpenStack instance is running LBaaS v1, try running
+the following command from your OpenStack control node::
+
+    neutron lb-pool-list
+
+Or look for the following configuration in neutron.conf or
+neutron_lbaas.conf::
+
+    service_provider = LOADBALANCER:Haproxy:neutron_lbaas.services.loadbalancer.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default
+
+To determine if your OpenStack instance is running LBaaS v2, try running
+the following command from your OpenStack control node::
+
+    neutron lbaas-pool-list
+
+Or look for the following configuration in neutron.conf or
+neutron_lbaas.conf::
+
+    service_plugins = neutron.plugins.services.agent_loadbalancer.plugin.LoadBalancerPluginv2
+
+To configure LBaaS v1 or v2, refer to the Neutron documentation.
+
 To enable the load balancer, log into each master node of your cluster and
 perform the following steps:
 
@@ -61,11 +95,19 @@ perform the following steps:
 
 2. Configure kube-controller-manager::
 
-    sudo vi /etc/kubernetes/controller-manager
+    sudo vi /etc/kubernetes/manifests/kube-controller-manager.yaml
 
-   Uncomment the line::
+   Immediately after the lines::
 
-    KUBE_CONTROLLER_MANAGER_ARGS="--cloud_config=/etc/sysconfig/kube_openstack_config --cloud_provider=openstack"
+    - controller-manager
+    - --master=http://127.0.0.1:8080
+    - --service-account-private-key-file=/etc/kubernetes/ssl/server.key
+    - --root-ca-file=/etc/kubernetes/ssl/ca.crt
+
+   Add the following lines::
+
+    - --cloud_config=/etc/sysconfig/kube_openstack_config
+    - --cloud_provider=openstack
 
 3. Enter OpenStack user credential::
 
@@ -77,12 +119,16 @@ perform the following steps:
 
     password=ChangeMe
 
-4. Restart Kubernetes services::
+4. Restart the Kubernetes API server::
 
     sudo service kube-apiserver restart
-    sudo service kube-controller-manager restart
     service kube-apiserver status
-    service kube-controller-manager status
+
+5. Restart the kube-controller-manager container::
+
+    KUBE_CONTROLLER=$(sudo docker ps | awk '/k8s_kube-controller/{print $1}')
+    sudo docker restart $KUBE_CONTROLLER
+    sudo docker inspect $KUBE_CONTROLLER
 
 This only needs to be done once.  The steps can be reversed to disable the
 load balancer feature. Before deleting the Kubernetes cluster, make sure to
