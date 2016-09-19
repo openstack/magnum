@@ -1250,7 +1250,7 @@ an Ubuntu server::
     $ diskimage-builder/bin/disk-image-create ubuntu vm docker mesos \
         os-collect-config os-refresh-config os-apply-config \
         heat-config heat-config-script \
-        -o ubuntu-14.04.3-mesos-0.25.0.qcow2
+        -o ubuntu-mesos.qcow2
 
 Dockerfile
 ++++++++++
