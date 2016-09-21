@@ -1121,7 +1121,7 @@ Image (image-id)
   for the Mesos master and slave.  The image binary is loaded in
   Glance with the attribute 'os_distro = ubuntu'.  You can download
   the `ready-built image
-  <https://fedorapeople.org/groups/magnum/ubuntu-14.04.3-mesos-0.25.0.qcow2>`_,
+  <https://fedorapeople.org/groups/magnum/ubuntu-mesos-latest.qcow2>`_,
   or you can create the image as described below in the `Building
   Mesos image`_ section.
 
@@ -2398,8 +2398,8 @@ Mesos on Ubuntu
 
 This image is built manually using diskimagebuilder.  The instructions are
 provided in the section `Diskimage-builder`_.
-The Fedora site hosts the current image `ubuntu-14.04.3-mesos-0.25.0.qcow2
-<https://fedorapeople.org/groups/magnum/ubuntu-14.04.3-mesos-0.25.0.qcow2>`_.
+The Fedora site hosts the current image `ubuntu-mesos-latest.qcow2
+<https://fedorapeople.org/groups/magnum/ubuntu-mesos-latest.qcow2>`_.
 
 +-------------+-----------+
 | OS/software | version   |

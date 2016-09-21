@@ -28,7 +28,7 @@ if [ "${coe}${special}" != "k8s-ironic" ]; then
 fi
 
 if [ "$coe" = "mesos" ]; then
-    echo "MAGNUM_GUEST_IMAGE_URL=https://fedorapeople.org/groups/magnum/ubuntu-14.04.3-mesos-0.25.0.qcow2" >> $BASE/new/devstack/localrc
+    echo "MAGNUM_GUEST_IMAGE_URL=https://fedorapeople.org/groups/magnum/ubuntu-mesos-latest.qcow2" >> $BASE/new/devstack/localrc
 elif [ "$coe" = "k8s-coreos" ]; then
     echo "MAGNUM_GUEST_IMAGE_URL=http://beta.release.core-os.net/amd64-usr/current/coreos_production_openstack_image.img.bz2" >> $BASE/new/devstack/localrc
 elif [ "${coe}${special}" = "k8s-ironic" ]; then
