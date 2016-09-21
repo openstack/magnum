@@ -120,8 +120,7 @@ class BayModel(base.APIBase):
     public = wsme.wsattr(types.boolean, default=False)
     """Indicates whether the Baymodel is public or not."""
 
-    server_type = wsme.wsattr(wtypes.StringType(min_length=1,
-                                                max_length=255),
+    server_type = wsme.wsattr(wtypes.Enum(str, *fields.ServerType.ALL),
                               default='vm')
     """Server type for this bay model"""
 
@@ -319,6 +318,7 @@ class BayModelsController(base.Controller):
         return BayModel.convert_with_links(baymodel)
 
     @expose.expose(BayModel, body=BayModel, status_code=201)
+    @validation.enforce_server_type()
     @validation.enforce_network_driver_types_create()
     @validation.enforce_volume_driver_types_create()
     @validation.enforce_volume_storage_size_create()
