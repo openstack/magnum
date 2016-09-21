@@ -198,7 +198,7 @@ resources:
       group: ungrouped
       config:
         str_replace:
-          template: {get_file: fragments/write-heat-params-master.yaml}
+          template: {get_file: ../../common/templates/swarm/fragments/write-heat-params-master.yaml}
           params:
             "$WAIT_HANDLE_ENDPOINT": {get_attr: [master_wait_handle, endpoint]}
             "$WAIT_HANDLE_TOKEN": {get_attr: [master_wait_handle, token]}
@@ -232,31 +232,31 @@ resources:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
-      config: {get_file: fragments/write-network-config.sh}
+      config: {get_file: ../../common/templates/swarm/fragments/write-network-config.sh}
 
   network_config_service:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
-      config: {get_file: fragments/network-config-service.sh}
+      config: {get_file: ../../common/templates/swarm/fragments/network-config-service.sh}
 
   network_service:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
-      config: {get_file: fragments/network-service.sh}
+      config: {get_file: ../../common/templates/swarm/fragments/network-service.sh}
 
   configure_etcd:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/configure-etcd.sh}
+      config: {get_file: ../../common/templates/swarm/fragments/configure-etcd.sh}
 
   remove_docker_key:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
-      config: {get_file: fragments/remove-docker-key.sh}
+      config: {get_file: ../../common/templates/swarm/fragments/remove-docker-key.sh}
 
   configure_docker_storage:
     type: OS::Heat::SoftwareConfig
@@ -272,13 +272,13 @@ resources:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
-      config: {get_file: fragments/make-cert.py}
+      config: {get_file: ../../common/templates/swarm/fragments/make-cert.py}
 
   write_docker_service:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
-      config: {get_file: fragments/write-docker-service.sh}
+      config: {get_file: ../../common/templates/swarm/fragments/write-docker-service.sh}
 
   write_swarm_manager_failure_service:
     type: "OS::Heat::SoftwareConfig"
@@ -286,7 +286,7 @@ resources:
       group: ungrouped
       config:
         str_replace:
-          template: {get_file: fragments/write-cluster-failure-service.yaml}
+          template: {get_file: ../../common/templates/swarm/fragments/write-cluster-failure-service.yaml}
           params:
             "$SERVICE": swarm-manager
             "$WAIT_HANDLE_ENDPOINT": {get_attr: [master_wait_handle, endpoint]}
@@ -296,7 +296,7 @@ resources:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
-      config: {get_file: fragments/write-docker-socket.yaml}
+      config: {get_file: ../../common/templates/swarm/fragments/write-docker-socket.yaml}
 
   write_swarm_master_service:
     type: "OS::Heat::SoftwareConfig"
@@ -304,7 +304,7 @@ resources:
       group: ungrouped
       config:
         str_replace:
-          template: {get_file: fragments/write-swarm-master-service.sh}
+          template: {get_file: ../../common/templates/swarm/fragments/write-swarm-master-service.sh}
           params:
             "$ETCD_SERVER_IP": {get_attr: [etcd_address_switch, private_ip]}
             "$NODE_IP": {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
@@ -322,7 +322,7 @@ resources:
       group: ungrouped
       config:
         str_replace:
-          template: {get_file: fragments/enable-services.sh}
+          template: {get_file: ../../common/templates/swarm/fragments/enable-services.sh}
           params:
             "$NODE_SERVICES": "etcd docker.socket swarm-manager"
 
@@ -330,25 +330,25 @@ resources:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
-      config: {get_file: fragments/cfn-signal.sh}
+      config: {get_file: ../../common/templates/swarm/fragments/cfn-signal.sh}
 
   disable_selinux:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
-      config: {get_file: fragments/disable-selinux.sh}
+      config: {get_file: ../../common/templates/swarm/fragments/disable-selinux.sh}
 
   add_proxy:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
-      config: {get_file: fragments/add-proxy.sh}
+      config: {get_file: ../../common/templates/swarm/fragments/add-proxy.sh}
 
   volume_service:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
-      config: {get_file: fragments/volume-service.sh}
+      config: {get_file: ../../common/templates/swarm/fragments/volume-service.sh}
 
   swarm_master_init:
     type: "OS::Heat::MultipartMime"
