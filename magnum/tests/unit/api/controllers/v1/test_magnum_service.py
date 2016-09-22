@@ -44,9 +44,6 @@ class db_rec(object):
 
 class TestMagnumServiceController(api_base.FunctionalTest):
 
-    def setUp(self):
-        super(TestMagnumServiceController, self).setUp()
-
     def test_empty(self):
         response = self.get_json('/mservices')
         self.assertEqual([], response['mservices'])

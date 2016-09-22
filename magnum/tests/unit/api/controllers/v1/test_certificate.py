@@ -185,9 +185,6 @@ class TestPost(api_base.FunctionalTest):
 
 class TestCertPolicyEnforcement(api_base.FunctionalTest):
 
-    def setUp(self):
-        super(TestCertPolicyEnforcement, self).setUp()
-
     def _common_policy_check(self, rule, func, *arg, **kwarg):
         self.policy.set_rules({rule: "project_id:non_fake"})
         response = func(*arg, **kwarg)

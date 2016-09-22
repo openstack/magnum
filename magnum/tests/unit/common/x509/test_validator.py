@@ -19,12 +19,6 @@ from magnum.common.x509 import validator as v
 
 
 class TestValidators(unittest.TestCase):
-    def setUp(self):
-        super(TestValidators, self).setUp()
-
-    def tearDown(self):
-        super(TestValidators, self).tearDown()
-
     def _build_key_usage(self, critical=False):
         # Digital Signature and Key Encipherment are enabled
         key_usage = c_x509.KeyUsage(
