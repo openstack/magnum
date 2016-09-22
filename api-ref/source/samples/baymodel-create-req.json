@@ -13,7 +13,7 @@
    "docker_volume_size":3,
    "server_type":"vm",
    "external_network_id":"public",
-   "image_id":"fedora-atomic-latest",
+   "image_id":"fedora-atomic-newton",
    "volume_driver":"cinder",
    "registry_enabled":false,
    "docker_storage_driver":"devicemapper",

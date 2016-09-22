@@ -18,12 +18,12 @@ developer/magnum/userguide.html#cluster>`__ is constructed. Following this
 example, you will provision a Docker Swarm cluster with one master
 and one node. Then, using docker's native API you will create a container.
 
-#. Download the latest Fedora Atomic image built by magnum team, which is
+#. Download the Fedora Atomic image built by magnum team, which is
    required to provision the cluster:
 
    .. code-block:: console
 
-      $ wget https://fedorapeople.org/groups/magnum/fedora-atomic-latest.qcow2
+      $ wget https://fedorapeople.org/groups/magnum/fedora-atomic-newton.qcow2
 
 #. Source the ``demo`` credentials to perform
    the following steps as a non-administrative project:
@@ -40,9 +40,9 @@ and one node. Then, using docker's native API you will create a container.
       $ openstack image create \
                             --disk-format=qcow2 \
                             --container-format=bare \
-                            --file=fedora-atomic-latest.qcow2 \
+                            --file=fedora-atomic-newton.qcow2 \
                             --property os_distro='fedora-atomic' \
-                            fedora-atomic-latest
+                            fedora-atomic-newton
       +------------------+------------------------------------------------------+
       | Field            | Value                                                |
       +------------------+------------------------------------------------------+
@@ -54,7 +54,7 @@ and one node. Then, using docker's native API you will create a container.
       | id               | 81b25935-3400-441a-9f2e-f984a46c89dd                 |
       | min_disk         | 0                                                    |
       | min_ram          | 0                                                    |
-      | name             | fedora-atomic-latest                                 |
+      | name             | fedora-atomic-newton                                 |
       | owner            | c4b42942156741dfbc4775dbcb032841                     |
       | properties       | os_distro='fedora-atomic'                            |
       | protected        | False                                                |
@@ -88,7 +88,7 @@ and one node. Then, using docker's native API you will create a container.
    .. code-block:: console
 
       $ magnum cluster-template-create --name swarm-cluster-template \
-                           --image-id fedora-atomic-latest \
+                           --image-id fedora-atomic-newton \
                            --keypair-id mykey \
                            --external-network-id public \
                            --dns-nameserver 8.8.8.8 \
@@ -115,7 +115,7 @@ and one node. Then, using docker's native API you will create a container.
       | server_type           | vm                                   |
       | external_network_id   | public                               |
       | cluster_distro        | fedora-atomic                        |
-      | image_id              | fedora-atomic-latest                 |
+      | image_id              | fedora-atomic-newton                 |
       | volume_driver         | -                                    |
       | registry_enabled      | False                                |
       | docker_storage_driver | devicemapper                         |

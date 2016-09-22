@@ -29,7 +29,7 @@ magnum_group = cfg.OptGroup(name="magnum", title="Magnum Options")
 
 MagnumGroup = [
     cfg.StrOpt("image_id",
-               default="fedora-atomic-latest",
+               default="fedora-atomic-newton",
                help="Image id to be used for ClusterTemplate."),
 
     cfg.StrOpt("nic_id",
