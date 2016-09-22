@@ -873,7 +873,7 @@ Image (image-id)
   Current supported images are Fedora Atomic (download from `Fedora
   <https://alt.fedoraproject.org/pub/alt/atomic/stable/Cloud-Images/x86_64/Images>`_ )
   and CoreOS (download from `CoreOS
-  <http://beta.release.core-os.net/amd64-usr/current/coreos_production_openstack_image.img.bz2>`_ )
+  <http://beta.release.core-os.net/amd64-usr/1153.4.0/coreos_production_openstack_image.img.bz2>`_ )
 
 TLS (tls-disabled)
   Transport Layer Security is enabled by default, so you need a key and
@@ -2343,7 +2343,7 @@ Kubernetes on CoreOS
 --------------------
 
 CoreOS publishes a `stock image
-<http://beta.release.core-os.net/amd64-usr/current/coreos_production_openstack_image.img.bz2>`_
+<http://beta.release.core-os.net/amd64-usr/1153.4.0/coreos_production_openstack_image.img.bz2>`_
 that is being used to deploy Kubernetes.
 This image has the following OS/software:
 

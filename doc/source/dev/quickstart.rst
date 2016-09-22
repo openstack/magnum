@@ -318,7 +318,7 @@ Building a Kubernetes Cluster - Based on CoreOS
 You can create a Kubernetes cluster based on CoreOS as an alternative to
 Atomic. First, download the official CoreOS image::
 
-    wget http://beta.release.core-os.net/amd64-usr/current/coreos_production_openstack_image.img.bz2
+    wget http://beta.release.core-os.net/amd64-usr/1153.4.0/coreos_production_openstack_image.img.bz2
     bunzip2 coreos_production_openstack_image.img.bz2
 
 Upload the image to glance::
