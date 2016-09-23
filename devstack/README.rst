@@ -5,7 +5,7 @@ DevStack Integration
 This directory contains the files necessary to integrate magnum with devstack.
 
 Refer the quickstart guide at
-http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html
+http://docs.openstack.org/developer/magnum/dev/quickstart.html
 for more information on using devstack and magnum.
 
 Running devstack with magnum for the first time may take a long time as it
