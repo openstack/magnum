@@ -22,29 +22,16 @@ import six
 
 from magnum.common import clients
 from magnum.common import exception
+import magnum.conf
 from magnum.i18n import _
 from magnum.i18n import _LW
 
 from requests import exceptions as req_exceptions
 
-
 LOG = logging.getLogger(__name__)
 
 COMMON_TEMPLATES_PATH = "../../common/templates/"
 COMMON_ENV_PATH = COMMON_TEMPLATES_PATH + "environments/"
-
-template_def_opts = [
-    cfg.StrOpt('etcd_discovery_service_endpoint_format',
-               default='https://discovery.etcd.io/new?size=%(size)d',
-               help=_('Url for etcd public discovery endpoint.'),
-               deprecated_group='bay'),
-    cfg.ListOpt('enabled_definitions',
-                default=['magnum_vm_atomic_k8s', 'magnum_bm_fedora_k8s',
-                         'magnum_vm_coreos_k8s', 'magnum_vm_atomic_swarm',
-                         'magnum_vm_ubuntu_mesos'],
-                help=_('Enabled cluster definition entry points.'),
-                deprecated_group='bay'),
-]
 
 docker_registry_opts = [
     cfg.StrOpt('swift_region',
@@ -55,8 +42,7 @@ docker_registry_opts = [
                       'stores images in'))
 ]
 
-CONF = cfg.CONF
-CONF.register_opts(template_def_opts, group='cluster')
+CONF = magnum.conf.CONF
 CONF.register_opts(docker_registry_opts, group='docker_registry')
 CONF.import_opt('trustee_domain_id', 'magnum.common.keystone', group='trust')
 
@@ -246,7 +232,7 @@ class TemplateDefinition(object):
                 coe=coe)
         type_definitions = definition_map[cluster_type]
 
-        for name in cfg.CONF.cluster.enabled_definitions:
+        for name in CONF.cluster.enabled_definitions:
             if name in type_definitions:
                 return type_definitions[name]()
 

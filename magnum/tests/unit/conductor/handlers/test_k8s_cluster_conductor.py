@@ -14,11 +14,13 @@
 
 import mock
 from mock import patch
-from oslo_config import cfg
 
 from magnum.conductor.handlers import cluster_conductor
+import magnum.conf
 from magnum import objects
 from magnum.tests import base
+
+CONF = magnum.conf.CONF
 
 
 class TestClusterConductorWithK8s(base.TestCase):
@@ -205,9 +207,9 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_get.return_value = mock_resp
         cluster = objects.Cluster(self.context, **self.cluster_dict)
 
-        cfg.CONF.set_override('swift_region',
-                              'RegionOne',
-                              group='docker_registry')
+        CONF.set_override('swift_region',
+                          'RegionOne',
+                          group='docker_registry')
 
         (template_path,
          definition,
@@ -488,9 +490,9 @@ class TestClusterConductorWithK8s(base.TestCase):
         cluster_dict['discovery_url'] = None
         cluster = objects.Cluster(self.context, **cluster_dict)
 
-        cfg.CONF.set_override('etcd_discovery_service_endpoint_format',
-                              'http://etcd/test?size=%(size)d',
-                              group='cluster')
+        CONF.set_override('etcd_discovery_service_endpoint_format',
+                          'http://etcd/test?size=%(size)d',
+                          group='cluster')
         mock_req = mock.MagicMock(text='https://address/token')
         reqget.return_value = mock_req
 
@@ -595,7 +597,7 @@ class TestClusterConductorWithK8s(base.TestCase):
         expected_stack_name = 'expected_stack_name-xx-xx-xx-xx'
         expected_template_contents = 'template_contents'
         dummy_cluster_name = 'expected_stack_name'
-        expected_timeout = cfg.CONF.cluster_heat.create_timeout
+        expected_timeout = CONF.cluster_heat.create_timeout
 
         mock_tpl_files = {}
         mock_get_template_contents.return_value = [
@@ -636,7 +638,7 @@ class TestClusterConductorWithK8s(base.TestCase):
         expected_template_contents = 'template_contents'
         dummy_cluster_name = 'expected_stack_name'
         cluster_timeout = 0
-        expected_timeout = cfg.CONF.cluster_heat.create_timeout
+        expected_timeout = CONF.cluster_heat.create_timeout
 
         mock_tpl_files = {}
         mock_get_template_contents.return_value = [
