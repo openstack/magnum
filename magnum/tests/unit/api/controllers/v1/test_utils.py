@@ -15,16 +15,16 @@
 
 import jsonpatch
 import mock
-from oslo_config import cfg
 from oslo_utils import uuidutils
 import wsme
 
 from magnum.api import utils
 from magnum.common import exception
+import magnum.conf
 from magnum.tests.unit.api import base
 
 
-CONF = cfg.CONF
+CONF = magnum.conf.CONF
 
 
 class TestApiUtils(base.FunctionalTest):

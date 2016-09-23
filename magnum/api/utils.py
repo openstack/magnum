@@ -14,18 +14,18 @@
 #    under the License.
 
 import jsonpatch
-from oslo_config import cfg
 from oslo_utils import uuidutils
 import pecan
 import wsme
 
 from magnum.common import exception
 from magnum.common import utils
+import magnum.conf
 from magnum.i18n import _
 from magnum.i18n import _LE
 from magnum import objects
 
-CONF = cfg.CONF
+CONF = magnum.conf.CONF
 
 
 JSONPATCH_EXCEPTIONS = (jsonpatch.JsonPatchException,

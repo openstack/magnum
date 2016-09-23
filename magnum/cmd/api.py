@@ -17,19 +17,20 @@
 import os
 import sys
 
-from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_reports import guru_meditation_report as gmr
 from werkzeug import serving
 
 from magnum.api import app as api_app
 from magnum.common import service
+import magnum.conf
 from magnum.i18n import _
 from magnum.i18n import _LI
 from magnum.objects import base
 from magnum import version
 
-CONF = cfg.CONF
+
+CONF = magnum.conf.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -65,11 +66,11 @@ def main():
     use_ssl = CONF.api.enabled_ssl
 
     # Create the WSGI server and start it
-    host, port = cfg.CONF.api.host, cfg.CONF.api.port
+    host, port = CONF.api.host, CONF.api.port
 
     LOG.info(_LI('Starting server in PID %s'), os.getpid())
     LOG.debug("Configuration:")
-    cfg.CONF.log_opt_values(LOG, logging.DEBUG)
+    CONF.log_opt_values(LOG, logging.DEBUG)
 
     LOG.info(_LI('Serving on %(proto)s://%(host)s:%(port)s'),
              dict(proto="https" if use_ssl else "http", host=host, port=port))

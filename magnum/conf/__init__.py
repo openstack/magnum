@@ -15,7 +15,7 @@
 
 from oslo_config import cfg
 
-# from magnum.conf import api
+from magnum.conf import api
 # from magnum.conf import barbican
 # from magnum.conf import certificates
 # from magnum.conf import cinder
@@ -34,7 +34,7 @@ from oslo_config import cfg
 
 CONF = cfg.CONF
 
-# api.register_opts(CONF)
+api.register_opts(CONF)
 # barbican.register_opts(CONF)
 # cluster.register_opts(CONF)
 # cluster_templates.register_opts(CONF)

@@ -19,41 +19,10 @@ import pecan
 from magnum.api import config as api_config
 from magnum.api import middleware
 from magnum.common import config as common_config
+import magnum.conf
 from magnum.i18n import _LI
 
-# Register options for the service
-API_SERVICE_OPTS = [
-    cfg.PortOpt('port',
-                default=9511,
-                help='The port for the Magnum API server.'),
-    cfg.IPOpt('host',
-              default='127.0.0.1',
-              help='The listen IP for the Magnum API server.'),
-    cfg.IntOpt('max_limit',
-               default=1000,
-               help='The maximum number of items returned in a single '
-                    'response from a collection resource.'),
-    cfg.StrOpt('api_paste_config',
-               default="api-paste.ini",
-               help="Configuration file for WSGI definition of API."
-               ),
-    cfg.StrOpt('ssl_cert_file',
-               help="This option allows setting path to the SSL certificate "
-                    "of API server. "),
-    cfg.StrOpt('ssl_key_file',
-               help="This option specifies the path to the file where SSL "
-                    "private key of API server is stored when SSL is in "
-                    "effect. "),
-    cfg.BoolOpt('enabled_ssl',
-                default=False,
-                help='Enable SSL Magnum API service')
-]
-
-CONF = cfg.CONF
-opt_group = cfg.OptGroup(name='api',
-                         title='Options for the magnum-api service')
-CONF.register_group(opt_group)
-CONF.register_opts(API_SERVICE_OPTS, opt_group)
+CONF = magnum.conf.CONF
 
 LOG = log.getLogger(__name__)
 
@@ -83,14 +52,14 @@ def setup_app(config=None):
 
 def load_app():
     cfg_file = None
-    cfg_path = cfg.CONF.api.api_paste_config
+    cfg_path = CONF.api.api_paste_config
     if not os.path.isabs(cfg_path):
         cfg_file = CONF.find_file(cfg_path)
     elif os.path.exists(cfg_path):
         cfg_file = cfg_path
 
     if not cfg_file:
-        raise cfg.ConfigFilesNotFoundError([cfg.CONF.api.api_paste_config])
+        raise cfg.ConfigFilesNotFoundError([CONF.api.api_paste_config])
     LOG.info(_LI("Full WSGI config used: %s"), cfg_file)
     return deploy.loadapp("config:" + cfg_file)
 
