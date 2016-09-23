@@ -18,115 +18,14 @@ from heatclient import client as heatclient
 from keystoneauth1.exceptions import catalog
 from neutronclient.v2_0 import client as neutronclient
 from novaclient import client as novaclient
-from oslo_config import cfg
 from oslo_log import log as logging
 
 from magnum.common import exception
 from magnum.common import keystone
-from magnum.i18n import _
+import magnum.conf
 from magnum.i18n import _LW
 
-common_security_opts = [
-    cfg.StrOpt('ca_file',
-               help=_('Optional CA cert file to use in SSL connections.')),
-    cfg.StrOpt('cert_file',
-               help=_('Optional PEM-formatted certificate chain file.')),
-    cfg.StrOpt('key_file',
-               help=_('Optional PEM-formatted file that contains the '
-                      'private key.')),
-    cfg.BoolOpt('insecure',
-                default=False,
-                help=_("If set, then the server's certificate will not "
-                       "be verified."))]
-
-magnum_client_opts = [
-    cfg.StrOpt('region_name',
-               help=_('Region in Identity service catalog to use for '
-                      'communication with the OpenStack service.')),
-    cfg.StrOpt('endpoint_type',
-               default='publicURL',
-               help=_(
-                   'Type of endpoint in Identity service catalog to use '
-                   'for communication with the OpenStack service.'))]
-
-heat_client_opts = [
-    cfg.StrOpt('region_name',
-               help=_('Region in Identity service catalog to use for '
-                      'communication with the OpenStack service.')),
-    cfg.StrOpt('endpoint_type',
-               default='publicURL',
-               help=_(
-                   'Type of endpoint in Identity service catalog to use '
-                   'for communication with the OpenStack service.')),
-    cfg.StrOpt('api_version',
-               default='1',
-               help=_('Version of Heat API to use in heatclient.'))]
-
-glance_client_opts = [
-    cfg.StrOpt('region_name',
-               help=_('Region in Identity service catalog to use for '
-                      'communication with the OpenStack service.')),
-    cfg.StrOpt('endpoint_type',
-               default='publicURL',
-               help=_(
-                   'Type of endpoint in Identity service catalog to use '
-                   'for communication with the OpenStack service.')),
-    cfg.StrOpt('api_version',
-               default='2',
-               help=_('Version of Glance API to use in glanceclient.'))]
-
-barbican_client_opts = [
-    cfg.StrOpt('region_name',
-               help=_('Region in Identity service catalog to use for '
-                      'communication with the OpenStack service.')),
-    cfg.StrOpt('endpoint_type',
-               default='publicURL',
-               help=_(
-                   'Type of endpoint in Identity service catalog to use '
-                   'for communication with the OpenStack service.'))]
-
-nova_client_opts = [
-    cfg.StrOpt('region_name',
-               help=_('Region in Identity service catalog to use for '
-                      'communication with the OpenStack service.')),
-    cfg.StrOpt('endpoint_type',
-               default='publicURL',
-               help=_(
-                   'Type of endpoint in Identity service catalog to use '
-                   'for communication with the OpenStack service.')),
-    cfg.StrOpt('api_version',
-               default='2',
-               help=_('Version of Nova API to use in novaclient.'))]
-
-neutron_client_opts = [
-    cfg.StrOpt('region_name',
-               help=_('Region in Identity service catalog to use for '
-                      'communication with the OpenStack service.')),
-    cfg.StrOpt('endpoint_type',
-               default='publicURL',
-               help=_(
-                   'Type of endpoint in Identity service catalog to use '
-                   'for communication with the OpenStack service.'))]
-
-cinder_client_opts = [
-    cfg.StrOpt('region_name',
-               help=_('Region in Identity service catalog to use for '
-                      'communication with the OpenStack service.'))]
-
-
-cfg.CONF.register_opts(magnum_client_opts, group='magnum_client')
-cfg.CONF.register_opts(heat_client_opts, group='heat_client')
-cfg.CONF.register_opts(glance_client_opts, group='glance_client')
-cfg.CONF.register_opts(barbican_client_opts, group='barbican_client')
-cfg.CONF.register_opts(nova_client_opts, group='nova_client')
-cfg.CONF.register_opts(neutron_client_opts, group='neutron_client')
-cfg.CONF.register_opts(cinder_client_opts, group='cinder_client')
-
-cfg.CONF.register_opts(common_security_opts, group='heat_client')
-cfg.CONF.register_opts(common_security_opts, group='glance_client')
-cfg.CONF.register_opts(common_security_opts, group='nova_client')
-cfg.CONF.register_opts(common_security_opts, group='neutron_client')
-
+CONF = magnum.conf.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -180,7 +79,7 @@ class OpenStackClients(object):
         return self._keystone
 
     def _get_client_option(self, client, option):
-        return getattr(getattr(cfg.CONF, '%s_client' % client), option)
+        return getattr(getattr(CONF, '%s_client' % client), option)
 
     @exception.wrap_keystone_exception
     def heat(self):

@@ -18,7 +18,6 @@ import itertools
 import magnum.api.validation
 import magnum.common.cert_manager
 from magnum.common.cert_manager import local_cert_manager
-import magnum.common.clients
 import magnum.common.exception
 import magnum.common.rpc_service
 import magnum.common.service
@@ -42,13 +41,6 @@ def list_opts():
         ('database', magnum.db.sql_opts),
         ('docker', magnum.common.docker_utils.docker_opts),
         ('trust', magnum.common.keystone.trust_opts),
-        ('magnum_client', magnum.common.clients.magnum_client_opts),
-        ('heat_client', magnum.common.clients.heat_client_opts),
-        ('glance_client', magnum.common.clients.glance_client_opts),
-        ('barbican_client', magnum.common.clients.barbican_client_opts),
-        ('cinder_client', magnum.common.clients.cinder_client_opts),
-        ('nova_client', magnum.common.clients.nova_client_opts),
-        ('neutron_client', magnum.common.clients.neutron_client_opts),
         ('x509', magnum.common.x509.config.x509_opts),
         ('cluster_heat',
             magnum.conductor.handlers.cluster_conductor.cluster_heat_opts),
