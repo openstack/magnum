@@ -109,6 +109,9 @@ perform the following steps:
     - --cloud_config=/etc/sysconfig/kube_openstack_config
     - --cloud_provider=openstack
 
+   When the file is saved, the pod will automatically restart the
+   kube-controller-manager container to pick up the change.
+
 3. Enter OpenStack user credential::
 
     sudo vi /etc/sysconfig/kube_openstack_config
@@ -123,12 +126,6 @@ perform the following steps:
 
     sudo service kube-apiserver restart
     service kube-apiserver status
-
-5. Restart the kube-controller-manager container::
-
-    KUBE_CONTROLLER=$(sudo docker ps | awk '/k8s_kube-controller/{print $1}')
-    sudo docker restart $KUBE_CONTROLLER
-    sudo docker inspect $KUBE_CONTROLLER
 
 This only needs to be done once.  The steps can be reversed to disable the
 load balancer feature. Before deleting the Kubernetes cluster, make sure to
@@ -245,9 +242,13 @@ Finally associate the floating IP with the port of the VIP::
 
     neutron floatingip-associate $FLOATING_ID $PORT_ID
 
-The endpoint for nginx can now be accessed at this floating IP::
+The endpoint for nginx can now be accessed on a browser at this floating IP::
 
     http://172.24.4.78:80
+
+Alternatively, you can check for the nginx 'welcome' message by::
+
+    curl http://172.24.4.78:80
 
 NOTE: it is not necessary to indicate port :80 here but it is shown to
 correlate with the port that was specified in the service manifest.
