@@ -17,7 +17,6 @@
 import os
 import sys
 
-from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_reports import guru_meditation_report as gmr
 from oslo_service import service
@@ -29,9 +28,11 @@ from magnum.conductor.handlers import ca_conductor
 from magnum.conductor.handlers import cluster_conductor
 from magnum.conductor.handlers import conductor_listener
 from magnum.conductor.handlers import indirection_api
+import magnum.conf
 from magnum.i18n import _LI
 from magnum import version
 
+CONF = magnum.conf.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -42,9 +43,7 @@ def main():
 
     LOG.info(_LI('Starting server in PID %s'), os.getpid())
     LOG.debug("Configuration:")
-    cfg.CONF.log_opt_values(LOG, logging.DEBUG)
-
-    cfg.CONF.import_opt('topic', 'magnum.conductor.config', group='conductor')
+    CONF.log_opt_values(LOG, logging.DEBUG)
 
     conductor_id = short_id.generate_id()
     endpoints = [
@@ -54,8 +53,8 @@ def main():
         ca_conductor.Handler(),
     ]
 
-    server = rpc_service.Service.create(cfg.CONF.conductor.topic,
+    server = rpc_service.Service.create(CONF.conductor.topic,
                                         conductor_id, endpoints,
                                         binary='magnum-conductor')
-    launcher = service.launch(cfg.CONF, server)
+    launcher = service.launch(CONF, server)
     launcher.wait()

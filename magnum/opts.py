@@ -22,7 +22,6 @@ import magnum.common.exception
 import magnum.common.rpc_service
 import magnum.common.service
 import magnum.common.x509.config
-import magnum.conductor.config
 import magnum.conductor.handlers.cluster_conductor
 import magnum.db
 
@@ -35,7 +34,6 @@ def list_opts():
                          magnum.common.rpc_service.periodic_opts,
                          magnum.common.service.service_opts,
                          )),
-        ('conductor', magnum.conductor.config.SERVICE_OPTS),
         ('database', magnum.db.sql_opts),
         ('docker', magnum.common.docker_utils.docker_opts),
         ('trust', magnum.common.keystone.trust_opts),

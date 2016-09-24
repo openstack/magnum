@@ -21,7 +21,7 @@ from magnum.conf import barbican
 from magnum.conf import cinder
 from magnum.conf import cluster
 # from magnum.conf import cluster_templates
-# from magnum.conf import conductor
+from magnum.conf import conductor
 # from magnum.conf import database
 # from magnum.conf import docker
 from magnum.conf import glance
@@ -40,7 +40,7 @@ cluster.register_opts(CONF)
 # cluster_templates.register_opts(CONF)
 # certificates.register_opts(CONF)
 cinder.register_opts(CONF)
-# conductor.register_opts(CONF)
+conductor.register_opts(CONF)
 # database.register_opts(CONF)
 # docker.register_opts(CONF)
 glance.register_opts(CONF)
