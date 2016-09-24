@@ -15,7 +15,6 @@
 
 import itertools
 
-import magnum.api.validation
 import magnum.common.cert_manager
 from magnum.common.cert_manager import local_cert_manager
 import magnum.common.exception
@@ -44,7 +43,6 @@ def list_opts():
             itertools.chain(magnum.common.cert_manager.cert_manager_opts,
                             local_cert_manager.local_cert_manager_opts,
                             )),
-        ('cluster_template', magnum.api.validation.cluster_template_opts),
         ('keystone_auth', magnum.common.keystone.keystone_auth_opts),
         ('docker_registry',
          magnum.drivers.common.template_def.docker_registry_opts)

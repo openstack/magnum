@@ -13,7 +13,6 @@
 import datetime
 
 import mock
-from oslo_config import cfg
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
 from six.moves.urllib import parse as urlparse
@@ -24,10 +23,13 @@ from magnum.api import attr_validator
 from magnum.api.controllers.v1 import baymodel as api_baymodel
 from magnum.common import exception
 from magnum.common import policy as magnum_policy
+import magnum.conf
 from magnum.tests import base
 from magnum.tests.unit.api import base as api_base
 from magnum.tests.unit.api import utils as apiutils
 from magnum.tests.unit.objects import utils as obj_utils
+
+CONF = magnum.conf.CONF
 
 
 class TestBayModelObject(base.TestCase):
@@ -171,7 +173,7 @@ class TestListBayModel(api_base.FunctionalTest):
         self.assertIn(next_marker, response['next'])
 
     def test_collection_links_default_limit(self):
-        cfg.CONF.set_override('max_limit', 3, 'api')
+        CONF.set_override('max_limit', 3, 'api')
         for id_ in range(5):
             obj_utils.create_test_cluster_template(
                 self.context, id=id_, uuid=uuidutils.generate_uuid())
@@ -625,11 +627,10 @@ class TestPost(api_base.FunctionalTest):
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
         for k, v in baymodel_config_dict.items():
-                    cfg.CONF.set_override(k, v, 'cluster_template')
+                    CONF.set_override(k, v, 'cluster_template')
         with mock.patch.object(
                 self.dbapi, 'create_cluster_template',
                 wraps=self.dbapi.create_cluster_template) as cc_mock:
-
             bdict = apiutils.baymodel_post_data(**baymodel_dict)
             response = self.post_json('/baymodels', bdict,
                                       expect_errors=expect_errors)
@@ -639,7 +640,7 @@ class TestPost(api_base.FunctionalTest):
                 expected_driver = bdict.get('network_driver')
                 if not expected_driver:
                     expected_driver = (
-                        cfg.CONF.cluster_template.swarm_default_network_driver)
+                        CONF.cluster_template.swarm_default_network_driver)
                 self.assertEqual(expected_driver,
                                  response.json['network_driver'])
                 self.assertEqual(bdict['image_id'],
