@@ -21,16 +21,16 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 from cryptography import x509
-from oslo_config import cfg
 from oslo_log import log as logging
 
 from magnum.common import exception
 from magnum.common.x509 import validator
+import magnum.conf
 from magnum.i18n import _LE
 
 LOG = logging.getLogger(__name__)
 
-cfg.CONF.import_group('x509', 'magnum.common.x509.config')
+CONF = magnum.conf.CONF
 
 
 def generate_ca_certificate(subject_name, encryption_password=None):
@@ -106,7 +106,7 @@ def _generate_certificate(issuer_name, subject_name, extensions, ca_key=None,
 
     private_key = rsa.generate_private_key(
         public_exponent=65537,
-        key_size=cfg.CONF.x509.rsa_key_size,
+        key_size=CONF.x509.rsa_key_size,
         backend=default_backend()
     )
 
@@ -192,7 +192,7 @@ def sign(csr, issuer_name, ca_key, ca_key_password=None,
             LOG.exception(_LE("Received invalid csr {0}.").format(csr))
             raise exception.InvalidCsr(csr=csr)
 
-    term_of_validity = cfg.CONF.x509.term_of_validity
+    term_of_validity = CONF.x509.term_of_validity
     one_day = datetime.timedelta(1, 0, 0)
     expire_after = datetime.timedelta(term_of_validity, 0, 0)
 

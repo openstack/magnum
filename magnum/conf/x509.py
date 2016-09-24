@@ -1,16 +1,14 @@
-# Copyright 2015 NEC Corporation.  All rights reserved.
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy
+# of the License at
 #
-# Licensed under the Apache License, Version 2.0 (the "License"); you may
-# not use this file except in compliance with the License. You may obtain
-# a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
+#    http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-# License for the specific language governing permissions and limitations
-# under the License.
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from oslo_config import cfg
 
@@ -31,6 +29,8 @@ DEFAULT_ALLOWED_KEY_USAGE = [
     extensions.KeyUsages.KEY_ENCIPHERMENT.value[0],
     extensions.KeyUsages.CONTENT_COMMITMENT.value[0]]
 
+x509_group = cfg.OptGroup(name='x509',
+                          title='Options for X509 in Magnum')
 
 x509_opts = [
     cfg.BoolOpt('allow_ca',
@@ -50,4 +50,13 @@ x509_opts = [
     cfg.IntOpt('rsa_key_size',
                default=2048, help=_('Size of generated private key. '))]
 
-cfg.CONF.register_opts(x509_opts, group='x509')
+
+def register_opts(conf):
+    conf.register_group(x509_group)
+    conf.register_opts(x509_opts, group=x509_group)
+
+
+def list_opts():
+    return {
+        x509_group: x509_opts
+    }
