@@ -16,30 +16,18 @@ import os
 from os import path
 import uuid
 
-from oslo_config import cfg
 from oslo_log import log as logging
 
 from magnum.common.cert_manager import cert_manager
 from magnum.common import exception
+import magnum.conf
 from magnum.i18n import _
 from magnum.i18n import _LE
 from magnum.i18n import _LW
 
-
 LOG = logging.getLogger(__name__)
 
-CONF = cfg.CONF
-
-TLS_STORAGE_DEFAULT = '/var/lib/magnum/certificates/'
-
-local_cert_manager_opts = [
-    cfg.StrOpt('storage_path',
-               default=TLS_STORAGE_DEFAULT,
-               help='Absolute path of the certificate storage directory. '
-                    'Defaults to /var/lib/magnum/certificates/.')
-]
-
-CONF.register_opts(local_cert_manager_opts, group='certificates')
+CONF = magnum.conf.CONF
 
 
 class Cert(cert_manager.Cert):

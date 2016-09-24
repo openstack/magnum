@@ -13,10 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import itertools
-
-import magnum.common.cert_manager
-from magnum.common.cert_manager import local_cert_manager
 import magnum.common.exception
 import magnum.common.x509.config
 import magnum.db
@@ -27,10 +23,6 @@ def list_opts():
     return [
         ('trust', magnum.common.keystone.trust_opts),
         ('x509', magnum.common.x509.config.x509_opts),
-        ('certificates',
-            itertools.chain(magnum.common.cert_manager.cert_manager_opts,
-                            local_cert_manager.local_cert_manager_opts,
-                            )),
         ('keystone_auth', magnum.common.keystone.keystone_auth_opts),
         ('docker_registry',
          magnum.drivers.common.template_def.docker_registry_opts)
