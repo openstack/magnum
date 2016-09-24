@@ -17,8 +17,8 @@ import itertools
 
 import magnum.common.cert_manager
 from magnum.common.cert_manager import local_cert_manager
+import magnum.common.docker_utils
 import magnum.common.exception
-import magnum.common.rpc_service
 import magnum.common.service
 import magnum.common.x509.config
 import magnum.db
@@ -27,10 +27,7 @@ import magnum.drivers.common.template_def
 
 def list_opts():
     return [
-        ('DEFAULT',
-         itertools.chain(magnum.common.rpc_service.periodic_opts,
-                         magnum.common.service.service_opts,
-                         )),
+        ('DEFAULT', magnum.common.service.service_opts),
         ('docker', magnum.common.docker_utils.docker_opts),
         ('trust', magnum.common.keystone.trust_opts),
         ('x509', magnum.common.x509.config.x509_opts),

@@ -15,11 +15,11 @@
 """Common RPC service and API tools for Magnum."""
 
 import eventlet
-from oslo_config import cfg
 import oslo_messaging as messaging
 from oslo_service import service
 
 from magnum.common import rpc
+import magnum.conf
 from magnum.objects import base as objects_base
 from magnum.service import periodic
 from magnum.servicegroup import magnum_service_periodic as servicegroup
@@ -41,25 +41,7 @@ TRANSPORT_ALIASES = {
     'magnum.openstack.common.rpc.impl_zmq': 'zmq',
 }
 
-periodic_opts = [
-    cfg.BoolOpt('periodic_global_stack_list',
-                default=False,
-                help="List Heat stacks globally when syncing clusters. "
-                     "Default is to do retrieve each cluster's stack  "
-                     "individually. Reduces number of requests against "
-                     "Heat API if enabled but requires changes to Heat's "
-                     "policy.json."),
-    cfg.BoolOpt('periodic_enable',
-                default=True,
-                help='Enable periodic tasks.'),
-    cfg.IntOpt('periodic_interval_max',
-               default=60,
-               help='Max interval size between periodic tasks execution in '
-                    'seconds.'),
-]
-
-CONF = cfg.CONF
-CONF.register_opts(periodic_opts)
+CONF = magnum.conf.CONF
 
 
 class Service(service.Service):
@@ -68,7 +50,7 @@ class Service(service.Service):
         super(Service, self).__init__()
         serializer = rpc.RequestContextSerializer(
             objects_base.MagnumObjectSerializer())
-        transport = messaging.get_transport(cfg.CONF,
+        transport = messaging.get_transport(CONF,
                                             aliases=TRANSPORT_ALIASES)
         # TODO(asalkeld) add support for version='x.y'
         target = messaging.Target(topic=topic, server=server)
@@ -102,7 +84,7 @@ class API(object):
             objects_base.MagnumObjectSerializer())
         if transport is None:
             exmods = rpc.get_allowed_exmods()
-            transport = messaging.get_transport(cfg.CONF,
+            transport = messaging.get_transport(CONF,
                                                 allowed_remote_exmods=exmods,
                                                 aliases=TRANSPORT_ALIASES)
         self._context = context
