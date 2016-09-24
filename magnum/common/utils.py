@@ -26,36 +26,15 @@ import shutil
 import tempfile
 
 from oslo_concurrency import processutils
-from oslo_config import cfg
 from oslo_log import log as logging
 import six
 
 from magnum.common import exception
+import magnum.conf
 from magnum.i18n import _LE
 from magnum.i18n import _LW
 
-
-# Default symbols to use for passwords. Avoids visually confusing characters.
-# ~6 bits per symbol
-DEFAULT_PASSWORD_SYMBOLS = ['23456789',  # Removed: 0,1
-                            'ABCDEFGHJKLMNPQRSTUVWXYZ',   # Removed: I, O
-                            'abcdefghijkmnopqrstuvwxyz']  # Removed: l
-
-UTILS_OPTS = [
-    cfg.StrOpt('rootwrap_config',
-               default="/etc/magnum/rootwrap.conf",
-               help='Path to the rootwrap configuration file to use for '
-                    'running commands as root.'),
-    cfg.StrOpt('tempdir',
-               help='Explicitly specify the temporary working directory.'),
-    cfg.ListOpt('password_symbols',
-                default=DEFAULT_PASSWORD_SYMBOLS,
-                help='Symbols to use for passwords')
-]
-
-CONF = cfg.CONF
-CONF.register_opts(UTILS_OPTS)
-
+CONF = magnum.conf.CONF
 LOG = logging.getLogger(__name__)
 
 MEMORY_UNITS = {

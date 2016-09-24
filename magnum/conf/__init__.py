@@ -32,6 +32,7 @@ from magnum.conf import magnum_client
 from magnum.conf import neutron
 from magnum.conf import nova
 from magnum.conf import paths
+from magnum.conf import utils
 # from magnum.conf import x509
 
 CONF = cfg.CONF
@@ -53,4 +54,5 @@ magnum_client.register_opts(CONF)
 neutron.register_opts(CONF)
 nova.register_opts(CONF)
 paths.register_opts(CONF)
+utils.register_opts(CONF)
 # x509.register_opts(CONF)
