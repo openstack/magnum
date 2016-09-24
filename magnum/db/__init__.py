@@ -15,7 +15,7 @@
 from oslo_config import cfg
 from oslo_db import options
 
-from magnum.common import paths
+from magnum.conf import paths
 
 
 sql_opts = [

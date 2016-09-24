@@ -18,10 +18,8 @@ from glob import glob
 from oslo_config import cfg
 from yaml import load
 
-
-from magnum.common import paths
+from magnum.conf import paths
 from magnum.tests import base
-
 
 cfg.CONF.register_opts([cfg.StrOpt('template_path',
                         default=paths.basedir_def('templates'),

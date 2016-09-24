@@ -29,8 +29,7 @@ import magnum.drivers.common.template_def
 def list_opts():
     return [
         ('DEFAULT',
-         itertools.chain(magnum.common.paths.PATH_OPTS,
-                         magnum.common.utils.UTILS_OPTS,
+         itertools.chain(magnum.common.utils.UTILS_OPTS,
                          magnum.common.rpc_service.periodic_opts,
                          magnum.common.service.service_opts,
                          )),
