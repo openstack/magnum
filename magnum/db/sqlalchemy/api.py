@@ -14,7 +14,6 @@
 
 """SQLAlchemy storage backend."""
 
-from oslo_config import cfg
 from oslo_db import exception as db_exc
 from oslo_db.sqlalchemy import session as db_session
 from oslo_db.sqlalchemy import utils as db_utils
@@ -25,11 +24,12 @@ from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy.orm.exc import NoResultFound
 
 from magnum.common import exception
+import magnum.conf
 from magnum.db import api
 from magnum.db.sqlalchemy import models
 from magnum.i18n import _
 
-CONF = cfg.CONF
+CONF = magnum.conf.CONF
 
 
 _FACADE = None

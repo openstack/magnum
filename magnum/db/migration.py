@@ -16,18 +16,19 @@
 
 """Database setup and migration commands."""
 
-from oslo_config import cfg
 from stevedore import driver
 
+import magnum.conf
+
+CONF = magnum.conf.CONF
 _IMPL = None
 
 
 def get_backend():
     global _IMPL
     if not _IMPL:
-        cfg.CONF.import_opt('backend', 'oslo_db.options', group='database')
         _IMPL = driver.DriverManager("magnum.database.migration_backend",
-                                     cfg.CONF.database.backend).driver
+                                     CONF.database.backend).driver
     return _IMPL
 
 

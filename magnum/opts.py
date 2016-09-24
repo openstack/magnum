@@ -33,7 +33,6 @@ def list_opts():
                          magnum.common.rpc_service.periodic_opts,
                          magnum.common.service.service_opts,
                          )),
-        ('database', magnum.db.sql_opts),
         ('docker', magnum.common.docker_utils.docker_opts),
         ('trust', magnum.common.keystone.trust_opts),
         ('x509', magnum.common.x509.config.x509_opts),
