@@ -30,15 +30,15 @@ __all__ = [
 import socket
 
 
-from oslo_config import cfg
 import oslo_messaging as messaging
 from oslo_serialization import jsonutils
 
 from magnum.common import context as magnum_context
 from magnum.common import exception
+import magnum.conf
 
 
-CONF = cfg.CONF
+CONF = magnum.conf.CONF
 TRANSPORT = None
 NOTIFIER = None
 
