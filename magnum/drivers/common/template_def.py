@@ -44,7 +44,6 @@ docker_registry_opts = [
 
 CONF = magnum.conf.CONF
 CONF.register_opts(docker_registry_opts, group='docker_registry')
-CONF.import_opt('trustee_domain_id', 'magnum.common.keystone', group='trust')
 
 
 class ParameterMapping(object):

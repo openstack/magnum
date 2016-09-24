@@ -15,14 +15,11 @@
 #    under the License.
 
 import fixtures
-from oslo_config import cfg
 
 from magnum.common import config
+import magnum.conf
 
-CONF = cfg.CONF
-CONF.import_opt('host', 'magnum.common.service')
-CONF.import_opt('connection', 'oslo_db.options', group='database')
-CONF.import_opt('sqlite_synchronous', 'oslo_db.options', group='database')
+CONF = magnum.conf.CONF
 
 
 class ConfFixture(fixtures.Fixture):

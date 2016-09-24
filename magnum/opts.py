@@ -21,7 +21,6 @@ import magnum.drivers.common.template_def
 
 def list_opts():
     return [
-        ('trust', magnum.common.keystone.trust_opts),
         ('x509', magnum.common.x509.config.x509_opts),
         ('keystone_auth', magnum.common.keystone.keystone_auth_opts),
         ('docker_registry',
