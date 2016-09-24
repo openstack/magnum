@@ -15,23 +15,17 @@
 
 import abc
 
-from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import importutils
 import six
 
+import magnum.conf
 from magnum.objects import fields
 
 
 LOG = log.getLogger(__name__)
 
-CONF = cfg.CONF
-CONF.import_opt('docker_remote_api_version',
-                'magnum.common.docker_utils',
-                group='docker')
-CONF.import_opt('default_timeout',
-                'magnum.common.docker_utils',
-                group='docker')
+CONF = magnum.conf.CONF
 
 COE_CLASS_PATH = {
     fields.ClusterType.SWARM: 'magnum.conductor.swarm_monitor.SwarmMonitor',

@@ -24,7 +24,7 @@ from magnum.conf import cluster_heat
 from magnum.conf import cluster_templates
 from magnum.conf import conductor
 from magnum.conf import database
-# from magnum.conf import docker
+from magnum.conf import docker
 from magnum.conf import glance
 from magnum.conf import heat
 # from magnum.conf import keystone
@@ -48,7 +48,7 @@ cluster_heat.register_opts(CONF)
 cinder.register_opts(CONF)
 conductor.register_opts(CONF)
 database.register_opts(CONF)
-# docker.register_opts(CONF)
+docker.register_opts(CONF)
 glance.register_opts(CONF)
 heat.register_opts(CONF)
 # keystone.register_opts(CONF)
