@@ -23,20 +23,11 @@ revision = '592131657ca1'
 down_revision = '4956f03cabad'
 
 from alembic import op
-from oslo_config import cfg
+
+import magnum.conf
 import sqlalchemy as sa
 
-from magnum.i18n import _
-
-
-cluster_heat_opts = [
-    cfg.StrOpt('cluster_coe',
-               default='kubernetes',
-               help=_('Container Orchestration Environments are '
-                      'kubernetes or swarm.'),
-               deprecated_group='bay_heat')
-]
-cfg.CONF.register_opts(cluster_heat_opts, group='cluster_heat')
+CONF = magnum.conf.CONF
 
 
 def upgrade():
@@ -48,5 +39,5 @@ def upgrade():
 
     op.execute(
         baymodel.update().values({
-            'coe': op.inline_literal(cfg.CONF.cluster_heat.cluster_coe)})
+            'coe': op.inline_literal("kubernetes")})
     )

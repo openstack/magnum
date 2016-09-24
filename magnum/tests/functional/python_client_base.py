@@ -18,7 +18,6 @@ Tests for `magnum` module.
 """
 
 import os
-from oslo_config import cfg
 import subprocess
 import tempfile
 import time
@@ -30,13 +29,17 @@ from heatclient import client as heatclient
 from k8sclient.client import api_client
 from k8sclient.client.apis import apiv_api
 from keystoneclient.v2_0 import client as ksclient
+
 from magnum.common.utils import rmtree_without_raise
+import magnum.conf
 from magnum.i18n import _LI
 from magnum.tests.functional.common import base
 from magnum.tests.functional.common import utils
 from magnumclient.common.apiclient import exceptions
 from magnumclient.common import cliutils
 from magnumclient.v1 import client as v1client
+
+CONF = magnum.conf.CONF
 
 
 class BaseMagnumClient(base.BaseMagnumTest):
@@ -268,9 +271,9 @@ extendedKeyUsage = clientAuth
             test_timeout = int(test_timeout)
         except ValueError:
             # If timeout value is invalid, set a default timeout.
-            test_timeout = cfg.CONF.cluster_heat.create_timeout
+            test_timeout = CONF.cluster_heat.create_timeout
         if test_timeout <= 0:
-            test_timeout = cfg.CONF.cluster_heat.create_timeout
+            test_timeout = CONF.cluster_heat.create_timeout
 
         self.useFixture(fixtures.Timeout(test_timeout, gentle=True))
 

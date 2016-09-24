@@ -20,9 +20,10 @@ from magnum.common.cert_manager import local_cert_manager
 import magnum.common.exception
 import magnum.common.rpc_service
 import magnum.common.service
+import magnum.common.utils
 import magnum.common.x509.config
-import magnum.conductor.handlers.cluster_conductor
 import magnum.db
+import magnum.drivers.common.template_def
 
 
 def list_opts():
@@ -37,8 +38,6 @@ def list_opts():
         ('docker', magnum.common.docker_utils.docker_opts),
         ('trust', magnum.common.keystone.trust_opts),
         ('x509', magnum.common.x509.config.x509_opts),
-        ('cluster_heat',
-            magnum.conductor.handlers.cluster_conductor.cluster_heat_opts),
         ('certificates',
             itertools.chain(magnum.common.cert_manager.cert_manager_opts,
                             local_cert_manager.local_cert_manager_opts,

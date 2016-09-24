@@ -279,11 +279,11 @@ class TestClusterConductorWithMesos(base.TestCase):
             env_files)
 
     @patch('magnum.conductor.utils.retrieve_cluster_template')
-    @patch('oslo_config.cfg')
+    @patch('magnum.conf.CONF')
     @patch('magnum.common.clients.OpenStackClients')
-    def setup_poll_test(self, mock_openstack_client, cfg,
+    def setup_poll_test(self, mock_openstack_client, mock_conf,
                         mock_retrieve_cluster_template):
-        cfg.CONF.cluster_heat.max_attempts = 10
+        mock_conf.cluster_heat.max_attempts = 10
 
         cluster = mock.MagicMock()
         mock_heat_stack = mock.MagicMock()
