@@ -20,6 +20,7 @@ import keystoneclient.exceptions as kc_exception
 from magnum.common import exception
 from magnum.common import keystone
 import magnum.conf
+from magnum.conf import keystone as ksconf
 from magnum.tests import base
 from magnum.tests import utils
 
@@ -40,19 +41,19 @@ class KeystoneClientTest(base.TestCase):
         plugin = keystone.ka_loading.get_plugin_loader('password')
         opts = keystone.ka_loading.get_auth_plugin_conf_options(plugin)
         cfg_fixture = self.useFixture(fixture.Config())
-        cfg_fixture.register_opts(opts, group=keystone.CFG_GROUP)
+        cfg_fixture.register_opts(opts, group=ksconf.CFG_GROUP)
         self.config(auth_type='password',
                     auth_url=dummy_url,
                     username='fake_user',
                     password='fake_pass',
                     project_name='fake_project',
-                    group=keystone.CFG_GROUP)
+                    group=ksconf.CFG_GROUP)
 
         self.config(auth_uri=dummy_url,
                     admin_user='magnum',
                     admin_password='varybadpass',
                     admin_tenant_name='service',
-                    group=keystone.CFG_LEGACY_GROUP)
+                    group=ksconf.CFG_LEGACY_GROUP)
 
     def test_client_with_password(self, mock_ks):
         self.ctx.is_admin = True

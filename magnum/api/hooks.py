@@ -12,16 +12,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-
-from oslo_config import cfg
 from pecan import hooks
 
 from magnum.common import context
 from magnum.conductor import api as conductor_api
+import magnum.conf
 
-CONF = cfg.CONF
-CONF.import_opt('auth_uri', 'keystonemiddleware.auth_token',
-                group='keystone_authtoken')
+CONF = magnum.conf.CONF
 
 
 class ContextHook(hooks.PecanHook):
@@ -105,7 +102,7 @@ class NoExceptionTracebackHook(hooks.PecanHook):
         json_body = state.response.json
         # Do not remove traceback when server in debug mode (except 'Server'
         # errors when 'debuginfo' will be used for traces).
-        if cfg.CONF.debug and json_body.get('faultcode') != 'Server':
+        if CONF.debug and json_body.get('faultcode') != 'Server':
             return
 
         faultsting = json_body.get('faultstring')
