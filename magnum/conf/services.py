@@ -16,7 +16,6 @@ from magnum.i18n import _
 
 service_opts = [
     cfg.StrOpt('host',
-               default=None,
                help=_('Name of this node. This can be an opaque identifier. '
                       'It is not necessarily a hostname, FQDN, or IP address. '
                       'However, the node name must be valid within '

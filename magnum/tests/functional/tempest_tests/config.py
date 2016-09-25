@@ -45,7 +45,6 @@ MagnumGroup = [
                help="Flavor id to use for ClusterTemplate."),
 
     cfg.StrOpt("magnum_url",
-               default=None,
                help="Bypass URL for Magnum to skip service catalog lookup"),
 
     cfg.StrOpt("master_flavor_id",
