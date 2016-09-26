@@ -254,51 +254,6 @@ class ClusterAlreadyExists(Conflict):
     message = _("A cluster with UUID %(uuid)s already exists.")
 
 
-class ContainerNotFound(ResourceNotFound):
-    message = _("Container %(container)s could not be found.")
-
-
-class ContainerAlreadyExists(Conflict):
-    message = _("A container with UUID %(uuid)s already exists.")
-
-
-class PodNotFound(ResourceNotFound):
-    message = _("Pod %(pod)s could not be found.")
-
-
-class PodAlreadyExists(Conflict):
-    message = _("A pod with UUID %(uuid)s already exists.")
-
-
-class PodListNotFound(ResourceNotFound):
-    message = _("Pod list could not be found for Cluster %(cluster_uuid)s.")
-
-
-class PodCreationFailed(Invalid):
-    message = _("Pod creation failed in Cluster %(cluster_uuid)s.")
-
-
-class ServiceNotFound(ResourceNotFound):
-    message = _("Service %(service)s could not be found.")
-
-
-class ServiceAlreadyExists(Conflict):
-    message = _("A service with UUID %(uuid)s already exists.")
-
-
-class ServiceListNotFound(ResourceNotFound):
-    message = _("Service list could not be found for Cluster "
-                "%(cluster_uuid)s.")
-
-
-class ServiceCreationFailed(Invalid):
-    message = _("Service creation failed for Cluster %(cluster_uuid)s.")
-
-
-class ContainerException(Exception):
-    pass
-
-
 class NotSupported(MagnumException):
     message = _("%(operation)s is not supported.")
     code = 400
