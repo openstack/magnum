@@ -127,9 +127,8 @@ function create_magnum_conf {
     # (Re)create ``magnum.conf``
     rm -f $MAGNUM_CONF
     iniset $MAGNUM_CONF DEFAULT debug "$ENABLE_DEBUG_LOG_LEVEL"
-    iniset $MAGNUM_CONF oslo_messaging_rabbit rabbit_userid $RABBIT_USERID
-    iniset $MAGNUM_CONF oslo_messaging_rabbit rabbit_password $RABBIT_PASSWORD
-    iniset $MAGNUM_CONF oslo_messaging_rabbit rabbit_host $RABBIT_HOST
+    iniset $MAGNUM_CONF DEFAULT transport_url \
+          "rabbit://$RABBIT_USERID:$RABBIT_PASSWORD@$RABBIT_HOST"
 
     iniset $MAGNUM_CONF database connection `database_connection_url magnum`
     iniset $MAGNUM_CONF api host "$MAGNUM_SERVICE_HOST"
