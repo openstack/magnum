@@ -1409,7 +1409,7 @@ For example, you can 'post' a JSON app description to
       "cmd": "while sleep 10; do date -u +%T; done"
     }
     END
-    $ API_ADDRESS=$(magnum cluster-show mesoscluster | awk '/ api_address /{print $4}')
+    $ API_ADDRESS=$(magnum cluster-show mesos-cluster | awk '/ api_address /{print $4}')
     $ curl -X POST -H "Content-Type: application/json" \
         http://${API_ADDRESS}:8080/v2/apps -d@app.json
 
@@ -2362,7 +2362,7 @@ the cinder volume in the json file ::
 
 4. Create the container using Marathon REST API ::
 
-    MASTER_IP=$(magnum cluster-show mesoscluster | awk '/ api_address /{print $4}')
+    MASTER_IP=$(magnum cluster-show mesos-cluster | awk '/ api_address /{print $4}')
     curl -X POST -H "Content-Type: application/json" \
     http://${MASTER_IP}:8080/v2/apps -d@mesos.json
 
