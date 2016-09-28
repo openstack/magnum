@@ -32,7 +32,12 @@ do
     sleep 5
 done
 
-/usr/bin/kubectl create -f /srv/kubernetes/kube-system-namespace.json
+#check for existence of namespace
+/usr/bin/kubectl get namespace kube-system
+
+if [ "\$?" != "0" ]; then
+    /usr/bin/kubectl create -f /srv/kubernetes/kube-system-namespace.json
+fi
 EOF
 }
 
