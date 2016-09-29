@@ -478,7 +478,7 @@ outputs:
       log in to the Mesos master via ssh or to access the Mesos API
       from outside the cluster.
 
-  mesos_slave_private:
+  mesos_slaves_private:
     value: {get_attr: [mesos_slaves, mesos_slave_ip]}
     description: >
       This is a list of the "private" addresses of all the Mesos slaves.
