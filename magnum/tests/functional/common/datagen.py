@@ -110,7 +110,6 @@ def baymodel_data(**kwargs):
         "docker_volume_size": 3,
         "labels": {},
         "public": False,
-        "fixed_network": "192.168.0.0/24",
         "dns_nameserver": "8.8.8.8",
         "flavor_id": data_utils.rand_name('bay'),
         "master_flavor_id": data_utils.rand_name('bay'),
@@ -217,7 +216,6 @@ def valid_swarm_baymodel(is_public=False):
     """
 
     return baymodel_data(image_id=config.Config.image_id,
-                         fixed_network="192.168.0.0/24",
                          flavor_id=config.Config.flavor_id, public=is_public,
                          dns_nameserver=config.Config.dns_nameserver,
                          master_flavor_id=config.Config.master_flavor_id,
@@ -353,7 +351,6 @@ def cluster_template_data(**kwargs):
         "docker_volume_size": 3,
         "labels": {},
         "public": False,
-        "fixed_network": "192.168.0.0/24",
         "dns_nameserver": "8.8.8.8",
         "flavor_id": data_utils.rand_name('cluster'),
         "master_flavor_id": data_utils.rand_name('cluster'),
@@ -497,7 +494,6 @@ def valid_swarm_cluster_template(is_public=False):
     """
     master_flavor_id = config.Config.master_flavor_id
     return cluster_template_data(image_id=config.Config.image_id,
-                                 fixed_network="192.168.0.0/24",
                                  flavor_id=config.Config.flavor_id,
                                  public=is_public,
                                  dns_nameserver=config.Config.dns_nameserver,
