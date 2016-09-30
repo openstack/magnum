@@ -161,7 +161,7 @@ we need a microversion".
   previously unspecified error code is the 400, 403, 404 and 415 cases. This is
   considered OK to return even if previously unspecified in the code since
   it's implied given keystone authentication can fail with a 403 and API
-  validation can fail with a 400 for invalid json request body. Request to
+  validation can fail with a 400 for invalid JSON request body. Request to
   url/resource that does not exist always fails with 404. Invalid content types
   are handled before API methods are called which results in a 415.
 

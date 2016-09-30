@@ -1306,11 +1306,11 @@ _`mesos_slave_executor_env_variables`
   environment variables to the executor and subsequent tasks.
   For more details, refer to the `Mesos configuration
   <http://mesos.apache.org/documentation/latest/configuration/>`_.
-  Valid value is the name of a json file, for example::
+  Valid value is the name of a JSON file, for example::
 
      mesos_slave_executor_env_variables=/home/ubuntu/test.json
 
-  The json file should contain environment variables, for example::
+  The JSON file should contain environment variables, for example::
 
     {
        "PATH": "/bin:/usr/bin",
@@ -2131,7 +2131,7 @@ Flocker.  Magnum currently supports Rexray as the volume driver for
 Swarm and Mesos.  Other drivers are being considered.
 
 Kubernetes allows a previously created Cinder block to be mounted to
-a pod and this is done by specifying the block ID in the pod yaml file.
+a pod and this is done by specifying the block ID in the pod YAML file.
 When the pod is scheduled on a node, Kubernetes will interface with
 Cinder to request the volume to be mounted on this node, then
 Kubernetes will launch the Docker container with the proper options to
@@ -2268,7 +2268,7 @@ Following is an example illustrating how Cinder is used in a pod.
             fsType: ext4
     END
 
-**NOTE:** The Cinder volume ID needs to be configured in the yaml file
+**NOTE:** The Cinder volume ID needs to be configured in the YAML file
 so the existing Cinder volume can be mounted in a pod by specifying
 the volume ID in the pod manifest as follows::
 
@@ -2353,7 +2353,7 @@ Using Cinder in Mesos
 **NOTE:** When the Mesos cluster is created using this ClusterTemplate, the
 Mesos cluster will be configured so that a filesystem on an existing cinder
 volume can be mounted in a container by configuring the parameters to mount
-the cinder volume in the json file ::
+the cinder volume in the JSON file ::
 
     "parameters": [
        { "key": "volume-driver", "value": "rexray" },

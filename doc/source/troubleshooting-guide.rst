@@ -609,7 +609,7 @@ Check the following:
 
     curl http://<master_node_ip>:2379/v2/keys/coreos.com/network/subnets
 
-  You should receive a json snippet that describes all the segments
+  You should receive a JSON snippet that describes all the segments
   allocated.
 
 - This network segment is passed to Docker via the parameter *--bip*.
