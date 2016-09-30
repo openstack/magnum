@@ -136,7 +136,6 @@ class BaseMagnumClient(base.BaseMagnumTest):
         #                Plan is to support other kinds of ClusterTemplate
         #                creation.
         coe = kwargs.pop('coe', 'kubernetes')
-        docker_volume_size = kwargs.pop('docker_volume_size', 3)
         network_driver = kwargs.pop('network_driver', 'flannel')
         volume_driver = kwargs.pop('volume_driver', 'cinder')
         labels = kwargs.pop('labels', {"K1": "V1", "K2": "V2"})
@@ -151,7 +150,6 @@ class BaseMagnumClient(base.BaseMagnumTest):
             image_id=cls.image_id,
             flavor_id=cls.flavor_id,
             master_flavor_id=cls.master_flavor_id,
-            docker_volume_size=docker_volume_size,
             network_driver=network_driver,
             volume_driver=volume_driver,
             dns_nameserver=cls.dns_nameserver,

@@ -92,7 +92,7 @@ parameters:
     description: >
       size of a cinder volume to allocate to docker for container/image
       storage
-    default: 25
+    default: 0
 
   docker_storage_driver:
     type: string

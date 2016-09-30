@@ -1,0 +1,4 @@
+# Environment file to NOT use a cinder volume to store containers
+resource_registry:
+  "Magnum::Optional::Cinder::Volume": "OS::Heat::None"
+  "Magnum::Optional::Cinder::VolumeAttachment": "OS::Heat::None"

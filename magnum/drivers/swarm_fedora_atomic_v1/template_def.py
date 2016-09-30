@@ -118,10 +118,19 @@ class AtomicSwarmTemplateDefinition(template_def.BaseTemplateDefinition):
                                       **kwargs)
 
     def get_env_files(self, cluster_template):
-        if cluster_template.master_lb_enabled:
-            return [template_def.COMMON_ENV_PATH + 'with_master_lb.yaml']
+        env_files = []
+
+        if cluster_template.docker_volume_size is None:
+            env_files.append('no_volume.yaml')
         else:
-            return [template_def.COMMON_ENV_PATH + 'no_master_lb.yaml']
+            env_files.append('with_volume.yaml')
+
+        if cluster_template.master_lb_enabled:
+            env_files.append('with_master_lb.yaml')
+        else:
+            env_files.append('no_master_lb.yaml')
+
+        return [template_def.COMMON_ENV_PATH + ef for ef in env_files]
 
     @property
     def driver_module_path(self):

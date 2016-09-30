@@ -100,7 +100,7 @@ parameters:
     description: >
       size of a cinder volume to allocate to docker for container/image
       storage
-    default: 25
+    default: 0
 
   docker_storage_driver:
     type: string
@@ -430,6 +430,7 @@ resources:
           master_flavor: {get_param: master_flavor}
           external_network: {get_param: external_network}
           kube_allow_priv: {get_param: kube_allow_priv}
+          docker_volume_size: {get_param: docker_volume_size}
           docker_storage_driver: {get_param: docker_storage_driver}
           wait_condition_timeout: {get_param: wait_condition_timeout}
           network_driver: {get_param: network_driver}
@@ -486,6 +487,7 @@ resources:
           etcd_server_ip: {get_attr: [etcd_address_switch, private_ip]}
           external_network: {get_param: external_network}
           kube_allow_priv: {get_param: kube_allow_priv}
+          docker_volume_size: {get_param: docker_volume_size}
           docker_storage_driver: {get_param: docker_storage_driver}
           wait_condition_timeout: {get_param: wait_condition_timeout}
           registry_enabled: {get_param: registry_enabled}

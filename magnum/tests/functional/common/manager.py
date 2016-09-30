@@ -28,7 +28,7 @@ class Manager(clients.Manager):
         if not credentials:
             credentials = common_creds.get_configured_credentials(
                 'identity_admin')
-        super(Manager, self).__init__(credentials, 'container-infra')
+        super(Manager, self).__init__(credentials)
         self.auth_provider.orig_base_url = self.auth_provider.base_url
         self.auth_provider.base_url = self.bypassed_base_url
         auth = self.auth_provider
