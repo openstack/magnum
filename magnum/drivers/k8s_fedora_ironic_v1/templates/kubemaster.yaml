@@ -35,6 +35,12 @@ parameters:
     constraints:
       - allowed_values: ["true", "false"]
 
+  docker_volume_size:
+    type: number
+    description: >
+      size of a cinder volume to allocate to docker for container/image
+      storage
+
   docker_storage_driver:
     type: string
     description: docker storage driver name
@@ -222,6 +228,7 @@ resources:
             "$KUBE_API_PORT": {get_param: kubernetes_port}
             "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
             "$DOCKER_VOLUME": 'None'
+            "$DOCKER_VOLUME_SIZE": {get_param: docker_volume_size}
             "$DOCKER_STORAGE_DRIVER": {get_param: docker_storage_driver}
             "$NETWORK_DRIVER": {get_param: network_driver}
             "$FLANNEL_NETWORK_CIDR": {get_param: flannel_network_cidr}

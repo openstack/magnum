@@ -80,17 +80,19 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
 
     def get_env_files(self, cluster_template):
         env_files = []
-        if cluster_template.master_lb_enabled:
-            env_files.append(
-                template_def.COMMON_ENV_PATH + 'with_master_lb.yaml')
-        else:
-            env_files.append(
-                template_def.COMMON_ENV_PATH + 'no_master_lb.yaml')
-        if cluster_template.floating_ip_enabled:
-            env_files.append(
-                template_def.COMMON_ENV_PATH + 'enable_floating_ip.yaml')
-        else:
-            env_files.append(
-                template_def.COMMON_ENV_PATH + 'disable_floating_ip.yaml')
 
-        return env_files
+        if cluster_template.docker_volume_size is None:
+            env_files.append('no_volume.yaml')
+        else:
+            env_files.append('with_volume.yaml')
+
+        if cluster_template.master_lb_enabled:
+            env_files.append('with_master_lb.yaml')
+        else:
+            env_files.append('no_master_lb.yaml')
+        if cluster_template.floating_ip_enabled:
+            env_files.append('enable_floating_ip.yaml')
+        else:
+            env_files.append('disable_floating_ip.yaml')
+
+        return [template_def.COMMON_ENV_PATH + ef for ef in env_files]

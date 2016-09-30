@@ -545,7 +545,6 @@ class TestPost(api_base.FunctionalTest):
         self._create_baymodel_raises_app_error(coe='osomatsu')
 
     def test_create_baymodel_with_invalid_docker_volume_size(self):
-        self._create_baymodel_raises_app_error(docker_volume_size=0)
         self._create_baymodel_raises_app_error(docker_volume_size=-1)
         self._create_baymodel_raises_app_error(
             docker_volume_size=1,

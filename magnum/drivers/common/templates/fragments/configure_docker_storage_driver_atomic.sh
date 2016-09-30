@@ -15,9 +15,11 @@ configure_overlay () {
 
     rm -rf /var/lib/docker/*
 
-    mkfs.xfs -f ${device_path}
-    echo "${device_path} /var/lib/docker xfs defaults 0 0" >> /etc/fstab
-    mount -a
+    if [ -n "$DOCKER_VOLUME_SIZE" ] && [ "$DOCKER_VOLUME_SIZE" -gt 0 ]; then
+        mkfs.xfs -f ${device_path}
+        echo "${device_path} /var/lib/docker xfs defaults 0 0" >> /etc/fstab
+        mount -a
+    fi
 
     echo "STORAGE_DRIVER=overlay" > /etc/sysconfig/docker-storage-setup
 
@@ -31,8 +33,10 @@ configure_overlay () {
 configure_devicemapper () {
     clear_docker_storage_congiguration
 
-    pvcreate -f ${device_path}
-    vgcreate docker ${device_path}
+    if [ -n "$DOCKER_VOLUME_SIZE" ] && [ "$DOCKER_VOLUME_SIZE" -gt 0 ]; then
+        pvcreate -f ${device_path}
+        vgcreate docker ${device_path}
 
-    echo "VG=docker" > /etc/sysconfig/docker-storage-setup
+        echo "VG=docker" > /etc/sysconfig/docker-storage-setup
+    fi
 }

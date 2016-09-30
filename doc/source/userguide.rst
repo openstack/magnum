@@ -206,11 +206,11 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   is 'None'.
 
 --docker-volume-size \<docker-volume-size\>
-  The size in GB for the local storage on each server for the Docker
-  daemon to cache the images and host the containers.  Cinder volumes
-  provide the storage.  The default is 25 GB. For the 'devicemapper'
-  storage driver, the minimum value is 3GB. For the 'overlay' storage
-  driver, the minimum value is 1GB.
+  If specified, container images will be stored in a cinder volume of the
+  specified size in GB. Each cluster node will have a volume attached of
+  the above size. If not specified, images will be stored in the compute
+  instance's local disk. For the 'devicemapper' storage driver, the minimum
+  value is 3GB. For the 'overlay' storage driver, the minimum value is 1GB.
 
 --docker-storage-driver \<docker-storage-driver\>
   The name of a driver to manage the storage for the images and the
@@ -359,8 +359,8 @@ Network
   needed.
 
 Storage
-  Cinder provides the block storage that is used for both hosting the
-  containers as well as persistent storage for the containers.
+  Cinder provides the block storage that can be used to host the
+  containers and as persistent storage for the containers.
 
 Security
   Barbican provides the storage of secrets such as certificates used
@@ -981,14 +981,8 @@ Volume driver (volume-driver)
 Storage driver (docker-storage-driver)
   Specified in the ClusterTemplate to select the Docker storage driver.  The
   supported storage drivers are 'devicemapper' and 'overlay', with
-  'devicemapper' being the default.  You may get better performance with
-  the overlay driver depending on your use patterns, with the requirement
-  that SELinux must be disabled inside the containers, although it still runs
-  in enforcing mode on the cluster servers.  Magnum will create a Cinder volume
-  for each node, mount it on the node and configure it as a logical
-  volume named 'docker'.  The Docker daemon will run the selected device
-  driver to manage this logical volume and host the container writable
-  layer there.  Refer to the `Storage`_ section for more details.
+  'devicemapper' being the default. Refer to the `Storage`_ section for more
+  details.
 
 Image (image-id)
   Specified in the ClusterTemplate to indicate the image to boot the servers.
@@ -1126,15 +1120,8 @@ Volume driver (volume-driver)
 Storage driver (docker-storage-driver)
   Specified in the ClusterTemplate to select the Docker storage driver.  The
   supported storage driver are 'devicemapper' and 'overlay', with
-  'devicemapper' being the default.  You may get better performance with
-  the 'overlay' driver depending on your use patterns, with the requirement
-  that SELinux must be disabled inside the containers, although it still runs
-  in enforcing mode on the cluster servers.  Magnum will create a Cinder volume
-  for each node and attach it as a device.  Then depending on the driver,
-  additional configuration is performed to make the volume available to
-  the particular driver.  For instance, 'devicemapper' uses LVM; therefore
-  Magnum will create physical volume and logical volume using the attached
-  device.  Refer to the `Storage`_ section for more details.
+  'devicemapper' being the default. Refer to the `Storage`_ section for more
+  details.
 
 Image (image-id)
   Specified in the ClusterTemplate to indicate the image to boot the servers
@@ -2132,25 +2119,32 @@ configured in the Docker daemon through a number of storage options.
 When the container is removed, the storage allocated to the particular
 container is also deleted.
 
-To manage this space in a flexible manner independent of the Nova
-instance flavor, Magnum creates a separate Cinder block volume for each
-node in the cluster, mounts it to the node and configures it to be used as
-ephemeral storage.  Users can specify the size of the Cinder volume with
-the ClusterTemplate attribute 'docker-volume-size'.  The default size is 5GB.
-Currently the block size is fixed at cluster creation time, but future
-lifecycle operations may allow modifying the block size during the
-life of the cluster.
+Magnum can manage the containers' filesystem in two ways, storing them
+on the local disk of the compute instances or in a separate Cinder block
+volume for each node in the cluster, mounts it to the node and
+configures it to be used as ephemeral storage.  Users can specify the
+size of the Cinder volume with the ClusterTemplate attribute
+'docker-volume-size'. Currently the block size is fixed at cluster
+creation time, but future lifecycle operations may allow modifying the
+block size during the life of the cluster.
 
-To use the Cinder block storage, there is a number of Docker
-storage drivers available.  Only 'devicemapper' is supported as the
-storage driver but other drivers such as 'OverlayFS' are being
-considered.  There are important trade-off between the choices
-for the storage drivers that should be considered.  For instance,
-'OperlayFS' may offer better performance, but it may not support
-the filesystem metadata needed to use SELinux, which is required
-to support strong isolation between containers running in the same
-cluster. Using the 'devicemapper' driver does allow the use of SELinux.
+Both local disk and the Cinder block storage can be used with a number
+of Docker storage drivers available.
 
+* 'devicemapper': When used with a dedicated Cinder volume it is
+  configured using direct-lvm and offers very good performance. If it's
+  used with the compute instance's local disk uses a loopback device
+  offering poor performance and it's not recommended for production
+  environments. Using the 'devicemapper' driver does allow the use of
+  SELinux.
+
+* 'overlay' When used with a dedicated Cinder volume offers as good
+  or better performance than devicemapper. If used on the local disk of
+  the compute instance (especially with high IOPS drives) you can get
+  significant performance gains. However, for kernel versions less than
+  4.9, SELinux must be disabled inside the containers resulting in worse
+  container isolation, although it still runs in enforcing mode on the
+  cluster compute instances.
 
 Persistent storage
 ------------------
