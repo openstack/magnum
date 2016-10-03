@@ -297,3 +297,18 @@ class TestAttrValidator(base.BaseTestCase):
         mock_context = mock.MagicMock()
         attr_validator.validate_os_resources(mock_context,
                                              mock_cluster_template)
+
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    def test_validate_os_resources_with_cluster(self, mock_os_cli):
+        mock_cluster_template = {}
+        mock_cluster = {'keypair': 'test-keypair'}
+        mock_keypair = mock.MagicMock()
+        mock_keypair.id = 'test-keypair'
+        mock_nova = mock.MagicMock()
+        mock_nova.keypairs.get.return_value = mock_keypair
+        mock_os_cli = mock.MagicMock()
+        mock_os_cli.nova.return_value = mock_nova
+        mock_context = mock.MagicMock()
+        attr_validator.validate_os_resources(mock_context,
+                                             mock_cluster_template,
+                                             mock_cluster)

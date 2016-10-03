@@ -415,9 +415,13 @@ class BaysController(base.Controller):
                        action='bay:create')
         baymodel = objects.ClusterTemplate.get_by_uuid(context,
                                                        bay.baymodel_id)
-        attr_validator.validate_os_resources(context, baymodel.as_dict())
-        attr_validator.validate_master_count(bay.as_dict(), baymodel.as_dict())
+
         bay_dict = bay.as_dict()
+        bay_dict['keypair'] = baymodel.keypair_id
+        attr_validator.validate_os_resources(context, baymodel.as_dict(),
+                                             bay_dict)
+        attr_validator.validate_master_count(bay.as_dict(), baymodel.as_dict())
+
         bay_dict['project_id'] = context.project_id
         bay_dict['user_id'] = context.user_id
         # NOTE(yuywz): We will generate a random human-readable name for
@@ -426,7 +430,6 @@ class BaysController(base.Controller):
         bay_dict['name'] = name
         bay_dict['coe_version'] = None
         bay_dict['container_version'] = None
-
         new_bay = objects.Cluster(context, **bay_dict)
         new_bay.uuid = uuid.uuid4()
         return new_bay

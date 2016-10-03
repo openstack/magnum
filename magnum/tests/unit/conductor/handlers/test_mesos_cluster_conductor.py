@@ -52,6 +52,7 @@ class TestClusterConductorWithMesos(base.TestCase):
             'id': 1,
             'uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
             'cluster_template_id': 'xx-xx-xx-xx',
+            'keypair': 'keypair_id',
             'name': 'cluster1',
             'stack_id': 'xx-xx-xx-xx',
             'api_address': '172.17.2.3',

@@ -101,13 +101,15 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   Mesos      Ubuntu
   ========== =====================
 
-This is a mandatory parameter and there is no default value.
+  This is a mandatory parameter and there is no default value.
 
 --keypair-id \<keypair-id\>
   The name or UUID of the SSH keypair to configure in the cluster servers
   for ssh access.  You will need the key to be able to ssh to the
   servers in the cluster.  The login name is specific to the cluster
-  driver.  This is a mandatory parameter and there is no default value.
+  driver. If keypair is not provided in template it will be required at
+  Cluster create. This value will be overridden by any keypair value that
+  is provided during Cluster create.
 
 --external-network-id \<external-network-id\>
   The name or network ID of a Neutron network to provide connectivity
@@ -426,6 +428,15 @@ follows:
   Name of the cluster to create.  If a name is not specified, a random
   name will be generated using a string and a number, for example
   "gamma-7-cluster".
+
+--keypair \<keypair\>
+  The name or UUID of the SSH keypair to configure in the cluster servers
+  for ssh access.  You will need the key to be able to ssh to the
+  servers in the cluster.  The login name is specific to the cluster
+  driver. If keypair is not provided it will attempt to use the value in
+  the ClusterTemplate. If the ClusterTemplate is also missing a keypair value
+  then an error will be returned.  The keypair value provided here will
+  override the keypair value from the ClusterTemplate.
 
 --node-count \<node-count\>
   The number of servers that will serve as node in the cluster.

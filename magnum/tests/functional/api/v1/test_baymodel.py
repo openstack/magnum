@@ -186,13 +186,6 @@ class BayModelTest(base.BaseTempestTest):
             self.baymodel_client.post_baymodel, gen_model)
 
     @testtools.testcase.attr('negative')
-    def test_create_baymodel_missing_keypair(self):
-        gen_model = datagen.baymodel_data_with_missing_keypair()
-        self.assertRaises(
-            exceptions.NotFound,
-            self.baymodel_client.post_baymodel, gen_model)
-
-    @testtools.testcase.attr('negative')
     def test_update_baymodel_invalid_patch(self):
         # get json object
         gen_model = datagen.baymodel_data_with_valid_keypair_image_flavor()

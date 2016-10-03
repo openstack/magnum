@@ -200,13 +200,11 @@ class ClusterTemplateTest(base.BaseTempestTest):
             exceptions.BadRequest,
             self.cluster_template_client.post_cluster_template, gen_model)
 
-    @testtools.testcase.attr('negative')
+    @testtools.testcase.attr('positive')
     def test_create_cluster_template_missing_keypair(self):
         gen_model = \
             datagen.cluster_template_data_with_missing_keypair()
-        self.assertRaises(
-            exceptions.NotFound,
-            self.cluster_template_client.post_cluster_template, gen_model)
+        resp, model = self._create_cluster_template(gen_model)
 
     @testtools.testcase.attr('negative')
     def test_update_cluster_template_invalid_patch(self):

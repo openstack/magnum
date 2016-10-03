@@ -1,0 +1,17 @@
+---
+prelude: >
+    Magnum's keypair-override-on-create blueprint [1]
+    allows for optional keypair value in ClusterTemplates
+    and the ability to specify a keypair value during
+    cluster creation.
+features:
+  - Added parameter in cluster-create to specify the
+    keypair. If keypair is not provided, the default
+    value from the matching ClusterTemplate will be used.
+  - Keypair is now optional for ClusterTemplate, in order
+    to allow Clusters to use keypairs separate from their
+    parent ClusterTemplate.
+deprecations:
+  - --keypair-id parameter in magnum CLI
+    cluster-template-create has been renamed to
+    --keypair.

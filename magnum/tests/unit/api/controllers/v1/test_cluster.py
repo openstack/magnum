@@ -741,6 +741,24 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
 
+    def test_create_cluster_with_keypair(self):
+        bdict = apiutils.cluster_post_data()
+        bdict['keypair'] = 'keypair2'
+        response = self.post_json('/clusters', bdict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        cluster, timeout = self.mock_cluster_create.call_args
+        self.assertEqual('keypair2', cluster[0].keypair)
+
+    def test_create_cluster_without_keypair(self):
+        bdict = apiutils.cluster_post_data()
+        response = self.post_json('/clusters', bdict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        cluster, timeout = self.mock_cluster_create.call_args
+        # Verify keypair from ClusterTemplate is used
+        self.assertEqual('keypair1', cluster[0].keypair)
+
 
 class TestDelete(api_base.FunctionalTest):
     def setUp(self):
