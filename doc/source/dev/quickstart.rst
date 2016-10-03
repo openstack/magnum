@@ -228,6 +228,17 @@ Create a keypair for use with the ClusterTemplate::
     test -f ~/.ssh/id_rsa.pub || ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
     nova keypair-add --pub-key ~/.ssh/id_rsa.pub testkey
 
+Check a dns server can resolve a host name properly::
+
+    dig <server name> @<dns server> +short
+
+For example::
+
+    $ dig www.openstack.org @8.8.8.8 +short
+    www.openstack.org.cdn.cloudflare.net.
+    104.20.64.68
+    104.20.65.68
+
 Building a Kubernetes Cluster - Based on Fedora Atomic
 ======================================================
 
