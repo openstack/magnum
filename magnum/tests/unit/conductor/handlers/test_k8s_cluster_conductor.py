@@ -317,7 +317,8 @@ class TestClusterConductorWithK8s(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/no_master_lb.yaml'],
+            ['../../common/templates/environments/no_master_lb.yaml',
+             '../../common/templates/environments/disable_floating_ip.yaml'],
             env_files)
 
     @patch('requests.get')
@@ -374,7 +375,8 @@ class TestClusterConductorWithK8s(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/no_master_lb.yaml'],
+            ['../../common/templates/environments/no_master_lb.yaml',
+             '../../common/templates/environments/disable_floating_ip.yaml'],
             env_files)
 
     @patch('requests.get')
