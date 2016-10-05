@@ -246,8 +246,6 @@ resources:
             "$TRUSTEE_PASSWORD": {get_param: trustee_password}
             "$TRUST_ID": {get_param: trust_id}
             "$AUTH_URL": {get_param: auth_url}
-            "$KUBE_API_PUBLIC_ADDRESS": {get_attr: [kube_master_floating, floating_ip_address]}
-            "$KUBE_API_PRIVATE_ADDRESS": {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
 
   configure_etcd:
     type: OS::Heat::SoftwareConfig
