@@ -86,11 +86,11 @@ EOF
 AUTH_URL=${AUTH_URL/v2.0/v3}
 content_type='Content-Type: application/json'
 url="$AUTH_URL/auth/tokens"
-USER_TOKEN=`curl -s -i -X POST -H "$content_type" -d "$auth_json" $url \
+USER_TOKEN=`curl -k -s -i -X POST -H "$content_type" -d "$auth_json" $url \
     | grep X-Subject-Token | awk '{print $2}' | tr -d '[[:space:]]'`
 
 # Get CA certificate for this cluster
-curl -X GET \
+curl -k -X GET \
   -H "X-Auth-Token: $USER_TOKEN" \
   $MAGNUM_URL/certificates/$CLUSTER_UUID | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > ${CA_CERT}
 
@@ -118,7 +118,7 @@ openssl req -new -days 1000 \
 
 # Send csr to Magnum to have it signed
 csr_req=$(python -c "import json; fp = open('${SERVER_CSR}'); print json.dumps({'cluster_uuid': '$CLUSTER_UUID', 'csr': fp.read()}); fp.close()")
-curl -X POST \
+curl -k -X POST \
     -H "X-Auth-Token: $USER_TOKEN" \
     -H "Content-Type: application/json" \
     -d "$csr_req" \
