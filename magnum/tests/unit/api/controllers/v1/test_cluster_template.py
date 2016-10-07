@@ -442,7 +442,7 @@ class TestPatch(api_base.FunctionalTest):
         self.assertTrue(response.json['errors'])
 
     def test_remove_mandatory_property_fail(self):
-        mandatory_properties = ('/image_id', '/keypair_id', '/coe',
+        mandatory_properties = ('/image_id', '/coe',
                                 '/external_network_id', '/server_type',
                                 '/tls_disabled', '/public',
                                 '/registry_enabled',
@@ -860,12 +860,15 @@ class TestPost(api_base.FunctionalTest):
                                   expect_errors=True)
         self.assertEqual(400, response.status_int)
 
-    def test_create_cluster_template_without_keypair_id(self):
+    @mock.patch('magnum.api.attr_validator.validate_image')
+    def test_create_cluster_template_without_keypair_id(self,
+                                                        mock_image_data):
+        mock_image_data.return_value = {'name': 'mock_name',
+                                        'os_distro': 'fedora-atomic'}
         bdict = apiutils.cluster_template_post_data()
         del bdict['keypair_id']
-        response = self.post_json('/clustertemplates', bdict,
-                                  expect_errors=True)
-        self.assertEqual(400, response.status_int)
+        response = self.post_json('/clustertemplates', bdict)
+        self.assertEqual(201, response.status_int)
 
     @mock.patch('magnum.api.attr_validator.validate_image')
     def test_create_cluster_template_with_dns(self,

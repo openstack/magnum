@@ -41,8 +41,9 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.9: Rename table name from 'bay' to 'cluster'
     #              Rename 'baymodel_id' to 'cluster_template_id'
     #              Rename 'bay_create_timeout' to 'create_timeout'
+    # Version 1.10: Added 'keypair' field
 
-    VERSION = '1.9'
+    VERSION = '1.10'
 
     dbapi = dbapi.get_instance()
 
@@ -53,6 +54,7 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
         'project_id': fields.StringField(nullable=True),
         'user_id': fields.StringField(nullable=True),
         'cluster_template_id': fields.StringField(nullable=True),
+        'keypair': fields.StringField(nullable=True),
         'stack_id': fields.StringField(nullable=True),
         'status': m_fields.ClusterStatusField(nullable=True),
         'status_reason': fields.StringField(nullable=True),

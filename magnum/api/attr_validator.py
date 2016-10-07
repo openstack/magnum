@@ -166,7 +166,7 @@ def validate_labels_executor_env_variables(labels):
         raise exception.InvalidParameterValue(err)
 
 
-def validate_os_resources(context, cluster_template):
+def validate_os_resources(context, cluster_template, cluster=None):
     """Validate ClusterTemplate's OpenStack Resources"""
 
     cli = clients.OpenStackClients(context)
@@ -177,6 +177,9 @@ def validate_os_resources(context, cluster_template):
                 validate_method(cli, cluster_template[attr])
             else:
                 validate_method(cluster_template[attr])
+
+    if cluster:
+        validate_keypair(cli, cluster['keypair'])
 
 
 def validate_master_count(cluster, cluster_template):
@@ -190,7 +193,6 @@ def validate_master_count(cluster, cluster_template):
 validators = {'image_id': validate_image,
               'flavor_id': validate_flavor,
               'master_flavor_id': validate_flavor,
-              'keypair_id': validate_keypair,
               'external_network_id': validate_external_network,
               'fixed_network': validate_fixed_network,
               'labels': validate_labels}

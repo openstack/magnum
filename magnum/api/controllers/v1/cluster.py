@@ -95,6 +95,10 @@ class Cluster(base.APIBase):
                                           mandatory=True)
     """The cluster_template UUID"""
 
+    keypair = wsme.wsattr(wtypes.StringType(min_length=1, max_length=255),
+                          default=None)
+    """The name or id of the nova ssh keypair"""
+
     node_count = wsme.wsattr(wtypes.IntegerType(minimum=1), default=1)
     """The node count for this cluster. Default to 1 if not set"""
 
@@ -152,7 +156,7 @@ class Cluster(base.APIBase):
     def _convert_with_links(cluster, url, expand=True):
         if not expand:
             cluster.unset_fields_except(['uuid', 'name', 'cluster_template_id',
-                                         'node_count', 'status',
+                                         'keypair', 'node_count', 'status',
                                          'create_timeout', 'master_count',
                                          'stack_id'])
 
@@ -174,6 +178,7 @@ class Cluster(base.APIBase):
         sample = cls(uuid='27e3153e-d5bf-4b7e-b517-fb518e17f34c',
                      name='example',
                      cluster_template_id=temp_id,
+                     keypair=None,
                      node_count=2,
                      master_count=1,
                      create_timeout=15,
@@ -360,10 +365,15 @@ class ClustersController(base.Controller):
         temp_id = cluster.cluster_template_id
         cluster_template = objects.ClusterTemplate.get_by_uuid(context,
                                                                temp_id)
+        # If keypair not present, use cluster_template value
+        if cluster.keypair is None:
+            cluster.keypair = cluster_template.keypair_id
+
         cluster_dict = cluster.as_dict()
 
         attr_validator.validate_os_resources(context,
-                                             cluster_template.as_dict())
+                                             cluster_template.as_dict(),
+                                             cluster_dict)
         attr_validator.validate_master_count(cluster_dict,
                                              cluster_template.as_dict())
 

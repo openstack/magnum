@@ -329,7 +329,7 @@ class BaseTemplateDefinition(TemplateDefinition):
         self._osc = None
 
         self.add_parameter('ssh_key_name',
-                           cluster_template_attr='keypair_id',
+                           cluster_attr='keypair',
                            required=True)
         self.add_parameter('server_image',
                            cluster_template_attr='image_id')

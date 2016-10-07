@@ -115,6 +115,7 @@ class Cluster(Base):
     uuid = Column(String(36))
     name = Column(String(255))
     cluster_template_id = Column(String(255))
+    keypair = Column(String(255))
     stack_id = Column(String(255))
     api_address = Column(String(255))
     node_addresses = Column(JSONEncodedList)
