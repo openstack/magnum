@@ -78,12 +78,12 @@ write_files:
 
       #trust is introduced in Keystone v3 version
       AUTH_URL=${AUTH_URL/v2.0/v3}
-      USER_TOKEN=`curl -s -i -X POST -H "Content-Type: application/json" -d @auth.json \
+      USER_TOKEN=`curl -k -s -i -X POST -H "Content-Type: application/json" -d @auth.json \
                        $AUTH_URL/auth/tokens | grep X-Subject-Token | awk '{print $2}'`
 
       rm -rf auth.json
 
-      ca_cert_json=$(curl -X GET \
+      ca_cert_json=$(curl -k -X GET \
         -H "X-Auth-Token: $USER_TOKEN" \
         $MAGNUM_URL/certificates/$CLUSTER_UUID)
       parse_json_response "${ca_cert_json}" > ${CA_CERT}
@@ -119,7 +119,7 @@ write_files:
       csr=$(cat $CLIENT_CSR | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g')
       csr_req="{\"cluster_uuid\": \"$CLUSTER_UUID\", \"csr\": \"$csr\"}"
       # Send csr to Magnum to have it signed
-      client_cert_json=$(curl -X POST \
+      client_cert_json=$(curl -k -X POST \
           -H "X-Auth-Token: $USER_TOKEN" \
           -H "Content-Type: application/json" \
           -d "$csr_req" \
