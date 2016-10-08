@@ -35,13 +35,6 @@
     "clustertemplate:update": "rule:default",
     "clustertemplate:publish": "rule:admin_or_owner",
 
-    "rc:create": "rule:default",
-    "rc:delete": "rule:default",
-    "rc:detail": "rule:default",
-    "rc:get": "rule:default",
-    "rc:get_all": "rule:default",
-    "rc:update": "rule:default",
-
     "certificate:create": "rule:admin_or_user",
     "certificate:get": "rule:admin_or_user",
 
