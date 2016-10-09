@@ -48,7 +48,7 @@ class TestHandler(db_base.DbTestCase):
         self.cluster = objects.Cluster(self.context, **cluster_dict)
         self.cluster.create()
 
-    @patch('magnum.conductor.scale_manager.ScaleManager')
+    @patch('magnum.conductor.scale_manager.get_scale_manager')
     @patch(
         'magnum.conductor.handlers.cluster_conductor.Handler._poll_and_check')
     @patch('magnum.conductor.handlers.cluster_conductor._update_stack')
@@ -116,7 +116,7 @@ class TestHandler(db_base.DbTestCase):
         cluster = objects.Cluster.get(self.context, self.cluster.uuid)
         self.assertEqual(1, cluster.node_count)
 
-    @patch('magnum.conductor.scale_manager.ScaleManager')
+    @patch('magnum.conductor.scale_manager.get_scale_manager')
     @patch(
         'magnum.conductor.handlers.cluster_conductor.Handler._poll_and_check')
     @patch('magnum.conductor.handlers.cluster_conductor._update_stack')

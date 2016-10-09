@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import abc
+from marathon import MarathonClient
 from oslo_log import log as logging
 
 from magnum.common import exception
@@ -23,6 +25,21 @@ from magnum import objects
 
 
 LOG = logging.getLogger(__name__)
+
+
+def get_scale_manager(context, osclient, cluster):
+    manager = None
+    coe = cluster.baymodel.coe
+    if coe == 'kubernetes':
+        manager = K8sScaleManager(context, osclient, cluster)
+    elif coe == 'mesos':
+        manager = MesosScaleManager(context, osclient, cluster)
+    else:
+        LOG.warning(_LW(
+            "Currently only kubernetes and mesos cluster scale manager "
+            "are available"))
+
+    return manager
 
 
 class ScaleManager(object):
@@ -46,13 +63,9 @@ class ScaleManager(object):
                 "%(stack_id)s") % {'output_key': hosts_output.heat_output,
                                    'stack_id': stack.id})
 
-        hosts_no_container = list(hosts)
-        k8s_api = k8s.create_k8s_api(self.context, cluster)
-        for pod in k8s_api.list_namespaced_pod(namespace='default').items:
-            host = pod.spec.node_name
-            if host in hosts_no_container:
-                hosts_no_container.remove(host)
-
+        hosts_with_container = self._get_hosts_with_container(self.context,
+                                                              cluster)
+        hosts_no_container = list(set(hosts) - hosts_with_container)
         LOG.debug('List of hosts that has no container: %s',
                   str(hosts_no_container))
 
@@ -76,3 +89,46 @@ class ScaleManager(object):
 
     def _get_num_of_removal(self):
         return self.old_cluster.node_count - self.new_cluster.node_count
+
+    @abc.abstractmethod
+    def _get_hosts_with_container(self, context, cluster):
+        """Return the hosts with container running on them."""
+        pass
+
+
+class K8sScaleManager(ScaleManager):
+
+    def __init__(self, context, osclient, cluster):
+        super(K8sScaleManager, self).__init__(context, osclient, cluster)
+
+    def _get_hosts_with_container(self, context, cluster):
+        k8s_api = k8s.create_k8s_api(self.context, cluster)
+        hosts = set()
+        for pod in k8s_api.list_namespaced_pod(namespace='default').items:
+            hosts.add(pod.spec.node_name)
+
+        return hosts
+
+
+class MesosScaleManager(ScaleManager):
+    """When scaling a mesos cluster, MesosScaleManager will inspect the
+
+    nodes and find out those with containers on them. Thus we can
+    ask Heat to delete the nodes without containers. Note that this
+    is a best effort basis -- Magnum doesn't have any synchronization
+    with Marathon, so while Magnum is checking for the containers to
+    choose nodes to remove, new containers can be deployed on the
+    nodes to be removed.
+    """
+
+    def __init__(self, context, osclient, cluster):
+        super(MesosScaleManager, self).__init__(context, osclient, cluster)
+
+    def _get_hosts_with_container(self, context, cluster):
+        marathon_client = MarathonClient(
+            'http://' + cluster.api_address + ':8080')
+        hosts = set()
+        for task in marathon_client.list_tasks():
+            hosts.add(task.host)
+
+        return hosts

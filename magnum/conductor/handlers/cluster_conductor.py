@@ -184,7 +184,7 @@ class Handler(object):
         if not delta:
             return cluster
 
-        manager = scale_manager.ScaleManager(context, osc, cluster)
+        manager = scale_manager.get_scale_manager(context, osc, cluster)
 
         conductor_utils.notify_about_cluster_operation(
             context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_PENDING)

@@ -2068,9 +2068,19 @@ Swarm
   consideration of what containers are running on the selected node.
 
 Mesos
-  No node selection heuristic is currently supported.  If you decrease
-  the node_count, a node will be chosen by magnum without
-  consideration of what containers are running on the selected node.
+  Magnum scans the running tasks on Marathon server to determine the
+  nodes on which there is *no* task running (empty nodes). If the
+  number of nodes to be removed is equal or less than the number of
+  these empty nodes, these nodes will be removed from the cluster.
+  If the number of nodes to be removed is larger than the number of
+  empty nodes, a warning message will be sent to the Magnum log and
+  the empty nodes along with additional nodes will be removed from the
+  cluster. The additional nodes are selected randomly and the containers
+  running on them will be deleted without warning. Note that even when
+  only the empty nodes are removed, there is no guarantee that no
+  container will be deleted because there is no locking to ensure that
+  Mesos will not launch new containers on these nodes after Magnum
+  has scanned the tasks.
 
 
 Currently, scaling containers and scaling cluster nodes are handled
