@@ -13,5 +13,5 @@
 #    limitations under the License.
 
 version = '1.0.0'
-driver = 'k8s_coreos'
+driver = 'k8s_coreos_v1'
 container_version = '1.11.2'

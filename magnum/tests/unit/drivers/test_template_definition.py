@@ -19,11 +19,17 @@ import six
 
 from magnum.common import exception
 import magnum.conf
+from magnum.drivers.common import driver
 from magnum.drivers.common import template_def as cmn_tdef
+from magnum.drivers.k8s_coreos_v1 import driver as k8s_coreos_dr
 from magnum.drivers.k8s_coreos_v1 import template_def as k8s_coreos_tdef
+from magnum.drivers.k8s_fedora_atomic_v1 import driver as k8sa_dr
 from magnum.drivers.k8s_fedora_atomic_v1 import template_def as k8sa_tdef
+from magnum.drivers.k8s_fedora_ironic_v1 import driver as k8s_i_dr
 from magnum.drivers.k8s_fedora_ironic_v1 import template_def as k8si_tdef
+from magnum.drivers.mesos_ubuntu_v1 import driver as mesos_dr
 from magnum.drivers.mesos_ubuntu_v1 import template_def as mesos_tdef
+from magnum.drivers.swarm_fedora_atomic_v1 import driver as swarm_dr
 from magnum.drivers.swarm_fedora_atomic_v1 import template_def as swarm_tdef
 from magnum.tests import base
 
@@ -34,13 +40,13 @@ CONF = magnum.conf.CONF
 
 class TemplateDefinitionTestCase(base.TestCase):
 
-    @mock.patch.object(cmn_tdef, 'iter_entry_points')
+    @mock.patch.object(driver, 'iter_entry_points')
     def test_load_entry_points(self, mock_iter_entry_points):
         mock_entry_point = mock.MagicMock()
         mock_entry_points = [mock_entry_point]
         mock_iter_entry_points.return_value = mock_entry_points.__iter__()
 
-        entry_points = cmn_tdef.TemplateDefinition.load_entry_points()
+        entry_points = driver.Driver().load_entry_points()
 
         for (expected_entry_point,
              (actual_entry_point, loaded_cls)) in zip(mock_entry_points,
@@ -48,76 +54,63 @@ class TemplateDefinitionTestCase(base.TestCase):
             self.assertEqual(expected_entry_point, actual_entry_point)
             expected_entry_point.load.assert_called_once_with(require=False)
 
-    def test_get_template_definitions(self):
-        defs = cmn_tdef.TemplateDefinition.get_template_definitions()
-
-        vm_atomic_k8s = defs[('vm', 'fedora-atomic', 'kubernetes')]
-        vm_coreos_k8s = defs[('vm', 'coreos', 'kubernetes')]
-
-        self.assertEqual(1, len(vm_atomic_k8s))
-        self.assertEqual(k8sa_tdef.AtomicK8sTemplateDefinition,
-                         vm_atomic_k8s['magnum_vm_atomic_k8s'])
-        self.assertEqual(1, len(vm_coreos_k8s))
-        self.assertEqual(k8s_coreos_tdef.CoreOSK8sTemplateDefinition,
-                         vm_coreos_k8s['magnum_vm_coreos_k8s'])
-
-    def test_get_vm_atomic_kubernetes_definition(self):
-        definition = cmn_tdef.TemplateDefinition.get_template_definition(
-            'vm',
-            'fedora-atomic',
-            'kubernetes')
+    @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
+    def test_get_vm_atomic_kubernetes_definition(self, mock_driver):
+        mock_driver.return_value = k8sa_dr.Driver()
+        cluster_driver = driver.Driver.get_driver('vm',
+                                                  'fedora-atomic',
+                                                  'kubernetes')
+        definition = cluster_driver.get_template_definition()
 
         self.assertIsInstance(definition,
                               k8sa_tdef.AtomicK8sTemplateDefinition)
 
-    def test_get_bm_fedora_kubernetes_ironic_definition(self):
-        definition = cmn_tdef.TemplateDefinition.get_template_definition(
-            'bm',
-            'fedora',
-            'kubernetes')
+    @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
+    def test_get_bm_fedora_kubernetes_ironic_definition(self, mock_driver):
+        mock_driver.return_value = k8s_i_dr.Driver()
+        cluster_driver = driver.Driver.get_driver('bm',
+                                                  'fedora',
+                                                  'kubernetes')
+        definition = cluster_driver.get_template_definition()
 
         self.assertIsInstance(definition,
                               k8si_tdef.FedoraK8sIronicTemplateDefinition)
 
-    def test_get_vm_coreos_kubernetes_definition(self):
-        definition = cmn_tdef.TemplateDefinition.get_template_definition(
-            'vm',
-            'coreos',
-            'kubernetes')
+    @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
+    def test_get_vm_coreos_kubernetes_definition(self, mock_driver):
+        mock_driver.return_value = k8s_coreos_dr.Driver()
+        cluster_driver = driver.Driver.get_driver('vm', 'coreos', 'kubernetes')
+        definition = cluster_driver.get_template_definition()
 
         self.assertIsInstance(definition,
                               k8s_coreos_tdef.CoreOSK8sTemplateDefinition)
 
-    def test_get_vm_atomic_swarm_definition(self):
-        definition = cmn_tdef.TemplateDefinition.get_template_definition(
-            'vm',
-            'fedora-atomic',
-            'swarm')
+    @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
+    def test_get_vm_atomic_swarm_definition(self, mock_driver):
+        mock_driver.return_value = swarm_dr.Driver()
+        cluster_driver = driver.Driver.get_driver('vm',
+                                                  'fedora-atomic',
+                                                  'swarm')
+        definition = cluster_driver.get_template_definition()
 
         self.assertIsInstance(definition,
                               swarm_tdef.AtomicSwarmTemplateDefinition)
 
-    def test_get_vm_ubuntu_mesos_definition(self):
-        definition = cmn_tdef.TemplateDefinition.get_template_definition(
-            'vm',
-            'ubuntu',
-            'mesos')
+    @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
+    def test_get_vm_ubuntu_mesos_definition(self, mock_driver):
+        mock_driver.return_value = mesos_dr.Driver()
+        cluster_driver = driver.Driver.get_driver('vm',
+                                                  'ubuntu',
+                                                  'mesos')
+        definition = cluster_driver.get_template_definition()
 
         self.assertIsInstance(definition,
                               mesos_tdef.UbuntuMesosTemplateDefinition)
 
-    def test_get_definition_not_supported(self):
+    def test_get_driver_not_supported(self):
         self.assertRaises(exception.ClusterTypeNotSupported,
-                          cmn_tdef.TemplateDefinition.get_template_definition,
+                          driver.Driver().get_driver,
                           'vm', 'not_supported', 'kubernetes')
-
-    def test_get_definition_not_enabled(self):
-        CONF.set_override('enabled_definitions',
-                          ['magnum_vm_atomic_k8s'],
-                          group='cluster')
-        self.assertRaises(exception.ClusterTypeNotEnabled,
-                          cmn_tdef.TemplateDefinition.get_template_definition,
-                          'vm', 'coreos', 'kubernetes')
 
     def test_required_param_not_set(self):
         param = cmn_tdef.ParameterMapping('test', cluster_template_attr='test',
@@ -164,10 +157,7 @@ class TemplateDefinitionTestCase(base.TestCase):
         self.assertIsNone(value)
 
     def test_add_output_with_mapping_type(self):
-        definition = cmn_tdef.TemplateDefinition.get_template_definition(
-            'vm',
-            'fedora-atomic',
-            'kubernetes')
+        definition = k8sa_dr.Driver().get_template_definition()
 
         mock_args = [1, 3, 4]
         mock_kwargs = {'test': 'test'}
@@ -227,11 +217,7 @@ class BaseTemplateDefinitionTestCase(base.TestCase):
 class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
 
     def get_definition(self):
-        return cmn_tdef.TemplateDefinition.get_template_definition(
-            'vm',
-            'fedora-atomic',
-            'kubernetes',
-        )
+        return k8sa_dr.Driver().get_template_definition()
 
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.drivers.k8s_fedora_atomic_v1.template_def'
@@ -446,12 +432,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             k8sa_tdef.AtomicK8sTemplateDefinition().get_discovery_url,
             fake_cluster)
 
-    def _test_update_outputs_api_address(self, coe, params, tls=True):
+    def _test_update_outputs_api_address(self, template_definition,
+                                         params, tls=True):
 
-        definition = cmn_tdef.TemplateDefinition.get_template_definition(
-            'vm',
-            'fedora-atomic',
-            coe)
         expected_api_address = '%(protocol)s://%(address)s:%(port)s' % params
 
         outputs = [
@@ -465,8 +448,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         mock_cluster_template = mock.MagicMock()
         mock_cluster_template.tls_disabled = tls
 
-        definition.update_outputs(mock_stack, mock_cluster_template,
-                                  mock_cluster)
+        template_definition.update_outputs(mock_stack, mock_cluster_template,
+                                           mock_cluster)
 
         self.assertEqual(expected_api_address, mock_cluster.api_address)
 
@@ -479,7 +462,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'address': address,
             'port': port,
         }
-        self._test_update_outputs_api_address('kubernetes', params)
+
+        template_definition = k8sa_tdef.AtomicK8sTemplateDefinition()
+        self._test_update_outputs_api_address(template_definition, params)
 
     def test_update_swarm_outputs_api_address(self):
         address = 'updated_address'
@@ -490,7 +475,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'address': address,
             'port': port,
         }
-        self._test_update_outputs_api_address('swarm', params)
+
+        template_definition = swarm_tdef.AtomicSwarmTemplateDefinition()
+        self._test_update_outputs_api_address(template_definition, params)
 
     def test_update_k8s_outputs_if_cluster_template_is_secure(self):
         address = 'updated_address'
@@ -501,7 +488,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'address': address,
             'port': port,
         }
-        self._test_update_outputs_api_address('kubernetes', params, tls=False)
+        template_definition = k8sa_tdef.AtomicK8sTemplateDefinition()
+        self._test_update_outputs_api_address(template_definition, params,
+                                              tls=False)
 
     def test_update_swarm_outputs_if_cluster_template_is_secure(self):
         address = 'updated_address'
@@ -512,14 +501,13 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'address': address,
             'port': port,
         }
-        self._test_update_outputs_api_address('swarm', params, tls=False)
 
-    def _test_update_outputs_none_api_address(self, coe, params, tls=True):
+        template_definition = swarm_tdef.AtomicSwarmTemplateDefinition()
+        self._test_update_outputs_api_address(template_definition, params,
+                                              tls=False)
 
-        definition = cmn_tdef.TemplateDefinition.get_template_definition(
-            'vm',
-            'fedora-atomic',
-            coe)
+    def _test_update_outputs_none_api_address(self, template_definition,
+                                              params, tls=True):
 
         outputs = [
             {"output_value": params['address'],
@@ -533,8 +521,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         mock_cluster_template = mock.MagicMock()
         mock_cluster_template.tls_disabled = tls
 
-        definition.update_outputs(mock_stack, mock_cluster_template,
-                                  mock_cluster)
+        template_definition.update_outputs(mock_stack, mock_cluster_template,
+                                           mock_cluster)
 
         self.assertEqual('none_api_address', mock_cluster.api_address)
 
@@ -546,7 +534,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'address': None,
             'port': port,
         }
-        self._test_update_outputs_none_api_address('kubernetes', params)
+
+        template_definition = k8sa_tdef.AtomicK8sTemplateDefinition()
+        self._test_update_outputs_none_api_address(template_definition, params)
 
     def test_update_swarm_outputs_none_api_address(self):
         protocol = 'tcp'
@@ -556,7 +546,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'address': None,
             'port': port,
         }
-        self._test_update_outputs_none_api_address('swarm', params)
+        template_definition = swarm_tdef.AtomicSwarmTemplateDefinition()
+        self._test_update_outputs_none_api_address(template_definition, params)
 
     def test_update_outputs_master_address(self):
         self._test_update_outputs_server_addrtess(
@@ -592,11 +583,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
 class FedoraK8sIronicTemplateDefinitionTestCase(base.TestCase):
 
     def get_definition(self):
-        return cmn_tdef.TemplateDefinition.get_template_definition(
-            'bm',
-            'fedora',
-            'kubernetes'
-        )
+        return k8s_i_dr.Driver().get_template_definition()
 
     def assert_neutron_find(self, mock_neutron_v20_find,
                             osc, cluster_template):

@@ -19,10 +19,6 @@ from magnum.drivers.common import template_def
 class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
     """Mesos template for Ubuntu VM."""
 
-    provides = [
-        {'server_type': 'vm', 'os': 'ubuntu', 'coe': 'mesos'},
-    ]
-
     def __init__(self):
         super(UbuntuMesosTemplateDefinition, self).__init__()
         self.add_parameter('external_network',

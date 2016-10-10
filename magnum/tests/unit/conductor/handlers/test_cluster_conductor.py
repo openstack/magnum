@@ -25,6 +25,7 @@ from pycadf import cadftaxonomy as taxonomy
 from magnum.common import exception
 from magnum.conductor.handlers import cluster_conductor
 import magnum.conf
+from magnum.drivers.k8s_fedora_atomic_v1 import driver as k8s_atomic_dr
 from magnum import objects
 from magnum.objects.fields import ClusterStatus as cluster_status
 from magnum.tests import base
@@ -51,11 +52,11 @@ class TestHandler(db_base.DbTestCase):
     @patch('magnum.conductor.scale_manager.get_scale_manager')
     @patch(
         'magnum.conductor.handlers.cluster_conductor.Handler._poll_and_check')
-    @patch('magnum.conductor.handlers.cluster_conductor._update_stack')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     @patch('magnum.common.clients.OpenStackClients')
     def test_update_node_count_success(
             self, mock_openstack_client_class,
-            mock_update_stack, mock_poll_and_check,
+            mock_driver, mock_poll_and_check,
             mock_scale_manager):
         def side_effect(*args, **kwargs):
             self.cluster.node_count = 2
@@ -67,6 +68,8 @@ class TestHandler(db_base.DbTestCase):
         mock_heat_client.stacks.get.return_value = mock_heat_stack
         mock_openstack_client = mock_openstack_client_class.return_value
         mock_openstack_client.heat.return_value = mock_heat_client
+        mock_dr = mock.MagicMock()
+        mock_driver.return_value = mock_dr
 
         self.cluster.node_count = 2
         self.handler.cluster_update(self.context, self.cluster)
@@ -78,7 +81,7 @@ class TestHandler(db_base.DbTestCase):
         self.assertEqual(
             taxonomy.OUTCOME_PENDING, notifications[0].payload['outcome'])
 
-        mock_update_stack.assert_called_once_with(
+        mock_dr.update_stack.assert_called_once_with(
             self.context, mock_openstack_client, self.cluster,
             mock_scale_manager.return_value, False)
         cluster = objects.Cluster.get(self.context, self.cluster.uuid)
@@ -86,11 +89,10 @@ class TestHandler(db_base.DbTestCase):
 
     @patch(
         'magnum.conductor.handlers.cluster_conductor.Handler._poll_and_check')
-    @patch('magnum.conductor.handlers.cluster_conductor._update_stack')
     @patch('magnum.common.clients.OpenStackClients')
     def test_update_node_count_failure(
             self, mock_openstack_client_class,
-            mock_update_stack, mock_poll_and_check):
+            mock_poll_and_check):
         def side_effect(*args, **kwargs):
             self.cluster.node_count = 2
             self.cluster.save()
@@ -119,11 +121,11 @@ class TestHandler(db_base.DbTestCase):
     @patch('magnum.conductor.scale_manager.get_scale_manager')
     @patch(
         'magnum.conductor.handlers.cluster_conductor.Handler._poll_and_check')
-    @patch('magnum.conductor.handlers.cluster_conductor._update_stack')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     @patch('magnum.common.clients.OpenStackClients')
     def _test_update_cluster_status_complete(
             self, expect_status, mock_openstack_client_class,
-            mock_update_stack, mock_poll_and_check,
+            mock_driver, mock_poll_and_check,
             mock_scale_manager):
         def side_effect(*args, **kwargs):
             self.cluster.node_count = 2
@@ -135,6 +137,8 @@ class TestHandler(db_base.DbTestCase):
         mock_heat_client.stacks.get.return_value = mock_heat_stack
         mock_openstack_client = mock_openstack_client_class.return_value
         mock_openstack_client.heat.return_value = mock_heat_client
+        mock_dr = mock.MagicMock()
+        mock_driver.return_value = mock_dr
 
         self.cluster.node_count = 2
         self.handler.cluster_update(self.context, self.cluster)
@@ -146,7 +150,7 @@ class TestHandler(db_base.DbTestCase):
         self.assertEqual(
             taxonomy.OUTCOME_PENDING, notifications[0].payload['outcome'])
 
-        mock_update_stack.assert_called_once_with(
+        mock_dr.update_stack.assert_called_once_with(
             self.context, mock_openstack_client, self.cluster,
             mock_scale_manager.return_value, False)
         cluster = objects.Cluster.get(self.context, self.cluster.uuid)
@@ -183,10 +187,10 @@ class TestHandler(db_base.DbTestCase):
     @patch('magnum.conductor.handlers.cluster_conductor.HeatPoller')
     @patch('magnum.conductor.handlers.cluster_conductor.trust_manager')
     @patch('magnum.conductor.handlers.cluster_conductor.cert_manager')
-    @patch('magnum.conductor.handlers.cluster_conductor._create_stack')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     @patch('magnum.common.clients.OpenStackClients')
     def test_create(self, mock_openstack_client_class,
-                    mock_create_stack, mock_cm, mock_trust_manager,
+                    mock_driver, mock_cm, mock_trust_manager,
                     mock_heat_poller_class):
         timeout = 15
         mock_poller = mock.MagicMock()
@@ -194,11 +198,13 @@ class TestHandler(db_base.DbTestCase):
         mock_heat_poller_class.return_value = mock_poller
         osc = mock.sentinel.osc
         mock_openstack_client_class.return_value = osc
+        mock_dr = mock.MagicMock()
+        mock_driver.return_value = mock_dr
 
         def create_stack_side_effect(context, osc, cluster, timeout):
             return {'stack': {'id': 'stack-id'}}
 
-        mock_create_stack.side_effect = create_stack_side_effect
+        mock_dr.create_stack.side_effect = create_stack_side_effect
 
         # FixMe(eliqiao): cluster_create will call cluster.create()
         # again, this so bad because we have already called it in setUp
@@ -221,9 +227,9 @@ class TestHandler(db_base.DbTestCase):
         self.assertEqual(
             taxonomy.OUTCOME_PENDING, notifications[0].payload['outcome'])
 
-        mock_create_stack.assert_called_once_with(self.context,
-                                                  mock.sentinel.osc,
-                                                  self.cluster, timeout)
+        mock_dr.create_stack.assert_called_once_with(self.context,
+                                                     mock.sentinel.osc,
+                                                     self.cluster, timeout)
         mock_cm.generate_certificates_to_cluster.assert_called_once_with(
             self.cluster, context=self.context)
         self.assertEqual(cluster_status.CREATE_IN_PROGRESS, cluster.status)
@@ -264,14 +270,16 @@ class TestHandler(db_base.DbTestCase):
     @patch('magnum.objects.Cluster.create')
     @patch('magnum.conductor.handlers.cluster_conductor.trust_manager')
     @patch('magnum.conductor.handlers.cluster_conductor.cert_manager')
-    @patch('magnum.conductor.handlers.cluster_conductor._create_stack')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     @patch('magnum.common.clients.OpenStackClients')
     def test_create_handles_bad_request(self, mock_openstack_client_class,
-                                        mock_create_stack,
+                                        mock_driver,
                                         mock_cert_manager,
                                         mock_trust_manager,
                                         mock_cluster_create):
-        mock_create_stack.side_effect = exc.HTTPBadRequest
+        mock_dr = mock.MagicMock()
+        mock_driver.return_value = mock_dr
+        mock_dr.create_stack.side_effect = exc.HTTPBadRequest
 
         self._test_create_failed(
             mock_openstack_client_class,
@@ -321,10 +329,8 @@ class TestHandler(db_base.DbTestCase):
     @patch('magnum.objects.Cluster.create')
     @patch('magnum.conductor.handlers.cluster_conductor.trust_manager')
     @patch('magnum.conductor.handlers.cluster_conductor.cert_manager')
-    @patch('magnum.conductor.handlers.cluster_conductor._create_stack')
     @patch('magnum.common.clients.OpenStackClients')
     def test_create_with_trust_failed(self, mock_openstack_client_class,
-                                      mock_create_stack,
                                       mock_cert_manager,
                                       mock_trust_manager,
                                       mock_cluster_create):
@@ -350,18 +356,20 @@ class TestHandler(db_base.DbTestCase):
     @patch('magnum.objects.Cluster.create')
     @patch('magnum.conductor.handlers.cluster_conductor.trust_manager')
     @patch('magnum.conductor.handlers.cluster_conductor.cert_manager')
-    @patch('magnum.conductor.handlers.cluster_conductor._create_stack')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     @patch('magnum.common.clients.OpenStackClients')
     def test_create_with_invalid_unicode_name(self,
                                               mock_openstack_client_class,
-                                              mock_create_stack,
+                                              mock_driver,
                                               mock_cert_manager,
                                               mock_trust_manager,
                                               mock_cluster_create):
         error_message = six.u("""Invalid stack name 测试集群-zoyh253geukk
                               must contain only alphanumeric or "_-."
                               characters, must start with alpha""")
-        mock_create_stack.side_effect = exc.HTTPBadRequest(error_message)
+        mock_dr = mock.MagicMock()
+        mock_driver.return_value = mock_dr
+        mock_dr.create_stack.side_effect = exc.HTTPBadRequest(error_message)
 
         self._test_create_failed(
             mock_openstack_client_class,
@@ -386,28 +394,30 @@ class TestHandler(db_base.DbTestCase):
     @patch('heatclient.common.template_utils'
            '.process_multiple_environments_and_files')
     @patch('heatclient.common.template_utils.get_template_contents')
-    @patch('magnum.conductor.handlers.cluster_conductor'
-           '._extract_template_definition')
     @patch('magnum.conductor.handlers.cluster_conductor.trust_manager')
     @patch('magnum.conductor.handlers.cluster_conductor.cert_manager')
-    @patch('magnum.conductor.handlers.cluster_conductor.short_id')
+    @patch('magnum.drivers.common.driver._extract_template_definition')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     @patch('magnum.common.clients.OpenStackClients')
+    @patch('magnum.common.short_id.generate_id')
     def test_create_with_environment(self,
-                                     mock_openstack_client_class,
                                      mock_short_id,
+                                     mock_openstack_client_class,
+                                     mock_driver,
+                                     mock_extract_tmpl_def,
                                      mock_cert_manager,
                                      mock_trust_manager,
-                                     mock_extract_tmpl_def,
                                      mock_get_template_contents,
                                      mock_process_mult,
                                      mock_heat_poller_class):
         timeout = 15
         self.cluster.cluster_template_id = self.cluster_template.uuid
         cluster_name = self.cluster.name
-        mock_short_id.generate_id.return_value = 'short_id'
         mock_poller = mock.MagicMock()
         mock_poller.poll_and_check.return_value = loopingcall.LoopingCallDone()
         mock_heat_poller_class.return_value = mock_poller
+        mock_driver.return_value = k8s_atomic_dr.Driver()
+        mock_short_id.return_value = 'short_id'
 
         mock_extract_tmpl_def.return_value = (
             'the/template/path.yaml',
@@ -515,7 +525,8 @@ class TestHeatPoller(base.TestCase):
     @patch('magnum.conductor.utils.retrieve_cluster_template')
     @patch('oslo_config.cfg')
     @patch('magnum.common.clients.OpenStackClients')
-    def setup_poll_test(self, mock_openstack_client, cfg,
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
+    def setup_poll_test(self, mock_driver, mock_openstack_client, cfg,
                         mock_retrieve_cluster_template):
         cfg.CONF.cluster_heat.max_attempts = 10
 
@@ -529,7 +540,9 @@ class TestHeatPoller(base.TestCase):
         cluster_template = objects.ClusterTemplate(self.context,
                                                    **cluster_template_dict)
         mock_retrieve_cluster_template.return_value = cluster_template
-        poller = cluster_conductor.HeatPoller(mock_openstack_client, cluster)
+        mock_driver.return_value = k8s_atomic_dr.Driver()
+        poller = cluster_conductor.HeatPoller(mock_openstack_client, cluster,
+                                              k8s_atomic_dr.Driver())
         poller.get_version_info = mock.MagicMock()
         return (mock_heat_stack, cluster, poller)
 

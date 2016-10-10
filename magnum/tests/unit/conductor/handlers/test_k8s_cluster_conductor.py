@@ -15,8 +15,10 @@
 import mock
 from mock import patch
 
-from magnum.conductor.handlers import cluster_conductor
 import magnum.conf
+from magnum.drivers.common import driver
+from magnum.drivers.k8s_coreos_v1 import driver as k8s_coreos_dr
+from magnum.drivers.k8s_fedora_atomic_v1 import driver as k8s_dr
 from magnum import objects
 from magnum.tests import base
 
@@ -89,15 +91,18 @@ class TestClusterConductorWithK8s(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self._test_extract_template_definition(
-            mock_objects_cluster_template_get_by_uuid, mock_get)
+            mock_driver, mock_objects_cluster_template_get_by_uuid, mock_get)
 
     def _test_extract_template_definition(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
             missing_attr=None):
@@ -115,11 +120,12 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_resp.text = expected_result
         mock_get.return_value = mock_resp
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+        mock_driver.return_value = k8s_dr.Driver()
 
         (template_path,
          definition,
-         env_files) = cluster_conductor._extract_template_definition(
-            self.context, cluster)
+         env_files) = driver._extract_template_definition(self.context,
+                                                          cluster)
 
         mapping = {
             'dns_nameserver': 'dns_nameserver',
@@ -192,8 +198,10 @@ class TestClusterConductorWithK8s(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_with_registry(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self.cluster_template_dict['registry_enabled'] = True
@@ -207,6 +215,7 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_resp.text = expected_result
         mock_get.return_value = mock_resp
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+        mock_driver.return_value = k8s_dr.Driver()
 
         CONF.set_override('swift_region',
                           'RegionOne',
@@ -214,8 +223,8 @@ class TestClusterConductorWithK8s(base.TestCase):
 
         (template_path,
          definition,
-         env_files) = cluster_conductor._extract_template_definition(
-            self.context, cluster)
+         env_files) = driver._extract_template_definition(self.context,
+                                                          cluster)
 
         expected = {
             'auth_url': 'http://192.168.10.10:5000/v3',
@@ -264,8 +273,10 @@ class TestClusterConductorWithK8s(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_coreos_with_disovery(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self.cluster_template_dict['cluster_distro'] = 'coreos'
@@ -279,11 +290,12 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_resp.text = expected_result
         mock_get.return_value = mock_resp
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+        mock_driver.return_value = k8s_coreos_dr.Driver()
 
         (template_path,
          definition,
-         env_files) = cluster_conductor._extract_template_definition(
-            self.context, cluster)
+         env_files) = driver._extract_template_definition(self.context,
+                                                          cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -323,8 +335,10 @@ class TestClusterConductorWithK8s(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_coreos_no_discoveryurl(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             reqget):
         self.cluster_template_dict['cluster_distro'] = 'coreos'
@@ -336,11 +350,12 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+        mock_driver.return_value = k8s_coreos_dr.Driver()
 
         (template_path,
          definition,
-         env_files) = cluster_conductor._extract_template_definition(
-            self.context, cluster)
+         env_files) = driver._extract_template_definition(self.context,
+                                                          cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -380,107 +395,145 @@ class TestClusterConductorWithK8s(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_without_dns(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
+        mock_driver.return_value = k8s_dr.Driver()
         self._test_extract_template_definition(
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
             missing_attr='dns_nameserver')
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_without_server_image(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
+        mock_driver.return_value = k8s_dr.Driver()
         self._test_extract_template_definition(
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
             missing_attr='image_id')
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_without_minion_flavor(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
+        mock_driver.return_value = k8s_dr.Driver()
         self._test_extract_template_definition(
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
             missing_attr='flavor_id')
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_without_docker_volume_size(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
+        mock_driver.return_value = k8s_dr.Driver()
         self._test_extract_template_definition(
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
             missing_attr='docker_volume_size')
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_without_docker_storage_driver(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
+        mock_driver.return_value = k8s_dr.Driver()
         self._test_extract_template_definition(
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
             missing_attr='docker_storage_driver')
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_without_master_flavor(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
+        mock_driver.return_value = k8s_dr.Driver()
         self._test_extract_template_definition(
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
             missing_attr='master_flavor_id')
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_without_apiserver_port(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
+        mock_driver.return_value = k8s_dr.Driver()
         self._test_extract_template_definition(
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
             missing_attr='apiserver_port')
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_without_node_count(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
+        mock_driver.return_value = k8s_dr.Driver()
         self._test_extract_template_definition(
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
             missing_attr='node_count')
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_without_master_count(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
+        mock_driver.return_value = k8s_dr.Driver()
         self._test_extract_template_definition(
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
             missing_attr='master_count')
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_without_discovery_url(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             reqget):
         cluster_template = objects.ClusterTemplate(
@@ -490,6 +543,7 @@ class TestClusterConductorWithK8s(base.TestCase):
         cluster_dict = self.cluster_dict
         cluster_dict['discovery_url'] = None
         cluster = objects.Cluster(self.context, **cluster_dict)
+        mock_driver.return_value = k8s_dr.Driver()
 
         CONF.set_override('etcd_discovery_service_endpoint_format',
                           'http://etcd/test?size=%(size)d',
@@ -499,8 +553,8 @@ class TestClusterConductorWithK8s(base.TestCase):
 
         (template_path,
          definition,
-         env_files) = cluster_conductor._extract_template_definition(
-            self.context, cluster)
+         env_files) = driver._extract_template_definition(self.context,
+                                                          cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -547,8 +601,7 @@ class TestClusterConductorWithK8s(base.TestCase):
 
     @patch('magnum.common.short_id.generate_id')
     @patch('heatclient.common.template_utils.get_template_contents')
-    @patch('magnum.conductor.handlers.cluster_conductor'
-           '._extract_template_definition')
+    @patch('magnum.drivers.common.driver._extract_template_definition')
     def test_create_stack(self,
                           mock_extract_template_definition,
                           mock_get_template_contents,
@@ -571,8 +624,8 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_cluster = mock.MagicMock()
         mock_cluster.name = dummy_cluster_name
 
-        cluster_conductor._create_stack(self.context, mock_osc,
-                                        mock_cluster, expected_timeout)
+        k8s_dr.Driver().create_stack(self.context, mock_osc,
+                                     mock_cluster, expected_timeout)
 
         expected_args = {
             'stack_name': expected_stack_name,
@@ -586,8 +639,7 @@ class TestClusterConductorWithK8s(base.TestCase):
 
     @patch('magnum.common.short_id.generate_id')
     @patch('heatclient.common.template_utils.get_template_contents')
-    @patch('magnum.conductor.handlers.cluster_conductor'
-           '._extract_template_definition')
+    @patch('magnum.drivers.common.driver._extract_template_definition')
     def test_create_stack_no_timeout_specified(
             self,
             mock_extract_template_definition,
@@ -611,8 +663,8 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_cluster = mock.MagicMock()
         mock_cluster.name = dummy_cluster_name
 
-        cluster_conductor._create_stack(self.context, mock_osc,
-                                        mock_cluster, None)
+        k8s_dr.Driver().create_stack(self.context, mock_osc,
+                                     mock_cluster, None)
 
         expected_args = {
             'stack_name': expected_stack_name,
@@ -626,8 +678,7 @@ class TestClusterConductorWithK8s(base.TestCase):
 
     @patch('magnum.common.short_id.generate_id')
     @patch('heatclient.common.template_utils.get_template_contents')
-    @patch('magnum.conductor.handlers.cluster_conductor'
-           '._extract_template_definition')
+    @patch('magnum.drivers.common.driver._extract_template_definition')
     def test_create_stack_timeout_is_zero(
             self,
             mock_extract_template_definition,
@@ -652,8 +703,8 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_cluster = mock.MagicMock()
         mock_cluster.name = dummy_cluster_name
 
-        cluster_conductor._create_stack(self.context, mock_osc,
-                                        mock_cluster, cluster_timeout)
+        k8s_dr.Driver().create_stack(self.context, mock_osc,
+                                     mock_cluster, cluster_timeout)
 
         expected_args = {
             'stack_name': expected_stack_name,
@@ -666,8 +717,7 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_heat_client.stacks.create.assert_called_once_with(**expected_args)
 
     @patch('heatclient.common.template_utils.get_template_contents')
-    @patch('magnum.conductor.handlers.cluster_conductor'
-           '._extract_template_definition')
+    @patch('magnum.drivers.common.driver._extract_template_definition')
     def test_update_stack(self,
                           mock_extract_template_definition,
                           mock_get_template_contents):
@@ -686,7 +736,7 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_cluster = mock.MagicMock()
         mock_cluster.stack_id = mock_stack_id
 
-        cluster_conductor._update_stack({}, mock_osc, mock_cluster)
+        k8s_dr.Driver().update_stack({}, mock_osc, mock_cluster)
 
         expected_args = {
             'parameters': {},

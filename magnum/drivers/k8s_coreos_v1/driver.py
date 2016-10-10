@@ -12,22 +12,16 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import os
-
-from magnum.drivers.common import k8s_fedora_template_def as kftd
-from oslo_config import cfg
-
-CONF = cfg.CONF
+from magnum.drivers.common import driver
+from magnum.drivers.k8s_coreos_v1 import template_def
 
 
-class AtomicK8sTemplateDefinition(kftd.K8sFedoraTemplateDefinition):
-    """Kubernetes template for a Fedora Atomic VM."""
+class Driver(driver.Driver):
+    provides = [
+        {'server_type': 'vm',
+         'os': 'coreos',
+         'coe': 'kubernetes'},
+    ]
 
-    @property
-    def driver_module_path(self):
-        return __name__[:__name__.rindex('.')]
-
-    @property
-    def template_path(self):
-        return os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                            'templates/kubecluster.yaml')
+    def get_template_definition(self):
+        return template_def.CoreOSK8sTemplateDefinition()

@@ -27,12 +27,6 @@ LOG = logging.getLogger(__name__)
 class FedoraK8sIronicTemplateDefinition(kftd.K8sFedoraTemplateDefinition):
     """Kubernetes template for a Fedora Baremetal."""
 
-    provides = [
-        {'server_type': 'bm',
-         'os': 'fedora',
-         'coe': 'kubernetes'},
-    ]
-
     def __init__(self):
         super(FedoraK8sIronicTemplateDefinition, self).__init__()
         self.add_parameter('fixed_subnet',

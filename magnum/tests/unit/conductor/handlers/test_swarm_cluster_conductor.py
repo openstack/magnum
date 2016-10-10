@@ -18,6 +18,8 @@ from oslo_config import cfg
 from oslo_service import loopingcall
 
 from magnum.conductor.handlers import cluster_conductor
+from magnum.drivers.common import driver
+from magnum.drivers.swarm_fedora_atomic_v1 import driver as swarm_dr
 from magnum import objects
 from magnum.objects.fields import ClusterStatus as cluster_status
 from magnum.tests import base
@@ -82,8 +84,10 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_all_values(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         cluster_template = objects.ClusterTemplate(
@@ -95,12 +99,13 @@ class TestClusterConductorWithSwarm(base.TestCase):
         mock_resp = mock.MagicMock()
         mock_resp.text = expected_result
         mock_get.return_value = mock_resp
+        mock_driver.return_value = swarm_dr.Driver()
         cluster = objects.Cluster(self.context, **self.cluster_dict)
 
         (template_path,
          definition,
-         env_files) = cluster_conductor._extract_template_definition(
-            self.context, cluster)
+         env_files) = driver._extract_template_definition(self.context,
+                                                          cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -142,8 +147,10 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_with_registry(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self.cluster_template_dict['registry_enabled'] = True
@@ -156,6 +163,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
         mock_resp = mock.MagicMock()
         mock_resp.text = expected_result
         mock_get.return_value = mock_resp
+        mock_driver.return_value = swarm_dr.Driver()
         cluster = objects.Cluster(self.context, **self.cluster_dict)
 
         cfg.CONF.set_override('swift_region',
@@ -164,8 +172,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
         (template_path,
          definition,
-         env_files) = cluster_conductor._extract_template_definition(
-            self.context, cluster)
+         env_files) = driver._extract_template_definition(self.context,
+                                                          cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -209,8 +217,10 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_only_required(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
 
@@ -232,12 +242,13 @@ class TestClusterConductorWithSwarm(base.TestCase):
         mock_resp = mock.MagicMock()
         mock_resp.text = expected_result
         mock_get.return_value = mock_resp
+        mock_driver.return_value = swarm_dr.Driver()
         cluster = objects.Cluster(self.context, **self.cluster_dict)
 
         (template_path,
          definition,
-         env_files) = cluster_conductor._extract_template_definition(
-            self.context, cluster)
+         env_files) = driver._extract_template_definition(self.context,
+                                                          cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -268,8 +279,10 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_with_lb(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self.cluster_template_dict['master_lb_enabled'] = True
@@ -282,12 +295,13 @@ class TestClusterConductorWithSwarm(base.TestCase):
         mock_resp = mock.MagicMock()
         mock_resp.text = expected_result
         mock_get.return_value = mock_resp
+        mock_driver.return_value = swarm_dr.Driver()
         cluster = objects.Cluster(self.context, **self.cluster_dict)
 
         (template_path,
          definition,
-         env_files) = cluster_conductor._extract_template_definition(
-            self.context, cluster)
+         env_files) = driver._extract_template_definition(self.context,
+                                                          cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -329,8 +343,10 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_multi_master(
             self,
+            mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self.cluster_template_dict['master_lb_enabled'] = True
@@ -344,12 +360,13 @@ class TestClusterConductorWithSwarm(base.TestCase):
         mock_resp = mock.MagicMock()
         mock_resp.text = expected_result
         mock_get.return_value = mock_resp
+        mock_driver.return_value = swarm_dr.Driver()
         cluster = objects.Cluster(self.context, **self.cluster_dict)
 
         (template_path,
          definition,
-         env_files) = cluster_conductor._extract_template_definition(
-            self.context, cluster)
+         env_files) = driver._extract_template_definition(self.context,
+                                                          cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -392,7 +409,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
     @patch('magnum.conductor.utils.retrieve_cluster_template')
     @patch('magnum.conf.CONF')
     @patch('magnum.common.clients.OpenStackClients')
-    def setup_poll_test(self, mock_openstack_client, mock_conf,
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
+    def setup_poll_test(self, mock_driver, mock_openstack_client, mock_conf,
                         mock_retrieve_cluster_template):
         mock_conf.cluster_heat.max_attempts = 10
 
@@ -405,7 +423,9 @@ class TestClusterConductorWithSwarm(base.TestCase):
             self.context, **self.cluster_template_dict)
         mock_retrieve_cluster_template.return_value = \
             cluster_template
-        poller = cluster_conductor.HeatPoller(mock_openstack_client, cluster)
+        mock_driver.return_value = swarm_dr.Driver()
+        poller = cluster_conductor.HeatPoller(mock_openstack_client, cluster,
+                                              swarm_dr.Driver())
         poller.get_version_info = mock.MagicMock()
         return (mock_heat_stack, cluster, poller)
 

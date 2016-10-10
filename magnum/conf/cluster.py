@@ -23,6 +23,10 @@ cluster_def_opts = [
                help=_('Url for etcd public discovery endpoint.'),
                deprecated_group='bay'),
     cfg.ListOpt('enabled_definitions',
+                deprecated_for_removal=True,
+                deprecated_reason=_('This configuration option is no longer '
+                                    'used. Installing a new driver enables '
+                                    'it for use automatically.'),
                 default=['magnum_vm_atomic_k8s', 'magnum_bm_fedora_k8s',
                          'magnum_vm_coreos_k8s', 'magnum_vm_atomic_swarm',
                          'magnum_vm_ubuntu_mesos'],
