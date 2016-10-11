@@ -29,7 +29,7 @@ write_files:
       [Service]
       Environment=KUBELET_VERSION=${KUBE_VERSION}_coreos.0
       ExecStart=/usr/lib/coreos/kubelet-wrapper \
-        --api_servers=http://127.0.0.1:8080 \
+        --api-servers=http://127.0.0.1:8080 \
         --address=0.0.0.0 \
         --register-node=true \
         --register-schedulable=false \

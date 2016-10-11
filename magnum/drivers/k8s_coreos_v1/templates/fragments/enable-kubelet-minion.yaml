@@ -42,7 +42,7 @@ write_files:
       [Service]
       Environment=KUBELET_VERSION=${KUBE_VERSION}_coreos.0
       ExecStart=/usr/lib/coreos/kubelet-wrapper \
-        --api_servers=${KUBE_MASTER_URI} \
+        --api-servers=${KUBE_MASTER_URI} \
         --address=0.0.0.0 \
         --register-node=true \
         --allow-privileged=true \
