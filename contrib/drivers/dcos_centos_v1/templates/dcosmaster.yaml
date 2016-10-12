@@ -1,0 +1,161 @@
+heat_template_version: 2014-10-16
+
+description: >
+  This is a nested stack that defines a single DC/OS master, This stack is
+  included by a ResourceGroup resource in the parent template
+  (dcoscluster.yaml).
+
+parameters:
+
+  server_image:
+    type: string
+    description: glance image used to boot the server
+
+  master_flavor:
+    type: string
+    description: flavor to use when booting the server
+
+  ssh_key_name:
+    type: string
+    description: name of ssh key to be provisioned on our server
+
+  external_network:
+    type: string
+    description: uuid/name of a network to use for floating ip addresses
+
+  fixed_network:
+    type: string
+    description: Network from which to allocate fixed addresses.
+
+  fixed_subnet:
+    type: string
+    description: Subnet from which to allocate fixed addresses.
+
+  secgroup_base_id:
+    type: string
+    description: ID of the security group for base.
+
+  secgroup_dcos_id:
+    type: string
+    description: ID of the security group for DC/OS master.
+
+  api_pool_80_id:
+    type: string
+    description: ID of the load balancer pool of Http.
+
+  api_pool_443_id:
+    type: string
+    description: ID of the load balancer pool of Https.
+
+  api_pool_8080_id:
+    type: string
+    description: ID of the load balancer pool of Marathon.
+
+  api_pool_5050_id:
+    type: string
+    description: ID of the load balancer pool of Mesos master.
+
+  api_pool_2181_id:
+    type: string
+    description: ID of the load balancer pool of Zookeeper.
+
+  api_pool_8181_id:
+    type: string
+    description: ID of the load balancer pool of Exhibitor.
+
+resources:
+
+  ######################################################################
+  #
+  # DC/OS master server.
+  #
+
+  dcos_master:
+    type: OS::Nova::Server
+    properties:
+      image: {get_param: server_image}
+      flavor: {get_param: master_flavor}
+      key_name: {get_param: ssh_key_name}
+      user_data_format: SOFTWARE_CONFIG
+      networks:
+        - port: {get_resource: dcos_master_eth0}
+
+  dcos_master_eth0:
+    type: OS::Neutron::Port
+    properties:
+      network: {get_param: fixed_network}
+      security_groups:
+        - {get_param: secgroup_base_id}
+        - {get_param: secgroup_dcos_id}
+      fixed_ips:
+        - subnet: {get_param: fixed_subnet}
+      replacement_policy: AUTO
+
+  dcos_master_floating:
+    type: Magnum::Optional::DcosMaster::Neutron::FloatingIP
+    properties:
+      floating_network: {get_param: external_network}
+      port_id: {get_resource: dcos_master_eth0}
+
+  api_pool_80_member:
+    type: Magnum::Optional::Neutron::LBaaS::PoolMember
+    properties:
+      pool: {get_param: api_pool_80_id}
+      address: {get_attr: [dcos_master_eth0, fixed_ips, 0, ip_address]}
+      subnet: { get_param: fixed_subnet }
+      protocol_port: 80
+
+  api_pool_443_member:
+    type: Magnum::Optional::Neutron::LBaaS::PoolMember
+    properties:
+      pool: {get_param: api_pool_443_id}
+      address: {get_attr: [dcos_master_eth0, fixed_ips, 0, ip_address]}
+      subnet: { get_param: fixed_subnet }
+      protocol_port: 443
+
+  api_pool_8080_member:
+    type: Magnum::Optional::Neutron::LBaaS::PoolMember
+    properties:
+      pool: {get_param: api_pool_8080_id}
+      address: {get_attr: [dcos_master_eth0, fixed_ips, 0, ip_address]}
+      subnet: { get_param: fixed_subnet }
+      protocol_port: 8080
+
+  api_pool_5050_member:
+    type: Magnum::Optional::Neutron::LBaaS::PoolMember
+    properties:
+      pool: {get_param: api_pool_5050_id}
+      address: {get_attr: [dcos_master_eth0, fixed_ips, 0, ip_address]}
+      subnet: { get_param: fixed_subnet }
+      protocol_port: 5050
+
+  api_pool_2181_member:
+    type: Magnum::Optional::Neutron::LBaaS::PoolMember
+    properties:
+      pool: {get_param: api_pool_2181_id}
+      address: {get_attr: [dcos_master_eth0, fixed_ips, 0, ip_address]}
+      subnet: { get_param: fixed_subnet }
+      protocol_port: 2181
+
+  api_pool_8181_member:
+    type: Magnum::Optional::Neutron::LBaaS::PoolMember
+    properties:
+      pool: {get_param: api_pool_8181_id}
+      address: {get_attr: [dcos_master_eth0, fixed_ips, 0, ip_address]}
+      subnet: { get_param: fixed_subnet }
+      protocol_port: 8181
+
+outputs:
+
+  dcos_master_ip:
+    value: {get_attr: [dcos_master_eth0, fixed_ips, 0, ip_address]}
+    description: >
+      This is the "private" address of the DC/OS master node.
+  dcos_master_external_ip:
+    value: {get_attr: [dcos_master_floating, floating_ip_address]}
+    description: >
+      This is the "public" address of the DC/OS master node.
+  dcos_server_id:
+    value: {get_resource: dcos_master}
+    description: >
+      This is the logical id of the DC/OS master node.

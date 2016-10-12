@@ -1,0 +1,674 @@
+heat_template_version: 2014-10-16
+
+description: >
+  This template will boot a DC/OS cluster with one or more masters
+  (as specified by number_of_masters, default is 1) and one or more slaves
+  (as specified by the number_of_slaves parameter, which
+  defaults to 1).
+
+parameters:
+
+  cluster_name:
+    type: string
+    description: human readable name for the DC/OS cluster
+    default: my-cluster
+
+  number_of_masters:
+    type: number
+    description: how many DC/OS masters to spawn initially
+    default: 1
+
+  # In DC/OS, there are two types of slave nodes, public and private.
+  # Public slave nodes have external access and private slave nodes don't.
+  # Magnum only supports one type of slave nodes and I decide not to modify
+  # cluster template properties. So I create slave nodes as private agents.
+  number_of_slaves:
+    type: number
+    description: how many DC/OS agents or slaves to spawn initially
+    default: 1
+
+  master_flavor:
+    type: string
+    default: m1.medium
+    description: flavor to use when booting the master servers
+
+  slave_flavor:
+    type: string
+    default: m1.medium
+    description: flavor to use when booting the slave servers
+
+  server_image:
+    type: string
+    default: centos-dcos
+    description: glance image used to boot the server
+
+  ssh_key_name:
+    type: string
+    description: name of ssh key to be provisioned on our server
+
+  external_network:
+    type: string
+    description: uuid/name of a network to use for floating ip addresses
+    default: public
+
+  fixed_network:
+    type: string
+    description: uuid/name of an existing network to use to provision machines
+    default: ""
+
+  fixed_subnet:
+    type: string
+    description: uuid/name of an existing subnet to use to provision machines
+    default: ""
+
+  fixed_network_cidr:
+    type: string
+    description: network range for fixed ip network
+    default: 10.0.0.0/24
+
+  dns_nameserver:
+    type: string
+    description: address of a dns nameserver reachable in your environment
+
+  http_proxy:
+    type: string
+    description: http proxy address for docker
+    default: ""
+
+  https_proxy:
+    type: string
+    description: https proxy address for docker
+    default: ""
+
+  no_proxy:
+    type: string
+    description: no proxies for docker
+    default: ""
+
+  ######################################################################
+  #
+  # Rexray Configuration
+  #
+
+  trustee_domain_id:
+    type: string
+    description: domain id of the trustee
+    default: ""
+
+  trustee_user_id:
+    type: string
+    description: user id of the trustee
+    default: ""
+
+  trustee_username:
+    type: string
+    description: username of the trustee
+    default: ""
+
+  trustee_password:
+    type: string
+    description: password of the trustee
+    default: ""
+    hidden: true
+
+  trust_id:
+    type: string
+    description: id of the trust which is used by the trustee
+    default: ""
+    hidden: true
+
+  ######################################################################
+  #
+  # Rexray Configuration
+  #
+
+  volume_driver:
+    type: string
+    description: volume driver to use for container storage
+    default: ""
+
+  username:
+    type: string
+    description: user name
+
+  tenant_name:
+    type: string
+    description: >
+      tenant_name is used to isolate access to cloud resources
+
+  domain_name:
+    type: string
+    description: >
+      domain is to define the administrative boundaries for management
+      of Keystone entities
+
+  region_name:
+    type: string
+    description: a logically separate section of the cluster
+
+  rexray_preempt:
+    type: string
+    description: >
+      enables any host to take control of a volume irrespective of whether
+      other hosts are using the volume
+    default: "false"
+
+  auth_url:
+    type: string
+    description: url for keystone
+
+  slaves_to_remove:
+    type: comma_delimited_list
+    description: >
+      List of slaves to be removed when doing an update. Individual slave may
+      be referenced several ways: (1) The resource name (e.g.['1', '3']),
+      (2) The private IP address ['10.0.0.4', '10.0.0.6']. Note: the list should
+      be empty when doing a create.
+    default: []
+
+  wait_condition_timeout:
+    type: number
+    description: >
+      timeout for the Wait Conditions
+    default: 6000
+
+  password:
+    type: string
+    description: >
+      user password, not set in current implementation, only used to
+      fill in for DC/OS config file
+    default:
+      password
+    hidden: true
+
+  ######################################################################
+  #
+  # DC/OS parameters
+  #
+
+  # cluster_name
+
+  exhibitor_storage_backend:
+    type: string
+    default: "static"
+
+  exhibitor_zk_hosts:
+    type: string
+    default: ""
+
+  exhibitor_zk_path:
+    type: string
+    default: ""
+
+  aws_access_key_id:
+    type: string
+    default: ""
+
+  aws_region:
+    type: string
+    default: ""
+
+  aws_secret_access_key:
+    type: string
+    default: ""
+
+  exhibitor_explicit_keys:
+    type: string
+    default: ""
+
+  s3_bucket:
+    type: string
+    default: ""
+
+  s3_prefix:
+    type: string
+    default: ""
+
+  exhibitor_azure_account_name:
+    type: string
+    default: ""
+
+  exhibitor_azure_account_key:
+    type: string
+    default: ""
+
+  exhibitor_azure_prefix:
+    type: string
+    default: ""
+
+  # master_discovery default set to "static"
+  # If --master-lb-enabled is specified,
+  # master_discovery will be set to "master_http_loadbalancer"
+  master_discovery:
+    type: string
+    default: "static"
+
+  # master_list
+
+  # exhibitor_address
+
+  # num_masters
+
+  ####################################################
+  # Networking
+
+  dcos_overlay_enable:
+    type: string
+    default: ""
+    constraints:
+      - allowed_values:
+        - "true"
+        - "false"
+        - ""
+
+  dcos_overlay_config_attempts:
+    type: string
+    default: ""
+
+  dcos_overlay_mtu:
+    type: string
+    default: ""
+
+  dcos_overlay_network:
+    type: string
+    default: ""
+
+  dns_search:
+    type: string
+    description: >
+      This parameter specifies a space-separated list of domains that
+      are tried when an unqualified domain is entered
+    default: ""
+
+  # resolvers
+
+  # use_proxy
+
+  ####################################################
+  # Performance and Tuning
+
+  check_time:
+    type: string
+    default: "true"
+    constraints:
+      - allowed_values:
+        - "true"
+        - "false"
+
+  docker_remove_delay:
+    type: number
+    default: 1
+
+  gc_delay:
+    type: number
+    default: 2
+
+  log_directory:
+    type: string
+    default: "/genconf/logs"
+
+  process_timeout:
+    type: number
+    default: 120
+
+  ####################################################
+  # Security And Authentication
+
+  oauth_enabled:
+    type: string
+    default: "true"
+    constraints:
+      - allowed_values:
+        - "true"
+        - "false"
+
+  telemetry_enabled:
+    type: string
+    default: "true"
+    constraints:
+      - allowed_values:
+        - "true"
+        - "false"
+
+resources:
+
+  ######################################################################
+  #
+  # network resources.  allocate a network and router for our server.
+  #
+
+  network:
+    type: ../../common/templates/network.yaml
+    properties:
+      existing_network: {get_param: fixed_network}
+      existing_subnet: {get_param: fixed_subnet}
+      private_network_cidr: {get_param: fixed_network_cidr}
+      dns_nameserver: {get_param: dns_nameserver}
+      external_network: {get_param: external_network}
+
+  api_lb:
+    type: lb.yaml
+    properties:
+      fixed_subnet: {get_attr: [network, fixed_subnet]}
+      external_network: {get_param: external_network}
+
+  ######################################################################
+  #
+  # security groups.  we need to permit network traffic of various
+  # sorts.
+  #
+
+  secgroup:
+    type: secgroup.yaml
+
+  ######################################################################
+  #
+  # resources that expose the IPs of either the dcos master or a given
+  # LBaaS pool depending on whether LBaaS is enabled for the cluster.
+  #
+
+  api_address_lb_switch:
+    type: Magnum::ApiGatewaySwitcher
+    properties:
+      pool_public_ip: {get_attr: [api_lb, floating_address]}
+      pool_private_ip: {get_attr: [api_lb, address]}
+      master_public_ip: {get_attr: [dcos_masters, resource.0.dcos_master_external_ip]}
+      master_private_ip: {get_attr: [dcos_masters, resource.0.dcos_master_ip]}
+
+  ######################################################################
+  #
+  # Master SoftwareConfig.
+  #
+
+  write_params_master:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config: {get_file: fragments/write-heat-params.sh}
+      inputs:
+        - name: HTTP_PROXY
+          type: String
+        - name: HTTPS_PROXY
+          type: String
+        - name: NO_PROXY
+          type: String
+        - name: AUTH_URL
+          type: String
+        - name: USERNAME
+          type: String
+        - name: PASSWORD
+          type: String
+        - name: TENANT_NAME
+          type: String
+        - name: VOLUME_DRIVER
+          type: String
+        - name: REGION_NAME
+          type: String
+        - name: DOMAIN_NAME
+          type: String
+        - name: REXRAY_PREEMPT
+          type: String
+        - name: CLUSTER_NAME
+          type: String
+        - name: EXHIBITOR_STORAGE_BACKEND
+          type: String
+        - name: EXHIBITOR_ZK_HOSTS
+          type: String
+        - name: EXHIBITOR_ZK_PATH
+          type: String
+        - name: AWS_ACCESS_KEY_ID
+          type: String
+        - name: AWS_REGION
+          type: String
+        - name: AWS_SECRET_ACCESS_KEY
+          type: String
+        - name: EXHIBITOR_EXPLICIT_KEYS
+          type: String
+        - name: S3_BUCKET
+          type: String
+        - name: S3_PREFIX
+          type: String
+        - name: EXHIBITOR_AZURE_ACCOUNT_NAME
+          type: String
+        - name: EXHIBITOR_AZURE_ACCOUNT_KEY
+          type: String
+        - name: EXHIBITOR_AZURE_PREFIX
+          type: String
+        - name: MASTER_DISCOVERY
+          type: String
+        - name: MASTER_LIST
+          type: String
+        - name: EXHIBITOR_ADDRESS
+          type: String
+        - name: NUM_MASTERS
+          type: String
+        - name: DCOS_OVERLAY_ENABLE
+          type: String
+        - name: DCOS_OVERLAY_CONFIG_ATTEMPTS
+          type: String
+        - name: DCOS_OVERLAY_MTU
+          type: String
+        - name: DCOS_OVERLAY_NETWORK
+          type: String
+        - name: DNS_SEARCH
+          type: String
+        - name: RESOLVERS
+          type: String
+        - name: CHECK_TIME
+          type: String
+        - name: DOCKER_REMOVE_DELAY
+          type: String
+        - name: GC_DELAY
+          type: String
+        - name: LOG_DIRECTORY
+          type: String
+        - name: PROCESS_TIMEOUT
+          type: String
+        - name: OAUTH_ENABLED
+          type: String
+        - name: TELEMETRY_ENABLED
+          type: String
+        - name: ROLES
+          type: String
+
+  ######################################################################
+  #
+  # DC/OS configuration SoftwareConfig.
+  # Configuration files are readered and injected into instance.
+  #
+
+  dcos_config:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config: {get_file: fragments/configure-dcos.sh}
+
+  ######################################################################
+  #
+  # Master SoftwareDeployment.
+  #
+
+  write_params_master_deployment:
+    type: OS::Heat::SoftwareDeploymentGroup
+    properties:
+      config: {get_resource: write_params_master}
+      servers: {get_attr: [dcos_masters, attributes, dcos_server_id]}
+      input_values:
+        HTTP_PROXY: {get_param: http_proxy}
+        HTTPS_PROXY: {get_param: https_proxy}
+        NO_PROXY: {get_param: no_proxy}
+        AUTH_URL: {get_param: auth_url}
+        USERNAME: {get_param: username}
+        PASSWORD: {get_param: password}
+        TENANT_NAME: {get_param: tenant_name}
+        VOLUME_DRIVER: {get_param: volume_driver}
+        REGION_NAME: {get_param: region_name}
+        DOMAIN_NAME: {get_param: domain_name}
+        REXRAY_PREEMPT: {get_param: rexray_preempt}
+        CLUSTER_NAME: {get_param: cluster_name}
+        EXHIBITOR_STORAGE_BACKEND: {get_param: exhibitor_storage_backend}
+        EXHIBITOR_ZK_HOSTS: {get_param: exhibitor_zk_hosts}
+        EXHIBITOR_ZK_PATH: {get_param: exhibitor_zk_path}
+        AWS_ACCESS_KEY_ID: {get_param: aws_access_key_id}
+        AWS_REGION: {get_param: aws_region}
+        AWS_SECRET_ACCESS_KEY: {get_param: aws_secret_access_key}
+        EXHIBITOR_EXPLICIT_KEYS: {get_param: exhibitor_explicit_keys}
+        S3_BUCKET: {get_param: s3_bucket}
+        S3_PREFIX: {get_param: s3_prefix}
+        EXHIBITOR_AZURE_ACCOUNT_NAME: {get_param: exhibitor_azure_account_name}
+        EXHIBITOR_AZURE_ACCOUNT_KEY: {get_param: exhibitor_azure_account_key}
+        EXHIBITOR_AZURE_PREFIX: {get_param: exhibitor_azure_prefix}
+        MASTER_DISCOVERY: {get_param: master_discovery}
+        MASTER_LIST: {list_join: [' ', {get_attr: [dcos_masters, dcos_master_ip]}]}
+        EXHIBITOR_ADDRESS: {get_attr: [api_lb, address]}
+        NUM_MASTERS: {get_param: number_of_masters}
+        DCOS_OVERLAY_ENABLE: {get_param: dcos_overlay_enable}
+        DCOS_OVERLAY_CONFIG_ATTEMPTS: {get_param: dcos_overlay_config_attempts}
+        DCOS_OVERLAY_MTU: {get_param: dcos_overlay_mtu}
+        DCOS_OVERLAY_NETWORK: {get_param: dcos_overlay_network}
+        DNS_SEARCH: {get_param: dns_search}
+        RESOLVERS: {get_param: dns_nameserver}
+        CHECK_TIME: {get_param: check_time}
+        DOCKER_REMOVE_DELAY: {get_param: docker_remove_delay}
+        GC_DELAY: {get_param: gc_delay}
+        LOG_DIRECTORY: {get_param: log_directory}
+        PROCESS_TIMEOUT: {get_param: process_timeout}
+        OAUTH_ENABLED: {get_param: oauth_enabled}
+        TELEMETRY_ENABLED: {get_param: telemetry_enabled}
+        ROLES: master
+
+  dcos_config_deployment:
+    type: OS::Heat::SoftwareDeploymentGroup
+    depends_on:
+      - write_params_master_deployment
+    properties:
+      config: {get_resource: dcos_config}
+      servers: {get_attr: [dcos_masters, attributes, dcos_server_id]}
+
+  ######################################################################
+  #
+  # DC/OS masters. This is a resource group that will create
+  # <number_of_masters> masters.
+  #
+
+  dcos_masters:
+    type: OS::Heat::ResourceGroup
+    depends_on:
+      - network
+    properties:
+      count: {get_param: number_of_masters}
+      resource_def:
+        type: dcosmaster.yaml
+        properties:
+          ssh_key_name: {get_param: ssh_key_name}
+          server_image: {get_param: server_image}
+          master_flavor: {get_param: master_flavor}
+          external_network: {get_param: external_network}
+          fixed_network: {get_attr: [network, fixed_network]}
+          fixed_subnet: {get_attr: [network, fixed_subnet]}
+          secgroup_base_id: {get_attr: [secgroup, secgroup_base_id]}
+          secgroup_dcos_id: {get_attr: [secgroup, secgroup_dcos_id]}
+          api_pool_80_id: {get_attr: [api_lb, pool_80_id]}
+          api_pool_443_id: {get_attr: [api_lb, pool_443_id]}
+          api_pool_8080_id: {get_attr: [api_lb, pool_8080_id]}
+          api_pool_5050_id: {get_attr: [api_lb, pool_5050_id]}
+          api_pool_2181_id: {get_attr: [api_lb, pool_2181_id]}
+          api_pool_8181_id: {get_attr: [api_lb, pool_8181_id]}
+
+  ######################################################################
+  #
+  # DC/OS slaves. This is a resource group that will initially
+  # create <number_of_slaves> public or private slaves,
+  # and needs to be manually scaled.
+  #
+
+  dcos_slaves:
+    type: OS::Heat::ResourceGroup
+    depends_on:
+      - network
+    properties:
+      count: {get_param: number_of_slaves}
+      removal_policies: [{resource_list: {get_param: slaves_to_remove}}]
+      resource_def:
+        type: dcosslave.yaml
+        properties:
+          ssh_key_name: {get_param: ssh_key_name}
+          server_image: {get_param: server_image}
+          slave_flavor: {get_param: slave_flavor}
+          fixed_network: {get_attr: [network, fixed_network]}
+          fixed_subnet: {get_attr: [network, fixed_subnet]}
+          external_network: {get_param: external_network}
+          wait_condition_timeout: {get_param: wait_condition_timeout}
+          secgroup_base_id: {get_attr: [secgroup, secgroup_base_id]}
+          # DC/OS params
+          auth_url: {get_param: auth_url}
+          username: {get_param: username}
+          password: {get_param: password}
+          tenant_name: {get_param: tenant_name}
+          volume_driver: {get_param: volume_driver}
+          region_name: {get_param: region_name}
+          domain_name: {get_param: domain_name}
+          rexray_preempt: {get_param: rexray_preempt}
+          http_proxy: {get_param: http_proxy}
+          https_proxy: {get_param: https_proxy}
+          no_proxy: {get_param: no_proxy}
+          cluster_name: {get_param: cluster_name}
+          exhibitor_storage_backend: {get_param: exhibitor_storage_backend}
+          exhibitor_zk_hosts: {get_param: exhibitor_zk_hosts}
+          exhibitor_zk_path: {get_param: exhibitor_zk_path}
+          aws_access_key_id: {get_param: aws_access_key_id}
+          aws_region: {get_param: aws_region}
+          aws_secret_access_key: {get_param: aws_secret_access_key}
+          exhibitor_explicit_keys: {get_param: exhibitor_explicit_keys}
+          s3_bucket: {get_param: s3_bucket}
+          s3_prefix: {get_param: s3_prefix}
+          exhibitor_azure_account_name: {get_param: exhibitor_azure_account_name}
+          exhibitor_azure_account_key: {get_param: exhibitor_azure_account_key}
+          exhibitor_azure_prefix: {get_param: exhibitor_azure_prefix}
+          master_discovery: {get_param: master_discovery}
+          master_list: {list_join: [' ', {get_attr: [dcos_masters, dcos_master_ip]}]}
+          exhibitor_address: {get_attr: [api_lb, address]}
+          num_masters: {get_param: number_of_masters}
+          dcos_overlay_enable: {get_param: dcos_overlay_enable}
+          dcos_overlay_config_attempts: {get_param: dcos_overlay_config_attempts}
+          dcos_overlay_mtu: {get_param: dcos_overlay_mtu}
+          dcos_overlay_network: {get_param: dcos_overlay_network}
+          dns_search: {get_param: dns_search}
+          resolvers: {get_param: dns_nameserver}
+          check_time: {get_param: check_time}
+          docker_remove_delay: {get_param: docker_remove_delay}
+          gc_delay: {get_param: gc_delay}
+          log_directory: {get_param: log_directory}
+          process_timeout: {get_param: process_timeout}
+          oauth_enabled: {get_param: oauth_enabled}
+          telemetry_enabled: {get_param: telemetry_enabled}
+
+outputs:
+
+  api_address:
+    value: {get_attr: [api_address_lb_switch, public_ip]}
+    description: >
+      This is the API endpoint of the DC/OS master. Use this to access
+      the DC/OS API from outside the cluster.
+
+  dcos_master_private:
+    value: {get_attr: [dcos_masters, dcos_master_ip]}
+    description: >
+      This is a list of the "private" addresses of all the DC/OS masters.
+
+  dcos_master:
+    value: {get_attr: [dcos_masters, dcos_master_external_ip]}
+    description: >
+      This is the "public" ip address of the DC/OS master server.  Use this address to
+      log in to the DC/OS master via ssh or to access the DC/OS API
+      from outside the cluster.
+
+  dcos_slaves_private:
+    value: {get_attr: [dcos_slaves, dcos_slave_ip]}
+    description: >
+      This is a list of the "private" addresses of all the DC/OS slaves.
+
+  dcos_slaves:
+    value: {get_attr: [dcos_slaves, dcos_slave_external_ip]}
+    description: >
+      This is a list of the "public" addresses of all the DC/OS slaves.
