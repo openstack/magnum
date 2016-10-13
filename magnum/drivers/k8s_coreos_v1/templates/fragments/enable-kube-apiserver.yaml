@@ -59,10 +59,10 @@ write_files:
           - /hyperkube
           - apiserver
           - ${BIND_ADDRESS_CMD}
-          - --etcd_servers=http://127.0.0.1:2379
+          - --etcd-servers=http://127.0.0.1:2379
           - --allow-privileged=true
           - --service-cluster-ip-range=${PORTAL_NETWORK_CIDR}
-          - --secure_port=${SECURE_PORT}
+          - --secure-port=${SECURE_PORT}
           - --insecure-port=${INSECURE_PORT}
           - --tls-cert-file=${TLS_CERT_FILE}
           - --tls-private-key-file=${TLS_PRIVATE_KEY_FILE}
