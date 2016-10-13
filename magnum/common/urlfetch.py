@@ -13,25 +13,18 @@
 
 """Utility for fetching a resource (e.g. a manifest) from a URL."""
 
-from oslo_config import cfg
 from oslo_log import log as logging
 import requests
 from requests import exceptions
 from six.moves import urllib
 
 from magnum.common import exception
+import magnum.conf
 from magnum.i18n import _
 from magnum.i18n import _LE
 from magnum.i18n import _LI
 
-URLFETCH_OPTS = [
-    cfg.IntOpt('max_manifest_size',
-               default=524288,
-               help=_('Maximum raw byte size of any manifest.'))
-]
-
-cfg.CONF.register_opts(URLFETCH_OPTS)
-
+CONF = magnum.conf.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -76,10 +69,10 @@ def get(url, allowed_schemes=('http', 'https')):
         result = ""
         for chunk in reader:
             result += chunk
-            if len(result) > cfg.CONF.max_manifest_size:
+            if len(result) > CONF.max_manifest_size:
                 raise URLFetchError(_LE("Manifest exceeds maximum allowed"
                                         "size (%s bytes)") %
-                                    cfg.CONF.max_manifest_size)
+                                    CONF.max_manifest_size)
         return result
 
     except exceptions.RequestException as ex:

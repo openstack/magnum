@@ -27,13 +27,14 @@ from oslo_config import cfg
 from oslo_log import log as logging
 import six
 
+import magnum.conf
 from magnum.i18n import _
 from magnum.i18n import _LE
 
 
 LOG = logging.getLogger(__name__)
 
-CONF = cfg.CONF
+CONF = magnum.conf.CONF
 
 try:
     CONF.import_opt('fatal_exception_format_errors',
