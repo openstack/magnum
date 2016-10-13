@@ -32,13 +32,6 @@ policy_data = """
     "baymodel:detail": "",
     "baymodel:get": "",
     "baymodel:get_all": "",
-    "baymodel:update": "",
-
-    "rc:create": "",
-    "rc:delete": "",
-    "rc:detail": "",
-    "rc:get": "",
-    "rc:get_all": "",
-    "rc:update": ""
+    "baymodel:update": ""
 }
 """
