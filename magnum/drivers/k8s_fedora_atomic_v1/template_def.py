@@ -14,10 +14,10 @@
 
 import os
 
+import magnum.conf
 from magnum.drivers.common import k8s_fedora_template_def as kftd
-from oslo_config import cfg
 
-CONF = cfg.CONF
+CONF = magnum.conf.CONF
 
 
 class AtomicK8sTemplateDefinition(kftd.K8sFedoraTemplateDefinition):
