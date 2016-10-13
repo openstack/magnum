@@ -12,8 +12,8 @@ AUTH_URL=$(echo "$AUTH_URL" | sed 's/v3/v2.0/')
 cat > $KUBE_OS_CLOUD_CONFIG <<EOF
 [Global]
 auth-url=$AUTH_URL
-Username=$USERNAME
-Password=$PASSWORD
+username=$USERNAME
+password=$PASSWORD
 tenant-name=$TENANT_NAME
 [LoadBalancer]
 subnet-id=$CLUSTER_SUBNET
