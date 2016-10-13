@@ -21,7 +21,6 @@ sys.path.insert(0, os.path.abspath('../..'))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
     'sphinx.ext.autodoc',
-    #'sphinx.ext.intersphinx',
     'stevedore.sphinxext',
     'oslosphinx'
 ]
@@ -50,6 +49,12 @@ add_module_names = True
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
+# The short X.Y version.
+from magnum.version import version_info as magnum_version
+version = magnum_version.canonical_version_string()
+# The full version, including alpha/beta/rc tags.
+release = magnum_version.version_string_with_vcs()
+
 # -- Options for HTML output --------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
@@ -72,4 +77,4 @@ latex_documents = [
 ]
 
 # Example configuration for intersphinx: refer to the Python standard library.
-#intersphinx_mapping = {'http://docs.python.org/': None}
+# intersphinx_mapping = {'http://docs.python.org/': None}

@@ -63,9 +63,10 @@ copyright = u'2016, OpenStack contributors'
 # built documents.
 #
 # The short X.Y version.
-version = '0.1'
+from magnum.version import version_info as magnum_version
+version = magnum_version.canonical_version_string()
 # The full version, including alpha/beta/rc tags.
-release = '0.1'
+release = magnum_version.version_string_with_vcs()
 
 # A few variables have to be set for the log-a-bug feature.
 #   giturl: The location of conf.py on Git. Must be set manually.
