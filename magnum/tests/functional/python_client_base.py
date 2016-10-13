@@ -198,7 +198,7 @@ class BaseMagnumClient(base.BaseMagnumTest):
         except exceptions.NotFound:
             pass
         else:
-            if cls._show_cluster(cls.clustser.uuid).status == 'DELETE_FAILED':
+            if cls._show_cluster(cls.cluster.uuid).status == 'DELETE_FAILED':
                 raise Exception("Cluster %s delete failed" % cls.cluster.uuid)
 
     @classmethod
