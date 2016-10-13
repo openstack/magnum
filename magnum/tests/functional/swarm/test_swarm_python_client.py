@@ -35,7 +35,6 @@ class TestSwarmAPIs(ClusterTest):
         "tls_disabled": False,
         "network_driver": None,
         "volume_driver": None,
-        "fixed_network": '192.168.0.0/24',
         "labels": {}
     }
 
