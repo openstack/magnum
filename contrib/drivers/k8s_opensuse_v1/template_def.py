@@ -16,6 +16,7 @@ import os
 
 import magnum.conf
 from magnum.drivers.common import k8s_template_def
+from magnum.drivers.common import template_def
 
 CONF = magnum.conf.CONF
 
@@ -48,6 +49,12 @@ class JeOSK8sTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                      self).get_params(context, cluster_template, cluster,
                                       extra_params=extra_params,
                                       **kwargs)
+
+    def get_env_files(self, cluster_template):
+        if cluster_template.master_lb_enabled:
+            return [template_def.COMMON_ENV_PATH + 'with_master_lb.yaml']
+        else:
+            return [template_def.COMMON_ENV_PATH + 'no_master_lb.yaml']
 
     @property
     def template_path(self):
