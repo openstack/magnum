@@ -32,6 +32,26 @@ policy_data = """
     "baymodel:detail": "",
     "baymodel:get": "",
     "baymodel:get_all": "",
-    "baymodel:update": ""
+    "baymodel:update": "",
+
+    "cluster:create": "",
+    "cluster:delete": "",
+    "cluster:detail": "",
+    "cluster:get": "",
+    "cluster:get_all": "",
+    "cluster:update": "",
+
+    "clustertemplate:create": "",
+    "clustertemplate:delete": "",
+    "clustertemplate:detail": "",
+    "clustertemplate:get": "",
+    "clustertemplate:get_all": "",
+    "clustertemplate:update": "",
+    "clustertemplate:publish": "",
+
+    "certificate:create": "",
+    "certificate:get": "",
+
+    "magnum-service:get_all": ""
 }
 """
