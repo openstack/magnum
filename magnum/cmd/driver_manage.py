@@ -11,7 +11,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""Starter script for magnum-template-manage."""
+"""Starter script for magnum-driver-manage."""
 import sys
 
 from cliff import app
@@ -19,22 +19,18 @@ from cliff import commandmanager
 from cliff import lister
 
 import magnum.conf
-from magnum.drivers.common import template_def as tdef
+from magnum.drivers.common import driver
 from magnum import version
 
 CONF = magnum.conf.CONF
 
 
-def is_enabled(name):
-    return name in CONF.cluster.enabled_definitions
-
-
-class TemplateList(lister.Lister):
+class DriverList(lister.Lister):
     """List templates"""
 
     def _print_rows(self, parsed_args, rows):
-        fields = ['name', 'enabled']
-        field_labels = ['Name', 'Enabled']
+        fields = ['name']
+        field_labels = ['Name']
 
         if parsed_args.details:
             fields.extend(['server_type', 'os', 'coe'])
@@ -46,7 +42,7 @@ class TemplateList(lister.Lister):
                               for row in rows]
 
     def get_parser(self, prog_name):
-        parser = super(TemplateList, self).get_parser(prog_name)
+        parser = super(DriverList, self).get_parser(prog_name)
         parser.add_argument('-d', '--details',
                             action='store_true',
                             dest='details',
@@ -57,40 +53,30 @@ class TemplateList(lister.Lister):
                             dest='paths',
                             help='display the path to each template file')
 
-        group = parser.add_mutually_exclusive_group()
-        group.add_argument('--enabled', action='store_true', dest='enabled',
-                           help="display only enabled templates")
-        group.add_argument('--disabled', action='store_true', dest='disabled',
-                           help="display only disabled templates")
-
         return parser
 
     def take_action(self, parsed_args):
         rows = []
 
-        for entry_point, cls in tdef.TemplateDefinition.load_entry_points():
+        for entry_point, cls in driver.Driver.load_entry_points():
             name = entry_point.name
-            if ((is_enabled(name) and not parsed_args.disabled) or
-                    (not is_enabled(name) and not parsed_args.enabled)):
-                definition = cls()
-                template = dict(name=name, enabled=is_enabled(name),
-                                path=definition.template_path)
+            definition = cls().get_template_definition()
+            template = dict(name=name, path=definition.template_path)
 
-                if parsed_args.details:
-                    for cluster_type in definition.provides:
-                        row = dict()
-                        row.update(template)
-                        row.update(cluster_type)
-                        rows.append(row)
-                else:
-                    rows.append(template)
-
+            if parsed_args.details:
+                for cluster_type in cls().provides:
+                    row = dict()
+                    row.update(template)
+                    row.update(cluster_type)
+                    rows.append(row)
+            else:
+                rows.append(template)
         return self._print_rows(parsed_args, rows)
 
 
-class TemplateCommandManager(commandmanager.CommandManager):
+class DriverCommandManager(commandmanager.CommandManager):
     COMMANDS = {
-        "list-templates": TemplateList,
+        "list-drivers": DriverList,
     }
 
     def load_commands(self, namespace):
@@ -98,12 +84,12 @@ class TemplateCommandManager(commandmanager.CommandManager):
             self.add_command(name, command_class)
 
 
-class TemplateManager(app.App):
+class DriverManager(app.App):
     def __init__(self):
-        super(TemplateManager, self).__init__(
-            description='Magnum Template Manager',
+        super(DriverManager, self).__init__(
+            description='Magnum Driver Manager',
             version=version.version_info,
-            command_manager=TemplateCommandManager(None),
+            command_manager=DriverCommandManager(None),
             deferred_help=True)
 
 
@@ -113,4 +99,4 @@ def main(args=None):
     CONF([],
          project='magnum',
          version=version.version_info.release_string())
-    return TemplateManager().run(args)
+    return DriverManager().run(args)
