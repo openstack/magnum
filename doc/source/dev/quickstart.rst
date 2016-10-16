@@ -146,6 +146,7 @@ Kilo, and heat must be enabled by yourself)::
     END
 
 **NOTE:** Update PUBLIC_INTERFACE as appropriate for your system.
+
 **NOTE:** Enable heat plugin is necessary.
 
 Optionally, you can enable ceilometer in devstack. If ceilometer is enabled,
@@ -534,11 +535,8 @@ except for the absence of some Kubernetes-specific arguments and the use of
                            --docker-volume-size 5 \
                            --coe swarm
 
-**NOTE:** If you are using Magnum behind a firewall then see:
-
-.. _Using_Magnum_Behind_Firewall:
-
-http://docs.openstack.org/developer/magnum/magnum-proxy.html
+**NOTE:** If you are using Magnum behind a firewall then refer
+to `<http://docs.openstack.org/developer/magnum/magnum-proxy.html>`_
 
 Finally, create the cluster. Use the ClusterTemplate 'swarm-cluster-template'
 as a template for cluster creation. This cluster will result in one swarm
