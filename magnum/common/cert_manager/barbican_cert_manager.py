@@ -13,12 +13,14 @@
 #    under the License.
 
 from barbicanclient import client as barbican_client
+from barbicanclient import exceptions as barbican_exc
 from oslo_log import log as logging
 from oslo_utils import excutils
 
 from magnum.common.cert_manager import cert_manager
 from magnum.common import clients
 from magnum.common import context
+from magnum.common import exception as magnum_exc
 from magnum.i18n import _
 from magnum.i18n import _LE
 from magnum.i18n import _LI
@@ -134,7 +136,7 @@ class CertManager(cert_manager.CertManager):
         #  exceptions strangely -- this will catch anything that it raises and
         #  reraise the original exception, while also providing useful
         #  feedback in the logs for debugging
-        except Exception:
+        except magnum_exc.CertificateStorageException:
             for secret in [certificate_secret, private_key_secret,
                            intermediates_secret, pkp_secret]:
                 if secret and secret.secret_ref:
@@ -183,7 +185,7 @@ class CertManager(cert_manager.CertManager):
                     url=resource_ref
                 )
             return Cert(cert_container)
-        except Exception:
+        except barbican_exc.HTTPClientError:
             with excutils.save_and_reraise_exception():
                 LOG.exception(_LE("Error getting {0}").format(cert_ref))
 
@@ -209,7 +211,7 @@ class CertManager(cert_manager.CertManager):
                 certificate_container.private_key_passphrase.delete()
             certificate_container.private_key.delete()
             certificate_container.delete()
-        except Exception:
+        except barbican_exc.HTTPClientError:
             with excutils.save_and_reraise_exception():
                 LOG.exception(_LE(
                     "Error recursively deleting certificate container {0}"
