@@ -47,24 +47,24 @@ Object Change Example
 '''''''''''''''''''''
 
 The following example shows the unit test workflow when changing an object
-(Container was updated to hold a new 'foo' field)::
+(Cluster was updated to hold a new 'foo' field)::
 
     tox -e py27 magnum.tests.unit.objects.test_objects
 
 This results in a unit test failure with the following output::
 
     testtools.matchers._impl.MismatchError: !=:
-    reference = {'Container': '1.0-e12affbba5f8a748882a3ae98aced282'}
-    actual    = {'Container': '1.0-22b40e8eed0414561ca921906b189820'}
+    reference = {'Cluster': '1.0-35edde13ad178e9419e7ea8b6d580bcd'}
+    actual    = {'Cluster': '1.0-22b40e8eed0414561ca921906b189820'}
     : Fields or remotable methods in some objects have changed. Make sure the versions of the objects has been bumped, and update the hashes in the static fingerprints tree (object_data). For more information, read http://docs.openstack.org/developer/magnum/objects.html.
 
-This is an indication that me adding the 'foo' field to Container means I need
-to bump the version of Container, so I increase the version and add a comment
+This is an indication that me adding the 'foo' field to Cluster means I need
+to bump the version of Cluster, so I increase the version and add a comment
 saying what I changed in the new version::
 
     @base.MagnumObjectRegistry.register
-    class Container(base.MagnumPersistentObject, base.MagnumObject,
-                    base.MagnumObjectDictCompat):
+    class Cluster(base.MagnumPersistentObject, base.MagnumObject,
+                  base.MagnumObjectDictCompat):
         # Version 1.0: Initial version
         # Version 1.1: Added 'foo' field
         VERSION = '1.1'
@@ -73,8 +73,8 @@ Now that I have updated the version, I will run the tests again and let the
 test tell me the fingerprint that I now need to put in the static tree::
 
     testtools.matchers._impl.MismatchError: !=:
-    reference = {'Container': '1.0-e12affbba5f8a748882a3ae98aced282'}
-    actual    = {'Container': '1.1-22b40e8eed0414561ca921906b189820'}
+    reference = {'Cluster': '1.0-35edde13ad178e9419e7ea8b6d580bcd'}
+    actual    = {'Cluster': '1.1-22b40e8eed0414561ca921906b189820'}
     : Fields or remotable methods in some objects have changed. Make sure the versions of the objects has been bumped, and update the hashes in the static fingerprints tree (object_data). For more information, read http://docs.openstack.org/developer/magnum/objects.html.
 
 I can now copy the new fingerprint needed
@@ -82,13 +82,12 @@ I can now copy the new fingerprint needed
 magnum/tests/unit/objects/test_objects.py::
 
     object_data = {
-        'Bay': '1.0-35edde13ad178e9419e7ea8b6d580bcd',
-        'BayModel': '1.0-06863f04ab4b98307e3d1b736d3137bf',
-        'Container': '1.1-22b40e8eed0414561ca921906b189820',
+        'Cluster': '1.1-22b40e8eed0414561ca921906b189820',
+        'ClusterTemplate': '1.0-06863f04ab4b98307e3d1b736d3137bf',
+        'Certificate': '1.0-69b579203c6d726be7878c606626e438',
         'MyObj': '1.0-b43567e512438205e32f4e95ca616697',
-        'Pod': '1.0-69b579203c6d726be7878c606626e438',
-        'Service': '1.0-d4b8c0f3a234aec35d273196e18f7ed1',
         'X509KeyPair': '1.0-fd008eba0fbc390e0e5da247bba4eedd',
+        'MagnumService': '1.0-d4b8c0f3a234aec35d273196e18f7ed1',
     }
 
 Running the unit tests now shows no failure.
