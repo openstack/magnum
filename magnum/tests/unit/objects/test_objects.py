@@ -365,7 +365,6 @@ object_data = {
     'Cluster': '1.10-377082b6d7895cd800a39fa004765538',
     'ClusterTemplate': '1.17-65a95ef932dd08800a83871eb3cf312b',
     'Certificate': '1.1-1924dc077daa844f0f9076332ef96815',
-    'MyObj': '1.0-b43567e512438205e32f4e95ca616697',
     'MyObj': '1.0-34c4b1aadefd177b13f9a2f894cc23cd',
     'X509KeyPair': '1.2-d81950af36c59a71365e33ce539d24f9',
     'MagnumService': '1.0-2d397ec59b0046bd5ec35cd3e06efeca',
