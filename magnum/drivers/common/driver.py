@@ -206,3 +206,6 @@ class Driver(object):
         }
 
         return osc.heat().stacks.update(cluster.stack_id, **fields)
+
+    def delete_stack(self, context, osc, cluster):
+        osc.heat().stacks.delete(cluster.stack_id)

@@ -472,7 +472,10 @@ class TestHandler(db_base.DbTestCase):
 
     @patch('magnum.conductor.handlers.cluster_conductor.cert_manager')
     @patch('magnum.common.clients.OpenStackClients')
-    def test_cluster_delete(self, mock_openstack_client_class, cert_manager):
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
+    def test_cluster_delete(self, mock_driver, mock_openstack_client_class,
+                            cert_manager):
+        mock_driver.return_value = k8s_atomic_dr.Driver()
         osc = mock.MagicMock()
         mock_openstack_client_class.return_value = osc
         osc.heat.side_effect = exc.HTTPNotFound
@@ -496,8 +499,11 @@ class TestHandler(db_base.DbTestCase):
 
     @patch('magnum.conductor.handlers.cluster_conductor.cert_manager')
     @patch('magnum.common.clients.OpenStackClients')
-    def test_cluster_delete_conflict(self, mock_openstack_client_class,
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
+    def test_cluster_delete_conflict(self, mock_driver,
+                                     mock_openstack_client_class,
                                      cert_manager):
+        mock_driver.return_value = k8s_atomic_dr.Driver()
         osc = mock.MagicMock()
         mock_openstack_client_class.return_value = osc
         osc.heat.side_effect = exc.HTTPConflict

@@ -133,22 +133,18 @@ class Handler(object):
         LOG.debug('cluster_heat cluster_delete')
         osc = clients.OpenStackClients(context)
         cluster = objects.Cluster.get_by_uuid(context, uuid)
+        ct = conductor_utils.retrieve_cluster_template(context, cluster)
+        cluster_driver = driver.Driver.get_driver(ct.server_type,
+                                                  ct.cluster_distro,
+                                                  ct.coe)
 
-        stack_id = cluster.stack_id
-        # NOTE(sdake): This will execute a stack_delete operation.  This will
-        # Ignore HTTPNotFound exceptions (stack wasn't present).  In the case
-        # that Heat couldn't find the stack representing the cluster, likely a
-        # user has deleted the stack outside the context of Magnum.  Therefore
-        # the contents of the cluster are forever lost.
-        #
-        # If the exception is unhandled, the original exception will be raised.
         try:
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_PENDING)
-            osc.heat().stacks.delete(stack_id)
+            cluster_driver.delete_stack(context, osc, cluster)
         except exc.HTTPNotFound:
             LOG.info(_LI('The stack %s was not found during cluster'
-                         ' deletion.'), stack_id)
+                         ' deletion.'), cluster.stack_id)
             try:
                 trust_manager.delete_trustee_and_trust(osc, context, cluster)
                 cert_manager.delete_certificates_from_cluster(cluster,
@@ -172,11 +168,11 @@ class Handler(object):
         cluster.status = fields.ClusterStatus.DELETE_IN_PROGRESS
         cluster.save()
 
-        self._poll_and_check(osc, cluster)
+        self._poll_and_check(osc, cluster, cluster_driver)
 
         return None
 
-    def _poll_and_check(self, osc, cluster, cluster_driver=None):
+    def _poll_and_check(self, osc, cluster, cluster_driver):
         poller = HeatPoller(osc, cluster, cluster_driver)
         lc = loopingcall.FixedIntervalLoopingCall(f=poller.poll_and_check)
         lc.start(CONF.cluster_heat.wait_interval, True)
@@ -184,15 +180,14 @@ class Handler(object):
 
 class HeatPoller(object):
 
-    def __init__(self, openstack_client, cluster, cluster_driver=None):
+    def __init__(self, openstack_client, cluster, cluster_driver):
         self.openstack_client = openstack_client
         self.context = self.openstack_client.context
         self.cluster = cluster
         self.attempts = 0
         self.cluster_template = conductor_utils.retrieve_cluster_template(
             self.context, cluster)
-        if cluster_driver:
-            self.template_def = cluster_driver.get_template_definition()
+        self.template_def = cluster_driver.get_template_definition()
 
     def poll_and_check(self):
         # TODO(yuanying): temporary implementation to update api_address,
