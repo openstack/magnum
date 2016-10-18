@@ -35,9 +35,21 @@ class TestClusterTemplateObject(base.TestCase):
     def test_cluster_template_init(self):
         cluster_template_dict = apiutils.cluster_template_post_data()
         del cluster_template_dict['image_id']
+        del cluster_template_dict['registry_enabled']
+        del cluster_template_dict['tls_disabled']
+        del cluster_template_dict['public']
+        del cluster_template_dict['server_type']
+        del cluster_template_dict['master_lb_enabled']
+        del cluster_template_dict['floating_ip_enabled']
         cluster_template = api_cluster_template.ClusterTemplate(
             **cluster_template_dict)
         self.assertEqual(wtypes.Unset, cluster_template.image_id)
+        self.assertFalse(cluster_template.registry_enabled)
+        self.assertFalse(cluster_template.tls_disabled)
+        self.assertFalse(cluster_template.public)
+        self.assertEqual('vm', cluster_template.server_type)
+        self.assertFalse(cluster_template.master_lb_enabled)
+        self.assertTrue(cluster_template.floating_ip_enabled)
 
 
 class TestListClusterTemplate(api_base.FunctionalTest):
@@ -81,6 +93,22 @@ class TestListClusterTemplate(api_base.FunctionalTest):
     def test_get_one_by_name_not_found(self):
         response = self.get_json(
             '/clustertemplates/not_found',
+            expect_errors=True)
+        self.assertEqual(404, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(response.json['errors'])
+
+    def test_get_one_by_uuid(self):
+        temp_uuid = uuidutils.generate_uuid()
+        obj_utils.create_test_cluster_template(self.context, uuid=temp_uuid)
+        response = self.get_json(
+            '/clustertemplates/%s' % temp_uuid)
+        self.assertEqual(temp_uuid, response['uuid'])
+
+    def test_get_one_by_uuid_not_found(self):
+        temp_uuid = uuidutils.generate_uuid()
+        response = self.get_json(
+            '/clustertemplates/%s' % temp_uuid,
             expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)

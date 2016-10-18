@@ -16,6 +16,7 @@ import mock
 from oslo_config import cfg
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
+from wsme import types as wtypes
 
 from magnum.api import attr_validator
 from magnum.api.controllers.v1 import cluster as api_cluster
@@ -38,6 +39,15 @@ class TestClusterObject(base.TestCase):
         self.assertEqual(1, cluster.node_count)
         self.assertEqual(1, cluster.master_count)
         self.assertEqual(60, cluster.create_timeout)
+
+        # test unset value for cluster_template_id
+        cluster.cluster_template_id = wtypes.Unset
+        self.assertEqual(wtypes.Unset, cluster.cluster_template_id)
+
+        # test backwards compatibility of bay fields with new objects
+        cluster_dict['create_timeout'] = 15
+        cluster = api_cluster.Cluster(**cluster_dict)
+        self.assertEqual(15, cluster.create_timeout)
 
 
 class TestListCluster(api_base.FunctionalTest):
@@ -110,6 +120,22 @@ class TestListCluster(api_base.FunctionalTest):
     def test_get_one_by_name_not_found(self):
         response = self.get_json(
             '/clusters/not_found',
+            expect_errors=True)
+        self.assertEqual(404, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(response.json['errors'])
+
+    def test_get_one_by_uuid(self):
+        temp_uuid = uuidutils.generate_uuid()
+        obj_utils.create_test_cluster(self.context, uuid=temp_uuid)
+        response = self.get_json(
+            '/clusters/%s' % temp_uuid)
+        self.assertEqual(temp_uuid, response['uuid'])
+
+    def test_get_one_by_uuid_not_found(self):
+        temp_uuid = uuidutils.generate_uuid()
+        response = self.get_json(
+            '/clusters/%s' % temp_uuid,
             expect_errors=True)
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
@@ -285,6 +311,19 @@ class TestPatch(api_base.FunctionalTest):
 
         response = self.patch_json('/clusters/%s' % name,
                                    [{'path': '/name', 'value': name,
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(404, response.status_code)
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_replace_ok_by_uuid_not_found(self, mock_utcnow):
+        uuid = uuidutils.generate_uuid()
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.patch_json('/clusters/%s' % uuid,
+                                   [{'path': '/cluster_id', 'value': uuid,
                                      'op': 'replace'}],
                                    expect_errors=True)
         self.assertEqual('application/json', response.content_type)
@@ -481,6 +520,14 @@ class TestPost(api_base.FunctionalTest):
     def test_create_cluster_with_non_existent_cluster_template_id(self):
         temp_uuid = uuidutils.generate_uuid()
         bdict = apiutils.cluster_post_data(cluster_template_id=temp_uuid)
+        response = self.post_json('/clusters', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_int)
+        self.assertTrue(response.json['errors'])
+
+    def test_create_cluster_with_non_existent_cluster_template_name(self):
+        modelname = 'notfound'
+        bdict = apiutils.cluster_post_data(cluster_template_id=modelname)
         response = self.post_json('/clusters', bdict, expect_errors=True)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
@@ -758,6 +805,14 @@ class TestPost(api_base.FunctionalTest):
         cluster, timeout = self.mock_cluster_create.call_args
         # Verify keypair from ClusterTemplate is used
         self.assertEqual('keypair1', cluster[0].keypair)
+
+    def test_create_cluster_with_multi_keypair_same_name(self):
+        bdict = apiutils.cluster_post_data()
+        self.mock_valid_os_res.side_effect = exception.Conflict('keypair2')
+        response = self.post_json('/clusters', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertTrue(self.mock_valid_os_res.called)
+        self.assertEqual(409, response.status_int)
 
 
 class TestDelete(api_base.FunctionalTest):
