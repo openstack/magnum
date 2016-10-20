@@ -14,17 +14,10 @@ pods deployed on different minions.
 
 ## Requirements
 
-### OpenStack
-
-These templates will work with the Kilo version of Heat.  They *may*
-work with Juno as well as soon as [#1402894][] is resolved.
-
-[#1402894]: https://bugs.launchpad.net/heat/+bug/1402894
-
 ### Guest image
 
-These templates will work with either CentOS Atomic Host or Fedora 21
-Atomic or OpenSUSE Atomic.
+These templates will work with either openSUSE JeOS or SLES JeOS images
+that are prepared for Docker and Kubernetes.
 
 You can enable docker registry v2 by setting the "registry_enabled"
 parameter to "true".
@@ -112,7 +105,7 @@ these commands.
 
 ## License
 
-Copyright 2014 Lars Kellogg-Stedman <lars@redhat.com>
+Copyright 2016 SUSE Linux GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use these files except in compliance with the License.
@@ -128,16 +121,9 @@ limitations under the License.
 
 ## Contributing
 
-Please submit bugs and pull requests via the [GitHub repository][] at
-https://github.com/larsks/heat-kubernetes/.
+Please submit bugs and pull requests via the Gerrit repository at
+https://review.openstack.org/. For more information, please refer
+to the following resources:
 
-When submitting pull requests:
-
-- Please ensure that each pull request contains a single commit and
-  contains only related changes.  Put unrelated changes in multiple
-  pull requests.
-
-- Please avoid conflating new features with
-  stylistic/formatting/cleanup changes.
-
-[github repository]: https://github.com/larsks/heat-kubernetes/
+* **Documentation:** http://docs.openstack.org/developer/magnum
+* **Source:** http://git.openstack.org/cgit/openstack/magnum

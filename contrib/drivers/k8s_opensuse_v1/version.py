@@ -1,4 +1,4 @@
-# Copyright 2016 - Rackspace Hosting
+# Copyright 2016 - SUSE Linux GmbH
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
