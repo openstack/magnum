@@ -29,6 +29,7 @@ fi
 # Checkout master and save coverage report
 git checkout HEAD^
 
+base_op_count=`grep "op\." -R magnum/db/sqlalchemy/alembic/versions/ | wc -l`
 baseline_report=$(mktemp -t magnum_coverageXXXXXXX)
 find . -type f -name "*.pyc" -delete && python setup.py testr --coverage --testr-args="$*"
 coverage report > $baseline_report
@@ -39,13 +40,14 @@ baseline_missing=$(awk 'END { print $3 }' $baseline_report)
 # Checkout back and save coverage report
 git checkout -
 
+current_op_count=`grep "op\." -R magnum/db/sqlalchemy/alembic/versions/ | wc -l`
 current_report=$(mktemp -t magnum_coverageXXXXXXX)
 find . -type f -name "*.pyc" -delete && python setup.py testr --coverage --testr-args="$*"
 coverage report > $current_report
 current_missing=$(awk 'END { print $3 }' $current_report)
 
 # Show coverage details
-allowed_missing=$((baseline_missing+ALLOWED_EXTRA_MISSING))
+allowed_missing=$((baseline_missing+ALLOWED_EXTRA_MISSING+current_op_count-base_op_count))
 
 echo "Allowed to introduce missing lines : ${ALLOWED_EXTRA_MISSING}"
 echo "Missing lines in master            : ${baseline_missing}"
