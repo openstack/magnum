@@ -11,7 +11,7 @@ supports versioning. There are two kinds of versions in Magnum.
 - ''microversions'', which can be requested through the use of the
   ``OpenStack-API-Version``.
 
-Begining with the Newton release, all API requests support the
+Beginning with the Newton release, all API requests support the
 ``OpenStack-API-Version`` header. This header SHOULD be supplied
 with every request; in the absence of this header, each request is treated
 as though coming from an older pre-Newton client. This was done to preserve
