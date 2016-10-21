@@ -13,6 +13,8 @@ Contents:
 
    unreleased
    newton
+   mitaka
+   liberty
 
 Indices and tables
 ==================
