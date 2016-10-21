@@ -23,12 +23,6 @@ CONF = magnum.conf.CONF
 class JeOSK8sTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
     """Kubernetes template for openSUSE/SLES JeOS VM."""
 
-    provides = [
-        {'server_type': 'vm',
-         'os': 'opensuse',
-         'coe': 'kubernetes'},
-    ]
-
     def __init__(self):
         super(JeOSK8sTemplateDefinition, self).__init__()
         self.add_parameter('docker_volume_size',
@@ -48,6 +42,10 @@ class JeOSK8sTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                      self).get_params(context, cluster_template, cluster,
                                       extra_params=extra_params,
                                       **kwargs)
+
+    @property
+    def driver_module_path(self):
+        return __name__[:__name__.rindex('.')]
 
     @property
     def template_path(self):
