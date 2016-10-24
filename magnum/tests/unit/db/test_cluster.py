@@ -63,6 +63,20 @@ class DbClusterTestCase(base.DbTestCase):
                           self.dbapi.get_cluster_by_uuid,
                           self.context,
                           '12345678-9999-0000-aaaa-123456789012')
+        self.assertRaises(exception.ClusterNotFound,
+                          self.dbapi.get_cluster_by_name,
+                          self.context, 'not_found')
+
+    def test_get_cluster_by_name_multiple_cluster(self):
+        utils.create_test_cluster(
+            id=1, name='clusterone',
+            uuid=uuidutils.generate_uuid())
+        utils.create_test_cluster(
+            id=2, name='clusterone',
+            uuid=uuidutils.generate_uuid())
+        self.assertRaises(exception.Conflict,
+                          self.dbapi.get_cluster_by_name,
+                          self.context, 'clusterone')
 
     def test_get_cluster_list(self):
         uuids = []
@@ -189,10 +203,14 @@ class DbClusterTestCase(base.DbTestCase):
                           self.dbapi.get_cluster_by_uuid, self.context,
                           cluster.uuid)
 
-    def test_destroy_cluster_that_does_not_exist(self):
+    def test_destroy_cluster_by_id_that_does_not_exist(self):
         self.assertRaises(exception.ClusterNotFound,
                           self.dbapi.destroy_cluster,
                           '12345678-9999-0000-aaaa-123456789012')
+
+    def test_destroy_cluster_by_uuid_that_does_not_exist(self):
+        self.assertRaises(exception.ClusterNotFound,
+                          self.dbapi.destroy_cluster, '999')
 
     def test_update_cluster(self):
         cluster = utils.create_test_cluster()

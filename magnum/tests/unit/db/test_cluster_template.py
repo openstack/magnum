@@ -140,6 +140,12 @@ class DbClusterTemplateTestCase(base.DbTestCase):
                           self.dbapi.get_cluster_template_by_name,
                           self.context, 'not_found')
 
+    def test_get_cluster_template_by_uuid_that_does_not_exist(self):
+        self.assertRaises(exception.ClusterTemplateNotFound,
+                          self.dbapi.get_cluster_template_by_uuid,
+                          self.context,
+                          '12345678-9999-0000-aaaa-123456789012')
+
     def test_update_cluster_template(self):
         ct = utils.create_test_cluster_template()
         res = self.dbapi.update_cluster_template(ct['id'],
