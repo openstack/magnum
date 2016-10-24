@@ -26,11 +26,11 @@ class TestScaleManager(base.TestCase):
         mock_context = mock.MagicMock()
         mock_osc = mock.MagicMock()
         k8s_cluster = mock.MagicMock()
-        k8s_cluster.baymodel.coe = 'kubernetes'
+        k8s_cluster.cluster_template.coe = 'kubernetes'
         mesos_cluster = mock.MagicMock()
-        mesos_cluster.baymodel.coe = 'mesos'
+        mesos_cluster.cluster_template.coe = 'mesos'
         invalid_cluster = mock.MagicMock()
-        invalid_cluster.baymodel.coe = 'fake'
+        invalid_cluster.cluster_template.coe = 'fake'
 
         mgr = scale_manager.get_scale_manager(
             mock_context, mock_osc, k8s_cluster)
