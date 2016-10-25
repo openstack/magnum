@@ -2,7 +2,7 @@
 
 . /etc/sysconfig/heat-params
 
-if [ "$NETWORK_DRIVER" == "flannel" ]; then
+if [ "$NETWORK_DRIVER" != "flannel" ]; then
     exit 0
 fi
 
@@ -51,9 +51,6 @@ fi
 cat >> $FLANNEL_JSON <<EOF
 }
 EOF
-
-#echo "creating flanneld config in etcd"
-#etcdctl --endpoints $FLANNEL_ETCD --no-sync set ${FLANNEL_ETCD_KEY}/config < ${FLANNEL_JSON}
 
 # wait for etcd to become active (we will need it to push the flanneld config)
 while ! curl -sf -o /dev/null $FLANNEL_ETCD/v2/keys/; do
