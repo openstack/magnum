@@ -18,14 +18,14 @@ TimeoutStartSec=0
 ExecStartPre=-/usr/bin/docker kill swarm-agent
 ExecStartPre=-/usr/bin/docker rm swarm-agent
 ExecStartPre=-/usr/bin/docker pull swarm:$SWARM_VERSION
-ExecStart=/usr/bin/docker run -e http_proxy=$HTTP_PROXY \\
-                              -e https_proxy=$HTTPS_PROXY \\
-                              -e no_proxy=$NO_PROXY \\
-                              --name swarm-agent \\
-                              swarm:$SWARM_VERSION \\
-                              join \\
-                              --addr $myip:2375 \\
-                              etcd://$ETCD_SERVER_IP:2379/v2/keys/swarm/
+ExecStart=/usr/bin/docker run   -e http_proxy=$HTTP_PROXY \\
+                                -e https_proxy=$HTTPS_PROXY \\
+                                -e no_proxy=$NO_PROXY \\
+                                --name swarm-agent \\
+                                swarm:$SWARM_VERSION \\
+                                join \\
+                                --addr $myip:2375 \\
+                                etcd://$ETCD_SERVER_IP:2379/v2/keys/swarm/
 Restart=always
 ExecStop=/usr/bin/docker stop swarm-agent
 ExecStartPost=/usr/local/bin/notify-heat
@@ -42,10 +42,10 @@ SCRIPT=/usr/local/bin/notify-heat
 cat > $SCRIPT << EOF
 #!/bin/sh
 until etcdctl \
-  --peers $ETCD_SERVER_IP:2379 \
-  --timeout 1s \
-  --total-timeout 5s \
-  ls /v2/keys/swarm/docker/swarm/nodes/$myip:2375
+    --peers $ETCD_SERVER_IP:2379 \
+    --timeout 1s \
+    --total-timeout 5s \
+    ls /v2/keys/swarm/docker/swarm/nodes/$myip:2375
 do
     echo "Waiting for swarm agent registration..."
     sleep 5

@@ -5,7 +5,7 @@
 echo "Configuring mesos (slave)"
 
 myip=$(ip addr show eth0 |
-       awk '$1 == "inet" {print $2}' | cut -f1 -d/)
+    awk '$1 == "inet" {print $2}' | cut -f1 -d/)
 
 zk=""
 for master_ip in $MESOS_MASTERS_IPS; do

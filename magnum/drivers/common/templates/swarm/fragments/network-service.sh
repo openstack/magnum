@@ -5,8 +5,8 @@
 echo "Configuring ${NETWORK_DRIVER} network service ..."
 
 if [ "$NETWORK_DRIVER" == "docker" ]; then
-    DOCKER_NETWORK_OPTIONS="--cluster-store etcd://$ETCD_SERVER_IP:2379\
- --cluster-advertise $SWARM_NODE_IP:9379"
+    DOCKER_NETWORK_OPTIONS="--cluster-store etcd://$ETCD_SERVER_IP:2379 \
+        --cluster-advertise $SWARM_NODE_IP:9379"
     sed -i "/^DOCKER_NETWORK_OPTIONS=/ s#=.*#='$DOCKER_NETWORK_OPTIONS'#" \
         /etc/sysconfig/docker-network
 fi

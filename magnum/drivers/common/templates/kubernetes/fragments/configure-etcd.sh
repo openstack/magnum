@@ -3,8 +3,8 @@
 . /etc/sysconfig/heat-params
 
 if [ -z "$KUBE_NODE_IP" ]; then
-  # FIXME(yuanying): Set KUBE_NODE_IP correctly
-  KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+    # FIXME(yuanying): Set KUBE_NODE_IP correctly
+    KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 fi
 
 myip="${KUBE_NODE_IP}"

@@ -5,8 +5,8 @@
 echo "configuring kubernetes (minion)"
 
 if [ -z "$KUBE_NODE_IP" ]; then
-  # FIXME(yuanying): Set KUBE_NODE_IP correctly
-  KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+    # FIXME(yuanying): Set KUBE_NODE_IP correctly
+    KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 fi
 
 ETCD_SERVER_IP=${ETCD_SERVER_IP:-$KUBE_MASTER_IP}
@@ -20,9 +20,9 @@ fi
 KUBE_MASTER_URI="$KUBE_PROTOCOL://$KUBE_MASTER_IP:$KUBE_API_PORT"
 
 sed -i '
-  /^KUBE_ALLOW_PRIV=/ s/=.*/="--allow-privileged='"$KUBE_ALLOW_PRIV"'"/
-  /^KUBE_ETCD_SERVERS=/ s|=.*|="--etcd-servers=http://'"$ETCD_SERVER_IP"':2379"|
-  /^KUBE_MASTER=/ s|=.*|="--master='"$KUBE_MASTER_URI"'"|
+    /^KUBE_ALLOW_PRIV=/ s/=.*/="--allow-privileged='"$KUBE_ALLOW_PRIV"'"/
+    /^KUBE_ETCD_SERVERS=/ s|=.*|="--etcd-servers=http://'"$ETCD_SERVER_IP"':2379"|
+    /^KUBE_MASTER=/ s|=.*|="--master='"$KUBE_MASTER_URI"'"|
 ' /etc/kubernetes/config
 
 # NOTE:  Kubernetes plugin for Openstack requires that the node name registered
@@ -40,19 +40,19 @@ if [ -n "${INSECURE_REGISTRY_URL}" ]; then
 fi
 
 sed -i '
-  /^KUBELET_ADDRESS=/ s/=.*/="--address=0.0.0.0"/
-  /^KUBELET_HOSTNAME=/ s/=.*/=""/
-  /^KUBELET_API_SERVER=/ s|=.*|="--api-servers='"$KUBE_MASTER_URI"'"|
-  /^KUBELET_ARGS=/ s|=.*|="'"${KUBELET_ARGS}"'"|
+    /^KUBELET_ADDRESS=/ s/=.*/="--address=0.0.0.0"/
+    /^KUBELET_HOSTNAME=/ s/=.*/=""/
+    /^KUBELET_API_SERVER=/ s|=.*|="--api-servers='"$KUBE_MASTER_URI"'"|
+    /^KUBELET_ARGS=/ s|=.*|="'"${KUBELET_ARGS}"'"|
 ' /etc/kubernetes/kubelet
 
 sed -i '
-  /^KUBE_PROXY_ARGS=/ s|=.*|='"$KUBE_CONFIG"'|
+    /^KUBE_PROXY_ARGS=/ s|=.*|='"$KUBE_CONFIG"'|
 ' /etc/kubernetes/proxy
 
 if [ "$NETWORK_DRIVER" = "flannel" ]; then
     sed -i '
-      /^FLANNEL_ETCD=/ s|=.*|="http://'"$ETCD_SERVER_IP"':2379"|
+        /^FLANNEL_ETCD=/ s|=.*|="http://'"$ETCD_SERVER_IP"':2379"|
     ' /etc/sysconfig/flanneld
 
     # Make sure etcd has a flannel configuration

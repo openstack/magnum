@@ -28,7 +28,7 @@ fi
 
 echo "creating flanneld config in etcd"
 while ! curl -sf -L $FLANNEL_ETCD/v2/keys${FLANNEL_ETCD_KEY}/config \
-  -X PUT --data-urlencode value@${FLANNEL_JSON}; do
+        -X PUT --data-urlencode value@${FLANNEL_JSON}; do
     echo "waiting for etcd"
     sleep 1
 done
