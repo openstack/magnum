@@ -16,6 +16,7 @@ from magnum.objects import certificate
 from magnum.objects import cluster
 from magnum.objects import cluster_template
 from magnum.objects import magnum_service
+from magnum.objects import stats
 from magnum.objects import x509keypair
 
 
@@ -24,8 +25,10 @@ ClusterTemplate = cluster_template.ClusterTemplate
 MagnumService = magnum_service.MagnumService
 X509KeyPair = x509keypair.X509KeyPair
 Certificate = certificate.Certificate
+Stats = stats.Stats
 __all__ = (Cluster,
            ClusterTemplate,
            MagnumService,
            X509KeyPair,
-           Certificate)
+           Certificate,
+           Stats)

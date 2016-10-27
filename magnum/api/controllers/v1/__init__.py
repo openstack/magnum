@@ -30,6 +30,7 @@ from magnum.api.controllers.v1 import certificate
 from magnum.api.controllers.v1 import cluster
 from magnum.api.controllers.v1 import cluster_template
 from magnum.api.controllers.v1 import magnum_services
+from magnum.api.controllers.v1 import stats
 from magnum.api.controllers import versions as ver
 from magnum.api import expose
 from magnum.api import http_error
@@ -91,6 +92,9 @@ class V1(controllers_base.APIBase):
     mservices = [link.Link]
     """Links to the magnum-services resource"""
 
+    stats = [link.Link]
+    """Links to the stats resource"""
+
     @staticmethod
     def convert():
         v1 = V1()
@@ -141,6 +145,12 @@ class V1(controllers_base.APIBase):
                                             pecan.request.host_url,
                                             'mservices', '',
                                             bookmark=True)]
+        v1.stats = [link.Link.make_link('self', pecan.request.host_url,
+                                        'stats', ''),
+                    link.Link.make_link('bookmark',
+                                        pecan.request.host_url,
+                                        'stats', '',
+                                        bookmark=True)]
         return v1
 
 
@@ -153,6 +163,7 @@ class Controller(controllers_base.Controller):
     clustertemplates = cluster_template.ClusterTemplatesController()
     certificates = certificate.CertificateController()
     mservices = magnum_services.MagnumServiceController()
+    stats = stats.StatsController()
 
     @expose.expose(V1)
     def get(self):

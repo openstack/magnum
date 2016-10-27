@@ -22,6 +22,7 @@ from oslo_utils import timeutils
 from oslo_utils import uuidutils
 from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.sql import func
 
 from magnum.common import exception
 import magnum.conf
@@ -189,6 +190,23 @@ class Connection(api.Connection):
             return query.one()
         except NoResultFound:
             raise exception.ClusterNotFound(cluster=cluster_uuid)
+
+    def get_cluster_stats(self, context, project_id=None):
+        query = model_query(models.Cluster)
+        node_count_col = models.Cluster.node_count
+        master_count_col = models.Cluster.master_count
+        ncfunc = func.sum(node_count_col + master_count_col)
+
+        if project_id:
+            query = query.filter_by(project_id=project_id)
+            nquery = query.session.query(ncfunc.label("nodes")).filter_by(
+                project_id=project_id)
+        else:
+            nquery = query.session.query(ncfunc.label("nodes"))
+
+        clusters = query.count()
+        nodes = int(nquery.one()[0]) if nquery.one()[0] else 0
+        return clusters, nodes
 
     def destroy_cluster(self, cluster_id):
         session = get_session()

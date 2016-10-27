@@ -78,6 +78,26 @@ class DbClusterTestCase(base.DbTestCase):
                           self.dbapi.get_cluster_by_name,
                           self.context, 'clusterone')
 
+    def test_get_all_cluster_stats(self):
+        utils.create_test_cluster(
+            id=1, name='clusterone',
+            uuid=uuidutils.generate_uuid())
+        utils.create_test_cluster(
+            id=2, name='clustertwo',
+            uuid=uuidutils.generate_uuid())
+        ret = self.dbapi.get_cluster_stats(self.context)
+        self.assertEqual(ret, (2, 12))
+
+    def test_get_one_tenant_cluster_stats(self):
+        utils.create_test_cluster(
+            id=1, name='clusterone', project_id='proj1',
+            uuid=uuidutils.generate_uuid())
+        utils.create_test_cluster(
+            id=2, name='clustertwo', project_id='proj2',
+            uuid=uuidutils.generate_uuid())
+        ret = self.dbapi.get_cluster_stats(self.context, 'proj2')
+        self.assertEqual(ret, (1, 6))
+
     def test_get_cluster_list(self):
         uuids = []
         for i in range(1, 6):
