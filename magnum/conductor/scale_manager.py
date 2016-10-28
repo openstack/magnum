@@ -29,7 +29,7 @@ LOG = logging.getLogger(__name__)
 
 def get_scale_manager(context, osclient, cluster):
     manager = None
-    coe = cluster.baymodel.coe
+    coe = cluster.cluster_template.coe
     if coe == 'kubernetes':
         manager = K8sScaleManager(context, osclient, cluster)
     elif coe == 'mesos':
