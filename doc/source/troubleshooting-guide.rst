@@ -142,7 +142,7 @@ and the domain admin:
     openstack domain create magnum
     openstack user create trustee_domain_admin --password=secret \
         --domain=magnum
-    openstack role add --user=trustee_domain_admin --domain=magnum admin
+    openstack role add --user=trustee_domain_admin --user-domain magnum --domain=magnum admin
 
     source /opt/stack/devstack/functions
     export MAGNUM_CONF=/etc/magnum/magnum.conf
