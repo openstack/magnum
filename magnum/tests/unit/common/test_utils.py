@@ -21,6 +21,7 @@ import tempfile
 
 import mock
 from oslo_concurrency import processutils
+from oslo_utils import netutils
 
 from magnum.common import exception
 from magnum.common import utils
@@ -183,26 +184,15 @@ grep foo
             utils.execute('foo', run_as_root=False)
             execute_mock.assert_called_once_with('foo', run_as_root=False)
 
-    def test_is_valid_mac(self):
-        self.assertTrue(utils.is_valid_mac("52:54:00:cf:2d:31"))
-        self.assertTrue(utils.is_valid_mac(u"52:54:00:cf:2d:31"))
-        self.assertFalse(utils.is_valid_mac("127.0.0.1"))
-        self.assertFalse(utils.is_valid_mac("not:a:mac:address"))
-        self.assertFalse(utils.is_valid_mac("52-54-00-cf-2d-31"))
-        self.assertFalse(utils.is_valid_mac("aa bb cc dd ee ff"))
-        self.assertTrue(utils.is_valid_mac("AA:BB:CC:DD:EE:FF"))
-        self.assertFalse(utils.is_valid_mac("AA BB CC DD EE FF"))
-        self.assertFalse(utils.is_valid_mac("AA-BB-CC-DD-EE-FF"))
-
     def test_validate_and_normalize_mac(self):
         mac = 'AA:BB:CC:DD:EE:FF'
-        with mock.patch.object(utils, 'is_valid_mac') as m_mock:
+        with mock.patch.object(netutils, 'is_valid_mac') as m_mock:
             m_mock.return_value = True
             self.assertEqual(mac.lower(),
                              utils.validate_and_normalize_mac(mac))
 
     def test_validate_and_normalize_mac_invalid_format(self):
-        with mock.patch.object(utils, 'is_valid_mac') as m_mock:
+        with mock.patch.object(netutils, 'is_valid_mac') as m_mock:
             m_mock.return_value = False
             self.assertRaises(exception.InvalidMAC,
                               utils.validate_and_normalize_mac, 'invalid-mac')

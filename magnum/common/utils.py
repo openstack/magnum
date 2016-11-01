@@ -27,6 +27,7 @@ import tempfile
 
 from oslo_concurrency import processutils
 from oslo_log import log as logging
+from oslo_utils import netutils
 import six
 
 from magnum.common import exception
@@ -100,22 +101,6 @@ def trycmd(*args, **kwargs):
     return processutils.trycmd(*args, **kwargs)
 
 
-def is_valid_mac(address):
-    """Verify the format of a MAC address.
-
-    Check if a MAC address is valid and contains six octets. Accepts
-    colon-separated format only.
-
-    :param address: MAC address to be validated.
-    :returns: True if valid. False if not.
-
-    """
-    m = "[0-9a-f]{2}(:[0-9a-f]{2}){5}$"
-    if isinstance(address, six.string_types) and re.match(m, address.lower()):
-        return True
-    return False
-
-
 def validate_and_normalize_mac(address):
     """Validate a MAC address and return normalized form.
 
@@ -127,7 +112,7 @@ def validate_and_normalize_mac(address):
     :raises: InvalidMAC If the MAC address is not valid.
 
     """
-    if not is_valid_mac(address):
+    if not netutils.is_valid_mac(address):
         raise exception.InvalidMAC(mac=address)
     return address.lower()
 
