@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (c) 2015 Rackspace Inc.
+# Copyright (c) 2016 SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ setuptools.setup(
     package_data={
         'k8s_opensuse_v1': ['templates/*', 'templates/fragments/*']
     },
-    author="Michal Jura",
-    author_email="mjura@suse.com",
+    author="SUSE Linux GmbH",
+    author_email="opensuse-cloud@opensuse.org",
     description="Magnum openSUSE Kubernetes driver",
     license="Apache",
     keywords="magnum opensuse driver",
