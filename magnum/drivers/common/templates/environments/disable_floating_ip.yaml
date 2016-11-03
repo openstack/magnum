@@ -4,7 +4,7 @@ resource_registry:
   "Magnum::FloatingIPAddressSwitcher": "../fragments/floating_ip_address_switcher_private.yaml"
 
   # with_master_lb.yaml
-  "Magnum::Optional::Neutron::Pool::FloatingIP": "OS::Heat::None"
+  "Magnum::Optional::Neutron::FloatingIP": "OS::Heat::None"
 
   # kubemaster.yaml
   "Magnum::Optional::KubeMaster::Neutron::FloatingIP": "OS::Heat::None"
