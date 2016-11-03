@@ -155,8 +155,8 @@ and the domain admin:
 Then, restart magnum-api and magnum-cond to pick up the new configuration.
 If the problem still exists, you might want to manually verify your domain
 admin credential to ensure it has the right privilege. To do that, run the
-script below with the credentials replaced. If it fails, that means the
-credential you provided is invalid.
+script below with the credentials replaced (you must use the IDs where
+specified). If it fails, that means the credential you provided is invalid.
 
 .. code-block:: python
 
@@ -169,7 +169,7 @@ credential you provided is invalid.
         user_id=YOUR_TRUSTEE_DOMAIN_ADMIN_ID,
         domain_id=YOUR_TRUSTEE_DOMAIN_ID,
         password=YOUR_TRUSTEE_DOMAIN_ADMIN_PASSWORD)
-    )
+
     session = ka_session.Session(auth=auth)
     domain_admin_client = kc_v3.Client(session=session)
     user = domain_admin_client.users.create(
