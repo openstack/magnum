@@ -186,6 +186,20 @@ class TestAttrValidator(base.BaseTestCase):
                           attr_validator.validate_labels_isolation,
                           fake_labels)
 
+    def test_validate_labels_strategy_valid(self):
+        fake_labels = {'swarm_strategy': 'spread'}
+        attr_validator.validate_labels_strategy(fake_labels)
+
+    def test_validate_labels_strategy_missing(self):
+        fake_labels = {'strategy': 'spread'}
+        attr_validator.validate_labels_strategy(fake_labels)
+
+    def test_validate_labels_strategy_invalid(self):
+        fake_labels = {'swarm_strategy': 'invalid'}
+        self.assertRaises(exception.InvalidParameterValue,
+                          attr_validator.validate_labels_strategy,
+                          fake_labels)
+
     @mock.patch('magnum.api.utils.get_openstack_resource')
     def test_validate_image_with_valid_image_by_name(self, mock_os_res):
         mock_image = {'name': 'fedora-21-atomic-5',

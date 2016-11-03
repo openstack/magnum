@@ -147,6 +147,12 @@ parameters:
     description: version of swarm used for swarm cluster
     default: 1.0.0
 
+  swarm_strategy:
+    type: string
+    description: >
+        schedule strategy to be used by swarm manager
+    default: "spread"
+
   trustee_domain_id:
     type: string
     description: domain id of the trustee
@@ -414,6 +420,7 @@ resources:
           etcd_server_ip: {get_attr: [etcd_loadbalancer, vip_address]}
           api_ip_address: {get_attr: [api_pool_floating, floating_ip_address]}
           swarm_version: {get_param: swarm_version}
+          swarm_strategy: {get_param: swarm_strategy}
           trustee_user_id: {get_param: trustee_user_id}
           trustee_password: {get_param: trustee_password}
           trust_id: {get_param: trust_id}
