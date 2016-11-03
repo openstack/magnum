@@ -103,6 +103,13 @@ parameters:
     type: string
     description: version of swarm used for swarm cluster
 
+  swarm_strategy:
+    type: string
+    description: >
+        schedule strategy to be used by swarm manager
+    constraints:
+      - allowed_values: ["spread", "binpack", "random"]
+
   secgroup_swarm_master_id:
     type: string
     description: ID of the security group for swarm master.
@@ -315,6 +322,7 @@ resources:
             "$NO_PROXY": {get_param: no_proxy}
             "$TLS_DISABLED": {get_param: tls_disabled}
             "$SWARM_VERSION": {get_param: swarm_version}
+            "$SWARM_STRATEGY": {get_param: swarm_strategy}
 
   enable_services:
     type: "OS::Heat::SoftwareConfig"

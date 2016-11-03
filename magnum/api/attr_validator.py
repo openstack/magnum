@@ -28,6 +28,7 @@ SUPPORTED_ISOLATION = ['filesystem/posix', 'filesystem/linux',
                        'cgroups/mem', 'docker/runtime',
                        'namespaces/pid']
 SUPPORTED_IMAGE_PROVIDERS = ['docker', 'appc']
+SUPPORTED_SWARM_STRATEGY = ['spread', 'binpack', 'random']
 
 
 def validate_image(cli, image):
@@ -166,6 +167,21 @@ def validate_labels_executor_env_variables(labels):
         raise exception.InvalidParameterValue(err)
 
 
+def validate_labels_strategy(labels):
+    """Validate swarm_strategy"""
+    swarm_strategy = list(labels.get('swarm_strategy', "").split())
+    unsupported_strategy = set(swarm_strategy) - set(
+        SUPPORTED_SWARM_STRATEGY)
+    if (len(unsupported_strategy) > 0):
+        raise exception.InvalidParameterValue(_(
+            'property "labels/swarm_strategy" with value '
+            '"%(strategy)s" is not supported, supported values are: '
+            '%(supported_strategies)s') % {
+                'strategy': ' '.join(list(unsupported_strategy)),
+                'supported_strategies': ', '.join(
+                    SUPPORTED_SWARM_STRATEGY + ['unspecified'])})
+
+
 def validate_os_resources(context, cluster_template, cluster=None):
     """Validate ClusterTemplate's OpenStack Resources"""
 
@@ -201,4 +217,5 @@ labels_validators = {'mesos_slave_isolation': validate_labels_isolation,
                      'mesos_slave_image_providers':
                      validate_labels_image_providers,
                      'mesos_slave_executor_env_variables':
-                     validate_labels_executor_env_variables}
+                     validate_labels_executor_env_variables,
+                     'swarm_strategy': validate_labels_strategy}

@@ -718,6 +718,7 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
             'flannel_network_subnetlen')
         flannel_backend = mock_cluster_template.labels.get('flannel_backend')
         rexray_preempt = mock_cluster_template.labels.get('rexray_preempt')
+        swarm_strategy = mock_cluster_template.labels.get('swarm_strategy')
 
         swarm_def = swarm_tdef.AtomicSwarmTemplateDefinition()
 
@@ -730,7 +731,8 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
             'flannel_backend': flannel_backend,
             'flannel_network_subnetlen': flannel_subnet,
             'auth_url': 'http://192.168.10.10:5000/v3',
-            'rexray_preempt': rexray_preempt}}
+            'rexray_preempt': rexray_preempt,
+            'swarm_strategy': swarm_strategy}}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
                                                 mock_cluster,

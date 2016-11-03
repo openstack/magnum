@@ -51,7 +51,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'labels': {'flannel_network_cidr': '10.101.0.0/16',
                        'flannel_network_subnetlen': '26',
                        'flannel_backend': 'vxlan',
-                       'rexray_preempt': 'False'},
+                       'rexray_preempt': 'False',
+                       'swarm_strategy': 'spread'},
             'master_lb_enabled': False,
             'volume_driver': 'rexray'
         }
@@ -139,6 +140,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
             'auth_url': 'http://192.168.10.10:5000/v3',
             'swarm_version': 'fake-version',
+            'swarm_strategy': u'spread',
             'volume_driver': 'rexray',
             'rexray_preempt': 'False'
         }
@@ -209,6 +211,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v3',
             'docker_storage_driver': 'devicemapper',
             'swarm_version': 'fake-version',
+            'swarm_strategy': u'spread',
             'volume_driver': 'rexray',
             'rexray_preempt': 'False'
         }
@@ -272,6 +275,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
             'auth_url': 'http://192.168.10.10:5000/v3',
             'swarm_version': 'fake-version',
+            'swarm_strategy': u'spread',
             'rexray_preempt': 'False'
         }
         self.assertEqual(expected, definition)
@@ -335,6 +339,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
             'auth_url': 'http://192.168.10.10:5000/v3',
             'swarm_version': 'fake-version',
+            'swarm_strategy': u'spread',
             'volume_driver': 'rexray',
             'rexray_preempt': 'False'
         }
@@ -400,6 +405,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
             'auth_url': 'http://192.168.10.10:5000/v3',
             'swarm_version': 'fake-version',
+            'swarm_strategy': u'spread',
             'volume_driver': 'rexray',
             'rexray_preempt': 'False'
         }

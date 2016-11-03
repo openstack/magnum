@@ -20,6 +20,7 @@ ExecStart=/usr/bin/docker run --name swarm-manager \\
                               -e no_proxy=$NO_PROXY \\
                               swarm:$SWARM_VERSION \\
                               manage -H tcp://0.0.0.0:2375 \\
+                              --strategy $SWARM_STRATEGY \\
                               --replication \\
                               --advertise $NODE_IP:2376 \\
 END_SERVICE_TOP
