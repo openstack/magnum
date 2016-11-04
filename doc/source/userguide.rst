@@ -298,6 +298,10 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `mesos_slave_executor_env_variables`_ | (file name)        | ""            |
 +---------------------------------------+--------------------+---------------+
+| `swarm_strategy`_                     | - spread           | spread        |
+|                                       | - binpack          |               |
+|                                       | - random           |               |
++---------------------------------------+--------------------+---------------+
 
 
 =======
@@ -1153,6 +1157,19 @@ Log into the servers
   You can log into the manager and node servers with the account 'fedora' and
   the keypair specified in the ClusterTemplate.
 
+In addition to the common attributes in the ClusterTemplate, you can specify
+the following attributes that are specific to Swarm by using the
+labels attribute.
+
+_`swarm_strategy`
+  This label corresponds to Swarm parameter for master '--strategy'.
+  For more details, refer to the `Swarm Strategy
+  <https://docs.docker.com/swarm/scheduler/strategy/>`_.
+  Valid values for this label are:
+
+  - spread
+  - binpack
+  - random
 
 =====
 Mesos
