@@ -225,7 +225,8 @@ service, you must create a database, service credentials, and API endpoints.
 
      .. code-block:: console
 
-        $ openstack role add --domain magnum --user magnum_domain_admin admin
+        $ openstack role add --domain magnum --user-domain magnum \
+          --user magnum_domain_admin admin
 
      .. note::
 
