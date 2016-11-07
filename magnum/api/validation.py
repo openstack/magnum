@@ -192,7 +192,7 @@ def _enforce_volume_storage_size(cluster_template):
             raise exception.InvalidParameterValue(
                 'docker volume size %s GB is not valid, '
                 'expecting minimum value 3GB for %s storage '
-                'driver.') % (volume_size, storage_driver)
+                'driver.' % (volume_size, storage_driver))
 
 
 def validate_cluster_properties(delta):
