@@ -30,6 +30,12 @@ parameters:
     constraints:
       - allowed_values: ["true", "false"]
 
+  docker_volume_size:
+    type: number
+    description: >
+      size of a cinder volume to allocate to docker for container/image
+      storage
+
   docker_storage_driver:
     type: string
     description: docker storage driver name
@@ -219,6 +225,7 @@ resources:
             $KUBE_API_PORT: {get_param: kubernetes_port}
             $ETCD_SERVER_IP: {get_param: etcd_server_ip}
             $DOCKER_VOLUME: 'None'
+            $DOCKER_VOLUME_SIZE: {get_param: docker_volume_size}
             $DOCKER_STORAGE_DRIVER: {get_param: docker_storage_driver}
             $NETWORK_DRIVER: {get_param: network_driver}
             $REGISTRY_ENABLED: {get_param: registry_enabled}

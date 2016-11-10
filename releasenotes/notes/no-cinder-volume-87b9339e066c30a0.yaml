@@ -1,0 +1,10 @@
+---
+prelude: >
+    Currently, the swarm and the kubernetes drivers use
+    a dedicated cinder volume to store the container
+    images. It was been observed that one cinder volume
+    per node is a bottleneck for large clusters.
+fixes:
+  - Make the dedicated cinder volume per node an opt-in
+    option. By default, no cinder volumes will be created
+    unless the user passes the docker-volume-size argument.

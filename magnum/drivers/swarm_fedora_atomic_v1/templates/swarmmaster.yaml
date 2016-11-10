@@ -211,6 +211,7 @@ resources:
             "$WAIT_HANDLE_TOKEN": {get_attr: [master_wait_handle, token]}
             "$WAIT_CURL": {get_attr: [master_wait_handle, curl_cli]}
             "$DOCKER_VOLUME": {get_resource: docker_volume}
+            "$DOCKER_VOLUME_SIZE": {get_param: docker_volume_size}
             "$DOCKER_STORAGE_DRIVER": {get_param: docker_storage_driver}
             "$ETCD_DISCOVERY_URL": {get_param: discovery_url}
             "$HTTP_PROXY": {get_param: http_proxy}
@@ -445,12 +446,12 @@ resources:
   #
 
   docker_volume:
-    type: OS::Cinder::Volume
+    type: Magnum::Optional::Cinder::Volume
     properties:
       size: {get_param: docker_volume_size}
 
   docker_volume_attach:
-    type: OS::Cinder::VolumeAttachment
+    type: Magnum::Optional::Cinder::VolumeAttachment
     properties:
       instance_uuid: {get_resource: swarm_master}
       volume_id: {get_resource: docker_volume}

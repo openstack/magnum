@@ -192,7 +192,8 @@ class TestClusterConductorWithK8s(base.TestCase):
 
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/no_master_lb.yaml',
+            ['../../common/templates/environments/with_volume.yaml',
+             '../../common/templates/environments/no_master_lb.yaml',
              '../../common/templates/environments/disable_floating_ip.yaml'],
             env_files)
 
@@ -267,7 +268,75 @@ class TestClusterConductorWithK8s(base.TestCase):
 
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/no_master_lb.yaml',
+            ['../../common/templates/environments/with_volume.yaml',
+             '../../common/templates/environments/no_master_lb.yaml',
+             '../../common/templates/environments/disable_floating_ip.yaml'],
+            env_files)
+
+    @patch('requests.get')
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
+    def test_extract_template_definition_only_required(
+            self,
+            mock_driver,
+            mock_objects_cluster_template_get_by_uuid,
+            mock_get):
+
+        not_required = ['image_id', 'flavor_id', 'dns_nameserver',
+                        'docker_volume_size', 'fixed_network', 'http_proxy',
+                        'https_proxy', 'no_proxy', 'network_driver',
+                        'master_flavor_id', 'docker_storage_driver',
+                        'volume_driver']
+        for key in not_required:
+            self.cluster_template_dict[key] = None
+        self.cluster_dict['discovery_url'] = 'https://discovery.etcd.io/test'
+
+        cluster_template = objects.ClusterTemplate(
+            self.context, **self.cluster_template_dict)
+        mock_objects_cluster_template_get_by_uuid.return_value = \
+            cluster_template
+        expected_result = str('{"action":"get","node":{"key":"test","value":'
+                              '"1","modifiedIndex":10,"createdIndex":10}}')
+        mock_resp = mock.MagicMock()
+        mock_resp.text = expected_result
+        mock_get.return_value = mock_resp
+        mock_driver.return_value = k8s_dr.Driver()
+        cluster = objects.Cluster(self.context, **self.cluster_dict)
+
+        (template_path,
+         definition,
+         env_files) = driver._extract_template_definition(self.context,
+                                                          cluster)
+
+        expected = {
+            'auth_url': 'http://192.168.10.10:5000/v3',
+            'cluster_uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
+            'discovery_url': 'https://discovery.etcd.io/test',
+            'external_network': 'external_network_id',
+            'flannel_backend': 'vxlan',
+            'flannel_network_cidr': '10.101.0.0/16',
+            'flannel_network_subnetlen': '26',
+            'insecure_registry_url': '10.0.0.1:5000',
+            'kube_version': 'fake-version',
+            'magnum_url': 'http://127.0.0.1:9511/v1',
+            'number_of_masters': 1,
+            'number_of_minions': 1,
+            'region_name': 'RegionOne',
+            'registry_enabled': False,
+            'ssh_key_name': 'keypair_id',
+            'tenant_name': 'fake_tenant',
+            'tls_disabled': False,
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
+            'trustee_domain_id': 'trustee_domain_id',
+            'trustee_password': 'fake_trustee_password',
+            'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
+            'trustee_username': 'fake_trustee',
+            'username': 'fake_user'
+        }
+        self.assertEqual(expected, definition)
+        self.assertEqual(
+            ['../../common/templates/environments/no_volume.yaml',
+             '../../common/templates/environments/no_master_lb.yaml',
              '../../common/templates/environments/disable_floating_ip.yaml'],
             env_files)
 
@@ -441,21 +510,6 @@ class TestClusterConductorWithK8s(base.TestCase):
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
-    def test_extract_template_definition_without_docker_volume_size(
-            self,
-            mock_driver,
-            mock_objects_cluster_template_get_by_uuid,
-            mock_get):
-        mock_driver.return_value = k8s_dr.Driver()
-        self._test_extract_template_definition(
-            mock_driver,
-            mock_objects_cluster_template_get_by_uuid,
-            mock_get,
-            missing_attr='docker_volume_size')
-
-    @patch('requests.get')
-    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
-    @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_without_docker_storage_driver(
             self,
             mock_driver,
@@ -594,7 +648,8 @@ class TestClusterConductorWithK8s(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/no_master_lb.yaml',
+            ['../../common/templates/environments/with_volume.yaml',
+             '../../common/templates/environments/no_master_lb.yaml',
              '../../common/templates/environments/disable_floating_ip.yaml'],
             env_files)
         reqget.assert_called_once_with('http://etcd/test?size=1')
