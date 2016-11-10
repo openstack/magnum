@@ -26,6 +26,7 @@ ExecStart=/usr/bin/docker run -e http_proxy=$HTTP_PROXY \\
                               join \\
                               --addr $myip:2375 \\
                               etcd://$ETCD_SERVER_IP:2379/v2/keys/swarm/
+Restart=always
 ExecStop=/usr/bin/docker stop swarm-agent
 ExecStartPost=/usr/local/bin/notify-heat
 
