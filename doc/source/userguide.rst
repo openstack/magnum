@@ -87,7 +87,7 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   documentation for the new COE names.  This is a mandatory parameter
   and there is no default value.
 
---image-id \<image-id\>
+--image \<image\>
   The name or UUID of the base image in Glance to boot the servers for
   the cluster.  The image must have the attribute 'os-distro' defined
   as appropriate for the cluster driver.  For the currently supported
@@ -103,7 +103,7 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
 
   This is a mandatory parameter and there is no default value.
 
---keypair-id \<keypair-id\>
+--keypair \<keypair\>
   The name or UUID of the SSH keypair to configure in the cluster servers
   for ssh access.  You will need the key to be able to ssh to the
   servers in the cluster.  The login name is specific to the cluster
@@ -111,7 +111,7 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   Cluster create. This value will be overridden by any keypair value that
   is provided during Cluster create.
 
---external-network-id \<external-network-id\>
+--external-network \<external-network\>
   The name or network ID of a Neutron network to provide connectivity
   to the external internet for the cluster.  This network must be an
   external network, i.e. its attribute 'router:external' must be
@@ -177,11 +177,11 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   This is configured in the private Neutron network for the cluster.  The
   default is '8.8.8.8'.
 
---flavor-id \<flavor-id\>
+--flavor \<flavor\>
   The nova flavor id for booting the node servers.  The default
   is 'm1.small'.
 
---master-flavor-id \<master-flavor-id\>
+--master-flavor \<master-flavor\>
   The nova flavor id for booting the master or manager servers.  The
   default is 'm1.small'.
 
@@ -933,11 +933,11 @@ When Magnum deploys a Kubernetes cluster, it uses parameters defined in the
 ClusterTemplate and specified on the cluster-create command, for example::
 
     magnum cluster-template-create --name k8s-cluster-template \
-                               --image-id fedora-atomic-latest \
-                               --keypair-id testkey \
-                               --external-network-id public \
+                               --image fedora-atomic-latest \
+                               --keypair testkey \
+                               --external-network public \
                                --dns-nameserver 8.8.8.8 \
-                               --flavor-id m1.small \
+                               --flavor m1.small \
                                --docker-volume-size 5 \
                                --network-driver flannel \
                                --coe kubernetes
@@ -990,7 +990,7 @@ Storage driver (docker-storage-driver)
   driver to manage this logical volume and host the container writable
   layer there.  Refer to the `Storage`_ section for more details.
 
-Image (image-id)
+Image (image)
   Specified in the ClusterTemplate to indicate the image to boot the servers.
   The image binary is loaded in Glance with the attribute
   'os_distro = fedora-atomic'.
@@ -1059,11 +1059,11 @@ the ClusterTemplate and specified on the 'cluster-create' command, for
 example::
 
     magnum cluster-template-create --name swarm-cluster-template \
-                               --image-id fedora-atomic-latest \
-                               --keypair-id testkey \
-                               --external-network-id public \
+                               --image fedora-atomic-latest \
+                               --keypair testkey \
+                               --external-network public \
                                --dns-nameserver 8.8.8.8 \
-                               --flavor-id m1.small \
+                               --flavor m1.small \
                                --docker-volume-size 5 \
                                --coe swarm
 
@@ -1136,7 +1136,7 @@ Storage driver (docker-storage-driver)
   Magnum will create physical volume and logical volume using the attached
   device.  Refer to the `Storage`_ section for more details.
 
-Image (image-id)
+Image (image)
   Specified in the ClusterTemplate to indicate the image to boot the servers
   for the Swarm manager and node.
   The image binary is loaded in Glance with the attribute
@@ -1188,11 +1188,11 @@ Magnum deploys a Mesos cluster using parameters defined in the ClusterTemplate
 and specified on the 'cluster-create' command, for example::
 
     magnum cluster-template-create --name mesos-cluster-template \
-                           --image-id ubuntu-mesos \
-                           --keypair-id testkey \
-                           --external-network-id public \
+                           --image ubuntu-mesos \
+                           --keypair testkey \
+                           --external-network public \
                            --dns-nameserver 8.8.8.8 \
-                           --flavor-id m1.small \
+                           --flavor m1.small \
                            --coe mesos
 
     magnum cluster-create --name mesos-cluster \
@@ -1252,7 +1252,7 @@ Volume driver (volume-driver)
 Storage driver (docker-storage-driver)
   This is currently not supported for Mesos.
 
-Image (image-id)
+Image (image)
 
   Specified in the ClusterTemplate to indicate the image to boot the servers
   for the Mesos master and slave.  The image binary is loaded in
@@ -1498,11 +1498,11 @@ First, create a ClusterTemplate; by default TLS is enabled in
 Magnum, therefore it does not need to be specified via a parameter::
 
     magnum cluster-template-create --name secure-kubernetes \
-                               --keypair-id default \
-                               --external-network-id public \
-                               --image-id fedora-atomic-latest \
+                               --keypair default \
+                               --external-network public \
+                               --image fedora-atomic-latest \
                                --dns-nameserver 8.8.8.8 \
-                               --flavor-id m1.small \
+                               --flavor m1.small \
                                --docker-volume-size 3 \
                                --coe kubernetes \
                                --network-driver flannel
@@ -1874,7 +1874,7 @@ new models are likely to be introduced in the future.
 For the Neutron infrastructure, the following configuration can
 be set in the ClusterTemplate:
 
-external-network-id
+external-network
   The external Neutron network ID to connect to this cluster. This
   is used to connect the cluster to the external internet, allowing
   the nodes in the cluster to access external URL for discovery, image
@@ -2207,11 +2207,11 @@ development team is working on a long term solution to automate these steps.
    Specify 'cinder' as the volume-driver for Kubernetes::
 
     magnum cluster-template-create --name k8s-cluster-template \
-                               --image-id fedora-23-atomic-7 \
-                               --keypair-id testkey \
-                               --external-network-id public \
+                               --image fedora-23-atomic-7 \
+                               --keypair testkey \
+                               --external-network public \
                                --dns-nameserver 8.8.8.8 \
-                               --flavor-id m1.small \
+                               --flavor m1.small \
                                --docker-volume-size 5 \
                                --network-driver flannel \
                                --coe kubernetes \
@@ -2342,14 +2342,14 @@ Using Cinder in Mesos
    will ensure data safety by locking the volume::
 
     magnum cluster-template-create --name mesos-cluster-template \
-                               --image-id ubuntu-mesos \
-                               --keypair-id testkey \
-                               --external-network-id public \
+                               --image ubuntu-mesos \
+                               --keypair testkey \
+                               --external-network public \
                                --dns-nameserver 8.8.8.8 \
-                               --master-flavor-id m1.magnum \
+                               --master-flavor m1.magnum \
                                --docker-volume-size 4 \
                                --tls-disabled \
-                               --flavor-id m1.magnum \
+                               --flavor m1.magnum \
                                --coe mesos \
                                --volume-driver rexray \
                                --labels rexray-preempt=true

@@ -41,31 +41,31 @@ You can specify all three proxy parameters while creating ClusterTemplate of
 any coe type. All of proxy parameters are optional.
 
     magnum cluster-template-create --name k8s-cluster-template \
-                       --image-id fedora-atomic-latest \
-                       --keypair-id testkey \
-                       --external-network-id public \
+                       --image fedora-atomic-latest \
+                       --keypair testkey \
+                       --external-network public \
                        --dns-nameserver 8.8.8.8 \
-                       --flavor-id m1.small \
+                       --flavor m1.small \
                        --coe kubernetes \
                        --http-proxy <http://abc-proxy.com:8080> \
                        --https-proxy <https://abc-proxy.com:8080> \
                        --no-proxy <172.24.4.4,172.24.4.9,172.24.4.8>
     magnum cluster-template-create --name swarm-cluster-template \
-                       --image-id fedora-atomic-latest \
-                       --keypair-id testkey \
-                       --external-network-id public \
+                       --image fedora-atomic-latest \
+                       --keypair testkey \
+                       --external-network public \
                        --dns-nameserver 8.8.8.8 \
-                       --flavor-id m1.small \
+                       --flavor m1.small \
                        --coe swarm \
                        --http-proxy <http://abc-proxy.com:8080> \
                        --https-proxy <https://abc-proxy.com:8080> \
                        --no-proxy <172.24.4.4,172.24.4.9,172.24.4.8>
     magnum cluster-template-create --name mesos-cluster-template \
-                       --image-id ubuntu-mesos \
-                       --keypair-id testkey \
-                       --external-network-id public \
+                       --image ubuntu-mesos \
+                       --keypair testkey \
+                       --external-network public \
                        --dns-nameserver 8.8.8.8 \
-                       --flavor-id m1.small \
+                       --flavor m1.small \
                        --coe mesos \
                        --http-proxy <http://abc-proxy.com:8080> \
                        --https-proxy <https://abc-proxy.com:8080> \
