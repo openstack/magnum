@@ -15,7 +15,6 @@
 from heatclient import exc
 from oslo_log import log as logging
 from oslo_service import loopingcall
-from oslo_utils import importutils
 from pycadf import cadftaxonomy as taxonomy
 import six
 
@@ -27,8 +26,8 @@ from magnum.conductor import scale_manager
 from magnum.conductor import utils as conductor_utils
 import magnum.conf
 from magnum.drivers.common import driver
+from magnum.drivers.heat import driver as heat_driver
 from magnum.i18n import _
-from magnum.i18n import _LE
 from magnum.i18n import _LI
 from magnum import objects
 from magnum.objects import fields
@@ -64,8 +63,9 @@ class Handler(object):
                                                       ct.cluster_distro,
                                                       ct.coe)
             # Create cluster
-            created_stack = cluster_driver.create_stack(context, osc, cluster,
-                                                        create_timeout)
+            cluster_driver.create_cluster(context, cluster, create_timeout)
+            cluster.status = fields.ClusterStatus.CREATE_IN_PROGRESS
+            cluster.status_reason = None
         except Exception as e:
             cluster.status = fields.ClusterStatus.CREATE_FAILED
             cluster.status_reason = six.text_type(e)
@@ -79,19 +79,14 @@ class Handler(object):
                 raise e
             raise
 
-        cluster.stack_id = created_stack['stack']['id']
-        cluster.status = fields.ClusterStatus.CREATE_IN_PROGRESS
         cluster.create()
-
         self._poll_and_check(osc, cluster, cluster_driver)
-
         return cluster
 
     def cluster_update(self, context, cluster, rollback=False):
         LOG.debug('cluster_heat cluster_update')
 
         osc = clients.OpenStackClients(context)
-        stack = osc.heat().stacks.get(cluster.stack_id)
         allow_update_status = (
             fields.ClusterStatus.CREATE_COMPLETE,
             fields.ClusterStatus.UPDATE_COMPLETE,
@@ -102,11 +97,11 @@ class Handler(object):
             fields.ClusterStatus.CHECK_COMPLETE,
             fields.ClusterStatus.ADOPT_COMPLETE
         )
-        if stack.stack_status not in allow_update_status:
+        if cluster.status not in allow_update_status:
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE)
-            operation = _('Updating a cluster when stack status is '
-                          '"%s"') % stack.stack_status
+            operation = _('Updating a cluster when status is '
+                          '"%s"') % cluster.status
             raise exception.NotSupported(operation=operation)
 
         delta = cluster.obj_what_changed()
@@ -115,36 +110,51 @@ class Handler(object):
 
         manager = scale_manager.get_scale_manager(context, osc, cluster)
 
-        conductor_utils.notify_about_cluster_operation(
-            context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_PENDING)
-
         # Get driver
         ct = conductor_utils.retrieve_cluster_template(context, cluster)
         cluster_driver = driver.Driver.get_driver(ct.server_type,
                                                   ct.cluster_distro,
                                                   ct.coe)
-        # Create cluster
-        cluster_driver.update_stack(context, osc, cluster, manager, rollback)
+        # Update cluster
+        try:
+            conductor_utils.notify_about_cluster_operation(
+                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_PENDING)
+            cluster_driver.update_cluster(context, cluster, manager, rollback)
+            cluster.status = fields.ClusterStatus.UPDATE_IN_PROGRESS
+            cluster.status_reason = None
+        except Exception as e:
+            cluster.status = fields.ClusterStatus.UPDATE_FAILED
+            cluster.status_reason = six.text_type(e)
+            cluster.save()
+            conductor_utils.notify_about_cluster_operation(
+                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE)
+            if isinstance(e, exc.HTTPBadRequest):
+                e = exception.InvalidParameterValue(message=six.text_type(e))
+                raise e
+            raise
+
+        cluster.save()
         self._poll_and_check(osc, cluster, cluster_driver)
 
         return cluster
 
     def cluster_delete(self, context, uuid):
-        LOG.debug('cluster_heat cluster_delete')
+        LOG.debug('cluster_conductor cluster_delete')
         osc = clients.OpenStackClients(context)
         cluster = objects.Cluster.get_by_uuid(context, uuid)
         ct = conductor_utils.retrieve_cluster_template(context, cluster)
         cluster_driver = driver.Driver.get_driver(ct.server_type,
                                                   ct.cluster_distro,
                                                   ct.coe)
-
         try:
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_PENDING)
-            cluster_driver.delete_stack(context, osc, cluster)
+            cluster_driver.delete_cluster(context, cluster)
+            cluster.status = fields.ClusterStatus.DELETE_IN_PROGRESS
+            cluster.status_reason = None
         except exc.HTTPNotFound:
-            LOG.info(_LI('The stack %s was not found during cluster'
-                         ' deletion.'), cluster.stack_id)
+            LOG.info(_LI('The cluster %s was not found during cluster'
+                         ' deletion.'), cluster.id)
             try:
                 trust_manager.delete_trustee_and_trust(osc, context, cluster)
                 cert_manager.delete_certificates_from_cluster(cluster,
@@ -160,147 +170,21 @@ class Handler(object):
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_FAILURE)
             raise exception.OperationInProgress(cluster_name=cluster.name)
-        except Exception:
+        except Exception as unexp:
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_FAILURE)
+            cluster.status = fields.ClusterStatus.DELETE_FAILED
+            cluster.status_reason = six.text_type(unexp)
+            cluster.save()
             raise
 
-        cluster.status = fields.ClusterStatus.DELETE_IN_PROGRESS
         cluster.save()
-
         self._poll_and_check(osc, cluster, cluster_driver)
-
         return None
 
     def _poll_and_check(self, osc, cluster, cluster_driver):
-        poller = HeatPoller(osc, cluster, cluster_driver)
+        # TODO(randall): this is a temporary hack. Next patch will sort the
+        # status update checking
+        poller = heat_driver.HeatPoller(osc, cluster, cluster_driver)
         lc = loopingcall.FixedIntervalLoopingCall(f=poller.poll_and_check)
         lc.start(CONF.cluster_heat.wait_interval, True)
-
-
-class HeatPoller(object):
-
-    def __init__(self, openstack_client, cluster, cluster_driver):
-        self.openstack_client = openstack_client
-        self.context = self.openstack_client.context
-        self.cluster = cluster
-        self.attempts = 0
-        self.cluster_template = conductor_utils.retrieve_cluster_template(
-            self.context, cluster)
-        self.template_def = cluster_driver.get_template_definition()
-
-    def poll_and_check(self):
-        # TODO(yuanying): temporary implementation to update api_address,
-        # node_addresses and cluster status
-        stack = self.openstack_client.heat().stacks.get(self.cluster.stack_id)
-        self.attempts += 1
-        status_to_event = {
-            fields.ClusterStatus.DELETE_COMPLETE: taxonomy.ACTION_DELETE,
-            fields.ClusterStatus.CREATE_COMPLETE: taxonomy.ACTION_CREATE,
-            fields.ClusterStatus.UPDATE_COMPLETE: taxonomy.ACTION_UPDATE,
-            fields.ClusterStatus.ROLLBACK_COMPLETE: taxonomy.ACTION_UPDATE,
-            fields.ClusterStatus.CREATE_FAILED: taxonomy.ACTION_CREATE,
-            fields.ClusterStatus.DELETE_FAILED: taxonomy.ACTION_DELETE,
-            fields.ClusterStatus.UPDATE_FAILED: taxonomy.ACTION_UPDATE,
-            fields.ClusterStatus.ROLLBACK_FAILED: taxonomy.ACTION_UPDATE
-        }
-        # poll_and_check is detached and polling long time to check status,
-        # so another user/client can call delete cluster/stack.
-        if stack.stack_status == fields.ClusterStatus.DELETE_COMPLETE:
-            self._delete_complete()
-            conductor_utils.notify_about_cluster_operation(
-                self.context, status_to_event[stack.stack_status],
-                taxonomy.OUTCOME_SUCCESS)
-            raise loopingcall.LoopingCallDone()
-
-        if stack.stack_status in (fields.ClusterStatus.CREATE_COMPLETE,
-                                  fields.ClusterStatus.UPDATE_COMPLETE):
-            self._sync_cluster_and_template_status(stack)
-            conductor_utils.notify_about_cluster_operation(
-                self.context, status_to_event[stack.stack_status],
-                taxonomy.OUTCOME_SUCCESS)
-            raise loopingcall.LoopingCallDone()
-        elif stack.stack_status != self.cluster.status:
-            self._sync_cluster_status(stack)
-
-        if stack.stack_status in (fields.ClusterStatus.CREATE_FAILED,
-                                  fields.ClusterStatus.DELETE_FAILED,
-                                  fields.ClusterStatus.UPDATE_FAILED,
-                                  fields.ClusterStatus.ROLLBACK_COMPLETE,
-                                  fields.ClusterStatus.ROLLBACK_FAILED):
-            self._sync_cluster_and_template_status(stack)
-            self._cluster_failed(stack)
-            conductor_utils.notify_about_cluster_operation(
-                self.context, status_to_event[stack.stack_status],
-                taxonomy.OUTCOME_FAILURE)
-            raise loopingcall.LoopingCallDone()
-        # only check max attempts when the stack is being created when
-        # the timeout hasn't been set. If the timeout has been set then
-        # the loop will end when the stack completes or the timeout occurs
-        if stack.stack_status == fields.ClusterStatus.CREATE_IN_PROGRESS:
-            if (stack.timeout_mins is None and
-               self.attempts > CONF.cluster_heat.max_attempts):
-                LOG.error(_LE('Cluster check exit after %(attempts)s attempts,'
-                              'stack_id: %(id)s, stack_status: %(status)s') %
-                          {'attempts': CONF.cluster_heat.max_attempts,
-                           'id': self.cluster.stack_id,
-                           'status': stack.stack_status})
-                raise loopingcall.LoopingCallDone()
-        else:
-            if self.attempts > CONF.cluster_heat.max_attempts:
-                LOG.error(_LE('Cluster check exit after %(attempts)s attempts,'
-                              'stack_id: %(id)s, stack_status: %(status)s') %
-                          {'attempts': CONF.cluster_heat.max_attempts,
-                           'id': self.cluster.stack_id,
-                           'status': stack.stack_status})
-                raise loopingcall.LoopingCallDone()
-
-    def _delete_complete(self):
-        LOG.info(_LI('Cluster has been deleted, stack_id: %s')
-                 % self.cluster.stack_id)
-        try:
-            trust_manager.delete_trustee_and_trust(self.openstack_client,
-                                                   self.context,
-                                                   self.cluster)
-            cert_manager.delete_certificates_from_cluster(self.cluster,
-                                                          context=self.context)
-            self.cluster.destroy()
-        except exception.ClusterNotFound:
-            LOG.info(_LI('The cluster %s has been deleted by others.')
-                     % self.cluster.uuid)
-
-    def _sync_cluster_status(self, stack):
-        self.cluster.status = stack.stack_status
-        self.cluster.status_reason = stack.stack_status_reason
-        stack_nc_param = self.template_def.get_heat_param(
-            cluster_attr='node_count')
-        self.cluster.node_count = stack.parameters[stack_nc_param]
-        self.cluster.save()
-
-    def get_version_info(self, stack):
-        stack_param = self.template_def.get_heat_param(
-            cluster_attr='coe_version')
-        if stack_param:
-            self.cluster.coe_version = stack.parameters[stack_param]
-
-        version_module_path = self.template_def.driver_module_path+'.version'
-        try:
-            ver = importutils.import_module(version_module_path)
-            container_version = ver.container_version
-        except Exception:
-            container_version = None
-        self.cluster.container_version = container_version
-
-    def _sync_cluster_and_template_status(self, stack):
-        self.template_def.update_outputs(stack, self.cluster_template,
-                                         self.cluster)
-        self.get_version_info(stack)
-        self._sync_cluster_status(stack)
-
-    def _cluster_failed(self, stack):
-        LOG.error(_LE('Cluster error, stack status: %(cluster_status)s, '
-                      'stack_id: %(stack_id)s, '
-                      'reason: %(reason)s') %
-                  {'cluster_status': stack.stack_status,
-                   'stack_id': self.cluster.stack_id,
-                   'reason': self.cluster.status_reason})

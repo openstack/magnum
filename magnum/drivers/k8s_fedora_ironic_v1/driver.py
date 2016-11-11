@@ -12,16 +12,19 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from magnum.drivers.common import driver
+from magnum.drivers.heat import driver
 from magnum.drivers.k8s_fedora_ironic_v1 import template_def
 
 
-class Driver(driver.Driver):
-    provides = [
-        {'server_type': 'bm',
-         'os': 'fedora',
-         'coe': 'kubernetes'},
-    ]
+class Driver(driver.HeatDriver):
+
+    @property
+    def provides(self):
+        return [
+            {'server_type': 'bm',
+             'os': 'fedora',
+             'coe': 'kubernetes'},
+        ]
 
     def get_template_definition(self):
         return template_def.FedoraK8sIronicTemplateDefinition()

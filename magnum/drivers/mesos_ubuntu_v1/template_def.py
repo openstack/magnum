@@ -13,7 +13,7 @@
 # under the License.
 import os
 
-from magnum.drivers.common import template_def
+from magnum.drivers.heat import template_def
 
 
 class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):

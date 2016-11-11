@@ -16,7 +16,6 @@ import mock
 from mock import patch
 
 import magnum.conf
-from magnum.drivers.common import driver
 from magnum.drivers.k8s_coreos_v1 import driver as k8s_coreos_dr
 from magnum.drivers.k8s_fedora_atomic_v1 import driver as k8s_dr
 from magnum import objects
@@ -124,8 +123,8 @@ class TestClusterConductorWithK8s(base.TestCase):
 
         (template_path,
          definition,
-         env_files) = driver._extract_template_definition(self.context,
-                                                          cluster)
+         env_files) = mock_driver()._extract_template_definition(self.context,
+                                                                 cluster)
 
         mapping = {
             'dns_nameserver': 'dns_nameserver',
@@ -224,8 +223,8 @@ class TestClusterConductorWithK8s(base.TestCase):
 
         (template_path,
          definition,
-         env_files) = driver._extract_template_definition(self.context,
-                                                          cluster)
+         env_files) = mock_driver()._extract_template_definition(self.context,
+                                                                 cluster)
 
         expected = {
             'auth_url': 'http://192.168.10.10:5000/v3',
@@ -305,8 +304,8 @@ class TestClusterConductorWithK8s(base.TestCase):
 
         (template_path,
          definition,
-         env_files) = driver._extract_template_definition(self.context,
-                                                          cluster)
+         env_files) = mock_driver()._extract_template_definition(self.context,
+                                                                 cluster)
 
         expected = {
             'auth_url': 'http://192.168.10.10:5000/v3',
@@ -363,8 +362,8 @@ class TestClusterConductorWithK8s(base.TestCase):
 
         (template_path,
          definition,
-         env_files) = driver._extract_template_definition(self.context,
-                                                          cluster)
+         env_files) = mock_driver()._extract_template_definition(self.context,
+                                                                 cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -423,8 +422,8 @@ class TestClusterConductorWithK8s(base.TestCase):
 
         (template_path,
          definition,
-         env_files) = driver._extract_template_definition(self.context,
-                                                          cluster)
+         env_files) = mock_driver()._extract_template_definition(self.context,
+                                                                 cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -607,8 +606,8 @@ class TestClusterConductorWithK8s(base.TestCase):
 
         (template_path,
          definition,
-         env_files) = driver._extract_template_definition(self.context,
-                                                          cluster)
+         env_files) = mock_driver()._extract_template_definition(self.context,
+                                                                 cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -656,8 +655,11 @@ class TestClusterConductorWithK8s(base.TestCase):
 
     @patch('magnum.common.short_id.generate_id')
     @patch('heatclient.common.template_utils.get_template_contents')
-    @patch('magnum.drivers.common.driver._extract_template_definition')
+    @patch('magnum.drivers.k8s_fedora_atomic_v1.driver.Driver.'
+           '_extract_template_definition')
+    @patch('magnum.common.clients.OpenStackClients')
     def test_create_stack(self,
+                          mock_osc,
                           mock_extract_template_definition,
                           mock_get_template_contents,
                           mock_generate_id):
@@ -674,13 +676,12 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_extract_template_definition.return_value = ('template/path',
                                                          {}, [])
         mock_heat_client = mock.MagicMock()
-        mock_osc = mock.MagicMock()
-        mock_osc.heat.return_value = mock_heat_client
+        mock_osc.return_value.heat.return_value = mock_heat_client
         mock_cluster = mock.MagicMock()
         mock_cluster.name = dummy_cluster_name
 
-        k8s_dr.Driver().create_stack(self.context, mock_osc,
-                                     mock_cluster, expected_timeout)
+        k8s_dr.Driver().create_cluster(self.context, mock_cluster,
+                                       expected_timeout)
 
         expected_args = {
             'stack_name': expected_stack_name,
@@ -694,9 +695,12 @@ class TestClusterConductorWithK8s(base.TestCase):
 
     @patch('magnum.common.short_id.generate_id')
     @patch('heatclient.common.template_utils.get_template_contents')
-    @patch('magnum.drivers.common.driver._extract_template_definition')
+    @patch('magnum.drivers.k8s_fedora_atomic_v1.driver.Driver.'
+           '_extract_template_definition')
+    @patch('magnum.common.clients.OpenStackClients')
     def test_create_stack_no_timeout_specified(
             self,
+            mock_osc,
             mock_extract_template_definition,
             mock_get_template_contents,
             mock_generate_id):
@@ -713,13 +717,11 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_extract_template_definition.return_value = ('template/path',
                                                          {}, [])
         mock_heat_client = mock.MagicMock()
-        mock_osc = mock.MagicMock()
-        mock_osc.heat.return_value = mock_heat_client
+        mock_osc.return_value.heat.return_value = mock_heat_client
         mock_cluster = mock.MagicMock()
         mock_cluster.name = dummy_cluster_name
 
-        k8s_dr.Driver().create_stack(self.context, mock_osc,
-                                     mock_cluster, None)
+        k8s_dr.Driver().create_cluster(self.context, mock_cluster, None)
 
         expected_args = {
             'stack_name': expected_stack_name,
@@ -733,9 +735,12 @@ class TestClusterConductorWithK8s(base.TestCase):
 
     @patch('magnum.common.short_id.generate_id')
     @patch('heatclient.common.template_utils.get_template_contents')
-    @patch('magnum.drivers.common.driver._extract_template_definition')
+    @patch('magnum.drivers.k8s_fedora_atomic_v1.driver.Driver.'
+           '_extract_template_definition')
+    @patch('magnum.common.clients.OpenStackClients')
     def test_create_stack_timeout_is_zero(
             self,
+            mock_osc,
             mock_extract_template_definition,
             mock_get_template_contents,
             mock_generate_id):
@@ -753,13 +758,12 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_extract_template_definition.return_value = ('template/path',
                                                          {}, [])
         mock_heat_client = mock.MagicMock()
-        mock_osc = mock.MagicMock()
-        mock_osc.heat.return_value = mock_heat_client
+        mock_osc.return_value.heat.return_value = mock_heat_client
         mock_cluster = mock.MagicMock()
         mock_cluster.name = dummy_cluster_name
 
-        k8s_dr.Driver().create_stack(self.context, mock_osc,
-                                     mock_cluster, cluster_timeout)
+        k8s_dr.Driver().create_cluster(self.context, mock_cluster,
+                                       cluster_timeout)
 
         expected_args = {
             'stack_name': expected_stack_name,
@@ -772,8 +776,11 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_heat_client.stacks.create.assert_called_once_with(**expected_args)
 
     @patch('heatclient.common.template_utils.get_template_contents')
-    @patch('magnum.drivers.common.driver._extract_template_definition')
+    @patch('magnum.drivers.k8s_fedora_atomic_v1.driver.Driver.'
+           '_extract_template_definition')
+    @patch('magnum.common.clients.OpenStackClients')
     def test_update_stack(self,
+                          mock_osc,
                           mock_extract_template_definition,
                           mock_get_template_contents):
 
@@ -786,12 +793,11 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_extract_template_definition.return_value = ('template/path',
                                                          {}, [])
         mock_heat_client = mock.MagicMock()
-        mock_osc = mock.MagicMock()
-        mock_osc.heat.return_value = mock_heat_client
+        mock_osc.return_value.heat.return_value = mock_heat_client
         mock_cluster = mock.MagicMock()
         mock_cluster.stack_id = mock_stack_id
 
-        k8s_dr.Driver().update_stack({}, mock_osc, mock_cluster)
+        k8s_dr.Driver().update_cluster({}, mock_cluster)
 
         expected_args = {
             'parameters': {},

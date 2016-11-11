@@ -12,8 +12,8 @@
 
 from oslo_log import log as logging
 
-from magnum.drivers.common import k8s_template_def
-from magnum.drivers.common import template_def
+from magnum.drivers.heat import k8s_template_def
+from magnum.drivers.heat import template_def
 from oslo_config import cfg
 
 CONF = cfg.CONF

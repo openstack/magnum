@@ -16,9 +16,8 @@ import mock
 from mock import patch
 from oslo_service import loopingcall
 
-from magnum.conductor.handlers import cluster_conductor
 import magnum.conf
-from magnum.drivers.common import driver
+from magnum.drivers.heat import driver as heat_driver
 from magnum.drivers.swarm_fedora_atomic_v1 import driver as swarm_dr
 from magnum import objects
 from magnum.objects.fields import ClusterStatus as cluster_status
@@ -107,8 +106,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
         (template_path,
          definition,
-         env_files) = driver._extract_template_definition(self.context,
-                                                          cluster)
+         env_files) = mock_driver()._extract_template_definition(self.context,
+                                                                 cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -177,8 +176,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
         (template_path,
          definition,
-         env_files) = driver._extract_template_definition(self.context,
-                                                          cluster)
+         env_files) = mock_driver()._extract_template_definition(self.context,
+                                                                 cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -254,8 +253,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
         (template_path,
          definition,
-         env_files) = driver._extract_template_definition(self.context,
-                                                          cluster)
+         env_files) = mock_driver()._extract_template_definition(self.context,
+                                                                 cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -309,8 +308,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
         (template_path,
          definition,
-         env_files) = driver._extract_template_definition(self.context,
-                                                          cluster)
+         env_files) = mock_driver()._extract_template_definition(self.context,
+                                                                 cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -376,8 +375,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
         (template_path,
          definition,
-         env_files) = driver._extract_template_definition(self.context,
-                                                          cluster)
+         env_files) = mock_driver()._extract_template_definition(self.context,
+                                                                 cluster)
 
         expected = {
             'ssh_key_name': 'keypair_id',
@@ -437,8 +436,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
         mock_retrieve_cluster_template.return_value = \
             cluster_template
         mock_driver.return_value = swarm_dr.Driver()
-        poller = cluster_conductor.HeatPoller(mock_openstack_client, cluster,
-                                              swarm_dr.Driver())
+        poller = heat_driver.HeatPoller(mock_openstack_client, cluster,
+                                        swarm_dr.Driver())
         poller.get_version_info = mock.MagicMock()
         return (mock_heat_stack, cluster, poller)
 

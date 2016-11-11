@@ -12,16 +12,19 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from magnum.drivers.common import driver
+from magnum.drivers.heat import driver
 from magnum.drivers.mesos_ubuntu_v1 import template_def
 
 
-class Driver(driver.Driver):
-    provides = [
-        {'server_type': 'vm',
-         'os': 'ubuntu',
-         'coe': 'mesos'},
-    ]
+class Driver(driver.HeatDriver):
+
+    @property
+    def provides(self):
+        return [
+            {'server_type': 'vm',
+             'os': 'ubuntu',
+             'coe': 'mesos'},
+        ]
 
     def get_template_definition(self):
         return template_def.UbuntuMesosTemplateDefinition()
