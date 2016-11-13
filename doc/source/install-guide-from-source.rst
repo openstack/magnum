@@ -343,6 +343,18 @@ Install and configure components
 
 7. Edit the ``/etc/magnum/magnum.conf``:
 
+   * In the ``[DEFAULT]`` section,
+     configure ``RabbitMQ`` message queue access:
+
+     .. code-block:: ini
+
+        [DEFAULT]
+        ...
+        transport_url = rabbit://openstack:RABBIT_PASS@controller
+
+     Replace ``RABBIT_PASS`` with the password you chose for the
+     ``openstack`` account in ``RabbitMQ``.
+
    * In the ``[api]`` section, configure the host:
 
      .. code-block:: ini
@@ -446,20 +458,6 @@ Install and configure components
         [oslo_messaging_notifications]
         ...
         driver = messaging
-
-   * In the ``[oslo_messaging_rabbit]`` section, configure RabbitMQ message
-     queue access:
-
-     .. code-block:: ini
-
-        [oslo_messaging_rabbit]
-        ...
-        rabbit_host = controller
-        rabbit_userid = openstack
-        rabbit_password = RABBIT_PASS
-
-     Replace RABBIT_PASS with the password you chose for the openstack account
-     in RabbitMQ.
 
    .. note::
 
