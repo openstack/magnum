@@ -87,18 +87,16 @@
         ...
         driver = messaging
 
-   * In the ``[oslo_messaging_rabbit]`` section, configure RabbitMQ message
-     queue access:
+   * In the ``[DEFAULT]`` section,
+     configure ``RabbitMQ`` message queue access:
 
      .. code-block:: ini
 
-        [oslo_messaging_rabbit]
+        [DEFAULT]
         ...
-        rabbit_host = controller
-        rabbit_userid = openstack
-        rabbit_password = RABBIT_PASS
+        transport_url = rabbit://openstack:RABBIT_PASS@controller
 
-     Replace RABBIT_PASS with the password you chose for the openstack account
-     in RabbitMQ.
+     Replace ``RABBIT_PASS`` with the password you chose for the
+     ``openstack`` account in ``RabbitMQ``.
 
 
