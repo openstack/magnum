@@ -113,10 +113,6 @@ parameters:
     description : >
       timeout for the Wait Conditions
 
-  secgroup_base_id:
-    type: string
-    description: ID of the security group for base.
-
   secgroup_kube_master_id:
     type: string
     description: ID of the security group for kubernetes master.
@@ -406,7 +402,6 @@ resources:
     properties:
       network: {get_param: fixed_network}
       security_groups:
-        - {get_param: secgroup_base_id}
         - {get_param: secgroup_kube_master_id}
       fixed_ips:
         - subnet: {get_param: fixed_subnet}
