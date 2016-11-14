@@ -3,7 +3,7 @@
 
 # Remove any existing docker-storage configuration. In case of an
 # existing configuration, docker-storage-setup will fail.
-clear_docker_storage_congiguration () {
+clear_docker_storage_configuration () {
     if [ -f /etc/sysconfig/docker-storage ]; then
         sed -i "/^DOCKER_STORAGE_OPTIONS=/ s/=.*/=/" /etc/sysconfig/docker-storage
     fi
@@ -11,7 +11,7 @@ clear_docker_storage_congiguration () {
 
 # Configure docker storage with xfs as backing filesystem.
 configure_overlay () {
-    clear_docker_storage_congiguration
+    clear_docker_storage_configuration
 
     rm -rf /var/lib/docker/*
 
@@ -31,7 +31,7 @@ configure_overlay () {
 
 # Configure docker storage with devicemapper using direct LVM
 configure_devicemapper () {
-    clear_docker_storage_congiguration
+    clear_docker_storage_configuration
 
     if [ -n "$DOCKER_VOLUME_SIZE" ] && [ "$DOCKER_VOLUME_SIZE" -gt 0 ]; then
         pvcreate -f ${device_path}
