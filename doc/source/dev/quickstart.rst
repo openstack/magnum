@@ -246,11 +246,11 @@ Fedora Atomic. The COE (Container Orchestration Engine) and keypair need to
 be specified as well::
 
     magnum cluster-template-create --name k8s-cluster-template \
-                           --image-id fedora-atomic-latest \
-                           --keypair-id testkey \
-                           --external-network-id public \
+                           --image fedora-atomic-latest \
+                           --keypair testkey \
+                           --external-network public \
                            --dns-nameserver 8.8.8.8 \
-                           --flavor-id m1.small \
+                           --flavor m1.small \
                            --docker-volume-size 5 \
                            --network-driver flannel \
                            --coe kubernetes
@@ -342,11 +342,11 @@ Create a CoreOS Kubernetes ClusterTemplate, which is similar to the Atomic
 Kubernetes ClusterTemplate, except for pointing to a different image::
 
     magnum cluster-template-create --name k8s-cluster-template-coreos \
-                           --image-id CoreOS \
-                           --keypair-id testkey \
-                           --external-network-id public \
+                           --image CoreOS \
+                           --keypair testkey \
+                           --external-network public \
                            --dns-nameserver 8.8.8.8 \
-                           --flavor-id m1.small \
+                           --flavor m1.small \
                            --network-driver flannel \
                            --coe kubernetes
 
@@ -523,11 +523,11 @@ except for the absence of some Kubernetes-specific arguments and the use of
 'swarm' as the COE::
 
     magnum cluster-template-create --name swarm-cluster-template \
-                           --image-id fedora-atomic-latest \
-                           --keypair-id testkey \
-                           --external-network-id public \
+                           --image fedora-atomic-latest \
+                           --keypair testkey \
+                           --external-network public \
                            --dns-nameserver 8.8.8.8 \
-                           --flavor-id m1.small \
+                           --flavor m1.small \
                            --docker-volume-size 5 \
                            --coe swarm
 
@@ -655,11 +655,11 @@ Alternatively, you can download and upload a pre-built image::
 Then, create a ClusterTemplate by using 'mesos' as the COE, with the rest of
 arguments similar to the Kubernetes ClusterTemplate::
 
-    magnum cluster-template-create --name mesos-cluster-template --image-id ubuntu-mesos \
-                           --keypair-id testkey \
-                           --external-network-id public \
+    magnum cluster-template-create --name mesos-cluster-template --image ubuntu-mesos \
+                           --keypair testkey \
+                           --external-network public \
                            --dns-nameserver 8.8.8.8 \
-                           --flavor-id m1.small \
+                           --flavor m1.small \
                            --coe mesos
 
 Finally, create the cluster. Use the ClusterTemplate 'mesos-cluster-template'

@@ -193,7 +193,7 @@ The nodes for Kubernetes, Swarm and Mesos are connected to a private
 Neutron network, so to provide access to the external internet, a router
 connects the private network to a public network.  With devstack, the
 default public network is "public", but this can be replaced by the
-parameter "external-network-id" in the ClusterTemplate.  The "public" network
+parameter "external-network" in the ClusterTemplate.  The "public" network
 with devstack is actually not a real external network, so it is in turn
 routed to the network interface of the host for devstack.  This is
 configured in the file local.conf with the variable PUBLIC_INTERFACE,
@@ -216,7 +216,7 @@ Check the following:
 
 - Is PUBLIC_INTERFACE in devstack/local.conf the correct network
   interface?  Does this interface have a route to the external internet?
-- If "external-network-id" is specified in the ClusterTemplate, does this
+- If "external-network" is specified in the ClusterTemplate, does this
   network have a route to the external internet?
 - Is your devstack environment behind a firewall?  This can be the case for some
   enterprises or countries.  In this case, consider using a `proxy server
