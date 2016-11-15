@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<image schemaversion="6.1" name="openSUSE-Leap-42.1-JeOS-for-OpenStack-Magnum-K8s">
+    <description type="system">
+        <author>SUSE Containers Team</author>
+        <contact>docker-devel@suse.de</contact>
+        <specification>Kubernetes openSUSE Leap 42.1 image for OpenStack Magnum</specification>
+    </description>
+    <preferences>
+        <version>1.1.1</version>
+        <packagemanager>zypper</packagemanager>
+        <bootsplash-theme>openSUSE</bootsplash-theme>
+        <bootloader-theme>openSUSE</bootloader-theme>
+        <rpm-excludedocs>true</rpm-excludedocs>
+        <!-- temporary filesystem change to ext4, btrfs is just a nightmare on steroids for aarch64 -->
+        <type
+            image="vmx"
+            filesystem="ext4"
+            boot="vmxboot/suse-leap42.1"
+            format="qcow2"
+            vga="normal"
+            boottimeout="1"
+            bootloader="grub2"
+            firmware="uefi"
+            kernelcmdline="console=tty1 console=ttyS0,115200n8 console=ttyAMA0,115200n8 plymouth.enable=0 net.ifnames=0"
+            bootpartition="false"
+            bootkernel="custom"
+            devicepersistency="by-label"
+        />
+    </preferences>
+    <repository type="rpm-md">
+        <source path="obs://Virtualization:containers/openSUSE_Leap_42.1"/>
+    </repository>
+    <repository type="rpm-md">
+        <source path="obs://Virtualization/openSUSE_Leap_42.1"/>
+    </repository>
+    <repository type="rpm-md">
+        <source path="obs://openSUSE:Leap:42.1:Update/standard"/>
+    </repository>
+    <repository type="rpm-md">
+        <source path="obs://openSUSE:Leap:42.1/standard"/>
+    </repository>
+    <repository type="rpm-md">
+        <source path="obs://openSUSE:Leap:42.1:Images/standard"/>
+    </repository>
+    <packages type="image">
+        <!-- jeos server -->
+        <package name="patterns-openSUSE-minimal_base"/>
+        <package name="aaa_base-extras"/>
+        <package name="acl"/>
+        <package name="curl"/>
+        <package name="dracut"/>
+        <package name="fipscheck"/>
+        <package name="grub2-branding-openSUSE" bootinclude="true"/>
+        <package name="iputils"/>
+        <package name="jeos-firstboot"/>
+        <package name="vim"/>
+        <package name="which"/>
+        <package name="gettext-runtime"/>
+        <package name="shim" arch="x86_64"/>
+        <package name="grub2"/>
+        <package name="grub2-x86_64-efi" arch="x86_64"/>
+        <package name="syslinux" arch="i586,x86_64"/>
+        <package name="fontconfig"/>
+        <package name="fonts-config"/>
+        <package name="haveged"/>
+        <package name="less" />
+        <package name="openslp"/>
+        <package name="tar"/>
+        <package name="parted"/>
+        <!-- <package name="SuSEfirewall2"/> not needed for JeOS and OpenStack Cloud-->
+        <package name="systemd"/>
+        <package name="systemd-sysvinit"/>
+        <package name="timezone"/>
+        <package name="wicked"/>
+        <package name="iproute2"/>
+        <package name="openssh"/>
+        <package name="elfutils"/>
+        <!-- kernel-default-base doesn't include kernel module tun.ko required by flanneld -->
+        <!-- <package name="kernel-default-base" bootinclude="true" replaces="kernel-default"/> -->
+        <package name="kernel-default" bootinclude="true"/>
+        <package name="python-base"/>
+        <package name="rsync"/>
+        <package name="libyui-ncurses-pkg7"/>
+        <package name="salt-minion"/>
+        <!-- packages required by file provides, BS can't resolve them -->
+        <package name="openSUSE-build-key"/>
+        <package name="pkg-config"/>
+        <package name="sg3_utils"/>
+        <package name="ncurses-utils"/>
+        <package name="krb5"/>
+        <package name="xfsprogs" />
+
+        <!-- cloud specific packages -->
+        <package name="cloud-init" />
+
+        <!-- kubernetes -->
+        <package name='docker'/>
+        <package name='etcd'/>
+        <package name='etcdctl'/>
+        <package name='flannel'/>
+        <package name='kubernetes-client'/>
+        <package name='kubernetes-master'/>
+        <package name='kubernetes-node'/>
+    </packages>
+    <packages type="bootstrap">
+        <package name="udev"/>
+        <package name="filesystem"/>
+        <package name="glibc-locale"/>
+        <package name="cracklib-dict-small"/>
+        <package name="ca-certificates"/>
+        <package name="openSUSE-release"/>
+    </packages>
+    <packages type="delete">
+        <package name="mtools"/>
+        <package name="initviocons"/>
+        <package name="cryptsetup"/>
+        <package name="autoyast2-installation"/>
+        <package name="bind-utils"/>
+        <package name="Mesa" />
+        <package name="Mesa-libGL1"/>
+        <package name="Mesa-libglapi0"/>
+        <package name="Mesa-EGL1"/>
+        <package name="Mesa-libEGL1"/>
+        <package name="lvm2"/>
+        <package name="sg3_utils"/>
+        <package name="libcairo2"/>
+        <package name="libcxb-dri2-0"/>
+        <package name="libgbm1"/>
+        <package name="libgio-2_0-0"/>
+        <package name="libharfbuzz0"/>
+        <package name="libpango-1_0-0"/>
+        <package name="libpixman-1-0"/>
+        <package name="libply-splash-graphics2"/>
+        <package name="libX11-6"/>
+        <package name="libX11-xcb1"/>
+        <package name="libxcb1"/>
+        <package name="libX11-data"/>
+        <package name="libXdamage1"/>
+        <package name="libXext6"/>
+        <package name="libXfixes3"/>
+        <package name="libXft2" />
+        <package name="libXrender1"/>
+        <package name="libXxf86vm1"/>
+        <package name="libpng16-16"/>
+        <package name="os-prober"/>
+        <package name="pango-modules"/>
+        <package name="plymouth"/>
+        <package name="plymouth-plugin-label"/>
+        <package name="plymouth-plugin-script"/>
+        <package name="plymouth-scripts"/>
+        <package name="plymouth-branding-openSUSE"/>
+        <package name="fontconfig"/>
+        <package name="fonts-config"/>
+        <package name="gnu-unifont-bitmap-fonts"/>
+        <package name="gio-branding-upstream"/>
+        <package name="libXau6"/>
+        <package name="libfreetype6"/>
+        <package name="shared-mime-info"/>
+    </packages>
+</image>
