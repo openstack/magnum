@@ -21,7 +21,7 @@ show_diff () {
 
 if ! git diff --exit-code || ! git diff --cached --exit-code
 then
-    echo "There are uncommited changes!"
+    echo "There are uncommitted changes!"
     echo "Please clean git working directory and try again"
     exit 1
 fi
