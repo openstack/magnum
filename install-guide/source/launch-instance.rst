@@ -88,12 +88,12 @@ and one node. Then, using docker's native API you will create a container.
    .. code-block:: console
 
       $ magnum cluster-template-create --name swarm-cluster-template \
-                           --image-id fedora-atomic-latest \
-                           --keypair-id mykey \
-                           --external-network-id public \
+                           --image fedora-atomic-latest \
+                           --keypair mykey \
+                           --external-network public \
                            --dns-nameserver 8.8.8.8 \
-                           --master-flavor-id m1.small \
-                           --flavor-id m1.small \
+                           --master-flavor m1.small \
+                           --flavor m1.small \
                            --coe swarm
       +-----------------------+--------------------------------------+
       | Property              | Value                                |
