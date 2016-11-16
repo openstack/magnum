@@ -411,16 +411,8 @@ to Magnum to get it signed and also download the signing cert.::
 Here's how to set up the replicated redis example. Now we create a pod for the
 redis-master::
 
-    KUBERNETES_URL=$(magnum cluster-show k8s-cluster |
-                     awk '/ api_address /{print $4}')
-
-    # Set kubectl to use the correct certs
-    kubectl config set-cluster k8s-cluster --server=${KUBERNETES_URL} \
-        --certificate-authority=$(pwd)/ca.crt
-    kubectl config set-credentials client --certificate-authority=$(pwd)/ca.crt \
-        --client-key=$(pwd)/client.key --client-certificate=$(pwd)/client.crt
-    kubectl config set-context k8s-cluster --cluster=k8s-cluster --user=client
-    kubectl config use-context k8s-cluster
+    # Using cluster-config command for faster configuration
+    eval $(magnum cluster-config k8s-cluster)
 
     # Test the cert and connection works
     kubectl version
