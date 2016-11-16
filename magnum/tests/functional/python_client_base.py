@@ -56,6 +56,7 @@ class BaseMagnumClient(base.BaseMagnumTest):
         tenant = cliutils.env('OS_TENANT_NAME')
         tenant_id = cliutils.env('OS_TENANT_ID')
         auth_url = cliutils.env('OS_AUTH_URL')
+        insecure = cliutils.env('INSECURE')
         region_name = cliutils.env('OS_REGION_NAME')
         magnum_url = cliutils.env('BYPASS_URL')
         image_id = cliutils.env('IMAGE_ID')
@@ -74,6 +75,7 @@ class BaseMagnumClient(base.BaseMagnumTest):
             passwd = passwd or config.get('admin', 'pass')
             tenant = tenant or config.get('admin', 'tenant')
             auth_url = auth_url or config.get('auth', 'auth_url')
+            insecure = insecure or config.get('auth', 'insecure')
             magnum_url = magnum_url or config.get('auth', 'magnum_url')
             image_id = image_id or config.get('magnum', 'image_id')
             nic_id = nic_id or config.get('magnum', 'nic_id')
@@ -100,13 +102,15 @@ class BaseMagnumClient(base.BaseMagnumTest):
                                  project_id=tenant_id,
                                  project_name=tenant,
                                  auth_url=auth_url,
+                                 insecure=insecure,
                                  service_type='container-infra',
                                  region_name=region_name,
                                  magnum_url=magnum_url)
         cls.keystone = ksclient.Client(username=user,
                                        password=passwd,
                                        tenant_name=tenant,
-                                       auth_url=auth_url)
+                                       auth_url=auth_url,
+                                       insecure=insecure)
         token = cls.keystone.auth_token
         heat_endpoint = cls.keystone.service_catalog.url_for(
             service_type='orchestration')

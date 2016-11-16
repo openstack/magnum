@@ -76,6 +76,7 @@ username = $OS_USERNAME
 tenant_name = $OS_TENANT_NAME
 password = $OS_PASSWORD
 auth_version = v2
+insecure = False
 [admin]
 user = $OS_USERNAME
 tenant = $OS_TENANT_NAME
