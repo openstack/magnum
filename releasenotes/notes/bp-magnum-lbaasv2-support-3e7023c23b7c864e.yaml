@@ -1,0 +1,7 @@
+---
+features:
+  - Add Support of LBaaS v2, LBaaS v1 is removed by
+    neutron community in Newton release. Until now,
+    LBaaS v1 was used by all clusters created using
+    magnum. This release adds support of LBaaS v2 for
+    all supported drivers.
