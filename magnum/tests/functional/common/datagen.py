@@ -384,7 +384,7 @@ def cluster_template_replace_patch_data(path,
 
 
 def cluster_template_remove_patch_data(path):
-    """Generates ClusterTempalte patch data by removing value
+    """Generates ClusterTemplate patch data by removing value
 
     :param path: path to remove
     :returns: ClusterTemplatePatchCollection with generated data
