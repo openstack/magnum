@@ -51,16 +51,23 @@ The following example shows the unit test workflow when changing an object
 
     tox -e py27 magnum.tests.unit.objects.test_objects
 
-This results in a unit test failure with the following output::
+This results in a unit test failure with the following output:
+
+  .. code-block:: python
 
     testtools.matchers._impl.MismatchError: !=:
     reference = {'Cluster': '1.0-35edde13ad178e9419e7ea8b6d580bcd'}
     actual    = {'Cluster': '1.0-22b40e8eed0414561ca921906b189820'}
+
+  .. code-block:: console
+
     : Fields or remotable methods in some objects have changed. Make sure the versions of the objects has been bumped, and update the hashes in the static fingerprints tree (object_data). For more information, read http://docs.openstack.org/developer/magnum/objects.html.
 
 This is an indication that me adding the 'foo' field to Cluster means I need
 to bump the version of Cluster, so I increase the version and add a comment
-saying what I changed in the new version::
+saying what I changed in the new version:
+
+  .. code-block:: python
 
     @base.MagnumObjectRegistry.register
     class Cluster(base.MagnumPersistentObject, base.MagnumObject,
@@ -70,16 +77,19 @@ saying what I changed in the new version::
         VERSION = '1.1'
 
 Now that I have updated the version, I will run the tests again and let the
-test tell me the fingerprint that I now need to put in the static tree::
+test tell me the fingerprint that I now need to put in the static tree:
+
+  .. code-block:: python
 
     testtools.matchers._impl.MismatchError: !=:
     reference = {'Cluster': '1.0-35edde13ad178e9419e7ea8b6d580bcd'}
     actual    = {'Cluster': '1.1-22b40e8eed0414561ca921906b189820'}
-    : Fields or remotable methods in some objects have changed. Make sure the versions of the objects has been bumped, and update the hashes in the static fingerprints tree (object_data). For more information, read http://docs.openstack.org/developer/magnum/objects.html.
 
 I can now copy the new fingerprint needed
 (1.1-22b40e8eed0414561ca921906b189820), to the object_data map within
-magnum/tests/unit/objects/test_objects.py::
+magnum/tests/unit/objects/test_objects.py:
+
+  .. code-block:: python
 
     object_data = {
         'Cluster': '1.1-22b40e8eed0414561ca921906b189820',
