@@ -60,20 +60,22 @@ parameters:
     type: string
     description: endpoint to retrieve TLS certs from
 
-
-  # The following are all generated in the parent template.
   kube_master_ip:
     type: string
     description: IP address of the Kubernetes master server.
+
   etcd_server_ip:
     type: string
     description: IP address of the Etcd server.
+
   fixed_network:
     type: string
     description: Network from which to allocate fixed addresses.
+
   fixed_subnet:
     type: string
     description: Subnet from which to allocate fixed addresses.
+
   network_driver:
     type: string
     description: network driver to use for instantiating container networks
@@ -305,9 +307,15 @@ outputs:
 
   kube_minion_ip:
     value: {get_attr: [kube_minion_eth0, fixed_ips, 0, ip_address]}
+    description: >
+      This is the "public" IP address of the Kubernetes minion node.
 
   kube_minion_external_ip:
     value: {get_attr: [kube_minion_floating, floating_ip_address]}
+    description: >
+      This is the "public" IP address of the Kubernetes minion node.
 
   OS::stack_id:
     value: {get_param: "OS::stack_id"}
+    description: >
+      This is a id of the stack which creates from this template.

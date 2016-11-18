@@ -81,7 +81,6 @@ parameters:
     type: string
     description: endpoint to retrieve TLS certs from
 
-  # The following are all generated in the parent template.
   api_public_address:
     type: string
     description: Public IP address of the Kubernetes master server.
@@ -91,40 +90,51 @@ parameters:
   fixed_network:
     type: string
     description: Network from which to allocate fixed addresses.
+
   fixed_subnet:
     type: string
     description: Subnet from which to allocate fixed addresses.
+
   network_driver:
     type: string
     description: network driver to use for instantiating container networks
+
   wait_condition_timeout:
     type: number
     description : >
       timeout for the Wait Conditions
+
   secgroup_base_id:
     type: string
     description: ID of the security group for base.
+
   secgroup_kube_master_id:
     type: string
     description: ID of the security group for kubernetes master.
+
   api_pool_id:
     type: string
     description: ID of the load balancer pool of k8s API server.
+
   etcd_pool_id:
     type: string
     description: ID of the load balancer pool of etcd server.
+
   auth_url:
     type: string
     description: >
-      url for kubernetes to authenticate before sending request to neutron
+      url for kubernetes to authenticate
+
   username:
     type: string
     description: >
       user account
+
   password:
     type: string
     description: >
       user password
+
   tenant_name:
     type: string
     description: >
@@ -275,6 +285,10 @@ outputs:
 
   kube_master_ip:
     value: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
+    description: >
+      This is the "private" IP address of the Kubernetes master node.
 
   kube_master_external_ip:
     value: {get_attr: [kube_master_floating, floating_ip_address]}
+    description: >
+      This is the "public" IP address of the Kubernetes master node.

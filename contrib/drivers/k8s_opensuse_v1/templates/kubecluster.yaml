@@ -23,16 +23,16 @@ parameters:
   master_flavor:
     type: string
     default: m1.small
-    description: flavor to use when booting the server
+    description: flavor to use when booting the server for master nodes
 
   minion_flavor:
     type: string
     default: m1.small
-    description: flavor to use when booting the server
+    description: flavor to use when booting the server for minions
 
   dns_nameserver:
     type: string
-    description: address of a dns nameserver reachable in your environment
+    description: address of a DNS nameserver reachable in your environment
     default: 8.8.8.8
 
   number_of_masters:
@@ -483,8 +483,8 @@ outputs:
         params:
           api_ip_address: {get_attr: [api_pool_floating, floating_ip_address]}
     description: >
-      This is the API endpoint of the Kubernetes server. Use this to access
-      the Kubernetes API from outside the cluster.
+      This is the API endpoint of the Kubernetes cluster. Use this to access
+      the Kubernetes API.
 
   registry_address:
     value:
@@ -499,16 +499,16 @@ outputs:
   kube_masters:
     value: {get_attr: [kube_masters, kube_master_external_ip]}
     description: >
-      This is a list of "public" ip addresses of all Kubernetes master servers.
-      Use these addresses to log in to the Kubernetes masters via ssh.
+      This is a list of the "public" IP addresses of all the Kubernetes masters.
+      Use these IP addresses to log in to the Kubernetes masters via ssh.
 
   kube_minions:
     value: {get_attr: [kube_minions, kube_minion_ip]}
     description: >
-      This is a list of the "private" addresses of all the Kubernetes minions.
+      This is a list of the "private" IP addresses of all the Kubernetes minions.
 
   kube_minions_external:
     value: {get_attr: [kube_minions, kube_minion_external_ip]}
     description: >
-      This is a list of the "public" addresses of all the Kubernetes minions. Use
-      these addresses to, e.g., log into the minions.
+      This is a list of the "public" IP addresses of all the Kubernetes minions.
+      Use these IP addresses to log in to the Kubernetes minions via ssh.
