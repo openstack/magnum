@@ -76,6 +76,10 @@ parameters:
     description : >
       timeout for the Wait Conditions
 
+  secgroup_kube_master_id:
+    type: string
+    description: ID of the security group for kubernetes master.
+
   network_driver:
     type: string
     description: network driver to use for instantiating container networks
@@ -171,41 +175,6 @@ resources:
       pool_private_ip: {get_param: api_private_address}
       master_public_ip: {get_attr: [kube_master_floating, floating_ip_address]}
       master_private_ip: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
-
-  ######################################################################
-  #
-  # security groups.  we need to permit network traffic of various
-  # sorts.
-  #
-
-  secgroup_base:
-    type: OS::Neutron::SecurityGroup
-    properties:
-      rules:
-        - protocol: icmp
-        - protocol: tcp
-          port_range_min: 22
-          port_range_max: 22
-
-  secgroup_kubernetes:
-    type: OS::Neutron::SecurityGroup
-    properties:
-      rules:
-        - protocol: tcp
-          port_range_min: 7080
-          port_range_max: 7080
-        - protocol: tcp
-          port_range_min: 8080
-          port_range_max: 8080
-        - protocol: tcp
-          port_range_min: 2379
-          port_range_max: 2379
-        - protocol: tcp
-          port_range_min: 2380
-          port_range_max: 2380
-        - protocol: tcp
-          port_range_min: 6443
-          port_range_max: 6443
 
   ######################################################################
   #
@@ -411,8 +380,7 @@ resources:
     properties:
       network: {get_param: fixed_network}
       security_groups:
-        - {get_resource: secgroup_base}
-        - {get_resource: secgroup_kubernetes}
+        - {get_param: secgroup_kube_master_id}
       fixed_ips:
         - subnet: {get_param: fixed_subnet}
       allowed_address_pairs:
