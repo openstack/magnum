@@ -193,6 +193,7 @@ parameters:
       fill in for Kubernetes config file
     default:
       ChangeMe
+    hidden: true
 
   tenant_name:
     type: string
