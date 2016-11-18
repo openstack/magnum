@@ -17,6 +17,7 @@
 import json
 import os
 import subprocess
+import sys
 
 import requests
 
@@ -181,4 +182,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
