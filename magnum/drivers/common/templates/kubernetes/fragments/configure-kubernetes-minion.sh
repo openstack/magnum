@@ -68,7 +68,7 @@ if [ "$VOLUME_DRIVER" = "cinder" ]; then
     CLOUD_CONFIG=/etc/kubernetes/kube_openstack_config
     KUBERNETES=/etc/kubernetes
     if [ ! -d ${KUBERNETES} -o ! -f ${CLOUD_CONFIG} ]; then
-        sudo mkdir -p $KUBERNETES
+        mkdir -p $KUBERNETES
     fi
     AUTH_URL=${AUTH_URL/v3/v2.0}
 cat > $CLOUD_CONFIG <<EOF
@@ -85,7 +85,7 @@ cat << _EOC_ >> /etc/kubernetes/kubelet
 _EOC_
 
     if [ ! -f /usr/bin/udevadm ]; then
-        sudo ln -s /sbin/udevadm /usr/bin/udevadm
+        ln -s /sbin/udevadm /usr/bin/udevadm
     fi
 
 fi
