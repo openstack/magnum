@@ -86,8 +86,19 @@ do
     sleep 5
 done
 
-/usr/bin/kubectl create -f /srv/kubernetes/manifests/kube-ui-rc.yaml --namespace=kube-system
-/usr/bin/kubectl create -f /srv/kubernetes/manifests/kube-ui-svc.yaml --namespace=kube-system
+#echo check for existence of kube-ui-v4 replication controller
+/usr/bin/kubectl get rc kube-ui-v4 --namespace=kube-system
+
+if [ "\$?" != "0" ]; then
+    /usr/bin/kubectl create -f /srv/kubernetes/manifests/kube-ui-rc.yaml --namespace=kube-system
+fi
+
+#echo check for existence of kube-ui service
+/usr/bin/kubectl get service kube-ui --namespace=kube-system
+
+if [ "\$?" != "0" ]; then
+    /usr/bin/kubectl create -f /srv/kubernetes/manifests/kube-ui-svc.yaml --namespace=kube-system
+fi
 EOF
 }
 
@@ -97,12 +108,13 @@ KUBE_UI_SERVICE=/etc/systemd/system/kube-ui.service
     mkdir -p $(dirname ${KUBE_UI_SERVICE})
     cat << EOF > ${KUBE_UI_SERVICE}
 [Unit]
-After=kube-system-namespace
+After=kube-system-namespace.service
 Requires=kubelet.service
-Requires=kube-system-namespace.service
+Wants=kube-system-namespace.service
 
 [Service]
 Type=oneshot
+Environment=HOME=/root
 EnvironmentFile=-/etc/kubernetes/config
 ExecStart=${KUBE_UI_BIN}
 
