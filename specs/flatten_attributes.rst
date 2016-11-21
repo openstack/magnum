@@ -64,7 +64,7 @@ Alternatives
 ============
 
 The shared fields can be added to the existing Cluster and ClusterTemplate
-tables. This acheives the same effect, but brings with it the burden of
+tables. This achieves the same effect, but brings with it the burden of
 maintaining two sets of the same fields in different tables.
 
 

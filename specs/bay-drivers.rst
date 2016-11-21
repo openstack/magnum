@@ -126,7 +126,7 @@ Proposed change
      directory can also hold artifacts for building the image, for instance
      diskimagebuilder elements, scripts, etc.
 
-   - a ``templates`` directory is *required* and will (for the forseeable
+   - a ``templates`` directory is *required* and will (for the foreseeable
      future) store Heat template YAML files. In the future drivers will allow
      operators to use their own orchestration tools like Ansible.
 
