@@ -1,0 +1,461 @@
+heat_template_version: 2014-10-16
+
+description: >
+  This is a nested stack that defines swarm master node. A swarm mater node is
+  running a Docker daemon and a swarm manager container listening on port 2376.
+
+parameters:
+
+  ssh_key_name:
+    type: string
+    description: name of ssh key to be provisioned on our server
+
+  docker_volume_size:
+    type: number
+    description: >
+      size of a cinder volume to allocate to docker for container/image
+      storage
+
+  docker_storage_driver:
+    type: string
+    description: docker storage driver name
+    constraints:
+      - allowed_values: ["devicemapper", "overlay"]
+
+  external_network:
+    type: string
+    description: uuid/name of a network to use for floating ip addresses
+
+  discovery_url:
+    type: string
+    description: url provided for node discovery
+
+  cluster_uuid:
+    type: string
+    description: identifier for the cluster this template is generating
+
+  magnum_url:
+    type: string
+    description: endpoint to retrieve TLS certs from
+
+  fixed_network_id:
+    type: string
+    description: Network from which to allocate fixed addresses.
+
+  fixed_subnet_id:
+    type: string
+    description: Subnet from which to allocate fixed addresses.
+
+  swarm_api_ip:
+    type: string
+    description: swarm master's api server ip address
+    default: ""
+
+  api_ip_address:
+    type: string
+    description: swarm master's api server public ip address
+    default: ""
+
+  server_image:
+    type: string
+    description: glance image used to boot the server
+
+  server_flavor:
+    type: string
+    description: flavor to use when booting the server
+
+  http_proxy:
+    type: string
+    description: http proxy address for docker
+
+  https_proxy:
+    type: string
+    description: https proxy address for docker
+
+  no_proxy:
+    type: string
+    description: no proxies for docker
+
+  tls_disabled:
+    type: boolean
+    description: whether or not to enable TLS
+
+  network_driver:
+    type: string
+    description: network driver to use for instantiating container networks
+
+  flannel_network_cidr:
+    type: string
+    description: network range for flannel overlay network
+
+  flannel_network_subnetlen:
+    type: number
+    description: size of subnet assigned to each master
+
+  flannel_backend:
+    type: string
+    description: >
+      specify the backend for flannel, default udp backend
+    constraints:
+      - allowed_values: ["udp", "vxlan", "host-gw"]
+
+  swarm_version:
+    type: string
+    description: version of swarm used for swarm cluster
+
+  secgroup_swarm_master_id:
+    type: string
+    description: ID of the security group for swarm master.
+
+  swarm_port:
+    type: number
+    description: >
+      The port which are used by swarm manager to provide swarm service.
+
+  api_pool_id:
+    type: string
+    description: ID of the load balancer pool of swarm master server.
+
+  etcd_pool_id:
+    type: string
+    description: ID of the load balancer pool of etcd server.
+
+  etcd_server_ip:
+    type: string
+    description: ip address of the load balancer pool of etcd server.
+    default: ""
+
+  trustee_user_id:
+    type: string
+    description: user id of the trustee
+
+  trustee_password:
+    type: string
+    description: password of the trustee
+    hidden: true
+
+  trust_id:
+    type: string
+    description: id of the trust which is used by the trustee
+    hidden: true
+
+  auth_url:
+    type: string
+    description: url for keystone
+
+  volume_driver:
+    type: string
+    description: volume driver to use for container storage
+    default: ""
+
+  rexray_preempt:
+    type: string
+    description: >
+      enables any host to take control of a volume irrespective of whether
+      other hosts are using the volume
+    default: "false"
+
+resources:
+
+  master_wait_handle:
+    type: "OS::Heat::WaitConditionHandle"
+
+  master_wait_condition:
+    type: "OS::Heat::WaitCondition"
+    depends_on: swarm_master
+    properties:
+      handle: {get_resource: master_wait_handle}
+      timeout: 6000
+
+  ######################################################################
+  #
+  # resource that exposes the IPs of either the Swarm master or the API
+  # LBaaS pool depending on whether LBaaS is enabled for the cluster.
+  #
+
+  api_address_switch:
+    type: Magnum::ApiGatewaySwitcher
+    properties:
+      pool_public_ip: {get_param: api_ip_address}
+      pool_private_ip: {get_param: swarm_api_ip}
+      master_public_ip: {get_attr: [swarm_master_floating, floating_ip_address]}
+      master_private_ip: {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
+
+  etcd_address_switch:
+    type: Magnum::ApiGatewaySwitcher
+    properties:
+      pool_private_ip: {get_param: etcd_server_ip}
+      master_private_ip: {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
+
+  ######################################################################
+  #
+  # software configs.  these are components that are combined into
+  # a multipart MIME user-data archive.
+  #
+  write_heat_params:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/write-heat-params-master.yaml}
+          params:
+            "$WAIT_HANDLE_ENDPOINT": {get_attr: [master_wait_handle, endpoint]}
+            "$WAIT_HANDLE_TOKEN": {get_attr: [master_wait_handle, token]}
+            "$WAIT_CURL": {get_attr: [master_wait_handle, curl_cli]}
+            "$DOCKER_VOLUME": {get_resource: docker_volume}
+            "$DOCKER_STORAGE_DRIVER": {get_param: docker_storage_driver}
+            "$ETCD_DISCOVERY_URL": {get_param: discovery_url}
+            "$HTTP_PROXY": {get_param: http_proxy}
+            "$HTTPS_PROXY": {get_param: https_proxy}
+            "$NO_PROXY": {get_param: no_proxy}
+            "$SWARM_API_IP": {get_attr: [api_address_switch, private_ip]}
+            "$SWARM_NODE_IP": {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
+            "$CLUSTER_UUID": {get_param: cluster_uuid}
+            "$MAGNUM_URL": {get_param: magnum_url}
+            "$TLS_DISABLED": {get_param: tls_disabled}
+            "$NETWORK_DRIVER": {get_param: network_driver}
+            "$FLANNEL_NETWORK_CIDR": {get_param: flannel_network_cidr}
+            "$FLANNEL_NETWORK_SUBNETLEN": {get_param: flannel_network_subnetlen}
+            "$FLANNEL_BACKEND": {get_param: flannel_backend}
+            "$ETCD_SERVER_IP": {get_attr: [etcd_address_switch, private_ip]}
+            "$API_IP_ADDRESS": {get_attr: [api_address_switch, public_ip]}
+            "$SWARM_VERSION": {get_param: swarm_version}
+            "$TRUSTEE_USER_ID": {get_param: trustee_user_id}
+            "$TRUSTEE_PASSWORD": {get_param: trustee_password}
+            "$TRUST_ID": {get_param: trust_id}
+            "$AUTH_URL": {get_param: auth_url}
+            "$VOLUME_DRIVER": {get_param: volume_driver}
+            "$REXRAY_PREEMPT": {get_param: rexray_preempt}
+
+  write_network_config:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/write-network-config.sh}
+
+  network_config_service:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/network-config-service.sh}
+
+  network_service:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/network-service.sh}
+
+  configure_etcd:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/configure-etcd.sh}
+
+  remove_docker_key:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/remove-docker-key.sh}
+
+  configure_docker_storage:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          params:
+            $configure_docker_storage_driver: {get_file: ../../common/templates/fragments/configure_docker_storage_driver_atomic.sh}
+          template: {get_file: ../../common/templates/fragments/configure-docker-storage.sh}
+
+  make_cert:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/make-cert.py}
+
+  write_docker_service:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/write-docker-service.sh}
+
+  write_swarm_manager_failure_service:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/write-cluster-failure-service.yaml}
+          params:
+            "$SERVICE": swarm-manager
+            "$WAIT_HANDLE_ENDPOINT": {get_attr: [master_wait_handle, endpoint]}
+            "$WAIT_HANDLE_TOKEN": {get_attr: [master_wait_handle, token]}
+
+  write_docker_socket:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/write-docker-socket.yaml}
+
+  write_swarm_master_service:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/write-swarm-master-service.sh}
+          params:
+            "$ETCD_SERVER_IP": {get_attr: [etcd_address_switch, private_ip]}
+            "$NODE_IP": {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
+            "$WAIT_HANDLE_ENDPOINT": {get_attr: [master_wait_handle, endpoint]}
+            "$WAIT_HANDLE_TOKEN": {get_attr: [master_wait_handle, token]}
+            "$HTTP_PROXY": {get_param: http_proxy}
+            "$HTTPS_PROXY": {get_param: https_proxy}
+            "$NO_PROXY": {get_param: no_proxy}
+            "$TLS_DISABLED": {get_param: tls_disabled}
+            "$SWARM_VERSION": {get_param: swarm_version}
+
+  enable_services:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/enable-services.sh}
+          params:
+            "$NODE_SERVICES": "etcd docker.socket swarm-manager"
+
+  cfn_signal:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/cfn-signal.sh}
+
+  disable_selinux:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/disable-selinux.sh}
+
+  add_proxy:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/add-proxy.sh}
+
+  volume_service:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/volume-service.sh}
+
+  swarm_master_init:
+    type: "OS::Heat::MultipartMime"
+    properties:
+      parts:
+        - config: {get_resource: disable_selinux}
+        - config: {get_resource: remove_docker_key}
+        - config: {get_resource: write_heat_params}
+        - config: {get_resource: make_cert}
+        - config: {get_resource: configure_etcd}
+        - config: {get_resource: write_network_config}
+        - config: {get_resource: network_config_service}
+        - config: {get_resource: network_service}
+        - config: {get_resource: configure_docker_storage}
+        - config: {get_resource: write_swarm_manager_failure_service}
+        - config: {get_resource: write_docker_service}
+        - config: {get_resource: write_docker_socket}
+        - config: {get_resource: write_swarm_master_service}
+        - config: {get_resource: add_proxy}
+        - config: {get_resource: enable_services}
+        - config: {get_resource: cfn_signal}
+        - config: {get_resource: volume_service}
+
+  ######################################################################
+  #
+  # Swarm_manager is a special node running the swarm manage daemon along
+  # side the swarm agent.
+  #
+
+  swarm_master:
+    type: "OS::Nova::Server"
+    properties:
+      image:
+        get_param: server_image
+      flavor:
+        get_param: server_flavor
+      key_name:
+        get_param: ssh_key_name
+      user_data_format: RAW
+      user_data: {get_resource: swarm_master_init}
+      networks:
+        - port:
+            get_resource: swarm_master_eth0
+
+  swarm_master_eth0:
+    type: "OS::Neutron::Port"
+    properties:
+      network_id:
+        get_param: fixed_network_id
+      security_groups:
+        - {get_param: secgroup_swarm_master_id}
+      fixed_ips:
+        - subnet_id:
+            get_param: fixed_subnet_id
+      allowed_address_pairs:
+        - ip_address: {get_param: flannel_network_cidr}
+
+  swarm_master_floating:
+    type: "OS::Neutron::FloatingIP"
+    properties:
+      floating_network:
+        get_param: external_network
+      port_id:
+        get_resource: swarm_master_eth0
+
+  api_pool_member:
+    type: Magnum::Optional::Neutron::LBaaS::PoolMember
+    properties:
+      pool: {get_param: api_pool_id}
+      address: {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
+      subnet: { get_param: fixed_subnet_id }
+      protocol_port: {get_param: swarm_port}
+
+  etcd_pool_member:
+    type: Magnum::Optional::Neutron::LBaaS::PoolMember
+    properties:
+      pool: {get_param: etcd_pool_id}
+      address: {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
+      subnet: { get_param: fixed_subnet_id }
+      protocol_port: 2379
+
+  ######################################################################
+  #
+  # docker storage.  This allocates a cinder volume and attaches it
+  # to the node.
+  #
+
+  docker_volume:
+    type: OS::Cinder::Volume
+    properties:
+      size: {get_param: docker_volume_size}
+
+  docker_volume_attach:
+    type: OS::Cinder::VolumeAttachment
+    properties:
+      instance_uuid: {get_resource: swarm_master}
+      volume_id: {get_resource: docker_volume}
+      mountpoint: /dev/vdb
+
+outputs:
+
+  swarm_master_ip:
+    value: {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
+    description: >
+      This is the "private" addresses of all the Swarm master.
+
+  swarm_master_external_ip:
+    value: {get_attr: [swarm_master_floating, floating_ip_address]}
+    description: >
+      This is the "public" ip addresses of Swarm master.

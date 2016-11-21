@@ -1,0 +1,20 @@
+#cloud-config
+merge_how: dict(recurse_array)+list(append)
+write_files:
+  - path: /etc/systemd/system/docker.socket
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Docker Socket for the API
+      PartOf=docker.service
+      After=docker-storage-setup.service
+
+      [Socket]
+      ListenStream=/var/run/docker.sock
+      SocketMode=0660
+      SocketUser=root
+      SocketGroup=root
+
+      [Install]
+      WantedBy=sockets.target

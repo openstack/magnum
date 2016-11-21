@@ -1,0 +1,16 @@
+#cloud-config
+merge_how: dict(recurse_array)+list(append)
+write_files:
+  - path: /etc/systemd/system/$SERVICE-failure.service
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=$SERVICE Failure Notifier
+
+      [Service]
+      Type=simple
+      TimeoutStartSec=0
+      ExecStart=/usr/bin/curl -i -X POST -H 'Content-Type: application/json' -H 'X-Auth-Token: $WAIT_HANDLE_TOKEN' \
+        --data-binary "'"'{"Status": "FAILURE", "Reason": "$SERVICE service failed to start.", "Data": "OK", "UniqueId": "00000"}'"'" \
+        "$WAIT_HANDLE_ENDPOINT"
