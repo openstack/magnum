@@ -9,13 +9,10 @@ fi
 FLANNEL_ETCD="http://127.0.0.1:2379"
 FLANNEL_JSON=/etc/sysconfig/flannel-network.json
 FLANNELD_CONFIG=/etc/sysconfig/flanneld
-FLANNEL_NETWORK_CIDR="$FLANNEL_NETWORK_CIDR"
-FLANNEL_NETWORK_SUBNETLEN="$FLANNEL_NETWORK_SUBNETLEN"
-FLANNEL_USE_VXLAN="$FLANNEL_USE_VXLAN"
 
 sed -i '
-  /^FLANNEL_ETCD=/ s/=.*/="http:\/\/127.0.0.1:2379"/
-  /^#FLANNEL_OPTIONS=/ s//FLANNEL_OPTIONS="-iface eth0 --ip-masq"/
+    /^FLANNEL_ETCD=/ s/=.*/="http:\/\/127.0.0.1:2379"/
+    /^#FLANNEL_OPTIONS=/ s//FLANNEL_OPTIONS="-iface eth0 --ip-masq"/
 ' /etc/sysconfig/flanneld
 
 cat >> /etc/sysconfig/flanneld <<EOF
@@ -27,35 +24,22 @@ EOF
 
 . /etc/sysconfig/flanneld
 
-if [ "$FLANNEL_USE_VXLAN" == "true" ]; then
-    use_vxlan=1
-fi
-
 # Generate a flannel configuration that we will
 # store into etcd using curl.
 cat > $FLANNEL_JSON <<EOF
 {
   "Network": "$FLANNEL_NETWORK_CIDR",
-  "Subnetlen": $FLANNEL_NETWORK_SUBNETLEN
-EOF
-
-if [ "$use_vxlan" = 1 ]; then
-cat >> $FLANNEL_JSON <<EOF
-  ,
+  "Subnetlen": $FLANNEL_NETWORK_SUBNETLEN,
   "Backend": {
-    "Type": "vxlan"
+    "Type": "$FLANNEL_BACKEND"
   }
-EOF
-fi
-
-cat >> $FLANNEL_JSON <<EOF
 }
 EOF
 
 # wait for etcd to become active (we will need it to push the flanneld config)
 while ! curl -sf -o /dev/null $FLANNEL_ETCD/v2/keys/; do
-  echo "waiting for etcd"
-  sleep 1
+    echo "waiting for etcd"
+    sleep 1
 done
 
 # put the flannel config in etcd

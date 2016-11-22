@@ -7,8 +7,8 @@ if [ "$NETWORK_DRIVER" != "flannel" ]; then
 fi
 
 sed -i '
-  /^FLANNEL_ETCD_ENDPOINTS=/ s|=.*|="http://'"$ETCD_SERVER_IP"':2379"|
-  /^#FLANNEL_OPTIONS=/ s//FLANNEL_OPTIONS="-iface eth0 --ip-masq"/
+    /^FLANNEL_ETCD_ENDPOINTS=/ s|=.*|="http://'"$ETCD_SERVER_IP"':2379"|
+    /^#FLANNEL_OPTIONS=/ s//FLANNEL_OPTIONS="-iface eth0 --ip-masq"/
 ' /etc/sysconfig/flanneld
 
 cat >> /etc/sysconfig/flanneld <<EOF

@@ -73,6 +73,10 @@ parameters:
       service.
     default: 6443
 
+  kube_version:
+    type: string
+    description: version of kubernetes used for kubernetes cluster
+
   cluster_uuid:
     type: string
     description: identifier for the cluster this template is generating
@@ -156,6 +160,10 @@ parameters:
     description: >
       tenant name
 
+  kube_master_id:
+    type: string
+    description: ID of for kubernetes master.
+
 resources:
 
   master_wait_handle:
@@ -198,6 +206,7 @@ resources:
             "$TENANT_NAME": {get_param: tenant_name}
             "$CLUSTER_SUBNET": {get_param: fixed_subnet}
             "$TLS_DISABLED": {get_param: tls_disabled}
+            "$KUBE_VERSION": {get_param: kube_version}
             "$CLUSTER_UUID": {get_param: cluster_uuid}
             "$MAGNUM_URL": {get_param: magnum_url}
             "$HTTP_PROXY": {get_param: http_proxy}
@@ -266,7 +275,7 @@ resources:
   kube_master:
     type: OS::Nova::Server
     properties:
-      name: kube_master
+      name: {get_param: kube_master_id}
       image: {get_param: server_image}
       flavor: {get_param: master_flavor}
       key_name: {get_param: ssh_key_name}

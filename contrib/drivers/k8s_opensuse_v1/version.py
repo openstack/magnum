@@ -14,4 +14,4 @@
 
 version = '1.0.0'
 driver = 'k8s_opensuse_v1'
-container_version = '1.12.1'
+container_version = '1.12.3'

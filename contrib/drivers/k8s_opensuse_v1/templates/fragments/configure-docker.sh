@@ -7,6 +7,7 @@ systemctl stop docker
 ip link del docker0
 
 if [ "$NETWORK_DRIVER" == "flannel" ]; then
+
     FLANNEL_ENV=/run/flannel/subnet.env
 
     attempts=60
@@ -19,13 +20,20 @@ if [ "$NETWORK_DRIVER" == "flannel" ]; then
     source $FLANNEL_ENV
 
     if ! [ "\$FLANNEL_SUBNET" ] && [ "\$FLANNEL_MTU" ] ; then
-      echo "ERROR: missing required environment variables." >&2
-      exit 1
+        echo "ERROR: missing required environment variables." >&2
+        exit 1
+    fi
+
+    if `grep -q DOCKER_NETWORK_OPTIONS /etc/sysconfig/docker`; then
+        sed -i '
+            /^DOCKER_NETWORK_OPTIONS=/ s|=.*|="--bip='"$FLANNEL_SUBNET"' --mtu='"$FLANNEL_MTU"'"|
+        ' /etc/sysconfig/docker
+    else
+        echo "DOCKER_NETWORK_OPTIONS=\"--bip=$FLANNEL_SUBNET --mtu=$FLANNEL_MTU\"" >> /etc/sysconfig/docker
     fi
 
     sed -i '
-      /^DOCKER_OPTS=/ s/=.*/="--storage-driver=btrfs"/
-      /^DOCKER_NETWORK_OPTIONS=/ s|=.*|="--bip='"$FLANNEL_SUBNET"' --mtu='"$FLANNEL_MTU"'"|
+        /^DOCKER_OPTS=/ s/=.*/="--storage-driver=btrfs"/
     ' /etc/sysconfig/docker
 fi
 
