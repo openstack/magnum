@@ -45,7 +45,7 @@ executed::
     export PATH="${PWD}/diskimage-builder/bin:$PATH"
 
     export ELEMENTS_PATH="${PWD}/diskimage-builder/elements"
-    export ELEMENTS_PATH="${ELEMENTS_PATH}:${PWD}/magnum/magnum/drivers/image/image"
+    export ELEMENTS_PATH="${ELEMENTS_PATH}:${PWD}/magnum/magnum/drivers/common/image"
 
     export DIB_RELEASE=24     # this can be switched to the desired version
     export DIB_IMAGE_SIZE=2.5 # we need to give a bit more space to loopback device
