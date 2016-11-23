@@ -227,6 +227,14 @@ resources:
       router_id: {get_resource: extrouter}
       subnet: {get_resource: fixed_subnet}
 
+  api_lb:
+    type: ../../common/templates/lb.yaml
+    properties:
+      fixed_subnet: {get_resource: fixed_subnet}
+      external_network: {get_param: external_network}
+      protocol: HTTP
+      port: 8080
+
   ######################################################################
   #
   # security groups.  we need to permit network traffic of various
@@ -344,55 +352,17 @@ resources:
 
   ######################################################################
   #
-  # load balancers.
-  #
-  api_loadbalancer:
-    type: Magnum::Optional::Neutron::LBaaS::LoadBalancer
-    properties:
-      vip_subnet: {get_resource: fixed_subnet}
-
-  api_listener:
-    type: Magnum::Optional::Neutron::LBaaS::Listener
-    properties:
-      loadbalancer: {get_resource: api_loadbalancer}
-      protocol: HTTP
-      protocol_port: 8080
-
-  api_pool:
-    type: Magnum::Optional::Neutron::LBaaS::Pool
-    properties:
-      lb_algorithm: ROUND_ROBIN
-      listener: {get_resource: api_listener}
-      protocol: HTTP
-
-  api_monitor:
-    type: Magnum::Optional::Neutron::LBaaS::HealthMonitor
-    properties:
-      type: TCP
-      delay: 5
-      max_retries: 5
-      timeout: 5
-      pool: { get_resource: api_pool }
-
-  api_pool_floating:
-    type: Magnum::Optional::Neutron::FloatingIP
-    depends_on:
-      - extrouter_inside
-    properties:
-      floating_network: {get_param: external_network}
-      port_id: {get_attr: [api_loadbalancer, vip_port_id]}
-
-  ######################################################################
-  #
   # resources that expose the IPs of either the mesos master or a given
   # LBaaS pool depending on whether LBaaS is enabled for the bay.
   #
 
-  api_address_switch:
+  api_address_lb_switch:
     type: Magnum::ApiGatewaySwitcher
     properties:
-      pool_public_ip: {get_attr: [api_pool_floating, floating_ip_address]}
+      pool_public_ip: {get_attr: [api_lb, floating_address]}
+      pool_private_ip: {get_attr: [api_lb, address]}
       master_public_ip: {get_attr: [mesos_masters, resource.0.mesos_master_external_ip]}
+      master_private_ip: {get_attr: [mesos_masters, resource.0.mesos_master_ip]}
 
   ######################################################################
   #
@@ -416,7 +386,7 @@ resources:
           fixed_network: {get_resource: fixed_network}
           fixed_subnet: {get_resource: fixed_subnet}
           secgroup_mesos_id: {get_resource: secgroup_master}
-          api_pool_id: {get_resource: api_pool}
+          api_pool_id: {get_attr: [api_lb, pool_id]}
 
   ######################################################################
   #
@@ -463,7 +433,7 @@ resources:
 outputs:
 
   api_address:
-    value: {get_attr: [api_address_switch, public_ip]}
+    value: {get_attr: [api_address_lb_switch, public_ip]}
     description: >
       This is the API endpoint of the Mesos master. Use this to access
       the Mesos API from outside the cluster.
