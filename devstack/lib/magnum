@@ -108,16 +108,13 @@ function create_magnum_accounts {
 
     create_service_user "magnum" "admin"
 
-    if [[ "$KEYSTONE_CATALOG_BACKEND" = 'sql' ]]; then
-
-        local magnum_service=$(get_or_create_service "magnum" \
-            "container-infra" "Container Infrastructure Management Service")
-        get_or_create_endpoint $magnum_service \
-            "$REGION_NAME" \
-            "$MAGNUM_SERVICE_PROTOCOL://$MAGNUM_SERVICE_HOST:$MAGNUM_SERVICE_PORT/v1" \
-            "$MAGNUM_SERVICE_PROTOCOL://$MAGNUM_SERVICE_HOST:$MAGNUM_SERVICE_PORT/v1" \
-            "$MAGNUM_SERVICE_PROTOCOL://$MAGNUM_SERVICE_HOST:$MAGNUM_SERVICE_PORT/v1"
-    fi
+    local magnum_service=$(get_or_create_service "magnum" \
+        "container-infra" "Container Infrastructure Management Service")
+    get_or_create_endpoint $magnum_service \
+        "$REGION_NAME" \
+        "$MAGNUM_SERVICE_PROTOCOL://$MAGNUM_SERVICE_HOST:$MAGNUM_SERVICE_PORT/v1" \
+        "$MAGNUM_SERVICE_PROTOCOL://$MAGNUM_SERVICE_HOST:$MAGNUM_SERVICE_PORT/v1" \
+        "$MAGNUM_SERVICE_PROTOCOL://$MAGNUM_SERVICE_HOST:$MAGNUM_SERVICE_PORT/v1"
 
 }
 
