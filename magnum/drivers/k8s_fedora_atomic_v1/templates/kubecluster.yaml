@@ -16,6 +16,16 @@ parameters:
     description: uuid/name of a network to use for floating ip addresses
     default: public
 
+  fixed_network:
+    type: string
+    description: uuid/name of an existing network to use to provision machines
+    default: ""
+
+  fixed_subnet:
+    type: string
+    description: uuid/name of an existing subnet to use to provision machines
+    default: ""
+
   server_image:
     type: string
     description: glance image used to boot the server
@@ -276,10 +286,12 @@ resources:
   network:
     type: ../../common/templates/network.yaml
     properties:
-      fixed_network_cidr: {get_param: fixed_network_cidr}
+      existing_network: {get_param: fixed_network}
+      existing_subnet: {get_param: fixed_subnet}
+      private_network_cidr: {get_param: fixed_network_cidr}
       dns_nameserver: {get_param: dns_nameserver}
       external_network: {get_param: external_network}
-      fixed_network_name: private
+      private_network_name: private
 
   api_lb:
     type: ../../common/templates/lb.yaml

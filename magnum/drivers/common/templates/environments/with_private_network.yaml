@@ -1,0 +1,8 @@
+resource_registry:
+  "Magnum::NetworkSwitcher": ../fragments/network_switcher_private.yaml
+
+  # Cluster template
+  "Magnum::Optional::Neutron::Subnet": "OS::Neutron::Subnet"
+  "Magnum::Optional::Neutron::Net": "OS::Neutron::Net"
+  "Magnum::Optional::Neutron::Router": "OS::Neutron::Router"
+  "Magnum::Optional::Neutron::RouterInterface": "OS::Neutron::RouterInterface"

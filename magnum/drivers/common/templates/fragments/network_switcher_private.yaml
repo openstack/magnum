@@ -1,0 +1,27 @@
+heat_template_version: 2014-10-16
+
+parameters:
+
+  private_network:
+    type: string
+    default: ""
+
+  existing_network:
+    type: string
+    default: ""
+
+  private_subnet:
+    type: string
+    default: ""
+
+  existing_subnet:
+    type: string
+    default: ""
+
+outputs:
+
+  network:
+    value: {get_param: private_network}
+
+  subnet:
+    value: {get_param: private_subnet}

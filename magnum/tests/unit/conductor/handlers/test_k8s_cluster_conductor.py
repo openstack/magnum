@@ -34,6 +34,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'keypair_id': 'keypair_id',
             'dns_nameserver': 'dns_nameserver',
             'external_network_id': 'external_network_id',
+            'fixed_network': 'fixed_network',
+            'fixed_subnet': 'fixed_subnet',
             'network_driver': 'network_driver',
             'volume_driver': 'volume_driver',
             'docker_volume_size': 20,
@@ -153,6 +155,8 @@ class TestClusterConductorWithK8s(base.TestCase):
         expected = {
             'ssh_key_name': 'keypair_id',
             'external_network': 'external_network_id',
+            'fixed_network': 'fixed_network',
+            'fixed_subnet': 'fixed_subnet',
             'network_driver': 'network_driver',
             'volume_driver': 'volume_driver',
             'dns_nameserver': 'dns_nameserver',
@@ -191,9 +195,11 @@ class TestClusterConductorWithK8s(base.TestCase):
 
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/with_volume.yaml',
+            ['../../common/templates/environments/no_private_network.yaml',
+             '../../common/templates/environments/with_volume.yaml',
              '../../common/templates/environments/no_master_lb.yaml',
-             '../../common/templates/environments/disable_floating_ip.yaml'],
+             '../../common/templates/environments/disable_floating_ip.yaml',
+             ],
             env_files)
 
     @patch('requests.get')
@@ -234,6 +240,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'docker_storage_driver': 'devicemapper',
             'docker_volume_size': 20,
             'external_network': 'external_network_id',
+            'fixed_network': 'fixed_network',
+            'fixed_subnet': 'fixed_subnet',
             'flannel_backend': 'vxlan',
             'flannel_network_cidr': '10.101.0.0/16',
             'flannel_network_subnetlen': '26',
@@ -267,9 +275,11 @@ class TestClusterConductorWithK8s(base.TestCase):
 
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/with_volume.yaml',
+            ['../../common/templates/environments/no_private_network.yaml',
+             '../../common/templates/environments/with_volume.yaml',
              '../../common/templates/environments/no_master_lb.yaml',
-             '../../common/templates/environments/disable_floating_ip.yaml'],
+             '../../common/templates/environments/disable_floating_ip.yaml',
+             ],
             env_files)
 
     @patch('requests.get')
@@ -285,7 +295,7 @@ class TestClusterConductorWithK8s(base.TestCase):
                         'docker_volume_size', 'fixed_network', 'http_proxy',
                         'https_proxy', 'no_proxy', 'network_driver',
                         'master_flavor_id', 'docker_storage_driver',
-                        'volume_driver']
+                        'volume_driver', 'fixed_subnet']
         for key in not_required:
             self.cluster_template_dict[key] = None
         self.cluster_dict['discovery_url'] = 'https://discovery.etcd.io/test'
@@ -334,9 +344,11 @@ class TestClusterConductorWithK8s(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/no_volume.yaml',
+            ['../../common/templates/environments/with_private_network.yaml',
+             '../../common/templates/environments/no_volume.yaml',
              '../../common/templates/environments/no_master_lb.yaml',
-             '../../common/templates/environments/disable_floating_ip.yaml'],
+             '../../common/templates/environments/disable_floating_ip.yaml',
+             ],
             env_files)
 
     @patch('requests.get')
@@ -368,6 +380,8 @@ class TestClusterConductorWithK8s(base.TestCase):
         expected = {
             'ssh_key_name': 'keypair_id',
             'external_network': 'external_network_id',
+            'fixed_network': 'fixed_network',
+            'fixed_subnet': 'fixed_subnet',
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'minion_flavor': 'flavor_id',
@@ -398,7 +412,8 @@ class TestClusterConductorWithK8s(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/no_master_lb.yaml',
+            ['../../common/templates/environments/no_private_network.yaml',
+             '../../common/templates/environments/no_master_lb.yaml',
              '../../common/templates/environments/disable_floating_ip.yaml'],
             env_files)
 
@@ -429,6 +444,8 @@ class TestClusterConductorWithK8s(base.TestCase):
         expected = {
             'ssh_key_name': 'keypair_id',
             'external_network': 'external_network_id',
+            'fixed_network': 'fixed_network',
+            'fixed_subnet': 'fixed_subnet',
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'minion_flavor': 'flavor_id',
@@ -459,7 +476,8 @@ class TestClusterConductorWithK8s(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/no_master_lb.yaml',
+            ['../../common/templates/environments/no_private_network.yaml',
+             '../../common/templates/environments/no_master_lb.yaml',
              '../../common/templates/environments/disable_floating_ip.yaml'],
             env_files)
 
@@ -614,6 +632,8 @@ class TestClusterConductorWithK8s(base.TestCase):
         expected = {
             'ssh_key_name': 'keypair_id',
             'external_network': 'external_network_id',
+            'fixed_network': 'fixed_network',
+            'fixed_subnet': 'fixed_subnet',
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'master_flavor': 'master_flavor_id',
@@ -649,9 +669,11 @@ class TestClusterConductorWithK8s(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/with_volume.yaml',
+            ['../../common/templates/environments/no_private_network.yaml',
+             '../../common/templates/environments/with_volume.yaml',
              '../../common/templates/environments/no_master_lb.yaml',
-             '../../common/templates/environments/disable_floating_ip.yaml'],
+             '../../common/templates/environments/disable_floating_ip.yaml',
+             ],
             env_files)
         reqget.assert_called_once_with('http://etcd/test?size=1')
 

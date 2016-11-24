@@ -1,0 +1,8 @@
+resource_registry:
+  "Magnum::NetworkSwitcher": ../fragments/network_switcher_existing.yaml
+
+  # Cluster template
+  "Magnum::Optional::Neutron::Subnet": "OS::Heat::None"
+  "Magnum::Optional::Neutron::Net": "OS::Heat::None"
+  "Magnum::Optional::Neutron::Router": "OS::Heat::None"
+  "Magnum::Optional::Neutron::RouterInterface": "OS::Heat::None"
