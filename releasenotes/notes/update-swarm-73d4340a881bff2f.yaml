@@ -1,0 +1,5 @@
+---
+features:
+  - Update Swarm default version to 1.2.5.
+    It should be the last version since Docker people
+    are now working on the new Swarm mode integrated in Docker.

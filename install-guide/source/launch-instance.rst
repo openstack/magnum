@@ -170,7 +170,7 @@ and one node. Then, using docker's native API you will create a container.
       | updated_at          | 2016-09-14T13:38:08+00:00                                  |
       | discovery_url       | https://discovery.etcd.io/a5ece414689287eca62e35555512bfd5 |
       | api_address         | tcp://172.24.4.10:2376                                     |
-      | coe_version         | 1.0.0                                                      |
+      | coe_version         | 1.2.5                                                      |
       | master_addresses    | ['172.24.4.10']                                            |
       | create_timeout      | 60                                                         |
       | node_addresses      | ['172.24.4.8']                                             |

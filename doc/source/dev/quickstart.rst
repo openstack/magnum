@@ -558,7 +558,7 @@ Now that we have a swarm cluster we can start interacting with it::
     | updated_at         | 2015-04-20T19:06:08+00:00                                  |
     | create_timeout     | 60                                                         |
     | api_address        | https://172.24.4.4:6443                                    |
-    | coe_version        | 1.0.0                                                      |
+    | coe_version        | 1.2.5                                                      |
     | cluster_template_id| e73298e7-e621-4d42-b35b-7a1952b97158                       |
     | master_addresses   | ['172.24.4.6']                                             |
     | node_count         | 2                                                          |

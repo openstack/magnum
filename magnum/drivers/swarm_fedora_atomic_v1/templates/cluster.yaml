@@ -145,7 +145,7 @@ parameters:
   swarm_version:
     type: string
     description: version of swarm used for swarm cluster
-    default: 1.0.0
+    default: 1.2.5
 
   swarm_strategy:
     type: string
