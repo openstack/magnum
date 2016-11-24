@@ -304,7 +304,7 @@ resources:
   # sorts.
   #
 
-  secgroup_base:
+  secgroup_kube_master:
     type: OS::Neutron::SecurityGroup
     properties:
       rules:
@@ -312,11 +312,6 @@ resources:
         - protocol: tcp
           port_range_min: 22
           port_range_max: 22
-
-  secgroup_kube_master:
-    type: OS::Neutron::SecurityGroup
-    properties:
-      rules:
         - protocol: tcp
           port_range_min: 7080
           port_range_max: 7080
@@ -486,7 +481,6 @@ resources:
           tenant_name: {get_param: tenant_name}
           kubernetes_port: {get_param: kubernetes_port}
           tls_disabled: {get_param: tls_disabled}
-          secgroup_base_id: {get_resource: secgroup_base}
           secgroup_kube_master_id: {get_resource: secgroup_kube_master}
           http_proxy: {get_param: http_proxy}
           https_proxy: {get_param: https_proxy}
