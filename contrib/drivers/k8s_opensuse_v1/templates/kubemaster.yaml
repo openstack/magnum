@@ -49,6 +49,16 @@ parameters:
     description: size of subnet assigned to each master
     default: 24
 
+  flannel_network_subnet_min:
+    type: string
+    description: minimum subnet
+    default: 10.100.50.0
+
+  flannel_network_subnet_max:
+    type: string
+    description: maximum subnet
+    default: 10.100.199.0
+
   flannel_backend:
     type: string
     description: >
@@ -197,6 +207,8 @@ resources:
             "$NETWORK_DRIVER": {get_param: network_driver}
             "$FLANNEL_NETWORK_CIDR": {get_param: flannel_network_cidr}
             "$FLANNEL_NETWORK_SUBNETLEN": {get_param: flannel_network_subnetlen}
+            "$FLANNEL_NETWORK_SUBNET_MIN": {get_param: flannel_network_subnet_min}
+            "$FLANNEL_NETWORK_SUBNET_MAX": {get_param: flannel_network_subnet_max}
             "$FLANNEL_BACKEND": {get_param: flannel_backend}
             "$PORTAL_NETWORK_CIDR": {get_param: portal_network_cidr}
             "$ETCD_DISCOVERY_URL": {get_param: discovery_url}

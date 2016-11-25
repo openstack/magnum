@@ -71,6 +71,16 @@ parameters:
     description: size of subnet assigned to each minion
     default: 24
 
+  flannel_network_subnet_min:
+    type: string
+    description: minimum subnet
+    default: 10.100.50.0
+
+  flannel_network_subnet_max:
+    type: string
+    description: maximum subnet
+    default: 10.100.199.0
+
   flannel_backend:
     type: string
     description: >
@@ -487,6 +497,8 @@ resources:
           flannel_backend: {get_param: flannel_backend}
           flannel_network_cidr: {get_param: flannel_network_cidr}
           flannel_network_subnetlen: {get_param: flannel_network_subnetlen}
+          flannel_network_subnet_min: {get_param: flannel_network_subnet_min}
+          flannel_network_subnet_max: {get_param: flannel_network_subnet_max}
           portal_network_cidr: {get_param: portal_network_cidr}
           discovery_url: {get_param: discovery_url}
           cluster_uuid: {get_param: cluster_uuid}
