@@ -190,7 +190,7 @@ resources:
 
   master_wait_condition:
     type: OS::Heat::WaitCondition
-    depends_on: kube_master
+    depends_on: kube-master
     properties:
       handle: {get_resource: master_wait_handle}
       timeout: {get_param: wait_condition_timeout}
@@ -389,7 +389,10 @@ resources:
   # a single kubernetes master.
   #
 
-  kube_master:
+  # do NOT use "_" (underscore) in the Nova server name
+  # it creates a mismatch between the generated Nova name and its hostname
+  # which can lead to weird problems
+  kube-master:
     type: OS::Nova::Server
     properties:
       image: {get_param: server_image}
@@ -406,13 +409,13 @@ resources:
       floating_network:
         get_param: external_network
       port_id:
-        get_attr: [kube_master, addresses, {get_param: fixed_network}, 0, port]
+        get_attr: [kube-master, addresses, {get_param: fixed_network}, 0, port]
 
   api_pool_member:
     type: Magnum::Optional::Neutron::LBaaS::PoolMember
     properties:
       pool: {get_param: api_pool_id}
-      address: {get_attr: [kube_master, networks, private, 0]}
+      address: {get_attr: [kube-master, networks, private, 0]}
       subnet: { get_param: fixed_subnet }
       protocol_port: {get_param: kubernetes_port}
 
@@ -420,14 +423,14 @@ resources:
     type: Magnum::Optional::Neutron::LBaaS::PoolMember
     properties:
       pool: {get_param: etcd_pool_id}
-      address: {get_attr: [kube_master, networks, private, 0]}
+      address: {get_attr: [kube-master, networks, private, 0]}
       subnet: { get_param: fixed_subnet }
       protocol_port: 2379
 
 outputs:
 
   kube_master_ip:
-    value: {get_attr: [kube_master, networks, private, 0]}
+    value: {get_attr: [kube-master, networks, private, 0]}
     description: >
       This is the "private" IP address of the Kubernetes master node.
 

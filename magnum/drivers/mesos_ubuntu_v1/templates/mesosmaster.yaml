@@ -50,7 +50,10 @@ resources:
   # Mesos master server.
   #
 
-  mesos_master:
+  # do NOT use "_" (underscore) in the Nova server name
+  # it creates a mismatch between the generated Nova name and its hostname
+  # which can lead to weird problems
+  mesos-master:
     type: OS::Nova::Server
     properties:
       image: {get_param: server_image}
@@ -96,6 +99,6 @@ outputs:
     description: >
       This is the "public" address of the Mesos master node.
   mesos_server_id:
-    value: {get_resource: mesos_master}
+    value: {get_resource: mesos-master}
     description: >
       This is the logical id of the Mesos master node.
