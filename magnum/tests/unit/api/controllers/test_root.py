@@ -40,7 +40,7 @@ class TestRootController(api_base.FunctionalTest):
                                [{u'href': u'http://localhost/v1/',
                                  u'rel': u'self'}],
                            u'status': u'CURRENT',
-                           u'max_version': u'1.4',
+                           u'max_version': u'1.5',
                            u'min_version': u'1.1'}]}
 
         self.v1_expected = {

@@ -1,0 +1,5 @@
+---
+features:
+  - Add microversion 1.5 to support rotation of a cluster's CA
+    certificate.  This gives admins a way to restrict/deny access to
+    an existing cluster once a user has been granted access.

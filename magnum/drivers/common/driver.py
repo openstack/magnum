@@ -184,3 +184,7 @@ class Driver(object):
         """return the scale manager for this driver."""
 
         return None
+
+    def rotate_ca_certificate(self, context, cluster):
+        raise exception.NotSupported(
+            "'rotate_ca_certificate' is not supported by this driver.")

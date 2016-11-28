@@ -57,3 +57,12 @@ user documentation.
   - http://XXX/v1/stats or
   - http://XXX/v1/stats?project_id=<project-id> or
   - http://XXX/v1/stats?project_id=<project-id>&type=<stats-type>
+
+
+1.5
+---
+
+  Support for cluster CA certificate rotation
+
+  This gives admins a way to revoke access to an existing cluster once
+  a user has been granted access.

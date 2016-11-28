@@ -20,6 +20,9 @@ from magnum.tests.unit.api import utils as api_utils
 from magnum.tests.unit.objects import utils as obj_utils
 
 
+HEADERS = {'OpenStack-API-Version': 'container-infra latest'}
+
+
 class TestCertObject(base.TestCase):
 
     @mock.patch('magnum.api.utils.get_resource')
@@ -36,10 +39,10 @@ class TestCertObject(base.TestCase):
         self.assertEqual(cert_dict['pem'], cert.pem)
 
 
-class TestGetCertificate(api_base.FunctionalTest):
+class TestGetCaCertificate(api_base.FunctionalTest):
 
     def setUp(self):
-        super(TestGetCertificate, self).setUp()
+        super(TestGetCaCertificate, self).setUp()
         self.cluster = obj_utils.create_test_cluster(self.context)
 
         conductor_api_patcher = mock.patch('magnum.conductor.api.API')
@@ -54,7 +57,8 @@ class TestGetCertificate(api_base.FunctionalTest):
         mock_cert.as_dict.return_value = fake_cert
         self.conductor_api.get_ca_certificate.return_value = mock_cert
 
-        response = self.get_json('/certificates/%s' % self.cluster.uuid)
+        response = self.get_json('/certificates/%s' % self.cluster.uuid,
+                                 headers=HEADERS)
 
         self.assertEqual(self.cluster.uuid, response['cluster_uuid'])
         # check that bay is still valid as well
@@ -68,7 +72,8 @@ class TestGetCertificate(api_base.FunctionalTest):
         mock_cert.as_dict.return_value = fake_cert
         self.conductor_api.get_ca_certificate.return_value = mock_cert
 
-        response = self.get_json('/certificates/%s' % self.cluster.name)
+        response = self.get_json('/certificates/%s' % self.cluster.name,
+                                 headers=HEADERS)
 
         self.assertEqual(self.cluster.uuid, response['cluster_uuid'])
         # check that bay is still valid as well
@@ -78,7 +83,7 @@ class TestGetCertificate(api_base.FunctionalTest):
 
     def test_get_one_by_name_not_found(self):
         response = self.get_json('/certificates/not_found',
-                                 expect_errors=True)
+                                 expect_errors=True, headers=HEADERS)
 
         self.assertEqual(404, response.status_int)
         self.assertEqual('application/json', response.content_type)
@@ -91,7 +96,7 @@ class TestGetCertificate(api_base.FunctionalTest):
                                       uuid=uuidutils.generate_uuid())
 
         response = self.get_json('/certificates/test_cluster',
-                                 expect_errors=True)
+                                 expect_errors=True, headers=HEADERS)
 
         self.assertEqual(409, response.status_int)
         self.assertEqual('application/json', response.content_type)
@@ -103,7 +108,8 @@ class TestGetCertificate(api_base.FunctionalTest):
         mock_cert.as_dict.return_value = fake_cert
         self.conductor_api.get_ca_certificate.return_value = mock_cert
 
-        response = self.get_json('/certificates/%s' % self.cluster.uuid)
+        response = self.get_json('/certificates/%s' % self.cluster.uuid,
+                                 headers=HEADERS)
 
         self.assertIn('links', response.keys())
         self.assertEqual(2, len(response['links']))
@@ -136,7 +142,7 @@ class TestPost(api_base.FunctionalTest):
         new_cert = api_utils.cert_post_data(cluster_uuid=self.cluster.uuid)
         del new_cert['pem']
 
-        response = self.post_json('/certificates', new_cert)
+        response = self.post_json('/certificates', new_cert, headers=HEADERS)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
         self.assertEqual(new_cert['cluster_uuid'],
@@ -152,7 +158,7 @@ class TestPost(api_base.FunctionalTest):
         new_cert['bay_uuid'] = new_cert['cluster_uuid']
         del new_cert['cluster_uuid']
 
-        response = self.post_json('/certificates', new_cert)
+        response = self.post_json('/certificates', new_cert, headers=HEADERS)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
         self.assertEqual(self.cluster.uuid, response.json['cluster_uuid'])
@@ -164,7 +170,7 @@ class TestPost(api_base.FunctionalTest):
         new_cert = api_utils.cert_post_data(cluster_uuid=self.cluster.name)
         del new_cert['pem']
 
-        response = self.post_json('/certificates', new_cert)
+        response = self.post_json('/certificates', new_cert, headers=HEADERS)
 
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
@@ -176,11 +182,63 @@ class TestPost(api_base.FunctionalTest):
         del new_cert['pem']
 
         response = self.post_json('/certificates', new_cert,
-                                  expect_errors=True)
+                                  expect_errors=True, headers=HEADERS)
 
         self.assertEqual(400, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['errors'])
+
+
+class TestRotateCaCertificate(api_base.FunctionalTest):
+
+    def setUp(self):
+        super(TestRotateCaCertificate, self).setUp()
+        self.cluster = obj_utils.create_test_cluster(self.context)
+
+        conductor_api_patcher = mock.patch('magnum.conductor.api.API')
+        self.conductor_api_class = conductor_api_patcher.start()
+        self.conductor_api = mock.MagicMock()
+        self.conductor_api_class.return_value = self.conductor_api
+        self.addCleanup(conductor_api_patcher.stop)
+
+    def test_rotate_ca_cert(self):
+        fake_cert = api_utils.cert_post_data()
+        mock_cert = mock.MagicMock()
+        mock_cert.as_dict.return_value = fake_cert
+        self.conductor_api.rotate_ca_certificate.return_value = mock_cert
+
+        response = self.patch_json('/certificates/%s' % self.cluster.uuid,
+                                   params={}, headers=HEADERS)
+
+        self.assertEqual(202, response.status_code)
+
+
+class TestRotateCaCertificateNonTls(api_base.FunctionalTest):
+
+    def setUp(self):
+        super(TestRotateCaCertificateNonTls, self).setUp()
+        self.cluster_template = obj_utils.create_test_cluster_template(
+            self.context, tls_disabled=True)
+        self.cluster = obj_utils.create_test_cluster(self.context)
+
+        conductor_api_patcher = mock.patch('magnum.conductor.api.API')
+        self.conductor_api_class = conductor_api_patcher.start()
+        self.conductor_api = mock.MagicMock()
+        self.conductor_api_class.return_value = self.conductor_api
+        self.addCleanup(conductor_api_patcher.stop)
+
+    def test_rotate_ca_cert_non_tls(self):
+        fake_cert = api_utils.cert_post_data()
+        mock_cert = mock.MagicMock()
+        mock_cert.as_dict.return_value = fake_cert
+        self.conductor_api.rotate_ca_certificate.return_value = mock_cert
+
+        response = self.patch_json('/certificates/%s' % self.cluster.uuid,
+                                   params={}, headers=HEADERS,
+                                   expect_errors=True)
+        self.assertEqual(400, response.status_code)
+        self.assertIn("Rotating the CA certificate on a non-TLS cluster",
+                      response.json['errors'][0]['detail'])
 
 
 class TestCertPolicyEnforcement(api_base.FunctionalTest):
@@ -199,11 +257,18 @@ class TestCertPolicyEnforcement(api_base.FunctionalTest):
         self._common_policy_check(
             "certificate:get", self.get_json,
             '/certificates/%s' % cluster.uuid,
-            expect_errors=True)
+            expect_errors=True, headers=HEADERS)
 
     def test_policy_disallow_create(self):
         cluster = obj_utils.create_test_cluster(self.context)
         cert = api_utils.cert_post_data(cluster_uuid=cluster.uuid)
         self._common_policy_check(
             "certificate:create", self.post_json, '/certificates', cert,
-            expect_errors=True)
+            expect_errors=True, headers=HEADERS)
+
+    def test_policy_disallow_rotate(self):
+        cluster = obj_utils.create_test_cluster(self.context)
+        self._common_policy_check(
+            "certificate:rotate_ca", self.patch_json,
+            '/certificates/%s' % cluster.uuid, params={}, expect_errors=True,
+            headers=HEADERS)

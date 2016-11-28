@@ -166,3 +166,15 @@ class CertificateController(base.Controller):
         new_cert = pecan.request.rpcapi.sign_certificate(cluster,
                                                          cert_obj)
         return Certificate.convert_with_links(new_cert)
+
+    @base.Controller.api_version("1.5")
+    @expose.expose(None, types.uuid_or_name, status_code=202)
+    def patch(self, cluster_ident):
+        context = pecan.request.context
+        cluster = api_utils.get_resource('Cluster', cluster_ident)
+        policy.enforce(context, 'certificate:rotate_ca', cluster,
+                       action='certificate:rotate_ca')
+        if cluster.cluster_template.tls_disabled:
+            raise exception.NotSupported("Rotating the CA certificate on a "
+                                         "non-TLS cluster is not supported")
+        pecan.request.rpcapi.rotate_ca_certificate(cluster)

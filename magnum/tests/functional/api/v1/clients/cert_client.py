@@ -38,7 +38,7 @@ class CertClient(client.MagnumClient):
         :returns: response object and ClusterCollection object
         """
 
-        resp, body = self.get(self.cert_uri(cluster_id))
+        resp, body = self.get(self.cert_uri(cluster_id), **kwargs)
         return self.deserialize(resp, body, cert_model.CertEntity)
 
     def post_cert(self, model, **kwargs):

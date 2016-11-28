@@ -37,10 +37,11 @@ REST_API_VERSION_HISTORY = """REST API Version History:
     * 1.2 - Async bay operations support
     * 1.3 - Add bay rollback support
     * 1.4 - Add stats API
+    * 1.5 - Add cluster CA certificate rotation support
 """
 
 BASE_VER = '1.1'
-CURRENT_MAX_VER = '1.4'
+CURRENT_MAX_VER = '1.5'
 
 
 class Version(object):

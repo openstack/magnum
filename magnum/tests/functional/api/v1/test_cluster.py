@@ -23,6 +23,11 @@ from magnum.tests.functional.common import config
 from magnum.tests.functional.common import datagen
 
 
+HEADERS = {'OpenStack-API-Version': 'container-infra latest',
+           'Accept': 'application/json',
+           'Content-Type': 'application/json'}
+
+
 class ClusterTest(base.BaseTempestTest):
 
     """Tests for cluster CRUD."""
@@ -118,7 +123,7 @@ class ClusterTest(base.BaseTempestTest):
         self.assertEqual(204, resp.status)
         self.cluster_client.wait_for_cluster_to_delete(cluster_id)
         self.assertRaises(exceptions.NotFound, self.cert_client.get_cert,
-                          cluster_id)
+                          cluster_id, headers=HEADERS)
         return resp, model
 
     def _get_cluster_by_id(self, cluster_id):
@@ -153,7 +158,7 @@ class ClusterTest(base.BaseTempestTest):
 
         # test ca show
         resp, cert_model = self.cert_client.get_cert(
-            cluster_model.uuid)
+            cluster_model.uuid, headers=HEADERS)
         self.LOG.debug("cert resp: %s" % resp)
         self.assertEqual(200, resp.status)
         self.assertEqual(cert_model.cluster_uuid, cluster_model.uuid)
@@ -179,7 +184,8 @@ Q0uA0aVog3f5iJxCa3Hp5gxbJQ6zV6kJ0TEsuaaOhEko9sdpCoPOnRBm2i/XRD2D
 
         cert_data_model = datagen.cert_data(cluster_model.uuid,
                                             csr_data=csr_sample)
-        resp, cert_model = self.cert_client.post_cert(cert_data_model)
+        resp, cert_model = self.cert_client.post_cert(cert_data_model,
+                                                      headers=HEADERS)
         self.LOG.debug("cert resp: %s" % resp)
         self.assertEqual(201, resp.status)
         self.assertEqual(cert_model.cluster_uuid, cluster_model.uuid)
@@ -193,7 +199,7 @@ Q0uA0aVog3f5iJxCa3Hp5gxbJQ6zV6kJ0TEsuaaOhEko9sdpCoPOnRBm2i/XRD2D
         self.assertRaises(
             exceptions.BadRequest,
             self.cert_client.post_cert,
-            cert_data_model)
+            cert_data_model, headers=HEADERS)
 
         # test cluster delete
         self._delete_cluster(cluster_model.uuid)

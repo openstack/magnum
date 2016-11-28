@@ -16,6 +16,7 @@
 from oslo_log import log as logging
 
 from magnum.conductor.handlers.common import cert_manager
+from magnum.drivers.common import driver
 from magnum import objects
 LOG = logging.getLogger(__name__)
 
@@ -45,3 +46,8 @@ class Handler(object):
         certificate = objects.Certificate.from_object_cluster(cluster)
         certificate.pem = ca_cert.get_certificate()
         return certificate
+
+    def rotate_ca_certificate(self, context, cluster):
+        cluster_driver = driver.Driver.get_driver_for_cluster(context,
+                                                              cluster)
+        cluster_driver.rotate_ca_certificate(context, cluster)
