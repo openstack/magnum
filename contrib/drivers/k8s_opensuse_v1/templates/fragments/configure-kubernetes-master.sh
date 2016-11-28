@@ -7,6 +7,9 @@ echo "configuring kubernetes (master)"
 KUBE_API_ARGS="--runtime_config=api/all=true"
 KUBE_API_ADDRESS="--insecure-bind-address=0.0.0.0 --insecure-port=$KUBE_API_PORT"
 
+# Setting correct permissions for Kubernetes files
+chown -R kube:kube /var/lib/kubernetes
+
 sed -i '
   /^KUBE_ALLOW_PRIV=/ s/=.*/="--allow_privileged='"$KUBE_ALLOW_PRIV"'"/
 ' /etc/kubernetes/config
