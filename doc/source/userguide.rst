@@ -141,8 +141,8 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
 
 --server-type \<server-type\>
   The servers in the cluster can be VM or baremetal.  This parameter selects
-  the type of server to create for the cluster.  The default is 'vm' and
-  currently this is the only supported server type.
+  the type of server to create for the cluster.  The default is 'vm'. Possible
+  values are 'vm', 'bm'.
 
 --network-driver \<network-driver\>
   The name of a network driver for providing the networks for the
