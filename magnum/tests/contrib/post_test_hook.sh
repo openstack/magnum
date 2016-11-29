@@ -162,14 +162,16 @@ echo "Running magnum functional test suite for $1"
 coe=$1
 special=$2
 
+if [[ "-ironic" != "$special" ]]; then
+    add_flavor
+fi
+
 if [[ "api" == "$coe" ]]; then
     # Import devstack functions 'iniset', 'iniget' and 'trueorfalse'
     source $BASE/new/devstack/functions
     echo "TEMPEST_SERVICES+=,magnum" >> $localrc_path
     pushd $BASE/new/tempest
     sudo chown -R jenkins:stack $BASE/new/tempest
-
-    add_flavor
 
     # Set demo credentials
     source $BASE/new/devstack/accrc/demo/demo
@@ -207,8 +209,6 @@ else
     unset OS_AUTH_TYPE
     popd
 
-    add_flavor
-
     create_test_data $coe $special
 
     target="${coe}${special}"
@@ -220,9 +220,12 @@ EXIT_CODE=$?
 echo_summary "Running keypair-delete"
 nova keypair-delete default
 
-# Delete the flavor used in the functional test.
-echo_summary "Running flavor-delete"
-nova flavor-delete m1.magnum
+if [[ "-ironic" != "$special" ]]; then
+    # Delete the flavor used in the functional test.
+    echo_summary "Running flavor-delete"
+    nova flavor-delete m1.magnum
+    nova flavor-delete s1.magnum
+fi
 
 # Save functional testing log
 sudo cp $MAGNUM_DIR/functional-tests.log /opt/stack/logs/
