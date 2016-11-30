@@ -246,13 +246,9 @@ resources:
             "$enable_kube_proxy": {get_attr: [enable_kube_proxy, config]}
             "$wc_notify": {get_attr: [wc_notify, config]}
 
-  # Important:  the name for the heat resource kube-minion below must
-  # not contain "_" (underscore) because it will be used in the
-  # hostname.  Because DNS domain name does not allow "_", the "_"
-  # will be converted to a "-" and this will make the hostname different
-  # from the Nova instance name.  This in turn will break the load
-  # balancer feature in Kubernetes.
-
+  # do NOT use "_" (underscore) in the Nova server name
+  # it creates a mismatch between the generated Nova name and its hostname
+  # which can lead to weird problems
   kube-minion:
     type: OS::Nova::Server
     properties:
