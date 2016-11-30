@@ -21,14 +21,14 @@ if ! [ -f "$FLANNEL_JSON" ]; then
   exit 1
 fi
 
-if ! [ "$FLANNEL_ETCD" ] && [ "$FLANNEL_ETCD_KEY" ]; then
+if [ -z "$FLANNEL_ETCD_ENDPOINTS" ] || [ -z "$FLANNEL_ETCD_PREFIX" ]; then
   echo "ERROR: missing required configuration" >&2
   exit 1
 fi
 
 echo "creating flanneld config in etcd"
-while ! curl -sf -L $FLANNEL_ETCD/v2/keys${FLANNEL_ETCD_KEY}/config \
-  -X PUT --data-urlencode value@${FLANNEL_JSON}; do
+while ! curl -sf -L $FLANNEL_ETCD_ENDPOINTS/v2/keys${FLANNEL_ETCD_PREFIX}/config \
+        -X PUT --data-urlencode value@${FLANNEL_JSON}; do
     echo "waiting for etcd"
     sleep 1
 done

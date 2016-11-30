@@ -1,5 +1,3 @@
-# Copyright 2016 - Rackspace Hosting
-#
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
 #    You may obtain a copy of the License at
@@ -13,5 +11,5 @@
 #    limitations under the License.
 
 version = '1.0.0'
-driver = 'k8s_fedora_atomic_v1'
+driver = 'k8s_fedora_ironic_v1'
 container_version = '1.12.6'
