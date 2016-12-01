@@ -108,7 +108,9 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
         label_list = ['flannel_network_cidr', 'flannel_backend',
                       'flannel_network_subnetlen',
                       'system_pods_initial_delay',
-                      'system_pods_timeout']
+                      'system_pods_timeout',
+                      'admission_control_list']
+
         for label in label_list:
             extra_params[label] = cluster_template.labels.get(label)
 

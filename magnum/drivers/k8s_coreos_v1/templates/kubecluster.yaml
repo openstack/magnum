@@ -104,6 +104,13 @@ parameters:
       (in seconds)
     default: 5
 
+  admission_control_list:
+    type: string
+    description: >
+      Not used by this driver
+    default: ""
+
+
   kube_allow_priv:
     type: string
     description: >
