@@ -235,7 +235,7 @@ resources:
             $REGISTRY_INSECURE: {get_param: registry_insecure}
             $REGISTRY_CHUNKSIZE: {get_param: registry_chunksize}
             $TLS_DISABLED: {get_param: tls_disabled}
-            $CLUSTER _UUID: {get_param: cluster_uuid}
+            $CLUSTER_UUID: {get_param: cluster_uuid}
             $MAGNUM_URL: {get_param: magnum_url}
             $USERNAME: {get_param: username}
             $PASSWORD: {get_param: password}
