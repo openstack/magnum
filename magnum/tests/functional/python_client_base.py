@@ -28,7 +28,7 @@ from six.moves import configparser
 from heatclient import client as heatclient
 from k8sclient.client import api_client
 from k8sclient.client.apis import apiv_api
-from keystoneclient.v2_0 import client as ksclient
+from keystoneclient.v3 import client as ksclient
 
 from magnum.common.utils import rmtree_without_raise
 import magnum.conf
@@ -53,8 +53,7 @@ class BaseMagnumClient(base.BaseMagnumTest):
         super(BaseMagnumClient, cls).setUpClass()
         user = cliutils.env('OS_USERNAME')
         passwd = cliutils.env('OS_PASSWORD')
-        tenant = cliutils.env('OS_TENANT_NAME')
-        tenant_id = cliutils.env('OS_TENANT_ID')
+        project_name = cliutils.env('OS_PROJECT_NAME')
         auth_url = cliutils.env('OS_AUTH_URL')
         insecure = cliutils.env('INSECURE')
         region_name = cliutils.env('OS_REGION_NAME')
@@ -66,6 +65,8 @@ class BaseMagnumClient(base.BaseMagnumTest):
         keypair_id = cliutils.env('KEYPAIR_ID')
         dns_nameserver = cliutils.env('DNS_NAMESERVER')
         copy_logs = cliutils.env('COPY_LOGS')
+        user_domain_id = cliutils.env('OS_USER_DOMAIN_ID')
+        project_domain_id = cliutils.env('OS_PROJECT_DOMAIN_ID')
 
         config = configparser.RawConfigParser()
         if config.read('functional_creds.conf'):
@@ -73,7 +74,7 @@ class BaseMagnumClient(base.BaseMagnumTest):
             # override
             user = user or config.get('admin', 'user')
             passwd = passwd or config.get('admin', 'pass')
-            tenant = tenant or config.get('admin', 'tenant')
+            project_name = project_name or config.get('admin', 'project_name')
             auth_url = auth_url or config.get('auth', 'auth_url')
             insecure = insecure or config.get('auth', 'insecure')
             magnum_url = magnum_url or config.get('auth', 'magnum_url')
@@ -85,6 +86,11 @@ class BaseMagnumClient(base.BaseMagnumTest):
             keypair_id = keypair_id or config.get('magnum', 'keypair_id')
             dns_nameserver = dns_nameserver or config.get(
                 'magnum', 'dns_nameserver')
+            user_domain_id = user_domain_id or config.get(
+                'admin', 'user_domain_id')
+            project_domain_id = project_domain_id or config.get(
+                'admin', 'project_domain_id')
+
             try:
                 copy_logs = copy_logs or config.get('magnum', 'copy_logs')
             except configparser.NoOptionError:
@@ -99,16 +105,19 @@ class BaseMagnumClient(base.BaseMagnumTest):
         cls.copy_logs = str(copy_logs).lower() == 'true'
         cls.cs = v1client.Client(username=user,
                                  api_key=passwd,
-                                 project_id=tenant_id,
-                                 project_name=tenant,
+                                 project_name=project_name,
                                  auth_url=auth_url,
                                  insecure=insecure,
+                                 user_domain_id=user_domain_id,
+                                 project_domain_id=project_domain_id,
                                  service_type='container-infra',
                                  region_name=region_name,
                                  magnum_url=magnum_url)
         cls.keystone = ksclient.Client(username=user,
                                        password=passwd,
-                                       tenant_name=tenant,
+                                       project_name=project_name,
+                                       project_domain_id=project_domain_id,
+                                       user_domain_id=user_domain_id,
                                        auth_url=auth_url,
                                        insecure=insecure)
         token = cls.keystone.auth_token

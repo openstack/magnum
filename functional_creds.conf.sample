@@ -1,16 +1,20 @@
 # Credentials for functional testing
 [auth]
-auth_url = http://127.0.0.1:5000/v2.0
+auth_url = http://127.0.0.1:5000/v3
 magnum_url = http://127.0.0.1:9511/v1
 username = demo
-tenant_name = demo
+project_name = demo
+project_domain_id = default
+user_domain_id = default
 password = password
-auth_version = v2
+auth_version = v3
 insecure=False
 [admin]
 user = admin
-tenant = admin
+project_name = admin
 pass = password
+project_domain_id = default
+user_domain_id = default
 [magnum]
 image_id = fedora-atomic-latest
 nic_id = public
