@@ -79,6 +79,12 @@ parameters:
     constraints:
       - allowed_values: ["udp", "vxlan", "host-gw"]
 
+  admission_control_list:
+    type: string
+    description: >
+      List of admission control plugins to activate
+    default: "NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota"
+
   kube_allow_priv:
     type: string
     description: >
@@ -474,6 +480,7 @@ resources:
           flannel_network_subnetlen: {get_param: flannel_network_subnetlen}
           flannel_backend: {get_param: flannel_backend}
           portal_network_cidr: {get_param: portal_network_cidr}
+          admission_control_list: {get_param: admission_control_list}
           discovery_url: {get_param: discovery_url}
           cluster_uuid: {get_param: cluster_uuid}
           magnum_url: {get_param: magnum_url}

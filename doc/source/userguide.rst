@@ -296,6 +296,8 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `mesos_slave_executor_env_variables`_ | (file name)        | ""            |
 +---------------------------------------+--------------------+---------------+
+| `admission_control_list`_             | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 
 
 =======
@@ -888,6 +890,17 @@ What runs on the servers
 Log into the servers
   You can log into the master servers using the login 'fedora' and the
   keypair specified in the ClusterTemplate.
+
+In addition to the common attributes in the ClusterTemplate, you can specify
+the following attributes that are specific to Kubernetes by using the
+labels attribute.
+
+_`admission_control_list`
+  This label corresponds to Kubernetes parameter for the API server '--admission-control'.
+  For more details, refer to the `Admission Controllers
+  <https://kubernetes.io/docs/admin/admission-controllers//>`_.
+  The default value corresponds to the one recommended in this doc
+  for our current Kubernetes version.
 
 External load balancer for services
 -----------------------------------

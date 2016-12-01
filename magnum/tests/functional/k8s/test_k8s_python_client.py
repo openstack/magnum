@@ -18,5 +18,8 @@ class TestKubernetesAPIs(base.BaseK8sTest):
         "tls_disabled": False,
         "network_driver": 'flannel',
         "volume_driver": 'cinder',
-        "fixed_network": '192.168.0.0/24'
+        "fixed_network": '192.168.0.0/24',
+        "labels": {
+            "admission_control_list": "",
+        }
     }

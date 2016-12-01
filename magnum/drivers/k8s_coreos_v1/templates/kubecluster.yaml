@@ -80,6 +80,12 @@ parameters:
     constraints:
       - allowed_values: ["udp", "vxlan", "host-gw"]
 
+  admission_control_list:
+    type: string
+    description: >
+      Not used by this driver
+    default: ""
+
   kube_allow_priv:
     type: string
     description: >
