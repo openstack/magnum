@@ -405,26 +405,9 @@ resources:
           slave_flavor: {get_param: slave_flavor}
           fixed_network: {get_attr: [network, fixed_network]}
           fixed_subnet: {get_attr: [network, fixed_subnet]}
-          mesos_masters_ips: {list_join: [' ', {get_attr: [mesos_masters, mesos_master_ip]}]}
           external_network: {get_param: external_network}
-          executor_registration_timeout: {get_param: executor_registration_timeout}
           secgroup_slave_all_open_id: {get_resource: secgroup_slave_all_open}
-          http_proxy: {get_param: http_proxy}
-          https_proxy: {get_param: https_proxy}
-          no_proxy: {get_param: no_proxy}
-          auth_url: {get_param: auth_url}
-          username: {get_param: username}
-          password: {get_param: password}
-          tenant_name: {get_param: tenant_name}
-          volume_driver: {get_param: volume_driver}
-          region_name: {get_param: region_name}
-          domain_name: {get_param: domain_name}
-          rexray_preempt: {get_param: rexray_preempt}
-          mesos_slave_isolation: {get_param: mesos_slave_isolation}
-          mesos_slave_work_dir: {get_param: mesos_slave_work_dir}
-          mesos_slave_image_providers: {get_param: mesos_slave_image_providers}
-          mesos_slave_executor_env_variables: {get_param: mesos_slave_executor_env_variables}
-          mesos_slave_wc_curl_cli: {get_attr: [slave_wait_handle, curl_cli]}
+          mesos_slave_software_configs: {get_attr: [mesos_slave_software_configs, mesos_init]}
 
   ######################################################################
   #
@@ -440,6 +423,33 @@ resources:
       count: {get_param: number_of_slaves}
       handle: {get_resource: slave_wait_handle}
       timeout: {get_param: wait_condition_timeout}
+
+  ######################################################################
+  #
+  # Software configs for Mesos slaves.
+  #
+
+  mesos_slave_software_configs:
+    type: mesos_slave_software_configs.yaml
+    properties:
+      mesos_masters_ips: {list_join: [' ', {get_attr: [mesos_masters, mesos_master_ip]}]}
+      executor_registration_timeout: {get_param: executor_registration_timeout}
+      http_proxy: {get_param: http_proxy}
+      https_proxy: {get_param: https_proxy}
+      no_proxy: {get_param: no_proxy}
+      auth_url: {get_param: auth_url}
+      username: {get_param: username}
+      password: {get_param: password}
+      tenant_name: {get_param: tenant_name}
+      volume_driver: {get_param: volume_driver}
+      region_name: {get_param: region_name}
+      domain_name: {get_param: domain_name}
+      rexray_preempt: {get_param: rexray_preempt}
+      mesos_slave_isolation: {get_param: mesos_slave_isolation}
+      mesos_slave_work_dir: {get_param: mesos_slave_work_dir}
+      mesos_slave_image_providers: {get_param: mesos_slave_image_providers}
+      mesos_slave_executor_env_variables: {get_param: mesos_slave_executor_env_variables}
+      mesos_slave_wc_curl_cli: {get_attr: [slave_wait_handle, curl_cli]}
 
 outputs:
 
