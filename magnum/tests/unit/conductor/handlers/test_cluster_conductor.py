@@ -49,18 +49,13 @@ class TestHandler(db_base.DbTestCase):
         self.cluster.create()
 
     @patch('magnum.conductor.scale_manager.get_scale_manager')
-    @patch(
-        'magnum.conductor.handlers.cluster_conductor.Handler._poll_and_check')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
     @patch('magnum.common.clients.OpenStackClients')
     def test_update_node_count_success(
             self, mock_openstack_client_class,
-            mock_driver, mock_poll_and_check,
+            mock_driver,
             mock_scale_manager):
-        def side_effect(*args, **kwargs):
-            self.cluster.node_count = 2
-            self.cluster.save()
-        mock_poll_and_check.side_effect = side_effect
+
         mock_heat_stack = mock.MagicMock()
         mock_heat_stack.stack_status = cluster_status.CREATE_COMPLETE
         mock_heat_client = mock.MagicMock()
@@ -87,16 +82,10 @@ class TestHandler(db_base.DbTestCase):
         cluster = objects.Cluster.get(self.context, self.cluster.uuid)
         self.assertEqual(2, cluster.node_count)
 
-    @patch(
-        'magnum.conductor.handlers.cluster_conductor.Handler._poll_and_check')
     @patch('magnum.common.clients.OpenStackClients')
     def test_update_node_count_failure(
-            self, mock_openstack_client_class,
-            mock_poll_and_check):
-        def side_effect(*args, **kwargs):
-            self.cluster.node_count = 2
-            self.cluster.save()
-        mock_poll_and_check.side_effect = side_effect
+            self, mock_openstack_client_class):
+
         mock_heat_stack = mock.MagicMock()
         mock_heat_stack.stack_status = cluster_status.CREATE_FAILED
         mock_heat_client = mock.MagicMock()
@@ -120,18 +109,12 @@ class TestHandler(db_base.DbTestCase):
         self.assertEqual(1, cluster.node_count)
 
     @patch('magnum.conductor.scale_manager.get_scale_manager')
-    @patch(
-        'magnum.conductor.handlers.cluster_conductor.Handler._poll_and_check')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
     @patch('magnum.common.clients.OpenStackClients')
     def _test_update_cluster_status_complete(
             self, expect_status, mock_openstack_client_class,
-            mock_driver, mock_poll_and_check,
-            mock_scale_manager):
-        def side_effect(*args, **kwargs):
-            self.cluster.node_count = 2
-            self.cluster.save()
-        mock_poll_and_check.side_effect = side_effect
+            mock_driver, mock_scale_manager):
+
         mock_heat_stack = mock.MagicMock()
         mock_heat_stack.stack_status = expect_status
         mock_heat_client = mock.MagicMock()

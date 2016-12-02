@@ -12,7 +12,6 @@
 
 import mock
 from mock import patch
-from oslo_service import loopingcall
 from pycadf import cadftaxonomy as taxonomy
 
 import magnum.conf
@@ -56,19 +55,24 @@ class TestHeatPoller(base.TestCase):
     def test_poll_and_check_send_notification(self):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
         mock_heat_stack.stack_status = cluster_status.CREATE_COMPLETE
-        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+        self.assertIsNone(poller.poll_and_check())
+        self.assertEqual(mock_heat_stack.stack_status, cluster.status)
         mock_heat_stack.stack_status = cluster_status.CREATE_FAILED
-        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+        self.assertIsNone(poller.poll_and_check())
+        self.assertEqual(mock_heat_stack.stack_status, cluster.status)
         mock_heat_stack.stack_status = cluster_status.DELETE_COMPLETE
-        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+        self.assertIsNone(poller.poll_and_check())
+        self.assertEqual(mock_heat_stack.stack_status, cluster.status)
         mock_heat_stack.stack_status = cluster_status.DELETE_FAILED
-        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+        self.assertIsNone(poller.poll_and_check())
+        self.assertEqual(mock_heat_stack.stack_status, cluster.status)
         mock_heat_stack.stack_status = cluster_status.UPDATE_COMPLETE
-        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+        self.assertIsNone(poller.poll_and_check())
+        self.assertEqual(mock_heat_stack.stack_status, cluster.status)
         mock_heat_stack.stack_status = cluster_status.UPDATE_FAILED
-        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+        self.assertIsNone(poller.poll_and_check())
+        self.assertEqual(mock_heat_stack.stack_status, cluster.status)
 
-        self.assertEqual(6, poller.attempts)
         notifications = fake_notifier.NOTIFICATIONS
         self.assertEqual(6, len(notifications))
         self.assertEqual(
@@ -102,9 +106,7 @@ class TestHeatPoller(base.TestCase):
         cluster.status = cluster_status.CREATE_IN_PROGRESS
         mock_heat_stack.stack_status = cluster_status.CREATE_IN_PROGRESS
         poller.poll_and_check()
-
         self.assertEqual(0, cluster.save.call_count)
-        self.assertEqual(1, poller.attempts)
 
     def test_poll_save(self):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
@@ -112,76 +114,70 @@ class TestHeatPoller(base.TestCase):
         cluster.status = cluster_status.CREATE_IN_PROGRESS
         mock_heat_stack.stack_status = cluster_status.CREATE_FAILED
         mock_heat_stack.stack_status_reason = 'Create failed'
-        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+        self.assertIsNone(poller.poll_and_check())
 
         self.assertEqual(2, cluster.save.call_count)
         self.assertEqual(cluster_status.CREATE_FAILED, cluster.status)
         self.assertEqual('Create failed', cluster.status_reason)
-        self.assertEqual(1, poller.attempts)
 
     def test_poll_done(self):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = cluster_status.DELETE_COMPLETE
-        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+        self.assertIsNone(poller.poll_and_check())
 
         mock_heat_stack.stack_status = cluster_status.CREATE_FAILED
-        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
-        self.assertEqual(2, poller.attempts)
+        self.assertIsNone(poller.poll_and_check())
 
     def test_poll_done_by_update(self):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = cluster_status.UPDATE_COMPLETE
         mock_heat_stack.parameters = {'number_of_minions': 2}
-        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+        self.assertIsNone(poller.poll_and_check())
 
         self.assertEqual(1, cluster.save.call_count)
         self.assertEqual(cluster_status.UPDATE_COMPLETE, cluster.status)
         self.assertEqual(2, cluster.node_count)
-        self.assertEqual(1, poller.attempts)
 
     def test_poll_done_by_update_failed(self):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = cluster_status.UPDATE_FAILED
         mock_heat_stack.parameters = {'number_of_minions': 2}
-        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+        self.assertIsNone(poller.poll_and_check())
 
         self.assertEqual(2, cluster.save.call_count)
         self.assertEqual(cluster_status.UPDATE_FAILED, cluster.status)
         self.assertEqual(2, cluster.node_count)
-        self.assertEqual(1, poller.attempts)
 
     def test_poll_done_by_rollback_complete(self):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = cluster_status.ROLLBACK_COMPLETE
         mock_heat_stack.parameters = {'number_of_minions': 1}
-        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+        self.assertIsNone(poller.poll_and_check())
 
         self.assertEqual(2, cluster.save.call_count)
         self.assertEqual(cluster_status.ROLLBACK_COMPLETE, cluster.status)
         self.assertEqual(1, cluster.node_count)
-        self.assertEqual(1, poller.attempts)
 
     def test_poll_done_by_rollback_failed(self):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = cluster_status.ROLLBACK_FAILED
         mock_heat_stack.parameters = {'number_of_minions': 1}
-        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+        self.assertIsNone(poller.poll_and_check())
 
         self.assertEqual(2, cluster.save.call_count)
         self.assertEqual(cluster_status.ROLLBACK_FAILED, cluster.status)
         self.assertEqual(1, cluster.node_count)
-        self.assertEqual(1, poller.attempts)
 
     def test_poll_destroy(self):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = cluster_status.DELETE_FAILED
-        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+        self.assertIsNone(poller.poll_and_check())
         # Destroy method is not called when stack delete failed
         self.assertEqual(0, cluster.destroy.call_count)
 
@@ -191,76 +187,12 @@ class TestHeatPoller(base.TestCase):
         self.assertEqual(cluster_status.DELETE_IN_PROGRESS, cluster.status)
 
         mock_heat_stack.stack_status = cluster_status.DELETE_COMPLETE
-        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+        self.assertIsNone(poller.poll_and_check())
         # The cluster status should still be DELETE_IN_PROGRESS, because
         # the destroy() method may be failed. If success, this cluster record
         # will delete directly, change status is meaningless.
-        self.assertEqual(cluster_status.DELETE_IN_PROGRESS, cluster.status)
+        self.assertEqual(cluster_status.DELETE_COMPLETE, cluster.status)
         self.assertEqual(1, cluster.destroy.call_count)
-
-    def test_poll_delete_in_progress_timeout_set(self):
-        mock_heat_stack, cluster, poller = self.setup_poll_test()
-
-        mock_heat_stack.stack_status = cluster_status.DELETE_IN_PROGRESS
-        mock_heat_stack.timeout_mins = 60
-        # timeout only affects stack creation so expecting this
-        # to process normally
-        poller.poll_and_check()
-
-    def test_poll_delete_in_progress_max_attempts_reached(self):
-        mock_heat_stack, cluster, poller = self.setup_poll_test()
-
-        mock_heat_stack.stack_status = cluster_status.DELETE_IN_PROGRESS
-        poller.attempts = CONF.cluster_heat.max_attempts
-        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
-
-    def test_poll_create_in_prog_max_att_reached_no_timeout(self):
-        mock_heat_stack, cluster, poller = self.setup_poll_test()
-
-        mock_heat_stack.stack_status = cluster_status.CREATE_IN_PROGRESS
-        poller.attempts = CONF.cluster_heat.max_attempts
-        mock_heat_stack.timeout_mins = None
-        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
-
-    def test_poll_create_in_prog_max_att_reached_timeout_set(self):
-        mock_heat_stack, cluster, poller = self.setup_poll_test()
-
-        mock_heat_stack.stack_status = cluster_status.CREATE_IN_PROGRESS
-        poller.attempts = CONF.cluster_heat.max_attempts
-        mock_heat_stack.timeout_mins = 60
-        # since the timeout is set the max attempts gets ignored since
-        # the timeout will eventually stop the poller either when
-        # the stack gets created or the timeout gets reached
-        poller.poll_and_check()
-
-    def test_poll_create_in_prog_max_att_reached_timed_out(self):
-        mock_heat_stack, cluster, poller = self.setup_poll_test()
-
-        mock_heat_stack.stack_status = cluster_status.CREATE_FAILED
-        poller.attempts = CONF.cluster_heat.max_attempts
-        mock_heat_stack.timeout_mins = 60
-        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
-
-    def test_poll_create_in_prog_max_att_not_reached_no_timeout(self):
-        mock_heat_stack, cluster, poller = self.setup_poll_test()
-
-        mock_heat_stack.stack_status = cluster_status.CREATE_IN_PROGRESS
-        mock_heat_stack.timeout.mins = None
-        poller.poll_and_check()
-
-    def test_poll_create_in_prog_max_att_not_reached_timeout_set(self):
-        mock_heat_stack, cluster, poller = self.setup_poll_test()
-
-        mock_heat_stack.stack_status = cluster_status.CREATE_IN_PROGRESS
-        mock_heat_stack.timeout_mins = 60
-        poller.poll_and_check()
-
-    def test_poll_create_in_prog_max_att_not_reached_timed_out(self):
-        mock_heat_stack, cluster, poller = self.setup_poll_test()
-
-        mock_heat_stack.stack_status = cluster_status.CREATE_FAILED
-        mock_heat_stack.timeout_mins = 60
-        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
 
     def test_poll_node_count(self):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
@@ -276,7 +208,7 @@ class TestHeatPoller(base.TestCase):
 
         mock_heat_stack.parameters = {'number_of_minions': 2}
         mock_heat_stack.stack_status = cluster_status.UPDATE_COMPLETE
-        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+        self.assertIsNone(poller.poll_and_check())
 
         self.assertEqual(2, cluster.node_count)
 
