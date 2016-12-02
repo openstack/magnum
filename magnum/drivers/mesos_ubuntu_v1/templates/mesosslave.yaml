@@ -23,11 +23,6 @@ parameters:
     type: string
     description: uuid/name of a network to use for floating ip addresses
 
-  wait_condition_timeout:
-    type: number
-    description : >
-      timeout for the Wait Conditions
-
   executor_registration_timeout:
     type: string
     description: >
@@ -131,17 +126,11 @@ parameters:
     type: string
     description: ID of the security group for slave.
 
+  mesos_slave_wc_curl_cli:
+    type: string
+    description: Wait condition notify command for slave.
+
 resources:
-
-  slave_wait_handle:
-    type: OS::Heat::WaitConditionHandle
-
-  slave_wait_condition:
-    type: OS::Heat::WaitCondition
-    depends_on: mesos-slave
-    properties:
-      handle: {get_resource: slave_wait_handle}
-      timeout: {get_param: wait_condition_timeout}
 
   ######################################################################
   #
@@ -197,7 +186,7 @@ resources:
             #!/bin/bash -v
             wc_notify --data-binary '{"status": "SUCCESS"}'
           params:
-            wc_notify: {get_attr: [slave_wait_handle, curl_cli]}
+            wc_notify: {get_param: mesos_slave_wc_curl_cli}
 
   add_proxy:
     type: OS::Heat::SoftwareConfig

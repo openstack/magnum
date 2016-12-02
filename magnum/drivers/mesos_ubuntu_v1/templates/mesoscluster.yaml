@@ -407,7 +407,6 @@ resources:
           fixed_subnet: {get_attr: [network, fixed_subnet]}
           mesos_masters_ips: {list_join: [' ', {get_attr: [mesos_masters, mesos_master_ip]}]}
           external_network: {get_param: external_network}
-          wait_condition_timeout: {get_param: wait_condition_timeout}
           executor_registration_timeout: {get_param: executor_registration_timeout}
           secgroup_slave_all_open_id: {get_resource: secgroup_slave_all_open}
           http_proxy: {get_param: http_proxy}
@@ -425,6 +424,22 @@ resources:
           mesos_slave_work_dir: {get_param: mesos_slave_work_dir}
           mesos_slave_image_providers: {get_param: mesos_slave_image_providers}
           mesos_slave_executor_env_variables: {get_param: mesos_slave_executor_env_variables}
+          mesos_slave_wc_curl_cli: {get_attr: [slave_wait_handle, curl_cli]}
+
+  ######################################################################
+  #
+  # Wait condition handler for Mesos slaves.
+  #
+
+  slave_wait_handle:
+    type: OS::Heat::WaitConditionHandle
+
+  slave_wait_condition:
+    type: OS::Heat::WaitCondition
+    properties:
+      count: {get_param: number_of_slaves}
+      handle: {get_resource: slave_wait_handle}
+      timeout: {get_param: wait_condition_timeout}
 
 outputs:
 
