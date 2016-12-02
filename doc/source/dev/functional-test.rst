@@ -28,7 +28,7 @@ If you're using devstack, you can copy and modify the devstack configuration::
     cp functional_creds.conf.sample functional_creds.conf
 
     # update the IP address
-    HOST=$(cat /etc/magnum/magnum.conf | awk '/^host = /{print $3}')
+    HOST=$(iniget /etc/magnum/magnum.conf api host)
     sed -i "s/127.0.0.1/$HOST/" functional_creds.conf
 
     # update admin password
@@ -126,3 +126,8 @@ For example, here is how you would run all of the kubernetes tests::
 To run a specific test or group of tests, specify the test path as a positional argument::
 
     tox -e functional-k8s -- magnum.tests.functional.k8s.v1.test_k8s_python_client.TestBayModelResource
+
+To avoid creating multiple clusters simultaneously, you can execute the tests
+with concurrency 1::
+
+    tox -e functional-swarm -- --concurrency 1
