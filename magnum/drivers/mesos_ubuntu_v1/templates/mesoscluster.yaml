@@ -233,7 +233,7 @@ resources:
   # sorts.
   #
 
-  secgroup_base:
+  secgroup_master:
     type: OS::Neutron::SecurityGroup
     properties:
       rules:
@@ -243,17 +243,20 @@ resources:
           port_range_max: 22
         - protocol: tcp
           remote_mode: remote_group_id
-
-  secgroup_mesos:
-    type: OS::Neutron::SecurityGroup
-    properties:
-      rules:
         - protocol: tcp
           port_range_min: 5050
           port_range_max: 5050
         - protocol: tcp
           port_range_min: 8080
           port_range_max: 8080
+
+  secgroup_slave_all_open:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      rules:
+        - protocol: icmp
+        - protocol: tcp
+        - protocol: udp
 
   ######################################################################
   #
@@ -412,8 +415,7 @@ resources:
           external_network: {get_param: external_network}
           fixed_network: {get_resource: fixed_network}
           fixed_subnet: {get_resource: fixed_subnet}
-          secgroup_base_id: {get_resource: secgroup_base}
-          secgroup_mesos_id: {get_resource: secgroup_mesos}
+          secgroup_mesos_id: {get_resource: secgroup_master}
           api_pool_id: {get_resource: api_pool}
 
   ######################################################################
@@ -441,7 +443,7 @@ resources:
           external_network: {get_param: external_network}
           wait_condition_timeout: {get_param: wait_condition_timeout}
           executor_registration_timeout: {get_param: executor_registration_timeout}
-          secgroup_base_id: {get_resource: secgroup_base}
+          secgroup_slave_all_open_id: {get_resource: secgroup_slave_all_open}
           http_proxy: {get_param: http_proxy}
           https_proxy: {get_param: https_proxy}
           no_proxy: {get_param: no_proxy}

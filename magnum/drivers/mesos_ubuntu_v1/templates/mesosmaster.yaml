@@ -31,10 +31,6 @@ parameters:
     type: string
     description: Subnet from which to allocate fixed addresses.
 
-  secgroup_base_id:
-    type: string
-    description: ID of the security group for base.
-
   secgroup_mesos_id:
     type: string
     description: ID of the security group for mesos master.
@@ -68,7 +64,6 @@ resources:
     properties:
       network: {get_param: fixed_network}
       security_groups:
-        - {get_param: secgroup_base_id}
         - {get_param: secgroup_mesos_id}
       fixed_ips:
         - subnet: {get_param: fixed_subnet}

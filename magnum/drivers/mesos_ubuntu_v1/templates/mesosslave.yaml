@@ -127,9 +127,9 @@ parameters:
     type: string
     description: Subnet from which to allocate fixed addresses.
 
-  secgroup_base_id:
+  secgroup_slave_all_open_id:
     type: string
-    description: ID of the security group for base.
+    description: ID of the security group for slave.
 
 resources:
 
@@ -142,14 +142,6 @@ resources:
     properties:
       handle: {get_resource: slave_wait_handle}
       timeout: {get_param: wait_condition_timeout}
-
-  secgroup_all_open:
-    type: OS::Neutron::SecurityGroup
-    properties:
-      rules:
-        - protocol: icmp
-        - protocol: tcp
-        - protocol: udp
 
   ######################################################################
   #
@@ -254,8 +246,7 @@ resources:
     properties:
       network: {get_param: fixed_network}
       security_groups:
-        - get_resource: secgroup_all_open
-        - get_param: secgroup_base_id
+        - get_param: secgroup_slave_all_open_id
       fixed_ips:
         - subnet: {get_param: fixed_subnet}
       replacement_policy: AUTO
