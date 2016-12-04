@@ -2,11 +2,27 @@
 
 . /etc/sysconfig/heat-params
 
+CERT_DIR=/etc/docker
+PROTOCOL=https
+FLANNEL_OPTIONS="-etcd-cafile $CERT_DIR/ca.crt \
+-etcd-certfile $CERT_DIR/server.crt \
+-etcd-keyfile $CERT_DIR/server.key"
+DOCKER_NETWORK_OPTIONS="--cluster-store etcd://$ETCD_SERVER_IP:2379 \
+--cluster-store-opt kv.cacertfile=$CERT_DIR/ca.crt \
+--cluster-store-opt kv.certfile=$CERT_DIR/server.crt \
+--cluster-store-opt kv.keyfile=$CERT_DIR/server.key \
+--cluster-advertise $SWARM_NODE_IP:9379"
+
+if [ "$TLS_DISABLED" = "True" ]; then
+    PROTOCOL=http
+    FLANNEL_OPTIONS=""
+    DOCKER_NETWORK_OPTIONS="--cluster-store etcd://$ETCD_SERVER_IP:2379 \
+    --cluster-advertise $SWARM_NODE_IP:9379"
+fi
+
 echo "Configuring ${NETWORK_DRIVER} network service ..."
 
 if [ "$NETWORK_DRIVER" == "docker" ]; then
-    DOCKER_NETWORK_OPTIONS="--cluster-store etcd://$ETCD_SERVER_IP:2379 \
-        --cluster-advertise $SWARM_NODE_IP:9379"
     sed -i "/^DOCKER_NETWORK_OPTIONS=/ s#=.*#='$DOCKER_NETWORK_OPTIONS'#" \
         /etc/sysconfig/docker-network
 fi
@@ -25,8 +41,14 @@ mkdir -p /etc/systemd/system/docker.service.d
 mkdir -p /etc/systemd/system/flanneld.service.d
 
 sed -i '
-/^FLANNEL_ETCD=/ s|=.*|="http://'"$ETCD_SERVER_IP"':2379"|
+/^FLANNEL_ETCD=/ s|=.*|="'"$PROTOCOL"'://'"$ETCD_SERVER_IP"':2379"|
 ' $FLANNELD_CONFIG
+
+sed -i '/FLANNEL_OPTIONS/'d $FLANNELD_CONFIG
+
+cat >> $FLANNELD_CONFIG <<EOF
+FLANNEL_OPTIONS="$FLANNEL_OPTIONS"
+EOF
 
 cat >> $FLANNEL_DOCKER_BRIDGE_BIN <<EOF
 #!/bin/sh

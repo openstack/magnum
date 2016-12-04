@@ -1,5 +1,7 @@
 #!/bin/sh
 
+CERT_DIR=/etc/docker
+
 cat > /etc/systemd/system/swarm-manager.service << END_SERVICE_TOP
 [Unit]
 Description=Swarm Manager
@@ -13,7 +15,7 @@ ExecStartPre=-/usr/bin/docker kill swarm-manager
 ExecStartPre=-/usr/bin/docker rm swarm-manager
 ExecStartPre=-/usr/bin/docker pull swarm:$SWARM_VERSION
 ExecStart=/usr/bin/docker run   --name swarm-manager \\
-                                -v /etc/docker:/etc/docker \\
+                                -v $CERT_DIR:$CERT_DIR \\
                                 -p 2376:2375 \\
                                 -e http_proxy=$HTTP_PROXY \\
                                 -e https_proxy=$HTTPS_PROXY \\
@@ -29,9 +31,12 @@ if [ $TLS_DISABLED = 'False'  ]; then
 
 cat >> /etc/systemd/system/swarm-manager.service << END_TLS
                                 --tlsverify \\
-                                --tlscacert=/etc/docker/ca.crt \\
-                                --tlskey=/etc/docker/server.key \\
-                                --tlscert=/etc/docker/server.crt \\
+                                --tlscacert=$CERT_DIR/ca.crt \\
+                                --tlskey=$CERT_DIR/server.key \\
+                                --tlscert=$CERT_DIR/server.crt \\
+                                --discovery-opt kv.cacertfile=$CERT_DIR/ca.crt \\
+                                --discovery-opt kv.certfile=$CERT_DIR/server.crt \\
+                                --discovery-opt kv.keyfile=$CERT_DIR/server.key \\
 END_TLS
 
 fi
