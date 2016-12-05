@@ -13,7 +13,7 @@ if [ "$TLS_DISABLED" == "True" ]; then
     KUBE_CONFIG=""
 else
     KUBE_PROTOCOL="https"
-    KUBE_CONFIG="--kubeconfig=/srv/kubernetes/kubeconfig.yaml"
+    KUBE_CONFIG="--kubeconfig=/etc/kubernetes/kubeconfig.yaml"
 fi
 
 KUBE_MASTER_URI="$KUBE_PROTOCOL://$KUBE_MASTER_IP:$KUBE_API_PORT"
@@ -32,7 +32,7 @@ sed -i '
 ' /etc/kubernetes/kubelet
 
 sed -i '
-    /^KUBE_PROXY_ARGS=/ s/=.*/="--proxy-mode=iptables"/
+    /^KUBE_PROXY_ARGS=/ s|=.*|="--proxy-mode=iptables '"$KUBE_CONFIG"'"|
 ' /etc/kubernetes/proxy
 
 cat >> /etc/environment <<EOF

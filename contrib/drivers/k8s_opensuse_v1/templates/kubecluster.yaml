@@ -548,6 +548,13 @@ resources:
           secgroup_base_id: {get_resource: secgroup_base}
           secgroup_kube_master_id: {get_resource: secgroup_kube_master}
           kube_master_id: 'kube-master%index%'
+          kube_master_ports: { get_attr: [kube_master_ports, refs] }
+          kube_master_ips: {get_attr: [kube_master_ports, fixed_ip]}
+          kube_master_ips_list: { list_join: ["|", {get_attr: [kube_master_ports, fixed_ip]} ] }
+          kube_minion_ips_list: { list_join: ["|", {get_attr: [kube_minion_ports, fixed_ip]} ] }
+          trustee_user_id: {get_param: trustee_user_id}
+          trustee_password: {get_param: trustee_password}
+          trust_id: {get_param: trust_id}
 
   ######################################################################
   #
@@ -600,6 +607,16 @@ resources:
           tls_disabled: {get_param: tls_disabled}
           secgroup_kube_minion_id: {get_resource: secgroup_kube_minion}
           kube_minion_id: 'kube-minion%index%'
+          kube_minion_ports: { get_attr: [kube_minion_ports, refs] }
+          kube_minion_ips: {get_attr: [kube_minion_ports, fixed_ip]}
+          kube_master_ips_list: { list_join: ["|", {get_attr: [kube_master_ports, fixed_ip]} ] }
+          kube_minion_ips_list: { list_join: ["|", {get_attr: [kube_minion_ports, fixed_ip]} ] }
+          auth_url: {get_param: auth_url}
+          trustee_user_id: {get_param: trustee_user_id}
+          trustee_username: {get_param: trustee_username}
+          trustee_password: {get_param: trustee_password}
+          trustee_domain_id: {get_param: trustee_domain_id}
+          trust_id: {get_param: trust_id}
 
 outputs:
 
