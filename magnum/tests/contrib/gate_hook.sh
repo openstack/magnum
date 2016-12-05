@@ -22,10 +22,14 @@ export PROJECTS="openstack/barbican $PROJECTS"
 export DEVSTACK_LOCAL_CONFIG="enable_plugin heat git://git.openstack.org/openstack/heat"
 export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ceilometer git://git.openstack.org/openstack/ceilometer"
 
-if [ "${coe}${special}" != "k8s-ironic" ]; then
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin neutron-lbaas https://git.openstack.org/openstack/neutron-lbaas"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin octavia https://github.com/openstack/octavia"
-fi
+# Disable LBaaS(v1) and LBaaS(v2)
+export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service q-lbaas"
+export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service q-lbaasv2"
+export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service octavia"
+export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service o-cw"
+export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service o-hk"
+export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service o-hm"
+export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service o-api"
 
 if [ "$coe" = "mesos" ]; then
     echo "MAGNUM_GUEST_IMAGE_URL=https://fedorapeople.org/groups/magnum/ubuntu-mesos-latest.qcow2" >> $BASE/new/devstack/localrc
@@ -42,15 +46,6 @@ elif [ "${coe}${special}" = "k8s-ironic" ]; then
     # export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service cinder c-sch c-api c-vol"
 
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ironic git://git.openstack.org/openstack/ironic"
-
-    # Disable LBaaS(v1) and LBaaS(v2)
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service q-lbaas"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service q-lbaasv2"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service octavia"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service o-cw"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service o-hk"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service o-hm"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service o-api"
 
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_DEPLOY_DRIVER=pxe_ssh"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_BAREMETAL_BASIC_OPS=True"
