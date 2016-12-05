@@ -27,15 +27,23 @@ enable_service q-l3
 enable_service q-meta
 enable_service neutron
 
-# Disable LBaaS(v1) service
-disable_service q-lbaas
-# Enable LBaaS(v2) services
-enable_service q-lbaasv2
-enable_service octavia
-enable_service o-cw
-enable_service o-hk
-enable_service o-hm
-enable_service o-api
+# Disable horizon
+disable_service horizon
+
+# Disable swift
+disable_service s-account
+disable_service s-container
+disable_service s-object
+disable_service s-proxy
+
+# Disable ceilometer
+disable_service ceilometer-acentral
+disable_service ceilometer-acompute
+disable_service ceilometer-alarm-evaluator
+disable_service ceilometer-alarm-notifier
+disable_service ceilometer-anotification
+disable_service ceilometer-api
+disable_service ceilometer-collector
 
 # Enable Magnum services
 enable_service magnum-api

@@ -20,16 +20,6 @@ special=$2
 
 export PROJECTS="openstack/barbican $PROJECTS"
 export DEVSTACK_LOCAL_CONFIG="enable_plugin heat git://git.openstack.org/openstack/heat"
-export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ceilometer git://git.openstack.org/openstack/ceilometer"
-
-# Disable LBaaS(v1) and LBaaS(v2)
-export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service q-lbaas"
-export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service q-lbaasv2"
-export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service octavia"
-export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service o-cw"
-export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service o-hk"
-export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service o-hm"
-export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service o-api"
 
 if [ "$coe" = "mesos" ]; then
     echo "MAGNUM_GUEST_IMAGE_URL=https://fedorapeople.org/groups/magnum/ubuntu-mesos-latest.qcow2" >> $BASE/new/devstack/localrc
