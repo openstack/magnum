@@ -19,9 +19,12 @@ from oslo_log import log
 from oslo_service import loopingcall
 from oslo_service import periodic_task
 
+from pycadf import cadftaxonomy as taxonomy
+
 from magnum.common import context
 from magnum.common import rpc
 from magnum.conductor import monitors
+from magnum.conductor import utils as conductor_utils
 import magnum.conf
 from magnum.drivers.common import driver
 from magnum.i18n import _LW
@@ -44,6 +47,17 @@ def set_context(func):
 
 class ClusterUpdateJob(object):
 
+    status_to_event = {
+        objects.fields.ClusterStatus.DELETE_COMPLETE: taxonomy.ACTION_DELETE,
+        objects.fields.ClusterStatus.CREATE_COMPLETE: taxonomy.ACTION_CREATE,
+        objects.fields.ClusterStatus.UPDATE_COMPLETE: taxonomy.ACTION_UPDATE,
+        objects.fields.ClusterStatus.ROLLBACK_COMPLETE: taxonomy.ACTION_UPDATE,
+        objects.fields.ClusterStatus.CREATE_FAILED: taxonomy.ACTION_CREATE,
+        objects.fields.ClusterStatus.DELETE_FAILED: taxonomy.ACTION_DELETE,
+        objects.fields.ClusterStatus.UPDATE_FAILED: taxonomy.ACTION_UPDATE,
+        objects.fields.ClusterStatus.ROLLBACK_FAILED: taxonomy.ACTION_UPDATE
+    }
+
     def __init__(self, ctx, cluster):
         self.ctx = ctx
         self.cluster = cluster
@@ -54,13 +68,22 @@ class ClusterUpdateJob(object):
         cdriver = driver.Driver.get_driver_for_cluster(self.ctx, self.cluster)
         # ask the driver to sync status
         cdriver.update_cluster_status(self.ctx, self.cluster)
-        # end the "loop"
         LOG.debug("Status for cluster %s updated to %s (%s)",
                   self.cluster.id, self.cluster.status,
                   self.cluster.status_reason)
+        # status update notifications
+        if self.cluster.status.endswith("_COMPLETE"):
+            conductor_utils.notify_about_cluster_operation(
+                self.ctx, self.status_to_event[self.cluster.status],
+                taxonomy.OUTCOME_SUCCESS)
+        if self.cluster.status.endswith("_FAILED"):
+            conductor_utils.notify_about_cluster_operation(
+                self.ctx, self.status_to_event[self.cluster.status],
+                taxonomy.OUTCOME_FAILURE)
         # if we're done with it, delete it
         if self.cluster.status == objects.fields.ClusterStatus.DELETE_COMPLETE:
             self.cluster.destroy()
+        # end the "loop"
         raise loopingcall.LoopingCallDone()
 
 

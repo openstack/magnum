@@ -12,7 +12,6 @@
 
 import abc
 import os
-from pycadf import cadftaxonomy as taxonomy
 import six
 
 from oslo_config import cfg
@@ -151,17 +150,6 @@ class HeatDriver(driver.Driver):
 
 class HeatPoller(object):
 
-    status_to_event = {
-        fields.ClusterStatus.DELETE_COMPLETE: taxonomy.ACTION_DELETE,
-        fields.ClusterStatus.CREATE_COMPLETE: taxonomy.ACTION_CREATE,
-        fields.ClusterStatus.UPDATE_COMPLETE: taxonomy.ACTION_UPDATE,
-        fields.ClusterStatus.ROLLBACK_COMPLETE: taxonomy.ACTION_UPDATE,
-        fields.ClusterStatus.CREATE_FAILED: taxonomy.ACTION_CREATE,
-        fields.ClusterStatus.DELETE_FAILED: taxonomy.ACTION_DELETE,
-        fields.ClusterStatus.UPDATE_FAILED: taxonomy.ACTION_UPDATE,
-        fields.ClusterStatus.ROLLBACK_FAILED: taxonomy.ACTION_UPDATE
-    }
-
     def __init__(self, openstack_client, cluster, cluster_driver):
         self.openstack_client = openstack_client
         self.context = self.openstack_client.context
@@ -184,18 +172,10 @@ class HeatPoller(object):
         # so another user/client can call delete cluster/stack.
         if stack.stack_status == fields.ClusterStatus.DELETE_COMPLETE:
             self._delete_complete()
-            # TODO(randall): Move the status notification up the stack
-            conductor_utils.notify_about_cluster_operation(
-                self.context, self.status_to_event[stack.stack_status],
-                taxonomy.OUTCOME_SUCCESS)
 
         if stack.stack_status in (fields.ClusterStatus.CREATE_COMPLETE,
                                   fields.ClusterStatus.UPDATE_COMPLETE):
             self._sync_cluster_and_template_status(stack)
-            # TODO(randall): Move the status notification up the stack
-            conductor_utils.notify_about_cluster_operation(
-                self.context, self.status_to_event[stack.stack_status],
-                taxonomy.OUTCOME_SUCCESS)
         elif stack.stack_status != self.cluster.status:
             self._sync_cluster_status(stack)
 
@@ -206,10 +186,6 @@ class HeatPoller(object):
                                   fields.ClusterStatus.ROLLBACK_FAILED):
             self._sync_cluster_and_template_status(stack)
             self._cluster_failed(stack)
-            # TODO(randall): Move the status notification up the stack
-            conductor_utils.notify_about_cluster_operation(
-                self.context, self.status_to_event[stack.stack_status],
-                taxonomy.OUTCOME_FAILURE)
 
     def _delete_complete(self):
         LOG.info(_LI('Cluster has been deleted, stack_id: %s')
@@ -220,7 +196,6 @@ class HeatPoller(object):
                                                    self.cluster)
             cert_manager.delete_certificates_from_cluster(self.cluster,
                                                           context=self.context)
-            self.cluster.destroy()
         except exception.ClusterNotFound:
             LOG.info(_LI('The cluster %s has been deleted by others.')
                      % self.cluster.uuid)
@@ -274,10 +249,6 @@ class HeatPoller(object):
         self.cluster.status_reason = _("Stack with id %s not found in "
                                        "Heat.") % self.cluster.stack_id
         self.cluster.save()
-        # TODO(randall): Move the status notification up the stack
-        conductor_utils.notify_about_cluster_operation(
-            self.context, self.status_to_event[self.cluster.status],
-            taxonomy.OUTCOME_FAILURE)
         LOG.info(_LI("Cluster with id %(id)s has been set to "
                      "%(status)s due to stack with id %(sid)s "
                      "not found in Heat."),

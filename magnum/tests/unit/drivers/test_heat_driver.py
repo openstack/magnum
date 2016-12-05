@@ -12,7 +12,6 @@
 
 import mock
 from mock import patch
-from pycadf import cadftaxonomy as taxonomy
 
 import magnum.conf
 from magnum.drivers.heat import driver as heat_driver
@@ -20,7 +19,6 @@ from magnum.drivers.k8s_fedora_atomic_v1 import driver as k8s_atomic_dr
 from magnum import objects
 from magnum.objects.fields import ClusterStatus as cluster_status
 from magnum.tests import base
-from magnum.tests import fake_notifier
 from magnum.tests.unit.db import utils
 
 CONF = magnum.conf.CONF
@@ -51,54 +49,6 @@ class TestHeatPoller(base.TestCase):
                                         k8s_atomic_dr.Driver())
         poller.get_version_info = mock.MagicMock()
         return (mock_heat_stack, cluster, poller)
-
-    def test_poll_and_check_send_notification(self):
-        mock_heat_stack, cluster, poller = self.setup_poll_test()
-        mock_heat_stack.stack_status = cluster_status.CREATE_COMPLETE
-        self.assertIsNone(poller.poll_and_check())
-        self.assertEqual(mock_heat_stack.stack_status, cluster.status)
-        mock_heat_stack.stack_status = cluster_status.CREATE_FAILED
-        self.assertIsNone(poller.poll_and_check())
-        self.assertEqual(mock_heat_stack.stack_status, cluster.status)
-        mock_heat_stack.stack_status = cluster_status.DELETE_COMPLETE
-        self.assertIsNone(poller.poll_and_check())
-        self.assertEqual(mock_heat_stack.stack_status, cluster.status)
-        mock_heat_stack.stack_status = cluster_status.DELETE_FAILED
-        self.assertIsNone(poller.poll_and_check())
-        self.assertEqual(mock_heat_stack.stack_status, cluster.status)
-        mock_heat_stack.stack_status = cluster_status.UPDATE_COMPLETE
-        self.assertIsNone(poller.poll_and_check())
-        self.assertEqual(mock_heat_stack.stack_status, cluster.status)
-        mock_heat_stack.stack_status = cluster_status.UPDATE_FAILED
-        self.assertIsNone(poller.poll_and_check())
-        self.assertEqual(mock_heat_stack.stack_status, cluster.status)
-
-        notifications = fake_notifier.NOTIFICATIONS
-        self.assertEqual(6, len(notifications))
-        self.assertEqual(
-            'magnum.cluster.create', notifications[0].event_type)
-        self.assertEqual(
-            taxonomy.OUTCOME_SUCCESS, notifications[0].payload['outcome'])
-        self.assertEqual(
-            'magnum.cluster.create', notifications[1].event_type)
-        self.assertEqual(
-            taxonomy.OUTCOME_FAILURE, notifications[1].payload['outcome'])
-        self.assertEqual(
-            'magnum.cluster.delete', notifications[2].event_type)
-        self.assertEqual(
-            taxonomy.OUTCOME_SUCCESS, notifications[2].payload['outcome'])
-        self.assertEqual(
-            'magnum.cluster.delete', notifications[3].event_type)
-        self.assertEqual(
-            taxonomy.OUTCOME_FAILURE, notifications[3].payload['outcome'])
-        self.assertEqual(
-            'magnum.cluster.update', notifications[4].event_type)
-        self.assertEqual(
-            taxonomy.OUTCOME_SUCCESS, notifications[4].payload['outcome'])
-        self.assertEqual(
-            'magnum.cluster.update', notifications[5].event_type)
-        self.assertEqual(
-            taxonomy.OUTCOME_FAILURE, notifications[5].payload['outcome'])
 
     def test_poll_no_save(self):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
@@ -188,11 +138,8 @@ class TestHeatPoller(base.TestCase):
 
         mock_heat_stack.stack_status = cluster_status.DELETE_COMPLETE
         self.assertIsNone(poller.poll_and_check())
-        # The cluster status should still be DELETE_IN_PROGRESS, because
-        # the destroy() method may be failed. If success, this cluster record
-        # will delete directly, change status is meaningless.
+        # destroy and notifications are handled up the stack now
         self.assertEqual(cluster_status.DELETE_COMPLETE, cluster.status)
-        self.assertEqual(1, cluster.destroy.call_count)
 
     def test_poll_node_count(self):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
@@ -217,11 +164,9 @@ class TestHeatPoller(base.TestCase):
     def test_delete_complete(self, cert_manager, trust_manager):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
         poller._delete_complete()
-        self.assertEqual(1, cluster.destroy.call_count)
         self.assertEqual(
             1, cert_manager.delete_certificates_from_cluster.call_count)
-        self.assertEqual(1,
-                         trust_manager.delete_trustee_and_trust.call_count)
+        self.assertEqual(1, trust_manager.delete_trustee_and_trust.call_count)
 
     def test_create_or_complete(self):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
