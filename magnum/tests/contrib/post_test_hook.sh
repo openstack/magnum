@@ -64,6 +64,11 @@ function create_test_data {
     # qcow2 images, the format is 'bare'.
     export IMAGE_ID=$(glance --os-image-api-version 1 image-list | grep $container_format | grep -i $image_name | awk '{print $2}')
 
+    #Get magnum_url
+    local magnum_api_ip=$(iniget /etc/magnum/magnum.conf api host)
+    local magnum_api_port=$(iniget /etc/magnum/magnum.conf api port)
+    local magnum_url="http://"$magnum_api_ip":"$magnum_api_port"/v1"
+
     # pass the appropriate variables via a config file
     CREDS_FILE=$MAGNUM_DIR/functional_creds.conf
     cat <<EOF > $CREDS_FILE
@@ -71,15 +76,19 @@ function create_test_data {
 
 [auth]
 auth_url = $OS_AUTH_URL
-magnum_url = $BYPASS_URL
+magnum_url = $magnum_url
 username = $OS_USERNAME
-tenant_name = $OS_TENANT_NAME
+project_name = $OS_PROJECT_NAME
+project_domain_id = $OS_PROJECT_DOMAIN_ID
+user_domain_id = $OS_USER_DOMAIN_ID
 password = $OS_PASSWORD
-auth_version = v2
+auth_version = v3
 insecure = False
 [admin]
 user = $OS_USERNAME
-tenant = $OS_TENANT_NAME
+project_name = $OS_PROJECT_NAME
+project_domain_id = $OS_PROJECT_DOMAIN_ID
+user_domain_id = $OS_USER_DOMAIN_ID
 pass = $OS_PASSWORD
 region_name = $OS_REGION_NAME
 [magnum]
@@ -109,19 +118,7 @@ function add_flavor {
     # Get admin credentials
     pushd ../devstack
     source openrc admin admin
-    # NOTE(hongbin): This is a temporary work around. These variables are for
-    # keystone v3, but magnum is using v2 API. Therefore, unset them to make the
-    # keystoneclient work.
-    # Bug: #1473600
-    unset OS_PROJECT_DOMAIN_ID
-    unset OS_USER_DOMAIN_ID
-    unset OS_AUTH_TYPE
     popd
-
-    # Due to keystone defaulting everything to v3, we need to update to make func tests
-    # work in our gates back to v2
-    export OS_AUTH_URL=http://127.0.0.1:5000/v2.0
-    export OS_IDENTITY_API_VERSION=2.0
 
     # Create magnum specific flavor for use in functional tests.
     echo_summary "Create a flavor"
@@ -173,7 +170,6 @@ if [[ "api" == "$coe" ]]; then
 
     # Set demo credentials
     source $BASE/new/devstack/accrc/demo/demo
-    unset OS_AUTH_TYPE
 
     create_test_data $coe
 
@@ -198,13 +194,6 @@ else
     # Get admin credentials
     pushd ../devstack
     source openrc admin admin
-    # NOTE(hongbin): This is a temporary work around. These variables are for
-    # keystone v3, but magnum is using v2 API. Therefore, unset them to make the
-    # keystoneclient work.
-    # Bug: #1473600
-    unset OS_PROJECT_DOMAIN_ID
-    unset OS_USER_DOMAIN_ID
-    unset OS_AUTH_TYPE
     popd
 
     add_flavor
