@@ -11,24 +11,24 @@ An example fedora based image and uploaded to glance with the following:
     git clone https://git.openstack.org/openstack/dib-utils.git
     export PATH="${PWD}/dib-utils/bin:$PATH"
     export ELEMENTS_PATH=diskimage-builder/elements
-    export ELEMENTS_PATH=${ELEMENTS_PATH}:magnum/magnum/drivers/k8s_fedora_atomic_v1/image/ironic
-    export DIB_RELEASE=23
+    export ELEMENTS_PATH=${ELEMENTS_PATH}:magnum/magnum/drivers/k8s_fedora_ironic_v1/image
+    export DIB_RELEASE=24
     diskimage-builder/bin/disk-image-create baremetal \
       fedora selinux-permissive \
       kubernetes \
-      -o fedora-23-kubernetes.qcow2
+      -o fedora-24-kubernetes.qcow2
 
     KERNEL_ID=`glance image-create --name fedora-k8s-kernel \
                                    --visibility public \
                                    --disk-format=aki \
                                    --container-format=aki \
-                                   --file=fedora-23-kubernetes.vmlinuz \
+                                   --file=fedora-24-kubernetes.vmlinuz \
                                    | grep id | tr -d '| ' | cut --bytes=3-57`
     RAMDISK_ID=`glance image-create --name fedora-k8s-ramdisk \
                                     --visibility public \
                                     --disk-format=ari \
                                     --container-format=ari \
-                                    --file=fedora-23-kubernetes.initrd \
+                                    --file=fedora-24-kubernetes.initrd \
                                     | grep id |  tr -d '| ' | cut --bytes=3-57`
     BASE_ID=`glance image-create --name fedora-k8s \
                                     --os-distro fedora \
@@ -37,6 +37,6 @@ An example fedora based image and uploaded to glance with the following:
                                     --container-format=bare \
                                     --property kernel_id=$KERNEL_ID \
                                     --property ramdisk_id=$RAMDISK_ID \
-                                    --file=fedora-23-kubernetes.qcow2 \
+                                    --file=fedora-24-kubernetes.qcow2 \
                                     | grep -v kernel | grep -v ramdisk \
                                     | grep id | tr -d '| ' | cut --bytes=3-57`
