@@ -91,7 +91,7 @@ service, you must create a database, service credentials, and API endpoints.
    .. code-block:: console
 
       $ openstack endpoint create --region RegionOne \
-        container-infra public http://controller:9511/v1
+        container-infra public http://CONTROLLER_IP:9511/v1
       +--------------+----------------------------------+
       | Field        | Value                            |
       +--------------+----------------------------------+
@@ -103,11 +103,11 @@ service, you must create a database, service credentials, and API endpoints.
       | service_id   | 0f7f62a1f1a247d2a4cb237642814d0e |
       | service_name | magnum                           |
       | service_type | container-infra                  |
-      | url          | http://controller:9511/v1        |
+      | url          | http://CONTROLLER_IP:9511/v1     |
       +--------------+----------------------------------+
 
       $ openstack endpoint create --region RegionOne \
-        container-infra internal http://controller:9511/v1
+        container-infra internal http://CONTROLLER_IP:9511/v1
       +--------------+----------------------------------+
       | Field        | Value                            |
       +--------------+----------------------------------+
@@ -119,11 +119,11 @@ service, you must create a database, service credentials, and API endpoints.
       | service_id   | 0f7f62a1f1a247d2a4cb237642814d0e |
       | service_name | magnum                           |
       | service_type | container-infra                  |
-      | url          | http://controller:9511/v1        |
+      | url          | http://CONTROLLER_IP:9511/v1     |
       +--------------+----------------------------------+
 
       $ openstack endpoint create --region RegionOne \
-        container-infra admin http://controller:9511/v1
+        container-infra admin http://CONTROLLER_IP:9511/v1
       +--------------+----------------------------------+
       | Field        | Value                            |
       +--------------+----------------------------------+
@@ -135,8 +135,11 @@ service, you must create a database, service credentials, and API endpoints.
       | service_id   | 0f7f62a1f1a247d2a4cb237642814d0e |
       | service_name | magnum                           |
       | service_type | container-infra                  |
-      | url          | http://controller:9511/v1        |
+      | url          | http://CONTROLLER_IP:9511/v1     |
       +--------------+----------------------------------+
+
+   Replace ``CONTROLLER_IP`` with the IP magnum listens to. Alternatively,
+   you can use a hostname which is reachable by the Compute instances.
 
 #. Magnum requires additional information in the Identity service to
    manage COE clusters. To add this information, complete these steps:
