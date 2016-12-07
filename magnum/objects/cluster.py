@@ -42,8 +42,9 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
     #              Rename 'baymodel_id' to 'cluster_template_id'
     #              Rename 'bay_create_timeout' to 'create_timeout'
     # Version 1.10: Added 'keypair' field
+    # Version 1.11: Added 'RESUME_FAILED' in status field
 
-    VERSION = '1.10'
+    VERSION = '1.11'
 
     dbapi = dbapi.get_instance()
 
