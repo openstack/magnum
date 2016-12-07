@@ -6,7 +6,10 @@
 
         [api]
         ...
-        host = controller
+        host = CONTROLLER_IP
+
+     Replace ``CONTROLLER_IP`` with the IP address on which you wish magnum api
+     should listen.
 
    * In the ``[certificates]`` section, select ``barbican`` (or ``x509keypair`` if
      you don't have barbican installed):
