@@ -1,0 +1,26 @@
+#!/bin/bash
+
+if [ ${DIB_DEBUG_TRACE:-0} -gt 0 ]; then
+    set -x
+fi
+set -eu
+set -o pipefail
+
+# Upgrade CentOS to 7.2
+sudo -E yum upgrade --assumeyes --tolerant
+sudo -E yum update --assumeyes
+
+# Verify that the kernel is at least 3.10
+function version_gt() { test "$(echo "$@" | tr " " "\n" | sort -V | head -n 1)" != "$1"; }
+
+kernel_version=`uname -r | cut --bytes=1-4`
+expect_version=3.10
+if version_gt $expect_version $kernel_version; then
+    echo "Error: kernel version at least $expect_version, current version $kernel_version"
+    exit 1
+fi
+
+# Enable OverlayFS
+sudo tee /etc/modules-load.d/overlay.conf <<-'EOF'
+overlay
+EOF

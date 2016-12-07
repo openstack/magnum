@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [ ${DIB_DEBUG_TRACE:-0} -gt 0 ]; then
+    set -x
+fi
+set -eu
+set -o pipefail
+
+# This scrpit file is used to dowload dcos_generate_config.sh outside chroot.
+# Ihis file is essential that the size of dcos_generate_config.sh is more than
+# 700M, we should download it into the image in advance.
+
+sudo mkdir -p $TMP_MOUNT_PATH/opt/dcos
+
+if [ -f $DCOS_GENERATE_CONFIG_SRC ]; then
+    # If $DCOS_GENERATE_CONFIG_SRC is a file path, copy the file
+    sudo cp $DCOS_GENERATE_CONFIG_SRC $TMP_MOUNT_PATH/opt/dcos
+else
+    # If $DCOS_GENERATE_CONFIG_SRC is a url, download it
+    # Please make sure curl is installed on your host environment
+    cd $TMP_MOUNT_PATH/opt/dcos
+    sudo -E curl -O $DCOS_GENERATE_CONFIG_SRC
+fi

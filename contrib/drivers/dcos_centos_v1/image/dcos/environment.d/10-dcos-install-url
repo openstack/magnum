@@ -1,0 +1,5 @@
+# Specify download url, default DC/OS version 1.8.4
+export DCOS_GENERATE_CONFIG_SRC=${DCOS_GENERATE_CONFIG_SRC:-https://downloads.dcos.io/dcos/stable/commit/e64024af95b62c632c90b9063ed06296fcf38ea5/dcos_generate_config.sh}
+
+# or local file path
+# export DCOS_GENERATE_CONFIG_SRC=${DCOS_GENERATE_CONFIG_SRC:-${PWD}/dcos_generate_config.sh}
