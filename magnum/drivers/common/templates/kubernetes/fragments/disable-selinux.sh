@@ -4,5 +4,5 @@
 setenforce 0
 
 sed -i '
-  /^SELINUX=/ s/=.*/=permissive/
+    /^SELINUX=/ s/=.*/=permissive/
 ' /etc/selinux/config

@@ -53,10 +53,8 @@ echo "Allowed to introduce missing lines : ${ALLOWED_EXTRA_MISSING}"
 echo "Missing lines in master            : ${baseline_missing}"
 echo "Missing lines in proposed change   : ${current_missing}"
 
-if [ $allowed_missing -ge $current_missing ];
-then
-    if [ $baseline_missing -lt $current_missing ];
-    then
+if [ $allowed_missing -ge $current_missing ]; then
+    if [ $baseline_missing -lt $current_missing ]; then
         show_diff $baseline_report $current_report
         echo "We believe you can test your code with 100% coverage!"
     else

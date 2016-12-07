@@ -14,7 +14,7 @@ FLANNEL_CONFIG_SERVICE=/etc/systemd/system/flannel-config.service
 FLANNEL_JSON=/etc/sysconfig/flannel-network.json
 
 sed -i '
-/^FLANNEL_ETCD=/ s|=.*|="http://'"$ETCD_SERVER_IP"':2379"|
+    /^FLANNEL_ETCD=/ s|=.*|="http://'"$ETCD_SERVER_IP"':2379"|
 ' $FLANNELD_CONFIG
 
 . $FLANNELD_CONFIG
@@ -35,7 +35,7 @@ fi
 
 echo "creating flanneld config in etcd"
 while ! curl -sf -L $FLANNEL_ETCD/v2/keys${FLANNEL_ETCD_KEY}/config \
-  -X PUT --data-urlencode value@${FLANNEL_JSON}; do
+    -X PUT --data-urlencode value@${FLANNEL_JSON}; do
     echo "waiting for etcd"
     sleep 1
 done

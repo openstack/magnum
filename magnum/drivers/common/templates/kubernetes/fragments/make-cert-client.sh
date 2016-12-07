@@ -69,8 +69,8 @@ USER_TOKEN=`curl -k -s -i -X POST -H "$content_type" -d "$auth_json" $url \
 
 # Get CA certificate for this cluster
 curl -k -X GET \
-  -H "X-Auth-Token: $USER_TOKEN" \
-  $MAGNUM_URL/certificates/$CLUSTER_UUID | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > $CA_CERT
+    -H "X-Auth-Token: $USER_TOKEN" \
+    $MAGNUM_URL/certificates/$CLUSTER_UUID | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > $CA_CERT
 
 # Create config for client's csr
 cat > ${cert_conf_dir}/client.conf <<EOF
@@ -111,7 +111,7 @@ chmod 500 "${cert_dir}"
 chown -R kube:kube "${cert_dir}"
 
 sed -i '
-  s|CA_CERT|'"$CA_CERT"'|
-  s|CLIENT_CERT|'"$CLIENT_CERT"'|
-  s|CLIENT_KEY|'"$CLIENT_KEY"'|
+    s|CA_CERT|'"$CA_CERT"'|
+    s|CLIENT_CERT|'"$CLIENT_CERT"'|
+    s|CLIENT_KEY|'"$CLIENT_KEY"'|
 ' /srv/kubernetes/kubeconfig.yaml

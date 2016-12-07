@@ -5,7 +5,7 @@
 echo "Configuring mesos (master)"
 
 myip=$(ip addr show eth0 |
-       awk '$1 == "inet" {print $2}' | cut -f1 -d/)
+    awk '$1 == "inet" {print $2}' | cut -f1 -d/)
 
 # Fix /etc/hosts
 sed -i "s/127.0.1.1/$myip/" /etc/hosts

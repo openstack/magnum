@@ -48,7 +48,7 @@ After=docker.service
 RemainAfterExit=yes
 ExecStartPre=-/usr/bin/docker pull openstackmagnum/rexray:alpine
 ExecStart=/usr/bin/rm -f /var/run/rexray/rexray.pid && \
-              /usr/bin/docker run -d --name=rexray --privileged -p 7979:7979 \
+            /usr/bin/docker run -d --name=rexray --privileged -p 7979:7979 \
                 -v /run/docker/plugins:/run/docker/plugins \
                 -v /var/lib/rexray:/var/lib/rexray:z \
                 -v /var/log/rexray:/var/log/rexray \

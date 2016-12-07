@@ -21,7 +21,7 @@ set -o nounset
 set -o pipefail
 
 if [ "$TLS_DISABLED" == "True" ]; then
-  exit 0
+    exit 0
 fi
 
 if [[ -z "${KUBE_NODE_PUBLIC_IP}" ]]; then
@@ -33,11 +33,11 @@ fi
 
 sans="IP:${KUBE_NODE_PUBLIC_IP},IP:${KUBE_NODE_IP}"
 if [ "${KUBE_NODE_PUBLIC_IP}" != "${KUBE_API_PUBLIC_ADDRESS}" ] \
-  && [ -n "${KUBE_API_PUBLIC_ADDRESS}" ]; then
+        && [ -n "${KUBE_API_PUBLIC_ADDRESS}" ]; then
     sans="${sans},IP:${KUBE_API_PUBLIC_ADDRESS}"
 fi
 if [ "${KUBE_NODE_IP}" != "${KUBE_API_PRIVATE_ADDRESS}" ] \
-  && [ -n "${KUBE_API_PRIVATE_ADDRESS}" ]; then
+        && [ -n "${KUBE_API_PRIVATE_ADDRESS}" ]; then
     sans="${sans},IP:${KUBE_API_PRIVATE_ADDRESS}"
 fi
 MASTER_HOSTNAME=${MASTER_HOSTNAME:-}
@@ -91,8 +91,8 @@ USER_TOKEN=`curl -k -s -i -X POST -H "$content_type" -d "$auth_json" $url \
 
 # Get CA certificate for this cluster
 curl -k -X GET \
-  -H "X-Auth-Token: $USER_TOKEN" \
-  $MAGNUM_URL/certificates/$CLUSTER_UUID | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > ${CA_CERT}
+    -H "X-Auth-Token: $USER_TOKEN" \
+    $MAGNUM_URL/certificates/$CLUSTER_UUID | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > ${CA_CERT}
 
 # Create config for server's csr
 cat > ${cert_conf_dir}/server.conf <<EOF
