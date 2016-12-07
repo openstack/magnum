@@ -8,7 +8,7 @@ resource_registry:
   "Magnum::Optional::Neutron::LBaaS::Listener": "OS::Heat::None"
   "Magnum::Optional::Neutron::LBaaS::Pool": "OS::Heat::None"
   "Magnum::Optional::Neutron::LBaaS::HealthMonitor": "OS::Heat::None"
-  "Magnum::Optional::Neutron::FloatingIP": "OS::Heat::None"
+  "Magnum::Optional::Neutron::LBaaS::FloatingIP": "OS::Heat::None"
 
   # Master node template
   "Magnum::Optional::Neutron::LBaaS::PoolMember": "OS::Heat::None"
