@@ -237,7 +237,7 @@ resources:
   api_lb:
     type: ../../common/templates/lb.yaml
     properties:
-      fixed_subnet: {get_param: fixed_subnet}
+      fixed_subnet: {get_resource: fixed_subnet}
       external_network: {get_param: external_network}
       protocol: {get_param: loadbalancing_protocol}
       port: {get_param: kubernetes_port}
@@ -245,7 +245,7 @@ resources:
   etcd_lb:
     type: ../../common/templates/lb.yaml
     properties:
-      fixed_subnet: {get_param: fixed_subnet}
+      fixed_subnet: {get_resource: fixed_subnet}
       external_network: {get_param: external_network}
       protocol: HTTP
       port: 2379
@@ -297,15 +297,15 @@ resources:
   api_address_lb_switch:
     type: Magnum::ApiGatewaySwitcher
     properties:
-      pool_public_ip: {get_attr: [api_pool_floating, floating_ip_address]}
-      pool_private_ip: {get_attr: [api_loadbalancer, vip_address]}
+      pool_public_ip: {get_attr: [api_lb, floating_address]}
+      pool_private_ip: {get_attr: [api_lb, address]}
       master_public_ip: {get_attr: [kube_masters, resource.0.kube_master_external_ip]}
       master_private_ip: {get_attr: [kube_masters, resource.0.kube_master_ip]}
 
   etcd_address_lb_switch:
     type: Magnum::ApiGatewaySwitcher
     properties:
-      pool_private_ip: {get_attr: [etcd_loadbalancer, vip_address]}
+      pool_private_ip: {get_attr: [etcd_lb, address]}
       master_private_ip: {get_attr: [kube_masters, resource.0.kube_master_ip]}
 
   ######################################################################
