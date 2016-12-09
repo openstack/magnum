@@ -11,7 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-from magnum.drivers.common import template_def
+from magnum.drivers.heat import template_def
 from oslo_config import cfg
 
 CONF = cfg.CONF

@@ -12,7 +12,7 @@
 
 from oslo_config import cfg
 
-from magnum.drivers.common import template_def
+from magnum.drivers.heat import template_def
 
 CONF = cfg.CONF
 

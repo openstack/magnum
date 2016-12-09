@@ -12,47 +12,25 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import os
+import abc
+import six
 
-from heatclient.common import template_utils
 from oslo_config import cfg
 from oslo_log import log as logging
 from pkg_resources import iter_entry_points
 from stevedore import driver
 
 from magnum.common import exception
-from magnum.common import short_id
-from magnum.conductor import utils as conductor_utils
 
 
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 
 
-def _extract_template_definition(context, cluster, scale_manager=None):
-    cluster_template = conductor_utils.retrieve_cluster_template(context,
-                                                                 cluster)
-    cluster_driver = Driver().get_driver(cluster_template.server_type,
-                                         cluster_template.cluster_distro,
-                                         cluster_template.coe)
-    definition = cluster_driver.get_template_definition()
-    return definition.extract_definition(context, cluster_template, cluster,
-                                         scale_manager=scale_manager)
-
-
-def _get_env_files(template_path, env_rel_paths):
-    template_dir = os.path.dirname(template_path)
-    env_abs_paths = [os.path.join(template_dir, f) for f in env_rel_paths]
-    environment_files = []
-    env_map, merged_env = (
-        template_utils.process_multiple_environments_and_files(
-            env_paths=env_abs_paths, env_list_tracker=environment_files))
-    return environment_files, env_map
-
-
+@six.add_metaclass(abc.ABCMeta)
 class Driver(object):
+
     definitions = None
-    provides = list()
 
     @classmethod
     def load_entry_points(cls):
@@ -96,7 +74,7 @@ class Driver(object):
         if not cls.definitions:
             cls.definitions = dict()
             for entry_point, def_class in cls.load_entry_points():
-                for cluster_type in def_class.provides:
+                for cluster_type in def_class().provides:
                     cluster_type_tuple = (cluster_type['server_type'],
                                           cluster_type['os'],
                                           cluster_type['coe'])
@@ -157,55 +135,26 @@ class Driver(object):
         return driver.DriverManager("magnum.drivers",
                                     driver_info['entry_point_name']).driver()
 
-    def create_stack(self, context, osc, cluster, cluster_create_timeout):
-        template_path, heat_params, env_files = (
-            _extract_template_definition(context, cluster))
+    @abc.abstractproperty
+    def provides(self):
+        '''return a list of (server_type, os, coe) tuples
 
-        tpl_files, template = template_utils.get_template_contents(
-            template_path)
+           Returns a list of cluster configurations supported by this driver
+        '''
+        raise NotImplementedError("Subclasses must implement 'provides'.")
 
-        environment_files, env_map = _get_env_files(template_path, env_files)
-        tpl_files.update(env_map)
+    @abc.abstractmethod
+    def create_cluster(self, context, cluster, cluster_create_timeout):
+        raise NotImplementedError("Subclasses must implement "
+                                  "'create_cluster'.")
 
-        # Make sure no duplicate stack name
-        stack_name = '%s-%s' % (cluster.name, short_id.generate_id())
-        if cluster_create_timeout:
-            heat_timeout = cluster_create_timeout
-        else:
-            # no cluster_create_timeout value was passed in to the request
-            # so falling back on configuration file value
-            heat_timeout = cfg.CONF.cluster_heat.create_timeout
-        fields = {
-            'stack_name': stack_name,
-            'parameters': heat_params,
-            'environment_files': environment_files,
-            'template': template,
-            'files': tpl_files,
-            'timeout_mins': heat_timeout
-        }
-        created_stack = osc.heat().stacks.create(**fields)
+    @abc.abstractmethod
+    def update_cluster(self, context, cluster, scale_manager=None,
+                       rollback=False):
+        raise NotImplementedError("Subclasses must implement "
+                                  "'update_cluster'.")
 
-        return created_stack
-
-    def update_stack(self, context, osc, cluster, scale_manager=None,
-                     rollback=False):
-        template_path, heat_params, env_files = _extract_template_definition(
-            context, cluster, scale_manager=scale_manager)
-
-        tpl_files, template = template_utils.get_template_contents(
-            template_path)
-        environment_files, env_map = _get_env_files(template_path, env_files)
-        tpl_files.update(env_map)
-
-        fields = {
-            'parameters': heat_params,
-            'environment_files': environment_files,
-            'template': template,
-            'files': tpl_files,
-            'disable_rollback': not rollback
-        }
-
-        return osc.heat().stacks.update(cluster.stack_id, **fields)
-
-    def delete_stack(self, context, osc, cluster):
-        osc.heat().stacks.delete(cluster.stack_id)
+    @abc.abstractmethod
+    def delete_cluster(self, context, cluster):
+        raise NotImplementedError("Subclasses must implement "
+                                  "'delete_cluster'.")

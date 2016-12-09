@@ -14,8 +14,8 @@
 import os
 
 import magnum.conf
-from magnum.drivers.common import k8s_template_def
-from magnum.drivers.common import template_def
+from magnum.drivers.heat import k8s_template_def
+from magnum.drivers.heat import template_def
 
 CONF = magnum.conf.CONF
 

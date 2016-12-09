@@ -13,7 +13,7 @@
 # under the License.
 import os
 
-from magnum.drivers.common import swarm_fedora_template_def as sftd
+from magnum.drivers.heat import swarm_fedora_template_def as sftd
 
 
 class AtomicSwarmTemplateDefinition(sftd.SwarmFedoraTemplateDefinition):

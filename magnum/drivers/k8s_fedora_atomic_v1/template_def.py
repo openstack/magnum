@@ -15,7 +15,7 @@
 import os
 
 import magnum.conf
-from magnum.drivers.common import k8s_fedora_template_def as kftd
+from magnum.drivers.heat import k8s_fedora_template_def as kftd
 
 CONF = magnum.conf.CONF
 

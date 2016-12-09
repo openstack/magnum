@@ -20,7 +20,7 @@ import six
 from magnum.common import exception
 import magnum.conf
 from magnum.drivers.common import driver
-from magnum.drivers.common import template_def as cmn_tdef
+from magnum.drivers.heat import template_def as cmn_tdef
 from magnum.drivers.k8s_coreos_v1 import driver as k8s_coreos_dr
 from magnum.drivers.k8s_coreos_v1 import template_def as k8s_coreos_tdef
 from magnum.drivers.k8s_fedora_atomic_v1 import driver as k8sa_dr
@@ -46,7 +46,7 @@ class TemplateDefinitionTestCase(base.TestCase):
         mock_entry_points = [mock_entry_point]
         mock_iter_entry_points.return_value = mock_entry_points.__iter__()
 
-        entry_points = driver.Driver().load_entry_points()
+        entry_points = driver.Driver.load_entry_points()
 
         for (expected_entry_point,
              (actual_entry_point, loaded_cls)) in zip(mock_entry_points,
@@ -109,7 +109,7 @@ class TemplateDefinitionTestCase(base.TestCase):
 
     def test_get_driver_not_supported(self):
         self.assertRaises(exception.ClusterTypeNotSupported,
-                          driver.Driver().get_driver,
+                          driver.Driver.get_driver,
                           'vm', 'not_supported', 'kubernetes')
 
     def test_required_param_not_set(self):
@@ -222,9 +222,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.drivers.k8s_fedora_atomic_v1.template_def'
                 '.AtomicK8sTemplateDefinition.get_discovery_url')
-    @mock.patch('magnum.drivers.common.template_def.BaseTemplateDefinition'
+    @mock.patch('magnum.drivers.heat.template_def.BaseTemplateDefinition'
                 '.get_params')
-    @mock.patch('magnum.drivers.common.template_def.TemplateDefinition'
+    @mock.patch('magnum.drivers.heat.template_def.TemplateDefinition'
                 '.get_output')
     def test_k8s_get_params(self, mock_get_output, mock_get_params,
                             mock_get_discovery_url, mock_osc_class):
@@ -276,11 +276,11 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
                                                 **expected_kwargs)
 
     @mock.patch('magnum.common.clients.OpenStackClients')
-    @mock.patch('magnum.drivers.common.template_def'
+    @mock.patch('magnum.drivers.heat.template_def'
                 '.BaseTemplateDefinition.get_discovery_url')
-    @mock.patch('magnum.drivers.common.template_def.BaseTemplateDefinition'
+    @mock.patch('magnum.drivers.heat.template_def.BaseTemplateDefinition'
                 '.get_params')
-    @mock.patch('magnum.drivers.common.template_def.TemplateDefinition'
+    @mock.patch('magnum.drivers.heat.template_def.TemplateDefinition'
                 '.get_output')
     def test_k8s_get_params_insecure(self, mock_get_output, mock_get_params,
                                      mock_get_discovery_url, mock_osc_class):
@@ -689,9 +689,9 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.drivers.swarm_fedora_atomic_v1.template_def'
                 '.AtomicSwarmTemplateDefinition.get_discovery_url')
-    @mock.patch('magnum.drivers.common.template_def.BaseTemplateDefinition'
+    @mock.patch('magnum.drivers.heat.template_def.BaseTemplateDefinition'
                 '.get_params')
-    @mock.patch('magnum.drivers.common.template_def.TemplateDefinition'
+    @mock.patch('magnum.drivers.heat.template_def.TemplateDefinition'
                 '.get_output')
     def test_swarm_get_params(self, mock_get_output, mock_get_params,
                               mock_get_discovery_url, mock_osc_class):
@@ -859,9 +859,9 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
 class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
 
     @mock.patch('magnum.common.clients.OpenStackClients')
-    @mock.patch('magnum.drivers.common.template_def.BaseTemplateDefinition'
+    @mock.patch('magnum.drivers.heat.template_def.BaseTemplateDefinition'
                 '.get_params')
-    @mock.patch('magnum.drivers.common.template_def.TemplateDefinition'
+    @mock.patch('magnum.drivers.heat.template_def.TemplateDefinition'
                 '.get_output')
     def test_mesos_get_params(self, mock_get_output, mock_get_params,
                               mock_osc_class):
