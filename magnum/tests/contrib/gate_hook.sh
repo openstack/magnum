@@ -21,6 +21,18 @@ special=$2
 export PROJECTS="openstack/barbican $PROJECTS"
 export DEVSTACK_LOCAL_CONFIG="enable_plugin heat git://git.openstack.org/openstack/heat"
 
+export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service horizon"
+export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service s-account"
+export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service s-container"
+export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service s-object"
+export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service s-proxy"
+export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service ceilometer-acentral"
+export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service ceilometer-acompute"
+export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service ceilometer-alarm-evaluator"
+export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service ceilometer-alarm-notifier"
+export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service ceilometer-api"
+export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service ceilometer-collector"
+
 if [ "$coe" = "mesos" ]; then
     echo "MAGNUM_GUEST_IMAGE_URL=https://fedorapeople.org/groups/magnum/ubuntu-mesos-latest.qcow2" >> $BASE/new/devstack/localrc
 elif [ "$coe" = "k8s-coreos" ]; then
