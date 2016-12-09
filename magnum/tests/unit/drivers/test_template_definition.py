@@ -254,6 +254,10 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         flannel_subnet = mock_cluster_template.labels.get(
             'flannel_network_subnetlen')
         flannel_backend = mock_cluster_template.labels.get('flannel_backend')
+        system_pods_initial_delay = mock_cluster_template.labels.get(
+            'system_pods_initial_delay')
+        system_pods_timeout = mock_cluster_template.labels.get(
+            'system_pods_timeout')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -266,6 +270,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'flannel_network_cidr': flannel_cidr,
             'flannel_network_subnetlen': flannel_subnet,
             'flannel_backend': flannel_backend,
+            'system_pods_initial_delay': system_pods_initial_delay,
+            'system_pods_timeout': system_pods_timeout,
             'username': 'fake_user',
             'tenant_name': 'fake_tenant',
             'magnum_url': mock_osc.magnum_url.return_value,
@@ -310,6 +316,10 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         flannel_subnet = mock_cluster_template.labels.get(
             'flannel_network_subnetlen')
         flannel_backend = mock_cluster_template.labels.get('flannel_backend')
+        system_pods_initial_delay = mock_cluster_template.labels.get(
+            'system_pods_initial_delay')
+        system_pods_timeout = mock_cluster_template.labels.get(
+            'system_pods_timeout')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -322,6 +332,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'flannel_network_cidr': flannel_cidr,
             'flannel_network_subnetlen': flannel_subnet,
             'flannel_backend': flannel_backend,
+            'system_pods_initial_delay': system_pods_initial_delay,
+            'system_pods_timeout': system_pods_timeout,
             'username': 'fake_user',
             'tenant_name': 'fake_tenant',
             'magnum_url': mock_osc.magnum_url.return_value,

@@ -63,6 +63,20 @@ parameters:
     constraints:
       - allowed_values: ["udp", "vxlan", "host-gw"]
 
+  system_pods_initial_delay:
+    type: number
+    description: >
+      health check, time to wait for system pods (podmaster, scheduler) to boot
+      (in seconds)
+    default: 30
+
+  system_pods_timeout:
+    type: number
+    description: >
+      health check, timeout for system pods (podmaster, scheduler) to answer.
+      (in seconds)
+    default: 5
+
   fixed_network:
     type: string
     description: Network from which to allocate fixed addresses.
@@ -199,6 +213,8 @@ resources:
             "$FLANNEL_NETWORK_CIDR": {get_param: flannel_network_cidr}
             "$FLANNEL_NETWORK_SUBNETLEN": {get_param: flannel_network_subnetlen}
             "$FLANNEL_BACKEND": {get_param: flannel_backend}
+            "$SYSTEM_PODS_INITIAL_DELAY": {get_param: system_pods_initial_delay}
+            "$SYSTEM_PODS_TIMEOUT": {get_param: system_pods_timeout}
             "$PORTAL_NETWORK_CIDR": {get_param: portal_network_cidr}
             "$CLUSTER_SUBNET": {get_param: fixed_subnet}
             "$ETCD_DISCOVERY_URL": {get_param: discovery_url}

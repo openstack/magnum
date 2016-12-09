@@ -17,5 +17,9 @@ class TestCoreosKubernetesAPIs(base.BaseK8sTest):
     cluster_template_kwargs = {
         "tls_disabled": True,
         "network_driver": 'flannel',
-        "volume_driver": None
+        "volume_driver": None,
+        "labels": {
+            "system_pods_initial_delay": 3600,
+            "system_pods_timeout": 600
+        }
     }

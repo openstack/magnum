@@ -22,4 +22,8 @@ class TestFedoraKubernetesIronicAPIs(base.BaseK8sTest):
         "fixed_subnet": 'private-subnet',
         "server_type": 'bm',
         "docker_storage_driver": 'overlay',
+        "labels": {
+            "system_pods_initial_delay": 3600,
+            "system_pods_timeout": 600
+        }
     }

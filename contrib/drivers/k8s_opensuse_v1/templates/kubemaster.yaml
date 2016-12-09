@@ -66,6 +66,20 @@ parameters:
     constraints:
       - allowed_values: ["udp", "vxlan", "host-gw"]
 
+  system_pods_initial_delay:
+    type: number
+    description: >
+      health check, time to wait for system pods (podmaster, scheduler) to boot
+      (in seconds)
+    default: 30
+
+  system_pods_timeout:
+    type: number
+    description: >
+      health check, timeout for system pods (podmaster, scheduler) to answer.
+      (in seconds)
+    default: 5
+
   discovery_url:
     type: string
     description: >
@@ -210,6 +224,8 @@ resources:
             "$FLANNEL_NETWORK_SUBNET_MIN": {get_param: flannel_network_subnet_min}
             "$FLANNEL_NETWORK_SUBNET_MAX": {get_param: flannel_network_subnet_max}
             "$FLANNEL_BACKEND": {get_param: flannel_backend}
+            "$SYSTEM_PODS_INITIAL_DELAY": {get_param: system_pods_initial_delay}
+            "$SYSTEM_PODS_TIMEOUT": {get_param: system_pods_timeout}
             "$PORTAL_NETWORK_CIDR": {get_param: portal_network_cidr}
             "$ETCD_DISCOVERY_URL": {get_param: discovery_url}
             "$AUTH_URL": {get_param: auth_url}

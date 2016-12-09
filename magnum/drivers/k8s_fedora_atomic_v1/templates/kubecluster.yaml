@@ -89,6 +89,20 @@ parameters:
     constraints:
       - allowed_values: ["udp", "vxlan", "host-gw"]
 
+  system_pods_initial_delay:
+    type: number
+    description: >
+      health check, time to wait for system pods (podmaster, scheduler) to boot
+      (in seconds)
+    default: 30
+
+  system_pods_timeout:
+    type: number
+    description: >
+      health check, timeout for system pods (podmaster, scheduler) to answer.
+      (in seconds)
+    default: 5
+
   kube_allow_priv:
     type: string
     description: >
@@ -411,6 +425,8 @@ resources:
           flannel_network_cidr: {get_param: flannel_network_cidr}
           flannel_network_subnetlen: {get_param: flannel_network_subnetlen}
           flannel_backend: {get_param: flannel_backend}
+          system_pods_initial_delay: {get_param: system_pods_initial_delay}
+          system_pods_timeout: {get_param: system_pods_timeout}
           portal_network_cidr: {get_param: portal_network_cidr}
           discovery_url: {get_param: discovery_url}
           cluster_uuid: {get_param: cluster_uuid}

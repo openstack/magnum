@@ -56,8 +56,8 @@ $(generate_pod_args "    - " $KUBE_LOGTOSTDERR $KUBE_LOG_LEVEL $KUBE_MASTER $KUB
         host: 127.0.0.1
         path: /healthz
         port: 10252
-      initialDelaySeconds: 15
-      timeoutSeconds: 1
+      initialDelaySeconds: ${SYSTEM_PODS_INITIAL_DELAY}
+      timeoutSeconds: ${SYSTEM_PODS_TIMEOUT}
     volumeMounts:
     - mountPath: /etc/ssl/certs
       name: ssl-certs-host
@@ -108,8 +108,8 @@ $(generate_pod_args "    - " $KUBE_LOGTOSTDERR $KUBE_LOG_LEVEL $KUBE_MASTER $KUB
         host: 127.0.0.1
         path: /healthz
         port: 10251
-      initialDelaySeconds: 15
-      timeoutSeconds: 1
+      initialDelaySeconds: ${SYSTEM_PODS_INITIAL_DELAY}
+      timeoutSeconds: ${SYSTEM_PODS_TIMEOUT}
     volumeMounts:
     - mountPath: /etc/ssl/certs
       name: ssl-certs-host
