@@ -246,11 +246,11 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/fragments/configure-docker-registry.sh}
 
-  write_docker_service:
+  add_docker_daemon_options:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
-      config: {get_file: ../../common/templates/swarm/fragments/write-docker-service.sh}
+      config: {get_file: ../../common/templates/swarm/fragments/add-docker-daemon-options.sh}
 
   write_docker_socket:
     type: "OS::Heat::SoftwareConfig"
@@ -335,7 +335,7 @@ resources:
         - config: {get_resource: configure_docker_registry}
         - config: {get_resource: write_swarm_agent_failure_service}
         - config: {get_resource: write_swarm_agent_service}
-        - config: {get_resource: write_docker_service}
+        - config: {get_resource: add_docker_daemon_options}
         - config: {get_resource: write_docker_socket}
         - config: {get_resource: add_proxy}
         - config: {get_resource: enable_docker_registry}

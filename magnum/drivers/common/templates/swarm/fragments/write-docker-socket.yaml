@@ -9,6 +9,7 @@ write_files:
       Description=Docker Socket for the API
       PartOf=docker.service
       After=docker-storage-setup.service
+      Before=docker.service
 
       [Socket]
       ListenStream=/var/run/docker.sock

@@ -282,11 +282,11 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/swarm/fragments/make-cert.py}
 
-  write_docker_service:
+  add_docker_daemon_options:
     type: "OS::Heat::SoftwareConfig"
     properties:
       group: ungrouped
-      config: {get_file: ../../common/templates/swarm/fragments/write-docker-service.sh}
+      config: {get_file: ../../common/templates/swarm/fragments/add-docker-daemon-options.sh}
 
   write_swarm_manager_failure_service:
     type: "OS::Heat::SoftwareConfig"
@@ -373,7 +373,7 @@ resources:
         - config: {get_resource: network_service}
         - config: {get_resource: configure_docker_storage}
         - config: {get_resource: write_swarm_manager_failure_service}
-        - config: {get_resource: write_docker_service}
+        - config: {get_resource: add_docker_daemon_options}
         - config: {get_resource: write_docker_socket}
         - config: {get_resource: write_swarm_master_service}
         - config: {get_resource: add_proxy}
