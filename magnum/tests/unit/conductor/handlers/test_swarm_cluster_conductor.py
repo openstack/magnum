@@ -435,7 +435,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
         mock_retrieve_cluster_template.return_value = \
             cluster_template
         mock_driver.return_value = swarm_dr.Driver()
-        poller = heat_driver.HeatPoller(mock_openstack_client, cluster,
+        poller = heat_driver.HeatPoller(mock_openstack_client,
+                                        mock.MagicMock(), cluster,
                                         swarm_dr.Driver())
         poller.get_version_info = mock.MagicMock()
         return (mock_heat_stack, cluster, poller)

@@ -22,6 +22,7 @@ from heatclient.common import template_utils
 from heatclient import exc as heatexc
 
 from magnum.common import clients
+from magnum.common import context as mag_ctx
 from magnum.common import exception
 from magnum.common import short_id
 from magnum.conductor.handlers.common import cert_manager
@@ -73,7 +74,9 @@ class HeatDriver(driver.Driver):
         raise NotImplementedError("Must implement 'get_template_definition'")
 
     def update_cluster_status(self, context, cluster):
-        poller = HeatPoller(clients.OpenStackClients(context), cluster, self)
+        stack_ctx = mag_ctx.make_cluster_context(cluster)
+        poller = HeatPoller(clients.OpenStackClients(stack_ctx), context,
+                            cluster, self)
         poller.poll_and_check()
 
     def create_cluster(self, context, cluster, cluster_create_timeout):
@@ -151,9 +154,9 @@ class HeatDriver(driver.Driver):
 
 class HeatPoller(object):
 
-    def __init__(self, openstack_client, cluster, cluster_driver):
+    def __init__(self, openstack_client, context, cluster, cluster_driver):
         self.openstack_client = openstack_client
-        self.context = self.openstack_client.context
+        self.context = context
         self.cluster = cluster
         self.cluster_template = conductor_utils.retrieve_cluster_template(
             self.context, cluster)
