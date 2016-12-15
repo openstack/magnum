@@ -84,9 +84,23 @@ parameters:
   api_public_address:
     type: string
     description: Public IP address of the Kubernetes master server.
+
   api_private_address:
     type: string
     description: Private IP address of the Kubernetes master server.
+
+  http_proxy:
+    type: string
+    description: http proxy address for docker
+
+  https_proxy:
+    type: string
+    description: https proxy address for docker
+
+  no_proxy:
+    type: string
+    description: no proxies for docker
+
   fixed_network:
     type: string
     description: Network from which to allocate fixed addresses.
@@ -184,6 +198,9 @@ resources:
             "$TLS_DISABLED": {get_param: tls_disabled}
             "$CLUSTER_UUID": {get_param: cluster_uuid}
             "$MAGNUM_URL": {get_param: magnum_url}
+            "$HTTP_PROXY": {get_param: http_proxy}
+            "$HTTPS_PROXY": {get_param: https_proxy}
+            "$NO_PROXY": {get_param: no_proxy}
 
   configure_etcd:
     type: OS::Heat::SoftwareConfig
@@ -209,6 +226,12 @@ resources:
       group: ungrouped
       config: {get_file: fragments/configure-kubernetes-master.sh}
 
+  add_proxy:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/add-proxy.sh}
+
   master_wc_notify:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -230,6 +253,7 @@ resources:
         - config: {get_resource: configure_flanneld}
         - config: {get_resource: create_kubernetes_user}
         - config: {get_resource: configure_kubernetes}
+        - config: {get_resource: add_proxy}
         - config: {get_resource: master_wc_notify}
 
   ######################################################################

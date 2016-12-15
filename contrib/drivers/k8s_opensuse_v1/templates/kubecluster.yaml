@@ -229,6 +229,21 @@ parameters:
     type: string
     description: endpoint to retrieve TLS certs from
 
+  http_proxy:
+    type: string
+    description: http proxy address for docker
+    default: ""
+
+  https_proxy:
+    type: string
+    description: https proxy address for docker
+    default: ""
+
+  no_proxy:
+    type: string
+    description: no proxies for docker
+    default: ""
+
   trustee_domain_id:
     type: string
     description: domain id of the trustee
@@ -414,6 +429,9 @@ resources:
           discovery_url: {get_param: discovery_url}
           cluster_uuid: {get_param: cluster_uuid}
           magnum_url: {get_param: magnum_url}
+          http_proxy: {get_param: http_proxy}
+          https_proxy: {get_param: https_proxy}
+          no_proxy: {get_param: no_proxy}
           fixed_network: {get_resource: fixed_network}
           fixed_subnet: {get_resource: fixed_subnet}
           api_pool_id: {get_resource: api_pool}
@@ -469,6 +487,9 @@ resources:
           registry_chunksize: {get_param: registry_chunksize}
           cluster_uuid: {get_param: cluster_uuid}
           magnum_url: {get_param: magnum_url}
+          http_proxy: {get_param: http_proxy}
+          https_proxy: {get_param: https_proxy}
+          no_proxy: {get_param: no_proxy}
           kubernetes_port: {get_param: kubernetes_port}
           tls_disabled: {get_param: tls_disabled}
           secgroup_kube_minion_id: {get_resource: secgroup_kube_minion}
