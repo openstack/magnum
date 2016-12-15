@@ -303,7 +303,7 @@ resources:
       replacement_policy: AUTO
 
   kube_minion_floating:
-    type: OS::Neutron::FloatingIP
+    type: Magnum::Optional::KubeMinion::Neutron::FloatingIP
     properties:
       floating_network: {get_param: external_network}
       port_id: {get_resource: kube_minion_eth0}

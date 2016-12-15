@@ -440,6 +440,18 @@ resources:
 
   ######################################################################
   #
+  # resources that expose the IPs of either floating ip or a given
+  # fixed ip depending on whether FloatingIP is enabled for the cluster.
+  #
+
+  api_address_floating_switch:
+    type: Magnum::FloatingIPAddressSwitcher
+    properties:
+      public_ip: {get_attr: [api_address_lb_switch, public_ip]}
+      private_ip: {get_attr: [api_address_lb_switch, private_ip]}
+
+  ######################################################################
+  #
   # kubernetes masters. This is a resource group that will create
   # <number_of_masters> masters.
   #
@@ -542,7 +554,7 @@ outputs:
       str_replace:
         template: api_ip_address
         params:
-          api_ip_address: {get_attr: [api_address_switch, public_ip]}
+          api_ip_address: {get_attr: [api_address_floating_switch, ip_address]}
     description: >
       This is the API endpoint of the Kubernetes cluster. Use this to access
       the Kubernetes API.
