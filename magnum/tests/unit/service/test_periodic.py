@@ -22,6 +22,7 @@ from magnum import objects
 from magnum.objects.fields import ClusterStatus as cluster_status
 from magnum.service import periodic
 from magnum.tests import base
+from magnum.tests import fake_notifier
 from magnum.tests import fakes
 from magnum.tests.unit.db import utils
 
@@ -151,6 +152,8 @@ class PeriodicTestCase(base.TestCase):
         self.assertEqual(cluster_status.ROLLBACK_COMPLETE,
                          self.cluster5.status)
         self.assertEqual('fake_reason_55', self.cluster5.status_reason)
+        notifications = fake_notifier.NOTIFICATIONS
+        self.assertEqual(4, len(notifications))
 
     @mock.patch('oslo_service.loopingcall.FixedIntervalLoopingCall',
                 new=fakes.FakeLoopingCall)
@@ -180,6 +183,8 @@ class PeriodicTestCase(base.TestCase):
         self.assertEqual(cluster_status.ROLLBACK_IN_PROGRESS,
                          self.cluster5.status)
         self.assertEqual('no change', self.cluster5.status_reason)
+        notifications = fake_notifier.NOTIFICATIONS
+        self.assertEqual(0, len(notifications))
 
     @mock.patch('oslo_service.loopingcall.FixedIntervalLoopingCall',
                 new=fakes.FakeLoopingCall)
@@ -208,6 +213,8 @@ class PeriodicTestCase(base.TestCase):
             mock.call(self.cluster4.uuid)
         ])
         self.assertEqual(2, mock_db_destroy.call_count)
+        notifications = fake_notifier.NOTIFICATIONS
+        self.assertEqual(5, len(notifications))
 
     @mock.patch('magnum.conductor.monitors.create_monitor')
     @mock.patch('magnum.objects.Cluster.list')
