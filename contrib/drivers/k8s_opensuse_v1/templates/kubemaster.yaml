@@ -84,10 +84,12 @@ parameters:
   api_public_address:
     type: string
     description: Public IP address of the Kubernetes master server.
+    default: ""
 
   api_private_address:
     type: string
     description: Private IP address of the Kubernetes master server.
+    default: ""
 
   http_proxy:
     type: string
@@ -165,6 +167,20 @@ resources:
     properties:
       handle: {get_resource: master_wait_handle}
       timeout: {get_param: wait_condition_timeout}
+
+  ######################################################################
+  #
+  # resource that exposes the IPs of either the kube master or the API
+  # LBaaS pool depending on whether LBaaS is enabled for the bay.
+  #
+
+  api_address_switch:
+    type: Magnum::ApiGatewaySwitcher
+    properties:
+      pool_public_ip: {get_param: api_public_address}
+      pool_private_ip: {get_param: api_private_address}
+      master_public_ip: {get_attr: [kube_master_floating, floating_ip_address]}
+      master_private_ip: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
 
   ######################################################################
   #
@@ -292,17 +308,19 @@ resources:
       port_id: {get_resource: kube_master_eth0}
 
   api_pool_member:
-    type: OS::Neutron::PoolMember
+    type: Magnum::Optional::Neutron::LBaaS::PoolMember
     properties:
-      pool_id: {get_param: api_pool_id}
+      pool: {get_param: api_pool_id}
       address: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
+      subnet: { get_param: fixed_subnet }
       protocol_port: {get_param: kubernetes_port}
 
   etcd_pool_member:
-    type: OS::Neutron::PoolMember
+    type: Magnum::Optional::Neutron::LBaaS::PoolMember
     properties:
-      pool_id: {get_param: etcd_pool_id}
+      pool: {get_param: etcd_pool_id}
       address: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
+      subnet: { get_param: fixed_subnet }
       protocol_port: 2379
 
 outputs:
