@@ -1,0 +1,60 @@
+heat_template_version: 2014-10-16
+
+description: >
+  Creates network resources for the cluster. allocate a network and
+  router for our server.
+
+parameters:
+
+  fixed_network_cidr:
+    type: string
+    description: network range for fixed ip network
+
+  fixed_network_name:
+    type: string
+    description: fixed network name
+    default: ""
+
+  dns_nameserver:
+    type: string
+    description: address of a dns nameserver reachable in your environment
+
+  external_network:
+    type: string
+    description: uuid/name of a network to use for floating ip addresses
+
+resources:
+  fixed_network:
+    type: OS::Neutron::Net
+    properties:
+      name: {get_param: fixed_network_name}
+
+  fixed_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      cidr: {get_param: fixed_network_cidr}
+      network: {get_resource: fixed_network}
+      dns_nameservers:
+        - {get_param: dns_nameserver}
+
+  extrouter:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: {get_param: external_network}
+
+  extrouter_inside:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: {get_resource: extrouter}
+      subnet: {get_resource: fixed_subnet}
+
+outputs:
+    fixed_network:
+      description: >
+        Created fixed network ID
+      value: {get_resource: fixed_network}
+    fixed_subnet:
+      description: >
+        Created fixed subnet ID
+      value: {get_resource: fixed_subnet}
