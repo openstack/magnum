@@ -17,10 +17,10 @@ import six
 
 from oslo_config import cfg
 from oslo_log import log as logging
-from oslo_service import loopingcall
 from oslo_utils import importutils
 
 from heatclient.common import template_utils
+from heatclient import exc as heatexc
 
 from magnum.common import clients
 from magnum.common import exception
@@ -71,6 +71,10 @@ class HeatDriver(driver.Driver):
         '''
 
         raise NotImplementedError("Must implement 'get_template_definition'")
+
+    def update_cluster_status(self, context, cluster):
+        poller = HeatPoller(clients.OpenStackClients(context), cluster, self)
+        poller.poll_and_check()
 
     def create_cluster(self, context, cluster, cluster_create_timeout):
         stack = self._create_stack(context, clients.OpenStackClients(context),
@@ -147,11 +151,21 @@ class HeatDriver(driver.Driver):
 
 class HeatPoller(object):
 
+    status_to_event = {
+        fields.ClusterStatus.DELETE_COMPLETE: taxonomy.ACTION_DELETE,
+        fields.ClusterStatus.CREATE_COMPLETE: taxonomy.ACTION_CREATE,
+        fields.ClusterStatus.UPDATE_COMPLETE: taxonomy.ACTION_UPDATE,
+        fields.ClusterStatus.ROLLBACK_COMPLETE: taxonomy.ACTION_UPDATE,
+        fields.ClusterStatus.CREATE_FAILED: taxonomy.ACTION_CREATE,
+        fields.ClusterStatus.DELETE_FAILED: taxonomy.ACTION_DELETE,
+        fields.ClusterStatus.UPDATE_FAILED: taxonomy.ACTION_UPDATE,
+        fields.ClusterStatus.ROLLBACK_FAILED: taxonomy.ACTION_UPDATE
+    }
+
     def __init__(self, openstack_client, cluster, cluster_driver):
         self.openstack_client = openstack_client
         self.context = self.openstack_client.context
         self.cluster = cluster
-        self.attempts = 0
         self.cluster_template = conductor_utils.retrieve_cluster_template(
             self.context, cluster)
         self.template_def = cluster_driver.get_template_definition()
@@ -159,34 +173,29 @@ class HeatPoller(object):
     def poll_and_check(self):
         # TODO(yuanying): temporary implementation to update api_address,
         # node_addresses and cluster status
-        stack = self.openstack_client.heat().stacks.get(self.cluster.stack_id)
-        self.attempts += 1
-        status_to_event = {
-            fields.ClusterStatus.DELETE_COMPLETE: taxonomy.ACTION_DELETE,
-            fields.ClusterStatus.CREATE_COMPLETE: taxonomy.ACTION_CREATE,
-            fields.ClusterStatus.UPDATE_COMPLETE: taxonomy.ACTION_UPDATE,
-            fields.ClusterStatus.ROLLBACK_COMPLETE: taxonomy.ACTION_UPDATE,
-            fields.ClusterStatus.CREATE_FAILED: taxonomy.ACTION_CREATE,
-            fields.ClusterStatus.DELETE_FAILED: taxonomy.ACTION_DELETE,
-            fields.ClusterStatus.UPDATE_FAILED: taxonomy.ACTION_UPDATE,
-            fields.ClusterStatus.ROLLBACK_FAILED: taxonomy.ACTION_UPDATE
-        }
+        try:
+            stack = self.openstack_client.heat().stacks.get(
+                self.cluster.stack_id)
+        except heatexc.NotFound:
+            self._sync_missing_heat_stack()
+            return
+
         # poll_and_check is detached and polling long time to check status,
         # so another user/client can call delete cluster/stack.
         if stack.stack_status == fields.ClusterStatus.DELETE_COMPLETE:
             self._delete_complete()
+            # TODO(randall): Move the status notification up the stack
             conductor_utils.notify_about_cluster_operation(
-                self.context, status_to_event[stack.stack_status],
+                self.context, self.status_to_event[stack.stack_status],
                 taxonomy.OUTCOME_SUCCESS)
-            raise loopingcall.LoopingCallDone()
 
         if stack.stack_status in (fields.ClusterStatus.CREATE_COMPLETE,
                                   fields.ClusterStatus.UPDATE_COMPLETE):
             self._sync_cluster_and_template_status(stack)
+            # TODO(randall): Move the status notification up the stack
             conductor_utils.notify_about_cluster_operation(
-                self.context, status_to_event[stack.stack_status],
+                self.context, self.status_to_event[stack.stack_status],
                 taxonomy.OUTCOME_SUCCESS)
-            raise loopingcall.LoopingCallDone()
         elif stack.stack_status != self.cluster.status:
             self._sync_cluster_status(stack)
 
@@ -197,30 +206,10 @@ class HeatPoller(object):
                                   fields.ClusterStatus.ROLLBACK_FAILED):
             self._sync_cluster_and_template_status(stack)
             self._cluster_failed(stack)
+            # TODO(randall): Move the status notification up the stack
             conductor_utils.notify_about_cluster_operation(
-                self.context, status_to_event[stack.stack_status],
+                self.context, self.status_to_event[stack.stack_status],
                 taxonomy.OUTCOME_FAILURE)
-            raise loopingcall.LoopingCallDone()
-        # only check max attempts when the stack is being created when
-        # the timeout hasn't been set. If the timeout has been set then
-        # the loop will end when the stack completes or the timeout occurs
-        if stack.stack_status == fields.ClusterStatus.CREATE_IN_PROGRESS:
-            if (stack.timeout_mins is None and
-               self.attempts > cfg.CONF.cluster_heat.max_attempts):
-                LOG.error(_LE('Cluster check exit after %(attempts)s attempts,'
-                              'stack_id: %(id)s, stack_status: %(status)s') %
-                          {'attempts': cfg.CONF.cluster_heat.max_attempts,
-                           'id': self.cluster.stack_id,
-                           'status': stack.stack_status})
-                raise loopingcall.LoopingCallDone()
-        else:
-            if self.attempts > cfg.CONF.cluster_heat.max_attempts:
-                LOG.error(_LE('Cluster check exit after %(attempts)s attempts,'
-                              'stack_id: %(id)s, stack_status: %(status)s') %
-                          {'attempts': cfg.CONF.cluster_heat.max_attempts,
-                           'id': self.cluster.stack_id,
-                           'status': stack.stack_status})
-                raise loopingcall.LoopingCallDone()
 
     def _delete_complete(self):
         LOG.info(_LI('Cluster has been deleted, stack_id: %s')
@@ -271,3 +260,26 @@ class HeatPoller(object):
                   {'cluster_status': stack.stack_status,
                    'stack_id': self.cluster.stack_id,
                    'reason': self.cluster.status_reason})
+
+    def _sync_missing_heat_stack(self):
+        if self.cluster.status == fields.ClusterStatus.DELETE_IN_PROGRESS:
+            self._delete_complete()
+        elif self.cluster.status == fields.ClusterStatus.CREATE_IN_PROGRESS:
+            self._sync_missing_stack(fields.ClusterStatus.CREATE_FAILED)
+        elif self.cluster.status == fields.ClusterStatus.UPDATE_IN_PROGRESS:
+            self._sync_missing_stack(fields.ClusterStatus.UPDATE_FAILED)
+
+    def _sync_missing_stack(self, new_status):
+        self.cluster.status = new_status
+        self.cluster.status_reason = _("Stack with id %s not found in "
+                                       "Heat.") % self.cluster.stack_id
+        self.cluster.save()
+        # TODO(randall): Move the status notification up the stack
+        conductor_utils.notify_about_cluster_operation(
+            self.context, self.status_to_event[self.cluster.status],
+            taxonomy.OUTCOME_FAILURE)
+        LOG.info(_LI("Cluster with id %(id)s has been set to "
+                     "%(status)s due to stack with id %(sid)s "
+                     "not found in Heat."),
+                 {'id': self.cluster.id, 'status': self.cluster.status,
+                  'sid': self.cluster.stack_id})

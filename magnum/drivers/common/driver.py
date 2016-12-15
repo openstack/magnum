@@ -21,6 +21,7 @@ from pkg_resources import iter_entry_points
 from stevedore import driver
 
 from magnum.common import exception
+from magnum.objects import cluster_template
 
 
 CONF = cfg.CONF
@@ -134,6 +135,21 @@ class Driver(object):
         # loading.
         return driver.DriverManager("magnum.drivers",
                                     driver_info['entry_point_name']).driver()
+
+    @classmethod
+    def get_driver_for_cluster(cls, context, cluster):
+        ct = cluster_template.ClusterTemplate.get_by_uuid(
+            context, cluster.cluster_template_id)
+        return cls.get_driver(ct.server_type, ct.cluster_distro, ct.coe)
+
+    def update_cluster_status(self, context, cluster):
+        '''Update the cluster status based on underlying orchestration
+
+           This is an optional method if your implementation does not need
+           to poll the orchestration for status updates (for example, your
+           driver uses some notification-based mechanism instead).
+        '''
+        return
 
     @abc.abstractproperty
     def provides(self):

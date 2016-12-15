@@ -14,7 +14,6 @@
 
 from heatclient import exc
 from oslo_log import log as logging
-from oslo_service import loopingcall
 from pycadf import cadftaxonomy as taxonomy
 import six
 
@@ -26,7 +25,6 @@ from magnum.conductor import scale_manager
 from magnum.conductor import utils as conductor_utils
 import magnum.conf
 from magnum.drivers.common import driver
-from magnum.drivers.heat import driver as heat_driver
 from magnum.i18n import _
 from magnum.i18n import _LI
 from magnum import objects
@@ -58,10 +56,8 @@ class Handler(object):
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_CREATE, taxonomy.OUTCOME_PENDING)
             # Get driver
-            ct = conductor_utils.retrieve_cluster_template(context, cluster)
-            cluster_driver = driver.Driver.get_driver(ct.server_type,
-                                                      ct.cluster_distro,
-                                                      ct.coe)
+            cluster_driver = driver.Driver.get_driver_for_cluster(context,
+                                                                  cluster)
             # Create cluster
             cluster_driver.create_cluster(context, cluster, create_timeout)
             cluster.status = fields.ClusterStatus.CREATE_IN_PROGRESS
@@ -80,7 +76,6 @@ class Handler(object):
             raise
 
         cluster.create()
-        self._poll_and_check(osc, cluster, cluster_driver)
         return cluster
 
     def cluster_update(self, context, cluster, rollback=False):
@@ -134,8 +129,6 @@ class Handler(object):
             raise
 
         cluster.save()
-        self._poll_and_check(osc, cluster, cluster_driver)
-
         return cluster
 
     def cluster_delete(self, context, uuid):
@@ -179,12 +172,4 @@ class Handler(object):
             raise
 
         cluster.save()
-        self._poll_and_check(osc, cluster, cluster_driver)
         return None
-
-    def _poll_and_check(self, osc, cluster, cluster_driver):
-        # TODO(randall): this is a temporary hack. Next patch will sort the
-        # status update checking
-        poller = heat_driver.HeatPoller(osc, cluster, cluster_driver)
-        lc = loopingcall.FixedIntervalLoopingCall(f=poller.poll_and_check)
-        lc.start(CONF.cluster_heat.wait_interval, True)

@@ -14,7 +14,6 @@
 
 import mock
 from mock import patch
-from oslo_service import loopingcall
 
 from magnum.drivers.heat import driver as heat_driver
 from magnum.drivers.mesos_ubuntu_v1 import driver as mesos_dr
@@ -328,6 +327,6 @@ class TestClusterConductorWithMesos(base.TestCase):
 
         mock_heat_stack.parameters = {'number_of_slaves': 2}
         mock_heat_stack.stack_status = cluster_status.UPDATE_COMPLETE
-        self.assertRaises(loopingcall.LoopingCallDone, poller.poll_and_check)
+        poller.poll_and_check()
 
         self.assertEqual(2, cluster.node_count)
