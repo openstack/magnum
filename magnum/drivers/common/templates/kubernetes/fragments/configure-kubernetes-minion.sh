@@ -9,9 +9,30 @@ if [ -z "$KUBE_NODE_IP" ]; then
     KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 fi
 
+CERT_DIR=/srv/kubernetes
+PROTOCOL=https
+FLANNEL_OPTIONS="-etcd-cafile $CERT_DIR/ca.crt \
+-etcd-certfile $CERT_DIR/client.crt \
+-etcd-keyfile $CERT_DIR/client.key"
+ETCD_CURL_OPTIONS="--cacert $CERT_DIR/ca.crt \
+--cert $CERT_DIR/client.crt --key $CERT_DIR/client.key"
 ETCD_SERVER_IP=${ETCD_SERVER_IP:-$KUBE_MASTER_IP}
 KUBE_PROTOCOL="https"
 KUBE_CONFIG=""
+FLANNELD_CONFIG=/etc/sysconfig/flanneld
+
+if [ "$TLS_DISABLED" = "True" ]; then
+    PROTOCOL=http
+    FLANNEL_OPTIONS=""
+    ETCD_CURL_OPTIONS=""
+fi
+
+sed -i '/FLANNEL_OPTIONS/'d $FLANNELD_CONFIG
+
+cat >> $FLANNELD_CONFIG <<EOF
+FLANNEL_OPTIONS="$FLANNEL_OPTIONS"
+EOF
+
 if [ "$TLS_DISABLED" = "True" ]; then
     KUBE_PROTOCOL="http"
 else
@@ -52,12 +73,13 @@ sed -i '
 
 if [ "$NETWORK_DRIVER" = "flannel" ]; then
     sed -i '
-        /^FLANNEL_ETCD=/ s|=.*|="http://'"$ETCD_SERVER_IP"':2379"|
-    ' /etc/sysconfig/flanneld
+        /^FLANNEL_ETCD=/ s|=.*|="'"$PROTOCOL"'://'"$ETCD_SERVER_IP"':2379"|
+    ' $FLANNELD_CONFIG
 
     # Make sure etcd has a flannel configuration
-    . /etc/sysconfig/flanneld
-    until curl -sf "$FLANNEL_ETCD/v2/keys${FLANNEL_ETCD_KEY}/config?quorum=false&recursive=false&sorted=false"
+    . $FLANNELD_CONFIG
+    until curl -sf $ETCD_CURL_OPTIONS \
+        "$FLANNEL_ETCD/v2/keys${FLANNEL_ETCD_KEY}/config?quorum=false&recursive=false&sorted=false"
     do
         echo "Waiting for flannel configuration in etcd..."
         sleep 5

@@ -5,8 +5,28 @@
 if [ "$NETWORK_DRIVER" != "flannel" ]; then
     exit 0
 fi
+CERT_DIR=/srv/kubernetes
+PROTOCOL=https
+FLANNEL_OPTIONS="-etcd-cafile $CERT_DIR/ca.crt \
+-etcd-certfile $CERT_DIR/server.crt \
+-etcd-keyfile $CERT_DIR/server.key"
+ETCD_CURL_OPTIONS="--cacert $CERT_DIR/ca.crt \
+--cert $CERT_DIR/server.crt --key $CERT_DIR/server.key"
+FLANNELD_CONFIG=/etc/sysconfig/flanneld
 
-. /etc/sysconfig/flanneld
+if [ "$TLS_DISABLED" = "True" ]; then
+    PROTOCOL=http
+    FLANNEL_OPTIONS=""
+    ETCD_CURL_OPTIONS=""
+fi
+
+sed -i '/FLANNEL_OPTIONS/'d $FLANNELD_CONFIG
+
+cat >> $FLANNELD_CONFIG <<EOF
+FLANNEL_OPTIONS="$FLANNEL_OPTIONS"
+EOF
+
+. $FLANNELD_CONFIG
 
 FLANNEL_CONFIG_BIN=/usr/local/bin/flannel-config
 FLANNEL_CONFIG_SERVICE=/etc/systemd/system/flannel-config.service
@@ -27,7 +47,8 @@ if ! [ "$FLANNEL_ETCD" ] && [ "$FLANNEL_ETCD_KEY" ]; then
 fi
 
 echo "creating flanneld config in etcd"
-while ! curl -sf -L $FLANNEL_ETCD/v2/keys${FLANNEL_ETCD_KEY}/config \
+while ! curl -sf -L $ETCD_CURL_OPTIONS \
+        $FLANNEL_ETCD/v2/keys${FLANNEL_ETCD_KEY}/config \
         -X PUT --data-urlencode value@${FLANNEL_JSON}; do
     echo "waiting for etcd"
     sleep 1

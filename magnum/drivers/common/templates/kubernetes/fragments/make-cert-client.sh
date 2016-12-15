@@ -107,8 +107,14 @@ curl -k -X POST \
     -d "$csr_req" \
     $MAGNUM_URL/certificates | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > ${CLIENT_CERT}
 
-chmod 500 "${cert_dir}"
-chown -R kube:kube "${cert_dir}"
+# Common certs and key are created for both etcd and kubernetes services.
+# Both etcd and kube user should have permission to access the certs and key.
+groupadd kube_etcd
+usermod -a -G kube_etcd etcd
+usermod -a -G kube_etcd kube
+chmod 550 "${cert_dir}"
+chown -R kube:kube_etcd "${cert_dir}"
+chmod 440 $CLIENT_KEY
 
 sed -i '
     s|CA_CERT|'"$CA_CERT"'|
