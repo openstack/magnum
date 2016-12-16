@@ -28,8 +28,7 @@ gettext.install('magnum')
 
 
 @base.MagnumObjectRegistry.register
-class MyObj(base.MagnumPersistentObject, base.MagnumObject,
-            base.MagnumObjectDictCompat):
+class MyObj(base.MagnumPersistentObject, base.MagnumObject):
     VERSION = '1.0'
 
     fields = {'foo': fields.IntegerField(),
@@ -152,8 +151,7 @@ class _TestObject(object):
 
     def test_load_in_base(self):
         @base.MagnumObjectRegistry.register_if(False)
-        class Foo(base.MagnumPersistentObject, base.MagnumObject,
-                  base.MagnumObjectDictCompat):
+        class Foo(base.MagnumPersistentObject, base.MagnumObject):
             fields = {'foobar': fields.IntegerField()}
         obj = Foo(self.context)
         # NOTE(danms): Can't use assertRaisesRegexp() because of py26
@@ -292,19 +290,15 @@ class _TestObject(object):
     def test_get(self):
         obj = MyObj(self.context, foo=1)
         # Foo has value, should not get the default
-        self.assertEqual(1, obj.get('foo', 2))
+        self.assertEqual(1, getattr(obj, 'foo', 2))
         # Foo has value, should return the value without error
-        self.assertEqual(1, obj.get('foo'))
-        # Bar is not loaded, so we should get the default
-        self.assertEqual('not-loaded', obj.get('bar', 'not-loaded'))
+        self.assertEqual(1, getattr(obj, 'foo'))
         # Bar without a default should lazy-load
-        self.assertEqual('loaded!', obj.get('bar'))
+        self.assertEqual('loaded!', getattr(obj, 'bar'))
         # Bar now has a default, but loaded value should be returned
-        self.assertEqual('loaded!', obj.get('bar', 'not-loaded'))
+        self.assertEqual('loaded!', getattr(obj, 'bar', 'not-loaded'))
         # Invalid attribute should raise AttributeError
-        self.assertRaises(AttributeError, obj.get, 'nothing')
-        # ...even with a default
-        self.assertRaises(AttributeError, obj.get, 'nothing', 3)
+        self.assertFalse(hasattr(obj, 'nothing'))
 
     def test_object_inheritance(self):
         base_fields = list(base.MagnumPersistentObject.fields.keys())
@@ -330,8 +324,7 @@ class _TestObject(object):
 
     def test_obj_fields(self):
         @base.MagnumObjectRegistry.register_if(False)
-        class TestObj(base.MagnumPersistentObject, base.MagnumObject,
-                      base.MagnumObjectDictCompat):
+        class TestObj(base.MagnumPersistentObject, base.MagnumObject):
             fields = {'foo': fields.IntegerField()}
             obj_extra_fields = ['bar']
 

@@ -26,11 +26,11 @@ class ServiceGroup(object):
     def service_is_up(self, member):
         if not isinstance(member, magnum_service.MagnumService):
             raise TypeError
-        if member.get('forced_down'):
+        if member.forced_down:
             return False
 
-        last_heartbeat = (member.get(
-            'last_seen_up') or member['updated_at'] or member['created_at'])
+        last_heartbeat = (member.last_seen_up or
+                          member.updated_at or member.created_at)
         now = timeutils.utcnow(True)
         elapsed = timeutils.delta_seconds(last_heartbeat, now)
         is_up = abs(elapsed) <= self.service_down_time
