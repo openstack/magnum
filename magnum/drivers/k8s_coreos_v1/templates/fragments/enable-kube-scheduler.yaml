@@ -22,7 +22,7 @@ write_files:
 
       . /etc/sysconfig/heat-params
 
-      TEMPLATE=/srv/kubernetes/manifests/kube-scheduler.yaml
+      TEMPLATE=/etc/kubernetes/manifests/kube-scheduler.yaml
       mkdir -p $(dirname ${TEMPLATE})
 
       cat > ${TEMPLATE} <<EOF
