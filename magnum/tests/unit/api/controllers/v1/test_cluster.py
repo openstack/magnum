@@ -578,102 +578,25 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
 
-    def test_create_cluster_with_invalid_long_name(self):
-        bdict = apiutils.cluster_post_data(name='x' * 243)
-        response = self.post_json('/clusters', bdict, expect_errors=True)
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(400, response.status_int)
-        self.assertTrue(response.json['errors'])
+    def test_create_cluster_with_invalid_name(self):
+        invalid_names = ['x' * 243, '123456', '123456test_cluster',
+                         '-test_cluster', '.test_cluster', '_test_cluster', '']
+        for value in invalid_names:
+            bdict = apiutils.cluster_post_data(name=value)
+            response = self.post_json('/clusters', bdict, expect_errors=True)
+            self.assertEqual('application/json', response.content_type)
+            self.assertEqual(400, response.status_int)
+            self.assertTrue(response.json['errors'])
 
-    def test_create_cluster_with_invalid_integer_name(self):
-        bdict = apiutils.cluster_post_data(name='123456')
-        response = self.post_json('/clusters', bdict, expect_errors=True)
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(400, response.status_int)
-        self.assertTrue(response.json['errors'])
-
-    def test_create_cluster_with_invalid_integer_str_name(self):
-        bdict = apiutils.cluster_post_data(name='123456test_cluster')
-        response = self.post_json('/clusters', bdict, expect_errors=True)
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(400, response.status_int)
-        self.assertTrue(response.json['errors'])
-
-    def test_create_cluster_with_hyphen_invalid_at_start_name(self):
-        bdict = apiutils.cluster_post_data(name='-test_cluster')
-        response = self.post_json('/clusters', bdict, expect_errors=True)
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(400, response.status_int)
-        self.assertTrue(response.json['errors'])
-
-    def test_create_cluster_with_period_invalid_at_start_name(self):
-        bdict = apiutils.cluster_post_data(name='.test_cluster')
-        response = self.post_json('/clusters', bdict, expect_errors=True)
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(400, response.status_int)
-        self.assertTrue(response.json['errors'])
-
-    def test_create_cluster_with_underscore_invalid_at_start_name(self):
-        bdict = apiutils.cluster_post_data(name='_test_cluster')
-        response = self.post_json('/clusters', bdict, expect_errors=True)
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(400, response.status_int)
-        self.assertTrue(response.json['errors'])
-
-    def test_create_cluster_with_valid_str_int_name(self):
-        bdict = apiutils.cluster_post_data(name='test_cluster123456')
-        response = self.post_json('/clusters', bdict, expect_errors=True)
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(202, response.status_int)
-
-    def test_create_cluster_with_hyphen_valid_name(self):
-        bdict = apiutils.cluster_post_data(name='test-cluster')
-        response = self.post_json('/clusters', bdict, expect_errors=True)
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(202, response.status_int)
-
-    def test_create_cluster_with_period_valid_name(self):
-        bdict = apiutils.cluster_post_data(name='test.cluster')
-        response = self.post_json('/clusters', bdict, expect_errors=True)
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(202, response.status_int)
-
-    def test_create_cluster_with_period_at_end_valid_name(self):
-        bdict = apiutils.cluster_post_data(name='testcluster.')
-        response = self.post_json('/clusters', bdict, expect_errors=True)
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(202, response.status_int)
-
-    def test_create_cluster_with_hyphen_at_end_valid_name(self):
-        bdict = apiutils.cluster_post_data(name='testcluster-')
-        response = self.post_json('/clusters', bdict, expect_errors=True)
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(202, response.status_int)
-
-    def test_create_cluster_with_underscore_at_end_valid_name(self):
-        bdict = apiutils.cluster_post_data(name='testcluster_')
-        response = self.post_json('/clusters', bdict, expect_errors=True)
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(202, response.status_int)
-
-    def test_create_cluster_with_mix_special_char_valid_name(self):
-        bdict = apiutils.cluster_post_data(name='test.-_cluster')
-        response = self.post_json('/clusters', bdict, expect_errors=True)
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(202, response.status_int)
-
-    def test_create_cluster_with_capital_letter_start_valid_name(self):
-        bdict = apiutils.cluster_post_data(name='Testcluster')
-        response = self.post_json('/clusters', bdict, expect_errors=True)
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(202, response.status_int)
-
-    def test_create_cluster_with_invalid_empty_name(self):
-        bdict = apiutils.cluster_post_data(name='')
-        response = self.post_json('/clusters', bdict, expect_errors=True)
-        self.assertEqual('application/json', response.content_type)
-        self.assertEqual(400, response.status_int)
-        self.assertTrue(response.json['errors'])
+    def test_create_cluster_with_valid_name(self):
+        valid_names = ['test_cluster123456', 'test-cluster', 'test.cluster',
+                       'testcluster.', 'testcluster-', 'testcluster_',
+                       'test.-_cluster', 'Testcluster']
+        for value in valid_names:
+            bdict = apiutils.cluster_post_data(name=value)
+            response = self.post_json('/clusters', bdict, expect_errors=True)
+            self.assertEqual('application/json', response.content_type)
+            self.assertEqual(202, response.status_int)
 
     def test_create_cluster_without_name(self):
         bdict = apiutils.cluster_post_data()
