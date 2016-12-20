@@ -28,6 +28,7 @@ from magnum.conductor.handlers.common import cert_manager
 from magnum.conductor.handlers.common import trust_manager
 from magnum.conductor import utils as conductor_utils
 from magnum.drivers.common import driver
+from magnum.i18n import _
 from magnum.i18n import _LE
 from magnum.i18n import _LI
 from magnum.objects import fields
