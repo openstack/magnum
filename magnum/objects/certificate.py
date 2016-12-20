@@ -19,8 +19,7 @@ from magnum.objects import base
 
 
 @base.MagnumObjectRegistry.register
-class Certificate(base.MagnumPersistentObject, base.MagnumObject,
-                  base.MagnumObjectDictCompat):
+class Certificate(base.MagnumPersistentObject, base.MagnumObject):
     # Version 1.0: Initial version
     # Version 1.1: Rename bay_uuid to cluster_uuid
     VERSION = '1.1'
