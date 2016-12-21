@@ -45,7 +45,8 @@ class TestHeatPoller(base.TestCase):
                                                    **cluster_template_dict)
         mock_retrieve_cluster_template.return_value = cluster_template
         mock_driver.return_value = k8s_atomic_dr.Driver()
-        poller = heat_driver.HeatPoller(mock_openstack_client, cluster,
+        poller = heat_driver.HeatPoller(mock_openstack_client,
+                                        mock.MagicMock(), cluster,
                                         k8s_atomic_dr.Driver())
         poller.get_version_info = mock.MagicMock()
         return (mock_heat_stack, cluster, poller)
