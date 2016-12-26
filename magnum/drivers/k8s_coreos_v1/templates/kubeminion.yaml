@@ -181,7 +181,7 @@ resources:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/enable-network-service.yaml}
+      config: {get_file: fragments/enable-network-service-client.yaml}
 
   enable_kubelet:
     type: OS::Heat::SoftwareConfig

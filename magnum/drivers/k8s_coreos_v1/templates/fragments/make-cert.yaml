@@ -146,4 +146,5 @@ write_files:
       parse_json_response "${server_cert_json}" > ${SERVER_CERT}
 
       chmod 600 ${cert_dir}/*-key.pem
-      chown root:root ${cert_dir}/*-key.pem
+      # Certs will also be used by etcd service
+      chown -R etcd:etcd ${cert_dir}
