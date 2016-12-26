@@ -14,6 +14,8 @@
 
 import mock
 
+from oslo_concurrency import processutils
+
 from magnum.cmd import api
 from magnum.tests import base
 
@@ -32,9 +34,28 @@ class TestMagnumAPI(base.TestCase):
         app = mock_app.load_app.return_value
         mock_prep.assert_called_once_with(mock.ANY)
         mock_app.load_app.assert_called_once_with()
+        workers = processutils.get_worker_count()
         mock_run.assert_called_once_with(base.CONF.api.host,
                                          base.CONF.api.port,
-                                         app, ssl_context=None)
+                                         app, processes=workers,
+                                         ssl_context=None)
+
+    @mock.patch('werkzeug.serving.run_simple')
+    @mock.patch.object(api, 'api_app')
+    @mock.patch('magnum.common.service.prepare_service')
+    def test_api_http_config_workers(self, mock_prep, mock_app,
+                                     mock_run, mock_base):
+        fake_workers = 8
+        self.config(workers=fake_workers, group='api')
+        api.main()
+
+        app = mock_app.load_app.return_value
+        mock_prep.assert_called_once_with(mock.ANY)
+        mock_app.load_app.assert_called_once_with()
+        mock_run.assert_called_once_with(base.CONF.api.host,
+                                         base.CONF.api.port,
+                                         app, processes=fake_workers,
+                                         ssl_context=None)
 
     @mock.patch('os.path.exists')
     @mock.patch('werkzeug.serving.run_simple')
@@ -91,6 +112,8 @@ class TestMagnumAPI(base.TestCase):
         mock_app.load_app.assert_called_once_with()
         mock_exist.assert_has_calls([mock.call('tmp_crt'),
                                      mock.call('tmp_key')])
+        workers = processutils.get_worker_count()
         mock_run.assert_called_once_with(base.CONF.api.host,
                                          base.CONF.api.port, app,
+                                         processes=workers,
                                          ssl_context=('tmp_crt', 'tmp_key'))

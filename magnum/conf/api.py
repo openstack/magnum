@@ -39,7 +39,10 @@ api_service_opts = [
                     "effect. "),
     cfg.BoolOpt('enabled_ssl',
                 default=False,
-                help='Enable SSL Magnum API service')
+                help='Enable SSL Magnum API service'),
+    cfg.IntOpt('workers',
+               help='The maximum number of magnum-api processes to '
+                    'fork and run. Default to number of CPUs on the host.')
 ]
 
 
