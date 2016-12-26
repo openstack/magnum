@@ -140,31 +140,31 @@ class TestHandler(db_base.DbTestCase):
         cluster = objects.Cluster.get(self.context, self.cluster.uuid)
         self.assertEqual(2, cluster.node_count)
 
-    def test_update_cluster_status_update_compelete(self):
+    def test_update_cluster_status_update_complete(self):
         self._test_update_cluster_status_complete(
             cluster_status.UPDATE_COMPLETE)
 
-    def test_update_cluster_status_resume_compelete(self):
+    def test_update_cluster_status_resume_complete(self):
         self._test_update_cluster_status_complete(
             cluster_status.RESUME_COMPLETE)
 
-    def test_update_cluster_status_restore_compelete(self):
+    def test_update_cluster_status_restore_complete(self):
         self._test_update_cluster_status_complete(
             cluster_status.RESTORE_COMPLETE)
 
-    def test_update_cluster_status_rollback_compelete(self):
+    def test_update_cluster_status_rollback_complete(self):
         self._test_update_cluster_status_complete(
             cluster_status.ROLLBACK_COMPLETE)
 
-    def test_update_cluster_status_snapshot_compelete(self):
+    def test_update_cluster_status_snapshot_complete(self):
         self._test_update_cluster_status_complete(
             cluster_status.SNAPSHOT_COMPLETE)
 
-    def test_update_cluster_status_check_compelete(self):
+    def test_update_cluster_status_check_complete(self):
         self._test_update_cluster_status_complete(
             cluster_status.CHECK_COMPLETE)
 
-    def test_update_cluster_status_adopt_compelete(self):
+    def test_update_cluster_status_adopt_complete(self):
         self._test_update_cluster_status_complete(
             cluster_status.ADOPT_COMPLETE)
 
