@@ -396,6 +396,7 @@ class TestHandler(db_base.DbTestCase):
                                      mock_heat_poller_class):
         timeout = 15
         self.cluster.cluster_template_id = self.cluster_template.uuid
+        self.cluster.name = 'cluster1'
         cluster_name = self.cluster.name
         mock_poller = mock.MagicMock()
         mock_poller.poll_and_check.return_value = loopingcall.LoopingCallDone()
