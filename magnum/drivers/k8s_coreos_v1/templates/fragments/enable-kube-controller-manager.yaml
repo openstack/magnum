@@ -33,7 +33,7 @@ write_files:
         ROOT_CA_FILE=
       fi
 
-      TEMPLATE=/srv/kubernetes/manifests/kube-controller-manager.yaml
+      TEMPLATE=/etc/kubernetes/manifests/kube-controller-manager.yaml
       mkdir -p $(dirname ${TEMPLATE})
 
       cat > ${TEMPLATE} <<EOF

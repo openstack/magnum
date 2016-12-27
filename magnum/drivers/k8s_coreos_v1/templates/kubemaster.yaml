@@ -276,12 +276,6 @@ resources:
       group: ungrouped
       config: {get_file: fragments/enable-kube-scheduler.yaml}
 
-  enable_kube_podmaster:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: fragments/enable-kube-podmaster.yaml}
-
   wc_notify:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -311,7 +305,6 @@ resources:
             $enable_kube_apiserver
             $create_kube_namespace
             $enable_kube_proxy
-            $enable_kube_podmaster
             $enable_kube_controller_manager
             $enable_kube_scheduler
             $wc_notify
@@ -339,8 +332,6 @@ resources:
                   command: "start"
                 - name: "enable-kube-scheduler.service"
                   command: "start"
-                - name: "enable-kube-podmaster.service"
-                  command: "start"
                 - name: "wc-notify.service"
                   command: "start"
           params:
@@ -356,7 +347,6 @@ resources:
             "$enable_kube_proxy": {get_attr: [enable_kube_proxy, config]}
             "$enable_kube_controller_manager": {get_attr: [enable_kube_controller_manager, config]}
             "$enable_kube_scheduler": {get_attr: [enable_kube_scheduler, config]}
-            "$enable_kube_podmaster": {get_attr: [enable_kube_podmaster, config]}
             "$wc_notify": {get_attr: [wc_notify, config]}
 
   ######################################################################
