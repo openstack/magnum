@@ -221,9 +221,6 @@ class Connection(api.Connection):
             except NoResultFound:
                 raise exception.ClusterNotFound(cluster=cluster_id)
 
-            if 'provision_state' in values:
-                values['provision_updated_at'] = timeutils.utcnow()
-
             ref.update(values)
         return ref
 
@@ -424,9 +421,6 @@ class Connection(api.Connection):
                 ref = query.with_lockmode('update').one()
             except NoResultFound:
                 raise exception.X509KeyPairNotFound(x509keypair=x509keypair_id)
-
-            if 'provision_state' in values:
-                values['provision_updated_at'] = timeutils.utcnow()
 
             ref.update(values)
         return ref
