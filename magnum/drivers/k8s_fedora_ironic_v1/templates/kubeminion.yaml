@@ -85,11 +85,6 @@ parameters:
     type: string
     description: network range for flannel overlay network
 
-  wait_condition_timeout:
-    type: number
-    description : >
-      timeout for the Wait Conditions
-
   registry_enabled:
     type: boolean
     description: >
@@ -194,17 +189,12 @@ parameters:
     type: string
     description: insecure registry url
 
+  wc_curl_cli:
+    type: string
+    description : >
+      Wait condition notify command for Minion.
+
 resources:
-
-  minion_wait_handle:
-    type: OS::Heat::WaitConditionHandle
-
-  minion_wait_condition:
-    type: OS::Heat::WaitCondition
-    depends_on: kube-minion
-    properties:
-      handle: {get_resource: minion_wait_handle}
-      timeout: {get_param: wait_condition_timeout}
 
   ######################################################################
   #
@@ -246,7 +236,7 @@ resources:
             $HTTPS_PROXY: {get_param: https_proxy}
             $NO_PROXY: {get_param: no_proxy}
             $KUBE_VERSION: {get_param: kube_version}
-            $WAIT_CURL: {get_attr: [minion_wait_handle, curl_cli]}
+            $WAIT_CURL: {get_param: wc_curl_cli}
             $TRUSTEE_DOMAIN_ID: {get_param: trustee_domain_id}
             $TRUSTEE_USER_ID: {get_param: trustee_user_id}
             $TRUSTEE_USERNAME: {get_param: trustee_username}
@@ -330,7 +320,7 @@ resources:
             #!/bin/bash -v
             wc_notify --data-binary '{"status": "SUCCESS"}'
           params:
-            wc_notify: {get_attr: [minion_wait_handle, curl_cli]}
+            wc_notify: {get_param: wc_curl_cli}
 
   disable_selinux:
     type: OS::Heat::SoftwareConfig
