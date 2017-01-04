@@ -47,6 +47,10 @@ class Handler(object):
 
         osc = clients.OpenStackClients(context)
 
+        cluster.status = fields.ClusterStatus.CREATE_IN_PROGRESS
+        cluster.status_reason = None
+        cluster.create()
+
         try:
             # Create trustee/trust and set them to cluster
             trust_manager.create_trustee_and_trust(osc, cluster)
@@ -60,12 +64,12 @@ class Handler(object):
                                                                   cluster)
             # Create cluster
             cluster_driver.create_cluster(context, cluster, create_timeout)
-            cluster.status = fields.ClusterStatus.CREATE_IN_PROGRESS
-            cluster.status_reason = None
+            cluster.save()
+
         except Exception as e:
             cluster.status = fields.ClusterStatus.CREATE_FAILED
             cluster.status_reason = six.text_type(e)
-            cluster.create()
+            cluster.save()
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_CREATE, taxonomy.OUTCOME_FAILURE)
 
@@ -75,7 +79,6 @@ class Handler(object):
                 raise e
             raise
 
-        cluster.create()
         return cluster
 
     def cluster_update(self, context, cluster, rollback=False):
