@@ -14,4 +14,4 @@
 
 version = '1.0.0'
 driver = 'swarm_fedora_atomic_v1'
-container_version = '1.9.1'
+container_version = '1.12.6'

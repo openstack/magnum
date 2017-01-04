@@ -42,6 +42,8 @@ function remote_exec {
 
 mkdir -p $LOG_PATH
 
+cat /proc/cpuinfo > /opt/stack/logs/cpuinfo.log
+
 if [[ "$COE" == "kubernetes" ]]; then
     SSH_USER=fedora
     remote_exec $SSH_USER "sudo systemctl --full list-units --no-pager" systemctl_list_units.log
@@ -81,6 +83,7 @@ elif [[ "$COE" == "swarm" ]]; then
     remote_exec $SSH_USER "sudo journalctl -u cloud-final --no-pager" cloud-final.log
     remote_exec $SSH_USER "sudo journalctl -u cloud-init-local --no-pager" cloud-init-local.log
     remote_exec $SSH_USER "sudo journalctl -u cloud-init --no-pager" cloud-init.log
+    remote_exec $SSH_USER "sudo cat /var/log/cloud-init-output.log" cloud-init-output.log
     remote_exec $SSH_USER "sudo journalctl -u etcd --no-pager" etcd.log
     remote_exec $SSH_USER "sudo journalctl -u swarm-manager --no-pager" swarm-manager.log
     remote_exec $SSH_USER "sudo journalctl -u swarm-agent --no-pager" swarm-agent.log
@@ -89,6 +92,9 @@ elif [[ "$COE" == "swarm" ]]; then
     remote_exec $SSH_USER "sudo systemctl show docker-storage-setup --no-pager" docker-storage-setup.service.show.log
     remote_exec $SSH_USER "sudo cat /etc/sysconfig/docker-storage-setup 2>/dev/null" docker-storage-setup.sysconfig.env.log
     remote_exec $SSH_USER "sudo journalctl -u docker --no-pager" docker.log
+    remote_exec $SSH_USER "sudo journalctl -u docker-containerd --no-pager" docker-containerd.log
+    remote_exec $SSH_USER "sudo systemctl status docker.socket -l" docker.socket.status.log
+    remote_exec $SSH_USER "sudo systemctl show docker.socket --no-pager" docker.socket.show.log
     remote_exec $SSH_USER "sudo systemctl status docker -l" docker.service.status.log
     remote_exec $SSH_USER "sudo systemctl show docker --no-pager" docker.service.show.log
     remote_exec $SSH_USER "sudo cat /etc/sysconfig/docker" docker.sysconfig.env.log

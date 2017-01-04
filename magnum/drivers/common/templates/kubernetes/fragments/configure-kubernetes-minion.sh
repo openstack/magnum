@@ -73,13 +73,13 @@ sed -i '
 
 if [ "$NETWORK_DRIVER" = "flannel" ]; then
     sed -i '
-        /^FLANNEL_ETCD=/ s|=.*|="'"$PROTOCOL"'://'"$ETCD_SERVER_IP"':2379"|
+        /^FLANNEL_ETCD_ENDPOINTS=/ s|=.*|="'"$PROTOCOL"'://'"$ETCD_SERVER_IP"':2379"|
     ' $FLANNELD_CONFIG
 
     # Make sure etcd has a flannel configuration
     . $FLANNELD_CONFIG
     until curl -sf $ETCD_CURL_OPTIONS \
-        "$FLANNEL_ETCD/v2/keys${FLANNEL_ETCD_KEY}/config?quorum=false&recursive=false&sorted=false"
+        "$FLANNEL_ETCD_ENDPOINTS/v2/keys${FLANNEL_ETCD_PREFIX}/config?quorum=false&recursive=false&sorted=false"
     do
         echo "Waiting for flannel configuration in etcd..."
         sleep 5

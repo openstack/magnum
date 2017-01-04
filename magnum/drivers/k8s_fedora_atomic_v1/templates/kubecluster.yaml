@@ -266,7 +266,7 @@ parameters:
   kube_version:
     type: string
     description: version of kubernetes used for kubernetes cluster
-    default: v1.2.0
+    default: v1.5.2
 
   insecure_registry_url:
     type: string
