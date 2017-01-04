@@ -303,7 +303,7 @@ extendedKeyUsage = clientAuth
             nodes = self._get_nodes_from_stack()
             if not [x for x in nodes if x]:
                 self.LOG.info(_LI("the list of nodes from stack is empty"))
-        self.LOG.info(_LI("Nodes are: %s") % nodes)
+        self.LOG.info(_LI("Nodes are: %s"), nodes)
         return nodes
 
     def _get_nodes_from_cluster(self):
