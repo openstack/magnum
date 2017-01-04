@@ -20,8 +20,7 @@ from magnum.objects import base
 
 
 @base.MagnumObjectRegistry.register
-class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject,
-                  base.MagnumObjectDictCompat):
+class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject):
     # Version 1.0: Initial version
     # Version 1.1: Added new method get_x509keypair_by_bay_uuid
     # Version 1.2: Remove bay_uuid, name, ca_cert and add intermediates
@@ -45,7 +44,7 @@ class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject,
     def _from_db_object(x509keypair, db_x509keypair):
         """Converts a database entity to a formal object."""
         for field in x509keypair.fields:
-            x509keypair[field] = db_x509keypair[field]
+            setattr(x509keypair, field, db_x509keypair[field])
 
         x509keypair.obj_reset_changes()
         return x509keypair
@@ -188,5 +187,6 @@ class X509KeyPair(base.MagnumPersistentObject, base.MagnumObject,
         """
         current = self.__class__.get_by_uuid(self._context, uuid=self.uuid)
         for field in self.fields:
-            if self.obj_attr_is_set(field) and self[field] != current[field]:
-                self[field] = current[field]
+            if self.obj_attr_is_set(field) and \
+               getattr(self, field) != getattr(current, field):
+                setattr(self, field, getattr(current, field))
