@@ -22,7 +22,7 @@ export DEVSTACK_LOCAL_CONFIG="enable_plugin magnum git://git.openstack.org/opens
 export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ceilometer git://git.openstack.org/openstack/ceilometer"
 
 if [ "$coe" = "mesos" ]; then
-    echo "MAGNUM_GUEST_IMAGE_URL="https://fedorapeople.org/groups/magnum/ubuntu-14.04.3-mesos-0.25.0.qcow2"" >> $BASE/new/devstack/localrc
+    export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_GUEST_IMAGE_URL=https://fedorapeople.org/groups/magnum/ubuntu-14.04.3-mesos-0.25.0.qcow2"
 fi
 
 $BASE/new/devstack-gate/devstack-vm-gate.sh
