@@ -295,10 +295,9 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_magnum_service_by_host_and_binary(self, context, host, binary):
+    def get_magnum_service_by_host_and_binary(self, host, binary):
         """Return a magnum_service record.
 
-        :param context: The security context
         :param host: The host where the binary is located.
         :param binary: The name of the binary.
         :returns: A magnum_service record.
@@ -314,14 +313,13 @@ class Connection(object):
         """
 
     @abc.abstractmethod
-    def get_magnum_service_list(self, context, disabled=None, limit=None,
+    def get_magnum_service_list(self, disabled=None, limit=None,
                                 marker=None, sort_key=None, sort_dir=None):
         """Get matching magnum_service records.
 
         Return a list of the specified columns for all magnum_services
         those match the specified filters.
 
-        :param context: The security context
         :param disabled: Filters disbaled services. Defaults to None.
         :param limit: Maximum number of magnum_services to return.
         :param marker: the last item of the previous page; we return the next

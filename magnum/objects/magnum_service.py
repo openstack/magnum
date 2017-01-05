@@ -59,7 +59,7 @@ class MagnumService(base.MagnumPersistentObject, base.MagnumObject):
         :returns: a :class:`MagnumService` object.
         """
         db_magnum_service = cls.dbapi.get_magnum_service_by_host_and_binary(
-            context, host, binary)
+            host, binary)
         if db_magnum_service is None:
             return None
         magnum_service = MagnumService._from_db_object(
@@ -80,7 +80,7 @@ class MagnumService(base.MagnumPersistentObject, base.MagnumObject):
 
         """
         db_magnum_services = cls.dbapi.get_magnum_service_list(
-            context, limit=limit, marker=marker, sort_key=sort_key,
+            limit=limit, marker=marker, sort_key=sort_key,
             sort_dir=sort_dir)
         return MagnumService._from_db_object_list(db_magnum_services, cls,
                                                   context)

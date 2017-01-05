@@ -472,7 +472,7 @@ class Connection(api.Connection):
             ref.update(values)
         return ref
 
-    def get_magnum_service_by_host_and_binary(self, context, host, binary):
+    def get_magnum_service_by_host_and_binary(self, host, binary):
         query = model_query(models.MagnumService)
         query = query.filter_by(host=host, binary=binary)
         try:
@@ -489,7 +489,7 @@ class Connection(api.Connection):
             raise exception.MagnumServiceAlreadyExists(id=magnum_service['id'])
         return magnum_service
 
-    def get_magnum_service_list(self, context, disabled=None, limit=None,
+    def get_magnum_service_list(self, disabled=None, limit=None,
                                 marker=None, sort_key=None, sort_dir=None
                                 ):
         query = model_query(models.MagnumService)

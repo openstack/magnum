@@ -31,13 +31,13 @@ class DbMagnumServiceTestCase(base.DbTestCase):
     def test_get_magnum_service_by_host_and_binary(self):
         ms = utils.create_test_magnum_service()
         res = self.dbapi.get_magnum_service_by_host_and_binary(
-            self.context, ms['host'], ms['binary'])
+            ms['host'], ms['binary'])
         self.assertEqual(ms.id, res.id)
 
     def test_get_magnum_service_by_host_and_binary_failure(self):
         utils.create_test_magnum_service()
         res = self.dbapi.get_magnum_service_by_host_and_binary(
-            self.context, 'fakehost1', 'fake-bin1')
+            'fakehost1', 'fake-bin1')
         self.assertIsNone(res)
 
     def test_update_magnum_service(self):
@@ -48,7 +48,7 @@ class DbMagnumServiceTestCase(base.DbTestCase):
         self.assertEqual(ms['id'], ms1['id'])
         self.assertEqual(d2, ms1['disabled'])
         res = self.dbapi.get_magnum_service_by_host_and_binary(
-            self.context, 'fakehost', 'fake-bin')
+            'fakehost', 'fake-bin')
         self.assertEqual(ms1['id'], res['id'])
         self.assertEqual(d2, res['disabled'])
 
@@ -62,11 +62,11 @@ class DbMagnumServiceTestCase(base.DbTestCase):
     def test_destroy_magnum_service(self):
         ms = utils.create_test_magnum_service()
         res = self.dbapi.get_magnum_service_by_host_and_binary(
-            self.context, 'fakehost', 'fake-bin')
+            'fakehost', 'fake-bin')
         self.assertEqual(res['id'], ms['id'])
         self.dbapi.destroy_magnum_service(ms['id'])
         res = self.dbapi.get_magnum_service_by_host_and_binary(
-            self.context, 'fakehost', 'fake-bin')
+            'fakehost', 'fake-bin')
         self.assertIsNone(res)
 
     def test_destroy_magnum_service_failure(self):
@@ -84,7 +84,7 @@ class DbMagnumServiceTestCase(base.DbTestCase):
             'disabled_reason': 'FakeReason'
         }
         utils.create_test_magnum_service(**fake_ms_params)
-        res = self.dbapi.get_magnum_service_list(self.context)
+        res = self.dbapi.get_magnum_service_list()
         self.assertEqual(1, len(res))
         res = res[0]
         for k, v in fake_ms_params.items():
@@ -93,7 +93,7 @@ class DbMagnumServiceTestCase(base.DbTestCase):
         fake_ms_params['binary'] = 'FakeBin1'
         fake_ms_params['disabled'] = True
         utils.create_test_magnum_service(**fake_ms_params)
-        res = self.dbapi.get_magnum_service_list(self.context, disabled=True)
+        res = self.dbapi.get_magnum_service_list(disabled=True)
         self.assertEqual(1, len(res))
         res = res[0]
         for k, v in fake_ms_params.items():

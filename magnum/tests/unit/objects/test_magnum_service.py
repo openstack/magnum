@@ -31,8 +31,7 @@ class TestMagnumServiceObject(base.DbTestCase):
             ms = objects.MagnumService.get_by_host_and_binary(self.context,
                                                               'fake-host',
                                                               'fake-bin')
-            mock_get_magnum_service.assert_called_once_with(self.context,
-                                                            'fake-host',
+            mock_get_magnum_service.assert_called_once_with('fake-host',
                                                             'fake-bin')
             self.assertEqual(self.context, ms._context)
 
@@ -67,7 +66,7 @@ class TestMagnumServiceObject(base.DbTestCase):
                     self.context, 'fake-host', 'fake-bin')
                 ms.destroy()
                 mock_get_magnum_service.assert_called_once_with(
-                    self.context, 'fake-host', 'fake-bin')
+                    'fake-host', 'fake-bin')
                 mock_destroy_ms.assert_called_once_with(
                     self.fake_magnum_service['id'])
                 self.assertEqual(self.context, ms._context)
@@ -85,7 +84,7 @@ class TestMagnumServiceObject(base.DbTestCase):
                 ms.disabled = True
                 ms.save()
                 mock_get_magnum_service.assert_called_once_with(
-                    self.context, 'fake-host', 'fake-bin')
+                    'fake-host', 'fake-bin')
                 mock_update_ms.assert_called_once_with(
                     self.fake_magnum_service['id'], {'disabled': True})
                 self.assertEqual(self.context, ms._context)
@@ -103,7 +102,7 @@ class TestMagnumServiceObject(base.DbTestCase):
                 last_report_count = self.fake_magnum_service['report_count']
                 ms.report_state_up()
                 mock_get_magnum_service.assert_called_once_with(
-                    self.context, 'fake-host', 'fake-bin')
+                    'fake-host', 'fake-bin')
                 self.assertEqual(self.context, ms._context)
                 mock_update_ms.assert_called_once_with(
                     self.fake_magnum_service['id'],
