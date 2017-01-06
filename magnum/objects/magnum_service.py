@@ -17,8 +17,7 @@ from magnum.objects import base
 
 
 @base.MagnumObjectRegistry.register
-class MagnumService(base.MagnumPersistentObject, base.MagnumObject,
-                    base.MagnumObjectDictCompat):
+class MagnumService(base.MagnumPersistentObject, base.MagnumObject):
     # Version 1.0: Initial version
     VERSION = '1.0'
 
@@ -39,7 +38,7 @@ class MagnumService(base.MagnumPersistentObject, base.MagnumObject,
     def _from_db_object(magnum_service, db_magnum_service):
         """Converts a database entity to a formal object."""
         for field in magnum_service.fields:
-            magnum_service[field] = db_magnum_service[field]
+            setattr(magnum_service, field, db_magnum_service[field])
 
         magnum_service.obj_reset_changes()
         return magnum_service
