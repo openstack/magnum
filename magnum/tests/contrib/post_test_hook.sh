@@ -43,8 +43,7 @@ function create_test_data {
         # cf. https://bugs.launchpad.net/ironic/+bug/1596421
         echo "alter table ironic.nodes modify instance_info LONGTEXT;" | mysql -uroot -p${MYSQL_PASSWORD} ironic
         # NOTE(yuanying): Ironic instances need to connect to Internet
-        neutron subnet-update private-subnet --dns-nameserver 8.8.8.8
-
+        openstack subnet set private-subnet --dns-nameserver 8.8.8.8
         local container_format="ami"
     else
         local image_name="atomic"
@@ -56,12 +55,14 @@ function create_test_data {
     # setting, it allows to perform testing on custom images.
     image_name=${MAGNUM_IMAGE_NAME:-$image_name}
 
-    export NIC_ID=$(neutron net-show public | awk '/ id /{print $4}')
+    export NIC_ID=$(openstack network show public -f value -c id)
 
     # We need to filter by container_format to get the appropriate
     # image. Specifically, when we provide kernel and ramdisk images
     # we need to select the 'ami' image. Otherwise, when we have
     # qcow2 images, the format is 'bare'.
+    # NOTE(prameswar): openstack cli not giving container format in
+    # command 'openstack image list' once it start supporting we have to add.
     export IMAGE_ID=$(glance --os-image-api-version 1 image-list | grep $container_format | grep -i $image_name | awk '{print $2}')
 
     #Get magnum_url
@@ -108,7 +109,7 @@ EOF
     # Create a keypair for use in the functional tests.
     echo_summary "Generate a key-pair"
     ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
-    nova keypair-add  --pub-key ~/.ssh/id_rsa.pub default
+    openstack keypair create --public-key ~/.ssh/id_rsa.pub default
 }
 
 function add_flavor {
@@ -122,8 +123,8 @@ function add_flavor {
 
     # Create magnum specific flavor for use in functional tests.
     echo_summary "Create a flavor"
-    nova flavor-create  m1.magnum 100 1024 10 1
-    nova flavor-create  s1.magnum 200 512 10 1
+    openstack flavor create m1.magnum --id 100 --ram 1024 --disk 10 --vcpus 1
+    openstack flavor create s1.magnum --id 200 --ram 512 --disk 10 --vcpus 1
 }
 
 if ! function_exists echo_summary; then
@@ -207,13 +208,13 @@ EXIT_CODE=$?
 
 # Delete the keypair used in the functional test.
 echo_summary "Running keypair-delete"
-nova keypair-delete default
+openstack keypair delete default
 
 if [[ "-ironic" != "$special" ]]; then
     # Delete the flavor used in the functional test.
     echo_summary "Running flavor-delete"
-    nova flavor-delete m1.magnum
-    nova flavor-delete s1.magnum
+    openstack flavor delete m1.magnum
+    openstack flavor delete s1.magnum
 fi
 
 # Save functional testing log
