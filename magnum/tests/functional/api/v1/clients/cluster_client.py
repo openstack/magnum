@@ -124,7 +124,7 @@ class ClusterClient(client.MagnumClient):
                 lambda: self.does_cluster_exist(cluster_id), 10, 1800)
         except Exception:
             # In error state.  Clean up the cluster id if desired
-            self.LOG.error(_LE('Cluster %s entered an exception state.') %
+            self.LOG.error(_LE('Cluster %s entered an exception state.'),
                            cluster_id)
             if delete_on_error:
                 self.LOG.error(_LE('We will attempt to delete clusters now.'))
@@ -141,22 +141,22 @@ class ClusterClient(client.MagnumClient):
             resp, model = self.get_cluster(cluster_id)
             if model.status in ['CREATED', 'CREATE_COMPLETE',
                                 'ERROR', 'CREATE_FAILED']:
-                self.LOG.info(_LI('Cluster %s succeeded.') % cluster_id)
+                self.LOG.info(_LI('Cluster %s succeeded.'), cluster_id)
                 return True
             else:
                 return False
         except exceptions.NotFound:
-            self.LOG.warning(_LW('Cluster %s is not found.') % cluster_id)
+            self.LOG.warning(_LW('Cluster %s is not found.'), cluster_id)
             return False
 
     def does_cluster_exist(self, cluster_id):
         try:
             resp, model = self.get_cluster(cluster_id)
             if model.status in ['CREATED', 'CREATE_COMPLETE']:
-                self.LOG.info(_LI('Cluster %s is created.') % cluster_id)
+                self.LOG.info(_LI('Cluster %s is created.'), cluster_id)
                 return True
             elif model.status in ['ERROR', 'CREATE_FAILED']:
-                self.LOG.error(_LE('Cluster %s is in fail state.') %
+                self.LOG.error(_LE('Cluster %s is in fail state.'),
                                cluster_id)
                 raise exceptions.ServerFault(
                     "Got into an error condition: %s for %s" %
@@ -164,13 +164,13 @@ class ClusterClient(client.MagnumClient):
             else:
                 return False
         except exceptions.NotFound:
-            self.LOG.warning(_LW('Cluster %s is not found.') % cluster_id)
+            self.LOG.warning(_LW('Cluster %s is not found.'), cluster_id)
             return False
 
     def does_cluster_not_exist(self, cluster_id):
         try:
             self.get_cluster(cluster_id)
         except exceptions.NotFound:
-            self.LOG.warning(_LW('Cluster %s is not found.') % cluster_id)
+            self.LOG.warning(_LW('Cluster %s is not found.'), cluster_id)
             return True
         return False
