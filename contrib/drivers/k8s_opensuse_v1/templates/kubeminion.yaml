@@ -3,7 +3,7 @@ heat_template_version: 2014-10-16
 description: >
   This is a nested stack that defines a single Kubernetes minion, This stack is
   included by an AutoScalingGroup resource in the parent template
-  (kubecluster-jeos.yaml).
+  (kubecluster.yaml).
 
 parameters:
 
@@ -59,6 +59,10 @@ parameters:
   magnum_url:
     type: string
     description: endpoint to retrieve TLS certs from
+
+  kube_version:
+    type: string
+    description: version of kubernetes used for kubernetes cluster
 
   kube_master_ip:
     type: string
@@ -188,32 +192,33 @@ resources:
       group: ungrouped
       config:
         str_replace:
-          template: {get_file: fragments/write-heat-params.yaml}
+          template: {get_file: fragments/write-heat-params-minion.yaml}
           params:
-            $KUBE_ALLOW_PRIV: {get_param: kube_allow_priv}
-            $KUBE_MASTER_IP: {get_param: kube_master_ip}
-            $KUBE_API_PORT: {get_param: kubernetes_port}
-            $ETCD_SERVER_IP: {get_param: etcd_server_ip}
-            $DOCKER_VOLUME: {get_resource: docker_volume}
-            $NETWORK_DRIVER: {get_param: network_driver}
-            $REGISTRY_ENABLED: {get_param: registry_enabled}
-            $REGISTRY_PORT: {get_param: registry_port}
-            $REGISTRY_AUTH_URL: {get_param: registry_auth_url}
-            $REGISTRY_REGION: {get_param: registry_region}
-            $REGISTRY_USERNAME: {get_param: registry_username}
-            $REGISTRY_PASSWORD: {get_param: registry_password}
-            $REGISTRY_DOMAIN: {get_param: registry_domain}
-            $REGISTRY_TRUST_ID: {get_param: registry_trust_id}
-            $REGISTRY_CONTAINER: {get_param: registry_container}
-            $REGISTRY_INSECURE: {get_param: registry_insecure}
-            $REGISTRY_CHUNKSIZE: {get_param: registry_chunksize}
-            $TLS_DISABLED: {get_param: tls_disabled}
-            $CLUSTER_UUID: {get_param: cluster_uuid}
-            $MAGNUM_URL: {get_param: magnum_url}
-            $HTTP_PROXY: {get_param: http_proxy}
-            $HTTPS_PROXY: {get_param: https_proxy}
-            $NO_PROXY: {get_param: no_proxy}
-            $NODE_FIXED_IP: {get_attr: [kube_minion_eth0, fixed_ips, 0, ip_address]}
+            "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
+            "$KUBE_MASTER_IP": {get_param: kube_master_ip}
+            "$KUBE_NODE_IP": {get_attr: [kube_minion_eth0, fixed_ips, 0, ip_address]}
+            "$KUBE_API_PORT": {get_param: kubernetes_port}
+            "$ETCD_SERVER_IP": {get_param: etcd_server_ip}
+            "$DOCKER_VOLUME": {get_resource: docker_volume}
+            "$NETWORK_DRIVER": {get_param: network_driver}
+            "$REGISTRY_ENABLED": {get_param: registry_enabled}
+            "$REGISTRY_PORT": {get_param: registry_port}
+            "$REGISTRY_AUTH_URL": {get_param: registry_auth_url}
+            "$REGISTRY_REGION": {get_param: registry_region}
+            "$REGISTRY_USERNAME": {get_param: registry_username}
+            "$REGISTRY_PASSWORD": {get_param: registry_password}
+            "$REGISTRY_DOMAIN": {get_param: registry_domain}
+            "$REGISTRY_TRUST_ID": {get_param: registry_trust_id}
+            "$REGISTRY_CONTAINER": {get_param: registry_container}
+            "$REGISTRY_INSECURE": {get_param: registry_insecure}
+            "$REGISTRY_CHUNKSIZE": {get_param: registry_chunksize}
+            "$TLS_DISABLED": {get_param: tls_disabled}
+            "$KUBE_VERSION": {get_param: kube_version}
+            "$CLUSTER_UUID": {get_param: cluster_uuid}
+            "$MAGNUM_URL": {get_param: magnum_url}
+            "$HTTP_PROXY": {get_param: http_proxy}
+            "$HTTPS_PROXY": {get_param: https_proxy}
+            "$NO_PROXY": {get_param: no_proxy}
 
   configure_flanneld:
     type: OS::Heat::SoftwareConfig

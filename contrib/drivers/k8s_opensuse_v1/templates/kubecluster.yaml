@@ -181,6 +181,16 @@ parameters:
       url for kubernetes to authenticate before sending request to neutron
       must be v2 since kubernetes backend only suppor v2 at this point
 
+  kube_version:
+    type: string
+    description: version of kubernetes used for kubernetes cluster
+    default: v1.3.7
+
+  volume_driver:
+    type: string
+    description: volume driver to use for container storage
+    default: ""
+
   username:
     type: string
     description: >
@@ -484,6 +494,7 @@ resources:
           http_proxy: {get_param: http_proxy}
           https_proxy: {get_param: https_proxy}
           no_proxy: {get_param: no_proxy}
+          kube_version: {get_param: kube_version}
           fixed_network: {get_resource: fixed_network}
           fixed_subnet: {get_resource: fixed_subnet}
           api_pool_id: {get_resource: api_pool}
@@ -496,6 +507,7 @@ resources:
           tls_disabled: {get_param: tls_disabled}
           secgroup_base_id: {get_resource: secgroup_base}
           secgroup_kube_master_id: {get_resource: secgroup_kube_master}
+          kube_master_id: 'kube-master%index%'
 
   ######################################################################
   #
@@ -542,10 +554,11 @@ resources:
           http_proxy: {get_param: http_proxy}
           https_proxy: {get_param: https_proxy}
           no_proxy: {get_param: no_proxy}
+          kube_version: {get_param: kube_version}
           kubernetes_port: {get_param: kubernetes_port}
           tls_disabled: {get_param: tls_disabled}
           secgroup_kube_minion_id: {get_resource: secgroup_kube_minion}
-          kube_minion_id: 'kube_minion_%index%'
+          kube_minion_id: 'kube-minion%index%'
 
 outputs:
 

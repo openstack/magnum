@@ -5,7 +5,6 @@ write_files:
     owner: "root:root"
     permissions: "0644"
     content: |
-      KUBE_NODE_PUBLIC_IP="$KUBE_NODE_PUBLIC_IP"
       KUBE_NODE_IP="$KUBE_NODE_IP"
       KUBE_API_PORT="$KUBE_API_PORT"
       KUBE_ALLOW_PRIV="$KUBE_ALLOW_PRIV"
@@ -21,5 +20,6 @@ write_files:
       TENANT_NAME="$TENANT_NAME"
       CLUSTER_SUBNET="$CLUSTER_SUBNET"
       TLS_DISABLED="$TLS_DISABLED"
+      KUBE_VERSION="$KUBE_VERSION"
       CLUSTER_UUID="$CLUSTER_UUID"
       MAGNUM_URL="$MAGNUM_URL"
