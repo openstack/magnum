@@ -33,6 +33,7 @@ from magnum.conf import magnum_client
 from magnum.conf import neutron
 from magnum.conf import nova
 from magnum.conf import paths
+from magnum.conf import quota
 from magnum.conf import rpc
 from magnum.conf import services
 from magnum.conf import trust
@@ -59,6 +60,7 @@ magnum_client.register_opts(CONF)
 neutron.register_opts(CONF)
 nova.register_opts(CONF)
 paths.register_opts(CONF)
+quota.register_opts(CONF)
 rpc.register_opts(CONF)
 services.register_opts(CONF)
 trust.register_opts(CONF)
