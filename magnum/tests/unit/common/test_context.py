@@ -18,7 +18,7 @@ from magnum.tests import base
 
 class ContextTestCase(base.TestCase):
 
-    def _create_context(self):
+    def _create_context(self, roles=None):
         return magnum_context.RequestContext(auth_token='auth_token1',
                                              auth_url='auth_url1',
                                              domain_id='domain_id1',
@@ -27,7 +27,7 @@ class ContextTestCase(base.TestCase):
                                              user_id='user-id1',
                                              project_name='tenant1',
                                              project_id='tenant-id1',
-                                             roles=['admin', 'service'],
+                                             roles=roles,
                                              is_admin=True,
                                              read_only=True,
                                              show_deleted=True,
@@ -37,6 +37,25 @@ class ContextTestCase(base.TestCase):
 
     def test_context(self):
         ctx = self._create_context()
+
+        self.assertEqual("auth_token1", ctx.auth_token)
+        self.assertEqual("auth_url1", ctx.auth_url)
+        self.assertEqual("domain_id1", ctx.domain_id)
+        self.assertEqual("domain_name1", ctx.domain_name)
+        self.assertEqual("user1", ctx.user_name)
+        self.assertEqual("user-id1", ctx.user_id)
+        self.assertEqual("tenant1", ctx.project_name)
+        self.assertEqual("tenant-id1", ctx.project_id)
+        self.assertEqual([], ctx.roles)
+        self.assertTrue(ctx.is_admin)
+        self.assertTrue(ctx.read_only)
+        self.assertTrue(ctx.show_deleted)
+        self.assertEqual("request_id1", ctx.request_id)
+        self.assertEqual("trust_id1", ctx.trust_id)
+        self.assertEqual("token_info1", ctx.auth_token_info)
+
+    def test_context_with_roles(self):
+        ctx = self._create_context(roles=['admin', 'service'])
 
         self.assertEqual("auth_token1", ctx.auth_token)
         self.assertEqual("auth_url1", ctx.auth_url)

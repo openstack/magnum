@@ -44,7 +44,8 @@ class RequestContext(context.RequestContext):
                                              is_admin=is_admin,
                                              read_only=read_only,
                                              show_deleted=show_deleted,
-                                             request_id=request_id)
+                                             request_id=request_id,
+                                             roles=roles)
 
         self.user_name = user_name
         self.user_id = user_id
@@ -54,7 +55,6 @@ class RequestContext(context.RequestContext):
         self.domain_name = domain_name
         self.user_domain_id = user_domain_id
         self.user_domain_name = user_domain_name
-        self.roles = roles
         self.auth_url = auth_url
         self.auth_token_info = auth_token_info
         self.trust_id = trust_id
