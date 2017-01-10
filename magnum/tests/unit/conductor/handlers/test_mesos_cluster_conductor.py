@@ -47,6 +47,8 @@ class TestClusterConductorWithMesos(base.TestCase):
                        'mesos_slave_work_dir': '/tmp/mesos/slave'
                        },
             'master_lb_enabled': False,
+            'fixed_network': 'fixed_network',
+            'fixed_subnet': 'fixed_subnet',
         }
         self.cluster_dict = {
             'id': 1,
@@ -99,6 +101,8 @@ class TestClusterConductorWithMesos(base.TestCase):
         expected = {
             'ssh_key_name': 'keypair_id',
             'external_network': 'external_network_id',
+            'fixed_network': 'fixed_network',
+            'fixed_subnet': 'fixed_subnet',
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'master_flavor': 'master_flavor_id',
@@ -128,7 +132,8 @@ class TestClusterConductorWithMesos(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/no_master_lb.yaml'],
+            ['../../common/templates/environments/no_private_network.yaml',
+             '../../common/templates/environments/no_master_lb.yaml'],
             env_files)
 
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
@@ -139,7 +144,8 @@ class TestClusterConductorWithMesos(base.TestCase):
             mock_objects_cluster_template_get_by_uuid):
         not_required = ['image_id', 'master_flavor_id', 'flavor_id',
                         'dns_nameserver', 'fixed_network', 'http_proxy',
-                        'https_proxy', 'no_proxy', 'volume_driver']
+                        'https_proxy', 'no_proxy', 'volume_driver',
+                        'fixed_subnet']
         for key in not_required:
             self.cluster_template_dict[key] = None
 
@@ -179,7 +185,8 @@ class TestClusterConductorWithMesos(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/no_master_lb.yaml'],
+            ['../../common/templates/environments/with_private_network.yaml',
+             '../../common/templates/environments/no_master_lb.yaml'],
             env_files)
 
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
@@ -204,6 +211,8 @@ class TestClusterConductorWithMesos(base.TestCase):
         expected = {
             'ssh_key_name': 'keypair_id',
             'external_network': 'external_network_id',
+            'fixed_network': 'fixed_network',
+            'fixed_subnet': 'fixed_subnet',
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'master_flavor': 'master_flavor_id',
@@ -233,7 +242,8 @@ class TestClusterConductorWithMesos(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/with_master_lb.yaml'],
+            ['../../common/templates/environments/no_private_network.yaml',
+             '../../common/templates/environments/with_master_lb.yaml'],
             env_files)
 
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
@@ -259,6 +269,8 @@ class TestClusterConductorWithMesos(base.TestCase):
         expected = {
             'ssh_key_name': 'keypair_id',
             'external_network': 'external_network_id',
+            'fixed_network': 'fixed_network',
+            'fixed_subnet': 'fixed_subnet',
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'master_flavor': 'master_flavor_id',
@@ -288,7 +300,8 @@ class TestClusterConductorWithMesos(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/with_master_lb.yaml'],
+            ['../../common/templates/environments/no_private_network.yaml',
+             '../../common/templates/environments/with_master_lb.yaml'],
             env_files)
 
     @patch('magnum.conductor.utils.retrieve_cluster_template')

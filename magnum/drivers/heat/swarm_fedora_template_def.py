@@ -58,6 +58,10 @@ class SwarmFedoraTemplateDefinition(template_def.BaseTemplateDefinition):
         self.add_parameter('external_network',
                            cluster_template_attr='external_network_id',
                            required=True)
+        self.add_parameter('fixed_network',
+                           cluster_template_attr='fixed_network')
+        self.add_parameter('fixed_subnet',
+                           cluster_template_attr='fixed_subnet')
         self.add_parameter('network_driver',
                            cluster_template_attr='network_driver')
         self.add_parameter('tls_disabled',
@@ -115,14 +119,8 @@ class SwarmFedoraTemplateDefinition(template_def.BaseTemplateDefinition):
     def get_env_files(self, cluster_template):
         env_files = []
 
-        if cluster_template.docker_volume_size is None:
-            env_files.append('no_volume.yaml')
-        else:
-            env_files.append('with_volume.yaml')
+        template_def.add_priv_net_env_file(env_files, cluster_template)
+        template_def.add_volume_env_file(env_files, cluster_template)
+        template_def.add_lb_env_file(env_files, cluster_template)
 
-        if cluster_template.master_lb_enabled:
-            env_files.append('with_master_lb.yaml')
-        else:
-            env_files.append('no_master_lb.yaml')
-
-        return [template_def.COMMON_ENV_PATH + ef for ef in env_files]
+        return env_files

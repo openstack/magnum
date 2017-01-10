@@ -37,6 +37,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'docker_volume_size': 20,
             'docker_storage_driver': 'devicemapper',
             'external_network_id': 'external_network_id',
+            'fixed_network': 'fixed_network',
+            'fixed_subnet': 'fixed_subnet',
             'cluster_distro': 'fedora-atomic',
             'coe': 'swarm',
             'http_proxy': 'http_proxy',
@@ -111,6 +113,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
         expected = {
             'ssh_key_name': 'keypair_id',
             'external_network': 'external_network_id',
+            'fixed_network': 'fixed_network',
+            'fixed_subnet': 'fixed_subnet',
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'master_flavor': 'master_flavor_id',
@@ -144,7 +148,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/with_volume.yaml',
+            ['../../common/templates/environments/no_private_network.yaml',
+             '../../common/templates/environments/with_volume.yaml',
              '../../common/templates/environments/no_master_lb.yaml'],
             env_files)
 
@@ -181,6 +186,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
         expected = {
             'ssh_key_name': 'keypair_id',
             'external_network': 'external_network_id',
+            'fixed_network': 'fixed_network',
+            'fixed_subnet': 'fixed_subnet',
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'master_flavor': 'master_flavor_id',
@@ -216,7 +223,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/with_volume.yaml',
+            ['../../common/templates/environments/no_private_network.yaml',
+             '../../common/templates/environments/with_volume.yaml',
              '../../common/templates/environments/no_master_lb.yaml'],
             env_files)
 
@@ -233,7 +241,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
                         'docker_volume_size', 'fixed_network', 'http_proxy',
                         'https_proxy', 'no_proxy', 'network_driver',
                         'master_flavor_id', 'docker_storage_driver',
-                        'volume_driver', 'rexray_preempt']
+                        'volume_driver', 'rexray_preempt', 'fixed_subnet']
         for key in not_required:
             self.cluster_template_dict[key] = None
         self.cluster_dict['discovery_url'] = 'https://discovery.etcd.io/test'
@@ -280,7 +288,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/no_volume.yaml',
+            ['../../common/templates/environments/with_private_network.yaml',
+             '../../common/templates/environments/no_volume.yaml',
              '../../common/templates/environments/no_master_lb.yaml'],
             env_files)
 
@@ -313,6 +322,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
         expected = {
             'ssh_key_name': 'keypair_id',
             'external_network': 'external_network_id',
+            'fixed_network': 'fixed_network',
+            'fixed_subnet': 'fixed_subnet',
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'master_flavor': 'master_flavor_id',
@@ -346,7 +357,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/with_volume.yaml',
+            ['../../common/templates/environments/no_private_network.yaml',
+             '../../common/templates/environments/with_volume.yaml',
              '../../common/templates/environments/with_master_lb.yaml'],
             env_files)
 
@@ -380,6 +392,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
         expected = {
             'ssh_key_name': 'keypair_id',
             'external_network': 'external_network_id',
+            'fixed_network': 'fixed_network',
+            'fixed_subnet': 'fixed_subnet',
             'dns_nameserver': 'dns_nameserver',
             'server_image': 'image_id',
             'master_flavor': 'master_flavor_id',
@@ -413,7 +427,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
-            ['../../common/templates/environments/with_volume.yaml',
+            ['../../common/templates/environments/no_private_network.yaml',
+             '../../common/templates/environments/with_volume.yaml',
              '../../common/templates/environments/with_master_lb.yaml'],
             env_files)
 

@@ -5,12 +5,19 @@ description: >
   router for our server.
 
 parameters:
+  existing_network:
+    type: string
+    default: ""
 
-  fixed_network_cidr:
+  existing_subnet:
+    type: string
+    default: ""
+
+  private_network_cidr:
     type: string
     description: network range for fixed ip network
 
-  fixed_network_name:
+  private_network_name:
     type: string
     description: fixed network name
     default: ""
@@ -24,37 +31,45 @@ parameters:
     description: uuid/name of a network to use for floating ip addresses
 
 resources:
-  fixed_network:
-    type: OS::Neutron::Net
+  private_network:
+    type: Magnum::Optional::Neutron::Net
     properties:
-      name: {get_param: fixed_network_name}
+      name: {get_param: private_network_name}
 
-  fixed_subnet:
-    type: OS::Neutron::Subnet
+  private_subnet:
+    type: Magnum::Optional::Neutron::Subnet
     properties:
-      cidr: {get_param: fixed_network_cidr}
-      network: {get_resource: fixed_network}
+      cidr: {get_param: private_network_cidr}
+      network: {get_resource: private_network}
       dns_nameservers:
         - {get_param: dns_nameserver}
 
   extrouter:
-    type: OS::Neutron::Router
+    type: Magnum::Optional::Neutron::Router
     properties:
       external_gateway_info:
         network: {get_param: external_network}
 
   extrouter_inside:
-    type: OS::Neutron::RouterInterface
+    type: Magnum::Optional::Neutron::RouterInterface
     properties:
       router_id: {get_resource: extrouter}
-      subnet: {get_resource: fixed_subnet}
+      subnet: {get_resource: private_subnet}
+
+  network_switch:
+    type: Magnum::NetworkSwitcher
+    properties:
+      private_network: {get_resource: private_network}
+      private_subnet: {get_resource: private_subnet}
+      existing_network: {get_param: existing_network}
+      existing_subnet: {get_param: existing_subnet}
 
 outputs:
     fixed_network:
       description: >
-        Created fixed network ID
-      value: {get_resource: fixed_network}
+        Network ID where to provision machines
+      value: {get_attr: [network_switch, network]}
     fixed_subnet:
       description: >
-        Created fixed subnet ID
-      value: {get_resource: fixed_subnet}
+        Subnet ID where to provision machines
+      value: {get_attr: [network_switch, subnet]}

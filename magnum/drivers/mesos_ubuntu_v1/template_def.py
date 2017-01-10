@@ -24,6 +24,10 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
         self.add_parameter('external_network',
                            cluster_template_attr='external_network_id',
                            required=True)
+        self.add_parameter('fixed_network',
+                           cluster_template_attr='fixed_network')
+        self.add_parameter('fixed_subnet',
+                           cluster_template_attr='fixed_subnet')
         self.add_parameter('number_of_slaves',
                            cluster_attr='node_count')
         self.add_parameter('master_flavor',
@@ -78,10 +82,12 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
                                       **kwargs)
 
     def get_env_files(self, cluster_template):
-        if cluster_template.master_lb_enabled:
-            return [template_def.COMMON_ENV_PATH + 'with_master_lb.yaml']
-        else:
-            return [template_def.COMMON_ENV_PATH + 'no_master_lb.yaml']
+        env_files = []
+
+        template_def.add_priv_net_env_file(env_files, cluster_template)
+        template_def.add_lb_env_file(env_files, cluster_template)
+
+        return env_files
 
     @property
     def driver_module_path(self):
