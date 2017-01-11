@@ -124,7 +124,7 @@ function add_flavor {
     # Create magnum specific flavor for use in functional tests.
     echo_summary "Create a flavor"
     openstack flavor create m1.magnum --id 100 --ram 1024 --disk 10 --vcpus 1
-    openstack flavor create s1.magnum --id 200 --ram 512 --disk 10 --vcpus 1
+    openstack flavor create s1.magnum --id 200 --ram 1024 --disk 10 --vcpus 1
 }
 
 if ! function_exists echo_summary; then
