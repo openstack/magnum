@@ -21,4 +21,5 @@ class TestFedoraKubernetesIronicAPIs(base.BaseK8sTest):
         "volume_driver": None,
         "fixed_subnet": 'private-subnet',
         "server_type": 'bm',
+        "docker_storage_driver": 'overlay',
     }

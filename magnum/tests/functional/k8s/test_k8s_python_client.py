@@ -17,5 +17,6 @@ class TestKubernetesAPIs(base.BaseK8sTest):
     cluster_template_kwargs = {
         "tls_disabled": False,
         "network_driver": 'flannel',
-        "volume_driver": 'cinder'
+        "volume_driver": 'cinder',
+        "docker_storage_driver": 'overlay',
     }
