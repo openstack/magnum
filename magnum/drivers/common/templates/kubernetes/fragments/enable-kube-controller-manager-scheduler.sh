@@ -8,15 +8,28 @@ else
     HYPERKUBE_IMAGE="gcr.io/google_containers/hyperkube:${KUBE_VERSION}"
 fi
 
+# vars also used by the Kubernetes config files
+unset KUBE_API_PORT
+unset KUBE_ALLOW_PRIV
+
+# this function generate a list of args (one per line) from a list of possibly nested args
+# the first parameter is the prefix to be added before each arg
+# empty args are ignored
+generate_pod_args() {
+    prefix=$1
+
+    for var in "${@:2}" ; do
+        for arg in "$var" ; do
+            echo "$prefix$arg"
+        done
+    done
+}
+
 
 init_templates () {
-    local SERVICE_ACCOUNT_PRIVATE_KEY_FILE=/etc/kubernetes/ssl/server.key
-    local ROOT_CA_FILE=/etc/kubernetes/ssl/ca.crt
+    . /etc/kubernetes/config
 
-    if [ "${TLS_DISABLED}" = "True" ]; then
-        SERVICE_ACCOUNT_PRIVATE_KEY_FILE=
-        ROOT_CA_FILE=
-    fi
+    . /etc/kubernetes/controller-manager
 
     local TEMPLATE=/etc/kubernetes/manifests/kube-controller-manager.yaml
     [ -f ${TEMPLATE} ] || {
@@ -29,16 +42,15 @@ metadata:
   name: kube-controller-manager
   namespace: kube-system
 spec:
+  hostNetwork: true
   containers:
   - name: kube-controller-manager
     image: ${HYPERKUBE_IMAGE}
     command:
     - /hyperkube
     - controller-manager
-    - --master=http://127.0.0.1:8080
     - --leader-elect=true
-    - --service-account-private-key-file=${SERVICE_ACCOUNT_PRIVATE_KEY_FILE}
-    - --root-ca-file=${ROOT_CA_FILE}
+$(generate_pod_args "    - " $KUBE_LOGTOSTDERR $KUBE_LOG_LEVEL $KUBE_MASTER $KUBE_CONTROLLER_MANAGER_ARGS)
     livenessProbe:
       httpGet:
         host: 127.0.0.1
@@ -47,28 +59,29 @@ spec:
       initialDelaySeconds: 15
       timeoutSeconds: 1
     volumeMounts:
-    - mountPath: /etc/kubernetes/ssl
-      name: ssl-certs-kubernetes
-      readOnly: true
     - mountPath: /etc/ssl/certs
       name: ssl-certs-host
+      readOnly: true
+    - mountPath: /srv/kubernetes
+      name: kubernetes-config
       readOnly: true
     - mountPath: /etc/sysconfig
       name: sysconfig
       readOnly: true
-  hostNetwork: true
   volumes:
-  - hostPath:
-      path: /srv/kubernetes
-    name: ssl-certs-kubernetes
   - hostPath:
       path: /etc/ssl/certs
     name: ssl-certs-host
+  - hostPath:
+      path: /srv/kubernetes
+    name: kubernetes-config
   - hostPath:
       path: /etc/sysconfig
     name: sysconfig
 EOF
     }
+
+    . /etc/kubernetes/scheduler
 
     local TEMPLATE=/etc/kubernetes/manifests/kube-scheduler.yaml
     [ -f ${TEMPLATE} ] || {
@@ -88,8 +101,8 @@ spec:
     command:
     - /hyperkube
     - scheduler
-    - --master=http://127.0.0.1:8080
     - --leader-elect=true
+$(generate_pod_args "    - " $KUBE_LOGTOSTDERR $KUBE_LOG_LEVEL $KUBE_MASTER $KUBE_SCHEDULER_ARGS)
     livenessProbe:
       httpGet:
         host: 127.0.0.1
@@ -97,6 +110,26 @@ spec:
         port: 10251
       initialDelaySeconds: 15
       timeoutSeconds: 1
+    volumeMounts:
+    - mountPath: /etc/ssl/certs
+      name: ssl-certs-host
+      readOnly: true
+    - mountPath: /srv/kubernetes
+      name: kubernetes-config
+      readOnly: true
+    - mountPath: /etc/sysconfig
+      name: sysconfig
+      readOnly: true
+  volumes:
+  - hostPath:
+      path: /etc/ssl/certs
+    name: ssl-certs-host
+  - hostPath:
+      path: /srv/kubernetes
+    name: kubernetes-config
+  - hostPath:
+      path: /etc/sysconfig
+    name: sysconfig
 EOF
     }
 }
