@@ -383,6 +383,10 @@ class QuotaAlreadyExists(Conflict):
                 "for resource %(resource)s.")
 
 
+class QuotaNotFound(ResourceNotFound):
+    message = _("Quota could not be found: %(msg)s")
+
+
 class RegionsListFailed(MagnumException):
     message = _("Failed to list regions.")
 

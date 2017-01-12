@@ -359,10 +359,76 @@ class Connection(object):
         """
 
     @abc.abstractmethod
+    def update_quota(self, project_id, values):
+        """Update quota record.
+
+        :param project_id: The project id.
+        :param values: A dict containing several items used to identify
+                       and track quota for a resource in a project.
+
+                       ::
+
+                        {
+                         'id': uuidutils.generate_uuid(),
+                         'project_id': 'fake_project',
+                         'resource': 'fake_resource',
+                         'hard_limit': 'fake_hardlimit',
+                        }
+        :returns:  A quota record.
+        """
+
+    @abc.abstractmethod
+    def delete_quota(self, project_id, resource):
+        """Delete a quota.
+
+        :param project_id: Project id.
+        :param resource: resource name.
+        """
+
+    @abc.abstractmethod
+    def get_quota_by_id(self, context, quota_id):
+        """Return a quota.
+
+        :param context: The security context
+        :param quota_id: The id of a quota.
+        :returns: A quota.
+        """
+
+    @abc.abstractmethod
+    def get_quota_list(self, context, filters=None, limit=None,
+                       marker=None, sort_key=None, sort_dir=None):
+        """Get quota list.
+
+        Return a list of the specified columns for all quotas that match the
+        specified filters.
+
+        :param context: The security context
+        :param filters: Filters to apply. Defaults to None.
+
+        :param limit: Maximum number of clusters to return.
+        :param marker: the last item of the previous page; we return the next
+                       result set.
+        :param sort_key: Attribute by which results should be sorted.
+        :param sort_dir: direction in which results should be sorted.
+                         (asc, desc)
+        :returns: A list of tuples of the specified columns.
+        """
+
+    @abc.abstractmethod
     def quota_get_all_by_project_id(self, project_id):
         """Gets Quota record for all the resources in a project.
 
         :param project_id: Project identifier of the project.
 
         :returns: Quota record for all resources in a project.
+        """
+
+    @abc.abstractmethod
+    def get_quota_by_project_id_resource(self, project_id, resource):
+        """Gets quota record for the given quota id.
+
+        :param project_id: project id.
+        :param resource: resource name.
+
+        :returns: Quota record.
         """

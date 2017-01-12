@@ -39,3 +39,123 @@ class DbQuotaTestCase(base.DbTestCase):
             self.assertEqual(q.hard_limit, r.hard_limit)
             self.assertEqual(q.project_id, r.project_id)
             self.assertEqual(q.resource, r.resource)
+
+    def test_get_quota_by_project_id_resource(self):
+        q = utils.create_test_quotas(project_id='123',
+                                     resource='test-res',
+                                     hard_limit=5)
+        res = self.dbapi.get_quota_by_project_id_resource('123', 'test-res')
+        self.assertEqual(q.hard_limit, res.hard_limit)
+        self.assertEqual(q.project_id, res.project_id)
+        self.assertEqual(q.resource, res.resource)
+
+    def test_get_quota_by_project_id_resource_not_found(self):
+        utils.create_test_quotas(project_id='123',
+                                 resource='test-res',
+                                 hard_limit=5)
+        self.assertRaises(exception.QuotaNotFound,
+                          self.dbapi.get_quota_by_project_id_resource,
+                          project_id='123',
+                          resource='bad-res')
+
+    def test_get_quota_list(self):
+        project_ids = []
+        for i in range(1, 6):
+            project_id = 'proj-'+str(i)
+            utils.create_test_quotas(project_id=project_id)
+            project_ids.append(project_id)
+        res = self.dbapi.get_quota_list(self.context)
+        res_proj_ids = [r.project_id for r in res]
+        self.assertEqual(sorted(project_ids), sorted(res_proj_ids))
+
+    def test_get_quota_list_sorted(self):
+        project_ids = []
+        for i in range(1, 6):
+            project_id = 'proj-'+str(i)
+            utils.create_test_quotas(project_id=project_id)
+            project_ids.append(project_id)
+        res = self.dbapi.get_quota_list(self.context, sort_key='project_id')
+        res_proj_ids = [r.project_id for r in res]
+        self.assertEqual(sorted(project_ids), res_proj_ids)
+
+    def test_get_quota_list_invalid_sort_key(self):
+        project_ids = []
+        for i in range(1, 6):
+            project_id = 'proj-'+str(i)
+            utils.create_test_quotas(project_id=project_id)
+            project_ids.append(project_id)
+
+        self.assertRaises(exception.InvalidParameterValue,
+                          self.dbapi.get_quota_list,
+                          self.context,
+                          sort_key='invalid')
+
+    def test_get_quota_list_with_filters(self):
+        quota1 = utils.create_test_quotas(project_id='proj-1', resource='res1')
+        quota2 = utils.create_test_quotas(project_id='proj-1', resource='res2')
+        quota3 = utils.create_test_quotas(project_id='proj-2', resource='res1')
+
+        res = self.dbapi.get_quota_list(
+            self.context, filters={'resource': 'res2'})
+        self.assertEqual(quota2.project_id, res[0].project_id)
+
+        res = self.dbapi.get_quota_list(
+            self.context, filters={'project_id': 'proj-2'})
+        self.assertEqual(quota3.project_id, res[0].project_id)
+
+        res = self.dbapi.get_quota_list(
+            self.context, filters={'project_id': 'proj-1'})
+        self.assertEqual(sorted([quota1.project_id, quota2.project_id]),
+                         sorted([r.project_id for r in res]))
+
+    def test_update_quota(self):
+        q = utils.create_test_quotas(hard_limit=5,
+                                     project_id='1234',
+                                     resource='Cluster')
+
+        res = self.dbapi.get_quota_by_project_id_resource('1234', 'Cluster')
+        self.assertEqual(q.hard_limit, res.hard_limit)
+        self.assertEqual(q.project_id, res.project_id)
+        self.assertEqual(q.resource, res.resource)
+        quota_dict = {'resource': 'Cluster', 'hard_limit': 15}
+        self.dbapi.update_quota('1234', quota_dict)
+        res = self.dbapi.get_quota_by_project_id_resource('1234', 'Cluster')
+        self.assertEqual(quota_dict['hard_limit'], res.hard_limit)
+        self.assertEqual(quota_dict['resource'], res.resource)
+
+    def test_update_quota_not_found(self):
+        utils.create_test_quotas(hard_limit=5,
+                                 project_id='1234',
+                                 resource='Cluster')
+        quota_dict = {'resource': 'Cluster', 'hard_limit': 15}
+        self.assertRaises(exception.QuotaNotFound,
+                          self.dbapi.update_quota,
+                          'invalid_proj',
+                          quota_dict)
+
+    def test_delete_quota(self):
+        q = utils.create_test_quotas(project_id='123',
+                                     resource='test-res',
+                                     hard_limit=5)
+        res = self.dbapi.get_quota_by_project_id_resource('123', 'test-res')
+        self.assertEqual(q.hard_limit, res.hard_limit)
+        self.assertEqual(q.project_id, res.project_id)
+        self.assertEqual(q.resource, res.resource)
+        self.dbapi.delete_quota(q.project_id, q.resource)
+        self.assertRaises(exception.QuotaNotFound,
+                          self.dbapi.get_quota_by_project_id_resource,
+                          project_id='123',
+                          resource='bad-res')
+
+    def test_delete_quota_that_does_not_exist(self):
+        # Make sure that quota does not exist
+        self.assertRaises(exception.QuotaNotFound,
+                          self.dbapi.get_quota_by_project_id_resource,
+                          project_id='123',
+                          resource='bad-res')
+
+        # Now try to delete non-existing quota
+        self.assertRaises(exception.QuotaNotFound,
+                          self.dbapi.delete_quota,
+                          project_id='123',
+                          resource='bad-res')

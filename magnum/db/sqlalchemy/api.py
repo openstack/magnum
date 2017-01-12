@@ -527,8 +527,81 @@ class Connection(api.Connection):
                                                resource=values['resource'])
         return quotas
 
+    def _add_quota_filters(self, query, filters):
+        if filters is None:
+            filters = {}
+
+        possible_filters = ["resource", "project_id"]
+
+        filter_names = set(filters).intersection(possible_filters)
+        filter_dict = {filter_name: filters[filter_name]
+                       for filter_name in filter_names}
+
+        query = query.filter_by(**filter_dict)
+        return query
+
+    def get_quota_list(self, context, filters=None, limit=None, marker=None,
+                       sort_key=None, sort_dir=None):
+        query = model_query(models.Quota)
+        query = self._add_quota_filters(query, filters)
+        return _paginate_query(models.Quota, limit, marker,
+                               sort_key, sort_dir, query)
+
+    def update_quota(self, project_id, values):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.Quota, session=session)
+            resource = values['resource']
+            try:
+                query = query.filter_by(project_id=project_id).filter_by(
+                    resource=resource)
+                ref = query.with_lockmode('update').one()
+            except NoResultFound:
+                msg = (_('project_id %(project_id)s resource %(resource)s.') %
+                       {'project_id': project_id, 'resource': resource})
+                raise exception.QuotaNotFound(msg=msg)
+
+            ref.update(values)
+        return ref
+
+    def delete_quota(self, project_id, resource):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.Quota, session=session)
+
+            try:
+                query.filter_by(project_id=project_id).filter_by(
+                    resource=resource).one()
+            except NoResultFound:
+                msg = (_('project_id %(project_id)s resource %(resource)s.') %
+                       {'project_id': project_id, 'resource': resource})
+                raise exception.QuotaNotFound(msg=msg)
+
+            query.delete()
+
+    def get_quota_by_id(self, context, quota_id):
+        query = model_query(models.Quota)
+        query = query.filter_by(id=quota_id)
+        try:
+            return query.one()
+        except NoResultFound:
+            msg = _('quota id %s .') % quota_id
+            raise exception.QuotaNotFound(msg=msg)
+
     def quota_get_all_by_project_id(self, project_id):
         query = model_query(models.Quota)
         result = query.filter_by(project_id=project_id).all()
 
         return result
+
+    def get_quota_by_project_id_resource(self, project_id, resource):
+        query = model_query(models.Quota)
+        query = query.filter_by(project_id=project_id).filter_by(
+            resource=resource)
+
+        try:
+            return query.one()
+        except NoResultFound:
+            msg = (_('project_id %(project_id)s resource %(resource)s.') %
+                   {'project_id': project_id, 'resource': resource})
+            raise exception.QuotaNotFound(msg=msg)

@@ -122,6 +122,32 @@ def create_test_cluster(**kw):
     return dbapi.create_cluster(cluster)
 
 
+def get_test_quota(**kw):
+    attrs = {
+        'id': kw.get('id', 42),
+        'project_id': kw.get('project_id', 'fake_project'),
+        'resource': kw.get('resource', 'Cluster'),
+        'hard_limit': kw.get('hard_limit', 10)
+    }
+
+    return attrs
+
+
+def create_test_quota(**kw):
+    """Create test quota entry in DB and return Quota DB object.
+
+    Function to be used to create test Quota objects in the database.
+    :param kw: kwargs with overriding values for quota's attributes.
+    :returns: Test Quota DB object.
+    """
+    quota = get_test_quota(**kw)
+    # Let DB generate ID if it isn't specified explicitly
+    if 'id' not in kw:
+        del quota['id']
+    dbapi = db_api.get_instance()
+    return dbapi.create_quota(quota)
+
+
 def get_test_x509keypair(**kw):
     return {
         'id': kw.get('id', 42),
@@ -187,7 +213,7 @@ def get_test_quotas(**kw):
     return {
         'id': kw.get('', 18),
         'project_id': kw.get('project_id', 'fake_project'),
-        'resource': kw.get('resource', 'fake_resource'),
+        'resource': kw.get('resource', 'Cluster'),
         'hard_limit': kw.get('hard_limit', 10),
         'created_at': kw.get('created_at'),
         'updated_at': kw.get('updated_at'),
