@@ -67,6 +67,10 @@ def cert_post_data(**kw):
     }
 
 
+def quota_post_data(**kw):
+    return utils.get_test_quota(**kw)
+
+
 def mservice_get_data(**kw):
     """Simulate what the RPC layer will get from DB """
     faketime = datetime.datetime(2001, 1, 1, tzinfo=pytz.UTC)

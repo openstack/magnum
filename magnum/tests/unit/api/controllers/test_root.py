@@ -69,6 +69,10 @@ class TestRootController(api_base.FunctionalTest):
                            u'rel': u'self'},
                           {u'href': u'http://localhost/clusters/',
                            u'rel': u'bookmark'}],
+            u'quotas': [{u'href': u'http://localhost/v1/quotas/',
+                         u'rel': u'self'},
+                        {u'href': u'http://localhost/quotas/',
+                         u'rel': u'bookmark'}],
             u'clustertemplates':
                 [{u'href': u'http://localhost/v1/clustertemplates/',
                   u'rel': u'self'},

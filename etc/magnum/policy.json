@@ -35,6 +35,12 @@
     "clustertemplate:update": "rule:default",
     "clustertemplate:publish": "rule:admin_or_owner",
 
+    "quotas:get": "rule:default",
+    "quotas:get_all": "rule:admin_api",
+    "quotas:create": "rule:admin_api",
+    "quotas:update": "rule:admin_api",
+    "quotas:delete": "rule:admin_api",
+
     "certificate:create": "rule:admin_or_user",
     "certificate:get": "rule:admin_or_user",
 

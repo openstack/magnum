@@ -89,6 +89,33 @@ def create_test_cluster(context, **kw):
     return cluster
 
 
+def get_test_quota(context, **kw):
+    """Return a Quota object with appropriate attributes.
+
+    NOTE: The object leaves the attributes marked as changed, such
+    that a create() could be used to commit it to the DB.
+    """
+    db_quota = db_utils.get_test_quota(**kw)
+    # Let DB generate ID if it isn't specified explicitly
+    if 'id' not in kw:
+        del db_quota['id']
+    quota = objects.Quota(context)
+    for key in db_quota:
+        setattr(quota, key, db_quota[key])
+    return quota
+
+
+def create_test_quota(context, **kw):
+    """Create and return a test Quota object.
+
+    Create a quota in the DB and return a Quota object with appropriate
+    attributes.
+    """
+    quota = get_test_quota(context, **kw)
+    quota.create()
+    return quota
+
+
 def get_test_x509keypair(context, **kw):
     """Return a X509KeyPair object with appropriate attributes.
 
