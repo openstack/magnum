@@ -8,8 +8,8 @@ CONF_FILE=/etc/systemd/system/swarm-agent.service
 CERT_DIR=/etc/docker
 PROTOCOL=https
 ETCDCTL_OPTIONS="--ca-file $CERT_DIR/ca.crt \
---cert-file $CERT_DIR/client.crt \
---key-file $CERT_DIR/client.key"
+--cert-file $CERT_DIR/server.crt \
+--key-file $CERT_DIR/server.key"
 
 if [ $TLS_DISABLED = 'True'  ]; then
     PROTOCOL=http
