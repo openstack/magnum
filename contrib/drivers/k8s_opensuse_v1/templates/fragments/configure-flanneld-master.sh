@@ -30,6 +30,8 @@ cat > $FLANNEL_JSON <<EOF
 {
   "Network": "$FLANNEL_NETWORK_CIDR",
   "Subnetlen": $FLANNEL_NETWORK_SUBNETLEN,
+  "SubnetMin": "$FLANNEL_NETWORK_SUBNET_MIN",
+  "SubnetMax": "$FLANNEL_NETWORK_SUBNET_MAX",
   "Backend": {
     "Type": "$FLANNEL_BACKEND"
   }
