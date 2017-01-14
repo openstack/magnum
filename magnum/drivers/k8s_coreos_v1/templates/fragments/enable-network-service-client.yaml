@@ -46,8 +46,8 @@ write_files:
       if [ "$TLS_DISABLED" = "False" ]; then
         cat >> $ENV_FILE <<EOF
       FLANNELD_ETCD_CAFILE=$CERT_DIR/ca.pem
-      FLANNELD_ETCD_CERTFILE=$CERT_DIR/apiserver.pem
-      FLANNELD_ETCD_KEYFILE=$CERT_DIR/apiserver-key.pem
+      FLANNELD_ETCD_CERTFILE=$CERT_DIR/worker.pem
+      FLANNELD_ETCD_KEYFILE=$CERT_DIR/worker-key.pem
       EOF
       fi
 
