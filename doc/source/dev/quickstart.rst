@@ -373,11 +373,12 @@ Using a Kubernetes Cluster
 k8s cluster created previously.
 
 Kubernetes provides a number of examples you can use to check that things are
-working. You may need to clone kubernetes using::
+working. You may need to download kubectl binary for interacting with k8s
+cluster using::
 
-    wget https://github.com/kubernetes/kubernetes/releases/download/v1.0.1/kubernetes.tar.gz
-    tar -xvzf kubernetes.tar.gz
-    sudo cp -a kubernetes/platforms/linux/amd64/kubectl /usr/bin/kubectl
+    curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.2.0/bin/linux/amd64/kubectl
+    chmod +x ./kubectl
+    sudo mv ./kubectl /usr/local/bin/kubectl
 
 We first need to setup the certs to allow Kubernetes to authenticate our
 connection.   Please refer to
