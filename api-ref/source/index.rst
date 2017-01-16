@@ -14,3 +14,4 @@
 .. include:: clustertemplates.inc
 .. include:: certificates.inc
 .. include:: mservices.inc
+.. include:: stats.inc

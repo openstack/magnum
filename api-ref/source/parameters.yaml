@@ -32,6 +32,12 @@ clustertemplate_ident:
   required: true
   description: |
     The UUID or name of cluster templates in Magnum.
+project_id:
+  type: string
+  in: path
+  required: true
+  description: |
+    Project ID.
 
 # Body params
 api_address:
@@ -106,6 +112,12 @@ cluster_list:
   required: true
   description: |
     The list of all clusters in Magnum.
+clusters:
+  type: integer
+  in: body
+  required: true
+  description: |
+    The number of clusters.
 clustertemplate_id:
   type: UUID
   in: body
@@ -414,6 +426,12 @@ node_count:
   description: |
     The number of servers that will serve as node in the bay/cluster. The
     default is 1.
+  in: body
+  required: true
+  type: integer
+nodes:
+  description: |
+    The total number of nodes including master nodes.
   in: body
   required: true
   type: integer
