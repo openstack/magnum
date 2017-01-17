@@ -1,0 +1,8 @@
+{
+   "resource": "Cluster",
+   "created_at": "2017-01-17T17:35:48+00:00",
+   "updated_at": null,
+   "hard_limit": 1,
+   "project_id": "aa5436ab58144c768ca4e9d2e9f5c3b2",
+   "id": 26
+}
