@@ -15,11 +15,13 @@
 
 from oslo_log import log as logging
 
+from magnum.common import profiler
 from magnum.conductor.handlers.common import cert_manager
 from magnum import objects
 LOG = logging.getLogger(__name__)
 
 
+@profiler.trace_cls("rpc")
 class Handler(object):
     """Magnum CA RPC handler.
 

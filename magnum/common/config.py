@@ -15,20 +15,22 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_config import cfg
 from oslo_middleware import cors
 
 from magnum.common import rpc
+import magnum.conf
 from magnum import version
+
+CONF = magnum.conf.CONF
 
 
 def parse_args(argv, default_config_files=None):
     rpc.set_defaults(control_exchange='magnum')
-    cfg.CONF(argv[1:],
-             project='magnum',
-             version=version.version_info.release_string(),
-             default_config_files=default_config_files)
-    rpc.init(cfg.CONF)
+    CONF(argv[1:],
+         project='magnum',
+         version=version.version_info.release_string(),
+         default_config_files=default_config_files)
+    rpc.init(CONF)
 
 
 def set_config_defaults():

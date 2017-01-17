@@ -32,11 +32,13 @@ import socket
 
 import oslo_messaging as messaging
 from oslo_serialization import jsonutils
+from oslo_utils import importutils
 
 from magnum.common import context as magnum_context
 from magnum.common import exception
 import magnum.conf
 
+profiler = importutils.try_import("osprofiler.profiler")
 
 CONF = magnum.conf.CONF
 TRANSPORT = None
@@ -121,22 +123,56 @@ class RequestContextSerializer(messaging.Serializer):
         return magnum_context.RequestContext.from_dict(context)
 
 
+class ProfilerRequestContextSerializer(RequestContextSerializer):
+    def serialize_context(self, context):
+        _context = super(ProfilerRequestContextSerializer,
+                         self).serialize_context(context)
+
+        prof = profiler.get()
+        if prof:
+            trace_info = {
+                "hmac_key": prof.hmac_key,
+                "base_id": prof.get_base_id(),
+                "parent_id": prof.get_id()
+            }
+            _context.update({"trace_info": trace_info})
+
+        return _context
+
+    def deserialize_context(self, context):
+        trace_info = context.pop("trace_info", None)
+        if trace_info:
+            profiler.init(**trace_info)
+
+        return super(ProfilerRequestContextSerializer,
+                     self).deserialize_context(context)
+
+
 def get_transport_url(url_str=None):
     return messaging.TransportURL.parse(CONF, url_str, TRANSPORT_ALIASES)
 
 
-def get_client(target, version_cap=None, serializer=None):
+def get_client(target, version_cap=None, serializer=None, timeout=None):
     assert TRANSPORT is not None
-    serializer = RequestContextSerializer(serializer)
+    if profiler:
+        serializer = ProfilerRequestContextSerializer(serializer)
+    else:
+        serializer = RequestContextSerializer(serializer)
+
     return messaging.RPCClient(TRANSPORT,
                                target,
                                version_cap=version_cap,
-                               serializer=serializer)
+                               serializer=serializer,
+                               timeout=timeout)
 
 
 def get_server(target, endpoints, serializer=None):
     assert TRANSPORT is not None
-    serializer = RequestContextSerializer(serializer)
+    if profiler:
+        serializer = ProfilerRequestContextSerializer(serializer)
+    else:
+        serializer = RequestContextSerializer(serializer)
+
     return messaging.get_rpc_server(TRANSPORT,
                                     target,
                                     endpoints,

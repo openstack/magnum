@@ -12,6 +12,7 @@
 
 """API for interfacing with Magnum Backend."""
 
+from magnum.common import profiler
 from magnum.common import rpc_service
 import magnum.conf
 
@@ -22,6 +23,7 @@ CONF = magnum.conf.CONF
 # API to trigger operations on the conductors
 
 
+@profiler.trace_cls("rpc")
 class API(rpc_service.API):
     def __init__(self, transport=None, context=None, topic=None):
         super(API, self).__init__(transport, context,
@@ -78,6 +80,7 @@ class API(rpc_service.API):
                                  target_version=target_version)
 
 
+@profiler.trace_cls("rpc")
 class ListenerAPI(rpc_service.API):
     def __init__(self, context=None, topic=None, server=None, timeout=None):
         super(ListenerAPI, self).__init__(context=context, topic=topic,
