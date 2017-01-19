@@ -40,8 +40,9 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
     #              Rename 'bay_create_timeout' to 'create_timeout'
     # Version 1.10: Added 'keypair' field
     # Version 1.11: Added 'RESUME_FAILED' in status field
+    # Version 1.12: Added 'get_stats' method
 
-    VERSION = '1.11'
+    VERSION = '1.12'
 
     dbapi = dbapi.get_instance()
 
@@ -171,6 +172,15 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
                                                  sort_dir=sort_dir,
                                                  filters=filters)
         return Cluster._from_db_object_list(db_clusters, cls, context)
+
+    @base.remotable_classmethod
+    def get_stats(cls, context, project_id=None):
+        """Return a list of Cluster objects.
+
+        :param context: Security context.
+        :param project_id: project id
+        """
+        return cls.dbapi.get_cluster_stats(project_id)
 
     @base.remotable
     def create(self, context=None):

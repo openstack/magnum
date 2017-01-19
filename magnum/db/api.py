@@ -107,6 +107,15 @@ class Connection(object):
         """
 
     @abc.abstractmethod
+    def get_cluster_stats(self, context, project_id):
+        """Return clusters stats for the given project.
+
+        :param context: The security context
+        :param project_id: The project id.
+        :returns: clusters, nodes count.
+        """
+
+    @abc.abstractmethod
     def destroy_cluster(self, cluster_id):
         """Destroy a cluster and all associated interfaces.
 

@@ -1,0 +1,6 @@
+---
+features:
+  - This release introduces 'stats' endpoint that provide the
+    total number of clusters and the total number of nodes
+    for the given tenant and also overall stats across all
+    the tenants.

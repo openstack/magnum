@@ -44,3 +44,16 @@ user documentation.
   For example:-
   - http://XXX/v1/clusters/XXX/?rollback=True or
   - http://XXX/v1/bays/XXX/?rollback=True
+
+
+1.4
+---
+
+  Add stats API
+
+  An admin user can get total number of clusters and nodes for a specified
+  tenant or for all the tenants and also a non-admin user can get self stats.
+  For example:-
+  - http://XXX/v1/stats or
+  - http://XXX/v1/stats?project_id=<project-id> or
+  - http://XXX/v1/stats?project_id=<project-id>&type=<stats-type>

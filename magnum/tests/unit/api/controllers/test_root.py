@@ -40,7 +40,7 @@ class TestRootController(api_base.FunctionalTest):
                                [{u'href': u'http://localhost/v1/',
                                  u'rel': u'self'}],
                            u'status': u'CURRENT',
-                           u'max_version': u'1.3',
+                           u'max_version': u'1.4',
                            u'min_version': u'1.1'}]}
 
         self.v1_expected = {
@@ -53,6 +53,10 @@ class TestRootController(api_base.FunctionalTest):
                         u'http://docs.openstack.org/developer'
                         '/magnum/dev/api-spec-v1.html',
                         u'type': u'text/html', u'rel': u'describedby'}],
+            u'stats': [{u'href': u'http://localhost/v1/stats/',
+                       u'rel': u'self'},
+                       {u'href': u'http://localhost/stats/',
+                        u'rel': u'bookmark'}],
             u'bays': [{u'href': u'http://localhost/v1/bays/',
                        u'rel': u'self'},
                       {u'href': u'http://localhost/bays/',
