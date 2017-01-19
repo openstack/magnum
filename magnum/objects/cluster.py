@@ -41,8 +41,9 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.10: Added 'keypair' field
     # Version 1.11: Added 'RESUME_FAILED' in status field
     # Version 1.12: Added 'get_stats' method
+    # Version 1.13: Added get_count_all method
 
-    VERSION = '1.12'
+    VERSION = '1.13'
 
     dbapi = dbapi.get_instance()
 
@@ -136,6 +137,10 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
         db_cluster = cls.dbapi.get_cluster_by_uuid(context, uuid)
         cluster = Cluster._from_db_object(cls(context), db_cluster)
         return cluster
+
+    @base.remotable_classmethod
+    def get_count_all(cls, context, **kwargs):
+        return cls.dbapi.get_cluster_count_all(context, **kwargs)
 
     @base.remotable_classmethod
     def get_by_name(cls, context, name):

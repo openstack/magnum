@@ -387,6 +387,10 @@ class QuotaNotFound(ResourceNotFound):
     message = _("Quota could not be found: %(msg)s")
 
 
+class ResourceLimitExceeded(NotAuthorized):
+    message = _('Resource limit exceeded: %(msg)s')
+
+
 class RegionsListFailed(MagnumException):
     message = _("Failed to list regions.")
 

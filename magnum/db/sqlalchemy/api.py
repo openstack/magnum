@@ -208,6 +208,12 @@ class Connection(api.Connection):
         nodes = int(nquery.one()[0]) if nquery.one()[0] else 0
         return clusters, nodes
 
+    def get_cluster_count_all(self, context, filters=None):
+        query = model_query(models.Cluster)
+        query = self._add_tenant_filters(context, query)
+        query = self._add_clusters_filters(query, filters)
+        return query.count()
+
     def destroy_cluster(self, cluster_id):
         session = get_session()
         with session.begin():
