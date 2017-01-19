@@ -451,7 +451,6 @@ resources:
           kube_allow_priv: {get_param: kube_allow_priv}
           docker_volume_size: {get_param: docker_volume_size}
           docker_storage_driver: {get_param: docker_storage_driver}
-          wait_condition_timeout: {get_param: wait_condition_timeout}
           registry_enabled: {get_param: registry_enabled}
           registry_port: {get_param: registry_port}
           swift_region: {get_param: swift_region}
@@ -480,6 +479,22 @@ resources:
           trust_id: {get_param: trust_id}
           auth_url: {get_param: auth_url}
           insecure_registry_url: {get_param: insecure_registry_url}
+          wc_curl_cli: {get_attr: [minion_wait_handle, curl_cli]}
+
+  ######################################################################
+  #
+  # wait condition handler for kubernetes minions
+  #
+
+  minion_wait_handle:
+    type: OS::Heat::WaitConditionHandle
+
+  minion_wait_condition:
+    type: OS::Heat::WaitCondition
+    properties:
+      count: {get_param: number_of_minions}
+      handle: {get_resource: minion_wait_handle}
+      timeout: {get_param: wait_condition_timeout}
 
 outputs:
 
