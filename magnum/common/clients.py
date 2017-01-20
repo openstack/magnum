@@ -165,9 +165,10 @@ class OpenStackClients(object):
             'insecure': self._get_client_option('nova', 'insecure')
         }
 
+        session = self.keystone().session
         self._nova = novaclient.Client(novaclient_version,
-                                       auth_token=self.auth_token, **args)
-        self._nova.client.management_url = endpoint
+                                       session=session,
+                                       endpoint_override=endpoint, **args)
         return self._nova
 
     @exception.wrap_keystone_exception

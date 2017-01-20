@@ -232,21 +232,27 @@ class ClientsTest(base.BaseTestCase):
         self.assertEqual(barbican, barbican_cached)
 
     @mock.patch.object(novaclient, 'Client')
+    @mock.patch.object(clients.OpenStackClients, 'keystone')
     @mock.patch.object(clients.OpenStackClients, 'url_for')
     @mock.patch.object(clients.OpenStackClients, 'auth_url')
     def _test_clients_nova(self, expected_region_name, mock_auth, mock_url,
-                           mock_call):
+                           mock_keystone, mock_call):
         mock_auth.__get__ = mock.Mock(return_value="keystone_url")
         con = mock.MagicMock()
-        con.auth_token = "3bcc3d3a03f44e3d8377f9247b0ad155"
+        keystone = mock.MagicMock()
+        keystone.session = mock.MagicMock()
+        mock_keystone.return_value = keystone
         con.auth_url = "keystone_url"
         mock_url.return_value = "url_from_keystone"
         obj = clients.OpenStackClients(con)
         obj._nova = None
         obj.nova()
+        expected_kwargs = {'session': keystone.session,
+                           'endpoint_override': mock_url.return_value,
+                           'cacert': None,
+                           'insecure': False}
         mock_call.assert_called_once_with(CONF.nova_client.api_version,
-                                          auth_token=con.auth_token,
-                                          cacert=None, insecure=False)
+                                          **expected_kwargs)
         mock_url.assert_called_once_with(service_type='compute',
                                          interface='publicURL',
                                          region_name=expected_region_name)
