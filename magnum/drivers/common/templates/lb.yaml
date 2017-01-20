@@ -27,7 +27,7 @@ resources:
     type: Magnum::Optional::Neutron::LBaaS::Listener
     properties:
       loadbalancer: {get_resource: loadbalancer}
-      protocol: {get_param: loadbalancing_protocol}
+      protocol: {get_param: protocol}
       protocol_port: {get_param: port}
 
   pool:
@@ -35,7 +35,7 @@ resources:
     properties:
       lb_algorithm: ROUND_ROBIN
       listener: {get_resource: listener}
-      protocol: {get_param: loadbalancing_protocol}
+      protocol: {get_param: protocol}
 
   monitor:
     type: Magnum::Optional::Neutron::LBaaS::HealthMonitor
