@@ -13,6 +13,7 @@
 # under the License.
 
 from magnum.drivers.heat import driver
+from magnum.drivers.mesos_ubuntu_v1 import monitor
 from magnum.drivers.mesos_ubuntu_v1 import template_def
 
 
@@ -28,3 +29,6 @@ class Driver(driver.HeatDriver):
 
     def get_template_definition(self):
         return template_def.UbuntuMesosTemplateDefinition()
+
+    def get_monitor(self, context, cluster):
+        return monitor.MesosMonitor(context, cluster)

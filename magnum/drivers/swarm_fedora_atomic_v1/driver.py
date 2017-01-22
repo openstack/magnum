@@ -13,6 +13,7 @@
 # under the License.
 
 from magnum.drivers.heat import driver
+from magnum.drivers.swarm_fedora_atomic_v1 import monitor
 from magnum.drivers.swarm_fedora_atomic_v1 import template_def
 
 
@@ -28,3 +29,6 @@ class Driver(driver.HeatDriver):
 
     def get_template_definition(self):
         return template_def.AtomicSwarmTemplateDefinition()
+
+    def get_monitor(self, context, cluster):
+        return monitor.SwarmMonitor(context, cluster)

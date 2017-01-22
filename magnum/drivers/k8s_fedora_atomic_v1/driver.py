@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from magnum.drivers.common import k8s_monitor
 from magnum.drivers.heat import driver
 from magnum.drivers.k8s_fedora_atomic_v1 import template_def
 
@@ -28,3 +29,6 @@ class Driver(driver.HeatDriver):
 
     def get_template_definition(self):
         return template_def.AtomicK8sTemplateDefinition()
+
+    def get_monitor(self, context, cluster):
+        return k8s_monitor.K8sMonitor(context, cluster)

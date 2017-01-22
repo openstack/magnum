@@ -174,3 +174,8 @@ class Driver(object):
     def delete_cluster(self, context, cluster):
         raise NotImplementedError("Subclasses must implement "
                                   "'delete_cluster'.")
+
+    def get_monitor(self, context, cluster):
+        """return the monitor with container data for this driver."""
+
+        return None

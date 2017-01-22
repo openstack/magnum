@@ -16,14 +16,12 @@
 import mock
 from oslo_serialization import jsonutils
 
-from magnum.conductor import k8s_monitor
-from magnum.conductor import mesos_monitor
-from magnum.conductor import monitors
-from magnum.conductor import swarm_monitor
+from magnum.drivers.common import k8s_monitor
+from magnum.drivers.mesos_ubuntu_v1 import monitor as mesos_monitor
+from magnum.drivers.swarm_fedora_atomic_v1 import monitor as swarm_monitor
 from magnum import objects
 from magnum.tests import base
 from magnum.tests.unit.db import utils
-from magnum.tests.unit.objects import utils as obj_utils
 
 
 class MonitorsTestCase(base.TestCase):
@@ -50,30 +48,12 @@ class MonitorsTestCase(base.TestCase):
         self.k8s_monitor = k8s_monitor.K8sMonitor(self.context, self.cluster)
         self.mesos_monitor = mesos_monitor.MesosMonitor(self.context,
                                                         self.cluster)
-        p = mock.patch('magnum.conductor.swarm_monitor.SwarmMonitor.'
-                       'metrics_spec', new_callable=mock.PropertyMock)
+        p = mock.patch('magnum.drivers.swarm_fedora_atomic_v1.monitor.'
+                       'SwarmMonitor.metrics_spec',
+                       new_callable=mock.PropertyMock)
         self.mock_metrics_spec = p.start()
         self.mock_metrics_spec.return_value = self.test_metrics_spec
         self.addCleanup(p.stop)
-
-    def test_create_monitor_success(self):
-        self.cluster.cluster_template = obj_utils.get_test_cluster_template(
-            self.context, uuid=self.cluster.cluster_template_id, coe='swarm')
-        monitor = monitors.create_monitor(self.context, self.cluster)
-        self.assertIsInstance(monitor, swarm_monitor.SwarmMonitor)
-
-    def test_create_monitor_k8s_cluster(self):
-        self.cluster.cluster_template = obj_utils.get_test_cluster_template(
-            self.context, uuid=self.cluster.cluster_template_id,
-            coe='kubernetes')
-        monitor = monitors.create_monitor(self.context, self.cluster)
-        self.assertIsInstance(monitor, k8s_monitor.K8sMonitor)
-
-    def test_create_monitor_mesos_cluster(self):
-        self.cluster.cluster_template = obj_utils.get_test_cluster_template(
-            self.context, uuid=self.cluster.cluster_template_id, coe='mesos')
-        monitor = monitors.create_monitor(self.context, self.cluster)
-        self.assertIsInstance(monitor, mesos_monitor.MesosMonitor)
 
     @mock.patch('magnum.common.docker_utils.docker_for_cluster')
     def test_swarm_monitor_pull_data_success(self, mock_docker_cluster):
@@ -176,7 +156,7 @@ class MonitorsTestCase(base.TestCase):
                          [{'Memory': 104857600.0, 'Cpu': 0.5}])
 
     def test_k8s_monitor_get_metric_names(self):
-        k8s_metric_spec = 'magnum.conductor.k8s_monitor.K8sMonitor.'\
+        k8s_metric_spec = 'magnum.drivers.common.k8s_monitor.K8sMonitor.'\
                           'metrics_spec'
         with mock.patch(k8s_metric_spec,
                         new_callable=mock.PropertyMock) as mock_k8s_metric:
@@ -185,7 +165,7 @@ class MonitorsTestCase(base.TestCase):
             self.assertEqual(sorted(['metric1', 'metric2']), sorted(names))
 
     def test_k8s_monitor_get_metric_unit(self):
-        k8s_metric_spec = 'magnum.conductor.k8s_monitor.K8sMonitor.' \
+        k8s_metric_spec = 'magnum.drivers.common.k8s_monitor.K8sMonitor.'\
                           'metrics_spec'
         with mock.patch(k8s_metric_spec,
                         new_callable=mock.PropertyMock) as mock_k8s_metric:
@@ -293,8 +273,8 @@ class MonitorsTestCase(base.TestCase):
         self._test_mesos_monitor_pull_data(mock_url_get, {}, 0, 0, 0, 0)
 
     def test_mesos_monitor_get_metric_names(self):
-        mesos_metric_spec = 'magnum.conductor.mesos_monitor.MesosMonitor.'\
-                            'metrics_spec'
+        mesos_metric_spec = ('magnum.drivers.mesos_ubuntu_v1.monitor.'
+                             'MesosMonitor.metrics_spec')
         with mock.patch(mesos_metric_spec,
                         new_callable=mock.PropertyMock) as mock_mesos_metric:
             mock_mesos_metric.return_value = self.test_metrics_spec
@@ -302,8 +282,8 @@ class MonitorsTestCase(base.TestCase):
             self.assertEqual(sorted(['metric1', 'metric2']), sorted(names))
 
     def test_mesos_monitor_get_metric_unit(self):
-        mesos_metric_spec = 'magnum.conductor.mesos_monitor.MesosMonitor.' \
-                            'metrics_spec'
+        mesos_metric_spec = ('magnum.drivers.mesos_ubuntu_v1.monitor.'
+                             'MesosMonitor.metrics_spec')
         with mock.patch(mesos_metric_spec,
                         new_callable=mock.PropertyMock) as mock_mesos_metric:
             mock_mesos_metric.return_value = self.test_metrics_spec
