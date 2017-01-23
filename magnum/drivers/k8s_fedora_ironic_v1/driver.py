@@ -13,6 +13,7 @@
 # under the License.
 
 from magnum.drivers.common import k8s_monitor
+from magnum.drivers.common.k8s_scale_manager import K8sScaleManager
 from magnum.drivers.heat import driver
 from magnum.drivers.k8s_fedora_ironic_v1 import template_def
 
@@ -32,3 +33,6 @@ class Driver(driver.HeatDriver):
 
     def get_monitor(self, context, cluster):
         return k8s_monitor.K8sMonitor(context, cluster)
+
+    def get_scale_manager(self, context, osclient, cluster):
+        return K8sScaleManager(context, osclient, cluster)

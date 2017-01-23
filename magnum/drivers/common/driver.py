@@ -179,3 +179,8 @@ class Driver(object):
         """return the monitor with container data for this driver."""
 
         return None
+
+    def get_scale_manager(self, context, osclient, cluster):
+        """return the scale manager for this driver."""
+
+        return None

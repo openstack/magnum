@@ -13,11 +13,10 @@
 # under the License.
 
 import abc
-from marathon import MarathonClient
 from oslo_log import log as logging
 
 from magnum.common import exception
-from magnum.conductor import k8s_api as k8s
+from magnum.drivers.common.driver import Driver
 from magnum.i18n import _
 from magnum.i18n import _LI
 from magnum.i18n import _LW
@@ -28,13 +27,9 @@ LOG = logging.getLogger(__name__)
 
 
 def get_scale_manager(context, osclient, cluster):
-    manager = None
-    coe = cluster.cluster_template.coe
-    if coe == 'kubernetes':
-        manager = K8sScaleManager(context, osclient, cluster)
-    elif coe == 'mesos':
-        manager = MesosScaleManager(context, osclient, cluster)
-    else:
+    cluster_driver = Driver.get_driver_for_cluster(context, cluster)
+    manager = cluster_driver.get_scale_manager(context, osclient, cluster)
+    if not manager:
         LOG.warning(_LW(
             "Currently only kubernetes and mesos cluster scale manager "
             "are available"))
@@ -94,41 +89,3 @@ class ScaleManager(object):
     def _get_hosts_with_container(self, context, cluster):
         """Return the hosts with container running on them."""
         pass
-
-
-class K8sScaleManager(ScaleManager):
-
-    def __init__(self, context, osclient, cluster):
-        super(K8sScaleManager, self).__init__(context, osclient, cluster)
-
-    def _get_hosts_with_container(self, context, cluster):
-        k8s_api = k8s.create_k8s_api(self.context, cluster)
-        hosts = set()
-        for pod in k8s_api.list_namespaced_pod(namespace='default').items:
-            hosts.add(pod.spec.node_name)
-
-        return hosts
-
-
-class MesosScaleManager(ScaleManager):
-    """When scaling a mesos cluster, MesosScaleManager will inspect the
-
-    nodes and find out those with containers on them. Thus we can
-    ask Heat to delete the nodes without containers. Note that this
-    is a best effort basis -- Magnum doesn't have any synchronization
-    with Marathon, so while Magnum is checking for the containers to
-    choose nodes to remove, new containers can be deployed on the
-    nodes to be removed.
-    """
-
-    def __init__(self, context, osclient, cluster):
-        super(MesosScaleManager, self).__init__(context, osclient, cluster)
-
-    def _get_hosts_with_container(self, context, cluster):
-        marathon_client = MarathonClient(
-            'http://' + cluster.api_address + ':8080')
-        hosts = set()
-        for task in marathon_client.list_tasks():
-            hosts.add(task.host)
-
-        return hosts

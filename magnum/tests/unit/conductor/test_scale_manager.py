@@ -16,33 +16,12 @@ import mock
 
 from magnum.common import exception
 from magnum.conductor import scale_manager
+from magnum.drivers.common.k8s_scale_manager import K8sScaleManager
+from magnum.drivers.mesos_ubuntu_v1.scale_manager import MesosScaleManager
 from magnum.tests import base
 
 
 class TestScaleManager(base.TestCase):
-
-    @mock.patch('magnum.objects.Cluster.get_by_uuid')
-    def test_get_scale_manager(self, mock_cluster_get):
-        mock_context = mock.MagicMock()
-        mock_osc = mock.MagicMock()
-        k8s_cluster = mock.MagicMock()
-        k8s_cluster.cluster_template.coe = 'kubernetes'
-        mesos_cluster = mock.MagicMock()
-        mesos_cluster.cluster_template.coe = 'mesos'
-        invalid_cluster = mock.MagicMock()
-        invalid_cluster.cluster_template.coe = 'fake'
-
-        mgr = scale_manager.get_scale_manager(
-            mock_context, mock_osc, k8s_cluster)
-        self.assertIsInstance(mgr, scale_manager.K8sScaleManager)
-
-        mgr = scale_manager.get_scale_manager(
-            mock_context, mock_osc, mesos_cluster)
-        self.assertIsInstance(mgr, scale_manager.MesosScaleManager)
-
-        mgr = scale_manager.get_scale_manager(
-            mock_context, mock_osc, invalid_cluster)
-        self.assertIsNone(mgr)
 
     def _test_get_removal_nodes(
             self, mock_get_hosts, mock_get_num_of_removal,
@@ -215,7 +194,7 @@ class TestK8sScaleManager(base.TestCase):
         mock_api.list_namespaced_pod.return_value = pods
         mock_create_api.return_value = mock_api
 
-        mgr = scale_manager.K8sScaleManager(
+        mgr = K8sScaleManager(
             mock.MagicMock(), mock.MagicMock(), mock.MagicMock())
         hosts = mgr._get_hosts_with_container(
             mock.MagicMock(), mock.MagicMock())
@@ -236,7 +215,7 @@ class TestMesosScaleManager(base.TestCase):
         tasks = [task_1, task_2]
         mock_list_tasks.return_value = tasks
 
-        mgr = scale_manager.MesosScaleManager(
+        mgr = MesosScaleManager(
             mock.MagicMock(), mock.MagicMock(), mock.MagicMock())
         hosts = mgr._get_hosts_with_container(
             mock.MagicMock(), mock.MagicMock())
