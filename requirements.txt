@@ -10,7 +10,7 @@ PyYAML>=3.10.0 # MIT
 SQLAlchemy<1.1.0,>=1.0.10 # MIT
 WSME>=0.8 # MIT
 WebOb>=1.6.0 # MIT
-alembic>=0.8.4 # MIT
+alembic>=0.8.10 # MIT
 cliff>=2.3.0 # Apache-2.0
 decorator>=3.4.0 # BSD
 docker-py>=1.8.1 # Apache-2.0
@@ -18,7 +18,7 @@ enum34;python_version=='2.7' or python_version=='2.6' or python_version=='3.3' #
 eventlet!=0.18.3,>=0.18.2 # MIT
 iso8601>=0.1.11 # MIT
 jsonpatch>=1.1 # BSD
-keystoneauth1>=2.16.0 # Apache-2.0
+keystoneauth1>=2.18.0 # Apache-2.0
 keystonemiddleware>=4.12.0 # Apache-2.0
 marathon>=0.8.6 # MIT
 netaddr!=0.7.16,>=0.7.13 # BSD
