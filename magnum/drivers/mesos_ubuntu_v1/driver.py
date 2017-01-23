@@ -14,6 +14,7 @@
 
 from magnum.drivers.heat import driver
 from magnum.drivers.mesos_ubuntu_v1 import monitor
+from magnum.drivers.mesos_ubuntu_v1.scale_manager import MesosScaleManager
 from magnum.drivers.mesos_ubuntu_v1 import template_def
 
 
@@ -32,3 +33,6 @@ class Driver(driver.HeatDriver):
 
     def get_monitor(self, context, cluster):
         return monitor.MesosMonitor(context, cluster)
+
+    def get_scale_manager(self, context, osclient, cluster):
+        return MesosScaleManager(context, osclient, cluster)
