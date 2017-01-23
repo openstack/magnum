@@ -1710,9 +1710,9 @@ saved in local files as follows::
 For Kubernetes, you need to get 'kubectl', a kubernetes CLI tool, to
 communicate with the cluster::
 
-    wget https://github.com/kubernetes/kubernetes/releases/download/v1.2.0/kubernetes.tar.gz
-    tar -xzvf kubernetes.tar.gz
-    sudo cp -a kubernetes/platforms/linux/amd64/kubectl /usr/bin/kubectl
+    curl -O https://storage.googleapis.com/kubernetes-release/release/v1.2.0/bin/linux/amd64/kubectl
+    chmod +x kubectl
+    sudo mv kubectl /usr/local/bin/kubectl
 
 Now let's run some 'kubectl' commands to check the secure communication.
 If you used 'cluster-config', then you can simply run the 'kubectl' command
