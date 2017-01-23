@@ -16,22 +16,15 @@
 import abc
 
 from oslo_log import log
-from oslo_utils import importutils
 import six
 
 import magnum.conf
-from magnum.objects import fields
+from magnum.drivers.common.driver import Driver
 
 
 LOG = log.getLogger(__name__)
 
 CONF = magnum.conf.CONF
-
-COE_CLASS_PATH = {
-    fields.ClusterType.SWARM: 'magnum.conductor.swarm_monitor.SwarmMonitor',
-    fields.ClusterType.KUBERNETES: 'magnum.conductor.k8s_monitor.K8sMonitor',
-    fields.ClusterType.MESOS: 'magnum.conductor.mesos_monitor.MesosMonitor'
-}
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -62,10 +55,10 @@ class MonitorBase(object):
 
 
 def create_monitor(context, cluster):
-    if cluster.cluster_template.coe in COE_CLASS_PATH:
-        coe_cls = importutils.import_class(
-            COE_CLASS_PATH[cluster.cluster_template.coe])
-        return coe_cls(context, cluster)
+    cluster_driver = Driver.get_driver_for_cluster(context, cluster)
+    monitor = cluster_driver.get_monitor(context, cluster)
+    if monitor:
+        return monitor
 
     LOG.debug("Cannot create monitor with cluster type '%s'",
               cluster.cluster_template.coe)
