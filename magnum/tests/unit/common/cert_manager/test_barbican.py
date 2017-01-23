@@ -22,6 +22,7 @@ from mock import patch
 
 from magnum.common.cert_manager import barbican_cert_manager as bcm
 from magnum.common.cert_manager import cert_manager
+from magnum.common import exception as magnum_exc
 from magnum.tests import base
 
 
@@ -175,12 +176,13 @@ class TestBarbicanManager(base.BaseTestCase):
             self.secret4
         ]
         bc.secrets.create.side_effect = test_secrets
-        self.empty_container.store.side_effect = ValueError()
+        self.empty_container.store.side_effect =\
+            magnum_exc.CertificateStorageException
         mock_barbican.return_value = bc
 
         # Attempt to store a cert
         self.assertRaises(
-            ValueError,
+            magnum_exc.CertificateStorageException,
             bcm.CertManager.store_cert,
             certificate=self.certificate,
             private_key=self.private_key,
