@@ -92,6 +92,7 @@ USER_TOKEN=`curl -k -s -i -X POST -H "$content_type" -d "$auth_json" $url \
 # Get CA certificate for this cluster
 curl -k -X GET \
     -H "X-Auth-Token: $USER_TOKEN" \
+    -H "OpenStack-API-Version: container-infra latest" \
     $MAGNUM_URL/certificates/$CLUSTER_UUID | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > ${CA_CERT}
 
 # Create config for server's csr
@@ -120,6 +121,7 @@ openssl req -new -days 1000 \
 csr_req=$(python -c "import json; fp = open('${SERVER_CSR}'); print json.dumps({'cluster_uuid': '$CLUSTER_UUID', 'csr': fp.read()}); fp.close()")
 curl -k -X POST \
     -H "X-Auth-Token: $USER_TOKEN" \
+    -H "OpenStack-API-Version: container-infra latest" \
     -H "Content-Type: application/json" \
     -d "$csr_req" \
     $MAGNUM_URL/certificates | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > ${SERVER_CERT}

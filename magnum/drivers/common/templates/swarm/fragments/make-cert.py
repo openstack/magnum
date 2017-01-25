@@ -84,7 +84,8 @@ def _build_subject_alt_names(config):
 def write_ca_cert(config):
     cluster_cert_url = '%s/certificates/%s' % (config['MAGNUM_URL'],
                                                config['CLUSTER_UUID'])
-    headers = {'X-Auth-Token': config['USER_TOKEN']}
+    headers = {'X-Auth-Token': config['USER_TOKEN'],
+               'OpenStack-API-Version': 'container-infra latest'}
     ca_cert_resp = requests.get(cluster_cert_url,
                                 headers=headers)
 
@@ -124,7 +125,8 @@ def write_server_cert(config, csr_req):
     cert_url = '%s/certificates' % config['MAGNUM_URL']
     headers = {
         'Content-Type': 'application/json',
-        'X-Auth-Token': config['USER_TOKEN']
+        'X-Auth-Token': config['USER_TOKEN'],
+        'OpenStack-API-Version': 'container-infra latest'
     }
     csr_resp = requests.post(cert_url,
                              data=json.dumps(csr_req),
