@@ -457,6 +457,7 @@ resources:
           server_image: {get_param: server_image}
           minion_flavor: {get_param: minion_flavor}
           fixed_network: {get_param: fixed_network}
+          external_network: {get_param: external_network}
           kube_software_configs: {get_attr: [kubeminion_software_configs, kube_minion_init]}
 
   ######################################################################
