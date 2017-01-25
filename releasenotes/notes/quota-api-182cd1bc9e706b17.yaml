@@ -1,0 +1,5 @@
+---
+features:
+  - This release introduces 'quota' endpoint that enable admin
+    users to set, update and show quota for a given tenant.
+    A non-admin user can get self quota limits.

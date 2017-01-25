@@ -30,6 +30,7 @@ from magnum.api.controllers.v1 import certificate
 from magnum.api.controllers.v1 import cluster
 from magnum.api.controllers.v1 import cluster_template
 from magnum.api.controllers.v1 import magnum_services
+from magnum.api.controllers.v1 import quota
 from magnum.api.controllers.v1 import stats
 from magnum.api.controllers import versions as ver
 from magnum.api import expose
@@ -86,6 +87,9 @@ class V1(controllers_base.APIBase):
     clusters = [link.Link]
     """Links to the clusters resource"""
 
+    quotas = [link.Link]
+    """Links to the quotas resource"""
+
     certificates = [link.Link]
     """Links to the certificates resource"""
 
@@ -133,6 +137,12 @@ class V1(controllers_base.APIBase):
                                            pecan.request.host_url,
                                            'clusters', '',
                                            bookmark=True)]
+        v1.quotas = [link.Link.make_link('self', pecan.request.host_url,
+                                         'quotas', ''),
+                     link.Link.make_link('bookmark',
+                                         pecan.request.host_url,
+                                         'quotas', '',
+                                         bookmark=True)]
         v1.certificates = [link.Link.make_link('self', pecan.request.host_url,
                                                'certificates', ''),
                            link.Link.make_link('bookmark',
@@ -161,6 +171,7 @@ class Controller(controllers_base.Controller):
     baymodels = baymodel.BayModelsController()
     clusters = cluster.ClustersController()
     clustertemplates = cluster_template.ClusterTemplatesController()
+    quotas = quota.QuotaController()
     certificates = certificate.CertificateController()
     mservices = magnum_services.MagnumServiceController()
     stats = stats.StatsController()

@@ -84,6 +84,18 @@ class DockerStorageDriver(fields.Enum):
             valid_values=DockerStorageDriver.ALL)
 
 
+class QuotaResourceName(fields.Enum):
+    ALL = (
+        CLUSTER,
+    ) = (
+        'Cluster',
+    )
+
+    def __init__(self):
+        super(QuotaResourceName, self).__init__(
+            valid_values=QuotaResourceName.ALL)
+
+
 class ServerType(fields.Enum):
     ALL = (
         VM, BM,
