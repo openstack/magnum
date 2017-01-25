@@ -25,8 +25,7 @@ write_files:
           exit 0
       fi
 
-      myip=$(ip addr show eth0 |
-             awk '$1 == "inet" {print $2}' | cut -f1 -d/)
+      myip=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
       ETCD_SERVER_IP=${ETCD_SERVER_IP:-127.0.0.1}
 
       CERT_DIR=/etc/kubernetes/ssl
