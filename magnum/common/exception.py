@@ -260,7 +260,7 @@ class NotSupported(MagnumException):
     code = 400
 
 
-class ClusterTypeNotSupported(MagnumException):
+class ClusterTypeNotSupported(NotSupported):
     message = _("Cluster type (%(server_type)s, %(os)s, %(coe)s)"
                 " not supported.")
 

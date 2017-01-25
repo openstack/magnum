@@ -28,7 +28,7 @@ from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api import expose
 from magnum.api import utils as api_utils
-from magnum.api.validation import validate_cluster_properties
+from magnum.api import validation
 from magnum.common import clients
 from magnum.common import exception
 from magnum.common import name_generator
@@ -375,6 +375,7 @@ class ClustersController(base.Controller):
             raise exception.ResourceLimitExceeded(msg=msg)
 
     @expose.expose(ClusterID, body=Cluster, status_code=202)
+    @validation.enforce_cluster_type_supported()
     def post(self, cluster):
         """Create a new cluster.
 
@@ -473,7 +474,7 @@ class ClustersController(base.Controller):
 
         delta = cluster.obj_what_changed()
 
-        validate_cluster_properties(delta)
+        validation.validate_cluster_properties(delta)
         return cluster
 
     @expose.expose(None, types.uuid_or_name, status_code=204)
