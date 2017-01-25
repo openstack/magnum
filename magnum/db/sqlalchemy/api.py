@@ -17,9 +17,11 @@
 from oslo_db import exception as db_exc
 from oslo_db.sqlalchemy import session as db_session
 from oslo_db.sqlalchemy import utils as db_utils
+from oslo_utils import importutils
 from oslo_utils import strutils
 from oslo_utils import timeutils
 from oslo_utils import uuidutils
+import sqlalchemy as sa
 from sqlalchemy.orm.exc import MultipleResultsFound
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import func
@@ -29,6 +31,8 @@ import magnum.conf
 from magnum.db import api
 from magnum.db.sqlalchemy import models
 from magnum.i18n import _
+
+profiler_sqlalchemy = importutils.try_import('osprofiler.sqlalchemy')
 
 CONF = magnum.conf.CONF
 
@@ -40,6 +44,10 @@ def _create_facade_lazily():
     global _FACADE
     if _FACADE is None:
         _FACADE = db_session.EngineFacade.from_config(CONF)
+        if profiler_sqlalchemy:
+            if CONF.profiler.enabled and CONF.profiler.trace_sqlalchemy:
+                profiler_sqlalchemy.add_tracing(sa, _FACADE.get_engine(), "db")
+
     return _FACADE
 
 

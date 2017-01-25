@@ -19,6 +19,7 @@ import six
 
 from magnum.common import clients
 from magnum.common import exception
+from magnum.common import profiler
 from magnum.conductor.handlers.common import cert_manager
 from magnum.conductor.handlers.common import trust_manager
 from magnum.conductor import scale_manager
@@ -35,6 +36,7 @@ CONF = magnum.conf.CONF
 LOG = logging.getLogger(__name__)
 
 
+@profiler.trace_cls("rpc")
 class Handler(object):
 
     def __init__(self):

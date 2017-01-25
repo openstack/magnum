@@ -18,6 +18,7 @@ import abc
 from oslo_log import log
 import six
 
+from magnum.common import profiler
 import magnum.conf
 from magnum.drivers.common.driver import Driver
 
@@ -27,6 +28,7 @@ LOG = log.getLogger(__name__)
 CONF = magnum.conf.CONF
 
 
+@profiler.trace_cls("rpc")
 @six.add_metaclass(abc.ABCMeta)
 class MonitorBase(object):
 

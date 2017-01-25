@@ -14,23 +14,16 @@
 
 """Common RPC service and API tools for Magnum."""
 
-import eventlet
 import oslo_messaging as messaging
 from oslo_service import service
+from oslo_utils import importutils
 
+from magnum.common import profiler
 from magnum.common import rpc
 import magnum.conf
 from magnum.objects import base as objects_base
 from magnum.service import periodic
 from magnum.servicegroup import magnum_service_periodic as servicegroup
-
-
-# NOTE(paulczar):
-# Ubuntu 14.04 forces librabbitmq when kombu is used
-# Unfortunately it forces a version that has a crash
-# bug.  Calling eventlet.monkey_patch() tells kombu
-# to use libamqp instead.
-eventlet.monkey_patch()
 
 # NOTE(asalkeld):
 # The magnum.openstack.common.rpc entries are for compatibility
@@ -41,15 +34,26 @@ TRANSPORT_ALIASES = {
     'magnum.openstack.common.rpc.impl_zmq': 'zmq',
 }
 
+osprofiler = importutils.try_import("osprofiler.profiler")
+
 CONF = magnum.conf.CONF
+
+
+def _init_serializer():
+    serializer = rpc.RequestContextSerializer(
+        objects_base.MagnumObjectSerializer())
+    if osprofiler:
+        serializer = rpc.ProfilerRequestContextSerializer(serializer)
+    else:
+        serializer = rpc.RequestContextSerializer(serializer)
+    return serializer
 
 
 class Service(service.Service):
 
     def __init__(self, topic, server, handlers, binary):
         super(Service, self).__init__()
-        serializer = rpc.RequestContextSerializer(
-            objects_base.MagnumObjectSerializer())
+        serializer = _init_serializer()
         transport = messaging.get_transport(CONF,
                                             aliases=TRANSPORT_ALIASES)
         # TODO(asalkeld) add support for version='x.y'
@@ -57,6 +61,7 @@ class Service(service.Service):
         self._server = messaging.get_rpc_server(transport, target, handlers,
                                                 serializer=serializer)
         self.binary = binary
+        profiler.setup(binary, CONF.host)
 
     def start(self):
         # NOTE(suro-patz): The parent class has created a threadgroup, already
@@ -80,8 +85,7 @@ class Service(service.Service):
 class API(object):
     def __init__(self, transport=None, context=None, topic=None, server=None,
                  timeout=None):
-        serializer = rpc.RequestContextSerializer(
-            objects_base.MagnumObjectSerializer())
+        serializer = _init_serializer()
         if transport is None:
             exmods = rpc.get_allowed_exmods()
             transport = messaging.get_transport(CONF,

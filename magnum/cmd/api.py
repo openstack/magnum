@@ -22,6 +22,7 @@ from oslo_reports import guru_meditation_report as gmr
 from werkzeug import serving
 
 from magnum.api import app as api_app
+from magnum.common import profiler
 from magnum.common import service
 import magnum.conf
 from magnum.i18n import _
@@ -61,6 +62,9 @@ def main():
     base.MagnumObject.indirection_api = base.MagnumObjectIndirectionAPI()
 
     app = api_app.load_app()
+
+    # Setup OSprofiler for WSGI service
+    profiler.setup('magnum-api', CONF.host)
 
     # SSL configuration
     use_ssl = CONF.api.enabled_ssl

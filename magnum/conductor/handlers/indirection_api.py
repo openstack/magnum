@@ -12,9 +12,11 @@
 
 import oslo_messaging as messaging
 
+from magnum.common import profiler
 from magnum.objects import base
 
 
+@profiler.trace_cls("rpc")
 class Handler(object):
     "Indirection API callbacks"
 

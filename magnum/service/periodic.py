@@ -22,6 +22,7 @@ from oslo_service import periodic_task
 from pycadf import cadftaxonomy as taxonomy
 
 from magnum.common import context
+from magnum.common import profiler
 from magnum.common import rpc
 from magnum.conductor import monitors
 from magnum.conductor import utils as conductor_utils
@@ -87,6 +88,7 @@ class ClusterUpdateJob(object):
         raise loopingcall.LoopingCallDone()
 
 
+@profiler.trace_cls("rpc")
 class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
     '''Magnum periodic Task class
 

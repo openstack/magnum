@@ -21,6 +21,8 @@ from oslo_config import cfg
 from oslo_db import api as db_api
 import six
 
+from magnum.common import profiler
+
 
 _BACKEND_MAPPING = {'sqlalchemy': 'magnum.db.sqlalchemy.api'}
 IMPL = db_api.DBAPI.from_config(cfg.CONF, backend_mapping=_BACKEND_MAPPING,
@@ -32,6 +34,7 @@ def get_instance():
     return IMPL
 
 
+@profiler.trace_cls("db")
 @six.add_metaclass(abc.ABCMeta)
 class Connection(object):
     """Base class for storage system connections."""

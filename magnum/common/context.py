@@ -142,3 +142,13 @@ def set_ctx(new_ctx):
     if new_ctx:
         setattr(_CTX_STORE, _CTX_KEY, new_ctx)
         setattr(context._request_store, 'context', new_ctx)
+
+
+def get_admin_context(read_deleted="no"):
+    # NOTE(tovin07): This method should only be used when an admin context is
+    # necessary for the entirety of the context lifetime.
+    return RequestContext(user_id=None,
+                          project_id=None,
+                          is_admin=True,
+                          read_deleted=read_deleted,
+                          overwrite=False)
