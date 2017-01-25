@@ -158,7 +158,7 @@ class K8sMonitor(monitors.MonitorBase):
             # Output of node.status.capacity is strong
             # for example:
             # capacity = "{'cpu': '1', 'memory': '1000Ki'}"
-            capacity = ast.literal_eval(node.status.capacity)
+            capacity = node.status.capacity
             memory = utils.get_k8s_quantity(capacity['memory'])
             cpu = int(capacity['cpu'])
             parsed_nodes.append({'Memory': memory, 'Cpu': cpu})
