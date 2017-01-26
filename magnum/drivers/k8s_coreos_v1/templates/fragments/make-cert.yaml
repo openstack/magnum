@@ -109,6 +109,7 @@ write_files:
       # Get CA certificate for this cluster
       ca_cert_json=$(curl -k -X GET \
         -H "X-Auth-Token: $USER_TOKEN" \
+        -H "OpenStack-API-Version: container-infra latest" \
         $MAGNUM_URL/certificates/$CLUSTER_UUID)
       parse_json_response "${ca_cert_json}" > ${CA_CERT}
 
@@ -140,6 +141,7 @@ write_files:
       # Send csr to Magnum to have it signed
       server_cert_json=$(curl -k -X POST \
           -H "X-Auth-Token: $USER_TOKEN" \
+          -H "OpenStack-API-Version: container-infra latest" \
           -H "Content-Type: application/json" \
           -d "$csr_req" \
           $MAGNUM_URL/certificates)
