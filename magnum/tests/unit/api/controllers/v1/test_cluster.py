@@ -22,11 +22,14 @@ from magnum.api import attr_validator
 from magnum.api.controllers.v1 import cluster as api_cluster
 from magnum.common import exception
 from magnum.conductor import api as rpcapi
+import magnum.conf
 from magnum import objects
 from magnum.tests import base
 from magnum.tests.unit.api import base as api_base
 from magnum.tests.unit.api import utils as apiutils
 from magnum.tests.unit.objects import utils as obj_utils
+
+CONF = magnum.conf.CONF
 
 
 class TestClusterObject(base.TestCase):
@@ -477,6 +480,27 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)
         self.assertTrue(uuidutils.is_uuid_like(response.json['uuid']))
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_create_cluster_resource_limit_reached(self, mock_utcnow):
+        # override max_cluster_per_project to 1
+        CONF.set_override('max_clusters_per_project', 1, group='quotas')
+
+        bdict = apiutils.cluster_post_data()
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        # create first cluster
+        response = self.post_json('/clusters', bdict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        self.assertTrue(uuidutils.is_uuid_like(response.json['uuid']))
+
+        # now try to create second cluster and make sure it fails
+        response = self.post_json('/clusters', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(403, response.status_int)
+        self.assertTrue(response.json['errors'])
 
     def test_create_cluster_set_project_id_and_user_id(self):
         bdict = apiutils.cluster_post_data()

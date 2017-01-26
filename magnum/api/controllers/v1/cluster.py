@@ -33,11 +33,14 @@ from magnum.common import clients
 from magnum.common import exception
 from magnum.common import name_generator
 from magnum.common import policy
+import magnum.conf
+from magnum.i18n import _
 from magnum.i18n import _LW
 from magnum import objects
 from magnum.objects import fields
 
 LOG = logging.getLogger(__name__)
+CONF = magnum.conf.CONF
 
 
 class ClusterID(wtypes.Base):
@@ -353,6 +356,24 @@ class ClustersController(base.Controller):
 
         return cluster
 
+    def _check_cluster_quota_limit(self, context):
+        try:
+            # Check if there is any explicit quota limit set in Quotas table
+            quota = objects.Quota.get_quota_by_project_id_resource(
+                context,
+                context.project_id,
+                'Cluster')
+            cluster_limit = quota.hard_limit
+        except exception.QuotaNotFound:
+            # If explicit quota was not set for the project, use default limit
+            cluster_limit = CONF.quotas.max_clusters_per_project
+
+        if objects.Cluster.get_count_all(context) >= cluster_limit:
+            msg = _("You have reached the maximum clusters per project, "
+                    "%d. You may delete a cluster to make room for a new "
+                    "one.") % cluster_limit
+            raise exception.ResourceLimitExceeded(msg=msg)
+
     @expose.expose(ClusterID, body=Cluster, status_code=202)
     def post(self, cluster):
         """Create a new cluster.
@@ -362,6 +383,9 @@ class ClustersController(base.Controller):
         context = pecan.request.context
         policy.enforce(context, 'cluster:create',
                        action='cluster:create')
+
+        self._check_cluster_quota_limit(context)
+
         temp_id = cluster.cluster_template_id
         cluster_template = objects.ClusterTemplate.get_by_uuid(context,
                                                                temp_id)
