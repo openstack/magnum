@@ -12,7 +12,7 @@ FLANNEL_JSON=/etc/sysconfig/flannel-network.json
 FLANNELD_CONFIG=/etc/sysconfig/flanneld
 
 sed -i '
-    /^FLANNEL_ETCD=/ s/=.*/="http:\/\/127.0.0.1:2379"/
+    /^FLANNEL_ETCD_ENDPOINTS=/ s/=.*/="http:\/\/127.0.0.1:2379"/
 ' /etc/sysconfig/flanneld
 
 # Generate a flannel configuration that we will
