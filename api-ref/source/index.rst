@@ -15,3 +15,4 @@
 .. include:: certificates.inc
 .. include:: mservices.inc
 .. include:: stats.inc
+.. include:: quotas.inc
