@@ -40,6 +40,19 @@ parameters:
     default: m1.small
     description: flavor to use when booting the server for minions
 
+  prometheus_monitoring:
+    type: boolean
+    default: false
+    description: >
+      whether or not to have the grafana-prometheus-cadvisor monitoring setup
+
+  grafana_admin_passwd:
+    type: string
+    default: admin
+    hidden: true
+    description: >
+      admin user password for the Grafana monitoring interface
+
   dns_nameserver:
     type: string
     description: address of a DNS nameserver reachable in your environment
@@ -417,6 +430,8 @@ resources:
       resource_def:
         type: kubemaster.yaml
         properties:
+          prometheus_monitoring: {get_param: prometheus_monitoring}
+          grafana_admin_passwd: {get_param: grafana_admin_passwd}
           api_public_address: {get_attr: [api_lb, floating_address]}
           api_private_address: {get_attr: [api_lb, address]}
           ssh_key_name: {get_param: ssh_key_name}
@@ -474,6 +489,7 @@ resources:
       resource_def:
         type: kubeminion.yaml
         properties:
+          prometheus_monitoring: {get_param: prometheus_monitoring}
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: server_image}
           minion_flavor: {get_param: minion_flavor}

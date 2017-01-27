@@ -33,6 +33,7 @@ Contents
 #. `Storage`_
 #. `Image Management`_
 #. `Notification`_
+#. `Container Monitoring`_
 
 ===========
 Terminology
@@ -304,7 +305,11 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `admission_control_list`_             | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
-
+| `prometheus_monitoring`_              | - true             | false         |
+|                                       | - false            |               |
++---------------------------------------+--------------------+---------------+
+| `grafana_admin_passwd`_               | (any string)       | "admin"       |
++---------------------------------------+--------------------+---------------+
 
 =======
 Cluster
@@ -2719,3 +2724,69 @@ created. This example can be applied for any ``create``, ``update`` or
         "publisher_id": "magnum.host1234",
         "timestamp": "2016-05-20 15:03:45.960280"
     }
+
+
+====================
+Container Monitoring
+====================
+
+The offered monitoring stack relies on the following set of containers and
+services:
+
+- cAdvisor
+- Node Exporter
+- Prometheus
+- Grafana
+
+To setup this monitoring stack, users are given two configurable labels in
+the Magnum cluster template's definition:
+
+_`prometheus_monitoring`
+  This label accepts a boolean value. If *True*, the monitoring stack will be
+  setup. By default *prometheus_monitoring = False*.
+
+_`grafana_admin_passwd`
+  This label lets users create their own *admin* user password for the Grafana
+  interface. It expects a string value. By default it is set to *admin*.
+
+
+Container Monitoring in Kubernetes
+----------------------------------
+
+By default, all Kubernetes clusters already contain *cAdvisor* integrated
+with the *Kubelet* binary. Its container monitoring data can be accessed on
+a node level basis through *http://NODE_IP:4194*.
+
+Node Exporter is part of the above mentioned monitoring stack as it can be
+used to export machine metrics. Such functionality also work on a node level
+which means that when `prometheus_monitoring`_ is *True*, the Kubernetes nodes
+will be populated with an additional manifest under
+*/etc/kubernetes/manifests*. Node Exporter is then automatically picked up
+and launched as a regular Kubernetes POD.
+
+To aggregate and complement all the existing monitoring metrics and add a
+built-in visualization layer, Prometheus is used. It is launched by the
+Kubernetes master node(s) as a *Service* within a *Deployment* with one
+replica and it relies on a *ConfigMap* where the Prometheus configuration
+(prometheus.yml) is defined. This configuration uses Prometheus native
+support for service discovery in Kubernetes clusters,
+*kubernetes_sd_configs*. The respective manifests can be found in
+*/srv/kubernetes/monitoring/* on the master nodes and once the service is
+up and running, Prometheus UI can be accessed through port 9090.
+
+Finally, for custom plotting and enhanced metric aggregation and
+visualization, Prometheus can be integrated with Grafana as it provides
+native compliance for Prometheus data sources. Also Grafana is deployed as
+a *Service* within a *Deployment* with one replica. The default user is
+*admin* and the password is setup according to `grafana_admin_passwd`_.
+There is also a default Grafana dashboard provided with this installation,
+from the official `Grafana dashboards' repository
+<https://grafana.net/dashboards>`_. The Prometheus data
+source is automatically added to Grafana once it is up and running, pointing
+to *http://prometheus:9090* through *Proxy*. The respective manifests can
+also be found in */srv/kubernetes/monitoring/* on the master nodes and once
+the service is running, the Grafana dashboards can be accessed through port
+3000.
+
+For both Prometheus and Grafana, there is an assigned *systemd* service
+called *kube-enable-monitoring*.

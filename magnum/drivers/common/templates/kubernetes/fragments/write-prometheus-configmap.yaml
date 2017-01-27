@@ -1,0 +1,82 @@
+#cloud-config
+merge_how: dict(recurse_array)+list(append)
+write_files:
+  - path: /srv/kubernetes/monitoring/prometheusConfigMap.yaml
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: prometheus
+        namespace: kube-system
+      data:
+        prometheus.yml: |
+          global:
+            scrape_interval: 10s
+            scrape_timeout: 10s
+            evaluation_interval: 10s
+
+          scrape_configs:
+          - job_name: 'kubernetes-nodes-cadvisor'
+            tls_config:
+              ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            kubernetes_sd_configs:
+            - role: node
+            relabel_configs:
+            - action: labelmap
+              regex: __meta_kubernetes_node_label_(.+)
+            - source_labels: [__meta_kubernetes_role]
+              action: replace
+              target_label: kubernetes_role
+            - source_labels: [__address__]
+              regex: '(.*):10250'
+              replacement: '${1}:10255'
+              target_label: __address__
+            metric_relabel_configs:
+            - action: replace
+              source_labels: [id]
+              regex: '^/machine\.slice/machine-rkt\\x2d([^\\]+)\\.+/([^/]+)\.service$'
+              target_label: rkt_container_name
+              replacement: '${2}-${1}'
+            - action: replace
+              source_labels: [id]
+              regex: '^/system\.slice/(.+)\.service$'
+              target_label: systemd_service_name
+              replacement: '${1}'
+
+          - job_name: 'kubernetes-apiserver-cadvisor'
+            tls_config:
+              insecure_skip_verify: true
+              ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            kubernetes_sd_configs:
+            - role: endpoints
+            relabel_configs:
+            - action: labelmap
+              regex: __meta_kubernetes_node_label_(.+)
+            - source_labels: [__meta_kubernetes_role]
+              action: replace
+              target_label: kubernetes_role
+            - source_labels: [__address__]
+              regex: '(.*):10250'
+              replacement: '${1}:10255'
+              target_label: __address__
+
+          - job_name: 'kubernetes-node-exporter'
+            tls_config:
+              ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            kubernetes_sd_configs:
+            - role: node
+            relabel_configs:
+            - action: labelmap
+              regex: __meta_kubernetes_node_label_(.+)
+            - source_labels: [__meta_kubernetes_role]
+              action: replace
+              target_label: kubernetes_role
+            - source_labels: [__address__]
+              regex: '(.*):10250'
+              replacement: '${1}:9100'
+              target_label: __address__

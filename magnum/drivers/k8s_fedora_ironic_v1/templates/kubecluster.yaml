@@ -43,6 +43,19 @@ parameters:
     default: baremetal
     description: flavor to use when booting the server
 
+  prometheus_monitoring:
+    type: boolean
+    default: false
+    description: >
+      whether or not to have the grafana-prometheus-cadvisor monitoring setup
+
+  grafana_admin_passwd:
+    type: string
+    default: admin
+    hidden: true
+    description: >
+      admin user password for the Grafana monitoring interface
+
   dns_nameserver:
     type: string
     description: address of a dns nameserver reachable in your environment
@@ -405,6 +418,8 @@ resources:
       resource_def:
         type: kubemaster.yaml
         properties:
+          prometheus_monitoring: {get_param: prometheus_monitoring}
+          grafana_admin_passwd: {get_param: grafana_admin_passwd}
           api_public_address: {get_attr: [api_lb, floating_address]}
           api_private_address: {get_attr: [api_lb, address]}
           ssh_key_name: {get_param: ssh_key_name}
@@ -491,6 +506,7 @@ resources:
   kubeminion_software_configs:
     type: kubeminion_software_configs.yaml
     properties:
+      prometheus_monitoring: {get_param: prometheus_monitoring}
       network_driver: {get_param: network_driver}
       kube_master_ip: {get_attr: [api_address_lb_switch, private_ip]}
       etcd_server_ip: {get_attr: [etcd_address_lb_switch, private_ip]}
