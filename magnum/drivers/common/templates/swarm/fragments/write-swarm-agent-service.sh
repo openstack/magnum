@@ -75,8 +75,9 @@ do
     sleep 5
 done
 
+UUID=`uuidgen`
 curl -k -i -X POST -H 'Content-Type: application/json' -H 'X-Auth-Token: $WAIT_HANDLE_TOKEN' \
-    --data-binary "'"'{"Status": "SUCCESS", "Reason": "Swarm agent ready", "Data": "OK", "UniqueId": "00000"}'"'" \
+    --data-binary "'"'{"Status": "SUCCESS", "Reason": "Swarm agent ready", "Data": "OK", "Id": "'${UUID}'"}'"'" \
     "$WAIT_HANDLE_ENDPOINT"
 EOF
 
