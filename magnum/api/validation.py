@@ -15,7 +15,6 @@
 
 import decorator
 
-from oslo_utils import uuidutils
 import pecan
 
 from magnum.api import utils as api_utils
@@ -27,38 +26,6 @@ from magnum import objects
 CONF = magnum.conf.CONF
 
 cluster_update_allowed_properties = set(['node_count'])
-
-
-def enforce_cluster_types(*cluster_types):
-    """Enforce that cluster_type is in supported list."""
-    @decorator.decorator
-    def wrapper(func, *args, **kwargs):
-        # Note(eliqiao): This decorator has some assumptions
-        # args[1] should be an APIBase instance or
-        # args[2] should be a cluster_ident
-        obj = args[1]
-        if hasattr(obj, 'cluster_uuid'):
-            cluster = objects.Cluster.get_by_uuid(pecan.request.context,
-                                                  obj.cluster_uuid)
-        else:
-            cluster_ident = args[2]
-            if uuidutils.is_uuid_like(cluster_ident):
-                cluster = objects.Cluster.get_by_uuid(pecan.request.context,
-                                                      cluster_ident)
-            else:
-                cluster = objects.Cluster.get_by_name(pecan.request.context,
-                                                      cluster_ident)
-
-        if cluster.cluster_template.coe not in cluster_types:
-            raise exception.InvalidParameterValue(_(
-                'Cannot fulfill request with a %(cluster_type)s cluster, '
-                'expecting a %(supported_cluster_types)s cluster.') %
-                {'cluster_type': cluster.cluster_template.coe,
-                 'supported_cluster_types': '/'.join(cluster_types)})
-
-        return func(*args, **kwargs)
-
-    return wrapper
 
 
 def enforce_network_driver_types_create():
