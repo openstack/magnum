@@ -226,7 +226,7 @@ class BaseMagnumClient(base.BaseMagnumTest):
         )
 
         if self.cs.clusters.get(cluster.uuid).status == 'CREATE_FAILED':
-            raise Exception("Cluster %s created failed" % cluster.uuid)
+            raise Exception("Cluster %s create failed" % cluster.uuid)
 
         return cluster
 
