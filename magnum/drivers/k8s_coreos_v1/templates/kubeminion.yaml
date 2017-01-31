@@ -57,6 +57,11 @@ parameters:
     type: string
     description: version of kubernetes used for kubernetes cluster
 
+  hyperkube_image_repo:
+    type: string
+    description: >
+      Docker registry used for hyperkube image
+
   kube_master_ip:
     type: string
     description: IP address of the Kubernetes master server.
@@ -166,6 +171,7 @@ resources:
             "$AUTH_URL": {get_param: auth_url}
             "$KUBE_CERTS_PATH": "/etc/kubernetes/ssl"
             "$HOST_CERTS_PATH": "/usr/share/ca-certificates"
+            "$HYPERKUBE_IMAGE_REPO": {get_param: hyperkube_image_repo}
 
   write_kubeconfig:
     type: OS::Heat::SoftwareConfig

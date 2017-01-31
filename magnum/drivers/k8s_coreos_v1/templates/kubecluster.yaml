@@ -211,7 +211,13 @@ parameters:
   kube_version:
     type: string
     description: version of kubernetes used for kubernetes cluster
-    default: v1.2.0
+    default: v1.5.2_coreos.1
+
+  hyperkube_image_repo:
+    type: string
+    description: >
+      Docker registry used for hyperkube image
+    default: quay.io/coreos/hyperkube
 
   registry_enabled:
     type: boolean
@@ -384,6 +390,7 @@ resources:
           trustee_password: {get_param: trustee_password}
           trust_id: {get_param: trust_id}
           auth_url: {get_param: auth_url}
+          hyperkube_image_repo: {get_param: hyperkube_image_repo}
 
   ######################################################################
   #
@@ -427,6 +434,7 @@ resources:
           trustee_password: {get_param: trustee_password}
           trust_id: {get_param: trust_id}
           auth_url: {get_param: auth_url}
+          hyperkube_image_repo: {get_param: hyperkube_image_repo}
 
 outputs:
 

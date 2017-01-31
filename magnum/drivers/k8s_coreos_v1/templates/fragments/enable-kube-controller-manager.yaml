@@ -43,7 +43,7 @@ write_files:
         hostNetwork: true
         containers:
         - name: kube-controller-manager
-          image: gcr.io/google_containers/hyperkube:${KUBE_VERSION}
+          image: ${HYPERKUBE_IMAGE_REPO}:${KUBE_VERSION}
           command:
           - /hyperkube
           - controller-manager
