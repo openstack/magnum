@@ -16,6 +16,10 @@ if [ $TLS_DISABLED = 'True'  ]; then
     ETCDCTL_OPTIONS=""
 fi
 
+if [ -z "$NO_PROXY" ]; then
+    NO_PROXY=$SWARM_API_IP,$ETCD_SERVER_IP,$SWARM_NODE_IP
+fi
+
 cat > $CONF_FILE << EOF
 [Unit]
 Description=Swarm Agent
