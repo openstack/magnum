@@ -18,10 +18,10 @@
 import decorator
 from oslo_config import cfg
 from oslo_policy import policy
+from oslo_utils import importutils
 import pecan
 
 from magnum.common import clients
-from magnum.common import context
 from magnum.common import exception
 
 
@@ -101,11 +101,22 @@ def enforce(context, rule=None, target=None,
 
 def add_policy_attributes(target):
     """Adds extra information for policy enforcement to raw target object"""
+    context = importutils.import_module('magnum.common.context')
     admin_context = context.make_admin_context()
     admin_osc = clients.OpenStackClients(admin_context)
     trustee_domain_id = admin_osc.keystone().trustee_domain_id
     target['trustee_domain_id'] = trustee_domain_id
     return target
+
+
+def check_is_admin(context):
+    """Whether or not user is admin according to policy setting.
+
+    """
+    init()
+    target = {}
+    credentials = context.to_dict()
+    return _ENFORCER.enforce('context_is_admin', target, credentials)
 
 
 def enforce_wsgi(api_name, act=None):

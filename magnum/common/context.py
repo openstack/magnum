@@ -13,6 +13,8 @@
 from eventlet.green import threading
 from oslo_context import context
 
+from magnum.common import policy
+
 import magnum.conf
 
 CONF = magnum.conf.CONF
@@ -25,7 +27,7 @@ class RequestContext(context.RequestContext):
                  domain_name=None, user_name=None, user_id=None,
                  user_domain_name=None, user_domain_id=None,
                  project_name=None, project_id=None, roles=None,
-                 is_admin=False, read_only=False, show_deleted=False,
+                 is_admin=None, read_only=False, show_deleted=False,
                  request_id=None, trust_id=None, auth_token_info=None,
                  all_tenants=False, password=None, **kwargs):
         """Stores several additional request parameters:
@@ -60,6 +62,10 @@ class RequestContext(context.RequestContext):
         self.trust_id = trust_id
         self.all_tenants = all_tenants
         self.password = password
+        if is_admin is None:
+            self.is_admin = policy.check_is_admin(self)
+        else:
+            self.is_admin = is_admin
 
     def to_dict(self):
         value = super(RequestContext, self).to_dict()

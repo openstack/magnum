@@ -70,6 +70,9 @@ class KeystoneClientTest(base.TestCase):
 
     def test_client_with_password(self, mock_ks):
         self.ctx.is_admin = True
+        self.ctx.auth_token_info = None
+        self.ctx.auth_token = None
+        self.ctx.trust_id = None
         ks_client = keystone.KeystoneClientV3(self.ctx)
         ks_client.client
         session = ks_client.session
@@ -81,6 +84,9 @@ class KeystoneClientTest(base.TestCase):
     @mock.patch('magnum.common.keystone.ka_v3')
     def test_client_with_password_legacy(self, mock_v3, mock_loading, mock_ks):
         self.ctx.is_admin = True
+        self.ctx.auth_token_info = None
+        self.ctx.auth_token = None
+        self.ctx.trust_id = None
         mock_loading.load_auth_from_conf_options.side_effect = \
             ka_exception.MissingRequiredOptions(mock.MagicMock())
         ks_client = keystone.KeystoneClientV3(self.ctx)

@@ -92,6 +92,7 @@ class ClientsTest(base.BaseTestCase):
         con = mock.MagicMock()
         con.auth_token = None
         con.auth_token_info = None
+        con.trust_id = None
         auth_url = mock.PropertyMock(name="auth_url",
                                      return_value="keystone_url")
         type(con).auth_url = auth_url
@@ -149,6 +150,7 @@ class ClientsTest(base.BaseTestCase):
         con = mock.MagicMock()
         con.auth_token = None
         con.auth_token_info = None
+        con.trust_id = None
         auth_url = mock.PropertyMock(name="auth_url",
                                      return_value="keystone_url")
         type(con).auth_url = auth_url
@@ -207,6 +209,7 @@ class ClientsTest(base.BaseTestCase):
         con = mock.MagicMock()
         con.auth_token = None
         con.auth_token_info = None
+        con.trust_id = None
         auth_url = mock.PropertyMock(name="auth_url",
                                      return_value="keystone_url")
         type(con).auth_url = auth_url
@@ -268,6 +271,7 @@ class ClientsTest(base.BaseTestCase):
         con = mock.MagicMock()
         con.auth_token = None
         con.auth_token_info = None
+        con.trust_id = None
         auth_url = mock.PropertyMock(name="auth_url",
                                      return_value="keystone_url")
         type(con).auth_url = auth_url
@@ -283,6 +287,7 @@ class ClientsTest(base.BaseTestCase):
         mock_auth.__get__ = mock.Mock(return_value="keystone_url")
         con = mock.MagicMock()
         con.auth_token = "3bcc3d3a03f44e3d8377f9247b0ad155"
+        con.auth_token_info = "auth-token-info"
         con.auth_url = "keystone_url"
         mock_url.return_value = "url_from_keystone"
         obj = clients.OpenStackClients(con)
@@ -329,6 +334,7 @@ class ClientsTest(base.BaseTestCase):
         con = mock.MagicMock()
         con.auth_token = None
         con.auth_token_info = None
+        con.trust_id = None
         auth_url = mock.PropertyMock(name="auth_url",
                                      return_value="keystone_url")
         type(con).auth_url = auth_url
