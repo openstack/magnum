@@ -9,6 +9,7 @@ write_files:
 
       [Service]
       Type=oneshot
+      EnvironmentFile=/etc/sysconfig/heat-params
       ExecStart=/etc/sysconfig/enable-network-service.sh
 
       [Install]
@@ -20,7 +21,6 @@ write_files:
     content: |
       #!/bin/sh
 
-      . /etc/sysconfig/heat-params
       if [ "$NETWORK_DRIVER" != "flannel" ]; then
           exit 0
       fi

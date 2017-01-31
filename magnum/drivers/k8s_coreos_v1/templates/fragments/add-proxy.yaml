@@ -9,6 +9,7 @@ write_files:
 
       [Service]
       Type=oneshot
+      EnvironmentFile=/etc/sysconfig/heat-params
       ExecStart=/etc/sysconfig/add-proxy.sh
 
       [Install]
@@ -19,8 +20,6 @@ write_files:
     permissions: "0755"
     content: |
       #!/bin/sh
-
-      . /etc/sysconfig/heat-params
 
       DOCKER_HTTP_PROXY_CONF=/etc/systemd/system/docker.service.d/http_proxy.conf
 

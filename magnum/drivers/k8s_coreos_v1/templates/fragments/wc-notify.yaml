@@ -9,6 +9,7 @@ write_files:
 
       [Service]
       Type=oneshot
+      EnvironmentFile=/etc/sysconfig/heat-params
       ExecStart=/etc/sysconfig/wc-notify.sh
 
       [Install]
@@ -19,6 +20,5 @@ write_files:
     permissions: "0755"
     content: |
       #!/bin/bash -v
-      . /etc/sysconfig/heat-params
       command="$WAIT_CURL --data-binary '{\"status\": \"SUCCESS\"}'"
       eval $(echo "$command")

@@ -9,6 +9,7 @@ write_files:
 
       [Service]
       Type=oneshot
+      EnvironmentFile=/etc/sysconfig/heat-params
       ExecStart=/etc/sysconfig/enable-kube-controller-manager.sh
 
       [Install]
@@ -19,8 +20,6 @@ write_files:
     permissions: "0755"
     content: |
       #!/bin/sh
-
-      . /etc/sysconfig/heat-params
 
       KUBE_CERTS_PATH=/etc/kubernetes/ssl
       HOST_CERTS_PATH=/usr/share/ca-certificates
