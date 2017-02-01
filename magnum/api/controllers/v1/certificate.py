@@ -167,7 +167,6 @@ class CertificateController(base.Controller):
                                                          cert_obj)
         return Certificate.convert_with_links(new_cert)
 
-    @base.Controller.api_version("1.5")
     @expose.expose(None, types.uuid_or_name, status_code=202)
     def patch(self, cluster_ident):
         context = pecan.request.context
