@@ -23,8 +23,6 @@ write_files:
 
       myip=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 
-      HOST_CERTS_PATH=/usr/share/ca-certificates
-
       TEMPLATE=/etc/kubernetes/manifests/kube-proxy.yaml
       mkdir -p $(dirname ${TEMPLATE})
       cat > ${TEMPLATE} <<EOF

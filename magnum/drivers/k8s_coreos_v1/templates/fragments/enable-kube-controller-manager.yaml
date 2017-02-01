@@ -21,8 +21,6 @@ write_files:
     content: |
       #!/bin/sh
 
-      KUBE_CERTS_PATH=/etc/kubernetes/ssl
-      HOST_CERTS_PATH=/usr/share/ca-certificates
       SYSCONFIG_PATH=/etc/sysconfig
 
       SERVICE_ACCOUNT_PRIVATE_KEY_FILE=${KUBE_CERTS_PATH}/apiserver-key.pem
