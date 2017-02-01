@@ -76,7 +76,7 @@ if [[ "$COE" == "kubernetes" ]]; then
     remote_exec $SSH_USER "sudo df -h" dfh.log
     remote_exec $SSH_USER "sudo journalctl -u wc-notify --no-pager" wc-notify.log
     remote_exec $SSH_USER "sudo cat /etc/sysconfig/heat-params" heat-params
-elif [[ "$COE" == "swarm" ]]; then
+elif [[ "$COE" == "swarm" || "$COE" == "swarm-mode" ]]; then
     SSH_USER=fedora
     remote_exec $SSH_USER "sudo systemctl --full list-units --no-pager" systemctl_list_units.log
     remote_exec $SSH_USER "sudo journalctl -u cloud-config --no-pager" cloud-config.log
@@ -87,6 +87,7 @@ elif [[ "$COE" == "swarm" ]]; then
     remote_exec $SSH_USER "sudo journalctl -u etcd --no-pager" etcd.log
     remote_exec $SSH_USER "sudo journalctl -u swarm-manager --no-pager" swarm-manager.log
     remote_exec $SSH_USER "sudo journalctl -u swarm-agent --no-pager" swarm-agent.log
+    remote_exec $SSH_USER "sudo journalctl -u swarm-worker --no-pager" swarm-worker.log
     remote_exec $SSH_USER "sudo journalctl -u docker-storage-setup --no-pager" docker-storage-setup.log
     remote_exec $SSH_USER "sudo systemctl status docker-storage-setup -l" docker-storage-setup.service.status.log
     remote_exec $SSH_USER "sudo systemctl show docker-storage-setup --no-pager" docker-storage-setup.service.show.log

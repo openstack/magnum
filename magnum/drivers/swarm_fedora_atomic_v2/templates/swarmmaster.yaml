@@ -1,0 +1,359 @@
+heat_template_version: 2014-10-16
+
+description: >
+  This is a nested stack that defines swarm master node. A swarm mater node is
+  running a Docker daemon and joins swarm as a manager. The Docker daemon
+  listens on port 2375.
+
+parameters:
+
+  ssh_key_name:
+    type: string
+    description: name of ssh key to be provisioned on our server
+
+  docker_volume_size:
+    type: number
+    description: >
+      size of a cinder volume to allocate to docker for container/image
+      storage
+
+  docker_volume_type:
+    type: string
+    description: >
+      type of a cinder volume to allocate to docker for container/image
+      storage
+
+  docker_storage_driver:
+    type: string
+    description: docker storage driver name
+    constraints:
+      - allowed_values: ["devicemapper", "overlay"]
+
+  external_network:
+    type: string
+    description: uuid/name of a network to use for floating ip addresses
+
+  cluster_uuid:
+    type: string
+    description: identifier for the cluster this template is generating
+
+  magnum_url:
+    type: string
+    description: endpoint to retrieve TLS certs from
+
+  fixed_network_id:
+    type: string
+    description: Network from which to allocate fixed addresses.
+
+  fixed_subnet_id:
+    type: string
+    description: Subnet from which to allocate fixed addresses.
+
+  swarm_api_ip:
+    type: string
+    description: swarm master's api server ip address
+    default: ""
+
+  api_ip_address:
+    type: string
+    description: swarm master's api server public ip address
+    default: ""
+
+  server_image:
+    type: string
+    description: glance image used to boot the server
+
+  server_flavor:
+    type: string
+    description: flavor to use when booting the server
+
+  http_proxy:
+    type: string
+    description: http proxy address for docker
+
+  https_proxy:
+    type: string
+    description: https proxy address for docker
+
+  no_proxy:
+    type: string
+    description: no proxies for docker
+
+  tls_disabled:
+    type: boolean
+    description: whether or not to enable TLS
+
+  secgroup_swarm_master_id:
+    type: string
+    description: ID of the security group for swarm master.
+
+  swarm_port:
+    type: number
+    description: >
+      The port which are used by swarm manager to provide swarm service.
+
+  api_pool_id:
+    type: string
+    description: ID of the load balancer pool of swarm master server.
+
+  trustee_user_id:
+    type: string
+    description: user id of the trustee
+
+  trustee_password:
+    type: string
+    description: password of the trustee
+    hidden: true
+
+  trust_id:
+    type: string
+    description: id of the trust which is used by the trustee
+    hidden: true
+
+  auth_url:
+    type: string
+    description: url for keystone
+
+  volume_driver:
+    type: string
+    description: volume driver to use for container storage
+    default: ""
+
+  rexray_preempt:
+    type: string
+    description: >
+      enables any host to take control of a volume irrespective of whether
+      other hosts are using the volume
+    default: "false"
+
+  is_primary_master:
+    type: boolean
+    description: whether this master is primary or not
+    default: False
+
+resources:
+
+  master_wait_handle:
+    type: "OS::Heat::WaitConditionHandle"
+
+  master_wait_condition:
+    type: "OS::Heat::WaitCondition"
+    depends_on: swarm-master
+    properties:
+      handle: {get_resource: master_wait_handle}
+      timeout: 6000
+
+  ######################################################################
+  #
+  # resource that exposes the IPs of either the Swarm master or the API
+  # LBaaS pool depending on whether LBaaS is enabled for the cluster.
+  #
+
+  api_address_switch:
+    type: Magnum::ApiGatewaySwitcher
+    properties:
+      pool_public_ip: {get_param: api_ip_address}
+      pool_private_ip: {get_param: swarm_api_ip}
+      master_public_ip: {get_attr: [swarm_master_floating, floating_ip_address]}
+      master_private_ip: {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
+
+  ######################################################################
+  #
+  # software configs.  these are components that are combined into
+  # a multipart MIME user-data archive.
+  #
+  write_heat_params:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/write-heat-params-master.yaml}
+          params:
+            "$IS_PRIMARY_MASTER": {get_param: is_primary_master}
+            "$WAIT_CURL": {get_attr: [master_wait_handle, curl_cli]}
+            "$DOCKER_VOLUME": {get_resource: docker_volume}
+            "$DOCKER_VOLUME_SIZE": {get_param: docker_volume_size}
+            "$DOCKER_STORAGE_DRIVER": {get_param: docker_storage_driver}
+            "$HTTP_PROXY": {get_param: http_proxy}
+            "$HTTPS_PROXY": {get_param: https_proxy}
+            "$NO_PROXY": {get_param: no_proxy}
+            "$PRIMARY_MASTER_IP": {get_param: swarm_api_ip}
+            "$SWARM_API_IP": {get_attr: [api_address_switch, private_ip]}
+            "$SWARM_NODE_IP": {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
+            "$CLUSTER_UUID": {get_param: cluster_uuid}
+            "$MAGNUM_URL": {get_param: magnum_url}
+            "$TLS_DISABLED": {get_param: tls_disabled}
+            "$API_IP_ADDRESS": {get_attr: [api_address_switch, public_ip]}
+            "$TRUSTEE_USER_ID": {get_param: trustee_user_id}
+            "$TRUSTEE_PASSWORD": {get_param: trustee_password}
+            "$TRUST_ID": {get_param: trust_id}
+            "$AUTH_URL": {get_param: auth_url}
+            "$VOLUME_DRIVER": {get_param: volume_driver}
+            "$REXRAY_PREEMPT": {get_param: rexray_preempt}
+
+  remove_docker_key:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: ../../common/templates/swarm/fragments/remove-docker-key.sh}
+
+  configure_docker_storage:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          params:
+            $configure_docker_storage_driver: {get_file: ../../common/templates/fragments/configure_docker_storage_driver_atomic.sh}
+          template: {get_file: ../../common/templates/fragments/configure-docker-storage.sh}
+
+  make_cert:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: ../../common/templates/swarm/fragments/make-cert.py}
+
+  add_docker_daemon_options:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: ../../common/templates/swarm/fragments/add-docker-daemon-options.sh}
+
+  write_docker_socket:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: ../../common/templates/swarm/fragments/write-docker-socket.yaml}
+
+  write_swarm_master_service:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/write-swarm-master-service.sh}
+
+  enable_services:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: ../../common/templates/swarm/fragments/enable-services.sh}
+          params:
+            "$NODE_SERVICES": "docker.socket docker"
+
+  configure_selinux:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: ../../common/templates/swarm/fragments/configure-selinux.sh}
+
+  add_proxy:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: ../../common/templates/swarm/fragments/add-proxy.sh}
+
+  volume_service:
+    type: "OS::Heat::SoftwareConfig"
+    properties:
+      group: ungrouped
+      config: {get_file: ../../common/templates/swarm/fragments/volume-service.sh}
+
+  swarm_master_init:
+    type: "OS::Heat::MultipartMime"
+    properties:
+      parts:
+        - config: {get_resource: configure_selinux}
+        - config: {get_resource: remove_docker_key}
+        - config: {get_resource: write_heat_params}
+        - config: {get_resource: make_cert}
+        - config: {get_resource: configure_docker_storage}
+        - config: {get_resource: add_docker_daemon_options}
+        - config: {get_resource: write_docker_socket}
+        - config: {get_resource: add_proxy}
+        - config: {get_resource: enable_services}
+        - config: {get_resource: write_swarm_master_service}
+        - config: {get_resource: volume_service}
+
+  ######################################################################
+  #
+  # Swarm_manager is a special node running the swarm manage daemon along
+  # side the swarm worker.
+  #
+
+  # do NOT use "_" (underscore) in the Nova server name
+  # it creates a mismatch between the generated Nova name and its hostname
+  # which can lead to weird problems
+  swarm-master:
+    type: "OS::Nova::Server"
+    properties:
+      image:
+        get_param: server_image
+      flavor:
+        get_param: server_flavor
+      key_name:
+        get_param: ssh_key_name
+      user_data_format: RAW
+      user_data: {get_resource: swarm_master_init}
+      networks:
+        - port:
+            get_resource: swarm_master_eth0
+
+  swarm_master_eth0:
+    type: "OS::Neutron::Port"
+    properties:
+      network_id:
+        get_param: fixed_network_id
+      security_groups:
+        - {get_param: secgroup_swarm_master_id}
+      fixed_ips:
+        - subnet_id:
+            get_param: fixed_subnet_id
+
+  swarm_master_floating:
+    type: "OS::Neutron::FloatingIP"
+    properties:
+      floating_network:
+        get_param: external_network
+      port_id:
+        get_resource: swarm_master_eth0
+
+  api_pool_member:
+    type: Magnum::Optional::Neutron::LBaaS::PoolMember
+    properties:
+      pool: {get_param: api_pool_id}
+      address: {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
+      subnet: { get_param: fixed_subnet_id }
+      protocol_port: {get_param: swarm_port}
+
+  ######################################################################
+  #
+  # docker storage.  This allocates a cinder volume and attaches it
+  # to the node.
+  #
+
+  docker_volume:
+    type: Magnum::Optional::Cinder::Volume
+    properties:
+      size: {get_param: docker_volume_size}
+      volume_type: {get_param: docker_volume_type}
+
+  docker_volume_attach:
+    type: Magnum::Optional::Cinder::VolumeAttachment
+    properties:
+      instance_uuid: {get_resource: swarm-master}
+      volume_id: {get_resource: docker_volume}
+      mountpoint: /dev/vdb
+
+outputs:
+
+  swarm_master_ip:
+    value: {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
+    description: >
+      This is the "private" addresses of all the Swarm master.
+
+  swarm_master_external_ip:
+    value: {get_attr: [swarm_master_floating, floating_ip_address]}
+    description: >
+      This is the "public" ip addresses of Swarm master.
