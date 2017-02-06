@@ -63,7 +63,7 @@ write_files:
 
         DOCKER_RESTART=1
 
-        echo "no_proxy=$NO_PROXY" >> ENVIRONMENT
+        echo "no_proxy=$NO_PROXY" >> $ENVIRONMENT
       fi
 
       if [ "$DOCKER_RESTART" -eq 1 ]; then
