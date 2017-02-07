@@ -108,7 +108,7 @@ pygments_style = 'sphinx'
 # Config logABug feature
 # source tree
 giturl = (
-    u'http://git.openstack.org/cgit/openstack/magnum/tree/api-ref/source')
+    u'https://git.openstack.org/cgit/openstack/magnum/tree/api-ref/source')
 # html_context allows us to pass arbitrary values into the html template
 html_context = {'bug_tag': 'api-ref',
                 'giturl': giturl,
