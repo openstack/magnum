@@ -101,6 +101,12 @@ parameters:
       (in seconds)
     default: 5
 
+  admission_control_list:
+    type: string
+    description: >
+      List of admission control plugins to activate
+    default: "NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota"
+
   kube_allow_priv:
     type: string
     description: >
@@ -415,6 +421,7 @@ resources:
           system_pods_initial_delay: {get_param: system_pods_initial_delay}
           system_pods_timeout: {get_param: system_pods_timeout}
           portal_network_cidr: {get_param: portal_network_cidr}
+          admission_control_list: {get_param: admission_control_list}
           discovery_url: {get_param: discovery_url}
           cluster_uuid: {get_param: cluster_uuid}
           magnum_url: {get_param: magnum_url}

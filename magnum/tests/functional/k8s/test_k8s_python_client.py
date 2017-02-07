@@ -21,6 +21,7 @@ class TestKubernetesAPIs(base.BaseK8sTest):
         "docker_storage_driver": 'overlay',
         "labels": {
             "system_pods_initial_delay": 3600,
-            "system_pods_timeout": 600
+            "system_pods_timeout": 600,
+            "admission_control_list": "",
         }
     }

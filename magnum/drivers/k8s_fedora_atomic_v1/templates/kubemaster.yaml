@@ -77,6 +77,11 @@ parameters:
       (in seconds)
     default: 5
 
+  admission_control_list:
+    type: string
+    description: >
+      List of admission control plugins to activate
+
   discovery_url:
     type: string
     description: >
@@ -249,6 +254,7 @@ resources:
             "$SYSTEM_PODS_INITIAL_DELAY": {get_param: system_pods_initial_delay}
             "$SYSTEM_PODS_TIMEOUT": {get_param: system_pods_timeout}
             "$PORTAL_NETWORK_CIDR": {get_param: portal_network_cidr}
+            "$ADMISSION_CONTROL_LIST": {get_param: admission_control_list}
             "$ETCD_DISCOVERY_URL": {get_param: discovery_url}
             "$AUTH_URL": {get_param: auth_url}
             "$USERNAME": {get_param: username}
