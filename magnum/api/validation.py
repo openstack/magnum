@@ -20,12 +20,28 @@ import pecan
 from magnum.api import utils as api_utils
 from magnum.common import exception
 import magnum.conf
+from magnum.drivers.common import driver
 from magnum.i18n import _
 from magnum import objects
 
 CONF = magnum.conf.CONF
 
 cluster_update_allowed_properties = set(['node_count'])
+
+
+def enforce_cluster_type_supported():
+    @decorator.decorator
+    def wrapper(func, *args, **kwargs):
+        cluster = args[1]
+        cluster_template = objects.ClusterTemplate.get_by_uuid(
+            pecan.request.context, cluster.cluster_template_id)
+        cluster_type = (cluster_template.server_type,
+                        cluster_template.cluster_distro,
+                        cluster_template.coe)
+        driver.Driver.get_driver(*cluster_type)
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 def enforce_network_driver_types_create():
