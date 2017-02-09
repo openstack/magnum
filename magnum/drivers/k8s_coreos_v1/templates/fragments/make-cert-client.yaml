@@ -32,8 +32,6 @@ write_files:
         echo "$key"
       }
 
-      . /etc/sysconfig/heat-params
-
       set -o errexit
       set -o nounset
       set -o pipefail
