@@ -79,7 +79,9 @@ class QuotaCollection(collection.Collection):
     def convert(quotas, limit, **kwargs):
         collection = QuotaCollection()
         collection.quotas = [Quota.convert(p) for p in quotas]
-        collection.next = collection.get_next(limit, **kwargs)
+        collection.next = collection.get_next(limit,
+                                              marker_attribute='id',
+                                              **kwargs)
         return collection
 
 
