@@ -45,7 +45,6 @@ class StatsController(base.Controller):
     def __init__(self, **kwargs):
         super(StatsController, self).__init__()
 
-    @base.Controller.api_version("1.4")  # noqa
     @expose.expose(Stats, wtypes.text, wtypes.text)
     def get_all(self, project_id=None, type="cluster"):
         """Retrieve magnum stats.
