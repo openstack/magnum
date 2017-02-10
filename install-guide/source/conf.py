@@ -74,7 +74,7 @@ release = magnum_version.version_string_with_vcs()
 #           from git log.
 #   bug_tag: Tag for categorizing the bug. Must be set manually.
 # These variables are passed to the logabug code via html_context.
-giturl = u'http://git.openstack.org/cgit/openstack/magnum/tree/'
+giturl = u'https://git.openstack.org/cgit/openstack/magnum/tree/'
 giturl += u'install-guide/source'
 git_cmd = "/usr/bin/git log | head -n1 | cut -f2 -d' '"
 gitsha = os.popen(git_cmd).read().strip('\n')
