@@ -66,3 +66,12 @@ user documentation.
 
   This gives admins a way to revoke access to an existing cluster once
   a user has been granted access.
+
+
+1.6
+---
+
+  Add quotas API
+
+  An admin user can set/update/delete/list quotas for the given tenant.
+  A non-admin user can get self quota information.
