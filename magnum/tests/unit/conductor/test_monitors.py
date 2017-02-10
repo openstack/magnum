@@ -137,7 +137,7 @@ class MonitorsTestCase(base.TestCase):
         mock_node.status = mock.MagicMock()
         mock_node.status.capacity = {'memory': '2000Ki', 'cpu': '1'}
         mock_nodes.items = [mock_node]
-        mock_k8s_api.return_value.list_namespaced_node.return_value = (
+        mock_k8s_api.return_value.list_node.return_value = (
             mock_nodes)
         mock_pods = mock.MagicMock()
         mock_pod = mock.MagicMock()

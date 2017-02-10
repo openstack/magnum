@@ -40,7 +40,7 @@ class K8sMonitor(monitors.MonitorBase):
 
     def pull_data(self):
         k8s_api = k8s.create_k8s_api(self.context, self.cluster)
-        nodes = k8s_api.list_namespaced_node()
+        nodes = k8s_api.list_node()
         self.data['nodes'] = self._parse_node_info(nodes)
         pods = k8s_api.list_namespaced_pod('default')
         self.data['pods'] = self._parse_pod_info(pods)

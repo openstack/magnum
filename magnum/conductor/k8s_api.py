@@ -14,8 +14,9 @@
 
 import tempfile
 
-from k8sclient.client import api_client
-from k8sclient.client.apis import apiv_api
+from kubernetes import client as k8s_config
+from kubernetes.client import api_client
+from kubernetes.client.apis import core_v1_api
 from oslo_log import log as logging
 
 from magnum.conductor.handlers.common.cert_manager import create_client_files
@@ -24,7 +25,7 @@ from magnum.i18n import _LE
 LOG = logging.getLogger(__name__)
 
 
-class K8sAPI(apiv_api.ApivApi):
+class K8sAPI(core_v1_api.CoreV1Api):
 
     def _create_temp_file_with_content(self, content):
         """Creates temp file and write content to the file.
@@ -50,11 +51,14 @@ class K8sAPI(apiv_api.ApivApi):
             (self.ca_file, self.key_file,
              self.cert_file) = create_client_files(cluster, context)
 
+        config = k8s_config.ConfigurationObject()
+        config.host = cluster.api_address
+        config.ssl_ca_cert = self.ca_file.name
+        config.cert_file = self.cert_file.name
+        config.key_file = self.key_file.name
+
         # build a connection with Kubernetes master
-        client = api_client.ApiClient(cluster.api_address,
-                                      key_file=self.key_file.name,
-                                      cert_file=self.cert_file.name,
-                                      ca_certs=self.ca_file.name)
+        client = api_client.ApiClient(config=config)
 
         super(K8sAPI, self).__init__(client)
 
