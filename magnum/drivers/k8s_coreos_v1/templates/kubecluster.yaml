@@ -242,6 +242,14 @@ parameters:
       - allowed_pattern: "^$|.*/"
     default: ""
 
+  container_runtime:
+    type: string
+    description: >
+      Container runtime to use with Kubernetes.
+    default: "docker"
+    constraints:
+      - allowed_values: ["docker"]
+
 resources:
 
   ######################################################################
@@ -398,6 +406,7 @@ resources:
           auth_url: {get_param: auth_url}
           hyperkube_image: {get_param: hyperkube_image}
           insecure_registry_url: {get_param: insecure_registry_url}
+          container_runtime: {get_param: container_runtime}
 
   ######################################################################
   #
@@ -443,6 +452,7 @@ resources:
           auth_url: {get_param: auth_url}
           hyperkube_image: {get_param: hyperkube_image}
           insecure_registry_url: {get_param: insecure_registry_url}
+          container_runtime: {get_param: container_runtime}
 
 outputs:
 
