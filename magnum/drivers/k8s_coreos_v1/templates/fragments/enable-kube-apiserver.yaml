@@ -56,7 +56,7 @@ write_files:
           - apiserver
           - ${BIND_ADDRESS_CMD}
           - --etcd-servers=http://127.0.0.1:2379
-          - --allow-privileged=true
+          - --allow-privileged=${KUBE_ALLOW_PRIV}
           - --service-cluster-ip-range=${PORTAL_NETWORK_CIDR}
           - --secure-port=${SECURE_PORT}
           - --insecure-port=${INSECURE_PORT}
