@@ -65,16 +65,14 @@ write_files:
       fi
       sans="${sans},IP:127.0.0.1"
 
-      cert_dir=/etc/kubernetes/ssl
-      cert_conf_dir=${cert_dir}/conf
+      cert_conf_dir=${KUBE_CERTS_PATH}/conf
 
-      mkdir -p "$cert_dir"
-      mkdir -p "$cert_conf_dir"
+      mkdir -p ${cert_conf_dir}
 
-      CA_CERT=$cert_dir/ca.pem
-      SERVER_CERT=$cert_dir/apiserver.pem
-      SERVER_CSR=$cert_dir/apiserver.pem
-      SERVER_KEY=$cert_dir/apiserver-key.pem
+      CA_CERT=${KUBE_CERTS_PATH}/ca.pem
+      SERVER_CERT=${KUBE_CERTS_PATH}/apiserver.pem
+      SERVER_CSR=${KUBE_CERTS_PATH}/apiserver.pem
+      SERVER_KEY=${KUBE_CERTS_PATH}/apiserver-key.pem
 
       #Get a token by user credentials and trust
       cat > auth.json << EOF
@@ -148,6 +146,6 @@ write_files:
           $MAGNUM_URL/certificates)
       parse_json_response "${server_cert_json}" > ${SERVER_CERT}
 
-      chmod 600 ${cert_dir}/*-key.pem
+      chmod 600 ${KUBE_CERTS_PATH}/*-key.pem
       # Certs will also be used by etcd service
-      chown -R etcd:etcd ${cert_dir}
+      chown -R etcd:etcd ${KUBE_CERTS_PATH}

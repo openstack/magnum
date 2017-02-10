@@ -23,9 +23,6 @@ write_files:
 
       myip=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 
-      KUBE_CERTS_PATH=/etc/kubernetes/ssl
-      HOST_CERTS_PATH=/usr/share/ca-certificates
-
       TLS_CERT_FILE=${KUBE_CERTS_PATH}/apiserver.pem
       TLS_PRIVATE_KEY_FILE=${KUBE_CERTS_PATH}/apiserver-key.pem
       CLIENT_CA_FILE=${KUBE_CERTS_PATH}/ca.pem
@@ -75,7 +72,7 @@ write_files:
             hostPort: 8080
             name: local
           volumeMounts:
-          - mountPath: /etc/kubernetes/ssl
+          - mountPath: ${KUBE_CERTS_PATH}
             name: ssl-certs-kubernetes
             readOnly: true
           - mountPath: /etc/ssl/certs

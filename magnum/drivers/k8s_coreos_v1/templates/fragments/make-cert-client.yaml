@@ -42,16 +42,14 @@ write_files:
         exit 0
       fi
 
-      cert_dir=/etc/kubernetes/ssl
-      cert_conf_dir=${cert_dir}/conf
+      cert_conf_dir=${KUBE_CERTS_PATH}/conf
 
-      mkdir -p "$cert_dir"
-      mkdir -p "$cert_conf_dir"
+      mkdir -p ${cert_conf_dir}
 
-      CA_CERT=$cert_dir/ca.pem
-      CLIENT_CERT=$cert_dir/worker.pem
-      CLIENT_CSR=$cert_dir/worker.csr
-      CLIENT_KEY=$cert_dir/worker-key.pem
+      CA_CERT=${KUBE_CERTS_PATH}/ca.pem
+      CLIENT_CERT=${KUBE_CERTS_PATH}/worker.pem
+      CLIENT_CSR=${KUBE_CERTS_PATH}/worker.csr
+      CLIENT_KEY=${KUBE_CERTS_PATH}/worker-key.pem
 
       #Get a token by user credentials and trust
       cat > auth.json << EOF
@@ -129,5 +127,5 @@ write_files:
           $MAGNUM_URL/certificates)
       parse_json_response "${client_cert_json}" > ${CLIENT_CERT}
 
-      chmod 600 ${cert_dir}/*-key.pem
-      chown root:root ${cert_dir}/*-key.pem
+      chmod 600 ${KUBE_CERTS_PATH}/*-key.pem
+      chown root:root ${KUBE_CERTS_PATH}/*-key.pem

@@ -25,7 +25,6 @@ write_files:
 
       DROP_IN_FILE=/etc/systemd/system/etcd2.service.d/20-configure-etcd.conf
       mkdir -p $(dirname $DROP_IN_FILE)
-      cert_dir="/etc/kubernetes/ssl"
       protocol="https"
 
       if [ "$TLS_DISABLED" = "True" ]; then
@@ -46,12 +45,12 @@ write_files:
       if [ "$TLS_DISABLED" = "False" ]; then
 
       cat >> $DROP_IN_FILE <<EOF
-      Environment=ETCD_CA_FILE=$cert_dir/ca.pem
-      Environment=ETCD_CERT_FILE=$cert_dir/apiserver.pem
-      Environment=ETCD_KEY_FILE=$cert_dir/apiserver-key.pem
-      Environment=ETCD_PEER_CA_FILE=$cert_dir/ca.pem
-      Environment=ETCD_PEER_CERT_FILE=$cert_dir/apiserver.pem
-      Environment=ETCD_PEER_KEY_FILE=$cert_dir/apiserver-key.pem
+      Environment=ETCD_CA_FILE=${KUBE_CERTS_PATH}/ca.pem
+      Environment=ETCD_CERT_FILE=${KUBE_CERTS_PATH}/apiserver.pem
+      Environment=ETCD_KEY_FILE=${KUBE_CERTS_PATH}/apiserver-key.pem
+      Environment=ETCD_PEER_CA_FILE=${KUBE_CERTS_PATH}/ca.pem
+      Environment=ETCD_PEER_CERT_FILE=${KUBE_CERTS_PATH}/apiserver.pem
+      Environment=ETCD_PEER_KEY_FILE=${KUBE_CERTS_PATH}/apiserver-key.pem
       EOF
 
       fi
