@@ -21,7 +21,9 @@ write_files:
     content: |
       #!/bin/sh
 
-      myip=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+      if [ -z "${KUBE_NODE_IP}" ]; then
+        KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+      fi
 
       DROP_IN_FILE=/etc/systemd/system/etcd2.service.d/20-configure-etcd.conf
       mkdir -p $(dirname $DROP_IN_FILE)
@@ -32,13 +34,13 @@ write_files:
       fi
       cat > $DROP_IN_FILE <<EOF
       [Service]
-      Environment=ETCD_NAME=$myip
+      Environment=ETCD_NAME=$KUBE_NODE_IP
       Environment=ETCD_DATA_DIR=/var/lib/etcd/default.etcd
-      Environment=ETCD_LISTEN_CLIENT_URLS=$protocol://$myip:2379,http://127.0.0.1:2379
-      Environment=ETCD_LISTEN_PEER_URLS=$protocol://$myip:2380
+      Environment=ETCD_LISTEN_CLIENT_URLS=$protocol://$KUBE_NODE_IP:2379,http://127.0.0.1:2379
+      Environment=ETCD_LISTEN_PEER_URLS=$protocol://$KUBE_NODE_IP:2380
 
-      Environment=ETCD_ADVERTISE_CLIENT_URLS=$protocol://$myip:2379,http://127.0.0.1:2379
-      Environment=ETCD_INITIAL_ADVERTISE_PEER_URLS=$protocol://$myip:2380
+      Environment=ETCD_ADVERTISE_CLIENT_URLS=$protocol://$KUBE_NODE_IP:2379,http://127.0.0.1:2379
+      Environment=ETCD_INITIAL_ADVERTISE_PEER_URLS=$protocol://$KUBE_NODE_IP:2380
       Environment=ETCD_DISCOVERY=$ETCD_DISCOVERY_URL
       EOF
 

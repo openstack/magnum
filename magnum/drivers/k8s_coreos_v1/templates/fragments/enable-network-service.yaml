@@ -25,7 +25,10 @@ write_files:
           exit 0
       fi
 
-      myip=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+      if [ -z "${KUBE_NODE_IP}" ]; then
+        KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+      fi
+
       ETCD_SERVER_IP=${ETCD_SERVER_IP:-127.0.0.1}
 
       PROTOCOL=https
@@ -37,7 +40,7 @@ write_files:
       ENV_FILE=/etc/flannel/options.env
       mkdir -p $(dirname $ENV_FILE)
       cat > $ENV_FILE <<EOF
-      FLANNELD_IFACE=$myip
+      FLANNELD_IFACE=${KUBE_NODE_IP}
       FLANNELD_ETCD_ENDPOINTS=${PROTOCOL}://${ETCD_SERVER_IP}:2379
       EOF
 
