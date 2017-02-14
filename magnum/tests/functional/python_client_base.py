@@ -26,9 +26,10 @@ import fixtures
 from six.moves import configparser
 
 from heatclient import client as heatclient
-from k8sclient.client import api_client
-from k8sclient.client.apis import apiv_api
 from keystoneclient.v3 import client as ksclient
+from kubernetes import client as k8s_config
+from kubernetes.client import api_client
+from kubernetes.client.apis import core_v1_api
 
 from magnum.common.utils import rmtree_without_raise
 import magnum.conf
@@ -386,26 +387,30 @@ class BaseK8sTest(ClusterTest):
     def setUpClass(cls):
         super(BaseK8sTest, cls).setUpClass()
         cls.kube_api_url = cls.cs.clusters.get(cls.cluster.uuid).api_address
-        k8s_client = api_client.ApiClient(cls.kube_api_url,
-                                          key_file=cls.key_file,
-                                          cert_file=cls.cert_file,
-                                          ca_certs=cls.ca_file)
-        cls.k8s_api = apiv_api.ApivApi(k8s_client)
+        config = k8s_config.ConfigurationObject()
+        config.host = cls.kube_api_url
+        config.ssl_ca_cert = cls.ca_file
+        config.cert_file = cls.cert_file
+        config.key_file = cls.key_file
+        k8s_client = api_client.ApiClient(config=config)
+        cls.k8s_api = core_v1_api.CoreV1Api(k8s_client)
 
     def setUp(self):
         super(BaseK8sTest, self).setUp()
         self.kube_api_url = self.cs.clusters.get(self.cluster.uuid).api_address
-        k8s_client = api_client.ApiClient(self.kube_api_url,
-                                          key_file=self.key_file,
-                                          cert_file=self.cert_file,
-                                          ca_certs=self.ca_file)
-        self.k8s_api = apiv_api.ApivApi(k8s_client)
+        config = k8s_config.ConfigurationObject()
+        config.host = self.kube_api_url
+        config.ssl_ca_cert = self.ca_file
+        config.cert_file = self.cert_file
+        config.key_file = self.key_file
+        k8s_client = api_client.ApiClient(config=config)
+        self.k8s_api = core_v1_api.CoreV1Api(k8s_client)
         # TODO(coreypobrien) https://bugs.launchpad.net/magnum/+bug/1551824
         utils.wait_for_condition(self._is_api_ready, 5, 600)
 
     def _is_api_ready(self):
         try:
-            self.k8s_api.list_namespaced_node()
+            self.k8s_api.list_node()
             self.LOG.info(_LI("API is ready."))
             return True
         except Exception:
