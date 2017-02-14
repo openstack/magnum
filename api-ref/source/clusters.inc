@@ -38,6 +38,7 @@ Request
   - cluster_template_id: clustertemplate_id
   - node_count: node_count
   - create_timeout: create_timeout
+  - keypair: keypair_id
 
 .. note::
 

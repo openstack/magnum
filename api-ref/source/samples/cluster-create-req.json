@@ -4,5 +4,6 @@
    "master_count":2,
    "cluster_template_id":"0562d357-8641-4759-8fed-8173f02c9633",
    "node_count":2,
-   "create_timeout":60
+   "create_timeout":60,
+   "keypair":"my_keypair"
 }
