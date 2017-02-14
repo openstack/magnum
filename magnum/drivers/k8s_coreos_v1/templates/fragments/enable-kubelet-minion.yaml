@@ -40,7 +40,8 @@ write_files:
       CONF_FILE=/etc/systemd/system/kubelet.service
       cat > $CONF_FILE <<EOF
       [Service]
-      Environment=KUBELET_VERSION=${KUBE_VERSION}_coreos.0
+      Environment=KUBELET_VERSION=${KUBE_VERSION}
+      Environment=KUBELET_ACI=${HYPERKUBE_IMAGE_REPO}
       ExecStart=/usr/lib/coreos/kubelet-wrapper \
         --api-servers=${KUBE_MASTER_URI} \
         --address=0.0.0.0 \

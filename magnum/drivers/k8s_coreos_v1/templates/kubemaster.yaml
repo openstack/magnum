@@ -113,6 +113,11 @@ parameters:
     type: string
     description: version of kubernetes used for kubernetes cluster
 
+  hyperkube_image_repo:
+    type: string
+    description: >
+      Docker registry used for hyperkube image
+
   cluster_uuid:
     type: string
     description: identifier for the cluster this template is generating
@@ -234,6 +239,7 @@ resources:
             "$AUTH_URL": {get_param: auth_url}
             "$KUBE_CERTS_PATH": "/etc/kubernetes/ssl"
             "$HOST_CERTS_PATH": "/usr/share/ca-certificates"
+            "$HYPERKUBE_IMAGE_REPO": {get_param: hyperkube_image_repo}
 
   configure_etcd:
     type: OS::Heat::SoftwareConfig
