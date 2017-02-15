@@ -463,8 +463,8 @@ class BaysController(base.Controller):
 
     @base.Controller.api_version("1.3")   # noqa
     @wsme.validate(types.uuid, bool, [BayPatchType])
-    @expose.expose(BayID, types.uuid_or_name, bool, body=[BayPatchType],
-                   status_code=202)
+    @expose.expose(BayID, types.uuid_or_name, types.boolean,
+                   body=[BayPatchType], status_code=202)
     def patch(self, bay_ident, rollback=False, patch=None):
         """Update an existing bay.
 

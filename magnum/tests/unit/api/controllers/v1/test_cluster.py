@@ -412,6 +412,26 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['errors'])
 
+    def test_update_cluster_with_rollback_enabled(self):
+        response = self.patch_json(
+            '/clusters/%s/?rollback=True' % self.cluster_obj.uuid,
+            [{'path': '/node_count', 'value': 4,
+              'op': 'replace'}],
+            headers={'OpenStack-API-Version': 'container-infra 1.3'})
+
+        self.mock_cluster_update.assert_called_once_with(mock.ANY, True)
+        self.assertEqual(202, response.status_code)
+
+    def test_update_cluster_with_rollback_disabled(self):
+        response = self.patch_json(
+            '/clusters/%s/?rollback=False' % self.cluster_obj.uuid,
+            [{'path': '/node_count', 'value': 4,
+              'op': 'replace'}],
+            headers={'OpenStack-API-Version': 'container-infra 1.3'})
+
+        self.mock_cluster_update.assert_called_once_with(mock.ANY, False)
+        self.assertEqual(202, response.status_code)
+
     def test_remove_ok(self):
         response = self.get_json('/clusters/%s' % self.cluster_obj.uuid)
         self.assertIsNotNone(response['name'])
