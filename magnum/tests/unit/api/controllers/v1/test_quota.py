@@ -141,6 +141,22 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(quota_list[-1].project_id,
                          response['quotas'][0]['project_id'])
 
+    @mock.patch("magnum.common.policy.enforce")
+    @mock.patch("magnum.common.context.make_context")
+    def test_get_all_admin_all_tenants_false(self, mock_context, mock_policy):
+        mock_context.return_value = self.context
+        quota_list = []
+        for i in range(4):
+            quota = obj_utils.create_test_quota(self.context,
+                                                project_id="proj-id-"+str(i))
+            quota_list.append(quota)
+
+        self.context.is_admin = True
+        self.context.project_id = 'proj-id-1'
+        response = self.get_json('/quotas?all_tenants=False')
+        self.assertEqual(1, len(response['quotas']))
+        self.assertEqual('proj-id-1', response['quotas'][0]['project_id'])
+
     def test_get_all_non_admin(self):
         quota_list = []
         for i in range(4):

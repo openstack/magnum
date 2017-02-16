@@ -20,6 +20,7 @@ from wsme import types as wtypes
 
 from magnum.api.controllers import base
 from magnum.api.controllers.v1 import collection
+from magnum.api.controllers.v1 import types
 from magnum.api import expose
 from magnum.api import utils as api_utils
 from magnum.common import exception
@@ -118,7 +119,8 @@ class QuotaController(base.Controller):
                                        sort_key=sort_key,
                                        sort_dir=sort_dir)
 
-    @expose.expose(QuotaCollection, int, int, wtypes.text, wtypes.text, bool)
+    @expose.expose(QuotaCollection, int, int, wtypes.text, wtypes.text,
+                   types.boolean)
     def get_all(self, marker=None, limit=None, sort_key='id',
                 sort_dir='asc', all_tenants=False):
         """Retrieve a list of quotas.
