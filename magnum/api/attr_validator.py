@@ -49,7 +49,7 @@ def validate_image(cli, image):
 def validate_flavor(cli, flavor):
     """Validate flavor.
 
-    If flavor is None, skip the validation and using the default value
+    If flavor is None, skip the validation and use the default value
     from the heat template.
     """
 

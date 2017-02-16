@@ -20,10 +20,10 @@ class VersionedMethod(object):
 
         @name: Name of the method
         @start_version: Minimum acceptable version
-        @end_version: Maximum acceptable_version
+        @end_version: Maximum acceptable version
         @func: Method to call
 
-        Minimum and maximums are inclusive
+        Minimum and maximum are inclusive
         """
         self.name = name
         self.start_version = start_version
