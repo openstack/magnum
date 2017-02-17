@@ -13,15 +13,12 @@
 from neutronclient.common import exceptions as n_exception
 from neutronclient.neutron import v2_0 as neutronV20
 import os
-from oslo_log import log as logging
 
 from magnum.common import exception
 from magnum.drivers.heat import k8s_fedora_template_def as kftd
 from oslo_config import cfg
 
 CONF = cfg.CONF
-
-LOG = logging.getLogger(__name__)
 
 
 class FedoraK8sIronicTemplateDefinition(kftd.K8sFedoraTemplateDefinition):
