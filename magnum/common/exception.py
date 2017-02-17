@@ -124,6 +124,11 @@ class ObjectNotFound(MagnumException):
     message = _("The %(name)s %(id)s could not be found.")
 
 
+class ProjectNotFound(ObjectNotFound):
+    message = _("The %(name)s %(id)s could not be found.")
+    code = 404
+
+
 class ResourceNotFound(ObjectNotFound):
     message = _("The %(name)s resource %(id)s could not be found.")
     code = 404
