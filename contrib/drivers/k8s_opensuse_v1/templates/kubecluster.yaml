@@ -572,6 +572,7 @@ resources:
           fixed_network: {get_resource: fixed_network}
           fixed_subnet: {get_resource: fixed_subnet}
           network_driver: {get_param: network_driver}
+          flannel_network_cidr: {get_param: flannel_network_cidr}
           kube_master_ip: {get_attr: [api_address_lb_switch, private_ip]}
           etcd_server_ip: {get_attr: [etcd_address_lb_switch, private_ip]}
           external_network: {get_param: external_network}

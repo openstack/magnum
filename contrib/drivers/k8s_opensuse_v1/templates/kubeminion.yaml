@@ -84,6 +84,10 @@ parameters:
     type: string
     description: network driver to use for instantiating container networks
 
+  flannel_network_cidr:
+    type: string
+    description: network range for flannel overlay network
+
   wait_condition_timeout:
     type: number
     description : >
@@ -305,6 +309,8 @@ resources:
         - get_param: secgroup_kube_minion_id
       fixed_ips:
         - subnet: {get_param: fixed_subnet}
+      allowed_address_pairs:
+        - ip_address: {get_param: flannel_network_cidr}
       replacement_policy: AUTO
 
   kube_minion_floating:
