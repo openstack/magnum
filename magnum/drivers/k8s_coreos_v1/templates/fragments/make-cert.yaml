@@ -63,6 +63,10 @@ write_files:
       fi
       sans="${sans},IP:127.0.0.1"
 
+      KUBE_SERVICE_IP=$(echo $PORTAL_NETWORK_CIDR | awk 'BEGIN{FS="[./]"; OFS="."}{print $1,$2,$3,$4 + 1}')
+
+      sans="${sans},IP:${KUBE_SERVICE_IP}"
+
       cert_conf_dir=${KUBE_CERTS_PATH}/conf
 
       mkdir -p ${cert_conf_dir}
