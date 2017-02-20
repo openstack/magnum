@@ -46,6 +46,10 @@ if [[ -n "${MASTER_HOSTNAME}" ]]; then
 fi
 sans="${sans},IP:127.0.0.1"
 
+KUBE_SERVICE_IP=$(echo $PORTAL_NETWORK_CIDR | awk 'BEGIN{FS="[./]"; OFS="."}{print $1,$2,$3,$4 + 1}')
+
+sans="${sans},IP:${KUBE_SERVICE_IP}"
+
 cert_dir=/srv/kubernetes
 cert_conf_dir=${cert_dir}/conf
 
