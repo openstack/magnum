@@ -110,7 +110,6 @@ parameters:
       Not used by this driver
     default: ""
 
-
   kube_allow_priv:
     type: string
     description: >
@@ -213,7 +212,7 @@ parameters:
     description: version of kubernetes used for kubernetes cluster
     default: v1.5.2_coreos.1
 
-  hyperkube_image_repo:
+  hyperkube_image:
     type: string
     description: >
       Docker registry used for hyperkube image
@@ -235,6 +234,13 @@ parameters:
     description: >
       timeout for the Wait Conditions
     default: 6000
+
+  insecure_registry_url:
+    type: string
+    description: insecure registry url
+    constraints:
+      - allowed_pattern: "^$|.*/"
+    default: ""
 
 resources:
 
@@ -390,7 +396,8 @@ resources:
           trustee_password: {get_param: trustee_password}
           trust_id: {get_param: trust_id}
           auth_url: {get_param: auth_url}
-          hyperkube_image_repo: {get_param: hyperkube_image_repo}
+          hyperkube_image: {get_param: hyperkube_image}
+          insecure_registry_url: {get_param: insecure_registry_url}
 
   ######################################################################
   #
@@ -434,7 +441,8 @@ resources:
           trustee_password: {get_param: trustee_password}
           trust_id: {get_param: trust_id}
           auth_url: {get_param: auth_url}
-          hyperkube_image_repo: {get_param: hyperkube_image_repo}
+          hyperkube_image: {get_param: hyperkube_image}
+          insecure_registry_url: {get_param: insecure_registry_url}
 
 outputs:
 

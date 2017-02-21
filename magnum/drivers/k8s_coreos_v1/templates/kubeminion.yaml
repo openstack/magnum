@@ -57,7 +57,7 @@ parameters:
     type: string
     description: version of kubernetes used for kubernetes cluster
 
-  hyperkube_image_repo:
+  hyperkube_image:
     type: string
     description: >
       Docker registry used for hyperkube image
@@ -124,6 +124,10 @@ parameters:
     type: string
     description: url for keystone
 
+  insecure_registry_url:
+    type: string
+    description: insecure registry url
+
 resources:
 
   minion_wait_handle:
@@ -171,7 +175,13 @@ resources:
             "$AUTH_URL": {get_param: auth_url}
             "$KUBE_CERTS_PATH": "/etc/kubernetes/ssl"
             "$HOST_CERTS_PATH": "/usr/share/ca-certificates"
-            "$HYPERKUBE_IMAGE_REPO": {get_param: hyperkube_image_repo}
+            "$HYPERKUBE_IMAGE_REPO":
+              str_replace:
+                template: insecure_registry_urlhyperkube_image
+                params:
+                  insecure_registry_url: { get_param: insecure_registry_url }
+                  hyperkube_image: { get_param: hyperkube_image }
+            "$INSECURE_REGISTRY_URL": {get_param: insecure_registry_url}
 
   write_kubeconfig:
     type: OS::Heat::SoftwareConfig
@@ -215,6 +225,12 @@ resources:
       group: ungrouped
       config: {get_file: fragments/add-proxy.yaml}
 
+  configure_docker:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/configure-docker.yaml}
+
   kube_minion_init:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -225,6 +241,7 @@ resources:
             $write_heat_params
             $write_kubeconfig
             $make_cert
+            $configure_docker
             $add_proxy
             $enable_network_service
             $enable_kubelet
@@ -233,6 +250,8 @@ resources:
             coreos:
               units:
                 - name: "make-cert.service"
+                  command: "start"
+                - name: "configure-docker.service"
                   command: "start"
                 - name: "add-proxy.service"
                   command: "start"
@@ -248,6 +267,7 @@ resources:
             "$write_heat_params": {get_attr: [write_heat_params, config]}
             "$write_kubeconfig": {get_attr: [write_kubeconfig, config]}
             "$make_cert": {get_attr: [make_cert, config]}
+            "$configure_docker": {get_attr: [configure_docker, config]}
             "$add_proxy": {get_attr: [add_proxy, config]}
             "$enable_network_service": {get_attr: [enable_network_service, config]}
             "$enable_kubelet": {get_attr: [enable_kubelet, config]}

@@ -25,6 +25,12 @@ write_files:
         KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
       fi
 
+      if [ -n "${INSECURE_REGISTRY_URL}" ]; then
+          INSECURE_REGISTRY_ARGS="--pod-infra-container-image=${INSECURE_REGISTRY_URL}/google_containers/pause\:3.0"
+      else
+          INSECURE_REGISTRY_ARGS=""
+      fi
+
       TLS_CERT_FILE=${KUBE_CERTS_PATH}/worker.pem
       TLS_PRIVATE_KEY_FILE=${KUBE_CERTS_PATH}/worker-key.pem
       KUBE_PROTOCOL="https"
@@ -54,7 +60,8 @@ write_files:
         --cadvisor-port=4194 \
         --kubeconfig=${KUBE_CONFIG} \
         --tls-cert-file=${TLS_CERT_FILE} \
-        --tls-private-key-file=${TLS_PRIVATE_KEY_FILE}
+        --tls-private-key-file=${TLS_PRIVATE_KEY_FILE} \
+        ${INSECURE_REGISTRY_ARGS}
       Restart=always
       RestartSec=10
       [Install]

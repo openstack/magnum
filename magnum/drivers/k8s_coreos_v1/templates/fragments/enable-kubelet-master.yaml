@@ -25,6 +25,12 @@ write_files:
         KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
       fi
 
+      if [ -n "${INSECURE_REGISTRY_URL}" ]; then
+          INSECURE_REGISTRY_ARGS="--pod-infra-container-image=${INSECURE_REGISTRY_URL}/google_containers/pause\:3.0"
+      else
+          INSECURE_REGISTRY_ARGS=""
+      fi
+
       CONF_FILE=/etc/systemd/system/kubelet.service
       cat > $CONF_FILE <<EOF
       [Service]
@@ -39,7 +45,8 @@ write_files:
         --config=/etc/kubernetes/manifests \
         --hostname-override=${KUBE_NODE_IP} \
         --logtostderr=true \
-        --v=0
+        --v=0 \
+        ${INSECURE_REGISTRY_ARGS}
       Restart=always
       RestartSec=10
       [Install]

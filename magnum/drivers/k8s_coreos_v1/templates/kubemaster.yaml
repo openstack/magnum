@@ -169,6 +169,10 @@ parameters:
     type: string
     description: url for keystone
 
+  insecure_registry_url:
+    type: string
+    description: insecure registry url
+
 resources:
 
   master_wait_handle:
@@ -239,7 +243,13 @@ resources:
             "$AUTH_URL": {get_param: auth_url}
             "$KUBE_CERTS_PATH": "/etc/kubernetes/ssl"
             "$HOST_CERTS_PATH": "/usr/share/ca-certificates"
-            "$HYPERKUBE_IMAGE_REPO": {get_param: hyperkube_image_repo}
+            "$HYPERKUBE_IMAGE_REPO":
+              str_replace:
+                template: insecure_registry_urlhyperkube_image
+                params:
+                  insecure_registry_url: { get_param: insecure_registry_url }
+                  hyperkube_image: { get_param: hyperkube_image }
+            "$INSECURE_REGISTRY_URL": {get_param: insecure_registry_url}
 
   configure_etcd:
     type: OS::Heat::SoftwareConfig
@@ -313,6 +323,12 @@ resources:
       group: ungrouped
       config: {get_file: fragments/add-proxy.yaml}
 
+  configure_docker:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/configure-docker.yaml}
+
   kube_master_init:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -322,6 +338,7 @@ resources:
           template: |
             $write_heat_params
             $make_cert
+            $configure_docker
             $add_proxy
             $configure_etcd
             $write_network_config
@@ -336,6 +353,8 @@ resources:
             coreos:
               units:
                 - name: "make-cert.service"
+                  command: "start"
+                - name: "configure-docker.service"
                   command: "start"
                 - name: "add-proxy.service"
                   command: "start"
@@ -362,6 +381,7 @@ resources:
           params:
             "$write_heat_params": {get_attr: [write_heat_params, config]}
             "$make_cert": {get_attr: [make_cert, config]}
+            "$configure_docker": {get_attr: [configure_docker, config]}
             "$add_proxy": {get_attr: [add_proxy, config]}
             "$configure_etcd": {get_attr: [configure_etcd, config]}
             "$write_network_config": {get_attr: [write_network_config, config]}
