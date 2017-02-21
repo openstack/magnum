@@ -4,8 +4,12 @@
 
 echo "configuring kubernetes (master)"
 
-KUBE_API_ARGS="--runtime_config=api/all=true"
-KUBE_API_ADDRESS="--insecure-bind-address=0.0.0.0 --insecure-port=$KUBE_API_PORT"
+# Generate ServiceAccount key if needed
+SERVICE_ACCOUNT_KEY="/var/lib/kubernetes/serviceaccount.key"
+if [[ ! -f "${SERVICE_ACCOUNT_KEY}" ]]; then
+    mkdir -p "$(dirname ${SERVICE_ACCOUNT_KEY})"
+    openssl genrsa -out "${SERVICE_ACCOUNT_KEY}" 2048 2>/dev/null
+fi
 
 # Setting correct permissions for Kubernetes files
 chown -R kube:kube /var/lib/kubernetes
@@ -18,7 +22,7 @@ sed -i '
     /^KUBE_API_ADDRESS=/ s|=.*|="--advertise-address='"$KUBE_NODE_IP"' --insecure-bind-address=0.0.0.0"|
     /^KUBE_API_PORT=/ s|=.*|="--insecure-port='"$KUBE_API_PORT"'"|
     /^KUBE_SERVICE_ADDRESSES=/ s|=.*|="--service-cluster-ip-range='"$PORTAL_NETWORK_CIDR"'"|
-    /^KUBE_API_ARGS=/ s/=.*/="--runtime-config=api\/all=true"/
+    /^KUBE_API_ARGS=/ s|=.*|="--service-account-key-file='"$SERVICE_ACCOUNT_KEY"' --runtime-config=api\/all=true"|
     /^KUBE_ETCD_SERVERS=/ s/=.*/="--etcd-servers=http:\/\/127.0.0.1:2379"/
     /^KUBE_ADMISSION_CONTROL=/ s/=.*/="--admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota"/
 ' /etc/kubernetes/apiserver
@@ -29,7 +33,7 @@ cat >> /etc/kubernetes/apiserver <<EOF
 EOF
 
 sed -i '
-    /^KUBE_CONTROLLER_MANAGER_ARGS=/ s|=.*|="--leader-elect=true --cluster-name=kubernetes --cluster-cidr='"$FLANNEL_NETWORK_CIDR"'"|
+    /^KUBE_CONTROLLER_MANAGER_ARGS=/ s|=.*|="--service_account_private_key_file='"$SERVICE_ACCOUNT_KEY"' --leader-elect=true --cluster-name=kubernetes --cluster-cidr='"$FLANNEL_NETWORK_CIDR"'"|
 ' /etc/kubernetes/controller-manager
 
 cat >> /etc/kubernetes/controller-manager <<EOF
