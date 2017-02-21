@@ -47,7 +47,7 @@ _EOC_
 # Add controller manager args
 KUBE_CONTROLLER_MANAGER_ARGS=""
 if [ -n "${ADMISSION_CONTROL_LIST}" ] && [ "${TLS_DISABLED}" == "False" ]; then
-    KUBE_CONTROLLER_MANAGER_ARGS="--service-account-private-key-file=/srv/kubernetes/server.key"
+    KUBE_CONTROLLER_MANAGER_ARGS="--service-account-private-key-file=/srv/kubernetes/server.key --root-ca-file=/srv/kubernetes/ca.crt"
 fi
 sed -i '
     /^KUBELET_ADDRESSES=/ s/=.*/="--machines='""'"/
