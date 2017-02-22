@@ -18,6 +18,17 @@ trust_group = cfg.OptGroup(name='trust',
                            title='Trustee options for the magnum services')
 
 trust_opts = [
+    cfg.BoolOpt('cluster_user_trust',
+                default=False,
+                help=_('This setting controls whether to assign a trust to'
+                       ' the cluster user or not. You will need to set it to'
+                       ' True for clusters with volume_driver=cinder or'
+                       ' registry_enabled=true in the underlying cluster'
+                       ' template to work. This is a potential security risk'
+                       ' since the trust gives instances OpenStack API access'
+                       " to the cluster's project. Note that this setting"
+                       ' does not affect per-cluster trusts assigned to the'
+                       'Magnum service user.')),
     cfg.StrOpt('trustee_domain_id',
                help=_('Id of the domain to create trustee for clusters')),
     cfg.StrOpt('trustee_domain_name',
