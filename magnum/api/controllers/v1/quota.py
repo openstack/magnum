@@ -23,6 +23,7 @@ from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api import expose
 from magnum.api import utils as api_utils
+from magnum.api import validation
 from magnum.common import exception
 from magnum.common import policy
 from magnum.i18n import _
@@ -164,6 +165,7 @@ class QuotaController(base.Controller):
         return Quota.convert(quota)
 
     @expose.expose(Quota, body=Quota, status_code=201)
+    @validation.enforce_valid_project_id_on_create()
     def post(self, quota):
         """Create Quota.
 

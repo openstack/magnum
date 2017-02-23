@@ -12,7 +12,10 @@
 
 import mock
 
+from keystoneauth1 import exceptions as ka_exception
+
 from magnum.api.controllers.v1 import quota as api_quota
+from magnum.common import clients
 from magnum.tests import base
 from magnum.tests.unit.api import base as api_base
 from magnum.tests.unit.api import utils as apiutils
@@ -169,14 +172,28 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(1, len(response['quotas']))
         self.assertEqual('proj-id-2', response['quotas'][0]['project_id'])
 
-    def test_create_quota(self):
+    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    def test_create_quota(self, mock_keystone):
         quota_dict = apiutils.quota_post_data()
         response = self.post_json('/quotas', quota_dict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(201, response.status_int)
         self.assertEqual(quota_dict['project_id'], response.json['project_id'])
 
-    def test_create_quota_invalid_resource(self):
+    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    def test_create_quota_project_id_not_found(self, mock_keystone):
+        keystone = mock.MagicMock()
+        exp = ka_exception.http.NotFound()
+        keystone.domain_admin_client.projects .get.side_effect = exp
+        mock_keystone.return_value = keystone
+        quota_dict = apiutils.quota_post_data()
+        response = self.post_json('/quotas', quota_dict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(404, response.status_int)
+        self.assertTrue(response.json['errors'])
+
+    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    def test_create_quota_invalid_resource(self, mock_keystone):
         quota_dict = apiutils.quota_post_data()
         quota_dict['resource'] = 'invalid-res'
         response = self.post_json('/quotas', quota_dict, expect_errors=True)
@@ -184,7 +201,8 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['errors'])
 
-    def test_create_quota_invalid_hard_limit(self):
+    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    def test_create_quota_invalid_hard_limit(self, mock_keystone):
         quota_dict = apiutils.quota_post_data()
         quota_dict['hard_limit'] = -10
         response = self.post_json('/quotas', quota_dict, expect_errors=True)
@@ -192,7 +210,8 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['errors'])
 
-    def test_create_quota_no_project_id(self):
+    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    def test_create_quota_no_project_id(self, mock_keystone):
         quota_dict = apiutils.quota_post_data()
         del quota_dict['project_id']
         response = self.post_json('/quotas', quota_dict, expect_errors=True)
@@ -200,7 +219,8 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['errors'])
 
-    def test_patch_quota(self):
+    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    def test_patch_quota(self, mock_keystone):
         quota_dict = apiutils.quota_post_data(hard_limit=5)
         response = self.post_json('/quotas', quota_dict)
         self.assertEqual('application/json', response.content_type)
@@ -214,7 +234,8 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(202, response.status_int)
         self.assertEqual(20, response.json['hard_limit'])
 
-    def test_patch_quota_not_found(self):
+    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    def test_patch_quota_not_found(self, mock_keystone):
         quota_dict = apiutils.quota_post_data()
         response = self.post_json('/quotas', quota_dict)
         self.assertEqual('application/json', response.content_type)
@@ -229,7 +250,8 @@ class TestQuota(api_base.FunctionalTest):
         self.assertEqual(404, response.status_int)
         self.assertTrue(response.json['errors'])
 
-    def test_delete_quota(self):
+    @mock.patch.object(clients.OpenStackClients, 'keystone')
+    def test_delete_quota(self, mock_keystone):
         quota_dict = apiutils.quota_post_data()
         response = self.post_json('/quotas', quota_dict)
         self.assertEqual('application/json', response.content_type)

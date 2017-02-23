@@ -17,7 +17,10 @@ import decorator
 
 import pecan
 
+from keystoneauth1 import exceptions as ka_exception
+
 from magnum.api import utils as api_utils
+from magnum.common import clients
 from magnum.common import exception
 import magnum.conf
 from magnum.drivers.common import driver
@@ -42,6 +45,26 @@ def enforce_cluster_type_supported():
         return func(*args, **kwargs)
 
     return wrapper
+
+
+def enforce_valid_project_id_on_create():
+    @decorator.decorator
+    def wrapper(func, *args, **kwargs):
+        quota = args[1]
+        _validate_project_id(quota.project_id)
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+def _validate_project_id(project_id):
+    try:
+        context = pecan.request.context
+        osc = clients.OpenStackClients(context)
+        osc.keystone().domain_admin_client.projects.get(project_id)
+    except ka_exception.http.NotFound:
+        raise exception.ProjectNotFound(name='project_id',
+                                        id=project_id)
 
 
 def enforce_network_driver_types_create():
