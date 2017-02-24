@@ -16,6 +16,7 @@
 import inspect
 import mock
 
+from oslo_config import cfg
 from oslo_utils import importutils
 from osprofiler import initializer as profiler_init
 from osprofiler import opts as profiler_opts
@@ -73,3 +74,9 @@ class TestProfiler(base.TestCase):
                                           project="magnum",
                                           service='foo',
                                           host='localhost')
+
+    @mock.patch.object(profiler_init, 'init_from_conf')
+    @mock.patch.object(conf, 'CONF', new=cfg.ConfigOpts())
+    def test_setup_profiler_without_osprofiler(self, mock_init):
+        profiler.setup('foo', 'localhost')
+        self.assertFalse(mock_init.called)

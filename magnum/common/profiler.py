@@ -57,7 +57,7 @@ class WsgiMiddleware(object):
 
 
 def setup(binary, host):
-    if CONF.profiler.enabled:
+    if hasattr(CONF, 'profiler') and CONF.profiler.enabled:
         profiler_initializer.init_from_conf(
             conf=CONF,
             context=context.get_admin_context().to_dict(),
