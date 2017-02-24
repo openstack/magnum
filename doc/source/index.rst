@@ -60,6 +60,7 @@ Developer Info
    :maxdepth: 1
 
    dev/quickstart
+   policies.rst
    dev/cluster-type-definition.rst
    dev/kubernetes-load-balancer.rst
    dev/functional-test.rst
