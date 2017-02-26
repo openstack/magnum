@@ -935,7 +935,7 @@ When Magnum deploys a Kubernetes cluster, it uses parameters defined in the
 ClusterTemplate and specified on the cluster-create command, for example::
 
     magnum cluster-template-create --name k8s-cluster-template \
-                               --image fedora-atomic-latest \
+                               --image fedora-atomic-ocata \
                                --keypair testkey \
                                --external-network public \
                                --dns-nameserver 8.8.8.8 \
@@ -993,7 +993,7 @@ Image (image)
   Current supported images are Fedora Atomic (download from `Fedora
   <https://alt.fedoraproject.org/pub/alt/atomic/stable/Cloud-Images/x86_64/Images>`_ )
   and CoreOS (download from `CoreOS
-  <http://beta.release.core-os.net/amd64-usr/current/coreos_production_openstack_image.img.bz2>`_ )
+  <http://beta.release.core-os.net/amd64-usr/1298.4.0/coreos_production_openstack_image.img.bz2>`_ )
 
 TLS (tls-disabled)
   Transport Layer Security is enabled by default, so you need a key and
@@ -1066,7 +1066,7 @@ the ClusterTemplate and specified on the 'cluster-create' command, for
 example::
 
     magnum cluster-template-create --name swarm-cluster-template \
-                               --image fedora-atomic-latest \
+                               --image fedora-atomic-ocata \
                                --keypair testkey \
                                --external-network public \
                                --dns-nameserver 8.8.8.8 \
@@ -1500,7 +1500,7 @@ Magnum, therefore it does not need to be specified via a parameter::
     magnum cluster-template-create --name secure-kubernetes \
                                --keypair default \
                                --external-network public \
-                               --image fedora-atomic-latest \
+                               --image fedora-atomic-ocata \
                                --dns-nameserver 8.8.8.8 \
                                --flavor m1.small \
                                --docker-volume-size 3 \
@@ -1525,7 +1525,7 @@ Magnum, therefore it does not need to be specified via a parameter::
     | server_type           | vm                                   |
     | external_network_id   | public                               |
     | cluster_distro        | fedora-atomic                        |
-    | image_id              | fedora-atomic-latest                 |
+    | image_id              | fedora-atomic-ocata                  |
     | volume_driver         | None                                 |
     | registry_enabled      | False                                |
     | docker_storage_driver | devicemapper                         |
@@ -2497,7 +2497,7 @@ Kubernetes on CoreOS
 --------------------
 
 CoreOS publishes a `stock image
-<http://beta.release.core-os.net/amd64-usr/current/coreos_production_openstack_image.img.bz2>`_
+<http://beta.release.core-os.net/amd64-usr/1298.4.0/coreos_production_openstack_image.img.bz2>`_
 that is being used to deploy Kubernetes.
 This image has the following OS/software:
 
