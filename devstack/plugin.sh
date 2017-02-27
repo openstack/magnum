@@ -13,7 +13,7 @@ if is_service_enabled magnum-api magnum-cond; then
         echo_summary "Installing magnum"
         install_magnum
 
-        MAGNUM_GUEST_IMAGE_URL=${MAGNUM_GUEST_IMAGE_URL:-"https://fedorapeople.org/groups/magnum/fedora-atomic-latest.qcow2"}
+        MAGNUM_GUEST_IMAGE_URL=${MAGNUM_GUEST_IMAGE_URL:-"https://fedorapeople.org/groups/magnum/fedora-atomic-ocata.qcow2"}
         IMAGE_URLS+=",${MAGNUM_GUEST_IMAGE_URL}"
 
         LIBS_FROM_GIT="${LIBS_FROM_GIT},python-magnumclient"
