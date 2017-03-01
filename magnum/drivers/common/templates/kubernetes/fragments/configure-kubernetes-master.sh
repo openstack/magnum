@@ -27,6 +27,7 @@ else
     KUBE_API_ARGS="$KUBE_API_ARGS --tls_cert_file=/srv/kubernetes/server.crt"
     KUBE_API_ARGS="$KUBE_API_ARGS --tls_private_key_file=/srv/kubernetes/server.key"
     KUBE_API_ARGS="$KUBE_API_ARGS --client_ca_file=/srv/kubernetes/ca.crt"
+    KUBE_API_ARGS="$KUBE_API_ARGS --kubelet-preferred-address-types=InternalIP,Hostname,ExternalIP"
 fi
 
 KUBE_ADMISSION_CONTROL=""
