@@ -48,6 +48,7 @@ write_files:
           - proxy
           - --master=${KUBE_MASTER_URI}
           - --kubeconfig=${KUBE_CONFIG}
+          - --cluster-cidr=${FLANNEL_NETWORK_CIDR}
           - --logtostderr=true
           - --v=0
           securityContext:
@@ -59,6 +60,12 @@ write_files:
             - mountPath: ${KUBE_CERTS_PATH}
               name: ssl-certs-kubernetes
               readOnly: true
+            - mountPath: /etc/ssl/certs
+              name: ssl-certs-host
+              readOnly: true
+            - mountPath: /var/run/dbus
+              name: dbus
+              readOnly: false
         volumes:
           - name: kubeconfig
             hostPath:
@@ -66,4 +73,10 @@ write_files:
           - name: ssl-certs-kubernetes
             hostPath:
               path: ${KUBE_CERTS_PATH}
+          - hostPath:
+              path: ${HOST_CERTS_PATH}
+            name: ssl-certs-host
+          - hostPath:
+              path: /var/run/dbus
+            name: dbus
       EOF

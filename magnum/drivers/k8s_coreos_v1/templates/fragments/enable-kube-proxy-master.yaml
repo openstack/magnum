@@ -38,8 +38,23 @@ write_files:
           - /hyperkube
           - proxy
           - --master=http://127.0.0.1:8080
+          - --cluster-cidr=${FLANNEL_NETWORK_CIDR}
           - --logtostderr=true
           - --v=0
           securityContext:
             privileged: true
+          volumeMounts:
+          - mountPath: /etc/ssl/certs
+            name: ssl-certs-host
+            readOnly: true
+          - mountPath: /var/run/dbus
+            name: dbus
+            readOnly: false
+        volumes:
+        - hostPath:
+            path: ${HOST_CERTS_PATH}
+          name: ssl-certs-host
+        - hostPath:
+            path: /var/run/dbus
+          name: dbus
       EOF
