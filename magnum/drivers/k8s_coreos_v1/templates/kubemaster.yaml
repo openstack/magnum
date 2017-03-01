@@ -113,7 +113,7 @@ parameters:
     type: string
     description: version of kubernetes used for kubernetes cluster
 
-  hyperkube_image_repo:
+  hyperkube_image:
     type: string
     description: >
       Docker registry used for hyperkube image
