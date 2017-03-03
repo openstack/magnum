@@ -80,6 +80,14 @@ exists.
 The definition and usage of the parameters of a ClusterTemplate are as follows.
 They are loosely grouped as: mandatory, infrastructure, COE specific.
 
+\<name\>
+  Name of the ClusterTemplate to create.  The name does not have to be
+  unique.  If multiple ClusterTemplates have the same name, you will need to
+  use the UUID to select the ClusterTemplate when creating a cluster or
+  updating, deleting a ClusterTemplate.  If a name is not specified, a random
+  name will be generated using a string and a number, for example
+  "pi-13-model".
+
 --coe \<coe\>
   Specify the Container Orchestration Engine to use.  Supported
   COE's include 'kubernetes', 'swarm', 'mesos'.  If your environment
@@ -124,14 +132,6 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   external internet to servers and the container services hosted in
   the cluster.  This is a mandatory parameter and there is no default
   value.
-
---name \<name\>
-  Name of the ClusterTemplate to create.  The name does not have to be
-  unique.  If multiple ClusterTemplates have the same name, you will need to
-  use the UUID to select the ClusterTemplate when creating a cluster or
-  updating, deleting a ClusterTemplate.  If a name is not specified, a random
-  name will be generated using a string and a number, for example
-  "pi-13-model".
 
 --public
   Access to a ClusterTemplate is normally limited to the admin, owner or users
@@ -407,7 +407,7 @@ is used as the baymodel parameter for this command instead of
 
 The 'cluster-create' command deploys a cluster, for example::
 
-    magnum cluster-create --name mycluster \
+    magnum cluster-create mycluster \
                       --cluster-template mytemplate \
                       --node-count 8 \
                       --master-count 3
@@ -424,16 +424,16 @@ resources of a failed 'cluster-create' are retained.
 The definition and usage of the parameters for 'cluster-create' are as
 follows:
 
+\<name\>
+  Name of the cluster to create.  If a name is not specified, a random
+  name will be generated using a string and a number, for example
+  "gamma-7-cluster".
+
 --cluster-template \<cluster-template\>
   The ID or name of the ClusterTemplate to use.  This is a mandatory
   parameter.  Once a ClusterTemplate is used to create a cluster, it cannot
   be deleted or modified until all clusters that use the ClusterTemplate have
   been deleted.
-
---name \<name\>
-  Name of the cluster to create.  If a name is not specified, a random
-  name will be generated using a string and a number, for example
-  "gamma-7-cluster".
 
 --keypair \<keypair\>
   The name or UUID of the SSH keypair to configure in the cluster servers
@@ -934,7 +934,7 @@ Service
 When Magnum deploys a Kubernetes cluster, it uses parameters defined in the
 ClusterTemplate and specified on the cluster-create command, for example::
 
-    magnum cluster-template-create --name k8s-cluster-template \
+    magnum cluster-template-create k8s-cluster-template \
                                --image fedora-atomic-latest \
                                --keypair testkey \
                                --external-network public \
@@ -944,7 +944,7 @@ ClusterTemplate and specified on the cluster-create command, for example::
                                --network-driver flannel \
                                --coe kubernetes
 
-    magnum cluster-create --name k8s-cluster \
+    magnum cluster-create k8s-cluster \
                           --cluster-template k8s-cluster-template \
                           --master-count 3 \
                           --node-count 8
@@ -1065,7 +1065,7 @@ Magnum deploys a Swarm cluster using parameters defined in
 the ClusterTemplate and specified on the 'cluster-create' command, for
 example::
 
-    magnum cluster-template-create --name swarm-cluster-template \
+    magnum cluster-template-create swarm-cluster-template \
                                --image fedora-atomic-latest \
                                --keypair testkey \
                                --external-network public \
@@ -1074,7 +1074,7 @@ example::
                                --docker-volume-size 5 \
                                --coe swarm
 
-    magnum cluster-create --name swarm-cluster \
+    magnum cluster-create swarm-cluster \
                       --cluster-template swarm-cluster-template \
                       --master-count 3 \
                       --node-count 8
@@ -1187,7 +1187,7 @@ offered.
 Magnum deploys a Mesos cluster using parameters defined in the ClusterTemplate
 and specified on the 'cluster-create' command, for example::
 
-    magnum cluster-template-create --name mesos-cluster-template \
+    magnum cluster-template-create mesos-cluster-template \
                            --image ubuntu-mesos \
                            --keypair testkey \
                            --external-network public \
@@ -1195,7 +1195,7 @@ and specified on the 'cluster-create' command, for example::
                            --flavor m1.small \
                            --coe mesos
 
-    magnum cluster-create --name mesos-cluster \
+    magnum cluster-create mesos-cluster \
                       --cluster-template mesos-cluster-template \
                       --master-count 3 \
                       --node-count 8
@@ -1497,7 +1497,7 @@ support.
 First, create a ClusterTemplate; by default TLS is enabled in
 Magnum, therefore it does not need to be specified via a parameter::
 
-    magnum cluster-template-create --name secure-kubernetes \
+    magnum cluster-template-create secure-kubernetes \
                                --keypair default \
                                --external-network public \
                                --image fedora-atomic-latest \
@@ -1543,7 +1543,7 @@ Magnum, therefore it does not need to be specified via a parameter::
 Now create a cluster. Use the ClusterTemplate name as a template for cluster
 creation::
 
-    magnum cluster-create --name secure-k8s-cluster \
+    magnum cluster-create secure-k8s-cluster \
                           --cluster-template secure-kubernetes \
                           --node-count 1
 
@@ -2213,7 +2213,7 @@ development team is working on a long term solution to automate these steps.
 
    Specify 'cinder' as the volume-driver for Kubernetes::
 
-    magnum cluster-template-create --name k8s-cluster-template \
+    magnum cluster-template-create k8s-cluster-template \
                                --image fedora-23-atomic-7 \
                                --keypair testkey \
                                --external-network public \
@@ -2226,7 +2226,7 @@ development team is working on a long term solution to automate these steps.
 
 2. Create the cluster::
 
-    magnum cluster-create --name k8s-cluster \
+    magnum cluster-create k8s-cluster \
                           --cluster-template k8s-cluster-template \
                           --node-count 1
 
@@ -2348,7 +2348,7 @@ Using Cinder in Mesos
    hosts are using the volume. If this is set to false, the driver
    will ensure data safety by locking the volume::
 
-    magnum cluster-template-create --name mesos-cluster-template \
+    magnum cluster-template-create mesos-cluster-template \
                                --image ubuntu-mesos \
                                --keypair testkey \
                                --external-network public \
@@ -2363,7 +2363,7 @@ Using Cinder in Mesos
 
 2. Create the Mesos cluster::
 
-    magnum cluster-create --name mesos-cluster \
+    magnum cluster-create mesos-cluster \
                           --cluster-template mesos-cluster-template \
                           --node-count 1
 

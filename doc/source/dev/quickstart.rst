@@ -254,7 +254,7 @@ Atomic image so the clusters which use this ClusterTemplate will be based on
 Fedora Atomic. The COE (Container Orchestration Engine) and keypair need to
 be specified as well::
 
-    magnum cluster-template-create --name k8s-cluster-template \
+    magnum cluster-template-create k8s-cluster-template \
                            --image fedora-atomic-latest \
                            --keypair testkey \
                            --external-network public \
@@ -268,7 +268,7 @@ Create a cluster. Use the ClusterTemplate name as a template for cluster
 creation. This cluster will result in one master kubernetes node and one minion
 node::
 
-    magnum cluster-create --name k8s-cluster \
+    magnum cluster-create k8s-cluster \
                           --cluster-template k8s-cluster-template \
                           --node-count 1
 
@@ -350,7 +350,7 @@ Upload the image to glance::
 Create a CoreOS Kubernetes ClusterTemplate, which is similar to the Atomic
 Kubernetes ClusterTemplate, except for pointing to a different image::
 
-    magnum cluster-template-create --name k8s-cluster-template-coreos \
+    magnum cluster-template-create k8s-cluster-template-coreos \
                            --image CoreOS \
                            --keypair testkey \
                            --external-network public \
@@ -362,7 +362,7 @@ Kubernetes ClusterTemplate, except for pointing to a different image::
 Create a CoreOS Kubernetes cluster. Use the CoreOS ClusterTemplate as a
 template for cluster creation::
 
-    magnum cluster-create --name k8s-cluster \
+    magnum cluster-create k8s-cluster \
                       --cluster-template k8s-cluster-template-coreos \
                       --node-count 2
 
@@ -524,7 +524,7 @@ Create a ClusterTemplate. It is very similar to the Kubernetes ClusterTemplate,
 except for the absence of some Kubernetes-specific arguments and the use of
 'swarm' as the COE::
 
-    magnum cluster-template-create --name swarm-cluster-template \
+    magnum cluster-template-create swarm-cluster-template \
                            --image fedora-atomic-latest \
                            --keypair testkey \
                            --external-network public \
@@ -540,7 +540,7 @@ Finally, create the cluster. Use the ClusterTemplate 'swarm-cluster-template'
 as a template for cluster creation. This cluster will result in one swarm
 manager node and two extra agent nodes::
 
-    magnum cluster-create --name swarm-cluster \
+    magnum cluster-create swarm-cluster \
                           --cluster-template swarm-cluster-template \
                           --node-count 2
 
@@ -654,7 +654,7 @@ Alternatively, you can download and upload a pre-built image::
 Then, create a ClusterTemplate by using 'mesos' as the COE, with the rest of
 arguments similar to the Kubernetes ClusterTemplate::
 
-    magnum cluster-template-create --name mesos-cluster-template --image ubuntu-mesos \
+    magnum cluster-template-create mesos-cluster-template --image ubuntu-mesos \
                            --keypair testkey \
                            --external-network public \
                            --dns-nameserver 8.8.8.8 \
@@ -665,7 +665,7 @@ Finally, create the cluster. Use the ClusterTemplate 'mesos-cluster-template'
 as a template for cluster creation. This cluster will result in one mesos
 master node and two mesos slave nodes::
 
-    magnum cluster-create --name mesos-cluster \
+    magnum cluster-create mesos-cluster \
                           --cluster-template mesos-cluster-template \
                           --node-count 2
 
