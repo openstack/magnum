@@ -91,6 +91,10 @@ parameters:
     type: boolean
     description: whether or not to enable TLS
 
+  kube_dashboard_enabled:
+    type: boolean
+    description: whether or not to disable kubernetes dashboard
+
   kubernetes_port:
     type: number
     description: >
@@ -190,6 +194,10 @@ parameters:
     type: string
     description: version of kubernetes used for kubernetes cluster
 
+  kube_dashboard_version:
+    type: string
+    description: version of kubernetes dashboard used for kubernetes cluster
+
   trustee_user_id:
     type: string
     description: user id of the trustee
@@ -266,12 +274,14 @@ resources:
             "$TENANT_NAME": {get_param: tenant_name}
             "$CLUSTER_SUBNET": {get_param: fixed_subnet}
             "$TLS_DISABLED": {get_param: tls_disabled}
+            "$KUBE_DASHBOARD_ENABLED": {get_param: kube_dashboard_enabled}
             "$CLUSTER_UUID": {get_param: cluster_uuid}
             "$MAGNUM_URL": {get_param: magnum_url}
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
             "$KUBE_VERSION": {get_param: kube_version}
+            "$KUBE_DASHBOARD_VERSION": {get_param: kube_dashboard_version}
             "$WAIT_CURL": {get_param: wc_curl_cli}
             "$TRUSTEE_USER_ID": {get_param: trustee_user_id}
             "$TRUSTEE_PASSWORD": {get_param: trustee_password}
@@ -392,7 +402,7 @@ resources:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/kube-ui-service.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/kube-dashboard-service.sh}
 
   enable_kube_proxy:
     type: OS::Heat::SoftwareConfig

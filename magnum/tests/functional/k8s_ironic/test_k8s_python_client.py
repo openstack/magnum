@@ -24,6 +24,7 @@ class TestFedoraKubernetesIronicAPIs(base.BaseK8sTest):
         "docker_storage_driver": 'overlay',
         "labels": {
             "system_pods_initial_delay": 3600,
-            "system_pods_timeout": 600
+            "system_pods_timeout": 600,
+            "kube_dashboard_enabled": False
         }
     }
