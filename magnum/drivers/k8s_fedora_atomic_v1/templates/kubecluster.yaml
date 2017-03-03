@@ -203,6 +203,11 @@ parameters:
     description: whether or not to disable TLS
     default: False
 
+  kube_dashboard_enabled:
+    type: boolean
+    description: whether or not to enable kubernetes dashboard
+    default: True
+
   kubernetes_port:
     type: number
     description: >
@@ -263,6 +268,11 @@ parameters:
     type: string
     description: version of kubernetes used for kubernetes cluster
     default: v1.5.3
+
+  kube_dashboard_version:
+    type: string
+    description: version of kubernetes dashboard used for kubernetes cluster
+    default: v1.5.1
 
   insecure_registry_url:
     type: string
@@ -494,11 +504,13 @@ resources:
           kubernetes_port: {get_param: kubernetes_port}
           tls_disabled: {get_param: tls_disabled}
           secgroup_base_id: {get_resource: secgroup_base}
+          kube_dashboard_enabled: {get_param: kube_dashboard_enabled}
           secgroup_kube_master_id: {get_resource: secgroup_kube_master}
           http_proxy: {get_param: http_proxy}
           https_proxy: {get_param: https_proxy}
           no_proxy: {get_param: no_proxy}
           kube_version: {get_param: kube_version}
+          kube_dashboard_version: {get_param: kube_dashboard_version}
           trustee_user_id: {get_param: trustee_user_id}
           trustee_password: {get_param: trustee_password}
           trust_id: {get_param: trust_id}

@@ -102,7 +102,8 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
             extra_params['kubernetes_port'] = 8080
 
         label_list = ['flannel_network_cidr', 'flannel_backend',
-                      'flannel_network_subnetlen', 'admission_control_list']
+                      'flannel_network_subnetlen', 'admission_control_list',
+                      'kube_dashboard_enabled']
 
         for label in label_list:
             extra_params[label] = cluster_template.labels.get(label)

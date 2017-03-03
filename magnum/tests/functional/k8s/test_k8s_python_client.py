@@ -21,5 +21,6 @@ class TestKubernetesAPIs(base.BaseK8sTest):
         "fixed_network": '192.168.0.0/24',
         "labels": {
             "admission_control_list": "",
+            "kube_dashboard_enabled": False,
         }
     }
