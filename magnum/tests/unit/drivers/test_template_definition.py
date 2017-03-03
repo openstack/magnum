@@ -260,6 +260,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'system_pods_timeout')
         admission_control_list = mock_cluster_template.labels.get(
             'admission_control_list')
+        kube_dashboard_enabled = mock_cluster_template.labels.get(
+            'kube_dashboard_enabled')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -275,6 +277,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'system_pods_initial_delay': system_pods_initial_delay,
             'system_pods_timeout': system_pods_timeout,
             'admission_control_list': admission_control_list,
+            'kube_dashboard_enabled': kube_dashboard_enabled,
             'username': 'fake_user',
             'tenant_name': 'fake_tenant',
             'magnum_url': mock_osc.magnum_url.return_value,
@@ -325,6 +328,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'system_pods_timeout')
         admission_control_list = mock_cluster_template.labels.get(
             'admission_control_list')
+        kube_dashboard_enabled = mock_cluster_template.labels.get(
+            'kube_dashboard_enabled')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -340,6 +345,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'system_pods_initial_delay': system_pods_initial_delay,
             'system_pods_timeout': system_pods_timeout,
             'admission_control_list': admission_control_list,
+            'kube_dashboard_enabled': kube_dashboard_enabled,
             'username': 'fake_user',
             'tenant_name': 'fake_tenant',
             'magnum_url': mock_osc.magnum_url.return_value,

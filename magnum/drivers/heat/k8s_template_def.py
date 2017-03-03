@@ -109,7 +109,8 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                       'flannel_network_subnetlen',
                       'system_pods_initial_delay',
                       'system_pods_timeout',
-                      'admission_control_list']
+                      'admission_control_list',
+                      'kube_dashboard_enabled']
 
         for label in label_list:
             extra_params[label] = cluster_template.labels.get(label)
