@@ -40,7 +40,7 @@ Steps to configure proxies.
 You can specify all three proxy parameters while creating ClusterTemplate of
 any coe type. All of proxy parameters are optional.
 
-    magnum cluster-template-create --name k8s-cluster-template \
+    magnum cluster-template-create k8s-cluster-template \
                        --image fedora-atomic-latest \
                        --keypair testkey \
                        --external-network public \
@@ -50,7 +50,7 @@ any coe type. All of proxy parameters are optional.
                        --http-proxy <http://abc-proxy.com:8080> \
                        --https-proxy <https://abc-proxy.com:8080> \
                        --no-proxy <172.24.4.4,172.24.4.9,172.24.4.8>
-    magnum cluster-template-create --name swarm-cluster-template \
+    magnum cluster-template-create swarm-cluster-template \
                        --image fedora-atomic-latest \
                        --keypair testkey \
                        --external-network public \
@@ -60,7 +60,7 @@ any coe type. All of proxy parameters are optional.
                        --http-proxy <http://abc-proxy.com:8080> \
                        --https-proxy <https://abc-proxy.com:8080> \
                        --no-proxy <172.24.4.4,172.24.4.9,172.24.4.8>
-    magnum cluster-template-create --name mesos-cluster-template \
+    magnum cluster-template-create mesos-cluster-template \
                        --image ubuntu-mesos \
                        --keypair testkey \
                        --external-network public \
