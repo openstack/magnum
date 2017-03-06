@@ -21,6 +21,11 @@ write_files:
     content: |
       #!/bin/sh
 
+      KUBE_ADMISSION_CONTROL=""
+      if [ -n "${ADMISSION_CONTROL_LIST}" ] && [ "${TLS_DISABLED}" == "False" ]; then
+          KUBE_ADMISSION_CONTROL="- --admission-control=${ADMISSION_CONTROL_LIST}"
+      fi
+
       TLS_CERT_FILE=${KUBE_CERTS_PATH}/apiserver.pem
       TLS_PRIVATE_KEY_FILE=${KUBE_CERTS_PATH}/apiserver-key.pem
       CLIENT_CA_FILE=${KUBE_CERTS_PATH}/ca.pem
@@ -62,6 +67,7 @@ write_files:
           - --tls-private-key-file=${TLS_PRIVATE_KEY_FILE}
           - --client-ca-file=${CLIENT_CA_FILE}
           - --service-account-key-file=${TLS_PRIVATE_KEY_FILE}
+          ${KUBE_ADMISSION_CONTROL}
           ports:
           - containerPort: 6443
             hostPort: 6443
