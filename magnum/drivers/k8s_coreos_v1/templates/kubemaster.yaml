@@ -178,6 +178,11 @@ parameters:
     type: string
     description: insecure registry url
 
+  container_runtime:
+    type: string
+    description: >
+      Container runtime to use with Kubernetes.
+
 resources:
 
   master_wait_handle:
@@ -256,6 +261,7 @@ resources:
                   insecure_registry_url: { get_param: insecure_registry_url }
                   hyperkube_image: { get_param: hyperkube_image }
             "$INSECURE_REGISTRY_URL": {get_param: insecure_registry_url}
+            "$CONTAINER_RUNTIME": {get_param: container_runtime}
 
   configure_etcd:
     type: OS::Heat::SoftwareConfig

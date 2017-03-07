@@ -68,5 +68,17 @@ write_files:
       After=flanneld.service
       EOF
 
+      CNI=/etc/kubernetes/cni/net.d/10-flannel.conf
+      mkdir -p $(dirname $CNI)
+      cat << EOF > $CNI
+      {
+          "name": "podnet",
+          "type": "flannel",
+          "delegate": {
+              "isDefaultGateway": true
+          }
+      }
+      EOF
+
       systemctl enable flanneld
       systemctl --no-block start flanneld
