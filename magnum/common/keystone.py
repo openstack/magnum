@@ -67,13 +67,7 @@ class KeystoneClientV3(object):
         return session
 
     def _get_auth(self):
-        if self.context.is_admin:
-            try:
-                auth = ka_loading.load_auth_from_conf_options(
-                    CONF, ksconf.CFG_GROUP)
-            except ka_exception.MissingRequiredOptions:
-                auth = self._get_legacy_auth()
-        elif self.context.auth_token_info:
+        if self.context.auth_token_info:
             access_info = ka_access.create(body=self.context.auth_token_info,
                                            auth_token=self.context.auth_token)
             auth = ka_access_plugin.AccessInfoPlugin(access_info)
@@ -91,7 +85,12 @@ class KeystoneClientV3(object):
             }
 
             auth = ka_v3.Password(**auth_info)
-
+        elif self.context.is_admin:
+            try:
+                auth = ka_loading.load_auth_from_conf_options(
+                    CONF, ksconf.CFG_GROUP)
+            except ka_exception.MissingRequiredOptions:
+                auth = self._get_legacy_auth()
         else:
             LOG.error(_LE('Keystone API connection failed: no password, '
                           'trust_id or token found.'))
