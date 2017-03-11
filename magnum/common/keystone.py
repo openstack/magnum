@@ -92,9 +92,11 @@ class KeystoneClientV3(object):
             except ka_exception.MissingRequiredOptions:
                 auth = self._get_legacy_auth()
         else:
-            LOG.error(_LE('Keystone API connection failed: no password, '
-                          'trust_id or token found.'))
-            raise exception.AuthorizationFailure()
+            msg = _LE('Keystone API connection failed: no password, '
+                      'trust_id or token found.')
+            LOG.error(msg)
+            raise exception.AuthorizationFailure(client='keystone',
+                                                 message='reason %s' % msg)
 
         return auth
 
@@ -180,8 +182,11 @@ class KeystoneClientV3(object):
                     self.domain_admin_session
                 )
             except kc_exception.Unauthorized:
-                LOG.error(_LE("Keystone client authentication failed"))
-                raise exception.AuthorizationFailure()
+                msg = _LE("Keystone client authentication failed")
+                LOG.error(msg)
+                raise exception.AuthorizationFailure(client='keystone',
+                                                     message='reason: %s' %
+                                                             msg)
 
             self._trustee_domain_id = access.domain_id
 
