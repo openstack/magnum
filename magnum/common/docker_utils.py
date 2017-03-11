@@ -59,7 +59,7 @@ def docker_for_cluster(context, cluster):
     client_kwargs = dict()
     if not cluster_template.tls_disabled:
         (ca_cert, magnum_key,
-         magnum_cert) = cert_manager.create_client_files(cluster)
+         magnum_cert) = cert_manager.create_client_files(cluster, context)
         client_kwargs['ca_cert'] = ca_cert.name
         client_kwargs['client_key'] = magnum_key.name
         client_kwargs['client_cert'] = magnum_cert.name
