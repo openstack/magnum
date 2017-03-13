@@ -438,6 +438,7 @@ resources:
           discovery_url: {get_param: discovery_url}
           cluster_uuid: {get_param: cluster_uuid}
           magnum_url: {get_param: magnum_url}
+          volume_driver: {get_param: volume_driver}
           fixed_network: {get_attr: [network, fixed_network]}
           fixed_subnet: {get_attr: [network, fixed_subnet]}
           api_pool_id: {get_attr: [api_lb, pool_id]}

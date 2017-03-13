@@ -2202,12 +2202,8 @@ Following are some examples for using Cinder as persistent storage.
 Using Cinder in Kubernetes
 ++++++++++++++++++++++++++
 
-**NOTE:** This feature requires Kubernetes version 1.1.1 or above and
-Docker version 1.8.3 or above.  The public Fedora image from Atomic
-currently meets this requirement.
-
-**NOTE:** The following steps are a temporary workaround, and Magnum's
-development team is working on a long term solution to automate these steps.
+**NOTE:** This feature requires Kubernetes version 1.5.0 or above.
+The public Fedora image from Atomic currently meets this requirement.
 
 1. Create the ClusterTemplate.
 
@@ -2229,49 +2225,6 @@ development team is working on a long term solution to automate these steps.
     magnum cluster-create --name k8s-cluster \
                           --cluster-template k8s-cluster-template \
                           --node-count 1
-
-
-3. Configure kubelet.
-
-   To allow Kubernetes to interface with Cinder, log into each minion
-   node of your cluster and perform step 4 through 6::
-
-    sudo vi /etc/kubernetes/kubelet
-
-   Comment out the line::
-
-    #KUBELET_ARGS=--config=/etc/kubernetes/manifests --cadvisor-port=4194
-
-   Uncomment the line::
-
-    #KUBELET_ARGS="--config=/etc/kubernetes/manifests --cadvisor-port=4194 --cloud-provider=openstack --cloud-config=/etc/kubernetes/kube_openstack_config"
-
-
-4. Enter OpenStack user credential::
-
-    sudo vi /etc/kubernetes/kube_openstack_config
-
-  The username, tenant-name and region entries have been filled in with the
-  Keystone values of the user who created the cluster.  Enter the password
-  of this user on the entry for password::
-
-    password=ChangeMe
-
-5. Restart Kubernetes services::
-
-    sudo systemctl restart kubelet
-
-   On restart, the new configuration enables the Kubernetes cloud provider
-   plugin for OpenStack, along with the necessary credential for kubelet
-   to authenticate with Keystone and to make request to OpenStack services.
-
-6. Install nsenter::
-
-    sudo docker run -v /usr/local/bin:/target jpetazzo/nsenter
-
-   The nsenter utility is used by Kubernetes to run new processes within
-   existing kernel namespaces. This allows the kubelet agent to manage storage
-   for pods.
 
 Kubernetes is now ready to use Cinder for persistent storage.
 Following is an example illustrating how Cinder is used in a pod.

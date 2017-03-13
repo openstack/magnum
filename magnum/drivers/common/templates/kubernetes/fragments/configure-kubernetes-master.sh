@@ -4,11 +4,6 @@
 
 echo "configuring kubernetes (master)"
 
-if [ -z "$KUBE_NODE_IP" ]; then
-    # FIXME(yuanying): Set KUBE_NODE_IP correctly
-    KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
-fi
-
 sed -i '
     /^KUBE_ALLOW_PRIV=/ s/=.*/="--allow-privileged='"$KUBE_ALLOW_PRIV"'"/
 ' /etc/kubernetes/config
@@ -30,6 +25,10 @@ if [ -n "${ADMISSION_CONTROL_LIST}" ] && [ "${TLS_DISABLED}" == "False" ]; then
     KUBE_ADMISSION_CONTROL="--admission-control=${ADMISSION_CONTROL_LIST}"
 fi
 
+if [ -n "$TRUST_ID" ]; then
+    KUBE_API_ARGS="$KUBE_API_ARGS --cloud-config=/etc/sysconfig/kube_openstack_config --cloud-provider=openstack"
+fi
+
 sed -i '
     /^KUBE_API_ADDRESS=/ s/=.*/="'"${KUBE_API_ADDRESS}"'"/
     /^KUBE_SERVICE_ADDRESSES=/ s|=.*|="--service-cluster-ip-range='"$PORTAL_NETWORK_CIDR"'"|
@@ -38,10 +37,7 @@ sed -i '
     /^KUBE_ADMISSION_CONTROL=/ s/=.*/="'"${KUBE_ADMISSION_CONTROL}"'"/
 ' /etc/kubernetes/apiserver
 cat << _EOC_ >> /etc/kubernetes/apiserver
-#Uncomment the following line to disable Load Balancer feature
 KUBE_API_ARGS="$KUBE_API_ARGS"
-#Uncomment the following line to enable Load Balancer feature
-#KUBE_API_ARGS="$KUBE_API_ARGS --cloud-config=/etc/sysconfig/kube_openstack_config --cloud-provider=openstack"
 _EOC_
 
 # Add controller manager args
@@ -49,16 +45,18 @@ KUBE_CONTROLLER_MANAGER_ARGS=""
 if [ -n "${ADMISSION_CONTROL_LIST}" ] && [ "${TLS_DISABLED}" == "False" ]; then
     KUBE_CONTROLLER_MANAGER_ARGS="--service-account-private-key-file=/srv/kubernetes/server.key --root-ca-file=/srv/kubernetes/ca.crt"
 fi
+
+if [ -n "$TRUST_ID" ]; then
+    KUBE_CONTROLLER_MANAGER_ARGS="$KUBE_CONTROLLER_MANAGER_ARGS --cloud-config=/etc/sysconfig/kube_openstack_config --cloud-provider=openstack"
+fi
+
 sed -i '
     /^KUBELET_ADDRESSES=/ s/=.*/="--machines='""'"/
     /^KUBE_CONTROLLER_MANAGER_ARGS=/ s#\(KUBE_CONTROLLER_MANAGER_ARGS\).*#\1="'"${KUBE_CONTROLLER_MANAGER_ARGS}"'"#
 ' /etc/kubernetes/controller-manager
-cat << _EOC_ >> /etc/kubernetes/controller-manager
-#Uncomment the following line to enable Kubernetes Load Balancer feature
-#KUBE_CONTROLLER_MANAGER_ARGS="\$KUBE_CONTROLLER_MANAGER_ARGS --cloud-config=/etc/sysconfig/kube_openstack_config --cloud-provider=openstack"
-_EOC_
 
-KUBELET_ARGS="--register-node=true --register-schedulable=false --config=/etc/kubernetes/manifests --hostname-override=$KUBE_NODE_IP"
+HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')
+KUBELET_ARGS="--register-node=true --register-schedulable=false --config=/etc/kubernetes/manifests --hostname-override=${HOSTNAME_OVERRIDE}"
 
 if [ -n "${INSECURE_REGISTRY_URL}" ]; then
     KUBELET_ARGS="${KUBELET_ARGS} --pod-infra-container-image=${INSECURE_REGISTRY_URL}/google_containers/pause\:0.8.0"
