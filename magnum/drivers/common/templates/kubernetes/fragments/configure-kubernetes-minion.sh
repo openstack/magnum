@@ -4,11 +4,6 @@
 
 echo "configuring kubernetes (minion)"
 
-if [ -z "$KUBE_NODE_IP" ]; then
-    # FIXME(yuanying): Set KUBE_NODE_IP correctly
-    KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
-fi
-
 CERT_DIR=/srv/kubernetes
 PROTOCOL=https
 FLANNEL_OPTIONS="-etcd-cafile $CERT_DIR/ca.crt \
@@ -52,8 +47,17 @@ sed -i '
 # The hostname of the node is set to be the Nova name of the instance, and
 # the option --hostname-override for kubelet uses the hostname to register the node.
 # Using any other name will break the load balancer and cinder volume features.
-HOSTNAME=$(hostname --short | sed 's/\.novalocal//')
-KUBELET_ARGS="--config=/etc/kubernetes/manifests --cadvisor-port=4194 ${KUBE_CONFIG} --hostname-override=${HOSTNAME}"
+HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')
+KUBELET_ARGS="--config=/etc/kubernetes/manifests --cadvisor-port=4194 ${KUBE_CONFIG} --hostname-override=${HOSTNAME_OVERRIDE}"
+
+if [ -n "$TRUST_ID" ]; then
+    KUBELET_ARGS="$KUBELET_ARGS --cloud-provider=openstack --cloud-config=/etc/sysconfig/kube_openstack_config"
+fi
+
+# Workaround for Cinder support (fixed in k8s >= 1.6)
+if [ ! -f /usr/bin/udevadm ]; then
+    ln -s /sbin/udevadm /usr/bin/udevadm
+fi
 
 if [ -n "${INSECURE_REGISTRY_URL}" ]; then
     KUBELET_ARGS="${KUBELET_ARGS} --pod-infra-container-image=${INSECURE_REGISTRY_URL}/google_containers/pause\:0.8.0"
@@ -84,32 +88,6 @@ if [ "$NETWORK_DRIVER" = "flannel" ]; then
         echo "Waiting for flannel configuration in etcd..."
         sleep 5
     done
-fi
-
-if [ "$VOLUME_DRIVER" = "cinder" ]; then
-    CLOUD_CONFIG=/etc/kubernetes/kube_openstack_config
-    KUBERNETES=/etc/kubernetes
-    if [ ! -d ${KUBERNETES} -o ! -f ${CLOUD_CONFIG} ]; then
-        mkdir -p $KUBERNETES
-    fi
-    AUTH_URL=${AUTH_URL/v3/v2.0}
-cat > $CLOUD_CONFIG <<EOF
-[Global]
-auth-url=$AUTH_URL
-username=$USERNAME
-password=$PASSWORD
-region=$REGION_NAME
-tenant-name=$TENANT_NAME
-EOF
-
-cat << _EOC_ >> /etc/kubernetes/kubelet
-#KUBELET_ARGS="$KUBELET_ARGS --cloud-provider=openstack --cloud-config=/etc/kubernetes/kube_openstack_config"
-_EOC_
-
-    if [ ! -f /usr/bin/udevadm ]; then
-        ln -s /sbin/udevadm /usr/bin/udevadm
-    fi
-
 fi
 
 cat >> /etc/environment <<EOF
