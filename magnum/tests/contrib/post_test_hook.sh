@@ -61,9 +61,7 @@ function create_test_data {
     # image. Specifically, when we provide kernel and ramdisk images
     # we need to select the 'ami' image. Otherwise, when we have
     # qcow2 images, the format is 'bare'.
-    # NOTE(prameswar): openstack cli not giving container format in
-    # command 'openstack image list' once it start supporting we have to add.
-    export IMAGE_ID=$(glance --os-image-api-version 1 image-list | grep $container_format | grep -i $image_name | awk '{print $2}')
+    export IMAGE_ID=$(openstack image list --property container_format=$container_format | grep -i $image_name | awk '{print $2}')
 
     #Get magnum_url
     local magnum_api_ip=$(iniget /etc/magnum/magnum.conf api host)

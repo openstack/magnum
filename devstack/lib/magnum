@@ -280,7 +280,7 @@ function magnum_register_image {
         echo "Unknown image extension in $image_filename, supported extensions: tgz, img, qcow2, iso, vhd, vhdx, tar.gz, img.gz, img.bz2, vhd.gz, vhdx.gz"; false
     fi
 
-    openstack --os-url $GLANCE_SERVICE_PROTOCOL://$GLANCE_HOSTPORT --os-image-api-version 1 image set $image_name $magnum_image_property
+    openstack --os-url $GLANCE_SERVICE_PROTOCOL://$GLANCE_HOSTPORT --os-image-api-version 2 image set $image_name $magnum_image_property
 }
 
 # install_magnumclient() - Collect source and prepare
