@@ -41,6 +41,19 @@ parameters:
     default: m1.small
     description: flavor to use when booting the servers for minions
 
+  prometheus_monitoring:
+    type: boolean
+    default: false
+    description: >
+      whether or not to have the grafana-prometheus-cadvisor monitoring setup
+
+  grafana_admin_passwd:
+    type: string
+    default: admin
+    hidden: true
+    description: >
+      admin user password for the Grafana monitoring interface
+
   discovery_url:
     type: string
     description: >
@@ -408,6 +421,8 @@ resources:
           hyperkube_image: {get_param: hyperkube_image}
           insecure_registry_url: {get_param: insecure_registry_url}
           container_runtime: {get_param: container_runtime}
+          prometheus_monitoring: {get_param: prometheus_monitoring}
+          grafana_admin_passwd: {get_param: grafana_admin_passwd}
 
   ######################################################################
   #
@@ -454,6 +469,7 @@ resources:
           hyperkube_image: {get_param: hyperkube_image}
           insecure_registry_url: {get_param: insecure_registry_url}
           container_runtime: {get_param: container_runtime}
+          prometheus_monitoring: {get_param: prometheus_monitoring}
 
 outputs:
 

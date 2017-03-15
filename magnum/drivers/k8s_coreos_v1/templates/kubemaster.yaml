@@ -127,6 +127,17 @@ parameters:
     type: string
     description: identifier for the cluster this template is generating
 
+  prometheus_monitoring:
+    type: boolean
+    description: >
+      whether or not to have prometheus and grafana deployed
+
+  grafana_admin_passwd:
+    type: string
+    hidden: true
+    description: >
+      admin user password for the Grafana monitoring interface
+
   magnum_url:
     type: string
     description: endpoint to retrieve TLS certs from

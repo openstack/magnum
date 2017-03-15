@@ -57,7 +57,7 @@ write_files:
         --cni-conf-dir=/etc/kubernetes/cni/net.d \
         --network-plugin=cni \
         --register-node=true \
-        --container-runtime=${CONTAINER_RUNTIME}
+        --container-runtime=${CONTAINER_RUNTIME} \
         --register-schedulable=false \
         --allow-privileged=true \
         --pod-manifest-path=/etc/kubernetes/manifests \
