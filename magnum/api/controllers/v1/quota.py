@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_log import log as logging
 import pecan
 import wsme
 from wsme import types as wtypes
@@ -29,8 +28,6 @@ from magnum.common import policy
 from magnum.i18n import _
 from magnum import objects
 from magnum.objects import fields
-
-LOG = logging.getLogger(__name__)
 
 
 class Quota(base.APIBase):

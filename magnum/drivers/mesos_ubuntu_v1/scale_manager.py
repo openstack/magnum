@@ -11,12 +11,8 @@
 # under the License.
 
 from marathon import MarathonClient
-from oslo_log import log as logging
 
 from magnum.conductor.scale_manager import ScaleManager
-
-
-LOG = logging.getLogger(__name__)
 
 
 class MesosScaleManager(ScaleManager):

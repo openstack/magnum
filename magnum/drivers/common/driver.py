@@ -16,7 +16,6 @@ import abc
 import six
 
 from oslo_config import cfg
-from oslo_log import log as logging
 from pkg_resources import iter_entry_points
 from stevedore import driver
 
@@ -25,7 +24,6 @@ from magnum.objects import cluster_template
 
 
 CONF = cfg.CONF
-LOG = logging.getLogger(__name__)
 
 
 @six.add_metaclass(abc.ABCMeta)
