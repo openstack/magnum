@@ -39,7 +39,7 @@ appropriately.
 a. Ability to know current resource consumption.
 b. Ability to prohibit overuse by a project.
 c. Prevent situation where users in the project get starved because users in
-   other project consume all the resource. Alice feels something like
+   other project consume all the resources. Alice feels something like
    "Quota Management" would help to guarantee "fairness".
 d. Prevent DOS kind of attack, abuse or error by users where an excessive
    amount of resources are created.
@@ -72,7 +72,7 @@ Other Openstack projects like Nova [2]_, Cinder [3]_ follow a similar pattern
 and we will also do so and hence won't have a separate CLI for quota-create.
 Later if the user wants to change the Quota of the resource option will be
 provided to do so using magnum quota-update. In situation where all of the
-quota for a specific Magnum resource (Bay) have been consumed and is
+quota for a specific Magnum resource (Bay) has been consumed and is
 under use, admin will be allowed to set the quota to a any value lower than
 the usage or hardlimit to prohibit users from the project to create new
 Bays. This gives more flexibility to the admin to have a better control

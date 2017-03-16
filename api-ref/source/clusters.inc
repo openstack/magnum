@@ -64,8 +64,8 @@ Response Example
 .. literalinclude:: samples/cluster-create-resp.json
    :language: javascript
 
-List all cluster
-================
+List all clusters
+=================
 
 .. rest_method:: GET /v1/clusters
 
