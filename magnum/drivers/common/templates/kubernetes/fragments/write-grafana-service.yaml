@@ -1,0 +1,67 @@
+#cloud-config
+merge_how: dict(recurse_array)+list(append)
+write_files:
+  - path: /srv/kubernetes/monitoring/grafanaService.yaml
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      apiVersion: v1
+      kind: Service
+      metadata:
+        labels:
+          name: node
+          role: service
+        name: grafana
+        namespace: kube-system
+      spec:
+        type: "NodePort"
+        ports:
+          - port: 3000
+            targetPort: 3000
+            nodePort: 30603
+        selector:
+          grafana: "true"
+      ---
+      apiVersion: extensions/v1beta1
+      kind: Deployment
+      metadata:
+        name: grafana
+        namespace: kube-system
+      spec:
+        replicas: 1
+        template:
+          metadata:
+            labels:
+              name: grafana
+              grafana: "true"
+              role: db
+          spec:
+            containers:
+              - image: grafana/grafana
+                imagePullPolicy: Always
+                name: grafana
+                env:
+                  - name: GF_SECURITY_ADMIN_PASSWORD
+                    value: $ADMIN_PASSWD
+                  - name: GF_DASHBOARDS_JSON_ENABLED
+                    value: "true"
+                  - name: GF_DASHBOARDS_JSON_PATH
+                    value: /var/lib/grafana/dashboards
+                resources:
+                  # keep request = limit to keep this container in guaranteed class
+                  limits:
+                    cpu: 100m
+                    memory: 200Mi
+                  requests:
+                    cpu: 100m
+                    memory: 200Mi
+                volumeMounts:
+                - name: default-dashboard
+                  mountPath: /var/lib/grafana/dashboards
+                ports:
+                  - containerPort: 3000
+                    hostPort: 3000
+            volumes:
+            - name: default-dashboard
+              configMap:
+                name: graf-dash

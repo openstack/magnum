@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Includes a monitoring stack based on cAdvisor, node-exporter, Prometheus
+    and Grafana. Users can enable this stack through the label
+    prometheus_monitoring. Prometheus scrapes metrics from the Kubernetes
+    cluster and then serves them to Grafana through Grafana's Prometheus
+    data source. Upon completion, a default Grafana dashboard is provided.

@@ -105,6 +105,17 @@ parameters:
     type: string
     description: endpoint to retrieve TLS certs from
 
+  prometheus_monitoring:
+    type: boolean
+    description: >
+      whether or not to have prometheus and grafana deployed
+
+  grafana_admin_passwd:
+    type: string
+    hidden: true
+    description: >
+      admin user password for the Grafana monitoring interface
+
   api_public_address:
     type: string
     description: Public IP address of the Kubernetes master server.
@@ -238,6 +249,7 @@ resources:
         str_replace:
           template: {get_file: ../../common/templates/kubernetes/fragments/write-heat-params-master.yaml}
           params:
+            "$PROMETHEUS_MONITORING": {get_param: prometheus_monitoring}
             "$KUBE_API_PUBLIC_ADDRESS": {get_attr: [api_address_switch, public_ip]}
             "$KUBE_API_PRIVATE_ADDRESS": {get_attr: [api_address_switch, private_ip]}
             "$KUBE_API_PORT": {get_param: kubernetes_port}
@@ -313,6 +325,39 @@ resources:
     properties:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/write-network-config.sh}
+
+  write_prometheus_configmap:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: ../../common/templates/kubernetes/fragments/write-prometheus-configmap.yaml}
+
+
+  write_prometheus_service:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: ../../common/templates/kubernetes/fragments/write-prometheus-service.yaml}
+
+  write_grafana_service:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: ../../common/templates/kubernetes/fragments/write-grafana-service.yaml}
+          params:
+            "$ADMIN_PASSWD": {get_param: grafana_admin_passwd}
+
+  enable_monitoring:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: ../../common/templates/kubernetes/fragments/enable-monitoring.sh}
+          params:
+            "$ADMIN_PASSWD": {get_param: grafana_admin_passwd}
 
   network_config_service:
     type: OS::Heat::SoftwareConfig
@@ -394,6 +439,9 @@ resources:
         - config: {get_resource: add_proxy}
         - config: {get_resource: enable_services}
         - config: {get_resource: write_network_config}
+        - config: {get_resource: write_prometheus_configmap}
+        - config: {get_resource: write_prometheus_service}
+        - config: {get_resource: write_grafana_service}
         - config: {get_resource: network_config_service}
         - config: {get_resource: network_service}
         - config: {get_resource: kube_system_namespace_service}
@@ -401,6 +449,7 @@ resources:
         - config: {get_resource: enable_kube_proxy}
         - config: {get_resource: kube_ui_service}
         - config: {get_resource: kube_examples}
+        - config: {get_resource: enable_monitoring}
         - config: {get_resource: master_wc_notify}
 
   ######################################################################

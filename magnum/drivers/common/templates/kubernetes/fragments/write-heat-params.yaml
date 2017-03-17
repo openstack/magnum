@@ -5,6 +5,7 @@ write_files:
     owner: "root:root"
     permissions: "0600"
     content: |
+      PROMETHEUS_MONITORING="$PROMETHEUS_MONITORING"
       KUBE_ALLOW_PRIV="$KUBE_ALLOW_PRIV"
       KUBE_MASTER_IP="$KUBE_MASTER_IP"
       KUBE_API_PORT="$KUBE_API_PORT"
