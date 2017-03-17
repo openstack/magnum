@@ -203,16 +203,15 @@ The Fedora Atomic micro-OS image will automatically be added to glance.  You
 can add additional images manually through glance. To verify the image created
 when installing devstack use::
 
-    glance -v image-list
+    openstack image list
 
-    +--------------------------------------+---------------------------------+-------------+------------------+-----------+--------+----------------------------------+
-    | ID                                   | Name                            | Disk_format | Container_format | Size      | Status | Owner                            |
-    +--------------------------------------+---------------------------------+-------------+------------------+-----------+--------+----------------------------------+
-    | 090de3a2-2c0c-42d5-b5a3-cfcddd6d011b | cirros-0.3.4-x86_64-uec         | ami         | ami              | 25165824  | active | f98b9727094d40c78b1ed40e3bc91e80 |
-    | 9501d296-f0aa-4c0e-bc24-2a680f8741f0 | cirros-0.3.4-x86_64-uec-kernel  | aki         | aki              | 4979632   | active | f98b9727094d40c78b1ed40e3bc91e80 |
-    | 01478d1a-59e0-4f36-b69e-0eaf5821ee46 | cirros-0.3.4-x86_64-uec-ramdisk | ari         | ari              | 3740163   | active | f98b9727094d40c78b1ed40e3bc91e80 |
-    | f14d6ee3-9e53-4f22-ba42-44e95810c294 | fedora-atomic-latest            | qcow2       | bare             | 507928064 | active | f98b9727094d40c78b1ed40e3bc91e80 |
-    +--------------------------------------+---------------------------------+-------------+------------------+-----------+--------+----------------------------------+
+    +--------------------------------------+----------------------+
+    | ID                                   | Name                 |
+    +--------------------------------------+----------------------+
+    | d6ab5b70-c866-4697-ad8c-f40dbd18eaec | cirros-0.3.4.img     |
+    | 71fe76a1-58fb-45e9-89a4-6d772fefea07 | fedora-atomic-latest |
+    | 7d5acefc-9766-47be-9bff-7af5d6fbef35 | cirros               |
+    +--------------------------------------+----------------------+
 
 To list the available commands and resources for magnum, use::
 
@@ -340,11 +339,11 @@ Atomic. First, download the official CoreOS image::
 
 Upload the image to glance::
 
-    glance image-create --name CoreOS  \
-                        --visibility public \
+    openstack image create CoreOS  \
+                        --public \
                         --disk-format=qcow2 \
                         --container-format=bare \
-                        --os-distro=coreos \
+                        --property os-distro=coreos \
                         --file=coreos_production_openstack_image.img
 
 Create a CoreOS Kubernetes ClusterTemplate, which is similar to the Atomic
@@ -647,9 +646,9 @@ pre-installed. To build and upload such image, please refer to
 Alternatively, you can download and upload a pre-built image::
 
     wget https://fedorapeople.org/groups/magnum/ubuntu-mesos-latest.qcow2
-    glance image-create --name ubuntu-mesos --visibility public \
+    openstack image create ubuntu-mesos --public \
                         --disk-format=qcow2 --container-format=bare \
-                        --os-distro=ubuntu --file=ubuntu-mesos-latest.qcow2
+                        --property os-distro=ubuntu --file=ubuntu-mesos-latest.qcow2
 
 Then, create a ClusterTemplate by using 'mesos' as the COE, with the rest of
 arguments similar to the Kubernetes ClusterTemplate::
