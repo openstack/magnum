@@ -19,7 +19,6 @@ Includes decorator for re-raising Magnum-type exceptions.
 """
 
 import functools
-import json
 import sys
 
 from keystoneclient import exceptions as keystone_exceptions
@@ -122,20 +121,20 @@ class MagnumException(Exception):
 
 class ObjectNotFound(MagnumException):
     message = _("The %(name)s %(id)s could not be found.")
+    code = 404
 
 
 class ProjectNotFound(ObjectNotFound):
     message = _("The %(name)s %(id)s could not be found.")
-    code = 404
 
 
 class ResourceNotFound(ObjectNotFound):
     message = _("The %(name)s resource %(id)s could not be found.")
-    code = 404
 
 
 class AuthorizationFailure(MagnumException):
     message = _("%(client)s connection failed. %(message)s")
+    code = 403
 
 
 class Invalid(MagnumException):
@@ -194,7 +193,7 @@ class Conflict(MagnumException):
     code = 409
 
 
-class ApiVersionsIntersect(MagnumException):
+class ApiVersionsIntersect(Invalid):
     message = _("Version of %(name)s %(min_ver)s %(max_ver)s intersects "
                 "with another versions.")
 
@@ -222,17 +221,8 @@ class InvalidMAC(Invalid):
     message = _("Expected a MAC address but received %(mac)s.")
 
 
-class ConfigInvalid(MagnumException):
+class ConfigInvalid(Invalid):
     message = _("Invalid configuration file. %(error_msg)s")
-
-
-class SSHConnectFailed(MagnumException):
-    message = _("Failed to establish SSH connection to host %(host)s.")
-
-
-class FileSystemNotSupported(MagnumException):
-    message = _("Failed to create a file system. "
-                "File system %(fs)s is not supported.")
 
 
 class ClusterTemplateNotFound(ResourceNotFound):
@@ -270,17 +260,8 @@ class ClusterTypeNotSupported(NotSupported):
                 " not supported.")
 
 
-class ClusterTypeNotEnabled(MagnumException):
-    message = _("Cluster type (%(server_type)s, %(os)s, %(coe)s)"
-                " not enabled.")
-
-
-class RequiredParameterNotProvided(MagnumException):
+class RequiredParameterNotProvided(Invalid):
     message = _("Required parameter %(heat_param)s not provided.")
-
-
-class Urllib2InvalidScheme(MagnumException):
-    message = _("The urllib2 URL %(url)s has an invalid scheme.")
 
 
 class OperationInProgress(Invalid):
@@ -294,7 +275,7 @@ class ImageNotFound(ResourceNotFound):
     code = 400
 
 
-class ImageNotAuthorized(MagnumException):
+class ImageNotAuthorized(NotAuthorized):
     message = _("Not authorized for image %(image_id)s.")
 
 
@@ -302,19 +283,6 @@ class OSDistroFieldNotFound(ResourceNotFound):
     """The code here changed to 400 according to the latest document."""
     message = _("Image %(image_id)s doesn't contain os_distro field.")
     code = 400
-
-
-class KubernetesAPIFailed(MagnumException):
-    def __init__(self, message=None, err=None, **kwargs):
-        if err:
-            if err.body:
-                message = json.loads(err.body)['message']
-            else:
-                message = err.reason
-            self.__class__.code = err.status
-        else:
-            self.__class__.code = kwargs.get('code')
-        super(KubernetesAPIFailed, self).__init__(message, **kwargs)
 
 
 class X509KeyPairNotFound(ResourceNotFound):
@@ -345,11 +313,11 @@ class MagnumServiceAlreadyExists(Conflict):
     message = _("A magnum service with ID %(id)s already exists.")
 
 
-class UnsupportedK8sQuantityFormat(MagnumException):
+class UnsupportedK8sQuantityFormat(Invalid):
     message = _("Unsupported quantity format for k8s cluster.")
 
 
-class UnsupportedDockerQuantityFormat(MagnumException):
+class UnsupportedDockerQuantityFormat(Invalid):
     message = _("Unsupported quantity format for Swarm cluster.")
 
 
