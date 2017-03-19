@@ -106,8 +106,7 @@ class TestRpc(base.TestCase):
         url = rpc.get_transport_url(url_str='bar')
 
         self.assertEqual('foo', url)
-        mock_url.parse.assert_called_once_with(conf, 'bar',
-                                               rpc.TRANSPORT_ALIASES)
+        mock_url.parse.assert_called_once_with(conf, 'bar')
 
     @mock.patch.object(messaging, 'TransportURL')
     def test_get_transport_url_null(self, mock_url):
@@ -118,8 +117,7 @@ class TestRpc(base.TestCase):
         url = rpc.get_transport_url()
 
         self.assertEqual('foo', url)
-        mock_url.parse.assert_called_once_with(conf, None,
-                                               rpc.TRANSPORT_ALIASES)
+        mock_url.parse.assert_called_once_with(conf, None)
 
     def test_cleanup_transport_null(self):
         rpc.TRANSPORT = None

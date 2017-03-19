@@ -24,7 +24,6 @@ __all__ = [
     'get_client',
     'get_server',
     'get_notifier',
-    'TRANSPORT_ALIASES',
 ]
 
 import socket
@@ -49,24 +48,12 @@ ALLOWED_EXMODS = [
 ]
 EXTRA_EXMODS = []
 
-# NOTE(lucasagomes): The magnum.openstack.common.rpc entries are for
-# backwards compat with IceHouse rpc_backend configuration values.
-TRANSPORT_ALIASES = {
-    'magnum.openstack.common.rpc.impl_kombu': 'rabbit',
-    'magnum.openstack.common.rpc.impl_qpid': 'qpid',
-    'magnum.openstack.common.rpc.impl_zmq': 'zmq',
-    'magnum.rpc.impl_kombu': 'rabbit',
-    'magnum.rpc.impl_qpid': 'qpid',
-    'magnum.rpc.impl_zmq': 'zmq',
-}
-
 
 def init(conf):
     global TRANSPORT, NOTIFIER
     exmods = get_allowed_exmods()
     TRANSPORT = messaging.get_transport(conf,
-                                        allowed_remote_exmods=exmods,
-                                        aliases=TRANSPORT_ALIASES)
+                                        allowed_remote_exmods=exmods)
     serializer = RequestContextSerializer(JsonPayloadSerializer())
     NOTIFIER = messaging.Notifier(TRANSPORT, serializer=serializer)
 
@@ -149,7 +136,7 @@ class ProfilerRequestContextSerializer(RequestContextSerializer):
 
 
 def get_transport_url(url_str=None):
-    return messaging.TransportURL.parse(CONF, url_str, TRANSPORT_ALIASES)
+    return messaging.TransportURL.parse(CONF, url_str)
 
 
 def get_client(target, version_cap=None, serializer=None, timeout=None):
