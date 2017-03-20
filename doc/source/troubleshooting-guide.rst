@@ -793,7 +793,7 @@ Helpful nuances about the Devstack Gate
       search for the magnum jobs where you'll see examples of what
       gets passed in.
 
-  * Three jobs are usually run as a part of Magnum gate, all of with are found in ``project-config``'s `macros.yml <https://github.com/openstack-infra/project-config/blob/master/jenkins/jobs/macros.yaml>`_:
+  * Three jobs are usually run as a part of Magnum gate, all of which are found in ``project-config``'s `macros.yml <https://github.com/openstack-infra/project-config/blob/master/jenkins/jobs/macros.yaml>`_:
 
     * link-logs
 

@@ -63,7 +63,7 @@ Response Example
 .. literalinclude:: samples/bay-create-resp.json
    :language: javascript
 
-List all bay
+List all bays
 ====================
 
 .. rest_method:: GET /v1/bays/
