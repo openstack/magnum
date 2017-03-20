@@ -112,7 +112,7 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   This is a mandatory parameter and there is no default value.
 
 --keypair \<keypair\>
-  The name or UUID of the SSH keypair to configure in the cluster servers
+  The name of the SSH keypair to configure in the cluster servers
   for ssh access.  You will need the key to be able to ssh to the
   servers in the cluster.  The login name is specific to the cluster
   driver. If keypair is not provided in template it will be required at
@@ -436,7 +436,7 @@ follows:
   been deleted.
 
 --keypair \<keypair\>
-  The name or UUID of the SSH keypair to configure in the cluster servers
+  The name of the SSH keypair to configure in the cluster servers
   for ssh access.  You will need the key to be able to ssh to the
   servers in the cluster.  The login name is specific to the cluster
   driver. If keypair is not provided it will attempt to use the value in

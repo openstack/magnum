@@ -333,7 +333,7 @@ insecure_registry:
   type: string
 keypair_id:
   description: |
-    The name or UUID of the SSH keypair to configure in the bay/cluster servers
+    The name of the SSH keypair to configure in the bay/cluster servers
     for ssh access. Users will need the key to be able to ssh to the servers in
     the bay/cluster. The login name is specific to the bay/cluster driver, for
     example with fedora-atomic image, default login name is ``fedora``.

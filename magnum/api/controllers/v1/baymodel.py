@@ -64,7 +64,7 @@ class BayModel(base.APIBase):
 
     keypair_id = wsme.wsattr(wtypes.StringType(min_length=1, max_length=255),
                              mandatory=True)
-    """The name or id of the nova ssh keypair"""
+    """The name of the nova ssh keypair"""
 
     external_network_id = wtypes.StringType(min_length=1, max_length=255)
     """The external network to attach to the Bay"""
