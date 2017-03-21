@@ -1,0 +1,97 @@
+#cloud-config
+write_files:
+  - path: /etc/systemd/system/enable-kube-dashboard.service
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Configure Kubernetes Dashboard
+
+      [Service]
+      Type=oneshot
+      EnvironmentFile=/etc/sysconfig/heat-params
+      ExecStart=/etc/sysconfig/enable-kube-dashboard.sh
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/sysconfig/enable-kube-dashboard.sh
+    owner: "root:root"
+    permissions: "0755"
+    content: |
+      #!/bin/sh
+
+      TEMPLATE=/etc/kubernetes/addons/kubedash-svc.yaml
+      mkdir -p $(dirname ${TEMPLATE})
+      cat > $TEMPLATE <<EOF
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: kubernetes-dashboard
+        namespace: kube-system
+        labels:
+          app: kubernetes-dashboard
+          kubernetes.io/cluster-service: "true"
+      spec:
+        selector:
+          app: kubernetes-dashboard
+        ports:
+        - port: 80
+          targetPort: 9090
+      EOF
+
+      TEMPLATE=/etc/kubernetes/addons/kubedash-rc.yaml
+      mkdir -p $(dirname ${TEMPLATE})
+      cat > $TEMPLATE <<EOF
+      apiVersion: v1
+      kind: ReplicationController
+      metadata:
+        name: kubernetes-dashboard
+        namespace: kube-system
+        labels:
+          app: kubernetes-dashboard
+          kubernetes.io/cluster-service: "true"
+      spec:
+        replicas: 1
+        selector:
+          app: kubernetes-dashboard
+        template:
+          metadata:
+            labels:
+              app: kubernetes-dashboard
+              kubernetes.io/cluster-service: "true"
+            annotations:
+              scheduler.alpha.kubernetes.io/critical-pod: ''
+              scheduler.alpha.kubernetes.io/tolerations: '[{"key":"CriticalAddonsOnly", "operator":"Exists"}]'
+          spec:
+            containers:
+              - name: kubernetes-dashboard
+                image: gcr.io/google_containers/kubernetes-dashboard-amd64:${KUBE_DASHBOARD_VERSION}
+                resources:
+                  limits:
+                    cpu: 100m
+                    memory: 50Mi
+                  requests:
+                    cpu: 100m
+                    memory: 50Mi
+                ports:
+                  - containerPort: 9090
+                livenessProbe:
+                  httpGet:
+                    path: /
+                    port: 9090
+                initialDelaySeconds: 30
+                timeoutSeconds: 30
+      EOF
+
+      echo "Waiting for Kubernetes API..."
+      until curl --silent "http://127.0.0.1:8080/version"
+      do
+          sleep 5
+      done
+
+      if [ "$(echo $KUBE_DASHBOARD_ENABLED | tr '[:upper:]' '[:lower:]')" == "true" ]; then
+          echo "Setup K8S Dasboard"
+          curl --silent -H "Content-Type: application/yaml" -XPOST -d"$(cat /etc/kubernetes/addons/kubedash-svc.yaml)" "http://127.0.0.1:8080/api/v1/namespaces/kube-system/services" > /dev/null
+          curl --silent -H "Content-Type: application/yaml" -XPOST -d"$(cat /etc/kubernetes/addons/kubedash-rc.yaml)" "http://127.0.0.1:8080/api/v1/namespaces/kube-system/replicationcontrollers" > /dev/null
+      fi
