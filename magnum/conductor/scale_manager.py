@@ -18,8 +18,6 @@ from oslo_log import log as logging
 from magnum.common import exception
 from magnum.drivers.common.driver import Driver
 from magnum.i18n import _
-from magnum.i18n import _LI
-from magnum.i18n import _LW
 from magnum import objects
 
 
@@ -30,9 +28,9 @@ def get_scale_manager(context, osclient, cluster):
     cluster_driver = Driver.get_driver_for_cluster(context, cluster)
     manager = cluster_driver.get_scale_manager(context, osclient, cluster)
     if not manager:
-        LOG.warning(_LW(
+        LOG.warning(
             "Currently only kubernetes and mesos cluster scale manager "
-            "are available"))
+            "are available")
 
     return manager
 
@@ -66,16 +64,16 @@ class ScaleManager(object):
 
         num_of_removal = self._get_num_of_removal()
         if len(hosts_no_container) < num_of_removal:
-            LOG.warning(_LW(
+            LOG.warning(
                 "About to remove %(num_removal)d nodes, which is larger than "
                 "the number of empty nodes (%(num_empty)d). %(num_non_empty)d "
-                "non-empty nodes will be removed."), {
+                "non-empty nodes will be removed." % {
                     'num_removal': num_of_removal,
                     'num_empty': len(hosts_no_container),
                     'num_non_empty': num_of_removal - len(hosts_no_container)})
 
         hosts_to_remove = hosts_no_container[0:num_of_removal]
-        LOG.info(_LI('Require removal of hosts: %s'), hosts_to_remove)
+        LOG.info('Require removal of hosts: %s' % hosts_to_remove)
 
         return hosts_to_remove
 

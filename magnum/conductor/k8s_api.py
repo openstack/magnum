@@ -20,7 +20,6 @@ from kubernetes.client.apis import core_v1_api
 from oslo_log import log as logging
 
 from magnum.conductor.handlers.common.cert_manager import create_client_files
-from magnum.i18n import _LE
 
 LOG = logging.getLogger(__name__)
 
@@ -38,7 +37,7 @@ class K8sAPI(core_v1_api.CoreV1Api):
             tmp.write(content)
             tmp.flush()
         except Exception as err:
-            LOG.error(_LE("Error while creating temp file: %s"), err)
+            LOG.error("Error while creating temp file: %s" % err)
             raise
         return tmp
 

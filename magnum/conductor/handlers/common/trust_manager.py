@@ -14,7 +14,6 @@ from oslo_log import log as logging
 
 from magnum.common import exception
 from magnum.common import utils
-from magnum.i18n import _LE
 
 LOG = logging.getLogger(__name__)
 
@@ -38,7 +37,7 @@ def create_trustee_and_trust(osc, cluster):
 
     except Exception:
         LOG.exception(
-            _LE('Failed to create trustee and trust for Cluster: %s'),
+            'Failed to create trustee and trust for Cluster: %s' %
             cluster.uuid)
         raise exception.TrusteeOrTrustToClusterFailed(
             cluster_uuid=cluster.uuid)

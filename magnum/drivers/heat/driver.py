@@ -30,8 +30,6 @@ from magnum.conductor.handlers.common import trust_manager
 from magnum.conductor import utils as conductor_utils
 from magnum.drivers.common import driver
 from magnum.i18n import _
-from magnum.i18n import _LE
-from magnum.i18n import _LI
 from magnum.objects import fields
 
 
@@ -192,7 +190,7 @@ class HeatPoller(object):
             self._cluster_failed(stack)
 
     def _delete_complete(self):
-        LOG.info(_LI('Cluster has been deleted, stack_id: %s')
+        LOG.info('Cluster has been deleted, stack_id: %s'
                  % self.cluster.stack_id)
         try:
             trust_manager.delete_trustee_and_trust(self.openstack_client,
@@ -201,7 +199,7 @@ class HeatPoller(object):
             cert_manager.delete_certificates_from_cluster(self.cluster,
                                                           context=self.context)
         except exception.ClusterNotFound:
-            LOG.info(_LI('The cluster %s has been deleted by others.')
+            LOG.info('The cluster %s has been deleted by others.'
                      % self.cluster.uuid)
 
     def _sync_cluster_status(self, stack):
@@ -233,9 +231,9 @@ class HeatPoller(object):
         self._sync_cluster_status(stack)
 
     def _cluster_failed(self, stack):
-        LOG.error(_LE('Cluster error, stack status: %(cluster_status)s, '
-                      'stack_id: %(stack_id)s, '
-                      'reason: %(reason)s') %
+        LOG.error('Cluster error, stack status: %(cluster_status)s, '
+                  'stack_id: %(stack_id)s, '
+                  'reason: %(reason)s' %
                   {'cluster_status': stack.stack_status,
                    'stack_id': self.cluster.stack_id,
                    'reason': self.cluster.status_reason})
@@ -253,8 +251,8 @@ class HeatPoller(object):
         self.cluster.status_reason = _("Stack with id %s not found in "
                                        "Heat.") % self.cluster.stack_id
         self.cluster.save()
-        LOG.info(_LI("Cluster with id %(id)s has been set to "
-                     "%(status)s due to stack with id %(sid)s "
-                     "not found in Heat."),
+        LOG.info("Cluster with id %(id)s has been set to "
+                 "%(status)s due to stack with id %(sid)s "
+                 "not found in Heat." %
                  {'id': self.cluster.id, 'status': self.cluster.status,
                   'sid': self.cluster.stack_id})

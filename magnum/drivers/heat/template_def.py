@@ -21,8 +21,6 @@ import six
 from magnum.common import clients
 from magnum.common import exception
 import magnum.conf
-from magnum.i18n import _LE
-from magnum.i18n import _LW
 
 from requests import exceptions as req_exceptions
 
@@ -102,7 +100,7 @@ class OutputMapping(object):
             if output['output_key'] == self.heat_output:
                 return output['output_value']
 
-        LOG.warning(_LW('stack does not have output_key %s'), self.heat_output)
+        LOG.warning('stack does not have output_key %s' % self.heat_output)
         return None
 
 
@@ -254,8 +252,8 @@ class BaseTemplateDefinition(TemplateDefinition):
                 extra_params['trust_id'] = cluster.trust_id
             else:
                 missing_setting = ('trust/cluster_user_trust = True')
-                msg = _LE('This cluster can only be created with %s in '
-                          'magnum.conf')
+                msg = ('This cluster can only be created with %s in '
+                       'magnum.conf')
                 raise exception.ConfigInvalid(msg % missing_setting)
         else:
             extra_params['trust_id'] = ""

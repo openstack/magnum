@@ -17,7 +17,6 @@ from oslo_log import log
 
 from magnum.common import docker_utils
 from magnum.conductor import monitors
-from magnum.i18n import _LW
 
 LOG = log.getLogger(__name__)
 
@@ -51,8 +50,8 @@ class SwarmMonitor(monitors.MonitorBase):
                 try:
                     container = docker.inspect_container(container['Id'])
                 except Exception as e:
-                    LOG.warning(_LW("Ignore error [%(e)s] when inspecting "
-                                    "container %(container_id)s."),
+                    LOG.warning("Ignore error [%(e)s] when inspecting "
+                                "container %(container_id)s." %
                                 {'e': e, 'container_id': container['Id']},
                                 exc_info=True)
                 containers.append(container)

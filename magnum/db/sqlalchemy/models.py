@@ -31,7 +31,6 @@ from sqlalchemy import Text
 from sqlalchemy.types import TypeDecorator, TEXT
 
 import magnum.conf
-from magnum.i18n import _LE
 
 CONF = magnum.conf.CONF
 
@@ -55,11 +54,11 @@ class JsonEncodedType(TypeDecorator):
             # interface the consistent.
             value = self.type()
         elif not isinstance(value, self.type):
-            raise TypeError(_LE("%(class)s supposes to store "
-                                "%(type)s objects, but %(value)s "
-                                "given") % {'class': self.__class__.__name__,
-                                            'type': self.type.__name__,
-                                            'value': type(value).__name__})
+            raise TypeError("%(class)s supposes to store "
+                            "%(type)s objects, but %(value)s "
+                            "given" % {'class': self.__class__.__name__,
+                                       'type': self.type.__name__,
+                                       'value': type(value).__name__})
         serialized_value = json.dumps(value)
         return serialized_value
 

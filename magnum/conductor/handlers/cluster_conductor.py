@@ -27,7 +27,6 @@ from magnum.conductor import utils as conductor_utils
 import magnum.conf
 from magnum.drivers.common import driver
 from magnum.i18n import _
-from magnum.i18n import _LI
 from magnum import objects
 from magnum.objects import fields
 
@@ -151,15 +150,15 @@ class Handler(object):
             cluster.status = fields.ClusterStatus.DELETE_IN_PROGRESS
             cluster.status_reason = None
         except exc.HTTPNotFound:
-            LOG.info(_LI('The cluster %s was not found during cluster'
-                         ' deletion.'), cluster.id)
+            LOG.info('The cluster %s was not found during cluster'
+                     ' deletion.' % cluster.id)
             try:
                 trust_manager.delete_trustee_and_trust(osc, context, cluster)
                 cert_manager.delete_certificates_from_cluster(cluster,
                                                               context=context)
                 cluster.destroy()
             except exception.ClusterNotFound:
-                LOG.info(_LI('The cluster %s has been deleted by others.'),
+                LOG.info('The cluster %s has been deleted by others.' %
                          uuid)
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_SUCCESS)
