@@ -100,7 +100,7 @@ class Cluster(base.APIBase):
 
     keypair = wsme.wsattr(wtypes.StringType(min_length=1, max_length=255),
                           default=None)
-    """The name or id of the nova ssh keypair"""
+    """The name of the nova ssh keypair"""
 
     node_count = wsme.wsattr(wtypes.IntegerType(minimum=1), default=1)
     """The node count for this cluster. Default to 1 if not set"""
