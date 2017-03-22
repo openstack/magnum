@@ -106,8 +106,10 @@ EOF
 
     # Create a keypair for use in the functional tests.
     echo_summary "Generate a key-pair"
-    ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
-    openstack keypair create --public-key ~/.ssh/id_rsa.pub default
+    # ~/.ssh/id_rsa already exists in multinode setup, so generate
+    # key with different name
+    ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa_magnum
+    openstack keypair create --public-key ~/.ssh/id_rsa_magnum.pub default
 }
 
 function add_flavor {
