@@ -37,14 +37,16 @@ How to generate Fedora Atomic image
 To generate an atomic image for Fedora 24 these commands can be
 executed::
 
+    # Install diskimage-builder in virtual environment
+    virtualenv .
+    . bin/activate
+    pip install diskimage-builder
     git clone https://git.openstack.org/openstack/magnum
-    git clone https://git.openstack.org/openstack/diskimage-builder.git
     git clone https://git.openstack.org/openstack/dib-utils.git
 
     export PATH="${PWD}/dib-utils/bin:$PATH"
-    export PATH="${PWD}/diskimage-builder/bin:$PATH"
 
-    export ELEMENTS_PATH="${PWD}/diskimage-builder/elements"
+    export ELEMENTS_PATH=$(python -c 'import os, diskimage_builder, pkg_resources;print(os.path.abspath(pkg_resources.resource_filename(diskimage_builder.__name__, "elements")))')
     export ELEMENTS_PATH="${ELEMENTS_PATH}:${PWD}/magnum/magnum/drivers/common/image"
 
     export DIB_RELEASE=24     # this can be switched to the desired version

@@ -6,14 +6,17 @@ elements to build an image which contains kubernetes required to use kubecluster
 
 An example fedora based image and uploaded to glance with the following:
 
+    # Install diskimage-builder in virtual environment
+    virtualenv .
+    . bin/activate
+    pip install diskimage-builder
     git clone https://git.openstack.org/openstack/magnum
-    git clone https://git.openstack.org/openstack/diskimage-builder.git
     git clone https://git.openstack.org/openstack/dib-utils.git
     export PATH="${PWD}/dib-utils/bin:$PATH"
-    export ELEMENTS_PATH=diskimage-builder/elements
+    export ELEMENTS_PATH=$(python -c 'import os, diskimage_builder, pkg_resources;print(os.path.abspath(pkg_resources.resource_filename(diskimage_builder.__name__, "elements")))')
     export ELEMENTS_PATH=${ELEMENTS_PATH}:magnum/magnum/drivers/k8s_fedora_ironic_v1/image
     export DIB_RELEASE=25
-    diskimage-builder/bin/disk-image-create baremetal \
+    disk-image-create baremetal \
       fedora selinux-permissive \
       kubernetes \
       -o fedora-25-kubernetes.qcow2

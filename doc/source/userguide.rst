@@ -1379,9 +1379,9 @@ an Ubuntu server::
 
     $ sudo apt-get update
     $ sudo apt-get install git qemu-utils python-pip
+    $ sudo pip install diskimage-builder
 
     $ git clone https://git.openstack.org/openstack/magnum
-    $ git clone https://git.openstack.org/openstack/diskimage-builder.git
     $ git clone https://git.openstack.org/openstack/dib-utils.git
     $ git clone https://git.openstack.org/openstack/tripleo-image-elements.git
     $ git clone https://git.openstack.org/openstack/heat-templates.git
@@ -1389,7 +1389,7 @@ an Ubuntu server::
     $ export ELEMENTS_PATH=tripleo-image-elements/elements:heat-templates/hot/software-config/elements:magnum/magnum/drivers/mesos_ubuntu_v1/image/mesos
     $ export DIB_RELEASE=trusty
 
-    $ diskimage-builder/bin/disk-image-create ubuntu vm docker mesos \
+    $ disk-image-create ubuntu vm docker mesos \
         os-collect-config os-refresh-config os-apply-config \
         heat-config heat-config-script \
         -o ubuntu-mesos.qcow2
