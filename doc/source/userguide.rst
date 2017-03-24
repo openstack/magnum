@@ -1707,6 +1707,11 @@ Certificate Authority
 
       magnum ca-show --cluster secure-k8s-cluster > ca.pem
 
+Rotate Certificate
+  To rotate the CA certificate for a cluster and invalidate all user
+  certificates, you can use the following command::
+
+      magnum ca-rotate --cluster secure-k8s-cluster
 
 User Examples
 -------------
