@@ -98,9 +98,9 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
 
 --image \<image\>
   The name or UUID of the base image in Glance to boot the servers for
-  the cluster.  The image must have the attribute 'os-distro' defined
+  the cluster.  The image must have the attribute 'os_distro' defined
   as appropriate for the cluster driver.  For the currently supported
-  images, the os-distro names are:
+  images, the os_distro names are:
 
   ========== =====================
   COE        os-distro

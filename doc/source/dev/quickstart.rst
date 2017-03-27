@@ -343,7 +343,7 @@ Upload the image to glance::
                         --public \
                         --disk-format=qcow2 \
                         --container-format=bare \
-                        --property os-distro=coreos \
+                        --property os_distro=coreos \
                         --file=coreos_production_openstack_image.img
 
 Create a CoreOS Kubernetes ClusterTemplate, which is similar to the Atomic
@@ -648,7 +648,7 @@ Alternatively, you can download and upload a pre-built image::
     wget https://fedorapeople.org/groups/magnum/ubuntu-mesos-latest.qcow2
     openstack image create ubuntu-mesos --public \
                         --disk-format=qcow2 --container-format=bare \
-                        --property os-distro=ubuntu --file=ubuntu-mesos-latest.qcow2
+                        --property os_distro=ubuntu --file=ubuntu-mesos-latest.qcow2
 
 Then, create a ClusterTemplate by using 'mesos' as the COE, with the rest of
 arguments similar to the Kubernetes ClusterTemplate::
