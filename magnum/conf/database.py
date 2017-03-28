@@ -31,7 +31,7 @@ sql_opts = [
 def register_opts(conf):
     conf.register_group(database_group)
     conf.register_opts(sql_opts, group=database_group)
-    options.set_defaults(conf, _DEFAULT_SQL_CONNECTION, 'magnum.sqlite')
+    options.set_defaults(conf, connection=_DEFAULT_SQL_CONNECTION)
 
 
 def list_opts():
