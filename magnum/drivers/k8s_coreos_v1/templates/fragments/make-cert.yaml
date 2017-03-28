@@ -67,6 +67,10 @@ write_files:
 
       sans="${sans},IP:${KUBE_SERVICE_IP}"
 
+      if [[ -n "${ETCD_LB_VIP}" ]]; then
+        sans="${sans},IP:${ETCD_LB_VIP}"
+      fi
+
       cert_conf_dir=${KUBE_CERTS_PATH}/conf
 
       mkdir -p ${cert_conf_dir}
