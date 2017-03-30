@@ -38,8 +38,8 @@ if [ "$coe" = "mesos" ]; then
 elif [ "$coe" = "k8s-coreos" ]; then
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_GUEST_IMAGE_URL=http://beta.release.core-os.net/amd64-usr/1298.4.0/coreos_production_openstack_image.img.bz2"
 elif [ "${coe}${special}" = "k8s-ironic" ]; then
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_GUEST_IMAGE_URL='https://fedorapeople.org/groups/magnum/fedora-25-kubernetes-ironic-ocata.tar.gz'"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_IMAGE_NAME='fedora-25-kubernetes-ironic-ocata'"
+    export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_GUEST_IMAGE_URL='https://fedorapeople.org/groups/magnum/fedora-kubernetes-ironic-ocata.tar.gz'"
+    export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_IMAGE_NAME='fedora-kubernetes-ironic-ocata'"
 
     export DEVSTACK_GATE_VIRT_DRIVER="ironic"
     # NOTE(yuanying): Current implementation requires only 1 subnet under network
