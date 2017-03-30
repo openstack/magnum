@@ -23,7 +23,6 @@ import webob.dec
 
 from magnum.common import context
 import magnum.conf
-from magnum.i18n import _LI
 
 profiler = importutils.try_import("osprofiler.profiler")
 profiler_initializer = importutils.try_import("osprofiler.initializer")
@@ -64,7 +63,7 @@ def setup(binary, host):
             project="magnum",
             service=binary,
             host=host)
-        LOG.info(_LI("OSprofiler is enabled."))
+        LOG.info("OSprofiler is enabled.")
 
 
 def trace_cls(name, **kwargs):

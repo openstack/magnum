@@ -17,8 +17,6 @@ import subprocess
 from tempest.lib import base
 
 import magnum
-from magnum.i18n import _LE
-from magnum.i18n import _LI
 
 
 COPY_LOG_HELPER = "magnum/tests/contrib/copy_instance_logs.sh"
@@ -46,10 +44,10 @@ class BaseMagnumTest(base.BaseTestCase):
         """
         def int_copy_logs(exec_info):
             try:
-                cls.LOG.info(_LI("Copying logs..."))
+                cls.LOG.info("Copying logs...")
                 fn = exec_info[2].tb_frame.f_locals['fn']
                 func_name = fn.im_self._get_test_method().__name__
-                msg = (_LE("Failed to copy logs for cluster"))
+                msg = ("Failed to copy logs for cluster")
                 nodes_addresses = get_nodes_fn()
 
                 master_nodes = nodes_addresses[0]
@@ -63,7 +61,7 @@ class BaseMagnumTest(base.BaseTestCase):
                     if not nodes_address:
                         return
 
-                    msg = _LI("copy logs from : %s") % ','.join(nodes_address)
+                    msg = "copy logs from : %s" % ','.join(nodes_address)
                     cls.LOG.info(msg)
                     log_name = prefix + "-" + func_name
                     for node_address in nodes_address:
@@ -80,9 +78,9 @@ class BaseMagnumTest(base.BaseTestCase):
                         except Exception:
                             cls.LOG.error(msg)
                             msg = (
-                                _LE("failed to copy from %(node_address)s "
-                                    "to %(base_path)s%(log_name)s-"
-                                    "%(node_address)s") %
+                                "failed to copy from %(node_address)s "
+                                "to %(base_path)s%(log_name)s-"
+                                "%(node_address)s" %
                                 {'node_address': node_address,
                                  'base_path': "/opt/stack/logs/cluster-nodes/",
                                  'log_name': log_name})

@@ -22,9 +22,6 @@ from magnum.common import clients
 from magnum.common import context
 from magnum.common import exception as magnum_exc
 from magnum.i18n import _
-from magnum.i18n import _LE
-from magnum.i18n import _LI
-from magnum.i18n import _LW
 
 LOG = logging.getLogger(__name__)
 
@@ -90,9 +87,8 @@ class CertManager(cert_manager.CertManager):
         """
         connection = get_admin_clients().barbican()
 
-        LOG.info(_LI(
-            "Storing certificate container '{0}' in Barbican."
-        ).format(name))
+        LOG.info("Storing certificate container '{0}' in Barbican."
+                 .format(name))
 
         certificate_secret = None
         private_key_secret = None
@@ -143,16 +139,15 @@ class CertManager(cert_manager.CertManager):
                     old_ref = secret.secret_ref
                     try:
                         secret.delete()
-                        LOG.info(_LI(
-                            "Deleted secret {0} ({1}) during rollback."
-                        ).format(secret.name, old_ref))
+                        LOG.info("Deleted secret {0} ({1}) during rollback."
+                                 .format(secret.name, old_ref))
                     except Exception:
-                        LOG.warning(_LW(
-                            "Failed to delete {0} ({1}) during rollback. This "
-                            "is probably not a problem."
-                        ).format(secret.name, old_ref))
+                        LOG.warning(
+                            "Failed to delete {0} ({1}) during rollback. "
+                            "This is probably not a problem."
+                            .format(secret.name, old_ref))
             with excutils.save_and_reraise_exception():
-                LOG.exception(_LE("Error storing certificate data"))
+                LOG.exception("Error storing certificate data")
 
     @staticmethod
     def get_cert(cert_ref, service_name='Magnum', resource_ref=None,
@@ -170,9 +165,9 @@ class CertManager(cert_manager.CertManager):
         """
         connection = get_admin_clients().barbican()
 
-        LOG.info(_LI(
+        LOG.info(
             "Loading certificate container {0} from Barbican."
-        ).format(cert_ref))
+            .format(cert_ref))
         try:
             if check_only:
                 cert_container = connection.containers.get(
@@ -187,7 +182,7 @@ class CertManager(cert_manager.CertManager):
             return Cert(cert_container)
         except barbican_exc.HTTPClientError:
             with excutils.save_and_reraise_exception():
-                LOG.exception(_LE("Error getting {0}").format(cert_ref))
+                LOG.exception("Error getting {0}".format(cert_ref))
 
     @staticmethod
     def delete_cert(cert_ref, service_name='Magnum', resource_ref=None,
@@ -199,9 +194,9 @@ class CertManager(cert_manager.CertManager):
         """
         connection = get_admin_clients().barbican()
 
-        LOG.info(_LI(
+        LOG.info(
             "Recursively deleting certificate container {0} from Barbican."
-        ).format(cert_ref))
+            .format(cert_ref))
         try:
             certificate_container = connection.containers.get(cert_ref)
             certificate_container.certificate.delete()
@@ -213,6 +208,6 @@ class CertManager(cert_manager.CertManager):
             certificate_container.delete()
         except barbican_exc.HTTPClientError:
             with excutils.save_and_reraise_exception():
-                LOG.exception(_LE(
+                LOG.exception(
                     "Error recursively deleting certificate container {0}"
-                ).format(cert_ref))
+                    .format(cert_ref))

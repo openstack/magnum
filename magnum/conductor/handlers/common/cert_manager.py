@@ -21,8 +21,6 @@ from magnum.common import cert_manager
 from magnum.common import exception
 from magnum.common import short_id
 from magnum.common.x509 import operations as x509
-from magnum.i18n import _LE
-from magnum.i18n import _LW
 
 CONDUCTOR_CLIENT_NAME = six.u('Magnum-Conductor')
 
@@ -45,7 +43,7 @@ def _generate_ca_cert(issuer_name, context=None):
         name=issuer_name,
         context=context,
     )
-    LOG.debug('CA cert is created: %s', ca_cert_ref)
+    LOG.debug('CA cert is created: %s' % ca_cert_ref)
     return ca_cert_ref, ca_cert, ca_password
 
 
@@ -72,7 +70,7 @@ def _generate_client_cert(issuer_name, ca_cert, ca_password, context=None):
         name=CONDUCTOR_CLIENT_NAME,
         context=context
     )
-    LOG.debug('Magnum client cert is created: %s', magnum_cert_ref)
+    LOG.debug('Magnum client cert is created: %s' % magnum_cert_ref)
     return magnum_cert_ref
 
 
@@ -94,7 +92,7 @@ def generate_certificates_to_cluster(cluster, context=None):
     try:
         issuer_name = _get_issuer_name(cluster)
 
-        LOG.debug('Start to generate certificates: %s', issuer_name)
+        LOG.debug('Start to generate certificates: %s' % issuer_name)
 
         ca_cert_ref, ca_cert, ca_password = _generate_ca_cert(issuer_name,
                                                               context=context)
@@ -106,7 +104,7 @@ def generate_certificates_to_cluster(cluster, context=None):
         cluster.ca_cert_ref = ca_cert_ref
         cluster.magnum_cert_ref = magnum_cert_ref
     except Exception:
-        LOG.exception(_LE('Failed to generate certificates for Cluster: %s'),
+        LOG.exception('Failed to generate certificates for Cluster: %s' %
                       cluster.uuid)
         raise exception.CertificatesToClusterFailed(cluster_uuid=cluster.uuid)
 
@@ -176,5 +174,5 @@ def delete_certificates_from_cluster(cluster, context=None):
                 cert_manager.get_backend().CertManager.delete_cert(
                     cert_ref, resource_ref=cluster.uuid, context=context)
         except Exception:
-            LOG.warning(_LW("Deleting certs is failed for Cluster %s"),
+            LOG.warning("Deleting certs is failed for Cluster %s" %
                         cluster.uuid)

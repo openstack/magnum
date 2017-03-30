@@ -23,8 +23,6 @@ from magnum.common import exception
 import magnum.conf
 from magnum.conf import keystone as ksconf
 from magnum.i18n import _
-from magnum.i18n import _LE
-from magnum.i18n import _LW
 
 CONF = magnum.conf.CONF
 LOG = logging.getLogger(__name__)
@@ -92,8 +90,8 @@ class KeystoneClientV3(object):
             except ka_exception.MissingRequiredOptions:
                 auth = self._get_legacy_auth()
         else:
-            msg = _LE('Keystone API connection failed: no password, '
-                      'trust_id or token found.')
+            msg = ('Keystone API connection failed: no password, '
+                   'trust_id or token found.')
             LOG.error(msg)
             raise exception.AuthorizationFailure(client='keystone',
                                                  message='reason %s' % msg)
@@ -101,11 +99,11 @@ class KeystoneClientV3(object):
         return auth
 
     def _get_legacy_auth(self):
-        LOG.warning(_LW('Auth plugin and its options for service user '
-                        'must be provided in [%(new)s] section. '
-                        'Using values from [%(old)s] section is '
-                        'deprecated.'), {'new': ksconf.CFG_GROUP,
-                                         'old': ksconf.CFG_LEGACY_GROUP})
+        LOG.warning('Auth plugin and its options for service user '
+                    'must be provided in [%(new)s] section. '
+                    'Using values from [%(old)s] section is '
+                    'deprecated.' % {'new': ksconf.CFG_GROUP,
+                                     'old': ksconf.CFG_LEGACY_GROUP})
 
         conf = getattr(CONF, ksconf.CFG_LEGACY_GROUP)
 
@@ -182,7 +180,7 @@ class KeystoneClientV3(object):
                     self.domain_admin_session
                 )
             except kc_exception.Unauthorized:
-                msg = _LE("Keystone client authentication failed")
+                msg = "Keystone client authentication failed"
                 LOG.error(msg)
                 raise exception.AuthorizationFailure(client='keystone',
                                                      message='reason: %s' %
@@ -211,7 +209,7 @@ class KeystoneClientV3(object):
                 delegation_depth=0,
                 role_names=roles)
         except Exception:
-            LOG.exception(_LE('Failed to create trust'))
+            LOG.exception('Failed to create trust')
             raise exception.TrustCreateFailed(
                 trustee_user_id=trustee_user)
         return trust
@@ -244,7 +242,7 @@ class KeystoneClientV3(object):
         except kc_exception.NotFound:
             pass
         except Exception:
-            LOG.exception(_LE('Failed to delete trust'))
+            LOG.exception('Failed to delete trust')
             raise exception.TrustDeleteFailed(trust_id=cluster.trust_id)
 
     def create_trustee(self, username, password):
@@ -255,7 +253,7 @@ class KeystoneClientV3(object):
                 password=password,
                 domain=domain_id)
         except Exception:
-            LOG.exception(_LE('Failed to create trustee'))
+            LOG.exception('Failed to create trustee')
             raise exception.TrusteeCreateFailed(username=username,
                                                 domain_id=domain_id)
         return user
@@ -266,7 +264,7 @@ class KeystoneClientV3(object):
         except kc_exception.NotFound:
             pass
         except Exception:
-            LOG.exception(_LE('Failed to delete trustee'))
+            LOG.exception('Failed to delete trustee')
             raise exception.TrusteeDeleteFailed(trustee_id=trustee_id)
 
     def get_validate_region_name(self, region_name):
@@ -280,7 +278,7 @@ class KeystoneClientV3(object):
         except kc_exception.NotFound:
             pass
         except Exception:
-            LOG.exception(_LE('Failed to list regions'))
+            LOG.exception('Failed to list regions')
             raise exception.RegionsListFailed()
         region_list = []
         for region in regions:

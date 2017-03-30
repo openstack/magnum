@@ -23,7 +23,6 @@ from oslo_log import log as logging
 from magnum.common import exception
 from magnum.common import keystone
 import magnum.conf
-from magnum.i18n import _LW
 
 CONF = magnum.conf.CONF
 LOG = logging.getLogger(__name__)
@@ -55,8 +54,8 @@ class OpenStackClients(object):
             url = self.url_for(service_type='container',
                                interface=endpoint_type,
                                region_name=region_name)
-            LOG.warning(_LW('Service type "container" is deprecated and will '
-                            'be removed in a subsequent release'))
+            LOG.warning('Service type "container" is deprecated and will '
+                        'be removed in a subsequent release')
             return url
 
     def cinder_region_name(self):

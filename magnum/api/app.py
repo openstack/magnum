@@ -20,7 +20,6 @@ from magnum.api import config as api_config
 from magnum.api import middleware
 from magnum.common import config as common_config
 import magnum.conf
-from magnum.i18n import _LI
 
 CONF = magnum.conf.CONF
 
@@ -60,7 +59,7 @@ def load_app():
 
     if not cfg_file:
         raise cfg.ConfigFilesNotFoundError([CONF.api.api_paste_config])
-    LOG.info(_LI("Full WSGI config used: %s"), cfg_file)
+    LOG.info("Full WSGI config used: %s" % cfg_file)
     return deploy.loadapp("config:" + cfg_file)
 
 

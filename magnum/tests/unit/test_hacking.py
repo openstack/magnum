@@ -215,28 +215,6 @@ class HackingTestCase(base.TestCase):
                """
         self._assert_has_no_errors(code, check)
 
-    def test_log_translations(self):
-        logs = ['audit', 'error', 'info', 'warning', 'critical', 'warn',
-                'exception']
-        levels = ['_LI', '_LW', '_LE', '_LC']
-        debug = "LOG.debug('OK')"
-        self.assertEqual(
-            0, len(list(checks.validate_log_translations(debug, debug))))
-        for log in logs:
-            bad = 'LOG.%s("Bad")' % log
-            self.assertEqual(
-                1, len(list(checks.validate_log_translations(bad, bad))))
-            ok = "LOG.%s('OK')    # noqa" % log
-            self.assertEqual(
-                0, len(list(checks.validate_log_translations(ok, ok))))
-            ok = "LOG.%s(variable)" % log
-            self.assertEqual(
-                0, len(list(checks.validate_log_translations(ok, ok))))
-            for level in levels:
-                ok = "LOG.%s(%s('OK'))" % (log, level)
-                self.assertEqual(
-                    0, len(list(checks.validate_log_translations(ok, ok))))
-
     def test_use_timeunitls_utcow(self):
         errors = [(1, 0, "M310")]
         check = checks.use_timeutils_utcnow

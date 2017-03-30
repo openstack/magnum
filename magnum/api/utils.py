@@ -22,7 +22,6 @@ from magnum.common import exception
 from magnum.common import utils
 import magnum.conf
 from magnum.i18n import _
-from magnum.i18n import _LE
 from magnum import objects
 
 CONF = magnum.conf.CONF
@@ -120,10 +119,10 @@ def get_openstack_resource(manager, resource_ident, resource_type):
             raise exception.ResourceNotFound(name=resource_type,
                                              id=resource_ident)
         if len(matches) > 1:
-            msg = _LE("Multiple %(resource_type)s exist with same name "
-                      "%(resource_ident)s. Please use the resource id "
-                      "instead.") % {'resource_type': resource_type,
-                                     'resource_ident': resource_ident}
+            msg = ("Multiple %(resource_type)s exist with same name "
+                   "%(resource_ident)s. Please use the resource id "
+                   "instead." % {'resource_type': resource_type,
+                                 'resource_ident': resource_ident})
             raise exception.Conflict(msg)
         resource_data = matches[0]
     return resource_data

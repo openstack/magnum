@@ -33,7 +33,6 @@ from kubernetes.client.apis import core_v1_api
 
 from magnum.common.utils import rmtree_without_raise
 import magnum.conf
-from magnum.i18n import _LI
 from magnum.tests.functional.common import base
 from magnum.tests.functional.common import utils
 from magnumclient.common.apiclient import exceptions
@@ -301,11 +300,11 @@ extendedKeyUsage = clientAuth
     def _get_nodes(self):
         nodes = self._get_nodes_from_cluster()
         if not [x for x in nodes if x]:
-            self.LOG.info(_LI("the list of nodes from cluster is empty"))
+            self.LOG.info("the list of nodes from cluster is empty")
             nodes = self._get_nodes_from_stack()
             if not [x for x in nodes if x]:
-                self.LOG.info(_LI("the list of nodes from stack is empty"))
-        self.LOG.info(_LI("Nodes are: %s"), nodes)
+                self.LOG.info("the list of nodes from stack is empty")
+        self.LOG.info("Nodes are: %s" % nodes)
         return nodes
 
     def _get_nodes_from_cluster(self):
@@ -411,10 +410,10 @@ class BaseK8sTest(ClusterTest):
     def _is_api_ready(self):
         try:
             self.k8s_api.list_node()
-            self.LOG.info(_LI("API is ready."))
+            self.LOG.info("API is ready.")
             return True
         except Exception:
-            self.LOG.info(_LI("API is not ready yet."))
+            self.LOG.info("API is not ready yet.")
             return False
 
     def test_pod_apis(self):

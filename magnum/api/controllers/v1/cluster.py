@@ -35,7 +35,6 @@ from magnum.common import name_generator
 from magnum.common import policy
 import magnum.conf
 from magnum.i18n import _
-from magnum.i18n import _LW
 from magnum import objects
 from magnum.objects import fields
 
@@ -328,9 +327,9 @@ class ClustersController(base.Controller):
                 cluster.stack_id, nested_depth=2, filters=filters)
         except Exception as e:
             failed_resources = []
-            LOG.warning(_LW("Failed to retrieve failed resources for "
-                            "cluster %(cluster)s from Heat stack "
-                            "%(stack)s due to error: %(e)s"),
+            LOG.warning("Failed to retrieve failed resources for "
+                        "cluster %(cluster)s from Heat stack "
+                        "%(stack)s due to error: %(e)s" %
                         {'cluster': cluster.uuid,
                          'stack': cluster.stack_id, 'e': e},
                         exc_info=True)

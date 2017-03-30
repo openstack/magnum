@@ -28,7 +28,6 @@ import six
 
 import magnum.conf
 from magnum.i18n import _
-from magnum.i18n import _LE
 
 
 LOG = logging.getLogger(__name__)
@@ -92,8 +91,8 @@ class MagnumException(Exception):
         except Exception:
             # kwargs doesn't match a variable in the message
             # log the issue and the kwargs
-            LOG.exception(_LE('Exception in string format operation, '
-                              'kwargs: %s') % kwargs)
+            LOG.exception('Exception in string format operation, '
+                          'kwargs: %s' % kwargs)
             try:
                 if CONF.fatal_exception_format_errors:
                     raise

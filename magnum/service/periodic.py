@@ -28,7 +28,6 @@ from magnum.conductor import monitors
 from magnum.conductor import utils as conductor_utils
 import magnum.conf
 from magnum.drivers.common import driver
-from magnum.i18n import _LW
 from magnum import objects
 
 
@@ -135,9 +134,9 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                 lc.start(1, stop_on_exception=True)
 
         except Exception as e:
-            LOG.warning(_LW(
-                "Ignore error [%s] when syncing up cluster status."
-            ), e, exc_info=True)
+            LOG.warning(
+                "Ignore error [%s] when syncing up cluster status." %
+                e, exc_info=True)
 
     @periodic_task.periodic_task(run_immediately=True)
     @set_context
@@ -157,8 +156,8 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                 monitor.pull_data()
             except Exception as e:
                 LOG.warning(
-                    _LW("Skip pulling data from cluster %(cluster)s due to "
-                        "error: %(e)s"),
+                    "Skip pulling data from cluster %(cluster)s due to "
+                    "error: %(e)s" %
                     {'e': e, 'cluster': cluster.uuid}, exc_info=True)
                 continue
 
@@ -172,8 +171,8 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                     }
                     metrics.append(metric)
                 except Exception as e:
-                    LOG.warning(_LW("Skip adding metric %(name)s due to "
-                                    "error: %(e)s"),
+                    LOG.warning("Skip adding metric %(name)s due to "
+                                "error: %(e)s" %
                                 {'e': e, 'name': name}, exc_info=True)
 
             message = dict(metrics=metrics,

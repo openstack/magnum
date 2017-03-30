@@ -21,8 +21,6 @@ from six.moves import urllib
 from magnum.common import exception
 import magnum.conf
 from magnum.i18n import _
-from magnum.i18n import _LE
-from magnum.i18n import _LI
 
 CONF = magnum.conf.CONF
 LOG = logging.getLogger(__name__)
@@ -40,7 +38,7 @@ def get(url, allowed_schemes=('http', 'https')):
     the allowed_schemes argument.
     Raise an IOError if getting the data fails.
     """
-    LOG.info(_LI('Fetching data from %s'), url)
+    LOG.info('Fetching data from %s' % url)
 
     components = urllib.parse.urlparse(url)
 
@@ -70,8 +68,8 @@ def get(url, allowed_schemes=('http', 'https')):
         for chunk in reader:
             result += chunk
             if len(result) > CONF.max_manifest_size:
-                raise URLFetchError(_LE("Manifest exceeds maximum allowed"
-                                        "size (%s bytes)") %
+                raise URLFetchError("Manifest exceeds maximum allowed"
+                                    "size (%s bytes)" %
                                     CONF.max_manifest_size)
         return result
 

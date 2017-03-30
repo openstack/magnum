@@ -22,8 +22,6 @@ from magnum.common.cert_manager import cert_manager
 from magnum.common import exception
 import magnum.conf
 from magnum.i18n import _
-from magnum.i18n import _LE
-from magnum.i18n import _LW
 
 LOG = logging.getLogger(__name__)
 
@@ -77,10 +75,10 @@ class CertManager(cert_manager.CertManager):
         cert_ref = str(uuid.uuid4())
         filename_base = os.path.join(CONF.certificates.storage_path, cert_ref)
 
-        LOG.warning(_LW(
+        LOG.warning(
             "Storing certificate data on the local filesystem. "
             "CertManager type 'local' should be used for testing purpose."
-        ))
+        )
         try:
             filename_certificate = "{0}.crt".format(filename_base)
             with open(filename_certificate, 'w') as cert_file:
@@ -100,7 +98,7 @@ class CertManager(cert_manager.CertManager):
                 with open(filename_pkp, 'w') as pass_file:
                     pass_file.write(private_key_passphrase)
         except IOError as ioe:
-            LOG.error(_LE("Failed to store certificate."))
+            LOG.error("Failed to store certificate.")
             raise exception.CertificateStorageException(msg=str(ioe))
 
         return cert_ref
@@ -115,10 +113,10 @@ class CertManager(cert_manager.CertManager):
                  representation of the certificate data
         :raises CertificateStorageException: if certificate retrieval fails
         """
-        LOG.warning(_LW(
+        LOG.warning(
             "Loading certificate {0} from the local filesystem. "
             "CertManager type 'local' should be used for testing purpose."
-        ).format(cert_ref))
+            .format(cert_ref))
 
         filename_base = os.path.join(CONF.certificates.storage_path, cert_ref)
 
@@ -133,9 +131,9 @@ class CertManager(cert_manager.CertManager):
             with open(filename_certificate, 'r') as cert_file:
                 cert_data['certificate'] = cert_file.read()
         except IOError:
-            LOG.error(_LE(
+            LOG.error(
                 "Failed to read certificate for {0}."
-            ).format(cert_ref))
+                .format(cert_ref))
             raise exception.CertificateStorageException(
                 msg=_("Certificate could not be read.")
             )
@@ -143,9 +141,9 @@ class CertManager(cert_manager.CertManager):
             with open(filename_private_key, 'r') as key_file:
                 cert_data['private_key'] = key_file.read()
         except IOError:
-            LOG.error(_LE(
+            LOG.error(
                 "Failed to read private key for {0}."
-            ).format(cert_ref))
+                .format(cert_ref))
             raise exception.CertificateStorageException(
                 msg=_("Private Key could not be read.")
             )
@@ -155,7 +153,7 @@ class CertManager(cert_manager.CertManager):
                 with open(filename_intermediates, 'r') as int_file:
                     cert_data['intermediates'] = int_file.read()
         except IOError as ioe:
-            LOG.error(_LE("Failed to read certificate."))
+            LOG.error("Failed to read certificate.")
             raise exception.CertificateStorageException(msg=str(ioe))
 
         try:
@@ -163,7 +161,7 @@ class CertManager(cert_manager.CertManager):
                 with open(filename_pkp, 'r') as pass_file:
                     cert_data['private_key_passphrase'] = pass_file.read()
         except IOError as ioe:
-            LOG.error(_LE("Failed to read certificate."))
+            LOG.error("Failed to read certificate.")
             raise exception.CertificateStorageException(msg=str(ioe))
 
         return Cert(**cert_data)
@@ -176,10 +174,10 @@ class CertManager(cert_manager.CertManager):
 
         :raises CertificateStorageException: if certificate deletion fails
         """
-        LOG.warning(_LW(
+        LOG.warning(
             "Deleting certificate {0} from the local filesystem. "
             "CertManager type 'local' should be used for testing purpose."
-        ).format(cert_ref))
+            .format(cert_ref))
 
         filename_base = os.path.join(CONF.certificates.storage_path, cert_ref)
 
@@ -196,7 +194,7 @@ class CertManager(cert_manager.CertManager):
             if path.isfile(filename_pkp):
                 os.remove(filename_pkp)
         except IOError as ioe:
-            LOG.error(_LE(
+            LOG.error(
                 "Failed to delete certificate {0}."
-            ).format(cert_ref))
+                .format(cert_ref))
             raise exception.CertificateStorageException(msg=str(ioe))

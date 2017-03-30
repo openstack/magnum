@@ -29,7 +29,6 @@ from magnum.conductor.handlers import cluster_conductor
 from magnum.conductor.handlers import conductor_listener
 from magnum.conductor.handlers import indirection_api
 import magnum.conf
-from magnum.i18n import _LI
 from magnum import version
 
 CONF = magnum.conf.CONF
@@ -41,7 +40,7 @@ def main():
 
     gmr.TextGuruMeditation.setup_autorun(version)
 
-    LOG.info(_LI('Starting server in PID %s'), os.getpid())
+    LOG.info('Starting server in PID %s' % os.getpid())
     LOG.debug("Configuration:")
     CONF.log_opt_values(LOG, logging.DEBUG)
 
