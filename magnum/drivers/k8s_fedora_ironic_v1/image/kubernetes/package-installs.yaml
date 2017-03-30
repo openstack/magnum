@@ -2,3 +2,4 @@ kubernetes:
 etcd:
 flannel:
 docker-io:
+python2:

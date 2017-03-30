@@ -19,7 +19,7 @@ ExecStartPre=-/usr/bin/docker kill swarm-manager
 ExecStartPre=-/usr/bin/docker rm swarm-manager
 ExecStartPre=-/usr/bin/docker pull swarm:$SWARM_VERSION
 ExecStart=/usr/bin/docker run   --name swarm-manager \\
-                                -v $CERT_DIR:$CERT_DIR \\
+                                -v $CERT_DIR:$CERT_DIR:Z \\
                                 -p 2376:2375 \\
                                 -e http_proxy=$HTTP_PROXY \\
                                 -e https_proxy=$HTTPS_PROXY \\
