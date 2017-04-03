@@ -749,6 +749,8 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         mock_context.user_name = 'fake_user'
         mock_context.tenant = 'fake_tenant'
 
+        docker_volume_type = mock_cluster_template.labels.get(
+            'docker_volume_type')
         flannel_cidr = mock_cluster_template.labels.get('flannel_network_cidr')
         flannel_subnet = mock_cluster_template.labels.get(
             'flannel_network_subnetlen')
@@ -768,7 +770,8 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
             'flannel_network_subnetlen': flannel_subnet,
             'auth_url': 'http://192.168.10.10:5000/v3',
             'rexray_preempt': rexray_preempt,
-            'swarm_strategy': swarm_strategy}}
+            'swarm_strategy': swarm_strategy,
+            'docker_volume_type': docker_volume_type}}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
                                                 mock_cluster,

@@ -14,8 +14,20 @@ from oslo_config import cfg
 
 from magnum.i18n import _
 
-cinder_group = cfg.OptGroup(name='cinder_client',
-                            title='Options for the Cinder client')
+cinder_group = cfg.OptGroup(
+    name='cinder',
+    title='Options for the Cinder configuration')
+
+cinder_client_group = cfg.OptGroup(
+    name='cinder_client',
+    title='Options for the Cinder client')
+
+cinder_opts = [
+    cfg.StrOpt('default_docker_volume_type',
+               help=_('The default docker volume_type to use for volumes '
+                      'used for docker storage. To use the cinder volumes '
+                      'for docker storage, you need to select a default '
+                      'value.'))]
 
 cinder_client_opts = [
     cfg.StrOpt('region_name',
@@ -25,10 +37,13 @@ cinder_client_opts = [
 
 def register_opts(conf):
     conf.register_group(cinder_group)
-    conf.register_opts(cinder_client_opts, group=cinder_group)
+    conf.register_group(cinder_client_group)
+    conf.register_opts(cinder_opts, group=cinder_group)
+    conf.register_opts(cinder_client_opts, group=cinder_client_group)
 
 
 def list_opts():
     return {
-        cinder_group: cinder_client_opts
+        cinder_group: cinder_opts,
+        cinder_client_group: cinder_client_opts
     }
