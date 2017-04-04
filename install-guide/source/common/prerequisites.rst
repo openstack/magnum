@@ -23,7 +23,7 @@ service, you must create a database, service credentials, and API endpoints.
 
      .. code-block:: console
 
-        GRANT ALL PRIVILEGES ON magnum.* TO 'magnum'@'controller' \
+        GRANT ALL PRIVILEGES ON magnum.* TO 'magnum'@'localhost' \
           IDENTIFIED BY 'MAGNUM_DBPASS';
         GRANT ALL PRIVILEGES ON magnum.* TO 'magnum'@'%' \
           IDENTIFIED BY 'MAGNUM_DBPASS';
