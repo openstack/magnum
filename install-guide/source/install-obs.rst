@@ -16,7 +16,7 @@ Install and configure components
 
    .. code-block:: console
 
-      # zypper install openstack-magnum-api openstack-magnum-conductor
+      # zypper install openstack-magnum-api openstack-magnum-conductor python-magnumclient
 
 .. include:: common/configure_2_edit_magnum_conf.rst
 
