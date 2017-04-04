@@ -107,7 +107,7 @@ We will run devstack with minimal local.conf settings required to enable
 magnum, heat, and neutron (neutron is enabled by default in devstack since
 Kilo, and heat must be enabled by yourself)::
 
-    cat > /opt/stack/devstack/local.conf << END
+    $ cat > /opt/stack/devstack/local.conf << END
     [[local|localrc]]
     DATABASE_PASSWORD=password
     RABBIT_PASSWORD=password
@@ -139,7 +139,7 @@ Kilo, and heat must be enabled by yourself)::
 Optionally, you can enable neutron/lbaas v2 with octavia to create load
 balancers for multi master clusters::
 
-    cat >> /opt/stack/devstack/local.conf << END
+    $ cat >> /opt/stack/devstack/local.conf << END
     enable_plugin neutron-lbaas https://git.openstack.org/openstack/neutron-lbaas
     enable_plugin octavia https://git.openstack.org/openstack/octavia
 
@@ -157,14 +157,14 @@ balancers for multi master clusters::
 Optionally, you can enable ceilometer in devstack. If ceilometer is enabled,
 magnum will periodically send metrics to ceilometer::
 
-    cat >> /opt/stack/devstack/local.conf << END
+    $ cat >> /opt/stack/devstack/local.conf << END
     enable_plugin ceilometer https://git.openstack.org/openstack/ceilometer
     END
 
 If you want to deploy Docker Registry 2.0 in your cluster, you should enable
 swift in devstack::
 
-    cat >> /opt/stack/devstack/local.conf << END
+    $ cat >> /opt/stack/devstack/local.conf << END
     enable_service s-proxy
     enable_service s-object
     enable_service s-container
@@ -203,7 +203,7 @@ The Fedora Atomic micro-OS image will automatically be added to glance.  You
 can add additional images manually through glance. To verify the image created
 when installing devstack use::
 
-    openstack image list
+    $ openstack image list
 
     +--------------------------------------+----------------------+
     | ID                                   | Name                 |
@@ -220,7 +220,7 @@ To list the available commands and resources for magnum, use::
 To list out the health of the internal services, namely conductor, of magnum,
 use::
 
-    magnum service-list
+    $ magnum service-list
 
     +----+---------------------------------------+------------------+-------+----------+-----------------+---------------------------+---------------------------+
     | id | host                                  | binary           | state | disabled | disabled_reason | created_at                | updated_at                |
@@ -279,7 +279,7 @@ magnum to become confused.
 
 The existing clusters can be listed as follows::
 
-    magnum cluster-list
+    $ magnum cluster-list
 
     +--------------------------------------+-------------+------------+--------------+-----------------+
     | uuid                                 | name        | node_count | master_count | status          |
@@ -452,7 +452,7 @@ across the cluster, replicating data between one another.
 Run the cluster-show command to get the IP of the cluster host on which the
 redis-master is running::
 
-    magnum cluster-show k8s-cluster
+    $ magnum cluster-show k8s-cluster
 
     +--------------------+------------------------------------------------------------+
     | Property           | Value                                                      |
@@ -479,29 +479,29 @@ redis-master is running::
 The output here indicates the redis-master is running on the cluster host with
 IP address 172.24.4.5. To access the redis master::
 
-    ssh fedora@172.24.4.5
-    REDIS_ID=$(sudo docker ps | grep redis:v1 | grep k8s_master | awk '{print $1}')
-    sudo docker exec -i -t $REDIS_ID redis-cli
+    $ ssh fedora@172.24.4.5
+    $ REDIS_ID=$(sudo docker ps | grep redis:v1 | grep k8s_master | awk '{print $1}')
+    $ sudo docker exec -i -t $REDIS_ID redis-cli
 
     127.0.0.1:6379> set replication:test true
     OK
     ^D
 
-    exit  # Log out of the host
+    $ exit  # Log out of the host
 
 Log into one of the other container hosts and access a redis slave from it.
 You can use `nova list` to enumerate the kube-minions. For this example we
 will use the same host as above::
 
-    ssh fedora@172.24.4.5
-    REDIS_ID=$(sudo docker ps | grep redis:v1 | grep k8s_redis | awk '{print $1}')
-    sudo docker exec -i -t $REDIS_ID redis-cli
+    $ ssh fedora@172.24.4.5
+    $ REDIS_ID=$(sudo docker ps | grep redis:v1 | grep k8s_redis | awk '{print $1}')
+    $ sudo docker exec -i -t $REDIS_ID redis-cli
 
     127.0.0.1:6379> get replication:test
     "true"
     ^D
 
-    exit  # Log out of the host
+    $ exit  # Log out of the host
 
 Additional useful commands from a given minion::
 
@@ -545,7 +545,7 @@ manager node and two extra agent nodes::
 
 Now that we have a swarm cluster we can start interacting with it::
 
-    magnum cluster-show swarm-cluster
+    $ magnum cluster-show swarm-cluster
 
     +--------------------+------------------------------------------------------------+
     | Property           | Value                                                      |
