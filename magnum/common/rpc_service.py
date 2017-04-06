@@ -25,14 +25,6 @@ from magnum.objects import base as objects_base
 from magnum.service import periodic
 from magnum.servicegroup import magnum_service_periodic as servicegroup
 
-# NOTE(asalkeld):
-# The magnum.openstack.common.rpc entries are for compatibility
-# with devstack rpc_backend configuration values.
-TRANSPORT_ALIASES = {
-    'magnum.openstack.common.rpc.impl_kombu': 'rabbit',
-    'magnum.openstack.common.rpc.impl_qpid': 'qpid',
-    'magnum.openstack.common.rpc.impl_zmq': 'zmq',
-}
 
 osprofiler = importutils.try_import("osprofiler.profiler")
 
@@ -54,8 +46,7 @@ class Service(service.Service):
     def __init__(self, topic, server, handlers, binary):
         super(Service, self).__init__()
         serializer = _init_serializer()
-        transport = messaging.get_transport(CONF,
-                                            aliases=TRANSPORT_ALIASES)
+        transport = messaging.get_transport(CONF)
         # TODO(asalkeld) add support for version='x.y'
         target = messaging.Target(topic=topic, server=server)
         self._server = messaging.get_rpc_server(transport, target, handlers,
@@ -89,8 +80,7 @@ class API(object):
         if transport is None:
             exmods = rpc.get_allowed_exmods()
             transport = messaging.get_transport(CONF,
-                                                allowed_remote_exmods=exmods,
-                                                aliases=TRANSPORT_ALIASES)
+                                                allowed_remote_exmods=exmods)
         self._context = context
         if topic is None:
             topic = ''
