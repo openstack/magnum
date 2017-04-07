@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Include kubernetes dashboard in kubernetes cluster by default. Users
+    can use this kubernetes dashboard to manage the kubernetes cluster.
+    Dashboard can be disabled by setting the label 'kube_dashboard_enabled'
+    to false.

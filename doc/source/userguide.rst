@@ -857,11 +857,13 @@ follows::
     chmod +x kubectl
     sudo mv kubectl /usr/local/bin/kubectl
 
-Kubernetes also provides a browser UI if the cluster has the
-Kubernetes UI running; it can be accessed at::
+Kubernetes also provides a browser UI. If the cluster has the
+Kubernetes Dashboard running; it can be accessed using::
 
-    http://<api_address>/UI
-    where the api_address can obtained from the command 'cluster-show'.
+    eval $(magnum cluster-config <cluster-name>)
+    kubectl proxy
+
+    The browser can be accessed at http://localhost:8001/ui
 
 For Swarm, the main CLI is 'docker', along with associated tools
 such as 'docker-compose', etc.  Specific version of the binaries can
