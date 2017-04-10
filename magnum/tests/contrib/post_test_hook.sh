@@ -124,8 +124,14 @@ function add_flavor {
 
     # Create magnum specific flavor for use in functional tests.
     echo_summary "Create a flavor"
-    openstack flavor create m1.magnum --id 100 --ram 1024 --disk 10 --vcpus 1
-    openstack flavor create s1.magnum --id 200 --ram 1024 --disk 10 --vcpus 1
+    if [[ "$DEVSTACK_GATE_TOPOLOGY" = "multinode" ]] ; then
+        local flavor_ram="3750"
+        local flavor_disk="20"
+        local flavor_vcpus="2"
+    fi
+
+    openstack flavor create m1.magnum --id 100 --ram ${flavor_ram:-1024} --disk ${flavor_disk:-10} --vcpus ${flavor_vcpus:-1}
+    openstack flavor create s1.magnum --id 200 --ram ${flavor_ram:-1024} --disk ${flavor_disk:-10} --vcpus ${flavor_vcpus:-1}
 }
 
 if ! function_exists echo_summary; then
