@@ -85,11 +85,11 @@ class TestClusterConductorWithSwarm(base.TestCase):
         self.addCleanup(osc_patcher.stop)
         self.mock_osc = mock.MagicMock()
         self.mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
+        self.mock_osc.url_for.return_value = 'http://192.168.10.10:5000/v3'
         self.mock_keystone = mock.MagicMock()
         self.mock_keystone.trustee_domain_id = 'trustee_domain_id'
         self.mock_osc.keystone.return_value = self.mock_keystone
         self.mock_osc_class.return_value = self.mock_osc
-        self.context.auth_url = 'http://192.168.10.10:5000/v3'
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
