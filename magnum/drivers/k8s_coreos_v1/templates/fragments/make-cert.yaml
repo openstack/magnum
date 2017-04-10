@@ -99,8 +99,6 @@ write_files:
       }
       EOF
 
-      #trust is introduced in Keystone v3 version
-      AUTH_URL=${AUTH_URL/v2.0/v3}
       USER_TOKEN=`curl -k -s -i -X POST -H "Content-Type: application/json" -d @auth.json \
                        $AUTH_URL/auth/tokens | grep X-Subject-Token | awk '{print $2}' | tr -d '\r'`
 

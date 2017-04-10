@@ -208,6 +208,7 @@ function create_magnum_conf {
     iniset $MAGNUM_CONF trust trustee_domain_name magnum
     iniset $MAGNUM_CONF trust trustee_domain_admin_name trustee_domain_admin
     iniset $MAGNUM_CONF trust trustee_domain_admin_password $MAGNUM_TRUSTEE_DOMAIN_ADMIN_PASSWORD
+    iniset $MAGNUM_CONF trust trustee_keystone_interface public
     iniset $MAGNUM_CONF cinder_client region_name $REGION_NAME
 
     if is_service_enabled swift; then

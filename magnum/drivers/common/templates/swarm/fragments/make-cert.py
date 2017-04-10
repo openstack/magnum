@@ -160,7 +160,7 @@ def get_user_token(config):
     }
     creds = creds_str % params
     headers = {'Content-Type': 'application/json'}
-    url = config['AUTH_URL'].replace('v2.0', 'v3') + '/auth/tokens'
+    url = config['AUTH_URL'] + '/auth/tokens'
     r = requests.post(url, headers=headers, data=creds)
     config['USER_TOKEN'] = r.headers['X-Subject-Token']
     return config
