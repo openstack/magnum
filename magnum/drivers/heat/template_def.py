@@ -245,16 +245,9 @@ class BaseTemplateDefinition(TemplateDefinition):
         extra_params['trustee_username'] = cluster.trustee_username
         extra_params['trustee_password'] = cluster.trustee_password
 
-        # Only pass trust ID into the template when it is needed.
-        if (cluster_template.volume_driver == 'rexray' or
-                cluster_template.registry_enabled):
-            if CONF.trust.cluster_user_trust:
-                extra_params['trust_id'] = cluster.trust_id
-            else:
-                missing_setting = ('trust/cluster_user_trust = True')
-                msg = ('This cluster can only be created with %s in '
-                       'magnum.conf')
-                raise exception.ConfigInvalid(msg % missing_setting)
+        # Only pass trust ID into the template if allowed by the config file
+        if CONF.trust.cluster_user_trust:
+            extra_params['trust_id'] = cluster.trust_id
         else:
             extra_params['trust_id'] = ""
 
