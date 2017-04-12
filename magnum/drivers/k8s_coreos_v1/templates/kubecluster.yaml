@@ -296,7 +296,7 @@ resources:
     properties:
       fixed_subnet: {get_attr: [network, fixed_subnet]}
       external_network: {get_param: external_network}
-      protocol: HTTP
+      protocol: {get_param: loadbalancing_protocol}
       port: 2379
 
  ######################################################################
@@ -423,6 +423,7 @@ resources:
           container_runtime: {get_param: container_runtime}
           prometheus_monitoring: {get_param: prometheus_monitoring}
           grafana_admin_passwd: {get_param: grafana_admin_passwd}
+          etcd_lb_vip: {get_attr: [etcd_lb, address]}
 
   ######################################################################
   #

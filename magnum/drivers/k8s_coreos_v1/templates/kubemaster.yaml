@@ -194,6 +194,12 @@ parameters:
     description: >
       Container runtime to use with Kubernetes.
 
+  etcd_lb_vip:
+    type: string
+    description: >
+      etcd lb vip private used to generate certs on master.
+    default: ""
+
 resources:
 
   master_wait_handle:
@@ -239,7 +245,6 @@ resources:
             "$KUBE_NODE_PUBLIC_IP": {get_attr: [kube_master_floating, floating_ip_address]}
             "$KUBE_NODE_IP": {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
             "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
-            "$ETCD_SERVER_IP": {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
             "$FLANNEL_NETWORK_CIDR": {get_param: flannel_network_cidr}
             "$FLANNEL_NETWORK_SUBNETLEN": {get_param: flannel_network_subnetlen}
             "$FLANNEL_BACKEND": {get_param: flannel_backend}
@@ -273,6 +278,7 @@ resources:
                   hyperkube_image: { get_param: hyperkube_image }
             "$INSECURE_REGISTRY_URL": {get_param: insecure_registry_url}
             "$CONTAINER_RUNTIME": {get_param: container_runtime}
+            "$ETCD_LB_VIP": {get_param: etcd_lb_vip}
 
   configure_etcd:
     type: OS::Heat::SoftwareConfig
