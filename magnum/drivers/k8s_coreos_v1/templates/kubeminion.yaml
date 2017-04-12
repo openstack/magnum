@@ -133,6 +133,11 @@ parameters:
     description: >
       Container runtime to use with Kubernetes.
 
+  prometheus_monitoring:
+    type: boolean
+    description: >
+      whether or not to have the node-exporter running on the node
+
 resources:
 
   minion_wait_handle:

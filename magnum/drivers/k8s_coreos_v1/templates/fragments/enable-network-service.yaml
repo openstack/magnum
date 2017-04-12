@@ -66,6 +66,8 @@ write_files:
       [Unit]
       Requires=flanneld.service
       After=flanneld.service
+      [Service]
+      EnvironmentFile=/etc/kubernetes/cni/docker_opts_cni.env
       EOF
 
       CNI=/etc/kubernetes/cni/net.d/10-flannel.conf
@@ -78,6 +80,13 @@ write_files:
               "isDefaultGateway": true
           }
       }
+      EOF
+
+      DOCKER_FLANNEL_CONF=/etc/kubernetes/cni/docker_opts_cni.env
+      mkdir -p $(dirname $DOCKER_FLANNEL_CONF)
+      cat > $DOCKER_FLANNEL_CONF <<EOF
+      DOCKER_OPT_BIP=""
+      DOCKER_OPT_IPMASQ=""
       EOF
 
       systemctl enable flanneld
