@@ -35,7 +35,7 @@ ExecStartPre=-/usr/bin/docker pull swarm:$SWARM_VERSION
 ExecStart=/usr/bin/docker run   -e http_proxy=$HTTP_PROXY \\
                                 -e https_proxy=$HTTPS_PROXY \\
                                 -e no_proxy=$NO_PROXY \\
-                                -v $CERT_DIR:$CERT_DIR \\
+                                -v $CERT_DIR:$CERT_DIR:Z \\
                                 --name swarm-agent \\
                                 swarm:$SWARM_VERSION \\
                                 join \\
