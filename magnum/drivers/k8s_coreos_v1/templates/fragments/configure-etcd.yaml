@@ -25,7 +25,7 @@ write_files:
         KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
       fi
 
-      DROP_IN_FILE=/etc/systemd/system/etcd2.service.d/20-configure-etcd.conf
+      DROP_IN_FILE=/etc/systemd/system/etcd-member.service.d/20-configure-etcd.conf
       mkdir -p $(dirname $DROP_IN_FILE)
       protocol="https"
 
@@ -53,6 +53,8 @@ write_files:
       Environment=ETCD_PEER_CA_FILE=${KUBE_CERTS_PATH}/ca.pem
       Environment=ETCD_PEER_CERT_FILE=${KUBE_CERTS_PATH}/apiserver.pem
       Environment=ETCD_PEER_KEY_FILE=${KUBE_CERTS_PATH}/apiserver-key.pem
+      Environment="RKT_RUN_ARGS=--volume ssl,kind=host,source=${KUBE_CERTS_PATH} \
+      --mount volume=ssl,target=${KUBE_CERTS_PATH}"
       EOF
 
       fi
@@ -61,5 +63,5 @@ write_files:
           echo "Environment=ETCD_DISCOVERY_PROXY=$HTTP_PROXY" >> $DROP_IN_FILE
       fi
 
-      systemctl enable etcd2
-      systemctl --no-block start etcd2
+      systemctl enable etcd-member
+      systemctl --no-block start etcd-member

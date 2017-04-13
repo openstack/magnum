@@ -228,7 +228,7 @@ parameters:
   kube_version:
     type: string
     description: version of kubernetes used for kubernetes cluster
-    default: v1.5.2_coreos.1
+    default: v1.6.2_coreos.0
 
   kube_dashboard_version:
     type: string
