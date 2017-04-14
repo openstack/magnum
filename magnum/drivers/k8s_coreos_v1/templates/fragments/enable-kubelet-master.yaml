@@ -61,9 +61,10 @@ write_files:
         --register-schedulable=false \
         --allow-privileged=true \
         --pod-manifest-path=/etc/kubernetes/manifests \
-        --hostname-override=${KUBE_NODE_IP} \
         --logtostderr=true \
         --v=0 \
+        --cluster_dns=${DNS_SERVICE_IP} \
+        --cluster_domain=${DNS_CLUSTER_DOMAIN} \
         ${INSECURE_REGISTRY_ARGS}
       ExecStop=-/usr/bin/rkt stop --uuid-file=${uuid_file}
       Restart=always

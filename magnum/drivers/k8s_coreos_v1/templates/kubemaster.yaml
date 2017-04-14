@@ -208,6 +208,16 @@ parameters:
       etcd lb vip private used to generate certs on master.
     default: ""
 
+  dns_service_ip:
+    type: string
+    description: >
+      address used by Kubernetes DNS service
+
+  dns_cluster_domain:
+    type: string
+    description: >
+      domain name for cluster DNS
+
 resources:
 
   master_wait_handle:
@@ -289,6 +299,8 @@ resources:
             "$INSECURE_REGISTRY_URL": {get_param: insecure_registry_url}
             "$CONTAINER_RUNTIME": {get_param: container_runtime}
             "$ETCD_LB_VIP": {get_param: etcd_lb_vip}
+            "$DNS_SERVICE_IP": {get_param: dns_service_ip}
+            "$DNS_CLUSTER_DOMAIN": {get_param: dns_cluster_domain}
 
   configure_etcd:
     type: OS::Heat::SoftwareConfig
@@ -374,6 +386,12 @@ resources:
       group: ungrouped
       config: {get_file: fragments/configure-docker.yaml}
 
+  enable_coredns:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/enable-coredns.yaml}
+
   kube_master_init:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -395,6 +413,7 @@ resources:
             $enable_kube_controller_manager
             $enable_kube_scheduler
             $enable_kube_dashboard
+            $enable_coredns
             $wc_notify
             coreos:
               units:
@@ -424,6 +443,8 @@ resources:
                   command: "start"
                 - name: "enable-kube-dashboard.service"
                   command: "start"
+                - name: "enable-coredns.service"
+                  command: "start"
                 - name: "wc-notify.service"
                   command: "start"
           params:
@@ -441,6 +462,7 @@ resources:
             "$enable_kube_controller_manager": {get_attr: [enable_kube_controller_manager, config]}
             "$enable_kube_scheduler": {get_attr: [enable_kube_scheduler, config]}
             "$enable_kube_dashboard": {get_attr: [enable_kube_dashboard, config]}
+            "$enable_coredns": {get_attr: [enable_coredns, config]}
             "$wc_notify": {get_attr: [wc_notify, config]}
 
   ######################################################################

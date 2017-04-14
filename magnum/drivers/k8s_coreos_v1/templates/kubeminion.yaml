@@ -138,6 +138,16 @@ parameters:
     description: >
       whether or not to have the node-exporter running on the node
 
+  dns_service_ip:
+    type: string
+    description: >
+      address used by Kubernetes DNS service
+
+  dns_cluster_domain:
+    type: string
+    description: >
+      domain name for cluster DNS
+
 resources:
 
   minion_wait_handle:
@@ -193,6 +203,8 @@ resources:
                   hyperkube_image: { get_param: hyperkube_image }
             "$INSECURE_REGISTRY_URL": {get_param: insecure_registry_url}
             "$CONTAINER_RUNTIME": {get_param: container_runtime}
+            "$DNS_SERVICE_IP": {get_param: dns_service_ip}
+            "$DNS_CLUSTER_DOMAIN": {get_param: dns_cluster_domain}
 
   write_kubeconfig:
     type: OS::Heat::SoftwareConfig
