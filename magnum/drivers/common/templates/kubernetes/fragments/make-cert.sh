@@ -44,6 +44,11 @@ MASTER_HOSTNAME=${MASTER_HOSTNAME:-}
 if [[ -n "${MASTER_HOSTNAME}" ]]; then
     sans="${sans},DNS:${MASTER_HOSTNAME}"
 fi
+
+if [[ -n "${ETCD_LB_VIP}" ]]; then
+    sans="${sans},IP:${ETCD_LB_VIP}"
+fi
+
 sans="${sans},IP:127.0.0.1"
 
 KUBE_SERVICE_IP=$(echo $PORTAL_NETWORK_CIDR | awk 'BEGIN{FS="[./]"; OFS="."}{print $1,$2,$3,$4 + 1}')

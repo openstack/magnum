@@ -311,7 +311,7 @@ resources:
     properties:
       fixed_subnet: {get_param: fixed_subnet}
       external_network: {get_param: external_network}
-      protocol: HTTP
+      protocol: {get_param: loadbalancing_protocol}
       port: 2379
 
   ######################################################################
@@ -446,6 +446,7 @@ resources:
           auth_url: {get_param: auth_url}
           insecure_registry_url: {get_param: insecure_registry_url}
           wc_curl_cli: {get_attr: [master_wait_handle, curl_cli]}
+          etcd_lb_vip: {get_attr: [etcd_lb, address]}
 
   ######################################################################
   #

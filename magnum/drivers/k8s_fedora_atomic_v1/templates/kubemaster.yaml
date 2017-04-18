@@ -202,6 +202,12 @@ parameters:
     type: string
     description: insecure registry url
 
+  etcd_lb_vip:
+    type: string
+    description: >
+      etcd lb vip private used to generate certs on master.
+    default: ""
+
 resources:
 
   master_wait_handle:
@@ -278,6 +284,7 @@ resources:
             "$TRUSTEE_PASSWORD": {get_param: trustee_password}
             "$TRUST_ID": {get_param: trust_id}
             "$INSECURE_REGISTRY_URL": {get_param: insecure_registry_url}
+            "$ETCD_LB_VIP": {get_param: etcd_lb_vip}
 
   make_cert:
     type: OS::Heat::SoftwareConfig
