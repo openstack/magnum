@@ -122,7 +122,7 @@ parameters:
     type: number
     description: >
       timeout for the Wait Conditions
-    default: 600
+    default: 2400
 
   minions_to_remove:
     type: comma_delimited_list
