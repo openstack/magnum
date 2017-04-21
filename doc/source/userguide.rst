@@ -243,13 +243,13 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   for more details.  The default is to use the public registry.
 
 --master-lb-enabled
-  Since multiple masters may exist in a bay, a load balancer is
-  created to provide the API endpoint for the bay and to direct
+  Since multiple masters may exist in a cluster, a load balancer is
+  created to provide the API endpoint for the cluster and to direct
   requests to the masters.  In some cases, such as when the LBaaS
   service is not available, this option can be set to 'false' to
-  create a bay without the load balancer.  In this case, one of the
+  create a cluster without the load balancer.  In this case, one of the
   masters will serve as the API endpoint.  The default is 'true',
-  i.e. to create the load balancer for the bay.
+  i.e. to create the load balancer for the cluster.
 
 
 Labels
@@ -387,7 +387,7 @@ will be implemented as needed.
 accessible to the cluster owner.  Care should be taken when modifying or
 reusing these resources to avoid impacting Magnum operations in
 unexpected manners.  For instance, if you launch your own Nova
-instance on the bay private network, Magnum would not be aware of this
+instance on the cluster private network, Magnum would not be aware of this
 instance.  Therefore, the cluster-delete operation will fail because
 Magnum would not delete the extra Nova instance and the private Neutron
 network cannot be removed while a Nova instance is still attached.
@@ -1641,7 +1641,7 @@ And the artifacts are placed in the directory specified::
     key.pem
 
 You can now use the native client to interact with the COE.
-The variables and artifacts are unique to the bay.
+The variables and artifacts are unique to the cluster.
 
 The parameters for 'bay-config' are as follows:
 
