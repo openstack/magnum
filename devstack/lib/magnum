@@ -150,9 +150,9 @@ function create_magnum_conf {
 
     configure_auth_token_middleware $MAGNUM_CONF magnum $MAGNUM_AUTH_CACHE_DIR
 
-    iniset $MAGNUM_CONF keystone_auth auth_url $KEYSTONE_SERVICE_URI/v3
-    iniset $MAGNUM_CONF keystone_authtoken auth_uri \
-           ${KEYSTONE_SERVICE_PROTOCOL}://${HOST_IP}:${KEYSTONE_SERVICE_PORT}/v3
+    iniset $MAGNUM_CONF keystone_auth auth_url $KEYSTONE_AUTH_URI_V3
+    iniset $MAGNUM_CONF keystone_authtoken auth_uri $KEYSTONE_SERVICE_URI_V3
+    iniset $MAGNUM_CONF keystone_authtoken auth_url $KEYSTONE_AUTH_URI_V3
     iniset $MAGNUM_CONF keystone_authtoken auth_version v3
 
     if is_fedora || is_suse; then
@@ -330,7 +330,9 @@ function configure_iptables {
         sudo iptables -t nat -A POSTROUTING -o $OBOUND_DEV -j MASQUERADE
         # bay nodes will access magnum-api (port $MAGNUM_SERVICE_PORT) to get CA certificate.
         sudo iptables -I INPUT -d $HOST_IP -p tcp --dport $MAGNUM_SERVICE_PORT -j ACCEPT || true
-        sudo iptables -I INPUT -d $HOST_IP -p tcp --dport $KEYSTONE_SERVICE_PORT -j ACCEPT || true
+        # allow access to keystone etc (http and https)
+        sudo iptables -I INPUT -d $HOST_IP -p tcp --dport 80 -j ACCEPT || true
+        sudo iptables -I INPUT -d $HOST_IP -p tcp --dport 443 -j ACCEPT || true
     fi
 }
 
