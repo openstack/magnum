@@ -61,7 +61,7 @@ MagnumGroup = [
                default="8.8.8.8",
                help="DNS nameserver to use for ClusterTemplate."),
 
-    cfg.StrOpt("copy_logs",
-               default=True,
-               help="Specify whether to copy nova server logs on failure."),
+    cfg.BoolOpt("copy_logs",
+                default=True,
+                help="Specify whether to copy nova server logs on failure."),
 ]
