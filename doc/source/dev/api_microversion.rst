@@ -205,7 +205,7 @@ In the controller class::
 This method would only be available if the caller had specified an
 ``OpenStack-API-Version`` of >= ``1.2``. If they had specified a
 lower version (or not specified it and received the default of ``1.1``)
-the server would respond with ``HTTP/404``.
+the server would respond with ``HTTP/406``.
 
 Removing an API method
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -217,8 +217,9 @@ In the controller class::
         ....
 
 This method would only be available if the caller had specified an
+``OpenStack-API-Version`` of >= ``1.2`` and
 ``OpenStack-API-Version`` of <= ``1.3``. If ``1.4`` or later
-is specified the server will respond with ``HTTP/404``.
+is specified the server will respond with ``HTTP/406``.
 
 Changing a method's behavior
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
