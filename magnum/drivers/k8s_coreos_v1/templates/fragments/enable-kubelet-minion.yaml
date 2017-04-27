@@ -43,6 +43,8 @@ write_files:
       fi
       KUBE_MASTER_URI="$KUBE_PROTOCOL://$KUBE_MASTER_IP:$KUBE_API_PORT"
 
+      HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')
+
       uuid_file="/var/run/kubelet-pod.uuid"
       CONF_FILE=/etc/systemd/system/kubelet.service
       cat > $CONF_FILE <<EOF
@@ -68,8 +70,8 @@ write_files:
         --api-servers=${KUBE_MASTER_URI} \
         --cni-conf-dir=/etc/kubernetes/cni/net.d \
         --network-plugin=cni \
+        --hostname-override=${HOSTNAME_OVERRIDE} \
         --container-runtime=${CONTAINER_RUNTIME} \
-        --register-node=true \
         --allow-privileged=true \
         --pod-manifest-path=/etc/kubernetes/manifests \
         --logtostderr=true \
