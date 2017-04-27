@@ -99,7 +99,7 @@ parameters:
     type: string
     description: >
       specify the backend for flannel, default udp backend
-    default: "udp"
+    default: "host-gw"
     constraints:
       - allowed_values: ["udp", "vxlan", "host-gw"]
 
