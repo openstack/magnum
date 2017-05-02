@@ -29,7 +29,6 @@ parameters:
     type: string
     description: >
       address range used by kubernetes for service portals
-    default: 10.254.0.0/16
 
   kube_allow_priv:
     type: string
@@ -50,12 +49,10 @@ parameters:
   flannel_network_subnet_min:
     type: string
     description: minimum subnet
-    default: 10.100.50.0
 
   flannel_network_subnet_max:
     type: string
     description: maximum subnet
-    default: 10.100.199.0
 
   flannel_backend:
     type: string
