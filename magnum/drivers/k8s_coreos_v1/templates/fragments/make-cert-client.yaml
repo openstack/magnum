@@ -49,6 +49,10 @@ write_files:
       CLIENT_CSR=${KUBE_CERTS_PATH}/worker.csr
       CLIENT_KEY=${KUBE_CERTS_PATH}/worker-key.pem
 
+      if [ -f ${CLIENT_CERT} ] || [ -f ${CLIENT_KEY} ] || [ -f ${CLIENT_CSR} ]; then
+        exit 0
+      fi
+
       #Get a token by user credentials and trust
       cat > auth.json << EOF
       {

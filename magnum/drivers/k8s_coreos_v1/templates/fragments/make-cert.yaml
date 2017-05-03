@@ -80,6 +80,10 @@ write_files:
       SERVER_CSR=${KUBE_CERTS_PATH}/apiserver.pem
       SERVER_KEY=${KUBE_CERTS_PATH}/apiserver-key.pem
 
+      if [ -f ${SERVER_CERT} ] || [ -f ${SERVER_KEY} ] || [ -f ${SERVER_CSR} ]; then
+        exit 0
+      fi
+
       #Get a token by user credentials and trust
       cat > auth.json << EOF
       {
