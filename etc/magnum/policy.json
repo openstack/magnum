@@ -20,7 +20,7 @@
     "baymodel:get": "rule:deny_cluster_user",
     "baymodel:get_all": "rule:deny_cluster_user",
     "baymodel:update": "rule:deny_cluster_user",
-    "baymodel:publish": "rule:admin_or_owner",
+    "baymodel:publish": "rule:admin_api",
 
     "cluster:create": "rule:deny_cluster_user",
     "cluster:delete": "rule:deny_cluster_user",
@@ -35,7 +35,7 @@
     "clustertemplate:get": "rule:deny_cluster_user",
     "clustertemplate:get_all": "rule:deny_cluster_user",
     "clustertemplate:update": "rule:deny_cluster_user",
-    "clustertemplate:publish": "rule:admin_or_owner",
+    "clustertemplate:publish": "rule:admin_api",
 
     "quotas:get": "rule:default",
     "quotas:get_all": "rule:admin_api",
