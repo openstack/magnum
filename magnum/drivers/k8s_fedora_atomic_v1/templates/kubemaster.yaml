@@ -192,6 +192,16 @@ parameters:
     type: string
     description: insecure registry url
 
+  dns_service_ip:
+    type: string
+    description: >
+      address used by Kubernetes DNS service
+
+  dns_cluster_domain:
+    type: string
+    description: >
+      domain name for cluster DNS
+
 resources:
 
   master_wait_handle:
@@ -266,6 +276,8 @@ resources:
             "$TRUSTEE_PASSWORD": {get_param: trustee_password}
             "$TRUST_ID": {get_param: trust_id}
             "$INSECURE_REGISTRY_URL": {get_param: insecure_registry_url}
+            "$DNS_SERVICE_IP": {get_param: dns_service_ip}
+            "$DNS_CLUSTER_DOMAIN": {get_param: dns_cluster_domain}
 
   make_cert:
     type: OS::Heat::SoftwareConfig
@@ -355,6 +367,12 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/enable-kube-proxy-master.sh}
 
+  core_dns_service:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: ../../common/templates/kubernetes/fragments/core-dns-service.sh}
+
   master_wc_notify:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -391,6 +409,7 @@ resources:
         - config: {get_resource: network_service}
         - config: {get_resource: kube_system_namespace_service}
         - config: {get_resource: enable_kube_podmaster}
+        - config: {get_resource: core_dns_service}
         - config: {get_resource: enable_kube_proxy}
         - config: {get_resource: kube_ui_service}
         - config: {get_resource: kube_examples}

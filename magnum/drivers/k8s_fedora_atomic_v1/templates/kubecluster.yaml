@@ -269,6 +269,18 @@ parameters:
     description: insecure registry url
     default: ""
 
+  dns_service_ip:
+    type: string
+    description: >
+      address used by Kubernetes DNS service
+    default: 10.254.0.10
+
+  dns_cluster_domain:
+    type: string
+    description: >
+      domain name for cluster DNS
+    default: "cluster.local"
+
 resources:
 
   ######################################################################
@@ -505,6 +517,8 @@ resources:
           trust_id: {get_param: trust_id}
           auth_url: {get_param: auth_url}
           insecure_registry_url: {get_param: insecure_registry_url}
+          dns_service_ip: {get_param: dns_service_ip}
+          dns_cluster_domain: {get_param: dns_cluster_domain}
 
   ######################################################################
   #
@@ -564,6 +578,8 @@ resources:
           trust_id: {get_param: trust_id}
           auth_url: {get_param: auth_url}
           insecure_registry_url: {get_param: insecure_registry_url}
+          dns_service_ip: {get_param: dns_service_ip}
+          dns_cluster_domain: {get_param: dns_cluster_domain}
 
 outputs:
 

@@ -194,6 +194,16 @@ parameters:
     type: string
     description: insecure registry url
 
+  dns_service_ip:
+    type: string
+    description: >
+      address used by Kubernetes DNS service
+
+  dns_cluster_domain:
+    type: string
+    description: >
+      domain name for cluster DNS
+
 resources:
 
   minion_wait_handle:
@@ -254,6 +264,8 @@ resources:
             $TRUST_ID: {get_param: trust_id}
             $AUTH_URL: {get_param: auth_url}
             $INSECURE_REGISTRY_URL: {get_param: insecure_registry_url}
+            $DNS_SERVICE_IP: {get_param: dns_service_ip}
+            $DNS_CLUSTER_DOMAIN: {get_param: dns_cluster_domain}
 
   write_kubeconfig:
     type: OS::Heat::SoftwareConfig
