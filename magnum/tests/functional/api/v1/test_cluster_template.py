@@ -80,12 +80,9 @@ class ClusterTemplateTest(base.BaseTempestTest):
     @testtools.testcase.attr('positive')
     def test_create_get_public_cluster_template(self):
         gen_model = datagen.valid_swarm_cluster_template(is_public=True)
-        resp, model = self._create_cluster_template(gen_model)
-
-        resp, model = \
-            self.cluster_template_client.get_cluster_template(model.uuid)
-        self.assertEqual(200, resp.status)
-        self.assertTrue(model.public)
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.cluster_template_client.post_cluster_template, gen_model)
 
     @testtools.testcase.attr('positive')
     def test_update_cluster_template_public_by_uuid(self):
@@ -96,14 +93,10 @@ class ClusterTemplateTest(base.BaseTempestTest):
 
         patch_model = datagen.cluster_template_replace_patch_data(path,
                                                                   value=True)
-        resp, new_model = self.cluster_template_client.patch_cluster_template(
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.cluster_template_client.patch_cluster_template,
             old_model.uuid, patch_model)
-        self.assertEqual(200, resp.status)
-
-        resp, model = self.cluster_template_client.get_cluster_template(
-            new_model.uuid)
-        self.assertEqual(200, resp.status)
-        self.assertTrue(model.public)
 
     @testtools.testcase.attr('positive')
     def test_update_cluster_template_by_uuid(self):
