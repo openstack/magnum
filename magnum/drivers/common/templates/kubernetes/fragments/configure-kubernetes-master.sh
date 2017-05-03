@@ -58,6 +58,7 @@ sed -i '
 
 HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')
 KUBELET_ARGS="--register-node=true --register-schedulable=false --config=/etc/kubernetes/manifests --hostname-override=${HOSTNAME_OVERRIDE}"
+KUBELET_ARGS="${KUBELET_ARGS} --cluster_dns=${DNS_SERVICE_IP} --cluster_domain=${DNS_CLUSTER_DOMAIN}"
 
 if [ -n "${INSECURE_REGISTRY_URL}" ]; then
     KUBELET_ARGS="${KUBELET_ARGS} --pod-infra-container-image=${INSECURE_REGISTRY_URL}/google_containers/pause\:0.8.0"
