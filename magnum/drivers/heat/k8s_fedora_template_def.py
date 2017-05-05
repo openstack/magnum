@@ -73,6 +73,12 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
         osc = self.get_osc(context)
         extra_params['region_name'] = osc.cinder_region_name()
 
+        # set docker_volume_type
+        # use the configuration default if None provided
+        docker_volume_type = cluster_template.labels.get(
+            'docker_volume_type', CONF.cinder.default_docker_volume_type)
+        extra_params['docker_volume_type'] = docker_volume_type
+
         return super(K8sFedoraTemplateDefinition,
                      self).get_params(context, cluster_template, cluster,
                                       extra_params=extra_params,

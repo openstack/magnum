@@ -41,6 +41,12 @@ parameters:
       size of a cinder volume to allocate to docker for container/image
       storage
 
+  docker_volume_type:
+    type: string
+    description: >
+      type of a cinder volume to allocate to docker for container/image
+      storage
+
   docker_storage_driver:
     type: string
     description: docker storage driver name
@@ -549,6 +555,7 @@ resources:
     type: Magnum::Optional::Cinder::Volume
     properties:
       size: {get_param: docker_volume_size}
+      volume_type: {get_param: docker_volume_type}
 
   docker_volume_attach:
     type: Magnum::Optional::Cinder::VolumeAttachment
