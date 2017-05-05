@@ -8,6 +8,78 @@ service, you can provision container clusters made up of virtual machines
 or baremetal servers. Then, you can use the appropriate COE client or
 endpoint to create containers.
 
+Create an external network (Optional)
+-------------------------------------
+
+To create a magnum cluster, you need an external network. If there are no
+external networks, create one.
+
+#. Create an external network with an appropriate provider based on your
+   cloud provider support for your case:
+
+   .. code-block:: console
+
+      $ openstack network create public --provider-network-type vxlan \
+                                        --external \
+                                        --project service
+      +---------------------------+--------------------------------------+
+      | Field                     | Value                                |
+      +---------------------------+--------------------------------------+
+      | admin_state_up            | UP                                   |
+      | availability_zone_hints   |                                      |
+      | availability_zones        |                                      |
+      | created_at                | 2017-03-27T10:09:04Z                 |
+      | description               |                                      |
+      | dns_domain                | None                                 |
+      | id                        | 372170ca-7d2e-48a2-8449-670e4ab66c23 |
+      | ipv4_address_scope        | None                                 |
+      | ipv6_address_scope        | None                                 |
+      | is_default                | False                                |
+      | mtu                       | 1450                                 |
+      | name                      | public                               |
+      | port_security_enabled     | True                                 |
+      | project_id                | 224c32c0dd2e49cbaadfd1cda069f149     |
+      | provider:network_type     | vxlan                                |
+      | provider:physical_network | None                                 |
+      | provider:segmentation_id  | 3                                    |
+      | qos_policy_id             | None                                 |
+      | revision_number           | 4                                    |
+      | router:external           | External                             |
+      | segments                  | None                                 |
+      | shared                    | False                                |
+      | status                    | ACTIVE                               |
+      | subnets                   |                                      |
+      | updated_at                | 2017-03-27T10:09:04Z                 |
+      +---------------------------+--------------------------------------+
+      $ openstack subnet create public-subnet --network public \
+                                        --subnet-range 192.168.1.0/24 \
+                                        --gateway 192.168.1.1 \
+                                        --ip-version 4
+      +-------------------+--------------------------------------+
+      | Field             | Value                                |
+      +-------------------+--------------------------------------+
+      | allocation_pools  | 192.168.1.2-192.168.1.254            |
+      | cidr              | 192.168.1.0/24                       |
+      | created_at        | 2017-03-27T10:46:15Z                 |
+      | description       |                                      |
+      | dns_nameservers   |                                      |
+      | enable_dhcp       | True                                 |
+      | gateway_ip        | 192.168.1.1                          |
+      | host_routes       |                                      |
+      | id                | 04185f6c-ea31-4109-b20b-fd7f935b3828 |
+      | ip_version        | 4                                    |
+      | ipv6_address_mode | None                                 |
+      | ipv6_ra_mode      | None                                 |
+      | name              | public-subnet                        |
+      | network_id        | 372170ca-7d2e-48a2-8449-670e4ab66c23 |
+      | project_id        | d9e40a0aff30441083d9f279a0ff50de     |
+      | revision_number   | 2                                    |
+      | segment_id        | None                                 |
+      | service_types     |                                      |
+      | subnetpool_id     | None                                 |
+      | updated_at        | 2017-03-27T10:46:15Z                 |
+      +-------------------+--------------------------------------+
+
 Provision a cluster and create a container
 ------------------------------------------
 
