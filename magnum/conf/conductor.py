@@ -24,6 +24,9 @@ conductor_service_opts = [
                default=4,
                help=('RPC timeout for the conductor liveness check that is '
                      'used for cluster locking.')),
+    cfg.IntOpt('workers',
+               help='Number of magnum-conductor processes to fork and run. '
+                    'Default to number of CPUs on the host.')
 ]
 
 

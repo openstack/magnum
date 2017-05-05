@@ -17,6 +17,7 @@
 import os
 import sys
 
+from oslo_concurrency import processutils
 from oslo_log import log as logging
 from oslo_reports import guru_meditation_report as gmr
 from oslo_service import service
@@ -55,5 +56,8 @@ def main():
     server = rpc_service.Service.create(CONF.conductor.topic,
                                         conductor_id, endpoints,
                                         binary='magnum-conductor')
-    launcher = service.launch(CONF, server)
+    workers = CONF.conductor.workers
+    if not workers:
+        workers = processutils.get_worker_count()
+    launcher = service.launch(CONF, server, workers=workers)
     launcher.wait()

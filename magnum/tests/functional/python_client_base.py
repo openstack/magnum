@@ -263,6 +263,14 @@ extendedKeyUsage = clientAuth
         cls.cluster = cls._create_cluster(cls.__name__,
                                           cls.cluster_template.uuid)
         if not cls.cluster_template_kwargs.get('tls_disabled', False):
+            # NOTE (wangbo) with multiple mangum-conductor processes, client
+            # ca files should be created after completion of cluster ca_cert
+            cls._wait_on_status(
+                cls.cluster,
+                [None, "CREATE_IN_PROGRESS"],
+                ["CREATE_FAILED", "CREATE_COMPLETE"],
+                timeout=cls.cluster_complete_timeout
+            )
             cls._create_tls_ca_files(cls.config_contents)
 
     @classmethod
