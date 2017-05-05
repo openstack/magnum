@@ -75,11 +75,9 @@ class BayModelTest(base.BaseTempestTest):
     @testtools.testcase.attr('positive')
     def test_create_get_public_baymodel(self):
         gen_model = datagen.valid_swarm_baymodel(is_public=True)
-        resp, model = self._create_baymodel(gen_model)
-
-        resp, model = self.baymodel_client.get_baymodel(model.uuid)
-        self.assertEqual(200, resp.status)
-        self.assertTrue(model.public)
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.baymodel_client.post_baymodel, gen_model)
 
     @testtools.testcase.attr('positive')
     def test_update_baymodel_public_by_uuid(self):
@@ -88,13 +86,9 @@ class BayModelTest(base.BaseTempestTest):
         resp, old_model = self._create_baymodel(gen_model)
 
         patch_model = datagen.baymodel_replace_patch_data(path, value=True)
-        resp, new_model = self.baymodel_client.patch_baymodel(
-            old_model.uuid, patch_model)
-        self.assertEqual(200, resp.status)
-
-        resp, model = self.baymodel_client.get_baymodel(new_model.uuid)
-        self.assertEqual(200, resp.status)
-        self.assertTrue(model.public)
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.baymodel_client.patch_baymodel, old_model.uuid, patch_model)
 
     @testtools.testcase.attr('positive')
     def test_update_baymodel_by_uuid(self):
