@@ -94,6 +94,7 @@ Response
   - uuid: cluster_id
   - links: links
   - stack_id: stack_id
+  - keypair: keypair_id
   - master_count: master_count
   - cluster_template_id: clustertemplate_id
   - node_count: node_count
@@ -149,6 +150,7 @@ Response
   - updated_at: updated_at
   - master_count: master_count
   - coe_version: coe_version
+  - keypair: keypair_id
   - cluster_template_id: clustertemplate_id
   - master_addresses: master_addresses
   - node_count: node_count
