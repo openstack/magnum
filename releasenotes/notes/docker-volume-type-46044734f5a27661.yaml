@@ -1,0 +1,14 @@
+---
+features:
+  - |
+    Support different volume types for the drivers that support docker storage
+    in cinder volumes. swarm_fedora_atomic and k8s_fedora_atomic accept a new
+    label to specify a docker_volume_type.
+upgrade:
+  - |
+    A new section is created in magnum.conf named cinder. In this cinder
+    section, you need to set a value for the key default_docker_volume_type,
+    which should be a valid type for cinder volumes in your cinder deployment.
+    This default value will be used if no volume_type is provided by the user
+    when using a cinder volume for container storage. The suggested default
+    value the one set in cinder.conf of your cinder deployment.
