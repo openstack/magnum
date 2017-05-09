@@ -46,16 +46,23 @@ After=docker.service
 
 [Service]
 RemainAfterExit=yes
+ExecStartPre=-/usr/bin/docker rm -f rexray
 ExecStartPre=-/usr/bin/docker pull openstackmagnum/rexray:alpine
-ExecStart=/usr/bin/rm -f /var/run/rexray/rexray.pid && \
-            /usr/bin/docker run -d --name=rexray --privileged -p 7979:7979 \
-                -v /run/docker/plugins:/run/docker/plugins \
-                -v /var/lib/rexray:/var/lib/rexray:z \
-                -v /var/log/rexray:/var/log/rexray \
-                -v /var/run/rexray:/var/run/rexray \
-                -v /dev:/dev \
-                -v /etc/rexray/config.yml:/etc/rexray/config.yml \
-                openstackmagnum/rexray:alpine
+ExecStartPre=-/usr/bin/rm -f /var/run/rexray/rexray.pid
+ExecStart=/usr/bin/docker run -d --name=rexray --privileged \\
+--pid host \\
+--net host \\
+-p 7979:7979 \\
+-v /run/docker/plugins:/run/docker/plugins \\
+-v /var/lib/rexray:/var/lib/rexray:Z \\
+-v /var/lib/libstorage:/var/lib/libstorage:rshared \\
+-v /var/log/rexray:/var/log/rexray \\
+-v /var/run/rexray:/var/run/rexray \\
+-v /var/lib/docker:/var/lib/docker:rshared \\
+-v /var/run/docker:/var/run/docker \\
+-v /dev:/dev \\
+-v /etc/rexray/config.yml:/etc/rexray/config.yml \\
+openstackmagnum/rexray:alpine
 ExecStop=/usr/bin/docker stop rexray
 
 [Install]
