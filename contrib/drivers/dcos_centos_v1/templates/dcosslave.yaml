@@ -1,0 +1,338 @@
+heat_template_version: 2014-10-16
+
+description: >
+  This is a nested stack that defines a single DC/OS slave, This stack is
+  included by a ResourceGroup resource in the parent template
+  (dcoscluster.yaml).
+
+parameters:
+
+  server_image:
+    type: string
+    description: glance image used to boot the server
+
+  slave_flavor:
+    type: string
+    description: flavor to use when booting the server
+
+  ssh_key_name:
+    type: string
+    description: name of ssh key to be provisioned on our server
+
+  external_network:
+    type: string
+    description: uuid/name of a network to use for floating ip addresses
+
+  wait_condition_timeout:
+    type: number
+    description : >
+      timeout for the Wait Conditions
+
+  http_proxy:
+    type: string
+    description: http proxy address for docker
+
+  https_proxy:
+    type: string
+    description: https proxy address for docker
+
+  no_proxy:
+    type: string
+    description: no proxies for docker
+
+  auth_url:
+    type: string
+    description: >
+      url for DC/OS to authenticate before sending request
+
+  username:
+    type: string
+    description: user name
+
+  password:
+    type: string
+    description: >
+      user password, not set in current implementation, only used to
+      fill in for Kubernetes config file
+    hidden: true
+
+  tenant_name:
+    type: string
+    description: >
+      tenant_name is used to isolate access to Compute resources
+
+  volume_driver:
+    type: string
+    description: volume driver to use for container storage
+
+  region_name:
+    type: string
+    description: A logically separate section of the cluster
+
+  domain_name:
+    type: string
+    description: >
+      domain is to define the administrative boundaries for management
+      of Keystone entities
+
+  fixed_network:
+    type: string
+    description: Network from which to allocate fixed addresses.
+
+  fixed_subnet:
+    type: string
+    description: Subnet from which to allocate fixed addresses.
+
+  secgroup_base_id:
+    type: string
+    description: ID of the security group for base.
+
+  rexray_preempt:
+    type: string
+    description: >
+      enables any host to take control of a volume irrespective of whether
+      other hosts are using the volume
+
+  ######################################################################
+  #
+  # DC/OS parameters
+  #
+  cluster_name:
+    type: string
+    description: human readable name for the DC/OS cluster
+    default: my-cluster
+
+  exhibitor_storage_backend:
+    type: string
+
+  exhibitor_zk_hosts:
+    type: string
+
+  exhibitor_zk_path:
+    type: string
+
+  aws_access_key_id:
+    type: string
+
+  aws_region:
+    type: string
+
+  aws_secret_access_key:
+    type: string
+
+  exhibitor_explicit_keys:
+    type: string
+
+  s3_bucket:
+    type: string
+
+  s3_prefix:
+    type: string
+
+  exhibitor_azure_account_name:
+    type: string
+
+  exhibitor_azure_account_key:
+    type: string
+
+  exhibitor_azure_prefix:
+    type: string
+
+  master_discovery:
+    type: string
+
+  master_list:
+    type: string
+
+  exhibitor_address:
+    type: string
+    default: 127.0.0.1
+
+  num_masters:
+    type: number
+
+  dcos_overlay_enable:
+    type: string
+
+  dcos_overlay_config_attempts:
+    type: string
+
+  dcos_overlay_mtu:
+    type: string
+
+  dcos_overlay_network:
+    type: string
+
+  dns_search:
+    type: string
+
+  resolvers:
+    type: string
+
+  check_time:
+    type: string
+
+  docker_remove_delay:
+    type: number
+
+  gc_delay:
+    type: number
+
+  log_directory:
+    type: string
+
+  process_timeout:
+    type: number
+
+  oauth_enabled:
+    type: string
+
+  telemetry_enabled:
+    type: string
+
+resources:
+
+  slave_wait_handle:
+    type: OS::Heat::WaitConditionHandle
+
+  slave_wait_condition:
+    type: OS::Heat::WaitCondition
+    depends_on: dcos_slave
+    properties:
+      handle: {get_resource: slave_wait_handle}
+      timeout: {get_param: wait_condition_timeout}
+
+  secgroup_all_open:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      rules:
+        - protocol: icmp
+        - protocol: tcp
+        - protocol: udp
+
+  ######################################################################
+  #
+  # software configs.  these are components that are combined into
+  # a multipart MIME user-data archive.
+  #
+
+  write_heat_params:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/write-heat-params.sh}
+          params:
+            "$HTTP_PROXY": {get_param: http_proxy}
+            "$HTTPS_PROXY": {get_param: https_proxy}
+            "$NO_PROXY": {get_param: no_proxy}
+            "$AUTH_URL": {get_param: auth_url}
+            "$USERNAME": {get_param: username}
+            "$PASSWORD": {get_param: password}
+            "$TENANT_NAME": {get_param: tenant_name}
+            "$VOLUME_DRIVER": {get_param: volume_driver}
+            "$REGION_NAME": {get_param: region_name}
+            "$DOMAIN_NAME": {get_param: domain_name}
+            "$REXRAY_PREEMPT": {get_param: rexray_preempt}
+            "$CLUSTER_NAME": {get_param: cluster_name}
+            "$EXHIBITOR_STORAGE_BACKEND": {get_param: exhibitor_storage_backend}
+            "$EXHIBITOR_ZK_HOSTS": {get_param: exhibitor_zk_hosts}
+            "$EXHIBITOR_ZK_PATH": {get_param: exhibitor_zk_path}
+            "$AWS_ACCESS_KEY_ID": {get_param: aws_access_key_id}
+            "$AWS_REGION": {get_param: aws_region}
+            "$AWS_SECRET_ACCESS_KEY": {get_param: aws_secret_access_key}
+            "$EXHIBITOR_EXPLICIT_KEYS": {get_param: exhibitor_explicit_keys}
+            "$S3_BUCKET": {get_param: s3_bucket}
+            "$S3_PREFIX": {get_param: s3_prefix}
+            "$EXHIBITOR_AZURE_ACCOUNT_NAME": {get_param: exhibitor_azure_account_name}
+            "$EXHIBITOR_AZURE_ACCOUNT_KEY": {get_param: exhibitor_azure_account_key}
+            "$EXHIBITOR_AZURE_PREFIX": {get_param: exhibitor_azure_prefix}
+            "$MASTER_DISCOVERY": {get_param: master_discovery}
+            "$MASTER_LIST": {get_param: master_list}
+            "$EXHIBITOR_ADDRESS": {get_param: exhibitor_address}
+            "$NUM_MASTERS": {get_param: num_masters}
+            "$DCOS_OVERLAY_ENABLE": {get_param: dcos_overlay_enable}
+            "$DCOS_OVERLAY_CONFIG_ATTEMPTS": {get_param: dcos_overlay_config_attempts}
+            "$DCOS_OVERLAY_MTU": {get_param: dcos_overlay_mtu}
+            "$DCOS_OVERLAY_NETWORK": {get_param: dcos_overlay_network}
+            "$DNS_SEARCH": {get_param: dns_search}
+            "$RESOLVERS": {get_param: resolvers}
+            "$CHECK_TIME": {get_param: check_time}
+            "$DOCKER_REMOVE_DELAY": {get_param: docker_remove_delay}
+            "$GC_DELAY": {get_param: gc_delay}
+            "$LOG_DIRECTORY": {get_param: log_directory}
+            "$PROCESS_TIMEOUT": {get_param: process_timeout}
+            "$OAUTH_ENABLED": {get_param: oauth_enabled}
+            "$TELEMETRY_ENABLED": {get_param: telemetry_enabled}
+            "$ROLES": slave
+
+  dcos_config:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/configure-dcos.sh}
+
+  slave_wc_notify:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: |
+            #!/bin/bash -v
+            wc_notify --data-binary '{"status": "SUCCESS"}'
+          params:
+            wc_notify: {get_attr: [slave_wait_handle, curl_cli]}
+
+  dcos_slave_init:
+    type: OS::Heat::MultipartMime
+    properties:
+      parts:
+        - config: {get_resource: write_heat_params}
+        - config: {get_resource: dcos_config}
+        - config: {get_resource: slave_wc_notify}
+
+  ######################################################################
+  #
+  # a single DC/OS slave.
+  #
+
+  dcos_slave:
+    type: OS::Nova::Server
+    properties:
+      image: {get_param: server_image}
+      flavor: {get_param: slave_flavor}
+      key_name: {get_param: ssh_key_name}
+      user_data_format: RAW
+      user_data: {get_resource: dcos_slave_init}
+      networks:
+        - port: {get_resource: dcos_slave_eth0}
+
+  dcos_slave_eth0:
+    type: OS::Neutron::Port
+    properties:
+      network: {get_param: fixed_network}
+      security_groups:
+        - get_resource: secgroup_all_open
+        - get_param: secgroup_base_id
+      fixed_ips:
+        - subnet: {get_param: fixed_subnet}
+
+  dcos_slave_floating:
+    type: Magnum::Optional::DcosSlave::Neutron::FloatingIP
+    properties:
+      floating_network: {get_param: external_network}
+      port_id: {get_resource: dcos_slave_eth0}
+
+outputs:
+
+  dcos_slave_ip:
+    value: {get_attr: [dcos_slave_eth0, fixed_ips, 0, ip_address]}
+    description: >
+      This is the "private" address of the DC/OS slave node.
+
+  dcos_slave_external_ip:
+    value: {get_attr: [dcos_slave_floating, floating_ip_address]}
+    description: >
+      This is the "public" address of the DC/OS slave node.

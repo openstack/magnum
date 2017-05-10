@@ -8,3 +8,9 @@ resource_registry:
 
   # kubeminion.yaml
   "Magnum::Optional::KubeMinion::Neutron::FloatingIP": "OS::Neutron::FloatingIP"
+
+  # dcosmaster.yaml
+  "Magnum::Optional::DcosMaster::Neutron::FloatingIP": "OS::Neutron::FloatingIP"
+
+  # dcosslave.yaml
+  "Magnum::Optional::DcosSlave::Neutron::FloatingIP": "OS::Neutron::FloatingIP"

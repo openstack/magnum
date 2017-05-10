@@ -1,0 +1,115 @@
+heat_template_version: 2014-10-16
+
+parameters:
+
+resources:
+
+  ######################################################################
+  #
+  # security groups.  we need to permit network traffic of various
+  # sorts.
+  # The following is a list of ports used by internal DC/OS components,
+  # and their corresponding systemd unit.
+  # https://dcos.io/docs/1.8/administration/installing/ports/
+  #
+  # The VIP features, added in DC/OS 1.8, require that ports 32768 - 65535
+  # are open between all agent and master nodes for both TCP and UDP.
+  # https://dcos.io/docs/1.8/administration/upgrading/
+  #
+
+  secgroup_base:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      rules:
+        - protocol: icmp
+        - protocol: tcp
+          port_range_min: 22
+          port_range_max: 22
+        - protocol: tcp
+          remote_mode: remote_group_id
+        - protocol: udp
+          remote_mode: remote_group_id
+        # All nodes
+        - protocol: tcp
+          port_range_min: 32768
+          port_range_max: 65535
+        # Master nodes
+        - protocol: tcp
+          port_range_min: 53
+          port_range_max: 53
+        - protocol: tcp
+          port_range_min: 1050
+          port_range_max: 1050
+        - protocol: tcp
+          port_range_min: 1801
+          port_range_max: 1801
+        - protocol: tcp
+          port_range_min: 7070
+          port_range_max: 7070
+        # dcos-oauth
+        - protocol: tcp
+          port_range_min: 8101
+          port_range_max: 8101
+        - protocol: tcp
+          port_range_min: 8123
+          port_range_max: 8123
+        - protocol: tcp
+          port_range_min: 9000
+          port_range_max: 9000
+        - protocol: tcp
+          port_range_min: 9942
+          port_range_max: 9942
+        - protocol: tcp
+          port_range_min: 9990
+          port_range_max: 9990
+        - protocol: tcp
+          port_range_min: 15055
+          port_range_max: 15055
+        - protocol: udp
+          port_range_min: 53
+          port_range_max: 53
+        - protocol: udp
+          port_range_min: 32768
+          port_range_max: 65535
+
+  secgroup_dcos:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      rules:
+        # Admin Router is a customized Nginx that proxies all of the internal
+        # services on port 80 and 443 (if https is configured)
+        # See https://github.com/dcos/adminrouter
+        # If parameter is specified to master_http_loadbalancer, the
+        # load balancer must accept traffic on ports 8080, 5050, 80, and 443,
+        # and forward it to the same ports on the master
+        # Admin Router http
+        - protocol: tcp
+          port_range_min: 80
+          port_range_max: 80
+        # Admin Router https
+        - protocol: tcp
+          port_range_min: 443
+          port_range_max: 443
+        # Marathon
+        - protocol: tcp
+          port_range_min: 8080
+          port_range_max: 8080
+        # Mesos master
+        - protocol: tcp
+          port_range_min: 5050
+          port_range_max: 5050
+        # Exhibitor
+        - protocol: tcp
+          port_range_min: 8181
+          port_range_max: 8181
+        # Zookeeper
+        - protocol: tcp
+          port_range_min: 2181
+          port_range_max: 2181
+outputs:
+
+  secgroup_base_id:
+    value: {get_resource: secgroup_base}
+
+  secgroup_dcos_id:
+    value: {get_resource: secgroup_dcos}
