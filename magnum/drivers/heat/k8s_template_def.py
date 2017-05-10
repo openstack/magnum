@@ -111,7 +111,8 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                       'system_pods_timeout',
                       'admission_control_list',
                       'prometheus_monitoring',
-                      'grafana_admin_passwd']
+                      'grafana_admin_passwd',
+                      'kube_dashboard_enabled']
 
         for label in label_list:
             extra_params[label] = cluster_template.labels.get(label)

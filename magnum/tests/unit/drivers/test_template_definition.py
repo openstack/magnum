@@ -264,6 +264,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'prometheus_monitoring')
         grafana_admin_passwd = mock_cluster_template.labels.get(
             'grafana_admin_passwd')
+        kube_dashboard_enabled = mock_cluster_template.labels.get(
+            'kube_dashboard_enabled')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -281,6 +283,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'admission_control_list': admission_control_list,
             'prometheus_monitoring': prometheus_monitoring,
             'grafana_admin_passwd': grafana_admin_passwd,
+            'kube_dashboard_enabled': kube_dashboard_enabled,
             'username': 'fake_user',
             'tenant_name': 'fake_tenant',
             'magnum_url': mock_osc.magnum_url.return_value,
@@ -335,6 +338,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'prometheus_monitoring')
         grafana_admin_passwd = mock_cluster_template.labels.get(
             'grafana_admin_passwd')
+        kube_dashboard_enabled = mock_cluster_template.labels.get(
+            'kube_dashboard_enabled')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -352,6 +357,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'admission_control_list': admission_control_list,
             'prometheus_monitoring': prometheus_monitoring,
             'grafana_admin_passwd': grafana_admin_passwd,
+            'kube_dashboard_enabled': kube_dashboard_enabled,
             'username': 'fake_user',
             'tenant_name': 'fake_tenant',
             'magnum_url': mock_osc.magnum_url.return_value,
