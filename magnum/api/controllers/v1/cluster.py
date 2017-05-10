@@ -346,7 +346,7 @@ class ClustersController(base.Controller):
         """
         context = pecan.request.context
         cluster = api_utils.get_resource('Cluster', cluster_ident)
-        policy.enforce(context, 'cluster:get', cluster,
+        policy.enforce(context, 'cluster:get', cluster.as_dict(),
                        action='cluster:get')
 
         cluster = Cluster.convert_with_links(cluster)
@@ -451,7 +451,7 @@ class ClustersController(base.Controller):
     def _patch(self, cluster_ident, patch):
         context = pecan.request.context
         cluster = api_utils.get_resource('Cluster', cluster_ident)
-        policy.enforce(context, 'cluster:update', cluster,
+        policy.enforce(context, 'cluster:update', cluster.as_dict(),
                        action='cluster:update')
         try:
             cluster_dict = cluster.as_dict()
@@ -485,7 +485,7 @@ class ClustersController(base.Controller):
         """
         context = pecan.request.context
         cluster = api_utils.get_resource('Cluster', cluster_ident)
-        policy.enforce(context, 'cluster:delete', cluster,
+        policy.enforce(context, 'cluster:delete', cluster.as_dict(),
                        action='cluster:delete')
 
         pecan.request.rpcapi.cluster_delete_async(cluster.uuid)

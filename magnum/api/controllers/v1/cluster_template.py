@@ -320,7 +320,8 @@ class ClusterTemplatesController(base.Controller):
         cluster_template = api_utils.get_resource('ClusterTemplate',
                                                   cluster_template_ident)
         if not cluster_template.public:
-            policy.enforce(context, 'clustertemplate:get', cluster_template,
+            policy.enforce(context, 'clustertemplate:get',
+                           cluster_template.as_dict(),
                            action='clustertemplate:get')
 
         return ClusterTemplate.convert_with_links(cluster_template)
@@ -383,7 +384,8 @@ class ClusterTemplatesController(base.Controller):
         context = pecan.request.context
         cluster_template = api_utils.get_resource('ClusterTemplate',
                                                   cluster_template_ident)
-        policy.enforce(context, 'clustertemplate:update', cluster_template,
+        policy.enforce(context, 'clustertemplate:update',
+                       cluster_template.as_dict(),
                        action='clustertemplate:update')
         try:
             cluster_template_dict = cluster_template.as_dict()
@@ -427,6 +429,7 @@ class ClusterTemplatesController(base.Controller):
         context = pecan.request.context
         cluster_template = api_utils.get_resource('ClusterTemplate',
                                                   cluster_template_ident)
-        policy.enforce(context, 'clustertemplate:delete', cluster_template,
+        policy.enforce(context, 'clustertemplate:delete',
+                       cluster_template.as_dict(),
                        action='clustertemplate:delete')
         cluster_template.destroy()
