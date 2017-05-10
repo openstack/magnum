@@ -107,6 +107,10 @@ parameters:
     type: boolean
     description: whether or not to enable TLS
 
+  kube_dashboard_enabled:
+    type: boolean
+    description: whether or not to disable kubernetes dashboard
+
   kubernetes_port:
     type: number
     description: >
@@ -117,6 +121,10 @@ parameters:
   kube_version:
     type: string
     description: version of kubernetes used for kubernetes cluster
+
+  kube_dashboard_version:
+    type: string
+    description: version of kubernetes dashboard used for kubernetes cluster
 
   hyperkube_image:
     type: string
@@ -258,7 +266,9 @@ resources:
             "$NETWORK_DRIVER": {get_param: network_driver}
             "$KUBE_API_PORT": {get_param: kubernetes_port}
             "$TLS_DISABLED": {get_param: tls_disabled}
+            "$KUBE_DASHBOARD_ENABLED": {get_param: kube_dashboard_enabled}
             "$KUBE_VERSION": {get_param: kube_version}
+            "$KUBE_DASHBOARD_VERSION": {get_param: kube_dashboard_version}
             "$CLUSTER_UUID": {get_param: cluster_uuid}
             "$MAGNUM_URL": {get_param: magnum_url}
             "$HTTP_PROXY": {get_param: http_proxy}
@@ -340,6 +350,12 @@ resources:
       group: ungrouped
       config: {get_file: fragments/enable-kube-scheduler.yaml}
 
+  enable_kube_dashboard:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/enable-kube-dashboard.yaml}
+
   wc_notify:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -378,6 +394,7 @@ resources:
             $enable_kube_proxy
             $enable_kube_controller_manager
             $enable_kube_scheduler
+            $enable_kube_dashboard
             $wc_notify
             coreos:
               units:
@@ -405,6 +422,8 @@ resources:
                   command: "start"
                 - name: "enable-kube-scheduler.service"
                   command: "start"
+                - name: "enable-kube-dashboard.service"
+                  command: "start"
                 - name: "wc-notify.service"
                   command: "start"
           params:
@@ -421,6 +440,7 @@ resources:
             "$enable_kube_proxy": {get_attr: [enable_kube_proxy, config]}
             "$enable_kube_controller_manager": {get_attr: [enable_kube_controller_manager, config]}
             "$enable_kube_scheduler": {get_attr: [enable_kube_scheduler, config]}
+            "$enable_kube_dashboard": {get_attr: [enable_kube_dashboard, config]}
             "$wc_notify": {get_attr: [wc_notify, config]}
 
   ######################################################################

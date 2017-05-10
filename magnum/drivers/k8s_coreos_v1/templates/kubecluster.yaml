@@ -150,6 +150,11 @@ parameters:
     description: whether or not to disable TLS
     default: False
 
+  kube_dashboard_enabled:
+    type: boolean
+    description: whether or not to disable kubernetes dashboard
+    default: True
+
   loadbalancing_protocol:
     type: string
     description: >
@@ -224,6 +229,11 @@ parameters:
     type: string
     description: version of kubernetes used for kubernetes cluster
     default: v1.5.2_coreos.1
+
+  kube_dashboard_version:
+    type: string
+    description: version of kubernetes dashboard used for kubernetes cluster
+    default: v1.5.1
 
   hyperkube_image:
     type: string
@@ -404,11 +414,13 @@ resources:
           network_driver: {get_param: network_driver}
           kubernetes_port: {get_param: kubernetes_port}
           tls_disabled: {get_param: tls_disabled}
+          kube_dashboard_enabled: {get_param: kube_dashboard_enabled}
           secgroup_kube_master_id: {get_resource: secgroup_master}
           http_proxy: {get_param: http_proxy}
           https_proxy: {get_param: https_proxy}
           no_proxy: {get_param: no_proxy}
           kube_version: {get_param: kube_version}
+          kube_dashboard_version: {get_param: kube_dashboard_version}
           wait_condition_timeout: {get_param: wait_condition_timeout}
           cluster_uuid: {get_param: cluster_uuid}
           api_pool_id: {get_attr: [api_lb, pool_id]}
