@@ -252,12 +252,6 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-minion.sh}
 
-  kube_examples:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/kube-examples.yaml}
-
   network_service:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -320,7 +314,6 @@ resources:
         - config: {get_resource: write_heat_params}
         - config: {get_resource: write_kubeconfig}
         - config: {get_resource: make_cert}
-        - config: {get_resource: kube_examples}
         - config: {get_resource: configure_docker_storage}
         - config: {get_resource: configure_docker_registry}
         - config: {get_resource: configure_kubernetes_minion}
