@@ -67,7 +67,6 @@ class TestClusterConductorWithMesos(base.TestCase):
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
         }
-        self.context.auth_url = 'http://192.168.10.10:5000/v3'
         self.context.user_name = 'mesos_user'
         self.context.tenant = 'admin'
         self.context.domain_name = 'domainname'
@@ -80,6 +79,7 @@ class TestClusterConductorWithMesos(base.TestCase):
         self.mock_keystone.trustee_domain_id = 'trustee_domain_id'
         self.mock_osc.keystone.return_value = self.mock_keystone
         self.mock_osc_class.return_value = self.mock_osc
+        self.mock_osc.url_for.return_value = 'http://192.168.10.10:5000/v3'
 
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.drivers.common.driver.Driver.get_driver')

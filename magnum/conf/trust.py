@@ -50,7 +50,10 @@ trust_opts = [
     cfg.ListOpt('roles',
                 default=[],
                 help=_('The roles which are delegated to the trustee '
-                       'by the trustor'))
+                       'by the trustor')),
+    cfg.StrOpt('trustee_keystone_interface',
+               default='public',
+               help=_('Auth interface used by instances/trustee'))
 ]
 
 

@@ -82,13 +82,13 @@ class TestClusterConductorWithK8s(base.TestCase):
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
             'coe_version': 'fake-version',
         }
-        self.context.auth_url = 'http://192.168.10.10:5000/v3'
         self.context.user_name = 'fake_user'
         self.context.tenant = 'fake_tenant'
         osc_patcher = mock.patch('magnum.common.clients.OpenStackClients')
         self.mock_osc_class = osc_patcher.start()
         self.addCleanup(osc_patcher.stop)
         self.mock_osc = mock.MagicMock()
+        self.mock_osc.url_for.return_value = 'http://192.168.10.10:5000/v3'
         self.mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
         self.mock_osc.cinder_region_name.return_value = 'RegionOne'
         self.mock_keystone = mock.MagicMock()

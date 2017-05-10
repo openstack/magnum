@@ -76,10 +76,16 @@
         trustee_domain_name = magnum
         trustee_domain_admin_name = magnum_domain_admin
         trustee_domain_admin_password = DOMAIN_ADMIN_PASS
+        trustee_keystone_interface = KEYSTONE_INTERFACE
 
      Replace MAGNUM_PASS with the password you chose for the magnum user in the
      Identity service and DOMAIN_ADMIN_PASS with the password you chose for the
      ``magnum_domain_admin`` user.
+
+     Replace KEYSTONE_INTERFACE with either ``public`` or ``internal``
+     depending on your network configuration. If your instances cannot reach
+     internal keystone endpoint which is often the case in production
+     environments it should be set to ``public``. Default to ``public``
 
    * In the ``[oslo_messaging_notifications]`` section, configure the
      ``driver``:
