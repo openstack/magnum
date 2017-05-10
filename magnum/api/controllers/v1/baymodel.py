@@ -312,7 +312,7 @@ class BayModelsController(base.Controller):
         context = pecan.request.context
         baymodel = api_utils.get_resource('ClusterTemplate', baymodel_ident)
         if not baymodel.public:
-            policy.enforce(context, 'baymodel:get', baymodel,
+            policy.enforce(context, 'baymodel:get', baymodel.as_dict(),
                            action='baymodel:get')
 
         return BayModel.convert_with_links(baymodel)
@@ -369,7 +369,7 @@ class BayModelsController(base.Controller):
         """
         context = pecan.request.context
         baymodel = api_utils.get_resource('ClusterTemplate', baymodel_ident)
-        policy.enforce(context, 'baymodel:update', baymodel,
+        policy.enforce(context, 'baymodel:update', baymodel.as_dict(),
                        action='baymodel:update')
         try:
             baymodel_dict = baymodel.as_dict()
@@ -410,6 +410,6 @@ class BayModelsController(base.Controller):
         """
         context = pecan.request.context
         baymodel = api_utils.get_resource('ClusterTemplate', baymodel_ident)
-        policy.enforce(context, 'baymodel:delete', baymodel,
+        policy.enforce(context, 'baymodel:delete', baymodel.as_dict(),
                        action='baymodel:delete')
         baymodel.destroy()

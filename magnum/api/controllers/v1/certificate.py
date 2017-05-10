@@ -143,7 +143,7 @@ class CertificateController(base.Controller):
         """
         context = pecan.request.context
         cluster = api_utils.get_resource('Cluster', cluster_ident)
-        policy.enforce(context, 'certificate:get', cluster,
+        policy.enforce(context, 'certificate:get', cluster.as_dict(),
                        action='certificate:get')
         certificate = pecan.request.rpcapi.get_ca_certificate(cluster)
         return Certificate.convert_with_links(certificate)
@@ -156,7 +156,7 @@ class CertificateController(base.Controller):
         """
         context = pecan.request.context
         cluster = certificate.get_cluster()
-        policy.enforce(context, 'certificate:create', cluster,
+        policy.enforce(context, 'certificate:create', cluster.as_dict(),
                        action='certificate:create')
         certificate_dict = certificate.as_dict()
         certificate_dict['project_id'] = context.project_id
@@ -171,7 +171,7 @@ class CertificateController(base.Controller):
     def patch(self, cluster_ident):
         context = pecan.request.context
         cluster = api_utils.get_resource('Cluster', cluster_ident)
-        policy.enforce(context, 'certificate:rotate_ca', cluster,
+        policy.enforce(context, 'certificate:rotate_ca', cluster.as_dict(),
                        action='certificate:rotate_ca')
         if cluster.cluster_template.tls_disabled:
             raise exception.NotSupported("Rotating the CA certificate on a "
