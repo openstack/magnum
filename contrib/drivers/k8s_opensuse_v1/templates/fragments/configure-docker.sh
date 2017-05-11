@@ -56,6 +56,11 @@ mkfs.btrfs $DOCKER_DEV
 
 mount $DOCKER_DEV /var/lib/docker
 
+# update /etc/fstab with DOCKER_DEV
+if ! `grep -q /var/lib/docker /etc/fstab`; then
+    grep /var/lib/docker /etc/mtab | head -1 >> /etc/fstab
+fi
+
 # make sure we pick up any modified unit files
 systemctl daemon-reload
 
