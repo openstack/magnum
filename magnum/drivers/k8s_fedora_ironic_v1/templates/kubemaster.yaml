@@ -240,8 +240,8 @@ resources:
     properties:
       pool_public_ip: {get_param: api_public_address}
       pool_private_ip: {get_param: api_private_address}
-      master_public_ip: ''
-      master_private_ip: ''
+      master_public_ip: {get_attr: [kube_master_floating, floating_ip_address]}
+      master_private_ip: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
 
   ######################################################################
   #
@@ -472,7 +472,20 @@ resources:
       user_data_format: RAW
       user_data: {get_resource: kube_master_init}
       networks:
-        - network: {get_param: fixed_network}
+        - port: {get_resource: kube_master_eth0}
+
+  kube_master_eth0:
+    type: "OS::Neutron::Port"
+    properties:
+      network_id:
+        get_param: fixed_network
+      security_groups:
+        - {get_param: secgroup_kube_master_id}
+      fixed_ips:
+        - subnet_id:
+            get_param: fixed_subnet
+      allowed_address_pairs:
+        - ip_address: {get_param: flannel_network_cidr}
 
   kube_master_floating:
     type: OS::Neutron::FloatingIP
@@ -480,13 +493,13 @@ resources:
       floating_network:
         get_param: external_network
       port_id:
-        get_attr: [kube-master, addresses, {get_param: fixed_network}, 0, port]
+        get_resource: kube_master_eth0
 
   api_pool_member:
     type: Magnum::Optional::Neutron::LBaaS::PoolMember
     properties:
       pool: {get_param: api_pool_id}
-      address: {get_attr: [kube-master, networks, private, 0]}
+      address: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
       subnet: { get_param: fixed_subnet }
       protocol_port: {get_param: kubernetes_port}
 
@@ -494,14 +507,14 @@ resources:
     type: Magnum::Optional::Neutron::LBaaS::PoolMember
     properties:
       pool: {get_param: etcd_pool_id}
-      address: {get_attr: [kube-master, networks, private, 0]}
+      address: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
       subnet: { get_param: fixed_subnet }
       protocol_port: 2379
 
 outputs:
 
   kube_master_ip:
-    value: {get_attr: [kube-master, networks, private, 0]}
+    value: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
     description: >
       This is the "private" IP address of the Kubernetes master node.
 

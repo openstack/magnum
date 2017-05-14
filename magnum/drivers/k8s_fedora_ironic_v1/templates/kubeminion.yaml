@@ -27,6 +27,18 @@ parameters:
     type: string
     description: Network from which to allocate fixed addresses.
 
+  fixed_subnet:
+    type: string
+    description: Subnet from which to allocate fixed addresses.
+
+  secgroup_kube_minion_id:
+    type: string
+    description: ID of the security group for kubernetes minion.
+
+  flannel_network_cidr:
+    type: string
+    description: network range for flannel overlay network
+
   kube_software_configs:
     type: string
     description : >
@@ -51,7 +63,20 @@ resources:
       user_data_format: RAW
       user_data: {get_param: kube_software_configs}
       networks:
-        - network: {get_param: fixed_network}
+        - port: {get_resource: kube_minion_eth0}
+
+  kube_minion_eth0:
+    type: "OS::Neutron::Port"
+    properties:
+      network_id:
+        get_param: fixed_network
+      security_groups:
+        - {get_param: secgroup_kube_minion_id}
+      fixed_ips:
+        - subnet_id:
+            get_param: fixed_subnet
+      allowed_address_pairs:
+        - ip_address: {get_param: flannel_network_cidr}
 
   kube_minion_floating:
     type: OS::Neutron::FloatingIP
@@ -59,12 +84,12 @@ resources:
       floating_network:
         get_param: external_network
       port_id:
-        get_attr: [kube-minion, addresses, {get_param: fixed_network}, 0, port]
+        get_resource: kube_minion_eth0
 
 outputs:
 
   kube_minion_ip:
-    value: {get_attr: [kube-minion, networks, private, 0]}
+    value: {get_attr: [kube_minion_eth0, fixed_ips, 0, ip_address]}
     description: >
       This is the "public" IP address of the Kubernetes minion node.
 
