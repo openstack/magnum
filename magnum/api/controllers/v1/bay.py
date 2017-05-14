@@ -371,7 +371,7 @@ class BaysController(base.Controller):
         """
         context = pecan.request.context
         bay = api_utils.get_resource('Cluster', bay_ident)
-        policy.enforce(context, 'bay:get', bay,
+        policy.enforce(context, 'bay:get', bay.as_dict(),
                        action='bay:get')
 
         bay = Bay.convert_with_links(bay)
@@ -478,7 +478,7 @@ class BaysController(base.Controller):
     def _patch(self, bay_ident, patch):
         context = pecan.request.context
         bay = api_utils.get_resource('Cluster', bay_ident)
-        policy.enforce(context, 'bay:update', bay,
+        policy.enforce(context, 'bay:update', bay.as_dict(),
                        action='bay:update')
         try:
             bay_dict = bay.as_dict()
@@ -528,6 +528,6 @@ class BaysController(base.Controller):
     def _delete(self, bay_ident):
         context = pecan.request.context
         bay = api_utils.get_resource('Cluster', bay_ident)
-        policy.enforce(context, 'bay:delete', bay,
+        policy.enforce(context, 'bay:delete', bay.as_dict(),
                        action='bay:delete')
         return bay
