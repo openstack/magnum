@@ -43,6 +43,7 @@ Response
 .. rest_parameters:: parameters.yaml
 
   - X-Openstack-Request-Id: request_id
+  - cluster_uuid: cluster_id
   - pem: pem
   - bay_uuid: bay_id
   - links: links
