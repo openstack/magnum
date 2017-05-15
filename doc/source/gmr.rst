@@ -40,7 +40,7 @@ own sections.  However, the base *GMR* consists of several sections:
 
 Package
   Shows information about the package to which this process belongs, including
-  version informations.
+  version information.
 
 Threads
   Shows stack traces and thread ids for each of the threads within this
