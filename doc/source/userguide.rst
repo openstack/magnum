@@ -2429,15 +2429,15 @@ The image currently has the following OS/software:
 +-------------+-----------+
 | OS/software | version   |
 +=============+===========+
-| Fedora      | 23        |
+| Fedora      | 25        |
 +-------------+-----------+
-| Docker      | 1.9.1     |
+| Docker      | 1.12.6    |
 +-------------+-----------+
-| Kubernetes  | 1.2.0     |
+| Kubernetes  | 1.5.3     |
 +-------------+-----------+
-| etcd        | 2.2.1     |
+| etcd        | 3.1.3     |
 +-------------+-----------+
-| Flannel     | 0.5.4     |
+| Flannel     | 0.7.0     |
 +-------------+-----------+
 
 The following software are managed as systemd services:
