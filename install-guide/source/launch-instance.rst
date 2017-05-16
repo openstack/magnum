@@ -213,7 +213,7 @@ and one node. Then, using docker's native API you will create a container.
       Request to create cluster 2582f192-480e-4329-ac05-32a8e5b1166b has been accepted.
 
    Your cluster is now being created. Creation time depends on your
-   infrastructure's performance. You can check the status of you cluster
+   infrastructure's performance. You can check the status of your cluster
    using the commands: ``magnum cluster-list`` or
    ``magnum cluster-show swarm-cluster``.
 
