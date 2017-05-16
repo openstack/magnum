@@ -12,7 +12,7 @@ You need to have a Magnum instance running somewhere. If you are using
 devstack, follow the developer quickstart guide to deploy Magnum in a devstack
 environment
 
-`<http://docs.openstack.org/developer/magnum/dev/quickstart.html>`_
+`<https://docs.openstack.org/developer/magnum/dev/quickstart.html>`_
 
 Configuration
 =============
@@ -48,12 +48,12 @@ Set the DNS name server to be used by your cluster nodes (e.g. 8.8.8.8)::
 Create the necessary keypair and flavor::
 
     source /opt/stack/devstack/openrc admin admin
-    nova keypair-add --pub-key ~/.ssh/id_rsa.pub default
-    nova flavor-create  m1.magnum 100 1024 10 1
-    nova flavor-create  s1.magnum 200 512 10 1
+    openstack keypair create --public-key ~/.ssh/id_rsa.pub  default
+    openstack flavor create --id 100 --ram 1024 --disk 10 --vcpus 1 m1.magnum
+    openstack flavor create --id 200 --ram 512 --disk 10 --vcpus 1 s1.magnum
 
     source /opt/stack/devstack/openrc demo demo
-    nova keypair-add --pub-key ~/.ssh/id_rsa.pub default
+    openstack keypair create --public-key ~/.ssh/id_rsa.pub  default
 
 You may need to explicitly upgrade required packages if you've installed them
 before and their versions become too old::
@@ -66,7 +66,7 @@ Outside of devstack
 If you are not using devstack, you'll need to create the configuration files.
 The /etc/tempest.conf configuration file is documented here
 
-`<http://docs.openstack.org/developer/tempest/configuration.html#tempest-configuration>`_
+`<https://docs.openstack.org/developer/tempest/configuration.html#tempest-configuration>`_
 
 Here's a reasonable sample of tempest.conf settings you might need::
 
