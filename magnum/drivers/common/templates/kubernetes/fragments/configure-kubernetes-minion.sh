@@ -59,6 +59,9 @@ if [ ! -f /usr/bin/udevadm ]; then
     ln -s /sbin/udevadm /usr/bin/udevadm
 fi
 
+# For using default log-driver, other options should be ignored
+sed -i 's/\-\-log\-driver\=journald//g' /etc/sysconfig/docker
+
 if [ -n "${INSECURE_REGISTRY_URL}" ]; then
     KUBELET_ARGS="${KUBELET_ARGS} --pod-infra-container-image=${INSECURE_REGISTRY_URL}/google_containers/pause\:0.8.0"
     echo "INSECURE_REGISTRY='--insecure-registry ${INSECURE_REGISTRY_URL}'" >> /etc/sysconfig/docker
