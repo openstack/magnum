@@ -3,10 +3,15 @@
 Launch an instance
 ~~~~~~~~~~~~~~~~~~
 
-In environments that include the Container Infrastructure Management
-service, you can provision container clusters made up of virtual machines
-or baremetal servers. Then, you can use the appropriate COE client or
-endpoint to create containers.
+In environments that include the Container Infrastructure Management service,
+you can provision container clusters made up of virtual machines or baremetal
+servers. The Container Infrastructure Management service uses `Cluster Templates
+<http://docs.openstack.org/developer/magnum/userguide.html#clustertemplate>`__
+to describe how a `Cluster <http://docs.openstack.org/developer/magnum/
+userguide.html#cluster>`__ is constructed. In each of the following examples
+you will create a Cluster Template for a specific COE and then you will
+provision a Cluster using the corresponding Cluster Template. Then, you can use
+the appropriate COE client or endpoint to create containers.
 
 Create an external network (Optional)
 -------------------------------------
@@ -80,29 +85,38 @@ external networks, create one.
       | updated_at        | 2017-03-27T10:46:15Z                 |
       +-------------------+--------------------------------------+
 
-Provision a cluster and create a container
-------------------------------------------
+Create a keypair (Optional)
+---------------------------
 
-The Container Infrastructure Management service uses `Cluster Templates
-<http://docs.openstack.org/developer/magnum/userguide.html
-#clustertemplate>`__ to describe how a `Cluster <http://docs.openstack.org/
-developer/magnum/userguide.html#cluster>`__ is constructed. Following this
-example, you will provision a Docker Swarm cluster with one master
-and one node. Then, using docker's native API you will create a container.
+To create a magnum cluster, you need a keypair which will be passed
+in all compute instances of the cluster. If you don't have a keypair
+in your project, create one.
 
-#. Download the latest Fedora Atomic image built by magnum team, which is
-   required to provision the cluster:
+#. Create a keypair on the Compute service:
+
+   .. code-block:: console
+
+      $ openstack keypair create --public-key ~/.ssh/id_rsa.pub mykey
+      +-------------+-------------------------------------------------+
+      | Field       | Value                                           |
+      +-------------+-------------------------------------------------+
+      | fingerprint | 05:be:32:07:58:a7:e8:0b:05:9b:81:6d:80:9a:4e:b1 |
+      | name        | mykey                                           |
+      | user_id     | 2d4398dbd5274707bf100a9dbbe85819                |
+      +-------------+-------------------------------------------------+
+
+Upload the images required for your clusters to the Image service
+-----------------------------------------------------------------
+
+The VM versions of Kubernetes and Docker Swarm drivers require a Fedora Atomic
+image. The following is stock Fedora Atomic image, built by the Atomic team
+and tested by the Magnum team.
+
+#. Download the image:
 
    .. code-block:: console
 
       $ wget https://fedorapeople.org/groups/magnum/fedora-atomic-latest.qcow2
-
-#. Source the ``demo`` credentials to perform
-   the following steps as a non-administrative project:
-
-   .. code-block:: console
-
-      $ . demo-openrc
 
 #. Register the image to the Image service setting the ``os_distro`` property
    to ``fedora-atomic``:
@@ -139,29 +153,23 @@ and one node. Then, using docker's native API you will create a container.
       | visibility       | private                                              |
       +------------------+------------------------------------------------------+
 
-#. Create a keypair on the Compute service:
+Provision a Docker Swarm cluster and create a container
+-------------------------------------------------------
 
-   .. code-block:: console
+Following this example, you will provision a Docker Swarm cluster with one
+master and one node. Then, using docker's native API you will create a
+container.
 
-      $ openstack keypair create --public-key ~/.ssh/id_rsa.pub mykey
-      +-------------+-------------------------------------------------+
-      | Field       | Value                                           |
-      +-------------+-------------------------------------------------+
-      | fingerprint | 05:be:32:07:58:a7:e8:0b:05:9b:81:6d:80:9a:4e:b1 |
-      | name        | mykey                                           |
-      | user_id     | 2d4398dbd5274707bf100a9dbbe85819                |
-      +-------------+-------------------------------------------------+
 
-#. Create a cluster template for a Docker Swarm cluster using the above image,
-   ``m1.small`` as flavor for the master and the node, ``mykey`` as keypair,
-   ``public`` as external network and ``8.8.8.8`` for DNS nameserver, with the
-   following command:
+#. Create a cluster template for a Docker Swarm cluster using the
+   ``fedora-atomic-latest`` image, ``m1.small`` as the flavor for the master
+   and the node, ``public`` as the external network and ``8.8.8.8`` for the
+   DNS nameserver, using the following command:
 
    .. code-block:: console
 
       $ magnum cluster-template-create swarm-cluster-template \
                            --image fedora-atomic-latest \
-                           --keypair mykey \
                            --external-network public \
                            --dns-nameserver 8.8.8.8 \
                            --master-flavor m1.small \
@@ -202,14 +210,16 @@ and one node. Then, using docker's native API you will create a container.
       | dns_nameserver        | 8.8.8.8                              |
       +-----------------------+--------------------------------------+
 
-#. Create a cluster with one node and one master with the following command:
+#. Create a cluster with one node and one master using ``mykey`` as the
+   keypair, using the following command:
 
    .. code-block:: console
 
       $ magnum cluster-create swarm-cluster \
                               --cluster-template swarm-cluster-template \
                               --master-count 1 \
-                              --node-count 1
+                              --node-count 1 \
+                              --keypair mykey
       Request to create cluster 2582f192-480e-4329-ac05-32a8e5b1166b has been accepted.
 
    Your cluster is now being created. Creation time depends on your
@@ -220,11 +230,11 @@ and one node. Then, using docker's native API you will create a container.
    .. code-block:: console
 
       $ magnum cluster-list
-      +--------------------------------------+---------------+------------+--------------+-----------------+
-      | uuid                                 | name          | node_count | master_count | status          |
-      +--------------------------------------+---------------+------------+--------------+-----------------+
-      | 2582f192-480e-4329-ac05-32a8e5b1166b | swarm-cluster | 1          | 1            | CREATE_COMPLETE |
-      +--------------------------------------+---------------+------------+--------------+-----------------+
+      +--------------------------------------+---------------+---------+------------+--------------+-----------------+
+      | uuid                                 | name          | keypair | node_count | master_count | status          |
+      +--------------------------------------+---------------+---------+------------+--------------+-----------------+
+      | 2582f192-480e-4329-ac05-32a8e5b1166b | swarm-cluster | mykey   | 1          | 1            | CREATE_COMPLETE |
+      +--------------------------------------+---------------+---------+------------+--------------+-----------------+
 
    .. code-block:: console
 
@@ -247,7 +257,7 @@ and one node. Then, using docker's native API you will create a container.
       | create_timeout      | 60                                                         |
       | node_addresses      | ['172.24.4.8']                                             |
       | master_count        | 1                                                          |
-      | container_version   | 1.9.1                                                      |
+      | container_version   | 1.12.6                                                     |
       | node_count          | 1                                                          |
       +---------------------+------------------------------------------------------------+
 
@@ -260,7 +270,7 @@ and one node. Then, using docker's native API you will create a container.
 
 
    The above command will save the authentication artifacts in the
-   `myclusterconfig` directory and it will export the environmental
+   `myclusterconfig` directory and it will export the environment
    variables: DOCKER_HOST, DOCKER_CERT_PATH and DOCKER_TLS_VERIFY.
    Sample output:
 
@@ -283,3 +293,161 @@ and one node. Then, using docker's native API you will create a container.
 
       $ magnum cluster-delete swarm-cluster
       Request to delete cluster swarm-cluster has been accepted.
+
+Provision a Kubernetes cluster and create a deployment
+------------------------------------------------------
+
+Following this example, you will provision a Kubernetes cluster with one
+master and one node. Then, using Kubernetes's native client ``kubectl``, you
+will create a deployment.
+
+#. Create a cluster template for a Kubernetes cluster using the
+   ``fedora-atomic-latest`` image, ``m1.small`` as the flavor for the master
+   and the node, ``public`` as the external network and ``8.8.8.8`` for the
+   DNS nameserver, using the following command:
+
+   .. code-block:: console
+
+      $ magnum cluster-template-create kubernetes-cluster-template \
+                           --image fedora-atomic-latest \
+                           --external-network public \
+                           --dns-nameserver 8.8.8.8 \
+                           --master-flavor m1.small \
+                           --flavor m1.small \
+                           --coe kubernetes
+      +-----------------------+--------------------------------------+
+      | Property              | Value                                |
+      +-----------------------+--------------------------------------+
+      | insecure_registry     | -                                    |
+      | labels                | {}                                   |
+      | updated_at            | -                                    |
+      | floating_ip_enabled   | True                                 |
+      | fixed_subnet          | -                                    |
+      | master_flavor_id      | m1.small                             |
+      | uuid                  | 0a601cc4-8fef-41aa-8036-d113e719ed7a |
+      | no_proxy              | -                                    |
+      | https_proxy           | -                                    |
+      | tls_disabled          | False                                |
+      | keypair_id            | -                                    |
+      | public                | False                                |
+      | http_proxy            | -                                    |
+      | docker_volume_size    | -                                    |
+      | server_type           | vm                                   |
+      | external_network_id   | public                               |
+      | cluster_distro        | fedora-atomic                        |
+      | image_id              | fedora-atomic-latest                 |
+      | volume_driver         | -                                    |
+      | registry_enabled      | False                                |
+      | docker_storage_driver | devicemapper                         |
+      | apiserver_port        | -                                    |
+      | name                  | kubernetes-cluster-template          |
+      | created_at            | 2017-05-16T09:53:00+00:00            |
+      | network_driver        | flannel                              |
+      | fixed_network         | -                                    |
+      | coe                   | kubernetes                           |
+      | flavor_id             | m1.small                             |
+      | master_lb_enabled     | False                                |
+      | dns_nameserver        | 8.8.8.8                              |
+      +-----------------------+--------------------------------------+
+
+#. Create a cluster with one node and one master using ``mykey`` as the
+   keypair, using the following command:
+
+   .. code-block:: console
+
+      $ magnum cluster-create kubernetes-cluster \
+                              --cluster-template kubernetes-cluster-template \
+                              --master-count 1 \
+                              --node-count 1 \
+                              --keypair mykey
+      Request to create cluster b1ef3528-ac03-4459-bbf7-22649bfbc84f has been accepted.
+
+   Your cluster is now being created. Creation time depends on your
+   infrastructure's performance. You can check the status of your cluster
+   using the commands: ``magnum cluster-list`` or
+   ``magnum cluster-show kubernetes-cluster``.
+
+   .. code-block:: console
+
+      $ magnum cluster-list
+      +--------------------------------------+--------------------+---------+------------+--------------+-----------------+
+      | uuid                                 | name               | keypair | node_count | master_count | status          |
+      +--------------------------------------+--------------------+---------+------------+--------------+-----------------+
+      | b1ef3528-ac03-4459-bbf7-22649bfbc84f | kubernetes-cluster | mykey   | 1          | 1            | CREATE_COMPLETE |
+      +--------------------------------------+--------------------+---------+------------+--------------+-----------------+
+
+   .. code-block:: console
+
+      $ magnum cluster-show kubernetes-cluster
+      +---------------------+------------------------------------------------------------+
+      | Property            | Value                                                      |
+      +---------------------+------------------------------------------------------------+
+      | status              | CREATE_COMPLETE                                            |
+      | cluster_template_id | 0a601cc4-8fef-41aa-8036-d113e719ed7a                       |
+      | node_addresses      | ['172.24.4.5']                                             |
+      | uuid                | b1ef3528-ac03-4459-bbf7-22649bfbc84f                       |
+      | stack_id            | 8296624c-3c0e-45e1-967e-b6ff05105a3b                       |
+      | status_reason       | Stack CREATE completed successfully                        |
+      | created_at          | 2017-05-16T09:58:02+00:00                                  |
+      | updated_at          | 2017-05-16T10:00:02+00:00                                  |
+      | coe_version         | v1.5.3                                                     |
+      | keypair             | default                                                    |
+      | api_address         | https://172.24.4.13:6443                                   |
+      | master_addresses    | ['172.24.4.13']                                            |
+      | create_timeout      | 60                                                         |
+      | node_count          | 1                                                          |
+      | discovery_url       | https://discovery.etcd.io/69c7cd3b3b06c98b4771410bd166a7c6 |
+      | master_count        | 1                                                          |
+      | container_version   | 1.12.6                                                     |
+      | name                | kubernetes-cluster                                         |
+      +---------------------+------------------------------------------------------------+
+
+#. Add the credentials of the above cluster to your environment:
+
+   .. code-block:: console
+
+      $ mkdir -p ~/clusters/kubernetes-cluster
+      $ $(magnum cluster-config kubernetes-cluster --dir ~/clusters/kubernetes-cluster)
+
+
+   The above command will save the authentication artifacts in the directory
+   ``~/clusters/kubernetes-cluster`` and it will export the ``KUBECONFIG``
+   environment variable:
+
+   .. code-block:: console
+
+      export KUBECONFIG=/home/user/clusters/kubernetes-cluster/config
+
+#. You can list the controller components of your Kubernetes cluster and
+   check if they are ``Running``:
+
+   .. code-block:: console
+
+      $ kubectl -n kube-system get po
+      NAME                                                                            READY     STATUS    RESTARTS   AGE
+      kube-controller-manager-ku-hesuip7l3i-0-5mqijvszepxw-kube-master-rqwmwne7rjh2   1/1       Running   0          1h
+      kube-proxy-ku-hesuip7l3i-0-5mqijvszepxw-kube-master-rqwmwne7rjh2                1/1       Running   0          1h
+      kube-proxy-ku-wmmticfvdr-0-k53p22xmlxvx-kube-minion-x4ly6zfhrrui                1/1       Running   0          1h
+      kube-scheduler-ku-hesuip7l3i-0-5mqijvszepxw-kube-master-rqwmwne7rjh2            1/1       Running   0          1h
+      kubernetes-dashboard-3203831700-zvj2d                                           1/1       Running   0          1h
+
+#. Now, you can create a nginx deployment and verify it is running:
+
+   .. code-block:: console
+
+      $ kubectl run nginx --image=nginx --replicas=5
+      deployment "nginx" created
+      $ kubectl get po
+      NAME                    READY     STATUS    RESTARTS   AGE
+      nginx-701339712-2ngt8   1/1       Running   0          15s
+      nginx-701339712-j8r3d   1/1       Running   0          15s
+      nginx-701339712-mb6jb   1/1       Running   0          15s
+      nginx-701339712-q115k   1/1       Running   0          15s
+      nginx-701339712-tb5lp   1/1       Running   0          15s
+
+#. Delete the cluster:
+
+   .. code-block:: console
+
+      $ magnum cluster-delete kubernetes-cluster
+      Request to delete cluster kubernetes-cluster has been accepted.
