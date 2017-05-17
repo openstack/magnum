@@ -33,6 +33,11 @@ export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service ceilometer-alarm-notifier"
 export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service ceilometer-api"
 export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service ceilometer-collector"
 
+if egrep --quiet '(vmx|svm)' /proc/cpuinfo; then
+    export DEVSTACK_GATE_LIBVIRT_TYPE=kvm
+fi
+
+
 if [ "$coe" = "mesos" ]; then
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_GUEST_IMAGE_URL=https://fedorapeople.org/groups/magnum/ubuntu-mesos-ocata.qcow2"
 elif [ "$coe" = "k8s-coreos" ]; then
