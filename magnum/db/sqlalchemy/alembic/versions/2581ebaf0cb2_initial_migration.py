@@ -24,7 +24,12 @@ revision = '2581ebaf0cb2'
 down_revision = None
 
 from alembic import op
+
+from oslo_db.sqlalchemy.types import String
+
 import sqlalchemy as sa
+
+from sqlalchemy.dialects.mysql import TINYTEXT
 
 
 def upgrade():
@@ -56,7 +61,8 @@ def upgrade():
         sa.Column('keypair_id', sa.String(length=255), nullable=True),
         sa.Column('image_id', sa.String(length=255), nullable=True),
         sa.Column('external_network_id', sa.String(length=255), nullable=True),
-        sa.Column('dns_nameserver', sa.String(length=255), nullable=True),
+        sa.Column('dns_nameserver', String(255, mysql_ndb_type=TINYTEXT),
+                  nullable=True),
         sa.Column('apiserver_port', sa.Integer(), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         mysql_ENGINE='InnoDB',
