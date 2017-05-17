@@ -17,7 +17,7 @@
 # - init_magnum
 # - magnum_register_image
 # - start_magnum
-# - configure_iptables
+# - configure_iptables_magnum
 # - stop_magnum
 # - cleanup_magnum
 
@@ -323,8 +323,8 @@ function start_magnum_api {
 }
 
 
-# configure_iptables() - Configure the IP table rules for Magnum
-function configure_iptables {
+# configure_iptables_magnum() - Configure the IP table rules for Magnum
+function configure_iptables_magnum {
     if [ "$MAGNUM_CONFIGURE_IPTABLES" != "False" ]; then
         ROUTE_TO_INTERNET=$(ip route get 8.8.8.8)
         OBOUND_DEV=$(echo ${ROUTE_TO_INTERNET#*dev} | awk '{print $1}')

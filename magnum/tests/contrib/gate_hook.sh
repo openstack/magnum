@@ -42,14 +42,12 @@ elif [ "${coe}${special}" = "k8s-ironic" ]; then
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_IMAGE_NAME='fedora-kubernetes-ironic-latest'"
 
     export DEVSTACK_GATE_VIRT_DRIVER="ironic"
-    # NOTE(yuanying): Current implementation requires only 1 subnet under network
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IP_VERSION=4"
     # NOTE(strigazi) keep cinder
     # export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service cinder c-sch c-api c-vol"
 
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ironic git://git.openstack.org/openstack/ironic"
 
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_DEPLOY_DRIVER=pxe_ssh"
+    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_DEPLOY_DRIVER=pxe_ipmitool"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_BAREMETAL_BASIC_OPS=True"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_VM_LOG_DIR=/opt/stack/new/ironic-bm-logs"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"DEFAULT_INSTANCE_TYPE=baremetal"
@@ -59,16 +57,16 @@ elif [ "${coe}${special}" = "k8s-ironic" ]; then
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"Q_ML2_TENANT_NETWORK_TYPE=vxlan"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_BUILD_DEPLOY_RAMDISK=False"
 
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"SWIFT_ENABLE_TEMPURLS=True"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"SWIFT_TEMPURL_KEY=password"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"SWIFT_HASH=password"
+    # We don't enable swift in Gate Jobs so not required
+    # export DEVSTACK_LOCAL_CONFIG+=$'\n'"SWIFT_ENABLE_TEMPURLS=True"
+    # export DEVSTACK_LOCAL_CONFIG+=$'\n'"SWIFT_TEMPURL_KEY=password"
+    # export DEVSTACK_LOCAL_CONFIG+=$'\n'"SWIFT_HASH=password"
 
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_ENABLED_DRIVERS=fake,agent_ssh,agent_ipmitool,pxe_ssh,pxe_ipmitool"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"VOLUME_BACKING_FILE_SIZE=24G"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"FORCE_CONFIG_DRIVE=True"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_DEPLOY_DRIVER_ISCSI_WITH_IPA=True"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_RAMDISK_TYPE=tinyipa"
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_IPXE_ENABLED=True"
+    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_IPXE_ENABLED=False"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_VM_COUNT=2"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_VM_SSH_PORT=22"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_VM_SPECS_RAM=1024"

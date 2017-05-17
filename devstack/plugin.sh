@@ -40,7 +40,7 @@ if is_service_enabled magnum-api magnum-cond; then
         echo_summary "Starting magnum"
         start_magnum
 
-        configure_iptables
+        configure_iptables_magnum
     fi
 
     if [[ "$1" == "unstack" ]]; then
