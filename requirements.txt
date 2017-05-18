@@ -15,7 +15,7 @@ cliff>=2.6.0 # Apache-2.0
 decorator>=3.4.0 # BSD
 docker-py>=1.8.1 # Apache-2.0
 enum34;python_version=='2.7' or python_version=='2.6' or python_version=='3.3' # BSD
-eventlet!=0.18.3,>=0.18.2 # MIT
+eventlet!=0.18.3,<0.21.0,>=0.18.2 # MIT
 iso8601>=0.1.11 # MIT
 jsonpatch>=1.1 # BSD
 keystoneauth1>=2.20.0 # Apache-2.0
