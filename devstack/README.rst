@@ -30,4 +30,4 @@ Then run devstack normally::
     cd /opt/stack/devstack
     ./stack.sh
 
-.. [#devstack_neutron] http://docs.openstack.org/developer/devstack/guides/neutron.html
+.. [#devstack_neutron] https://docs.openstack.org/developer/devstack/guides/neutron.html
