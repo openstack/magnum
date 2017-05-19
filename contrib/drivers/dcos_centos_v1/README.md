@@ -60,12 +60,12 @@ dcos_centos_v1 = magnum.drivers.dcos_centos_v1.driver:Driver
    See how to build a centos image in /opt/stack/magnum/magnum/drivers/dcos_centos_v1/image/README.md
 
 5. Create glance image
-$ glance image-create --name centos-7-dcos.qcow2 \
-          --visibility public \
-          --disk-format qcow2 \
-          --container-format bare \
-          --os-distro=centos \
-          < centos-7-dcos.qcow2
+$ openstack image create centos-7-dcos.qcow2 \
+          --public \
+          --disk-format=qcow2 \
+          --container-format=bare \
+          --property os_distro=centos \
+          --file=centos-7-dcos.qcow2
 
 6. Create magnum cluster template
    Configure DC/OS cluster with --labels
