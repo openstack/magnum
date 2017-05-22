@@ -221,6 +221,12 @@ parameters:
     description : >
       Wait condition notify command for Master.
 
+  etcd_lb_vip:
+    type: string
+    description: >
+      etcd lb vip private used to generate certs on master.
+    default: ""
+
 resources:
 
   ######################################################################
@@ -288,6 +294,7 @@ resources:
             "$TRUST_ID": {get_param: trust_id}
             "$INSECURE_REGISTRY_URL": {get_param: insecure_registry_url}
             "$ENABLE_CINDER": "False"
+            "$ETCD_LB_VIP": {get_param: etcd_lb_vip}
 
   make_cert:
     type: OS::Heat::SoftwareConfig
