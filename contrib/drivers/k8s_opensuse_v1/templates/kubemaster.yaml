@@ -181,6 +181,20 @@ parameters:
     type: string
     description: ID of for kubernetes master.
 
+  trustee_user_id:
+    type: string
+    description: user id of the trustee
+
+  trustee_password:
+    type: string
+    description: password of the trustee
+    hidden: true
+
+  trust_id:
+    type: string
+    description: id of the trust which is used by the trustee
+    hidden: true
+
 resources:
 
   master_wait_handle:
@@ -211,6 +225,11 @@ resources:
             "$KUBE_NODE_IP": {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
             "$KUBE_API_PORT": {get_param: kubernetes_port}
             "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
+            "$KUBE_MASTER_IPS": {get_param: kube_master_ips_list}
+            "$KUBE_MINION_IPS": {get_param: kube_minion_ips_list}
+            "$KUBE_NODE_PUBLIC_IP": {get_attr: [kube_master_floating, floating_ip_address]}
+            "$KUBE_NODE_IP": { "Fn::Select": [ { get_param: kube_master_index }, { get_param: kube_master_ips} ] }
+            "$KUBE_NODE_NAME": {get_param: kube_master_id}
             "$NETWORK_DRIVER": {get_param: network_driver}
             "$FLANNEL_NETWORK_CIDR": {get_param: flannel_network_cidr}
             "$FLANNEL_NETWORK_SUBNETLEN": {get_param: flannel_network_subnetlen}
@@ -233,6 +252,15 @@ resources:
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
+            "$TRUSTEE_USER_ID": {get_param: trustee_user_id}
+            "$TRUSTEE_PASSWORD": {get_param: trustee_password}
+            "$TRUST_ID": {get_param: trust_id}
+
+  make_cert:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/make-cert.sh}
 
   configure_etcd:
     type: OS::Heat::SoftwareConfig
@@ -281,6 +309,7 @@ resources:
     properties:
       parts:
         - config: {get_resource: write_heat_params}
+        - config: {get_resource: make_cert}
         - config: {get_resource: configure_etcd}
         - config: {get_resource: configure_flanneld}
         - config: {get_resource: create_kubernetes_user}

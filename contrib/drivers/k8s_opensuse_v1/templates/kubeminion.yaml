@@ -172,6 +172,33 @@ parameters:
     type: string
     description: ID of for kubernetes minion.
 
+  auth_url:
+    type: string
+    description: >
+      url for kubernetes to authenticate before sending request to neutron
+
+  trustee_domain_id:
+    type: string
+    description: domain id of the trustee
+
+  trustee_user_id:
+    type: string
+    description: user id of the trustee
+
+  trustee_username:
+    type: string
+    description: username of the trustee
+
+  trustee_password:
+    type: string
+    description: password of the trustee
+    hidden: true
+
+  trust_id:
+    type: string
+    description: id of the trust which is used by the trustee
+    hidden: true
+
 resources:
 
   minion_wait_handle:
@@ -223,6 +250,24 @@ resources:
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
+            "$AUTH_URL": {get_param: auth_url}
+            "$TRUSTEE_DOMAIN_ID": {get_param: trustee_domain_id}
+            "$TRUSTEE_USER_ID": {get_param: trustee_user_id}
+            "$TRUSTEE_USERNAME": {get_param: trustee_username}
+            "$TRUSTEE_PASSWORD": {get_param: trustee_password}
+            "$TRUST_ID": {get_param: trust_id}
+
+  write_kubeconfig:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/write-kubeconfig.yaml}
+
+  make_cert:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/make-cert-client.sh}
 
   configure_flanneld:
     type: OS::Heat::SoftwareConfig
@@ -271,6 +316,8 @@ resources:
     properties:
       parts:
         - config: {get_resource: write_heat_params}
+        - config: {get_resource: write_kubeconfig}
+        - config: {get_resource: make_cert}
         - config: {get_resource: configure_flanneld}
         - config: {get_resource: configure_docker}
         - config: {get_resource: create_kubernetes_user}
