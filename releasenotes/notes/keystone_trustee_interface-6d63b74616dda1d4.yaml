@@ -1,0 +1,5 @@
+---
+features:
+  - Keystone URL used by Cluster Templates instances to authenticate is now
+    configurable with the ``trustee_keystone_interface`` parameter
+    which default to ``public``.
