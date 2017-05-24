@@ -79,7 +79,7 @@ To run unit test coverage and check percentage of code covered::
     tox -e cover
 
 To discover and interact with templates, please refer to
-`<http://docs.openstack.org/developer/magnum/dev/bay-template-example.html>`_
+`<http://docs.openstack.org/developer/magnum/dev/cluster-type-definition.html>`_
 
 Exercising the Services Using Devstack
 ======================================
