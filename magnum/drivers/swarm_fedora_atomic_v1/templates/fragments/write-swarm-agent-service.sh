@@ -51,7 +51,7 @@ do
 done
 
 curl -i -X POST -H 'Content-Type: application/json' -H 'X-Auth-Token: $WAIT_HANDLE_TOKEN' \
-    --data-binary "'"'{"Status": "SUCCESS", "Reason": "Swarm agent ready", "Data": "OK", "UniqueId": "00000"}'"'" \
+    --data-binary '{"status": "SUCCESS", "reason": "Swarm agent ready", "data": "OK", "id": "00000"}' \
     "$WAIT_HANDLE_ENDPOINT"
 EOF
 
