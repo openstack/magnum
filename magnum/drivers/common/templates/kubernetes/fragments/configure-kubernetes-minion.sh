@@ -48,7 +48,7 @@ sed -i '
 # the option --hostname-override for kubelet uses the hostname to register the node.
 # Using any other name will break the load balancer and cinder volume features.
 HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')
-KUBELET_ARGS="--config=/etc/kubernetes/manifests --cadvisor-port=4194 ${KUBE_CONFIG} --hostname-override=${HOSTNAME_OVERRIDE}"
+KUBELET_ARGS="--pod-manifest-path=/etc/kubernetes/manifests --cadvisor-port=4194 ${KUBE_CONFIG} --hostname-override=${HOSTNAME_OVERRIDE}"
 KUBELET_ARGS="${KUBELET_ARGS} --cluster_dns=${DNS_SERVICE_IP} --cluster_domain=${DNS_CLUSTER_DOMAIN}"
 
 if [ -n "$TRUST_ID" ]; then
@@ -67,6 +67,9 @@ if [ -n "${INSECURE_REGISTRY_URL}" ]; then
     KUBELET_ARGS="${KUBELET_ARGS} --pod-infra-container-image=${INSECURE_REGISTRY_URL}/google_containers/pause\:0.8.0"
     echo "INSECURE_REGISTRY='--insecure-registry ${INSECURE_REGISTRY_URL}'" >> /etc/sysconfig/docker
 fi
+
+# specified cgroup driver
+KUBELET_ARGS="${KUBELET_ARGS} --cgroup-driver=systemd"
 
 sed -i '
     /^KUBELET_ADDRESS=/ s/=.*/="--address=0.0.0.0"/
