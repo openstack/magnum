@@ -1,7 +1,8 @@
 heat_template_version: 2014-10-16
 
 description: >
-  This is just an example template. It does not produce a usable bay.
+  This is just an example Heat template. It only provisions a single server
+  instance and does not produce a usable cluster.
 
 parameters:
   #
