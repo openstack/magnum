@@ -27,6 +27,11 @@ if [ "${coe}${special}" != "k8s-ironic" ]; then
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin octavia https://github.com/openstack/octavia"
 fi
 
+if egrep --quiet '(vmx|svm)' /proc/cpuinfo; then
+    export DEVSTACK_GATE_LIBVIRT_TYPE=kvm
+fi
+
+
 if [ "$coe" = "mesos" ]; then
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"MAGNUM_GUEST_IMAGE_URL=https://fedorapeople.org/groups/magnum/ubuntu-mesos-newton.qcow2"
 elif [ "$coe" = "k8s-coreos" ]; then
