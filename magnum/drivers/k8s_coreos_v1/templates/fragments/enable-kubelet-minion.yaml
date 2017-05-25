@@ -72,13 +72,14 @@ write_files:
         --register-node=true \
         --allow-privileged=true \
         --pod-manifest-path=/etc/kubernetes/manifests \
-        --hostname-override=${KUBE_NODE_IP} \
         --logtostderr=true \
         --v=0 \
         --cadvisor-port=4194 \
         --kubeconfig=${KUBE_CONFIG} \
         --tls-cert-file=${TLS_CERT_FILE} \
         --tls-private-key-file=${TLS_PRIVATE_KEY_FILE} \
+        --cluster_dns=${DNS_SERVICE_IP} \
+        --cluster_domain=${DNS_CLUSTER_DOMAIN} \
         ${INSECURE_REGISTRY_ARGS}
       Restart=always
       RestartSec=10

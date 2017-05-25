@@ -273,6 +273,18 @@ parameters:
     constraints:
       - allowed_values: ["docker"]
 
+  dns_service_ip:
+    type: string
+    description: >
+      address used by Kubernetes DNS service
+    default: 10.254.0.10
+
+  dns_cluster_domain:
+    type: string
+    description: >
+      domain name for cluster DNS
+    default: "cluster.local"
+
 resources:
 
   ######################################################################
@@ -436,6 +448,8 @@ resources:
           prometheus_monitoring: {get_param: prometheus_monitoring}
           grafana_admin_passwd: {get_param: grafana_admin_passwd}
           etcd_lb_vip: {get_attr: [etcd_lb, address]}
+          dns_service_ip: {get_param: dns_service_ip}
+          dns_cluster_domain: {get_param: dns_cluster_domain}
 
   ######################################################################
   #
@@ -483,6 +497,8 @@ resources:
           insecure_registry_url: {get_param: insecure_registry_url}
           container_runtime: {get_param: container_runtime}
           prometheus_monitoring: {get_param: prometheus_monitoring}
+          dns_service_ip: {get_param: dns_service_ip}
+          dns_cluster_domain: {get_param: dns_cluster_domain}
 
 outputs:
 
