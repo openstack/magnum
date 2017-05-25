@@ -24,6 +24,9 @@ My cluster-create takes a really long time
   fail with a timeout, but since heat has a long default timeout, you can
   look at the `heat stacks`_ and check the WaitConditionHandle resources.
 
+Only a master node was created after cluster_create took a long time
+  Try to `use IP instead of hostname`_
+
 My cluster-create fails with error: "Failed to create trustee XXX in domain XXX"
   Check the `trustee for cluster`_
 
@@ -106,6 +109,19 @@ one of the services that are being started on the node is hung.  Log into the
 node where the failure occurred and check the respective `Kubernetes
 services`_, `Swarm services`_ or `Mesos services`_.  If the failure is in
 other scripts, look for them as `Heat software resource scripts`_.
+
+
+Use IP instead of hostname
+--------------------------
+Open /etc/sysconfig/heat-params on master node.
+Check if the host given in the WAIT_CURL command is pingable from the master node.
+If the host is not provided as IP but as hostname and this hostname is not pingable try this:
+
+#. Replace controller hostname in /etc/heat/heat.conf with the IP.
+#. Do the same in the endpoint definitions for heat in the database (url field of keystone.endpoint table).
+#. Restart heat services.
+#. Restart magnum services.
+#. Recreate your cluster-template.
 
 
 Trustee for cluster
