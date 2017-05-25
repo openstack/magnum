@@ -31,13 +31,15 @@ write_files:
           INSECURE_REGISTRY_ARGS=""
       fi
 
+      HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')
+
       uuid_file="/var/run/kubelet-pod.uuid"
       CONF_FILE=/etc/systemd/system/kubelet.service
       cat > $CONF_FILE <<EOF
       [Service]
-      Environment=KUBELET_VERSION=${KUBE_VERSION}
-      Environment=KUBELET_ACI=${HYPERKUBE_IMAGE_REPO}
-      Environment="RKT_OPTS=--uuid-file-save=${uuid_file} \
+      Environment=KUBELET_IMAGE_TAG=${KUBE_VERSION}
+      Environment=KUBELET_IMAGE_REPO=${HYPERKUBE_IMAGE_REPO}
+      Environment="RKT_RUN_ARGS=--uuid-file-save=${uuid_file} \
         --volume dns,kind=host,source=/etc/resolv.conf \
         --mount volume=dns,target=/etc/resolv.conf \
         --volume rkt,kind=host,source=/opt/bin/host-rkt \
@@ -56,9 +58,9 @@ write_files:
         --api-servers=http://127.0.0.1:8080 \
         --cni-conf-dir=/etc/kubernetes/cni/net.d \
         --network-plugin=cni \
-        --register-node=true \
+        --hostname-override=${HOSTNAME_OVERRIDE} \
         --container-runtime=${CONTAINER_RUNTIME} \
-        --register-schedulable=false \
+        --register-with-taints=node.alpha.kubernetes.io/role=master:NoSchedule \
         --allow-privileged=true \
         --pod-manifest-path=/etc/kubernetes/manifests \
         --logtostderr=true \
