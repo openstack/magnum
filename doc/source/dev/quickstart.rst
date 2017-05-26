@@ -17,11 +17,11 @@ Setup Dev Environment
 
 Install OS-specific prerequisites::
 
-    # Ubuntu/Debian:
-    sudo apt-get update
-    sudo apt-get install -y python-dev libssl-dev libxml2-dev curl \
-                            libmysqlclient-dev libxslt-dev libpq-dev git \
-                            libffi-dev gettext build-essential python3.4-dev
+    # Ubuntu Xenial:
+    sudo apt update
+    sudo apt install -y python-dev libssl-dev libxml2-dev curl \
+                        libmysqlclient-dev libxslt-dev libpq-dev git \
+                        libffi-dev gettext build-essential python3-dev
 
     # Fedora/RHEL:
     sudo yum install -y python-devel openssl-devel mysql-devel curl \
@@ -92,7 +92,7 @@ bare-metal support is under active development).
 **NOTE:** Running devstack within a virtual machine with magnum enabled is not
 recommended at this time.
 
-This session has only been tested on Ubuntu 14.04 (Trusty) and Fedora 20/21.
+This session has only been tested on Ubuntu 16.04 (Xenial) and Fedora 20/21.
 We recommend users to select one of them if it is possible.
 
 Clone devstack::
