@@ -20,9 +20,8 @@ in the service manifest.  When the service is created, Kubernetes will add an
 external load balancer in front of the service so that the service will have
 an external IP address in addition to the internal IP address on the container
 network.  The service endpoint can then be accessed with this external IP
-address.  Refer to the Kubernetes guide for more details::
-
-    http://kubernetes.io/v1.0/docs/user-guide/services.html#external-services
+address.  Refer to the `Kubernetes service document <https://kubernetes.io/docs
+/concepts/services-networking/service/#type-loadbalancer>`_ for more details.
 
 A Kubernetes cluster deployed by Magnum will have all the necessary
 configuration required for the external load balancer.  This document describes
@@ -133,9 +132,10 @@ Create a file (e.g nginx-service.yaml) describing a service for the nginx pod::
         app: nginx
       type: LoadBalancer
 
-Assuming that a Kubernetes cluster named k8sclusterv1 has been created, deploy
-the pod and service by the commands. Please refer to the quickstart guide on
-how to connect to Kubernetes running on the launched cluster.::
+Please refer to the `quickstart <https://docs.openstack.org/developer/magnum/
+userguide.html>`_ guide on how to connect to Kubernetes running on the launched
+cluster. Assuming a Kubernetes cluster named k8sclusterv1 has been created,
+deploy the pod and service using following commands::
 
     kubectl create -f nginx.yaml
 
@@ -283,8 +283,8 @@ For the VIP of the pool::
 
 Note that the VIP is created on the private network of the cluster;  therefore
 it has an internal IP address of 10.0.0.7.  This address is also associated as
-the "external address" of the Kubernetes service.  You can verify in Kubernetes
-by running the kubectl command::
+the "external address" of the Kubernetes service.  You can verify this in
+Kubernetes by running following command::
 
     kubectl get services
     NAME           LABELS                                    SELECTOR    IP(S)            PORT(S)
