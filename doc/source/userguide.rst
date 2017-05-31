@@ -310,6 +310,8 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `grafana_admin_passwd`_               | (any string)       | "admin"       |
 +---------------------------------------+--------------------+---------------+
+| `docker_volume_type`_                 | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 
 =======
 Cluster
@@ -2152,6 +2154,16 @@ size of the Cinder volume with the ClusterTemplate attribute
 'docker-volume-size'. Currently the block size is fixed at cluster
 creation time, but future lifecycle operations may allow modifying the
 block size during the life of the cluster.
+
+_`docker_volume_type`
+  For drivers that support additional volumes for container storage, a
+  label named 'docker_volume_type' is exposed so that users can select
+  different cinder volume types for their volumes. The default volume
+  *must* be set in 'default_docker_volume_type' in the 'cinder' section
+  of magnum.conf, an obvious value is the default volume type set in
+  cinder.conf of your cinder deployment . Please note, that
+  docker_volume_type refers to a cinder volume type and it is unrelated
+  to docker or kubernetes volumes.
 
 Both local disk and the Cinder block storage can be used with a number
 of Docker storage drivers available.
