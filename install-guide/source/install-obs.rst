@@ -4,8 +4,8 @@ Install and configure for openSUSE and SUSE Linux Enterprise
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This section describes how to install and configure the Container
-Infrastructure Management service for openSUSE Leap 42.1 and SUSE Linux
-Enterprise Server 12 SP1.
+Infrastructure Management service for openSUSE Leap 42.2 and SUSE Linux
+Enterprise Server 12 SP2.
 
 .. include:: common/prerequisites.rst
 
