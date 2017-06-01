@@ -66,6 +66,7 @@ class Service(service.Service):
         # TODO(asalkeld) add support for version='x.y'
         target = messaging.Target(topic=topic, server=server)
         self._server = messaging.get_rpc_server(transport, target, handlers,
+                                                executor='eventlet',
                                                 serializer=serializer)
         self.binary = binary
 
