@@ -48,7 +48,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'registry_enabled': False,
             'server_type': 'vm',
             'network_driver': 'network_driver',
-            'labels': {'flannel_network_cidr': '10.101.0.0/16',
+            'labels': {'docker_volume_type': 'lvmdriver-1',
+                       'flannel_network_cidr': '10.101.0.0/16',
                        'flannel_network_subnetlen': '26',
                        'flannel_backend': 'vxlan',
                        'rexray_preempt': 'False',
@@ -150,7 +151,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'swarm_version': 'fake-version',
             'swarm_strategy': u'spread',
             'volume_driver': 'rexray',
-            'rexray_preempt': 'False'
+            'rexray_preempt': 'False',
+            'docker_volume_type': 'lvmdriver-1'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -225,7 +227,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'swarm_version': 'fake-version',
             'swarm_strategy': u'spread',
             'volume_driver': 'rexray',
-            'rexray_preempt': 'False'
+            'rexray_preempt': 'False',
+            'docker_volume_type': 'lvmdriver-1'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -247,7 +250,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
                         'docker_volume_size', 'fixed_network', 'http_proxy',
                         'https_proxy', 'no_proxy', 'network_driver',
                         'master_flavor_id', 'docker_storage_driver',
-                        'volume_driver', 'rexray_preempt', 'fixed_subnet']
+                        'volume_driver', 'rexray_preempt', 'fixed_subnet',
+                        'docker_volume_type']
         for key in not_required:
             self.cluster_template_dict[key] = None
         self.cluster_dict['discovery_url'] = 'https://discovery.etcd.io/test'
@@ -290,7 +294,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v3',
             'swarm_version': 'fake-version',
             'swarm_strategy': u'spread',
-            'rexray_preempt': 'False'
+            'rexray_preempt': 'False',
+            'docker_volume_type': 'lvmdriver-1'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -359,7 +364,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'swarm_version': 'fake-version',
             'swarm_strategy': u'spread',
             'volume_driver': 'rexray',
-            'rexray_preempt': 'False'
+            'rexray_preempt': 'False',
+            'docker_volume_type': 'lvmdriver-1'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -429,7 +435,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'swarm_version': 'fake-version',
             'swarm_strategy': u'spread',
             'volume_driver': 'rexray',
-            'rexray_preempt': 'False'
+            'rexray_preempt': 'False',
+            'docker_volume_type': 'lvmdriver-1'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

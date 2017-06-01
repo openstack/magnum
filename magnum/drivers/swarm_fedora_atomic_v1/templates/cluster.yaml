@@ -130,6 +130,12 @@ parameters:
       storage
     default: 0
 
+  docker_volume_type:
+    type: string
+    description: >
+      type of a cinder volume to allocate to docker for container/image
+      storage
+
   docker_storage_driver:
     type: string
     description: docker storage driver name
@@ -351,6 +357,7 @@ resources:
           server_image: {get_param: server_image}
           server_flavor: {get_param: master_flavor}
           docker_volume_size: {get_param: docker_volume_size}
+          docker_volume_type: {get_param: docker_volume_type}
           docker_storage_driver: {get_param: docker_storage_driver}
           fixed_network_id: {get_attr: [network, fixed_network]}
           fixed_subnet_id: {get_attr: [network, fixed_subnet]}
@@ -395,6 +402,7 @@ resources:
           server_image: {get_param: server_image}
           server_flavor: {get_param: node_flavor}
           docker_volume_size: {get_param: docker_volume_size}
+          docker_volume_type: {get_param: docker_volume_type}
           docker_storage_driver: {get_param: docker_storage_driver}
           fixed_network_id: {get_attr: [network, fixed_network]}
           fixed_subnet_id: {get_attr: [network, fixed_subnet]}
