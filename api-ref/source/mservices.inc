@@ -4,14 +4,14 @@
 Manage Magnum service
 =====================
 
-Show container infrastructure management service status
+List container infrastructure management services
 =======================================================
 
 .. rest_method::  GET /v1/mservices
 
-Enables administrative users to view details for all Magnum services.
+Enables administrative users to list all Magnum services.
 
-Container infrastructure service status details include service id, binary,
+Container infrastructure service information include service id, binary,
 host, report count, creation time, last updated time, health status, and
 the reason for disabling service.
 
