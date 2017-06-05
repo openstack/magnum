@@ -15,6 +15,7 @@
             }
          ],
          "stack_id":"31c1ee6c-081e-4f39-9f0f-f1d87a7defa1",
+         "keypair":"my_keypair",
          "master_count":1,
          "create_timeout":60,
          "node_count":1,
