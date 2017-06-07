@@ -139,8 +139,17 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
         return cluster
 
     @base.remotable_classmethod
-    def get_count_all(cls, context, **kwargs):
-        return cls.dbapi.get_cluster_count_all(context, **kwargs)
+    def get_count_all(cls, context, filters=None):
+        """Get count of matching clusters.
+
+        :param context: The security context
+        :param filters: filter dict, can includes 'cluster_template_id',
+                        'name', 'node_count', 'stack_id', 'api_address',
+                        'node_addresses', 'project_id', 'user_id',
+                        'status'(should be a status list), 'master_count'.
+        :returns: Count of matching clusters.
+        """
+        return cls.dbapi.get_cluster_count_all(context, filters=filters)
 
     @base.remotable_classmethod
     def get_by_name(cls, context, name):
