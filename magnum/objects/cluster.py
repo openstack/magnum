@@ -42,8 +42,9 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.11: Added 'RESUME_FAILED' in status field
     # Version 1.12: Added 'get_stats' method
     # Version 1.13: Added get_count_all method
+    # Version 1.14: Added 'docker_volume_size' field
 
-    VERSION = '1.13'
+    VERSION = '1.14'
 
     dbapi = dbapi.get_instance()
 
@@ -55,6 +56,7 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
         'user_id': fields.StringField(nullable=True),
         'cluster_template_id': fields.StringField(nullable=True),
         'keypair': fields.StringField(nullable=True),
+        'docker_volume_size': fields.IntegerField(nullable=True),
         'stack_id': fields.StringField(nullable=True),
         'status': m_fields.ClusterStatusField(nullable=True),
         'status_reason': fields.StringField(nullable=True),

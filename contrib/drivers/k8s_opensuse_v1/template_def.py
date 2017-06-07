@@ -44,7 +44,7 @@ class JeOSK8sTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                                       extra_params=extra_params,
                                       **kwargs)
 
-    def get_env_files(self, cluster_template):
+    def get_env_files(self, cluster_template, cluster):
         env_files = []
         if cluster_template.master_lb_enabled:
             env_files.append(

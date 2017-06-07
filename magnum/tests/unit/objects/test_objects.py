@@ -355,7 +355,7 @@ class TestObject(test_base.TestCase, _TestObject):
 # For more information on object version testing, read
 # http://docs.openstack.org/developer/magnum/objects.html
 object_data = {
-    'Cluster': '1.13-5da08d5f023eab4c5657c3fb6997e44c',
+    'Cluster': '1.14-281c582b16291c4f0666371e53975a5c',
     'ClusterTemplate': '1.17-74e4e6b1faca768714be809a828599c2',
     'Certificate': '1.1-1924dc077daa844f0f9076332ef96815',
     'MyObj': '1.0-34c4b1aadefd177b13f9a2f894cc23cd',

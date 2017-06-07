@@ -38,6 +38,7 @@ class TestClusterObject(base.DbTestCase):
         self.fake_cluster_template = objects.ClusterTemplate(
             uuid=cluster_template_id)
         self.fake_cluster['keypair'] = 'keypair1'
+        self.fake_cluster['docker_volume_size'] = 3
 
     @mock.patch('magnum.objects.ClusterTemplate.get_by_uuid')
     def test_get_by_id(self, mock_cluster_template_get):

@@ -212,6 +212,7 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   the above size. If not specified, images will be stored in the compute
   instance's local disk. For the 'devicemapper' storage driver, the minimum
   value is 3GB. For the 'overlay' storage driver, the minimum value is 1GB.
+  This value can be overridden at cluster creation.
 
 --docker-storage-driver \<docker-storage-driver\>
   The name of a driver to manage the storage for the images and the

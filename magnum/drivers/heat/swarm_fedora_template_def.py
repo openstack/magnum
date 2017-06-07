@@ -52,7 +52,7 @@ class SwarmFedoraTemplateDefinition(template_def.BaseTemplateDefinition):
         self.add_parameter('node_flavor',
                            cluster_template_attr='flavor_id')
         self.add_parameter('docker_volume_size',
-                           cluster_template_attr='docker_volume_size')
+                           cluster_attr='docker_volume_size')
         self.add_parameter('volume_driver',
                            cluster_template_attr='volume_driver')
         self.add_parameter('external_network',
@@ -122,11 +122,11 @@ class SwarmFedoraTemplateDefinition(template_def.BaseTemplateDefinition):
                                       extra_params=extra_params,
                                       **kwargs)
 
-    def get_env_files(self, cluster_template):
+    def get_env_files(self, cluster_template, cluster):
         env_files = []
 
         template_def.add_priv_net_env_file(env_files, cluster_template)
-        template_def.add_volume_env_file(env_files, cluster_template)
+        template_def.add_volume_env_file(env_files, cluster)
         template_def.add_lb_env_file(env_files, cluster_template)
 
         return env_files

@@ -74,6 +74,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'node_count': 1,
             'master_count': 1,
             'discovery_url': 'https://discovery.etcd.io/test',
+            'docker_volume_size': 20,
             'master_addresses': ['172.17.2.18'],
             'ca_cert_ref': 'http://barbican/v1/containers/xx-xx-xx-xx',
             'magnum_cert_ref': 'http://barbican/v1/containers/xx-xx-xx-xx',
@@ -353,6 +354,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v3',
             'cluster_uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
             'discovery_url': 'https://discovery.etcd.io/test',
+            'docker_volume_size': 20,
             'external_network': 'external_network_id',
             'flannel_backend': 'vxlan',
             'flannel_network_cidr': '10.101.0.0/16',
@@ -384,7 +386,7 @@ class TestClusterConductorWithK8s(base.TestCase):
         self.assertEqual(expected, definition)
         self.assertEqual(
             ['../../common/templates/environments/with_private_network.yaml',
-             '../../common/templates/environments/no_volume.yaml',
+             '../../common/templates/environments/with_volume.yaml',
              '../../common/templates/environments/no_master_lb.yaml',
              '../../common/templates/environments/disable_floating_ip.yaml',
              ],

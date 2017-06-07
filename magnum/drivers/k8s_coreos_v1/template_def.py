@@ -30,7 +30,7 @@ class CoreOSK8sTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
         self.add_output('kube_masters',
                         cluster_attr='master_addresses')
 
-    def get_env_files(self, cluster_template):
+    def get_env_files(self, cluster_template, cluster):
         env_files = []
 
         template_def.add_priv_net_env_file(env_files, cluster_template)

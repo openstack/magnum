@@ -62,6 +62,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
             'cluster_template_id': 'xx-xx-xx-xx',
             'keypair': 'keypair_id',
+            'docker_volume_size': 20,
             'name': 'cluster1',
             'stack_id': 'xx-xx-xx-xx',
             'api_address': '172.17.2.3',
@@ -295,12 +296,13 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'swarm_version': 'fake-version',
             'swarm_strategy': u'spread',
             'rexray_preempt': 'False',
-            'docker_volume_type': 'lvmdriver-1'
+            'docker_volume_type': 'lvmdriver-1',
+            'docker_volume_size': 20,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
             ['../../common/templates/environments/with_private_network.yaml',
-             '../../common/templates/environments/no_volume.yaml',
+             '../../common/templates/environments/with_volume.yaml',
              '../../common/templates/environments/no_master_lb.yaml'],
             env_files)
 

@@ -55,7 +55,7 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
     def __init__(self):
         super(K8sFedoraTemplateDefinition, self).__init__()
         self.add_parameter('docker_volume_size',
-                           cluster_template_attr='docker_volume_size')
+                           cluster_attr='docker_volume_size')
         self.add_parameter('docker_storage_driver',
                            cluster_template_attr='docker_storage_driver')
         self.add_output('kube_minions',
@@ -84,11 +84,11 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                                       extra_params=extra_params,
                                       **kwargs)
 
-    def get_env_files(self, cluster_template):
+    def get_env_files(self, cluster_template, cluster):
         env_files = []
 
         template_def.add_priv_net_env_file(env_files, cluster_template)
-        template_def.add_volume_env_file(env_files, cluster_template)
+        template_def.add_volume_env_file(env_files, cluster)
         template_def.add_lb_env_file(env_files, cluster_template)
         template_def.add_fip_env_file(env_files, cluster_template)
 
