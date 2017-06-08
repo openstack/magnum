@@ -171,7 +171,7 @@ regarding the service accounts.
 
 References
 ==========
-.. [1] http://docs.openstack.org/developer/magnum/dev/dev-kubernetes-load-balancer.html
+.. [1] http://docs.openstack.org/developer/magnum/dev/kubernetes-load-balancer.html
 .. [2] https://blueprints.launchpad.net/magnum/+spec/registryv2-in-master
 .. [3] http://blogs.rdoproject.org/5858/role-delegation-in-keystone-trusts
 .. [4] https://wiki.openstack.org/wiki/Keystone/Trusts
