@@ -269,3 +269,52 @@ class Handler(object):
 
         cluster.save()
         return cluster
+
+    def cluster_upgrade(self, context, cluster, cluster_template,
+                        max_batch_size, nodegroup, rollback=False):
+        LOG.debug('cluster_conductor cluster_upgrade')
+
+        # osc = clients.OpenStackClients(context)
+        allow_update_status = (
+            fields.ClusterStatus.CREATE_COMPLETE,
+            fields.ClusterStatus.UPDATE_COMPLETE,
+            fields.ClusterStatus.RESUME_COMPLETE,
+            fields.ClusterStatus.RESTORE_COMPLETE,
+            fields.ClusterStatus.ROLLBACK_COMPLETE,
+            fields.ClusterStatus.SNAPSHOT_COMPLETE,
+            fields.ClusterStatus.CHECK_COMPLETE,
+            fields.ClusterStatus.ADOPT_COMPLETE
+        )
+        if cluster.status not in allow_update_status:
+            conductor_utils.notify_about_cluster_operation(
+                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE)
+            operation = _('Upgrading a cluster when status is '
+                          '"%s"') % cluster.status
+            raise exception.NotSupported(operation=operation)
+
+        # Get driver
+        ct = conductor_utils.retrieve_cluster_template(context, cluster)
+        cluster_driver = driver.Driver.get_driver(ct.server_type,
+                                                  ct.cluster_distro,
+                                                  ct.coe)
+        # Upgrade cluster
+        try:
+            conductor_utils.notify_about_cluster_operation(
+                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_PENDING)
+            cluster_driver.upgrade_cluster(context, cluster, cluster_template,
+                                           max_batch_size, nodegroup, rollback)
+            cluster.status = fields.ClusterStatus.UPDATE_IN_PROGRESS
+            cluster.status_reason = None
+        except Exception as e:
+            cluster.status = fields.ClusterStatus.UPDATE_FAILED
+            cluster.status_reason = six.text_type(e)
+            cluster.save()
+            conductor_utils.notify_about_cluster_operation(
+                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE)
+            if isinstance(e, exc.HTTPBadRequest):
+                e = exception.InvalidParameterValue(message=six.text_type(e))
+                raise e
+            raise
+
+        cluster.save()
+        return cluster

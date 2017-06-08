@@ -150,6 +150,17 @@ rules = [
                 'method': 'POST'
             }
         ]
+    ),
+    policy.DocumentedRuleDefault(
+        name=CLUSTER % 'upgrade',
+        check_str=base.RULE_DENY_CLUSTER_USER,
+        description='Upgrade an existing cluster.',
+        operations=[
+            {
+                'path': '/v1/clusters/{cluster_ident}/actions/upgrade',
+                'method': 'POST'
+            }
+        ]
     )
 ]
 

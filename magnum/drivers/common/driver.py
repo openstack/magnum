@@ -177,6 +177,13 @@ class Driver(object):
         return None
 
     @abc.abstractmethod
+    def upgrade_cluster(self, context, cluster, cluster_template,
+                        max_batch_size, nodegroup, scale_manager=None,
+                        rollback=False):
+        raise NotImplementedError("Subclasses must implement "
+                                  "'upgrade_cluster'.")
+
+    @abc.abstractmethod
     def delete_cluster(self, context, cluster):
         raise NotImplementedError("Subclasses must implement "
                                   "'delete_cluster'.")

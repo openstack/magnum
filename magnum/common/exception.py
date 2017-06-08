@@ -183,6 +183,10 @@ class InvalidSubnet(Invalid):
     message = _("Received invalid subnet %(subnet)s.")
 
 
+class InvalidVersion(Invalid):
+    message = _("Received invalid tag for %(tag)s.")
+
+
 class HTTPNotFound(ResourceNotFound):
     pass
 

@@ -33,6 +33,7 @@ created and managed by Magnum to support the COE's.
 #. `Notification`_
 #. `Container Monitoring`_
 #. `Kubernetes External Load Balancer`_
+#. `Rolling Upgrade`_
 
 Overview
 ========
@@ -3230,3 +3231,8 @@ Kubernetes External Load Balancer
 =================================
 
 .. include:: kubernetes-load-balancer.rst
+
+Rolling Upgrade
+===============
+
+.. include:: rolling-upgrade.rst

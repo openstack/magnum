@@ -40,10 +40,11 @@ REST_API_VERSION_HISTORY = """REST API Version History:
     * 1.5 - Add cluster CA certificate rotation support
     * 1.6 - Add quotas API
     * 1.7 - Add resize API
+    * 1.8 - Add upgrade API
 """
 
 BASE_VER = '1.1'
-CURRENT_MAX_VER = '1.7'
+CURRENT_MAX_VER = '1.8'
 
 
 class Version(object):

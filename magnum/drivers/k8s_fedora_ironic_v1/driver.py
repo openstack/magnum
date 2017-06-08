@@ -38,3 +38,7 @@ class Driver(driver.HeatDriver):
         # the scale_manager.
         # https://bugs.launchpad.net/magnum/+bug/1746510
         return None
+
+    def upgrade_cluster(self, context, cluster, scale_manager=None,
+                        rollback=False):
+        raise NotImplementedError("Must implement 'upgrade_cluster'")

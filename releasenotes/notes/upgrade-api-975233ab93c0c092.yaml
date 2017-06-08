@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    A new API endpoint <ClusterID>/actions/upgrade is added to support rolling
+    upgrade the base OS of nodes and the version of Kubernetes. More details
+    please refer the API Refreence document.

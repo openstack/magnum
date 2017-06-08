@@ -36,3 +36,8 @@ class Driver(driver.HeatDriver):
 
     def get_scale_manager(self, context, osclient, cluster):
         return MesosScaleManager(context, osclient, cluster)
+
+    def upgrade_cluster(self, context, cluster, cluster_template,
+                        max_batch_size, nodegroup, scale_manager=None,
+                        rollback=False):
+        raise NotImplementedError("Must implement 'upgrade_cluster'")

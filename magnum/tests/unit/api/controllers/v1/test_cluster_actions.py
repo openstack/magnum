@@ -43,7 +43,7 @@ class TestClusterActions(api_base.FunctionalTest):
                                   self.cluster_obj.uuid,
                                   {"node_count": new_node_count},
                                   headers={"Openstack-Api-Version":
-                                           "container-infra 1.7"})
+                                           "container-infra latest"})
         self.assertEqual(202, response.status_code)
 
         response = self.get_json('/clusters/%s' % self.cluster_obj.uuid)
@@ -66,7 +66,7 @@ class TestClusterActions(api_base.FunctionalTest):
                                   self.cluster_obj.uuid,
                                   cluster_resize_req,
                                   headers={"Openstack-Api-Version":
-                                           "container-infra 1.7"})
+                                           "container-infra latest"})
         self.assertEqual(202, response.status_code)
 
         response = self.get_json('/clusters/%s' % self.cluster_obj.uuid)
@@ -86,7 +86,7 @@ class TestClusterActions(api_base.FunctionalTest):
                                   self.cluster_obj.uuid,
                                   cluster_resize_req,
                                   headers={"Openstack-Api-Version":
-                                           "container-infra 1.7"},
+                                           "container-infra latest"},
                                   expect_errors=True)
         self.assertEqual(400, response.status_code)
 
@@ -103,7 +103,7 @@ class TestClusterActions(api_base.FunctionalTest):
                                   self.cluster_obj.uuid,
                                   cluster_resize_req,
                                   headers={"Openstack-Api-Version":
-                                           "container-infra 1.7"},
+                                           "container-infra latest"},
                                   expect_errors=True)
         self.assertEqual(400, response.status_code)
 
@@ -120,6 +120,6 @@ class TestClusterActions(api_base.FunctionalTest):
                                   self.cluster_obj.uuid,
                                   cluster_resize_req,
                                   headers={"Openstack-Api-Version":
-                                           "container-infra 1.7"},
+                                           "container-infra latest"},
                                   expect_errors=True)
         self.assertEqual(400, response.status_code)

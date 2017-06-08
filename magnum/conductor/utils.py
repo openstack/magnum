@@ -45,6 +45,17 @@ def retrieve_cluster_uuid(context, cluster_ident):
         return cluster_ident
 
 
+def retrieve_ct_by_name_or_uuid(context, cluster_template_ident):
+    if not uuidutils.is_uuid_like(cluster_template_ident):
+        return cluster_template.ClusterTemplate.get_by_name(
+            context,
+            cluster_template_ident)
+    else:
+        return cluster_template.ClusterTemplate.get_by_uuid(
+            context,
+            cluster_template_ident)
+
+
 def object_has_stack(context, cluster_uuid):
     osc = clients.OpenStackClients(context)
     obj = retrieve_cluster(context, cluster_uuid)

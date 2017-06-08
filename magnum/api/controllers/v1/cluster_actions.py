@@ -55,6 +55,22 @@ class ClusterResizeRequest(base.APIBase):
     """Group of nodes to be uprgaded (master or node)"""
 
 
+class ClusterUpgradeRequest(base.APIBase):
+    """API object for handling upgrade requests.
+
+    This class enforces type checking and value constraints.
+    """
+
+    max_batch_size = wtypes.IntegerType(minimum=1)
+    """Max batch size of nodes to be upraded in parallel"""
+
+    nodegroup = wtypes.StringType(min_length=1, max_length=255)
+    """Group of nodes to be uprgaded (master or node)"""
+
+    cluster_template = wtypes.StringType(min_length=1, max_length=255)
+    """The cluster_template UUID"""
+
+
 class ActionsController(base.Controller):
     """REST controller for cluster actions."""
     def __init__(self):
@@ -62,6 +78,7 @@ class ActionsController(base.Controller):
 
     _custom_actions = {
         'resize': ['POST'],
+        'upgrade': ['POST']
     }
 
     @base.Controller.api_version("1.7")
@@ -106,5 +123,37 @@ class ActionsController(base.Controller):
             cluster,
             cluster_resize_req.node_count,
             cluster_resize_req.nodes_to_remove,
+            nodegroup)
+        return ClusterID(cluster.uuid)
+
+    @base.Controller.api_version("1.8")
+    @expose.expose(None, types.uuid_or_name,
+                   body=ClusterUpgradeRequest, status_code=202)
+    def upgrade(self, cluster_ident, cluster_upgrade_req):
+        """Upgrade a cluster.
+
+        :param cluster_ident: UUID of a cluster or logical name of the cluster.
+        """
+        context = pecan.request.context
+        cluster = api_utils.get_resource('Cluster', cluster_ident)
+        policy.enforce(context, 'cluster:upgrade', cluster,
+                       action='cluster:upgrade')
+
+        new_cluster_template = api_utils.get_resource(
+            'ClusterTemplate',
+            cluster_upgrade_req.cluster_template)
+
+        if (cluster_upgrade_req.nodegroup == wtypes.Unset or
+                not cluster_upgrade_req.nodegroup):
+            # NOTE(ttsiouts): If the nodegroup is not specified
+            # reflect the change to the default worker nodegroup
+            nodegroup = cluster.default_ng_worker
+        else:
+            nodegroup = objects.NodeGroup.get(
+                context, cluster.uuid, cluster_upgrade_req.nodegroup)
+        pecan.request.rpcapi.cluster_upgrade(
+            cluster,
+            new_cluster_template,
+            cluster_upgrade_req.max_batch_size,
             nodegroup)
         return ClusterID(cluster.uuid)

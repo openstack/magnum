@@ -74,6 +74,22 @@ class API(rpc_service.API):
                           nodes_to_remove=nodes_to_remove,
                           nodegroup=nodegroup)
 
+    def cluster_upgrade(self, cluster, cluster_template, max_batch_size,
+                        nodegroup):
+        return self._call('cluster_upgrade',
+                          cluster=cluster,
+                          cluster_template=cluster_template,
+                          max_batch_size=max_batch_size,
+                          nodegroup=nodegroup)
+
+    def cluster_upgrade_async(self, cluster, cluster_template, max_batch_size,
+                              nodegroup):
+        return self._call('cluster_upgrade',
+                          cluster=cluster,
+                          cluster_template=cluster_template,
+                          max_batch_size=max_batch_size,
+                          nodegroup=nodegroup)
+
     # Federation Operations
 
     def federation_create(self, federation, create_timeout):

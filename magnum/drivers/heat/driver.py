@@ -46,6 +46,17 @@ class HeatDriver(driver.Driver):
        orchestrating cluster lifecycle operations
     """
 
+    def _extract_template_definition_up(self, context, cluster,
+                                        cluster_template,
+                                        scale_manager=None):
+        ct_obj = conductor_utils.retrieve_ct_by_name_or_uuid(
+            context,
+            cluster_template)
+        definition = self.get_template_definition()
+        return definition.extract_definition(context, ct_obj,
+                                             cluster,
+                                             scale_manager=scale_manager)
+
     def _extract_template_definition(self, context, cluster,
                                      scale_manager=None):
         cluster_template = conductor_utils.retrieve_cluster_template(context,
@@ -104,6 +115,12 @@ class HeatDriver(driver.Driver):
     def update_cluster(self, context, cluster, scale_manager=None,
                        rollback=False):
         self._update_stack(context, cluster, scale_manager, rollback)
+
+    @abc.abstractmethod
+    def upgrade_cluster(self, context, cluster, cluster_template,
+                        max_batch_size, nodegroup, scale_manager=None,
+                        rollback=False):
+        raise NotImplementedError("Must implement 'upgrade_cluster'")
 
     def delete_cluster(self, context, cluster):
         self.pre_delete_cluster(context, cluster)
