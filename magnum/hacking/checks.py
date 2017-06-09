@@ -38,14 +38,6 @@ assert_equal_in_end_with_true_or_false_re = re.compile(
     r"assertEqual\((\w|[][.'\"])+ in (\w|[][.'\", ])+, (True|False)\)")
 assert_equal_in_start_with_true_or_false_re = re.compile(
     r"assertEqual\((True|False), (\w|[][.'\"])+ in (\w|[][.'\", ])+\)")
-assert_equal_end_with_none_re = re.compile(
-    r"(.)*assertEqual\((\w|\.|\'|\"|\[|\])+, None\)")
-assert_equal_start_with_none_re = re.compile(
-    r"(.)*assertEqual\(None, (\w|\.|\'|\"|\[|\])+\)")
-assert_not_equal_end_with_none_re = re.compile(
-    r"(.)*assertNotEqual\((\w|\.|\'|\"|\[|\])+, None\)")
-assert_not_equal_start_with_none_re = re.compile(
-    r"(.)*assertNotEqual\(None, (\w|\.|\'|\"|\[|\])+\)")
 assert_equal_with_true_re = re.compile(
     r"assertEqual\(True,")
 assert_equal_with_false_re = re.compile(
@@ -72,32 +64,6 @@ translated_log = re.compile(
     r"(.)*LOG\.(audit|error|info|critical|exception)"
     "\(\s*_\(\s*('|\")")
 string_translation = re.compile(r"[^_]*_\(\s*('|\")")
-
-
-def assert_equal_none(logical_line):
-    """Check for assertEqual(A, None) or assertEqual(None, A) sentences
-
-    M318
-    """
-    msg = ("M318: assertEqual(A, None) or assertEqual(None, A) "
-           "sentences not allowed")
-    res = (assert_equal_start_with_none_re.match(logical_line) or
-           assert_equal_end_with_none_re.match(logical_line))
-    if res:
-        yield (0, msg)
-
-
-def assert_not_equal_none(logical_line):
-    """Check for assertNotEqual(A, None) or assertNotEqual(None, A) sentences
-
-    M319
-    """
-    msg = ("M319: assertNotEqual(A, None) or assertNotEqual(None, A) "
-           "sentences not allowed")
-    res = (assert_not_equal_start_with_none_re.match(logical_line) or
-           assert_not_equal_end_with_none_re.match(logical_line))
-    if res:
-        yield (0, msg)
 
 
 def no_mutable_default_args(logical_line):
@@ -215,8 +181,6 @@ def check_explicit_underscore_import(logical_line, filename):
 
 def factory(register):
     register(no_mutable_default_args)
-    register(assert_equal_none)
-    register(assert_not_equal_none)
     register(assert_equal_true_or_false)
     register(assert_equal_not_none)
     register(assert_true_isinstance)

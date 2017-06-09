@@ -14,10 +14,6 @@ Magnum Specific Commandments
   datetime.datetime.utcnow() to make it easy to override its return value.
 - [M316] Change assertTrue(isinstance(A, B)) by optimal assert like
   assertIsInstance(A, B).
-- [M318] Change assertEqual(A, None) or assertEqual(None, A) by optimal assert
-  like assertIsNone(A)
-- [M319] Change assertNotEqual(A, None) or assertNotEqual(None, A)
-  by optimal assert like assertIsNotNone(A)
 - [M322] Method's default argument shouldn't be mutable.
 - [M323] Change assertEqual(True, A) or assertEqual(False, A) by optimal assert
   like assertTrue(A) or assertFalse(A)
