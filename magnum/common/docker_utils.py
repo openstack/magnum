@@ -14,8 +14,6 @@
 import contextlib
 
 import docker
-from docker import client
-from docker import tls
 from docker.utils import utils
 
 from magnum.conductor.handlers.common import cert_manager
@@ -79,7 +77,7 @@ def docker_for_cluster(context, cluster):
         magnum_cert.close()
 
 
-class DockerHTTPClient(client.Client):
+class DockerHTTPClient(docker.APIClient):
     def __init__(self, url='unix://var/run/docker.sock',
                  ver=CONF.docker.docker_remote_api_version,
                  timeout=CONF.docker.default_timeout,
@@ -88,7 +86,7 @@ class DockerHTTPClient(client.Client):
                  client_cert=None):
 
         if ca_cert and client_key and client_cert:
-            ssl_config = tls.TLSConfig(
+            ssl_config = docker.tls.TLSConfig(
                 client_cert=(client_cert, client_key),
                 verify=ca_cert,
                 assert_hostname=False,
