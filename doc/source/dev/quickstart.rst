@@ -101,7 +101,7 @@ Clone devstack::
     sudo mkdir -p /opt/stack
     sudo chown $USER /opt/stack
 
-    git clone https://git.openstack.org/openstack-dev/devstack /opt/stack/devstack
+    git clone https://git.openstack.org/openstack-dev/devstack /opt/stack/devstack -b stable/ocata
 
 We will run devstack with minimal local.conf settings required to enable
 magnum, heat, and neutron (neutron is enabled by default in devstack since
@@ -119,15 +119,15 @@ Kilo, and heat must be enabled by yourself)::
 
     # Enable barbican service and use it to store TLS certificates
     # For details http://docs.openstack.org/developer/magnum/dev/tls.html
-    enable_plugin barbican https://git.openstack.org/openstack/barbican
+    enable_plugin barbican https://git.openstack.org/openstack/barbican stable/ocata
 
-    enable_plugin heat https://git.openstack.org/openstack/heat
+    enable_plugin heat https://git.openstack.org/openstack/heat stable/ocata
 
     # Enable magnum plugin after dependent plugins
-    enable_plugin magnum https://git.openstack.org/openstack/magnum
+    enable_plugin magnum https://git.openstack.org/openstack/magnum stable/ocata
 
     # Optional:  uncomment to enable the Magnum UI plugin in Horizon
-    #enable_plugin magnum-ui https://github.com/openstack/magnum-ui
+    #enable_plugin magnum-ui https://github.com/openstack/magnum-ui stable/ocata
 
     VOLUME_BACKING_FILE_SIZE=20G
     END
@@ -140,8 +140,8 @@ Optionally, you can enable neutron/lbaas v2 with octavia to create load
 balancers for multi master clusters::
 
     cat >> /opt/stack/devstack/local.conf << END
-    enable_plugin neutron-lbaas https://git.openstack.org/openstack/neutron-lbaas
-    enable_plugin octavia https://git.openstack.org/openstack/octavia
+    enable_plugin neutron-lbaas https://git.openstack.org/openstack/neutron-lbaas stable/ocata
+    enable_plugin octavia https://git.openstack.org/openstack/octavia stable/ocata
 
     # Disable LBaaS(v1) service
     disable_service q-lbaas
@@ -158,7 +158,7 @@ Optionally, you can enable ceilometer in devstack. If ceilometer is enabled,
 magnum will periodically send metrics to ceilometer::
 
     cat >> /opt/stack/devstack/local.conf << END
-    enable_plugin ceilometer https://git.openstack.org/openstack/ceilometer
+    enable_plugin ceilometer https://git.openstack.org/openstack/ceilometer stable/ocata
     END
 
 If you want to deploy Docker Registry 2.0 in your cluster, you should enable

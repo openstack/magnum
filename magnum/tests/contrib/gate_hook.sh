@@ -19,7 +19,7 @@ coe=$1
 special=$2
 
 export PROJECTS="openstack/barbican $PROJECTS"
-export DEVSTACK_LOCAL_CONFIG="enable_plugin heat git://git.openstack.org/openstack/heat"
+export DEVSTACK_LOCAL_CONFIG="enable_plugin heat git://git.openstack.org/openstack/heat stable/ocata"
 
 export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service horizon"
 export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service s-account"
@@ -52,7 +52,7 @@ elif [ "${coe}${special}" = "k8s-ironic" ]; then
     # NOTE(strigazi) keep cinder
     # export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service cinder c-sch c-api c-vol"
 
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ironic git://git.openstack.org/openstack/ironic"
+    export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ironic git://git.openstack.org/openstack/ironic stable/ocata"
 
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_DEPLOY_DRIVER=pxe_ssh"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_BAREMETAL_BASIC_OPS=True"
@@ -85,6 +85,6 @@ else
 fi
 
 # Enable magnum plugin in the last step
-export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin magnum git://git.openstack.org/openstack/magnum"
+export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin magnum git://git.openstack.org/openstack/magnum stable/ocata"
 
 $BASE/new/devstack-gate/devstack-vm-gate.sh

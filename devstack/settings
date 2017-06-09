@@ -14,7 +14,8 @@
 # TENANT_VLAN_RANGE=
 # PHYSICAL_NETWORK=public
 # OVS_PHYSICAL_BRIDGE=br-ex
-
+export MAGNUMCLIENT_BRANCH=stable/ocata
+export BARBICANCLIENT_BRANCH=stable/ocata
 # Enable Neutron which is required by Magnum and disable nova-network.
 disable_service n-net
 enable_service q-svc
