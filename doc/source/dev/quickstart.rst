@@ -118,7 +118,7 @@ Kilo, and heat must be enabled by yourself)::
     PUBLIC_INTERFACE=eth1
 
     # Enable barbican service and use it to store TLS certificates
-    # For details http://docs.openstack.org/developer/magnum/dev/tls.html
+    # For details https://docs.openstack.org/developer/magnum/userguide.html#transport-layer-security
     enable_plugin barbican https://git.openstack.org/openstack/barbican
 
     enable_plugin heat https://git.openstack.org/openstack/heat
