@@ -110,6 +110,9 @@ class Cluster(base.APIBase):
     docker_volume_size = wtypes.IntegerType(minimum=1)
     """The size in GB of the docker volume"""
 
+    labels = wtypes.DictType(str, str)
+    """One or more key/value pairs"""
+
     create_timeout = wsme.wsattr(wtypes.IntegerType(minimum=0), default=60)
     """Timeout for creating the cluster in minutes. Default to 60 if not set"""
 
@@ -162,7 +165,7 @@ class Cluster(base.APIBase):
         if not expand:
             cluster.unset_fields_except(['uuid', 'name', 'cluster_template_id',
                                          'keypair', 'docker_volume_size',
-                                         'node_count', 'status',
+                                         'labels', 'node_count', 'status',
                                          'create_timeout', 'master_count',
                                          'stack_id'])
 
@@ -188,6 +191,7 @@ class Cluster(base.APIBase):
                      node_count=2,
                      master_count=1,
                      docker_volume_size=1,
+                     labels={},
                      create_timeout=15,
                      stack_id='49dc23f5-ffc9-40c3-9d34-7be7f9e34d63',
                      status=fields.ClusterStatus.CREATE_COMPLETE,
@@ -402,6 +406,10 @@ class ClustersController(base.Controller):
         # If docker_volume_size is not present, use cluster_template value
         if cluster.docker_volume_size == wtypes.Unset:
             cluster.docker_volume_size = cluster_template.docker_volume_size
+
+        # If labels is not present, use cluster_template value
+        if cluster.labels == wtypes.Unset:
+            cluster.labels = cluster_template.labels
 
         cluster_dict = cluster.as_dict()
 

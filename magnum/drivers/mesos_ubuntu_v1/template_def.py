@@ -68,7 +68,7 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
                       'mesos_slave_executor_env_variables']
 
         for label in label_list:
-            extra_params[label] = cluster_template.labels.get(label)
+            extra_params[label] = cluster.labels.get(label)
 
         scale_mgr = kwargs.pop('scale_manager', None)
         if scale_mgr:

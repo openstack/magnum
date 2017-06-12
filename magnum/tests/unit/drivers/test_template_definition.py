@@ -250,25 +250,25 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         mock_context.user_name = 'fake_user'
         mock_context.tenant = 'fake_tenant'
 
-        flannel_cidr = mock_cluster_template.labels.get('flannel_network_cidr')
-        flannel_subnet = mock_cluster_template.labels.get(
+        flannel_cidr = mock_cluster.labels.get('flannel_network_cidr')
+        flannel_subnet = mock_cluster.labels.get(
             'flannel_network_subnetlen')
-        flannel_backend = mock_cluster_template.labels.get('flannel_backend')
-        system_pods_initial_delay = mock_cluster_template.labels.get(
+        flannel_backend = mock_cluster.labels.get('flannel_backend')
+        system_pods_initial_delay = mock_cluster.labels.get(
             'system_pods_initial_delay')
-        system_pods_timeout = mock_cluster_template.labels.get(
+        system_pods_timeout = mock_cluster.labels.get(
             'system_pods_timeout')
-        admission_control_list = mock_cluster_template.labels.get(
+        admission_control_list = mock_cluster.labels.get(
             'admission_control_list')
-        prometheus_monitoring = mock_cluster_template.labels.get(
+        prometheus_monitoring = mock_cluster.labels.get(
             'prometheus_monitoring')
-        grafana_admin_passwd = mock_cluster_template.labels.get(
+        grafana_admin_passwd = mock_cluster.labels.get(
             'grafana_admin_passwd')
-        kube_dashboard_enabled = mock_cluster_template.labels.get(
+        kube_dashboard_enabled = mock_cluster.labels.get(
             'kube_dashboard_enabled')
-        docker_volume_type = mock_cluster_template.labels.get(
+        docker_volume_type = mock_cluster.labels.get(
             'docker_volume_type')
-        etcd_volume_size = mock_cluster_template.labels.get(
+        etcd_volume_size = mock_cluster.labels.get(
             'etcd_volume_size')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
@@ -330,25 +330,25 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         mock_context.user_name = 'fake_user'
         mock_context.tenant = 'fake_tenant'
 
-        flannel_cidr = mock_cluster_template.labels.get('flannel_network_cidr')
-        flannel_subnet = mock_cluster_template.labels.get(
+        flannel_cidr = mock_cluster.labels.get('flannel_network_cidr')
+        flannel_subnet = mock_cluster.labels.get(
             'flannel_network_subnetlen')
-        flannel_backend = mock_cluster_template.labels.get('flannel_backend')
-        system_pods_initial_delay = mock_cluster_template.labels.get(
+        flannel_backend = mock_cluster.labels.get('flannel_backend')
+        system_pods_initial_delay = mock_cluster.labels.get(
             'system_pods_initial_delay')
-        system_pods_timeout = mock_cluster_template.labels.get(
+        system_pods_timeout = mock_cluster.labels.get(
             'system_pods_timeout')
-        admission_control_list = mock_cluster_template.labels.get(
+        admission_control_list = mock_cluster.labels.get(
             'admission_control_list')
-        prometheus_monitoring = mock_cluster_template.labels.get(
+        prometheus_monitoring = mock_cluster.labels.get(
             'prometheus_monitoring')
-        grafana_admin_passwd = mock_cluster_template.labels.get(
+        grafana_admin_passwd = mock_cluster.labels.get(
             'grafana_admin_passwd')
-        kube_dashboard_enabled = mock_cluster_template.labels.get(
+        kube_dashboard_enabled = mock_cluster.labels.get(
             'kube_dashboard_enabled')
-        docker_volume_type = mock_cluster_template.labels.get(
+        docker_volume_type = mock_cluster.labels.get(
             'docker_volume_type')
-        etcd_volume_size = mock_cluster_template.labels.get(
+        etcd_volume_size = mock_cluster.labels.get(
             'etcd_volume_size')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
@@ -761,14 +761,14 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         mock_context.user_name = 'fake_user'
         mock_context.tenant = 'fake_tenant'
 
-        docker_volume_type = mock_cluster_template.labels.get(
+        docker_volume_type = mock_cluster.labels.get(
             'docker_volume_type')
-        flannel_cidr = mock_cluster_template.labels.get('flannel_network_cidr')
-        flannel_subnet = mock_cluster_template.labels.get(
+        flannel_cidr = mock_cluster.labels.get('flannel_network_cidr')
+        flannel_subnet = mock_cluster.labels.get(
             'flannel_network_subnetlen')
-        flannel_backend = mock_cluster_template.labels.get('flannel_backend')
-        rexray_preempt = mock_cluster_template.labels.get('rexray_preempt')
-        swarm_strategy = mock_cluster_template.labels.get('swarm_strategy')
+        flannel_backend = mock_cluster.labels.get('flannel_backend')
+        rexray_preempt = mock_cluster.labels.get('rexray_preempt')
+        swarm_strategy = mock_cluster.labels.get('swarm_strategy')
 
         swarm_def = swarm_tdef.AtomicSwarmTemplateDefinition()
 
@@ -923,18 +923,18 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
         mock_context.domain_name = 'domainname'
         mock_cluster_template = mock.MagicMock()
         mock_cluster_template.tls_disabled = False
-        rexray_preempt = mock_cluster_template.labels.get('rexray_preempt')
-        mesos_slave_isolation = mock_cluster_template.labels.get(
-            'mesos_slave_isolation')
-        mesos_slave_work_dir = mock_cluster_template.labels.get(
-            'mesos_slave_work_dir')
-        mesos_slave_image_providers = mock_cluster_template.labels.get(
-            'image_providers')
-        mesos_slave_executor_env_variables = mock_cluster_template.labels.get(
-            'mesos_slave_executor_env_variables')
         mock_cluster = mock.MagicMock()
         mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
         del mock_cluster.stack_id
+        rexray_preempt = mock_cluster.labels.get('rexray_preempt')
+        mesos_slave_isolation = mock_cluster.labels.get(
+            'mesos_slave_isolation')
+        mesos_slave_work_dir = mock_cluster.labels.get(
+            'mesos_slave_work_dir')
+        mesos_slave_image_providers = mock_cluster.labels.get(
+            'image_providers')
+        mesos_slave_executor_env_variables = mock_cluster.labels.get(
+            'mesos_slave_executor_env_variables')
         mock_osc = mock.MagicMock()
         mock_osc.cinder_region_name.return_value = 'RegionOne'
         mock_osc_class.return_value = mock_osc

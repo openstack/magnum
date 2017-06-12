@@ -66,6 +66,13 @@ class TestClusterConductorWithMesos(base.TestCase):
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
+            'labels': {'rexray_preempt': 'False',
+                       'mesos_slave_isolation':
+                       'docker/runtime,filesystem/linux',
+                       'mesos_slave_image_providers': 'docker',
+                       'mesos_slave_executor_env_variables': '{}',
+                       'mesos_slave_work_dir': '/tmp/mesos/slave'
+                       },
         }
         self.context.user_name = 'mesos_user'
         self.context.tenant = 'admin'

@@ -119,7 +119,7 @@ class DcosCentosTemplateDefinition(template_def.BaseTemplateDefinition):
                       'telemetry_enabled']
 
         for label in label_list:
-            extra_params[label] = cluster_template.labels.get(label)
+            extra_params[label] = cluster.labels.get(label)
 
         # By default, master_discovery is set to 'static'
         # If --master-lb-enabled is specified,

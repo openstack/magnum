@@ -74,6 +74,12 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
             'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
+            'labels': {'docker_volume_type': 'lvmdriver-1',
+                       'flannel_network_cidr': '10.101.0.0/16',
+                       'flannel_network_subnetlen': '26',
+                       'flannel_backend': 'vxlan',
+                       'rexray_preempt': 'False',
+                       'swarm_strategy': 'spread'},
             'coe_version': 'fake-version'
         }
 
