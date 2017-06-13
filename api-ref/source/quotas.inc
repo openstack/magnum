@@ -95,7 +95,7 @@ Update a resource quota
 
 .. rest_method:: PATCH /v1/quotas/{project_id}/{resource}
 
-Update resource quota for the given projec id.
+Update resource quota for the given project id.
 
 Response Codes
 --------------
@@ -121,4 +121,31 @@ Response Example
 ----------------
 
 .. literalinclude:: samples/quota-update-resp.json
+   :language: javascript
+
+Delete a resource quota
+============================
+
+.. rest_method:: DELETE /v1/quotas/{project_id}/{resource}
+
+Delete a resource quota for the given project id.
+
+Response Codes
+--------------
+
+.. rest_status_code:: success status.yaml
+
+   - 204
+
+.. rest_status_code:: error status.yaml
+
+   - 400
+   - 401
+   - 403
+   - 404
+
+Request Example
+----------------
+
+.. literalinclude:: samples/quota-delete-req.json
    :language: javascript
