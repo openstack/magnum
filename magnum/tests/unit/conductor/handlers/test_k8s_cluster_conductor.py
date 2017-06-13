@@ -55,7 +55,8 @@ class TestClusterConductorWithK8s(base.TestCase):
                        'prometheus_monitoring': 'False',
                        'grafana_admin_passwd': 'fake_pwd',
                        'kube_dashboard_enabled': 'True',
-                       'docker_volume_type': 'lvmdriver-1'},
+                       'docker_volume_type': 'lvmdriver-1',
+                       'etcd_volume_size': '0'},
             'tls_disabled': False,
             'server_type': 'vm',
             'registry_enabled': False,
@@ -158,7 +159,8 @@ class TestClusterConductorWithK8s(base.TestCase):
                        'prometheus_monitoring': 'False',
                        'grafana_admin_passwd': 'fake_pwd',
                        'kube_dashboard_enabled': 'True',
-                       'docker_volume_type': 'lvmdriver-1'},
+                       'docker_volume_type': 'lvmdriver-1',
+                       'etcd_volume_size': '0'},
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
@@ -184,6 +186,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'docker_volume_type': 'lvmdriver-1',
             'docker_storage_driver': 'devicemapper',
             'discovery_url': 'https://discovery.etcd.io/test',
+            'etcd_volume_size': '0',
             'flannel_network_cidr': '10.101.0.0/16',
             'flannel_network_subnetlen': '26',
             'flannel_backend': 'vxlan',
@@ -218,6 +221,7 @@ class TestClusterConductorWithK8s(base.TestCase):
         self.assertEqual(expected, definition)
         self.assertEqual(
             ['../../common/templates/environments/no_private_network.yaml',
+             '../../common/templates/environments/no_etcd_volume.yaml',
              '../../common/templates/environments/with_volume.yaml',
              '../../common/templates/environments/no_master_lb.yaml',
              '../../common/templates/environments/disable_floating_ip.yaml',
@@ -266,6 +270,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'docker_storage_driver': 'devicemapper',
             'docker_volume_size': 20,
             'docker_volume_type': 'lvmdriver-1',
+            'etcd_volume_size': '0',
             'external_network': 'external_network_id',
             'fixed_network': 'fixed_network',
             'fixed_subnet': 'fixed_subnet',
@@ -309,6 +314,7 @@ class TestClusterConductorWithK8s(base.TestCase):
         self.assertEqual(expected, definition)
         self.assertEqual(
             ['../../common/templates/environments/no_private_network.yaml',
+             '../../common/templates/environments/no_etcd_volume.yaml',
              '../../common/templates/environments/with_volume.yaml',
              '../../common/templates/environments/no_master_lb.yaml',
              '../../common/templates/environments/disable_floating_ip.yaml',
@@ -366,6 +372,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'grafana_admin_passwd': 'fake_pwd',
             'kube_dashboard_enabled': 'True',
             'docker_volume_type': 'lvmdriver-1',
+            'etcd_volume_size': '0',
             'insecure_registry_url': '10.0.0.1:5000',
             'kube_version': 'fake-version',
             'magnum_url': 'http://127.0.0.1:9511/v1',
@@ -386,6 +393,7 @@ class TestClusterConductorWithK8s(base.TestCase):
         self.assertEqual(expected, definition)
         self.assertEqual(
             ['../../common/templates/environments/with_private_network.yaml',
+             '../../common/templates/environments/no_etcd_volume.yaml',
              '../../common/templates/environments/with_volume.yaml',
              '../../common/templates/environments/no_master_lb.yaml',
              '../../common/templates/environments/disable_floating_ip.yaml',
@@ -432,6 +440,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'network_driver': 'network_driver',
             'volume_driver': 'volume_driver',
             'discovery_url': 'https://discovery.etcd.io/test',
+            'etcd_volume_size': '0',
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
@@ -502,6 +511,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'network_driver': 'network_driver',
             'volume_driver': 'volume_driver',
             'discovery_url': 'http://tokentest/h1/h2/h3',
+            'etcd_volume_size': '0',
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
@@ -699,6 +709,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'docker_volume_type': 'lvmdriver-1',
             'docker_storage_driver': 'devicemapper',
             'discovery_url': 'https://address/token',
+            'etcd_volume_size': '0',
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
@@ -730,6 +741,7 @@ class TestClusterConductorWithK8s(base.TestCase):
         self.assertEqual(expected, definition)
         self.assertEqual(
             ['../../common/templates/environments/no_private_network.yaml',
+             '../../common/templates/environments/no_etcd_volume.yaml',
              '../../common/templates/environments/with_volume.yaml',
              '../../common/templates/environments/no_master_lb.yaml',
              '../../common/templates/environments/disable_floating_ip.yaml',

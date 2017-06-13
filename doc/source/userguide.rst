@@ -337,6 +337,9 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `docker_volume_type`_                 | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
+| `etcd_volume_size`_                   | etcd storage       | 0             |
+|                                       | volume size        |               |
++---------------------------------------+--------------------+---------------+
 
 =======
 Cluster
@@ -1059,6 +1062,10 @@ _`admission_control_list`
   <https://kubernetes.io/docs/admin/admission-controllers//>`_.
   The default value corresponds to the one recommended in this doc
   for our current Kubernetes version.
+
+_`etcd_volume_size`
+  This label sets the size of a volume holding the etcd storage data.
+  The default value is 0, meaning the etcd data is not persisted (no volume).
 
 External load balancer for services
 -----------------------------------

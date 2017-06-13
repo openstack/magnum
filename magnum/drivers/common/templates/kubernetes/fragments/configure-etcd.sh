@@ -2,6 +2,38 @@
 
 . /etc/sysconfig/heat-params
 
+if [ -n "$ETCD_VOLUME_SIZE" ] && [ "$ETCD_VOLUME_SIZE" -gt 0 ]; then
+
+    attempts=60
+    while [ ${attempts} -gt 0 ]; do
+        device_name=$(ls /dev/disk/by-id | grep ${ETCD_VOLUME:0:20}$)
+        if [ -n "${device_name}" ]; then
+            break
+        fi
+        echo "waiting for disk device"
+        sleep 0.5
+        udevadm trigger
+        let attempts--
+    done
+
+    if [ -z "${device_name}" ]; then
+        echo "ERROR: disk device does not exist" >&2
+        exit 1
+    fi
+
+    device_path=/dev/disk/by-id/${device_name}
+    fstype=$(blkid -s TYPE -o value ${device_path})
+    if [ "${fstype}" != "xfs" ]; then
+        mkfs.xfs -f ${device_path}
+    fi
+    mkdir -p /var/lib/etcd
+    echo "${device_path} /var/lib/etcd xfs defaults 0 0" >> /etc/fstab
+    mount -a
+    chown -R etcd.etcd /var/lib/etcd
+    chmod 755 /var/lib/etcd
+
+fi
+
 if [ -z "$KUBE_NODE_IP" ]; then
     # FIXME(yuanying): Set KUBE_NODE_IP correctly
     KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)

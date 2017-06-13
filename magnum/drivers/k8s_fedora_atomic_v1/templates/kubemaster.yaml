@@ -35,6 +35,11 @@ parameters:
     constraints:
       - allowed_values: ["true", "false"]
 
+  etcd_volume_size:
+    type: number
+    description: >
+      size of a cinder volume to allocate for etcd storage
+
   docker_volume_size:
     type: number
     description: >
@@ -290,6 +295,8 @@ resources:
             "$KUBE_NODE_PUBLIC_IP": {get_attr: [kube_master_floating, floating_ip_address]}
             "$KUBE_NODE_IP": {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
             "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
+            "$ETCD_VOLUME": {get_resource: etcd_volume}
+            "$ETCD_VOLUME_SIZE": {get_param: etcd_volume_size}
             "$DOCKER_VOLUME": {get_resource: docker_volume}
             "$DOCKER_VOLUME_SIZE": {get_param: docker_volume_size}
             "$DOCKER_STORAGE_DRIVER": {get_param: docker_storage_driver}
@@ -544,6 +551,24 @@ resources:
       address: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
       subnet: { get_param: fixed_subnet }
       protocol_port: 2379
+
+  ######################################################################
+  #
+  # etcd storage.  This allocates a cinder volume and attaches it
+  # to the master.
+  #
+
+  etcd_volume:
+    type: Magnum::Optional::Etcd::Volume
+    properties:
+      size: {get_param: etcd_volume_size}
+
+  etcd_volume_attach:
+    type: Magnum::Optional::Etcd::VolumeAttachment
+    properties:
+      instance_uuid: {get_resource: kube-master}
+      volume_id: {get_resource: etcd_volume}
+      mountpoint: /dev/vdc
 
   ######################################################################
   #

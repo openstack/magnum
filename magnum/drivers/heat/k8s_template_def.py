@@ -112,7 +112,8 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                       'admission_control_list',
                       'prometheus_monitoring',
                       'grafana_admin_passwd',
-                      'kube_dashboard_enabled']
+                      'kube_dashboard_enabled',
+                      'etcd_volume_size']
 
         for label in label_list:
             extra_params[label] = cluster_template.labels.get(label)

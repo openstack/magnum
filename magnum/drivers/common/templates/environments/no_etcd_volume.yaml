@@ -1,0 +1,4 @@
+# Environment file to not use a cinder volume for etcd storage
+resource_registry:
+  "Magnum::Optional::Etcd::Volume": "OS::Heat::None"
+  "Magnum::Optional::Etcd::VolumeAttachment": "OS::Heat::None"
