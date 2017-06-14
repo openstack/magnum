@@ -79,4 +79,4 @@ class TestProfiler(base.TestCase):
     @mock.patch.object(conf, 'CONF', new=cfg.ConfigOpts())
     def test_setup_profiler_without_osprofiler(self, mock_init):
         profiler.setup('foo', 'localhost')
-        self.assertFalse(mock_init.called)
+        self.assertEqual(False, mock_init.called)

@@ -427,7 +427,9 @@ class TestObjectSerializer(test_base.TestCase):
         primitive = obj.obj_to_primitive()
         result = ser.deserialize_entity(self.context, primitive)
         if backported_to is None:
-            self.assertFalse(mock_indirection_api.object_backport.called)
+            self.assertEqual(
+                False,
+                mock_indirection_api.object_backport.called)
         else:
             self.assertEqual('backported', result)
             mock_indirection_api.object_backport.assert_called_with(

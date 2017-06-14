@@ -15,8 +15,6 @@ Magnum Specific Commandments
 - [M316] Change assertTrue(isinstance(A, B)) by optimal assert like
   assertIsInstance(A, B).
 - [M322] Method's default argument shouldn't be mutable.
-- [M323] Change assertEqual(True, A) or assertEqual(False, A) by optimal assert
-  like assertTrue(A) or assertFalse(A)
 - [M336] Must use a dict comprehension instead of a dict constructor
   with a sequence of key-value pairs.
 - [M338] Use assertIn/NotIn(A, B) rather than assertEqual(A in B, True/False).

@@ -117,22 +117,6 @@ class HackingTestCase(base.TestCase):
         code = "self.assertEqual(False, any(a==1 for a in b))"
         self._assert_has_no_errors(code, check)
 
-    def test_assert_equal_true_or_false(self):
-        errors = [(1, 0, "M323")]
-        check = checks.assert_equal_true_or_false
-
-        code = "self.assertEqual(True, A)"
-        self._assert_has_errors(code, check, errors)
-
-        code = "self.assertEqual(False, A)"
-        self._assert_has_errors(code, check, errors)
-
-        code = "self.assertTrue()"
-        self._assert_has_no_errors(code, check)
-
-        code = "self.assertFalse()"
-        self._assert_has_no_errors(code, check)
-
     def test_no_mutable_default_args(self):
         errors = [(1, 0, "M322")]
         check = checks.no_mutable_default_args

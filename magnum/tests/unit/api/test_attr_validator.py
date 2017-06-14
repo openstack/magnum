@@ -46,7 +46,7 @@ class TestAttrValidator(base.BaseTestCase):
         mock_os_cli = mock.MagicMock()
         mock_os_cli.nova.return_value = mock_nova
         attr_validator.validate_flavor(mock_os_cli, None)
-        self.assertFalse(mock_nova.flavors.list.called)
+        self.assertEqual(False, mock_nova.flavors.list.called)
 
     def test_validate_flavor_with_invalid_flavor(self):
         mock_flavor = mock.MagicMock()

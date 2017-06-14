@@ -38,10 +38,6 @@ assert_equal_in_end_with_true_or_false_re = re.compile(
     r"assertEqual\((\w|[][.'\"])+ in (\w|[][.'\", ])+, (True|False)\)")
 assert_equal_in_start_with_true_or_false_re = re.compile(
     r"assertEqual\((True|False), (\w|[][.'\"])+ in (\w|[][.'\", ])+\)")
-assert_equal_with_true_re = re.compile(
-    r"assertEqual\(True,")
-assert_equal_with_false_re = re.compile(
-    r"assertEqual\(False,")
 asse_equal_with_is_not_none_re = re.compile(
     r"assertEqual\(.*?\s+is+\s+not+\s+None\)$")
 assert_true_isinstance_re = re.compile(
@@ -70,18 +66,6 @@ def no_mutable_default_args(logical_line):
     msg = "M322: Method's default argument shouldn't be mutable!"
     if mutable_default_args.match(logical_line):
         yield (0, msg)
-
-
-def assert_equal_true_or_false(logical_line):
-    """Check for assertEqual(True, A) or assertEqual(False, A) sentences
-
-    M323
-    """
-    res = (assert_equal_with_true_re.search(logical_line) or
-           assert_equal_with_false_re.search(logical_line))
-    if res:
-        yield (0, "M323: assertEqual(True, A) or assertEqual(False, A) "
-               "sentences not allowed")
 
 
 def assert_equal_not_none(logical_line):
@@ -181,7 +165,6 @@ def check_explicit_underscore_import(logical_line, filename):
 
 def factory(register):
     register(no_mutable_default_args)
-    register(assert_equal_true_or_false)
     register(assert_equal_not_none)
     register(assert_true_isinstance)
     register(assert_equal_in)

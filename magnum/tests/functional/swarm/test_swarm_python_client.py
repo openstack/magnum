@@ -137,7 +137,7 @@ class TestSwarmAPIs(ClusterTest):
                                   container=container_id)
         resp = self._container_operation(self.docker_client.inspect_container,
                                          container=container_id)
-        self.assertFalse(resp['State']['Running'])
+        self.assertEqual(False, resp['State']['Running'])
 
         self._container_operation(self.docker_client.remove_container,
                                   container=container_id)
