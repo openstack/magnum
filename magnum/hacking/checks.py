@@ -38,7 +38,7 @@ assert_equal_in_end_with_true_or_false_re = re.compile(
     r"assertEqual\((\w|[][.'\"])+ in (\w|[][.'\", ])+, (True|False)\)")
 assert_equal_in_start_with_true_or_false_re = re.compile(
     r"assertEqual\((True|False), (\w|[][.'\"])+ in (\w|[][.'\", ])+\)")
-asse_equal_with_is_not_none_re = re.compile(
+assert_equal_with_is_not_none_re = re.compile(
     r"assertEqual\(.*?\s+is+\s+not+\s+None\)$")
 assert_true_isinstance_re = re.compile(
     r"(.)*assertTrue\(isinstance\((\w|\.|\'|\"|\[|\])+, "
@@ -71,7 +71,7 @@ def no_mutable_default_args(logical_line):
 def assert_equal_not_none(logical_line):
     """Check for assertEqual(A is not None) sentences M302"""
     msg = "M302: assertEqual(A is not None) sentences not allowed."
-    res = asse_equal_with_is_not_none_re.search(logical_line)
+    res = assert_equal_with_is_not_none_re.search(logical_line)
     if res:
         yield (0, msg)
 
