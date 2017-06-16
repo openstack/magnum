@@ -46,7 +46,7 @@ class Service(service.Service):
     def __init__(self, topic, server, handlers, binary):
         super(Service, self).__init__()
         serializer = _init_serializer()
-        transport = messaging.get_transport(CONF)
+        transport = messaging.get_rpc_transport(CONF)
         # TODO(asalkeld) add support for version='x.y'
         target = messaging.Target(topic=topic, server=server)
         self._server = messaging.get_rpc_server(transport, target, handlers,
@@ -80,8 +80,8 @@ class API(object):
         serializer = _init_serializer()
         if transport is None:
             exmods = rpc.get_allowed_exmods()
-            transport = messaging.get_transport(CONF,
-                                                allowed_remote_exmods=exmods)
+            transport = messaging.get_rpc_transport(
+                CONF, allowed_remote_exmods=exmods)
         self._context = context
         if topic is None:
             topic = ''
