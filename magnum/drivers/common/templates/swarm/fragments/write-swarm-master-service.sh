@@ -51,7 +51,7 @@ cat >> /etc/systemd/system/swarm-manager.service << END_SERVICE_BOTTOM
 ExecStop=/usr/bin/docker stop swarm-manager
 Restart=always
 ExecStartPost=/usr/bin/curl -k -i -X POST -H 'Content-Type: application/json' -H 'X-Auth-Token: $WAIT_HANDLE_TOKEN' \\
-    --data-binary "'"'{"Status": "SUCCESS", "Reason": "Setup complete", "Data": "OK", "Id": "$UUID"}'"'" \\
+    --data-binary '{"status": "SUCCESS", "reason": "Setup complete", "data": "OK", "id": "$UUID"}' \\
     "$WAIT_HANDLE_ENDPOINT"
 
 [Install]
