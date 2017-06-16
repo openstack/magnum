@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from docker import client as docker_py_client
+import docker
 import mock
 
 from magnum.common import docker_utils
@@ -30,9 +30,9 @@ class TestDockerUtils(base.BaseTestCase):
         def fake_version():
             return {'ApiVersion': '1.18'}
 
-        docker = mock.MagicMock()
-        docker.version.side_effect = fake_version
-        res = docker_utils.is_docker_api_version_atleast(docker, '1.19')
+        docker_client = mock.MagicMock()
+        docker_client.version.side_effect = fake_version
+        res = docker_utils.is_docker_api_version_atleast(docker_client, '1.21')
         self.assertFalse(res)
 
 
@@ -73,8 +73,8 @@ class DockerClientTestCase(base.BaseTestCase):
         self.assertEqual(CONF.docker.default_timeout,
                          client.timeout)
 
-    @mock.patch.object(docker_py_client.Client, 'inspect_container')
-    @mock.patch.object(docker_py_client.Client, 'containers')
+    @mock.patch.object(docker.APIClient, 'inspect_container')
+    @mock.patch.object(docker.APIClient, 'containers')
     def test_list_instances(self, mock_containers, mock_inspect):
         client = docker_utils.DockerHTTPClient()
 
@@ -90,8 +90,8 @@ class DockerClientTestCase(base.BaseTestCase):
         mock_containers.assert_called_once_with(all=True)
         mock_inspect.assert_has_calls([mock.call(x) for x in range(0, 3)])
 
-    @mock.patch.object(docker_py_client.Client, 'inspect_container')
-    @mock.patch.object(docker_py_client.Client, 'containers')
+    @mock.patch.object(docker.APIClient, 'inspect_container')
+    @mock.patch.object(docker.APIClient, 'containers')
     def test_list_instances_inspect(self, mock_containers, mock_inspect):
         client = docker_utils.DockerHTTPClient()
 
