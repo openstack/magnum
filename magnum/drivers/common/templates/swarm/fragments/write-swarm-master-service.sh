@@ -50,9 +50,8 @@ cat >> /etc/systemd/system/swarm-manager.service << END_SERVICE_BOTTOM
                                   etcd://$ETCD_SERVER_IP:2379/v2/keys/swarm/
 ExecStop=/usr/bin/docker stop swarm-manager
 Restart=always
-ExecStartPost=/usr/bin/curl -k -i -X POST -H 'Content-Type: application/json' -H 'X-Auth-Token: $WAIT_HANDLE_TOKEN' \\
-    --data-binary '{"status": "SUCCESS", "reason": "Setup complete", "data": "OK", "id": "$UUID"}' \\
-    "$WAIT_HANDLE_ENDPOINT"
+ExecStartPost=/usr/bin/$WAIT_CURL \\
+    --data-binary '{"status": "SUCCESS", "reason": "Setup complete", "data": "OK", "id": "$UUID"}'
 
 [Install]
 WantedBy=multi-user.target

@@ -5,8 +5,6 @@ write_files:
     owner: "root:root"
     permissions: "0600"
     content: |
-      WAIT_HANDLE_ENDPOINT="$WAIT_HANDLE_ENDPOINT"
-      WAIT_HANDLE_TOKEN="$WAIT_HANDLE_TOKEN"
       WAIT_CURL="$WAIT_CURL"
       ETCD_DISCOVERY_URL="$ETCD_DISCOVERY_URL"
       DOCKER_VOLUME="$DOCKER_VOLUME"
