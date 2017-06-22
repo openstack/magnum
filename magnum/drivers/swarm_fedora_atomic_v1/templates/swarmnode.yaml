@@ -191,8 +191,6 @@ resources:
         str_replace:
           template: {get_file: ../../common/templates/swarm/fragments/write-heat-params-node.yaml}
           params:
-            "$WAIT_HANDLE_ENDPOINT": {get_attr: [node_wait_handle, endpoint]}
-            "$WAIT_HANDLE_TOKEN": {get_attr: [node_wait_handle, token]}
             "$WAIT_CURL": {get_attr: [node_wait_handle, curl_cli]}
             "$DOCKER_VOLUME": {get_resource: docker_volume}
             "$DOCKER_VOLUME_SIZE": {get_param: docker_volume_size}
@@ -279,8 +277,7 @@ resources:
           template: {get_file: ../../common/templates/swarm/fragments/write-cluster-failure-service.yaml}
           params:
             "$SERVICE": swarm-agent
-            "$WAIT_HANDLE_ENDPOINT": {get_attr: [node_wait_handle, endpoint]}
-            "$WAIT_HANDLE_TOKEN": {get_attr: [node_wait_handle, token]}
+            "$WAIT_CURL": {get_attr: [node_wait_handle, curl_cli]}
 
   write_swarm_agent_service:
     type: "OS::Heat::SoftwareConfig"
