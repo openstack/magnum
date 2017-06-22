@@ -18,6 +18,7 @@ present:
 * yum
 * yum-utils
 * python-yaml
+* curl
 
 For Debian/Ubuntu systems, use::
 
@@ -26,15 +27,15 @@ For Debian/Ubuntu systems, use::
 
 For CentOS and Fedora < 22, use::
 
-    yum install python-dev build-essential python-pip kpartx python-lzma qemu-utils yum yum-utils python-yaml
+    yum install python-dev build-essential python-pip kpartx python-lzma qemu-utils yum yum-utils python-yaml curl
 
 For Fedora >= 22, use::
 
-    dnf install python-devel @development-tools python-pip kpartx python-backports-lzma @virtualization yum yum-utils python-yaml
+    dnf install python-devel @development-tools python-pip kpartx python-backports-lzma @virtualization yum yum-utils python-yaml curl
 
 How to generate Fedora Atomic image
 -----------------------------------
-To generate an atomic image for Fedora 24 these commands can be
+To generate an atomic image for Fedora 25 these commands can be
 executed::
 
     # Install diskimage-builder in virtual environment
@@ -49,7 +50,7 @@ executed::
     export ELEMENTS_PATH=$(python -c 'import os, diskimage_builder, pkg_resources;print(os.path.abspath(pkg_resources.resource_filename(diskimage_builder.__name__, "elements")))')
     export ELEMENTS_PATH="${ELEMENTS_PATH}:${PWD}/magnum/magnum/drivers/common/image"
 
-    export DIB_RELEASE=24     # this can be switched to the desired version
+    export DIB_RELEASE=25     # this can be switched to the desired version
     export DIB_IMAGE_SIZE=2.5 # we need to give a bit more space to loopback device
 
     disk-image-create fedora-atomic -o fedora-atomic
@@ -67,15 +68,15 @@ FEDORA_ATOMIC_TREE_URL
   :Required: Yes
   :Description: Url for the public fedora-atomic tree to use. It can
                 reference to own published trees.
-  :Default: `https://kojipkgs.fedoraproject.org/atomic/24/ <https://kojipkgs.fedoraproject.org/atomic/24/>`_
+  :Default: ``https://kojipkgs.fedoraproject.org/atomic/${DIB_RELEASE}/``
 
 
 FEDORA_ATOMIC_TREE_REF
   :Required: Yes
   :Description: Reference of the tree to install.
-  :Default: d9c8b8a31238e857f010c6fdc282f5f611d3c8af3e78caa891f7edb85822771b
+  :Default: ``$(curl ${FEDORA_ATOMIC_TREE_URL}/refs/heads/fedora-atomic/${DIB_RELEASE}/x86_64/docker-host)``
 
 You can use the defaults or export your url and reference, like following::
 
-    export FEDORA_ATOMIC_TREE_URL="https://kojipkgs.fedoraproject.org/atomic/24/"
-    export FEDORA_ATOMIC_TREE_REF="$(curl https://kojipkgs.fedoraproject.org/atomic/24/refs/heads/fedora-atomic/f24/x86_64/docker-host)"
+    export FEDORA_ATOMIC_TREE_URL="https://kojipkgs.fedoraproject.org/atomic/25/"
+    export FEDORA_ATOMIC_TREE_REF="$(curl https://kojipkgs.fedoraproject.org/atomic/25/refs/heads/fedora-atomic/25/x86_64/docker-host)"

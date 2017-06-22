@@ -27,7 +27,7 @@ VMLINUZ_IMAGE=$(find ${DEPLOYED_DIRECTORY} -name vmlinuz*)
 # generate ostree boot
 cat > /etc/grub.d/15_ostree <<EOF
 cat <<EOL
-menuentry 'Fedora 24 (ostree)' --class gnu-linux --class gnu --class os --unrestricted "ostree-0-${DIB_IMAGE_ROOT_FS_UUID}" {
+menuentry 'Fedora ${DIB_RELEASE} (ostree)' --class gnu-linux --class gnu --class os --unrestricted "ostree-0-${DIB_IMAGE_ROOT_FS_UUID}" {
 set gfxpayload=text
 insmod gzio
 insmod part_msdos

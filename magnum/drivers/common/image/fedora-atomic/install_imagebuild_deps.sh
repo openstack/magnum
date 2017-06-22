@@ -18,4 +18,5 @@ sudo apt-get install -y \
     python-lzma \
     yum \
     yum-utils \
-    python-yaml
+    python-yaml \
+    curl
