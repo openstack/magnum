@@ -61,9 +61,33 @@ Container Orchestration Engine (COE)
 ========
 Overview
 ========
-*To be filled in*
 
-Magnum rationale, concept, compelling features
+Magnum is an OpenStack API service developed by the OpenStack Containers Team
+making container orchestration engines (COE) such as Docker Swarm, Kubernetes
+and Apache Mesos available as the first class resources in OpenStack.
+
+Magnum uses Heat to orchestrate an OS image which contains Docker and COE
+and runs that image in either virtual machines or bare metal in a cluster
+configuration.
+
+Magnum offers complete life-cycle management of COEs in an
+OpenStack environment, integrated with other OpenStack services for a seamless
+experience for OpenStack users who wish to run containers in an OpenStack
+environment.
+
+Following are few salient features of Magnum:
+
+- Standard API based complete life-cycle management for Container Clusters
+- Multi-tenancy for container clusters
+- Choice of COE: Kubernetes, Swarm, Mesos, DC/OS
+- Choice of container cluster deployment model: VM or Bare-metal
+- Keystone-based multi-tenant security and auth management
+- Neutron based multi-tenant network control and isolation
+- Cinder based volume service for containers
+- Integrated with OpenStack: SSO experience for cloud users
+- Secure container cluster access (TLS enabled)
+
+More details: `Magnum Project Wiki <https://wiki.openstack.org/wiki/Magnum>`_
 
 ===============
 ClusterTemplate
