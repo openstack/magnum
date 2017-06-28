@@ -756,8 +756,8 @@ Simulating gate tests
       export PROJECTS="openstack/magnum $PROJECTS"
       export PROJECTS="openstack/python-magnumclient $PROJECTS"
       export PROJECTS="openstack/barbican $PROJECTS"
-      export DEVSTACK_LOCAL_CONFIG="enable_plugin magnum git://git.openstack.org/openstack/magnum"
-      export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ceilometer git://git.openstack.org/openstack/ceilometer"
+      export DEVSTACK_LOCAL_CONFIG="enable_plugin magnum git://git.openstack.org/openstack/magnum stable/ocata"
+      export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ceilometer git://git.openstack.org/openstack/ceilometer stable/ocata"
       # Keep localrc to be able to set some vars in post_test_hook
       export KEEP_LOCALRC=1
       function gate_hook {
