@@ -96,6 +96,7 @@ def get_test_cluster(**kw):
         'master_addresses': kw.get('master_addresses', ['172.17.2.18']),
         'created_at': kw.get('created_at'),
         'updated_at': kw.get('updated_at'),
+        'docker_volume_size': kw.get('docker_volume_size'),
     }
 
     # Only add Keystone trusts related attributes on demand since they may

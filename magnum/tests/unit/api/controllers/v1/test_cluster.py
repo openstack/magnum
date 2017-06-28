@@ -781,6 +781,35 @@ class TestPost(api_base.FunctionalTest):
         self.assertTrue(self.mock_valid_os_res.called)
         self.assertEqual(409, response.status_int)
 
+    def test_create_cluster_with_docker_volume_size(self):
+        bdict = apiutils.cluster_post_data()
+        bdict['docker_volume_size'] = 3
+        response = self.post_json('/clusters', bdict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        cluster, timeout = self.mock_cluster_create.call_args
+        self.assertEqual(3, cluster[0].docker_volume_size)
+
+    def test_create_cluster_without_docker_volume_size(self):
+        bdict = apiutils.cluster_post_data()
+        response = self.post_json('/clusters', bdict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        cluster, timeout = self.mock_cluster_create.call_args
+        # Verify docker_volume_size from ClusterTemplate is used
+        self.assertEqual(20, cluster[0].docker_volume_size)
+
+    def test_create_cluster_with_invalid_docker_volume_size(self):
+        invalid_values = [(-1, None), ('notanint', None),
+                          (1, 'devicemapper'), (2, 'devicemapper')]
+        for value in invalid_values:
+            bdict = apiutils.cluster_post_data(docker_volume_size=value[0],
+                                               docker_storage_driver=value[1])
+            response = self.post_json('/clusters', bdict, expect_errors=True)
+            self.assertEqual('application/json', response.content_type)
+            self.assertEqual(400, response.status_int)
+            self.assertTrue(response.json['errors'])
+
 
 class TestDelete(api_base.FunctionalTest):
     def setUp(self):

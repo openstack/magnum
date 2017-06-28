@@ -47,6 +47,19 @@ def enforce_cluster_type_supported():
     return wrapper
 
 
+def enforce_cluster_volume_storage_size():
+    @decorator.decorator
+    def wrapper(func, *args, **kwargs):
+        cluster = args[1]
+        cluster_template = objects.ClusterTemplate.get_by_uuid(
+            pecan.request.context, cluster.cluster_template_id)
+        _enforce_volume_storage_size(
+            cluster_template.as_dict(), cluster.as_dict())
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
 def enforce_valid_project_id_on_create():
     @decorator.decorator
     def wrapper(func, *args, **kwargs):
@@ -133,7 +146,7 @@ def enforce_volume_storage_size_create():
     @decorator.decorator
     def wrapper(func, *args, **kwargs):
         cluster_template = args[1]
-        _enforce_volume_storage_size(cluster_template.as_dict())
+        _enforce_volume_storage_size(cluster_template.as_dict(), {})
         return func(*args, **kwargs)
 
     return wrapper
@@ -164,10 +177,11 @@ def _enforce_volume_driver_types(cluster_template):
     validator.validate_volume_driver(cluster_template['volume_driver'])
 
 
-def _enforce_volume_storage_size(cluster_template):
-    if not cluster_template.get('docker_volume_size'):
+def _enforce_volume_storage_size(cluster_template, cluster):
+    volume_size = cluster.get('docker_volume_size') \
+        or cluster_template.get('docker_volume_size')
+    if not volume_size:
         return
-    volume_size = cluster_template.get('docker_volume_size')
     storage_driver = cluster_template.get('docker_storage_driver')
     if storage_driver == 'devicemapper':
         if volume_size < 3:

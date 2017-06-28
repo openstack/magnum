@@ -107,6 +107,9 @@ class Cluster(base.APIBase):
     master_count = wsme.wsattr(wtypes.IntegerType(minimum=1), default=1)
     """The number of master nodes for this cluster. Default to 1 if not set"""
 
+    docker_volume_size = wtypes.IntegerType(minimum=1)
+    """The size in GB of the docker volume"""
+
     create_timeout = wsme.wsattr(wtypes.IntegerType(minimum=0), default=60)
     """Timeout for creating the cluster in minutes. Default to 60 if not set"""
 
@@ -158,7 +161,8 @@ class Cluster(base.APIBase):
     def _convert_with_links(cluster, url, expand=True):
         if not expand:
             cluster.unset_fields_except(['uuid', 'name', 'cluster_template_id',
-                                         'keypair', 'node_count', 'status',
+                                         'keypair', 'docker_volume_size',
+                                         'node_count', 'status',
                                          'create_timeout', 'master_count',
                                          'stack_id'])
 
@@ -183,6 +187,7 @@ class Cluster(base.APIBase):
                      keypair=None,
                      node_count=2,
                      master_count=1,
+                     docker_volume_size=1,
                      create_timeout=15,
                      stack_id='49dc23f5-ffc9-40c3-9d34-7be7f9e34d63',
                      status=fields.ClusterStatus.CREATE_COMPLETE,
@@ -375,6 +380,7 @@ class ClustersController(base.Controller):
 
     @expose.expose(ClusterID, body=Cluster, status_code=202)
     @validation.enforce_cluster_type_supported()
+    @validation.enforce_cluster_volume_storage_size()
     def post(self, cluster):
         """Create a new cluster.
 
@@ -392,6 +398,10 @@ class ClustersController(base.Controller):
         # If keypair not present, use cluster_template value
         if cluster.keypair is None:
             cluster.keypair = cluster_template.keypair_id
+
+        # If docker_volume_size is not present, use cluster_template value
+        if cluster.docker_volume_size is None:
+            cluster.docker_volume_size = cluster_template.docker_volume_size
 
         cluster_dict = cluster.as_dict()
 

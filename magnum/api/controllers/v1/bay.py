@@ -89,6 +89,9 @@ class Bay(base.APIBase):
     master_count = wsme.wsattr(wtypes.IntegerType(minimum=1), default=1)
     """The number of master nodes for this bay. Default to 1 if not set"""
 
+    docker_volume_size = wtypes.IntegerType(minimum=1)
+    """The size in GB of the docker volume"""
+
     bay_create_timeout = wsme.wsattr(wtypes.IntegerType(minimum=0), default=60)
     """Timeout for creating the bay in minutes. Default to 60 if not set"""
 
@@ -171,6 +174,7 @@ class Bay(base.APIBase):
     def _convert_with_links(bay, url, expand=True):
         if not expand:
             bay.unset_fields_except(['uuid', 'name', 'baymodel_id',
+                                     'docker_volume_size',
                                      'node_count', 'status',
                                      'bay_create_timeout', 'master_count',
                                      'stack_id'])
@@ -194,6 +198,7 @@ class Bay(base.APIBase):
                      baymodel_id='4a96ac4b-2447-43f1-8ca6-9fd6f36d146d',
                      node_count=2,
                      master_count=1,
+                     docker_volume_size=1,
                      bay_create_timeout=15,
                      stack_id='49dc23f5-ffc9-40c3-9d34-7be7f9e34d63',
                      status=fields.ClusterStatus.CREATE_COMPLETE,
@@ -414,6 +419,10 @@ class BaysController(base.Controller):
                        action='bay:create')
         baymodel = objects.ClusterTemplate.get_by_uuid(context,
                                                        bay.baymodel_id)
+
+        # If docker_volume_size is not present, use baymodel value
+        if bay.docker_volume_size is None:
+            bay.docker_volume_size = baymodel.docker_volume_size
 
         bay_dict = bay.as_dict()
         bay_dict['keypair'] = baymodel.keypair_id
