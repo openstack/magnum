@@ -74,6 +74,11 @@ class HeatDriver(driver.Driver):
         raise NotImplementedError("Must implement 'get_template_definition'")
 
     def update_cluster_status(self, context, cluster):
+        if cluster.stack_id is None:
+            # NOTE(mgoddard): During cluster creation it is possible to poll
+            # the cluster before its heat stack has been created. See bug
+            # 1682058.
+            return
         stack_ctx = mag_ctx.make_cluster_context(cluster)
         poller = HeatPoller(clients.OpenStackClients(stack_ctx), context,
                             cluster, self)
