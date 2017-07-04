@@ -421,7 +421,7 @@ class BaysController(base.Controller):
                                                        bay.baymodel_id)
 
         # If docker_volume_size is not present, use baymodel value
-        if bay.docker_volume_size is None:
+        if bay.docker_volume_size == wtypes.Unset:
             bay.docker_volume_size = baymodel.docker_volume_size
 
         bay_dict = bay.as_dict()

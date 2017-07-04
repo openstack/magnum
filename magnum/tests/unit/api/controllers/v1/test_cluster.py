@@ -792,6 +792,8 @@ class TestPost(api_base.FunctionalTest):
 
     def test_create_cluster_without_docker_volume_size(self):
         bdict = apiutils.cluster_post_data()
+        # Remove the default docker_volume_size from the cluster dict.
+        del bdict['docker_volume_size']
         response = self.post_json('/clusters', bdict)
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(202, response.status_int)

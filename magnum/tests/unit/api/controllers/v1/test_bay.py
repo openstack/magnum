@@ -788,6 +788,26 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertEqual(400, response.status_int)
 
+    def test_create_bay_with_docker_volume_size(self):
+        bdict = apiutils.bay_post_data()
+        bdict['docker_volume_size'] = 3
+        response = self.post_json('/bays', bdict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(201, response.status_int)
+        bay, timeout = self.mock_bay_create.call_args
+        self.assertEqual(3, bay[0].docker_volume_size)
+
+    def test_create_bay_without_docker_volume_size(self):
+        bdict = apiutils.bay_post_data()
+        # Remove the default docker_volume_size from the bay dict.
+        del bdict['docker_volume_size']
+        response = self.post_json('/bays', bdict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(201, response.status_int)
+        bay, timeout = self.mock_bay_create.call_args
+        # Verify docker_volume_size from BayModel is used
+        self.assertEqual(20, bay[0].docker_volume_size)
+
 
 class TestDelete(api_base.FunctionalTest):
 
