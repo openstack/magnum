@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Add support to store the etcd configuration in a cinder volume.
+    k8s_fedora_atomic accepts a new label etcd_volume_size defining the size
+    of the volume. A value of 0 or leaving the label unset means no volume
+    should be used, and the data will go to the instance local storage.
