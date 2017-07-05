@@ -130,6 +130,12 @@ parameters:
     constraints:
       - allowed_values: ["true", "false"]
 
+  etcd_volume_size:
+    type: number
+    description: >
+      size of the cinder volume for etcd storage
+    default: 0
+
   docker_volume_size:
     type: number
     description: >
@@ -467,6 +473,7 @@ resources:
           master_flavor: {get_param: master_flavor}
           external_network: {get_param: external_network}
           kube_allow_priv: {get_param: kube_allow_priv}
+          etcd_volume_size: {get_param: etcd_volume_size}
           docker_volume_size: {get_param: docker_volume_size}
           docker_volume_type: {get_param: docker_volume_type}
           docker_storage_driver: {get_param: docker_storage_driver}

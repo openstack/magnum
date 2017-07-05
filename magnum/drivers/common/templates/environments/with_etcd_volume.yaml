@@ -1,0 +1,4 @@
+# Environment file to use a volume for etcd storage
+resource_registry:
+  "Magnum::Optional::Etcd::Volume": "OS::Cinder::Volume"
+  "Magnum::Optional::Etcd::VolumeAttachment": "OS::Cinder::VolumeAttachment"

@@ -268,6 +268,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'kube_dashboard_enabled')
         docker_volume_type = mock_cluster_template.labels.get(
             'docker_volume_type')
+        etcd_volume_size = mock_cluster_template.labels.get(
+            'etcd_volume_size')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -287,6 +289,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'grafana_admin_passwd': grafana_admin_passwd,
             'kube_dashboard_enabled': kube_dashboard_enabled,
             'docker_volume_type': docker_volume_type,
+            'etcd_volume_size': etcd_volume_size,
             'username': 'fake_user',
             'tenant_name': 'fake_tenant',
             'magnum_url': mock_osc.magnum_url.return_value,
@@ -345,6 +348,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'kube_dashboard_enabled')
         docker_volume_type = mock_cluster_template.labels.get(
             'docker_volume_type')
+        etcd_volume_size = mock_cluster_template.labels.get(
+            'etcd_volume_size')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -364,6 +369,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'grafana_admin_passwd': grafana_admin_passwd,
             'kube_dashboard_enabled': kube_dashboard_enabled,
             'docker_volume_type': docker_volume_type,
+            'etcd_volume_size': etcd_volume_size,
             'username': 'fake_user',
             'tenant_name': 'fake_tenant',
             'magnum_url': mock_osc.magnum_url.return_value,
