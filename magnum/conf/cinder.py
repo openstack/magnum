@@ -24,6 +24,7 @@ cinder_client_group = cfg.OptGroup(
 
 cinder_opts = [
     cfg.StrOpt('default_docker_volume_type',
+               default='',
                help=_('The default docker volume_type to use for volumes '
                       'used for docker storage. To use the cinder volumes '
                       'for docker storage, you need to select a default '
