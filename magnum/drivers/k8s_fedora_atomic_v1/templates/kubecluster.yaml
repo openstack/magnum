@@ -417,6 +417,36 @@ parameters:
       node role where the ingress controller backend should run
     default: "ingress"
 
+  kubelet_options:
+    type: string
+    description: >
+      additional options to be passed to the kubelet
+    default: ""
+
+  kubeapi_options:
+    type: string
+    description: >
+      additional options to be passed to the api
+    default: ""
+
+  kubecontroller_options:
+    type: string
+    description: >
+      additional options to be passed to the controller manager
+    default: ""
+
+  kubeproxy_options:
+    type: string
+    description: >
+      additional options to be passed to the kube proxy
+    default: ""
+
+  kubescheduler_options:
+    type: string
+    description: >
+      additional options to be passed to the scheduler
+    default: ""
+
 resources:
 
   ######################################################################
@@ -620,6 +650,11 @@ resources:
           pods_network_cidr: {get_param: pods_network_cidr}
           ingress_controller: {get_param: ingress_controller}
           ingress_controller_role: {get_param: ingress_controller_role}
+          kubelet_options: {get_param: kubelet_options}
+          kubeapi_options: {get_param: kubeapi_options}
+          kubeproxy_options: {get_param: kubeproxy_options}
+          kubecontroller_options: {get_param: kubecontroller_options}
+          kubescheduler_options: {get_param: kubescheduler_options}
 
   ######################################################################
   #
@@ -692,6 +727,8 @@ resources:
           nodes_server_group_id: {get_resource: nodes_server_group}
           availability_zone: {get_param: availability_zone}
           pods_network_cidr: {get_param: pods_network_cidr}
+          kubelet_options: {get_param: kubelet_options}
+          kubeproxy_options: {get_param: kubeproxy_options}
 
 outputs:
 
