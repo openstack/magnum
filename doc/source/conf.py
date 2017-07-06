@@ -22,9 +22,13 @@ sys.path.insert(0, os.path.abspath('../..'))
 extensions = [
     'sphinx.ext.autodoc',
     'stevedore.sphinxext',
-    'oslosphinx'
+    'openstackdocstheme'
 ]
 
+# openstackdocstheme options
+repository_name = 'openstack/magnum'
+bug_project = 'magnum'
+bug_tag = ''
 # autodoc generation is a bit aggressive and a nuisance when doing heavy
 # text edit cycles.
 # execute "export SPHINX_DEBUG=1" in your terminal to disable
@@ -60,11 +64,13 @@ release = magnum_version.version_string_with_vcs()
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
 # html_theme_path = ["."]
-# html_theme = '_theme'
+html_theme = 'openstackdocs'
 # html_static_path = ['static']
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = '%sdoc' % project
+
+html_last_updated_fmt = '%Y-%m-%d %H:%M'
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass
