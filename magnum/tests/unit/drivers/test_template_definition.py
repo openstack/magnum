@@ -292,6 +292,16 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'ingress_controller')
         ingress_controller_role = mock_cluster.labels.get(
             'ingress_controller_role')
+        kubelet_options = mock_cluster.labels.get(
+            'kubelet_options')
+        kubeapi_options = mock_cluster.labels.get(
+            'kubeapi_options')
+        kubecontroller_options = mock_cluster.labels.get(
+            'kubecontroller_options')
+        kubescheduler_options = mock_cluster.labels.get(
+            'kubescheduler_options')
+        kubeproxy_options = mock_cluster.labels.get(
+            'kubeproxy_options')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -312,6 +322,11 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'kube_dashboard_enabled': kube_dashboard_enabled,
             'docker_volume_type': docker_volume_type,
             'etcd_volume_size': etcd_volume_size,
+            'kubelet_options': kubelet_options,
+            'kubeapi_options': kubeapi_options,
+            'kubecontroller_options': kubecontroller_options,
+            'kubescheduler_options': kubescheduler_options,
+            'kubeproxy_options': kubeproxy_options,
             'username': 'fake_user',
             'magnum_url': mock_osc.magnum_url.return_value,
             'region_name': mock_osc.cinder_region_name.return_value,
@@ -405,6 +420,16 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'ingress_controller')
         ingress_controller_role = mock_cluster.labels.get(
             'ingress_controller_role')
+        kubelet_options = mock_cluster.labels.get(
+            'kubelet_options')
+        kubeapi_options = mock_cluster.labels.get(
+            'kubeapi_options')
+        kubecontroller_options = mock_cluster.labels.get(
+            'kubecontroller_options')
+        kubescheduler_options = mock_cluster.labels.get(
+            'kubescheduler_options')
+        kubeproxy_options = mock_cluster.labels.get(
+            'kubeproxy_options')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -425,6 +450,11 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'kube_dashboard_enabled': kube_dashboard_enabled,
             'docker_volume_type': docker_volume_type,
             'etcd_volume_size': etcd_volume_size,
+            'kubelet_options': kubelet_options,
+            'kubeapi_options': kubeapi_options,
+            'kubecontroller_options': kubecontroller_options,
+            'kubescheduler_options': kubescheduler_options,
+            'kubeproxy_options': kubeproxy_options,
             'username': 'fake_user',
             'magnum_url': mock_osc.magnum_url.return_value,
             'region_name': mock_osc.cinder_region_name.return_value,

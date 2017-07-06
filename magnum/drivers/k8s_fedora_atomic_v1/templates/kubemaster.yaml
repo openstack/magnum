@@ -313,6 +313,31 @@ parameters:
     description: >
       node role where the ingress controller should run
 
+  kubelet_options:
+    type: string
+    description: >
+      additional options to be passed to the kubelet
+
+  kubeapi_options:
+    type: string
+    description: >
+      additional options to be passed to the api
+
+  kubecontroller_options:
+    type: string
+    description: >
+      additional options to be passed to the controller manager
+
+  kubeproxy_options:
+    type: string
+    description: >
+      additional options to be passed to the kube proxy
+
+  kubescheduler_options:
+    type: string
+    description: >
+      additional options to be passed to the scheduler
+
 resources:
 
   master_wait_handle:
@@ -408,6 +433,11 @@ resources:
             "$CALICO_IPV4POOL": {get_param: calico_ipv4pool}
             "$INGRESS_CONTROLLER": {get_param: ingress_controller}
             "$INGRESS_CONTROLLER_ROLE": {get_param: ingress_controller_role}
+            "$KUBELET_OPTIONS": {get_param: kubelet_options}
+            "$KUBEAPI_OPTIONS": {get_param: kubeapi_options}
+            "$KUBECONTROLLER_OPTIONS": {get_param: kubecontroller_options}
+            "$KUBEPROXY_OPTIONS": {get_param: kubeproxy_options}
+            "$KUBESCHEDULER_OPTIONS": {get_param: kubescheduler_options}
 
   install_openstack_ca:
     type: OS::Heat::SoftwareConfig

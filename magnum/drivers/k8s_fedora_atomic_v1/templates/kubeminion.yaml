@@ -245,6 +245,16 @@ parameters:
     type: string
     description: Configure the IP pool/range from which pod IPs will be chosen
 
+  kubelet_options:
+    type: string
+    description: >
+      additional options to be passed to the kubelet
+
+  kubeproxy_options:
+    type: string
+    description: >
+      additional options to be passed to the kube proxy
+
 resources:
 
   minion_wait_handle:
@@ -310,6 +320,8 @@ resources:
             $CONTAINER_INFRA_PREFIX: {get_param: container_infra_prefix}
             $DNS_SERVICE_IP: {get_param: dns_service_ip}
             $DNS_CLUSTER_DOMAIN: {get_param: dns_cluster_domain}
+            $KUBELET_OPTIONS: {get_param: kubelet_options}
+            $KUBEPROXY_OPTIONS: {get_param: kubeproxy_options}
 
   install_openstack_ca:
     type: OS::Heat::SoftwareConfig
