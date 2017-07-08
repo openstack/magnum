@@ -86,21 +86,21 @@ class ClusterTest(base.BaseTempestTest):
             super(ClusterTest, self).tearDown()
 
     def _create_cluster_template(self, cm_model):
-        self.LOG.debug('We will create a clustertemplate for %s' % cm_model)
+        self.LOG.debug('We will create a clustertemplate for %s', cm_model)
         resp, model = self.cluster_template_client.post_cluster_template(
             cm_model)
         return resp, model
 
     def _delete_cluster_template(self, cm_id):
-        self.LOG.debug('We will delete a clustertemplate for %s' % cm_id)
+        self.LOG.debug('We will delete a clustertemplate for %s', cm_id)
         resp, model = self.cluster_template_client.delete_cluster_template(
             cm_id)
         return resp, model
 
     def _create_cluster(self, cluster_model):
-        self.LOG.debug('We will create cluster for %s' % cluster_model)
+        self.LOG.debug('We will create cluster for %s', cluster_model)
         resp, model = self.cluster_client.post_cluster(cluster_model)
-        self.LOG.debug('Response: %s' % resp)
+        self.LOG.debug('Response: %s', resp)
         self.assertEqual(202, resp.status)
         self.assertIsNotNone(model.uuid)
         self.assertTrue(uuidutils.is_uuid_like(model.uuid))
@@ -118,7 +118,7 @@ class ClusterTest(base.BaseTempestTest):
         return resp, model
 
     def _delete_cluster(self, cluster_id):
-        self.LOG.debug('We will delete a cluster for %s' % cluster_id)
+        self.LOG.debug('We will delete a cluster for %s', cluster_id)
         resp, model = self.cluster_client.delete_cluster(cluster_id)
         self.assertEqual(204, resp.status)
         self.cluster_client.wait_for_cluster_to_delete(cluster_id)
@@ -159,7 +159,7 @@ class ClusterTest(base.BaseTempestTest):
         # test ca show
         resp, cert_model = self.cert_client.get_cert(
             cluster_model.uuid, headers=HEADERS)
-        self.LOG.debug("cert resp: %s" % resp)
+        self.LOG.debug("cert resp: %s", resp)
         self.assertEqual(200, resp.status)
         self.assertEqual(cert_model.cluster_uuid, cluster_model.uuid)
         self.assertIsNotNone(cert_model.pem)
@@ -186,7 +186,7 @@ Q0uA0aVog3f5iJxCa3Hp5gxbJQ6zV6kJ0TEsuaaOhEko9sdpCoPOnRBm2i/XRD2D
                                             csr_data=csr_sample)
         resp, cert_model = self.cert_client.post_cert(cert_data_model,
                                                       headers=HEADERS)
-        self.LOG.debug("cert resp: %s" % resp)
+        self.LOG.debug("cert resp: %s", resp)
         self.assertEqual(201, resp.status)
         self.assertEqual(cert_model.cluster_uuid, cluster_model.uuid)
         self.assertIsNotNone(cert_model.pem)

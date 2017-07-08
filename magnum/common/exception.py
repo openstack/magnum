@@ -92,7 +92,7 @@ class MagnumException(Exception):
             # kwargs doesn't match a variable in the message
             # log the issue and the kwargs
             LOG.exception('Exception in string format operation, '
-                          'kwargs: %s' % kwargs)
+                          'kwargs: %s', kwargs)
             try:
                 if CONF.fatal_exception_format_errors:
                     raise

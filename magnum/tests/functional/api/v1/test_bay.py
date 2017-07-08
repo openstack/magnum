@@ -81,23 +81,23 @@ class BayTest(base.BaseTempestTest):
             super(BayTest, self).tearDown()
 
     def _create_baymodel(self, baymodel_model):
-        self.LOG.debug('We will create a baymodel for %s' % baymodel_model)
+        self.LOG.debug('We will create a baymodel for %s', baymodel_model)
         resp, model = self.baymodel_client.post_baymodel(baymodel_model)
         return resp, model
 
     def _delete_baymodel(self, baymodel_id):
-        self.LOG.debug('We will delete a baymodel for %s' % baymodel_id)
+        self.LOG.debug('We will delete a baymodel for %s', baymodel_id)
         resp, model = self.baymodel_client.delete_baymodel(baymodel_id)
         return resp, model
 
     def _create_bay(self, bay_model, is_async=False):
-        self.LOG.debug('We will create bay for %s' % bay_model)
+        self.LOG.debug('We will create bay for %s', bay_model)
         headers = {'Content-Type': 'application/json',
                    'Accept': 'application/json'}
         if is_async:
             headers["OpenStack-API-Version"] = "container-infra 1.2"
         resp, model = self.bay_client.post_bay(bay_model, headers=headers)
-        self.LOG.debug('Response: %s' % resp)
+        self.LOG.debug('Response: %s', resp)
         if is_async:
             self.assertEqual(202, resp.status)
         else:
@@ -117,7 +117,7 @@ class BayTest(base.BaseTempestTest):
         return resp, model
 
     def _delete_bay(self, bay_id):
-        self.LOG.debug('We will delete a bay for %s' % bay_id)
+        self.LOG.debug('We will delete a bay for %s', bay_id)
         resp, model = self.bay_client.delete_bay(bay_id)
         self.assertEqual(204, resp.status)
         self.bay_client.wait_for_bay_to_delete(bay_id)

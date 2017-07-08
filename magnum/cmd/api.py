@@ -72,17 +72,17 @@ def main():
     # Create the WSGI server and start it
     host, port = CONF.api.host, CONF.api.port
 
-    LOG.info('Starting server in PID %s' % os.getpid())
+    LOG.info('Starting server in PID %s', os.getpid())
     LOG.debug("Configuration:")
     CONF.log_opt_values(LOG, logging.DEBUG)
 
-    LOG.info('Serving on %(proto)s://%(host)s:%(port)s' %
+    LOG.info('Serving on %(proto)s://%(host)s:%(port)s',
              dict(proto="https" if use_ssl else "http", host=host, port=port))
 
     workers = CONF.api.workers
     if not workers:
         workers = processutils.get_worker_count()
     LOG.info('Server will handle each request in a new process up to'
-             ' %s concurrent processes' % workers)
+             ' %s concurrent processes', workers)
     serving.run_simple(host, port, app, processes=workers,
                        ssl_context=_get_ssl_configs(use_ssl))

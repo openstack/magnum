@@ -133,7 +133,7 @@ class BaseMagnumClient(base.BaseMagnumTest):
 
         def _check_status():
             status = cls.cs.clusters.get(cluster.uuid).status
-            cls.LOG.debug("Cluster status is %s" % status)
+            cls.LOG.debug("Cluster status is %s", status)
             if status in wait_status:
                 return False
             elif status in finish_status:
@@ -312,7 +312,7 @@ extendedKeyUsage = clientAuth
             nodes = self._get_nodes_from_stack()
             if not [x for x in nodes if x]:
                 self.LOG.info("the list of nodes from stack is empty")
-        self.LOG.info("Nodes are: %s" % nodes)
+        self.LOG.info("Nodes are: %s", nodes)
         return nodes
 
     def _get_nodes_from_cluster(self):

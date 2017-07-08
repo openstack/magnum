@@ -106,7 +106,7 @@ class BaseTempestTest(base.BaseMagnumTest):
         except Exception:
             keypair_body = keypairs_client.create_keypair(
                 name=config.Config.keypair_id)
-            cls.LOG.debug("Keypair body: %s" % keypair_body)
+            cls.LOG.debug("Keypair body: %s", keypair_body)
             keypair = keypair_body['keypair']['private_key']
         return (creds, keypair)
 

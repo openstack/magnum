@@ -361,7 +361,7 @@ class BaysController(base.Controller):
             failed_resources = []
             LOG.warning("Failed to retrieve failed resources for "
                         "bay %(bay)s from Heat stack %(stack)s "
-                        "due to error: %(e)s" %
+                        "due to error: %(e)s",
                         {'bay': bay.uuid, 'stack': bay.stack_id, 'e': e},
                         exc_info=True)
 
