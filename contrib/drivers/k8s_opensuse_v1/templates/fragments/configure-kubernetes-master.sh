@@ -37,14 +37,14 @@ sed -i '
 sed -i '
     /^KUBE_API_ADDRESS=/ s|=.*|="--advertise-address='"$KUBE_NODE_IP"' --insecure-bind-address=0.0.0.0 --bind_address=0.0.0.0"|
     /^KUBE_SERVICE_ADDRESSES=/ s|=.*|="--service-cluster-ip-range='"$PORTAL_NETWORK_CIDR"'"|
-    /^KUBE_API_ARGS=/ s|=.*|="'"$KUBE_API_ARGS"'"|
+    /^KUBE_API_ARGS=/ s|=.*|="--service-account-key-file='"$SERVICE_ACCOUNT_KEY"' --runtime-config=api\/all=true"|
     /^KUBE_ETCD_SERVERS=/ s/=.*/="--etcd-servers=http:\/\/127.0.0.1:2379"/
     /^KUBE_ADMISSION_CONTROL=/ s/=.*/="--admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,ResourceQuota"/
 ' /etc/kubernetes/apiserver
 
 cat >> /etc/kubernetes/apiserver <<EOF
 #Uncomment the following line to enable Load Balancer feature
-#KUBE_API_ARGS="--runtime-config=api/all=true --cloud-config=/etc/sysconfig/kubernetes_openstack_config --cloud-provider=openstack"
+#KUBE_API_ARGS="--service-account-key-file='"$SERVICE_ACCOUNT_KEY"' --runtime-config=api\/all=true" --runtime-config=api\/all=true --cloud-config=/etc/sysconfig/kubernetes_openstack_config --cloud-provider=openstack"
 EOF
 
 sed -i '
@@ -52,19 +52,20 @@ sed -i '
 ' /etc/kubernetes/controller-manager
 
 cat >> /etc/kubernetes/controller-manager <<EOF
-
-#Uncomment the following line to enable Kubernetes Load Balancer feature
-#KUBE_CONTROLLER_MANAGER_ARGS="--cloud-config=/etc/sysconfig/kubernetes_openstack_config --cloud-provider=openstack"
+#Uncomment the following line to enable Load Balancer feature
+#KUBE_CONTROLLER_MANAGER_ARGS="--service_account_private_key_file='"$SERVICE_ACCOUNT_KEY"' --leader-elect=true --cluster-name=kubernetes --cluster-cidr='"$FLANNEL_NETWORK_CIDR"' --cloud-config=/etc/sysconfig/kubernetes_openstack_config --cloud-provider=openstack"
 EOF
 
 # Generate a the configuration for Kubernetes services to talk to OpenStack Neutron
 cat > /etc/sysconfig/kubernetes_openstack_config <<EOF
 [Global]
 auth-url=$AUTH_URL
-Username=$USERNAME
-Password=$PASSWORD
+username=$USERNAME
+password=$PASSWORD
 tenant-name=$TENANT_NAME
+domain-name=$DOMAIN_NAME
 [LoadBalancer]
+lb-version=v2
 subnet-id=$CLUSTER_SUBNET
 create-monitor=yes
 monitor-delay=1m

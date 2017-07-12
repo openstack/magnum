@@ -305,6 +305,11 @@ parameters:
     default: ""
     hidden: true
 
+  domain_name:
+    type: string
+    description: domain_name
+    default: ""
+
 resources:
 
   ######################################################################
@@ -555,6 +560,7 @@ resources:
           trustee_user_id: {get_param: trustee_user_id}
           trustee_password: {get_param: trustee_password}
           trust_id: {get_param: trust_id}
+          domain_name: {get_param: domain_name}
 
   ######################################################################
   #

@@ -195,6 +195,10 @@ parameters:
     description: id of the trust which is used by the trustee
     hidden: true
 
+  domain_name:
+    type: string
+    description: domain name
+
 resources:
 
   master_wait_handle:
@@ -255,6 +259,7 @@ resources:
             "$TRUSTEE_USER_ID": {get_param: trustee_user_id}
             "$TRUSTEE_PASSWORD": {get_param: trustee_password}
             "$TRUST_ID": {get_param: trust_id}
+            "$DOMAIN_NAME": {get_param: domain_name}
 
   make_cert:
     type: OS::Heat::SoftwareConfig
