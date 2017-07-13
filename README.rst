@@ -17,7 +17,7 @@ for deploying and managing containers as first class resources in OpenStack.
 For more information, please refer to the following resources:
 
 * **Free software:** under the `Apache license <http://www.apache.org/licenses/LICENSE-2.0>`_
-* **Documentation:** http://docs.openstack.org/developer/magnum
+* **Documentation:** https://docs.openstack.org/magnum/latest/
 * **Source:** http://git.openstack.org/cgit/openstack/magnum
 * **Blueprints:** https://blueprints.launchpad.net/magnum
 * **Bugs:** http://bugs.launchpad.net/magnum
