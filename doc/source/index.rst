@@ -53,25 +53,32 @@ Features
 * Integration with Neutron for Kubernetes multi-tenancy network security
 * Integration with Cinder to provide volume service for containers
 
-Developer Info
-==============
-
+User Documentation
+==================
 .. toctree::
    :maxdepth: 1
 
-   dev/quickstart
    policies.rst
    dev/cluster-type-definition.rst
    dev/kubernetes-load-balancer.rst
-   dev/functional-test.rst
-   dev/reno.rst
-   dev/api_microversion.rst
    api_microversion_history.rst
-   magnum-proxy.rst
-   contributing
    heat-templates
-   objects
+
+
+Contributor Guide
+=================
+.. toctree::
+   :maxdepth: 1
+
+   contributor/index
+
+Admin Guide
+===========
+.. toctree::
+   :maxdepth: 1
+
    gmr.rst
+   magnum-proxy.rst
 
 Work In Progress
 ================
