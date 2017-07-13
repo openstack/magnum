@@ -107,7 +107,7 @@ class BayTest(base.BaseTempestTest):
         self.bays.append(model.uuid)
         self.bay_uuid = model.uuid
         if config.Config.copy_logs:
-            self.addOnException(self.copy_logs_handler(
+            self.addCleanup(self.copy_logs_handler(
                 lambda: list(
                     [self._get_bay_by_id(self.bay_uuid)[1].master_addresses,
                      self._get_bay_by_id(self.bay_uuid)[1].node_addresses]),

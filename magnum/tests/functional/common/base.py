@@ -42,11 +42,10 @@ class BaseMagnumTest(base.BaseTestCase):
                 [[master_nodes], [slave_nodes]].
         :param coe: the COE type of the nodes
         """
-        def int_copy_logs(exec_info):
+        def int_copy_logs():
             try:
                 cls.LOG.info("Copying logs...")
-                fn = exec_info[2].tb_frame.f_locals['fn']
-                func_name = fn.im_self._get_test_method().__name__
+                func_name = "test"
                 msg = ("Failed to copy logs for cluster")
                 nodes_addresses = get_nodes_fn()
 
