@@ -264,6 +264,24 @@ extendedKeyUsage = clientAuth
         cls.cluster = cls._create_cluster(cls.__name__,
                                           cls.cluster_template.uuid)
         if not cls.cluster_template_kwargs.get('tls_disabled', False):
+            # NOTE (wangbo) with multiple mangum-conductor processes, client
+            # ca files should be created after completion of cluster ca_cert
+            try:
+                cls._wait_on_status(
+                    cls.cluster,
+                    [None, "CREATE_IN_PROGRESS"],
+                    ["CREATE_FAILED", "CREATE_COMPLETE"],
+                    timeout=cls.cluster_complete_timeout
+                )
+            except Exception:
+                # copy logs if setUpClass fails, may be this will not work
+                # as master_address, node_address would not be available, if
+                # not we can get that from nova
+                if cls.copy_logs:
+                    cls.copy_logs_handler(
+                        cls._get_nodes,
+                        cls.cluster_template.coe,
+                        'default')
             cls._create_tls_ca_files(cls.config_contents)
 
     @classmethod
@@ -290,8 +308,9 @@ extendedKeyUsage = clientAuth
 
         self.useFixture(fixtures.Timeout(test_timeout, gentle=True))
 
+        # Copy cluster nodes logs
         if self.copy_logs:
-            self.addOnException(
+            self.addCleanup(
                 self.copy_logs_handler(
                     self._get_nodes,
                     self.cluster_template.coe,
