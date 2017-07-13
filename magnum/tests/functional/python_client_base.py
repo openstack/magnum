@@ -272,8 +272,9 @@ extendedKeyUsage = clientAuth
 
         self.useFixture(fixtures.Timeout(test_timeout, gentle=True))
 
+        # Copy cluster nodes logs
         if self.copy_logs:
-            self.addOnException(
+            self.addCleanup(
                 self.copy_logs_handler(
                     self._get_nodes,
                     self.cluster_template.coe,
