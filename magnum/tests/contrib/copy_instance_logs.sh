@@ -75,7 +75,7 @@ if [[ "$COE" == "kubernetes" ]]; then
     remote_exec $SSH_USER "sudo netstat -an" netstat.log
     remote_exec $SSH_USER "sudo df -h" dfh.log
     remote_exec $SSH_USER "sudo journalctl -u wc-notify --no-pager" wc-notify.log
-    remote_exec $SSH_USER "cat /etc/sysconfig/heat-params" heat-params
+    remote_exec $SSH_USER "sudo cat /etc/sysconfig/heat-params" heat-params
 elif [[ "$COE" == "swarm" ]]; then
     SSH_USER=fedora
     remote_exec $SSH_USER "sudo systemctl --full list-units --no-pager" systemctl_list_units.log
@@ -106,7 +106,7 @@ elif [[ "$COE" == "swarm" ]]; then
     remote_exec $SSH_USER "sudo ip a" ipa.log
     remote_exec $SSH_USER "sudo netstat -an" netstat.log
     remote_exec $SSH_USER "sudo df -h" dfh.log
-    remote_exec $SSH_USER "cat /etc/sysconfig/heat-params" heat-params
+    remote_exec $SSH_USER "sudo cat /etc/sysconfig/heat-params" heat-params
 else
     echo "ERROR: Unknown COE '${COE}'"
     EXIT_CODE=1
