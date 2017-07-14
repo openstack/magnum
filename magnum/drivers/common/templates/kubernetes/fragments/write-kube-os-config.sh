@@ -18,4 +18,6 @@ create-monitor=yes
 monitor-delay=1m
 monitor-timeout=30s
 monitor-max-retries=3
+[BlockStorage]
+bs-version=v2
 EOF
