@@ -62,22 +62,16 @@ $(generate_pod_args "    - " $KUBE_LOGTOSTDERR $KUBE_LOG_LEVEL $KUBE_MASTER $KUB
     - mountPath: /etc/ssl/certs
       name: ssl-certs-host
       readOnly: true
-    - mountPath: /srv/kubernetes
+    - mountPath: /etc/kubernetes
       name: kubernetes-config
-      readOnly: true
-    - mountPath: /etc/sysconfig
-      name: sysconfig
       readOnly: true
   volumes:
   - hostPath:
       path: /etc/ssl/certs
     name: ssl-certs-host
   - hostPath:
-      path: /srv/kubernetes
+      path: /etc/kubernetes
     name: kubernetes-config
-  - hostPath:
-      path: /etc/sysconfig
-    name: sysconfig
 EOF
     }
 
@@ -114,22 +108,16 @@ $(generate_pod_args "    - " $KUBE_LOGTOSTDERR $KUBE_LOG_LEVEL $KUBE_MASTER $KUB
     - mountPath: /etc/ssl/certs
       name: ssl-certs-host
       readOnly: true
-    - mountPath: /srv/kubernetes
+    - mountPath: /etc/kubernetes
       name: kubernetes-config
-      readOnly: true
-    - mountPath: /etc/sysconfig
-      name: sysconfig
       readOnly: true
   volumes:
   - hostPath:
       path: /etc/ssl/certs
     name: ssl-certs-host
   - hostPath:
-      path: /srv/kubernetes
+      path: /etc/kubernetes
     name: kubernetes-config
-  - hostPath:
-      path: /etc/sysconfig
-    name: sysconfig
 EOF
     }
 }

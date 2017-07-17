@@ -24,11 +24,9 @@ if [ "$TLS_DISABLED" == "True" ]; then
     exit 0
 fi
 
-cert_dir=/srv/kubernetes
-cert_conf_dir=${cert_dir}/conf
+cert_dir=/etc/kubernetes/certs
 
 mkdir -p "$cert_dir"
-mkdir -p "$cert_conf_dir"
 
 CA_CERT=$cert_dir/ca.crt
 CLIENT_CERT=$cert_dir/client.crt
@@ -67,7 +65,7 @@ curl -k -X GET \
     $MAGNUM_URL/certificates/$CLUSTER_UUID | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > $CA_CERT
 
 # Create config for client's csr
-cat > ${cert_conf_dir}/client.conf <<EOF
+cat > ${cert_dir}/client.conf <<EOF
 [req]
 distinguished_name = req_distinguished_name
 req_extensions     = req_ext
@@ -91,7 +89,7 @@ openssl req -new -days 1000 \
         -key "${CLIENT_KEY}" \
         -out "${CLIENT_CSR}" \
         -reqexts req_ext \
-        -config "${cert_conf_dir}/client.conf"
+        -config "${cert_dir}/client.conf"
 
 # Send csr to Magnum to have it signed
 csr_req=$(python -c "import json; fp = open('${CLIENT_CSR}'); print json.dumps({'cluster_uuid': '$CLUSTER_UUID', 'csr': fp.read()}); fp.close()")
@@ -115,4 +113,4 @@ sed -i '
     s|CA_CERT|'"$CA_CERT"'|
     s|CLIENT_CERT|'"$CLIENT_CERT"'|
     s|CLIENT_KEY|'"$CLIENT_KEY"'|
-' /srv/kubernetes/kubeconfig.yaml
+' /etc/kubernetes/kubeconfig.yaml
