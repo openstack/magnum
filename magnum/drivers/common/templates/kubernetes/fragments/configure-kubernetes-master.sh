@@ -4,6 +4,9 @@
 
 echo "configuring kubernetes (master)"
 
+atomic install --storage ostree --system --system-package=no --name=kubelet docker.io/openstackmagnum/kubernetes-kubelet:${KUBE_VERSION}
+atomic install --storage ostree --system --system-package=no --name=kube-apiserver docker.io/openstackmagnum/kubernetes-apiserver:${KUBE_VERSION}
+
 sed -i '
     /^KUBE_ALLOW_PRIV=/ s/=.*/="--allow-privileged='"$KUBE_ALLOW_PRIV"'"/
 ' /etc/kubernetes/config

@@ -4,6 +4,8 @@
 
 echo "configuring kubernetes (minion)"
 
+atomic install --storage ostree --system --system-package=no --name=kubelet docker.io/openstackmagnum/kubernetes-kubelet:${KUBE_VERSION}
+
 CERT_DIR=/etc/kubernetes/certs
 PROTOCOL=https
 FLANNEL_OPTIONS="-etcd-cafile $CERT_DIR/ca.crt \

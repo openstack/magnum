@@ -2494,7 +2494,7 @@ The image currently has the following OS/software:
 +-------------+-----------+
 | Docker      | 1.13.1    |
 +-------------+-----------+
-| Kubernetes  | 1.6.7     |
+| Kubernetes  | 1.7.4     |
 +-------------+-----------+
 | etcd        | 3.1.3     |
 +-------------+-----------+
