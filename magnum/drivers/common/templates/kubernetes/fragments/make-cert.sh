@@ -55,6 +55,8 @@ KUBE_SERVICE_IP=$(echo $PORTAL_NETWORK_CIDR | awk 'BEGIN{FS="[./]"; OFS="."}{pri
 
 sans="${sans},IP:${KUBE_SERVICE_IP}"
 
+sans="${sans},DNS:kubernetes,DNS:kubernetes.default,DNS:kubernetes.default.svc,DNS:kubernetes.default.svc.cluster.local"
+
 cert_dir=/srv/kubernetes
 cert_conf_dir=${cert_dir}/conf
 
@@ -104,7 +106,7 @@ distinguished_name = req_distinguished_name
 req_extensions     = req_ext
 prompt = no
 [req_distinguished_name]
-CN = kubernetes.invalid
+CN = kubernetes.default.svc
 [req_ext]
 subjectAltName = ${sans}
 extendedKeyUsage = clientAuth,serverAuth
