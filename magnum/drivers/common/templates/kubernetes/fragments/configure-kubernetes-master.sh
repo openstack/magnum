@@ -33,13 +33,11 @@ fi
 sed -i '
     /^KUBE_API_ADDRESS=/ s/=.*/="'"${KUBE_API_ADDRESS}"'"/
     /^KUBE_SERVICE_ADDRESSES=/ s|=.*|="--service-cluster-ip-range='"$PORTAL_NETWORK_CIDR"'"|
-    /^KUBE_API_ARGS=/ s/KUBE_API_ARGS.//
+    /^KUBE_API_ARGS=/ s|=.*|="'"${KUBE_API_ARGS}"'"|
     /^KUBE_ETCD_SERVERS=/ s/=.*/="--etcd-servers=http:\/\/127.0.0.1:2379"/
     /^KUBE_ADMISSION_CONTROL=/ s/=.*/="'"${KUBE_ADMISSION_CONTROL}"'"/
 ' /etc/kubernetes/apiserver
-cat << _EOC_ >> /etc/kubernetes/apiserver
-KUBE_API_ARGS="$KUBE_API_ARGS"
-_EOC_
+
 
 # Add controller manager args
 KUBE_CONTROLLER_MANAGER_ARGS=""
@@ -74,5 +72,5 @@ KUBELET_ARGS="${KUBELET_ARGS} --cgroup-driver=systemd"
 sed -i '
     /^KUBELET_ADDRESS=/ s/=.*/="--address=0.0.0.0"/
     /^KUBELET_HOSTNAME=/ s/=.*/=""/
-    /^KUBELET_ARGS=/ s|=.*|='"$KUBELET_ARGS"'|
+    /^KUBELET_ARGS=/ s|=.*|="'"$KUBELET_ARGS"'"|
 ' /etc/kubernetes/kubelet
