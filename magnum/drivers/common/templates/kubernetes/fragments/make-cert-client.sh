@@ -73,7 +73,7 @@ distinguished_name = req_distinguished_name
 req_extensions     = req_ext
 prompt = no
 [req_distinguished_name]
-CN = kubernetes.invalid
+CN = kubernetes.default.svc
 [req_ext]
 keyUsage=critical,digitalSignature,keyEncipherment
 extendedKeyUsage=clientAuth
