@@ -85,10 +85,10 @@ def execute(*cmd, **kwargs):
     if kwargs.get('run_as_root') and 'root_helper' not in kwargs:
         kwargs['root_helper'] = _get_root_helper()
     result = processutils.execute(*cmd, **kwargs)
-    LOG.debug('Execution completed, command line is "%s"' %
+    LOG.debug('Execution completed, command line is "%s"',
               ' '.join(map(str, cmd)))
-    LOG.debug('Command stdout is: "%s"' % result[0])
-    LOG.debug('Command stderr is: "%s"' % result[1])
+    LOG.debug('Command stdout is: "%s"', result[0])
+    LOG.debug('Command stderr is: "%s"', result[1])
     return result
 
 
@@ -125,7 +125,7 @@ def tempdir(**kwargs):
         try:
             shutil.rmtree(tmpdir)
         except OSError as e:
-            LOG.error('Could not remove tmpdir: %s' % e)
+            LOG.error('Could not remove tmpdir: %s', e)
 
 
 def rmtree_without_raise(path):
@@ -133,7 +133,7 @@ def rmtree_without_raise(path):
         if os.path.isdir(path):
             shutil.rmtree(path)
     except OSError as e:
-        LOG.warning("Failed to remove dir %(path)s, error: %(e)s" %
+        LOG.warning("Failed to remove dir %(path)s, error: %(e)s",
                     {'path': path, 'e': e})
 
 
@@ -148,7 +148,7 @@ def safe_rstrip(value, chars=None):
     if not isinstance(value, six.string_types):
         LOG.warning("Failed to remove trailing character. "
                     "Returning original object. "
-                    "Supplied object is not a string: %s," % value)
+                    "Supplied object is not a string: %s,", value)
         return value
 
     return value.rstrip(chars) or value

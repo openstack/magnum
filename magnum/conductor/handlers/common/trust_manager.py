@@ -37,7 +37,7 @@ def create_trustee_and_trust(osc, cluster):
 
     except Exception:
         LOG.exception(
-            'Failed to create trustee and trust for Cluster: %s' %
+            'Failed to create trustee and trust for Cluster: %s',
             cluster.uuid)
         raise exception.TrusteeOrTrustToClusterFailed(
             cluster_uuid=cluster.uuid)

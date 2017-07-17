@@ -66,8 +66,8 @@ class BaseMagnumTest(base.BaseTestCase):
                     log_name = prefix + "-" + func_name
                     for node_address in nodes_address:
                         try:
-                            cls.LOG.debug("running %s" % full_location)
-                            cls.LOG.debug("keypair: %s" % keypair)
+                            cls.LOG.debug("running %s", full_location)
+                            cls.LOG.debug("keypair: %s", keypair)
                             subprocess.check_call([
                                 full_location,
                                 node_address,

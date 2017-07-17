@@ -102,8 +102,8 @@ class KeystoneClientV3(object):
         LOG.warning('Auth plugin and its options for service user '
                     'must be provided in [%(new)s] section. '
                     'Using values from [%(old)s] section is '
-                    'deprecated.' % {'new': ksconf.CFG_GROUP,
-                                     'old': ksconf.CFG_LEGACY_GROUP})
+                    'deprecated.', {'new': ksconf.CFG_GROUP,
+                                    'old': ksconf.CFG_LEGACY_GROUP})
 
         conf = getattr(CONF, ksconf.CFG_LEGACY_GROUP)
 

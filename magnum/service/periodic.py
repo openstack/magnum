@@ -135,7 +135,7 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
 
         except Exception as e:
             LOG.warning(
-                "Ignore error [%s] when syncing up cluster status." %
+                "Ignore error [%s] when syncing up cluster status.",
                 e, exc_info=True)
 
     @periodic_task.periodic_task(run_immediately=True)
@@ -157,7 +157,7 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
             except Exception as e:
                 LOG.warning(
                     "Skip pulling data from cluster %(cluster)s due to "
-                    "error: %(e)s" %
+                    "error: %(e)s",
                     {'e': e, 'cluster': cluster.uuid}, exc_info=True)
                 continue
 
@@ -172,7 +172,7 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                     metrics.append(metric)
                 except Exception as e:
                     LOG.warning("Skip adding metric %(name)s due to "
-                                "error: %(e)s" %
+                                "error: %(e)s",
                                 {'e': e, 'name': name}, exc_info=True)
 
             message = dict(metrics=metrics,

@@ -38,7 +38,7 @@ def get(url, allowed_schemes=('http', 'https')):
     the allowed_schemes argument.
     Raise an IOError if getting the data fails.
     """
-    LOG.info('Fetching data from %s' % url)
+    LOG.info('Fetching data from %s', url)
 
     components = urllib.parse.urlparse(url)
 

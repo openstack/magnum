@@ -100,7 +100,7 @@ class OutputMapping(object):
             if output['output_key'] == self.heat_output:
                 return output['output_value']
 
-        LOG.warning('stack does not have output_key %s' % self.heat_output)
+        LOG.warning('stack does not have output_key %s', self.heat_output)
         return None
 
 

@@ -190,8 +190,8 @@ class HeatPoller(object):
             self._cluster_failed(stack)
 
     def _delete_complete(self):
-        LOG.info('Cluster has been deleted, stack_id: %s'
-                 % self.cluster.stack_id)
+        LOG.info('Cluster has been deleted, stack_id: %s',
+                 self.cluster.stack_id)
         try:
             trust_manager.delete_trustee_and_trust(self.openstack_client,
                                                    self.context,
@@ -199,8 +199,8 @@ class HeatPoller(object):
             cert_manager.delete_certificates_from_cluster(self.cluster,
                                                           context=self.context)
         except exception.ClusterNotFound:
-            LOG.info('The cluster %s has been deleted by others.'
-                     % self.cluster.uuid)
+            LOG.info('The cluster %s has been deleted by others.',
+                     self.cluster.uuid)
 
     def _sync_cluster_status(self, stack):
         self.cluster.status = stack.stack_status
@@ -233,7 +233,7 @@ class HeatPoller(object):
     def _cluster_failed(self, stack):
         LOG.error('Cluster error, stack status: %(cluster_status)s, '
                   'stack_id: %(stack_id)s, '
-                  'reason: %(reason)s' %
+                  'reason: %(reason)s',
                   {'cluster_status': stack.stack_status,
                    'stack_id': self.cluster.stack_id,
                    'reason': self.cluster.status_reason})
@@ -253,6 +253,6 @@ class HeatPoller(object):
         self.cluster.save()
         LOG.info("Cluster with id %(id)s has been set to "
                  "%(status)s due to stack with id %(sid)s "
-                 "not found in Heat." %
+                 "not found in Heat.",
                  {'id': self.cluster.id, 'status': self.cluster.status,
                   'sid': self.cluster.stack_id})

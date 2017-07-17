@@ -67,13 +67,13 @@ class ScaleManager(object):
             LOG.warning(
                 "About to remove %(num_removal)d nodes, which is larger than "
                 "the number of empty nodes (%(num_empty)d). %(num_non_empty)d "
-                "non-empty nodes will be removed." % {
+                "non-empty nodes will be removed.", {
                     'num_removal': num_of_removal,
                     'num_empty': len(hosts_no_container),
                     'num_non_empty': num_of_removal - len(hosts_no_container)})
 
         hosts_to_remove = hosts_no_container[0:num_of_removal]
-        LOG.info('Require removal of hosts: %s' % hosts_to_remove)
+        LOG.info('Require removal of hosts: %s', hosts_to_remove)
 
         return hosts_to_remove
 

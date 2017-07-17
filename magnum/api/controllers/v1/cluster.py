@@ -334,7 +334,7 @@ class ClustersController(base.Controller):
             failed_resources = []
             LOG.warning("Failed to retrieve failed resources for "
                         "cluster %(cluster)s from Heat stack "
-                        "%(stack)s due to error: %(e)s" %
+                        "%(stack)s due to error: %(e)s",
                         {'cluster': cluster.uuid,
                          'stack': cluster.stack_id, 'e': e},
                         exc_info=True)

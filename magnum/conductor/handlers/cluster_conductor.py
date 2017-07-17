@@ -151,14 +151,14 @@ class Handler(object):
             cluster.status_reason = None
         except exc.HTTPNotFound:
             LOG.info('The cluster %s was not found during cluster'
-                     ' deletion.' % cluster.id)
+                     ' deletion.', cluster.id)
             try:
                 trust_manager.delete_trustee_and_trust(osc, context, cluster)
                 cert_manager.delete_certificates_from_cluster(cluster,
                                                               context=context)
                 cluster.destroy()
             except exception.ClusterNotFound:
-                LOG.info('The cluster %s has been deleted by others.' %
+                LOG.info('The cluster %s has been deleted by others.',
                          uuid)
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_SUCCESS)
