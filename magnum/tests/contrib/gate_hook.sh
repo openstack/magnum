@@ -53,6 +53,8 @@ elif [ "${coe}${special}" = "k8s-ironic" ]; then
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ironic git://git.openstack.org/openstack/ironic"
 
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_DEPLOY_DRIVER=pxe_ipmitool"
+    # NOTE(ykarel) Ironic to work with magnum, requires devstack to be configured with IP_VERSION=4
+    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IP_VERSION=4"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_BAREMETAL_BASIC_OPS=True"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_VM_LOG_DIR=/opt/stack/new/ironic-bm-logs"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"DEFAULT_INSTANCE_TYPE=baremetal"
