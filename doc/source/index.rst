@@ -58,10 +58,8 @@ User Documentation
 .. toctree::
    :maxdepth: 1
 
-   policies.rst
    dev/cluster-type-definition.rst
    dev/kubernetes-load-balancer.rst
-   api_microversion_history.rst
    heat-templates
 
 
@@ -77,8 +75,7 @@ Admin Guide
 .. toctree::
    :maxdepth: 1
 
-   gmr.rst
-   magnum-proxy.rst
+   admin/index
 
 Work In Progress
 ================
@@ -86,7 +83,7 @@ Work In Progress
 .. toctree::
    :maxdepth: 1
 
-   troubleshooting-guide.rst
+   admin/troubleshooting-guide.rst
    userguide.rst
-   configuring.rst
+   admin/configuring.rst
    install-guide-from-source.rst

@@ -24,3 +24,5 @@ contribute effectively towards code standards to the project.
   Writing a Release Note <reno>
   Adding a New API Method <api-microversion>
   Changing Magnum DB Objects <objects>
+  api-microversion-history
+  policies
