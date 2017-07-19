@@ -1,7 +1,3 @@
-=======================
-Cluster Type Definition
-=======================
-
 There are three key pieces to a Cluster Type Definition:
 
 1. Heat Stack template - The HOT file that Magnum will use to generate a

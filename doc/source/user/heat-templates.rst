@@ -1,7 +1,3 @@
-====================
-Heat Stack Templates
-====================
-
 Heat Stack Templates are what Magnum passes to Heat to generate a cluster. For
 each ClusterTemplate resource in Magnum, a Heat stack is created to arrange all
 of the cloud resources needed to support the container orchestration

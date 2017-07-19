@@ -1,7 +1,3 @@
-===============================================
-Using Kubernetes external load balancer feature
-===============================================
-
 In a Kubernetes cluster, all masters and minions are connected to a private
 Neutron subnet, which in turn is connected by a router to the public network.
 This allows the nodes to access each other and the external internet.
@@ -28,7 +24,7 @@ configuration required for the external load balancer.  This document describes
 how to use this feature.
 
 Steps for the cluster administrator
-===================================
+-----------------------------------
 
 Because the Kubernetes master needs to interface with OpenStack to create and
 manage the Neutron load balancer, we need to provide a credential for
@@ -85,7 +81,7 @@ this occurs, delete the neutron objects manually (lb-pool, lb-vip, lb-member,
 lb-healthmonitor) and then run cluster-delete again.
 
 Steps for the users
-===================
+-------------------
 
 This feature requires the OpenStack cloud provider to be enabled.
 To do so, enable the cinder support (--volume-driver cinder).
@@ -207,7 +203,7 @@ NOTE: it is not necessary to indicate port :80 here but it is shown to
 correlate with the port that was specified in the service manifest.
 
 How it works
-============
+------------
 
 Kubernetes is designed to work with different Clouds such as Google Compute
 Engine (GCE), Amazon Web Services (AWS), and OpenStack;  therefore, different

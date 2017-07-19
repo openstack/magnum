@@ -21,6 +21,8 @@ Contents
 #. `Python Client`_
 #. `Horizon Interface`_
 #. `Cluster Drivers`_
+#. `Cluster Type Definition`_
+#. `Heat Stack Templates`_
 #. `Choosing a COE`_
 #. `Native Clients`_
 #. `Kubernetes`_
@@ -34,6 +36,7 @@ Contents
 #. `Image Management`_
 #. `Notification`_
 #. `Container Monitoring`_
+#. `Kubernetes External Load Balancer`_
 
 ===========
 Terminology
@@ -693,16 +696,16 @@ Other operations are not yet supported and the CLI should be used for these.
 Following is the screenshot of the Horizon view showing the list of cluster
 templates.
 
-.. image:: images/cluster-template.png
+.. image:: ../images/cluster-template.png
 
 Following is the screenshot of the Horizon view showing the details of a
 cluster template.
 
-.. image:: images/cluster-template-details.png
+.. image:: ../images/cluster-template-details.png
 
 Following is the screenshot of the dialog to create a new cluster.
 
-.. image:: images/cluster-create.png
+.. image:: ../images/cluster-create.png
 
 
 ===============
@@ -809,6 +812,18 @@ Installing a cluster driver
 ---------------------------
 *To be filled in*
 
+
+=======================
+Cluster Type Definition
+=======================
+
+.. include:: cluster-type-definition.rst
+
+====================
+Heat Stack Templates
+====================
+
+.. include:: heat-templates.rst
 
 ==============
 Choosing a COE
@@ -2794,3 +2809,9 @@ the service is running, the Grafana dashboards can be accessed through port
 
 For both Prometheus and Grafana, there is an assigned *systemd* service
 called *kube-enable-monitoring*.
+
+=================================
+Kubernetes External Load Balancer
+=================================
+
+.. include:: kubernetes-load-balancer.rst

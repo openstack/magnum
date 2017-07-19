@@ -58,10 +58,7 @@ User Documentation
 .. toctree::
    :maxdepth: 1
 
-   dev/cluster-type-definition.rst
-   dev/kubernetes-load-balancer.rst
-   heat-templates
-
+   user/index
 
 Contributor Guide
 =================
@@ -92,5 +89,5 @@ Work In Progress
    :maxdepth: 1
 
    admin/troubleshooting-guide.rst
-   userguide.rst
+   user/index.rst
    admin/configuring.rst
