@@ -77,6 +77,14 @@ Admin Guide
 
    admin/index
 
+Installation Guide
+==================
+.. toctree::
+   :maxdepth: 1
+
+   install/index
+
+
 Work In Progress
 ================
 
@@ -86,4 +94,3 @@ Work In Progress
    admin/troubleshooting-guide.rst
    userguide.rst
    admin/configuring.rst
-   install-guide-from-source.rst
