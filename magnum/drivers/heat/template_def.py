@@ -170,12 +170,12 @@ class TemplateDefinition(object):
         """Returns stack param name.
 
         Return stack param name using cluster and cluster_template attributes
-        :param cluster_attr cluster attribute from which it maps to stack
+        :param cluster_attr: cluster attribute from which it maps to stack
          attribute
-        :param cluster_template_attr cluster_template attribute from which it
+        :param cluster_template_attr: cluster_template attribute from which it
          maps to stack attribute
 
-        :return stack parameter name or None
+        :return: stack parameter name or None
         """
         for mapping in self.param_mappings:
             if (mapping.cluster_attr == cluster_attr and
