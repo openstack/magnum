@@ -23,13 +23,18 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.graphviz',
     'stevedore.sphinxext',
-    'openstackdocstheme'
+    'openstackdocstheme',
+    'oslo_config.sphinxconfiggen',
 ]
 
 # openstackdocstheme options
 repository_name = 'openstack/magnum'
 bug_project = 'magnum'
 bug_tag = ''
+
+config_generator_config_file = '../../etc/magnum/magnum-config-generator.conf'
+sample_config_basename = '_static/magnum'
+
 # autodoc generation is a bit aggressive and a nuisance when doing heavy
 # text edit cycles.
 # execute "export SPHINX_DEBUG=1" in your terminal to disable

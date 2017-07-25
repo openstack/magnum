@@ -82,6 +82,14 @@ Installation Guide
    install/index
 
 
+Sample Configurations
+=====================
+
+.. toctree::
+   :maxdepth: 1
+
+   configuration/index
+
 Work In Progress
 ================
 
