@@ -12,7 +12,6 @@ with pointers to the details for troubleshooting.
 A separate section `for developers`_ describes useful techniques such as
 debugging unit tests and gate tests.
 
-================
 Failure symptoms
 ================
 
@@ -70,7 +69,6 @@ My cluster-create fails with a resource error on docker_volume
   Run "nova volume-list" to check the volume status.
 
 
-=======================
 Troubleshooting details
 =======================
 
@@ -681,7 +679,6 @@ Heat software resource scripts
 *To be filled in*
 
 
-==============
 For Developers
 ==============
 
