@@ -40,7 +40,7 @@ if [ -z "$KUBE_NODE_IP" ]; then
 fi
 
 myip="${KUBE_NODE_IP}"
-cert_dir="/srv/kubernetes"
+cert_dir="/etc/kubernetes/certs"
 protocol="https"
 
 if [ "$TLS_DISABLED" = "True" ]; then

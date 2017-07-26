@@ -4,7 +4,7 @@
 
 echo "configuring kubernetes (minion)"
 
-CERT_DIR=/srv/kubernetes
+CERT_DIR=/etc/kubernetes/certs
 PROTOCOL=https
 FLANNEL_OPTIONS="-etcd-cafile $CERT_DIR/ca.crt \
 -etcd-certfile $CERT_DIR/client.crt \
@@ -31,7 +31,7 @@ EOF
 if [ "$TLS_DISABLED" = "True" ]; then
     KUBE_PROTOCOL="http"
 else
-    KUBE_CONFIG="--kubeconfig=/srv/kubernetes/kubeconfig.yaml"
+    KUBE_CONFIG="--kubeconfig=/etc/kubernetes/kubeconfig.yaml"
 fi
 KUBE_MASTER_URI="$KUBE_PROTOCOL://$KUBE_MASTER_IP:$KUBE_API_PORT"
 
@@ -52,7 +52,7 @@ KUBELET_ARGS="--pod-manifest-path=/etc/kubernetes/manifests --cadvisor-port=4194
 KUBELET_ARGS="${KUBELET_ARGS} --cluster_dns=${DNS_SERVICE_IP} --cluster_domain=${DNS_CLUSTER_DOMAIN}"
 
 if [ -n "$TRUST_ID" ]; then
-    KUBELET_ARGS="$KUBELET_ARGS --cloud-provider=openstack --cloud-config=/etc/sysconfig/kube_openstack_config"
+    KUBELET_ARGS="$KUBELET_ARGS --cloud-provider=openstack --cloud-config=/etc/kubernetes/kube_openstack_config"
 fi
 
 # Workaround for Cinder support (fixed in k8s >= 1.6)

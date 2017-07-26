@@ -57,11 +57,8 @@ sans="${sans},IP:${KUBE_SERVICE_IP}"
 
 sans="${sans},DNS:kubernetes,DNS:kubernetes.default,DNS:kubernetes.default.svc,DNS:kubernetes.default.svc.cluster.local"
 
-cert_dir=/srv/kubernetes
-cert_conf_dir=${cert_dir}/conf
-
+cert_dir=/etc/kubernetes/certs
 mkdir -p "$cert_dir"
-mkdir -p "$cert_conf_dir"
 
 CA_CERT=$cert_dir/ca.crt
 SERVER_CERT=$cert_dir/server.crt
@@ -100,7 +97,7 @@ curl -k -X GET \
     $MAGNUM_URL/certificates/$CLUSTER_UUID | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > ${CA_CERT}
 
 # Create config for server's csr
-cat > ${cert_conf_dir}/server.conf <<EOF
+cat > ${cert_dir}/server.conf <<EOF
 [req]
 distinguished_name = req_distinguished_name
 req_extensions     = req_ext
@@ -119,7 +116,7 @@ openssl req -new -days 1000 \
         -key "${SERVER_KEY}" \
         -out "${SERVER_CSR}" \
         -reqexts req_ext \
-        -config "${cert_conf_dir}/server.conf"
+        -config "${cert_dir}/server.conf"
 
 # Send csr to Magnum to have it signed
 csr_req=$(python -c "import json; fp = open('${SERVER_CSR}'); print json.dumps({'cluster_uuid': '$CLUSTER_UUID', 'csr': fp.read()}); fp.close()")

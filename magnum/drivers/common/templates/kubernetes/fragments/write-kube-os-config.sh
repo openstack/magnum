@@ -2,7 +2,7 @@
 
 . /etc/sysconfig/heat-params
 
-KUBE_OS_CLOUD_CONFIG=/etc/sysconfig/kube_openstack_config
+KUBE_OS_CLOUD_CONFIG=/etc/kubernetes/kube_openstack_config
 
 # Generate a the configuration for Kubernetes services
 # to talk to OpenStack Neutron

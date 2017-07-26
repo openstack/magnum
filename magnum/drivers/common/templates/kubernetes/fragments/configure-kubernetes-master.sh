@@ -8,6 +8,8 @@ sed -i '
     /^KUBE_ALLOW_PRIV=/ s/=.*/="--allow-privileged='"$KUBE_ALLOW_PRIV"'"/
 ' /etc/kubernetes/config
 
+CERT_DIR=/etc/kubernetes/certs
+
 KUBE_API_ARGS="--runtime-config=api/all=true"
 if [ "$TLS_DISABLED" == "True" ]; then
     KUBE_API_ADDRESS="--insecure-bind-address=0.0.0.0 --insecure-port=$KUBE_API_PORT"
@@ -15,9 +17,9 @@ else
     KUBE_API_ADDRESS="--bind-address=0.0.0.0 --secure-port=$KUBE_API_PORT"
     # insecure port is used internaly
     KUBE_API_ADDRESS="$KUBE_API_ADDRESS --insecure-port=8080"
-    KUBE_API_ARGS="$KUBE_API_ARGS --tls-cert-file=/srv/kubernetes/server.crt"
-    KUBE_API_ARGS="$KUBE_API_ARGS --tls-private-key-file=/srv/kubernetes/server.key"
-    KUBE_API_ARGS="$KUBE_API_ARGS --client-ca-file=/srv/kubernetes/ca.crt"
+    KUBE_API_ARGS="$KUBE_API_ARGS --tls-cert-file=$CERT_DIR/server.crt"
+    KUBE_API_ARGS="$KUBE_API_ARGS --tls-private-key-file=$CERT_DIR/server.key"
+    KUBE_API_ARGS="$KUBE_API_ARGS --client-ca-file=$CERT_DIR/ca.crt"
     KUBE_API_ARGS="$KUBE_API_ARGS --kubelet-preferred-address-types=InternalIP,Hostname,ExternalIP"
 fi
 
@@ -27,7 +29,7 @@ if [ -n "${ADMISSION_CONTROL_LIST}" ] && [ "${TLS_DISABLED}" == "False" ]; then
 fi
 
 if [ -n "$TRUST_ID" ]; then
-    KUBE_API_ARGS="$KUBE_API_ARGS --cloud-config=/etc/sysconfig/kube_openstack_config --cloud-provider=openstack"
+    KUBE_API_ARGS="$KUBE_API_ARGS --cloud-config=/etc/kubernetes/kube_openstack_config --cloud-provider=openstack"
 fi
 
 sed -i '
@@ -42,11 +44,11 @@ sed -i '
 # Add controller manager args
 KUBE_CONTROLLER_MANAGER_ARGS=""
 if [ -n "${ADMISSION_CONTROL_LIST}" ] && [ "${TLS_DISABLED}" == "False" ]; then
-    KUBE_CONTROLLER_MANAGER_ARGS="--service-account-private-key-file=/srv/kubernetes/server.key --root-ca-file=/srv/kubernetes/ca.crt"
+    KUBE_CONTROLLER_MANAGER_ARGS="--service-account-private-key-file=$CERT_DIR/server.key --root-ca-file=$CERT_DIR/ca.crt"
 fi
 
 if [ -n "$TRUST_ID" ]; then
-    KUBE_CONTROLLER_MANAGER_ARGS="$KUBE_CONTROLLER_MANAGER_ARGS --cloud-config=/etc/sysconfig/kube_openstack_config --cloud-provider=openstack"
+    KUBE_CONTROLLER_MANAGER_ARGS="$KUBE_CONTROLLER_MANAGER_ARGS --cloud-config=/etc/kubernetes/kube_openstack_config --cloud-provider=openstack"
 fi
 
 sed -i '

@@ -5,7 +5,7 @@
 if [ "$NETWORK_DRIVER" != "flannel" ]; then
     exit 0
 fi
-CERT_DIR=/srv/kubernetes
+CERT_DIR=/etc/kubernetes/certs
 PROTOCOL=https
 FLANNEL_OPTIONS="-etcd-cafile $CERT_DIR/ca.crt \
 -etcd-certfile $CERT_DIR/server.crt \

@@ -10,7 +10,7 @@ fi
 
 init_templates () {
     local KUBE_PROTOCOL="https"
-    local KUBE_CONFIG="/srv/kubernetes/kubeconfig.yaml"
+    local KUBE_CONFIG="/etc/kubernetes/kubeconfig.yaml"
     if [ "${TLS_DISABLED}" = "True" ]; then
         KUBE_PROTOCOL="http"
         KUBE_CONFIG=
@@ -42,13 +42,13 @@ spec:
     securityContext:
       privileged: true
     volumeMounts:
-    - mountPath: /srv/kubernetes
-      name: "srv-kube"
+    - mountPath: /etc/kubernetes
+      name: kubernetes-config
       readOnly: true
   volumes:
   - hostPath:
-      path: "/srv/kubernetes"
-    name: "srv-kube"
+      path: /etc/kubernetes
+    name: kubernetes-config
 EOF
     }
 }
