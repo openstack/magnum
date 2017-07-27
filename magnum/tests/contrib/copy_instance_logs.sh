@@ -76,6 +76,25 @@ if [[ "$COE" == "kubernetes" ]]; then
     remote_exec $SSH_USER "sudo df -h" dfh.log
     remote_exec $SSH_USER "sudo journalctl -u wc-notify --no-pager" wc-notify.log
     remote_exec $SSH_USER "sudo cat /etc/sysconfig/heat-params" heat-params
+    remote_exec $SSH_USER "sudo cat /etc/etcd/etcd.conf" etcd.conf
+    remote_exec $SSH_USER "sudo cat /etc/kubernetes/config" kubernetes-config
+    remote_exec $SSH_USER "sudo cat /etc/kubernetes/apiserver" kubernetes-apiserver-config
+    remote_exec $SSH_USER "sudo cat /etc/kubernetes/controller-manager" kubernetes-controller-config
+    remote_exec $SSH_USER "sudo cat /etc/kubernetes/kubelet" kubelet-config
+    remote_exec $SSH_USER "sudo cat /etc/kubernetes/proxy" kubernetes-proxy-config
+    remote_exec $SSH_USER "sudo cat /etc/kubernetes/kubeconfig.yaml" kubeconfig.yaml
+    remote_exec $SSH_USER "sudo tail -n +1 -- /etc/kubernetes/manifests/*" kubernetes-manifests
+    remote_exec $SSH_USER "sudo tail -n +1 -- /etc/kubernetes/certs/*" kubernetes-certs
+    remote_exec $SSH_USER "sudo cat /usr/local/bin/wc-notify" bin-wc-notify
+    remote_exec $SSH_USER "sudo cat /etc/kubernetes/kube_openstack_config" kube_openstack_config
+    remote_exec $SSH_USER "sudo cat /etc/sysconfig/flanneld" flanneld.sysconfig
+    remote_exec $SSH_USER "sudo cat /usr/local/bin/flannel-config" bin-flannel-config
+    remote_exec $SSH_USER "sudo cat /etc/sysconfig/flannel-network.json" flannel-network.json.sysconfig
+    remote_exec $SSH_USER "sudo cat /usr/local/bin/flannel-docker-bridge" bin-flannel-docker-bridge
+    remote_exec $SSH_USER "sudo cat /etc/systemd/system/docker.service.d/flannel.conf" docker-flannel.conf
+    remote_exec $SSH_USER "sudo cat /etc/systemd/system/flanneld.service.d/flannel-docker-bridge.conf" flannel-docker-bridge.conf
+    remote_exec $SSH_USER "sudo cat /etc/systemd/system/flannel-docker-bridge.service" flannel-docker-bridge.service
+    remote_exec $SSH_USER "sudo cat /etc/systemd/system/flannel-config.service" flannel-config.service
 elif [[ "$COE" == "swarm" || "$COE" == "swarm-mode" ]]; then
     SSH_USER=fedora
     remote_exec $SSH_USER "sudo systemctl --full list-units --no-pager" systemctl_list_units.log
@@ -108,6 +127,21 @@ elif [[ "$COE" == "swarm" || "$COE" == "swarm-mode" ]]; then
     remote_exec $SSH_USER "sudo netstat -an" netstat.log
     remote_exec $SSH_USER "sudo df -h" dfh.log
     remote_exec $SSH_USER "sudo cat /etc/sysconfig/heat-params" heat-params
+    remote_exec $SSH_USER "sudo cat /etc/etcd/etcd.conf" etcd.conf
+    remote_exec $SSH_USER "sudo ls -lR /etc/docker" docker-certs
+    remote_exec $SSH_USER "sudo cat /etc/sysconfig/flanneld" flanneld.sysconfig
+    remote_exec $SSH_USER "sudo cat /etc/sysconfig/flannel-network.json" flannel-network.json.sysconfig
+    remote_exec $SSH_USER "sudo cat /usr/local/bin/flannel-docker-bridge" bin-flannel-docker-bridge
+    remote_exec $SSH_USER "sudo cat /etc/systemd/system/docker.service.d/flannel.conf" docker-flannel.conf
+    remote_exec $SSH_USER "sudo cat /etc/systemd/system/flanneld.service.d/flannel-docker-bridge.conf" flannel-docker-bridge.conf
+    remote_exec $SSH_USER "sudo cat /etc/systemd/system/flannel-docker-bridge.service" flannel-docker-bridge.service
+    remote_exec $SSH_USER "sudo cat /etc/systemd/system/swarm-manager.service" swarm-manager.service
+    remote_exec $SSH_USER "sudo cat /etc/systemd/system/swarm-manager-failure.service" swarm-manager-failure.service
+    remote_exec $SSH_USER "sudo cat /etc/systemd/system/swarm-agent.service" swarm-agent.service
+    remote_exec $SSH_USER "sudo cat /etc/systemd/system/swarm-agent-failure.service" swarm-agent-failure.service
+    remote_exec $SSH_USER "sudo cat /etc/systemd/system/swarm-worker.service" swarm-worker.service
+    remote_exec $SSH_USER "sudo cat /usr/local/bin/magnum-start-swarm-manager" bin-magnum-start-swarm-manager
+    remote_exec $SSH_USER "sudo cat /usr/local/bin/magnum-start-swarm-worker" bin-magnum-start-swarm-worker
 else
     echo "ERROR: Unknown COE '${COE}'"
     EXIT_CODE=1
