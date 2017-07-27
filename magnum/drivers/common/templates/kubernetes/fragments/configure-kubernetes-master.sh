@@ -6,6 +6,8 @@ echo "configuring kubernetes (master)"
 
 atomic install --storage ostree --system --system-package=no --name=kubelet docker.io/openstackmagnum/kubernetes-kubelet:${KUBE_VERSION}
 atomic install --storage ostree --system --system-package=no --name=kube-apiserver docker.io/openstackmagnum/kubernetes-apiserver:${KUBE_VERSION}
+atomic install --storage ostree --system --system-package=no --name=kube-controller-manager docker.io/openstackmagnum/kubernetes-controller-manager:${KUBE_VERSION}
+atomic install --storage ostree --system --system-package=no --name=kube-scheduler docker.io/openstackmagnum/kubernetes-scheduler:${KUBE_VERSION}
 
 sed -i '
     /^KUBE_ALLOW_PRIV=/ s/=.*/="--allow-privileged='"$KUBE_ALLOW_PRIV"'"/
@@ -45,9 +47,9 @@ sed -i '
 
 
 # Add controller manager args
-KUBE_CONTROLLER_MANAGER_ARGS=""
+KUBE_CONTROLLER_MANAGER_ARGS="--leader-elect=true"
 if [ -n "${ADMISSION_CONTROL_LIST}" ] && [ "${TLS_DISABLED}" == "False" ]; then
-    KUBE_CONTROLLER_MANAGER_ARGS="--service-account-private-key-file=$CERT_DIR/server.key --root-ca-file=$CERT_DIR/ca.crt"
+    KUBE_CONTROLLER_MANAGER_ARGS="$KUBE_CONTROLLER_MANAGER_ARGS --service-account-private-key-file=$CERT_DIR/server.key --root-ca-file=$CERT_DIR/ca.crt"
 fi
 
 if [ -n "$TRUST_ID" ]; then
@@ -58,6 +60,8 @@ sed -i '
     /^KUBELET_ADDRESSES=/ s/=.*/="--machines='""'"/
     /^KUBE_CONTROLLER_MANAGER_ARGS=/ s#\(KUBE_CONTROLLER_MANAGER_ARGS\).*#\1="'"${KUBE_CONTROLLER_MANAGER_ARGS}"'"#
 ' /etc/kubernetes/controller-manager
+
+sed -i '/^KUBE_SCHEDULER_ARGS=/ s/=.*/="--leader-elect=true"/' /etc/kubernetes/scheduler
 
 HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')
 KUBELET_ARGS="--register-node=true --register-schedulable=false --pod-manifest-path=/etc/kubernetes/manifests --hostname-override=${HOSTNAME_OVERRIDE}"

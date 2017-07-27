@@ -56,8 +56,8 @@ if [[ "$COE" == "kubernetes" ]]; then
     remote_exec $SSH_USER "sudo journalctl -u kube-proxy --no-pager" kube-proxy.log
     remote_exec $SSH_USER "sudo journalctl -u etcd --no-pager" etcd.log
     remote_exec $SSH_USER "sudo journalctl -u kube-apiserver --no-pager" kube-apiserver.log
-    remote_exec $SSH_USER "kubectl logs --namespace=kube-system \$(kubectl --namespace=kube-system get pods | grep kube-scheduler | awk '{print \$1}')" kube-scheduler.log
-    remote_exec $SSH_USER "kubectl logs --namespace=kube-system \$(kubectl --namespace=kube-system get pods | grep kube-controller-manager | awk '{print \$1}')" kube-controller-manager.log
+    remote_exec $SSH_USER "sudo journalctl -u kube-scheduler --no-pager" kube-scheduler.log
+    remote_exec $SSH_USER "sudo journalctl -u kube-controller-manager --no-pager" kube-controller-manager.log
     remote_exec $SSH_USER "sudo journalctl -u docker-storage-setup --no-pager" docker-storage-setup.log
     remote_exec $SSH_USER "sudo systemctl status docker-storage-setup -l" docker-storage-setup.service.status.log
     remote_exec $SSH_USER "sudo systemctl show docker-storage-setup --no-pager" docker-storage-setup.service.show.log

@@ -424,12 +424,6 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/network-service.sh}
 
-  enable_kube_controller_manager_scheduler:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/enable-kube-controller-manager-scheduler.sh}
-
   kube_system_namespace_service:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -493,7 +487,6 @@ resources:
         - config: {get_resource: network_service}
         - config: {get_resource: kube_system_namespace_service}
         - config: {get_resource: core_dns_service}
-        - config: {get_resource: enable_kube_controller_manager_scheduler}
         - config: {get_resource: enable_kube_proxy}
         - config: {get_resource: kube_ui_service}
         - config: {get_resource: enable_monitoring}
