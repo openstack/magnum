@@ -65,9 +65,6 @@ class TestSwarmAPIs(ClusterTest):
             raise Exception(msg)
 
         url = self.cs.clusters.get(self.cluster.uuid).api_address
-        # FIXME (strigazi) until we upgrade to docker-py 1.8.0 use
-        # only the https protocol instead of tcp.
-        https_url = url.replace('tcp', 'https')
 
         # Note(eliqiao): docker_utils.CONF.docker.default_timeout is 10,
         # tested this default configure option not works on gate, it will
@@ -77,7 +74,7 @@ class TestSwarmAPIs(ClusterTest):
 
         docker_api_time_out = 180
         self.docker_client = docker_utils.DockerHTTPClient(
-            https_url,
+            url,
             CONF.docker.docker_remote_api_version,
             docker_api_time_out,
             client_key=self.key_file,
@@ -85,7 +82,7 @@ class TestSwarmAPIs(ClusterTest):
             ca_cert=self.ca_file)
 
         self.docker_client_non_tls = docker_utils.DockerHTTPClient(
-            https_url,
+            url,
             CONF.docker.docker_remote_api_version,
             docker_api_time_out)
 
@@ -145,5 +142,11 @@ class TestSwarmAPIs(ClusterTest):
         self.assertEqual([], resp)
 
     def test_access_with_non_tls_client(self):
-        self.assertRaises(req_exceptions.SSLError,
+        """Try to contact master's docker using the TCP protocol.
+
+        TCP returns ConnectionError whereas HTTPS returns SSLError. The
+        default protocol we use in magnum is TCP which works fine docker
+        python SDK docker>=2.0.0.
+        """
+        self.assertRaises(req_exceptions.ConnectionError,
                           self.docker_client_non_tls.containers)
