@@ -436,12 +436,6 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/kube-dashboard-service.sh}
 
-  enable_kube_proxy:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/enable-kube-proxy-master.sh}
-
   core_dns_service:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -487,7 +481,6 @@ resources:
         - config: {get_resource: network_service}
         - config: {get_resource: kube_system_namespace_service}
         - config: {get_resource: core_dns_service}
-        - config: {get_resource: enable_kube_proxy}
         - config: {get_resource: kube_ui_service}
         - config: {get_resource: enable_monitoring}
         - config: {get_resource: master_wc_notify}

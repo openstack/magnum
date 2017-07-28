@@ -5,12 +5,14 @@
 echo "configuring kubernetes (master)"
 
 atomic install --storage ostree --system --system-package=no --name=kubelet docker.io/openstackmagnum/kubernetes-kubelet:${KUBE_VERSION}
+atomic install --storage ostree --system --system-package=no --name=kube-proxy docker.io/openstackmagnum/kubernetes-proxy:${KUBE_VERSION}
 atomic install --storage ostree --system --system-package=no --name=kube-apiserver docker.io/openstackmagnum/kubernetes-apiserver:${KUBE_VERSION}
 atomic install --storage ostree --system --system-package=no --name=kube-controller-manager docker.io/openstackmagnum/kubernetes-controller-manager:${KUBE_VERSION}
 atomic install --storage ostree --system --system-package=no --name=kube-scheduler docker.io/openstackmagnum/kubernetes-scheduler:${KUBE_VERSION}
 
 sed -i '
     /^KUBE_ALLOW_PRIV=/ s/=.*/="--allow-privileged='"$KUBE_ALLOW_PRIV"'"/
+    /^KUBE_MASTER=/ s|=.*|="--master=http://127.0.0.1:8080"|
 ' /etc/kubernetes/config
 
 CERT_DIR=/etc/kubernetes/certs
