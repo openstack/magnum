@@ -231,7 +231,7 @@ use::
 Create a keypair for use with the ClusterTemplate::
 
     test -f ~/.ssh/id_rsa.pub || ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
-    nova keypair-add --pub-key ~/.ssh/id_rsa.pub testkey
+    openstack keypair create --public-key ~/.ssh/id_rsa.pub testkey
 
 Check a dns server can resolve a host name properly::
 
