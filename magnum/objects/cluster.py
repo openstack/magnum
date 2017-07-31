@@ -45,8 +45,9 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.14: Added 'docker_volume_size' field
     # Version 1.15: Added 'labels' field
     # Version 1.16: Added 'master_flavor_id' field
+    # Version 1.17: Added 'flavor_id' field
 
-    VERSION = '1.16'
+    VERSION = '1.17'
 
     dbapi = dbapi.get_instance()
 
@@ -61,6 +62,7 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
         'docker_volume_size': fields.IntegerField(nullable=True),
         'labels': fields.DictOfStringsField(nullable=True),
         'master_flavor_id': fields.StringField(nullable=True),
+        'flavor_id': fields.StringField(nullable=True),
         'stack_id': fields.StringField(nullable=True),
         'status': m_fields.ClusterStatusField(nullable=True),
         'status_reason': fields.StringField(nullable=True),

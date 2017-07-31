@@ -315,11 +315,18 @@ class TestAttrValidator(base.BaseTestCase):
     @mock.patch('magnum.common.clients.OpenStackClients')
     def test_validate_os_resources_with_cluster(self, mock_os_cli):
         mock_cluster_template = {}
-        mock_cluster = {'keypair': 'test-keypair'}
+        mock_cluster = {
+            'keypair': 'test-keypair', 'labels': {'lab1': 'val1'},
+            'image_id': 'e33f0988-1730-405e-8401-30cbc8535302'
+        }
         mock_keypair = mock.MagicMock()
         mock_keypair.id = 'test-keypair'
+        mock_image = {'name': 'fedora-21-atomic-5',
+                      'id': 'e33f0988-1730-405e-8401-30cbc8535302',
+                      'os_distro': 'fedora-atomic'}
         mock_nova = mock.MagicMock()
         mock_nova.keypairs.get.return_value = mock_keypair
+        mock_nova.images.get.return_value = mock_image
         mock_os_cli = mock.MagicMock()
         mock_os_cli.nova.return_value = mock_nova
         mock_context = mock.MagicMock()

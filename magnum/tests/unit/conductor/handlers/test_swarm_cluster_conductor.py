@@ -62,6 +62,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
             'cluster_template_id': 'xx-xx-xx-xx',
             'keypair': 'keypair_id',
+            'flavor_id': 'flavor_id',
             'docker_volume_size': 20,
             'master_flavor_id': 'master_flavor_id',
             'name': 'cluster1',
@@ -309,6 +310,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'docker_volume_size': 20,
             'master_flavor': 'master_flavor_id',
             'verify_ca': True,
+            'node_flavor': 'flavor_id',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

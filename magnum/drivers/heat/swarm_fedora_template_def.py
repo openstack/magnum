@@ -50,7 +50,7 @@ class SwarmFedoraTemplateDefinition(template_def.BaseTemplateDefinition):
         self.add_parameter('master_flavor',
                            cluster_attr='master_flavor_id')
         self.add_parameter('node_flavor',
-                           cluster_template_attr='flavor_id')
+                           cluster_attr='flavor_id')
         self.add_parameter('docker_volume_size',
                            cluster_attr='docker_volume_size')
         self.add_parameter('volume_driver',

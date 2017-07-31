@@ -99,6 +99,7 @@ def get_test_cluster(**kw):
         'docker_volume_size': kw.get('docker_volume_size'),
         'labels': kw.get('labels'),
         'master_flavor_id': kw.get('master_flavor_id', None),
+        'flavor_id': kw.get('flavor_id', None),
     }
 
     # Only add Keystone trusts related attributes on demand since they may

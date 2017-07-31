@@ -41,6 +41,7 @@ Request
   - keypair: keypair_id
   - master_flavor_id: master_flavor_id
   - labels: labels
+  - flavor_id: flavor_id
 
 .. note::
 

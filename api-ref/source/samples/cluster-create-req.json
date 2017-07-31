@@ -8,5 +8,6 @@
    "keypair":"my_keypair",
    "master_flavor_id":null,
    "labels":{
-   }
+   },
+   "flavor_id":null
 }

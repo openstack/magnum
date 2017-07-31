@@ -188,7 +188,12 @@ def validate_os_resources(context, cluster_template, cluster=None):
     cli = clients.OpenStackClients(context)
 
     for attr, validate_method in validators.items():
-        if attr in cluster_template and cluster_template[attr] is not None:
+        if cluster and attr in cluster and cluster[attr]:
+            if attr != 'labels':
+                validate_method(cli, cluster[attr])
+            else:
+                validate_method(cluster[attr])
+        elif attr in cluster_template and cluster_template[attr] is not None:
             if attr != 'labels':
                 validate_method(cli, cluster_template[attr])
             else:

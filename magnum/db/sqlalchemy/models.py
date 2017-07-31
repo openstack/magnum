@@ -118,6 +118,7 @@ class Cluster(Base):
     docker_volume_size = Column(Integer())
     labels = Column(JSONEncodedDict)
     master_flavor_id = Column(String(255))
+    flavor_id = Column(String(255))
     stack_id = Column(String(255))
     api_address = Column(String(255))
     node_addresses = Column(JSONEncodedList)

@@ -200,7 +200,7 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
 
 --flavor \<flavor\>
   The nova flavor id for booting the node servers.  The default
-  is 'm1.small'.
+  is 'm1.small'. This value can be overridden at cluster creation.
 
 --master-flavor \<master-flavor\>
   The nova flavor id for booting the master or manager servers.  The

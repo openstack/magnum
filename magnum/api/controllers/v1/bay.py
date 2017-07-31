@@ -98,6 +98,9 @@ class Bay(base.APIBase):
     master_flavor_id = wtypes.StringType(min_length=1, max_length=255)
     """The master flavor of this Bay"""
 
+    flavor_id = wtypes.StringType(min_length=1, max_length=255)
+    """The flavor of this Bay"""
+
     bay_create_timeout = wsme.wsattr(wtypes.IntegerType(minimum=0), default=60)
     """Timeout for creating the bay in minutes. Default to 60 if not set"""
 
@@ -181,7 +184,7 @@ class Bay(base.APIBase):
         if not expand:
             bay.unset_fields_except(['uuid', 'name', 'baymodel_id',
                                      'docker_volume_size', 'labels',
-                                     'master_flavor_id',
+                                     'master_flavor_id', 'flavor_id',
                                      'node_count', 'status',
                                      'bay_create_timeout', 'master_count',
                                      'stack_id'])
@@ -208,6 +211,7 @@ class Bay(base.APIBase):
                      docker_volume_size=1,
                      labels={},
                      master_flavor_id=None,
+                     flavor_id=None,
                      bay_create_timeout=15,
                      stack_id='49dc23f5-ffc9-40c3-9d34-7be7f9e34d63',
                      status=fields.ClusterStatus.CREATE_COMPLETE,
@@ -440,6 +444,10 @@ class BaysController(base.Controller):
         # If master_flavor_id is not present, use baymodel value
         if bay.master_flavor_id == wtypes.Unset or not bay.master_flavor_id:
             bay.master_flavor_id = baymodel.master_flavor_id
+
+        # If flavor_id is not present, use baymodel value
+        if bay.flavor_id == wtypes.Unset or not bay.flavor_id:
+            bay.flavor_id = baymodel.flavor_id
 
         bay_dict = bay.as_dict()
         bay_dict['keypair'] = baymodel.keypair_id

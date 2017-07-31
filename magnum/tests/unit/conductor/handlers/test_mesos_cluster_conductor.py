@@ -57,6 +57,7 @@ class TestClusterConductorWithMesos(base.TestCase):
             'cluster_template_id': 'xx-xx-xx-xx',
             'keypair': 'keypair_id',
             'master_flavor_id': 'master_flavor_id',
+            'flavor_id': 'flavor_id',
             'name': 'cluster1',
             'stack_id': 'xx-xx-xx-xx',
             'api_address': '172.17.2.3',
@@ -194,6 +195,7 @@ class TestClusterConductorWithMesos(base.TestCase):
             'mesos_slave_image_providers': 'docker',
             'master_flavor': 'master_flavor_id',
             'verify_ca': True,
+            'slave_flavor': 'flavor_id',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

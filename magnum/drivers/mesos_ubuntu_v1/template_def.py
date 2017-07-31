@@ -33,7 +33,7 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
         self.add_parameter('master_flavor',
                            cluster_attr='master_flavor_id')
         self.add_parameter('slave_flavor',
-                           cluster_template_attr='flavor_id')
+                           cluster_attr='flavor_id')
         self.add_parameter('cluster_name',
                            cluster_attr='name')
         self.add_parameter('volume_driver',
