@@ -838,6 +838,24 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(400, response.status_int)
         self.assertTrue(response.json['errors'])
 
+    def test_create_cluster_with_master_flavor_id(self):
+        bdict = apiutils.cluster_post_data()
+        bdict['master_flavor_id'] = 'm2.small'
+        response = self.post_json('/clusters', bdict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        cluster, timeout = self.mock_cluster_create.call_args
+        self.assertEqual('m2.small', cluster[0].master_flavor_id)
+
+    def test_create_cluster_without_master_flavor_id(self):
+        bdict = apiutils.cluster_post_data()
+        response = self.post_json('/clusters', bdict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        cluster, timeout = self.mock_cluster_create.call_args
+        # Verify master_flavor_id from ClusterTemplate is used
+        self.assertEqual('m1.small', cluster[0].master_flavor_id)
+
 
 class TestDelete(api_base.FunctionalTest):
     def setUp(self):

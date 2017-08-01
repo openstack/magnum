@@ -113,6 +113,9 @@ class Cluster(base.APIBase):
     labels = wtypes.DictType(str, str)
     """One or more key/value pairs"""
 
+    master_flavor_id = wtypes.StringType(min_length=1, max_length=255)
+    """The flavor of the master node for this Cluster"""
+
     create_timeout = wsme.wsattr(wtypes.IntegerType(minimum=0), default=60)
     """Timeout for creating the cluster in minutes. Default to 60 if not set"""
 
@@ -166,6 +169,7 @@ class Cluster(base.APIBase):
             cluster.unset_fields_except(['uuid', 'name', 'cluster_template_id',
                                          'keypair', 'docker_volume_size',
                                          'labels', 'node_count', 'status',
+                                         'master_flavor_id',
                                          'create_timeout', 'master_count',
                                          'stack_id'])
 
@@ -192,6 +196,7 @@ class Cluster(base.APIBase):
                      master_count=1,
                      docker_volume_size=1,
                      labels={},
+                     master_flavor_id='m1.small',
                      create_timeout=15,
                      stack_id='49dc23f5-ffc9-40c3-9d34-7be7f9e34d63',
                      status=fields.ClusterStatus.CREATE_COMPLETE,
@@ -410,6 +415,11 @@ class ClustersController(base.Controller):
         # If labels is not present, use cluster_template value
         if cluster.labels == wtypes.Unset:
             cluster.labels = cluster_template.labels
+
+        # If master_flavor_id is not present, use cluster_template value
+        if (cluster.master_flavor_id == wtypes.Unset or
+                not cluster.master_flavor_id):
+            cluster.master_flavor_id = cluster_template.master_flavor_id
 
         cluster_dict = cluster.as_dict()
 

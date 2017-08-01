@@ -52,7 +52,7 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
     def __init__(self):
         super(K8sTemplateDefinition, self).__init__()
         self.add_parameter('master_flavor',
-                           cluster_template_attr='master_flavor_id')
+                           cluster_attr='master_flavor_id')
         self.add_parameter('minion_flavor',
                            cluster_template_attr='flavor_id')
         self.add_parameter('number_of_minions',

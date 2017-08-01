@@ -63,6 +63,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'cluster_template_id': 'xx-xx-xx-xx',
             'keypair': 'keypair_id',
             'docker_volume_size': 20,
+            'master_flavor_id': 'master_flavor_id',
             'name': 'cluster1',
             'stack_id': 'xx-xx-xx-xx',
             'api_address': '172.17.2.3',
@@ -304,6 +305,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'rexray_preempt': 'False',
             'docker_volume_type': 'lvmdriver-1',
             'docker_volume_size': 20,
+            'master_flavor': 'master_flavor_id',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

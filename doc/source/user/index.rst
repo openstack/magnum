@@ -211,7 +211,7 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
 
 --master-flavor \<master-flavor\>
   The nova flavor id for booting the master or manager servers.  The
-  default is 'm1.small'.
+  default is 'm1.small'. This value can be overridden at cluster creation.
 
 --http-proxy \<http-proxy\>
   The IP address for a proxy to use when direct http access from the
