@@ -79,6 +79,10 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
             'docker_volume_type', CONF.cinder.default_docker_volume_type)
         extra_params['docker_volume_type'] = docker_volume_type
 
+        kube_tag = cluster_template.labels.get('kube_tag')
+        if kube_tag:
+            extra_params['kube_tag'] = kube_tag
+
         return super(K8sFedoraTemplateDefinition,
                      self).get_params(context, cluster_template, cluster,
                                       extra_params=extra_params,

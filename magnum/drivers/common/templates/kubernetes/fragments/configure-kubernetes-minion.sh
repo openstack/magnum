@@ -4,8 +4,8 @@
 
 echo "configuring kubernetes (minion)"
 
-atomic install --storage ostree --system --system-package=no --name=kubelet docker.io/openstackmagnum/kubernetes-kubelet:${KUBE_VERSION}
-atomic install --storage ostree --system --system-package=no --name=kube-proxy docker.io/openstackmagnum/kubernetes-proxy:${KUBE_VERSION}
+atomic install --storage ostree --system --system-package=no --name=kubelet docker.io/openstackmagnum/kubernetes-kubelet:${KUBE_TAG}
+atomic install --storage ostree --system --system-package=no --name=kube-proxy docker.io/openstackmagnum/kubernetes-proxy:${KUBE_TAG}
 
 CERT_DIR=/etc/kubernetes/certs
 PROTOCOL=https

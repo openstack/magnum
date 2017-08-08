@@ -313,6 +313,11 @@ parameters:
     type: string
     description: url for keystone
 
+  kube_tag:
+    type: string
+    description: tag of the k8s containers used to provision the kubernetes cluster
+    default: v1.7.4
+
   kube_version:
     type: string
     description: version of kubernetes used for kubernetes cluster
@@ -504,6 +509,7 @@ resources:
           http_proxy: {get_param: http_proxy}
           https_proxy: {get_param: https_proxy}
           no_proxy: {get_param: no_proxy}
+          kube_tag: {get_param: kube_tag}
           kube_version: {get_param: kube_version}
           kube_dashboard_version: {get_param: kube_dashboard_version}
           trustee_user_id: {get_param: trustee_user_id}
@@ -567,6 +573,7 @@ resources:
           http_proxy: {get_param: http_proxy}
           https_proxy: {get_param: https_proxy}
           no_proxy: {get_param: no_proxy}
+          kube_tag: {get_param: kube_tag}
           kube_version: {get_param: kube_version}
           trustee_user_id: {get_param: trustee_user_id}
           trustee_username: {get_param: trustee_username}

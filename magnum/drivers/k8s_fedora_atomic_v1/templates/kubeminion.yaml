@@ -169,6 +169,10 @@ parameters:
     type: string
     description: no proxies for docker
 
+  kube_tag:
+    type: string
+    description: tag of the k8s containers used to provision the kubernetes cluster
+
   kube_version:
     type: string
     description: version of kubernetes used for kubernetes cluster
@@ -269,6 +273,7 @@ resources:
             $HTTP_PROXY: {get_param: http_proxy}
             $HTTPS_PROXY: {get_param: https_proxy}
             $NO_PROXY: {get_param: no_proxy}
+            $KUBE_TAG: {get_param: kube_tag}
             $KUBE_VERSION: {get_param: kube_version}
             $WAIT_CURL: {get_attr: [minion_wait_handle, curl_cli]}
             $TRUSTEE_USER_ID: {get_param: trustee_user_id}
