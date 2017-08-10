@@ -171,46 +171,48 @@ if [[ "-ironic" != "$special" ]]; then
     add_flavor
 fi
 
+# Get admin credentials
+pushd ../devstack
+source openrc admin admin
+popd
+
+create_test_data $coe $special
+
+local _magnum_tests=""
 if [[ "api" == "$coe" ]]; then
-    # Import devstack functions 'iniset', 'iniget' and 'trueorfalse'
-    source $BASE/new/devstack/functions
-    echo "TEMPEST_SERVICES+=,magnum" >> $localrc_path
-    pushd $BASE/new/tempest
     sudo chown -R jenkins:stack $BASE/new/tempest
 
-    # Set demo credentials
-    source $BASE/new/devstack/accrc/demo/demo
-
-    create_test_data $coe
+    export TEMPEST_CONFIG=$BASE/new/tempest/etc/tempest.conf
 
     # Set up tempest config with magnum goodness
-    iniset $BASE/new/tempest/etc/tempest.conf magnum image_id $IMAGE_ID
-    iniset $BASE/new/tempest/etc/tempest.conf magnum nic_id $NIC_ID
-    iniset $BASE/new/tempest/etc/tempest.conf magnum keypair_id default
-    iniset $BASE/new/tempest/etc/tempest.conf magnum flavor_id s1.magnum
-    iniset $BASE/new/tempest/etc/tempest.conf magnum master_flavor_id m1.magnum
-    iniset $BASE/new/tempest/etc/tempest.conf magnum copy_logs True
+    iniset $TEMPEST_CONFIG magnum image_id $IMAGE_ID
+    iniset $TEMPEST_CONFIG magnum nic_id $NIC_ID
+    iniset $TEMPEST_CONFIG magnum keypair_id default
+    iniset $TEMPEST_CONFIG magnum flavor_id s1.magnum
+    iniset $TEMPEST_CONFIG magnum master_flavor_id m1.magnum
+    iniset $TEMPEST_CONFIG magnum copy_logs True
 
     # show tempest config with magnum
-    cat etc/tempest.conf
+    cat $TEMPEST_CONFIG
 
-    # Set up concurrency and test regex
-    export MAGNUM_TEMPEST_CONCURRENCY=${MAGNUM_TEMPEST_CONCURRENCY:-1}
-    export MAGNUM_TESTS=${MAGNUM_TESTS:-'magnum.tests.functional.api.v1'}
-
-    echo "Running tempest magnum test suites"
-    sudo -H -u jenkins tox -eall-plugin -- $MAGNUM_TESTS --concurrency=$MAGNUM_TEMPEST_CONCURRENCY
-else
-    # Get admin credentials
-    pushd ../devstack
-    source openrc admin admin
-    popd
-
-    create_test_data $coe $special
-
-    target="${coe}${special}"
-    sudo -E -H -u jenkins tox -e functional-"$target" -- --concurrency=1
+    # strigazi: don't run test_create_list_sign_delete_clusters because
+    # it is very unstable in the CI
+    _magnum_tests="magnum.tests.functional.api.v1.test_bay"
+    _magnum_tests="$_magnum_tests magnum.tests.functional.api.v1.test_baymodel"
+    _magnum_tests="$_magnum_tests magnum.tests.functional.api.v1.test_cluster_template"
+    _magnum_tests="$_magnum_tests magnum.tests.functional.api.v1.test_cluster_template_admin"
+    _magnum_tests="$_magnum_tests magnum.tests.functional.api.v1.test_magnum_service"
+    _magnum_tests="$_magnum_tests magnum.tests.functional.api.v1.test_cluster.ClusterTest.test_create_cluster_for_nonexisting_cluster_template"
+    _magnum_tests="$_magnum_tests magnum.tests.functional.api.v1.test_cluster.ClusterTest.test_create_cluster_with_node_count_0"
+    _magnum_tests="$_magnum_tests magnum.tests.functional.api.v1.test_cluster.ClusterTest.test_create_cluster_with_nonexisting_flavor"
+    _magnum_tests="$_magnum_tests magnum.tests.functional.api.v1.test_cluster.ClusterTest.test_create_cluster_with_zero_masters"
+    _magnum_tests="$_magnum_tests magnum.tests.functional.api.v1.test_cluster.ClusterTest.test_delete_cluster_for_nonexisting_cluster"
+    _magnum_tests="$_magnum_tests magnum.tests.functional.api.v1.test_cluster.ClusterTest.test_update_cluster_for_nonexisting_cluster"
 fi
+
+target="${coe}${special}"
+sudo -E -H -u jenkins tox -e functional-"$target" $_magnum_tests -- --concurrency=1
+
 EXIT_CODE=$?
 
 # Delete the keypair used in the functional test.

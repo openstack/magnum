@@ -63,7 +63,7 @@ class ClusterTest(base.BaseTempestTest):
                 creds=self.creds,
                 type_of_creds='default',
                 request_type='cert')
-            model = datagen.valid_swarm_cluster_template()
+            model = datagen.valid_swarm_mode_cluster_template()
             _, self.cluster_template = self._create_cluster_template(model)
 
             # NOTE (dimtruck) by default tempest sets timeout to 20 mins.

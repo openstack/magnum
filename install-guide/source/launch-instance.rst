@@ -116,7 +116,7 @@ and tested by the Magnum team.
 
    .. code-block:: console
 
-      $ wget https://fedorapeople.org/groups/magnum/fedora-atomic-latest.qcow2
+      $ wget https://download.fedoraproject.org/pub/alt/atomic/stable/Fedora-Atomic-26-20170723.0/CloudImages/x86_64/images/Fedora-Atomic-26-20170723.0.x86_64.qcow2
 
 #. Register the image to the Image service setting the ``os_distro`` property
    to ``fedora-atomic``:
@@ -390,7 +390,7 @@ will create a deployment.
       | status_reason       | Stack CREATE completed successfully                        |
       | created_at          | 2017-05-16T09:58:02+00:00                                  |
       | updated_at          | 2017-05-16T10:00:02+00:00                                  |
-      | coe_version         | v1.5.3                                                     |
+      | coe_version         | v1.6.7                                                     |
       | keypair             | default                                                    |
       | api_address         | https://172.24.4.13:6443                                   |
       | master_addresses    | ['172.24.4.13']                                            |

@@ -74,7 +74,7 @@ class BayModelTest(base.BaseTempestTest):
 
     @testtools.testcase.attr('positive')
     def test_create_get_public_baymodel(self):
-        gen_model = datagen.valid_swarm_baymodel(is_public=True)
+        gen_model = datagen.valid_swarm_mode_baymodel(is_public=True)
         self.assertRaises(
             exceptions.Forbidden,
             self.baymodel_client.post_baymodel, gen_model)

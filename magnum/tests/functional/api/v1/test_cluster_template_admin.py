@@ -59,7 +59,7 @@ class ClusterTemplateAdminTest(base.BaseTempestTest):
 
     @testtools.testcase.attr('positive')
     def test_create_get_public_cluster_template(self):
-        gen_model = datagen.valid_swarm_cluster_template(is_public=True)
+        gen_model = datagen.valid_swarm_mode_cluster_template(is_public=True)
         resp, model = self._create_cluster_template(gen_model)
 
         resp, model = \

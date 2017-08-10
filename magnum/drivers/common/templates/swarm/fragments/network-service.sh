@@ -58,6 +58,10 @@ if ! [ "\$FLANNEL_SUBNET" ] && [ "\$FLANNEL_MTU" ] ; then
     exit 1
 fi
 
+# NOTE(mnaser): Since Docker 1.13, it does not set the default forwarding
+#               policy to ACCEPT which will cause CNI networking to fail.
+iptables -P FORWARD ACCEPT
+
 mkdir -p /run/flannel/
 cat > /run/flannel/docker <<EOF
 DOCKER_NETWORK_OPTIONS="--bip=\$FLANNEL_SUBNET --mtu=\$FLANNEL_MTU"

@@ -37,6 +37,7 @@ def gen_coe_dep_network_driver(coe):
     allowed_driver_types = {
         'kubernetes': ['flannel', None],
         'swarm': ['docker', 'flannel', None],
+        'swarm-mode': ['docker', None],
         'mesos': ['docker', None],
     }
     driver_types = allowed_driver_types[coe]
@@ -47,6 +48,7 @@ def gen_coe_dep_volume_driver(coe):
     allowed_driver_types = {
         'kubernetes': ['cinder', None],
         'swarm': ['rexray', None],
+        'swarm-mode': ['rexray', None],
         'mesos': ['rexray', None],
     }
     driver_types = allowed_driver_types[coe]
@@ -103,7 +105,7 @@ def baymodel_data(**kwargs):
 
     data = {
         "name": data_utils.rand_name('bay'),
-        "coe": "swarm",
+        "coe": "swarm-mode",
         "tls_disabled": False,
         "network_driver": None,
         "volume_driver": None,
@@ -208,8 +210,8 @@ def baymodel_valid_data_with_specific_coe(coe):
                          image_id=config.Config.image_id, coe=coe)
 
 
-def valid_swarm_baymodel(is_public=False):
-    """Generates a valid swarm baymodel with valid data
+def valid_swarm_mode_baymodel(is_public=False):
+    """Generates a valid swarm mode baymodel with valid data
 
     :returns: BayModelEntity with generated data
     """
@@ -218,7 +220,7 @@ def valid_swarm_baymodel(is_public=False):
                          flavor_id=config.Config.flavor_id, public=is_public,
                          dns_nameserver=config.Config.dns_nameserver,
                          master_flavor_id=config.Config.master_flavor_id,
-                         keypair_id=config.Config.keypair_id, coe="swarm",
+                         keypair_id=config.Config.keypair_id, coe="swarm-mode",
                          cluster_distro=None,
                          external_network_id=config.Config.nic_id,
                          http_proxy=None, https_proxy=None, no_proxy=None,
@@ -343,7 +345,7 @@ def cluster_template_data(**kwargs):
 
     data = {
         "name": data_utils.rand_name('cluster'),
-        "coe": "swarm",
+        "coe": "swarm-mode",
         "tls_disabled": False,
         "network_driver": None,
         "volume_driver": None,
@@ -485,8 +487,8 @@ def cluster_template_valid_data_with_specific_coe(coe):
                                  image_id=config.Config.image_id, coe=coe)
 
 
-def valid_swarm_cluster_template(is_public=False):
-    """Generates a valid swarm cluster_template with valid data
+def valid_swarm_mode_cluster_template(is_public=False):
+    """Generates a valid swarm-mode cluster_template with valid data
 
     :returns: ClusterTemplateEntity with generated data
     """
@@ -496,7 +498,7 @@ def valid_swarm_cluster_template(is_public=False):
                                  public=is_public,
                                  dns_nameserver=config.Config.dns_nameserver,
                                  master_flavor_id=master_flavor_id,
-                                 coe="swarm",
+                                 coe="swarm-mode",
                                  cluster_distro=None,
                                  external_network_id=config.Config.nic_id,
                                  http_proxy=None, https_proxy=None,

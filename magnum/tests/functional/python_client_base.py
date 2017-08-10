@@ -341,6 +341,10 @@ extendedKeyUsage = clientAuth
             output_keys = ["kube_masters", "kube_minions"]
         elif self.cluster_template.coe == "swarm":
             output_keys = ["swarm_masters", "swarm_nodes"]
+        elif self.cluster_template.coe == "swarm-mode":
+            output_keys = ["swarm_primary_master",
+                           "swarm_secondary_masters",
+                           "swarm_nodes"]
         elif self.cluster_template.coe == "mesos":
             output_keys = ["mesos_master", "mesos_slaves"]
 

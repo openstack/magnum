@@ -58,7 +58,7 @@ class BayTest(base.BaseTempestTest):
                 creds=self.creds,
                 type_of_creds='default',
                 request_type='cert')
-            model = datagen.valid_swarm_baymodel()
+            model = datagen.valid_swarm_mode_baymodel()
             _, self.baymodel = self._create_baymodel(model)
 
             # NOTE (dimtruck) by default tempest sets timeout to 20 mins.

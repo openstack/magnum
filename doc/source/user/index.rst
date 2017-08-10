@@ -2490,11 +2490,11 @@ The image currently has the following OS/software:
 +-------------+-----------+
 | OS/software | version   |
 +=============+===========+
-| Fedora      | 25        |
+| Fedora      | 26        |
 +-------------+-----------+
-| Docker      | 1.12.6    |
+| Docker      | 1.13.1    |
 +-------------+-----------+
-| Kubernetes  | 1.5.3     |
+| Kubernetes  | 1.6.7     |
 +-------------+-----------+
 | etcd        | 3.1.3     |
 +-------------+-----------+
