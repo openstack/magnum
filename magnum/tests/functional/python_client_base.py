@@ -26,6 +26,8 @@ import fixtures
 from six.moves import configparser
 
 from heatclient import client as heatclient
+from keystoneauth1.identity import v3 as ksa_v3
+from keystoneauth1 import session as ksa_session
 from keystoneclient.v3 import client as ksclient
 from kubernetes import client as k8s_config
 from kubernetes.client import api_client
@@ -103,28 +105,57 @@ class BaseMagnumClient(base.BaseMagnumTest):
         cls.keypair_id = keypair_id
         cls.dns_nameserver = dns_nameserver
         cls.copy_logs = str(copy_logs).lower() == 'true'
-        cls.cs = v1client.Client(username=user,
-                                 api_key=passwd,
-                                 project_name=project_name,
-                                 auth_url=auth_url,
+
+        # NOTE(clenimar): The recommended way to issue clients is by creating
+        # a keystoneauth Session. Using auth parameters (e.g. username and
+        # password) directly is deprecated.
+        _session = cls._get_auth_session(username=user,
+                                         password=passwd,
+                                         project_name=project_name,
+                                         project_domain_id=project_domain_id,
+                                         user_domain_id=user_domain_id,
+                                         auth_url=auth_url,
+                                         insecure=insecure)
+
+        cls.cs = v1client.Client(session=_session,
                                  insecure=insecure,
-                                 user_domain_id=user_domain_id,
-                                 project_domain_id=project_domain_id,
                                  service_type='container-infra',
                                  region_name=region_name,
                                  magnum_url=magnum_url,
                                  api_version='latest')
-        cls.keystone = ksclient.Client(username=user,
-                                       password=passwd,
-                                       project_name=project_name,
-                                       project_domain_id=project_domain_id,
-                                       user_domain_id=user_domain_id,
-                                       auth_url=auth_url,
-                                       insecure=insecure)
-        token = cls.keystone.auth_token
-        heat_endpoint = cls.keystone.service_catalog.url_for(
+
+        cls.keystone = ksclient.Client(session=_session)
+
+        # Get heat endpoint from session
+        auth_ref = _session.auth.get_auth_ref(_session)
+        heat_endpoint = auth_ref.service_catalog.url_for(
             service_type='orchestration')
-        cls.heat = heatclient.Client('1', token=token, endpoint=heat_endpoint)
+
+        cls.heat = heatclient.Client('1', session=_session,
+                                     auth=_session.auth,
+                                     endpoint=heat_endpoint)
+
+    @classmethod
+    def _get_auth_session(cls, username, password, project_name,
+                          project_domain_id, user_domain_id, auth_url,
+                          insecure):
+        """Return a `keystoneauth1.session.Session` from auth parameters."""
+        # create v3Password auth plugin
+        _auth = ksa_v3.Password(username=username,
+                                password=password,
+                                project_name=project_name,
+                                project_domain_id=project_domain_id,
+                                user_domain_id=user_domain_id,
+                                auth_url=auth_url)
+
+        # `insecure` is being replaced by `verify`. Please note they have
+        # opposite meanings.
+        verify = False if insecure else True
+
+        # create a `keystoneauth1.session.Session`
+        _session = ksa_session.Session(auth=_auth, verify=verify)
+
+        return _session
 
     @classmethod
     def _wait_on_status(cls, cluster, wait_status, finish_status,
