@@ -270,6 +270,10 @@ resources:
       resource_def:
         type: swarmmaster.yaml
         properties:
+          name:
+            list_join:
+              - '-'
+              - [{ get_param: 'OS::stack_name' }, 'primary-master', '%index%']
           is_primary_master: True
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: server_image}
@@ -308,6 +312,10 @@ resources:
       resource_def:
         type: swarmmaster.yaml
         properties:
+          name:
+            list_join:
+              - '-'
+              - [{ get_param: 'OS::stack_name' }, 'secondary-master', '%index%']
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: server_image}
           server_flavor: {get_param: master_flavor}
@@ -345,6 +353,10 @@ resources:
       resource_def:
         type: swarmnode.yaml
         properties:
+          name:
+            list_join:
+              - '-'
+              - [{ get_param: 'OS::stack_name' }, 'node', '%index%']
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: server_image}
           server_flavor: {get_param: node_flavor}
