@@ -375,6 +375,10 @@ resources:
       resource_def:
         type: mesosmaster.yaml
         properties:
+          name:
+            list_join:
+              - '-'
+              - [{ get_param: 'OS::stack_name' }, 'master', '%index%']
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: server_image}
           master_flavor: {get_param: master_flavor}
@@ -400,6 +404,10 @@ resources:
       resource_def:
         type: mesosslave.yaml
         properties:
+          name:
+            list_join:
+              - '-'
+              - [{ get_param: 'OS::stack_name' }, 'slave', '%index%']
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: server_image}
           slave_flavor: {get_param: slave_flavor}
