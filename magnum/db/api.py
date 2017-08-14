@@ -444,3 +444,99 @@ class Connection(object):
 
         :returns: Quota record.
         """
+
+    @abc.abstractmethod
+    def get_federation_by_id(self, context, federation_id):
+        """Return a federation for a given federation id.
+
+        :param context: The security context
+        :param federation_id: The id of a federation
+        :returns: A federation
+        """
+
+    @abc.abstractmethod
+    def get_federation_by_uuid(self, context, federation_uuid):
+        """Return a federation for a given federation uuid.
+
+        :param context: The security context
+        :param federation_uuid: The uuid of a federation
+        :returns: A federation
+        """
+
+    @abc.abstractmethod
+    def get_federation_by_name(self, context, federation_name):
+        """Return a federation for a given federation name.
+
+        :param context: The security context
+        :param federation_name: The name of a federation
+        :returns: A federation
+        """
+
+    @abc.abstractmethod
+    def get_federation_list(self, context, limit=None, marker=None,
+                            sort_key=None, sort_dir=None, filters=None):
+        """Get matching federations.
+
+        Return a list of the specified columns for all federations that
+        match the specified filters.
+
+        :param context: The security context
+        :param filters: Filters to apply. Defaults to None.
+
+        :param limit: Maximum number of federations to return.
+        :param marker: the last item of the previous page; we return the next
+                       result set.
+        :param sort_key: Attribute by which results should be sorted.
+        :param sort_dir: direction in which results should be sorted.
+                         (asc, desc)
+        :returns: A list of tuples of the specified columns.
+        """
+
+    @abc.abstractmethod
+    def create_federation(self, values):
+        """Create a new federation.
+
+        :param values: A dict containing several items used to identify
+                       and track the federation.
+                       For example:
+                       ::
+
+                    {
+                      'uuid': uuidutils.generate_uuid(),
+                      'name': 'example',
+                      'hostcluster_id': '91c8dd07-14a2-4fd8-b084-915fa53552fd',
+                      'properties': 'dns-zone:example.com.'
+                    }
+
+        :returns: A federation.
+        """
+
+    @abc.abstractmethod
+    def destroy_federation(self, federation_id):
+        """Destroy a federation.
+
+        This action *will not* destroy the host cluster nor the member
+        clusters.
+        :param federation_id: The id or uuid of a federation.
+        """
+
+    @abc.abstractmethod
+    def update_federation(self, federation_id, values):
+        """Update properties of a federation.
+
+        :param federation_id: The id or uuid of a federation.
+        :param values: A dict containing several items used to identify
+                       and track the federation.
+                       For example:
+                       ::
+
+                    {
+                      'uuid': uuidutils.generate_uuid(),
+                      'name': 'example',
+                      'hostcluster_id': '91c8dd07-14a2-4fd8-b084-915fa53552fd',
+                      'properties': 'dns-zone:example.com.'
+                    }
+
+        :returns: A federation.
+        :raises: FederationNotFound
+        """

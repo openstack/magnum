@@ -374,3 +374,11 @@ class TrusteeOrTrustToClusterFailed(MagnumException):
 
 class CertificatesToClusterFailed(MagnumException):
     message = _("Failed to create certificates for Cluster: %(cluster_uuid)s")
+
+
+class FederationNotFound(ResourceNotFound):
+    message = _("Federation %(federation)s could not be found.")
+
+
+class FederationAlreadyExists(Conflict):
+    message = _("A federation with UUID %(uuid)s already exists.")

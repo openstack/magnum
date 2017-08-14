@@ -643,3 +643,112 @@ class Connection(api.Connection):
             msg = (_('project_id %(project_id)s resource %(resource)s.') %
                    {'project_id': project_id, 'resource': resource})
             raise exception.QuotaNotFound(msg=msg)
+
+    def _add_federation_filters(self, query, filters):
+        if filters is None:
+            filters = {}
+
+        possible_filters = ["name", "project_id", "hostcluster_id",
+                            "member_ids", "properties"]
+
+        # TODO(clenimar): implement 'member_ids' filter as a contains query,
+        # so we return all the federations that have the given clusters,
+        # instead of all the federations that *only* have the exact given
+        # clusters.
+
+        filter_names = set(filters).intersection(possible_filters)
+        filter_dict = {filter_name: filters[filter_name]
+                       for filter_name in filter_names}
+
+        query = query.filter_by(**filter_dict)
+
+        if 'status' in filters:
+            query = query.filter(
+                models.Federation.status.in_(filters['status']))
+
+        return query
+
+    def get_federation_by_id(self, context, federation_id):
+        query = model_query(models.Federation)
+        query = self._add_tenant_filters(context, query)
+        query = query.filter_by(id=federation_id)
+        try:
+            return query.one()
+        except NoResultFound:
+            raise exception.FederationNotFound(federation=federation_id)
+
+    def get_federation_by_uuid(self, context, federation_uuid):
+        query = model_query(models.Federation)
+        query = self._add_tenant_filters(context, query)
+        query = query.filter_by(uuid=federation_uuid)
+        try:
+            return query.one()
+        except NoResultFound:
+            raise exception.FederationNotFound(federation=federation_uuid)
+
+    def get_federation_by_name(self, context, federation_name):
+        query = model_query(models.Federation)
+        query = self._add_tenant_filters(context, query)
+        query = query.filter_by(name=federation_name)
+        try:
+            return query.one()
+        except MultipleResultsFound:
+            raise exception.Conflict('Multiple federations exist with same '
+                                     'name. Please use the federation uuid '
+                                     'instead.')
+        except NoResultFound:
+            raise exception.FederationNotFound(federation=federation_name)
+
+    def get_federation_list(self, context, limit=None, marker=None,
+                            sort_key=None, sort_dir=None, filters=None):
+        query = model_query(models.Federation)
+        query = self._add_tenant_filters(context, query)
+        query = self._add_federation_filters(query, filters)
+        return _paginate_query(models.Federation, limit, marker,
+                               sort_key, sort_dir, query)
+
+    def create_federation(self, values):
+        if not values.get('uuid'):
+            values['uuid'] = uuidutils.generate_uuid()
+
+        federation = models.Federation()
+        federation.update(values)
+        try:
+            federation.save()
+        except db_exc.DBDuplicateEntry:
+            raise exception.FederationAlreadyExists(uuid=values['uuid'])
+        return federation
+
+    def destroy_federation(self, federation_id):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.Federation, session=session)
+            query = add_identity_filter(query, federation_id)
+
+            try:
+                query.one()
+            except NoResultFound:
+                raise exception.FederationNotFound(federation=federation_id)
+
+            query.delete()
+
+    def update_federation(self, federation_id, values):
+        if 'uuid' in values:
+            msg = _("Cannot overwrite UUID for an existing Federation.")
+            raise exception.InvalidParameterValue(err=msg)
+
+        return self._do_update_federation(federation_id, values)
+
+    def _do_update_federation(self, federation_id, values):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.Federation, session=session)
+            query = add_identity_filter(query, federation_id)
+            try:
+                ref = query.with_lockmode('update').one()
+            except NoResultFound:
+                raise exception.FederationNotFound(federation=federation_id)
+
+            ref.update(values)
+
+        return ref
