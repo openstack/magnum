@@ -11,6 +11,7 @@ sed -i '
 CERT_DIR=/etc/kubernetes/certs
 
 KUBE_API_ARGS="--runtime-config=api/all=true"
+KUBE_API_ARGS="$KUBE_API_ARGS --kubelet-preferred-address-types=InternalIP,Hostname,ExternalIP"
 if [ "$TLS_DISABLED" == "True" ]; then
     KUBE_API_ADDRESS="--insecure-bind-address=0.0.0.0 --insecure-port=$KUBE_API_PORT"
 else
@@ -20,7 +21,6 @@ else
     KUBE_API_ARGS="$KUBE_API_ARGS --tls-cert-file=$CERT_DIR/server.crt"
     KUBE_API_ARGS="$KUBE_API_ARGS --tls-private-key-file=$CERT_DIR/server.key"
     KUBE_API_ARGS="$KUBE_API_ARGS --client-ca-file=$CERT_DIR/ca.crt"
-    KUBE_API_ARGS="$KUBE_API_ARGS --kubelet-preferred-address-types=InternalIP,Hostname,ExternalIP"
 fi
 
 KUBE_ADMISSION_CONTROL=""
