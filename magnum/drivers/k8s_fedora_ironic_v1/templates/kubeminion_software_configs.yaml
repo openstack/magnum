@@ -96,10 +96,6 @@ parameters:
     type: string
     description: A logically separate section of the cluster
 
-  tenant_name:
-    type: string
-    description: an alternative term for a project
-
   username:
     type: string
     description: >
@@ -203,7 +199,6 @@ resources:
             $PASSWORD: {get_param: password}
             $VOLUME_DRIVER: {get_param: volume_driver}
             $REGION_NAME: {get_param: region_name}
-            $TENANT_NAME: {get_param: tenant_name}
             $HTTP_PROXY: {get_param: http_proxy}
             $HTTPS_PROXY: {get_param: https_proxy}
             $NO_PROXY: {get_param: no_proxy}

@@ -248,7 +248,6 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
 
         mock_context.auth_url = 'http://192.168.10.10:5000/v3'
         mock_context.user_name = 'fake_user'
-        mock_context.tenant = 'fake_tenant'
 
         flannel_cidr = mock_cluster_template.labels.get('flannel_network_cidr')
         flannel_subnet = mock_cluster_template.labels.get(
@@ -291,7 +290,6 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'docker_volume_type': docker_volume_type,
             'etcd_volume_size': etcd_volume_size,
             'username': 'fake_user',
-            'tenant_name': 'fake_tenant',
             'magnum_url': mock_osc.magnum_url.return_value,
             'region_name': mock_osc.cinder_region_name.return_value}}
         mock_get_params.assert_called_once_with(mock_context,
@@ -328,7 +326,6 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
 
         mock_context.auth_url = 'http://192.168.10.10:5000/v3'
         mock_context.user_name = 'fake_user'
-        mock_context.tenant = 'fake_tenant'
 
         flannel_cidr = mock_cluster_template.labels.get('flannel_network_cidr')
         flannel_subnet = mock_cluster_template.labels.get(
@@ -371,7 +368,6 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'docker_volume_type': docker_volume_type,
             'etcd_volume_size': etcd_volume_size,
             'username': 'fake_user',
-            'tenant_name': 'fake_tenant',
             'magnum_url': mock_osc.magnum_url.return_value,
             'region_name': mock_osc.cinder_region_name.return_value,
             'loadbalancing_protocol': 'HTTP',
