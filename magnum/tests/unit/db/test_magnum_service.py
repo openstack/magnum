@@ -24,9 +24,10 @@ class DbMagnumServiceTestCase(base.DbTestCase):
         utils.create_test_magnum_service()
 
     def test_create_magnum_service_failure_for_dup(self):
-        utils.create_test_magnum_service()
-        self.assertRaises(exception.MagnumServiceAlreadyExists,
-                          utils.create_test_magnum_service)
+        ms = utils.create_test_magnum_service()
+        res = self.dbapi.get_magnum_service_by_host_and_binary(
+            ms['host'], ms['binary'])
+        self.assertEqual(ms.id, res.id)
 
     def test_get_magnum_service_by_host_and_binary(self):
         ms = utils.create_test_magnum_service()
