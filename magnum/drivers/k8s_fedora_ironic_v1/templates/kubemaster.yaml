@@ -173,11 +173,6 @@ parameters:
     description: >
       user password
 
-  tenant_name:
-    type: string
-    description: >
-      tenant name
-
   http_proxy:
     type: string
     description: http proxy address for docker
@@ -281,7 +276,6 @@ resources:
             "$AUTH_URL": {get_param: auth_url}
             "$USERNAME": {get_param: username}
             "$PASSWORD": {get_param: password}
-            "$TENANT_NAME": {get_param: tenant_name}
             "$CLUSTER_SUBNET": {get_param: fixed_subnet}
             "$TLS_DISABLED": {get_param: tls_disabled}
             "$KUBE_DASHBOARD_ENABLED": {get_param: kube_dashboard_enabled}
