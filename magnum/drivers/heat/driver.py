@@ -74,6 +74,15 @@ class HeatDriver(driver.Driver):
 
         raise NotImplementedError("Must implement 'get_template_definition'")
 
+    def create_federation(self, context, federation):
+        return NotImplementedError("Must implement 'create_federation'")
+
+    def update_federation(self, context, federation):
+        return NotImplementedError("Must implement 'update_federation'")
+
+    def delete_federation(self, context, federation):
+        return NotImplementedError("Must implement 'delete_federation'")
+
     def update_cluster_status(self, context, cluster):
         if cluster.stack_id is None:
             # NOTE(mgoddard): During cluster creation it is possible to poll

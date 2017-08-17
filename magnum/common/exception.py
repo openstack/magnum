@@ -382,3 +382,8 @@ class FederationNotFound(ResourceNotFound):
 
 class FederationAlreadyExists(Conflict):
     message = _("A federation with UUID %(uuid)s already exists.")
+
+
+class MemberAlreadyExists(Conflict):
+    message = _("A cluster with UUID %(uuid)s is already a member of the"
+                "federation %(federation_name)s.")

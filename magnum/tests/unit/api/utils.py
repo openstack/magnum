@@ -20,6 +20,7 @@ from magnum.api.controllers.v1 import bay as bay_controller
 from magnum.api.controllers.v1 import baymodel as baymodel_controller
 from magnum.api.controllers.v1 import cluster as cluster_controller
 from magnum.api.controllers.v1 import cluster_template as cluster_tmp_ctrl
+from magnum.api.controllers.v1 import federation as federation_controller
 from magnum.tests.unit.db import utils
 
 
@@ -86,3 +87,9 @@ def mservice_get_data(**kw):
         'created_at': kw.get('created_at', faketime),
         'updated_at': kw.get('updated_at', faketime),
     }
+
+
+def federation_post_data(**kw):
+    federation = utils.get_test_federation(**kw)
+    internal = federation_controller.FederationPatchType.internal_attrs()
+    return remove_internal(federation, internal)

@@ -20,6 +20,7 @@ from magnum.common.policies import baymodel
 from magnum.common.policies import certificate
 from magnum.common.policies import cluster
 from magnum.common.policies import cluster_template
+from magnum.common.policies import federation
 from magnum.common.policies import magnum_service
 from magnum.common.policies import quota
 from magnum.common.policies import stats
@@ -33,6 +34,7 @@ def list_rules():
         certificate.list_rules(),
         cluster.list_rules(),
         cluster_template.list_rules(),
+        federation.list_rules(),
         magnum_service.list_rules(),
         quota.list_rules(),
         stats.list_rules()

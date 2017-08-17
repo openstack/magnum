@@ -210,6 +210,33 @@ def validate_master_count(cluster, cluster_template):
             "master_count must be 1 when master_lb_enabled is False"))
 
 
+def validate_federation_hostcluster(cluster_uuid):
+    """Validate Federation `hostcluster_id` parameter.
+
+    If the parameter was not specified raise an
+    `exceptions.InvalidParameterValue`. If the specified identifier does not
+    identify any Cluster, raise `exception.ClusterNotFound`
+    """
+    if cluster_uuid is not None:
+        api_utils.get_resource('Cluster', cluster_uuid)
+    else:
+        raise exception.InvalidParameterValue(
+            "No hostcluster specified. "
+            "Please specify a hostcluster_id.")
+
+
+def validate_federation_properties(properties):
+    """Validate Federation `properties` parameter."""
+    if properties is None:
+        raise exception.InvalidParameterValue(
+            "Please specify a `properties` "
+            "dict for the federation.")
+    # Currently, we only support the property `dns-zone`.
+    if properties.get('dns-zone') is None:
+        raise exception.InvalidParameterValue("No DNS zone specified. "
+                                              "Please specify a `dns-zone`.")
+
+
 # Dictionary that maintains a list of validation functions
 validators = {'image_id': validate_image,
               'flavor_id': validate_flavor,
