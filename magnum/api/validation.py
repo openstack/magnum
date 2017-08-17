@@ -30,6 +30,7 @@ from magnum import objects
 CONF = magnum.conf.CONF
 
 cluster_update_allowed_properties = set(['node_count'])
+federation_update_allowed_properties = set(['member_ids', 'properties'])
 
 
 def enforce_cluster_type_supported():
@@ -196,6 +197,15 @@ def validate_cluster_properties(delta):
     update_disallowed_properties = delta - cluster_update_allowed_properties
     if update_disallowed_properties:
         err = (_("cannot change cluster property(ies) %s.") %
+               ", ".join(update_disallowed_properties))
+        raise exception.InvalidParameterValue(err=err)
+
+
+def validate_federation_properties(delta):
+
+    update_disallowed_properties = delta - federation_update_allowed_properties
+    if update_disallowed_properties:
+        err = (_("cannot change federation property(ies) %s.") %
                ", ".join(update_disallowed_properties))
         raise exception.InvalidParameterValue(err=err)
 

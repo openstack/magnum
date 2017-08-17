@@ -28,6 +28,7 @@ from magnum.common import short_id
 from magnum.conductor.handlers import ca_conductor
 from magnum.conductor.handlers import cluster_conductor
 from magnum.conductor.handlers import conductor_listener
+from magnum.conductor.handlers import federation_conductor
 from magnum.conductor.handlers import indirection_api
 import magnum.conf
 from magnum import version
@@ -51,6 +52,7 @@ def main():
         cluster_conductor.Handler(),
         conductor_listener.Handler(),
         ca_conductor.Handler(),
+        federation_conductor.Handler(),
     ]
 
     server = rpc_service.Service.create(CONF.conductor.topic,

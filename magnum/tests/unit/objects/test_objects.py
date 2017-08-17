@@ -363,6 +363,7 @@ object_data = {
     'MagnumService': '1.0-2d397ec59b0046bd5ec35cd3e06efeca',
     'Stats': '1.0-73a1cd6e3c0294c932a66547faba216c',
     'Quota': '1.0-94e100aebfa88f7d8428e007f2049c18',
+    'Federation': '1.0-166da281432b083f0e4b851336e12e20'
 }
 
 
