@@ -59,16 +59,10 @@ $(generate_pod_args "    - " $KUBE_LOGTOSTDERR $KUBE_LOG_LEVEL $KUBE_MASTER $KUB
       initialDelaySeconds: ${SYSTEM_PODS_INITIAL_DELAY}
       timeoutSeconds: ${SYSTEM_PODS_TIMEOUT}
     volumeMounts:
-    - mountPath: /etc/ssl/certs
-      name: ssl-certs-host
-      readOnly: true
     - mountPath: /etc/kubernetes
       name: kubernetes-config
       readOnly: true
   volumes:
-  - hostPath:
-      path: /etc/ssl/certs
-    name: ssl-certs-host
   - hostPath:
       path: /etc/kubernetes
     name: kubernetes-config
@@ -105,16 +99,10 @@ $(generate_pod_args "    - " $KUBE_LOGTOSTDERR $KUBE_LOG_LEVEL $KUBE_MASTER $KUB
       initialDelaySeconds: ${SYSTEM_PODS_INITIAL_DELAY}
       timeoutSeconds: ${SYSTEM_PODS_TIMEOUT}
     volumeMounts:
-    - mountPath: /etc/ssl/certs
-      name: ssl-certs-host
-      readOnly: true
     - mountPath: /etc/kubernetes
       name: kubernetes-config
       readOnly: true
   volumes:
-  - hostPath:
-      path: /etc/ssl/certs
-    name: ssl-certs-host
   - hostPath:
       path: /etc/kubernetes
     name: kubernetes-config
