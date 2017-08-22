@@ -334,6 +334,19 @@ class TestPatch(api_base.FunctionalTest):
                                  self.cluster_template.uuid)
         self.assertEqual(response['public'], True)
 
+    def test_update_cluster_template_replace_labels_success(self):
+        cluster_template = obj_utils.create_test_cluster_template(self.context)
+        response = self.patch_json('/clustertemplates/%s' %
+                                   cluster_template.uuid,
+                                   [{'path': '/labels',
+                                     'value': '{\'etcd_volume_size\': \'1\'}',
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual(200, response.status_int)
+        response = self.get_json('/clustertemplates/%s' %
+                                 self.cluster_template.uuid)
+        self.assertEqual(response['labels'], {'etcd_volume_size': '1'})
+
     def test_update_cluster_template_with_cluster_not_allow_update(self):
         cluster_template = obj_utils.create_test_cluster_template(self.context)
         obj_utils.create_test_cluster(

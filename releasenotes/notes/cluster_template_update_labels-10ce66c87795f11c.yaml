@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Now user can update labels in cluster-template. Previously string is
+    passed as a value to labels, but we know that labels can only hold
+    dictionary values. Now we are parsing the string and storing it as
+    dictionary for labels in cluster-template.
