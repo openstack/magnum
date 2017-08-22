@@ -18,6 +18,7 @@
 # - magnum_register_image
 # - start_magnum
 # - configure_iptables_magnum
+# - configure_apache_magnum
 # - stop_magnum
 # - cleanup_magnum
 
@@ -341,6 +342,46 @@ function configure_iptables_magnum {
         sudo iptables -I INPUT -d $HOST_IP -p tcp --dport 80 -j ACCEPT || true
         sudo iptables -I INPUT -d $HOST_IP -p tcp --dport 443 -j ACCEPT || true
     fi
+}
+
+
+function configure_apache_magnum {
+    # Set redirection for kubernetes openstack cloud provider
+    # FIXME: When [1] is in kubernetes, we won't need the redirection anymore.
+    # [1] https://github.com/gophercloud/gophercloud/pull/423
+    HTACCESS_PATH=/var/www/html
+    if is_ubuntu; then
+        OVERRIDE_CONF_FILE=/etc/apache2/apache2.conf
+    elif is_fedora; then
+        OVERRIDE_CONF_FILE=/etc/httpd/conf/httpd.conf
+    fi
+    # If horizon is enabled then we need
+    if is_service_enabled horizon; then
+         HTACCESS_PATH=$DEST/horizon/.blackhole
+         sudo tee -a $APACHE_CONF_DIR/horizon.conf <<EOF
+<Directory $HTACCESS_PATH>
+Options Indexes FollowSymLinks
+AllowOverride all
+Require all granted
+</Directory>
+EOF
+    else
+        sudo tee -a $OVERRIDE_CONF_FILE <<EOF
+<Directory $HTACCESS_PATH>
+    Options Indexes FollowSymLinks
+    AllowOverride all
+    Require all granted
+</Directory>
+EOF
+    fi
+
+    sudo mkdir -p $HTACCESS_PATH
+    sudo tee $HTACCESS_PATH/.htaccess <<EOF
+RewriteEngine on
+RewriteRule ^v2\.0(.*) /identity/v2.0\$1
+RewriteRule ^v3(.*) /identity/v3\$1
+EOF
+    enable_apache_mod rewrite
 }
 
 
