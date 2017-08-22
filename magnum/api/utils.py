@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import ast
 import jsonpatch
 from oslo_utils import uuidutils
 import pecan
@@ -80,6 +81,14 @@ def apply_jsonpatch(doc, patch):
                 msg = _("The attribute %s has existed, please use "
                         "'replace' operation instead.") % p['path']
                 raise wsme.exc.ClientSideError(msg)
+
+        if p['op'] == 'replace' and p['path'] == '/labels':
+            try:
+                val = p['value']
+                dict_val = val if type(val) == dict else ast.literal_eval(val)
+                p['value'] = dict_val
+            except (SyntaxError, ValueError, AssertionError) as e:
+                raise exception.PatchError(patch=patch, reason=e)
     return jsonpatch.apply_patch(doc, patch)
 
 
