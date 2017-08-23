@@ -233,11 +233,6 @@ parameters:
       ChangeMe
     hidden: true
 
-  tenant_name:
-    type: string
-    description: >
-      tenant name
-
   loadbalancing_protocol:
     type: string
     description: >
@@ -501,7 +496,6 @@ resources:
           etcd_pool_id: {get_attr: [etcd_lb, pool_id]}
           username: {get_param: username}
           password: {get_param: password}
-          tenant_name: {get_param: tenant_name}
           kubernetes_port: {get_param: kubernetes_port}
           tls_disabled: {get_param: tls_disabled}
           kube_dashboard_enabled: {get_param: kube_dashboard_enabled}
@@ -563,7 +557,6 @@ resources:
           magnum_url: {get_param: magnum_url}
           volume_driver: {get_param: volume_driver}
           region_name: {get_param: region_name}
-          tenant_name: {get_param: tenant_name}
           auth_url: {get_param: auth_url}
           username: {get_param: username}
           password: {get_param: password}

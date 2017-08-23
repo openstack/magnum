@@ -69,7 +69,6 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
         extra_params = kwargs.pop('extra_params', {})
 
         extra_params['username'] = context.user_name
-        extra_params['tenant_name'] = context.tenant
         osc = self.get_osc(context)
         extra_params['region_name'] = osc.cinder_region_name()
 

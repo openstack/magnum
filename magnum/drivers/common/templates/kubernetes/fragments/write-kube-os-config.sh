@@ -5,7 +5,7 @@
 KUBE_OS_CLOUD_CONFIG=/etc/kubernetes/kube_openstack_config
 
 # Generate a the configuration for Kubernetes services
-# to talk to OpenStack Neutron
+# to talk to OpenStack Neutron and Cinder
 cat > $KUBE_OS_CLOUD_CONFIG <<EOF
 [Global]
 auth-url=$AUTH_URL
