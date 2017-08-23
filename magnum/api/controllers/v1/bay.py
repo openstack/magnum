@@ -433,7 +433,7 @@ class BaysController(base.Controller):
         bay_dict['project_id'] = context.project_id
         bay_dict['user_id'] = context.user_id
         # NOTE(yuywz): We will generate a random human-readable name for
-        # bay if the name is not spcified by user.
+        # bay if the name is not specified by user.
         name = bay_dict.get('name') or self._generate_name_for_bay(context)
         bay_dict['name'] = name
         bay_dict['coe_version'] = None

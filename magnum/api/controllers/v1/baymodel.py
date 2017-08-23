@@ -345,7 +345,7 @@ class BayModelsController(base.Controller):
                 raise exception.ClusterTemplatePublishDenied()
 
         # NOTE(yuywz): We will generate a random human-readable name for
-        # baymodel if the name is not spcified by user.
+        # baymodel if the name is not specified by user.
         arg_name = baymodel_dict.get('name')
         name = arg_name or self._generate_name_for_baymodel(context)
         baymodel_dict['name'] = name
