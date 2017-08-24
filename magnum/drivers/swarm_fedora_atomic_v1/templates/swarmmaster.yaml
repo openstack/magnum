@@ -205,6 +205,19 @@ resources:
   # software configs.  these are components that are combined into
   # a multipart MIME user-data archive.
   #
+  no_proxy_extended:
+    type: OS::Heat::Value
+    properties:
+      type: string
+      value:
+        list_join:
+          - ','
+          - - {get_attr: [api_address_switch, private_ip]}
+            - {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
+            - {get_attr: [etcd_address_switch, private_ip]}
+            - {get_attr: [api_address_switch, public_ip]}
+            - {get_param: no_proxy}
+
   write_heat_params:
     type: "OS::Heat::SoftwareConfig"
     properties:
@@ -220,7 +233,7 @@ resources:
             "$ETCD_DISCOVERY_URL": {get_param: discovery_url}
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
-            "$NO_PROXY": {get_param: no_proxy}
+            "$NO_PROXY": {get_attr: [no_proxy_extended, value]}
             "$SWARM_API_IP": {get_attr: [api_address_switch, private_ip]}
             "$SWARM_NODE_IP": {get_attr: [swarm_master_eth0, fixed_ips, 0, ip_address]}
             "$CLUSTER_UUID": {get_param: cluster_uuid}
@@ -322,7 +335,7 @@ resources:
             "$WAIT_CURL": {get_attr: [master_wait_handle, curl_cli]}
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
-            "$NO_PROXY": {get_param: no_proxy}
+            "$NO_PROXY": {get_attr: [no_proxy_extended, value]}
             "$TLS_DISABLED": {get_param: tls_disabled}
             "$SWARM_VERSION": {get_param: swarm_version}
             "$SWARM_STRATEGY": {get_param: swarm_strategy}
