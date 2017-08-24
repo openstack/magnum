@@ -160,6 +160,12 @@ parameters:
     type: string
     description: insecure registry url
 
+  container_infra_prefix:
+    type: string
+    description: >
+      prefix of container images used in the cluster, kubernetes components,
+      kubernetes-dashboard, coredns etc
+
   wc_curl_cli:
     type: string
     description : >
@@ -216,6 +222,7 @@ resources:
             $TRUST_ID: {get_param: trust_id}
             $AUTH_URL: {get_param: auth_url}
             $INSECURE_REGISTRY_URL: {get_param: insecure_registry_url}
+            $CONTAINER_INFRA_PREFIX: {get_param: container_infra_prefix}
             $ENABLE_CINDER: "False"
 
   write_kubeconfig:

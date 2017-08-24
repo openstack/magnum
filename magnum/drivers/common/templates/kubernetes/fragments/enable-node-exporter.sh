@@ -24,7 +24,7 @@ metadata:
 spec:
   containers:
   - name: node-exporter
-    image: prom/node-exporter
+    image: ${CONTAINER_INFRA_PREFIX:-docker.io/prom/}node-exporter
     ports:
     - containerPort: 9100
       hostPort: 9100

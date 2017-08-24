@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    Prefix of all container images used in the cluster (kubernetes components,
+    coredns, kubernetes-dashboard, node-exporter). For example,
+    kubernetes-apiserver is pulled from
+    docker.io/openstackmagnum/kubernetes-apiserver, with this label it can be
+    changed to myregistry.example.com/mycloud/kubernetes-apiserver. Similarly,
+    all other components used in the cluster will be prefixed with this label,
+    which assumes an operator has cloned all expected images in
+    myregistry.example.com/mycloud.

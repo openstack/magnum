@@ -2,6 +2,7 @@
 
 . /etc/sysconfig/heat-params
 
+_prefix=${CONTAINER_INFRA_PREFIX:-docker.io/coredns/}
 CORE_DNS=/etc/kubernetes/manifests/kube-coredns.yaml
 [ -f ${CORE_DNS} ] || {
     echo "Writing File: $CORE_DNS"
@@ -47,7 +48,7 @@ spec:
     spec:
       containers:
       - name: coredns
-        image: coredns/coredns:011
+        image: ${_prefix}coredns:011
         imagePullPolicy: Always
         args: [ "-conf", "/etc/coredns/Corefile" ]
         volumeMounts:
