@@ -17,6 +17,7 @@
 from oslo_db import exception as db_exc
 from oslo_db.sqlalchemy import session as db_session
 from oslo_db.sqlalchemy import utils as db_utils
+from oslo_log import log
 from oslo_utils import importutils
 from oslo_utils import strutils
 from oslo_utils import timeutils
@@ -38,6 +39,7 @@ profiler_sqlalchemy = importutils.try_import('osprofiler.sqlalchemy')
 
 CONF = magnum.conf.CONF
 
+LOG = log.getLogger(__name__)
 
 _FACADE = None
 
@@ -533,7 +535,14 @@ class Connection(api.Connection):
         try:
             magnum_service.save()
         except db_exc.DBDuplicateEntry:
-            raise exception.MagnumServiceAlreadyExists(id=magnum_service['id'])
+            host = values["host"]
+            binary = values["binary"]
+            LOG.warning("Magnum service with same host:%(host)s and"
+                        " binary:%(binary)s had been saved into DB",
+                        {'host': host, 'binary': binary})
+            query = model_query(models.MagnumService)
+            query = query.filter_by(host=host, binary=binary)
+            return query.one()
         return magnum_service
 
     def get_magnum_service_list(self, disabled=None, limit=None,
