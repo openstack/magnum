@@ -1,0 +1,24 @@
+---
+features:
+  - |
+    Kubernetes for fedora-atomic runs in system containers [1]. These
+    containers are stored in ostree in the fedora-atomic hosts and they don't
+    require docker to be running. Pulling and storing them in ostree is very
+    fast and they can easily be managed as systemd services. Since these
+    containers are based on fedora packages, they are working as drop in
+    replacements of the binaries in the fedora atomic host. The ProjectAtomic
+    hasn't found a solution yet [3] on tagging the images, so the magnum team
+    builds and publishes images in this [2] account in dockerhub. Users can
+    select the tag they want using the `kube_tag` label. Users can use custom
+    built kubernetes images from [1] or mirror the images from [2] and use the
+    `container_infra_prefix` to point to their own public/private registry or
+    group.
+
+    [1] https://github.com/projectatomic/atomic-system-containers
+    [2] https://hub.docker.com/r/openstackmagnum/kubernetes-kubelet/tags/
+    [3] https://pagure.io/atomic/kubernetes-sig/issue/6
+  - |
+    Add swarm-mode driver based on fedora-atomic. Users can select the
+    swarm-mode COE by using the `coe` field in cluster-template. This is a new
+    driver, it is recommended to let magnum create a private-network and
+    security groups per cluster.
