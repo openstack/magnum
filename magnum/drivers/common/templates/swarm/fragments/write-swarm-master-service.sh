@@ -2,10 +2,6 @@
 
 CERT_DIR=/etc/docker
 
-if [ -z "$NO_PROXY" ]; then
-    NO_PROXY=$SWARM_API_IP,$ETCD_SERVER_IP,$SWARM_NODE_IP
-fi
-
 cat > /etc/systemd/system/swarm-manager.service << END_SERVICE_TOP
 [Unit]
 Description=Swarm Manager

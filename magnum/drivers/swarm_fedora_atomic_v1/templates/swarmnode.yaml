@@ -183,6 +183,19 @@ resources:
   #
   # software configs.  these are components that are combined into
   # a multipart MIME user-data archive.
+  no_proxy_extended:
+    type: OS::Heat::Value
+    properties:
+      type: string
+      value:
+        list_join:
+          - ','
+          - - {get_param: swarm_api_ip}
+            - {get_attr: [swarm_node_eth0, fixed_ips, 0, ip_address]}
+            - {get_param: etcd_server_ip}
+            - {get_param: api_ip_address}
+            - {get_param: no_proxy}
+
   write_heat_params:
     type: "OS::Heat::SoftwareConfig"
     properties:
@@ -197,7 +210,7 @@ resources:
             "$DOCKER_STORAGE_DRIVER": {get_param: docker_storage_driver}
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
-            "$NO_PROXY": {get_param: no_proxy}
+            "$NO_PROXY": {get_attr: [no_proxy_extended, value]}
             "$SWARM_API_IP": {get_param: swarm_api_ip}
             "$SWARM_NODE_IP": {get_attr: [swarm_node_eth0, fixed_ips, 0, ip_address]}
             "$CLUSTER_UUID": {get_param: cluster_uuid}

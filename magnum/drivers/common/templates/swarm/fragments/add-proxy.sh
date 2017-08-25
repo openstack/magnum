@@ -44,31 +44,20 @@ EOF
     fi
 fi
 
-if [ -n "$NO_PROXY" ]; then
-    cat <<EOF | sed "s/^ *//" > $DOCKER_NO_PROXY_CONF
-    [Service]
-    Environment=NO_PROXY=$NO_PROXY
+if [ -n "$HTTP_PROXY" -o -n "$HTTPS_PROXY" ]; then
+    if [ -n "$NO_PROXY" ]; then
+        cat <<EOF | sed "s/^ *//" > $DOCKER_NO_PROXY_CONF
+        [Service]
+        Environment=NO_PROXY=$NO_PROXY
 EOF
 
-    DOCKER_RESTART=1
+        DOCKER_RESTART=1
 
-    if [ -f "$BASH_RC" ]; then
-        echo "declare -x no_proxy=$NO_PROXY" >> $BASH_RC
-    else
-        echo "File $BASH_RC does not exist, not setting no_proxy"
-    fi
-else
-    cat <<EOF | sed "s/^ *//" > $DOCKER_NO_PROXY_CONF
-    [Service]
-    Environment=NO_PROXY=$SWARM_API_IP,$ETCD_SERVER_IP,$SWARM_NODE_IP
-EOF
-
-    DOCKER_RESTART=1
-
-    if [ -f "$BASH_RC" ]; then
-        echo "declare -x no_proxy=$SWARM_API_IP,$ETCD_SERVER_IP,$SWARM_NODE_IP" >> $BASH_RC
-    else
-        echo "File $BASH_RC does not exist, not setting no_proxy"
+        if [ -f "$BASH_RC" ]; then
+            echo "declare -x no_proxy=$NO_PROXY" >> $BASH_RC
+        else
+            echo "File $BASH_RC does not exist, not setting no_proxy"
+        fi
     fi
 fi
 
