@@ -9,10 +9,7 @@ features:
     replacements of the binaries in the fedora atomic host. The ProjectAtomic
     hasn't found a solution yet [3] on tagging the images, so the magnum team
     builds and publishes images in this [2] account in dockerhub. Users can
-    select the tag they want using the `kube_tag` label. Users can use custom
-    built kubernetes images from [1] or mirror the images from [2] and use the
-    `container_infra_prefix` to point to their own public/private registry or
-    group.
+    select the tag they want using the `kube_tag` label.
 
     [1] https://github.com/projectatomic/atomic-system-containers
     [2] https://hub.docker.com/r/openstackmagnum/kubernetes-kubelet/tags/
