@@ -134,7 +134,7 @@ and the domain admin:
 
 .. code-block:: bash
 
-    source /opt/stack/devstack/accrc/admin/admin
+    . /opt/stack/devstack/accrc/admin/admin
     export OS_IDENTITY_API_VERSION=3
     unset OS_AUTH_TYPE
     openstack domain create magnum
@@ -142,7 +142,7 @@ and the domain admin:
         --domain=magnum
     openstack role add --user=trustee_domain_admin --user-domain magnum --domain=magnum admin
 
-    source /opt/stack/devstack/functions
+    . /opt/stack/devstack/functions
     export MAGNUM_CONF=/etc/magnum/magnum.conf
     iniset $MAGNUM_CONF trust trustee_domain_id \
         $(openstack domain show magnum | awk '/ id /{print $4}')
@@ -487,7 +487,7 @@ If etcd continues to fail, check the following:
   cause of failure is that this public discovery service is not
   reachable.  Check by running on the master nodes::
 
-    source /etc/sysconfig/heat-params
+    . /etc/sysconfig/heat-params
     curl $ETCD_DISCOVERY_URL
 
   You should receive something like::
@@ -763,7 +763,7 @@ Simulating gate tests
       }
       export -f gate_hook
       function post_test_hook {
-          source $BASE/new/devstack/accrc/admin/admin
+          . $BASE/new/devstack/accrc/admin/admin
           cd /opt/stack/new/magnum/
           ./magnum/tests/contrib/post_test_hook.sh api # change this to swarm to run swarm functional tests or k8s to run kubernetes functional tests
       }
