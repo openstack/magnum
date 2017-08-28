@@ -49,6 +49,7 @@ sed -i '
 # Using any other name will break the load balancer and cinder volume features.
 HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')
 KUBELET_ARGS="--config=/etc/kubernetes/manifests --cadvisor-port=4194 ${KUBE_CONFIG} --hostname-override=${HOSTNAME_OVERRIDE}"
+KUBELET_ARGS="${KUBELET_ARGS} --cluster_dns=${DNS_SERVICE_IP} --cluster_domain=${DNS_CLUSTER_DOMAIN}"
 
 if [ -n "$TRUST_ID" ]; then
     KUBELET_ARGS="$KUBELET_ARGS --cloud-provider=openstack --cloud-config=/etc/sysconfig/kube_openstack_config"
