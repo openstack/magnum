@@ -48,6 +48,10 @@ parameters:
     constraints:
       - allowed_values: ["devicemapper", "overlay"]
 
+  volume_driver:
+    type: string
+    description: volume driver to use for container storage
+
   flannel_network_cidr:
     type: string
     description: network range for flannel overlay network
@@ -261,6 +265,7 @@ resources:
             "$KUBE_DASHBOARD_ENABLED": {get_param: kube_dashboard_enabled}
             "$CLUSTER_UUID": {get_param: cluster_uuid}
             "$MAGNUM_URL": {get_param: magnum_url}
+            "$VOLUME_DRIVER": {get_param: volume_driver}
             "$HTTP_PROXY": {get_param: http_proxy}
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}

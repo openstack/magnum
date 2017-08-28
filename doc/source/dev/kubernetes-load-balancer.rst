@@ -78,57 +78,7 @@ neutron_lbaas.conf::
 
 To configure LBaaS v1 or v2, refer to the Neutron documentation.
 
-To enable the load balancer, log into each master node of your cluster and
-perform the following steps:
-
-1. Configure kube-apiserver::
-
-    sudo vi /etc/kubernetes/apiserver
-
-   Comment out the line::
-
-    #KUBE_API_ARGS="--runtime_config=api/all=true"
-
-   Uncomment the line::
-
-    KUBE_API_ARGS="--runtime_config=api/all=true --cloud_config=/etc/sysconfig/kube_openstack_config --cloud_provider=openstack"""
-
-2. Configure kube-controller-manager::
-
-    sudo vi /etc/kubernetes/manifests/kube-controller-manager.yaml
-
-   Immediately after the lines::
-
-    - controller-manager
-    - --master=http://127.0.0.1:8080
-    - --service-account-private-key-file=/etc/kubernetes/ssl/server.key
-    - --root-ca-file=/etc/kubernetes/ssl/ca.crt
-
-   Add the following lines::
-
-    - --cloud_config=/etc/sysconfig/kube_openstack_config
-    - --cloud_provider=openstack
-
-   When the file is saved, the pod will automatically restart the
-   kube-controller-manager container to pick up the change.
-
-3. Enter OpenStack user credential::
-
-    sudo vi /etc/sysconfig/kube_openstack_config
-
-   The username and tenant-name entries have been filled in with the
-   Keystone values of the user who created the cluster.  Enter the password
-   of this user on the entry for password::
-
-    password=ChangeMe
-
-4. Restart the Kubernetes API server::
-
-    sudo service kube-apiserver restart
-    service kube-apiserver status
-
-This only needs to be done once.  The steps can be reversed to disable the
-load balancer feature. Before deleting the Kubernetes cluster, make sure to
+Before deleting the Kubernetes cluster, make sure to
 delete all the services that created load balancers. Because the Neutron
 objects created by Kubernetes are not managed by Heat, they will not be
 deleted by Heat and this will cause the cluster-delete operation to fail. If
@@ -137,6 +87,9 @@ lb-healthmonitor) and then run cluster-delete again.
 
 Steps for the users
 ===================
+
+This feature requires the OpenStack cloud provider to be enabled.
+To do so, enable the cinder support (--volume-driver cinder).
 
 For the user, publishing the service endpoint externally involves the following
 2 steps:
