@@ -464,6 +464,10 @@ resources:
       resource_def:
         type: kubemaster.yaml
         properties:
+          name:
+            list_join:
+              - '-'
+              - [{ get_param: 'OS::stack_name' }, 'master', '%index%']
           prometheus_monitoring: {get_param: prometheus_monitoring}
           grafana_admin_passwd: {get_param: grafana_admin_passwd}
           api_public_address: {get_attr: [api_lb, floating_address]}
@@ -531,6 +535,10 @@ resources:
       resource_def:
         type: kubeminion.yaml
         properties:
+          name:
+            list_join:
+              - '-'
+              - [{ get_param: 'OS::stack_name' }, 'minion', '%index%']
           prometheus_monitoring: {get_param: prometheus_monitoring}
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: server_image}

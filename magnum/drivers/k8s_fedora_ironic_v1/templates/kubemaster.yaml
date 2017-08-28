@@ -7,6 +7,10 @@ description: >
 
 parameters:
 
+  name:
+    type: string
+    description: server name
+
   server_image:
     type: string
     description: glance image used to boot the server
@@ -465,6 +469,7 @@ resources:
   kube-master:
     type: OS::Nova::Server
     properties:
+      name: {get_param: name}
       image: {get_param: server_image}
       flavor: {get_param: master_flavor}
       key_name: {get_param: ssh_key_name}

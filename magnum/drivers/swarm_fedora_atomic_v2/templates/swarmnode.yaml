@@ -7,6 +7,10 @@ description: >
 
 parameters:
 
+  name:
+    type: string
+    description: server name
+
   server_image:
     type: string
     description: glance image used to boot the server
@@ -259,6 +263,7 @@ resources:
   swarm-node:
     type: "OS::Nova::Server"
     properties:
+      name: {get_param: name}
       image:
         get_param: server_image
       flavor:
