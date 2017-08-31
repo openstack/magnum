@@ -59,11 +59,12 @@ class Service(service.Service):
         profiler.setup(binary, CONF.host)
 
     def start(self):
-        # NOTE(suro-patz): The parent class has created a threadgroup, already
+        self._server.start()
+
+    def create_periodic_tasks(self):
         if CONF.periodic_enable:
             periodic.setup(CONF, self.tg)
         servicegroup.setup(CONF, self.binary, self.tg)
-        self._server.start()
 
     def stop(self):
         if self._server:
