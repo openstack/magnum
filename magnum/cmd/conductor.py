@@ -60,4 +60,11 @@ def main():
     if not workers:
         workers = processutils.get_worker_count()
     launcher = service.launch(CONF, server, workers=workers)
+
+    # NOTE(mnaser): We create the periodic tasks here so that they
+    #               can be attached to the main process and not
+    #               duplicated in all the children if multiple
+    #               workers are being used.
+    server.create_periodic_tasks()
+
     launcher.wait()
