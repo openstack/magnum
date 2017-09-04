@@ -432,7 +432,7 @@ network cannot be removed while a Nova instance is still attached.
 resources; therefore if an error occurs, you can troubleshoot through
 Heat.  For more help on Heat stack troubleshooting, refer to the
 `Troubleshooting Guide
-<https://github.com/openstack/magnum/blob/master/doc/source/troubleshooting-guide.rst#heat-stacks>`_.
+<https://docs.openstack.org/magnum/latest/admin/troubleshooting-guide.html#heat-stacks>`_.
 
 
 
@@ -1130,8 +1130,7 @@ this external IP address.  Kubernetes handles all the life cycle
 operations when pods are modified behind the service and when the
 service is deleted.
 
-Refer to the document `Kubernetes external load balancer
-<https://github.com/openstack/magnum/blob/master/doc/source/dev/kubernetes-load-balancer.rst>`_
+Refer to the `Kubernetes External Load Balancer`_ section
 for more details.
 
 

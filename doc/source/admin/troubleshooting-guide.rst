@@ -218,7 +218,7 @@ Check the following:
   network have a route to the external internet?
 - Is your devstack environment behind a firewall?  This can be the case for some
   enterprises or countries.  In this case, consider using a `proxy server
-  <https://github.com/openstack/magnum/blob/master/doc/source/magnum-proxy.rst>`_.
+  <https://docs.openstack.org/magnum/latest/admin/magnum-proxy.html>`_.
 - Is the traffic blocked by the security group? Check the
   `rules of security group
   <http://docs.openstack.org/ops-guide/ops-user-facing-operations.html#security-groups>`_.
