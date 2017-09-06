@@ -6,7 +6,7 @@
 # ascii betical order.
 
 Babel!=2.4.0,>=2.3.4 # BSD
-PyYAML>=3.10 # MIT
+PyYAML>=3.10.0 # MIT
 SQLAlchemy!=1.1.5,!=1.1.6,!=1.1.7,!=1.1.8,>=1.0.10 # MIT
 WSME>=0.8 # MIT
 WebOb>=1.7.1 # MIT
