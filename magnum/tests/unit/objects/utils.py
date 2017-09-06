@@ -166,7 +166,7 @@ def datetime_or_none(dt):
             # NOTE(danms): Legacy objects from sqlalchemy are stored in UTC,
             # but are returned without a timezone attached.
             # As a transitional aid, assume a tz-naive object is in UTC.
-            return dt.replace(tzinfo=iso8601.iso8601.Utc())
+            return dt.replace(tzinfo=iso8601.UTC)
         else:
             return dt
     raise ValueError(_("A datetime.datetime is required here"))
