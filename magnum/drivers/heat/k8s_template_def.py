@@ -116,7 +116,7 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                       'etcd_volume_size']
 
         for label in label_list:
-            extra_params[label] = cluster_template.labels.get(label)
+            extra_params[label] = cluster.labels.get(label)
 
         if cluster_template.registry_enabled:
             extra_params['swift_region'] = CONF.docker_registry.swift_region

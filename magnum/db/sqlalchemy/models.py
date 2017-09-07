@@ -116,6 +116,7 @@ class Cluster(Base):
     cluster_template_id = Column(String(255))
     keypair = Column(String(255))
     docker_volume_size = Column(Integer())
+    labels = Column(JSONEncodedDict)
     stack_id = Column(String(255))
     api_address = Column(String(255))
     node_addresses = Column(JSONEncodedList)

@@ -790,6 +790,15 @@ class TestPost(api_base.FunctionalTest):
         cluster, timeout = self.mock_cluster_create.call_args
         self.assertEqual(3, cluster[0].docker_volume_size)
 
+    def test_create_cluster_with_labels(self):
+        bdict = apiutils.cluster_post_data()
+        bdict['labels'] = {'key': 'value'}
+        response = self.post_json('/clusters', bdict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        cluster, timeout = self.mock_cluster_create.call_args
+        self.assertEqual({'key': 'value'}, cluster[0].labels)
+
     def test_create_cluster_without_docker_volume_size(self):
         bdict = apiutils.cluster_post_data()
         # Remove the default docker_volume_size from the cluster dict.
@@ -801,6 +810,16 @@ class TestPost(api_base.FunctionalTest):
         # Verify docker_volume_size from ClusterTemplate is used
         self.assertEqual(20, cluster[0].docker_volume_size)
 
+    def test_create_cluster_without_labels(self):
+        bdict = apiutils.cluster_post_data()
+        bdict.pop('labels')
+        response = self.post_json('/clusters', bdict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        cluster, timeout = self.mock_cluster_create.call_args
+        # Verify labels from ClusterTemplate is used
+        self.assertEqual({'key1': u'val1', 'key2': u'val2'}, cluster[0].labels)
+
     def test_create_cluster_with_invalid_docker_volume_size(self):
         invalid_values = [(-1, None), ('notanint', None),
                           (1, 'devicemapper'), (2, 'devicemapper')]
@@ -811,6 +830,13 @@ class TestPost(api_base.FunctionalTest):
             self.assertEqual('application/json', response.content_type)
             self.assertEqual(400, response.status_int)
             self.assertTrue(response.json['errors'])
+
+    def test_create_cluster_with_invalid_labels(self):
+        bdict = apiutils.cluster_post_data(labels='invalid')
+        response = self.post_json('/clusters', bdict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_int)
+        self.assertTrue(response.json['errors'])
 
 
 class TestDelete(api_base.FunctionalTest):

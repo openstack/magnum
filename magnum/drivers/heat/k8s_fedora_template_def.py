@@ -74,7 +74,7 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
 
         # set docker_volume_type
         # use the configuration default if None provided
-        docker_volume_type = cluster_template.labels.get(
+        docker_volume_type = cluster.labels.get(
             'docker_volume_type', CONF.cinder.default_docker_volume_type)
         extra_params['docker_volume_type'] = docker_volume_type
 

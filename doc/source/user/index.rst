@@ -252,6 +252,7 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   way to pass additional parameters that are specific to a cluster driver.
   Refer to the subsection on labels for a list of the supported
   key/value pairs and their usage.
+  The value can be overridden at cluster creation.
 
 --tls-disabled
   Transport Layer Security (TLS) is normally enabled to secure the

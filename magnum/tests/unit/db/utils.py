@@ -97,6 +97,7 @@ def get_test_cluster(**kw):
         'created_at': kw.get('created_at'),
         'updated_at': kw.get('updated_at'),
         'docker_volume_size': kw.get('docker_volume_size'),
+        'labels': kw.get('labels'),
     }
 
     # Only add Keystone trusts related attributes on demand since they may
