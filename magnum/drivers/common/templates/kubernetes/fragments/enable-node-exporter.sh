@@ -7,7 +7,11 @@ if [ "$(echo $PROMETHEUS_MONITORING | tr '[:upper:]' '[:lower:]')" = "false" ]; 
 fi
 
 # Write node-exporter manifest as a regular pod
-cat > /etc/kubernetes/manifests/node-exporter.yaml << EOF
+node_exporter_file=/etc/kubernetes/manifests/node-exporter.yaml
+[ -f ${node_exporter_file} ] || {
+    echo "Writing File: $node_exporter_file"
+    mkdir -p $(dirname ${node_exporter_file})
+    cat << EOF > ${node_exporter_file}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -25,3 +29,4 @@ spec:
     - containerPort: 9100
       hostPort: 9100
 EOF
+}
