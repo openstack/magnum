@@ -18,9 +18,7 @@ data:
         errors
         log stdout
         health
-        kubernetes ${DNS_CLUSTER_DOMAIN} {
-          cidrs ${PORTAL_NETWORK_CIDR}
-        }
+        kubernetes ${DNS_CLUSTER_DOMAIN} ${PORTAL_NETWORK_CIDR}
         proxy . /etc/resolv.conf
         cache 30
     }
@@ -49,7 +47,7 @@ spec:
     spec:
       containers:
       - name: coredns
-        image: coredns/coredns:007
+        image: coredns/coredns:011
         imagePullPolicy: Always
         args: [ "-conf", "/etc/coredns/Corefile" ]
         volumeMounts:
