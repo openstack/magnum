@@ -7,7 +7,6 @@
 # FIXED_RANGE=10.0.0.0/24
 ## Log all output to files
 # LOGFILE=$HOME/devstack.log
-# SCREEN_LOGDIR=$HOME/logs
 ## Neutron settings
 # Q_USE_SECGROUP=True
 # ENABLE_TENANT_VLANS=True
