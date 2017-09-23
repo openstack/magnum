@@ -16,6 +16,7 @@ from wsme import types as wtypes
 
 from magnum.api.controllers import base
 from magnum.api.controllers.v1 import collection
+from magnum.api.controllers.v1 import types
 from magnum.api import expose
 from magnum.api import servicegroup as svcgrp_api
 from magnum.common import policy
@@ -40,7 +41,7 @@ class MagnumService(base.APIBase):
     report_count = wsme.wsattr(wtypes.IntegerType(minimum=0))
     """The number of times the heartbeat was reported """
 
-    # disabled = wsme.wsattr(wtypes.BoolType(default=False))
+    disabled = wsme.wsattr(types.boolean, default=False)
     """If the service is 'disabled' administratively """
 
     disabled_reason = wtypes.StringType(min_length=0, max_length=255)
