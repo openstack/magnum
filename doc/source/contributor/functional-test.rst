@@ -32,27 +32,27 @@ If you're using devstack, you can copy and modify the devstack configuration::
     sed -i "s/127.0.0.1/$HOST/" functional_creds.conf
 
     # update admin password
-    source /opt/stack/devstack/openrc admin admin
+    . /opt/stack/devstack/openrc admin admin
     iniset functional_creds.conf admin pass $OS_PASSWORD
 
     # update demo password
-    source /opt/stack/devstack/openrc demo demo
+    . /opt/stack/devstack/openrc demo demo
     iniset functional_creds.conf auth password $OS_PASSWORD
 
 Set the DNS name server to be used by your cluster nodes (e.g. 8.8.8.8)::
 
     # update DNS name server
-    source /opt/stack/devstack/openrc demo demo
+    . /opt/stack/devstack/openrc demo demo
     iniset functional_creds.conf magnum dns_nameserver <dns-svr-ip-address>
 
 Create the necessary keypair and flavor::
 
-    source /opt/stack/devstack/openrc admin admin
+    . /opt/stack/devstack/openrc admin admin
     openstack keypair create --public-key ~/.ssh/id_rsa.pub  default
     openstack flavor create --id 100 --ram 1024 --disk 10 --vcpus 1 m1.magnum
     openstack flavor create --id 200 --ram 512 --disk 10 --vcpus 1 s1.magnum
 
-    source /opt/stack/devstack/openrc demo demo
+    . /opt/stack/devstack/openrc demo demo
     openstack keypair create --public-key ~/.ssh/id_rsa.pub  default
 
 You may need to explicitly upgrade required packages if you've installed them

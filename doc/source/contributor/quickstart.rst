@@ -193,7 +193,7 @@ Prepare your session to be able to use the various openstack clients including
 magnum, neutron, and glance. Create a new shell, and source the devstack openrc
 script::
 
-    source /opt/stack/devstack/openrc admin admin
+    . /opt/stack/devstack/openrc admin admin
 
 Magnum has been tested with the Fedora Atomic micro-OS and CoreOS. Magnum will
 likely work with other micro-OS platforms, but each requires individual
