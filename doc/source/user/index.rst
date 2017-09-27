@@ -344,6 +344,8 @@ the table are linked to more details elsewhere in the user guide.
 | `etcd_volume_size`_                   | etcd storage       | 0             |
 |                                       | volume size        |               |
 +---------------------------------------+--------------------+---------------+
+| `container_infra_prefix`_             | see below          | ""            |
++---------------------------------------+--------------------+---------------+
 
 =======
 Cluster
@@ -1082,6 +1084,28 @@ _`admission_control_list`
 _`etcd_volume_size`
   This label sets the size of a volume holding the etcd storage data.
   The default value is 0, meaning the etcd data is not persisted (no volume).
+
+_`container_infra_prefix`
+  Prefix of all container images used in the cluster (kubernetes components,
+  coredns, kubernetes-dashboard, node-exporter). For example,
+  kubernetes-apiserver is pulled from
+  docker.io/openstackmagnum/kubernetes-apiserver, with this label it can be
+  changed to myregistry.example.com/mycloud/kubernetes-apiserver. Similarly,
+  all other components used in the cluster will be prefixed with this label,
+  which assumes an operator has cloned all expected images in
+  myregistry.example.com/mycloud.
+  Images that must be mirrored:
+  * docker.io/coredns/coredns:011
+  * docker.io/grafana/grafana:latest
+  * docker.io/openstackmagnum/kubernetes-apiserver
+  * docker.io/openstackmagnum/kubernetes-controller-manager
+  * docker.io/openstackmagnum/kubernetes-kubelet
+  * docker.io/openstackmagnum/kubernetes-proxy
+  * docker.io/openstackmagnum/kubernetes-scheduler
+  * docker.io/prom/node-exporter:latest
+  * docker.io/prom/prometheus:latest
+  * gcr.io/google_containers/kubernetes-dashboard-amd64:v1.5.1
+  * gcr.io/google_containers/pause:3.0
 
 External load balancer for services
 -----------------------------------

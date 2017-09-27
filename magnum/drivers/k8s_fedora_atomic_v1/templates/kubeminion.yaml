@@ -209,6 +209,12 @@ parameters:
     type: string
     description: insecure registry url
 
+  container_infra_prefix:
+    type: string
+    description: >
+      prefix of container images used in the cluster, kubernetes components,
+      kubernetes-dashboard, coredns etc
+
   dns_service_ip:
     type: string
     description: >
@@ -280,6 +286,7 @@ resources:
             $TRUST_ID: {get_param: trust_id}
             $AUTH_URL: {get_param: auth_url}
             $INSECURE_REGISTRY_URL: {get_param: insecure_registry_url}
+            $CONTAINER_INFRA_PREFIX: {get_param: container_infra_prefix}
             $DNS_SERVICE_IP: {get_param: dns_service_ip}
             $DNS_CLUSTER_DOMAIN: {get_param: dns_cluster_domain}
 

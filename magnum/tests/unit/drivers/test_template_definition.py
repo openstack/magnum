@@ -270,6 +270,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         etcd_volume_size = mock_cluster.labels.get(
             'etcd_volume_size')
         kube_tag = mock_cluster_template.labels.get('kube_tag')
+        container_infra_prefix = mock_cluster_template.labels.get(
+            'container_infra_prefix')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -293,7 +295,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'username': 'fake_user',
             'magnum_url': mock_osc.magnum_url.return_value,
             'region_name': mock_osc.cinder_region_name.return_value,
-            'kube_tag': kube_tag}}
+            'kube_tag': kube_tag,
+            'container_infra_prefix': container_infra_prefix}}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
                                                 mock_cluster,
@@ -350,6 +353,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         etcd_volume_size = mock_cluster.labels.get(
             'etcd_volume_size')
         kube_tag = mock_cluster_template.labels.get('kube_tag')
+        container_infra_prefix = mock_cluster_template.labels.get(
+            'container_infra_prefix')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -375,7 +380,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'region_name': mock_osc.cinder_region_name.return_value,
             'loadbalancing_protocol': 'HTTP',
             'kubernetes_port': 8080,
-            'kube_tag': kube_tag}}
+            'kube_tag': kube_tag,
+            'container_infra_prefix': container_infra_prefix}}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
                                                 mock_cluster,

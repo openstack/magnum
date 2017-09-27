@@ -4,8 +4,9 @@
 
 echo "configuring kubernetes (minion)"
 
-atomic install --storage ostree --system --system-package=no --name=kubelet docker.io/openstackmagnum/kubernetes-kubelet:${KUBE_TAG}
-atomic install --storage ostree --system --system-package=no --name=kube-proxy docker.io/openstackmagnum/kubernetes-proxy:${KUBE_TAG}
+_prefix=${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}
+atomic install --storage ostree --system --system-package=no --name=kubelet ${_prefix}kubernetes-kubelet:${KUBE_TAG}
+atomic install --storage ostree --system --system-package=no --name=kube-proxy ${_prefix}kubernetes-proxy:${KUBE_TAG}
 
 CERT_DIR=/etc/kubernetes/certs
 PROTOCOL=https
@@ -66,8 +67,8 @@ fi
 # For using default log-driver, other options should be ignored
 sed -i 's/\-\-log\-driver\=journald//g' /etc/sysconfig/docker
 
+KUBELET_ARGS="${KUBELET_ARGS} --pod-infra-container-image=${CONTAINER_INFRA_PREFIX:-gcr.io/google_containers/}pause:3.0"
 if [ -n "${INSECURE_REGISTRY_URL}" ]; then
-    KUBELET_ARGS="${KUBELET_ARGS} --pod-infra-container-image=${INSECURE_REGISTRY_URL}/google_containers/pause\:0.8.0"
     echo "INSECURE_REGISTRY='--insecure-registry ${INSECURE_REGISTRY_URL}'" >> /etc/sysconfig/docker
 fi
 

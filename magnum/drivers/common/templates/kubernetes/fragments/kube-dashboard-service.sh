@@ -10,11 +10,7 @@ if [ "$(echo $KUBE_DASHBOARD_ENABLED | tr '[:upper:]' '[:lower:]')" == "false" ]
     exit 0
 fi
 
-if [ -n "${INSECURE_REGISTRY_URL}" ]; then
-    KUBE_DASH_IMAGE="${INSECURE_REGISTRY_URL}/google_containers/kubernetes-dashboard-amd64:${KUBE_DASHBOARD_VERSION}"
-else
-    KUBE_DASH_IMAGE="gcr.io/google_containers/kubernetes-dashboard-amd64:${KUBE_DASHBOARD_VERSION}"
-fi
+KUBE_DASH_IMAGE="${CONTAINER_INFRA_PREFIX:-gcr.io/google_containers/}kubernetes-dashboard-amd64:${KUBE_DASHBOARD_VERSION}"
 
 KUBE_DASH_DEPLOY=/srv/kubernetes/manifests/kube-dash-deploy.yaml
 
