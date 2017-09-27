@@ -6,5 +6,7 @@
    "node_count":2,
    "create_timeout":60,
    "keypair":"my_keypair",
-   "master_flavor_id":null
+   "master_flavor_id":null,
+   "labels":{
+   }
 }

@@ -40,6 +40,7 @@ Request
   - create_timeout: create_timeout
   - keypair: keypair_id
   - master_flavor_id: master_flavor_id
+  - labels: labels
 
 .. note::
 
