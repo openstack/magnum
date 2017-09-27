@@ -281,7 +281,7 @@ resources:
     properties:
       fixed_subnet: {get_attr: [network, fixed_subnet]}
       external_network: {get_param: external_network}
-      protocol: HTTP
+      protocol: {get_param: loadbalancing_protocol}
       port: 2379
 
   ######################################################################
