@@ -19,17 +19,17 @@ Install OS-specific prerequisites::
 
     # Ubuntu Xenial:
     sudo apt update
-    sudo apt install -y python-dev libssl-dev libxml2-dev curl \
-                        libmysqlclient-dev libxslt-dev libpq-dev git \
-                        libffi-dev gettext build-essential python3-dev
+    sudo apt install python-dev libssl-dev libxml2-dev curl \
+                     libmysqlclient-dev libxslt-dev libpq-dev git \
+                     libffi-dev gettext build-essential python3-dev
 
     # Fedora/RHEL:
-    sudo yum install -y python-devel openssl-devel mysql-devel curl \
-                        libxml2-devel libxslt-devel postgresql-devel git \
-                        libffi-devel gettext gcc
+    sudo yum install python-devel openssl-devel mysql-devel curl \
+                     libxml2-devel libxslt-devel postgresql-devel git \
+                     libffi-devel gettext gcc
 
     # openSUSE/SLE 12:
-    sudo zypper --non-interactive install git libffi-devel curl \
+    sudo zypper install git libffi-devel curl \
                         libmysqlclient-devel libopenssl-devel libxml2-devel \
                         libxslt-devel postgresql-devel python-devel \
                         gettext-runtime
