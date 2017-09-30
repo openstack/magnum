@@ -1,0 +1,82 @@
+- hosts: primary
+  tasks:
+    - shell:
+        cmd: |
+          set -e
+          set -x
+          export PYTHONUNBUFFERED=true
+
+          if [ "{{ neutron }}" -eq 1 ] ; then
+              export DEVSTACK_GATE_NEUTRON=1
+          fi
+
+          export DEVSTACK_GATE_TEMPEST=1
+          if [ "{{ tempest }}" -eq 0 ] ; then
+              # Do not run any tempest tests
+              export DEVSTACK_GATE_TEMPEST_NOTESTS=1
+          fi
+
+          if [ "{{ branch_override }}" != "default" ] ; then
+              export OVERRIDE_ZUUL_BRANCH=$BRANCH_OVERRIDE
+          fi
+
+          export PROJECTS="openstack/magnum $PROJECTS"
+          export PROJECTS="openstack/python-magnumclient $PROJECTS"
+          export PROJECTS="openstack/diskimage-builder $PROJECTS"
+
+          if [ "{{ multinode }}" -eq 1 ] ; then
+              export DEVSTACK_GATE_TOPOLOGY="multinode"
+              export DEVSTACK_SUBNODE_CONFIG+=$'\n'"disable_service tempest"
+          fi
+
+          if [ "{{ ironic }}" -eq 1 ] ; then
+              export PROJECTS="openstack/ironic $PROJECTS"
+              export PROJECTS="openstack/ironic-lib $PROJECTS"
+              export PROJECTS="openstack/ironic-python-agent $PROJECTS"
+              export PROJECTS="openstack/python-ironicclient $PROJECTS"
+              export PROJECTS="openstack/pyghmi $PROJECTS"
+              export PROJECTS="openstack/virtualbmc $PROJECTS"
+              export MAGNUM_GATE_SPECIAL="-ironic"
+          fi
+
+          if [ "{{ horizon }}" -eq 0 ] ; then
+              export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service horizon"
+          else
+              export DEVSTACK_GATE_HORIZON=1
+          fi
+          if [ "{{ swift }}" -eq 0 ] ; then
+              export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service s-account"
+              export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service s-container"
+              export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service s-object"
+              export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service s-proxy"
+          fi
+          if [ "{{ ceilometer }}" -eq 0 ] ; then
+              export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service ceilometer-acentral"
+              export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service ceilometer-acompute"
+              export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service ceilometer-alarm-evaluator"
+              export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service ceilometer-alarm-notifier"
+              export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service ceilometer-api"
+              export DEVSTACK_LOCAL_CONFIG+=$'\n'"disable_service ceilometer-collector"
+          fi
+
+          # Keep localrc to be able to set some vars in post_test_hook
+          export KEEP_LOCALRC=1
+
+          function gate_hook {
+              cd /opt/stack/new/magnum/
+              ./magnum/tests/contrib/gate_hook.sh {{ coe }} $MAGNUM_GATE_SPECIAL
+          }
+          export -f gate_hook
+
+          function post_test_hook {
+              source $BASE/new/devstack/accrc/admin/admin
+              cd /opt/stack/new/magnum/
+              ./magnum/tests/contrib/post_test_hook.sh {{ coe }} $MAGNUM_GATE_SPECIAL
+          }
+          export -f post_test_hook
+
+          cp devstack-gate/devstack-vm-gate-wrap.sh ./safe-devstack-vm-gate-wrap.sh
+          ./safe-devstack-vm-gate-wrap.sh
+        executable: /bin/bash
+        chdir: '{{ ansible_user_dir }}/workspace'
+      environment: '{{ zuul | zuul_legacy_vars }}'
