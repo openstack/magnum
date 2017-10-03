@@ -62,5 +62,8 @@ ChangeLog
 # generated config file
 etc/magnum/magnum.conf.sample
 
+# generated policy file
+etc/magnum/policy.yaml.sample
+
 # Files created by releasenotes build
 releasenotes/build
