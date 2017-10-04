@@ -201,7 +201,9 @@ class TestRotateCaCertificate(api_base.FunctionalTest):
         self.conductor_api_class.return_value = self.conductor_api
         self.addCleanup(conductor_api_patcher.stop)
 
-    def test_rotate_ca_cert(self):
+    @mock.patch("magnum.common.policy.enforce")
+    def test_rotate_ca_cert(self, mock_policy):
+        mock_policy.return_value = True
         fake_cert = api_utils.cert_post_data()
         mock_cert = mock.MagicMock()
         mock_cert.as_dict.return_value = fake_cert
@@ -227,7 +229,9 @@ class TestRotateCaCertificateNonTls(api_base.FunctionalTest):
         self.conductor_api_class.return_value = self.conductor_api
         self.addCleanup(conductor_api_patcher.stop)
 
-    def test_rotate_ca_cert_non_tls(self):
+    @mock.patch("magnum.common.policy.enforce")
+    def test_rotate_ca_cert_non_tls(self, mock_policy):
+        mock_policy.return_value = True
         fake_cert = api_utils.cert_post_data()
         mock_cert = mock.MagicMock()
         mock_cert.as_dict.return_value = fake_cert

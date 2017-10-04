@@ -15,8 +15,6 @@
 
 policy_data = """
 {
-    "default": "rule:admin_or_owner",
-
     "certificate:create": "",
     "certificate:get": "",
 
