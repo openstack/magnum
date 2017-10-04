@@ -16,10 +16,12 @@ import itertools
 
 from magnum.common.policies import base
 from magnum.common.policies import bay
+from magnum.common.policies import baymodel
 
 
 def list_rules():
     return itertools.chain(
         base.list_rules(),
-        bay.list_rules()
+        bay.list_rules(),
+        baymodel.list_rules()
     )
