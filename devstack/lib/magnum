@@ -43,8 +43,8 @@ MAGNUM_AUTH_CACHE_DIR=${MAGNUM_AUTH_CACHE_DIR:-/var/cache/magnum}
 
 MAGNUM_CONF_DIR=/etc/magnum
 MAGNUM_CONF=$MAGNUM_CONF_DIR/magnum.conf
-MAGNUM_POLICY_JSON=$MAGNUM_CONF_DIR/policy.json
 MAGNUM_API_PASTE=$MAGNUM_CONF_DIR/api-paste.ini
+MAGNUM_POLICY=$MAGNUM_CONF_DIR/policy.yaml
 
 if is_ssl_enabled_service "magnum" || is_service_enabled tls-proxy; then
     MAGNUM_SERVICE_PROTOCOL="https"
@@ -92,7 +92,6 @@ function configure_magnum {
         sudo chown $STACK_USER $MAGNUM_CONF_DIR
     fi
 
-    install_default_policy magnum
     # Rebuild the config file from scratch
     create_magnum_conf
 
@@ -132,8 +131,7 @@ function create_magnum_conf {
     iniset $MAGNUM_CONF database connection `database_connection_url magnum`
     iniset $MAGNUM_CONF api host "$MAGNUM_SERVICE_HOST"
     iniset $MAGNUM_CONF api port "$MAGNUM_SERVICE_PORT"
-
-    iniset $MAGNUM_CONF oslo_policy policy_file $MAGNUM_POLICY_JSON
+    iniset $MAGNUM_CONF oslo_policy policy_file $MAGNUM_POLICY
 
     iniset $MAGNUM_CONF keystone_auth auth_type password
     iniset $MAGNUM_CONF keystone_auth username magnum

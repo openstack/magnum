@@ -1,4 +1,0 @@
-{
-    "magnum-service:get_all": "rule:admin_api",
-    "stats:get_all": "rule:admin_or_owner"
-}

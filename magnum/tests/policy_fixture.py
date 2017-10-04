@@ -12,29 +12,20 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import os
-
 import fixtures
-from oslo_config import cfg
 from oslo_policy import _parser
 from oslo_policy import opts as policy_opts
 
 from magnum.common import policy as magnum_policy
-from magnum.tests import fake_policy
+import magnum.conf
 
-CONF = cfg.CONF
+CONF = magnum.conf.CONF
 
 
 class PolicyFixture(fixtures.Fixture):
 
     def _setUp(self):
-        self.policy_dir = self.useFixture(fixtures.TempDir())
-        self.policy_file_name = os.path.join(self.policy_dir.path,
-                                             'policy.json')
-        with open(self.policy_file_name, 'w') as policy_file:
-            policy_file.write(fake_policy.policy_data)
         policy_opts.set_defaults(CONF)
-        CONF.set_override('policy_file', self.policy_file_name, 'oslo_policy')
         magnum_policy._ENFORCER = None
         self.addCleanup(magnum_policy.init().clear)
 
