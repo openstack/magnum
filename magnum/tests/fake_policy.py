@@ -17,14 +17,6 @@ policy_data = """
 {
     "default": "rule:admin_or_owner",
 
-    "clustertemplate:create": "",
-    "clustertemplate:delete": "",
-    "clustertemplate:detail": "",
-    "clustertemplate:get": "",
-    "clustertemplate:get_all": "",
-    "clustertemplate:update": "",
-    "clustertemplate:publish": "",
-
     "certificate:create": "",
     "certificate:get": "",
 
