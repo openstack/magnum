@@ -1,8 +1,4 @@
 {
-    "certificate:rotate_ca": "rule:admin_or_owner",
-    "certificate:create": "rule:admin_or_user or rule:cluster_user",
-    "certificate:get": "rule:admin_or_user or rule:cluster_user",
-
     "magnum-service:get_all": "rule:admin_api",
     "stats:get_all": "rule:admin_or_owner"
 }
