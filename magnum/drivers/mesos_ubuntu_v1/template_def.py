@@ -31,7 +31,7 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
         self.add_parameter('number_of_slaves',
                            cluster_attr='node_count')
         self.add_parameter('master_flavor',
-                           cluster_template_attr='master_flavor_id')
+                           cluster_attr='master_flavor_id')
         self.add_parameter('slave_flavor',
                            cluster_template_attr='flavor_id')
         self.add_parameter('cluster_name',

@@ -39,6 +39,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'network_driver': 'network_driver',
             'volume_driver': 'volume_driver',
             'docker_volume_size': 20,
+            'master_flavor_id': 'flavor_id',
             'docker_storage_driver': 'devicemapper',
             'cluster_distro': 'fedora-atomic',
             'coe': 'kubernetes',
@@ -94,6 +95,7 @@ class TestClusterConductorWithK8s(base.TestCase):
                        'grafana_admin_passwd': 'fake_pwd',
                        'kube_dashboard_enabled': 'True',
                        'docker_volume_type': 'lvmdriver-1'},
+            'master_flavor_id': 'master_flavor_id',
         }
         self.context.user_name = 'fake_user'
         self.context.tenant = 'fake_tenant'
@@ -369,6 +371,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'cluster_uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
             'discovery_url': 'https://discovery.etcd.io/test',
             'docker_volume_size': 20,
+            'master_flavor': 'master_flavor_id',
             'external_network': 'external_network_id',
             'flannel_backend': 'vxlan',
             'flannel_network_cidr': '10.101.0.0/16',
@@ -610,21 +613,6 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
             missing_attr='docker_storage_driver')
-
-    @patch('requests.get')
-    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
-    @patch('magnum.drivers.common.driver.Driver.get_driver')
-    def test_extract_template_definition_without_master_flavor(
-            self,
-            mock_driver,
-            mock_objects_cluster_template_get_by_uuid,
-            mock_get):
-        mock_driver.return_value = k8s_dr.Driver()
-        self._test_extract_template_definition(
-            mock_driver,
-            mock_objects_cluster_template_get_by_uuid,
-            mock_get,
-            missing_attr='master_flavor_id')
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
