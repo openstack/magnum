@@ -70,6 +70,9 @@
         username = magnum
         auth_url = http://controller:35357
         auth_type = password
+        admin_user = magnum
+        admin_password = MAGNUM_PASS
+        admin_tenant_name = service
 
         [trust]
         ...
