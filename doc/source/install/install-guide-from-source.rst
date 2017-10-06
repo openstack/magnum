@@ -329,11 +329,10 @@ Install and configure components
       # su -s /bin/sh -c "/var/lib/magnum/env/bin/pip install -r requirements.txt" magnum
       # su -s /bin/sh -c "/var/lib/magnum/env/bin/python setup.py install" magnum
 
-5. Copy policy.json and api-paste.ini:
+5. Copy api-paste.ini:
 
    .. code-block:: console
 
-      # su -s /bin/sh -c "cp etc/magnum/policy.json /etc/magnum" magnum
       # su -s /bin/sh -c "cp etc/magnum/api-paste.ini /etc/magnum" magnum
 
 6. Generate a sample configuration file:
@@ -341,10 +340,18 @@ Install and configure components
    .. code-block:: console
 
       # su -s /bin/sh -c "/var/lib/magnum/env/bin/tox -e genconfig" magnum
-      # su -s /bin/sh -c "cp etc/magnum/magnum.conf.sample \
-        /etc/magnum/magnum.conf" magnum
+      # su -s /bin/sh -c "cp etc/magnum/magnum.conf.sample /etc/magnum/magnum.conf" magnum
 
-7. Edit the ``/etc/magnum/magnum.conf``:
+7. Optionally, if you want to customize the policies for Magnum API accesses,
+   you can generate a sample policy file, put it into ``/etc/magnum`` folder
+   for further modifications:
+
+   .. code-block:: console
+
+      # su -s /bin/sh -c "/var/lib/magnum/env/bin/tox -e genpolicy" magnum
+      # su -s /bin/sh -c "cp etc/magnum/policy.yaml.sample /etc/magnum/policy.yaml" magnum
+
+8. Edit the ``/etc/magnum/magnum.conf``:
 
    * In the ``[DEFAULT]`` section,
      configure ``RabbitMQ`` message queue access:
@@ -468,6 +475,15 @@ Install and configure components
         ...
         driver = messaging
 
+   * If you decide to customize Magnum policies in ``step 7``, then in the
+     ``[oslo_policy]`` section, configure the ``policy_file``:
+
+     .. code-block:: ini
+
+        [oslo_policy]
+        ...
+        policy_file = /etc/magnum/policy.yaml
+
    .. note::
 
       Make sure that ``/etc/magnum/magnum.conf`` still have the correct
@@ -475,13 +491,13 @@ Install and configure components
 
       # chown magnum:magnum /etc/magnum/magnum.conf
 
-8. Populate Magnum database:
+9. Populate Magnum database:
 
    .. code-block:: console
 
       # su -s /bin/sh -c "/var/lib/magnum/env/bin/magnum-db-manage upgrade" magnum
 
-9. Set magnum for log rotation:
+10. Set magnum for log rotation:
 
    .. code-block:: console
 

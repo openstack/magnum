@@ -1,0 +1,21 @@
+---
+features:
+  - |
+    Magnum now support policy in code [1], which means if users didn't modify
+    any of policy rules, they can leave policy file (in `json` or `yaml`
+    format) empty or just remove it all together. Because from now, Magnum
+    keeps all default policies under `magnum/common/policies` module. Users can
+    still modify/generate the policy rules they want in the `policy.yaml` or
+    `policy.json` file which will override the default policy rules in code
+    only if those rules show in the policy file.
+
+    [1]. https://blueprints.launchpad.net/magnum/+spec/policy-in-code
+other:
+  - |
+    Default `policy.json` file is now removed as Magnum now generate the
+    default policies in code. Please be aware that when using that file in your
+    environment.
+upgrade:
+  - |
+    Magnum now supports policy in code, please refer to the relevant
+    features in the release notes for more information.

@@ -1,7 +1,9 @@
-Sample Configuration File
--------------------------
+Sample Configuration and Policy File
+------------------------------------
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
 
-    sample-config
+    sample-config.rst
+    sample-policy.rst
+    samples/index.rst

@@ -25,6 +25,8 @@ extensions = [
     'stevedore.sphinxext',
     'openstackdocstheme',
     'oslo_config.sphinxconfiggen',
+    'oslo_policy.sphinxext',
+    'oslo_policy.sphinxpolicygen',
 ]
 
 # openstackdocstheme options
@@ -34,6 +36,9 @@ bug_tag = ''
 
 config_generator_config_file = '../../etc/magnum/magnum-config-generator.conf'
 sample_config_basename = '_static/magnum'
+
+policy_generator_config_file = '../../etc/magnum/magnum-policy-generator.conf'
+sample_policy_basename = '_static/magnum'
 
 # autodoc generation is a bit aggressive and a nuisance when doing heavy
 # text edit cycles.
