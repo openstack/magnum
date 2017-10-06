@@ -13,10 +13,6 @@ best meets your needs and how to develop a driver for a new COE.
 Section 10-15 describe the low level OpenStack infrastructure that is
 created and managed by Magnum to support the COE's.
 
-========
-Contents
-========
-
 #. `Overview`_
 #. `Python Client`_
 #. `Horizon Interface`_
@@ -38,7 +34,6 @@ Contents
 #. `Container Monitoring`_
 #. `Kubernetes External Load Balancer`_
 
-===========
 Terminology
 ===========
 
@@ -61,7 +56,6 @@ Container Orchestration Engine (COE)
   number of container orchestration engines, each with their own pros and cons,
   including Docker Swarm, Kubernetes, and Mesos.
 
-========
 Overview
 ========
 
@@ -92,9 +86,8 @@ Following are few salient features of Magnum:
 
 More details: `Magnum Project Wiki <https://wiki.openstack.org/wiki/Magnum>`_
 
-===============
 ClusterTemplate
-===============
+---------------
 
 A ClusterTemplate (previously known as BayModel) is a collection of parameters
 to describe how a cluster can be constructed.  Some parameters are relevant to
@@ -347,9 +340,8 @@ the table are linked to more details elsewhere in the user guide.
 | `container_infra_prefix`_             | see below          | ""            |
 +---------------------------------------+--------------------+---------------+
 
-=======
 Cluster
-=======
+-------
 
 A cluster (previously known as bay) is an instance of the ClusterTemplate
 of a COE.  Magnum deploys a cluster by referring to the attributes
@@ -618,7 +610,6 @@ The 'cluster-delete' operation can be initiated when another operation is
 still in progress.
 
 
-=============
 Python Client
 =============
 
@@ -666,7 +657,6 @@ Refer to the `OpenStack Command-Line Interface Reference
 <http://docs.openstack.org/cli-reference/magnum.html>`_ for a full list of the
 commands supported by the `magnum` command-line client.
 
-=================
 Horizon Interface
 =================
 
@@ -711,7 +701,6 @@ Following is the screenshot of the dialog to create a new cluster.
 .. image:: ../images/cluster-create.png
 
 
-===============
 Cluster Drivers
 ===============
 
@@ -816,21 +805,19 @@ Installing a cluster driver
 *To be filled in*
 
 
-=======================
 Cluster Type Definition
 =======================
 
 .. include:: cluster-type-definition.rst
 
-====================
 Heat Stack Templates
 ====================
 
 .. include:: heat-templates.rst
 
-==============
 Choosing a COE
 ==============
+
 Magnum supports a variety of COE options, and allows more to be added over time
 as they gain popularity. As an operator, you may choose to support the full
 variety of options, or you may want to offer a subset of the available choices.
@@ -874,7 +861,6 @@ choice to select among the prevailing leading options. Once you decide, see
 the next sections for examples of how to create a cluster with your desired
 COE.
 
-==============
 Native Clients
 ==============
 
@@ -950,7 +936,6 @@ look for the attribute *coe_version* and *container_version*::
     +--------------------+------------------------------------------------------------+
 
 
-==========
 Kubernetes
 ==========
 Kubernetes uses a range of terminology that we refer to in this guide. We
@@ -1134,7 +1119,6 @@ Refer to the `Kubernetes External Load Balancer`_ section
 for more details.
 
 
-=====
 Swarm
 =====
 
@@ -1251,7 +1235,6 @@ _`swarm_strategy`
   - binpack
   - random
 
-=====
 Mesos
 =====
 
@@ -1522,7 +1505,6 @@ For example, you can 'post' a JSON app description to
         http://${API_ADDRESS}:8080/v2/apps -d@app.json
 
 
-========================
 Transport Layer Security
 ========================
 
@@ -1931,7 +1913,6 @@ For the nodes, the certificates for communicating with the masters are
 stored locally and the nodes are assumed to be secured.
 
 
-==========
 Networking
 ==========
 
@@ -2036,12 +2017,10 @@ _`flannel_backend`
   the Flannel backend.
 
 
-=================
 High Availability
 =================
 *To be filled in*
 
-=======
 Scaling
 =======
 
@@ -2199,7 +2178,6 @@ exploring-magnum-and-senlin-integration-for-autoscaling-containers>`_.
 This remains an active area of discussion and research.
 
 
-=======
 Storage
 =======
 
@@ -2464,7 +2442,6 @@ you can run the command 'cinder list' to verify that your cinder
 volume status is 'in-use'.
 
 
-================
 Image Management
 ================
 
@@ -2615,7 +2592,6 @@ The Fedora site hosts the current image `ubuntu-mesos-latest.qcow2
 | Marathon    | 0.11.1    |
 +-------------+-----------+
 
-============
 Notification
 ============
 
@@ -2769,7 +2745,6 @@ created. This example can be applied for any ``create``, ``update`` or
     }
 
 
-====================
 Container Monitoring
 ====================
 
@@ -2834,7 +2809,6 @@ the service is running, the Grafana dashboards can be accessed through port
 For both Prometheus and Grafana, there is an assigned *systemd* service
 called *kube-enable-monitoring*.
 
-=================================
 Kubernetes External Load Balancer
 =================================
 
