@@ -41,7 +41,8 @@ class ClusterTemplate(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.15: Added 'floating_ip_enabled' field
     # Version 1.16: Renamed the class from "BayModel' to 'ClusterTemplate'
     # Version 1.17: 'coe' field type change to ClusterTypeField
-    VERSION = '1.17'
+    # Version 1.18: DockerStorageDriver is a StringField (was an Enum)
+    VERSION = '1.18'
 
     dbapi = dbapi.get_instance()
 
@@ -63,8 +64,7 @@ class ClusterTemplate(base.MagnumPersistentObject, base.MagnumObject,
         'volume_driver': fields.StringField(nullable=True),
         'apiserver_port': fields.IntegerField(nullable=True),
         'docker_volume_size': fields.IntegerField(nullable=True),
-        'docker_storage_driver': m_fields.DockerStorageDriverField(
-            nullable=True),
+        'docker_storage_driver': fields.StringField(nullable=True),
         'cluster_distro': fields.StringField(nullable=True),
         'coe': m_fields.ClusterTypeField(nullable=True),
         'http_proxy': fields.StringField(nullable=True),

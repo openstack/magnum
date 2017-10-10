@@ -49,8 +49,6 @@ parameters:
     type: string
     description: docker storage driver name
     default: "devicemapper"
-    constraints:
-      - allowed_values: ["devicemapper", "overlay"]
 
   flannel_network_cidr:
     type: string

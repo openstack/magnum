@@ -151,8 +151,6 @@ parameters:
     type: string
     description: docker storage driver name
     default: "devicemapper"
-    constraints:
-      - allowed_values: ["devicemapper", "overlay"]
 
   wait_condition_timeout:
     type: number

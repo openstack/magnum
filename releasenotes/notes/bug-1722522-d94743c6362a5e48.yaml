@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    Allow any value to be passed on the docker_storage_driver field by turning it
+    into a StringField (was EnumField), and remove the constraints limiting the
+    values to 'devicemapper' and 'overlay'.
+upgrade:
+  - |
+    Requires a db upgrade to change the docker_storage_driver
+    field to be a string instead of an enum.

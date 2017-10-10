@@ -127,7 +127,7 @@ class BayModel(base.APIBase):
     insecure_registry = wtypes.StringType(min_length=1, max_length=255)
     """Insecure registry URL when creating a Baymodel"""
 
-    docker_storage_driver = wtypes.Enum(str, *fields.DockerStorageDriver.ALL)
+    docker_storage_driver = wtypes.StringType(min_length=1, max_length=255)
     """Docker storage driver"""
 
     master_lb_enabled = wsme.wsattr(types.boolean, default=False)

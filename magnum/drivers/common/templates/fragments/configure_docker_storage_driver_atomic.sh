@@ -1,5 +1,5 @@
 # This file contains docker storage drivers configuration for fedora
-# atomic hosts. Currently, devicemapper and overlay are supported.
+# atomic hosts, as supported by Magnum.
 
 # * Remove any existing docker-storage configuration. In case of an
 #   existing configuration, docker-storage-setup will fail.
@@ -17,8 +17,8 @@ clear_docker_storage () {
     fi
 }
 
-# Configure docker storage with xfs as backing filesystem.
-configure_overlay () {
+# Configure generic docker storage driver.
+configure_storage_driver_generic() {
     clear_docker_storage
 
     if [ -n "$DOCKER_VOLUME_SIZE" ] && [ "$DOCKER_VOLUME_SIZE" -gt 0 ]; then
@@ -27,9 +27,7 @@ configure_overlay () {
         mount -a
     fi
 
-    echo "STORAGE_DRIVER=overlay" > /etc/sysconfig/docker-storage-setup
-
-    docker-storage-setup
+    sed -i "/^DOCKER_STORAGE_OPTIONS=/ s/=.*/=-s $1/" /etc/sysconfig/docker-storage
 
     local lvname=$(lvdisplay | grep "LV\ Path" | awk '{print $3}')
     local pvname=$(pvdisplay | grep "PV\ Name" | awk '{print $3}')

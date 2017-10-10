@@ -72,18 +72,6 @@ class ClusterType(fields.Enum):
         super(ClusterType, self).__init__(valid_values=ClusterType.ALL)
 
 
-class DockerStorageDriver(fields.Enum):
-    ALL = (
-        DEVICEMAPPER, OVERLAY,
-    ) = (
-        'devicemapper', 'overlay',
-    )
-
-    def __init__(self):
-        super(DockerStorageDriver, self).__init__(
-            valid_values=DockerStorageDriver.ALL)
-
-
 class QuotaResourceName(fields.Enum):
     ALL = (
         CLUSTER,
@@ -154,10 +142,6 @@ class ContainerStatusField(fields.BaseEnumField):
 
 class ClusterTypeField(fields.BaseEnumField):
     AUTO_TYPE = ClusterType()
-
-
-class DockerStorageDriverField(fields.BaseEnumField):
-    AUTO_TYPE = DockerStorageDriver()
 
 
 class ServerTypeField(fields.BaseEnumField):

@@ -30,8 +30,6 @@ parameters:
   docker_storage_driver:
     type: string
     description: docker storage driver name
-    constraints:
-      - allowed_values: ["devicemapper", "overlay"]
 
   external_network:
     type: string

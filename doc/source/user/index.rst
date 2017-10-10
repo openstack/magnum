@@ -236,8 +236,7 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
 
 --docker-storage-driver \<docker-storage-driver\>
   The name of a driver to manage the storage for the images and the
-  container's writable layer.  The supported drivers are 'devicemapper'
-  and 'overlay'.  The default is 'devicemapper'.
+  container's writable layer. The default is 'devicemapper'.
 
 --labels \<KEY1=VALUE1,KEY2=VALUE2;KEY3=VALUE3...\>
   Arbitrary labels in the form of key=value pairs.  The accepted keys
@@ -1025,8 +1024,7 @@ Volume driver (volume-driver)
 
 Storage driver (docker-storage-driver)
   Specified in the ClusterTemplate to select the Docker storage driver.  The
-  supported storage drivers are 'devicemapper' and 'overlay', with
-  'devicemapper' being the default. Refer to the `Storage`_ section for more
+  default is 'devicemapper'. Refer to the `Storage`_ section for more
   details.
 
 Image (image)
@@ -1203,8 +1201,7 @@ Volume driver (volume-driver)
 
 Storage driver (docker-storage-driver)
   Specified in the ClusterTemplate to select the Docker storage driver.  The
-  supported storage driver are 'devicemapper' and 'overlay', with
-  'devicemapper' being the default. Refer to the `Storage`_ section for more
+  default is 'devicemapper'. Refer to the `Storage`_ section for more
   details.
 
 Image (image)

@@ -225,8 +225,7 @@ dns_nameserver:
 docker_storage_driver:
   description: |
     The name of a driver to manage the storage for the images and the
-    container's writable layer. The supported drivers are ``devicemapper`` and
-    ``overlay``. The default is ``devicemapper``.
+    container's writable layer. The default is ``devicemapper``.
   in: body
   required: true
   type: string
