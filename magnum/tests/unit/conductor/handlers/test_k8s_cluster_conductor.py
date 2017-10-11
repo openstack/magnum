@@ -757,7 +757,7 @@ class TestClusterConductorWithK8s(base.TestCase):
                           mock_generate_id):
 
         mock_generate_id.return_value = 'xx-xx-xx-xx'
-        expected_stack_name = 'expected_stack_name-xx-xx-xx-xx'
+        expected_stack_name = 'expected-stack-name-xx-xx-xx-xx'
         expected_template_contents = 'template_contents'
         dummy_cluster_name = 'expected_stack_name'
         expected_timeout = 15
@@ -798,7 +798,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_generate_id):
 
         mock_generate_id.return_value = 'xx-xx-xx-xx'
-        expected_stack_name = 'expected_stack_name-xx-xx-xx-xx'
+        expected_stack_name = 'expected-stack-name-xx-xx-xx-xx'
         expected_template_contents = 'template_contents'
         dummy_cluster_name = 'expected_stack_name'
         expected_timeout = CONF.cluster_heat.create_timeout
@@ -838,7 +838,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_generate_id):
 
         mock_generate_id.return_value = 'xx-xx-xx-xx'
-        expected_stack_name = 'expected_stack_name-xx-xx-xx-xx'
+        expected_stack_name = 'expected-stack-name-xx-xx-xx-xx'
         expected_template_contents = 'template_contents'
         dummy_cluster_name = 'expected_stack_name'
         cluster_timeout = 0
