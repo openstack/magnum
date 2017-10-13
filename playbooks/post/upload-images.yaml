@@ -1,0 +1,21 @@
+- hosts: primary
+  tasks:
+
+    - name: Ensure artifacts directory exists
+      file:
+        path: '{{ zuul.executor.work_root }}/artifacts'
+        state: directory
+      delegate_to: localhost
+
+    - name: Copy files from {{ ansible_user_dir }}/workspace/ on node
+      synchronize:
+        src: '{{ ansible_user_dir }}/workspace/'
+        dest: '{{ zuul.executor.work_root }}/artifacts/images'
+        mode: pull
+        copy_links: true
+        verify_host: true
+        rsync_opts:
+          - --include=/*.qcow2
+          - --include=*/
+          - --exclude=*
+          - --prune-empty-dirs

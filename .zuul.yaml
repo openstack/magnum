@@ -1,0 +1,241 @@
+- job:
+    name: magnum-functional-base
+    parent: legacy-dsvm-base
+    timeout: 7800
+    nodeset: legacy-ubuntu-xenial
+    pre-run: playbooks/pre/prepare-workspace
+    run: playbooks/magnum-functional-base
+    post-run: playbooks/post/upload-logs
+    required-projects:
+      - openstack-infra/devstack-gate
+      - openstack/diskimage-builder
+      - openstack/ironic
+      - openstack/ironic-lib
+      - openstack/ironic-python-agent
+      - openstack/magnum
+      - openstack/pyghmi
+      - openstack/python-ironicclient
+      - openstack/python-magnumclient
+      - openstack/virtualbmc
+    irrelevant-files:
+      - ^.*\.rst$
+      - ^doc/.*$
+      - ^specs/.*$
+      - ^install-guide/.*$
+      - ^releasenotes/.*$
+    vars:
+      ironic: 0
+      ceilometer: 0
+      swift: 0
+      horizon: 0
+      multinode: 0
+      neutron: 1
+      tempest: 0
+      branch_override: "default"
+
+- job:
+    name: magnum-functional-multinode-base
+    parent: legacy-dsvm-base-multinode
+    timeout: 7800
+    nodeset: legacy-ubuntu-xenial-2-node
+    pre-run: playbooks/pre/prepare-workspace
+    run: playbooks/magnum-functional-base
+    post-run: playbooks/post/upload-logs
+    required-projects:
+      - openstack-infra/devstack-gate
+      - openstack/diskimage-builder
+      - openstack/ironic
+      - openstack/ironic-lib
+      - openstack/ironic-python-agent
+      - openstack/magnum
+      - openstack/pyghmi
+      - openstack/python-ironicclient
+      - openstack/python-magnumclient
+      - openstack/virtualbmc
+    irrelevant-files:
+      - ^.*\.rst$
+      - ^doc/.*$
+      - ^specs/.*$
+      - ^install-guide/.*$
+      - ^releasenotes/.*$
+    vars:
+      ironic: 0
+      ceilometer: 0
+      swift: 0
+      horizon: 0
+      multinode: 1
+      neutron: 1
+      tempest: 0
+      branch_override: "default"
+
+- job:
+    name: magnum-functional-api
+    parent: magnum-functional-base
+    vars:
+      coe: "api"
+
+- job:
+    name: magnum-functional-k8s
+    parent: magnum-functional-base
+    voting: false
+    vars:
+      coe: "k8s"
+    irrelevant-files:
+      - ^magnum/drivers/swarm.*$
+      - ^magnum/drivers/mesos.*$
+
+- job:
+    name: magnum-functional-swarm-mode
+    parent: magnum-functional-base
+    voting: false
+    branches: ^(?!stable/(newton|ocata)).*$
+    vars:
+      coe: "swarm-mode"
+    irrelevant-files:
+      - ^magnum/drivers/swarm_fedora_atomic_v1/.*$
+      - ^magnum/drivers/k8s.*$
+      - ^magnum/drivers/mesos.*$
+
+- job:
+    name: magnum-functional-dcos
+    parent: magnum-functional-base
+    voting: false
+    branches: ^(?!stable/(newton|ocata)).*$
+    vars:
+      coe: "dcos"
+    irrelevant-files:
+      - ^magnum/drivers/k8s.*$
+      - ^magnum/drivers/mesos.*$
+      - ^magnum/drivers/swarm.*$
+
+- job:
+    name: magnum-functional-mesos
+    parent: magnum-functional-base
+    voting: false
+    vars:
+      coe: "mesos"
+    irrelevant-files:
+      - ^magnum/drivers/k8s.*$
+      - ^magnum/drivers/swarm.*$
+
+- job:
+    name: magnum-functional-swarm
+    parent: magnum-functional-base
+    voting: false
+    vars:
+      coe: "swarm"
+    irrelevant-files:
+      - ^magnum/drivers/swarm_fedora_atomic_v2/.*$
+      - ^magnum/drivers/k8s.*$
+      - ^magnum/drivers/mesos.*$
+
+- job:
+    name: magnum-functional-k8s-ironic
+    parent: magnum-functional-base
+    voting: false
+    vars:
+      coe: "k8s"
+      ironic: 1
+    irrelevant-files:
+      - ^magnum/drivers/swarm.*$
+      - ^magnum/drivers/mesos.*$
+
+- job:
+    name: magnum-functional-swarm-ironic
+    parent: magnum-functional-base
+    voting: false
+    vars:
+      coe: "swarm"
+      ironic: 1
+    irrelevant-files:
+      - ^magnum/drivers/k8s.*$
+      - ^magnum/drivers/mesos.*$
+
+- job:
+    name: magnum-functional-k8s-multinode
+    parent: magnum-functional-multinode-base
+    voting: false
+    vars:
+      coe: "k8s"
+    irrelevant-files:
+      - ^magnum/drivers/swarm.*$
+      - ^magnum/drivers/mesos.*$
+
+- job:
+    name: magnum-functional-swarm-mode-multinode
+    parent: magnum-functional-multinode-base
+    voting: false
+    branches: ^(?!stable/(newton|ocata)).*$
+    vars:
+      coe: "swarm-mode"
+    irrelevant-files:
+      - ^magnum/drivers/k8s.*$
+      - ^magnum/drivers/mesos.*$
+      - ^magnum/drivers/swarm_fedora_atomic_v1/.*$
+
+- job:
+    name: magnum-non-functional-tox-migration
+    nodeset: legacy-ubuntu-xenial
+    run: playbooks/magnum-tox-migration
+    post-run: playbooks/post/upload-logs-tox
+    timeout: 2400
+    required-projects:
+      - openstack/requirements
+
+- job:
+    name: magnum-buildimages-base
+    parent: legacy-publish-openstack-artifacts
+    timeout: 3600
+    nodeset: legacy-ubuntu-xenial
+    pre-run: playbooks/pre/prepare-workspace-images
+    run: playbooks/magnum-buildimages-base
+    post-run: playbooks/post/upload-images
+    required-projects:
+      - openstack/dib-utils
+      - openstack/diskimage-builder
+      - openstack/magnum
+
+- job:
+    name: magnum-dib-buildimage-fedora-atomic-25
+    parent: magnum-buildimages-base
+    vars:
+      image_name: "fedora-atomic-25"
+
+- job:
+    name: magnum-dib-buildimage-ubuntu-mesos
+    parent: magnum-buildimages-base
+    vars:
+      image_name: "ubuntu-mesos"
+
+- job:
+    name: magnum-dib-buildimage-centos-dcos
+    parent: magnum-buildimages-base
+    vars:
+      image_name: "centos-dcos"
+
+- project:
+    name: openstack/magnum
+    check:
+      jobs:
+        - magnum-functional-api
+        - magnum-functional-k8s
+        - magnum-functional-swarm-mode
+    gate:
+      jobs:
+        - magnum-functional-api
+    experimental:
+      jobs:
+        - magnum-functional-dcos
+        - magnum-functional-mesos
+        - magnum-functional-swarm
+        - magnum-functional-k8s-ironic
+        - magnum-functional-swarm-ironic
+        - magnum-functional-k8s-multinode
+        - magnum-functional-swarm-mode-multinode
+        - magnum-non-functional-tox-migration
+    periodic:
+      jobs:
+        - magnum-dib-buildimage-fedora-atomic-25
+        - magnum-dib-buildimage-ubuntu-mesos
+        - magnum-dib-buildimage-centos-dcos
+
