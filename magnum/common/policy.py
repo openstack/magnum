@@ -23,6 +23,7 @@ import pecan
 
 from magnum.common import clients
 from magnum.common import exception
+from magnum.common import policies
 
 
 _ENFORCER = None
@@ -60,6 +61,8 @@ def init(policy_file=None, rules=None,
                                     default_rule=default_rule,
                                     use_conf=use_conf,
                                     overwrite=overwrite)
+        _ENFORCER.register_defaults(policies.list_rules())
+
     return _ENFORCER
 
 
