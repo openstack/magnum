@@ -1,13 +1,6 @@
 {
     "default": "rule:admin_or_owner",
 
-    "cluster:create": "rule:deny_cluster_user",
-    "cluster:delete": "rule:deny_cluster_user",
-    "cluster:detail": "rule:deny_cluster_user",
-    "cluster:get": "rule:deny_cluster_user",
-    "cluster:get_all": "rule:deny_cluster_user",
-    "cluster:update": "rule:deny_cluster_user",
-
     "clustertemplate:create": "rule:deny_cluster_user",
     "clustertemplate:delete": "rule:deny_cluster_user",
     "clustertemplate:detail": "rule:deny_cluster_user",
