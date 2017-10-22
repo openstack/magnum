@@ -1,12 +1,4 @@
 {
-    "default": "rule:admin_or_owner",
-
-    "quotas:get": "rule:default",
-    "quotas:get_all": "rule:admin_api",
-    "quotas:create": "rule:admin_api",
-    "quotas:update": "rule:admin_api",
-    "quotas:delete": "rule:admin_api",
-
     "certificate:rotate_ca": "rule:admin_or_owner",
     "certificate:create": "rule:admin_or_user or rule:cluster_user",
     "certificate:get": "rule:admin_or_user or rule:cluster_user",
