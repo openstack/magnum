@@ -17,13 +17,6 @@ policy_data = """
 {
     "default": "rule:admin_or_owner",
 
-    "baymodel:create": "",
-    "baymodel:delete": "",
-    "baymodel:detail": "",
-    "baymodel:get": "",
-    "baymodel:get_all": "",
-    "baymodel:update": "",
-
     "cluster:create": "",
     "cluster:delete": "",
     "cluster:detail": "",
