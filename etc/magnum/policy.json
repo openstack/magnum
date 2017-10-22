@@ -1,13 +1,6 @@
 {
     "default": "rule:admin_or_owner",
 
-    "bay:create": "rule:deny_cluster_user",
-    "bay:delete": "rule:deny_cluster_user",
-    "bay:detail": "rule:deny_cluster_user",
-    "bay:get": "rule:deny_cluster_user",
-    "bay:get_all": "rule:deny_cluster_user",
-    "bay:update": "rule:deny_cluster_user",
-
     "baymodel:create": "rule:deny_cluster_user",
     "baymodel:delete": "rule:deny_cluster_user",
     "baymodel:detail": "rule:deny_cluster_user",

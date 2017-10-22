@@ -15,9 +15,11 @@
 import itertools
 
 from magnum.common.policies import base
+from magnum.common.policies import bay
 
 
 def list_rules():
     return itertools.chain(
-        base.list_rules()
+        base.list_rules(),
+        bay.list_rules()
     )
