@@ -293,7 +293,10 @@ class TestPatch(api_base.FunctionalTest):
                           [{'path': '/public', 'value': True,
                             'op': 'replace'}])
 
-    def test_update_cluster_template_with_cluster_allow_update(self):
+    @mock.patch.object(magnum_policy, 'enforce')
+    def test_update_cluster_template_with_cluster_allow_update(self,
+                                                               mock_policy):
+        mock_policy.return_value = True
         cluster_template = obj_utils.create_test_cluster_template(self.context)
         obj_utils.create_test_cluster(
             self.context, cluster_template_id=cluster_template.uuid)

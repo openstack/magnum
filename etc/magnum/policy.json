@@ -1,14 +1,6 @@
 {
     "default": "rule:admin_or_owner",
 
-    "clustertemplate:create": "rule:deny_cluster_user",
-    "clustertemplate:delete": "rule:deny_cluster_user",
-    "clustertemplate:detail": "rule:deny_cluster_user",
-    "clustertemplate:get": "rule:deny_cluster_user",
-    "clustertemplate:get_all": "rule:deny_cluster_user",
-    "clustertemplate:update": "rule:deny_cluster_user",
-    "clustertemplate:publish": "rule:admin_api",
-
     "quotas:get": "rule:default",
     "quotas:get_all": "rule:admin_api",
     "quotas:create": "rule:admin_api",
