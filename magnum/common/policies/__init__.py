@@ -17,6 +17,7 @@ import itertools
 from magnum.common.policies import base
 from magnum.common.policies import bay
 from magnum.common.policies import baymodel
+from magnum.common.policies import certificate
 from magnum.common.policies import cluster
 from magnum.common.policies import cluster_template
 from magnum.common.policies import quota
@@ -27,6 +28,7 @@ def list_rules():
         base.list_rules(),
         bay.list_rules(),
         baymodel.list_rules(),
+        certificate.list_rules(),
         cluster.list_rules(),
         cluster_template.list_rules(),
         quota.list_rules()

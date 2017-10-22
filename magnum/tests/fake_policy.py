@@ -15,9 +15,6 @@
 
 policy_data = """
 {
-    "certificate:create": "",
-    "certificate:get": "",
-
     "magnum-service:get_all": "",
     "stats:get_all": ""
 }
