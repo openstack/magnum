@@ -34,6 +34,7 @@ write_files:
       fi
       cat > $DROP_IN_FILE <<EOF
       [Service]
+      EnvironmentFile=/etc/environment
       Environment=ETCD_NAME=$KUBE_NODE_IP
       Environment=ETCD_DATA_DIR=/var/lib/etcd/default.etcd
       Environment=ETCD_LISTEN_CLIENT_URLS=$protocol://$KUBE_NODE_IP:2379,http://127.0.0.1:2379

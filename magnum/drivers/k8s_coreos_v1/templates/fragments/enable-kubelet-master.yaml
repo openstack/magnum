@@ -37,6 +37,7 @@ write_files:
       CONF_FILE=/etc/systemd/system/kubelet.service
       cat > $CONF_FILE <<EOF
       [Service]
+      EnvironmentFile=/etc/environment
       Environment=KUBELET_IMAGE_TAG=${KUBE_VERSION}
       Environment=KUBELET_IMAGE_REPO=${HYPERKUBE_IMAGE_REPO}
       Environment="RKT_RUN_ARGS=--uuid-file-save=${uuid_file} \

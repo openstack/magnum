@@ -44,6 +44,13 @@ write_files:
       ExecStartPre=/usr/bin/ln -sf /etc/flannel/options.env /run/flannel/options.env
       EOF
 
+      DROP_IN_FILE=/etc/systemd/system/flanneld.service.d/50-Environment.conf
+      mkdir -p $(dirname $DROP_IN_FILE)
+      cat > $DROP_IN_FILE <<EOF
+      [Service]
+      EnvironmentFile=/etc/environment
+      EOF
+
       DOCKER_FLANNEL_CONF=/etc/systemd/system/docker.service.d/40-flannel.conf
       mkdir -p $(dirname $DOCKER_FLANNEL_CONF)
       cat > $DOCKER_FLANNEL_CONF <<EOF
