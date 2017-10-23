@@ -14,6 +14,7 @@ project.
   Developer Contribution Guide <contributing>
   Setting Up Your Development Environment <quickstart>
   Running Tempest Tests <functional-test>
+  Developer Troubleshooting Guide <troubleshooting>
 
 There are some other important documents also that helps new contributors to
 contribute effectively towards code standards to the project.
