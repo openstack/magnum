@@ -148,7 +148,7 @@ constraints="-c $REQUIREMENTS_DIR/upper-constraints.txt"
 sudo -H pip install $constraints -U -r requirements.txt -r test-requirements.txt
 
 export MAGNUM_DIR="$BASE/new/magnum"
-sudo chown -R jenkins:stack $MAGNUM_DIR
+sudo chown -R $USER:stack $MAGNUM_DIR
 
 # Run functional tests
 # Currently we support functional-api, functional-k8s, will support swarm,
@@ -170,7 +170,7 @@ if [[ "api" == "$coe" ]]; then
     source $BASE/new/devstack/functions
     echo "TEMPEST_SERVICES+=,magnum" >> $localrc_path
     pushd $BASE/new/tempest
-    sudo chown -R jenkins:stack $BASE/new/tempest
+    sudo chown -R $USER:stack $BASE/new/tempest
 
     # Set demo credentials
     source $BASE/new/devstack/accrc/demo/demo
@@ -193,7 +193,7 @@ if [[ "api" == "$coe" ]]; then
     export MAGNUM_TESTS=${MAGNUM_TESTS:-'magnum.tests.functional.api.v1'}
 
     echo "Running tempest magnum test suites"
-    sudo -H -u jenkins tox -eall-plugin -- $MAGNUM_TESTS --concurrency=$MAGNUM_TEMPEST_CONCURRENCY
+    sudo -H -u $USER tox -eall-plugin -- $MAGNUM_TESTS --concurrency=$MAGNUM_TEMPEST_CONCURRENCY
 else
     # Get admin credentials
     pushd ../devstack
@@ -203,7 +203,7 @@ else
     create_test_data $coe $special
 
     target="${coe}${special}"
-    sudo -E -H -u jenkins tox -e functional-"$target" -- --concurrency=1
+    sudo -E -H -u $USER tox -e functional-"$target" -- --concurrency=1
 fi
 EXIT_CODE=$?
 
