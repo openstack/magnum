@@ -81,6 +81,11 @@
     vars:
       coe: "k8s"
     irrelevant-files:
+      - ^.*\.rst$
+      - ^doc/.*$
+      - ^specs/.*$
+      - ^install-guide/.*$
+      - ^releasenotes/.*$
       - ^magnum/drivers/swarm.*$
       - ^magnum/drivers/mesos.*$
 
@@ -92,6 +97,11 @@
     vars:
       coe: "swarm-mode"
     irrelevant-files:
+      - ^.*\.rst$
+      - ^doc/.*$
+      - ^specs/.*$
+      - ^install-guide/.*$
+      - ^releasenotes/.*$
       - ^magnum/drivers/swarm_fedora_atomic_v1/.*$
       - ^magnum/drivers/k8s.*$
       - ^magnum/drivers/mesos.*$
@@ -104,6 +114,11 @@
     vars:
       coe: "dcos"
     irrelevant-files:
+      - ^.*\.rst$
+      - ^doc/.*$
+      - ^specs/.*$
+      - ^install-guide/.*$
+      - ^releasenotes/.*$
       - ^magnum/drivers/k8s.*$
       - ^magnum/drivers/mesos.*$
       - ^magnum/drivers/swarm.*$
@@ -115,6 +130,11 @@
     vars:
       coe: "mesos"
     irrelevant-files:
+      - ^.*\.rst$
+      - ^doc/.*$
+      - ^specs/.*$
+      - ^install-guide/.*$
+      - ^releasenotes/.*$
       - ^magnum/drivers/k8s.*$
       - ^magnum/drivers/swarm.*$
 
@@ -125,6 +145,11 @@
     vars:
       coe: "swarm"
     irrelevant-files:
+      - ^.*\.rst$
+      - ^doc/.*$
+      - ^specs/.*$
+      - ^install-guide/.*$
+      - ^releasenotes/.*$
       - ^magnum/drivers/swarm_fedora_atomic_v2/.*$
       - ^magnum/drivers/k8s.*$
       - ^magnum/drivers/mesos.*$
@@ -137,6 +162,11 @@
       coe: "k8s"
       ironic: 1
     irrelevant-files:
+      - ^.*\.rst$
+      - ^doc/.*$
+      - ^specs/.*$
+      - ^install-guide/.*$
+      - ^releasenotes/.*$
       - ^magnum/drivers/swarm.*$
       - ^magnum/drivers/mesos.*$
 
@@ -148,6 +178,11 @@
       coe: "swarm"
       ironic: 1
     irrelevant-files:
+      - ^.*\.rst$
+      - ^doc/.*$
+      - ^specs/.*$
+      - ^install-guide/.*$
+      - ^releasenotes/.*$
       - ^magnum/drivers/k8s.*$
       - ^magnum/drivers/mesos.*$
 
@@ -158,6 +193,11 @@
     vars:
       coe: "k8s"
     irrelevant-files:
+      - ^.*\.rst$
+      - ^doc/.*$
+      - ^specs/.*$
+      - ^install-guide/.*$
+      - ^releasenotes/.*$
       - ^magnum/drivers/swarm.*$
       - ^magnum/drivers/mesos.*$
 
@@ -169,6 +209,11 @@
     vars:
       coe: "swarm-mode"
     irrelevant-files:
+      - ^.*\.rst$
+      - ^doc/.*$
+      - ^specs/.*$
+      - ^install-guide/.*$
+      - ^releasenotes/.*$
       - ^magnum/drivers/k8s.*$
       - ^magnum/drivers/mesos.*$
       - ^magnum/drivers/swarm_fedora_atomic_v1/.*$
