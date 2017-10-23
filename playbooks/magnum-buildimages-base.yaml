@@ -1,0 +1,102 @@
+- hosts: primary
+  tasks:
+
+    - shell:
+        cmd: |
+          set -u
+          set -e
+          set -x
+          cd ~
+
+          if [[ "{{ image_name }}" =~ ^(ubuntu-mesos|centos-dcos)$ ]]; then
+              EXTRA_PROJECTS="openstack/tripleo-image-elements openstack/heat-templates"
+          else
+              EXTRA_PROJECTS=""
+          fi
+
+          /usr/zuul-env/bin/zuul-cloner --cache-dir /opt/git \
+            git://git.openstack.org \
+            openstack/diskimage-builder \
+            openstack/dib-utils \
+            openstack/magnum $EXTRA_PROJECTS
+
+          virtualenv env
+
+          ./env/bin/pip install $(pwd)/openstack/dib-utils
+          ./env/bin/pip install $(pwd)/openstack/diskimage-builder
+
+          # TODO(pabelanger): Remove once we migrated to bindep
+          ./openstack/diskimage-builder/tests/install_test_deps.sh
+
+          # activate the virtualenv so that any tools run by dib run
+          # using the python inside it
+          set +u
+          source ./env/bin/activate
+          set -u
+
+          DIB_ELEMENTS=./openstack/diskimage-builder/diskimage_builder/elements
+
+          if [ "{{ image_name }}" == "ubuntu-mesos" ]; then
+              TRIPLEO_ELEMENTS=./openstack/tripleo-image-elements/elements
+              HEAT_ELEMENTS=./openstack/heat-templates/hot/software-config/elements
+              MESOS_ELEMENTS=./openstack/magnum/magnum/drivers/mesos_ubuntu_v1/image
+              export ELEMENTS_PATH=$TRIPLEO_ELEMENTS:$HEAT_ELEMENTS:$MESOS_ELEMENTS
+
+              $MESOS_ELEMENTS/install_imagebuild_deps.sh
+
+              export DIB_RELEASE=trusty
+
+              export DIB_IMAGE_SIZE=2.2
+
+              disk-image-create ubuntu vm docker mesos \
+                os-collect-config os-refresh-config os-apply-config \
+                heat-config heat-config-script -o $WORKSPACE/{{ image_name }}.qcow2
+
+              $MESOS_ELEMENTS/validate_image.sh $WORKSPACE/{{ image_name }}.qcow2
+          elif [ "{{ image_name }}" == "centos-dcos" ]; then
+              DCOS_ELEMENTS=./openstack/magnum/contrib/drivers/dcos_centos_v1/image
+              TRIPLEO_ELEMENTS=./openstack/tripleo-image-elements/elements
+              HEAT_ELEMENTS=./openstack/heat-templates/hot/software-config/elements
+              # Order matters, we need the docker elements from DCOS_ELEMENTS to be used first
+              export ELEMENTS_PATH=$DCOS_ELEMENTS:$DIB_ELEMENTS:$TRIPLEO_ELEMENTS:$HEAT_ELEMENTS
+
+              $DCOS_ELEMENTS/install_imagebuild_deps.sh
+
+              export DIB_IMAGE_SIZE=3.0
+
+              export FS_TYPE=xfs
+
+              curl -O https://downloads.dcos.io/dcos/stable/commit/e64024af95b62c632c90b9063ed06296fcf38ea5/dcos_generate_config.sh
+              export DCOS_GENERATE_CONFIG_SRC=`pwd`/dcos_generate_config.sh
+
+              disk-image-create \
+                centos7 vm docker dcos selinux-permissive \
+                os-collect-config os-refresh-config os-apply-config \
+                heat-config heat-config-script \
+                -o $WORKSPACE/{{ image_name }}.qcow2
+
+              #TODO: Add size validation
+          else
+              MAGNUM_ELEMENTS=./openstack/magnum/magnum/drivers/common/image
+              export ELEMENTS_PATH=$DIB_ELEMENTS:$MAGNUM_ELEMENTS
+              $MAGNUM_ELEMENTS/fedora-atomic/install_imagebuild_deps.sh
+
+              export DIB_RELEASE="25"
+
+              export DIB_IMAGE_SIZE=2.5
+
+              export FEDORA_ATOMIC_TREE_URL="https://kojipkgs.fedoraproject.org/atomic/25/"
+              export FEDORA_ATOMIC_TREE_REF="8b15e9b988b4b02f4cb8b39bdd63d182ab7004a8926ecdac6314ee5c7ffa646b"
+
+              disk-image-create -x -o $WORKSPACE/{{ image_name }}-dib fedora-atomic
+
+              # validate image
+              $MAGNUM_ELEMENTS/fedora-atomic/validate_atomic_image.sh $WORKSPACE/{{ image_name }}-dib.qcow2
+          fi
+
+          set +u
+          deactivate
+          set -u
+        executable: /bin/bash
+        chdir: '{{ ansible_user_dir }}/workspace'
+      environment: '{{ zuul | zuul_legacy_vars }}'

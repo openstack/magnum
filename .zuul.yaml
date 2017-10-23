@@ -1,0 +1,20 @@
+- project:
+    name: openstack/magnum
+    check:
+      jobs:
+        - magnum-functional-api
+        - magnum-functional-k8s
+        - magnum-functional-swarm-mode
+    gate:
+      jobs:
+        - magnum-functional-api
+    experimental:
+      jobs:
+        - magnum-functional-dcos
+        - magnum-functional-mesos
+        - magnum-functional-swarm
+        - magnum-functional-k8s-ironic
+        - magnum-functional-swarm-ironic
+        - magnum-functional-k8s-multinode
+        - magnum-functional-swarm-mode-multinode
+        - magnum-non-functional-tox-migration
