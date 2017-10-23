@@ -23,6 +23,11 @@ Install OS-specific prerequisites::
                      libmysqlclient-dev libxslt-dev libpq-dev git \
                      libffi-dev gettext build-essential python3-dev
 
+    # CentOS 7:
+    sudo yum install -y python-devel openssl-devel mariadb-devel curl \
+                        libxml2-devel libxslt-devel postgresql-devel git \
+                        libffi-devel gettext gcc
+
     # Fedora/RHEL:
     sudo yum install python-devel openssl-devel mysql-devel curl \
                      libxml2-devel libxslt-devel postgresql-devel git \
