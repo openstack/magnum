@@ -225,12 +225,6 @@ resources:
             $CONTAINER_INFRA_PREFIX: {get_param: container_infra_prefix}
             $ENABLE_CINDER: "False"
 
-  write_kubeconfig:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/write-kubeconfig.yaml}
-
   make_cert:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -319,7 +313,6 @@ resources:
       parts:
         - config: {get_resource: disable_selinux}
         - config: {get_resource: write_heat_params}
-        - config: {get_resource: write_kubeconfig}
         - config: {get_resource: make_cert}
         - config: {get_resource: configure_docker_storage}
         - config: {get_resource: configure_docker_registry}

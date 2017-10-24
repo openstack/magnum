@@ -108,9 +108,3 @@ usermod -a -G kube_etcd kube
 chmod 550 "${cert_dir}"
 chown -R kube:kube_etcd "${cert_dir}"
 chmod 440 $CLIENT_KEY
-
-sed -i '
-    s|CA_CERT|'"$CA_CERT"'|
-    s|CLIENT_CERT|'"$CLIENT_CERT"'|
-    s|CLIENT_KEY|'"$CLIENT_KEY"'|
-' /etc/kubernetes/kubeconfig.yaml
