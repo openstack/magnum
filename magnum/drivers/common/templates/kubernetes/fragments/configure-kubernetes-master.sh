@@ -5,8 +5,6 @@
 echo "configuring kubernetes (master)"
 
 _prefix=${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}
-atomic install --storage ostree --system --system-package=no --name=kubelet ${_prefix}kubernetes-kubelet:${KUBE_TAG}
-atomic install --storage ostree --system --system-package=no --name=kube-proxy ${_prefix}kubernetes-proxy:${KUBE_TAG}
 atomic install --storage ostree --system --system-package=no --name=kube-apiserver ${_prefix}kubernetes-apiserver:${KUBE_TAG}
 atomic install --storage ostree --system --system-package=no --name=kube-controller-manager ${_prefix}kubernetes-controller-manager:${KUBE_TAG}
 atomic install --storage ostree --system --system-package=no --name=kube-scheduler ${_prefix}kubernetes-scheduler:${KUBE_TAG}
@@ -66,23 +64,9 @@ sed -i '
 
 sed -i '/^KUBE_SCHEDULER_ARGS=/ s/=.*/="--leader-elect=true"/' /etc/kubernetes/scheduler
 
-HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')
-KUBELET_ARGS="--register-node=true --register-schedulable=false --pod-manifest-path=/etc/kubernetes/manifests --hostname-override=${HOSTNAME_OVERRIDE}"
-KUBELET_ARGS="${KUBELET_ARGS} --cluster_dns=${DNS_SERVICE_IP} --cluster_domain=${DNS_CLUSTER_DOMAIN}"
-
 # For using default log-driver, other options should be ignored
 sed -i 's/\-\-log\-driver\=journald//g' /etc/sysconfig/docker
 
-KUBELET_ARGS="${KUBELET_ARGS} --pod-infra-container-image=${CONTAINER_INFRA_PREFIX:-gcr.io/google_containers/}pause:3.0"
 if [ -n "${INSECURE_REGISTRY_URL}" ]; then
     echo "INSECURE_REGISTRY='--insecure-registry ${INSECURE_REGISTRY_URL}'" >> /etc/sysconfig/docker
 fi
-
-# specified cgroup driver
-KUBELET_ARGS="${KUBELET_ARGS} --cgroup-driver=systemd"
-
-sed -i '
-    /^KUBELET_ADDRESS=/ s/=.*/="--address=0.0.0.0"/
-    /^KUBELET_HOSTNAME=/ s/=.*/=""/
-    /^KUBELET_ARGS=/ s|=.*|="'"$KUBELET_ARGS"'"|
-' /etc/kubernetes/kubelet
