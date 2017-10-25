@@ -64,6 +64,10 @@ parameters:
       enables any host to take control of a volume irrespective of whether
       other hosts are using the volume
 
+  verify_ca:
+    type: boolean
+    description: whether or not to validate certificate authority
+
   mesos_slave_isolation:
     type: string
     description: >
@@ -154,9 +158,10 @@ resources:
         str_replace:
           template: |
             #!/bin/bash -v
-            wc_notify --data-binary '{"status": "SUCCESS"}'
+            wc_notify $VERIFY_CA --data-binary '{"status": "SUCCESS"}'
           params:
             wc_notify: {get_param: mesos_slave_wc_curl_cli}
+            "$VERIFY_CA": {get_param: verify_ca}
 
   add_proxy:
     type: OS::Heat::SoftwareConfig

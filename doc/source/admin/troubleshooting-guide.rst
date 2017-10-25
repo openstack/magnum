@@ -177,7 +177,11 @@ specified). If it fails, that means the credential you provided is invalid.
 
 TLS
 ---
-*To be filled in*
+The cluster nodes will validate the Certificate Authority by default
+when making requests to the OpenStack APIs (Keystone, Magnum, Heat).
+If you need to disable CA validation, the configuration parameter
+verify_ca can be set to False.  More information on `CA Validation
+<https://bugs.launchpad.net/magnum/+bug/1663757>`_.
 
 
 Barbican service

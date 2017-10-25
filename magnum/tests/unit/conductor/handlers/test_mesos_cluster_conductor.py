@@ -129,7 +129,8 @@ class TestClusterConductorWithMesos(base.TestCase):
             'mesos_slave_executor_env_variables': '{}',
             'mesos_slave_isolation': 'docker/runtime,filesystem/linux',
             'mesos_slave_work_dir': '/tmp/mesos/slave',
-            'mesos_slave_image_providers': 'docker'
+            'mesos_slave_image_providers': 'docker',
+            'verify_ca': True,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -182,7 +183,8 @@ class TestClusterConductorWithMesos(base.TestCase):
             'mesos_slave_isolation': 'docker/runtime,filesystem/linux',
             'mesos_slave_executor_env_variables': '{}',
             'mesos_slave_work_dir': '/tmp/mesos/slave',
-            'mesos_slave_image_providers': 'docker'
+            'mesos_slave_image_providers': 'docker',
+            'verify_ca': True,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -239,7 +241,8 @@ class TestClusterConductorWithMesos(base.TestCase):
             'mesos_slave_executor_env_variables': '{}',
             'mesos_slave_isolation': 'docker/runtime,filesystem/linux',
             'mesos_slave_work_dir': '/tmp/mesos/slave',
-            'mesos_slave_image_providers': 'docker'
+            'mesos_slave_image_providers': 'docker',
+            'verify_ca': True,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -297,7 +300,8 @@ class TestClusterConductorWithMesos(base.TestCase):
             'mesos_slave_executor_env_variables': '{}',
             'mesos_slave_isolation': 'docker/runtime,filesystem/linux',
             'mesos_slave_work_dir': '/tmp/mesos/slave',
-            'mesos_slave_image_providers': 'docker'
+            'mesos_slave_image_providers': 'docker',
+            'verify_ca': True,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

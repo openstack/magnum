@@ -57,6 +57,10 @@ parameters:
     type: boolean
     description: whether or not to enable TLS
 
+  verify_ca:
+    type: boolean
+    description: whether or not to validate certificate authority
+
   kubernetes_port:
     type: number
     description: >
@@ -263,6 +267,7 @@ resources:
             $REGISTRY_INSECURE: {get_param: registry_insecure}
             $REGISTRY_CHUNKSIZE: {get_param: registry_chunksize}
             $TLS_DISABLED: {get_param: tls_disabled}
+            $VERIFY_CA: {get_param: verify_ca}
             $CLUSTER_UUID: {get_param: cluster_uuid}
             $MAGNUM_URL: {get_param: magnum_url}
             $USERNAME: {get_param: username}

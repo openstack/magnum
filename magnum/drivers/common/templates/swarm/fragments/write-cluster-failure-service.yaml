@@ -11,5 +11,5 @@ write_files:
       [Service]
       Type=simple
       TimeoutStartSec=0
-      ExecStart=/usr/bin/$WAIT_CURL \
+      ExecStart=/usr/bin/$WAIT_CURL $VERIFY_CA \
         --data-binary '{"status": "FAILURE", "reason": "$SERVICE service failed to start.", "data": "Failure"}'

@@ -213,6 +213,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v3',
             'insecure_registry_url': '10.0.0.1:5000',
             'kube_version': 'fake-version',
+            'verify_ca': True,
         }
         if missing_attr is not None:
             expected.pop(mapping[missing_attr], None)
@@ -307,6 +308,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'volume_driver': 'volume_driver',
             'insecure_registry_url': '10.0.0.1:5000',
             'kube_version': 'fake-version',
+            'verify_ca': True,
         }
 
         self.assertEqual(expected, definition)
@@ -385,7 +387,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'trustee_password': 'fake_trustee_password',
             'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
             'trustee_username': 'fake_trustee',
-            'username': 'fake_user'
+            'username': 'fake_user',
+            'verify_ca': True,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -462,6 +465,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'insecure_registry_url': '10.0.0.1:5000',
             'kube_version': 'fake-version',
+            'verify_ca': True,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -533,6 +537,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'insecure_registry_url': '10.0.0.1:5000',
             'kube_version': 'fake-version',
+            'verify_ca': True,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -733,6 +738,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v3',
             'insecure_registry_url': '10.0.0.1:5000',
             'kube_version': 'fake-version',
+            'verify_ca': True,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

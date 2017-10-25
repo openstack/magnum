@@ -4,6 +4,12 @@
 
 set -x
 
+if [ "$VERIFY_CA" == "True" ]; then
+    VERIFY_CA=""
+else
+    VERIFY_CA="-k"
+fi
+
 if [ "${TLS_DISABLED}" = 'False'  ]; then
     tls="--tlsverify"
     tls=$tls" --tlscacert=/etc/docker/ca.crt"
@@ -22,7 +28,7 @@ do
 done
 
 if [[ -z \$token ]] ; then
-    sh -c "${WAIT_CURL} --data-binary '{\"status\": \"FAILURE\", \"reason\": \"Failed to retrieve swarm join token.\"}'"
+    sh -c "${WAIT_CURL} ${VERIFY_CA} --data-binary '{\"status\": \"FAILURE\", \"reason\": \"Failed to retrieve swarm join token.\"}'"
 fi
 
 i=0
@@ -33,9 +39,9 @@ do
     sleep 5
 done
 if [[ \$i -ge 5 ]] ; then
-    sh -c "${WAIT_CURL} --data-binary '{\"status\": \"FAILURE\", \"reason\": \"Node failed to join swarm.\"}'"
+    sh -c "${WAIT_CURL} ${VERIFY_CA} --data-binary '{\"status\": \"FAILURE\", \"reason\": \"Node failed to join swarm.\"}'"
 else
-    sh -c "${WAIT_CURL} --data-binary '{\"status\": \"SUCCESS\", \"reason\": \"Node joined swarm.\"}'"
+    sh -c "${WAIT_CURL} ${VERIFY_CA} --data-binary '{\"status\": \"SUCCESS\", \"reason\": \"Node joined swarm.\"}'"
 fi
 START_SWARM_BIN
 

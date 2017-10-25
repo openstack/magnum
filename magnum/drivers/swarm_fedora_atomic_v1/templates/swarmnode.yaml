@@ -93,6 +93,10 @@ parameters:
     type: boolean
     description: whether or not to disable TLS
 
+  verify_ca:
+    type: boolean
+    description: whether or not to validate certificate authority
+
   swarm_version:
     type: string
     description: version of swarm used for swarm cluster
@@ -220,6 +224,7 @@ resources:
             "$CLUSTER_UUID": {get_param: cluster_uuid}
             "$MAGNUM_URL": {get_param: magnum_url}
             "$TLS_DISABLED": {get_param: tls_disabled}
+            "$VERIFY_CA": {get_param: verify_ca}
             "$NETWORK_DRIVER": {get_param: network_driver}
             "$ETCD_SERVER_IP": {get_param: etcd_server_ip}
             "$API_IP_ADDRESS": {get_param: api_ip_address}
@@ -295,6 +300,7 @@ resources:
           params:
             "$SERVICE": swarm-agent
             "$WAIT_CURL": {get_attr: [node_wait_handle, curl_cli]}
+            "$VERIFY_CA": {get_param: verify_ca}
 
   write_swarm_agent_service:
     type: "OS::Heat::SoftwareConfig"

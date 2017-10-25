@@ -26,6 +26,7 @@ from magnum.conf import conductor
 from magnum.conf import database
 from magnum.conf import docker
 from magnum.conf import docker_registry
+from magnum.conf import drivers
 from magnum.conf import glance
 from magnum.conf import heat
 from magnum.conf import keystone
@@ -54,6 +55,7 @@ conductor.register_opts(CONF)
 database.register_opts(CONF)
 docker.register_opts(CONF)
 docker_registry.register_opts(CONF)
+drivers.register_opts(CONF)
 glance.register_opts(CONF)
 heat.register_opts(CONF)
 keystone.register_opts(CONF)

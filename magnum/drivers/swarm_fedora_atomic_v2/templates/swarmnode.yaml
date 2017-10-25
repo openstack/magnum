@@ -127,6 +127,10 @@ parameters:
       other hosts are using the volume
     default: "false"
 
+  verify_ca:
+    type: boolean
+    description: whether or not to validate certificate authority
+
 resources:
 
   node_wait_handle:
@@ -172,6 +176,7 @@ resources:
             "$AUTH_URL": {get_param: auth_url}
             "$VOLUME_DRIVER": {get_param: volume_driver}
             "$REXRAY_PREEMPT": {get_param: rexray_preempt}
+            "$VERIFY_CA": {get_param: verify_ca}
 
   remove_docker_key:
     type: "OS::Heat::SoftwareConfig"

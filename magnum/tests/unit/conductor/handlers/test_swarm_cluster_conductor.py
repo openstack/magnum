@@ -153,7 +153,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'swarm_strategy': u'spread',
             'volume_driver': 'rexray',
             'rexray_preempt': 'False',
-            'docker_volume_type': 'lvmdriver-1'
+            'docker_volume_type': 'lvmdriver-1',
+            'verify_ca': True,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -229,7 +230,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'swarm_strategy': u'spread',
             'volume_driver': 'rexray',
             'rexray_preempt': 'False',
-            'docker_volume_type': 'lvmdriver-1'
+            'docker_volume_type': 'lvmdriver-1',
+            'verify_ca': True,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -298,6 +300,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'rexray_preempt': 'False',
             'docker_volume_type': 'lvmdriver-1',
             'docker_volume_size': 20,
+            'verify_ca': True,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -367,7 +370,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'swarm_strategy': u'spread',
             'volume_driver': 'rexray',
             'rexray_preempt': 'False',
-            'docker_volume_type': 'lvmdriver-1'
+            'docker_volume_type': 'lvmdriver-1',
+            'verify_ca': True,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -438,7 +442,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'swarm_strategy': u'spread',
             'volume_driver': 'rexray',
             'rexray_preempt': 'False',
-            'docker_volume_type': 'lvmdriver-1'
+            'docker_volume_type': 'lvmdriver-1',
+            'verify_ca': True,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

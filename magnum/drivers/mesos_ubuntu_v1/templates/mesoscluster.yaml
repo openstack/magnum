@@ -207,6 +207,10 @@ parameters:
       be empty when doing a create.
     default: []
 
+  verify_ca:
+    type: boolean
+    description: whether or not to validate certificate authority
+
 resources:
 
   ######################################################################
@@ -458,6 +462,7 @@ resources:
       mesos_slave_image_providers: {get_param: mesos_slave_image_providers}
       mesos_slave_executor_env_variables: {get_param: mesos_slave_executor_env_variables}
       mesos_slave_wc_curl_cli: {get_attr: [slave_wait_handle, curl_cli]}
+      verify_ca: {get_param: verify_ca}
 
 outputs:
 
