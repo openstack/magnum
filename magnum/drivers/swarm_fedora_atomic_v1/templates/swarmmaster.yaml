@@ -90,6 +90,10 @@ parameters:
     type: boolean
     description: whether or not to enable TLS
 
+  verify_ca:
+    type: boolean
+    description: whether or not to validate certificate authority
+
   network_driver:
     type: string
     description: network driver to use for instantiating container networks
@@ -243,6 +247,7 @@ resources:
             "$CLUSTER_UUID": {get_param: cluster_uuid}
             "$MAGNUM_URL": {get_param: magnum_url}
             "$TLS_DISABLED": {get_param: tls_disabled}
+            "$VERIFY_CA": {get_param: verify_ca}
             "$NETWORK_DRIVER": {get_param: network_driver}
             "$FLANNEL_NETWORK_CIDR": {get_param: flannel_network_cidr}
             "$FLANNEL_NETWORK_SUBNETLEN": {get_param: flannel_network_subnetlen}
@@ -319,6 +324,7 @@ resources:
           params:
             "$SERVICE": swarm-manager
             "$WAIT_CURL": {get_attr: [master_wait_handle, curl_cli]}
+            "$VERIFY_CA": {get_param: verify_ca}
 
   write_docker_socket:
     type: "OS::Heat::SoftwareConfig"
@@ -341,6 +347,7 @@ resources:
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_attr: [no_proxy_extended, value]}
             "$TLS_DISABLED": {get_param: tls_disabled}
+            "$VERIFY_CA": {get_param: verify_ca}
             "$SWARM_VERSION": {get_param: swarm_version}
             "$SWARM_STRATEGY": {get_param: swarm_strategy}
 

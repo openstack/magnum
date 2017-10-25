@@ -99,6 +99,10 @@ parameters:
     type: boolean
     description: whether or not to disable kubernetes dashboard
 
+  verify_ca:
+    type: boolean
+    description: whether or not to validate certificate authority
+
   kubernetes_port:
     type: number
     description: >
@@ -289,6 +293,7 @@ resources:
             "$CLUSTER_SUBNET": {get_param: fixed_subnet}
             "$TLS_DISABLED": {get_param: tls_disabled}
             "$KUBE_DASHBOARD_ENABLED": {get_param: kube_dashboard_enabled}
+            "$VERIFY_CA": {get_param: verify_ca}
             "$CLUSTER_UUID": {get_param: cluster_uuid}
             "$MAGNUM_URL": {get_param: magnum_url}
             "$HTTP_PROXY": {get_param: http_proxy}

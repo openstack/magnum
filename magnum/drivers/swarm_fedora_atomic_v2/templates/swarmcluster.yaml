@@ -179,6 +179,9 @@ parameters:
       other hosts are using the volume
     default: "false"
 
+  verify_ca:
+    type: boolean
+    description: whether or not to validate certificate authority
 
 resources:
 
@@ -301,6 +304,7 @@ resources:
           auth_url: {get_param: auth_url}
           volume_driver: {get_param: volume_driver}
           rexray_preempt: {get_param: rexray_preempt}
+          verify_ca: {get_param: verify_ca}
 
   swarm_secondary_masters:
     type: "OS::Heat::ResourceGroup"
@@ -342,6 +346,7 @@ resources:
           auth_url: {get_param: auth_url}
           volume_driver: {get_param: volume_driver}
           rexray_preempt: {get_param: rexray_preempt}
+          verify_ca: {get_param: verify_ca}
 
   swarm_nodes:
     type: "OS::Heat::ResourceGroup"
@@ -383,6 +388,7 @@ resources:
           auth_url: {get_param: auth_url}
           volume_driver: {get_param: volume_driver}
           rexray_preempt: {get_param: rexray_preempt}
+          verify_ca: {get_param: verify_ca}
 
 outputs:
 

@@ -2,6 +2,12 @@
 
 CERT_DIR=/etc/docker
 
+if [ "$VERIFY_CA" == "True" ]; then
+    VERIFY_CA=""
+else
+    VERIFY_CA="-k"
+fi
+
 cat > /etc/systemd/system/swarm-manager.service << END_SERVICE_TOP
 [Unit]
 Description=Swarm Manager
@@ -46,7 +52,7 @@ cat >> /etc/systemd/system/swarm-manager.service << END_SERVICE_BOTTOM
                                   etcd://$ETCD_SERVER_IP:2379/v2/keys/swarm/
 ExecStop=/usr/bin/docker stop swarm-manager
 Restart=always
-ExecStartPost=/usr/bin/$WAIT_CURL \\
+ExecStartPost=/usr/bin/$WAIT_CURL $VERIFY_CA \\
     --data-binary '{"status": "SUCCESS", "reason": "Setup complete", "data": "OK", "id": "$UUID"}'
 
 [Install]

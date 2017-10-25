@@ -4,6 +4,12 @@
 
 myip="$SWARM_NODE_IP"
 
+if [ "$VERIFY_CA" == "True" ]; then
+    VERIFY_CA=""
+else
+    VERIFY_CA="-k"
+fi
+
 CONF_FILE=/etc/systemd/system/swarm-agent.service
 CERT_DIR=/etc/docker
 PROTOCOL=https
@@ -76,7 +82,7 @@ do
     sleep 5
 done
 
-${WAIT_CURL} \
+${WAIT_CURL} {$VERIFY_CA} \
     --data-binary '{"status": "SUCCESS", "reason": "Swarm agent ready", "data": "OK", "id": "${UUID}"}'
 EOF
 

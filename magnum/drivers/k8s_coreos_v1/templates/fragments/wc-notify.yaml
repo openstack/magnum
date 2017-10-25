@@ -20,5 +20,5 @@ write_files:
     permissions: "0755"
     content: |
       #!/bin/bash -v
-      command="$WAIT_CURL --insecure --data-binary '{\"status\": \"SUCCESS\"}'"
+      command="$WAIT_CURL $VERIFY_CA --data-binary '{\"status\": \"SUCCESS\"}'"
       eval $(echo "$command")
