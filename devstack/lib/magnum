@@ -130,7 +130,11 @@ function create_magnum_conf {
 
     iniset $MAGNUM_CONF database connection `database_connection_url magnum`
     iniset $MAGNUM_CONF api host "$MAGNUM_SERVICE_HOST"
-    iniset $MAGNUM_CONF api port "$MAGNUM_SERVICE_PORT"
+    if is_service_enabled tls-proxy; then
+        iniset $MAGNUM_CONF api port "$MAGNUM_SERVICE_PORT_INT"
+    else
+        iniset $MAGNUM_CONF api port "$MAGNUM_SERVICE_PORT"
+    fi
     iniset $MAGNUM_CONF oslo_policy policy_file $MAGNUM_POLICY
 
     iniset $MAGNUM_CONF keystone_auth auth_type password
@@ -320,8 +324,7 @@ function start_magnum_api {
 
     # Start proxies if enabled
     if is_service_enabled tls-proxy; then
-        start_tls_proxy '*' $MAGNUM_SERVICE_PORT $MAGNUM_SERVICE_HOST $MAGNUM_SERVICE_PORT_INT &
-        start_tls_proxy '*' $EC2_SERVICE_PORT $MAGNUM_SERVICE_HOST $EC2_SERVICE_PORT_INT &
+        start_tls_proxy magnum '*' $MAGNUM_SERVICE_PORT $MAGNUM_SERVICE_HOST $MAGNUM_SERVICE_PORT_INT &
     fi
 }
 
