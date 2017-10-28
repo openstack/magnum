@@ -3,9 +3,9 @@
     parent: legacy-dsvm-base
     timeout: 7800
     nodeset: legacy-ubuntu-xenial
-    pre-run: playbooks/pre/prepare-workspace
-    run: playbooks/magnum-functional-base
-    post-run: playbooks/post/upload-logs
+    pre-run: playbooks/pre/prepare-workspace.yaml
+    run: playbooks/magnum-functional-base.yaml
+    post-run: playbooks/post/upload-logs.yaml
     required-projects:
       - openstack-infra/devstack-gate
       - openstack/diskimage-builder
@@ -31,16 +31,16 @@
       multinode: 0
       neutron: 1
       tempest: 0
-      branch_override: "default"
+      branch_override: default
 
 - job:
     name: magnum-functional-multinode-base
     parent: legacy-dsvm-base-multinode
     timeout: 7800
     nodeset: legacy-ubuntu-xenial-2-node
-    pre-run: playbooks/pre/prepare-workspace
-    run: playbooks/magnum-functional-base
-    post-run: playbooks/post/upload-logs
+    pre-run: playbooks/pre/prepare-workspace.yaml
+    run: playbooks/magnum-functional-base.yaml
+    post-run: playbooks/post/upload-logs.yaml
     required-projects:
       - openstack-infra/devstack-gate
       - openstack/diskimage-builder
@@ -66,20 +66,20 @@
       multinode: 1
       neutron: 1
       tempest: 0
-      branch_override: "default"
+      branch_override: default
 
 - job:
     name: magnum-functional-api
     parent: magnum-functional-base
     vars:
-      coe: "api"
+      coe: api
 
 - job:
     name: magnum-functional-k8s
     parent: magnum-functional-base
     voting: false
     vars:
-      coe: "k8s"
+      coe: k8s
     irrelevant-files:
       - ^.*\.rst$
       - ^doc/.*$
@@ -95,7 +95,7 @@
     voting: false
     branches: ^(?!stable/(newton|ocata)).*$
     vars:
-      coe: "swarm-mode"
+      coe: swarm-mode
     irrelevant-files:
       - ^.*\.rst$
       - ^doc/.*$
@@ -112,7 +112,7 @@
     voting: false
     branches: ^(?!stable/(newton|ocata)).*$
     vars:
-      coe: "dcos"
+      coe: dcos
     irrelevant-files:
       - ^.*\.rst$
       - ^doc/.*$
@@ -128,7 +128,7 @@
     parent: magnum-functional-base
     voting: false
     vars:
-      coe: "mesos"
+      coe: mesos
     irrelevant-files:
       - ^.*\.rst$
       - ^doc/.*$
@@ -143,7 +143,7 @@
     parent: magnum-functional-base
     voting: false
     vars:
-      coe: "swarm"
+      coe: swarm
     irrelevant-files:
       - ^.*\.rst$
       - ^doc/.*$
@@ -159,7 +159,7 @@
     parent: magnum-functional-base
     voting: false
     vars:
-      coe: "k8s"
+      coe: k8s
       ironic: 1
     irrelevant-files:
       - ^.*\.rst$
@@ -175,7 +175,7 @@
     parent: magnum-functional-base
     voting: false
     vars:
-      coe: "swarm"
+      coe: swarm
       ironic: 1
     irrelevant-files:
       - ^.*\.rst$
@@ -191,7 +191,7 @@
     parent: magnum-functional-multinode-base
     voting: false
     vars:
-      coe: "k8s"
+      coe: k8s
     irrelevant-files:
       - ^.*\.rst$
       - ^doc/.*$
@@ -207,7 +207,7 @@
     voting: false
     branches: ^(?!stable/(newton|ocata)).*$
     vars:
-      coe: "swarm-mode"
+      coe: swarm-mode
     irrelevant-files:
       - ^.*\.rst$
       - ^doc/.*$
@@ -221,8 +221,8 @@
 - job:
     name: magnum-non-functional-tox-migration
     nodeset: legacy-ubuntu-xenial
-    run: playbooks/magnum-tox-migration
-    post-run: playbooks/post/upload-logs-tox
+    run: playbooks/magnum-tox-migration.yaml
+    post-run: playbooks/post/upload-logs-tox.yaml
     timeout: 2400
     required-projects:
       - openstack/requirements
@@ -232,9 +232,9 @@
     parent: legacy-publish-openstack-artifacts
     timeout: 3600
     nodeset: legacy-ubuntu-xenial
-    pre-run: playbooks/pre/prepare-workspace-images
-    run: playbooks/magnum-buildimages-base
-    post-run: playbooks/post/upload-images
+    pre-run: playbooks/pre/prepare-workspace-images.yaml
+    run: playbooks/magnum-buildimages-base.yaml
+    post-run: playbooks/post/upload-images.yaml
     required-projects:
       - openstack/dib-utils
       - openstack/diskimage-builder
@@ -244,19 +244,19 @@
     name: magnum-dib-buildimage-fedora-atomic-25
     parent: magnum-buildimages-base
     vars:
-      image_name: "fedora-atomic-25"
+      image_name: fedora-atomic-25
 
 - job:
     name: magnum-dib-buildimage-ubuntu-mesos
     parent: magnum-buildimages-base
     vars:
-      image_name: "ubuntu-mesos"
+      image_name: ubuntu-mesos
 
 - job:
     name: magnum-dib-buildimage-centos-dcos
     parent: magnum-buildimages-base
     vars:
-      image_name: "centos-dcos"
+      image_name: centos-dcos
 
 - project:
     name: openstack/magnum
