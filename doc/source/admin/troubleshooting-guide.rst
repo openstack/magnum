@@ -138,9 +138,10 @@ and the domain admin:
     export OS_IDENTITY_API_VERSION=3
     unset OS_AUTH_TYPE
     openstack domain create magnum
-    openstack user create trustee_domain_admin --password=secret \
-        --domain=magnum
-    openstack role add --user=trustee_domain_admin --user-domain magnum --domain=magnum admin
+    openstack user create trustee_domain_admin --password secret \
+        --domain magnum
+    openstack role add --user=trustee_domain_admin --user-domain magnum \
+        --domain magnum admin
 
     . /opt/stack/devstack/functions
     export MAGNUM_CONF=/etc/magnum/magnum.conf
