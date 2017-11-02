@@ -332,6 +332,9 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `grafana_admin_passwd`_               | (any string)       | "admin"       |
 +---------------------------------------+--------------------+---------------+
+| `kube_dashboard_enabled`_             | - true             | true          |
+|                                       | - false            |               |
++---------------------------------------+--------------------+---------------+
 | `docker_volume_type`_                 | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
 | `etcd_volume_size`_                   | etcd storage       | 0             |
@@ -1091,6 +1094,10 @@ _`container_infra_prefix`
   * docker.io/prom/prometheus:latest
   * gcr.io/google_containers/kubernetes-dashboard-amd64:v1.5.1
   * gcr.io/google_containers/pause:3.0
+
+_`kube_dashboard_enabled`
+  This label triggers the deployment of the kubernetes dashboard.
+  The default value is 1, meaning it will be enabled.
 
 External load balancer for services
 -----------------------------------
