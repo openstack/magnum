@@ -14,6 +14,9 @@ import abc
 import os
 import six
 
+from string import ascii_letters
+from string import digits
+
 from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_utils import importutils
@@ -109,8 +112,18 @@ class HeatDriver(driver.Driver):
                                                          env_files)
         tpl_files.update(env_map)
 
+        # Make sure we end up with a valid hostname
+        valid_chars = set(ascii_letters + digits + '-')
+
+        # valid hostnames are 63 chars long, leaving enough room
+        # to add the random id (for uniqueness)
+        stack_name = cluster.name[:30]
+        stack_name = stack_name.replace('_', '-')
+        stack_name = stack_name.replace('.', '-')
+        stack_name = ''.join(filter(valid_chars.__contains__, stack_name))
+
         # Make sure no duplicate stack name
-        stack_name = '%s-%s' % (cluster.name, short_id.generate_id())
+        stack_name = '%s-%s' % (stack_name, short_id.generate_id())
         if cluster_create_timeout:
             heat_timeout = cluster_create_timeout
         else:

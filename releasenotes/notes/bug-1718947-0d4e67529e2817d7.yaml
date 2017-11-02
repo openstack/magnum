@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    From now on, server names are prefixed with the cluster name.
+    The cluster name is truncated to 30 characters, ('_', '.') are mapped to '-'
+    and non alpha-numeric characters are removed to ensure FQDN compatibility.
