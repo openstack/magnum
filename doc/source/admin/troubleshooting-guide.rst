@@ -697,8 +697,8 @@ Simulating gate tests
   #. Provision this VM like so::
 
       apt-get update \
-      && apt-get upgrade -y \ # Kernel upgrade, as recommended by README, select to keep existing grub config
-      && apt-get install -y git tmux vim \
+      && apt-get upgrade \ # Kernel upgrade, as recommended by README, select to keep existing grub config
+      && apt-get install git tmux vim \
       && git clone https://git.openstack.org/openstack-infra/system-config \
       && system-config/install_puppet.sh && system-config/install_modules.sh \
       && puppet apply \
