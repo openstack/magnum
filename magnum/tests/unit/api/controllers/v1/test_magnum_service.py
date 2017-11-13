@@ -13,7 +13,7 @@
 import mock
 
 from magnum.api.controllers.v1 import magnum_services as mservice
-from magnum.api import servicegroup as servicegroup
+from magnum.api import servicegroup
 from magnum import objects
 from magnum.tests import base
 from magnum.tests.unit.api import base as api_base
