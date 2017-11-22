@@ -42,6 +42,10 @@ parameters:
     type: boolean
     description: whether or not to enable TLS
 
+  verify_ca:
+    type: boolean
+    description: whether or not to validate certificate authority
+
   kubernetes_port:
     type: number
     description: >
@@ -185,6 +189,7 @@ resources:
             "$WAIT_CURL": {get_attr: [minion_wait_handle, curl_cli]}
             "$KUBE_API_PORT": {get_param: kubernetes_port}
             "$TLS_DISABLED": {get_param: tls_disabled}
+            "$VERIFY_CA": {get_param: verify_ca}
             "$NETWORK_DRIVER": {get_param: network_driver}
             "$ETCD_SERVER_IP": {get_param: etcd_server_ip}
             "$KUBE_VERSION": {get_param: kube_version}

@@ -155,6 +155,10 @@ parameters:
     description: whether or not to disable kubernetes dashboard
     default: True
 
+  verify_ca:
+    type: boolean
+    description: whether or not to validate certificate authority
+
   loadbalancing_protocol:
     type: string
     description: >
@@ -431,6 +435,7 @@ resources:
           kubernetes_port: {get_param: kubernetes_port}
           tls_disabled: {get_param: tls_disabled}
           kube_dashboard_enabled: {get_param: kube_dashboard_enabled}
+          verify_ca: {get_param: verify_ca}
           secgroup_kube_master_id: {get_resource: secgroup_master}
           http_proxy: {get_param: http_proxy}
           https_proxy: {get_param: https_proxy}
@@ -489,6 +494,7 @@ resources:
           network_driver: {get_param: network_driver}
           kubernetes_port: {get_param: kubernetes_port}
           tls_disabled: {get_param: tls_disabled}
+          verify_ca: {get_param: verify_ca}
           secgroup_kube_minion_id: {get_resource: secgroup_minion_all_open}
           http_proxy: {get_param: http_proxy}
           https_proxy: {get_param: https_proxy}

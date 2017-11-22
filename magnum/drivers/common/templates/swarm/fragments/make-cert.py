@@ -81,13 +81,14 @@ def _build_subject_alt_names(config):
     return ','.join(subject_alt_names)
 
 
-def write_ca_cert(config):
+def write_ca_cert(config, verify_ca):
     cluster_cert_url = '%s/certificates/%s' % (config['MAGNUM_URL'],
                                                config['CLUSTER_UUID'])
     headers = {'X-Auth-Token': config['USER_TOKEN'],
                'OpenStack-API-Version': 'container-infra latest'}
     ca_cert_resp = requests.get(cluster_cert_url,
-                                headers=headers)
+                                headers=headers,
+                                verify=verify_ca)
 
     with open(CA_CERT_PATH, 'w') as fp:
         fp.write(ca_cert_resp.json()['pem'])
@@ -121,7 +122,7 @@ def create_server_csr(config):
         return {'cluster_uuid': config['CLUSTER_UUID'], 'csr': fp.read()}
 
 
-def write_server_cert(config, csr_req):
+def write_server_cert(config, csr_req, verify_ca):
     cert_url = '%s/certificates' % config['MAGNUM_URL']
     headers = {
         'Content-Type': 'application/json',
@@ -130,13 +131,14 @@ def write_server_cert(config, csr_req):
     }
     csr_resp = requests.post(cert_url,
                              data=json.dumps(csr_req),
-                             headers=headers)
+                             headers=headers,
+                             verify=verify_ca)
 
     with open(SERVER_CERT_PATH, 'w') as fp:
         fp.write(csr_resp.json()['pem'])
 
 
-def get_user_token(config):
+def get_user_token(config, verify_ca):
     creds_str = '''
 {
     "auth": {
@@ -161,7 +163,7 @@ def get_user_token(config):
     creds = creds_str % params
     headers = {'Content-Type': 'application/json'}
     url = config['AUTH_URL'] + '/auth/tokens'
-    r = requests.post(url, headers=headers, data=creds)
+    r = requests.post(url, headers=headers, data=creds, verify=verify_ca)
     config['USER_TOKEN'] = r.headers['X-Subject-Token']
     return config
 
@@ -169,12 +171,13 @@ def get_user_token(config):
 def main():
     config = load_config()
     if config['TLS_DISABLED'] == 'False':
+        verify_ca = True if config['VERIFY_CA'] == 'True' else False
         create_dirs()
-        config = get_user_token(config)
-        write_ca_cert(config)
+        config = get_user_token(config, verify_ca)
+        write_ca_cert(config, verify_ca)
         write_server_key()
         csr_req = create_server_csr(config)
-        write_server_cert(config, csr_req)
+        write_server_cert(config, csr_req, verify_ca)
 
 
 if __name__ == '__main__':

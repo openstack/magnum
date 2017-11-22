@@ -100,6 +100,10 @@ parameters:
     description: whether or not to enable TLS
     default: False
 
+  verify_ca:
+    type: boolean
+    description: whether or not to validate certificate authority
+
   network_driver:
     type: string
     description: network driver to use for instantiating container networks
@@ -374,6 +378,7 @@ resources:
           cluster_uuid: {get_param: cluster_uuid}
           magnum_url: {get_param: magnum_url}
           tls_disabled: {get_param: tls_disabled}
+          verify_ca: {get_param: verify_ca}
           secgroup_swarm_master_id: {get_resource: secgroup_swarm_manager}
           network_driver: {get_param: network_driver}
           flannel_network_cidr: {get_param: flannel_network_cidr}
@@ -422,6 +427,7 @@ resources:
           cluster_uuid: {get_param: cluster_uuid}
           magnum_url: {get_param: magnum_url}
           tls_disabled: {get_param: tls_disabled}
+          verify_ca: {get_param: verify_ca}
           secgroup_swarm_node_id: {get_resource: secgroup_swarm_node}
           flannel_network_cidr: {get_param: flannel_network_cidr}
           network_driver: {get_param: network_driver}

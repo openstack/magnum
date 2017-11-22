@@ -1,0 +1,12 @@
+---
+fixes:
+  - |
+    [`bug 1663757 <https://bugs.launchpad.net/magnum/+bug/1663757>`_]
+    A configuration parameter, verify_ca, was added to magnum.conf
+    with a default value of True and passed to the heat templates to indicate
+    whether the cluster nodes validate the Certificate Authority when making
+    requests to the OpenStack APIs (Keystone, Magnum, Heat).  This parameter
+    can be set to False to disable CA validation if you have self-signed
+    certificates for the OpenStack APIs or you have your own Certificate
+    Authority and you have not installed the Certificate Authority to all
+    nodes.

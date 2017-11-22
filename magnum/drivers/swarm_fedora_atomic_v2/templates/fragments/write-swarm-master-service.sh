@@ -4,6 +4,12 @@
 
 set -x
 
+if [ "$VERIFY_CA" == "True" ]; then
+    VERIFY_CA=""
+else
+    VERIFY_CA="-k"
+fi
+
 if [ "${IS_PRIMARY_MASTER}" = "True" ]; then
     cat > /usr/local/bin/magnum-start-swarm-manager << START_SWARM_BIN
 #!/bin/bash -xe
@@ -16,7 +22,7 @@ else
     status="FAILURE"
     msg="Failed to init swarm."
 fi
-sh -c "${WAIT_CURL} --data-binary '{\"status\": \"\$status\", \"reason\": \"\$msg\"}'"
+sh -c "${WAIT_CURL} ${VERIFY_CA} --data-binary '{\"status\": \"\$status\", \"reason\": \"\$msg\"}'"
 START_SWARM_BIN
 else
     if [ "${TLS_DISABLED}" = 'False'  ]; then
@@ -37,7 +43,7 @@ do
 done
 
 if [[ -z \$token ]] ; then
-    sh -c "${WAIT_CURL} --data-binary '{\"status\": \"FAILURE\", \"reason\": \"Failed to retrieve swarm join token.\"}'"
+    sh -c "${WAIT_CURL} ${VERIFY_CA} --data-binary '{\"status\": \"FAILURE\", \"reason\": \"Failed to retrieve swarm join token.\"}'"
 fi
 
 i=0
@@ -48,9 +54,9 @@ do
     sleep 5
 done
 if [[ \$i -ge 5 ]] ; then
-    sh -c "${WAIT_CURL} --data-binary '{\"status\": \"FAILURE\", \"reason\": \"Manager failed to join swarm.\"}'"
+    sh -c "${WAIT_CURL} ${VERIFY_CA} --data-binary '{\"status\": \"FAILURE\", \"reason\": \"Manager failed to join swarm.\"}'"
 else
-    sh -c "${WAIT_CURL} --data-binary '{\"status\": \"SUCCESS\", \"reason\": \"Manager joined swarm.\"}'"
+    sh -c "${WAIT_CURL} ${VERIFY_CA} --data-binary '{\"status\": \"SUCCESS\", \"reason\": \"Manager joined swarm.\"}'"
 fi
 START_SWARM_BIN
 fi

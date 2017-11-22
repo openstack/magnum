@@ -244,6 +244,7 @@ class BaseTemplateDefinition(TemplateDefinition):
         extra_params['trustee_user_id'] = cluster.trustee_user_id
         extra_params['trustee_username'] = cluster.trustee_username
         extra_params['trustee_password'] = cluster.trustee_password
+        extra_params['verify_ca'] = CONF.drivers.verify_ca
 
         # Only pass trust ID into the template if allowed by the config file
         if CONF.trust.cluster_user_trust:
