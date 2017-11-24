@@ -124,6 +124,7 @@ class HeatDriver(driver.Driver):
 
         # Make sure no duplicate stack name
         stack_name = '%s-%s' % (stack_name, short_id.generate_id())
+        stack_name = stack_name.lower()
         if cluster_create_timeout:
             heat_timeout = cluster_create_timeout
         else:
