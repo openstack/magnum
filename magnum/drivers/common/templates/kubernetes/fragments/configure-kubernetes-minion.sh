@@ -17,13 +17,14 @@ ETCD_CURL_OPTIONS="--cacert $CERT_DIR/ca.crt \
 --cert $CERT_DIR/client.crt --key $CERT_DIR/client.key"
 ETCD_SERVER_IP=${ETCD_SERVER_IP:-$KUBE_MASTER_IP}
 KUBE_PROTOCOL="https"
-KUBE_CONFIG=""
+KUBECONFIG=/etc/kubernetes/kubeconfig.yaml
 FLANNELD_CONFIG=/etc/sysconfig/flanneld
 
 if [ "$TLS_DISABLED" = "True" ]; then
     PROTOCOL=http
     FLANNEL_OPTIONS=""
     ETCD_CURL_OPTIONS=""
+    KUBE_PROTOCOL="http"
 fi
 
 sed -i '/FLANNEL_OPTIONS/'d $FLANNELD_CONFIG
@@ -32,12 +33,37 @@ cat >> $FLANNELD_CONFIG <<EOF
 FLANNEL_OPTIONS="$FLANNEL_OPTIONS"
 EOF
 
-if [ "$TLS_DISABLED" = "True" ]; then
-    KUBE_PROTOCOL="http"
-else
-    KUBE_CONFIG="--kubeconfig=/etc/kubernetes/kubeconfig.yaml"
-fi
 KUBE_MASTER_URI="$KUBE_PROTOCOL://$KUBE_MASTER_IP:$KUBE_API_PORT"
+
+cat << EOF >> ${KUBECONFIG}
+apiVersion: v1
+kind: Config
+users:
+- name: kubeclient
+  user:
+    client-certificate: ${CERT_DIR}/client.crt
+    client-key: ${CERT_DIR}/client.key
+clusters:
+- name: kubernetes
+  cluster:
+    server: ${KUBE_MASTER_URI}
+    certificate-authority: ${CERT_DIR}/ca.crt
+contexts:
+- context:
+    cluster: kubernetes
+    user: kubeclient
+  name: service-account-context
+current-context: service-account-context
+EOF
+
+if [ "$TLS_DISABLED" = "True" ]; then
+    sed -i 's/^.*user:$//' ${KUBECONFIG}
+    sed -i 's/^.*client-certificate.*$//' ${KUBECONFIG}
+    sed -i 's/^.*client-key.*$//' ${KUBECONFIG}
+    sed -i 's/^.*certificate-authority.*$//' ${KUBECONFIG}
+fi
+
+chmod 0644 ${KUBECONFIG}
 
 sed -i '
     /^KUBE_ALLOW_PRIV=/ s/=.*/="--allow-privileged='"$KUBE_ALLOW_PRIV"'"/
@@ -52,7 +78,7 @@ sed -i '
 # the option --hostname-override for kubelet uses the hostname to register the node.
 # Using any other name will break the load balancer and cinder volume features.
 HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')
-KUBELET_ARGS="--pod-manifest-path=/etc/kubernetes/manifests --cadvisor-port=4194 ${KUBE_CONFIG} --hostname-override=${HOSTNAME_OVERRIDE}"
+KUBELET_ARGS="--pod-manifest-path=/etc/kubernetes/manifests --cadvisor-port=4194 --kubeconfig ${KUBECONFIG} --hostname-override=${HOSTNAME_OVERRIDE}"
 KUBELET_ARGS="${KUBELET_ARGS} --cluster_dns=${DNS_SERVICE_IP} --cluster_domain=${DNS_CLUSTER_DOMAIN}"
 
 if [ -n "$TRUST_ID" ]; then
@@ -78,12 +104,12 @@ KUBELET_ARGS="${KUBELET_ARGS} --cgroup-driver=systemd"
 sed -i '
     /^KUBELET_ADDRESS=/ s/=.*/="--address=0.0.0.0"/
     /^KUBELET_HOSTNAME=/ s/=.*/=""/
-    /^KUBELET_API_SERVER=/ s|=.*|="--api-servers='"$KUBE_MASTER_URI"'"|
+    s/^KUBELET_API_SERVER=.*$//
     /^KUBELET_ARGS=/ s|=.*|="'"${KUBELET_ARGS}"'"|
 ' /etc/kubernetes/kubelet
 
 sed -i '
-    /^KUBE_PROXY_ARGS=/ s|=.*|='"$KUBE_CONFIG"'|
+    /^KUBE_PROXY_ARGS=/ s|=.*|=--kubeconfig='"$KUBECONFIG"'|
 ' /etc/kubernetes/proxy
 
 if [ "$NETWORK_DRIVER" = "flannel" ]; then

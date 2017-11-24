@@ -295,12 +295,6 @@ resources:
             $DNS_SERVICE_IP: {get_param: dns_service_ip}
             $DNS_CLUSTER_DOMAIN: {get_param: dns_cluster_domain}
 
-  write_kubeconfig:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/write-kubeconfig.yaml}
-
   write_kube_os_config:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -389,7 +383,6 @@ resources:
       parts:
         - config: {get_resource: disable_selinux}
         - config: {get_resource: write_heat_params}
-        - config: {get_resource: write_kubeconfig}
         - config: {get_resource: write_kube_os_config}
         - config: {get_resource: make_cert}
         - config: {get_resource: configure_docker_storage}
