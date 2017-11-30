@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    Update k8s_fedora_atomic driver to the latest Fedora Atomic 27 release
+    and run etcd and flanneld in system containers which are removed from
+    the base OS.
+upgrade:
+  - |
+    New clusters should be created with kube_tag=v1.9.3 or later. v1.9.3 is
+    the default version in the queens release.

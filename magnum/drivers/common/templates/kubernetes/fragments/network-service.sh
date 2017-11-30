@@ -43,7 +43,7 @@ Requires=flanneld.service
 
 [Service]
 Type=oneshot
-EnvironmentFile=/run/flannel/subnet.env
+EnvironmentFile=/run/flanneld/subnet.env
 ExecStart=/usr/local/bin/flannel-docker-bridge
 
 [Install]
@@ -79,4 +79,4 @@ chmod 0644 $FLANNEL_DOCKER_BRIDGE_CONF
 
 echo "activating service flanneld"
 systemctl enable flanneld
-systemctl --no-block start flanneld
+systemctl start flanneld
