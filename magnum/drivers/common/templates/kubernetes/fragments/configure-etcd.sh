@@ -34,13 +34,20 @@ if [ -n "$ETCD_VOLUME_SIZE" ] && [ "$ETCD_VOLUME_SIZE" -gt 0 ]; then
 
 fi
 
+_prefix=${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}
+atomic install \
+--system-package no \
+--system \
+--storage ostree \
+--name=etcd ${_prefix}etcd:${ETCD_TAG}
+
 if [ -z "$KUBE_NODE_IP" ]; then
     # FIXME(yuanying): Set KUBE_NODE_IP correctly
     KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 fi
 
 myip="${KUBE_NODE_IP}"
-cert_dir="/etc/kubernetes/certs"
+cert_dir="/etc/etcd/certs"
 protocol="https"
 
 if [ "$TLS_DISABLED" = "True" ]; then

@@ -7,24 +7,14 @@ if [ "$NETWORK_DRIVER" != "flannel" ]; then
 fi
 CERT_DIR=/etc/kubernetes/certs
 PROTOCOL=https
-FLANNEL_OPTIONS="-etcd-cafile $CERT_DIR/ca.crt \
--etcd-certfile $CERT_DIR/server.crt \
--etcd-keyfile $CERT_DIR/server.key"
 ETCD_CURL_OPTIONS="--cacert $CERT_DIR/ca.crt \
 --cert $CERT_DIR/server.crt --key $CERT_DIR/server.key"
 FLANNELD_CONFIG=/etc/sysconfig/flanneld
 
 if [ "$TLS_DISABLED" = "True" ]; then
     PROTOCOL=http
-    FLANNEL_OPTIONS=""
     ETCD_CURL_OPTIONS=""
 fi
-
-sed -i '/FLANNEL_OPTIONS/'d $FLANNELD_CONFIG
-
-cat >> $FLANNELD_CONFIG <<EOF
-FLANNEL_OPTIONS="$FLANNEL_OPTIONS"
-EOF
 
 . $FLANNELD_CONFIG
 

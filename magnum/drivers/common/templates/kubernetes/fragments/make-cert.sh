@@ -141,3 +141,5 @@ usermod -a -G kube_etcd kube
 chmod 550 "${cert_dir}"
 chown -R kube:kube_etcd "${cert_dir}"
 chmod 440 $SERVER_KEY
+mkdir -p /etc/etcd/certs
+cp ${cert_dir}/* /etc/etcd/certs

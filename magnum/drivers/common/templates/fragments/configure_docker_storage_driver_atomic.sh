@@ -7,10 +7,9 @@
 clear_docker_storage () {
     # stop docker
     systemctl stop docker
+    systemctl disable docker-storage-setup
     # clear storage graph
     rm -rf /var/lib/docker/*
-    # remove current LVs
-    docker-storage-setup --reset
 
     if [ -f /etc/sysconfig/docker-storage ]; then
         sed -i "/^DOCKER_STORAGE_OPTIONS=/ s/=.*/=/" /etc/sysconfig/docker-storage
@@ -27,11 +26,7 @@ configure_storage_driver_generic() {
         mount -a
     fi
 
-    sed -i "/^DOCKER_STORAGE_OPTIONS=/ s/=.*/=-s $1/" /etc/sysconfig/docker-storage
-
-    local lvname=$(lvdisplay | grep "LV\ Path" | awk '{print $3}')
-    local pvname=$(pvdisplay | grep "PV\ Name" | awk '{print $3}')
-    lvextend -r $lvname $pvname
+    echo "DOCKER_STORAGE_OPTIONS=\"--storage-driver $1\"" > /etc/sysconfig/docker-storage
 }
 
 # Configure docker storage with devicemapper using direct LVM
@@ -39,7 +34,7 @@ configure_devicemapper () {
     clear_docker_storage
 
     echo "GROWROOT=True" > /etc/sysconfig/docker-storage-setup
-    echo "ROOT_SIZE=5GB" >> /etc/sysconfig/docker-storage-setup
+    echo "STORAGE_DRIVER=devicemapper" >> /etc/sysconfig/docker-storage-setup
 
     if [ -n "$DOCKER_VOLUME_SIZE" ] && [ "$DOCKER_VOLUME_SIZE" -gt 0 ]; then
 
@@ -48,6 +43,7 @@ configure_devicemapper () {
 
         echo "VG=docker" >> /etc/sysconfig/docker-storage-setup
     else
+        echo "ROOT_SIZE=5GB" >> /etc/sysconfig/docker-storage-setup
         echo "DATA_SIZE=95%FREE" >> /etc/sysconfig/docker-storage-setup
     fi
 
