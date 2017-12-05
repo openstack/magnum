@@ -25,7 +25,11 @@ drivers_opts = [
                      'you have your own Certificate Authority and you '
                      'have not installed the Certificate Authority to all '
                      'nodes, you may need to disable CA validation by '
-                     'setting this flag to False.')
+                     'setting this flag to False.'),
+    cfg.StrOpt('openstack_ca_file',
+               default="",
+               help='Path to the OpenStack CA-bundle file to pass and '
+                    'install in all cluster nodes.')
 ]
 
 

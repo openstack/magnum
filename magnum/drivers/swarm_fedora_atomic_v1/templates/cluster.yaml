@@ -250,6 +250,11 @@ parameters:
       other hosts are using the volume
     default: "false"
 
+  openstack_ca:
+    type: string
+    hidden: true
+    description: The OpenStack CA certificate to install on the node.
+
 
 resources:
 
@@ -395,6 +400,7 @@ resources:
           auth_url: {get_param: auth_url}
           volume_driver: {get_param: volume_driver}
           rexray_preempt: {get_param: rexray_preempt}
+          openstack_ca: {get_param: openstack_ca}
 
   swarm_nodes:
     type: "OS::Heat::ResourceGroup"
@@ -446,6 +452,7 @@ resources:
           registry_chunksize: {get_param: registry_chunksize}
           volume_driver: {get_param: volume_driver}
           rexray_preempt: {get_param: rexray_preempt}
+          openstack_ca: {get_param: openstack_ca}
 
 outputs:
 

@@ -140,6 +140,7 @@ class TestClusterConductorWithMesos(base.TestCase):
             'mesos_slave_work_dir': '/tmp/mesos/slave',
             'mesos_slave_image_providers': 'docker',
             'verify_ca': True,
+            'openstack_ca': '',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -196,6 +197,7 @@ class TestClusterConductorWithMesos(base.TestCase):
             'master_flavor': 'master_flavor_id',
             'verify_ca': True,
             'slave_flavor': 'flavor_id',
+            'openstack_ca': '',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -254,6 +256,7 @@ class TestClusterConductorWithMesos(base.TestCase):
             'mesos_slave_work_dir': '/tmp/mesos/slave',
             'mesos_slave_image_providers': 'docker',
             'verify_ca': True,
+            'openstack_ca': '',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -313,6 +316,7 @@ class TestClusterConductorWithMesos(base.TestCase):
             'mesos_slave_work_dir': '/tmp/mesos/slave',
             'mesos_slave_image_providers': 'docker',
             'verify_ca': True,
+            'openstack_ca': '',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

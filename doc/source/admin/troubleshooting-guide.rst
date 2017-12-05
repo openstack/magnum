@@ -178,6 +178,24 @@ specified). If it fails, that means the credential you provided is invalid.
 
 TLS
 ---
+In production deployments, operators run the OpenStack APIs using
+ssl certificates and in private clouds it is common to use self-signed
+or certificates signed from CAs that they are usually not included
+in the systems' default CA-bundles. Magnum clusters with TLS enabled
+have their own CA but they need to make requests to the OpenStack
+APIs for several reasons. Eg Get the cluster CA and sign node
+certificates (Keystone, Magnum), signal the Heat API for stack
+completion, create resources (volumes, load balancers) or get
+information for each node (Cinder, Neutron, Nova). In these cases,
+the cluster nodes need the CA used for to run the APIs.
+
+To pass the OpenStack CA bundle to the nodes you can set the CA
+using the `openstack_ca_file` option in the `drivers` section of
+Magnum's configuration file (usually `/etc/magnum/magnum.conf`).
+The default drivers in magnum install this CA in the system and
+set it in all the places it might be needed (eg when configuring
+the kubernetes cloud provider or for the heat-agents.)
+
 The cluster nodes will validate the Certificate Authority by default
 when making requests to the OpenStack APIs (Keystone, Magnum, Heat).
 If you need to disable CA validation, the configuration parameter

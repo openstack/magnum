@@ -132,8 +132,11 @@ function create_magnum_conf {
     iniset $MAGNUM_CONF api host "$MAGNUM_SERVICE_HOST"
     if is_service_enabled tls-proxy; then
         iniset $MAGNUM_CONF api port "$MAGNUM_SERVICE_PORT_INT"
+        iniset $MAGNUM_CONF drivers verify_ca true
+        iniset $MAGNUM_CONF drivers openstack_ca_file $SSL_BUNDLE_FILE
     else
         iniset $MAGNUM_CONF api port "$MAGNUM_SERVICE_PORT"
+        iniset $MAGNUM_CONF drivers verify_ca false
     fi
     iniset $MAGNUM_CONF oslo_policy policy_file $MAGNUM_POLICY
 

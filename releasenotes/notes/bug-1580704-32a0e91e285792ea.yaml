@@ -1,0 +1,7 @@
+---
+security:
+  - |
+    Add new configuration option `openstack_ca_file` in the `drivers` section
+    to pass the CA bundle used for the OpenStack API. Setting this file and
+    setting `verify_ca` to `true` will result to all requests from the cluster
+    nodes to the OpenStack APIs to be verified.

@@ -129,6 +129,10 @@ parameters:
     type: boolean
     description: whether or not to validate certificate authority
 
+  openstack_ca:
+    type: string
+    description: The OpenStack CA certificate to install on the node.
+
 resources:
 
   node_wait_handle:
@@ -175,6 +179,16 @@ resources:
             "$VOLUME_DRIVER": {get_param: volume_driver}
             "$REXRAY_PREEMPT": {get_param: rexray_preempt}
             "$VERIFY_CA": {get_param: verify_ca}
+
+  install_openstack_ca:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          params:
+            $OPENSTACK_CA: {get_param: openstack_ca}
+          template: {get_file: ../../common/templates/fragments/atomic-install-openstack-ca.sh}
 
   remove_docker_key:
     type: "OS::Heat::SoftwareConfig"
@@ -248,6 +262,7 @@ resources:
     type: "OS::Heat::MultipartMime"
     properties:
       parts:
+        - config: {get_resource: install_openstack_ca}
         - config: {get_resource: configure_selinux}
         - config: {get_resource: remove_docker_key}
         - config: {get_resource: write_heat_params}

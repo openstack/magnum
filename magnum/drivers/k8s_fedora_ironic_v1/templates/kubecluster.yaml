@@ -342,6 +342,11 @@ parameters:
       - allowed_pattern: "^$|.*/"
     default: ""
 
+  openstack_ca:
+    type: string
+    hidden: true
+    description: The OpenStack CA certificate to install on the node.
+
 resources:
 
   api_lb:
@@ -503,6 +508,7 @@ resources:
           container_infra_prefix: {get_param: container_infra_prefix}
           wc_curl_cli: {get_attr: [master_wait_handle, curl_cli]}
           etcd_lb_vip: {get_attr: [etcd_lb, address]}
+          openstack_ca: {get_param: openstack_ca}
 
   ######################################################################
   #
@@ -591,6 +597,7 @@ resources:
       insecure_registry_url: {get_param: insecure_registry_url}
       container_infra_prefix: {get_param: container_infra_prefix}
       wc_curl_cli: {get_attr: [minion_wait_handle, curl_cli]}
+      openstack_ca: {get_param: openstack_ca}
 
   ######################################################################
   #

@@ -173,6 +173,10 @@ parameters:
     description : >
       Wait condition notify command for Minion.
 
+  openstack_ca:
+    type: string
+    description: The OpenStack CA certificate to install on the node.
+
 resources:
 
   ######################################################################
@@ -227,6 +231,16 @@ resources:
             $INSECURE_REGISTRY_URL: {get_param: insecure_registry_url}
             $CONTAINER_INFRA_PREFIX: {get_param: container_infra_prefix}
             $ENABLE_CINDER: "False"
+
+  install_openstack_ca:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          params:
+            $OPENSTACK_CA: {get_param: openstack_ca}
+          template: {get_file: ../../common/templates/fragments/atomic-install-openstack-ca.sh}
 
   make_cert:
     type: OS::Heat::SoftwareConfig
@@ -320,6 +334,7 @@ resources:
     type: OS::Heat::MultipartMime
     properties:
       parts:
+        - config: {get_resource: install_openstack_ca}
         - config: {get_resource: disable_selinux}
         - config: {get_resource: write_heat_params}
         - config: {get_resource: make_cert}

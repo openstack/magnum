@@ -181,6 +181,11 @@ parameters:
     type: boolean
     description: whether or not to validate certificate authority
 
+  openstack_ca:
+    type: string
+    hidden: true
+    description: The OpenStack CA certificate to install on the node.
+
 resources:
 
   ######################################################################
@@ -303,6 +308,7 @@ resources:
           volume_driver: {get_param: volume_driver}
           rexray_preempt: {get_param: rexray_preempt}
           verify_ca: {get_param: verify_ca}
+          openstack_ca: {get_param: openstack_ca}
 
   swarm_secondary_masters:
     type: "OS::Heat::ResourceGroup"
@@ -345,6 +351,7 @@ resources:
           volume_driver: {get_param: volume_driver}
           rexray_preempt: {get_param: rexray_preempt}
           verify_ca: {get_param: verify_ca}
+          openstack_ca: {get_param: openstack_ca}
 
   swarm_nodes:
     type: "OS::Heat::ResourceGroup"
@@ -387,6 +394,7 @@ resources:
           volume_driver: {get_param: volume_driver}
           rexray_preempt: {get_param: rexray_preempt}
           verify_ca: {get_param: verify_ca}
+          openstack_ca: {get_param: openstack_ca}
 
 outputs:
 

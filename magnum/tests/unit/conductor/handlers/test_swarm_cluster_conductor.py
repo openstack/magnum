@@ -163,6 +163,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'rexray_preempt': 'False',
             'docker_volume_type': 'lvmdriver-1',
             'verify_ca': True,
+            'openstack_ca': '',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -240,6 +241,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'rexray_preempt': 'False',
             'docker_volume_type': 'lvmdriver-1',
             'verify_ca': True,
+            'openstack_ca': '',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -311,6 +313,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'master_flavor': 'master_flavor_id',
             'verify_ca': True,
             'node_flavor': 'flavor_id',
+            'openstack_ca': '',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -382,6 +385,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'rexray_preempt': 'False',
             'docker_volume_type': 'lvmdriver-1',
             'verify_ca': True,
+            'openstack_ca': '',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -454,6 +458,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'rexray_preempt': 'False',
             'docker_volume_type': 'lvmdriver-1',
             'verify_ca': True,
+            'openstack_ca': '',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

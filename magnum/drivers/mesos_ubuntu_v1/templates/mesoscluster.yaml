@@ -211,6 +211,11 @@ parameters:
     type: boolean
     description: whether or not to validate certificate authority
 
+  openstack_ca:
+    type: string
+    hidden: true
+    description: The OpenStack CA certificate to install on the node.
+
 resources:
 
   ######################################################################
@@ -391,6 +396,7 @@ resources:
           fixed_subnet: {get_attr: [network, fixed_subnet]}
           secgroup_mesos_id: {get_resource: secgroup_master}
           api_pool_id: {get_attr: [api_lb, pool_id]}
+          openstack_ca: {get_param: openstack_ca}
 
   ######################################################################
   #
@@ -463,6 +469,7 @@ resources:
       mesos_slave_executor_env_variables: {get_param: mesos_slave_executor_env_variables}
       mesos_slave_wc_curl_cli: {get_attr: [slave_wait_handle, curl_cli]}
       verify_ca: {get_param: verify_ca}
+      openstack_ca: {get_param: openstack_ca}
 
 outputs:
 
