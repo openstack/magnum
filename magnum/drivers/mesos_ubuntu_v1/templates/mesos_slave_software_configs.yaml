@@ -104,6 +104,10 @@ parameters:
     type: string
     description: Wait condition notify command for slave.
 
+  openstack_ca:
+    type: string
+    description: The OpenStack CA certificate to install on the node.
+
 resources:
 
   ######################################################################
@@ -137,6 +141,16 @@ resources:
             "$WORK_DIR": {get_param: mesos_slave_work_dir}
             "$IMAGE_PROVIDERS": {get_param: mesos_slave_image_providers}
             "$EXECUTOR_ENVIRONMENT_VARIABLES": {get_param: mesos_slave_executor_env_variables}
+
+  add_ext_ca_certs:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: fragments/add-ext-ca-certs.sh}
+          params:
+            "@@CACERTS_CONTENT@@": {get_param: openstack_ca}
 
   configure_mesos_slave:
     type: OS::Heat::SoftwareConfig
@@ -179,6 +193,7 @@ resources:
     type: OS::Heat::MultipartMime
     properties:
       parts:
+        - config: {get_resource: add_ext_ca_certs}
         - config: {get_resource: write_heat_params}
         - config: {get_resource: configure_mesos_slave}
         - config: {get_resource: add_proxy}

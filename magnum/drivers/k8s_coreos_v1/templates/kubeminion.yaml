@@ -156,6 +156,10 @@ parameters:
     description: >
       domain name for cluster DNS
 
+  openstack_ca:
+    type: string
+    description: The OpenStack CA certificate to install on the node.
+
 resources:
 
   minion_wait_handle:
@@ -215,6 +219,16 @@ resources:
             "$DNS_SERVICE_IP": {get_param: dns_service_ip}
             "$DNS_CLUSTER_DOMAIN": {get_param: dns_cluster_domain}
 
+  add_ext_ca_certs:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          params:
+            $OPENSTACK_CA: {get_param: openstack_ca}
+          template: {get_file: fragments/add-ext-ca-certs.yaml}
+
   write_kubeconfig:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -270,6 +284,7 @@ resources:
       config:
         str_replace:
           template: |
+            $add_ext_ca_certs
             $write_heat_params
             $write_kubeconfig
             $make_cert
@@ -281,6 +296,8 @@ resources:
             $wc_notify
             coreos:
               units:
+                - name: "add-ext-ca-certs.service"
+                  command: "start"
                 - name: "make-cert.service"
                   command: "start"
                 - name: "configure-docker.service"
@@ -296,6 +313,7 @@ resources:
                 - name: "wc-notify.service"
                   command: "start"
           params:
+            "$add_ext_ca_certs": {get_attr: [add_ext_ca_certs, config]}
             "$write_heat_params": {get_attr: [write_heat_params, config]}
             "$write_kubeconfig": {get_attr: [write_kubeconfig, config]}
             "$make_cert": {get_attr: [make_cert, config]}

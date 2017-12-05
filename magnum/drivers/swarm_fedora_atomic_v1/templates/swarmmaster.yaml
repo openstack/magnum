@@ -176,6 +176,10 @@ parameters:
       other hosts are using the volume
     default: "false"
 
+  openstack_ca:
+    type: string
+    description: The OpenStack CA certificate to install on the node.
+
 resources:
 
   master_wait_handle:
@@ -261,6 +265,16 @@ resources:
             "$AUTH_URL": {get_param: auth_url}
             "$VOLUME_DRIVER": {get_param: volume_driver}
             "$REXRAY_PREEMPT": {get_param: rexray_preempt}
+
+  install_openstack_ca:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          params:
+            $OPENSTACK_CA: {get_param: openstack_ca}
+          template: {get_file: ../../common/templates/fragments/atomic-install-openstack-ca.sh}
 
   write_network_config:
     type: "OS::Heat::SoftwareConfig"
@@ -389,6 +403,7 @@ resources:
     type: "OS::Heat::MultipartMime"
     properties:
       parts:
+        - config: {get_resource: install_openstack_ca}
         - config: {get_resource: configure_selinux}
         - config: {get_resource: remove_docker_key}
         - config: {get_resource: write_heat_params}

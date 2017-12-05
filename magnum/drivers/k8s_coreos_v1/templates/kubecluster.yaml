@@ -289,6 +289,11 @@ parameters:
       domain name for cluster DNS
     default: "cluster.local"
 
+  openstack_ca:
+    type: string
+    hidden: true
+    description: The OpenStack CA certificate to install on the node.
+
 resources:
 
   ######################################################################
@@ -459,6 +464,7 @@ resources:
           etcd_lb_vip: {get_attr: [etcd_lb, address]}
           dns_service_ip: {get_param: dns_service_ip}
           dns_cluster_domain: {get_param: dns_cluster_domain}
+          openstack_ca: {get_param: openstack_ca}
 
   ######################################################################
   #
@@ -513,6 +519,7 @@ resources:
           prometheus_monitoring: {get_param: prometheus_monitoring}
           dns_service_ip: {get_param: dns_service_ip}
           dns_cluster_domain: {get_param: dns_cluster_domain}
+          openstack_ca: {get_param: openstack_ca}
 
 outputs:
 
