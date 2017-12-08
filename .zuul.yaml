@@ -13,6 +13,7 @@
       - openstack/ironic-lib
       - openstack/ironic-python-agent
       - openstack/magnum
+      - openstack/magnum-tempest-plugin
       - openstack/pyghmi
       - openstack/python-ironicclient
       - openstack/python-magnumclient

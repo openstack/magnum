@@ -4,6 +4,19 @@
         cmd: |
           set -e
           set -x
+          cat << 'EOF' >>"/tmp/dg-local.conf"
+          [[local|localrc]]
+          # Enable Magnum Tempest plugin
+          TEMPEST_PLUGINS='/opt/stack/new/magnum-tempest-plugin'
+          EOF
+        executable: /bin/bash
+        chdir: '{{ ansible_user_dir }}/workspace'
+      environment: '{{ zuul | zuul_legacy_vars }}'
+
+    - shell:
+        cmd: |
+          set -e
+          set -x
           export PYTHONUNBUFFERED=true
 
           if [ "{{ neutron }}" -eq 1 ] ; then
@@ -23,6 +36,7 @@
           export PROJECTS="openstack/magnum $PROJECTS"
           export PROJECTS="openstack/python-magnumclient $PROJECTS"
           export PROJECTS="openstack/diskimage-builder $PROJECTS"
+          export PROJECTS="openstack/magnum-tempest-plugin $PROJECTS"
 
           if [ "{{ multinode }}" -eq 1 ] ; then
               export DEVSTACK_GATE_TOPOLOGY="multinode"
