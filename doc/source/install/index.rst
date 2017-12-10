@@ -2,18 +2,24 @@
 Magnum Installation Guide
 =========================
 
-The Container Infrastructure Management service is a collection of components
-that provides support to manage different container orchestration engines(COE)
-like Kubernetes, Mesos and Swarm.
-
-This chapter assumes a working setup of OpenStack following the
-`OpenStack Installation Guides <http://docs.openstack.org/#install-guides>`_.
-It is recommended to follow the `Container Infrastructure Management Service
-<https://docs.openstack.org/project-install-guide/container-infrastructure-management>`_
-section from the OpenStack Installation Tutorials. This chapter contains the
-following sections:
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
-   install-guide-from-source
+   get_started.rst
+   install.rst
+   verify.rst
+   launch-instance.rst
+   next-steps.rst
+
+The Container Infrastructure Management service codenamed (magnum) is an
+OpenStack API service developed by the OpenStack Containers Team making
+container orchestration engines (COE) such as Docker Swarm, Kubernetes
+and Mesos available as first class resources in OpenStack. Magnum uses
+Heat to orchestrate an OS image which contains Docker and Kubernetes and
+runs that image in either virtual machines or bare metal in a cluster
+configuration.
+
+This chapter assumes a working setup of OpenStack following `OpenStack
+Installation Tutorial <http://docs.openstack.org/#install-guides>`_.
+

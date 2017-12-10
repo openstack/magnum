@@ -1,481 +1,144 @@
-.. _install:
+.. _install-guide-from-source:
 
-===================================================================
-Install the Container Infrastructure Management service from source
-===================================================================
-
-Install and configure
-~~~~~~~~~~~~~~~~~~~~~
+Install from source code and configure
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This section describes how to install and configure the Container
-Infrastructure Management service, code-named magnum, on the controller node.
+Infrastructure Management service for from source code.
 
-This section assumes that you already have a working OpenStack environment with
-at least the following components installed: Identity service, Image service,
-Compute service, Networking service, Block Storage service and Orchestration
-service. See `OpenStack Install Guides <http://docs.openstack.org/
-#install-guides>`__.
-
-To provide access to Docker Swarm or Kubernetes using the native clients
-(docker or kubectl respectively) magnum uses TLS certificates. To store the
-certificates, it is recommended to use the `Key Manager service, code-named
-barbican <http://docs.openstack.org/project-install-guide/key-manager/
-draft/>`__, or you can save them in magnum's database.
-
-Optionally, you can install the following components:
-
-- `Load Balancer as a Service (LBaaS v2) <http://docs.openstack.org/
-  networking-guide/config-lbaas.html>`__ to create clusters with multiple
-  masters
-- `Bare Metal service <http://docs.openstack.org/project-install-guide/
-  baremetal/draft/>`__ to create baremetal clusters
-- `Object Storage service <http://docs.openstack.org/project-install-guide/
-  object-storage/draft/>`__ to make private Docker registries available to
-  users
-- `Telemetry Data Collection service <http://docs.openstack.org/
-  project-install-guide/telemetry/draft/>`__ to periodically send
-  magnum-related metrics
-
-.. important::
-
-   Magnum creates clusters of compute instances on the Compute service (nova).
-   These instances must have basic Internet connectivity and must be able to
-   reach magnum's API server. Make sure that the Compute and Network services
-   are configured accordingly.
-
-Prerequisites
--------------
-
-Before you install and configure the Container Infrastructure Management
-service, you must create a database, service credentials, and API endpoints.
-
-#. To create the database, complete these steps:
-
-   * Use the database access client to connect to the database
-     server as the ``root`` user:
-
-     .. code-block:: console
-
-        $ mysql -u root -p
-
-   * Create the ``magnum`` database:
-
-     .. code-block:: console
-
-        CREATE DATABASE magnum;
-
-   * Grant proper access to the ``magnum`` database:
-
-     .. code-block:: console
-
-        GRANT ALL PRIVILEGES ON magnum.* TO 'magnum'@'controller' \
-          IDENTIFIED BY 'MAGNUM_DBPASS';
-        GRANT ALL PRIVILEGES ON magnum.* TO 'magnum'@'%' \
-          IDENTIFIED BY 'MAGNUM_DBPASS';
-
-     Replace ``MAGNUM_DBPASS`` with a suitable password.
-
-   * Exit the database access client.
-
-#. Source the ``admin`` credentials to gain access to
-   admin-only CLI commands:
-
-   .. code-block:: console
-
-      $ . admin-openrc
-
-#. To create the service credentials, complete these steps:
-
-   * Create the ``magnum`` user:
-
-     .. code-block:: console
-
-
-        $ openstack user create --domain default \
-          --password-prompt magnum
-        User Password:
-        Repeat User Password:
-        +-----------+----------------------------------+
-        | Field     | Value                            |
-        +-----------+----------------------------------+
-        | domain_id | default                          |
-        | enabled   | True                             |
-        | id        | a8ebafc275c54d389dfc1bff8b4fe286 |
-        | name      | magnum                           |
-        +-----------+----------------------------------+
-
-   * Add the ``admin`` role to the ``magnum`` user:
-
-     .. code-block:: console
-
-        $ openstack role add --project service --user magnum admin
-
-     .. note::
-
-        This command provides no output.
-
-   * Create the ``magnum`` service entity:
-
-     .. code-block:: console
-
-        $ openstack service create --name magnum \
-          --description "OpenStack Container Infrastructure Management Service" \
-          container-infra
-        +-------------+-------------------------------------------------------+
-        | Field       | Value                                                 |
-        +-------------+-------------------------------------------------------+
-        | description | OpenStack Container Infrastructure Management Service |
-        | enabled     | True                                                  |
-        | id          | 194faf83e8fd4e028e5ff75d3d8d0df2                      |
-        | name        | magnum                                                |
-        | type        | container-infra                                       |
-        +-------------+-------------------------------------------------------+
-
-#. Create the Container Infrastructure Management service API endpoints:
-
-   .. code-block:: console
-
-      $ openstack endpoint create --region RegionOne \
-        container-infra public http://CONTROLLER_IP:9511/v1
-      +--------------+----------------------------------+
-      | Field        | Value                            |
-      +--------------+----------------------------------+
-      | enabled      | True                             |
-      | id           | cb137e6366ad495bb521cfe92d8b8858 |
-      | interface    | public                           |
-      | region       | RegionOne                        |
-      | region_id    | RegionOne                        |
-      | service_id   | 0f7f62a1f1a247d2a4cb237642814d0e |
-      | service_name | magnum                           |
-      | service_type | container-infra                  |
-      | url          | http://CONTROLLER_IP:9511/v1     |
-      +--------------+----------------------------------+
-
-      $ openstack endpoint create --region RegionOne \
-        container-infra internal http://CONTROLLER_IP:9511/v1
-      +--------------+----------------------------------+
-      | Field        | Value                            |
-      +--------------+----------------------------------+
-      | enabled      | True                             |
-      | id           | 17cbc3b6f51449a0a818118d6d62868d |
-      | interface    | internal                         |
-      | region       | RegionOne                        |
-      | region_id    | RegionOne                        |
-      | service_id   | 0f7f62a1f1a247d2a4cb237642814d0e |
-      | service_name | magnum                           |
-      | service_type | container-infra                  |
-      | url          | http://CONTROLLER_IP:9511/v1     |
-      +--------------+----------------------------------+
-
-      $ openstack endpoint create --region RegionOne \
-        container-infra admin http://CONTROLLER_IP:9511/v1
-      +--------------+----------------------------------+
-      | Field        | Value                            |
-      +--------------+----------------------------------+
-      | enabled      | True                             |
-      | id           | 30f8888e6b6646d7b5cd14354c95a684 |
-      | interface    | admin                            |
-      | region       | RegionOne                        |
-      | region_id    | RegionOne                        |
-      | service_id   | 0f7f62a1f1a247d2a4cb237642814d0e |
-      | service_name | magnum                           |
-      | service_type | container-infra                  |
-      | url          | http://CONTROLLER_IP:9511/v1     |
-      +--------------+----------------------------------+
-
-   Replace ``CONTROLLER_IP`` with the IP magnum listens to. Alternatively,
-   you can use a hostname which is reachable by the Compute instances.
-
-#. Magnum requires additional information in the Identity service to
-   manage clusters. To add this information, complete these steps:
-
-   * Create the ``magnum`` domain that contains projects and users:
-
-     .. code-block:: console
-
-        $ openstack domain create --description "Owns users and projects \
-          created by magnum" magnum
-          +-------------+-------------------------------------------+
-          | Field       | Value                                     |
-          +-------------+-------------------------------------------+
-          | description | Owns users and projects created by magnum |
-          | enabled     | True                                      |
-          | id          | 66e0469de9c04eda9bc368e001676d20          |
-          | name        | magnum                                    |
-          +-------------+-------------------------------------------+
-
-   * Create the ``magnum_domain_admin`` user to manage projects and users
-     in the ``magnum`` domain:
-
-     .. code-block:: console
-
-        $ openstack user create --domain magnum --password-prompt \
-          magnum_domain_admin
-          User Password:
-          Repeat User Password:
-          +-----------+----------------------------------+
-          | Field     | Value                            |
-          +-----------+----------------------------------+
-          | domain_id | 66e0469de9c04eda9bc368e001676d20 |
-          | enabled   | True                             |
-          | id        | 529b81cf35094beb9784c6d06c090c2b |
-          | name      | magnum_domain_admin              |
-          +-----------+----------------------------------+
-
-   * Add the ``admin`` role to the ``magnum_domain_admin`` user in the
-     ``magnum`` domain to enable administrative management privileges
-     by the ``magnum_domain_admin`` user:
-
-     .. code-block:: console
-
-        $ openstack role add --domain magnum --user-domain magnum \
-          --user magnum_domain_admin admin
-
-     .. note::
-
-        This command provides no output.
+.. include:: common/prerequisites.rst
 
 Install and configure components
 --------------------------------
 
-#. Install OS-specific prerequisites:
+1. Install Magnum from source:
 
-   * Ubuntu 14.04 (trusty) or higher, Debian 8:
+   a. Install OS-specific prerequisites:
 
-     .. code-block:: console
+      * Ubuntu 16.04 (xenial) or higher:
 
-        # apt-get update
-        # apt-get install python-dev libssl-dev libxml2-dev \
-                          libmysqlclient-dev libxslt-dev libpq-dev git \
-                          libffi-dev gettext build-essential
+        .. code-block:: console
 
-   * Fedora 21 / Centos 7 / RHEL 7
+           # apt update
+           # apt install python-dev libssl-dev libxml2-dev \
+                         libmysqlclient-dev libxslt-dev libpq-dev git \
+                         libffi-dev gettext build-essential
 
-     .. code-block:: console
+      * Fedora 21 / Centos 7 / RHEL 7
 
-        # yum install python-devel openssl-devel mysql-devel \
-                      libxml2-devel libxslt-devel postgresql-devel git \
-                      libffi-devel gettext gcc
+        .. code-block:: console
 
-   * Fedora 22 or higher
+           # yum install python-devel openssl-devel mysql-devel \
+                         libxml2-devel libxslt-devel postgresql-devel git \
+                         libffi-devel gettext gcc
 
-     .. code-block:: console
+      * Fedora 22 or higher
 
-        # dnf install python-devel openssl-devel mysql-devel \
-                      libxml2-devel libxslt-devel postgresql-devel git \
-                      libffi-devel gettext gcc
+        .. code-block:: console
 
-   * openSUSE Leap 42.1
+           # dnf install python-devel openssl-devel mysql-devel \
+                         libxml2-devel libxslt-devel postgresql-devel git \
+                         libffi-devel gettext gcc
 
-     .. code-block:: console
+      * openSUSE Leap 42.1
 
-        # zypper install git libffi-devel libmysqlclient-devel \
-                         libopenssl-devel libxml2-devel libxslt-devel \
-                         postgresql-devel python-devel gettext-runtime gcc
+        .. code-block:: console
 
-2. Create magnum user and necessary directories:
+           # zypper install git libffi-devel libmysqlclient-devel \
+                            libopenssl-devel libxml2-devel libxslt-devel \
+                            postgresql-devel python-devel gettext-runtime gcc
 
-   * Create user:
+   b. Create magnum user and necessary directories:
 
-     .. code-block:: console
+      * Create user:
 
-        # groupadd --system magnum
-        # useradd --home-dir "/var/lib/magnum" \
-              --create-home \
-              --system \
-              --shell /bin/false \
-              -g magnum \
-              magnum
+        .. code-block:: console
 
-   * Create directories:
+           # groupadd --system magnum
+           # useradd --home-dir "/var/lib/magnum" \
+                 --create-home \
+                 --system \
+                 --shell /bin/false \
+                 -g magnum \
+                 magnum
 
-     .. code-block:: console
+      * Create directories:
 
-        # mkdir -p /var/log/magnum
-        # mkdir -p /etc/magnum
+        .. code-block:: console
 
-   * Set ownership to directories:
+           # mkdir -p /var/log/magnum
+           # mkdir -p /etc/magnum
 
-     .. code-block:: console
+      * Set ownership to directories:
 
-        # chown magnum:magnum /var/log/magnum
-        # chown magnum:magnum /var/lib/magnum
-        # chown magnum:magnum /etc/magnum
+        .. code-block:: console
 
-3. Install virtualenv and python prerequisites:
+           # chown magnum:magnum /var/log/magnum
+           # chown magnum:magnum /var/lib/magnum
+           # chown magnum:magnum /etc/magnum
 
-   * Install virtualenv and create one for magnum's installation:
+   c. Install virtualenv and python prerequisites:
 
-     .. code-block:: console
+      * Install virtualenv and create one for magnum's installation:
 
-        # easy_install -U virtualenv
-        # su -s /bin/sh -c "virtualenv /var/lib/magnum/env" magnum
+        .. code-block:: console
 
-   * Install python prerequisites:
+           # easy_install -U virtualenv
+           # su -s /bin/sh -c "virtualenv /var/lib/magnum/env" magnum
 
-     .. code-block:: console
+      * Install python prerequisites:
 
-        # su -s /bin/sh -c "/var/lib/magnum/env/bin/pip install tox pymysql \
-          python-memcached" magnum
+        .. code-block:: console
 
-4. Clone and install magnum:
+           # su -s /bin/sh -c "/var/lib/magnum/env/bin/pip install tox pymysql \
+             python-memcached" magnum
 
-   .. code-block:: console
+   d. Clone and install magnum:
 
-      # cd /var/lib/magnum
-      # git clone https://git.openstack.org/openstack/magnum.git
-      # chown -R magnum:magnum magnum
-      # cd magnum
-      # su -s /bin/sh -c "/var/lib/magnum/env/bin/pip install -r requirements.txt" magnum
-      # su -s /bin/sh -c "/var/lib/magnum/env/bin/python setup.py install" magnum
+      .. code-block:: console
 
-5. Copy api-paste.ini:
+         # cd /var/lib/magnum
+         # git clone https://git.openstack.org/openstack/magnum.git
+         # chown -R magnum:magnum magnum
+         # cd magnum
+         # su -s /bin/sh -c "/var/lib/magnum/env/bin/pip install -r requirements.txt" magnum
+         # su -s /bin/sh -c "/var/lib/magnum/env/bin/python setup.py install" magnum
 
-   .. code-block:: console
+   e. Copy api-paste.ini:
 
-      # su -s /bin/sh -c "cp etc/magnum/api-paste.ini /etc/magnum" magnum
+      .. code-block:: console
 
-6. Generate a sample configuration file:
+         # su -s /bin/sh -c "cp etc/magnum/api-paste.ini /etc/magnum" magnum
 
-   .. code-block:: console
+   f. Generate a sample configuration file:
 
-      # su -s /bin/sh -c "/var/lib/magnum/env/bin/tox -e genconfig" magnum
-      # su -s /bin/sh -c "cp etc/magnum/magnum.conf.sample /etc/magnum/magnum.conf" magnum
+      .. code-block:: console
 
-7. Optionally, if you want to customize the policies for Magnum API accesses,
-   you can generate a sample policy file, put it into ``/etc/magnum`` folder
-   for further modifications:
+         # su -s /bin/sh -c "/var/lib/magnum/env/bin/tox -e genconfig" magnum
+         # su -s /bin/sh -c "cp etc/magnum/magnum.conf.sample /etc/magnum/magnum.conf" magnum
 
-   .. code-block:: console
+   e. Optionally, if you want to customize the policies for Magnum API accesses,
+      you can generate a sample policy file, put it into ``/etc/magnum`` folder
+      for further modifications:
 
-      # su -s /bin/sh -c "/var/lib/magnum/env/bin/tox -e genpolicy" magnum
-      # su -s /bin/sh -c "cp etc/magnum/policy.yaml.sample /etc/magnum/policy.yaml" magnum
+      .. code-block:: console
 
-8. Edit the ``/etc/magnum/magnum.conf``:
+         # su -s /bin/sh -c "/var/lib/magnum/env/bin/tox -e genpolicy" magnum
+         # su -s /bin/sh -c "cp etc/magnum/policy.yaml.sample /etc/magnum/policy.yaml" magnum
 
-   * In the ``[DEFAULT]`` section,
-     configure ``RabbitMQ`` message queue access:
+.. include:: common/configure_2_edit_magnum_conf.rst
 
-     .. code-block:: ini
+* Additionally, edit the ``/etc/magnum/magnum.conf`` file:
 
-        [DEFAULT]
-        ...
-        transport_url = rabbit://openstack:RABBIT_PASS@controller
+  * In the ``[oslo_concurrency]`` section, configure the ``lock_path``:
 
-     Replace ``RABBIT_PASS`` with the password you chose for the
-     ``openstack`` account in ``RabbitMQ``.
+    .. code-block:: ini
 
-   * In the ``[api]`` section, configure the host:
+       [oslo_concurrency]
+       ...
+       lock_path = /var/lib/magnum/tmp
 
-     .. code-block:: ini
-
-        [api]
-        ...
-        host = CONTROLLER_IP
-
-     Replace ``CONTROLLER_IP`` with the IP address on which you wish magnum api
-     should listen.
-
-   * In the ``[certificates]`` section, select ``barbican`` (or ``local`` if
-     you don't have barbican installed):
-
-     * Use barbican to store certificates:
-
-       .. code-block:: ini
-
-          [certificates]
-          ...
-          cert_manager_type = barbican
-
-     .. important::
-
-       Barbican is recommended for production environments, local store should
-       be used for evaluation purposes.
-
-     * To use local store for certificates, you have to create and specify the
-       directory to use:
-
-       .. code-block:: console
-
-          # su -s /bin/sh -c  "mkdir -p /var/lib/magnum/certificates/" magnum
-
-       .. code-block:: ini
-
-          [certificates]
-          ...
-          cert_manager_type = local
-          storage_path = /var/lib/magnum/certificates/
-
-   * In the ``[cinder_client]`` section, configure the region name:
-
-     .. code-block:: ini
-
-        [cinder_client]
-        ...
-        region_name = RegionOne
-
-   * In the ``[database]`` section, configure database access:
-
-     .. code-block:: ini
-
-        [database]
-        ...
-        connection = mysql+pymysql://magnum:MAGNUM_DBPASS@controller/magnum
-
-     Replace ``MAGNUM_DBPASS`` with the password you chose for
-     the magnum database.
-
-   * In the ``[keystone_authtoken]`` and ``trust`` sections, configure
-     Identity service access:
-
-     .. code-block:: ini
-
-        [keystone_authtoken]
-        ...
-        memcached_servers = controller:11211
-        auth_version = v3
-        auth_uri = http://controller:5000/v3
-        project_domain_name = default
-        project_name = service
-        user_domain_name = default
-        password = MAGNUM_PASS
-        username = magnum
-        auth_url = http://controller:35357
-        auth_type = password
-        admin_user = magnum
-        admin_password = MAGNUM_PASS
-        admin_tenant_name = service
-
-        [trust]
-        ...
-        trustee_domain_name = magnum
-        trustee_domain_admin_name = magnum_domain_admin
-        trustee_domain_admin_password = DOMAIN_ADMIN_PASS
-
-     ``trustee_domain_name`` is the name of the ``magnum`` domain and
-     ``trustee_domain_admin_name`` is the name of the ``magnum_domain_admin``
-     user. Replace MAGNUM_PASS with the password you chose for the magnum user in the
-     Identity service and DOMAIN_ADMIN_PASS with the password you chose for the
-     ``magnum_domain_admin`` user.
-
-   * In the ``[oslo_concurrency]`` section, configure the ``lock_path``:
-
-     .. code-block:: ini
-
-        [oslo_concurrency]
-        ...
-        lock_path = /var/lib/magnum/tmp
-
-   * In the ``[oslo_messaging_notifications]`` section, configure the
-     ``driver``:
-
-     .. code-block:: ini
-
-        [oslo_messaging_notifications]
-        ...
-        driver = messaging
-
-   * If you decide to customize Magnum policies in ``step 7``, then in the
+   * If you decide to customize Magnum policies in ``1.e``, then in the
      ``[oslo_policy]`` section, configure the ``policy_file``:
 
      .. code-block:: ini
@@ -491,13 +154,13 @@ Install and configure components
 
       # chown magnum:magnum /etc/magnum/magnum.conf
 
-9. Populate Magnum database:
+3. Populate Magnum database:
 
    .. code-block:: console
 
       # su -s /bin/sh -c "/var/lib/magnum/env/bin/magnum-db-manage upgrade" magnum
 
-10. Set magnum for log rotation:
+4. Set magnum for log rotation:
 
    .. code-block:: console
 
@@ -509,18 +172,8 @@ Finalize installation
 
 #. Create init scripts and services:
 
-   * Ubuntu 14.04 (trusty):
-
-     .. code-block:: console
-
-        # cd /var/lib/magnum/magnum
-        # cp doc/examples/etc/init/magnum-api.conf \
-          /etc/init/magnum-api.conf
-        # cp doc/examples/etc/init/magnum-conductor.conf \
-          /etc/init/magnum-conductor.conf
-
-   * Ubuntu 14.10 or higher, Fedora 21 or higher/RHEL 7/CentOS 7,  openSUSE
-     Leap 42.1 or Debian 8:
+   * Ubuntu 16.04 or higher, Fedora 21 or higher/RHEL 7/CentOS 7 or openSUSE
+     Leap 42.1:
 
      .. code-block:: console
 
@@ -532,15 +185,8 @@ Finalize installation
 
 #. Start magnum-api and magnum-conductor:
 
-   * Ubuntu 14.04 (trusty):
-
-     .. code-block:: console
-
-        # start magnum-api
-        # start magnum-conductor
-
-   * Ubuntu 14.10 or higher, Fedora 21 or higher/RHEL 7/CentOS 7,  openSUSE
-     Leap 42.1 or Debian 8:
+   * Ubuntu 16.04 or higher, Fedora 21 or higher/RHEL 7/CentOS 7 or openSUSE
+     Leap 42.1:
 
      .. code-block:: console
 
@@ -554,15 +200,8 @@ Finalize installation
 
 #. Verify that magnum-api and magnum-conductor services are running:
 
-   * Ubuntu 14.04 (trusty):
-
-     .. code-block:: console
-
-        # status magnum-api
-        # status magnum-conductor
-
-   * Ubuntu 14.10 or higher, Fedora 21 or higher/RHEL 7/CentOS 7,  openSUSE
-     Leap 42.1 or Debian 8:
+   * Ubuntu 16.04 or higher, Fedora 21 or higher/RHEL 7/CentOS 7 or openSUSE
+     Leap 42.1:
 
      .. code-block:: console
 
@@ -588,13 +227,13 @@ Install the command-line client
         # dnf install python-devel openssl-devel python-virtualenv \
                       libffi-devel git gcc
 
-   * Ubuntu/Debian
+   * Ubuntu
 
      .. code-block:: console
 
-        # apt-get update
-        # apt-get install python-dev libssl-dev python-virtualenv \
-                          libffi-dev git gcc
+        # apt update
+        # apt install python-dev libssl-dev python-virtualenv \
+                      libffi-dev git gcc
 
    * openSUSE Leap 42.1
 
@@ -625,12 +264,3 @@ Install the command-line client
       The command-line client can be installed on the controller node or
       on a different host than the service. It is good practice to install it
       as a non-root user.
-
-Next Steps
-----------
-
-Since you have the Container Infrastructure Management service running, you
-can `Verify Operation <http://docs.openstack.org/project-install-guide/
-container-infrastructure-management/draft/verify.html>`__ and `Launch an
-instance <http://docs.openstack.org/project-install-guide/
-container-infrastructure-management/draft/launch-instance.html>`__.
