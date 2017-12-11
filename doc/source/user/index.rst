@@ -125,9 +125,9 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   ========== =====================
   COE        os-distro
   ========== =====================
-  Kubernetes Fedora-atomic, CoreOS
-  Swarm      Fedora-atomic
-  Mesos      Ubuntu
+  Kubernetes fedora-atomic, coreos
+  Swarm      fedora-atomic
+  Mesos      ubuntu
   ========== =====================
 
   This is a mandatory parameter and there is no default value.
