@@ -164,6 +164,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'docker_volume_type': 'lvmdriver-1',
             'verify_ca': True,
             'openstack_ca': '',
+            'nodes_affinity_policy': 'soft-anti-affinity'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -242,6 +243,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'docker_volume_type': 'lvmdriver-1',
             'verify_ca': True,
             'openstack_ca': '',
+            'nodes_affinity_policy': 'soft-anti-affinity'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -314,6 +316,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'verify_ca': True,
             'node_flavor': 'flavor_id',
             'openstack_ca': '',
+            'nodes_affinity_policy': 'soft-anti-affinity'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -386,6 +389,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'docker_volume_type': 'lvmdriver-1',
             'verify_ca': True,
             'openstack_ca': '',
+            'nodes_affinity_policy': 'soft-anti-affinity'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -459,6 +463,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'docker_volume_type': 'lvmdriver-1',
             'verify_ca': True,
             'openstack_ca': '',
+            'nodes_affinity_policy': 'soft-anti-affinity'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

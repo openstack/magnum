@@ -43,6 +43,10 @@ parameters:
     type: string
     description: ID of the multipart mime.
 
+  nodes_server_group_id:
+    type: string
+    description: ID of the server group for kubernetes cluster nodes.
+
 resources:
 
   ######################################################################
@@ -64,6 +68,7 @@ resources:
       user_data: {get_param: mesos_slave_software_configs}
       networks:
         - port: {get_resource: mesos_slave_eth0}
+      scheduler_hints: { group: { get_param: nodes_server_group_id }}
 
   mesos_slave_eth0:
     type: OS::Neutron::Port

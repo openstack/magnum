@@ -48,6 +48,10 @@ parameters:
     description : >
       ID of the multipart mime.
 
+  nodes_server_group_id:
+    type: string
+    description: ID of the server group for kubernetes cluster nodes.
+
 resources:
 
   ######################################################################
@@ -69,6 +73,7 @@ resources:
       user_data: {get_param: kube_software_configs}
       networks:
         - port: {get_resource: kube_minion_eth0}
+      scheduler_hints: { group: { get_param: nodes_server_group_id }}
 
   kube_minion_eth0:
     type: "OS::Neutron::Port"

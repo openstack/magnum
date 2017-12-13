@@ -48,6 +48,10 @@ parameters:
     hidden: true
     description: The OpenStack CA certificate to install on the node.
 
+  nodes_server_group_id:
+    type: string
+    description: ID of the server group for kubernetes cluster nodes.
+
 resources:
 
   add_ext_ca_certs:
@@ -85,6 +89,7 @@ resources:
       user_data: {get_resource: mesos_master_init}
       networks:
         - port: {get_resource: mesos_master_eth0}
+      scheduler_hints: { group: { get_param: nodes_server_group_id }}
 
   mesos_master_eth0:
     type: OS::Neutron::Port

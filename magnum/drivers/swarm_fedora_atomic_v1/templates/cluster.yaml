@@ -255,6 +255,13 @@ parameters:
     hidden: true
     description: The OpenStack CA certificate to install on the node.
 
+  nodes_affinity_policy:
+    type: string
+    description: >
+      affinity policy for nodes server group
+    constraints:
+      - allowed_values: ["affinity", "anti-affinity", "soft-affinity",
+                         "soft-anti-affinity"]
 
 resources:
 
@@ -338,6 +345,17 @@ resources:
       master_public_ip: {get_attr: [swarm_masters, resource.0.swarm_master_external_ip]}
       master_private_ip: {get_attr: [swarm_masters, resource.0.swarm_master_ip]}
 
+  ######################################################################
+  #
+  # resources that expose the server group for all nodes include master
+  # and minions.
+  #
+
+  nodes_server_group:
+    type: OS::Nova::ServerGroup
+    properties:
+      policies: [{get_param: nodes_affinity_policy}]
+
   etcd_address_lb_switch:
     type: Magnum::ApiGatewaySwitcher
     properties:
@@ -401,6 +419,7 @@ resources:
           volume_driver: {get_param: volume_driver}
           rexray_preempt: {get_param: rexray_preempt}
           openstack_ca: {get_param: openstack_ca}
+          nodes_server_group_id: {get_resource: nodes_server_group}
 
   swarm_nodes:
     type: "OS::Heat::ResourceGroup"
@@ -453,6 +472,7 @@ resources:
           volume_driver: {get_param: volume_driver}
           rexray_preempt: {get_param: rexray_preempt}
           openstack_ca: {get_param: openstack_ca}
+          nodes_server_group_id: {get_resource: nodes_server_group}
 
 outputs:
 

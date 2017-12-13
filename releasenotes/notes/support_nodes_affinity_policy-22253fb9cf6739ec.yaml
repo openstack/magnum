@@ -1,0 +1,7 @@
+---
+issues:
+  - |
+    Enhancement to support anfinity policy for cluster nodes. Before this patch,
+    There is no way to gurantee all nodes of a cluster created on different
+    compute hosts to get high availbility.
+

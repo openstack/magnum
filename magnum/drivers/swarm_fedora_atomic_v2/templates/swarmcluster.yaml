@@ -186,6 +186,14 @@ parameters:
     hidden: true
     description: The OpenStack CA certificate to install on the node.
 
+  nodes_affinity_policy:
+    type: string
+    description: >
+      affinity policy for nodes server group
+    constraints:
+      - allowed_values: ["affinity", "anti-affinity", "soft-affinity",
+                         "soft-anti-affinity"]
+
 resources:
 
   ######################################################################
@@ -262,6 +270,17 @@ resources:
 
   ######################################################################
   #
+  # resources that expose the server group for all nodes include master
+  # and minions.
+  #
+
+  nodes_server_group:
+    type: OS::Nova::ServerGroup
+    properties:
+      policies: [{get_param: nodes_affinity_policy}]
+
+  ######################################################################
+  #
   # Swarm manager is responsible for the entire cluster and manages the
   # resources of multiple Docker hosts at scale.
   # It supports high availability by create a primary manager and multiple
@@ -309,6 +328,7 @@ resources:
           rexray_preempt: {get_param: rexray_preempt}
           verify_ca: {get_param: verify_ca}
           openstack_ca: {get_param: openstack_ca}
+          nodes_server_group_id: {get_resource: nodes_server_group}
 
   swarm_secondary_masters:
     type: "OS::Heat::ResourceGroup"
@@ -352,6 +372,7 @@ resources:
           rexray_preempt: {get_param: rexray_preempt}
           verify_ca: {get_param: verify_ca}
           openstack_ca: {get_param: openstack_ca}
+          nodes_server_group_id: {get_resource: nodes_server_group}
 
   swarm_nodes:
     type: "OS::Heat::ResourceGroup"
@@ -395,6 +416,7 @@ resources:
           rexray_preempt: {get_param: rexray_preempt}
           verify_ca: {get_param: verify_ca}
           openstack_ca: {get_param: openstack_ca}
+          nodes_server_group_id: {get_resource: nodes_server_group}
 
 outputs:
 

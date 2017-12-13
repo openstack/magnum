@@ -87,6 +87,9 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
         if container_infra_prefix:
             extra_params['container_infra_prefix'] = container_infra_prefix
 
+        extra_params['nodes_affinity_policy'] = \
+            CONF.cluster.nodes_affinity_policy
+
         return super(K8sFedoraTemplateDefinition,
                      self).get_params(context, cluster_template, cluster,
                                       extra_params=extra_params,

@@ -105,6 +105,8 @@ class SwarmModeTemplateDefinition(template_def.BaseTemplateDefinition):
         label_list = ['rexray_preempt']
 
         extra_params['auth_url'] = context.auth_url
+        extra_params['nodes_affinity_policy'] = \
+            CONF.cluster.nodes_affinity_policy
 
         for label in label_list:
             extra_params[label] = cluster_template.labels.get(label)
