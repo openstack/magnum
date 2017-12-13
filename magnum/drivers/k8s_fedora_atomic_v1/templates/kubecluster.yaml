@@ -364,6 +364,12 @@ parameters:
       - allowed_values: ["affinity", "anti-affinity", "soft-affinity",
                          "soft-anti-affinity"]
 
+  availability_zone:
+    type: string
+    description: >
+      availability zone for master and nodes
+    default: ""
+
 resources:
 
   ######################################################################
@@ -557,6 +563,7 @@ resources:
           dns_cluster_domain: {get_param: dns_cluster_domain}
           openstack_ca: {get_param: openstack_ca}
           nodes_server_group_id: {get_resource: nodes_server_group}
+          availability_zone: {get_param: availability_zone}
 
   ######################################################################
   #
@@ -627,6 +634,7 @@ resources:
           dns_cluster_domain: {get_param: dns_cluster_domain}
           openstack_ca: {get_param: openstack_ca}
           nodes_server_group_id: {get_resource: nodes_server_group}
+          availability_zone: {get_param: availability_zone}
 
 outputs:
 

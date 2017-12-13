@@ -272,6 +272,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         kube_tag = mock_cluster.labels.get('kube_tag')
         container_infra_prefix = mock_cluster.labels.get(
             'container_infra_prefix')
+        availability_zone = mock_cluster.labels.get(
+            'availability_zone')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -297,7 +299,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'region_name': mock_osc.cinder_region_name.return_value,
             'kube_tag': kube_tag,
             'container_infra_prefix': container_infra_prefix,
-            'nodes_affinity_policy': 'soft-anti-affinity'}}
+            'nodes_affinity_policy': 'soft-anti-affinity',
+            'availability_zone': availability_zone,
+        }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
                                                 mock_cluster,
@@ -356,6 +360,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         kube_tag = mock_cluster.labels.get('kube_tag')
         container_infra_prefix = mock_cluster.labels.get(
             'container_infra_prefix')
+        availability_zone = mock_cluster.labels.get(
+            'availability_zone')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -383,7 +389,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'kubernetes_port': 8080,
             'kube_tag': kube_tag,
             'container_infra_prefix': container_infra_prefix,
-            'nodes_affinity_policy': 'soft-anti-affinity'}}
+            'nodes_affinity_policy': 'soft-anti-affinity',
+            'availability_zone': availability_zone,
+        }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
                                                 mock_cluster,

@@ -102,7 +102,7 @@ class SwarmModeTemplateDefinition(template_def.BaseTemplateDefinition):
         osc = self.get_osc(context)
         extra_params['magnum_url'] = osc.magnum_url()
 
-        label_list = ['rexray_preempt']
+        label_list = ['rexray_preempt', 'availability_zone']
 
         extra_params['auth_url'] = context.auth_url
         extra_params['nodes_affinity_policy'] = \
