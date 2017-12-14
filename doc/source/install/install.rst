@@ -50,3 +50,4 @@ Optionally, you can install the following components:
    install-obs.rst
    install-rdo.rst
    install-ubuntu.rst
+   install-guide-from-source.rst
