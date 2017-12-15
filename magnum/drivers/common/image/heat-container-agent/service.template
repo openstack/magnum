@@ -1,0 +1,11 @@
+[Unit]
+Description=Heat Container Agent system image
+
+[Service]
+ExecStart=$EXEC_START
+ExecStop=$EXEC_STOP
+Restart=on-failure
+WorkingDirectory=$DESTDIR
+
+[Install]
+WantedBy=multi-user.target

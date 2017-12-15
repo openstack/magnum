@@ -1,0 +1,5 @@
+#!/bin/bash
+
+/opt/heat-container-agent/configure_container_agent.sh
+
+exec /usr/bin/os-collect-config --debug

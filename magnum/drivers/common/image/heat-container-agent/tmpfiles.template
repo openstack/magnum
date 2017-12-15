@@ -1,0 +1,10 @@
+d    /var/lib/heat-container-agent - - - - -
+Z    /var/lib/heat-container-agent - - - - -
+d    /var/run/heat-config - - - - -
+Z    /var/run/heat-config - - - - -
+d    /var/run/os-collect-config - - - - -
+Z    /var/run/os-collect-config - - - - -
+d    /opt/stack/os-config-refresh - - - - -
+Z    /opt/stack/os-config-refresh - - - - -
+d    /srv/magnum - - - - -
+Z    /srv/magnum - - - - -
