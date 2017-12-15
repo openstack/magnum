@@ -349,39 +349,6 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/write-network-config.sh}
 
-  write_prometheus_configmap:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/write-prometheus-configmap.yaml}
-
-
-  write_prometheus_service:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/write-prometheus-service.yaml}
-
-  write_grafana_service:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config:
-        str_replace:
-          template: {get_file: ../../common/templates/kubernetes/fragments/write-grafana-service.yaml}
-          params:
-            "$ADMIN_PASSWD": {get_param: grafana_admin_passwd}
-
-  enable_monitoring:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config:
-        str_replace:
-          template: {get_file: ../../common/templates/kubernetes/fragments/enable-monitoring.sh}
-          params:
-            "$ADMIN_PASSWD": {get_param: grafana_admin_passwd}
-
   network_config_service:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -442,6 +409,12 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/add-proxy.sh}
 
+  start_container_agent:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: ../../common/templates/kubernetes/fragments/start-container-agent.sh}
+
   kube_master_init:
     type: OS::Heat::MultipartMime
     properties:
@@ -456,17 +429,32 @@ resources:
         - config: {get_resource: add_proxy}
         - config: {get_resource: enable_services}
         - config: {get_resource: write_network_config}
-        - config: {get_resource: write_prometheus_configmap}
-        - config: {get_resource: write_prometheus_service}
-        - config: {get_resource: write_grafana_service}
         - config: {get_resource: network_config_service}
         - config: {get_resource: network_service}
         - config: {get_resource: kube_system_namespace_service}
         - config: {get_resource: enable_kube_controller_manager_scheduler}
         - config: {get_resource: enable_kube_proxy}
         - config: {get_resource: kube_ui_service}
-        - config: {get_resource: enable_monitoring}
+        - config: {get_resource: start_container_agent}
         - config: {get_resource: master_wc_notify}
+
+  enable_prometheus_monitoring:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config:
+        str_replace:
+          template: {get_file: ../../common/templates/kubernetes/fragments/enable-prometheus-monitoring}
+          params:
+            "$ADMIN_PASSWD": {get_param: grafana_admin_passwd}
+
+  enable_prometheus_monitoring_deployment:
+    type: OS::Heat::SoftwareDeployment
+    properties:
+      signal_transport: HEAT_SIGNAL
+      config: {get_resource: enable_prometheus_monitoring}
+      server: {get_resource: kube-master}
+      actions: ['CREATE']
 
   ######################################################################
   #
@@ -483,7 +471,8 @@ resources:
       image: {get_param: server_image}
       flavor: {get_param: master_flavor}
       key_name: {get_param: ssh_key_name}
-      user_data_format: RAW
+      user_data_format: SOFTWARE_CONFIG
+      software_config_transport: POLL_SERVER_HEAT
       user_data: {get_resource: kube_master_init}
       networks:
         - port: {get_resource: kube_master_eth0}
