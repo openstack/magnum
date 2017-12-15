@@ -15,7 +15,7 @@ from oslo_policy import policy
 
 from magnum.common.policies import base
 
-QUOTA = 'quotas:%s'
+QUOTA = 'quota:%s'
 
 rules = [
     policy.DocumentedRuleDefault(
