@@ -288,6 +288,10 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             pods_network_cidr = flannel_cidr
         elif mock_cluster_template.network_driver == 'calico':
             pods_network_cidr = calico_ipv4pool
+        ingress_controller = mock_cluster.labels.get(
+            'ingress_controller')
+        ingress_controller_role = mock_cluster.labels.get(
+            'ingress_controller_role')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -320,8 +324,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'calico_cni_tag': calico_cni_tag,
             'calico_kube_controllers_tag': calico_kube_controllers_tag,
             'calico_ipv4pool': calico_ipv4pool,
-            'pods_network_cidr': pods_network_cidr
-        }}
+            'pods_network_cidr': pods_network_cidr,
+            'ingress_controller': ingress_controller,
+            'ingress_controller_role': ingress_controller_role}}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
                                                 mock_cluster,
@@ -396,6 +401,10 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             pods_network_cidr = flannel_cidr
         elif mock_cluster_template.network_driver == 'calico':
             pods_network_cidr = calico_ipv4pool
+        ingress_controller = mock_cluster.labels.get(
+            'ingress_controller')
+        ingress_controller_role = mock_cluster.labels.get(
+            'ingress_controller_role')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -430,8 +439,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'calico_cni_tag': calico_cni_tag,
             'calico_kube_controllers_tag': calico_kube_controllers_tag,
             'calico_ipv4pool': calico_ipv4pool,
-            'pods_network_cidr': pods_network_cidr
-        }}
+            'pods_network_cidr': pods_network_cidr,
+            'ingress_controller': ingress_controller,
+            'ingress_controller_role': ingress_controller_role}}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
                                                 mock_cluster,

@@ -114,7 +114,9 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                       'grafana_admin_passwd',
                       'kube_dashboard_enabled',
                       'etcd_volume_size',
-                      'cert_manager_api']
+                      'cert_manager_api',
+                      'ingress_controller',
+                      'ingress_controller_role']
 
         for label in label_list:
             extra_params[label] = cluster.labels.get(label)

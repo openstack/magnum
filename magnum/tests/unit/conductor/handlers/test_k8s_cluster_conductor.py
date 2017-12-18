@@ -98,7 +98,9 @@ class TestClusterConductorWithK8s(base.TestCase):
                        'kube_dashboard_enabled': 'True',
                        'docker_volume_type': 'lvmdriver-1',
                        'availability_zone': 'az_1',
-                       'cert_manager_api': 'False'},
+                       'cert_manager_api': 'False',
+                       'ingress_controller': 'i-controller',
+                       'ingress_controller_role': 'i-controller-role'},
             'master_flavor_id': 'master_flavor_id',
             'flavor_id': 'flavor_id',
         }
@@ -179,7 +181,9 @@ class TestClusterConductorWithK8s(base.TestCase):
                        'docker_volume_type': 'lvmdriver-1',
                        'etcd_volume_size': None,
                        'availability_zone': 'az_1',
-                       'cert_manager_api': 'False'},
+                       'cert_manager_api': 'False',
+                       'ingress_controller': 'i-controller',
+                       'ingress_controller_role': 'i-controller-role'},
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
@@ -237,6 +241,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             "nodes_affinity_policy": "soft-anti-affinity",
             'availability_zone': 'az_1',
             'cert_manager_api': 'False',
+            'ingress_controller': 'i-controller',
+            'ingress_controller_role': 'i-controller-role',
         }
         if missing_attr is not None:
             expected.pop(mapping[missing_attr], None)
@@ -336,6 +342,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             "nodes_affinity_policy": "soft-anti-affinity",
             'availability_zone': 'az_1',
             'cert_manager_api': 'False',
+            'ingress_controller': 'i-controller',
+            'ingress_controller_role': 'i-controller-role',
         }
 
         self.assertEqual(expected, definition)
@@ -422,6 +430,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             "nodes_affinity_policy": "soft-anti-affinity",
             'availability_zone': 'az_1',
             'cert_manager_api': 'False',
+            'ingress_controller': 'i-controller',
+            'ingress_controller_role': 'i-controller-role',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -501,6 +511,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'verify_ca': True,
             'openstack_ca': '',
             'cert_manager_api': 'False',
+            'ingress_controller': 'i-controller',
+            'ingress_controller_role': 'i-controller-role',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -575,6 +587,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'verify_ca': True,
             'openstack_ca': '',
             'cert_manager_api': 'False',
+            'ingress_controller': 'i-controller',
+            'ingress_controller_role': 'i-controller-role',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -750,6 +764,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             "nodes_affinity_policy": "soft-anti-affinity",
             'availability_zone': 'az_1',
             'cert_manager_api': 'False',
+            'ingress_controller': 'i-controller',
+            'ingress_controller_role': 'i-controller-role',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
