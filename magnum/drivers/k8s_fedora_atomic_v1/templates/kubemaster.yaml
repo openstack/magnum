@@ -303,6 +303,16 @@ parameters:
     type: string
     description: Configure the IP pool/range from which pod IPs will be chosen
 
+  ingress_controller:
+    type: string
+    description: >
+      ingress controller backend to use
+
+  ingress_controller_role:
+    type: string
+    description: >
+      node role where the ingress controller should run
+
 resources:
 
   master_wait_handle:
@@ -396,6 +406,8 @@ resources:
             "$CALICO_CNI_TAG": {get_param: calico_cni_tag}
             "$CALICO_KUBE_CONTROLLERS_TAG": {get_param: calico_kube_controllers_tag}
             "$CALICO_IPV4POOL": {get_param: calico_ipv4pool}
+            "$INGRESS_CONTROLLER": {get_param: ingress_controller}
+            "$INGRESS_CONTROLLER_ROLE": {get_param: ingress_controller_role}
 
   install_openstack_ca:
     type: OS::Heat::SoftwareConfig
@@ -577,6 +589,24 @@ resources:
     properties:
       signal_transport: HEAT_SIGNAL
       config: {get_resource: calico_service}
+      server: {get_resource: kube-master}
+      actions: ['CREATE']
+
+  enable_ingress_controller:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config:
+        str_replace:
+          params:
+            $enable-ingress-traefik: {get_file: ../../common/templates/kubernetes/fragments/enable-ingress-traefik}
+          template: {get_file: ../../common/templates/kubernetes/fragments/enable-ingress-controller}
+
+  enable_ingress_controller_deployment:
+    type: OS::Heat::SoftwareDeployment
+    properties:
+      signal_transport: HEAT_SIGNAL
+      config: {get_resource: enable_ingress_controller}
       server: {get_resource: kube-master}
       actions: ['CREATE']
 
