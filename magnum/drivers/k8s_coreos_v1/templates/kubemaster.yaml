@@ -115,6 +115,10 @@ parameters:
     type: boolean
     description: whether or not to disable kubernetes dashboard
 
+  influx_grafana_dashboard_enabled:
+    type: boolean
+    description: whether or not to disable kubernetes dashboard
+
   verify_ca:
     type: boolean
     description: whether or not to validate certificate authority
@@ -293,6 +297,7 @@ resources:
             "$TLS_DISABLED": {get_param: tls_disabled}
             "$VERIFY_CA": {get_param: verify_ca}
             "$KUBE_DASHBOARD_ENABLED": {get_param: kube_dashboard_enabled}
+            "$INFLUX_GRAFANA_DASHBOARD_ENABLED": {get_param: enable_influx_grafana_dashboard}
             "$KUBE_VERSION": {get_param: kube_version}
             "$KUBE_DASHBOARD_VERSION": {get_param: kube_dashboard_version}
             "$CLUSTER_UUID": {get_param: cluster_uuid}
