@@ -121,7 +121,8 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                       'kubeapi_options',
                       'kubeproxy_options',
                       'kubecontroller_options',
-                      'kubescheduler_options']
+                      'kubescheduler_options',
+                      'influx_grafana_dashboard_enabled']
 
         for label in label_list:
             extra_params[label] = cluster.labels.get(label)

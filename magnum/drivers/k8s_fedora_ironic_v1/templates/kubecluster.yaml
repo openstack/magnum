@@ -248,6 +248,11 @@ parameters:
     description: whether or not to disable kubernetes dashboard
     default: True
 
+  influx_grafana_dashboard_enabled:
+    type: boolean
+    description: Enable influxdb with grafana dashboard for data from heapster
+    default: False
+
   verify_ca:
     type: boolean
     description: whether or not to validate certificate authority
@@ -510,6 +515,7 @@ resources:
           kubernetes_port: {get_param: kubernetes_port}
           tls_disabled: {get_param: tls_disabled}
           kube_dashboard_enabled: {get_param: kube_dashboard_enabled}
+          influx_grafana_dashboard_enabled: {get_param: influx_grafana_dashboard_enabled}
           verify_ca: {get_param: verify_ca}
           secgroup_base_id: {get_resource: secgroup_base}
           secgroup_kube_master_id: {get_resource: secgroup_kube_master}

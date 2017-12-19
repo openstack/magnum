@@ -341,6 +341,9 @@ the table are linked to more details elsewhere in the user guide.
 | `kube_dashboard_enabled`_             | - true             | true          |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
+| `influx_grafana_dashboard_enabled`_   | - true             | false         |
+|                                       | - false            |               |
++---------------------------------------+--------------------+---------------+
 | `docker_volume_type`_                 | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
 | `etcd_volume_size`_                   | etcd storage       | 0             |
@@ -1163,6 +1166,11 @@ _`kubescheduler_options`
   For more details, refer to the `kube scheduler admin guide
   <https://kubernetes.io/docs/admin/kube-scheduler//>`_.
   By default no additional options are passed.
+
+_`influx_grafana_dashboard_enabled`
+  The kubernetes dashboard comes with heapster enabled. If this
+  label is set, an influxdb and grafana instance will be deployed,
+  heapster will push data to influx and grafana will project them.
 
 External load balancer for services
 -----------------------------------

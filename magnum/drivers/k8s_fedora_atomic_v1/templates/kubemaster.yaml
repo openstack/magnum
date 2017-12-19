@@ -112,6 +112,10 @@ parameters:
     type: boolean
     description: whether or not to disable kubernetes dashboard
 
+  influx_grafana_dashboard_enabled:
+    type: boolean
+    description: Enable influxdb with grafana dashboard for data from heapster
+
   verify_ca:
     type: boolean
     description: whether or not to validate certificate authority
@@ -406,6 +410,7 @@ resources:
             "$CLUSTER_SUBNET": {get_param: fixed_subnet}
             "$TLS_DISABLED": {get_param: tls_disabled}
             "$KUBE_DASHBOARD_ENABLED": {get_param: kube_dashboard_enabled}
+            "$INFLUX_GRAFANA_DASHBOARD_ENABLED": {get_param: influx_grafana_dashboard_enabled}
             "$VERIFY_CA": {get_param: verify_ca}
             "$CLUSTER_UUID": {get_param: cluster_uuid}
             "$MAGNUM_URL": {get_param: magnum_url}
@@ -513,12 +518,6 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/kube-apiserver-to-kubelet-role.sh}
 
-  kube_ui_service:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/kube-dashboard-service.sh}
-
   core_dns_service:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -569,7 +568,6 @@ resources:
         - config: {get_resource: network_service}
         - config: {get_resource: kube_apiserver_to_kubelet_role}
         - config: {get_resource: core_dns_service}
-        - config: {get_resource: kube_ui_service}
         - config: {get_resource: master_wc_notify}
 
   enable_prometheus_monitoring:
@@ -637,6 +635,20 @@ resources:
     properties:
       signal_transport: HEAT_SIGNAL
       config: {get_resource: enable_ingress_controller}
+      server: {get_resource: kube-master}
+      actions: ['CREATE']
+
+  kubernetes_dashboard:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config: {get_file: ../../common/templates/kubernetes/fragments/kube-dashboard-service.sh}
+
+  kubernetes_dashboard_deployment:
+    type: OS::Heat::SoftwareDeployment
+    properties:
+      signal_transport: HEAT_SIGNAL
+      config: {get_resource: kubernetes_dashboard}
       server: {get_resource: kube-master}
       actions: ['CREATE']
 

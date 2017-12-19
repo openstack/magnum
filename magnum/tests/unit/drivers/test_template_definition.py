@@ -266,6 +266,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'grafana_admin_passwd')
         kube_dashboard_enabled = mock_cluster.labels.get(
             'kube_dashboard_enabled')
+        influx_grafana_dashboard_enabled = mock_cluster.labels.get(
+            'influx_grafana_dashboard_enabled')
         docker_volume_type = mock_cluster.labels.get(
             'docker_volume_type')
         etcd_volume_size = mock_cluster.labels.get(
@@ -320,6 +322,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'prometheus_monitoring': prometheus_monitoring,
             'grafana_admin_passwd': grafana_admin_passwd,
             'kube_dashboard_enabled': kube_dashboard_enabled,
+            'influx_grafana_dashboard_enabled':
+                influx_grafana_dashboard_enabled,
             'docker_volume_type': docker_volume_type,
             'etcd_volume_size': etcd_volume_size,
             'kubelet_options': kubelet_options,
@@ -394,6 +398,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'grafana_admin_passwd')
         kube_dashboard_enabled = mock_cluster.labels.get(
             'kube_dashboard_enabled')
+        influx_grafana_dashboard_enabled = mock_cluster.labels.get(
+            'influx_grafana_dashboard_enabled')
         docker_volume_type = mock_cluster.labels.get(
             'docker_volume_type')
         etcd_volume_size = mock_cluster.labels.get(
@@ -448,6 +454,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'prometheus_monitoring': prometheus_monitoring,
             'grafana_admin_passwd': grafana_admin_passwd,
             'kube_dashboard_enabled': kube_dashboard_enabled,
+            'influx_grafana_dashboard_enabled':
+                influx_grafana_dashboard_enabled,
             'docker_volume_type': docker_volume_type,
             'etcd_volume_size': etcd_volume_size,
             'kubelet_options': kubelet_options,

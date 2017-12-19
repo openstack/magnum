@@ -15,7 +15,7 @@ RUN dnf -y --setopt=tsflags=nodocs install \
     findutils os-collect-config os-apply-config \
     os-refresh-config dib-utils python-pip python-docker-py \
     python-yaml python-zaqarclient python2-oslo-log \
-    python-psutil && dnf clean all
+    python-psutil kubernetes-client && dnf clean all
 
 # pip installing dpath as python-dpath is an older version of dpath
 # install docker-compose
