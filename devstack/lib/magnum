@@ -225,6 +225,7 @@ function create_magnum_conf {
     # default in magnum.conf
     default_volume_type=$(iniget /etc/cinder/cinder.conf DEFAULT default_volume_type)
     iniset $MAGNUM_CONF cinder default_docker_volume_type $default_volume_type
+    iniset $MAGNUM_CONF drivers send_cluster_metrics False
 }
 
 function create_api_paste_conf {

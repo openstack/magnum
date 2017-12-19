@@ -29,7 +29,11 @@ drivers_opts = [
     cfg.StrOpt('openstack_ca_file',
                default="",
                help='Path to the OpenStack CA-bundle file to pass and '
-                    'install in all cluster nodes.')
+                    'install in all cluster nodes.'),
+    cfg.BoolOpt('send_cluster_metrics',
+                default=True,
+                help='Allow periodic tasks to pull COE data and send to '
+                     'ceilometer.')
 ]
 
 
