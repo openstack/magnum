@@ -82,7 +82,7 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
         if kube_tag:
             extra_params['kube_tag'] = kube_tag
 
-        container_infra_prefix = cluster_template.labels.get(
+        container_infra_prefix = cluster.labels.get(
             'container_infra_prefix')
         if container_infra_prefix:
             extra_params['container_infra_prefix'] = container_infra_prefix

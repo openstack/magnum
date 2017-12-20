@@ -270,7 +270,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         etcd_volume_size = mock_cluster.labels.get(
             'etcd_volume_size')
         kube_tag = mock_cluster.labels.get('kube_tag')
-        container_infra_prefix = mock_cluster_template.labels.get(
+        container_infra_prefix = mock_cluster.labels.get(
             'container_infra_prefix')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
@@ -353,7 +353,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         etcd_volume_size = mock_cluster.labels.get(
             'etcd_volume_size')
         kube_tag = mock_cluster.labels.get('kube_tag')
-        container_infra_prefix = mock_cluster_template.labels.get(
+        container_infra_prefix = mock_cluster.labels.get(
             'container_infra_prefix')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
