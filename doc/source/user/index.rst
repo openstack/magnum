@@ -442,7 +442,7 @@ is used as the baymodel parameter for this command instead of
 
 The 'cluster-create' command deploys a cluster, for example::
 
-    magnum cluster-create mycluster \
+    openstack coe cluster create mycluster \
                       --cluster-template mytemplate \
                       --node-count 8 \
                       --master-count 3
@@ -515,7 +515,7 @@ List
 The 'cluster-list' command lists all the clusters that belong to the tenant,
 for example::
 
-    magnum cluster-list
+    openstack coe cluster list
 
 Show
 ++++
@@ -523,7 +523,7 @@ Show
 The 'cluster-show' command prints all the details of a cluster, for
 example::
 
-    magnum cluster-show mycluster
+    openstack coe cluster show mycluster
 
 The properties include those not specified by users that have been
 assigned default values and properties from new resources that
@@ -534,7 +534,7 @@ Update
 
 A cluster can be modified using the 'cluster-update' command, for example::
 
-    magnum cluster-update mycluster replace node_count=8
+    openstack coe cluster update mycluster replace node_count=8
 
 The parameters are positional and their definition and usage are as
 follows.
@@ -585,7 +585,7 @@ Scaling a cluster means adding servers to or removing servers from the cluster.
 Currently, this is done through the 'cluster-update' operation by modifying
 the node-count attribute, for example::
 
-    magnum cluster-update mycluster replace node_count=2
+    openstack coe cluster update mycluster replace node_count=2
 
 When some nodes are removed, Magnum will attempt to find nodes with no
 containers to remove.  If some nodes with containers must be removed,
@@ -597,7 +597,7 @@ Delete
 The 'cluster-delete' operation removes the cluster by deleting all resources
 such as servers, network, storage;  for example::
 
-    magnum cluster-delete mycluster
+    openstack coe cluster delete mycluster
 
 The only parameter for the cluster-delete command is the ID or name of the
 cluster to delete.  Multiple clusters can be specified, separated by a blank
@@ -643,21 +643,18 @@ Install using distribution packages for OpenSuSE and SuSE Enterprise Linux::
 Verifying installation
 ----------------------
 
-Execute the `magnum` command with the `--version` argument to confirm that the
-client is installed and in the system path::
+Execute the `openstack help coe` command to confirm that the client is
+installed and in the system path::
 
-    $ magnum --version
+    $ openstack help coe
     1.1.0
-
-Note that the version returned may differ from the above, 1.1.0 was the latest
-available version at the time of writing.
 
 Using the command-line client
 -----------------------------
 
 Refer to the `OpenStack Command-Line Interface Reference
 <http://docs.openstack.org/cli-reference/magnum.html>`_ for a full list of the
-commands supported by the `magnum` command-line client.
+commands supported by the `openstack coe` command-line client.
 
 Horizon Interface
 =================
@@ -896,7 +893,7 @@ follows::
 Kubernetes also provides a browser UI. If the cluster has the
 Kubernetes Dashboard running; it can be accessed using::
 
-    eval $(magnum cluster-config <cluster-name>)
+    eval $(openstack coe cluster config <cluster-name>)
     kubectl proxy
 
     The browser can be accessed at http://localhost:8001/ui
@@ -914,7 +911,7 @@ the client that matches the version in the cluster.  To determine the
 version of the COE and container, use the command 'cluster-show' and
 look for the attribute *coe_version* and *container_version*::
 
-    magnum cluster-show k8s-cluster
+    openstack coe cluster show k8s-cluster
     +--------------------+------------------------------------------------------------+
     | Property           | Value                                                      |
     +--------------------+------------------------------------------------------------+
@@ -976,7 +973,7 @@ Service
 When Magnum deploys a Kubernetes cluster, it uses parameters defined in the
 ClusterTemplate and specified on the cluster-create command, for example::
 
-    magnum cluster-template-create k8s-cluster-template \
+    openstack coe cluster template create k8s-cluster-template \
                                --image fedora-atomic-latest \
                                --keypair testkey \
                                --external-network public \
@@ -986,7 +983,7 @@ ClusterTemplate and specified on the cluster-create command, for example::
                                --network-driver flannel \
                                --coe kubernetes
 
-    magnum cluster-create k8s-cluster \
+    openstack coe cluster create k8s-cluster \
                           --cluster-template k8s-cluster-template \
                           --master-count 3 \
                           --node-count 8
@@ -1134,7 +1131,7 @@ Magnum deploys a Swarm cluster using parameters defined in
 the ClusterTemplate and specified on the 'cluster-create' command, for
 example::
 
-    magnum cluster-template-create swarm-cluster-template \
+    openstack coe cluster template create swarm-cluster-template \
                                --image fedora-atomic-latest \
                                --keypair testkey \
                                --external-network public \
@@ -1143,7 +1140,7 @@ example::
                                --docker-volume-size 5 \
                                --coe swarm
 
-    magnum cluster-create swarm-cluster \
+    openstack coe cluster create swarm-cluster \
                       --cluster-template swarm-cluster-template \
                       --master-count 3 \
                       --node-count 8
@@ -1254,7 +1251,7 @@ offered.
 Magnum deploys a Mesos cluster using parameters defined in the ClusterTemplate
 and specified on the 'cluster-create' command, for example::
 
-    magnum cluster-template-create mesos-cluster-template \
+    openstack coe cluster template create mesos-cluster-template \
                            --image ubuntu-mesos \
                            --keypair testkey \
                            --external-network public \
@@ -1262,7 +1259,7 @@ and specified on the 'cluster-create' command, for example::
                            --flavor m1.small \
                            --coe mesos
 
-    magnum cluster-create mesos-cluster \
+    openstack coe cluster create mesos-cluster \
                       --cluster-template mesos-cluster-template \
                       --master-count 3 \
                       --node-count 8
@@ -1504,7 +1501,7 @@ For example, you can 'post' a JSON app description to
       "cmd": "while sleep 10; do date -u +%T; done"
     }
     END
-    $ API_ADDRESS=$(magnum cluster-show mesos-cluster | awk '/ api_address /{print $4}')
+    $ API_ADDRESS=$(openstack coe cluster show mesos-cluster | awk '/ api_address /{print $4}')
     $ curl -X POST -H "Content-Type: application/json" \
         http://${API_ADDRESS}:8080/v2/apps -d@app.json
 
@@ -1563,7 +1560,7 @@ support.
 First, create a ClusterTemplate; by default TLS is enabled in
 Magnum, therefore it does not need to be specified via a parameter::
 
-    magnum cluster-template-create secure-kubernetes \
+    openstack coe cluster template create secure-kubernetes \
                                --keypair default \
                                --external-network public \
                                --image fedora-atomic-latest \
@@ -1609,7 +1606,7 @@ Magnum, therefore it does not need to be specified via a parameter::
 Now create a cluster. Use the ClusterTemplate name as a template for cluster
 creation::
 
-    magnum cluster-create secure-k8s-cluster \
+    openstack coe cluster create secure-k8s-cluster \
                           --cluster-template secure-kubernetes \
                           --node-count 1
 
@@ -1639,7 +1636,7 @@ creation::
 Now run cluster-show command to get the details of the cluster and verify that
 the api_address is 'https'::
 
-    magnum cluster-show secure-k8scluster
+    openstack coe cluster show secure-k8scluster
     +--------------------+------------------------------------------------------------+
     | Property           | Value                                                      |
     +--------------------+------------------------------------------------------------+
@@ -1686,7 +1683,7 @@ Automated
 Magnum provides the command 'cluster-config' to help the user in setting
 up the environment and artifacts for TLS, for example::
 
-    magnum cluster-config swarm-cluster --dir myclusterconfig
+    openstack coe cluster config swarm-cluster --dir myclusterconfig
 
 This will display the necessary environment variables, which you
 can add to your environment::
@@ -1780,7 +1777,7 @@ User Examples
 Here are some examples for using the CLI on a secure Kubernetes and
 Swarm cluster.  You can perform all the TLS set up automatically by::
 
-    eval $(magnum cluster-config <cluster-name>)
+    eval $(openstack coe cluster config <cluster-name>)
 
 Or you can perform the manual steps as described above and specify
 the TLS options on the CLI.  The SSL artifacts are assumed to be
@@ -1809,7 +1806,7 @@ in the environment::
 
 You can specify the TLS options manually as follows::
 
-    KUBERNETES_URL=$(magnum cluster-show secure-k8s-cluster |
+    KUBERNETES_URL=$(openstack coe cluster show secure-k8s-cluster |
                      awk '/ api_address /{print $4}')
     kubectl version --certificate-authority=ca.pem \
                     --client-key=key.pem \
@@ -2113,7 +2110,7 @@ supports manual scaling through the attribute 'node_count' in the
 cluster, so you can scale the cluster simply by changing this
 attribute::
 
-  magnum cluster-update mycluster replace node_count=2
+  openstack coe cluster update mycluster replace node_count=2
 
 Refer to the section `Scale`_ lifecycle operation for more details.
 
@@ -2286,7 +2283,7 @@ The public Fedora image from Atomic currently meets this requirement.
 
    Specify 'cinder' as the volume-driver for Kubernetes::
 
-    magnum cluster-template-create k8s-cluster-template \
+    openstack coe cluster template create k8s-cluster-template \
                                --image fedora-23-atomic-7 \
                                --keypair testkey \
                                --external-network public \
@@ -2299,7 +2296,7 @@ The public Fedora image from Atomic currently meets this requirement.
 
 2. Create the cluster::
 
-    magnum cluster-create k8s-cluster \
+    openstack coe cluster create k8s-cluster \
                           --cluster-template k8s-cluster-template \
                           --node-count 1
 
@@ -2378,7 +2375,7 @@ Using Cinder in Mesos
    hosts are using the volume. If this is set to false, the driver
    will ensure data safety by locking the volume::
 
-    magnum cluster-template-create mesos-cluster-template \
+    openstack coe cluster template create mesos-cluster-template \
                                --image ubuntu-mesos \
                                --keypair testkey \
                                --external-network public \
@@ -2393,7 +2390,7 @@ Using Cinder in Mesos
 
 2. Create the Mesos cluster::
 
-    magnum cluster-create mesos-cluster \
+    openstack coe cluster create mesos-cluster \
                           --cluster-template mesos-cluster-template \
                           --node-count 1
 
@@ -2437,7 +2434,7 @@ the cinder volume in the JSON file ::
 
 4. Create the container using Marathon REST API ::
 
-    MASTER_IP=$(magnum cluster-show mesos-cluster | awk '/ api_address /{print $4}')
+    MASTER_IP=$(openstack coe cluster show mesos-cluster | awk '/ api_address /{print $4}')
     curl -X POST -H "Content-Type: application/json" \
     http://${MASTER_IP}:8080/v2/apps -d@mesos.json
 

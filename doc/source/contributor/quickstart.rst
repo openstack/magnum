@@ -215,12 +215,12 @@ when installing devstack use::
 
 To list the available commands and resources for magnum, use::
 
-    magnum help
+    openstack help coe
 
 To list out the health of the internal services, namely conductor, of magnum,
 use::
 
-    $ magnum service-list
+    $ openstack coe service list
 
     +----+---------------------------------------+------------------+-------+----------+-----------------+---------------------------+---------------------------+
     | id | host                                  | binary           | state | disabled | disabled_reason | created_at                | updated_at                |
@@ -250,10 +250,9 @@ Building a Kubernetes Cluster - Based on Fedora Atomic
 Create a ClusterTemplate. This is similar in nature to a flavor and describes
 to magnum how to construct the cluster. The ClusterTemplate specifies a Fedora
 Atomic image so the clusters which use this ClusterTemplate will be based on
-Fedora Atomic. The COE (Container Orchestration Engine) and keypair need to
-be specified as well::
+Fedora Atomic::
 
-    magnum cluster-template-create k8s-cluster-template \
+    openstack coe cluster template create k8s-cluster-template \
                            --image fedora-atomic-latest \
                            --keypair testkey \
                            --external-network public \
@@ -267,7 +266,7 @@ Create a cluster. Use the ClusterTemplate name as a template for cluster
 creation. This cluster will result in one master kubernetes node and one minion
 node::
 
-    magnum cluster-create k8s-cluster \
+    openstack coe cluster create k8s-cluster \
                           --cluster-template k8s-cluster-template \
                           --node-count 1
 
@@ -279,7 +278,7 @@ magnum to become confused.
 
 The existing clusters can be listed as follows::
 
-    $ magnum cluster-list
+    $ openstack coe cluster list
 
     +--------------------------------------+-------------+------------+--------------+-----------------+
     | uuid                                 | name        | node_count | master_count | status          |
@@ -289,13 +288,13 @@ The existing clusters can be listed as follows::
 
 More detailed information for a given cluster is obtained via::
 
-    magnum cluster-show k8s-cluster
+    openstack coe cluster show k8s-cluster
 
 After a cluster is created, you can dynamically add/remove node(s) to/from the
 cluster by updating the node_count attribute. For example, to add one more
 node::
 
-    magnum cluster-update k8s-cluster replace node_count=2
+    openstack coe cluster update k8s-cluster replace node_count=2
 
 Clusters in the process of updating will have a status of UPDATE_IN_PROGRESS.
 Magnum will update the status to UPDATE_COMPLETE when it is done updating
@@ -349,7 +348,7 @@ Upload the image to glance::
 Create a CoreOS Kubernetes ClusterTemplate, which is similar to the Atomic
 Kubernetes ClusterTemplate, except for pointing to a different image::
 
-    magnum cluster-template-create k8s-cluster-template-coreos \
+    openstack coe cluster template create k8s-cluster-template-coreos \
                            --image CoreOS \
                            --keypair testkey \
                            --external-network public \
@@ -361,7 +360,7 @@ Kubernetes ClusterTemplate, except for pointing to a different image::
 Create a CoreOS Kubernetes cluster. Use the CoreOS ClusterTemplate as a
 template for cluster creation::
 
-    magnum cluster-create k8s-cluster \
+    openstack coe cluster create k8s-cluster \
                       --cluster-template k8s-cluster-template-coreos \
                       --node-count 2
 
@@ -421,7 +420,7 @@ Here's how to set up the replicated redis example. Now we create a pod for the
 redis-master::
 
     # Using cluster-config command for faster configuration
-    eval $(magnum cluster-config k8s-cluster)
+    eval $(openstack coe cluster config k8s-cluster)
 
     # Test the cert and connection works
     kubectl version
@@ -444,15 +443,16 @@ redis slaves and sentinels::
     kubectl create -f ./redis-sentinel-controller.yaml
 
 Full lifecycle and introspection operations for each object are supported.
-For example, magnum cluster-create, magnum cluster-template-delete.
+For example, openstack coe cluster create, openstack coe cluster template
+delete.
 
 Now there are four redis instances (one master and three slaves) running
 across the cluster, replicating data between one another.
 
-Run the cluster-show command to get the IP of the cluster host on which the
-redis-master is running::
+Run the openstack coe cluster show command to get the IP of the cluster host on
+which the redis-master is running::
 
-    $ magnum cluster-show k8s-cluster
+    $ openstack coe cluster show k8s-cluster
 
     +--------------------+------------------------------------------------------------+
     | Property           | Value                                                      |
@@ -514,7 +514,7 @@ Additional useful commands from a given minion::
 After you finish using the cluster, you want to delete it. A cluster can be
 deleted as follows::
 
-    magnum cluster-delete k8s-cluster
+    openstack coe cluster delete k8s-cluster
 
 Building and Using a Swarm Cluster
 ==================================
@@ -523,7 +523,7 @@ Create a ClusterTemplate. It is very similar to the Kubernetes ClusterTemplate,
 except for the absence of some Kubernetes-specific arguments and the use of
 'swarm' as the COE::
 
-    magnum cluster-template-create swarm-cluster-template \
+    openstack coe cluster template create swarm-cluster-template \
                            --image fedora-atomic-latest \
                            --keypair testkey \
                            --external-network public \
@@ -539,13 +539,13 @@ Finally, create the cluster. Use the ClusterTemplate 'swarm-cluster-template'
 as a template for cluster creation. This cluster will result in one swarm
 manager node and two extra agent nodes::
 
-    magnum cluster-create swarm-cluster \
+    openstack coe cluster create swarm-cluster \
                           --cluster-template swarm-cluster-template \
                           --node-count 2
 
 Now that we have a swarm cluster we can start interacting with it::
 
-    $ magnum cluster-show swarm-cluster
+    $ openstack coe cluster show swarm-cluster
 
     +--------------------+------------------------------------------------------------+
     | Property           | Value                                                      |
@@ -617,7 +617,7 @@ Set the CLI to use TLS . This env var is consumed by docker.::
 Set the correct host to use which is the public ip address of swarm API server
 endpoint. This env var is consumed by docker.::
 
-    export DOCKER_HOST=$(magnum cluster-show swarm-cluster | awk '/ api_address /{print substr($4,7)}')
+    export DOCKER_HOST=$(openstack coe cluster show swarm-cluster | awk '/ api_address /{print substr($4,7)}')
 
 Next we will create a container in this swarm cluster. This container will ping
 the address 8.8.8.8 four times::
@@ -653,7 +653,7 @@ Alternatively, you can download and upload a pre-built image::
 Then, create a ClusterTemplate by using 'mesos' as the COE, with the rest of
 arguments similar to the Kubernetes ClusterTemplate::
 
-    magnum cluster-template-create mesos-cluster-template --image ubuntu-mesos \
+    openstack coe cluster template create mesos-cluster-template --image ubuntu-mesos \
                            --keypair testkey \
                            --external-network public \
                            --dns-nameserver 8.8.8.8 \
@@ -664,14 +664,14 @@ Finally, create the cluster. Use the ClusterTemplate 'mesos-cluster-template'
 as a template for cluster creation. This cluster will result in one mesos
 master node and two mesos slave nodes::
 
-    magnum cluster-create mesos-cluster \
+    openstack coe cluster create mesos-cluster \
                           --cluster-template mesos-cluster-template \
                           --node-count 2
 
 Now that we have a mesos cluster we can start interacting with it. First we
 need to make sure the cluster's status is 'CREATE_COMPLETE'::
 
-    $ magnum cluster-show mesos-cluster
+    $ openstack coe cluster show mesos-cluster
 
     +--------------------+------------------------------------------------------------+
     | Property           | Value                                                      |
@@ -714,7 +714,7 @@ Marathon. This container will ping the address 8.8.8.8::
       "cmd": "ping 8.8.8.8"
     }
     END
-    $ MASTER_IP=$(magnum cluster-show mesos-cluster | awk '/ api_address /{print $4}')
+    $ MASTER_IP=$(openstack coe cluster show mesos-cluster | awk '/ api_address /{print $4}')
     $ curl -X POST -H "Content-Type: application/json" \
         http://${MASTER_IP}:8080/v2/apps -d@mesos.json
 

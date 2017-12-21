@@ -20,7 +20,7 @@ Verify operation of the Container Infrastructure Management service.
 
    .. code-block:: console
 
-      $ magnum service-list
+      $ openstack coe service list
       +----+-----------------------+------------------+-------+
       | id | host                  | binary           | state |
       +----+-----------------------+------------------+-------+

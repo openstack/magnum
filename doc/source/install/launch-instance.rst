@@ -168,7 +168,7 @@ container.
 
    .. code-block:: console
 
-      $ magnum cluster-template-create swarm-cluster-template \
+      $ openstack coe cluster template create swarm-cluster-template \
                            --image fedora-atomic-latest \
                            --external-network public \
                            --dns-nameserver 8.8.8.8 \
@@ -215,7 +215,7 @@ container.
 
    .. code-block:: console
 
-      $ magnum cluster-create swarm-cluster \
+      $ openstack coe cluster create swarm-cluster \
                               --cluster-template swarm-cluster-template \
                               --master-count 1 \
                               --node-count 1 \
@@ -224,12 +224,12 @@ container.
 
    Your cluster is now being created. Creation time depends on your
    infrastructure's performance. You can check the status of your cluster
-   using the commands: ``magnum cluster-list`` or
-   ``magnum cluster-show swarm-cluster``.
+   using the commands: ``openstack coe cluster list`` or
+   ``openstack coe cluster show swarm-cluster``.
 
    .. code-block:: console
 
-      $ magnum cluster-list
+      $ openstack coe cluster list
       +--------------------------------------+---------------+---------+------------+--------------+-----------------+
       | uuid                                 | name          | keypair | node_count | master_count | status          |
       +--------------------------------------+---------------+---------+------------+--------------+-----------------+
@@ -238,7 +238,7 @@ container.
 
    .. code-block:: console
 
-      $ magnum cluster-show swarm-cluster
+      $ openstack coe cluster show swarm-cluster
       +---------------------+------------------------------------------------------------+
       | Property            | Value                                                      |
       +---------------------+------------------------------------------------------------+
@@ -266,7 +266,7 @@ container.
    .. code-block:: console
 
       $ mkdir myclusterconfig
-      $ $(magnum cluster-config swarm-cluster --dir myclusterconfig)
+      $ $(openstack coe cluster config swarm-cluster --dir myclusterconfig)
 
 
    The above command will save the authentication artifacts in the
@@ -291,7 +291,7 @@ container.
 
    .. code-block:: console
 
-      $ magnum cluster-delete swarm-cluster
+      $ openstack coe cluster delete swarm-cluster
       Request to delete cluster swarm-cluster has been accepted.
 
 Provision a Kubernetes cluster and create a deployment
@@ -308,7 +308,7 @@ will create a deployment.
 
    .. code-block:: console
 
-      $ magnum cluster-template-create kubernetes-cluster-template \
+      $ openstack coe cluster template create kubernetes-cluster-template \
                            --image fedora-atomic-latest \
                            --external-network public \
                            --dns-nameserver 8.8.8.8 \
@@ -355,7 +355,7 @@ will create a deployment.
 
    .. code-block:: console
 
-      $ magnum cluster-create kubernetes-cluster \
+      $ openstack coe cluster create kubernetes-cluster \
                               --cluster-template kubernetes-cluster-template \
                               --master-count 1 \
                               --node-count 1 \
@@ -364,12 +364,12 @@ will create a deployment.
 
    Your cluster is now being created. Creation time depends on your
    infrastructure's performance. You can check the status of your cluster
-   using the commands: ``magnum cluster-list`` or
-   ``magnum cluster-show kubernetes-cluster``.
+   using the commands: ``openstack coe cluster list`` or
+   ``openstack coe cluster show kubernetes-cluster``.
 
    .. code-block:: console
 
-      $ magnum cluster-list
+      $ openstack coe cluster list
       +--------------------------------------+--------------------+---------+------------+--------------+-----------------+
       | uuid                                 | name               | keypair | node_count | master_count | status          |
       +--------------------------------------+--------------------+---------+------------+--------------+-----------------+
@@ -378,7 +378,7 @@ will create a deployment.
 
    .. code-block:: console
 
-      $ magnum cluster-show kubernetes-cluster
+      $ openstack coe cluster show kubernetes-cluster
       +---------------------+------------------------------------------------------------+
       | Property            | Value                                                      |
       +---------------------+------------------------------------------------------------+
@@ -407,7 +407,7 @@ will create a deployment.
    .. code-block:: console
 
       $ mkdir -p ~/clusters/kubernetes-cluster
-      $ $(magnum cluster-config kubernetes-cluster --dir ~/clusters/kubernetes-cluster)
+      $ $(openstack coe cluster config kubernetes-cluster --dir ~/clusters/kubernetes-cluster)
 
 
    The above command will save the authentication artifacts in the directory
@@ -449,5 +449,5 @@ will create a deployment.
 
    .. code-block:: console
 
-      $ magnum cluster-delete kubernetes-cluster
+      $ openstack coe cluster delete kubernetes-cluster
       Request to delete cluster kubernetes-cluster has been accepted.
