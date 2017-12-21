@@ -205,13 +205,13 @@ when installing devstack use::
 
     $ openstack image list
 
-    +--------------------------------------+----------------------+
-    | ID                                   | Name                 |
-    +--------------------------------------+----------------------+
-    | d6ab5b70-c866-4697-ad8c-f40dbd18eaec | cirros-0.3.4.img     |
-    | 71fe76a1-58fb-45e9-89a4-6d772fefea07 | fedora-atomic-latest |
-    | 7d5acefc-9766-47be-9bff-7af5d6fbef35 | cirros               |
-    +--------------------------------------+----------------------+
+    +--------------------------------------+------------------------------------+--------+
+    | ID                                   | Name                               | Status |
+    +--------------------------------------+------------------------------------+--------+
+    | 0bc132b1-ee91-4bd8-b0fd-19deb57fb39f | Fedora-Atomic-26-20170723.0.x86_64 | active |
+    | 7537bbf2-f1c3-47da-97bb-38c09007e146 | cirros-0.3.5-x86_64-disk           | active |
+    +--------------------------------------+------------------------------------+--------+
+
 
 To list the available commands and resources for magnum, use::
 
@@ -253,7 +253,7 @@ Atomic image so the clusters which use this ClusterTemplate will be based on
 Fedora Atomic::
 
     openstack coe cluster template create k8s-cluster-template \
-                           --image fedora-atomic-latest \
+                           --image Fedora-Atomic-26-20170723.0.x86_64 \
                            --keypair testkey \
                            --external-network public \
                            --dns-nameserver 8.8.8.8 \
@@ -524,7 +524,7 @@ except for the absence of some Kubernetes-specific arguments and the use of
 'swarm' as the COE::
 
     openstack coe cluster template create swarm-cluster-template \
-                           --image fedora-atomic-latest \
+                           --image Fedora-Atomic-26-20170723.0.x86_64 \
                            --keypair testkey \
                            --external-network public \
                            --dns-nameserver 8.8.8.8 \
