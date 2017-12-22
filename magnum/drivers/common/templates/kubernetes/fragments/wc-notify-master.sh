@@ -2,6 +2,12 @@
 
 . /etc/sysconfig/heat-params
 
+if [ "$VERIFY_CA" == "True" ]; then
+    VERIFY_CA=""
+else
+    VERIFY_CA="-k"
+fi
+
 WC_NOTIFY_BIN=/usr/local/bin/wc-notify
 WC_NOTIFY_SERVICE=/etc/systemd/system/wc-notify.service
 
