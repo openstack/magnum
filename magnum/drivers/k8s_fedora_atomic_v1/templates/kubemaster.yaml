@@ -273,6 +273,16 @@ parameters:
       availability zone for master and nodes
     default: ""
 
+  ca_key:
+    type: string
+    description: key of internal ca for the kube certificate api manager
+    hidden: true
+
+  cert_manager_api:
+    type: boolean
+    description: true if the kubernetes cert api manager should be enabled
+    default: false
+
 resources:
 
   master_wait_handle:
@@ -359,6 +369,8 @@ resources:
             "$ETCD_LB_VIP": {get_param: etcd_lb_vip}
             "$DNS_SERVICE_IP": {get_param: dns_service_ip}
             "$DNS_CLUSTER_DOMAIN": {get_param: dns_cluster_domain}
+            "$CERT_MANAGER_API": {get_param: cert_manager_api}
+            "$CA_KEY": {get_param: ca_key}
 
   install_openstack_ca:
     type: OS::Heat::SoftwareConfig
@@ -483,6 +495,7 @@ resources:
         - config: {get_resource: configure_docker_storage}
         - config: {get_resource: configure_kubernetes}
         - config: {get_resource: add_proxy}
+        - config: {get_resource: start_container_agent}
         - config: {get_resource: enable_services}
         - config: {get_resource: write_network_config}
         - config: {get_resource: network_config_service}
@@ -490,7 +503,6 @@ resources:
         - config: {get_resource: kube_apiserver_to_kubelet_role}
         - config: {get_resource: core_dns_service}
         - config: {get_resource: kube_ui_service}
-        - config: {get_resource: start_container_agent}
         - config: {get_resource: master_wc_notify}
 
   enable_prometheus_monitoring:
@@ -508,6 +520,24 @@ resources:
     properties:
       signal_transport: HEAT_SIGNAL
       config: {get_resource: enable_prometheus_monitoring}
+      server: {get_resource: kube-master}
+      actions: ['CREATE']
+
+  enable_cert_manager_api:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config:
+        str_replace:
+          template: {get_file: ../../common/templates/kubernetes/fragments/enable-cert-api-manager}
+          params:
+            "$CA_KEY": {get_param: ca_key}
+
+  enable_cert_manager_api_deployment:
+    type: OS::Heat::SoftwareDeployment
+    properties:
+      signal_transport: HEAT_SIGNAL
+      config: {get_resource: enable_cert_manager_api}
       server: {get_resource: kube-master}
       actions: ['CREATE']
 

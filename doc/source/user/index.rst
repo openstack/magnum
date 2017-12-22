@@ -343,9 +343,10 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `container_infra_prefix`_             | see below          | ""            |
 +---------------------------------------+--------------------+---------------+
-+---------------------------------------+--------------------+---------------+
 | `availability_zone`_                  | AZ for the cluster | ""            |
 |                                       | nodes              |               |
++---------------------------------------+--------------------+---------------+
+| `cert_manager_api`_                   | see below          | false         |
 +---------------------------------------+--------------------+---------------+
 
 Cluster
@@ -1107,6 +1108,10 @@ _`kube_tag`
 _`kube_dashboard_enabled`
   This label triggers the deployment of the kubernetes dashboard.
   The default value is 1, meaning it will be enabled.
+
+_`cert_manager_api`
+  This label enables the kubernetes `certificate manager api
+  <https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/>`_.
 
 External load balancer for services
 -----------------------------------

@@ -11,7 +11,10 @@
 # under the License.
 
 from oslo_log import log as logging
+from oslo_utils import strutils
 
+from magnum.common.x509 import operations as x509
+from magnum.conductor.handlers.common import cert_manager
 from magnum.drivers.heat import k8s_template_def
 from magnum.drivers.heat import template_def
 from oslo_config import cfg
@@ -87,6 +90,14 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
             label_value = cluster.labels.get(label)
             if label_value:
                 extra_params[label] = label_value
+
+        cert_manager_api = cluster.labels.get('cert_manager_api')
+        if strutils.bool_from_string(cert_manager_api):
+            extra_params['cert_manager_api'] = cert_manager_api
+            ca_cert = cert_manager.get_cluster_ca_certificate(cluster)
+            extra_params['ca_key'] = x509.decrypt_key(
+                ca_cert.get_private_key(),
+                ca_cert.get_private_key_passphrase()).replace("\n", "\\n")
 
         return super(K8sFedoraTemplateDefinition,
                      self).get_params(context, cluster_template, cluster,

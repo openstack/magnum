@@ -113,7 +113,8 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                       'prometheus_monitoring',
                       'grafana_admin_passwd',
                       'kube_dashboard_enabled',
-                      'etcd_volume_size']
+                      'etcd_volume_size',
+                      'cert_manager_api']
 
         for label in label_list:
             extra_params[label] = cluster.labels.get(label)
