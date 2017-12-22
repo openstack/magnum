@@ -370,6 +370,17 @@ parameters:
       availability zone for master and nodes
     default: ""
 
+  cert_manager_api:
+    type: boolean
+    description: true if the kubernetes cert api manager should be enabled
+    default: false
+
+  ca_key:
+    type: string
+    description: key of internal ca for the kube certificate api manager
+    default: ""
+    hidden: true
+
 resources:
 
   ######################################################################
@@ -564,6 +575,8 @@ resources:
           openstack_ca: {get_param: openstack_ca}
           nodes_server_group_id: {get_resource: nodes_server_group}
           availability_zone: {get_param: availability_zone}
+          ca_key: {get_param: ca_key}
+          cert_manager_api: {get_param: cert_manager_api}
 
   ######################################################################
   #
