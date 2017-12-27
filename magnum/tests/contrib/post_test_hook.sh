@@ -197,22 +197,23 @@ if [[ "api" == "$coe" ]]; then
 
     # strigazi: don't run test_create_list_sign_delete_clusters because
     # it is very unstable in the CI
-    _magnum_tests="magnum.tests.functional.api.v1.test_bay"
-    _magnum_tests="$_magnum_tests magnum.tests.functional.api.v1.test_baymodel"
-    _magnum_tests="$_magnum_tests magnum.tests.functional.api.v1.test_cluster_template"
-    _magnum_tests="$_magnum_tests magnum.tests.functional.api.v1.test_cluster_template_admin"
-    _magnum_tests="$_magnum_tests magnum.tests.functional.api.v1.test_magnum_service"
-    _magnum_tests="$_magnum_tests magnum.tests.functional.api.v1.test_cluster.ClusterTest.test_create_cluster_for_nonexisting_cluster_template"
-    _magnum_tests="$_magnum_tests magnum.tests.functional.api.v1.test_cluster.ClusterTest.test_create_cluster_with_node_count_0"
-    _magnum_tests="$_magnum_tests magnum.tests.functional.api.v1.test_cluster.ClusterTest.test_create_cluster_with_nonexisting_flavor"
-    _magnum_tests="$_magnum_tests magnum.tests.functional.api.v1.test_cluster.ClusterTest.test_create_cluster_with_zero_masters"
-    _magnum_tests="$_magnum_tests magnum.tests.functional.api.v1.test_cluster.ClusterTest.test_delete_cluster_for_nonexisting_cluster"
-    _magnum_tests="$_magnum_tests magnum.tests.functional.api.v1.test_cluster.ClusterTest.test_update_cluster_for_nonexisting_cluster"
+    _magnum_tests="magnum_tempest_plugin.tests.api.v1.test_bay"
+    _magnum_tests="$_magnum_tests magnum_tempest_plugin.tests.api.v1.test_baymodel"
+    _magnum_tests="$_magnum_tests magnum_tempest_plugin.tests.api.v1.test_cluster_template"
+    _magnum_tests="$_magnum_tests magnum_tempest_plugin.tests.api.v1.test_cluster_template_admin"
+    _magnum_tests="$_magnum_tests magnum_tempest_plugin.tests.api.v1.test_magnum_service"
+    _magnum_tests="$_magnum_tests magnum_tempest_plugin.tests.api.v1.test_cluster.ClusterTest.test_create_cluster_for_nonexisting_cluster_template"
+    _magnum_tests="$_magnum_tests magnum_tempest_plugin.tests.api.v1.test_cluster.ClusterTest.test_create_cluster_with_node_count_0"
+    _magnum_tests="$_magnum_tests magnum_tempest_plugin.tests.api.v1.test_cluster.ClusterTest.test_create_cluster_with_nonexisting_flavor"
+    _magnum_tests="$_magnum_tests magnum_tempest_plugin.tests.api.v1.test_cluster.ClusterTest.test_create_cluster_with_zero_masters"
+    _magnum_tests="$_magnum_tests magnum_tempest_plugin.tests.api.v1.test_cluster.ClusterTest.test_delete_cluster_for_nonexisting_cluster"
+    _magnum_tests="$_magnum_tests magnum_tempest_plugin.tests.api.v1.test_cluster.ClusterTest.test_update_cluster_for_nonexisting_cluster"
 fi
 
 target="${coe}${special}"
+pushd $BASE/new/magnum-tempest-plugin
 sudo -E -H -u $USER tox -e functional-"$target" $_magnum_tests -- --concurrency=1
-
+popd
 EXIT_CODE=$?
 
 # Delete the keypair used in the functional test.
