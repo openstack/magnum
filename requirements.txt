@@ -20,7 +20,7 @@ iso8601>=0.1.11 # MIT
 jsonpatch!=1.20,>=1.16 # BSD
 keystoneauth1>=3.3.0 # Apache-2.0
 keystonemiddleware>=4.17.0 # Apache-2.0
-kubernetes>=1.0.0 # Apache-2.0
+kubernetes>=4.0.0 # Apache-2.0
 marathon!=0.9.1,>=0.8.6 # MIT
 netaddr>=0.7.18 # BSD
 oslo.concurrency>=3.20.0 # Apache-2.0
@@ -33,8 +33,8 @@ oslo.messaging>=5.29.0 # Apache-2.0
 oslo.middleware>=3.31.0 # Apache-2.0
 oslo.policy>=1.30.0 # Apache-2.0
 oslo.serialization!=2.19.1,>=2.18.0 # Apache-2.0
-oslo.service>=1.24.0 # Apache-2.0
-oslo.utils>=3.31.0 # Apache-2.0
+oslo.service!=1.28.1,>=1.24.0 # Apache-2.0
+oslo.utils>=3.33.0 # Apache-2.0
 oslo.versionedobjects>=1.28.0 # Apache-2.0
 oslo.reports>=1.18.0 # Apache-2.0
 pbr!=2.1.0,>=2.0.0 # Apache-2.0
