@@ -41,6 +41,18 @@ rules = [
         ]
     ),
     policy.DocumentedRuleDefault(
+        name=CLUSTER_TEMPLATE % 'detail_all_projects',
+        check_str=base.RULE_ADMIN_API,
+        description=('Retrieve a list of cluster templates with detail across '
+                     'projects.'),
+        operations=[
+            {
+                'path': '/v1/clustertemplates',
+                'method': 'GET'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
         name=CLUSTER_TEMPLATE % 'detail',
         check_str=base.RULE_DENY_CLUSTER_USER,
         description='Retrieve a list of cluster templates with detail.',
@@ -63,9 +75,32 @@ rules = [
         ]
     ),
     policy.DocumentedRuleDefault(
+        name=CLUSTER_TEMPLATE % 'get_one_all_projects',
+        check_str=base.RULE_ADMIN_API,
+        description=('Retrieve information about the given cluster template '
+                     'across project.'),
+        operations=[
+            {
+                'path': '/v1/clustertemplate/{clustertemplate_ident}',
+                'method': 'GET'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
         name=CLUSTER_TEMPLATE % 'get_all',
         check_str=base.RULE_DENY_CLUSTER_USER,
         description='Retrieve a list of cluster templates.',
+        operations=[
+            {
+                'path': '/v1/clustertemplates',
+                'method': 'GET'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
+        name=CLUSTER_TEMPLATE % 'get_all_all_projects',
+        check_str=base.RULE_ADMIN_API,
+        description='Retrieve a list of cluster templates across projects.',
         operations=[
             {
                 'path': '/v1/clustertemplates',

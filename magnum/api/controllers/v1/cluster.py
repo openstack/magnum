@@ -147,6 +147,12 @@ class Cluster(base.APIBase):
     container_version = wsme.wsattr(wtypes.text, readonly=True)
     """Version of the container software. Example: docker version."""
 
+    project_id = wsme.wsattr(wtypes.text, readonly=True)
+    """Project id of the cluster belongs to"""
+
+    user_id = wsme.wsattr(wtypes.text, readonly=True)
+    """User id of the cluster belongs to"""
+
     node_addresses = wsme.wsattr([wtypes.text], readonly=True)
     """IP addresses of cluster slave nodes"""
 
@@ -272,6 +278,23 @@ class ClustersController(base.Controller):
                                  sort_key, sort_dir, expand=False,
                                  resource_url=None):
 
+        context = pecan.request.context
+        if context.is_admin:
+            if expand:
+                policy.enforce(context, "cluster:detail_all_projects",
+                               action="cluster:detail_all_projects")
+            else:
+                policy.enforce(context, "cluster:get_all_all_projects",
+                               action="cluster:get_all_all_projects")
+            # TODO(flwang): Instead of asking an extra 'all_project's
+            # parameter, currently the design is allowing admin user to list
+            # all clusters from all projects. But the all_tenants is one of
+            # the condition to do project filter in DB API. And it's also used
+            # by periodic tasks. So the could be removed in the future and
+            # a new parameter 'project_id' would be added so that admin user
+            # can list clusters for a particular project.
+            context.all_tenants = True
+
         limit = api_utils.validate_limit(limit)
         sort_dir = api_utils.validate_sort_dir(sort_dir)
 
@@ -362,6 +385,18 @@ class ClustersController(base.Controller):
         :param cluster_ident: UUID or logical name of the Cluster.
         """
         context = pecan.request.context
+        if context.is_admin:
+            policy.enforce(context, "cluster:get_one_all_projects",
+                           action="cluster:get_one_all_projects")
+            # TODO(flwang): Instead of asking an extra 'all_project's
+            # parameter, currently the design is allowing admin user to list
+            # all clusters from all projects. But the all_tenants is one of
+            # the condition to do project filter in DB API. And it's also used
+            # by periodic tasks. So the could be removed in the future and
+            # a new parameter 'project_id' would be added so that admin user
+            # can list clusters for a particular project.
+            context.all_tenants = True
+
         cluster = api_utils.get_resource('Cluster', cluster_ident)
         policy.enforce(context, 'cluster:get', cluster.as_dict(),
                        action='cluster:get')

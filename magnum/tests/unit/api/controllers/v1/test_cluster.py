@@ -144,6 +144,17 @@ class TestListCluster(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['errors'])
 
+    @mock.patch("magnum.common.policy.enforce")
+    @mock.patch("magnum.common.context.make_context")
+    def test_get_one_by_uuid_admin(self, mock_context, mock_policy):
+        temp_uuid = uuidutils.generate_uuid()
+        obj_utils.create_test_cluster(self.context, uuid=temp_uuid,
+                                      project_id=temp_uuid)
+        self.context.is_admin = True
+        response = self.get_json(
+            '/clusters/%s' % temp_uuid)
+        self.assertEqual(temp_uuid, response['uuid'])
+
     def test_get_one_by_name_multiple_cluster(self):
         obj_utils.create_test_cluster(self.context, name='test_cluster',
                                       uuid=uuidutils.generate_uuid())
@@ -168,6 +179,19 @@ class TestListCluster(api_base.FunctionalTest):
         self.assertEqual(1, len(response['clusters']))
         self.assertEqual(cluster_list[-1].uuid,
                          response['clusters'][0]['uuid'])
+
+    @mock.patch("magnum.common.policy.enforce")
+    @mock.patch("magnum.common.context.make_context")
+    def test_get_all_with_all_projects(self, mock_context, mock_policy):
+        for id_ in range(4):
+            temp_uuid = uuidutils.generate_uuid()
+            obj_utils.create_test_cluster(self.context, id=id_,
+                                          uuid=temp_uuid,
+                                          project_id=id_)
+
+        self.context.is_admin = True
+        response = self.get_json('/clusters')
+        self.assertEqual(4, len(response['clusters']))
 
     def test_detail(self):
         cluster = obj_utils.create_test_cluster(self.context)
