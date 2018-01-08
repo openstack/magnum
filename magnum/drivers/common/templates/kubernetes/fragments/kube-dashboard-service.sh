@@ -99,7 +99,7 @@ do
 done
 
 #echo check for existence of kubernetes-dashboard deployment
-/usr/bin/kubectl get deployment kube-dashboard --namespace=kube-system
+/usr/bin/kubectl get deployment kubernetes-dashboard --namespace=kube-system
 
 if [ "\$?" != "0" ]; then
     /usr/bin/kubectl create -f /srv/kubernetes/manifests/kube-dash-deploy.yaml --namespace=kube-system
