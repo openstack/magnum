@@ -440,23 +440,23 @@ class BaseK8sTest(ClusterTest):
     def setUpClass(cls):
         super(BaseK8sTest, cls).setUpClass()
         cls.kube_api_url = cls.cs.clusters.get(cls.cluster.uuid).api_address
-        config = k8s_config.ConfigurationObject()
+        config = k8s_config.Configuration()
         config.host = cls.kube_api_url
         config.ssl_ca_cert = cls.ca_file
         config.cert_file = cls.cert_file
         config.key_file = cls.key_file
-        k8s_client = api_client.ApiClient(config=config)
+        k8s_client = api_client.ApiClient(configuration=config)
         cls.k8s_api = core_v1_api.CoreV1Api(k8s_client)
 
     def setUp(self):
         super(BaseK8sTest, self).setUp()
         self.kube_api_url = self.cs.clusters.get(self.cluster.uuid).api_address
-        config = k8s_config.ConfigurationObject()
+        config = k8s_config.Configuration()
         config.host = self.kube_api_url
         config.ssl_ca_cert = self.ca_file
         config.cert_file = self.cert_file
         config.key_file = self.key_file
-        k8s_client = api_client.ApiClient(config=config)
+        k8s_client = api_client.ApiClient(configuration=config)
         self.k8s_api = core_v1_api.CoreV1Api(k8s_client)
         # TODO(coreypobrien) https://bugs.launchpad.net/magnum/+bug/1551824
         utils.wait_for_condition(self._is_api_ready, 5, 600)
