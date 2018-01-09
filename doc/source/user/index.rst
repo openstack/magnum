@@ -123,7 +123,7 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   images, the os_distro names are:
 
   ========== =====================
-  COE        os-distro
+  COE        os_distro
   ========== =====================
   Kubernetes fedora-atomic, coreos
   Swarm      fedora-atomic

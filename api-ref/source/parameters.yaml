@@ -98,7 +98,7 @@ cluster_distro:
   in: body
   required: true
   description: |
-    Display the attribute ``os-distro`` defined as appropriate metadata in
+    Display the attribute ``os_distro`` defined as appropriate metadata in
     image for the bay/cluster driver.
 cluster_id:
   type: UUID
@@ -318,7 +318,7 @@ id_s:
 image_id:
   description: |
     The name or UUID of the base image in Glance to boot the servers for the
-    bay/cluster. The image must have the attribute ``os-distro`` defined as
+    bay/cluster. The image must have the attribute ``os_distro`` defined as
     appropriate for the bay/cluster driver.
   in: body
   required: true
