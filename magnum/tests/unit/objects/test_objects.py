@@ -353,7 +353,7 @@ class TestObject(test_base.TestCase, _TestObject):
 # object (fields and remotable methods). If either the version or hash
 # change, the static tree needs to be updated.
 # For more information on object version testing, read
-# http://docs.openstack.org/developer/magnum/objects.html
+# https://docs.openstack.org/magnum/latest/contributor/objects.html
 object_data = {
     'Cluster': '1.17-c32c07425ab0042c7370bef2902b4d21',
     'ClusterTemplate': '1.18-7fa94f4fdd027acfb4f022f202afdfb5',
@@ -380,8 +380,8 @@ class TestObjectVersions(test_base.TestCase):
                          "changed. Make sure the versions of the objects has "
                          "been bumped, and update the hashes in the static "
                          "fingerprints tree (object_data). For more "
-                         "information, read http://docs.openstack.org/"
-                         "developer/magnum/objects.html.")
+                         "information, read https://docs.openstack.org/"
+                         "magnum/latest/contributor/objects.html")
 
 
 class TestObjectSerializer(test_base.TestCase):
