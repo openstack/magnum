@@ -100,7 +100,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'flavor_id': 'flavor_id',
         }
         self.context.user_name = 'fake_user'
-        self.context.tenant = 'fake_tenant'
+        self.context.project_id = 'fake_tenant'
         osc_patcher = mock.patch('magnum.common.clients.OpenStackClients')
         self.mock_osc_class = osc_patcher.start()
         self.addCleanup(osc_patcher.stop)

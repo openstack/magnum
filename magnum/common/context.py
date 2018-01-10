@@ -41,7 +41,7 @@ class RequestContext(context.RequestContext):
 
         """
         super(RequestContext, self).__init__(auth_token=auth_token,
-                                             user=user_name,
+                                             user_id=user_name,
                                              tenant=project_name,
                                              is_admin=is_admin,
                                              read_only=read_only,

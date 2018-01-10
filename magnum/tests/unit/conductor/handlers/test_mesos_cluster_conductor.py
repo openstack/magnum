@@ -77,7 +77,7 @@ class TestClusterConductorWithMesos(base.TestCase):
                        },
         }
         self.context.user_name = 'mesos_user'
-        self.context.tenant = 'admin'
+        self.context.project_id = 'admin'
         self.context.domain_name = 'domainname'
         osc_patcher = mock.patch('magnum.common.clients.OpenStackClients')
         self.mock_osc_class = osc_patcher.start()

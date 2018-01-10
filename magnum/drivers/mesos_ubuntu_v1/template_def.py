@@ -58,7 +58,7 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
         osc = self.get_osc(context)
         extra_params['auth_url'] = context.auth_url
         extra_params['username'] = context.user_name
-        extra_params['tenant_name'] = context.tenant
+        extra_params['tenant_name'] = context.project_id
         extra_params['domain_name'] = context.domain_name
         extra_params['region_name'] = osc.cinder_region_name()
 

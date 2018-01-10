@@ -928,7 +928,7 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
         mock_context = mock.MagicMock()
         mock_context.auth_url = 'http://192.168.10.10:5000/v3'
         mock_context.user_name = 'mesos_user'
-        mock_context.tenant = 'admin'
+        mock_context.project_id = 'admin'
         mock_context.domain_name = 'domainname'
         mock_cluster_template = mock.MagicMock()
         mock_cluster_template.tls_disabled = False
