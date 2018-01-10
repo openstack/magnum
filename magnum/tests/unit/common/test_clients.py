@@ -10,7 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from barbicanclient import client as barbicanclient
+from barbicanclient.v1 import client as barbicanclient
 from glanceclient import client as glanceclient
 from heatclient import client as heatclient
 import mock
