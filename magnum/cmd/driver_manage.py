@@ -89,7 +89,7 @@ class DriverManager(app.App):
         super(DriverManager, self).__init__(
             description='Magnum Driver Manager',
             version=version.version_info,
-            command_manager=DriverCommandManager(None),
+            command_manager=DriverCommandManager('magnum'),
             deferred_help=True)
 
 
