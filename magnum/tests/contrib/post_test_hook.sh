@@ -178,7 +178,8 @@ popd
 
 create_test_data $coe $special
 
-local _magnum_tests=""
+_magnum_tests=""
+target="${coe}${special}"
 if [[ "api" == "$coe" ]]; then
     sudo chown -R $USER:stack $BASE/new/tempest
 
@@ -194,6 +195,9 @@ if [[ "api" == "$coe" ]]; then
 
     # show tempest config with magnum
     cat $TEMPEST_CONFIG
+    # tempest tox env is looking for /etc/tempest/tempest.conf
+    sudo mkdir -p /etc/tempest
+    sudo cp $TEMPEST_CONFIG /etc/tempest/tempest.conf
 
     # strigazi: don't run test_create_list_sign_delete_clusters because
     # it is very unstable in the CI
@@ -208,13 +212,17 @@ if [[ "api" == "$coe" ]]; then
     _magnum_tests="$_magnum_tests magnum_tempest_plugin.tests.api.v1.test_cluster.ClusterTest.test_create_cluster_with_zero_masters"
     _magnum_tests="$_magnum_tests magnum_tempest_plugin.tests.api.v1.test_cluster.ClusterTest.test_delete_cluster_for_nonexisting_cluster"
     _magnum_tests="$_magnum_tests magnum_tempest_plugin.tests.api.v1.test_cluster.ClusterTest.test_update_cluster_for_nonexisting_cluster"
+
+    pushd $BASE/new/magnum-tempest-plugin
+    sudo cp $CREDS_FILE .
+    sudo -E -H -u $USER tox -e functional-"$target" $_magnum_tests -- --concurrency=1
+    EXIT_CODE=$?
+    popd
+else
+    sudo -E -H -u $USER tox -e functional-"$target" $_magnum_tests -- --concurrency=1
+    EXIT_CODE=$?
 fi
 
-target="${coe}${special}"
-pushd $BASE/new/magnum-tempest-plugin
-sudo -E -H -u $USER tox -e functional-"$target" $_magnum_tests -- --concurrency=1
-popd
-EXIT_CODE=$?
 
 # Delete the keypair used in the functional test.
 echo_summary "Running keypair-delete"

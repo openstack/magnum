@@ -50,14 +50,14 @@ class K8sAPI(core_v1_api.CoreV1Api):
             (self.ca_file, self.key_file,
              self.cert_file) = create_client_files(cluster, context)
 
-        config = k8s_config.ConfigurationObject()
+        config = k8s_config.Configuration()
         config.host = cluster.api_address
         config.ssl_ca_cert = self.ca_file.name
         config.cert_file = self.cert_file.name
         config.key_file = self.key_file.name
 
         # build a connection with Kubernetes master
-        client = api_client.ApiClient(config=config)
+        client = api_client.ApiClient(configuration=config)
 
         super(K8sAPI, self).__init__(client)
 
