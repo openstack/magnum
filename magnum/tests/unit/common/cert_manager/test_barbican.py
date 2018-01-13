@@ -14,9 +14,9 @@
 
 import uuid
 
-from barbicanclient import client as barbican_client
-from barbicanclient import containers
-from barbicanclient import secrets
+from barbicanclient.v1 import client as barbican_client
+from barbicanclient.v1 import containers
+from barbicanclient.v1 import secrets
 import mock
 from mock import patch
 
