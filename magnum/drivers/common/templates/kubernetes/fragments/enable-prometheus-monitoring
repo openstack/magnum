@@ -398,7 +398,7 @@ writeFile $KUBE_MON_BIN "$KUBE_MON_BIN_CONTENT"
 
 # Write the monitoring service
 KUBE_MON_SERVICE_CONTENT='''[Unit]
-Requires=kubelet.service
+Description=Enable Prometheus monitoring stack
 
 [Service]
 Type=oneshot

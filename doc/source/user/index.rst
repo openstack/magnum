@@ -1749,6 +1749,25 @@ Signed Certificate
       extendedKeyUsage = clientAuth
       END
 
+  For RBAC enabled kubernetes clusters you need to use the name admin and
+  system:masters as Organization (O=)::
+
+      $ cat > client.conf << END
+      [req]
+      distinguished_name = req_distinguished_name
+      req_extensions     = req_ext
+      prompt = no
+      [req_distinguished_name]
+      CN = admin
+      O = system:masters
+      OU=OpenStack/Magnum
+      C=US
+      ST=TX
+      L=Austin
+      [req_ext]
+      extendedKeyUsage = clientAuth
+      END
+
   Once you have client.conf, you can run the openssl 'req' command to
   generate the CSR::
 

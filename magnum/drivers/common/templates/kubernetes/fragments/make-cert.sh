@@ -109,7 +109,7 @@ distinguished_name = req_distinguished_name
 req_extensions     = req_ext
 prompt = no
 [req_distinguished_name]
-CN = kubernetes.default.svc
+CN = kubernetes
 [req_ext]
 subjectAltName = ${sans}
 extendedKeyUsage = clientAuth,serverAuth

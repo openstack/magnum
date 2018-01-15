@@ -23,15 +23,15 @@ if [ "$TLS_DISABLED" == "True" ]; then
 else
     KUBE_API_ADDRESS="--bind-address=0.0.0.0 --secure-port=$KUBE_API_PORT"
     # insecure port is used internaly
-    KUBE_API_ADDRESS="$KUBE_API_ADDRESS --insecure-port=8080"
-    KUBE_API_ARGS="$KUBE_API_ARGS --tls-cert-file=$CERT_DIR/server.crt"
+    KUBE_API_ADDRESS="$KUBE_API_ADDRESS --insecure-bind-address=127.0.0.1 --insecure-port=8080"
+    KUBE_API_ARGS="$KUBE_API_ARGS --authorization-mode=Node,RBAC --tls-cert-file=$CERT_DIR/server.crt"
     KUBE_API_ARGS="$KUBE_API_ARGS --tls-private-key-file=$CERT_DIR/server.key"
     KUBE_API_ARGS="$KUBE_API_ARGS --client-ca-file=$CERT_DIR/ca.crt"
 fi
 
 KUBE_ADMISSION_CONTROL=""
 if [ -n "${ADMISSION_CONTROL_LIST}" ] && [ "${TLS_DISABLED}" == "False" ]; then
-    KUBE_ADMISSION_CONTROL="--admission-control=${ADMISSION_CONTROL_LIST}"
+    KUBE_ADMISSION_CONTROL="--admission-control=NodeRestriction,${ADMISSION_CONTROL_LIST}"
 fi
 
 if [ -n "$TRUST_ID" ]; then
