@@ -56,9 +56,18 @@ def _generate_client_cert(issuer_name, ca_cert, ca_password, context=None):
     :returns: Magnum client cert uuid
     """
     client_password = short_id.generate_id()
+    # TODO(strigazi): set subject name and organization per driver
+    # For RBAC kubernetes cluster we need the client to have:
+    # subject_name: admin
+    # organization_name system:masters
+    # Non kubernetes drivers are not using the certificates fields
+    # for authorization
+    subject_name = 'admin'
+    organization_name = 'system:masters'
     client_cert = x509.generate_client_certificate(
         issuer_name,
-        CONDUCTOR_CLIENT_NAME,
+        subject_name,
+        organization_name,
         ca_cert['private_key'],
         encryption_password=client_password,
         ca_key_password=ca_password,

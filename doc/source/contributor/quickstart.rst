@@ -397,7 +397,12 @@ that specifies a few values.::
     req_extensions     = req_ext
     prompt = no
     [req_distinguished_name]
-    CN = Your Name
+    CN = admin
+    O = system:masters
+    OU=OpenStack/Magnum
+    C=US
+    ST=TX
+    L=Austin
     [req_ext]
     extendedKeyUsage = clientAuth
     END

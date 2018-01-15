@@ -46,20 +46,23 @@ def generate_ca_certificate(subject_name, encryption_password=None):
     )
 
 
-def generate_client_certificate(issuer_name, subject_name, ca_key,
+def generate_client_certificate(issuer_name, subject_name,
+                                organization_name, ca_key,
                                 encryption_password=None,
                                 ca_key_password=None):
     """Generate Client Certificate
 
     :param issuer_name: issuer name
     :param subject_name: subject name of client
+    :param organization_name: Organization name of client
     :param ca_key: private key of CA
     :param encryption_password: encryption passsword for private key
     :param ca_key_password: private key password for given ca key
     :returns: generated private key and certificate pair
     """
     return _generate_certificate(issuer_name, subject_name,
-                                 _build_client_extentions(), ca_key=ca_key,
+                                 _build_client_extentions(),
+                                 organization_name, ca_key=ca_key,
                                  encryption_password=encryption_password,
                                  ca_key_password=ca_key_password)
 
@@ -97,11 +100,14 @@ def _generate_self_signed_certificate(subject_name, extensions,
                                  encryption_password=encryption_password)
 
 
-def _generate_certificate(issuer_name, subject_name, extensions, ca_key=None,
+def _generate_certificate(issuer_name, subject_name, extensions,
+                          organization_name=None, ca_key=None,
                           encryption_password=None, ca_key_password=None):
 
     if not isinstance(subject_name, six.text_type):
         subject_name = six.text_type(subject_name.decode('utf-8'))
+    if organization_name and not isinstance(organization_name, six.text_type):
+        organization_name = six.text_type(organization_name.decode('utf-8'))
 
     private_key = rsa.generate_private_key(
         public_exponent=65537,
@@ -111,9 +117,11 @@ def _generate_certificate(issuer_name, subject_name, extensions, ca_key=None,
 
     # subject name is set as common name
     csr = x509.CertificateSigningRequestBuilder()
-    csr = csr.subject_name(x509.Name([
-        x509.NameAttribute(x509.OID_COMMON_NAME, subject_name),
-    ]))
+    name_attributes = [x509.NameAttribute(x509.OID_COMMON_NAME, subject_name)]
+    if organization_name:
+        name_attributes.append(x509.NameAttribute(x509.OID_ORGANIZATION_NAME,
+                                                  organization_name))
+    csr = csr.subject_name(x509.Name(name_attributes))
 
     for extention in extensions:
         csr = csr.add_extension(extention.value, critical=extention.critical)

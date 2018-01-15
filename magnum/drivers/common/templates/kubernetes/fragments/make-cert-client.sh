@@ -35,12 +35,14 @@ cert_dir=/etc/kubernetes/certs
 mkdir -p "$cert_dir"
 
 CA_CERT=$cert_dir/ca.crt
-CLIENT_CERT=$cert_dir/client.crt
-CLIENT_CSR=$cert_dir/client.csr
-CLIENT_KEY=$cert_dir/client.key
 
-#Get a token by user credentials and trust
-auth_json=$(cat << EOF
+function generate_certificates {
+    _CERT=$cert_dir/${1}.crt
+    _CSR=$cert_dir/${1}.csr
+    _KEY=$cert_dir/${1}.key
+    _CONF=$2
+    #Get a token by user credentials and trust
+    auth_json=$(cat << EOF
 {
     "auth": {
         "identity": {
@@ -59,52 +61,76 @@ auth_json=$(cat << EOF
 EOF
 )
 
-content_type='Content-Type: application/json'
-url="$AUTH_URL/auth/tokens"
-USER_TOKEN=`curl $VERIFY_CA -s -i -X POST -H "$content_type" -d "$auth_json" $url \
-    | grep X-Subject-Token | awk '{print $2}' | tr -d '[[:space:]]'`
+    content_type='Content-Type: application/json'
+    url="$AUTH_URL/auth/tokens"
+    USER_TOKEN=`curl $VERIFY_CA -s -i -X POST -H "$content_type" -d "$auth_json" $url \
+        | grep X-Subject-Token | awk '{print $2}' | tr -d '[[:space:]]'`
 
-# Get CA certificate for this cluster
-curl $VERIFY_CA -X GET \
-    -H "X-Auth-Token: $USER_TOKEN" \
-    -H "OpenStack-API-Version: container-infra latest" \
-    $MAGNUM_URL/certificates/$CLUSTER_UUID | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > $CA_CERT
+    # Get CA certificate for this cluster
+    curl $VERIFY_CA -X GET \
+        -H "X-Auth-Token: $USER_TOKEN" \
+        -H "OpenStack-API-Version: container-infra latest" \
+        $MAGNUM_URL/certificates/$CLUSTER_UUID | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > $CA_CERT
 
-# Create config for client's csr
-cat > ${cert_dir}/client.conf <<EOF
+    # Generate client's private key and csr
+    openssl genrsa -out "${_KEY}" 4096
+    chmod 400 "${_KEY}"
+    openssl req -new -days 1000 \
+            -key "${_KEY}" \
+            -out "${_CSR}" \
+            -reqexts req_ext \
+            -config "${_CONF}"
+
+    # Send csr to Magnum to have it signed
+    csr_req=$(python -c "import json; fp = open('${_CSR}'); print json.dumps({'cluster_uuid': '$CLUSTER_UUID', 'csr': fp.read()}); fp.close()")
+    curl  $VERIFY_CA -X POST \
+        -H "X-Auth-Token: $USER_TOKEN" \
+        -H "OpenStack-API-Version: container-infra latest" \
+        -H "Content-Type: application/json" \
+        -d "$csr_req" \
+        $MAGNUM_URL/certificates | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > ${_CERT}
+}
+
+#Kubelet Certs
+INSTANCE_NAME=$(hostname --short | sed 's/\.novalocal//')
+
+cat > ${cert_dir}/kubelet.conf <<EOF
 [req]
 distinguished_name = req_distinguished_name
 req_extensions     = req_ext
 prompt = no
 [req_distinguished_name]
-CN = kubernetes.default.svc
+CN = system:node:${INSTANCE_NAME}
+O=system:nodes
+OU=OpenStack/Magnum
+C=US
+ST=TX
+L=Austin
 [req_ext]
 keyUsage=critical,digitalSignature,keyEncipherment
 extendedKeyUsage=clientAuth
-subjectAltName=dirName:kubelet,dirName:kubeproxy
-[kubelet]
-CN=kubelet
-[kubeproxy]
-CN=kube-proxy
 EOF
 
-# Generate client's private key and csr
-openssl genrsa -out "${CLIENT_KEY}" 4096
-chmod 400 "${CLIENT_KEY}"
-openssl req -new -days 1000 \
-        -key "${CLIENT_KEY}" \
-        -out "${CLIENT_CSR}" \
-        -reqexts req_ext \
-        -config "${cert_dir}/client.conf"
+#kube-proxy Certs
+cat > ${cert_dir}/proxy.conf <<EOF
+[req]
+distinguished_name = req_distinguished_name
+req_extensions     = req_ext
+prompt = no
+[req_distinguished_name]
+CN = system:kube-proxy
+O=system:node-proxier
+OU=OpenStack/Magnum
+C=US
+ST=TX
+L=Austin
+[req_ext]
+keyUsage=critical,digitalSignature,keyEncipherment
+extendedKeyUsage=clientAuth
+EOF
 
-# Send csr to Magnum to have it signed
-csr_req=$(python -c "import json; fp = open('${CLIENT_CSR}'); print json.dumps({'cluster_uuid': '$CLUSTER_UUID', 'csr': fp.read()}); fp.close()")
-curl  $VERIFY_CA -X POST \
-    -H "X-Auth-Token: $USER_TOKEN" \
-    -H "OpenStack-API-Version: container-infra latest" \
-    -H "Content-Type: application/json" \
-    -d "$csr_req" \
-    $MAGNUM_URL/certificates | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > ${CLIENT_CERT}
+generate_certificates kubelet ${cert_dir}/kubelet.conf
+generate_certificates proxy ${cert_dir}/proxy.conf
 
 # Common certs and key are created for both etcd and kubernetes services.
 # Both etcd and kube user should have permission to access the certs and key.
@@ -113,4 +139,5 @@ usermod -a -G kube_etcd etcd
 usermod -a -G kube_etcd kube
 chmod 550 "${cert_dir}"
 chown -R kube:kube_etcd "${cert_dir}"
-chmod 440 $CLIENT_KEY
+chmod 440 ${cert_dir}/kubelet.key
+chmod 440 ${cert_dir}/proxy.key

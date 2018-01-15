@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 
 . /etc/sysconfig/heat-params
 
@@ -11,13 +11,14 @@ atomic install --storage ostree --system --system-package=no --name=kube-proxy $
 CERT_DIR=/etc/kubernetes/certs
 PROTOCOL=https
 FLANNEL_OPTIONS="-etcd-cafile $CERT_DIR/ca.crt \
--etcd-certfile $CERT_DIR/client.crt \
--etcd-keyfile $CERT_DIR/client.key"
+-etcd-certfile $CERT_DIR/proxy.crt \
+-etcd-keyfile $CERT_DIR/proxy.key"
 ETCD_CURL_OPTIONS="--cacert $CERT_DIR/ca.crt \
---cert $CERT_DIR/client.crt --key $CERT_DIR/client.key"
+--cert $CERT_DIR/proxy.crt --key $CERT_DIR/proxy.key"
 ETCD_SERVER_IP=${ETCD_SERVER_IP:-$KUBE_MASTER_IP}
 KUBE_PROTOCOL="https"
-KUBECONFIG=/etc/kubernetes/kubeconfig.yaml
+KUBELET_KUBECONFIG=/etc/kubernetes/kubelet-config.yaml
+PROXY_KUBECONFIG=/etc/kubernetes/proxy-config.yaml
 FLANNELD_CONFIG=/etc/sysconfig/flanneld
 
 if [ "$TLS_DISABLED" = "True" ]; then
@@ -35,35 +36,61 @@ EOF
 
 KUBE_MASTER_URI="$KUBE_PROTOCOL://$KUBE_MASTER_IP:$KUBE_API_PORT"
 
-cat << EOF >> ${KUBECONFIG}
+HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')
+cat << EOF >> ${KUBELET_KUBECONFIG}
 apiVersion: v1
-kind: Config
-users:
-- name: kubeclient
-  user:
-    client-certificate: ${CERT_DIR}/client.crt
-    client-key: ${CERT_DIR}/client.key
 clusters:
-- name: kubernetes
-  cluster:
-    server: ${KUBE_MASTER_URI}
+- cluster:
     certificate-authority: ${CERT_DIR}/ca.crt
+    server: ${KUBE_MASTER_URI}
+  name: kubernetes
 contexts:
 - context:
     cluster: kubernetes
-    user: kubeclient
-  name: service-account-context
-current-context: service-account-context
+    user: system:node:${HOSTNAME_OVERRIDE}
+  name: default
+current-context: default
+kind: Config
+preferences: {}
+users:
+- name: system:node:${HOSTNAME_OVERRIDE}
+  user:
+    as-user-extra: {}
+    client-certificate: ${CERT_DIR}/kubelet.crt
+    client-key: ${CERT_DIR}/kubelet.key
+EOF
+cat << EOF >> ${PROXY_KUBECONFIG}
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority: ${CERT_DIR}/ca.crt
+    server: ${KUBE_MASTER_URI}
+  name: kubernetes
+contexts:
+- context:
+    cluster: kubernetes
+    user: kube-proxy
+  name: default
+current-context: default
+kind: Config
+preferences: {}
+users:
+- name: kube-proxy
+  user:
+    as-user-extra: {}
+    client-certificate: ${CERT_DIR}/proxy.crt
+    client-key: ${CERT_DIR}/proxy.key
 EOF
 
 if [ "$TLS_DISABLED" = "True" ]; then
-    sed -i 's/^.*user:$//' ${KUBECONFIG}
-    sed -i 's/^.*client-certificate.*$//' ${KUBECONFIG}
-    sed -i 's/^.*client-key.*$//' ${KUBECONFIG}
-    sed -i 's/^.*certificate-authority.*$//' ${KUBECONFIG}
+    sed -i 's/^.*user:$//' ${KUBELET_KUBECONFIG}
+    sed -i 's/^.*client-certificate.*$//' ${KUBELET_KUBECONFIG}
+    sed -i 's/^.*client-key.*$//' ${KUBELET_KUBECONFIG}
+    sed -i 's/^.*certificate-authority.*$//' ${KUBELET_KUBECONFIG}
 fi
 
-chmod 0644 ${KUBECONFIG}
+chmod 0644 ${KUBELET_KUBECONFIG}
+chmod 0644 ${PROXY_KUBECONFIG}
 
 sed -i '
     /^KUBE_ALLOW_PRIV=/ s/=.*/="--allow-privileged='"$KUBE_ALLOW_PRIV"'"/
@@ -77,8 +104,8 @@ sed -i '
 # The hostname of the node is set to be the Nova name of the instance, and
 # the option --hostname-override for kubelet uses the hostname to register the node.
 # Using any other name will break the load balancer and cinder volume features.
-HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')
-KUBELET_ARGS="--pod-manifest-path=/etc/kubernetes/manifests --cadvisor-port=4194 --kubeconfig ${KUBECONFIG} --hostname-override=${HOSTNAME_OVERRIDE}"
+mkdir -p /etc/kubernetes/manifests
+KUBELET_ARGS="--pod-manifest-path=/etc/kubernetes/manifests --cadvisor-port=4194 --kubeconfig ${KUBELET_KUBECONFIG} --hostname-override=${HOSTNAME_OVERRIDE}"
 KUBELET_ARGS="${KUBELET_ARGS} --cluster_dns=${DNS_SERVICE_IP} --cluster_domain=${DNS_CLUSTER_DOMAIN}"
 
 if [ -n "$TRUST_ID" ]; then
@@ -99,17 +126,28 @@ if [ -n "${INSECURE_REGISTRY_URL}" ]; then
 fi
 
 # specified cgroup driver
-KUBELET_ARGS="${KUBELET_ARGS} --cgroup-driver=systemd"
+KUBELET_ARGS="${KUBELET_ARGS} --client-ca-file=${CERT_DIR}/ca.crt --tls-cert-file=${CERT_DIR}/kubelet.crt --tls-private-key-file=${CERT_DIR}/kubelet.key  --cgroup-driver=systemd"
+
+cat > /etc/kubernetes/get_require_kubeconfig.sh <<EOF
+#!/bin/bash
+
+KUBE_VERSION=\$(kubelet --version | awk '{print \$2}')
+min_version=v1.8.0
+if [[ "\${min_version}" != \$(echo -e "\${min_version}\n\${KUBE_VERSION}" | sort -s -t. -k 1,1 -k 2,2n -k 3,3n | head -n1) && "\${KUBE_VERSION}" != "devel" ]]; then
+    echo "--require-kubeconfig"
+fi
+EOF
+chmod +x /etc/kubernetes/get_require_kubeconfig.sh
 
 sed -i '
     /^KUBELET_ADDRESS=/ s/=.*/="--address=0.0.0.0"/
     /^KUBELET_HOSTNAME=/ s/=.*/=""/
     s/^KUBELET_API_SERVER=.*$//
-    /^KUBELET_ARGS=/ s|=.*|="'"${KUBELET_ARGS}"'"|
+    /^KUBELET_ARGS=/ s|=.*|="'"\$(/etc/kubernetes/get_require_kubeconfig.sh) ${KUBELET_ARGS}"'"|
 ' /etc/kubernetes/kubelet
 
 sed -i '
-    /^KUBE_PROXY_ARGS=/ s|=.*|=--kubeconfig='"$KUBECONFIG"'|
+    /^KUBE_PROXY_ARGS=/ s|=.*|=--kubeconfig='"$PROXY_KUBECONFIG"'|
 ' /etc/kubernetes/proxy
 
 if [ "$NETWORK_DRIVER" = "flannel" ]; then

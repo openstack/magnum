@@ -120,9 +120,7 @@ KUBE_DASH_SERVICE=/etc/systemd/system/kube-dash.service
     mkdir -p $(dirname ${KUBE_DASH_SERVICE})
     cat << EOF > ${KUBE_DASH_SERVICE}
 [Unit]
-After=kube-system-namespace.service
-Requires=kubelet.service
-Wants=kube-system-namespace.service
+Description=Enable kubernetes dashboard
 
 [Service]
 Type=oneshot
