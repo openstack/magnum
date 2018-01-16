@@ -38,6 +38,10 @@ cluster_def_opts = [
                       'Possible values include "affinity", "anti-affinity",'
                       '"soft-affinity" and "soft-anti-affinity".')
                ),
+    cfg.StrOpt('temp_cache_dir',
+               default="/var/lib/magnum/certificate-cache",
+               help='Explicitly specify the temporary directory to hold '
+                    'cached TLS certs.'),
 ]
 
 

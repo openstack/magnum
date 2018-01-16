@@ -226,6 +226,9 @@ class HeatPoller(object):
                                                    self.cluster)
             cert_manager.delete_certificates_from_cluster(self.cluster,
                                                           context=self.context)
+            cert_manager.delete_client_files(self.cluster,
+                                             context=self.context)
+
         except exception.ClusterNotFound:
             LOG.info('The cluster %s has been deleted by others.',
                      self.cluster.uuid)

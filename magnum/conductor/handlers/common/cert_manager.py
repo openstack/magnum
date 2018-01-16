@@ -12,8 +12,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import tempfile
-
 from oslo_log import log as logging
 import six
 
@@ -22,9 +20,15 @@ from magnum.common import exception
 from magnum.common import short_id
 from magnum.common.x509 import operations as x509
 
+import magnum.conf
+import os
+import shutil
+import tempfile
+
 CONDUCTOR_CLIENT_NAME = six.u('Magnum-Conductor')
 
 LOG = logging.getLogger(__name__)
+CONF = magnum.conf.CONF
 
 
 def _generate_ca_cert(issuer_name, context=None):
@@ -139,22 +143,59 @@ def get_cluster_magnum_cert(cluster, context=None):
 
 
 def create_client_files(cluster, context=None):
-    ca_cert = get_cluster_ca_certificate(cluster, context)
-    magnum_cert = get_cluster_magnum_cert(cluster, context)
+    if not os.path.isdir(CONF.cluster.temp_cache_dir):
+        LOG.debug("Certificates will not be cached in the filesystem: they \
+            will be created as tempfiles.")
+        ca_cert = get_cluster_ca_certificate(cluster, context)
+        magnum_cert = get_cluster_magnum_cert(cluster, context)
 
-    ca_cert_file = tempfile.NamedTemporaryFile()
-    ca_cert_file.write(ca_cert.get_certificate())
-    ca_cert_file.flush()
+        ca_file = tempfile.NamedTemporaryFile(mode="w+")
+        ca_file.write(ca_cert.get_certificate())
+        ca_file.flush()
 
-    magnum_key_file = tempfile.NamedTemporaryFile()
-    magnum_key_file.write(magnum_cert.get_decrypted_private_key())
-    magnum_key_file.flush()
+        key_file = tempfile.NamedTemporaryFile(mode="w+")
+        key_file.write(magnum_cert.get_decrypted_private_key())
+        key_file.flush()
 
-    magnum_cert_file = tempfile.NamedTemporaryFile()
-    magnum_cert_file.write(magnum_cert.get_certificate())
-    magnum_cert_file.flush()
+        cert_file = tempfile.NamedTemporaryFile(mode="w+")
+        cert_file.write(magnum_cert.get_certificate())
+        cert_file.flush()
 
-    return ca_cert_file, magnum_key_file, magnum_cert_file
+    else:
+        cached_cert_dir = os.path.join(CONF.cluster.temp_cache_dir,
+                                       cluster.uuid)
+        cached_ca_file = os.path.join(cached_cert_dir, 'ca.crt')
+        cached_key_file = os.path.join(cached_cert_dir, 'client.key')
+        cached_cert_file = os.path.join(cached_cert_dir, 'client.crt')
+
+        if not os.path.isdir(cached_cert_dir):
+            os.mkdir(cached_cert_dir)
+
+            ca_cert = get_cluster_ca_certificate(cluster, context)
+            magnum_cert = get_cluster_magnum_cert(cluster, context)
+
+            ca_file = open(cached_ca_file, "w+")
+            ca_file.write(ca_cert.get_certificate())
+            ca_file.flush()
+
+            key_file = open(cached_key_file, "w+")
+            key_file.write(magnum_cert.get_decrypted_private_key())
+            key_file.flush()
+
+            cert_file = open(cached_cert_file, "w+")
+            cert_file.write(magnum_cert.get_certificate())
+            cert_file.flush()
+
+            os.chmod(cached_ca_file, 0o600)
+            os.chmod(cached_key_file, 0o600)
+            os.chmod(cached_cert_file, 0o600)
+
+        else:
+            ca_file = open(cached_ca_file, "r")
+            key_file = open(cached_key_file, "r")
+            cert_file = open(cached_cert_file, "r")
+
+    return ca_file, key_file, cert_file
 
 
 def sign_node_certificate(cluster, csr, context=None):
@@ -184,4 +225,15 @@ def delete_certificates_from_cluster(cluster, context=None):
                     cert_ref, resource_ref=cluster.uuid, context=context)
         except Exception:
             LOG.warning("Deleting certs is failed for Cluster %s",
+                        cluster.uuid)
+
+
+def delete_client_files(cluster, context=None):
+        cached_cert_dir = os.path.join(CONF.cluster.temp_cache_dir,
+                                       cluster.uuid)
+        try:
+            if os.path.isdir(cached_cert_dir):
+                shutil.rmtree(cached_cert_dir)
+        except Exception:
+            LOG.warning("Deleting client files failed for Cluster %s",
                         cluster.uuid)

@@ -41,6 +41,7 @@ GITDIR["python-magnumclient"]=$DEST/python-magnumclient
 
 MAGNUM_STATE_PATH=${MAGNUM_STATE_PATH:=$DATA_DIR/magnum}
 MAGNUM_AUTH_CACHE_DIR=${MAGNUM_AUTH_CACHE_DIR:-/var/cache/magnum}
+MAGNUM_CERTIFICATE_CACHE_DIR=${MAGNUM_CERTIFICATE_CACHE_DIR:-/var/lib/magnum/certificate-cache}
 
 MAGNUM_CONF_DIR=/etc/magnum
 MAGNUM_CONF=$MAGNUM_CONF_DIR/magnum.conf
@@ -82,7 +83,7 @@ function is_magnum_enabled {
 # cleanup_magnum() - Remove residual data files, anything left over from previous
 # runs that a clean run would need to clean up
 function cleanup_magnum {
-    sudo rm -rf $MAGNUM_STATE_PATH $MAGNUM_AUTH_CACHE_DIR
+    sudo rm -rf $MAGNUM_STATE_PATH $MAGNUM_AUTH_CACHE_DIR $MAGNUM_CERTIFICATE_CACHE_DIR
 }
 
 # configure_magnum() - Set config files, create data dirs, etc
@@ -139,6 +140,9 @@ function create_magnum_conf {
         iniset $MAGNUM_CONF api port "$MAGNUM_SERVICE_PORT"
         iniset $MAGNUM_CONF drivers verify_ca false
     fi
+
+    iniset $MAGNUM_CONF cluster temp_cache_dir $MAGNUM_CERTIFICATE_CACHE_DIR
+
     iniset $MAGNUM_CONF oslo_policy policy_file $MAGNUM_POLICY
 
     iniset $MAGNUM_CONF keystone_auth auth_type password
@@ -237,9 +241,9 @@ function create_api_paste_conf {
 # create_magnum_cache_dir() - Part of the init_magnum() process
 function create_magnum_cache_dir {
     # Create cache dir
-    sudo mkdir -p $MAGNUM_AUTH_CACHE_DIR
-    sudo chown $STACK_USER $MAGNUM_AUTH_CACHE_DIR
-    rm -f $MAGNUM_AUTH_CACHE_DIR/*
+    sudo mkdir -p $1
+    sudo chown $STACK_USER $1
+    rm -f $1/*
 }
 
 
@@ -253,7 +257,8 @@ function init_magnum {
         # Migrate magnum database
         $MAGNUM_BIN_DIR/magnum-db-manage upgrade
     fi
-    create_magnum_cache_dir
+    create_magnum_cache_dir $MAGNUM_AUTH_CACHE_DIR
+    create_magnum_cache_dir $MAGNUM_CERTIFICATE_CACHE_DIR
 }
 
 # magnum_register_image - Register heat image for magnum with property os_distro

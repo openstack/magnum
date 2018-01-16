@@ -17,6 +17,15 @@ import mock
 from magnum.common import exception
 from magnum.conductor.handlers.common import cert_manager
 from magnum.tests import base
+from oslo_config import cfg
+
+import magnum.conf
+import os
+import stat
+import tempfile
+
+
+CONF = magnum.conf.CONF
 
 
 class CertManagerTestCase(base.BaseTestCase):
@@ -229,6 +238,154 @@ class CertManagerTestCase(base.BaseTestCase):
             context=None)
         self.assertEqual(mock_ca_cert, cluster_ca_cert)
 
+    def test_create_client_files_notin_cache(self):
+        mock_cluster = mock.MagicMock()
+        mock_cluster.uuid = "mock_cluster_uuid"
+        mock_dir = tempfile.mkdtemp()
+        cert_dir = os.path.join(mock_dir,
+                                mock_cluster.uuid)
+        cfg.CONF.set_override("temp_cache_dir", mock_dir, group='cluster')
+
+        mock_ca_return = '%s/ca.crt' % cert_dir
+        mock_key_return = '%s/client.key' % cert_dir
+        mock_magnum_return = '%s/client.crt' % cert_dir
+
+        mock_cert = mock.MagicMock()
+        mock_cert.get_certificate.return_value = "some_content"
+        mock_cert.get_decrypted_private_key.return_value = "some_key"
+        self.CertManager.get_cert.return_value = \
+            mock_cert
+
+        # Test that directory and files DNE
+        self.assertEqual(False, os.path.isdir(cert_dir))
+        self.assertEqual(False, os.path.isfile(mock_ca_return))
+        self.assertEqual(False, os.path.isfile(mock_key_return))
+        self.assertEqual(False, os.path.isfile(mock_magnum_return))
+
+        (cluster_ca_cert, cluster_key, cluster_magnum_cert) = \
+            cert_manager.create_client_files(mock_cluster)
+
+        # Test the directory and files were created
+        self.assertEqual(True, os.path.isdir(cert_dir))
+        self.assertEqual(True, os.path.isfile(mock_ca_return))
+        self.assertEqual(True, os.path.isfile(mock_key_return))
+        self.assertEqual(True, os.path.isfile(mock_magnum_return))
+
+        # Test that all functions were called in the if not conditional
+        self.assertEqual(self.CertManager.get_cert.call_count, 2)
+        self.assertEqual(mock_cert.get_certificate.call_count, 2)
+        self.assertEqual(mock_cert.get_decrypted_private_key.call_count, 1)
+
+        # Test that contents were written to files & returned properly
+        cluster_ca_cert.seek(0)
+        cluster_key.seek(0)
+        cluster_magnum_cert.seek(0)
+        self.assertEqual(mock_cert.get_certificate.return_value,
+                         cluster_ca_cert.read())
+        self.assertEqual(mock_cert.get_decrypted_private_key.return_value,
+                         cluster_key.read())
+        self.assertEqual(mock_cert.get_certificate.return_value,
+                         cluster_magnum_cert.read())
+
+    @mock.patch('magnum.conductor.handlers.common.cert_manager.LOG')
+    def test_create_client_files_temp_no_dir(self, mock_logging):
+        mock_cluster = mock.MagicMock()
+        mock_cluster.uuid = "mock_cluster_uuid"
+
+        cfg.CONF.set_override("temp_cache_dir", "", group='cluster')
+
+        mock_cert = mock.MagicMock()
+        mock_cert.get_certificate.return_value = "some_content"
+        mock_cert.get_decrypted_private_key.return_value = "some_key"
+        self.CertManager.get_cert.return_value = \
+            mock_cert
+
+        (cluster_ca_cert, cluster_key, cluster_magnum_cert) = \
+            cert_manager.create_client_files(mock_cluster)
+
+        mock_logging.debug.assert_called_once_with("Certificates will not be cached in the filesystem: they \
+            will be created as tempfiles.")
+        self.assertEqual(self.CertManager.get_cert.call_count, 2)
+        self.assertEqual(mock_cert.get_certificate.call_count, 2)
+        self.assertEqual(mock_cert.get_decrypted_private_key.call_count, 1)
+
+        # Test that contents were written to files & returned properly
+        cluster_ca_cert.seek(0)
+        cluster_key.seek(0)
+        cluster_magnum_cert.seek(0)
+        self.assertEqual(mock_cert.get_certificate.return_value,
+                         cluster_ca_cert.read())
+        self.assertEqual(mock_cert.get_decrypted_private_key.return_value,
+                         cluster_key.read())
+        self.assertEqual(mock_cert.get_certificate.return_value,
+                         cluster_magnum_cert.read())
+
+    def test_create_client_files_in_cache(self):
+        mock_cluster = mock.MagicMock()
+        mock_cluster.uuid = "mock_cluster_uuid"
+        mock_dir = tempfile.mkdtemp()
+        cfg.CONF.set_override("temp_cache_dir", mock_dir, group='cluster')
+
+        mock_cert = mock.MagicMock()
+        mock_cert.get_certificate.return_value = "some_content"
+        mock_cert.get_decrypted_private_key.return_value = "some_key"
+        self.CertManager.get_cert.return_value = \
+            mock_cert
+
+        # First call creates directory and writes files
+        (cluster_ca_cert, cluster_key, cluster_magnum_cert) = \
+            cert_manager.create_client_files(mock_cluster)
+
+        # Establish call count baseline
+        self.assertEqual(self.CertManager.get_cert.call_count, 2)
+        self.assertEqual(mock_cert.get_certificate.call_count, 2)
+        self.assertEqual(mock_cert.get_decrypted_private_key.call_count, 1)
+
+        # Second call to create_client_files for same cluster should enter else
+        # conditional, open cached file and return file contents unchanged.
+        (cluster_ca_cert, cluster_key, cluster_magnum_cert) = \
+            cert_manager.create_client_files(mock_cluster)
+
+        # Test that function call count did not increase.
+        self.assertEqual(self.CertManager.get_cert.call_count, 2)
+        self.assertEqual(mock_cert.get_certificate.call_count, 2)
+        self.assertEqual(mock_cert.get_decrypted_private_key.call_count, 1)
+
+        # Check that original file contents/return values have not changed
+        self.assertEqual(mock_cert.get_certificate.return_value,
+                         cluster_ca_cert.read())
+        self.assertEqual(mock_cert.get_decrypted_private_key.return_value,
+                         cluster_key.read())
+        self.assertEqual(mock_cert.get_certificate.return_value,
+                         cluster_magnum_cert.read())
+
+    def test_create_client_files_set_file_permissions(self):
+        mock_cluster = mock.MagicMock()
+        mock_cluster.uuid = "mock_cluster_uuid"
+        mock_dir = tempfile.mkdtemp()
+        cert_dir = os.path.join(mock_dir,
+                                mock_cluster.uuid)
+        cfg.CONF.set_override("temp_cache_dir", mock_dir, group='cluster')
+
+        mock_ca_return = '%s/ca.crt' % cert_dir
+        mock_key_return = '%s/client.key' % cert_dir
+        mock_magnum_return = '%s/client.crt' % cert_dir
+
+        mock_cert = mock.MagicMock()
+        mock_cert.get_certificate.return_value = "some_content"
+        mock_cert.get_decrypted_private_key.return_value = "some_key"
+        self.CertManager.get_cert.return_value = \
+            mock_cert
+
+        cert_manager.create_client_files(mock_cluster)
+
+        ca_permission = stat.S_IMODE(os.lstat(mock_ca_return).st_mode)
+        self.assertEqual(ca_permission, 0o600)
+        key_permission = stat.S_IMODE(os.lstat(mock_key_return).st_mode)
+        self.assertEqual(key_permission, 0o600)
+        magnum_permission = stat.S_IMODE(os.lstat(mock_magnum_return).st_mode)
+        self.assertEqual(magnum_permission, 0o600)
+
     def test_delete_certtificate(self):
         mock_delete_cert = self.CertManager.delete_cert
         expected_cert_ref = 'cert_ref'
@@ -272,3 +429,54 @@ class CertManagerTestCase(base.BaseTestCase):
 
         cert_manager.delete_certificates_from_cluster(mock_cluster)
         self.assertFalse(mock_delete_cert.called)
+
+    def test_delete_client_files(self):
+        mock_cluster = mock.MagicMock()
+        mock_cluster.uuid = "mock_cluster_uuid"
+        mock_dir = tempfile.mkdtemp()
+        cert_dir = os.path.join(mock_dir,
+                                mock_cluster.uuid)
+        cfg.CONF.set_override("temp_cache_dir", mock_dir, group='cluster')
+
+        mock_ca_return = '%s/ca.crt' % cert_dir
+        mock_key_return = '%s/client.key' % cert_dir
+        mock_magnum_return = '%s/client.crt' % cert_dir
+
+        mock_cert = mock.MagicMock()
+        mock_cert.get_certificate.return_value = "some_content"
+        mock_cert.get_decrypted_private_key.return_value = "some_key"
+        self.CertManager.get_cert.return_value = \
+            mock_cert
+
+        (cluster_ca_cert, cluster_key, cluster_magnum_cert) = \
+            cert_manager.create_client_files(mock_cluster)
+
+        # Test the directory and files were created
+        self.assertEqual(True, os.path.isdir(cert_dir))
+        self.assertEqual(True, os.path.isfile(mock_ca_return))
+        self.assertEqual(True, os.path.isfile(mock_key_return))
+        self.assertEqual(True, os.path.isfile(mock_magnum_return))
+
+        cert_manager.delete_client_files(mock_cluster)
+
+        # Test that directory and files DNE
+        self.assertEqual(False, os.path.isdir(cert_dir))
+        self.assertEqual(False, os.path.isfile(mock_ca_return))
+        self.assertEqual(False, os.path.isfile(mock_key_return))
+        self.assertEqual(False, os.path.isfile(mock_magnum_return))
+
+    def test_delete_client_files_none(self):
+        mock_cluster = mock.MagicMock()
+        mock_cluster.uuid = "mock_cluster_uuid"
+        mock_dir = tempfile.mkdtemp()
+        cfg.CONF.set_override("temp_cache_dir", mock_dir, group='cluster')
+        cert_dir = os.path.join(mock_dir,
+                                mock_cluster.uuid)
+
+        self.assertEqual(True, os.path.isdir(mock_dir))
+        self.assertEqual(False, os.path.isdir(cert_dir))
+
+        cert_manager.delete_client_files(mock_cluster)
+
+        self.assertEqual(True, os.path.isdir(mock_dir))
+        self.assertEqual(False, os.path.isdir(cert_dir))
