@@ -95,6 +95,10 @@ if [[ "$COE" == "kubernetes" ]]; then
     remote_exec $SSH_USER "sudo cat /etc/systemd/system/flanneld.service.d/flannel-docker-bridge.conf" flannel-docker-bridge.conf
     remote_exec $SSH_USER "sudo cat /etc/systemd/system/flannel-docker-bridge.service" flannel-docker-bridge.service
     remote_exec $SSH_USER "sudo cat /etc/systemd/system/flannel-config.service" flannel-config.service
+    remote_exec $SSH_USER "sudo journalctl -u heat-container-agent --no-pager" heat-container-agent.log
+    remote_exec $SSH_USER "sudo journalctl -u kube-enable-monitoring --no-pager" kube-enable-monitoring.service.log
+    remote_exec $SSH_USER "sudo atomic containers list" atomic-containers-list.log
+    remote_exec $SSH_USER "sudo atomic images list" atomic-images-list.log
 elif [[ "$COE" == "swarm" || "$COE" == "swarm-mode" ]]; then
     SSH_USER=fedora
     remote_exec $SSH_USER "sudo systemctl --full list-units --no-pager" systemctl_list_units.log
