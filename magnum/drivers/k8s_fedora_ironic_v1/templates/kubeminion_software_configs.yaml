@@ -295,9 +295,15 @@ resources:
         str_replace:
           template: |
             #!/bin/bash -v
-            wc_notify --data-binary '{"status": "SUCCESS"}'
+            if [ "verify_ca" == "True" ]; then
+                VERIFY_CA=""
+            else
+                VERIFY_CA="-k"
+            fi
+            wc_notify $VERIFY_CA --data-binary '{"status": "SUCCESS"}'
           params:
             wc_notify: {get_param: wc_curl_cli}
+            verify_ca: {get_param: verify_ca}
 
   disable_selinux:
     type: OS::Heat::SoftwareConfig
