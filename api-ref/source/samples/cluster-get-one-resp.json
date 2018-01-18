@@ -18,7 +18,7 @@
    "updated_at":"2016-08-29T06:53:24+00:00",
    "master_count":1,
    "coe_version": "v1.2.0",
-   "keypair":"my_keypair"
+   "keypair":"my_keypair",
    "cluster_template_id":"0562d357-8641-4759-8fed-8173f02c9633",
    "master_addresses":[
       "172.24.4.6"
