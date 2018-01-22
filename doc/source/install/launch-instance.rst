@@ -126,7 +126,7 @@ and tested by the Magnum team.
       $ openstack image create \
                             --disk-format=qcow2 \
                             --container-format=bare \
-                            --file=fedora-atomic-latest.qcow2 \
+                            --file=Fedora-Atomic-26-20170723.0.x86_64.qcow2\
                             --property os_distro='fedora-atomic' \
                             fedora-atomic-latest
       +------------------+------------------------------------------------------+
