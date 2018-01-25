@@ -259,7 +259,6 @@
       image_name: centos-dcos
 
 - project:
-    name: openstack/magnum
     check:
       jobs:
         - magnum-functional-api
