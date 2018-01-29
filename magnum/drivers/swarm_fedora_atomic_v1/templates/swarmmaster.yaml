@@ -178,6 +178,10 @@ parameters:
     type: string
     description: The OpenStack CA certificate to install on the node.
 
+  nodes_server_group_id:
+    type: string
+    description: ID of the server group for kubernetes cluster nodes.
+
 resources:
 
   master_wait_handle:
@@ -444,6 +448,7 @@ resources:
       networks:
         - port:
             get_resource: swarm_master_eth0
+      scheduler_hints: { group: { get_param: nodes_server_group_id }}
 
   swarm_master_eth0:
     type: "OS::Neutron::Port"

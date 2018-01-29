@@ -216,6 +216,14 @@ parameters:
     hidden: true
     description: The OpenStack CA certificate to install on the node.
 
+  nodes_affinity_policy:
+    type: string
+    description: >
+      affinity policy for nodes server group
+    constraints:
+      - allowed_values: ["affinity", "anti-affinity", "soft-affinity",
+                         "soft-anti-affinity"]
+
 resources:
 
   ######################################################################
@@ -371,6 +379,17 @@ resources:
 
   ######################################################################
   #
+  # resources that expose the server group for all nodes include master
+  # and minions.
+  #
+
+  nodes_server_group:
+    type: OS::Nova::ServerGroup
+    properties:
+      policies: [{get_param: nodes_affinity_policy}]
+
+  ######################################################################
+  #
   # Mesos masters. This is a resource group that will create
   # <number_of_masters> masters.
   #
@@ -397,6 +416,7 @@ resources:
           secgroup_mesos_id: {get_resource: secgroup_master}
           api_pool_id: {get_attr: [api_lb, pool_id]}
           openstack_ca: {get_param: openstack_ca}
+          nodes_server_group_id: {get_resource: nodes_server_group}
 
   ######################################################################
   #
@@ -426,6 +446,7 @@ resources:
           external_network: {get_param: external_network}
           secgroup_slave_all_open_id: {get_resource: secgroup_slave_all_open}
           mesos_slave_software_configs: {get_attr: [mesos_slave_software_configs, mesos_init]}
+          nodes_server_group_id: {get_resource: nodes_server_group}
 
   ######################################################################
   #

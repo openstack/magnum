@@ -102,6 +102,8 @@ class SwarmFedoraTemplateDefinition(template_def.BaseTemplateDefinition):
                       'swarm_strategy']
 
         extra_params['auth_url'] = context.auth_url
+        extra_params['nodes_affinity_policy'] = \
+            CONF.cluster.nodes_affinity_policy
 
         # set docker_volume_type
         # use the configuration default if None provided

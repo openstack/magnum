@@ -32,6 +32,12 @@ cluster_def_opts = [
                          'magnum_vm_ubuntu_mesos'],
                 help=_('Enabled cluster definition entry points.'),
                 deprecated_group='bay'),
+    cfg.StrOpt('nodes_affinity_policy',
+               default='soft-anti-affinity',
+               help=_('Affinity policy for server group of cluster nodes.'
+                      'Possible values include "affinity", "anti-affinity",'
+                      '"soft-affinity" and "soft-anti-affinity".')
+               ),
 ]
 
 

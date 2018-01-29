@@ -347,6 +347,14 @@ parameters:
     hidden: true
     description: The OpenStack CA certificate to install on the node.
 
+  nodes_affinity_policy:
+    type: string
+    description: >
+      affinity policy for nodes server group
+    constraints:
+      - allowed_values: ["affinity", "anti-affinity", "soft-affinity",
+                         "soft-anti-affinity"]
+
 resources:
 
   api_lb:
@@ -445,6 +453,17 @@ resources:
 
   ######################################################################
   #
+  # resources that expose the server group for all nodes include master
+  # and minions.
+  #
+
+  nodes_server_group:
+    type: OS::Nova::ServerGroup
+    properties:
+      policies: [{get_param: nodes_affinity_policy}]
+
+  ######################################################################
+  #
   # kubernetes masters. This is a resource group that will create
   # <number_of_masters> masters.
   #
@@ -509,6 +528,7 @@ resources:
           wc_curl_cli: {get_attr: [master_wait_handle, curl_cli]}
           etcd_lb_vip: {get_attr: [etcd_lb, address]}
           openstack_ca: {get_param: openstack_ca}
+          nodes_server_group_id: {get_resource: nodes_server_group}
 
   ######################################################################
   #
@@ -552,6 +572,7 @@ resources:
           flannel_network_cidr: {get_param: flannel_network_cidr}
           external_network: {get_param: external_network}
           kube_software_configs: {get_attr: [kubeminion_software_configs, kube_minion_init]}
+          nodes_server_group_id: {get_resource: nodes_server_group}
 
   ######################################################################
   #

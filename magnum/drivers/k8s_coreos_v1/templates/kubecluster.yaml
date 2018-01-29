@@ -294,6 +294,14 @@ parameters:
     hidden: true
     description: The OpenStack CA certificate to install on the node.
 
+ nodes_affinity_policy:
+    type: string
+    description: >
+      affinity policy for nodes server group
+    constraints:
+      - allowed_values: ["affinity", "anti-affinity", "soft-affinity",
+                         "soft-anti-affinity"]
+
 resources:
 
   ######################################################################
@@ -402,6 +410,17 @@ resources:
 
   ######################################################################
   #
+  # resources that expose the server group for all nodes include master
+  # and minions.
+  #
+
+  nodes_server_group:
+    type: OS::Nova::ServerGroup
+    properties:
+      policies: [{get_param: nodes_affinity_policy}]
+
+  ######################################################################
+  #
   # kubernetes masters. This is a resource group that will create
   # <number_of_masters> master.
   #
@@ -465,6 +484,7 @@ resources:
           dns_service_ip: {get_param: dns_service_ip}
           dns_cluster_domain: {get_param: dns_cluster_domain}
           openstack_ca: {get_param: openstack_ca}
+          nodes_server_group_id: {get_resource: nodes_server_group}
 
   ######################################################################
   #
@@ -520,6 +540,7 @@ resources:
           dns_service_ip: {get_param: dns_service_ip}
           dns_cluster_domain: {get_param: dns_cluster_domain}
           openstack_ca: {get_param: openstack_ca}
+          nodes_server_group_id: {get_resource: nodes_server_group}
 
 outputs:
 

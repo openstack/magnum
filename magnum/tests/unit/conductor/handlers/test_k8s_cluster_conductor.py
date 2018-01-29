@@ -229,6 +229,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kube_version': 'fake-version',
             'verify_ca': True,
             'openstack_ca': '',
+            "nodes_affinity_policy": "soft-anti-affinity"
         }
         if missing_attr is not None:
             expected.pop(mapping[missing_attr], None)
@@ -325,6 +326,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kube_version': 'fake-version',
             'verify_ca': True,
             'openstack_ca': '',
+            "nodes_affinity_policy": "soft-anti-affinity"
         }
 
         self.assertEqual(expected, definition)
@@ -408,6 +410,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'username': 'fake_user',
             'verify_ca': True,
             'openstack_ca': '',
+            "nodes_affinity_policy": "soft-anti-affinity"
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -731,6 +734,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kube_version': 'fake-version',
             'verify_ca': True,
             'openstack_ca': '',
+            "nodes_affinity_policy": "soft-anti-affinity"
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

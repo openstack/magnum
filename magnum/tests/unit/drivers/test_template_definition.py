@@ -296,7 +296,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'magnum_url': mock_osc.magnum_url.return_value,
             'region_name': mock_osc.cinder_region_name.return_value,
             'kube_tag': kube_tag,
-            'container_infra_prefix': container_infra_prefix}}
+            'container_infra_prefix': container_infra_prefix,
+            'nodes_affinity_policy': 'soft-anti-affinity'}}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
                                                 mock_cluster,
@@ -381,7 +382,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'loadbalancing_protocol': 'HTTP',
             'kubernetes_port': 8080,
             'kube_tag': kube_tag,
-            'container_infra_prefix': container_infra_prefix}}
+            'container_infra_prefix': container_infra_prefix,
+            'nodes_affinity_policy': 'soft-anti-affinity'}}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
                                                 mock_cluster,
@@ -789,7 +791,8 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
             'auth_url': 'http://192.168.10.10:5000/v3',
             'rexray_preempt': rexray_preempt,
             'swarm_strategy': swarm_strategy,
-            'docker_volume_type': docker_volume_type}}
+            'docker_volume_type': docker_volume_type,
+            'nodes_affinity_policy': 'soft-anti-affinity'}}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
                                                 mock_cluster,
