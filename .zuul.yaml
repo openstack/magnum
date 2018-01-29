@@ -20,6 +20,7 @@
       - openstack/virtualbmc
     irrelevant-files:
       - ^.*\.rst$
+      - ^api-ref/.*$
       - ^doc/.*$
       - ^specs/.*$
       - ^install-guide/.*$
@@ -55,6 +56,7 @@
       - openstack/virtualbmc
     irrelevant-files:
       - ^.*\.rst$
+      - ^api-ref/.*$
       - ^doc/.*$
       - ^specs/.*$
       - ^install-guide/.*$
@@ -83,6 +85,7 @@
       coe: k8s
     irrelevant-files:
       - ^.*\.rst$
+      - ^api-ref/.*$
       - ^doc/.*$
       - ^specs/.*$
       - ^install-guide/.*$
@@ -99,6 +102,7 @@
       coe: swarm-mode
     irrelevant-files:
       - ^.*\.rst$
+      - ^api-ref/.*$
       - ^doc/.*$
       - ^specs/.*$
       - ^install-guide/.*$
@@ -116,6 +120,7 @@
       coe: dcos
     irrelevant-files:
       - ^.*\.rst$
+      - ^api-ref/.*$
       - ^doc/.*$
       - ^specs/.*$
       - ^install-guide/.*$
@@ -132,6 +137,7 @@
       coe: mesos
     irrelevant-files:
       - ^.*\.rst$
+      - ^api-ref/.*$
       - ^doc/.*$
       - ^specs/.*$
       - ^install-guide/.*$
@@ -147,6 +153,7 @@
       coe: swarm
     irrelevant-files:
       - ^.*\.rst$
+      - ^api-ref/.*$
       - ^doc/.*$
       - ^specs/.*$
       - ^install-guide/.*$
@@ -164,6 +171,7 @@
       ironic: 1
     irrelevant-files:
       - ^.*\.rst$
+      - ^api-ref/.*$
       - ^doc/.*$
       - ^specs/.*$
       - ^install-guide/.*$
@@ -180,6 +188,7 @@
       ironic: 1
     irrelevant-files:
       - ^.*\.rst$
+      - ^api-ref/.*$
       - ^doc/.*$
       - ^specs/.*$
       - ^install-guide/.*$
@@ -195,6 +204,7 @@
       coe: k8s
     irrelevant-files:
       - ^.*\.rst$
+      - ^api-ref/.*$
       - ^doc/.*$
       - ^specs/.*$
       - ^install-guide/.*$
@@ -211,6 +221,7 @@
       coe: swarm-mode
     irrelevant-files:
       - ^.*\.rst$
+      - ^api-ref/.*$
       - ^doc/.*$
       - ^specs/.*$
       - ^install-guide/.*$
