@@ -199,7 +199,7 @@ class TestHandler(db_base.DbTestCase):
         # again, this so bad because we have already called it in setUp
         # since other test case will share the codes in setUp()
         # But in self.handler.cluster_create, we update cluster.uuid and
-        # cluster.stack_id so cluster.create will create a new recored with
+        # cluster.stack_id so cluster.create will create a new record with
         # clustermodel_id None, this is bad because we load clusterModel
         # object in cluster object by clustermodel_id. Here update
         # self.cluster.clustermodel_id so cluster.obj_get_changes will get
