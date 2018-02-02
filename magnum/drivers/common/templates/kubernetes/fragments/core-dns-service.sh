@@ -60,7 +60,7 @@ data:
         errors
         log stdout
         health
-        kubernetes ${DNS_CLUSTER_DOMAIN} ${PORTAL_NETWORK_CIDR} {
+        kubernetes ${DNS_CLUSTER_DOMAIN} ${PORTAL_NETWORK_CIDR} ${PODS_NETWORK_CIDR} {
             pods verified
         }
         proxy . /etc/resolv.conf

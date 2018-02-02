@@ -381,6 +381,30 @@ parameters:
     default: ""
     hidden: true
 
+  calico_tag:
+    type: string
+    description: tag of the calico containers used to provision the calico node
+    default: v2.6.7
+
+  calico_cni_tag:
+    type: string
+    description: tag of the cni used to provision the calico node
+    default: v1.11.2
+
+  calico_kube_controllers_tag:
+    type: string
+    description: tag of the kube_controllers used to provision the calico node
+    default: v1.0.3
+
+  calico_ipv4pool:
+    type: string
+    description: Configure the IP pool from which Pod IPs will be chosen
+    default: "192.168.0.0/16"
+
+  pods_network_cidr:
+    type: string
+    description: Configure the IP pool/range from which pod IPs will be chosen
+
 resources:
 
   ######################################################################
@@ -577,6 +601,11 @@ resources:
           availability_zone: {get_param: availability_zone}
           ca_key: {get_param: ca_key}
           cert_manager_api: {get_param: cert_manager_api}
+          calico_tag: {get_param: calico_tag}
+          calico_cni_tag: {get_param: calico_cni_tag}
+          calico_kube_controllers_tag: {get_param: calico_kube_controllers_tag}
+          calico_ipv4pool: {get_param: calico_ipv4pool}
+          pods_network_cidr: {get_param: pods_network_cidr}
 
   ######################################################################
   #
@@ -648,6 +677,7 @@ resources:
           openstack_ca: {get_param: openstack_ca}
           nodes_server_group_id: {get_resource: nodes_server_group}
           availability_zone: {get_param: availability_zone}
+          pods_network_cidr: {get_param: pods_network_cidr}
 
 outputs:
 

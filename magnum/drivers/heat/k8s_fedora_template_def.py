@@ -84,8 +84,17 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
         extra_params['nodes_affinity_policy'] = \
             CONF.cluster.nodes_affinity_policy
 
+        if cluster_template.network_driver == 'flannel':
+            extra_params["pods_network_cidr"] = \
+                cluster.labels.get('flannel_network_cidr', '10.100.0.0/16')
+        if cluster_template.network_driver == 'calico':
+            extra_params["pods_network_cidr"] = \
+                cluster.labels.get('calico_ipv4pool', '192.168.0.0/16')
+
         label_list = ['kube_tag', 'container_infra_prefix',
-                      'availability_zone']
+                      'availability_zone',
+                      'calico_tag', 'calico_cni_tag',
+                      'calico_kube_controllers_tag', 'calico_ipv4pool']
         for label in label_list:
             label_value = cluster.labels.get(label)
             if label_value:
