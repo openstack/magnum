@@ -175,9 +175,9 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   ===========  =================  ========
   COE           Network-Driver    Default
   ===========  =================  ========
-  Kubernetes   Flannel            Flannel
-  Swarm        Docker, Flannel    Flannel
-  Mesos        Docker             Docker
+  Kubernetes   flannel, calico    flannel
+  Swarm        docker, flannel    flannel
+  Mesos        docker             docker
   ===========  =================  ========
 
 --volume-driver \<volume-driver\>
@@ -2013,13 +2013,15 @@ network-driver
   The network driver name for instantiating container networks.
   Currently, the following network drivers are supported:
 
-  +--------+-------------+-----------+-------------+
-  | Driver | Kubernetes  |   Swarm   |    Mesos    |
-  +========+=============+===========+=============+
-  | Flannel| supported   | supported | unsupported |
-  +--------+-------------+-----------+-------------+
-  | Docker | unsupported | supported | supported   |
-  +--------+-------------+-----------+-------------+
+  +--------+-------------+-------------+-------------+
+  | Driver | Kubernetes  |   Swarm     |    Mesos    |
+  +========+=============+=============+=============+
+  | Flannel| supported   | supported   | unsupported |
+  +--------+-------------+-------------+-------------+
+  | Docker | unsupported | supported   | supported   |
+  +--------+-------------+-------------+-------------+
+  | Calico | supported   | unsupported | unsupported |
+  +--------+-------------+-------------+-------------+
 
   If not specified, the default driver is Flannel for Kubernetes, and
   Docker for Swarm and Mesos.
@@ -2055,6 +2057,26 @@ _`flannel_backend`
   is not specified in the ClusterTemplate, *host-gw* is the best choice for
   the Flannel backend.
 
+When Calico is specified as the network driver, the following
+optional labels can be added:
+
+_`calico_ipv4pool`
+  IPv4 network in CIDR format which is the IP pool, from which Pod IPs will
+  be chosen. If not specified, the default is 192.168.0.0/16.
+
+_`calico_tag`
+  Tag of the calico containers used to provision the calico node
+
+_`calico_cni_tag`
+  Tag of the cni used to provision the calico node
+
+_`calico_kube_controllers_tag`
+  Tag of the kube_controllers used to provision the calico node
+
+Besides, the Calico network driver needs kube_tag with v1.9.3 or later, because
+Calico needs extra mounts for the kubelet container. See `commit
+<https://github.com/projectatomic/atomic-system-containers/commit/54ab8abc7fa1bfb6fa674f55cd0c2fa0c812fd36>`_
+of atomic-system-containers for more information.
 
 High Availability
 =================

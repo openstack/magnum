@@ -1,0 +1,5 @@
+---
+issues:
+  - |
+    Adding 'calico' as network driver for Kubernetes so as to support network
+    isolation between namespace with k8s network policy.

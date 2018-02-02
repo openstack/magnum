@@ -283,6 +283,26 @@ parameters:
     description: true if the kubernetes cert api manager should be enabled
     default: false
 
+  calico_tag:
+    type: string
+    description: tag of the calico containers used to provision the calico node
+
+  calico_cni_tag:
+    type: string
+    description: tag of the cni used to provision the calico node
+
+  calico_kube_controllers_tag:
+    type: string
+    description: tag of the kube_controllers used to provision the calico node
+
+  calico_ipv4pool:
+    type: string
+    description: Configure the IP pool from which Pod IPs will be chosen
+
+  pods_network_cidr:
+    type: string
+    description: Configure the IP pool/range from which pod IPs will be chosen
+
 resources:
 
   master_wait_handle:
@@ -341,6 +361,7 @@ resources:
             "$FLANNEL_BACKEND": {get_param: flannel_backend}
             "$SYSTEM_PODS_INITIAL_DELAY": {get_param: system_pods_initial_delay}
             "$SYSTEM_PODS_TIMEOUT": {get_param: system_pods_timeout}
+            "$PODS_NETWORK_CIDR": {get_param: pods_network_cidr}
             "$PORTAL_NETWORK_CIDR": {get_param: portal_network_cidr}
             "$ADMISSION_CONTROL_LIST": {get_param: admission_control_list}
             "$ETCD_DISCOVERY_URL": {get_param: discovery_url}
@@ -371,6 +392,10 @@ resources:
             "$DNS_CLUSTER_DOMAIN": {get_param: dns_cluster_domain}
             "$CERT_MANAGER_API": {get_param: cert_manager_api}
             "$CA_KEY": {get_param: ca_key}
+            "$CALICO_TAG": {get_param: calico_tag}
+            "$CALICO_CNI_TAG": {get_param: calico_cni_tag}
+            "$CALICO_KUBE_CONTROLLERS_TAG": {get_param: calico_kube_controllers_tag}
+            "$CALICO_IPV4POOL": {get_param: calico_ipv4pool}
 
   install_openstack_ca:
     type: OS::Heat::SoftwareConfig
@@ -541,6 +566,20 @@ resources:
       server: {get_resource: kube-master}
       actions: ['CREATE']
 
+  calico_service:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config: {get_file: ../../common/templates/kubernetes/fragments/calico-service.sh}
+
+  calico_service_deployment:
+    type: OS::Heat::SoftwareDeployment
+    properties:
+      signal_transport: HEAT_SIGNAL
+      config: {get_resource: calico_service}
+      server: {get_resource: kube-master}
+      actions: ['CREATE']
+
   ######################################################################
   #
   # a single kubernetes master.
@@ -573,7 +612,7 @@ resources:
       fixed_ips:
         - subnet: {get_param: fixed_subnet}
       allowed_address_pairs:
-        - ip_address: {get_param: flannel_network_cidr}
+        - ip_address: {get_param: pods_network_cidr}
       replacement_policy: AUTO
 
   kube_master_floating:

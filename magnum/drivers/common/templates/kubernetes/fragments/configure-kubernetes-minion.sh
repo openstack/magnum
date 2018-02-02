@@ -5,7 +5,14 @@
 echo "configuring kubernetes (minion)"
 
 _prefix=${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}
-atomic install --storage ostree --system --system-package=no --name=kubelet ${_prefix}kubernetes-kubelet:${KUBE_TAG}
+
+_addtl_mounts=''
+if [ "$NETWORK_DRIVER" = "calico" ]; then
+    mkdir -p /opt/cni
+    _addtl_mounts=',{"type":"bind","source":"/opt/cni","destination":"/opt/cni","options":["bind","rw","slave","mode=777"]}'
+fi
+
+atomic install --storage ostree --system --system-package=no --set=ADDTL_MOUNTS=${_addtl_mounts} --name=kubelet ${_prefix}kubernetes-kubelet:${KUBE_TAG}
 atomic install --storage ostree --system --system-package=no --name=kube-proxy ${_prefix}kubernetes-proxy:${KUBE_TAG}
 
 CERT_DIR=/etc/kubernetes/certs
@@ -138,6 +145,10 @@ if [[ "\${min_version}" != \$(echo -e "\${min_version}\n\${KUBE_VERSION}" | sort
 fi
 EOF
 chmod +x /etc/kubernetes/get_require_kubeconfig.sh
+
+if [ "$NETWORK_DRIVER" = "calico" ]; then
+    KUBELET_ARGS="${KUBELET_ARGS} --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin"
+fi
 
 sed -i '
     /^KUBELET_ADDRESS=/ s/=.*/="--address=0.0.0.0"/

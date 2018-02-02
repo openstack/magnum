@@ -233,6 +233,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         mock_cluster_template = mock.MagicMock()
         mock_cluster_template.tls_disabled = False
         mock_cluster_template.registry_enabled = False
+        mock_cluster_template.network_driver = 'flannel'
         mock_cluster = mock.MagicMock()
         mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
         del mock_cluster.stack_id
@@ -275,6 +276,18 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         availability_zone = mock_cluster.labels.get(
             'availability_zone')
         cert_manager_api = mock_cluster.labels.get('cert_manager_api')
+        calico_tag = mock_cluster.labels.get(
+            'calico_tag')
+        calico_cni_tag = mock_cluster.labels.get(
+            'calico_cni_tag')
+        calico_kube_controllers_tag = mock_cluster.labels.get(
+            'calico_kube_controllers_tag')
+        calico_ipv4pool = mock_cluster.labels.get(
+            'calico_ipv4pool')
+        if mock_cluster_template.network_driver == 'flannel':
+            pods_network_cidr = flannel_cidr
+        elif mock_cluster_template.network_driver == 'calico':
+            pods_network_cidr = calico_ipv4pool
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -302,7 +315,13 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'container_infra_prefix': container_infra_prefix,
             'nodes_affinity_policy': 'soft-anti-affinity',
             'availability_zone': availability_zone,
-            'cert_manager_api': cert_manager_api}}
+            'cert_manager_api': cert_manager_api,
+            'calico_tag': calico_tag,
+            'calico_cni_tag': calico_cni_tag,
+            'calico_kube_controllers_tag': calico_kube_controllers_tag,
+            'calico_ipv4pool': calico_ipv4pool,
+            'pods_network_cidr': pods_network_cidr
+        }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
                                                 mock_cluster,
@@ -322,6 +341,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         mock_cluster_template = mock.MagicMock()
         mock_cluster_template.tls_disabled = True
         mock_cluster_template.registry_enabled = False
+        mock_cluster_template.network_driver = 'calico'
         mock_cluster = mock.MagicMock()
         mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
         del mock_cluster.stack_id
@@ -364,6 +384,18 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         availability_zone = mock_cluster.labels.get(
             'availability_zone')
         cert_manager_api = mock_cluster.labels.get('cert_manager_api')
+        calico_tag = mock_cluster.labels.get(
+            'calico_tag')
+        calico_cni_tag = mock_cluster.labels.get(
+            'calico_cni_tag')
+        calico_kube_controllers_tag = mock_cluster.labels.get(
+            'calico_kube_controllers_tag')
+        calico_ipv4pool = mock_cluster.labels.get(
+            'calico_ipv4pool')
+        if mock_cluster_template.network_driver == 'flannel':
+            pods_network_cidr = flannel_cidr
+        elif mock_cluster_template.network_driver == 'calico':
+            pods_network_cidr = calico_ipv4pool
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -393,7 +425,13 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'container_infra_prefix': container_infra_prefix,
             'nodes_affinity_policy': 'soft-anti-affinity',
             'availability_zone': availability_zone,
-            'cert_manager_api': cert_manager_api}}
+            'cert_manager_api': cert_manager_api,
+            'calico_tag': calico_tag,
+            'calico_cni_tag': calico_cni_tag,
+            'calico_kube_controllers_tag': calico_kube_controllers_tag,
+            'calico_ipv4pool': calico_ipv4pool,
+            'pods_network_cidr': pods_network_cidr
+        }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
                                                 mock_cluster,

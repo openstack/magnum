@@ -241,6 +241,10 @@ parameters:
       availability zone for master and nodes
     default: ""
 
+  pods_network_cidr:
+    type: string
+    description: Configure the IP pool/range from which pod IPs will be chosen
+
 resources:
 
   minion_wait_handle:
@@ -455,7 +459,7 @@ resources:
       fixed_ips:
         - subnet: {get_param: fixed_subnet}
       allowed_address_pairs:
-        - ip_address: {get_param: flannel_network_cidr}
+        - ip_address: {get_param: pods_network_cidr}
       replacement_policy: AUTO
 
   kube_minion_floating:
