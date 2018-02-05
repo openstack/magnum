@@ -48,6 +48,30 @@ def enforce_cluster_type_supported():
     return wrapper
 
 
+def enforce_driver_supported():
+    @decorator.decorator
+    def wrapper(func, *args, **kwargs):
+        cluster_template = args[1]
+        cluster_distro = cluster_template.cluster_distro
+        if not cluster_distro:
+            try:
+                cli = clients.OpenStackClients(pecan.request.context)
+                image_id = cluster_template.image_id
+                image = api_utils.get_openstack_resource(cli.glance().images,
+                                                         image_id,
+                                                         'images')
+                cluster_distro = image.get('os_distro')
+            except Exception:
+                pass
+        cluster_type = (cluster_template.server_type,
+                        cluster_distro,
+                        cluster_template.coe)
+        driver.Driver.get_driver(*cluster_type)
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
 def enforce_cluster_volume_storage_size():
     @decorator.decorator
     def wrapper(func, *args, **kwargs):

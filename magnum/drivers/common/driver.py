@@ -34,7 +34,8 @@ class Driver(object):
     @classmethod
     def load_entry_points(cls):
         for entry_point in iter_entry_points('magnum.drivers'):
-            yield entry_point, entry_point.load(require=False)
+            if entry_point.name not in CONF.drivers.disabled_drivers:
+                yield entry_point, entry_point.load(require=False)
 
     @classmethod
     def get_drivers(cls):
