@@ -231,15 +231,6 @@
       - ^magnum/drivers/swarm_fedora_atomic_v1/.*$
 
 - job:
-    name: magnum-non-functional-tox-migration
-    nodeset: legacy-ubuntu-xenial
-    run: playbooks/magnum-tox-migration.yaml
-    post-run: playbooks/post/upload-logs-tox.yaml
-    timeout: 2400
-    required-projects:
-      - openstack/requirements
-
-- job:
     name: magnum-buildimages-base
     parent: legacy-publish-openstack-artifacts
     timeout: 3600
@@ -288,7 +279,6 @@
         - magnum-functional-swarm-ironic
         - magnum-functional-k8s-multinode
         - magnum-functional-swarm-mode-multinode
-        - magnum-non-functional-tox-migration
     periodic:
       jobs:
         - magnum-dib-buildimage-fedora-atomic-25
