@@ -66,5 +66,6 @@ def main():
     #               duplicated in all the children if multiple
     #               workers are being used.
     server.create_periodic_tasks()
+    server.start()
 
     launcher.wait()
