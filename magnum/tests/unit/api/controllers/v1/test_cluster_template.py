@@ -1017,6 +1017,14 @@ class TestPost(api_base.FunctionalTest):
             self.assertEqual(201, resp.status_int)
             self.assertIsNotNone(resp.json['name'])
 
+    def test_create_cluster_with_disabled_driver(self):
+        cfg.CONF.set_override('disabled_drivers',
+                              ['mesos_ubuntu_v1'],
+                              group='drivers')
+        bdict = apiutils.cluster_template_post_data(coe="mesos")
+        self.assertRaises(AppError, self.post_json, '/clustertemplates',
+                          bdict)
+
 
 class TestDelete(api_base.FunctionalTest):
 
