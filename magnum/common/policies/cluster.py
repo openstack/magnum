@@ -52,6 +52,17 @@ rules = [
         ]
     ),
     policy.DocumentedRuleDefault(
+        name=CLUSTER % 'detail_all_projects',
+        check_str=base.RULE_ADMIN_API,
+        description='Retrieve a list of clusters with detail across projects.',
+        operations=[
+            {
+                'path': '/v1/clusters',
+                'method': 'GET'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
         name=CLUSTER % 'get',
         check_str=base.RULE_DENY_CLUSTER_USER,
         description='Retrieve information about the given cluster.',
@@ -63,9 +74,32 @@ rules = [
         ]
     ),
     policy.DocumentedRuleDefault(
+        name=CLUSTER % 'get_one_all_projects',
+        check_str=base.RULE_ADMIN_API,
+        description=('Retrieve information about the given cluster across '
+                     'projects.'),
+        operations=[
+            {
+                'path': '/v1/clusters/{cluster_ident}',
+                'method': 'GET'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
         name=CLUSTER % 'get_all',
         check_str=base.RULE_DENY_CLUSTER_USER,
         description='Retrieve a list of clusters.',
+        operations=[
+            {
+                'path': '/v1/clusters/',
+                'method': 'GET'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
+        name=CLUSTER % 'get_all_all_projects',
+        check_str=base.RULE_ADMIN_API,
+        description='Retrieve a list of all clusters across projects.',
         operations=[
             {
                 'path': '/v1/clusters/',
