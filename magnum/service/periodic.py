@@ -141,6 +141,10 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
     @periodic_task.periodic_task(run_immediately=True)
     @set_context
     def _send_cluster_metrics(self, ctx):
+        if not CONF.drivers.send_cluster_metrics:
+            LOG.debug('Skip sending cluster metrics')
+            return
+
         LOG.debug('Starting to send cluster metrics')
         for cluster in objects.Cluster.list(ctx):
             if cluster.status not in (

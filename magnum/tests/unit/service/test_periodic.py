@@ -332,3 +332,30 @@ class PeriodicTestCase(base.TestCase):
 
         self.assertEqual(1, mock_create_monitor.call_count)
         self.assertEqual(0, notifier.info.call_count)
+
+    @mock.patch('magnum.conductor.monitors.create_monitor')
+    @mock.patch('magnum.objects.Cluster.list')
+    @mock.patch('magnum.common.rpc.get_notifier')
+    @mock.patch('magnum.common.context.make_admin_context')
+    def test_send_cluster_metrics_disable_pull_data(
+            self, mock_make_admin_context, mock_get_notifier,
+            mock_cluster_list, mock_create_monitor):
+        mock_make_admin_context.return_value = self.context
+        notifier = mock.MagicMock()
+        mock_get_notifier.return_value = notifier
+        mock_cluster_list.return_value = [self.cluster1, self.cluster2,
+                                          self.cluster3, self.cluster4]
+        self.cluster4.status = cluster_status.CREATE_COMPLETE
+        monitor = mock.MagicMock()
+        monitor.get_metric_names.return_value = ['metric1', 'metric2']
+        monitor.compute_metric_value.return_value = 30
+        monitor.get_metric_unit.return_value = '%'
+        mock_create_monitor.return_value = monitor
+
+        CONF.set_override('send_cluster_metrics',
+                          False, group='drivers')
+
+        periodic.MagnumPeriodicTasks(CONF)._send_cluster_metrics(self.context)
+
+        self.assertEqual(0, mock_create_monitor.call_count)
+        self.assertEqual(0, notifier.info.call_count)
