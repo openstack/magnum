@@ -238,3 +238,21 @@ class Quota(Base):
     project_id = Column(String(255))
     resource = Column(String(255))
     hard_limit = Column(Integer())
+
+
+class Federation(Base):
+    """Represents a Federation."""
+    __tablename__ = 'federation'
+    __table_args__ = (
+        schema.UniqueConstraint("uuid", name="uniq_federation0uuid"),
+        table_args()
+    )
+    id = Column(Integer, primary_key=True)
+    project_id = Column(String(255))
+    uuid = Column(String(36))
+    name = Column(String(255))
+    hostcluster_id = Column(String(255))
+    member_ids = Column(JSONEncodedList)
+    status = Column(String(20))
+    status_reason = Column(Text)
+    properties = Column(JSONEncodedDict)
