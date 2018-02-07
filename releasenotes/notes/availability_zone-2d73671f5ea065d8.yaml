@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Support passing an availability zone where all cluster nodes should be
+    deployed, via the new availability_zone label. Both swarm_fedora_atomic_v2
+    and k8s_fedora_atomic_v1 support this new label.

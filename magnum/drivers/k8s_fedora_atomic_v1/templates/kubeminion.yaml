@@ -235,6 +235,12 @@ parameters:
     type: string
     description: ID of the server group for kubernetes cluster nodes.
 
+  availability_zone:
+    type: string
+    description: >
+      availability zone for master and nodes
+    default: ""
+
 resources:
 
   minion_wait_handle:
@@ -438,6 +444,7 @@ resources:
       networks:
         - port: {get_resource: kube_minion_eth0}
       scheduler_hints: { group: { get_param: nodes_server_group_id }}
+      availability_zone: {get_param: availability_zone}
 
   kube_minion_eth0:
     type: OS::Neutron::Port

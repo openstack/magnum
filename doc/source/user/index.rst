@@ -341,6 +341,10 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `container_infra_prefix`_             | see below          | ""            |
 +---------------------------------------+--------------------+---------------+
++---------------------------------------+--------------------+---------------+
+| `availability_zone`_                  | AZ for the cluster | ""            |
+|                                       | nodes              |               |
++---------------------------------------+--------------------+---------------+
 
 Cluster
 -------
@@ -2020,7 +2024,16 @@ _`flannel_backend`
 
 High Availability
 =================
-*To be filled in*
+
+Support for highly available clusters is a work in progress, the goal being to
+enable clusters spanning multiple availability zones.
+
+As of today you can specify one single availability zone for you cluster.
+
+_`availability_zone`
+  The availability zone where the cluster nodes should be deployed. If not
+  specified, the default is None.
+
 
 Scaling
 =======

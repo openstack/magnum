@@ -78,17 +78,15 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
             'docker_volume_type', CONF.cinder.default_docker_volume_type)
         extra_params['docker_volume_type'] = docker_volume_type
 
-        kube_tag = cluster.labels.get('kube_tag')
-        if kube_tag:
-            extra_params['kube_tag'] = kube_tag
-
-        container_infra_prefix = cluster.labels.get(
-            'container_infra_prefix')
-        if container_infra_prefix:
-            extra_params['container_infra_prefix'] = container_infra_prefix
-
         extra_params['nodes_affinity_policy'] = \
             CONF.cluster.nodes_affinity_policy
+
+        label_list = ['kube_tag', 'container_infra_prefix',
+                      'availability_zone']
+        for label in label_list:
+            label_value = cluster.labels.get(label)
+            if label_value:
+                extra_params[label] = label_value
 
         return super(K8sFedoraTemplateDefinition,
                      self).get_params(context, cluster_template, cluster,

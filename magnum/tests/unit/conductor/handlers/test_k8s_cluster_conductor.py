@@ -57,7 +57,8 @@ class TestClusterConductorWithK8s(base.TestCase):
                        'grafana_admin_passwd': 'fake_pwd',
                        'kube_dashboard_enabled': 'True',
                        'docker_volume_type': 'lvmdriver-1',
-                       'etcd_volume_size': 0},
+                       'etcd_volume_size': 0,
+                       'availability_zone': 'az_1'},
             'tls_disabled': False,
             'server_type': 'vm',
             'registry_enabled': False,
@@ -95,7 +96,8 @@ class TestClusterConductorWithK8s(base.TestCase):
                        'prometheus_monitoring': 'False',
                        'grafana_admin_passwd': 'fake_pwd',
                        'kube_dashboard_enabled': 'True',
-                       'docker_volume_type': 'lvmdriver-1'},
+                       'docker_volume_type': 'lvmdriver-1',
+                       'availability_zone': 'az_1'},
             'master_flavor_id': 'master_flavor_id',
             'flavor_id': 'flavor_id',
         }
@@ -174,7 +176,8 @@ class TestClusterConductorWithK8s(base.TestCase):
                        'grafana_admin_passwd': 'fake_pwd',
                        'kube_dashboard_enabled': 'True',
                        'docker_volume_type': 'lvmdriver-1',
-                       'etcd_volume_size': None},
+                       'etcd_volume_size': None,
+                       'availability_zone': 'az_1'},
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
@@ -229,7 +232,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kube_version': 'fake-version',
             'verify_ca': True,
             'openstack_ca': '',
-            "nodes_affinity_policy": "soft-anti-affinity"
+            "nodes_affinity_policy": "soft-anti-affinity",
+            'availability_zone': 'az_1'
         }
         if missing_attr is not None:
             expected.pop(mapping[missing_attr], None)
@@ -326,7 +330,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kube_version': 'fake-version',
             'verify_ca': True,
             'openstack_ca': '',
-            "nodes_affinity_policy": "soft-anti-affinity"
+            "nodes_affinity_policy": "soft-anti-affinity",
+            'availability_zone': 'az_1'
         }
 
         self.assertEqual(expected, definition)
@@ -410,7 +415,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'username': 'fake_user',
             'verify_ca': True,
             'openstack_ca': '',
-            "nodes_affinity_policy": "soft-anti-affinity"
+            "nodes_affinity_policy": "soft-anti-affinity",
+            'availability_zone': 'az_1'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -488,7 +494,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'insecure_registry_url': '10.0.0.1:5000',
             'kube_version': 'fake-version',
             'verify_ca': True,
-            'openstack_ca': '',
+            'openstack_ca': ''
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -561,7 +567,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'insecure_registry_url': '10.0.0.1:5000',
             'kube_version': 'fake-version',
             'verify_ca': True,
-            'openstack_ca': '',
+            'openstack_ca': ''
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -734,7 +740,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kube_version': 'fake-version',
             'verify_ca': True,
             'openstack_ca': '',
-            "nodes_affinity_policy": "soft-anti-affinity"
+            "nodes_affinity_policy": "soft-anti-affinity",
+            'availability_zone': 'az_1'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

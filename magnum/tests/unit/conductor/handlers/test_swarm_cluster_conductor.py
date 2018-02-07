@@ -53,7 +53,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
                        'flannel_network_subnetlen': '26',
                        'flannel_backend': 'vxlan',
                        'rexray_preempt': 'False',
-                       'swarm_strategy': 'spread'},
+                       'swarm_strategy': 'spread',
+                       'availability_zone': 'az_1'},
             'master_lb_enabled': False,
             'volume_driver': 'rexray'
         }
@@ -81,7 +82,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
                        'flannel_network_subnetlen': '26',
                        'flannel_backend': 'vxlan',
                        'rexray_preempt': 'False',
-                       'swarm_strategy': 'spread'},
+                       'swarm_strategy': 'spread',
+                       'availability_zone': 'az_1'},
             'coe_version': 'fake-version'
         }
 
@@ -266,7 +268,7 @@ class TestClusterConductorWithSwarm(base.TestCase):
                         'https_proxy', 'no_proxy', 'network_driver',
                         'master_flavor_id', 'docker_storage_driver',
                         'volume_driver', 'rexray_preempt', 'fixed_subnet',
-                        'docker_volume_type']
+                        'docker_volume_type', 'availablity_zone']
         for key in not_required:
             self.cluster_template_dict[key] = None
         self.cluster_dict['discovery_url'] = 'https://discovery.etcd.io/test'

@@ -194,6 +194,12 @@ parameters:
       - allowed_values: ["affinity", "anti-affinity", "soft-affinity",
                          "soft-anti-affinity"]
 
+  availability_zone:
+    type: string
+    description: >
+      availability zone for master and nodes
+    default: ""
+
 resources:
 
   ######################################################################
@@ -329,6 +335,7 @@ resources:
           verify_ca: {get_param: verify_ca}
           openstack_ca: {get_param: openstack_ca}
           nodes_server_group_id: {get_resource: nodes_server_group}
+          availability_zone: {get_param: availability_zone}
 
   swarm_secondary_masters:
     type: "OS::Heat::ResourceGroup"
@@ -373,6 +380,7 @@ resources:
           verify_ca: {get_param: verify_ca}
           openstack_ca: {get_param: openstack_ca}
           nodes_server_group_id: {get_resource: nodes_server_group}
+          availability_zone: {get_param: availability_zone}
 
   swarm_nodes:
     type: "OS::Heat::ResourceGroup"
@@ -417,6 +425,7 @@ resources:
           verify_ca: {get_param: verify_ca}
           openstack_ca: {get_param: openstack_ca}
           nodes_server_group_id: {get_resource: nodes_server_group}
+          availability_zone: {get_param: availability_zone}
 
 outputs:
 
