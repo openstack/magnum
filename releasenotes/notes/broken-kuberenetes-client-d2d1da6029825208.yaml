@@ -1,0 +1,17 @@
+---
+issues:
+  - |
+    Kubernetes client is incompatible with evenlet and breaks the periodic
+    tasks. After kubernetes client 4.0.0 magnum is affected by the bug
+    below.
+    https://github.com/eventlet/eventlet/issues/147
+    Magnum has three periodic tasks, one to sync the magnum service, one to
+    update the cluster status and one send cluster metrics The send_metrics
+    task uses the kubernetes client for kubernetes clusters and it crashes
+    the sync_cluster_status and send_cluster_metrics tasks.
+    https://bugs.launchpad.net/magnum/+bug/1746510
+upgrade:
+  - |
+    In magnum configuration, in [drivers] set send_cluster_metrics = False to
+    to avoid collecting metrics using the kubernetes client which crashes the
+    periodic tasks.
