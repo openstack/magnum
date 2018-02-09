@@ -530,7 +530,7 @@ except for the absence of some Kubernetes-specific arguments and the use of
                            --dns-nameserver 8.8.8.8 \
                            --flavor m1.small \
                            --docker-volume-size 5 \
-                           --coe swarm
+                           --coe swarm-mode
 
 **NOTE:** If you are using Magnum behind a firewall then refer
 to `<http://docs.openstack.org/developer/magnum/magnum-proxy.html>`_
