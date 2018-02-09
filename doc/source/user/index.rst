@@ -130,7 +130,8 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   Mesos      ubuntu
   ========== =====================
 
-  This is a mandatory parameter and there is no default value.
+  This is a mandatory parameter and there is no default value. Note that the
+  os_distro attribute is case sensitive.
 
 --keypair \<keypair\>
   The name of the SSH keypair to configure in the cluster servers
@@ -175,10 +176,12 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   ===========  =================  ========
   COE           Network-Driver    Default
   ===========  =================  ========
-  Kubernetes   Flannel            Flannel
-  Swarm        Docker, Flannel    Flannel
-  Mesos        Docker             Docker
+  Kubernetes   flannel            flannel
+  Swarm        docker, flannel    flannel
+  Mesos        docker             docker
   ===========  =================  ========
+
+  Note that the network driver name is case sensitive.
 
 --volume-driver \<volume-driver\>
   The name of a volume driver for managing the persistent storage for
@@ -188,10 +191,12 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   ============= ============= ===========
   COE           Volume-Driver Default
   ============= ============= ===========
-  Kubernetes    Cinder        No Driver
-  Swarm         Rexray        No Driver
-  Mesos         Rexray        No Driver
+  Kubernetes    cinder        No Driver
+  Swarm         rexray        No Driver
+  Mesos         rexray        No Driver
   ============= ============= ===========
+
+  Note that the volume driver name is case sensitive.
 
 --dns-nameserver \<dns-nameserver\>
   The DNS nameserver for the servers and containers in the cluster to use.
