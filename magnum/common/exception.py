@@ -367,6 +367,10 @@ class RegionsListFailed(MagnumException):
     message = _("Failed to list regions.")
 
 
+class ServicesListFailed(MagnumException):
+    message = _("Failed to list services.")
+
+
 class TrusteeOrTrustToClusterFailed(MagnumException):
     message = _("Failed to create trustee or trust for Cluster: "
                 "%(cluster_uuid)s")

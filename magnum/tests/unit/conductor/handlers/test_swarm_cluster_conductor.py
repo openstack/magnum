@@ -330,8 +330,10 @@ class TestClusterConductorWithSwarm(base.TestCase):
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
-    def test_extract_template_definition_with_lb(
+    @patch('magnum.common.keystone.KeystoneClientV3')
+    def test_extract_template_definition_with_lb_neutron(
             self,
+            mock_kc,
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
@@ -347,6 +349,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
         mock_get.return_value = mock_resp
         mock_driver.return_value = swarm_dr.Driver()
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+
+        mock_kc.return_value.client.services.list.return_value = []
 
         (template_path,
          definition,
@@ -403,8 +407,92 @@ class TestClusterConductorWithSwarm(base.TestCase):
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
+    @patch('magnum.common.keystone.KeystoneClientV3')
+    def test_extract_template_definition_with_lb_octavia(
+            self,
+            mock_kc,
+            mock_driver,
+            mock_objects_cluster_template_get_by_uuid,
+            mock_get):
+        self.cluster_template_dict['master_lb_enabled'] = True
+        cluster_template = objects.ClusterTemplate(
+            self.context, **self.cluster_template_dict)
+        mock_objects_cluster_template_get_by_uuid.return_value = \
+            cluster_template
+        expected_result = str('{"action":"get","node":{"key":"test","value":'
+                              '"1","modifiedIndex":10,"createdIndex":10}}')
+        mock_resp = mock.MagicMock()
+        mock_resp.text = expected_result
+        mock_get.return_value = mock_resp
+        mock_driver.return_value = swarm_dr.Driver()
+        cluster = objects.Cluster(self.context, **self.cluster_dict)
+
+        class Service(object):
+            def __init__(self):
+                self.enabled = True
+
+        mock_kc.return_value.client.services.list.return_value = [Service()]
+
+        (template_path,
+         definition,
+         env_files) = mock_driver()._extract_template_definition(self.context,
+                                                                 cluster)
+
+        expected = {
+            'ssh_key_name': 'keypair_id',
+            'external_network': 'external_network_id',
+            'fixed_network': 'fixed_network',
+            'fixed_subnet': 'fixed_subnet',
+            'dns_nameserver': 'dns_nameserver',
+            'server_image': 'image_id',
+            'master_flavor': 'master_flavor_id',
+            'node_flavor': 'flavor_id',
+            'number_of_masters': 1,
+            'number_of_nodes': 1,
+            'docker_volume_size': 20,
+            'docker_storage_driver': 'devicemapper',
+            'discovery_url': 'https://discovery.test.io/123456789',
+            'http_proxy': 'http_proxy',
+            'https_proxy': 'https_proxy',
+            'no_proxy': 'no_proxy',
+            'cluster_uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
+            'magnum_url': self.mock_osc.magnum_url.return_value,
+            'tls_disabled': False,
+            'registry_enabled': False,
+            'network_driver': 'network_driver',
+            'flannel_network_cidr': '10.101.0.0/16',
+            'flannel_network_subnetlen': '26',
+            'flannel_backend': 'vxlan',
+            'trustee_domain_id': self.mock_keystone.trustee_domain_id,
+            'trustee_username': 'fake_trustee',
+            'trustee_password': 'fake_trustee_password',
+            'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
+            'trust_id': 'bd11efc5-d4e2-4dac-bbce-25e348ddf7de',
+            'auth_url': 'http://192.168.10.10:5000/v3',
+            'swarm_version': 'fake-version',
+            'swarm_strategy': u'spread',
+            'volume_driver': 'rexray',
+            'rexray_preempt': 'False',
+            'docker_volume_type': 'lvmdriver-1',
+            'verify_ca': True,
+            'openstack_ca': '',
+            'nodes_affinity_policy': 'soft-anti-affinity'
+        }
+        self.assertEqual(expected, definition)
+        self.assertEqual(
+            ['../../common/templates/environments/no_private_network.yaml',
+             '../../common/templates/environments/with_volume.yaml',
+             '../../common/templates/environments/with_master_lb_octavia.yaml'
+             ],
+            env_files)
+
+    @patch('requests.get')
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
+    @patch('magnum.common.keystone.KeystoneClientV3')
     def test_extract_template_definition_multi_master(
             self,
+            mock_kc,
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
@@ -421,6 +509,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
         mock_get.return_value = mock_resp
         mock_driver.return_value = swarm_dr.Driver()
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+
+        mock_kc.return_value.client.services.list.return_value = []
 
         (template_path,
          definition,

@@ -20,6 +20,7 @@ import six
 
 from magnum.common import clients
 from magnum.common import exception
+from magnum.common import keystone
 from magnum.common import utils
 import magnum.conf
 
@@ -328,7 +329,10 @@ class BaseTemplateDefinition(TemplateDefinition):
 
 def add_lb_env_file(env_files, cluster_template):
     if cluster_template.master_lb_enabled:
-        env_files.append(COMMON_ENV_PATH + 'with_master_lb.yaml')
+        if keystone.is_octavia_enabled():
+            env_files.append(COMMON_ENV_PATH + 'with_master_lb_octavia.yaml')
+        else:
+            env_files.append(COMMON_ENV_PATH + 'with_master_lb.yaml')
     else:
         env_files.append(COMMON_ENV_PATH + 'no_master_lb.yaml')
 
