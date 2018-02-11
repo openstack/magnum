@@ -207,8 +207,10 @@ class TestClusterConductorWithMesos(base.TestCase):
 
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
-    def test_extract_template_definition_with_lb(
+    @patch('magnum.common.keystone.KeystoneClientV3')
+    def test_extract_template_definition_with_lb_neutron(
             self,
+            mock_kc,
             mock_driver,
             mock_objects_cluster_template_get_by_uuid):
         self.cluster_template_dict['master_lb_enabled'] = True
@@ -218,6 +220,8 @@ class TestClusterConductorWithMesos(base.TestCase):
             cluster_template
         cluster = objects.Cluster(self.context, **self.cluster_dict)
         mock_driver.return_value = mesos_dr.Driver()
+
+        mock_kc.return_value.client.services.list.return_value = []
 
         (template_path,
          definition,
@@ -266,8 +270,78 @@ class TestClusterConductorWithMesos(base.TestCase):
 
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
+    @patch('magnum.common.keystone.KeystoneClientV3')
+    def test_extract_template_definition_with_lb_octavia(
+            self,
+            mock_kc,
+            mock_driver,
+            mock_objects_cluster_template_get_by_uuid):
+        self.cluster_template_dict['master_lb_enabled'] = True
+        cluster_template = objects.ClusterTemplate(
+            self.context, **self.cluster_template_dict)
+        mock_objects_cluster_template_get_by_uuid.return_value = \
+            cluster_template
+        cluster = objects.Cluster(self.context, **self.cluster_dict)
+        mock_driver.return_value = mesos_dr.Driver()
+
+        class Service(object):
+            def __init__(self):
+                self.enabled = True
+
+        mock_kc.return_value.client.services.list.return_value = [Service()]
+
+        (template_path,
+         definition,
+         env_files) = mock_driver()._extract_template_definition(self.context,
+                                                                 cluster)
+
+        expected = {
+            'ssh_key_name': 'keypair_id',
+            'external_network': 'external_network_id',
+            'fixed_network': 'fixed_network',
+            'fixed_subnet': 'fixed_subnet',
+            'dns_nameserver': 'dns_nameserver',
+            'server_image': 'image_id',
+            'master_flavor': 'master_flavor_id',
+            'slave_flavor': 'flavor_id',
+            'number_of_slaves': 1,
+            'number_of_masters': 1,
+            'http_proxy': 'http_proxy',
+            'https_proxy': 'https_proxy',
+            'no_proxy': 'no_proxy',
+            'cluster_name': 'cluster1',
+            'trustee_domain_id': self.mock_keystone.trustee_domain_id,
+            'trustee_username': 'fake_trustee',
+            'trustee_password': 'fake_trustee_password',
+            'trustee_user_id': '7b489f04-b458-4541-8179-6a48a553e656',
+            'trust_id': '',
+            'volume_driver': 'volume_driver',
+            'auth_url': 'http://192.168.10.10:5000/v3',
+            'region_name': self.mock_osc.cinder_region_name.return_value,
+            'username': 'mesos_user',
+            'tenant_name': 'admin',
+            'domain_name': 'domainname',
+            'rexray_preempt': 'False',
+            'mesos_slave_executor_env_variables': '{}',
+            'mesos_slave_isolation': 'docker/runtime,filesystem/linux',
+            'mesos_slave_work_dir': '/tmp/mesos/slave',
+            'mesos_slave_image_providers': 'docker',
+            'verify_ca': True,
+            'openstack_ca': '',
+        }
+        self.assertEqual(expected, definition)
+        self.assertEqual(
+            ['../../common/templates/environments/no_private_network.yaml',
+             '../../common/templates/environments/with_master_lb_octavia.yaml'
+             ],
+            env_files)
+
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
+    @patch('magnum.common.keystone.KeystoneClientV3')
     def test_extract_template_definition_multi_master(
             self,
+            mock_kc,
             mock_driver,
             mock_objects_cluster_template_get_by_uuid):
         self.cluster_template_dict['master_lb_enabled'] = True
@@ -278,6 +352,8 @@ class TestClusterConductorWithMesos(base.TestCase):
             cluster_template
         cluster = objects.Cluster(self.context, **self.cluster_dict)
         mock_driver.return_value = mesos_dr.Driver()
+
+        mock_kc.return_value.client.services.list.return_value = []
 
         (template_path,
          definition,
