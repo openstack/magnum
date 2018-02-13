@@ -338,6 +338,11 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `grafana_admin_passwd`_               | (any string)       | "admin"       |
 +---------------------------------------+--------------------+---------------+
+| `kube_tag`_                           | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `kube_dashboard_enabled`_             | - true             | true          |
+|                                       | - false            |               |
++---------------------------------------+--------------------+---------------+
 | `docker_volume_type`_                 | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
 | `etcd_volume_size`_                   | etcd storage       | 0             |
@@ -1081,6 +1086,17 @@ _`admission_control_list`
 _`etcd_volume_size`
   This label sets the size of a volume holding the etcd storage data.
   The default value is 0, meaning the etcd data is not persisted (no volume).
+
+_`kube_tag`
+  This label allows users to select `a specific Kubernetes release,
+  based on its container tag
+  <https://hub.docker.com/r/openstackmagnum/kubernetes-apiserver/tags/>`_.
+  If unset, the current Magnum version's default Kubernetes release is
+  installed.
+
+_`kube_dashboard_enabled`
+  This label triggers the deployment of the kubernetes dashboard.
+  The default value is 1, meaning it will be enabled.
 
 External load balancer for services
 -----------------------------------

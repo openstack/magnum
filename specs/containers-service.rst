@@ -175,7 +175,7 @@ with the Containers Service, and can be controlled only by a Nova virt driver.
  |           +-------+ |  | +-----+                   |
  |                     |  |                           |
  +-----------+---------+  +---------------+-----------+
-             |                            |            
+             |                            |
  +-----------+----+ Compute Host ---------|-----------+
  |                                    +---+---+       |
  |                               +----+ Relay +---+   |
