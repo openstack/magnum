@@ -331,6 +331,8 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `grafana_admin_passwd`_               | (any string)       | "admin"       |
 +---------------------------------------+--------------------+---------------+
+| `kube_tag`_                           | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 | `kube_dashboard_enabled`_             | - true             | true          |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
@@ -1082,6 +1084,7 @@ _`container_infra_prefix`
   which assumes an operator has cloned all expected images in
   myregistry.example.com/mycloud.
   Images that must be mirrored:
+
   * docker.io/coredns/coredns:011
   * docker.io/grafana/grafana:latest
   * docker.io/openstackmagnum/kubernetes-apiserver
@@ -1093,6 +1096,13 @@ _`container_infra_prefix`
   * docker.io/prom/prometheus:latest
   * gcr.io/google_containers/kubernetes-dashboard-amd64:v1.5.1
   * gcr.io/google_containers/pause:3.0
+
+_`kube_tag`
+  This label allows users to select `a specific Kubernetes release,
+  based on its container tag
+  <https://hub.docker.com/r/openstackmagnum/kubernetes-apiserver/tags/>`_.
+  If unset, the current Magnum version's default Kubernetes release is
+  installed.
 
 _`kube_dashboard_enabled`
   This label triggers the deployment of the kubernetes dashboard.
