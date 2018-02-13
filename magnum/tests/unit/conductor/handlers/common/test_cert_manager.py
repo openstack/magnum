@@ -63,7 +63,8 @@ class CertManagerTestCase(base.BaseTestCase):
     @mock.patch('magnum.common.x509.operations.generate_client_certificate')
     @mock.patch('magnum.common.short_id.generate_id')
     def test_generate_client_cert(self, mock_generate_id, mock_generate_cert):
-        expected_name = cert_manager.CONDUCTOR_CLIENT_NAME
+        expected_name = 'admin'
+        expected_organization_name = 'system:masters'
         expected_ca_name = 'ca-name'
         expected_password = 'password'
         expected_ca_password = 'ca-password'
@@ -88,6 +89,7 @@ class CertManagerTestCase(base.BaseTestCase):
         mock_generate_cert.assert_called_once_with(
             expected_ca_name,
             expected_name,
+            expected_organization_name,
             expected_ca_cert['private_key'],
             encryption_password=expected_password,
             ca_key_password=expected_ca_password,
@@ -96,7 +98,7 @@ class CertManagerTestCase(base.BaseTestCase):
             certificate=expected_cert['certificate'],
             private_key=expected_cert['private_key'],
             private_key_passphrase=expected_password,
-            name=expected_name,
+            name=cert_manager.CONDUCTOR_CLIENT_NAME,
             context=None
         )
 

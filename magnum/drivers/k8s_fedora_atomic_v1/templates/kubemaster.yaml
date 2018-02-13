@@ -428,11 +428,11 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/network-service.sh}
 
-  kube_system_namespace_service:
+  kube_apiserver_to_kubelet_role:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/kube-system-namespace-service.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/kube-apiserver-to-kubelet-role.sh}
 
   kube_ui_service:
     type: OS::Heat::SoftwareConfig
@@ -487,7 +487,7 @@ resources:
         - config: {get_resource: write_network_config}
         - config: {get_resource: network_config_service}
         - config: {get_resource: network_service}
-        - config: {get_resource: kube_system_namespace_service}
+        - config: {get_resource: kube_apiserver_to_kubelet_role}
         - config: {get_resource: core_dns_service}
         - config: {get_resource: kube_ui_service}
         - config: {get_resource: start_container_agent}

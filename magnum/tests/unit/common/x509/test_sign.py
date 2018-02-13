@@ -32,6 +32,7 @@ class TestX509(base.BaseTestCase):
         super(TestX509, self).setUp()
         self.issuer_name = six.u("fake-issuer")
         self.subject_name = six.u("fake-subject")
+        self.organization_name = six.u("fake-organization")
         self.ca_encryption_password = six.b("fake-ca-password")
         self.encryption_password = six.b("fake-password")
 
@@ -59,6 +60,7 @@ class TestX509(base.BaseTestCase):
         keypairs = operations.generate_client_certificate(
             self.issuer_name,
             self.subject_name,
+            self.organization_name,
             ca['private_key'],
             encryption_password=self.encryption_password,
             ca_key_password=self.ca_encryption_password,
