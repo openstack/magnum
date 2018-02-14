@@ -86,7 +86,11 @@ class TestRootController(api_base.FunctionalTest):
             u'mservices': [{u'href': u'http://localhost/v1/mservices/',
                             u'rel': u'self'},
                            {u'href': u'http://localhost/mservices/',
-                            u'rel': u'bookmark'}]}
+                            u'rel': u'bookmark'}],
+            u'federations': [{u'href': u'http://localhost/v1/federations/',
+                              u'rel': u'self'},
+                             {u'href': u'http://localhost/federations/',
+                              u'rel': u'bookmark'}]}
 
     def make_app(self, paste_file):
         file_name = self.get_path(paste_file)

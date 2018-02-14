@@ -157,6 +157,33 @@ def get_test_magnum_service_object(context, **kw):
     return magnum_service
 
 
+def get_test_federation(context, **kw):
+    """Return a Federation object with appropriate attributes.
+
+    NOTE: The object leaves the attributes marked as changed, such
+    that a create() could be used to commit it to the DB.
+    """
+    db_federation = db_utils.get_test_federation(**kw)
+    # Let DB generate ID if it isn't specified explicitly
+    if 'id' not in kw:
+        del db_federation['id']
+    federation = objects.Federation(context)
+    for key in db_federation:
+        setattr(federation, key, db_federation[key])
+    return federation
+
+
+def create_test_federation(context, **kw):
+    """Create and return a test Federation object.
+
+    Create a Federation in the DB and return a Federation object with
+    appropriate attributes.
+    """
+    federation = get_test_federation(context, **kw)
+    federation.create()
+    return federation
+
+
 def datetime_or_none(dt):
     """Validate a datetime or None value."""
     if dt is None:

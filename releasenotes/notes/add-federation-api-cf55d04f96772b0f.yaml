@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    This release introduces 'federations' endpoint
+    to Magnum API, which allows an admin to create
+    and manage federations of clusters through Magnum.
+    As the feature is still under development, 
+    the endpoints are not bound to any driver yet.
+    For more details, please refer to bp/federation-api [1].
+
+    [1] https://review.openstack.org/#/q/topic:bp/federation-api

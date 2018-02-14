@@ -51,6 +51,29 @@ class API(rpc_service.API):
     def cluster_update_async(self, cluster, rollback=False):
         self._cast('cluster_update', cluster=cluster, rollback=rollback)
 
+    # Federation Operations
+
+    def federation_create(self, federation, create_timeout):
+        return self._call('federation_create', federation=federation,
+                          create_timeout=create_timeout)
+
+    def federation_create_async(self, federation, create_timeout):
+        self._cast('federation_create', federation=federation,
+                   create_timeout=create_timeout)
+
+    def federation_delete(self, uuid):
+        return self._call('federation_delete', uuid=uuid)
+
+    def federation_delete_async(self, uuid):
+        self._cast('federation_delete', uuid=uuid)
+
+    def federation_update(self, federation):
+        return self._call('federation_update', federation=federation)
+
+    def federation_update_async(self, federation, rollback=False):
+        self._cast('federation_update', federation=federation,
+                   rollback=rollback)
+
     # CA operations
 
     def sign_certificate(self, cluster, certificate):

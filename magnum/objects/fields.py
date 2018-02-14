@@ -49,6 +49,28 @@ class ClusterStatus(fields.Enum):
         super(ClusterStatus, self).__init__(valid_values=ClusterStatus.ALL)
 
 
+class FederationStatus(fields.Enum):
+    CREATE_IN_PROGRESS = 'CREATE_IN_PROGRESS'
+    CREATE_FAILED = 'CREATE_FAILED'
+    CREATE_COMPLETE = 'CREATE_COMPLETE'
+    UPDATE_IN_PROGRESS = 'UPDATE_IN_PROGRESS'
+    UPDATE_FAILED = 'UPDATE_FAILED'
+    UPDATE_COMPLETE = 'UPDATE_COMPLETE'
+    DELETE_IN_PROGRESS = 'DELETE_IN_PROGRESS'
+    DELETE_FAILED = 'DELETE_FAILED'
+    DELETE_COMPLETE = 'DELETE_COMPLETE'
+
+    ALL = (CREATE_IN_PROGRESS, CREATE_FAILED, CREATE_COMPLETE,
+           UPDATE_IN_PROGRESS, UPDATE_FAILED, UPDATE_COMPLETE,
+           DELETE_IN_PROGRESS, DELETE_FAILED, DELETE_COMPLETE)
+
+    STATUS_FAILED = (CREATE_FAILED, UPDATE_FAILED, DELETE_FAILED)
+
+    def __init__(self):
+        super(FederationStatus, self).__init__(
+            valid_values=FederationStatus.ALL)
+
+
 class ContainerStatus(fields.Enum):
     ALL = (
         ERROR, RUNNING, STOPPED, PAUSED, UNKNOWN,
@@ -146,3 +168,7 @@ class ClusterTypeField(fields.BaseEnumField):
 
 class ServerTypeField(fields.BaseEnumField):
     AUTO_TYPE = ServerType()
+
+
+class FederationStatusField(fields.BaseEnumField):
+    AUTO_TYPE = FederationStatus()

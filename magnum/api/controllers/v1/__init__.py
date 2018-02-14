@@ -29,6 +29,7 @@ from magnum.api.controllers.v1 import baymodel
 from magnum.api.controllers.v1 import certificate
 from magnum.api.controllers.v1 import cluster
 from magnum.api.controllers.v1 import cluster_template
+from magnum.api.controllers.v1 import federation
 from magnum.api.controllers.v1 import magnum_services
 from magnum.api.controllers.v1 import quota
 from magnum.api.controllers.v1 import stats
@@ -99,6 +100,9 @@ class V1(controllers_base.APIBase):
     stats = [link.Link]
     """Links to the stats resource"""
 
+    # Links to the federations resources
+    federations = [link.Link]
+
     @staticmethod
     def convert():
         v1 = V1()
@@ -161,6 +165,13 @@ class V1(controllers_base.APIBase):
                                         pecan.request.host_url,
                                         'stats', '',
                                         bookmark=True)]
+        v1.federations = [link.Link.make_link('self', pecan.request.host_url,
+                                              'federations', ''),
+                          link.Link.make_link('bookmark',
+                                              pecan.request.host_url,
+                                              'federations', '',
+                                              bookmark=True)]
+
         return v1
 
 
@@ -175,6 +186,7 @@ class Controller(controllers_base.Controller):
     certificates = certificate.CertificateController()
     mservices = magnum_services.MagnumServiceController()
     stats = stats.StatsController()
+    federations = federation.FederationsController()
 
     @expose.expose(V1)
     def get(self):
