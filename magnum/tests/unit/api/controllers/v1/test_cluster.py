@@ -950,6 +950,16 @@ class TestDelete(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['errors'])
 
+    @mock.patch("magnum.common.policy.enforce")
+    @mock.patch("magnum.common.context.make_context")
+    def test_delete_cluster_as_admin(self, mock_context, mock_policy):
+        temp_uuid = uuidutils.generate_uuid()
+        obj_utils.create_test_cluster(self.context, uuid=temp_uuid)
+        self.context.is_admin = True
+        response = self.delete('/clusters/%s' % temp_uuid,
+                               expect_errors=True)
+        self.assertEqual(204, response.status_int)
+
 
 class TestClusterPolicyEnforcement(api_base.FunctionalTest):
     def setUp(self):

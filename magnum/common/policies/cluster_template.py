@@ -41,6 +41,17 @@ rules = [
         ]
     ),
     policy.DocumentedRuleDefault(
+        name=CLUSTER_TEMPLATE % 'delete_all_projects',
+        check_str=base.RULE_ADMIN_API,
+        description='Delete a cluster template from any project.',
+        operations=[
+            {
+                'path': '/v1/clustertemplate/{clustertemplate_ident}',
+                'method': 'DELETE'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
         name=CLUSTER_TEMPLATE % 'detail_all_projects',
         check_str=base.RULE_ADMIN_API,
         description=('Retrieve a list of cluster templates with detail across '

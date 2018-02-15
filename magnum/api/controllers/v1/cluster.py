@@ -554,6 +554,11 @@ class ClustersController(base.Controller):
         :param cluster_ident: UUID of cluster or logical name of the cluster.
         """
         context = pecan.request.context
+        if context.is_admin:
+            policy.enforce(context, 'cluster:delete_all_projects',
+                           action='cluster:delete_all_projects')
+            context.all_tenants = True
+
         cluster = api_utils.get_resource('Cluster', cluster_ident)
         policy.enforce(context, 'cluster:delete', cluster.as_dict(),
                        action='cluster:delete')
