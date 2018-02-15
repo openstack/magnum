@@ -41,6 +41,17 @@ rules = [
         ]
     ),
     policy.DocumentedRuleDefault(
+        name=CLUSTER % 'delete_all_projects',
+        check_str=base.RULE_ADMIN_API,
+        description='Delete a cluster from any project.',
+        operations=[
+            {
+                'path': '/v1/clusters/{cluster_ident}',
+                'method': 'DELETE'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
         name=CLUSTER % 'detail',
         check_str=base.RULE_DENY_CLUSTER_USER,
         description='Retrieve a list of clusters with detail.',

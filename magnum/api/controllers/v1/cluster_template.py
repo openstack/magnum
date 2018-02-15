@@ -464,6 +464,11 @@ class ClusterTemplatesController(base.Controller):
          ClusterTemplate.
         """
         context = pecan.request.context
+        if context.is_admin:
+            policy.enforce(context, 'clustertemplate:delete_all_projects',
+                           action='clustertemplate:delete_all_projects')
+            context.all_tenants = True
+
         cluster_template = api_utils.get_resource('ClusterTemplate',
                                                   cluster_template_ident)
         policy.enforce(context, 'clustertemplate:delete',
