@@ -294,7 +294,7 @@ parameters:
     hidden: true
     description: The OpenStack CA certificate to install on the node.
 
- nodes_affinity_policy:
+  nodes_affinity_policy:
     type: string
     description: >
       affinity policy for nodes server group
