@@ -25,7 +25,10 @@ from oslo_utils import netutils
 
 from magnum.common import exception
 from magnum.common import utils
+import magnum.conf
 from magnum.tests import base
+
+CONF = magnum.conf.CONF
 
 
 class UtilsTestCase(base.TestCase):
@@ -51,6 +54,24 @@ class UtilsTestCase(base.TestCase):
                           utils.get_docker_quantity, '512bb')
         self.assertRaises(exception.UnsupportedDockerQuantityFormat,
                           utils.get_docker_quantity, '512B')
+
+    def test_get_openstasck_ca(self):
+        # openstack_ca_file is empty
+        self.assertEqual('', utils.get_openstack_ca())
+
+        # openstack_ca_file is set but the file doesn't exist
+        CONF.set_override('openstack_ca_file',
+                          '/tmp/invalid-ca.pem',
+                          group='drivers')
+        self.assertRaises(IOError, utils.get_openstack_ca)
+
+        # openstack_ca_file is set and the file exists
+        CONF.set_override('openstack_ca_file',
+                          '/tmp/invalid-ca.pem',
+                          group='drivers')
+        with mock.patch('magnum.common.utils.open',
+                        mock.mock_open(read_data="CERT"), create=True):
+            self.assertEqual('CERT', utils.get_openstack_ca())
 
 
 class ExecuteTestCase(base.TestCase):

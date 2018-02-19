@@ -43,7 +43,28 @@ parameters:
     type: string
     description: ID of the load balancer pool of Marathon.
 
+  openstack_ca:
+    type: string
+    hidden: true
+    description: The OpenStack CA certificate to install on the node.
+
 resources:
+
+  add_ext_ca_certs:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config:
+        str_replace:
+          template: {get_file: fragments/add-ext-ca-certs.sh}
+          params:
+            "@@CACERTS_CONTENT@@": {get_param: openstack_ca}
+
+  mesos_master_init:
+    type: OS::Heat::MultipartMime
+    properties:
+      parts:
+        - config: {get_resource: add_ext_ca_certs}
 
   ######################################################################
   #
@@ -61,6 +82,7 @@ resources:
       flavor: {get_param: master_flavor}
       key_name: {get_param: ssh_key_name}
       user_data_format: SOFTWARE_CONFIG
+      user_data: {get_resource: mesos_master_init}
       networks:
         - port: {get_resource: mesos_master_eth0}
 

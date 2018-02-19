@@ -214,6 +214,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'insecure_registry_url': '10.0.0.1:5000',
             'kube_version': 'fake-version',
             'verify_ca': True,
+            'openstack_ca': '',
         }
         if missing_attr is not None:
             expected.pop(mapping[missing_attr], None)
@@ -309,6 +310,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'insecure_registry_url': '10.0.0.1:5000',
             'kube_version': 'fake-version',
             'verify_ca': True,
+            'openstack_ca': '',
         }
 
         self.assertEqual(expected, definition)
@@ -389,6 +391,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'trustee_username': 'fake_trustee',
             'username': 'fake_user',
             'verify_ca': True,
+            'openstack_ca': '',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -466,6 +469,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'insecure_registry_url': '10.0.0.1:5000',
             'kube_version': 'fake-version',
             'verify_ca': True,
+            'openstack_ca': '',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -538,6 +542,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'insecure_registry_url': '10.0.0.1:5000',
             'kube_version': 'fake-version',
             'verify_ca': True,
+            'openstack_ca': '',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -739,6 +744,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'insecure_registry_url': '10.0.0.1:5000',
             'kube_version': 'fake-version',
             'verify_ca': True,
+            'openstack_ca': '',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

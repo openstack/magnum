@@ -223,6 +223,10 @@ parameters:
     description: >
       domain name for cluster DNS
 
+  openstack_ca:
+    type: string
+    description: The OpenStack CA certificate to install on the node.
+
 resources:
 
   minion_wait_handle:
@@ -293,6 +297,16 @@ resources:
     properties:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/write-kubeconfig.yaml}
+
+  install_openstack_ca:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          params:
+            $OPENSTACK_CA: {get_param: openstack_ca}
+          template: {get_file: ../../common/templates/fragments/atomic-install-openstack-ca.sh}
 
   write_kube_os_config:
     type: OS::Heat::SoftwareConfig
@@ -386,6 +400,7 @@ resources:
     type: OS::Heat::MultipartMime
     properties:
       parts:
+        - config: {get_resource: install_openstack_ca}
         - config: {get_resource: disable_selinux}
         - config: {get_resource: write_heat_params}
         - config: {get_resource: write_kubeconfig}

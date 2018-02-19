@@ -3,6 +3,7 @@
 . /etc/sysconfig/heat-params
 
 KUBE_OS_CLOUD_CONFIG=/etc/kubernetes/kube_openstack_config
+cp /etc/pki/tls/certs/ca-bundle.crt /etc/kubernetes/ca-bundle.crt
 
 # Generate a the configuration for Kubernetes services
 # to talk to OpenStack Neutron and Cinder
@@ -12,6 +13,7 @@ auth-url=$AUTH_URL
 user-id=$TRUSTEE_USER_ID
 password=$TRUSTEE_PASSWORD
 trust-id=$TRUST_ID
+ca-file=/etc/kubernetes/ca-bundle.crt
 [LoadBalancer]
 subnet-id=$CLUSTER_SUBNET
 create-monitor=yes

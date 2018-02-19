@@ -278,3 +278,13 @@ def generate_password(length, symbolgroups=None):
     r.shuffle(password)
 
     return ''.join(password)
+
+
+def get_openstack_ca():
+    openstack_ca_file = CONF.drivers.openstack_ca_file
+
+    if openstack_ca_file:
+        with open(openstack_ca_file) as fd:
+            return fd.read()
+    else:
+        return ''
