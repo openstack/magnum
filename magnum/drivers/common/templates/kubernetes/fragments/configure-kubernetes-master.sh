@@ -57,6 +57,10 @@ if [ -n "$TRUST_ID" ]; then
     KUBE_CONTROLLER_MANAGER_ARGS="$KUBE_CONTROLLER_MANAGER_ARGS --cloud-config=/etc/kubernetes/kube_openstack_config --cloud-provider=openstack"
 fi
 
+if [ -n "$CERT_MANAGER_API" ]; then
+    KUBE_CONTROLLER_MANAGER_ARGS="$KUBE_CONTROLLER_MANAGER_ARGS --cluster-signing-cert-file=$CERT_DIR/ca.crt --cluster-signing-key-file=$CERT_DIR/ca.key"
+fi
+
 sed -i '
     /^KUBELET_ADDRESSES=/ s/=.*/="--machines='""'"/
     /^KUBE_CONTROLLER_MANAGER_ARGS=/ s#\(KUBE_CONTROLLER_MANAGER_ARGS\).*#\1="'"${KUBE_CONTROLLER_MANAGER_ARGS}"'"#

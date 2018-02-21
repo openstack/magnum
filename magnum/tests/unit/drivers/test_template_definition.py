@@ -274,6 +274,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'container_infra_prefix')
         availability_zone = mock_cluster.labels.get(
             'availability_zone')
+        cert_manager_api = mock_cluster.labels.get('cert_manager_api')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -301,7 +302,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'container_infra_prefix': container_infra_prefix,
             'nodes_affinity_policy': 'soft-anti-affinity',
             'availability_zone': availability_zone,
-        }}
+            'cert_manager_api': cert_manager_api}}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
                                                 mock_cluster,
@@ -362,6 +363,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'container_infra_prefix')
         availability_zone = mock_cluster.labels.get(
             'availability_zone')
+        cert_manager_api = mock_cluster.labels.get('cert_manager_api')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -391,7 +393,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'container_infra_prefix': container_infra_prefix,
             'nodes_affinity_policy': 'soft-anti-affinity',
             'availability_zone': availability_zone,
-        }}
+            'cert_manager_api': cert_manager_api}}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
                                                 mock_cluster,
