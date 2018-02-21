@@ -291,3 +291,32 @@ class KeystoneClientV3(object):
                     'region_name_list': '/'.join(
                         region_list + ['unspecified'])})
         return region_name
+
+
+def is_octavia_enabled():
+    """Check if Octavia service is deployed in the cloud.
+
+    Octavia is already an official LBaaS solution for Openstack
+    (https://governance.openstack.org/tc/reference/projects/octavia.html) and
+    will deprecate the neutron-lbaas extension starting from Queens release.
+
+    We use Octavia instead of Neutron LBaaS API for load balancing
+    functionality for k8s cluster if Octavia service is deployed and enabled
+    in the cloud.
+    """
+    # Put the import here to avoid circular importing.
+    from magnum.common import context
+    admin_context = context.make_admin_context()
+    keystone = KeystoneClientV3(admin_context)
+
+    try:
+        octavia_svc = keystone.client.services.list(type='load-balancer')
+    except Exception:
+        LOG.exception('Failed to list services')
+        raise exception.ServicesListFailed()
+
+    # Always assume there is only one load balancing service configured.
+    if octavia_svc and octavia_svc[0].enabled:
+        return True
+
+    return False
