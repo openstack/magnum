@@ -316,12 +316,12 @@ parameters:
   kube_tag:
     type: string
     description: tag of the k8s containers used to provision the kubernetes cluster
-    default: v1.7.4
+    default: v1.9.3
 
   kube_version:
     type: string
     description: version of kubernetes used for kubernetes cluster
-    default: v1.7.4
+    default: v1.9.3
 
   kube_dashboard_version:
     type: string
