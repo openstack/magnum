@@ -22,17 +22,22 @@ revision = '5518af8dbc21'
 down_revision = '6f21dc920bb'
 
 from alembic import op
+
+from oslo_db.sqlalchemy.types import String
+
 import sqlalchemy as sa
+
+from sqlalchemy.dialects.mysql import TEXT
 
 
 def upgrade():
     op.alter_column('bay', 'ca_cert_uuid',
                     new_column_name='ca_cert_ref',
                     existing_type=sa.String(length=36),
-                    type_=sa.String(length=512),
+                    type_=String(512, mysql_ndb_type=TEXT),
                     nullable=True)
     op.alter_column('bay', 'magnum_cert_uuid',
                     new_column_name='magnum_cert_ref',
                     existing_type=sa.String(length=36),
-                    type_=sa.String(length=512),
+                    type_=String(512, mysql_ndb_type=TEXT),
                     nullable=True)

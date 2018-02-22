@@ -24,18 +24,24 @@ down_revision = '4956f03cabad'
 
 from alembic import op
 
+from oslo_db.sqlalchemy.types import String
+
 import magnum.conf
 import sqlalchemy as sa
+
+from sqlalchemy.dialects.mysql import TINYTEXT
 
 CONF = magnum.conf.CONF
 
 
 def upgrade():
-    op.add_column('baymodel', sa.Column('coe', sa.String(length=255),
+    op.add_column('baymodel', sa.Column('coe', String(255,
+                                        mysql_ndb_type=TINYTEXT),
                                         nullable=True))
 
     baymodel = sa.sql.table('baymodel',
-                            sa.sql.column('coe', sa.String(length=255)))
+                            sa.sql.column('coe', String(255,
+                                          mysql_ndb_type=TINYTEXT)))
 
     op.execute(
         baymodel.update().values({

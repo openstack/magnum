@@ -26,7 +26,12 @@ revision = '5d4caa6e0a42'
 down_revision = 'bb42b7cad130'
 
 from alembic import op
+
+from oslo_db.sqlalchemy.types import String
+
 import sqlalchemy as sa
+
+from sqlalchemy.dialects.mysql import TINYTEXT
 
 
 def upgrade():
@@ -34,8 +39,10 @@ def upgrade():
                     new_column_name='trust_id',
                     existing_type=sa.String(255))
     op.add_column('bay', sa.Column('trustee_username',
-                  sa.String(length=255), nullable=True))
+                  String(255, mysql_ndb_type=TINYTEXT),
+                  nullable=True))
     op.add_column('bay', sa.Column('trustee_user_id',
                   sa.String(length=255), nullable=True))
     op.add_column('bay', sa.Column('trustee_password',
-                  sa.String(length=255), nullable=True))
+                  String(255, mysql_ndb_type=TINYTEXT),
+                  nullable=True))

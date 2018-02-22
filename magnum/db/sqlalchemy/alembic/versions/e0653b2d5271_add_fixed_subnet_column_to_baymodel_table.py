@@ -22,9 +22,15 @@ revision = 'e0653b2d5271'
 down_revision = '68ce16dfd341'
 
 from alembic import op
+
+from oslo_db.sqlalchemy.types import String
+
 import sqlalchemy as sa
+
+from sqlalchemy.dialects.mysql import TINYTEXT
 
 
 def upgrade():
     op.add_column('baymodel', sa.Column('fixed_subnet',
-                                        sa.String(length=255), nullable=True))
+                                        String(255, mysql_ndb_type=TINYTEXT),
+                                        nullable=True))

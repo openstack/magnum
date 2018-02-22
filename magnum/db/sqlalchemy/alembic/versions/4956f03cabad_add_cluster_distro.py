@@ -23,9 +23,14 @@ revision = '4956f03cabad'
 down_revision = '2d8657c0cdc'
 
 from alembic import op
+
+from oslo_db.sqlalchemy.types import String
+
 import sqlalchemy as sa
+
+from sqlalchemy.dialects.mysql import TINYTEXT
 
 
 def upgrade():
     op.add_column('baymodel', sa.Column('cluster_distro',
-                  sa.String(length=255), nullable=True))
+                  String(255, mysql_ndb_type=TINYTEXT), nullable=True))

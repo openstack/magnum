@@ -22,13 +22,21 @@ revision = '966a99e70ff'
 down_revision = '6f21dc998bb'
 
 from alembic import op
+
+from oslo_db.sqlalchemy.types import String
+
 import sqlalchemy as sa
+
+from sqlalchemy.dialects.mysql import TINYTEXT
 
 
 def upgrade():
     op.add_column('baymodel', sa.Column('http_proxy',
-                                        sa.String(length=255), nullable=True))
+                                        String(255, mysql_ndb_type=TINYTEXT),
+                                        nullable=True))
     op.add_column('baymodel', sa.Column('https_proxy',
-                                        sa.String(length=255), nullable=True))
+                                        String(255, mysql_ndb_type=TINYTEXT),
+                                        nullable=True))
     op.add_column('baymodel', sa.Column('no_proxy',
-                                        sa.String(length=255), nullable=True))
+                                        String(255, mysql_ndb_type=TINYTEXT),
+                                        nullable=True))
