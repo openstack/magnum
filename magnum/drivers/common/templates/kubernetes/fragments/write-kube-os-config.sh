@@ -2,6 +2,7 @@
 
 . /etc/sysconfig/heat-params
 
+mkdir -p /etc/kubernetes/
 KUBE_OS_CLOUD_CONFIG=/etc/kubernetes/kube_openstack_config
 cp /etc/pki/tls/certs/ca-bundle.crt /etc/kubernetes/ca-bundle.crt
 

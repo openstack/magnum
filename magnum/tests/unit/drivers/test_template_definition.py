@@ -271,6 +271,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         etcd_volume_size = mock_cluster.labels.get(
             'etcd_volume_size')
         kube_tag = mock_cluster.labels.get('kube_tag')
+        etcd_tag = mock_cluster.labels.get('etcd_tag')
+        flannel_tag = mock_cluster.labels.get('flannel_tag')
         container_infra_prefix = mock_cluster.labels.get(
             'container_infra_prefix')
         availability_zone = mock_cluster.labels.get(
@@ -312,6 +314,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'magnum_url': mock_osc.magnum_url.return_value,
             'region_name': mock_osc.cinder_region_name.return_value,
             'kube_tag': kube_tag,
+            'etcd_tag': etcd_tag,
+            'flannel_tag': flannel_tag,
             'container_infra_prefix': container_infra_prefix,
             'nodes_affinity_policy': 'soft-anti-affinity',
             'availability_zone': availability_zone,
@@ -379,6 +383,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         etcd_volume_size = mock_cluster.labels.get(
             'etcd_volume_size')
         kube_tag = mock_cluster.labels.get('kube_tag')
+        etcd_tag = mock_cluster.labels.get('etcd_tag')
+        flannel_tag = mock_cluster.labels.get('flannel_tag')
         container_infra_prefix = mock_cluster.labels.get(
             'container_infra_prefix')
         availability_zone = mock_cluster.labels.get(
@@ -422,6 +428,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'loadbalancing_protocol': 'HTTP',
             'kubernetes_port': 8080,
             'kube_tag': kube_tag,
+            'etcd_tag': etcd_tag,
+            'flannel_tag': flannel_tag,
             'container_infra_prefix': container_infra_prefix,
             'nodes_affinity_policy': 'soft-anti-affinity',
             'availability_zone': availability_zone,
