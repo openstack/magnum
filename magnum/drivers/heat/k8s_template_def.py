@@ -116,7 +116,12 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                       'etcd_volume_size',
                       'cert_manager_api',
                       'ingress_controller',
-                      'ingress_controller_role']
+                      'ingress_controller_role',
+                      'kubelet_options',
+                      'kubeapi_options',
+                      'kubeproxy_options',
+                      'kubecontroller_options',
+                      'kubescheduler_options']
 
         for label in label_list:
             extra_params[label] = cluster.labels.get(label)

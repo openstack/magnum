@@ -361,6 +361,19 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `ingress_controller_role`_            | see below          | "ingress"     |
 +---------------------------------------+--------------------+---------------+
+| `kubelet_options`_                    | extra kubelet args | ""            |
++---------------------------------------+--------------------+---------------+
+| `kubeapi_options`_                    | extra kubeapi args | ""            |
++---------------------------------------+--------------------+---------------+
+| `kubescheduler_options`_              | extra kubescheduler| ""            |
+|                                       | args               |               |
++---------------------------------------+--------------------+---------------+
+| `kubecontroller_options`_             | extra              | ""            |
+|                                       | kubecontroller args|               |
++---------------------------------------+--------------------+---------------+
+| `kubeproxy_options`_                  | extra kubeproxy    | ""            |
+|                                       | args               |               |
++---------------------------------------+--------------------+---------------+
 
 Cluster
 -------
@@ -1141,6 +1154,35 @@ _`kube_dashboard_enabled`
 _`cert_manager_api`
   This label enables the kubernetes `certificate manager api
   <https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/>`_.
+_`kubelet_options`
+  This label can hold any additional options to be passed to the kubelet.
+  For more details, refer to the `kubelet admin guide
+  <https://kubernetes.io/docs/admin/kubelet//>`_.
+  By default no additional options are passed.
+
+_`kubeproxy_options`
+  This label can hold any additional options to be passed to the kube proxy.
+  For more details, refer to the `kube proxy admin guide
+  <https://kubernetes.io/docs/admin/kube-proxy//>`_.
+  By default no additional options are passed.
+
+_`kubecontroller_options`
+  This label can hold any additional options to be passed to the kube controller manager.
+  For more details, refer to the `kube controller manager admin guide
+  <https://kubernetes.io/docs/admin/kube-controller-manager//>`_.
+  By default no additional options are passed.
+
+_`kubeapi_options`
+  This label can hold any additional options to be passed to the kube api server.
+  For more details, refer to the `kube api admin guide
+  <https://kubernetes.io/docs/admin/kube-apiserver//>`_.
+  By default no additional options are passed.
+
+_`kubescheduler_options`
+  This label can hold any additional options to be passed to the kube scheduler.
+  For more details, refer to the `kube scheduler admin guide
+  <https://kubernetes.io/docs/admin/kube-scheduler//>`_.
+  By default no additional options are passed.
 
 External load balancer for services
 -----------------------------------

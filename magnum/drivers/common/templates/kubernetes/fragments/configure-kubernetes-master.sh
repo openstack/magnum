@@ -18,6 +18,7 @@ CERT_DIR=/etc/kubernetes/certs
 
 KUBE_API_ARGS="--runtime-config=api/all=true"
 KUBE_API_ARGS="$KUBE_API_ARGS --kubelet-preferred-address-types=InternalIP,Hostname,ExternalIP"
+KUBE_API_ARGS="$KUBE_API_ARGS $KUBEAPI_OPTIONS"
 if [ "$TLS_DISABLED" == "True" ]; then
     KUBE_API_ADDRESS="--insecure-bind-address=0.0.0.0 --insecure-port=$KUBE_API_PORT"
 else
@@ -49,6 +50,7 @@ sed -i '
 
 # Add controller manager args
 KUBE_CONTROLLER_MANAGER_ARGS="--leader-elect=true"
+KUBE_CONTROLLER_MANAGER_ARGS="$KUBE_CONTROLLER_MANAGER_ARGS $KUBECONTROLLER_OPTIONS"
 if [ -n "${ADMISSION_CONTROL_LIST}" ] && [ "${TLS_DISABLED}" == "False" ]; then
     KUBE_CONTROLLER_MANAGER_ARGS="$KUBE_CONTROLLER_MANAGER_ARGS --service-account-private-key-file=$CERT_DIR/server.key --root-ca-file=$CERT_DIR/ca.crt"
 fi
@@ -67,6 +69,11 @@ sed -i '
 ' /etc/kubernetes/controller-manager
 
 sed -i '/^KUBE_SCHEDULER_ARGS=/ s/=.*/="--leader-elect=true"/' /etc/kubernetes/scheduler
+
+HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')
+KUBELET_ARGS="--register-node=true --register-schedulable=false --pod-manifest-path=/etc/kubernetes/manifests --hostname-override=${HOSTNAME_OVERRIDE}"
+KUBELET_ARGS="${KUBELET_ARGS} --cluster_dns=${DNS_SERVICE_IP} --cluster_domain=${DNS_CLUSTER_DOMAIN}"
+KUBELET_ARGS="${KUBELET_ARGS} ${KUBELET_OPTIONS}"
 
 # For using default log-driver, other options should be ignored
 sed -i 's/\-\-log\-driver\=journald//g' /etc/sysconfig/docker
