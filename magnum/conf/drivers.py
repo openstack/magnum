@@ -33,7 +33,13 @@ drivers_opts = [
     cfg.BoolOpt('send_cluster_metrics',
                 default=True,
                 help='Allow periodic tasks to pull COE data and send to '
-                     'ceilometer.')
+                     'ceilometer.'),
+    cfg.ListOpt('disabled_drivers',
+                default=[],
+                help='Disabled driver entry points. The default value is []. '
+                     ' Means if not specified, then all available drivers '
+                     'are enabled.'
+                ),
 ]
 
 

@@ -368,6 +368,7 @@ class ClusterTemplatesController(base.Controller):
     @validation.enforce_network_driver_types_create()
     @validation.enforce_volume_driver_types_create()
     @validation.enforce_volume_storage_size_create()
+    @validation.enforce_driver_supported()
     def post(self, cluster_template):
         """Create a new ClusterTemplate.
 
