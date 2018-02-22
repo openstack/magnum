@@ -357,6 +357,10 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `cert_manager_api`_                   | see below          | false         |
 +---------------------------------------+--------------------+---------------+
+| `ingress_controller`_                 | see below          | ""            |
++---------------------------------------+--------------------+---------------+
+| `ingress_controller_role`_            | see below          | "ingress"     |
++---------------------------------------+--------------------+---------------+
 
 Cluster
 -------
@@ -1164,6 +1168,29 @@ service is deleted.
 Refer to the `Kubernetes External Load Balancer`_ section
 for more details.
 
+Ingress Controller
+------------------
+
+In addition to the LoadBalancer described above, Kubernetes can also
+be configured with an Ingress Controller. Ingress can provide load
+balancing, SSL termination and name-based virtual hosting.
+
+Magnum allows selecting one of multiple controller options via the
+'ingress_controller' label. Check the Kubernetes documentation to define
+your own Ingress resources.
+
+_`ingress_controller`
+  This label sets the Ingress Controller to be used. Currently only traefik
+  is supported. The default is '', meaning no Ingress Controller configured.
+
+_`ingress_controller_role`
+  This label defines the role nodes should have to run an instance of the
+  Ingress Controller. This gives operators full control on which nodes should
+  be running an instance of the controller, and should be set in multiple nodes
+  for availability. Default is 'ingress'. An example of setting this in a
+  Kubernetes node would be::
+
+    kubectl label node <node-name> role=ingress
 
 Swarm
 =====

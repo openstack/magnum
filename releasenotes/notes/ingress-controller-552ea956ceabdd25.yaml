@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Add new labels 'ingress_controller' and 'ingress_controller_role' enabling
+    the deployment of a Kubernetes Ingress Controller backend for clusters.
+    Default for 'ingress_controller' is '' (meaning no controller deployed),
+    with possible values being 'traefik'.
+    Default for 'ingress_controller_role' is 'ingress'.
