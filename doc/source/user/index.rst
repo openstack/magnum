@@ -338,6 +338,10 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `kube_tag`_                           | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
+| `etcd_tag`_                           | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `flannel_tag`_                        | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 | `kube_dashboard_enabled`_             | - true             | true          |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
@@ -1098,6 +1102,8 @@ _`container_infra_prefix`
   * docker.io/openstackmagnum/kubernetes-kubelet
   * docker.io/openstackmagnum/kubernetes-proxy
   * docker.io/openstackmagnum/kubernetes-scheduler
+  * docker.io/openstackmagnum/etcd
+  * docker.io/openstackmagnum/flannel
   * docker.io/prom/node-exporter:latest
   * docker.io/prom/prometheus:latest
   * gcr.io/google_containers/kubernetes-dashboard-amd64:v1.5.1
@@ -1109,6 +1115,20 @@ _`kube_tag`
   <https://hub.docker.com/r/openstackmagnum/kubernetes-apiserver/tags/>`_.
   If unset, the current Magnum version's default Kubernetes release is
   installed.
+
+_`etcd_tag`
+  This label allows users to select `a specific etcd version,
+  based on its container tag
+  <https://hub.docker.com/r/openstackmagnum/etcd/tags/>`_.
+  If unset, the current Magnum version's a default etcd version.
+  For queens, v3.2.7
+
+_`flannel_tag`
+  This label allows users to select `a specific flannel version,
+  based on its container tag
+  <https://hub.docker.com/r/openstackmagnum/flannel/tags/>`_.
+  If unset, the current Magnum version's a default flannel version.
+  For queens, v0.9.0
 
 _`kube_dashboard_enabled`
   This label triggers the deployment of the kubernetes dashboard.

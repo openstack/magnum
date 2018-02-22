@@ -315,6 +315,16 @@ parameters:
     description: tag of the k8s containers used to provision the kubernetes cluster
     default: v1.9.3
 
+  etcd_tag:
+    type: string
+    description: tag of the etcd system container
+    default: v3.2.7
+
+  flannel_tag:
+    type: string
+    description: tag of the flannel system containers
+    default: v0.9.0
+
   kube_version:
     type: string
     description: version of kubernetes used for kubernetes cluster
@@ -586,6 +596,7 @@ resources:
           no_proxy: {get_param: no_proxy}
           kube_tag: {get_param: kube_tag}
           kube_version: {get_param: kube_version}
+          etcd_tag: {get_param: etcd_tag}
           kube_dashboard_version: {get_param: kube_dashboard_version}
           trustee_user_id: {get_param: trustee_user_id}
           trustee_password: {get_param: trustee_password}
@@ -665,6 +676,7 @@ resources:
           no_proxy: {get_param: no_proxy}
           kube_tag: {get_param: kube_tag}
           kube_version: {get_param: kube_version}
+          flannel_tag: {get_param: flannel_tag}
           trustee_user_id: {get_param: trustee_user_id}
           trustee_username: {get_param: trustee_username}
           trustee_password: {get_param: trustee_password}

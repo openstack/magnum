@@ -208,7 +208,7 @@ when installing devstack use::
     +--------------------------------------+------------------------------------+--------+
     | ID                                   | Name                               | Status |
     +--------------------------------------+------------------------------------+--------+
-    | 0bc132b1-ee91-4bd8-b0fd-19deb57fb39f | Fedora-Atomic-26-20170723.0.x86_64 | active |
+    | 0bc132b1-ee91-4bd8-b0fd-19deb57fb39f | Fedora-Atomic-27-20180212.2.x86_64 | active |
     | 7537bbf2-f1c3-47da-97bb-38c09007e146 | cirros-0.3.5-x86_64-disk           | active |
     +--------------------------------------+------------------------------------+--------+
 
@@ -253,7 +253,7 @@ Atomic image so the clusters which use this ClusterTemplate will be based on
 Fedora Atomic::
 
     openstack coe cluster template create k8s-cluster-template \
-                           --image Fedora-Atomic-26-20170723.0.x86_64 \
+                           --image Fedora-Atomic-27-20180212.2.x86_64 \
                            --keypair testkey \
                            --external-network public \
                            --dns-nameserver 8.8.8.8 \
@@ -529,7 +529,7 @@ except for the absence of some Kubernetes-specific arguments and the use of
 'swarm' as the COE::
 
     openstack coe cluster template create swarm-cluster-template \
-                           --image Fedora-Atomic-26-20170723.0.x86_64 \
+                           --image Fedora-Atomic-27-20180212.2.x86_64 \
                            --keypair testkey \
                            --external-network public \
                            --dns-nameserver 8.8.8.8 \

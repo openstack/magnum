@@ -17,29 +17,15 @@ atomic install --storage ostree --system --system-package=no --name=kube-proxy $
 
 CERT_DIR=/etc/kubernetes/certs
 PROTOCOL=https
-FLANNEL_OPTIONS="-etcd-cafile $CERT_DIR/ca.crt \
--etcd-certfile $CERT_DIR/proxy.crt \
--etcd-keyfile $CERT_DIR/proxy.key"
-ETCD_CURL_OPTIONS="--cacert $CERT_DIR/ca.crt \
---cert $CERT_DIR/proxy.crt --key $CERT_DIR/proxy.key"
 ETCD_SERVER_IP=${ETCD_SERVER_IP:-$KUBE_MASTER_IP}
 KUBE_PROTOCOL="https"
 KUBELET_KUBECONFIG=/etc/kubernetes/kubelet-config.yaml
 PROXY_KUBECONFIG=/etc/kubernetes/proxy-config.yaml
-FLANNELD_CONFIG=/etc/sysconfig/flanneld
 
 if [ "$TLS_DISABLED" = "True" ]; then
     PROTOCOL=http
-    FLANNEL_OPTIONS=""
-    ETCD_CURL_OPTIONS=""
     KUBE_PROTOCOL="http"
 fi
-
-sed -i '/FLANNEL_OPTIONS/'d $FLANNELD_CONFIG
-
-cat >> $FLANNELD_CONFIG <<EOF
-FLANNEL_OPTIONS="$FLANNEL_OPTIONS"
-EOF
 
 KUBE_MASTER_URI="$KUBE_PROTOCOL://$KUBE_MASTER_IP:$KUBE_API_PORT"
 
@@ -162,9 +148,25 @@ sed -i '
 ' /etc/kubernetes/proxy
 
 if [ "$NETWORK_DRIVER" = "flannel" ]; then
-    sed -i '
-        /^FLANNEL_ETCD_ENDPOINTS=/ s|=.*|="'"$PROTOCOL"'://'"$ETCD_SERVER_IP"':2379"|
-    ' $FLANNELD_CONFIG
+    atomic install --storage ostree --system --system-package=no \
+    --name=flanneld ${_prefix}flannel:${FLANNEL_TAG}
+    if [ "$TLS_DISABLED" = "True" ]; then
+        FLANNEL_OPTIONS=""
+        ETCD_CURL_OPTIONS=""
+    else
+        FLANNEL_CERT_DIR=/etc/flanneld/certs
+        FLANNEL_OPTIONS="-etcd-cafile $FLANNEL_CERT_DIR/ca.crt"
+        FLANNEL_OPTIONS="$FLANNEL_OPTIONS -etcd-certfile $FLANNEL_CERT_DIR/proxy.crt"
+        FLANNEL_OPTIONS="$FLANNEL_OPTIONS -etcd-keyfile $FLANNEL_CERT_DIR/proxy.key"
+        ETCD_CURL_OPTIONS="--cacert $FLANNEL_CERT_DIR/ca.crt --cert $FLANNEL_CERT_DIR/proxy.crt --key $FLANNEL_CERT_DIR/proxy.key"
+    fi
+    FLANNELD_CONFIG=/etc/sysconfig/flanneld
+
+    cat >> $FLANNELD_CONFIG <<EOF
+    FLANNEL_ETCD_ENDPOINTS="$PROTOCOL://${ETCD_SERVER_IP}:2379"
+    FLANNEL_ETCD_PREFIX="/atomic.io/network"
+    FLANNEL_OPTIONS="$FLANNEL_OPTIONS"
+EOF
 
     # Make sure etcd has a flannel configuration
     . $FLANNELD_CONFIG

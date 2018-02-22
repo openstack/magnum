@@ -94,7 +94,8 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
         label_list = ['kube_tag', 'container_infra_prefix',
                       'availability_zone',
                       'calico_tag', 'calico_cni_tag',
-                      'calico_kube_controllers_tag', 'calico_ipv4pool']
+                      'calico_kube_controllers_tag', 'calico_ipv4pool',
+                      'etcd_tag', 'flannel_tag']
         for label in label_list:
             label_value = cluster.labels.get(label)
             if label_value:
