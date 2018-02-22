@@ -1,0 +1,14 @@
+# Environment file to enable LBaaS in a cluster by mapping
+# LBaaS-related resource types to the real Octavia resource types.
+resource_registry:
+  "Magnum::ApiGatewaySwitcher": ../fragments/api_gateway_switcher_pool.yaml
+
+  # Cluster template
+  "Magnum::Optional::Neutron::LBaaS::LoadBalancer": "OS::Octavia::LoadBalancer"
+  "Magnum::Optional::Neutron::LBaaS::Listener": "OS::Octavia::Listener"
+  "Magnum::Optional::Neutron::LBaaS::Pool": "OS::Octavia::Pool"
+  "Magnum::Optional::Neutron::LBaaS::HealthMonitor": "OS::Octavia::HealthMonitor"
+  "Magnum::Optional::Neutron::LBaaS::FloatingIP": "OS::Neutron::FloatingIP"
+
+  # Master node template
+  "Magnum::Optional::Neutron::LBaaS::PoolMember": "OS::Octavia::PoolMember"
