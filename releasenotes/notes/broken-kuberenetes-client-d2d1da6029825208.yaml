@@ -10,6 +10,10 @@ issues:
     task uses the kubernetes client for kubernetes clusters and it crashes
     the sync_cluster_status and send_cluster_metrics tasks.
     https://bugs.launchpad.net/magnum/+bug/1746510
+    Additionally, the kubernetes scale manager needs to be disabled
+    to not break the scale down command completely. Note, that when magnum
+    scales down the cluster will pick the nodes to scale randomly.
+
 upgrade:
   - |
     In magnum configuration, in [drivers] set send_cluster_metrics = False to
