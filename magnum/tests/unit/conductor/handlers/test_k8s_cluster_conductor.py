@@ -100,7 +100,12 @@ class TestClusterConductorWithK8s(base.TestCase):
                        'availability_zone': 'az_1',
                        'cert_manager_api': 'False',
                        'ingress_controller': 'i-controller',
-                       'ingress_controller_role': 'i-controller-role'},
+                       'ingress_controller_role': 'i-controller-role',
+                       'kubelet_options': '--kubelet',
+                       'kubeapi_options': '--kubeapi',
+                       'kubecontroller_options': '--kubecontroller',
+                       'kubescheduler_options': '--kubescheduler',
+                       'kubeproxy_options': '--kubeproxy'},
             'master_flavor_id': 'master_flavor_id',
             'flavor_id': 'flavor_id',
         }
@@ -183,7 +188,13 @@ class TestClusterConductorWithK8s(base.TestCase):
                        'availability_zone': 'az_1',
                        'cert_manager_api': 'False',
                        'ingress_controller': 'i-controller',
-                       'ingress_controller_role': 'i-controller-role'},
+                       'ingress_controller_role': 'i-controller-role',
+                       'kubelet_options': '--kubelet',
+                       'kubeapi_options': '--kubeapi',
+                       'kubecontroller_options': '--kubecontroller',
+                       'kubescheduler_options': '--kubescheduler',
+                       'kubeproxy_options': '--kubeproxy',
+                       },
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
             'no_proxy': 'no_proxy',
@@ -243,6 +254,11 @@ class TestClusterConductorWithK8s(base.TestCase):
             'cert_manager_api': 'False',
             'ingress_controller': 'i-controller',
             'ingress_controller_role': 'i-controller-role',
+            'kubelet_options': '--kubelet',
+            'kubeapi_options': '--kubeapi',
+            'kubecontroller_options': '--kubecontroller',
+            'kubescheduler_options': '--kubescheduler',
+            'kubeproxy_options': '--kubeproxy',
         }
         if missing_attr is not None:
             expected.pop(mapping[missing_attr], None)
@@ -344,6 +360,11 @@ class TestClusterConductorWithK8s(base.TestCase):
             'cert_manager_api': 'False',
             'ingress_controller': 'i-controller',
             'ingress_controller_role': 'i-controller-role',
+            'kubelet_options': '--kubelet',
+            'kubeapi_options': '--kubeapi',
+            'kubecontroller_options': '--kubecontroller',
+            'kubescheduler_options': '--kubescheduler',
+            'kubeproxy_options': '--kubeproxy',
         }
 
         self.assertEqual(expected, definition)
@@ -432,6 +453,11 @@ class TestClusterConductorWithK8s(base.TestCase):
             'cert_manager_api': 'False',
             'ingress_controller': 'i-controller',
             'ingress_controller_role': 'i-controller-role',
+            'kubelet_options': '--kubelet',
+            'kubeapi_options': '--kubeapi',
+            'kubecontroller_options': '--kubecontroller',
+            'kubescheduler_options': '--kubescheduler',
+            'kubeproxy_options': '--kubeproxy',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -513,6 +539,11 @@ class TestClusterConductorWithK8s(base.TestCase):
             'cert_manager_api': 'False',
             'ingress_controller': 'i-controller',
             'ingress_controller_role': 'i-controller-role',
+            'kubelet_options': '--kubelet',
+            'kubeapi_options': '--kubeapi',
+            'kubecontroller_options': '--kubecontroller',
+            'kubescheduler_options': '--kubescheduler',
+            'kubeproxy_options': '--kubeproxy',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -589,6 +620,11 @@ class TestClusterConductorWithK8s(base.TestCase):
             'cert_manager_api': 'False',
             'ingress_controller': 'i-controller',
             'ingress_controller_role': 'i-controller-role',
+            'kubelet_options': '--kubelet',
+            'kubeapi_options': '--kubeapi',
+            'kubecontroller_options': '--kubecontroller',
+            'kubescheduler_options': '--kubescheduler',
+            'kubeproxy_options': '--kubeproxy',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -766,6 +802,11 @@ class TestClusterConductorWithK8s(base.TestCase):
             'cert_manager_api': 'False',
             'ingress_controller': 'i-controller',
             'ingress_controller_role': 'i-controller-role',
+            'kubelet_options': '--kubelet',
+            'kubeapi_options': '--kubeapi',
+            'kubecontroller_options': '--kubecontroller',
+            'kubescheduler_options': '--kubescheduler',
+            'kubeproxy_options': '--kubeproxy',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

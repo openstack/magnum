@@ -100,6 +100,7 @@ sed -i '
 mkdir -p /etc/kubernetes/manifests
 KUBELET_ARGS="--pod-manifest-path=/etc/kubernetes/manifests --cadvisor-port=4194 --kubeconfig ${KUBELET_KUBECONFIG} --hostname-override=${HOSTNAME_OVERRIDE}"
 KUBELET_ARGS="${KUBELET_ARGS} --cluster_dns=${DNS_SERVICE_IP} --cluster_domain=${DNS_CLUSTER_DOMAIN}"
+KUBELET_ARGS="${KUBELET_ARGS} ${KUBELET_OPTIONS}"
 
 if [ -n "$TRUST_ID" ]; then
     KUBELET_ARGS="$KUBELET_ARGS --cloud-provider=openstack --cloud-config=/etc/kubernetes/kube_openstack_config"
