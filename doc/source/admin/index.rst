@@ -1,5 +1,5 @@
-Adminstrator's Guide
-====================
+Administrator's Guide
+=====================
 
 Installation & Operations
 -------------------------

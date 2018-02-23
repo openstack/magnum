@@ -43,7 +43,7 @@ class BaseModel(object):
 
 
 class EntityModel(BaseModel):
-    """Superclass resposible from converting dict to instance of model"""
+    """Superclass responsible from converting dict to instance of model"""
 
     @classmethod
     def from_dict(cls, data):
@@ -55,7 +55,7 @@ class EntityModel(BaseModel):
 
 
 class CollectionModel(BaseModel):
-    """Superclass resposible from converting dict to list of models"""
+    """Superclass responsible from converting dict to list of models"""
 
     @classmethod
     def from_dict(cls, data):
