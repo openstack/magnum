@@ -1792,7 +1792,7 @@ And the artifacts are placed in the directory specified::
 You can now use the native client to interact with the COE.
 The variables and artifacts are unique to the cluster.
 
-The parameters for 'bay-config' are as follows:
+The parameters for 'coe cluster config' are as follows:
 
 --dir \<dirname\>
   Directory to save the certificate and config files.
@@ -1866,20 +1866,20 @@ Signed Certificate
   Now that you have your client CSR, you can use the Magnum CLI to
   send it off to Magnum to get it signed::
 
-      magnum ca-sign --cluster secure-k8s-cluster --csr client.csr > cert.pem
+      openstack coe ca sign secure-k8s-cluster client.csr > cert.pem
 
 Certificate Authority
   The final artifact you need to retrieve is the CA certificate for
   the cluster. This is used by your native client to ensure you are only
   communicating with hosts that Magnum set up::
 
-      magnum ca-show --cluster secure-k8s-cluster > ca.pem
+      openstack coe ca show secure-k8s-cluster > ca.pem
 
 Rotate Certificate
   To rotate the CA certificate for a cluster and invalidate all user
   certificates, you can use the following command::
 
-      magnum ca-rotate --cluster secure-k8s-cluster
+      openstack coe ca rotate secure-k8s-cluster
 
 User Examples
 -------------
