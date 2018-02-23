@@ -273,7 +273,7 @@ spec:
         role: db
     spec:
       containers:
-        - image: ${CONTAINER_INFRA_PREFIX:-docker.io/grafana/}grafana
+        - image: ${CONTAINER_INFRA_PREFIX:-docker.io/grafana/}grafana:4.6.3
           imagePullPolicy: Always
           name: grafana
           env:
