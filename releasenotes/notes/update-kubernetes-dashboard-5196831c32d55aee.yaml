@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Update kubernetes dashboard to `v1.8.3` which is compatible via kubectl
+    proxy. Addionally, heapster is deployed as standalone deployemt and the
+    user can enable a grafana-influx stack with the
+    `influx_grafana_dashboard_enabled` label. See the kubernetes dashboard
+    documenation for more details. https://github.com/kubernetes/dashboard/wiki
