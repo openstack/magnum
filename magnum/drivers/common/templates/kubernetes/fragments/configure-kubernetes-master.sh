@@ -5,6 +5,15 @@
 echo "configuring kubernetes (master)"
 
 _prefix=${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}
+
+# TODO(flwang): We should revisit this part to figure out if it's possible to
+# only run the calico-node container as a systemd service before starting the
+# minion nodes.
+if [ "$NETWORK_DRIVER" = "calico" ]; then
+    mkdir -p /opt/cni
+    _addtl_mounts=',{"type":"bind","source":"/opt/cni","destination":"/opt/cni","options":["bind","rw","slave","mode=777"]}'
+    atomic install --storage ostree --system --set=ADDTL_MOUNTS=${_addtl_mounts} --system-package=no --name=kubelet ${_prefix}kubernetes-kubelet:${KUBE_TAG}
+fi
 atomic install --storage ostree --system --system-package=no --name=kube-apiserver ${_prefix}kubernetes-apiserver:${KUBE_TAG}
 atomic install --storage ostree --system --system-package=no --name=kube-controller-manager ${_prefix}kubernetes-controller-manager:${KUBE_TAG}
 atomic install --storage ostree --system --system-package=no --name=kube-scheduler ${_prefix}kubernetes-scheduler:${KUBE_TAG}
@@ -74,7 +83,7 @@ sed -i '
 sed -i '/^KUBE_SCHEDULER_ARGS=/ s/=.*/="--leader-elect=true"/' /etc/kubernetes/scheduler
 
 HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')
-KUBELET_ARGS="--register-node=true --register-schedulable=false --pod-manifest-path=/etc/kubernetes/manifests --hostname-override=${HOSTNAME_OVERRIDE}"
+KUBELET_ARGS="--register-node=true --register-schedulable=false --pod-manifest-path=/etc/kubernetes/manifests --cadvisor-port=0 --hostname-override=${HOSTNAME_OVERRIDE}"
 KUBELET_ARGS="${KUBELET_ARGS} --cluster_dns=${DNS_SERVICE_IP} --cluster_domain=${DNS_CLUSTER_DOMAIN}"
 KUBELET_ARGS="${KUBELET_ARGS} ${KUBELET_OPTIONS}"
 
@@ -83,4 +92,61 @@ sed -i 's/\-\-log\-driver\=journald//g' /etc/sysconfig/docker
 
 if [ -n "${INSECURE_REGISTRY_URL}" ]; then
     echo "INSECURE_REGISTRY='--insecure-registry ${INSECURE_REGISTRY_URL}'" >> /etc/sysconfig/docker
+fi
+
+if [ "$NETWORK_DRIVER" = "calico" ]; then
+    KUBELET_ARGS="${KUBELET_ARGS} --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin --register-with-taints=CriticalAddonsOnly=True:NoSchedule,dedicated=master:NoSchedule"
+
+    KUBELET_KUBECONFIG=/etc/kubernetes/kubelet-config.yaml
+    HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')
+    cat << EOF >> ${KUBELET_KUBECONFIG}
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority: ${CERT_DIR}/ca.crt
+    server: http://127.0.0.1:8080
+  name: kubernetes
+contexts:
+- context:
+    cluster: kubernetes
+    user: system:node:${HOSTNAME_OVERRIDE}
+  name: default
+current-context: default
+kind: Config
+preferences: {}
+users:
+- name: system:node:${HOSTNAME_OVERRIDE}
+  user:
+    as-user-extra: {}
+    client-certificate: ${CERT_DIR}/server.crt
+    client-key: ${CERT_DIR}/server.key
+EOF
+
+    cat > /etc/kubernetes/get_require_kubeconfig.sh <<EOF
+#!/bin/bash
+
+KUBE_VERSION=\$(kubelet --version | awk '{print \$2}')
+min_version=v1.8.0
+if [[ "\${min_version}" != \$(echo -e "\${min_version}\n\${KUBE_VERSION}" | sort -s -t. -k 1,1 -k 2,2n -k 3,3n | head -n1) && "\${KUBE_VERSION}" != "devel" ]]; then
+    echo "--require-kubeconfig"
+fi
+EOF
+    chmod +x /etc/kubernetes/get_require_kubeconfig.sh
+
+    KUBELET_ARGS="${KUBELET_ARGS} --client-ca-file=${CERT_DIR}/ca.crt --tls-cert-file=${CERT_DIR}/kubelet.crt --tls-private-key-file=${CERT_DIR}/kubelet.key --kubeconfig ${KUBELET_KUBECONFIG}"
+
+    # specified cgroup driver
+    KUBELET_ARGS="${KUBELET_ARGS} --cgroup-driver=systemd"
+
+    if [ -z "${KUBE_NODE_IP}" ]; then
+        KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+    fi
+
+    KUBELET_ARGS="${KUBELET_ARGS} --address=${KUBE_NODE_IP} --port=10250 --read-only-port=0 --anonymous-auth=false --authorization-mode=Webhook --authentication-token-webhook=true"
+
+    sed -i '
+    /^KUBELET_ADDRESS=/ s/=.*/="--address=${KUBE_NODE_IP}"/
+    /^KUBELET_HOSTNAME=/ s/=.*/=""/
+    /^KUBELET_ARGS=/ s|=.*|="'"\$(/etc/kubernetes/get_require_kubeconfig.sh) ${KUBELET_ARGS}"'"|
+' /etc/kubernetes/kubelet
 fi

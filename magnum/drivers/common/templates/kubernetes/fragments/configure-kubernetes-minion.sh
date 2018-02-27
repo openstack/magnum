@@ -10,6 +10,19 @@ _addtl_mounts=''
 if [ "$NETWORK_DRIVER" = "calico" ]; then
     mkdir -p /opt/cni
     _addtl_mounts=',{"type":"bind","source":"/opt/cni","destination":"/opt/cni","options":["bind","rw","slave","mode=777"]}'
+
+    if [ "`systemctl status NetworkManager.service | grep -o "Active: active"`" = "Active: active" ]; then
+        CALICO_NM=/etc/NetworkManager/conf.d/calico.conf
+        [ -f ${CALICO_NM} ] || {
+        echo "Writing File: $CALICO_NM"
+        mkdir -p $(dirname ${CALICO_NM})
+        cat << EOF > ${CALICO_NM}
+[keyfile]
+unmanaged-devices=interface-name:cali*;interface-name:tunl*
+EOF
+}
+        systemctl restart NetworkManager
+    fi
 fi
 
 atomic install --storage ostree --system --system-package=no --set=ADDTL_MOUNTS=${_addtl_mounts} --name=kubelet ${_prefix}kubernetes-kubelet:${KUBE_TAG}

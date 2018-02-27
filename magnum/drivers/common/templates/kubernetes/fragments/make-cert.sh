@@ -65,14 +65,16 @@ sans="${sans},DNS:kubernetes,DNS:kubernetes.default,DNS:kubernetes.default.svc,D
 
 cert_dir=/etc/kubernetes/certs
 mkdir -p "$cert_dir"
-
 CA_CERT=$cert_dir/ca.crt
-SERVER_CERT=$cert_dir/server.crt
-SERVER_CSR=$cert_dir/server.csr
-SERVER_KEY=$cert_dir/server.key
 
-#Get a token by user credentials and trust
-auth_json=$(cat << EOF
+function generate_certificates {
+    _CERT=$cert_dir/${1}.crt
+    _CSR=$cert_dir/${1}.csr
+    _KEY=$cert_dir/${1}.key
+    _CONF=$2
+
+    #Get a token by user credentials and trust
+    auth_json=$(cat << EOF
 {
     "auth": {
         "identity": {
@@ -91,16 +93,35 @@ auth_json=$(cat << EOF
 EOF
 )
 
-content_type='Content-Type: application/json'
-url="$AUTH_URL/auth/tokens"
-USER_TOKEN=`curl $VERIFY_CA -s -i -X POST -H "$content_type" -d "$auth_json" $url \
-    | grep X-Subject-Token | awk '{print $2}' | tr -d '[[:space:]]'`
+    content_type='Content-Type: application/json'
+    url="$AUTH_URL/auth/tokens"
+    USER_TOKEN=`curl $VERIFY_CA -s -i -X POST -H "$content_type" -d "$auth_json" $url \
+        | grep X-Subject-Token | awk '{print $2}' | tr -d '[[:space:]]'`
 
-# Get CA certificate for this cluster
-curl $VERIFY_CA -X GET \
-    -H "X-Auth-Token: $USER_TOKEN" \
-    -H "OpenStack-API-Version: container-infra latest" \
-    $MAGNUM_URL/certificates/$CLUSTER_UUID | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > ${CA_CERT}
+    # Get CA certificate for this cluster
+    curl $VERIFY_CA -X GET \
+        -H "X-Auth-Token: $USER_TOKEN" \
+        -H "OpenStack-API-Version: container-infra latest" \
+        $MAGNUM_URL/certificates/$CLUSTER_UUID | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > ${CA_CERT}
+
+    # Generate server's private key and csr
+    openssl genrsa -out "${_KEY}" 4096
+    chmod 400 "${_KEY}"
+    openssl req -new -days 1000 \
+            -key "${_KEY}" \
+            -out "${_CSR}" \
+            -reqexts req_ext \
+            -config "${_CONF}"
+
+    # Send csr to Magnum to have it signed
+    csr_req=$(python -c "import json; fp = open('${_CSR}'); print json.dumps({'cluster_uuid': '$CLUSTER_UUID', 'csr': fp.read()}); fp.close()")
+    curl $VERIFY_CA -X POST \
+        -H "X-Auth-Token: $USER_TOKEN" \
+        -H "OpenStack-API-Version: container-infra latest" \
+        -H "Content-Type: application/json" \
+        -d "$csr_req" \
+        $MAGNUM_URL/certificates | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > ${_CERT}
+}
 
 # Create config for server's csr
 cat > ${cert_dir}/server.conf <<EOF
@@ -115,23 +136,28 @@ subjectAltName = ${sans}
 extendedKeyUsage = clientAuth,serverAuth
 EOF
 
-# Generate server's private key and csr
-openssl genrsa -out "${SERVER_KEY}" 4096
-chmod 400 "${SERVER_KEY}"
-openssl req -new -days 1000 \
-        -key "${SERVER_KEY}" \
-        -out "${SERVER_CSR}" \
-        -reqexts req_ext \
-        -config "${cert_dir}/server.conf"
+#Kubelet Certs
+INSTANCE_NAME=$(hostname --short | sed 's/\.novalocal//')
+cat > ${cert_dir}/kubelet.conf <<EOF
+[req]
+distinguished_name = req_distinguished_name
+req_extensions     = req_ext
+prompt = no
+[req_distinguished_name]
+CN = system:node:${INSTANCE_NAME}
+O=system:nodes
+OU=OpenStack/Magnum
+C=US
+ST=TX
+L=Austin
+[req_ext]
+subjectAltName = ${sans}
+keyUsage=critical,digitalSignature,keyEncipherment
+extendedKeyUsage=clientAuth,serverAuth
+EOF
 
-# Send csr to Magnum to have it signed
-csr_req=$(python -c "import json; fp = open('${SERVER_CSR}'); print json.dumps({'cluster_uuid': '$CLUSTER_UUID', 'csr': fp.read()}); fp.close()")
-curl $VERIFY_CA -X POST \
-    -H "X-Auth-Token: $USER_TOKEN" \
-    -H "OpenStack-API-Version: container-infra latest" \
-    -H "Content-Type: application/json" \
-    -d "$csr_req" \
-    $MAGNUM_URL/certificates | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > ${SERVER_CERT}
+generate_certificates server ${cert_dir}/server.conf
+generate_certificates kubelet ${cert_dir}/kubelet.conf
 
 # Common certs and key are created for both etcd and kubernetes services.
 # Both etcd and kube user should have permission to access the certs and key.
@@ -140,6 +166,6 @@ usermod -a -G kube_etcd etcd
 usermod -a -G kube_etcd kube
 chmod 550 "${cert_dir}"
 chown -R kube:kube_etcd "${cert_dir}"
-chmod 440 $SERVER_KEY
+chmod 440 $cert_dir/server.key
 mkdir -p /etc/etcd/certs
 cp ${cert_dir}/* /etc/etcd/certs
