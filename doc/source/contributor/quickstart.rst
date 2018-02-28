@@ -81,20 +81,27 @@ To run unit test coverage and check percentage of code covered::
 To discover and interact with templates, please refer to
 `<http://docs.openstack.org/developer/magnum/dev/cluster-type-definition.html>`_
 
-Exercising the Services Using Devstack
+Exercising the Services Using DevStack
 ======================================
 
-Devstack can be configured to enable magnum support. It is easy to develop
-magnum with the devstack environment. Magnum depends on nova, glance, heat and
+DevStack can be configured to enable magnum support. It is easy to develop
+magnum with the DevStack environment. Magnum depends on nova, glance, heat and
 neutron to create and schedule virtual machines to simulate bare-metal (full
 bare-metal support is under active development).
 
-**NOTE:** Running devstack within a virtual machine with magnum enabled is not
+Minimum System Requirements
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Magnum running in DevStack requires at least: 10 GB RAM, 8 CPU and 100 GB disk
+storage.
+
+**NOTE:** Running DevStack within a virtual machine with magnum enabled is not
 recommended at this time.
 
 This session has only been tested on Ubuntu 16.04 (Xenial) and Fedora 20/21.
 We recommend users to select one of them if it is possible.
 
+Set-up Environment and Create a Magnum Session
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Clone devstack::
 
     # Create a root directory for devstack if needed
