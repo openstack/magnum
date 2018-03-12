@@ -2180,6 +2180,40 @@ Calico needs extra mounts for the kubelet container. See `commit
 <https://github.com/projectatomic/atomic-system-containers/commit/54ab8abc7fa1bfb6fa674f55cd0c2fa0c812fd36>`_
 of atomic-system-containers for more information.
 
+Network for VMs
+---------------
+
+Every cluster has its own private network which is created along with the
+cluster. All the cluster nodes also get a floating ip on the external
+network. This approach works by default, but can be expensive in terms of
+complexity and cost (public Ipv4). To reduce this expense, the following
+methods can be used:
+
+1. **Create private networks but do not assign floating IPs**
+   With this approach the cluster *will* be inaccessible from the outside.
+   The user can add a floating ip to access it, but the certificates
+   will not work.
+2. **Create a private network and a LoadBalancer for the master node(s)**
+   There are two type of loadbalancers in magnum, one for the api and one
+   for the services running on the nodes. For kubernetes LoadBalancer
+   service type see: `Kubernetes External Load Balancer`_.
+   Not recommended when using only a single master node as it will add 2
+   amphora vms: one for the kube API and another for etcd thus being more
+   expensive.
+
+All the above can also work by passing an existing private network instead
+of creating a new one using --fixed-network and --fixed-subnet.
+
+_`Flannel`
+  When using flannel, the backend should be 'host-gw' if performance is a
+  requirement, 'udp' is too slow and 'vxlan' creates one more overlay network
+  on top of the existing neutron network. On the other hand, in a flat network
+  one should use 'vxlan' for network isolation.
+
+_`Calico`
+  Calico allows users to setup network policies in kubernetes policies for
+  network isolation.
+
 High Availability
 =================
 
