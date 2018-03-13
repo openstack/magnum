@@ -238,6 +238,20 @@ class CertManagerTestCase(base.BaseTestCase):
             context=None)
         self.assertEqual(mock_ca_cert, cluster_ca_cert)
 
+    def test_get_cluster_magnum_cert(self):
+        mock_cluster = mock.MagicMock()
+        mock_cluster.uuid = "mock_cluster_uuid"
+        mock_magnum_cert = mock.MagicMock()
+        self.CertManager.get_cert.return_value = mock_magnum_cert
+
+        cluster_magnum_cert = cert_manager.get_cluster_magnum_cert(
+            mock_cluster)
+
+        self.CertManager.get_cert.assert_called_once_with(
+            mock_cluster.magnum_cert_ref, resource_ref=mock_cluster.uuid,
+            context=None)
+        self.assertEqual(mock_magnum_cert, cluster_magnum_cert)
+
     def test_create_client_files_notin_cache(self):
         mock_cluster = mock.MagicMock()
         mock_cluster.uuid = "mock_cluster_uuid"
@@ -386,7 +400,7 @@ class CertManagerTestCase(base.BaseTestCase):
         magnum_permission = stat.S_IMODE(os.lstat(mock_magnum_return).st_mode)
         self.assertEqual(magnum_permission, 0o600)
 
-    def test_delete_certtificate(self):
+    def test_delete_certificates(self):
         mock_delete_cert = self.CertManager.delete_cert
         expected_cert_ref = 'cert_ref'
         expected_ca_cert_ref = 'ca_cert_ref'
@@ -403,7 +417,7 @@ class CertManagerTestCase(base.BaseTestCase):
                                          resource_ref=mock_cluster.uuid,
                                          context=None)
 
-    def test_delete_certtificate_if_raise_error(self):
+    def test_delete_certificates_if_raise_error(self):
         mock_delete_cert = self.CertManager.delete_cert
         expected_cert_ref = 'cert_ref'
         expected_ca_cert_ref = 'ca_cert_ref'
@@ -421,7 +435,7 @@ class CertManagerTestCase(base.BaseTestCase):
                                          resource_ref=mock_cluster.uuid,
                                          context=None)
 
-    def test_delete_certtificate_without_cert_ref(self):
+    def test_delete_certificates_without_cert_ref(self):
         mock_delete_cert = self.CertManager.delete_cert
         mock_cluster = mock.MagicMock()
         mock_cluster.ca_cert_ref = None
