@@ -65,7 +65,7 @@ class DockerClientTestCase(base.BaseTestCase):
                          client.timeout)
 
     def test_docker_client_init_version(self):
-        expected_version = '1.16'
+        expected_version = '1.21'
         client = docker_utils.DockerHTTPClient(ver=expected_version)
 
         self.assertEqual(expected_version,
