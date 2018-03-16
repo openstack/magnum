@@ -15,6 +15,7 @@ spec:
         k8s-app: ingress-traefik-backend
         name: ingress-traefik-backend
     spec:
+      serviceAccountName: ingress-traefik
       terminationGracePeriodSeconds: 60
       hostNetwork: true
       containers:
