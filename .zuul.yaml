@@ -267,9 +267,11 @@
         - magnum-functional-api
         - magnum-functional-k8s
         - magnum-functional-swarm-mode
+        - openstack-tox-lower-constraints
     gate:
       jobs:
         - magnum-functional-api
+        - openstack-tox-lower-constraints
     experimental:
       jobs:
         - magnum-functional-dcos
