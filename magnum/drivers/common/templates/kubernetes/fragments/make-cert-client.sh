@@ -30,6 +30,10 @@ else
     VERIFY_CA="-k"
 fi
 
+if [ -z "${KUBE_NODE_IP}" ]; then
+    KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+fi
+
 cert_dir=/etc/kubernetes/certs
 
 mkdir -p "$cert_dir"
@@ -93,6 +97,7 @@ EOF
 
 #Kubelet Certs
 INSTANCE_NAME=$(hostname --short | sed 's/\.novalocal//')
+HOSTNAME=$(hostname)
 
 cat > ${cert_dir}/kubelet.conf <<EOF
 [req]
@@ -107,8 +112,9 @@ C=US
 ST=TX
 L=Austin
 [req_ext]
+subjectAltName = IP:${KUBE_NODE_IP},DNS:${INSTANCE_NAME},DNS:${HOSTNAME}
 keyUsage=critical,digitalSignature,keyEncipherment
-extendedKeyUsage=clientAuth
+extendedKeyUsage=clientAuth,serverAuth
 EOF
 
 #kube-proxy Certs
