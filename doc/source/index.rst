@@ -59,6 +59,7 @@ User Documentation
    :maxdepth: 1
 
    user/index
+   user/glossary.rst
 
 Contributor Guide
 =================

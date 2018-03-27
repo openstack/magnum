@@ -34,28 +34,6 @@ created and managed by Magnum to support the COE's.
 #. `Container Monitoring`_
 #. `Kubernetes External Load Balancer`_
 
-Terminology
-===========
-
-Cluster (previously Bay)
-  A cluster is the construct in which Magnum launches container orchestration
-  engines. After a cluster has been created the user is able to add containers
-  to it either directly, or in the case of the Kubernetes container
-  orchestration engine within pods - a logical construct specific to that
-  implementation. A cluster is created based on a ClusterTemplate.
-
-ClusterTemplate (previously BayModel)
-  A ClusterTemplate in Magnum is roughly equivalent to a flavor in Nova. It
-  acts as a template that defines options such as the container orchestration
-  engine, keypair and image for use when Magnum is creating clusters using
-  the given ClusterTemplate.
-
-Container Orchestration Engine (COE)
-  A container orchestration engine manages the lifecycle of one or more
-  containers, logically represented in Magnum as a cluster. Magnum supports a
-  number of container orchestration engines, each with their own pros and cons,
-  including Docker Swarm, Kubernetes, and Mesos.
-
 Overview
 ========
 
@@ -974,37 +952,8 @@ look for the attribute *coe_version* and *container_version*::
 Kubernetes
 ==========
 Kubernetes uses a range of terminology that we refer to in this guide. We
-define these common terms for your reference:
-
-Pod
-  When using the Kubernetes container orchestration engine, a pod is the
-  smallest deployable unit that can be created and managed. A pod is a
-  co-located group of application containers that run with a shared context.
-  When using Magnum, pods are created and managed within clusters. Refer to the
-  `pods section
-  <http://kubernetes.io/v1.0/docs/user-guide/pods.html>`_ in the `Kubernetes
-  User Guide`_ for more information.
-
-Replication controller
-  A replication controller is used to ensure that at any given time a certain
-  number of replicas of a pod are running. Pods are automatically created and
-  deleted by the replication controller as necessary based on a template to
-  ensure that the defined number of replicas exist. Refer to the `replication
-  controller section
-  <http://kubernetes.io/v1.0/docs/user-guide/replication-controller.html>`_ in
-  the `Kubernetes User Guide`_ for more information.
-
-Service
-  A service is an additional layer of abstraction provided by the Kubernetes
-  container orchestration engine which defines a logical set of pods and a
-  policy for accessing them. This is useful because pods are created and
-  deleted by a replication controller, for example, other pods needing to
-  discover them can do so via the service abstraction. Refer to the
-  `services section
-  <http://kubernetes.io/v1.0/docs/user-guide/services.html>`_ in the
-  `Kubernetes User Guide`_ for more information.
-
-.. _Kubernetes User Guide: http://kubernetes.io/v1.0/docs/user-guide/
+define these common terms in the `Glossary
+<https://docs.openstack.org/magnum/latest/glossary.html>`_ for your reference.
 
 When Magnum deploys a Kubernetes cluster, it uses parameters defined in the
 ClusterTemplate and specified on the cluster-create command, for example::
