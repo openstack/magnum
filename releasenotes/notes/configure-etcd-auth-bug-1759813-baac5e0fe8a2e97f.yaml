@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Fix etcd configuration in k8s_fedora_atomic driver. Explicitly enable
+    client and peer authentication and set trusted CA (ETCD_TRUSTED_CA_FILE,
+    ETCD_PEER_TRUSTED_CA_FILE, ETCD_CLIENT_CERT_AUTH,
+    ETCD_PEER_CLIENT_CERT_AUTH). Only new clusters will benefit from the fix.
