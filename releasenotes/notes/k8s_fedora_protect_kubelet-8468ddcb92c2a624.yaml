@@ -1,0 +1,12 @@
+---
+fixes:
+  - |
+    Fix bug #1758672 [1] to protect kubelet in the k8s_fedora_atomic driver.
+    Before this patch kubelet was listening to 0.0.0.0 and for clusters with
+    floating IPs the kubelet was exposed. Also, even on clusters without fips
+    the kubelet was exposed inside the cluster. This patch allows access to
+    the kubelet only over https and with the appropriate roles. The apiserver
+    and heapster have the appropriate roles to access it. Finally, all
+    read-only ports have been closed to not expose any cluster data. The only
+    remaining open ports without authentication are for healthz.
+    [1] https://bugs.launchpad.net/magnum/+bug/1758672
