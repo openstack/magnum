@@ -69,11 +69,15 @@ if [ "$TLS_DISABLED" = "False" ]; then
 
 cat >> /etc/etcd/etcd.conf <<EOF
 ETCD_CA_FILE=$cert_dir/ca.crt
+ETCD_TRUSTED_CA_FILE=$cert_dir/ca.crt
 ETCD_CERT_FILE=$cert_dir/server.crt
 ETCD_KEY_FILE=$cert_dir/server.key
+ETCD_CLIENT_CERT_AUTH=true
 ETCD_PEER_CA_FILE=$cert_dir/ca.crt
+ETCD_PEER_TRUSTED_CA_FILE=$cert_dir/ca.crt
 ETCD_PEER_CERT_FILE=$cert_dir/server.crt
 ETCD_PEER_KEY_FILE=$cert_dir/server.key
+ETCD_PEER_CLIENT_CERT_AUTH=true
 EOF
 
 fi
