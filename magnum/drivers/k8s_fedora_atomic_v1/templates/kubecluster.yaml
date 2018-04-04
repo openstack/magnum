@@ -645,6 +645,7 @@ resources:
           kube_tag: {get_param: kube_tag}
           kube_version: {get_param: kube_version}
           etcd_tag: {get_param: etcd_tag}
+          flannel_tag: {get_param: flannel_tag}
           kube_dashboard_version: {get_param: kube_dashboard_version}
           trustee_user_id: {get_param: trustee_user_id}
           trustee_password: {get_param: trustee_password}
