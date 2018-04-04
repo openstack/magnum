@@ -67,3 +67,7 @@ chmod 0644 $FLANNEL_CONFIG_SERVICE
 
 systemctl enable flannel-config
 systemctl start --no-block flannel-config
+
+echo "activating service flanneld"
+systemctl enable flanneld
+systemctl start --no-block flanneld

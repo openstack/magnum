@@ -219,6 +219,10 @@ parameters:
     type: string
     description: tag of the etcd system container
 
+  flannel_tag:
+    type: string
+    description: tag of the flannel system containers
+
   kube_version:
     type: string
     description: version of kubernetes used for kubernetes cluster
@@ -424,6 +428,7 @@ resources:
             "$NO_PROXY": {get_param: no_proxy}
             "$KUBE_TAG": {get_param: kube_tag}
             "$ETCD_TAG": {get_param: etcd_tag}
+            "$FLANNEL_TAG": {get_param: flannel_tag}
             "$KUBE_VERSION": {get_param: kube_version}
             "$KUBE_DASHBOARD_VERSION": {get_param: kube_dashboard_version}
             "$WAIT_CURL": {get_attr: [master_wait_handle, curl_cli]}
