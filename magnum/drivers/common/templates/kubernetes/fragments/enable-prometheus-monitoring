@@ -25,7 +25,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: prometheus
-  namespace: kube-system
+  namespace: prometheus-monitoring
 data:
   prometheus.yml: |
     global:
@@ -190,7 +190,7 @@ metadata:
   labels:
     name: prometheus
   name: prometheus
-  namespace: kube-system
+  namespace: prometheus-monitoring
 spec:
   selector:
     app: prometheus
@@ -205,7 +205,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: prometheus
-  namespace: kube-system
+  namespace: prometheus-monitoring
 spec:
   replicas: 1
   selector:
@@ -217,6 +217,7 @@ spec:
       labels:
         app: prometheus
     spec:
+      serviceAccountName: prometheus
       containers:
       - name: prometheus
         image: ${CONTAINER_INFRA_PREFIX:-docker.io/prom/}prometheus:v1.8.2
@@ -235,6 +236,46 @@ spec:
       - name: config-volume
         configMap:
           name: prometheus
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: prometheus
+rules:
+- apiGroups: [""]
+  resources:
+  - nodes
+  - nodes/proxy
+  - services
+  - endpoints
+  - pods
+  verbs: ["get", "list", "watch"]
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs: ["get", "list", "watch"]
+- nonResourceURLs: ["/metrics"]
+  verbs: ["get"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus
+  namespace: prometheus-monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus
+subjects:
+- kind: ServiceAccount
+  name: prometheus
+  namespace: prometheus-monitoring
 EOF
 )
 writeFile $prometheusService_file "$prometheusService_content"
@@ -248,7 +289,7 @@ metadata:
     name: node
     role: service
   name: grafana
-  namespace: kube-system
+  namespace: prometheus-monitoring
 spec:
   type: "NodePort"
   ports:
@@ -262,7 +303,7 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: grafana
-  namespace: kube-system
+  namespace: prometheus-monitoring
 spec:
   replicas: 1
   template:
@@ -327,28 +368,28 @@ done
 
 # Check if all resources exist already before creating them
 # Check if configmap Prometheus exists
-kubectl get configmap prometheus -n kube-system
+kubectl get configmap prometheus -n prometheus-monitoring
 if [ "$?" != "0" ] && \
         [ -f "'''${PROMETHEUS_MON_BASE_DIR}'''/prometheusConfigMap.yaml" ]; then
     kubectl create -f '''${PROMETHEUS_MON_BASE_DIR}'''/prometheusConfigMap.yaml
 fi
 
 # Check if deployment and service Prometheus exist
-kubectl get service prometheus -n kube-system | kubectl get deployment prometheus -n kube-system
+kubectl get service prometheus -n prometheus-monitoring | kubectl get deployment prometheus -n prometheus-monitoring
 if [ "${PIPESTATUS[0]}" != "0" ] && [ "${PIPESTATUS[1]}" != "0" ] && \
         [ -f "'''${PROMETHEUS_MON_BASE_DIR}'''/prometheusService.yaml" ]; then
     kubectl create -f '''${PROMETHEUS_MON_BASE_DIR}'''/prometheusService.yaml
 fi
 
 # Check if configmap graf-dash exists
-kubectl get configmap graf-dash -n kube-system
+kubectl get configmap graf-dash -n prometheus-monitoring
 if [ "$?" != "0" ] && \
         [ -f '''$GRAFANA_DEF_DASHBOARD_FILE''' ]; then
-    kubectl create configmap graf-dash --from-file='''$GRAFANA_DEF_DASHBOARD_FILE''' -n kube-system
+    kubectl create configmap graf-dash --from-file='''$GRAFANA_DEF_DASHBOARD_FILE''' -n prometheus-monitoring
 fi
 
 # Check if deployment and service Grafana exist
-kubectl get service grafana -n kube-system | kubectl get deployment grafana -n kube-system
+kubectl get service grafana -n prometheus-monitoring | kubectl get deployment grafana -n prometheus-monitoring
 if [ "${PIPESTATUS[0]}" != "0" ] && [ "${PIPESTATUS[1]}" != "0" ] && \
         [ -f "'''${PROMETHEUS_MON_BASE_DIR}'''/grafanaService.yaml" ]; then
     kubectl create -f '''${PROMETHEUS_MON_BASE_DIR}'''/grafanaService.yaml
@@ -358,15 +399,15 @@ fi
 while true
 do
     echo "Waiting for Grafana pod to be up and Running"
-    if [ "$(kubectl get po -n kube-system -l name=grafana -o jsonpath={..phase})" = "Running" ]; then
+    if [ "$(kubectl get po -n prometheus-monitoring -l name=grafana -o jsonpath={..phase})" = "Running" ]; then
         break
     fi
     sleep 2
 done
 
 # Which node is running Grafana
-NODE_IP=`kubectl get po -n kube-system -o jsonpath={.items[0].status.hostIP} -l name=grafana`
-PROM_SERVICE_IP=`kubectl get svc prometheus --namespace kube-system -o jsonpath={..clusterIP}`
+NODE_IP=`kubectl get po -n prometheus-monitoring -o jsonpath={.items[0].status.hostIP} -l name=grafana`
+PROM_SERVICE_IP=`kubectl get svc prometheus --namespace prometheus-monitoring -o jsonpath={..clusterIP}`
 
 # The Grafana pod might be running but the app might still be initiating
 echo "Check if Grafana is ready..."
