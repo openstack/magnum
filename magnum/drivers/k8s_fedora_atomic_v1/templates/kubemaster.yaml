@@ -512,17 +512,17 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-master.sh}
 
-  write_network_config:
+  write_flannel_config:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/write-network-config.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/write-flannel-config.sh}
 
-  network_config_service:
+  flannel_config_service:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/network-config-service.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/flannel-config-service.sh}
 
   enable_services:
     type: OS::Heat::SoftwareConfig
@@ -575,8 +575,8 @@ resources:
         - config: {get_resource: add_proxy}
         - config: {get_resource: start_container_agent}
         - config: {get_resource: enable_services}
-        - config: {get_resource: write_network_config}
-        - config: {get_resource: network_config_service}
+        - config: {get_resource: write_flannel_config}
+        - config: {get_resource: flannel_config_service}
         - config: {get_resource: kube_apiserver_to_kubelet_role}
         - config: {get_resource: master_wc_notify}
 
@@ -600,7 +600,7 @@ resources:
       group: script
       config:
         str_replace:
-          template: {get_file: ../../common/templates/kubernetes/fragments/enable-prometheus-monitoring}
+          template: {get_file: ../../common/templates/kubernetes/fragments/enable-prometheus-monitoring.sh}
           params:
             "$ADMIN_PASSWD": {get_param: grafana_admin_passwd}
 
@@ -618,7 +618,7 @@ resources:
       group: script
       config:
         str_replace:
-          template: {get_file: ../../common/templates/kubernetes/fragments/enable-cert-api-manager}
+          template: {get_file: ../../common/templates/kubernetes/fragments/enable-cert-api-manager.sh}
           params:
             "$CA_KEY": {get_param: ca_key}
 
@@ -651,8 +651,8 @@ resources:
       config:
         str_replace:
           params:
-            $enable-ingress-traefik: {get_file: ../../common/templates/kubernetes/fragments/enable-ingress-traefik}
-          template: {get_file: ../../common/templates/kubernetes/fragments/enable-ingress-controller}
+            $enable-ingress-traefik: {get_file: ../../common/templates/kubernetes/fragments/enable-ingress-traefik.sh}
+          template: {get_file: ../../common/templates/kubernetes/fragments/enable-ingress-controller.sh}
 
   enable_ingress_controller_deployment:
     type: OS::Heat::SoftwareDeployment
