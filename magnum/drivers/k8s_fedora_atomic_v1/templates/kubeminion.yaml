@@ -379,11 +379,11 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-minion.sh}
 
-  network_service:
+  flannel_service:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/network-service.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/flannel-service.sh}
 
   enable_services:
     type: OS::Heat::SoftwareConfig
@@ -445,7 +445,7 @@ resources:
         - config: {get_resource: configure_docker_storage}
         - config: {get_resource: configure_docker_registry}
         - config: {get_resource: configure_kubernetes_minion}
-        - config: {get_resource: network_service}
+        - config: {get_resource: flannel_service}
         - config: {get_resource: add_proxy}
         - config: {get_resource: enable_services}
         - config: {get_resource: enable_node_exporter}
