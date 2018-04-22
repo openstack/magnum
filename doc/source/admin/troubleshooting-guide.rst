@@ -667,7 +667,7 @@ Kubernetes services
 
 (How to introspect k8s when heat works and k8s does not)
 
-Additional `Kubenetes troubleshooting guide
+Additional `Kubernetes troubleshooting guide
 <http://kubernetes.io/v1.0/docs/troubleshooting.html>`_ is available.
 
 Swarm services
