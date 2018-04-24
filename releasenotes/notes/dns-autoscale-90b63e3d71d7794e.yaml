@@ -1,0 +1,8 @@
+---
+issues:
+  - |
+    Currently, the replicas of coreDNS pod is hardcoded as 1. It's not a
+    reasonable number for such a critical service. Without DNS, probably all
+    workloads running on the k8s cluster will be broken. Now Magnum is making
+    the coreDNS pod autoscaling based on the nodes and cores number.
+

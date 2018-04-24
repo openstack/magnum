@@ -1191,6 +1191,27 @@ _`ingress_controller_role`
 
     kubectl label node <node-name> role=ingress
 
+DNS
+---
+
+CoreDNS is a critical service in Kubernetes cluster for service discovery. To
+get high availability for CoreDNS pod for Kubernetes cluster, now Magnum
+supports the autoscaling of CoreDNS using `cluster-proportional-autoscaler
+<https://github.com/kubernetes-incubator/cluster-proportional-autoscaler>`_.
+With cluster-proportional-autoscaler, the replicas of CoreDNS pod will be
+autoscaled based on the nodes and cores in the clsuter to prevent single
+point failure.
+
+The scaling parameters and data points are provided via a ConfigMap to the
+autoscaler and it refreshes its parameters table every poll interval to be up
+to date with the latest desired scaling parameters. Using ConfigMap means user
+can do on-the-fly changes(including control mode) without rebuilding or
+restarting the scaler containers/pods. Please refer `Autoscale the DNS Service
+in a Cluster
+<https://kubernetes.io/docs/tasks/administer-cluster/dns-horizontal-autoscaling/#tuning-autoscaling-parameters>`_
+for more info.
+
+
 Swarm
 =====
 
