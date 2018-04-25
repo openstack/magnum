@@ -17,6 +17,10 @@ fi
 atomic install --storage ostree --system --system-package=no --name=kube-apiserver ${_prefix}kubernetes-apiserver:${KUBE_TAG}
 atomic install --storage ostree --system --system-package=no --name=kube-controller-manager ${_prefix}kubernetes-controller-manager:${KUBE_TAG}
 atomic install --storage ostree --system --system-package=no --name=kube-scheduler ${_prefix}kubernetes-scheduler:${KUBE_TAG}
+if [ "$NETWORK_DRIVER" = "flannel" ]; then
+    atomic install --storage ostree --system --system-package=no \
+    --name=flanneld ${_prefix}flannel:${FLANNEL_TAG}
+fi
 
 sed -i '
     /^KUBE_ALLOW_PRIV=/ s/=.*/="--allow-privileged='"$KUBE_ALLOW_PRIV"'"/
