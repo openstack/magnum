@@ -19,3 +19,9 @@ for service in etcd docker kube-apiserver kube-controller-manager kube-scheduler
     systemctl enable $service
     systemctl --no-block start $service
 done
+
+if [ "$NETWORK_DRIVER" = "calico" ]; then
+    echo "activating service kubelet"
+    systemctl enable kubelet
+    systemctl start kubelet
+fi
