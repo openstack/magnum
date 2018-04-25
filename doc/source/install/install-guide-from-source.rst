@@ -23,8 +23,15 @@ Install and configure components
            # apt install python-dev libssl-dev libxml2-dev \
                          libmysqlclient-dev libxslt-dev libpq-dev git \
                          libffi-dev gettext build-essential
+      * CentOS 7:
 
-      * Fedora 21 / Centos 7 / RHEL 7
+        .. code-block:: console
+
+           # yum install python-devel openssl-devel mariadb-devel \
+                         libxml2-devel libxslt-devel postgresql-devel git \
+                         libffi-devel gettext gcc
+
+      * Fedora 21 / RHEL 7
 
         .. code-block:: console
 
