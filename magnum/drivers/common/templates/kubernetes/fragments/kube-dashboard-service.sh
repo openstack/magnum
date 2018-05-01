@@ -196,23 +196,6 @@ spec:
       targetPort: 8443
   selector:
     k8s-app: kubernetes-dashboard
----
-# Grant admin privileges to the dashboard serviceacount
-
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  name: kubernetes-dashboard
-  labels:
-    k8s-app: kubernetes-dashboard
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects:
-- kind: ServiceAccount
-  name: kubernetes-dashboard
-  namespace: kube-system
 EOF
 }
 

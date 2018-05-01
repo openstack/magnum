@@ -1,0 +1,8 @@
+---
+security:
+  - |
+    k8s_fedora Remove cluster role from the kubernetes-dashboard account. When
+    accessing the dashboard and skip authentication, users login with the
+    kunernetes-dashboard service account, if that service account has the
+    cluster role, users have admin access without authentication. Create an
+    admin service account for this use case and others.
