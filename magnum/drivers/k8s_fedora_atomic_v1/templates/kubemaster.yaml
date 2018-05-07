@@ -522,12 +522,6 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/kube-apiserver-to-kubelet-role.sh}
 
-  core_dns_service:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/core-dns-service.sh}
-
   master_wc_notify:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -570,8 +564,21 @@ resources:
         - config: {get_resource: write_network_config}
         - config: {get_resource: network_config_service}
         - config: {get_resource: kube_apiserver_to_kubelet_role}
-        - config: {get_resource: core_dns_service}
         - config: {get_resource: master_wc_notify}
+
+  core_dns_service:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config: {get_file: ../../common/templates/kubernetes/fragments/core-dns-service.sh}
+
+  core_dns_service_deployment:
+    type: OS::Heat::SoftwareDeployment
+    properties:
+      signal_transport: HEAT_SIGNAL
+      config: {get_resource: core_dns_service}
+      server: {get_resource: kube-master}
+      actions: ['CREATE']
 
   enable_prometheus_monitoring:
     type: OS::Heat::SoftwareConfig

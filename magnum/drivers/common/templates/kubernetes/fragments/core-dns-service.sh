@@ -5,7 +5,7 @@
 _dns_prefix=${CONTAINER_INFRA_PREFIX:-docker.io/coredns/}
 _autoscaler_prefix=${CONTAINER_INFRA_PREFIX:-docker.io/googlecontainer/}
 
-CORE_DNS=/etc/kubernetes/manifests/kube-coredns.yaml
+CORE_DNS=/srv/magnum/kubernetes/manifests/kube-coredns.yaml
 [ -f ${CORE_DNS} ] || {
     echo "Writing File: $CORE_DNS"
     mkdir -p $(dirname ${CORE_DNS})
@@ -251,4 +251,4 @@ do
     sleep 5
 done
 
-kubectl create --validate=false -f $CORE_DNS
+kubectl apply --validate=false -f $CORE_DNS
