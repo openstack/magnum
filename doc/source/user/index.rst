@@ -1014,7 +1014,7 @@ Image (image)
   The image binary is loaded in Glance with the attribute
   'os_distro = fedora-atomic'.
   Current supported images are Fedora Atomic (download from `Fedora
-  <https://alt.fedoraproject.org/pub/alt/atomic/stable/Cloud-Images/x86_64/Images>`_ )
+  <https://dl.fedoraproject.org/pub/alt/atomic/stable/Fedora-Atomic-27-20180419.0/CloudImages/x86_64/images/>`__ )
   and CoreOS (download from `CoreOS
   <http://beta.release.core-os.net/amd64-usr/current/coreos_production_openstack_image.img.bz2>`_ )
 
