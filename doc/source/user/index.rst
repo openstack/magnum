@@ -1064,7 +1064,7 @@ _`container_infra_prefix`
   myregistry.example.com/mycloud.
   Images that must be mirrored:
 
-  * docker.io/coredns/coredns:011
+  * docker.io/coredns/coredns:1.0.1
   * docker.io/grafana/grafana:latest
   * docker.io/openstackmagnum/kubernetes-apiserver
   * docker.io/openstackmagnum/kubernetes-controller-manager
