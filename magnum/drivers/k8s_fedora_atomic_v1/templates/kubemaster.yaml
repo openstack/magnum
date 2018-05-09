@@ -350,6 +350,12 @@ parameters:
     description: >
       additional options to be passed to the scheduler
 
+  octavia_enabled:
+    type: boolean
+    description: >
+      whether or not to use Octavia for LoadBalancer type service.
+    default: False
+
 resources:
 
   master_wait_handle:
@@ -453,6 +459,7 @@ resources:
             "$KUBECONTROLLER_OPTIONS": {get_param: kubecontroller_options}
             "$KUBEPROXY_OPTIONS": {get_param: kubeproxy_options}
             "$KUBESCHEDULER_OPTIONS": {get_param: kubescheduler_options}
+            "$OCTAVIA_ENABLED": {get_param: octavia_enabled}
 
   install_openstack_ca:
     type: OS::Heat::SoftwareConfig

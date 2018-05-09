@@ -125,6 +125,13 @@ class TestClusterConductorWithK8s(base.TestCase):
         self.mock_osc.keystone.return_value = self.mock_keystone
         self.mock_osc_class.return_value = self.mock_osc
 
+        octavia_patcher = mock.patch(
+            'magnum.common.keystone.is_octavia_enabled'
+        )
+        self.mock_enable_octavia = octavia_patcher.start()
+        self.mock_enable_octavia.return_value = False
+        self.addCleanup(octavia_patcher.stop)
+
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
@@ -263,6 +270,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kubecontroller_options': '--kubecontroller',
             'kubescheduler_options': '--kubescheduler',
             'kubeproxy_options': '--kubeproxy',
+            'octavia_enabled': False,
         }
         if missing_attr is not None:
             expected.pop(mapping[missing_attr], None)
@@ -370,6 +378,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kubecontroller_options': '--kubecontroller',
             'kubescheduler_options': '--kubescheduler',
             'kubeproxy_options': '--kubeproxy',
+            'octavia_enabled': False,
         }
 
         self.assertEqual(expected, definition)
@@ -464,6 +473,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kubecontroller_options': '--kubecontroller',
             'kubescheduler_options': '--kubescheduler',
             'kubeproxy_options': '--kubeproxy',
+            'octavia_enabled': False,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -551,6 +561,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kubecontroller_options': '--kubecontroller',
             'kubescheduler_options': '--kubescheduler',
             'kubeproxy_options': '--kubeproxy',
+            'octavia_enabled': False,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -633,6 +644,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kubecontroller_options': '--kubecontroller',
             'kubescheduler_options': '--kubescheduler',
             'kubeproxy_options': '--kubeproxy',
+            'octavia_enabled': False,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -816,6 +828,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kubecontroller_options': '--kubecontroller',
             'kubescheduler_options': '--kubescheduler',
             'kubeproxy_options': '--kubeproxy',
+            'octavia_enabled': False,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

@@ -360,6 +360,12 @@ parameters:
       - allowed_values: ["affinity", "anti-affinity", "soft-affinity",
                          "soft-anti-affinity"]
 
+  octavia_enabled:
+    type: boolean
+    description: >
+      whether or not to use Octavia for LoadBalancer type service.
+    default: False
+
 resources:
 
   api_lb:
@@ -535,6 +541,7 @@ resources:
           etcd_lb_vip: {get_attr: [etcd_lb, address]}
           openstack_ca: {get_param: openstack_ca}
           nodes_server_group_id: {get_resource: nodes_server_group}
+          octavia_enabled: {get_param: octavia_enabled}
 
   ######################################################################
   #
@@ -625,6 +632,7 @@ resources:
       container_infra_prefix: {get_param: container_infra_prefix}
       wc_curl_cli: {get_attr: [minion_wait_handle, curl_cli]}
       openstack_ca: {get_param: openstack_ca}
+      octavia_enabled: {get_param: octavia_enabled}
 
   ######################################################################
   #

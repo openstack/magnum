@@ -12,6 +12,7 @@
 
 from oslo_config import cfg
 
+from magnum.common import keystone
 from magnum.drivers.heat import template_def
 
 CONF = cfg.CONF
@@ -104,6 +105,8 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
         if cluster_template.tls_disabled:
             extra_params['loadbalancing_protocol'] = 'HTTP'
             extra_params['kubernetes_port'] = 8080
+
+        extra_params['octavia_enabled'] = keystone.is_octavia_enabled()
 
         label_list = ['flannel_network_cidr', 'flannel_backend',
                       'flannel_network_subnetlen',
