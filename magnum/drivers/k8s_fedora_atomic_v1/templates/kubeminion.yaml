@@ -259,6 +259,12 @@ parameters:
     description: >
       additional options to be passed to the kube proxy
 
+  octavia_enabled:
+    type: boolean
+    description: >
+      whether or not to use Octavia for LoadBalancer type service.
+    default: False
+
 resources:
 
   minion_wait_handle:
@@ -327,6 +333,7 @@ resources:
             $DNS_CLUSTER_DOMAIN: {get_param: dns_cluster_domain}
             $KUBELET_OPTIONS: {get_param: kubelet_options}
             $KUBEPROXY_OPTIONS: {get_param: kubeproxy_options}
+            $OCTAVIA_ENABLED: {get_param: octavia_enabled}
 
   install_openstack_ca:
     type: OS::Heat::SoftwareConfig

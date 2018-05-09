@@ -250,6 +250,12 @@ parameters:
     type: string
     description: ID of the server group for kubernetes cluster nodes.
 
+  octavia_enabled:
+    type: boolean
+    description: >
+      whether or not to use Octavia for LoadBalancer type service.
+    default: False
+
 resources:
 
   ######################################################################
@@ -321,6 +327,7 @@ resources:
             "$CONTAINER_INFRA_PREFIX": {get_param: container_infra_prefix}
             "$ENABLE_CINDER": "False"
             "$ETCD_LB_VIP": {get_param: etcd_lb_vip}
+            "$OCTAVIA_ENABLED": {get_param: octavia_enabled}
 
   install_openstack_ca:
     type: OS::Heat::SoftwareConfig
