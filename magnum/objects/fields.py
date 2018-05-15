@@ -49,6 +49,19 @@ class ClusterStatus(fields.Enum):
         super(ClusterStatus, self).__init__(valid_values=ClusterStatus.ALL)
 
 
+class ClusterHealthStatus(fields.Enum):
+    HEALTHY = 'HEALTHY'
+    UNHEALTHY = 'UNHEALTHY'
+
+    ALL = (HEALTHY, UNHEALTHY)
+
+    STATUS_FAILED = (UNHEALTHY)
+
+    def __init__(self):
+        super(ClusterHealthStatus, self).__init__(
+            valid_values=ClusterHealthStatus.ALL)
+
+
 class FederationStatus(fields.Enum):
     CREATE_IN_PROGRESS = 'CREATE_IN_PROGRESS'
     CREATE_FAILED = 'CREATE_FAILED'
@@ -148,6 +161,10 @@ class ListOfDictsField(fields.AutoTypedField):
 
 class ClusterStatusField(fields.BaseEnumField):
     AUTO_TYPE = ClusterStatus()
+
+
+class ClusterHealthStatusField(fields.BaseEnumField):
+    AUTO_TYPE = ClusterHealthStatus()
 
 
 class MagnumServiceField(fields.BaseEnumField):

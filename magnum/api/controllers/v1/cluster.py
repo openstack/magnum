@@ -134,6 +134,12 @@ class Cluster(base.APIBase):
     status_reason = wtypes.text
     """Status reason of the cluster from the heat stack"""
 
+    health_status = wtypes.Enum(str, *fields.ClusterStatus.ALL)
+    """Health status of the cluster from the native COE API"""
+
+    health_status_reason = wtypes.DictType(str, str)
+    """Health status reason of the cluster from the native COE API"""
+
     discovery_url = wtypes.text
     """Url used for cluster node discovery"""
 
@@ -211,6 +217,8 @@ class Cluster(base.APIBase):
                      stack_id='49dc23f5-ffc9-40c3-9d34-7be7f9e34d63',
                      status=fields.ClusterStatus.CREATE_COMPLETE,
                      status_reason="CREATE completed successfully",
+                     health_status=fields.ClusterHealthStatus.HEALTHY,
+                     health_status_reason='{"api_server": "OK"}',
                      api_address='172.24.4.3',
                      node_addresses=['172.24.4.4', '172.24.4.5'],
                      created_at=timeutils.utcnow(),
