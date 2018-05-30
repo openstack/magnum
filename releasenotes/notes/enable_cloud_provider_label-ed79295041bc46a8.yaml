@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Add 'cloud_provider_enabled' label for the k8s_fedora_atomic driver.
+    Defaults to true. For specific kubernetes versions if 'cinder' is
+    selected as a 'volume_driver', it is implied that the cloud provider
+    will be enabled since they are combined.

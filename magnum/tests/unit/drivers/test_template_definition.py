@@ -368,6 +368,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'kubescheduler_options')
         kubeproxy_options = mock_cluster.labels.get(
             'kubeproxy_options')
+        cloud_provider_enabled = mock_cluster.labels.get(
+            'cloud_provider_enabled')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -395,6 +397,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'kubecontroller_options': kubecontroller_options,
             'kubescheduler_options': kubescheduler_options,
             'kubeproxy_options': kubeproxy_options,
+            'cloud_provider_enabled': cloud_provider_enabled,
             'username': 'fake_user',
             'magnum_url': mock_osc.magnum_url.return_value,
             'region_name': mock_osc.cinder_region_name.return_value,
@@ -421,6 +424,18 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
                                                 mock_cluster_template,
                                                 mock_cluster,
                                                 **expected_kwargs)
+
+        mock_cluster_template.volume_driver = 'cinder'
+        mock_cluster.labels = {'cloud_provider_enabled': 'false'}
+        k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
+        self.assertRaises(
+            exception.InvalidParameterValue,
+            k8s_def.get_params,
+            mock_context,
+            mock_cluster_template,
+            mock_cluster,
+            scale_manager=mock_scale_manager
+        )
 
     @mock.patch('magnum.common.keystone.is_octavia_enabled')
     @mock.patch('magnum.common.clients.OpenStackClients')
@@ -522,6 +537,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'kubescheduler_options')
         kubeproxy_options = mock_cluster.labels.get(
             'kubeproxy_options')
+        cloud_provider_enabled = mock_cluster.labels.get(
+            'cloud_provider_enabled')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -549,6 +566,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'kubecontroller_options': kubecontroller_options,
             'kubescheduler_options': kubescheduler_options,
             'kubeproxy_options': kubeproxy_options,
+            'cloud_provider_enabled': cloud_provider_enabled,
             'username': 'fake_user',
             'magnum_url': mock_osc.magnum_url.return_value,
             'region_name': mock_osc.cinder_region_name.return_value,

@@ -13,10 +13,12 @@
 from oslo_log import log as logging
 from oslo_utils import strutils
 
+from magnum.common import exception
 from magnum.common.x509 import operations as x509
 from magnum.conductor.handlers.common import cert_manager
 from magnum.drivers.heat import k8s_template_def
 from magnum.drivers.heat import template_def
+from magnum.i18n import _
 from oslo_config import cfg
 
 CONF = cfg.CONF
@@ -91,12 +93,24 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
             extra_params["pods_network_cidr"] = \
                 cluster.labels.get('calico_ipv4pool', '192.168.0.0/16')
 
+        # check cloud provider and cinder options. If cinder is selected,
+        # the cloud provider needs to be enabled.
+        cloud_provider_enabled = cluster.labels.get(
+            'cloud_provider_enabled', 'true').lower()
+        if (cluster_template.volume_driver == 'cinder'
+                and cloud_provider_enabled == 'false'):
+            raise exception.InvalidParameterValue(_(
+                '"cinder" volume driver needs "cloud_provider_enabled" label '
+                'to be true or unset.'))
+
         label_list = ['kube_tag', 'container_infra_prefix',
                       'availability_zone',
                       'cgroup_driver',
                       'calico_tag', 'calico_cni_tag',
                       'calico_kube_controllers_tag', 'calico_ipv4pool',
-                      'etcd_tag', 'flannel_tag']
+                      'etcd_tag', 'flannel_tag',
+                      'cloud_provider_enabled']
+
         for label in label_list:
             label_value = cluster.labels.get(label)
             if label_value:
