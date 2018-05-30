@@ -380,6 +380,9 @@ the table are linked to more details elsewhere in the user guide.
 | `cgroup_driver`_                      | - systemd          | "systemd"     |
 |                                       | - cgroupfs         |               |
 +---------------------------------------+--------------------+---------------+
+| `cloud_provider_enabled`_             | - true             | true          |
+|                                       | - false            |               |
++---------------------------------------+--------------------+---------------+
 
 Cluster
 -------
@@ -1199,6 +1202,12 @@ _`cgroup_driver`
   This label tells kubelet which Cgroup driver to use. Ideally this
   should be identical to the Cgroup driver that Docker has been
   started with.
+
+_`cloud_provider_enabled`
+  Add 'cloud_provider_enabled' label for the k8s_fedora_atomic driver. Defaults
+  to true. For specific kubernetes versions if 'cinder' is selected as a
+  'volume_driver', it is implied that the cloud provider will be enabled since
+  they are combined.
 
 External load balancer for services
 -----------------------------------

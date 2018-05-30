@@ -373,6 +373,10 @@ parameters:
       the index of master node, index 0 means the master node is the primary,
       bootstrapping node.
 
+  cloud_provider_enabled:
+    type: boolean
+    description: Enable or disable the openstack kubernetes cloud provider
+
 resources:
 
   master_wait_handle:
@@ -461,6 +465,7 @@ resources:
             "$TRUSTEE_USER_ID": {get_param: trustee_user_id}
             "$TRUSTEE_PASSWORD": {get_param: trustee_password}
             "$TRUST_ID": {get_param: trust_id}
+            "$CLOUD_PROVIDER_ENABLED": {get_param: cloud_provider_enabled}
             "$INSECURE_REGISTRY_URL": {get_param: insecure_registry_url}
             "$CONTAINER_INFRA_PREFIX": {get_param: container_infra_prefix}
             "$ETCD_LB_VIP": {get_param: etcd_lb_vip}

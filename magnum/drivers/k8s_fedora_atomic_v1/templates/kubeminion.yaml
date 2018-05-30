@@ -272,6 +272,10 @@ parameters:
       whether or not to use Octavia for LoadBalancer type service.
     default: False
 
+  cloud_provider_enabled:
+    type: boolean
+    description: Enable or disable the openstack kubernetes cloud provider
+
 resources:
 
   minion_wait_handle:
@@ -337,6 +341,7 @@ resources:
             $TRUSTEE_PASSWORD: {get_param: trustee_password}
             $TRUST_ID: {get_param: trust_id}
             $AUTH_URL: {get_param: auth_url}
+            $CLOUD_PROVIDER_ENABLED: {get_param: cloud_provider_enabled}
             $INSECURE_REGISTRY_URL: {get_param: insecure_registry_url}
             $CONTAINER_INFRA_PREFIX: {get_param: container_infra_prefix}
             $DNS_SERVICE_IP: {get_param: dns_service_ip}
