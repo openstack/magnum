@@ -377,6 +377,9 @@ the table are linked to more details elsewhere in the user guide.
 | `kubeproxy_options`_                  | extra kubeproxy    | ""            |
 |                                       | args               |               |
 +---------------------------------------+--------------------+---------------+
+| `cgroup_driver`_                      | - systemd          | "systemd"     |
+|                                       | - cgroupfs         |               |
++---------------------------------------+--------------------+---------------+
 
 Cluster
 -------
@@ -1191,6 +1194,11 @@ _`influx_grafana_dashboard_enabled`
   The kubernetes dashboard comes with heapster enabled. If this
   label is set, an influxdb and grafana instance will be deployed,
   heapster will push data to influx and grafana will project them.
+
+_`cgroup_driver`
+  This label tells kubelet which Cgroup driver to use. Ideally this
+  should be identical to the Cgroup driver that Docker has been
+  started with.
 
 External load balancer for services
 -----------------------------------

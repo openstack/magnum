@@ -136,8 +136,25 @@ if [ -n "${INSECURE_REGISTRY_URL}" ]; then
     echo "INSECURE_REGISTRY='--insecure-registry ${INSECURE_REGISTRY_URL}'" >> /etc/sysconfig/docker
 fi
 
+KUBELET_ARGS="${KUBELET_ARGS} --client-ca-file=${CERT_DIR}/ca.crt --tls-cert-file=${CERT_DIR}/kubelet.crt --tls-private-key-file=${CERT_DIR}/kubelet.key"
+
 # specified cgroup driver
-KUBELET_ARGS="${KUBELET_ARGS} --client-ca-file=${CERT_DIR}/ca.crt --tls-cert-file=${CERT_DIR}/kubelet.crt --tls-private-key-file=${CERT_DIR}/kubelet.key  --cgroup-driver=systemd"
+KUBELET_ARGS="${KUBELET_ARGS} --cgroup-driver=${CGROUP_DRIVER}"
+
+systemctl disable docker
+if cat /usr/lib/systemd/system/docker.service | grep 'native.cgroupdriver'; then
+        cp /usr/lib/systemd/system/docker.service /etc/systemd/system/
+        sed -i "s/\(native.cgroupdriver=\)\w\+/\1$CGROUP_DRIVER/" \
+                /etc/systemd/system/docker.service
+else
+        cat > /etc/systemd/system/docker.service.d/cgroupdriver.conf << EOF
+ExecStart=---exec-opt native.cgroupdriver=$CGROUP_DRIVER
+EOF
+
+fi
+
+systemctl daemon-reload
+systemctl enable docker
 
 cat > /etc/kubernetes/get_require_kubeconfig.sh <<EOF
 #!/bin/bash

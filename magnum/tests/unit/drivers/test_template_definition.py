@@ -331,6 +331,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             pods_network_cidr = flannel_cidr
         elif mock_cluster_template.network_driver == 'calico':
             pods_network_cidr = calico_ipv4pool
+        cgroup_driver = mock_cluster.labels.get(
+            'cgroup_driver')
         ingress_controller = mock_cluster.labels.get(
             'ingress_controller')
         ingress_controller_role = mock_cluster.labels.get(
@@ -386,6 +388,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'calico_cni_tag': calico_cni_tag,
             'calico_kube_controllers_tag': calico_kube_controllers_tag,
             'calico_ipv4pool': calico_ipv4pool,
+            'cgroup_driver': cgroup_driver,
             'pods_network_cidr': pods_network_cidr,
             'ingress_controller': ingress_controller,
             'ingress_controller_role': ingress_controller_role,
@@ -472,6 +475,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             pods_network_cidr = flannel_cidr
         elif mock_cluster_template.network_driver == 'calico':
             pods_network_cidr = calico_ipv4pool
+        cgroup_driver = mock_cluster.labels.get(
+            'cgroup_driver')
         ingress_controller = mock_cluster.labels.get(
             'ingress_controller')
         ingress_controller_role = mock_cluster.labels.get(
@@ -529,6 +534,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'calico_cni_tag': calico_cni_tag,
             'calico_kube_controllers_tag': calico_kube_controllers_tag,
             'calico_ipv4pool': calico_ipv4pool,
+            'cgroup_driver': cgroup_driver,
             'pods_network_cidr': pods_network_cidr,
             'ingress_controller': ingress_controller,
             'ingress_controller_role': ingress_controller_role,

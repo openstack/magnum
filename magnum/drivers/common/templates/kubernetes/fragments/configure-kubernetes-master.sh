@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 
 . /etc/sysconfig/heat-params
 
@@ -140,7 +140,22 @@ EOF
     KUBELET_ARGS="${KUBELET_ARGS} --client-ca-file=${CERT_DIR}/ca.crt --tls-cert-file=${CERT_DIR}/kubelet.crt --tls-private-key-file=${CERT_DIR}/kubelet.key --kubeconfig ${KUBELET_KUBECONFIG}"
 
     # specified cgroup driver
-    KUBELET_ARGS="${KUBELET_ARGS} --cgroup-driver=systemd"
+    KUBELET_ARGS="${KUBELET_ARGS} --cgroup-driver=${CGROUP_DRIVER}"
+
+    systemctl disable docker
+    if cat /usr/lib/systemd/system/docker.service | grep 'native.cgroupdriver'; then
+            cp /usr/lib/systemd/system/docker.service /etc/systemd/system/
+            sed -i "s/\(native.cgroupdriver=\)\w\+/\1$CGROUP_DRIVER/" \
+                    /etc/systemd/system/docker.service
+    else
+            cat > /etc/systemd/system/docker.service.d/cgroupdriver.conf << EOF
+ExecStart=---exec-opt native.cgroupdriver=$CGROUP_DRIVER
+EOF
+
+    fi
+
+    systemctl daemon-reload
+    systemctl enable docker
 
     if [ -z "${KUBE_NODE_IP}" ]; then
         KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
