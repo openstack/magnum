@@ -177,6 +177,12 @@ parameters:
     type: string
     description: The OpenStack CA certificate to install on the node.
 
+  octavia_enabled:
+    type: boolean
+    description: >
+      whether or not to use Octavia for LoadBalancer type service.
+    default: False
+
 resources:
 
   ######################################################################
@@ -231,6 +237,7 @@ resources:
             $INSECURE_REGISTRY_URL: {get_param: insecure_registry_url}
             $CONTAINER_INFRA_PREFIX: {get_param: container_infra_prefix}
             $ENABLE_CINDER: "False"
+            $OCTAVIA_ENABLED: {get_param: octavia_enabled}
 
   install_openstack_ca:
     type: OS::Heat::SoftwareConfig

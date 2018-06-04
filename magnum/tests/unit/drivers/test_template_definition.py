@@ -219,6 +219,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
     def get_definition(self):
         return k8sa_dr.Driver().get_template_definition()
 
+    @mock.patch('magnum.common.keystone.is_octavia_enabled')
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.drivers.k8s_fedora_atomic_v1.template_def'
                 '.AtomicK8sTemplateDefinition.get_discovery_url')
@@ -227,7 +228,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
     @mock.patch('magnum.drivers.heat.template_def.TemplateDefinition'
                 '.get_output')
     def test_k8s_get_params(self, mock_get_output, mock_get_params,
-                            mock_get_discovery_url, mock_osc_class):
+                            mock_get_discovery_url, mock_osc_class,
+                            mock_enable_octavia):
+        mock_enable_octavia.return_value = False
         mock_context = mock.MagicMock()
         mock_context.auth_token = 'AUTH_TOKEN'
         mock_cluster_template = mock.MagicMock()
@@ -349,12 +352,15 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'calico_ipv4pool': calico_ipv4pool,
             'pods_network_cidr': pods_network_cidr,
             'ingress_controller': ingress_controller,
-            'ingress_controller_role': ingress_controller_role}}
+            'ingress_controller_role': ingress_controller_role,
+            'octavia_enabled': False,
+        }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
                                                 mock_cluster,
                                                 **expected_kwargs)
 
+    @mock.patch('magnum.common.keystone.is_octavia_enabled')
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.drivers.heat.template_def'
                 '.BaseTemplateDefinition.get_discovery_url')
@@ -363,7 +369,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
     @mock.patch('magnum.drivers.heat.template_def.TemplateDefinition'
                 '.get_output')
     def test_k8s_get_params_insecure(self, mock_get_output, mock_get_params,
-                                     mock_get_discovery_url, mock_osc_class):
+                                     mock_get_discovery_url, mock_osc_class,
+                                     mock_enable_octavia):
+        mock_enable_octavia.return_value = False
         mock_context = mock.MagicMock()
         mock_context.auth_token = 'AUTH_TOKEN'
         mock_cluster_template = mock.MagicMock()
@@ -487,7 +495,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'calico_ipv4pool': calico_ipv4pool,
             'pods_network_cidr': pods_network_cidr,
             'ingress_controller': ingress_controller,
-            'ingress_controller_role': ingress_controller_role}}
+            'ingress_controller_role': ingress_controller_role,
+            'octavia_enabled': False,
+        }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
                                                 mock_cluster,

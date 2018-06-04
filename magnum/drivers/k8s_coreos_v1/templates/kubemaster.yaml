@@ -237,6 +237,12 @@ parameters:
     type: string
     description: ID of the server group for kubernetes cluster nodes.
 
+  octavia_enabled:
+    type: boolean
+    description: >
+      whether or not to use Octavia for LoadBalancer type service.
+    default: False
+
 resources:
 
   master_wait_handle:
@@ -322,6 +328,7 @@ resources:
             "$ETCD_LB_VIP": {get_param: etcd_lb_vip}
             "$DNS_SERVICE_IP": {get_param: dns_service_ip}
             "$DNS_CLUSTER_DOMAIN": {get_param: dns_cluster_domain}
+            "$OCTAVIA_ENABLED": {get_param: octavia_enabled}
 
   add_ext_ca_certs:
     type: OS::Heat::SoftwareConfig

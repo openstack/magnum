@@ -462,6 +462,12 @@ parameters:
       additional options to be passed to the scheduler
     default: ""
 
+  octavia_enabled:
+    type: boolean
+    description: >
+      whether or not to use Octavia for LoadBalancer type service.
+    default: False
+
 resources:
 
   ######################################################################
@@ -679,6 +685,7 @@ resources:
           kubeproxy_options: {get_param: kubeproxy_options}
           kubecontroller_options: {get_param: kubecontroller_options}
           kubescheduler_options: {get_param: kubescheduler_options}
+          octavia_enabled: {get_param: octavia_enabled}
 
   ######################################################################
   #
@@ -754,6 +761,7 @@ resources:
           pods_network_cidr: {get_param: pods_network_cidr}
           kubelet_options: {get_param: kubelet_options}
           kubeproxy_options: {get_param: kubeproxy_options}
+          octavia_enabled: {get_param: octavia_enabled}
 
 outputs:
 

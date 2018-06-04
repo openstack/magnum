@@ -307,6 +307,12 @@ parameters:
       - allowed_values: ["affinity", "anti-affinity", "soft-affinity",
                          "soft-anti-affinity"]
 
+  octavia_enabled:
+    type: boolean
+    description: >
+      whether or not to use Octavia for LoadBalancer type service.
+    default: False
+
 resources:
 
   ######################################################################
@@ -491,6 +497,7 @@ resources:
           dns_cluster_domain: {get_param: dns_cluster_domain}
           openstack_ca: {get_param: openstack_ca}
           nodes_server_group_id: {get_resource: nodes_server_group}
+          octavia_enabled: {get_param: octavia_enabled}
 
   ######################################################################
   #
@@ -547,6 +554,7 @@ resources:
           dns_cluster_domain: {get_param: dns_cluster_domain}
           openstack_ca: {get_param: openstack_ca}
           nodes_server_group_id: {get_resource: nodes_server_group}
+          octavia_enabled: {get_param: octavia_enabled}
 
 outputs:
 
