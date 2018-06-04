@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    In the OpenStack deployment with Octavia service enabled, the Octavia
+    service should be used not only for master nodes high availability, but
+    also for k8s LoadBalancer type service implementation as well.
