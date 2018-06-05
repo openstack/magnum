@@ -1,0 +1,14 @@
+---
+deprecations:
+  - |
+    Currently, Magnum is running periodic tasks to collect k8s cluster
+    metrics to message bus. Unfortunately, it's collecting pods info
+    only from "default" namespace which makes this function useless.
+    What's more, even Magnum can get all pods from all namespaces, it
+    doesn't make much sense to keep this function in Magnum. Because
+    operators only care about the health of cluster nodes. If they
+    want to know the status of pods, they can use heapster or other
+    tools to get that. So the feauture is being deprecated now and will be
+    removed in Stein release. And the default value is changed to False, which
+    means won't send the metrics.
+

@@ -16,6 +16,7 @@
 import functools
 
 from oslo_log import log
+from oslo_log.versionutils import deprecated
 from oslo_service import loopingcall
 from oslo_service import periodic_task
 
@@ -140,6 +141,7 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
 
     @periodic_task.periodic_task(run_immediately=True)
     @set_context
+    @deprecated(as_of=deprecated.ROCKY)
     def _send_cluster_metrics(self, ctx):
         if not CONF.drivers.send_cluster_metrics:
             LOG.debug('Skip sending cluster metrics')
