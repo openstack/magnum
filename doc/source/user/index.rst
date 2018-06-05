@@ -213,8 +213,9 @@ They are loosely grouped as: mandatory, infrastructure, COE specific.
   If specified, container images will be stored in a cinder volume of the
   specified size in GB. Each cluster node will have a volume attached of
   the above size. If not specified, images will be stored in the compute
-  instance's local disk. For the 'devicemapper' storage driver, the minimum
-  value is 3GB. For the 'overlay' storage driver, the minimum value is 1GB.
+  instance's local disk. For the 'devicemapper' storage driver, must specify
+  volume and the minimum value is 3GB. For the 'overlay' and 'overlay2'
+  storage driver, the minimum value is 1GB or None(no volume).
   This value can be overridden at cluster creation.
 
 --docker-storage-driver \<docker-storage-driver\>
