@@ -224,6 +224,7 @@ class PeriodicTestCase(base.TestCase):
                                   mock_get_notifier, mock_cluster_list,
                                   mock_create_monitor):
         """Test if RPC notifier receives the expected message"""
+        CONF.set_override('send_cluster_metrics', True, group='drivers')
         mock_make_admin_context.return_value = self.context
         notifier = mock.MagicMock()
         mock_get_notifier.return_value = notifier
@@ -269,6 +270,7 @@ class PeriodicTestCase(base.TestCase):
     def test_send_cluster_metrics_compute_metric_raise(
             self, mock_make_admin_context, mock_get_notifier,
             mock_cluster_list, mock_create_monitor):
+        CONF.set_override('send_cluster_metrics', True, group='drivers')
         mock_make_admin_context.return_value = self.context
         notifier = mock.MagicMock()
         mock_get_notifier.return_value = notifier
@@ -300,6 +302,7 @@ class PeriodicTestCase(base.TestCase):
     def test_send_cluster_metrics_pull_data_raise(
             self, mock_make_admin_context, mock_get_notifier,
             mock_cluster_list, mock_create_monitor):
+        CONF.set_override('send_cluster_metrics', True, group='drivers')
         mock_make_admin_context.return_value = self.context
         notifier = mock.MagicMock()
         mock_get_notifier.return_value = notifier
@@ -321,6 +324,7 @@ class PeriodicTestCase(base.TestCase):
     def test_send_cluster_metrics_monitor_none(
             self, mock_make_admin_context, mock_get_notifier,
             mock_cluster_list, mock_create_monitor):
+        CONF.set_override('send_cluster_metrics', True, group='drivers')
         mock_make_admin_context.return_value = self.context
         notifier = mock.MagicMock()
         mock_get_notifier.return_value = notifier
@@ -340,6 +344,7 @@ class PeriodicTestCase(base.TestCase):
     def test_send_cluster_metrics_disable_pull_data(
             self, mock_make_admin_context, mock_get_notifier,
             mock_cluster_list, mock_create_monitor):
+
         mock_make_admin_context.return_value = self.context
         notifier = mock.MagicMock()
         mock_get_notifier.return_value = notifier
@@ -351,9 +356,6 @@ class PeriodicTestCase(base.TestCase):
         monitor.compute_metric_value.return_value = 30
         monitor.get_metric_unit.return_value = '%'
         mock_create_monitor.return_value = monitor
-
-        CONF.set_override('send_cluster_metrics',
-                          False, group='drivers')
 
         periodic.MagnumPeriodicTasks(CONF)._send_cluster_metrics(self.context)
 
