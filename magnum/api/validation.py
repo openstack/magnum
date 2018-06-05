@@ -205,11 +205,10 @@ def _enforce_volume_driver_types(cluster_template):
 def _enforce_volume_storage_size(cluster_template, cluster):
     volume_size = cluster.get('docker_volume_size') \
         or cluster_template.get('docker_volume_size')
-    if not volume_size:
-        return
     storage_driver = cluster_template.get('docker_storage_driver')
+
     if storage_driver == 'devicemapper':
-        if volume_size < 3:
+        if not volume_size or volume_size < 3:
             raise exception.InvalidParameterValue(
                 'docker volume size %s GB is not valid, '
                 'expecting minimum value 3GB for %s storage '
