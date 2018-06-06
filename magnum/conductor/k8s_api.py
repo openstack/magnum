@@ -17,11 +17,76 @@ import tempfile
 from kubernetes import client as k8s_config
 from kubernetes.client import api_client
 from kubernetes.client.apis import core_v1_api
+from kubernetes.client import configuration as k8s_configuration
+from kubernetes.client import rest
 from oslo_log import log as logging
 
 from magnum.conductor.handlers.common.cert_manager import create_client_files
 
 LOG = logging.getLogger(__name__)
+
+
+class ApiClient(api_client.ApiClient):
+
+    def __init__(self, configuration=None, header_name=None,
+                 header_value=None, cookie=None):
+        if configuration is None:
+            configuration = k8s_configuration.Configuration()
+        self.configuration = configuration
+
+        self.rest_client = rest.RESTClientObject(configuration)
+        self.default_headers = {}
+        if header_name is not None:
+            self.default_headers[header_name] = header_value
+        self.cookie = cookie
+
+    def __del__(self):
+        pass
+
+    def call_api(self, resource_path, method,
+                 path_params=None, query_params=None, header_params=None,
+                 body=None, post_params=None, files=None, async=None,
+                 response_type=None, auth_settings=None, async_req=None,
+                 _return_http_data_only=None, collection_formats=None,
+                 _preload_content=True, _request_timeout=None):
+        """Makes http request (synchronous) and return the deserialized data
+
+        :param resource_path: Path to method endpoint.
+        :param method: Method to call.
+        :param path_params: Path parameters in the url.
+        :param query_params: Query parameters in the url.
+        :param header_params: Header parameters to be
+            placed in the request header.
+        :param body: Request body.
+        :param post_params dict: Request post form parameters,
+            for `application/x-www-form-urlencoded`, `multipart/form-data`.
+        :param auth_settings list: Auth Settings names for the request.
+        :param response: Response data type.
+        :param files dict: key -> filename, value -> filepath,
+            for `multipart/form-data`.
+        :param async bool: to be compatible with k8s-client before 7.0.0
+        :param async_req bool: execute request asynchronously
+        :param _return_http_data_only: response data without head status code
+                                       and headers
+        :param collection_formats: dict of collection formats for path, query,
+            header, and post parameters.
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+
+        :return: The method will return the response directly
+
+        """
+        return self.__call_api(resource_path, method,
+                               path_params, query_params, header_params,
+                               body, post_params, files,
+                               response_type, auth_settings,
+                               _return_http_data_only, collection_formats,
+                               _preload_content, _request_timeout)
 
 
 class K8sAPI(core_v1_api.CoreV1Api):
@@ -57,7 +122,7 @@ class K8sAPI(core_v1_api.CoreV1Api):
         config.key_file = self.key_file.name
 
         # build a connection with Kubernetes master
-        client = api_client.ApiClient(configuration=config)
+        client = ApiClient(configuration=config)
 
         super(K8sAPI, self).__init__(client)
 

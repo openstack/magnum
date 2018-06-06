@@ -88,6 +88,46 @@ class ClusterUpdateJob(object):
         raise loopingcall.LoopingCallDone()
 
 
+class ClusterHealthUpdateJob(object):
+
+    def __init__(self, ctx, cluster):
+        self.ctx = ctx
+        self.cluster = cluster
+
+    def _update_health_status(self):
+        monitor = monitors.create_monitor(self.ctx, self.cluster)
+        if monitor is None:
+            return
+
+        try:
+            monitor.poll_health_status()
+        except Exception as e:
+            LOG.warning(
+                "Skip pulling data from cluster %(cluster)s due to "
+                "error: %(e)s",
+                {'e': e, 'cluster': self.cluster.uuid}, exc_info=True)
+            # TODO(flwang): Should we mark this cluster's health status as
+            # UNKNOWN if Magnum failed to pull data from the cluster? Because
+            # that basically means the k8s API doesn't work at that moment.
+            return
+
+        if monitor.data.get('health_status'):
+            self.cluster.health_status = monitor.data.get('health_status')
+            self.cluster.health_status_reason = monitor.data.get(
+                'health_status_reason')
+            self.cluster.save()
+
+    def update_health_status(self):
+        LOG.debug("Updating health status for cluster %s", self.cluster.id)
+        self._update_health_status()
+        LOG.debug("Status for cluster %s updated to %s (%s)",
+                  self.cluster.id, self.cluster.health_status,
+                  self.cluster.health_status_reason)
+        # TODO(flwang): Health status update notifications?
+        # end the "loop"
+        raise loopingcall.LoopingCallDone()
+
+
 @profiler.trace_cls("rpc")
 class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
     """Magnum periodic Task class
@@ -132,6 +172,36 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
                 # abstraction anyway to avoid dealing directly with eventlet
                 # hooey
                 lc = loopingcall.FixedIntervalLoopingCall(f=job.update_status)
+                lc.start(1, stop_on_exception=True)
+
+        except Exception as e:
+            LOG.warning(
+                "Ignore error [%s] when syncing up cluster status.",
+                e, exc_info=True)
+
+    @periodic_task.periodic_task(spacing=10, run_immediately=True)
+    @set_context
+    def sync_cluster_health_status(self, ctx):
+        try:
+            LOG.debug('Starting to sync up cluster health status')
+
+            status = [objects.fields.ClusterStatus.CREATE_COMPLETE,
+                      objects.fields.ClusterStatus.UPDATE_COMPLETE,
+                      objects.fields.ClusterStatus.UPDATE_IN_PROGRESS,
+                      objects.fields.ClusterStatus.ROLLBACK_IN_PROGRESS]
+            filters = {'status': status}
+            clusters = objects.Cluster.list(ctx, filters=filters)
+            if not clusters:
+                return
+
+            # synchronize using native COE API
+            for cluster in clusters:
+                job = ClusterHealthUpdateJob(ctx, cluster)
+                # though this call isn't really looping, we use this
+                # abstraction anyway to avoid dealing directly with eventlet
+                # hooey
+                lc = loopingcall.FixedIntervalLoopingCall(
+                    f=job.update_health_status)
                 lc.start(1, stop_on_exception=True)
 
         except Exception as e:

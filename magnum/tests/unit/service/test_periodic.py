@@ -18,7 +18,9 @@ from magnum.common import context
 from magnum.common.rpc_service import CONF
 from magnum.db.sqlalchemy import api as dbapi
 from magnum.drivers.common import driver
+from magnum.drivers.common import k8s_monitor
 from magnum import objects
+from magnum.objects.fields import ClusterHealthStatus as cluster_health_status
 from magnum.objects.fields import ClusterStatus as cluster_status
 from magnum.service import periodic
 from magnum.tests import base
@@ -361,3 +363,31 @@ class PeriodicTestCase(base.TestCase):
 
         self.assertEqual(0, mock_create_monitor.call_count)
         self.assertEqual(0, notifier.info.call_count)
+
+    @mock.patch('oslo_service.loopingcall.FixedIntervalLoopingCall',
+                new=fakes.FakeLoopingCall)
+    @mock.patch('magnum.conductor.monitors.create_monitor')
+    @mock.patch('magnum.objects.Cluster.list')
+    @mock.patch('magnum.common.rpc.get_notifier')
+    @mock.patch('magnum.common.context.make_admin_context')
+    def test_sync_cluster_health_status(self, mock_make_admin_context,
+                                        mock_get_notifier, mock_cluster_list,
+                                        mock_create_monitor):
+        """Test sync cluster health status"""
+        mock_make_admin_context.return_value = self.context
+        notifier = mock.MagicMock()
+        mock_get_notifier.return_value = notifier
+        mock_cluster_list.return_value = [self.cluster4]
+        self.cluster4.status = cluster_status.CREATE_COMPLETE
+        health = {'health_status': cluster_health_status.UNHEALTHY,
+                  'health_status_reason': {'api': 'ok', 'node-0.Ready': False}}
+        monitor = mock.MagicMock(spec=k8s_monitor.K8sMonitor, name='test',
+                                 data=health)
+        mock_create_monitor.return_value = monitor
+        periodic.MagnumPeriodicTasks(CONF).sync_cluster_health_status(
+            self.context)
+
+        self.assertEqual(cluster_health_status.UNHEALTHY,
+                         self.cluster4.health_status)
+        self.assertEqual({'api': 'ok', 'node-0.Ready': 'False'},
+                         self.cluster4.health_status_reason)

@@ -13,16 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from collections import namedtuple
+
 import mock
 from oslo_serialization import jsonutils
 
+from magnum.common import exception
 from magnum.drivers.common import k8s_monitor
 from magnum.drivers.mesos_ubuntu_v1 import monitor as mesos_monitor
 from magnum.drivers.swarm_fedora_atomic_v1 import monitor as swarm_monitor
 from magnum.drivers.swarm_fedora_atomic_v2 import monitor as swarm_v2_monitor
 from magnum import objects
+from magnum.objects import fields as m_fields
 from magnum.tests import base
 from magnum.tests.unit.db import utils
+
+NODE_STATUS_CONDITION = namedtuple('Condition',
+                                   ['type', 'status'])
 
 
 class MonitorsTestCase(base.TestCase):
@@ -418,3 +425,75 @@ class MonitorsTestCase(base.TestCase):
         self.mesos_monitor.data = test_data
         cpu_util = self.mesos_monitor.compute_cpu_util()
         self.assertEqual(0, cpu_util)
+
+    @mock.patch('magnum.conductor.k8s_api.create_k8s_api')
+    def test_k8s_monitor_health_healthy(self, mock_k8s_api):
+        mock_nodes = mock.MagicMock()
+        mock_node = mock.MagicMock()
+        mock_api_client = mock.MagicMock()
+        mock_node.status = mock.MagicMock()
+        mock_node.metadata.name = 'k8s-cluster-node-0'
+        mock_node.status.conditions = [NODE_STATUS_CONDITION(type='Ready',
+                                                             status='True')]
+        mock_nodes.items = [mock_node]
+        mock_k8s_api.return_value.list_node.return_value = (
+            mock_nodes)
+        mock_k8s_api.return_value.api_client = mock_api_client
+        mock_api_client.call_api.return_value = ('ok', None, None)
+
+        self.k8s_monitor.poll_health_status()
+        self.assertEqual(self.k8s_monitor.data['health_status'],
+                         m_fields.ClusterHealthStatus.HEALTHY)
+        self.assertEqual(self.k8s_monitor.data['health_status_reason'],
+                         {'api': 'ok', 'k8s-cluster-node-0.Ready': True})
+
+    @mock.patch('magnum.conductor.k8s_api.create_k8s_api')
+    def test_k8s_monitor_health_unhealthy_api(self, mock_k8s_api):
+        mock_nodes = mock.MagicMock()
+        mock_node = mock.MagicMock()
+        mock_api_client = mock.MagicMock()
+        mock_node.status = mock.MagicMock()
+        mock_node.metadata.name = 'k8s-cluster-node-0'
+        mock_node.status.conditions = [NODE_STATUS_CONDITION(type='Ready',
+                                                             status='True')]
+        mock_nodes.items = [mock_node]
+        mock_k8s_api.return_value.list_node.return_value = (
+            mock_nodes)
+        mock_k8s_api.return_value.api_client = mock_api_client
+        mock_api_client.call_api.side_effect = exception.MagnumException(
+            message='failed')
+
+        self.k8s_monitor.poll_health_status()
+        self.assertEqual(self.k8s_monitor.data['health_status'],
+                         m_fields.ClusterHealthStatus.UNHEALTHY)
+        self.assertEqual(self.k8s_monitor.data['health_status_reason'],
+                         {'api': 'failed'})
+
+    @mock.patch('magnum.conductor.k8s_api.create_k8s_api')
+    def test_k8s_monitor_health_unhealthy_node(self, mock_k8s_api):
+        mock_nodes = mock.MagicMock()
+        mock_api_client = mock.MagicMock()
+
+        mock_node0 = mock.MagicMock()
+        mock_node0.status = mock.MagicMock()
+        mock_node0.metadata.name = 'k8s-cluster-node-0'
+        mock_node0.status.conditions = [NODE_STATUS_CONDITION(type='Ready',
+                                                              status='False')]
+        mock_node1 = mock.MagicMock()
+        mock_node1.status = mock.MagicMock()
+        mock_node1.metadata.name = 'k8s-cluster-node-1'
+        mock_node1.status.conditions = [NODE_STATUS_CONDITION(type='Ready',
+                                                              status='True')]
+
+        mock_nodes.items = [mock_node0, mock_node1]
+        mock_k8s_api.return_value.list_node.return_value = (
+            mock_nodes)
+        mock_k8s_api.return_value.api_client = mock_api_client
+        mock_api_client.call_api.return_value = ('ok', None, None)
+
+        self.k8s_monitor.poll_health_status()
+        self.assertEqual(self.k8s_monitor.data['health_status'],
+                         m_fields.ClusterHealthStatus.UNHEALTHY)
+        self.assertEqual(self.k8s_monitor.data['health_status_reason'],
+                         {'api': 'ok', 'k8s-cluster-node-0.Ready': False,
+                          'api': 'ok', 'k8s-cluster-node-1.Ready': True})
