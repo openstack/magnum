@@ -223,22 +223,6 @@ class TestX509(base.BaseTestCase):
                         skip_validation=True)
         mock_six.assert_called_once_with(csr)
 
-    @mock.patch('cryptography.x509.load_pem_x509_csr')
-    def test_sign_empty_chars(self, mock_load_pem):
-        ca_key = self._generate_private_key()
-        private_key = self._generate_private_key()
-        csr_obj = self._build_csr(private_key)
-        csr = csr_obj.public_bytes(serialization.Encoding.PEM)
-        csr = six.text_type(csr.decode('utf-8'))
-
-        mock_load_pem.return_value = csr_obj
-        certificate = operations.sign(csr, self.issuer_name,
-                                      ca_key, skip_validation=True)
-
-        # Certificate has to be striped for some parsers
-        self.assertEqual(certificate,
-                         certificate.strip())
-
     def test_sign_with_invalid_csr(self):
         ca_key = self._generate_private_key()
         csr = 'test'
