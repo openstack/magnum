@@ -226,7 +226,7 @@ def sign(csr, issuer_name, ca_key, ca_key_password=None,
     certificate = builder.sign(
         private_key=ca_key, algorithm=hashes.SHA256(),
         backend=default_backend()
-    ).public_bytes(serialization.Encoding.PEM).strip()
+    ).public_bytes(serialization.Encoding.PEM)
 
     return certificate
 
