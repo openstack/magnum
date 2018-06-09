@@ -356,6 +356,12 @@ parameters:
       whether or not to use Octavia for LoadBalancer type service.
     default: False
 
+  master_index:
+    type: string
+    description: >
+      the index of master node, index 0 means the master node is the primary,
+      bootstrapping node.
+
 resources:
 
   master_wait_handle:
@@ -396,6 +402,7 @@ resources:
         str_replace:
           template: {get_file: ../../common/templates/kubernetes/fragments/write-heat-params-master.yaml}
           params:
+            "$MASTER_INDEX": {get_param: master_index}
             "$PROMETHEUS_MONITORING": {get_param: prometheus_monitoring}
             "$KUBE_API_PUBLIC_ADDRESS": {get_attr: [api_address_switch, public_ip]}
             "$KUBE_API_PRIVATE_ADDRESS": {get_attr: [api_address_switch, private_ip]}
