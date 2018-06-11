@@ -1,0 +1,4 @@
+# disables the use of floating ip on the load balancer
+
+resource_registry:
+  "Magnum::Optional::Neutron::LBaaS::FloatingIP": "OS::Heat::None"
