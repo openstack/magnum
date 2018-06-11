@@ -170,6 +170,42 @@ class TemplateDefinitionTestCase(base.TestCase):
         self.assertIn(mock_mapping_type.return_value,
                       definition.output_mappings)
 
+    def test_add_fip_env_lb_disabled_with_fp(self):
+        mock_cluster_template = mock.MagicMock(floating_ip_enabled=True,
+                                               master_lb_enabled=False)
+        env_files = []
+        cmn_tdef.add_fip_env_file(env_files, mock_cluster_template)
+        self.assertEqual([cmn_tdef.COMMON_ENV_PATH +
+                          'enable_floating_ip.yaml'], env_files)
+
+    def test_add_fip_env_lb_enabled_with_fp(self):
+        mock_cluster_template = mock.MagicMock(floating_ip_enabled=True,
+                                               master_lb_enabled=True)
+        env_files = []
+        cmn_tdef.add_fip_env_file(env_files, mock_cluster_template)
+        self.assertEqual([cmn_tdef.COMMON_ENV_PATH +
+                          'enable_floating_ip.yaml',
+                          cmn_tdef.COMMON_ENV_PATH +
+                          'enable_lb_floating_ip.yaml'], env_files)
+
+    def test_add_fip_env_lb_disabled_without_fp(self):
+        mock_cluster_template = mock.MagicMock(floating_ip_enabled=False,
+                                               master_lb_enabled=False)
+        env_files = []
+        cmn_tdef.add_fip_env_file(env_files, mock_cluster_template)
+        self.assertEqual([cmn_tdef.COMMON_ENV_PATH +
+                          'disable_floating_ip.yaml'], env_files)
+
+    def test_add_fip_env_lb_enabled_without_fp(self):
+        mock_cluster_template = mock.MagicMock(floating_ip_enabled=False,
+                                               master_lb_enabled=True)
+        env_files = []
+        cmn_tdef.add_fip_env_file(env_files, mock_cluster_template)
+        self.assertEqual([cmn_tdef.COMMON_ENV_PATH +
+                          'disable_floating_ip.yaml',
+                          cmn_tdef.COMMON_ENV_PATH +
+                          'disable_lb_floating_ip.yaml'], env_files)
+
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseTemplateDefinitionTestCase(base.TestCase):

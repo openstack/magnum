@@ -16,6 +16,7 @@
 
 . /etc/sysconfig/heat-params
 
+set -x
 set -o errexit
 set -o nounset
 set -o pipefail
@@ -30,28 +31,36 @@ else
     VERIFY_CA="-k"
 fi
 
-if [[ -z "${KUBE_NODE_PUBLIC_IP}" ]]; then
-    KUBE_NODE_PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
-fi
-if [[ -z "${KUBE_NODE_IP}" ]]; then
+if [ -z "${KUBE_NODE_IP}" ]; then
     KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 fi
 
-sans="IP:${KUBE_NODE_PUBLIC_IP},IP:${KUBE_NODE_IP}"
+sans="IP:${KUBE_NODE_IP}"
+
+if [ -z "${KUBE_NODE_PUBLIC_IP}" ]; then
+    KUBE_NODE_PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+fi
+
+if [ -n "${KUBE_NODE_PUBLIC_IP}" ]; then
+    sans="${sans},IP:${KUBE_NODE_PUBLIC_IP}"
+fi
+
 if [ "${KUBE_NODE_PUBLIC_IP}" != "${KUBE_API_PUBLIC_ADDRESS}" ] \
         && [ -n "${KUBE_API_PUBLIC_ADDRESS}" ]; then
     sans="${sans},IP:${KUBE_API_PUBLIC_ADDRESS}"
 fi
+
 if [ "${KUBE_NODE_IP}" != "${KUBE_API_PRIVATE_ADDRESS}" ] \
         && [ -n "${KUBE_API_PRIVATE_ADDRESS}" ]; then
     sans="${sans},IP:${KUBE_API_PRIVATE_ADDRESS}"
 fi
+
 MASTER_HOSTNAME=${MASTER_HOSTNAME:-}
-if [[ -n "${MASTER_HOSTNAME}" ]]; then
+if [ -n "${MASTER_HOSTNAME}" ]; then
     sans="${sans},DNS:${MASTER_HOSTNAME}"
 fi
 
-if [[ -n "${ETCD_LB_VIP}" ]]; then
+if [ -n "${ETCD_LB_VIP}" ]; then
     sans="${sans},IP:${ETCD_LB_VIP}"
 fi
 
@@ -63,6 +72,7 @@ sans="${sans},IP:${KUBE_SERVICE_IP}"
 
 sans="${sans},DNS:kubernetes,DNS:kubernetes.default,DNS:kubernetes.default.svc,DNS:kubernetes.default.svc.cluster.local"
 
+echo "sans is ${sans}"
 cert_dir=/etc/kubernetes/certs
 mkdir -p "$cert_dir"
 CA_CERT=$cert_dir/ca.crt

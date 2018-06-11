@@ -21,7 +21,8 @@ lib64
 pip-log.txt
 
 # Unit test / coverage reports
-.coverage
+!.coveragerc
+.coverage*
 cover
 cover-master
 .tox
