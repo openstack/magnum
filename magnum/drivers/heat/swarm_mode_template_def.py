@@ -9,11 +9,15 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+
 from magnum.drivers.heat import template_def
 from oslo_config import cfg
+from oslo_log import log as logging
 
 CONF = cfg.CONF
 DOCKER_PORT = '2375'
+
+LOG = logging.getLogger(__name__)
 
 
 class SwarmModeApiAddressOutputMapping(template_def.OutputMapping):
@@ -35,19 +39,44 @@ class SwarmModeApiAddressOutputMapping(template_def.OutputMapping):
             setattr(cluster, self.cluster_attr, value)
 
 
-class SwarmModeMasterAddressesOutputMapping(template_def.OutputMapping):
+class ServerAddressOutputMapping(template_def.OutputMapping):
+    public_ip_output_key = None
+    private_ip_output_key = None
+
+    def __init__(self, dummy_arg, cluster_attr=None):
+        self.cluster_attr = cluster_attr
+        self.heat_output = self.public_ip_output_key
+
+
+class MasterAddressOutputMapping(ServerAddressOutputMapping):
+    public_ip_output_key = ['swarm_primary_master',
+                            'swarm_secondary_masters']
+    private_ip_output_key = ['swarm_primary_master_private',
+                             'swarm_secondary_masters_private']
 
     def set_output(self, stack, cluster_template, cluster):
-        if self.cluster_attr is None:
-            return
+        if not cluster_template.floating_ip_enabled:
+            self.heat_output = self.private_ip_output_key
 
+        LOG.debug("Using heat_output: %s", self.heat_output)
         _master_addresses = []
         for output in stack.to_dict().get('outputs', []):
-            if output['output_key'] == 'swarm_primary_master':
-                _master_addresses.append(output['output_value'][0])
-            elif output['output_key'] == 'swarm_secondary_masters':
+            if output['output_key'] in self.heat_output:
                 _master_addresses += output['output_value']
         setattr(cluster, self.cluster_attr, _master_addresses)
+
+
+class NodeAddressOutputMapping(ServerAddressOutputMapping):
+    public_ip_output_key = 'swarm_nodes'
+    private_ip_output_key = 'swarm_nodes_private'
+
+    def set_output(self, stack, cluster_template, cluster):
+        if not cluster_template.floating_ip_enabled:
+            self.heat_output = self.private_ip_output_key
+
+        LOG.debug("Using heat_output: %s", self.heat_output)
+        super(NodeAddressOutputMapping,
+              self).set_output(stack, cluster_template, cluster)
 
 
 class SwarmModeTemplateDefinition(template_def.BaseTemplateDefinition):
@@ -84,15 +113,12 @@ class SwarmModeTemplateDefinition(template_def.BaseTemplateDefinition):
         self.add_output('api_address',
                         cluster_attr='api_address',
                         mapping_type=SwarmModeApiAddressOutputMapping)
-        self.add_output('swarm_primary_master_private',
-                        cluster_attr=None)
-        self.add_output('swarm_primary_master',
+        self.add_output('swarm_masters',
                         cluster_attr='master_addresses',
-                        mapping_type=SwarmModeMasterAddressesOutputMapping)
-        self.add_output('swarm_nodes_private',
-                        cluster_attr=None)
+                        mapping_type=MasterAddressOutputMapping)
         self.add_output('swarm_nodes',
-                        cluster_attr='node_addresses')
+                        cluster_attr='node_addresses',
+                        mapping_type=NodeAddressOutputMapping)
 
     def get_params(self, context, cluster_template, cluster, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
@@ -128,5 +154,6 @@ class SwarmModeTemplateDefinition(template_def.BaseTemplateDefinition):
         template_def.add_priv_net_env_file(env_files, cluster_template)
         template_def.add_volume_env_file(env_files, cluster)
         template_def.add_lb_env_file(env_files, cluster_template)
+        template_def.add_fip_env_file(env_files, cluster_template)
 
         return env_files

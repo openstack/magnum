@@ -14,3 +14,9 @@ resource_registry:
 
   # dcosslave.yaml
   "Magnum::Optional::DcosSlave::Neutron::FloatingIP": "OS::Neutron::FloatingIP"
+
+  # swarmmaster.yaml
+  "Magnum::Optional::SwarmMaster::Neutron::FloatingIP": "OS::Neutron::FloatingIP"
+
+  # swarmnode.yaml
+  "Magnum::Optional::SwarmNode::Neutron::FloatingIP": "OS::Neutron::FloatingIP"

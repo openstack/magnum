@@ -71,13 +71,19 @@ def _get_public_ip():
 
 
 def _build_subject_alt_names(config):
-    subject_alt_names = [
-        'IP:%s' % _get_public_ip(),
-        'IP:%s' % config['API_IP_ADDRESS'],
-        'IP:%s' % config['SWARM_NODE_IP'],
-        'IP:%s' % config['SWARM_API_IP'],
-        'IP:127.0.0.1'
-    ]
+    ips = {
+        config['SWARM_NODE_IP'],
+        config['SWARM_API_IP'],
+        '127.0.0.1',
+    }
+    # NOTE(mgoddard): If floating IP is disabled, these can be empty.
+    public_ip = _get_public_ip()
+    if public_ip:
+        ips.add(public_ip)
+    api_ip = config['API_IP_ADDRESS']
+    if api_ip:
+        ips.add(api_ip)
+    subject_alt_names = ['IP:%s' % ip for ip in ips]
     return ','.join(subject_alt_names)
 
 
@@ -95,9 +101,10 @@ def write_ca_cert(config, verify_ca):
 
 
 def write_server_key():
-    subprocess.call(['openssl', 'genrsa',
-                     '-out', SERVER_KEY_PATH,
-                     '4096'])
+    subprocess.check_call(
+        ['openssl', 'genrsa',
+         '-out', SERVER_KEY_PATH,
+         '4096'])
 
 
 def _write_csr_config(config):
@@ -110,13 +117,14 @@ def _write_csr_config(config):
 
 def create_server_csr(config):
     _write_csr_config(config)
-    subprocess.call(['openssl', 'req', '-new',
-                     '-days', '1000',
-                     '-key', SERVER_KEY_PATH,
-                     '-out', SERVER_CSR_PATH,
-                     '-reqexts', 'req_ext',
-                     '-extensions', 'req_ext',
-                     '-config', SERVER_CONF_PATH])
+    subprocess.check_call(
+        ['openssl', 'req', '-new',
+         '-days', '1000',
+         '-key', SERVER_KEY_PATH,
+         '-out', SERVER_CSR_PATH,
+         '-reqexts', 'req_ext',
+         '-extensions', 'req_ext',
+         '-config', SERVER_CONF_PATH])
 
     with open(SERVER_CSR_PATH, 'r') as fp:
         return {'cluster_uuid': config['CLUSTER_UUID'], 'csr': fp.read()}

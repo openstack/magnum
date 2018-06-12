@@ -31,6 +31,8 @@ from magnum.drivers.mesos_ubuntu_v1 import driver as mesos_dr
 from magnum.drivers.mesos_ubuntu_v1 import template_def as mesos_tdef
 from magnum.drivers.swarm_fedora_atomic_v1 import driver as swarm_dr
 from magnum.drivers.swarm_fedora_atomic_v1 import template_def as swarm_tdef
+from magnum.drivers.swarm_fedora_atomic_v2 import driver as swarm_v2_dr
+from magnum.drivers.swarm_fedora_atomic_v2 import template_def as swarm_v2_tdef
 from magnum.tests import base
 
 from requests import exceptions as req_exceptions
@@ -95,6 +97,17 @@ class TemplateDefinitionTestCase(base.TestCase):
 
         self.assertIsInstance(definition,
                               swarm_tdef.AtomicSwarmTemplateDefinition)
+
+    @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
+    def test_get_vm_atomic_swarm_v2_definition(self, mock_driver):
+        mock_driver.return_value = swarm_v2_dr.Driver()
+        cluster_driver = driver.Driver.get_driver('vm',
+                                                  'fedora-atomic',
+                                                  'swarm-mode')
+        definition = cluster_driver.get_template_definition()
+
+        self.assertIsInstance(definition,
+                              swarm_v2_tdef.AtomicSwarmTemplateDefinition)
 
     @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_get_vm_ubuntu_mesos_definition(self, mock_driver):
@@ -208,14 +221,14 @@ class TemplateDefinitionTestCase(base.TestCase):
 
 
 @six.add_metaclass(abc.ABCMeta)
-class BaseTemplateDefinitionTestCase(base.TestCase):
+class BaseK8sTemplateDefinitionTestCase(base.TestCase):
 
     @abc.abstractmethod
     def get_definition(self):
         """Returns the template definition."""
         pass
 
-    def _test_update_outputs_server_addrtess(
+    def _test_update_outputs_server_address(
         self,
         floating_ip_enabled=True,
         public_ip_output_key='kube_masters',
@@ -250,7 +263,7 @@ class BaseTemplateDefinitionTestCase(base.TestCase):
         self.assertEqual(expected_address, getattr(mock_cluster, cluster_attr))
 
 
-class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
+class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
 
     def get_definition(self):
         return k8sa_dr.Driver().get_template_definition()
@@ -762,21 +775,21 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         self._test_update_outputs_none_api_address(template_definition, params)
 
     def test_update_outputs_master_address(self):
-        self._test_update_outputs_server_addrtess(
+        self._test_update_outputs_server_address(
             public_ip_output_key='kube_masters',
             private_ip_output_key='kube_masters_private',
             cluster_attr='master_addresses',
         )
 
     def test_update_outputs_node_address(self):
-        self._test_update_outputs_server_addrtess(
+        self._test_update_outputs_server_address(
             public_ip_output_key='kube_minions',
             private_ip_output_key='kube_minions_private',
             cluster_attr='node_addresses',
         )
 
     def test_update_outputs_master_address_fip_disabled(self):
-        self._test_update_outputs_server_addrtess(
+        self._test_update_outputs_server_address(
             floating_ip_enabled=False,
             public_ip_output_key='kube_masters',
             private_ip_output_key='kube_masters_private',
@@ -784,7 +797,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         )
 
     def test_update_outputs_node_address_fip_disabled(self):
-        self._test_update_outputs_server_addrtess(
+        self._test_update_outputs_server_address(
             floating_ip_enabled=False,
             public_ip_output_key='kube_minions',
             private_ip_output_key='kube_minions_private',
@@ -893,6 +906,169 @@ class FedoraK8sIronicTemplateDefinitionTestCase(base.TestCase):
             mock_neutron_v20_find,
             ex,
             n_exception.ServiceUnavailable,
+        )
+
+
+class AtomicSwarmModeTemplateDefinitionTestCase(base.TestCase):
+
+    def get_definition(self):
+        return swarm_v2_dr.Driver().get_template_definition()
+
+    def _test_update_outputs_server_address(
+        self,
+        floating_ip_enabled=True,
+        public_ip_output_key='swarm_nodes',
+        private_ip_output_key='swarm_nodes_private',
+        cluster_attr='node_addresses',
+    ):
+
+        definition = self.get_definition()
+
+        expected_address = expected_public_address = ['public']
+        expected_private_address = ['private']
+        if not floating_ip_enabled:
+            expected_address = expected_private_address
+
+        outputs = [
+            {"output_value": expected_public_address,
+             "description": "No description given",
+             "output_key": public_ip_output_key},
+            {"output_value": expected_private_address,
+             "description": "No description given",
+             "output_key": private_ip_output_key},
+        ]
+        mock_stack = mock.MagicMock()
+        mock_stack.to_dict.return_value = {'outputs': outputs}
+        mock_cluster = mock.MagicMock()
+        mock_cluster_template = mock.MagicMock()
+        mock_cluster_template.floating_ip_enabled = floating_ip_enabled
+
+        definition.update_outputs(mock_stack, mock_cluster_template,
+                                  mock_cluster)
+
+        self.assertEqual(expected_address, getattr(mock_cluster, cluster_attr))
+
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.drivers.swarm_fedora_atomic_v2.template_def'
+                '.AtomicSwarmTemplateDefinition.get_discovery_url')
+    @mock.patch('magnum.drivers.heat.template_def.BaseTemplateDefinition'
+                '.get_params')
+    @mock.patch('magnum.drivers.heat.template_def.TemplateDefinition'
+                '.get_output')
+    def test_swarm_get_params(self, mock_get_output, mock_get_params,
+                              mock_get_discovery_url, mock_osc_class):
+        mock_context = mock.MagicMock()
+        mock_context.auth_token = 'AUTH_TOKEN'
+        mock_cluster_template = mock.MagicMock()
+        mock_cluster_template.tls_disabled = False
+        mock_cluster_template.registry_enabled = False
+        mock_cluster = mock.MagicMock()
+        mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
+        del mock_cluster.stack_id
+        mock_osc = mock.MagicMock()
+        mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
+        mock_osc_class.return_value = mock_osc
+
+        discovery_url = 'fake_discovery_url'
+        mock_get_discovery_url.return_value = discovery_url
+
+        mock_context.auth_url = 'http://192.168.10.10:5000/v3'
+        mock_context.user_name = 'fake_user'
+        mock_context.tenant = 'fake_tenant'
+
+        docker_volume_type = mock_cluster_template.labels.get(
+            'docker_volume_type')
+        rexray_preempt = mock_cluster_template.labels.get('rexray_preempt')
+        availability_zone = mock_cluster_template.labels.get(
+            'availability_zone')
+
+        number_of_secondary_masters = mock_cluster.master_count - 1
+
+        swarm_def = swarm_v2_tdef.AtomicSwarmTemplateDefinition()
+
+        swarm_def.get_params(mock_context, mock_cluster_template, mock_cluster)
+
+        expected_kwargs = {'extra_params': {
+            'magnum_url': mock_osc.magnum_url.return_value,
+            'auth_url': 'http://192.168.10.10:5000/v3',
+            'rexray_preempt': rexray_preempt,
+            'docker_volume_type': docker_volume_type,
+            'number_of_secondary_masters': number_of_secondary_masters,
+            'availability_zone': availability_zone,
+            'nodes_affinity_policy': 'soft-anti-affinity'}}
+        mock_get_params.assert_called_once_with(mock_context,
+                                                mock_cluster_template,
+                                                mock_cluster,
+                                                **expected_kwargs)
+
+    def test_swarm_get_heat_param(self):
+        swarm_def = swarm_v2_tdef.AtomicSwarmTemplateDefinition()
+
+        heat_param = swarm_def.get_heat_param(cluster_attr='node_count')
+        self.assertEqual('number_of_nodes', heat_param)
+
+    def test_update_outputs(self):
+        swarm_def = swarm_v2_tdef.AtomicSwarmTemplateDefinition()
+
+        expected_api_address = 'updated_address'
+        expected_node_addresses = ['ex_minion', 'address']
+
+        outputs = [
+            {"output_value": expected_api_address,
+             "description": "No description given",
+             "output_key": "api_address"},
+            {"output_value": ['any', 'output'],
+             "description": "No description given",
+             "output_key": "swarm_master_private"},
+            {"output_value": ['any', 'output'],
+             "description": "No description given",
+             "output_key": "swarm_master"},
+            {"output_value": ['any', 'output'],
+             "description": "No description given",
+             "output_key": "swarm_nodes_private"},
+            {"output_value": expected_node_addresses,
+             "description": "No description given",
+             "output_key": "swarm_nodes"},
+        ]
+        mock_stack = mock.MagicMock()
+        mock_stack.to_dict.return_value = {'outputs': outputs}
+        mock_cluster = mock.MagicMock()
+        mock_cluster_template = mock.MagicMock()
+
+        swarm_def.update_outputs(mock_stack, mock_cluster_template,
+                                 mock_cluster)
+        expected_api_address = "tcp://%s:2375" % expected_api_address
+        self.assertEqual(expected_api_address, mock_cluster.api_address)
+        self.assertEqual(expected_node_addresses, mock_cluster.node_addresses)
+
+    def test_update_outputs_master_address(self):
+        self._test_update_outputs_server_address(
+            public_ip_output_key='swarm_primary_master',
+            private_ip_output_key='swarm_primary_master_private',
+            cluster_attr='master_addresses',
+        )
+
+    def test_update_outputs_node_address(self):
+        self._test_update_outputs_server_address(
+            public_ip_output_key='swarm_nodes',
+            private_ip_output_key='swarm_nodes_private',
+            cluster_attr='node_addresses',
+        )
+
+    def test_update_outputs_master_address_fip_disabled(self):
+        self._test_update_outputs_server_address(
+            floating_ip_enabled=False,
+            public_ip_output_key='swarm_primary_master',
+            private_ip_output_key='swarm_primary_master_private',
+            cluster_attr='master_addresses',
+        )
+
+    def test_update_outputs_node_address_fip_disabled(self):
+        self._test_update_outputs_server_address(
+            floating_ip_enabled=False,
+            public_ip_output_key='swarm_nodes',
+            private_ip_output_key='swarm_nodes_private',
+            cluster_attr='node_addresses',
         )
 
 
