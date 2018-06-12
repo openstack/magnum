@@ -19,6 +19,7 @@ from oslo_serialization import jsonutils
 from magnum.drivers.common import k8s_monitor
 from magnum.drivers.mesos_ubuntu_v1 import monitor as mesos_monitor
 from magnum.drivers.swarm_fedora_atomic_v1 import monitor as swarm_monitor
+from magnum.drivers.swarm_fedora_atomic_v2 import monitor as swarm_v2_monitor
 from magnum import objects
 from magnum.tests import base
 from magnum.tests.unit.db import utils
@@ -45,6 +46,8 @@ class MonitorsTestCase(base.TestCase):
                                          master_addresses=['10.0.0.6'])
         self.cluster = objects.Cluster(self.context, **cluster)
         self.monitor = swarm_monitor.SwarmMonitor(self.context, self.cluster)
+        self.v2_monitor = swarm_v2_monitor.SwarmMonitor(self.context,
+                                                        self.cluster)
         self.k8s_monitor = k8s_monitor.K8sMonitor(self.context, self.cluster)
         self.mesos_monitor = mesos_monitor.MesosMonitor(self.context,
                                                         self.cluster)
@@ -54,6 +57,13 @@ class MonitorsTestCase(base.TestCase):
         self.mock_metrics_spec = p.start()
         self.mock_metrics_spec.return_value = self.test_metrics_spec
         self.addCleanup(p.stop)
+
+        p2 = mock.patch('magnum.drivers.swarm_fedora_atomic_v2.monitor.'
+                        'SwarmMonitor.metrics_spec',
+                        new_callable=mock.PropertyMock)
+        self.mock_metrics_spec_v2 = p2.start()
+        self.mock_metrics_spec_v2.return_value = self.test_metrics_spec
+        self.addCleanup(p2.stop)
 
     @mock.patch('magnum.common.docker_utils.docker_for_cluster')
     def test_swarm_monitor_pull_data_success(self, mock_docker_cluster):
@@ -71,6 +81,22 @@ class MonitorsTestCase(base.TestCase):
         self.assertEqual(['test_container'], self.monitor.data['containers'])
 
     @mock.patch('magnum.common.docker_utils.docker_for_cluster')
+    def test_swarm_v2_monitor_pull_data_success(self, mock_docker_cluster):
+        mock_docker = mock.MagicMock()
+        mock_docker.info.return_value = {'DriverStatus': [[
+            u' \u2514 Reserved Memory', u'0 B / 1 GiB']]}
+        mock_docker.containers.return_value = [mock.MagicMock()]
+        mock_docker.inspect_container.return_value = 'test_container'
+        mock_docker_cluster.return_value.__enter__.return_value = mock_docker
+
+        self.v2_monitor.pull_data()
+
+        self.assertEqual([{'MemTotal': 1073741824.0}],
+                         self.v2_monitor.data['nodes'])
+        self.assertEqual(['test_container'],
+                         self.v2_monitor.data['containers'])
+
+    @mock.patch('magnum.common.docker_utils.docker_for_cluster')
     def test_swarm_monitor_pull_data_raise(self, mock_docker_cluster):
         mock_container = mock.MagicMock()
         mock_docker = mock.MagicMock()
@@ -86,12 +112,36 @@ class MonitorsTestCase(base.TestCase):
                          self.monitor.data['nodes'])
         self.assertEqual([mock_container], self.monitor.data['containers'])
 
+    @mock.patch('magnum.common.docker_utils.docker_for_cluster')
+    def test_swarm_v2_monitor_pull_data_raise(self, mock_docker_cluster):
+        mock_container = mock.MagicMock()
+        mock_docker = mock.MagicMock()
+        mock_docker.info.return_value = {'DriverStatus': [[
+            u' \u2514 Reserved Memory', u'0 B / 1 GiB']]}
+        mock_docker.containers.return_value = [mock_container]
+        mock_docker.inspect_container.side_effect = Exception("inspect error")
+        mock_docker_cluster.return_value.__enter__.return_value = mock_docker
+
+        self.v2_monitor.pull_data()
+
+        self.assertEqual([{'MemTotal': 1073741824.0}],
+                         self.v2_monitor.data['nodes'])
+        self.assertEqual([mock_container], self.v2_monitor.data['containers'])
+
     def test_swarm_monitor_get_metric_names(self):
         names = self.monitor.get_metric_names()
         self.assertEqual(sorted(['metric1', 'metric2']), sorted(names))
 
+    def test_swarm_v2_monitor_get_metric_names(self):
+        names = self.v2_monitor.get_metric_names()
+        self.assertEqual(sorted(['metric1', 'metric2']), sorted(names))
+
     def test_swarm_monitor_get_metric_unit(self):
         unit = self.monitor.get_metric_unit('metric1')
+        self.assertEqual('metric1_unit', unit)
+
+    def test_swarm_v2_monitor_get_metric_unit(self):
+        unit = self.v2_monitor.get_metric_unit('metric1')
         self.assertEqual('metric1_unit', unit)
 
     def test_swarm_monitor_compute_metric_value(self):
@@ -99,6 +149,13 @@ class MonitorsTestCase(base.TestCase):
         mock_func.return_value = 'metric1_value'
         self.monitor.metric1_func = mock_func
         value = self.monitor.compute_metric_value('metric1')
+        self.assertEqual('metric1_value', value)
+
+    def test_swarm_v2_monitor_compute_metric_value(self):
+        mock_func = mock.MagicMock()
+        mock_func.return_value = 'metric1_value'
+        self.v2_monitor.metric1_func = mock_func
+        value = self.v2_monitor.compute_metric_value('metric1')
         self.assertEqual('metric1_value', value)
 
     def test_swarm_monitor_compute_memory_util(self):
@@ -128,6 +185,35 @@ class MonitorsTestCase(base.TestCase):
         }
         self.monitor.data = test_data
         mem_util = self.monitor.compute_memory_util()
+        self.assertEqual(0, mem_util)
+
+    def test_swarm_v2_monitor_compute_memory_util(self):
+        test_data = {
+            'nodes': [
+                {
+                    'Name': 'node',
+                    'MemTotal': 20,
+                },
+            ],
+            'containers': [
+                {
+                    'Name': 'container',
+                    'HostConfig': {
+                        'Memory': 10,
+                    },
+                },
+            ],
+        }
+        self.v2_monitor.data = test_data
+        mem_util = self.v2_monitor.compute_memory_util()
+        self.assertEqual(50, mem_util)
+
+        test_data = {
+            'nodes': [],
+            'containers': [],
+        }
+        self.v2_monitor.data = test_data
+        mem_util = self.v2_monitor.compute_memory_util()
         self.assertEqual(0, mem_util)
 
     @mock.patch('magnum.conductor.k8s_api.create_k8s_api')

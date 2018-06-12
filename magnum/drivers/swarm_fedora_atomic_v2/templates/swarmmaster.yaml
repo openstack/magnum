@@ -346,7 +346,7 @@ resources:
             get_param: fixed_subnet_id
 
   swarm_master_floating:
-    type: "OS::Neutron::FloatingIP"
+    type: "Magnum::Optional::SwarmMaster::Neutron::FloatingIP"
     properties:
       floating_network:
         get_param: external_network
