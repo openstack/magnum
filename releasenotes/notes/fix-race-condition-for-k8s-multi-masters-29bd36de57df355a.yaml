@@ -1,0 +1,13 @@
+---
+fixes:
+  - |
+    When creating a multi-master cluster, all master nodes will attempt to
+    create kubernetes resources in the cluster at this same time, like
+    coredns, the dashboard, calico etc. This race conditon shouldn't be
+    a problem when doing declarative calls instead of imperative (kubectl
+    apply instead of create). However, due to [1], kubectl fails to apply
+    the changes and the deployemnt scripts fail causing cluster to creation
+    to fail in the case of Heat SoftwareDeployments. This patch passes the
+    ResourceGroup index of every master so that resource creation will be
+    attempted only from the first master node.
+    [1] https://github.com/kubernetes/kubernetes/issues/44165
