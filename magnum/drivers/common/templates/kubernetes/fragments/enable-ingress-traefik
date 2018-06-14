@@ -30,8 +30,8 @@ spec:
         securityContext:
           privileged: true
         args:
-        - -d
-        - --web
+        - --api
+        - --logLevel=INFO
         - --kubernetes
       nodeSelector:
         role: ${INGRESS_CONTROLLER_ROLE}
