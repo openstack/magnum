@@ -25,6 +25,9 @@ spec:
         - name: http
           containerPort: 80
           hostPort: 80
+        - name: https
+          containerPort: 443
+          hostPort: 443
         - name: admin
           containerPort: 8080
         securityContext:
@@ -33,6 +36,8 @@ spec:
         - --api
         - --logLevel=INFO
         - --kubernetes
+        - --entrypoints=Name:http Address::80
+        - --entrypoints=Name:https Address::443 TLS
       nodeSelector:
         role: ${INGRESS_CONTROLLER_ROLE}
 ---
@@ -48,6 +53,9 @@ spec:
     - name: http
       protocol: TCP
       port: 80
+    - name: https
+      protocol: TCP
+      port: 443
     - name: admin
       protocol: TCP
       port: 8080
