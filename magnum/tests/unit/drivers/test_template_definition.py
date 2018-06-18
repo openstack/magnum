@@ -555,6 +555,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
         expected_discovery_url = 'http://etcd/token'
         mock_resp = mock.MagicMock()
         mock_resp.text = expected_discovery_url
+        mock_resp.status_code = 200
         mock_get.return_value = mock_resp
         mock_cluster = mock.MagicMock()
         mock_cluster.master_count = 10
@@ -592,6 +593,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
     def test_k8s_get_discovery_url_not_found(self, mock_get):
         mock_resp = mock.MagicMock()
         mock_resp.text = ''
+        mock_resp.status_code = 200
         mock_get.return_value = mock_resp
 
         fake_cluster = mock.MagicMock()
@@ -964,6 +966,7 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         expected_discovery_url = 'http://etcd/token'
         mock_resp = mock.MagicMock()
         mock_resp.text = expected_discovery_url
+        mock_resp.status_code = 200
         mock_get.return_value = mock_resp
         mock_cluster = mock.MagicMock()
         mock_cluster.discovery_url = None
@@ -979,6 +982,7 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
     def test_swarm_get_discovery_url_not_found(self, mock_get):
         mock_resp = mock.MagicMock()
         mock_resp.text = ''
+        mock_resp.status_code = 200
         mock_get.return_value = mock_resp
 
         fake_cluster = mock.MagicMock()

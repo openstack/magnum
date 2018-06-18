@@ -161,6 +161,7 @@ class TestClusterConductorWithK8s(base.TestCase):
                               '"1","modifiedIndex":10,"createdIndex":10}}')
         mock_resp = mock.MagicMock()
         mock_resp.text = expected_result
+        mock_resp.status_code = 200
         mock_get.return_value = mock_resp
         cluster = objects.Cluster(self.context, **self.cluster_dict)
         mock_driver.return_value = k8s_dr.Driver()
@@ -502,6 +503,7 @@ class TestClusterConductorWithK8s(base.TestCase):
                               '"1","modifiedIndex":10,"createdIndex":10}}')
         mock_resp = mock.MagicMock()
         mock_resp.text = expected_result
+        mock_resp.status_code = 200
         mock_get.return_value = mock_resp
         cluster = objects.Cluster(self.context, **self.cluster_dict)
         mock_driver.return_value = k8s_coreos_dr.Driver()
@@ -580,7 +582,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             reqget):
         self.cluster_template_dict['cluster_distro'] = 'coreos'
         self.cluster_dict['discovery_url'] = None
-        mock_req = mock.MagicMock(text='http://tokentest/h1/h2/h3')
+        mock_req = mock.MagicMock(text='http://tokentest/h1/h2/h3',
+                                  status_code=200)
         reqget.return_value = mock_req
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
@@ -763,7 +766,8 @@ class TestClusterConductorWithK8s(base.TestCase):
         CONF.set_override('etcd_discovery_service_endpoint_format',
                           'http://etcd/test?size=%(size)d',
                           group='cluster')
-        mock_req = mock.MagicMock(text='https://address/token')
+        mock_req = mock.MagicMock(text='https://address/token',
+                                  status_code=200)
         reqget.return_value = mock_req
 
         (template_path,
