@@ -82,3 +82,5 @@ subjects:
   namespace: kube-system
 EOF
 }
+
+kubectl apply --validate=false -f ${ADMIN_RBAC}
