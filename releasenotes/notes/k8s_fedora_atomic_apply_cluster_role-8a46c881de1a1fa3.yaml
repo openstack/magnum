@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Create admin cluster role for k8s_fedora_atomic, it is defined in
+    the configuration but it wasn't applied.
