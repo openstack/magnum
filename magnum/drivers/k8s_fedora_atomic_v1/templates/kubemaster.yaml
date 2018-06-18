@@ -362,6 +362,18 @@ parameters:
       the index of master node, index 0 means the master node is the primary,
       bootstrapping node.
 
+  kube_service_account_key:
+    type: string
+    description: >
+      The signed cert will be used to verify the k8s service account tokens
+      during authentication.
+
+  kube_service_account_private_key:
+    type: string
+    description: >
+      The private key will be used to sign generated k8s service account
+      tokens.
+
 resources:
 
   master_wait_handle:
@@ -467,6 +479,8 @@ resources:
             "$KUBEPROXY_OPTIONS": {get_param: kubeproxy_options}
             "$KUBESCHEDULER_OPTIONS": {get_param: kubescheduler_options}
             "$OCTAVIA_ENABLED": {get_param: octavia_enabled}
+            "$KUBE_SERVICE_ACCOUNT_KEY": {get_param: kube_service_account_key}
+            "$KUBE_SERVICE_ACCOUNT_PRIVATE_KEY": {get_param: kube_service_account_private_key}
 
   install_openstack_ca:
     type: OS::Heat::SoftwareConfig

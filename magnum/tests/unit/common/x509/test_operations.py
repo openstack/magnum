@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 import mock
 
@@ -43,3 +44,11 @@ class TestX509Operations(base.BaseTestCase):
             encryption_algorithm=mock_no_encryption_class.return_value
         )
         self.assertEqual(mock.sentinel.decrypted, actual_decrypted)
+
+    @mock.patch.object(operations, 'default_backend')
+    @mock.patch.object(rsa, 'generate_private_key')
+    def test_generate_csr_and_key(self, mock_generate_private_key,
+                                  mock_default_backend):
+        mock_generate_private_key.return_value = mock.MagicMock()
+        csr_key = operations.generate_csr_and_key(u"Test")
+        self.assertIsNotNone(csr_key)

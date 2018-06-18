@@ -135,16 +135,24 @@ class TestClusterConductorWithK8s(base.TestCase):
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
+    @patch('magnum.conductor.handlers.common.cert_manager'
+           '.sign_node_certificate')
+    @patch('magnum.common.x509.operations.generate_csr_and_key')
     def test_extract_template_definition(
             self,
+            mock_generate_csr_and_key,
+            mock_sign_node_certificate,
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self._test_extract_template_definition(
+            mock_generate_csr_and_key, mock_sign_node_certificate,
             mock_driver, mock_objects_cluster_template_get_by_uuid, mock_get)
 
     def _test_extract_template_definition(
             self,
+            mock_generate_csr_and_key,
+            mock_sign_node_certificate,
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
@@ -155,6 +163,9 @@ class TestClusterConductorWithK8s(base.TestCase):
             self.cluster_dict[missing_attr] = None
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
+        mock_generate_csr_and_key.return_value = {'csr': 'csr',
+                                                  'key': 'private_key'}
+        mock_sign_node_certificate.return_value = 'signed_cert'
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
         expected_result = str('{"action":"get","node":{"key":"test","value":'
@@ -271,6 +282,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kubescheduler_options': '--kubescheduler',
             'kubeproxy_options': '--kubeproxy',
             'octavia_enabled': False,
+            'kube_service_account_key': 'signed_cert',
+            'kube_service_account_private_key': 'private_key',
         }
         if missing_attr is not None:
             expected.pop(mapping[missing_attr], None)
@@ -288,14 +301,22 @@ class TestClusterConductorWithK8s(base.TestCase):
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
+    @patch('magnum.conductor.handlers.common.cert_manager'
+           '.sign_node_certificate')
+    @patch('magnum.common.x509.operations.generate_csr_and_key')
     def test_extract_template_definition_with_registry(
             self,
+            mock_generate_csr_and_key,
+            mock_sign_node_certificate,
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self.cluster_template_dict['registry_enabled'] = True
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
+        mock_generate_csr_and_key.return_value = {'csr': 'csr',
+                                                  'key': 'private_key'}
+        mock_sign_node_certificate.return_value = 'signed_cert'
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
         expected_result = str('{"action":"get","node":{"key":"test","value":'
@@ -379,6 +400,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kubescheduler_options': '--kubescheduler',
             'kubeproxy_options': '--kubeproxy',
             'octavia_enabled': False,
+            'kube_service_account_key': 'signed_cert',
+            'kube_service_account_private_key': 'private_key',
         }
 
         self.assertEqual(expected, definition)
@@ -394,8 +417,13 @@ class TestClusterConductorWithK8s(base.TestCase):
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
+    @patch('magnum.conductor.handlers.common.cert_manager'
+           '.sign_node_certificate')
+    @patch('magnum.common.x509.operations.generate_csr_and_key')
     def test_extract_template_definition_only_required(
             self,
+            mock_generate_csr_and_key,
+            mock_sign_node_certificate,
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
@@ -411,6 +439,9 @@ class TestClusterConductorWithK8s(base.TestCase):
 
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
+        mock_generate_csr_and_key.return_value = {'csr': 'csr',
+                                                  'key': 'private_key'}
+        mock_sign_node_certificate.return_value = 'signed_cert'
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
         expected_result = str('{"action":"get","node":{"key":"test","value":'
@@ -474,6 +505,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kubescheduler_options': '--kubescheduler',
             'kubeproxy_options': '--kubeproxy',
             'octavia_enabled': False,
+            'kube_service_account_key': 'signed_cert',
+            'kube_service_account_private_key': 'private_key',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -656,13 +689,20 @@ class TestClusterConductorWithK8s(base.TestCase):
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
+    @patch('magnum.conductor.handlers.common.cert_manager'
+           '.sign_node_certificate')
+    @patch('magnum.common.x509.operations.generate_csr_and_key')
     def test_extract_template_definition_without_dns(
             self,
+            mock_generate_csr_and_key,
+            mock_sign_node_certificate,
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         mock_driver.return_value = k8s_dr.Driver()
         self._test_extract_template_definition(
+            mock_generate_csr_and_key,
+            mock_sign_node_certificate,
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
@@ -671,13 +711,20 @@ class TestClusterConductorWithK8s(base.TestCase):
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
+    @patch('magnum.conductor.handlers.common.cert_manager'
+           '.sign_node_certificate')
+    @patch('magnum.common.x509.operations.generate_csr_and_key')
     def test_extract_template_definition_without_server_image(
             self,
+            mock_generate_csr_and_key,
+            mock_sign_node_certificate,
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         mock_driver.return_value = k8s_dr.Driver()
         self._test_extract_template_definition(
+            mock_generate_csr_and_key,
+            mock_sign_node_certificate,
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
@@ -686,13 +733,20 @@ class TestClusterConductorWithK8s(base.TestCase):
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
+    @patch('magnum.conductor.handlers.common.cert_manager'
+           '.sign_node_certificate')
+    @patch('magnum.common.x509.operations.generate_csr_and_key')
     def test_extract_template_definition_without_docker_storage_driver(
             self,
+            mock_generate_csr_and_key,
+            mock_sign_node_certificate,
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         mock_driver.return_value = k8s_dr.Driver()
         self._test_extract_template_definition(
+            mock_generate_csr_and_key,
+            mock_sign_node_certificate,
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
@@ -701,13 +755,20 @@ class TestClusterConductorWithK8s(base.TestCase):
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
+    @patch('magnum.conductor.handlers.common.cert_manager'
+           '.sign_node_certificate')
+    @patch('magnum.common.x509.operations.generate_csr_and_key')
     def test_extract_template_definition_without_apiserver_port(
             self,
+            mock_generate_csr_and_key,
+            mock_sign_node_certificate,
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         mock_driver.return_value = k8s_dr.Driver()
         self._test_extract_template_definition(
+            mock_generate_csr_and_key,
+            mock_sign_node_certificate,
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
@@ -716,13 +777,20 @@ class TestClusterConductorWithK8s(base.TestCase):
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
+    @patch('magnum.conductor.handlers.common.cert_manager'
+           '.sign_node_certificate')
+    @patch('magnum.common.x509.operations.generate_csr_and_key')
     def test_extract_template_definition_without_node_count(
             self,
+            mock_generate_csr_and_key,
+            mock_sign_node_certificate,
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         mock_driver.return_value = k8s_dr.Driver()
         self._test_extract_template_definition(
+            mock_generate_csr_and_key,
+            mock_sign_node_certificate,
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
@@ -731,13 +799,20 @@ class TestClusterConductorWithK8s(base.TestCase):
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
+    @patch('magnum.conductor.handlers.common.cert_manager'
+           '.sign_node_certificate')
+    @patch('magnum.common.x509.operations.generate_csr_and_key')
     def test_extract_template_definition_without_master_count(
             self,
+            mock_generate_csr_and_key,
+            mock_sign_node_certificate,
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         mock_driver.return_value = k8s_dr.Driver()
         self._test_extract_template_definition(
+            mock_generate_csr_and_key,
+            mock_sign_node_certificate,
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
@@ -746,13 +821,21 @@ class TestClusterConductorWithK8s(base.TestCase):
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
+    @patch('magnum.conductor.handlers.common.cert_manager'
+           '.sign_node_certificate')
+    @patch('magnum.common.x509.operations.generate_csr_and_key')
     def test_extract_template_definition_without_discovery_url(
             self,
+            mock_generate_csr_and_key,
+            mock_sign_node_certificate,
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             reqget):
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
+        mock_generate_csr_and_key.return_value = {'csr': 'csr',
+                                                  'key': 'private_key'}
+        mock_sign_node_certificate.return_value = 'signed_cert'
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
         cluster_dict = self.cluster_dict
@@ -829,6 +912,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kubescheduler_options': '--kubescheduler',
             'kubeproxy_options': '--kubeproxy',
             'octavia_enabled': False,
+            'kube_service_account_key': 'signed_cert',
+            'kube_service_account_private_key': 'private_key',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

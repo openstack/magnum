@@ -227,9 +227,17 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
                 '.get_params')
     @mock.patch('magnum.drivers.heat.template_def.TemplateDefinition'
                 '.get_output')
-    def test_k8s_get_params(self, mock_get_output, mock_get_params,
+    @mock.patch('magnum.conductor.handlers.common.cert_manager'
+                '.sign_node_certificate')
+    @mock.patch('magnum.common.x509.operations.generate_csr_and_key')
+    def test_k8s_get_params(self, mock_generate_csr_and_key,
+                            mock_sign_node_certificate,
+                            mock_get_output, mock_get_params,
                             mock_get_discovery_url, mock_osc_class,
                             mock_enable_octavia):
+        mock_generate_csr_and_key.return_value = {'csr': 'csr',
+                                                  'key': 'private_key'}
+        mock_sign_node_certificate.return_value = 'signed_cert'
         mock_enable_octavia.return_value = False
         mock_context = mock.MagicMock()
         mock_context.auth_token = 'AUTH_TOKEN'
@@ -354,6 +362,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'ingress_controller': ingress_controller,
             'ingress_controller_role': ingress_controller_role,
             'octavia_enabled': False,
+            'kube_service_account_key': 'signed_cert',
+            'kube_service_account_private_key': 'private_key',
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
@@ -368,9 +378,17 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
                 '.get_params')
     @mock.patch('magnum.drivers.heat.template_def.TemplateDefinition'
                 '.get_output')
-    def test_k8s_get_params_insecure(self, mock_get_output, mock_get_params,
+    @mock.patch('magnum.conductor.handlers.common.cert_manager'
+                '.sign_node_certificate')
+    @mock.patch('magnum.common.x509.operations.generate_csr_and_key')
+    def test_k8s_get_params_insecure(self, mock_generate_csr_and_key,
+                                     mock_sign_node_certificate,
+                                     mock_get_output, mock_get_params,
                                      mock_get_discovery_url, mock_osc_class,
                                      mock_enable_octavia):
+        mock_generate_csr_and_key.return_value = {'csr': 'csr',
+                                                  'key': 'private_key'}
+        mock_sign_node_certificate.return_value = 'signed_cert'
         mock_enable_octavia.return_value = False
         mock_context = mock.MagicMock()
         mock_context.auth_token = 'AUTH_TOKEN'
@@ -497,6 +515,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseTemplateDefinitionTestCase):
             'ingress_controller': ingress_controller,
             'ingress_controller_role': ingress_controller_role,
             'octavia_enabled': False,
+            'kube_service_account_key': 'signed_cert',
+            'kube_service_account_private_key': 'private_key',
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
