@@ -313,7 +313,11 @@ class BaseTemplateDefinition(TemplateDefinition):
                 CONF.cluster.etcd_discovery_service_endpoint_format %
                 {'size': cluster.master_count})
             try:
-                discovery_url = requests.get(discovery_endpoint).text
+                discovery_request = requests.get(discovery_endpoint)
+                if discovery_request.status_code != requests.codes.ok:
+                    raise exception.GetDiscoveryUrlFailed(
+                        discovery_endpoint=discovery_endpoint)
+                discovery_url = discovery_request.text
             except req_exceptions.RequestException as err:
                 LOG.error(six.text_type(err))
                 raise exception.GetDiscoveryUrlFailed(
