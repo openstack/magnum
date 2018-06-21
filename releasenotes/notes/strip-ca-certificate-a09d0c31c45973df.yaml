@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Strip signed certificate. Certificate (ca.crt) has to be striped
+    for some application parsers as they might require pure base64
+    representation of the certificate itself, without empty characters
+    at the beginning nor the end of file.
