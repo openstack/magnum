@@ -221,6 +221,16 @@ parameters:
     type: string
     description: tag of the k8s containers used to provision the kubernetes cluster
 
+  cloud_provider_tag:
+    type: string
+    description:
+      tag of the kubernetes/cloud-provider-openstack
+      https://hub.docker.com/r/k8scloudprovider/openstack-cloud-controller-manager/tags/
+
+  cloud_provider_enabled:
+    type: boolean
+    description: Enable or disable the openstack kubernetes cloud provider
+
   etcd_tag:
     type: string
     description: tag of the etcd system container
@@ -376,10 +386,6 @@ parameters:
       The private key will be used to sign generated k8s service account
       tokens.
 
-  cloud_provider_enabled:
-    type: boolean
-    description: Enable or disable the openstack kubernetes cloud provider
-
   prometheus_tag:
     type: string
     description: tag of prometheus container
@@ -456,6 +462,8 @@ resources:
             "$HTTPS_PROXY": {get_param: https_proxy}
             "$NO_PROXY": {get_param: no_proxy}
             "$KUBE_TAG": {get_param: kube_tag}
+            "$CLOUD_PROVIDER_TAG": {get_param: cloud_provider_tag}
+            "$CLOUD_PROVIDER_ENABLED": {get_param: cloud_provider_enabled}
             "$ETCD_TAG": {get_param: etcd_tag}
             "$FLANNEL_TAG": {get_param: flannel_tag}
             "$KUBE_VERSION": {get_param: kube_version}
@@ -463,7 +471,6 @@ resources:
             "$TRUSTEE_USER_ID": {get_param: trustee_user_id}
             "$TRUSTEE_PASSWORD": {get_param: trustee_password}
             "$TRUST_ID": {get_param: trust_id}
-            "$CLOUD_PROVIDER_ENABLED": {get_param: cloud_provider_enabled}
             "$INSECURE_REGISTRY_URL": {get_param: insecure_registry_url}
             "$CONTAINER_INFRA_PREFIX": {get_param: container_infra_prefix}
             "$ETCD_LB_VIP": {get_param: etcd_lb_vip}

@@ -399,6 +399,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'kubeproxy_options')
         cloud_provider_enabled = mock_cluster.labels.get(
             'cloud_provider_enabled')
+        cloud_provider_tag = mock_cluster.labels.get(
+            'cloud_provider_tag')
         service_cluster_ip_range = mock_cluster.labels.get(
             'service_cluster_ip_range')
         prometheus_tag = mock_cluster.labels.get(
@@ -431,6 +433,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'kubescheduler_options': kubescheduler_options,
             'kubeproxy_options': kubeproxy_options,
             'cloud_provider_enabled': cloud_provider_enabled,
+            'cloud_provider_tag': cloud_provider_tag,
             'username': 'fake_user',
             'magnum_url': mock_osc.magnum_url.return_value,
             'region_name': mock_osc.cinder_region_name.return_value,
@@ -572,6 +575,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'kubeproxy_options')
         cloud_provider_enabled = mock_cluster.labels.get(
             'cloud_provider_enabled')
+        cloud_provider_tag = mock_cluster.labels.get(
+            'cloud_provider_tag')
         service_cluster_ip_range = mock_cluster.labels.get(
             'service_cluster_ip_range')
         prometheus_tag = mock_cluster.labels.get(
@@ -604,6 +609,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'kubescheduler_options': kubescheduler_options,
             'kubeproxy_options': kubeproxy_options,
             'cloud_provider_enabled': cloud_provider_enabled,
+            'cloud_provider_tag': cloud_provider_tag,
             'username': 'fake_user',
             'magnum_url': mock_osc.magnum_url.return_value,
             'region_name': mock_osc.cinder_region_name.return_value,
