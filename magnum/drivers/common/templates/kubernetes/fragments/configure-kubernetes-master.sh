@@ -76,9 +76,10 @@ if [ -n "${ADMISSION_CONTROL_LIST}" ] && [ "${TLS_DISABLED}" == "False" ]; then
     KUBE_ADMISSION_CONTROL="--admission-control=NodeRestriction,${ADMISSION_CONTROL_LIST}"
 fi
 
-if [ -n "$TRUST_ID" && "$(echo $CLOUD_PROVIDER_ENABLED | tr '[:upper:]' '[:lower:]')" == "true" ]; then
-    KUBE_API_ARGS="$KUBE_API_ARGS --cloud-config=/etc/kubernetes/kube_openstack_config --cloud-provider=openstack"
+if [ -n "$TRUST_ID" ] && [ "$(echo "${CLOUD_PROVIDER_ENABLED}" | tr '[:upper:]' '[:lower:]')" = "true" ]; then
+    KUBE_API_ARGS="$KUBE_API_ARGS --cloud-provider=external"
 fi
+
 
 sed -i '
     /^KUBE_API_ADDRESS=/ s/=.*/="'"${KUBE_API_ADDRESS}"'"/
@@ -96,9 +97,11 @@ if [ -n "${ADMISSION_CONTROL_LIST}" ] && [ "${TLS_DISABLED}" == "False" ]; then
     KUBE_CONTROLLER_MANAGER_ARGS="$KUBE_CONTROLLER_MANAGER_ARGS --service-account-private-key-file=$CERT_DIR/server.key --root-ca-file=$CERT_DIR/ca.crt"
 fi
 
-if [ -n "$TRUST_ID" && "$(echo $CLOUD_PROVIDER_ENABLED | tr '[:upper:]' '[:lower:]')" == "true" ]; then
-    KUBE_CONTROLLER_MANAGER_ARGS="$KUBE_CONTROLLER_MANAGER_ARGS --cloud-config=/etc/kubernetes/kube_openstack_config --cloud-provider=openstack"
+if [ -n "$TRUST_ID" ] && [ "$(echo "${CLOUD_PROVIDER_ENABLED}" | tr '[:upper:]' '[:lower:]')" = "true" ]; then
+    KUBE_CONTROLLER_MANAGER_ARGS="$KUBE_CONTROLLER_MANAGER_ARGS --cloud-provider=external"
+    KUBE_CONTROLLER_MANAGER_ARGS="$KUBE_CONTROLLER_MANAGER_ARGS --external-cloud-volume-plugin=openstack --cloud-config=/etc/kubernetes/cloud-config"
 fi
+
 
 if [ "$(echo $CERT_MANAGER_API | tr '[:upper:]' '[:lower:]')" = "true" ]; then
     KUBE_CONTROLLER_MANAGER_ARGS="$KUBE_CONTROLLER_MANAGER_ARGS --cluster-signing-cert-file=$CERT_DIR/ca.crt --cluster-signing-key-file=$CERT_DIR/ca.key"
@@ -116,6 +119,10 @@ KUBELET_ARGS="--register-node=true --register-schedulable=false --pod-manifest-p
 KUBELET_ARGS="${KUBELET_ARGS} --cluster_dns=${DNS_SERVICE_IP} --cluster_domain=${DNS_CLUSTER_DOMAIN}"
 KUBELET_ARGS="${KUBELET_ARGS} ${KUBELET_OPTIONS}"
 
+if [ -n "$TRUST_ID" ] && [ "$(echo "${CLOUD_PROVIDER_ENABLED}" | tr '[:upper:]' '[:lower:]')" = "true" ]; then
+    KUBELET_ARGS="${KUBELET_ARGS} --cloud-provider=external"
+fi
+
 # For using default log-driver, other options should be ignored
 sed -i 's/\-\-log\-driver\=journald//g' /etc/sysconfig/docker
 
@@ -127,6 +134,7 @@ if [ "$NETWORK_DRIVER" = "calico" ]; then
     KUBELET_ARGS="${KUBELET_ARGS} --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin"
 fi
 KUBELET_ARGS="${KUBELET_ARGS} --register-with-taints=CriticalAddonsOnly=True:NoSchedule,dedicated=master:NoSchedule"
+KUBELET_ARGS="${KUBELET_ARGS} --node-labels=node-role.kubernetes.io/master=\"\""
 
 KUBELET_KUBECONFIG=/etc/kubernetes/kubelet-config.yaml
 HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')

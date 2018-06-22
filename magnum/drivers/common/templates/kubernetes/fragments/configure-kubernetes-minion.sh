@@ -119,8 +119,8 @@ KUBELET_ARGS="${KUBELET_ARGS} --address=${KUBE_NODE_IP} --port=10250 --read-only
 KUBELET_ARGS="${KUBELET_ARGS} --cluster_dns=${DNS_SERVICE_IP} --cluster_domain=${DNS_CLUSTER_DOMAIN}"
 KUBELET_ARGS="${KUBELET_ARGS} ${KUBELET_OPTIONS}"
 
-if [ -n "$TRUST_ID" && "$(echo $CLOUD_PROVIDER_ENABLED | tr '[:upper:]' '[:lower:]')" == "true" ]; then
-    KUBELET_ARGS="$KUBELET_ARGS --cloud-provider=openstack --cloud-config=/etc/kubernetes/kube_openstack_config"
+if [ "$(echo "${CLOUD_PROVIDER_ENABLED}" | tr '[:upper:]' '[:lower:]')" = "true" ]; then
+    KUBELET_ARGS="${KUBELET_ARGS} --cloud-provider=external"
 fi
 
 # Workaround for Cinder support (fixed in k8s >= 1.6)

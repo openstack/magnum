@@ -1,0 +1,14 @@
+---
+features:
+  - |
+    Use the external cloud provider in k8s_fedora_atomic. The
+    cloud_provider_tag label can be used to select the container tag for it,
+    together with the cloud_provider_enabled label. The cloud provider runs
+    as a DaemonSet on all master nodes.
+upgrade:
+  - |
+    The cloud config for kubernets has been renamed from
+    /etc/kubernetes/kube_openstack_config to /etc/kubernetes/cloud-config as
+    the kubelet expects this exact name when the external cloud provider is
+    used. A copy of /etc/kubernetes/kube_openstack_config is in place for
+    applications developed for previous versions of magnum.
