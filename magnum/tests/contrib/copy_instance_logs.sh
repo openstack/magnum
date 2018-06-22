@@ -87,6 +87,7 @@ if [[ "$COE" == "kubernetes" ]]; then
     remote_exec $SSH_USER "sudo tail -n +1 -- /etc/kubernetes/certs/*" kubernetes-certs
     remote_exec $SSH_USER "sudo cat /usr/local/bin/wc-notify" bin-wc-notify
     remote_exec $SSH_USER "sudo cat /etc/kubernetes/kube_openstack_config" kube_openstack_config
+    remote_exec $SSH_USER "sudo cat /etc/kubernetes/cloud-config" cloud-config
     remote_exec $SSH_USER "sudo cat /etc/sysconfig/flanneld" flanneld.sysconfig
     remote_exec $SSH_USER "sudo cat /usr/local/bin/flannel-config" bin-flannel-config
     remote_exec $SSH_USER "sudo cat /etc/sysconfig/flannel-network.json" flannel-network.json.sysconfig

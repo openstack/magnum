@@ -3,7 +3,12 @@
 . /etc/sysconfig/heat-params
 
 mkdir -p /etc/kubernetes/
-KUBE_OS_CLOUD_CONFIG=/etc/kubernetes/kube_openstack_config
+
+if [ -z "${TRUST_ID}" ]; then
+    exit 0
+fi
+
+KUBE_OS_CLOUD_CONFIG=/etc/kubernetes/cloud-config
 cp /etc/pki/tls/certs/ca-bundle.crt /etc/kubernetes/ca-bundle.crt
 
 # Generate a the configuration for Kubernetes services
@@ -30,3 +35,6 @@ EOF
 if [ -n ${REGION_NAME} ]; then
     sed -i '/ca-file/a region='${REGION_NAME}'' $KUBE_OS_CLOUD_CONFIG
 fi
+
+# backwards compatibility, some apps may expect this file from previous magnum versions.
+cp ${KUBE_OS_CLOUD_CONFIG} /etc/kubernetes/kube_openstack_config
