@@ -8,7 +8,6 @@ resource_registry:
   "Magnum::Optional::Neutron::LBaaS::Listener": "OS::Octavia::Listener"
   "Magnum::Optional::Neutron::LBaaS::Pool": "OS::Octavia::Pool"
   "Magnum::Optional::Neutron::LBaaS::HealthMonitor": "OS::Octavia::HealthMonitor"
-  "Magnum::Optional::Neutron::LBaaS::FloatingIP": "OS::Neutron::FloatingIP"
 
   # Master node template
   "Magnum::Optional::Neutron::LBaaS::PoolMember": "OS::Octavia::PoolMember"

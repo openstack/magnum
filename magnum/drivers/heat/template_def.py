@@ -358,8 +358,12 @@ def add_etcd_volume_env_file(env_files, cluster_template):
 def add_fip_env_file(env_files, cluster_template):
     if cluster_template.floating_ip_enabled:
         env_files.append(COMMON_ENV_PATH + 'enable_floating_ip.yaml')
+        if cluster_template.master_lb_enabled:
+            env_files.append(COMMON_ENV_PATH + 'enable_lb_floating_ip.yaml')
     else:
         env_files.append(COMMON_ENV_PATH + 'disable_floating_ip.yaml')
+        if cluster_template.master_lb_enabled:
+            env_files.append(COMMON_ENV_PATH + 'disable_lb_floating_ip.yaml')
 
 
 def add_priv_net_env_file(env_files, cluster_template):
