@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Add a new label `service_cluster_ip_range` for kubernetes so that user can
+    set the IP range for service portals to avoid conflicts with pod IP range.
+
