@@ -362,6 +362,9 @@ the table are linked to more details elsewhere in the user guide.
 | `cloud_provider_enabled`_             | - true             | true          |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
+| `service_cluster_ip_range`            | IPv4 CIDR for k8s  | 10.254.0.0/16 |
+|                                       | service portals    |               |
++---------------------------------------+--------------------+---------------+
 
 Cluster
 -------

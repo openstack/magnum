@@ -59,7 +59,8 @@ class TestClusterConductorWithK8s(base.TestCase):
                        'influx_grafana_dashboard_enabled': 'True',
                        'docker_volume_type': 'lvmdriver-1',
                        'etcd_volume_size': 0,
-                       'availability_zone': 'az_1'},
+                       'availability_zone': 'az_1',
+                       'service_cluster_ip_range': '10.254.0.0/16'},
             'tls_disabled': False,
             'server_type': 'vm',
             'registry_enabled': False,
@@ -107,7 +108,8 @@ class TestClusterConductorWithK8s(base.TestCase):
                        'kubecontroller_options': '--kubecontroller',
                        'kubescheduler_options': '--kubescheduler',
                        'kubeproxy_options': '--kubeproxy',
-                       'influx_grafana_dashboard_enabled': 'True'},
+                       'influx_grafana_dashboard_enabled': 'True',
+                       'service_cluster_ip_range': '10.254.0.0/16'},
             'master_flavor_id': 'master_flavor_id',
             'flavor_id': 'flavor_id',
         }
@@ -217,6 +219,7 @@ class TestClusterConductorWithK8s(base.TestCase):
                        'kubecontroller_options': '--kubecontroller',
                        'kubescheduler_options': '--kubescheduler',
                        'kubeproxy_options': '--kubeproxy',
+                       'service_cluster_ip_range': '10.254.0.0/16',
                        },
             'http_proxy': 'http_proxy',
             'https_proxy': 'https_proxy',
@@ -286,6 +289,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'octavia_enabled': False,
             'kube_service_account_key': 'public_key',
             'kube_service_account_private_key': 'private_key',
+            'portal_network_cidr': '10.254.0.0/16',
         }
         if missing_attr is not None:
             expected.pop(mapping[missing_attr], None)
@@ -405,6 +409,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'octavia_enabled': False,
             'kube_service_account_key': 'public_key',
             'kube_service_account_private_key': 'private_key',
+            'portal_network_cidr': '10.254.0.0/16',
         }
 
         self.assertEqual(expected, definition)
@@ -511,6 +516,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'octavia_enabled': False,
             'kube_service_account_key': 'public_key',
             'kube_service_account_private_key': 'private_key',
+            'portal_network_cidr': '10.254.0.0/16',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -600,6 +606,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kubescheduler_options': '--kubescheduler',
             'kubeproxy_options': '--kubeproxy',
             'octavia_enabled': False,
+            'portal_network_cidr': '10.254.0.0/16',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -684,6 +691,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kubescheduler_options': '--kubescheduler',
             'kubeproxy_options': '--kubeproxy',
             'octavia_enabled': False,
+            'portal_network_cidr': '10.254.0.0/16',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -922,6 +930,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'octavia_enabled': False,
             'kube_service_account_key': 'public_key',
             'kube_service_account_private_key': 'private_key',
+            'portal_network_cidr': '10.254.0.0/16',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
