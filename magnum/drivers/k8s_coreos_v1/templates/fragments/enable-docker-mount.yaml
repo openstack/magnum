@@ -1,0 +1,52 @@
+#cloud-config
+write_files:
+  - path: /etc/sytemd/system/var-lib-docker.mount
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Mount ephemeral to /var/lib/docker
+
+      [Mount]
+      What=/dev/vdb
+      Where=/var/lib/docker
+      Type=ext4
+
+      [Install]
+      WantedBy=local-fs.target
+
+  - path: /etc/sysconfig/enable-docker-mount.sh
+    owner: "root:root"
+    permissions: "0755"
+    content: |
+      #!/bin/sh
+      if [  -n "$DOCKER_VOLUME_SIZE" ] && [ "$DOCKER_VOLUME_SIZE" -gt 0 ]; then
+         if [[ $(blkid -o value -s TYPE /dev/vdb) ]]; then
+            systemctl daemon-reload
+            systemctl start var-lib-docker.mount
+            systemctl enable var-lib-docker.mount
+         else
+            mkfs -t ext4 /dev/vdb
+            systemctl daemon-reload
+            systemctl start var-lib-docker.mount
+            systemctl enable var-lib-docker.mount
+         fi
+       fi
+
+  - path: /etc/systemd/system/enable-docker-mount.service
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Mount docker volume
+
+      [Service]
+      Type=oneshot
+      EnvironmentFile=/etc/sysconfig/heat-params
+      ExecStart=/etc/sysconfig/enable-docker-mount.sh
+
+      [Install]
+      RequiredBy=multi-user.target
+
+
+

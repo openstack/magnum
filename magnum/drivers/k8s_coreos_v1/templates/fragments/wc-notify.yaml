@@ -20,5 +20,11 @@ write_files:
     permissions: "0755"
     content: |
       #!/bin/bash -v
+      if [ "$VERIFY_CA" == "True" ]; then
+          VERIFY_CA=""
+      else
+          VERIFY_CA="-k"
+      fi
+
       command="$WAIT_CURL $VERIFY_CA --data-binary '{\"status\": \"SUCCESS\"}'"
       eval $(echo "$command")
