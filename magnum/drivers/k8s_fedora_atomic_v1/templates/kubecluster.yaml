@@ -154,6 +154,13 @@ parameters:
     description: docker storage driver name
     default: "devicemapper"
 
+  cgroup_driver:
+    type: string
+    description: >
+      cgroup driver name that kubelet should use, ideally the same as
+      the docker cgroup driver.
+    default: "systemd"
+
   wait_condition_timeout:
     type: number
     description: >
@@ -627,6 +634,7 @@ resources:
           docker_volume_size: {get_param: docker_volume_size}
           docker_volume_type: {get_param: docker_volume_type}
           docker_storage_driver: {get_param: docker_storage_driver}
+          cgroup_driver: {get_param: cgroup_driver}
           wait_condition_timeout: {get_param: wait_condition_timeout}
           network_driver: {get_param: network_driver}
           flannel_network_cidr: {get_param: flannel_network_cidr}
@@ -723,6 +731,7 @@ resources:
           docker_volume_size: {get_param: docker_volume_size}
           docker_volume_type: {get_param: docker_volume_type}
           docker_storage_driver: {get_param: docker_storage_driver}
+          cgroup_driver: {get_param: cgroup_driver}
           wait_condition_timeout: {get_param: wait_condition_timeout}
           registry_enabled: {get_param: registry_enabled}
           registry_port: {get_param: registry_port}
