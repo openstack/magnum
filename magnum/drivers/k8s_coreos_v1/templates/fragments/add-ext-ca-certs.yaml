@@ -15,6 +15,13 @@ write_files:
       [Install]
       WantedBy=multi-user.target
 
+  - path: /etc/ssl/certs/openstack-ca.pem
+    owner: "root:root"
+    permissions: "0644"
+    encoding: b64
+    content: |
+      $OPENSTACK_CA
+
   - path: /etc/sysconfig/add-ext-ca-certs.sh
     owner: "root:root"
     permissions: "0755"
@@ -22,9 +29,8 @@ write_files:
       #!/bin/sh
 
       CERT_FILE=/etc/ssl/certs/openstack-ca.pem
-      if [ -n "$OPENSTACK_CA" ]
+      if [ -f "$CERT_FILE" ]
       then
-          echo -ne "$OPENSTACK_CA" | tee -a ${CERT_FILE}
 
           chmod 0644 ${CERT_FILE}
           chown root:root ${CERT_FILE}
