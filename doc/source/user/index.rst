@@ -661,11 +661,10 @@ Install using distribution packages for OpenSuSE and SuSE Enterprise Linux::
 Verifying installation
 ----------------------
 
-Execute the `openstack help coe` command to confirm that the client is
+Execute the `openstack coe cluster list` command to confirm that the client is
 installed and in the system path::
 
-    $ openstack help coe
-    1.1.0
+    $ openstack coe cluster list
 
 Using the command-line client
 -----------------------------
