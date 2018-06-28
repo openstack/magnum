@@ -1417,7 +1417,6 @@ Storage driver (docker-storage-driver)
   This is currently not supported for Mesos.
 
 Image (image)
-
   Specified in the ClusterTemplate to indicate the image to boot the servers
   for the Mesos master and slave.  The image binary is loaded in
   Glance with the attribute 'os_distro = ubuntu'.  You can download
