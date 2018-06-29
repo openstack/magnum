@@ -25,3 +25,8 @@ monitor-max-retries=3
 [BlockStorage]
 bs-version=v2
 EOF
+
+# Provide optional region parameter if it's set.
+if [ -n ${REGION_NAME} ]; then
+    sed -i '/ca-file/a region='${REGION_NAME}'' $KUBE_OS_CLOUD_CONFIG
+fi

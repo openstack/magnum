@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Add `region` parameter to the Global configuration section of the
+    Kubernetes configuration file. Setting this parameter will allow Magnum
+    cluster to be created in the multi-regional OpenStack installation.
