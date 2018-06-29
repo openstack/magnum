@@ -475,6 +475,18 @@ parameters:
       whether or not to use Octavia for LoadBalancer type service.
     default: False
 
+  kube_service_account_key:
+    type: string
+    description: >
+      The signed cert will be used to verify the k8s service account tokens
+      during authentication.
+
+  kube_service_account_private_key:
+    type: string
+    description: >
+      The private key will be used to sign generated k8s service account
+      tokens.
+
 resources:
 
   ######################################################################
@@ -695,6 +707,9 @@ resources:
           kubecontroller_options: {get_param: kubecontroller_options}
           kubescheduler_options: {get_param: kubescheduler_options}
           octavia_enabled: {get_param: octavia_enabled}
+          kube_service_account_key: {get_param: kube_service_account_key}
+          kube_service_account_private_key: {get_param: kube_service_account_private_key}
+
 
   ######################################################################
   #

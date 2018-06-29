@@ -102,6 +102,18 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
             if label_value:
                 extra_params[label] = label_value
 
+        # NOTE(flwang): We're generating a signed cert and private key
+        # based on the cluster CA as the service account signing keys for
+        # k8s cluster, though a general public/private keypair works as well.
+        csr_key = x509.generate_csr_and_key(u"Kubernetes Service Account")
+        signed_cert = cert_manager.sign_node_certificate(cluster,
+                                                         csr_key["csr"],
+                                                         context=context)
+        extra_params['kube_service_account_key'] = \
+            signed_cert.replace("\n", "\\n")
+        extra_params['kube_service_account_private_key'] = \
+            csr_key["key"].replace("\n", "\\n")
+
         cert_manager_api = cluster.labels.get('cert_manager_api')
         if strutils.bool_from_string(cert_manager_api):
             extra_params['cert_manager_api'] = cert_manager_api

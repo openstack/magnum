@@ -169,6 +169,10 @@ EOF
 generate_certificates server ${cert_dir}/server.conf
 generate_certificates kubelet ${cert_dir}/kubelet.conf
 
+# Generate service account key and private key
+echo -e "${KUBE_SERVICE_ACCOUNT_KEY}" > ${cert_dir}/service_account.key
+echo -e "${KUBE_SERVICE_ACCOUNT_PRIVATE_KEY}" > ${cert_dir}/service_account_private.key
+
 # Common certs and key are created for both etcd and kubernetes services.
 # Both etcd and kube user should have permission to access the certs and key.
 groupadd kube_etcd
