@@ -335,8 +335,14 @@ spec:
 EOF
     }
 
+    if [ "$MASTER_INDEX" != "0" ]; then
+        exit 0
+    fi
+
+
+
     echo "Waiting for Kubernetes API..."
-    until curl --silent "http://127.0.0.1:8080/version"
+    until  [ "ok" = "$(curl --silent http://127.0.0.1:8080/healthz)" ]
     do
         sleep 5
     done
@@ -459,7 +465,7 @@ if [ "$MASTER_INDEX" != "0" ]; then
 fi
 
 echo "Waiting for Kubernetes API..."
-until curl --silent "http://127.0.0.1:8080/version"
+until  [ "ok" = "$(curl --silent http://127.0.0.1:8080/healthz)" ]
 do
     sleep 5
 done
