@@ -456,7 +456,7 @@ if [ "$MASTER_INDEX" != "0" ]; then
     exit 0
 fi
 
-until curl -sf "http://127.0.0.1:8080/healthz"
+until  [ "ok" = "$(curl --silent http://127.0.0.1:8080/healthz)" ]
 do
     echo "Waiting for Kubernetes API..."
     sleep 5
