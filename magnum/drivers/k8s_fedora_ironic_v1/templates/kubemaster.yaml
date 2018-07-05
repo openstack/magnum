@@ -373,17 +373,17 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-master.sh}
 
-  write_flannel_config:
+  write_network_config:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/write-flannel-config.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/write-network-config.sh}
 
-  flannel_config_service:
+  network_config_service:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/flannel-config-service.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/network-config-service.sh}
 
   enable_services:
     type: OS::Heat::SoftwareConfig
@@ -391,11 +391,11 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/enable-services-master.sh}
 
-  flannel_service:
+  network_service:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/flannel-service.sh}
+      config: {get_file: ../../common/templates/kubernetes/fragments/network-service.sh}
 
   enable_kube_controller_manager_scheduler:
     type: OS::Heat::SoftwareConfig
@@ -459,9 +459,9 @@ resources:
         - config: {get_resource: configure_kubernetes}
         - config: {get_resource: add_proxy}
         - config: {get_resource: enable_services}
-        - config: {get_resource: write_flannel_config}
-        - config: {get_resource: flannel_config_service}
-        - config: {get_resource: flannel_service}
+        - config: {get_resource: write_network_config}
+        - config: {get_resource: network_config_service}
+        - config: {get_resource: network_service}
         - config: {get_resource: kube_apiserver_to_kubelet_role}
         - config: {get_resource: enable_kube_controller_manager_scheduler}
         - config: {get_resource: enable_kube_proxy}
@@ -475,7 +475,7 @@ resources:
       group: script
       config:
         str_replace:
-          template: {get_file: ../../common/templates/kubernetes/fragments/enable-prometheus-monitoring.sh}
+          template: {get_file: ../../common/templates/kubernetes/fragments/enable-prometheus-monitoring}
           params:
             "$ADMIN_PASSWD": {get_param: grafana_admin_passwd}
 
