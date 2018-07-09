@@ -477,12 +477,14 @@ parameters:
 
   kube_service_account_key:
     type: string
+    hidden: true
     description: >
       The signed cert will be used to verify the k8s service account tokens
       during authentication.
 
   kube_service_account_private_key:
     type: string
+    hidden: true
     description: >
       The private key will be used to sign generated k8s service account
       tokens.
