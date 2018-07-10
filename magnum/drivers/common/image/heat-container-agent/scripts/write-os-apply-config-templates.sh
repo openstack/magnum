@@ -45,6 +45,7 @@ password = {{password}}
 project_id = {{project_id}}
 stack_id = {{stack_id}}
 resource_name = {{resource_name}}
+region_name = {{region_name}}
 {{/heat}}
 
 {{#zaqar}}
@@ -54,6 +55,7 @@ user_id = {{user_id}}
 password = {{password}}
 project_id = {{project_id}}
 queue_id = {{queue_id}}
+region_name = {{region_name}}
 {{/zaqar}}
 
 {{#request}}
