@@ -192,8 +192,10 @@ class HeatPoller(object):
         # TODO(yuanying): temporary implementation to update api_address,
         # node_addresses and cluster status
         try:
+            # Do not resolve outputs by default. Resolving all
+            # node IPs is expensive on heat.
             stack = self.openstack_client.heat().stacks.get(
-                self.cluster.stack_id)
+                self.cluster.stack_id, resolve_outputs=False)
         except heatexc.NotFound:
             self._sync_missing_heat_stack()
             return
@@ -205,6 +207,10 @@ class HeatPoller(object):
 
         if stack.stack_status in (fields.ClusterStatus.CREATE_COMPLETE,
                                   fields.ClusterStatus.UPDATE_COMPLETE):
+            # Resolve all outputs if the stack is COMPLETE
+            stack = self.openstack_client.heat().stacks.get(
+                self.cluster.stack_id, resolve_outputs=True)
+
             self._sync_cluster_and_template_status(stack)
         elif stack.stack_status != self.cluster.status:
             self._sync_cluster_status(stack)
