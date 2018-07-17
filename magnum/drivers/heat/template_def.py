@@ -255,10 +255,14 @@ class BaseTemplateDefinition(TemplateDefinition):
         else:
             extra_params['trust_id'] = ""
 
-        extra_params['auth_url'] = osc.url_for(
-            service_type='identity',
-            interface=CONF.trust.trustee_keystone_interface,
-            version=3)
+        kwargs = {
+            'service_type': 'identity',
+            'interface': CONF.trust.trustee_keystone_interface,
+            'version': 3
+        }
+        if CONF.trust.trustee_keystone_region_name:
+            kwargs['region_name'] = CONF.trust.trustee_keystone_region_name
+        extra_params['auth_url'] = osc.url_for(**kwargs)
 
         return super(BaseTemplateDefinition,
                      self).get_params(context, cluster_template, cluster,

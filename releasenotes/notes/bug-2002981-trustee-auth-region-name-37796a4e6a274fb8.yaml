@@ -1,0 +1,8 @@
+---
+fixes:
+  - |
+    Add `trustee_keystone_region_name` optional parameter to the `trust`
+    section. This parameter is useful for multi-regional OpenStack
+    installations with different Identity service for every region.
+    In such installation it is necessary to specify a region when searching
+    for `auth_url` to authenticate a trustee user.

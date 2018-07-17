@@ -53,7 +53,10 @@ trust_opts = [
                        'by the trustor')),
     cfg.StrOpt('trustee_keystone_interface',
                default='public',
-               help=_('Auth interface used by instances/trustee'))
+               help=_('Auth interface used by instances/trustee')),
+    cfg.StrOpt('trustee_keystone_region_name',
+               help=_('Region in Identity service catalog to use for '
+                      'communication with the OpenStack service.'))
 ]
 
 
