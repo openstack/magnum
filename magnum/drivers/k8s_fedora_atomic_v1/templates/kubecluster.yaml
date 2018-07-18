@@ -120,7 +120,7 @@ parameters:
     type: string
     description: >
       List of admission control plugins to activate
-    default: "NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota"
+    default: "NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota"
 
   kube_allow_priv:
     type: string
