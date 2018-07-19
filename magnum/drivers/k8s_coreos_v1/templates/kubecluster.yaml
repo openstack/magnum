@@ -294,6 +294,12 @@ parameters:
       domain name for cluster DNS
     default: "cluster.local"
 
+  etcd_volume_size:
+    type: number
+    description: >
+      size of the cinder volume for etcd storage
+    default: 0
+
   openstack_ca:
     type: string
     hidden: true
