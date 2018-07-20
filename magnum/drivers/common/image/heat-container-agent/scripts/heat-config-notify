@@ -124,7 +124,7 @@ def main(argv=sys.argv, stdin=sys.stdin):
             project_id=iv['deploy_project_id'])
         endpoint = ks.service_catalog.url_for(
             service_type='messaging', endpoint_type='publicURL',
-            region_name=iv.get('deploy_region_name')
+            region_name=iv.get('deploy_region_name'))
 
         conf = {
             'auth_opts': {
