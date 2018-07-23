@@ -12,14 +12,24 @@ LABEL name="heat-container-agent" \
       distribution-scope="public"
 
 RUN dnf -y --setopt=tsflags=nodocs install \
-    findutils os-collect-config os-apply-config \
-    os-refresh-config dib-utils python-pip python-docker-py \
-    python-yaml python-zaqarclient python2-oslo-log \
-    python-psutil kubernetes-client && dnf clean all
-
-# pip installing dpath as python-dpath is an older version of dpath
-# install docker-compose
-RUN pip install --no-cache dpath docker-compose
+        bash \
+        findutils \
+        gcc \
+        kubernetes-client \
+        python-devel \
+        python-pip \
+        python-psutil \
+        redhat-rpm-config && \
+    pip install --no-cache --no-cache-dir \
+        dib-utils \
+        dpath \
+        os-apply-config \
+        os-collect-config \
+        os-refresh-config \
+        python-heatclient \
+        python-keystoneclient && \
+    dnf remove -y gcc redhat-rpm-config -y && \
+    dnf clean all
 
 ADD ./scripts/55-heat-config \
   /opt/heat-container-agent/scripts/
