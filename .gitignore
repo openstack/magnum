@@ -26,8 +26,7 @@ pip-log.txt
 cover
 cover-master
 .tox
-nosetests.xml
-.testrepository
+.stestr/
 .venv
 
 # Functional test
