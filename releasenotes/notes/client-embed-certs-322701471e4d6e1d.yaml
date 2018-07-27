@@ -1,0 +1,6 @@
+---
+features:
+  - Embed certificates in kubernetes config file when issuing 'cluster config',
+    instead of generating additional files with the certificates. This is now
+    the default behavior. To get the old behavior and still generate cert
+    files, pass --output-certs.
