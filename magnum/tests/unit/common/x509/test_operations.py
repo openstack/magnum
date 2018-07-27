@@ -50,5 +50,7 @@ class TestX509Operations(base.BaseTestCase):
     def test_generate_csr_and_key(self, mock_generate_private_key,
                                   mock_default_backend):
         mock_generate_private_key.return_value = mock.MagicMock()
-        csr_key = operations.generate_csr_and_key(u"Test")
-        self.assertIsNotNone(csr_key)
+        csr_keys = operations.generate_csr_and_key(u"Test")
+        self.assertIsNotNone(csr_keys)
+        self.assertTrue("public_key" in csr_keys)
+        self.assertTrue("private_key" in csr_keys)
