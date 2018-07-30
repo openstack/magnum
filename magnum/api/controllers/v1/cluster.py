@@ -448,7 +448,8 @@ class ClustersController(base.Controller):
             cluster.keypair = cluster_template.keypair_id
 
         # If docker_volume_size is not present, use cluster_template value
-        if cluster.docker_volume_size == wtypes.Unset:
+        if (cluster.docker_volume_size == wtypes.Unset or
+                not cluster.docker_volume_size):
             cluster.docker_volume_size = cluster_template.docker_volume_size
 
         # If labels is not present, use cluster_template value
