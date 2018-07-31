@@ -494,6 +494,16 @@ parameters:
     description: Enable or disable the openstack kubernetes cloud provider
     default: true
 
+  prometheus_tag:
+    type: string
+    description: tag of the prometheus container
+    default: v1.8.2
+
+  grafana_tag:
+    type: string
+    description: tag of grafana container
+    default: 5.1.5
+
 resources:
 
   ######################################################################
@@ -718,6 +728,8 @@ resources:
           octavia_enabled: {get_param: octavia_enabled}
           kube_service_account_key: {get_param: kube_service_account_key}
           kube_service_account_private_key: {get_param: kube_service_account_private_key}
+          prometheus_tag: {get_param: prometheus_tag}
+          grafana_tag: {get_param: grafana_tag}
 
 
   ######################################################################

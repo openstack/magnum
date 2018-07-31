@@ -391,6 +391,14 @@ parameters:
     type: boolean
     description: Enable or disable the openstack kubernetes cloud provider
 
+  prometheus_tag:
+    type: string
+    description: tag of prometheus container
+
+  grafana_tag:
+    type: string
+    description: tag of grafana container
+
 resources:
 
   master_wait_handle:
@@ -501,6 +509,8 @@ resources:
             "$OCTAVIA_ENABLED": {get_param: octavia_enabled}
             "$KUBE_SERVICE_ACCOUNT_KEY": {get_param: kube_service_account_key}
             "$KUBE_SERVICE_ACCOUNT_PRIVATE_KEY": {get_param: kube_service_account_private_key}
+            "$PROMETHEUS_TAG": {get_param: prometheus_tag}
+            "$GRAFANA_TAG": {get_param: grafana_tag}
 
   install_openstack_ca:
     type: OS::Heat::SoftwareConfig
