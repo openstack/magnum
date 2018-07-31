@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Add 'grafana_tag' and 'prometheus_tag' labels for the k8s_fedora_atomic driver.
+    Grafana defaults to 5.1.5 and Prometheus defaults to v1.8.2.

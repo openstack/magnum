@@ -220,7 +220,7 @@ spec:
       serviceAccountName: prometheus
       containers:
       - name: prometheus
-        image: ${CONTAINER_INFRA_PREFIX:-docker.io/prom/}prometheus:v1.8.2
+        image: ${CONTAINER_INFRA_PREFIX:-docker.io/prom/}prometheus:${PROMETHEUS_TAG}
         args:
           - '-storage.local.retention=6h'
           - '-storage.local.memory-chunks=500000'
@@ -314,7 +314,7 @@ spec:
         role: db
     spec:
       containers:
-        - image: ${CONTAINER_INFRA_PREFIX:-docker.io/grafana/}grafana:4.6.3
+        - image: ${CONTAINER_INFRA_PREFIX:-docker.io/grafana/}grafana:${GRAFANA_TAG}
           imagePullPolicy: Always
           name: grafana
           env:

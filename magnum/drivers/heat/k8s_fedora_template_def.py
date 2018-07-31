@@ -109,7 +109,9 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                       'calico_tag', 'calico_cni_tag',
                       'calico_kube_controllers_tag', 'calico_ipv4pool',
                       'etcd_tag', 'flannel_tag',
-                      'cloud_provider_enabled']
+                      'cloud_provider_enabled',
+                      'prometheus_tag',
+                      'grafana_tag']
 
         for label in label_list:
             label_value = cluster.labels.get(label)
