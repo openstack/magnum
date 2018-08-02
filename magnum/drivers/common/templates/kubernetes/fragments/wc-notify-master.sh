@@ -13,7 +13,7 @@ WC_NOTIFY_SERVICE=/etc/systemd/system/wc-notify.service
 
 cat > $WC_NOTIFY_BIN <<EOF
 #!/bin/bash -v
-until  [ "ok" = "$(curl --silent http://127.0.0.1:8080/healthz)" ]
+until  [ "ok" = "\$(curl --silent http://127.0.0.1:8080/healthz)" ]
 do
     echo "Waiting for Kubernetes API..."
     sleep 5

@@ -356,8 +356,9 @@ the table are linked to more details elsewhere in the user guide.
 | `kubeproxy_options`_                  | extra kubeproxy    | ""            |
 |                                       | args               |               |
 +---------------------------------------+--------------------+---------------+
-| `cgroup_driver`_                      | - systemd          | "systemd"     |
+| `cgroup_driver`_                      | - systemd          | "cgroupfs"    |
 |                                       | - cgroupfs         |               |
++---------------------------------------+--------------------+---------------+
 | `cloud_provider_enabled`_             | - true             | true          |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
@@ -2166,6 +2167,10 @@ Besides, the Calico network driver needs kube_tag with v1.9.3 or later, because
 Calico needs extra mounts for the kubelet container. See `commit
 <https://github.com/projectatomic/atomic-system-containers/commit/54ab8abc7fa1bfb6fa674f55cd0c2fa0c812fd36>`_
 of atomic-system-containers for more information.
+
+**NOTE:** We have seen some issues using systemd as cgroup-driver with Calico
+together, so we highly recommend to use cgroupfs as the cgroup-driver for
+Calico.
 
 Network for VMs
 ---------------
