@@ -87,14 +87,12 @@ def _build_ca_extentions():
     key_usage = x509.KeyUsage(False, False, False, False, False, True, False,
                               False, False)
     key_usage = x509.Extension(key_usage.oid, True, key_usage)
-    extended_key_usage = x509.ExtendedKeyUsage([x509.OID_SERVER_AUTH])
-    extended_key_usage = x509.Extension(extended_key_usage.oid, False,
-                                        extended_key_usage)
+
     basic_constraints = x509.BasicConstraints(ca=True, path_length=0)
     basic_constraints = x509.Extension(basic_constraints.oid, True,
                                        basic_constraints)
 
-    return [basic_constraints, key_usage, extended_key_usage]
+    return [basic_constraints, key_usage]
 
 
 def _generate_self_signed_certificate(subject_name, extensions,
@@ -235,23 +233,29 @@ def sign(csr, issuer_name, ca_key, ca_key_password=None,
 
 
 def generate_csr_and_key(common_name):
-    """Return a dict with a new csr and key."""
-    key = rsa.generate_private_key(
+    """Return a dict with a new csr, public key and private key."""
+    private_key = rsa.generate_private_key(
         public_exponent=65537,
         key_size=2048,
         backend=default_backend())
 
+    public_key = private_key.public_key()
+
     csr = x509.CertificateSigningRequestBuilder().subject_name(x509.Name([
         x509.NameAttribute(x509.oid.NameOID.COMMON_NAME, common_name),
-    ])).sign(key, hashes.SHA256(), default_backend())
+    ])).sign(private_key, hashes.SHA256(), default_backend())
 
     result = {
         'csr': csr.public_bytes(
             encoding=serialization.Encoding.PEM).decode("utf-8"),
-        'key': key.private_bytes(
+        'private_key': private_key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.TraditionalOpenSSL,
             encryption_algorithm=serialization.NoEncryption()).decode("utf-8"),
+        'public_key': public_key.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo).decode(
+                "utf-8"),
     }
 
     return result

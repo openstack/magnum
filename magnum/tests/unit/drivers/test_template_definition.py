@@ -285,7 +285,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
                             mock_get_discovery_url, mock_osc_class,
                             mock_enable_octavia):
         mock_generate_csr_and_key.return_value = {'csr': 'csr',
-                                                  'key': 'private_key'}
+                                                  'private_key': 'private_key',
+                                                  'public_key': 'public_key'}
         mock_sign_node_certificate.return_value = 'signed_cert'
         mock_enable_octavia.return_value = False
         mock_context = mock.MagicMock()
@@ -417,7 +418,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'ingress_controller': ingress_controller,
             'ingress_controller_role': ingress_controller_role,
             'octavia_enabled': False,
-            'kube_service_account_key': 'signed_cert',
+            'kube_service_account_key': 'public_key',
             'kube_service_account_private_key': 'private_key',
         }}
         mock_get_params.assert_called_once_with(mock_context,
@@ -454,7 +455,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
                                      mock_get_discovery_url, mock_osc_class,
                                      mock_enable_octavia):
         mock_generate_csr_and_key.return_value = {'csr': 'csr',
-                                                  'key': 'private_key'}
+                                                  'private_key': 'private_key',
+                                                  'public_key': 'public_key'}
         mock_sign_node_certificate.return_value = 'signed_cert'
         mock_enable_octavia.return_value = False
         mock_context = mock.MagicMock()
@@ -588,7 +590,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'ingress_controller': ingress_controller,
             'ingress_controller_role': ingress_controller_role,
             'octavia_enabled': False,
-            'kube_service_account_key': 'signed_cert',
+            'kube_service_account_key': 'public_key',
             'kube_service_account_private_key': 'private_key',
         }}
         mock_get_params.assert_called_once_with(mock_context,

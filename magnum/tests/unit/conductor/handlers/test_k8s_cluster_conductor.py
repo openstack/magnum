@@ -164,7 +164,8 @@ class TestClusterConductorWithK8s(base.TestCase):
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
         mock_generate_csr_and_key.return_value = {'csr': 'csr',
-                                                  'key': 'private_key'}
+                                                  'private_key': 'private_key',
+                                                  'public_key': 'public_key'}
         mock_sign_node_certificate.return_value = 'signed_cert'
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
@@ -283,7 +284,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kubescheduler_options': '--kubescheduler',
             'kubeproxy_options': '--kubeproxy',
             'octavia_enabled': False,
-            'kube_service_account_key': 'signed_cert',
+            'kube_service_account_key': 'public_key',
             'kube_service_account_private_key': 'private_key',
         }
         if missing_attr is not None:
@@ -316,7 +317,8 @@ class TestClusterConductorWithK8s(base.TestCase):
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
         mock_generate_csr_and_key.return_value = {'csr': 'csr',
-                                                  'key': 'private_key'}
+                                                  'private_key': 'private_key',
+                                                  'public_key': 'public_key'}
         mock_sign_node_certificate.return_value = 'signed_cert'
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
@@ -401,7 +403,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kubescheduler_options': '--kubescheduler',
             'kubeproxy_options': '--kubeproxy',
             'octavia_enabled': False,
-            'kube_service_account_key': 'signed_cert',
+            'kube_service_account_key': 'public_key',
             'kube_service_account_private_key': 'private_key',
         }
 
@@ -441,7 +443,8 @@ class TestClusterConductorWithK8s(base.TestCase):
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
         mock_generate_csr_and_key.return_value = {'csr': 'csr',
-                                                  'key': 'private_key'}
+                                                  'private_key': 'private_key',
+                                                  'public_key': 'public_key'}
         mock_sign_node_certificate.return_value = 'signed_cert'
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
@@ -506,7 +509,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kubescheduler_options': '--kubescheduler',
             'kubeproxy_options': '--kubeproxy',
             'octavia_enabled': False,
-            'kube_service_account_key': 'signed_cert',
+            'kube_service_account_key': 'public_key',
             'kube_service_account_private_key': 'private_key',
         }
         self.assertEqual(expected, definition)
@@ -837,7 +840,8 @@ class TestClusterConductorWithK8s(base.TestCase):
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
         mock_generate_csr_and_key.return_value = {'csr': 'csr',
-                                                  'key': 'private_key'}
+                                                  'private_key': 'private_key',
+                                                  'public_key': 'public_key'}
         mock_sign_node_certificate.return_value = 'signed_cert'
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
@@ -916,7 +920,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kubescheduler_options': '--kubescheduler',
             'kubeproxy_options': '--kubeproxy',
             'octavia_enabled': False,
-            'kube_service_account_key': 'signed_cert',
+            'kube_service_account_key': 'public_key',
             'kube_service_account_private_key': 'private_key',
         }
         self.assertEqual(expected, definition)
