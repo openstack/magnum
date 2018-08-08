@@ -159,7 +159,7 @@ parameters:
     description: >
       cgroup driver name that kubelet should use, ideally the same as
       the docker cgroup driver.
-    default: "systemd"
+    default: "cgroupfs"
 
   wait_condition_timeout:
     type: number

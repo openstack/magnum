@@ -56,7 +56,7 @@ parameters:
     description: >
       cgroup driver name that kubelet should use, ideally the same as
       the docker cgroup driver.
-    default: "systemd"
+    default: "cgroupfs"
 
   tls_disabled:
     type: boolean
