@@ -86,6 +86,7 @@ sed -i '
 
 sed -i '/^KUBE_SCHEDULER_ARGS=/ s/=.*/="--leader-elect=true"/' /etc/kubernetes/scheduler
 
+mkdir -p /etc/kubernetes/manifests
 HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')
 KUBELET_ARGS="--register-node=true --register-schedulable=false --pod-manifest-path=/etc/kubernetes/manifests --cadvisor-port=0 --hostname-override=${HOSTNAME_OVERRIDE}"
 KUBELET_ARGS="${KUBELET_ARGS} --cluster_dns=${DNS_SERVICE_IP} --cluster_domain=${DNS_CLUSTER_DOMAIN}"
