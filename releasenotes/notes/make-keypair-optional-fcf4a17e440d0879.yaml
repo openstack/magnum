@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    This makes the keypair optional. The user should not have to include
+    the keypair because they may use some other method of security such
+    as using SSSD, preconfigured on the image.

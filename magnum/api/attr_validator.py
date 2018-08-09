@@ -63,8 +63,12 @@ def validate_flavor(cli, flavor):
 
 
 def validate_keypair(cli, keypair):
-    """Validate keypair"""
+    """Validate keypair
 
+    validate the keypair, if provided.
+    """
+    if keypair is None:
+        return
     try:
         cli.nova().keypairs.get(keypair)
     except nova_exception.NotFound:

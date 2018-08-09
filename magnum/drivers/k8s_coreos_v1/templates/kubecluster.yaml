@@ -10,10 +10,11 @@ parameters:
   octavia_enabled:
     type: string
     default: true
-  
+
   ssh_key_name:
     type: string
     description: name of ssh key to be provisioned on our server
+    default: ""
 
   external_network:
     type: string
@@ -337,7 +338,7 @@ parameters:
   kube_version:
     type: string
     description: version of kubernetes used for kubernetes cluster
-    default: v1.10.3_coreos.0 
+    default: v1.10.3_coreos.0
 
   kube_dashboard_version:
     type: string
