@@ -369,7 +369,7 @@ GRAFANA_DEF_DASHBOARD_FILE=$GRAFANA_DEF_DASHBOARDS"/default.json"
 
 # Write the binary for enable-monitoring
 KUBE_MON_BIN_CONTENT='''#!/bin/sh
-until curl -sf "http://127.0.0.1:8080/healthz"
+until  [ "ok" = "$(curl --silent http://127.0.0.1:8080/healthz)" ]
 do
     echo "Waiting for Kubernetes API..."
     sleep 5
