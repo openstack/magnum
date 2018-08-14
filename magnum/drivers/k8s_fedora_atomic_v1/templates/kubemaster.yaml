@@ -614,38 +614,6 @@ resources:
         - config: {get_resource: kube_apiserver_to_kubelet_role}
         - config: {get_resource: master_wc_notify}
 
-  core_dns_service:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: script
-      config: {get_file: ../../common/templates/kubernetes/fragments/core-dns-service.sh}
-
-  core_dns_service_deployment:
-    type: OS::Heat::SoftwareDeployment
-    properties:
-      signal_transport: HEAT_SIGNAL
-      config: {get_resource: core_dns_service}
-      server: {get_resource: kube-master}
-      actions: ['CREATE']
-
-  enable_prometheus_monitoring:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: script
-      config:
-        str_replace:
-          template: {get_file: ../../common/templates/kubernetes/fragments/enable-prometheus-monitoring.sh}
-          params:
-            "$ADMIN_PASSWD": {get_param: grafana_admin_passwd}
-
-  enable_prometheus_monitoring_deployment:
-    type: OS::Heat::SoftwareDeployment
-    properties:
-      signal_transport: HEAT_SIGNAL
-      config: {get_resource: enable_prometheus_monitoring}
-      server: {get_resource: kube-master}
-      actions: ['CREATE']
-
   enable_cert_manager_api:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -664,6 +632,40 @@ resources:
       server: {get_resource: kube-master}
       actions: ['CREATE']
 
+  core_dns_service:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config: {get_file: ../../common/templates/kubernetes/fragments/core-dns-service.sh}
+
+  core_dns_service_deployment:
+    type: OS::Heat::SoftwareDeployment
+    depends_on: enable_cert_manager_api_deployment
+    properties:
+      signal_transport: HEAT_SIGNAL
+      config: {get_resource: core_dns_service}
+      server: {get_resource: kube-master}
+      actions: ['CREATE']
+
+  enable_prometheus_monitoring:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config:
+        str_replace:
+          template: {get_file: ../../common/templates/kubernetes/fragments/enable-prometheus-monitoring.sh}
+          params:
+            "$ADMIN_PASSWD": {get_param: grafana_admin_passwd}
+
+  enable_prometheus_monitoring_deployment:
+    type: OS::Heat::SoftwareDeployment
+    depends_on: core_dns_service_deployment
+    properties:
+      signal_transport: HEAT_SIGNAL
+      config: {get_resource: enable_prometheus_monitoring}
+      server: {get_resource: kube-master}
+      actions: ['CREATE']
+
   calico_service:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -672,6 +674,7 @@ resources:
 
   calico_service_deployment:
     type: OS::Heat::SoftwareDeployment
+    depends_on: enable_prometheus_monitoring_deployment
     properties:
       signal_transport: HEAT_SIGNAL
       config: {get_resource: calico_service}
@@ -690,6 +693,7 @@ resources:
 
   enable_ingress_controller_deployment:
     type: OS::Heat::SoftwareDeployment
+    depends_on: calico_service_deployment
     properties:
       signal_transport: HEAT_SIGNAL
       config: {get_resource: enable_ingress_controller}
@@ -704,6 +708,7 @@ resources:
 
   kubernetes_dashboard_deployment:
     type: OS::Heat::SoftwareDeployment
+    depends_on: enable_ingress_controller_deployment
     properties:
       signal_transport: HEAT_SIGNAL
       config: {get_resource: kubernetes_dashboard}
