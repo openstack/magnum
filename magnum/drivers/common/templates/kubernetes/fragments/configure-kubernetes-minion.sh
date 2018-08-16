@@ -178,9 +178,9 @@ sed -i '
     /^KUBELET_ARGS=/ s|=.*|="'"\$(/etc/kubernetes/get_require_kubeconfig.sh) ${KUBELET_ARGS}"'"|
 ' /etc/kubernetes/kubelet
 
-sed -i '
-    /^KUBE_PROXY_ARGS=/ s|=.*|=--kubeconfig='"$PROXY_KUBECONFIG"'|
-' /etc/kubernetes/proxy
+cat > /etc/kubernetes/proxy << EOF
+KUBE_PROXY_ARGS="--kubeconfig=${PROXY_KUBECONFIG} --cluster-cidr=${PODS_NETWORK_CIDR}"
+EOF
 
 if [ "$NETWORK_DRIVER" = "flannel" ]; then
     atomic install --storage ostree --system --system-package=no \
