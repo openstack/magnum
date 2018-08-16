@@ -14,7 +14,7 @@ while [ ! -f /etc/kubernetes/certs/ca.key ] && \
 done
 
 echo "starting services"
-for service in etcd docker kube-apiserver kube-controller-manager kube-scheduler; do
+for service in etcd docker kube-apiserver kube-controller-manager kube-scheduler kube-proxy; do
     echo "activating service $service"
     systemctl enable $service
     systemctl --no-block start $service
