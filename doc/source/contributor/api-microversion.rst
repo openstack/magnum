@@ -165,8 +165,8 @@ we need a microversion".
   url/resource that does not exist always fails with 404. Invalid content types
   are handled before API methods are called which results in a 415.
 
-    .. note:: When in doubt about whether or not a microversion is required
-        for changing an error response code, consult the `Containers Team`_.
+  .. note:: When in doubt about whether or not a microversion is required
+      for changing an error response code, consult the `Containers Team`_.
 
 .. _Containers Team: https://wiki.openstack.org/wiki/Meetings/Containers
 
