@@ -11,7 +11,7 @@ service, you must create a database, service credentials, and API endpoints.
 
      .. code-block:: console
 
-        $ mysql -u root -p
+        # mysql
 
    * Create the ``magnum`` database:
 
