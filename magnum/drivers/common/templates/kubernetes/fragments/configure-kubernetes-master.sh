@@ -17,6 +17,38 @@ fi
 atomic install --storage ostree --system --system-package=no --name=kube-apiserver ${_prefix}kubernetes-apiserver:${KUBE_TAG}
 atomic install --storage ostree --system --system-package=no --name=kube-controller-manager ${_prefix}kubernetes-controller-manager:${KUBE_TAG}
 atomic install --storage ostree --system --system-package=no --name=kube-scheduler ${_prefix}kubernetes-scheduler:${KUBE_TAG}
+atomic install --storage ostree --system --system-package=no --name=kube-proxy ${_prefix}kubernetes-proxy:${KUBE_TAG}
+
+CERT_DIR=/etc/kubernetes/certs
+
+# kube-proxy config
+PROXY_KUBECONFIG=/etc/kubernetes/proxy-kubeconfig.yaml
+cat > /etc/kubernetes/proxy << EOF
+KUBE_PROXY_ARGS="--kubeconfig=${PROXY_KUBECONFIG} --cluster-cidr=${PODS_NETWORK_CIDR}"
+EOF
+
+cat > ${PROXY_KUBECONFIG} << EOF
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority: ${CERT_DIR}/ca.crt
+    server: http://127.0.0.1:8080
+  name: kubernetes
+contexts:
+- context:
+    cluster: kubernetes
+    user: kube-proxy
+  name: default
+current-context: default
+kind: Config
+preferences: {}
+users:
+- name: kube-proxy
+  user:
+    as-user-extra: {}
+EOF
+
+
 if [ "$NETWORK_DRIVER" = "flannel" ]; then
     atomic install --storage ostree --system --system-package=no \
     --name=flanneld ${_prefix}flannel:${FLANNEL_TAG}
@@ -26,8 +58,6 @@ sed -i '
     /^KUBE_ALLOW_PRIV=/ s/=.*/="--allow-privileged='"$KUBE_ALLOW_PRIV"'"/
     /^KUBE_MASTER=/ s|=.*|="--master=http://127.0.0.1:8080"|
 ' /etc/kubernetes/config
-
-CERT_DIR=/etc/kubernetes/certs
 
 KUBE_API_ARGS="--runtime-config=api/all=true"
 KUBE_API_ARGS="$KUBE_API_ARGS --kubelet-preferred-address-types=InternalIP,Hostname,ExternalIP"
