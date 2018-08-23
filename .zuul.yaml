@@ -259,12 +259,21 @@
       image_name: centos-dcos
 
 - project:
+    templates:
+      - openstack-python-jobs
+      - openstack-python35-jobs
+      - check-requirements
+      - publish-openstack-sphinx-docs
+      - release-notes-jobs
     check:
       jobs:
         - magnum-functional-api
         - magnum-functional-k8s
         - magnum-functional-swarm-mode
+        - openstack-tox-cover:
+            voting: false
     gate:
+      queue: magnum
       jobs:
         - magnum-functional-api
     experimental:
