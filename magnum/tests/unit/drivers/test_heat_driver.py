@@ -71,7 +71,8 @@ class TestHeatPoller(base.TestCase):
         self.assertEqual(cluster_status.CREATE_FAILED, cluster.status)
         self.assertEqual('Create failed', cluster.status_reason)
 
-    def test_poll_done(self):
+    @patch('os.path.join')
+    def test_poll_done(self, mock_join):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = cluster_status.DELETE_COMPLETE
@@ -124,7 +125,8 @@ class TestHeatPoller(base.TestCase):
         self.assertEqual(cluster_status.ROLLBACK_FAILED, cluster.status)
         self.assertEqual(1, cluster.node_count)
 
-    def test_poll_destroy(self):
+    @patch('os.path.join')
+    def test_poll_destroy(self, mock_join):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = cluster_status.DELETE_FAILED
