@@ -2,104 +2,213 @@
 
 . /etc/sysconfig/heat-params
 
-if [ "$NETWORK_DRIVER" != "flannel" ]; then
-    exit 0
+set -x
+
+if [ "$NETWORK_DRIVER" = "flannel" ]; then
+    _prefix=${CONTAINER_INFRA_PREFIX:-quay.io/coreos/}
+    FLANNEL_DEPLOY=/srv/magnum/kubernetes/manifests/flannel-deploy.yaml
+
+    [ -f ${FLANNEL_DEPLOY} ] || {
+    echo "Writing File: $FLANNEL_DEPLOY"
+    mkdir -p "$(dirname ${FLANNEL_DEPLOY})"
+    cat << EOF > ${FLANNEL_DEPLOY}
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: flannel
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+    verbs:
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - nodes/status
+    verbs:
+      - patch
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: flannel
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: flannel
+subjects:
+- kind: ServiceAccount
+  name: flannel
+  namespace: kube-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: flannel
+  namespace: kube-system
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: kube-flannel-cfg
+  namespace: kube-system
+  labels:
+    tier: node
+    app: flannel
+data:
+  cni-conf.json: |
+    {
+      "name": "cbr0",
+      "plugins": [
+        {
+          "type": "flannel",
+          "delegate": {
+            "hairpinMode": true,
+            "isDefaultGateway": true
+          }
+        },
+        {
+          "type": "portmap",
+          "capabilities": {
+            "portMappings": true
+          }
+        }
+      ]
+    }
+  net-conf.json: |
+    {
+      "Network": "$FLANNEL_NETWORK_CIDR",
+      "Subnetlen": $FLANNEL_NETWORK_SUBNETLEN,
+      "Backend": {
+        "Type": "$FLANNEL_BACKEND"
+      }
+    }
+  magnum-install-cni.sh: |
+    #!/bin/sh
+    set -e -x;
+    if [ -w "/host/opt/cni/bin/" ]; then
+      cp /opt/cni/bin/* /host/opt/cni/bin/;
+      echo "Wrote CNI binaries to /host/opt/cni/bin/";
+    fi;
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: kube-flannel-ds-amd64
+  namespace: kube-system
+  labels:
+    tier: node
+    app: flannel
+spec:
+  template:
+    metadata:
+      labels:
+        tier: node
+        app: flannel
+    spec:
+      hostNetwork: true
+      nodeSelector:
+        beta.kubernetes.io/arch: amd64
+      tolerations:
+        # Make sure flannel gets scheduled on all nodes.
+        - effect: NoSchedule
+          operator: Exists
+        # Mark the pod as a critical add-on for rescheduling.
+        - key: CriticalAddonsOnly
+          operator: Exists
+        - effect: NoExecute
+          operator: Exists
+      serviceAccountName: flannel
+      initContainers:
+      - name: install-cni-plugins
+        image: ${_prefix}flannel-cni:${FLANNEL_CNI_TAG}
+        command:
+        - sh
+        args:
+        - /etc/kube-flannel/magnum-install-cni.sh
+        volumeMounts:
+        - name: host-cni-bin
+          mountPath: /host/opt/cni/bin/
+        - name: flannel-cfg
+          mountPath: /etc/kube-flannel/
+      - name: install-cni
+        image: ${_prefix}flannel:${FLANNEL_TAG}
+        command:
+        - cp
+        args:
+        - -f
+        - /etc/kube-flannel/cni-conf.json
+        - /etc/cni/net.d/10-flannel.conflist
+        volumeMounts:
+        - name: cni
+          mountPath: /etc/cni/net.d
+        - name: flannel-cfg
+          mountPath: /etc/kube-flannel/
+      containers:
+      - name: kube-flannel
+        image: ${_prefix}flannel:${FLANNEL_TAG}
+        command:
+        - /opt/bin/flanneld
+        args:
+        - --ip-masq
+        - --kube-subnet-mgr
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "50Mi"
+          limits:
+            cpu: "100m"
+            memory: "50Mi"
+        securityContext:
+          privileged: true
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        volumeMounts:
+        - name: run
+          mountPath: /run
+        - name: flannel-cfg
+          mountPath: /etc/kube-flannel/
+      volumes:
+        - name: host-cni-bin
+          hostPath:
+            path: /opt/cni/bin
+        - name: run
+          hostPath:
+            path: /run
+        - name: cni
+          hostPath:
+            path: /etc/cni/net.d
+        - name: flannel-cfg
+          configMap:
+            name: kube-flannel-cfg
+EOF
+    }
+
+    if [ "$MASTER_INDEX" = "0" ]; then
+
+        until  [ "ok" = "$(curl --silent http://127.0.0.1:8080/healthz)" ]
+        do
+            echo "Waiting for Kubernetes API..."
+            sleep 5
+        done
+    fi
+
+    /usr/bin/kubectl apply -f "${FLANNEL_DEPLOY}" --namespace=kube-system
 fi
-
-SYSTEMD_UNITS_DIR=/etc/systemd/system/
-FLANNEL_DOCKER_BRIDGE_BIN=/usr/local/bin/flannel-docker-bridge
-FLANNEL_DOCKER_BRIDGE_SERVICE=/etc/systemd/system/flannel-docker-bridge.service
-FLANNEL_IPTABLES_FORWARD_ACCEPT_SERVICE=flannel-iptables-forward-accept.service
-DOCKER_FLANNEL_CONF=/etc/systemd/system/docker.service.d/flannel.conf
-FLANNEL_DOCKER_BRIDGE_CONF=/etc/systemd/system/flanneld.service.d/flannel-docker-bridge.conf
-
-mkdir -p /etc/systemd/system/docker.service.d
-mkdir -p /etc/systemd/system/flanneld.service.d
-
-cat >> $FLANNEL_DOCKER_BRIDGE_BIN <<EOF1
-#!/bin/sh
-
-if ! [ "\$FLANNEL_SUBNET" ] && [ "\$FLANNEL_MTU" ] ; then
-  echo "ERROR: missing required environment variables." >&2
-  exit 1
-fi
-
-# NOTE(mnaser): Since Docker 1.13, it does not set the default forwarding
-#               policy to ACCEPT which will cause CNI networking to fail.
-iptables -P FORWARD ACCEPT
-
-mkdir -p /run/flannel/
-cat > /run/flannel/docker <<EOF2
-DOCKER_NETWORK_OPTIONS="--bip=\$FLANNEL_SUBNET --mtu=\$FLANNEL_MTU"
-EOF2
-EOF1
-
-chown root:root $FLANNEL_DOCKER_BRIDGE_BIN
-chmod 0755 $FLANNEL_DOCKER_BRIDGE_BIN
-
-cat >> $FLANNEL_DOCKER_BRIDGE_SERVICE <<EOF
-[Unit]
-After=flanneld.service
-Before=docker.service
-Requires=flanneld.service
-
-[Service]
-Type=oneshot
-EnvironmentFile=/run/flanneld/subnet.env
-ExecStart=/usr/local/bin/flannel-docker-bridge
-
-[Install]
-WantedBy=docker.service
-EOF
-
-chown root:root $FLANNEL_DOCKER_BRIDGE_SERVICE
-chmod 0644 $FLANNEL_DOCKER_BRIDGE_SERVICE
-
-cat >> $DOCKER_FLANNEL_CONF <<EOF
-[Unit]
-Requires=flannel-docker-bridge.service
-After=flannel-docker-bridge.service
-
-[Service]
-EnvironmentFile=/run/flannel/docker
-EOF
-
-chown root:root $DOCKER_FLANNEL_CONF
-chmod 0644 $DOCKER_FLANNEL_CONF
-
-cat >> $FLANNEL_DOCKER_BRIDGE_CONF <<EOF
-[Unit]
-Requires=flannel-docker-bridge.service
-Before=flannel-docker-bridge.service
-
-[Install]
-Also=flannel-docker-bridge.service
-EOF
-
-chown root:root $FLANNEL_DOCKER_BRIDGE_CONF
-chmod 0644 $FLANNEL_DOCKER_BRIDGE_CONF
-
-# Workaround for https://github.com/coreos/flannel/issues/799
-# Not solved upstream properly yet.
-cat >> "${SYSTEMD_UNITS_DIR}${FLANNEL_IPTABLES_FORWARD_ACCEPT_SERVICE}" <<EOF
-[Unit]
-After=flanneld.service docker.service kubelet.service kube-proxy.service
-Requires=flanneld.service
-
-[Service]
-Type=oneshot
-ExecStart=/usr/sbin/iptables -P FORWARD ACCEPT
-ExecStartPost=/usr/sbin/iptables -S
-
-[Install]
-WantedBy=flanneld.service
-EOF
-
-chown root:root "${SYSTEMD_UNITS_DIR}${FLANNEL_IPTABLES_FORWARD_ACCEPT_SERVICE}"
-chmod 0644 "${SYSTEMD_UNITS_DIR}${FLANNEL_IPTABLES_FORWARD_ACCEPT_SERVICE}"
-systemctl daemon-reload
-systemctl enable "${FLANNEL_IPTABLES_FORWARD_ACCEPT_SERVICE}"
-
-echo "activating service flanneld"
-systemctl enable flanneld
-systemctl start flanneld

@@ -348,8 +348,13 @@ parameters:
 
   flannel_tag:
     type: string
-    description: tag of the flannel system containers
-    default: v0.9.0
+    description: tag of the flannel container
+    default: v0.10.0-amd64
+
+  flannel_cni_tag:
+    type: string
+    description: tag of the flannel cni container
+    default: v0.3.0
 
   kube_version:
     type: string
@@ -778,6 +783,7 @@ resources:
           kube_version: {get_param: kube_version}
           etcd_tag: {get_param: etcd_tag}
           flannel_tag: {get_param: flannel_tag}
+          flannel_cni_tag: {get_param: flannel_cni_tag}
           kube_dashboard_version: {get_param: kube_dashboard_version}
           trustee_user_id: {get_param: trustee_user_id}
           trustee_password: {get_param: trustee_password}
@@ -834,6 +840,7 @@ resources:
                   "$CA_KEY": {get_param: ca_key}
             - get_file: ../../common/templates/kubernetes/fragments/core-dns-service.sh
             - get_file: ../../common/templates/kubernetes/fragments/calico-service.sh
+            - get_file: ../../common/templates/kubernetes/fragments/flannel-service.sh
             - get_file: ../../common/templates/kubernetes/fragments/enable-helm-tiller.sh
             - get_file: ../../common/templates/kubernetes/helm/metrics-server.sh
             - get_file: ../../common/templates/kubernetes/fragments/install-helm-modules.sh
@@ -919,7 +926,6 @@ resources:
           no_proxy: {get_param: no_proxy}
           kube_tag: {get_param: kube_tag}
           kube_version: {get_param: kube_version}
-          flannel_tag: {get_param: flannel_tag}
           trustee_user_id: {get_param: trustee_user_id}
           trustee_username: {get_param: trustee_username}
           trustee_password: {get_param: trustee_password}

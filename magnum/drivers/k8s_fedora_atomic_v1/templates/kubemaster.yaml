@@ -239,6 +239,10 @@ parameters:
     type: string
     description: tag of the flannel system containers
 
+  flannel_cni_tag:
+    type: string
+    description: tag of the flannel cni container
+
   kube_version:
     type: string
     description: version of kubernetes used for kubernetes cluster
@@ -502,6 +506,7 @@ resources:
             "$CLOUD_PROVIDER_ENABLED": {get_param: cloud_provider_enabled}
             "$ETCD_TAG": {get_param: etcd_tag}
             "$FLANNEL_TAG": {get_param: flannel_tag}
+            "$FLANNEL_CNI_TAG": {get_param: flannel_cni_tag}
             "$KUBE_VERSION": {get_param: kube_version}
             "$KUBE_DASHBOARD_VERSION": {get_param: kube_dashboard_version}
             "$TRUSTEE_USER_ID": {get_param: trustee_user_id}
@@ -584,24 +589,6 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-master.sh}
 
-  write_flannel_config:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/write-flannel-config.sh}
-
-  flannel_config_service:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/flannel-config-service.sh}
-
-  flannel_service:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/flannel-service.sh}
-
   enable_services:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -641,9 +628,6 @@ resources:
         - config: {get_resource: add_proxy}
         - config: {get_resource: start_container_agent}
         - config: {get_resource: enable_services}
-        - config: {get_resource: write_flannel_config}
-        - config: {get_resource: flannel_config_service}
-        - config: {get_resource: flannel_service}
 
   ######################################################################
   #

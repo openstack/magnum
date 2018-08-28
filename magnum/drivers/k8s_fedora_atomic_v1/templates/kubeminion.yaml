@@ -182,10 +182,6 @@ parameters:
     type: string
     description: tag of the k8s containers used to provision the kubernetes cluster
 
-  flannel_tag:
-    type: string
-    description: tag of the flannel system containers
-
   kube_version:
     type: string
     description: version of kubernetes used for kubernetes cluster
@@ -342,7 +338,6 @@ resources:
             $HTTPS_PROXY: {get_param: https_proxy}
             $NO_PROXY: {get_param: no_proxy}
             $KUBE_TAG: {get_param: kube_tag}
-            $FLANNEL_TAG: {get_param: flannel_tag}
             $FLANNEL_NETWORK_CIDR: {get_param: flannel_network_cidr}
             $PODS_NETWORK_CIDR: {get_param: pods_network_cidr}
             $KUBE_VERSION: {get_param: kube_version}
@@ -405,12 +400,6 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-minion.sh}
 
-  flannel_service:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/flannel-service.sh}
-
   enable_services:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -466,7 +455,6 @@ resources:
         - config: {get_resource: configure_docker_storage}
         - config: {get_resource: configure_docker_registry}
         - config: {get_resource: configure_kubernetes_minion}
-        - config: {get_resource: flannel_service}
         - config: {get_resource: add_proxy}
         - config: {get_resource: enable_services}
         - config: {get_resource: enable_docker_registry}

@@ -323,6 +323,8 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `flannel_tag`_                        | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
+| `flannel_cni_tag`_                    | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 | `heat_container_agent_tag`_           | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
 | `kube_dashboard_enabled`_             | - true             | true          |
@@ -1132,10 +1134,20 @@ _`etcd_tag`
 
 _`flannel_tag`
   This label allows users to select `a specific flannel version,
-  based on its container tag
-  <https://hub.docker.com/r/openstackmagnum/flannel/tags/>`_.
-  If unset, the current Magnum version's a default flannel version.
+  based on its container tag:
+  Queens <https://hub.docker.com/r/openstackmagnum/flannel/tags/>`_
+  Rocky <https://quay.io/repository/coreos/flannel?tab=tags>`_
+  If unset, the default version will be used.
   For queens, v0.9.0
+  For stein, v0.10.0-amd64
+
+_`flannel_cni_tag`
+  This label allows users to select `a specific flannel_cni version,
+  based on its container tag. This container adds the cni plugins in
+  the host under /opt/cni/bin
+  <https://quay.io/repository/coreos/flannel-cni?tab=tags>`_.
+  If unset, the current Magnum version's a default flannel version.
+  For stein, v0.3.0
 
 _`heat_container_agent_tag`
   This label allows users to select `a specific heat_container_agent

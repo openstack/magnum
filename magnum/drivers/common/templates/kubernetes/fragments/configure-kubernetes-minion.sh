@@ -7,10 +7,10 @@ echo "configuring kubernetes (minion)"
 _prefix=${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}
 
 _addtl_mounts=''
-if [ "$NETWORK_DRIVER" = "calico" ]; then
-    mkdir -p /opt/cni
-    _addtl_mounts=',{"type":"bind","source":"/opt/cni","destination":"/opt/cni","options":["bind","rw","slave","mode=777"]}'
+mkdir -p /opt/cni
+_addtl_mounts=',{"type":"bind","source":"/opt/cni","destination":"/opt/cni","options":["bind","rw","slave","mode=777"]}'
 
+if [ "$NETWORK_DRIVER" = "calico" ]; then
     if [ "`systemctl status NetworkManager.service | grep -o "Active: active"`" = "Active: active" ]; then
         CALICO_NM=/etc/NetworkManager/conf.d/calico.conf
         [ -f ${CALICO_NM} ] || {
@@ -168,9 +168,7 @@ fi
 EOF
 chmod +x /etc/kubernetes/get_require_kubeconfig.sh
 
-if [ "$NETWORK_DRIVER" = "calico" ]; then
-    KUBELET_ARGS="${KUBELET_ARGS} --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin"
-fi
+KUBELET_ARGS="${KUBELET_ARGS} --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin"
 
 sed -i '
     /^KUBELET_ADDRESS=/ s/=.*/="--address=0.0.0.0"/
@@ -182,37 +180,6 @@ sed -i '
 cat > /etc/kubernetes/proxy << EOF
 KUBE_PROXY_ARGS="--kubeconfig=${PROXY_KUBECONFIG} --cluster-cidr=${PODS_NETWORK_CIDR}"
 EOF
-
-if [ "$NETWORK_DRIVER" = "flannel" ]; then
-    atomic install --storage ostree --system --system-package=no \
-    --name=flanneld ${_prefix}flannel:${FLANNEL_TAG}
-    if [ "$TLS_DISABLED" = "True" ]; then
-        FLANNEL_OPTIONS=""
-        ETCD_CURL_OPTIONS=""
-    else
-        FLANNEL_CERT_DIR=/etc/flanneld/certs
-        FLANNEL_OPTIONS="-etcd-cafile $FLANNEL_CERT_DIR/ca.crt"
-        FLANNEL_OPTIONS="$FLANNEL_OPTIONS -etcd-certfile $FLANNEL_CERT_DIR/proxy.crt"
-        FLANNEL_OPTIONS="$FLANNEL_OPTIONS -etcd-keyfile $FLANNEL_CERT_DIR/proxy.key"
-        ETCD_CURL_OPTIONS="--cacert $FLANNEL_CERT_DIR/ca.crt --cert $FLANNEL_CERT_DIR/proxy.crt --key $FLANNEL_CERT_DIR/proxy.key"
-    fi
-    FLANNELD_CONFIG=/etc/sysconfig/flanneld
-
-    cat >> $FLANNELD_CONFIG <<EOF
-    FLANNEL_ETCD_ENDPOINTS="$PROTOCOL://${ETCD_SERVER_IP}:2379"
-    FLANNEL_ETCD_PREFIX="/atomic.io/network"
-    FLANNEL_OPTIONS="$FLANNEL_OPTIONS"
-EOF
-
-    # Make sure etcd has a flannel configuration
-    . $FLANNELD_CONFIG
-    until curl -sf $ETCD_CURL_OPTIONS \
-        "$FLANNEL_ETCD_ENDPOINTS/v2/keys${FLANNEL_ETCD_PREFIX}/config?quorum=false&recursive=false&sorted=false"
-    do
-        echo "Waiting for flannel configuration in etcd..."
-        sleep 5
-    done
-fi
 
 cat >> /etc/environment <<EOF
 KUBERNETES_MASTER=$KUBE_MASTER_URI

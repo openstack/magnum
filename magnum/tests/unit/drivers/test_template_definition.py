@@ -366,6 +366,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         kube_tag = mock_cluster.labels.get('kube_tag')
         etcd_tag = mock_cluster.labels.get('etcd_tag')
         flannel_tag = mock_cluster.labels.get('flannel_tag')
+        flannel_cni_tag = mock_cluster.labels.get('flannel_cni_tag')
         container_infra_prefix = mock_cluster.labels.get(
             'container_infra_prefix')
         availability_zone = mock_cluster.labels.get(
@@ -457,6 +458,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'kube_tag': kube_tag,
             'etcd_tag': etcd_tag,
             'flannel_tag': flannel_tag,
+            'flannel_cni_tag': flannel_cni_tag,
             'container_infra_prefix': container_infra_prefix,
             'nodes_affinity_policy': 'soft-anti-affinity',
             'availability_zone': availability_zone,
@@ -732,6 +734,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         kube_tag = mock_cluster.labels.get('kube_tag')
         etcd_tag = mock_cluster.labels.get('etcd_tag')
         flannel_tag = mock_cluster.labels.get('flannel_tag')
+        flannel_cni_tag = mock_cluster.labels.get('flannel_cni_tag')
         container_infra_prefix = mock_cluster.labels.get(
             'container_infra_prefix')
         availability_zone = mock_cluster.labels.get(
@@ -825,6 +828,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'kube_tag': kube_tag,
             'etcd_tag': etcd_tag,
             'flannel_tag': flannel_tag,
+            'flannel_cni_tag': flannel_cni_tag,
             'container_infra_prefix': container_infra_prefix,
             'nodes_affinity_policy': 'soft-anti-affinity',
             'availability_zone': availability_zone,
