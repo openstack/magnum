@@ -130,6 +130,10 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
         for label in label_list:
             extra_params[label] = cluster.labels.get(label)
 
+        cluser_ip_range = cluster.labels.get('service_cluster_ip_range')
+        if cluser_ip_range:
+            extra_params['portal_network_cidr'] = cluser_ip_range
+
         if cluster_template.registry_enabled:
             extra_params['swift_region'] = CONF.docker_registry.swift_region
             extra_params['registry_container'] = (

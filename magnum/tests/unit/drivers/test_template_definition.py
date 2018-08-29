@@ -371,6 +371,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'kubeproxy_options')
         cloud_provider_enabled = mock_cluster.labels.get(
             'cloud_provider_enabled')
+        service_cluster_ip_range = mock_cluster.labels.get(
+            'service_cluster_ip_range')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -420,6 +422,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'octavia_enabled': False,
             'kube_service_account_key': 'public_key',
             'kube_service_account_private_key': 'private_key',
+            'portal_network_cidr': service_cluster_ip_range,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
@@ -541,6 +544,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'kubeproxy_options')
         cloud_provider_enabled = mock_cluster.labels.get(
             'cloud_provider_enabled')
+        service_cluster_ip_range = mock_cluster.labels.get(
+            'service_cluster_ip_range')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -592,6 +597,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'octavia_enabled': False,
             'kube_service_account_key': 'public_key',
             'kube_service_account_private_key': 'private_key',
+            'portal_network_cidr': service_cluster_ip_range,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
