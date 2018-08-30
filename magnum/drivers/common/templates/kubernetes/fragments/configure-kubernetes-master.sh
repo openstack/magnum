@@ -6,14 +6,9 @@ echo "configuring kubernetes (master)"
 
 _prefix=${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}
 
-# TODO(flwang): We should revisit this part to figure out if it's possible to
-# only run the calico-node container as a systemd service before starting the
-# minion nodes.
-if [ "$NETWORK_DRIVER" = "calico" ]; then
-    mkdir -p /opt/cni
-    _addtl_mounts=',{"type":"bind","source":"/opt/cni","destination":"/opt/cni","options":["bind","rw","slave","mode=777"]}'
-    atomic install --storage ostree --system --set=ADDTL_MOUNTS=${_addtl_mounts} --system-package=no --name=kubelet ${_prefix}kubernetes-kubelet:${KUBE_TAG}
-fi
+mkdir -p /opt/cni
+_addtl_mounts=',{"type":"bind","source":"/opt/cni","destination":"/opt/cni","options":["bind","rw","slave","mode=777"]}'
+atomic install --storage ostree --system --set=ADDTL_MOUNTS=${_addtl_mounts} --system-package=no --name=kubelet ${_prefix}kubernetes-kubelet:${KUBE_TAG}
 atomic install --storage ostree --system --system-package=no --name=kube-apiserver ${_prefix}kubernetes-apiserver:${KUBE_TAG}
 atomic install --storage ostree --system --system-package=no --name=kube-controller-manager ${_prefix}kubernetes-controller-manager:${KUBE_TAG}
 atomic install --storage ostree --system --system-package=no --name=kube-scheduler ${_prefix}kubernetes-scheduler:${KUBE_TAG}
@@ -130,11 +125,13 @@ if [ -n "${INSECURE_REGISTRY_URL}" ]; then
 fi
 
 if [ "$NETWORK_DRIVER" = "calico" ]; then
-    KUBELET_ARGS="${KUBELET_ARGS} --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin --register-with-taints=CriticalAddonsOnly=True:NoSchedule,dedicated=master:NoSchedule"
+    KUBELET_ARGS="${KUBELET_ARGS} --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/opt/cni/bin"
+fi
+KUBELET_ARGS="${KUBELET_ARGS} --register-with-taints=CriticalAddonsOnly=True:NoSchedule,dedicated=master:NoSchedule"
 
-    KUBELET_KUBECONFIG=/etc/kubernetes/kubelet-config.yaml
-    HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')
-    cat << EOF >> ${KUBELET_KUBECONFIG}
+KUBELET_KUBECONFIG=/etc/kubernetes/kubelet-config.yaml
+HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')
+cat << EOF >> ${KUBELET_KUBECONFIG}
 apiVersion: v1
 clusters:
 - cluster:
@@ -157,7 +154,7 @@ users:
     client-key: ${CERT_DIR}/server.key
 EOF
 
-    cat > /etc/kubernetes/get_require_kubeconfig.sh <<EOF
+cat > /etc/kubernetes/get_require_kubeconfig.sh << EOF
 #!/bin/bash
 
 KUBE_VERSION=\$(kubelet --version | awk '{print \$2}')
@@ -166,37 +163,36 @@ if [[ "\${min_version}" != \$(echo -e "\${min_version}\n\${KUBE_VERSION}" | sort
     echo "--require-kubeconfig"
 fi
 EOF
-    chmod +x /etc/kubernetes/get_require_kubeconfig.sh
+chmod +x /etc/kubernetes/get_require_kubeconfig.sh
 
-    KUBELET_ARGS="${KUBELET_ARGS} --client-ca-file=${CERT_DIR}/ca.crt --tls-cert-file=${CERT_DIR}/kubelet.crt --tls-private-key-file=${CERT_DIR}/kubelet.key --kubeconfig ${KUBELET_KUBECONFIG}"
+KUBELET_ARGS="${KUBELET_ARGS} --client-ca-file=${CERT_DIR}/ca.crt --tls-cert-file=${CERT_DIR}/kubelet.crt --tls-private-key-file=${CERT_DIR}/kubelet.key --kubeconfig ${KUBELET_KUBECONFIG}"
 
-    # specified cgroup driver
-    KUBELET_ARGS="${KUBELET_ARGS} --cgroup-driver=${CGROUP_DRIVER}"
+# specified cgroup driver
+KUBELET_ARGS="${KUBELET_ARGS} --cgroup-driver=${CGROUP_DRIVER}"
 
-    systemctl disable docker
-    if cat /usr/lib/systemd/system/docker.service | grep 'native.cgroupdriver'; then
-            cp /usr/lib/systemd/system/docker.service /etc/systemd/system/
-            sed -i "s/\(native.cgroupdriver=\)\w\+/\1$CGROUP_DRIVER/" \
-                    /etc/systemd/system/docker.service
-    else
-            cat > /etc/systemd/system/docker.service.d/cgroupdriver.conf << EOF
+systemctl disable docker
+if cat /usr/lib/systemd/system/docker.service | grep 'native.cgroupdriver'; then
+        cp /usr/lib/systemd/system/docker.service /etc/systemd/system/
+        sed -i "s/\(native.cgroupdriver=\)\w\+/\1$CGROUP_DRIVER/" \
+                /etc/systemd/system/docker.service
+else
+        cat > /etc/systemd/system/docker.service.d/cgroupdriver.conf << EOF
 ExecStart=---exec-opt native.cgroupdriver=$CGROUP_DRIVER
 EOF
 
-    fi
-
-    systemctl daemon-reload
-    systemctl enable docker
-
-    if [ -z "${KUBE_NODE_IP}" ]; then
-        KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
-    fi
-
-    KUBELET_ARGS="${KUBELET_ARGS} --address=${KUBE_NODE_IP} --port=10250 --read-only-port=0 --anonymous-auth=false --authorization-mode=Webhook --authentication-token-webhook=true"
-
-    sed -i '
-    /^KUBELET_ADDRESS=/ s/=.*/="--address=${KUBE_NODE_IP}"/
-    /^KUBELET_HOSTNAME=/ s/=.*/=""/
-    /^KUBELET_ARGS=/ s|=.*|="'"\$(/etc/kubernetes/get_require_kubeconfig.sh) ${KUBELET_ARGS}"'"|
-' /etc/kubernetes/kubelet
 fi
+
+systemctl daemon-reload
+systemctl enable docker
+
+if [ -z "${KUBE_NODE_IP}" ]; then
+    KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+fi
+
+KUBELET_ARGS="${KUBELET_ARGS} --address=${KUBE_NODE_IP} --port=10250 --read-only-port=0 --anonymous-auth=false --authorization-mode=Webhook --authentication-token-webhook=true"
+
+sed -i '
+/^KUBELET_ADDRESS=/ s/=.*/="--address=${KUBE_NODE_IP}"/
+/^KUBELET_HOSTNAME=/ s/=.*/=""/
+/^KUBELET_ARGS=/ s|=.*|="'"\$(/etc/kubernetes/get_require_kubeconfig.sh) ${KUBELET_ARGS}"'"|
+' /etc/kubernetes/kubelet
