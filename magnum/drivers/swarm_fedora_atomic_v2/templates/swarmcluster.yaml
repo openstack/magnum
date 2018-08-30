@@ -245,6 +245,9 @@ resources:
           port_range_min: 2375
           port_range_max: 2375
         - protocol: tcp
+          port_range_min: 2377
+          port_range_max: 2377
+        - protocol: tcp
           remote_ip_prefix: {get_param: fixed_network_cidr}
           port_range_min: 1
           port_range_max: 65535
