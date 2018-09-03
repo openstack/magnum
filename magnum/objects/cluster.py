@@ -46,8 +46,9 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.15: Added 'labels' field
     # Version 1.16: Added 'master_flavor_id' field
     # Version 1.17: Added 'flavor_id' field
+    # Version 1.18: Added 'health_status' and 'health_status_reason' field
 
-    VERSION = '1.17'
+    VERSION = '1.18'
 
     dbapi = dbapi.get_instance()
 
@@ -66,6 +67,8 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
         'stack_id': fields.StringField(nullable=True),
         'status': m_fields.ClusterStatusField(nullable=True),
         'status_reason': fields.StringField(nullable=True),
+        'health_status': m_fields.ClusterHealthStatusField(nullable=True),
+        'health_status_reason': fields.DictOfStringsField(nullable=True),
         'create_timeout': fields.IntegerField(nullable=True),
         'api_address': fields.StringField(nullable=True),
         'node_addresses': fields.ListOfStringsField(nullable=True),

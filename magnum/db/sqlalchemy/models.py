@@ -128,6 +128,8 @@ class Cluster(Base):
     master_count = Column(Integer())
     status = Column(String(20))
     status_reason = Column(Text)
+    health_status = Column(String(20))
+    health_status_reason = Column(JSONEncodedDict)
     create_timeout = Column(Integer())
     discovery_url = Column(String(255, mysql_ndb_type=TINYTEXT))
     master_addresses = Column(JSONEncodedList)

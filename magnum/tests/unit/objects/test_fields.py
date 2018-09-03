@@ -50,6 +50,25 @@ class TestClusterStatus(test_fields.TestField):
         self.assertRaises(ValueError, self.field.stringify, 'DELETE_STOPPED')
 
 
+class TestClusterHealthStatus(test_fields.TestField):
+    def setUp(self):
+        super(TestClusterHealthStatus, self).setUp()
+        self.field = fields.ClusterHealthStatusField()
+        self.coerce_good_values = [('HEALTHY', 'HEALTHY'),
+                                   ('UNHEALTHY', 'UNHEALTHY')]
+        self.coerce_bad_values = ['FAKE']
+
+        self.to_primitive_values = self.coerce_good_values[0:1]
+        self.from_primitive_values = self.coerce_good_values[0:1]
+
+    def test_stringify(self):
+        self.assertEqual("'UNHEALTHY'",
+                         self.field.stringify('UNHEALTHY'))
+
+    def test_stringify_invalid(self):
+        self.assertRaises(ValueError, self.field.stringify, 'FAKE')
+
+
 class TestContainerStatus(test_fields.TestField):
     def setUp(self):
         super(TestContainerStatus, self).setUp()
