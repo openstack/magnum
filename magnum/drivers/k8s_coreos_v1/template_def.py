@@ -14,30 +14,13 @@
 import os
 
 import magnum.conf
-from magnum.drivers.heat import k8s_template_def
-from magnum.drivers.heat import template_def
+from magnum.drivers.heat import k8s_coreos_template_def as kctd
 
 CONF = magnum.conf.CONF
 
 
-class CoreOSK8sTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
-    """Kubernetes template for CoreOS VM."""
-
-    def __init__(self):
-        super(CoreOSK8sTemplateDefinition, self).__init__()
-        self.add_output('kube_minions',
-                        cluster_attr='node_addresses')
-        self.add_output('kube_masters',
-                        cluster_attr='master_addresses')
-
-    def get_env_files(self, cluster_template, cluster):
-        env_files = []
-
-        template_def.add_priv_net_env_file(env_files, cluster_template)
-        template_def.add_lb_env_file(env_files, cluster_template)
-        template_def.add_fip_env_file(env_files, cluster_template)
-
-        return env_files
+class CoreOSK8sTemplateDefinition(kctd.CoreOSK8sTemplateDefinition):
+    """Kubernetes template for a CoreOS Atomic VM."""
 
     @property
     def driver_module_path(self):

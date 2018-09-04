@@ -1,5 +1,20 @@
 #cloud-config
 write_files:
+  - path: /etc/systemd/system/var-lib-docker.mount
+    owner: "root:root"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Mount ephemeral to /var/lib/docker
+
+      [Mount]
+      What=/dev/vdb
+      Where=/var/lib/docker
+      Type=ext4
+
+      [Install]
+      WantedBy=local-fs.target
+
   - path: /etc/systemd/system/configure-docker.service
     owner: "root:root"
     permissions: "0644"

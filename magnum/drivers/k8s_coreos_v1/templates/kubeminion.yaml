@@ -1,9 +1,9 @@
 heat_template_version: 2014-10-16
 
 description: >
-  This is a nested stack that defines a single Kubernetes minion,
-  based on a CoreOS cloud image.  This stack is included by a ResourceGroup
-  resource in the parent template (kubecluster.yaml).
+  This is a nested stack that defines a single Kubernetes minion, This stack is
+  included by an AutoScalingGroup resource in the parent template
+  (kubecluster.yaml).
 
 parameters:
 
@@ -34,9 +34,22 @@ parameters:
     constraints:
       - allowed_values: ["true", "false"]
 
-  network_driver:
+  docker_volume_size:
+    type: number
+    description: >
+      size of a cinder volume to allocate to docker for container/image
+      storage
+
+  docker_volume_type:
     type: string
-    description: network driver to use for instantiating container networks
+    description: >
+      type of a cinder volume to allocate to docker for container/image
+      storage
+
+  docker_storage_driver:
+    type: string
+    description: docker storage driver name
+    default: "devicemapper"
 
   tls_disabled:
     type: boolean
@@ -51,7 +64,6 @@ parameters:
     description: >
       The port which are used by kube-apiserver to provide Kubernetes
       service.
-    default: 6443
 
   cluster_uuid:
     type: string
@@ -61,14 +73,10 @@ parameters:
     type: string
     description: endpoint to retrieve TLS certs from
 
-  kube_version:
-    type: string
-    description: version of kubernetes used for kubernetes cluster
-
-  hyperkube_image:
-    type: string
+  prometheus_monitoring:
+    type: boolean
     description: >
-      Docker registry used for hyperkube image
+      whether or not to have the node-exporter running on the node
 
   kube_master_ip:
     type: string
@@ -86,18 +94,70 @@ parameters:
     type: string
     description: Subnet from which to allocate fixed addresses.
 
+  network_driver:
+    type: string
+    description: network driver to use for instantiating container networks
+
   flannel_network_cidr:
     type: string
     description: network range for flannel overlay network
 
   wait_condition_timeout:
     type: number
-    description: >
+    description : >
       timeout for the Wait Conditions
+
+  registry_enabled:
+    type: boolean
+    description: >
+      Indicates whether the docker registry is enabled.
+
+  registry_port:
+    type: number
+    description: port of registry service
+
+  swift_region:
+    type: string
+    description: region of swift service
+
+  registry_container:
+    type: string
+    description: >
+      name of swift container which docker registry stores images in
+
+  registry_insecure:
+    type: boolean
+    description: >
+      indicates whether to skip TLS verification between registry and backend storage
+
+  registry_chunksize:
+    type: number
+    description: >
+      size fo the data segments for the swift dynamic large objects
 
   secgroup_kube_minion_id:
     type: string
     description: ID of the security group for kubernetes minion.
+
+  volume_driver:
+    type: string
+    description: volume driver to use for container storage
+
+  region_name:
+    type: string
+    description: A logically separate section of the cluster
+
+  username:
+    type: string
+    description: >
+      user account
+
+  password:
+    type: string
+    description: >
+      user password, not set in current implementation, only used to
+      fill in for Kubernetes config file
+    hidden: true
 
   http_proxy:
     type: string
@@ -111,40 +171,55 @@ parameters:
     type: string
     description: no proxies for docker
 
+  kube_tag:
+    type: string
+    description: tag of the k8s containers used to provision the kubernetes cluster
+
+  flannel_tag:
+    type: string
+    description: tag of the flannel system containers
+
+  kube_version:
+    type: string
+    description: version of kubernetes used for kubernetes cluster
+
+  trustee_domain_id:
+    type: string
+    description: domain id of the trustee
+
   trustee_user_id:
     type: string
     description: user id of the trustee
-    default: ""
+
+  trustee_username:
+    type: string
+    description: username of the trustee
 
   trustee_password:
     type: string
     description: password of the trustee
-    default: ""
     hidden: true
 
   trust_id:
     type: string
     description: id of the trust which is used by the trustee
-    default: ""
     hidden: true
 
   auth_url:
     type: string
-    description: url for keystone
+    description: >
+      url for keystone, must be v2 since k8s backend only support v2
+      at this point
 
   insecure_registry_url:
     type: string
     description: insecure registry url
 
-  container_runtime:
+  container_infra_prefix:
     type: string
     description: >
-      Container runtime to use with Kubernetes.
-
-  prometheus_monitoring:
-    type: boolean
-    description: >
-      whether or not to have the node-exporter running on the node
+      prefix of container images used in the cluster, kubernetes components,
+      kubernetes-dashboard, coredns etc
 
   dns_service_ip:
     type: string
@@ -164,13 +239,44 @@ parameters:
     type: string
     description: ID of the server group for kubernetes cluster nodes.
 
+  availability_zone:
+    type: string
+    description: >
+      availability zone for master and nodes
+    default: ""
+
+  pods_network_cidr:
+    type: string
+    description: Configure the IP pool/range from which pod IPs will be chosen
+
+  kubelet_options:
+    type: string
+    description: >
+      additional options to be passed to the kubelet
+
+  kubeproxy_options:
+    type: string
+    description: >
+      additional options to be passed to the kube proxy
+
   octavia_enabled:
     type: boolean
     description: >
       whether or not to use Octavia for LoadBalancer type service.
     default: False
 
+  container_runtime:
+    type: string
+    description: >
+      Container runtime to use with Kubernetes.
+
+  hyperkube_image:
+    type: string
+    description: >
+      Docker registry used for hyperkube image
+
 resources:
+
 
   minion_wait_handle:
     type: OS::Heat::WaitConditionHandle
@@ -197,6 +303,8 @@ resources:
           template: {get_file: fragments/write-heat-params.yaml}
           params:
             "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
+            "$DOCKER_VOLUME": {get_resource: docker_volume}
+            "$DOCKER_VOLUME_SIZE": {get_param: docker_volume_size}
             "$KUBE_MASTER_IP": {get_param: kube_master_ip}
             "$KUBE_NODE_PUBLIC_IP": {get_attr: [kube_minion_floating, floating_ip_address]}
             "$KUBE_NODE_IP": {get_attr: [kube_minion_eth0, fixed_ips, 0, ip_address]}
@@ -240,11 +348,23 @@ resources:
             $OPENSTACK_CA: {get_param: openstack_ca}
           template: {get_file: fragments/add-ext-ca-certs.yaml}
 
+  enable_docker_mount:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config: {get_file: fragments/enable-docker-mount.yaml}
+
   write_kubeconfig:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: fragments/write-kubeconfig.yaml}
+      config: 
+        str_replace:
+          template: {get_file: fragments/write-kubeconfig.yaml}
+          params:
+            "$KUBE_API_PORT": {get_param: kubernetes_port}
+            "$KUBE_MASTER_IP": {get_param: kube_master_ip}
+
 
   make_cert:
     type: OS::Heat::SoftwareConfig
@@ -297,6 +417,7 @@ resources:
           template: |
             $add_ext_ca_certs
             $write_heat_params
+            $enable_docker_mount
             $write_kubeconfig
             $make_cert
             $configure_docker
@@ -310,6 +431,8 @@ resources:
                 - name: "add-ext-ca-certs.service"
                   command: "start"
                 - name: "make-cert.service"
+                  command: "start"
+                - name: "enable-docker-mount.service"
                   command: "start"
                 - name: "configure-docker.service"
                   command: "start"
@@ -327,6 +450,7 @@ resources:
             "$add_ext_ca_certs": {get_attr: [add_ext_ca_certs, config]}
             "$write_heat_params": {get_attr: [write_heat_params, config]}
             "$write_kubeconfig": {get_attr: [write_kubeconfig, config]}
+            "$enable_docker_mount": {get_attr: [enable_docker_mount, config]}
             "$make_cert": {get_attr: [make_cert, config]}
             "$configure_docker": {get_attr: [configure_docker, config]}
             "$add_proxy": {get_attr: [add_proxy, config]}
@@ -369,12 +493,31 @@ resources:
       floating_network: {get_param: external_network}
       port_id: {get_resource: kube_minion_eth0}
 
+  ######################################################################
+  #
+  # docker storage.  This allocates a cinder volume and attaches it
+  # to the minion.
+  #
+
+  docker_volume:
+    type: Magnum::Optional::Cinder::Volume
+    properties:
+      size: {get_param: docker_volume_size}
+      volume_type: {get_param: docker_volume_type}
+
+  docker_volume_attach:
+    type: Magnum::Optional::Cinder::VolumeAttachment
+    properties:
+      instance_uuid: {get_resource: kube-minion}
+      volume_id: {get_resource: docker_volume}
+      mountpoint: /dev/vdb
+
 outputs:
 
   kube_minion_ip:
     value: {get_attr: [kube_minion_eth0, fixed_ips, 0, ip_address]}
     description: >
-      This is the "private" IP address of the Kubernetes minion node.
+      This is the "public" IP address of the Kubernetes minion node.
 
   kube_minion_external_ip:
     value: {get_attr: [kube_minion_floating, floating_ip_address]}
