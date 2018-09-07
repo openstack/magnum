@@ -263,6 +263,8 @@
 
 - project:
     templates:
+      - openstack-cover-jobs
+      - openstack-lower-constraints-jobs
       - openstack-python-jobs
       - openstack-python35-jobs
       - check-requirements
@@ -273,14 +275,10 @@
         - magnum-functional-api
         - magnum-functional-k8s
         - magnum-functional-swarm-mode
-        - openstack-tox-lower-constraints
-        - openstack-tox-cover:
-            voting: false
     gate:
       queue: magnum
       jobs:
         - magnum-functional-api
-        - openstack-tox-lower-constraints
     experimental:
       jobs:
         - magnum-functional-dcos
