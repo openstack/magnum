@@ -219,6 +219,18 @@ class TemplateDefinitionTestCase(base.TestCase):
                           cmn_tdef.COMMON_ENV_PATH +
                           'disable_lb_floating_ip.yaml'], env_files)
 
+    @mock.patch('magnum.drivers.common.driver.Driver.get_driver')
+    def test_base_get_scale_params(self, mock_driver):
+        mock_context = mock.MagicMock()
+        mock_cluster = mock.MagicMock()
+        mock_driver.return_value = swarm_v2_dr.Driver()
+        cluster_driver = driver.Driver.get_driver('vm',
+                                                  'fedora-atomic',
+                                                  'swarm-mode')
+        definition = cluster_driver.get_template_definition()
+        self.assertEqual(definition.get_scale_params(mock_context,
+                                                     mock_cluster), {})
+
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseK8sTemplateDefinitionTestCase(base.TestCase):
@@ -268,6 +280,25 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
     def get_definition(self):
         return k8sa_dr.Driver().get_template_definition()
 
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.drivers.heat.template_def.TemplateDefinition'
+                '.get_output')
+    def test_k8s_get_scale_params(self, mock_get_output,
+                                  mock_osc_class):
+        mock_context = mock.MagicMock()
+        mock_cluster = mock.MagicMock()
+
+        removal_nodes = ['node1', 'node2']
+        mock_scale_manager = mock.MagicMock()
+        mock_scale_manager.get_removal_nodes.return_value = removal_nodes
+
+        definition = k8sa_tdef.AtomicK8sTemplateDefinition()
+
+        scale_params = definition.get_scale_params(mock_context, mock_cluster,
+                                                   mock_scale_manager)
+        expected_scale_params = {'minions_to_remove': ['node1', 'node2']}
+        self.assertEqual(scale_params, expected_scale_params)
+
     @mock.patch('magnum.common.keystone.is_octavia_enabled')
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.drivers.k8s_fedora_atomic_v1.template_def'
@@ -298,14 +329,11 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         mock_cluster = mock.MagicMock()
         mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
         del mock_cluster.stack_id
-        mock_scale_manager = mock.MagicMock()
         mock_osc = mock.MagicMock()
         mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
         mock_osc.cinder_region_name.return_value = 'RegionOne'
         mock_osc_class.return_value = mock_osc
 
-        removal_nodes = ['node1', 'node2']
-        mock_scale_manager.get_removal_nodes.return_value = removal_nodes
         mock_get_discovery_url.return_value = 'fake_discovery_url'
 
         mock_context.auth_url = 'http://192.168.10.10:5000/v3'
@@ -374,11 +402,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
-        k8s_def.get_params(mock_context, mock_cluster_template, mock_cluster,
-                           scale_manager=mock_scale_manager)
+        k8s_def.get_params(mock_context, mock_cluster_template, mock_cluster)
 
         expected_kwargs = {'extra_params': {
-            'minions_to_remove': removal_nodes,
             'discovery_url': 'fake_discovery_url',
             'flannel_network_cidr': flannel_cidr,
             'flannel_network_subnetlen': flannel_subnet,
@@ -435,7 +461,6 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             mock_context,
             mock_cluster_template,
             mock_cluster,
-            scale_manager=mock_scale_manager
         )
 
     @mock.patch('magnum.common.keystone.is_octavia_enabled')
@@ -468,14 +493,11 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         mock_cluster = mock.MagicMock()
         mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
         del mock_cluster.stack_id
-        mock_scale_manager = mock.MagicMock()
         mock_osc = mock.MagicMock()
         mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
         mock_osc.cinder_region_name.return_value
         mock_osc_class.return_value = mock_osc
 
-        removal_nodes = ['node1', 'node2']
-        mock_scale_manager.get_removal_nodes.return_value = removal_nodes
         mock_get_discovery_url.return_value = 'fake_discovery_url'
 
         mock_context.auth_url = 'http://192.168.10.10:5000/v3'
@@ -544,11 +566,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
-        k8s_def.get_params(mock_context, mock_cluster_template, mock_cluster,
-                           scale_manager=mock_scale_manager)
+        k8s_def.get_params(mock_context, mock_cluster_template, mock_cluster)
 
         expected_kwargs = {'extra_params': {
-            'minions_to_remove': removal_nodes,
             'discovery_url': 'fake_discovery_url',
             'flannel_network_cidr': flannel_cidr,
             'flannel_network_subnetlen': flannel_subnet,
@@ -1297,9 +1317,8 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.drivers.heat.template_def.BaseTemplateDefinition'
                 '.get_params')
-    @mock.patch('magnum.drivers.heat.template_def.TemplateDefinition'
-                '.get_output')
-    def test_mesos_get_params(self, mock_get_output, mock_get_params,
+    def test_mesos_get_params(self,
+                              mock_get_params,
                               mock_osc_class):
         mock_context = mock.MagicMock()
         mock_context.auth_url = 'http://192.168.10.10:5000/v3'
@@ -1324,14 +1343,9 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
         mock_osc.cinder_region_name.return_value = 'RegionOne'
         mock_osc_class.return_value = mock_osc
 
-        removal_nodes = ['node1', 'node2']
-        mock_scale_manager = mock.MagicMock()
-        mock_scale_manager.get_removal_nodes.return_value = removal_nodes
-
         mesos_def = mesos_tdef.UbuntuMesosTemplateDefinition()
 
-        mesos_def.get_params(mock_context, mock_cluster_template, mock_cluster,
-                             scale_manager=mock_scale_manager)
+        mesos_def.get_params(mock_context, mock_cluster_template, mock_cluster)
 
         expected_kwargs = {'extra_params': {
             'region_name': mock_osc.cinder_region_name.return_value,
@@ -1344,12 +1358,31 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
             'mesos_slave_work_dir': mesos_slave_work_dir,
             'mesos_slave_executor_env_variables':
                 mesos_slave_executor_env_variables,
-            'mesos_slave_image_providers': mesos_slave_image_providers,
-            'slaves_to_remove': removal_nodes}}
+            'mesos_slave_image_providers': mesos_slave_image_providers}}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
                                                 mock_cluster,
                                                 **expected_kwargs)
+
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.drivers.heat.template_def.TemplateDefinition'
+                '.get_output')
+    def test_mesos_get_scale_params(self, mock_get_output,
+                                    mock_osc_class):
+        mock_context = mock.MagicMock()
+        mock_cluster = mock.MagicMock()
+        mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
+
+        removal_nodes = ['node1', 'node2']
+        mock_scale_manager = mock.MagicMock()
+        mock_scale_manager.get_removal_nodes.return_value = removal_nodes
+
+        mesos_def = mesos_tdef.UbuntuMesosTemplateDefinition()
+
+        scale_params = mesos_def.get_scale_params(mock_context, mock_cluster,
+                                                  mock_scale_manager)
+        expected_scale_params = {'slaves_to_remove': ['node1', 'node2']}
+        self.assertEqual(scale_params, expected_scale_params)
 
     def test_mesos_get_heat_param(self):
         mesos_def = mesos_tdef.UbuntuMesosTemplateDefinition()

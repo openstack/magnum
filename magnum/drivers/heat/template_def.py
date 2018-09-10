@@ -334,6 +334,9 @@ class BaseTemplateDefinition(TemplateDefinition):
                 cluster.discovery_url = discovery_url
         return discovery_url
 
+    def get_scale_params(self, context, cluster, scale_manager=None):
+        return dict()
+
 
 def add_lb_env_file(env_files, cluster_template):
     if cluster_template.master_lb_enabled:

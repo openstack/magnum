@@ -70,16 +70,18 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
         for label in label_list:
             extra_params[label] = cluster.labels.get(label)
 
-        scale_mgr = kwargs.pop('scale_manager', None)
-        if scale_mgr:
-            hosts = self.get_output('mesos_slaves_private')
-            extra_params['slaves_to_remove'] = (
-                scale_mgr.get_removal_nodes(hosts))
-
         return super(UbuntuMesosTemplateDefinition,
                      self).get_params(context, cluster_template, cluster,
                                       extra_params=extra_params,
                                       **kwargs)
+
+    def get_scale_params(self, context, cluster, scale_manager=None):
+        scale_params = dict()
+        if scale_manager:
+            hosts = self.get_output('mesos_slaves_private')
+            scale_params['slaves_to_remove'] = (
+                scale_manager.get_removal_nodes(hosts))
+        return scale_params
 
     def get_env_files(self, cluster_template, cluster):
         env_files = []

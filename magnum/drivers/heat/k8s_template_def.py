@@ -92,11 +92,6 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
 
     def get_params(self, context, cluster_template, cluster, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
-        scale_mgr = kwargs.pop('scale_manager', None)
-        if scale_mgr:
-            hosts = self.get_output('kube_minions_private')
-            extra_params['minions_to_remove'] = (
-                scale_mgr.get_removal_nodes(hosts))
 
         extra_params['discovery_url'] = self.get_discovery_url(cluster)
         osc = self.get_osc(context)
@@ -139,3 +134,11 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                      self).get_params(context, cluster_template, cluster,
                                       extra_params=extra_params,
                                       **kwargs)
+
+    def get_scale_params(self, context, cluster, scale_manager=None):
+        scale_params = dict()
+        if scale_manager:
+            hosts = self.get_output('kube_minions_private')
+            scale_params['minions_to_remove'] = (
+                scale_manager.get_removal_nodes(hosts))
+        return scale_params

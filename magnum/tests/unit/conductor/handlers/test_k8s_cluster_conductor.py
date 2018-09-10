@@ -1066,13 +1066,6 @@ class TestClusterConductorWithK8s(base.TestCase):
                           mock_get_template_contents):
 
         mock_stack_id = 'xx-xx-xx-xx'
-        expected_template_contents = 'template_contents'
-
-        mock_tpl_files = {}
-        mock_get_template_contents.return_value = [
-            mock_tpl_files, expected_template_contents]
-        mock_extract_template_definition.return_value = ('template/path',
-                                                         {}, [])
         mock_heat_client = mock.MagicMock()
         mock_osc.return_value.heat.return_value = mock_heat_client
         mock_cluster = mock.MagicMock()
@@ -1081,10 +1074,8 @@ class TestClusterConductorWithK8s(base.TestCase):
         k8s_dr.Driver().update_cluster({}, mock_cluster)
 
         expected_args = {
-            'parameters': {},
-            'template': expected_template_contents,
-            'files': {},
-            'environment_files': [],
+            'parameters': {'number_of_minions': mock_cluster.node_count},
+            'existing': True,
             'disable_rollback': True
         }
         mock_heat_client.stacks.update.assert_called_once_with(mock_stack_id,
