@@ -104,8 +104,7 @@ class HeatDriver(driver.Driver):
 
     def update_cluster(self, context, cluster, scale_manager=None,
                        rollback=False):
-        self._update_stack(context, clients.OpenStackClients(context), cluster,
-                           scale_manager, rollback)
+        self._update_stack(context, cluster, scale_manager, rollback)
 
     def delete_cluster(self, context, cluster):
         self._delete_stack(context, clients.OpenStackClients(context), cluster)
@@ -152,26 +151,27 @@ class HeatDriver(driver.Driver):
 
         return created_stack
 
-    def _update_stack(self, context, osc, cluster, scale_manager=None,
+    def _update_stack(self, context, cluster, scale_manager=None,
                       rollback=False):
-        template_path, heat_params, env_files = (
-            self._extract_template_definition(context, cluster,
-                                              scale_manager=scale_manager))
+        definition = self.get_template_definition()
 
-        tpl_files, template = template_utils.get_template_contents(
-            template_path)
-        environment_files, env_map = self._get_env_files(template_path,
-                                                         env_files)
-        tpl_files.update(env_map)
+        heat_params = {}
+        # stack node_count parameter name
+        stack_nc_param = definition.get_heat_param(cluster_attr='node_count')
+        heat_params[stack_nc_param] = cluster.node_count
+
+        scale_params = definition.get_scale_params(context,
+                                                   cluster,
+                                                   scale_manager)
+        heat_params.update(scale_params)
 
         fields = {
             'parameters': heat_params,
-            'environment_files': environment_files,
-            'template': template,
-            'files': tpl_files,
+            'existing': True,
             'disable_rollback': not rollback
         }
 
+        osc = clients.OpenStackClients(context)
         osc.heat().stacks.update(cluster.stack_id, **fields)
 
     def _delete_stack(self, context, osc, cluster):

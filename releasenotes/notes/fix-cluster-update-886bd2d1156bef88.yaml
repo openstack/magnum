@@ -1,0 +1,8 @@
+---
+fixes:
+  - |
+    When doing a cluster update magnum is now passing the existing parameter
+    to heat which will use the heat templates stored in the heat db. This
+    change will prevent heat from replacacing all nodes when the heat
+    templates change, for example after an upgrade of the magnum server code.
+    https://storyboard.openstack.org/#!/story/1722573
