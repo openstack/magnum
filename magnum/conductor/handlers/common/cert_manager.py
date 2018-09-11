@@ -144,8 +144,8 @@ def get_cluster_magnum_cert(cluster, context=None):
 
 def create_client_files(cluster, context=None):
     if not os.path.isdir(CONF.cluster.temp_cache_dir):
-        LOG.debug("Certificates will not be cached in the filesystem: they \
-            will be created as tempfiles.")
+        LOG.debug("Certificates will not be cached in the filesystem: they "
+                  "will be created as tempfiles.")
         ca_cert = get_cluster_ca_certificate(cluster, context)
         magnum_cert = get_cluster_magnum_cert(cluster, context)
 

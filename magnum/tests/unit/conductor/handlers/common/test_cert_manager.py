@@ -317,8 +317,9 @@ class CertManagerTestCase(base.BaseTestCase):
         (cluster_ca_cert, cluster_key, cluster_magnum_cert) = \
             cert_manager.create_client_files(mock_cluster)
 
-        mock_logging.debug.assert_called_once_with("Certificates will not be cached in the filesystem: they \
-            will be created as tempfiles.")
+        mock_logging.debug.assert_called_once_with(
+            "Certificates will not be cached in the filesystem: "
+            "they will be created as tempfiles.")
         self.assertEqual(self.CertManager.get_cert.call_count, 2)
         self.assertEqual(mock_cert.get_certificate.call_count, 2)
         self.assertEqual(mock_cert.get_decrypted_private_key.call_count, 1)

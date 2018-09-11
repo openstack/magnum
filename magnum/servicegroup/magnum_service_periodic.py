@@ -25,10 +25,10 @@ LOG = log.getLogger(__name__)
 
 
 class MagnumServicePeriodicTasks(periodic_task.PeriodicTasks):
-    '''Magnum periodic Task class
+    """Magnum periodic Task class
 
     Any periodic task job need to be added into this class
-    '''
+    """
 
     def __init__(self, conf, binary):
         self.magnum_service_ref = None

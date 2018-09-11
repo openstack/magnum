@@ -290,7 +290,7 @@ class BaysController(base.Controller):
     }
 
     def _generate_name_for_bay(self, context):
-        '''Generate a random name like: zeta-22-bay.'''
+        """Generate a random name like: zeta-22-bay."""
         name_gen = name_generator.NameGenerator()
         name = name_gen.generate()
         return name + '-bay'

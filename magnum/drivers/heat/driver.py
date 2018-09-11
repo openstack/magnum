@@ -41,11 +41,11 @@ LOG = logging.getLogger(__name__)
 
 @six.add_metaclass(abc.ABCMeta)
 class HeatDriver(driver.Driver):
-    '''Base Driver class for using Heat
+    """Base Driver class for using Heat
 
        Abstract class for implementing Drivers that leverage OpenStack Heat for
        orchestrating cluster lifecycle operations
-    '''
+    """
 
     def _extract_template_definition(self, context, cluster,
                                      scale_manager=None):
@@ -67,10 +67,10 @@ class HeatDriver(driver.Driver):
 
     @abc.abstractmethod
     def get_template_definition(self):
-        '''return an implementation of
+        """return an implementation of
 
            magnum.drivers.common.drivers.heat.TemplateDefinition
-        '''
+        """
 
         raise NotImplementedError("Must implement 'get_template_definition'")
 

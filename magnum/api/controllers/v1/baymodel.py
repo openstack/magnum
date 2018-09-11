@@ -236,7 +236,7 @@ class BayModelsController(base.Controller):
     }
 
     def _generate_name_for_baymodel(self, context):
-        '''Generate a random name like: zeta-22-model.'''
+        """Generate a random name like: zeta-22-model."""
 
         name_gen = name_generator.NameGenerator()
         name = name_gen.generate()

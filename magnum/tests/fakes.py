@@ -97,11 +97,11 @@ class FakeAuthProtocol(mock.Mock):
 
 
 class FakeLoopingCall(object):
-    '''Fake a looping call without the eventlet stuff
+    """Fake a looping call without the eventlet stuff
 
        For tests, just do a simple implementation so that we can ensure the
        called logic works rather than testing LoopingCall
-    '''
+    """
 
     def __init__(self, **kwargs):
         func = kwargs.pop("f", None)

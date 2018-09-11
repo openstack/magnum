@@ -114,9 +114,9 @@ class CertManager(cert_manager.CertManager):
         :raises CertificateStorageException: if certificate retrieval fails
         """
         LOG.warning(
-            "Loading certificate {0} from the local filesystem. "
-            "CertManager type 'local' should be used for testing purpose."
-            .format(cert_ref))
+            "Loading certificate %s from the local filesystem. "
+            "CertManager type 'local' should be used for testing purpose.",
+            cert_ref)
 
         filename_base = os.path.join(CONF.certificates.storage_path, cert_ref)
 
@@ -131,9 +131,7 @@ class CertManager(cert_manager.CertManager):
             with open(filename_certificate, 'r') as cert_file:
                 cert_data['certificate'] = cert_file.read()
         except IOError:
-            LOG.error(
-                "Failed to read certificate for {0}."
-                .format(cert_ref))
+            LOG.error("Failed to read certificate for %s.", cert_ref)
             raise exception.CertificateStorageException(
                 msg=_("Certificate could not be read.")
             )
@@ -141,9 +139,7 @@ class CertManager(cert_manager.CertManager):
             with open(filename_private_key, 'r') as key_file:
                 cert_data['private_key'] = key_file.read()
         except IOError:
-            LOG.error(
-                "Failed to read private key for {0}."
-                .format(cert_ref))
+            LOG.error("Failed to read private key for %s.", cert_ref)
             raise exception.CertificateStorageException(
                 msg=_("Private Key could not be read.")
             )
@@ -175,9 +171,9 @@ class CertManager(cert_manager.CertManager):
         :raises CertificateStorageException: if certificate deletion fails
         """
         LOG.warning(
-            "Deleting certificate {0} from the local filesystem. "
-            "CertManager type 'local' should be used for testing purpose."
-            .format(cert_ref))
+            "Deleting certificate %s from the local filesystem. "
+            "CertManager type 'local' should be used for testing purpose.",
+            cert_ref)
 
         filename_base = os.path.join(CONF.certificates.storage_path, cert_ref)
 
@@ -194,7 +190,5 @@ class CertManager(cert_manager.CertManager):
             if path.isfile(filename_pkp):
                 os.remove(filename_pkp)
         except IOError as ioe:
-            LOG.error(
-                "Failed to delete certificate {0}."
-                .format(cert_ref))
+            LOG.error("Failed to delete certificate %s.", cert_ref)
             raise exception.CertificateStorageException(msg=str(ioe))
