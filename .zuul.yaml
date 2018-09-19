@@ -276,6 +276,8 @@
         - magnum-functional-api
         - magnum-functional-k8s
         - magnum-functional-swarm-mode
+        - openstack-tox-cover:
+           voting: false
     gate:
       queue: magnum
       jobs:
