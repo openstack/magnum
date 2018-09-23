@@ -540,3 +540,118 @@ class Connection(object):
         :returns: A federation.
         :raises: FederationNotFound
         """
+
+    @abc.abstractmethod
+    def create_nodegroup(self, values):
+        """Create a new nodegroup in cluster.
+
+        :param values: A dict containing several items used to identify
+                       and track the nodegroup.
+                       For example:
+                       ::
+
+                    {
+                      'uuid': uuidutils.generate_uuid(),
+                      'name': 'example',
+                      ...
+                    }
+
+        :returns: A nodegroup record.
+        """
+
+    @abc.abstractmethod
+    def destroy_nodegroup(self, cluster_id, nodegroup_id):
+        """Destroy a nodegroup.
+
+        :param cluster_id: The uuid of the cluster where the nodegroup
+                             belongs to.
+        :param nodegroup_id: The id or uuid of the nodegroup
+        """
+
+    @abc.abstractmethod
+    def update_nodegroup(self, cluster_id, nodegroup_id, values):
+        """Update properties of a nodegroup.
+
+        :param cluster_id: The uuid of the cluster where the nodegroup
+                             belongs to.
+        :param nodegroup_id: The id or uuid of a nodegroup.
+        :param values: A dict containing several items used to identify
+                       and track the nodegroup.
+                       For example:
+                       ::
+
+                    {
+                      'uuid': uuidutils.generate_uuid(),
+                      'name': 'example',
+                      ...
+                    }
+
+        :returns: A nodegroup record.
+        :raises: NodeGroupNotFound
+        """
+
+    @abc.abstractmethod
+    def get_nodegroup_by_id(self, context, cluster_id, nodegroup_id):
+        """Return a nodegroup for a given cluster uuid and nodegroup id.
+
+        :param cluster_id: The uuid of the cluster where the nodegroup
+                             belongs to.
+        :param nodegroup_id: The id of a nodegroup.
+
+        :returns: A nodegroup record.
+        :raises: NodeGroupNotFound
+        """
+
+    @abc.abstractmethod
+    def get_nodegroup_by_uuid(self, context, cluster_id, nodegroup_uuid):
+        """Return a nodegroup for a given cluster uuid and nodegroup uuid.
+
+        :param cluster_id: The uuid of the cluster where the nodegroup
+                             belongs to.
+        :param nodegroup_uuid: The uuid of a nodegroup.
+
+        :returns: A nodegroup record.
+        :raises: NodeGroupNotFound
+        """
+
+    @abc.abstractmethod
+    def get_nodegroup_by_name(self, context, cluster_id, nodegroup_name):
+        """Return a nodegroup for a given cluster uuid and nodegroup name.
+
+        :param cluster_id: The uuid of the cluster where the nodegroup
+                             belongs to.
+        :param nodegroup_name: The name of a nodegroup.
+
+        :returns: A nodegroup record.
+        :raises: NodeGroupNotFound
+        """
+
+    @abc.abstractmethod
+    def list_cluster_nodegroups(self, context, cluster_id, filters=None,
+                                limit=None, marker=None, sort_key=None,
+                                sort_dir=None):
+        """Get matching nodegroups in a given cluster.
+
+        :param context: The security context
+        :param cluster_id: The uuid of the cluster where the nodegroup
+                             belongs to.
+        :param filters: Filters to apply. Defaults to None.
+
+        :param limit: Maximum number of nodegroups to return.
+        :param marker: the last item of the previous page; we return the next
+                       result set.
+        :param sort_key: Attribute by which results should be sorted.
+        :param sort_dir: direction in which results should be sorted.
+                         (asc, desc)
+
+        :returns: A list of nodegroup records.
+        """
+
+    @abc.abstractmethod
+    def get_cluster_nodegroup_count(self, context, cluster_id):
+        """Get count of nodegroups in a given cluster.
+
+        :param cluster_id: The uuid of the cluster where the nodegroup
+                             belongs to.
+        :returns: Count of matching clusters.
+        """

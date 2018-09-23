@@ -267,3 +267,40 @@ def create_test_federation(**kw):
         del federation['id']
     dbapi = db_api.get_instance()
     return dbapi.create_federation(federation)
+
+
+def get_test_nodegroup(**kw):
+    return {
+        'id': kw.get('id', 12),
+        'uuid': kw.get('uuid', '483203a3-dbee-4a9c-9d65-9820512f4df8'),
+        'name': kw.get('name', 'nodegroup1'),
+        'cluster_id': kw.get('cluster_id',
+                             '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'),
+        'project_id': kw.get('project_id', 'fake_project'),
+        'docker_volume_size': kw.get('docker_volume_size'),
+        'labels': kw.get('labels'),
+        'flavor_id': kw.get('flavor_id', None),
+        'image_id': kw.get('image_id', None),
+        'node_addresses': kw.get('node_addresses', ['172.17.2.4']),
+        'node_count': kw.get('node_count', 3),
+        'role': kw.get('role', 'worker'),
+        'max_node_count': kw.get('max_node_count', None),
+        'min_node_count': kw.get('min_node_count', 1),
+        'is_default': kw.get('is_default', True),
+        'created_at': kw.get('created_at'),
+        'updated_at': kw.get('updated_at')
+    }
+
+
+def create_test_nodegroup(**kw):
+    """Create test nodegroup entry in DB and return federation DB object.
+
+    :param kw: kwargs with overriding values for nodegroup attributes.
+    :return: Test nodegroup DB object.
+    """
+    nodegroup = get_test_nodegroup(**kw)
+    # Let DB generate ID if it isn't specified explicitly
+    if 'id' not in kw:
+        del nodegroup['id']
+    dbapi = db_api.get_instance()
+    return dbapi.create_nodegroup(nodegroup)
