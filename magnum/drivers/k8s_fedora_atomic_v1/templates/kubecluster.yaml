@@ -1009,7 +1009,7 @@ resources:
           name:
             list_join:
               - '-'
-              - [{ get_param: 'OS::stack_name' }, 'minion', '%index%']
+              - [{ get_param: 'OS::stack_name' }, 'node', '%index%']
           prometheus_monitoring: {get_param: prometheus_monitoring}
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: minion_image}
