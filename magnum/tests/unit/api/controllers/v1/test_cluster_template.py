@@ -284,8 +284,8 @@ class TestPatch(api_base.FunctionalTest):
 
         response = self.patch_json('/clustertemplates/%s' %
                                    cluster_template.uuid,
-                                   [{'path': '/name',
-                                     'value': 'cluster_model_example_B',
+                                   [{'path': '/network_driver',
+                                     'value': 'flannel',
                                      'op': 'replace'}],
                                    expect_errors=True)
         self.assertEqual(400, response.status_int)
@@ -293,6 +293,19 @@ class TestPatch(api_base.FunctionalTest):
         self.assertTrue(response.json['errors'])
         self.assertIn(cluster_template.uuid,
                       response.json['errors'][0]['detail'])
+
+    def test_update_cluster_template_name_with_cluster(self):
+        cluster_template = obj_utils.create_test_cluster_template(self.context)
+        obj_utils.create_test_cluster(
+            self.context, cluster_template_id=cluster_template.uuid)
+
+        response = self.patch_json('/clustertemplates/%s' %
+                                   cluster_template.uuid,
+                                   [{'path': '/name',
+                                     'value': 'cluster_model_example_B',
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual(200, response.status_int)
 
     @mock.patch.object(magnum_policy, 'enforce')
     def test_update_public_cluster_template_success(self, mock_policy):
@@ -353,8 +366,8 @@ class TestPatch(api_base.FunctionalTest):
             self.context, cluster_template_id=cluster_template.uuid)
         response = self.patch_json('/clustertemplates/%s' %
                                    cluster_template.uuid,
-                                   [{'path': '/name',
-                                     'value': 'new_name',
+                                   [{'path': '/network_driver',
+                                     'value': 'calico',
                                      'op': 'replace'}],
                                    expect_errors=True)
         self.assertEqual(400, response.status_code)

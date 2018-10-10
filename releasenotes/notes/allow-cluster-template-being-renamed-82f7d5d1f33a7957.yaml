@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    To get a better cluster template versioning and relieve the pain
+    of maintaining public cluster template, now the name of cluster template
+    can be changed.
+
