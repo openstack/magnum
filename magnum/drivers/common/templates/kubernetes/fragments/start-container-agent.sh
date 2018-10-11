@@ -11,6 +11,6 @@ atomic install \
 --system-package no \
 --set REQUESTS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt \
 --name heat-container-agent \
-${_prefix}heat-container-agent:rawhide
+${_prefix}heat-container-agent:queens-stable
 
 systemctl start heat-container-agent
