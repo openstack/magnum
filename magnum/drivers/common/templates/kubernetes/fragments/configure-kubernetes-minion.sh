@@ -4,6 +4,10 @@
 
 echo "configuring kubernetes (minion)"
 
+# resize sysroot because it runs out of space
+lvextend --size +2G /dev/atomicos/root
+xfs_growfs /dev/atomicos/root
+
 _prefix=${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}
 
 _addtl_mounts=''
@@ -24,6 +28,9 @@ EOF
         systemctl restart NetworkManager
     fi
 fi
+
+# added extra parameters to shared mount for docker, otherwise, it doesn't have access to containers
+_addtl_mounts="${_addtl_mounts},{\"type\":\"bind\",\"source\":\"/var/lib/docker\",\"destination\":\"/var/lib/docker\",\"options\":[\"rbind\",\"rw\",\"rshared\",\"mode=755\"]}"
 
 atomic install --storage ostree --system --system-package=no --set=ADDTL_MOUNTS=${_addtl_mounts} --name=kubelet ${_prefix}kubernetes-kubelet:${KUBE_TAG}
 atomic install --storage ostree --system --system-package=no --name=kube-proxy ${_prefix}kubernetes-proxy:${KUBE_TAG}

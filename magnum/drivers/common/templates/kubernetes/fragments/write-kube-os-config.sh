@@ -16,7 +16,7 @@ password=$TRUSTEE_PASSWORD
 trust-id=$TRUST_ID
 ca-file=/etc/kubernetes/ca-bundle.crt
 [LoadBalancer]
-use-octavia=$OCTAVIA_ENABLED
+#   use-octavia=$OCTAVIA_ENABLED
 subnet-id=$CLUSTER_SUBNET
 create-monitor=yes
 monitor-delay=1m

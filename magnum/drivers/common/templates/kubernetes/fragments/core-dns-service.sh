@@ -199,7 +199,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 
 ---
-apiVersion: apps/v1
+apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: kube-dns-autoscaler

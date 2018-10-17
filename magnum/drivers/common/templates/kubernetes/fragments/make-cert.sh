@@ -183,3 +183,4 @@ chown -R kube:kube_etcd "${cert_dir}"
 chmod 440 $cert_dir/server.key
 mkdir -p /etc/etcd/certs
 cp ${cert_dir}/* /etc/etcd/certs
+chown -R etcd:etcd /etc/etcd/certs
