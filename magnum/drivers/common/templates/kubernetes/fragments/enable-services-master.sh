@@ -13,6 +13,13 @@ while [ ! -f /etc/kubernetes/certs/ca.key ] && \
     sleep 2
 done
 
+# docker is already enabled and possibly running on centos atomic host
+# so we need to stop it first and delete the docker0 bridge (which will
+# be re-created using the flannel-provided subnet).
+echo "stopping docker"
+systemctl stop docker
+ip link del docker0
+
 echo "starting services"
 for service in etcd docker kube-apiserver kube-controller-manager kube-scheduler kubelet kube-proxy; do
     echo "activating service $service"

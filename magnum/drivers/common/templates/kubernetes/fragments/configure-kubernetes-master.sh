@@ -4,6 +4,10 @@
 
 echo "configuring kubernetes (master)"
 
+# resize sysroot because it runs out of space
+lvextend --size +2G /dev/atomicos/root
+xfs_growfs /dev/atomicos/root
+
 _prefix=${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}
 
 mkdir -p /opt/cni
@@ -170,6 +174,10 @@ KUBELET_ARGS="${KUBELET_ARGS} --client-ca-file=${CERT_DIR}/ca.crt --tls-cert-fil
 # specified cgroup driver
 KUBELET_ARGS="${KUBELET_ARGS} --cgroup-driver=${CGROUP_DRIVER}"
 
+if [ -n "$TRUST_ID" ] && [ "$(echo "${CLOUD_PROVIDER_ENABLED}" | tr '[:upper:]' '[:lower:]')" = "true" ]; then
+    KUBELET_ARGS="$KUBELET_ARGS --cloud-config=/etc/kubernetes/kube_openstack_config --cloud-provider=openstack"
+fi
+
 systemctl disable docker
 if cat /usr/lib/systemd/system/docker.service | grep 'native.cgroupdriver'; then
         cp /usr/lib/systemd/system/docker.service /etc/systemd/system/
@@ -192,7 +200,8 @@ fi
 KUBELET_ARGS="${KUBELET_ARGS} --address=${KUBE_NODE_IP} --port=10250 --read-only-port=0 --anonymous-auth=false --authorization-mode=Webhook --authentication-token-webhook=true"
 
 sed -i '
-/^KUBELET_ADDRESS=/ s/=.*/="--address=${KUBE_NODE_IP}"/
+/^KUBELET_ADDRESS=/ s/=.*/=""/
 /^KUBELET_HOSTNAME=/ s/=.*/=""/
+s/^KUBELET_API_SERVER=.*$//
 /^KUBELET_ARGS=/ s|=.*|="'"\$(/etc/kubernetes/get_require_kubeconfig.sh) ${KUBELET_ARGS}"'"|
 ' /etc/kubernetes/kubelet
