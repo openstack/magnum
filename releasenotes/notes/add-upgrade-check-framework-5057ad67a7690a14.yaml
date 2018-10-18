@@ -1,0 +1,8 @@
+---
+prelude: >
+    Added new tool ``magnum-status upgrade check``.
+features:
+  - |
+    New framework for ``magnum-status upgrade check`` command is added.
+    This framework allows adding various checks which can be run before a
+    Magnum upgrade to ensure if the upgrade can be performed safely.

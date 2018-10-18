@@ -82,6 +82,12 @@ Installation Guide
 
    install/index
 
+CLI Guide
+=========
+.. toctree::
+   :maxdepth: 1
+
+   cli/index
 
 Sample Configurations and Policies
 ==================================
