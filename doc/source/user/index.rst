@@ -375,6 +375,13 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `k8s_keystone_auth_tag`_              | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
+| `tiller_enabled`_                     | - true             | false         |
+|                                       | - false            |               |
++---------------------------------------+--------------------+---------------+
+| `tiller_tag`_                         | see below          | ""            |
++---------------------------------------+--------------------+---------------+
+| `tiller_namespace`_                   | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 
 Cluster
 -------
@@ -1198,6 +1205,20 @@ _`k8s_keystone_auth_tag`
   version, based on its container tag
   <https://hub.docker.com/r/k8scloudprovider/k8s-keystone-auth/tags/>`_.
   Stein-default: 1.13.0
+
+_`tiller_enabled`
+  If set to true, tiller will be deployed in the kube-system namespace.
+  Defaults to false.
+
+_`tiller_tag`
+  Add tiller_tag label to select the version of tiller. If the tag is not set
+  the tag that matches the helm client version in the heat-agent will be
+  picked. The tiller image can be stored in a private registry and the
+  cluster can pull it using the container_infra_prefix label.
+
+_`tiller_namespace`
+  Configure in which namespace tiller is going to be installed.
+  Default: magnum-tiller
 
 External load balancer for services
 -----------------------------------

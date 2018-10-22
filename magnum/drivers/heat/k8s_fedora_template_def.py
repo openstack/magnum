@@ -115,7 +115,10 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                       'prometheus_tag',
                       'grafana_tag',
                       'heat_container_agent_tag',
-                      'keystone_auth_enabled', 'k8s_keystone_auth_tag']
+                      'keystone_auth_enabled', 'k8s_keystone_auth_tag',
+                      'tiller_enabled',
+                      'tiller_tag',
+                      'tiller_namespace']
 
         for label in label_list:
             label_value = cluster.labels.get(label)

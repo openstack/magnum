@@ -540,6 +540,21 @@ parameters:
     description: >
       project id of current project
 
+  tiller_enabled:
+    type: boolean
+    description: Choose whether to install tiller or not.
+    default: false
+
+  tiller_tag:
+    type: string
+    description: tag of tiller container
+    default: "v2.12.3"
+
+  tiller_namespace:
+    type: string
+    description: namespace where tiller will be installed.
+    default: "magnum-tiller"
+
 resources:
 
   ######################################################################
@@ -773,6 +788,9 @@ resources:
           keystone_auth_enabled: {get_param: keystone_auth_enabled}
           k8s_keystone_auth_tag: {get_param: k8s_keystone_auth_tag}
           project_id: {get_param: project_id}
+          tiller_enabled: {get_param: tiller_enabled}
+          tiller_tag: {get_param: tiller_tag}
+          tiller_namespace: {get_param: tiller_namespace}
 
   kube_cluster_config:
     type: OS::Heat::SoftwareConfig
@@ -788,11 +806,12 @@ resources:
                 params:
                   "$CA_KEY": {get_param: ca_key}
             - get_file: ../../common/templates/kubernetes/fragments/core-dns-service.sh
+            - get_file: ../../common/templates/kubernetes/fragments/calico-service.sh
+            - get_file: ../../common/templates/kubernetes/fragments/enable-helm-tiller.sh
             - str_replace:
                 template: {get_file: ../../common/templates/kubernetes/fragments/enable-prometheus-monitoring.sh}
                 params:
                   "$ADMIN_PASSWD": {get_param: grafana_admin_passwd}
-            - get_file: ../../common/templates/kubernetes/fragments/calico-service.sh
             - str_replace:
                 params:
                   $enable-ingress-traefik: {get_file: ../../common/templates/kubernetes/fragments/enable-ingress-traefik.sh}

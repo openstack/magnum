@@ -51,3 +51,14 @@
             push: no
           with_items: "{{ kubernetes_images }}"
           retries: 10
+
+    - name: "Build helm-client image"
+      block:
+        - docker_image:
+            path: "{{ magnum_src_dir }}/dockerfiles/helm-client"
+            name: "{{ magnum_repository }}/helm-client"
+            tag: "{{ helm_version }}"
+            buildargs:
+              HELM_VERSION: "{{ helm_version }}"
+            push: no
+          retries: 10

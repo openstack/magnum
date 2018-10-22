@@ -1,0 +1,14 @@
+---
+features:
+  - |
+    Add tiller_enabled to install tiller in k8s_fedora_atomic
+    clusters. Defaults to false. Add tiller_tag label to select the
+    version of tiller. If the tag is not set the tag that matches the helm
+    client version in the heat-agent will be picked. The tiller image can
+    be stored in a private registry and the cluster can pull it using the
+    container_infra_prefix label. Add tiller_namespace label to select in
+    which namespace to install tiller. Tiller is install with a Kubernetes
+    job. This job runs with a container that includes the helm client.
+    This image is maintained by the magnum team and lives in,
+    docker.io/openstackmagnum/helm-client. This container follows the same
+    versions as helm and tiller.

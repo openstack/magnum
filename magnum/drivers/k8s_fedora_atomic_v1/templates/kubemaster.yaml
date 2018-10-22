@@ -418,6 +418,18 @@ parameters:
     description: >
       project id of current project
 
+  tiller_enabled:
+    type: string
+    description: Whether to enable tiller or not
+
+  tiller_tag:
+    type: string
+    description: tag of tiller container
+
+  tiller_namespace:
+    type: string
+    description: namespace where tiller will be installed
+
 resources:
   ######################################################################
   #
@@ -524,6 +536,9 @@ resources:
             "$K8S_KEYSTONE_AUTH_TAG": {get_param: k8s_keystone_auth_tag}
             "$PROJECT_ID": {get_param: project_id}
             "$EXTERNAL_NETWORK_ID": {get_param: external_network}
+            "$TILLER_ENABLED": {get_param: tiller_enabled}
+            "$TILLER_TAG": {get_param: tiller_tag}
+            "$TILLER_NAMESPACE": {get_param: tiller_namespace}
 
   install_openstack_ca:
     type: OS::Heat::SoftwareConfig

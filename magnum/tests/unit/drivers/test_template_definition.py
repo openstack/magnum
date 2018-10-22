@@ -418,6 +418,12 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         k8s_keystone_auth_tag = mock_cluster.labels.get(
             'k8s_keystone_auth_tag')
         project_id = mock_cluster.project_id
+        tiller_enabled = mock_cluster.labels.get(
+            'tiller_enabled')
+        tiller_tag = mock_cluster.labels.get(
+            'tiller_tag')
+        tiller_namespace = mock_cluster.labels.get(
+            'tiller_namespace')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -474,7 +480,10 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'keystone_auth_enabled': keystone_auth_enabled,
             'k8s_keystone_auth_tag': k8s_keystone_auth_tag,
             'project_id': project_id,
-            'external_network': external_network_id
+            'external_network': external_network_id,
+            'tiller_enabled': tiller_enabled,
+            'tiller_tag': tiller_tag,
+            'tiller_namespace': tiller_namespace,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
@@ -775,6 +784,12 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         k8s_keystone_auth_tag = mock_cluster.labels.get(
             'k8s_keystone_auth_tag')
         project_id = mock_cluster.project_id
+        tiller_enabled = mock_cluster.labels.get(
+            'tiller_enabled')
+        tiller_tag = mock_cluster.labels.get(
+            'tiller_tag')
+        tiller_namespace = mock_cluster.labels.get(
+            'tiller_namespace')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -833,7 +848,10 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'keystone_auth_enabled': keystone_auth_enabled,
             'k8s_keystone_auth_tag': k8s_keystone_auth_tag,
             'project_id': project_id,
-            'external_network': external_network_id
+            'external_network': external_network_id,
+            'tiller_enabled': tiller_enabled,
+            'tiller_tag': tiller_tag,
+            'tiller_namespace': tiller_namespace,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
