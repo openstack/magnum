@@ -38,10 +38,11 @@ function create_test_data {
     elif [ "${coe}${special}" == 'k8s-ironic' ]; then
         local bm_flavor_id=$(openstack flavor show baremetal -f value -c id)
         die_if_not_set $LINENO bm_flavor_id "Failed to get id of baremetal flavor"
-
+        # NOTE(TheJulia): This issue was fixed in Feb 2018 as part of change
+        # Ifb9a49d4258a559cf2175d902e9424a3f98065c5. Commented out in Oct 2018.
         # NOTE(yuanying): Workaround fix for ironic issue
         # cf. https://bugs.launchpad.net/ironic/+bug/1596421
-        echo "alter table ironic.nodes modify instance_info LONGTEXT;" | mysql -uroot -p${MYSQL_PASSWORD} ironic
+        # echo "alter table ironic.nodes modify instance_info LONGTEXT;" | mysql -uroot -p${MYSQL_PASSWORD} ironic
         # NOTE(yuanying): Ironic instances need to connect to Internet
         openstack subnet set private-subnet --dns-nameserver 8.8.8.8
         local container_format="ami"
