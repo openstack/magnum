@@ -280,6 +280,19 @@ EOF
 )
 writeFile $prometheusService_file "$prometheusService_content"
 
+# Write the file for prometheus-monitoring namespace
+prometheusNamespace_file=/srv/magnum/kubernetes/monitoring/prometheusNamespace.yaml
+prometheusNamespace_content=$(cat <<EOF
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    name: prometheus-monitoring
+  name: prometheus-monitoring
+EOF
+)
+writeFile $prometheusNamespace_file "$prometheusNamespace_content"
+
 grafanaService_file=/srv/magnum/kubernetes/monitoring/grafanaService.yaml
 grafanaService_content=$(cat <<EOF
 apiVersion: v1
@@ -374,6 +387,13 @@ do
     echo "Waiting for Kubernetes API..."
     sleep 5
 done
+
+# Check if prometheus-monitoring namespace exist already before creating the namespace
+kubectl get namespace prometheus-monitoring
+if [ "$?" != "0" ] && \
+        [ -f "'''${PROMETHEUS_MON_BASE_DIR}'''/prometheusNamespace.yaml" ]; then
+    kubectl create -f  '''${PROMETHEUS_MON_BASE_DIR}'''/prometheusNamespace.yaml
+fi
 
 # Check if all resources exist already before creating them
 # Check if configmap Prometheus exists
