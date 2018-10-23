@@ -323,6 +323,8 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `flannel_tag`_                        | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
+| `heat_container_agent_tag`_           | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 | `kube_dashboard_enabled`_             | - true             | true          |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
@@ -1122,6 +1124,12 @@ _`flannel_tag`
   <https://hub.docker.com/r/openstackmagnum/flannel/tags/>`_.
   If unset, the current Magnum version's a default flannel version.
   For queens, v0.9.0
+
+_`heat_container_agent_tag`
+  This label allows users to select `a specific heat_container_agent
+  version, based on its container tag
+  <https://hub.docker.com/r/openstackmagnum/heat-container-agent/tags/>`_.
+  Stein-default: stein-dev
 
 _`kube_dashboard_enabled`
   This label triggers the deployment of the kubernetes dashboard.

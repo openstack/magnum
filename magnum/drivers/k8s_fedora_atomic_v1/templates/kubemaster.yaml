@@ -394,6 +394,10 @@ parameters:
     type: string
     description: tag of grafana container
 
+  heat_container_agent_tag:
+    type: string
+    description: tag of the heat_container_agent system container
+
 resources:
   ######################################################################
   #
@@ -494,6 +498,7 @@ resources:
             "$KUBE_SERVICE_ACCOUNT_PRIVATE_KEY": {get_param: kube_service_account_private_key}
             "$PROMETHEUS_TAG": {get_param: prometheus_tag}
             "$GRAFANA_TAG": {get_param: grafana_tag}
+            "$HEAT_CONTAINER_AGENT_TAG": {get_param: heat_container_agent_tag}
 
   install_openstack_ca:
     type: OS::Heat::SoftwareConfig

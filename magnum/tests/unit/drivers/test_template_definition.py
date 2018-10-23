@@ -407,6 +407,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'prometheus_tag')
         grafana_tag = mock_cluster.labels.get(
             'grafana_tag')
+        heat_container_agent_tag = mock_cluster.labels.get(
+            'heat_container_agent_tag')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -458,6 +460,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'portal_network_cidr': service_cluster_ip_range,
             'prometheus_tag': prometheus_tag,
             'grafana_tag': grafana_tag,
+            'heat_container_agent_tag': heat_container_agent_tag,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
@@ -583,6 +586,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'prometheus_tag')
         grafana_tag = mock_cluster.labels.get(
             'grafana_tag')
+        heat_container_agent_tag = mock_cluster.labels.get(
+            'heat_container_agent_tag')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -636,6 +641,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'portal_network_cidr': service_cluster_ip_range,
             'prometheus_tag': prometheus_tag,
             'grafana_tag': grafana_tag,
+            'heat_container_agent_tag': heat_container_agent_tag,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
