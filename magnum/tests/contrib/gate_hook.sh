@@ -57,7 +57,9 @@ elif [ "${coe}${special}" = "k8s-ironic" ]; then
 
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ironic git://git.openstack.org/openstack/ironic"
 
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_DEPLOY_DRIVER=pxe_ipmitool"
+    # NOTE(TheJulia): Ironic switched to "hardware types" in Queens and
+    # removed legacy "drivers" in Rocky. "ipmi" superceeds *_ipmitool drivers.
+    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_DEPLOY_DRIVER=ipmi"
     # NOTE(ykarel) Ironic to work with magnum, requires devstack to be configured with IP_VERSION=4
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IP_VERSION=4"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_BAREMETAL_BASIC_OPS=True"
@@ -73,8 +75,9 @@ elif [ "${coe}${special}" = "k8s-ironic" ]; then
     # export DEVSTACK_LOCAL_CONFIG+=$'\n'"SWIFT_ENABLE_TEMPURLS=True"
     # export DEVSTACK_LOCAL_CONFIG+=$'\n'"SWIFT_TEMPURL_KEY=password"
     # export DEVSTACK_LOCAL_CONFIG+=$'\n'"SWIFT_HASH=password"
-
-    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_ENABLED_DRIVERS=fake,agent_ipmitool,pxe_ipmitool"
+    # NOTE(TheJulia): Enable interface order will result in the iscsi
+    # deployment method being used by default.
+    export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_ENABLED_DEPLOY_INTERFACES=iscsi,direct"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"VOLUME_BACKING_FILE_SIZE=24G"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"FORCE_CONFIG_DRIVE=True"
     export DEVSTACK_LOCAL_CONFIG+=$'\n'"IRONIC_RAMDISK_TYPE=tinyipa"
