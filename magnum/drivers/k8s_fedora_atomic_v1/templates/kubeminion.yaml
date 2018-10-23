@@ -276,6 +276,10 @@ parameters:
     type: boolean
     description: Enable or disable the openstack kubernetes cloud provider
 
+  heat_container_agent_tag:
+    type: string
+    description: tag of the heat_container_agent system container
+
 resources:
 
   minion_wait_handle:
@@ -349,6 +353,7 @@ resources:
             $KUBELET_OPTIONS: {get_param: kubelet_options}
             $KUBEPROXY_OPTIONS: {get_param: kubeproxy_options}
             $OCTAVIA_ENABLED: {get_param: octavia_enabled}
+            $HEAT_CONTAINER_AGENT_TAG: {get_param: heat_container_agent_tag}
 
   install_openstack_ca:
     type: OS::Heat::SoftwareConfig

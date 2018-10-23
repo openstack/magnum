@@ -504,6 +504,11 @@ parameters:
     description: tag of grafana container
     default: 5.1.5
 
+  heat_container_agent_tag:
+    type: string
+    description: tag of the heat_container_agent system container
+    default: stein-dev
+
 resources:
 
   ######################################################################
@@ -730,6 +735,7 @@ resources:
           kube_service_account_private_key: {get_param: kube_service_account_private_key}
           prometheus_tag: {get_param: prometheus_tag}
           grafana_tag: {get_param: grafana_tag}
+          heat_container_agent_tag: {get_param: heat_container_agent_tag}
 
 
   ######################################################################
@@ -809,6 +815,7 @@ resources:
           kubelet_options: {get_param: kubelet_options}
           kubeproxy_options: {get_param: kubeproxy_options}
           octavia_enabled: {get_param: octavia_enabled}
+          heat_container_agent_tag: {get_param: heat_container_agent_tag}
 
 outputs:
 
