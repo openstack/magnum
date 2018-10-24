@@ -11,3 +11,8 @@ if [ "$TLS_DISABLED" = 'False' ]; then
 fi
 
 sed -i '/^OPTIONS=/ s#\(OPTIONS='"'"'\)#\1'"$opts"'#' /etc/sysconfig/docker
+
+# NOTE(tobias-urdin): The live restore option is only for standalone daemons.
+# If its specified the swarm init will fail so we remove it here.
+# See: https://docs.docker.com/config/containers/live-restore
+sed -i 's/\ --live-restore//g' /etc/sysconfig/docker

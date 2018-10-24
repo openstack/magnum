@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Fixed a bug where --live-restore was passed to Docker daemon causing the
+    swarm init to fail. Magnum now ensures the --live-restore is not passed
+    to the Docker daemon if it's default in an image.
