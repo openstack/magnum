@@ -1,0 +1,37 @@
+- hosts: all
+  tasks:
+
+    - name: setup swap
+      block:
+        - command: fallocate -l20g /swap
+        - file:
+            path: /swap
+            mode: 0600
+        - command: mkswap /swap
+        - command: swapon /swap
+      become: True
+
+    - name: setup logging
+      shell:
+        cmd: |
+          mkdir logs
+          ln -s $(pwd)/logs /tmp/logs
+          mkdir -p /tmp/logs/{ansible,build}
+        executable: /bin/bash
+        chdir: "{{ zuul.project.src_dir }}"
+
+    - name: copy setup script
+      copy:
+        src: "{{ zuul.executor.work_root }}/{{ zuul.project.src_dir }}/tools/install_docker_UBUNTU.sh"
+        dest: /tmp/setup.sh
+        mode: 0755
+
+    - name: run node setup script
+      shell: /tmp/setup.sh
+      become: true
+
+    - name: changing permission of Docker socket to 666
+      file:
+        path: /run/docker.sock
+        mode: 666
+      become: true

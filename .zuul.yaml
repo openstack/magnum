@@ -1,3 +1,29 @@
+- secret:
+    name: magnum_docker_login
+    data:
+      user: !encrypted/pkcs1-oaep
+        - rxOFTiiWYyvD5fzSRM3uMXoLKAF9rUzgY3AhyLbIkQ5dUfKO8cJ5zasJG+3qVOyT6hjOO
+          sCkWC7Cta74cxDr7cMjH4m80R8hD5o6/Q7m3xMnwRz/6s12vpd1LXOMp6R7ahXCmH/Cxe
+          2O7UeFUN7vX0JKIWw47ioitqqQ1GywFzBgiCN9f8Qg7sIdaner5MmQD+3x8XmqKMEqr88
+          /j2Nxc4UHvhK+zkjDMM21+7RH33vC2KVteA8hbnKLd621D+8ocPQRihdQ221xiXtij38C
+          hTSHvYYgphEbZK2G/iwbG+Ol+orc215UE+ZnDXrxI6f20rit2KVboaWrUkuKgwHqJJ8mx
+          SQ/QFFhe4gW2b3WkB18eDb1APob+sGFCxd6gjWO9DjOK2LTpioUQPfgMNDU1JJ4p0HlIl
+          mHI7PK4LrX5jZzguA+NRj+vg7+7R78wWD0U6kM/nhouIK19VMEfL1DslJ+nqvLoniod6u
+          sztgHJ7EEqrrUAsOE2PssGt5wRZpqx5w8+KiFFFrsVcOtHmGBh3DwUNTGMtMpcq5XTICx
+          +7/irRonpxElqsdCZNKtzv/zmAioiwHLaZZPyDrzk80QyIUc9ljCEuQgCLbDM0jVZjntY
+          c+S6EYqYuAUPymMZ9p/ctRIDIU1dzvwnlddOc4IF34iqUCmTrI527pRBStjqdU=
+      password: !encrypted/pkcs1-oaep
+        - Vcw08awGz2D3UAr2ceufpOJHAP9kkUqenjlChN2gSd1GIUpsehJY0fmAYQNZ4y6CH97Cu
+          7Z4lGRf+UV0Ql/QlJXkdlEHhrmdzAE391y1bpzzP583R5zSJHlLqEFL12Wf4mM62LGGTw
+          HaJzWvwUzKxmHuJQddLNN+NvXsdU2he4gGViG5gmOmr9wKrxjp/T9hVhYcR8eLxGg9/Bo
+          JzGabDgl/PdtXVzCS9Xhg6RP1Vdq/JeVPNuERFYvZWM7YvxbTXMRp7/V83tLy7UtCXusi
+          ge8LaYgTMuBMioBaD7snmI08HZilo34hKg5fRHkf4ZRvbC+baJxEumSX5zfWoO10Jw8Dc
+          4FK8d0O2+2erAwvyZIWSdj/EGlwUqPJ0qHIMbOl3ahMEHujQ42UHhtUpYS4kMEdBcdOOU
+          C3eruiqligGbClK3Mpf1MVlJC8jmkeRofseQmSt7arQ6RAlMn64k8kr1/biMs0saaGKbw
+          Nw7PhUQTf67yemJvB1zHOI4i9SEkApRNoBmtOe9UxeJxlsDnvOUUteOja3EnIrdIt8Qnk
+          N+yvPc0MhDVNU0SHJp+AiHJ6jk/tXDkKNnoZJH0BHGPDNp+/pC2ckLxzOrXLPGJkVglwA
+          4gTl0N/3dRouxVITTmeVwGfffCo/jrdrr1gIr5FAzbiz2jQxF0OOXqRA1YRHn8=
+
 - job:
     name: magnum-functional-base
     parent: legacy-dsvm-base
@@ -25,6 +51,7 @@
       - ^specs/.*$
       - ^install-guide/.*$
       - ^releasenotes/.*$
+      - ^dockerfiles/.*$
     vars:
       ironic: 0
       ceilometer: 0
@@ -61,6 +88,7 @@
       - ^specs/.*$
       - ^install-guide/.*$
       - ^releasenotes/.*$
+      - ^dockerfiles/.*$
     vars:
       ironic: 0
       ceilometer: 0
@@ -269,6 +297,29 @@
     vars:
       image_name: centos-dcos
 
+- job:
+    name: container-build
+    pre-run: playbooks/container-builder-setup-gate.yaml
+    run: playbooks/container-builder.yaml
+    post-run: playbooks/container-builder-copy-logs.yaml
+    timeout: 1200
+    irrelevant-files:
+      - ^.*\.rst$
+      - ^api-ref/.*$
+      - ^doc/.*$
+      - ^specs/.*$
+      - ^install-guide/.*$
+      - ^releasenotes/.*$
+      - ^magnum/.*$
+
+- job:
+    name: container-publish
+    parent: container-build
+    post-run: playbooks/container-publish.yaml
+    secrets:
+      - magnum_docker_login
+    timeout: 1200
+
 - project:
     templates:
       - openstack-cover-jobs
@@ -286,6 +337,7 @@
         - magnum-functional-swarm-mode
         - openstack-tox-cover:
            voting: false
+        - container-build
     gate:
       queue: magnum
       jobs:
@@ -304,3 +356,6 @@
         - magnum-dib-buildimage-fedora-atomic-25
         - magnum-dib-buildimage-ubuntu-mesos
         - magnum-dib-buildimage-centos-dcos
+    post:
+      jobs:
+        - container-publish

@@ -1,0 +1,3 @@
+d   ${STATE_DIRECTORY}/kubelet - - - - -
+d   /var/lib/cni - - - - -
+d   /var/run/secrets - - - - -

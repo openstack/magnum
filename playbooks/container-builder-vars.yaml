@@ -1,0 +1,14 @@
+magnum_src_dir: "src/git.openstack.org/openstack/magnum"
+
+repository: docker.io/openstackmagnumtest
+kubernetes_version: v1.11.3
+kubernetes_images:
+  - name: kubernetes-apiserver
+  - name: kubernetes-controller-manager
+  - name: kubernetes-kubelet
+  - name: kubernetes-scheduler
+  - name: kubernetes-proxy
+
+magnum_images:
+  - name: heat-container-agent
+    tag: stein-dev

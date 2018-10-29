@@ -1,0 +1,12 @@
+- hosts: all
+  tasks:
+    - include_vars: container-builder-vars.yaml
+
+    - name: Push images to DockerHub
+      block:
+        - command: docker login -u {{ magnum_docker_login.user }} -p {{ magnum_docker_login.password }}
+          no_log: False
+        - command: docker push {{ repository }}/{{ item.name }}:{{ tag }}
+          with_items: "{{ magnum_images }}"
+        - command: docker push {{ repository }}/{{ item.name }}:{{ kubernetes_version }}
+          with_items: "{{ kubernetes_images }}"
