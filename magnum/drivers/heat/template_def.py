@@ -108,12 +108,12 @@ class OutputMapping(object):
 
 @six.add_metaclass(abc.ABCMeta)
 class TemplateDefinition(object):
-    '''A mapping between Magnum objects and Heat templates.
+    """A mapping between Magnum objects and Heat templates.
 
     A TemplateDefinition is essentially a mapping between Magnum objects
     and Heat templates. Each TemplateDefinition has a mapping of Heat
     parameters.
-    '''
+    """
 
     def __init__(self):
         self.param_mappings = list()
@@ -279,7 +279,7 @@ class BaseTemplateDefinition(TemplateDefinition):
         try:
             result = requests.get(url).text
         except req_exceptions.RequestException as err:
-            LOG.error(six.text_type(err))
+            LOG.error(err)
             raise exception.GetClusterSizeFailed(
                 discovery_url=discovery_url)
 
@@ -323,7 +323,7 @@ class BaseTemplateDefinition(TemplateDefinition):
                         discovery_endpoint=discovery_endpoint)
                 discovery_url = discovery_request.text
             except req_exceptions.RequestException as err:
-                LOG.error(six.text_type(err))
+                LOG.error(err)
                 raise exception.GetDiscoveryUrlFailed(
                     discovery_endpoint=discovery_endpoint)
             if not discovery_url:

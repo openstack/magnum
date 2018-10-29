@@ -39,7 +39,7 @@ class Driver(object):
 
     @classmethod
     def get_drivers(cls):
-        '''Retrieves cluster drivers from python entry_points.
+        """Retrieves cluster drivers from python entry_points.
 
         Example:
 
@@ -69,7 +69,7 @@ class Driver(object):
             }
 
         :return: dict
-        '''
+        """
 
         if not cls.definitions:
             cls.definitions = dict()
@@ -87,7 +87,7 @@ class Driver(object):
 
     @classmethod
     def get_driver(cls, server_type, os, coe):
-        '''Get Driver.
+        """Get Driver.
 
         Returns the Driver class for the provided cluster_type.
 
@@ -118,7 +118,7 @@ class Driver(object):
                     produce
 
         :return: class
-        '''
+        """
 
         definition_map = cls.get_drivers()
         cluster_type = (server_type, os, coe)
@@ -142,20 +142,20 @@ class Driver(object):
         return cls.get_driver(ct.server_type, ct.cluster_distro, ct.coe)
 
     def update_cluster_status(self, context, cluster):
-        '''Update the cluster status based on underlying orchestration
+        """Update the cluster status based on underlying orchestration
 
            This is an optional method if your implementation does not need
            to poll the orchestration for status updates (for example, your
            driver uses some notification-based mechanism instead).
-        '''
+        """
         return
 
     @abc.abstractproperty
     def provides(self):
-        '''return a list of (server_type, os, coe) tuples
+        """return a list of (server_type, os, coe) tuples
 
            Returns a list of cluster configurations supported by this driver
-        '''
+        """
         raise NotImplementedError("Subclasses must implement 'provides'.")
 
     @abc.abstractmethod

@@ -15,15 +15,15 @@ from magnum.common import profiler
 
 @profiler.trace_cls("rpc")
 class Handler(object):
-    '''Listen on an AMQP queue named for the conductor.
+    """Listen on an AMQP queue named for the conductor.
 
     Allows individual conductors to communicate with each other for
     multi-conductor support.
-    '''
+    """
     def ping_conductor(self, context):
-        '''Respond to conductor.
+        """Respond to conductor.
 
         Respond affirmatively to confirm that the conductor performing the
         action is still alive.
-        '''
+        """
         return True

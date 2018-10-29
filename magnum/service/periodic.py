@@ -90,7 +90,7 @@ class ClusterUpdateJob(object):
 
 @profiler.trace_cls("rpc")
 class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
-    '''Magnum periodic Task class
+    """Magnum periodic Task class
 
     Any periodic task job need to be added into this class
 
@@ -103,7 +103,7 @@ class MagnumPeriodicTasks(periodic_task.PeriodicTasks):
       try/catch block. The present try/catch block here helps putting
       magnum-periodic-task-specific log/error message.
 
-    '''
+    """
 
     def __init__(self, conf):
         super(MagnumPeriodicTasks, self).__init__(conf)

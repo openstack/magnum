@@ -92,7 +92,7 @@ class TestSwarmAPIs(ClusterTest):
         # need to investigate the cause of this issue. See bug #1583337.
         for i in range(150):
             try:
-                self.LOG.info("Calling function " + func.__name__)
+                self.LOG.info("Calling function %s", func.__name__)
                 return func(*args, **kwargs)
             except req_exceptions.ConnectionError:
                 self.LOG.info("Connection aborted on calling Swarm API. "
@@ -100,7 +100,7 @@ class TestSwarmAPIs(ClusterTest):
             except errors.APIError as e:
                 if e.response.status_code != 500:
                     raise
-                self.LOG.info("Internal Server Error: " + str(e))
+                self.LOG.info("Internal Server Error: %s", e)
             time.sleep(2)
 
         raise Exception("Cannot connect to Swarm API.")

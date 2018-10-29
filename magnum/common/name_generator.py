@@ -26,10 +26,10 @@ class NameGenerator(object):
         self.random = random.Random()
 
     def generate(self):
-        '''Generate a random name compose of a Greek leter and
+        """Generate a random name compose of a Greek leter and
 
         a number, like: beta_2.
-        '''
+        """
 
         letter = self.random.choice(self.letters)
         number = self.random.randint(1, 24)

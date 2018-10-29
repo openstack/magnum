@@ -87,8 +87,7 @@ class CertManager(cert_manager.CertManager):
         """
         connection = get_admin_clients().barbican()
 
-        LOG.info("Storing certificate container '{0}' in Barbican."
-                 .format(name))
+        LOG.info("Storing certificate container '%s' in Barbican.", name)
 
         certificate_secret = None
         private_key_secret = None
@@ -139,13 +138,13 @@ class CertManager(cert_manager.CertManager):
                     old_ref = secret.secret_ref
                     try:
                         secret.delete()
-                        LOG.info("Deleted secret {0} ({1}) during rollback."
-                                 .format(secret.name, old_ref))
+                        LOG.info("Deleted secret %s (%s) during rollback.",
+                                 secret.name, old_ref)
                     except Exception:
                         LOG.warning(
-                            "Failed to delete {0} ({1}) during rollback. "
-                            "This is probably not a problem."
-                            .format(secret.name, old_ref))
+                            "Failed to delete %s (%s) during rollback. "
+                            "This is probably not a problem.",
+                            secret.name, old_ref)
             with excutils.save_and_reraise_exception():
                 LOG.exception("Error storing certificate data")
 
@@ -165,9 +164,7 @@ class CertManager(cert_manager.CertManager):
         """
         connection = get_admin_clients().barbican()
 
-        LOG.info(
-            "Loading certificate container {0} from Barbican."
-            .format(cert_ref))
+        LOG.info("Loading certificate container %s from Barbican.", cert_ref)
         try:
             if check_only:
                 cert_container = connection.containers.get(
@@ -182,7 +179,7 @@ class CertManager(cert_manager.CertManager):
             return Cert(cert_container)
         except barbican_exc.HTTPClientError:
             with excutils.save_and_reraise_exception():
-                LOG.exception("Error getting {0}".format(cert_ref))
+                LOG.exception("Error getting %s", cert_ref)
 
     @staticmethod
     def delete_cert(cert_ref, service_name='Magnum', resource_ref=None,
@@ -195,8 +192,8 @@ class CertManager(cert_manager.CertManager):
         connection = get_admin_clients().barbican()
 
         LOG.info(
-            "Recursively deleting certificate container {0} from Barbican."
-            .format(cert_ref))
+            "Recursively deleting certificate container %s from Barbican.",
+            cert_ref)
         try:
             certificate_container = connection.containers.get(cert_ref)
             certificate_container.certificate.delete()
@@ -209,5 +206,5 @@ class CertManager(cert_manager.CertManager):
         except barbican_exc.HTTPClientError:
             with excutils.save_and_reraise_exception():
                 LOG.exception(
-                    "Error recursively deleting certificate container {0}"
-                    .format(cert_ref))
+                    "Error recursively deleting certificate container %s",
+                    cert_ref)

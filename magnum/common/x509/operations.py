@@ -197,7 +197,7 @@ def sign(csr, issuer_name, ca_key, ca_key_password=None,
         try:
             csr = x509.load_pem_x509_csr(csr, backend=default_backend())
         except ValueError:
-            LOG.exception("Received invalid csr {0}.".format(csr))
+            LOG.exception("Received invalid csr %s.", csr)
             raise exception.InvalidCsr(csr=csr)
 
     term_of_validity = CONF.x509.term_of_validity
