@@ -605,11 +605,16 @@ resources:
 
   ######################################################################
   #
-  # resources that expose the server group for all nodes include master
-  # and minions.
+  # resources that expose one server group for each master and worker nodes
+  # separately.
   #
 
-  nodes_server_group:
+  master_nodes_server_group:
+    type: OS::Nova::ServerGroup
+    properties:
+      policies: [{get_param: nodes_affinity_policy}]
+
+  worker_nodes_server_group:
     type: OS::Nova::ServerGroup
     properties:
       policies: [{get_param: nodes_affinity_policy}]
@@ -690,7 +695,7 @@ resources:
           dns_service_ip: {get_param: dns_service_ip}
           dns_cluster_domain: {get_param: dns_cluster_domain}
           openstack_ca: {get_param: openstack_ca_coreos}
-          nodes_server_group_id: {get_resource: nodes_server_group}
+          nodes_server_group_id: {get_resource: master_nodes_server_group}
           availability_zone: {get_param: availability_zone}
           ca_key: {get_param: ca_key}
           cert_manager_api: {get_param: cert_manager_api}
@@ -778,7 +783,7 @@ resources:
           dns_service_ip: {get_param: dns_service_ip}
           dns_cluster_domain: {get_param: dns_cluster_domain}
           openstack_ca: {get_param: openstack_ca_coreos}
-          nodes_server_group_id: {get_resource: nodes_server_group}
+          nodes_server_group_id: {get_resource: worker_nodes_server_group}
           availability_zone: {get_param: availability_zone}
           pods_network_cidr: {get_param: pods_network_cidr}
           kubelet_options: {get_param: kubelet_options}

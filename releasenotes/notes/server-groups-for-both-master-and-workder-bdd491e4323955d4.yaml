@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    Magnums onlys has one server group for all master and worker nodes
+    per cluster, which is not very flexible for small cloud scale. For a
+    3+ master clusters, it's easily meeting the capacity when using hard
+    anti-affinity policy. Now one server group is added for each
+    master and worker nodes group to have better flexibility.
+

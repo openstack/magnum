@@ -346,22 +346,27 @@ resources:
       master_public_ip: {get_attr: [swarm_masters, resource.0.swarm_master_external_ip]}
       master_private_ip: {get_attr: [swarm_masters, resource.0.swarm_master_ip]}
 
-  ######################################################################
-  #
-  # resources that expose the server group for all nodes include master
-  # and minions.
-  #
-
-  nodes_server_group:
-    type: OS::Nova::ServerGroup
-    properties:
-      policies: [{get_param: nodes_affinity_policy}]
-
   etcd_address_lb_switch:
     type: Magnum::ApiGatewaySwitcher
     properties:
       pool_private_ip: {get_attr: [etcd_lb, address]}
       master_private_ip: {get_attr: [swarm_masters, resource.0.swarm_master_ip]}
+
+  ######################################################################
+  #
+  # resources that expose one server group for each master and worker nodes
+  # separately.
+  #
+
+  master_nodes_server_group:
+    type: OS::Nova::ServerGroup
+    properties:
+      policies: [{get_param: nodes_affinity_policy}]
+
+  worker_nodes_server_group:
+    type: OS::Nova::ServerGroup
+    properties:
+      policies: [{get_param: nodes_affinity_policy}]
 
   ######################################################################
   #
@@ -420,7 +425,7 @@ resources:
           volume_driver: {get_param: volume_driver}
           rexray_preempt: {get_param: rexray_preempt}
           openstack_ca: {get_param: openstack_ca}
-          nodes_server_group_id: {get_resource: nodes_server_group}
+          nodes_server_group_id: {get_resource: master_nodes_server_group}
 
   swarm_nodes:
     type: "OS::Heat::ResourceGroup"
@@ -473,7 +478,7 @@ resources:
           volume_driver: {get_param: volume_driver}
           rexray_preempt: {get_param: rexray_preempt}
           openstack_ca: {get_param: openstack_ca}
-          nodes_server_group_id: {get_resource: nodes_server_group}
+          nodes_server_group_id: {get_resource: worker_nodes_server_group}
 
 outputs:
 

@@ -380,11 +380,16 @@ resources:
 
   ######################################################################
   #
-  # resources that expose the server group for all nodes include master
-  # and minions.
+  # resources that expose one server group for each master and worker nodes
+  # separately.
   #
 
-  nodes_server_group:
+  master_nodes_server_group:
+    type: OS::Nova::ServerGroup
+    properties:
+      policies: [{get_param: nodes_affinity_policy}]
+
+  worker_nodes_server_group:
     type: OS::Nova::ServerGroup
     properties:
       policies: [{get_param: nodes_affinity_policy}]
@@ -417,7 +422,7 @@ resources:
           secgroup_mesos_id: {get_resource: secgroup_master}
           api_pool_id: {get_attr: [api_lb, pool_id]}
           openstack_ca: {get_param: openstack_ca}
-          nodes_server_group_id: {get_resource: nodes_server_group}
+          nodes_server_group_id: {get_resource: master_nodes_server_group}
 
   ######################################################################
   #
@@ -447,7 +452,7 @@ resources:
           external_network: {get_param: external_network}
           secgroup_slave_all_open_id: {get_resource: secgroup_slave_all_open}
           mesos_slave_software_configs: {get_attr: [mesos_slave_software_configs, mesos_init]}
-          nodes_server_group_id: {get_resource: nodes_server_group}
+          nodes_server_group_id: {get_resource: worker_nodes_server_group}
 
   ######################################################################
   #

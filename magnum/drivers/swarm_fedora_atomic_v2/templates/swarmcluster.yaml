@@ -292,11 +292,16 @@ resources:
 
   ######################################################################
   #
-  # resources that expose the server group for all nodes include master
-  # and minions.
+  # resources that expose one server group for each master and worker nodes
+  # separately.
   #
 
-  nodes_server_group:
+  master_nodes_server_group:
+    type: OS::Nova::ServerGroup
+    properties:
+      policies: [{get_param: nodes_affinity_policy}]
+
+  worker_nodes_server_group:
     type: OS::Nova::ServerGroup
     properties:
       policies: [{get_param: nodes_affinity_policy}]
@@ -350,7 +355,7 @@ resources:
           rexray_preempt: {get_param: rexray_preempt}
           verify_ca: {get_param: verify_ca}
           openstack_ca: {get_param: openstack_ca}
-          nodes_server_group_id: {get_resource: nodes_server_group}
+          nodes_server_group_id: {get_resource: master_nodes_server_group}
           availability_zone: {get_param: availability_zone}
 
   swarm_secondary_masters:
@@ -395,7 +400,7 @@ resources:
           rexray_preempt: {get_param: rexray_preempt}
           verify_ca: {get_param: verify_ca}
           openstack_ca: {get_param: openstack_ca}
-          nodes_server_group_id: {get_resource: nodes_server_group}
+          nodes_server_group_id: {get_resource: worker_nodes_server_group}
           availability_zone: {get_param: availability_zone}
 
   swarm_nodes:
