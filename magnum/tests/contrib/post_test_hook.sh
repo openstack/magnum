@@ -67,7 +67,7 @@ function create_test_data {
     local magnum_api_ip=$(iniget /etc/magnum/magnum.conf api host)
     local magnum_api_port=$(iniget /etc/magnum/magnum.conf api port)
     local magnum_url="http://"$magnum_api_ip":"$magnum_api_port"/v1"
-    local keystone_auth_url=$(iniget /etc/magnum/magnum.conf keystone_authtoken auth_uri)
+    local keystone_auth_url=$(iniget /etc/magnum/magnum.conf keystone_authtoken www_authenticate_uri)
 
     # pass the appropriate variables via a config file
     CREDS_FILE=$MAGNUM_DIR/functional_creds.conf
