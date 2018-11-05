@@ -121,6 +121,7 @@ python-keystoneclient==3.8.0
 python-mimeparse==1.6.0
 python-neutronclient==6.7.0
 python-novaclient==9.1.0
+python-octaviaclient==1.6.0
 python-subunit==1.0.0
 python-swiftclient==3.5.0
 pytz==2013.6

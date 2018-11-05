@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    This will add the octavia client code for client to interact with
+    the Octavia component of OpenStack
