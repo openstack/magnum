@@ -18,6 +18,7 @@ from heatclient import client as heatclient
 from keystoneauth1.exceptions import catalog
 from neutronclient.v2_0 import client as neutronclient
 from novaclient import client as novaclient
+from octaviaclient.api.v2 import octavia
 from oslo_log import log as logging
 
 from magnum.common import exception
@@ -39,6 +40,7 @@ class OpenStackClients(object):
         self._barbican = None
         self._nova = None
         self._neutron = None
+        self._octavia = None
 
     def url_for(self, **kwargs):
         return self.keystone().session.get_endpoint(**kwargs)
@@ -79,6 +81,21 @@ class OpenStackClients(object):
 
     def _get_client_option(self, client, option):
         return getattr(getattr(CONF, '%s_client' % client), option)
+
+    @exception.wrap_keystone_exception
+    def octavia(self):
+        if self._octavia:
+            return self._octavia
+
+        region_name = self._get_client_option('octavia', 'region_name')
+        endpoint_type = self._get_client_option('octavia', 'endpoint_type')
+        endpoint = self.url_for(service_type='load-balancer',
+                                interface=endpoint_type,
+                                region_name=region_name)
+        session = self.keystone().session
+        return octavia.OctaviaAPI(session=session,
+                                  service_type='load-balancer',
+                                  endpoint=endpoint)
 
     @exception.wrap_keystone_exception
     def heat(self):
