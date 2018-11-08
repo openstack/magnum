@@ -169,6 +169,13 @@ class Driver(object):
         raise NotImplementedError("Subclasses must implement "
                                   "'update_cluster'.")
 
+    def pre_delete_cluster(self, context, cluster):
+        """Delete cloud resources before deleting the cluster.
+
+        Specific driver could implement this method as needed.
+        """
+        return None
+
     @abc.abstractmethod
     def delete_cluster(self, context, cluster):
         raise NotImplementedError("Subclasses must implement "

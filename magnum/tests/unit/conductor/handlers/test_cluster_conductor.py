@@ -463,8 +463,10 @@ class TestHandler(db_base.DbTestCase):
     @patch('magnum.conductor.handlers.cluster_conductor.cert_manager')
     @patch('magnum.common.clients.OpenStackClients')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
-    def test_cluster_delete(self, mock_driver, mock_openstack_client_class,
-                            cert_manager):
+    @patch('magnum.common.keystone.is_octavia_enabled')
+    def test_cluster_delete(self, mock_octavia, mock_driver,
+                            mock_openstack_client_class, cert_manager):
+        mock_octavia.return_value = False
         mock_driver.return_value = k8s_atomic_dr.Driver()
         osc = mock.MagicMock()
         mock_openstack_client_class.return_value = osc
@@ -490,9 +492,11 @@ class TestHandler(db_base.DbTestCase):
     @patch('magnum.conductor.handlers.cluster_conductor.cert_manager')
     @patch('magnum.common.clients.OpenStackClients')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
-    def test_cluster_delete_conflict(self, mock_driver,
+    @patch('magnum.common.keystone.is_octavia_enabled')
+    def test_cluster_delete_conflict(self, mock_octavia, mock_driver,
                                      mock_openstack_client_class,
                                      cert_manager):
+        mock_octavia.return_value = False
         mock_driver.return_value = k8s_atomic_dr.Driver()
         osc = mock.MagicMock()
         mock_openstack_client_class.return_value = osc
@@ -514,3 +518,18 @@ class TestHandler(db_base.DbTestCase):
             taxonomy.OUTCOME_FAILURE, notifications[1].payload['outcome'])
         self.assertEqual(
             0, cert_manager.delete_certificates_from_cluster.call_count)
+
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
+    @patch('magnum.common.clients.OpenStackClients')
+    @patch('magnum.common.keystone.is_octavia_enabled')
+    @patch('magnum.common.octavia.delete_loadbalancers')
+    def test_cluster_delete_with_lb(self, mock_delete_lb, mock_octavia,
+                                    mock_clients, mock_driver):
+        mock_octavia.return_value = True
+        mock_driver.return_value = k8s_atomic_dr.Driver()
+
+        self.handler.cluster_delete(self.context, self.cluster.uuid)
+
+        notifications = fake_notifier.NOTIFICATIONS
+        self.assertEqual(1, len(notifications))
+        self.assertEqual(1, mock_delete_lb.call_count)

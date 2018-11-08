@@ -42,6 +42,10 @@ cluster_def_opts = [
                default="/var/lib/magnum/certificate-cache",
                help='Explicitly specify the temporary directory to hold '
                     'cached TLS certs.'),
+    cfg.IntOpt('pre_delete_lb_timeout',
+               default=60,
+               help=_('The timeout in seconds to wait for the load balancers'
+                      'to be deleted.')),
 ]
 
 
