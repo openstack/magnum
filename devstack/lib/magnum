@@ -175,16 +175,13 @@ function create_magnum_conf {
         iniset $MAGNUM_CONF oslo_concurrency lock_path "$MAGNUM_STATE_PATH"
     fi
 
-    if [ "$SYSLOG" != "False" ]; then
-        iniset $MAGNUM_CONF DEFAULT use_syslog "True"
+    if [ "$USE_SYSTEMD" != "False" ]; then
+        setup_systemd_logging $MAGNUM_CONF
     fi
 
     # Format logging
-    if [ "$LOG_COLOR" == "True" ] && [ "$SYSLOG" == "False" ]; then
+    if [ "$LOG_COLOR" == "True" ] && [ "$USE_SYSTEMD" == "False" ]; then
         setup_colorized_logging $MAGNUM_CONF DEFAULT
-    else
-        # Show user_name and project_name instead of user_id and project_id
-        iniset $MAGNUM_CONF DEFAULT logging_context_format_string "%(asctime)s.%(msecs)03d %(levelname)s %(name)s [%(request_id)s %(user_name)s %(project_name)s] %(instance)s%(message)s"
     fi
 
     # Register SSL certificates if provided
