@@ -44,7 +44,12 @@ class KeystoneClientV3(object):
     def auth_url(self):
         # FIXME(pauloewerton): auth_url should be retrieved from keystone_auth
         # section by default
-        return CONF[ksconf.CFG_LEGACY_GROUP].auth_uri.replace('v2.0', 'v3')
+        conf = CONF[ksconf.CFG_LEGACY_GROUP]
+        auth_uri = (getattr(conf, 'www_authenticate_uri', None) or
+                    getattr(conf, 'auth_uri', None))
+        if auth_uri:
+            auth_uri = auth_uri.replace('v2.0', 'v3')
+        return auth_uri
 
     @property
     def auth_token(self):
