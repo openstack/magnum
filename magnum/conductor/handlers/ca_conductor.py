@@ -19,6 +19,7 @@ from magnum.common import profiler
 from magnum.conductor.handlers.common import cert_manager
 from magnum.drivers.common import driver
 from magnum import objects
+import six
 LOG = logging.getLogger(__name__)
 
 
@@ -39,14 +40,20 @@ class Handler(object):
         signed_cert = cert_manager.sign_node_certificate(cluster,
                                                          certificate.csr,
                                                          context=context)
-        certificate.pem = signed_cert
+        if six.PY3 and isinstance(signed_cert, six.binary_type):
+            certificate.pem = signed_cert.decode()
+        else:
+            certificate.pem = signed_cert
         return certificate
 
     def get_ca_certificate(self, context, cluster):
         ca_cert = cert_manager.get_cluster_ca_certificate(cluster,
                                                           context=context)
         certificate = objects.Certificate.from_object_cluster(cluster)
-        certificate.pem = ca_cert.get_certificate()
+        if six.PY3 and isinstance(ca_cert.get_certificate(), six.binary_type):
+            certificate.pem = ca_cert.get_certificate().decode()
+        else:
+            certificate.pem = ca_cert.get_certificate()
         return certificate
 
     def rotate_ca_certificate(self, context, cluster):

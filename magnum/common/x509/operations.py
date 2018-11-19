@@ -134,6 +134,9 @@ def _generate_certificate(issuer_name, subject_name, extensions,
 
     csr = csr.sign(private_key, hashes.SHA256(), default_backend())
 
+    if six.PY3 and isinstance(encryption_password, six.text_type):
+        encryption_password = encryption_password.encode()
+
     if encryption_password:
         encryption_algorithm = serialization.BestAvailableEncryption(
             encryption_password)
