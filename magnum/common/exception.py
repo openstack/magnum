@@ -389,5 +389,5 @@ class FederationAlreadyExists(Conflict):
 
 
 class MemberAlreadyExists(Conflict):
-    message = _("A cluster with UUID %(uuid)s is already a member of the"
+    message = _("A cluster with UUID %(uuid)s is already a member of the "
                 "federation %(federation_name)s.")

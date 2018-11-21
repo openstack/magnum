@@ -64,7 +64,7 @@ def validate_docker_memory(mem_str):
                                          "<number>[<unit>],"
                                          "where unit = b, k, m or g"))
     if mem < DOCKER_MINIMUM_MEMORY:
-        raise wsme.exc.ClientSideError(_("Docker Minimum memory limit"
+        raise wsme.exc.ClientSideError(_("Docker Minimum memory limit "
                                          "allowed is %d B.")
                                        % DOCKER_MINIMUM_MEMORY)
 

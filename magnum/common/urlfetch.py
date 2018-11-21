@@ -68,7 +68,7 @@ def get(url, allowed_schemes=('http', 'https')):
         for chunk in reader:
             result += chunk
             if len(result) > CONF.max_manifest_size:
-                raise URLFetchError("Manifest exceeds maximum allowed"
+                raise URLFetchError("Manifest exceeds maximum allowed "
                                     "size (%s bytes)" %
                                     CONF.max_manifest_size)
         return result
