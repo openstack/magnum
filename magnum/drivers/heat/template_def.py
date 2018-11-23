@@ -210,8 +210,7 @@ class BaseTemplateDefinition(TemplateDefinition):
         self._osc = None
 
         self.add_parameter('ssh_key_name',
-                           cluster_attr='keypair',
-                           required=True)
+                           cluster_attr='keypair')
         self.add_parameter('server_image',
                            cluster_template_attr='image_id')
         self.add_parameter('dns_nameserver',

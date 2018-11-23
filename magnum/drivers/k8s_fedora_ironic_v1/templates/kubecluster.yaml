@@ -10,7 +10,8 @@ parameters:
   ssh_key_name:
     type: string
     description: name of ssh key to be provisioned on our server
-
+    default: ""
+    
   external_network:
     type: string
     description: uuid/name of a network to use for floating ip addresses

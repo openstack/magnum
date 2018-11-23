@@ -94,6 +94,15 @@ class TestAttrValidator(base.BaseTestCase):
                           attr_validator.validate_external_network,
                           mock_os_cli, 'test_ext_net')
 
+    def test_validate_keypair_with_no_keypair(self):
+        mock_keypair = mock.MagicMock()
+        mock_keypair.id = None
+        mock_nova = mock.MagicMock()
+        mock_nova.keypairs.get.return_value = mock_keypair
+        mock_os_cli = mock.MagicMock()
+        mock_os_cli.nova.return_value = mock_nova
+        attr_validator.validate_keypair(mock_os_cli, None)
+
     def test_validate_keypair_with_valid_keypair(self):
         mock_keypair = mock.MagicMock()
         mock_keypair.id = 'test-keypair'
