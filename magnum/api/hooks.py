@@ -16,7 +16,8 @@ from pecan import hooks
 
 from magnum.common import context
 from magnum.conductor import api as conductor_api
-import magnum.conf
+import magnum.conf.keystone
+
 
 CONF = magnum.conf.CONF
 
@@ -57,7 +58,11 @@ class ContextHook(hooks.PecanHook):
         roles = headers.get('X-Roles', '').split(',')
         auth_token_info = state.request.environ.get('keystone.token_info')
 
-        auth_url = CONF.keystone_authtoken.auth_uri
+        conf = CONF[magnum.conf.keystone.CFG_LEGACY_GROUP]
+        auth_url = (getattr(conf, 'www_authenticate_uri', None) or
+                    getattr(conf, 'auth_uri', None))
+        if auth_url:
+            auth_url = auth_url.replace('v2.0', 'v3')
 
         state.request.context = context.make_context(
             auth_token=auth_token,
