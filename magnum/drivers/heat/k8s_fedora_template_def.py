@@ -113,7 +113,8 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                       'cloud_provider_tag',
                       'prometheus_tag',
                       'grafana_tag',
-                      'heat_container_agent_tag']
+                      'heat_container_agent_tag',
+                      'keystone_auth_enabled', 'k8s_keystone_auth_tag']
 
         for label in label_list:
             label_value = cluster.labels.get(label)
@@ -134,6 +135,8 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
             extra_params['ca_key'] = x509.decrypt_key(
                 ca_cert.get_private_key(),
                 ca_cert.get_private_key_passphrase()).replace("\n", "\\n")
+
+        extra_params['project_id'] = cluster.project_id
 
         return super(K8sFedoraTemplateDefinition,
                      self).get_params(context, cluster_template, cluster,

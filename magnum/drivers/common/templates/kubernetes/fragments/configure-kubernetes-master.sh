@@ -79,6 +79,36 @@ if [ -n "$TRUST_ID" ] && [ "$(echo "${CLOUD_PROVIDER_ENABLED}" | tr '[:upper:]' 
     KUBE_API_ARGS="$KUBE_API_ARGS --cloud-provider=external"
 fi
 
+if [ "$KEYSTONE_AUTH_ENABLED" == "True" ]; then
+    KEYSTONE_WEBHOOK_CONFIG=/etc/kubernetes/keystone_webhook_config.yaml
+
+    [ -f ${KEYSTONE_WEBHOOK_CONFIG} ] || {
+echo "Writing File: $KEYSTONE_WEBHOOK_CONFIG"
+mkdir -p $(dirname ${KEYSTONE_WEBHOOK_CONFIG})
+cat << EOF > ${KEYSTONE_WEBHOOK_CONFIG}
+---
+apiVersion: v1
+kind: Config
+preferences: {}
+clusters:
+  - cluster:
+      insecure-skip-tls-verify: true
+      server: https://127.0.0.1:8443/webhook
+    name: webhook
+users:
+  - name: webhook
+contexts:
+  - context:
+      cluster: webhook
+      user: webhook
+    name: webhook
+current-context: webhook
+EOF
+}
+    KUBE_API_ARGS="$KUBE_API_ARGS --authentication-token-webhook-config-file=/etc/kubernetes/keystone_webhook_config.yaml --authorization-webhook-config-file=/etc/kubernetes/keystone_webhook_config.yaml"
+    webhook_auth="--authorization-mode=Node,Webhook,RBAC"
+    KUBE_API_ARGS=${KUBE_API_ARGS/--authorization-mode=Node,RBAC/$webhook_auth}
+fi
 
 sed -i '
     /^KUBE_API_ADDRESS=/ s/=.*/="'"${KUBE_API_ADDRESS}"'"/

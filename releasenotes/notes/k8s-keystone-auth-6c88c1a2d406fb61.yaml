@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Now cloud-provider-openstack of Kubernetes has a webhook to support
+    Keystone authorization and authentication. With this feature, user can use
+    a new label 'keystone-auth-enabled' to enable the keystone authN and authZ.
+

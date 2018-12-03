@@ -519,6 +519,23 @@ parameters:
     description: tag of the heat_container_agent system container
     default: stein-dev
 
+  keystone_auth_enabled:
+    type: boolean
+    description: >
+      true if the keystone authN and authZ should be enabled
+    default:
+      false
+
+  k8s_keystone_auth_tag:
+    type: string
+    description: tag of the k8s_keystone_auth container
+    default: 1.13.0
+
+  project_id:
+    type: string
+    description: >
+      project id of current project
+
 resources:
 
   ######################################################################
@@ -745,6 +762,9 @@ resources:
           prometheus_tag: {get_param: prometheus_tag}
           grafana_tag: {get_param: grafana_tag}
           heat_container_agent_tag: {get_param: heat_container_agent_tag}
+          keystone_auth_enabled: {get_param: keystone_auth_enabled}
+          k8s_keystone_auth_tag: {get_param: k8s_keystone_auth_tag}
+          project_id: {get_param: project_id}
 
   kube_cluster_config:
     type: OS::Heat::SoftwareConfig
@@ -770,6 +790,7 @@ resources:
                   $enable-ingress-traefik: {get_file: ../../common/templates/kubernetes/fragments/enable-ingress-traefik.sh}
                 template: {get_file: ../../common/templates/kubernetes/fragments/enable-ingress-controller.sh}
             - get_file: ../../common/templates/kubernetes/fragments/kube-dashboard-service.sh
+            - get_file: ../../common/templates/kubernetes/fragments/enable-keystone-auth.sh
 
   kube_cluster_deploy:
     type: OS::Heat::SoftwareDeployment
