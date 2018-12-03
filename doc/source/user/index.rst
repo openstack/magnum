@@ -369,6 +369,10 @@ the table are linked to more details elsewhere in the user guide.
 | `service_cluster_ip_range`            | IPv4 CIDR for k8s  | 10.254.0.0/16 |
 |                                       | service portals    |               |
 +---------------------------------------+--------------------+---------------+
+| `keystone_auth_enabled`_              | see below          | false         |
++---------------------------------------+--------------------+---------------+
+| `k8s_keystone_auth_tag`_              | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 
 Cluster
 -------
@@ -1184,6 +1188,16 @@ _`cloud_provider_enabled`
   'volume_driver', it is implied that the cloud provider will be enabled since
   they are combined.
 
+_`keystone_auth_enabled`
+  If this label is set to True, Kubernetes will support use Keystone for
+  authorization and authentication.
+
+_`k8s_keystone_auth_tag`
+  This label allows users to select `a specific k8s_keystone_auth
+  version, based on its container tag
+  <https://hub.docker.com/r/k8scloudprovider/k8s-keystone-auth/tags/>`_.
+  Stein-default: 1.13.0
+
 External load balancer for services
 -----------------------------------
 
@@ -1254,6 +1268,39 @@ in a Cluster
 <https://kubernetes.io/docs/tasks/administer-cluster/dns-horizontal-autoscaling/#tuning-autoscaling-parameters>`_
 for more info.
 
+Keystone authN and authZ
+------------------------
+
+Now `cloud-provider-openstack
+<https://github.com/kubernetes/cloud-provider-openstack>`_
+provides a good webhook between OpenStack Keystone and Kubernetes, so that
+user can do authorization and authentication with a Keystone user/role against
+the Kubernetes cluster. If label `keystone-auth-enabled` is set True, then
+user can use their OpenStack credentials and roles to access resources in
+Kubernetes.
+
+Assume you have already got the configs with command
+`eval $(openstack coe cluster config <cluster ID>)`, then to configure the
+kubectl client, the following commands are needed:
+
+1. Run `kubectl config set-credentials openstackuser --auth-provider=openstack`
+
+2. Run `kubectl config set-context --cluster=<your cluster name>
+   --user=openstackuser openstackuser@kubernetes`
+
+3. Run `kubectl config use-context openstackuser@kubernetes` to activate the
+   context
+
+
+**NOTE:** Please make sure the version of kubectl is 1.8+ and make sure
+OS_DOMAIN_NAME is included in the rc file.
+
+Now try `kubectl get pods`, you should be able to see response from Kubernetes
+based on current user's role.
+
+Please refer the doc of `k8s-keystone-auth in cloud-provider-openstack
+<https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/using-keystone-webhook-authenticator-and-authorizer.md>`_
+for more information.
 
 Swarm
 =====
