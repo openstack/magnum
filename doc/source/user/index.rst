@@ -346,8 +346,14 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `docker_volume_type`_                 | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
+| `boot_volume_size`_                   | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `boot_volume_type`_                   | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 | `etcd_volume_size`_                   | etcd storage       | 0             |
 |                                       | volume size        |               |
++---------------------------------------+--------------------+---------------+
+| `etcd_volume_type`_                   | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
 | `container_infra_prefix`_             | see below          | ""            |
 +---------------------------------------+--------------------+---------------+
@@ -1114,9 +1120,25 @@ _`admission_control_list`
   The default value corresponds to the one recommended in this doc
   for our current Kubernetes version.
 
+_`boot_volume_size`
+  This label overrides the default_boot_volume_size of instances which is
+  useful if your flavors are boot from volume only. The default value is 0,
+  meaning that cluster instances will not boot from volume.
+
+_`boot_volume_type`
+  This label overrides the default_boot_volume_type of instances which is
+  useful if your flavors are boot from volume only. The default value is '',
+  meaning that Magnum will randomly select a Cinder volume type from all
+  available options.
+
 _`etcd_volume_size`
   This label sets the size of a volume holding the etcd storage data.
   The default value is 0, meaning the etcd data is not persisted (no volume).
+
+_`etcd_volume_type`
+  This label overrides the default_etcd_volume_type holding the etcd storage
+  data. The default value is '', meaning meaning that Magnum will randomly
+  select a Cinder volume type from all available options.
 
 _`container_infra_prefix`
   Prefix of all container images used in the cluster (kubernetes components,

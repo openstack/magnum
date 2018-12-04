@@ -1,4 +1,4 @@
-heat_template_version: 2014-10-16
+heat_template_version: queens
 
 description: >
   This is a nested stack that defines a single Kubernetes minion, This stack is
@@ -33,6 +33,16 @@ parameters:
       whether or not kubernetes should permit privileged containers.
     constraints:
       - allowed_values: ["true", "false"]
+
+  boot_volume_size:
+    type: number
+    description: >
+      size of the cinder boot volume
+
+  boot_volume_type:
+    type: string
+    description: >
+      type of the cinder boot volume
 
   docker_volume_size:
     type: number
@@ -294,6 +304,15 @@ parameters:
     default:
       true
 
+conditions:
+
+  image_based: {equals: [{get_param: boot_volume_size}, 0]}
+  volume_based:
+    not:
+      equals:
+      - get_param: boot_volume_size
+      - 0
+
 resources:
 
   agent_config:
@@ -399,7 +418,7 @@ resources:
     properties:
       signal_transport: HEAT_SIGNAL
       config: {get_resource: node_config}
-      server: {get_resource: kube-minion}
+      server: {if: ["volume_based", {get_resource: kube-minion-bfv}, {get_resource: kube-minion}]}
       actions: ['CREATE']
 
   ######################################################################
@@ -407,14 +426,38 @@ resources:
   # a single kubernetes minion.
   #
 
+  kube_node_volume:
+    type: OS::Cinder::Volume
+    condition: volume_based
+    properties:
+      image: {get_param: server_image}
+      size: {get_param: boot_volume_size}
+      volume_type: {get_param: boot_volume_type}
+
   # do NOT use "_" (underscore) in the Nova server name
   # it creates a mismatch between the generated Nova name and its hostname
   # which can lead to weird problems
   kube-minion:
+    condition: image_based
     type: OS::Nova::Server
     properties:
       name: {get_param: name}
+      flavor: {get_param: minion_flavor}
       image: {get_param: server_image}
+      key_name: {get_param: ssh_key_name}
+      user_data: {get_resource: agent_config}
+      user_data_format: SOFTWARE_CONFIG
+      software_config_transport: POLL_SERVER_HEAT
+      networks:
+        - port: {get_resource: kube_minion_eth0}
+      scheduler_hints: { group: { get_param: nodes_server_group_id }}
+      availability_zone: {get_param: availability_zone}
+
+  kube-minion-bfv:
+    condition: volume_based
+    type: OS::Nova::Server
+    properties:
+      name: {get_param: name}
       flavor: {get_param: minion_flavor}
       key_name: {get_param: ssh_key_name}
       user_data: {get_resource: agent_config}
@@ -424,6 +467,10 @@ resources:
         - port: {get_resource: kube_minion_eth0}
       scheduler_hints: { group: { get_param: nodes_server_group_id }}
       availability_zone: {get_param: availability_zone}
+      block_device_mapping_v2:
+        - boot_index: 0
+          volume_id: {get_resource: kube_node_volume}
+          delete_on_termination: true
 
   kube_minion_eth0:
     type: OS::Neutron::Port
@@ -458,7 +505,7 @@ resources:
   docker_volume_attach:
     type: Magnum::Optional::Cinder::VolumeAttachment
     properties:
-      instance_uuid: {get_resource: kube-minion}
+      instance_uuid: {if: ["volume_based", {get_resource: kube-minion-bfv}, {get_resource: kube-minion}]}
       volume_id: {get_resource: docker_volume}
       mountpoint: /dev/vdb
 
@@ -476,7 +523,7 @@ resources:
     properties:
       signal_transport: HEAT_SIGNAL
       config: {get_resource: upgrade_kubernetes}
-      server: {get_resource: kube-minion}
+      server: {if: ["volume_based", {get_resource: kube-minion-bfv}, {get_resource: kube-minion}]}
       actions: ['UPDATE']
       input_values:
         kube_tag_input: {get_param: kube_tag}
@@ -505,6 +552,6 @@ outputs:
   ######################################################################
 
   OS::stack_id:
-    value: { get_resource: kube-minion }
+    value: {if: ["volume_based", {get_resource: kube-minion-bfv}, {get_resource: kube-minion}]}
     description: >
       This is the Nova server id of the node.

@@ -28,12 +28,53 @@ cinder_opts = [
                help=_('The default docker volume_type to use for volumes '
                       'used for docker storage. To use the cinder volumes '
                       'for docker storage, you need to select a default '
-                      'value.'))]
+                      'value. Otherwise, Magnum will select random one from '
+                      'Cinder volume type list.')),
+    cfg.StrOpt('default_etcd_volume_type',
+               default='',
+               help=_('The default etcd volume_type to use for volumes '
+                      'used for etcd storage. To use the cinder volumes '
+                      'for etcd storage, you need to select a default '
+                      'value. Otherwise, Magnum will select random one from '
+                      'Cinder volume type list.')),
+    cfg.StrOpt('default_boot_volume_type',
+               default='',
+               help=_('The default boot volume_type to use for volumes '
+                      'used for VM of COE. To use the cinder volumes '
+                      'for VM of COE, you need to select a default '
+                      'value. Otherwise, Magnum will select random one from '
+                      'Cinder volume type list.')),
+    cfg.IntOpt('default_boot_volume_size',
+               default=0,
+               help=_('The default volume size to use for volumes '
+                      'used for VM of COE.'))
+]
 
 cinder_client_opts = [
     cfg.StrOpt('region_name',
                help=_('Region in Identity service catalog to use for '
-                      'communication with the OpenStack service.'))]
+                      'communication with the OpenStack service.')),
+    cfg.StrOpt('endpoint_type',
+               default='publicURL',
+               help=_('Type of endpoint in Identity service catalog to use '
+                      'for communication with the OpenStack service.')),
+    cfg.StrOpt('api_version',
+               default='2',
+               help=_('Version of Cinder API to use in cinderclient.'))
+]
+
+common_security_opts = [
+    cfg.StrOpt('ca_file',
+               help=_('Optional CA cert file to use in SSL connections.')),
+    cfg.StrOpt('cert_file',
+               help=_('Optional PEM-formatted certificate chain file.')),
+    cfg.StrOpt('key_file',
+               help=_('Optional PEM-formatted file that contains the '
+                      'private key.')),
+    cfg.BoolOpt('insecure',
+                default=False,
+                help=_("If set, then the server's certificate will not "
+                       "be verified."))]
 
 
 def register_opts(conf):
@@ -41,6 +82,7 @@ def register_opts(conf):
     conf.register_group(cinder_client_group)
     conf.register_opts(cinder_opts, group=cinder_group)
     conf.register_opts(cinder_client_opts, group=cinder_client_group)
+    conf.register_opts(common_security_opts, group=cinder_client_group)
 
 
 def list_opts():
