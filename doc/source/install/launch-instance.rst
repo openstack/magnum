@@ -116,7 +116,7 @@ and tested by the Magnum team.
 
    .. code-block:: console
 
-      $ wget https://download.fedoraproject.org/pub/alt/atomic/stable/Fedora-Atomic-27-20180212.2/CloudImages/x86_64/images/Fedora-Atomic-27-20180212.2.x86_64.qcow2
+      $ wget https://download.fedoraproject.org/pub/alt/atomic/stable/Fedora-Atomic-27-20180419.0/CloudImages/x86_64/images/Fedora-Atomic-27-20180419.0.x86_64.qcow2
 
 #. Register the image to the Image service setting the ``os_distro`` property
    to ``fedora-atomic``:
@@ -126,7 +126,7 @@ and tested by the Magnum team.
       $ openstack image create \
                             --disk-format=qcow2 \
                             --container-format=bare \
-                            --file=Fedora-Atomic-27-20180212.2.x86_64.qcow2\
+                            --file=Fedora-Atomic-27-20180419.0.x86_64.qcow2\
                             --property os_distro='fedora-atomic' \
                             fedora-atomic-latest
       +------------------+------------------------------------------------------+
