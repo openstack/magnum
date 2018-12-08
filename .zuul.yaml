@@ -78,8 +78,16 @@
       coe: api
 
 - job:
-    name: magnum-functional-k8s
+    name: magnum-functional-coe
     parent: magnum-functional-base
+    nodeset:
+      nodes:
+        - name: primary
+          label: ubuntu-xenial-vexxhost
+
+- job:
+    name: magnum-functional-k8s
+    parent: magnum-functional-coe
     voting: false
     vars:
       coe: k8s
@@ -95,7 +103,7 @@
 
 - job:
     name: magnum-functional-swarm-mode
-    parent: magnum-functional-base
+    parent: magnum-functional-coe
     voting: false
     branches: ^(?!stable/(newton|ocata)).*$
     vars:
@@ -113,7 +121,7 @@
 
 - job:
     name: magnum-functional-dcos
-    parent: magnum-functional-base
+    parent: magnum-functional-coe
     voting: false
     branches: ^(?!stable/(newton|ocata)).*$
     vars:
@@ -131,7 +139,7 @@
 
 - job:
     name: magnum-functional-mesos
-    parent: magnum-functional-base
+    parent: magnum-functional-coe
     voting: false
     vars:
       coe: mesos
@@ -147,7 +155,7 @@
 
 - job:
     name: magnum-functional-swarm
-    parent: magnum-functional-base
+    parent: magnum-functional-coe
     voting: false
     vars:
       coe: swarm
@@ -164,7 +172,7 @@
 
 - job:
     name: magnum-functional-k8s-ironic
-    parent: magnum-functional-base
+    parent: magnum-functional-coe
     voting: false
     vars:
       coe: k8s
@@ -181,7 +189,7 @@
 
 - job:
     name: magnum-functional-swarm-ironic
-    parent: magnum-functional-base
+    parent: magnum-functional-coe
     voting: false
     vars:
       coe: swarm
@@ -295,4 +303,3 @@
         - magnum-dib-buildimage-fedora-atomic-25
         - magnum-dib-buildimage-ubuntu-mesos
         - magnum-dib-buildimage-centos-dcos
-
