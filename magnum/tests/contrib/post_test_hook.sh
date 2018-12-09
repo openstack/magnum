@@ -131,8 +131,8 @@ function add_flavor {
         local flavor_vcpus="2"
     fi
 
-    openstack flavor create m1.magnum --id 100 --ram ${flavor_ram:-1024} --disk ${flavor_disk:-10} --vcpus ${flavor_vcpus:-1}
-    openstack flavor create s1.magnum --id 200 --ram ${flavor_ram:-1024} --disk ${flavor_disk:-10} --vcpus ${flavor_vcpus:-1}
+    openstack flavor create m1.magnum --id 100 --ram ${flavor_ram:-1024} --disk ${flavor_disk:-10} --vcpus ${flavor_vcpus:-4}
+    openstack flavor create s1.magnum --id 200 --ram ${flavor_ram:-1024} --disk ${flavor_disk:-10} --vcpus ${flavor_vcpus:-4}
 }
 
 if ! function_exists echo_summary; then
