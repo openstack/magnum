@@ -216,7 +216,7 @@ if [[ "api" == "$coe" ]]; then
 
     pushd $BASE/new/magnum-tempest-plugin
     sudo cp $CREDS_FILE .
-    sudo -E -H -u $USER tox -e functional-"$target" $_magnum_tests -- --concurrency=1
+    sudo -E -H -u $USER tox -e functional-"$target" $_magnum_tests
     EXIT_CODE=$?
     popd
 else
