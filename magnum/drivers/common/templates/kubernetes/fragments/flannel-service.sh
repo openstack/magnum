@@ -6,8 +6,10 @@ if [ "$NETWORK_DRIVER" != "flannel" ]; then
     exit 0
 fi
 
+SYSTEMD_UNITS_DIR=/etc/systemd/system/
 FLANNEL_DOCKER_BRIDGE_BIN=/usr/local/bin/flannel-docker-bridge
 FLANNEL_DOCKER_BRIDGE_SERVICE=/etc/systemd/system/flannel-docker-bridge.service
+FLANNEL_IPTABLES_FORWARD_ACCEPT_SERVICE=flannel-iptables-forward-accept.service
 DOCKER_FLANNEL_CONF=/etc/systemd/system/docker.service.d/flannel.conf
 FLANNEL_DOCKER_BRIDGE_CONF=/etc/systemd/system/flanneld.service.d/flannel-docker-bridge.conf
 
@@ -76,6 +78,27 @@ EOF
 
 chown root:root $FLANNEL_DOCKER_BRIDGE_CONF
 chmod 0644 $FLANNEL_DOCKER_BRIDGE_CONF
+
+# Workaround for https://github.com/coreos/flannel/issues/799
+# Not solved upstream properly yet.
+cat >> "${SYSTEMD_UNITS_DIR}${FLANNEL_IPTABLES_FORWARD_ACCEPT_SERVICE}" <<EOF
+[Unit]
+After=flanneld.service docker.service kubelet.service kube-proxy.service
+Requires=flanneld.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/iptables -P FORWARD ACCEPT
+ExecStartPost=/usr/sbin/iptables -S
+
+[Install]
+WantedBy=flanneld.service
+EOF
+
+chown root:root "${SYSTEMD_UNITS_DIR}${FLANNEL_IPTABLES_FORWARD_ACCEPT_SERVICE}"
+chmod 0644 "${SYSTEMD_UNITS_DIR}${FLANNEL_IPTABLES_FORWARD_ACCEPT_SERVICE}"
+systemctl daemon-reload
+systemctl enable "${FLANNEL_IPTABLES_FORWARD_ACCEPT_SERVICE}"
 
 echo "activating service flanneld"
 systemctl enable flanneld
