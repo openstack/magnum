@@ -369,8 +369,9 @@ extendedKeyUsage = clientAuth
         return nodes
 
     def _get_nodes_from_stack(self):
+        cluster = self.cs.clusters.get(self.cluster.uuid)
         nodes = []
-        stack = self.heat.stacks.get(self.cluster.stack_id)
+        stack = self.heat.stacks.get(cluster.stack_id)
         stack_outputs = stack.to_dict().get('outputs', [])
         output_keys = []
         if self.cluster_template.coe == "kubernetes":
