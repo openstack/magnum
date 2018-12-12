@@ -362,6 +362,81 @@ EOF
 )
 writeFile $grafanaService_file "$grafanaService_content"
 
+nodeExporter_file=/srv/magnum/kubernetes/monitoring/nodeExporter.yaml
+nodeExporter_content=$(cat <<EOF
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+  namespace: prometheus-monitoring
+  labels:
+    k8s-app: node-exporter
+    kubernetes.io/cluster-service: "true"
+    addonmanager.kubernetes.io/mode: Reconcile
+    version: v0.15.2
+spec:
+  selector:
+    matchLabels:
+      k8s-app: node-exporter
+      version: v0.15.2
+  updateStrategy:
+    type: OnDelete
+  template:
+    metadata:
+      labels:
+        k8s-app: node-exporter
+        version: v0.15.2
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+    spec:
+      tolerations:
+        # Make sure calico/node gets scheduled on all nodes.
+        - effect: NoSchedule
+          operator: Exists
+        # Mark the pod as a critical add-on for rescheduling.
+        - key: CriticalAddonsOnly
+          operator: Exists
+        - effect: NoExecute
+          operator: Exists
+      priorityClassName: system-node-critical
+      containers:
+        - name: prometheus-node-exporter
+          image: "${CONTAINER_INFRA_PREFIX:-docker.io/prom/}node-exporter:v0.15.2"
+          imagePullPolicy: "IfNotPresent"
+          args:
+            - --path.procfs=/host/proc
+            - --path.sysfs=/host/sys
+          ports:
+            - name: metrics
+              containerPort: 9100
+              hostPort: 9100
+          volumeMounts:
+            - name: proc
+              mountPath: /host/proc
+              readOnly:  true
+            - name: sys
+              mountPath: /host/sys
+              readOnly: true
+          resources:
+            limits:
+              cpu: 10m
+              memory: 50Mi
+            requests:
+              cpu: 10m
+              memory: 50Mi
+      hostNetwork: true
+      hostPID: true
+      volumes:
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: sys
+          hostPath:
+            path: /sys
+EOF
+)
+writeFile $nodeExporter_file "$nodeExporter_content"
+
 . /etc/sysconfig/heat-params
 
 
@@ -402,6 +477,13 @@ if [ "$(echo $PROMETHEUS_MONITORING | tr '[:upper:]' '[:lower:]')" = "true" ]; t
         kubectl create -f '''${PROMETHEUS_MON_BASE_DIR}'''/prometheusService.yaml
     fi
 
+    # Check if node exporter daemonset exist
+    kubectl get daemonset node-exporter -n prometheus-monitoring
+    if [ "$?" != "0" ] && \
+            [ -f "'''${PROMETHEUS_MON_BASE_DIR}'''/nodeExporter.yaml" ]; then
+        kubectl create -f '''${PROMETHEUS_MON_BASE_DIR}'''/nodeExporter.yaml
+    fi
+
     # Check if configmap graf-dash exists
     kubectl get configmap graf-dash -n prometheus-monitoring
     if [ "$?" != "0" ] && \
@@ -429,14 +511,15 @@ if [ "$(echo $PROMETHEUS_MONITORING | tr '[:upper:]' '[:lower:]')" = "true" ]; t
     # Which node is running Grafana
     NODE_IP=`kubectl get po -n prometheus-monitoring -o jsonpath={.items[0].status.hostIP} -l name=grafana`
     PROM_SERVICE_IP=`kubectl get svc prometheus --namespace prometheus-monitoring -o jsonpath={..clusterIP}`
+    GRAFANA_SERVICE_IP=`kubectl get svc grafana --namespace prometheus-monitoring -o jsonpath={..clusterIP}`
 
     # The Grafana pod might be running but the app might still be initiating
     echo "Check if Grafana is ready..."
-    curl --user admin:$ADMIN_PASSWD -X GET http://$NODE_IP:3000/api/datasources/1
+    curl --user admin:$ADMIN_PASSWD -X GET http://$GRAFANA_SERVICE_IP:3000/api/datasources/1
     until [ $? -eq 0 ]
     do
         sleep 2
-        curl --user admin:$ADMIN_PASSWD -X GET http://$NODE_IP:3000/api/datasources/1
+        curl --user admin:$ADMIN_PASSWD -X GET http://$GRAFANA_SERVICE_IP:3000/api/datasources/1
     done
 
     # Inject Prometheus datasource into Grafana
@@ -446,7 +529,7 @@ if [ "$(echo $PROMETHEUS_MONITORING | tr '[:upper:]' '[:lower:]')" = "true" ]; t
             -H "Content-Type: application/json;charset=UTF-8" \
             --data-binary '''"'"'''{"name":"k8sPrometheus","isDefault":true,
                 "type":"prometheus","url":"http://'''"'"'''$PROM_SERVICE_IP'''"'"''':9090","access":"proxy"}'''"'"'''\
-            "http://$NODE_IP:3000/api/datasources/"`
+            "http://$GRAFANA_SERVICE_IP:3000/api/datasources/"`
 
         if [[ "$INJECT" = *"Datasource added"* ]]; then
             echo "Prometheus datasource injected into Grafana"

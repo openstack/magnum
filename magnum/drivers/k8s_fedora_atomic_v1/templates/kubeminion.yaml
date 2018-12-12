@@ -412,12 +412,6 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/fragments/enable-docker-registry.sh}
 
-  enable_node_exporter:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/enable-node-exporter.sh}
-
   minion_wc_notify:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -463,7 +457,6 @@ resources:
         - config: {get_resource: flannel_service}
         - config: {get_resource: add_proxy}
         - config: {get_resource: enable_services}
-        - config: {get_resource: enable_node_exporter}
         - config: {get_resource: enable_docker_registry}
         - config: {get_resource: minion_wc_notify}
 

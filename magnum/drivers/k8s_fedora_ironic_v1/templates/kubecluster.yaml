@@ -419,6 +419,9 @@ resources:
           port_range_min: 6443
           port_range_max: 6443
         - protocol: tcp
+          port_range_min: 9100
+          port_range_max: 9100
+        - protocol: tcp
           port_range_min: 30000
           port_range_max: 32767
 
