@@ -1,24 +1,24 @@
 #!/bin/sh
 
+step="calico-service"
+printf "Starting to run ${step}\n"
+
 . /etc/sysconfig/heat-params
 
-if [ "$NETWORK_DRIVER" != "calico" ]; then
-    exit 0
-fi
+if [ "$NETWORK_DRIVER" = "calico" ]; then
+    _prefix=${CONTAINER_INFRA_PREFIX:-quay.io/calico/}
+    ETCD_SERVER_IP=${ETCD_LB_VIP:-$KUBE_NODE_IP}
+    CERT_DIR=/etc/kubernetes/certs
+    ETCD_CA=`cat ${CERT_DIR}/ca.crt | base64 | tr -d '\n'`
+    ETCD_CERT=`cat ${CERT_DIR}/server.crt | base64 | tr -d '\n'`
+    ETCD_KEY=`cat ${CERT_DIR}/server.key | base64 | tr -d '\n'`
 
-_prefix=${CONTAINER_INFRA_PREFIX:-quay.io/calico/}
-ETCD_SERVER_IP=${ETCD_LB_VIP:-$KUBE_NODE_IP}
-CERT_DIR=/etc/kubernetes/certs
-ETCD_CA=`cat ${CERT_DIR}/ca.crt | base64 | tr -d '\n'`
-ETCD_CERT=`cat ${CERT_DIR}/server.crt | base64 | tr -d '\n'`
-ETCD_KEY=`cat ${CERT_DIR}/server.key | base64 | tr -d '\n'`
+    CALICO_DEPLOY=/srv/magnum/kubernetes/manifests/calico-deploy.yaml
 
-CALICO_DEPLOY=/srv/magnum/kubernetes/manifests/calico-deploy.yaml
-
-[ -f ${CALICO_DEPLOY} ] || {
-echo "Writing File: $CALICO_DEPLOY"
-mkdir -p $(dirname ${CALICO_DEPLOY})
-cat << EOF > ${CALICO_DEPLOY}
+    [ -f ${CALICO_DEPLOY} ] || {
+    echo "Writing File: $CALICO_DEPLOY"
+    mkdir -p $(dirname ${CALICO_DEPLOY})
+    cat << EOF > ${CALICO_DEPLOY}
 # Calico Version v2.6.7
 # https://docs.projectcalico.org/v2.6/releases#v2.6.7
 # This manifest includes the following component versions:
@@ -445,21 +445,15 @@ subjects:
   name: calico-node
   namespace: kube-system
 EOF
-}
+    }
 
-# NOTE(flwang): Let's keep the same addons yaml file on all masters,
-# but if it's not the primary/bootstrapping master, don't try to
-# create those resources to avoid race condition issue until the
-# kubectl issue https://github.com/kubernetes/kubernetes/issues/44165
-# fixed.
-if [ "$MASTER_INDEX" != "0" ]; then
-    exit 0
+    until  [ "ok" = "$(curl --silent http://127.0.0.1:8080/healthz)" ]
+    do
+        echo "Waiting for Kubernetes API..."
+        sleep 5
+    done
+
+    /usr/bin/kubectl apply -f ${CALICO_DEPLOY} --namespace=kube-system
 fi
 
-until  [ "ok" = "$(curl --silent http://127.0.0.1:8080/healthz)" ]
-do
-    echo "Waiting for Kubernetes API..."
-    sleep 5
-done
-
-/usr/bin/kubectl apply -f ${CALICO_DEPLOY} --namespace=kube-system
+printf "Finished running ${step}\n"

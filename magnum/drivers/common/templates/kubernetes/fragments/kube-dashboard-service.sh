@@ -1,20 +1,20 @@
-#!/bin/bash -x
+#!/bin/sh
+
+step="kube-dashboard-service"
+printf "Starting to run ${step}\n"
 
 . /etc/sysconfig/heat-params
 
-if [ "$(echo $KUBE_DASHBOARD_ENABLED | tr '[:upper:]' '[:lower:]')" == "false" ]; then
-    exit 0
-fi
+if [ "$(echo $KUBE_DASHBOARD_ENABLED | tr '[:upper:]' '[:lower:]')" == "true" ]; then
+    KUBE_DASH_IMAGE="${CONTAINER_INFRA_PREFIX:-gcr.io/google_containers/}kubernetes-dashboard-amd64:${KUBE_DASHBOARD_VERSION}"
+    HEAPSTER_IMAGE="${CONTAINER_INFRA_PREFIX:-gcr.io/google_containers/}heapster-amd64:v1.4.2"
 
-KUBE_DASH_IMAGE="${CONTAINER_INFRA_PREFIX:-gcr.io/google_containers/}kubernetes-dashboard-amd64:${KUBE_DASHBOARD_VERSION}"
-HEAPSTER_IMAGE="${CONTAINER_INFRA_PREFIX:-gcr.io/google_containers/}heapster-amd64:v1.4.2"
+    KUBE_DASH_DEPLOY=/srv/magnum/kubernetes/kubernetes-dashboard.yaml
 
-KUBE_DASH_DEPLOY=/srv/magnum/kubernetes/kubernetes-dashboard.yaml
-
-[ -f ${KUBE_DASH_DEPLOY} ] || {
-    echo "Writing File: $KUBE_DASH_DEPLOY"
-    mkdir -p $(dirname ${KUBE_DASH_DEPLOY})
-    cat << EOF > ${KUBE_DASH_DEPLOY}
+    [ -f ${KUBE_DASH_DEPLOY} ] || {
+        echo "Writing File: $KUBE_DASH_DEPLOY"
+        mkdir -p $(dirname ${KUBE_DASH_DEPLOY})
+        cat << EOF > ${KUBE_DASH_DEPLOY}
 # Copyright 2017 The Kubernetes Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -197,22 +197,22 @@ spec:
   selector:
     k8s-app: kubernetes-dashboard
 EOF
-}
+    }
 
-INFLUX_SINK=""
-# Deploy INFLUX AND GRAFANA
-if [ "$(echo $INFLUX_GRAFANA_DASHBOARD_ENABLED | tr '[:upper:]' '[:lower:]')" == "true" ]; then
-    INFLUX_SINK="        - --sink=influxdb:http://monitoring-influxdb.kube-system.svc:8086"
-    INFLUX_IMAGE="${CONTAINER_INFRA_PREFIX:-gcr.io/google_containers/}heapster-influxdb-amd64:v1.3.3"
-    GRAFANA_IMAGE="${CONTAINER_INFRA_PREFIX:-gcr.io/google_containers/}heapster-grafana-amd64:v4.4.3"
+    INFLUX_SINK=""
+    # Deploy INFLUX AND GRAFANA
+    if [ "$(echo $INFLUX_GRAFANA_DASHBOARD_ENABLED | tr '[:upper:]' '[:lower:]')" == "true" ]; then
+        INFLUX_SINK="        - --sink=influxdb:http://monitoring-influxdb.kube-system.svc:8086"
+        INFLUX_IMAGE="${CONTAINER_INFRA_PREFIX:-gcr.io/google_containers/}heapster-influxdb-amd64:v1.3.3"
+        GRAFANA_IMAGE="${CONTAINER_INFRA_PREFIX:-gcr.io/google_containers/}heapster-grafana-amd64:v4.4.3"
 
-    INFLUX_DEPLOY=/srv/magnum/kubernetes/influxdb.yaml
-    GRAFANA_DEPLOY=/srv/magnum/kubernetes/grafana.yaml
+        INFLUX_DEPLOY=/srv/magnum/kubernetes/influxdb.yaml
+        GRAFANA_DEPLOY=/srv/magnum/kubernetes/grafana.yaml
 
-    [ -f ${INFLUX_DEPLOY} ] || {
-        echo "Writing File: $INFLUX_DEPLOY"
-        mkdir -p $(dirname ${INFLUX_DEPLOY})
-        cat << EOF > ${INFLUX_DEPLOY}
+        [ -f ${INFLUX_DEPLOY} ] || {
+            echo "Writing File: $INFLUX_DEPLOY"
+            mkdir -p $(dirname ${INFLUX_DEPLOY})
+            cat << EOF > ${INFLUX_DEPLOY}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -254,12 +254,12 @@ spec:
   selector:
     k8s-app: influxdb
 EOF
-    }
+        }
 
-    [ -f ${GRAFANA_DEPLOY} ] || {
-        echo "Writing File: $GRAFANA_DEPLOY"
-        mkdir -p $(dirname ${GRAFANA_DEPLOY})
-        cat << EOF > ${GRAFANA_DEPLOY}
+        [ -f ${GRAFANA_DEPLOY} ] || {
+            echo "Writing File: $GRAFANA_DEPLOY"
+            mkdir -p $(dirname ${GRAFANA_DEPLOY})
+            cat << EOF > ${GRAFANA_DEPLOY}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -333,31 +333,25 @@ spec:
   selector:
     k8s-app: grafana
 EOF
-    }
+        }
 
-    if [ "$MASTER_INDEX" != "0" ]; then
-        exit 0
+        echo "Waiting for Kubernetes API..."
+        until  [ "ok" = "$(curl --silent http://127.0.0.1:8080/healthz)" ]
+        do
+            sleep 5
+        done
+
+        kubectl apply --validate=false -f $INFLUX_DEPLOY
+        kubectl apply --validate=false -f $GRAFANA_DEPLOY
     fi
 
+    # Deploy Heapster
+    HEAPSTER_DEPLOY=/srv/magnum/kubernetes/heapster-controller.yaml
 
-
-    echo "Waiting for Kubernetes API..."
-    until  [ "ok" = "$(curl --silent http://127.0.0.1:8080/healthz)" ]
-    do
-        sleep 5
-    done
-
-    kubectl apply --validate=false -f $INFLUX_DEPLOY
-    kubectl apply --validate=false -f $GRAFANA_DEPLOY
-fi
-
-# Deploy Heapster
-HEAPSTER_DEPLOY=/srv/magnum/kubernetes/heapster-controller.yaml
-
-[ -f ${HEAPSTER_DEPLOY} ] || {
-    echo "Writing File: $HEAPSTER_DEPLOY"
-    mkdir -p $(dirname ${HEAPSTER_DEPLOY})
-    cat << EOF > ${HEAPSTER_DEPLOY}
+    [ -f ${HEAPSTER_DEPLOY} ] || {
+        echo "Writing File: $HEAPSTER_DEPLOY"
+        mkdir -p $(dirname ${HEAPSTER_DEPLOY})
+        cat << EOF > ${HEAPSTER_DEPLOY}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -452,23 +446,16 @@ subjects:
   name: heapster
   namespace: kube-system
 EOF
-}
+    }
 
-# NOTE(flwang): Let's keep the same addons yaml file on all masters,
-# but if it's not the primary/bootstrapping master, don't try to
-# create those resources to avoid race condition issue until the
-# kubectl issue https://github.com/kubernetes/kubernetes/issues/44165
-# fixed.
+    echo "Waiting for Kubernetes API..."
+    until  [ "ok" = "$(curl --silent http://127.0.0.1:8080/healthz)" ]
+    do
+        sleep 5
+    done
 
-if [ "$MASTER_INDEX" != "0" ]; then
-    exit 0
+    kubectl apply --validate=false -f $KUBE_DASH_DEPLOY
+    kubectl apply --validate=false -f $HEAPSTER_DEPLOY
 fi
 
-echo "Waiting for Kubernetes API..."
-until  [ "ok" = "$(curl --silent http://127.0.0.1:8080/healthz)" ]
-do
-    sleep 5
-done
-
-kubectl apply --validate=false -f $KUBE_DASH_DEPLOY
-kubectl apply --validate=false -f $HEAPSTER_DEPLOY
+printf "Finished running ${step}\n"
