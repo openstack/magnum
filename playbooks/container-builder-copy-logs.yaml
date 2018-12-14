@@ -1,13 +1,5 @@
 - hosts: all
   tasks:
-    - name: collect ansible_async logs
-      synchronize:
-        src: '/home/zuul/.ansible_async'
-        dest: '{{ zuul.executor.log_root }}'
-        mode: pull
-        copy_links: true
-        verify_host: true
-
     - shell:
         cmd: |
           set +o errexit

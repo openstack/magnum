@@ -1,6 +1,6 @@
 ARG KUBE_VERSION=v1.13.0
 
-FROM registry.fedoraproject.org/fedora:rawhide
+FROM fedora:rawhide
 RUN curl -o /root/kubectl -O https://storage.googleapis.com/kubernetes-release/release/${KUBE_VERSION}/bin/linux/amd64/kubectl
 
 FROM gcr.io/google-containers/kube-apiserver-amd64:${KUBE_VERSION}

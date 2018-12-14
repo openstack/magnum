@@ -1,4 +1,4 @@
-FROM registry.fedoraproject.org/fedora:rawhide
+FROM fedora:rawhide
 
 # Fill out the labels
 LABEL name="heat-container-agent" \
