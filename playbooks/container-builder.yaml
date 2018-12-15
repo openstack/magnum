@@ -2,33 +2,26 @@
   tasks:
     - include_vars: container-builder-vars.yaml
 
-    - name: Build images
+    - name: "Build magnum images"
       block:
-        - docker_image:
+        - name: "Build {{ magnum_repository }}/{{ item.name }}:{{ item.tag }} image"
+          docker_image:
             path: "{{ magnum_src_dir }}/dockerfiles/{{ item.name }}"
-            name: "{{ item.name }}"
-            repository: "{{ repository }}/{{ item.name }}"
-            tag: "{{ item.tag}}"
+            name: "{{ magnum_repository }}/{{ item.name }}"
+            tag: "{{ item.tag }}"
             push: no
           with_items: "{{ magnum_images }}"
-        - docker_image:
+          retries: 10
+
+    - name: "Build kubernetes images"
+      block:
+        - name: "Build {{ magnum_repository }}/{{ item.name }}:{{ item.tag }} image"
+          docker_image:
             path: "{{ magnum_src_dir }}/dockerfiles/{{ item.name }}"
-            name: "{{ item.name }}"
-            repository: "{{ repository }}/{{ item.name }}"
+            name: "{{ magnum_repository }}/{{ item.name }}"
             tag: "{{ kubernetes_version }}"
             buildargs:
               KUBE_VERSION: "{{ kubernetes_version }}"
             push: no
           with_items: "{{ kubernetes_images }}"
-          async: 1000
-          poll: 0
-          register: pull
-        - async_status:
-            jid: "{{ item.ansible_job_id }}"
-          with_items: "{{ pull.results }}"
-          register: pull_result
-          until:
-            - pull_result.finished is defined
-            - pull_result.finished
-          retries: 1000
-          delay: 5
+          retries: 10
