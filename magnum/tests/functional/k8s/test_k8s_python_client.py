@@ -22,7 +22,6 @@ class TestKubernetesAPIs(base.BaseK8sTest):
         "labels": {
             "system_pods_initial_delay": 3600,
             "system_pods_timeout": 600,
-            "admission_control_list": "",
             "kube_dashboard_enabled": False,
         }
     }
