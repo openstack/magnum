@@ -35,7 +35,6 @@ from magnum.drivers.common import driver
 from magnum.i18n import _
 from magnum.objects import fields
 
-
 LOG = logging.getLogger(__name__)
 
 
@@ -107,6 +106,9 @@ class HeatDriver(driver.Driver):
         self._update_stack(context, cluster, scale_manager, rollback)
 
     def delete_cluster(self, context, cluster):
+        self.pre_delete_cluster(context, cluster)
+
+        LOG.info("Starting to delete cluster %s", cluster.uuid)
         self._delete_stack(context, clients.OpenStackClients(context), cluster)
 
     def _create_stack(self, context, osc, cluster, cluster_create_timeout):
