@@ -655,7 +655,6 @@ resources:
             list_join:
               - '-'
               - [{ get_param: 'OS::stack_name' }, 'master', '%index%']
-          master_index: '%index%'
           prometheus_monitoring: {get_param: prometheus_monitoring}
           grafana_admin_passwd: {get_param: grafana_admin_passwd}
           api_public_address: {get_attr: [api_lb, floating_address]}
@@ -670,7 +669,6 @@ resources:
           docker_volume_type: {get_param: docker_volume_type}
           docker_storage_driver: {get_param: docker_storage_driver}
           cgroup_driver: {get_param: cgroup_driver}
-          wait_condition_timeout: {get_param: wait_condition_timeout}
           network_driver: {get_param: network_driver}
           flannel_network_cidr: {get_param: flannel_network_cidr}
           flannel_network_subnetlen: {get_param: flannel_network_subnetlen}
@@ -737,6 +735,41 @@ resources:
           prometheus_tag: {get_param: prometheus_tag}
           grafana_tag: {get_param: grafana_tag}
           heat_container_agent_tag: {get_param: heat_container_agent_tag}
+
+  kube_cluster_config:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config:
+        list_join:
+          - "\n"
+          -
+            - get_file: ../../common/templates/kubernetes/fragments/kube-apiserver-to-kubelet-role.sh
+            - str_replace:
+                template: {get_file: ../../common/templates/kubernetes/fragments/enable-cert-api-manager.sh}
+                params:
+                  "$CA_KEY": {get_param: ca_key}
+            - get_file: ../../common/templates/kubernetes/fragments/core-dns-service.sh
+            - str_replace:
+                template: {get_file: ../../common/templates/kubernetes/fragments/enable-prometheus-monitoring.sh}
+                params:
+                  "$ADMIN_PASSWD": {get_param: grafana_admin_passwd}
+            - get_file: ../../common/templates/kubernetes/fragments/calico-service.sh
+            - str_replace:
+                params:
+                  $enable-ingress-traefik: {get_file: ../../common/templates/kubernetes/fragments/enable-ingress-traefik.sh}
+                template: {get_file: ../../common/templates/kubernetes/fragments/enable-ingress-controller.sh}
+            - get_file: ../../common/templates/kubernetes/fragments/kube-dashboard-service.sh
+
+  kube_cluster_deploy:
+    type: OS::Heat::SoftwareDeployment
+    properties:
+      actions: ['CREATE']
+      signal_transport: HEAT_SIGNAL
+      config:
+        get_resource: kube_cluster_config
+      server:
+        get_attr: [kube_masters, resource.0]
 
 
   ######################################################################
