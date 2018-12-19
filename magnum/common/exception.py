@@ -391,3 +391,8 @@ class FederationAlreadyExists(Conflict):
 class MemberAlreadyExists(Conflict):
     message = _("A cluster with UUID %(uuid)s is already a member of the"
                 "federation %(federation_name)s.")
+
+
+class PreDeletionFailed(Conflict):
+    message = _("Failed to pre-delete resources for cluster %(cluster_uuid)s, "
+                "error: %(msg)s.")

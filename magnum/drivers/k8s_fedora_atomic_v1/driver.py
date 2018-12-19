@@ -12,9 +12,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from oslo_log import log as logging
+
+from magnum.common import keystone
+from magnum.common import octavia
 from magnum.drivers.common import k8s_monitor
 from magnum.drivers.heat import driver
 from magnum.drivers.k8s_fedora_atomic_v1 import template_def
+
+LOG = logging.getLogger(__name__)
 
 
 class Driver(driver.HeatDriver):
@@ -38,3 +44,10 @@ class Driver(driver.HeatDriver):
         # the scale_manager.
         # https://bugs.launchpad.net/magnum/+bug/1746510
         return None
+
+    def pre_delete_cluster(self, context, cluster):
+        """Delete cloud resources before deleting the cluster."""
+        if keystone.is_octavia_enabled():
+            LOG.info("Starting to delete loadbalancers for cluster %s",
+                     cluster.uuid)
+            octavia.delete_loadbalancers(context, cluster)
