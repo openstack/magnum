@@ -517,7 +517,7 @@ class BaseK8sTest(ClusterTest):
         self.assertEqual('frontend', resp.metadata.name)
         self.assertTrue(resp.status)
 
-        resp = self.k8s_api.delete_namespaced_service(name='frontend', body={},
+        resp = self.k8s_api.delete_namespaced_service(name='frontend',
                                                       namespace='default')
 
     def test_replication_controller_apis(self):
