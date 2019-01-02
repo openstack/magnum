@@ -703,7 +703,92 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
         discovery_url = k8s_def.get_discovery_url(mock_cluster)
 
-        mock_get.assert_called_once_with('http://etcd/test?size=10')
+        mock_get.assert_called_once_with('http://etcd/test?size=10',
+                                         proxies={})
+        self.assertEqual(expected_discovery_url, mock_cluster.discovery_url)
+        self.assertEqual(expected_discovery_url, discovery_url)
+
+    @mock.patch('requests.get')
+    def test_k8s_get_discovery_url_proxy(self, mock_get):
+        CONF.set_override('etcd_discovery_service_endpoint_format',
+                          'http://etcd/test?size=%(size)d',
+                          group='cluster')
+        expected_discovery_url = 'http://etcd/token'
+        mock_resp = mock.MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.text = expected_discovery_url
+        mock_get.return_value = mock_resp
+        mock_cluster = mock.MagicMock()
+        mock_cluster.master_count = 10
+        mock_cluster.discovery_url = None
+
+        mock_cluster_template = mock.MagicMock()
+        mock_cluster_template.http_proxy = 'http_proxy'
+        mock_cluster_template.https_proxy = 'https_proxy'
+        mock_cluster_template.no_proxy = 'localhost,127.0.0.1'
+
+        k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
+        discovery_url = k8s_def.get_discovery_url(mock_cluster,
+                                                  mock_cluster_template)
+
+        mock_get.assert_called_once_with('http://etcd/test?size=10', proxies={
+            'http': 'http_proxy', 'https': 'https_proxy'})
+        self.assertEqual(expected_discovery_url, mock_cluster.discovery_url)
+        self.assertEqual(expected_discovery_url, discovery_url)
+
+    @mock.patch('requests.get')
+    def test_k8s_get_discovery_url_no_proxy(self, mock_get):
+        CONF.set_override('etcd_discovery_service_endpoint_format',
+                          'http://etcd/test?size=%(size)d',
+                          group='cluster')
+        expected_discovery_url = 'http://etcd/token'
+        mock_resp = mock.MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.text = expected_discovery_url
+        mock_get.return_value = mock_resp
+        mock_cluster = mock.MagicMock()
+        mock_cluster.master_count = 10
+        mock_cluster.discovery_url = None
+
+        mock_cluster_template = mock.MagicMock()
+        mock_cluster_template.http_proxy = 'http_proxy'
+        mock_cluster_template.https_proxy = 'https_proxy'
+        mock_cluster_template.no_proxy = 'localhost,127.0.0.1,etcd'
+
+        k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
+        discovery_url = k8s_def.get_discovery_url(mock_cluster,
+                                                  mock_cluster_template)
+
+        mock_get.assert_called_once_with('http://etcd/test?size=10',
+                                         proxies={})
+        self.assertEqual(expected_discovery_url, mock_cluster.discovery_url)
+        self.assertEqual(expected_discovery_url, discovery_url)
+
+    @mock.patch('requests.get')
+    def test_k8s_get_discovery_url_no_proxy_wildcard(self, mock_get):
+        CONF.set_override('etcd_discovery_service_endpoint_format',
+                          'http://etcd/test?size=%(size)d',
+                          group='cluster')
+        expected_discovery_url = 'http://etcd/token'
+        mock_resp = mock.MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.text = expected_discovery_url
+        mock_get.return_value = mock_resp
+        mock_cluster = mock.MagicMock()
+        mock_cluster.master_count = 10
+        mock_cluster.discovery_url = None
+
+        mock_cluster_template = mock.MagicMock()
+        mock_cluster_template.http_proxy = 'http_proxy'
+        mock_cluster_template.https_proxy = 'https_proxy'
+        mock_cluster_template.no_proxy = '*'
+
+        k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
+        discovery_url = k8s_def.get_discovery_url(mock_cluster,
+                                                  mock_cluster_template)
+
+        mock_get.assert_called_once_with('http://etcd/test?size=10',
+                                         proxies={})
         self.assertEqual(expected_discovery_url, mock_cluster.discovery_url)
         self.assertEqual(expected_discovery_url, discovery_url)
 
@@ -1276,7 +1361,84 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         swarm_def = swarm_tdef.AtomicSwarmTemplateDefinition()
         discovery_url = swarm_def.get_discovery_url(mock_cluster)
 
-        mock_get.assert_called_once_with('http://etcd/test?size=1')
+        mock_get.assert_called_once_with('http://etcd/test?size=1', proxies={})
+        self.assertEqual(mock_cluster.discovery_url, expected_discovery_url)
+        self.assertEqual(discovery_url, expected_discovery_url)
+
+    @mock.patch('requests.get')
+    def test_swarm_get_discovery_url_proxy(self, mock_get):
+        CONF.set_override('etcd_discovery_service_endpoint_format',
+                          'http://etcd/test?size=%(size)d',
+                          group='cluster')
+        expected_discovery_url = 'http://etcd/token'
+        mock_resp = mock.MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.text = expected_discovery_url
+        mock_get.return_value = mock_resp
+        mock_cluster = mock.MagicMock()
+        mock_cluster.discovery_url = None
+
+        mock_cluster_template = mock.MagicMock()
+        mock_cluster_template.http_proxy = 'http_proxy'
+        mock_cluster_template.https_proxy = 'https_proxy'
+        mock_cluster_template.no_proxy = 'localhost,127.0.0.1'
+
+        swarm_def = swarm_tdef.AtomicSwarmTemplateDefinition()
+        discovery_url = swarm_def.get_discovery_url(mock_cluster,
+                                                    mock_cluster_template)
+
+        mock_get.assert_called_once_with('http://etcd/test?size=1', proxies={
+            'http': 'http_proxy', 'https': 'https_proxy'})
+        self.assertEqual(mock_cluster.discovery_url, expected_discovery_url)
+        self.assertEqual(discovery_url, expected_discovery_url)
+
+    @mock.patch('requests.get')
+    def test_swarm_get_discovery_url_no_proxy(self, mock_get):
+        CONF.set_override('etcd_discovery_service_endpoint_format',
+                          'http://etcd/test?size=%(size)d',
+                          group='cluster')
+        expected_discovery_url = 'http://etcd/token'
+        mock_resp = mock.MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.text = expected_discovery_url
+        mock_get.return_value = mock_resp
+        mock_cluster = mock.MagicMock()
+        mock_cluster.discovery_url = None
+
+        mock_cluster_template = mock.MagicMock()
+        mock_cluster_template.http_proxy = 'http_proxy'
+        mock_cluster_template.https_proxy = 'https_proxy'
+        mock_cluster_template.no_proxy = 'etcd,localhost,127.0.0.1'
+
+        swarm_def = swarm_tdef.AtomicSwarmTemplateDefinition()
+        discovery_url = swarm_def.get_discovery_url(mock_cluster)
+
+        mock_get.assert_called_once_with('http://etcd/test?size=1', proxies={})
+        self.assertEqual(mock_cluster.discovery_url, expected_discovery_url)
+        self.assertEqual(discovery_url, expected_discovery_url)
+
+    @mock.patch('requests.get')
+    def test_swarm_get_discovery_url_no_proxy_wildcard(self, mock_get):
+        CONF.set_override('etcd_discovery_service_endpoint_format',
+                          'http://etcd/test?size=%(size)d',
+                          group='cluster')
+        expected_discovery_url = 'http://etcd/token'
+        mock_resp = mock.MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.text = expected_discovery_url
+        mock_get.return_value = mock_resp
+        mock_cluster = mock.MagicMock()
+        mock_cluster.discovery_url = None
+
+        mock_cluster_template = mock.MagicMock()
+        mock_cluster_template.http_proxy = 'http_proxy'
+        mock_cluster_template.https_proxy = 'https_proxy'
+        mock_cluster_template.no_proxy = '*'
+
+        swarm_def = swarm_tdef.AtomicSwarmTemplateDefinition()
+        discovery_url = swarm_def.get_discovery_url(mock_cluster)
+
+        mock_get.assert_called_once_with('http://etcd/test?size=1', proxies={})
         self.assertEqual(mock_cluster.discovery_url, expected_discovery_url)
         self.assertEqual(discovery_url, expected_discovery_url)
 
