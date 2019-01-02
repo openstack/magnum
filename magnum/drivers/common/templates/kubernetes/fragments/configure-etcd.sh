@@ -71,6 +71,16 @@ EOF
 
 fi
 
-if [ -n "$HTTP_PROXY" ]; then
-    echo "ETCD_DISCOVERY_PROXY=$HTTP_PROXY" >> /etc/etcd/etcd.conf
+if [ -n "$HTTP_PROXY" -o "$HTTPS_PROXY" ]; then
+    ETCD_DISCOVERY_PROTOCOL=$(python -c "from six.moves.urllib import parse as urlparse; print urlparse.urlparse('${ETCD_DISCOVERY_URL}').scheme")
+    ETCD_DISCOVERY_HOSTNAME=$(python -c "from six.moves.urllib import parse as urlparse; print urlparse.urlparse('${ETCD_DISCOVERY_URL}').netloc.partition(':')[0]")
+    # prints 1 if $ETCD_DISCOVERY_HOSTNAME is listed explicitly in $NO_PROXY, or $NO_PROXY is set to "*"
+    ETCD_DISCOVERY_PROXY_BYPASS=$(NO_PROXY="${NO_PROXY}" python -c "import requests; print requests.utils.proxy_bypass('${ETCD_DISCOVERY_HOSTNAME}')")
+    if [ $ETCD_DISCOVERY_PROXY_BYPASS == "0" ]; then
+        if [ -n "$HTTP_PROXY" -a "$ETCD_DISCOVERY_PROTOCOL" == "http" ]; then
+            echo "ETCD_DISCOVERY_PROXY=$HTTP_PROXY" >> /etc/etcd/etcd.conf
+        elif [ -n "$HTTPS_PROXY" -a "$ETCD_DISCOVERY_PROTOCOL" == "https" ]; then
+            echo "ETCD_DISCOVERY_PROXY=$HTTPS_PROXY" >> /etc/etcd/etcd.conf
+        fi
+    fi
 fi

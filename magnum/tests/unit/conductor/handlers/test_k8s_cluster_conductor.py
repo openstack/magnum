@@ -489,6 +489,7 @@ class TestClusterConductorWithK8s(base.TestCase):
         self.cluster_template_dict['cluster_distro'] = 'coreos'
         self.cluster_dict['discovery_url'] = None
         mock_req = mock.MagicMock(text='http://tokentest/h1/h2/h3')
+        mock_req.status_code = 200
         reqget.return_value = mock_req
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
@@ -692,6 +693,7 @@ class TestClusterConductorWithK8s(base.TestCase):
                           'http://etcd/test?size=%(size)d',
                           group='cluster')
         mock_req = mock.MagicMock(text='https://address/token')
+        mock_req.status_code = 200
         reqget.return_value = mock_req
 
         (template_path,
@@ -755,7 +757,8 @@ class TestClusterConductorWithK8s(base.TestCase):
              '../../common/templates/environments/disable_floating_ip.yaml',
              ],
             env_files)
-        reqget.assert_called_once_with('http://etcd/test?size=1')
+        reqget.assert_called_once_with('http://etcd/test?size=1', proxies={
+            'http': 'http_proxy', 'https': 'https_proxy'})
 
     @patch('magnum.common.short_id.generate_id')
     @patch('heatclient.common.template_utils.get_template_contents')
