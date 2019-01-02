@@ -90,7 +90,8 @@ class SwarmFedoraTemplateDefinition(template_def.BaseTemplateDefinition):
 
     def get_params(self, context, cluster_template, cluster, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
-        extra_params['discovery_url'] = self.get_discovery_url(cluster)
+        extra_params['discovery_url'] = \
+            self.get_discovery_url(cluster, cluster_template=cluster_template)
         # HACK(apmelton) - This uses the user's bearer token, ideally
         # it should be replaced with an actual trust token with only
         # access to do what the template needs it to do.
