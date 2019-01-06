@@ -317,6 +317,8 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `kube_tag`_                           | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
+| `cloud_provider_tag`_                 | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 | `etcd_tag`_                           | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
 | `flannel_tag`_                        | see below          | see below     |
@@ -1095,6 +1097,18 @@ _`kube_tag`
   <https://hub.docker.com/r/openstackmagnum/kubernetes-apiserver/tags/>`_.
   If unset, the current Magnum version's default Kubernetes release is
   installed.
+
+_`cloud_provider_tag`
+  This label allows users to select `a specific release for the openstack
+  cloud provider
+  <https://hub.docker.com/r/openstackmagnum/kubernetes-apiserver/tags/>`_.
+  If unset, the current Magnum version's default
+  kubernetes/cloud-provider-openstack release is installed.
+  For version compatibility, please consult the `release page
+  <https://github.com/kubernetes/cloud-provider-openstack/releases>`_ of
+  the cloud-provider. The images are hosted `here
+  <https://hub.docker.com/r/k8scloudprovider/openstack-cloud-controller-manager/tags/>`_.
+  Stein default: v0.2.0
 
 _`etcd_tag`
   This label allows users to select `a specific etcd version,
@@ -2695,19 +2709,21 @@ or can be built locally using diskimagebuilder.  Details can be found in the
 <https://github.com/openstack/magnum/tree/master/magnum/elements/fedora-atomic>`_
 The image currently has the following OS/software:
 
-+-------------+-----------+
-| OS/software | version   |
-+=============+===========+
-| Fedora      | 26        |
-+-------------+-----------+
-| Docker      | 1.13.1    |
-+-------------+-----------+
-| Kubernetes  | 1.9.3     |
-+-------------+-----------+
-| etcd        | 3.1.3     |
-+-------------+-----------+
-| Flannel     | 0.7.0     |
-+-------------+-----------+
++--------------------------+-----------+
+| OS/software              | version   |
++==========================+===========+
+| Fedora                   | 27        |
++--------------------------+-----------+
+| Docker                   | 1.13.1    |
++--------------------------+-----------+
+| Kubernetes               | 1.11.5    |
++--------------------------+-----------+
+| etcd                     | v3.2.7    |
++--------------------------+-----------+
+| Flannel                  | v0.9.0    |
++--------------------------+-----------+
+| Cloud Provider OpenStack | v0.2.0    |
++--------------------------+-----------+
 
 The following software are managed as systemd services:
 
