@@ -331,7 +331,7 @@ spec:
     spec:
       containers:
         - image: ${CONTAINER_INFRA_PREFIX:-docker.io/grafana/}grafana:${GRAFANA_TAG}
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: grafana
           env:
             - name: GF_SECURITY_ADMIN_PASSWORD
