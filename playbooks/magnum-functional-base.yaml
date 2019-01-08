@@ -19,6 +19,12 @@
           set -x
           export PYTHONUNBUFFERED=true
 
+          if [ "{{ devstack_python3 }}" -eq 1 ] ; then
+              export DEVSTACK_GATE_USE_PYTHON3=True
+          else
+              export DEVSTACK_GATE_USE_PYTHON3=False
+          fi
+
           if [ "{{ neutron }}" -eq 1 ] ; then
               export DEVSTACK_GATE_NEUTRON=1
           fi
