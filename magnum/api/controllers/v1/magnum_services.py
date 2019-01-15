@@ -29,10 +29,10 @@ class MagnumService(base.APIBase):
     host = wtypes.StringType(min_length=1, max_length=255)
     """Name of the host """
 
-    binary = wtypes.Enum(str, *fields.MagnumServiceBinary.ALL)
+    binary = wtypes.Enum(wtypes.text, *fields.MagnumServiceBinary.ALL)
     """Name of the binary"""
 
-    state = wtypes.Enum(str, *fields.MagnumServiceState.ALL)
+    state = wtypes.Enum(wtypes.text, *fields.MagnumServiceState.ALL)
     """State of the binary"""
 
     id = wsme.wsattr(wtypes.IntegerType(minimum=1))

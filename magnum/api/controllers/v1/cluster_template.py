@@ -14,6 +14,7 @@
 
 from oslo_utils import timeutils
 import pecan
+import six
 import wsme
 from wsme import types as wtypes
 
@@ -47,7 +48,7 @@ class ClusterTemplate(base.APIBase):
     name = wtypes.StringType(min_length=1, max_length=255)
     """The name of the ClusterTemplate"""
 
-    coe = wtypes.Enum(str, *fields.ClusterType.ALL, mandatory=True)
+    coe = wtypes.Enum(wtypes.text, *fields.ClusterType.ALL, mandatory=True)
     """The Container Orchestration Engine for this clustertemplate"""
 
     image_id = wsme.wsattr(wtypes.StringType(min_length=1, max_length=255),
@@ -112,7 +113,10 @@ class ClusterTemplate(base.APIBase):
     registry_enabled = wsme.wsattr(types.boolean, default=False)
     """Indicates whether the docker registry is enabled"""
 
-    labels = wtypes.DictType(str, str)
+    labels = wtypes.DictType(wtypes.text, types.MultiType(wtypes.text,
+                                                          six.integer_types,
+                                                          bool,
+                                                          float))
     """One or more key/value pairs"""
 
     tls_disabled = wsme.wsattr(types.boolean, default=False)
@@ -121,7 +125,7 @@ class ClusterTemplate(base.APIBase):
     public = wsme.wsattr(types.boolean, default=False)
     """Indicates whether the ClusterTemplate is public or not."""
 
-    server_type = wsme.wsattr(wtypes.Enum(str, *fields.ServerType.ALL),
+    server_type = wsme.wsattr(wtypes.Enum(wtypes.text, *fields.ServerType.ALL),
                               default='vm')
     """Server type for this ClusterTemplate """
 

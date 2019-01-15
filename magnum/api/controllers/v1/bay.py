@@ -18,6 +18,7 @@ import uuid
 from oslo_log import log as logging
 from oslo_utils import timeutils
 import pecan
+import six
 import wsme
 from wsme import types as wtypes
 
@@ -92,7 +93,10 @@ class Bay(base.APIBase):
     docker_volume_size = wtypes.IntegerType(minimum=1)
     """The size in GB of the docker volume"""
 
-    labels = wtypes.DictType(str, str)
+    labels = wtypes.DictType(wtypes.text, types.MultiType(wtypes.text,
+                                                          six.integer_types,
+                                                          bool,
+                                                          float))
     """One or more key/value pairs"""
 
     master_flavor_id = wtypes.StringType(min_length=1, max_length=255)
@@ -110,7 +114,7 @@ class Bay(base.APIBase):
     stack_id = wsme.wsattr(wtypes.text, readonly=True)
     """Stack id of the heat stack"""
 
-    status = wtypes.Enum(str, *fields.ClusterStatus.ALL)
+    status = wtypes.Enum(wtypes.text, *fields.ClusterStatus.ALL)
     """Status of the bay from the heat stack"""
 
     status_reason = wtypes.text
@@ -135,7 +139,7 @@ class Bay(base.APIBase):
     master_addresses = wsme.wsattr([wtypes.text], readonly=True)
     """IP addresses of cluster master nodes"""
 
-    bay_faults = wsme.wsattr(wtypes.DictType(str, wtypes.text))
+    bay_faults = wsme.wsattr(wtypes.DictType(wtypes.text, wtypes.text))
     """Fault info collected from the heat resources of this bay"""
 
     def __init__(self, **kwargs):

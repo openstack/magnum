@@ -73,13 +73,13 @@ class Federation(base.APIBase):
     member_ids = wsme.wsattr([wtypes.text])
 
     # Status of the federation.
-    status = wtypes.Enum(str, *fields.FederationStatus.ALL)
+    status = wtypes.Enum(wtypes.text, *fields.FederationStatus.ALL)
 
     # Status reason of the federation.
     status_reason = wtypes.text
 
     # Set of federation metadata (COE-specific in some cases).
-    properties = wtypes.DictType(str, str)
+    properties = wtypes.DictType(wtypes.text, wtypes.text)
 
     # A list containing a self link and associated federations links
     links = wsme.wsattr([link.Link], readonly=True)
