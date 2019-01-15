@@ -1,0 +1,5 @@
+features:
+  - |
+    Add Kubernetes cluster pre-delete support to remove the cloud resources
+    before deleting the cluster. For now, only load balancers for Kubernetes
+    services of LoadBalancer type are deleted.
