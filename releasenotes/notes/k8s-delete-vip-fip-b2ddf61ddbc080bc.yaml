@@ -1,0 +1,6 @@
+fixes:
+  - |
+    In kubernetes cluster, a floating IP is created and associated with the vip
+    of a load balancer which is created corresponding to the service of
+    LoadBalancer type inside kubernetes, it should be deleted when the cluster
+    is deleted.
