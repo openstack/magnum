@@ -18,8 +18,7 @@ response with one formatted so the client can parse it.
 Based on pecan.middleware.errordocument
 """
 
-import json
-import six
+from oslo_serialization import jsonutils
 
 from magnum.i18n import _
 
@@ -34,7 +33,7 @@ class ParsableErrorMiddleware(object):
         for err_str in app_iter:
             err = {}
             try:
-                err = json.loads(err_str.decode('utf-8'))
+                err = jsonutils.loads(err_str.decode('utf-8'))
             except ValueError:
                 pass
 
@@ -96,7 +95,7 @@ class ParsableErrorMiddleware(object):
 
         if (state['status_code'] // 100) not in (2, 3):
             errs = self._update_errors(app_iter, state['status_code'])
-            body = [six.b(json.dumps({'errors': errs}))]
+            body = [jsonutils.dump_as_bytes({'errors': errs})]
             state['headers'].append(('Content-Type', 'application/json'))
             state['headers'].append(('Content-Length', str(len(body[0]))))
 

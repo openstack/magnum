@@ -16,10 +16,9 @@
 SQLAlchemy models for container service
 """
 
-import json
-
 from oslo_db.sqlalchemy import models
 from oslo_db.sqlalchemy.types import String
+from oslo_serialization import jsonutils
 import six.moves.urllib.parse as urlparse
 from sqlalchemy import Boolean
 from sqlalchemy import Column
@@ -61,12 +60,12 @@ class JsonEncodedType(TypeDecorator):
                             "given" % {'class': self.__class__.__name__,
                                        'type': self.type.__name__,
                                        'value': type(value).__name__})
-        serialized_value = json.dumps(value)
+        serialized_value = jsonutils.dumps(value)
         return serialized_value
 
     def process_result_value(self, value, dialect):
         if value is not None:
-            value = json.loads(value)
+            value = jsonutils.loads(value)
         return value
 
 
