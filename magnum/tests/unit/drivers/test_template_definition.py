@@ -326,6 +326,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         mock_cluster_template.tls_disabled = False
         mock_cluster_template.registry_enabled = False
         mock_cluster_template.network_driver = 'flannel'
+        external_network_id = '17e4e301-b7f3-4996-b3dd-97b3a700174b'
+        mock_cluster_template.external_network_id = external_network_id
         mock_cluster = mock.MagicMock()
         mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
         del mock_cluster.stack_id
@@ -384,9 +386,11 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         cgroup_driver = mock_cluster.labels.get(
             'cgroup_driver')
         ingress_controller = mock_cluster.labels.get(
-            'ingress_controller')
+            'ingress_controller').lower()
         ingress_controller_role = mock_cluster.labels.get(
             'ingress_controller_role')
+        octavia_ingress_controller_tag = mock_cluster.labels.get(
+            'octavia_ingress_controller_tag')
         kubelet_options = mock_cluster.labels.get(
             'kubelet_options')
         kubeapi_options = mock_cluster.labels.get(
@@ -459,6 +463,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'pods_network_cidr': pods_network_cidr,
             'ingress_controller': ingress_controller,
             'ingress_controller_role': ingress_controller_role,
+            'octavia_ingress_controller_tag': octavia_ingress_controller_tag,
             'octavia_enabled': False,
             'kube_service_account_key': 'public_key',
             'kube_service_account_private_key': 'private_key',
@@ -469,6 +474,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'keystone_auth_enabled': keystone_auth_enabled,
             'k8s_keystone_auth_tag': k8s_keystone_auth_tag,
             'project_id': project_id,
+            'external_network': external_network_id
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
@@ -484,6 +490,170 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             mock_context,
             mock_cluster_template,
             mock_cluster,
+        )
+
+    @mock.patch('magnum.common.neutron.get_network_id')
+    @mock.patch('magnum.common.keystone.is_octavia_enabled')
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.drivers.k8s_fedora_atomic_v1.template_def'
+                '.AtomicK8sTemplateDefinition.get_discovery_url')
+    @mock.patch('magnum.drivers.heat.template_def.BaseTemplateDefinition'
+                '.get_params')
+    @mock.patch('magnum.drivers.heat.template_def.TemplateDefinition'
+                '.get_output')
+    @mock.patch('magnum.common.x509.operations.generate_csr_and_key')
+    def test_k8s_get_params_external_network_id(self,
+                                                mock_generate_csr_and_key,
+                                                mock_get_output,
+                                                mock_get_params,
+                                                mock_get_discovery_url,
+                                                mock_osc_class,
+                                                mock_enable_octavia,
+                                                mock_network_id):
+        mock_generate_csr_and_key.return_value = {'csr': 'csr',
+                                                  'private_key': 'private_key',
+                                                  'public_key': 'public_key'}
+        mock_enable_octavia.return_value = False
+        mock_get_discovery_url.return_value = 'fake_discovery_url'
+        external_network_id = 'e2a6c8b0-a3c2-42a3-b3f4-01400a30896e'
+        mock_network_id.return_value = external_network_id
+
+        mock_context = mock.MagicMock()
+        mock_context.auth_token = 'AUTH_TOKEN'
+        mock_context.auth_url = 'http://192.168.10.10:5000/v3'
+        mock_context.user_name = 'fake_user'
+
+        mock_cluster_template = mock.MagicMock()
+        mock_cluster_template.tls_disabled = False
+        mock_cluster_template.registry_enabled = False
+        mock_cluster_template.network_driver = 'calico'
+        mock_cluster_template.external_network_id = "public"
+
+        mock_cluster = mock.MagicMock()
+        mock_cluster.labels = {}
+        mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
+
+        mock_osc = mock.MagicMock()
+        mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
+        mock_osc.cinder_region_name.return_value = 'RegionOne'
+        mock_osc_class.return_value = mock_osc
+
+        k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
+        k8s_def.get_params(mock_context, mock_cluster_template, mock_cluster)
+
+        actual_params = mock_get_params.call_args[1]["extra_params"]
+        self.assertEqual(
+            external_network_id,
+            actual_params.get("external_network")
+        )
+        mock_network_id.assert_called_once_with(
+            mock_context,
+            mock_cluster_template.external_network_id
+        )
+
+    @mock.patch('magnum.common.keystone.is_octavia_enabled')
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.drivers.k8s_fedora_atomic_v1.template_def'
+                '.AtomicK8sTemplateDefinition.get_discovery_url')
+    @mock.patch('magnum.drivers.heat.template_def.BaseTemplateDefinition'
+                '.get_params')
+    @mock.patch('magnum.drivers.heat.template_def.TemplateDefinition'
+                '.get_output')
+    @mock.patch('magnum.common.x509.operations.generate_csr_and_key')
+    def test_k8s_get_params_octavia_disabled(self,
+                                             mock_generate_csr_and_key,
+                                             mock_get_output,
+                                             mock_get_params,
+                                             mock_get_discovery_url,
+                                             mock_osc_class,
+                                             mock_enable_octavia):
+        mock_generate_csr_and_key.return_value = {'csr': 'csr',
+                                                  'private_key': 'private_key',
+                                                  'public_key': 'public_key'}
+        mock_enable_octavia.return_value = False
+        mock_get_discovery_url.return_value = 'fake_discovery_url'
+
+        mock_context = mock.MagicMock()
+        mock_context.auth_token = 'AUTH_TOKEN'
+        mock_context.auth_url = 'http://192.168.10.10:5000/v3'
+        mock_context.user_name = 'fake_user'
+
+        mock_cluster_template = mock.MagicMock()
+        mock_cluster_template.tls_disabled = False
+        mock_cluster_template.registry_enabled = False
+        mock_cluster_template.network_driver = 'calico'
+        external_network_id = 'e2a6c8b0-a3c2-42a3-b3f4-01400a30896e'
+        mock_cluster_template.external_network_id = external_network_id
+
+        mock_cluster = mock.MagicMock()
+        mock_cluster.labels = {"ingress_controller": "octavia"}
+        mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
+
+        mock_osc = mock.MagicMock()
+        mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
+        mock_osc.cinder_region_name.return_value = 'RegionOne'
+        mock_osc_class.return_value = mock_osc
+
+        k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
+
+        self.assertRaises(
+            exception.InvalidParameterValue,
+            k8s_def.get_params,
+            mock_context,
+            mock_cluster_template,
+            mock_cluster,
+        )
+
+    @mock.patch('magnum.common.keystone.is_octavia_enabled')
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    @mock.patch('magnum.drivers.k8s_fedora_atomic_v1.template_def'
+                '.AtomicK8sTemplateDefinition.get_discovery_url')
+    @mock.patch('magnum.drivers.heat.template_def.BaseTemplateDefinition'
+                '.get_params')
+    @mock.patch('magnum.drivers.heat.template_def.TemplateDefinition'
+                '.get_output')
+    @mock.patch('magnum.common.x509.operations.generate_csr_and_key')
+    def test_k8s_get_params_octavia_enabled(self,
+                                            mock_generate_csr_and_key,
+                                            mock_get_output,
+                                            mock_get_params,
+                                            mock_get_discovery_url,
+                                            mock_osc_class,
+                                            mock_enable_octavia):
+        mock_generate_csr_and_key.return_value = {'csr': 'csr',
+                                                  'private_key': 'private_key',
+                                                  'public_key': 'public_key'}
+        mock_enable_octavia.return_value = True
+        mock_get_discovery_url.return_value = 'fake_discovery_url'
+
+        mock_context = mock.MagicMock()
+        mock_context.auth_token = 'AUTH_TOKEN'
+        mock_context.auth_url = 'http://192.168.10.10:5000/v3'
+        mock_context.user_name = 'fake_user'
+
+        mock_cluster_template = mock.MagicMock()
+        mock_cluster_template.tls_disabled = False
+        mock_cluster_template.registry_enabled = False
+        mock_cluster_template.network_driver = 'calico'
+        external_network_id = 'e2a6c8b0-a3c2-42a3-b3f4-01400a30896e'
+        mock_cluster_template.external_network_id = external_network_id
+
+        mock_cluster = mock.MagicMock()
+        mock_cluster.labels = {"ingress_controller": "octavia"}
+        mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
+
+        mock_osc = mock.MagicMock()
+        mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
+        mock_osc.cinder_region_name.return_value = 'RegionOne'
+        mock_osc_class.return_value = mock_osc
+
+        k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
+        k8s_def.get_params(mock_context, mock_cluster_template, mock_cluster)
+
+        actual_params = mock_get_params.call_args[1]["extra_params"]
+        self.assertEqual(
+            "octavia",
+            actual_params.get("ingress_controller")
         )
 
     @mock.patch('magnum.common.keystone.is_octavia_enabled')
@@ -513,6 +683,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         mock_cluster_template.tls_disabled = True
         mock_cluster_template.registry_enabled = False
         mock_cluster_template.network_driver = 'calico'
+        external_network_id = '17e4e301-b7f3-4996-b3dd-97b3a700174b'
+        mock_cluster_template.external_network_id = external_network_id
         mock_cluster = mock.MagicMock()
         mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
         del mock_cluster.stack_id
@@ -571,9 +743,11 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         cgroup_driver = mock_cluster.labels.get(
             'cgroup_driver')
         ingress_controller = mock_cluster.labels.get(
-            'ingress_controller')
+            'ingress_controller').lower()
         ingress_controller_role = mock_cluster.labels.get(
             'ingress_controller_role')
+        octavia_ingress_controller_tag = mock_cluster.labels.get(
+            'octavia_ingress_controller_tag')
         kubelet_options = mock_cluster.labels.get(
             'kubelet_options')
         kubeapi_options = mock_cluster.labels.get(
@@ -648,6 +822,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'pods_network_cidr': pods_network_cidr,
             'ingress_controller': ingress_controller,
             'ingress_controller_role': ingress_controller_role,
+            'octavia_ingress_controller_tag': octavia_ingress_controller_tag,
             'octavia_enabled': False,
             'kube_service_account_key': 'public_key',
             'kube_service_account_private_key': 'private_key',
@@ -658,6 +833,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'keystone_auth_enabled': keystone_auth_enabled,
             'k8s_keystone_auth_tag': k8s_keystone_auth_tag,
             'project_id': project_id,
+            'external_network': external_network_id
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
