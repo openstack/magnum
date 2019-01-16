@@ -11,8 +11,11 @@
 # under the License.
 
 from oslo_config import cfg
+from oslo_utils import uuidutils
 
+from magnum.common import exception
 from magnum.common import keystone
+from magnum.common import neutron
 from magnum.drivers.heat import template_def
 
 CONF = cfg.CONF
@@ -104,6 +107,17 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
 
         extra_params['octavia_enabled'] = keystone.is_octavia_enabled()
 
+        # NOTE(lxkong): Convert external network name to UUID, the template
+        # field name is confused. If external_network_id is not specified in
+        # cluster template use 'public' as the default value, which is the same
+        # with the heat template default value as before.
+        ext_net = cluster_template.external_network_id or "public"
+        if not uuidutils.is_uuid_like(ext_net):
+            ext_net_id = neutron.get_network_id(context, ext_net)
+            extra_params['external_network'] = ext_net_id
+        else:
+            extra_params['external_network'] = ext_net
+
         label_list = ['flannel_network_cidr', 'flannel_backend',
                       'flannel_network_subnetlen',
                       'system_pods_initial_delay',
@@ -114,8 +128,8 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                       'kube_dashboard_enabled',
                       'etcd_volume_size',
                       'cert_manager_api',
-                      'ingress_controller',
                       'ingress_controller_role',
+                      'octavia_ingress_controller_tag',
                       'kubelet_options',
                       'kubeapi_options',
                       'kubeproxy_options',
@@ -125,6 +139,15 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
 
         for label in label_list:
             extra_params[label] = cluster.labels.get(label)
+
+        ingress_controller = cluster.labels.get('ingress_controller',
+                                                '').lower()
+        if (ingress_controller == 'octavia'
+                and not extra_params['octavia_enabled']):
+            raise exception.InvalidParameterValue(
+                'Octavia service needs to be deployed for octavia ingress '
+                'controller.')
+        extra_params["ingress_controller"] = ingress_controller
 
         cluser_ip_range = cluster.labels.get('service_cluster_ip_range')
         if cluser_ip_range:

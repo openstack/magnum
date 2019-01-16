@@ -13,8 +13,7 @@ parameters:
 
   external_network:
     type: string
-    description: uuid/name of a network to use for floating ip addresses
-    default: public
+    description: uuid of a network to use for floating ip addresses
 
   fixed_network:
     type: string
@@ -453,6 +452,11 @@ parameters:
       node role where the ingress controller backend should run
     default: "ingress"
 
+  octavia_ingress_controller_tag:
+    type: string
+    description: Octavia ingress controller docker image tag.
+    default: "1.13.2-alpha"
+
   kubelet_options:
     type: string
     description: >
@@ -753,6 +757,7 @@ resources:
           pods_network_cidr: {get_param: pods_network_cidr}
           ingress_controller: {get_param: ingress_controller}
           ingress_controller_role: {get_param: ingress_controller_role}
+          octavia_ingress_controller_tag: {get_param: octavia_ingress_controller_tag}
           kubelet_options: {get_param: kubelet_options}
           kubeapi_options: {get_param: kubeapi_options}
           kubeproxy_options: {get_param: kubeproxy_options}
@@ -790,6 +795,7 @@ resources:
             - str_replace:
                 params:
                   $enable-ingress-traefik: {get_file: ../../common/templates/kubernetes/fragments/enable-ingress-traefik.sh}
+                  $enable-ingress-octavia: {get_file: ../../common/templates/kubernetes/fragments/enable-ingress-octavia.sh}
                 template: {get_file: ../../common/templates/kubernetes/fragments/enable-ingress-controller.sh}
             - get_file: ../../common/templates/kubernetes/fragments/kube-dashboard-service.sh
             - get_file: ../../common/templates/kubernetes/fragments/enable-keystone-auth.sh

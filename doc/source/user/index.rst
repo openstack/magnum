@@ -347,6 +347,8 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `ingress_controller_role`_            | see below          | "ingress"     |
 +---------------------------------------+--------------------+---------------+
+| `octavia_ingress_controller_tag`_     | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 | `kubelet_options`_                    | extra kubelet args | ""            |
 +---------------------------------------+--------------------+---------------+
 | `kubeapi_options`_                    | extra kubeapi args | ""            |
@@ -1236,8 +1238,11 @@ Magnum allows selecting one of multiple controller options via the
 your own Ingress resources.
 
 _`ingress_controller`
-  This label sets the Ingress Controller to be used. Currently only traefik
-  is supported. The default is '', meaning no Ingress Controller configured.
+  This label sets the Ingress Controller to be used. Currently 'traefik' and
+  'octavia' are supported. The default is '', meaning no Ingress Controller
+  configured. For more details about octavia-ingress-controller please refer
+  to `cloud-provider-openstack document
+  <https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/using-octavia-ingress-controller.md>`_
 
 _`ingress_controller_role`
   This label defines the role nodes should have to run an instance of the
@@ -1247,6 +1252,11 @@ _`ingress_controller_role`
   Kubernetes node would be::
 
     kubectl label node <node-name> role=ingress
+
+  This lable is not used for octavia-ingress-controller.
+
+_`octavia_ingress_controller_tag`
+  The image tag for octavia-ingress-controller. Stain-default: 1.13.2-alpha
 
 DNS
 ---

@@ -25,7 +25,7 @@ parameters:
 
   external_network:
     type: string
-    description: uuid/name of a network to use for floating ip addresses
+    description: uuid of a network to use for floating ip addresses
 
   portal_network_cidr:
     type: string
@@ -341,6 +341,10 @@ parameters:
     description: >
       node role where the ingress controller should run
 
+  octavia_ingress_controller_tag:
+    type: string
+    description: Octavia ingress controller docker image tag.
+
   kubelet_options:
     type: string
     description: >
@@ -504,6 +508,7 @@ resources:
             "$CALICO_IPV4POOL": {get_param: calico_ipv4pool}
             "$INGRESS_CONTROLLER": {get_param: ingress_controller}
             "$INGRESS_CONTROLLER_ROLE": {get_param: ingress_controller_role}
+            "$OCTAVIA_INGRESS_CONTROLLER_TAG": {get_param: octavia_ingress_controller_tag}
             "$KUBELET_OPTIONS": {get_param: kubelet_options}
             "$KUBEAPI_OPTIONS": {get_param: kubeapi_options}
             "$KUBECONTROLLER_OPTIONS": {get_param: kubecontroller_options}
@@ -518,6 +523,7 @@ resources:
             "$KEYSTONE_AUTH_ENABLED": {get_param: keystone_auth_enabled}
             "$K8S_KEYSTONE_AUTH_TAG": {get_param: k8s_keystone_auth_tag}
             "$PROJECT_ID": {get_param: project_id}
+            "$EXTERNAL_NETWORK_ID": {get_param: external_network}
 
   install_openstack_ca:
     type: OS::Heat::SoftwareConfig
