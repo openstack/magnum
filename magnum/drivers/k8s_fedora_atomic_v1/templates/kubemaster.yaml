@@ -439,9 +439,37 @@ parameters:
     type: string
     description: namespace where tiller will be installed
 
+  auto_healing_enabled:
+    type: boolean
+    description: >
+      true if the auto healing feature should be enabled
+
+  auto_scaling_enabled:
+    type: boolean
+    description: >
+      true if the auto scaling feature should be enabled
+
   node_problem_detector_tag:
     type: string
     description: tag of the node problem detector container
+
+  draino_tag:
+    type: string
+    description: tag of the draino container
+
+  autoscaler_tag:
+    type: string
+    description: tag of the autoscaler container
+
+  min_node_count:
+    type: number
+    description: >
+      minimum node count of cluster workers when doing scale down
+
+  max_node_count:
+    type: number
+    description: >
+      maximum node count of cluster workers when doing scale up
 
 resources:
   ######################################################################
@@ -555,6 +583,12 @@ resources:
             "$TILLER_TAG": {get_param: tiller_tag}
             "$TILLER_NAMESPACE": {get_param: tiller_namespace}
             "$NODE_PROBLEM_DETECTOR_TAG": {get_param: node_problem_detector_tag}
+            "$AUTO_HEALING_ENABLED": {get_param: auto_healing_enabled}
+            "$AUTO_SCALING_ENABLED": {get_param: auto_scaling_enabled}
+            "$DRAINO_TAG": {get_param: draino_tag}
+            "$AUTOSCALER_TAG": {get_param: autoscaler_tag}
+            "$MIN_NODE_COUNT": {get_param: min_node_count}
+            "$MAX_NODE_COUNT": {get_param: max_node_count}
 
   install_openstack_ca:
     type: OS::Heat::SoftwareConfig

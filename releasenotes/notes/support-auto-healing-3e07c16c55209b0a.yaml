@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    Using Node Problem Detector, Draino and AutoScaler to support
+    auto healing for K8s cluster, user can use a new label
+    "auto_healing_enabled' to turn on/off it.
+
+    Meanwhile, a new label "auto_scaling_enabled" is also introduced
+    to enable the capability to let the k8s cluster auto scale based
+    its workload.
+

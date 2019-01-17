@@ -495,6 +495,14 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         tiller_namespace = mock_cluster.labels.get(
             'tiller_namespace')
         npd_tag = mock_cluster.labels.get('node_problem_detector_tag')
+        auto_healing_enabled = mock_cluster.labels.get(
+            'auto_healing_enabled')
+        auto_scaling_enabled = mock_cluster.labels.get(
+            'auto_scaling_enabled')
+        draino_tag = mock_cluster.labels.get('draino_tag')
+        autoscaler_tag = mock_cluster.labels.get('autoscaler_tag')
+        min_node_count = mock_cluster.labels.get('min_node_count')
+        max_node_count = mock_cluster.labels.get('max_node_count')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -558,6 +566,12 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'tiller_tag': tiller_tag,
             'tiller_namespace': tiller_namespace,
             'node_problem_detector_tag': npd_tag,
+            'auto_healing_enabled': auto_healing_enabled,
+            'auto_scaling_enabled': auto_scaling_enabled,
+            'draino_tag': draino_tag,
+            'autoscaler_tag': autoscaler_tag,
+            'min_node_count': min_node_count,
+            'max_node_count': max_node_count,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
@@ -868,6 +882,14 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         tiller_namespace = mock_cluster.labels.get(
             'tiller_namespace')
         npd_tag = mock_cluster.labels.get('node_problem_detector_tag')
+        auto_healing_enabled = mock_cluster.labels.get(
+            'auto_healing_enabled')
+        auto_scaling_enabled = mock_cluster.labels.get(
+            'auto_scaling_enabled')
+        draino_tag = mock_cluster.labels.get('draino_tag')
+        autoscaler_tag = mock_cluster.labels.get('autoscaler_tag')
+        min_node_count = mock_cluster.labels.get('min_node_count')
+        max_node_count = mock_cluster.labels.get('max_node_count')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -933,6 +955,12 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'tiller_tag': tiller_tag,
             'tiller_namespace': tiller_namespace,
             'node_problem_detector_tag': npd_tag,
+            'auto_healing_enabled': auto_healing_enabled,
+            'auto_scaling_enabled': auto_scaling_enabled,
+            'draino_tag': draino_tag,
+            'autoscaler_tag': autoscaler_tag,
+            'min_node_count': min_node_count,
+            'max_node_count': max_node_count,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,

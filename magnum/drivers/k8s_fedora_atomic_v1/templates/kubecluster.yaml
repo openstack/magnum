@@ -565,10 +565,45 @@ parameters:
     description: namespace where tiller will be installed.
     default: "magnum-tiller"
 
+  auto_healing_enabled:
+    type: boolean
+    description: >
+      true if the auto healing feature should be enabled
+    default:
+      false
+
+  auto_scaling_enabled:
+    type: boolean
+    description: >
+      true if the auto scaling feature should be enabled
+    default:
+      false
+
   node_problem_detector_tag:
     type: string
     description: tag of the node problem detector container
     default: v0.6.2
+
+  draino_tag:
+    type: string
+    description: tag of the draino container
+    default: abf028a
+
+  autoscaler_tag:
+    type: string
+    description: tag of the autoscaler container
+    default: v1.0
+
+  min_node_count:
+    type: number
+    description: >
+      minimum node count of cluster workers when doing scale down
+    default: 1
+
+  max_node_count:
+    type: number
+    description: >
+      maximum node count of cluster workers when doing scale up
 
 resources:
 
@@ -846,6 +881,12 @@ resources:
           tiller_tag: {get_param: tiller_tag}
           tiller_namespace: {get_param: tiller_namespace}
           node_problem_detector_tag: {get_param: node_problem_detector_tag}
+          auto_healing_enabled: {get_param: auto_healing_enabled}
+          auto_scaling_enabled: {get_param: auto_scaling_enabled}
+          draino_tag: {get_param: draino_tag}
+          autoscaler_tag: {get_param: autoscaler_tag}
+          min_node_count: {get_param: min_node_count}
+          max_node_count: {get_param: max_node_count}
 
   kube_cluster_config:
     type: OS::Heat::SoftwareConfig
@@ -876,6 +917,7 @@ resources:
             - get_file: ../../common/templates/kubernetes/fragments/kube-dashboard-service.sh
             - get_file: ../../common/templates/kubernetes/fragments/enable-keystone-auth.sh
             - get_file: ../../common/templates/kubernetes/fragments/enable-auto-healing.sh
+            - get_file: ../../common/templates/kubernetes/fragments/enable-auto-scaling.sh
             # Helm Based Installation Configuration Scripts
             - get_file: ../../common/templates/kubernetes/helm/metrics-server.sh
             - str_replace:
@@ -972,6 +1014,7 @@ resources:
           kubeproxy_options: {get_param: kubeproxy_options}
           octavia_enabled: {get_param: octavia_enabled}
           heat_container_agent_tag: {get_param: heat_container_agent_tag}
+          auto_healing_enabled: {get_param: auto_healing_enabled}
 
 outputs:
 
