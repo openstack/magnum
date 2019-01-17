@@ -276,6 +276,11 @@ parameters:
     type: string
     description: tag of the heat_container_agent system container
 
+  auto_healing_enabled:
+    type: boolean
+    description: >
+      true if the auto healing feature should be enabled
+
 resources:
 
   start_container_agent:
@@ -355,6 +360,8 @@ resources:
             $KUBEPROXY_OPTIONS: {get_param: kubeproxy_options}
             $OCTAVIA_ENABLED: {get_param: octavia_enabled}
             $HEAT_CONTAINER_AGENT_TAG: {get_param: heat_container_agent_tag}
+            $AUTO_HEALING_ENABLED: {get_param: auto_healing_enabled}
+
 
   install_openstack_ca:
     type: OS::Heat::SoftwareConfig

@@ -331,10 +331,14 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kube_service_account_key': 'public_key',
             'kube_service_account_private_key': 'private_key',
             'portal_network_cidr': '10.254.0.0/16',
-            'project_id': 'project_id'
+            'project_id': 'project_id',
+            'max_node_count': 2,
         }
         if missing_attr is not None:
             expected.pop(mapping[missing_attr], None)
+
+        if missing_attr == 'node_count':
+            expected['max_node_count'] = None
 
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -459,7 +463,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kube_service_account_key': 'public_key',
             'kube_service_account_private_key': 'private_key',
             'portal_network_cidr': '10.254.0.0/16',
-            'project_id': 'project_id'
+            'project_id': 'project_id',
+            'max_node_count': 2,
         }
 
         self.assertEqual(expected, definition)
@@ -574,7 +579,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kube_service_account_key': 'public_key',
             'kube_service_account_private_key': 'private_key',
             'portal_network_cidr': '10.254.0.0/16',
-            'project_id': 'project_id'
+            'project_id': 'project_id',
+            'max_node_count': 2,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -1000,7 +1006,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kube_service_account_key': 'public_key',
             'kube_service_account_private_key': 'private_key',
             'portal_network_cidr': '10.254.0.0/16',
-            'project_id': 'project_id'
+            'project_id': 'project_id',
+            'max_node_count': 2,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
