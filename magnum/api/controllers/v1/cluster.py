@@ -18,6 +18,7 @@ import uuid
 from oslo_log import log as logging
 from oslo_utils import timeutils
 import pecan
+import six
 import wsme
 from wsme import types as wtypes
 
@@ -110,7 +111,10 @@ class Cluster(base.APIBase):
     docker_volume_size = wtypes.IntegerType(minimum=1)
     """The size in GB of the docker volume"""
 
-    labels = wtypes.DictType(str, str)
+    labels = wtypes.DictType(wtypes.text, types.MultiType(wtypes.text,
+                                                          six.integer_types,
+                                                          bool,
+                                                          float))
     """One or more key/value pairs"""
 
     master_flavor_id = wtypes.StringType(min_length=1, max_length=255)
@@ -128,16 +132,16 @@ class Cluster(base.APIBase):
     stack_id = wsme.wsattr(wtypes.text, readonly=True)
     """Stack id of the heat stack"""
 
-    status = wtypes.Enum(str, *fields.ClusterStatus.ALL)
+    status = wtypes.Enum(wtypes.text, *fields.ClusterStatus.ALL)
     """Status of the cluster from the heat stack"""
 
     status_reason = wtypes.text
     """Status reason of the cluster from the heat stack"""
 
-    health_status = wtypes.Enum(str, *fields.ClusterStatus.ALL)
+    health_status = wtypes.Enum(wtypes.text, *fields.ClusterStatus.ALL)
     """Health status of the cluster from the native COE API"""
 
-    health_status_reason = wtypes.DictType(str, str)
+    health_status_reason = wtypes.DictType(wtypes.text, wtypes.text)
     """Health status reason of the cluster from the native COE API"""
 
     discovery_url = wtypes.text
@@ -165,7 +169,7 @@ class Cluster(base.APIBase):
     master_addresses = wsme.wsattr([wtypes.text], readonly=True)
     """IP addresses of cluster master nodes"""
 
-    faults = wsme.wsattr(wtypes.DictType(str, wtypes.text))
+    faults = wsme.wsattr(wtypes.DictType(wtypes.text, wtypes.text))
     """Fault info collected from the heat resources of this cluster"""
 
     def __init__(self, **kwargs):

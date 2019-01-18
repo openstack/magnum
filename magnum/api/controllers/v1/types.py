@@ -141,7 +141,7 @@ class JsonPatchType(wtypes.Base):
 
     path = wtypes.wsattr(wtypes.StringType(pattern='^(/[\w-]+)+$'),
                          mandatory=True)
-    op = wtypes.wsattr(wtypes.Enum(str, 'add', 'replace', 'remove'),
+    op = wtypes.wsattr(wtypes.Enum(wtypes.text, 'add', 'replace', 'remove'),
                        mandatory=True)
     value = MultiType(wtypes.text, int)
 

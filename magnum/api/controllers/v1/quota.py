@@ -46,7 +46,8 @@ class Quota(base.APIBase):
                              default=None)
     """The project id"""
 
-    resource = wsme.wsattr(wtypes.Enum(str, *fields.QuotaResourceName.ALL),
+    resource = wsme.wsattr(wtypes.Enum(wtypes.text,
+                                       *fields.QuotaResourceName.ALL),
                            default='Cluster')
     """The resource name"""
 
