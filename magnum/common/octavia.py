@@ -52,15 +52,17 @@ def wait_for_lb_deleted(octavia_client, deleted_lbs):
 
 
 def delete_loadbalancers(context, cluster):
-    """Delete loadbalancers for k8s service.
+    """Delete loadbalancers for kubernetes resources.
 
     This method only works for the k8s cluster with
     cloud-provider-openstack manager or controller-manager patched with
     this PR:
     https://github.com/kubernetes/cloud-provider-openstack/pull/223
+
+    The load balancers created for kubernetes services and ingresses are
+    deleted.
     """
-    pattern = (r'Kubernetes external service \w+ from cluster %s$' %
-               cluster.uuid)
+    pattern = (r'Kubernetes .+ from cluster %s$' % cluster.uuid)
     valid_status = ["ACTIVE", "ERROR", "PENDING_DELETE", "DELETED"]
 
     try:
