@@ -21,6 +21,7 @@ import sys
 
 import requests
 
+
 HEAT_PARAMS_PATH = '/etc/sysconfig/heat-params'
 PUBLIC_IP_URL = 'http://169.254.169.254/latest/meta-data/public-ipv4'
 CERT_DIR = '/etc/docker'

@@ -10,7 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import json
+from oslo_serialization import jsonutils
 
 
 class BaseModel(object):
@@ -18,10 +18,10 @@ class BaseModel(object):
 
     @classmethod
     def from_json(cls, json_str):
-        return cls.from_dict(json.loads(json_str))
+        return cls.from_dict(jsonutils.loads(json_str))
 
     def to_json(self):
-        return json.dumps(self.to_dict())
+        return jsonutils.dumps(self.to_dict())
 
     @classmethod
     def from_dict(cls, data):

@@ -10,7 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import json
+from oslo_serialization import jsonutils
 
 from magnum.tests.functional.common import models
 
@@ -47,7 +47,7 @@ class BayModelPatchCollection(models.CollectionModel):
         collection = []
         for d in data:
             collection.append(d.to_dict())
-        return json.dumps(collection)
+        return jsonutils.dumps(collection)
 
     @classmethod
     def from_dict(cls, data):

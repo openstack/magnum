@@ -14,7 +14,7 @@
 
 from glanceclient import exc as glance_exception
 from novaclient import exceptions as nova_exception
-from oslo_serialization import jsonutils as json
+from oslo_serialization import jsonutils
 
 from magnum.api import utils as api_utils
 from magnum.common import clients
@@ -165,7 +165,7 @@ def validate_labels_executor_env_variables(labels):
     mesos_slave_executor_env_val = labels.get(
         'mesos_slave_executor_env_variables')
     try:
-        json.loads(mesos_slave_executor_env_val)
+        jsonutils.loads(mesos_slave_executor_env_val)
     except ValueError:
         err = (_("Json format error"))
         raise exception.InvalidParameterValue(err)
