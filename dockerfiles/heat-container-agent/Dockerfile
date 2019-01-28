@@ -16,6 +16,7 @@ RUN dnf -y --setopt=tsflags=nodocs install \
         findutils \
         gcc \
         kubernetes-client \
+        openssh-clients \
         python-devel \
         python-pip \
         python-psutil \
