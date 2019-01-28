@@ -68,6 +68,7 @@ data:
         kubernetes ${DNS_CLUSTER_DOMAIN} ${PORTAL_NETWORK_CIDR} ${PODS_NETWORK_CIDR} {
             pods verified
         }
+        prometheus :9153
         proxy . /etc/resolv.conf
         cache 30
     }
@@ -98,7 +99,7 @@ spec:
           operator: "Exists"
       containers:
       - name: coredns
-        image: ${_dns_prefix}coredns:1.0.1
+        image: ${_dns_prefix}coredns:1.3.0
         imagePullPolicy: IfNotPresent
         args: [ "-conf", "/etc/coredns/Corefile" ]
         volumeMounts:
