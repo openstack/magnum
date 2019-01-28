@@ -1144,31 +1144,31 @@ _`cert_manager_api`
 _`kubelet_options`
   This label can hold any additional options to be passed to the kubelet.
   For more details, refer to the `kubelet admin guide
-  <https://kubernetes.io/docs/admin/kubelet//>`_.
+  <https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/>`_.
   By default no additional options are passed.
 
 _`kubeproxy_options`
   This label can hold any additional options to be passed to the kube proxy.
   For more details, refer to the `kube proxy admin guide
-  <https://kubernetes.io/docs/admin/kube-proxy//>`_.
+  <https://kubernetes.io/docs/reference/command-line-tools-reference/kube-proxy/>`_.
   By default no additional options are passed.
 
 _`kubecontroller_options`
   This label can hold any additional options to be passed to the kube controller manager.
   For more details, refer to the `kube controller manager admin guide
-  <https://kubernetes.io/docs/admin/kube-controller-manager//>`_.
+  <https://kubernetes.io/docs/reference/command-line-tools-reference/kube-controller-manager/>`_.
   By default no additional options are passed.
 
 _`kubeapi_options`
   This label can hold any additional options to be passed to the kube api server.
   For more details, refer to the `kube api admin guide
-  <https://kubernetes.io/docs/admin/kube-apiserver//>`_.
+  <https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/>`_.
   By default no additional options are passed.
 
 _`kubescheduler_options`
   This label can hold any additional options to be passed to the kube scheduler.
   For more details, refer to the `kube scheduler admin guide
-  <https://kubernetes.io/docs/admin/kube-scheduler//>`_.
+  <https://kubernetes.io/docs/reference/command-line-tools-reference/kube-scheduler/>`_.
   By default no additional options are passed.
 
 _`influx_grafana_dashboard_enabled`
