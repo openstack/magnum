@@ -10,6 +10,12 @@
         - command: docker push {{ magnum_repository }}/{{ item.name }}:{{ item.tag }}
           with_items: "{{ magnum_images }}"
           retries: 10
-        - command: docker push {{ magnum_repository }}/{{ item.name }}:{{ kubernetes_version }}
+        - command: docker push {{ magnum_repository }}/{{ item.name }}:{{ kubernetes_version_v1_11 }}
+          with_items: "{{ kubernetes_images }}"
+          retries: 10
+        - command: docker push {{ magnum_repository }}/{{ item.name }}:{{ kubernetes_version_v1_12 }}
+          with_items: "{{ kubernetes_images }}"
+          retries: 10
+        - command: docker push {{ magnum_repository }}/{{ item.name }}:{{ kubernetes_version_v1_13 }}
           with_items: "{{ kubernetes_images }}"
           retries: 10

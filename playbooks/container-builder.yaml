@@ -13,15 +13,41 @@
           with_items: "{{ magnum_images }}"
           retries: 10
 
-    - name: "Build kubernetes images"
+    - name: "Build kubernetes images v1.11"
       block:
         - name: "Build {{ magnum_repository }}/{{ item.name }}:{{ item.tag }} image"
           docker_image:
             path: "{{ magnum_src_dir }}/dockerfiles/{{ item.name }}"
             name: "{{ magnum_repository }}/{{ item.name }}"
-            tag: "{{ kubernetes_version }}"
+            tag: "{{kubernetes_version_v1_11}}"
             buildargs:
-              KUBE_VERSION: "{{ kubernetes_version }}"
+              KUBE_VERSION: "{{kubernetes_version_v1_11}}"
+            push: no
+          with_items: "{{ kubernetes_images }}"
+          retries: 10
+
+    - name: "Build kubernetes images v1.12"
+      block:
+        - name: "Build {{ magnum_repository }}/{{ item.name }}:{{ item.tag }} image"
+          docker_image:
+            path: "{{ magnum_src_dir }}/dockerfiles/{{ item.name }}"
+            name: "{{ magnum_repository }}/{{ item.name }}"
+            tag: "{{kubernetes_version_v1_12}}"
+            buildargs:
+              KUBE_VERSION: "{{kubernetes_version_v1_12}}"
+            push: no
+          with_items: "{{ kubernetes_images }}"
+          retries: 10
+
+    - name: "Build kubernetes images v1.13"
+      block:
+        - name: "Build {{ magnum_repository }}/{{ item.name }}:{{ item.tag }} image"
+          docker_image:
+            path: "{{ magnum_src_dir }}/dockerfiles/{{ item.name }}"
+            name: "{{ magnum_repository }}/{{ item.name }}"
+            tag: "{{kubernetes_version_v1_13}}"
+            buildargs:
+              KUBE_VERSION: "{{kubernetes_version_v1_13}}"
             push: no
           with_items: "{{ kubernetes_images }}"
           retries: 10
