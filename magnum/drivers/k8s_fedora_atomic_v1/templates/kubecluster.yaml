@@ -808,6 +808,8 @@ resources:
             - get_file: ../../common/templates/kubernetes/fragments/core-dns-service.sh
             - get_file: ../../common/templates/kubernetes/fragments/calico-service.sh
             - get_file: ../../common/templates/kubernetes/fragments/enable-helm-tiller.sh
+            - get_file: ../../common/templates/kubernetes/helm/metrics-server.sh
+            - get_file: ../../common/templates/kubernetes/fragments/install-helm-modules.sh
             - str_replace:
                 template: {get_file: ../../common/templates/kubernetes/fragments/enable-prometheus-monitoring.sh}
                 params:
