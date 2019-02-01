@@ -326,7 +326,7 @@ parameters:
   kube_tag:
     type: string
     description: tag of the k8s containers used to provision the kubernetes cluster
-    default: v1.11.5-1
+    default: v1.11.6
 
   # FIXME update cloud_provider_tag when a fix for PVC is released
   # https://github.com/kubernetes/cloud-provider-openstack/pull/405
@@ -355,7 +355,7 @@ parameters:
   kube_version:
     type: string
     description: version of kubernetes used for kubernetes cluster
-    default: v1.11.5
+    default: v1.11.6
 
   kube_dashboard_version:
     type: string
@@ -524,7 +524,7 @@ parameters:
     description: >
       true if the keystone authN and authZ should be enabled
     default:
-      false
+      true
 
   k8s_keystone_auth_tag:
     type: string
