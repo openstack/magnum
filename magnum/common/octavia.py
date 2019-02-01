@@ -19,6 +19,7 @@ import time
 
 from magnum.common import clients
 from magnum.common import exception
+from magnum.common import neutron
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
@@ -74,6 +75,10 @@ def delete_loadbalancers(context, cluster):
                     invalids.add(lb["id"])
                     continue
                 if lb["provisioning_status"] in ["ACTIVE", "ERROR"]:
+                    # Delete VIP floating ip if needed.
+                    neutron.delete_floatingip(context, lb["vip_port_id"],
+                                              cluster)
+
                     LOG.debug("Deleting load balancer %s for cluster %s",
                               lb["id"], cluster.uuid)
                     o_client.load_balancer_delete(lb["id"], cascade=True)
