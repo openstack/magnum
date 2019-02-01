@@ -1169,10 +1169,10 @@ class AtomicSwarmModeTemplateDefinitionTestCase(base.TestCase):
         mock_context.user_name = 'fake_user'
         mock_context.tenant = 'fake_tenant'
 
-        docker_volume_type = mock_cluster_template.labels.get(
+        docker_volume_type = mock_cluster.labels.get(
             'docker_volume_type')
-        rexray_preempt = mock_cluster_template.labels.get('rexray_preempt')
-        availability_zone = mock_cluster_template.labels.get(
+        rexray_preempt = mock_cluster.labels.get('rexray_preempt')
+        availability_zone = mock_cluster.labels.get(
             'availability_zone')
 
         number_of_secondary_masters = mock_cluster.master_count - 1
