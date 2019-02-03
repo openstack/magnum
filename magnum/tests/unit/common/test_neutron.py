@@ -136,3 +136,84 @@ class NeutronTest(base.TestCase):
             fake_port_id,
             self.cluster
         )
+
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    def test_get_network_id(self, mock_clients):
+        fake_name = "fake_network"
+        fake_id = "24fe5da0-1ac0-11e9-84cd-00224d6b7bc1"
+        mock_nclient = mock.MagicMock()
+        mock_nclient.list_networks.return_value = {
+            'networks': [
+                {
+                    'id': fake_id,
+                    'name': fake_name,
+                    'router:external': True
+                }
+            ]
+        }
+
+        osc = mock.MagicMock()
+        mock_clients.return_value = osc
+        osc.neutron.return_value = mock_nclient
+
+        network_id = neutron.get_network_id(self.context, fake_name)
+
+        self.assertEqual(fake_id, network_id)
+
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    def test_get_network_id_notfound(self, mock_clients):
+        fake_name = "fake_network"
+        fake_id = "24fe5da0-1ac0-11e9-84cd-00224d6b7bc1"
+        mock_nclient = mock.MagicMock()
+        mock_nclient.list_networks.return_value = {
+            'networks': [
+                {
+                    'id': fake_id,
+                    'name': fake_name,
+                    'router:external': True
+                }
+            ]
+        }
+
+        osc = mock.MagicMock()
+        mock_clients.return_value = osc
+        osc.neutron.return_value = mock_nclient
+
+        self.assertRaises(
+            exception.ExternalNetworkNotFound,
+            neutron.get_network_id,
+            self.context,
+            "another_network"
+        )
+
+    @mock.patch('magnum.common.clients.OpenStackClients')
+    def test_get_network_id_conflict(self, mock_clients):
+        fake_name = "fake_network"
+        fake_id_1 = "24fe5da0-1ac0-11e9-84cd-00224d6b7bc1"
+        fake_id_2 = "93781f82-1ac0-11e9-84cd-00224d6b7bc1"
+        mock_nclient = mock.MagicMock()
+        mock_nclient.list_networks.return_value = {
+            'networks': [
+                {
+                    'id': fake_id_1,
+                    'name': fake_name,
+                    'router:external': True
+                },
+                {
+                    'id': fake_id_2,
+                    'name': fake_name,
+                    'router:external': True
+                }
+            ]
+        }
+
+        osc = mock.MagicMock()
+        mock_clients.return_value = osc
+        osc.neutron.return_value = mock_nclient
+
+        self.assertRaises(
+            exception.Conflict,
+            neutron.get_network_id,
+            self.context,
+            fake_name
+        )

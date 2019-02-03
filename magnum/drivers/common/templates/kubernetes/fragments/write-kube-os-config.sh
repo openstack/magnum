@@ -23,6 +23,7 @@ ca-file=/etc/kubernetes/ca-bundle.crt
 [LoadBalancer]
 use-octavia=$OCTAVIA_ENABLED
 subnet-id=$CLUSTER_SUBNET
+floating-network-id=$EXTERNAL_NETWORK_ID
 create-monitor=yes
 monitor-delay=1m
 monitor-timeout=30s
