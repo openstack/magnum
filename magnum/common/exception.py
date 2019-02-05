@@ -238,7 +238,8 @@ class ClusterTemplateReferenced(Invalid):
 
 
 class ClusterTemplatePublishDenied(NotAuthorized):
-    message = _("Not authorized to set public flag for cluster template.")
+    message = _("Not authorized to set public or hidden flag for cluster"
+                " template.")
 
 
 class ClusterNotFound(ResourceNotFound):

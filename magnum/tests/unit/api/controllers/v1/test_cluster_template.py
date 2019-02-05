@@ -41,6 +41,7 @@ class TestClusterTemplateObject(base.TestCase):
         del cluster_template_dict['server_type']
         del cluster_template_dict['master_lb_enabled']
         del cluster_template_dict['floating_ip_enabled']
+        del cluster_template_dict['hidden']
         cluster_template = api_cluster_template.ClusterTemplate(
             **cluster_template_dict)
         self.assertEqual(wtypes.Unset, cluster_template.image_id)
@@ -50,6 +51,7 @@ class TestClusterTemplateObject(base.TestCase):
         self.assertEqual('vm', cluster_template.server_type)
         self.assertFalse(cluster_template.master_lb_enabled)
         self.assertTrue(cluster_template.floating_ip_enabled)
+        self.assertFalse(cluster_template.hidden)
 
 
 class TestListClusterTemplate(api_base.FunctionalTest):
@@ -62,7 +64,7 @@ class TestListClusterTemplate(api_base.FunctionalTest):
                                'image_id', 'registry_enabled', 'no_proxy',
                                'keypair_id', 'https_proxy', 'tls_disabled',
                                'public', 'labels', 'master_flavor_id',
-                               'volume_driver', 'insecure_registry')
+                               'volume_driver', 'insecure_registry', 'hidden')
 
     def test_empty(self):
         response = self.get_json('/clustertemplates')
@@ -263,7 +265,8 @@ class TestPatch(api_base.FunctionalTest):
             public=False,
             docker_volume_size=20,
             coe='swarm',
-            labels={'key1': 'val1', 'key2': 'val2'}
+            labels={'key1': 'val1', 'key2': 'val2'},
+            hidden=False
         )
 
     def test_update_not_found(self):
@@ -346,6 +349,46 @@ class TestPatch(api_base.FunctionalTest):
         response = self.get_json('/clustertemplates/%s' %
                                  self.cluster_template.uuid)
         self.assertEqual(response['public'], True)
+
+    @mock.patch.object(magnum_policy, 'enforce')
+    def test_update_hidden_cluster_template_success(self, mock_policy):
+        mock_policy.return_value = True
+        response = self.patch_json('/clustertemplates/%s' %
+                                   self.cluster_template.uuid,
+                                   [{'path': '/hidden', 'value': True,
+                                     'op': 'replace'}])
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(200, response.status_code)
+
+        response = self.get_json('/clustertemplates/%s' %
+                                 self.cluster_template.uuid)
+        self.assertTrue(response['hidden'])
+
+    @mock.patch.object(magnum_policy, 'enforce')
+    def test_update_hidden_cluster_template_fail(self, mock_policy):
+        mock_policy.return_value = False
+        self.assertRaises(AppError, self.patch_json,
+                          '/clustertemplates/%s' % self.cluster_template.uuid,
+                          [{'path': '/hidden', 'value': True,
+                            'op': 'replace'}])
+
+    @mock.patch.object(magnum_policy, 'enforce')
+    def test_update_cluster_template_hidden_with_cluster_allow_update(
+            self, mock_policy):
+        mock_policy.return_value = True
+        cluster_template = obj_utils.create_test_cluster_template(self.context)
+        obj_utils.create_test_cluster(
+            self.context, cluster_template_id=cluster_template.uuid)
+        response = self.patch_json('/clustertemplates/%s' %
+                                   cluster_template.uuid,
+                                   [{'path': '/hidden',
+                                     'value': True,
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual(200, response.status_int)
+        response = self.get_json('/clustertemplates/%s' %
+                                 self.cluster_template.uuid)
+        self.assertEqual(response['hidden'], True)
 
     def test_update_cluster_template_replace_labels_success(self):
         cluster_template = obj_utils.create_test_cluster_template(self.context)
@@ -878,6 +921,40 @@ class TestPost(api_base.FunctionalTest):
             cc_mock.assert_called_once_with(mock.ANY)
             self.assertNotIn('id', cc_mock.call_args[0][0])
             self.assertFalse(cc_mock.call_args[0][0]['public'])
+
+    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch.object(magnum_policy, 'enforce')
+    def test_create_cluster_template_hidden_success(self, mock_policy,
+                                                    mock_image_data):
+        with mock.patch.object(
+                self.dbapi, 'create_cluster_template',
+                wraps=self.dbapi.create_cluster_template) as cc_mock:
+            mock_policy.return_value = True
+            mock_image_data.return_value = {'name': 'mock_name',
+                                            'os_distro': 'fedora-atomic'}
+            bdict = apiutils.cluster_template_post_data(hidden=True)
+            response = self.post_json('/clustertemplates', bdict)
+            self.assertTrue(response.json['hidden'])
+            mock_policy.assert_called_with(mock.ANY,
+                                           "clustertemplate:publish",
+                                           None, do_raise=False)
+            cc_mock.assert_called_once_with(mock.ANY)
+            self.assertNotIn('id', cc_mock.call_args[0][0])
+            self.assertTrue(cc_mock.call_args[0][0]['hidden'])
+
+    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch.object(magnum_policy, 'enforce')
+    def test_create_cluster_template_hidden_fail(self, mock_policy,
+                                                 mock_image_data):
+        with mock.patch.object(self.dbapi, 'create_cluster_template',
+                               wraps=self.dbapi.create_cluster_template):
+            # make policy enforcement fail
+            mock_policy.return_value = False
+            mock_image_data.return_value = {'name': 'mock_name',
+                                            'os_distro': 'fedora-atomic'}
+            bdict = apiutils.cluster_template_post_data(hidden=True)
+            self.assertRaises(AppError, self.post_json, '/clustertemplates',
+                              bdict)
 
     @mock.patch('magnum.api.attr_validator.validate_image')
     def test_create_cluster_template_with_no_os_distro_image(self,

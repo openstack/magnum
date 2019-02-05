@@ -93,6 +93,12 @@ class DbClusterTemplateTestCase(base.DbTestCase):
             self.context, ct['id'])
         self.assertEqual(ct['uuid'], cluster_template.uuid)
 
+    def test_get_cluster_template_by_id_hidden(self):
+        ct = utils.create_test_cluster_template(user_id='not_me', hidden=True)
+        cluster_template = self.dbapi.get_cluster_template_by_id(
+            self.context, ct['id'])
+        self.assertEqual(ct['uuid'], cluster_template.uuid)
+
     def test_get_cluster_template_by_uuid(self):
         ct = utils.create_test_cluster_template()
         cluster_template = self.dbapi.get_cluster_template_by_uuid(
@@ -101,6 +107,12 @@ class DbClusterTemplateTestCase(base.DbTestCase):
 
     def test_get_cluster_template_by_uuid_public(self):
         ct = utils.create_test_cluster_template(user_id='not_me', public=True)
+        cluster_template = self.dbapi.get_cluster_template_by_uuid(
+            self.context, ct['uuid'])
+        self.assertEqual(ct['id'], cluster_template.id)
+
+    def test_get_cluster_template_by_uuid_hidden(self):
+        ct = utils.create_test_cluster_template(user_id='not_me', hidden=True)
         cluster_template = self.dbapi.get_cluster_template_by_uuid(
             self.context, ct['uuid'])
         self.assertEqual(ct['id'], cluster_template.id)
@@ -118,6 +130,12 @@ class DbClusterTemplateTestCase(base.DbTestCase):
 
     def test_get_cluster_template_by_name_public(self):
         ct = utils.create_test_cluster_template(user_id='not_me', public=True)
+        res = self.dbapi.get_cluster_template_by_name(self.context, ct['name'])
+        self.assertEqual(ct['id'], res.id)
+        self.assertEqual(ct['uuid'], res.uuid)
+
+    def test_get_cluster_template_by_name_hidden(self):
+        ct = utils.create_test_cluster_template(user_id='not_me', hidden=True)
         res = self.dbapi.get_cluster_template_by_name(self.context, ct['name'])
         self.assertEqual(ct['id'], res.id)
         self.assertEqual(ct['uuid'], res.uuid)

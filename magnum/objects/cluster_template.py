@@ -42,7 +42,8 @@ class ClusterTemplate(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.16: Renamed the class from "BayModel' to 'ClusterTemplate'
     # Version 1.17: 'coe' field type change to ClusterTypeField
     # Version 1.18: DockerStorageDriver is a StringField (was an Enum)
-    VERSION = '1.18'
+    # Version 1.19: Added 'hidden' field
+    VERSION = '1.19'
 
     dbapi = dbapi.get_instance()
 
@@ -78,6 +79,7 @@ class ClusterTemplate(base.MagnumPersistentObject, base.MagnumObject,
         'insecure_registry': fields.StringField(nullable=True),
         'master_lb_enabled': fields.BooleanField(default=False),
         'floating_ip_enabled': fields.BooleanField(default=True),
+        'hidden': fields.BooleanField(default=False),
     }
 
     @staticmethod
