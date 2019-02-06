@@ -485,6 +485,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'keystone_auth_enabled')
         k8s_keystone_auth_tag = mock_cluster.labels.get(
             'k8s_keystone_auth_tag')
+        monitoring_enabled = mock_cluster.labels.get(
+            'monitoring_enabled')
         project_id = mock_cluster.project_id
         tiller_enabled = mock_cluster.labels.get(
             'tiller_enabled')
@@ -549,6 +551,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'heat_container_agent_tag': heat_container_agent_tag,
             'keystone_auth_enabled': keystone_auth_enabled,
             'k8s_keystone_auth_tag': k8s_keystone_auth_tag,
+            'monitoring_enabled': monitoring_enabled,
             'project_id': project_id,
             'external_network': external_network_id,
             'tiller_enabled': tiller_enabled,
@@ -855,6 +858,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'keystone_auth_enabled')
         k8s_keystone_auth_tag = mock_cluster.labels.get(
             'k8s_keystone_auth_tag')
+        monitoring_enabled = mock_cluster.labels.get(
+            'monitoring_enabled')
         project_id = mock_cluster.project_id
         tiller_enabled = mock_cluster.labels.get(
             'tiller_enabled')
@@ -921,6 +926,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'heat_container_agent_tag': heat_container_agent_tag,
             'keystone_auth_enabled': keystone_auth_enabled,
             'k8s_keystone_auth_tag': k8s_keystone_auth_tag,
+            'monitoring_enabled': monitoring_enabled,
             'project_id': project_id,
             'external_network': external_network_id,
             'tiller_enabled': tiller_enabled,

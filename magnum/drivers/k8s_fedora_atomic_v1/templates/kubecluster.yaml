@@ -540,6 +540,11 @@ parameters:
     description: tag of the k8s_keystone_auth container
     default: 1.13.0
 
+  monitoring_enabled:
+    type: boolean
+    description: Enable or disable prometheus-operator monitoring solution.
+    default: false
+
   project_id:
     type: string
     description: >
@@ -824,6 +829,7 @@ resources:
           heat_container_agent_tag: {get_param: heat_container_agent_tag}
           keystone_auth_enabled: {get_param: keystone_auth_enabled}
           k8s_keystone_auth_tag: {get_param: k8s_keystone_auth_tag}
+          monitoring_enabled: {get_param: monitoring_enabled}
           project_id: {get_param: project_id}
           tiller_enabled: {get_param: tiller_enabled}
           tiller_tag: {get_param: tiller_tag}
@@ -847,8 +853,6 @@ resources:
             - get_file: ../../common/templates/kubernetes/fragments/calico-service.sh
             - get_file: ../../common/templates/kubernetes/fragments/flannel-service.sh
             - get_file: ../../common/templates/kubernetes/fragments/enable-helm-tiller.sh
-            - get_file: ../../common/templates/kubernetes/helm/metrics-server.sh
-            - get_file: ../../common/templates/kubernetes/fragments/install-helm-modules.sh
             - str_replace:
                 template: {get_file: ../../common/templates/kubernetes/fragments/enable-prometheus-monitoring.sh}
                 params:
@@ -861,6 +865,13 @@ resources:
             - get_file: ../../common/templates/kubernetes/fragments/kube-dashboard-service.sh
             - get_file: ../../common/templates/kubernetes/fragments/enable-keystone-auth.sh
             - get_file: ../../common/templates/kubernetes/fragments/enable-auto-healing.sh
+            # Helm Based Installation Configuration Scripts
+            - get_file: ../../common/templates/kubernetes/helm/metrics-server.sh
+            - str_replace:
+                template: {get_file:  ../../common/templates/kubernetes/helm/prometheus-operator.sh}
+                params:
+                  "${ADMIN_PASSWD}": {get_param: grafana_admin_passwd}
+            - get_file: ../../common/templates/kubernetes/fragments/install-helm-modules.sh
 
   kube_cluster_deploy:
     type: OS::Heat::SoftwareDeployment

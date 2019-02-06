@@ -417,6 +417,11 @@ parameters:
     type: string
     description: tag of the k8s_keystone_auth container
 
+  monitoring_enabled:
+    type: boolean
+    description: Enable or disable prometheus-operator monitoring solution.
+    default: false
+
   project_id:
     type: string
     description: >
@@ -543,6 +548,7 @@ resources:
             "$HEAT_CONTAINER_AGENT_TAG": {get_param: heat_container_agent_tag}
             "$KEYSTONE_AUTH_ENABLED": {get_param: keystone_auth_enabled}
             "$K8S_KEYSTONE_AUTH_TAG": {get_param: k8s_keystone_auth_tag}
+            "$MONITORING_ENABLED": {get_param: monitoring_enabled}
             "$PROJECT_ID": {get_param: project_id}
             "$EXTERNAL_NETWORK_ID": {get_param: external_network}
             "$TILLER_ENABLED": {get_param: tiller_enabled}

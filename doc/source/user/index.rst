@@ -304,6 +304,9 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `mesos_slave_executor_env_variables`_ | (file name)        | ""            |
 +---------------------------------------+--------------------+---------------+
+| `monitoring_enabled`_                 | - true             | false         |
+|                                       | - false            |               |
++---------------------------------------+--------------------+---------------+
 | `swarm_strategy`_                     | - spread           | spread        |
 |                                       | - binpack          |               |
 |                                       | - random           |               |
@@ -1108,6 +1111,12 @@ _`container_infra_prefix`
   * docker.io/prom/prometheus:latest
   * gcr.io/google_containers/kubernetes-dashboard-amd64:v1.5.1
   * gcr.io/google_containers/pause:3.0
+  * gcr.io/google-containers/hyperkube:v1.12.1
+  * quay.io/prometheus/alertmanager:v0.15.3
+  * quay.io/coreos/prometheus-operator:v0.15.3
+  * quay.io/coreos/configmap-reload:v0.0.1
+  * quay.io/coreos/prometheus-config-reloader:v0.26.0
+  * quay.io/prometheus/prometheus:v2.5.0
 
 _`kube_tag`
   This label allows users to select `a specific Kubernetes release,
@@ -1220,6 +1229,11 @@ _`k8s_keystone_auth_tag`
   version, based on its container tag
   <https://hub.docker.com/r/k8scloudprovider/k8s-keystone-auth/tags/>`_.
   Stein-default: 1.13.0
+
+_`monitoring_enabled`
+  Enable installation of cluster monitoring solution provided by the
+  stable/prometheus-operator helm chart.
+  Default: false
 
 _`tiller_enabled`
   If set to true, tiller will be deployed in the kube-system namespace.
