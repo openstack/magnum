@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Allow overriding cluster template labels for swarm mode clusters - this
+    functionality was missed from this COE when it was introduced.
