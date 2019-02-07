@@ -25,15 +25,14 @@ def delete_floatingip(context, fix_port_id, cluster):
     """Deletes the floating IP associated with the fix_port_id.
 
     Only delete the floating IP if it's created and associated with the
-    LoadBalancer type service in Kubernetes cluster.
+    the load balancers that corresponding to the services and ingresses in
+    Kubernetes cluster.
 
     This method only works with the Kubernetes cluster with
-    cloud-provider-openstack controller manager deployed, patched with
-    this PR:
-    https://github.com/kubernetes/cloud-provider-openstack/pull/433
+    cloud-provider-openstack controller manager deployed.
     """
-    pattern = (r'Floating IP for Kubernetes external service \w+ from cluster '
-               r'%s$' % cluster.uuid)
+    pattern = (r'Floating IP for Kubernetes .+ from cluster %s$' %
+               cluster.uuid)
 
     try:
         n_client = clients.OpenStackClients(context).neutron()
