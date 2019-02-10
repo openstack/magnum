@@ -1239,7 +1239,7 @@ your own Ingress resources.
 _`ingress_controller`
   This label sets the Ingress Controller to be used. Currently 'traefik' and
   'octavia' are supported. The default is '', meaning no Ingress Controller
-  configured. For more details about octavia-ingress-controller please refer
+  is configured. For more details about octavia-ingress-controller please refer
   to `cloud-provider-openstack document
   <https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/using-octavia-ingress-controller.md>`_
 
@@ -1252,10 +1252,10 @@ _`ingress_controller_role`
 
     kubectl label node <node-name> role=ingress
 
-  This lable is not used for octavia-ingress-controller.
+  This label is not used for octavia-ingress-controller.
 
 _`octavia_ingress_controller_tag`
-  The image tag for octavia-ingress-controller. Stain-default: 1.13.2-alpha
+  The image tag for octavia-ingress-controller. Stein-default: 1.13.2-alpha
 
 DNS
 ---
