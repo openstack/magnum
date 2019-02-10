@@ -52,3 +52,25 @@ def delete_floatingip(context, fix_port_id, cluster):
     except Exception as e:
         raise exception.PreDeletionFailed(cluster_uuid=cluster.uuid,
                                           msg=str(e))
+
+
+def get_network_id(context, network_name):
+    nets = []
+    n_client = clients.OpenStackClients(context).neutron()
+    ext_filter = {'router:external': True}
+
+    networks = n_client.list_networks(**ext_filter)
+    for net in networks.get('networks'):
+        if net.get('name') == network_name:
+            nets.append(net)
+
+    if len(nets) == 0:
+        raise exception.ExternalNetworkNotFound(network=network_name)
+
+    if len(nets) > 1:
+        raise exception.Conflict(
+            "Multiple networks exist with same name '%s'. Please use the "
+            "network ID instead." % network_name
+        )
+
+    return nets[0]["id"]

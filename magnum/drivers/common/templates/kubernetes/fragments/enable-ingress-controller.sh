@@ -3,9 +3,6 @@
 step="enable-ingress-controller"
 printf "Starting to run ${step}\n"
 
-# Enables the specified ingress controller.
-#
-# Currently there is only support for traefik.
 . /etc/sysconfig/heat-params
 
 function writeFile {
@@ -21,8 +18,20 @@ EOF
     }
 }
 
-if [ "$(echo $INGRESS_CONTROLLER | tr '[:upper:]' '[:lower:]')" = "traefik" ]; then
+ingress_controller=$(echo $INGRESS_CONTROLLER | tr '[:upper:]' '[:lower:]')
+case "$ingress_controller" in
+"")
+    echo "No ingress controller configured."
+    ;;
+"traefik")
     $enable-ingress-traefik
-fi
+    ;;
+"octavia")
+    $enable-ingress-octavia
+    ;;
+*)
+    echo "Ingress controller $ingress_controller not supported."
+    ;;
+esac
 
 printf "Finished running ${step}\n"

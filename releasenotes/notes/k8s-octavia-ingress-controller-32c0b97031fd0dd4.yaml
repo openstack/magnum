@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Add a new option 'octavia' for the label 'ingress_controller' and a new
+    label 'octavia_ingress_controller_tag' to enable the deployment of
+    `octavia-ingress-controller <https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/using-octavia-ingress-controller.md>`_
+    in the kubernetes cluster. The 'ingress_controller_role' label is not used
+    for this option.
