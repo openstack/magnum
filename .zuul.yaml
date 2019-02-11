@@ -349,6 +349,8 @@
     pre-run: playbooks/container-builder-setup-gate.yaml
     run: playbooks/container-builder.yaml
     post-run: playbooks/container-builder-copy-logs.yaml
+    roles:
+      - zuul: openstack-infra/openstack-zuul-jobs
     timeout: 1200
     irrelevant-files:
       - ^.*\.rst$
