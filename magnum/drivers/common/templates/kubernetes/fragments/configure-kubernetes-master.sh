@@ -4,6 +4,18 @@
 
 echo "configuring kubernetes (master)"
 
+if [ ! -z "$HTTP_PROXY" ]; then
+    export HTTP_PROXY
+fi
+
+if [ ! -z "$HTTPS_PROXY" ]; then
+    export HTTPS_PROXY
+fi
+
+if [ ! -z "$NO_PROXY" ]; then
+    export NO_PROXY
+fi
+
 _prefix=${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}
 
 mkdir -p /opt/cni

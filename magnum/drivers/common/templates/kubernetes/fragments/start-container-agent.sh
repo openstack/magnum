@@ -4,6 +4,18 @@
 
 set -uxe
 
+if [ ! -z "$HTTP_PROXY" ]; then
+    export HTTP_PROXY
+fi
+
+if [ ! -z "$HTTPS_PROXY" ]; then
+    export HTTPS_PROXY
+fi
+
+if [ ! -z "$NO_PROXY" ]; then
+    export NO_PROXY
+fi
+
 # Create a keypair for the heat-container-agent to
 # access the node over ssh. It is useful to operate
 # in host mount namespace and apply configuration.
