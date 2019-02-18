@@ -294,9 +294,15 @@ class Connection(api.Connection):
         query = model_query(models.ClusterTemplate)
         query = self._add_tenant_filters(context, query)
         query = self._add_cluster_template_filters(query, filters)
-        # include public ClusterTemplates
-        public_q = model_query(models.ClusterTemplate).filter_by(public=True)
+        # include public (and not hidden)  ClusterTemplates
+        public_q = model_query(models.ClusterTemplate).filter_by(
+            public=True, hidden=False)
         query = query.union(public_q)
+        # include hidden and public ClusterTemplate if admin
+        if context.is_admin:
+            hidden_q = model_query(models.ClusterTemplate).filter_by(
+                public=True, hidden=True)
+            query = query.union(hidden_q)
 
         return _paginate_query(models.ClusterTemplate, limit, marker,
                                sort_key, sort_dir, query)
@@ -362,8 +368,9 @@ class Connection(api.Connection):
         return query.count() != 0
 
     def _is_publishing_cluster_template(self, values):
-        if (len(values) == 1 and
-                'public' in values and values['public'] is True):
+        if (len(values) == 1 and (
+                ('public' in values and values['public'] is True) or
+                ('hidden' in values))):
             return True
         return False
 
@@ -407,7 +414,7 @@ class Connection(api.Connection):
 
             if self._is_cluster_template_referenced(session, ref['uuid']):
                 # NOTE(flwang): We only allow to update ClusterTemplate to be
-                # public and rename
+                # public, hidden and rename
                 if (not self._is_publishing_cluster_template(values) and
                         list(six.viewkeys(values)) != ["name"]):
                     raise exception.ClusterTemplateReferenced(

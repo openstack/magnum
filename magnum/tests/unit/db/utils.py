@@ -55,6 +55,7 @@ def get_test_cluster_template(**kw):
         'insecure_registry': kw.get('insecure_registry', '10.0.0.1:5000'),
         'master_lb_enabled': kw.get('master_lb_enabled', True),
         'floating_ip_enabled': kw.get('floating_ip_enabled', True),
+        'hidden': kw.get('hidden', False),
     }
 
 

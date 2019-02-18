@@ -189,6 +189,7 @@ class ClusterTemplate(Base):
     insecure_registry = Column(String(255, mysql_ndb_type=TINYTEXT))
     master_lb_enabled = Column(Boolean, default=False)
     floating_ip_enabled = Column(Boolean, default=True)
+    hidden = Column(Boolean, default=False)
 
 
 class X509KeyPair(Base):

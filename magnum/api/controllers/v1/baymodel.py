@@ -138,6 +138,9 @@ class BayModel(base.APIBase):
     floating_ip_enabled = wsme.wsattr(types.boolean, default=True)
     """Indicates whether created bays should have a floating ip or not."""
 
+    hidden = wsme.wsattr(types.boolean, default=False)
+    """Indicates whether the Baymodel is hidden or not."""
+
     def __init__(self, **kwargs):
         self.fields = []
         for field in objects.ClusterTemplate.fields:
@@ -192,6 +195,7 @@ class BayModel(base.APIBase):
             public=False,
             master_lb_enabled=False,
             floating_ip_enabled=True,
+            hidden=False,
         )
         return cls._convert_with_links(sample, 'http://localhost:9511')
 
@@ -201,7 +205,7 @@ class BayModelPatchType(types.JsonPatchType):
     _extra_non_removable_attrs = {'/network_driver', '/external_network_id',
                                   '/tls_disabled', '/public', '/server_type',
                                   '/coe', '/registry_enabled',
-                                  '/cluster_distro'}
+                                  '/cluster_distro', '/hidden'}
 
 
 class BayModelCollection(collection.Collection):

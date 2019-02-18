@@ -149,6 +149,9 @@ class ClusterTemplate(base.APIBase):
     user_id = wsme.wsattr(wtypes.text, readonly=True)
     """User id of the cluster belongs to"""
 
+    hidden = wsme.wsattr(types.boolean, default=False)
+    """Indicates whether the ClusterTemplate is hidden or not."""
+
     def __init__(self, **kwargs):
         self.fields = []
         for field in objects.ClusterTemplate.fields:
@@ -205,7 +208,8 @@ class ClusterTemplate(base.APIBase):
             updated_at=timeutils.utcnow(),
             public=False,
             master_lb_enabled=False,
-            floating_ip_enabled=True)
+            floating_ip_enabled=True,
+            hidden=False)
         return cls._convert_with_links(sample, 'http://localhost:9511')
 
 
@@ -214,7 +218,7 @@ class ClusterTemplatePatchType(types.JsonPatchType):
     _extra_non_removable_attrs = {'/network_driver', '/external_network_id',
                                   '/tls_disabled', '/public', '/server_type',
                                   '/coe', '/registry_enabled',
-                                  '/cluster_distro'}
+                                  '/cluster_distro', '/hidden'}
 
 
 class ClusterTemplateCollection(collection.Collection):
@@ -390,8 +394,8 @@ class ClusterTemplatesController(base.Controller):
         cluster_template_dict['cluster_distro'] = image_data['os_distro']
         cluster_template_dict['project_id'] = context.project_id
         cluster_template_dict['user_id'] = context.user_id
-        # check permissions for making cluster_template public
-        if cluster_template_dict['public']:
+        # check permissions for making cluster_template public or hidden
+        if cluster_template_dict['public'] or cluster_template_dict['hidden']:
             if not policy.enforce(context, "clustertemplate:publish", None,
                                   do_raise=False):
                 raise exception.ClusterTemplatePublishDenied()
@@ -440,8 +444,9 @@ class ClusterTemplatesController(base.Controller):
         new_cluster_template_dict = new_cluster_template.as_dict()
         attr_validator.validate_os_resources(context,
                                              new_cluster_template_dict)
-        # check permissions when updating ClusterTemplate public flag
-        if cluster_template.public != new_cluster_template.public:
+        # check permissions when updating ClusterTemplate public or hidden flag
+        if (cluster_template.public != new_cluster_template.public or
+                cluster_template.hidden != new_cluster_template.hidden):
             if not policy.enforce(context, "clustertemplate:publish", None,
                                   do_raise=False):
                 raise exception.ClusterTemplatePublishDenied()
