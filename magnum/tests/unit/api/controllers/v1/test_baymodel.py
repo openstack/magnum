@@ -225,14 +225,26 @@ class TestPatch(api_base.FunctionalTest):
                                       cluster_template_id=baymodel.uuid)
 
         response = self.patch_json('/baymodels/%s' % baymodel.uuid,
-                                   [{'path': '/name',
-                                     'value': 'bay_model_example_B',
+                                   [{'path': '/network_driver',
+                                     'value': 'flannel',
                                      'op': 'replace'}],
                                    expect_errors=True)
         self.assertEqual(400, response.status_int)
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['errors'])
         self.assertIn(baymodel.uuid, response.json['errors'][0]['detail'])
+
+    def test_update_baymodel_name_with_bay(self):
+        baymodel = obj_utils.create_test_cluster_template(self.context)
+        obj_utils.create_test_cluster(self.context,
+                                      cluster_template_id=baymodel.uuid)
+
+        response = self.patch_json('/baymodels/%s' % baymodel.uuid,
+                                   [{'path': '/name',
+                                     'value': 'bay_model_example_B',
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual(200, response.status_int)
 
     @mock.patch.object(magnum_policy, 'enforce')
     def test_update_public_baymodel_success(self, mock_policy):
@@ -274,8 +286,8 @@ class TestPatch(api_base.FunctionalTest):
         obj_utils.create_test_cluster(self.context,
                                       cluster_template_id=baymodel.uuid)
         response = self.patch_json('/baymodels/%s' % baymodel.uuid,
-                                   [{'path': '/name',
-                                     'value': 'new_name',
+                                   [{'path': '/network_driver',
+                                     'value': 'calico',
                                      'op': 'replace'}],
                                    expect_errors=True)
         self.assertEqual(400, response.status_code)
