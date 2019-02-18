@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Installs the metrics-server service that is replacing kubernetes deprecated
+    heapster as a cluster wide metrics reporting service used by schedulling,
+    HPA and others. This service is installed and configured using helm and so
+    tiller_enabled flag must be True. Heapster service is maintained active to
+    allow compatibility.

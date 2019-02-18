@@ -68,6 +68,15 @@ else
     KUBE_API_ARGS="$KUBE_API_ARGS --client-ca-file=$CERT_DIR/ca.crt"
     KUBE_API_ARGS="$KUBE_API_ARGS --service-account-key-file=${CERT_DIR}/service_account.key"
     KUBE_API_ARGS="$KUBE_API_ARGS --kubelet-certificate-authority=${CERT_DIR}/ca.crt --kubelet-client-certificate=${CERT_DIR}/server.crt --kubelet-client-key=${CERT_DIR}/server.key --kubelet-https=true"
+    # Allow for metrics-server/aggregator communication
+    KUBE_API_ARGS="${KUBE_API_ARGS} \
+        --proxy-client-cert-file=${CERT_DIR}/server.crt \
+        --proxy-client-key-file=${CERT_DIR}/server.key \
+        --requestheader-allowed-names=front-proxy-client,kube,kubernetes \
+        --requestheader-client-ca-file=${CERT_DIR}/ca.crt \
+        --requestheader-extra-headers-prefix=X-Remote-Extra- \
+        --requestheader-group-headers=X-Remote-Group \
+        --requestheader-username-headers=X-Remote-User"
 fi
 
 KUBE_ADMISSION_CONTROL=""
