@@ -775,7 +775,7 @@ class TestPost(api_base.FunctionalTest):
         mock_image_data.return_value = {'name': 'mock_name',
                                         'os_distro': 'fedora-atomic'}
         for k, v in cluster_template_config_dict.items():
-                    cfg.CONF.set_override(k, v, 'cluster_template')
+            cfg.CONF.set_override(k, v, 'cluster_template')
         with mock.patch.object(
                 self.dbapi, 'create_cluster_template',
                 wraps=self.dbapi.create_cluster_template) as cc_mock:
@@ -1114,6 +1114,30 @@ class TestPost(api_base.FunctionalTest):
         bdict = apiutils.cluster_template_post_data(coe="mesos")
         self.assertRaises(AppError, self.post_json, '/clustertemplates',
                           bdict)
+
+    @mock.patch('magnum.api.attr_validator.validate_image')
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_create_cluster_template_with_multi_dns(self, mock_utcnow,
+                                                    mock_image_data):
+        bdict = apiutils.cluster_template_post_data(
+            dns_nameserver="8.8.8.8,114.114.114.114")
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+        mock_image_data.return_value = {'name': 'mock_name',
+                                        'os_distro': 'fedora-atomic'}
+
+        response = self.post_json('/clustertemplates', bdict)
+        self.assertEqual(201, response.status_int)
+        # Check location header
+        self.assertIsNotNone(response.location)
+        expected_location = '/v1/clustertemplates/%s' % bdict['uuid']
+        self.assertEqual(expected_location,
+                         urlparse.urlparse(response.location).path)
+        self.assertEqual(bdict['uuid'], response.json['uuid'])
+        self.assertNotIn('updated_at', response.json.keys)
+        return_created_at = timeutils.parse_isotime(
+            response.json['created_at']).replace(tzinfo=None)
+        self.assertEqual(test_time, return_created_at)
 
 
 class TestDelete(api_base.FunctionalTest):

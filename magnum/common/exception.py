@@ -220,6 +220,12 @@ class InvalidMAC(Invalid):
     message = _("Expected a MAC address but received %(mac)s.")
 
 
+class InvalidDNS(Invalid):
+    message = _(
+        "Expected a single dns address or comma separated dns list, "
+        "but received %(dns)s.")
+
+
 class ConfigInvalid(Invalid):
     message = _("Invalid configuration file. %(error_msg)s")
 

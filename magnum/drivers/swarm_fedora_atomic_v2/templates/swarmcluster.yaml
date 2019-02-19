@@ -57,7 +57,7 @@ parameters:
     description: flavor to use when booting the swarm node
 
   dns_nameserver:
-    type: string
+    type: comma_delimited_list
     description: address of a dns nameserver reachable in your environment
     default: 8.8.8.8
 
