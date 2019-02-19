@@ -61,7 +61,7 @@ class ClusterTemplate(base.APIBase):
     master_flavor_id = wtypes.StringType(min_length=1, max_length=255)
     """The flavor of the master node for this ClusterTemplate"""
 
-    dns_nameserver = wtypes.IPv4AddressType()
+    dns_nameserver = types.dns_list
     """The DNS nameserver address"""
 
     keypair_id = wsme.wsattr(wtypes.StringType(min_length=1, max_length=255),

@@ -67,7 +67,7 @@ parameters:
     default: 10.0.0.0/24
 
   dns_nameserver:
-    type: string
+    type: comma_delimited_list
     description: address of a dns nameserver reachable in your environment
 
   http_proxy:
