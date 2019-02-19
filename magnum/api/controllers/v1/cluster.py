@@ -138,7 +138,7 @@ class Cluster(base.APIBase):
     status_reason = wtypes.text
     """Status reason of the cluster from the heat stack"""
 
-    health_status = wtypes.Enum(wtypes.text, *fields.ClusterStatus.ALL)
+    health_status = wtypes.Enum(wtypes.text, *fields.ClusterHealthStatus.ALL)
     """Health status of the cluster from the native COE API"""
 
     health_status_reason = wtypes.DictType(wtypes.text, wtypes.text)
@@ -222,7 +222,8 @@ class Cluster(base.APIBase):
                      status=fields.ClusterStatus.CREATE_COMPLETE,
                      status_reason="CREATE completed successfully",
                      health_status=fields.ClusterHealthStatus.HEALTHY,
-                     health_status_reason='{"api_server": "OK"}',
+                     health_status_reason={"api": "ok",
+                                           "node-0.Ready": 'True'},
                      api_address='172.24.4.3',
                      node_addresses=['172.24.4.4', '172.24.4.5'],
                      created_at=timeutils.utcnow(),

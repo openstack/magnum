@@ -12,9 +12,12 @@
 
 import ast
 
+from oslo_utils import strutils
+
 from magnum.common import utils
 from magnum.conductor import k8s_api as k8s
 from magnum.conductor import monitors
+from magnum.objects import fields as m_fields
 
 
 class K8sMonitor(monitors.MonitorBase):
@@ -44,6 +47,12 @@ class K8sMonitor(monitors.MonitorBase):
         self.data['nodes'] = self._parse_node_info(nodes)
         pods = k8s_api.list_namespaced_pod('default')
         self.data['pods'] = self._parse_pod_info(pods)
+
+    def poll_health_status(self):
+        k8s_api = k8s.create_k8s_api(self.context, self.cluster)
+        status, reason = self._poll_health_status(k8s_api)
+        self.data['health_status'] = status
+        self.data['health_status_reason'] = reason
 
     def _compute_res_util(self, res):
         res_total = 0
@@ -164,3 +173,66 @@ class K8sMonitor(monitors.MonitorBase):
             parsed_nodes.append({'Memory': memory, 'Cpu': cpu})
 
         return parsed_nodes
+
+    def _poll_health_status(self, k8s_api):
+        """Poll health status of API and nodes for given cluster
+
+        Design Policy:
+        1.  How to calculate the overall health status?
+            Any node (including API and minion nodes) is not OK, then the
+            overall health status is UNHEALTHY
+
+        2.  The data structure of health_status_reason
+            As an attribute of the cluster, the health_status_reason have to
+            use the field type from
+            oslo.versionedobjects/blob/master/oslo_versionedobjects/fields.py
+
+        3.  How to get the health_status and health_status_reason?
+            3.1 Call /healthz to get the API health status
+            3.2 Call list_node (using API /api/v1/nodes) to get the nodes
+                health status
+
+        :param k8s_api: The api client to the cluster
+        :return: Tumple including status and reason. Example:
+            (
+                ClusterHealthStatus.HEALTHY,
+                {
+                    'api': 'ok',
+                    'k8scluster-ydz7cfbxqqu3-node-0.Ready': False,
+                    'k8scluster-ydz7cfbxqqu3-node-1.Ready': True,
+                    'k8scluster-ydz7cfbxqqu3-node-2.Ready': True,
+                }
+            )
+
+        """
+
+        health_status = m_fields.ClusterHealthStatus.UNHEALTHY
+        health_status_reason = {}
+        api_status = None
+
+        try:
+            api_status, _, _ = k8s_api.api_client.call_api(
+                '/healthz', 'GET', response_type=object)
+
+            for node in k8s_api.list_node().items:
+                node_key = node.metadata.name + ".Ready"
+                ready = False
+                for condition in node.status.conditions:
+                    if condition.type == 'Ready':
+                        ready = strutils.bool_from_string(condition.status)
+                        break
+
+                health_status_reason[node_key] = ready
+
+            if (api_status == 'ok' and
+                    all(n for n in health_status_reason.values())):
+                health_status = m_fields.ClusterHealthStatus.HEALTHY
+
+            health_status_reason['api'] = api_status
+        except Exception as exp_api:
+            if not api_status:
+                api_status = (getattr(exp_api, 'body', None) or
+                              getattr(exp_api, 'message', None))
+                health_status_reason['api'] = api_status
+
+        return health_status, health_status_reason
