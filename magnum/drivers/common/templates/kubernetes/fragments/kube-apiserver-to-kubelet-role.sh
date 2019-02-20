@@ -80,6 +80,15 @@ EOF
 }
 kubectl apply --validate=false -f ${ADMIN_RBAC}
 
+# Add the openstack trustee as a secret under kube-system
+kubectl -n kube-system create secret generic os-trustee \
+    --from-literal=os-authURL=${AUTH_URL} \
+    --from-literal=os-trustID=${TRUST_ID} \
+    --from-literal=os-trusteeID=${TRUSTEE_USER_ID} \
+    --from-literal=os-trusteePassword=${TRUSTEE_PASSWORD} \
+    --from-literal=os-region=${REGION_NAME} \
+    --from-file=os-certAuthority=/etc/kubernetes/ca-bundle.crt
+
 #TODO: add heat variables for master count to determine leaderelect true/False ?
 if [ -n "${TRUST_ID}" ] && [ "$(echo "${CLOUD_PROVIDER_ENABLED}" | tr '[:upper:]' '[:lower:]')" = "true" ]; then
     occm_image="${CONTAINER_INFRA_PREFIX:-docker.io/k8scloudprovider/}openstack-cloud-controller-manager:${CLOUD_PROVIDER_TAG}"
