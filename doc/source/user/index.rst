@@ -1257,6 +1257,19 @@ Magnum allows selecting one of multiple controller options via the
 'ingress_controller' label. Check the Kubernetes documentation to define
 your own Ingress resources.
 
+Traefik:
+Traefik's pods by default expose port 80 and 443 for http(s) traffic
+on the nodes they are running. In kubernetes cluster, these ports are
+closed by default. Cluster administrator needs to add a rule in the
+worker nodes security group. For example::
+
+    openstack security group rule create <SECURITY_GROUP> \
+      --protocol tcp \
+      --dst-port 80:80
+    openstack security group rule create <SECURITY_GROUP> \
+      --protocol tcp \
+      --dst-port 443:443
+
 _`ingress_controller`
   This label sets the Ingress Controller to be used. Currently 'traefik' and
   'octavia' are supported. The default is '', meaning no Ingress Controller

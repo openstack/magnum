@@ -638,8 +638,30 @@ resources:
     properties:
       rules:
         - protocol: icmp
+        # Default port range for external service ports.
+        # In future, if the option `manage-security-groups` for ccm works
+        # well, we could remove this rule here.
+        # The PR in ccm is
+        # https://github.com/kubernetes/cloud-provider-openstack/pull/491
         - protocol: tcp
+          port_range_min: 30000
+          port_range_max: 32767
+        # Worker node kubelet healthcheck port.
+        - protocol: tcp
+          port_range_min: 10250
+          port_range_max: 10250
+        # Calico BGP network, only required if the BGP backend is used.
+        - protocol: tcp
+          port_range_min: 179
+          port_range_max: 179
+        # flannel overlay network - udp backend.
         - protocol: udp
+          port_range_min: 8285
+          port_range_max: 8285
+        # flannel overlay network - vxlan backend.
+        - protocol: udp
+          port_range_min: 8472
+          port_range_max: 8472
 
   ######################################################################
   #

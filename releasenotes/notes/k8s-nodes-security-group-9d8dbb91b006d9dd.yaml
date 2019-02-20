@@ -1,0 +1,12 @@
+security:
+  - |
+    Defines more strict security group rules for kubernetes worker nodes. The
+    ports that are open by default: default port range(30000-32767) for
+    external service ports; kubelet healthcheck port; Calico BGP network ports;
+    flannel overlay network ports. The cluster admin should manually config the
+    security group on the nodes where Traefik is allowed. To allow traffic to
+    the default ports (80, 443) that the traefik ingress controller exposes
+    users will need to create additional rules or expose traefik with a
+    kubernetes service with type: LoadBalaner. Finally, the ssh port in worker
+    nodes is closed as well. If ssh access is required, users will need to
+    create a rule for port 22 as well.
