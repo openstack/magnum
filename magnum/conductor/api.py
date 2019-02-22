@@ -51,6 +51,23 @@ class API(rpc_service.API):
     def cluster_update_async(self, cluster, rollback=False):
         self._cast('cluster_update', cluster=cluster, rollback=rollback)
 
+    def cluster_resize(self, cluster, node_count, nodes_to_remove,
+                       nodegroup=None, rollback=False):
+
+        return self._call('cluster_resize',
+                          cluster=cluster,
+                          node_count=node_count,
+                          nodes_to_remove=nodes_to_remove,
+                          nodegroup=nodegroup)
+
+    def cluster_resize_async(self, cluster, node_count, nodes_to_remove,
+                             nodegroup=None, rollback=False):
+        return self._cast('cluster_resize',
+                          cluster=cluster,
+                          node_count=node_count,
+                          nodes_to_remove=nodes_to_remove,
+                          nodegroup=nodegroup)
+
     # Federation Operations
 
     def federation_create(self, federation, create_timeout):

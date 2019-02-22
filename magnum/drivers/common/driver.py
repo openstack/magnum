@@ -182,6 +182,12 @@ class Driver(object):
                                   "'delete_cluster'.")
 
     @abc.abstractmethod
+    def resize_cluster(self, context, cluster, resize_manager,
+                       node_count, nodes_to_remove, nodegroup=None):
+        raise NotImplementedError("Subclasses must implement "
+                                  "'resize_cluster'.")
+
+    @abc.abstractmethod
     def create_federation(self, context, federation):
         raise NotImplementedError("Subclasses must implement "
                                   "'create_federation'.")

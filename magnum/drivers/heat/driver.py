@@ -111,6 +111,13 @@ class HeatDriver(driver.Driver):
         LOG.info("Starting to delete cluster %s", cluster.uuid)
         self._delete_stack(context, clients.OpenStackClients(context), cluster)
 
+    def resize_cluster(self, context, cluster, resize_manager,
+                       node_count, nodes_to_remove, nodegroup=None,
+                       rollback=False):
+        self._resize_stack(context, cluster, resize_manager,
+                           node_count, nodes_to_remove, nodegroup=nodegroup,
+                           rollback=rollback)
+
     def _create_stack(self, context, osc, cluster, cluster_create_timeout):
         template_path, heat_params, env_files = (
             self._extract_template_definition(context, cluster))
@@ -167,6 +174,28 @@ class HeatDriver(driver.Driver):
                                                    scale_manager)
         heat_params.update(scale_params)
 
+        fields = {
+            'parameters': heat_params,
+            'existing': True,
+            'disable_rollback': not rollback
+        }
+
+        osc = clients.OpenStackClients(context)
+        osc.heat().stacks.update(cluster.stack_id, **fields)
+
+    def _resize_stack(self, context, cluster, resize_manager,
+                      node_count, nodes_to_remove, nodegroup=None,
+                      rollback=False):
+        definition = self.get_template_definition()
+        heat_params = {}
+        stack_nc_param = definition.get_heat_param(cluster_attr='node_count')
+        heat_params[stack_nc_param] = node_count or cluster.node_count
+
+        scale_params = definition.get_scale_params(context,
+                                                   cluster,
+                                                   resize_manager,
+                                                   nodes_to_remove)
+        heat_params.update(scale_params)
         fields = {
             'parameters': heat_params,
             'existing': True,
