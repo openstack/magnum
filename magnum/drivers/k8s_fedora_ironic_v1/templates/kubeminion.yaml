@@ -108,7 +108,18 @@ outputs:
     description: >
       This is the "public" IP address of the Kubernetes minion node.
 
+  ######################################################################
+  #
+  # NOTE(flwang): Returning the minion node server ID here so that
+  # consumer can send API request to Heat to remove a particular
+  # node with removal_policies. Otherwise, the consumer (e.g. AutoScaler)
+  # has to use index to do the remove which is confusing out of the
+  # OpenStack world.
+  # https://storyboard.openstack.org/#!/story/2005054
+  #
+  ######################################################################
+
   OS::stack_id:
-    value: {get_param: "OS::stack_id"}
+    value: { get_resource: kube-minion }
     description: >
-      This is a id of the stack which creates from this template.
+      This is the Ironic server id of the node.

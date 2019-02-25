@@ -1,0 +1,11 @@
+---
+fixes:
+  - |
+    Return instance ID of workder node in k8s minion template so that
+    consumer can send API request to Heat to remove a particular
+    node with removal_policies. Otherwise, the consumer (e.g. AutoScaler)
+    has to use index to do the remove which is confusing out of the
+    OpenStack world.
+    https://storyboard.openstack.org/#!/story/2005054
+
+
