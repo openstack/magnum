@@ -13,6 +13,7 @@
 # under the License.
 
 from oslo_log import log as logging
+from oslo_utils import encodeutils
 import six
 
 from magnum.common import cert_manager
@@ -150,15 +151,16 @@ def create_client_files(cluster, context=None):
         magnum_cert = get_cluster_magnum_cert(cluster, context)
 
         ca_file = tempfile.NamedTemporaryFile(mode="w+")
-        ca_file.write(ca_cert.get_certificate())
+        ca_file.write(encodeutils.safe_decode(ca_cert.get_certificate()))
         ca_file.flush()
 
         key_file = tempfile.NamedTemporaryFile(mode="w+")
-        key_file.write(magnum_cert.get_decrypted_private_key())
+        key_file.write(encodeutils.safe_decode(
+            magnum_cert.get_decrypted_private_key()))
         key_file.flush()
 
         cert_file = tempfile.NamedTemporaryFile(mode="w+")
-        cert_file.write(magnum_cert.get_certificate())
+        cert_file.write(encodeutils.safe_decode(magnum_cert.get_certificate()))
         cert_file.flush()
 
     else:
@@ -175,15 +177,17 @@ def create_client_files(cluster, context=None):
             magnum_cert = get_cluster_magnum_cert(cluster, context)
 
             ca_file = open(cached_ca_file, "w+")
-            ca_file.write(ca_cert.get_certificate())
+            ca_file.write(encodeutils.safe_decode(ca_cert.get_certificate()))
             ca_file.flush()
 
             key_file = open(cached_key_file, "w+")
-            key_file.write(magnum_cert.get_decrypted_private_key())
+            key_file.write(encodeutils.safe_decode(
+                magnum_cert.get_decrypted_private_key()))
             key_file.flush()
 
             cert_file = open(cached_cert_file, "w+")
-            cert_file.write(magnum_cert.get_certificate())
+            cert_file.write(
+                encodeutils.safe_decode(magnum_cert.get_certificate()))
             cert_file.flush()
 
             os.chmod(cached_ca_file, 0o600)

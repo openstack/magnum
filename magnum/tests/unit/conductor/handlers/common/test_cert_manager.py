@@ -335,6 +335,22 @@ class CertManagerTestCase(base.BaseTestCase):
         self.assertEqual(mock_cert.get_certificate.return_value,
                          cluster_magnum_cert.read())
 
+        # Test for certs and keys that might be returned in binary
+        mock_cert.get_certificate.return_value = b"byte_content"
+        mock_cert.get_decrypted_private_key.return_value = b"byte_key"
+        ca_cert_text = magnum_cert_text = \
+            mock_cert.get_certificate.return_value.decode('UTF-8')
+        magnum_key_text = \
+            mock_cert.get_decrypted_private_key.return_value.decode('UTF-8')
+        (cluster_ca_cert, cluster_key, cluster_magnum_cert) = \
+            cert_manager.create_client_files(mock_cluster)
+        cluster_ca_cert.seek(0)
+        cluster_key.seek(0)
+        cluster_magnum_cert.seek(0)
+        self.assertEqual(ca_cert_text, cluster_ca_cert.read())
+        self.assertEqual(magnum_key_text, cluster_key.read())
+        self.assertEqual(magnum_cert_text, cluster_magnum_cert.read())
+
     def test_create_client_files_in_cache(self):
         mock_cluster = mock.MagicMock()
         mock_cluster.uuid = "mock_cluster_uuid"
