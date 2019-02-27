@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Add iptables -P FORWARD ACCEPT unit. On node reboot, kubelet and kube-proxy
+    set iptables -P FORWARD DROP which doesn't work with flannel in the way we
+    use it.  Add a systemd unit to set the rule to ACCEPT after flannel,
+    docker, kubelet, kube-proxy.
