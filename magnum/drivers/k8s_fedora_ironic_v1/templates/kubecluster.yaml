@@ -468,11 +468,16 @@ resources:
 
   ######################################################################
   #
-  # resources that expose the server group for all nodes include master
-  # and minions.
+  # resources that expose one server group for each master and worker nodes
+  # separately.
   #
 
-  nodes_server_group:
+  master_nodes_server_group:
+    type: OS::Nova::ServerGroup
+    properties:
+      policies: [{get_param: nodes_affinity_policy}]
+
+  worker_nodes_server_group:
     type: OS::Nova::ServerGroup
     properties:
       policies: [{get_param: nodes_affinity_policy}]
@@ -544,7 +549,7 @@ resources:
           wc_curl_cli: {get_attr: [master_wait_handle, curl_cli]}
           etcd_lb_vip: {get_attr: [etcd_lb, address]}
           openstack_ca: {get_param: openstack_ca}
-          nodes_server_group_id: {get_resource: nodes_server_group}
+          nodes_server_group_id: {get_resource: master_nodes_server_group}
           octavia_enabled: {get_param: octavia_enabled}
 
   ######################################################################
@@ -589,7 +594,7 @@ resources:
           flannel_network_cidr: {get_param: flannel_network_cidr}
           external_network: {get_param: external_network}
           kube_software_configs: {get_attr: [kubeminion_software_configs, kube_minion_init]}
-          nodes_server_group_id: {get_resource: nodes_server_group}
+          nodes_server_group_id: {get_resource: worker_nodes_server_group}
 
   ######################################################################
   #
