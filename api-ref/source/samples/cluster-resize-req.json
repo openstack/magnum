@@ -1,0 +1,5 @@
+{
+    "node_count": 3,
+    "nodes_to_remove": ["e74c40e0-d825-11e2-a28f-0800200c9a66"],
+    "nodegroup":　"production_group"
+}
