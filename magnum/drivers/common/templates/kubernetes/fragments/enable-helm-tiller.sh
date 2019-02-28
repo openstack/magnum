@@ -2,49 +2,47 @@
 
 . /etc/sysconfig/heat-params
 
-set -x
+step="enable-helm-tiller"
+printf "Starting to run ${step}\n"
 
-if [ "$(echo ${TILLER_ENABLED} | tr '[:upper:]' '[:lower:]')" != "true" ]; then
-    exit 0
-fi
+if [ "$(echo ${TILLER_ENABLED} | tr '[:upper:]' '[:lower:]')" == "true" ]; then
+    CERTS_DIR="/etc/kubernetes/helm/certs/"
+    mkdir -p "${CERTS_DIR}"
 
-CERTS_DIR="/etc/kubernetes/helm/certs/"
-mkdir -p "${CERTS_DIR}"
+    # Private CA key
+    openssl genrsa -out "${CERTS_DIR}/ca.key.pem" 4096
 
-# Private CA key
-openssl genrsa -out "${CERTS_DIR}/ca.key.pem" 4096
+    # CA public cert
+    openssl req -key "${CERTS_DIR}/ca.key.pem" -new -x509 -days 7300 -sha256 -out "${CERTS_DIR}/ca.cert.pem" -extensions v3_ca -subj "/C=US/ST=Texas/L=Austin/O=OpenStack/OU=Magnum/CN=tiller"
 
-# CA public cert
-openssl req -key "${CERTS_DIR}/ca.key.pem" -new -x509 -days 7300 -sha256 -out "${CERTS_DIR}/ca.cert.pem" -extensions v3_ca -subj "/C=US/ST=Texas/L=Austin/O=OpenStack/OU=Magnum/CN=tiller"
+    # Private tiller-server key
+    openssl genrsa -out "${CERTS_DIR}/tiller.key.pem" 4096
 
-# Private tiller-server key
-openssl genrsa -out "${CERTS_DIR}/tiller.key.pem" 4096
+    # Private helm-client key
+    openssl genrsa -out "${CERTS_DIR}/helm.key.pem" 4096
 
-# Private helm-client key
-openssl genrsa -out "${CERTS_DIR}/helm.key.pem" 4096
+    # Request for tiller-server cert
+    openssl req -key "${CERTS_DIR}/tiller.key.pem" -new -sha256 -out "${CERTS_DIR}/tiller.csr.pem" -subj "/C=US/ST=Texas/L=Austin/O=OpenStack/OU=Magnum/CN=tiller-server"
 
-# Request for tiller-server cert
-openssl req -key "${CERTS_DIR}/tiller.key.pem" -new -sha256 -out "${CERTS_DIR}/tiller.csr.pem" -subj "/C=US/ST=Texas/L=Austin/O=OpenStack/OU=Magnum/CN=tiller-server"
+    # Request for helm-client cert
+    openssl req -key "${CERTS_DIR}/helm.key.pem" -new -sha256 -out "${CERTS_DIR}/helm.csr.pem" -subj "/C=US/ST=Texas/L=Austin/O=OpenStack/OU=Magnum/CN=helm-client"
 
-# Request for helm-client cert
-openssl req -key "${CERTS_DIR}/helm.key.pem" -new -sha256 -out "${CERTS_DIR}/helm.csr.pem" -subj "/C=US/ST=Texas/L=Austin/O=OpenStack/OU=Magnum/CN=helm-client"
+    # Sign tiller-server cert
+    openssl x509 -req -CA "${CERTS_DIR}/ca.cert.pem" -CAkey "${CERTS_DIR}/ca.key.pem" -CAcreateserial -in "${CERTS_DIR}/tiller.csr.pem" -out "${CERTS_DIR}/tiller.cert.pem" -days 365
 
-# Sign tiller-server cert
-openssl x509 -req -CA "${CERTS_DIR}/ca.cert.pem" -CAkey "${CERTS_DIR}/ca.key.pem" -CAcreateserial -in "${CERTS_DIR}/tiller.csr.pem" -out "${CERTS_DIR}/tiller.cert.pem" -days 365
+    # Sign helm-client cert
+    openssl x509 -req -CA "${CERTS_DIR}/ca.cert.pem" -CAkey "${CERTS_DIR}/ca.key.pem" -CAcreateserial -in "${CERTS_DIR}/helm.csr.pem" -out "${CERTS_DIR}/helm.cert.pem"  -days 365
 
-# Sign helm-client cert
-openssl x509 -req -CA "${CERTS_DIR}/ca.cert.pem" -CAkey "${CERTS_DIR}/ca.key.pem" -CAcreateserial -in "${CERTS_DIR}/helm.csr.pem" -out "${CERTS_DIR}/helm.cert.pem"  -days 365
+    _tiller_prefix=${CONTAINER_INFRA_PREFIX:-gcr.io/kubernetes-helm/}
+    TILLER_RBAC=/srv/magnum/kubernetes/manifests/tiller-rbac.yaml
+    TILLER_DEPLOYER=/srv/magnum/kubernetes/manifests/deploy-tiller.yaml
 
-_tiller_prefix=${CONTAINER_INFRA_PREFIX:-gcr.io/kubernetes-helm/}
-TILLER_RBAC=/srv/magnum/kubernetes/manifests/tiller-rbac.yaml
-TILLER_DEPLOYER=/srv/magnum/kubernetes/manifests/deploy-tiller.yaml
+    TILLER_IMAGE="${_tiller_prefix}tiller:${TILLER_TAG}"
 
-TILLER_IMAGE="${_tiller_prefix}tiller:${TILLER_TAG}"
-
-[ -f ${TILLER_RBAC} ] || {
-    echo "Writing File: $TILLER_RBAC"
-    mkdir -p $(dirname ${TILLER_RBAC})
-    cat << EOF > ${TILLER_RBAC}
+    [ -f ${TILLER_RBAC} ] || {
+        echo "Writing File: $TILLER_RBAC"
+        mkdir -p $(dirname ${TILLER_RBAC})
+        cat << EOF > ${TILLER_RBAC}
 ---
 apiVersion: v1
 kind: Namespace
@@ -71,12 +69,12 @@ subjects:
     name: tiller
     namespace: ${TILLER_NAMESPACE}
 EOF
-}
+    }
 
-[ -f ${TILLER_DEPLOYER} ] || {
-    echo "Writing File: $TILLER_DEPLOYER"
-    mkdir -p $(dirname ${TILLER_DEPLOYER})
-    cat << EOF > ${TILLER_DEPLOYER}
+    [ -f ${TILLER_DEPLOYER} ] || {
+        echo "Writing File: $TILLER_DEPLOYER"
+        mkdir -p $(dirname ${TILLER_DEPLOYER})
+        cat << EOF > ${TILLER_DEPLOYER}
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -219,13 +217,16 @@ data:
   cert.pem: $(cat "${CERTS_DIR}/helm.cert.pem" | base64 --wrap=0)
   key.pem: $(cat "${CERTS_DIR}/helm.key.pem" | base64 --wrap=0)
 EOF
-}
+    }
 
-echo "Waiting for Kubernetes API..."
-until  [ "ok" = "$(curl --silent http://127.0.0.1:8080/healthz)" ]
-do
-    sleep 5
-done
+    until  [ "ok" = "$(curl --silent http://127.0.0.1:8080/healthz)" ]
+    do
+        echo "Waiting for Kubernetes API..."
+        sleep 5
+    done
 
-kubectl apply -f ${TILLER_RBAC}
-kubectl apply -f ${TILLER_DEPLOYER}
+    kubectl apply -f ${TILLER_RBAC}
+    kubectl apply -f ${TILLER_DEPLOYER}
+fi
+
+printf "Finished running ${step}\n"
