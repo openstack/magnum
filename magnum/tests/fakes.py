@@ -110,10 +110,10 @@ class FakeLoopingCall(object):
         self.call_func = func
 
     def start(self, interval, **kwargs):
-        intitial_delay = kwargs.pop("initial_delay", -1)
+        initial_delay = kwargs.pop("initial_delay", 0)
         stop_on_exception = kwargs.pop("stop_on_exception", True)
-        if intitial_delay:
-            time.sleep(intitial_delay)
+        if initial_delay:
+            time.sleep(initial_delay)
         while True:
             try:
                 self.call_func()
