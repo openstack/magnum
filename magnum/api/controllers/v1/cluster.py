@@ -190,7 +190,7 @@ class Cluster(base.APIBase):
                                          'labels', 'node_count', 'status',
                                          'master_flavor_id', 'flavor_id',
                                          'create_timeout', 'master_count',
-                                         'stack_id'])
+                                         'stack_id', 'health_status'])
 
         cluster.links = [link.Link.make_link('self', url,
                                              'clusters', cluster.uuid),
