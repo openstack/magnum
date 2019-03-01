@@ -13,7 +13,10 @@
 # under the License.
 import os
 
+import magnum.conf
 from magnum.drivers.heat import template_def
+
+CONF = magnum.conf.CONF
 
 
 class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
@@ -61,6 +64,8 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
         extra_params['tenant_name'] = context.project_id
         extra_params['domain_name'] = context.domain_name
         extra_params['region_name'] = osc.cinder_region_name()
+        extra_params['nodes_affinity_policy'] = \
+            CONF.cluster.nodes_affinity_policy
 
         label_list = ['rexray_preempt', 'mesos_slave_isolation',
                       'mesos_slave_image_providers',
