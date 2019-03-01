@@ -197,12 +197,11 @@ metadata:
 spec:
   selector:
     app: prometheus
-  type: NodePort
+  type: ClusterIP
   ports:
   - name: prometheus
     protocol: TCP
     port: 9090
-    nodePort: 30900
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -307,11 +306,10 @@ metadata:
   name: grafana
   namespace: prometheus-monitoring
 spec:
-  type: "NodePort"
+  type: ClusterIP
   ports:
     - port: 3000
       targetPort: 3000
-      nodePort: 30603
   selector:
     grafana: "true"
 ---

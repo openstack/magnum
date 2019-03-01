@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Use ClusterIP as the default Prometheus service type, because the NodePort
+    type service has the requirement that extra security group rule is properly
+    configured. Kubernetes cluster administrator could still change the service
+    type after the cluster creation.
