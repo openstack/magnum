@@ -1729,10 +1729,15 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
 
         mesos_def = mesos_tdef.UbuntuMesosTemplateDefinition()
 
+        CONF.set_override('nodes_affinity_policy',
+                          'anti-affinity',
+                          group='cluster')
+
         mesos_def.get_params(mock_context, mock_cluster_template, mock_cluster)
 
         expected_kwargs = {'extra_params': {
             'region_name': mock_osc.cinder_region_name.return_value,
+            'nodes_affinity_policy': 'anti-affinity',
             'auth_url': 'http://192.168.10.10:5000/v3',
             'username': 'mesos_user',
             'tenant_name': 'admin',
