@@ -28,6 +28,7 @@ class RPCAPITestCase(base.DbTestCase):
     def setUp(self):
         super(RPCAPITestCase, self).setUp()
         self.fake_cluster = dbutils.get_test_cluster(driver='fake-driver')
+        self.fake_nodegroups = dbutils.get_nodegroups_for_cluster()
         self.fake_certificate = objects.Certificate.from_db_cluster(
             self.fake_cluster)
         self.fake_certificate.csr = 'fake-csr'
@@ -78,6 +79,8 @@ class RPCAPITestCase(base.DbTestCase):
                           'call',
                           version='1.0',
                           cluster=self.fake_cluster,
+                          master_count=3,
+                          node_count=4,
                           create_timeout=15)
 
     def test_cluster_delete(self):
@@ -95,7 +98,8 @@ class RPCAPITestCase(base.DbTestCase):
         self._test_rpcapi('cluster_update',
                           'call',
                           version='1.1',
-                          cluster=self.fake_cluster['name'])
+                          cluster=self.fake_cluster['name'],
+                          node_count=2)
 
     def test_ping_conductor(self):
         self._test_rpcapi('ping_conductor',

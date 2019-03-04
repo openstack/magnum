@@ -28,6 +28,7 @@ class TestClusterObject(base.DbTestCase):
     def setUp(self):
         super(TestClusterObject, self).setUp()
         self.fake_cluster = utils.get_test_cluster()
+        self.fake_nodegroups = utils.get_nodegroups_for_cluster()
         self.fake_cluster['trust_id'] = 'trust_id'
         self.fake_cluster['trustee_username'] = 'trustee_user'
         self.fake_cluster['trustee_user_id'] = 'trustee_user_id'

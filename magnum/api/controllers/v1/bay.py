@@ -410,8 +410,9 @@ class BaysController(base.Controller):
 
         :param bay: a bay within the request body.
         """
-        new_bay = self._post(bay)
+        new_bay, node_count, master_count = self._post(bay)
         res_bay = pecan.request.rpcapi.cluster_create(new_bay,
+                                                      master_count, node_count,
                                                       bay.bay_create_timeout)
 
         # Set the HTTP Location Header
@@ -425,8 +426,9 @@ class BaysController(base.Controller):
 
         :param bay: a bay within the request body.
         """
-        new_bay = self._post(bay)
+        new_bay, node_count, master_count = self._post(bay)
         pecan.request.rpcapi.cluster_create_async(new_bay,
+                                                  master_count, node_count,
                                                   bay.bay_create_timeout)
         return BayID(new_bay.uuid)
 
@@ -464,12 +466,15 @@ class BaysController(base.Controller):
         # NOTE(yuywz): We will generate a random human-readable name for
         # bay if the name is not specified by user.
         name = bay_dict.get('name') or self._generate_name_for_bay(context)
+        node_count = bay_dict.pop('node_count')
+        master_count = bay_dict.pop('master_count')
         bay_dict['name'] = name
         bay_dict['coe_version'] = None
         bay_dict['container_version'] = None
+
         new_bay = objects.Cluster(context, **bay_dict)
         new_bay.uuid = uuid.uuid4()
-        return new_bay
+        return new_bay, node_count, master_count
 
     @base.Controller.api_version("1.1", "1.1")
     @wsme.validate(types.uuid, [BayPatchType])
@@ -480,8 +485,8 @@ class BaysController(base.Controller):
         :param bay_ident: UUID or logical name of a bay.
         :param patch: a json PATCH document to apply to this bay.
         """
-        bay = self._patch(bay_ident, patch)
-        res_bay = pecan.request.rpcapi.cluster_update(bay)
+        bay, node_count = self._patch(bay_ident, patch)
+        res_bay = pecan.request.rpcapi.cluster_update(bay, node_count)
         return Bay.convert_with_links(res_bay)
 
     @base.Controller.api_version("1.2", "1.2")   # noqa
@@ -494,8 +499,8 @@ class BaysController(base.Controller):
         :param bay_ident: UUID or logical name of a bay.
         :param patch: a json PATCH document to apply to this bay.
         """
-        bay = self._patch(bay_ident, patch)
-        pecan.request.rpcapi.cluster_update_async(bay)
+        bay, node_count = self._patch(bay_ident, patch)
+        pecan.request.rpcapi.cluster_update_async(bay, node_count)
         return BayID(bay.uuid)
 
     @base.Controller.api_version("1.3")   # noqa
@@ -509,8 +514,9 @@ class BaysController(base.Controller):
         :param rollback: whether to rollback bay on update failure.
         :param patch: a json PATCH document to apply to this bay.
         """
-        bay = self._patch(bay_ident, patch)
-        pecan.request.rpcapi.cluster_update_async(bay, rollback=rollback)
+        bay, node_count = self._patch(bay_ident, patch)
+        pecan.request.rpcapi.cluster_update_async(bay, node_count,
+                                                  rollback=rollback)
         return BayID(bay.uuid)
 
     def _patch(self, bay_ident, patch):
@@ -518,28 +524,33 @@ class BaysController(base.Controller):
         bay = api_utils.get_resource('Cluster', bay_ident)
         policy.enforce(context, 'bay:update', bay.as_dict(),
                        action='bay:update')
+
+        bay_to_cluster_attrs = {
+            'baymodel_id': 'cluster_template_id',
+            'bay_create_timeout': 'create_timeout'
+        }
         try:
             bay_dict = bay.as_dict()
             new_bay = Bay(**api_utils.apply_jsonpatch(bay_dict, patch))
         except api_utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)
 
-        # Update only the fields that have changed
-        for field in objects.Cluster.fields:
-            try:
-                patch_val = getattr(new_bay, field)
-            except AttributeError:
-                # Ignore fields that aren't exposed in the API
+        # NOTE(ttsiouts): magnum.objects.Cluster.node_count will be a
+        # property so we won't be able to store it in the object. So
+        # instead of object_what_changed compare the new and the old
+        # clusters.
+        delta = set()
+        for field in new_bay.fields:
+            cluster_field = field
+            if cluster_field in bay_to_cluster_attrs:
+                cluster_field = bay_to_cluster_attrs[field]
+            if cluster_field not in bay_dict:
                 continue
-            if patch_val == wtypes.Unset:
-                patch_val = None
-            if bay[field] != patch_val:
-                bay[field] = patch_val
-
-        delta = bay.obj_what_changed()
+            if getattr(new_bay, field) != bay_dict[cluster_field]:
+                delta.add(cluster_field)
 
         validate_cluster_properties(delta)
-        return bay
+        return bay, new_bay.node_count
 
     @base.Controller.api_version("1.1", "1.1")
     @expose.expose(None, types.uuid_or_name, status_code=204)

@@ -280,7 +280,9 @@ class TestPatch(api_base.FunctionalTest):
         self.mock_cluster_update.side_effect = self._sim_rpc_cluster_update
         self.addCleanup(p.stop)
 
-    def _sim_rpc_cluster_update(self, cluster, rollback=False):
+    def _sim_rpc_cluster_update(self, cluster, node_count, rollback=False):
+        cluster.status = 'UPDATE_IN_PROGRESS'
+        cluster.node_count = node_count
         cluster.save()
         return cluster
 
@@ -437,23 +439,27 @@ class TestPatch(api_base.FunctionalTest):
         self.assertTrue(response.json['errors'])
 
     def test_update_cluster_with_rollback_enabled(self):
+        node_count = 4
         response = self.patch_json(
             '/clusters/%s/?rollback=True' % self.cluster_obj.uuid,
-            [{'path': '/node_count', 'value': 4,
+            [{'path': '/node_count', 'value': node_count,
               'op': 'replace'}],
             headers={'OpenStack-API-Version': 'container-infra 1.3'})
 
-        self.mock_cluster_update.assert_called_once_with(mock.ANY, True)
+        self.mock_cluster_update.assert_called_once_with(
+            mock.ANY, node_count, True)
         self.assertEqual(202, response.status_code)
 
     def test_update_cluster_with_rollback_disabled(self):
+        node_count = 4
         response = self.patch_json(
             '/clusters/%s/?rollback=False' % self.cluster_obj.uuid,
-            [{'path': '/node_count', 'value': 4,
+            [{'path': '/node_count', 'value': node_count,
               'op': 'replace'}],
             headers={'OpenStack-API-Version': 'container-infra 1.3'})
 
-        self.mock_cluster_update.assert_called_once_with(mock.ANY, False)
+        self.mock_cluster_update.assert_called_once_with(
+            mock.ANY, node_count, False)
         self.assertEqual(202, response.status_code)
 
     def test_remove_ok(self):
@@ -510,7 +516,10 @@ class TestPost(api_base.FunctionalTest):
         self.mock_valid_os_res = p.start()
         self.addCleanup(p.stop)
 
-    def _simulate_cluster_create(self, cluster, create_timeout):
+    def _simulate_cluster_create(self, cluster, master_count, node_count,
+                                 create_timeout):
+        cluster.node_count = node_count
+        cluster.master_count = master_count
         cluster.create()
         return cluster
 
@@ -549,7 +558,8 @@ class TestPost(api_base.FunctionalTest):
     def test_create_cluster_set_project_id_and_user_id(self):
         bdict = apiutils.cluster_post_data()
 
-        def _simulate_rpc_cluster_create(cluster, create_timeout):
+        def _simulate_rpc_cluster_create(cluster, master_count, node_count,
+                                         create_timeout):
             self.assertEqual(self.context.project_id, cluster.project_id)
             self.assertEqual(self.context.user_id, cluster.user_id)
             cluster.create()
@@ -681,7 +691,8 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(202, response.status_int)
 
     def test_create_cluster_with_no_timeout(self):
-        def _simulate_rpc_cluster_create(cluster, create_timeout):
+        def _simulate_rpc_cluster_create(cluster, master_count, node_count,
+                                         create_timeout):
             self.assertEqual(60, create_timeout)
             cluster.create()
             return cluster

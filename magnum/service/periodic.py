@@ -83,6 +83,9 @@ class ClusterUpdateJob(object):
                 taxonomy.OUTCOME_FAILURE)
         # if we're done with it, delete it
         if self.cluster.status == objects.fields.ClusterStatus.DELETE_COMPLETE:
+            # delete all the nodegroups that belong to this cluster
+            for ng in objects.NodeGroup.list(self.ctx, self.cluster.uuid):
+                ng.destroy()
             self.cluster.destroy()
         # end the "loop"
         raise loopingcall.LoopingCallDone()

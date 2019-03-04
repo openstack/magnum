@@ -406,3 +406,13 @@ class NodeGroupAlreadyExists(Conflict):
 
 class NodeGroupNotFound(ResourceNotFound):
     message = _("Nodegroup %(nodegroup)s could not be found.")
+
+
+class MasterNGResizeNotSupported(NotSupported):
+    message = _("Resizing a master nodegroup is not supported.")
+
+
+class NGResizeOutBounds(Invalid):
+    message = _("Resizing %(nodegroup)s outside the allowed range: "
+                "min_node_count = %(min_node_count), "
+                "max_node_count = %(max_node_count)")

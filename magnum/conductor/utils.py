@@ -22,6 +22,7 @@ from magnum.common import clients
 from magnum.common import rpc
 from magnum.objects import cluster
 from magnum.objects import cluster_template
+from magnum.objects import nodegroup
 
 
 def retrieve_cluster(context, cluster_ident):
@@ -111,3 +112,25 @@ def notify_about_cluster_operation(context, action, outcome):
         method = notifier.info
 
     method(context, event_type, payload)
+
+
+def _get_nodegroup_object(context, cluster, node_count, is_master=False):
+    """Returns a nodegroup object based on the given cluster object."""
+    ng = nodegroup.NodeGroup(context)
+    ng.cluster_id = cluster.uuid
+    ng.project_id = cluster.project_id
+    ng.labels = cluster.labels
+    ng.node_count = node_count
+    ng.image_id = cluster.cluster_template.image_id
+    ng.docker_volume_size = (cluster.docker_volume_size or
+                             cluster.cluster_template.docker_volume_size)
+    if is_master:
+        ng.flavor_id = (cluster.master_flavor_id or
+                        cluster.cluster_template.master_flavor_id)
+        ng.role = "master"
+    else:
+        ng.flavor_id = cluster.flavor_id or cluster.cluster_template.flavor_id
+        ng.role = "worker"
+    ng.name = "default-%s" % ng.role
+    ng.is_default = True
+    return ng

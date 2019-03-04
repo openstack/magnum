@@ -14,6 +14,7 @@
 #    under the License.
 """Magnum test utilities."""
 
+from oslo_utils import uuidutils
 
 from magnum.db import api as db_api
 
@@ -300,7 +301,45 @@ def create_test_nodegroup(**kw):
     """
     nodegroup = get_test_nodegroup(**kw)
     # Let DB generate ID if it isn't specified explicitly
-    if 'id' not in kw:
+    if 'id' in nodegroup:
         del nodegroup['id']
     dbapi = db_api.get_instance()
     return dbapi.create_nodegroup(nodegroup)
+
+
+def get_nodegroups_for_cluster(**kw):
+    # get workers nodegroup
+    worker = get_test_nodegroup(
+        role='worker',
+        name=kw.get('worker_name', 'test-worker'),
+        uuid=kw.get('worker_uuid', uuidutils.generate_uuid()),
+        cluster_id=kw.get('cluster_id',
+                          '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'),
+        project_id=kw.get('project_id', 'fake_project'),
+        node_addresses=kw.get('node_addresses', ['172.17.2.4']),
+        node_count=kw.get('node_count', 3)
+    )
+
+    # get masters nodegroup
+    master = get_test_nodegroup(
+        role='master',
+        name=kw.get('master_name', 'test-master'),
+        uuid=kw.get('master_uuid', uuidutils.generate_uuid()),
+        cluster_id=kw.get('cluster_id',
+                          '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'),
+        project_id=kw.get('project_id', 'fake_project'),
+        node_addresses=kw.get('master_addresses', ['172.17.2.18']),
+        node_count=kw.get('master_count', 3)
+    )
+    return {'master': master, 'worker': worker}
+
+
+def create_nodegroups_for_cluster(**kw):
+    nodegroups = get_nodegroups_for_cluster(**kw)
+    # Create workers nodegroup
+    worker = nodegroups['worker']
+    create_test_nodegroup(**worker)
+
+    # Create masters nodegroup
+    master = nodegroups['master']
+    create_test_nodegroup(**master)

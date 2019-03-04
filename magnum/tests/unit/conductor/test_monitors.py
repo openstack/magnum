@@ -52,6 +52,12 @@ class MonitorsTestCase(base.TestCase):
                                          api_address='https://5.6.7.8:2376',
                                          master_addresses=['10.0.0.6'])
         self.cluster = objects.Cluster(self.context, **cluster)
+        nodegroups = utils.get_nodegroups_for_cluster(
+            node_addresses=['1.2.3.4'], master_addresses=['10.0.0.6'])
+        self.nodegroups = [
+            objects.NodeGroup(self.context, **nodegroups['master']),
+            objects.NodeGroup(self.context, **nodegroups['worker'])
+        ]
         self.monitor = swarm_monitor.SwarmMonitor(self.context, self.cluster)
         self.v2_monitor = swarm_v2_monitor.SwarmMonitor(self.context,
                                                         self.cluster)

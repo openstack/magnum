@@ -31,12 +31,16 @@ class API(rpc_service.API):
 
     # Cluster Operations
 
-    def cluster_create(self, cluster, create_timeout):
+    def cluster_create(self, cluster, master_count, node_count,
+                       create_timeout):
         return self._call('cluster_create', cluster=cluster,
+                          master_count=master_count, node_count=node_count,
                           create_timeout=create_timeout)
 
-    def cluster_create_async(self, cluster, create_timeout):
+    def cluster_create_async(self, cluster, master_count, node_count,
+                             create_timeout):
         self._cast('cluster_create', cluster=cluster,
+                   master_count=master_count, node_count=node_count,
                    create_timeout=create_timeout)
 
     def cluster_delete(self, uuid):
@@ -45,14 +49,16 @@ class API(rpc_service.API):
     def cluster_delete_async(self, uuid):
         self._cast('cluster_delete', uuid=uuid)
 
-    def cluster_update(self, cluster):
-        return self._call('cluster_update', cluster=cluster)
+    def cluster_update(self, cluster, node_count):
+        return self._call(
+            'cluster_update', cluster=cluster, node_count=node_count)
 
-    def cluster_update_async(self, cluster, rollback=False):
-        self._cast('cluster_update', cluster=cluster, rollback=rollback)
+    def cluster_update_async(self, cluster, node_count, rollback=False):
+        self._cast('cluster_update', cluster=cluster,
+                   node_count=node_count, rollback=rollback)
 
     def cluster_resize(self, cluster, node_count, nodes_to_remove,
-                       nodegroup=None, rollback=False):
+                       nodegroup, rollback=False):
 
         return self._call('cluster_resize',
                           cluster=cluster,
@@ -61,7 +67,7 @@ class API(rpc_service.API):
                           nodegroup=nodegroup)
 
     def cluster_resize_async(self, cluster, node_count, nodes_to_remove,
-                             nodegroup=None, rollback=False):
+                             nodegroup, rollback=False):
         return self._cast('cluster_resize',
                           cluster=cluster,
                           node_count=node_count,

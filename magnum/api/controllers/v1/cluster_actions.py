@@ -18,7 +18,9 @@ from magnum.api.controllers import base
 from magnum.api.controllers.v1 import types
 from magnum.api import expose
 from magnum.api import utils as api_utils
+from magnum.common import exception
 from magnum.common import policy
+from magnum import objects
 
 
 class ClusterID(wtypes.Base):
@@ -42,10 +44,10 @@ class ClusterResizeRequest(base.APIBase):
     This class enforces type checking and value constraints.
     """
 
-    node_count = wtypes.IntegerType(minimum=1)
+    node_count = wsme.wsattr(wtypes.IntegerType(minimum=1), mandatory=True)
     """The expected node count after resize."""
 
-    nodes_to_remove = wsme.wsattr([wsme.types.text], mandatory=False,
+    nodes_to_remove = wsme.wsattr([wtypes.text], mandatory=False,
                                   default=[])
     """Instance ID list for nodes to be removed."""
 
@@ -77,14 +79,32 @@ class ActionsController(base.Controller):
 
         if (cluster_resize_req.nodegroup == wtypes.Unset or
                 not cluster_resize_req.nodegroup):
-            # TODO(flwang): The default node group of current cluster could be
-            # extracted by objects.NodeGroups.get_by_uuid or something like
-            # that as long as we have node group support.
-            cluster_resize_req.nodegroup = None
+            # NOTE(ttsiouts): If the nodegroup is not specified
+            # reflect the change to the default worker nodegroup
+            nodegroup = cluster.default_ng_worker
+        else:
+            nodegroup = objects.NodeGroup.get(
+                context, cluster.uuid, cluster_resize_req.nodegroup)
+
+        if nodegroup.role == 'master':
+            # NOTE(ttsiouts): Restrict the resize to worker nodegroups
+            raise exception.MasterNGResizeNotSupported()
+
+        # NOTE(ttsiouts): Make sure that the new node count is within
+        # the configured boundaries of the selected nodegroup.
+        if nodegroup.min_node_count > cluster_resize_req.node_count:
+            raise exception.NGResizeOutBounds(
+                nodegroup=nodegroup.name, min_nc=nodegroup.min_node_count,
+                max_nc=nodegroup.max_node_count)
+        if (nodegroup.max_node_count and
+                nodegroup.max_node_count < cluster_resize_req.node_count):
+            raise exception.NGResizeOutBounds(
+                nodegroup=nodegroup.name, min_nc=nodegroup.min_node_count,
+                max_nc=nodegroup.max_node_count)
 
         pecan.request.rpcapi.cluster_resize_async(
             cluster,
             cluster_resize_req.node_count,
             cluster_resize_req.nodes_to_remove,
-            cluster_resize_req.nodegroup)
+            nodegroup)
         return ClusterID(cluster.uuid)

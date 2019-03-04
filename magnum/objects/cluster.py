@@ -19,6 +19,7 @@ from magnum.db import api as dbapi
 from magnum.objects import base
 from magnum.objects.cluster_template import ClusterTemplate
 from magnum.objects import fields as m_fields
+from magnum.objects.nodegroup import NodeGroup
 
 
 @base.MagnumObjectRegistry.register
@@ -47,8 +48,9 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.16: Added 'master_flavor_id' field
     # Version 1.17: Added 'flavor_id' field
     # Version 1.18: Added 'health_status' and 'health_status_reason' field
+    # Version 1.19: Added nodegroups, default_ng_worker, default_ng_master
 
-    VERSION = '1.18'
+    VERSION = '1.19'
 
     dbapi = dbapi.get_instance()
 
@@ -103,6 +105,28 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
 
         cluster.obj_reset_changes()
         return cluster
+
+    @property
+    def nodegroups(self):
+        # Returns all nodegroups that belong to the cluster.
+        return NodeGroup.list(self._context, self.uuid)
+
+    @property
+    def default_ng_worker(self):
+        # Assume that every cluster will have only one default
+        # non-master nodegroup. We don't want to limit the roles
+        # so each nodegroup that does not have a master role is
+        # considered as a worker/minion nodegroup.
+        filters = {'is_default': True}
+        default_ngs = NodeGroup.list(self._context, self.uuid, filters=filters)
+        return [n for n in default_ngs if n.role != 'master'][0]
+
+    @property
+    def default_ng_master(self):
+        # Assume that every cluster will have only one default
+        # master nodegroup.
+        filters = {'role': 'master', 'is_default': True}
+        return NodeGroup.list(self._context, self.uuid, filters=filters)[0]
 
     @staticmethod
     def _from_db_object_list(db_objects, cls, context):

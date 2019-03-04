@@ -26,7 +26,12 @@ class NeutronTest(base.TestCase):
         super(NeutronTest, self).setUp()
 
         cluster_dict = utils.get_test_cluster(node_count=1)
+        nodegroups_dict = utils.get_nodegroups_for_cluster(node_count=1)
         self.cluster = objects.Cluster(self.context, **cluster_dict)
+        self.nodegroups = [
+            objects.NodeGroup(self.context, **nodegroups_dict['master']),
+            objects.NodeGroup(self.context, **nodegroups_dict['worker'])
+        ]
 
     @mock.patch('magnum.common.clients.OpenStackClients')
     def test_delete_floatingip(self, mock_clients):

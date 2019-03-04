@@ -499,9 +499,12 @@ class ClustersController(base.Controller):
         cluster_dict['coe_version'] = None
         cluster_dict['container_version'] = None
 
+        node_count = cluster_dict.pop('node_count')
+        master_count = cluster_dict.pop('master_count')
         new_cluster = objects.Cluster(context, **cluster_dict)
         new_cluster.uuid = uuid.uuid4()
         pecan.request.rpcapi.cluster_create_async(new_cluster,
+                                                  master_count, node_count,
                                                   cluster.create_timeout)
 
         return ClusterID(new_cluster.uuid)
@@ -516,8 +519,8 @@ class ClustersController(base.Controller):
         :param cluster_ident: UUID or logical name of a cluster.
         :param patch: a json PATCH document to apply to this cluster.
         """
-        cluster = self._patch(cluster_ident, patch)
-        pecan.request.rpcapi.cluster_update_async(cluster)
+        cluster, node_count = self._patch(cluster_ident, patch)
+        pecan.request.rpcapi.cluster_update_async(cluster, node_count)
         return ClusterID(cluster.uuid)
 
     @base.Controller.api_version("1.3")  # noqa
@@ -531,8 +534,9 @@ class ClustersController(base.Controller):
         :param rollback: whether to rollback cluster on update failure.
         :param patch: a json PATCH document to apply to this cluster.
         """
-        cluster = self._patch(cluster_ident, patch)
-        pecan.request.rpcapi.cluster_update_async(cluster, rollback)
+        cluster, node_count = self._patch(cluster_ident, patch)
+        pecan.request.rpcapi.cluster_update_async(cluster, node_count,
+                                                  rollback)
         return ClusterID(cluster.uuid)
 
     def _patch(self, cluster_ident, patch):
@@ -547,22 +551,17 @@ class ClustersController(base.Controller):
         except api_utils.JSONPATCH_EXCEPTIONS as e:
             raise exception.PatchError(patch=patch, reason=e)
 
-        # Update only the fields that have changed
-        for field in objects.Cluster.fields:
-            try:
-                patch_val = getattr(new_cluster, field)
-            except AttributeError:
-                # Ignore fields that aren't exposed in the API
-                continue
-            if patch_val == wtypes.Unset:
-                patch_val = None
-            if cluster[field] != patch_val:
-                cluster[field] = patch_val
-
-        delta = cluster.obj_what_changed()
+        # NOTE(ttsiouts): magnum.objects.Cluster.node_count will be a
+        # property so we won't be able to store it in the object. So
+        # instead of object_what_changed compare the new and the old
+        # clusters.
+        delta = set()
+        for field in new_cluster.fields:
+            if getattr(cluster, field) != getattr(new_cluster, field):
+                delta.add(field)
 
         validation.validate_cluster_properties(delta)
-        return cluster
+        return cluster, new_cluster.node_count
 
     @expose.expose(None, types.uuid_or_name, status_code=204)
     def delete(self, cluster_ident):

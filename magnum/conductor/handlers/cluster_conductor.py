@@ -43,14 +43,26 @@ class Handler(object):
 
     # Cluster Operations
 
-    def cluster_create(self, context, cluster, create_timeout):
+    def cluster_create(self, context, cluster, master_count, node_count,
+                       create_timeout):
         LOG.debug('cluster_heat cluster_create')
 
         osc = clients.OpenStackClients(context)
 
         cluster.status = fields.ClusterStatus.CREATE_IN_PROGRESS
         cluster.status_reason = None
+        cluster.node_count = node_count
+        cluster.master_count = master_count
         cluster.create()
+
+        # Master nodegroup
+        master_ng = conductor_utils._get_nodegroup_object(
+            context, cluster, master_count, is_master=True)
+        master_ng.create()
+        # Minion nodegroup
+        minion_ng = conductor_utils._get_nodegroup_object(
+            context, cluster, node_count, is_master=False)
+        minion_ng.create()
 
         try:
             # Create trustee/trust and set them to cluster
@@ -82,7 +94,7 @@ class Handler(object):
 
         return cluster
 
-    def cluster_update(self, context, cluster, rollback=False):
+    def cluster_update(self, context, cluster, node_count, rollback=False):
         LOG.debug('cluster_heat cluster_update')
 
         osc = clients.OpenStackClients(context)
@@ -103,9 +115,14 @@ class Handler(object):
                           '"%s"') % cluster.status
             raise exception.NotSupported(operation=operation)
 
-        delta = cluster.obj_what_changed()
-        if not delta:
-            return cluster
+        # Updates will be only reflected to the default worker
+        # nodegroup.
+        worker_ng = cluster.default_ng_worker
+        if worker_ng.node_count == node_count:
+            return
+        # Backup the old node count so that we can restore it
+        # in case of an exception.
+        old_node_count = worker_ng.node_count
 
         manager = scale_manager.get_scale_manager(context, osc, cluster)
 
@@ -118,6 +135,10 @@ class Handler(object):
         try:
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_PENDING)
+            worker_ng.node_count = node_count
+            worker_ng.save()
+            # For now update also the cluster.node_count
+            cluster.node_count = node_count
             cluster_driver.update_cluster(context, cluster, manager, rollback)
             cluster.status = fields.ClusterStatus.UPDATE_IN_PROGRESS
             cluster.status_reason = None
@@ -125,6 +146,9 @@ class Handler(object):
             cluster.status = fields.ClusterStatus.UPDATE_FAILED
             cluster.status_reason = six.text_type(e)
             cluster.save()
+            # Restore the node_count
+            worker_ng.node_count = old_node_count
+            worker_ng.save()
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE)
             if isinstance(e, exc.HTTPBadRequest):
@@ -156,6 +180,9 @@ class Handler(object):
                 trust_manager.delete_trustee_and_trust(osc, context, cluster)
                 cert_manager.delete_certificates_from_cluster(cluster,
                                                               context=context)
+                # delete all cluster's nodegroups
+                for ng in cluster.nodegroups:
+                    ng.destroy()
                 cluster.destroy()
             except exception.ClusterNotFound:
                 LOG.info('The cluster %s has been deleted by others.',
@@ -179,7 +206,7 @@ class Handler(object):
         return None
 
     def cluster_resize(self, context, cluster,
-                       node_count, nodes_to_remove, nodegroup=None):
+                       node_count, nodes_to_remove, nodegroup):
         LOG.debug('cluster_conductor cluster_resize')
 
         osc = clients.OpenStackClients(context)
@@ -216,8 +243,14 @@ class Handler(object):
         cluster_driver = driver.Driver.get_driver(ct.server_type,
                                                   ct.cluster_distro,
                                                   ct.coe)
+        # Backup the old node count so that we can restore it
+        # in case of an exception.
+        old_node_count = nodegroup.node_count
+
         # Resize cluster
         try:
+            nodegroup.node_count = node_count
+            nodegroup.save()
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_PENDING)
             cluster_driver.resize_cluster(context, cluster, resize_manager,
@@ -229,6 +262,8 @@ class Handler(object):
             cluster.status = fields.ClusterStatus.UPDATE_FAILED
             cluster.status_reason = six.text_type(e)
             cluster.save()
+            nodegroup.node_count = old_node_count
+            nodegroup.save()
             conductor_utils.notify_about_cluster_operation(
                 context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE)
             if isinstance(e, exc.HTTPBadRequest):

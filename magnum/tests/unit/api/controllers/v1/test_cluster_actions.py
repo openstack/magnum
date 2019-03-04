@@ -32,9 +32,11 @@ class TestClusterActions(api_base.FunctionalTest):
         self.addCleanup(p.stop)
 
     def _sim_rpc_cluster_resize(self, cluster, node_count, nodes_to_remove,
-                                nodegroup=None, rollback=False):
+                                nodegroup, rollback=False):
         cluster.node_count = node_count
         cluster.save()
+        nodegroup.node_count = node_count
+        nodegroup.save()
         return cluster
 
     def test_resize(self):
@@ -51,3 +53,75 @@ class TestClusterActions(api_base.FunctionalTest):
         self.assertEqual(self.cluster_obj.uuid, response['uuid'])
         self.assertEqual(self.cluster_obj.cluster_template_id,
                          response['cluster_template_id'])
+
+    def test_resize_with_nodegroup(self):
+        new_node_count = 6
+        nodegroup = self.cluster_obj.default_ng_worker
+        # Verify that the API is ok with maximum allowed
+        # node count set to None
+        self.assertIsNone(nodegroup.max_node_count)
+        cluster_resize_req = {
+            "node_count": new_node_count,
+            "nodegroup": nodegroup.uuid
+        }
+        response = self.post_json('/clusters/%s/actions/resize' %
+                                  self.cluster_obj.uuid,
+                                  cluster_resize_req,
+                                  headers={"Openstack-Api-Version":
+                                           "container-infra 1.7"})
+        self.assertEqual(202, response.status_code)
+
+        response = self.get_json('/clusters/%s' % self.cluster_obj.uuid)
+        self.assertEqual(new_node_count, response['node_count'])
+        self.assertEqual(self.cluster_obj.uuid, response['uuid'])
+        self.assertEqual(self.cluster_obj.cluster_template_id,
+                         response['cluster_template_id'])
+
+    def test_resize_with_master_nodegroup(self):
+        new_node_count = 6
+        nodegroup = self.cluster_obj.default_ng_master
+        cluster_resize_req = {
+            "node_count": new_node_count,
+            "nodegroup": nodegroup.uuid
+        }
+        response = self.post_json('/clusters/%s/actions/resize' %
+                                  self.cluster_obj.uuid,
+                                  cluster_resize_req,
+                                  headers={"Openstack-Api-Version":
+                                           "container-infra 1.7"},
+                                  expect_errors=True)
+        self.assertEqual(400, response.status_code)
+
+    def test_resize_with_node_count_greater_than_max(self):
+        new_node_count = 6
+        nodegroup = self.cluster_obj.default_ng_worker
+        nodegroup.max_node_count = 5
+        nodegroup.save()
+        cluster_resize_req = {
+            "node_count": new_node_count,
+            "nodegroup": nodegroup.uuid
+        }
+        response = self.post_json('/clusters/%s/actions/resize' %
+                                  self.cluster_obj.uuid,
+                                  cluster_resize_req,
+                                  headers={"Openstack-Api-Version":
+                                           "container-infra 1.7"},
+                                  expect_errors=True)
+        self.assertEqual(400, response.status_code)
+
+    def test_resize_with_node_count_less_than_min(self):
+        new_node_count = 3
+        nodegroup = self.cluster_obj.default_ng_worker
+        nodegroup.min_node_count = 4
+        nodegroup.save()
+        cluster_resize_req = {
+            "node_count": new_node_count,
+            "nodegroup": nodegroup.uuid
+        }
+        response = self.post_json('/clusters/%s/actions/resize' %
+                                  self.cluster_obj.uuid,
+                                  cluster_resize_req,
+                                  headers={"Openstack-Api-Version":
+                                           "container-infra 1.7"},
+                                  expect_errors=True)
+        self.assertEqual(400, response.status_code)

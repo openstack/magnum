@@ -14,6 +14,8 @@
 
 import mock
 
+from oslo_utils import uuidutils
+
 from magnum.common import context
 from magnum.common.rpc_service import CONF
 from magnum.db.sqlalchemy import api as dbapi
@@ -34,6 +36,17 @@ class fake_stack(object):
         for key, val in kw.items():
             setattr(self, key, val)
 
+# This dictionary will be populated by setUp to help mock
+# the nodegroup list magnum.db.api.get_cluster_nodergoups.
+cluster_ngs = {}
+
+
+def mock_nodegroup_list(cls, dummy_context, cluster_id, **kwargs):
+    try:
+        return cluster_ngs[cluster_id]
+    except KeyError:
+        return []
+
 
 class PeriodicTestCase(base.TestCase):
 
@@ -49,32 +62,75 @@ class PeriodicTestCase(base.TestCase):
             'trust_id': '39d920ca-67c6-4047-b57a-01e9e16bb96f',
             }
 
-        trust_attrs.update({'id': 1, 'stack_id': '11',
+        uuid = uuidutils.generate_uuid()
+        trust_attrs.update({'id': 1, 'stack_id': '11', 'uuid': uuid,
                             'status': cluster_status.CREATE_IN_PROGRESS,
                             'status_reason': 'no change'})
         cluster1 = utils.get_test_cluster(**trust_attrs)
-        trust_attrs.update({'id': 2, 'stack_id': '22',
+        ngs1 = utils.get_nodegroups_for_cluster()
+        uuid = uuidutils.generate_uuid()
+        trust_attrs.update({'id': 2, 'stack_id': '22', 'uuid': uuid,
                             'status': cluster_status.DELETE_IN_PROGRESS,
                             'status_reason': 'no change'})
         cluster2 = utils.get_test_cluster(**trust_attrs)
-        trust_attrs.update({'id': 3, 'stack_id': '33',
+        ngs2 = utils.get_nodegroups_for_cluster()
+        uuid = uuidutils.generate_uuid()
+        trust_attrs.update({'id': 3, 'stack_id': '33', 'uuid': uuid,
                             'status': cluster_status.UPDATE_IN_PROGRESS,
                             'status_reason': 'no change'})
         cluster3 = utils.get_test_cluster(**trust_attrs)
-        trust_attrs.update({'id': 4, 'stack_id': '44',
+        ngs3 = utils.get_nodegroups_for_cluster()
+        uuid = uuidutils.generate_uuid()
+        trust_attrs.update({'id': 4, 'stack_id': '44', 'uuid': uuid,
                             'status': cluster_status.DELETE_IN_PROGRESS,
                             'status_reason': 'no change'})
         cluster4 = utils.get_test_cluster(**trust_attrs)
-        trust_attrs.update({'id': 5, 'stack_id': '55',
+        ngs4 = utils.get_nodegroups_for_cluster()
+        uuid = uuidutils.generate_uuid()
+        trust_attrs.update({'id': 5, 'stack_id': '55', 'uuid': uuid,
                             'status': cluster_status.ROLLBACK_IN_PROGRESS,
                             'status_reason': 'no change'})
         cluster5 = utils.get_test_cluster(**trust_attrs)
+        ngs5 = utils.get_nodegroups_for_cluster()
+
+        self.nodegroups1 = [
+            objects.NodeGroup(self.context, **ngs1['master']),
+            objects.NodeGroup(self.context, **ngs1['worker'])
+        ]
+        self.nodegroups2 = [
+            objects.NodeGroup(self.context, **ngs2['master']),
+            objects.NodeGroup(self.context, **ngs2['worker'])
+        ]
+        self.nodegroups3 = [
+            objects.NodeGroup(self.context, **ngs3['master']),
+            objects.NodeGroup(self.context, **ngs3['worker'])
+        ]
+        self.nodegroups4 = [
+            objects.NodeGroup(self.context, **ngs4['master']),
+            objects.NodeGroup(self.context, **ngs4['worker'])
+        ]
+        self.nodegroups5 = [
+            objects.NodeGroup(self.context, **ngs5['master']),
+            objects.NodeGroup(self.context, **ngs5['worker'])
+        ]
 
         self.cluster1 = objects.Cluster(self.context, **cluster1)
         self.cluster2 = objects.Cluster(self.context, **cluster2)
         self.cluster3 = objects.Cluster(self.context, **cluster3)
         self.cluster4 = objects.Cluster(self.context, **cluster4)
         self.cluster5 = objects.Cluster(self.context, **cluster5)
+
+        # This is used to mock the get_cluster_nodegroups from magnum.db.api.
+        # It's not the greatest way to do it, But we have to populate the
+        # dictionary in the runtime (or have statically defined uuids per NG).
+        global cluster_ngs
+        cluster_ngs = {
+            self.cluster1.uuid: self.nodegroups1,
+            self.cluster2.uuid: self.nodegroups2,
+            self.cluster3.uuid: self.nodegroups3,
+            self.cluster4.uuid: self.nodegroups4,
+            self.cluster5.uuid: self.nodegroups5
+        }
 
         # these tests are based on the basic behavior of our standard
         # Heat-based drivers, but drivers based on other orchestration
@@ -131,31 +187,39 @@ class PeriodicTestCase(base.TestCase):
                 new=fakes.FakeLoopingCall)
     @mock.patch('magnum.drivers.common.driver.Driver.get_driver_for_cluster')
     @mock.patch('magnum.objects.Cluster.list')
+    @mock.patch.object(dbapi.Connection, 'destroy_nodegroup')
     @mock.patch.object(dbapi.Connection, 'destroy_cluster')
     def test_sync_cluster_status_changes(self, mock_db_destroy,
-                                         mock_cluster_list, mock_get_driver):
+                                         mock_ng_destroy,
+                                         mock_cluster_list,
+                                         mock_get_driver):
 
         mock_cluster_list.return_value = [self.cluster1, self.cluster2,
                                           self.cluster3, self.cluster4,
                                           self.cluster5]
         mock_get_driver.return_value = self.mock_driver
 
-        periodic.MagnumPeriodicTasks(CONF).sync_cluster_status(None)
+        with mock.patch.object(dbapi.Connection, 'list_cluster_nodegroups',
+                               mock_nodegroup_list):
+            periodic.MagnumPeriodicTasks(CONF).sync_cluster_status(None)
 
-        self.assertEqual(cluster_status.CREATE_COMPLETE, self.cluster1.status)
-        self.assertEqual('fake_reason_11', self.cluster1.status_reason)
-        # make sure cluster 2 didn't change
-        self.assertEqual(cluster_status.DELETE_IN_PROGRESS,
-                         self.cluster2.status)
-        self.assertEqual('no change', self.cluster2.status_reason)
-        self.assertEqual(cluster_status.UPDATE_COMPLETE, self.cluster3.status)
-        self.assertEqual('fake_reason_33', self.cluster3.status_reason)
-        mock_db_destroy.assert_called_once_with(self.cluster4.uuid)
-        self.assertEqual(cluster_status.ROLLBACK_COMPLETE,
-                         self.cluster5.status)
-        self.assertEqual('fake_reason_55', self.cluster5.status_reason)
-        notifications = fake_notifier.NOTIFICATIONS
-        self.assertEqual(4, len(notifications))
+            self.assertEqual(cluster_status.CREATE_COMPLETE,
+                             self.cluster1.status)
+            self.assertEqual('fake_reason_11', self.cluster1.status_reason)
+            # make sure cluster 2 didn't change
+            self.assertEqual(cluster_status.DELETE_IN_PROGRESS,
+                             self.cluster2.status)
+            self.assertEqual('no change', self.cluster2.status_reason)
+            self.assertEqual(cluster_status.UPDATE_COMPLETE,
+                             self.cluster3.status)
+            self.assertEqual('fake_reason_33', self.cluster3.status_reason)
+            self.assertEqual(2, mock_ng_destroy.call_count)
+            mock_db_destroy.assert_called_once_with(self.cluster4.uuid)
+            self.assertEqual(cluster_status.ROLLBACK_COMPLETE,
+                             self.cluster5.status)
+            self.assertEqual('fake_reason_55', self.cluster5.status_reason)
+            notifications = fake_notifier.NOTIFICATIONS
+            self.assertEqual(4, len(notifications))
 
     @mock.patch('oslo_service.loopingcall.FixedIntervalLoopingCall',
                 new=fakes.FakeLoopingCall)
@@ -171,6 +235,7 @@ class PeriodicTestCase(base.TestCase):
         mock_cluster_list.return_value = [self.cluster1, self.cluster2,
                                           self.cluster3, self.cluster5]
         mock_get_driver.return_value = self.mock_driver
+
         periodic.MagnumPeriodicTasks(CONF).sync_cluster_status(None)
 
         self.assertEqual(cluster_status.CREATE_IN_PROGRESS,
@@ -193,7 +258,9 @@ class PeriodicTestCase(base.TestCase):
     @mock.patch('magnum.drivers.common.driver.Driver.get_driver_for_cluster')
     @mock.patch('magnum.objects.Cluster.list')
     @mock.patch.object(dbapi.Connection, 'destroy_cluster')
-    def test_sync_cluster_status_heat_not_found(self, mock_db_destroy,
+    @mock.patch.object(dbapi.Connection, 'destroy_nodegroup')
+    def test_sync_cluster_status_heat_not_found(self, mock_ng_destroy,
+                                                mock_db_destroy,
                                                 mock_cluster_list,
                                                 mock_get_driver):
         self.get_stacks.clear()
@@ -202,21 +269,26 @@ class PeriodicTestCase(base.TestCase):
                                           self.cluster3, self.cluster4,
                                           self.cluster5]
 
-        periodic.MagnumPeriodicTasks(CONF).sync_cluster_status(None)
+        with mock.patch.object(dbapi.Connection, 'list_cluster_nodegroups',
+                               mock_nodegroup_list):
+            periodic.MagnumPeriodicTasks(CONF).sync_cluster_status(None)
 
-        self.assertEqual(cluster_status.CREATE_FAILED, self.cluster1.status)
-        self.assertEqual('Stack 11 not found', self.cluster1.status_reason)
-        self.assertEqual(cluster_status.UPDATE_FAILED, self.cluster3.status)
-        self.assertEqual('Stack 33 not found', self.cluster3.status_reason)
-        self.assertEqual(cluster_status.ROLLBACK_FAILED, self.cluster5.status)
-        self.assertEqual('Stack 55 not found', self.cluster5.status_reason)
-        mock_db_destroy.assert_has_calls([
-            mock.call(self.cluster2.uuid),
-            mock.call(self.cluster4.uuid)
-        ])
-        self.assertEqual(2, mock_db_destroy.call_count)
-        notifications = fake_notifier.NOTIFICATIONS
-        self.assertEqual(5, len(notifications))
+            self.assertEqual(cluster_status.CREATE_FAILED,
+                             self.cluster1.status)
+            self.assertEqual('Stack 11 not found', self.cluster1.status_reason)
+            self.assertEqual(cluster_status.UPDATE_FAILED,
+                             self.cluster3.status)
+            self.assertEqual('Stack 33 not found', self.cluster3.status_reason)
+            self.assertEqual(cluster_status.ROLLBACK_FAILED,
+                             self.cluster5.status)
+            self.assertEqual('Stack 55 not found', self.cluster5.status_reason)
+            mock_db_destroy.assert_has_calls([
+                mock.call(self.cluster2.uuid),
+                mock.call(self.cluster4.uuid)
+            ])
+            self.assertEqual(2, mock_db_destroy.call_count)
+            notifications = fake_notifier.NOTIFICATIONS
+            self.assertEqual(5, len(notifications))
 
     @mock.patch('magnum.conductor.monitors.create_monitor')
     @mock.patch('magnum.objects.Cluster.list')

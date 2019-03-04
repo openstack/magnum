@@ -243,7 +243,9 @@ class TestPatch(api_base.FunctionalTest):
         self.mock_bay_update.side_effect = self._simulate_rpc_bay_update
         self.addCleanup(p.stop)
 
-    def _simulate_rpc_bay_update(self, bay, rollback=False):
+    def _simulate_rpc_bay_update(self, bay, node_count, rollback=False):
+        bay.status = 'UPDATE_IN_PROGRESS'
+        bay.node_count = node_count
         bay.save()
         return bay
 
@@ -394,13 +396,15 @@ class TestPatch(api_base.FunctionalTest):
 
     @mock.patch.object(rpcapi.API, 'cluster_update_async')
     def test_update_bay_with_rollback_enabled(self, mock_update):
+        node_count = 4
         response = self.patch_json(
             '/bays/%s/?rollback=True' % self.bay.name,
-            [{'path': '/node_count', 'value': 4,
+            [{'path': '/node_count', 'value': node_count,
               'op': 'replace'}],
             headers={'OpenStack-API-Version': 'container-infra 1.3'})
 
-        mock_update.assert_called_once_with(mock.ANY, rollback=True)
+        mock_update.assert_called_once_with(mock.ANY, node_count,
+                                            rollback=True)
         self.assertEqual(202, response.status_code)
 
     def test_remove_ok(self):
@@ -455,7 +459,10 @@ class TestPost(api_base.FunctionalTest):
         self.mock_valid_os_res = p.start()
         self.addCleanup(p.stop)
 
-    def _simulate_rpc_bay_create(self, bay, bay_create_timeout):
+    def _simulate_rpc_bay_create(self, bay, master_count, node_count,
+                                 bay_create_timeout):
+        bay.node_count = node_count
+        bay.master_count = master_count
         bay.create()
         return bay
 
@@ -481,7 +488,8 @@ class TestPost(api_base.FunctionalTest):
     def test_create_bay_set_project_id_and_user_id(self):
         bdict = apiutils.bay_post_data()
 
-        def _simulate_rpc_bay_create(bay, bay_create_timeout):
+        def _simulate_rpc_bay_create(bay, node_count, master_count,
+                                     bay_create_timeout):
             self.assertEqual(self.context.project_id, bay.project_id)
             self.assertEqual(self.context.user_id, bay.user_id)
             bay.create()
@@ -691,7 +699,8 @@ class TestPost(api_base.FunctionalTest):
         self.assertEqual(201, response.status_int)
 
     def test_create_bay_with_no_timeout(self):
-        def _simulate_rpc_bay_create(bay, bay_create_timeout):
+        def _simulate_rpc_bay_create(bay, node_count, master_count,
+                                     bay_create_timeout):
             self.assertEqual(60, bay_create_timeout)
             bay.create()
             return bay

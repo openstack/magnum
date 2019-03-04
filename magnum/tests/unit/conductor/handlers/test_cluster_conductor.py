@@ -44,9 +44,19 @@ class TestHandler(db_base.DbTestCase):
         self.cluster_template = objects.ClusterTemplate(
             self.context, **cluster_template_dict)
         self.cluster_template.create()
-        cluster_dict = utils.get_test_cluster(node_count=1)
-        self.cluster = objects.Cluster(self.context, **cluster_dict)
+        self.cluster_dict = utils.get_test_cluster(node_count=1)
+        self.nodegroups_dict = utils.get_nodegroups_for_cluster(
+            node_count=1)
+        del self.nodegroups_dict['master']['id']
+        del self.nodegroups_dict['worker']['id']
+        self.cluster = objects.Cluster(self.context, **self.cluster_dict)
+        self.master_count = self.cluster.master_count
+        self.node_count = self.cluster.node_count
         self.cluster.create()
+        self.master = objects.NodeGroup(
+            self.context, **self.nodegroups_dict['master'])
+        self.worker = objects.NodeGroup(
+            self.context, **self.nodegroups_dict['worker'])
 
     @patch('magnum.conductor.scale_manager.get_scale_manager')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
@@ -65,9 +75,11 @@ class TestHandler(db_base.DbTestCase):
         mock_dr = mock.MagicMock()
         mock_driver.return_value = mock_dr
 
-        self.cluster.node_count = 2
+        node_count = 2
+        self.master.create()
+        self.worker.create()
         self.cluster.status = cluster_status.CREATE_COMPLETE
-        self.handler.cluster_update(self.context, self.cluster)
+        self.handler.cluster_update(self.context, self.cluster, node_count)
 
         notifications = fake_notifier.NOTIFICATIONS
         self.assertEqual(1, len(notifications))
@@ -79,8 +91,9 @@ class TestHandler(db_base.DbTestCase):
         mock_dr.update_cluster.assert_called_once_with(
             self.context, self.cluster, mock_scale_manager.return_value,
             False)
-        cluster = objects.Cluster.get(self.context, self.cluster.uuid)
+        cluster = objects.Cluster.get_by_uuid(self.context, self.cluster.uuid)
         self.assertEqual(2, cluster.node_count)
+        self.assertEqual(2, cluster.default_ng_worker.node_count)
 
     @patch('magnum.common.clients.OpenStackClients')
     def test_update_node_count_failure(
@@ -93,10 +106,12 @@ class TestHandler(db_base.DbTestCase):
         mock_openstack_client = mock_openstack_client_class.return_value
         mock_openstack_client.heat.return_value = mock_heat_client
 
-        self.cluster.node_count = 2
+        node_count = 2
+        self.master.create()
+        self.worker.create()
         self.cluster.status = cluster_status.CREATE_FAILED
         self.assertRaises(exception.NotSupported, self.handler.cluster_update,
-                          self.context, self.cluster)
+                          self.context, self.cluster, node_count)
 
         notifications = fake_notifier.NOTIFICATIONS
         self.assertEqual(1, len(notifications))
@@ -107,6 +122,7 @@ class TestHandler(db_base.DbTestCase):
 
         cluster = objects.Cluster.get(self.context, self.cluster.uuid)
         self.assertEqual(1, cluster.node_count)
+        self.assertEqual(1, self.worker.node_count)
 
     @patch('magnum.conductor.scale_manager.get_scale_manager')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
@@ -124,9 +140,11 @@ class TestHandler(db_base.DbTestCase):
         mock_dr = mock.MagicMock()
         mock_driver.return_value = mock_dr
 
-        self.cluster.node_count = 2
+        node_count = 2
         self.cluster.status = cluster_status.CREATE_COMPLETE
-        self.handler.cluster_update(self.context, self.cluster)
+        self.master.create()
+        self.worker.create()
+        self.handler.cluster_update(self.context, self.cluster, node_count)
 
         notifications = fake_notifier.NOTIFICATIONS
         self.assertEqual(1, len(notifications))
@@ -139,6 +157,7 @@ class TestHandler(db_base.DbTestCase):
             self.context, self.cluster, mock_scale_manager.return_value, False)
         cluster = objects.Cluster.get(self.context, self.cluster.uuid)
         self.assertEqual(2, cluster.node_count)
+        self.assertEqual(2, cluster.default_ng_worker.node_count)
 
     def test_update_cluster_status_update_complete(self):
         self._test_update_cluster_status_complete(
@@ -195,19 +214,18 @@ class TestHandler(db_base.DbTestCase):
 
         mock_dr.create_stack.side_effect = create_stack_side_effect
 
-        # FixMe(eliqiao): cluster_create will call cluster.create()
-        # again, this so bad because we have already called it in setUp
-        # since other test case will share the codes in setUp()
-        # But in self.handler.cluster_create, we update cluster.uuid and
-        # cluster.stack_id so cluster.create will create a new record with
-        # clustermodel_id None, this is bad because we load clusterModel
-        # object in cluster object by clustermodel_id. Here update
-        # self.cluster.clustermodel_id so cluster.obj_get_changes will get
-        # notice that clustermodel_id is updated and will update it
-        # in db.
-        self.cluster.cluster_template_id = self.cluster_template.uuid
-        cluster = self.handler.cluster_create(self.context,
-                                              self.cluster, timeout)
+        # Just create a new cluster, since the one in setUp is already
+        # created and the previous solution seems kind of hacky.
+        cluster_dict = utils.get_test_cluster(node_count=1)
+        cluster = objects.Cluster(self.context, **cluster_dict)
+        node_count = cluster.node_count
+        master_count = cluster.node_count
+        del cluster_dict['id']
+        del cluster_dict['uuid']
+        cluster_obj = objects.Cluster(self.context, **cluster_dict)
+        cluster = self.handler.cluster_create(self.context, cluster_obj,
+                                              master_count, node_count,
+                                              timeout)
 
         notifications = fake_notifier.NOTIFICATIONS
         self.assertEqual(1, len(notifications))
@@ -217,12 +235,15 @@ class TestHandler(db_base.DbTestCase):
             taxonomy.OUTCOME_PENDING, notifications[0].payload['outcome'])
 
         mock_dr.create_cluster.assert_called_once_with(self.context,
-                                                       self.cluster, timeout)
+                                                       cluster, timeout)
         mock_cm.generate_certificates_to_cluster.assert_called_once_with(
-            self.cluster, context=self.context)
+            cluster, context=self.context)
         self.assertEqual(cluster_status.CREATE_IN_PROGRESS, cluster.status)
         mock_trust_manager.create_trustee_and_trust.assert_called_once_with(
-            osc, self.cluster)
+            osc, cluster)
+        self.assertEqual(2, len(cluster.nodegroups))
+        self.assertEqual(node_count, cluster.default_ng_worker.node_count)
+        self.assertEqual(master_count, cluster.default_ng_master.node_count)
 
     def _test_create_failed(self,
                             mock_openstack_client_class,
@@ -239,8 +260,8 @@ class TestHandler(db_base.DbTestCase):
         self.assertRaises(
             expected_exception,
             self.handler.cluster_create,
-            self.context,
-            self.cluster, timeout
+            self.context, self.cluster,
+            self.master_count, self.node_count, timeout
         )
 
         gctb = mock_cert_manager.generate_certificates_to_cluster
@@ -400,9 +421,6 @@ class TestHandler(db_base.DbTestCase):
                                      mock_process_mult,
                                      mock_heat_poller_class):
         timeout = 15
-        self.cluster.cluster_template_id = self.cluster_template.uuid
-        self.cluster.name = 'cluster1'
-        cluster_name = self.cluster.name
         mock_poller = mock.MagicMock()
         mock_poller.poll_and_check.return_value = loopingcall.LoopingCallDone()
         mock_heat_poller_class.return_value = mock_poller
@@ -435,10 +453,22 @@ class TestHandler(db_base.DbTestCase):
         osc.heat.return_value = mock_hc
         mock_openstack_client_class.return_value = osc
 
-        self.handler.cluster_create(self.context, self.cluster, timeout)
+        # NOTE(ttsiouts): self.cluster is already created so it's
+        # a bad idea to use it and try to create it again... Instead
+        # get a new object and use it.
+        cluster_dict = utils.get_test_cluster(
+            node_count=1, uuid='f6a99187-6f42-4fbb-aa6f-18407c0ee50e')
+        del cluster_dict['id']
+        cluster = objects.Cluster(self.context, **cluster_dict)
+        node_count = cluster.node_count
+        master_count = cluster.master_count
+
+        self.handler.cluster_create(self.context, cluster,
+                                    master_count, node_count,
+                                    timeout)
 
         mock_extract_tmpl_def.assert_called_once_with(self.context,
-                                                      self.cluster)
+                                                      cluster)
         mock_get_template_contents.assert_called_once_with(
             'the/template/path.yaml')
         mock_process_mult.assert_called_once_with(
@@ -456,9 +486,13 @@ class TestHandler(db_base.DbTestCase):
                     'content of file:///the/template/env_file_2'
             },
             parameters={'heat_param_1': 'foo', 'heat_param_2': 'bar'},
-            stack_name=('%s-short_id' % cluster_name),
+            stack_name=('%s-short_id' % cluster.name),
             template='some template yaml',
             timeout_mins=timeout)
+        self.assertEqual(node_count, cluster.node_count)
+        self.assertEqual(node_count, cluster.default_ng_worker.node_count)
+        self.assertEqual(master_count, cluster.master_count)
+        self.assertEqual(master_count, cluster.default_ng_master.node_count)
 
     @patch('magnum.conductor.handlers.cluster_conductor.cert_manager')
     @patch('magnum.common.clients.OpenStackClients')
@@ -471,6 +505,9 @@ class TestHandler(db_base.DbTestCase):
         osc = mock.MagicMock()
         mock_openstack_client_class.return_value = osc
         osc.heat.side_effect = exc.HTTPNotFound
+        self.master.create()
+        self.worker.create()
+        self.assertEqual(2, len(self.cluster.nodegroups))
         self.handler.cluster_delete(self.context, self.cluster.uuid)
 
         notifications = fake_notifier.NOTIFICATIONS
@@ -485,6 +522,9 @@ class TestHandler(db_base.DbTestCase):
             taxonomy.OUTCOME_SUCCESS, notifications[1].payload['outcome'])
         self.assertEqual(
             1, cert_manager.delete_certificates_from_cluster.call_count)
+        # Assert that the cluster nodegroups were delete as well
+        db_nodegroups = objects.NodeGroup.list(self.context, self.cluster.uuid)
+        self.assertEqual([], db_nodegroups)
         # The cluster has been destroyed
         self.assertRaises(exception.ClusterNotFound,
                           objects.Cluster.get, self.context, self.cluster.uuid)
@@ -551,8 +591,11 @@ class TestHandler(db_base.DbTestCase):
         mock_dr = mock.MagicMock()
         mock_driver.return_value = mock_dr
 
+        # Create the default worker
+        self.worker.create()
         self.cluster.status = cluster_status.CREATE_COMPLETE
-        self.handler.cluster_resize(self.context, self.cluster, 3, ["ID1"])
+        self.handler.cluster_resize(self.context, self.cluster, 3, ["ID1"],
+                                    self.worker)
 
         notifications = fake_notifier.NOTIFICATIONS
         self.assertEqual(1, len(notifications))
@@ -563,7 +606,10 @@ class TestHandler(db_base.DbTestCase):
 
         mock_dr.resize_cluster.assert_called_once_with(
             self.context, self.cluster, mock_scale_manager.return_value, 3,
-            ["ID1"], None)
+            ["ID1"], self.worker)
+        nodegroup = objects.NodeGroup.get_by_uuid(
+            self.context, self.cluster.uuid, self.worker.uuid)
+        self.assertEqual(3, nodegroup.node_count)
 
     @patch('magnum.common.clients.OpenStackClients')
     def test_cluster_resize_failure(
@@ -576,9 +622,11 @@ class TestHandler(db_base.DbTestCase):
         mock_openstack_client = mock_openstack_client_class.return_value
         mock_openstack_client.heat.return_value = mock_heat_client
 
+        # Create the default worker
+        self.worker.create()
         self.cluster.status = cluster_status.CREATE_FAILED
         self.assertRaises(exception.NotSupported, self.handler.cluster_resize,
-                          self.context, self.cluster, 2, [])
+                          self.context, self.cluster, 2, [], self.worker)
 
         notifications = fake_notifier.NOTIFICATIONS
         self.assertEqual(1, len(notifications))
@@ -589,3 +637,6 @@ class TestHandler(db_base.DbTestCase):
 
         cluster = objects.Cluster.get(self.context, self.cluster.uuid)
         self.assertEqual(1, cluster.node_count)
+        nodegroup = objects.NodeGroup.get_by_uuid(
+            self.context, self.cluster.uuid, self.worker.uuid)
+        self.assertEqual(1, nodegroup.node_count)
