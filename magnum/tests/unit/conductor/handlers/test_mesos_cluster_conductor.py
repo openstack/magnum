@@ -141,6 +141,7 @@ class TestClusterConductorWithMesos(base.TestCase):
             'mesos_slave_image_providers': 'docker',
             'verify_ca': True,
             'openstack_ca': '',
+            'nodes_affinity_policy': 'soft-anti-affinity'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -198,6 +199,7 @@ class TestClusterConductorWithMesos(base.TestCase):
             'verify_ca': True,
             'slave_flavor': 'flavor_id',
             'openstack_ca': '',
+            'nodes_affinity_policy': 'soft-anti-affinity'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -261,6 +263,7 @@ class TestClusterConductorWithMesos(base.TestCase):
             'mesos_slave_image_providers': 'docker',
             'verify_ca': True,
             'openstack_ca': '',
+            'nodes_affinity_policy': 'soft-anti-affinity'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -328,6 +331,7 @@ class TestClusterConductorWithMesos(base.TestCase):
             'mesos_slave_image_providers': 'docker',
             'verify_ca': True,
             'openstack_ca': '',
+            'nodes_affinity_policy': 'soft-anti-affinity'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -393,6 +397,7 @@ class TestClusterConductorWithMesos(base.TestCase):
             'mesos_slave_image_providers': 'docker',
             'verify_ca': True,
             'openstack_ca': '',
+            'nodes_affinity_policy': 'soft-anti-affinity'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Fixes the problem with Mesos cluster creation where the
+    nodes_affinity_policy was not properly conveyed as it is required
+    in order to create the corresponding server group in Nova.
+    https://storyboard.openstack.org/#!/story/2005116
