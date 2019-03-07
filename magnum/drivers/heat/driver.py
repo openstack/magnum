@@ -164,11 +164,17 @@ class HeatDriver(driver.Driver):
                       rollback=False):
         definition = self.get_template_definition()
 
+        osc = clients.OpenStackClients(context)
         heat_params = {}
-        # stack node_count parameter name
-        stack_nc_param = definition.get_heat_param(cluster_attr='node_count')
-        heat_params[stack_nc_param] = cluster.node_count
 
+        # Find what changed checking the stack params
+        # against the ones in the template_def.
+        stack = osc.heat().stacks.get(cluster.stack_id,
+                                      resolve_outputs=True)
+        stack_params = stack.parameters
+        definition.add_nodegroup_params(cluster)
+        heat_params = definition.get_stack_diff(context, stack_params, cluster)
+        LOG.debug('Updating stack with these params: %s', heat_params)
         scale_params = definition.get_scale_params(context,
                                                    cluster,
                                                    scale_manager)
@@ -180,16 +186,22 @@ class HeatDriver(driver.Driver):
             'disable_rollback': not rollback
         }
 
-        osc = clients.OpenStackClients(context)
         osc.heat().stacks.update(cluster.stack_id, **fields)
 
     def _resize_stack(self, context, cluster, resize_manager,
                       node_count, nodes_to_remove, nodegroup=None,
                       rollback=False):
         definition = self.get_template_definition()
-        heat_params = {}
-        stack_nc_param = definition.get_heat_param(cluster_attr='node_count')
-        heat_params[stack_nc_param] = node_count or cluster.node_count
+        osc = clients.OpenStackClients(context)
+
+        # Find what changed checking the stack params
+        # against the ones in the template_def.
+        stack = osc.heat().stacks.get(cluster.stack_id,
+                                      resolve_outputs=True)
+        stack_params = stack.parameters
+        definition.add_nodegroup_params(cluster)
+        heat_params = definition.get_stack_diff(context, stack_params, cluster)
+        LOG.debug('Updating stack with these params: %s', heat_params)
 
         scale_params = definition.get_scale_params(context,
                                                    cluster,
@@ -244,6 +256,8 @@ class HeatPoller(object):
 
             self._sync_cluster_and_template_status(stack)
         elif stack.stack_status != self.cluster.status:
+            self.template_def.update_outputs(stack, self.cluster_template,
+                                             self.cluster)
             self._sync_cluster_status(stack)
 
         if stack.stack_status in (fields.ClusterStatus.CREATE_FAILED,
@@ -273,9 +287,6 @@ class HeatPoller(object):
     def _sync_cluster_status(self, stack):
         self.cluster.status = stack.stack_status
         self.cluster.status_reason = stack.stack_status_reason
-        stack_nc_param = self.template_def.get_heat_param(
-            cluster_attr='node_count')
-        self.cluster.node_count = stack.parameters[stack_nc_param]
         self.cluster.save()
 
     def get_version_info(self, stack):

@@ -55,12 +55,6 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
 
     def __init__(self):
         super(K8sTemplateDefinition, self).__init__()
-        self.add_parameter('master_flavor',
-                           cluster_attr='master_flavor_id')
-        self.add_parameter('minion_flavor',
-                           cluster_attr='flavor_id')
-        self.add_parameter('number_of_minions',
-                           cluster_attr='node_count')
         self.add_parameter('external_network',
                            cluster_template_attr='external_network_id',
                            required=True)
@@ -92,6 +86,34 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                         cluster_attr=None)
         self.add_output('kube_masters_private',
                         cluster_attr=None)
+
+    def add_nodegroup_params(self, cluster):
+        super(K8sTemplateDefinition,
+              self).add_nodegroup_params(cluster)
+        worker_ng = cluster.default_ng_worker
+        master_ng = cluster.default_ng_master
+        self.add_parameter('number_of_minions',
+                           nodegroup_attr='node_count',
+                           nodegroup_uuid=worker_ng.uuid,
+                           param_class=template_def.NodeGroupParameterMapping)
+        self.add_parameter('minion_flavor',
+                           nodegroup_attr='flavor_id',
+                           nodegroup_uuid=worker_ng.uuid,
+                           param_class=template_def.NodeGroupParameterMapping)
+        self.add_parameter('master_flavor',
+                           nodegroup_attr='flavor_id',
+                           nodegroup_uuid=master_ng.uuid,
+                           param_class=template_def.NodeGroupParameterMapping)
+
+    def update_outputs(self, stack, cluster_template, cluster):
+        worker_ng = cluster.default_ng_worker
+        self.add_output('number_of_minions',
+                        nodegroup_attr='node_count',
+                        nodegroup_uuid=worker_ng.uuid,
+                        is_stack_param=True,
+                        mapping_type=template_def.NodeGroupOutputMapping)
+        super(K8sTemplateDefinition,
+              self).update_outputs(stack, cluster_template, cluster)
 
     def get_params(self, context, cluster_template, cluster, **kwargs):
         extra_params = kwargs.pop('extra_params', {})

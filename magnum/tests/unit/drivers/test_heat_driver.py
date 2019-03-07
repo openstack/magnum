@@ -34,7 +34,12 @@ class TestHeatPoller(base.TestCase):
                         mock_retrieve_cluster_template):
         cfg.CONF.cluster_heat.max_attempts = 10
 
-        cluster = mock.MagicMock()
+        worker_ng = mock.MagicMock(uuid='worker_ng', role='worker')
+        master_ng = mock.MagicMock(uuid='master_ng', role='master')
+        nodegroups = [worker_ng, master_ng]
+        cluster = mock.MagicMock(nodegroups=nodegroups,
+                                 default_ng_worker=worker_ng,
+                                 default_ng_master=master_ng)
         cluster_template_dict = utils.get_test_cluster_template(
             coe='kubernetes')
         mock_heat_stack = mock.MagicMock()
@@ -85,45 +90,63 @@ class TestHeatPoller(base.TestCase):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = cluster_status.UPDATE_COMPLETE
-        mock_heat_stack.parameters = {'number_of_minions': 2}
+        mock_heat_stack.parameters = {
+            'number_of_minions': 2,
+            'number_of_masters': 1
+        }
         self.assertIsNone(poller.poll_and_check())
 
         self.assertEqual(1, cluster.save.call_count)
+        self.assertEqual(1, cluster.default_ng_worker.save.call_count)
+        self.assertEqual(1, cluster.default_ng_master.save.call_count)
         self.assertEqual(cluster_status.UPDATE_COMPLETE, cluster.status)
-        self.assertEqual(2, cluster.node_count)
+        self.assertEqual(2, cluster.default_ng_worker.node_count)
+        self.assertEqual(1, cluster.default_ng_master.node_count)
 
     def test_poll_done_by_update_failed(self):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = cluster_status.UPDATE_FAILED
-        mock_heat_stack.parameters = {'number_of_minions': 2}
+        mock_heat_stack.parameters = {
+            'number_of_minions': 2,
+            'number_of_masters': 1
+        }
         self.assertIsNone(poller.poll_and_check())
 
         self.assertEqual(2, cluster.save.call_count)
         self.assertEqual(cluster_status.UPDATE_FAILED, cluster.status)
-        self.assertEqual(2, cluster.node_count)
+        self.assertEqual(2, cluster.default_ng_worker.node_count)
+        self.assertEqual(1, cluster.default_ng_master.node_count)
 
     def test_poll_done_by_rollback_complete(self):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = cluster_status.ROLLBACK_COMPLETE
-        mock_heat_stack.parameters = {'number_of_minions': 1}
+        mock_heat_stack.parameters = {
+            'number_of_minions': 1,
+            'number_of_masters': 1
+        }
         self.assertIsNone(poller.poll_and_check())
 
         self.assertEqual(2, cluster.save.call_count)
         self.assertEqual(cluster_status.ROLLBACK_COMPLETE, cluster.status)
-        self.assertEqual(1, cluster.node_count)
+        self.assertEqual(1, cluster.default_ng_worker.node_count)
+        self.assertEqual(1, cluster.default_ng_master.node_count)
 
     def test_poll_done_by_rollback_failed(self):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
 
         mock_heat_stack.stack_status = cluster_status.ROLLBACK_FAILED
-        mock_heat_stack.parameters = {'number_of_minions': 1}
+        mock_heat_stack.parameters = {
+            'number_of_minions': 1,
+            'number_of_masters': 1
+        }
         self.assertIsNone(poller.poll_and_check())
 
         self.assertEqual(2, cluster.save.call_count)
         self.assertEqual(cluster_status.ROLLBACK_FAILED, cluster.status)
-        self.assertEqual(1, cluster.node_count)
+        self.assertEqual(1, cluster.default_ng_worker.node_count)
+        self.assertEqual(1, cluster.default_ng_master.node_count)
 
     @patch('os.path.join')
     def test_poll_destroy(self, mock_join):
@@ -147,20 +170,28 @@ class TestHeatPoller(base.TestCase):
     def test_poll_node_count(self):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
 
-        mock_heat_stack.parameters = {'number_of_minions': 1}
+        mock_heat_stack.parameters = {
+            'number_of_minions': 1,
+            'number_of_masters': 1
+        }
         mock_heat_stack.stack_status = cluster_status.CREATE_IN_PROGRESS
         poller.poll_and_check()
 
-        self.assertEqual(1, cluster.node_count)
+        self.assertEqual(1, cluster.default_ng_worker.node_count)
+        self.assertEqual(1, cluster.default_ng_master.node_count)
 
     def test_poll_node_count_by_update(self):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
 
-        mock_heat_stack.parameters = {'number_of_minions': 2}
+        mock_heat_stack.parameters = {
+            'number_of_minions': 2,
+            'number_of_masters': 3
+        }
         mock_heat_stack.stack_status = cluster_status.UPDATE_COMPLETE
         self.assertIsNone(poller.poll_and_check())
 
-        self.assertEqual(2, cluster.node_count)
+        self.assertEqual(2, cluster.default_ng_worker.node_count)
+        self.assertEqual(3, cluster.default_ng_master.node_count)
 
     @patch('magnum.drivers.heat.driver.trust_manager')
     @patch('magnum.drivers.heat.driver.cert_manager')

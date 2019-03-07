@@ -26,14 +26,16 @@ CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 
 
-class ServerAddressOutputMapping(template_def.OutputMapping):
+class ServerAddressOutputMapping(template_def.NodeGroupOutputMapping):
 
     public_ip_output_key = None
     private_ip_output_key = None
 
-    def __init__(self, dummy_arg, cluster_attr=None):
-        self.cluster_attr = cluster_attr
+    def __init__(self, dummy_arg, nodegroup_attr=None, nodegroup_uuid=None):
+        self.nodegroup_attr = nodegroup_attr
+        self.nodegroup_uuid = nodegroup_uuid
         self.heat_output = self.public_ip_output_key
+        self.is_stack_param = False
 
     def set_output(self, stack, cluster_template, cluster):
         if not cluster_template.floating_ip_enabled:
@@ -63,12 +65,43 @@ class CoreOSK8sTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                            cluster_attr='docker_volume_size')
         self.add_parameter('docker_storage_driver',
                            cluster_template_attr='docker_storage_driver')
+
+    def add_nodegroup_params(self, cluster):
+        super(CoreOSK8sTemplateDefinition,
+              self).add_nodegroup_params(cluster)
+        worker_ng = cluster.default_ng_worker
+        master_ng = cluster.default_ng_master
+        self.add_parameter('number_of_minions',
+                           nodegroup_attr='node_count',
+                           nodegroup_uuid=worker_ng.uuid,
+                           param_class=template_def.NodeGroupParameterMapping)
+        self.add_parameter('minion_flavor',
+                           nodegroup_attr='flavor_id',
+                           nodegroup_uuid=worker_ng.uuid,
+                           param_class=template_def.NodeGroupParameterMapping)
+        self.add_parameter('master_flavor',
+                           nodegroup_attr='flavor_id',
+                           nodegroup_uuid=master_ng.uuid,
+                           param_class=template_def.NodeGroupParameterMapping)
+
+    def update_outputs(self, stack, cluster_template, cluster):
+        worker_ng = cluster.default_ng_worker
+        master_ng = cluster.default_ng_master
+
         self.add_output('kube_minions',
-                        cluster_attr='node_addresses',
+                        nodegroup_attr='node_addresses',
+                        nodegroup_uuid=worker_ng.uuid,
                         mapping_type=NodeAddressOutputMapping)
         self.add_output('kube_masters',
-                        cluster_attr='master_addresses',
+                        nodegroup_attr='node_addresses',
+                        nodegroup_uuid=master_ng.uuid,
                         mapping_type=MasterAddressOutputMapping)
+        self.add_output('number_of_minions',
+                        nodegroup_attr='node_count',
+                        nodegroup_uuid=worker_ng.uuid,
+                        is_stack_param=True)
+        super(CoreOSK8sTemplateDefinition,
+              self).update_outputs(stack, cluster_template, cluster)
 
     def get_params(self, context, cluster_template, cluster, **kwargs):
         extra_params = kwargs.pop('extra_params', {})

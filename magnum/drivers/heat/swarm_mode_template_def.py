@@ -39,13 +39,15 @@ class SwarmModeApiAddressOutputMapping(template_def.OutputMapping):
             setattr(cluster, self.cluster_attr, value)
 
 
-class ServerAddressOutputMapping(template_def.OutputMapping):
+class ServerAddressOutputMapping(template_def.NodeGroupOutputMapping):
     public_ip_output_key = None
     private_ip_output_key = None
 
-    def __init__(self, dummy_arg, cluster_attr=None):
-        self.cluster_attr = cluster_attr
+    def __init__(self, dummy_arg, nodegroup_attr=None, nodegroup_uuid=None):
         self.heat_output = self.public_ip_output_key
+        self.nodegroup_attr = nodegroup_attr
+        self.nodegroup_uuid = nodegroup_uuid
+        self.is_stack_param = False
 
 
 class MasterAddressOutputMapping(ServerAddressOutputMapping):
@@ -63,7 +65,10 @@ class MasterAddressOutputMapping(ServerAddressOutputMapping):
         for output in stack.to_dict().get('outputs', []):
             if output['output_key'] in self.heat_output:
                 _master_addresses += output['output_value']
-        setattr(cluster, self.cluster_attr, _master_addresses)
+
+        for ng in cluster.nodegroups:
+            if ng.uuid == self.nodegroup_uuid:
+                setattr(ng, self.nodegroup_attr, _master_addresses)
 
 
 class NodeAddressOutputMapping(ServerAddressOutputMapping):
@@ -87,12 +92,6 @@ class SwarmModeTemplateDefinition(template_def.BaseTemplateDefinition):
         self.add_parameter('cluster_uuid',
                            cluster_attr='uuid',
                            param_type=str)
-        self.add_parameter('number_of_nodes',
-                           cluster_attr='node_count')
-        self.add_parameter('master_flavor',
-                           cluster_attr='master_flavor_id')
-        self.add_parameter('node_flavor',
-                           cluster_attr='flavor_id')
         self.add_parameter('docker_volume_size',
                            cluster_attr='docker_volume_size')
         self.add_parameter('volume_driver',
@@ -113,12 +112,6 @@ class SwarmModeTemplateDefinition(template_def.BaseTemplateDefinition):
         self.add_output('api_address',
                         cluster_attr='api_address',
                         mapping_type=SwarmModeApiAddressOutputMapping)
-        self.add_output('swarm_masters',
-                        cluster_attr='master_addresses',
-                        mapping_type=MasterAddressOutputMapping)
-        self.add_output('swarm_nodes',
-                        cluster_attr='node_addresses',
-                        mapping_type=NodeAddressOutputMapping)
 
     def get_params(self, context, cluster_template, cluster, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
@@ -147,6 +140,44 @@ class SwarmModeTemplateDefinition(template_def.BaseTemplateDefinition):
                      self).get_params(context, cluster_template, cluster,
                                       extra_params=extra_params,
                                       **kwargs)
+
+    def add_nodegroup_params(self, cluster):
+        super(SwarmModeTemplateDefinition,
+              self).add_nodegroup_params(cluster)
+        worker_ng = cluster.default_ng_worker
+        master_ng = cluster.default_ng_master
+        self.add_parameter('number_of_nodes',
+                           nodegroup_attr='node_count',
+                           nodegroup_uuid=worker_ng.uuid,
+                           param_class=template_def.NodeGroupParameterMapping)
+        self.add_parameter('node_flavor',
+                           nodegroup_attr='flavor_id',
+                           nodegroup_uuid=worker_ng.uuid,
+                           param_class=template_def.NodeGroupParameterMapping)
+        self.add_parameter('master_flavor',
+                           nodegroup_attr='flavor_id',
+                           nodegroup_uuid=master_ng.uuid,
+                           param_class=template_def.NodeGroupParameterMapping)
+
+    def update_outputs(self, stack, cluster_template, cluster):
+        worker_ng = cluster.default_ng_worker
+        master_ng = cluster.default_ng_master
+
+        self.add_output('swarm_masters',
+                        nodegroup_attr='node_addresses',
+                        nodegroup_uuid=master_ng.uuid,
+                        mapping_type=MasterAddressOutputMapping)
+        self.add_output('swarm_nodes',
+                        nodegroup_attr='node_addresses',
+                        nodegroup_uuid=worker_ng.uuid,
+                        mapping_type=NodeAddressOutputMapping)
+        self.add_output('number_of_nodes',
+                        nodegroup_attr='node_count',
+                        nodegroup_uuid=worker_ng.uuid,
+                        is_stack_param=True,
+                        mapping_type=template_def.NodeGroupOutputMapping)
+        super(SwarmModeTemplateDefinition,
+              self).update_outputs(stack, cluster_template, cluster)
 
     def get_env_files(self, cluster_template, cluster):
         env_files = []

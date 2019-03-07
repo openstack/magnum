@@ -45,12 +45,6 @@ class SwarmFedoraTemplateDefinition(template_def.BaseTemplateDefinition):
         self.add_parameter('cluster_uuid',
                            cluster_attr='uuid',
                            param_type=str)
-        self.add_parameter('number_of_nodes',
-                           cluster_attr='node_count')
-        self.add_parameter('master_flavor',
-                           cluster_attr='master_flavor_id')
-        self.add_parameter('node_flavor',
-                           cluster_attr='flavor_id')
         self.add_parameter('docker_volume_size',
                            cluster_attr='docker_volume_size')
         self.add_parameter('volume_driver',
@@ -79,14 +73,48 @@ class SwarmFedoraTemplateDefinition(template_def.BaseTemplateDefinition):
                         mapping_type=SwarmApiAddressOutputMapping)
         self.add_output('swarm_master_private',
                         cluster_attr=None)
-        self.add_output('swarm_masters',
-                        cluster_attr='master_addresses')
         self.add_output('swarm_nodes_private',
                         cluster_attr=None)
-        self.add_output('swarm_nodes',
-                        cluster_attr='node_addresses')
         self.add_output('discovery_url',
                         cluster_attr='discovery_url')
+
+    def add_nodegroup_params(self, cluster):
+        super(SwarmFedoraTemplateDefinition,
+              self).add_nodegroup_params(cluster)
+        master_ng = cluster.default_ng_master
+        worker_ng = cluster.default_ng_worker
+        self.add_parameter('number_of_nodes',
+                           nodegroup_attr='node_count',
+                           nodegroup_uuid=worker_ng.uuid,
+                           param_class=template_def.NodeGroupParameterMapping)
+        self.add_parameter('node_flavor',
+                           nodegroup_attr='flavor_id',
+                           nodegroup_uuid=worker_ng.uuid,
+                           param_class=template_def.NodeGroupParameterMapping)
+        self.add_parameter('master_flavor',
+                           nodegroup_attr='flavor_id',
+                           nodegroup_uuid=master_ng.uuid,
+                           param_class=template_def.NodeGroupParameterMapping)
+
+    def update_outputs(self, stack, cluster_template, cluster):
+        worker_ng = cluster.default_ng_worker
+        master_ng = cluster.default_ng_master
+
+        self.add_output('swarm_masters',
+                        nodegroup_attr='node_addresses',
+                        nodegroup_uuid=master_ng.uuid,
+                        mapping_type=template_def.NodeGroupOutputMapping)
+        self.add_output('swarm_nodes',
+                        nodegroup_attr='node_addresses',
+                        nodegroup_uuid=worker_ng.uuid,
+                        mapping_type=template_def.NodeGroupOutputMapping)
+        self.add_output('number_of_nodes',
+                        nodegroup_attr='node_count',
+                        nodegroup_uuid=worker_ng.uuid,
+                        is_stack_param=True,
+                        mapping_type=template_def.NodeGroupOutputMapping)
+        super(SwarmFedoraTemplateDefinition,
+              self).update_outputs(stack, cluster_template, cluster)
 
     def get_params(self, context, cluster_template, cluster, **kwargs):
         extra_params = kwargs.pop('extra_params', {})

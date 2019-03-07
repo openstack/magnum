@@ -121,8 +121,8 @@ class TestHandler(db_base.DbTestCase):
             taxonomy.OUTCOME_FAILURE, notifications[0].payload['outcome'])
 
         cluster = objects.Cluster.get(self.context, self.cluster.uuid)
-        self.assertEqual(1, cluster.node_count)
         self.assertEqual(1, self.worker.node_count)
+        self.assertEqual(1, cluster.node_count)
 
     @patch('magnum.conductor.scale_manager.get_scale_manager')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
@@ -218,8 +218,8 @@ class TestHandler(db_base.DbTestCase):
         # created and the previous solution seems kind of hacky.
         cluster_dict = utils.get_test_cluster(node_count=1)
         cluster = objects.Cluster(self.context, **cluster_dict)
-        node_count = cluster.node_count
-        master_count = cluster.node_count
+        node_count = 1
+        master_count = 1
         del cluster_dict['id']
         del cluster_dict['uuid']
         cluster_obj = objects.Cluster(self.context, **cluster_dict)
@@ -242,6 +242,8 @@ class TestHandler(db_base.DbTestCase):
         mock_trust_manager.create_trustee_and_trust.assert_called_once_with(
             osc, cluster)
         self.assertEqual(2, len(cluster.nodegroups))
+        self.assertEqual(node_count, cluster.node_count)
+        self.assertEqual(master_count, cluster.master_count)
         self.assertEqual(node_count, cluster.default_ng_worker.node_count)
         self.assertEqual(master_count, cluster.default_ng_master.node_count)
 

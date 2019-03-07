@@ -86,6 +86,38 @@ class TestClusterConductorWithSwarm(base.TestCase):
                        'availability_zone': 'az_1'},
             'coe_version': 'fake-version'
         }
+        self.worker_ng_dict = {
+            'uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a53',
+            'name': 'worker_ng',
+            'cluster_id': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
+            'project_id': 'project_id',
+            'docker_volume_size': 20,
+            'labels': self.cluster_dict['labels'],
+            'flavor_id': 'flavor_id',
+            'image_id': 'image_id',
+            'node_addresses': ['172.17.2.4'],
+            'node_count': 1,
+            'role': 'worker',
+            'max_nodes': 5,
+            'min_nodes': 1,
+            'is_default': True
+        }
+        self.master_ng_dict = {
+            'uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a54',
+            'name': 'master_ng',
+            'cluster_id': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
+            'project_id': 'project_id',
+            'docker_volume_size': 20,
+            'labels': self.cluster_dict['labels'],
+            'flavor_id': 'master_flavor_id',
+            'image_id': 'image_id',
+            'node_addresses': ['172.17.2.18'],
+            'node_count': 1,
+            'role': 'master',
+            'max_nodes': 5,
+            'min_nodes': 1,
+            'is_default': True
+        }
 
         # We need this due to volume_driver=rexray
         CONF.set_override('cluster_user_trust',
@@ -105,10 +137,12 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.objects.NodeGroup.list')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_all_values(
             self,
             mock_driver,
+            mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         cluster_template = objects.ClusterTemplate(
@@ -122,6 +156,9 @@ class TestClusterConductorWithSwarm(base.TestCase):
         mock_get.return_value = mock_resp
         mock_driver.return_value = swarm_dr.Driver()
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+        worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
+        master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
+        mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
 
         (template_path,
          definition,
@@ -177,10 +214,12 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.objects.NodeGroup.list')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_with_registry(
             self,
             mock_driver,
+            mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self.cluster_template_dict['registry_enabled'] = True
@@ -195,6 +234,9 @@ class TestClusterConductorWithSwarm(base.TestCase):
         mock_get.return_value = mock_resp
         mock_driver.return_value = swarm_dr.Driver()
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+        worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
+        master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
+        mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
 
         CONF.set_override('swift_region',
                           'RegionOne',
@@ -256,10 +298,12 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.objects.NodeGroup.list')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_only_required(
             self,
             mock_driver,
+            mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
 
@@ -284,6 +328,9 @@ class TestClusterConductorWithSwarm(base.TestCase):
         mock_get.return_value = mock_resp
         mock_driver.return_value = swarm_dr.Driver()
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+        worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
+        master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
+        mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
 
         (template_path,
          definition,
@@ -329,12 +376,14 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.objects.NodeGroup.list')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
     @patch('magnum.common.keystone.KeystoneClientV3')
     def test_extract_template_definition_with_lb_neutron(
             self,
             mock_kc,
             mock_driver,
+            mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self.cluster_template_dict['master_lb_enabled'] = True
@@ -349,6 +398,9 @@ class TestClusterConductorWithSwarm(base.TestCase):
         mock_get.return_value = mock_resp
         mock_driver.return_value = swarm_dr.Driver()
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+        worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
+        master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
+        mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
 
         mock_kc.return_value.client.services.list.return_value = []
 
@@ -406,12 +458,14 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.objects.NodeGroup.list')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
     @patch('magnum.common.keystone.KeystoneClientV3')
     def test_extract_template_definition_with_lb_octavia(
             self,
             mock_kc,
             mock_driver,
+            mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self.cluster_template_dict['master_lb_enabled'] = True
@@ -426,6 +480,9 @@ class TestClusterConductorWithSwarm(base.TestCase):
         mock_get.return_value = mock_resp
         mock_driver.return_value = swarm_dr.Driver()
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+        worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
+        master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
+        mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
 
         class Service(object):
             def __init__(self):
@@ -488,16 +545,19 @@ class TestClusterConductorWithSwarm(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.objects.NodeGroup.list')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
     @patch('magnum.common.keystone.KeystoneClientV3')
     def test_extract_template_definition_multi_master(
             self,
             mock_kc,
             mock_driver,
+            mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self.cluster_template_dict['master_lb_enabled'] = True
         self.cluster_dict['master_count'] = 2
+        self.master_ng_dict['node_count'] = 2
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
         mock_objects_cluster_template_get_by_uuid.return_value = \
@@ -509,6 +569,9 @@ class TestClusterConductorWithSwarm(base.TestCase):
         mock_get.return_value = mock_resp
         mock_driver.return_value = swarm_dr.Driver()
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+        worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
+        master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
+        mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
 
         mock_kc.return_value.client.services.list.return_value = []
 
@@ -572,7 +635,19 @@ class TestClusterConductorWithSwarm(base.TestCase):
                         mock_retrieve_cluster_template):
         mock_conf.cluster_heat.max_attempts = 10
 
-        cluster = mock.MagicMock()
+        worker_ng = mock.MagicMock(
+            uuid='5d12f6fd-a196-4bf0-ae4c-1f639a523a53',
+            role='worker',
+            node_count=1,
+        )
+        master_ng = mock.MagicMock(
+            uuid='5d12f6fd-a196-4bf0-ae4c-1f639a523a54',
+            role='master',
+            node_count=1,
+        )
+        cluster = mock.MagicMock(nodegroups=[worker_ng, master_ng],
+                                 default_ng_worker=worker_ng,
+                                 default_ng_master=master_ng)
         mock_heat_stack = mock.MagicMock()
         mock_heat_client = mock.MagicMock()
         mock_heat_client.stacks.get.return_value = mock_heat_stack
@@ -585,23 +660,30 @@ class TestClusterConductorWithSwarm(base.TestCase):
         poller = heat_driver.HeatPoller(mock_openstack_client,
                                         mock.MagicMock(), cluster,
                                         swarm_dr.Driver())
+        poller.template_def.add_nodegroup_params(cluster)
         poller.get_version_info = mock.MagicMock()
         return (mock_heat_stack, cluster, poller)
 
     def test_poll_node_count(self):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
 
-        mock_heat_stack.parameters = {'number_of_nodes': 1}
+        mock_heat_stack.parameters = {
+            'number_of_nodes': 1,
+            'number_of_masters': 1
+        }
         mock_heat_stack.stack_status = cluster_status.CREATE_IN_PROGRESS
         poller.poll_and_check()
 
-        self.assertEqual(1, cluster.node_count)
+        self.assertEqual(1, cluster.default_ng_worker.node_count)
 
     def test_poll_node_count_by_update(self):
         mock_heat_stack, cluster, poller = self.setup_poll_test()
 
-        mock_heat_stack.parameters = {'number_of_nodes': 2}
+        mock_heat_stack.parameters = {
+            'number_of_nodes': 2,
+            'number_of_masters': 1
+        }
         mock_heat_stack.stack_status = cluster_status.UPDATE_COMPLETE
         poller.poll_and_check()
 
-        self.assertEqual(2, cluster.node_count)
+        self.assertEqual(2, cluster.default_ng_worker.node_count)

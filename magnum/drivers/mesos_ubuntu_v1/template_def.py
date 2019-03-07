@@ -31,12 +31,6 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
                            cluster_template_attr='fixed_network')
         self.add_parameter('fixed_subnet',
                            cluster_template_attr='fixed_subnet')
-        self.add_parameter('number_of_slaves',
-                           cluster_attr='node_count')
-        self.add_parameter('master_flavor',
-                           cluster_attr='master_flavor_id')
-        self.add_parameter('slave_flavor',
-                           cluster_attr='flavor_id')
         self.add_parameter('cluster_name',
                            cluster_attr='name')
         self.add_parameter('volume_driver',
@@ -46,12 +40,45 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
                         cluster_attr='api_address')
         self.add_output('mesos_master_private',
                         cluster_attr=None)
-        self.add_output('mesos_master',
-                        cluster_attr='master_addresses')
         self.add_output('mesos_slaves_private',
                         cluster_attr=None)
+
+    def add_nodegroup_params(self, cluster):
+        super(UbuntuMesosTemplateDefinition,
+              self).add_nodegroup_params(cluster)
+        master_ng = cluster.default_ng_master
+        worker_ng = cluster.default_ng_worker
+        self.add_parameter('number_of_slaves',
+                           nodegroup_attr='node_count',
+                           nodegroup_uuid=worker_ng.uuid,
+                           param_class=template_def.NodeGroupParameterMapping)
+        self.add_parameter('slave_flavor',
+                           nodegroup_attr='flavor_id',
+                           nodegroup_uuid=worker_ng.uuid,
+                           param_class=template_def.NodeGroupParameterMapping)
+        self.add_parameter('master_flavor',
+                           nodegroup_attr='flavor_id',
+                           nodegroup_uuid=master_ng.uuid,
+                           param_class=template_def.NodeGroupParameterMapping)
+
+    def update_outputs(self, stack, cluster_template, cluster):
+        worker_ng = cluster.default_ng_worker
+        master_ng = cluster.default_ng_master
+        self.add_output('mesos_master',
+                        nodegroup_attr='node_addresses',
+                        nodegroup_uuid=master_ng.uuid,
+                        mapping_type=template_def.NodeGroupOutputMapping)
         self.add_output('mesos_slaves',
-                        cluster_attr='node_addresses')
+                        nodegroup_attr='node_addresses',
+                        nodegroup_uuid=worker_ng.uuid,
+                        mapping_type=template_def.NodeGroupOutputMapping)
+        self.add_output('number_of_slaves',
+                        nodegroup_attr='node_count',
+                        nodegroup_uuid=worker_ng.uuid,
+                        is_stack_param=True,
+                        mapping_type=template_def.NodeGroupOutputMapping)
+        super(UbuntuMesosTemplateDefinition,
+              self).update_outputs(stack, cluster_template, cluster)
 
     def get_params(self, context, cluster_template, cluster, **kwargs):
         extra_params = kwargs.pop('extra_params', {})

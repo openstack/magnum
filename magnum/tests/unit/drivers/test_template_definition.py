@@ -303,6 +303,15 @@ class TemplateDefinitionTestCase(base.TestCase):
 @six.add_metaclass(abc.ABCMeta)
 class BaseK8sTemplateDefinitionTestCase(base.TestCase):
 
+    def setUp(self):
+        super(BaseK8sTemplateDefinitionTestCase, self).setUp()
+        self.master_ng = mock.MagicMock(uuid='master_ng', role='master')
+        self.worker_ng = mock.MagicMock(uuid='worker_ng', role='worker')
+        self.nodegroups = [self.master_ng, self.worker_ng]
+        self.mock_cluster = mock.MagicMock(nodegroups=self.nodegroups,
+                                           default_ng_worker=self.worker_ng,
+                                           default_ng_master=self.master_ng)
+
     @abc.abstractmethod
     def get_definition(self):
         """Returns the template definition."""
@@ -313,7 +322,9 @@ class BaseK8sTemplateDefinitionTestCase(base.TestCase):
         floating_ip_enabled=True,
         public_ip_output_key='kube_masters',
         private_ip_output_key='kube_masters_private',
-        cluster_attr='master_addresses',
+        cluster_attr=None,
+        nodegroup_attr=None,
+        is_master=False
     ):
         definition = self.get_definition()
 
@@ -332,14 +343,23 @@ class BaseK8sTemplateDefinitionTestCase(base.TestCase):
         ]
         mock_stack = mock.MagicMock()
         mock_stack.to_dict.return_value = {'outputs': outputs}
-        mock_cluster = mock.MagicMock()
         mock_cluster_template = mock.MagicMock()
         mock_cluster_template.floating_ip_enabled = floating_ip_enabled
 
         definition.update_outputs(mock_stack, mock_cluster_template,
-                                  mock_cluster)
+                                  self.mock_cluster)
 
-        self.assertEqual(expected_address, getattr(mock_cluster, cluster_attr))
+        actual = None
+        if cluster_attr:
+            actual = getattr(self.mock_cluster, cluster_attr)
+        elif is_master:
+            actual = getattr(
+                self.mock_cluster.default_ng_master, nodegroup_attr)
+        else:
+            actual = getattr(
+                self.mock_cluster.default_ng_worker, nodegroup_attr)
+
+        self.assertEqual(expected_address, actual)
 
 
 class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
@@ -1107,8 +1127,13 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
     def test_k8s_get_heat_param(self):
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
-        heat_param = k8s_def.get_heat_param(cluster_attr='node_count')
+        k8s_def.add_nodegroup_params(self.mock_cluster)
+        heat_param = k8s_def.get_heat_param(nodegroup_attr='node_count',
+                                            nodegroup_uuid='worker_ng')
         self.assertEqual('number_of_minions', heat_param)
+        heat_param = k8s_def.get_heat_param(nodegroup_attr='node_count',
+                                            nodegroup_uuid='master_ng')
+        self.assertEqual('number_of_masters', heat_param)
 
     @mock.patch('requests.get')
     def test_k8s_get_discovery_url_not_found(self, mock_get):
@@ -1246,14 +1271,16 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         self._test_update_outputs_server_address(
             public_ip_output_key='kube_masters',
             private_ip_output_key='kube_masters_private',
-            cluster_attr='master_addresses',
+            nodegroup_attr='node_addresses',
+            is_master=True
         )
 
     def test_update_outputs_node_address(self):
         self._test_update_outputs_server_address(
             public_ip_output_key='kube_minions',
             private_ip_output_key='kube_minions_private',
-            cluster_attr='node_addresses',
+            nodegroup_attr='node_addresses',
+            is_master=False
         )
 
     def test_update_outputs_master_address_fip_disabled(self):
@@ -1261,7 +1288,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             floating_ip_enabled=False,
             public_ip_output_key='kube_masters',
             private_ip_output_key='kube_masters_private',
-            cluster_attr='master_addresses',
+            nodegroup_attr='node_addresses',
+            is_master=True
         )
 
     def test_update_outputs_node_address_fip_disabled(self):
@@ -1269,7 +1297,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             floating_ip_enabled=False,
             public_ip_output_key='kube_minions',
             private_ip_output_key='kube_minions_private',
-            cluster_attr='node_addresses',
+            nodegroup_attr='node_addresses',
+            is_master=False
         )
 
 
@@ -1379,6 +1408,15 @@ class FedoraK8sIronicTemplateDefinitionTestCase(base.TestCase):
 
 class AtomicSwarmModeTemplateDefinitionTestCase(base.TestCase):
 
+    def setUp(self):
+        super(AtomicSwarmModeTemplateDefinitionTestCase, self).setUp()
+        self.master_ng = mock.MagicMock(uuid='master_ng', role='master')
+        self.worker_ng = mock.MagicMock(uuid='worker_ng', role='worker')
+        self.nodegroups = [self.master_ng, self.worker_ng]
+        self.mock_cluster = mock.MagicMock(nodegroups=self.nodegroups,
+                                           default_ng_worker=self.worker_ng,
+                                           default_ng_master=self.master_ng)
+
     def get_definition(self):
         return swarm_v2_dr.Driver().get_template_definition()
 
@@ -1387,7 +1425,9 @@ class AtomicSwarmModeTemplateDefinitionTestCase(base.TestCase):
         floating_ip_enabled=True,
         public_ip_output_key='swarm_nodes',
         private_ip_output_key='swarm_nodes_private',
-        cluster_attr='node_addresses',
+        cluster_attr=None,
+        nodegroup_attr=None,
+        is_master=False
     ):
 
         definition = self.get_definition()
@@ -1407,14 +1447,20 @@ class AtomicSwarmModeTemplateDefinitionTestCase(base.TestCase):
         ]
         mock_stack = mock.MagicMock()
         mock_stack.to_dict.return_value = {'outputs': outputs}
-        mock_cluster = mock.MagicMock()
         mock_cluster_template = mock.MagicMock()
         mock_cluster_template.floating_ip_enabled = floating_ip_enabled
 
         definition.update_outputs(mock_stack, mock_cluster_template,
-                                  mock_cluster)
+                                  self.mock_cluster)
 
-        self.assertEqual(expected_address, getattr(mock_cluster, cluster_attr))
+        actual = None
+        if cluster_attr:
+            actual = getattr(self.mock_cluster, cluster_attr)
+        elif is_master:
+            actual = getattr(self.master_ng, nodegroup_attr)
+        else:
+            actual = getattr(self.worker_ng, nodegroup_attr)
+        self.assertEqual(expected_address, actual)
 
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.drivers.swarm_fedora_atomic_v2.template_def'
@@ -1472,8 +1518,12 @@ class AtomicSwarmModeTemplateDefinitionTestCase(base.TestCase):
     def test_swarm_get_heat_param(self):
         swarm_def = swarm_v2_tdef.AtomicSwarmTemplateDefinition()
 
-        heat_param = swarm_def.get_heat_param(cluster_attr='node_count')
+        swarm_def.add_nodegroup_params(self.mock_cluster)
+        heat_param = swarm_def.get_heat_param(nodegroup_attr='node_count',
+                                              nodegroup_uuid='worker_ng')
         self.assertEqual('number_of_nodes', heat_param)
+        heat_param = swarm_def.get_heat_param(cluster_attr='uuid')
+        self.assertEqual('cluster_uuid', heat_param)
 
     def test_update_outputs(self):
         swarm_def = swarm_v2_tdef.AtomicSwarmTemplateDefinition()
@@ -1500,27 +1550,29 @@ class AtomicSwarmModeTemplateDefinitionTestCase(base.TestCase):
         ]
         mock_stack = mock.MagicMock()
         mock_stack.to_dict.return_value = {'outputs': outputs}
-        mock_cluster = mock.MagicMock()
         mock_cluster_template = mock.MagicMock()
 
         swarm_def.update_outputs(mock_stack, mock_cluster_template,
-                                 mock_cluster)
+                                 self.mock_cluster)
         expected_api_address = "tcp://%s:2375" % expected_api_address
-        self.assertEqual(expected_api_address, mock_cluster.api_address)
-        self.assertEqual(expected_node_addresses, mock_cluster.node_addresses)
+        self.assertEqual(expected_api_address, self.mock_cluster.api_address)
+        self.assertEqual(expected_node_addresses,
+                         self.mock_cluster.default_ng_worker.node_addresses)
 
     def test_update_outputs_master_address(self):
         self._test_update_outputs_server_address(
             public_ip_output_key='swarm_primary_master',
             private_ip_output_key='swarm_primary_master_private',
-            cluster_attr='master_addresses',
+            nodegroup_attr='node_addresses',
+            is_master=True
         )
 
     def test_update_outputs_node_address(self):
         self._test_update_outputs_server_address(
             public_ip_output_key='swarm_nodes',
             private_ip_output_key='swarm_nodes_private',
-            cluster_attr='node_addresses',
+            nodegroup_attr='node_addresses',
+            is_master=False
         )
 
     def test_update_outputs_master_address_fip_disabled(self):
@@ -1528,7 +1580,8 @@ class AtomicSwarmModeTemplateDefinitionTestCase(base.TestCase):
             floating_ip_enabled=False,
             public_ip_output_key='swarm_primary_master',
             private_ip_output_key='swarm_primary_master_private',
-            cluster_attr='master_addresses',
+            nodegroup_attr='node_addresses',
+            is_master=True
         )
 
     def test_update_outputs_node_address_fip_disabled(self):
@@ -1536,11 +1589,21 @@ class AtomicSwarmModeTemplateDefinitionTestCase(base.TestCase):
             floating_ip_enabled=False,
             public_ip_output_key='swarm_nodes',
             private_ip_output_key='swarm_nodes_private',
-            cluster_attr='node_addresses',
+            nodegroup_attr='node_addresses',
+            is_master=False
         )
 
 
 class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
+
+    def setUp(self):
+        super(AtomicSwarmTemplateDefinitionTestCase, self).setUp()
+        self.master_ng = mock.MagicMock(uuid='master_ng', role='master')
+        self.worker_ng = mock.MagicMock(uuid='worker_ng', role='worker')
+        self.nodegroups = [self.master_ng, self.worker_ng]
+        self.mock_cluster = mock.MagicMock(nodegroups=self.nodegroups,
+                                           default_ng_worker=self.worker_ng,
+                                           default_ng_master=self.master_ng)
 
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.drivers.swarm_fedora_atomic_v1.template_def'
@@ -1757,7 +1820,9 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
     def test_swarm_get_heat_param(self):
         swarm_def = swarm_tdef.AtomicSwarmTemplateDefinition()
 
-        heat_param = swarm_def.get_heat_param(cluster_attr='node_count')
+        swarm_def.add_nodegroup_params(self.mock_cluster)
+        heat_param = swarm_def.get_heat_param(nodegroup_attr='node_count',
+                                              nodegroup_uuid='worker_ng')
         self.assertEqual('number_of_nodes', heat_param)
 
     def test_update_outputs(self):
@@ -1785,17 +1850,26 @@ class AtomicSwarmTemplateDefinitionTestCase(base.TestCase):
         ]
         mock_stack = mock.MagicMock()
         mock_stack.to_dict.return_value = {'outputs': outputs}
-        mock_cluster = mock.MagicMock()
         mock_cluster_template = mock.MagicMock()
 
         swarm_def.update_outputs(mock_stack, mock_cluster_template,
-                                 mock_cluster)
+                                 self.mock_cluster)
         expected_api_address = "tcp://%s:2376" % expected_api_address
-        self.assertEqual(expected_api_address, mock_cluster.api_address)
-        self.assertEqual(expected_node_addresses, mock_cluster.node_addresses)
+        self.assertEqual(expected_api_address, self.mock_cluster.api_address)
+        self.assertEqual(expected_node_addresses,
+                         self.worker_ng.node_addresses)
 
 
 class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
+
+    def setUp(self):
+        super(UbuntuMesosTemplateDefinitionTestCase, self).setUp()
+        self.master_ng = mock.MagicMock(uuid='master_ng', role='master')
+        self.worker_ng = mock.MagicMock(uuid='worker_ng', role='worker')
+        self.nodegroups = [self.master_ng, self.worker_ng]
+        self.mock_cluster = mock.MagicMock(nodegroups=self.nodegroups,
+                                           default_ng_worker=self.worker_ng,
+                                           default_ng_master=self.master_ng)
 
     @mock.patch('magnum.common.clients.OpenStackClients')
     @mock.patch('magnum.drivers.heat.template_def.BaseTemplateDefinition'
@@ -1875,10 +1949,14 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
     def test_mesos_get_heat_param(self):
         mesos_def = mesos_tdef.UbuntuMesosTemplateDefinition()
 
-        heat_param = mesos_def.get_heat_param(cluster_attr='node_count')
+        mesos_def.add_nodegroup_params(self.mock_cluster)
+
+        heat_param = mesos_def.get_heat_param(nodegroup_attr='node_count',
+                                              nodegroup_uuid='worker_ng')
         self.assertEqual('number_of_slaves', heat_param)
 
-        heat_param = mesos_def.get_heat_param(cluster_attr='master_count')
+        heat_param = mesos_def.get_heat_param(nodegroup_attr='node_count',
+                                              nodegroup_uuid='master_ng')
         self.assertEqual('number_of_masters', heat_param)
 
     def test_update_outputs(self):
@@ -1907,13 +1985,13 @@ class UbuntuMesosTemplateDefinitionTestCase(base.TestCase):
         ]
         mock_stack = mock.MagicMock()
         mock_stack.to_dict.return_value = {'outputs': outputs}
-        mock_cluster = mock.MagicMock()
         mock_cluster_template = mock.MagicMock()
 
         mesos_def.update_outputs(mock_stack, mock_cluster_template,
-                                 mock_cluster)
+                                 self.mock_cluster)
 
-        self.assertEqual(expected_api_address, mock_cluster.api_address)
-        self.assertEqual(expected_node_addresses, mock_cluster.node_addresses)
+        self.assertEqual(expected_api_address, self.mock_cluster.api_address)
+        self.assertEqual(expected_node_addresses,
+                         self.mock_cluster.default_ng_worker.node_addresses)
         self.assertEqual(expected_master_addresses,
-                         mock_cluster.master_addresses)
+                         self.mock_cluster.default_ng_master.node_addresses)

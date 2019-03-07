@@ -16,6 +16,7 @@ import ast
 
 from oslo_log import log as logging
 from oslo_utils import strutils
+from oslo_utils import uuidutils
 import re
 import requests
 import six
@@ -51,8 +52,7 @@ class ParameterMapping(object):
     isn't set, a RequiredArgumentNotProvided exception will be raised.
     """
     def __init__(self, heat_param, cluster_template_attr=None,
-                 cluster_attr=None, required=False,
-                 param_type=lambda x: x):
+                 cluster_attr=None, required=False, param_type=lambda x: x):
         self.heat_param = heat_param
         self.cluster_template_attr = cluster_template_attr
         self.cluster_attr = cluster_attr
@@ -60,8 +60,17 @@ class ParameterMapping(object):
         self.param_type = param_type
 
     def set_param(self, params, cluster_template, cluster):
-        value = None
+        value = self.get_value(cluster_template, cluster)
+        if self.required and value is None:
+            kwargs = dict(heat_param=self.heat_param)
+            raise exception.RequiredParameterNotProvided(**kwargs)
 
+        if value is not None:
+            value = self.param_type(value)
+            params[self.heat_param] = value
+
+    def get_value(self, cluster_template, cluster):
+        value = None
         if (self.cluster_template_attr and
                 getattr(cluster_template, self.cluster_template_attr, None)
                 is not None):
@@ -69,13 +78,26 @@ class ParameterMapping(object):
         elif (self.cluster_attr and
                 getattr(cluster, self.cluster_attr, None) is not None):
             value = getattr(cluster, self.cluster_attr)
-        elif self.required:
-            kwargs = dict(heat_param=self.heat_param)
-            raise exception.RequiredParameterNotProvided(**kwargs)
+        return value
 
-        if value is not None:
-            value = self.param_type(value)
-            params[self.heat_param] = value
+
+class NodeGroupParameterMapping(ParameterMapping):
+
+    def __init__(self, heat_param, nodegroup_attr=None, nodegroup_uuid=None,
+                 required=False, param_type=lambda x: x):
+        self.heat_param = heat_param
+        self.nodegroup_attr = nodegroup_attr
+        self.nodegroup_uuid = nodegroup_uuid
+        self.required = required
+        self.param_type = param_type
+
+    def get_value(self, cluster_template, cluster):
+        value = None
+        for ng in cluster.nodegroups:
+            if ng.uuid == self.nodegroup_uuid:
+                value = getattr(ng, self.nodegroup_attr)
+                break
+        return value
 
 
 class OutputMapping(object):
@@ -94,8 +116,9 @@ class OutputMapping(object):
             return
 
         output_value = self.get_output_value(stack)
-        if output_value is not None:
-            setattr(cluster, self.cluster_attr, output_value)
+        if output_value is None:
+            return
+        setattr(cluster, self.cluster_attr, output_value)
 
     def matched(self, output_key):
         return self.heat_output == output_key
@@ -106,6 +129,51 @@ class OutputMapping(object):
                 return output['output_value']
 
         LOG.warning('stack does not have output_key %s', self.heat_output)
+        return None
+
+
+class NodeGroupOutputMapping(OutputMapping):
+    """A mapping associating stack info and nodegroup attr.
+
+    A NodeGroupOutputMapping is an association of a Heat output or parameter
+    with a nodegroup field. By default stack output values are reflected to the
+    specified nodegroup attribute. In the case where is_stack_param is set to
+    True, the specified heat information will come from the stack parameters.
+    """
+    def __init__(self, heat_output, nodegroup_attr=None, nodegroup_uuid=None,
+                 is_stack_param=False):
+        self.nodegroup_attr = nodegroup_attr
+        self.nodegroup_uuid = nodegroup_uuid
+        self.heat_output = heat_output
+        self.is_stack_param = is_stack_param
+
+    def set_output(self, stack, cluster_template, cluster):
+        if self.nodegroup_attr is None:
+            return
+
+        output_value = self.get_output_value(stack)
+        if output_value is None:
+            return
+
+        for ng in cluster.nodegroups:
+            if ng.uuid == self.nodegroup_uuid:
+                # nodegroups are fetched from the database every
+                # time, so the bad thing here is that we need to
+                # save each change.
+                setattr(ng, self.nodegroup_attr, output_value)
+                ng.save()
+
+    def get_output_value(self, stack):
+        if not self.is_stack_param:
+            return super(NodeGroupOutputMapping, self).get_output_value(stack)
+        return self.get_param_value(stack)
+
+    def get_param_value(self, stack):
+        for param, value in stack.parameters.items():
+            if param == self.heat_output:
+                return value
+
+        LOG.warning('stack does not have param %s', self.heat_output)
         return None
 
 
@@ -123,7 +191,8 @@ class TemplateDefinition(object):
         self.output_mappings = list()
 
     def add_parameter(self, *args, **kwargs):
-        param = ParameterMapping(*args, **kwargs)
+        param_class = kwargs.pop('param_class', ParameterMapping)
+        param = param_class(*args, **kwargs)
         self.param_mappings.append(param)
 
     def add_output(self, *args, **kwargs):
@@ -171,7 +240,8 @@ class TemplateDefinition(object):
         """
         return []
 
-    def get_heat_param(self, cluster_attr=None, cluster_template_attr=None):
+    def get_heat_param(self, cluster_attr=None, cluster_template_attr=None,
+                       nodegroup_attr=None, nodegroup_uuid=None):
         """Returns stack param name.
 
         Return stack param name using cluster and cluster_template attributes
@@ -183,11 +253,52 @@ class TemplateDefinition(object):
         :return: stack parameter name or None
         """
         for mapping in self.param_mappings:
-            if (mapping.cluster_attr == cluster_attr and
-                    mapping.cluster_template_attr == cluster_template_attr):
-                return mapping.heat_param
+            if hasattr(mapping, 'cluster_attr'):
+                if mapping.cluster_attr == cluster_attr and \
+                        mapping.cluster_template_attr == cluster_template_attr:
+                    return mapping.heat_param
+            if hasattr(mapping, 'nodegroup_attr'):
+                if mapping.nodegroup_attr == nodegroup_attr and \
+                        mapping.nodegroup_uuid == nodegroup_uuid:
+                    return mapping.heat_param
 
         return None
+
+    def get_stack_diff(self, context, heat_params, cluster):
+        """Returns all the params that are changed.
+
+        Compares the current params of a stack with the template def for
+        the cluster and return the ones that changed.
+        :param heat_params: a dict containing the current params and values
+         for a stack
+        :param cluster: the cluster we need to compare with.
+        """
+        diff = {}
+        for mapping in self.param_mappings:
+            try:
+                heat_param_name = mapping.heat_param
+                stack_value = heat_params[heat_param_name]
+                value = mapping.get_value(cluster.cluster_template, cluster)
+                if value is None:
+                    continue
+                # We need to avoid changing the param values if it's not
+                # necessary, so for some attributes we need to resolve the
+                # value either to name or uuid.
+                value = self.resolve_ambiguous_values(context, heat_param_name,
+                                                      stack_value, value)
+                if stack_value != value:
+                    diff.update({heat_param_name: value})
+            except KeyError:
+                # If the key is not in heat_params just skip it. In case
+                # of update we don't want to trigger a rebuild....
+                continue
+        return diff
+
+    def resolve_ambiguous_values(self, context, heat_param, heat_value, value):
+        return str(value)
+
+    def add_nodegroup_params(self, cluster):
+        pass
 
     def update_outputs(self, stack, cluster_template, cluster):
         for output in self.output_mappings:
@@ -224,8 +335,6 @@ class BaseTemplateDefinition(TemplateDefinition):
                            cluster_template_attr='https_proxy')
         self.add_parameter('no_proxy',
                            cluster_template_attr='no_proxy')
-        self.add_parameter('number_of_masters',
-                           cluster_attr='master_count')
 
     @property
     def driver_module_path(self):
@@ -242,6 +351,9 @@ class BaseTemplateDefinition(TemplateDefinition):
 
     def get_params(self, context, cluster_template, cluster, **kwargs):
         osc = self.get_osc(context)
+
+        # Add all the params from the cluster's nodegroups
+        self.add_nodegroup_params(cluster)
 
         extra_params = kwargs.pop('extra_params', {})
         extra_params['trustee_domain_id'] = osc.keystone().trustee_domain_id
@@ -270,6 +382,39 @@ class BaseTemplateDefinition(TemplateDefinition):
                      self).get_params(context, cluster_template, cluster,
                                       extra_params=extra_params,
                                       **kwargs)
+
+    def resolve_ambiguous_values(self, context, heat_param, heat_value, value):
+        # Ambiguous values should be converted to the same format.
+        osc = self.get_osc(context)
+        if heat_param == 'external_network':
+            network = osc.neutron().show_network(heat_value).get('network')
+            if uuidutils.is_uuid_like(heat_value):
+                value = network.get('id')
+            else:
+                value = network('name')
+        # Any other values we might need to resolve?
+        return super(BaseTemplateDefinition, self).resolve_ambiguous_values(
+            context, heat_param, heat_value, value)
+
+    def add_nodegroup_params(self, cluster):
+        # Assuming that all the drivers that will not override
+        # this method do not support more than two nodegroups.
+        # Meaning that we have one master and one worker.
+        master_ng = cluster.default_ng_master
+        self.add_parameter('number_of_masters',
+                           nodegroup_attr='node_count',
+                           nodegroup_uuid=master_ng.uuid,
+                           param_class=NodeGroupParameterMapping)
+
+    def update_outputs(self, stack, cluster_template, cluster):
+        master_ng = cluster.default_ng_master
+        self.add_output('number_of_masters',
+                        nodegroup_attr='node_count',
+                        nodegroup_uuid=master_ng.uuid,
+                        is_stack_param=True,
+                        mapping_type=NodeGroupOutputMapping)
+        super(BaseTemplateDefinition,
+              self).update_outputs(stack, cluster_template, cluster)
 
     def validate_discovery_url(self, discovery_url, expect_size):
         url = str(discovery_url)
@@ -327,11 +472,8 @@ class BaseTemplateDefinition(TemplateDefinition):
 
     def get_discovery_url(self, cluster, cluster_template=None):
         if hasattr(cluster, 'discovery_url') and cluster.discovery_url:
-            if getattr(cluster, 'master_count', None) is not None:
-                self.validate_discovery_url(cluster.discovery_url,
-                                            cluster.master_count)
-            else:
-                self.validate_discovery_url(cluster.discovery_url, 1)
+            self.validate_discovery_url(cluster.discovery_url,
+                                        cluster.master_count)
             discovery_url = cluster.discovery_url
         else:
             discovery_endpoint = (

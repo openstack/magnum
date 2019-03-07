@@ -114,6 +114,38 @@ class TestClusterConductorWithK8s(base.TestCase):
             'flavor_id': 'flavor_id',
             'project_id': 'project_id',
         }
+        self.worker_ng_dict = {
+            'uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a53',
+            'name': 'worker_ng',
+            'cluster_id': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
+            'project_id': 'project_id',
+            'docker_volume_size': 20,
+            'labels': self.cluster_dict['labels'],
+            'flavor_id': 'flavor_id',
+            'image_id': 'image_id',
+            'node_addresses': ['172.17.2.4'],
+            'node_count': 1,
+            'role': 'worker',
+            'max_nodes': 5,
+            'min_nodes': 1,
+            'is_default': True
+        }
+        self.master_ng_dict = {
+            'uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a54',
+            'name': 'master_ng',
+            'cluster_id': '5d12f6fd-a196-4bf0-ae4c-1f639a523a52',
+            'project_id': 'project_id',
+            'docker_volume_size': 20,
+            'labels': self.cluster_dict['labels'],
+            'flavor_id': 'master_flavor_id',
+            'image_id': 'image_id',
+            'node_addresses': ['172.17.2.18'],
+            'node_count': 1,
+            'role': 'master',
+            'max_nodes': 5,
+            'min_nodes': 1,
+            'is_default': True
+        }
         self.context.user_name = 'fake_user'
         self.context.project_id = 'fake_tenant'
         osc_patcher = mock.patch('magnum.common.clients.OpenStackClients')
@@ -137,6 +169,7 @@ class TestClusterConductorWithK8s(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.objects.NodeGroup.list')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
     @patch('magnum.conductor.handlers.common.cert_manager'
            '.sign_node_certificate')
@@ -146,11 +179,13 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_generate_csr_and_key,
             mock_sign_node_certificate,
             mock_driver,
+            mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self._test_extract_template_definition(
             mock_generate_csr_and_key, mock_sign_node_certificate,
-            mock_driver, mock_objects_cluster_template_get_by_uuid, mock_get)
+            mock_driver, mock_objects_cluster_template_get_by_uuid, mock_get,
+            mock_objects_nodegroup_list)
 
     def _test_extract_template_definition(
             self,
@@ -159,11 +194,16 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
+            mock_objects_nodegroup_list,
             missing_attr=None):
         if missing_attr in self.cluster_template_dict:
             self.cluster_template_dict[missing_attr] = None
         elif missing_attr in self.cluster_dict:
             self.cluster_dict[missing_attr] = None
+        elif missing_attr == 'node_count':
+            self.worker_ng_dict['node_count'] = None
+        elif missing_attr == 'master_count':
+            self.master_ng_dict['node_count'] = None
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
         mock_generate_csr_and_key.return_value = {'csr': 'csr',
@@ -179,6 +219,9 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_resp.status_code = 200
         mock_get.return_value = mock_resp
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+        worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
+        master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
+        mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
         mock_driver.return_value = k8s_dr.Driver()
 
         (template_path,
@@ -310,6 +353,7 @@ class TestClusterConductorWithK8s(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.objects.NodeGroup.list')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
     @patch('magnum.conductor.handlers.common.cert_manager'
            '.sign_node_certificate')
@@ -319,6 +363,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_generate_csr_and_key,
             mock_sign_node_certificate,
             mock_driver,
+            mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self.cluster_template_dict['registry_enabled'] = True
@@ -336,6 +381,9 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_resp.text = expected_result
         mock_get.return_value = mock_resp
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+        worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
+        master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
+        mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
         mock_driver.return_value = k8s_dr.Driver()
 
         CONF.set_override('swift_region',
@@ -431,6 +479,7 @@ class TestClusterConductorWithK8s(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.objects.NodeGroup.list')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
     @patch('magnum.conductor.handlers.common.cert_manager'
            '.sign_node_certificate')
@@ -440,6 +489,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_generate_csr_and_key,
             mock_sign_node_certificate,
             mock_driver,
+            mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
 
@@ -467,6 +517,9 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_get.return_value = mock_resp
         mock_driver.return_value = k8s_dr.Driver()
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+        worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
+        master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
+        mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
 
         (template_path,
          definition,
@@ -540,10 +593,12 @@ class TestClusterConductorWithK8s(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.objects.NodeGroup.list')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_coreos_with_disovery(
             self,
             mock_driver,
+            mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self.cluster_template_dict['cluster_distro'] = 'coreos'
@@ -558,6 +613,9 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_resp.status_code = 200
         mock_get.return_value = mock_resp
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+        worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
+        master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
+        mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
         mock_driver.return_value = k8s_coreos_dr.Driver()
 
         (template_path,
@@ -640,10 +698,12 @@ class TestClusterConductorWithK8s(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.objects.NodeGroup.list')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
     def test_extract_template_definition_coreos_no_discoveryurl(
             self,
             mock_driver,
+            mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
             reqget):
         self.cluster_template_dict['cluster_distro'] = 'coreos'
@@ -656,6 +716,9 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+        worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
+        master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
+        mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
         mock_driver.return_value = k8s_coreos_dr.Driver()
 
         (template_path,
@@ -738,6 +801,7 @@ class TestClusterConductorWithK8s(base.TestCase):
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.objects.NodeGroup.list')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
     @patch('magnum.conductor.handlers.common.cert_manager'
            '.sign_node_certificate')
@@ -747,6 +811,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_generate_csr_and_key,
             mock_sign_node_certificate,
             mock_driver,
+            mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         mock_driver.return_value = k8s_dr.Driver()
@@ -756,10 +821,12 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
+            mock_objects_nodegroup_list,
             missing_attr='dns_nameserver')
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.objects.NodeGroup.list')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
     @patch('magnum.conductor.handlers.common.cert_manager'
            '.sign_node_certificate')
@@ -769,6 +836,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_generate_csr_and_key,
             mock_sign_node_certificate,
             mock_driver,
+            mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         mock_driver.return_value = k8s_dr.Driver()
@@ -778,10 +846,12 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
+            mock_objects_nodegroup_list,
             missing_attr='image_id')
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.objects.NodeGroup.list')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
     @patch('magnum.conductor.handlers.common.cert_manager'
            '.sign_node_certificate')
@@ -791,6 +861,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_generate_csr_and_key,
             mock_sign_node_certificate,
             mock_driver,
+            mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         mock_driver.return_value = k8s_dr.Driver()
@@ -800,10 +871,12 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
+            mock_objects_nodegroup_list,
             missing_attr='docker_storage_driver')
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.objects.NodeGroup.list')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
     @patch('magnum.conductor.handlers.common.cert_manager'
            '.sign_node_certificate')
@@ -813,6 +886,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_generate_csr_and_key,
             mock_sign_node_certificate,
             mock_driver,
+            mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         mock_driver.return_value = k8s_dr.Driver()
@@ -822,54 +896,12 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_driver,
             mock_objects_cluster_template_get_by_uuid,
             mock_get,
+            mock_objects_nodegroup_list,
             missing_attr='apiserver_port')
 
     @patch('requests.get')
     @patch('magnum.objects.ClusterTemplate.get_by_uuid')
-    @patch('magnum.drivers.common.driver.Driver.get_driver')
-    @patch('magnum.conductor.handlers.common.cert_manager'
-           '.sign_node_certificate')
-    @patch('magnum.common.x509.operations.generate_csr_and_key')
-    def test_extract_template_definition_without_node_count(
-            self,
-            mock_generate_csr_and_key,
-            mock_sign_node_certificate,
-            mock_driver,
-            mock_objects_cluster_template_get_by_uuid,
-            mock_get):
-        mock_driver.return_value = k8s_dr.Driver()
-        self._test_extract_template_definition(
-            mock_generate_csr_and_key,
-            mock_sign_node_certificate,
-            mock_driver,
-            mock_objects_cluster_template_get_by_uuid,
-            mock_get,
-            missing_attr='node_count')
-
-    @patch('requests.get')
-    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
-    @patch('magnum.drivers.common.driver.Driver.get_driver')
-    @patch('magnum.conductor.handlers.common.cert_manager'
-           '.sign_node_certificate')
-    @patch('magnum.common.x509.operations.generate_csr_and_key')
-    def test_extract_template_definition_without_master_count(
-            self,
-            mock_generate_csr_and_key,
-            mock_sign_node_certificate,
-            mock_driver,
-            mock_objects_cluster_template_get_by_uuid,
-            mock_get):
-        mock_driver.return_value = k8s_dr.Driver()
-        self._test_extract_template_definition(
-            mock_generate_csr_and_key,
-            mock_sign_node_certificate,
-            mock_driver,
-            mock_objects_cluster_template_get_by_uuid,
-            mock_get,
-            missing_attr='master_count')
-
-    @patch('requests.get')
-    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.objects.NodeGroup.list')
     @patch('magnum.drivers.common.driver.Driver.get_driver')
     @patch('magnum.conductor.handlers.common.cert_manager'
            '.sign_node_certificate')
@@ -879,6 +911,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             mock_generate_csr_and_key,
             mock_sign_node_certificate,
             mock_driver,
+            mock_objects_nodegroup_list,
             mock_objects_cluster_template_get_by_uuid,
             reqget):
         cluster_template = objects.ClusterTemplate(
@@ -892,6 +925,9 @@ class TestClusterConductorWithK8s(base.TestCase):
         cluster_dict = self.cluster_dict
         cluster_dict['discovery_url'] = None
         cluster = objects.Cluster(self.context, **cluster_dict)
+        worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
+        master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
+        mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
         mock_driver.return_value = k8s_dr.Driver()
 
         CONF.set_override('etcd_discovery_service_endpoint_format',
@@ -1109,21 +1145,35 @@ class TestClusterConductorWithK8s(base.TestCase):
     @patch('magnum.drivers.k8s_fedora_atomic_v1.driver.Driver.'
            '_extract_template_definition')
     @patch('magnum.common.clients.OpenStackClients')
+    @patch('magnum.objects.ClusterTemplate.get_by_uuid')
+    @patch('magnum.objects.NodeGroup.list')
     def test_update_stack(self,
+                          mock_objects_nodegroup_list,
+                          mock_objects_cluster_template_get_by_uuid,
                           mock_osc,
                           mock_extract_template_definition,
                           mock_get_template_contents):
 
         mock_stack_id = 'xx-xx-xx-xx'
-        mock_heat_client = mock.MagicMock()
+        mock_stack = mock.MagicMock(parameters={'number_of_minions': 1})
+        mock_stacks = mock.MagicMock()
+        mock_stacks.get.return_value = mock_stack
+        mock_heat_client = mock.MagicMock(stacks=mock_stacks)
         mock_osc.return_value.heat.return_value = mock_heat_client
-        mock_cluster = mock.MagicMock()
-        mock_cluster.stack_id = mock_stack_id
+        mock_template = objects.ClusterTemplate(
+            self.context, **self.cluster_template_dict)
+        mock_objects_cluster_template_get_by_uuid.return_value = mock_template
+        mock_cluster = objects.Cluster(self.context, **self.cluster_dict)
+        mock_cluster.cluster_template = mock_template
+        self.worker_ng_dict['node_count'] = 2
+        worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
+        master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
+        mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
 
         k8s_dr.Driver().update_cluster({}, mock_cluster)
 
         expected_args = {
-            'parameters': {'number_of_minions': mock_cluster.node_count},
+            'parameters': {'number_of_minions': '2'},
             'existing': True,
             'disable_rollback': True
         }
