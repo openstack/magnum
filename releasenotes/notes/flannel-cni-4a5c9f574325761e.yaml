@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    For k8s_fedora_atomic, run flannel as a cni plugin. The deployment method
+    is taken from the flannel upstream documentation. One more label for the
+    cni tag is added `flannel_cni_tag` for the container,
+    quay.io/repository/coreos/flannel-cni. The flannel container is taken
+    from flannel upsteam as well quay.io/repository/coreos/flannel.

@@ -109,7 +109,7 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                       'cgroup_driver',
                       'calico_tag', 'calico_cni_tag',
                       'calico_kube_controllers_tag', 'calico_ipv4pool',
-                      'etcd_tag', 'flannel_tag',
+                      'etcd_tag', 'flannel_tag', 'flannel_cni_tag',
                       'cloud_provider_enabled',
                       'cloud_provider_tag',
                       'prometheus_tag',

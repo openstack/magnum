@@ -147,5 +147,3 @@ chmod 550 "${cert_dir}"
 chown -R kube:kube_etcd "${cert_dir}"
 chmod 440 ${cert_dir}/kubelet.key
 chmod 440 ${cert_dir}/proxy.key
-mkdir -p /etc/flanneld/certs
-cp ${cert_dir}/* /etc/flanneld/certs
