@@ -69,9 +69,6 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'name': 'cluster1',
             'stack_id': 'xx-xx-xx-xx',
             'api_address': '172.17.2.3',
-            'node_addresses': ['172.17.2.4'],
-            'master_count': 1,
-            'node_count': 1,
             'discovery_url': 'https://discovery.test.io/123456789',
             'trustee_username': 'fake_trustee',
             'trustee_password': 'fake_trustee_password',
@@ -556,7 +553,6 @@ class TestClusterConductorWithSwarm(base.TestCase):
             mock_objects_cluster_template_get_by_uuid,
             mock_get):
         self.cluster_template_dict['master_lb_enabled'] = True
-        self.cluster_dict['master_count'] = 2
         self.master_ng_dict['node_count'] = 2
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)

@@ -49,8 +49,10 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
     # Version 1.17: Added 'flavor_id' field
     # Version 1.18: Added 'health_status' and 'health_status_reason' field
     # Version 1.19: Added nodegroups, default_ng_worker, default_ng_master
+    # Version 1.20: Fields node_count, master_count, node_addresses,
+    #               master_addresses are now properties.
 
-    VERSION = '1.19'
+    VERSION = '1.20'
 
     dbapi = dbapi.get_instance()
 
@@ -73,11 +75,7 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
         'health_status_reason': fields.DictOfStringsField(nullable=True),
         'create_timeout': fields.IntegerField(nullable=True),
         'api_address': fields.StringField(nullable=True),
-        'node_addresses': fields.ListOfStringsField(nullable=True),
-        'node_count': fields.IntegerField(nullable=True),
-        'master_count': fields.IntegerField(nullable=True),
         'discovery_url': fields.StringField(nullable=True),
-        'master_addresses': fields.ListOfStringsField(nullable=True),
         'ca_cert_ref': fields.StringField(nullable=True),
         'magnum_cert_ref': fields.StringField(nullable=True),
         'cluster_template': fields.ObjectField('ClusterTemplate'),
@@ -127,6 +125,30 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
         # master nodegroup.
         filters = {'role': 'master', 'is_default': True}
         return NodeGroup.list(self._context, self.uuid, filters=filters)[0]
+
+    @property
+    def node_count(self):
+        return sum(n.node_count for n in self.nodegroups if n.role != 'master')
+
+    @property
+    def master_count(self):
+        return sum(n.node_count for n in self.nodegroups if n.role == 'master')
+
+    @property
+    def node_addresses(self):
+        node_addresses = []
+        for ng in self.nodegroups:
+            if ng.role != 'master':
+                node_addresses += ng.node_addresses
+        return node_addresses
+
+    @property
+    def master_addresses(self):
+        master_addresses = []
+        for ng in self.nodegroups:
+            if ng.role == 'master':
+                master_addresses += ng.node_addresses
+        return master_addresses
 
     @staticmethod
     def _from_db_object_list(db_objects, cls, context):
@@ -299,3 +321,15 @@ class Cluster(base.MagnumPersistentObject, base.MagnumObject,
         for field in self.fields:
             if self.obj_attr_is_set(field) and self[field] != current[field]:
                 self[field] = current[field]
+
+    def as_dict(self):
+        dict_ = super(Cluster, self).as_dict()
+        # Update the dict with the attributes coming form
+        # the cluster's nodegroups.
+        dict_.update({
+            'node_count': self.node_count,
+            'master_count': self.master_count,
+            'node_addresses': self.node_addresses,
+            'master_addresses': self.master_addresses
+        })
+        return dict_

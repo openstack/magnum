@@ -183,6 +183,12 @@ class Bay(base.APIBase):
         else:
             setattr(self, 'bay_faults', kwargs.get('faults', wtypes.Unset))
 
+        nodegroup_fields = ['node_count', 'master_count',
+                            'node_addresses', 'master_addresses']
+        for field in nodegroup_fields:
+            self.fields.append(field)
+            setattr(self, field, kwargs.get(field, wtypes.Unset))
+
     @staticmethod
     def _convert_with_links(bay, url, expand=True):
         if not expand:

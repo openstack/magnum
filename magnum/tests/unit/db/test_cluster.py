@@ -79,22 +79,32 @@ class DbClusterTestCase(base.DbTestCase):
                           self.context, 'clusterone')
 
     def test_get_all_cluster_stats(self):
+        uuid1 = uuidutils.generate_uuid()
         utils.create_test_cluster(
             id=1, name='clusterone',
-            uuid=uuidutils.generate_uuid())
+            uuid=uuid1)
+        utils.create_nodegroups_for_cluster(cluster_id=uuid1)
+        uuid2 = uuidutils.generate_uuid()
         utils.create_test_cluster(
             id=2, name='clustertwo',
-            uuid=uuidutils.generate_uuid())
+            uuid=uuid2)
+        utils.create_nodegroups_for_cluster(cluster_id=uuid2)
         ret = self.dbapi.get_cluster_stats(self.context)
         self.assertEqual(ret, (2, 12))
 
     def test_get_one_tenant_cluster_stats(self):
+        uuid1 = uuidutils.generate_uuid()
         utils.create_test_cluster(
             id=1, name='clusterone', project_id='proj1',
-            uuid=uuidutils.generate_uuid())
+            uuid=uuid1)
+        utils.create_nodegroups_for_cluster(
+            cluster_id=uuid1, project_id='proj1')
+        uuid2 = uuidutils.generate_uuid()
         utils.create_test_cluster(
             id=2, name='clustertwo', project_id='proj2',
-            uuid=uuidutils.generate_uuid())
+            uuid=uuid2)
+        utils.create_nodegroups_for_cluster(
+            cluster_id=uuid2, project_id='proj2')
         ret = self.dbapi.get_cluster_stats(self.context, 'proj2')
         self.assertEqual(ret, (1, 6))
 
@@ -129,23 +139,26 @@ class DbClusterTestCase(base.DbTestCase):
         self.dbapi.create_cluster_template(ct1)
         self.dbapi.create_cluster_template(ct2)
 
+        uuid1 = uuidutils.generate_uuid()
         cluster1 = utils.create_test_cluster(
             name='cluster-one',
-            uuid=uuidutils.generate_uuid(),
+            uuid=uuid1,
             cluster_template_id=ct1['uuid'],
             status=cluster_status.CREATE_IN_PROGRESS)
+        utils.create_nodegroups_for_cluster(cluster_id=uuid1)
+        uuid2 = uuidutils.generate_uuid()
         cluster2 = utils.create_test_cluster(
             name='cluster-two',
-            uuid=uuidutils.generate_uuid(),
+            uuid=uuid2,
             cluster_template_id=ct2['uuid'],
-            node_count=1,
-            master_count=1,
             status=cluster_status.UPDATE_IN_PROGRESS)
+        utils.create_nodegroups_for_cluster(
+            cluster_id=uuid2, node_count=1, master_count=1)
         cluster3 = utils.create_test_cluster(
             name='cluster-three',
-            node_count=2,
-            master_count=5,
             status=cluster_status.DELETE_IN_PROGRESS)
+        utils.create_nodegroups_for_cluster(
+            node_count=2, master_count=5)
 
         res = self.dbapi.get_cluster_list(
             self.context, filters={'cluster_template_id': ct1['uuid']})
@@ -178,6 +191,15 @@ class DbClusterTestCase(base.DbTestCase):
         res = self.dbapi.get_cluster_list(self.context,
                                           filters={'master_count': 1})
         self.assertEqual([cluster2.id], [r.id for r in res])
+
+        # Check that both filters have to be valid
+        filters = {'master_count': 1, 'node_count': 1}
+        res = self.dbapi.get_cluster_list(self.context, filters=filters)
+        self.assertEqual([cluster2.id], [r.id for r in res])
+
+        filters = {'master_count': 1, 'node_count': 2}
+        res = self.dbapi.get_cluster_list(self.context, filters=filters)
+        self.assertEqual(0, len(res))
 
         filters = {'status': [cluster_status.CREATE_IN_PROGRESS,
                               cluster_status.DELETE_IN_PROGRESS]}
@@ -234,11 +256,11 @@ class DbClusterTestCase(base.DbTestCase):
 
     def test_update_cluster(self):
         cluster = utils.create_test_cluster()
-        old_nc = cluster.node_count
-        new_nc = 5
-        self.assertNotEqual(old_nc, new_nc)
-        res = self.dbapi.update_cluster(cluster.id, {'node_count': new_nc})
-        self.assertEqual(new_nc, res.node_count)
+        old_status = cluster.status
+        new_status = 'UPDATE_IN_PROGRESS'
+        self.assertNotEqual(old_status, new_status)
+        res = self.dbapi.update_cluster(cluster.id, {'status': new_status})
+        self.assertEqual(new_status, res.status)
 
     def test_update_cluster_not_found(self):
         cluster_uuid = uuidutils.generate_uuid()

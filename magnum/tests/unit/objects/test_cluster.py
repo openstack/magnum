@@ -171,13 +171,12 @@ class TestClusterObject(base.DbTestCase):
             with mock.patch.object(self.dbapi, 'update_cluster',
                                    autospec=True) as mock_update_cluster:
                 cluster = objects.Cluster.get_by_uuid(self.context, uuid)
-                cluster.node_count = 10
-                cluster.master_count = 5
+                cluster.status = 'DELETE_IN_PROGRESS'
                 cluster.save()
 
                 mock_get_cluster.assert_called_once_with(self.context, uuid)
                 mock_update_cluster.assert_called_once_with(
-                    uuid, {'node_count': 10, 'master_count': 5,
+                    uuid, {'status': 'DELETE_IN_PROGRESS',
                            'cluster_template': self.fake_cluster_template})
                 self.assertEqual(self.context, cluster._context)
 

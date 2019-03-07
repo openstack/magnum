@@ -26,6 +26,7 @@ from magnum import objects
 from magnum.tests import base
 from magnum.tests.unit.api import base as api_base
 from magnum.tests.unit.api import utils as apiutils
+from magnum.tests.unit.db import utils as db_utils
 from magnum.tests.unit.objects import utils as obj_utils
 
 
@@ -245,8 +246,10 @@ class TestPatch(api_base.FunctionalTest):
 
     def _simulate_rpc_bay_update(self, bay, node_count, rollback=False):
         bay.status = 'UPDATE_IN_PROGRESS'
-        bay.node_count = node_count
         bay.save()
+        default_ng_worker = bay.default_ng_worker
+        default_ng_worker.node_count = node_count
+        default_ng_worker.save()
         return bay
 
     @mock.patch('oslo_utils.timeutils.utcnow')
@@ -461,9 +464,10 @@ class TestPost(api_base.FunctionalTest):
 
     def _simulate_rpc_bay_create(self, bay, master_count, node_count,
                                  bay_create_timeout):
-        bay.node_count = node_count
-        bay.master_count = master_count
         bay.create()
+        db_utils.create_nodegroups_for_cluster(
+            cluster_id=bay.uuid, node_count=node_count,
+            master_count=master_count)
         return bay
 
     @mock.patch('oslo_utils.timeutils.utcnow')
@@ -493,6 +497,9 @@ class TestPost(api_base.FunctionalTest):
             self.assertEqual(self.context.project_id, bay.project_id)
             self.assertEqual(self.context.user_id, bay.user_id)
             bay.create()
+            db_utils.create_nodegroups_for_cluster(
+                cluster_id=bay.uuid, node_count=node_count,
+                master_count=master_count)
             return bay
         self.mock_bay_create.side_effect = _simulate_rpc_bay_create
 
@@ -703,6 +710,9 @@ class TestPost(api_base.FunctionalTest):
                                      bay_create_timeout):
             self.assertEqual(60, bay_create_timeout)
             bay.create()
+            db_utils.create_nodegroups_for_cluster(
+                cluster_id=bay.uuid, node_count=node_count,
+                master_count=master_count)
             return bay
         self.mock_bay_create.side_effect = _simulate_rpc_bay_create
         bdict = apiutils.bay_post_data()
@@ -833,6 +843,9 @@ class TestDelete(api_base.FunctionalTest):
     def _simulate_rpc_bay_delete(self, bay_uuid):
         bay = objects.Cluster.get_by_uuid(self.context, bay_uuid)
         bay.destroy()
+        ngs = objects.NodeGroup.list(self.context, bay_uuid)
+        for ng in ngs:
+            ng.destroy()
 
     def test_delete_bay(self):
         self.delete('/bays/%s' % self.bay.uuid)

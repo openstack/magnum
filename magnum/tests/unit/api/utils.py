@@ -43,6 +43,7 @@ def cluster_template_post_data(**kw):
 
 
 def bay_post_data(**kw):
+    kw.update({'for_api_use': True})
     bay = utils.get_test_cluster(**kw)
     bay['baymodel_id'] = kw.get('baymodel_id', bay['cluster_template_id'])
     bay['bay_create_timeout'] = kw.get('bay_create_timeout', 15)
@@ -53,6 +54,7 @@ def bay_post_data(**kw):
 
 
 def cluster_post_data(**kw):
+    kw.update({'for_api_use': True})
     cluster = utils.get_test_cluster(**kw)
     cluster['create_timeout'] = kw.get('create_timeout', 15)
     internal = cluster_controller.ClusterPatchType.internal_attrs()

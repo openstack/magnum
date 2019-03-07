@@ -182,6 +182,11 @@ class Cluster(base.APIBase):
                 continue
             self.fields.append(field)
             setattr(self, field, kwargs.get(field, wtypes.Unset))
+        nodegroup_fields = ['node_count', 'master_count',
+                            'node_addresses', 'master_addresses']
+        for field in nodegroup_fields:
+            self.fields.append(field)
+            setattr(self, field, kwargs.get(field, wtypes.Unset))
 
     @staticmethod
     def _convert_with_links(cluster, url, expand=True):
