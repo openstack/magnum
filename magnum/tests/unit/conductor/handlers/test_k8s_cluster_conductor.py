@@ -304,6 +304,7 @@ class TestClusterConductorWithK8s(base.TestCase):
              '../../common/templates/environments/with_volume.yaml',
              '../../common/templates/environments/no_master_lb.yaml',
              '../../common/templates/environments/disable_floating_ip.yaml',
+             '../../common/templates/environments/disable_lb_floating_ip.yaml',
              ],
             env_files)
 
@@ -424,6 +425,7 @@ class TestClusterConductorWithK8s(base.TestCase):
              '../../common/templates/environments/with_volume.yaml',
              '../../common/templates/environments/no_master_lb.yaml',
              '../../common/templates/environments/disable_floating_ip.yaml',
+             '../../common/templates/environments/disable_lb_floating_ip.yaml'
              ],
             env_files)
 
@@ -532,6 +534,7 @@ class TestClusterConductorWithK8s(base.TestCase):
              '../../common/templates/environments/with_volume.yaml',
              '../../common/templates/environments/no_master_lb.yaml',
              '../../common/templates/environments/disable_floating_ip.yaml',
+             '../../common/templates/environments/disable_lb_floating_ip.yaml'
              ],
             env_files)
 
@@ -630,7 +633,9 @@ class TestClusterConductorWithK8s(base.TestCase):
              '../../common/templates/environments/no_etcd_volume.yaml',
              '../../common/templates/environments/with_volume.yaml',
              '../../common/templates/environments/no_master_lb.yaml',
-             '../../common/templates/environments/disable_floating_ip.yaml'],
+             '../../common/templates/environments/disable_floating_ip.yaml',
+             '../../common/templates/environments/disable_lb_floating_ip.yaml'
+             ],
             env_files)
 
     @patch('requests.get')
@@ -726,7 +731,9 @@ class TestClusterConductorWithK8s(base.TestCase):
              '../../common/templates/environments/no_etcd_volume.yaml',
              '../../common/templates/environments/with_volume.yaml',
              '../../common/templates/environments/no_master_lb.yaml',
-             '../../common/templates/environments/disable_floating_ip.yaml'],
+             '../../common/templates/environments/disable_floating_ip.yaml',
+             '../../common/templates/environments/disable_lb_floating_ip.yaml'
+             ],
             env_files)
 
     @patch('requests.get')
@@ -970,6 +977,7 @@ class TestClusterConductorWithK8s(base.TestCase):
              '../../common/templates/environments/with_volume.yaml',
              '../../common/templates/environments/no_master_lb.yaml',
              '../../common/templates/environments/disable_floating_ip.yaml',
+             '../../common/templates/environments/disable_lb_floating_ip.yaml',
              ],
             env_files)
         reqget.assert_called_once_with('http://etcd/test?size=1', proxies={

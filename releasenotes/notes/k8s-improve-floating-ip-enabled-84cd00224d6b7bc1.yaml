@@ -1,0 +1,10 @@
+upgrade:
+  - The etcd service for Kubernetes cluster is no longer allocated a floating
+    IP.
+features:
+  - A new label named ``master_lb_floating_ip_enabled`` is introduced which
+    controls if Magnum allocates floating IP for the load balancer of master
+    nodes. This label only takes effect when the ``master_lb_enabled`` is set.
+    The default value is the same as ``floating_ip_enabled``. The
+    ``floating_ip_enabled`` property now only controls if Magnum should
+    allocate the floating IPs for the master and worker nodes.

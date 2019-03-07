@@ -15,6 +15,7 @@ import abc
 import ast
 
 from oslo_log import log as logging
+from oslo_utils import strutils
 import re
 import requests
 import six
@@ -385,15 +386,22 @@ def add_etcd_volume_env_file(env_files, cluster_template):
         env_files.append(COMMON_ENV_PATH + 'with_etcd_volume.yaml')
 
 
-def add_fip_env_file(env_files, cluster_template):
+def add_fip_env_file(env_files, cluster_template, cluster):
+    lb_fip_enabled = cluster.labels.get(
+        "master_lb_floating_ip_enabled",
+        cluster_template.floating_ip_enabled
+    )
+    master_lb_fip_enabled = strutils.bool_from_string(lb_fip_enabled)
+
     if cluster_template.floating_ip_enabled:
         env_files.append(COMMON_ENV_PATH + 'enable_floating_ip.yaml')
-        if cluster_template.master_lb_enabled:
-            env_files.append(COMMON_ENV_PATH + 'enable_lb_floating_ip.yaml')
     else:
         env_files.append(COMMON_ENV_PATH + 'disable_floating_ip.yaml')
-        if cluster_template.master_lb_enabled:
-            env_files.append(COMMON_ENV_PATH + 'disable_lb_floating_ip.yaml')
+
+    if cluster_template.master_lb_enabled and master_lb_fip_enabled:
+        env_files.append(COMMON_ENV_PATH + 'enable_lb_floating_ip.yaml')
+    else:
+        env_files.append(COMMON_ENV_PATH + 'disable_lb_floating_ip.yaml')
 
 
 def add_priv_net_env_file(env_files, cluster_template):

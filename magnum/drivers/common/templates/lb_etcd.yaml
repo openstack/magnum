@@ -1,0 +1,52 @@
+# etcd service load balancer doesn't have floating IP associated.
+heat_template_version: 2014-10-16
+
+parameters:
+
+  fixed_subnet:
+    type: string
+
+  protocol:
+    type: string
+    default: TCP
+    constraints:
+      - allowed_values: ["TCP", "HTTP"]
+
+  port:
+    type: number
+
+resources:
+  loadbalancer:
+    type: Magnum::Optional::Neutron::LBaaS::LoadBalancer
+    properties:
+      vip_subnet: {get_param: fixed_subnet}
+
+  listener:
+    type: Magnum::Optional::Neutron::LBaaS::Listener
+    properties:
+      loadbalancer: {get_resource: loadbalancer}
+      protocol: {get_param: protocol}
+      protocol_port: {get_param: port}
+
+  pool:
+    type: Magnum::Optional::Neutron::LBaaS::Pool
+    properties:
+      lb_algorithm: ROUND_ROBIN
+      listener: {get_resource: listener}
+      protocol: {get_param: protocol}
+
+  monitor:
+    type: Magnum::Optional::Neutron::LBaaS::HealthMonitor
+    properties:
+      type: TCP
+      delay: 5
+      max_retries: 5
+      timeout: 5
+      pool: { get_resource: pool }
+
+outputs:
+  pool_id:
+    value: {get_resource: pool}
+
+  address:
+    value: {get_attr: [loadbalancer, vip_address]}
