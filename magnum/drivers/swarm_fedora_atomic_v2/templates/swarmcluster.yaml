@@ -400,7 +400,7 @@ resources:
           rexray_preempt: {get_param: rexray_preempt}
           verify_ca: {get_param: verify_ca}
           openstack_ca: {get_param: openstack_ca}
-          nodes_server_group_id: {get_resource: worker_nodes_server_group}
+          nodes_server_group_id: {get_resource: master_nodes_server_group}
           availability_zone: {get_param: availability_zone}
 
   swarm_nodes:
@@ -445,7 +445,7 @@ resources:
           rexray_preempt: {get_param: rexray_preempt}
           verify_ca: {get_param: verify_ca}
           openstack_ca: {get_param: openstack_ca}
-          nodes_server_group_id: {get_resource: nodes_server_group}
+          nodes_server_group_id: {get_resource: worker_nodes_server_group}
           availability_zone: {get_param: availability_zone}
 
 outputs:
