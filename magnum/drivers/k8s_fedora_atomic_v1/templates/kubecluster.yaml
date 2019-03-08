@@ -555,6 +555,11 @@ parameters:
     description: namespace where tiller will be installed.
     default: "magnum-tiller"
 
+  node_problem_detector_tag:
+    type: string
+    description: tag of the node problem detector container
+    default: v0.6.2
+
 resources:
 
   ######################################################################
@@ -818,6 +823,7 @@ resources:
           tiller_enabled: {get_param: tiller_enabled}
           tiller_tag: {get_param: tiller_tag}
           tiller_namespace: {get_param: tiller_namespace}
+          node_problem_detector_tag: {get_param: node_problem_detector_tag}
 
   kube_cluster_config:
     type: OS::Heat::SoftwareConfig
@@ -848,6 +854,7 @@ resources:
                 template: {get_file: ../../common/templates/kubernetes/fragments/enable-ingress-controller.sh}
             - get_file: ../../common/templates/kubernetes/fragments/kube-dashboard-service.sh
             - get_file: ../../common/templates/kubernetes/fragments/enable-keystone-auth.sh
+            - get_file: ../../common/templates/kubernetes/fragments/enable-auto-healing.sh
 
   kube_cluster_deploy:
     type: OS::Heat::SoftwareDeployment

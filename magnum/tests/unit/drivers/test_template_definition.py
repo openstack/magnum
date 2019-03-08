@@ -424,6 +424,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'tiller_tag')
         tiller_namespace = mock_cluster.labels.get(
             'tiller_namespace')
+        npd_tag = mock_cluster.labels.get('node_problem_detector_tag')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -484,6 +485,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'tiller_enabled': tiller_enabled,
             'tiller_tag': tiller_tag,
             'tiller_namespace': tiller_namespace,
+            'node_problem_detector_tag': npd_tag,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
@@ -790,6 +792,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'tiller_tag')
         tiller_namespace = mock_cluster.labels.get(
             'tiller_namespace')
+        npd_tag = mock_cluster.labels.get('node_problem_detector_tag')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -852,6 +855,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'tiller_enabled': tiller_enabled,
             'tiller_tag': tiller_tag,
             'tiller_namespace': tiller_namespace,
+            'node_problem_detector_tag': npd_tag,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
