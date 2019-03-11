@@ -28,7 +28,7 @@ trust_opts = [
                        ' since the trust gives instances OpenStack API access'
                        " to the cluster's project. Note that this setting"
                        ' does not affect per-cluster trusts assigned to the'
-                       'Magnum service user.')),
+                       ' Magnum service user.')),
     cfg.StrOpt('trustee_domain_id',
                help=_('Id of the domain to create trustee for clusters')),
     cfg.StrOpt('trustee_domain_name',
