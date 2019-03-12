@@ -434,6 +434,10 @@ parameters:
     type: string
     description: namespace where tiller will be installed
 
+  node_problem_detector_tag:
+    type: string
+    description: tag of the node problem detector container
+
 resources:
   ######################################################################
   #
@@ -544,6 +548,7 @@ resources:
             "$TILLER_ENABLED": {get_param: tiller_enabled}
             "$TILLER_TAG": {get_param: tiller_tag}
             "$TILLER_NAMESPACE": {get_param: tiller_namespace}
+            "$NODE_PROBLEM_DETECTOR_TAG": {get_param: node_problem_detector_tag}
 
   install_openstack_ca:
     type: OS::Heat::SoftwareConfig
