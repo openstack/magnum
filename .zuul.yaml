@@ -383,8 +383,6 @@
       jobs:
         - magnum-functional-api
         - magnum-functional-api-python2
-        - magnum-functional-k8s
-        - magnum-functional-swarm-mode
         - openstack-tox-cover:
            voting: false
         - container-build
