@@ -661,6 +661,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         mock_cluster = mock.MagicMock()
         mock_cluster.labels = {}
         mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
+        mock_cluster.project_id = 'e2a6c8b0-a3c2-42a3-b3f4-1f639a523a52'
 
         mock_osc = mock.MagicMock()
         mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
@@ -717,6 +718,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         mock_cluster = mock.MagicMock()
         mock_cluster.labels = {"ingress_controller": "octavia"}
         mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
+        mock_cluster.project_id = 'e2a6c8b0-a3c2-42a3-b3f4-1f639a523a52'
 
         mock_osc = mock.MagicMock()
         mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'
@@ -770,6 +772,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         mock_cluster = mock.MagicMock()
         mock_cluster.labels = {"ingress_controller": "octavia"}
         mock_cluster.uuid = '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'
+        mock_cluster.project_id = 'e2a6c8b0-a3c2-42a3-b3f4-1f639a523a52'
 
         mock_osc = mock.MagicMock()
         mock_osc.magnum_url.return_value = 'http://127.0.0.1:9511/v1'

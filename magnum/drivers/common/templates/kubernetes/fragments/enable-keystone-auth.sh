@@ -6,7 +6,7 @@ step="enable-keystone-auth"
 printf "Starting to run ${step}\n"
 
 if [ "$(echo $KEYSTONE_AUTH_ENABLED | tr '[:upper:]' '[:lower:]')" != "false" ]; then
-    _prefix=${CONTAINER_INFRA_PREFIX:-docker.io/k8scloudprovider/}
+    _prefix=${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}
     CERT_DIR=/etc/kubernetes/certs
 
     # Create policy configmap for keystone auth
@@ -65,26 +65,7 @@ metadata:
   namespace: kube-system
 data:
   policies: |
-    [
-      {
-        "resource": {
-          "verbs": ["list"],
-          "resources": ["pods", "services", "deployments", "pvc"],
-          "version": "*",
-          "namespace": "default"
-        },
-        "match": [
-          {
-            "type": "role",
-            "values": ["member"]
-          },
-          {
-            "type": "project",
-            "values": ["$PROJECT_ID"]
-          }
-        ]
-      }
-    ]
+    $KEYSTONE_AUTH_DEFAULT_POLICY
 EOF
     }
 

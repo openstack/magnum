@@ -1,0 +1,9 @@
+---
+issues:
+  - |
+    With the new config option keystone_auth_default_policy, cloud admin
+    can set a default keystone auth policy for k8s cluster when the
+    keystone auth is enabled. As a result, user can use their current
+    keystone user to access k8s cluster as long as they're assigned
+    correct roles, and they will get the pre-defined permissions
+    defined by the cloud provider.

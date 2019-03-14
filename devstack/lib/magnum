@@ -46,6 +46,7 @@ MAGNUM_CERTIFICATE_CACHE_DIR=${MAGNUM_CERTIFICATE_CACHE_DIR:-/var/lib/magnum/cer
 MAGNUM_CONF_DIR=/etc/magnum
 MAGNUM_CONF=$MAGNUM_CONF_DIR/magnum.conf
 MAGNUM_API_PASTE=$MAGNUM_CONF_DIR/api-paste.ini
+MAGNUM_K8S_KEYSTONE_AUTH_DEFAULT_POLICY=$MAGNUM_CONF_DIR/k8s_keystone_auth_default_policy.json
 MAGNUM_POLICY=$MAGNUM_CONF_DIR/policy.yaml
 
 if is_ssl_enabled_service "magnum" || is_service_enabled tls-proxy; then
@@ -98,6 +99,8 @@ function configure_magnum {
     create_magnum_conf
 
     create_api_paste_conf
+
+    create_k8s_keystone_auth_default_poliy
 }
 
 # create_magnum_accounts() - Set up common required magnum accounts
@@ -117,6 +120,10 @@ function create_magnum_accounts {
         "$MAGNUM_SERVICE_PROTOCOL://$MAGNUM_SERVICE_HOST:$MAGNUM_SERVICE_PORT/v1" \
         "$MAGNUM_SERVICE_PROTOCOL://$MAGNUM_SERVICE_HOST:$MAGNUM_SERVICE_PORT/v1"
 
+    # Create for Kubernetes Keystone auth
+    get_or_create_role k8s_admin
+    get_or_create_role k8s_developer
+    get_or_create_role k8s_viewer
 }
 
 # create_magnum_conf() - Create a new magnum.conf file
@@ -224,11 +231,17 @@ function create_magnum_conf {
     default_volume_type=$(iniget /etc/cinder/cinder.conf DEFAULT default_volume_type)
     iniset $MAGNUM_CONF cinder default_docker_volume_type $default_volume_type
     iniset $MAGNUM_CONF drivers send_cluster_metrics False
+
+    iniset $MAGNUM_CONF kubernetes keystone_auth_default_policy $MAGNUM_K8S_KEYSTONE_AUTH_DEFAULT_POLICY
 }
 
 function create_api_paste_conf {
     # copy api_paste.ini
     cp $MAGNUM_DIR/etc/magnum/api-paste.ini $MAGNUM_API_PASTE
+}
+
+function create_k8s_keystone_auth_default_poliy {
+    cp $MAGNUM_DIR/etc/magnum/keystone_auth_default_policy.sample $MAGNUM_K8S_KEYSTONE_AUTH_DEFAULT_POLICY
 }
 
 # create_magnum_cache_dir() - Part of the init_magnum() process

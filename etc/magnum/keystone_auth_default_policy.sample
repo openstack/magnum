@@ -1,0 +1,76 @@
+[
+   {
+      "users":{
+         "roles":[
+            "k8s_admin"
+         ],
+         "projects":[
+            "$PROJECT_ID"
+         ]
+      },
+      "resource_permissions":{
+         "*/*":[
+            "*"
+         ]
+      },
+      "nonresource_permissions":{
+         "/healthz":[
+            "get",
+            "post"
+         ]
+      }
+   },
+   {
+      "users":{
+         "roles":[
+            "k8s_developer"
+         ],
+         "projects":[
+            "$PROJECT_ID"
+         ]
+      },
+      "resource_permissions":{
+         "!kube-system/['apiServices', 'bindings', 'componentstatuses', 'configmaps', 'cronjobs', 'customResourceDefinitions', 'deployments', 'endpoints', 'events', 'horizontalPodAutoscalers', 'ingresses', 'initializerConfigurations', 'jobs', 'limitRanges', 'localSubjectAccessReviews', 'namespaces', 'networkPolicies', 'persistentVolumeClaims', 'persistentVolumes', 'podDisruptionBudgets', 'podPresets', 'podTemplates', 'pods', 'replicaSets', 'replicationControllers', 'resourceQuotas', 'secrets', 'selfSubjectAccessReviews', 'serviceAccounts', 'services', 'statefulSets', 'storageClasses', 'subjectAccessReviews', 'tokenReviews']":[
+            "*"
+         ],
+         "*/['clusterrolebindings', 'clusterroles', 'rolebindings', 'roles', 'controllerrevisions', 'nodes', 'podSecurityPolicies']":[
+            "get",
+            "list",
+            "watch"
+         ],
+         "*/['certificateSigningRequests']":[
+            "create",
+            "delete",
+            "get",
+            "list",
+            "watch",
+            "update"
+         ]
+      }
+   },
+   {
+      "users":{
+         "roles":[
+            "k8s_viewer"
+         ],
+         "projects":[
+            "$PROJECT_ID"
+         ]
+      },
+      "resource_permissions":{
+         "!kube-system/['tokenReviews']":[
+            "*"
+         ],
+         "!kube-system/['apiServices', 'bindings', 'componentstatuses', 'configmaps', 'cronjobs', 'customResourceDefinitions', 'deployments', 'endpoints', 'events', 'horizontalPodAutoscalers', 'ingresses', 'initializerConfigurations', 'jobs', 'limitRanges', 'localSubjectAccessReviews', 'namespaces', 'networkPolicies', 'persistentVolumeClaims', 'persistentVolumes', 'podDisruptionBudgets', 'podPresets', 'podTemplates', 'pods', 'replicaSets', 'replicationControllers', 'resourceQuotas', 'secrets', 'selfSubjectAccessReviews', 'serviceAccounts', 'services', 'statefulSets', 'storageClasses', 'subjectAccessReviews']":[
+            "get",
+            "list",
+            "watch"
+         ],
+         "*/['clusterrolebindings', 'clusterroles', 'rolebindings', 'roles', 'controllerrevisions', 'nodes', 'podSecurityPolicies']":[
+            "get",
+            "list",
+            "watch"
+         ]
+      }
+   }
+]

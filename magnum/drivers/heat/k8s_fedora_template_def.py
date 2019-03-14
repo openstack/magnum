@@ -10,6 +10,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import json
+
 from oslo_log import log as logging
 from oslo_utils import strutils
 
@@ -158,6 +160,7 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
             extra_params['max_node_count'] = cluster.node_count + 1
 
         self._set_cert_manager_params(cluster, extra_params)
+        self._get_keystone_auth_default_policy(extra_params)
 
         return super(K8sFedoraTemplateDefinition,
                      self).get_params(context, cluster_template, cluster,
@@ -179,6 +182,35 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                 extra_params['ca_key'] = x509.decrypt_key(
                     ca_cert.get_private_key(),
                     ca_cert.get_private_key_passphrase()).replace("\n", "\\n")
+
+    def _get_keystone_auth_default_policy(self, extra_params):
+        # NOTE(flwang): This purpose of this function is to make the default
+        # policy more flexible for different cloud providers. Since the default
+        # policy was "hardcode" in the bash script and vendors can't change
+        # it unless fork it. So the new config option is introduced to address
+        # this. This function can be extracted to k8s_template_def.py if k8s
+        # keystone auth feature is adopted by other drivers.
+
+        default_policy = """[{"resource": {"verbs": ["list"],
+            "resources": ["pods", "services", "deployments", "pvc"],
+            "version": "*", "namespace": "default"},
+            "match": [{"type": "role","values": ["member"]},
+            {"type": "project", "values": ["$PROJECT_ID"]}]}]"""
+
+        keystone_auth_enabled = extra_params.get("keystone_auth_enabled",
+                                                 "True")
+        if strutils.bool_from_string(keystone_auth_enabled):
+            try:
+                with open(CONF.kubernetes.keystone_auth_default_policy) as f:
+                    default_policy = json.dumps(json.loads(f.read()))
+            except Exception:
+                LOG.error("Failed to load default keystone auth policy")
+                default_policy = json.dumps(json.loads(default_policy),
+                                            sort_keys=True)
+
+            washed_policy = default_policy.replace('"', '\"') \
+                .replace("$PROJECT_ID", extra_params["project_id"])
+            extra_params["keystone_auth_default_policy"] = washed_policy
 
     def get_env_files(self, cluster_template, cluster):
         env_files = []

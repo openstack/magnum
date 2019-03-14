@@ -27,6 +27,15 @@ CONF = magnum.conf.CONF
 class TestClusterConductorWithK8s(base.TestCase):
     def setUp(self):
         super(TestClusterConductorWithK8s, self).setUp()
+        self.keystone_auth_default_policy = ('[{"match": [{"type": "role", '
+                                             '"values": ["member"]}, {"type": '
+                                             '"project", "values": '
+                                             '["project_id"]}], "resource": '
+                                             '{"namespace": "default", '
+                                             '"resources": ["pods", '
+                                             '"services", "deployments", '
+                                             '"pvc"], "verbs": ["list"], '
+                                             '"version": "*"}}]')
         self.cluster_template_dict = {
             'image_id': 'image_id',
             'flavor_id': 'flavor_id',
@@ -109,6 +118,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'master_flavor_id': 'master_flavor_id',
             'flavor_id': 'flavor_id',
             'project_id': 'project_id',
+            'keystone_auth_default_policy': self.keystone_auth_default_policy
         }
         self.worker_ng_dict = {
             'uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a53',
@@ -335,6 +345,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'max_node_count': 2,
             'master_image': 'image_id',
             'minion_image': 'image_id',
+            'keystone_auth_default_policy': self.keystone_auth_default_policy
         }
         if missing_attr is not None:
             expected.pop(mapping[missing_attr], None)
@@ -473,6 +484,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'max_node_count': 2,
             'master_image': 'image_id',
             'minion_image': 'image_id',
+            'keystone_auth_default_policy': self.keystone_auth_default_policy
         }
 
         self.assertEqual(expected, definition)
@@ -591,6 +603,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'max_node_count': 2,
             'master_image': None,
             'minion_image': None,
+            'keystone_auth_default_policy': self.keystone_auth_default_policy
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -1020,6 +1033,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'max_node_count': 2,
             'master_image': 'image_id',
             'minion_image': 'image_id',
+            'keystone_auth_default_policy': self.keystone_auth_default_policy
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

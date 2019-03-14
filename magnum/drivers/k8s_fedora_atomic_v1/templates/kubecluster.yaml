@@ -563,10 +563,14 @@ parameters:
     default:
       true
 
+  keystone_auth_default_policy:
+    type: string
+    description: Json read from /etc/magnum/keystone_auth_default_policy.json
+
   k8s_keystone_auth_tag:
     type: string
     description: tag of the k8s_keystone_auth container
-    default: 1.13.0
+    default: v1.14.0
 
   monitoring_enabled:
     type: boolean
@@ -965,7 +969,10 @@ resources:
                   $enable-ingress-octavia: {get_file: ../../common/templates/kubernetes/fragments/enable-ingress-octavia.sh}
                 template: {get_file: ../../common/templates/kubernetes/fragments/enable-ingress-controller.sh}
             - get_file: ../../common/templates/kubernetes/fragments/kube-dashboard-service.sh
-            - get_file: ../../common/templates/kubernetes/fragments/enable-keystone-auth.sh
+            - str_replace:
+                template: {get_file: ../../common/templates/kubernetes/fragments/enable-keystone-auth.sh}
+                params:
+                  "$KEYSTONE_AUTH_DEFAULT_POLICY": {get_param: keystone_auth_default_policy}
             - get_file: ../../common/templates/kubernetes/fragments/enable-auto-healing.sh
             - get_file: ../../common/templates/kubernetes/fragments/enable-auto-scaling.sh
             # Helm Based Installation Configuration Scripts

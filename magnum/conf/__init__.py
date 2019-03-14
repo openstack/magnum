@@ -30,6 +30,7 @@ from magnum.conf import drivers
 from magnum.conf import glance
 from magnum.conf import heat
 from magnum.conf import keystone
+from magnum.conf import kubernetes
 from magnum.conf import magnum_client
 from magnum.conf import neutron
 from magnum.conf import nova
@@ -60,6 +61,7 @@ drivers.register_opts(CONF)
 glance.register_opts(CONF)
 heat.register_opts(CONF)
 keystone.register_opts(CONF)
+kubernetes.register_opts(CONF)
 magnum_client.register_opts(CONF)
 neutron.register_opts(CONF)
 nova.register_opts(CONF)
