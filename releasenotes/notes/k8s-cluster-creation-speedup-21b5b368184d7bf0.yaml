@@ -1,0 +1,5 @@
+features:
+  - |
+    Start Kubernetes workers installation right after the master instances are
+    created rather than waiting for all the services inside masters, which
+    could decrease the Kubernetes cluster launch time significantly.

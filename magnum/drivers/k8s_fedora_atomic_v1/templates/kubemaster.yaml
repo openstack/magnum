@@ -178,11 +178,6 @@ parameters:
     type: string
     description: network driver to use for instantiating container networks
 
-  wait_condition_timeout:
-    type: number
-    description : >
-      timeout for the Wait Conditions
-
   secgroup_kube_master_id:
     type: string
     description: ID of the security group for kubernetes master.
@@ -367,28 +362,11 @@ parameters:
       whether or not to use Octavia for LoadBalancer type service.
     default: False
 
-  master_index:
-    type: string
-    description: >
-      the index of master node, index 0 means the master node is the primary,
-      bootstrapping node.
-
   cloud_provider_enabled:
     type: boolean
     description: Enable or disable the openstack kubernetes cloud provider
 
 resources:
-
-  master_wait_handle:
-    type: OS::Heat::WaitConditionHandle
-
-  master_wait_condition:
-    type: OS::Heat::WaitCondition
-    depends_on: kube-master
-    properties:
-      handle: {get_resource: master_wait_handle}
-      timeout: {get_param: wait_condition_timeout}
-
   ######################################################################
   #
   # resource that exposes the IPs of either the kube master or the API
@@ -417,7 +395,6 @@ resources:
         str_replace:
           template: {get_file: ../../common/templates/kubernetes/fragments/write-heat-params-master.yaml}
           params:
-            "$MASTER_INDEX": {get_param: master_index}
             "$PROMETHEUS_MONITORING": {get_param: prometheus_monitoring}
             "$KUBE_API_PUBLIC_ADDRESS": {get_attr: [api_address_switch, public_ip]}
             "$KUBE_API_PRIVATE_ADDRESS": {get_attr: [api_address_switch, private_ip]}
@@ -461,7 +438,6 @@ resources:
             "$FLANNEL_TAG": {get_param: flannel_tag}
             "$KUBE_VERSION": {get_param: kube_version}
             "$KUBE_DASHBOARD_VERSION": {get_param: kube_dashboard_version}
-            "$WAIT_CURL": {get_attr: [master_wait_handle, curl_cli]}
             "$TRUSTEE_USER_ID": {get_param: trustee_user_id}
             "$TRUSTEE_PASSWORD": {get_param: trustee_password}
             "$TRUST_ID": {get_param: trust_id}
@@ -548,24 +524,6 @@ resources:
       group: ungrouped
       config: {get_file: ../../common/templates/kubernetes/fragments/enable-services-master.sh}
 
-  kube_apiserver_to_kubelet_role:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/kube-apiserver-to-kubelet-role.sh}
-
-  core_dns_service:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/core-dns-service.sh}
-
-  master_wc_notify:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/wc-notify-master.sh}
-
   disable_selinux:
     type: OS::Heat::SoftwareConfig
     properties:
@@ -601,91 +559,6 @@ resources:
         - config: {get_resource: enable_services}
         - config: {get_resource: write_flannel_config}
         - config: {get_resource: flannel_config_service}
-        - config: {get_resource: kube_apiserver_to_kubelet_role}
-        - config: {get_resource: core_dns_service}
-        - config: {get_resource: master_wc_notify}
-
-  enable_prometheus_monitoring:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: script
-      config:
-        str_replace:
-          template: {get_file: ../../common/templates/kubernetes/fragments/enable-prometheus-monitoring.sh}
-          params:
-            "$ADMIN_PASSWD": {get_param: grafana_admin_passwd}
-
-  enable_prometheus_monitoring_deployment:
-    type: OS::Heat::SoftwareDeployment
-    properties:
-      signal_transport: HEAT_SIGNAL
-      config: {get_resource: enable_prometheus_monitoring}
-      server: {get_resource: kube-master}
-      actions: ['CREATE']
-
-  enable_cert_manager_api:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: script
-      config:
-        str_replace:
-          template: {get_file: ../../common/templates/kubernetes/fragments/enable-cert-api-manager.sh}
-          params:
-            "$CA_KEY": {get_param: ca_key}
-
-  enable_cert_manager_api_deployment:
-    type: OS::Heat::SoftwareDeployment
-    properties:
-      signal_transport: HEAT_SIGNAL
-      config: {get_resource: enable_cert_manager_api}
-      server: {get_resource: kube-master}
-      actions: ['CREATE']
-
-  calico_service:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: script
-      config: {get_file: ../../common/templates/kubernetes/fragments/calico-service.sh}
-
-  calico_service_deployment:
-    type: OS::Heat::SoftwareDeployment
-    properties:
-      signal_transport: HEAT_SIGNAL
-      config: {get_resource: calico_service}
-      server: {get_resource: kube-master}
-      actions: ['CREATE']
-
-  enable_ingress_controller:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: script
-      config:
-        str_replace:
-          params:
-            $enable-ingress-traefik: {get_file: ../../common/templates/kubernetes/fragments/enable-ingress-traefik.sh}
-          template: {get_file: ../../common/templates/kubernetes/fragments/enable-ingress-controller.sh}
-
-  enable_ingress_controller_deployment:
-    type: OS::Heat::SoftwareDeployment
-    properties:
-      signal_transport: HEAT_SIGNAL
-      config: {get_resource: enable_ingress_controller}
-      server: {get_resource: kube-master}
-      actions: ['CREATE']
-
-  kubernetes_dashboard:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: script
-      config: {get_file: ../../common/templates/kubernetes/fragments/kube-dashboard-service.sh}
-
-  kubernetes_dashboard_deployment:
-    type: OS::Heat::SoftwareDeployment
-    properties:
-      signal_transport: HEAT_SIGNAL
-      config: {get_resource: kubernetes_dashboard}
-      server: {get_resource: kube-master}
-      actions: ['CREATE']
 
   ######################################################################
   #
@@ -782,6 +655,9 @@ resources:
       mountpoint: /dev/vdb
 
 outputs:
+
+  OS::stack_id:
+    value: { get_resource: kube-master }
 
   kube_master_ip:
     value: {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}

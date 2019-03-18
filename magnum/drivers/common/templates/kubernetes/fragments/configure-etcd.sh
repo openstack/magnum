@@ -2,6 +2,8 @@
 
 . /etc/sysconfig/heat-params
 
+set -x
+
 if [ -n "$ETCD_VOLUME_SIZE" ] && [ "$ETCD_VOLUME_SIZE" -gt 0 ]; then
 
     attempts=60

@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/bin/sh
+
+step="enable-ingress-controller"
+printf "Starting to run ${step}\n"
 
 # Enables the specified ingress controller.
 #
@@ -21,3 +24,5 @@ EOF
 if [ "$(echo $INGRESS_CONTROLLER | tr '[:upper:]' '[:lower:]')" = "traefik" ]; then
     $enable-ingress-traefik
 fi
+
+printf "Finished running ${step}\n"
