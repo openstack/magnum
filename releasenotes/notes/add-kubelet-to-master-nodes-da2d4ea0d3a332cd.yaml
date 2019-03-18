@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Deploy kubelet in master nodes for the k8s_fedora_atomic driver.
+    Previously it was done only for calico, now kubelet will run in all
+    cases. Really useful, for monitoing the master nodes (eg deploy fluentd)
+    or run the kubernetes control-plance self-hosted.

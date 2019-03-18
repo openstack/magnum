@@ -14,14 +14,8 @@ while [ ! -f /etc/kubernetes/certs/ca.key ] && \
 done
 
 echo "starting services"
-for service in etcd docker kube-apiserver kube-controller-manager kube-scheduler kube-proxy; do
+for service in etcd docker kube-apiserver kube-controller-manager kube-scheduler kubelet kube-proxy; do
     echo "activating service $service"
     systemctl enable $service
     systemctl --no-block start $service
 done
-
-if [ "$NETWORK_DRIVER" = "calico" ]; then
-    echo "activating service kubelet"
-    systemctl enable kubelet
-    systemctl start kubelet
-fi
