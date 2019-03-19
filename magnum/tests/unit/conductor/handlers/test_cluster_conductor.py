@@ -533,3 +533,59 @@ class TestHandler(db_base.DbTestCase):
         notifications = fake_notifier.NOTIFICATIONS
         self.assertEqual(1, len(notifications))
         self.assertEqual(1, mock_delete_lb.call_count)
+
+    @patch('magnum.conductor.scale_manager.get_scale_manager')
+    @patch('magnum.drivers.common.driver.Driver.get_driver')
+    @patch('magnum.common.clients.OpenStackClients')
+    def test_cluster_resize_success(
+            self, mock_openstack_client_class,
+            mock_driver,
+            mock_scale_manager):
+
+        mock_heat_stack = mock.MagicMock()
+        mock_heat_stack.stack_status = cluster_status.CREATE_COMPLETE
+        mock_heat_client = mock.MagicMock()
+        mock_heat_client.stacks.get.return_value = mock_heat_stack
+        mock_openstack_client = mock_openstack_client_class.return_value
+        mock_openstack_client.heat.return_value = mock_heat_client
+        mock_dr = mock.MagicMock()
+        mock_driver.return_value = mock_dr
+
+        self.cluster.status = cluster_status.CREATE_COMPLETE
+        self.handler.cluster_resize(self.context, self.cluster, 3, ["ID1"])
+
+        notifications = fake_notifier.NOTIFICATIONS
+        self.assertEqual(1, len(notifications))
+        self.assertEqual(
+            'magnum.cluster.update', notifications[0].event_type)
+        self.assertEqual(
+            taxonomy.OUTCOME_PENDING, notifications[0].payload['outcome'])
+
+        mock_dr.resize_cluster.assert_called_once_with(
+            self.context, self.cluster, mock_scale_manager.return_value, 3,
+            ["ID1"], None)
+
+    @patch('magnum.common.clients.OpenStackClients')
+    def test_cluster_resize_failure(
+            self, mock_openstack_client_class):
+
+        mock_heat_stack = mock.MagicMock()
+        mock_heat_stack.stack_status = cluster_status.CREATE_FAILED
+        mock_heat_client = mock.MagicMock()
+        mock_heat_client.stacks.get.return_value = mock_heat_stack
+        mock_openstack_client = mock_openstack_client_class.return_value
+        mock_openstack_client.heat.return_value = mock_heat_client
+
+        self.cluster.status = cluster_status.CREATE_FAILED
+        self.assertRaises(exception.NotSupported, self.handler.cluster_resize,
+                          self.context, self.cluster, 2, [])
+
+        notifications = fake_notifier.NOTIFICATIONS
+        self.assertEqual(1, len(notifications))
+        self.assertEqual(
+            'magnum.cluster.update', notifications[0].event_type)
+        self.assertEqual(
+            taxonomy.OUTCOME_FAILURE, notifications[0].payload['outcome'])
+
+        cluster = objects.Cluster.get(self.context, self.cluster.uuid)
+        self.assertEqual(1, cluster.node_count)

@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    Now an OpenStack driver for Kubernetes Cluster Autoscaler is being
+    proposed to support autoscaling when running k8s cluster on top of
+    OpenStack. However, currently there is no way in Magnum to let
+    the external consumer to control which node will be removed. The
+    alternative option is calling Heat API directly but obviously it
+    is not the best solution and it's confusing k8s community. So this
+    new API is being added into Magnum: POST <ClusterID>/actions/resize
+

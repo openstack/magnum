@@ -80,8 +80,11 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
                                       extra_params=extra_params,
                                       **kwargs)
 
-    def get_scale_params(self, context, cluster, scale_manager=None):
+    def get_scale_params(self, context, cluster, scale_manager=None,
+                         nodes_to_remove=None):
         scale_params = dict()
+        if nodes_to_remove:
+            scale_params['slaves_to_remove'] = nodes_to_remove
         if scale_manager:
             hosts = self.get_output('mesos_slaves_private')
             scale_params['slaves_to_remove'] = (

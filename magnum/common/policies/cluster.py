@@ -128,6 +128,17 @@ rules = [
                 'method': 'PATCH'
             }
         ]
+    ),
+    policy.DocumentedRuleDefault(
+        name=CLUSTER % 'resize',
+        check_str=base.RULE_DENY_CLUSTER_USER,
+        description='Resize an existing cluster.',
+        operations=[
+            {
+                'path': '/v1/clusters/{cluster_ident}/actions/resize',
+                'method': 'POST'
+            }
+        ]
     )
 ]
 

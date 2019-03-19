@@ -25,6 +25,7 @@ from wsme import types as wtypes
 from magnum.api import attr_validator
 from magnum.api.controllers import base
 from magnum.api.controllers import link
+from magnum.api.controllers.v1 import cluster_actions
 from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api import expose
@@ -280,6 +281,8 @@ class ClustersController(base.Controller):
     _custom_actions = {
         'detail': ['GET'],
     }
+
+    actions = cluster_actions.ActionsController()
 
     def _generate_name_for_cluster(self, context):
         """Generate a random name like: zeta-22-cluster."""

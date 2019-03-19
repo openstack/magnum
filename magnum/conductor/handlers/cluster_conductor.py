@@ -177,3 +177,64 @@ class Handler(object):
 
         cluster.save()
         return None
+
+    def cluster_resize(self, context, cluster,
+                       node_count, nodes_to_remove, nodegroup=None):
+        LOG.debug('cluster_conductor cluster_resize')
+
+        osc = clients.OpenStackClients(context)
+        # NOTE(flwang): One of important user cases of /resize API is
+        # supporting the auto scaling action triggered by Kubernetes Cluster
+        # Autoscaler, so there are 2 cases may happen:
+        # 1. API could be triggered very offen
+        # 2. Scale up or down may fail and we would like to offer the ability
+        #    that recover the cluster to allow it being resized when last
+        #    update failed.
+        allow_update_status = (
+            fields.ClusterStatus.CREATE_COMPLETE,
+            fields.ClusterStatus.UPDATE_COMPLETE,
+            fields.ClusterStatus.RESUME_COMPLETE,
+            fields.ClusterStatus.RESTORE_COMPLETE,
+            fields.ClusterStatus.ROLLBACK_COMPLETE,
+            fields.ClusterStatus.SNAPSHOT_COMPLETE,
+            fields.ClusterStatus.CHECK_COMPLETE,
+            fields.ClusterStatus.ADOPT_COMPLETE,
+            fields.ClusterStatus.UPDATE_FAILED,
+            fields.ClusterStatus.UPDATE_IN_PROGRESS,
+        )
+        if cluster.status not in allow_update_status:
+            conductor_utils.notify_about_cluster_operation(
+                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE)
+            operation = _('Resizing a cluster when status is '
+                          '"%s"') % cluster.status
+            raise exception.NotSupported(operation=operation)
+
+        resize_manager = scale_manager.get_scale_manager(context, osc, cluster)
+
+        # Get driver
+        ct = conductor_utils.retrieve_cluster_template(context, cluster)
+        cluster_driver = driver.Driver.get_driver(ct.server_type,
+                                                  ct.cluster_distro,
+                                                  ct.coe)
+        # Resize cluster
+        try:
+            conductor_utils.notify_about_cluster_operation(
+                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_PENDING)
+            cluster_driver.resize_cluster(context, cluster, resize_manager,
+                                          node_count, nodes_to_remove,
+                                          nodegroup)
+            cluster.status = fields.ClusterStatus.UPDATE_IN_PROGRESS
+            cluster.status_reason = None
+        except Exception as e:
+            cluster.status = fields.ClusterStatus.UPDATE_FAILED
+            cluster.status_reason = six.text_type(e)
+            cluster.save()
+            conductor_utils.notify_about_cluster_operation(
+                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE)
+            if isinstance(e, exc.HTTPBadRequest):
+                e = exception.InvalidParameterValue(message=six.text_type(e))
+                raise e
+            raise
+
+        cluster.save()
+        return cluster
