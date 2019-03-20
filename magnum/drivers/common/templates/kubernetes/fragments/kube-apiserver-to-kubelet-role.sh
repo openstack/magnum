@@ -179,6 +179,7 @@ items:
     verbs:
     - list
     - get
+    - watch
 - apiVersion: rbac.authorization.k8s.io/v1
   kind: ClusterRole
   metadata:
