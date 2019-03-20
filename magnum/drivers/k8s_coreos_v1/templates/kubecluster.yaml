@@ -515,7 +515,7 @@ resources:
       private_network_name: private
 
   api_lb:
-    type: ../../common/templates/lb.yaml
+    type: ../../common/templates/lb_api.yaml
     properties:
       fixed_subnet: {get_attr: [network, fixed_subnet]}
       external_network: {get_param: external_network}
@@ -523,10 +523,9 @@ resources:
       port: {get_param: kubernetes_port}
 
   etcd_lb:
-    type: ../../common/templates/lb.yaml
+    type: ../../common/templates/lb_etcd.yaml
     properties:
       fixed_subnet: {get_attr: [network, fixed_subnet]}
-      external_network: {get_param: external_network}
       protocol: {get_param: loadbalancing_protocol}
       port: 2379
 

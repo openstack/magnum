@@ -221,7 +221,7 @@ resources:
       external_network: {get_param: external_network}
 
   api_lb:
-    type: ../../common/templates/lb.yaml
+    type: ../../common/templates/lb_api.yaml
     properties:
       fixed_subnet: {get_attr: [network, fixed_subnet]}
       external_network: {get_param: external_network}

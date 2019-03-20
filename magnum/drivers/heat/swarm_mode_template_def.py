@@ -154,6 +154,6 @@ class SwarmModeTemplateDefinition(template_def.BaseTemplateDefinition):
         template_def.add_priv_net_env_file(env_files, cluster_template)
         template_def.add_volume_env_file(env_files, cluster)
         template_def.add_lb_env_file(env_files, cluster_template)
-        template_def.add_fip_env_file(env_files, cluster_template)
+        template_def.add_fip_env_file(env_files, cluster_template, cluster)
 
         return env_files

@@ -2,3 +2,5 @@
 
 resource_registry:
   "Magnum::Optional::Neutron::LBaaS::FloatingIP": "OS::Neutron::FloatingIP"
+
+  "Magnum::FloatingIPAddressSwitcher": "../fragments/floating_ip_address_switcher_public.yaml"

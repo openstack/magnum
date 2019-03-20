@@ -1,5 +1,3 @@
-# Environment file to disable FloatingIP in a Kubernetes cluster by mapping
-# FloatingIP-related resource types to OS::Neutron::FloatingIP
 resource_registry:
   "Magnum::FloatingIPAddressSwitcher": "../fragments/floating_ip_address_switcher_public.yaml"
 

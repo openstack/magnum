@@ -384,6 +384,9 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `tiller_namespace`_                   | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
+| `master_lb_floating_ip_enabled`_      | - true             | see below     |
+|                                       | - false            |               |
++---------------------------------------+--------------------+---------------+
 
 Cluster
 -------
@@ -1231,6 +1234,12 @@ _`tiller_tag`
 _`tiller_namespace`
   Configure in which namespace tiller is going to be installed.
   Default: magnum-tiller
+
+_`master_lb_floating_ip_enabled`
+  Controls if Magnum allocates floating IP for the load balancer of master
+  nodes. This label only takes effect when the template property
+  ``master_lb_enabled`` is set. If not specified, the default value is the same
+  as template property ``floating_ip_enabled``.
 
 External load balancer for services
 -----------------------------------

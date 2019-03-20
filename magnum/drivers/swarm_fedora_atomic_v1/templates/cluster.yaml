@@ -17,7 +17,7 @@ parameters:
     type: string
     description: name of ssh key to be provisioned on our server
     default: ""
-    
+
   external_network:
     type: string
     description: uuid/name of a network to use for floating ip addresses
@@ -284,7 +284,7 @@ resources:
       external_network: {get_param: external_network}
 
   api_lb:
-    type: ../../common/templates/lb.yaml
+    type: ../../common/templates/lb_api.yaml
     properties:
       fixed_subnet: {get_attr: [network, fixed_subnet]}
       external_network: {get_param: external_network}
@@ -292,10 +292,9 @@ resources:
       port: {get_param: swarm_port}
 
   etcd_lb:
-    type: ../../common/templates/lb.yaml
+    type: ../../common/templates/lb_etcd.yaml
     properties:
       fixed_subnet: {get_attr: [network, fixed_subnet]}
-      external_network: {get_param: external_network}
       protocol: {get_param: loadbalancing_protocol}
       port: 2379
 
