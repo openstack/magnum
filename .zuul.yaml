@@ -28,7 +28,6 @@
     name: magnum-functional-base
     parent: legacy-dsvm-base
     timeout: 7800
-    nodeset: legacy-ubuntu-xenial
     pre-run: playbooks/pre/prepare-workspace.yaml
     run: playbooks/magnum-functional-base.yaml
     post-run: playbooks/post/upload-logs.yaml
@@ -67,7 +66,6 @@
     name: magnum-functional-base-python2
     parent: legacy-dsvm-base
     timeout: 7800
-    nodeset: legacy-ubuntu-xenial
     pre-run: playbooks/pre/prepare-workspace.yaml
     run: playbooks/magnum-functional-base.yaml
     post-run: playbooks/post/upload-logs.yaml
@@ -106,7 +104,6 @@
     name: magnum-functional-multinode-base
     parent: legacy-dsvm-base-multinode
     timeout: 7800
-    nodeset: legacy-ubuntu-xenial-2-node
     pre-run: playbooks/pre/prepare-workspace.yaml
     run: playbooks/magnum-functional-base.yaml
     post-run: playbooks/post/upload-logs.yaml
@@ -158,7 +155,7 @@
     nodeset:
       nodes:
         - name: primary
-          label: ubuntu-xenial-vexxhost
+          label: ubuntu-bionic-vexxhost
 
 - job:
     name: magnum-functional-k8s
@@ -317,7 +314,6 @@
     name: magnum-buildimages-base
     parent: legacy-publish-openstack-artifacts
     timeout: 3600
-    nodeset: legacy-ubuntu-xenial
     pre-run: playbooks/pre/prepare-workspace-images.yaml
     run: playbooks/magnum-buildimages-base.yaml
     post-run: playbooks/post/upload-images.yaml
