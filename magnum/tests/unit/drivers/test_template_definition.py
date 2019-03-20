@@ -362,6 +362,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'kubeproxy_options')
         cloud_provider_enabled = mock_cluster.labels.get(
             'cloud_provider_enabled')
+        cloud_provider_tag = mock_cluster.labels.get(
+            'cloud_provider_tag')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -390,6 +392,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'kubescheduler_options': kubescheduler_options,
             'kubeproxy_options': kubeproxy_options,
             'cloud_provider_enabled': cloud_provider_enabled,
+            'cloud_provider_tag': cloud_provider_tag,
             'username': 'fake_user',
             'magnum_url': mock_osc.magnum_url.return_value,
             'region_name': mock_osc.cinder_region_name.return_value,
@@ -521,6 +524,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'kubeproxy_options')
         cloud_provider_enabled = mock_cluster.labels.get(
             'cloud_provider_enabled')
+        cloud_provider_tag = mock_cluster.labels.get(
+            'cloud_provider_tag')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -549,6 +554,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'kubescheduler_options': kubescheduler_options,
             'kubeproxy_options': kubeproxy_options,
             'cloud_provider_enabled': cloud_provider_enabled,
+            'cloud_provider_tag': cloud_provider_tag,
             'username': 'fake_user',
             'magnum_url': mock_osc.magnum_url.return_value,
             'region_name': mock_osc.cinder_region_name.return_value,
