@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 2
 
    unreleased
+   stein
    rocky
    queens
    pike
