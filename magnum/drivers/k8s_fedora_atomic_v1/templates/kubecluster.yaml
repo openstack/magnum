@@ -161,6 +161,11 @@ parameters:
       the docker cgroup driver.
     default: "cgroupfs"
 
+  traefik_ingress_controller_tag:
+    type: string
+    description: tag of the traefik containers to be used.
+    default: v1.7.10
+
   wait_condition_timeout:
     type: number
     description: >
@@ -821,6 +826,7 @@ resources:
           discovery_url: {get_param: discovery_url}
           cluster_uuid: {get_param: cluster_uuid}
           magnum_url: {get_param: magnum_url}
+          traefik_ingress_controller_tag: {get_param: traefik_ingress_controller_tag}
           volume_driver: {get_param: volume_driver}
           region_name: {get_param: region_name}
           fixed_network: {get_attr: [network, fixed_network]}

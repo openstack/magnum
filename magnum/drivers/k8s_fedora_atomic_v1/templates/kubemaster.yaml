@@ -119,6 +119,10 @@ parameters:
     type: boolean
     description: whether or not to enable TLS
 
+  traefik_ingress_controller_tag:
+    type: string
+    description: tag of the traefik containers to be used.
+
   kube_dashboard_enabled:
     type: boolean
     description: whether or not to disable kubernetes dashboard
@@ -532,6 +536,7 @@ resources:
             "$PASSWORD": {get_param: password}
             "$CLUSTER_SUBNET": {get_param: fixed_subnet}
             "$TLS_DISABLED": {get_param: tls_disabled}
+            "$TRAEFIK_INGRESS_CONTROLLER_TAG": {get_param: traefik_ingress_controller_tag}
             "$KUBE_DASHBOARD_ENABLED": {get_param: kube_dashboard_enabled}
             "$INFLUX_GRAFANA_DASHBOARD_ENABLED": {get_param: influx_grafana_dashboard_enabled}
             "$VERIFY_CA": {get_param: verify_ca}

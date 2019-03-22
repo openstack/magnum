@@ -497,6 +497,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         tiller_namespace = mock_cluster.labels.get(
             'tiller_namespace')
         npd_tag = mock_cluster.labels.get('node_problem_detector_tag')
+        traefik_ingress_controller_tag = mock_cluster.labels.get(
+            'traefik_ingress_controller_tag')
         auto_healing_enabled = mock_cluster.labels.get(
             'auto_healing_enabled')
         auto_scaling_enabled = mock_cluster.labels.get(
@@ -575,6 +577,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'autoscaler_tag': autoscaler_tag,
             'min_node_count': min_node_count,
             'max_node_count': max_node_count,
+            'traefik_ingress_controller_tag': traefik_ingress_controller_tag,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
@@ -887,6 +890,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         tiller_namespace = mock_cluster.labels.get(
             'tiller_namespace')
         npd_tag = mock_cluster.labels.get('node_problem_detector_tag')
+        traefik_ingress_controller_tag = mock_cluster.labels.get(
+            'traefik_ingress_controller_tag')
         auto_healing_enabled = mock_cluster.labels.get(
             'auto_healing_enabled')
         auto_scaling_enabled = mock_cluster.labels.get(
@@ -967,6 +972,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'autoscaler_tag': autoscaler_tag,
             'min_node_count': min_node_count,
             'max_node_count': max_node_count,
+            'traefik_ingress_controller_tag': traefik_ingress_controller_tag,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
