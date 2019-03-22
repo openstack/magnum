@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Added label traefik_ingress_controller_tag to enable specifying traefik container version.
+fixes:
+  - |
+    Traefik container now defaults to a fixed tag (v1.7.10) instead of tag
+    (latest)
