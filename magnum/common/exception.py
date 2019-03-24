@@ -397,3 +397,12 @@ class MemberAlreadyExists(Conflict):
 class PreDeletionFailed(Conflict):
     message = _("Failed to pre-delete resources for cluster %(cluster_uuid)s, "
                 "error: %(msg)s.")
+
+
+class NodeGroupAlreadyExists(Conflict):
+    message = _("A node group with name %(name)s already exists in the "
+                "cluster %(cluster_id)s.")
+
+
+class NodeGroupNotFound(ResourceNotFound):
+    message = _("Nodegroup %(nodegroup)s could not be found.")

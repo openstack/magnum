@@ -17,6 +17,7 @@ from magnum.objects import cluster
 from magnum.objects import cluster_template
 from magnum.objects import federation
 from magnum.objects import magnum_service
+from magnum.objects import nodegroup
 from magnum.objects import quota
 from magnum.objects import stats
 from magnum.objects import x509keypair
@@ -30,6 +31,7 @@ X509KeyPair = x509keypair.X509KeyPair
 Certificate = certificate.Certificate
 Stats = stats.Stats
 Federation = federation.Federation
+NodeGroup = nodegroup.NodeGroup
 __all__ = (Cluster,
            ClusterTemplate,
            MagnumService,
@@ -37,5 +39,6 @@ __all__ = (Cluster,
            Certificate,
            Stats,
            Quota,
-           Federation
+           Federation,
+           NodeGroup
            )

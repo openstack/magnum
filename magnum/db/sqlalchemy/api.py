@@ -762,3 +762,115 @@ class Connection(api.Connection):
             ref.update(values)
 
         return ref
+
+    def _add_nodegoup_filters(self, query, filters):
+        if filters is None:
+            filters = {}
+
+        possible_filters = ["name", "node_count", "node_addresses",
+                            "role", "is_default"]
+
+        filter_names = set(filters).intersection(possible_filters)
+        filter_dict = {filter_name: filters[filter_name]
+                       for filter_name in filter_names}
+
+        query = query.filter_by(**filter_dict)
+
+        return query
+
+    def create_nodegroup(self, values):
+        if not values.get('uuid'):
+            values['uuid'] = uuidutils.generate_uuid()
+
+        nodegroup = models.NodeGroup()
+        nodegroup.update(values)
+        try:
+            nodegroup.save()
+        except db_exc.DBDuplicateEntry:
+            raise exception.NodeGroupAlreadyExists(
+                cluster_id=values['cluster_id'], name=values['name'])
+        return nodegroup
+
+    def destroy_nodegroup(self, cluster_id, nodegroup_id):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.NodeGroup, session=session)
+            query = add_identity_filter(query, nodegroup_id)
+            query = query.filter_by(cluster_id=cluster_id)
+            try:
+                query.one()
+            except NoResultFound:
+                raise exception.NodeGroupNotFound(nodegroup=nodegroup_id)
+            query.delete()
+
+    def update_nodegroup(self, cluster_id, nodegroup_id, values):
+        return self._do_update_nodegroup(cluster_id, nodegroup_id, values)
+
+    def _do_update_nodegroup(self, cluster_id, nodegroup_id, values):
+        session = get_session()
+        with session.begin():
+            query = model_query(models.NodeGroup, session=session)
+            query = add_identity_filter(query, nodegroup_id)
+            query = query.filter_by(cluster_id=cluster_id)
+            try:
+                ref = query.with_lockmode('update').one()
+            except NoResultFound:
+                raise exception.NodeGroupNotFound(nodegroup=nodegroup_id)
+
+            ref.update(values)
+        return ref
+
+    def get_nodegroup_by_id(self, context, cluster_id, nodegroup_id):
+        query = model_query(models.NodeGroup)
+        if not context.is_admin:
+            query = query.filter_by(project_id=context.project_id)
+        query = query.filter_by(cluster_id=cluster_id)
+        query = query.filter_by(id=nodegroup_id)
+        try:
+            return query.one()
+        except NoResultFound:
+            raise exception.NodeGroupNotFound(nodegroup=nodegroup_id)
+
+    def get_nodegroup_by_uuid(self, context, cluster_id, nodegroup_uuid):
+        query = model_query(models.NodeGroup)
+        if not context.is_admin:
+            query = query.filter_by(project_id=context.project_id)
+        query = query.filter_by(cluster_id=cluster_id)
+        query = query.filter_by(uuid=nodegroup_uuid)
+        try:
+            return query.one()
+        except NoResultFound:
+            raise exception.NodeGroupNotFound(nodegroup=nodegroup_uuid)
+
+    def get_nodegroup_by_name(self, context, cluster_id, nodegroup_name):
+        query = model_query(models.NodeGroup)
+        if not context.is_admin:
+            query = query.filter_by(project_id=context.project_id)
+        query = query.filter_by(cluster_id=cluster_id)
+        query = query.filter_by(name=nodegroup_name)
+        try:
+            return query.one()
+        except MultipleResultsFound:
+            raise exception.Conflict('Multiple nodegroups exist with same '
+                                     'name. Please use the nodegroup uuid '
+                                     'instead.')
+        except NoResultFound:
+            raise exception.NodeGroupNotFound(nodegroup=nodegroup_name)
+
+    def list_cluster_nodegroups(self, context, cluster_id, filters=None,
+                                limit=None, marker=None, sort_key=None,
+                                sort_dir=None):
+        query = model_query(models.NodeGroup)
+        if not context.is_admin:
+            query = query.filter_by(project_id=context.project_id)
+        query = self._add_nodegoup_filters(query, filters)
+        query = query.filter_by(cluster_id=cluster_id)
+        return _paginate_query(models.NodeGroup, limit, marker,
+                               sort_key, sort_dir, query)
+
+    def get_cluster_nodegroup_count(self, context, cluster_id):
+        query = model_query(models.NodeGroup)
+        if not context.is_admin:
+            query = query.filter_by(project_id=context.project_id)
+        query = query.filter_by(cluster_id=cluster_id)
+        return query.count()

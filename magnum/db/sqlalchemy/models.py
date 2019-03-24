@@ -260,3 +260,33 @@ class Federation(Base):
     status = Column(String(20))
     status_reason = Column(Text)
     properties = Column(JSONEncodedDict)
+
+
+class NodeGroup(Base):
+    """Represents a NodeGroup."""
+
+    __tablename__ = 'nodegroup'
+    __table_args__ = (
+        schema.UniqueConstraint('uuid', name='uniq_nodegroup0uuid'),
+        schema.UniqueConstraint(
+            'cluster_id', 'name',
+            name='uniq_nodegroup0cluster_id0name'),
+        table_args()
+    )
+    id = Column(Integer, primary_key=True)
+    uuid = Column(String(36))
+    name = Column(String(255))
+    cluster_id = Column(String(255))
+    project_id = Column(String(255))
+    docker_volume_size = Column(Integer(), nullable=True)
+    labels = Column(JSONEncodedDict, nullable=True)
+    flavor_id = Column(String(255), nullable=True)
+    image_id = Column(String(255), nullable=True)
+    node_addresses = Column(JSONEncodedList, nullable=True)
+    node_count = Column(Integer())
+    role = Column(String(255))
+    # NOTE(ttsiouts) We have to define the min and
+    # max number of nodes for each nodegroup
+    max_node_count = Column(Integer())
+    min_node_count = Column(Integer())
+    is_default = Column(Boolean, default=False)
