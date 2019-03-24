@@ -31,7 +31,7 @@
           EOF
           fi
           /usr/zuul-env/bin/zuul-cloner -m $CLONEMAP --cache-dir /opt/git \
-              git://git.openstack.org $ZUUL_PROJECT openstack/requirements
+              https://git.openstack.org $ZUUL_PROJECT openstack/requirements
           # REQS_DIR is not set for openstack/requirements and there is also
           # no need to copy in this case.
           if [[ "$ZUUL_PROJECT" != "openstack/requirements" ]]; then
