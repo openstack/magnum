@@ -741,7 +741,7 @@ Simulating gate tests
           dest: devstack-gate
       EOF
       /usr/zuul-env/bin/zuul-cloner -m clonemap.yaml --cache-dir /opt/git \
-          git://git.openstack.org \
+          https://git.openstack.org \
           openstack-infra/devstack-gate
       export PYTHONUNBUFFERED=true
       export DEVSTACK_GATE_TIMEOUT=240 # bump this if you see timeout issues.  Default is 120
@@ -756,8 +756,8 @@ Simulating gate tests
       export PROJECTS="openstack/magnum $PROJECTS"
       export PROJECTS="openstack/python-magnumclient $PROJECTS"
       export PROJECTS="openstack/barbican $PROJECTS"
-      export DEVSTACK_LOCAL_CONFIG="enable_plugin magnum git://git.openstack.org/openstack/magnum stable/ocata"
-      export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ceilometer git://git.openstack.org/openstack/ceilometer stable/ocata"
+      export DEVSTACK_LOCAL_CONFIG="enable_plugin magnum https://git.openstack.org/openstack/magnum stable/ocata"
+      export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin ceilometer https://git.openstack.org/openstack/ceilometer stable/ocata"
       # Keep localrc to be able to set some vars in post_test_hook
       export KEEP_LOCALRC=1
       function gate_hook {
