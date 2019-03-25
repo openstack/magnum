@@ -263,3 +263,60 @@ Response Example
 
 .. literalinclude:: samples/cluster-create-resp.json
    :language: javascript
+
+
+Resize a cluster
+================
+
+.. rest_method:: POST /v1/clusters/{cluster_ident}/actions/resize
+
+Resize a cluster.
+
+Response Codes
+--------------
+
+.. rest_status_code:: success status.yaml
+
+   - 202
+
+.. rest_status_code:: error status.yaml
+
+   - 401
+   - 403
+   - 404
+   - 409
+
+Request
+-------
+
+.. rest_parameters:: parameters.yaml
+
+  - cluster_ident: cluster_ident
+  - node_count: node_count
+  - nodes_to_remove: nodes_to_remove
+  - nodegroup: nodegroup
+
+.. note::
+
+   The nodegroup is just a placeholder for future. It hasn't been supported
+   in Magnum now.
+
+Request Example
+----------------
+
+.. literalinclude:: samples/cluster-resize-req.json
+   :language: javascript
+
+Response
+--------
+
+.. rest_parameters:: parameters.yaml
+
+  - X-Openstack-Request-Id: request_id
+  - uuid: cluster_id
+
+Response Example
+----------------
+
+.. literalinclude:: samples/cluster-create-resp.json
+   :language: javascript
