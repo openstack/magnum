@@ -4,6 +4,18 @@
 
 echo "configuring kubernetes (minion)"
 
+if [ ! -z "$HTTP_PROXY" ]; then
+    export HTTP_PROXY
+fi
+
+if [ ! -z "$HTTPS_PROXY" ]; then
+    export HTTPS_PROXY
+fi
+
+if [ ! -z "$NO_PROXY" ]; then
+    export NO_PROXY
+fi
+
 _prefix=${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}
 
 _addtl_mounts=''
@@ -203,6 +215,11 @@ if [ "$NETWORK_DRIVER" = "flannel" ]; then
     FLANNEL_ETCD_PREFIX="/atomic.io/network"
     FLANNEL_OPTIONS="$FLANNEL_OPTIONS"
 EOF
+
+    # Ensure external proxy is not used for the following curl
+    unset HTTP_PROXY
+    unset HTTPS_PROXY
+    unset NO_PROXY
 
     # Make sure etcd has a flannel configuration
     . $FLANNELD_CONFIG
