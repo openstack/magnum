@@ -89,30 +89,15 @@ class TestListCluster(api_base.FunctionalTest):
         self.assertEqual(cluster.uuid, response['uuid'])
         self._verify_attrs(self._expand_cluster_attrs, response)
 
-    @mock.patch('magnum.common.clients.OpenStackClients.heat')
-    def test_get_one_failed_cluster(self, mock_heat):
-        fake_resources = mock.MagicMock()
-        fake_resources.resource_name = 'fake_name'
-        fake_resources.resource_status_reason = 'fake_reason'
-
-        ht = mock.MagicMock()
-        ht.resources.list.return_value = [fake_resources]
-        mock_heat.return_value = ht
-
+    def test_get_one_failed_cluster(self):
         cluster = obj_utils.create_test_cluster(self.context,
-                                                status='CREATE_FAILED')
+                                                status='CREATE_FAILED',
+                                                master_status='CREATE_FAILED',
+                                                master_reason='fake_reason')
         response = self.get_json('/clusters/%s' % cluster['uuid'])
+        expected_faults = {cluster.default_ng_master.name: 'fake_reason'}
         self.assertEqual(cluster.uuid, response['uuid'])
-        self.assertEqual({'fake_name': 'fake_reason'}, response['faults'])
-
-    @mock.patch('magnum.common.clients.OpenStackClients.heat')
-    def test_get_one_failed_cluster_heatclient_exception(self, mock_heat):
-        mock_heat.resources.list.side_effect = Exception('fake')
-        cluster = obj_utils.create_test_cluster(self.context,
-                                                status='CREATE_FAILED')
-        response = self.get_json('/clusters/%s' % cluster['uuid'])
-        self.assertEqual(cluster.uuid, response['uuid'])
-        self.assertEqual({}, response['faults'])
+        self.assertEqual(expected_faults, response['faults'])
 
     def test_get_one_by_name(self):
         cluster = obj_utils.create_test_cluster(self.context)

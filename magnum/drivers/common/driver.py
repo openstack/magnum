@@ -209,6 +209,21 @@ class Driver(object):
         raise NotImplementedError("Subclasses must implement "
                                   "'delete_federation'.")
 
+    @abc.abstractmethod
+    def create_nodegroup(self, context, cluster, nodegroup):
+        raise NotImplementedError("Subclasses must implement "
+                                  "'create_nodegroup'.")
+
+    @abc.abstractmethod
+    def update_nodegroup(self, context, cluster, nodegroup):
+        raise NotImplementedError("Subclasses must implement "
+                                  "'update_nodegroup'.")
+
+    @abc.abstractmethod
+    def delete_nodegroup(self, context, cluster, nodegroup):
+        raise NotImplementedError("Subclasses must implement "
+                                  "'delete_nodegroup'.")
+
     def get_monitor(self, context, cluster):
         """return the monitor with container data for this driver."""
 

@@ -66,6 +66,39 @@ rules = [
             }
         ]
     ),
+    policy.DocumentedRuleDefault(
+        name=NODEGROUP % 'create',
+        check_str=base.RULE_ADMIN_OR_OWNER,
+        description='Create a new nodegroup.',
+        operations=[
+            {
+                'path': '/v1/clusters/{cluster_id}/nodegroups/',
+                'method': 'POST'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
+        name=NODEGROUP % 'delete',
+        check_str=base.RULE_ADMIN_OR_OWNER,
+        description='Delete a nodegroup.',
+        operations=[
+            {
+                'path': '/v1/clusters/{cluster_id}/nodegroups/{nodegroup}',
+                'method': 'DELETE'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
+        name=NODEGROUP % 'update',
+        check_str=base.RULE_ADMIN_OR_OWNER,
+        description='Update an existing nodegroup.',
+        operations=[
+            {
+                'path': '/v1/clusters/{cluster_id}/nodegroups/{nodegroup}',
+                'method': 'PATCH'
+            }
+        ]
+    ),
 ]
 
 

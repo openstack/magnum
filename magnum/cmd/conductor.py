@@ -30,6 +30,7 @@ from magnum.conductor.handlers import cluster_conductor
 from magnum.conductor.handlers import conductor_listener
 from magnum.conductor.handlers import federation_conductor
 from magnum.conductor.handlers import indirection_api
+from magnum.conductor.handlers import nodegroup_conductor
 import magnum.conf
 from magnum import version
 
@@ -53,6 +54,7 @@ def main():
         conductor_listener.Handler(),
         ca_conductor.Handler(),
         federation_conductor.Handler(),
+        nodegroup_conductor.Handler(),
     ]
 
     server = rpc_service.Service.create(CONF.conductor.topic,

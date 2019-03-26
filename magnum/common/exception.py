@@ -437,5 +437,22 @@ class MasterNGResizeNotSupported(NotSupported):
 
 class NGResizeOutBounds(Invalid):
     message = _("Resizing %(nodegroup)s outside the allowed range: "
-                "min_node_count = %(min_node_count)s, "
-                "max_node_count = %(max_node_count)s")
+                "min_node_count = %(min_nc)s, "
+                "max_node_count = %(max_nc)s")
+
+
+class DeletingDefaultNGNotSupported(NotSupported):
+    message = _("Deleting a default nodegroup is not supported.")
+
+
+class NodeGroupInvalidInput(Conflict):
+    message = _("%(attr)s for %(nodegroup)s is invalid (%(expl)s).")
+
+
+class CreateMasterNodeGroup(NotSupported):
+    message = _("Creating master nodegroups is currently not supported.")
+
+
+class NgOperationInProgress(Invalid):
+    message = _("Nodegroup %(nodegroup)s already has an operation in "
+                "progress.")

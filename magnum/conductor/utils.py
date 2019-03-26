@@ -23,6 +23,7 @@ from magnum.common import clients
 from magnum.common import rpc
 from magnum.objects import cluster
 from magnum.objects import cluster_template
+from magnum.objects import fields
 from magnum.objects import nodegroup
 
 
@@ -184,4 +185,5 @@ def _get_nodegroup_object(context, cluster, node_count, is_master=False):
         ng.role = "worker"
     ng.name = "default-%s" % ng.role
     ng.is_default = True
+    ng.status = fields.ClusterStatus.CREATE_IN_PROGRESS
     return ng

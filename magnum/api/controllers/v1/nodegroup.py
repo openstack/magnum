@@ -14,6 +14,8 @@
 #    under the License.
 
 import pecan
+import six
+import uuid
 import wsme
 from wsme import types as wtypes
 
@@ -23,8 +25,34 @@ from magnum.api.controllers.v1 import collection
 from magnum.api.controllers.v1 import types
 from magnum.api import expose
 from magnum.api import utils as api_utils
+from magnum.common import exception
 from magnum.common import policy
 from magnum import objects
+from magnum.objects import fields
+
+
+def _validate_node_count(ng):
+    if ng.max_node_count:
+        if ng.max_node_count < ng.min_node_count:
+            expl = ("min_node_count (%s) should be less or equal to "
+                    "max_node_count (%s)" % (ng.min_node_count,
+                                             ng.max_node_count))
+            raise exception.NodeGroupInvalidInput(attr='max_node_count',
+                                                  nodegroup=ng.name,
+                                                  expl=expl)
+        if ng.node_count > ng.max_node_count:
+            expl = ("node_count (%s) should be less or equal to "
+                    "max_node_count (%s)" % (ng.node_count,
+                                             ng.max_node_count))
+            raise exception.NodeGroupInvalidInput(attr='max_node_count',
+                                                  nodegroup=ng.name,
+                                                  expl=expl)
+    if ng.min_node_count > ng.node_count:
+        expl = ('min_node_count (%s) should be less or equal to '
+                'node_count (%s)' % (ng.min_node_count, ng.node_count))
+        raise exception.NodeGroupInvalidInput(attr='min_node_count',
+                                              nodegroup=ng.name,
+                                              expl=expl)
 
 
 class NodeGroup(base.APIBase):
@@ -52,7 +80,10 @@ class NodeGroup(base.APIBase):
     docker_volume_size = wtypes.IntegerType(minimum=1)
     """The size in GB of the docker volume"""
 
-    labels = wtypes.DictType(str, str)
+    labels = wtypes.DictType(wtypes.text, types.MultiType(wtypes.text,
+                                                          six.integer_types,
+                                                          bool,
+                                                          float))
     """One or more key/value pairs"""
 
     links = wsme.wsattr([link.Link], readonly=True)
@@ -70,7 +101,8 @@ class NodeGroup(base.APIBase):
     node_count = wsme.wsattr(wtypes.IntegerType(minimum=1), default=1)
     """The node count for this nodegroup. Default to 1 if not set"""
 
-    role = wtypes.StringType(min_length=1, max_length=255)
+    role = wsme.wsattr(wtypes.StringType(min_length=1, max_length=255),
+                       default='worker')
     """The role of the nodes included in this nodegroup"""
 
     min_node_count = wsme.wsattr(wtypes.IntegerType(minimum=1), default=1)
@@ -81,6 +113,18 @@ class NodeGroup(base.APIBase):
 
     is_default = types.BooleanType()
     """Specifies is a nodegroup was created by default or not"""
+
+    stack_id = wsme.wsattr(wtypes.text, readonly=True)
+    """Stack id of the heat stack"""
+
+    status = wtypes.Enum(wtypes.text, *fields.ClusterStatus.ALL)
+    """Status of the nodegroup from the heat stack"""
+
+    status_reason = wtypes.text
+    """Status reason of the nodegroup from the heat stack"""
+
+    version = wtypes.text
+    """Version of the nodegroup"""
 
     def __init__(self, **kwargs):
         super(NodeGroup, self).__init__()
@@ -101,7 +145,8 @@ class NodeGroup(base.APIBase):
         ng = NodeGroup(**nodegroup.as_dict())
         if not expand:
             ng.unset_fields_except(["uuid", "name", "flavor_id", "node_count",
-                                    "role", "is_default", "image_id"])
+                                    "role", "is_default", "image_id", "status",
+                                    "stack_id"])
         else:
             ng.links = [link.Link.make_link('self', url, cluster_path,
                                             nodegroup_path),
@@ -109,6 +154,20 @@ class NodeGroup(base.APIBase):
                                             cluster_path, nodegroup_path,
                                             bookmark=True)]
         return ng
+
+
+class NodeGroupPatchType(types.JsonPatchType):
+    _api_base = NodeGroup
+
+    @staticmethod
+    def internal_attrs():
+        # Allow updating only min/max_node_count
+        internal_attrs = ["/name", "/cluster_id", "/project_id",
+                          "/docker_volume_size", "/labels", "/flavor_id",
+                          "/image_id", "/node_addresses", "/node_count",
+                          "/role", "/is_default", "/stack_id", "/status",
+                          "/status_reason", "/version"]
+        return types.JsonPatchType.internal_attrs() + internal_attrs
 
 
 class NodeGroupCollection(collection.Collection):
@@ -145,14 +204,14 @@ class NodeGroupController(base.Controller):
 
         marker_obj = None
         if marker:
-            marker_obj = objects.NodeGroup.list(pecan.request.context,
-                                                cluster_id,
-                                                marker)
+            marker_obj = objects.NodeGroup.get(pecan.request.context,
+                                               cluster_id,
+                                               marker)
 
         nodegroups = objects.NodeGroup.list(pecan.request.context,
                                             cluster_id,
-                                            limit,
-                                            marker_obj,
+                                            limit=limit,
+                                            marker=marker_obj,
                                             sort_key=sort_key,
                                             sort_dir=sort_dir,
                                             filters=filters)
@@ -217,3 +276,98 @@ class NodeGroupController(base.Controller):
         cluster = api_utils.get_resource('Cluster', cluster_id)
         nodegroup = objects.NodeGroup.get(context, cluster.uuid, nodegroup_id)
         return NodeGroup.convert(nodegroup)
+
+    @expose.expose(NodeGroup, types.uuid_or_name, NodeGroup, body=NodeGroup,
+                   status_code=202)
+    def post(self, cluster_id, nodegroup):
+        """Create NodeGroup.
+
+        :param nodegroup: a json document to create this NodeGroup.
+        """
+
+        context = pecan.request.context
+        policy.enforce(context, 'nodegroup:create', action='nodegroup:create')
+
+        cluster = api_utils.get_resource('Cluster', cluster_id)
+        cluster_ngs = [ng.name for ng in cluster.nodegroups]
+        if nodegroup.name in cluster_ngs:
+            raise exception.NodeGroupAlreadyExists(name=nodegroup.name,
+                                                   cluster_id=cluster.name)
+        _validate_node_count(nodegroup)
+
+        if nodegroup.role == "master":
+            # Currently we don't support adding master nodegroups.
+            # Keep this until we start supporting it.
+            raise exception.CreateMasterNodeGroup()
+        if nodegroup.image_id is None or nodegroup.image_id == wtypes.Unset:
+            nodegroup.image_id = cluster.cluster_template.image_id
+        if nodegroup.flavor_id is None or nodegroup.flavor_id == wtypes.Unset:
+            nodegroup.flavor_id = cluster.flavor_id
+        if nodegroup.labels is None or nodegroup.labels == wtypes.Unset:
+            nodegroup.labels = cluster.labels
+
+        nodegroup_dict = nodegroup.as_dict()
+        nodegroup_dict['cluster_id'] = cluster.uuid
+        nodegroup_dict['project_id'] = context.project_id
+
+        new_obj = objects.NodeGroup(context, **nodegroup_dict)
+        new_obj.uuid = uuid.uuid4()
+        pecan.request.rpcapi.nodegroup_create_async(cluster, new_obj)
+        return NodeGroup.convert(new_obj)
+
+    @expose.expose(NodeGroup, types.uuid_or_name, types.uuid_or_name,
+                   body=[NodeGroupPatchType], status_code=202)
+    def patch(self, cluster_id, nodegroup_id, patch):
+        """Update NodeGroup.
+
+        :param cluster_id: cluster id.
+        :param : resource name.
+        :param values: a json document to update a nodegroup.
+        """
+        cluster = api_utils.get_resource('Cluster', cluster_id)
+        nodegroup = self._patch(cluster.uuid, nodegroup_id, patch)
+        pecan.request.rpcapi.nodegroup_update_async(cluster, nodegroup)
+        return NodeGroup.convert(nodegroup)
+
+    @expose.expose(None, types.uuid_or_name, types.uuid_or_name,
+                   status_code=204)
+    def delete(self, cluster_id,  nodegroup_id):
+        """Delete NodeGroup for a given project_id and resource.
+
+        :param cluster_id: cluster id.
+        :param nodegroup_id: resource name.
+        """
+        context = pecan.request.context
+        policy.enforce(context, 'nodegroup:delete', action='nodegroup:delete')
+        cluster = api_utils.get_resource('Cluster', cluster_id)
+        nodegroup = objects.NodeGroup.get(context, cluster.uuid, nodegroup_id)
+        if nodegroup.is_default:
+            raise exception.DeletingDefaultNGNotSupported()
+        pecan.request.rpcapi.nodegroup_delete_async(cluster, nodegroup)
+
+    def _patch(self, cluster_uuid, nodegroup_id, patch):
+        context = pecan.request.context
+        policy.enforce(context, 'nodegroup:update', action='nodegroup:update')
+        nodegroup = objects.NodeGroup.get(context, cluster_uuid, nodegroup_id)
+
+        try:
+            ng_dict = nodegroup.as_dict()
+            new_nodegroup = NodeGroup(**api_utils.apply_jsonpatch(ng_dict,
+                                                                  patch))
+        except api_utils.JSONPATCH_EXCEPTIONS as e:
+            raise exception.PatchError(patch=patch, reason=e)
+
+        # Update only the fields that have changed
+        for field in objects.NodeGroup.fields:
+            try:
+                patch_val = getattr(new_nodegroup, field)
+            except AttributeError:
+                # Ignore fields that aren't exposed in the API
+                continue
+            if patch_val == wtypes.Unset:
+                patch_val = None
+            if nodegroup[field] != patch_val:
+                nodegroup[field] = patch_val
+        _validate_node_count(nodegroup)
+
+        return nodegroup

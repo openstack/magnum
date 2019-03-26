@@ -32,7 +32,6 @@ from magnum.api.controllers.v1 import types
 from magnum.api import expose
 from magnum.api import utils as api_utils
 from magnum.api import validation
-from magnum.common import clients
 from magnum.common import exception
 from magnum.common import name_generator
 from magnum.common import policy
@@ -397,22 +396,11 @@ class ClustersController(base.Controller):
 
         and store them into cluster.faults.
         """
-        osc = clients.OpenStackClients(context)
-        filters = {'status': 'FAILED'}
-        try:
-            failed_resources = osc.heat().resources.list(
-                cluster.stack_id, nested_depth=2, filters=filters)
-        except Exception as e:
-            failed_resources = []
-            LOG.warning("Failed to retrieve failed resources for "
-                        "cluster %(cluster)s from Heat stack "
-                        "%(stack)s due to error: %(e)s",
-                        {'cluster': cluster.uuid,
-                         'stack': cluster.stack_id, 'e': e},
-                        exc_info=True)
-
-        return {res.resource_name: res.resource_status_reason
-                for res in failed_resources}
+        # Gather fault info from the cluster nodegroups.
+        return {
+            ng.name: ng.status_reason for ng in cluster.nodegroups
+            if ng.status.endswith('FAILED')
+        }
 
     @expose.expose(Cluster, types.uuid_or_name)
     def get_one(self, cluster_ident):
@@ -437,12 +425,12 @@ class ClustersController(base.Controller):
         policy.enforce(context, 'cluster:get', cluster.as_dict(),
                        action='cluster:get')
 
-        cluster = Cluster.convert_with_links(cluster)
+        api_cluster = Cluster.convert_with_links(cluster)
 
-        if cluster.status in fields.ClusterStatus.STATUS_FAILED:
-            cluster.faults = self._collect_fault_info(context, cluster)
+        if api_cluster.status in fields.ClusterStatus.STATUS_FAILED:
+            api_cluster.faults = self._collect_fault_info(context, cluster)
 
-        return cluster
+        return api_cluster
 
     def _check_cluster_quota_limit(self, context):
         try:

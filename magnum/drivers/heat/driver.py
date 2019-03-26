@@ -96,6 +96,15 @@ class HeatDriver(driver.Driver):
     def delete_federation(self, context, federation):
         return NotImplementedError("Must implement 'delete_federation'")
 
+    def create_nodegroup(self, context, cluster, nodegroup):
+        raise NotImplementedError("Must implement 'create_nodegroup'.")
+
+    def update_nodegroup(self, context, cluster, nodegroup):
+        raise NotImplementedError("Must implement 'update_nodegroup'.")
+
+    def delete_nodegroup(self, context, cluster, nodegroup):
+        raise NotImplementedError("Must implement 'delete_nodegroup'.")
+
     def update_cluster_status(self, context, cluster):
         if cluster.stack_id is None:
             # NOTE(mgoddard): During cluster creation it is possible to poll

@@ -13,11 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import datetime
 import mock
 
+from oslo_utils import timeutils
 from oslo_utils import uuidutils
 
 from magnum.api.controllers.v1 import nodegroup as api_nodegroup
+from magnum.conductor import api as rpcapi
 import magnum.conf
 from magnum import objects
 from magnum.tests import base
@@ -86,6 +89,13 @@ class TestListNodegroups(api_base.FunctionalTest):
         expected = [ng.uuid for ng in self.cluster.nodegroups]
         self._test_list_nodegroups(self.cluster.name, expected=expected)
 
+    def test_get_all_with_pagination_marker(self):
+        ng_uuid = self.cluster.default_ng_master.uuid
+        url = '/clusters/%s/nodegroups?limit=1&marker=1' % (self.cluster_uuid)
+        response = self.get_json(url)
+        self.assertEqual(1, len(response['nodegroups']))
+        self.assertEqual(ng_uuid, response['nodegroups'][0]['uuid'])
+
     def test_get_all_by_role(self):
         filters = {'role': 'master'}
         expected = [self.cluster.default_ng_master.uuid]
@@ -145,6 +155,403 @@ class TestListNodegroups(api_base.FunctionalTest):
         self.assertEqual(worker.name, response['name'])
         self._verify_attrs(self._nodegroup_attrs, response)
         self._verify_attrs(self._expanded_attrs, response)
+
+
+class TestPost(api_base.FunctionalTest):
+    def setUp(self):
+        super(TestPost, self).setUp()
+        self.cluster_template = obj_utils.create_test_cluster_template(
+            self.context)
+        self.cluster = obj_utils.create_test_cluster(self.context)
+        self.cluster.refresh()
+        p = mock.patch.object(rpcapi.API, 'nodegroup_create_async')
+        self.mock_ng_create = p.start()
+        self.mock_ng_create.side_effect = self._simulate_nodegroup_create
+        self.addCleanup(p.stop)
+        self.url = "/clusters/%s/nodegroups" % self.cluster.uuid
+
+    def _simulate_nodegroup_create(self, cluster, nodegroup):
+        nodegroup.create()
+        return nodegroup
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_create_nodegroup(self, mock_utcnow):
+        ng_dict = apiutils.nodegroup_post_data()
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.post_json(self.url, ng_dict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        self.assertTrue(uuidutils.is_uuid_like(response.json['uuid']))
+        self.assertFalse(response.json['is_default'])
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_create_nodegroup_without_node_count(self, mock_utcnow):
+        ng_dict = apiutils.nodegroup_post_data()
+        del ng_dict['node_count']
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.post_json(self.url, ng_dict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        # Verify node_count defaults to 1
+        self.assertEqual(1, response.json['node_count'])
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_create_nodegroup_with_max_node_count(self, mock_utcnow):
+        ng_dict = apiutils.nodegroup_post_data(max_node_count=5)
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.post_json(self.url, ng_dict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        self.assertEqual(5, response.json['max_node_count'])
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_create_nodegroup_with_role(self, mock_utcnow):
+        ng_dict = apiutils.nodegroup_post_data(role='test-role')
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.post_json(self.url, ng_dict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        self.assertEqual('test-role', response.json['role'])
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_create_nodegroup_with_labels(self, mock_utcnow):
+        labels = {'label1': 'value1'}
+        ng_dict = apiutils.nodegroup_post_data(labels=labels)
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.post_json(self.url, ng_dict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        self.assertEqual(labels, response.json['labels'])
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_create_nodegroup_with_image_id(self, mock_utcnow):
+        ng_dict = apiutils.nodegroup_post_data(image_id='test_image')
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.post_json(self.url, ng_dict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        self.assertEqual('test_image', response.json['image_id'])
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_create_nodegroup_with_flavor(self, mock_utcnow):
+        ng_dict = apiutils.nodegroup_post_data(flavor_id='test_flavor')
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.post_json(self.url, ng_dict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        self.assertEqual('test_flavor', response.json['flavor_id'])
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_create_nodegroup_only_name(self, mock_utcnow):
+        ng_dict = {'name': 'test_ng'}
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.post_json(self.url, ng_dict)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_int)
+        self.assertEqual('worker', response.json['role'])
+        self.assertEqual(self.cluster_template.image_id,
+                         response.json['image_id'])
+        self.assertEqual(self.cluster.flavor_id, response.json['flavor_id'])
+        self.assertEqual(self.cluster.uuid, response.json['cluster_id'])
+        self.assertEqual(self.cluster.project_id, response.json['project_id'])
+        self.assertEqual(self.cluster.labels, response.json['labels'])
+        self.assertEqual('worker', response.json['role'])
+        self.assertEqual(1, response.json['min_node_count'])
+        self.assertEqual(1, response.json['node_count'])
+        self.assertIsNone(response.json['max_node_count'])
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_create_nodegroup_invalid_node_count(self, mock_utcnow):
+        ng_dict = apiutils.nodegroup_post_data(node_count=7, max_node_count=5)
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.post_json(self.url, ng_dict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(409, response.status_int)
+
+        ng_dict = apiutils.nodegroup_post_data(node_count=2, min_node_count=3)
+
+        response = self.post_json(self.url, ng_dict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(409, response.status_int)
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_create_master_ng(self, mock_utcnow):
+        ng_dict = apiutils.nodegroup_post_data(role='master')
+        response = self.post_json(self.url, ng_dict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_int)
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_create_ng_same_name(self, mock_utcnow):
+        existing_name = self.cluster.default_ng_master.name
+        ng_dict = apiutils.nodegroup_post_data(name=existing_name)
+        response = self.post_json(self.url, ng_dict, expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(409, response.status_int)
+
+
+class TestDelete(api_base.FunctionalTest):
+
+    def setUp(self):
+        super(TestDelete, self).setUp()
+        self.cluster_template = obj_utils.create_test_cluster_template(
+            self.context)
+        self.cluster = obj_utils.create_test_cluster(self.context)
+        self.cluster.refresh()
+        self.nodegroup = obj_utils.create_test_nodegroup(
+            self.context, cluster_id=self.cluster.uuid, is_default=False)
+        p = mock.patch.object(rpcapi.API, 'nodegroup_delete_async')
+        self.mock_ng_delete = p.start()
+        self.mock_ng_delete.side_effect = self._simulate_nodegroup_delete
+        self.addCleanup(p.stop)
+        self.url = "/clusters/%s/nodegroups/" % self.cluster.uuid
+
+    def _simulate_nodegroup_delete(self, cluster, nodegroup):
+        nodegroup.destroy()
+
+    def test_delete_nodegroup(self):
+        response = self.delete(self.url + self.nodegroup.uuid)
+        self.assertEqual(204, response.status_int)
+        response = self.get_json(self.url + self.nodegroup.uuid,
+                                 expect_errors=True)
+        self.assertEqual(404, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertIsNotNone(response.json['errors'])
+
+    def test_delete_nodegroup_by_name(self):
+        response = self.delete(self.url + self.nodegroup.name)
+        self.assertEqual(204, response.status_int)
+        response = self.get_json(self.url + self.nodegroup.name,
+                                 expect_errors=True)
+        self.assertEqual(404, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertIsNotNone(response.json['errors'])
+
+    def test_delete_not_found(self):
+        uuid = uuidutils.generate_uuid()
+        response = self.delete(self.url + uuid, expect_errors=True)
+        self.assertEqual(404, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertIsNotNone(response.json['errors'])
+
+    def test_delete_by_name_not_found(self):
+        response = self.delete(self.url + "not-there", expect_errors=True)
+        self.assertEqual(404, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertIsNotNone(response.json['errors'])
+
+    def test_delete_default_nodegroup(self):
+        response = self.delete(self.url + self.cluster.default_ng_master.uuid,
+                               expect_errors=True)
+        self.assertEqual(400, response.status_int)
+        self.assertEqual('application/json', response.content_type)
+        self.assertIsNotNone(response.json['errors'])
+
+    @mock.patch("magnum.common.policy.enforce")
+    @mock.patch("magnum.common.context.make_context")
+    def test_delete_nodegroup_as_admin(self, mock_context, mock_policy):
+        cluster_uuid = uuidutils.generate_uuid()
+        obj_utils.create_test_cluster(self.context, uuid=cluster_uuid,
+                                      project_id='fake', name='test-fake')
+        ng_uuid = uuidutils.generate_uuid()
+        obj_utils.create_test_nodegroup(self.context, uuid=ng_uuid,
+                                        cluster_id=cluster_uuid,
+                                        is_default=False,
+                                        project_id='fake', id=50)
+        self.context.is_admin = True
+        url = '/clusters/%s/nodegroups/%s' % (cluster_uuid, ng_uuid)
+        response = self.delete(url)
+        self.assertEqual(204, response.status_int)
+
+
+class TestPatch(api_base.FunctionalTest):
+    def setUp(self):
+        super(TestPatch, self).setUp()
+        self.cluster_template = obj_utils.create_test_cluster_template(
+            self.context)
+        self.cluster = obj_utils.create_test_cluster(self.context)
+        self.cluster.refresh()
+        self.nodegroup = obj_utils.create_test_nodegroup(
+            self.context, cluster_id=self.cluster.uuid, is_default=False,
+            min_node_count=2, max_node_count=5, node_count=2)
+        p = mock.patch.object(rpcapi.API, 'nodegroup_update_async')
+        self.mock_ng_update = p.start()
+        self.mock_ng_update.side_effect = self._simulate_nodegroup_update
+        self.addCleanup(p.stop)
+        self.url = "/clusters/%s/nodegroups/" % self.cluster.uuid
+
+    def _simulate_nodegroup_update(self, cluster, nodegroup):
+        nodegroup.save()
+        return nodegroup
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_replace_ok(self, mock_utcnow):
+        max_node_count = 4
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.patch_json(self.url + self.nodegroup.uuid,
+                                   [{'path': '/max_node_count',
+                                     'value': max_node_count,
+                                     'op': 'replace'}])
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_code)
+
+        response = self.get_json(self.url + self.nodegroup.uuid)
+        self.assertEqual(max_node_count, response['max_node_count'])
+        return_updated_at = timeutils.parse_isotime(
+            response['updated_at']).replace(tzinfo=None)
+        self.assertEqual(test_time, return_updated_at)
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_replace_ok_by_name(self, mock_utcnow):
+        max_node_count = 4
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.patch_json(self.url + self.nodegroup.name,
+                                   [{'path': '/max_node_count',
+                                     'value': max_node_count,
+                                     'op': 'replace'}])
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_code)
+
+        response = self.get_json(self.url + self.nodegroup.uuid)
+        self.assertEqual(max_node_count, response['max_node_count'])
+        return_updated_at = timeutils.parse_isotime(
+            response['updated_at']).replace(tzinfo=None)
+        self.assertEqual(test_time, return_updated_at)
+
+    def test_replace_node_count_failed(self):
+        response = self.patch_json(self.url + self.nodegroup.name,
+                                   [{'path': '/node_count',
+                                     'value': 3,
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_code)
+        self.assertIsNotNone(response.json['errors'])
+
+    def test_replace_max_node_count_failed(self):
+        # min_node_count equals to 2. Verify that if the max_node_count
+        # is less than the min the patch fails
+        response = self.patch_json(self.url + self.nodegroup.name,
+                                   [{'path': '/max_node_count',
+                                     'value': 1,
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(409, response.status_code)
+        self.assertIsNotNone(response.json['errors'])
+
+    def test_replace_min_node_count_failed(self):
+        # min_node_count equals to 2. Verify that if the max_node_count
+        # is less than the min the patch fails
+        response = self.patch_json(self.url + self.nodegroup.name,
+                                   [{'path': '/min_node_count',
+                                     'value': 3,
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(409, response.status_code)
+        self.assertIsNotNone(response.json['errors'])
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_remove_ok(self, mock_utcnow):
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.patch_json(self.url + self.nodegroup.name,
+                                   [{'path': '/max_node_count',
+                                     'op': 'remove'}])
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_code)
+
+        response = self.get_json(self.url + self.nodegroup.uuid)
+        self.assertIsNone(response['max_node_count'])
+        return_updated_at = timeutils.parse_isotime(
+            response['updated_at']).replace(tzinfo=None)
+        self.assertEqual(test_time, return_updated_at)
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_remove_min_node_count(self, mock_utcnow):
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.patch_json(self.url + self.nodegroup.name,
+                                   [{'path': '/min_node_count',
+                                     'op': 'remove'}])
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_code)
+
+        response = self.get_json(self.url + self.nodegroup.uuid)
+        # Removing the min_node_count just restores the default value
+        self.assertEqual(1, response['min_node_count'])
+        return_updated_at = timeutils.parse_isotime(
+            response['updated_at']).replace(tzinfo=None)
+        self.assertEqual(test_time, return_updated_at)
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_remove_internal_attr(self, mock_utcnow):
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.patch_json(self.url + self.nodegroup.name,
+                                   [{'path': '/node_count',
+                                     'op': 'remove'}], expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_code)
+        self.assertIsNotNone(response.json['errors'])
+
+    @mock.patch('oslo_utils.timeutils.utcnow')
+    def test_remove_non_existent_property(self, mock_utcnow):
+        test_time = datetime.datetime(2000, 1, 1, 0, 0)
+        mock_utcnow.return_value = test_time
+
+        response = self.patch_json(self.url + self.nodegroup.name,
+                                   [{'path': '/not_there',
+                                     'op': 'remove'}], expect_errors=True)
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(400, response.status_code)
+        self.assertIsNotNone(response.json['errors'])
+
+    @mock.patch("magnum.common.policy.enforce")
+    @mock.patch("magnum.common.context.make_context")
+    def test_update_nodegroup_as_admin(self, mock_context, mock_policy):
+        cluster_uuid = uuidutils.generate_uuid()
+        obj_utils.create_test_cluster(self.context, uuid=cluster_uuid,
+                                      project_id='fake', name='test-fake')
+        ng_uuid = uuidutils.generate_uuid()
+        obj_utils.create_test_nodegroup(self.context, uuid=ng_uuid,
+                                        cluster_id=cluster_uuid,
+                                        is_default=False,
+                                        project_id='fake', id=50)
+        self.context.is_admin = True
+        url = '/clusters/%s/nodegroups/%s' % (cluster_uuid, ng_uuid)
+        response = self.patch_json(url,
+                                   [{'path': '/max_node_count',
+                                     'value': 4,
+                                     'op': 'replace'}])
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_code)
 
 
 class TestNodeGroupPolicyEnforcement(api_base.FunctionalTest):

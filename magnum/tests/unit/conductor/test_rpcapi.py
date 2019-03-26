@@ -119,3 +119,24 @@ class RPCAPITestCase(base.DbTestCase):
                           'call',
                           version='1.0',
                           cluster=self.fake_cluster)
+
+    def test_nodegroup_create(self):
+        self._test_rpcapi('nodegroup_create',
+                          'call',
+                          version='1.0',
+                          cluster=self.fake_cluster,
+                          nodegroup=self.fake_nodegroups['worker'])
+
+    def test_nodegroup_update(self):
+        self._test_rpcapi('nodegroup_update',
+                          'call',
+                          version='1.0',
+                          cluster=self.fake_cluster,
+                          nodegroup=self.fake_nodegroups['worker'])
+
+    def test_nodegroup_delete(self):
+        self._test_rpcapi('nodegroup_delete',
+                          'call',
+                          version='1.0',
+                          cluster=self.fake_cluster,
+                          nodegroup=self.fake_nodegroups['worker'])
