@@ -676,6 +676,17 @@ resources:
         - protocol: udp
           port_range_min: 8472
           port_range_max: 8472
+        # allow any traffic from master nodes
+        - protocol: tcp
+          port_range_min: 1
+          port_range_max: 65535
+          remote_mode: 'remote_group_id'
+          remote_group_id: {get_resource: secgroup_kube_master}
+        - protocol: udp
+          port_range_min: 1
+          port_range_max: 65535
+          remote_mode: 'remote_group_id'
+          remote_group_id: {get_resource: secgroup_kube_master}
 
   ######################################################################
   #
