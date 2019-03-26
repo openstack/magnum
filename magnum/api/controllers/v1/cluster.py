@@ -27,6 +27,7 @@ from magnum.api.controllers import base
 from magnum.api.controllers import link
 from magnum.api.controllers.v1 import cluster_actions
 from magnum.api.controllers.v1 import collection
+from magnum.api.controllers.v1 import nodegroup
 from magnum.api.controllers.v1 import types
 from magnum.api import expose
 from magnum.api import utils as api_utils
@@ -333,6 +334,8 @@ class ClustersController(base.Controller):
                                                     expand=expand,
                                                     sort_key=sort_key,
                                                     sort_dir=sort_dir)
+
+    nodegroups = nodegroup.NodeGroupController()
 
     @expose.expose(ClusterCollection, types.uuid, int, wtypes.text,
                    wtypes.text)

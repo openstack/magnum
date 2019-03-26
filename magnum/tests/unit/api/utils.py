@@ -95,3 +95,8 @@ def federation_post_data(**kw):
     federation = utils.get_test_federation(**kw)
     internal = federation_controller.FederationPatchType.internal_attrs()
     return remove_internal(federation, internal)
+
+
+def nodegroup_post_data(**kw):
+    nodegroup = utils.get_test_nodegroup(**kw)
+    return nodegroup

@@ -103,6 +103,9 @@ class V1(controllers_base.APIBase):
     # Links to the federations resources
     federations = [link.Link]
 
+    nodegroups = [link.Link]
+    """Links to the nodegroups resource"""
+
     @staticmethod
     def convert():
         v1 = V1()
@@ -171,6 +174,14 @@ class V1(controllers_base.APIBase):
                                               pecan.request.host_url,
                                               'federations', '',
                                               bookmark=True)]
+        v1.nodegroups = [link.Link.make_link('self', pecan.request.host_url,
+                                             'clusters/{cluster_id}',
+                                             'nodegroups'),
+                         link.Link.make_link('bookmark',
+                                             pecan.request.host_url,
+                                             'clusters/{cluster_id}',
+                                             'nodegroups',
+                                             bookmark=True)]
 
         return v1
 
