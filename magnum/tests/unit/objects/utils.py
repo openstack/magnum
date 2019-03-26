@@ -159,6 +159,20 @@ def get_test_magnum_service_object(context, **kw):
     return magnum_service
 
 
+def get_test_nodegroup(context, **kw):
+    db_nodegroup = db_utils.get_test_nodegroup(**kw)
+    nodegroup = objects.NodeGroup(context)
+    for key in db_nodegroup:
+        setattr(nodegroup, key, db_nodegroup[key])
+    return nodegroup
+
+
+def create_test_nodegroup(context, **kw):
+    nodegroup = get_test_nodegroup(context, **kw)
+    nodegroup.create()
+    return nodegroup
+
+
 def get_test_federation(context, **kw):
     """Return a Federation object with appropriate attributes.
 

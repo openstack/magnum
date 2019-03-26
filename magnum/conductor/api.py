@@ -144,6 +144,29 @@ class API(rpc_service.API):
         return self._client.call(context, 'object_backport', objinst=objinst,
                                  target_version=target_version)
 
+    # NodeGroup Operations
+
+    def nodegroup_create(self, cluster, nodegroup):
+        return self._call('nodegroup_create', cluster=cluster,
+                          nodegroup=nodegroup)
+
+    def nodegroup_create_async(self, cluster, nodegroup):
+        self._cast('nodegroup_create', cluster=cluster, nodegroup=nodegroup)
+
+    def nodegroup_delete(self, cluster, nodegroup):
+        return self._call('nodegroup_delete', cluster=cluster,
+                          nodegroup=nodegroup)
+
+    def nodegroup_delete_async(self, cluster, nodegroup):
+        self._cast('nodegroup_delete', cluster=cluster, nodegroup=nodegroup)
+
+    def nodegroup_update(self, cluster, nodegroup):
+        return self._call('nodegroup_update', cluster=cluster,
+                          nodegroup=nodegroup)
+
+    def nodegroup_update_async(self, cluster, nodegroup):
+        self._cast('nodegroup_update', cluster=cluster, nodegroup=nodegroup)
+
 
 @profiler.trace_cls("rpc")
 class ListenerAPI(rpc_service.API):

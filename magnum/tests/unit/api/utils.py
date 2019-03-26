@@ -98,5 +98,8 @@ def federation_post_data(**kw):
 
 
 def nodegroup_post_data(**kw):
+    internal = ['/cluster_id', '/project_id', '/node_addresses', '/is_default',
+                '/created_at', '/updated_at', '/status', '/status_reason',
+                '/version', '/stack_id']
     nodegroup = utils.get_test_nodegroup(**kw)
-    return nodegroup
+    return remove_internal(nodegroup, internal)
