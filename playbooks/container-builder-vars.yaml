@@ -1,9 +1,10 @@
 magnum_src_dir: "src/git.openstack.org/openstack/magnum"
 
 magnum_repository: openstackmagnum
-kubernetes_version_v1_11: v1.11.8
-kubernetes_version_v1_12: v1.12.6
-kubernetes_version_v1_13: v1.13.4
+kubernetes_version_v1_11: v1.11.9
+kubernetes_version_v1_12: v1.12.7
+kubernetes_version_v1_13: v1.13.5
+kubernetes_version_v1_14: v1.14.0
 kubernetes_images:
   - name: kubernetes-apiserver
   - name: kubernetes-controller-manager
