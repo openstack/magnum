@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add nginx as an additional Ingress controller option for Kubernetes.
+    Installation is done via the upstream nginx-ingress helm chart, and
+    selection can be done via label ingress_controller=nginx.

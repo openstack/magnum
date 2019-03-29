@@ -443,6 +443,10 @@ parameters:
     type: string
     description: tag of the node problem detector container
 
+  nginx_ingress_controller_tag:
+    type: string
+    description: nginx ingress controller docker image tag
+
 resources:
   ######################################################################
   #
@@ -555,6 +559,7 @@ resources:
             "$TILLER_TAG": {get_param: tiller_tag}
             "$TILLER_NAMESPACE": {get_param: tiller_namespace}
             "$NODE_PROBLEM_DETECTOR_TAG": {get_param: node_problem_detector_tag}
+            "$NGINX_INGRESS_CONTROLLER_TAG": {get_param: nginx_ingress_controller_tag}
 
   install_openstack_ca:
     type: OS::Heat::SoftwareConfig
