@@ -275,7 +275,7 @@ class ClusterTemplatesController(base.Controller):
             # parameter, currently the design is allowing admin user to list
             # all clusters from all projects. But the all_tenants is one of
             # the condition to do project filter in DB API. And it's also used
-            # by periodic tasks. So the could be removed in the future and
+            # by periodic tasks. So this could be removed in the future and
             # a new parameter 'project_id' would be added so that admin user
             # can list clusters for a particular project.
             context.all_tenants = True
@@ -356,7 +356,7 @@ class ClusterTemplatesController(base.Controller):
             # parameter, currently the design is allowing admin user to list
             # all clusters from all projects. But the all_tenants is one of
             # the condition to do project filter in DB API. And it's also used
-            # by periodic tasks. So the could be removed in the future and
+            # by periodic tasks. So this could be removed in the future and
             # a new parameter 'project_id' would be added so that admin user
             # can list clusters for a particular project.
             context.all_tenants = True
@@ -428,6 +428,10 @@ class ClusterTemplatesController(base.Controller):
         ClusterTemplate.
         """
         context = pecan.request.context
+        if context.is_admin:
+            policy.enforce(context, 'clustertemplate:update_all_projects',
+                           action='clustertemplate:update_all_projects')
+            context.all_tenants = True
         cluster_template = api_utils.get_resource('ClusterTemplate',
                                                   cluster_template_ident)
         policy.enforce(context, 'clustertemplate:update',

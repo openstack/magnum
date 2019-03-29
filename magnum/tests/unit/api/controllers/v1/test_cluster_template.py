@@ -597,6 +597,20 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual('application/json', response.content_type)
         self.assertTrue(response.json['errors'])
 
+    @mock.patch("magnum.common.policy.enforce")
+    @mock.patch("magnum.common.context.make_context")
+    def test_update_cluster_template_as_admin(self, mock_context, mock_policy):
+        temp_uuid = uuidutils.generate_uuid()
+        obj_utils.create_test_cluster_template(self.context, uuid=temp_uuid,
+                                               project_id=temp_uuid)
+        self.context.is_admin = True
+        response = self.patch_json('/clustertemplates/%s' % temp_uuid,
+                                   [{'path': '/name',
+                                     'value': 'cluster_model_example_B',
+                                     'op': 'replace'}],
+                                   expect_errors=True)
+        self.assertEqual(200, response.status_int)
+
 
 class TestPost(api_base.FunctionalTest):
 

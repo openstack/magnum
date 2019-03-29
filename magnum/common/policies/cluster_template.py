@@ -131,6 +131,17 @@ rules = [
         ]
     ),
     policy.DocumentedRuleDefault(
+        name=CLUSTER_TEMPLATE % 'update_all_projects',
+        check_str=base.RULE_ADMIN_API,
+        description='Update an existing cluster template.',
+        operations=[
+            {
+                'path': '/v1/clustertemplate/{clustertemplate_ident}',
+                'method': 'PATCH'
+            }
+        ]
+    ),
+    policy.DocumentedRuleDefault(
         name=CLUSTER_TEMPLATE % 'publish',
         check_str=base.RULE_ADMIN_API,
         description='Publish an existing cluster template.',
