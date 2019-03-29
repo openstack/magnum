@@ -459,6 +459,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'ingress_controller_role')
         octavia_ingress_controller_tag = mock_cluster.labels.get(
             'octavia_ingress_controller_tag')
+        nginx_ingress_controller_tag = mock_cluster.labels.get(
+            'nginx_ingress_controller_tag')
         kubelet_options = mock_cluster.labels.get(
             'kubelet_options')
         kubeapi_options = mock_cluster.labels.get(
@@ -550,6 +552,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'ingress_controller': ingress_controller,
             'ingress_controller_role': ingress_controller_role,
             'octavia_ingress_controller_tag': octavia_ingress_controller_tag,
+            'nginx_ingress_controller_tag': nginx_ingress_controller_tag,
             'octavia_enabled': False,
             'kube_service_account_key': 'public_key',
             'kube_service_account_private_key': 'private_key',
@@ -846,6 +849,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'ingress_controller_role')
         octavia_ingress_controller_tag = mock_cluster.labels.get(
             'octavia_ingress_controller_tag')
+        nginx_ingress_controller_tag = mock_cluster.labels.get(
+            'nginx_ingress_controller_tag')
         kubelet_options = mock_cluster.labels.get(
             'kubelet_options')
         kubeapi_options = mock_cluster.labels.get(
@@ -939,6 +944,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'ingress_controller': ingress_controller,
             'ingress_controller_role': ingress_controller_role,
             'octavia_ingress_controller_tag': octavia_ingress_controller_tag,
+            'nginx_ingress_controller_tag': nginx_ingress_controller_tag,
             'octavia_enabled': False,
             'kube_service_account_key': 'public_key',
             'kube_service_account_private_key': 'private_key',

@@ -471,6 +471,10 @@ parameters:
     description: >
       maximum node count of cluster workers when doing scale up
 
+  nginx_ingress_controller_tag:
+    type: string
+    description: nginx ingress controller docker image tag
+
 resources:
   ######################################################################
   #
@@ -589,6 +593,7 @@ resources:
             "$AUTOSCALER_TAG": {get_param: autoscaler_tag}
             "$MIN_NODE_COUNT": {get_param: min_node_count}
             "$MAX_NODE_COUNT": {get_param: max_node_count}
+            "$NGINX_INGRESS_CONTROLLER_TAG": {get_param: nginx_ingress_controller_tag}
 
   install_openstack_ca:
     type: OS::Heat::SoftwareConfig
