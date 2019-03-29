@@ -1,6 +1,45 @@
 INGRESS_TRAEFIK_MANIFEST=/srv/magnum/kubernetes/ingress-traefik.yaml
 INGRESS_TRAEFIK_MANIFEST_CONTENT=$(cat <<EOF
 ---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: ingress-traefik
+  namespace: kube-system
+  labels:
+    k8s-app: ingress-traefik-backend
+data:
+  traefik.toml: |-
+    logLevel = "INFO"
+    defaultEntryPoints = ["http", "https"]
+    [api]
+    [kubernetes]
+    [entryPoints]
+      [entryPoints.http]
+        address = ":80"
+      [entryPoints.https]
+        address = ":443"
+        [entryPoints.https.tls]
+          cipherSuites = [
+            "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305",
+            "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305",
+            "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+            "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+            "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+            "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+            "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
+            "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+            "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
+            "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+            "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA",
+            "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
+            "TLS_RSA_WITH_AES_256_GCM_SHA384",
+            "TLS_RSA_WITH_AES_128_GCM_SHA256",
+            "TLS_RSA_WITH_AES_128_CBC_SHA256",
+            "TLS_RSA_WITH_AES_256_CBC_SHA",
+            "TLS_RSA_WITH_AES_128_CBC_SHA"
+          ]
+---
 kind: DaemonSet
 apiVersion: extensions/v1beta1
 metadata:
@@ -32,12 +71,14 @@ spec:
           containerPort: 8080
         securityContext:
           privileged: true
-        args:
-        - --api
-        - --logLevel=INFO
-        - --kubernetes
-        - --entrypoints=Name:http Address::80
-        - --entrypoints=Name:https Address::443 TLS
+        volumeMounts:
+        - name: ingress-traefik
+          mountPath: /etc/traefik/traefik.toml
+          subPath: traefik.toml
+      volumes:
+      - name: ingress-traefik
+        configMap:
+          name: ingress-traefik
       nodeSelector:
         role: ${INGRESS_CONTROLLER_ROLE}
 ---
