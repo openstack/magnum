@@ -34,8 +34,8 @@ cluster_def_opts = [
                 deprecated_group='bay'),
     cfg.StrOpt('nodes_affinity_policy',
                default='soft-anti-affinity',
-               help=_('Affinity policy for server group of cluster nodes.'
-                      'Possible values include "affinity", "anti-affinity",'
+               help=_('Affinity policy for server group of cluster nodes. '
+                      'Possible values include "affinity", "anti-affinity", '
                       '"soft-affinity" and "soft-anti-affinity".')
                ),
     cfg.StrOpt('temp_cache_dir',
@@ -44,7 +44,7 @@ cluster_def_opts = [
                     'cached TLS certs.'),
     cfg.IntOpt('pre_delete_lb_timeout',
                default=60,
-               help=_('The timeout in seconds to wait for the load balancers'
+               help=_('The timeout in seconds to wait for the load balancers '
                       'to be deleted.')),
 ]
 
