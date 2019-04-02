@@ -30,6 +30,8 @@ monitor-timeout=30s
 monitor-max-retries=3
 [BlockStorage]
 bs-version=v2
+[Networking]
+internal-network-name=$CLUSTER_NETWORK
 EOF
 
 # Provide optional region parameter if it's set.
