@@ -428,12 +428,25 @@ node_count:
   in: body
   required: true
   type: integer
+nodegroup:
+  description: |
+    The ID of node group. A node group is a subset of node instances within
+    a cluster that all have the same configuration.
+  in: body
+  required: false
+  type: string
 nodes:
   description: |
     The total number of nodes including master nodes.
   in: body
   required: true
   type: integer
+nodes_to_remove:
+  description: |
+    The server ID list will be removed.
+  in: body
+  required: false
+  type: array
 op:
   description: |
     The operation used to modify resource's attributes. Supported operations
