@@ -318,5 +318,62 @@ Response
 Response Example
 ----------------
 
-.. literalinclude:: samples/cluster-create-resp.json
+.. literalinclude:: samples/cluster-resize-resp.json
+   :language: javascript
+
+
+Upgrade a cluster
+=================
+
+.. rest_method:: POST /v1/clusters/{cluster_ident}/actions/upgrade
+
+Resize a cluster.
+
+Response Codes
+--------------
+
+.. rest_status_code:: success status.yaml
+
+   - 202
+
+.. rest_status_code:: error status.yaml
+
+   - 401
+   - 403
+   - 404
+   - 409
+
+Request
+-------
+
+.. rest_parameters:: parameters.yaml
+
+  - cluster_ident: cluster_ident
+  - cluster_template: clustertemplate_id
+  - max_batch_size: max_batch_size
+  - nodegroup: nodegroup
+
+.. note::
+
+   The nodegroup is just a placeholder for future. It hasn't been supported
+   in Magnum now.
+
+Request Example
+----------------
+
+.. literalinclude:: samples/cluster-upgrade-req.json
+   :language: javascript
+
+Response
+--------
+
+.. rest_parameters:: parameters.yaml
+
+  - X-Openstack-Request-Id: request_id
+  - uuid: cluster_id
+
+Response Example
+----------------
+
+.. literalinclude:: samples/cluster-upgrade-resp.json
    :language: javascript
