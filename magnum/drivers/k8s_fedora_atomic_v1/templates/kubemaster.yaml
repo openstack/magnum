@@ -493,7 +493,6 @@ resources:
             "$AUTH_URL": {get_param: auth_url}
             "$USERNAME": {get_param: username}
             "$PASSWORD": {get_param: password}
-            "$CLUSTER_NETWORK": {get_param: fixed_network}
             "$CLUSTER_SUBNET": {get_param: fixed_subnet}
             "$TLS_DISABLED": {get_param: tls_disabled}
             "$KUBE_DASHBOARD_ENABLED": {get_param: kube_dashboard_enabled}
