@@ -338,7 +338,7 @@ parameters:
   kube_tag:
     type: string
     description: tag of the k8s containers used to provision the kubernetes cluster
-    default: v1.11.6
+    default: v1.14.3
 
   master_kube_tag:
     type: string
@@ -357,7 +357,7 @@ parameters:
     description:
       tag of the kubernetes/cloud-provider-openstack
       https://hub.docker.com/r/k8scloudprovider/openstack-cloud-controller-manager/tags/
-    default: v0.2.0
+    default: v1.14.0
 
   cloud_provider_enabled:
     type: boolean
