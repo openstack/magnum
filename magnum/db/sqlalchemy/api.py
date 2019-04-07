@@ -151,9 +151,9 @@ class Connection(api.Connection):
         if filters is None:
             filters = {}
 
-        possible_filters = ["cluster_template_id", "name", "node_count",
-                            "master_count", "stack_id", "api_address",
-                            "node_addresses", "project_id", "user_id"]
+        possible_filters = ["cluster_template_id", "name", "stack_id",
+                            "api_address", "node_addresses", "project_id",
+                            "user_id"]
 
         filter_names = set(filters).intersection(possible_filters)
         filter_dict = {filter_name: filters[filter_name]
@@ -163,6 +163,26 @@ class Connection(api.Connection):
 
         if 'status' in filters:
             query = query.filter(models.Cluster.status.in_(filters['status']))
+
+        # Helper to filter based on node_count field from nodegroups
+        def filter_node_count(query, node_count, is_master=False):
+            nfunc = func.sum(models.NodeGroup.node_count)
+            nquery = model_query(models.NodeGroup)
+            if is_master:
+                nquery = nquery.filter(models.NodeGroup.role == 'master')
+            else:
+                nquery = nquery.filter(models.NodeGroup.role != 'master')
+            nquery = nquery.group_by(models.NodeGroup.cluster_id)
+            nquery = nquery.having(nfunc == node_count)
+            uuids = [ng.cluster_id for ng in nquery.all()]
+            return query.filter(models.Cluster.uuid.in_(uuids))
+
+        if 'node_count' in filters:
+            query = filter_node_count(
+                query, filters['node_count'], is_master=False)
+        if 'master_count' in filters:
+            query = filter_node_count(
+                query, filters['master_count'], is_master=True)
 
         return query
 
@@ -219,9 +239,8 @@ class Connection(api.Connection):
 
     def get_cluster_stats(self, context, project_id=None):
         query = model_query(models.Cluster)
-        node_count_col = models.Cluster.node_count
-        master_count_col = models.Cluster.master_count
-        ncfunc = func.sum(node_count_col + master_count_col)
+        node_count_col = models.NodeGroup.node_count
+        ncfunc = func.sum(node_count_col)
 
         if project_id:
             query = query.filter_by(project_id=project_id)

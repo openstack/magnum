@@ -337,8 +337,11 @@ class MonitorsTestCase(base.TestCase):
         self.assertEqual(self.mesos_monitor.data['cpu_used'],
                          expected_cpu_used)
 
+    @mock.patch('magnum.objects.NodeGroup.list')
     @mock.patch('magnum.common.urlfetch.get')
-    def test_mesos_monitor_pull_data_success(self, mock_url_get):
+    def test_mesos_monitor_pull_data_success(self, mock_url_get,
+                                             mock_ng_list):
+        mock_ng_list.return_value = self.nodegroups
         state_json = {
             'leader': 'master@10.0.0.6:5050',
             'pid': 'master@10.0.0.6:5050',
@@ -356,8 +359,11 @@ class MonitorsTestCase(base.TestCase):
         self._test_mesos_monitor_pull_data(mock_url_get, state_json,
                                            100, 50, 1, 0.2)
 
+    @mock.patch('magnum.objects.NodeGroup.list')
     @mock.patch('magnum.common.urlfetch.get')
-    def test_mesos_monitor_pull_data_success_not_leader(self, mock_url_get):
+    def test_mesos_monitor_pull_data_success_not_leader(self, mock_url_get,
+                                                        mock_ng_list):
+        mock_ng_list.return_value = self.nodegroups
         state_json = {
             'leader': 'master@10.0.0.6:5050',
             'pid': 'master@1.1.1.1:5050',
@@ -366,9 +372,11 @@ class MonitorsTestCase(base.TestCase):
         self._test_mesos_monitor_pull_data(mock_url_get, state_json,
                                            0, 0, 0, 0)
 
+    @mock.patch('magnum.objects.NodeGroup.list')
     @mock.patch('magnum.common.urlfetch.get')
-    def test_mesos_monitor_pull_data_success_no_master(self, mock_url_get):
-        self.cluster.master_addresses = []
+    def test_mesos_monitor_pull_data_success_no_master(self, mock_url_get,
+                                                       mock_ng_list):
+        mock_ng_list.return_value = []
         self._test_mesos_monitor_pull_data(mock_url_get, {}, 0, 0, 0, 0)
 
     def test_mesos_monitor_get_metric_names(self):

@@ -45,25 +45,27 @@ class SqlAlchemyCustomTypesTestCase(base.DbTestCase):
                            ['this is not a dict']})
 
     def test_JSONEncodedList_default_value(self):
-        # Create cluster w/o master_addresses
-        cluster1_id = uuidutils.generate_uuid()
-        self.dbapi.create_cluster({'uuid': cluster1_id})
-        cluster1 = sa_api.model_query(
-            models.Cluster).filter_by(uuid=cluster1_id).one()
-        self.assertEqual([], cluster1.master_addresses)
+        # Create nodegroup w/o node_addresses
+        nodegroup1_id = uuidutils.generate_uuid()
+        self.dbapi.create_nodegroup({'uuid': nodegroup1_id})
+        nodegroup1 = sa_api.model_query(
+            models.NodeGroup).filter_by(uuid=nodegroup1_id).one()
+        self.assertEqual([], nodegroup1.node_addresses)
 
-        # Create cluster with master_addresses
-        cluster2_id = uuidutils.generate_uuid()
-        self.dbapi.create_cluster({'uuid': cluster2_id,
-                                   'master_addresses': ['mymaster_address1',
-                                                        'mymaster_address2']})
-        cluster2 = sa_api.model_query(
-            models.Cluster).filter_by(uuid=cluster2_id).one()
-        self.assertEqual(['mymaster_address1', 'mymaster_address2'],
-                         cluster2.master_addresses)
+        # Create nodegroup with node_addresses
+        nodegroup2_id = uuidutils.generate_uuid()
+        self.dbapi.create_nodegroup({
+            'uuid': nodegroup2_id,
+            'node_addresses': ['mynode_address1',
+                               'mynode_address2']
+        })
+        nodegroup2 = sa_api.model_query(
+            models.NodeGroup).filter_by(uuid=nodegroup2_id).one()
+        self.assertEqual(['mynode_address1', 'mynode_address2'],
+                         nodegroup2.node_addresses)
 
     def test_JSONEncodedList_type_check(self):
         self.assertRaises(db_exc.DBError,
-                          self.dbapi.create_cluster,
-                          {'master_addresses':
+                          self.dbapi.create_nodegroup,
+                          {'node_addresses':
                            {'this is not a list': 'test'}})

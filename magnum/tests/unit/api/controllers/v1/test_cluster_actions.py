@@ -33,8 +33,6 @@ class TestClusterActions(api_base.FunctionalTest):
 
     def _sim_rpc_cluster_resize(self, cluster, node_count, nodes_to_remove,
                                 nodegroup, rollback=False):
-        cluster.node_count = node_count
-        cluster.save()
         nodegroup.node_count = node_count
         nodegroup.save()
         return cluster

@@ -51,8 +51,6 @@ class Handler(object):
 
         cluster.status = fields.ClusterStatus.CREATE_IN_PROGRESS
         cluster.status_reason = None
-        cluster.node_count = node_count
-        cluster.master_count = master_count
         cluster.create()
 
         # Master nodegroup
@@ -137,8 +135,6 @@ class Handler(object):
                 context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_PENDING)
             worker_ng.node_count = node_count
             worker_ng.save()
-            # For now update also the cluster.node_count
-            cluster.node_count = node_count
             cluster_driver.update_cluster(context, cluster, manager, rollback)
             cluster.status = fields.ClusterStatus.UPDATE_IN_PROGRESS
             cluster.status_reason = None

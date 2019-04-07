@@ -92,10 +92,6 @@ def get_test_cluster(**kw):
         'status_reason': kw.get('status_reason', 'Completed successfully'),
         'create_timeout': kw.get('create_timeout', 60),
         'api_address': kw.get('api_address', '172.17.2.3'),
-        'node_addresses': kw.get('node_addresses', ['172.17.2.4']),
-        'node_count': kw.get('node_count', 3),
-        'master_count': kw.get('master_count', 3),
-        'master_addresses': kw.get('master_addresses', ['172.17.2.18']),
         'created_at': kw.get('created_at'),
         'updated_at': kw.get('updated_at'),
         'docker_volume_size': kw.get('docker_volume_size'),
@@ -104,6 +100,13 @@ def get_test_cluster(**kw):
         'flavor_id': kw.get('flavor_id', None),
     }
 
+    if kw.pop('for_api_use', False):
+        attrs.update({
+            'node_addresses': kw.get('node_addresses', ['172.17.2.4']),
+            'node_count': kw.get('node_count', 3),
+            'master_count': kw.get('master_count', 3),
+            'master_addresses': kw.get('master_addresses', ['172.17.2.18'])
+        })
     # Only add Keystone trusts related attributes on demand since they may
     # break other tests.
     for attr in ['trustee_username', 'trustee_password', 'trust_id']:
@@ -338,8 +341,10 @@ def create_nodegroups_for_cluster(**kw):
     nodegroups = get_nodegroups_for_cluster(**kw)
     # Create workers nodegroup
     worker = nodegroups['worker']
+    del worker['id']
     create_test_nodegroup(**worker)
 
     # Create masters nodegroup
     master = nodegroups['master']
+    del master['id']
     create_test_nodegroup(**master)

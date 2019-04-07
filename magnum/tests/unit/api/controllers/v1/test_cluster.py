@@ -282,7 +282,9 @@ class TestPatch(api_base.FunctionalTest):
 
     def _sim_rpc_cluster_update(self, cluster, node_count, rollback=False):
         cluster.status = 'UPDATE_IN_PROGRESS'
-        cluster.node_count = node_count
+        default_ng_worker = cluster.default_ng_worker
+        default_ng_worker.node_count = node_count
+        default_ng_worker.save()
         cluster.save()
         return cluster
 
@@ -518,8 +520,6 @@ class TestPost(api_base.FunctionalTest):
 
     def _simulate_cluster_create(self, cluster, master_count, node_count,
                                  create_timeout):
-        cluster.node_count = node_count
-        cluster.master_count = master_count
         cluster.create()
         return cluster
 
@@ -1021,6 +1021,9 @@ class TestClusterPolicyEnforcement(api_base.FunctionalTest):
     def _simulate_cluster_delete(self, cluster_uuid):
         cluster = objects.Cluster.get_by_uuid(self.context, cluster_uuid)
         cluster.destroy()
+        ngs = objects.NodeGroup.list(self.context, cluster_uuid)
+        for ng in ngs:
+            ng.destroy()
 
     def test_policy_disallow_delete(self):
         p = mock.patch.object(rpcapi.API, 'cluster_delete')
