@@ -90,7 +90,13 @@ class TestRootController(api_base.FunctionalTest):
             u'federations': [{u'href': u'http://localhost/v1/federations/',
                               u'rel': u'self'},
                              {u'href': u'http://localhost/federations/',
-                              u'rel': u'bookmark'}]}
+                              u'rel': u'bookmark'}],
+            u'nodegroups': [{u'href': u'http://localhost/v1/clusters/'
+                                      '{cluster_id}/nodegroups',
+                             u'rel': u'self'},
+                            {u'href': u'http://localhost/clusters/'
+                                      '{cluster_id}/nodegroups',
+                             u'rel': u'bookmark'}]}
 
     def make_app(self, paste_file):
         file_name = self.get_path(paste_file)
