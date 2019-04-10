@@ -131,7 +131,8 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                       'tiller_enabled',
                       'tiller_tag',
                       'tiller_namespace',
-                      'node_problem_detector_tag']
+                      'node_problem_detector_tag',
+                      'nginx_ingress_controller_tag']
 
         for label in label_list:
             label_value = cluster.labels.get(label)
