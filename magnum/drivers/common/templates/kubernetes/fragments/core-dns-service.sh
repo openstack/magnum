@@ -6,7 +6,7 @@ printf "Starting to run ${step}\n"
 . /etc/sysconfig/heat-params
 
 _dns_prefix=${CONTAINER_INFRA_PREFIX:-docker.io/coredns/}
-_autoscaler_prefix=${CONTAINER_INFRA_PREFIX:-docker.io/googlecontainer/}
+_autoscaler_prefix=${CONTAINER_INFRA_PREFIX:-gcr.io/google_containers/}
 
 CORE_DNS=/srv/magnum/kubernetes/manifests/kube-coredns.yaml
 [ -f ${CORE_DNS} ] || {
