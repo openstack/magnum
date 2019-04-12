@@ -453,7 +453,7 @@ parameters:
   calico_tag:
     type: string
     description: tag of the calico containers used to provision the calico node
-    default: v2.6.7
+    default: v3.3.6
 
   calico_cni_tag:
     type: string
