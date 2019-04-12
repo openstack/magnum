@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add coredns_tag label to control the tag of the coredns container in
+    k8s_fedora_atomic. Taken from https://hub.docker.com/r/coredns/coredns/tags/
+    Since stein default to 1.3.1

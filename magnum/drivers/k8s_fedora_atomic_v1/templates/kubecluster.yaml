@@ -351,6 +351,11 @@ parameters:
     description: tag of the etcd system container
     default: v3.2.7
 
+  coredns_tag:
+    type: string
+    description: tag for coredns
+    default: 1.3.1
+
   flannel_tag:
     type: string
     description: tag of the flannel container
@@ -850,6 +855,7 @@ resources:
           cloud_provider_enabled: {get_param: cloud_provider_enabled}
           kube_version: {get_param: kube_version}
           etcd_tag: {get_param: etcd_tag}
+          coredns_tag: {get_param: coredns_tag}
           flannel_tag: {get_param: flannel_tag}
           flannel_cni_tag: {get_param: flannel_cni_tag}
           kube_dashboard_version: {get_param: kube_dashboard_version}
