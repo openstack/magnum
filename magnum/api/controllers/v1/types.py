@@ -14,6 +14,7 @@
 #    under the License.
 
 import inspect
+import six
 
 from oslo_utils import strutils
 from oslo_utils import uuidutils
@@ -23,6 +24,17 @@ from wsme import types as wtypes
 from magnum.common import exception
 from magnum.common import utils
 from magnum.i18n import _
+
+
+class DNSListType(wtypes.UserType):
+    """A comman delimited dns nameserver list"""
+
+    basetype = six.string_types
+    name = "dnslist"
+
+    @staticmethod
+    def validate(value):
+        return utils.validate_dns(value)
 
 
 class MacAddressType(wtypes.UserType):
@@ -129,6 +141,7 @@ class MultiType(wtypes.UserType):
                 % {'type': self.types, 'value': type(value)})
 
 
+dns_list = DNSListType()
 macaddress = MacAddressType()
 uuid = UuidType()
 name = NameType()

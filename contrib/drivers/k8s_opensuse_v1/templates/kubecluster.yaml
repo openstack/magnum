@@ -31,7 +31,7 @@ parameters:
     description: flavor to use when booting the server for minions
 
   dns_nameserver:
-    type: string
+    type: comma_delimited_list
     description: address of a DNS nameserver reachable in your environment
     default: 8.8.8.8
 

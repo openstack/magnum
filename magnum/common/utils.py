@@ -25,6 +25,7 @@ import re
 import shutil
 import tempfile
 
+import netaddr
 from oslo_concurrency import processutils
 from oslo_log import log as logging
 from oslo_utils import netutils
@@ -113,6 +114,24 @@ def validate_and_normalize_mac(address):
     if not netutils.is_valid_mac(address):
         raise exception.InvalidMAC(mac=address)
     return address.lower()
+
+
+def validate_dns(dns_list):
+    """Validate a string is a single dns address or comma separated dns list
+
+    :param dns_list: dns_list to be validated
+    :returns: original dns_list.
+    :raise: InvalidDNS if dns format is invalid
+
+    """
+    dns_nameservers = dns_list.split(',')
+    try:
+        for dns in dns_nameservers:
+            netaddr.IPAddress(dns, version=4, flags=netaddr.INET_PTON)
+    except netaddr.AddrFormatError:
+        raise exception.InvalidDNS(dns=dns_list)
+    else:
+        return dns_list
 
 
 @contextlib.contextmanager

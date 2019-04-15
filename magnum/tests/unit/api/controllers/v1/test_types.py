@@ -26,6 +26,24 @@ from magnum.common import utils
 from magnum.tests.unit.api import base
 
 
+class TestDNSListType(base.FunctionalTest):
+    def test_valid_single_dns(self):
+        test_dns = "8.8.8.8"
+        with mock.patch.object(utils, 'validate_dns') as m_mock:
+            types.DNSListType.validate(test_dns)
+            m_mock.assert_called_once_with(test_dns)
+
+    def test_valid_multi_dns(self):
+        test_dns = "8.8.8.8,114.114.114.114"
+        with mock.patch.object(utils, 'validate_dns') as m_mock:
+            types.DNSListType.validate(test_dns)
+            m_mock.assert_called_once_with(test_dns)
+
+    def test_invalid_single_dns(self):
+        self.assertRaises(exception.InvalidDNS,
+                          types.DNSListType.validate, 'invalid-dns')
+
+
 class TestMacAddressType(base.FunctionalTest):
 
     def test_valid_mac_addr(self):

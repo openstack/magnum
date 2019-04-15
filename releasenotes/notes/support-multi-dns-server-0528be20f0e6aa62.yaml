@@ -1,0 +1,6 @@
+---
+features:
+  - Support multi DNS server when creating template.
+    User can use a comma delimited ipv4 address list
+    to specify multi dns server, for example
+    "8.8.8.8,114.114.114.114"

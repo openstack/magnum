@@ -23,7 +23,7 @@ parameters:
     default: ""
 
   dns_nameserver:
-    type: string
+    type: comma_delimited_list
     description: address of a dns nameserver reachable in your environment
 
   external_network:
@@ -41,8 +41,7 @@ resources:
     properties:
       cidr: {get_param: private_network_cidr}
       network: {get_resource: private_network}
-      dns_nameservers:
-        - {get_param: dns_nameserver}
+      dns_nameservers: {get_param: dns_nameserver}
 
   extrouter:
     type: Magnum::Optional::Neutron::Router
