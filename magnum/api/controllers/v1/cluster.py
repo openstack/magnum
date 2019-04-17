@@ -416,7 +416,7 @@ class ClustersController(base.Controller):
             # parameter, currently the design is allowing admin user to list
             # all clusters from all projects. But the all_tenants is one of
             # the condition to do project filter in DB API. And it's also used
-            # by periodic tasks. So the could be removed in the future and
+            # by periodic tasks. So this could be removed in the future and
             # a new parameter 'project_id' would be added so that admin user
             # can list clusters for a particular project.
             context.all_tenants = True
@@ -549,6 +549,11 @@ class ClustersController(base.Controller):
 
     def _patch(self, cluster_ident, patch):
         context = pecan.request.context
+        if context.is_admin:
+            policy.enforce(context, "cluster:update_all_projects",
+                           action="cluster:update_all_projects")
+            context.all_tenants = True
+
         cluster = api_utils.get_resource('Cluster', cluster_ident)
         policy.enforce(context, 'cluster:update', cluster.as_dict(),
                        action='cluster:update')

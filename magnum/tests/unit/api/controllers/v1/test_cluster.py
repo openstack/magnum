@@ -504,6 +504,19 @@ class TestPatch(api_base.FunctionalTest):
         self.assertEqual(400, response.status_code)
         self.assertTrue(response.json['errors'])
 
+    @mock.patch("magnum.common.policy.enforce")
+    @mock.patch("magnum.common.context.make_context")
+    def test_update_cluster_as_admin(self, mock_context, mock_policy):
+        temp_uuid = uuidutils.generate_uuid()
+        obj_utils.create_test_cluster(self.context, uuid=temp_uuid)
+        self.context.is_admin = True
+        response = self.patch_json('/clusters/%s' % temp_uuid,
+                                   [{'path': '/node_count',
+                                     'value': 4,
+                                     'op': 'replace'}])
+        self.assertEqual('application/json', response.content_type)
+        self.assertEqual(202, response.status_code)
+
 
 class TestPost(api_base.FunctionalTest):
     def setUp(self):
