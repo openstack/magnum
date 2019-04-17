@@ -116,15 +116,12 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                 'to be true or unset.'))
 
         label_list = ['kube_tag', 'container_infra_prefix',
-                      'availability_zone',
-                      'cgroup_driver',
+                      'availability_zone', 'cgroup_driver',
                       'calico_tag', 'calico_cni_tag',
                       'calico_kube_controllers_tag', 'calico_ipv4pool',
                       'etcd_tag', 'flannel_tag', 'flannel_cni_tag',
-                      'cloud_provider_enabled',
-                      'cloud_provider_tag',
-                      'prometheus_tag',
-                      'grafana_tag',
+                      'cloud_provider_enabled', 'cloud_provider_tag',
+                      'prometheus_tag', 'grafana_tag',
                       'heat_container_agent_tag',
                       'keystone_auth_enabled', 'k8s_keystone_auth_tag',
                       'monitoring_enabled',
@@ -132,7 +129,10 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                       'tiller_tag',
                       'tiller_namespace',
                       'node_problem_detector_tag',
-                      'nginx_ingress_controller_tag']
+                      'nginx_ingress_controller_tag',
+                      'auto_healing_enabled', 'auto_scaling_enabled',
+                      'draino_tag', 'autoscaler_tag',
+                      'min_node_count', 'max_node_count']
 
         for label in label_list:
             label_value = cluster.labels.get(label)
@@ -146,6 +146,19 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
         extra_params['kube_service_account_private_key'] = \
             csr_keys["private_key"].replace("\n", "\\n")
 
+        extra_params['project_id'] = cluster.project_id
+
+        if not extra_params.get('max_node_count'):
+            extra_params['max_node_count'] = cluster.node_count + 1
+
+        self._set_cert_manager_params(cluster, extra_params)
+
+        return super(K8sFedoraTemplateDefinition,
+                     self).get_params(context, cluster_template, cluster,
+                                      extra_params=extra_params,
+                                      **kwargs)
+
+    def _set_cert_manager_params(self, cluster, extra_params):
         cert_manager_api = cluster.labels.get('cert_manager_api')
         if strutils.bool_from_string(cert_manager_api):
             extra_params['cert_manager_api'] = cert_manager_api
@@ -160,13 +173,6 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                 extra_params['ca_key'] = x509.decrypt_key(
                     ca_cert.get_private_key(),
                     ca_cert.get_private_key_passphrase()).replace("\n", "\\n")
-
-        extra_params['project_id'] = cluster.project_id
-
-        return super(K8sFedoraTemplateDefinition,
-                     self).get_params(context, cluster_template, cluster,
-                                      extra_params=extra_params,
-                                      **kwargs)
 
     def get_env_files(self, cluster_template, cluster):
         env_files = []

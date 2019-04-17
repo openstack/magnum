@@ -154,6 +154,10 @@ KUBELET_ARGS="${KUBELET_ARGS} --client-ca-file=${CERT_DIR}/ca.crt --tls-cert-fil
 # specified cgroup driver
 KUBELET_ARGS="${KUBELET_ARGS} --cgroup-driver=${CGROUP_DRIVER}"
 
+if [ "$(echo $AUTO_HEALING_ENABLED | tr '[:upper:]' '[:lower:]')" = "true" ]; then
+    KUBELET_ARGS="${KUBELET_ARGS} --node-labels=draino-enabled=true"
+fi
+
 systemctl disable docker
 if cat /usr/lib/systemd/system/docker.service | grep 'native.cgroupdriver'; then
         cp /usr/lib/systemd/system/docker.service /etc/systemd/system/

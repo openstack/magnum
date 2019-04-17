@@ -392,6 +392,22 @@ the table are linked to more details elsewhere in the user guide.
 | `master_lb_floating_ip_enabled`_      | - true             | see below     |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
+| `auto_healing_enabled`_               | - true             | false         |
+|                                       | - false            |               |
++---------------------------------------+--------------------+---------------+
+| `auto_scaling_enabled`_               | - true             | true          |
+|                                       | - false            |               |
++---------------------------------------+--------------------+---------------+
+| `node_problem_detector_tag`_          | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `draino_tag`_                         | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `autoscaler_tag`_                     | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `min_node_count`_                     | see below          | see below     |
++---------------------------------------+--------------------+---------------+
+| `max_node_count`_                     | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 
 Cluster
 -------
@@ -1119,6 +1135,9 @@ _`container_infra_prefix`
   * quay.io/coreos/configmap-reload:v0.0.1
   * quay.io/coreos/prometheus-config-reloader:v0.26.0
   * quay.io/prometheus/prometheus:v2.5.0
+  * k8s.gcr.io/node-problem-detector:v0.6.2
+  * docker.io/planetlabs/draino:abf028a
+  * docker.io/openstackmagnum/cluster-autoscaler:v1.0
 
 _`kube_tag`
   This label allows users to select `a specific Kubernetes release,
@@ -1256,6 +1275,31 @@ _`master_lb_floating_ip_enabled`
   nodes. This label only takes effect when the template property
   ``master_lb_enabled`` is set. If not specified, the default value is the same
   as template property ``floating_ip_enabled``.
+
+_`auto_healing_enabled`
+  If set to true, auto healing feature will be enabled. Defaults to false.
+
+_`auto_scaling_enabled`
+  If set to true, auto scaling feature will be enabled. Defaults to true.
+
+_`node_problem_detector_tag`
+  This label allows users to select a specific Node Problem Detector
+  version.
+
+_`draino_tag`
+  This label allows users to select a specific Draino version.
+
+_`autoscaler_tag`
+  This label allows users to select a specific Cluster Autoscaler version.
+
+_`min_node_count`
+  The minmium node count of the cluster when doing auto scaling or auto
+  healing. Defaults to 1.
+
+_`max_node_count`
+  The maxmium node count of the cluster when doing auto scaling or auto
+  healing.
+
 
 External load balancer for services
 -----------------------------------
