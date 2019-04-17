@@ -58,7 +58,7 @@ spec:
       terminationGracePeriodSeconds: 60
       hostNetwork: true
       containers:
-      - image: ${CONTAINER_INFRA_PREFIX:-docker.io/}traefik
+      - image: ${CONTAINER_INFRA_PREFIX:-docker.io/}traefik:${TRAEFIK_INGRESS_CONTROLLER_TAG}
         name: ingress-traefik-backend
         ports:
         - name: http
@@ -70,7 +70,11 @@ spec:
         - name: admin
           containerPort: 8080
         securityContext:
-          privileged: true
+          capabilities:
+            drop:
+            - ALL
+            add:
+            - NET_BIND_SERVICE
         volumeMounts:
         - name: ingress-traefik
           mountPath: /etc/traefik/traefik.toml
@@ -100,7 +104,6 @@ spec:
     - name: admin
       protocol: TCP
       port: 8080
-  type: NodePort
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1

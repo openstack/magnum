@@ -128,6 +128,7 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                       'tiller_enabled',
                       'tiller_tag',
                       'tiller_namespace',
+                      'traefik_ingress_controller_tag',
                       'node_problem_detector_tag',
                       'nginx_ingress_controller_tag',
                       'auto_healing_enabled', 'auto_scaling_enabled',

@@ -311,6 +311,8 @@ the table are linked to more details elsewhere in the user guide.
 |                                       | - binpack          |               |
 |                                       | - random           |               |
 +---------------------------------------+--------------------+---------------+
+| `traefik_ingress_controller_tag`_     | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 | `admission_control_list`_             | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
 | `prometheus_monitoring`_              | - true             | false         |
@@ -1114,26 +1116,31 @@ _`container_infra_prefix`
   all other components used in the cluster will be prefixed with this label,
   which assumes an operator has cloned all expected images in
   myregistry.example.com/mycloud.
+
   Images that must be mirrored:
 
-  * docker.io/coredns/coredns:1.0.1
-  * docker.io/grafana/grafana:5.1.5
+  * docker.io/coredns/coredns:1.3.0
+  * docker.io/openstackmagnum/etcd
+  * docker.io/openstackmagnum/flannel
   * docker.io/openstackmagnum/kubernetes-apiserver
   * docker.io/openstackmagnum/kubernetes-controller-manager
   * docker.io/openstackmagnum/kubernetes-kubelet
   * docker.io/openstackmagnum/kubernetes-proxy
   * docker.io/openstackmagnum/kubernetes-scheduler
-  * docker.io/openstackmagnum/etcd
-  * docker.io/openstackmagnum/flannel
+  * gcr.io/google_containers/pause:3.0
+
+  Images that might be needed:
+
+  * docker.io/grafana/grafana:5.1.5
   * docker.io/prom/node-exporter:latest
   * docker.io/prom/prometheus:latest
+  * docker.io/traefik:v1.7.10
   * gcr.io/google_containers/kubernetes-dashboard-amd64:v1.5.1
-  * gcr.io/google_containers/pause:3.0
   * gcr.io/google-containers/hyperkube:v1.12.1
-  * quay.io/prometheus/alertmanager:v0.15.3
-  * quay.io/coreos/prometheus-operator:v0.15.3
   * quay.io/coreos/configmap-reload:v0.0.1
   * quay.io/coreos/prometheus-config-reloader:v0.26.0
+  * quay.io/coreos/prometheus-operator:v0.15.3
+  * quay.io/prometheus/alertmanager:v0.15.3
   * quay.io/prometheus/prometheus:v2.5.0
   * k8s.gcr.io/node-problem-detector:v0.6.2
   * docker.io/planetlabs/draino:abf028a
@@ -1374,6 +1381,9 @@ _`octavia_ingress_controller_tag`
 
 _`nginx_ingress_controller_tag`
   The image tag for nginx-ingress-controller. Stein-default: 0.23.0
+
+_`traefik_ingress_controller_tag`
+  The image tag for traefik_ingress_controller_tag. Stein-default: v1.7.10
 
 DNS
 ---
