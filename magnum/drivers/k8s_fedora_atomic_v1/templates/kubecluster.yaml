@@ -700,22 +700,6 @@ resources:
         - protocol: tcp
           port_range_min: 30000
           port_range_max: 32767
-        # Worker node kubelet healthcheck port.
-        - protocol: tcp
-          port_range_min: 10250
-          port_range_max: 10250
-        # Calico BGP network, only required if the BGP backend is used.
-        - protocol: tcp
-          port_range_min: 179
-          port_range_max: 179
-        # flannel overlay network - udp backend.
-        - protocol: udp
-          port_range_min: 8285
-          port_range_max: 8285
-        # flannel overlay network - vxlan backend.
-        - protocol: udp
-          port_range_min: 8472
-          port_range_max: 8472
         # allow any traffic from master nodes
         - protocol: tcp
           port_range_min: 1
@@ -727,6 +711,24 @@ resources:
           port_range_max: 65535
           remote_mode: 'remote_group_id'
           remote_group_id: {get_resource: secgroup_kube_master}
+
+  # allow any traffic between worker nodes
+  secgroup_rule_tcp_kube_minion:
+    type: OS::Neutron::SecurityGroupRule
+    properties:
+      protocol: tcp
+      port_range_min: 1
+      port_range_max: 65535
+      security_group: {get_resource: secgroup_kube_minion}
+      remote_group: {get_resource: secgroup_kube_minion}
+  secgroup_rule_udp_kube_minion:
+    type: OS::Neutron::SecurityGroupRule
+    properties:
+      protocol: udp
+      port_range_min: 1
+      port_range_max: 65535
+      security_group: {get_resource: secgroup_kube_minion}
+      remote_group: {get_resource: secgroup_kube_minion}
 
   ######################################################################
   #
