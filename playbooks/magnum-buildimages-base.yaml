@@ -15,7 +15,7 @@
           fi
 
           /usr/zuul-env/bin/zuul-cloner --cache-dir /opt/git \
-            https://git.openstack.org \
+            https://opendev.org \
             openstack/diskimage-builder \
             openstack/dib-utils \
             openstack/magnum $EXTRA_PROJECTS
