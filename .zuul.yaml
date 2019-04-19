@@ -7,13 +7,13 @@
     run: playbooks/magnum-functional-base.yaml
     post-run: playbooks/post/upload-logs.yaml
     required-projects:
-      - openstack-infra/devstack-gate
+      - openstack/devstack-gate
       - openstack/diskimage-builder
       - openstack/ironic
       - openstack/ironic-lib
       - openstack/ironic-python-agent
       - openstack/magnum
-      - openstack/pyghmi
+      - x/pyghmi
       - openstack/python-ironicclient
       - openstack/python-magnumclient
       - openstack/virtualbmc
@@ -42,13 +42,13 @@
     run: playbooks/magnum-functional-base.yaml
     post-run: playbooks/post/upload-logs.yaml
     required-projects:
-      - openstack-infra/devstack-gate
+      - openstack/devstack-gate
       - openstack/diskimage-builder
       - openstack/ironic
       - openstack/ironic-lib
       - openstack/ironic-python-agent
       - openstack/magnum
-      - openstack/pyghmi
+      - x/pyghmi
       - openstack/python-ironicclient
       - openstack/python-magnumclient
       - openstack/virtualbmc
