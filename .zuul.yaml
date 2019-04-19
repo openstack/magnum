@@ -32,14 +32,14 @@
     run: playbooks/magnum-functional-base.yaml
     post-run: playbooks/post/upload-logs.yaml
     required-projects:
-      - openstack-infra/devstack-gate
+      - openstack/devstack-gate
       - openstack/diskimage-builder
       - openstack/ironic
       - openstack/ironic-lib
       - openstack/ironic-python-agent
       - openstack/magnum
       - openstack/magnum-tempest-plugin
-      - openstack/pyghmi
+      - x/pyghmi
       - openstack/python-ironicclient
       - openstack/python-magnumclient
       - openstack/virtualbmc
@@ -70,14 +70,14 @@
     run: playbooks/magnum-functional-base.yaml
     post-run: playbooks/post/upload-logs.yaml
     required-projects:
-      - openstack-infra/devstack-gate
+      - openstack/devstack-gate
       - openstack/diskimage-builder
       - openstack/ironic
       - openstack/ironic-lib
       - openstack/ironic-python-agent
       - openstack/magnum
       - openstack/magnum-tempest-plugin
-      - openstack/pyghmi
+      - x/pyghmi
       - openstack/python-ironicclient
       - openstack/python-magnumclient
       - openstack/virtualbmc
@@ -108,13 +108,13 @@
     run: playbooks/magnum-functional-base.yaml
     post-run: playbooks/post/upload-logs.yaml
     required-projects:
-      - openstack-infra/devstack-gate
+      - openstack/devstack-gate
       - openstack/diskimage-builder
       - openstack/ironic
       - openstack/ironic-lib
       - openstack/ironic-python-agent
       - openstack/magnum
-      - openstack/pyghmi
+      - x/pyghmi
       - openstack/python-ironicclient
       - openstack/python-magnumclient
       - openstack/virtualbmc
@@ -346,7 +346,7 @@
     run: playbooks/container-builder.yaml
     post-run: playbooks/container-builder-copy-logs.yaml
     roles:
-      - zuul: openstack-infra/openstack-zuul-jobs
+      - zuul: openstack/openstack-zuul-jobs
     timeout: 1200
     irrelevant-files:
       - ^.*\.rst$
