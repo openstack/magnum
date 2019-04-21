@@ -65,6 +65,19 @@
           with_items: "{{ kubernetes_images }}"
           retries: 10
 
+    - name: "Build kubernetes images v1.15"
+      block:
+        - name: "Build {{ magnum_repository }}/{{ item.name }}:{{ item.tag }} image"
+          docker_image:
+            path: "{{ magnum_src_dir }}/dockerfiles/{{ item.name }}"
+            name: "{{ magnum_repository }}/{{ item.name }}"
+            tag: "{{kubernetes_version_v1_15}}"
+            buildargs:
+              KUBE_VERSION: "{{kubernetes_version_v1_15}}"
+            push: no
+          with_items: "{{ kubernetes_images }}"
+          retries: 10
+
     - name: "Build helm-client image"
       block:
         - docker_image:
