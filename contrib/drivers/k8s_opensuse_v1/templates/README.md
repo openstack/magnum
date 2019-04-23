@@ -125,5 +125,5 @@ Please submit bugs and pull requests via the Gerrit repository at
 https://review.openstack.org/. For more information, please refer
 to the following resources:
 
-* **Documentation:** http://docs.openstack.org/developer/magnum
-* **Source:** http://git.openstack.org/cgit/openstack/magnum
+* **Documentation:** https://docs.openstack.org/magnum/latest/
+* **Source:** https://opendev.org/openstack/magnum

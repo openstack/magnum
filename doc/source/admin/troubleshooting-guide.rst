@@ -114,7 +114,7 @@ access the OpenStack services (i.e. Neutron, Swift, etc.). A trust relationship
 will be created between the user who created the cluster (the "trustor") and
 the service account created for the cluster (the "trustee"). For details,
 please refer
-<http://git.openstack.org/cgit/openstack/magnum/tree/specs/create-trustee-user-for-each-cluster.rst>`_.
+<https://opendev.org/openstack/magnum/src/branch/master/specs/create-trustee-user-for-each-bay.rst>`_.
 
 If Magnum fails to create the trustee, check the magnum config file (usually
 in /etc/magnum/magnum.conf). Make sure 'trustee_*' and 'auth_uri' are set and
