@@ -219,6 +219,10 @@ parameters:
     type: string
     description: tag of the etcd system container
 
+  coredns_tag:
+    type: string
+    description: tag for coredns
+
   kube_version:
     type: string
     description: version of kubernetes used for kubernetes cluster

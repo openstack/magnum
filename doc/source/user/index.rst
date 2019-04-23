@@ -326,6 +326,8 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `etcd_tag`_                           | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
+| `coredns_tag`_                        | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 | `flannel_tag`_                        | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
 | `flannel_cni_tag`_                    | see below          | see below     |
@@ -1119,7 +1121,7 @@ _`container_infra_prefix`
 
   Images that must be mirrored:
 
-  * docker.io/coredns/coredns:1.3.0
+  * docker.io/coredns/coredns:1.3.1
   * docker.io/openstackmagnum/etcd
   * docker.io/openstackmagnum/flannel
   * docker.io/openstackmagnum/kubernetes-apiserver
@@ -1171,6 +1173,13 @@ _`etcd_tag`
   <https://hub.docker.com/r/openstackmagnum/etcd/tags/>`_.
   If unset, the current Magnum version's a default etcd version.
   For queens, v3.2.7
+
+_`coredns_tag`
+  This label allows users to select `a specific coredns version,
+  based on its container tag
+  <https://hub.docker.com/r/coredns/coredns/tags/>`_.
+  If unset, the current Magnum version's a default etcd version.
+  For stein, 1.3.1
 
 _`flannel_tag`
   This label allows users to select `a specific flannel version,

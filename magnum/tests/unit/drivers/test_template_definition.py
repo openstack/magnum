@@ -452,6 +452,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'etcd_volume_size')
         kube_tag = mock_cluster.labels.get('kube_tag')
         etcd_tag = mock_cluster.labels.get('etcd_tag')
+        coredns_tag = mock_cluster.labels.get('coredns_tag')
         flannel_tag = mock_cluster.labels.get('flannel_tag')
         flannel_cni_tag = mock_cluster.labels.get('flannel_cni_tag')
         container_infra_prefix = mock_cluster.labels.get(
@@ -559,6 +560,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'region_name': mock_osc.cinder_region_name.return_value,
             'kube_tag': kube_tag,
             'etcd_tag': etcd_tag,
+            'coredns_tag': coredns_tag,
             'flannel_tag': flannel_tag,
             'flannel_cni_tag': flannel_cni_tag,
             'container_infra_prefix': container_infra_prefix,
@@ -845,6 +847,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'etcd_volume_size')
         kube_tag = mock_cluster.labels.get('kube_tag')
         etcd_tag = mock_cluster.labels.get('etcd_tag')
+        coredns_tag = mock_cluster.labels.get('coredns_tag')
         flannel_tag = mock_cluster.labels.get('flannel_tag')
         flannel_cni_tag = mock_cluster.labels.get('flannel_cni_tag')
         container_infra_prefix = mock_cluster.labels.get(
@@ -954,6 +957,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'kubernetes_port': 8080,
             'kube_tag': kube_tag,
             'etcd_tag': etcd_tag,
+            'coredns_tag': coredns_tag,
             'flannel_tag': flannel_tag,
             'flannel_cni_tag': flannel_cni_tag,
             'container_infra_prefix': container_infra_prefix,

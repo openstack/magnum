@@ -239,6 +239,10 @@ parameters:
     type: string
     description: tag of the etcd system container
 
+  coredns_tag:
+    type: string
+    description: tag of the coredns container
+
   flannel_tag:
     type: string
     description: tag of the flannel system containers
@@ -551,6 +555,7 @@ resources:
             "$CLOUD_PROVIDER_TAG": {get_param: cloud_provider_tag}
             "$CLOUD_PROVIDER_ENABLED": {get_param: cloud_provider_enabled}
             "$ETCD_TAG": {get_param: etcd_tag}
+            "$COREDNS_TAG": {get_param: coredns_tag}
             "$FLANNEL_TAG": {get_param: flannel_tag}
             "$FLANNEL_CNI_TAG": {get_param: flannel_cni_tag}
             "$KUBE_VERSION": {get_param: kube_version}
