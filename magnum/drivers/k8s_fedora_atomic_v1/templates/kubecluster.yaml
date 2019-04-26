@@ -520,7 +520,7 @@ parameters:
   heat_container_agent_tag:
     type: string
     description: tag of the heat_container_agent system container
-    default: stein-dev
+    default: rocky-stable
 
   keystone_auth_enabled:
     type: boolean
