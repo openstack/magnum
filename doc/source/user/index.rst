@@ -309,6 +309,8 @@ the table are linked to more details elsewhere in the user guide.
 | `monitoring_enabled`_                 | - true             | false         |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
+| `prometheus_operator_chart_tag`_      | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 | `swarm_strategy`_                     | - spread           | spread        |
 |                                       | - binpack          |               |
 |                                       | - random           |               |
@@ -1142,10 +1144,10 @@ _`container_infra_prefix`
   * gcr.io/google_containers/kubernetes-dashboard-amd64:v1.5.1
   * gcr.io/google-containers/hyperkube:v1.12.1
   * quay.io/coreos/configmap-reload:v0.0.1
-  * quay.io/coreos/prometheus-config-reloader:v0.26.0
-  * quay.io/coreos/prometheus-operator:v0.15.3
-  * quay.io/prometheus/alertmanager:v0.15.3
-  * quay.io/prometheus/prometheus:v2.5.0
+  * quay.io/coreos/prometheus-config-reloader:v0.30.1
+  * quay.io/coreos/prometheus-operator:v0.30.1
+  * quay.io/prometheus/alertmanager:v0.17.0
+  * quay.io/prometheus/prometheus:v2.9.1
   * k8s.gcr.io/node-problem-detector:v0.6.2
   * docker.io/planetlabs/draino:abf028a
   * docker.io/openstackmagnum/cluster-autoscaler:v1.0
@@ -1273,6 +1275,13 @@ _`monitoring_enabled`
   Enable installation of cluster monitoring solution provided by the
   stable/prometheus-operator helm chart.
   Default: false
+
+_`prometheus_operator_chart_tag`
+  Add prometheus_operator_chart_tag to select version of the
+  stable/prometheus-operator chart to install. When installing the chart,
+  helm will use the default values of the tag defined and overwrite them based
+  on the prometheus-operator-config ConfigMap currently defined. You must
+  certify that the versions are compatible.
 
 _`tiller_enabled`
   If set to true, tiller will be deployed in the kube-system namespace.

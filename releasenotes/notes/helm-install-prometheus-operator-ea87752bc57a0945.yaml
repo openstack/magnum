@@ -5,4 +5,4 @@ features:
     solution by means of helm stable/prometheus-operator public chart.
     Defaults to false. grafana_admin_passwd label can be used to set
     grafana dashboard admin access password. If grafana_admin_passwd
-    is not set the password defaults to prom_operator.
+    is not set the password defaults to admin.

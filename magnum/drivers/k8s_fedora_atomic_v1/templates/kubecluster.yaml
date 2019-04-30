@@ -577,6 +577,11 @@ parameters:
     description: Enable or disable prometheus-operator monitoring solution.
     default: false
 
+  prometheus_operator_chart_tag:
+    type: string
+    description: The stable/prometheus-operator chart version to use.
+    default: 5.12.3
+
   project_id:
     type: string
     description: >
@@ -929,6 +934,7 @@ resources:
           keystone_auth_enabled: {get_param: keystone_auth_enabled}
           k8s_keystone_auth_tag: {get_param: k8s_keystone_auth_tag}
           monitoring_enabled: {get_param: monitoring_enabled}
+          prometheus_operator_chart_tag: {get_param: prometheus_operator_chart_tag}
           project_id: {get_param: project_id}
           tiller_enabled: {get_param: tiller_enabled}
           tiller_tag: {get_param: tiller_tag}
