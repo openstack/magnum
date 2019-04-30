@@ -77,9 +77,7 @@
 
               #TODO: Add size validation
           else
-              MAGNUM_ELEMENTS=./openstack/magnum/magnum/drivers/common/image
-              export ELEMENTS_PATH=$DIB_ELEMENTS:$MAGNUM_ELEMENTS
-              $MAGNUM_ELEMENTS/fedora-atomic/install_imagebuild_deps.sh
+              export ELEMENTS_PATH=$DIB_ELEMENTS
 
               export DIB_RELEASE="25"
 
@@ -90,8 +88,6 @@
 
               disk-image-create -x -o $WORKSPACE/{{ image_name }}-dib fedora-atomic
 
-              # validate image
-              $MAGNUM_ELEMENTS/fedora-atomic/validate_atomic_image.sh $WORKSPACE/{{ image_name }}-dib.qcow2
           fi
 
           set +u
