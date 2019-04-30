@@ -341,7 +341,7 @@
       image_name: centos-dcos
 
 - job:
-    name: container-build
+    name: magnum-container-build
     pre-run: playbooks/container-builder-setup-gate.yaml
     run: playbooks/container-builder.yaml
     post-run: playbooks/container-builder-copy-logs.yaml
@@ -358,8 +358,8 @@
       - ^magnum/.*$
 
 - job:
-    name: container-publish
-    parent: container-build
+    name: magnum-container-publish
+    parent: magnum-container-build
     post-run: playbooks/container-publish.yaml
     secrets:
       - magnum_docker_login
@@ -381,7 +381,7 @@
         - magnum-functional-api-python2
         - openstack-tox-cover:
            voting: false
-        - container-build
+        - magnum-container-build
     gate:
       queue: magnum
       jobs:
@@ -403,4 +403,4 @@
         - magnum-dib-buildimage-centos-dcos
     post:
       jobs:
-        - container-publish
+        - magnum-container-publish
