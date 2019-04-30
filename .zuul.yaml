@@ -296,8 +296,10 @@
         - magnum-functional-swarm-ironic
         - magnum-functional-k8s-multinode
         - magnum-functional-swarm-mode-multinode
-    periodic:
-      jobs:
-        - magnum-dib-buildimage-fedora-atomic-25
-        - magnum-dib-buildimage-ubuntu-mesos
-        - magnum-dib-buildimage-centos-dcos
+    # XXX: The periodic jobs are completely broken and need to be fixed,
+    # enable them once they work again.
+    # periodic:
+    #   jobs:
+    #     - magnum-dib-buildimage-fedora-atomic-25
+    #     - magnum-dib-buildimage-ubuntu-mesos
+    #     - magnum-dib-buildimage-centos-dcos
