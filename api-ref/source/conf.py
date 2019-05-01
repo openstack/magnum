@@ -30,12 +30,10 @@ import warnings
 
 extensions = [
     'os_api_ref',
+    'openstackdocstheme',
 ]
 
-import openstackdocstheme  # noqa
-
 html_theme = 'openstackdocs'
-html_theme_path = [openstackdocstheme.get_html_theme_path()]
 html_theme_options = {
     "sidebar_mode": "toc",
 }
@@ -105,14 +103,10 @@ show_authors = False
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
-# Config logABug feature
-# source tree
-giturl = (
-    u'https://git.openstack.org/cgit/openstack/magnum/tree/api-ref/source')
-# html_context allows us to pass arbitrary values into the html template
-html_context = {'bug_tag': 'api-ref',
-                'giturl': giturl,
-                'bug_project': 'magnum'}
+# openstackdocstheme options
+repository_name = 'openstack/magnum'
+bug_project = 'magnum'
+bug_tag = 'api-ref'
 
 # -- Options for man page output ----------------------------------------------
 
