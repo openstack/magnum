@@ -120,7 +120,8 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                       'node_problem_detector_tag',
                       'auto_healing_enabled', 'auto_scaling_enabled',
                       'draino_tag', 'autoscaler_tag',
-                      'min_node_count', 'max_node_count']
+                      'min_node_count', 'max_node_count',
+                      'nginx_ingress_controller_tag']
 
         for label in label_list:
             label_value = cluster.labels.get(label)

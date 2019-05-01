@@ -605,6 +605,11 @@ parameters:
     description: >
       maximum node count of cluster workers when doing scale up
 
+  nginx_ingress_controller_tag:
+    type: string
+    description: nginx ingress controller docker image tag
+    default: 0.23.0
+
 resources:
 
   ######################################################################
@@ -889,6 +894,7 @@ resources:
           autoscaler_tag: {get_param: autoscaler_tag}
           min_node_count: {get_param: min_node_count}
           max_node_count: {get_param: max_node_count}
+          nginx_ingress_controller_tag: {get_param: nginx_ingress_controller_tag}
 
   kube_cluster_config:
     type: OS::Heat::SoftwareConfig
@@ -926,6 +932,7 @@ resources:
                 template: {get_file:  ../../common/templates/kubernetes/helm/prometheus-operator.sh}
                 params:
                   "${ADMIN_PASSWD}": {get_param: grafana_admin_passwd}
+            - get_file: ../../common/templates/kubernetes/helm/ingress-nginx.sh
             - get_file: ../../common/templates/kubernetes/fragments/install-helm-modules.sh
 
   kube_cluster_deploy:

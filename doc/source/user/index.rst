@@ -354,6 +354,8 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `octavia_ingress_controller_tag`_     | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
+| `nginx_ingress_controller_tag`_       | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 | `kubelet_options`_                    | extra kubelet args | ""            |
 +---------------------------------------+--------------------+---------------+
 | `kubeapi_options`_                    | extra kubeapi args | ""            |
@@ -1350,10 +1352,10 @@ worker nodes security group. For example::
       --dst-port 443:443
 
 _`ingress_controller`
-  This label sets the Ingress Controller to be used. Currently 'traefik' and
-  'octavia' are supported. The default is '', meaning no Ingress Controller
-  is configured. For more details about octavia-ingress-controller please refer
-  to `cloud-provider-openstack document
+  This label sets the Ingress Controller to be used. Currently 'traefik',
+  'nginx' and 'octavia' are supported. The default is '', meaning no Ingress
+  Controller is configured. For more details about octavia-ingress-controller
+  please refer to `cloud-provider-openstack document
   <https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/using-octavia-ingress-controller.md>`_
 
 _`ingress_controller_role`
@@ -1369,6 +1371,9 @@ _`ingress_controller_role`
 
 _`octavia_ingress_controller_tag`
   The image tag for octavia-ingress-controller. Stein-default: 1.13.2-alpha
+
+_`nginx_ingress_controller_tag`
+  The image tag for nginx-ingress-controller. Stein-default: 0.23.0
 
 DNS
 ---
