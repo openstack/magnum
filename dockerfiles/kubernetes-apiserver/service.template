@@ -1,5 +1,6 @@
 [Unit]
 Description=kubernetes-apiserver
+After=network-online.target
 
 [Service]
 ExecStart=$EXEC_START
