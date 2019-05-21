@@ -1019,8 +1019,7 @@ class TestClusterConductorWithK8s(base.TestCase):
              '../../common/templates/environments/disable_lb_floating_ip.yaml',
              ],
             env_files)
-        reqget.assert_called_once_with('http://etcd/test?size=1', proxies={
-            'http': 'http_proxy', 'https': 'https_proxy'})
+        reqget.assert_called_once_with('http://etcd/test?size=1')
 
     @patch('magnum.common.short_id.generate_id')
     @patch('heatclient.common.template_utils.get_template_contents')

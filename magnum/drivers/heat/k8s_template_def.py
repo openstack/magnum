@@ -118,8 +118,7 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
     def get_params(self, context, cluster_template, cluster, **kwargs):
         extra_params = kwargs.pop('extra_params', {})
 
-        extra_params['discovery_url'] = \
-            self.get_discovery_url(cluster, cluster_template=cluster_template)
+        extra_params['discovery_url'] = self.get_discovery_url(cluster)
         osc = self.get_osc(context)
         extra_params['magnum_url'] = osc.magnum_url()
 
