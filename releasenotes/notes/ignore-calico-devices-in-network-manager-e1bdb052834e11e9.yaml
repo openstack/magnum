@@ -1,0 +1,5 @@
+fixes:
+  - Fixed an issue that applications running on master nodes which rely on
+    network connection  keep restarting because of timeout or connection lost,
+    by making calico devices unmanaged in NetworkManager config on master
+    nodes.
