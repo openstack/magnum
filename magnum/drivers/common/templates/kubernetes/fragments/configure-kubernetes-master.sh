@@ -4,6 +4,8 @@
 
 echo "configuring kubernetes (master)"
 
+ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
+
 if [ ! -z "$HTTP_PROXY" ]; then
     export HTTP_PROXY
 fi
@@ -18,7 +20,7 @@ fi
 
 _prefix=${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}
 
-mkdir -p /opt/cni
+$ssh_cmd mkdir -p /opt/cni
 _addtl_mounts=',{"type":"bind","source":"/opt/cni","destination":"/opt/cni","options":["bind","rw","slave","mode=777"]}'
 
 if [ "$NETWORK_DRIVER" = "calico" ]; then
@@ -36,11 +38,19 @@ EOF
     fi
 fi
 
-atomic install --storage ostree --system --set=ADDTL_MOUNTS=${_addtl_mounts} --system-package=no --name=kubelet ${_prefix}kubernetes-kubelet:${KUBE_TAG}
+
+mkdir -p /srv/magnum/kubernetes/
+cat > /srv/magnum/kubernetes/install-kubernetes.sh <<EOF
+#!/bin/bash -x
+atomic install --storage ostree --system --set=ADDTL_MOUNTS='${_addtl_mounts}' --system-package=no --name=kubelet ${_prefix}kubernetes-kubelet:${KUBE_TAG}
 atomic install --storage ostree --system --system-package=no --name=kube-apiserver ${_prefix}kubernetes-apiserver:${KUBE_TAG}
 atomic install --storage ostree --system --system-package=no --name=kube-controller-manager ${_prefix}kubernetes-controller-manager:${KUBE_TAG}
 atomic install --storage ostree --system --system-package=no --name=kube-scheduler ${_prefix}kubernetes-scheduler:${KUBE_TAG}
 atomic install --storage ostree --system --system-package=no --name=kube-proxy ${_prefix}kubernetes-proxy:${KUBE_TAG}
+EOF
+chmod +x /srv/magnum/kubernetes/install-kubernetes.sh
+$ssh_cmd "/srv/magnum/kubernetes/install-kubernetes.sh"
+
 
 CERT_DIR=/etc/kubernetes/certs
 
@@ -177,8 +187,8 @@ sed -i '
 
 sed -i '/^KUBE_SCHEDULER_ARGS=/ s/=.*/="--leader-elect=true"/' /etc/kubernetes/scheduler
 
-mkdir -p /etc/kubernetes/manifests
-HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')
+$ssh_cmd mkdir -p /etc/kubernetes/manifests
+HOSTNAME_OVERRIDE=$(cat /etc/hostname | head -1 | sed 's/\.novalocal//')
 KUBELET_ARGS="--register-node=true --pod-manifest-path=/etc/kubernetes/manifests --cadvisor-port=0 --hostname-override=${HOSTNAME_OVERRIDE}"
 KUBELET_ARGS="${KUBELET_ARGS} --pod-infra-container-image=${CONTAINER_INFRA_PREFIX:-gcr.io/google_containers/}pause:3.0"
 KUBELET_ARGS="${KUBELET_ARGS} --cluster_dns=${DNS_SERVICE_IP} --cluster_domain=${DNS_CLUSTER_DOMAIN}"
@@ -201,7 +211,7 @@ KUBELET_ARGS="${KUBELET_ARGS} --register-with-taints=CriticalAddonsOnly=True:NoS
 KUBELET_ARGS="${KUBELET_ARGS} --node-labels=node-role.kubernetes.io/master=\"\""
 
 KUBELET_KUBECONFIG=/etc/kubernetes/kubelet-config.yaml
-HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')
+HOSTNAME_OVERRIDE=$(cat /etc/hostname | head -1 | sed 's/\.novalocal//')
 cat << EOF >> ${KUBELET_KUBECONFIG}
 apiVersion: v1
 clusters:
@@ -241,9 +251,9 @@ KUBELET_ARGS="${KUBELET_ARGS} --client-ca-file=${CERT_DIR}/ca.crt --tls-cert-fil
 # specified cgroup driver
 KUBELET_ARGS="${KUBELET_ARGS} --cgroup-driver=${CGROUP_DRIVER}"
 
-systemctl disable docker
-if cat /usr/lib/systemd/system/docker.service | grep 'native.cgroupdriver'; then
-        cp /usr/lib/systemd/system/docker.service /etc/systemd/system/
+$ssh_cmd systemctl disable docker
+if $ssh_cmd cat /usr/lib/systemd/system/docker.service | grep 'native.cgroupdriver'; then
+        $ssh_cmd cp /usr/lib/systemd/system/docker.service /etc/systemd/system/
         sed -i "s/\(native.cgroupdriver=\)\w\+/\1$CGROUP_DRIVER/" \
                 /etc/systemd/system/docker.service
 else
@@ -253,8 +263,8 @@ EOF
 
 fi
 
-systemctl daemon-reload
-systemctl enable docker
+$ssh_cmd systemctl daemon-reload
+$ssh_cmd systemctl enable docker
 
 if [ -z "${KUBE_NODE_IP}" ]; then
     KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
@@ -267,4 +277,3 @@ sed -i '
 /^KUBELET_HOSTNAME=/ s/=.*/=""/
 /^KUBELET_ARGS=/ s|=.*|="'"\$(/etc/kubernetes/get_require_kubeconfig.sh) ${KUBELET_ARGS}"'"|
 ' /etc/kubernetes/kubelet
-

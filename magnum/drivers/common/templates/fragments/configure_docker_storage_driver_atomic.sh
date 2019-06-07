@@ -4,12 +4,14 @@
 # * Remove any existing docker-storage configuration. In case of an
 #   existing configuration, docker-storage-setup will fail.
 # * Remove docker storage graph
+ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
+
 clear_docker_storage () {
     # stop docker
-    systemctl stop docker
-    systemctl disable docker-storage-setup
+    $ssh_cmd systemctl stop docker
+    $ssh_cmd systemctl disable docker-storage-setup
     # clear storage graph
-    rm -rf /var/lib/docker/*
+    $ssh_cmd rm -rf /var/lib/docker/*
 
     if [ -f /etc/sysconfig/docker-storage ]; then
         sed -i "/^DOCKER_STORAGE_OPTIONS=/ s/=.*/=/" /etc/sysconfig/docker-storage
@@ -21,9 +23,9 @@ configure_storage_driver_generic() {
     clear_docker_storage
 
     if [ -n "$DOCKER_VOLUME_SIZE" ] && [ "$DOCKER_VOLUME_SIZE" -gt 0 ]; then
-        mkfs.xfs -f ${device_path}
+        $ssh_cmd mkfs.xfs -f ${device_path}
         echo "${device_path} /var/lib/docker xfs defaults 0 0" >> /etc/fstab
-        mount -a
+        $ssh_cmd mount -a
     fi
 
     echo "DOCKER_STORAGE_OPTIONS=\"--storage-driver $1\"" > /etc/sysconfig/docker-storage
@@ -38,8 +40,8 @@ configure_devicemapper () {
 
     if [ -n "$DOCKER_VOLUME_SIZE" ] && [ "$DOCKER_VOLUME_SIZE" -gt 0 ]; then
 
-        pvcreate -f ${device_path}
-        vgcreate docker ${device_path}
+        $ssh_cmd pvcreate -f ${device_path}
+        $ssh_cmd vgcreate docker ${device_path}
 
         echo "VG=docker" >> /etc/sysconfig/docker-storage-setup
     else
@@ -47,5 +49,5 @@ configure_devicemapper () {
         echo "DATA_SIZE=95%FREE" >> /etc/sysconfig/docker-storage-setup
     fi
 
-    docker-storage-setup
+    $ssh_cmd docker-storage-setup
 }

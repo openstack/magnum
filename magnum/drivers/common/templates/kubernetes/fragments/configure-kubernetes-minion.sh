@@ -1,6 +1,10 @@
-#!/bin/sh -x
+#!/bin/sh
 
+set +x
 . /etc/sysconfig/heat-params
+set -x
+
+ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
 
 echo "configuring kubernetes (minion)"
 
@@ -19,11 +23,11 @@ fi
 _prefix=${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}
 
 _addtl_mounts=''
-mkdir -p /opt/cni
+$ssh_cmd mkdir -p /opt/cni
 _addtl_mounts=',{"type":"bind","source":"/opt/cni","destination":"/opt/cni","options":["bind","rw","slave","mode=777"]}'
 
 if [ "$NETWORK_DRIVER" = "calico" ]; then
-    if [ "`systemctl status NetworkManager.service | grep -o "Active: active"`" = "Active: active" ]; then
+    if [ "$($ssh_cmd systemctl status NetworkManager.service | grep -o "Active: active")" = "Active: active" ]; then
         CALICO_NM=/etc/NetworkManager/conf.d/calico.conf
         [ -f ${CALICO_NM} ] || {
         echo "Writing File: $CALICO_NM"
@@ -33,22 +37,26 @@ if [ "$NETWORK_DRIVER" = "calico" ]; then
 unmanaged-devices=interface-name:cali*;interface-name:tunl*
 EOF
 }
-        systemctl restart NetworkManager
+        $ssh_cmd systemctl restart NetworkManager
     fi
 fi
 
-atomic install --storage ostree --system --system-package=no --set=ADDTL_MOUNTS=${_addtl_mounts} --name=kubelet ${_prefix}kubernetes-kubelet:${KUBE_TAG}
+mkdir -p /srv/magnum/kubernetes/
+cat > /srv/magnum/kubernetes/install-kubernetes.sh <<EOF
+#!/bin/bash -x
+atomic install --storage ostree --system --system-package=no --set=ADDTL_MOUNTS='${_addtl_mounts}' --name=kubelet ${_prefix}kubernetes-kubelet:${KUBE_TAG}
 atomic install --storage ostree --system --system-package=no --name=kube-proxy ${_prefix}kubernetes-proxy:${KUBE_TAG}
+EOF
+chmod +x /srv/magnum/kubernetes/install-kubernetes.sh
+$ssh_cmd "/srv/magnum/kubernetes/install-kubernetes.sh"
 
 CERT_DIR=/etc/kubernetes/certs
-PROTOCOL=https
 ETCD_SERVER_IP=${ETCD_SERVER_IP:-$KUBE_MASTER_IP}
 KUBE_PROTOCOL="https"
 KUBELET_KUBECONFIG=/etc/kubernetes/kubelet-config.yaml
 PROXY_KUBECONFIG=/etc/kubernetes/proxy-config.yaml
 
 if [ "$TLS_DISABLED" = "True" ]; then
-    PROTOCOL=http
     KUBE_PROTOCOL="http"
 fi
 
@@ -57,7 +65,7 @@ KUBE_MASTER_URI="$KUBE_PROTOCOL://$KUBE_MASTER_IP:$KUBE_API_PORT"
 if [ -z "${KUBE_NODE_IP}" ]; then
     KUBE_NODE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 fi
-HOSTNAME_OVERRIDE=$(hostname --short | sed 's/\.novalocal//')
+HOSTNAME_OVERRIDE="$(cat /etc/hostname | head -1 | sed 's/\.novalocal//')"
 cat << EOF >> ${KUBELET_KUBECONFIG}
 apiVersion: v1
 clusters:
@@ -110,8 +118,8 @@ if [ "$TLS_DISABLED" = "True" ]; then
     sed -i 's/^.*certificate-authority.*$//' ${KUBELET_KUBECONFIG}
 fi
 
-chmod 0644 ${KUBELET_KUBECONFIG}
-chmod 0644 ${PROXY_KUBECONFIG}
+chmod 0640 ${KUBELET_KUBECONFIG}
+chmod 0640 ${PROXY_KUBECONFIG}
 
 sed -i '
     /^KUBE_ALLOW_PRIV=/ s/=.*/="--allow-privileged='"$KUBE_ALLOW_PRIV"'"/
@@ -136,11 +144,6 @@ if [ "$(echo "${CLOUD_PROVIDER_ENABLED}" | tr '[:upper:]' '[:lower:]')" = "true"
     KUBELET_ARGS="${KUBELET_ARGS} --cloud-provider=external"
 fi
 
-# Workaround for Cinder support (fixed in k8s >= 1.6)
-if [ ! -f /usr/bin/udevadm ]; then
-    ln -s /sbin/udevadm /usr/bin/udevadm
-fi
-
 # For using default log-driver, other options should be ignored
 sed -i 's/\-\-log\-driver\=journald//g' /etc/sysconfig/docker
 
@@ -158,9 +161,9 @@ if [ "$(echo $AUTO_HEALING_ENABLED | tr '[:upper:]' '[:lower:]')" = "true" ]; th
     KUBELET_ARGS="${KUBELET_ARGS} --node-labels=draino-enabled=true"
 fi
 
-systemctl disable docker
-if cat /usr/lib/systemd/system/docker.service | grep 'native.cgroupdriver'; then
-        cp /usr/lib/systemd/system/docker.service /etc/systemd/system/
+$ssh_cmd systemctl disable docker
+if $ssh_cmd cat /usr/lib/systemd/system/docker.service | grep 'native.cgroupdriver'; then
+        $ssh_cmd "cp /usr/lib/systemd/system/docker.service /etc/systemd/system/"
         sed -i "s/\(native.cgroupdriver=\)\w\+/\1$CGROUP_DRIVER/" \
                 /etc/systemd/system/docker.service
 else
@@ -170,8 +173,8 @@ EOF
 
 fi
 
-systemctl daemon-reload
-systemctl enable docker
+$ssh_cmd systemctl daemon-reload
+$ssh_cmd systemctl enable docker
 
 cat > /etc/kubernetes/get_require_kubeconfig.sh <<EOF
 #!/bin/bash
@@ -201,4 +204,4 @@ cat >> /etc/environment <<EOF
 KUBERNETES_MASTER=$KUBE_MASTER_URI
 EOF
 
-hostname `hostname | sed 's/.novalocal//'`
+$ssh_cmd "hostname $(cat /etc/hostname | head -1 |sed 's/.novalocal//')"

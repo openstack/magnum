@@ -1,10 +1,12 @@
-#cloud-config
-merge_how: dict(recurse_array)+list(append)
-write_files:
-  - path: /etc/sysconfig/heat-params
-    owner: "root:root"
-    permissions: "0600"
-    content: |
+#!/bin/sh
+
+echo "START: write-heat-params"
+
+HEAT_PARAMS=/etc/sysconfig/heat-params
+[ -f ${HEAT_PARAMS} ] || {
+    echo "Writing File: $HEAT_PARAMS"
+    mkdir -p "$(dirname ${HEAT_PARAMS})"
+    cat > ${HEAT_PARAMS} <<EOF
       PROMETHEUS_MONITORING="$PROMETHEUS_MONITORING"
       KUBE_API_PUBLIC_ADDRESS="$KUBE_API_PUBLIC_ADDRESS"
       KUBE_API_PRIVATE_ADDRESS="$KUBE_API_PRIVATE_ADDRESS"
@@ -98,3 +100,10 @@ write_files:
       AUTOSCALER_TAG="$AUTOSCALER_TAG"
       MIN_NODE_COUNT="$MIN_NODE_COUNT"
       MAX_NODE_COUNT="$MAX_NODE_COUNT"
+EOF
+}
+
+chown root:root "${HEAT_PARAMS}"
+chmod 600 "${HEAT_PARAMS}"
+
+echo "END: write-heat-params"

@@ -472,8 +472,11 @@ class BaseTemplateDefinition(TemplateDefinition):
 
     def get_discovery_url(self, cluster, cluster_template=None):
         if hasattr(cluster, 'discovery_url') and cluster.discovery_url:
-            self.validate_discovery_url(cluster.discovery_url,
-                                        cluster.master_count)
+            # NOTE(flwang): The discovery URl does have a expiry time,
+            # so better skip it when the cluster has been created.
+            if not cluster.master_addresses:
+                self.validate_discovery_url(cluster.discovery_url,
+                                            cluster.master_count)
             discovery_url = cluster.discovery_url
         else:
             discovery_endpoint = (

@@ -4,6 +4,8 @@
 
 set -x
 
+ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
+
 if [ ! -z "$HTTP_PROXY" ]; then
     export HTTP_PROXY
 fi
@@ -20,13 +22,13 @@ if [ -n "$ETCD_VOLUME_SIZE" ] && [ "$ETCD_VOLUME_SIZE" -gt 0 ]; then
 
     attempts=60
     while [ ${attempts} -gt 0 ]; do
-        device_name=$(ls /dev/disk/by-id | grep ${ETCD_VOLUME:0:20}$)
+        device_name=$($ssh_cmd ls /dev/disk/by-id | grep ${ETCD_VOLUME:0:20}$)
         if [ -n "${device_name}" ]; then
             break
         fi
         echo "waiting for disk device"
         sleep 0.5
-        udevadm trigger
+        $ssh_cmd udevadm trigger
         let attempts--
     done
 
@@ -36,20 +38,20 @@ if [ -n "$ETCD_VOLUME_SIZE" ] && [ "$ETCD_VOLUME_SIZE" -gt 0 ]; then
     fi
 
     device_path=/dev/disk/by-id/${device_name}
-    fstype=$(blkid -s TYPE -o value ${device_path})
+    fstype=$($ssh_cmd blkid -s TYPE -o value ${device_path} || echo "")
     if [ "${fstype}" != "xfs" ]; then
-        mkfs.xfs -f ${device_path}
+        $ssh_cmd mkfs.xfs -f ${device_path}
     fi
-    mkdir -p /var/lib/etcd
+    $ssh_cmd mkdir -p /var/lib/etcd
     echo "${device_path} /var/lib/etcd xfs defaults 0 0" >> /etc/fstab
-    mount -a
-    chown -R etcd.etcd /var/lib/etcd
-    chmod 755 /var/lib/etcd
+    $ssh_cmd mount -a
+    $ssh_cmd chown -R etcd.etcd /var/lib/etcd
+    $ssh_cmd chmod 755 /var/lib/etcd
 
 fi
 
 _prefix=${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}
-atomic install \
+$ssh_cmd atomic install \
 --system-package no \
 --system \
 --storage ostree \

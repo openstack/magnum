@@ -115,6 +115,9 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                 '"cinder" volume driver needs "cloud_provider_enabled" label '
                 'to be true or unset.'))
 
+        extra_params['master_image'] = cluster_template.image_id
+        extra_params['minion_image'] = cluster_template.image_id
+
         label_list = ['coredns_tag',
                       'kube_tag', 'container_infra_prefix',
                       'availability_zone',

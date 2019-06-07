@@ -327,4 +327,51 @@ EOF
     kubectl apply -f ${OCCM}
 fi
 
+# Assgin read daemonset/replicaset/statefulset permssion to allow node drain itself
+cat <<EOF | kubectl apply --validate=false -f -
+---
+apiVersion: v1
+items:
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRole
+  metadata:
+    name: system:node-drainer
+  rules:
+  - apiGroups:
+    - ""
+    resources:
+    - pods/eviction
+    verbs:
+    - create
+  - apiGroups:
+    - apps
+    resources:
+    - statefulsets
+    verbs:
+    - get
+    - list
+  - apiGroups:
+    - extensions
+    resources:
+    - daemonsets
+    - replicasets
+    verbs:
+    - get
+    - list
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRoleBinding
+  metadata:
+    name: system:node-drainer
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: system:node-drainer
+  subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: Group
+    name: system:nodes
+kind: List
+metadata: {}
+EOF
+
 printf "Finished running ${step}\n"

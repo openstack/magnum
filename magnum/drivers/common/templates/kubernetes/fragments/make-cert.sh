@@ -21,6 +21,8 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
+
 if [ "$TLS_DISABLED" == "True" ]; then
     exit 0
 fi
@@ -115,9 +117,9 @@ EOF
         $MAGNUM_URL/certificates/$CLUSTER_UUID | python -c 'import sys, json; print json.load(sys.stdin)["pem"]' > ${CA_CERT}
 
     # Generate server's private key and csr
-    openssl genrsa -out "${_KEY}" 4096
+    $ssh_cmd openssl genrsa -out "${_KEY}" 4096
     chmod 400 "${_KEY}"
-    openssl req -new -days 1000 \
+    $ssh_cmd openssl req -new -days 1000 \
             -key "${_KEY}" \
             -out "${_CSR}" \
             -reqexts req_ext \
@@ -147,7 +149,7 @@ extendedKeyUsage = clientAuth,serverAuth
 EOF
 
 #Kubelet Certs
-INSTANCE_NAME=$(hostname --short | sed 's/\.novalocal//')
+INSTANCE_NAME=$(cat /etc/hostname | head -1 | sed 's/\.novalocal//')
 cat > ${cert_dir}/kubelet.conf <<EOF
 [req]
 distinguished_name = req_distinguished_name
@@ -175,11 +177,11 @@ echo -e "${KUBE_SERVICE_ACCOUNT_PRIVATE_KEY}" > ${cert_dir}/service_account_priv
 
 # Common certs and key are created for both etcd and kubernetes services.
 # Both etcd and kube user should have permission to access the certs and key.
-groupadd kube_etcd
-usermod -a -G kube_etcd etcd
-usermod -a -G kube_etcd kube
-chmod 550 "${cert_dir}"
-chown -R kube:kube_etcd "${cert_dir}"
-chmod 440 $cert_dir/server.key
-mkdir -p /etc/etcd/certs
-cp ${cert_dir}/* /etc/etcd/certs
+$ssh_cmd groupadd kube_etcd
+$ssh_cmd usermod -a -G kube_etcd etcd
+$ssh_cmd usermod -a -G kube_etcd kube
+$ssh_cmd chmod 550 "${cert_dir}"
+$ssh_cmd chown -R kube:kube_etcd "${cert_dir}"
+$ssh_cmd chmod 440 "$cert_dir/server.key"
+$ssh_cmd mkdir -p /etc/etcd/certs
+$ssh_cmd cp ${cert_dir}/* /etc/etcd/certs

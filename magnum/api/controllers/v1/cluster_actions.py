@@ -151,6 +151,7 @@ class ActionsController(base.Controller):
         else:
             nodegroup = objects.NodeGroup.get(
                 context, cluster.uuid, cluster_upgrade_req.nodegroup)
+
         pecan.request.rpcapi.cluster_upgrade(
             cluster,
             new_cluster_template,

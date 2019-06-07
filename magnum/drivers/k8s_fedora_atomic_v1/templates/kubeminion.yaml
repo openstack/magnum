@@ -283,21 +283,24 @@ parameters:
 
 resources:
 
-  start_container_agent:
+  agent_config:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/start-container-agent.sh}
-
-  minion_wait_handle:
-    type: OS::Heat::WaitConditionHandle
-
-  minion_wait_condition:
-    type: OS::Heat::WaitCondition
-    depends_on: kube-minion
-    properties:
-      handle: {get_resource: minion_wait_handle}
-      timeout: {get_param: wait_condition_timeout}
+      config:
+        list_join:
+          - "\n"
+          -
+            - str_replace:
+                template: {get_file: ../../common/templates/fragments/atomic-install-openstack-ca.sh}
+                params:
+                  $OPENSTACK_CA: {get_param: openstack_ca}
+            - str_replace:
+                template: {get_file: ../../common/templates/kubernetes/fragments/start-container-agent.sh}
+                params:
+                  $CONTAINER_INFRA_PREFIX: {get_param: container_infra_prefix}
+                  $HEAT_CONTAINER_AGENT_TAG: {get_param: heat_container_agent_tag}
+            - get_file: ../../common/templates/kubernetes/fragments/disable-selinux.sh
 
   ######################################################################
   #
@@ -305,169 +308,83 @@ resources:
   # a multipart MIME user-data archive.
   #
 
-  write_heat_params:
+  node_config:
     type: OS::Heat::SoftwareConfig
     properties:
-      group: ungrouped
+      group: script
       config:
-        str_replace:
-          template: {get_file: ../../common/templates/kubernetes/fragments/write-heat-params.yaml}
-          params:
-            $PROMETHEUS_MONITORING: {get_param: prometheus_monitoring}
-            $KUBE_ALLOW_PRIV: {get_param: kube_allow_priv}
-            $KUBE_MASTER_IP: {get_param: kube_master_ip}
-            $KUBE_API_PORT: {get_param: kubernetes_port}
-            $KUBE_NODE_PUBLIC_IP: {get_attr: [kube_minion_floating, floating_ip_address]}
-            $KUBE_NODE_IP: {get_attr: [kube_minion_eth0, fixed_ips, 0, ip_address]}
-            $ETCD_SERVER_IP: {get_param: etcd_server_ip}
-            $DOCKER_VOLUME: {get_resource: docker_volume}
-            $DOCKER_VOLUME_SIZE: {get_param: docker_volume_size}
-            $DOCKER_STORAGE_DRIVER: {get_param: docker_storage_driver}
-            $CGROUP_DRIVER: {get_param: cgroup_driver}
-            $NETWORK_DRIVER: {get_param: network_driver}
-            $REGISTRY_ENABLED: {get_param: registry_enabled}
-            $REGISTRY_PORT: {get_param: registry_port}
-            $SWIFT_REGION: {get_param: swift_region}
-            $REGISTRY_CONTAINER: {get_param: registry_container}
-            $REGISTRY_INSECURE: {get_param: registry_insecure}
-            $REGISTRY_CHUNKSIZE: {get_param: registry_chunksize}
-            $TLS_DISABLED: {get_param: tls_disabled}
-            $VERIFY_CA: {get_param: verify_ca}
-            $CLUSTER_UUID: {get_param: cluster_uuid}
-            $MAGNUM_URL: {get_param: magnum_url}
-            $USERNAME: {get_param: username}
-            $PASSWORD: {get_param: password}
-            $VOLUME_DRIVER: {get_param: volume_driver}
-            $REGION_NAME: {get_param: region_name}
-            $HTTP_PROXY: {get_param: http_proxy}
-            $HTTPS_PROXY: {get_param: https_proxy}
-            $NO_PROXY: {get_param: no_proxy}
-            $KUBE_TAG: {get_param: kube_tag}
-            $FLANNEL_NETWORK_CIDR: {get_param: flannel_network_cidr}
-            $PODS_NETWORK_CIDR: {get_param: pods_network_cidr}
-            $KUBE_VERSION: {get_param: kube_version}
-            $WAIT_CURL: {get_attr: [minion_wait_handle, curl_cli]}
-            $TRUSTEE_USER_ID: {get_param: trustee_user_id}
-            $TRUSTEE_USERNAME: {get_param: trustee_username}
-            $TRUSTEE_PASSWORD: {get_param: trustee_password}
-            $TRUSTEE_DOMAIN_ID: {get_param: trustee_domain_id}
-            $TRUST_ID: {get_param: trust_id}
-            $AUTH_URL: {get_param: auth_url}
-            $CLOUD_PROVIDER_ENABLED: {get_param: cloud_provider_enabled}
-            $INSECURE_REGISTRY_URL: {get_param: insecure_registry_url}
-            $CONTAINER_INFRA_PREFIX: {get_param: container_infra_prefix}
-            $DNS_SERVICE_IP: {get_param: dns_service_ip}
-            $DNS_CLUSTER_DOMAIN: {get_param: dns_cluster_domain}
-            $KUBELET_OPTIONS: {get_param: kubelet_options}
-            $KUBEPROXY_OPTIONS: {get_param: kubeproxy_options}
-            $OCTAVIA_ENABLED: {get_param: octavia_enabled}
-            $HEAT_CONTAINER_AGENT_TAG: {get_param: heat_container_agent_tag}
-            $AUTO_HEALING_ENABLED: {get_param: auto_healing_enabled}
+        list_join:
+          - "\n"
+          -
+            - str_replace:
+                template: {get_file: ../../common/templates/kubernetes/fragments/write-heat-params.sh}
+                params:
+                  $PROMETHEUS_MONITORING: {get_param: prometheus_monitoring}
+                  $KUBE_ALLOW_PRIV: {get_param: kube_allow_priv}
+                  $KUBE_MASTER_IP: {get_param: kube_master_ip}
+                  $KUBE_API_PORT: {get_param: kubernetes_port}
+                  $KUBE_NODE_PUBLIC_IP: {get_attr: [kube_minion_floating, floating_ip_address]}
+                  $KUBE_NODE_IP: {get_attr: [kube_minion_eth0, fixed_ips, 0, ip_address]}
+                  $ETCD_SERVER_IP: {get_param: etcd_server_ip}
+                  $DOCKER_VOLUME: {get_resource: docker_volume}
+                  $DOCKER_VOLUME_SIZE: {get_param: docker_volume_size}
+                  $DOCKER_STORAGE_DRIVER: {get_param: docker_storage_driver}
+                  $CGROUP_DRIVER: {get_param: cgroup_driver}
+                  $NETWORK_DRIVER: {get_param: network_driver}
+                  $REGISTRY_ENABLED: {get_param: registry_enabled}
+                  $REGISTRY_PORT: {get_param: registry_port}
+                  $SWIFT_REGION: {get_param: swift_region}
+                  $REGISTRY_CONTAINER: {get_param: registry_container}
+                  $REGISTRY_INSECURE: {get_param: registry_insecure}
+                  $REGISTRY_CHUNKSIZE: {get_param: registry_chunksize}
+                  $TLS_DISABLED: {get_param: tls_disabled}
+                  $VERIFY_CA: {get_param: verify_ca}
+                  $CLUSTER_UUID: {get_param: cluster_uuid}
+                  $MAGNUM_URL: {get_param: magnum_url}
+                  $USERNAME: {get_param: username}
+                  $PASSWORD: {get_param: password}
+                  $VOLUME_DRIVER: {get_param: volume_driver}
+                  $REGION_NAME: {get_param: region_name}
+                  $HTTP_PROXY: {get_param: http_proxy}
+                  $HTTPS_PROXY: {get_param: https_proxy}
+                  $NO_PROXY: {get_param: no_proxy}
+                  $KUBE_TAG: {get_param: kube_tag}
+                  $FLANNEL_NETWORK_CIDR: {get_param: flannel_network_cidr}
+                  $PODS_NETWORK_CIDR: {get_param: pods_network_cidr}
+                  $KUBE_VERSION: {get_param: kube_version}
+                  $TRUSTEE_USER_ID: {get_param: trustee_user_id}
+                  $TRUSTEE_PASSWORD: {get_param: trustee_password}
+                  $TRUST_ID: {get_param: trust_id}
+                  $AUTH_URL: {get_param: auth_url}
+                  $CLOUD_PROVIDER_ENABLED: {get_param: cloud_provider_enabled}
+                  $INSECURE_REGISTRY_URL: {get_param: insecure_registry_url}
+                  $CONTAINER_INFRA_PREFIX: {get_param: container_infra_prefix}
+                  $DNS_SERVICE_IP: {get_param: dns_service_ip}
+                  $DNS_CLUSTER_DOMAIN: {get_param: dns_cluster_domain}
+                  $KUBELET_OPTIONS: {get_param: kubelet_options}
+                  $KUBEPROXY_OPTIONS: {get_param: kubeproxy_options}
+                  $OCTAVIA_ENABLED: {get_param: octavia_enabled}
+                  $HEAT_CONTAINER_AGENT_TAG: {get_param: heat_container_agent_tag}
+                  $AUTO_HEALING_ENABLED: {get_param: auto_healing_enabled}
+            - get_file: ../../common/templates/kubernetes/fragments/write-kube-os-config.sh
+            - get_file: ../../common/templates/kubernetes/fragments/make-cert-client.sh
+            - get_file: ../../common/templates/fragments/configure-docker-registry.sh
+            - get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-minion.sh
+            - get_file: ../../common/templates/kubernetes/fragments/add-proxy.sh
+            - str_replace:
+                template: {get_file: ../../common/templates/fragments/configure-docker-storage.sh}
+                params:
+                  $configure_docker_storage_driver: {get_file: ../../common/templates/fragments/configure_docker_storage_driver_atomic.sh}
+            - get_file: ../../common/templates/kubernetes/fragments/enable-services-minion.sh
+            - get_file: ../../common/templates/fragments/enable-docker-registry.sh
 
-
-  install_openstack_ca:
-    type: OS::Heat::SoftwareConfig
+  node_config_deployment:
+    type: OS::Heat::SoftwareDeployment
     properties:
-      group: ungrouped
-      config:
-        str_replace:
-          params:
-            $OPENSTACK_CA: {get_param: openstack_ca}
-          template: {get_file: ../../common/templates/fragments/atomic-install-openstack-ca.sh}
-
-  write_kube_os_config:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/write-kube-os-config.sh}
-
-  make_cert:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/make-cert-client.sh}
-
-  configure_docker_storage:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config:
-        str_replace:
-          params:
-            $configure_docker_storage_driver: {get_file: ../../common/templates/fragments/configure_docker_storage_driver_atomic.sh}
-          template: {get_file: ../../common/templates/fragments/configure-docker-storage.sh}
-
-  configure_docker_registry:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/fragments/configure-docker-registry.sh}
-
-  configure_kubernetes_minion:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-minion.sh}
-
-  enable_services:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/enable-services-minion.sh}
-
-  enable_docker_registry:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/fragments/enable-docker-registry.sh}
-
-  minion_wc_notify:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config:
-        str_replace:
-          template: |
-            #!/bin/bash -v
-            if [ "verify_ca" == "True" ]; then
-                VERIFY_CA=""
-            else
-                VERIFY_CA="-k"
-            fi
-            wc_notify $VERIFY_CA --data-binary '{"status": "SUCCESS"}'
-          params:
-            wc_notify: {get_attr: [minion_wait_handle, curl_cli]}
-            verify_ca: {get_param: verify_ca}
-
-  disable_selinux:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/disable-selinux.sh}
-
-  add_proxy:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/add-proxy.sh}
-
-  kube_minion_init:
-    type: OS::Heat::MultipartMime
-    properties:
-      parts:
-        - config: {get_resource: install_openstack_ca}
-        - config: {get_resource: disable_selinux}
-        - config: {get_resource: write_heat_params}
-        - config: {get_resource: start_container_agent}
-        - config: {get_resource: write_kube_os_config}
-        - config: {get_resource: make_cert}
-        - config: {get_resource: configure_docker_storage}
-        - config: {get_resource: configure_docker_registry}
-        - config: {get_resource: configure_kubernetes_minion}
-        - config: {get_resource: add_proxy}
-        - config: {get_resource: enable_services}
-        - config: {get_resource: enable_docker_registry}
-        - config: {get_resource: minion_wc_notify}
+      signal_transport: HEAT_SIGNAL
+      config: {get_resource: node_config}
+      server: {get_resource: kube-minion}
+      actions: ['CREATE']
 
   ######################################################################
   #
@@ -484,8 +401,9 @@ resources:
       image: {get_param: server_image}
       flavor: {get_param: minion_flavor}
       key_name: {get_param: ssh_key_name}
-      user_data_format: RAW
-      user_data: {get_resource: kube_minion_init}
+      user_data: {get_resource: agent_config}
+      user_data_format: SOFTWARE_CONFIG
+      software_config_transport: POLL_SERVER_HEAT
       networks:
         - port: {get_resource: kube_minion_eth0}
       scheduler_hints: { group: { get_param: nodes_server_group_id }}
@@ -527,6 +445,25 @@ resources:
       instance_uuid: {get_resource: kube-minion}
       volume_id: {get_resource: docker_volume}
       mountpoint: /dev/vdb
+
+  upgrade_kubernetes:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      inputs:
+      - name: kube_tag_input
+      config:
+        get_file: ../../common/templates/kubernetes/fragments/upgrade-kubernetes.sh
+
+  upgrade_kubernetes_deployment:
+    type: OS::Heat::SoftwareDeployment
+    properties:
+      signal_transport: HEAT_SIGNAL
+      config: {get_resource: upgrade_kubernetes}
+      server: {get_resource: kube-minion}
+      actions: ['UPDATE']
+      input_values:
+        kube_tag_input: {get_param: kube_tag}
 
 outputs:
 

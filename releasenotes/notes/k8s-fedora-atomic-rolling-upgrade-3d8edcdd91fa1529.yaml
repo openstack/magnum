@@ -1,0 +1,17 @@
+---
+features:
+  - |
+    Now the fedora atomic Kubernetes driver can support rolling upgrade for k8s
+    version change or the image change. User can call command
+    `openstack coe cluster upgrade <cluster ID> <new cluster template ID>` to
+    upgrade current cluster to the new version defined in the new cluster
+    template. At this moment, only the image change and the kube_tag change
+    are supported.
+issues:
+  - |
+    There is a known issue when doing image(operating system) upgrade for k8s
+    cluster. Because when doing image change for a server resource, Heat will
+    trigger the Nova rebuild to rebuild the instnace and there is no chance to
+    call kubectl drain to drain the node, so there could be a very minior
+    downtime when doing(starting to do) the rebuild and meanwhile a request
+    is routed to that node.

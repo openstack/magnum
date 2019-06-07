@@ -504,190 +504,146 @@ resources:
   # a multipart MIME user-data archive.
   #
 
-  write_heat_params:
+  agent_config:
     type: OS::Heat::SoftwareConfig
     properties:
       group: ungrouped
       config:
-        str_replace:
-          template: {get_file: ../../common/templates/kubernetes/fragments/write-heat-params-master.yaml}
-          params:
-            "$PROMETHEUS_MONITORING": {get_param: prometheus_monitoring}
-            "$KUBE_API_PUBLIC_ADDRESS": {get_attr: [api_address_switch, public_ip]}
-            "$KUBE_API_PRIVATE_ADDRESS": {get_attr: [api_address_switch, private_ip]}
-            "$KUBE_API_PORT": {get_param: kubernetes_port}
-            "$KUBE_NODE_PUBLIC_IP": {get_attr: [kube_master_floating, floating_ip_address]}
-            "$KUBE_NODE_IP": {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
-            "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
-            "$ETCD_VOLUME": {get_resource: etcd_volume}
-            "$ETCD_VOLUME_SIZE": {get_param: etcd_volume_size}
-            "$DOCKER_VOLUME": {get_resource: docker_volume}
-            "$DOCKER_VOLUME_SIZE": {get_param: docker_volume_size}
-            "$DOCKER_STORAGE_DRIVER": {get_param: docker_storage_driver}
-            "$CGROUP_DRIVER": {get_param: cgroup_driver}
-            "$NETWORK_DRIVER": {get_param: network_driver}
-            "$FLANNEL_NETWORK_CIDR": {get_param: flannel_network_cidr}
-            "$FLANNEL_NETWORK_SUBNETLEN": {get_param: flannel_network_subnetlen}
-            "$FLANNEL_BACKEND": {get_param: flannel_backend}
-            "$SYSTEM_PODS_INITIAL_DELAY": {get_param: system_pods_initial_delay}
-            "$SYSTEM_PODS_TIMEOUT": {get_param: system_pods_timeout}
-            "$PODS_NETWORK_CIDR": {get_param: pods_network_cidr}
-            "$PORTAL_NETWORK_CIDR": {get_param: portal_network_cidr}
-            "$ADMISSION_CONTROL_LIST": {get_param: admission_control_list}
-            "$ETCD_DISCOVERY_URL": {get_param: discovery_url}
-            "$AUTH_URL": {get_param: auth_url}
-            "$USERNAME": {get_param: username}
-            "$PASSWORD": {get_param: password}
-            "$CLUSTER_SUBNET": {get_param: fixed_subnet}
-            "$TLS_DISABLED": {get_param: tls_disabled}
-            "$TRAEFIK_INGRESS_CONTROLLER_TAG": {get_param: traefik_ingress_controller_tag}
-            "$KUBE_DASHBOARD_ENABLED": {get_param: kube_dashboard_enabled}
-            "$INFLUX_GRAFANA_DASHBOARD_ENABLED": {get_param: influx_grafana_dashboard_enabled}
-            "$VERIFY_CA": {get_param: verify_ca}
-            "$CLUSTER_UUID": {get_param: cluster_uuid}
-            "$MAGNUM_URL": {get_param: magnum_url}
-            "$VOLUME_DRIVER": {get_param: volume_driver}
-            "$REGION_NAME": {get_param: region_name}
-            "$HTTP_PROXY": {get_param: http_proxy}
-            "$HTTPS_PROXY": {get_param: https_proxy}
-            "$NO_PROXY": {get_param: no_proxy}
-            "$KUBE_TAG": {get_param: kube_tag}
-            "$CLOUD_PROVIDER_TAG": {get_param: cloud_provider_tag}
-            "$CLOUD_PROVIDER_ENABLED": {get_param: cloud_provider_enabled}
-            "$ETCD_TAG": {get_param: etcd_tag}
-            "$COREDNS_TAG": {get_param: coredns_tag}
-            "$FLANNEL_TAG": {get_param: flannel_tag}
-            "$FLANNEL_CNI_TAG": {get_param: flannel_cni_tag}
-            "$KUBE_VERSION": {get_param: kube_version}
-            "$KUBE_DASHBOARD_VERSION": {get_param: kube_dashboard_version}
-            "$TRUSTEE_USER_ID": {get_param: trustee_user_id}
-            "$TRUSTEE_PASSWORD": {get_param: trustee_password}
-            "$TRUST_ID": {get_param: trust_id}
-            "$INSECURE_REGISTRY_URL": {get_param: insecure_registry_url}
-            "$CONTAINER_INFRA_PREFIX": {get_param: container_infra_prefix}
-            "$ETCD_LB_VIP": {get_param: etcd_lb_vip}
-            "$DNS_SERVICE_IP": {get_param: dns_service_ip}
-            "$DNS_CLUSTER_DOMAIN": {get_param: dns_cluster_domain}
-            "$CERT_MANAGER_API": {get_param: cert_manager_api}
-            "$CA_KEY": {get_param: ca_key}
-            "$CALICO_TAG": {get_param: calico_tag}
-            "$CALICO_CNI_TAG": {get_param: calico_cni_tag}
-            "$CALICO_KUBE_CONTROLLERS_TAG": {get_param: calico_kube_controllers_tag}
-            "$CALICO_IPV4POOL": {get_param: calico_ipv4pool}
-            "$INGRESS_CONTROLLER": {get_param: ingress_controller}
-            "$INGRESS_CONTROLLER_ROLE": {get_param: ingress_controller_role}
-            "$OCTAVIA_INGRESS_CONTROLLER_TAG": {get_param: octavia_ingress_controller_tag}
-            "$KUBELET_OPTIONS": {get_param: kubelet_options}
-            "$KUBEAPI_OPTIONS": {get_param: kubeapi_options}
-            "$KUBECONTROLLER_OPTIONS": {get_param: kubecontroller_options}
-            "$KUBEPROXY_OPTIONS": {get_param: kubeproxy_options}
-            "$KUBESCHEDULER_OPTIONS": {get_param: kubescheduler_options}
-            "$OCTAVIA_ENABLED": {get_param: octavia_enabled}
-            "$KUBE_SERVICE_ACCOUNT_KEY": {get_param: kube_service_account_key}
-            "$KUBE_SERVICE_ACCOUNT_PRIVATE_KEY": {get_param: kube_service_account_private_key}
-            "$PROMETHEUS_TAG": {get_param: prometheus_tag}
-            "$GRAFANA_TAG": {get_param: grafana_tag}
-            "$HEAT_CONTAINER_AGENT_TAG": {get_param: heat_container_agent_tag}
-            "$KEYSTONE_AUTH_ENABLED": {get_param: keystone_auth_enabled}
-            "$K8S_KEYSTONE_AUTH_TAG": {get_param: k8s_keystone_auth_tag}
-            "$MONITORING_ENABLED": {get_param: monitoring_enabled}
-            "$PROJECT_ID": {get_param: project_id}
-            "$EXTERNAL_NETWORK_ID": {get_param: external_network}
-            "$TILLER_ENABLED": {get_param: tiller_enabled}
-            "$TILLER_TAG": {get_param: tiller_tag}
-            "$TILLER_NAMESPACE": {get_param: tiller_namespace}
-            "$NODE_PROBLEM_DETECTOR_TAG": {get_param: node_problem_detector_tag}
-            "$NGINX_INGRESS_CONTROLLER_TAG": {get_param: nginx_ingress_controller_tag}
-            "$AUTO_HEALING_ENABLED": {get_param: auto_healing_enabled}
-            "$AUTO_SCALING_ENABLED": {get_param: auto_scaling_enabled}
-            "$DRAINO_TAG": {get_param: draino_tag}
-            "$AUTOSCALER_TAG": {get_param: autoscaler_tag}
-            "$MIN_NODE_COUNT": {get_param: min_node_count}
-            "$MAX_NODE_COUNT": {get_param: max_node_count}
+        list_join:
+          - "\n"
+          -
+            - str_replace:
+                template: {get_file: ../../common/templates/fragments/atomic-install-openstack-ca.sh}
+                params:
+                  $OPENSTACK_CA: {get_param: openstack_ca}
+            - str_replace:
+                template: {get_file: ../../common/templates/kubernetes/fragments/start-container-agent.sh}
+                params:
+                  $CONTAINER_INFRA_PREFIX: {get_param: container_infra_prefix}
+                  $HEAT_CONTAINER_AGENT_TAG: {get_param: heat_container_agent_tag}
+            - get_file: ../../common/templates/kubernetes/fragments/disable-selinux.sh
 
-  install_openstack_ca:
+  master_config:
     type: OS::Heat::SoftwareConfig
     properties:
-      group: ungrouped
+      group: script
       config:
-        str_replace:
-          params:
-            $OPENSTACK_CA: {get_param: openstack_ca}
-          template: {get_file: ../../common/templates/fragments/atomic-install-openstack-ca.sh}
+        list_join:
+          - "\n"
+          -
+            - str_replace:
+                template: {get_file: ../../common/templates/kubernetes/fragments/write-heat-params-master.sh}
+                params:
+                  "$PROMETHEUS_MONITORING": {get_param: prometheus_monitoring}
+                  "$KUBE_API_PUBLIC_ADDRESS": {get_attr: [api_address_switch, public_ip]}
+                  "$KUBE_API_PRIVATE_ADDRESS": {get_attr: [api_address_switch, private_ip]}
+                  "$KUBE_API_PORT": {get_param: kubernetes_port}
+                  "$KUBE_NODE_PUBLIC_IP": {get_attr: [kube_master_floating, floating_ip_address]}
+                  "$KUBE_NODE_IP": {get_attr: [kube_master_eth0, fixed_ips, 0, ip_address]}
+                  "$KUBE_ALLOW_PRIV": {get_param: kube_allow_priv}
+                  "$ETCD_VOLUME": {get_resource: etcd_volume}
+                  "$ETCD_VOLUME_SIZE": {get_param: etcd_volume_size}
+                  "$DOCKER_VOLUME": {get_resource: docker_volume}
+                  "$DOCKER_VOLUME_SIZE": {get_param: docker_volume_size}
+                  "$DOCKER_STORAGE_DRIVER": {get_param: docker_storage_driver}
+                  "$CGROUP_DRIVER": {get_param: cgroup_driver}
+                  "$NETWORK_DRIVER": {get_param: network_driver}
+                  "$FLANNEL_NETWORK_CIDR": {get_param: flannel_network_cidr}
+                  "$FLANNEL_NETWORK_SUBNETLEN": {get_param: flannel_network_subnetlen}
+                  "$FLANNEL_BACKEND": {get_param: flannel_backend}
+                  "$SYSTEM_PODS_INITIAL_DELAY": {get_param: system_pods_initial_delay}
+                  "$SYSTEM_PODS_TIMEOUT": {get_param: system_pods_timeout}
+                  "$PODS_NETWORK_CIDR": {get_param: pods_network_cidr}
+                  "$PORTAL_NETWORK_CIDR": {get_param: portal_network_cidr}
+                  "$ADMISSION_CONTROL_LIST": {get_param: admission_control_list}
+                  "$ETCD_DISCOVERY_URL": {get_param: discovery_url}
+                  "$AUTH_URL": {get_param: auth_url}
+                  "$USERNAME": {get_param: username}
+                  "$PASSWORD": {get_param: password}
+                  "$CLUSTER_SUBNET": {get_param: fixed_subnet}
+                  "$TLS_DISABLED": {get_param: tls_disabled}
+                  "$TRAEFIK_INGRESS_CONTROLLER_TAG": {get_param: traefik_ingress_controller_tag}
+                  "$KUBE_DASHBOARD_ENABLED": {get_param: kube_dashboard_enabled}
+                  "$INFLUX_GRAFANA_DASHBOARD_ENABLED": {get_param: influx_grafana_dashboard_enabled}
+                  "$VERIFY_CA": {get_param: verify_ca}
+                  "$CLUSTER_UUID": {get_param: cluster_uuid}
+                  "$MAGNUM_URL": {get_param: magnum_url}
+                  "$VOLUME_DRIVER": {get_param: volume_driver}
+                  "$REGION_NAME": {get_param: region_name}
+                  "$HTTP_PROXY": {get_param: http_proxy}
+                  "$HTTPS_PROXY": {get_param: https_proxy}
+                  "$NO_PROXY": {get_param: no_proxy}
+                  "$KUBE_TAG": {get_param: kube_tag}
+                  "$CLOUD_PROVIDER_TAG": {get_param: cloud_provider_tag}
+                  "$CLOUD_PROVIDER_ENABLED": {get_param: cloud_provider_enabled}
+                  "$ETCD_TAG": {get_param: etcd_tag}
+                  "$COREDNS_TAG": {get_param: coredns_tag}
+                  "$FLANNEL_TAG": {get_param: flannel_tag}
+                  "$FLANNEL_CNI_TAG": {get_param: flannel_cni_tag}
+                  "$KUBE_VERSION": {get_param: kube_version}
+                  "$KUBE_DASHBOARD_VERSION": {get_param: kube_dashboard_version}
+                  "$TRUSTEE_USER_ID": {get_param: trustee_user_id}
+                  "$TRUSTEE_PASSWORD": {get_param: trustee_password}
+                  "$TRUST_ID": {get_param: trust_id}
+                  "$INSECURE_REGISTRY_URL": {get_param: insecure_registry_url}
+                  "$CONTAINER_INFRA_PREFIX": {get_param: container_infra_prefix}
+                  "$ETCD_LB_VIP": {get_param: etcd_lb_vip}
+                  "$DNS_SERVICE_IP": {get_param: dns_service_ip}
+                  "$DNS_CLUSTER_DOMAIN": {get_param: dns_cluster_domain}
+                  "$CERT_MANAGER_API": {get_param: cert_manager_api}
+                  "$CA_KEY": {get_param: ca_key}
+                  "$CALICO_TAG": {get_param: calico_tag}
+                  "$CALICO_CNI_TAG": {get_param: calico_cni_tag}
+                  "$CALICO_KUBE_CONTROLLERS_TAG": {get_param: calico_kube_controllers_tag}
+                  "$CALICO_IPV4POOL": {get_param: calico_ipv4pool}
+                  "$INGRESS_CONTROLLER": {get_param: ingress_controller}
+                  "$INGRESS_CONTROLLER_ROLE": {get_param: ingress_controller_role}
+                  "$OCTAVIA_INGRESS_CONTROLLER_TAG": {get_param: octavia_ingress_controller_tag}
+                  "$KUBELET_OPTIONS": {get_param: kubelet_options}
+                  "$KUBEAPI_OPTIONS": {get_param: kubeapi_options}
+                  "$KUBECONTROLLER_OPTIONS": {get_param: kubecontroller_options}
+                  "$KUBEPROXY_OPTIONS": {get_param: kubeproxy_options}
+                  "$KUBESCHEDULER_OPTIONS": {get_param: kubescheduler_options}
+                  "$OCTAVIA_ENABLED": {get_param: octavia_enabled}
+                  "$KUBE_SERVICE_ACCOUNT_KEY": {get_param: kube_service_account_key}
+                  "$KUBE_SERVICE_ACCOUNT_PRIVATE_KEY": {get_param: kube_service_account_private_key}
+                  "$PROMETHEUS_TAG": {get_param: prometheus_tag}
+                  "$GRAFANA_TAG": {get_param: grafana_tag}
+                  "$HEAT_CONTAINER_AGENT_TAG": {get_param: heat_container_agent_tag}
+                  "$KEYSTONE_AUTH_ENABLED": {get_param: keystone_auth_enabled}
+                  "$K8S_KEYSTONE_AUTH_TAG": {get_param: k8s_keystone_auth_tag}
+                  "$MONITORING_ENABLED": {get_param: monitoring_enabled}
+                  "$PROJECT_ID": {get_param: project_id}
+                  "$EXTERNAL_NETWORK_ID": {get_param: external_network}
+                  "$TILLER_ENABLED": {get_param: tiller_enabled}
+                  "$TILLER_TAG": {get_param: tiller_tag}
+                  "$TILLER_NAMESPACE": {get_param: tiller_namespace}
+                  "$NODE_PROBLEM_DETECTOR_TAG": {get_param: node_problem_detector_tag}
+                  "$NGINX_INGRESS_CONTROLLER_TAG": {get_param: nginx_ingress_controller_tag}
+                  "$AUTO_HEALING_ENABLED": {get_param: auto_healing_enabled}
+                  "$AUTO_SCALING_ENABLED": {get_param: auto_scaling_enabled}
+                  "$DRAINO_TAG": {get_param: draino_tag}
+                  "$AUTOSCALER_TAG": {get_param: autoscaler_tag}
+                  "$MIN_NODE_COUNT": {get_param: min_node_count}
+                  "$MAX_NODE_COUNT": {get_param: max_node_count}
+            - get_file: ../../common/templates/kubernetes/fragments/make-cert.sh
+            - get_file: ../../common/templates/kubernetes/fragments/configure-etcd.sh
+            - get_file: ../../common/templates/kubernetes/fragments/write-kube-os-config.sh
+            - get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-master.sh
+            - str_replace:
+                template: {get_file: ../../common/templates/fragments/configure-docker-storage.sh}
+                params:
+                  $configure_docker_storage_driver: {get_file: ../../common/templates/fragments/configure_docker_storage_driver_atomic.sh}
+            - get_file: ../../common/templates/kubernetes/fragments/enable-services-master.sh
+            - get_file: ../../common/templates/kubernetes/fragments/add-proxy.sh
 
-  make_cert:
-    type: OS::Heat::SoftwareConfig
+  master_config_deployment:
+    type: OS::Heat::SoftwareDeployment
     properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/make-cert.sh}
-
-  configure_docker_storage:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config:
-        str_replace:
-          params:
-            $configure_docker_storage_driver: {get_file: ../../common/templates/fragments/configure_docker_storage_driver_atomic.sh}
-          template: {get_file: ../../common/templates/fragments/configure-docker-storage.sh}
-
-  configure_etcd:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/configure-etcd.sh}
-
-  write_kube_os_config:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/write-kube-os-config.sh}
-
-  configure_kubernetes:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/configure-kubernetes-master.sh}
-
-  enable_services:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/enable-services-master.sh}
-
-  disable_selinux:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/disable-selinux.sh}
-
-  add_proxy:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/add-proxy.sh}
-
-  start_container_agent:
-    type: OS::Heat::SoftwareConfig
-    properties:
-      group: ungrouped
-      config: {get_file: ../../common/templates/kubernetes/fragments/start-container-agent.sh}
-
-  kube_master_init:
-    type: OS::Heat::MultipartMime
-    properties:
-      parts:
-        - config: {get_resource: install_openstack_ca}
-        - config: {get_resource: disable_selinux}
-        - config: {get_resource: write_heat_params}
-        - config: {get_resource: configure_etcd}
-        - config: {get_resource: write_kube_os_config}
-        - config: {get_resource: configure_docker_storage}
-        - config: {get_resource: configure_kubernetes}
-        - config: {get_resource: make_cert}
-        - config: {get_resource: add_proxy}
-        - config: {get_resource: start_container_agent}
-        - config: {get_resource: enable_services}
+      signal_transport: HEAT_SIGNAL
+      config: {get_resource: master_config}
+      server: {get_resource: kube-master}
+      actions: ['CREATE']
 
   ######################################################################
   #
@@ -706,7 +662,7 @@ resources:
       key_name: {get_param: ssh_key_name}
       user_data_format: SOFTWARE_CONFIG
       software_config_transport: POLL_SERVER_HEAT
-      user_data: {get_resource: kube_master_init}
+      user_data: {get_resource: agent_config}
       networks:
         - port: {get_resource: kube_master_eth0}
       scheduler_hints: { group: { get_param: nodes_server_group_id }}
@@ -782,6 +738,25 @@ resources:
       instance_uuid: {get_resource: kube-master}
       volume_id: {get_resource: docker_volume}
       mountpoint: /dev/vdb
+
+  upgrade_kubernetes:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      inputs:
+      - name: kube_tag_input
+      config:
+        get_file: ../../common/templates/kubernetes/fragments/upgrade-kubernetes.sh
+
+  upgrade_kubernetes_deployment:
+    type: OS::Heat::SoftwareDeployment
+    properties:
+      signal_transport: HEAT_SIGNAL
+      config: {get_resource: upgrade_kubernetes}
+      server: {get_resource: kube-master}
+      actions: ['UPDATE']
+      input_values:
+        kube_tag_input: {get_param: kube_tag}
 
 outputs:
 

@@ -2,11 +2,9 @@
 
 . /etc/sysconfig/heat-params
 
-if [ "$REGISTRY_ENABLED" = "False" ]; then
-    exit 0
-fi
-
-cat > /etc/sysconfig/registry-config.yml << EOF
+if [ "$REGISTRY_ENABLED" = "True" ]; then
+    ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
+    $ssh_cmd cat > /etc/sysconfig/registry-config.yml << EOF
 version: 0.1
 log:
   fields:
@@ -28,7 +26,7 @@ http:
     addr: :5000
 EOF
 
-cat > /etc/systemd/system/registry.service << EOF
+    $ssh_cmd cat > /etc/systemd/system/registry.service << EOF
 [Unit]
 Description=Docker registry v2
 Requires=docker.service
@@ -43,3 +41,5 @@ ExecStop=/usr/bin/docker rm -f registry
 [Install]
 WantedBy=multi-user.target
 EOF
+
+fi

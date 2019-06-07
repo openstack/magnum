@@ -333,12 +333,18 @@ class TestClusterConductorWithK8s(base.TestCase):
             'portal_network_cidr': '10.254.0.0/16',
             'project_id': 'project_id',
             'max_node_count': 2,
+            'master_image': 'image_id',
+            'minion_image': 'image_id',
         }
         if missing_attr is not None:
             expected.pop(mapping[missing_attr], None)
 
         if missing_attr == 'node_count':
             expected['max_node_count'] = None
+
+        if missing_attr == 'image_id':
+            expected['master_image'] = None
+            expected['minion_image'] = None
 
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -465,6 +471,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'portal_network_cidr': '10.254.0.0/16',
             'project_id': 'project_id',
             'max_node_count': 2,
+            'master_image': 'image_id',
+            'minion_image': 'image_id',
         }
 
         self.assertEqual(expected, definition)
@@ -581,6 +589,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'portal_network_cidr': '10.254.0.0/16',
             'project_id': 'project_id',
             'max_node_count': 2,
+            'master_image': None,
+            'minion_image': None,
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -1008,6 +1018,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'portal_network_cidr': '10.254.0.0/16',
             'project_id': 'project_id',
             'max_node_count': 2,
+            'master_image': 'image_id',
+            'minion_image': 'image_id',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

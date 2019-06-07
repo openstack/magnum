@@ -2,8 +2,10 @@
 
 . /etc/sysconfig/heat-params
 
+ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
+
 # make sure we pick up any modified unit files
-systemctl daemon-reload
+$ssh_cmd systemctl daemon-reload
 
 # if the certificate manager api is enabled, wait for the ca key to be handled
 # by the heat container agent (required for the controller-manager)
@@ -16,6 +18,6 @@ done
 echo "starting services"
 for service in etcd docker kube-apiserver kube-controller-manager kube-scheduler kubelet kube-proxy; do
     echo "activating service $service"
-    systemctl enable $service
-    systemctl --no-block start $service
+    $ssh_cmd systemctl enable $service
+    $ssh_cmd systemctl --no-block restart $service
 done

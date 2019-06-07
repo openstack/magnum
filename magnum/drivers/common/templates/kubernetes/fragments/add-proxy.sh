@@ -1,6 +1,10 @@
 #!/bin/sh
 
+set +x
 . /etc/sysconfig/heat-params
+set -x
+
+ssh_cmd="ssh -F /srv/magnum/.ssh/config root@localhost"
 
 DOCKER_HTTP_PROXY_CONF=/etc/systemd/system/docker.service.d/http_proxy.conf
 
@@ -60,6 +64,6 @@ EOF
 fi
 
 if [ "$DOCKER_RESTART" -eq 1 ]; then
-    systemctl daemon-reload
-    systemctl --no-block restart docker.service
+    $ssh_cmd systemctl daemon-reload
+    $ssh_cmd systemctl --no-block restart docker.service
 fi
