@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    The coe_version was out of sync with the k8s version deployed
+    for the cluster. Now it is fixed by making sure the kube_version is
+    consistent with the kube_tag when creating the cluster and upgrading
+    the cluster.
