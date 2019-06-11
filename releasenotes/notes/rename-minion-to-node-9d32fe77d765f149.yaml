@@ -1,0 +1,7 @@
+---
+issues:
+  - |
+    Minion is not a good name for k8s worker node anymore, now it has been
+    replaced in the fedora atomic driver with 'node' to align with the k8s
+    terminologies. So the server name of a worker will be something like
+    `k8s-1-lnveovyzpreg-node-0` instead of `k8s-1-lnveovyzpreg-worker-0`.
