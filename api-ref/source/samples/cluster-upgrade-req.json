@@ -1,0 +1,5 @@
+{
+    "cluster_template": "e74c40e0-d825-11e2-a28f-0800200c9a66",
+    "max_batch_size": 1,
+    "nodegroup":　"production_group"
+}

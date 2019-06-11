@@ -386,6 +386,12 @@ master_lb_enabled:
   in: body
   required: true
   type: boolean
+max_batch_size:
+  description: |
+    The max batch size each time when doing upgrade, default value is 1
+  in: body
+  required: false
+  type: int
 mservices:
   description: |
     A list of Magnum services.
