@@ -1760,7 +1760,7 @@ Diskimage-builder
 To run the `diskimage-builder
 <http://docs.openstack.org/developer/diskimage-builder>`__ tool
 manually, use the provided `elements
-<http://git.openstack.org/cgit/openstack/magnum/tree/magnum/drivers/mesos_ubuntu_v1/image/mesos/>`__.
+<https://opendev.org/openstack/magnum/src/branch/master/magnum/drivers/mesos_ubuntu_v1/image/mesos/>`__.
 Following are the typical steps to use the diskimage-builder tool on
 an Ubuntu server::
 
@@ -1786,7 +1786,7 @@ Dockerfile
 
 To build the image as above but within a Docker container, use the
 provided `Dockerfile
-<http://git.openstack.org/cgit/openstack/magnum/tree/magnum/drivers/mesos_ubuntu_v1/image/Dockerfile>`__.
+<https://opendev.org/openstack/magnum/src/branch/master/magnum/drivers/mesos_ubuntu_v1/image/Dockerfile>`__.
 The output image will be saved as '/tmp/ubuntu-mesos.qcow2'.
 Following are the typical steps to run a Docker container to build the image::
 

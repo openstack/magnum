@@ -18,8 +18,8 @@ For more information, please refer to the following resources:
 
 * **Free software:** under the `Apache license <http://www.apache.org/licenses/LICENSE-2.0>`_
 * **Documentation:** https://docs.openstack.org/magnum/latest/
-* **Source:** http://git.openstack.org/cgit/openstack/magnum
+* **Source:** https://opendev.org/openstack/magnum
 * **Blueprints:** https://blueprints.launchpad.net/magnum
 * **Bugs:** https://storyboard.openstack.org/#!/project/openstack/magnum
-* **REST Client:** http://git.openstack.org/cgit/openstack/python-magnumclient
-* ** Release notes:** https://docs.openstack.org/releasenotes/magnum/index.html
+* **REST Client:** https://opendev.org/openstack/python-magnumclient
+* **Release notes:** https://docs.openstack.org/releasenotes/magnum/index.html

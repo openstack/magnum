@@ -22,10 +22,10 @@ Magnum is an OpenStack project which offers container orchestration engines
 for deploying and managing containers as first class resources in OpenStack.
 
 * **Free software:** under the `Apache license <http://www.apache.org/licenses/LICENSE-2.0>`_
-* **Source:** http://git.openstack.org/cgit/openstack/magnum
+* **Source:** https://opendev.org/openstack/magnum
 * **Blueprints:** https://blueprints.launchpad.net/magnum
-* **Bugs:** http://bugs.launchpad.net/magnum
-* **REST Client:** http://git.openstack.org/cgit/openstack/python-magnumclient
+* **Bugs:** https://bugs.launchpad.net/magnum
+* **REST Client:** https://opendev.org/openstack/python-magnumclient
 
 Architecture
 ============
