@@ -62,7 +62,7 @@
         ...
         memcached_servers = controller:11211
         auth_version = v3
-        auth_uri = http://controller:5000/v3
+        www_authenticate_uri = http://controller:5000/v3
         project_domain_id = default
         project_name = service
         user_domain_id = default
