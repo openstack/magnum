@@ -86,6 +86,7 @@ class Driver(driver.HeatDriver):
         # rebuild then do the k8s upgrade again, when both image id and
         # kube_tag changed
         heat_params["kube_tag"] = cluster_template.labels["kube_tag"]
+        heat_params["kube_version"] = cluster_template.labels["kube_tag"]
         heat_params["master_kube_tag"] = cluster_template.labels["kube_tag"]
         heat_params["minion_kube_tag"] = cluster_template.labels["kube_tag"]
         heat_params["update_max_batch_size"] = max_batch_size

@@ -604,6 +604,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'traefik_ingress_controller_tag': traefik_ingress_controller_tag,
             'master_image': master_image,
             'minion_image': minion_image,
+            'kube_version': kube_tag,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
@@ -1008,6 +1009,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'traefik_ingress_controller_tag': traefik_ingress_controller_tag,
             'master_image': master_image,
             'minion_image': minion_image,
+            'kube_version': kube_tag,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
