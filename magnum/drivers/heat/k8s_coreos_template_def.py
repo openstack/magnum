@@ -129,7 +129,7 @@ class CoreOSK8sTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
         label_list = ['coredns_tag',
                       'kube_tag', 'container_infra_prefix',
                       'availability_zone',
-                      'calico_tag', 'calico_cni_tag',
+                      'calico_tag',
                       'calico_kube_controllers_tag', 'calico_ipv4pool',
                       'etcd_tag', 'flannel_tag']
         for label in label_list:

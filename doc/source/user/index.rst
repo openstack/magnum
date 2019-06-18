@@ -2376,9 +2376,6 @@ _`calico_ipv4pool`
 _`calico_tag`
   Tag of the calico containers used to provision the calico node
 
-_`calico_cni_tag`
-  Tag of the cni used to provision the calico node
-
 _`calico_kube_controllers_tag`
   Tag of the kube_controllers used to provision the calico node
 
