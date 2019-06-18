@@ -343,12 +343,12 @@ parameters:
   master_kube_tag:
     type: string
     description: tag of the k8s containers used to provision the kubernetes cluster
-    default: v1.11.6
+    default: v1.14.3
 
   minion_kube_tag:
     type: string
     description: tag of the k8s containers used to provision the kubernetes cluster
-    default: v1.11.6
+    default: v1.14.3
 
   # FIXME update cloud_provider_tag when a fix for PVC is released
   # https://github.com/kubernetes/cloud-provider-openstack/pull/405
@@ -387,7 +387,7 @@ parameters:
   kube_version:
     type: string
     description: version of kubernetes used for kubernetes cluster
-    default: v1.11.6
+    default: v1.14.3
 
   kube_dashboard_version:
     type: string
