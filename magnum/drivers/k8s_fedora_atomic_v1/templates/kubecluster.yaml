@@ -610,6 +610,17 @@ parameters:
     default:
       false
 
+  auto_healing_controller:
+    type: string
+    description: >
+      The service to be deployed for auto-healing.
+    default: "draino"
+
+  magnum_auto_healer_tag:
+    type: string
+    description: tag of the magnum-auto-healer service.
+    default: "v1.15.0"
+
   auto_scaling_enabled:
     type: boolean
     description: >
@@ -949,6 +960,8 @@ resources:
           node_problem_detector_tag: {get_param: node_problem_detector_tag}
           nginx_ingress_controller_tag: {get_param: nginx_ingress_controller_tag}
           auto_healing_enabled: {get_param: auto_healing_enabled}
+          auto_healing_controller: {get_param: auto_healing_controller}
+          magnum_auto_healer_tag: {get_param: magnum_auto_healer_tag}
           auto_scaling_enabled: {get_param: auto_scaling_enabled}
           draino_tag: {get_param: draino_tag}
           autoscaler_tag: {get_param: autoscaler_tag}
@@ -1090,6 +1103,7 @@ resources:
           heat_container_agent_tag: {get_param: heat_container_agent_tag}
           auto_healing_enabled: {get_param: auto_healing_enabled}
           npd_enabled: {get_param: npd_enabled}
+          auto_healing_controller: {get_param: auto_healing_controller}
 
 outputs:
 

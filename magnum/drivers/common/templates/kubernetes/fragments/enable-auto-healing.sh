@@ -8,7 +8,7 @@ printf "Starting to run ${step}\n"
 _gcr_prefix=${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/}
 
 # Either auto scaling or auto healing we need CA to be deployed
-if [ "$(echo $AUTO_HEALING_ENABLED | tr '[:upper:]' '[:lower:]')" = "true" || "$(echo $NPD_ENABLED | tr '[:upper:]' '[:lower:]')" = "true"]; then
+if [[ "$(echo $AUTO_HEALING_ENABLED | tr '[:upper:]' '[:lower:]')" = "true" || "$(echo $NPD_ENABLED | tr '[:upper:]' '[:lower:]')" = "true" ]]; then
     # Generate Node Problem Detector manifest file
     NPD_DEPLOY=/srv/magnum/kubernetes/manifests/npd.yaml
 
@@ -121,18 +121,15 @@ EOF
 fi
 
 
-_docker_draino_prefix=${CONTAINER_INFRA_PREFIX:-docker.io/planetlabs/}
-step="enable-auto-healing"
-printf "Starting to run ${step}\n"
+function enable_draino {
+    echo "Installing draino"
+    _docker_draino_prefix=${CONTAINER_INFRA_PREFIX:-docker.io/planetlabs/}
+    draino_manifest=/srv/magnum/kubernetes/manifests/draino.yaml
 
-if [ "$(echo $AUTO_HEALING_ENABLED | tr '[:upper:]' '[:lower:]')" = "true" ]; then
-    # Generate Draino manifest file
-    DRAINO_DEPLOY=/srv/magnum/kubernetes/manifests/draino.yaml
-
-    [ -f ${DRAINO_DEPLOY} ] || {
-        echo "Writing File: $DRAINO_DEPLOY"
-        mkdir -p $(dirname ${DRAINO_DEPLOY})
-        cat << EOF > ${DRAINO_DEPLOY}
+    [ -f ${draino_manifest} ] || {
+        echo "Writing File: $draino_manifest"
+        mkdir -p $(dirname ${draino_manifest})
+        cat << EOF > ${draino_manifest}
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -222,7 +219,156 @@ spec:
 EOF
     }
 
-    kubectl apply -f ${DRAINO_DEPLOY}
+    kubectl apply -f ${draino_manifest}
+}
 
+function enable_magnum_auto_healer {
+    echo "Installing magnum_auto_healer"
+    image_prefix=${CONTAINER_INFRA_PREFIX:-docker.io/k8scloudprovider/}
+    image_prefix=${image_prefix%/}
+    magnum_auto_healer_manifest=/srv/magnum/kubernetes/manifests/magnum_auto_healer.yaml
+
+    [ -f ${magnum_auto_healer_manifest} ] || {
+        echo "Writing File: ${magnum_auto_healer_manifest}"
+        mkdir -p $(dirname ${magnum_auto_healer_manifest})
+        cat << EOF > ${magnum_auto_healer_manifest}
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: magnum-auto-healer
+  namespace: kube-system
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: magnum-auto-healer
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: magnum-auto-healer
+    namespace: kube-system
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: magnum-auto-healer-config
+  namespace: kube-system
+data:
+  config.yaml: |
+    cluster-name: ${CLUSTER_UUID}
+    dry-run: false
+    monitor-interval: 30s
+    check-delay-after-add: 20m
+    leader-elect: true
+    healthcheck:
+      master:
+        - type: Endpoint
+          params:
+            unhealthy-duration: 3m
+            protocol: HTTPS
+            port: 6443
+            endpoints: ["/healthz"]
+            ok-codes: [200]
+        - type: NodeCondition
+          params:
+            unhealthy-duration: 3m
+            types: ["Ready"]
+            ok-values: ["True"]
+      worker:
+        - type: NodeCondition
+          params:
+            unhealthy-duration: 3m
+            types: ["Ready"]
+            ok-values: ["True"]
+    openstack:
+      auth-url: ${AUTH_URL}
+      user-id: ${TRUSTEE_USER_ID}
+      password: ${TRUSTEE_PASSWORD}
+      trust-id: ${TRUST_ID}
+      region: ${REGION_NAME}
+      ca-file: /etc/kubernetes/ca-bundle.crt
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: magnum-auto-healer
+  namespace: kube-system
+  labels:
+    k8s-app: magnum-auto-healer
+spec:
+  selector:
+    matchLabels:
+      k8s-app: magnum-auto-healer
+  template:
+    metadata:
+      labels:
+        k8s-app: magnum-auto-healer
+    spec:
+      hostNetwork: true
+      serviceAccountName: magnum-auto-healer
+      tolerations:
+        - effect: NoSchedule
+          operator: Exists
+        - key: CriticalAddonsOnly
+          operator: Exists
+        - effect: NoExecute
+          operator: Exists
+      nodeSelector:
+        node-role.kubernetes.io/master: ""
+      containers:
+        - name: magnum-auto-healer
+          image: ${image_prefix}/magnum-auto-healer:${MAGNUM_AUTO_HEALER_TAG}
+          imagePullPolicy: Always
+          args:
+            - /bin/magnum-auto-healer
+            - --config=/etc/magnum-auto-healer/config.yaml
+            - --v
+            - "2"
+          volumeMounts:
+            - name: config
+              mountPath: /etc/magnum-auto-healer
+            - name: kubernetes-config
+              mountPath: /etc/kubernetes
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: magnum-auto-healer-config
+        - name: kubernetes-config
+          hostPath:
+            path: /etc/kubernetes
+EOF
+    }
+
+    kubectl apply -f ${magnum_auto_healer_manifest}
+}
+
+step="enable-auto-healing"
+printf "Starting to run ${step}\n"
+
+if [ "$(echo $AUTO_HEALING_ENABLED | tr '[:upper:]' '[:lower:]')" = "true" ]; then
+    autohealing_controller=$(echo ${AUTO_HEALING_CONTROLLER} | tr '[:upper:]' '[:lower:]')
+    case "${autohealing_controller}" in
+    "")
+        echo "No autohealing controller configured."
+        ;;
+    "draino")
+        enable_draino
+        ;;
+    "magnum-auto-healer")
+        enable_magnum_auto_healer
+        ;;
+    *)
+        echo "Autohealing controller ${autohealing_controller} not supported."
+        ;;
+    esac
 fi
+
 printf "Finished running ${step}\n"

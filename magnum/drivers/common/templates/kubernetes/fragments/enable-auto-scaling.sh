@@ -7,8 +7,11 @@ printf "Starting to run ${step}\n"
 
 _docker_ca_prefix=${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}
 
-# Either auto scaling or auto healing we need CA to be deployed
-if [ "$(echo $AUTO_HEALING_ENABLED | tr '[:upper:]' '[:lower:]')" = "true" || "$(echo $AUTO_SCALING_ENABLED | tr '[:upper:]' '[:lower:]')" = "true"]; then
+auto_scaling_enabled=$(echo $AUTO_SCALING_ENABLED | tr '[:upper:]' '[:lower:]')
+auto_healing_enabled=$(echo $AUTO_HEALING_ENABLED | tr '[:upper:]' '[:lower:]')
+autohealing_controller=$(echo ${AUTO_HEALING_CONTROLLER} | tr '[:upper:]' '[:lower:]')
+
+if [[ "${auto_scaling_enabled}" = "true" || ("${auto_healing_enabled}" = "true" && "${autohealing_controller}" = "draino") ]]; then
     # Generate Autoscaler manifest file
     AUTOSCALER_DEPLOY=/srv/magnum/kubernetes/manifests/autoscaler.yaml
 

@@ -403,6 +403,10 @@ the table are linked to more details elsewhere in the user guide.
 | `auto_healing_enabled`_               | - true             | false         |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
+| `auto_healing_controller`_            | see below          | "draino"      |
++---------------------------------------+--------------------+---------------+
+| `magnum_auto_healer_tag`_             | see below          | see below     |
++---------------------------------------+--------------------+---------------+
 | `auto_scaling_enabled`_               | - true             | false         |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
@@ -1309,6 +1313,14 @@ _`master_lb_floating_ip_enabled`
 _`auto_healing_enabled`
   If set to true, auto healing feature will be enabled. Defaults to false.
 
+_`auto_healing_controller`
+  This label sets the auto-healing service to be used. Currently ``draino`` and
+  ``magnum-auto-healer`` are supported. The default is ``draino``. For more
+  details, see
+  `draino doc <https://github.com/planetlabs/draino>`_ and
+  `magnum-auto-healer doc
+  <https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/using-magnum-auto-healer.md>`_.
+
 _`auto_scaling_enabled`
   If set to true, auto scaling feature will be enabled. Defaults to true.
 
@@ -1318,6 +1330,10 @@ _`node_problem_detector_tag`
 
 _`draino_tag`
   This label allows users to select a specific Draino version.
+
+_`magnum_auto_healer_tag`
+  This label allows users to select a specific magnum-auto-healer version.
+  The default value for Train: v1.15.0
 
 _`autoscaler_tag`
   This label allows users to select a specific Cluster Autoscaler version.
