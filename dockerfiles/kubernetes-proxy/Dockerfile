@@ -1,4 +1,5 @@
 ARG KUBE_VERSION=v1.13.0
+ARG ADD_KUBE_ALLOW_PRIV=false
 FROM gcr.io/google-containers/kube-proxy-amd64:${KUBE_VERSION}
 ENV container=docker
 
@@ -16,6 +17,8 @@ COPY launch.sh /usr/bin/kube-proxy-docker.sh
 COPY service.template config.json.template /exports/
 
 COPY proxy config /etc/kubernetes/
+RUN [ $ADD_KUBE_ALLOW_PRIV = "true" ] && echo "KUBE_ALLOW_PRIV=\"--allow-privileged=false\"" >> /etc/kubernetes/config || true
+
 RUN mkdir -p /exports/hostfs/etc/kubernetes && \
     cp /etc/kubernetes/config /exports/hostfs/etc/kubernetes/ && \
     cp /etc/kubernetes/proxy /exports/hostfs/etc/kubernetes/
