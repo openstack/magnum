@@ -17,16 +17,13 @@ from pbr.version import SemanticVersion as SV
 
 from magnum.common import clients
 from magnum.common import exception
-from magnum.common import keystone
-from magnum.common import octavia
-from magnum.drivers.common import k8s_monitor
 from magnum.drivers.heat import driver
 from magnum.drivers.k8s_fedora_atomic_v1 import template_def
 
 LOG = logging.getLogger(__name__)
 
 
-class Driver(driver.HeatDriver):
+class Driver(driver.KubernetesDriver):
 
     @property
     def provides(self):
@@ -38,22 +35,6 @@ class Driver(driver.HeatDriver):
 
     def get_template_definition(self):
         return template_def.AtomicK8sTemplateDefinition()
-
-    def get_monitor(self, context, cluster):
-        return k8s_monitor.K8sMonitor(context, cluster)
-
-    def get_scale_manager(self, context, osclient, cluster):
-        # FIXME: Until the kubernetes client is fixed, remove
-        # the scale_manager.
-        # https://bugs.launchpad.net/magnum/+bug/1746510
-        return None
-
-    def pre_delete_cluster(self, context, cluster):
-        """Delete cloud resources before deleting the cluster."""
-        if keystone.is_octavia_enabled():
-            LOG.info("Starting to delete loadbalancers for cluster %s",
-                     cluster.uuid)
-            octavia.delete_loadbalancers(context, cluster)
 
     def upgrade_cluster(self, context, cluster, cluster_template,
                         max_batch_size, nodegroup, scale_manager=None,
