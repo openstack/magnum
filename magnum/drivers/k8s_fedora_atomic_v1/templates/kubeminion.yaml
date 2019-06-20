@@ -281,6 +281,13 @@ parameters:
     description: >
       true if the auto healing feature should be enabled
 
+  npd_enabled:
+    type: boolean
+    description: >
+      true if the npd service should be launched
+    default:
+      true
+
 resources:
 
   agent_config:
@@ -366,6 +373,7 @@ resources:
                   $OCTAVIA_ENABLED: {get_param: octavia_enabled}
                   $HEAT_CONTAINER_AGENT_TAG: {get_param: heat_container_agent_tag}
                   $AUTO_HEALING_ENABLED: {get_param: auto_healing_enabled}
+                  $NPD_ENABLED: {get_param: npd_enabled}
             - get_file: ../../common/templates/kubernetes/fragments/write-kube-os-config.sh
             - get_file: ../../common/templates/kubernetes/fragments/make-cert-client.sh
             - get_file: ../../common/templates/fragments/configure-docker-registry.sh

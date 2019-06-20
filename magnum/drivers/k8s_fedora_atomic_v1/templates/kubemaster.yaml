@@ -483,6 +483,13 @@ parameters:
     description: >
       maximum node count of cluster workers when doing scale up
 
+  npd_enabled:
+    type: boolean
+    description: >
+      true if the npd service should be launched
+    default:
+      true
+
 resources:
   ######################################################################
   #
@@ -626,6 +633,7 @@ resources:
                   "$AUTOSCALER_TAG": {get_param: autoscaler_tag}
                   "$MIN_NODE_COUNT": {get_param: min_node_count}
                   "$MAX_NODE_COUNT": {get_param: max_node_count}
+                  "$NPD_ENABLED": {get_param: npd_enabled}
             - get_file: ../../common/templates/kubernetes/fragments/make-cert.sh
             - get_file: ../../common/templates/kubernetes/fragments/configure-etcd.sh
             - get_file: ../../common/templates/kubernetes/fragments/write-kube-os-config.sh
