@@ -19,6 +19,7 @@ from oslo_versionedobjects import fields
 
 from magnum.db import api as dbapi
 from magnum.objects import base
+from magnum.objects import fields as m_fields
 
 
 @base.MagnumObjectRegistry.register
@@ -45,7 +46,11 @@ class NodeGroup(base.MagnumPersistentObject, base.MagnumObject,
         'role': fields.StringField(),
         'max_node_count': fields.IntegerField(nullable=True),
         'min_node_count': fields.IntegerField(nullable=False, default=1),
-        'is_default': fields.BooleanField(default=False)
+        'is_default': fields.BooleanField(default=False),
+        'stack_id': fields.StringField(nullable=True),
+        'status': m_fields.ClusterStatusField(nullable=True),
+        'status_reason': fields.StringField(nullable=True),
+        'version': fields.StringField(nullable=True),
     }
 
     @staticmethod
@@ -129,7 +134,7 @@ class NodeGroup(base.MagnumPersistentObject, base.MagnumObject,
         return cls.dbapi.get_cluster_nodegroup_count(context, cluster_id)
 
     @base.remotable_classmethod
-    def list(cls, context, cluster, limit=None, marker=None,
+    def list(cls, context, cluster_id, limit=None, marker=None,
              sort_key=None, sort_dir=None, filters=None):
         """Return a list of NodeGroup objects.
 
@@ -145,12 +150,9 @@ class NodeGroup(base.MagnumPersistentObject, base.MagnumObject,
         :returns: a list of :class:`NodeGroup` objects.
 
         """
-        db_nodegroups = cls.dbapi.list_cluster_nodegroups(context, cluster,
-                                                          limit=limit,
-                                                          marker=marker,
-                                                          sort_key=sort_key,
-                                                          sort_dir=sort_dir,
-                                                          filters=filters)
+        db_nodegroups = cls.dbapi.list_cluster_nodegroups(
+            context, cluster_id, limit=limit, marker=marker, sort_key=sort_key,
+            sort_dir=sort_dir, filters=filters)
         return NodeGroup._from_db_object_list(db_nodegroups, cls, context)
 
     @base.remotable

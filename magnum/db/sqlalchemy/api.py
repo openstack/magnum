@@ -795,6 +795,10 @@ class Connection(api.Connection):
 
         query = query.filter_by(**filter_dict)
 
+        if 'status' in filters:
+            query = query.filter(
+                models.NodeGroup.status.in_(filters['status']))
+
         return query
 
     def create_nodegroup(self, values):
@@ -882,8 +886,8 @@ class Connection(api.Connection):
         query = model_query(models.NodeGroup)
         if not context.is_admin:
             query = query.filter_by(project_id=context.project_id)
-        query = self._add_nodegoup_filters(query, filters)
         query = query.filter_by(cluster_id=cluster_id)
+        query = self._add_nodegoup_filters(query, filters)
         return _paginate_query(models.NodeGroup, limit, marker,
                                sort_key, sort_dir, query)
 
