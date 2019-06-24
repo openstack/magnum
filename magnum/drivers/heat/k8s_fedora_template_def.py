@@ -100,8 +100,10 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                       'draino_tag', 'autoscaler_tag',
                       'min_node_count', 'max_node_count', 'npd_enabled']
 
+        labels = self._get_relevant_labels(cluster, kwargs)
+
         for label in label_list:
-            label_value = cluster.labels.get(label)
+            label_value = labels.get(label)
             if label_value:
                 extra_params[label] = label_value
 

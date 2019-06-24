@@ -1,11 +1,52 @@
-heat_template_version: 2015-04-30
+heat_template_version: queens
 
 description: >
   This template will boot a Kubernetes cluster with one or more
   minions (as specified by the number_of_minions parameter, which
   defaults to 1).
 
+conditions:
+  master_only:
+    or:
+    - equals:
+      - get_param: role
+      - "master"
+    - equals:
+      - get_param: is_cluster_stack
+      - true
+
+  worker_only:
+    or:
+    - equals:
+      - get_param: role
+      - "worker"
+    - equals:
+      - get_param: is_cluster_stack
+      - true
+
+  create_cluster_resources:
+    equals:
+    - get_param: is_cluster_stack
+    - true
+
 parameters:
+
+  # needs to become a list if we want to join master nodes?
+  existing_master_private_ip:
+    type: string
+    default: ""
+
+  is_cluster_stack:
+    type: boolean
+    default: false
+
+  role:
+    type: string
+    default: ""
+
+  existing_security_group:
+    type: string
+    default: ""
 
   ssh_key_name:
     type: string
@@ -34,10 +75,16 @@ parameters:
   master_image:
     type: string
     description: glance image used to boot the server
+    # When creating a new minion nodegroup this will not
+    # be provided by magnum. So make it default to ""
+    default: ""
 
   minion_image:
     type: string
     description: glance image used to boot the server
+    # When creating a new master nodegroup this will not
+    # be provided by magnum. So make it default to ""
+    default: ""
 
   master_flavor:
     type: string
@@ -693,6 +740,7 @@ resources:
   #
 
   network:
+    condition: create_cluster_resources
     type: ../../common/templates/network.yaml
     properties:
       existing_network: {get_param: fixed_network}
@@ -703,6 +751,7 @@ resources:
       private_network_name: {get_param: fixed_network_name}
 
   api_lb:
+    condition: create_cluster_resources
     type: ../../common/templates/lb_api.yaml
     properties:
       fixed_subnet: {get_attr: [network, fixed_subnet]}
@@ -711,6 +760,7 @@ resources:
       port: {get_param: kubernetes_port}
 
   etcd_lb:
+    condition: create_cluster_resources
     type: ../../common/templates/lb_etcd.yaml
     properties:
       fixed_subnet: {get_attr: [network, fixed_subnet]}
@@ -724,6 +774,7 @@ resources:
   #
 
   secgroup_kube_master:
+    condition: create_cluster_resources
     type: OS::Neutron::SecurityGroup
     properties:
       rules:
@@ -760,6 +811,7 @@ resources:
           port_range_max: 8472
 
   secgroup_kube_minion:
+    condition: create_cluster_resources
     type: OS::Neutron::SecurityGroup
     properties:
       rules:
@@ -789,6 +841,7 @@ resources:
 
   # allow any traffic between worker nodes
   secgroup_rule_tcp_kube_minion:
+    condition: create_cluster_resources
     type: OS::Neutron::SecurityGroupRule
     properties:
       protocol: tcp
@@ -797,6 +850,7 @@ resources:
       security_group: {get_resource: secgroup_kube_minion}
       remote_group: {get_resource: secgroup_kube_minion}
   secgroup_rule_udp_kube_minion:
+    condition: create_cluster_resources
     type: OS::Neutron::SecurityGroupRule
     properties:
       protocol: udp
@@ -812,6 +866,7 @@ resources:
   #
 
   api_address_lb_switch:
+    condition: create_cluster_resources
     type: Magnum::ApiGatewaySwitcher
     properties:
       pool_public_ip: {get_attr: [api_lb, floating_address]}
@@ -820,6 +875,7 @@ resources:
       master_private_ip: {get_attr: [kube_masters, resource.0.kube_master_ip]}
 
   etcd_address_lb_switch:
+    condition: create_cluster_resources
     type: Magnum::ApiGatewaySwitcher
     properties:
       pool_private_ip: {get_attr: [etcd_lb, address]}
@@ -832,6 +888,7 @@ resources:
   #
 
   api_address_floating_switch:
+    condition: create_cluster_resources
     type: Magnum::FloatingIPAddressSwitcher
     properties:
       public_ip: {get_attr: [api_address_lb_switch, public_ip]}
@@ -844,11 +901,13 @@ resources:
   #
 
   master_nodes_server_group:
+    condition: master_only
     type: OS::Nova::ServerGroup
     properties:
       policies: [{get_param: nodes_affinity_policy}]
 
   worker_nodes_server_group:
+    condition: worker_only
     type: OS::Nova::ServerGroup
     properties:
       policies: [{get_param: nodes_affinity_policy}]
@@ -860,6 +919,7 @@ resources:
   #
 
   kube_masters:
+    condition: master_only
     type: OS::Heat::ResourceGroup
     depends_on:
       - network
@@ -983,6 +1043,7 @@ resources:
           npd_enabled: {get_param: npd_enabled}
 
   kube_cluster_config:
+    condition: create_cluster_resources
     type: OS::Heat::SoftwareConfig
     properties:
       group: script
@@ -1025,6 +1086,7 @@ resources:
             - get_file: ../../common/templates/kubernetes/fragments/install-helm-modules.sh
 
   kube_cluster_deploy:
+    condition: create_cluster_resources
     type: OS::Heat::SoftwareDeployment
     properties:
       actions: ['CREATE']
@@ -1042,6 +1104,7 @@ resources:
   #
 
   kube_minions:
+    condition: worker_only
     type: OS::Heat::ResourceGroup
     depends_on:
       - network
@@ -1061,12 +1124,28 @@ resources:
           ssh_key_name: {get_param: ssh_key_name}
           server_image: {get_param: minion_image}
           minion_flavor: {get_param: minion_flavor}
-          fixed_network: {get_attr: [network, fixed_network]}
-          fixed_subnet: {get_attr: [network, fixed_subnet]}
+          fixed_network:
+            if:
+              - create_cluster_resources
+              - get_attr: [network, fixed_network]
+              - get_param: fixed_network
+          fixed_subnet:
+            if:
+              - create_cluster_resources
+              - get_attr: [network, fixed_subnet]
+              - get_param: fixed_subnet
           network_driver: {get_param: network_driver}
           flannel_network_cidr: {get_param: flannel_network_cidr}
-          kube_master_ip: {get_attr: [api_address_lb_switch, private_ip]}
-          etcd_server_ip: {get_attr: [etcd_address_lb_switch, private_ip]}
+          kube_master_ip:
+            if:
+              - create_cluster_resources
+              - get_attr: [api_address_lb_switch, private_ip]
+              - get_param: existing_master_private_ip
+          etcd_server_ip:
+            if:
+              - create_cluster_resources
+              - get_attr: [etcd_address_lb_switch, private_ip]
+              - get_param: existing_master_private_ip
           external_network: {get_param: external_network}
           kube_allow_priv: {get_param: kube_allow_priv}
           boot_volume_size: {get_param: boot_volume_size}
@@ -1092,7 +1171,11 @@ resources:
           kubernetes_port: {get_param: kubernetes_port}
           tls_disabled: {get_param: tls_disabled}
           verify_ca: {get_param: verify_ca}
-          secgroup_kube_minion_id: {get_resource: secgroup_kube_minion}
+          secgroup_kube_minion_id:
+            if:
+              - create_cluster_resources
+              - get_resource: secgroup_kube_minion
+              - get_param: existing_security_group
           http_proxy: {get_param: http_proxy}
           https_proxy: {get_param: https_proxy}
           no_proxy: {get_param: no_proxy}
@@ -1123,6 +1206,7 @@ resources:
 outputs:
 
   api_address:
+    condition: create_cluster_resources
     value:
       str_replace:
         template: api_ip_address
@@ -1133,6 +1217,7 @@ outputs:
       the Kubernetes API.
 
   registry_address:
+    condition: create_cluster_resources
     value:
       str_replace:
         template: localhost:port
@@ -1143,22 +1228,26 @@ outputs:
       images.
 
   kube_masters_private:
+    condition: master_only
     value: {get_attr: [kube_masters, kube_master_ip]}
     description: >
       This is a list of the "private" IP addresses of all the Kubernetes masters.
 
   kube_masters:
+    condition: master_only
     value: {get_attr: [kube_masters, kube_master_external_ip]}
     description: >
       This is a list of the "public" IP addresses of all the Kubernetes masters.
       Use these IP addresses to log in to the Kubernetes masters via ssh.
 
   kube_minions_private:
+    condition: worker_only
     value: {get_attr: [kube_minions, kube_minion_ip]}
     description: >
       This is a list of the "private" IP addresses of all the Kubernetes minions.
 
   kube_minions:
+    condition: worker_only
     value: {get_attr: [kube_minions, kube_minion_external_ip]}
     description: >
       This is a list of the "public" IP addresses of all the Kubernetes minions.

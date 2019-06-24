@@ -11,6 +11,7 @@
 # under the License.
 
 import abc
+import collections
 import os
 import six
 
@@ -41,6 +42,10 @@ from magnum.objects import fields
 LOG = logging.getLogger(__name__)
 
 
+NodeGroupStatus = collections.namedtuple('NodeGroupStatus',
+                                         'name status reason is_default')
+
+
 @six.add_metaclass(abc.ABCMeta)
 class HeatDriver(driver.Driver):
     """Base Driver class for using Heat
@@ -61,12 +66,14 @@ class HeatDriver(driver.Driver):
                                              scale_manager=scale_manager)
 
     def _extract_template_definition(self, context, cluster,
-                                     scale_manager=None):
+                                     scale_manager=None,
+                                     nodegroups=None):
         cluster_template = conductor_utils.retrieve_cluster_template(context,
                                                                      cluster)
         definition = self.get_template_definition()
         return definition.extract_definition(context, cluster_template,
                                              cluster,
+                                             nodegroups=nodegroups,
                                              scale_manager=scale_manager)
 
     def _get_env_files(self, template_path, env_rel_paths):
@@ -96,14 +103,20 @@ class HeatDriver(driver.Driver):
     def delete_federation(self, context, federation):
         return NotImplementedError("Must implement 'delete_federation'")
 
-    def create_nodegroup(self, context, cluster, nodegroup):
-        raise NotImplementedError("Must implement 'create_nodegroup'.")
-
     def update_nodegroup(self, context, cluster, nodegroup):
-        raise NotImplementedError("Must implement 'update_nodegroup'.")
+        # we just need to save the nodegroup here. This is because,
+        # at the moment, this method is used to update min and max node
+        # counts.
+        nodegroup.save()
 
     def delete_nodegroup(self, context, cluster, nodegroup):
-        raise NotImplementedError("Must implement 'delete_nodegroup'.")
+        # Default nodegroups share stack_id so it will be deleted
+        # as soon as the cluster gets destroyed
+        if not nodegroup.stack_id:
+            nodegroup.destroy()
+        else:
+            osc = clients.OpenStackClients(context)
+            self._delete_stack(context, osc, nodegroup.stack_id)
 
     def update_cluster_status(self, context, cluster):
         if cluster.stack_id is None:
@@ -128,6 +141,16 @@ class HeatDriver(driver.Driver):
                        rollback=False):
         self._update_stack(context, cluster, scale_manager, rollback)
 
+    def create_nodegroup(self, context, cluster, nodegroup):
+        stack = self._create_stack(context, clients.OpenStackClients(context),
+                                   cluster, cluster.create_timeout,
+                                   nodegroup=nodegroup)
+        nodegroup.stack_id = stack['stack']['id']
+
+    def get_nodegroup_extra_params(self, cluster, osc):
+        raise NotImplementedError("Must implement "
+                                  "'get_nodegroup_extra_params'")
+
     @abc.abstractmethod
     def upgrade_cluster(self, context, cluster, cluster_template,
                         max_batch_size, nodegroup, scale_manager=None,
@@ -138,7 +161,14 @@ class HeatDriver(driver.Driver):
         self.pre_delete_cluster(context, cluster)
 
         LOG.info("Starting to delete cluster %s", cluster.uuid)
-        self._delete_stack(context, clients.OpenStackClients(context), cluster)
+        osc = clients.OpenStackClients(context)
+        for ng in cluster.nodegroups:
+            ng.status = fields.ClusterStatus.DELETE_IN_PROGRESS
+            ng.save()
+            if ng.is_default:
+                continue
+            self._delete_stack(context, osc, ng.stack_id)
+        self._delete_stack(context, osc, cluster.default_ng_master.stack_id)
 
     def resize_cluster(self, context, cluster, resize_manager,
                        node_count, nodes_to_remove, nodegroup=None,
@@ -147,9 +177,13 @@ class HeatDriver(driver.Driver):
                            node_count, nodes_to_remove, nodegroup=nodegroup,
                            rollback=rollback)
 
-    def _create_stack(self, context, osc, cluster, cluster_create_timeout):
+    def _create_stack(self, context, osc, cluster, cluster_create_timeout,
+                      nodegroup=None):
+
+        nodegroups = [nodegroup] if nodegroup else None
         template_path, heat_params, env_files = (
-            self._extract_template_definition(context, cluster))
+            self._extract_template_definition(context, cluster,
+                                              nodegroups=nodegroups))
 
         tpl_files, template = template_utils.get_template_contents(
             template_path)
@@ -163,7 +197,10 @@ class HeatDriver(driver.Driver):
 
         # valid hostnames are 63 chars long, leaving enough room
         # to add the random id (for uniqueness)
-        stack_name = cluster.name[:30]
+        if nodegroup is None:
+            stack_name = cluster.name[:30]
+        else:
+            stack_name = "%s-%s" % (cluster.name[:20], nodegroup.name[:9])
         stack_name = stack_name.replace('_', '-')
         stack_name = stack_name.replace('.', '-')
         stack_name = ''.join(filter(valid_chars.__contains__, stack_name))
@@ -177,6 +214,14 @@ class HeatDriver(driver.Driver):
             # no cluster_create_timeout value was passed in to the request
             # so falling back on configuration file value
             heat_timeout = cfg.CONF.cluster_heat.create_timeout
+
+        heat_params['is_cluster_stack'] = nodegroup is None
+
+        if nodegroup:
+            # In case we are creating a new stack for a new nodegroup then
+            # we need to extract more params.
+            heat_params.update(self.get_nodegroup_extra_params(cluster, osc))
+
         fields = {
             'stack_name': stack_name,
             'parameters': heat_params,
@@ -225,10 +270,10 @@ class HeatDriver(driver.Driver):
 
         # Find what changed checking the stack params
         # against the ones in the template_def.
-        stack = osc.heat().stacks.get(cluster.stack_id,
+        stack = osc.heat().stacks.get(nodegroup.stack_id,
                                       resolve_outputs=True)
         stack_params = stack.parameters
-        definition.add_nodegroup_params(cluster)
+        definition.add_nodegroup_params(cluster, nodegroups=[nodegroup])
         heat_params = definition.get_stack_diff(context, stack_params, cluster)
         LOG.debug('Updating stack with these params: %s', heat_params)
 
@@ -244,10 +289,10 @@ class HeatDriver(driver.Driver):
         }
 
         osc = clients.OpenStackClients(context)
-        osc.heat().stacks.update(cluster.stack_id, **fields)
+        osc.heat().stacks.update(nodegroup.stack_id, **fields)
 
-    def _delete_stack(self, context, osc, cluster):
-        osc.heat().stacks.delete(cluster.stack_id)
+    def _delete_stack(self, context, osc, stack_id):
+        osc.heat().stacks.delete(stack_id)
 
 
 class KubernetesDriver(HeatDriver):
@@ -288,39 +333,123 @@ class HeatPoller(object):
     def poll_and_check(self):
         # TODO(yuanying): temporary implementation to update api_address,
         # node_addresses and cluster status
+        ng_statuses = list()
+        self.default_ngs = list()
+        for nodegroup in self.cluster.nodegroups:
+            self.nodegroup = nodegroup
+            if self.nodegroup.is_default:
+                self.default_ngs.append(self.nodegroup)
+            status = self.extract_nodegroup_status()
+            # In case a non-default nodegroup is deleted, None
+            # is returned. We shouldn't add None in the list
+            if status is not None:
+                ng_statuses.append(status)
+        self.aggregate_nodegroup_statuses(ng_statuses)
+
+    def extract_nodegroup_status(self):
+
+        if self.nodegroup.stack_id is None:
+            # There is a slight window for a race condition here. If
+            # a nodegroup is created and just before the stack_id is
+            # assigned to it, this periodic task is executed, the
+            # periodic task would try to find the status of the
+            # stack with id = None. At that time the nodegroup status
+            # is already set to CREATE_IN_PROGRESS by the conductor.
+            # Keep this status for this loop until the stack_id is assigned.
+            return NodeGroupStatus(name=self.nodegroup.name,
+                                   status=self.nodegroup.status,
+                                   is_default=self.nodegroup.is_default,
+                                   reason=self.nodegroup.status_reason)
+
         try:
             # Do not resolve outputs by default. Resolving all
             # node IPs is expensive on heat.
             stack = self.openstack_client.heat().stacks.get(
-                self.cluster.stack_id, resolve_outputs=False)
+                self.nodegroup.stack_id, resolve_outputs=False)
+
+            # poll_and_check is detached and polling long time to check
+            # status, so another user/client can call delete cluster/stack.
+            if stack.stack_status == fields.ClusterStatus.DELETE_COMPLETE:
+                if self.nodegroup.is_default:
+                    self._check_delete_complete()
+                else:
+                    self.nodegroup.destroy()
+                    return
+
+            if stack.stack_status in (fields.ClusterStatus.CREATE_COMPLETE,
+                                      fields.ClusterStatus.UPDATE_COMPLETE):
+                # Resolve all outputs if the stack is COMPLETE
+                stack = self.openstack_client.heat().stacks.get(
+                    self.nodegroup.stack_id, resolve_outputs=True)
+
+                self._sync_cluster_and_template_status(stack)
+            elif stack.stack_status != self.nodegroup.status:
+                self.template_def.nodegroup_output_mappings = list()
+                self.template_def.update_outputs(
+                    stack, self.cluster_template, self.cluster,
+                    nodegroups=[self.nodegroup])
+                self._sync_cluster_status(stack)
+
+            if stack.stack_status in (fields.ClusterStatus.CREATE_FAILED,
+                                      fields.ClusterStatus.DELETE_FAILED,
+                                      fields.ClusterStatus.UPDATE_FAILED,
+                                      fields.ClusterStatus.ROLLBACK_COMPLETE,
+                                      fields.ClusterStatus.ROLLBACK_FAILED):
+                self._sync_cluster_and_template_status(stack)
+                self._nodegroup_failed(stack)
         except heatexc.NotFound:
             self._sync_missing_heat_stack()
+        return NodeGroupStatus(name=self.nodegroup.name,
+                               status=self.nodegroup.status,
+                               is_default=self.nodegroup.is_default,
+                               reason=self.nodegroup.status_reason)
+
+    def aggregate_nodegroup_statuses(self, ng_statuses):
+        # NOTE(ttsiouts): Aggregate the nodegroup statuses and set the
+        # cluster overall status.
+        FAILED = '_FAILED'
+        IN_PROGRESS = '_IN_PROGRESS'
+        COMPLETE = '_COMPLETE'
+        UPDATE = 'UPDATE'
+
+        previous_state = self.cluster.status
+        self.cluster.status_reason = None
+
+        # Both default nodegroups will have the same status so it's
+        # enough to check one of them.
+        self.cluster.status = self.cluster.default_ng_master.status
+        default_ng = self.cluster.default_ng_master
+        if (default_ng.status.endswith(IN_PROGRESS) or
+                default_ng.status == fields.ClusterStatus.DELETE_COMPLETE):
+            self.cluster.save()
             return
 
-        # poll_and_check is detached and polling long time to check status,
-        # so another user/client can call delete cluster/stack.
-        if stack.stack_status == fields.ClusterStatus.DELETE_COMPLETE:
-            self._delete_complete()
+        # Keep priority to the states below
+        for state in (IN_PROGRESS, FAILED, COMPLETE):
+            if any(ns.status.endswith(state) for ns in ng_statuses
+                   if not ns.is_default):
+                status = getattr(fields.ClusterStatus, UPDATE+state)
+                self.cluster.status = status
+                if state == FAILED:
+                    reasons = ["%s failed" % (ns.name)
+                               for ns in ng_statuses
+                               if ns.status.endswith(FAILED)]
+                    self.cluster.status_reason = ' ,'.join(reasons)
+                break
 
-        if stack.stack_status in (fields.ClusterStatus.CREATE_COMPLETE,
-                                  fields.ClusterStatus.UPDATE_COMPLETE):
-            # Resolve all outputs if the stack is COMPLETE
-            stack = self.openstack_client.heat().stacks.get(
-                self.cluster.stack_id, resolve_outputs=True)
+        if self.cluster.status == fields.ClusterStatus.CREATE_COMPLETE:
+            # Consider the scenario where the user:
+            # - creates the cluster (cluster: create_complete)
+            # - adds a nodegroup (cluster: update_complete)
+            # - deletes the nodegroup
+            # The cluster should go to CREATE_COMPLETE only if the previous
+            # state was CREATE_COMPLETE or CREATE_IN_PROGRESS. In all other
+            # cases, just go to UPDATE_COMPLETE.
+            if previous_state not in (fields.ClusterStatus.CREATE_COMPLETE,
+                                      fields.ClusterStatus.CREATE_IN_PROGRESS):
+                self.cluster.status = fields.ClusterStatus.UPDATE_COMPLETE
 
-            self._sync_cluster_and_template_status(stack)
-        elif stack.stack_status != self.cluster.status:
-            self.template_def.update_outputs(stack, self.cluster_template,
-                                             self.cluster)
-            self._sync_cluster_status(stack)
-
-        if stack.stack_status in (fields.ClusterStatus.CREATE_FAILED,
-                                  fields.ClusterStatus.DELETE_FAILED,
-                                  fields.ClusterStatus.UPDATE_FAILED,
-                                  fields.ClusterStatus.ROLLBACK_COMPLETE,
-                                  fields.ClusterStatus.ROLLBACK_FAILED):
-            self._sync_cluster_and_template_status(stack)
-            self._cluster_failed(stack)
+        self.cluster.save()
 
     def _delete_complete(self):
         LOG.info('Cluster has been deleted, stack_id: %s',
@@ -339,9 +468,9 @@ class HeatPoller(object):
                      self.cluster.uuid)
 
     def _sync_cluster_status(self, stack):
-        self.cluster.status = stack.stack_status
-        self.cluster.status_reason = stack.stack_status_reason
-        self.cluster.save()
+        self.nodegroup.status = stack.stack_status
+        self.nodegroup.status_reason = stack.stack_status_reason
+        self.nodegroup.save()
 
     def get_version_info(self, stack):
         stack_param = self.template_def.get_heat_param(
@@ -358,34 +487,44 @@ class HeatPoller(object):
         self.cluster.container_version = container_version
 
     def _sync_cluster_and_template_status(self, stack):
+        self.template_def.nodegroup_output_mappings = list()
         self.template_def.update_outputs(stack, self.cluster_template,
-                                         self.cluster)
+                                         self.cluster,
+                                         nodegroups=[self.nodegroup])
         self.get_version_info(stack)
         self._sync_cluster_status(stack)
 
-    def _cluster_failed(self, stack):
-        LOG.error('Cluster error, stack status: %(cluster_status)s, '
+    def _nodegroup_failed(self, stack):
+        LOG.error('Nodegroup error, stack status: %(ng_status)s, '
                   'stack_id: %(stack_id)s, '
                   'reason: %(reason)s',
-                  {'cluster_status': stack.stack_status,
-                   'stack_id': self.cluster.stack_id,
-                   'reason': self.cluster.status_reason})
+                  {'ng_status': stack.stack_status,
+                   'stack_id': self.nodegroup.stack_id,
+                   'reason': self.nodegroup.status_reason})
 
     def _sync_missing_heat_stack(self):
-        if self.cluster.status == fields.ClusterStatus.DELETE_IN_PROGRESS:
-            self._delete_complete()
-        elif self.cluster.status == fields.ClusterStatus.CREATE_IN_PROGRESS:
+        if self.nodegroup.status == fields.ClusterStatus.DELETE_IN_PROGRESS:
+            self._sync_missing_stack(fields.ClusterStatus.DELETE_COMPLETE)
+            if self.nodegroup.is_default:
+                self._check_delete_complete()
+        elif self.nodegroup.status == fields.ClusterStatus.CREATE_IN_PROGRESS:
             self._sync_missing_stack(fields.ClusterStatus.CREATE_FAILED)
-        elif self.cluster.status == fields.ClusterStatus.UPDATE_IN_PROGRESS:
+        elif self.nodegroup.status == fields.ClusterStatus.UPDATE_IN_PROGRESS:
             self._sync_missing_stack(fields.ClusterStatus.UPDATE_FAILED)
 
+    def _check_delete_complete(self):
+        default_ng_statuses = [ng.status for ng in self.default_ngs]
+        if all(status == fields.ClusterStatus.DELETE_COMPLETE
+               for status in default_ng_statuses):
+            self._delete_complete()
+
     def _sync_missing_stack(self, new_status):
-        self.cluster.status = new_status
-        self.cluster.status_reason = _("Stack with id %s not found in "
-                                       "Heat.") % self.cluster.stack_id
-        self.cluster.save()
-        LOG.info("Cluster with id %(id)s has been set to "
+        self.nodegroup.status = new_status
+        self.nodegroup.status_reason = _("Stack with id %s not found in "
+                                         "Heat.") % self.cluster.stack_id
+        self.nodegroup.save()
+        LOG.info("Nodegroup with id %(id)s has been set to "
                  "%(status)s due to stack with id %(sid)s "
                  "not found in Heat.",
-                 {'id': self.cluster.id, 'status': self.cluster.status,
-                  'sid': self.cluster.stack_id})
+                 {'id': self.nodegroup.uuid, 'status': self.nodegroup.status,
+                  'sid': self.nodegroup.stack_id})
