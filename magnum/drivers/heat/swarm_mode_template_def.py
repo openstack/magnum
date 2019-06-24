@@ -141,43 +141,44 @@ class SwarmModeTemplateDefinition(template_def.BaseTemplateDefinition):
                                       extra_params=extra_params,
                                       **kwargs)
 
-    def add_nodegroup_params(self, cluster):
-        super(SwarmModeTemplateDefinition,
-              self).add_nodegroup_params(cluster)
-        worker_ng = cluster.default_ng_worker
-        master_ng = cluster.default_ng_master
-        self.add_parameter('number_of_nodes',
-                           nodegroup_attr='node_count',
-                           nodegroup_uuid=worker_ng.uuid,
-                           param_class=template_def.NodeGroupParameterMapping)
-        self.add_parameter('node_flavor',
-                           nodegroup_attr='flavor_id',
-                           nodegroup_uuid=worker_ng.uuid,
-                           param_class=template_def.NodeGroupParameterMapping)
-        self.add_parameter('master_flavor',
-                           nodegroup_attr='flavor_id',
-                           nodegroup_uuid=master_ng.uuid,
-                           param_class=template_def.NodeGroupParameterMapping)
+    def get_nodegroup_param_maps(self, master_params=None, worker_params=None):
+        master_params = master_params or dict()
+        worker_params = worker_params or dict()
+        master_params.update({
+            'master_flavor': 'flavor_id',
+            'master_image': 'image_id'
+        })
+        worker_params.update({
+            'number_of_nodes': 'node_count',
+            'node_flavor': 'flavor_id',
+            'node_image': 'image_id'
+        })
+        return super(
+            SwarmModeTemplateDefinition, self).get_nodegroup_param_maps(
+                master_params=master_params, worker_params=worker_params)
 
-    def update_outputs(self, stack, cluster_template, cluster):
-        worker_ng = cluster.default_ng_worker
-        master_ng = cluster.default_ng_master
-
-        self.add_output('swarm_masters',
-                        nodegroup_attr='node_addresses',
-                        nodegroup_uuid=master_ng.uuid,
-                        mapping_type=MasterAddressOutputMapping)
-        self.add_output('swarm_nodes',
-                        nodegroup_attr='node_addresses',
-                        nodegroup_uuid=worker_ng.uuid,
-                        mapping_type=NodeAddressOutputMapping)
-        self.add_output('number_of_nodes',
-                        nodegroup_attr='node_count',
-                        nodegroup_uuid=worker_ng.uuid,
-                        is_stack_param=True,
-                        mapping_type=template_def.NodeGroupOutputMapping)
+    def update_outputs(self, stack, cluster_template, cluster,
+                       nodegroups=None):
+        nodegroups = nodegroups or [cluster.default_ng_worker,
+                                    cluster.default_ng_master]
+        for nodegroup in nodegroups:
+            if nodegroup.role == 'master':
+                self.add_output('swarm_masters',
+                                nodegroup_attr='node_addresses',
+                                nodegroup_uuid=nodegroup.uuid,
+                                mapping_type=MasterAddressOutputMapping)
+            else:
+                self.add_output('swarm_nodes',
+                                nodegroup_attr='node_addresses',
+                                nodegroup_uuid=nodegroup.uuid,
+                                mapping_type=NodeAddressOutputMapping)
+                self.add_output(
+                    'number_of_nodes', nodegroup_attr='node_count',
+                    nodegroup_uuid=nodegroup.uuid, is_stack_param=True,
+                    mapping_type=template_def.NodeGroupOutputMapping)
         super(SwarmModeTemplateDefinition,
-              self).update_outputs(stack, cluster_template, cluster)
+              self).update_outputs(stack, cluster_template, cluster,
+                                   nodegroups=nodegroups)
 
     def get_env_files(self, cluster_template, cluster):
         env_files = []

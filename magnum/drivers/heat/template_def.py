@@ -92,7 +92,7 @@ class NodeGroupParameterMapping(ParameterMapping):
     def get_value(self, cluster_template, cluster):
         value = None
         for ng in cluster.nodegroups:
-            if ng.uuid == self.nodegroup_uuid:
+            if ng.uuid == self.nodegroup_uuid and self.nodegroup_attr in ng:
                 value = getattr(ng, self.nodegroup_attr)
                 break
         return value
@@ -187,6 +187,7 @@ class TemplateDefinition(object):
     def __init__(self):
         self.param_mappings = list()
         self.output_mappings = list()
+        self.nodegroup_output_mappings = list()
 
     def add_parameter(self, *args, **kwargs):
         param_class = kwargs.pop('param_class', ParameterMapping)
@@ -196,7 +197,10 @@ class TemplateDefinition(object):
     def add_output(self, *args, **kwargs):
         mapping_type = kwargs.pop('mapping_type', OutputMapping)
         output = mapping_type(*args, **kwargs)
-        self.output_mappings.append(output)
+        if kwargs.get('cluster_attr', None):
+            self.output_mappings.append(output)
+        else:
+            self.nodegroup_output_mappings.append(output)
 
     def get_output(self, *args, **kwargs):
         for output in self.output_mappings:
@@ -295,11 +299,14 @@ class TemplateDefinition(object):
     def resolve_ambiguous_values(self, context, heat_param, heat_value, value):
         return str(value)
 
-    def add_nodegroup_params(self, cluster):
+    def add_nodegroup_params(self, cluster, nodegroups=None):
         pass
 
-    def update_outputs(self, stack, cluster_template, cluster):
+    def update_outputs(self, stack, cluster_template, cluster,
+                       nodegroups=None):
         for output in self.output_mappings:
+            output.set_output(stack, cluster_template, cluster)
+        for output in self.nodegroup_output_mappings:
             output.set_output(stack, cluster_template, cluster)
 
     @abc.abstractproperty
@@ -323,8 +330,6 @@ class BaseTemplateDefinition(TemplateDefinition):
 
         self.add_parameter('ssh_key_name',
                            cluster_attr='keypair')
-        self.add_parameter('server_image',
-                           cluster_template_attr='image_id')
         self.add_parameter('dns_nameserver',
                            cluster_template_attr='dns_nameserver')
         self.add_parameter('http_proxy',
@@ -350,8 +355,9 @@ class BaseTemplateDefinition(TemplateDefinition):
     def get_params(self, context, cluster_template, cluster, **kwargs):
         osc = self.get_osc(context)
 
+        nodegroups = kwargs.pop('nodegroups', None)
         # Add all the params from the cluster's nodegroups
-        self.add_nodegroup_params(cluster)
+        self.add_nodegroup_params(cluster, nodegroups=nodegroups)
 
         extra_params = kwargs.pop('extra_params', {})
         extra_params['trustee_domain_id'] = osc.keystone().trustee_domain_id
@@ -394,25 +400,46 @@ class BaseTemplateDefinition(TemplateDefinition):
         return super(BaseTemplateDefinition, self).resolve_ambiguous_values(
             context, heat_param, heat_value, value)
 
-    def add_nodegroup_params(self, cluster):
-        # Assuming that all the drivers that will not override
-        # this method do not support more than two nodegroups.
-        # Meaning that we have one master and one worker.
-        master_ng = cluster.default_ng_master
-        self.add_parameter('number_of_masters',
-                           nodegroup_attr='node_count',
-                           nodegroup_uuid=master_ng.uuid,
-                           param_class=NodeGroupParameterMapping)
+    def add_nodegroup_params(self, cluster, nodegroups=None):
+        master_params, worker_params = self.get_nodegroup_param_maps()
+        nodegroups = nodegroups or [cluster.default_ng_worker,
+                                    cluster.default_ng_master]
+        for nodegroup in nodegroups:
+            params = worker_params
+            if nodegroup.role == 'master':
+                params = master_params
+            self._handle_nodegroup_param_map(nodegroup, params)
 
-    def update_outputs(self, stack, cluster_template, cluster):
+    def get_nodegroup_param_maps(self, master_params=None, worker_params=None):
+        master_params = master_params or dict()
+        worker_params = worker_params or dict()
+        master_params.update({
+            'number_of_masters': 'node_count',
+            'role': 'role'
+        })
+        worker_params.update({'role': 'role'})
+        return master_params, worker_params
+
+    def _handle_nodegroup_param_map(self, nodegroup, param_map):
+        for template_attr, nodegroup_attr in param_map.items():
+            self.add_parameter(template_attr, nodegroup_attr=nodegroup_attr,
+                               nodegroup_uuid=nodegroup.uuid,
+                               param_class=NodeGroupParameterMapping)
+
+    def update_outputs(self, stack, cluster_template, cluster,
+                       nodegroups=None):
         master_ng = cluster.default_ng_master
-        self.add_output('number_of_masters',
-                        nodegroup_attr='node_count',
-                        nodegroup_uuid=master_ng.uuid,
-                        is_stack_param=True,
-                        mapping_type=NodeGroupOutputMapping)
+        nodegroups = nodegroups or [cluster.default_ng_master]
+        for nodegroup in nodegroups:
+            if nodegroup.role == 'master':
+                self.add_output('number_of_masters',
+                                nodegroup_attr='node_count',
+                                nodegroup_uuid=master_ng.uuid,
+                                is_stack_param=True,
+                                mapping_type=NodeGroupOutputMapping)
         super(BaseTemplateDefinition,
-              self).update_outputs(stack, cluster_template, cluster)
+              self).update_outputs(stack, cluster_template, cluster,
+                                   nodegroups=nodegroups)
 
     def validate_discovery_url(self, discovery_url, expect_size):
         url = str(discovery_url)

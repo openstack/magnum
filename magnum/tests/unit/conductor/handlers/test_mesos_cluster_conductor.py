@@ -151,7 +151,8 @@ class TestClusterConductorWithMesos(base.TestCase):
             'fixed_network': 'fixed_network',
             'fixed_subnet': 'fixed_subnet',
             'dns_nameserver': 'dns_nameserver',
-            'server_image': 'image_id',
+            'master_image': 'image_id',
+            'slave_image': 'image_id',
             'master_flavor': 'master_flavor_id',
             'slave_flavor': 'flavor_id',
             'number_of_slaves': 1,
@@ -178,7 +179,8 @@ class TestClusterConductorWithMesos(base.TestCase):
             'mesos_slave_image_providers': 'docker',
             'verify_ca': True,
             'openstack_ca': '',
-            'nodes_affinity_policy': 'soft-anti-affinity'
+            'nodes_affinity_policy': 'soft-anti-affinity',
+            'role': 'master'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -206,6 +208,8 @@ class TestClusterConductorWithMesos(base.TestCase):
         mock_objects_cluster_template_get_by_uuid.return_value = \
             cluster_template
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+        del self.worker_ng_dict['image_id']
+        del self.master_ng_dict['image_id']
         worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
         master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
         mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
@@ -241,7 +245,8 @@ class TestClusterConductorWithMesos(base.TestCase):
             'verify_ca': True,
             'slave_flavor': 'flavor_id',
             'openstack_ca': '',
-            'nodes_affinity_policy': 'soft-anti-affinity'
+            'nodes_affinity_policy': 'soft-anti-affinity',
+            'role': 'master'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -283,7 +288,8 @@ class TestClusterConductorWithMesos(base.TestCase):
             'fixed_network': 'fixed_network',
             'fixed_subnet': 'fixed_subnet',
             'dns_nameserver': 'dns_nameserver',
-            'server_image': 'image_id',
+            'master_image': 'image_id',
+            'slave_image': 'image_id',
             'master_flavor': 'master_flavor_id',
             'slave_flavor': 'flavor_id',
             'number_of_slaves': 1,
@@ -310,7 +316,8 @@ class TestClusterConductorWithMesos(base.TestCase):
             'mesos_slave_image_providers': 'docker',
             'verify_ca': True,
             'openstack_ca': '',
-            'nodes_affinity_policy': 'soft-anti-affinity'
+            'nodes_affinity_policy': 'soft-anti-affinity',
+            'role': 'master'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -356,7 +363,8 @@ class TestClusterConductorWithMesos(base.TestCase):
             'fixed_network': 'fixed_network',
             'fixed_subnet': 'fixed_subnet',
             'dns_nameserver': 'dns_nameserver',
-            'server_image': 'image_id',
+            'master_image': 'image_id',
+            'slave_image': 'image_id',
             'master_flavor': 'master_flavor_id',
             'slave_flavor': 'flavor_id',
             'number_of_slaves': 1,
@@ -383,7 +391,8 @@ class TestClusterConductorWithMesos(base.TestCase):
             'mesos_slave_image_providers': 'docker',
             'verify_ca': True,
             'openstack_ca': '',
-            'nodes_affinity_policy': 'soft-anti-affinity'
+            'nodes_affinity_policy': 'soft-anti-affinity',
+            'role': 'master'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -427,7 +436,8 @@ class TestClusterConductorWithMesos(base.TestCase):
             'fixed_network': 'fixed_network',
             'fixed_subnet': 'fixed_subnet',
             'dns_nameserver': 'dns_nameserver',
-            'server_image': 'image_id',
+            'master_image': 'image_id',
+            'slave_image': 'image_id',
             'master_flavor': 'master_flavor_id',
             'slave_flavor': 'flavor_id',
             'number_of_slaves': 1,
@@ -454,7 +464,8 @@ class TestClusterConductorWithMesos(base.TestCase):
             'mesos_slave_image_providers': 'docker',
             'verify_ca': True,
             'openstack_ca': '',
-            'nodes_affinity_policy': 'soft-anti-affinity'
+            'nodes_affinity_policy': 'soft-anti-affinity',
+            'role': 'master'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

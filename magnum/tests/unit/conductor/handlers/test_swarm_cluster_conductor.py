@@ -171,7 +171,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'fixed_network': 'fixed_network',
             'fixed_subnet': 'fixed_subnet',
             'dns_nameserver': 'dns_nameserver',
-            'server_image': 'image_id',
+            'master_image': 'image_id',
+            'node_image': 'image_id',
             'master_flavor': 'master_flavor_id',
             'node_flavor': 'flavor_id',
             'number_of_masters': 1,
@@ -203,7 +204,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'docker_volume_type': 'lvmdriver-1',
             'verify_ca': True,
             'openstack_ca': '',
-            'nodes_affinity_policy': 'soft-anti-affinity'
+            'nodes_affinity_policy': 'soft-anti-affinity',
+            'role': u'master',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -253,7 +255,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'fixed_network': 'fixed_network',
             'fixed_subnet': 'fixed_subnet',
             'dns_nameserver': 'dns_nameserver',
-            'server_image': 'image_id',
+            'master_image': 'image_id',
+            'node_image': 'image_id',
             'master_flavor': 'master_flavor_id',
             'node_flavor': 'flavor_id',
             'number_of_masters': 1,
@@ -287,7 +290,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'docker_volume_type': 'lvmdriver-1',
             'verify_ca': True,
             'openstack_ca': '',
-            'nodes_affinity_policy': 'soft-anti-affinity'
+            'nodes_affinity_policy': 'soft-anti-affinity',
+            'role': u'master',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -328,6 +332,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
         mock_get.return_value = mock_resp
         mock_driver.return_value = swarm_dr.Driver()
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+        del self.worker_ng_dict['image_id']
+        del self.master_ng_dict['image_id']
         worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
         master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
         mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
@@ -365,7 +371,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'verify_ca': True,
             'node_flavor': 'flavor_id',
             'openstack_ca': '',
-            'nodes_affinity_policy': 'soft-anti-affinity'
+            'nodes_affinity_policy': 'soft-anti-affinity',
+            'role': 'master'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -415,7 +422,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'fixed_network': 'fixed_network',
             'fixed_subnet': 'fixed_subnet',
             'dns_nameserver': 'dns_nameserver',
-            'server_image': 'image_id',
+            'master_image': 'image_id',
+            'node_image': 'image_id',
             'master_flavor': 'master_flavor_id',
             'node_flavor': 'flavor_id',
             'number_of_masters': 1,
@@ -447,7 +455,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'docker_volume_type': 'lvmdriver-1',
             'verify_ca': True,
             'openstack_ca': '',
-            'nodes_affinity_policy': 'soft-anti-affinity'
+            'nodes_affinity_policy': 'soft-anti-affinity',
+            'role': u'master',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -501,7 +510,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'fixed_network': 'fixed_network',
             'fixed_subnet': 'fixed_subnet',
             'dns_nameserver': 'dns_nameserver',
-            'server_image': 'image_id',
+            'master_image': 'image_id',
+            'node_image': 'image_id',
             'master_flavor': 'master_flavor_id',
             'node_flavor': 'flavor_id',
             'number_of_masters': 1,
@@ -533,7 +543,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'docker_volume_type': 'lvmdriver-1',
             'verify_ca': True,
             'openstack_ca': '',
-            'nodes_affinity_policy': 'soft-anti-affinity'
+            'nodes_affinity_policy': 'soft-anti-affinity',
+            'role': u'master',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -585,7 +596,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'fixed_network': 'fixed_network',
             'fixed_subnet': 'fixed_subnet',
             'dns_nameserver': 'dns_nameserver',
-            'server_image': 'image_id',
+            'master_image': 'image_id',
+            'node_image': 'image_id',
             'master_flavor': 'master_flavor_id',
             'node_flavor': 'flavor_id',
             'number_of_masters': 2,
@@ -617,7 +629,8 @@ class TestClusterConductorWithSwarm(base.TestCase):
             'docker_volume_type': 'lvmdriver-1',
             'verify_ca': True,
             'openstack_ca': '',
-            'nodes_affinity_policy': 'soft-anti-affinity'
+            'nodes_affinity_policy': 'soft-anti-affinity',
+            'role': u'master',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
