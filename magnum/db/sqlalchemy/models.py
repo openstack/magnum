@@ -289,3 +289,7 @@ class NodeGroup(Base):
     max_node_count = Column(Integer())
     min_node_count = Column(Integer())
     is_default = Column(Boolean, default=False)
+    stack_id = Column(String(255))
+    status = Column(String(20))
+    status_reason = Column(Text)
+    version = Column(String(20))

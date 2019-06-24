@@ -77,6 +77,9 @@ class Handler(object):
             # Create cluster
             cluster_driver.create_cluster(context, cluster, create_timeout)
             cluster.save()
+            for ng in cluster.nodegroups:
+                ng.stack_id = cluster.stack_id
+                ng.save()
 
         except Exception as e:
             cluster.status = fields.ClusterStatus.CREATE_FAILED

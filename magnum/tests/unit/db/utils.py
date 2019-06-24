@@ -299,7 +299,11 @@ def get_test_nodegroup(**kw):
         'min_node_count': kw.get('min_node_count', 1),
         'is_default': kw.get('is_default', True),
         'created_at': kw.get('created_at'),
-        'updated_at': kw.get('updated_at')
+        'updated_at': kw.get('updated_at'),
+        'status': kw.get('status', 'CREATE_COMPLETE'),
+        'status_reason': kw.get('status_reason', 'Completed successfully'),
+        'version': kw.get('version', '1'),
+        'stack_id': kw.get('stack_id', '047c6319-7abd-fake-a033-8c6af0173cd0'),
     }
 
 
@@ -327,7 +331,7 @@ def get_nodegroups_for_cluster(**kw):
                           '5d12f6fd-a196-4bf0-ae4c-1f639a523a52'),
         project_id=kw.get('project_id', 'fake_project'),
         node_addresses=kw.get('node_addresses', ['172.17.2.4']),
-        node_count=kw.get('node_count', 3)
+        node_count=kw.get('node_count', 3),
     )
 
     # get masters nodegroup

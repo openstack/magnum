@@ -634,7 +634,7 @@ class Connection(object):
 
         :param context: The security context
         :param cluster_id: The uuid of the cluster where the nodegroup
-                             belongs to.
+                           belongs to.
         :param filters: Filters to apply. Defaults to None.
 
         :param limit: Maximum number of nodegroups to return.
