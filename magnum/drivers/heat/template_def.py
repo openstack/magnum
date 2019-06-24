@@ -17,10 +17,8 @@ import ast
 from oslo_log import log as logging
 from oslo_utils import strutils
 from oslo_utils import uuidutils
-import re
 import requests
 import six
-from six.moves.urllib import parse as urlparse
 
 from magnum.common import clients
 from magnum.common import exception
@@ -451,26 +449,7 @@ class BaseTemplateDefinition(TemplateDefinition):
                 size=int(value),
                 discovery_url=discovery_url)
 
-    def get_proxies(self, url, cluster_template):
-        proxies = dict()
-        if cluster_template is None:
-            return proxies
-        hostname = urlparse.urlparse(url).netloc.partition(":")[0]
-        if hasattr(cluster_template, 'no_proxy') and \
-            cluster_template.no_proxy and \
-            (cluster_template.no_proxy == '*' or
-             re.search('\\b%s\\b' % re.escape(hostname),
-                       cluster_template.no_proxy, re.I)):
-            LOG.debug('Bypass proxy, because discovery hostname is listed in'
-                      ' cluster template no_proxy variable')
-        else:
-            if hasattr(cluster_template, 'http_proxy'):
-                proxies['http'] = cluster_template.http_proxy
-            if hasattr(cluster_template, 'https_proxy'):
-                proxies['https'] = cluster_template.https_proxy
-        return proxies
-
-    def get_discovery_url(self, cluster, cluster_template=None):
+    def get_discovery_url(self, cluster):
         if hasattr(cluster, 'discovery_url') and cluster.discovery_url:
             # NOTE(flwang): The discovery URl does have a expiry time,
             # so better skip it when the cluster has been created.
@@ -483,10 +462,7 @@ class BaseTemplateDefinition(TemplateDefinition):
                 CONF.cluster.etcd_discovery_service_endpoint_format %
                 {'size': cluster.master_count})
             try:
-                proxies = self.get_proxies(discovery_endpoint,
-                                           cluster_template)
-                discovery_request = requests.get(discovery_endpoint,
-                                                 proxies=proxies)
+                discovery_request = requests.get(discovery_endpoint)
                 if discovery_request.status_code != requests.codes.ok:
                     raise exception.GetDiscoveryUrlFailed(
                         discovery_endpoint=discovery_endpoint)
