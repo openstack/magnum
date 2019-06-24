@@ -95,3 +95,19 @@ class Driver(driver.KubernetesDriver):
             'disable_rollback': not rollback
         }
         osc.heat().stacks.update(cluster.stack_id, **fields)
+
+    def get_nodegroup_extra_params(self, cluster, osc):
+        network = osc.heat().resources.get(cluster.stack_id, 'network')
+        secgroup = osc.heat().resources.get(cluster.stack_id,
+                                            'secgroup_kube_minion')
+        for output in osc.heat().stacks.get(cluster.stack_id).outputs:
+            if output['output_key'] == 'api_address':
+                api_address = output['output_value']
+                break
+        extra_params = {
+            'existing_master_private_ip': api_address,
+            'existing_security_group': secgroup.attributes['id'],
+            'fixed_network': network.attributes['fixed_network'],
+            'fixed_subnet': network.attributes['fixed_subnet'],
+        }
+        return extra_params

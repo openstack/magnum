@@ -158,6 +158,10 @@ class NodeGroupOutputMapping(OutputMapping):
                 # nodegroups are fetched from the database every
                 # time, so the bad thing here is that we need to
                 # save each change.
+                previous_value = getattr(ng, self.nodegroup_attr, None)
+                if previous_value == output_value:
+                    # Avoid saving if it's not needed.
+                    return
                 setattr(ng, self.nodegroup_attr, output_value)
                 ng.save()
 
@@ -425,6 +429,13 @@ class BaseTemplateDefinition(TemplateDefinition):
             self.add_parameter(template_attr, nodegroup_attr=nodegroup_attr,
                                nodegroup_uuid=nodegroup.uuid,
                                param_class=NodeGroupParameterMapping)
+
+    def _get_relevant_labels(self, cluster, kwargs):
+        nodegroups = kwargs.get('nodegroups', None)
+        labels = cluster.labels
+        if nodegroups is not None:
+            labels = nodegroups[0].labels
+        return labels
 
     def update_outputs(self, stack, cluster_template, cluster,
                        nodegroups=None):

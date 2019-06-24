@@ -470,7 +470,8 @@ class TestHandler(db_base.DbTestCase):
                                     timeout)
 
         mock_extract_tmpl_def.assert_called_once_with(self.context,
-                                                      cluster)
+                                                      cluster,
+                                                      nodegroups=None)
         mock_get_template_contents.assert_called_once_with(
             'the/template/path.yaml')
         mock_process_mult.assert_called_once_with(
@@ -487,7 +488,8 @@ class TestHandler(db_base.DbTestCase):
                 'file:///the/template/env_file_2':
                     'content of file:///the/template/env_file_2'
             },
-            parameters={'heat_param_1': 'foo', 'heat_param_2': 'bar'},
+            parameters={'is_cluster_stack': True, 'heat_param_1': 'foo',
+                        'heat_param_2': 'bar'},
             stack_name=('%s-short_id' % cluster.name),
             template='some template yaml',
             timeout_mins=timeout)
@@ -543,6 +545,8 @@ class TestHandler(db_base.DbTestCase):
         osc = mock.MagicMock()
         mock_openstack_client_class.return_value = osc
         osc.heat.side_effect = exc.HTTPConflict
+        self.worker.create()
+        self.master.create()
         self.assertRaises(exception.OperationInProgress,
                           self.handler.cluster_delete,
                           self.context,
@@ -570,6 +574,8 @@ class TestHandler(db_base.DbTestCase):
         mock_octavia.return_value = True
         mock_driver.return_value = k8s_atomic_dr.Driver()
 
+        self.master.create()
+        self.worker.create()
         self.handler.cluster_delete(self.context, self.cluster.uuid)
 
         notifications = fake_notifier.NOTIFICATIONS

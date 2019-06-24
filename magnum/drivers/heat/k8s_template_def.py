@@ -212,8 +212,10 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                       'kubescheduler_options',
                       'influx_grafana_dashboard_enabled']
 
+        labels = self._get_relevant_labels(cluster, kwargs)
+
         for label in label_list:
-            extra_params[label] = cluster.labels.get(label)
+            extra_params[label] = labels.get(label)
 
         ingress_controller = cluster.labels.get('ingress_controller',
                                                 '').lower()
@@ -233,7 +235,7 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
             extra_params['registry_container'] = (
                 CONF.docker_registry.swift_registry_container)
 
-        kube_tag = (cluster.labels.get("kube_tag") or
+        kube_tag = (labels.get("kube_tag") or
                     cluster_template.labels.get("kube_tag"))
         if kube_tag:
             extra_params['kube_version'] = kube_tag

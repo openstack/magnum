@@ -127,8 +127,10 @@ class SwarmModeTemplateDefinition(template_def.BaseTemplateDefinition):
         extra_params['nodes_affinity_policy'] = \
             CONF.cluster.nodes_affinity_policy
 
+        labels = self._get_relevant_labels(cluster, kwargs)
+
         for label in label_list:
-            extra_params[label] = cluster.labels.get(label)
+            extra_params[label] = labels.get(label)
 
         # set docker_volume_type
         # use the configuration default if None provided

@@ -101,8 +101,10 @@ class UbuntuMesosTemplateDefinition(template_def.BaseTemplateDefinition):
                       'mesos_slave_work_dir',
                       'mesos_slave_executor_env_variables']
 
+        labels = self._get_relevant_labels(cluster, kwargs)
+
         for label in label_list:
-            extra_params[label] = cluster.labels.get(label)
+            extra_params[label] = labels.get(label)
 
         return super(UbuntuMesosTemplateDefinition,
                      self).get_params(context, cluster_template, cluster,

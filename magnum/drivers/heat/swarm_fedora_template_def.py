@@ -141,8 +141,10 @@ class SwarmFedoraTemplateDefinition(template_def.BaseTemplateDefinition):
             'docker_volume_type', CONF.cinder.default_docker_volume_type)
         extra_params['docker_volume_type'] = docker_volume_type
 
+        labels = self._get_relevant_labels(cluster, kwargs)
+
         for label in label_list:
-            extra_params[label] = cluster.labels.get(label)
+            extra_params[label] = labels.get(label)
 
         if cluster_template.registry_enabled:
             extra_params['swift_region'] = CONF.docker_registry.swift_region

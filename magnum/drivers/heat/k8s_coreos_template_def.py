@@ -65,8 +65,11 @@ class CoreOSK8sTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                       'calico_tag',
                       'calico_kube_controllers_tag', 'calico_ipv4pool',
                       'etcd_tag', 'flannel_tag']
+
+        labels = self._get_relevant_labels(cluster, kwargs)
+
         for label in label_list:
-            label_value = cluster.labels.get(label)
+            label_value = labels.get(label)
             if label_value:
                 extra_params[label] = label_value
 

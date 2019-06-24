@@ -1126,7 +1126,7 @@ class TestClusterConductorWithK8s(base.TestCase):
 
         expected_args = {
             'stack_name': expected_stack_name,
-            'parameters': {},
+            'parameters': {'is_cluster_stack': True},
             'template': expected_template_contents,
             'files': {},
             'environment_files': [],
@@ -1166,7 +1166,7 @@ class TestClusterConductorWithK8s(base.TestCase):
 
         expected_args = {
             'stack_name': expected_stack_name,
-            'parameters': {},
+            'parameters': {'is_cluster_stack': True},
             'template': expected_template_contents,
             'files': {},
             'environment_files': [],
@@ -1208,7 +1208,7 @@ class TestClusterConductorWithK8s(base.TestCase):
 
         expected_args = {
             'stack_name': expected_stack_name,
-            'parameters': {},
+            'parameters': {'is_cluster_stack': True},
             'template': expected_template_contents,
             'files': {},
             'environment_files': [],
