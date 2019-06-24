@@ -11,6 +11,7 @@
 # under the License.
 
 from oslo_config import cfg
+from oslo_log import log as logging
 
 from magnum.common import exception
 from magnum.common import keystone
@@ -18,6 +19,9 @@ from magnum.common import neutron
 from magnum.drivers.heat import template_def
 
 CONF = cfg.CONF
+
+
+LOG = logging.getLogger(__name__)
 
 
 """kubernetes ports """
@@ -47,6 +51,36 @@ class K8sApiAddressOutputMapping(template_def.OutputMapping):
             }
             value = "%(protocol)s://%(address)s:%(port)s" % params
             setattr(cluster, self.cluster_attr, value)
+
+
+class ServerAddressOutputMapping(template_def.NodeGroupOutputMapping):
+
+    public_ip_output_key = None
+    private_ip_output_key = None
+
+    def __init__(self, dummy_arg, nodegroup_attr=None, nodegroup_uuid=None):
+        self.nodegroup_attr = nodegroup_attr
+        self.nodegroup_uuid = nodegroup_uuid
+        self.heat_output = self.public_ip_output_key
+        self.is_stack_param = False
+
+    def set_output(self, stack, cluster_template, cluster):
+        if not cluster_template.floating_ip_enabled:
+            self.heat_output = self.private_ip_output_key
+
+        LOG.debug("Using heat_output: %s", self.heat_output)
+        super(ServerAddressOutputMapping,
+              self).set_output(stack, cluster_template, cluster)
+
+
+class MasterAddressOutputMapping(ServerAddressOutputMapping):
+    public_ip_output_key = 'kube_masters'
+    private_ip_output_key = 'kube_masters_private'
+
+
+class NodeAddressOutputMapping(ServerAddressOutputMapping):
+    public_ip_output_key = 'kube_minions'
+    private_ip_output_key = 'kube_minions_private'
 
 
 class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
@@ -86,33 +120,45 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
         self.add_output('kube_masters_private',
                         cluster_attr=None)
 
-    def add_nodegroup_params(self, cluster):
-        super(K8sTemplateDefinition,
-              self).add_nodegroup_params(cluster)
-        worker_ng = cluster.default_ng_worker
-        master_ng = cluster.default_ng_master
-        self.add_parameter('number_of_minions',
-                           nodegroup_attr='node_count',
-                           nodegroup_uuid=worker_ng.uuid,
-                           param_class=template_def.NodeGroupParameterMapping)
-        self.add_parameter('minion_flavor',
-                           nodegroup_attr='flavor_id',
-                           nodegroup_uuid=worker_ng.uuid,
-                           param_class=template_def.NodeGroupParameterMapping)
-        self.add_parameter('master_flavor',
-                           nodegroup_attr='flavor_id',
-                           nodegroup_uuid=master_ng.uuid,
-                           param_class=template_def.NodeGroupParameterMapping)
+    def get_nodegroup_param_maps(self, master_params=None, worker_params=None):
+        master_params = master_params or dict()
+        worker_params = worker_params or dict()
+        master_params.update({
+            'master_flavor': 'flavor_id',
+            'master_image': 'image_id',
+        })
+        worker_params.update({
+            'number_of_minions': 'node_count',
+            'minion_flavor': 'flavor_id',
+            'minion_image': 'image_id',
+        })
+        return super(
+            K8sTemplateDefinition, self).get_nodegroup_param_maps(
+                master_params=master_params, worker_params=worker_params)
 
-    def update_outputs(self, stack, cluster_template, cluster):
-        worker_ng = cluster.default_ng_worker
-        self.add_output('number_of_minions',
-                        nodegroup_attr='node_count',
-                        nodegroup_uuid=worker_ng.uuid,
-                        is_stack_param=True,
-                        mapping_type=template_def.NodeGroupOutputMapping)
+    def update_outputs(self, stack, cluster_template, cluster,
+                       nodegroups=None):
+        nodegroups = nodegroups or [cluster.default_ng_worker,
+                                    cluster.default_ng_master]
+        for nodegroup in nodegroups:
+            if nodegroup.role == 'master':
+                self.add_output('kube_masters',
+                                nodegroup_attr='node_addresses',
+                                nodegroup_uuid=nodegroup.uuid,
+                                mapping_type=MasterAddressOutputMapping)
+            else:
+                self.add_output('kube_minions',
+                                nodegroup_attr='node_addresses',
+                                nodegroup_uuid=nodegroup.uuid,
+                                mapping_type=NodeAddressOutputMapping)
+                self.add_output(
+                    'number_of_minions', nodegroup_attr='node_count',
+                    nodegroup_uuid=nodegroup.uuid,
+                    mapping_type=template_def.NodeGroupOutputMapping,
+                    is_stack_param=True)
         super(K8sTemplateDefinition,
-              self).update_outputs(stack, cluster_template, cluster)
+              self).update_outputs(stack, cluster_template, cluster,
+                                   nodegroups=nodegroups)
 
     def get_params(self, context, cluster_template, cluster, **kwargs):
         extra_params = kwargs.pop('extra_params', {})

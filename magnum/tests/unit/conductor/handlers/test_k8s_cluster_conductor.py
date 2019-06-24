@@ -214,10 +214,9 @@ class TestClusterConductorWithK8s(base.TestCase):
             self.cluster_template_dict[missing_attr] = None
         elif missing_attr in self.cluster_dict:
             self.cluster_dict[missing_attr] = None
-        elif missing_attr == 'node_count':
-            self.worker_ng_dict['node_count'] = None
-        elif missing_attr == 'master_count':
-            self.master_ng_dict['node_count'] = None
+        if missing_attr == 'image_id':
+            del self.worker_ng_dict['image_id']
+            del self.master_ng_dict['image_id']
         cluster_template = objects.ClusterTemplate(
             self.context, **self.cluster_template_dict)
         mock_generate_csr_and_key.return_value = {'csr': 'csr',
@@ -245,7 +244,6 @@ class TestClusterConductorWithK8s(base.TestCase):
 
         mapping = {
             'dns_nameserver': 'dns_nameserver',
-            'image_id': 'server_image',
             'flavor_id': 'minion_flavor',
             'docker_volume_size': 'docker_volume_size',
             'docker_storage_driver': 'docker_storage_driver',
@@ -288,6 +286,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'magnum_url': self.mock_osc.magnum_url.return_value,
             'tls_disabled': False,
             'insecure_registry': '10.0.0.1:5000',
+            'image_id': ['master_image', 'minion_image']
         }
         expected = {
             'cloud_provider_enabled': 'false',
@@ -299,7 +298,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'network_driver': 'network_driver',
             'volume_driver': 'volume_driver',
             'dns_nameserver': 'dns_nameserver',
-            'server_image': 'image_id',
+            'master_image': 'image_id',
+            'minion_image': 'image_id',
             'minion_flavor': 'flavor_id',
             'master_flavor': 'master_flavor_id',
             'number_of_minions': 1,
@@ -360,17 +360,19 @@ class TestClusterConductorWithK8s(base.TestCase):
             'keystone_auth_default_policy': self.keystone_auth_default_policy,
             'boot_volume_size': '60',
             'boot_volume_type': 'lvmdriver-1',
-            'etcd_volume_type': 'lvmdriver-1'
+            'etcd_volume_type': 'lvmdriver-1',
+            'role': 'master'
         }
+
         if missing_attr is not None:
-            expected.pop(mapping[missing_attr], None)
+            attrs = mapping[missing_attr]
+            if not isinstance(attrs, list):
+                attrs = [attrs]
+            for attr in attrs:
+                expected.pop(attr, None)
 
         if missing_attr == 'node_count':
             expected['max_node_count'] = None
-
-        if missing_attr == 'image_id':
-            expected['master_image'] = None
-            expected['minion_image'] = None
 
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -467,7 +469,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'region_name': 'RegionOne',
             'registry_container': 'docker_registry',
             'registry_enabled': True,
-            'server_image': 'image_id',
+            'master_image': 'image_id',
+            'minion_image': 'image_id',
             'ssh_key_name': 'keypair_id',
             'swift_region': 'RegionOne',
             'tls_disabled': False,
@@ -504,7 +507,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'keystone_auth_default_policy': self.keystone_auth_default_policy,
             'boot_volume_size': '60',
             'boot_volume_type': 'lvmdriver-1',
-            'etcd_volume_type': 'lvmdriver-1'
+            'etcd_volume_type': 'lvmdriver-1',
+            'role': 'master',
         }
 
         self.assertEqual(expected, definition)
@@ -558,8 +562,11 @@ class TestClusterConductorWithK8s(base.TestCase):
         mock_get.return_value = mock_resp
         mock_driver.return_value = k8s_dr.Driver()
         cluster = objects.Cluster(self.context, **self.cluster_dict)
+        del self.worker_ng_dict['image_id']
         worker_ng = objects.NodeGroup(self.context, **self.worker_ng_dict)
+        del self.master_ng_dict['image_id']
         master_ng = objects.NodeGroup(self.context, **self.master_ng_dict)
+        master_ng.image_id = None
         mock_objects_nodegroup_list.return_value = [master_ng, worker_ng]
 
         (template_path,
@@ -625,12 +632,12 @@ class TestClusterConductorWithK8s(base.TestCase):
             'portal_network_cidr': '10.254.0.0/16',
             'project_id': 'project_id',
             'max_node_count': 2,
-            'master_image': None,
-            'minion_image': None,
             'keystone_auth_default_policy': self.keystone_auth_default_policy,
             'boot_volume_size': '60',
             'boot_volume_type': 'lvmdriver-1',
-            'etcd_volume_type': 'lvmdriver-1'
+            'etcd_volume_type': 'lvmdriver-1',
+            'keystone_auth_default_policy': self.keystone_auth_default_policy,
+            'role': 'master',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -687,9 +694,10 @@ class TestClusterConductorWithK8s(base.TestCase):
             'docker_storage_driver': 'devicemapper',
             'docker_volume_size': 20,
             'docker_volume_type': 'lvmdriver-1',
-            'server_image': 'image_id',
             'minion_flavor': 'flavor_id',
             'master_flavor': 'master_flavor_id',
+            'master_image': 'image_id',
+            'minion_image': 'image_id',
             'number_of_minions': 1,
             'number_of_masters': 1,
             'network_driver': 'network_driver',
@@ -737,6 +745,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kubeproxy_options': '--kubeproxy',
             'octavia_enabled': False,
             'portal_network_cidr': '10.254.0.0/16',
+            'role': 'master',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -790,7 +799,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'docker_storage_driver': u'devicemapper',
             'docker_volume_size': 20,
             'docker_volume_type': u'lvmdriver-1',
-            'server_image': 'image_id',
+            'master_image': 'image_id',
+            'minion_image': 'image_id',
             'minion_flavor': 'flavor_id',
             'master_flavor': 'master_flavor_id',
             'number_of_minions': 1,
@@ -841,6 +851,7 @@ class TestClusterConductorWithK8s(base.TestCase):
             'kubeproxy_options': '--kubeproxy',
             'octavia_enabled': False,
             'portal_network_cidr': '10.254.0.0/16',
+            'role': 'master',
         }
         self.assertEqual(expected, definition)
         self.assertEqual(
@@ -1004,7 +1015,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'fixed_network_name': 'fixed_network',
             'fixed_subnet': 'fixed_subnet',
             'dns_nameserver': 'dns_nameserver',
-            'server_image': 'image_id',
+            'master_image': 'image_id',
+            'minion_image': 'image_id',
             'master_flavor': 'master_flavor_id',
             'minion_flavor': 'flavor_id',
             'number_of_minions': 1,
@@ -1067,7 +1079,8 @@ class TestClusterConductorWithK8s(base.TestCase):
             'keystone_auth_default_policy': self.keystone_auth_default_policy,
             'boot_volume_size': '60',
             'boot_volume_type': 'lvmdriver-1',
-            'etcd_volume_type': 'lvmdriver-1'
+            'etcd_volume_type': 'lvmdriver-1',
+            'role': 'master'
         }
         self.assertEqual(expected, definition)
         self.assertEqual(

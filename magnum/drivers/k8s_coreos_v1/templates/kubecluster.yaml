@@ -31,7 +31,11 @@ parameters:
     description: uuid/name of an existing subnet to use to provision machines
     default: ""
 
-  server_image:
+  master_image:
+    type: string
+    description: glance image used to boot the server
+
+  minion_image:
     type: string
     description: glance image used to boot the server
 
@@ -642,7 +646,7 @@ resources:
           api_public_address: {get_attr: [api_lb, floating_address]}
           api_private_address: {get_attr: [api_lb, address]}
           ssh_key_name: {get_param: ssh_key_name}
-          server_image: {get_param: server_image}
+          server_image: {get_param: master_image}
           master_flavor: {get_param: master_flavor}
           external_network: {get_param: external_network}
           kube_allow_priv: {get_param: kube_allow_priv}
@@ -733,7 +737,7 @@ resources:
               - [{ get_param: 'OS::stack_name' }, 'minion', '%index%']
           prometheus_monitoring: {get_param: prometheus_monitoring}
           ssh_key_name: {get_param: ssh_key_name}
-          server_image: {get_param: server_image}
+          server_image: {get_param: minion_image}
           minion_flavor: {get_param: minion_flavor}
           fixed_network: {get_attr: [network, fixed_network]}
           fixed_subnet: {get_attr: [network, fixed_subnet]}

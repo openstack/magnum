@@ -66,7 +66,6 @@ class Driver(driver.KubernetesDriver):
                     # SemanticVersion. For this case, let's just skip it.
                     LOG.debug("Failed to parse tag/version %s", str(e))
 
-        heat_params["server_image"] = cluster_template.image_id
         heat_params["master_image"] = cluster_template.image_id
         heat_params["minion_image"] = cluster_template.image_id
         # NOTE(flwang): Overwrite the kube_tag as well to avoid a server

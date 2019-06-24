@@ -173,7 +173,7 @@ class TemplateDefinitionTestCase(base.TestCase):
         definition = k8sa_dr.Driver().get_template_definition()
 
         mock_args = [1, 3, 4]
-        mock_kwargs = {'test': 'test'}
+        mock_kwargs = {'cluster_attr': 'test'}
         mock_mapping_type = mock.MagicMock()
         mock_mapping_type.return_value = mock.MagicMock()
         definition.add_output(mapping_type=mock_mapping_type, *mock_args,
@@ -566,8 +566,6 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         min_node_count = mock_cluster.labels.get('min_node_count')
         max_node_count = mock_cluster.labels.get('max_node_count')
         npd_enabled = mock_cluster.labels.get('npd_enabled')
-        master_image = mock_cluster_template.image_id
-        minion_image = mock_cluster_template.image_id
         boot_volume_size = mock_cluster.labels.get('boot_volume_size')
         boot_volume_type = mock_cluster.labels.get('boot_volume_type')
         etcd_volume_type = mock_cluster.labels.get('etcd_volume_type')
@@ -647,8 +645,6 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'min_node_count': min_node_count,
             'max_node_count': max_node_count,
             'traefik_ingress_controller_tag': traefik_ingress_controller_tag,
-            'master_image': master_image,
-            'minion_image': minion_image,
             'npd_enabled': npd_enabled,
             'kube_version': kube_tag,
             'master_kube_tag': kube_tag,
@@ -1001,8 +997,6 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         min_node_count = mock_cluster.labels.get('min_node_count')
         max_node_count = mock_cluster.labels.get('max_node_count')
         npd_enabled = mock_cluster.labels.get('npd_enabled')
-        master_image = mock_cluster_template.image_id
-        minion_image = mock_cluster_template.image_id
         boot_volume_size = mock_cluster.labels.get('boot_volume_size')
         boot_volume_type = mock_cluster.labels.get('boot_volume_type')
         etcd_volume_type = mock_cluster.labels.get('etcd_volume_type')
@@ -1084,8 +1078,6 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'min_node_count': min_node_count,
             'max_node_count': max_node_count,
             'traefik_ingress_controller_tag': traefik_ingress_controller_tag,
-            'master_image': master_image,
-            'minion_image': minion_image,
             'npd_enabled': npd_enabled,
             'kube_version': kube_tag,
             'master_kube_tag': kube_tag,

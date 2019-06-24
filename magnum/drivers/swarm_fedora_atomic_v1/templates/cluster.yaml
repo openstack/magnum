@@ -44,10 +44,13 @@ parameters:
     type: string
     description: endpoint to retrieve TLS certs from
 
-  server_image:
+  master_image:
     type: string
     description: glance image used to boot the server
 
+  node_image:
+    type: string
+    description: glance image used to boot the server
   #
   # OPTIONAL PARAMETERS
   #
@@ -388,7 +391,7 @@ resources:
               - '-'
               - [{ get_param: 'OS::stack_name' }, 'master', '%index%']
           ssh_key_name: {get_param: ssh_key_name}
-          server_image: {get_param: server_image}
+          server_image: {get_param: master_image}
           server_flavor: {get_param: master_flavor}
           docker_volume_size: {get_param: docker_volume_size}
           docker_volume_type: {get_param: docker_volume_type}
@@ -440,7 +443,7 @@ resources:
               - '-'
               - [{ get_param: 'OS::stack_name' }, 'node', '%index%']
           ssh_key_name: {get_param: ssh_key_name}
-          server_image: {get_param: server_image}
+          server_image: {get_param: node_image}
           server_flavor: {get_param: node_flavor}
           docker_volume_size: {get_param: docker_volume_size}
           docker_volume_type: {get_param: docker_volume_type}

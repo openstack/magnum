@@ -31,10 +31,6 @@ parameters:
     description: uuid/name of an existing subnet to use to provision machines
     default: ""
 
-  server_image:
-    type: string
-    description: glance image used to boot the server
-
   master_image:
     type: string
     description: glance image used to boot the server
