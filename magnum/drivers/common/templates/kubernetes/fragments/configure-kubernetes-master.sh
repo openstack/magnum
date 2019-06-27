@@ -188,8 +188,7 @@ sed -i '
 sed -i '/^KUBE_SCHEDULER_ARGS=/ s/=.*/="--leader-elect=true"/' /etc/kubernetes/scheduler
 
 $ssh_cmd mkdir -p /etc/kubernetes/manifests
-HOSTNAME_OVERRIDE=$(cat /etc/hostname | head -1 | sed 's/\.novalocal//')
-KUBELET_ARGS="--register-node=true --pod-manifest-path=/etc/kubernetes/manifests --cadvisor-port=0 --hostname-override=${HOSTNAME_OVERRIDE}"
+KUBELET_ARGS="--register-node=true --pod-manifest-path=/etc/kubernetes/manifests --cadvisor-port=0 --hostname-override=${INSTANCE_NAME}"
 KUBELET_ARGS="${KUBELET_ARGS} --pod-infra-container-image=${CONTAINER_INFRA_PREFIX:-gcr.io/google_containers/}pause:3.0"
 KUBELET_ARGS="${KUBELET_ARGS} --cluster_dns=${DNS_SERVICE_IP} --cluster_domain=${DNS_CLUSTER_DOMAIN}"
 KUBELET_ARGS="${KUBELET_ARGS} --volume-plugin-dir=/var/lib/kubelet/volumeplugins"
@@ -211,7 +210,6 @@ KUBELET_ARGS="${KUBELET_ARGS} --register-with-taints=CriticalAddonsOnly=True:NoS
 KUBELET_ARGS="${KUBELET_ARGS} --node-labels=node-role.kubernetes.io/master=\"\""
 
 KUBELET_KUBECONFIG=/etc/kubernetes/kubelet-config.yaml
-HOSTNAME_OVERRIDE=$(cat /etc/hostname | head -1 | sed 's/\.novalocal//')
 cat << EOF >> ${KUBELET_KUBECONFIG}
 apiVersion: v1
 clusters:
@@ -222,13 +220,13 @@ clusters:
 contexts:
 - context:
     cluster: kubernetes
-    user: system:node:${HOSTNAME_OVERRIDE}
+    user: system:node:${INSTANCE_NAME}
   name: default
 current-context: default
 kind: Config
 preferences: {}
 users:
-- name: system:node:${HOSTNAME_OVERRIDE}
+- name: system:node:${INSTANCE_NAME}
   user:
     as-user-extra: {}
     client-certificate: ${CERT_DIR}/server.crt

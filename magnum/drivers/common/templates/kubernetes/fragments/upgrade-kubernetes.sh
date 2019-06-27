@@ -8,15 +8,14 @@ kubecontrol="/var/lib/containers/atomic/heat-container-agent.0/rootfs/usr/bin/ku
 new_kube_tag="$kube_tag_input"
 
 if [ ${new_kube_tag}!=${KUBE_TAG} ]; then
-    HOSTNAME_OVERRIDE="$(cat /etc/hostname | head -1 | sed 's/\.novalocal//')"
     # If there is only one master and this is the master node, skip the drain, just cordon it
     # If there is only one worker and this is the worker node, skip the drain, just cordon it
     all_masters=$(${ssh_cmd} ${kubecontrol} get nodes --selector=node-role.kubernetes.io/master= -o name)
     all_workers=$(${ssh_cmd} ${kubecontrol} get nodes --selector=node-role.kubernetes.io/master!= -o name)
-    if [ "node/${HOSTNAME_OVERRIDE}" != "${all_masters}" ] && [ "node/${HOSTNAME_OVERRIDE}" != "${all_workers}" ]; then
-        ${ssh_cmd} ${kubecontrol} drain ${HOSTNAME_OVERRIDE} --ignore-daemonsets --delete-local-data --force
+    if [ "node/${INSTANCE_NAME}" != "${all_masters}" ] && [ "node/${INSTANCE_NAME}" != "${all_workers}" ]; then
+        ${ssh_cmd} ${kubecontrol} drain ${INSTANCE_NAME} --ignore-daemonsets --delete-local-data --force
     else
-        ${ssh_cmd} ${kubecontrol} cordon ${HOSTNAME_OVERRIDE}
+        ${ssh_cmd} ${kubecontrol} cordon ${INSTANCE_NAME}
     fi
 
     declare -A service_image_mapping
@@ -40,7 +39,7 @@ if [ ${new_kube_tag}!=${KUBE_TAG} ]; then
         systemctl restart ${service}
     done
 
-    ${ssh_cmd} /var/lib/containers/atomic/heat-container-agent.0/rootfs/usr/bin/kubectl --kubeconfig /etc/kubernetes/kubelet-config.yaml uncordon ${HOSTNAME_OVERRIDE}
+    ${ssh_cmd} /var/lib/containers/atomic/heat-container-agent.0/rootfs/usr/bin/kubectl --kubeconfig /etc/kubernetes/kubelet-config.yaml uncordon ${INSTANCE_NAME}
 
     # FIXME(flwang): The KUBE_TAG could be out of date after a successful upgrade
     for service in ${SERVICE_LIST}; do

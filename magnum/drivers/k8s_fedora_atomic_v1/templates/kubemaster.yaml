@@ -539,6 +539,7 @@ resources:
             - str_replace:
                 template: {get_file: ../../common/templates/kubernetes/fragments/write-heat-params-master.sh}
                 params:
+                  "$INSTANCE_NAME": {get_param: name}
                   "$PROMETHEUS_MONITORING": {get_param: prometheus_monitoring}
                   "$KUBE_API_PUBLIC_ADDRESS": {get_attr: [api_address_switch, public_ip]}
                   "$KUBE_API_PRIVATE_ADDRESS": {get_attr: [api_address_switch, private_ip]}
