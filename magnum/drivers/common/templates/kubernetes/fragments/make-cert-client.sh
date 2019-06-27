@@ -96,8 +96,7 @@ EOF
 }
 
 #Kubelet Certs
-INSTANCE_NAME=$(hostname --short | sed 's/\.novalocal//')
-HOSTNAME=$(hostname)
+HOSTNAME=$(cat /etc/hostname | head -1)
 
 cat > ${cert_dir}/kubelet.conf <<EOF
 [req]
