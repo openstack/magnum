@@ -132,6 +132,7 @@ class K8sFedoraTemplateDefinition(k8s_template_def.K8sTemplateDefinition):
                       'heat_container_agent_tag',
                       'keystone_auth_enabled', 'k8s_keystone_auth_tag',
                       'monitoring_enabled',
+                      'prometheus_operator_chart_tag',
                       'tiller_enabled',
                       'tiller_tag',
                       'tiller_namespace',

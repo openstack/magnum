@@ -10,9 +10,15 @@ printf "Starting to run ${step}\n"
 ### Configuration
 ###############################################################################
 CHART_NAME="prometheus-operator"
-CHART_VERSION="0.1.31"
+CHART_VERSION=${PROMETHEUS_OPERATOR_CHART_TAG:-5.12.3}
+
 
 if [ "$(echo ${MONITORING_ENABLED} | tr '[:upper:]' '[:lower:]')" = "true" ]; then
+
+    # Calculate resources needed to run the Prometheus Monitoring Solution
+    # MAX_NODE_COUNT so we can have metrics even if cluster scales
+    PROMETHEUS_SERVER_CPU=$(expr 128 + 7 \* ${MAX_NODE_COUNT} )
+    PROMETHEUS_SERVER_RAM=$(expr 256 + 40 \* ${MAX_NODE_COUNT})
 
     # Validate if communication node <-> master is secure or insecure
     PROTOCOL="https"
@@ -53,11 +59,12 @@ data:
     done
     helm repo update
 
-    if [[ \$(helm history prometheus-operator | grep prometheus-operator) ]]; then
+    if [[ \$(helm history ${CHART_NAME} | grep ${CHART_NAME}) ]]; then
         echo "${CHART_NAME} already installed on server. Continue..."
         exit 0
     else
-        helm install stable/${CHART_NAME} --namespace monitoring --name ${CHART_NAME} --version v${CHART_VERSION} --values /opt/magnum/install-${CHART_NAME}-values.yaml
+        # TODO: Set namespace to monitoring. This is needed as the Kubernetes default priorityClass can only be used in NS kube-system
+        helm install stable/${CHART_NAME} --namespace kube-system --name ${CHART_NAME} --version v${CHART_VERSION} --values /opt/magnum/install-${CHART_NAME}-values.yaml
     fi
 
   install-${CHART_NAME}-values.yaml:  |
@@ -67,11 +74,22 @@ data:
     alertmanager:
       alertmanagerSpec:
         image:
-          repository: ${CONTAINER_INFRA_PREFIX:-quay.io/}prometheus/alertmanager
+          repository: ${CONTAINER_INFRA_PREFIX:-quay.io/prometheus/}alertmanager
+        # # Needs testing
+        # resources:
+        #   requests:
+        #     cpu: 100m
+        #     memory: 256Mi
+        priorityClassName: "system-cluster-critical"
+
 
     # Dashboard
     grafana:
       #enabled: ${ENABLE_GRAFANA}
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
       adminPassword: ${ADMIN_PASSWD}
 
     kubeApiServer:
@@ -88,37 +106,59 @@ data:
         port: 9153
         targetPort: 9153
         selector:
-          k8s-app: coredns
+          k8s-app: kube-dns
 
     kubeEtcd:
-      service:
-        port: 4001
-        targetPort: 4001
-        selector:
-          k8s-app: etcd-server
       serviceMonitor:
         scheme: ${PROTOCOL}
-        insecureSkipVerify: ${INSECURE_SKIP_VERIFY}
+        insecureSkipVerify: true
         ##  If Protocol is http this files should be neglected
-        caFile: ${CERT_DIR}/ca.crt
-        certFile: ${CERT_DIR}/kubelet.crt
-        keyFile: ${CERT_DIR}/kubelet.key
+        caFile: /etc/prometheus/secrets/etcd-certificates/ca.crt
+        certFile: /etc/prometheus/secrets/etcd-certificates/kubelet.crt
+        keyFile: /etc/prometheus/secrets/etcd-certificates/kubelet.key
+
+    kube-state-metrics:
+      priorityClassName: "system-cluster-critical"
+      resources:
+        #Guaranteed
+        limits:
+          cpu: 50m
+          memory: 64M
+
+    prometheus-node-exporter:
+      priorityClassName: "system-node-critical"
+      resources:
+        #Guaranteed
+        limits:
+          cpu: 20m
+          memory: 20M
 
     prometheusOperator:
+      priorityClassName: "system-cluster-critical"
       image:
-        repository: ${CONTAINER_INFRA_PREFIX:-quay.io/}coreos/prometheus-operator
+        repository: ${CONTAINER_INFRA_PREFIX:-quay.io/coreos/}prometheus-operator
       configmapReloadImage:
-        repository: ${CONTAINER_INFRA_PREFIX:-quay.io/}coreos/configmap-reload
+        repository: ${CONTAINER_INFRA_PREFIX:-quay.io/coreos/}configmap-reload
       prometheusConfigReloaderImage:
-        repository: ${CONTAINER_INFRA_PREFIX:-quay.io/}coreos/prometheus-config-reloader
+        repository: ${CONTAINER_INFRA_PREFIX:-quay.io/coreos/}prometheus-config-reloader
       hyperkubeImage:
         repository: ${CONTAINER_INFRA_PREFIX:-gcr.io/google-containers/}hyperkube
 
     prometheus:
       prometheusSpec:
+        scrapeInterval: 30s
+        evaluationInterval: 30s
         image:
-          repository: ${CONTAINER_INFRA_PREFIX:-quay.io/}prometheus/prometheus
+          repository: ${CONTAINER_INFRA_PREFIX:-quay.io/prometheus/}prometheus
         retention: 14d
+        resources:
+          requests:
+            cpu: ${PROMETHEUS_SERVER_CPU}m
+            memory: ${PROMETHEUS_SERVER_RAM}M
+        # secrets:
+        # - etcd-certificates
+        priorityClassName: "system-cluster-critical"
+
 ---
 apiVersion: batch/v1
 kind: Job
@@ -132,7 +172,7 @@ spec:
       serviceAccountName: tiller
       containers:
       - name: config-helm
-        image: docker.io/openstackmagnum/helm-client:dev
+        image: ${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}helm-client:dev
         command:
         - bash
         args:
