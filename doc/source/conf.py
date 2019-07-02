@@ -51,7 +51,6 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'magnum'
 copyright = u'2013, OpenStack Foundation'
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
@@ -64,12 +63,6 @@ add_module_names = True
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
-# The short X.Y version.
-from magnum.version import version_info as magnum_version
-version = magnum_version.canonical_version_string()
-# The full version, including alpha/beta/rc tags.
-release = magnum_version.version_string_with_vcs()
-
 # -- Options for HTML output --------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
@@ -79,17 +72,15 @@ html_theme = 'openstackdocs'
 # html_static_path = ['static']
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = '%sdoc' % project
-
-html_last_updated_fmt = '%Y-%m-%d %H:%M'
+htmlhelp_basename = 'magnumdoc'
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass
 # [howto/manual]).
 latex_documents = [
     ('index',
-     '%s.tex' % project,
-     u'%s Documentation' % project,
+     'magnum.tex',
+     u'magnum Documentation',
      u'OpenStack Foundation', 'manual'),
 ]
 
