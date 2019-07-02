@@ -183,6 +183,8 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                     cluster_template.labels.get("kube_tag"))
         if kube_tag:
             extra_params['kube_version'] = kube_tag
+            extra_params['master_kube_tag'] = kube_tag
+            extra_params['minion_kube_tag'] = kube_tag
 
         return super(K8sTemplateDefinition,
                      self).get_params(context, cluster_template, cluster,
