@@ -18,7 +18,11 @@ fi
 
 _prefix=${CONTAINER_INFRA_PREFIX:-docker.io/openstackmagnum/}
 
+rm -rf /etc/cni/net.d/*
+rm -rf /var/lib/cni/*
+rm -rf /opt/cni/*
 mkdir -p /opt/cni
+mkdir -p /etc/cni/net.d/
 _addtl_mounts=',{"type":"bind","source":"/opt/cni","destination":"/opt/cni","options":["bind","rw","slave","mode=777"]},{"type":"bind","source":"/var/lib/docker","destination":"/var/lib/docker","options":["bind","rw","slave","mode=755"]}'
 
 if [ "$NETWORK_DRIVER" = "calico" ]; then
