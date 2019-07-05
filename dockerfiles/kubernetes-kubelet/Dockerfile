@@ -1,4 +1,5 @@
 ARG KUBE_VERSION=v1.13.0
+ARG ADD_KUBE_ALLOW_PRIV=false
 FROM gcr.io/google-containers/hyperkube-amd64:${KUBE_VERSION}
 
 ENV container=docker
@@ -14,6 +15,7 @@ LABEL bzcomponent="$NAME" \
 
 COPY launch.sh /usr/bin/kubelet-docker.sh
 COPY kubelet config /etc/kubernetes/
+RUN [ $ADD_KUBE_ALLOW_PRIV = "true" ] && echo "KUBE_ALLOW_PRIV=\"--allow-privileged=false\"" >> /etc/kubernetes/config || true
 
 COPY manifest.json tmpfiles.template service.template config.json.template /exports/
 
