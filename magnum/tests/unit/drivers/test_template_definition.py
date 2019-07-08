@@ -571,6 +571,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         boot_volume_size = mock_cluster.labels.get('boot_volume_size')
         boot_volume_type = mock_cluster.labels.get('boot_volume_type')
         etcd_volume_type = mock_cluster.labels.get('etcd_volume_type')
+        ostree_remote = mock_cluster.labels.get('ostree_remote')
+        ostree_commit = mock_cluster.labels.get('ostree_commit')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -654,7 +656,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'minion_kube_tag': kube_tag,
             'boot_volume_size': boot_volume_size,
             'boot_volume_type': boot_volume_type,
-            'etcd_volume_type': etcd_volume_type
+            'etcd_volume_type': etcd_volume_type,
+            'ostree_remote': ostree_remote,
+            'ostree_commit': ostree_commit,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
@@ -1008,6 +1012,8 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         boot_volume_size = mock_cluster.labels.get('boot_volume_size')
         boot_volume_type = mock_cluster.labels.get('boot_volume_type')
         etcd_volume_type = mock_cluster.labels.get('etcd_volume_type')
+        ostree_remote = mock_cluster.labels.get('ostree_remote')
+        ostree_commit = mock_cluster.labels.get('ostree_commit')
 
         k8s_def = k8sa_tdef.AtomicK8sTemplateDefinition()
 
@@ -1093,7 +1099,9 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'minion_kube_tag': kube_tag,
             'boot_volume_size': boot_volume_size,
             'boot_volume_type': boot_volume_type,
-            'etcd_volume_type': etcd_volume_type
+            'etcd_volume_type': etcd_volume_type,
+            'ostree_remote': ostree_remote,
+            'ostree_commit': ostree_commit,
         }}
         mock_get_params.assert_called_once_with(mock_context,
                                                 mock_cluster_template,
