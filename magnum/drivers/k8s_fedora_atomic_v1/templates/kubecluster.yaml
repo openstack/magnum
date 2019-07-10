@@ -653,6 +653,12 @@ parameters:
       max batch size when doing rolling upgrade
     default: 1
 
+  npd_enabled:
+    type: boolean
+    description: >
+      true if the npd service should be launched
+    default:
+      true
 
 resources:
 
@@ -947,6 +953,7 @@ resources:
           autoscaler_tag: {get_param: autoscaler_tag}
           min_node_count: {get_param: min_node_count}
           max_node_count: {get_param: max_node_count}
+          npd_enabled: {get_param: npd_enabled}
 
   kube_cluster_config:
     type: OS::Heat::SoftwareConfig
@@ -1081,6 +1088,7 @@ resources:
           octavia_enabled: {get_param: octavia_enabled}
           heat_container_agent_tag: {get_param: heat_container_agent_tag}
           auto_healing_enabled: {get_param: auto_healing_enabled}
+          npd_enabled: {get_param: npd_enabled}
 
 outputs:
 

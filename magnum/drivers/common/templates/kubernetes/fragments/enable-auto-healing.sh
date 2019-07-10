@@ -7,13 +7,16 @@ printf "Starting to run ${step}\n"
 
 _gcr_prefix=${CONTAINER_INFRA_PREFIX:-k8s.gcr.io/}
 
-# Generate Node Problem Detector manifest file
-NPD_DEPLOY=/srv/magnum/kubernetes/manifests/npd.yaml
+# Either auto scaling or auto healing we need CA to be deployed
+if [ "$(echo $AUTO_HEALING_ENABLED | tr '[:upper:]' '[:lower:]')" = "true" || "$(echo $NPD_ENABLED | tr '[:upper:]' '[:lower:]')" = "true"]; then
+    # Generate Node Problem Detector manifest file
+    NPD_DEPLOY=/srv/magnum/kubernetes/manifests/npd.yaml
 
-[ -f ${NPD_DEPLOY} ] || {
-    echo "Writing File: $NPD_DEPLOY"
-    mkdir -p $(dirname ${NPD_DEPLOY})
-    cat << EOF > ${NPD_DEPLOY}
+    [ -f ${NPD_DEPLOY} ] || {
+        echo "Writing File: $NPD_DEPLOY"
+        mkdir -p $(dirname ${NPD_DEPLOY})
+        cat << EOF > ${NPD_DEPLOY}
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -104,17 +107,19 @@ spec:
       - key: "CriticalAddonsOnly"
         operator: "Exists"
 EOF
-}
+    }
 
-echo "Waiting for Kubernetes API..."
-until  [ "ok" = "$(curl --silent http://127.0.0.1:8080/healthz)" ]
-do
-    sleep 5
-done
+    echo "Waiting for Kubernetes API..."
+    until  [ "ok" = "$(curl --silent http://127.0.0.1:8080/healthz)" ]
+    do
+        sleep 5
+    done
 
-kubectl apply -f ${NPD_DEPLOY}
+    kubectl apply -f ${NPD_DEPLOY}
 
-printf "Finished running ${step}\n"
+    printf "Finished running ${step}\n"
+fi
+
 
 _docker_draino_prefix=${CONTAINER_INFRA_PREFIX:-docker.io/planetlabs/}
 step="enable-auto-healing"

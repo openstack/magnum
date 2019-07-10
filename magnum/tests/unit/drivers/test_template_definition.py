@@ -530,6 +530,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         autoscaler_tag = mock_cluster.labels.get('autoscaler_tag')
         min_node_count = mock_cluster.labels.get('min_node_count')
         max_node_count = mock_cluster.labels.get('max_node_count')
+        npd_enabled = mock_cluster.labels.get('npd_enabled')
         master_image = mock_cluster_template.image_id
         minion_image = mock_cluster_template.image_id
 
@@ -607,6 +608,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'traefik_ingress_controller_tag': traefik_ingress_controller_tag,
             'master_image': master_image,
             'minion_image': minion_image,
+            'npd_enabled': npd_enabled,
             'kube_version': kube_tag,
             'master_kube_tag': kube_tag,
             'minion_kube_tag': kube_tag,
@@ -938,6 +940,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
         autoscaler_tag = mock_cluster.labels.get('autoscaler_tag')
         min_node_count = mock_cluster.labels.get('min_node_count')
         max_node_count = mock_cluster.labels.get('max_node_count')
+        npd_enabled = mock_cluster.labels.get('npd_enabled')
         master_image = mock_cluster_template.image_id
         minion_image = mock_cluster_template.image_id
 
@@ -1017,6 +1020,7 @@ class AtomicK8sTemplateDefinitionTestCase(BaseK8sTemplateDefinitionTestCase):
             'traefik_ingress_controller_tag': traefik_ingress_controller_tag,
             'master_image': master_image,
             'minion_image': minion_image,
+            'npd_enabled': npd_enabled,
             'kube_version': kube_tag,
             'master_kube_tag': kube_tag,
             'minion_kube_tag': kube_tag,

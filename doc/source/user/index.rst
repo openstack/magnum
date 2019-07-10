@@ -416,6 +416,9 @@ the table are linked to more details elsewhere in the user guide.
 +---------------------------------------+--------------------+---------------+
 | `max_node_count`_                     | see below          | see below     |
 +---------------------------------------+--------------------+---------------+
+| `npd_enabled`_                        | - true             | true          |
+|                                       | - false            |               |
++---------------------------------------+--------------------+---------------+
 
 Cluster
 -------
@@ -1326,6 +1329,10 @@ _`min_node_count`
 _`max_node_count`
   The maxmium node count of the cluster when doing auto scaling or auto
   healing.
+
+_`npd_enabled`
+  Set Node Problem Detector service enabled or disabled. Default enabled.
+
 
 
 External load balancer for services
