@@ -76,11 +76,11 @@ class ClusterUpdateJob(object):
         if self.cluster.status.endswith("_COMPLETE"):
             conductor_utils.notify_about_cluster_operation(
                 self.ctx, self.status_to_event[self.cluster.status],
-                taxonomy.OUTCOME_SUCCESS)
+                taxonomy.OUTCOME_SUCCESS, self.cluster)
         if self.cluster.status.endswith("_FAILED"):
             conductor_utils.notify_about_cluster_operation(
                 self.ctx, self.status_to_event[self.cluster.status],
-                taxonomy.OUTCOME_FAILURE)
+                taxonomy.OUTCOME_FAILURE, self.cluster)
         # if we're done with it, delete it
         if self.cluster.status == objects.fields.ClusterStatus.DELETE_COMPLETE:
             # delete all the nodegroups that belong to this cluster

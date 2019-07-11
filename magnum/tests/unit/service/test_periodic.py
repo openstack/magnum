@@ -65,31 +65,36 @@ class PeriodicTestCase(base.TestCase):
         uuid = uuidutils.generate_uuid()
         trust_attrs.update({'id': 1, 'stack_id': '11', 'uuid': uuid,
                             'status': cluster_status.CREATE_IN_PROGRESS,
-                            'status_reason': 'no change'})
+                            'status_reason': 'no change',
+                            'keypair': 'keipair1', 'health_status': None})
         cluster1 = utils.get_test_cluster(**trust_attrs)
         ngs1 = utils.get_nodegroups_for_cluster()
         uuid = uuidutils.generate_uuid()
         trust_attrs.update({'id': 2, 'stack_id': '22', 'uuid': uuid,
                             'status': cluster_status.DELETE_IN_PROGRESS,
-                            'status_reason': 'no change'})
+                            'status_reason': 'no change',
+                            'keypair': 'keipair1', 'health_status': None})
         cluster2 = utils.get_test_cluster(**trust_attrs)
         ngs2 = utils.get_nodegroups_for_cluster()
         uuid = uuidutils.generate_uuid()
         trust_attrs.update({'id': 3, 'stack_id': '33', 'uuid': uuid,
                             'status': cluster_status.UPDATE_IN_PROGRESS,
-                            'status_reason': 'no change'})
+                            'status_reason': 'no change',
+                            'keypair': 'keipair1', 'health_status': None})
         cluster3 = utils.get_test_cluster(**trust_attrs)
         ngs3 = utils.get_nodegroups_for_cluster()
         uuid = uuidutils.generate_uuid()
         trust_attrs.update({'id': 4, 'stack_id': '44', 'uuid': uuid,
                             'status': cluster_status.DELETE_IN_PROGRESS,
-                            'status_reason': 'no change'})
+                            'status_reason': 'no change',
+                            'keypair': 'keipair1', 'health_status': None})
         cluster4 = utils.get_test_cluster(**trust_attrs)
         ngs4 = utils.get_nodegroups_for_cluster()
         uuid = uuidutils.generate_uuid()
         trust_attrs.update({'id': 5, 'stack_id': '55', 'uuid': uuid,
                             'status': cluster_status.ROLLBACK_IN_PROGRESS,
-                            'status_reason': 'no change'})
+                            'status_reason': 'no change',
+                            'keypair': 'keipair1', 'health_status': None})
         cluster5 = utils.get_test_cluster(**trust_attrs)
         ngs5 = utils.get_nodegroups_for_cluster()
 

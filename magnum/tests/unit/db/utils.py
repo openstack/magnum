@@ -112,6 +112,10 @@ def get_test_cluster(**kw):
     for attr in ['trustee_username', 'trustee_password', 'trust_id']:
         if attr in kw:
             attrs[attr] = kw[attr]
+    # Required only in PeriodicTestCase, may break other tests
+    for attr in ['keypair', 'health_status']:
+        if attr in kw:
+            attrs[attr] = kw[attr]
 
     return attrs
 

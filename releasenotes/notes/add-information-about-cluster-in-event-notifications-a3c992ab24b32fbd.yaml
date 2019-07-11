@@ -1,0 +1,12 @@
+---
+features:
+  - |
+    Add information about the cluster in magnum event notifications.
+    Previously the CADF notification's target ID was randomly generated and
+    no other relevant info about the cluster was sent. Cluster details are
+    now included in the notifications. This is useful for other OpenStack
+    projects like Searchlight or third party projects that cache information
+    regarding OpenStack objects or have custom actions running on
+    notification. Caching systems can now efficiently update one single
+    object (e.g. cluster), while without notifications they need to
+    periodically retrieve object list, which is inefficient.

@@ -69,7 +69,8 @@ class Handler(object):
             cert_manager.generate_certificates_to_cluster(cluster,
                                                           context=context)
             conductor_utils.notify_about_cluster_operation(
-                context, taxonomy.ACTION_CREATE, taxonomy.OUTCOME_PENDING)
+                context, taxonomy.ACTION_CREATE, taxonomy.OUTCOME_PENDING,
+                cluster)
             # Get driver
             cluster_driver = driver.Driver.get_driver_for_cluster(context,
                                                                   cluster)
@@ -82,7 +83,8 @@ class Handler(object):
             cluster.status_reason = six.text_type(e)
             cluster.save()
             conductor_utils.notify_about_cluster_operation(
-                context, taxonomy.ACTION_CREATE, taxonomy.OUTCOME_FAILURE)
+                context, taxonomy.ACTION_CREATE, taxonomy.OUTCOME_FAILURE,
+                cluster)
 
             if isinstance(e, exc.HTTPBadRequest):
                 e = exception.InvalidParameterValue(message=six.text_type(e))
@@ -108,7 +110,8 @@ class Handler(object):
         )
         if cluster.status not in allow_update_status:
             conductor_utils.notify_about_cluster_operation(
-                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE)
+                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE,
+                cluster)
             operation = _('Updating a cluster when status is '
                           '"%s"') % cluster.status
             raise exception.NotSupported(operation=operation)
@@ -132,7 +135,8 @@ class Handler(object):
         # Update cluster
         try:
             conductor_utils.notify_about_cluster_operation(
-                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_PENDING)
+                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_PENDING,
+                cluster)
             worker_ng.node_count = node_count
             worker_ng.save()
             cluster_driver.update_cluster(context, cluster, manager, rollback)
@@ -146,7 +150,8 @@ class Handler(object):
             worker_ng.node_count = old_node_count
             worker_ng.save()
             conductor_utils.notify_about_cluster_operation(
-                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE)
+                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE,
+                cluster)
             if isinstance(e, exc.HTTPBadRequest):
                 e = exception.InvalidParameterValue(message=six.text_type(e))
                 raise e
@@ -165,7 +170,8 @@ class Handler(object):
                                                   ct.coe)
         try:
             conductor_utils.notify_about_cluster_operation(
-                context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_PENDING)
+                context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_PENDING,
+                cluster)
             cluster_driver.delete_cluster(context, cluster)
             cluster.status = fields.ClusterStatus.DELETE_IN_PROGRESS
             cluster.status_reason = None
@@ -184,15 +190,18 @@ class Handler(object):
                 LOG.info('The cluster %s has been deleted by others.',
                          uuid)
             conductor_utils.notify_about_cluster_operation(
-                context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_SUCCESS)
+                context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_SUCCESS,
+                cluster)
             return None
         except exc.HTTPConflict:
             conductor_utils.notify_about_cluster_operation(
-                context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_FAILURE)
+                context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_FAILURE,
+                cluster)
             raise exception.OperationInProgress(cluster_name=cluster.name)
         except Exception as unexp:
             conductor_utils.notify_about_cluster_operation(
-                context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_FAILURE)
+                context, taxonomy.ACTION_DELETE, taxonomy.OUTCOME_FAILURE,
+                cluster)
             cluster.status = fields.ClusterStatus.DELETE_FAILED
             cluster.status_reason = six.text_type(unexp)
             cluster.save()
@@ -227,7 +236,8 @@ class Handler(object):
         )
         if cluster.status not in allow_update_status:
             conductor_utils.notify_about_cluster_operation(
-                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE)
+                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE,
+                cluster)
             operation = _('Resizing a cluster when status is '
                           '"%s"') % cluster.status
             raise exception.NotSupported(operation=operation)
@@ -248,7 +258,8 @@ class Handler(object):
             nodegroup.node_count = node_count
             nodegroup.save()
             conductor_utils.notify_about_cluster_operation(
-                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_PENDING)
+                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_PENDING,
+                cluster)
             cluster_driver.resize_cluster(context, cluster, resize_manager,
                                           node_count, nodes_to_remove,
                                           nodegroup)
@@ -261,7 +272,8 @@ class Handler(object):
             nodegroup.node_count = old_node_count
             nodegroup.save()
             conductor_utils.notify_about_cluster_operation(
-                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE)
+                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE,
+                cluster)
             if isinstance(e, exc.HTTPBadRequest):
                 e = exception.InvalidParameterValue(message=six.text_type(e))
                 raise e
@@ -287,7 +299,8 @@ class Handler(object):
         )
         if cluster.status not in allow_update_status:
             conductor_utils.notify_about_cluster_operation(
-                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE)
+                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE,
+                cluster)
             operation = _('Upgrading a cluster when status is '
                           '"%s"') % cluster.status
             raise exception.NotSupported(operation=operation)
@@ -300,7 +313,8 @@ class Handler(object):
         # Upgrade cluster
         try:
             conductor_utils.notify_about_cluster_operation(
-                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_PENDING)
+                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_PENDING,
+                cluster)
             cluster_driver.upgrade_cluster(context, cluster, cluster_template,
                                            max_batch_size, nodegroup, rollback)
             cluster.status = fields.ClusterStatus.UPDATE_IN_PROGRESS
@@ -310,7 +324,8 @@ class Handler(object):
             cluster.status_reason = six.text_type(e)
             cluster.save()
             conductor_utils.notify_about_cluster_operation(
-                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE)
+                context, taxonomy.ACTION_UPDATE, taxonomy.OUTCOME_FAILURE,
+                cluster)
             if isinstance(e, exc.HTTPBadRequest):
                 e = exception.InvalidParameterValue(message=six.text_type(e))
                 raise e
