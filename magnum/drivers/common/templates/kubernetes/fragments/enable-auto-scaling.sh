@@ -108,7 +108,6 @@ spec:
         node-role.kubernetes.io/master: ""
       securityContext:
         runAsUser: 1001
-      hostNetwork: True
       tolerations:
         - effect: NoSchedule
           operator: Exists
