@@ -566,6 +566,7 @@ parameters:
   keystone_auth_default_policy:
     type: string
     description: Json read from /etc/magnum/keystone_auth_default_policy.json
+    default: ""
 
   k8s_keystone_auth_tag:
     type: string
