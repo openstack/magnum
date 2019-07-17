@@ -59,9 +59,9 @@ class K8sTemplateDefinition(template_def.BaseTemplateDefinition):
                            cluster_template_attr='external_network_id',
                            required=True)
         self.add_parameter('fixed_network',
-                           cluster_template_attr='fixed_network')
+                           cluster_attr='fixed_network')
         self.add_parameter('fixed_subnet',
-                           cluster_template_attr='fixed_subnet')
+                           cluster_attr='fixed_subnet')
         self.add_parameter('network_driver',
                            cluster_template_attr='network_driver')
         self.add_parameter('volume_driver',

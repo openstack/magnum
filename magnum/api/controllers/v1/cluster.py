@@ -174,6 +174,15 @@ class Cluster(base.APIBase):
     faults = wsme.wsattr(wtypes.DictType(wtypes.text, wtypes.text))
     """Fault info collected from the heat resources of this cluster"""
 
+    fixed_network = wtypes.StringType(min_length=1, max_length=255)
+    """The fixed network name to attach to the Cluster"""
+
+    fixed_subnet = wtypes.StringType(min_length=1, max_length=255)
+    """The fixed subnet name to attach to the Cluster"""
+
+    floating_ip_enabled = wsme.wsattr(types.boolean, default=True)
+    """Indicates whether created clusters should have a floating ip or not."""
+
     def __init__(self, **kwargs):
         super(Cluster, self).__init__()
         self.fields = []
@@ -236,7 +245,10 @@ class Cluster(base.APIBase):
                      created_at=timeutils.utcnow(),
                      updated_at=timeutils.utcnow(),
                      coe_version=None,
-                     container_version=None)
+                     container_version=None,
+                     fixed_network=None,
+                     fixed_subnet=None,
+                     floating_ip_enabled=True)
         return cls._convert_with_links(sample, 'http://localhost:9511', expand)
 
 
@@ -471,23 +483,20 @@ class ClustersController(base.Controller):
         if cluster.keypair is None:
             cluster.keypair = cluster_template.keypair_id
 
-        # If docker_volume_size is not present, use cluster_template value
-        if (cluster.docker_volume_size == wtypes.Unset or
-                not cluster.docker_volume_size):
-            cluster.docker_volume_size = cluster_template.docker_volume_size
-
         # If labels is not present, use cluster_template value
         if cluster.labels == wtypes.Unset:
             cluster.labels = cluster_template.labels
 
-        # If master_flavor_id is not present, use cluster_template value
-        if (cluster.master_flavor_id == wtypes.Unset or
-                not cluster.master_flavor_id):
-            cluster.master_flavor_id = cluster_template.master_flavor_id
+        # If floating_ip_enabled is not present, use cluster_template value
+        if cluster.floating_ip_enabled == wtypes.Unset:
+            cluster.floating_ip_enabled = cluster_template.floating_ip_enabled
 
-        # If flavor_id is not present, use cluster_template value
-        if cluster.flavor_id == wtypes.Unset or not cluster.flavor_id:
-            cluster.flavor_id = cluster_template.flavor_id
+        attributes = ["docker_volume_size", "master_flavor_id", "flavor_id",
+                      "fixed_network", "fixed_subnet"]
+        for attr in attributes:
+            if (getattr(cluster, attr) == wtypes.Unset or
+                    not getattr(cluster, attr)):
+                setattr(cluster, attr, getattr(cluster_template, attr))
 
         cluster_dict = cluster.as_dict()
 

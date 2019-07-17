@@ -514,7 +514,7 @@ def add_fip_env_file(env_files, cluster_template, cluster):
     )
     master_lb_fip_enabled = strutils.bool_from_string(lb_fip_enabled)
 
-    if cluster_template.floating_ip_enabled:
+    if cluster.floating_ip_enabled:
         env_files.append(COMMON_ENV_PATH + 'enable_floating_ip.yaml')
     else:
         env_files.append(COMMON_ENV_PATH + 'disable_floating_ip.yaml')
@@ -525,8 +525,8 @@ def add_fip_env_file(env_files, cluster_template, cluster):
         env_files.append(COMMON_ENV_PATH + 'disable_lb_floating_ip.yaml')
 
 
-def add_priv_net_env_file(env_files, cluster_template):
-    if cluster_template.fixed_network:
+def add_priv_net_env_file(env_files, cluster_template, cluster):
+    if (cluster.fixed_network or cluster_template.fixed_network):
         env_files.append(COMMON_ENV_PATH + 'no_private_network.yaml')
     else:
         env_files.append(COMMON_ENV_PATH + 'with_private_network.yaml')

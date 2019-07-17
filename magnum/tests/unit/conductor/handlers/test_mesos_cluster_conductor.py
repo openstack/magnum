@@ -72,6 +72,9 @@ class TestClusterConductorWithMesos(base.TestCase):
                        'mesos_slave_executor_env_variables': '{}',
                        'mesos_slave_work_dir': '/tmp/mesos/slave'
                        },
+            'fixed_network': '',
+            'fixed_subnet': '',
+            'floating_ip_enabled': False,
         }
         self.worker_ng_dict = {
             'uuid': '5d12f6fd-a196-4bf0-ae4c-1f639a523a53',

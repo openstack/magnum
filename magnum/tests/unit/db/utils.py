@@ -98,6 +98,9 @@ def get_test_cluster(**kw):
         'labels': kw.get('labels'),
         'master_flavor_id': kw.get('master_flavor_id', None),
         'flavor_id': kw.get('flavor_id', None),
+        'fixed_network': kw.get('fixed_network', None),
+        'fixed_subnet': kw.get('fixed_subnet', None),
+        'floating_ip_enabled': kw.get('floating_ip_enabled', True),
     }
 
     if kw.pop('for_api_use', False):
