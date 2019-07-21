@@ -1115,7 +1115,7 @@ _`cloud_provider_tag`
   <https://github.com/kubernetes/cloud-provider-openstack/releases>`_ of
   the cloud-provider. The images are hosted `here
   <https://hub.docker.com/r/k8scloudprovider/openstack-cloud-controller-manager/tags/>`_.
-  Stein default: v0.2.0
+  Rocky default: v0.2.0
 
 _`etcd_tag`
   This label allows users to select `a specific etcd version,
@@ -1135,7 +1135,7 @@ _`heat_container_agent_tag`
   This label allows users to select `a specific heat_container_agent
   version, based on its container tag
   <https://hub.docker.com/r/openstackmagnum/heat-container-agent/tags/>`_.
-  Stein-default: stein-dev
+  Rocky default: rocky-stable
 
 _`kube_dashboard_enabled`
   This label triggers the deployment of the kubernetes dashboard.

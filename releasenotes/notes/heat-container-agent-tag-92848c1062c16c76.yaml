@@ -2,4 +2,4 @@
 features:
   - |
     Add heat_container_agent_tag label to allow users select the heat-agent
-    tag. Stein default: stein-dev
+    tag. Rocky default: rocky-stable
