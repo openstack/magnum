@@ -403,7 +403,7 @@ the table are linked to more details elsewhere in the user guide.
 | `auto_healing_enabled`_               | - true             | false         |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
-| `auto_scaling_enabled`_               | - true             | true          |
+| `auto_scaling_enabled`_               | - true             | false         |
 |                                       | - false            |               |
 +---------------------------------------+--------------------+---------------+
 | `node_problem_detector_tag`_          | see below          | see below     |
