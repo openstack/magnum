@@ -1,8 +1,8 @@
 ARG KUBE_VERSION=v1.13.0
-ARG ADD_KUBE_ALLOW_PRIV=false
 
 FROM fedora:rawhide
 ARG KUBE_VERSION
+ARG ADD_KUBE_ALLOW_PRIV=false
 RUN curl -o /root/kubectl -O https://storage.googleapis.com/kubernetes-release/release/${KUBE_VERSION}/bin/linux/amd64/kubectl
 
 FROM gcr.io/google-containers/kube-apiserver-amd64:${KUBE_VERSION}
@@ -31,7 +31,7 @@ COPY service.template config.json.template /exports/
 # however, this would require hard-coding the container name
 
 COPY apiserver config /etc/kubernetes/
-RUN [ $ADD_KUBE_ALLOW_PRIV = "true" ] && echo "KUBE_ALLOW_PRIV=\"--allow-privileged=false\"" >> /etc/kubernetes/config || true
+RUN [ "$ADD_KUBE_ALLOW_PRIV" = "true" ] && echo "KUBE_ALLOW_PRIV=\"--allow-privileged=false\"" >> /etc/kubernetes/config || true
 RUN mkdir -p /exports/hostfs/usr/local/bin/
 COPY --from=0 /root/kubectl /exports/hostfs/usr/local/bin/
 RUN chmod +x /exports/hostfs/usr/local/bin/kubectl && \
