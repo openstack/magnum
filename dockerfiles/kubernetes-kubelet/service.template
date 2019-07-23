@@ -5,8 +5,10 @@ After=docker.service
 [Service]
 ExecStart=$EXEC_START
 ExecStop=$EXEC_STOP
-Restart=on-failure
 WorkingDirectory=$DESTDIR
+Restart=always
+StartLimitInterval=0
+RestartSec=10
 
 [Install]
 WantedBy=multi-user.target
