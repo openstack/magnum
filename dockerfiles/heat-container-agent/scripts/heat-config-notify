@@ -58,7 +58,7 @@ def trim_response(response, trimmed_values=None):
     """
 
     trimmed_values = trimmed_values or ('deploy_stdout', 'deploy_stderr')
-    str_response = json.dumps(response, ensure_ascii=True, encoding='utf-8')
+    str_response = json.dumps(response, ensure_ascii=True)
     len_total = len(str_response)
     offset = MAX_RESPONSE_SIZE - len_total
     if offset >= 0:

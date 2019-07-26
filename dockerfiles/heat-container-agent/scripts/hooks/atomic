@@ -30,8 +30,8 @@ def prepare_dir(path):
 
 def build_response(deploy_stdout, deploy_stderr, deploy_status_code):
     return {
-        'deploy_stdout': deploy_stdout,
-        'deploy_stderr': deploy_stderr,
+        'deploy_stdout': deploy_stdout.decode('utf-8', 'replace'),
+        'deploy_stderr': deploy_stderr.decode('utf-8', 'replace'),
         'deploy_status_code': deploy_status_code,
     }
 
